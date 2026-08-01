@@ -401,6 +401,7 @@ function buildRig(S, group, mats) {
   };
 
   const sails = [];
+  const maxMastShare = S.masts.length ? Math.max(...S.masts.map(m => m.height)) : 1;
 
   S.masts.forEach(mk => {
     const u = mk.at;
@@ -425,7 +426,8 @@ function buildRig(S, group, mats) {
        which is why the rig stood 72 m over a 57 m hull instead of about 62. */
     const top = lower * 0.60, tg = top * 0.50;
     let y = base;
-    const segs = mk.rig === 'lateen' || mk.rig === 'crabclaw' ? [lower] : [lower, top, tg];
+    const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
+               : mk.rig === 'crabclaw' ? [lower] : [lower, top, tg];
     const radii = [B * 0.030, B * 0.020, B * 0.013];
 
     segs.forEach((seg, si) => {
@@ -476,38 +478,78 @@ function buildRig(S, group, mats) {
         sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
                             yardLen * 0.96, seg * 0.56, canvas, group, 'square'));
       }
+
+      /* ── MASTS STACK. ⚠ THIS LINE WAS MISSING, AND NOTHING LOOKED WRONG. ──────────────
+         Every segment was drawn from the DECK, so the three masts were concentric rather than
+         stepped, and because the lower mast is the longest it also finished highest: the main
+         COURSE — the biggest sail on the ship — flew at the top of the rig and the topgallant
+         at the bottom. The square rig was upside down on every square-rigged vessel here, and
+         it read as plausible because the yards still descended in size, just in the wrong order.
+         It was caught by measuring: rigTop came back 38 m on a 74 whose main truck stood at 55.
+
+         The heel of a topmast is not at the head of the mast below it — the two are fidded
+         side by side and overlap through the DOUBLING, about an eighth of the lower spar. That
+         is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
+      y += seg * 0.88;
     });
 
     if (mk.rig === 'lateen') {
-      /* ── THE LATEEN YARD RUNS THE LENGTH OF THE SHIP ───────────────
-         Three independent primary statements, and they agree. Pâris (*Essai sur la construction
-         navale des peuples extra-européens*, 1841) on the Arab baggala: "the yard almost always
-         has the total length of the vessel"; on the Indian patamar: "the main yard, as long as
-         the boat", slung at one third of its length. Whitewright (2008): Mediterranean lateen
-         yards run "nearly as long, or sometimes even longer, than the vessel itself".
-         The mechanism is geometric — a triangular sail on a short mast needs a long yard to
-         keep the same area, which is exactly why the mast is short. Scaling the yard off the
-         MAST, as this did, makes it about 40% too short and the rig reads as a felucca toy. */
-      const yardLen = L * 1.0;
-      /* The yard is slung about a THIRD of its length from the tack (Pâris on the patamar), so
-         it stands with its foot low and forward and its peak high and aft. Both the spar and
-         the sail are hung from that same slinging point, or the canvas comes adrift of the
-         ship — which it did. */
-      const peak = 0.62;                                  // radians above horizontal
-      const slingX = x, slingY = base + lower * 0.30;
-      const yg = new THREE.CylinderGeometry(B * 0.005, B * 0.010, yardLen, 7);
-      const ym = new THREE.Mesh(yg, woodDark);
-      ym.rotation.z = -(Math.PI / 2 - peak);
-      /* the sling sits 1/3 along, so the spar's centre is 1/6 of its length up the slope */
-      ym.position.set(slingX + Math.cos(peak) * yardLen * (0.5 - 0.333),
-                      slingY + Math.sin(peak) * yardLen * (0.5 - 0.333), 0);
+      /* ── THE LATEEN IS DETERMINED BY THE SHIP, NOT BY THE MAST ─────
+         Three sourced facts, and together they leave NO free parameters:
+           (1) the yard is as long as the hull.  Pâris (*Essai sur la construction navale des
+               peuples extra-européens*, 1841) on the Arab baggala: "the yard almost always has
+               the total length of the vessel"; on the Indian patamar, "the main yard, as long
+               as the boat". Whitewright 2008 on the Mediterranean lateen: "nearly as long, or
+               sometimes even longer, than the vessel itself".
+           (2) it is slung a THIRD of its length from the tack.        (Pâris, on the patamar)
+           (3) the tack is hauled down to the stemhead.
+         Fix the tack at the stem and the sling at the mast, and the yard's ANGLE follows from
+         arithmetic: cos θ = (mast - stem) / (yard/3). The masthead height then falls out of it.
+         That is the right way round. The mast on a lateen craft is short BECAUSE the yard is
+         long — the rig gets its area from the spar, not from height — so deriving the mast from
+         the yard reproduces the silhouette, while imposing a tall mast (which is what this did)
+         forces the yard nearly upright and throws the sail off the ship. */
+      const yardLen = L * (mk.height / maxMastShare);
+      /* θ is the OBSERVABLE, and it is about 45°: that is the angle in every plate of Pâris's
+         and in every photograph of a working boom or baghla. Deriving θ instead from the mast's
+         fore-and-aft position (which is what the first attempt did) forced it to 65° and the
+         boat read as a Bermudan sloop.
+         Then comes the consequence that makes a dhow look like a dhow: a yard as long as the
+         hull, slung a third of the way along at a mast set well forward, has its HEEL PROJECTING
+         OUT BEYOND THE STEM. It is not an artefact — it is the most recognisable thing about
+         the rig, and it falls straight out of (1) and (2) once θ is fixed. */
+      const th = 0.785;                                  // 45°, off Pâris's plates
+      const dir = [Math.cos(th), Math.sin(th)];          // +x is AFT, so the yard rises aft
+      const sling = [x, base + dir[1] * yardLen / 3];
+      const heel = [x - dir[0] * yardLen / 3, base];
+      const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
+
+      /* the mast, drawn from the deck UP TO the sling — its height is the consequence, and it
+         is SHORT, because a lateen takes its area from the spar rather than from height */
+      const mh = sling[1] - base;
+      const mm = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.020, B * 0.032, mh, 9), woodDark);
+      mm.position.set(x, (base + sling[1]) / 2, 0);
+      group.add(mm);
+
+      const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
+      const ym = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.005, B * 0.011, ylen, 7), woodDark);
+      ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
+      ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
       group.add(ym);
-      /* the sail is the triangle under the yard: its head follows the spar, its tack comes
-         down to the deck at the mast foot */
-      const sailW = yardLen * 0.62, sailH = lower * 0.78;
-      sails.push(makeSail(slingX + Math.cos(peak) * yardLen * 0.14,
-                          slingY + Math.sin(peak) * yardLen * 0.14 + sailH * 0.30,
-                          sailW, sailH, canvas, group, 'lateen'));
+
+      /* The CANVAS starts at the stemhead, not at the heel: the projecting part of the yard is
+         bare spar, and the tack is bowsed down to the stem. So the sail's tack is the point
+         where the yard crosses over the stemhead — or the heel itself, on the after masts,
+         whose shorter yards do not overhang. */
+      const xStem = -0.455 * L;
+      const along = Math.max(0, Math.min(yardLen * 0.5, (xStem - heel[0]) / dir[0]));
+      const tack = [heel[0] + dir[0] * along, heel[1] + dir[1] * along];
+
+      /* the clew is sheeted aft along the deck; a settee foot runs about 0.62 of its head */
+      const clew = [tack[0] + yardLen * 0.62, base + H.sheer(0.5) * 0.10];
+      sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
     }
     if (mk.rig === 'crabclaw') {
       /* Same rule, independently attested in the Pacific. Pâris on the Tongan kalia: the sail
@@ -673,6 +715,55 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
   return m;
 }
 
+/* ── A TRIANGULAR SAIL, BUILT FROM ITS THREE CORNERS ───────────────────────────────────
+   A lateen, a settee and a crab-claw are TRIANGLES. The first version hung a rectangular
+   PlaneGeometry near the yard and rotated it, which is why the dhow's canvas floated off the
+   side of the hull: a rectangle has four corners and the spar has two ends, so there is no
+   placement that makes them agree. The honest object is the triangle itself —
+
+       A   the TACK, hauled down to the stemhead
+       B   the PEAK, the upper end of the yard
+       C   the CLEW, sheeted aft
+
+   — and the head A->B is the yard, so the sail is built from the SAME two points as the spar
+   and cannot come adrift of it. That is the whole fix: not an offset, a shape.
+
+   Draft is a bubble that vanishes on all three edges, because all three are bolt-roped. */
+function makeTriSail(A, B, C, group, belly) {
+  const N = 18, pos = [], uvs = [], idx = [];
+  const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
+  const head = Math.hypot(B[0] - A[0], B[1] - A[1]);
+  for (let i = 0; i <= N; i++) {
+    const sA = i / N;                                   // along the head, tack -> peak
+    const Hd = lerp(A, B, sA);
+    for (let j = 0; j <= N; j++) {
+      const t = j / N;                                  // head -> clew
+      const P = lerp(Hd, C, t);
+      pos.push(P[0], P[1], 16 * sA * (1 - sA) * t * (1 - t) * head * belly);
+      uvs.push(sA, t);
+    }
+  }
+  const row = N + 1;
+  for (let i = 0; i < N; i++)
+    for (let j = 0; j < N; j++) {
+      const a = i * row + j;
+      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+    }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.ShaderMaterial({
+    vertexShader: SAIL_VERT, fragmentShader: SAIL_FRAG, side: THREE.DoubleSide,
+    uniforms: { uPanels: { value: Math.max(4, Math.round(head / 0.61)) },
+                uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
+  }));
+  m.userData.kind = 'tri';
+  group.add(m);
+  return m;
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S) {
@@ -712,7 +803,15 @@ function buildShip(S) {
   };
   const sails = buildRig(S, group, mats);
 
-  group.userData = { hullMat, sails, spec: S };
+  /* ── HOW TALL IS THE RIG? MEASURE IT, DO NOT ESTIMATE IT ─────────────────────────────
+     The Yard used to reconstruct rig height from the mast data with a multiplier per rig type —
+     a second, parallel model of geometry this function has just BUILT. It drifted the moment the
+     lateen stopped taking its height from its mast, and cut the peak off the top of the frame.
+     The bounding box is the exact answer, for every rig, including ones not written yet. */
+  const bb = new THREE.Box3().setFromObject(group);
+  group.userData = { hullMat, sails, spec: S,
+                     rigTop: bb.max.y, keelBottom: bb.min.y,
+                     extentX: bb.max.x - bb.min.x };   // a lateen yard overhangs the stem
   return group;
 }
 

@@ -128,13 +128,19 @@ function yardOpen(vessel) {
   /* Frame to the whole SHIP, rig included. A ship of the line is taller than it is long once
      the topgallants are up — the main truck stands about 60 m over a 57 m hull — so framing on
      the hull alone cuts the rig off at the yards, which is most of what there is to look at. */
-  const steelMain = (H.lwl + H.beam) / 2;
-  const tallest = H.masts.length
-    /* lower + topmast (0.60) + topgallant (0.30) = 1.90 x the Steel main mast, per Steel 1794 */
-    ? Math.max(...H.masts.map(m => m.height)) * steelMain * (H.masts[0].rig === 'square' ? 1.90 : 1.15)
-    : H.freeboard * 2;
-  YARD.rigTop = H.freeboard + tallest;
-  YARD.dist = Math.max(1.5, (YARD.rigTop * 1.75) / L);
+  /* ── FRAME FROM THE MEASURED BOX AND THE ACTUAL FIELD OF VIEW ──────────────────────
+     ⚠ Not from a multiplier. Rig height used to be rebuilt here from the mast data with a
+     per-rig fudge factor — a second model of geometry buildShip had already built — and it
+     drifted the moment a rig stopped taking its height from its mast. buildShip now returns
+     the bounding box of what it ACTUALLY made, and the camera solves for the distance that
+     contains it: no constant to retune when a new rig is added. */
+  const U = YARD.ship.userData;
+  YARD.rigTop = U.rigTop;
+  const look = U.rigTop * 0.26;
+  const halfV = Math.max(U.rigTop - look, look - U.keelBottom);
+  const tanV = Math.tan(YARD.cam.fov * Math.PI / 360);
+  const tanH = tanV * Math.max(1.2, YARD.cam.aspect || 1.78);
+  YARD.dist = 1.14 * Math.max(halfV / tanV, U.extentX / 2 / tanH) / L;
   YARD.spin = true;
   YARD.t0 = performance.now();
 
@@ -189,12 +195,12 @@ function yardFrame(now) {
   /* Frame on the ship's centre of area, which for a full-rigged ship sits about a quarter of
      the way up the rig — high enough to hold the topgallants, low enough to keep the hull and
      its waterline in shot, which is the part that carries the information. */
-  const eye = (YARD.rigTop || L * 0.3) * 0.30;
+  const eye = YARD.rigTop * 0.26;
   YARD.cam.position.set(
     d * Math.cos(YARD.lat) * Math.sin(YARD.lon),
     d * Math.sin(YARD.lat) + eye,
     d * Math.cos(YARD.lat) * Math.cos(YARD.lon));
-  YARD.cam.lookAt(0, (YARD.rigTop || L * 0.3) * 0.26, 0);
+  YARD.cam.lookAt(0, YARD.rigTop * 0.26, 0);
 
   /* the ship floats: it heels to the wind and lifts and pitches on the swell */
   const t = (now - YARD.t0) / 1000;
