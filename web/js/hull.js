@@ -1,0 +1,637 @@
+/* hull.js — ships, generated.
+ *
+ * Every hull on this site is GENERATED from the vessel's attested principal dimensions and
+ * published hull-form coefficients. Nothing is modelled by hand and nothing is traced from a
+ * copyrighted drawing. That is not a compromise, it is the honest option: the good geometry
+ * for historical ships is mostly not redistributable, and *generating and disclosing* beats
+ * *copying and hoping*. Every card says which dimensions are attested and which are inferred.
+ *
+ * ── HOW A HULL IS BUILT ─────────────────────────────────────────────────────────────
+ * A hull surface is parametrised by u along the length (0 = stem, 1 = sternpost) and v from
+ * the keel up to the sheer line. Four curves and one exponent do almost all the work:
+ *
+ *   waterline(u)   the half-breadth at the design waterline, as a fraction of B/2.
+ *                  Its integral is the waterplane coefficient Cw.
+ *   keel(u)        how deep the hull is at that station, as a fraction of T. Flat over the
+ *                  midbody, rising into the ends — the "rise of floor" and the deadwood.
+ *   sheer(u)       the deck line, which on a real ship is never flat: it rises toward bow and
+ *                  stern, and how much is one of the strongest signals of period.
+ *   tumble(u)      how far the topsides fall INWARD above the waterline. On a ship of the line
+ *                  this is severe, and it is most of why a 74 looks like a 74.
+ *   n              the superellipse exponent of the underwater section, |y/b|ⁿ + |z/t|ⁿ = 1.
+ *                  n = 1 is a V, n = 2 an ellipse, n → ∞ a box. It is solved numerically to
+ *                  hit the vessel's midship coefficient Cm, so the section is not a guess —
+ *                  it is the section that has the right area.
+ *
+ * Block coefficient then falls out: Cb = Cp × Cm, and the model reports what it achieved so a
+ * card can be checked against the published figure rather than trusting the generator.
+ *
+ * ── WHAT IS DELIBERATELY NOT MODELLED ───────────────────────────────────────────────
+ * Interior arrangement, deck furniture, carving and figureheads, and running rigging beyond
+ * the principal standing rig. A generated hull that sprouted invented ornament would be
+ * pretending to a precision it does not have.
+ */
+'use strict';
+
+/* ── numeric helpers ───────────────────────────────────────────────────────────────── */
+
+/* Area of one quadrant of |y/b|ⁿ + |z/t|ⁿ = 1, as a fraction of the enclosing rectangle b·t.
+   Integrated numerically because the closed form is a beta function and this is clearer. */
+function superellipseFullness(n) {
+  const N = 256;
+  let a = 0;
+  for (let i = 0; i < N; i++) {
+    const y = (i + 0.5) / N;
+    a += Math.pow(Math.max(0, 1 - Math.pow(y, n)), 1 / n);
+  }
+  return a / N;
+}
+
+/* Solve for the exponent that gives a section of the required fullness. Cm for a real hull
+   runs from about 0.55 (a sharp V-sectioned clipper or a canoe) to 0.99 (a tanker). */
+function exponentForCm(cm) {
+  let lo = 0.6, hi = 24.0;
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (superellipseFullness(mid) < cm) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+/* A shape function that is 1 amidships and falls to `end` at the extremities, with `p`
+   controlling how full the ends are. p = 2 is a parabola; large p is a long parallel body. */
+function fullness(u, p, endF, endA) {
+  const s = Math.abs(2 * u - 1);
+  const f = 1 - Math.pow(s, p);
+  const end = u < 0.5 ? endF : endA;
+  return end + (1 - end) * f;
+}
+
+/* ── the parametric hull ───────────────────────────────────────────────────────────── */
+
+function hullSurface(S) {
+  const nExp = exponentForCm(S.cm);
+  const halfB = S.beam / 2;
+
+  /* waterline half-breadth, normalised */
+  const wl = u => fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
+  /* depth of the keel below the waterline, normalised. The forefoot rises and the run sweeps
+     up to the sternpost; a flat-floored cog barely does either. */
+  const keel = u => {
+    const fore = 1 - Math.pow(Math.max(0, (S.forefoot - u) / S.forefoot), 2) * S.riseF;
+    const aft = 1 - Math.pow(Math.max(0, (u - (1 - S.run)) / S.run), 2) * S.riseA;
+    return Math.max(0.06, Math.min(fore, aft));
+  };
+  /* The deck line. Sheer is the rise of the deck at the ends above amidships, and getting its
+     SHAPE right matters more than its size: the standard profile (ICLL 1966 Reg. 38) is a
+     cubic-ish curve that is nearly flat over the middle third and lifts sharply only in the
+     outer sixth, with bow sheer exactly TWICE stern sheer.
+     ⚠ A power of 1.9 spreads the rise across the whole hull and bends the ship into a banana.
+     The real curve is much flatter amidships — hence 2.8. */
+  const sheer = u => {
+    const s = Math.abs(2 * u - 1);
+    const rise = u < 0.5 ? S.sheerBow : S.sheerStern;
+    return S.freeboard + rise * Math.pow(s, 2.8);
+  };
+  /* tumblehome grows above the waterline; quoted as the fraction of half-beam lost at deck */
+  const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
+
+  /* the profile of the stem and the sternpost, as an x-offset that rakes the ends */
+  const rake = u => {
+    if (u < S.forefoot) {
+      const k = (S.forefoot - u) / S.forefoot;
+      return -S.stemRake * k * k * S.loa;
+    }
+    if (u > 1 - S.run) {
+      const k = (u - (1 - S.run)) / S.run;
+      return S.sternRake * k * k * S.loa;
+    }
+    return 0;
+  };
+
+  return { nExp, halfB, wl, keel, sheer, tumble, rake };
+}
+
+/* Build the hull as an indexed triangle mesh. u runs stem→stern, v runs keel→sheer. */
+function buildHullGeometry(S, NU = 120, NV = 34) {
+  const H = hullSurface(S);
+  const pos = [], nor = [], uvs = [], idx = [];
+  const L = S.lwl;
+
+  const pointAt = (u, v) => {
+    const b = H.halfB * H.wl(u);
+    const t = S.draught * H.keel(u);
+    const deckHalf = b * (1 - H.tumble(u));
+    const fb = H.sheer(u);
+    let y, z;
+    if (v <= 0.62) {
+      /* underwater: the superellipse whose area is the vessel's own Cm */
+      const k = v / 0.62;                 // 0 at keel, 1 at waterline
+      z = -t * (1 - k);
+      const yy = Math.pow(Math.max(0, 1 - Math.pow(1 - k, H.nExp)), 1 / H.nExp);
+      y = b * yy;
+    } else {
+      /* topsides: waterline → deck edge, falling inward by the tumblehome */
+      const k = (v - 0.62) / 0.38;
+      z = fb * k;
+      y = b + (deckHalf - b) * Math.pow(k, 0.9);
+    }
+    /* the ends close: half-breadth goes to (nearly) zero at stem and sternpost */
+    const x = (u - 0.5) * L + H.rake(u);
+    return [x, z, y];
+  };
+
+  for (let i = 0; i <= NU; i++) {
+    const u = i / NU;
+    for (let j = 0; j <= NV; j++) {
+      const v = j / NV;
+      const [x, z, y] = pointAt(u, v);
+      pos.push(x, z, y);
+      uvs.push(u, v);
+      /* normal by finite difference on the surface */
+      const e = 1 / (NU * 2), f = 1 / (NV * 2);
+      const a = pointAt(Math.min(1, u + e), v), c = pointAt(u, Math.min(1, v + f));
+      const du = [a[0] - x, a[1] - z, a[2] - y];
+      const dv = [c[0] - x, c[1] - z, c[2] - y];
+      let nx = du[1] * dv[2] - du[2] * dv[1];
+      let ny = du[2] * dv[0] - du[0] * dv[2];
+      let nz = du[0] * dv[1] - du[1] * dv[0];
+      const ln = Math.hypot(nx, ny, nz) || 1;
+      nor.push(nx / ln, ny / ln, nz / ln);
+    }
+  }
+  const row = NV + 1;
+  for (let i = 0; i < NU; i++) {
+    for (let j = 0; j < NV; j++) {
+      const a = i * row + j, b = a + row, c = a + 1, d = b + 1;
+      idx.push(a, b, c, c, b, d);
+    }
+  }
+
+  /* mirror to the port side by duplicating with negated z (the beam axis) */
+  const n0 = pos.length / 3;
+  for (let i = 0; i < n0; i++) {
+    pos.push(pos[i * 3], pos[i * 3 + 1], -pos[i * 3 + 2]);
+    nor.push(nor[i * 3], nor[i * 3 + 1], -nor[i * 3 + 2]);
+    uvs.push(uvs[i * 2], uvs[i * 2 + 1]);
+  }
+  const m = idx.length;
+  for (let i = 0; i < m; i += 3) {
+    idx.push(idx[i] + n0, idx[i + 2] + n0, idx[i + 1] + n0);   // reversed winding
+  }
+
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  g.setIndex(idx);
+  return g;
+}
+
+/* The deck: a cap across the sheer line, slightly cambered as a real deck is. */
+function buildDeckGeometry(S, NU = 120) {
+  const H = hullSurface(S);
+  const pos = [], nor = [], uvs = [], idx = [];
+  const L = S.lwl;
+  for (let i = 0; i <= NU; i++) {
+    const u = i / NU;
+    const b = H.halfB * H.wl(u) * (1 - H.tumble(u));
+    const fb = H.sheer(u);
+    const x = (u - 0.5) * L + H.rake(u);
+    for (let j = 0; j <= 8; j++) {
+      const k = j / 8;                    // 0 = starboard edge, 1 = port edge
+      const y = b * (1 - 2 * k);
+      const camber = Math.cos((k - 0.5) * Math.PI) * b * 0.035;   // real decks are cambered
+      pos.push(x, fb + camber, y);
+      nor.push(0, 1, 0);
+      uvs.push(u, k);
+    }
+  }
+  for (let i = 0; i < NU; i++) {
+    for (let j = 0; j < 8; j++) {
+      const a = i * 9 + j, b = a + 9, c = a + 1, d = b + 1;
+      idx.push(a, c, b, c, d, b);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  g.setIndex(idx);
+  return g;
+}
+
+/* ── the hull's surface ────────────────────────────────────────────────────────────────
+ * Planking, caulked seams, copper below the waterline and the paint scheme above it — all
+ * procedural, all keyed to the hull's own parametrisation, so they follow the sheer and the
+ * tumblehome instead of being wrapped round it like a decal.
+ *
+ * Copper sheathing: the Royal Navy plate was about 4 ft x 14 in, fastened in overlapping
+ * courses from the keel up to a line a little above the load waterline. New copper is bright
+ * salmon; within weeks it is dull brown; within a season in warm water it is the green that
+ * gave verdigris its name. The `copperAge` uniform runs that progression.
+ */
+const HULL_VERT = `
+varying vec2 vUv; varying vec3 vN; varying vec3 vP;
+void main(){ vUv=uv; vN=normalize(normalMatrix*normal);
+  vec4 wp = modelMatrix*vec4(position,1.0); vP=wp.xyz;
+  gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+
+const HULL_FRAG = `
+precision highp float;
+varying vec2 vUv; varying vec3 vN; varying vec3 vP;
+uniform vec3 uSun, uCam;
+uniform float uStrakes;      // number of planking strakes keel to sheer
+uniform float uCopper;       // 0 = none, 1 = sheathed
+uniform float uCopperAge;    // 0 = new and bright, 1 = fully verdigris
+uniform float uWaterline;    // v coordinate of the load waterline
+uniform float uChequer;      // 0 = plain, 1 = Nelson chequer with gunport bands
+uniform float uGunDecks;
+uniform vec3  uTopside;      // the paint above the waterline
+uniform float uIron;         // 0 = wood, 1 = iron/steel plate
+uniform float uTime;
+
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
+
+void main(){
+  float u = vUv.x, v = vUv.y;
+  vec3 N = normalize(vN);
+  vec3 V = normalize(uCam - vP);
+  vec3 L = normalize(uSun);
+
+  vec3 col;
+  bool underwater = v < uWaterline;
+
+  if (underwater && uCopper > 0.5) {
+    /* ── COPPER SHEATHING ────────────────────────────────────────────────
+       The Royal Navy plate is 4 ft × 14 in, and the 14 inches is not arbitrary: hull planks
+       were 12 in wide, so a 14 in sheet gives a 1 in overlap top and bottom AND puts the
+       copper seam deliberately midway between two plank seams. The whole geometry falls out
+       of one sentence in the record.
+
+       ⚠ IT DOES NOT GO GREEN. Verdigris is what copper does in AIR — roofs, statues. On the
+       wetted hull the antifouling mechanism *is* that the corrosion film keeps dissolving
+       away; a stable green patina cannot build up, because if it did the copper would stop
+       working. So: bright salmon when new, dulling within weeks, then a dark brown immersed
+       film that is continuously shedding. The green belongs only at the boot-top, which is
+       wetted and dried and sees the air. The first version of this shader painted the whole
+       underwater body verdigris and was wrong for a reason worth knowing. */
+    float courses = uStrakes * 1.6;                 // 14 in courses against 12 in planks
+    float cv = v * courses;
+    float ch = u * 46.0 + floor(cv) * 0.5;          // courses are staggered, like brickwork
+    float seamV = smoothstep(0.03, 0.10, abs(fract(cv) - 0.5) * 2.0);
+    float seamH = smoothstep(0.05, 0.14, abs(fract(ch) - 0.5) * 2.0);
+    /* tacks: 1.25–1.5 in along the overlaps, ~4 in across the field of the sheet */
+    float tack = smoothstep(0.40, 0.26,
+                   length(fract(vec2(ch * 4.0, cv * 3.0)) - 0.5)) * seamV;
+    vec3 bright = vec3(0.76, 0.42, 0.25);           // newly laid
+    vec3 dull   = vec3(0.42, 0.26, 0.17);           // weeks
+    vec3 dark   = vec3(0.20, 0.15, 0.12);           // the shedding immersed film
+    vec3 c = mix(bright, dull, clamp(uCopperAge * 2.2, 0.0, 1.0));
+    c = mix(c, dark, clamp((uCopperAge - 0.45) * 1.8, 0.0, 1.0));
+    c *= 0.80 + 0.20 * noise(vec2(u * 220.0, v * 90.0));
+    c *= mix(0.62, 1.0, seamV * seamH);              // the plate edges catch shadow
+    c += tack * 0.06;
+    /* the sheathing was carried to about a foot above the load waterline and finished with a
+       batten or a canvas roll — and THAT band, wetted and dried, is where green appears */
+    c = mix(c, vec3(0.28, 0.44, 0.34), smoothstep(0.585, 0.615, v) * 0.55);
+    col = c;
+  } else if (underwater) {
+    /* the unsheathed underwater body: "white stuff" — tallow, rosin and sulphur — over pitch */
+    col = vec3(0.42, 0.40, 0.35) * (0.80 + 0.22 * noise(vec2(u * 160.0, v * 70.0)));
+    col = mix(col, vec3(0.20, 0.24, 0.18),
+              smoothstep(0.35, 0.9, noise(vec2(u * 34.0, v * 15.0))) * 0.55);  // weed
+  } else if (uIron > 0.5) {
+    /* riveted iron plate: strakes are wider, seams are proud, and the rivets show */
+    float pv = v * uStrakes * 0.6, ph = u * 30.0;
+    float seam = smoothstep(0.04, 0.12, abs(fract(pv) - 0.5) * 2.0)
+               * smoothstep(0.03, 0.10, abs(fract(ph) - 0.5) * 2.0);
+    float rivet = smoothstep(0.42, 0.30, length(fract(vec2(ph, pv) * vec2(6.0, 2.0)) - 0.5));
+    col = uTopside * (0.86 + 0.16 * noise(vec2(u * 300.0, v * 120.0)));
+    col *= mix(0.72, 1.0, seam);
+    col += rivet * 0.05;
+  } else {
+    /* ── PLANKING ────────────────────────────────────────────────────────
+       Carvel strakes running fore-and-aft, caulked with oakum and payed with pine tar. The
+       planks NARROW toward the ends, which they must: the girth of a section falls away at
+       the stem, so the same number of strakes has less to cover. */
+    float taper = 0.55 + 0.45 * (1.0 - abs(2.0 * u - 1.0));
+    float sv = v * uStrakes;
+    float seam = smoothstep(0.02, 0.09, abs(fract(sv) - 0.5) * 2.0);
+    float grain = noise(vec2(u * 420.0, floor(sv) * 31.7)) * 0.5
+                + noise(vec2(u * 90.0, floor(sv) * 12.3)) * 0.5;
+    col = uTopside * (0.84 + 0.30 * grain);
+    col *= mix(0.52, 1.0, seam);                     // the caulked seam is a dark line
+
+    /* ── THE "NELSON CHEQUER", as the paint actually was ────────────────
+       ⚠ NOT yellow and black. The 2015 repaint of HMS Victory was preceded by the most
+       extensive paint survey ever made of a historic ship — several hundred samples, in places
+       through 72 layers, led by Michael Crick-Smith at Lincoln — and it found that at
+       Trafalgar she was **pale yellow and DARK GREY**. The pigments were the ones the Navy
+       issued free: lead white and ochre. The result is described as running "from a
+       creamy-orange to almost salmon pink in certain lights", which is a long way from the
+       lemon-yellow of every model kit.
+
+       And the chequer is only a chequer when the ports are OPEN — cleared for action. With
+       the lids closed the hull reads as plain stripes, because the lids were painted to match. */
+    if (uChequer > 0.5) {
+      float band = 0.0, port = 0.0;
+      for (float d = 0.0; d < 4.0; d += 1.0) {
+        if (d >= uGunDecks) break;
+        float centre = uWaterline + 0.10 + d * 0.115;
+        band = max(band, smoothstep(0.052, 0.030, abs(v - centre)));
+        float px = fract(u * 26.0);
+        port = max(port, smoothstep(0.030, 0.016, abs(v - centre))
+                       * smoothstep(0.30, 0.22, abs(px - 0.5)));
+      }
+      vec3 ochre = vec3(0.780, 0.585, 0.395);        // creamy-orange, not lemon
+      vec3 grey  = vec3(0.180, 0.178, 0.172);        // dark grey, not black
+      col = mix(grey, ochre, band);
+      col *= (0.84 + 0.30 * grain);
+      col *= mix(0.52, 1.0, seam);
+      col = mix(col, vec3(0.055, 0.052, 0.050), port);   // the open port is a hole
+    }
+    col *= taper * 0.25 + 0.75;
+  }
+
+  /* ── light. One sun, a broad sky term, and a bounce off the water so the underside of the
+     hull is never black — which it never is, at sea. */
+  float lam = max(dot(N, L), 0.0);
+  float sky = 0.5 + 0.5 * N.y;
+  float bounce = max(0.0, -N.y) * 0.30;
+  vec3 lit = col * (0.24 * sky + 0.95 * lam) + col * bounce * vec3(0.34, 0.52, 0.62);
+
+  /* wet sheen below the waterline, and a spec on the paint above it */
+  vec3 Hv = normalize(L + V);
+  float shin = underwater ? 46.0 : 22.0;
+  float spec = pow(max(dot(N, Hv), 0.0), shin) * (underwater ? 0.55 : 0.16);
+  lit += vec3(1.0, 0.97, 0.90) * spec * lam;
+
+  /* the boot-top: a hard, wet line exactly at the load waterline */
+  float wl = smoothstep(0.012, 0.0, abs(v - uWaterline));
+  lit = mix(lit, lit * 0.45, wl * 0.75);
+
+  gl_FragColor = vec4(pow(clamp(lit, 0.0, 1.6), vec3(0.4545)), 1.0);
+}`;
+
+
+/* ── rig ──────────────────────────────────────────────────────────────────────────────
+ * Masts, yards and sails placed by the PROPORTIONAL RULES the shipwrights actually used —
+ * mast positions as fractions of the length, mast height as a multiple of the beam, yard
+ * lengths as fractions of the mast — rather than by eye. Where a rule is not attested for a
+ * type, the value is marked inferred on the card.
+ */
+function buildRig(S, group, mats) {
+  const L = S.lwl, B = S.beam;
+  const H = hullSurface(S);
+  const deckAt = u => H.sheer(u);
+
+  const woodDark = mats.spar, canvas = mats.canvas, rope = mats.rope;
+
+  const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
+    const h = y1 - y0;
+    const g = new THREE.CylinderGeometry(r1, r0, h, 9, 1, true);
+    const m = new THREE.Mesh(g, mat);
+    m.position.set(x, y0 + h / 2, 0);
+    m.rotation.z = tiltZ;
+    group.add(m);
+    return m;
+  };
+
+  const sails = [];
+
+  S.masts.forEach(mk => {
+    const u = mk.at;
+    const x = (u - 0.5) * L + H.rake(u);
+    const base = deckAt(u);
+    const rakeRad = (mk.rake || 0) * Math.PI / 180;
+
+    /* ── STEEL'S RULE, 1794 ────────────────────────────────────────────
+       "The length of the lower deck and extreme breadth being added together, the half is the
+       length of the main-mast." — Steel, *Elements of Mastmaking, Sailmaking and Rigging*.
+       So the mast is a function of BOTH length and beam, not of beam alone: on a 74 with a
+       51 m lower deck and 14.6 m breadth it gives a 32.8 m main mast, which is what a 74 had.
+       `mk.height` is that mast's share of the main — main 1.0, fore ~0.88, mizzen ~0.72.
+       Those three ratios are conventional and are NOT confirmed from Steel's tables; they are
+       marked inferred on the card. The rule itself is attested. */
+    const steelMain = (S.lwl + S.beam) / 2;
+    const lower = mk.height * steelMain;
+    /* topgallant yard = half its topsail yard is attested for most of the 18th century; the
+       mast-length fractions below are the conventional ones and are inferred. */
+    const top = lower * 0.62, tg = lower * 0.42;
+    let y = base;
+    const segs = mk.rig === 'lateen' || mk.rig === 'crabclaw' ? [lower] : [lower, top, tg];
+    const radii = [B * 0.030, B * 0.020, B * 0.013];
+
+    segs.forEach((seg, si) => {
+      if (mk.only && si >= mk.only) return;
+      const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
+                    radii[si], radii[si] * 0.7, woodDark, -rakeRad);
+      m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
+
+      if (mk.rig === 'square') {
+        /* yard lengths run as a fraction of the mast, narrowing with each tier */
+        const yardLen = seg * (si === 0 ? 1.10 : si === 1 ? 0.86 : 0.62);
+        const yy = y + seg * 0.94;
+        const yg = new THREE.CylinderGeometry(B * 0.006, B * 0.010, yardLen, 7);
+        const ym = new THREE.Mesh(yg, woodDark);
+        ym.rotation.x = Math.PI / 2;
+        ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
+        group.add(ym);
+        /* the sail hangs from the yard and bellies to leeward */
+        sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
+                            yardLen, seg * 0.60, canvas, group, 'square'));
+      }
+    });
+
+    if (mk.rig === 'lateen') {
+      /* a lateen yard is carried at a steep angle and is often longer than the mast;
+         it pivots about a point roughly a third along its length */
+      const yardLen = lower * 1.35;
+      const yg = new THREE.CylinderGeometry(B * 0.006, B * 0.011, yardLen, 7);
+      const ym = new THREE.Mesh(yg, woodDark);
+      ym.rotation.z = -0.72;
+      ym.position.set(x + yardLen * 0.16, base + lower * 0.62, 0);
+      group.add(ym);
+      sails.push(makeSail(x, base + lower * 0.55, yardLen * 0.72, lower * 0.72,
+                          canvas, group, 'lateen'));
+    }
+    if (mk.rig === 'crabclaw') {
+      const sparLen = lower * 1.25;
+      [-0.55, 0.30].forEach((rot, i) => {
+        const g2 = new THREE.CylinderGeometry(B * 0.008, B * 0.014, sparLen, 7);
+        const m2 = new THREE.Mesh(g2, woodDark);
+        m2.rotation.z = rot;
+        m2.position.set(x + Math.sin(rot) * sparLen * 0.42,
+                        base + Math.cos(rot) * sparLen * 0.42, 0);
+        group.add(m2);
+      });
+      sails.push(makeSail(x, base + lower * 0.42, lower * 0.72, lower * 0.90,
+                          canvas, group, 'crabclaw'));
+    }
+    if (mk.rig === 'junk') {
+      /* battened lug: the battens are the whole point — they make it self-reefing, let it set
+         flat, and let a small crew handle a large sail */
+      const sailH = lower * 0.80, sailW = lower * 0.62;
+      const nb = 6;
+      for (let i = 0; i <= nb; i++) {
+        const yy = base + lower * 0.16 + sailH * (i / nb);
+        const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 6);
+        const bm = new THREE.Mesh(bg, woodDark);
+        bm.rotation.x = Math.PI / 2;
+        bm.position.set(x + sailW * 0.10, yy, 0);
+        group.add(bm);
+      }
+      sails.push(makeSail(x + sailW * 0.10, base + lower * 0.16 + sailH * 0.5,
+                          sailW, sailH, canvas, group, 'junk'));
+    }
+
+    /* standing rigging: shrouds from the channels out on the hull's side up to the masthead */
+    if (mk.shrouds) {
+      const half = H.halfB * H.wl(u) * (1 - H.tumble(u));
+      for (let s = 0; s < mk.shrouds; s++) {
+        const f = (s + 1) / (mk.shrouds + 1);
+        const chX = x + (f - 0.5) * L * 0.055;
+        [1, -1].forEach(side => {
+          const pts = [new THREE.Vector3(chX, base, side * half * 1.06),
+                       new THREE.Vector3(x + Math.sin(rakeRad) * lower, base + lower * 0.97,
+                                         side * B * 0.03)];
+          const lg = new THREE.BufferGeometry().setFromPoints(pts);
+          group.add(new THREE.Line(lg, rope));
+        });
+      }
+    }
+  });
+
+  /* bowsprit — steeved up at an angle, and on a large ship it carries its own sail */
+  if (S.bowsprit) {
+    const u0 = 0.02;
+    const x0 = -L / 2 + H.rake(u0);
+    const len = L * S.bowsprit;
+    const steeve = (S.steeve || 22) * Math.PI / 180;
+    const bg = new THREE.CylinderGeometry(B * 0.010, B * 0.020, len, 8);
+    const bm = new THREE.Mesh(bg, woodDark);
+    bm.rotation.z = Math.PI / 2 - steeve;
+    bm.position.set(x0 - Math.cos(steeve) * len / 2,
+                    deckAt(u0) + Math.sin(steeve) * len / 2, 0);
+    group.add(bm);
+  }
+
+  return sails;
+}
+
+/* ── SAILCLOTH ────────────────────────────────────────────────────────────────────────
+ * Canvas came in bolts 24 inches wide — a standard enacted in 1746 and unchanged for a
+ * century — so a sail is a set of 24-inch panels seamed edge to edge, running parallel to the
+ * leech. That panel pitch is the single most recognisable thing about a real sail at any
+ * distance, and a smooth white quad has none of it.
+ *
+ * Flax canvas is not white either. It is a warm oatmeal that greys and stains with weather;
+ * HMS Victory's topsails were No. 1 canvas, the heaviest of the sixteen grades.
+ */
+const SAIL_VERT = `varying vec2 vUv; varying vec3 vN;
+void main(){ vUv=uv; vN=normalize(normalMatrix*normal);
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+
+const SAIL_FRAG = `
+precision highp float;
+varying vec2 vUv; varying vec3 vN;
+uniform float uPanels;      // number of 24-inch cloths across this sail
+uniform vec3 uSun;
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
+void main(){
+  /* panels run parallel to the leech; the seam is a doubled, stitched band about an inch wide */
+  float p = vUv.x * uPanels;
+  float seam = smoothstep(0.030, 0.075, abs(fract(p) - 0.5) * 2.0);
+  vec3 flax = vec3(0.815, 0.775, 0.660);
+  float weather = noise(vUv * vec2(9.0, 5.0)) * 0.5 + noise(vUv * vec2(38.0, 21.0)) * 0.5;
+  vec3 col = flax * (0.86 + 0.20 * weather);
+  col *= mix(1.10, 1.0, seam);                       // the seam is thicker, so it catches light
+  /* bolt-rope and tabling darken the edges */
+  float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
+  col *= mix(0.78, 1.0, smoothstep(0.0, 0.035, edge));
+  vec3 N = normalize(vN);
+  float lam = abs(dot(N, normalize(uSun)));
+  /* canvas is thin: light comes through it as much as off it */
+  col *= (0.52 + 0.62 * lam);
+  gl_FragColor = vec4(pow(clamp(col,0.0,1.4), vec3(0.4545)), 1.0);
+}`;
+
+/* A sail is a bellied surface, not a flat quad: it takes the shape the wind puts in it, and
+   that curve is most of what makes a ship under sail look alive rather than papery. */
+function makeSail(x, yTop, width, height, mat, group, kind) {
+  const NW = 16, NH = 12;
+  const g = new THREE.PlaneGeometry(width, height, NW, NH);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const px = p.getX(i), py = p.getY(i);
+    const fx = 1 - Math.abs(px / (width / 2));            // 0 at the leeches, 1 at the middle
+    const fy = kind === 'square' ? (0.5 - py / height) : 1 - Math.abs(py / (height / 2));
+    p.setZ(i, Math.pow(Math.max(0, fx), 0.8) * Math.max(0, fy) * width * 0.16);
+  }
+  g.computeVertexNormals();
+  /* 0.61 m = the 24-inch bolt. A 30 m course therefore carries about 49 cloths. */
+  const sailMat = new THREE.ShaderMaterial({
+    vertexShader: SAIL_VERT, fragmentShader: SAIL_FRAG, side: THREE.DoubleSide,
+    uniforms: { uPanels: { value: Math.max(4, Math.round(width / 0.61)) },
+                uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
+  });
+  const m = new THREE.Mesh(g, sailMat);
+  m.position.set(x, yTop - height / 2, 0);
+  m.rotation.y = Math.PI / 2;
+  if (kind === 'lateen') m.rotation.z = 0.36;
+  if (kind === 'crabclaw') m.rotation.z = -0.20;
+  m.userData.kind = kind;
+  group.add(m);
+  return m;
+}
+
+/* ── assembly ──────────────────────────────────────────────────────────────────────── */
+
+function buildShip(S) {
+  const group = new THREE.Group();
+
+  const sun = new THREE.Vector3(0.5, 0.72, 0.42).normalize();
+  const hullMat = new THREE.ShaderMaterial({
+    vertexShader: HULL_VERT, fragmentShader: HULL_FRAG, side: THREE.DoubleSide,
+    uniforms: {
+      uSun: { value: sun }, uCam: { value: new THREE.Vector3() },
+      uStrakes: { value: S.strakes || 26 },
+      uCopper: { value: S.copper ? 1 : 0 },
+      uCopperAge: { value: S.copperAge !== undefined ? S.copperAge : 0.55 },
+      uWaterline: { value: 0.62 },
+      uChequer: { value: S.chequer ? 1 : 0 },
+      uGunDecks: { value: S.gunDecks || 0 },
+      uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
+      uIron: { value: S.iron ? 1 : 0 },
+      uTime: { value: 0 },
+    },
+  });
+
+  const hull = new THREE.Mesh(buildHullGeometry(S), hullMat);
+  group.add(hull);
+
+  const deckMat = new THREE.MeshLambertMaterial({ color: 0x9a8663, side: THREE.DoubleSide });
+  group.add(new THREE.Mesh(buildDeckGeometry(S), deckMat));
+
+  const mats = {
+    spar: new THREE.MeshLambertMaterial({ color: 0x5a4126 }),
+    canvas: new THREE.MeshLambertMaterial({ color: 0xcfc4a8, side: THREE.DoubleSide }),
+    /* ⚠ Standing rigging is NOT black. It is hemp tarred with Stockholm tar, which is a dark
+       reddish-brown to golden-brown. True black rigging is a late-19th-century appearance and
+       comes from PETROLEUM tar — so black shrouds on an 18th-century ship are an anachronism
+       of about a hundred years. */
+    rope: new THREE.LineBasicMaterial({ color: 0x4a3520, transparent: true, opacity: 0.78 }),
+  };
+  const sails = buildRig(S, group, mats);
+
+  group.userData = { hullMat, sails, spec: S };
+  return group;
+}
+
+window.SHIPS_HULL = { buildShip, buildHullGeometry, hullSurface, exponentForCm,
+                      superellipseFullness };

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ships — how we learned to cross the ocean</title>
 <meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
-<link rel="stylesheet" href="css/styles.css?v=1785571065">
-<meta name="data-version" content="1785571065">
+<link rel="stylesheet" href="css/styles.css?v=1785601975">
+<meta name="data-version" content="1785601975">
 </head>
 <body>
 
@@ -15,12 +15,16 @@
      Its CSS size is 100vw/100vh so the CSS size never depends on the attribute. -->
 <canvas id="gl"></canvas>
 
+<!-- Chart lettering over the globe. Ports and seas are NAMED, not dotted: on a chart the
+     label IS the mark, and a name carries more than a symbol ever does. -->
+<div id="labels"></div>
+
 <div id="splash">
   <div class="sp-inner">
     <h1>Ships</h1>
     <p class="sub">How we learned to cross the ocean</p>
     <div class="bar"><i></i></div>
-    <p class="note" id="loadnote">reading the sea floor…</p>
+    <p class="note" id="loadnote">sounding the sea floor…</p>
   </div>
 </div>
 
@@ -31,24 +35,29 @@
   <div class="ro-stats" id="roStats"></div>
 </div>
 
-<!-- ── left rail: layers ───────────────────────────────────────────── -->
+<!-- ── right rail: the sea ─────────────────────────────────────────── -->
 <div id="rail" class="panel">
-  <button class="rail-tab" id="railTab" title="Layers">☰</button>
   <div class="rail-body">
-    <h3>The sea</h3>
+    <h3 class="rule">The sea</h3>
     <label><input type="checkbox" id="lySeafloor" checked> Sea floor through the water</label>
     <label><input type="checkbox" id="lyWind" checked> Wind on the surface</label>
     <label><input type="checkbox" id="lyChl" checked> What lives in the water</label>
     <label><input type="checkbox" id="lyIce" checked> Sea ice</label>
     <label><input type="checkbox" id="lyCloud"> Cloud</label>
-    <h3>What people did on it</h3>
-    <label><input type="checkbox" id="lyPorts" checked> Ports</label>
-    <label><input type="checkbox" id="lyReach"> Reachability from a port</label>
-    <h3>Month</h3>
+    <h3 class="rule">Marks</h3>
+    <label><input type="checkbox" id="lyPorts" checked> Ports and seas</label>
+    <label><input type="checkbox" id="lyReach"> Reach of a hull</label>
+    <h3 class="rule">Season</h3>
     <input type="range" id="month" min="0" max="11.99" step="0.01" value="6.5">
-    <div class="mrow"><span id="monthName">July</span>
-      <button id="monthPlay" class="mini">▶ cycle the year</button></div>
+    <div class="mrow"><span class="mn" id="monthName">July</span>
+      <button id="monthPlay" class="mini">Cycle</button></div>
   </div>
+</div>
+
+<!-- ── voyages ─────────────────────────────────────────────────────── -->
+<div id="voyages" class="panel">
+  <h3 class="rule">Voyages of this era</h3>
+  <div id="voyList"></div>
 </div>
 
 <!-- ── info card ───────────────────────────────────────────────────── -->
@@ -63,15 +72,38 @@
   <div class="c-cite" id="cCite"></div>
 </div>
 
-<!-- ── timeline ────────────────────────────────────────────────────── -->
-<div id="timeline" class="panel">
-  <div id="chapters"></div>
-  <input type="range" id="t" min="0" max="1000" step="1" value="1000">
-  <div class="t-row">
-    <button id="play" class="mini">▶</button>
-    <span id="tLabel">2026</span>
-    <span class="spacer"></span>
-    <button class="mini" data-about>About &amp; limits</button>
+<!-- ── eras: the timeline is a set of PERIODS, not a slider over everything ──────────
+     A linear scrubber over 70,000 years put every event on screen at once and explained
+     nothing. Each era now filters the world to itself and says what changed. -->
+<div id="eras">
+  <div class="era-strip" id="eraStrip"></div>
+  <div class="era-detail">
+    <div class="txt">
+      <div class="hd" id="eraHd">—</div>
+      <div class="sm" id="eraSm"></div>
+    </div>
+    <div class="yr">
+      <input type="range" id="yr" min="0" max="1000" step="1" value="1000">
+      <span class="ylab" id="yrLab">—</span>
+      <button id="eraAbout" class="mini">About</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── the yard: a vessel, generated ───────────────────────────────── -->
+<div id="yard" class="hidden">
+  <canvas id="yardCanvas"></canvas>
+  <div id="yardNote"></div>
+  <button id="yardClose" class="mini">Back to the sea</button>
+  <div id="yardBar">
+    <div class="meta">
+      <h2 id="yardTitle"></h2>
+      <div class="sub" id="yardSub"></div>
+      <div class="dims" id="yardDims"></div>
+    </div>
+    <div id="yardCtl">
+      <button id="yardCard" class="mini">Read the card</button>
+    </div>
   </div>
 </div>
 
@@ -82,7 +114,9 @@
 </div>
 
 <script src="js/three.min.js"></script>
-<script src="js/app.js?v=1785571065"></script>
-<script src="js/route.js?v=1785571065"></script>
+<script src="js/hull.js"></script>
+<script src="js/yard.js"></script>
+<script src="js/app.js?v=1785601975"></script>
+<script src="js/route.js?v=1785601975"></script>
 </body>
 </html>

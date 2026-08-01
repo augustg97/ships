@@ -176,7 +176,7 @@ def gate_budget(man):
     log("5. byte budget")
     lv0 = next(l for l in man["levels"] if l["level"] == 0)["bytes"]
     app = sum(os.path.getsize(os.path.join(WEB, p)) for p in
-              ("index.html", "js/app.js", "js/route.js", "js/three.min.js", "css/styles.css"))
+              ("index.html", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js", "js/three.min.js", "css/styles.css"))
     data = sum(os.path.getsize(os.path.join(WEB, "data", f))
                for f in os.listdir(os.path.join(WEB, "data")))
     months = sum(os.path.getsize(os.path.join(WEB, "fields", f"{k}_{m:02d}.png"))

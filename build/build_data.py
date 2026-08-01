@@ -126,6 +126,198 @@ RIGS = {
 }
 
 
+# ══════════════════════════════════════════════════════════ HULL FORM ═════
+#
+# What the procedural generator builds each ship from. These are the vessel's ATTESTED
+# principal dimensions plus hull-form coefficients, and where a coefficient is derived rather
+# than published the derivation is Cb = displacement / 1.025 / (L·B·T) and it is marked.
+#
+# Every card states which of its numbers are attested and which inferred. A generated hull that
+# claimed more precision than its inputs have would be worse than no hull at all.
+#
+#   cm            midship section coefficient — solved into a superellipse exponent
+#   wlPower       how full the waterline is toward the ends (2 = parabolic, higher = longer
+#                 parallel midbody)
+#   forefoot/run  how much of the length the rising floor occupies forward and aft
+#   tumblehome    fraction of half-beam lost between waterline and deck. A ship of the line is
+#                 severe (~0.22); a clipper is nearly nothing.
+#   masts[].height  lower-mast length as a MULTIPLE OF BEAM — the rule shipwrights actually
+#                 worked to (Steel, *Elements and Practice of Rigging and Seamanship*, 1794)
+
+def hull(**k):
+    d = dict(wlPower=2.4, stemFineness=0.05, sternFineness=0.12,
+             forefoot=0.30, run=0.32, riseF=0.55, riseA=0.45,
+             sheerBow=0.9, sheerStern=0.55, tumblehome=0.06,
+             stemRake=0.03, sternRake=0.02, strakes=24,
+             copper=False, copperAge=0.55, chequer=False, gunDecks=0,
+             iron=False, topside="#5b4a33", bowsprit=0.0, steeve=22, masts=[])
+    d.update(k)
+    return d
+
+
+HULLS = {
+  # LOA 36.9, beam 5.5, draught 1.25, displacement 47 t (Olympias, as built).
+  # Cb = 47/1.025/(36.9·5.5·1.25) = 0.18 — extraordinarily fine, and the reason a trireme
+  # could be driven at 8 knots by muscle alone.
+  "trireme": hull(loa=36.9, lwl=35.0, beam=5.5, draught=1.25, freeboard=1.35, cm=0.58,
+                  wlPower=3.0, stemFineness=0.02, sternFineness=0.03,
+                  forefoot=0.22, run=0.24, riseF=0.70, riseA=0.62,
+                  sheerBow=1.0, sheerStern=0.5, tumblehome=0.10,
+                  stemRake=0.045, sternRake=0.055, strakes=18, topside="#6b5533",
+                  masts=[dict(at=0.42, height=1.05, rig="square", rake=2, shrouds=3)]),
+
+  # Skuldelev 2: 30 m × 3.8 m, draught ~1.0, sail 112 m². L/B 7.9 — a hull built to be rowed
+  # and sailed, and shallow enough to be beached anywhere.
+  "voyaging-canoe": hull(loa=19.0, lwl=18.0, beam=1.05, draught=0.75, freeboard=0.75, cm=0.62,
+                  wlPower=3.2, forefoot=0.28, run=0.30, riseF=0.55, riseA=0.50,
+                  sheerBow=0.5, sheerStern=0.5, tumblehome=0.02, strakes=10,
+                  stemRake=0.05, sternRake=0.05, topside="#6a4f34",
+                  masts=[dict(at=0.46, height=0.95, rig="crabclaw", rake=6, shrouds=2)]),
+
+  # Bremen cog, 1380: 23.3 × 7.6 × 2.25 m. Flat-bottomed so it could take the ground on a tidal
+  # flat and be unloaded at low water — which is what the Hanse ports needed.
+  "cog": hull(loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.4, cm=0.80,
+              wlPower=2.0, stemFineness=0.20, sternFineness=0.24,
+              forefoot=0.34, run=0.34, riseF=0.30, riseA=0.28,
+              sheerBow=1.2, sheerStern=0.6, tumblehome=0.04, strakes=14,
+              stemRake=0.10, sternRake=0.09, topside="#5a4227",
+              masts=[dict(at=0.46, height=0.72, rig="square", rake=0, shrouds=4)]),
+
+  "corbita": hull(loa=26.0, lwl=23.0, beam=7.0, draught=2.6, freeboard=1.9, cm=0.72,
+              wlPower=2.4, forefoot=0.30, run=0.34, riseF=0.48, riseA=0.44,
+              sheerBow=0.9, sheerStern=0.5, tumblehome=0.08, strakes=18,
+              stemRake=0.05, sternRake=0.07, topside="#63492c",
+              masts=[dict(at=0.44, height=0.62, rig="square", rake=0, shrouds=3)],
+              bowsprit=0.16, steeve=12),
+
+  "dhow": hull(loa=26.0, lwl=22.5, beam=6.4, draught=2.4, freeboard=2.0, cm=0.68,
+              wlPower=2.6, stemFineness=0.03, sternFineness=0.18,
+              forefoot=0.34, run=0.30, riseF=0.60, riseA=0.40,
+              sheerBow=1.1, sheerStern=0.55, tumblehome=0.05, strakes=16,
+              stemRake=0.13, sternRake=0.04, topside="#6d5333",
+              masts=[dict(at=0.38, height=0.9, rig="lateen", rake=-8, shrouds=3),
+                     dict(at=0.76, height=0.52, rig="lateen", rake=-6, shrouds=2)]),
+
+  # Quanzhou ship, sank c.1272: surviving hull 24.2 × 9.15 × 1.98, reconstructed ~34 m LOA,
+  # ~380 t displacement, 12 bulkheads and 13 watertight compartments.
+  "junk": hull(loa=34.0, lwl=29.0, beam=9.8, draught=3.3, freeboard=3.0, cm=0.78,
+              wlPower=2.2, stemFineness=0.24, sternFineness=0.30,
+              forefoot=0.30, run=0.30, riseF=0.34, riseA=0.26,
+              sheerBow=1.1, sheerStern=0.9, tumblehome=0.03, strakes=20,
+              stemRake=0.08, sternRake=0.10, topside="#5e4326",
+              masts=[dict(at=0.40, height=0.86, rig="junk", rake=0, shrouds=0),
+                     dict(at=0.70, height=0.58, rig="junk", rake=0, shrouds=0)]),
+
+  # Drawn at the DEFENSIBLE length (Church, Sleeswyk, Xin Yuan'ou: 50–76 m), not the 138 m
+  # that first appears in a novel of 1597. The card carries both.
+  "treasure-ship": hull(loa=70.0, lwl=60.0, beam=18.0, draught=5.2, freeboard=5.4, cm=0.80,
+              wlPower=2.2, stemFineness=0.24, sternFineness=0.30,
+              forefoot=0.30, run=0.30, riseF=0.32, riseA=0.24,
+              sheerBow=1.6, sheerStern=1.3, tumblehome=0.03, strakes=26,
+              stemRake=0.08, sternRake=0.10, topside="#5e4326",
+              masts=[dict(at=0.24, height=0.62, rig="junk", rake=0, shrouds=0),
+                     dict(at=0.46, height=0.88, rig="junk", rake=0, shrouds=0),
+                     dict(at=0.72, height=0.66, rig="junk", rake=0, shrouds=0)]),
+
+  "caravel": hull(loa=23.0, lwl=19.5, beam=6.2, draught=2.0, freeboard=2.1, cm=0.70,
+              wlPower=2.5, forefoot=0.32, run=0.32, riseF=0.52, riseA=0.46,
+              sheerBow=1.0, sheerStern=0.5, tumblehome=0.07, strakes=16,
+              stemRake=0.09, sternRake=0.06, topside="#6a4f30",
+              masts=[dict(at=0.32, height=0.82, rig="lateen", rake=-6, shrouds=3),
+                     dict(at=0.62, height=0.68, rig="lateen", rake=-5, shrouds=3),
+                     dict(at=0.86, height=0.46, rig="lateen", rake=-4, shrouds=2)],
+              bowsprit=0.14, steeve=20),
+
+  "carrack": hull(loa=34.0, lwl=28.0, beam=10.5, draught=4.2, freeboard=4.8, cm=0.78,
+              wlPower=2.2, stemFineness=0.10, sternFineness=0.20,
+              forefoot=0.32, run=0.30, riseF=0.42, riseA=0.34,
+              sheerBow=2.0, sheerStern=1.6, tumblehome=0.15, strakes=22,
+              stemRake=0.11, sternRake=0.07, topside="#5b4327",
+              masts=[dict(at=0.24, height=0.62, rig="square", rake=-3, shrouds=4),
+                     dict(at=0.50, height=0.94, rig="square", rake=1, shrouds=6),
+                     dict(at=0.80, height=0.6, rig="lateen", rake=4, shrouds=3)],
+              bowsprit=0.26, steeve=26),
+
+  "fluyt": hull(loa=32.0, lwl=27.5, beam=6.6, draught=3.1, freeboard=3.0, cm=0.82,
+              wlPower=3.0, stemFineness=0.14, sternFineness=0.22,
+              forefoot=0.28, run=0.28, riseF=0.32, riseA=0.28,
+              sheerBow=1.2, sheerStern=0.9, tumblehome=0.24, strakes=20,
+              stemRake=0.07, sternRake=0.05, topside="#5d452a",
+              masts=[dict(at=0.26, height=0.78, rig="square", rake=-2, shrouds=4),
+                     dict(at=0.54, height=1.02, rig="square", rake=1, shrouds=5),
+                     dict(at=0.83, height=0.6, rig="lateen", rake=4, shrouds=3)],
+              bowsprit=0.22, steeve=24),
+
+  "east-indiaman": hull(loa=50.0, lwl=43.0, beam=12.4, draught=5.6, freeboard=4.6, cm=0.84,
+              wlPower=2.6, stemFineness=0.12, sternFineness=0.20,
+              forefoot=0.28, run=0.30, riseF=0.36, riseA=0.30,
+              sheerBow=1.6, sheerStern=0.9, tumblehome=0.17, strakes=26,
+              stemRake=0.08, sternRake=0.05, copper=True, copperAge=0.5,
+              chequer=True, gunDecks=1, topside="#4a3a26",
+              masts=[dict(at=0.22, height=0.7, rig="square", rake=-2, shrouds=6),
+                     dict(at=0.50, height=0.96, rig="square", rake=1, shrouds=8),
+                     dict(at=0.80, height=0.66, rig="square", rake=4, shrouds=5)],
+              bowsprit=0.24, steeve=22),
+
+  # 74-gun third rate: gundeck 168–176 ft, beam 47–48 ft, 1,600–1,750 tons BOM.
+  # Cb ≈ 0.51 derived from Victory's dimensions and displacement — exactly where the
+  # literature expects a ship of the line to sit.
+  "ship-of-the-line": hull(loa=57.0, lwl=51.0, beam=14.6, draught=6.6, freeboard=5.4, cm=0.86,
+              wlPower=2.6, stemFineness=0.12, sternFineness=0.18,
+              forefoot=0.26, run=0.28, riseF=0.34, riseA=0.28,
+              sheerBow=1.8, sheerStern=0.9, tumblehome=0.22, strakes=30,
+              stemRake=0.08, sternRake=0.04, copper=True, copperAge=0.45,
+              chequer=True, gunDecks=2, topside="#3f3222",
+              masts=[dict(at=0.21, height=0.72, rig="square", rake=-2, shrouds=7),
+                     dict(at=0.49, height=1.0, rig="square", rake=1, shrouds=9),
+                     dict(at=0.79, height=0.7, rig="square", rake=5, shrouds=6)],
+              bowsprit=0.26, steeve=22),
+
+  "slave-ship": hull(loa=30.0, lwl=26.0, beam=8.0, draught=3.6, freeboard=3.0, cm=0.80,
+              wlPower=2.6, forefoot=0.28, run=0.30, riseF=0.38, riseA=0.32,
+              sheerBow=1.2, sheerStern=0.6, tumblehome=0.13, strakes=22,
+              copper=True, copperAge=0.6, topside="#4c3b28",
+              masts=[dict(at=0.26, height=0.74, rig="square", rake=-2, shrouds=5),
+                     dict(at=0.58, height=0.98, rig="square", rake=1, shrouds=6),
+                     dict(at=0.85, height=0.58, rig="square", rake=4, shrouds=4)],
+              bowsprit=0.22, steeve=22),
+
+  # Cutty Sark, 1869: 64.8 × 10.97 × 6.10, 963 gross register tons. Cb ≈ 0.48 derived, L/B 5.9
+  # — a long, fine, hard-driven hull with almost no tumblehome.
+  "clipper": hull(loa=64.8, lwl=59.0, beam=10.97, draught=6.10, freeboard=3.4, cm=0.74,
+              wlPower=3.0, stemFineness=0.03, sternFineness=0.08,
+              forefoot=0.30, run=0.36, riseF=0.50, riseA=0.44,
+              sheerBow=1.1, sheerStern=0.55, tumblehome=0.05, strakes=28,
+              stemRake=0.10, sternRake=0.06, copper=True, copperAge=0.25,
+              topside="#22201d",
+              masts=[dict(at=0.22, height=0.92, rig="square", rake=-1, shrouds=7),
+                     dict(at=0.50, height=1.12, rig="square", rake=2, shrouds=9),
+                     dict(at=0.78, height=0.86, rig="square", rake=5, shrouds=6)],
+              bowsprit=0.22, steeve=14),
+
+  # SS Great Britain, 1843: 98 × 15.4 m, 1,930 GRT — the first iron-hulled screw Atlantic liner,
+  # and the moment the wind stops setting the route.
+  "steamer": hull(loa=98.0, lwl=92.0, beam=15.4, draught=4.9, freeboard=6.0, cm=0.88,
+              wlPower=3.4, stemFineness=0.05, sternFineness=0.10,
+              forefoot=0.24, run=0.30, riseF=0.36, riseA=0.34,
+              sheerBow=1.4, sheerStern=0.7, tumblehome=0.05, strakes=22,
+              stemRake=0.06, sternRake=0.04, iron=True, topside="#25282b",
+              masts=[dict(at=0.16, height=0.4, rig="square", rake=2, shrouds=4, only=2),
+                     dict(at=0.40, height=0.46, rig="square", rake=2, shrouds=4, only=2),
+                     dict(at=0.62, height=0.42, rig="square", rake=2, shrouds=4, only=2),
+                     dict(at=0.84, height=0.36, rig="lateen", rake=3, shrouds=3)],
+              bowsprit=0.10, steeve=10),
+
+  # MSC Irina class, 2023: 399.9 × 61.3 m, 24,346 TEU. Cb 0.62–0.72 for a container liner
+  # (MAN, *Basic Principles of Ship Propulsion*, Table 1.01).
+  "container": hull(loa=399.9, lwl=383.0, beam=61.3, draught=16.0, freeboard=30.0, cm=0.98,
+              wlPower=4.6, stemFineness=0.06, sternFineness=0.30,
+              forefoot=0.18, run=0.22, riseF=0.20, riseA=0.14,
+              sheerBow=2.2, sheerStern=0.0, tumblehome=0.0, strakes=16,
+              stemRake=0.03, sternRake=0.0, iron=True, topside="#2b3f52", masts=[]),
+}
+
+
 # ═══════════════════════════════════════════════════════════ VESSELS ══════
 # dims are metres. "tonnage" ALWAYS names its system — SCOPE §7: burden, builder's old
 # measurement, gross register, displacement, deadweight and TEU are different quantities and
@@ -461,6 +653,7 @@ CH = [
             "required crossing at least 70–90 km of open water, out of sight of land, with a "
             "target that could not be seen from the departure point.\n\n"
             "No boat survives. The evidence is the arrival.",
+       view=[124, -8, 300], lede="Sea level 70 m lower. People cross 70–90 km of open water to a land they cannot see.",
        cite="Clarkson et al., *Nature* (2017); Kealy, Louys & O'Connor (2018); Spratt & Lisiecki sea-level stack (2016)."),
   dict(short="Reed & plank", title="Reed, plank and the first sea trades", years="8000 – 1000 BC",
        from_=-8000, to=-1000, seek=-2000,
@@ -471,6 +664,7 @@ CH = [
             "Egypt was building 43 m hulls by 2566 BC. The Khufu ship has no keel and no frames: "
             "it is 1,224 pieces of cedar held with unpegged mortise-and-tenon joints and grass "
             "lashing, and it works.",
+       view=[30, 30, 300], lede="The Bronze Age Mediterranean runs on sea-borne metal, in hulls held together with mortise-and-tenon and grass.",
        cite="Bass & Pulak, Institute of Nautical Archaeology; Khufu ship, Grand Egyptian Museum."),
   dict(short="Oar & monsoon", title="The oared sea and the monsoon ocean", years="1000 BC – AD 500",
        from_=-1000, to=500, seek=-300,
@@ -480,6 +674,7 @@ CH = [
             "the wind, and the sea is small enough that it never has to go far. In the Indian "
             "Ocean, the monsoon, which reverses twice a year and fixes the sailing calendar of "
             "half the world.",
+       view=[55, 20, 330], lede="Two oceans on two principles at once: oars in the Mediterranean, and a wind that reverses twice a year in the Indian.",
        cite="Casson, *Ships and Seamanship in the Ancient World*; *Periplus Maris Erythraei*."),
   dict(short="Longships & junks", title="Longships, junks and the sewn ocean", years="AD 500 – 1400",
        from_=500, to=1400, seek=1000,
@@ -489,6 +684,7 @@ CH = [
             "all; and Austronesian navigators have already settled the Pacific.\n\n"
             "There is no single centre in this period, and any version of this story that puts "
             "one in Europe is wrong on the dates.",
+       view=[60, 30, 380], lede="No single centre. The Norse reach America, Chinese hulls carry bulkheads and a compass, and the Pacific is already settled.",
        cite="Viking Ship Museum Roskilde; Needham IV.3; Belitung wreck."),
   dict(short="Ocean crossing", title="The ocean crossed, and taken", years="1400 – 1800",
        from_=1400, to=1800, seek=1590,
@@ -499,6 +695,7 @@ CH = [
             "to.\n\n"
             "The Atlantic's principal cargo in this period was human beings. That is not an "
             "aside from the technology; the ships were designed for it.",
+       view=[-30, 5, 380], lede="Every ocean crossed, charted and fought over in four centuries — and the Atlantic’s principal cargo is people.",
        cite="Eltis & Richardson; Solar & de Zwart (2017); Portuguese *Regimento*."),
   dict(short="Iron & steam", title="Iron, steam, and the end of the wind", years="1800 – 1900",
        from_=1800, to=1900, seek=1869,
@@ -508,6 +705,7 @@ CH = [
             "much coal for the same power.\n\n"
             "The Suez Canal opens in 1869 and sail cannot use it. The fastest sailing ships "
             "ever built are launched in the same decade they are made obsolete.",
+       view=[35, 25, 330], lede="Within one lifetime the ocean stops being a wind field and becomes a distance.",
        cite="Griffiths, *Steam at Sea*; Suez Canal Authority."),
   dict(short="Steel & war", title="Steel, and two wars at sea", years="1900 – 1950",
        from_=1900, to=1950, seek=1943,
@@ -518,6 +716,7 @@ CH = [
             "They could, from May 1943, when the mid-ocean air gap closed. Of about 40,000 men "
             "who served in U-boats, some 30,000 died: the highest loss rate of any arm of the "
             "German military.",
+       view=[-35, 48, 300], lede="Two wars in which the question is whether merchant ships can cross the Atlantic at all.",
        cite="Runyan & Copes, *To Die Gallantly*; uboat.net."),
   dict(short="The box", title="The box, and the sea as a cost line", years="1950 – 2026",
        from_=1950, to=2026, seek=2000,
@@ -528,6 +727,7 @@ CH = [
             "The route of a modern ship is set by lock chambers and dredged channels rather "
             "than by wind. The ocean is still there; it has simply stopped being the thing that "
             "decides.",
+       view=[70, 15, 380], lede="A steel box of standard size removes most of the cost of moving anything anywhere — and most of the reason a port is where it is.",
        cite="Levinson, *The Box* (2006); UNCTAD Review of Maritime Transport."),
 ]
 
@@ -690,6 +890,292 @@ B = [
 ]
 
 
+# ══════════════════════════════════════════════════════════ VOYAGES ══════
+# Each voyage is a sequence of dated waypoints. The app densifies them along GREAT CIRCLES,
+# which is the path a ship actually sails, and draws the track as a wake with a generated hull
+# at its head — not a dot on a line.
+#
+# Where a leg's route is inferred rather than recorded, the card says so.
+
+def leg(lon, lat, name, date=""): return dict(lon=lon, lat=lat, name=name, date=date)
+
+VOY = [
+ dict(id="sahul", name="The crossing to Sahul", dates="c. 65,000 BP", year=-63000,
+      vessel="dugout", view=[124, -6, 250], tags=["Inferred"],
+      legs=[leg(122.5, -8.6, "Timor"), leg(125.5, -9.6, "the last land in sight"),
+            leg(128.5, -11.0, "open water"), leg(130.4, -12.4, "Sahul landfall")],
+      rows=[["Minimum open-water leg", "70–90 km, out of sight of land"],
+            ["Sea level then", "about 70 m lower than today"],
+            ["Craft", "unknown — none survives"]],
+      text="The first crossing anyone made that could not be seen across. Even at the lowest "
+           "sea level of the glacial cycle there were 70–90 km of open water between Timor and "
+           "Sahul, and the target could not be seen from the departure point.\n\n"
+           "**No boat survives.** The evidence is the arrival. What the record does support is "
+           "a negative: experimental crossings found bamboo rafts made under a knot against the "
+           "Kuroshio and failed outright, while a 7.6 m cedar dugout crossed 225 km of open "
+           "water in 45 hours. If the craft was anything, it was more like a dugout than a raft.",
+      cite="Clarkson et al., *Nature* (2017); Kaifu experimental crossings, 2016–19."),
+
+ dict(id="lapita", name="The Austronesian expansion", dates="c. 3300 BP – 1300 CE", year=-1000,
+      vessel="voyaging-canoe", view=[-170, -15, 400], tags=["Attested"],
+      legs=[leg(152.0, -4.0, "the Bismarcks", "c. 3300 BP"), leg(168.0, -16.0, "Vanuatu"),
+            leg(178.0, -18.0, "Fiji", "c. 3000 BP"), leg(-175.2, -21.1, "Tonga"),
+            leg(-172.0, -13.8, "Samoa", "c. 2800 BP"),
+            leg(-149.5, -17.5, "the Society Islands", "c. 1000 CE"),
+            leg(-139.0, -9.8, "the Marquesas"),
+            leg(-155.5, 19.6, "Hawaiʻi", "c. 1000–1200 CE"),
+            leg(-109.4, -27.1, "Rapa Nui", "c. 1200 CE"),
+            leg(174.8, -41.0, "Aotearoa", "c. 1280 CE")],
+      rows=[["Distance covered", "a third of the surface of the planet"],
+            ["Direction", "largely INTO the prevailing trade winds"],
+            ["Craft", "double hull, crab-claw sail, lashed-lug planking, no metal"],
+            ["Windward capability", "about 75° made good — poor, and positive"]],
+      text="The largest maritime expansion in human history, and it went **the wrong way for "
+           "the wind**. The trades in the tropical Pacific blow from the east; the settlement "
+           "runs west to east.\n\n"
+           "That is only possible with a rig that generates lift rather than merely catching "
+           "wind. A crab claw on a double hull makes good about 75° to the true wind — poor by "
+           "modern standards, and the crucial thing is that it is *positive*, where a square "
+           "rig in the same conditions makes none at all. Sailing upwind also means you can "
+           "always run home if you find nothing, which is how you explore an ocean and survive.\n\n"
+           "The East Polynesian dates are far younger than once thought: the short chronology "
+           "moved Hawaiʻi, Rapa Nui and New Zealand several centuries later.",
+      cite="Irwin, *Archaeology in Oceania* 58 (2023); Wilmshurst et al. (2011)."),
+
+ dict(id="periplus", name="The monsoon crossing", dates="1st century AD", year=50,
+      vessel="dhow", view=[60, 15, 250],
+      legs=[leg(35.5, 23.9, "Berenike", "leave in July"), leg(43.5, 12.6, "Bab-el-Mandeb"),
+            leg(53.0, 12.5, "the Arabian coast"), leg(65.0, 15.0, "the open crossing"),
+            leg(75.78, 11.25, "Muziris, about 40 days out")],
+      rows=[["Departure month", "July — 'that is Epiphi'"], ["Passage", "about 40 days"],
+            ["Return", "November to January, on the north-east monsoon"]],
+      text="The only wind system on Earth that reverses, and it fixes the sailing calendar of "
+           "half the world. The *Periplus of the Erythraean Sea* names the month outright — "
+           "'about the month of July, that is Epiphi' — four separate times for four separate "
+           "routes.\n\n"
+           "In this ocean the departure **date** is not a free variable. Miss the monsoon and "
+           "you wait six months.",
+      cite="*Periplus Maris Erythraei* §§14, 39, 49, 56."),
+
+ dict(id="norse", name="The Norse Atlantic", dates="c. 870 – 1021", year=980,
+      vessel="voyaging-canoe", view=[-35, 62, 280], tags=["Attested"],
+      legs=[leg(5.3, 60.4, "Bergen"), leg(-6.8, 62.0, "the Faroes"),
+            leg(-21.9, 64.1, "Iceland", "c. 870"),
+            leg(-45.4, 61.0, "the Eastern Settlement, Greenland", "985"),
+            leg(-63.0, 67.0, "Helluland"), leg(-55.5, 51.6, "L'Anse aux Meadows", "1021")],
+      rows=[["Vinland, dated", "1021 CE exactly — from a cosmic-ray spike in the wood"],
+            ["Craft", "clinker-built, one square sail, shallow draught"],
+            ["Navigation", "latitude sailing along a parallel; no instruments"]],
+      text="Crossing an ocean without being able to fix a position, in an open boat, by holding "
+           "a latitude and running west.\n\n"
+           "The Vinland date is one of the most precise in archaeology: a cosmic-ray event in "
+           "993 CE left a spike in tree rings worldwide, and wood cut at L'Anse aux Meadows "
+           "shows exactly 28 rings after it. **1021 CE**, to the year.",
+      cite="Kuitems et al., *Nature* (2021); Viking Ship Museum, Roskilde."),
+
+ dict(id="zhenghe", name="Zheng He's treasure fleets", dates="1405 – 1433", year=1415,
+      vessel="treasure-ship", view=[75, 12, 330], tags=["Contested"],
+      legs=[leg(118.8, 32.0, "Nanjing"), leg(109.2, 13.8, "Champa"),
+            leg(112.7, -6.9, "Java"), leg(102.25, 2.2, "Malacca"), leg(97.1, 5.2, "Semudera"),
+            leg(79.9, 6.9, "Ceylon"), leg(75.78, 11.25, "Calicut"), leg(56.4, 27.1, "Hormuz"),
+            leg(45.03, 12.8, "Aden"), leg(45.34, 2.04, "Mogadishu"), leg(40.1, -3.2, "Malindi")],
+      rows=[["Voyages", "seven, 1405–1433"],
+            ["First fleet", "62 treasure ships, 27,800 men (*Ming Shi*)"],
+            ["First reached East Africa", "the fifth voyage, 1417–19"],
+            ["Claimed ship length", "138 m — from a novel of 1597"],
+            ["Scholarly range", "50–76 m"]],
+      text="Seven voyages across the Indian Ocean, sixty years before a Portuguese ship reached "
+           "it — and then the archives were destroyed and the fleets were never rebuilt.\n\n"
+           "**The famous dimensions come from fiction.** The 44-*zhang* figure first appears in "
+           "Luo Maodeng's *Xiyang Ji* of 1597, a novel in which ships are built with divine "
+           "help, and was carried into the official history in 1739. The Longjiang shipyard was "
+           "excavated in 2003–04 and its largest building basin is 41 m wide, against a claimed "
+           "52 m beam. The hull drawn here is at the defensible length.",
+      cite="Church, *Monumenta Serica* 53 (2005); Longjiang shipyard excavation, 2003–04."),
+
+ dict(id="dagama", name="Da Gama to India", dates="1497 – 1499", year=1498,
+      vessel="carrack", view=[10, -10, 340], tags=["Attested"],
+      legs=[leg(-9.14, 38.71, "Lisbon", "8 July 1497"), leg(-15.4, 28.1, "the Canaries"),
+            leg(-23.6, 15.1, "Cape Verde"), leg(-29.0, -3.0, "out into the Atlantic"),
+            leg(-25.0, -22.0, "the great arc — reconstructed; no longitude was ever logged"),
+            leg(-5.0, -33.0, "standing east on the westerlies"),
+            leg(18.0, -32.7, "St Helena Bay", "7 Nov 1497"),
+            leg(18.5, -34.4, "the Cape of Good Hope", "22 Nov 1497"),
+            leg(36.9, -17.9, "Quelimane"), leg(39.7, -4.05, "Mombasa"),
+            leg(40.1, -3.2, "Malindi — and a pilot"),
+            leg(75.78, 11.25, "Calicut", "20 May 1498")],
+      rows=[["Out of sight of land", "93 days — 1,533 leagues, 5,180 nautical miles"],
+            ["Crew", "~170 out (Barros); ~55 returned"],
+            ["Return crossing", "89 days — 'three months less three days'"],
+            ["Died of scurvy", "30 on the return crossing; as many again before"]],
+      text="The *volta do mar*, at full scale. Rather than creep down the African coast against "
+           "the wind and current, da Gama stood **west and south into the empty Atlantic**, "
+           "swung round the South Atlantic high, and came in on the westerlies below the Cape: "
+           "**93 days and 5,180 nautical miles** from Cape Verde to a landfall at about 30°S.\n\n"
+           "It is the longest open-ocean passage anyone had deliberately made, and it was a "
+           "wind-field calculation. Sailing away from your destination in order to reach it is "
+           "the first great piece of applied knowledge about the ocean.\n\n"
+           "**The arc drawn here is a reconstruction.** The journal records a heading and a "
+           "date and never once a longitude, so where the fleet actually turned is not known — "
+           "only that it was somewhere in the western South Atlantic.\n\n"
+           "**The pilot taken on at Malindi was not Ibn Majid.** The journal calls him only 'a "
+           "Christian pilot' — the Portuguese routinely mistook Hindus for Christians — and the "
+           "chroniclers call him a Gujarati whose supposed name, *Malemo Cana*, is not a name "
+           "at all but two titles: *mu'allim*, master, and *kanaka*, his caste. Tibbetts, "
+           "Subrahmanyam and Khoury all reject the identification; Ibn Majid thought himself "
+           "too old to navigate by 1498.",
+      cite="Ravenstein (ed.), *A Journal of the First Voyage of Vasco da Gama* (Hakluyt, 1898); Tibbetts; Subrahmanyam."),
+
+ dict(id="magellan", name="Magellan and Elcano", dates="1519 – 1522", year=1521,
+      vessel="carrack", view=[-120, -15, 400], tags=["Attested"],
+      legs=[leg(-6.35, 36.78, "Sanlúcar de Barrameda", "20 Sept 1519"),
+            leg(-15.4, 28.1, "the Canaries"), leg(-25.0, 2.0, "the doldrums"),
+            leg(-43.2, -22.9, "Rio de Janeiro", "13 Dec 1519"),
+            leg(-56.0, -35.0, "Río de la Plata"),
+            leg(-67.7, -49.3, "Puerto San Julián — the winter, and the mutiny", "31 Mar 1520"),
+            leg(-68.4, -52.3, "the strait, entered", "21 Oct 1520"),
+            leg(-74.7, -52.9, "and cleared", "28 Nov 1520"),
+            leg(-100.0, -30.0, "into the Pacific"), leg(-140.0, -15.0, "98 days, no land"),
+            leg(144.8, 13.4, "Guam", "6 Mar 1521"),
+            leg(123.9, 10.3, "Cebu"), leg(124.0, 10.3, "Mactan — Magellan killed", "27 Apr 1521"),
+            leg(127.4, 0.7, "Tidore, the Moluccas", "Nov 1521"),
+            leg(105.0, -12.0, "Elcano turns west"), leg(75.0, -30.0, "the Indian Ocean"),
+            leg(18.5, -34.4, "the Cape of Good Hope", "May 1522"),
+            leg(-23.6, 15.1, "Cape Verde"),
+            leg(-6.35, 36.78, "Sanlúcar", "6 Sept 1522")],
+      rows=[["Ships", "five out; one home"], ["Men", "~270 out; 18 home in *Victoria*"],
+            ["Pacific crossing", "98 days without fresh food"],
+            ["Magellan", "killed at Mactan, 27 April 1521, less than half way"]],
+      text="The voyage that measured the planet, and it did so by nearly killing everyone on "
+           "it. Five ships and about 270 men left; one ship and eighteen men came back.\n\n"
+           "The Pacific crossing is the part that could not be planned for, because nobody knew "
+           "how wide it was. **Ninety-eight days without fresh food.** They ate the leather off "
+           "the yards. That the ocean was that big was the single most important thing the "
+           "voyage found out.\n\n"
+           "Magellan himself never completed it — he was killed at Mactan on 27 April 1521, "
+           "with more than a year still to run. The circumnavigation is Elcano's.",
+      cite="Pigafetta, *Relazione del primo viaggio intorno al mondo*; Bergreen, *Over the Edge of the World*."),
+
+ dict(id="galleon", name="The Manila galleon's return", dates="1565 – 1815", year=1600,
+      vessel="carrack", view=[-170, 30, 380],
+      legs=[leg(120.98, 14.6, "Manila — leave in July"), leg(124.2, 12.5, "San Bernardino Strait"),
+            leg(135.0, 25.0, "north into the Kuroshio"), leg(145.0, 35.0, "and further north"),
+            leg(175.0, 40.0, "the westerlies, at 40°N"), leg(-160.0, 42.0, "the long empty leg"),
+            leg(-135.0, 41.0, "still running east"),
+            leg(-124.4, 40.4, "Cape Mendocino — landfall"),
+            leg(-99.9, 16.85, "Acapulco, four to six months out")],
+      rows=[["Westbound, Acapulco→Manila", "2–3 months"],
+            ["Eastbound, Manila→Acapulco", "4–6 months, sometimes 8"],
+            ["Urdaneta, 1565", "Cebu 1 June → Acapulco 8 October = 130 days"]],
+      text="The same two ports, opposite directions, and half the time or less one way. There "
+           "is no argument in this whole model that makes the point more cleanly.\n\n"
+           "Westbound you run down the north-east trades at 13°N and it is easy. Eastbound there "
+           "is no wind at that latitude that will take you, so you must climb to 40°N, pick up "
+           "the Kuroshio and the westerlies, cross the widest part of the Pacific, and come down "
+           "the American coast. Thousands of extra miles, and men arrived dead of scurvy.",
+      cite="Schurz, *The Manila Galleon*; Urdaneta's *tornaviaje*, 1565."),
+
+ dict(id="cook", name="Cook's first voyage", dates="1768 – 1771", year=1770,
+      vessel="east-indiaman", view=[170, -25, 400], tags=["Attested"],
+      legs=[leg(-4.14, 50.37, "Plymouth", "26 Aug 1768"), leg(-16.9, 32.6, "Madeira"),
+            leg(-43.2, -22.9, "Rio de Janeiro"),
+            leg(-67.28, -55.98, "Cape Horn", "Jan 1769"),
+            leg(-149.5, -17.5, "Tahiti — the transit of Venus", "3 June 1769"),
+            leg(174.8, -41.0, "New Zealand, circumnavigated", "Oct 1769"),
+            leg(151.2, -34.0, "Botany Bay", "Apr 1770"),
+            leg(145.4, -15.7, "the Barrier Reef — aground", "11 June 1770"),
+            leg(106.83, -6.13, "Batavia — and the dying begins", "Oct 1770"),
+            leg(18.4, -33.9, "Cape Town"), leg(-4.14, 50.37, "home", "July 1771")],
+      rows=[["Purpose", "observe the transit of Venus, then look for a southern continent"],
+            ["Deaths at sea, first two years", "very few — Cook's diet worked"],
+            ["Deaths after Batavia", "about a third of the ship's company, of dysentery and malaria"]],
+      text="A voyage that solved scurvy and was then wrecked by dysentery. Cook lost almost "
+           "nobody to scurvy in two years at sea — an astonishing result for the period — and "
+           "then buried about a third of his company after a few weeks refitting at Batavia.\n\n"
+           "The Barrier Reef grounding on 11 June 1770 nearly ended it: *Endeavour* was held off "
+           "the bottom by a piece of coral wedged in her own hull.",
+      cite="Cook, *Journals*, ed. Beaglehole; Royal Museums Greenwich."),
+
+ dict(id="greatwestern", name="Steam crosses the Atlantic", dates="April 1838", year=1838,
+      vessel="steamer", view=[-45, 45, 280],
+      legs=[leg(-2.6, 51.45, "Bristol", "8 April 1838"), leg(-12.0, 50.0, "the western approaches"),
+            leg(-35.0, 45.0, "mid-ocean"), leg(-55.0, 42.0, "the Grand Banks"),
+            leg(-74.0, 40.6, "New York", "23 April 1838")],
+      rows=[["Passage", "15 days 5 hours, about 8.2 knots"],
+            ["Coal remaining on arrival", "200 tons"],
+            ["Best sailing packet, same route", "about 40 days westbound"]],
+      text="The moment the wind stopped mattering. *Great Western* crossed westbound — the hard "
+           "direction, against the prevailing wind that made a sailing packet take forty days — "
+           "in fifteen days and five hours, and arrived with 200 tons of coal still in her "
+           "bunkers.\n\n"
+           "*Sirius* beat her there by hours, having left four days earlier, and the story that "
+           "her crew burned the furniture is a newspaper invention: they burned four barrels of "
+           "resin and still had fifteen tons of coal.",
+      cite="Fox, *The Ocean Railway*; Griffiths, *Steam at Sea*."),
+
+ dict(id="woolrun", name="The wool clipper's run home", dates="1885 – 1895", year=1887,
+      vessel="clipper", view=[100, -42, 400],
+      legs=[leg(151.2, -33.9, "Sydney"), leg(175.0, -45.0, "into the Forties"),
+            leg(-160.0, -50.0, "running the westerlies"), leg(-110.0, -53.0, "the Pacific leg"),
+            leg(-67.28, -55.98, "Cape Horn"), leg(-40.0, -35.0, "north into the Atlantic"),
+            leg(-30.0, -5.0, "across the doldrums"), leg(-25.0, 25.0, "the north-east trades"),
+            leg(-10.0, 45.0, "the western approaches"), leg(0.5, 51.5, "London")],
+      rows=[["Cutty Sark's best", "73 days Sydney → London"],
+            ["Best day's run", "363 nautical miles — 15.1 knots averaged for 24 hours"],
+            ["Why this route", "the westerlies blow round the world unbroken below 40°S"]],
+      text="The last thing sail was still best at. The Suez Canal killed the tea trade for "
+           "sailing ships in 1869 — there is no wind in a cut — so the clippers were driven onto "
+           "the routes the canal did not help, and the Australian wool run was the best of them.\n\n"
+           "It is a route that only makes sense if you read the wind: you do not sail back the "
+           "way you came. You run east, all the way round the bottom of the world, on the only "
+           "belt of wind on Earth that has no land in its way.",
+      cite="Royal Museums Greenwich; Lubbock, *The Colonial Clippers*."),
+
+ dict(id="baltic", name="The Baltic Fleet's last voyage", dates="1904 – 1905", year=1905,
+      vessel="steamer", view=[60, 10, 420], tags=["Attested"],
+      legs=[leg(21.0, 56.5, "Libau", "15 Oct 1904"),
+            leg(2.8, 54.7, "Dogger Bank — they fire on trawlers", "22 Oct 1904"),
+            leg(-9.5, 43.0, "Cape Finisterre"), leg(-5.8, 35.8, "Tangier — the fleet divides"),
+            leg(-17.4, 14.7, "Dakar"), leg(9.0, -10.0, "the Gulf of Guinea"),
+            leg(18.5, -34.4, "the Cape of Good Hope"),
+            leg(48.3, -13.4, "Nosy Be — two months at anchor", "Jan 1905"),
+            leg(95.0, 5.0, "the Malacca approaches"),
+            leg(109.2, 11.9, "Cam Ranh Bay", "Apr 1905"),
+            leg(130.15, 34.45, "Tsushima", "27 May 1905")],
+      rows=[["Distance", "about 18,000 nautical miles, seven months"],
+            ["Coal", "~500,000 tons, 30–40 coaling evolutions, 60 German colliers"],
+            ["Result", "six battleships sunk in an afternoon"]],
+      text="A fleet sailed two-thirds of the way round the world because it had no bases along "
+           "the route, and was destroyed in an afternoon by one that was six knots faster and "
+           "could see further.\n\n"
+           "Coal is the whole story. Without a friendly port anywhere on the way, every ton had "
+           "to come from chartered German colliers, and the squadron was tied to the speed of "
+           "its slowest transports. This is what the age of steam did: it freed ships from the "
+           "wind and chained them to fuel.",
+      cite="Corbett, *Maritime Operations in the Russo-Japanese War*."),
+
+ dict(id="boxroute", name="Asia to Europe, today", dates="the standing route", year=2020,
+      vessel="container", view=[70, 15, 400],
+      legs=[leg(121.5, 31.2, "Shanghai"), leg(114.2, 22.3, "Hong Kong"),
+            leg(103.8, 1.26, "Singapore"), leg(100.0, 5.5, "the Strait of Malacca"),
+            leg(79.9, 6.9, "Colombo"), leg(60.0, 12.0, "the Arabian Sea"),
+            leg(43.5, 12.6, "Bab-el-Mandeb"), leg(32.6, 30.0, "Suez"),
+            leg(14.0, 36.0, "the Mediterranean"), leg(-5.4, 36.0, "Gibraltar"),
+            leg(-9.0, 43.0, "Finisterre"), leg(4.1, 51.95, "Rotterdam")],
+      rows=[["Suez, since 1869", "London–Bombay 10,600 → 6,200 nautical miles"],
+            ["Malacca, narrowest", "2.8 km at the Phillips Channel"],
+            ["Largest hull, 2023", "399.9 × 61.3 m, 24,346 TEU"],
+            ["What sets the route", "lock chambers and dredged channels, not wind"]],
+      text="The last chapter is not about the sea at all. A modern container ship's route is set "
+           "by **numbers written down by engineers** — the inside dimension of a lock, the depth "
+           "of a dredged channel — rather than by anything the ocean does.\n\n"
+           "Panamax is not a ship. It is the inside of a lock built in 1914, and for a century "
+           "the world's fleet was designed around it. The ocean is still there. It has simply "
+           "stopped being the thing that decides.",
+      cite="UNCTAD *Review of Maritime Transport*; Suez Canal Authority; EIA chokepoint data."),
+]
+
+
 # ═══════════════════════════════════════════════════════════ PORTS ════════
 
 def build_ports():
@@ -820,8 +1306,18 @@ def main():
         v = dict(v)
         v["from"] = v.pop("from_")
         v["polar"] = RIGS[v["rig"]]
+        if v["id"] in HULLS:
+            v["hull"] = HULLS[v["id"]]
         vessels.append(v)
+    missing = [v["id"] for v in vessels if "hull" not in v]
+    if missing:
+        print(f"  (no hull yet: {', '.join(missing)})")
     write("vessels.json", {"vessels": vessels, "rigs": RIGS})
+
+    voy = []
+    for v in VOY:
+        v = dict(v); voy.append(v)
+    write("voyages.json", {"voyages": voy})
 
     chapters = []
     for c in CH:

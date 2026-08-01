@@ -39,31 +39,16 @@ const R = 100;                       // globe radius in world units
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
-/* The time axis is piecewise linear. The density of the record is roughly exponential in
- * recency; a linear axis over 70,000 years spends 97% of its length on prehistory and is
- * unusable. Each breakpoint gets a share of the slider proportional to how much there is to
- * show, not to how long it lasted. SCOPE D5. */
-const TIME_STOPS = [
-  { y: -68000, f: 0.00 }, { y: -8000, f: 0.10 }, { y: -3000, f: 0.20 },
-  { y: 500,    f: 0.34 }, { y: 1400,  f: 0.46 }, { y: 1800,  f: 0.70 },
-  { y: 1900,   f: 0.83 }, { y: 1950,  f: 0.90 }, { y: 2026,  f: 1.00 },
-];
-
-function fracToYear(f) {
-  f = Math.max(0, Math.min(1, f));
-  for (let i = 1; i < TIME_STOPS.length; i++) {
-    const a = TIME_STOPS[i - 1], b = TIME_STOPS[i];
-    if (f <= b.f) return a.y + (b.y - a.y) * (f - a.f) / (b.f - a.f);
-  }
-  return 2026;
-}
-function yearToFrac(y) {
-  for (let i = 1; i < TIME_STOPS.length; i++) {
-    const a = TIME_STOPS[i - 1], b = TIME_STOPS[i];
-    if (y <= b.y) return a.f + (b.f - a.f) * (y - a.y) / (b.y - a.y);
-  }
-  return 1;
-}
+/* ── TIME IS ERAS, NOT A SLIDER ──────────────────────────────────────────────────────
+ * The first version was a single piecewise-linear scrubber across 70,000 years, inherited
+ * from a deep-time project where it was right. Here it was not: every event stayed on screen
+ * at every date, so the slider explained nothing and the world never emptied out.
+ *
+ * Now the era IS the unit of navigation. Picking one filters the whole world to it — the ports
+ * that existed, the voyages that were made, the hulls that could be built — and says in a
+ * sentence what changed. The year slider then moves only WITHIN the chosen era, so the Earth
+ * still breathes (sea level, ice) without the timeline pretending to carry everything.
+ */
 function yearLabel(y) {
   y = Math.round(y);
   if (y < -10000) return `${Math.round(-y / 1000)},000 BC`;
@@ -74,14 +59,15 @@ function yearLabel(y) {
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 const S = {
-  t: 1.0,                 // time slider fraction
-  year: 2026,
+  era: 4,                 // index into APP.chapters.chapters
+  year: 1600,
   month: 6.5,             // 0..12, fractional so the field interpolates
-  playing: false,
   monthPlaying: false,
   lon: -30, lat: 20, dist: 340,
   layers: { seafloor: 1, wind: 1, chl: 1, ice: 1, cloud: 0, ports: 1, reach: 0 },
-  selected: null,
+  voyage: null,           // the voyage being animated
+  voyT: 0,                // 0..1 along it
+  voyPlaying: false,
   reachFrom: null,
 };
 
@@ -577,80 +563,307 @@ async function loadData() {
   APP.vessels  = await get('data/vessels.json')  || { vessels: [] };
   APP.battles  = await get('data/battles.json')  || { battles: [] };
   APP.chapters = await get('data/chapters.json') || { chapters: [] };
+  APP.voyages  = await get('data/voyages.json')  || { voyages: [] };
   APP.about    = await get('data/about.json')    || null;
   buildChapters();
   buildMarkers();
   updateReadout();
 }
 
-/* ── markers ────────────────────────────────────────────────────────────── */
-let markerGroup;
+/* ── CHART LETTERING, not dots ────────────────────────────────────────────
+ * On an Admiralty chart the label IS the mark: a place is named, not stippled. So there are no
+ * point symbols on this globe. Ports are set in letterspaced roman capitals with a short tick
+ * down to the coast; sea areas are in italic, which is the actual chart convention for water;
+ * battles are in the one warm colour on the site.
+ *
+ * This also solves the density problem that dots never do — a label that would collide with a
+ * more important label simply does not draw, so the map thins itself out as you zoom out
+ * instead of turning into a smear of points.
+ */
+const SEAS = [
+  ['North Atlantic Ocean', -40, 35], ['South Atlantic Ocean', -20, -25],
+  ['North Pacific Ocean', -160, 30], ['South Pacific Ocean', -130, -25],
+  ['Indian Ocean', 78, -20], ['Southern Ocean', 40, -58],
+  ['Arctic Ocean', 0, 84], ['Mediterranean Sea', 17, 36],
+  ['Caribbean Sea', -75, 15], ['Bay of Bengal', 88, 15],
+  ['Arabian Sea', 63, 15], ['South China Sea', 114, 14],
+  ['Coral Sea', 155, -17], ['Tasman Sea', 162, -38],
+  ['Gulf of Guinea', 2, 2], ['Bering Sea', -178, 58], ['North Sea', 3, 56],
+  ['Sea of Japan', 135, 40], ['Drake Passage', -63, -58], ['Baltic Sea', 19, 58],
+];
+
+let labelHost;
 function buildMarkers() {
-  if (markerGroup) scene.remove(markerGroup);
-  markerGroup = new THREE.Group();
-  scene.add(markerGroup);
+  labelHost = document.getElementById('labels');
   APP.markers = [];
-
-  const addSet = (items, kind, color, size) => {
-    if (!items || !items.length) return;
-    const g = new THREE.BufferGeometry();
-    const pos = [], idx = [];
-    items.forEach((it, i) => {
-      const v = lonLatToVec(it.lon, it.lat, R * 1.0035);
-      pos.push(v.x, v.y, v.z);
-      idx.push(i);
-      APP.markers.push({ kind, item: it, v });
-    });
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    const m = new THREE.PointsMaterial({
-      color, size, sizeAttenuation: false, transparent: true, opacity: 0.92,
-      depthWrite: false,
-    });
-    const p = new THREE.Points(g, m);
-    p.userData.kind = kind;
-    markerGroup.add(p);
+  const push = (kind, item, cls) => {
+    const el = document.createElement('div');
+    el.className = 'lbl ' + cls;
+    el.innerHTML = (kind === 'sea')
+      ? item.name
+      : `${item.name}<i class="tick"></i>`;
+    if (kind !== 'sea') el.onclick = () => (kind === 'port' ? openPort(item) : openBattle(item));
+    labelHost.appendChild(el);
+    APP.markers.push({ kind, item, el, v: lonLatToVec(item.lon, item.lat, R * 1.002),
+                       major: !!item.kind && item.kind === 'historic' });
   };
-
-  addSet(APP.ports.ports, 'port', 0xf0d98a, 2.6);
-  addSet(APP.battles.battles, 'battle', 0xe0724d, 6.5);
+  SEAS.forEach(([name, lon, lat]) => push('sea', { name, lon, lat }, 'sea'));
+  (APP.ports.ports || []).forEach(p =>
+    push('port', p, 'port' + (p.kind === 'historic' ? ' major' : '')));
+  (APP.battles.battles || []).forEach(b => push('battle', b, 'battle'));
 }
 
-function markersVisible() {
-  if (!markerGroup) return;
-  markerGroup.children.forEach(c => {
-    if (c.userData.kind === 'port') c.visible = !!S.layers.ports;
-    if (c.userData.kind === 'battle') c.visible = true;
+/* Projected once per frame, on a throttle, with collision culling by importance. */
+let lblTick = 0;
+function updateLabels(now) {
+  if (!APP.markers || now - lblTick < 90) return;
+  lblTick = now;
+  const rect = renderer.domElement.getBoundingClientRect();
+  const camDir = camera.position.clone().normalize();
+  const taken = [];
+  const era = currentEra();
+
+  /* nearest first, so the important thing wins a collision */
+  const order = APP.markers.slice().sort((a, b) => {
+    const rank = m => m.kind === 'sea' ? 0 : (m.kind === 'battle' ? 1 : (m.major ? 2 : 3));
+    return rank(a) - rank(b);
   });
+
+  for (const m of order) {
+    let show = true;
+    if (m.kind !== 'sea' && !S.layers.ports) show = false;
+    /* ── AN ERA SHOWS ITS OWN WORLD ──────────────────────────────────
+       The World Port Index is a MODERN gazetteer: it lists the port network as it is today,
+       so its entries are only honest from the era in which that network exists. Showing them
+       across the whole timeline put oil terminals on a chart of 1590 — which is exactly the
+       failure the era system was built to end. Historical ports carry their own founding date
+       and appear from it. */
+    if (show && m.kind === 'port') {
+      if (m.item.kind === 'modern' && S.year < 1900) show = false;
+      else if (m.item.from !== undefined && S.year < m.item.from) show = false;
+    }
+    if (show && m.kind === 'battle' && era && (m.item.year < era.from || m.item.year > era.to))
+      show = false;
+    /* the far side of the planet */
+    if (show && m.v.clone().normalize().dot(camDir) < 0.06) show = false;
+
+    if (show) {
+      const p = m.v.clone().project(camera);
+      const sx = (p.x * 0.5 + 0.5) * rect.width, sy = (-p.y * 0.5 + 0.5) * rect.height;
+      if (sx < -60 || sy < -30 || sx > rect.width + 60 || sy > rect.height + 30) show = false;
+      else {
+        /* collision: minor ports yield to everything already placed */
+        const pad = m.kind === 'sea' ? 120 : (m.major ? 88 : 76);
+        const vpad = m.kind === 'sea' ? 34 : 22;
+        for (const t of taken) {
+          if (Math.abs(t[0] - sx) < pad && Math.abs(t[1] - sy) < vpad) { show = false; break; }
+        }
+        if (show) {
+          taken.push([sx, sy]);
+          m.el.style.left = sx + 'px';
+          m.el.style.top = sy + 'px';
+        }
+      }
+    }
+    m.el.style.opacity = show ? '1' : '0';
+    m.el.style.pointerEvents = show ? 'auto' : 'none';
+  }
 }
 
-/* ── chapters ───────────────────────────────────────────────────────────── */
+function markersVisible() { lblTick = 0; }
+
+/* ── eras ───────────────────────────────────────────────────────────────── */
+function currentEra() {
+  const chs = (APP.chapters && APP.chapters.chapters) || [];
+  return chs[S.era] || null;
+}
+
 function buildChapters() {
-  const host = document.getElementById('chapters');
-  host.innerHTML = '';
-  (APP.chapters.chapters || []).forEach(ch => {
+  const strip = document.getElementById('eraStrip');
+  strip.innerHTML = '';
+  (APP.chapters.chapters || []).forEach((ch, i) => {
     const b = document.createElement('button');
-    b.className = 'chap';
-    b.textContent = ch.short || ch.title;
+    b.className = 'era';
+    b.innerHTML = `<span class="en">${ch.short || ch.title}</span>
+                   <span class="ey">${ch.years}</span>`;
     b.title = ch.title;
-    b.onclick = () => {
-      S.t = yearToFrac(ch.seek);
-      document.getElementById('t').value = Math.round(S.t * 1000);
-      onTime();
-      showCard({
-        eyebrow: 'Chapter', title: ch.title, sub: ch.years,
-        rows: ch.rows || [], prose: ch.text, span: ch.years, cite: ch.cite,
-      });
-    };
+    b.onclick = () => selectEra(i, true);
+    strip.appendChild(b);
+  });
+  selectEra(S.era, false);
+}
+
+function selectEra(i, fly) {
+  const chs = APP.chapters.chapters || [];
+  if (!chs[i]) return;
+  S.era = i;
+  const ch = chs[i];
+  document.querySelectorAll('.era').forEach((b, j) => b.classList.toggle('on', j === i));
+
+  /* the year slider now runs only WITHIN the era, so it never spends its length on
+     millennia that have nothing on them */
+  S.year = ch.seek;
+  const yr = document.getElementById('yr');
+  yr.min = ch.from; yr.max = ch.to; yr.step = Math.max(1, Math.round((ch.to - ch.from) / 400));
+  yr.value = S.year;
+
+  document.getElementById('eraHd').textContent = ch.title;
+  document.getElementById('eraSm').innerHTML = ch.lede || (ch.text || '').split('\n\n')[0];
+  onTime();
+  buildVoyageList();
+  if (fly && ch.view) flyTo(ch.view[0], ch.view[1], ch.view[2] || 330);
+  if (fly) {
+    showCard({ eyebrow: 'Era', title: ch.title, sub: ch.years,
+               rows: ch.rows || [], prose: ch.text, span: ch.years, cite: ch.cite });
+  }
+}
+
+/* ── the camera flies, rather than cutting ─────────────────────────────── */
+let fly = null;
+function flyTo(lon, lat, dist, ms = 1500) {
+  fly = { t0: performance.now(), ms,
+          a: { lon: S.lon, lat: S.lat, dist: S.dist },
+          b: { lon, lat, dist } };
+  /* take the short way round the globe */
+  while (fly.b.lon - fly.a.lon > 180) fly.b.lon -= 360;
+  while (fly.b.lon - fly.a.lon < -180) fly.b.lon += 360;
+}
+function stepFly(now) {
+  if (!fly) return;
+  const k = Math.min(1, (now - fly.t0) / fly.ms);
+  const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  S.lon = fly.a.lon + (fly.b.lon - fly.a.lon) * e;
+  S.lat = fly.a.lat + (fly.b.lat - fly.a.lat) * e;
+  S.dist = fly.a.dist + (fly.b.dist - fly.a.dist) * e;
+  placeCamera();
+  if (k >= 1) fly = null;
+}
+
+/* ── VOYAGES: a wake that draws itself, with a hull at the head ─────────
+ * Not a dot moving along a line. The track is the ship's own wake — it accumulates behind and
+ * fades, the way a real one does — and the mark at the head is a small generated silhouette of
+ * the hull that made the passage, heading along its own course.
+ */
+let voyGroup = null, voyWake = null, voyShip = null;
+
+function buildVoyageList() {
+  const host = document.getElementById('voyList');
+  const era = currentEra();
+  const all = (APP.voyages && APP.voyages.voyages) || [];
+  const mine = all.filter(v => era && v.year >= era.from && v.year <= era.to);
+  host.innerHTML = '';
+  if (!mine.length) {
+    host.innerHTML = '<div style="font-size:11px;color:var(--ink-faint);line-height:1.6">' +
+      'No voyage in this model is dated to this era.</div>';
+    clearVoyage();
+    return;
+  }
+  mine.forEach(v => {
+    const b = document.createElement('button');
+    b.className = 'voy' + (S.voyage && S.voyage.id === v.id ? ' on' : '');
+    b.innerHTML = `<span class="vn">${v.name}</span><span class="vy">${v.dates}</span>`;
+    b.onclick = () => startVoyage(v);
     host.appendChild(b);
   });
 }
-function markChapter() {
-  const y = S.year;
-  const chs = APP.chapters.chapters || [];
-  document.querySelectorAll('.chap').forEach((b, i) => {
-    const ch = chs[i];
-    b.classList.toggle('on', ch && y >= ch.from && y <= ch.to);
+
+function clearVoyage() {
+  if (voyGroup) { scene.remove(voyGroup); voyGroup = null; voyWake = null; voyShip = null; }
+  S.voyage = null; S.voyPlaying = false;
+}
+
+function startVoyage(v) {
+  clearVoyage();
+  S.voyage = v; S.voyT = 0; S.voyPlaying = true;
+  voyGroup = new THREE.Group();
+  scene.add(voyGroup);
+
+  /* densify the waypoints along great circles so the wake curves the way a real track does */
+  const pts = [];
+  for (let i = 0; i < v.legs.length - 1; i++) {
+    const a = v.legs[i], b = v.legs[i + 1];
+    const n = 26;
+    for (let k = 0; k < n; k++) {
+      const f = k / n;
+      pts.push(slerpLonLat(a.lon, a.lat, b.lon, b.lat, f));
+    }
+  }
+  pts.push([v.legs[v.legs.length - 1].lon, v.legs[v.legs.length - 1].lat]);
+  APP.voyPts = pts;
+
+  const pos = new Float32Array(pts.length * 3);
+  const col = new Float32Array(pts.length * 3);
+  pts.forEach((p, i) => {
+    const w = lonLatToVec(p[0], p[1], R * 1.004);
+    pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z;
   });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  g.setDrawRange(0, 0);
+  voyWake = new THREE.Line(g, new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.95, linewidth: 2 }));
+  voyGroup.add(voyWake);
+
+  /* the head: a small silhouette of the actual hull, not a dot */
+  const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === v.vessel);
+  if (ves && ves.hull) {
+    const s = window.SHIPS_HULL.buildShip(ves.hull);
+    const k = (R * 0.030) / ves.hull.loa;
+    s.scale.setScalar(k);
+    voyShip = new THREE.Group();
+    voyShip.add(s);
+    voyGroup.add(voyShip);
+  }
+  buildVoyageList();
+  flyTo(v.view ? v.view[0] : pts[0][0], v.view ? v.view[1] : pts[0][1], v.view ? v.view[2] : 300);
+  showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: v.rows || [],
+             prose: v.text, span: v.dates, cite: v.cite, tags: v.tags });
+}
+
+/* great-circle interpolation between two lon/lat, which is the path a ship actually sails */
+function slerpLonLat(lon1, lat1, lon2, lat2, f) {
+  const p1 = lonLatToVec(lon1, lat1, 1), p2 = lonLatToVec(lon2, lat2, 1);
+  const d = Math.acos(Math.max(-1, Math.min(1, p1.dot(p2))));
+  if (d < 1e-6) return [lon1, lat1];
+  const a = Math.sin((1 - f) * d) / Math.sin(d), b = Math.sin(f * d) / Math.sin(d);
+  const v = new THREE.Vector3(p1.x * a + p2.x * b, p1.y * a + p2.y * b, p1.z * a + p2.z * b);
+  const ll = vecToLonLat(v);
+  return [ll.lon, ll.lat];
+}
+
+function stepVoyage(dt) {
+  if (!S.voyage || !voyWake) return;
+  const pts = APP.voyPts;
+  if (S.voyPlaying) S.voyT = Math.min(1, S.voyT + dt * 0.055);
+  const head = Math.max(1, Math.floor(S.voyT * (pts.length - 1)));
+  voyWake.geometry.setDrawRange(0, head + 1);
+
+  /* the wake fades behind the ship: bright at the head, gone a long way astern */
+  const col = voyWake.geometry.attributes.color;
+  for (let i = 0; i <= head; i++) {
+    const age = (head - i) / Math.max(1, pts.length * 0.42);
+    const k = Math.max(0.06, 1 - age);
+    col.setXYZ(i, 0.92 * k + 0.05, 0.80 * k + 0.06, 0.42 * k + 0.08);
+  }
+  col.needsUpdate = true;
+
+  if (voyShip) {
+    const p = pts[head], q = pts[Math.max(0, head - 1)];
+    const w = lonLatToVec(p[0], p[1], R * 1.008);
+    voyShip.position.copy(w);
+    /* stand the hull upright on the sphere and point it along its own course */
+    const up = w.clone().normalize();
+    const prev = lonLatToVec(q[0], q[1], R * 1.008);
+    const fwd = w.clone().sub(prev).normalize();
+    if (fwd.lengthSq() > 1e-9) {
+      const right = new THREE.Vector3().crossVectors(up, fwd).normalize();
+      const f2 = new THREE.Vector3().crossVectors(right, up).normalize();
+      const m = new THREE.Matrix4().makeBasis(f2, up, right);
+      voyShip.quaternion.setFromRotationMatrix(m);
+    }
+  }
+  if (S.voyT >= 1) S.voyPlaying = false;
 }
 
 /* ── card ───────────────────────────────────────────────────────────────── */
@@ -679,27 +892,25 @@ function showCard(c) {
 
 /* ── readout ────────────────────────────────────────────────────────────── */
 function updateReadout() {
-  const y = S.year;
-  const chs = APP.chapters ? (APP.chapters.chapters || []) : [];
-  const ch = chs.find(c => y >= c.from && y <= c.to);
+  const ch = currentEra();
   document.getElementById('roEra').textContent = ch ? ch.title : '—';
-  document.getElementById('roDate').textContent = yearLabel(y);
+  document.getElementById('roDate').textContent = yearLabel(S.year);
   const mi = Math.floor(S.month) % 12;
-  const rows = [];
-  rows.push(`<b>${MONTH_NAMES[mi]}</b> on the water`);
+  const rows = [`<b>${MONTH_NAMES[mi]}</b> on the water`];
+  const sl = seaLevelAt(S.year);
+  if (sl < -3) rows.push(`Sea level <b>${Math.round(-sl)} m</b> lower`);
   if (ch && ch.stat) rows.push(ch.stat);
   document.getElementById('roStats').innerHTML = rows.join('<br>');
 }
 
 /* ── UI ─────────────────────────────────────────────────────────────────── */
 function onTime() {
-  S.year = fracToYear(S.t);
-  document.getElementById('tLabel').textContent = yearLabel(S.year);
+  document.getElementById('yrLab').textContent = yearLabel(S.year);
   /* Sea level from the Spratt & Lisiecki stack, for deep time. Interpolated linearly in
      thousands of years; zero at the present. The defensibility ladder is stated in About. */
   mat.uniforms.uSeaLevel.value = seaLevelAt(S.year);
   updateReadout();
-  markChapter();
+  markersVisible();
 }
 
 /* Spratt & Lisiecki 2016 sea-level stack, thinned to the points that matter for seafaring.
@@ -734,8 +945,15 @@ function setMonthTextures() {
 }
 
 function wireUI() {
-  const t = document.getElementById('t');
-  t.addEventListener('input', () => { S.t = +t.value / 1000; onTime(); });
+  const yr = document.getElementById('yr');
+  yr.addEventListener('input', () => { S.year = +yr.value; onTime(); });
+  document.getElementById('eraAbout').onclick = openAbout;
+  document.getElementById('yardClose').onclick = () => window.SHIPS_YARD.yardClose();
+  document.getElementById('yardCard').onclick = () => {
+    const v = window.SHIPS_YARD.YARD.spec;
+    window.SHIPS_YARD.yardClose();
+    if (v) openVessel(v);
+  };
 
   const m = document.getElementById('month');
   m.addEventListener('input', () => {
@@ -745,12 +963,9 @@ function wireUI() {
     updateReadout();
   });
 
-  document.getElementById('play').onclick = e => {
-    S.playing = !S.playing; e.target.textContent = S.playing ? '❚❚' : '▶';
-  };
   document.getElementById('monthPlay').onclick = e => {
     S.monthPlaying = !S.monthPlaying;
-    e.target.textContent = S.monthPlaying ? '❚❚ cycling' : '▶ cycle the year';
+    e.target.classList.toggle('on', S.monthPlaying);
   };
   document.getElementById('cardClose').onclick = () =>
     document.getElementById('card').classList.add('hidden');
@@ -784,21 +999,19 @@ function wireUI() {
     cv.setPointerCapture(e.pointerId);
   });
   cv.addEventListener('pointermove', e => {
-    if (drag) {
-      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      drag.moved += Math.abs(dx) + Math.abs(dy);
-      const k = S.dist / 900;
-      S.lon = drag.lon - dx * 0.28 * k;
-      S.lat = Math.max(-84, Math.min(84, drag.lat + dy * 0.28 * k));
-      placeCamera();
-    } else hoverTest(e);
+    if (!drag) return;
+    fly = null;                                   // a hand on the globe always wins
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    drag.moved += Math.abs(dx) + Math.abs(dy);
+    const k = S.dist / 900;
+    S.lon = drag.lon - dx * 0.28 * k;
+    S.lat = Math.max(-84, Math.min(84, drag.lat + dy * 0.28 * k));
+    placeCamera();
   });
-  cv.addEventListener('pointerup', e => {
-    if (drag && drag.moved < 6) clickTest(e);
-    drag = null;
-  });
+  cv.addEventListener('pointerup', () => { drag = null; });
   cv.addEventListener('wheel', e => {
     e.preventDefault();
+    fly = null;
     S.dist = Math.max(112, Math.min(700, S.dist * (1 + Math.sign(e.deltaY) * 0.11)));
     placeCamera();
   }, { passive: false });
@@ -810,45 +1023,6 @@ function wireUI() {
       document.getElementById('about').classList.add('hidden');
     }
   });
-}
-
-/* ── picking ────────────────────────────────────────────────────────────── */
-const hoverEl = (() => {
-  const d = document.createElement('div'); d.id = 'hover';
-  document.body.appendChild(d); return d;
-})();
-
-function pickMarker(e) {
-  if (!APP.markers || !APP.markers.length) return null;
-  const rect = renderer.domElement.getBoundingClientRect();
-  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-  let best = null, bd = 15 * 15;
-  const camDir = camera.position.clone().normalize();
-  for (const mk of APP.markers) {
-    if (mk.kind === 'port' && !S.layers.ports) continue;
-    if (mk.v.clone().normalize().dot(camDir) < 0.02) continue;   // on the far side
-    const p = mk.v.clone().project(camera);
-    const sx = (p.x * 0.5 + 0.5) * rect.width, sy = (-p.y * 0.5 + 0.5) * rect.height;
-    const d = (sx - mx) * (sx - mx) + (sy - my) * (sy - my);
-    if (d < bd) { bd = d; best = mk; }
-  }
-  return best;
-}
-
-function hoverTest(e) {
-  const mk = pickMarker(e);
-  if (!mk) { hoverEl.style.display = 'none'; return; }
-  hoverEl.textContent = mk.item.name;
-  hoverEl.style.display = 'block';
-  hoverEl.style.left = (e.clientX + 13) + 'px';
-  hoverEl.style.top = (e.clientY - 9) + 'px';
-}
-
-function clickTest(e) {
-  const mk = pickMarker(e);
-  if (!mk) return;
-  if (mk.kind === 'port') openPort(mk.item);
-  if (mk.kind === 'battle') openBattle(mk.item);
 }
 
 /* ── resize / frame ─────────────────────────────────────────────────────── */
@@ -863,12 +1037,16 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
 
-  if (S.playing) {
-    S.t = Math.min(1, S.t + dt * 0.035);
-    document.getElementById('t').value = Math.round(S.t * 1000);
-    onTime();
-    if (S.t >= 1) { S.playing = false; document.getElementById('play').textContent = '▶'; }
+  if (window.SHIPS_YARD && window.SHIPS_YARD.YARD.on) {
+    window.SHIPS_YARD.yardFrame(now);
+    requestAnimationFrame(frame);
+    return;                                     // the globe is not being looked at
   }
+
+  stepFly(now);
+  stepVoyage(dt);
+  updateLabels(now);
+
   if (S.monthPlaying) {
     S.month = (S.month + dt * 1.1) % 12;
     document.getElementById('month').value = S.month;
@@ -890,6 +1068,30 @@ function vesselsAtYear(y) {
   const all = (APP.vessels && APP.vessels.vessels) || [];
   const live = all.filter(v => y >= v.from && y <= v.to);
   return live.length ? live : all;
+}
+
+/* ── a vessel's card, with the way into the Yard ────────────────────────── */
+function openVessel(v) {
+  const H = v.hull;
+  const rows = (v.rows || []).slice();
+  if (H) {
+    rows.push(['Generated from', `${H.loa} × ${H.beam} × ${H.draught} m, Cm ${H.cm}`]);
+  }
+  showCard({
+    eyebrow: 'Vessel', title: v.name, sub: v.sub || '',
+    rows, prose: v.text, span: v.era ? `${yearLabel(v.era[0])} – ${yearLabel(v.era[1])}` : '',
+    cite: v.cite, tags: [v.attestation, v.confidence].filter(Boolean)
+                        .map(s => s[0].toUpperCase() + s.slice(1)),
+  });
+  const host = document.getElementById('cProse');
+  const box = document.createElement('div');
+  box.style.cssText = 'margin-top:14px;border-top:1px solid var(--edge);padding-top:12px';
+  box.innerHTML =
+    `<div style="font-size:11.5px;color:var(--ink-dim);line-height:1.6;margin-bottom:9px">
+       <b style="color:var(--verdigris)">${v.polar.rig}.</b> ${v.polar.rigNote}</div>` +
+    (H ? '<button id="toYard" class="mini" style="width:100%">See the hull</button>' : '');
+  host.appendChild(box);
+  if (H) document.getElementById('toYard').onclick = () => window.SHIPS_YARD.yardOpen(v);
 }
 
 function openPort(p) {
@@ -916,9 +1118,17 @@ function openPort(p) {
     '</select>' +
     '<button id="reachGo" class="mini" style="margin-top:8px;width:100%">' +
     'Compute the passage field</button>' +
+    '<button id="reachYard" class="mini" style="margin-top:6px;width:100%">' +
+    'See that hull</button>' +
     '<div id="reachOut" style="font-size:11.5px;color:var(--ink-dim);margin-top:9px;' +
     'line-height:1.6"></div>';
   host.appendChild(box);
+
+  document.getElementById('reachYard').onclick = () => {
+    const id = document.getElementById('reachHull').value;
+    const v = live.find(x => x.id === id);
+    if (v && v.hull) window.SHIPS_YARD.yardOpen(v);
+  };
 
   document.getElementById('reachGo').onclick = async () => {
     const out = document.getElementById('reachOut');

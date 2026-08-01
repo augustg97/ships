@@ -1,0 +1,213 @@
+/* yard.js — the Yard: one vessel, generated and rendered, floating on a real sea.
+ *
+ * This is a SECOND VIEW of a real object, not an abstract space — a ship is a thing, so
+ * rendering one is still rendering reality (WORKING-RULES §13b). Every leaf of it returns to
+ * the globe and the water the vessel sailed on.
+ *
+ * The sea under the ship is the same physics as the globe's: a wind-driven surface with
+ * whitecapping above force 6, a sun glint that broadens as it blows harder, and a horizon.
+ * The ship sits at its real draught and heels to the wind on the dial.
+ */
+'use strict';
+
+const YARD = {
+  on: false, renderer: null, scene: null, cam: null, ship: null,
+  sea: null, spec: null, t0: 0, spin: true, lon: 0.9, lat: 0.22, dist: 2.4,
+};
+
+/* ── the sea the ship sits in ──────────────────────────────────────────────────────── */
+const SEA_VERT = `
+varying vec3 vP; varying vec2 vUv;
+void main(){ vUv=uv; vec4 wp=modelMatrix*vec4(position,1.0); vP=wp.xyz;
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+
+const SEA_FRAG = `
+precision highp float;
+varying vec3 vP; varying vec2 vUv;
+uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
+float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.07; a*=0.5;} return v; }
+
+void main(){
+  vec2 p = vP.xz / uScale;
+  float drift = uTime * 0.16 * (0.5 + uWind * 0.06);
+  /* swell runs in one direction and the wind chop across it, which is what real water does */
+  float swell = fbm(p * vec2(0.30, 1.5) + vec2(drift, 0.0));
+  float chop  = fbm(p * vec2(3.2, 6.0) - vec2(drift * 2.1, 0.0));
+  float h = swell * 0.65 + chop * 0.35;
+
+  vec3 N = normalize(vec3((swell - 0.5) * 0.55 + (chop - 0.5) * 0.30,
+                          1.0,
+                          (chop - 0.5) * 0.42));
+  vec3 V = normalize(uCam - vP);
+  vec3 L = normalize(uSun);
+
+  float dist = length(vP.xz);
+  vec3 deep = vec3(0.020, 0.070, 0.115);
+  vec3 shal = vec3(0.045, 0.135, 0.160);
+  vec3 col = mix(shal, deep, clamp(dist / (uScale * 8.0), 0.0, 1.0));
+
+  float fres = 0.02 + 0.98 * pow(1.0 - max(dot(N, V), 0.0), 5.0);
+  col = mix(col, vec3(0.30, 0.44, 0.56), fres * 0.62);
+
+  vec3 Hv = normalize(L + V);
+  float shin = mix(340.0, 46.0, clamp(uWind / 16.0, 0.0, 1.0));
+  col += vec3(1.0, 0.96, 0.88) * pow(max(dot(N, Hv), 0.0), shin) * 0.9;
+
+  float breakF = smoothstep(6.0, 13.0, uWind);
+  float foam = smoothstep(0.60 - breakF * 0.22, 0.82, h);
+  col = mix(col, vec3(0.88, 0.92, 0.94), foam * breakF * 0.75);
+
+  /* haze into the horizon so the plane reads as an ocean rather than a floor */
+  float haze = smoothstep(uScale * 3.0, uScale * 14.0, dist);
+  col = mix(col, vec3(0.10, 0.17, 0.24), haze);
+
+  gl_FragColor = vec4(pow(clamp(col, 0.0, 1.5), vec3(0.4545)), 1.0);
+}`;
+
+function yardInit() {
+  if (YARD.renderer) return;
+  const cv = document.getElementById('yardCanvas');
+  YARD.renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
+  YARD.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  YARD.scene = new THREE.Scene();
+  YARD.cam = new THREE.PerspectiveCamera(32, 1, 0.1, 40000);
+
+  YARD.scene.add(new THREE.HemisphereLight(0x9fc4d8, 0x203040, 1.25));
+  const dir = new THREE.DirectionalLight(0xfff3dd, 1.5);
+  dir.position.set(60, 90, 50);
+  YARD.scene.add(dir);
+
+  const seaG = new THREE.PlaneGeometry(1, 1, 1, 1);
+  YARD.sea = new THREE.Mesh(seaG, new THREE.ShaderMaterial({
+    vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
+    uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
+                uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
+                uWind: { value: 8 }, uScale: { value: 60 } },
+  }));
+  YARD.sea.rotation.x = -Math.PI / 2;
+  YARD.scene.add(YARD.sea);
+
+  /* drag to orbit, wheel to zoom */
+  let drag = null;
+  cv.addEventListener('pointerdown', e => {
+    drag = { x: e.clientX, y: e.clientY, lon: YARD.lon, lat: YARD.lat };
+    YARD.spin = false;
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!drag) return;
+    YARD.lon = drag.lon - (e.clientX - drag.x) * 0.007;
+    YARD.lat = Math.max(-0.05, Math.min(1.05, drag.lat + (e.clientY - drag.y) * 0.005));
+  });
+  cv.addEventListener('pointerup', () => { drag = null; });
+  cv.addEventListener('wheel', e => {
+    e.preventDefault();
+    YARD.dist = Math.max(1.15, Math.min(7.0, YARD.dist * (1 + Math.sign(e.deltaY) * 0.11)));
+  }, { passive: false });
+}
+
+function yardOpen(vessel) {
+  yardInit();
+  const H = vessel.hull;
+  if (!H) return false;
+
+  if (YARD.ship) { YARD.scene.remove(YARD.ship); YARD.ship = null; }
+  YARD.spec = vessel;
+  YARD.ship = window.SHIPS_HULL.buildShip(H);
+  YARD.scene.add(YARD.ship);
+
+  /* the sea plane and the camera scale with the ship, so a canoe and a container ship are both
+     framed properly and the water keeps a believable wavelength beside each */
+  const L = H.loa;
+  YARD.sea.scale.set(L * 60, L * 60, 1);
+  YARD.sea.material.uniforms.uScale.value = L * 0.9;
+
+  /* Frame to the whole SHIP, rig included. A ship of the line is taller than it is long once
+     the topgallants are up — the main truck stands about 60 m over a 57 m hull — so framing on
+     the hull alone cuts the rig off at the yards, which is most of what there is to look at. */
+  const steelMain = (H.lwl + H.beam) / 2;
+  const tallest = H.masts.length
+    ? Math.max(...H.masts.map(m => m.height)) * steelMain * (H.masts[0].rig === 'square' ? 2.04 : 1.15)
+    : H.freeboard * 2;
+  YARD.rigTop = H.freeboard + tallest;
+  YARD.dist = Math.max(1.5, (YARD.rigTop * 1.75) / L);
+  YARD.spin = true;
+  YARD.t0 = performance.now();
+
+  /* achieved coefficients, computed from the geometry the generator actually produced —
+     so the card reports what was BUILT, not what was asked for */
+  const cm = window.SHIPS_HULL.superellipseFullness(
+               window.SHIPS_HULL.exponentForCm(H.cm));
+
+  document.getElementById('yard').classList.remove('hidden');
+  document.getElementById('yardTitle').textContent = vessel.name;
+  document.getElementById('yardSub').textContent =
+    (vessel.sub || '') + ' · ' + (H.masts.length ? vessel.polar.rig : 'no sail');
+  const dims = [
+    ['Length overall', H.loa.toFixed(1) + ' m'],
+    ['Beam', H.beam.toFixed(2) + ' m'],
+    ['Draught', H.draught.toFixed(2) + ' m'],
+    ['L : B', (H.loa / H.beam).toFixed(2)],
+    ['Midship coeff.', cm.toFixed(3)],
+  ];
+  if (H.masts.length) dims.push(['Masts', String(H.masts.length)]);
+  document.getElementById('yardDims').innerHTML = dims.map(
+    d => `<div><b>${d[1]}</b><span>${d[0]}</span></div>`).join('');
+  document.getElementById('yardNote').innerHTML =
+    'Generated from attested dimensions and hull-form coefficients.<br>' +
+    'Nothing here is traced from a drawing.';
+  YARD.on = true;
+  yardResize();
+  return true;
+}
+
+function yardClose() {
+  YARD.on = false;
+  document.getElementById('yard').classList.add('hidden');
+}
+
+function yardResize() {
+  if (!YARD.renderer) return;
+  const el = document.getElementById('yard');
+  const w = el.clientWidth || innerWidth, h = el.clientHeight || innerHeight;
+  YARD.renderer.setSize(w, h, false);
+  YARD.cam.aspect = w / h;
+  YARD.cam.updateProjectionMatrix();
+}
+
+function yardFrame(now) {
+  if (!YARD.on || !YARD.ship) return;
+  const H = YARD.spec.hull;
+  const L = H.loa;
+  if (YARD.spin) YARD.lon += 0.0022;
+
+  const d = L * YARD.dist;
+  const eye = (YARD.rigTop || L * 0.3) * 0.42;
+  YARD.cam.position.set(
+    d * Math.cos(YARD.lat) * Math.sin(YARD.lon),
+    d * Math.sin(YARD.lat) + eye,
+    d * Math.cos(YARD.lat) * Math.cos(YARD.lon));
+  YARD.cam.lookAt(0, (YARD.rigTop || L * 0.3) * 0.38, 0);
+
+  /* the ship floats: it heels to the wind and lifts and pitches on the swell */
+  const t = (now - YARD.t0) / 1000;
+  const wind = 8.5;
+  const heel = H.masts.length ? -0.055 * Math.min(1, wind / 10) : -0.012;
+  YARD.ship.rotation.z = heel + Math.sin(t * 0.62) * 0.012;
+  YARD.ship.rotation.x = Math.sin(t * 0.47 + 1.1) * 0.010;
+  YARD.ship.position.y = Math.sin(t * 0.55) * L * 0.004;
+
+  YARD.sea.material.uniforms.uTime.value = t;
+  YARD.sea.material.uniforms.uWind.value = wind;
+  YARD.sea.material.uniforms.uCam.value.copy(YARD.cam.position);
+  const hm = YARD.ship.userData.hullMat;
+  if (hm) hm.uniforms.uCam.value.copy(YARD.cam.position);
+
+  YARD.renderer.render(YARD.scene, YARD.cam);
+}
+
+addEventListener('resize', yardResize);
+window.SHIPS_YARD = { yardOpen, yardClose, yardFrame, YARD };
