@@ -645,7 +645,13 @@ function updateLabels(now) {
     if (show && m.kind === 'battle' && era && (m.item.year < era.from || m.item.year > era.to))
       show = false;
     /* the far side of the planet */
-    if (show && m.v.clone().normalize().dot(camDir) < 0.06) show = false;
+    /* ⚠ THE HORIZON IS NOT AT 90 DEGREES. This tested dot < 0.06 — the threshold for a camera
+       at INFINITY. From a camera at distance d the visible cap is only acos(R/d) wide: at
+       d = 124 that is 36 degrees, not 87. Everything between the two limits is BEHIND the
+       planet and was still being drawn, projecting onto the disc as though it belonged there —
+       which is how SEA OF JAPAN came to be lettered across the English Channel. It gets worse
+       the closer you fly, because the true horizon closes in while the test does not move. */
+    if (show && m.v.clone().normalize().dot(camDir) < R / S.dist) show = false;
 
     if (show) {
       const p = m.v.clone().project(camera);
@@ -948,6 +954,10 @@ function wireUI() {
   const yr = document.getElementById('yr');
   yr.addEventListener('input', () => { S.year = +yr.value; onTime(); });
   document.getElementById('eraAbout').onclick = openAbout;
+  document.getElementById('campClose').onclick = () => {
+    clearCampaign();
+    document.getElementById('campBar').classList.add('hidden');
+  };
   document.getElementById('yardClose').onclick = () => window.SHIPS_YARD.yardClose();
   document.getElementById('yardCard').onclick = () => {
     const v = window.SHIPS_YARD.YARD.spec;
@@ -1045,6 +1055,7 @@ function frame(now) {
 
   stepFly(now);
   stepVoyage(dt);
+  stepCampaign(dt);
   updateLabels(now);
 
   if (S.monthPlaying) {
@@ -1145,7 +1156,170 @@ function openPort(p) {
       `A typical passage on a monthly mean wind — not a forecast.</span>`;
   };
 }
+/* ── THE CAMPAIGN: A BATTLE THAT MOVES ──────────────────────────────────────────────────
+ * A battle card is a still, and a still cannot make this project's argument — that a campaign
+ * IS a wind field with a fleet in it. So a battle carrying a `campaign` plays: two fleets run
+ * their real day-by-day tracks over the real ocean, and the WIND of each day, from the
+ * commander's journal, blows across the water while they do.
+ *
+ * The wind is drawn as drifting streaks on the sea surface, not as an arrow. An arrow is a
+ * symbol pointing at a fact; streaks ARE the fact, and you can read the shift at Portland and
+ * the veer that saved the Armada off Zeeland straight off the water without a legend.
+ *
+ * What the geometry says without a word of commentary: on twelve of thirteen days the English
+ * fleet lies UPWIND of the Armada. That is the whole military story of 1588.
+ */
+let campGroup = null, campWake = [], campShip = [], campWind = null;
+
+/* local east/north on the sphere, so a compass bearing becomes a direction in world space */
+function bearingVec(lon, lat, degFromNorth) {
+  const la = lat * Math.PI / 180, lo = lon * Math.PI / 180, th = degFromNorth * Math.PI / 180;
+  const east = new THREE.Vector3(Math.cos(lo), 0, -Math.sin(lo));
+  const north = new THREE.Vector3(-Math.sin(la) * Math.sin(lo), Math.cos(la), -Math.sin(la) * Math.cos(lo));
+  return north.multiplyScalar(Math.cos(th)).add(east.multiplyScalar(Math.sin(th))).normalize();
+}
+
+function clearCampaign() {
+  if (campGroup) scene.remove(campGroup);
+  campGroup = null; campWake = []; campShip = []; campWind = null;
+  S.camp = null; S.campT = 0;
+  const cb = document.getElementById('campBar');
+  if (cb) cb.classList.add('hidden');
+}
+
+function startCampaign(b) {
+  clearVoyage(); clearCampaign();
+  S.camp = b; S.campT = 0;
+  campGroup = new THREE.Group();
+  scene.add(campGroup);
+
+  /* two tracks: the Armada, and the English fleet that spends the fortnight to windward of it */
+  const track = k => b.campaign.map(d => k === 0 ? [d.lon, d.lat] : [d.elon, d.elat]);
+  const COL = [[0xd9a441, 'Armada'], [0x86c7d8, 'English fleet']];
+  for (let k = 0; k < 2; k++) {
+    const pts = [];
+    const raw = track(k);
+    for (let i = 0; i < raw.length - 1; i++)
+      for (let j = 0; j < 20; j++)
+        pts.push(slerpLonLat(raw[i][0], raw[i][1], raw[i + 1][0], raw[i + 1][1], j / 20));
+    pts.push(raw[raw.length - 1]);
+    const pos = new Float32Array(pts.length * 3);
+    pts.forEach((q, i) => {
+      const w = lonLatToVec(q[0], q[1], R * 1.004);
+      pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z;
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    g.setDrawRange(0, 0);
+    const ln = new THREE.Line(g, new THREE.LineBasicMaterial({
+      color: COL[k][0], transparent: true, opacity: 0.95 }));
+    campGroup.add(ln);
+    campWake.push({ line: ln, pts });
+
+    /* the head of each track is a generated hull of the right kind, not a marker */
+    const vid = k === 0 ? 'carrack' : 'fluyt';
+    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === vid);
+    if (ves && ves.hull) {
+      const sh = window.SHIPS_HULL.buildShip(ves.hull);
+      const holder = new THREE.Group(); holder.add(sh);
+      holder.userData.loa = ves.hull.loa;
+      campGroup.add(holder); campShip.push(holder);
+    } else campShip.push(null);
+  }
+
+  /* the wind field: streaks over the water, re-oriented and re-seeded every day */
+  const NW = 150;
+  const wp = new Float32Array(NW * 2 * 3);
+  const wg = new THREE.BufferGeometry();
+  wg.setAttribute('position', new THREE.BufferAttribute(wp, 3));
+  campWind = new THREE.LineSegments(wg, new THREE.LineBasicMaterial({
+    color: 0xbcd8e6, transparent: true, opacity: 0.34 }));
+  campGroup.add(campWind);
+  /* ⚠ (i * 37.7) % 1 cycles through TEN values, not NW of them — one decimal place of
+     precision means a period of 10 — so 150 streaks landed on a 10x10 lattice and the "field"
+     was a visible grid. This is the R2 low-discrepancy sequence, which is what that line was
+     reaching for: irrational multipliers, so the sequence never repeats and fills evenly. */
+  campWind.userData.seed = Array.from({ length: NW }, (_, i) => [
+    ((i + 1) * 0.7548776662) % 1, ((i + 1) * 0.5698402910) % 1, ((i + 1) * 0.6180339887) % 1]);
+
+  const d0 = b.campaign[0];
+  /* centred north of the action so the Channel sits clear of the campaign bar */
+  flyTo(1.2, 54.2, 132);
+  showCard({ eyebrow: 'Campaign', title: b.name, sub: b.date || '',
+             rows: b.rows || [], prose: b.text || '', span: b.span || '',
+             cite: b.cite || '', tags: b.tags });
+  document.getElementById('campBar').classList.remove('hidden');
+}
+
+const CAMP_DAY = 2.3;                       // seconds of animation per day of 1588
+
+function stepCampaign(dt) {
+  if (!S.camp || !campGroup) return;
+  const C = S.camp.campaign;
+  S.campT += dt / CAMP_DAY;
+  if (S.campT > C.length - 1 + 1.4) S.campT = 0;      // hold on the last day, then run again
+  const f = Math.min(S.campT, C.length - 1);
+  const i = Math.min(C.length - 2, Math.floor(f)), fr = Math.min(1, f - i);
+  const a = C[i], bb = C[i + 1];
+
+  for (let k = 0; k < 2; k++) {
+    const wk = campWake[k];
+    const n = Math.max(2, Math.round((i + fr) * 20) + 1);
+    wk.line.geometry.setDrawRange(0, Math.min(n, wk.pts.length));
+    const sh = campShip[k];
+    if (!sh) continue;
+    const lo = k === 0 ? a.lon + (bb.lon - a.lon) * fr : a.elon + (bb.elon - a.elon) * fr;
+    const la = k === 0 ? a.lat + (bb.lat - a.lat) * fr : a.elat + (bb.elat - a.elat) * fr;
+    const w = lonLatToVec(lo, la, R * 1.006);
+    sh.position.copy(w);
+    /* A hull on a globe is a legible TOKEN, not a scale drawing — at true scale a 42 m carrack
+       is a third of a pixel. Scale it with the camera instead of with the world, so it holds
+       one size on screen at every zoom rather than becoming a 250 km ship when you fly in. */
+    sh.scale.setScalar((S.dist * 0.0062) / sh.userData.loa);
+    /* stand the hull up on the sphere and point it the way it is going */
+    const up = w.clone().normalize();
+    const hd = bearingVec(lo, la, Math.atan2(bb.lon - a.lon, bb.lat - a.lat) * 180 / Math.PI);
+    const m = new THREE.Matrix4();
+    m.makeBasis(hd.clone().cross(up).normalize().negate(), up, hd);
+    sh.quaternion.setFromRotationMatrix(m);
+  }
+
+  /* the day's wind, blowing across the water the fleets are on */
+  const wdir = a.w, force = a.f;
+  const wp = campWind.geometry.attributes.position;
+  const drift = (S.campT * 0.55) % 1;
+  campWind.userData.seed.forEach((sd, j) => {
+    const lon = -7.0 + sd[0] * 13.0, lat = 49.2 + sd[1] * 7.6;
+    const dir = bearingVec(lon, lat, wdir + 180);
+    const base = lonLatToVec(lon, lat, R * 1.0045);
+    const ph = (sd[2] + drift) % 1;
+    const len = R * 0.018 * (0.5 + force / 8);
+    const p0 = base.clone().addScaledVector(dir, len * (ph * 6 - 1.0));
+    const p1 = p0.clone().addScaledVector(dir, len);
+    wp.setXYZ(j * 2, p0.x, p0.y, p0.z);
+    wp.setXYZ(j * 2 + 1, p1.x, p1.y, p1.z);
+  });
+  wp.needsUpdate = true;
+  campWind.material.opacity = 0.22 + force * 0.045;
+
+  const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const pt = CARD[Math.round(wdir / 22.5) % 16];
+  document.getElementById('campDay').textContent = a.d + ' 1588';
+  document.getElementById('campWind').innerHTML =
+    '<b>' + pt + '</b> force ' + force;
+  document.getElementById('campText').textContent = a.t;
+  const gauge = document.getElementById('campGauge');
+  /* which fleet holds the weather gauge — computed from the geometry, not asserted */
+  const toWind = bearingVec(a.lon, a.lat, wdir);
+  const sep = lonLatToVec(a.elon, a.elat, 1).sub(lonLatToVec(a.lon, a.lat, 1));
+  gauge.textContent = sep.dot(toWind) > 0
+    ? 'English fleet holds the weather gauge'
+    : 'Armada holds the weather gauge';
+  gauge.className = 'gauge ' + (sep.dot(toWind) > 0 ? 'eng' : 'esp');
+}
+
 function openBattle(b) {
+  if (b.campaign && b.campaign.length) return startCampaign(b);
   showCard({
     eyebrow: 'Battle', title: b.name, sub: b.date || '',
     rows: b.rows || [], prose: b.text || '', span: b.span || '', cite: b.cite || '',

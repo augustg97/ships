@@ -78,3 +78,37 @@ a map of where people have looked.
 
 **SlaveVoyages is CC BY-NC** — it is cited here and not republished. The Middle Passage figures
 in the app are the published aggregates.
+
+### A9 — a loop that draws stacked parts but never advances the stack cursor
+
+`y` was never incremented between mast segments, so the lower mast, topmast and topgallant were
+all drawn from the deck. The longest segment therefore finished highest, and **the main course
+flew at the top of the rig on every square-rigged ship on the site**. It survived review because
+the sails still descended in size — just in the wrong direction — and a rig of descending sails
+looks like a rig. Nothing in the render says "this is upside down."
+
+Only a **measurement** caught it: rigTop came back 38 m on a 74 whose main truck stood at 60.
+The general form: when a routine draws N stacked parts, assert on the total height, not on the
+picture. Sizes that vary monotonically will look plausible in either order.
+
+### A10 — two models of the same geometry, one of them a reconstruction
+
+The Yard framed the camera by rebuilding rig height from the mast data with a per-rig multiplier
+(`× 1.90` square, `× 1.15` fore-and-aft) — while `buildShip` had *already built* the thing and
+knew its real extent. Two models of one quantity stay in agreement only as long as nobody edits
+either. The moment the lateen stopped taking its height from its mast, the estimate was wrong
+and the peak went off the top of the frame.
+
+The fix is not a better multiplier. It is to delete the second model: `buildShip` returns its
+bounding box and the camera solves for the distance that contains it, from the real FOV and
+aspect. A new rig type now needs no constant retuned.
+
+### A11 — a rectangle is not a triangle, and no placement will fix it
+
+The lateen sail was a `PlaneGeometry` rotated near the yard, and it floated off the side of the
+hull. Three rounds went into adjusting its *offset*. The bug was its **shape**: a rectangle has
+four corners, a spar has two ends, and there is no translation that reconciles them. The sail is
+now built from its three real corners with the head laced along the yard, so the sail and the
+spar are constructed from the same two points and *cannot* come apart.
+
+When a part keeps needing its position nudged, check whether it is the right object.

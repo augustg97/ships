@@ -236,3 +236,19 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   .era-detail .yr{flex:1 1 auto}
   .sp-inner h1{font-size:46px}
 }
+
+
+/* ── the campaign bar ─────────────────────────────────────────────────────────────────── */
+#campBar{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;width:min(560px,86vw);
+  padding:13px 16px 14px;z-index:32}
+#campBar.hidden{display:none}
+.cb-head{display:flex;align-items:baseline;gap:14px}
+.cb-day{font-family:var(--serif);font-size:20px;letter-spacing:.01em;color:var(--ink)}
+.cb-wind{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--verdigris)}
+.cb-wind b{color:var(--ink);letter-spacing:.06em}
+#campBar .x{margin-left:auto;position:static}
+.gauge{margin:8px 0 7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 9px;border-radius:2px;display:inline-block}
+.gauge.eng{color:#bfe3f0;background:rgba(134,199,216,.13);border:1px solid rgba(134,199,216,.34)}
+.gauge.esp{color:#f0d9a8;background:rgba(217,164,65,.13);border:1px solid rgba(217,164,65,.34)}
+.cb-text{font-size:13.5px;line-height:1.55;color:var(--ink-dim)}

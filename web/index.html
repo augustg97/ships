@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ships — how we learned to cross the ocean</title>
 <meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
-<link rel="stylesheet" href="css/styles.css?v=1785604295">
-<meta name="data-version" content="1785604295">
+<link rel="stylesheet" href="css/styles.css?v=1785605050">
+<meta name="data-version" content="1785605050">
 </head>
 <body>
 
@@ -107,6 +107,20 @@
   </div>
 </div>
 
+<!-- ── the campaign bar: a battle that moves ────────────────────────
+     Shown only while a campaign is playing. The date, the wind of that day from the
+     commander's own journal, and which fleet holds the weather gauge — the last computed
+     from the two fleets' geometry, not asserted. -->
+<div id="campBar" class="panel hidden">
+  <div class="cb-head">
+    <span class="cb-day" id="campDay">—</span>
+    <span class="cb-wind" id="campWind"></span>
+    <button id="campClose" class="x">×</button>
+  </div>
+  <div class="gauge" id="campGauge"></div>
+  <div class="cb-text" id="campText"></div>
+</div>
+
 <!-- ── about ───────────────────────────────────────────────────────── -->
 <div id="about" class="sheet hidden">
   <button id="aboutClose" class="x">×</button>
@@ -114,9 +128,9 @@
 </div>
 
 <script src="js/three.min.js"></script>
-<script src="js/hull.js?v=1785604295"></script>
-<script src="js/yard.js?v=1785604295"></script>
-<script src="js/app.js?v=1785604295"></script>
-<script src="js/route.js?v=1785604295"></script>
+<script src="js/hull.js?v=1785605050"></script>
+<script src="js/yard.js?v=1785605050"></script>
+<script src="js/app.js?v=1785605050"></script>
+<script src="js/route.js?v=1785605050"></script>
 </body>
 </html>

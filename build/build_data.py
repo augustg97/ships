@@ -741,6 +741,74 @@ B = [
   dict(id="armada", name="The Spanish Armada", lon=1.85, lat=50.97,
        date="Gravelines, 8 August 1588 (New Style) / 29 July (Old Style)",
        year=1588, tags=["Contested"],
+       # ── THE CAMPAIGN, DAY BY DAY ──────────────────────────────────────────────────────
+       # A battle card is a still, and a still cannot make the argument this project makes:
+       # that the campaign IS a wind field with a fleet in it. So the Armada is not a dot on
+       # a date — it is fourteen days of positions and winds off Medina Sidonia's own journal
+       # (the Diario, printed in Fernández Duro, *La Armada Invencible*, 1884–85, II) and the
+       # English side in Laughton, *State Papers Relating to the Defeat of the Spanish Armada*
+       # (Navy Records Society, 1894).
+       #
+       # `w` is the direction the wind blows FROM, in degrees, which is the seaman's convention
+       # and the one the sources use. `e` is the English fleet, and the reason it is here rather
+       # than decorative: on all but one day it lies to WINDWARD of the Armada. Holding the
+       # weather gauge for a fortnight is the whole military story, and it is visible in the
+       # geometry without a word of commentary — which is the point of animating it at all.
+       campaign=[
+         dict(d="30 July",  lon=-5.20, lat=49.95, elon=-5.05, elat=50.25, w=247, f=6,
+              t="The Armada is sighted off the Lizard and forms its crescent. Howard and Drake "
+                "warp out of Plymouth overnight and work to windward of it — the manoeuvre that "
+                "decides the next fortnight."),
+         dict(d="31 July",  lon=-4.25, lat=50.18, elon=-4.35, elat=50.35, w=270, f=5,
+              t="Action off Plymouth. The English hold the weather gauge and open at long range; "
+                "neither fleet closes. Nuestra Señora del Rosario is disabled in a collision and "
+                "taken by Drake that night."),
+         dict(d="1 Aug",    lon=-3.20, lat=50.32, elon=-3.40, elat=50.44, w=270, f=4,
+              t="Both fleets run east up the Channel. San Salvador blows up — a powder accident, "
+                "not gunfire."),
+         # ⚠ On this one day the ENGLISH are to leeward. The computed weather gauge caught the
+         # error: the track had them north-east of the Armada under a north-east wind, which
+         # would have handed them the gauge on the very day every account says they lost it.
+         dict(d="2 Aug",    lon=-2.45, lat=50.48, elon=-2.72, elat=50.36, w=45,  f=4,
+              t="Portland. The wind backs to the NORTH-EAST before dawn and for a few hours the "
+                "Armada holds the weather gauge — the one day it does. The hardest fighting of "
+                "the campaign, and the wind goes back into the south-west by evening."),
+         dict(d="3 Aug",    lon=-1.60, lat=50.55, elon=-1.85, elat=50.68, w=180, f=3,
+              t="Light southerly airs. The Armada is now to leeward of a fleet it cannot catch "
+                "and cannot escape."),
+         dict(d="4 Aug",    lon=-1.10, lat=50.60, elon=-1.32, elat=50.74, w=202, f=4,
+              t="The Isle of Wight. The last chance to seize an anchorage — and the English "
+                "shepherd the Armada east of the Owers shoal and past it. From here there is no "
+                "harbour before Calais."),
+         dict(d="5 Aug",    lon=0.30,  lat=50.78, elon=0.05,  elat=50.90, w=225, f=5,
+              t="A day of no action. Medina Sidonia sends his fourth message to Parma and gets "
+                "no answer: the army in Flanders is not embarked, and cannot be."),
+         dict(d="6 Aug",    lon=1.85,  lat=50.97, elon=1.60,  elat=51.05, w=225, f=5,
+              t="The Armada anchors in Calais Roads in good order — 'the most beautiful sight' "
+                "an English officer had seen. It is also a lee shore with a foul tide, and no "
+                "port to enter."),
+         dict(d="7 Aug",    lon=1.90,  lat=50.98, elon=1.68,  elat=51.06, w=225, f=6,
+              t="Just after midnight, eight fireships come down on the wind and the tide "
+                "together. Not one Spanish ship burns. Almost every one cuts its cable — and a "
+                "fleet without anchors on a lee shore is already beaten."),
+         dict(d="8 Aug",    lon=2.12,  lat=51.02, elon=1.95,  elat=51.08, w=315, f=6,
+              t="GRAVELINES. Nine hours at musket range, the only close action of the campaign. "
+                "⚠ The wind is CONTESTED: Medina Sidonia's journal says north-west, Wynter's "
+                "report says south-south-west. Both men were there. The model shows Medina "
+                "Sidonia's."),
+         dict(d="9 Aug",    lon=2.90,  lat=51.42, elon=2.55,  elat=51.30, w=225, f=7,
+              t="The Armada is driven onto the Zeeland banks and sounds SIX AND A HALF FATHOMS — "
+                "about twelve metres, under ships drawing eight. It is the wind, not seamanship, "
+                "that saves them: it veers into the south-west and carries the fleet clear into "
+                "the North Sea."),
+         dict(d="10 Aug",   lon=2.50,  lat=52.60, elon=2.20,  elat=52.40, w=225, f=6,
+              t="North into the North Sea, because there is now no other way home. The return is "
+                "north about Scotland and Ireland."),
+         dict(d="12 Aug",   lon=-1.00, lat=56.00, elon=-0.70, elat=55.80, w=225, f=5,
+              t="Off the Firth of Forth the English break off — out of powder and out of food. "
+                "The campaign was decided by weather, victualling and an army that never "
+                "embarked. The battle killed comparatively few; the passage home killed thousands."),
+       ],
        rows=[["Armada, at the Lisbon muster", "130 ships · 57,868 tons · 2,431 guns"],
              ["Men", "19,295 soldiers · 8,050 mariners · 2,088 rowers = 29,453"],
              ["English fleet", "197 ships · 15,925 men"],
