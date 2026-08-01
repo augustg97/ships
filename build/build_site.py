@@ -203,7 +203,7 @@ def stamp_and_copy():
     import re
     html = re.sub(r'<meta name="data-version"[^>]*>\n?', '', html)
     html = html.replace("</head>", f'<meta name="data-version" content="{stamp}">\n</head>')
-    for asset in ("css/styles.css", "js/app.js", "js/route.js"):
+    for asset in ("css/styles.css", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js"):
         html = re.sub(rf'({re.escape(asset)})(\?v=\d+)?', rf'\1?v={stamp}', html)
     open(idx, "w").write(html)
     log(f"   stamp {stamp}")

@@ -130,7 +130,8 @@ function yardOpen(vessel) {
      the hull alone cuts the rig off at the yards, which is most of what there is to look at. */
   const steelMain = (H.lwl + H.beam) / 2;
   const tallest = H.masts.length
-    ? Math.max(...H.masts.map(m => m.height)) * steelMain * (H.masts[0].rig === 'square' ? 2.04 : 1.15)
+    /* lower + topmast (0.60) + topgallant (0.30) = 1.90 x the Steel main mast, per Steel 1794 */
+    ? Math.max(...H.masts.map(m => m.height)) * steelMain * (H.masts[0].rig === 'square' ? 1.90 : 1.15)
     : H.freeboard * 2;
   YARD.rigTop = H.freeboard + tallest;
   YARD.dist = Math.max(1.5, (YARD.rigTop * 1.75) / L);
@@ -185,12 +186,15 @@ function yardFrame(now) {
   if (YARD.spin) YARD.lon += 0.0022;
 
   const d = L * YARD.dist;
-  const eye = (YARD.rigTop || L * 0.3) * 0.42;
+  /* Frame on the ship's centre of area, which for a full-rigged ship sits about a quarter of
+     the way up the rig — high enough to hold the topgallants, low enough to keep the hull and
+     its waterline in shot, which is the part that carries the information. */
+  const eye = (YARD.rigTop || L * 0.3) * 0.30;
   YARD.cam.position.set(
     d * Math.cos(YARD.lat) * Math.sin(YARD.lon),
     d * Math.sin(YARD.lat) + eye,
     d * Math.cos(YARD.lat) * Math.cos(YARD.lon));
-  YARD.cam.lookAt(0, (YARD.rigTop || L * 0.3) * 0.38, 0);
+  YARD.cam.lookAt(0, (YARD.rigTop || L * 0.3) * 0.26, 0);
 
   /* the ship floats: it heels to the wind and lifts and pitches on the swell */
   const t = (now - YARD.t0) / 1000;

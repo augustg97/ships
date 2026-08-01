@@ -418,9 +418,12 @@ function buildRig(S, group, mats) {
        marked inferred on the card. The rule itself is attested. */
     const steelMain = (S.lwl + S.beam) / 2;
     const lower = mk.height * steelMain;
-    /* topgallant yard = half its topsail yard is attested for most of the 18th century; the
-       mast-length fractions below are the conventional ones and are inferred. */
-    const top = lower * 0.62, tg = lower * 0.42;
+    /* Steel 1794, "Proportional Lengths of Masts": main topmast = 3/5 of the main mast;
+       topgallant = 1/2 of its topmast. Cross-checked against Fincham 1843, whose measured
+       ships give topmast 1.05–1.22 x extreme breadth and topgallant 0.57–0.70 x breadth.
+       ⚠ The first version used 0.62 and 0.42 — the topgallant was nearly half again too long,
+       which is why the rig stood 72 m over a 57 m hull instead of about 62. */
+    const top = lower * 0.60, tg = top * 0.50;
     let y = base;
     const segs = mk.rig === 'lateen' || mk.rig === 'crabclaw' ? [lower] : [lower, top, tg];
     const radii = [B * 0.030, B * 0.020, B * 0.013];
@@ -432,17 +435,42 @@ function buildRig(S, group, mats) {
       m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
 
       if (mk.rig === 'square') {
-        /* yard lengths run as a fraction of the mast, narrowing with each tier */
-        const yardLen = seg * (si === 0 ? 1.10 : si === 1 ? 0.86 : 0.62);
+        /* ── YARD LENGTHS, Steel 1794 p.40 ────────────────────────────
+           "Proportional Lengths of Yards, in the Royal Navy":
+             main yard          = 8/9 of the main mast          (0.889)
+             main topsail yard  = 5/7 of the main yard          (0.714)
+             topgallant yard    = 2/3 of its topsail yard       (0.667, 74s and up)
+           Falconer 1780 independently gives the main yard as 0.559–0.576 of the gun deck by
+           rate; Steel's rule works out at 0.567 of the lower deck, so the two agree. Fincham's
+           measured ships fall at 0.53–0.59. Three sources, three different rule forms, one
+           answer — which is why these are the numbers and not my earlier 1.10/0.86/0.62. */
+        const yardLen = si === 0 ? lower * 0.889
+                      : si === 1 ? lower * 0.889 * 0.714
+                      : lower * 0.889 * 0.714 * 0.667;
         const yy = y + seg * 0.94;
-        const yg = new THREE.CylinderGeometry(B * 0.006, B * 0.010, yardLen, 7);
+        /* A yard is not a cylinder: it is octagonal in the middle quarters and tapers to two
+           fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
+           sector divisions — 1.000, 0.964, 0.900, 0.700, 0.400 — and the last of those is why
+           a yard reads as a yard rather than a pole. */
+        const yg = new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, yardLen, 8);
         const ym = new THREE.Mesh(yg, woodDark);
+        const yp = yg.attributes.position;
+        for (let i = 0; i < yp.count; i++) {
+          const t = Math.abs(yp.getY(i)) / (yardLen / 2);          // 0 slings, 1 arm
+          const taper = t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
+                      : t < 0.75 ? 0.856 - 0.256 * ((t - 0.25) / 0.5)
+                                 : 0.600 - 0.200 * ((t - 0.75) / 0.25);
+          const k = taper / 0.4 * 0.9;
+          yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
+        }
+        yg.computeVertexNormals();
         ym.rotation.x = Math.PI / 2;
         ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
         group.add(ym);
-        /* the sail hangs from the yard and bellies to leeward */
+        /* the sail hangs from the yard and bellies to leeward; its drop is set by the gap to
+           the tier below, not by the mast segment */
         sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-                            yardLen, seg * 0.60, canvas, group, 'square'));
+                            yardLen * 0.96, seg * 0.56, canvas, group, 'square'));
       }
     });
 
@@ -488,20 +516,37 @@ function buildRig(S, group, mats) {
                           sailW, sailH, canvas, group, 'junk'));
     }
 
-    /* standing rigging: shrouds from the channels out on the hull's side up to the masthead */
+    /* standing rigging: shrouds from the channels out on the hull's side up to the masthead,
+       rattled down with ratlines at THIRTEEN INCHES — Steel 1794 states it outright: "Each
+       ratling is placed thirteen inches asunder." Lees gives 13–15 in across all cases and
+       the Anatomy of Nelson's Ships gives 13 for Victory. The 14–16 in commonly used by
+       modellers is looser practice, not a documented rule. */
     if (mk.shrouds) {
       const half = H.halfB * H.wl(u) * (1 - H.tumble(u));
+      const topY = base + lower * 0.97;
+      const shroudPts = [[], []];
       for (let s = 0; s < mk.shrouds; s++) {
         const f = (s + 1) / (mk.shrouds + 1);
         const chX = x + (f - 0.5) * L * 0.055;
-        [1, -1].forEach(side => {
-          const pts = [new THREE.Vector3(chX, base, side * half * 1.06),
-                       new THREE.Vector3(x + Math.sin(rakeRad) * lower, base + lower * 0.97,
-                                         side * B * 0.03)];
-          const lg = new THREE.BufferGeometry().setFromPoints(pts);
-          group.add(new THREE.Line(lg, rope));
+        [1, -1].forEach((side, si2) => {
+          const a = new THREE.Vector3(chX, base, side * half * 1.06);
+          const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+          group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), rope));
+          shroudPts[si2].push([a, b]);
         });
       }
+      /* the ratlines themselves — they are what makes shrouds read as a ladder */
+      const RAT = 0.3302;                                  // thirteen inches, in metres
+      shroudPts.forEach(side => {
+        if (side.length < 2) return;
+        const rise = topY - base;
+        for (let h = RAT; h < rise * 0.86; h += RAT) {
+          const t = h / rise;
+          const pts = side.map(([a, b]) => new THREE.Vector3(
+            a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t));
+          group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), rope));
+        }
+      });
     }
   });
 

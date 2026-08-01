@@ -159,7 +159,7 @@ HULLS = {
   # LOA 36.9, beam 5.5, draught 1.25, displacement 47 t (Olympias, as built).
   # Cb = 47/1.025/(36.9·5.5·1.25) = 0.18 — extraordinarily fine, and the reason a trireme
   # could be driven at 8 knots by muscle alone.
-  "trireme": hull(loa=36.9, lwl=35.0, beam=5.5, draught=1.25, freeboard=1.35, cm=0.58,
+  "trireme": hull(loa=36.9, lwl=35.0, beam=3.8, draught=1.25, freeboard=1.45, cm=0.52,
                   wlPower=3.0, stemFineness=0.02, sternFineness=0.03,
                   forefoot=0.22, run=0.24, riseF=0.70, riseA=0.62,
                   sheerBow=1.0, sheerStern=0.5, tumblehome=0.10,
@@ -176,15 +176,15 @@ HULLS = {
 
   # Bremen cog, 1380: 23.3 × 7.6 × 2.25 m. Flat-bottomed so it could take the ground on a tidal
   # flat and be unloaded at low water — which is what the Hanse ports needed.
-  "cog": hull(loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.4, cm=0.80,
+  "cog": hull(loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.01, cm=0.80,
               wlPower=2.0, stemFineness=0.20, sternFineness=0.24,
               forefoot=0.34, run=0.34, riseF=0.30, riseA=0.28,
               sheerBow=1.2, sheerStern=0.6, tumblehome=0.04, strakes=14,
               stemRake=0.10, sternRake=0.09, topside="#5a4227",
               masts=[dict(at=0.46, height=0.72, rig="square", rake=0, shrouds=4)]),
 
-  "corbita": hull(loa=26.0, lwl=23.0, beam=7.0, draught=2.6, freeboard=1.9, cm=0.72,
-              wlPower=2.4, forefoot=0.30, run=0.34, riseF=0.48, riseA=0.44,
+  "corbita": hull(loa=40.0, lwl=35.0, beam=9.0, draught=3.4, freeboard=2.4, cm=0.62,
+              wlPower=2.4, forefoot=0.30, run=0.34, riseF=0.62, riseA=0.56,
               sheerBow=0.9, sheerStern=0.5, tumblehome=0.08, strakes=18,
               stemRake=0.05, sternRake=0.07, topside="#63492c",
               masts=[dict(at=0.44, height=0.62, rig="square", rake=0, shrouds=3)],
@@ -195,18 +195,18 @@ HULLS = {
               forefoot=0.34, run=0.30, riseF=0.60, riseA=0.40,
               sheerBow=1.1, sheerStern=0.55, tumblehome=0.05, strakes=16,
               stemRake=0.13, sternRake=0.04, topside="#6d5333",
-              masts=[dict(at=0.38, height=0.9, rig="lateen", rake=-8, shrouds=3),
-                     dict(at=0.76, height=0.52, rig="lateen", rake=-6, shrouds=2)]),
+              masts=[dict(at=0.18, height=0.9, rig="lateen", rake=0, shrouds=3),
+                     dict(at=0.64, height=0.52, rig="lateen", rake=0, shrouds=2)]),
 
   # Quanzhou ship, sank c.1272: surviving hull 24.2 × 9.15 × 1.98, reconstructed ~34 m LOA,
   # ~380 t displacement, 12 bulkheads and 13 watertight compartments.
-  "junk": hull(loa=34.0, lwl=29.0, beam=9.8, draught=3.3, freeboard=3.0, cm=0.78,
+  "junk": hull(loa=34.0, lwl=29.0, beam=9.8, draught=3.3, freeboard=3.0, cm=0.70,
               wlPower=2.2, stemFineness=0.24, sternFineness=0.30,
-              forefoot=0.30, run=0.30, riseF=0.34, riseA=0.26,
+              forefoot=0.30, run=0.30, riseF=0.48, riseA=0.38,
               sheerBow=1.1, sheerStern=0.9, tumblehome=0.03, strakes=20,
               stemRake=0.08, sternRake=0.10, topside="#5e4326",
-              masts=[dict(at=0.40, height=0.86, rig="junk", rake=0, shrouds=0),
-                     dict(at=0.70, height=0.58, rig="junk", rake=0, shrouds=0)]),
+              masts=[dict(at=0.18, height=0.86, rig="junk", rake=0, shrouds=0),
+                     dict(at=0.64, height=0.58, rig="junk", rake=0, shrouds=0)]),
 
   # Drawn at the DEFENSIBLE length (Church, Sleeswyk, Xin Yuan'ou: 50–76 m), not the 138 m
   # that first appears in a novel of 1597. The card carries both.
@@ -215,17 +215,17 @@ HULLS = {
               forefoot=0.30, run=0.30, riseF=0.32, riseA=0.24,
               sheerBow=1.6, sheerStern=1.3, tumblehome=0.03, strakes=26,
               stemRake=0.08, sternRake=0.10, topside="#5e4326",
-              masts=[dict(at=0.24, height=0.62, rig="junk", rake=0, shrouds=0),
-                     dict(at=0.46, height=0.88, rig="junk", rake=0, shrouds=0),
-                     dict(at=0.72, height=0.66, rig="junk", rake=0, shrouds=0)]),
+              masts=[dict(at=0.15, height=0.62, rig="junk", rake=0, shrouds=0),
+                     dict(at=0.52, height=0.88, rig="junk", rake=0, shrouds=0),
+                     dict(at=0.83, height=0.66, rig="junk", rake=0, shrouds=0)]),
 
   "caravel": hull(loa=23.0, lwl=19.5, beam=6.2, draught=2.0, freeboard=2.1, cm=0.70,
               wlPower=2.5, forefoot=0.32, run=0.32, riseF=0.52, riseA=0.46,
               sheerBow=1.0, sheerStern=0.5, tumblehome=0.07, strakes=16,
               stemRake=0.09, sternRake=0.06, topside="#6a4f30",
-              masts=[dict(at=0.32, height=0.82, rig="lateen", rake=-6, shrouds=3),
-                     dict(at=0.62, height=0.68, rig="lateen", rake=-5, shrouds=3),
-                     dict(at=0.86, height=0.46, rig="lateen", rake=-4, shrouds=2)],
+              masts=[dict(at=0.115, height=0.82, rig="lateen", rake=0, shrouds=3),
+                     dict(at=0.556, height=0.68, rig="lateen", rake=0, shrouds=3),
+                     dict(at=0.85, height=0.46, rig="lateen", rake=0, shrouds=2)],
               bowsprit=0.14, steeve=20),
 
   "carrack": hull(loa=34.0, lwl=28.0, beam=10.5, draught=4.2, freeboard=4.8, cm=0.78,
@@ -233,9 +233,9 @@ HULLS = {
               forefoot=0.32, run=0.30, riseF=0.42, riseA=0.34,
               sheerBow=2.0, sheerStern=1.6, tumblehome=0.15, strakes=22,
               stemRake=0.11, sternRake=0.07, topside="#5b4327",
-              masts=[dict(at=0.24, height=0.62, rig="square", rake=-3, shrouds=4),
-                     dict(at=0.50, height=0.94, rig="square", rake=1, shrouds=6),
-                     dict(at=0.80, height=0.6, rig="lateen", rake=4, shrouds=3)],
+              masts=[dict(at=0.115, height=0.62, rig="square", rake=-3, shrouds=4),
+                     dict(at=0.556, height=0.94, rig="square", rake=1, shrouds=6),
+                     dict(at=0.85, height=0.6, rig="lateen", rake=4, shrouds=3)],
               bowsprit=0.26, steeve=26),
 
   "fluyt": hull(loa=32.0, lwl=27.5, beam=6.6, draught=3.1, freeboard=3.0, cm=0.82,
@@ -243,9 +243,9 @@ HULLS = {
               forefoot=0.28, run=0.28, riseF=0.32, riseA=0.28,
               sheerBow=1.2, sheerStern=0.9, tumblehome=0.24, strakes=20,
               stemRake=0.07, sternRake=0.05, topside="#5d452a",
-              masts=[dict(at=0.26, height=0.78, rig="square", rake=-2, shrouds=4),
-                     dict(at=0.54, height=1.02, rig="square", rake=1, shrouds=5),
-                     dict(at=0.83, height=0.6, rig="lateen", rake=4, shrouds=3)],
+              masts=[dict(at=0.115, height=0.78, rig="square", rake=-2, shrouds=4),
+                     dict(at=0.556, height=1.02, rig="square", rake=1, shrouds=5),
+                     dict(at=0.85, height=0.6, rig="lateen", rake=4, shrouds=3)],
               bowsprit=0.22, steeve=24),
 
   "east-indiaman": hull(loa=50.0, lwl=43.0, beam=12.4, draught=5.6, freeboard=4.6, cm=0.84,
@@ -254,9 +254,9 @@ HULLS = {
               sheerBow=1.6, sheerStern=0.9, tumblehome=0.17, strakes=26,
               stemRake=0.08, sternRake=0.05, copper=True, copperAge=0.5,
               chequer=True, gunDecks=1, topside="#4a3a26",
-              masts=[dict(at=0.22, height=0.7, rig="square", rake=-2, shrouds=6),
-                     dict(at=0.50, height=0.96, rig="square", rake=1, shrouds=8),
-                     dict(at=0.80, height=0.66, rig="square", rake=4, shrouds=5)],
+              masts=[dict(at=0.115, height=0.7, rig="square", rake=-2, shrouds=6),
+                     dict(at=0.556, height=0.96, rig="square", rake=1, shrouds=8),
+                     dict(at=0.85, height=0.66, rig="square", rake=4, shrouds=5)],
               bowsprit=0.24, steeve=22),
 
   # 74-gun third rate: gundeck 168–176 ft, beam 47–48 ft, 1,600–1,750 tons BOM.
@@ -268,17 +268,17 @@ HULLS = {
               sheerBow=1.8, sheerStern=0.9, tumblehome=0.22, strakes=30,
               stemRake=0.08, sternRake=0.04, copper=True, copperAge=0.45,
               chequer=True, gunDecks=2, topside="#3f3222",
-              masts=[dict(at=0.21, height=0.72, rig="square", rake=-2, shrouds=7),
-                     dict(at=0.49, height=1.0, rig="square", rake=1, shrouds=9),
-                     dict(at=0.79, height=0.7, rig="square", rake=5, shrouds=6)],
+              masts=[dict(at=0.115, height=0.72, rig="square", rake=-2, shrouds=7),
+                     dict(at=0.556, height=1.0, rig="square", rake=1, shrouds=9),
+                     dict(at=0.85, height=0.7, rig="square", rake=5, shrouds=6)],
               bowsprit=0.26, steeve=22),
 
   "slave-ship": hull(loa=30.0, lwl=26.0, beam=8.0, draught=3.6, freeboard=3.0, cm=0.80,
               wlPower=2.6, forefoot=0.28, run=0.30, riseF=0.38, riseA=0.32,
               sheerBow=1.2, sheerStern=0.6, tumblehome=0.13, strakes=22,
               copper=True, copperAge=0.6, topside="#4c3b28",
-              masts=[dict(at=0.26, height=0.74, rig="square", rake=-2, shrouds=5),
-                     dict(at=0.58, height=0.98, rig="square", rake=1, shrouds=6),
+              masts=[dict(at=0.115, height=0.74, rig="square", rake=-2, shrouds=5),
+                     dict(at=0.556, height=0.98, rig="square", rake=1, shrouds=6),
                      dict(at=0.85, height=0.58, rig="square", rake=4, shrouds=4)],
               bowsprit=0.22, steeve=22),
 
@@ -290,9 +290,9 @@ HULLS = {
               sheerBow=1.1, sheerStern=0.55, tumblehome=0.05, strakes=28,
               stemRake=0.10, sternRake=0.06, copper=True, copperAge=0.25,
               topside="#22201d",
-              masts=[dict(at=0.22, height=0.92, rig="square", rake=-1, shrouds=7),
-                     dict(at=0.50, height=1.12, rig="square", rake=2, shrouds=9),
-                     dict(at=0.78, height=0.86, rig="square", rake=5, shrouds=6)],
+              masts=[dict(at=0.115, height=0.92, rig="square", rake=-1, shrouds=7),
+                     dict(at=0.556, height=1.12, rig="square", rake=2, shrouds=9),
+                     dict(at=0.85, height=0.86, rig="square", rake=5, shrouds=6)],
               bowsprit=0.22, steeve=14),
 
   # SS Great Britain, 1843: 98 × 15.4 m, 1,930 GRT — the first iron-hulled screw Atlantic liner,
@@ -302,10 +302,10 @@ HULLS = {
               forefoot=0.24, run=0.30, riseF=0.36, riseA=0.34,
               sheerBow=1.4, sheerStern=0.7, tumblehome=0.05, strakes=22,
               stemRake=0.06, sternRake=0.04, iron=True, topside="#25282b",
-              masts=[dict(at=0.16, height=0.4, rig="square", rake=2, shrouds=4, only=2),
-                     dict(at=0.40, height=0.46, rig="square", rake=2, shrouds=4, only=2),
-                     dict(at=0.62, height=0.42, rig="square", rake=2, shrouds=4, only=2),
-                     dict(at=0.84, height=0.36, rig="lateen", rake=3, shrouds=3)],
+              masts=[dict(at=0.13, height=0.4, rig="square", rake=2, shrouds=4, only=2),
+                     dict(at=0.38, height=0.46, rig="square", rake=2, shrouds=4, only=2),
+                     dict(at=0.61, height=0.42, rig="square", rake=2, shrouds=4, only=2),
+                     dict(at=0.845, height=0.36, rig="lateen", rake=3, shrouds=3)],
               bowsprit=0.10, steeve=10),
 
   # MSC Irina class, 2023: 399.9 × 61.3 m, 24,346 TEU. Cb 0.62–0.72 for a container liner
@@ -365,7 +365,10 @@ vessel(id="voyaging-canoe", name="Voyaging canoe", sub="Austronesian double hull
 
 vessel(id="trireme", name="Trireme", sub="τριήρης", rig="oar", era=[-700, -200],
        from_=-700, to=-100, region="Mediterranean",
-       rows=[["Length overall", "36.9 m (reconstruction *Olympias*)"], ["Beam", "5.5 m"],
+       rows=[["Length overall", "36.9 m (reconstruction *Olympias*)"],
+             ["Beam of the HULL, at the waterline", "3.8 ± 0.1 m"],
+             ["Beam over the outriggers", "5.4–5.5 m"],
+             ["Length : beam", "9.7 — as slender as a modern frigate"],
              ["Draught", "1.25 m"], ["Displacement", "47 t"],
              ["Oars", "170 — 62 thranite, 54 zygian, 54 thalamite"],
              ["Sprint, measured", "8.3 kn (not the 8.9 kn usually quoted)"],
