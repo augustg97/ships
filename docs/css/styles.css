@@ -1,0 +1,146 @@
+/* Ships — the chrome around the ocean.
+   The map is dark because it is the sea at night with the sun on it somewhere; the panels are
+   the instruments you read it with, so they are brass-and-chart, not glass-and-neon. */
+
+:root{
+  --ink:#e8e2d4;
+  --ink-dim:#a49b88;
+  --ink-faint:#6f6857;
+  --brass:#c9a227;
+  --brass-dim:#8a7020;
+  --paper:#11100e;
+  --panel:rgba(17,16,14,.90);
+  --edge:rgba(201,162,39,.24);
+  --sea:#04070c;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:ui-sans-serif,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--sea);
+  color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* A canvas is a REPLACED element. Size it in CSS units that do not depend on layout,
+   or the width attribute and the CSS width chase each other: 1280 -> 2560 -> 5120. */
+#gl{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block;touch-action:none}
+
+.panel{position:fixed;background:var(--panel);border:1px solid var(--edge);
+  border-radius:3px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 40px rgba(0,0,0,.55)}
+.hidden{display:none!important}
+
+button{font-family:var(--sans);cursor:pointer}
+.mini{background:transparent;border:1px solid var(--edge);color:var(--ink-dim);
+  font-size:11px;letter-spacing:.06em;padding:4px 9px;border-radius:2px;text-transform:uppercase}
+.mini:hover{color:var(--brass);border-color:var(--brass-dim)}
+.x{position:absolute;top:8px;right:9px;background:none;border:0;color:var(--ink-faint);
+  font-size:22px;line-height:1;padding:2px 6px}
+.x:hover{color:var(--ink)}
+
+/* ── splash ─────────────────────────────────────────────────── */
+#splash{position:fixed;inset:0;background:var(--sea);z-index:90;display:flex;
+  align-items:center;justify-content:center;transition:opacity .7s ease}
+#splash.gone{opacity:0;pointer-events:none}
+.sp-inner{text-align:center;max-width:420px;padding:0 24px}
+.sp-inner h1{font-family:var(--serif);font-size:64px;margin:0;letter-spacing:.14em;
+  font-weight:400;color:var(--ink)}
+.sp-inner .sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);
+  margin:2px 0 30px;font-size:17px}
+.bar{height:2px;background:rgba(201,162,39,.16);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--brass);transition:width .3s}
+.note{color:var(--ink-faint);font-size:11.5px;letter-spacing:.08em;margin-top:12px;
+  text-transform:lowercase}
+
+/* ── readout ────────────────────────────────────────────────── */
+#readout{top:14px;left:14px;padding:11px 15px 12px;min-width:196px;max-width:230px}
+.ro-era{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass)}
+.ro-date{font-family:var(--serif);font-size:25px;margin:1px 0 7px;letter-spacing:.02em}
+.ro-stats{font-size:11.5px;line-height:1.65;color:var(--ink-dim)}
+.ro-stats b{color:var(--ink);font-weight:600}
+
+/* ── left rail ──────────────────────────────────────────────── */
+#rail{top:14px;right:14px;padding:0;width:246px;overflow:hidden}
+#railTab{display:none}
+.rail-body{padding:12px 15px 15px}
+.rail-body h3{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--brass);margin:13px 0 7px;font-weight:600}
+.rail-body h3:first-child{margin-top:2px}
+.rail-body label{display:flex;align-items:center;gap:8px;font-size:12.5px;
+  color:var(--ink-dim);padding:3px 0;cursor:pointer}
+.rail-body label:hover{color:var(--ink)}
+.rail-body input[type=checkbox]{accent-color:var(--brass);width:13px;height:13px;margin:0}
+input[type=range]{width:100%;accent-color:var(--brass);margin:6px 0 2px}
+.mrow{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  font-size:12px;color:var(--ink-dim)}
+
+/* ── card ───────────────────────────────────────────────────── */
+#card{left:14px;top:132px;width:340px;max-height:calc(100vh - 260px);overflow-y:auto;
+  padding:15px 17px 17px}
+.c-eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass)}
+#card h2{font-family:var(--serif);font-size:25px;font-weight:400;margin:3px 0 1px;line-height:1.14}
+.c-sub{font-family:var(--serif);font-style:italic;color:var(--ink-faint);font-size:13.5px;
+  margin-bottom:11px}
+.c-rows{border-top:1px solid var(--edge);padding-top:9px;margin-bottom:11px}
+.c-rows div{display:flex;justify-content:space-between;gap:14px;font-size:12px;padding:2.5px 0}
+.c-rows .k{color:var(--ink-faint);flex:0 0 auto}
+.c-rows .v{color:var(--ink);text-align:right}
+.c-prose{font-family:var(--serif);font-size:14px;line-height:1.62;color:#d5cebe}
+.c-prose p{margin:0 0 9px}
+.c-span{font-size:10.5px;color:var(--ink-faint);letter-spacing:.05em;margin-top:9px;
+  font-style:italic}
+.c-cite{font-size:10.5px;color:var(--ink-faint);margin-top:8px;border-top:1px solid var(--edge);
+  padding-top:8px;line-height:1.5}
+.tag{display:inline-block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  border:1px solid var(--edge);padding:1.5px 5px;border-radius:2px;margin-right:5px;
+  color:var(--ink-faint)}
+.tag.contested{color:#d98c5f;border-color:rgba(217,140,95,.4)}
+.tag.generated{color:#7fa8c9;border-color:rgba(127,168,201,.4)}
+.tag.attested{color:#8fb08a;border-color:rgba(143,176,138,.4)}
+
+/* ── timeline ───────────────────────────────────────────────── */
+#timeline{left:50%;transform:translateX(-50%);bottom:14px;width:min(880px,calc(100vw - 28px));
+  padding:9px 15px 10px}
+#chapters{display:flex;gap:0;margin-bottom:5px;height:17px}
+.chap{flex:1 1 0;font-size:9px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-faint);border-bottom:1px solid rgba(201,162,39,.16);
+  text-align:center;cursor:pointer;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;padding-bottom:3px;background:none;border-top:0;border-left:0;border-right:0}
+.chap:hover{color:var(--brass)}
+.chap.on{color:var(--brass);border-bottom-color:var(--brass)}
+.t-row{display:flex;align-items:center;gap:11px;font-size:12px;color:var(--ink-dim)}
+.spacer{flex:1}
+#tLabel{font-family:var(--serif);font-size:15px;color:var(--ink);min-width:90px}
+
+/* ── about sheet ────────────────────────────────────────────── */
+.sheet{position:fixed;inset:0;background:rgba(6,6,5,.965);z-index:70;overflow-y:auto;
+  backdrop-filter:blur(6px)}
+.sheet-in{max-width:720px;margin:0 auto;padding:56px 26px 90px;font-family:var(--serif);
+  font-size:15px;line-height:1.68;color:#cfc8b8}
+.sheet-in h2{font-size:31px;font-weight:400;margin:34px 0 9px;color:var(--ink)}
+.sheet-in h2:first-child{margin-top:0}
+.sheet-in h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);
+  margin:26px 0 7px;font-family:var(--sans);font-weight:600}
+.sheet-in p{margin:0 0 13px}
+.sheet-in b{color:var(--ink)}
+.sheet-in .lede{font-size:18px;color:var(--ink);line-height:1.55}
+.sheet-in ul{padding-left:19px;margin:0 0 13px}
+.sheet-in li{margin-bottom:6px}
+.sheet-in table{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:12.5px;
+  margin:6px 0 16px}
+.sheet-in th,.sheet-in td{text-align:left;padding:5px 9px 5px 0;border-bottom:1px solid rgba(201,162,39,.13);
+  vertical-align:top}
+.sheet-in th{color:var(--brass);font-weight:600;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase}
+
+/* ── hover label over the globe ─────────────────────────────── */
+#hover{position:fixed;pointer-events:none;z-index:60;background:rgba(17,16,14,.94);
+  border:1px solid var(--edge);border-radius:2px;padding:4px 8px;font-size:11.5px;
+  color:var(--ink);display:none;white-space:nowrap}
+
+@media (max-width:860px){
+  #rail{width:auto;right:14px;left:auto;max-width:246px}
+  #card{left:14px;right:14px;width:auto;top:auto;bottom:118px;max-height:44vh}
+  #readout{min-width:0;max-width:170px;padding:8px 11px 9px}
+  .ro-date{font-size:20px}
+  .sp-inner h1{font-size:44px}
+}

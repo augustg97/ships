@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ships — how we learned to cross the ocean</title>
+<meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
+<link rel="stylesheet" href="css/styles.css?v=1785571065">
+<meta name="data-version" content="1785571065">
+</head>
+<body>
+
+<!-- The canvas is a REPLACED element: position:fixed;inset:0 does NOT stretch it, and
+     measuring clientWidth to set width is a feedback loop that grows it every frame.
+     Its CSS size is 100vw/100vh so the CSS size never depends on the attribute. -->
+<canvas id="gl"></canvas>
+
+<div id="splash">
+  <div class="sp-inner">
+    <h1>Ships</h1>
+    <p class="sub">How we learned to cross the ocean</p>
+    <div class="bar"><i></i></div>
+    <p class="note" id="loadnote">reading the sea floor…</p>
+  </div>
+</div>
+
+<!-- ── readout ─────────────────────────────────────────────────────── -->
+<div id="readout" class="panel">
+  <div class="ro-era" id="roEra">—</div>
+  <div class="ro-date" id="roDate">—</div>
+  <div class="ro-stats" id="roStats"></div>
+</div>
+
+<!-- ── left rail: layers ───────────────────────────────────────────── -->
+<div id="rail" class="panel">
+  <button class="rail-tab" id="railTab" title="Layers">☰</button>
+  <div class="rail-body">
+    <h3>The sea</h3>
+    <label><input type="checkbox" id="lySeafloor" checked> Sea floor through the water</label>
+    <label><input type="checkbox" id="lyWind" checked> Wind on the surface</label>
+    <label><input type="checkbox" id="lyChl" checked> What lives in the water</label>
+    <label><input type="checkbox" id="lyIce" checked> Sea ice</label>
+    <label><input type="checkbox" id="lyCloud"> Cloud</label>
+    <h3>What people did on it</h3>
+    <label><input type="checkbox" id="lyPorts" checked> Ports</label>
+    <label><input type="checkbox" id="lyReach"> Reachability from a port</label>
+    <h3>Month</h3>
+    <input type="range" id="month" min="0" max="11.99" step="0.01" value="6.5">
+    <div class="mrow"><span id="monthName">July</span>
+      <button id="monthPlay" class="mini">▶ cycle the year</button></div>
+  </div>
+</div>
+
+<!-- ── info card ───────────────────────────────────────────────────── -->
+<div id="card" class="panel hidden">
+  <button id="cardClose" class="x">×</button>
+  <div class="c-eyebrow" id="cEyebrow"></div>
+  <h2 id="cTitle"></h2>
+  <div class="c-sub" id="cSub"></div>
+  <div class="c-rows" id="cRows"></div>
+  <div class="c-prose" id="cProse"></div>
+  <div class="c-span" id="cSpan"></div>
+  <div class="c-cite" id="cCite"></div>
+</div>
+
+<!-- ── timeline ────────────────────────────────────────────────────── -->
+<div id="timeline" class="panel">
+  <div id="chapters"></div>
+  <input type="range" id="t" min="0" max="1000" step="1" value="1000">
+  <div class="t-row">
+    <button id="play" class="mini">▶</button>
+    <span id="tLabel">2026</span>
+    <span class="spacer"></span>
+    <button class="mini" data-about>About &amp; limits</button>
+  </div>
+</div>
+
+<!-- ── about ───────────────────────────────────────────────────────── -->
+<div id="about" class="sheet hidden">
+  <button id="aboutClose" class="x">×</button>
+  <div class="sheet-in" id="aboutBody"></div>
+</div>
+
+<script src="js/three.min.js"></script>
+<script src="js/app.js?v=1785571065"></script>
+<script src="js/route.js?v=1785571065"></script>
+</body>
+</html>

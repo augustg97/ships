@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ships",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "8149",
+                      "--directory", "/Users/augustgweon/Ships/web"],
+      "port": 8149
+    }
+  ]
+}
