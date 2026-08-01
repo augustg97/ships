@@ -1043,9 +1043,12 @@ VOY = [
             leg(18.5, -34.4, "the Cape of Good Hope", "May 1522"),
             leg(-23.6, 15.1, "Cape Verde"),
             leg(-6.35, 36.78, "Sanlúcar", "6 Sept 1522")],
-      rows=[["Ships", "five out; one home"], ["Men", "~270 out; 18 home in *Victoria*"],
-            ["Pacific crossing", "98 days without fresh food"],
-            ["Magellan", "killed at Mactan, 27 April 1521, less than half way"]],
+      rows=[["Ships", "five out; one home"],
+            ["Men out", "237 on the payroll; ~239–245 actually sailed"],
+            ["Circumnavigated", "~35 — 18 in *Victoria*, 12 held at Cape Verde, 3–5 from *Trinidad*"],
+            ["Returned to Spain by any route", "~90, counting *San Antonio*'s 55 deserters"],
+            ["Pacific crossing", "98 days; 21 died — 19 crew, a Patagonian, a Brazilian"],
+            ["Magellan", "killed at Mactan, 27 April 1521, with a year still to run"]],
       text="The voyage that measured the planet, and it did so by nearly killing everyone on "
            "it. Five ships and about 270 men left; one ship and eighteen men came back.\n\n"
            "The Pacific crossing is the part that could not be planned for, because nobody knew "
@@ -1053,8 +1056,17 @@ VOY = [
            "the yards. That the ocean was that big was the single most important thing the "
            "voyage found out.\n\n"
            "Magellan himself never completed it — he was killed at Mactan on 27 April 1521, "
-           "with more than a year still to run. The circumnavigation is Elcano's.",
-      cite="Pigafetta, *Relazione del primo viaggio intorno al mondo*; Bergreen, *Over the Edge of the World*."),
+           "with more than a year still to run. The circumnavigation is Elcano's.\n\n"
+           "**And they came home a day early.** At Cape Verde the shore party asked what day it "
+           "was and were told Thursday; the ship's log said Wednesday. Two men had kept "
+           "independent logs — Pigafetta and the pilot Albo — and neither had missed a day. "
+           "Sailing west with the sun, they had counted 1,023 days where a man standing still "
+           "counted 1,024. It is the first empirical proof that the world needs a date line, "
+           "and nobody had anticipated it.\n\n"
+           "*The famous 18 is the number aboard* Victoria. *About 35 people actually went round; "
+           "about 90 got back to Spain, most of them deserters who had turned for home in the "
+           "strait two years earlier.*",
+      cite="Pigafetta and Albo's log-book, in Stanley (ed.), Hakluyt Society, 1874; Navarrete's armada accounts."),
 
  dict(id="galleon", name="The Manila galleon's return", dates="1565 – 1815", year=1600,
       vessel="carrack", view=[-170, 30, 380],
