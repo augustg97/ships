@@ -437,16 +437,20 @@ function buildRig(S, group, mats) {
       if (mk.rig === 'square') {
         /* ── YARD LENGTHS, Steel 1794 p.40 ────────────────────────────
            "Proportional Lengths of Yards, in the Royal Navy":
-             main yard          = 8/9 of the main mast          (0.889)
+             main yard          = 7/8 of the main mast          (0.875)
              main topsail yard  = 5/7 of the main yard          (0.714)
              topgallant yard    = 2/3 of its topsail yard       (0.667, 74s and up)
-           Falconer 1780 independently gives the main yard as 0.559–0.576 of the gun deck by
-           rate; Steel's rule works out at 0.567 of the lower deck, so the two agree. Fincham's
-           measured ships fall at 0.53–0.59. Three sources, three different rule forms, one
-           answer — which is why these are the numbers and not my earlier 1.10/0.86/0.62. */
-        const yardLen = si === 0 ? lower * 0.889
-                      : si === 1 ? lower * 0.889 * 0.714
-                      : lower * 0.889 * 0.714 * 0.667;
+           ⚠ 7/8, not 8/9. Read off the page at high zoom AND validated against Steel's own
+           *Dimensions of Masts and Yards in the Royal Navy* (p.49): 7/8 x 112 ft = 98 ft 0 in,
+           and the table lists 98 ft 0 in. The tabulated ratio is .875 at 100 guns, .875 at 90,
+           .874 at 74. Falconer 1780 independently puts the main yard at .559-.576 of the gun
+           deck by rate; this rule gives .567 of the lower deck. Two sources, two rule forms,
+           one answer.
+           ⚠ And the fractions hold for two-deckers and above ONLY. Below 74 guns Steel's own
+           tables run .89-.91, so a frigate wants the tabulated ratio, not the rule. */
+        const yardLen = si === 0 ? lower * 0.875
+                      : si === 1 ? lower * 0.875 * 0.714
+                      : lower * 0.875 * 0.714 * 0.667;
         const yy = y + seg * 0.94;
         /* A yard is not a cylinder: it is octagonal in the middle quarters and tapers to two
            fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
@@ -475,19 +479,44 @@ function buildRig(S, group, mats) {
     });
 
     if (mk.rig === 'lateen') {
-      /* a lateen yard is carried at a steep angle and is often longer than the mast;
-         it pivots about a point roughly a third along its length */
-      const yardLen = lower * 1.35;
-      const yg = new THREE.CylinderGeometry(B * 0.006, B * 0.011, yardLen, 7);
+      /* ── THE LATEEN YARD RUNS THE LENGTH OF THE SHIP ───────────────
+         Three independent primary statements, and they agree. Pâris (*Essai sur la construction
+         navale des peuples extra-européens*, 1841) on the Arab baggala: "the yard almost always
+         has the total length of the vessel"; on the Indian patamar: "the main yard, as long as
+         the boat", slung at one third of its length. Whitewright (2008): Mediterranean lateen
+         yards run "nearly as long, or sometimes even longer, than the vessel itself".
+         The mechanism is geometric — a triangular sail on a short mast needs a long yard to
+         keep the same area, which is exactly why the mast is short. Scaling the yard off the
+         MAST, as this did, makes it about 40% too short and the rig reads as a felucca toy. */
+      const yardLen = L * 1.0;
+      /* The yard is slung about a THIRD of its length from the tack (Pâris on the patamar), so
+         it stands with its foot low and forward and its peak high and aft. Both the spar and
+         the sail are hung from that same slinging point, or the canvas comes adrift of the
+         ship — which it did. */
+      const peak = 0.62;                                  // radians above horizontal
+      const slingX = x, slingY = base + lower * 0.30;
+      const yg = new THREE.CylinderGeometry(B * 0.005, B * 0.010, yardLen, 7);
       const ym = new THREE.Mesh(yg, woodDark);
-      ym.rotation.z = -0.72;
-      ym.position.set(x + yardLen * 0.16, base + lower * 0.62, 0);
+      ym.rotation.z = -(Math.PI / 2 - peak);
+      /* the sling sits 1/3 along, so the spar's centre is 1/6 of its length up the slope */
+      ym.position.set(slingX + Math.cos(peak) * yardLen * (0.5 - 0.333),
+                      slingY + Math.sin(peak) * yardLen * (0.5 - 0.333), 0);
       group.add(ym);
-      sails.push(makeSail(x, base + lower * 0.55, yardLen * 0.72, lower * 0.72,
-                          canvas, group, 'lateen'));
+      /* the sail is the triangle under the yard: its head follows the spar, its tack comes
+         down to the deck at the mast foot */
+      const sailW = yardLen * 0.62, sailH = lower * 0.78;
+      sails.push(makeSail(slingX + Math.cos(peak) * yardLen * 0.14,
+                          slingY + Math.sin(peak) * yardLen * 0.14 + sailH * 0.30,
+                          sailW, sailH, canvas, group, 'lateen'));
     }
     if (mk.rig === 'crabclaw') {
-      const sparLen = lower * 1.25;
+      /* Same rule, independently attested in the Pacific. Pâris on the Tongan kalia: the sail
+         "is always the same length as the boat"; on the Caroline proa: "a triangular mat as long
+         as the proa". Layard's Vanuatu field notes: "each spar is carefully measured to equal
+         in its length the length of the canoe between the inner ends of the bow-pieces." Pâris
+         also notes Fijian canoes carry LESS sail "the yards not being as long as the hull,
+         which makes the mast rake more" — so the rule is diagnostic, not decorative. */
+      const sparLen = L * 0.98;
       [-0.55, 0.30].forEach((rot, i) => {
         const g2 = new THREE.CylinderGeometry(B * 0.008, B * 0.014, sparLen, 7);
         const m2 = new THREE.Mesh(g2, woodDark);
@@ -500,19 +529,28 @@ function buildRig(S, group, mats) {
                           canvas, group, 'crabclaw'));
     }
     if (mk.rig === 'junk') {
-      /* battened lug: the battens are the whole point — they make it self-reefing, let it set
-         flat, and let a small crew handle a large sail */
-      const sailH = lower * 0.80, sailW = lower * 0.62;
-      const nb = 6;
+      /* ── THE BATTENED LUG, to Reddish's measured average ────────────
+         Vincent Reddish scaled and averaged ELEVEN photographs of Chinese ocean-trading junks
+         under sail and published the proportions (*Practical Boat Owner*, 2022): usually FIVE
+         battens, rarely six; boom and battens all equal within 5%; the luff and the yard both
+         two thirds of the boom; total leech 1.75 x boom; sail area 1.10 x boom²; aspect ratio
+         1.1; and only 8% of the sail's width carried forward of the mast.
+         That 8% balance is the number to keep — modern junk rigs run 10–15% and split rigs a
+         third, but the traditional ocean junk is nearly all abaft its mast. */
+      const boom = lower * 0.78;
+      const sailW = boom, sailH = boom * 1.10;      // area 1.10 x boom², AR 1.1
+      const nb = 5;
+      /* 8% of the chord forward of the mast — the sail sits almost entirely abaft it */
+      const off = sailW * (0.5 - 0.08);
       for (let i = 0; i <= nb; i++) {
-        const yy = base + lower * 0.16 + sailH * (i / nb);
+        const yy = base + lower * 0.14 + sailH * (i / nb);
         const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 6);
         const bm = new THREE.Mesh(bg, woodDark);
         bm.rotation.x = Math.PI / 2;
-        bm.position.set(x + sailW * 0.10, yy, 0);
+        bm.position.set(x + off, yy, 0);
         group.add(bm);
       }
-      sails.push(makeSail(x + sailW * 0.10, base + lower * 0.16 + sailH * 0.5,
+      sails.push(makeSail(x + off, base + lower * 0.14 + sailH * 0.5,
                           sailW, sailH, canvas, group, 'junk'));
     }
 
