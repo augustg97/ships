@@ -1033,8 +1033,10 @@ VOY = [
             leg(-43.2, -22.9, "Rio de Janeiro", "13 Dec 1519"),
             leg(-56.0, -35.0, "Río de la Plata"),
             leg(-67.7, -49.3, "Puerto San Julián — the winter, and the mutiny", "31 Mar 1520"),
-            leg(-68.4, -52.3, "the strait, entered", "21 Oct 1520"),
-            leg(-74.7, -52.9, "and cleared", "28 Nov 1520"),
+            leg(-68.5, -50.1, "Río Santa Cruz — the *Santiago* wrecked", "22 May 1520"),
+            leg(-68.36, -52.33, "Cabo Vírgenes — a strait, entered", "21 Oct 1520"),
+            leg(-71.31, -53.90, "Cabo Froward — All Saints, and the name", "1 Nov 1520"),
+            leg(-74.73, -52.73, "Cabo Deseado — and cleared, 38 days", "28 Nov 1520"),
             leg(-100.0, -30.0, "into the Pacific"), leg(-140.0, -15.0, "98 days, no land"),
             leg(144.8, 13.4, "Guam", "6 Mar 1521"),
             leg(123.9, 10.3, "Cebu"), leg(124.0, 10.3, "Mactan — Magellan killed", "27 Apr 1521"),
@@ -1048,6 +1050,7 @@ VOY = [
             ["Circumnavigated", "~35 — 18 in *Victoria*, 12 held at Cape Verde, 3–5 from *Trinidad*"],
             ["Returned to Spain by any route", "~90, counting *San Antonio*'s 55 deserters"],
             ["Pacific crossing", "98 days; 21 died — 19 crew, a Patagonian, a Brazilian"],
+            ["In the strait", "38 days; 570 km; the narrows are 3.7 km wide"],
             ["Magellan", "killed at Mactan, 27 April 1521, with a year still to run"]],
       text="The voyage that measured the planet, and it did so by nearly killing everyone on "
            "it. Five ships and about 270 men left; one ship and eighteen men came back.\n\n"
@@ -1057,6 +1060,10 @@ VOY = [
            "voyage found out.\n\n"
            "Magellan himself never completed it — he was killed at Mactan on 27 April 1521, "
            "with more than a year still to run. The circumnavigation is Elcano's.\n\n"
+           "**The mutiny was not an Easter mutiny.** It broke out on the night of 1 April 1520 "
+           "at Puerto San Julián — which was **Palm Sunday**, not Easter. Julian Easter that year "
+           "fell on 8 April, which means Quesada was beheaded and quartered on Holy Saturday, "
+           "the eve of it. The popular framing gets the liturgy exactly one week wrong.\n\n"
            "**And they came home a day early.** At Cape Verde the shore party asked what day it "
            "was and were told Thursday; the ship's log said Wednesday. Two men had kept "
            "independent logs — Pigafetta and the pilot Albo — and neither had missed a day. "
