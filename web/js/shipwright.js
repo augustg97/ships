@@ -285,6 +285,22 @@ function swBuildYard() {
     SW.yard.add(obj);
     SW.layout.push({ id: v.id, v, x, loa: L, obj, fine: false });
   });
+  /* ── A NAME UNDER EVERY HULL ────────────────────────────────────────────────────────
+     Without them the line is twenty-one anonymous silhouettes and the comparison has nothing
+     to hold on to. The name and the length go under each ship and are projected from the
+     ship's own position every frame — the same way the globe letters its ports, and for the
+     same reason: on a chart the label IS the mark. */
+  const lay = document.getElementById('swLabels');
+  lay.innerHTML = '';
+  SW.layout.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'sl';
+    const yr = e.v.from === undefined ? '' :
+      (e.v.from < 0 ? Math.abs(e.v.from) + ' BC' : String(e.v.from));
+    d.innerHTML = '<b>' + e.v.name + '</b><span>' + yr + ' · ' + e.loa.toFixed(0) + ' m</span>';
+    lay.appendChild(d);
+    e.el = d;
+  });
   const first = SW.layout[0], last = SW.layout[SW.layout.length - 1];
   SW.yardSpan = [first.x - first.loa, last.x + last.loa];
 }
@@ -424,6 +440,8 @@ function swBuildFleetStrip() {
 
 function swClose() {
   SW.on = false;
+  const lay = document.getElementById('swLabels');
+  if (lay) lay.querySelectorAll('.sl').forEach(d => { d.style.opacity = '0'; });
   document.getElementById('shipwright').classList.add('hidden');
 }
 
@@ -477,6 +495,21 @@ function swFrame(now) {
   SW.cam.lookAt(SW.panX, look, 0);
   const hm = SW.ship.userData.hullMat;
   if (hm) hm.uniforms.uCam.value.copy(SW.cam.position);
+  /* place the names: project each ship's foot to the screen */
+  if (SW.layout) {
+    const el = document.getElementById('shipwright');
+    const w = el.clientWidth, h = el.clientHeight;
+    const v = new THREE.Vector3();
+    SW.layout.forEach(e => {
+      v.set(e.x, SW.viewBot !== undefined ? SW.viewBot : 0, 0).project(SW.cam);
+      const sx = (v.x * 0.5 + 0.5) * w, sy = (-v.y * 0.5 + 0.5) * h;
+      const on = SW.spec && e.id === SW.spec.id;
+      const vis = v.z < 1 && sx > -80 && sx < w + 80 && Math.abs(e.x - SW.panX) < (SW.fit || 200) * 4;
+      e.el.style.opacity = vis ? (on ? '1' : '0.62') : '0';
+      if (vis) { e.el.style.left = sx + 'px'; e.el.style.top = Math.min(h - 120, sy + 14) + 'px'; }
+      e.el.classList.toggle('on', !!on);
+    });
+  }
   SW.renderer.render(SW.scene, SW.cam);
 }
 

@@ -1110,15 +1110,52 @@ void main(){
 /* A sail is a bellied surface, not a flat quad: it takes the shape the wind puts in it, and
    that curve is most of what makes a ship under sail look alive rather than papery. */
 function makeSail(x, yTop, width, height, mat, group, kind) {
-  const NW = 16, NH = 12;
-  const g = new THREE.PlaneGeometry(width, height, NW, NH);
-  const p = g.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    const px = p.getX(i), py = p.getY(i);
-    const fx = 1 - Math.abs(px / (width / 2));            // 0 at the leeches, 1 at the middle
-    const fy = kind === 'square' ? (0.5 - py / height) : 1 - Math.abs(py / (height / 2));
-    p.setZ(i, Math.pow(Math.max(0, fx), 0.8) * Math.max(0, fy) * width * 0.16);
+  /* ── A SAIL IS NOT A RECTANGLE WITH A BULGE IN IT ────────────────────────────────────
+     The first version was a PlaneGeometry with a symmetric hump pushed out of the middle, and
+     it read as exactly that: a flat card, bent. Three things are wrong with it, and all three
+     are visible from across the room.
+
+     THE OUTLINE. A square sail's head is straight because it is laced to a rigid yard — but
+     nothing else about it is. The FOOT is cut with a ROACH, an upward curve in the middle, so
+     it clears the stay below it and does not chafe; and the leeches are cut slightly hollow so
+     they set flat instead of curling. A perfectly rectangular sail is a sailmaker's failure.
+
+     THE DRAFT IS NOT IN THE MIDDLE. Maximum belly sits about 40% of the chord aft of the luff,
+     not at 50%: that is what makes a sail an aerofoil rather than a bag, and it is the whole
+     reason a square-rigger can sail across the wind at all.
+
+     AND IT IS DEEPER AT THE FOOT THAN AT THE HEAD, because the head is stretched along a spar
+     and the foot is held only at its two corners. That taper is most of a sail's shape.  */
+  const NW = 28, NH = 20;
+  const pos = [], uvs = [], idx = [];
+  const roach = kind === 'square' ? 0.085 : 0.03;     // the foot's upward cut
+  const hollow = 0.022;                                // the leeches' inward cut
+  for (let i = 0; i <= NW; i++) {
+    const u = i / NW;                                  // 0 = one leech, 1 = the other
+    const arch = Math.sin(Math.PI * u);
+    const halfW = width / 2 * (1 - hollow * arch * 0.0) ;
+    const xw = (u - 0.5) * width;
+    const footY = -height + roach * height * arch;     // the roach lifts the middle of the foot
+    for (let j = 0; j <= NH; j++) {
+      const v = j / NH;                                // 0 = head, 1 = foot
+      const y = footY * v - hollow * height * v * (1 - v) * 0.0;
+      /* draft: peak 40% aft of the luff, growing from head to foot */
+      const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
+      const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
+      pos.push(xw, y, Math.max(0, chord) * depth);
+      uvs.push(u, v);
+    }
   }
+  const row = NH + 1;
+  for (let i = 0; i < NW; i++)
+    for (let j = 0; j < NH; j++) {
+      const a = i * row + j;
+      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+    }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  g.setIndex(idx);
   g.computeVertexNormals();
   /* 0.61 m = the 24-inch bolt. A 30 m course therefore carries about 49 cloths. */
   const sailMat = new THREE.ShaderMaterial({
@@ -1127,7 +1164,7 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
                 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
   });
   const m = new THREE.Mesh(g, sailMat);
-  m.position.set(x, yTop - height / 2, 0);
+  m.position.set(x, yTop, 0);
   /* ⚠ Square sails hang ACROSS the ship; lug, lateen and gaff sails lie ALONG it. This
      quarter-turn was applied unconditionally, which silently swung every fore-and-aft sail
      broadside-on. The rig type has to decide it. */
@@ -1136,6 +1173,7 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
   group.add(tag(m, 'sail'));
   return m;
 }
+
 
 /* ── A TRIANGULAR SAIL, BUILT FROM ITS THREE CORNERS ───────────────────────────────────
    A lateen, a settee and a crab-claw are TRIANGLES. The first version hung a rectangular

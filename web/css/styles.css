@@ -375,3 +375,14 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:13px 16px 14px;
   border-top:0;min-height:0}
 #swPart.empty{opacity:.62}
+
+/* ── names along the line ─────────────────────────────────────────────────────────────── */
+#swLabels{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+#swLabels .sl{position:absolute;transform:translate(-50%,0);text-align:center;white-space:nowrap;
+  transition:opacity .25s}
+#swLabels .sl b{display:block;font-family:var(--serif);font-size:13px;font-weight:400;
+  color:var(--ink-dim);letter-spacing:.01em}
+#swLabels .sl span{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-faint);margin-top:1px}
+#swLabels .sl.on b{color:var(--brass)}
+#swLabels .sl.on span{color:var(--verdigris)}
