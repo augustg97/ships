@@ -43,6 +43,8 @@ function swInit() {
   const cv = document.getElementById('swCanvas');
   SW.renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
   SW.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  SW.renderer.shadowMap.enabled = true;
+  SW.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   SW.scene = new THREE.Scene();
   SW.cam = new THREE.PerspectiveCamera(34, 1, 0.05, 40000);
   SW.ray = new THREE.Raycaster();
@@ -56,7 +58,21 @@ function swInit() {
      still reads, a low bounce standing in for light off the floor, and a rim behind to separate
      the rigging from the background. Four lights, and the ship stops being a silhouette. */
   SW.scene.add(new THREE.HemisphereLight(0xbcd6e6, 0x4a4536, 1.5));
+  /* ── SHADOWS ────────────────────────────────────────────────────────────────────────
+     The single largest thing still separating this from a photograph. Without them a hull is a
+     collection of correctly-shaped objects floating in the same light; with them the courses
+     throw onto the deck, the tops throw onto the courses, and the rigging draws itself across
+     the canvas. Shadow is what tells the eye these things are in front of each other rather
+     than merely near each other.
+     Cast from the key only, and the map is fitted to the SELECTED ship rather than the whole
+     2.6 km line — a shadow camera stretched over the full yard would put a 57 m ship inside
+     about two texels of it. */
   const key = new THREE.DirectionalLight(0xfff4e2, 2.5); key.position.set(90, 120, 70);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.bias = -0.0012;
+  key.shadow.normalBias = 0.35;
+  SW.key = key;
   const fill = new THREE.DirectionalLight(0xa8c8e0, 0.85); fill.position.set(-80, 45, -55);
   const bounce = new THREE.DirectionalLight(0xd8c9a8, 0.40); bounce.position.set(15, -60, 25);
   const rim = new THREE.DirectionalLight(0xdcecf6, 1.15); rim.position.set(-40, 70, -120);
@@ -72,27 +88,26 @@ function swInit() {
   const gm = new THREE.Mesh(gg, new THREE.MeshStandardMaterial({
     color: 0x18232b, roughness: 0.95, metalness: 0.0 }));
   gm.rotation.x = -Math.PI / 2;
+  gm.receiveShadow = true;
   SW.ground = gm; SW.scene.add(gm);
 
-  /* ── DRAG WALKS THE LINE; IT DOES NOT SPIN IT ────────────────────────────────────────
-     Orbiting swung all twenty-one hulls round a single point, which looks like a carousel and
-     makes it impossible to compare anything: the ships you are comparing are on opposite sides
-     of the turn. Horizontal drag now TRAVELS along the row and vertical drag raises or lowers
-     the eye. The viewing angle stays fixed, which is exactly what a comparison needs — every
-     ship is seen the same way. */
+  /* ── DRAG TURNS THE SHIP, NOT THE CAMERA ────────────────────────────────────────────
+     Orbiting the camera swung all twenty-one hulls about a point, which reads as a carousel.
+     But not being able to walk round a ship at all is worse — the whole promise of this view is
+     that you can look at the thing from any side. So the drag rotates the SELECTED SHIP on its
+     own axis and leaves the line where it is. The camera never moves sideways, so the ships
+     either side stay exactly where they were and the one you are looking at turns. Stepping
+     between ships is a separate act, on the arrows.  */
   let drag = null;
   cv.addEventListener('pointerdown', e => {
-    drag = { x: e.clientX, y: e.clientY, pan: SW.panX, lat: SW.lat, moved: false };
-    SW.spin = false; cv.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY, spin: SW.shipSpin || 0, lat: SW.lat, moved: false };
+    cv.setPointerCapture(e.pointerId);
   });
   cv.addEventListener('pointermove', e => {
     if (!drag) return;
     if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) drag.moved = true;
-    const reach = SW.fit || 200;
-    SW.panX = drag.pan - (e.clientX - drag.x) * reach * 0.0045;
-    SW.panX = Math.max(SW.yardSpan[0], Math.min(SW.yardSpan[1], SW.panX));
-    SW.panTo = SW.panX;                                  // cancel any fly-to in progress
-    SW.lat = Math.max(0.02, Math.min(0.85, drag.lat + (e.clientY - drag.y) * 0.004));
+    SW.shipSpin = drag.spin - (e.clientX - drag.x) * 0.008;
+    SW.lat = Math.max(0.02, Math.min(0.90, drag.lat + (e.clientY - drag.y) * 0.004));
   });
   cv.addEventListener('pointerup', e => {
     if (drag && !drag.moved) swPick(e);
@@ -102,6 +117,21 @@ function swInit() {
     e.preventDefault();
     SW.dist = Math.max(0.35, Math.min(8.0, SW.dist * (1 + Math.sign(e.deltaY) * 0.11)));
   }, { passive: false });
+
+  /* ── stepping along the line ──────────────────────────────────────────────────────── */
+  const step = d => {
+    if (!SW.layout) return;
+    const i2 = SW.layout.findIndex(e => e.id === SW.spec.id);
+    const n = SW.layout[(i2 + d + SW.layout.length) % SW.layout.length];
+    swOpen(n.v);
+  };
+  document.getElementById('swPrev').onclick = () => step(-1);
+  document.getElementById('swNext').onclick = () => step(1);
+  addEventListener('keydown', e => {
+    if (!SW.on) return;
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
 
   document.getElementById('swStage').addEventListener('input', e => {
     SW.stage = +e.target.value; swApplyStage();
@@ -341,8 +371,12 @@ function swOpen(vessel) {
      one ship rather than a second ship. Only one exists at a time: sixteen of them is two and
      a half million triangles and will not run. */
   SW.ship = swPromote(entry);
+  SW.ship.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   SW.shipX = entry.x;
   SW.panTo = entry.x;
+  SW.shipSpin = 0;                                   // a new ship faces the way she was built
+  const idx = SW.layout.findIndex(e => e.id === vessel.id);
+  document.getElementById('swNavPos').textContent = (idx + 1) + ' of ' + SW.layout.length;
   SW.sel = null;
 
   SW.hit = [];
@@ -370,6 +404,17 @@ function swOpen(vessel) {
     ['Rig, deck to truck', U.rigTop.toFixed(1) + ' m'],
   ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
+  /* fit the shadow frustum to this ship, in her own place on the line */
+  if (SW.key) {
+    const r = Math.max(L, U.rigTop) * 0.85;
+    const sc = SW.key.shadow.camera;
+    sc.left = -r; sc.right = r; sc.top = r; sc.bottom = -r;
+    sc.near = 1; sc.far = r * 6;
+    SW.key.position.set(entry.x + r * 1.1, r * 1.6, r * 0.9);
+    SW.key.target.position.set(entry.x, U.rigTop * 0.3, 0);
+    SW.scene.add(SW.key.target);
+    sc.updateProjectionMatrix();
+  }
   swFillCard(vessel);
   swApplyStage();
   swSelect(null);
@@ -477,7 +522,9 @@ function swResize() {
 function swFrame(now) {
   if (!SW.on || !SW.ship) return;
   const L = SW.spec.hull.loa;
-  SW.lon = 0.42;      // one fixed three-quarter view, so every hull is seen alike
+  SW.lon = 0.42;      // the camera's angle is fixed; the SHIP turns instead
+  /* the line stays put and the selected hull turns under the drag */
+  SW.layout && SW.layout.forEach(e => { e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
   const top = SW.viewTop, bot = SW.viewBot;
   const look = bot + (top - bot) * 0.34;
   const halfV = Math.max(top - look, look - bot);

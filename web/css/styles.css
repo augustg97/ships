@@ -386,3 +386,12 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   color:var(--ink-faint);margin-top:1px}
 #swLabels .sl.on b{color:var(--brass)}
 #swLabels .sl.on span{color:var(--verdigris)}
+
+/* ── stepping along the line ──────────────────────────────────────────────────────────── */
+#swNav{position:absolute;left:50%;transform:translateX(-50%);bottom:272px;z-index:5;
+  display:flex;align-items:center;gap:14px}
+#swNav .mini{font-size:15px;line-height:1;padding:7px 16px;background:var(--panel);
+  border:1px solid var(--edge)}
+#swNav .mini:hover{border-color:var(--edge-strong);color:var(--ink)}
+#swNavPos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  min-width:74px;text-align:center}
