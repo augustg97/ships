@@ -177,6 +177,11 @@ def hull(**k):
     return d
 
 
+# `transom` is the extra half-breadth the topsides FLARE OUT to at the taffrail, as a fraction
+# of half-beam. It is the counter, and it is what makes a square stern square. Round-sterned and
+# double-ended hulls — the trireme, the dhow, the canoe, the junk, the caravel — do not have one
+# and get no value here. The cog is the interesting case: a flat transom stern on a clinker hull,
+# which is exactly what let the Hanse hang a stern rudder on it.
 HULLS = {
   # LOA 36.9, beam 5.5, draught 1.25, displacement 47 t (Olympias, as built).
   # Cb = 47/1.025/(36.9·5.5·1.25) = 0.18 — extraordinarily fine, and the reason a trireme
@@ -204,7 +209,7 @@ HULLS = {
 
   # Bremen cog, 1380: 23.3 × 7.6 × 2.25 m. Flat-bottomed so it could take the ground on a tidal
   # flat and be unloaded at low water — which is what the Hanse ports needed.
-  "cog": hull(build="shell", loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.01, cm=0.80,
+  "cog": hull(transom=0.30, build="shell", loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.01, cm=0.80,
               wlPower=2.0, stemFineness=0.20, sternFineness=0.24,
               forefoot=0.34, run=0.34, riseF=0.30, riseA=0.28,
               sheerBow=1.2, sheerStern=0.6, tumblehome=0.04, strakes=14,
@@ -265,7 +270,7 @@ HULLS = {
                      dict(at=0.85, height=0.46, rig="lateen", rake=0, shrouds=2)],
               bowsprit=0.14, steeve=20),
 
-  "carrack": hull(loa=42.0, lwl=35.0, beam=11.0, draught=4.6, freeboard=4.4, cm=0.76,
+  "carrack": hull(transom=0.34, loa=42.0, lwl=35.0, beam=11.0, draught=4.6, freeboard=4.4, cm=0.76,
               wlPower=2.2, stemFineness=0.10, sternFineness=0.20,
               forefoot=0.32, run=0.30, riseF=0.42, riseA=0.34,
               sheerBow=2.0, sheerStern=1.6, tumblehome=0.17, strakes=22,
@@ -275,7 +280,7 @@ HULLS = {
                      dict(at=0.85, height=0.806, rig="lateen", rake=4, shrouds=3)],
               bowsprit=0.26, steeve=26),
 
-  "fluyt": hull(loa=32.0, lwl=27.5, beam=6.6, draught=3.1, freeboard=3.0, cm=0.82,
+  "fluyt": hull(transom=0.46, loa=32.0, lwl=27.5, beam=6.6, draught=3.1, freeboard=3.0, cm=0.82,
               wlPower=3.0, stemFineness=0.14, sternFineness=0.22,
               forefoot=0.28, run=0.28, riseF=0.32, riseA=0.28,
               sheerBow=1.2, sheerStern=0.9, tumblehome=0.284, strakes=20,
@@ -285,7 +290,7 @@ HULLS = {
                      dict(at=0.85, height=0.874, rig="lateen", rake=4, shrouds=3)],
               bowsprit=0.22, steeve=24),
 
-  "east-indiaman": hull(loa=50.0, lwl=43.0, beam=12.4, draught=5.6, freeboard=4.6, cm=0.8,
+  "east-indiaman": hull(transom=0.40, loa=50.0, lwl=43.0, beam=12.4, draught=5.6, freeboard=4.6, cm=0.8,
               wlPower=2.6, stemFineness=0.12, sternFineness=0.20,
               forefoot=0.28, run=0.30, riseF=0.36, riseA=0.30,
               sheerBow=1.6, sheerStern=0.9, tumblehome=0.15, strakes=26,
@@ -299,7 +304,7 @@ HULLS = {
   # 74-gun third rate: gundeck 168–176 ft, beam 47–48 ft, 1,600–1,750 tons BOM.
   # Cb ≈ 0.51 derived from Victory's dimensions and displacement — exactly where the
   # literature expects a ship of the line to sit.
-  "ship-of-the-line": hull(loa=57.0, lwl=51.0, beam=14.6, draught=6.6, freeboard=5.4, cm=0.8,
+  "ship-of-the-line": hull(transom=0.42, loa=57.0, lwl=51.0, beam=14.6, draught=6.6, freeboard=5.4, cm=0.8,
               wlPower=2.6, stemFineness=0.12, sternFineness=0.18,
               forefoot=0.26, run=0.28, riseF=0.34, riseA=0.28,
               sheerBow=1.8, sheerStern=0.9, tumblehome=0.139, strakes=30,
@@ -310,7 +315,7 @@ HULLS = {
                      dict(at=0.85, height=0.857, rig="square", rake=5, shrouds=6)],
               bowsprit=0.26, steeve=22),
 
-  "slave-ship": hull(loa=30.0, lwl=26.0, beam=8.0, draught=3.6, freeboard=3.0, cm=0.80,
+  "slave-ship": hull(transom=0.38, loa=30.0, lwl=26.0, beam=8.0, draught=3.6, freeboard=3.0, cm=0.80,
               wlPower=2.6, forefoot=0.28, run=0.30, riseF=0.38, riseA=0.32,
               sheerBow=1.2, sheerStern=0.6, tumblehome=0.13, strakes=22,
               copper=True, copperAge=0.6, topside="#4c3b28",
@@ -321,7 +326,7 @@ HULLS = {
 
   # Cutty Sark, 1869: 64.8 × 10.97 × 6.10, 963 gross register tons. Cb ≈ 0.48 derived, L/B 5.9
   # — a long, fine, hard-driven hull with almost no tumblehome.
-  "clipper": hull(loa=64.8, lwl=59.0, beam=10.97, draught=6.10, freeboard=3.4, cm=0.764,
+  "clipper": hull(transom=0.30, loa=64.8, lwl=59.0, beam=10.97, draught=6.10, freeboard=3.4, cm=0.764,
               wlPower=3.0, stemFineness=0.03, sternFineness=0.08,
               forefoot=0.30, run=0.36, riseF=0.50, riseA=0.44,
               sheerBow=0.95, sheerStern=0.48, tumblehome=0.024, strakes=28,

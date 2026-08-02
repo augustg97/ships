@@ -65,7 +65,7 @@ Ordered by how much each closes the gap per unit of work.
    Still missing: sheets, tacks, halyards, lifts, and the topmast/topgallant shroud sets.
 3. **Head and beakhead** — headrails, gammoning, the beakhead platform. The bow currently ends
    in a bare stem with a bowsprit stuck through it.
-4. **Stern — BLOCKED ON A HULL-FORM CHANGE, and this is the finding.** `buildStern` is written
+4. **Stern — the COUNTER is in; the stern furniture wants another pass.** ~~Blocked on a hull-form change.~~ Resolved: the flare belongs entirely ABOVE the waterline, so Cw/Cp/Cb/Cm are untouched and no coefficient needed re-checking. Original diagnosis below, kept because the reasoning was the useful part. `buildStern` is written
    and its parts are right, but it is an appliqué on a hull whose planking tapers to a near-point
    at the sternpost, so the transom reads as a slab glued to the back however it is sized. Three
    widths were tried — an unbounded flare, an absolute 0.6 of beam, and the ship's own after-body

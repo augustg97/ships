@@ -297,6 +297,24 @@ function surfacePoint(S, H, u, v) {
     const k = (v - 0.62) / 0.38;
     z = fb * k;
     y = b + (deckHalf - b) * Math.pow(k, 0.9);
+    /* ── THE COUNTER ────────────────────────────────────────────────────────────────
+       A square-sterned ship is FINE AT THE WATERLINE AND BROAD AT THE TAFFRAIL. The run
+       tapers away underwater — it has to, or she drags a wake like a barn door — while the
+       topsides above it flare outward into a flat transom. The model had the after-body the
+       same width at every height, which is why a transom could not be attached to it: there
+       was nothing up there to attach one to.
+
+       ⚠ And this is why the fix belongs HERE rather than in the waterline function. The flare
+       is entirely above v = 0.62, so the waterplane is untouched: Cw, Cp, Cb and Cm are all
+       exactly what they were, and no published coefficient has to be re-checked. Changing
+       sternFineness instead — the obvious move — would have moved every one of them. */
+    if (S.transom) {
+      const runStart = 1 - S.run;
+      if (u > runStart) {
+        const t = (u - runStart) / S.run;
+        y += (S.beam / 2) * S.transom * t * t * Math.pow(k, 0.75);
+      }
+    }
   }
   return [(u - 0.5) * L + H.rake(u), z, y];
 }
@@ -1373,7 +1391,12 @@ function buildGuns(S, group, mat) {
     if (v > 0.985) continue;
     for (let k = 0; k < 26; k++) {
       const u = (k + 0.5) / 26;
-      if (u < 0.13 || u > 0.88) continue;               // the ends are too fine to carry guns
+      /* ⚠ And no gun stands in the COUNTER. The flare pushes the topsides outboard over the
+         after body, so a barrel placed there is thrown clear of the ship and reads as a spar.
+         Real ports stop where the run begins for the same physical reason: there is no flat
+         side left to cut one in. */
+      const aftLimit = Math.min(0.88, 1 - (S.run || 0.3) - 0.02);
+      if (u < 0.13 || u > aftLimit) continue;
       const p = surfacePoint(S, H, u, v);
       for (const sgn of [-1, 1]) {
         const bar = new THREE.Mesh(
@@ -1593,8 +1616,7 @@ function buildStern(S, group, mats) {
        construction. On a fine-sterned hull it is narrow, which is correct: that ship did not
        have a broad transom. */
     const p = surfacePoint(S, H, 0.985, v);
-    const q = surfacePoint(S, H, 0.905, v);             // where there is still real hull
-    const half = q[2] * 0.94;
+    const half = p[2] * 0.99;                           // the hull's own width, counter included
     for (let i = 0; i <= NW; i++) {
       const t = (i / NW) * 2 - 1;
       pos.push(p[0] + Math.abs(t) * L * 0.010, p[1], t * half);
@@ -1743,16 +1765,11 @@ function buildShip(S, opts) {
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
   if (FINE) buildFunnel(S, group);
-  /* ⚠ THE HEAD SHIPS; THE STERN DOES NOT, YET. buildStern is written and correct in its parts,
-     but it is an APPLIQUÉ on a hull whose planking tapers to a near-point at the sternpost, so
-     the transom reads as a slab glued to the back of the ship however it is sized. Three widths
-     were tried — an unbounded flare, an absolute 0.6 of beam, and the ship's own after-body
-     half-breadth — and all three fail the same way, because the problem is not the width.
-     A square-sterned ship's HULL FORM ends in a transom: `wl(u)` must not run to zero at u = 1.
-     That is a change to hullSurface and to every vessel's sternFineness, and it belongs in its
-     own round with the coefficients re-checked. Shipping the bolt-on would look worse than the
-     bare stern it replaces, so it stays off until the hull form carries it. */
   if (FINE) buildHead(S, group, mats);
+  /* the transom is now continuous with the hull because the hull FLARES to meet it — see the
+     counter in surfacePoint. Three earlier attempts failed by sizing the plate; none of them
+     could work, because the ship had no broad stern for a plate to sit on. */
+  if (FINE && S.transom) buildStern(S, group, mats);
   if (FINE && S.containers) buildContainers(S, group);
 
   /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
