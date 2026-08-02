@@ -74,8 +74,7 @@ Ordered by how much each closes the gap per unit of work.
    That means changing `hullSurface` and re-checking every vessel's `sternFineness` against its
    published coefficients, since a squarer stern changes Cw and therefore Cb. Own round.
    The code stays in the file, disabled at the call site, with the reason at the call site.
-5. **Ratlines as ladders.** They are `THREE.Line` segments; at close range they read as wire.
-   Thin geometry instead.
+5. ~~Ratlines as ladders~~ — **done**. All standing rigging is merged prism geometry with a real diameter; 496 line objects became 6 meshes, so it is cheaper AND lit. LineBasicMaterial is unlit, which is why the old rigging never changed value in shadow.
 6. **Plank seams and fastenings on the hull surface** — the shader draws strakes but no butts,
    no treenails, no caulking line.
 7. **Furled sails** as a state, so a ship can be shown under bare poles or with courses handed —

@@ -67,6 +67,48 @@ function fullness(u, p, endF, endA) {
   return end + (1 - end) * f;
 }
 
+
+/* ── ROPE WITH A DIAMETER ──────────────────────────────────────────────────────────────
+ * Standing rigging was drawn with THREE.Line, which is one pixel wide at every distance. At
+ * arm's length — which is the whole point of this view — a 74's shrouds read as scratched wire
+ * and 452 separate ratline objects read as static.
+ *
+ * Real rope has a diameter, and on a ship of the line it is a startling one: a main shroud is
+ * about 4½ inches in circumference, which is over an inch thick, and the main stay is 20 inches
+ * around — as thick as a man's calf. Drawing it as a hairline throws away the single most
+ * physical fact about a sailing ship, which is how MASSIVE the cordage is.
+ *
+ * Every segment becomes a thin four-sided prism and they are merged into ONE geometry per set,
+ * so the whole ladder is a single draw call. That is what makes 500 real ropes cheaper than 500
+ * lines were.
+ */
+function ropeMesh(segs, r, mat) {
+  const pos = [], idx = [];
+  const up = new THREE.Vector3(0, 1, 0), tmp = new THREE.Vector3();
+  segs.forEach(([a, b]) => {
+    const d = tmp.copy(b).sub(a);
+    if (d.lengthSq() < 1e-9) return;
+    d.normalize();
+    const n1 = new THREE.Vector3().crossVectors(d, Math.abs(d.y) > 0.95 ? new THREE.Vector3(1, 0, 0) : up).normalize();
+    const n2 = new THREE.Vector3().crossVectors(d, n1).normalize();
+    const base0 = pos.length / 3;
+    for (const P of [a, b])
+      for (const [s1, s2] of [[1, 1], [1, -1], [-1, -1], [-1, 1]])
+        pos.push(P.x + (n1.x * s1 + n2.x * s2) * r,
+                 P.y + (n1.y * s1 + n2.y * s2) * r,
+                 P.z + (n1.z * s1 + n2.z * s2) * r);
+    for (let f = 0; f < 4; f++) {
+      const c = (f + 1) % 4;
+      idx.push(base0 + f, base0 + 4 + f, base0 + c, base0 + c, base0 + 4 + f, base0 + 4 + c);
+    }
+  });
+  if (!pos.length) return null;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return new THREE.Mesh(g, mat);
+}
+
 /* ── the parametric hull ───────────────────────────────────────────────────────────── */
 
 function hullSurface(S) {
@@ -595,6 +637,10 @@ function buildRig(S, group, mats, FINE) {
   const deckAt = u => H.sheer(u);
 
   const woodDark = mats.spar, canvas = mats.canvas, rope = mats.rope;
+  /* ⚠ LineBasicMaterial is UNLIT — it renders flat at whatever colour it is given, so rigging
+     drawn with it stayed the same value whether it was in sunlight or in the shadow of a sail.
+     Rope that is actually geometry can take the light like everything else. */
+  const ropeMat = mats.ropeSolid || woodDark;
 
   const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
     const h = y1 - y0;
@@ -889,17 +935,22 @@ function buildRig(S, group, mats, FINE) {
       const half = H.halfB * H.wl(u) * (1 - H.tumble(u));
       const topY = base + lower * 0.97;
       const shroudPts = [[], []];
+      const shroudSegs = [], ratSegs = [];
       for (let s = 0; s < mk.shrouds; s++) {
         const f = (s + 1) / (mk.shrouds + 1);
         const chX = x + (f - 0.5) * L * 0.055;
         [1, -1].forEach((side, si2) => {
           const a = new THREE.Vector3(chX, base, side * half * 1.06);
           const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
-          group.add(tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), rope), 'shroud'));
+          shroudSegs.push([a, b]);
           shroudPts[si2].push([a, b]);
         });
       }
-      /* the ratlines themselves — they are what makes shrouds read as a ladder */
+      /* a main shroud is about 4½ inches in circumference — call it 36 mm of rope */
+      const shr = ropeMesh(shroudSegs, 0.018 + B * 0.0009, ropeMat);
+      if (shr) group.add(tag(shr, 'shroud'));
+
+      /* the ratlines — they are what makes shrouds read as a ladder rather than as stays */
       const RAT = 0.3302;                                  // thirteen inches, in metres
       shroudPts.forEach(side => {
         if (side.length < 2) return;
@@ -908,9 +959,16 @@ function buildRig(S, group, mats, FINE) {
           const t = h / rise;
           const pts = side.map(([a, b]) => new THREE.Vector3(
             a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t));
-          group.add(tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), rope), 'ratline'));
+          for (let i = 0; i < pts.length - 1; i++) ratSegs.push([pts[i], pts[i + 1]]);
         }
       });
+      /* Ratline stuff is 6–9 mm rope, but it is SERVED — wound with spun yarn against chafe —
+         and the served line is two to three times the core. 34 mm is the served diameter, and it
+         is also the point at which a ladder 24 m away stops being sub-pixel and starts being a
+         ladder. Both facts happen to agree; where they had not, the physical one would win and
+         the ratlines would simply be faint. */
+      const rats = ropeMesh(ratSegs, 0.017 + B * 0.0006, ropeMat);
+      if (rats) group.add(tag(rats, 'ratline'));
     }
   });
 
@@ -1766,6 +1824,7 @@ function buildShip(S, opts) {
        comes from PETROLEUM tar — so black shrouds on an 18th-century ship are an anachronism
        of about a hundred years. */
     rope: new THREE.LineBasicMaterial({ color: 0x4a3520, transparent: true, opacity: 0.78 }),
+    ropeSolid: new THREE.MeshStandardMaterial({ color: 0x5a4326, roughness: 0.88 }),
   };
   const sails = buildRig(S, group, mats, FINE);
   if (FINE) {
