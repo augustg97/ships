@@ -493,19 +493,26 @@ vessel(id="dugout", name="Dugout canoe", sub="the first sea craft", rig="oar", e
 
 vessel(id="voyaging-canoe", name="Voyaging canoe", sub="Austronesian double hull", rig="crabclaw",
        era=[-3000, 1500], from_=-3000, to=2026, region="Pacific and Indian Oceans",
-       rows=[["Length", "18–20 m (Hōkūleʻa 19.0 m)"], ["Displacement", "~11.5 t laden"],
-             ["Sail area", "~50 m², two crab claws"], ["Crew", "12–16"],
+       rows=[["Hōkūleʻa", "18.7 m LOA · 4.72 m beam · 0.76 m draught"],
+             ["Displacement", "7.3 t empty; 12.2 t loaded"],
+             ["Rig", "**two masts**, crab claw — a triangular sail on two spars along its long sides"],
+             ["Sail area", "50.2 m² for the pair"], ["Crew", "12–16"],
+             ["Steering", "a long paddle, not a rudder"],
+             ["Speed", "4–6 kn under full sail"],
              ["Measured passage", "Hawaiʻi→Tahiti 1976, ~2,400 nm in 30 days at sea ≈ 3.3 kn"],
+             ["Mālama Honua, 2014–17", "47,000 nm, 85 ports, 26 countries"],
              ["Construction", "lashed-lug planking, no metal at all"]],
        crew=14, attestation="attested", confidence="good",
-       text="The technology that settled a third of the surface of the planet, and it did it "
-            "**against the prevailing wind** — which is the reason this model does not put "
-            "Europe at the root of the tree.\n\n"
-            "The crab claw generates lift rather than merely catching wind, and a double hull "
-            "carries enough sail to use it. That combination makes good about 75° to the true "
-            "wind. By modern standards that is poor. Against a square rig, which in ordinary "
-            "conditions makes good 90° and in a blow goes backwards, it is the difference "
-            "between being able to explore upwind and not.\n\n"
+       text="A double-hulled sailing canoe: two hulls of equal length lashed side by side, "
+            "carrying two masts and steered by a long paddle rather than a rudder. Austronesian "
+            "voyagers using vessels of this kind settled the Pacific islands, reaching the Lapita "
+            "range by about 900 BC and Hawaiʻi, Rapa Nui and Aotearoa later.\n\n"
+            "The crab claw is approximately an isosceles triangle carried on two light spars "
+            "along its long sides. It generates lift rather than merely catching wind, and it "
+            "**widens upwards**, putting sail area high where the wind is stronger — which also "
+            "raises the heeling moment, and is why the rig is carried on a multihull. A double "
+            "hull carries enough sail to use it, and the combination makes good about 75° to the "
+            "true wind, against roughly 90° for a square rig in ordinary conditions.\n\n"
             "Lashed-lug construction uses planks carved with integral internal lugs and lashed "
             "to ribs with fibre — no nails, no iron, nothing that corrodes.",
        cite="Irwin, *Archaeology in Oceania* 58 (2023); Finney, *Science* (1977); Polynesian Voyaging Society logs.")
@@ -542,27 +549,52 @@ vessel(id="corbita", name="Roman merchantman", sub="corbita", rig="square", era=
        from_=-300, to=500, region="Mediterranean",
        rows=[["Typical length", "20–30 m; Madrague de Giens 40 × 9 m"],
              ["Burden", "150–350 tons typical; the largest ~400 t"],
-             ["The grain ship *Isis*", "~53 m; 1,200–1,300 t of grain (Casson) — contested, some read 1,900 t"],
+             ["Standard grain capacity", "50,000 *modii* ≈ 350 t"],
+             ["Rig", "one mainmast with a broad square mainsail; larger ships carried more than "
+                     "one mast and more than one sail per mast — the raked *artemon* forward "
+                     "and a triangular *supparum* above the main (Casson)"],
+             ["Handed by brailing", "no reef points: brailing lines ran through lead or bone "
+                                    "rings sewn to the sail and gathered it up to the yard"],
+             ["The grain ship *Isis*", "55 m; beam over a quarter of that; hold 13 m deep; "
+                                       "1,200–1,300 t of grain (Lucian) — contested, some read 1,900 t"],
              ["Construction", "shell-first, pegged mortise-and-tenon, double planking"],
-             ["Passage, downwind", "Puteoli→Alexandria 9 days ≈ 5–6 kn (Pliny)"],
-             ["Passage, upwind", "Alexandria→Rome 40–70 days ≈ 1–2 kn made good"]],
+             ["Passage, downwind", "Rome→Alexandria in ballast 10–14 days"],
+             ["Passage, upwind", "Alexandria→Rome laden a month, sometimes two or more"],
+             ["Round trip", "about 70 days; 2,000–3,000 voyages a year fed the city"]],
        crew=20, attestation="generated", confidence="moderate",
-       text="The same ship on the same route took nine days in one direction and forty to seventy "
-            "in the other. The difference is the wind: the Etesian northerlies of the eastern "
-            "Mediterranean blow steadily down toward Egypt in summer.\n\n"
-            "The Roman grain fleet ran downwind to Italy and beat its way back, and the "
-            "sailing season closed in winter, when the *mare clausum* held from November to "
-            "March.",
-       cite="Casson, *Ships and Seamanship in the Ancient World* (1971); Pliny, *Natural History*.")
+       text="The bulk carrier of the Roman Mediterranean, built shell-first with pegged "
+            "mortise-and-tenon joints and double planking. Typical hulls ran 20–30 m and carried "
+            "150–350 tons; the standard grain capacity was 50,000 *modii*, about 350 tonnes.\n\n"
+            "The rig is a single broad square mainsail on one mast, with a small raked *artemon* "
+            "over the bows on larger ships and sometimes a triangular *supparum* above the main. "
+            "It was handled by **brailing**: there are no reef points, and the yard does not come "
+            "down. Lines ran up the face of the sail through rings of lead or bone sewn to the "
+            "cloth, and hauling on them gathered the sail up to the yard like a curtain.\n\n"
+            "The same ship on the same route took ten days to a fortnight in one direction and a "
+            "month or more in the other. The difference is the wind: the Etesian northerlies of "
+            "the eastern Mediterranean blow steadily down toward Egypt in summer. The grain fleet "
+            "ran downwind to Alexandria in ballast and beat its way home laden, a round trip of "
+            "about seventy days, and the sailing season closed in winter when the *mare clausum* "
+            "held from November to March.",
+       cite="Casson, *Ships and Seamanship in the Ancient World* (1971); Lucian, *The Ship*; "
+            "Wikipedia, *Grain supply to the city of Rome* and *Square rig* (accessed 2026-08-02).")
 
 vessel(id="dhow", name="Sewn-plank dhow", sub="the Indian Ocean trader", rig="lateen",
        era=[500, 1900], from_=300, to=2026, region="Indian Ocean",
-       rows=[["Belitung wreck (c. AD 830)", "~18 × 6.4 m; ~60,000 Changsha wares"],
+       rows=[["Rig", "one to three masts carrying **settee** sails — a quadrilateral, a lateen "
+                     "with its forward point cut off — sometimes a true lateen"],
+             ["Belitung wreck (c. AD 830)", "~18 × 6.4 m; ~60,000 Changsha wares"],
              ["Baghlah / ghanjah", "30–40 m, 150–400 t, crew 40–150"],
+             ["The types", "*baghlah* the heavy deep-sea trader · *boum* large, tapering stern · "
+                           "*sambuk* the largest still sailing in the Gulf · *jalibut* small to medium"],
+             ["Crew", "about 30 on a large dhow, about 12 on a small one"],
              ["Construction", "coir stitching through drilled holes; no iron"],
              ["Sailing season", "out on the SW monsoon Apr–Sep, home on the NE Nov–Mar"]],
        crew=20, attestation="attested", confidence="good",
-       text="In the Indian Ocean the departure **date** is not a free variable. The monsoon "
+       text="A sewn-plank trader of one to three masts. The sail is usually a **settee** rather "
+            "than a true lateen: a quadrilateral, in effect a lateen with its forward point cut "
+            "off, so the luff is short and the yard still rakes steeply.\n\n"
+            "In the Indian Ocean the departure **date** is not a free variable. The monsoon "
             "reverses twice a year, and it is the only wind system on Earth that does, so the "
             "calendar of the whole ocean is fixed by it: Egypt to India leaving in July on the "
             "south-west monsoon, home from November on the north-east.\n\n"

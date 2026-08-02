@@ -6,21 +6,46 @@
   },
   "device_scale_factor": 2,
   "ready": {
-    "expr": null,
-    "timeout_ms": 45000,
-    "note": "TODO: app should set window.__FRAME_READY = true after first render"
+    "expr": "window.__FRAME_READY === true",
+    "timeout_ms": 60000,
+    "note": "set in app.js armNext() after the first painted frame"
   },
-  "settle_ms": 3500,
+  "settle_ms": 600,
   "thresholds": {
-    "changed_frac": 0.002,
-    "mean_abs": 1.0
+    "changed_frac": 0.0005,
+    "mean_abs": 0.15
   },
   "blank_variance_floor": 4.0,
   "frames": [
     {
-      "name": "default-view",
-      "path": "/",
-      "note": "the frame the \u00a713 check is run on"
+      "name": "globe-default",
+      "path": "/?frozen=1",
+      "note": "the frame the \u00a713 check is run on \u2014 Ocean Crossing era, 1590"
+    },
+    {
+      "name": "globe-crossing",
+      "path": "/?frozen=1#e=0&t=40000",
+      "note": "era 0 \u2014 the first crossings, low sea level and exposed shelves"
+    },
+    {
+      "name": "globe-steam",
+      "path": "/?frozen=1#e=5&t=1870",
+      "note": "era 5 \u2014 iron and steam"
+    },
+    {
+      "name": "globe-modern",
+      "path": "/?frozen=1#e=7&t=2000",
+      "note": "era 7 \u2014 the box; the network at its densest"
+    },
+    {
+      "name": "shipwright",
+      "path": "/?frozen=1#v=ship",
+      "note": "hull.js shaders \u2014 HULL_VERT/FRAG, SAIL_VERT/FRAG"
+    },
+    {
+      "name": "action",
+      "path": "/?frozen=1#v=action",
+      "note": "battle view"
     }
   ]
 }
