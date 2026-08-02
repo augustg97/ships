@@ -496,18 +496,41 @@ function swFrame(now) {
   const hm = SW.ship.userData.hullMat;
   if (hm) hm.uniforms.uCam.value.copy(SW.cam.position);
   /* place the names: project each ship's foot to the screen */
+  /* ── PLACE THE NAMES, AND LET THEM YIELD TO EACH OTHER ──────────────────────────────
+     Where the small hulls bunch, their labels overlapped into a smear. The globe already
+     solved this for ports: sort by importance, place in order, and drop anything that lands
+     on top of something already placed. Here importance is simple — the SELECTED ship always
+     gets its name, then the nearest to the camera, then outward. A dropped label is better
+     than two unreadable ones. */
   if (SW.layout) {
     const el = document.getElementById('shipwright');
     const w = el.clientWidth, h = el.clientHeight;
     const v = new THREE.Vector3();
+    const cand = [];
     SW.layout.forEach(e => {
       v.set(e.x, SW.viewBot !== undefined ? SW.viewBot : 0, 0).project(SW.cam);
       const sx = (v.x * 0.5 + 0.5) * w, sy = (-v.y * 0.5 + 0.5) * h;
       const on = SW.spec && e.id === SW.spec.id;
-      const vis = v.z < 1 && sx > -80 && sx < w + 80 && Math.abs(e.x - SW.panX) < (SW.fit || 200) * 4;
-      e.el.style.opacity = vis ? (on ? '1' : '0.62') : '0';
-      if (vis) { e.el.style.left = sx + 'px'; e.el.style.top = Math.min(h - 120, sy + 14) + 'px'; }
-      e.el.classList.toggle('on', !!on);
+      const near = Math.abs(e.x - SW.panX);
+      const vis = v.z < 1 && sx > -40 && sx < w + 40 && near < (SW.fit || 200) * 4;
+      cand.push({ e, sx, sy, on, near, vis });
+    });
+    cand.sort((a, b) => (b.on ? 1 : 0) - (a.on ? 1 : 0) || a.near - b.near);
+    const taken = [];
+    cand.forEach(c => {
+      let show = c.vis;
+      if (show) {
+        for (const t of taken) {
+          if (Math.abs(t[0] - c.sx) < 96 && Math.abs(t[1] - c.sy) < 26) { show = false; break; }
+        }
+      }
+      if (show) {
+        taken.push([c.sx, c.sy]);
+        c.e.el.style.left = c.sx + 'px';
+        c.e.el.style.top = Math.min(h - 118, c.sy + 14) + 'px';
+      }
+      c.e.el.style.opacity = show ? (c.on ? '1' : '0.6') : '0';
+      c.e.el.classList.toggle('on', !!c.on);
     });
   }
   SW.renderer.render(SW.scene, SW.cam);

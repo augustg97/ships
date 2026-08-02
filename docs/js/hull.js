@@ -1483,36 +1483,64 @@ function buildFittings(S, group, mats) {
     group.add(gratingAt(u, w, L * 0.055));
   });
 
-  /* ── the CAPSTAN: the machine that made a big ship workable by hand ───────────────── */
+  /* ── THE CAPSTAN, WHICH IS A MACHINE AND NOT A DRUM ────────────────────────────────
+     The barrel is not smooth: it carries WHELPS — vertical ribs that give the cable something
+     to bite on, because a polished cylinder would simply let it slip. Above them sits the
+     drumhead, pierced square for the bars, and the spindle runs down through the deck to a
+     second capstan below, so two decks of men heave on the same anchor at once. */
   if (timberShip) {
-    const u = 0.62, y = deckAtU(u);
+    const u = 0.62, y = deckAtU(u), R = B * 0.062;
     const cg = new THREE.Group();
-    const drum = new THREE.Mesh(
-      new THREE.CylinderGeometry(B * 0.055, B * 0.070, B * 0.13, 12), wood);
-    drum.position.y = y + B * 0.065;
-    cg.add(drum);
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.80, R, B * 0.115, 16), wood);
+    barrel.position.y = y + B * 0.058;
+    cg.add(barrel);
+    for (let i = 0; i < 8; i++) {                       // the whelps
+      const a = i / 8 * Math.PI * 2;
+      const w = new THREE.Mesh(new THREE.BoxGeometry(B * 0.014, B * 0.100, B * 0.030), wood);
+      w.position.set(Math.cos(a) * R * 0.92, y + B * 0.056, Math.sin(a) * R * 0.92);
+      w.rotation.y = -a;
+      cg.add(w);
+    }
+    const head = new THREE.Mesh(
+      new THREE.CylinderGeometry(R * 1.16, R * 1.02, B * 0.038, 16), pale);
+    head.position.y = y + B * 0.132;
+    cg.add(head);
     for (let i = 0; i < 8; i++) {                       // the bars, shipped for heaving
       const a = i / 8 * Math.PI * 2;
       const bar = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.008, B * 0.010, B * 0.30, 14), pale);
+        new THREE.CylinderGeometry(B * 0.009, B * 0.012, B * 0.34, 10), pale);
       bar.rotation.z = Math.PI / 2; bar.rotation.y = a;
-      bar.position.set(Math.cos(a) * B * 0.15, y + B * 0.115, Math.sin(a) * B * 0.15);
+      bar.position.set(Math.cos(a) * B * 0.17, y + B * 0.132, Math.sin(a) * B * 0.17);
       cg.add(bar);
     }
     cg.position.x = (u - 0.5) * L;
     group.add(tag(cg, 'capstan'));
   }
 
-  /* ── the SHIP'S BOAT, stowed on the beams over the main hatch ─────────────────────── */
+  /* ── THE SHIP'S BOAT, WHICH IS A HULL, SO IT COMES FROM THE HULL GENERATOR ──────────
+     ⚠ It was half a squashed sphere — the one shape in this whole model with no argument behind
+     it at all. And the fix was sitting in the file the entire time: a boat IS a hull, with a
+     keel and a stem and a run, so it gets built by the same surfacePoint() as the ship carrying
+     it. Not a new model — the same generator at a different size, which is exactly the rule
+     this project holds everything else to.
+     Her proportions are a launch's: L/B about 3.4, fine forward, transom-sterned and open. */
   if (timberShip && S.lwl > 25) {
-    const u = 0.46, y = deckAtU(u);
-    const bl = L * 0.16, bb = bl * 0.30;
-    const bg = new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-    const bm = new THREE.Mesh(bg, pale);
-    bm.scale.set(bl / 2, bb * 0.62, bb / 2);
-    bm.rotation.x = Math.PI;                            // hollow side up
-    bm.position.set((u - 0.5) * L, y + bb * 0.34, 0);
+    const bl = L * 0.17, u = 0.46;
+    const boatSpec = {
+      loa: bl, lwl: bl * 0.94, beam: bl / 3.4, draught: bl * 0.075, freeboard: bl * 0.105,
+      cm: 0.62, wlPower: 2.6, stemFineness: 0.06, sternFineness: 0.42, transom: 0.20,
+      forefoot: 0.26, run: 0.30, riseF: 0.55, riseA: 0.30, sheerBow: 0.9, sheerStern: 0.6,
+      tumblehome: 0.0, stemRake: 0.06, sternRake: 0.02, strakes: 9, masts: [],
+    };
+    const bm = new THREE.Mesh(buildHullGeometry(boatSpec, 40, 14), pale);
+    bm.position.set((u - 0.5) * L, deckAtU(u) + bl * 0.060, 0);
     group.add(tag(bm, 'boat'));
+    for (const d of [-0.30, 0.30]) {                    // she sits on skids across the beams
+      const sk = new THREE.Mesh(
+        new THREE.BoxGeometry(B * 0.030, B * 0.022, bl / 3.4 * 1.5), wood);
+      sk.position.set((u - 0.5) * L + d * bl, deckAtU(u) + bl * 0.012, 0);
+      group.add(sk);
+    }
   }
 }
 
