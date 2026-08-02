@@ -747,6 +747,18 @@ function buildRig(S, group, mats, FINE) {
     return m;
   };
 
+  /* ── ⚠ THE YARDS WERE BRACED SQUARE ────────────────────────────────────────────────
+     Every yard sat exactly athwartships and every fore-and-aft sail hung in the centreline
+     plane, which is how a rig is DRAWN and not how one is ever set. A ship at sea is trimmed:
+     the yards are braced round so the sails meet the wind at an angle, and the whole plan
+     turns together because it is all working the same breeze.
+     Square sails braced square are for running dead before the wind, which is the one point of
+     sailing a square-rigger is worst at and almost never does deliberately. Trimmed round, the
+     sails present their curve to the viewer instead of their edge — which is most of why they
+     were reading as flat boards.
+     One angle for the ship, applied to yard and canvas alike. Both sit on the mast centreline,
+     so a rotation about Y is a brace. */
+  const TRIM = S.trim !== undefined ? S.trim : 0.34;    // ~19 degrees off square
   const sails = [], spars = [], mastTops = [];
   const maxMastShare = S.masts.length ? Math.max(...S.masts.map(m => m.height)) : 1;
 
@@ -848,6 +860,7 @@ function buildRig(S, group, mats, FINE) {
         }
         yg.computeVertexNormals();
         ym.rotation.x = Math.PI / 2;
+        ym.rotation.z = TRIM;   // braced round; z because the yard is already turned onto X
         ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
         group.add(tag(ym, 'yard'));
         /* recorded from the spar that was actually placed, so the braces lead to real yard arms */
@@ -862,7 +875,7 @@ function buildRig(S, group, mats, FINE) {
         const drop = yy - prevYard;
         prevYard = yy;
         sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-                            yardLen * 0.96, drop * 0.97, canvas, group, 'square'));
+                            yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
       }
 
       /* ── MASTS STACK. ⚠ THIS LINE WAS MISSING, AND NOTHING LOOKED WRONG. ──────────────
@@ -1047,7 +1060,11 @@ function buildRig(S, group, mats, FINE) {
         bm.position.set(x + off, yy, 0);
         group.add(tag(bm, 'yard', i === 0 ? 'Boom' : (i === nb ? 'Yard' : 'Batten ' + i)));
       }
-      sails.push(makeSail(x + off, footY + sailH, sailW, sailH, canvas, group, 'junk'));
+      /* a lug sail is sheeted out to leeward, not held amidships — it swings about its mast */
+      const js = makeSail(x + off, footY + sailH, sailW, sailH, canvas, group, 'junk');
+      js.position.x = x; js.rotation.y = -TRIM * 1.5;
+      js.translateX(off);
+      sails.push(js);
     }
 
     /* standing rigging: shrouds from the channels out on the hull's side up to the masthead,
@@ -1139,8 +1156,19 @@ void main(){
   /* panels run parallel to the leech; the seam is a doubled, stitched band about an inch wide */
   float p = vUv.x * uPanels;
   float seam = smoothstep(0.030, 0.075, abs(fract(p) - 0.5) * 2.0);
-  vec3 flax = vec3(0.815, 0.775, 0.660);
+  /* ── ⚠ SAILCLOTH IS NOT WHITE ───────────────────────────────────────────────────────
+     Unbleached flax is a grey-buff, and a working sail is darker still: tanned or oiled against
+     rot on many rigs, and everywhere stained by salt, spray, tar from the rigging above it and
+     the smoke of the galley funnel. New white canvas exists for about one voyage. The old value
+     was 0.815 — near paper — which is most of why these read as bedsheets rather than as gear.
+     Weathering is stronger toward the FOOT and the leeches, because that is where spray reaches
+     and where the sail is handled. */
+  vec3 flax = vec3(0.680, 0.640, 0.545);
   float weather = noise(vUv * vec2(9.0, 5.0)) * 0.5 + noise(vUv * vec2(38.0, 21.0)) * 0.5;
+  /* salt and spray stain from the foot upward, and from the leeches inward */
+  float low  = smoothstep(0.35, 1.0, vUv.y);
+  float side = 1.0 - smoothstep(0.0, 0.22, min(vUv.x, 1.0 - vUv.x));
+  float grime = max(low * 0.55, side * 0.35) * (0.5 + 0.5 * weather);
   /* ── THE WEAVE ─────────────────────────────────────────────────────────────────────
      Flax canvas is a coarse cloth and at close range you see the threads: warp one way, weft
      the other, at different pitches because they are different yarns. Without it the sail is a
@@ -1149,6 +1177,7 @@ void main(){
   float weft = sin(vUv.y * 640.0) * 0.5 + 0.5;
   float weave = (warp * 0.55 + weft * 0.45);
   vec3 col = flax * (0.86 + 0.20 * weather) * (0.965 + 0.035 * weave);
+  col = mix(col, col * vec3(0.80, 0.77, 0.72), grime);
   col *= mix(1.10, 1.0, seam);                       // the seam is thicker, so it catches light
   /* ── CANVAS IS TRANSLUCENT, and that is half of why a sail reads as fabric ──────────
      A sail lit from behind GLOWS, and the spars and rigging in front of it show through as
@@ -1189,7 +1218,7 @@ void main(){
 
 /* A sail is a bellied surface, not a flat quad: it takes the shape the wind puts in it, and
    that curve is most of what makes a ship under sail look alive rather than papery. */
-function makeSail(x, yTop, width, height, mat, group, kind) {
+function makeSail(x, yTop, width, height, mat, group, kind, trim) {
   /* ── A SAIL IS NOT A RECTANGLE WITH A BULGE IN IT ────────────────────────────────────
      The first version was a PlaneGeometry with a symmetric hump pushed out of the middle, and
      it read as exactly that: a flat card, bent. Three things are wrong with it, and all three
@@ -1272,7 +1301,7 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
   /* ⚠ Square sails hang ACROSS the ship; lug, lateen and gaff sails lie ALONG it. This
      quarter-turn was applied unconditionally, which silently swung every fore-and-aft sail
      broadside-on. The rig type has to decide it. */
-  if (kind === 'square') m.rotation.y = Math.PI / 2;
+  if (kind === 'square') m.rotation.y = Math.PI / 2 + (trim || 0);
   m.userData.kind = kind;
   group.add(tag(m, 'sail'));
   return m;
