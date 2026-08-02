@@ -429,10 +429,28 @@ function setTexParams(t) {
   return t;
 }
 
-function loadTex(url) {
-  return new Promise((res, rej) => {
-    new THREE.TextureLoader().load(url, t => res(setTexParams(t)), undefined, rej);
-  });
+/* ── ⚠ NEVER LOAD A TEXTURE THROUGH AN HTMLImageElement ────────────────────────────────
+ * This used THREE.TextureLoader, which decodes through an <img>. An <img> in a HIDDEN OR
+ * THROTTLED TAB may never fire its load event and never settle its decode — so boot awaited
+ * the first monthly field forever, the splash never cleared, and the render loop never started.
+ * A background tab, a tab opened with cmd-click, or an automated browser pane all hit it.
+ *
+ * The project already knew this and had already fixed it once, in route.js, where the wind
+ * sampler was hanging for exactly the same reason. It was never fixed HERE — in the boot path,
+ * where it is worst, because nothing else can happen until it resolves. loadLevel twenty lines
+ * above has always done it correctly; this function is the one that was left behind.
+ *
+ * fetch + createImageBitmap has no such dependency on the document being visible. And
+ * colorSpaceConversion:'none' matters for the same reason it does for the tiles: these PNGs are
+ * DATA, and a colour transform would corrupt the low byte of a 16-bit field. */
+async function loadTex(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(url + ' → HTTP ' + r.status);
+  const bmp = await createImageBitmap(await r.blob(),
+                { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
+  const t = new THREE.CanvasTexture(bmp);
+  t.needsUpdate = true;
+  return setTexParams(t);
 }
 
 /* ── sun position ───────────────────────────────────────────────────────── */
@@ -533,7 +551,7 @@ async function boot() {
   resize();
   placeCamera();
   setP(1);
-  requestAnimationFrame(frame);
+  nextFrame(frame);
 
   setTimeout(() => {
     document.getElementById('splash').classList.add('gone');
@@ -1052,6 +1070,25 @@ function resize() {
   camera.updateProjectionMatrix();
 }
 
+/* ── ⚠ requestAnimationFrame DOES NOT FIRE IN A HIDDEN TAB ─────────────────────────────
+ * Browsers suspend rAF entirely when document.hidden is true. That is correct behaviour and
+ * good for battery — but this app calls nextFrame(frame) as the LAST step of boot,
+ * so a page loading in a background tab finished every fetch, built every buffer, and then
+ * froze one line short of running: splash still up, canvas black, progress bar at 100%.
+ * Switching to the tab did not help, because nothing had cleared the splash.
+ *
+ * It is also why the model could not be verified from an automated browser pane, which reports
+ * itself hidden permanently. A view you cannot look at is a view you cannot check, and this
+ * project's first rule is that a change is not done until it has been rendered and looked at.
+ *
+ * So: rAF when visible, a timer when not. The timer runs at ~20 fps rather than 60 — enough to
+ * finish boot, keep state consistent and let a screenshot capture something real, without
+ * spending a laptop battery animating a globe nobody is looking at. */
+function nextFrame(fn) {
+  if (document.hidden) setTimeout(() => fn(performance.now()), 50);
+  else requestAnimationFrame(fn);
+}
+
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -1061,17 +1098,17 @@ function frame(now) {
      entire app froze — including after you closed it again. */
   if (window.SHIPS_BT && window.SHIPS_BT.BT.on) {
     window.SHIPS_BT.btFrame(now, dt);
-    requestAnimationFrame(frame);
+    nextFrame(frame);
     return;
   }
   if (window.SHIPS_SW && window.SHIPS_SW.SW.on) {
     window.SHIPS_SW.swFrame(now);
-    requestAnimationFrame(frame);
+    nextFrame(frame);
     return;
   }
   if (window.SHIPS_YARD && window.SHIPS_YARD.YARD.on) {
     window.SHIPS_YARD.yardFrame(now);
-    requestAnimationFrame(frame);
+    nextFrame(frame);
     return;                                     // the globe is not being looked at
   }
 
@@ -1093,7 +1130,7 @@ function frame(now) {
   mat.uniforms.uCam.value.copy(camera.position);
 
   renderer.render(scene, camera);
-  requestAnimationFrame(frame);
+  nextFrame(frame);
 }
 
 /* ── ports, and the reachability the routing engine computes from them ─────────── */
