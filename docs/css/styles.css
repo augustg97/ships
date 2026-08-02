@@ -298,3 +298,24 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs .l{display:block;font-family:var(--serif);font-size:12.5px;color:var(--ink-faint);margin-top:2px}
 .fs.on .n{color:var(--ink)}
+
+
+/* ── the action ───────────────────────────────────────────────────────────────────────── */
+#battle{position:fixed;inset:0;z-index:62;background:#0b1720}
+#battle.hidden{display:none}
+#btCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+#btCanvas:active{cursor:grabbing}
+#btClose{position:absolute;top:16px;right:18px;z-index:3}
+#btBar{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;z-index:3;
+  width:min(680px,88vw);background:var(--panel);border:1px solid var(--edge);border-radius:3px;
+  padding:13px 17px 14px}
+#btBar .bh{display:flex;align-items:baseline;gap:14px;margin-bottom:9px}
+#btBar .d{font-family:var(--serif);font-size:21px;color:var(--ink)}
+#btBar .w{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--verdigris)}
+#btBar .w b{color:var(--ink);letter-spacing:.05em}
+#btBar .t{margin-left:auto;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-faint)}
+#btBar input[type=range]{width:100%}
+#btBar .bx{font-size:13px;line-height:1.55;color:var(--ink-dim);margin-top:9px;min-height:42px}
+#btBar .brow{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+#btBar .rng{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--brass)}

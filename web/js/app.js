@@ -959,6 +959,9 @@ function wireUI() {
     window.SHIPS_YARD.yardClose();
     if (v) window.SHIPS_SW.swOpen(v);
   };
+  document.getElementById('btOpen').onclick = () => {
+    if (S.camp) window.SHIPS_BT.btOpen(S.camp);
+  };
   document.getElementById('campClose').onclick = () => {
     clearCampaign();
     document.getElementById('campBar').classList.add('hidden');
@@ -1055,6 +1058,11 @@ function frame(now) {
   /* ⚠ EVERY EARLY EXIT FROM THIS FUNCTION MUST RE-ARM THE LOOP FIRST. A bare `return` here
      skipped requestAnimationFrame, so the Shipwright rendered exactly one frame and then the
      entire app froze — including after you closed it again. */
+  if (window.SHIPS_BT && window.SHIPS_BT.BT.on) {
+    window.SHIPS_BT.btFrame(now, dt);
+    requestAnimationFrame(frame);
+    return;
+  }
   if (window.SHIPS_SW && window.SHIPS_SW.SW.on) {
     window.SHIPS_SW.swFrame(now);
     requestAnimationFrame(frame);

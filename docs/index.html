@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ships — how we learned to cross the ocean</title>
 <meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
-<link rel="stylesheet" href="css/styles.css?v=1785668471">
-<meta name="data-version" content="1785668471">
+<link rel="stylesheet" href="css/styles.css?v=1785669271">
+<meta name="data-version" content="1785669271">
 </head>
 <body>
 
@@ -116,6 +116,7 @@
   <div class="cb-head">
     <span class="cb-day" id="campDay">—</span>
     <span class="cb-wind" id="campWind"></span>
+    <button id="btOpen" class="mini">Go down to the water</button>
     <button id="campClose" class="x">×</button>
   </div>
   <div class="gauge" id="campGauge"></div>
@@ -141,6 +142,26 @@
   <div id="swFleet"></div>
 </div>
 
+<!-- ── the action: a fleet engagement from the water ───────────────── -->
+<div id="battle" class="hidden">
+  <canvas id="btCanvas"></canvas>
+  <button id="btClose" class="mini">Back to the sea</button>
+  <div id="btBar">
+    <div class="bh">
+      <span class="d" id="btDate">—</span>
+      <span class="w" id="btWind"></span>
+      <span class="t" id="btTitle"></span>
+      <button id="btPlay" class="mini">Pause</button>
+    </div>
+    <div class="brow">
+      <span class="gauge" id="btGauge"></span>
+      <span class="rng" id="btRange"></span>
+    </div>
+    <input type="range" id="btDay" min="0" max="12" step="1" value="0">
+    <div class="bx" id="btText"></div>
+  </div>
+</div>
+
 <!-- ── about ───────────────────────────────────────────────────────── -->
 <div id="about" class="sheet hidden">
   <button id="aboutClose" class="x">×</button>
@@ -148,10 +169,11 @@
 </div>
 
 <script src="js/three.min.js"></script>
-<script src="js/hull.js?v=1785668471"></script>
-<script src="js/shipwright.js?v=1785668471"></script>
-<script src="js/yard.js?v=1785668471"></script>
-<script src="js/app.js?v=1785668471"></script>
-<script src="js/route.js?v=1785668471"></script>
+<script src="js/hull.js?v=1785669271"></script>
+<script src="js/shipwright.js?v=1785669271"></script>
+<script src="js/yard.js?v=1785669271"></script>
+<script src="js/battle.js?v=1785669271"></script>
+<script src="js/app.js?v=1785669271"></script>
+<script src="js/route.js?v=1785669271"></script>
 </body>
 </html>
