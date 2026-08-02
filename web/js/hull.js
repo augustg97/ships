@@ -1119,8 +1119,22 @@ void main(){
   float seam = smoothstep(0.030, 0.075, abs(fract(p) - 0.5) * 2.0);
   vec3 flax = vec3(0.815, 0.775, 0.660);
   float weather = noise(vUv * vec2(9.0, 5.0)) * 0.5 + noise(vUv * vec2(38.0, 21.0)) * 0.5;
-  vec3 col = flax * (0.86 + 0.20 * weather);
+  /* ── THE WEAVE ─────────────────────────────────────────────────────────────────────
+     Flax canvas is a coarse cloth and at close range you see the threads: warp one way, weft
+     the other, at different pitches because they are different yarns. Without it the sail is a
+     painted surface; with it, it is woven. */
+  float warp = sin(vUv.x * 900.0) * 0.5 + 0.5;
+  float weft = sin(vUv.y * 640.0) * 0.5 + 0.5;
+  float weave = (warp * 0.55 + weft * 0.45);
+  vec3 col = flax * (0.86 + 0.20 * weather) * (0.965 + 0.035 * weave);
   col *= mix(1.10, 1.0, seam);                       // the seam is thicker, so it catches light
+  /* ── CANVAS IS TRANSLUCENT, and that is half of why a sail reads as fabric ──────────
+     A sail lit from behind GLOWS, and the spars and rigging in front of it show through as
+     dark bars. A shell that only reflects can never look like cloth however it is shaped,
+     because cloth's defining optical property is that light gets through it. Wet-and-strained
+     canvas passes perhaps 12%; here the back face is lit by the same sun as the front. */
+  float back = max(0.0, dot(-normalize(vN), normalize(uSun)));
+  col += flax * pow(back, 1.6) * 0.42;
   /* bolt-rope and tabling darken the edges */
   float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
   col *= mix(0.78, 1.0, smoothstep(0.0, 0.035, edge));
@@ -1166,7 +1180,31 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
       /* draft: peak 40% aft of the luff, growing from head to foot */
       const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
       const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
-      pos.push(xw, y, Math.max(0, chord) * depth);
+      let z = Math.max(0, chord) * depth;
+
+      /* ── WHAT MAKES CLOTH LOOK LIKE CLOTH ─────────────────────────────────────────
+         A sail is not a smooth shell. It is a limp sheet held at a few points, and every
+         one of those points shows.
+
+         WRINKLES RADIATE FROM THE CORNERS. All the load in a square sail arrives through
+         the two clews and the bolt rope; the cloth between them is slack, so it creases in
+         fans running diagonally inward from each corner. That fan is the single most
+         recognisable thing about real canvas and no amount of smooth curvature substitutes
+         for it.
+
+         AND IT SAGS BETWEEN ITS FASTENINGS. The head is laced to the yard at intervals, not
+         continuously, so it scallops between the robands — a row of shallow bights along the
+         top edge that says "tied on" rather than "welded to". */
+      const cx = Math.min(u, 1 - u) * 2.0;              // 0 at a leech, 1 amidships
+      const cy = v;
+      const corner = Math.exp(-cx * 3.4) * Math.exp(-Math.abs(cy - 1.0) * 2.2)
+                   + Math.exp(-cx * 3.4) * Math.exp(-cy * 3.0);
+      const crease = Math.sin((u * 9.0 + v * 5.0) * Math.PI) * corner * width * 0.016;
+      const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
+      /* slack cloth low down luffs a little; taut cloth at the head does not */
+      const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
+      z += crease + roband + slack;
+      pos.push(xw, y, z);
       uvs.push(u, v);
     }
   }
@@ -1752,8 +1790,20 @@ function buildFunnel(S, group) {
   const h = S.beam * 1.55, r = S.beam * 0.115;
   const black = new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: 0.62, metalness: 0.30 });
   const band = new THREE.MeshStandardMaterial({ color: 0x8a3820, roughness: 0.55, metalness: 0.18 });
+  /* ⚠ FUNNELS MUST NOT STAND WHERE MASTS DO. Fixed stations put Great Eastern's two funnels
+     at 0.42 and 0.62 — exactly where two of her three masts are stepped — so they grew through
+     each other. On a real auxiliary steamer the uptakes are threaded into the GAPS between the
+     masts, because a boiler casing and a mast step cannot occupy the same frame. Take the mast
+     positions and sit in the widest holes between them. */
+  const mu = (S.masts || []).map(m => m.at).sort((a, b) => a - b);
+  const slots = [];
+  if (mu.length) {
+    for (let i = 0; i < mu.length - 1; i++) slots.push((mu[i] + mu[i + 1]) / 2);
+    slots.push(Math.min(0.92, mu[mu.length - 1] + 0.14));
+  }
   for (let i = 0; i < n; i++) {
-    const u = n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1));
+    const u = mu.length ? (slots[i % slots.length] || 0.50)
+                        : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
     const y = H.sheer(u);
     const g = new THREE.Group();
     const stack = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.93, r, h, 18), black);
