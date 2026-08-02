@@ -13,23 +13,25 @@ Working list for the `/loop` raising the Shipwright to the reference bar. Each i
 | 4 | voyaging canoe | crab-claw spars converged at the top — an inverted V | **fixed** |
 | 5 | carrack | dhow's hull-length-yard rule applied to a lateen **mizzen** → mizzen bigger than the mainsail | **fixed** |
 | 6 | every square rig | yards slung at 0.94 of their own segment → two-storey hole between deck and lowest sail | **fixed** |
-| 7 | voyaging canoe | card says **double hull**; only one hull is drawn, and no crossbeams or platform | **OPEN** |
+| 7 | voyaging canoe | card says **double hull**; only one hull is drawn, and no crossbeams or platform | **fixed** |
+| 8 | voyaging canoe | crab claw 4x too large — Pâris's kalia rule applied to Hōkūleʻa, whose 50 m² for the pair is on her own card. Spar now **solved from the attested area** (10.8 m) | **fixed** |
+| 9 | all fore-and-aft | crab-claw leech drawn straight; it is cut deeply **hollow**, which is what lets hull-length spars carry a small area | **fixed** |
+| 10 | Shipwright camera | fitted on the X extent alone — a 5.4 m-wide double canoe ran off screen | **fixed** |
 
 ## Still to verify by rendering
 
 trireme · Roman merchantman · sewn-plank dhow · treasure ship · cog · caravel · fluyt ·
 east indiaman · slave ship · clipper · steamer · container ship
 
-Round 1 verified: junk, voyaging canoe, carrack, ship of the line.
+Verified so far: junk, voyaging canoe, carrack, ship of the line.
 
 ## Detail gaps against the reference bar
 
 Ordered by how much each closes the gap per unit of work.
 
-1. **Guns run out through the ports.** The ports are shader-drawn; there is no barrel. On a
-   two-decker this is the single most obvious absence.
-2. **Running rigging** — braces, sheets, tacks, halyards, lifts. The model has standing rigging
-   only, and the references are a cobweb of running gear. Biggest single visual delta.
+1. ~~Guns run out through the ports~~ — **done**, placed off the shader's own port formula.
+2. ~~Stays, backstays and braces~~ — **done**, drawn from the spar positions actually placed.
+   Still missing: sheets, tacks, halyards, lifts, and the topmast/topgallant shroud sets.
 3. **Head and beakhead** — headrails, gammoning, the beakhead platform. The bow currently ends
    in a bare stem with a bowsprit stuck through it.
 4. **Stern** — transom, quarter galleries, stern lights. Currently the hull simply stops.
