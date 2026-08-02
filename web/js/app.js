@@ -954,10 +954,11 @@ function wireUI() {
   const yr = document.getElementById('yr');
   yr.addEventListener('input', () => { S.year = +yr.value; onTime(); });
   document.getElementById('eraAbout').onclick = openAbout;
+  wireTabs();
   document.getElementById('swOpen').onclick = () => {
     const v = window.SHIPS_YARD.YARD.spec;
     window.SHIPS_YARD.yardClose();
-    if (v) window.SHIPS_SW.swOpen(v);
+    if (v) { setView('ship'); window.SHIPS_SW.swOpen(v); }
   };
   document.getElementById('btOpen').onclick = () => {
     if (S.camp) window.SHIPS_BT.btOpen(S.camp);
@@ -1397,6 +1398,37 @@ function stepCampaign(dt) {
     ? 'English fleet holds the weather gauge'
     : 'Armada holds the weather gauge';
   gauge.className = 'gauge ' + (sep.dot(toWind) > 0 ? 'eng' : 'esp');
+}
+
+
+/* ── THE THREE VIEWS ────────────────────────────────────────────────────────────────────
+ * The Shipwright and the Action used to be reachable only from inside the Yard, three clicks
+ * down a path you had to already know about. A view nobody can find is a view that does not
+ * exist. They are top-level tabs now, and each one closes the others so there is exactly one
+ * live renderer at a time.
+ */
+function setView(v) {
+  document.querySelectorAll('#tabs .tab').forEach(b =>
+    b.classList.toggle('on', b.dataset.view === v));
+  if (window.SHIPS_YARD) window.SHIPS_YARD.yardClose();
+  if (window.SHIPS_SW) window.SHIPS_SW.swClose();
+  if (window.SHIPS_BT) window.SHIPS_BT.btClose();
+
+  if (v === 'ship') {
+    const all = ((APP.vessels && APP.vessels.vessels) || []).filter(x => x.hull);
+    const keep = window.SHIPS_SW.SW.spec;
+    window.SHIPS_SW.swOpen(keep && keep.hull ? keep : all.find(x => x.id === 'ship-of-the-line') || all[0]);
+  } else if (v === 'action') {
+    const b = ((APP.battles && APP.battles.battles) || []).find(x => x.campaign);
+    if (b) window.SHIPS_BT.btOpen(b);
+  }
+  APP.view = v;
+}
+
+function wireTabs() {
+  document.querySelectorAll('#tabs .tab').forEach(b => {
+    b.onclick = () => setView(b.dataset.view);
+  });
 }
 
 function openBattle(b) {

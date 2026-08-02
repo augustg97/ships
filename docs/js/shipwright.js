@@ -82,7 +82,6 @@ function swInit() {
   document.getElementById('swStage').addEventListener('input', e => {
     SW.stage = +e.target.value; swApplyStage();
   });
-  document.getElementById('swClose').onclick = swClose;
 }
 
 /* ── clicking a timber ─────────────────────────────────────────────────────────────── */
@@ -166,7 +165,13 @@ function swOpen(vessel) {
   if (!vessel || !vessel.hull) return false;
   if (SW.ship) { SW.scene.remove(SW.ship); }
   SW.spec = vessel;
-  SW.ship = window.SHIPS_HULL.buildShip(vessel.hull);
+  /* ── THE FINE BUILD ────────────────────────────────────────────────────────────────
+     The Shipwright gets its OWN model of the ship, at four times the stations and twice the
+     waterlines, with members the globe and the Yard have no use for: stem and sternpost as
+     separate timbers, wales, rudder, channels, and every frame as its own pickable object.
+     Separate model, much higher detail — but generated from the SAME spec and the same
+     surfacePoint(), so it is a finer rendering of one ship rather than a second ship. */
+  SW.ship = window.SHIPS_HULL.buildShip(vessel.hull, { fine: true });
   SW.scene.add(SW.ship);
   SW.sel = null;
 
@@ -196,6 +201,7 @@ function swOpen(vessel) {
   swApplyStage();
   swSelect(null);
   swBuildFleetStrip();
+  swBuildList();
   SW.on = true;
   swResize();
   return true;
@@ -222,6 +228,27 @@ function swBuildFleetStrip() {
 function swClose() {
   SW.on = false;
   document.getElementById('shipwright').classList.add('hidden');
+}
+
+/* ── the Shipwright's OWN vessel list ──────────────────────────────────────────────────
+   Its own list, not the globe's. This view is about the ship as an object — so it is ordered
+   by DATE, and reading down it is the argument the project exists to make: the same handful of
+   problems solved over and over, each time a little bigger. */
+function swBuildList() {
+  const el = document.getElementById('swListBody');
+  const all = ((APP.vessels && APP.vessels.vessels) || []).filter(v => v.hull)
+    .slice().sort((a, b) => (a.from || 0) - (b.from || 0));
+  el.innerHTML = '';
+  all.forEach(v => {
+    const b = document.createElement('button');
+    b.className = 'sv' + (SW.spec && SW.spec.id === v.id ? ' on' : '');
+    const yr = v.from === undefined ? '' :
+      (v.from < 0 ? Math.abs(v.from) + ' BC' : String(v.from));
+    b.innerHTML = '<span class="n">' + v.name + '</span>'
+                + '<span class="m">' + yr + (yr ? ' · ' : '') + v.hull.loa.toFixed(0) + ' m</span>';
+    b.onclick = () => swOpen(v);
+    el.appendChild(b);
+  });
 }
 
 function swResize() {

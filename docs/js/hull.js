@@ -155,13 +155,14 @@ function buildKeelGeometry(S) {
   return g;
 }
 
-function buildFramesGeometry(S, NF = 26) {
+function buildFramesGeometry(S, NF = 26, onlyU) {
   const H = hullSurface(S);
   const pos = [], idx = [];
-  const NV = 26, half = 0.016 * S.lwl / 2;          // the room-and-space of one frame
+  const NV = 26, half = 0.016 * S.lwl / 2;
+  if (NF === 1 && onlyU === undefined) NF = 1;          // the room-and-space of one frame
   let base = 0;
   for (let f = 0; f < NF; f++) {
-    const u = 0.055 + (f / (NF - 1)) * 0.89;
+    const u = onlyU !== undefined ? onlyU : 0.055 + (f / (NF - 1)) * 0.89;
     for (let sgn = -1; sgn <= 1; sgn += 2) {        // both sides of the ship
       for (let j = 0; j <= NV; j++) {
         const v = j / NV;
@@ -177,6 +178,99 @@ function buildFramesGeometry(S, NF = 26) {
       base += (NV + 1) * 2;
     }
   }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
+
+/* ── THE SHIPWRIGHT'S MODEL: THE SAME SHIP, BUILT FINER ────────────────────────────────
+ * The globe needs a token, the Yard needs a silhouette, and the Shipwright needs an object you
+ * can put your face against. These are separate models — deliberately, at a much higher level
+ * of detail — but they are generated from the SAME vessel spec and the SAME surfacePoint(), so
+ * detail can go up without the ship becoming a different ship. That is the distinction worth
+ * holding: more members and finer tessellation is detail; a second set of dimensions would be
+ * drift.
+ *
+ * What the fine build adds, all of it derived rather than drawn:
+ *   · the hull at 4x the stations and 2x the waterlines
+ *   · the STEM and STERNPOST as their own timbers, because they are their own timbers
+ *   · WALES — the thickened strakes that stop a long wooden hull from hogging
+ *   · a RUDDER on the sternpost, with its tiller
+ *   · CHANNELS, the shelves that push the shrouds out clear of the topsides
+ *   · every FRAME as its own object, so you can pick one out of the skeleton
+ */
+function buildStemGeometry(S, aft) {
+  const H = hullSurface(S);
+  const pos = [], idx = [];
+  const N = 26, sided = 0.055 * S.beam / 2;
+  /* the timber follows the ship's own profile at the very end of the hull */
+  for (let i = 0; i <= N; i++) {
+    const f = i / N;
+    const u = aft ? 1 - (1 - f) * 0.10 : f * 0.10;
+    const v = aft ? f : 1 - f;
+    const p = surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
+    const t = 0.05 * S.draught;
+    pos.push(p[0] - t, p[1], -sided, p[0] - t, p[1], sided,
+             p[0] + t, p[1], sided,  p[0] + t, p[1], -sided);
+  }
+  for (let i = 0; i < N; i++) {
+    const a = i * 4, b = a + 4;
+    for (let f = 0; f < 4; f++) {
+      const c = (f + 1) % 4;
+      idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
+/* a wale is a band of the hull surface, pushed proud of it */
+function buildWaleGeometry(S, v0, thick) {
+  const H = hullSurface(S);
+  const pos = [], idx = [];
+  const NU = 120;
+  let base = 0;
+  for (let sgn = -1; sgn <= 1; sgn += 2) {
+    for (let i = 0; i <= NU; i++) {
+      const u = 0.012 + (i / NU) * 0.976;
+      for (let k = -1; k <= 1; k += 2) {
+        const p = surfacePoint(S, H, u, v0 + k * 0.5 * thick);
+        const out = 1.018;                       // proud of the planking
+        pos.push(p[0], p[1], sgn * p[2] * out);
+      }
+    }
+    for (let i = 0; i < NU; i++) {
+      const a = base + i * 2;
+      idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+    }
+    base += (NU + 1) * 2;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
+function buildRudderGeometry(S) {
+  const H = hullSurface(S);
+  const p = surfacePoint(S, H, 1.0, 0);
+  const top = H.sheer(1.0) * 0.35;
+  const depth = -S.draught * 0.92;
+  const w = 0.030 * S.beam, chord = S.lwl * 0.055;
+  const pos = [], idx = [];
+  /* a plate on the sternpost: wider at the foot, raked with the post */
+  const pts = [[p[0], top], [p[0] + chord * 0.55, top],
+               [p[0] + chord, depth], [p[0], depth]];
+  pts.forEach(q => pos.push(q[0], q[1], -w, q[0], q[1], w));
+  for (let i = 0; i < 4; i++) {
+    const a = i * 2, b = ((i + 1) % 4) * 2;
+    idx.push(a, a + 1, b, b, a + 1, b + 1);
+  }
+  idx.push(0, 2, 4, 0, 4, 6, 1, 5, 3, 1, 7, 5);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx); g.computeVertexNormals();
@@ -884,6 +978,11 @@ const PARTS = {
               what: 'The skin. In carvel work the planks meet edge to edge on the frames and the '
                   + 'seams are caulked; in clinker work they overlap and are riveted to each '
                   + 'other, and the shell is built first. Carvel can be scaled up; clinker cannot.' },
+  channel:  { stage: 5, name: 'Channels',
+              what: 'Shelves bolted to the outside of the hull at deck level. They exist to push '
+                  + 'the shrouds OUTBOARD, widening the angle at which the standing rigging '
+                  + 'pulls down on the masthead. A wider base means a mast that can carry more '
+                  + 'sail without being wrung out of the ship.' },
   wale:     { stage: 2, name: 'Wales',
               what: 'Thickened longitudinal strakes running the length of the hull — the girders '
                   + 'that stop a long wooden ship from hogging, drooping at the ends under its '
@@ -931,7 +1030,8 @@ function tag(o, key, extra) {
 
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
-function buildShip(S) {
+function buildShip(S, opts) {
+  const FINE = !!(opts && opts.fine);
   const group = new THREE.Group();
 
   const sun = new THREE.Vector3(0.5, 0.72, 0.42).normalize();
@@ -957,9 +1057,36 @@ function buildShip(S) {
      The Shipwright hides and shows these by their tagged stage. */
   const timber = new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
   group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
-  group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
+  if (FINE) {
+    /* every frame its own object, so one rib can be picked out of the skeleton */
+    for (let f = 0; f < 30; f++)
+      group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
+                    'frames', 'Frame ' + (f + 1) + ' of 30'));
+    group.add(tag(new THREE.Mesh(buildStemGeometry(S, false), timber), 'stempost', 'Stem'));
+    group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'Sternpost'));
+    const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
+    group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
+    group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026), waleMat), 'wale'));
+    group.add(tag(new THREE.Mesh(buildRudderGeometry(S), timber), 'rudder'));
+    /* channels: a shelf outboard of each mast, on both sides, which is what the shrouds set
+       up to. Positioned from the mast stations, so they cannot land in the wrong place. */
+    const HS = hullSurface(S);
+    (S.masts || []).forEach(mk => {
+      if (mk.rig !== 'square') return;
+      for (const sgn of [-1, 1]) {
+        const p = surfacePoint(S, HS, mk.at, 0.985);
+        const ch = new THREE.Mesh(
+          new THREE.BoxGeometry(S.lwl * 0.075, S.beam * 0.012, S.beam * 0.055), timber);
+        ch.position.set(p[0], p[1] * 0.97, sgn * (p[2] + S.beam * 0.026));
+        group.add(tag(ch, 'channel'));
+      }
+    });
+  } else {
+    group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
+  }
 
-  const hull = new THREE.Mesh(buildHullGeometry(S), hullMat);
+  const hull = new THREE.Mesh(
+    FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
   group.add(tag(hull, 'planking'));
 
   const deckMat = new THREE.MeshLambertMaterial({ color: 0x9a8663, side: THREE.DoubleSide });

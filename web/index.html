@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ships — how we learned to cross the ocean</title>
 <meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
-<link rel="stylesheet" href="css/styles.css?v=1785669271">
-<meta name="data-version" content="1785669271">
+<link rel="stylesheet" href="css/styles.css?v=1785670080">
+<meta name="data-version" content="1785670080">
 </head>
 <body>
 
@@ -29,6 +29,17 @@
 </div>
 
 <!-- ── readout ─────────────────────────────────────────────────────── -->
+<!-- ── TABS ─────────────────────────────────────────────────────────
+     Three views of the same evidence, each reachable at any time. The Shipwright and the
+     Action were previously buried inside the Yard, which meant that unless you already knew
+     they existed you could not find them. A view nobody can reach is a view that does not
+     exist. -->
+<nav id="tabs">
+  <button class="tab on" data-view="sea"><b>The Sea</b><span>the ocean as a machine</span></button>
+  <button class="tab" data-view="ship"><b>The Shipwright</b><span>take a ship apart</span></button>
+  <button class="tab" data-view="action"><b>The Action</b><span>a fleet from the water</span></button>
+</nav>
+
 <div id="readout" class="panel">
   <div class="ro-era" id="roEra">—</div>
   <div class="ro-date" id="roDate">—</div>
@@ -126,7 +137,6 @@
 <!-- ── the shipwright: take a ship apart, and put it together ──────── -->
 <div id="shipwright" class="hidden">
   <canvas id="swCanvas"></canvas>
-  <button id="swClose" class="mini">Back to the sea</button>
   <div id="swLeft">
     <h2 id="swTitle"></h2>
     <div class="sub" id="swSub"></div>
@@ -139,13 +149,16 @@
     <input type="range" id="swStage" min="0" max="7" step="1" value="7">
     <div class="bw" id="swStageWhat"></div>
   </div>
+  <div id="swList">
+    <div class="hd">The fleet</div>
+    <div class="ls" id="swListBody"></div>
+  </div>
   <div id="swFleet"></div>
 </div>
 
 <!-- ── the action: a fleet engagement from the water ───────────────── -->
 <div id="battle" class="hidden">
   <canvas id="btCanvas"></canvas>
-  <button id="btClose" class="mini">Back to the sea</button>
   <div id="btBar">
     <div class="bh">
       <span class="d" id="btDate">—</span>
@@ -169,11 +182,11 @@
 </div>
 
 <script src="js/three.min.js"></script>
-<script src="js/hull.js?v=1785669271"></script>
-<script src="js/shipwright.js?v=1785669271"></script>
-<script src="js/yard.js?v=1785669271"></script>
-<script src="js/battle.js?v=1785669271"></script>
-<script src="js/app.js?v=1785669271"></script>
-<script src="js/route.js?v=1785669271"></script>
+<script src="js/hull.js?v=1785670080"></script>
+<script src="js/shipwright.js?v=1785670080"></script>
+<script src="js/yard.js?v=1785670080"></script>
+<script src="js/battle.js?v=1785670080"></script>
+<script src="js/app.js?v=1785670080"></script>
+<script src="js/route.js?v=1785670080"></script>
 </body>
 </html>

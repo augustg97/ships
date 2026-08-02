@@ -125,7 +125,6 @@ function btInit() {
     BT.dist = Math.max(90, Math.min(6000, BT.dist * (1 + Math.sign(e.deltaY) * 0.11)));
   }, { passive: false });
 
-  document.getElementById('btClose').onclick = btClose;
   document.getElementById('btPlay').onclick = () => {
     BT.playing = !BT.playing;
     document.getElementById('btPlay').textContent = BT.playing ? 'Pause' : 'Play';
