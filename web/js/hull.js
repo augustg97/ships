@@ -1082,6 +1082,16 @@ const PARTS = {
               what: 'The deck between the hulls, and the only flat space aboard. It carries the '
                   + 'crew, the water, the fire hearth, the breeding pigs and the seed stock — '
                   + 'and it is what made the Pacific settleable rather than merely crossable.' },
+  container:{ stage: 3, name: 'Containers',
+              what: 'The cargo IS the architecture. Eight feet by eight foot six by twenty or '
+                  + 'forty, with corner castings identical everywhere on earth since 1968 — and '
+                  + 'that standard, not the ship, is the invention. The hull is a rack built to '
+                  + 'fit it. Loading a break-bulk freighter took a gang of dockers several days; '
+                  + 'the same tonnage in boxes takes hours.' },
+  bridge:   { stage: 3, name: 'Accommodation and bridge',
+              what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
+                  + 'over a stack that may be twelve boxes high, which is why it stands where it '
+                  + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
   funnel:   { stage: 3, name: 'Funnel',
               what: 'Not decoration and not arbitrary: its HEIGHT is set by the draught a boiler '
                   + 'needs, because the taller the stack the harder it pulls air through the '
@@ -1191,6 +1201,12 @@ function tag(o, key, extra) {
  * not drawn for.
  */
 function buildFittings(S, group, mats) {
+  /* ⚠ THESE ARE TIMBER-SHIP FITTINGS AND THEY WERE BEING PUT ON EVERYTHING. A 400 m container
+     ship was carrying wooden hatch gratings, a capstan turned by hand-spikes, wales to stop her
+     hogging and a ship's boat stowed on the beams. Same failure as the carvel label: a routine
+     that is right for most of the fleet, applied to all of it. Steel and iron hulls get their
+     own fittings below. */
+  const timberShip = !(S.build === 'iron' || S.build === 'steel');
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckAtU = u => H.sheer(u);
@@ -1244,13 +1260,13 @@ function buildFittings(S, group, mats) {
     }
     return tag(gg, 'grating');
   };
-  [0.30, 0.50, 0.70].forEach(u => {
+  if (timberShip) [0.30, 0.50, 0.70].forEach(u => {
     const w = halfAtU(u) * 0.85;
     group.add(gratingAt(u, w, L * 0.055));
   });
 
   /* ── the CAPSTAN: the machine that made a big ship workable by hand ───────────────── */
-  {
+  if (timberShip) {
     const u = 0.62, y = deckAtU(u);
     const cg = new THREE.Group();
     const drum = new THREE.Mesh(
@@ -1270,7 +1286,7 @@ function buildFittings(S, group, mats) {
   }
 
   /* ── the SHIP'S BOAT, stowed on the beams over the main hatch ─────────────────────── */
-  if (S.lwl > 25) {
+  if (timberShip && S.lwl > 25) {
     const u = 0.46, y = deckAtU(u);
     const bl = L * 0.16, bb = bl * 0.30;
     const bg = new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2);
@@ -1437,6 +1453,52 @@ function buildFunnel(S, group) {
   }
 }
 
+
+/* ── WHAT A BOX BOAT CARRIES INSTEAD ───────────────────────────────────────────────────
+ * The container ship is the one hull here whose cargo is its own architecture. Everything
+ * above her deck is the boxes, stacked to a standard that is the actual invention: 8 ft by
+ * 8 ft 6 in by 20 or 40 ft, corner castings identical worldwide since 1968. The ship is a
+ * rack. The accommodation is pushed to one end so nothing blocks the crane runs, and the
+ * bridge has to see over a stack that may be twelve high — which is why it stands where it does
+ * and why modern boats have moved it forward of the boxes rather than behind them.
+ */
+function buildContainers(S, group) {
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const TEU_L = 12.19, TEU_W = 2.44, TEU_H = 2.59;      // the 40-ft box, in metres
+  const cols = Math.max(4, Math.floor(B * 0.86 / TEU_W));
+  const pal = [0xb0442e, 0x2f5f86, 0x8a8f93, 0x3f7a55, 0xa8792c, 0x6a4a72];
+  const mats = pal.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.74, metalness: 0.14 }));
+  const box = new THREE.BoxGeometry(TEU_L * 0.97, TEU_H * 0.95, TEU_W * 0.94);
+  const stack = new THREE.Group();
+  let n = 0;
+  for (let bay = 0; bay < Math.floor(L * 0.66 / (TEU_L * 1.06)); bay++) {
+    const x = -L * 0.40 + bay * TEU_L * 1.06;
+    const high = 5 + ((bay * 3) % 3);                    // stows are not level; they never are
+    for (let c = 0; c < cols; c++)
+      for (let h = 0; h < high; h++) {
+        const m = new THREE.Mesh(box, mats[(bay * 7 + c * 3 + h) % mats.length]);
+        m.position.set(x, H.sheer(0.5) + TEU_H * (h + 0.5), (c - (cols - 1) / 2) * TEU_W * 1.02);
+        stack.add(m); n++;
+      }
+  }
+  group.add(tag(stack, 'container'));
+
+  /* the accommodation block and the funnel above the engine, both right aft */
+  const white = new THREE.MeshStandardMaterial({ color: 0xd8d8d4, roughness: 0.55 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2a2d31, roughness: 0.6, metalness: 0.25 });
+  const hs = H.sheer(0.5);
+  const acc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, TEU_H * 7, B * 0.72), white);
+  acc.position.set(L * 0.345, hs + TEU_H * 3.5, 0);
+  group.add(tag(acc, 'bridge'));
+  const br = new THREE.Mesh(new THREE.BoxGeometry(L * 0.070, TEU_H * 1.1, B * 0.90), dark);
+  br.position.set(L * 0.345, hs + TEU_H * 7.5, 0);
+  group.add(tag(br, 'bridge'));
+  const fn = new THREE.Mesh(new THREE.BoxGeometry(L * 0.035, TEU_H * 3.2, B * 0.26), dark);
+  fn.position.set(L * 0.405, hs + TEU_H * 8.2, 0);
+  group.add(tag(fn, 'funnel'));
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -1473,9 +1535,14 @@ function buildShip(S, opts) {
                     'frames', 'Frame ' + (f + 1) + ' of 30'));
     group.add(tag(new THREE.Mesh(buildStemGeometry(S, false), timber), 'stempost', 'Stem'));
     group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'Sternpost'));
-    const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
-    group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
-    group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026), waleMat), 'wale'));
+    /* wales are a TIMBER remedy for hogging — thickened strakes acting as girders. A steel
+       hull's own plating is the girder, and putting wales on one is like bracing a bridge with
+       rope. */
+    if (S.build !== 'iron' && S.build !== 'steel') {
+      const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
+      group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
+      group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026), waleMat), 'wale'));
+    }
     group.add(tag(new THREE.Mesh(buildRudderGeometry(S), timber), 'rudder'));
     /* channels: a shelf outboard of each mast, on both sides, which is what the shrouds set
        up to. Positioned from the mast stations, so they cannot land in the wrong place. */
@@ -1534,6 +1601,7 @@ function buildShip(S, opts) {
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
   if (FINE) buildFunnel(S, group);
+  if (FINE && S.containers) buildContainers(S, group);
 
   /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
      The card has always said "Austronesian double hull" and the model drew one hull, which is

@@ -166,6 +166,14 @@ const TRADITION = {
            s2: ['Plated', 'Plates riveted to the frames, lapped and caulked. A riveted seam is '
                         + 'watertight and, unlike a caulked one, does not need re-caulking every '
                         + 'few years — which is a large part of why iron won.'] },
+  steel:    { label: 'Steel: frames, then welded plate',
+           s1: ['Frames erected', 'Steel frames on a keel plate — and not one at a time. A modern '
+                                + 'hull is assembled from prefabricated BLOCKS welded up elsewhere '
+                                + 'and craned together, which is why a 400 m ship takes months '
+                                + 'rather than years.'],
+           s2: ['Plated', 'Welded plate, not riveted. A welded seam is continuous, so the hull is '
+                        + 'one member instead of thousands of plates lapped together — and that '
+                        + 'continuity is what lets a ship be 400 m long at all.'] },
   bulkhead: { label: 'Bulkhead-first (Chinese): bulkheads, then planking',
            s1: ['Bulkheads raised', 'Transverse bulkheads go up first. They are structure and '
                                   + 'subdivision at once — which gave the junk WATERTIGHT '
@@ -173,6 +181,25 @@ const TRADITION = {
                                   + 'one compartment and the ship swims home.'],
            s2: ['Planked', 'The planking is fastened to the bulkheads rather than to ribs.'] },
 };
+
+/* ── A SHIP WITH NO RIG IS NOT "BENT ON" ───────────────────────────────────────────────
+   The build stages are a sailing ship's story: masts, rigging, yards, canvas. Run a container
+   ship through them and the last panel congratulates her on being able to sail. Where there is
+   no rig, the same four stages describe what actually goes in — the machinery that replaced it.
+   Same slider, same stage numbers, different subject, because that IS the succession. */
+const ENGINE_STAGES = [
+  null, null, null,
+  ['Decked', 'The strength deck closes the box. On a container ship it is mostly hatch, because '
+           + 'the hull is a rack and the cargo has to drop straight in.'],
+  ['Machinery in', 'The engine and shafting go in before the ship is closed up — they are far too '
+                 + 'big to fit through any opening afterwards. A modern low-speed diesel is three '
+                 + 'storeys tall and turns at about 100 rpm, straight onto the shaft, no gearbox.'],
+  ['Accommodation', 'The house and bridge, pushed to one end so nothing blocks the crane runs.'],
+  ['Funnel and uptakes', 'What a mast used to be, doing what a mast never did: taking the exhaust '
+                       + 'of about 80 megawatts out of the top of the ship.'],
+  ['Loaded', 'The boxes. Eight feet by eight foot six by twenty or forty, corner castings identical '
+           + 'everywhere on earth — and the standard, not the ship, is the invention.'],
+];
 
 function swApplyStage() {
   if (!SW.ship) return;
@@ -195,7 +222,10 @@ function swApplyStage() {
     SW.viewX = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z);
   }
 
-  const nm = SW.stage === 1 ? trad.s1 : SW.stage === 2 ? trad.s2 : STAGE_NAMES[SW.stage];
+  const engine = !(SW.spec.hull.masts || []).length;
+  const nm = SW.stage === 1 ? trad.s1
+           : SW.stage === 2 ? trad.s2
+           : (engine && ENGINE_STAGES[SW.stage]) || STAGE_NAMES[SW.stage];
   document.getElementById('swStageName').textContent = nm[0];
   document.getElementById('swStageWhat').textContent = nm[1];
   document.getElementById('swOrder').textContent = trad.label;

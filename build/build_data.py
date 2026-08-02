@@ -338,7 +338,7 @@ HULLS = {
 
   # MSC Irina class, 2023: 399.9 × 61.3 m, 24,346 TEU. Cb 0.62–0.72 for a container liner
   # (MAN, *Basic Principles of Ship Propulsion*, Table 1.01).
-  "container": hull(loa=399.9, lwl=383.0, beam=61.3, draught=16.0, freeboard=30.0, cm=0.98,
+  "container": hull(build="steel", containers=True, loa=399.9, lwl=383.0, beam=61.3, draught=16.0, freeboard=30.0, cm=0.98,
               wlPower=4.6, stemFineness=0.06, sternFineness=0.30,
               forefoot=0.18, run=0.22, riseF=0.20, riseA=0.14,
               sheerBow=2.2, sheerStern=0.0, tumblehome=0.0, strakes=16,
