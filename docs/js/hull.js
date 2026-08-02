@@ -859,12 +859,25 @@ function buildRig(S, group, mats, FINE) {
           yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
         }
         yg.computeVertexNormals();
-        ym.rotation.x = Math.PI / 2;
-        ym.rotation.z = TRIM;   // braced round; z because the yard is already turned onto X
+        /* ── ⚠ THE YARD WAS NEVER ACTUALLY BRACED. ────────────────────────────────────────
+           `rotation.x = PI/2` lays the cylinder's axis onto Z. `rotation.z` then turns it about
+           the very axis it now lies along — a NO-OP, and the comment that used to sit here
+           asserted the opposite. So the canvas swung round to the trim angle and the spar it
+           hangs from stayed square, which is why the yard arms stood out past the cloth as bare
+           sticks in the air. A rotation composed as Euler angles is only as good as the order it
+           is read in; composed as quaternions it says what it does. Lay the spar athwartships
+           FIRST, then brace the whole thing about the vertical — which is the order a real crew
+           works in, and the only one that keeps the yard in the sail. */
+        ym.quaternion
+          .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
+          .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
         ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
         group.add(tag(ym, 'yard'));
-        /* recorded from the spar that was actually placed, so the braces lead to real yard arms */
-        spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2 });
+        /* recorded from the spar that was actually placed, so the braces lead to real yard arms:
+           a braced yard's arms swing FORE AND AFT as well as out, and the brace is the rope that
+           holds them there, so it has to be led to where the arm now is. */
+        spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
+                     armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
         /* ── THE DROP IS THE GAP TO THE TIER BELOW ────────────────────────────────
            Which is what the comment here always said, while the code used a fixed fraction of
            the mast segment and left the tiers floating apart from each other. A square sail
@@ -1052,18 +1065,28 @@ function buildRig(S, group, mats, FINE) {
              the waterline. The battens, computed separately, were in the right place — which
              is exactly how the two disagreed. One number, used twice, is the fix. */
       const footY = base + lower * 0.14;             // the boom lies just above the deck
+      /* ── ⚠ A BATTEN IS IN THE SAIL, NOT NEAR IT. ──────────────────────────────────────
+         The canvas was sheeted out to leeward about its mast and the battens were left where
+         they had been built — amidships, along the hull. A lug sail swung 29 degrees and then
+         translated along its own axis puts its centre nearly half a sail-width to leeward of
+         spars that never moved, so five straight rods stood out over open water with no cloth
+         on them. The battens are sewn into pockets ACROSS the sail; they are the one part of a
+         junk rig that cannot possibly be somewhere else. So the whole sail — boom, battens,
+         yard and canvas — is one group hung on the mast, and sheeting it is a single rotation
+         of that group. Nothing in it can now disagree with anything else in it. */
+      const lug = new THREE.Group();
+      lug.position.set(x, 0, 0);
+      lug.rotation.y = -TRIM * 1.5;
+      group.add(lug);
       for (let i = 0; i <= nb; i++) {
         const yy = footY + sailH * (i / nb);
         const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 14);
         const bm = new THREE.Mesh(bg, woodDark);
-        bm.rotation.z = Math.PI / 2;                 // along the hull, not across it
-        bm.position.set(x + off, yy, 0);
-        group.add(tag(bm, 'yard', i === 0 ? 'Boom' : (i === nb ? 'Yard' : 'Batten ' + i)));
+        bm.rotation.z = Math.PI / 2;                 // along the sail's chord, not across it
+        bm.position.set(off, yy, 0);
+        lug.add(tag(bm, 'yard', i === 0 ? 'Boom' : (i === nb ? 'Yard' : 'Batten ' + i)));
       }
-      /* a lug sail is sheeted out to leeward, not held amidships — it swings about its mast */
-      const js = makeSail(x + off, footY + sailH, sailW, sailH, canvas, group, 'junk');
-      js.position.x = x; js.rotation.y = -TRIM * 1.5;
-      js.translateX(off);
+      const js = makeSail(off, footY + sailH, sailW, sailH, canvas, lug, 'junk');
       sails.push(js);
     }
 
@@ -1828,7 +1851,8 @@ function buildRigging(S, group, rope, spars, mastTops) {
     const bu = Math.min(0.97, sp.u + 0.26);
     const bx = (bu - 0.5) * L, by = deckAt(bu);
     for (const sgn of [-1, 1])
-      group.add(tag(line([sp.x, sp.y, sgn * sp.half], [bx, by + sp.half * 0.10, sgn * sp.half * 0.30]),
+      group.add(tag(line([sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half)],
+                         [bx, by + sp.half * 0.10, sgn * sp.half * 0.30]),
                     'brace'));
   });
 }
