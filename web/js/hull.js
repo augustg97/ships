@@ -615,8 +615,15 @@ function buildRig(S, group, mats, FINE) {
     const top = lower * 0.60, tg = top * 0.50;
     let y = base;
     let prevYard = base + lower * 0.13;   // the courses' foot clears the deck by this
+    /* ⚠ A JUNK MAST IS A SINGLE POLE. Only a square rig is built up in fidded sections —
+       lower mast, topmast, topgallant — because only a square rig needs to send its upper
+       spars down in heavy weather. A junk reefs by dropping battens onto the boom and never
+       sends anything down, so it steps one unstayed pole and the sail hoists to its head.
+       Falling through to the square-rig case gave the treasure ship a 64 m mast carrying a
+       sail that stopped halfway up it. */
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
-               : mk.rig === 'crabclaw' ? [lower] : [lower, top, tg];
+               : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
+               : [lower, top, tg];
     const radii = [B * 0.030, B * 0.020, B * 0.013];
 
     segs.forEach((seg, si) => {

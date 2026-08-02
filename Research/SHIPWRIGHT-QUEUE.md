@@ -17,13 +17,27 @@ Working list for the `/loop` raising the Shipwright to the reference bar. Each i
 | 8 | voyaging canoe | crab claw 4x too large — Pâris's kalia rule applied to Hōkūleʻa, whose 50 m² for the pair is on her own card. Spar now **solved from the attested area** (10.8 m) | **fixed** |
 | 9 | all fore-and-aft | crab-claw leech drawn straight; it is cut deeply **hollow**, which is what lets hull-length spars carry a small area | **fixed** |
 | 10 | Shipwright camera | fitted on the X extent alone — a 5.4 m-wide double canoe ran off screen | **fixed** |
+| 11 | junk, treasure ship | junk rigs fell through to the SQUARE-rig mast case and got three fidded segments. A junk steps ONE unstayed pole. The treasure ship carried a 64 m mast with a sail stopping halfway up it; now 39.7 m with the sail head at the truck | **fixed** |
 
-## Still to verify by rendering
+## Verification
 
-trireme · Roman merchantman · sewn-plank dhow · treasure ship · cog · caravel · fluyt ·
-east indiaman · slave ship · clipper · steamer · container ship
+**An automated screen now covers the whole class** rather than relying on catching each one by
+eye. It builds every vessel and asserts, per ship:
 
-Verified so far: junk, voyaging canoe, carrack, ship of the line.
+- no sail dips below `freeboard * 0.35` — the junk's half-submerged canvas would have tripped this
+- no sail projects past `±0.72 × LOA` — catches canvas flying clear of the hull
+- `rigTop / LOA` inside 0.30–1.35, and total span under 1.55 × LOA
+- **sail orientation matches rig type** — square athwartships, junk/lateen/crab-claw fore-and-aft.
+  This is the check that would have caught the junk directly.
+- for junk rigs, sail head within a metre of the masthead
+
+All 16 pass. The only flag is the container ship's `rigTop/LOA = 0.09`, which is correct — she
+has no rig, only a superstructure.
+
+Numbers cannot judge proportion, so ships still get looked at. **Rendered and checked:** junk,
+voyaging canoe, carrack, ship of the line, treasure ship.
+**Still to look at:** trireme · Roman merchantman · dhow · cog · caravel · fluyt · east indiaman ·
+slave ship · clipper · steamer · container ship.
 
 ## Detail gaps against the reference bar
 
