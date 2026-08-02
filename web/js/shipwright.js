@@ -295,8 +295,12 @@ function swFillCard(v) {
   const cap = [
     [bestV.toFixed(1) + ' kn', 'best speed'],
     [bestA + '°', 'at this angle off the wind'],
-    [(P.beatLight !== undefined ? P.beatLight + '°' : '—'), 'closest, light airs'],
-    [(P.beatHard !== undefined ? P.beatHard + '°' : '—'), 'closest, blowing hard'],
+    /* ⚠ "made good" is in the LABEL, not in a paragraph underneath. The note used to spend
+       three lines explaining that these are course-made-good rather than heading, and restating
+       the numbers while it did — which made the prose a second copy of the figures, and it had
+       already drifted from them. Put the meaning where the number is. */
+    [(P.beatLight !== undefined ? P.beatLight + '°' : '—'), 'closest made good, light airs'],
+    [(P.beatHard !== undefined ? P.beatHard + '°' : '—'), 'closest made good, blowing hard'],
   ];
   document.getElementById('swCap').innerHTML =
     '<h4>What she could do</h4><div class="cap">' +

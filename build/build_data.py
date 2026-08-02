@@ -67,17 +67,21 @@ RIGS = {
     "crabclaw": polar(75, 82, {0: 2.2, 30: 2.4, 45: 2.9, 60: 3.4, 75: 3.6, 90: 4.2,
                                110: 4.8, 120: 4.9, 135: 4.6, 150: 4.0, 180: 3.2},
                       "crab claw on a double hull",
-                      "Makes good about 75° to the true wind — poor by modern standards, "
-                      "positive by ancient ones, and positive is the whole argument. "
-                      "Maximum speed is on a broad reach, 90–120°, not before the wind."),
+                      "Poor by modern standards, positive by ancient ones — and positive is "
+                      "the whole argument, because it is what lets a canoe beat back the way "
+                      "she came. Fastest on a broad reach, not before the wind."),
 
     # ── Square rig. Willis's arithmetic, and the replicas agree with it.
     "square": polar(80, 95, {0: 1.0, 30: 1.4, 45: 2.2, 60: 3.0, 75: 3.9, 90: 4.8,
                              110: 5.6, 120: 5.8, 135: 5.5, 150: 4.9, 180: 4.2},
                     "square rig",
-                    "Six points off the wind is a HEADING, not progress. With leeway the best "
-                    "case is 78–79° made good and the ordinary case is 90° — no windward "
-                    "ground at all. Above force 4 it goes backwards relative to the wind."),
+                    # ⚠ The panel prints beatLight and beatHard immediately above this line, so
+                    # a note that restates them is not prose, it is a SECOND COPY of the number —
+                    # and it had already drifted: this said 78–79°/90° while the polar says 80°/95°.
+                    # The note's job is to say what the figures cannot.
+                    "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes "
+                    "good is the figure above, and above force 4 she loses ground to leeward "
+                    "faster than she gains it."),
 
     # ── Fore-and-aft: lateen and settee. Whitewright (IJNA 40.1, 2011) puts the lateen at
     # 55–65° — but those are HEADING angles, and Gal et al. (IJNA 2023) show the corrected
@@ -86,9 +90,9 @@ RIGS = {
     "lateen": polar(72, 84, {0: 1.4, 30: 2.0, 45: 2.9, 60: 3.6, 75: 4.1, 90: 4.5,
                              110: 4.7, 120: 4.6, 135: 4.2, 150: 3.6, 180: 2.9},
                     "lateen / settee",
-                    "Points better than a square rig and by less than the textbooks claim: "
-                    "the widely quoted 55–65° is a heading angle. Needs a large crew to tack, "
-                    "because the whole yard must be walked round the mast."),
+                    "Better than a square rig, and by less than the textbooks claim — their "
+                    "55–65° is a heading. The cost is manpower: tacking means walking the whole "
+                    "yard round the mast."),
 
     # ── Junk. Instrumented polars from the Junk Rig Association put a junk at 75–80% of a
     # modern Bermudan's windward VMG — the best pre-industrial rig for windward work, and
@@ -96,9 +100,9 @@ RIGS = {
     "junk": polar(62, 70, {0: 1.6, 30: 2.4, 45: 3.3, 60: 4.0, 75: 4.4, 90: 4.7,
                            110: 4.9, 120: 4.8, 135: 4.5, 150: 3.9, 180: 3.2},
                   "battened lug (junk)",
-                  "Battens make it self-reefing and let it set flat, so it works to windward "
-                  "far better than a square rig and needs a fraction of the crew. Measured "
-                  "against modern rigs it reaches 75–80% of Bermudan windward performance."),
+                  "The battens do it: they make the sail self-reefing and let it set flat, so "
+                  "it beats a square rig to windward on a fraction of the crew — about 75–80% "
+                  "of Bermudan performance."),
 
     # ── Oar. Not a sail at all, and that is the point: a galley's polar is nearly independent
     # of wind, which is exactly why galleys held the Mediterranean for two thousand years and
@@ -108,7 +112,8 @@ RIGS = {
     "oar": polar(30, 45, {0: 3.4, 30: 3.6, 45: 3.9, 60: 4.2, 75: 4.4, 90: 4.6,
                           110: 4.8, 120: 4.9, 135: 4.8, 150: 4.6, 180: 4.4},
                  "oars, with a square sail for fair winds",
-                 "A galley goes where it likes and not far. Speed is set by muscle, not wind: "
+                 "A galley goes where it likes and not far, and the figure above is her SAILING "
+                  "speed — the sail is for fair winds only. Under oar: "
                  "8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre "
                  "of sea — measured on the reconstruction Olympias, which fell short of what "
                  "the ancient sources imply and is thought to be ~10% too short in the hull."),
