@@ -772,7 +772,34 @@ function buildRig(S, group, mats, FINE) {
 
       /* the clew is sheeted aft along the deck; a settee foot runs about 0.62 of its head */
       const clew = [tack[0] + yardLen * 0.62, base + H.sheer(0.5) * 0.10];
-      sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
+      /* ── ⚠ A SETTEE IS NOT A TRIANGLE, AND THIS COMMENT KNEW IT BEFORE THE CODE DID ────
+         The line above has said "a settee foot" since it was written, while the code below
+         built a lateen — one triangle, tack to peak to clew. They are different sails. A
+         settee is a QUADRILATERAL: the lateen's forward point is cut off, leaving a short
+         luff between the tack and a throat some way up the yard, while the yard still rakes
+         just as steeply. It is the characteristic sail of the dhow and of most of the
+         Mediterranean and Indian Ocean craft that get called lateen-rigged loosely.
+         The cut-off shows: the sail no longer runs to a needle point at the stemhead, and
+         there is far less useless cloth down where the wind is slowest and the spar is
+         hardest to control. Built as two triangles on the diagonal, the same way the gaff
+         quadrilateral above is built, so it shares that geometry rather than inventing one. */
+      if (S.settee) {
+        /* ⚠ The first attempt put the throat on the line from tack to peak, which is the YARD:
+           a lateen's luff IS its yard, so tack, throat and peak were collinear, the forward
+           triangle had zero area, and the after one was the original lateen exactly. The render
+           was correctly unchanged and the data, the code and the served files all checked out —
+           only looking at the sail found it.
+           Truncating a corner takes TWO new points, one along each edge that meets there. The
+           cut is at the TACK, where the luff (up the yard) meets the foot (aft to the clew). */
+        const throat = [tack[0] + (peakPt[0] - tack[0]) * S.settee,
+                        tack[1] + (peakPt[1] - tack[1]) * S.settee];
+        const foreft = [tack[0] + (clew[0] - tack[0]) * S.settee * 0.55,
+                        tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
+        sails.push(makeTriSail(foreft, throat, peakPt, group, 0.055));
+        sails.push(makeTriSail(foreft, peakPt, clew, group, 0.055));
+      } else {
+        sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
+      }
     }
     if (mk.rig === 'crabclaw') {
       /* Same rule, independently attested in the Pacific. Pâris on the Tongan kalia: the sail

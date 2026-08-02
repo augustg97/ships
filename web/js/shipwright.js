@@ -129,6 +129,18 @@ function swInit() {
   };
   document.getElementById('swPrev').onclick = () => step(-1);
   document.getElementById('swNext').onclick = () => step(1);
+  /* Addressable by id, so a URL can name a hull. Until this existed the Shipwright's
+     selection was the one piece of state no link could carry and no baseline could target:
+     the frame harness could open the view but not choose the ship in it, and verifying a
+     particular hull meant stepping the arrow keys a counted number of times and trusting
+     the count. A green ratchet over a frame that cannot see the changed ship looks exactly
+     like coverage. */
+  window.swOpenById = id => {
+    const e = (SW.layout || []).find(en => en.id === id);
+    if (!e) return false;
+    swOpen(e.v);
+    return true;
+  };
   addEventListener('keydown', e => {
     if (!SW.on) return;
     if (e.key === 'ArrowLeft') step(-1);
@@ -585,7 +597,16 @@ function swFrame(now) {
   const fitT = 1.14 * Math.max(halfV / tanV,
                                SW.viewX / 2 / (tanV * Math.max(1.2, SW.cam.aspect)));
   if (!isFinite(SW.fit) || !isFinite(SW.look)) { SW.fit = fitT; SW.look = lookT; }
-  const EASE = 0.055;                                  // ~1.2 s to settle, which reads as travel
+  /* ⚠ FROZEN MUST MEAN FROZEN, AND THIS EASE WAS MISSED WHEN IT WAS BUILT.
+     The globe's camera flight is pinned by setting fly.t0 far in the past so it clamps to
+     complete. The Shipwright pans and zooms by a per-frame ease toward a target, which is the
+     same class of animation and was not pinned — so a capture landed wherever the ease had got
+     to. Two consecutive captures of the junk differed by 26% of pixels, and a baseline taken
+     from one of them would have failed against the next for no reason at all. In frozen mode
+     the camera goes straight to its target. */
+  const EASE = typeof FROZEN !== 'undefined' && FROZEN
+             ? 1.0                                     // arrive immediately, for deterministic capture
+             : 0.055;                                  // ~1.2 s to settle, which reads as travel
   SW.fit += (fitT - SW.fit) * EASE;
   SW.look += (lookT - SW.look) * EASE;
   const look = SW.look;

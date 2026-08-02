@@ -46,6 +46,16 @@
       "name": "action",
       "path": "/?frozen=1#v=action",
       "note": "battle view"
+    },
+    {
+      "name": "ship-dhow",
+      "path": "/?frozen=1#v=ship&s=dhow",
+      "note": "the settee rig \u2014 a quadrilateral, not the lateen triangle the code built until 2026-08-02"
+    },
+    {
+      "name": "ship-junk",
+      "path": "/?frozen=1#v=ship&s=junk",
+      "note": "the battened lug \u2014 battens must stay inside the canvas when the sail is sheeted out"
     }
   ]
 }

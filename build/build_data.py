@@ -255,7 +255,10 @@ HULLS = {
                      dict(at=0.10, height=0.30, rig="square", rake=-48, shrouds=0, only=1)],
               bowsprit=0.16, steeve=12),
 
-  "dhow": hull(build="shell", loa=26.0, lwl=22.5, beam=6.4, draught=2.4, freeboard=2.0, cm=0.68,
+  # settee: the luff is cut off at this fraction up the yard, making the sail a quadrilateral.
+  # 0 would be a true lateen. The dhow's characteristic sail is the settee, not the lateen.
+  "dhow": hull(build="shell", settee=0.30,
+              loa=26.0, lwl=22.5, beam=6.4, draught=2.4, freeboard=2.0, cm=0.68,
               wlPower=2.6, stemFineness=0.03, sternFineness=0.18,
               forefoot=0.34, run=0.30, riseF=0.60, riseA=0.40,
               sheerBow=1.1, sheerStern=0.55, tumblehome=0.05, strakes=16,
@@ -769,7 +772,10 @@ vessel(id="east-indiaman", name="East Indiaman", sub="retourschip", rig="square"
 
 vessel(id="ship-of-the-line", name="Ship of the line", sub="third rate, 74 guns", rig="square",
        era=[1650, 1850], from_=1640, to=1870, region="worldwide",
-       rows=[["Gundeck length", "168–176 ft (51–54 m)"], ["Beam", "47–48 ft (14.3–14.6 m)"],
+       rows=[["The rates", "first 100+ guns · second 90–98 · third 64–90 · fourth 50"],
+             ["The 74", "developed in France in the 1730s; two complete gun decks"],
+             ["Gundeck length", "168–176 ft (51–54 m); Slade's British 74s 167–171 ft"],
+             ["Beam", "47–48 ft (14.3–14.6 m)"],
              ["Tonnage", "1,600–1,750 tons builder's old measurement"],
              ["Crew", "600–650"], ["Speed", "8–9 kn maximum; fleet speed ~5 kn"],
              ["Timber", "~2,000 mature oaks — a 19th-c. estimate, not a dockyard account"],
@@ -792,7 +798,11 @@ vessel(id="slave-ship", name="Slave ship", sub="the Middle Passage", rig="square
              ["Died at sea", "~1.8 million — about 14.5%"],
              ["Passage length", "~60 days (17th c.) → ~40 days (19th c.)"],
              ["Mortality by era", "22–30% (16th c.) → ~5% (final decade)"],
-             ["Crew mortality", "~20% per voyage on British slavers"]],
+             ["Crew mortality", "~20% per voyage on British slavers"],
+             ["*Brookes*, 267 tons burden", "**454 people** permitted by the 1788 Act; "
+                                            "reportedly as many as **609** carried before it"],
+             ["Which is", "2.3 people per ton — the ratio the Act was written to reduce"],
+             ["*Henrietta Marie*", "about 200 people per passage"]],
        crew=35, pax=300, attestation="attested", confidence="good",
        text="For three centuries the principal cargo carried across the Atlantic was people. "
             "An estimated 12.5 million were embarked and 10.7 million landed.\n\n"
@@ -916,11 +926,16 @@ vessel(id="usv", name="Unmanned surface vessel", sub="nobody aboard", rig="motor
 
 vessel(id="clipper", name="Clipper", sub="the last argument for sail", rig="square",
        era=[1845, 1890], from_=1843, to=1900, region="worldwide",
-       rows=[["*Cutty Sark*, 1869", "hull 64.8 m, beam 10.97 m, 963 gross register tons"],
+       rows=[["Rig", "⚠ **not a sailplan.** A clipper is a hull — fine lines built for speed. "
+                     "Clippers were schooners, brigs and brigantines as well as full-rigged ships"],
+             ["*Cutty Sark*, 1869", "hull 64.8 m, beam 10.97 m, 963 gross register tons"],
              ["Sail area", "~2,970 m²; crew 28–35"],
-             ["Best day's run", "363 nm — a 15.1 kn average sustained for 24 hours"],
-             ["NY→San Francisco record", "*Flying Cloud*, 89 days 8 hours (1854)"],
-             ["Construction", "composite — iron frames, teak and rock elm planking"]],
+             ["*Cutty Sark*'s best day", "363 nm — a 15.1 kn average sustained for 24 hours"],
+             ["The era's best day", "*Champion of the Seas*, 465 nm in 1854 — unbeaten until 1984"],
+             ["Highest speed reported", "*Sovereign of the Seas*, 22 kn (1854)"],
+             ["NY→San Francisco record", "*Flying Cloud*, 89 days 8 hours (1854) — held until 1989"],
+             ["Construction", "composite after 1863 — iron framework, wooden planking"],
+             ["The era", "boom from 1843; ended by the Panama Railroad (1855) and Suez (1869)"]],
        crew=30, attestation="generated", confidence="good",
        text="The fastest commercial sailing ships ever built, and they were obsolete almost "
             "immediately.\n\n"

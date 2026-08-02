@@ -229,12 +229,18 @@ function applyHash() {
 function applyHashView() {
   const vm = /[#&]v=(sea|ship|action)/.exec(location.hash);
   if (vm && typeof setView === 'function') setView(vm[1]);
+  /* `#v=ship&s=<id>` names a hull, e.g. #v=ship&s=dhow. Ordered after setView for the same
+     reason setView is ordered after the data load: the Shipwright builds its layout when the
+     view opens, and there is nothing to select before that. */
+  const sm = /[#&]s=([a-z0-9-]+)/i.exec(location.hash);
+  if (sm && typeof swOpenById === 'function') swOpenById(sm[1]);
 }
 
 function writeHash() {
   if (FROZEN) return;                       // a capture must not rewrite its own URL
   const view = APP.view && APP.view !== 'sea' ? `&v=${APP.view}` : '';
-  const h = `#e=${S.era}&t=${Math.round(S.year)}${view}`;
+  const ship = APP.view === 'ship' && typeof SW === 'object' && SW.spec ? `&s=${SW.spec.id}` : '';
+  const h = `#e=${S.era}&t=${Math.round(S.year)}${view}${ship}`;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
 

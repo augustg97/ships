@@ -62,3 +62,23 @@ Remaining: voyaging canoe, Roman merchantman/corbita, sewn-plank dhow, Chinese j
 ⚠ **A note on source selection.** Three first-choice articles were the wrong page — *Polynesian navigation* covers wayfinding and not vessels, *Roman navy* covers warships and not merchantmen, and *Artemon (sail)* does not exist. The specialist pages carried everything. **A general article on the subject is not the same as the article on the object**, and taking the first for the second would have returned "not stated" for facts Wikipedia holds in full.
 
 Remaining: Chinese junk, ship of the line, slave ship, clipper, ocean steamer, container ship, USV.
+
+## Batch 6 — 2026-08-02
+
+| Ship | Checked | Finding |
+|---|---|---|
+| Clipper | rig, records, construction | ⚠ **A clipper is not a sailplan.** Wikipedia: "Clipper does not refer to a specific sailplan; clippers may be schooners, brigs, brigantines, etc., as well as full-rigged ships." The card treated it as a rig type. It names a **hull** — fine lines built for speed. Recorded as the first row. Added: composite construction dated (after 1863, iron framework with wooden planking); the era's real day-run record, *Champion of the Seas* 465 nm in 1854, unbeaten until 1984 — distinguished from *Cutty Sark*'s own best of 363 nm, which the card had been presenting alone; *Sovereign of the Seas* 22 kn (1854); *Flying Cloud*'s NY→San Francisco record held until 1989; and the era's bounds, boom from 1843, ended by the Panama Railroad (1855) and Suez (1869). |
+| Ship of the line | rates, rig, dimensions | Added the rating system (first 100+ guns, second 90–98, third 64–90, fourth 50), that the 74 was developed in France in the 1730s and became the most common size, that it is a two-decker with two complete gun decks, and Slade's British 74s at 167–171 ft gundeck. Existing dimensions confirmed against source. |
+| Slave ship | capacity, the *Brookes* | Added the *Brookes*: 267 tons burden, **454 people permitted by the 1788 Act, reportedly as many as 609 carried before it** — 2.3 people per ton, the ratio the Act was written to reduce. Added *Henrietta Marie* at about 200 per passage. Kept our embarked/landed figures (12.5 m / 10.7 m, Trans-Atlantic Slave Trade Database) over Wikipedia's looser "as many as 20 million". |
+
+**Model change, not just a card.** The dhow now sets **settee** sails — a quadrilateral — where the code had always built a lateen triangle. The comment on that line had read "a settee foot" since it was written while the code below it built a lateen; the distinction was known and never modelled.
+
+⚠ **The settee took two attempts, and the first failed in a way no check but looking could catch.** The first version put the throat on the line from tack to peak — but that line *is the yard*, because a lateen's luff is its yard. Tack, throat and peak were collinear: the forward triangle had zero area and the after one was the original lateen exactly. The data was right, the code was present in the served file, and the render was correctly unchanged. Truncating a corner needs **two** new points, one along each edge meeting at it. Confirmed afterwards by counting: 4 sail meshes with settee against 2 as a lateen.
+
+## Two harness faults found and fixed — 2026-08-02
+
+⚠ **The Shipwright's selection was not addressable.** The URL carried the view but not the ship, so no baseline could target a hull and verifying one meant stepping the arrow keys a counted number of times and trusting the count. `#v=ship&s=<id>` now names a hull, and `writeHash` emits it. Two frames added: `ship-dhow` and `ship-junk`.
+
+⚠ **Frozen did not freeze the Shipwright camera.** The globe's flight is pinned by `fly.t0 = -1e9`; the Shipwright pans and zooms by a per-frame ease toward a target, which is the same class of animation and was never pinned. Two consecutive captures of the junk differed by **26.1% of pixels**. A baseline taken from either would have failed against the next for no reason. `EASE = 1.0` under `FROZEN` — the camera arrives immediately. Both ship frames are now byte-stable across runs.
+
+Remaining: Chinese junk, ocean steamer, container ship, USV.
