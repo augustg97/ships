@@ -661,42 +661,73 @@ vessel(id="carrack", name="Carrack", sub="nau", rig="square", era=[1450, 1600],
        from_=1440, to=1650, region="Atlantic and Indian Ocean",
        rows=[["Portuguese India naus", "~400 t (1500) → 1,000–2,000 t (1600)"],
              ["*Madre de Deus*, 1592", "1,600 t burden, 7 decks, 47 m, 900 crew"],
-             ["Rig", "square fore and main, lateen mizzen"],
+             ["Rig", "three or four masts: square fore and main, lateen mizzen"],
+             ["A three-master's sails", "six — spritsail, foresail, mainsail, mizzen, two topsails"],
+             ["Hull", "carvel-built; forecastle forward, high rounded stern with aftcastle"],
              ["Tonnage system", "tons burden — not comparable with register or displacement tons"]],
        crew=80, attestation="generated", confidence="moderate",
-       text="The hull that carried the Portuguese and Spanish empires, and the first ship type "
-            "designed from the start to cross oceans with cargo and guns at the same time. The "
-            "mixed rig is the compromise that made it work: square sails forward for driving "
-            "power downwind, a lateen mizzen aft to help it steer and lie closer.",
-       cite="Rodrigues & Loureiro on the *carreira da Índia*.")
+       text="A three- or four-masted ocean-going ship developed in Portugal and Spain during the "
+            "fourteenth and fifteenth centuries, carvel-built, with a forecastle forward and a "
+            "high rounded stern carrying an aftcastle. It carried cargo and guns on the same "
+            "voyage and was large enough to remain stable in heavy seas.\n\n"
+            "The rig is mixed: square sails on the fore and main for driving power, a lateen "
+            "mizzen aft to help the ship steer and lie closer to the wind. A typical three-master "
+            "set six sails — spritsail, foresail, mainsail, mizzen and two topsails.\n\n"
+            "Portuguese carracks on the India run were often over 1,000 tons. Galleons gradually "
+            "superseded the type from the late sixteenth century, though carracks remained in use "
+            "into the middle of the seventeenth.",
+       cite="Rodrigues & Loureiro on the *carreira da Índia*; "
+            "Wikipedia, *Carrack* (accessed 2026-08-02).")
 
 vessel(id="fluyt", name="Fluyt", sub="the freight machine", rig="square", era=[1595, 1700],
        from_=1595, to=1750, region="Baltic and Atlantic",
        rows=[["Length", "24–40 m"], ["Length : beam", "4:1 to 6:1"],
              ["Burden", "200–500 t"],
-             ["Crew", "12–15 — against ~30 for the English equivalent"]],
+             ["Crew", "12–15 — against ~30 for the English equivalent"],
+             ["Rig", "two or three masts; square fore and main, lateen mizzen"],
+             ["Section", "pear-shaped — broad in the hold, narrow at the deck"],
+             ["Armament", "minimal or none; armed only as a naval auxiliary"],
+             ["The Sound Toll story", "**a persistent myth.** Toll officers assessed cargo from "
+                                      "bills of lading, not by measuring the ship"]],
        crew=12, attestation="generated", confidence="good",
-       text="Not a better sailer. A cheaper one — and that turned out to matter more.\n\n"
-            "Built of softwood cut by wind-powered sawmills, rigged so that a dozen men could "
-            "work it where an English ship of the same burden needed thirty, and shaped with a "
-            "deliberately narrow deck because the **Danish Sound Toll was charged on deck "
-            "area**. A ship designed around a tax. It roughly halved the cost of moving freight "
-            "and is a large part of why the Dutch carried everyone else's cargo for a century.",
-       cite="Unger, *Dutch Shipbuilding before 1800*; Sound Toll Registers Online.")
+       text="A cargo vessel designed by shipwrights of Hoorn in the Dutch Republic in the 1590s "
+            "and built to no other purpose. The hull is pear-shaped in section, broad in the hold "
+            "and narrow at the deck, with a shallow draught that let it reach ports and rivers "
+            "closed to deeper ships. Armament was minimised or omitted to leave the hold clear, "
+            "which restricted it to waters where it did not expect to fight.\n\n"
+            "It was built of softwood cut by wind-powered sawmills and rigged so that twelve to "
+            "fifteen men could work it where an English ship of the same burden needed about "
+            "thirty. It carried roughly twice the cargo of its rivals at about half the freight "
+            "cost.\n\n"
+            "⚠ The narrow deck is often explained as evasion of the Danish Sound Toll, which is "
+            "said to have been charged on deck area. **The Sound Toll Registers do not support "
+            "it**: officers assessed dues from the bills of lading a master presented, not from "
+            "any measurement of the ship. The shape follows from what the hull is for — hold "
+            "volume below, and as little weight and rigging as possible above.",
+       cite="Unger, *Dutch Shipbuilding before 1800*; Sound Toll Registers Online; "
+            "Wikipedia, *Fluyt* (accessed 2026-08-02).")
 
 vessel(id="east-indiaman", name="East Indiaman", sub="retourschip", rig="square", era=[1600, 1830],
        from_=1595, to=1840, region="Europe to Asia",
-       rows=[["VOC retourschip", "45–55 m, 700–1,150 t, crew 200–350"],
+       rows=[["Rig", "three masts: square fore and main, mizzen square over a lateen or spanker"],
+             ["VOC retourschip", "45–55 m, 700–1,150 t, crew 200–350"],
+             ["British EIC", "1,100–1,400 tons burden"],
+             ["*Earl of Mansfield*, 1795", "1,426 t bm · 175 ft overall · 43 ft beam · 17 ft draught"],
+             ["*Amsterdam* (VOC), 1749", "1,100 t bm · 42.5 m"],
              ["Passage Netherlands→Batavia", "mean 253 days (1770–75), 238 days (1783–92)"],
              ["English EIC to Batavia", "mean 173 days over the same years"],
              ["Mortality", "VOC-wide ~9–10% per voyage across the whole record"]],
        crew=120, attestation="generated", confidence="good",
-       text="The best-documented long passage in the age of sail, because the Dutch counted "
-            "everything. Solar and de Zwart worked the Dutch-Asiatic Shipping database and "
-            "found something the model has to reproduce and mostly cannot flatter: **VOC ships "
-            "were slow, and they did not get faster.** Mean passage to Batavia was 253 days in "
-            "1770–75 and 238 in 1783–92, and there is 'no significant trend' across the "
-            "seventeenth and eighteenth centuries at all.\n\n"
+       text="A three-masted armed merchantman chartered by the European East India companies for "
+            "the Asia trade: the British EIC from 1600 to 1834, the Dutch VOC through the "
+            "seventeenth and eighteenth centuries, with French, Danish, Swedish, Austrian and "
+            "Portuguese equivalents. British ships ran 1,100–1,400 tons burden. They carried "
+            "substantial armament against pirates and privateers, which is why a merchant hull of "
+            "the period is built to the proportions of a warship.\n\n"
+            "Solar and de Zwart worked the Dutch-Asiatic Shipping database, which records every "
+            "VOC voyage made. **VOC ships were slow, and they did not get faster.** Mean passage "
+            "to Batavia was 253 days in 1770–75 and 238 in 1783–92, and there is 'no significant "
+            "trend' across the seventeenth and eighteenth centuries at all.\n\n"
             "English East Indiamen did the same passage in 173 days. The gap is 60–80 days "
             "between two fleets sailing the same ocean in the same years, and it is a fact "
             "about the hulls and the standing orders, not about the wind: Dutch hull form was "

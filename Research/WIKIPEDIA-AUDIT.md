@@ -36,3 +36,15 @@ in a table gets verified; a sentence does not.
 
 And one systemic thing: **the card's "best speed" comes from the rig polar**, which is
 meaningless on a ship with no rig. `speedKn` now overrides it where an attested speed exists.
+
+## Batch 4 — 2026-08-02
+
+| Ship | Checked | Finding |
+|---|---|---|
+| Carrack | rig, masts, hull, tonnage | Rig row said "square fore and main, lateen mizzen" — correct, but the card never gave the MAST COUNT. Three **or four**. Added the six-sail inventory of a typical three-master (spritsail, foresail, mainsail, mizzen, two topsails), carvel construction, forecastle + high rounded stern with aftcastle, and the Portuguese India naus at over 1,000 tons. Tone: opening announced significance ("the hull that carried the Portuguese and Spanish empires") — replaced with description. |
+| Fluyt | rig, masts, hull, tolls | ⚠ **FACTUAL ERROR CORRECTED.** The card asserted the narrow deck was shaped to evade the Danish Sound Toll, "charged on deck area" — a ship designed around a tax. Wikipedia states outright that this is **a persistent myth**: Sound Toll officers assessed dues from the bills of lading a master presented, not from any measurement of the ship. The claim is now shown as the myth it is, with the actual reason for the section (hold volume below, minimum weight and rigging above). Also added: **two or three masts** (the card gave none), square fore and main with lateen mizzen, pear-shaped section, shallow draught, minimal armament, Hoorn origin. Tone: cut "Not a better sailer. A cheaper one." |
+| East Indiaman | rig, masts, tonnage, named ships | Card carried **no rig or mast count at all** for a square-rigged vessel. Added three masts and the sail plan. Added British EIC burden 1,100–1,400 tons and two named examples with dimensions: *Earl of Mansfield* 1795 (1,426 t bm, 175 ft × 43 ft × 17 ft) and VOC *Amsterdam* 1749 (1,100 t bm, 42.5 m). Added the armament point. Tone: ⚠ removed **meta commentary** — "something the model has to reproduce and mostly cannot flatter" discusses the model's own editorial position, the worst class in CARD-TONE.md. |
+
+**Running finding, now four batches deep: dimensions are mostly right and RIG IS MOSTLY WRONG OR ABSENT.** Two of these three cards did not state a mast count at all. The audit has now found a missing or incorrect rig on the trireme, treasure ship, Great Eastern, caravel, fluyt and East Indiaman.
+
+Remaining: voyaging canoe, Roman merchantman/corbita, sewn-plank dhow, Chinese junk, ship of the line, slave ship, clipper, ocean steamer, container ship, USV.
