@@ -209,8 +209,14 @@ HULLS = {
                   stemRake=0.045, sternRake=0.055, strakes=18, topside="#6b5533",
                   # Olympias's mast is ~11 m and stows on deck; Steel's rule would give 20 m on this
                   # hull, which is what happens when an 18th-century warship formula meets L/B 9.7.
-                  oarBanks=3, oarsPerBank=27,
-                  masts=[dict(at=0.42, heightM=11.0, rig="square", rake=2, shrouds=3)]),
+                  # 170 oars in three UNEQUAL banks: 62 thranitai, 54 zygitai, 54 thalamitai — per side
+                  # 31 / 27 / 27. The top bank is longer because it rows through the outrigger.
+                  oarBanks=3, oarsPerBank=[27, 27, 31],
+                  # ⚠ TWO masts, not one: the main (histos megas) and a small foremast (histos
+                  # akateios) raked forward over the bow. Both square. Both struck and left
+                  # ashore before an action, because a trireme fights under oar.
+                  masts=[dict(at=0.42, heightM=11.0, rig="square", rake=2, shrouds=3),
+                         dict(at=0.13, heightM=6.0, rig="square", rake=-28, shrouds=0, only=1)]),
 
   # Skuldelev 2: 30 m × 3.8 m, draught ~1.0, sail 112 m². L/B 7.9 — a hull built to be rowed
   # and sailed, and shallow enough to be beached anywhere.
@@ -274,9 +280,14 @@ HULLS = {
               forefoot=0.30, run=0.30, riseF=0.32, riseA=0.24,
               sheerBow=1.6, sheerStern=1.3, tumblehome=0.03, strakes=26,
               stemRake=0.08, sternRake=0.10, topside="#5e4326",
-              masts=[dict(at=0.15, height=0.62, rig="junk", rake=0, shrouds=0),
-                     dict(at=0.52, height=0.88, rig="junk", rake=0, shrouds=0),
-                     dict(at=0.83, height=0.66, rig="junk", rake=0, shrouds=0)]),
+              # FIVE masts, not three. Contemporary accounts give 2,000-liao ships FOUR masts and
+                     # 5,000-liao ships six or seven; the nine of the 1597 novel is rejected by
+                     # every scholar who has looked at it. At 70 m she sits between the two.
+                     masts=[dict(at=0.14, height=0.62, rig="junk", rake=0, shrouds=0),
+                            dict(at=0.32, height=0.86, rig="junk", rake=0, shrouds=0),
+                            dict(at=0.50, height=1.00, rig="junk", rake=0, shrouds=0),
+                            dict(at=0.68, height=0.84, rig="junk", rake=0, shrouds=0),
+                            dict(at=0.85, height=0.60, rig="junk", rake=0, shrouds=0)]),
 
   "caravel": hull(loa=23.0, lwl=19.5, beam=6.2, draught=2.0, freeboard=2.1, cm=0.70,
               wlPower=2.5, forefoot=0.32, run=0.32, riseF=0.52, riseA=0.46,
@@ -509,7 +520,10 @@ vessel(id="trireme", name="Trireme", sub="τριήρης", rig="oar", era=[-700,
              ["Oars", "170 — 62 thranite, 54 zygian, 54 thalamite"],
              ["Sprint, measured", "8.3 kn (not the 8.9 kn usually quoted)"],
              ["Cruise, measured", "~5.4 kn; 2.9 kn into a headwind and 1 m sea"],
-             ["Turning circle", "1.9 ship-lengths; 360° in 128 s"]],
+             ["Turning circle", "1.9 ship-lengths; 360° in 128 s"],
+             ["Crew", "about 200 — 170 rowers (62 thranitai, 54 zygitai, 54 thalamitai), ~14 deck crew, 10–20 marines"],
+             ["Turning", "180° in one minute, inside 2.5 ship-lengths — measured on Olympias"],
+             ["Rig", "two masts, both square: the main and a small foremast, struck before battle"]],
        crew=200, attestation="generated", confidence="contested",
        text="A hull built to carry a bronze ram at speed and to turn inside its own length. It "
             "is also the best-measured ancient ship in existence, because one was built.\n\n"
@@ -580,7 +594,12 @@ vessel(id="treasure-ship", name="Treasure ship", sub="寶船 — and how big it 
        rows=[["Claimed length", "44 zhang 4 chi ≈ 138 m"],
              ["Scholarly range", "50–76 m"],
              ["Fleet, first voyage", "~317 ships, 27,800 men"],
-             ["Voyages", "seven, 1405–1433"]],
+             ["Voyages", "seven, 1405–1433"],
+             ["Scholarly range", "Xin Yuan-ou 61-76 m; Barker 70 m; Sleeswyk 52.5 m; Church 50.6 m - none near the claimed 134 m"],
+             ["The dock", "Longjiang basin, excavated 2003-04: 421 m long but only 41 m WIDE and 4 m deep. It could not have built a 55 m beam"],
+             ["Crew", "200-300 documented per ship; the novel dimensions would need 8,000"],
+             ["The fleet", "first voyage 62-63 treasure ships and 187-255 support vessels, about 250 sail"],
+             ["Masts", "four on a 2,000-liao ship, six or seven on a 5,000-liao; the nine of the novel is rejected"]],
        crew=250, attestation="generated", confidence="contested",
        text="**The famous dimensions come from a novel.** The 44-zhang figure appears first in "
             "Luo Maodeng's *Xiyang Ji* of 1597 — a work of fiction written 164 years after the "

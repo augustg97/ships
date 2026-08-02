@@ -2135,13 +2135,22 @@ function buildOars(S, group, mat) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const g = new THREE.Group();
-  const perBank = S.oarsPerBank || 27;
+  /* ⚠ THE THREE BANKS ARE NOT EQUAL. 62 thranitai on the top bench against 54 zygitai and 54
+     thalamitai — 170 oars, not 3 x 54. The top bank is longer because it rows through the
+     OUTRIGGER, which carries it outboard of the hull and lets it reach past the two banks
+     below; that extra reach is also why it can be extended further fore and aft. Drawing three
+     equal banks throws away the one structural fact that makes a trireme a trireme. */
+  const perBankArr = S.oarsPerBank;
+  const perBankOf = b => Array.isArray(perBankArr) ? perBankArr[b]
+                       : (perBankArr || 27);
   const len = B * 2.4;
   for (let bank = 0; bank < n; bank++) {
     const v = 0.70 + bank * 0.11;                     // each level higher up the side
     const out = 1.0 + bank * 0.22;                    // and further outboard
+    const perBank = perBankOf(bank);
+    const spread = 0.62 + bank * 0.05;                  // the top bank reaches further fore and aft
     for (let i = 0; i < perBank; i++) {
-      const u = 0.16 + (i / (perBank - 1)) * 0.62;
+      const u = 0.16 + (i / (perBank - 1)) * spread;
       const p = surfacePoint(S, H, u, Math.min(0.99, v));
       for (const sgn of [-1, 1]) {
         const o = new THREE.Group();

@@ -10,8 +10,9 @@ compared against it, not that the article was glanced at.
 | Great Eastern | ✅ | **six** masts not three, **five** funnels not two, **gaff** rig not square, 18,915 GRT not 32,160, 17 m paddle wheels added |
 | Titanic | ✅ | **bulkheads reached D deck, not E** — I had it wrong in her prose; crew 892→866, pax 1,317→1,342; 46,329 GRT; only **three** of four funnels drew smoke; service speed 21 kn added because the card was showing a sail polar's 9.6 kn |
 | Cog | ✅ | dimensions, shell-first construction and single square sail all confirmed; added double-clenched iron nails and the flush-laid bottom |
+| trireme | ✅ | **two masts, not one** — main *histos megas* and a small foremast *histos akateios*; oar banks are **unequal**, 62 thranitai to 54 and 54, because the top bank rows through the outrigger; added crew composition and Olympias's 180° turn inside 2.5 ship-lengths |
+| treasure ship | ✅ | **five masts, not three** — contemporary accounts give 4 on a 2,000-liao ship and 6–7 on a 5,000-liao; added the full scholarly range (Xin Yuan-ou 61–76 m, Barker 70, Sleeswyk 52.5, Church 50.6), the Longjiang dock evidence (421 m long but only **41 m wide**), and the crew contradiction (200–300 documented against 8,000 implied) |
 | voyaging canoe | ☐ | |
-| trireme | ☐ | |
 | Roman merchantman | ☐ | |
 | sewn-plank dhow | ☐ | |
 | Chinese junk | ☐ | |
