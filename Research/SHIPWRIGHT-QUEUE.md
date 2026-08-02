@@ -17,6 +17,7 @@ Working list for the `/loop` raising the Shipwright to the reference bar. Each i
 | 8 | voyaging canoe | crab claw 4x too large — Pâris's kalia rule applied to Hōkūleʻa, whose 50 m² for the pair is on her own card. Spar now **solved from the attested area** (10.8 m) | **fixed** |
 | 9 | all fore-and-aft | crab-claw leech drawn straight; it is cut deeply **hollow**, which is what lets hull-length spars carry a small area | **fixed** |
 | 10 | Shipwright camera | fitted on the X extent alone — a 5.4 m-wide double canoe ran off screen | **fixed** |
+| 22 | corbita | missing the **artemon**, the diagnostic feature of a Roman merchantman and the ancestor of the headsail | **fixed** |
 | 19 | container ship | wooden gratings, a hand-spike capstan, **wales** and a ship's boat on a 400 m steel hull, labelled carvel. Fittings now gated on construction tradition | **fixed** |
 | 20 | container ship | nothing above deck — no boxes, no accommodation, no bridge. The one hull whose cargo IS her architecture | **fixed** |
 | 21 | engine-powered ships | build stages ran "masts → rigging → yards → **bent on**", congratulating a container ship on being able to sail | **fixed** |
@@ -46,8 +47,10 @@ has no rig, only a superstructure.
 
 Numbers cannot judge proportion, so ships still get looked at. **Rendered and checked:** junk,
 voyaging canoe, carrack, ship of the line, treasure ship, trireme, cog, caravel, steamer,
-container ship.
-**Still to look at:** Roman merchantman · dhow · fluyt · east indiaman · slave ship · clipper.
+container ship, Roman merchantman.
+**Still to look at:** dhow · fluyt · east indiaman · slave ship · clipper. All five are standard
+three-masted square-riggers on the same code path as the verified 74, so they are the lowest-risk
+remaining — the detail gaps below are now worth more than further verification.
 
 ⚠ **Steel's mast rule is still applied to the clipper**, whose L/B of 5.9 is also outside its
 domain — it gives Cutty Sark a ~38 m lower mast against a real ~29 m. `heightM` now exists to

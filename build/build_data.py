@@ -215,7 +215,16 @@ HULLS = {
               wlPower=2.4, forefoot=0.30, run=0.34, riseF=0.62, riseA=0.56,
               sheerBow=0.9, sheerStern=0.5, tumblehome=0.08, strakes=18,
               stemRake=0.05, sternRake=0.07, topside="#63492c",
-              masts=[dict(at=0.44, height=0.62, rig="square", rake=0, shrouds=3)],
+              masts=[dict(at=0.44, height=0.62, rig="square", rake=0, shrouds=3),
+                     # ── THE ARTEMON, and it is the diagnostic feature of the type ──────────
+                     # A small square sail on a mast raked sharply forward over the bow. Every
+                     # Roman relief of a merchantman shows it — Ostia, the Torlonia relief, the
+                     # Sidon sarcophagus — and it is not auxiliary canvas. Set that far forward of
+                     # the hull's centre of lateral resistance it acts as a LEVER: trim it and the
+                     # bow falls off the wind without touching the steering oars. That is what let
+                     # a corbita be handled at all, and it is the direct ancestor of the headsail
+                     # every sailing vessel since has carried.
+                     dict(at=0.10, height=0.30, rig="square", rake=-48, shrouds=0, only=1)],
               bowsprit=0.16, steeve=12),
 
   "dhow": hull(build="shell", loa=26.0, lwl=22.5, beam=6.4, draught=2.4, freeboard=2.0, cm=0.68,
