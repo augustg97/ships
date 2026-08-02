@@ -1280,6 +1280,12 @@ const PARTS = {
                   + 'that standard, not the ship, is the invention. The hull is a rack built to '
                   + 'fit it. Loading a break-bulk freighter took a gang of dockers several days; '
                   + 'the same tonnage in boxes takes hours.' },
+  superstructure: { stage: 3, name: 'Superstructure',
+              what: 'On a passenger ship the HULL is the smaller half. Titanic\'s boat deck stands '
+                  + '19 m above the waterline and the accommodation below it is most of what she '
+                  + 'is — 46,328 tons of which comparatively little is hold. Each tier steps in '
+                  + 'fore and aft, because the decks must taper as the hull does and because a '
+                  + 'stepped profile sheds the wind that a slab would catch.' },
   bridge:   { stage: 3, name: 'Accommodation and bridge',
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
@@ -1675,6 +1681,39 @@ function buildRigging(S, group, rope, spars, mastTops) {
  * until compound engines cut coal consumption threefold, sail was what got you home when the
  * bunkers ran dry.
  */
+/* ── A LINER IS MOSTLY SUPERSTRUCTURE ──────────────────────────────────────────────────
+ * Titanic was a hull with four funnels standing on it and nothing else, which gets her exactly
+ * backwards: on a passenger ship the hull is the smaller half. Her boat deck stands 19 m above
+ * the waterline and the accommodation below it is most of what she IS — 46,328 tons of which
+ * comparatively little is hold. Building her as a cargo hull with a chimney is the same error
+ * as drawing the container ship without her boxes.
+ * Decks are stacked and stepped in from the hull's own sheer, so they follow whatever shape the
+ * coefficients produced. */
+function buildSuperstructure(S, group) {
+  const n = S.decks || 0;
+  if (!n) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const white = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2c2f33, roughness: 0.55, metalness: 0.2 });
+  const g = new THREE.Group();
+  const base = H.sheer(0.5);
+  const dh = B * 0.105;                                 // one deck's height
+  for (let i = 0; i < n; i++) {
+    const f = i / n;
+    const len = L * (0.80 - f * 0.34);                  // each tier steps in fore and aft
+    const wid = B * (0.92 - f * 0.16);
+    const tier = new THREE.Mesh(new THREE.BoxGeometry(len, dh, wid), white);
+    tier.position.set(-L * 0.02 + f * L * 0.03, base + dh * (i + 0.5), 0);
+    g.add(tier);
+    /* the windows are the whole reason the deck exists */
+    const strip = new THREE.Mesh(new THREE.BoxGeometry(len * 0.97, dh * 0.34, wid * 1.006), dark);
+    strip.position.set(tier.position.x, base + dh * (i + 0.55), 0);
+    g.add(strip);
+  }
+  group.add(tag(g, 'superstructure'));
+}
+
 function buildFunnel(S, group) {
   const n = S.funnels || 0;
   if (!n) return;
@@ -2046,6 +2085,7 @@ function buildShip(S, opts) {
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
   if (FINE) buildFunnel(S, group);
+  if (FINE) buildSuperstructure(S, group);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the

@@ -237,8 +237,12 @@ const ENGINE_STAGES = [
   ['Accommodation', 'The house and bridge, pushed to one end so nothing blocks the crane runs.'],
   ['Funnel and uptakes', 'What a mast used to be, doing what a mast never did: taking the exhaust '
                        + 'of about 80 megawatts out of the top of the ship.'],
-  ['Loaded', 'The boxes. Eight feet by eight foot six by twenty or forty, corner castings identical '
-           + 'everywhere on earth — and the standard, not the ship, is the invention.'],
+  /* ⚠ THIS LAST STAGE WAS WRITTEN FOR THE CONTAINER SHIP AND SHOWN ON ALL OF THEM. Titanic
+     and Great Eastern were both being told about corner castings and the 1968 box standard.
+     The generic line is below; the box boat gets its own, keyed off S.containers. */
+  ['Loaded', 'Cargo and stores aboard. What she carries is what she is for — and on a liner that '
+           + 'includes the people, which is why so much of her volume is accommodation rather '
+           + 'than hold.'],
 ];
 
 function swApplyStage() {
@@ -264,9 +268,13 @@ function swApplyStage() {
   }
 
   const engine = !(SW.spec.hull.masts || []).length;
-  const nm = SW.stage === 1 ? trad.s1
-           : SW.stage === 2 ? trad.s2
-           : (engine && ENGINE_STAGES[SW.stage]) || STAGE_NAMES[SW.stage];
+  let nm = SW.stage === 1 ? trad.s1
+         : SW.stage === 2 ? trad.s2
+         : (engine && ENGINE_STAGES[SW.stage]) || STAGE_NAMES[SW.stage];
+  if (SW.stage === 7 && SW.spec.hull.containers)
+    nm = ['Loaded', 'The boxes. Eight feet by eight foot six by twenty or forty, corner castings '
+                  + 'identical everywhere on earth — and the standard, not the ship, is the '
+                  + 'invention.'];
   document.getElementById('swStageName').textContent = nm[0];
   document.getElementById('swStageWhat').textContent = nm[1];
   document.getElementById('swOrder').textContent = trad.label;
@@ -401,7 +409,10 @@ function swOpen(vessel) {
     ['Length overall', L.toFixed(1) + ' m'],
     ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
     ['Draught', vessel.hull.draught.toFixed(2) + ' m'],
-    ['Rig, deck to truck', U.rigTop.toFixed(1) + ' m'],
+    /* ⚠ "deck to truck" is a MAST measurement, and it was being printed on ships with no
+       masts — Titanic's 62.3 m is her funnels and superstructure. Say what is being measured. */
+    [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
+     U.rigTop.toFixed(1) + ' m'],
   ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
   /* fit the shadow frustum to this ship, in her own place on the line */
