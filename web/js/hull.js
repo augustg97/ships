@@ -717,7 +717,7 @@ function buildRig(S, group, mats, FINE) {
        Falling through to the square-rig case gave the treasure ship a 64 m mast carrying a
        sail that stopped halfway up it. */
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
-               : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
+               : (mk.rig === 'crabclaw' || mk.rig === 'junk' || mk.rig === 'gaff') ? [lower]
                : [lower, top, tg];
     const radii = [B * 0.030, B * 0.020, B * 0.013];
 
@@ -918,6 +918,35 @@ function buildRig(S, group, mats, FINE) {
          also why it works: the deeply raked tips shed tip vortices and it out-performs a
          triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
       sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
+    }
+    if (mk.rig === 'gaff') {
+      /* ── THE GAFF SCHOONER ─────────────────────────────────────────
+         A quadrilateral fore-and-aft sail set between a BOOM along the deck and a GAFF angled
+         up from the mast. It is the rig that made the big American schooners possible, and the
+         reason is crew: a gaff sail is handled entirely from the deck. Nobody goes aloft to
+         reef it. Wyoming carried 3,730 tons on six masts with a crew of THIRTEEN, where a
+         square-rigged ship of that tonnage wanted thirty or more — and that ratio, not speed,
+         is why the American coal and lumber trades went to schooners. */
+      const boomL = lower * 0.62, gaffL = lower * 0.42;
+      const peak = 0.62;                                 // the gaff's angle above horizontal
+      const footY = base + lower * 0.11;
+      const bm2 = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 7), woodDark);
+      bm2.rotation.z = Math.PI / 2;
+      bm2.position.set(x + boomL / 2, footY, 0);
+      group.add(tag(bm2, 'yard', 'Boom'));
+      const gy = base + lower * 0.86;
+      const gm = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 7), woodDark);
+      gm.rotation.z = -(Math.PI / 2 - peak);
+      gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+      group.add(tag(gm, 'yard', 'Gaff'));
+      /* the sail is the quadrilateral: throat, peak, clew, tack — built from the two spars'
+         own endpoints so it cannot come adrift of either */
+      const throat = [x, gy], peakPt = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
+      const tack = [x, footY], clew = [x + boomL, footY];
+      sails.push(makeTriSail(tack, throat, peakPt, group, 0.045, 1.0));
+      sails.push(makeTriSail(tack, peakPt, clew, group, 0.045, 1.0));
     }
     if (mk.rig === 'junk') {
       /* ── THE BATTENED LUG, to Reddish's measured average ────────────

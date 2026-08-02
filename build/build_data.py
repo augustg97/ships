@@ -97,6 +97,17 @@ RIGS = {
     # ── Junk. Instrumented polars from the Junk Rig Association put a junk at 75–80% of a
     # modern Bermudan's windward VMG — the best pre-industrial rig for windward work, and
     # self-reefing, so it needs a fraction of the crew.
+    # ── Gaff schooner. Points high, and far more importantly is worked entirely from the
+    # DECK — nobody goes aloft to reef a gaff sail. Wyoming carried 3,730 tons on six masts
+    # with a crew of THIRTEEN where a square-rigged ship of that tonnage wanted thirty or
+    # more. That ratio, not speed, is what sent the American coal and lumber trades to
+    # schooners, and it is why they got so long.
+    "gaff": polar(55, 68, {0: 1.0, 30: 2.2, 45: 4.4, 60: 6.0, 75: 7.0, 90: 7.8,
+                           110: 8.2, 120: 8.0, 135: 7.2, 150: 6.2, 180: 5.0},
+                  "gaff schooner",
+                  "Points high and is worked entirely from the deck — nobody goes aloft to "
+                  "reef a gaff sail. That is the whole economic argument for the rig: the "
+                  "crew, not the speed."),
     "junk": polar(62, 70, {0: 1.6, 30: 2.4, 45: 3.3, 60: 4.0, 75: 4.4, 90: 4.7,
                            110: 4.9, 120: 4.8, 135: 4.5, 150: 3.9, 180: 3.2},
                   "battened lug (junk)",
@@ -357,6 +368,67 @@ HULLS = {
 
   # MSC Irina class, 2023: 399.9 × 61.3 m, 24,346 TEU. Cb 0.62–0.72 for a container liner
   # (MAN, *Basic Principles of Ship Propulsion*, Table 1.01).
+  # Wyoming, 1909 — the LONGEST WOODEN SHIP EVER BUILT, and the proof of why that stopped.
+  # 350 ft on deck / 450 ft overall, beam 50.1 ft, depth of hold 33 ft, draught 30.4 ft,
+  # 3,730.54 GRT, six masts, 22 sails. She flexed so badly at that length that her planks
+  # twisted and worked open, and she ran her pumps continuously to stay afloat. Foundered off
+  # Cape Cod, 11 March 1924, all hands. Wood has a maximum length and this is what it looks like.
+  "wyoming": hull(build="frame", loa=140.0, lwl=110.0, beam=15.3, draught=9.3, freeboard=4.2,
+                  cm=0.92, wlPower=3.2, stemFineness=0.10, sternFineness=0.22, transom=0.34,
+                  forefoot=0.22, run=0.26, riseF=0.30, riseA=0.26, sheerBow=1.4, sheerStern=0.9,
+                  tumblehome=0.03, stemRake=0.05, sternRake=0.03, strakes=30, topside="#3b3a36",
+                  masts=[dict(at=0.14, height=0.62, rig="gaff", shrouds=3),
+                         dict(at=0.29, height=0.66, rig="gaff", shrouds=3),
+                         dict(at=0.44, height=0.66, rig="gaff", shrouds=3),
+                         dict(at=0.58, height=0.66, rig="gaff", shrouds=3),
+                         dict(at=0.72, height=0.64, rig="gaff", shrouds=3),
+                         dict(at=0.86, height=0.60, rig="gaff", shrouds=3)]),
+
+  # Preussen, 1902 — the largest sailing ship ever built and the only five-masted FULL-RIGGER.
+  # LOA 147 m, LBP 122 m, beam 16.4 m, draught 8.26 m, 5,081 GRT, 47 sails (30 square, 17
+  # fore-and-aft), 6,806 m2 of canvas, steel. Best day's run 426 nm; 20.5 kn at her fastest.
+  # Rammed by a cross-Channel steamer off Dover in 1910 and lost: sail's high-water mark, ended
+  # by a ferry that misjudged her speed.
+  "preussen": hull(build="steel", loa=147.0, lwl=122.0, beam=16.4, draught=8.26, freeboard=5.0,
+                   cm=0.90, wlPower=3.4, stemFineness=0.07, sternFineness=0.16, transom=0.30,
+                   forefoot=0.20, run=0.28, riseF=0.26, riseA=0.22, sheerBow=1.1, sheerStern=0.7,
+                   tumblehome=0.02, stemRake=0.04, sternRake=0.03, strakes=34, iron=True,
+                   topside="#2b2b2c", bowsprit=0.10, steeve=12,
+                   masts=[dict(at=0.16, height=0.86, rig="square", shrouds=6),
+                          dict(at=0.34, height=0.92, rig="square", shrouds=7),
+                          dict(at=0.52, height=0.92, rig="square", shrouds=7),
+                          dict(at=0.70, height=0.90, rig="square", shrouds=6),
+                          dict(at=0.86, height=0.80, rig="square", shrouds=5)]),
+
+  # Great Eastern, 1858 — six times the tonnage of any ship afloat, and forty years too early.
+  # 211 m, 25.3 m beam, 32,160 GRT. Paddles AND screw AND six masts, built to steam to Australia
+  # without coaling. There was no trade that needed her; she ended laying transatlantic cable,
+  # which is the one job only she could do.
+  "great-eastern": hull(build="iron", loa=211.0, lwl=207.0, beam=25.3, draught=9.1, freeboard=8.5,
+                        cm=0.94, wlPower=3.6, stemFineness=0.10, sternFineness=0.22, transom=0.26,
+                        forefoot=0.16, run=0.26, riseF=0.20, riseA=0.18, sheerBow=0.8,
+                        sheerStern=0.5, tumblehome=0.02, stemRake=0.02, sternRake=0.02,
+                        strakes=40, iron=True, topside="#232427", funnels=2,
+                        masts=[dict(at=0.20, height=0.34, rig="square", shrouds=4, only=2),
+                               dict(at=0.42, height=0.36, rig="square", shrouds=4, only=2),
+                               dict(at=0.64, height=0.34, rig="square", shrouds=4, only=2)]),
+
+  # Titanic, 1912 — 269.1 m, 28.2 m beam, 46,328 GRT. Not the fastest and never meant to be:
+  # built for size and comfort against Cunard's speed. Sixteen watertight compartments — and the
+  # bulkheads stopped at E deck, which is why flooding five of them was enough to sink her.
+  "titanic": hull(build="steel", loa=269.1, lwl=259.0, beam=28.2, draught=10.5, freeboard=18.5,
+                  cm=0.95, wlPower=3.8, stemFineness=0.10, sternFineness=0.20, transom=0.22,
+                  forefoot=0.14, run=0.24, riseF=0.18, riseA=0.15, sheerBow=0.7, sheerStern=0.4,
+                  tumblehome=0.01, stemRake=0.02, sternRake=0.02, strakes=44, iron=True,
+                  topside="#1a1a1c", funnels=4, masts=[]),
+
+  # And the end of a story about people crossing oceans: a hull with NO PEOPLE ON IT.
+  # Wind and solar, months at sea, no crew to feed, water, berth or lose.
+  "usv": hull(build="steel", loa=22.0, lwl=20.5, beam=6.1, draught=2.4, freeboard=1.4, cm=0.72,
+              wlPower=3.4, stemFineness=0.06, sternFineness=0.30, transom=0.30, forefoot=0.24,
+              run=0.30, riseF=0.34, riseA=0.20, sheerBow=0.4, sheerStern=0.3, tumblehome=0.0,
+              stemRake=0.03, sternRake=0.01, strakes=12, iron=True, topside="#8d9498", masts=[]),
+
   "container": hull(build="steel", containers=True, loa=399.9, lwl=383.0, beam=61.3, draught=16.0, freeboard=30.0, cm=0.98,
               wlPower=4.6, stemFineness=0.06, sternFineness=0.30,
               forefoot=0.18, run=0.22, riseF=0.20, riseA=0.14,
@@ -630,6 +702,105 @@ vessel(id="slave-ship", name="Slave ship", sub="the Middle Passage", rig="square
             "only, so this model cites it and does not republish it. The figures here are the "
             "published aggregates.*",
        cite="Eltis & Richardson, *Atlas of the Transatlantic Slave Trade*; SlaveVoyages.org (cited, not redistributed — CC BY-NC).")
+
+vessel(id="wyoming", name="Wyoming", sub="the longest wooden ship ever built", rig="gaff",
+       era=[1890, 1930], from_=1909, to=1924, region="North Atlantic",
+       rows=[["Length", "110 m on deck, 140 m overall — beam 15.3 m, depth of hold 10 m"],
+             ["Tonnage", "3,730.54 gross register tons"],
+             ["Rig", "six-masted schooner, 22 sails"],
+             ["Crew", "13"],
+             ["Fate", "foundered off Cape Cod, 11 March 1924, all hands"]],
+       attestation="generated", confidence="good",
+       text="Wood has a maximum length, and this is what reaching it looks like.\n\n"
+            "At 110 m on deck she was too long to hold herself straight. A wooden hull resists "
+            "bending only through the friction and fastenings between thousands of separate "
+            "timbers, and past a certain length the sea simply works them: her planks twisted "
+            "and opened, and **she ran her pumps continuously to stay afloat**. Not in heavy "
+            "weather — always.\n\n"
+            "She foundered in a gale off Cape Cod in 1924 with everyone aboard. Iron and steel "
+            "did not replace wood because they were cheaper; they replaced it because a metal "
+            "hull is one continuous member and a wooden one is a negotiation.\n\n"
+            "And the rig is the other half of the story. Six masts of gaff sail are worked "
+            "entirely from the deck — nobody goes aloft to reef — so she carried 3,730 tons "
+            "with **thirteen people**. A square-rigged ship of that tonnage wanted thirty.",
+       cite="Wikipedia, *Wyoming (schooner)*, citing the Percy & Small yard records."),
+
+vessel(id="preussen", name="Preussen", sub="the largest sailing ship ever built", rig="square",
+       era=[1890, 1920], from_=1902, to=1910, region="Cape Horn nitrate route",
+       rows=[["Length", "147 m overall, 122 m between perpendiculars — beam 16.4 m"],
+             ["Tonnage", "5,081 gross register tons"],
+             ["Rig", "five-masted full-rigger — the only one ever built"],
+             ["Canvas", "47 sails, 6,806 m²"],
+             ["Best day's run", "426 nautical miles (1904); 20.5 kn at her fastest"]],
+       attestation="generated", confidence="good",
+       text="The high-water mark of sail, and she was sunk by a ferry.\n\n"
+            "Five masts, all square-rigged — the only ship ever built that way. 6,806 m² of "
+            "canvas driving 5,081 tons round Cape Horn with nitrate, on a route where steam "
+            "still could not compete because there was nowhere to coal.\n\n"
+            "In November 1910 the cross-Channel steamer *Brighton* misjudged her speed and tried "
+            "to cross her bows. Preussen was making 16 knots. She broke her keel going ashore "
+            "near Dover and was never salvaged.\n\n"
+            "That is the ending sail actually got: not obsolescence, but a steamer in a hurry.",
+       cite="Wikipedia, *Preussen (ship)*; Laeisz Flying-P line records."),
+
+vessel(id="great-eastern", name="Great Eastern", sub="forty years too early", rig="steam",
+       era=[1850, 1890], from_=1858, to=1889, region="worldwide",
+       rows=[["Length", "211 m — beam 25.3 m, 32,160 gross register tons"],
+             ["Scale", "six times the tonnage of any ship then afloat"],
+             ["Propulsion", "paddle wheels AND screw AND six masts of sail"],
+             ["Design purpose", "steam to Australia and back without coaling"],
+             ["What she actually did", "laid the transatlantic telegraph cable, 1866"]],
+       attestation="generated", confidence="good",
+       text="Brunel built a ship six times bigger than anything afloat, and there was no trade "
+            "for her.\n\n"
+            "The engineering was sound and the reasoning was sound: coal is the constraint on "
+            "steam, and a bigger hull carries proportionally more of it, so a big enough ship "
+            "could reach Australia without refuelling. She could. Nobody wanted to go to "
+            "Australia in those numbers.\n\n"
+            "She spent her career unprofitable and ended doing the one job that needed a hull "
+            "that size: **laying the Atlantic telegraph cable**, 4,200 km of it in one bottom. "
+            "No other ship on earth could hold it.\n\n"
+            "No ship exceeded her tonnage for forty years.",
+       cite="Wikipedia, *SS Great Eastern*; Brunel's own calculations on the coal fraction."),
+
+vessel(id="titanic", name="Titanic", sub="size instead of speed", rig="steam",
+       era=[1900, 1930], from_=1912, to=1912, region="North Atlantic",
+       rows=[["Length", "269.1 m — beam 28.2 m, draught 10.5 m"],
+             ["Tonnage", "46,328 gross register tons"],
+             ["Watertight compartments", "16 — but the bulkheads stopped at E deck"],
+             ["Design speed", "21 kn — deliberately not a record-breaker"],
+             ["Lifeboats", "20, for 1,178 people, against 2,224 aboard"]],
+       attestation="generated", confidence="good",
+       text="She was not built to be fast. Cunard had the speed record and White Star chose not "
+            "to compete for it — Titanic was built for **size and comfort**, on the theory that "
+            "passengers would rather cross well than quickly.\n\n"
+            "Her sixteen watertight compartments were real, and they were not enough for a "
+            "reason of geometry rather than engineering: **the bulkheads stopped at E deck**. "
+            "Water filling one compartment past that level simply flowed over the top into the "
+            "next. She could float with four flooded. The iceberg opened five.\n\n"
+            "The lifeboat number was legal. The regulation scaled boats to a ship's TONNAGE and "
+            "had last been written when the largest ship afloat was 10,000 tons.",
+       cite="Wikipedia, *RMS Titanic*; British Wreck Commissioner's Inquiry, 1912."),
+
+vessel(id="usv", name="Unmanned surface vessel", sub="nobody aboard", rig="motor",
+       era=[2010, 2026], from_=2015, to=2026, region="worldwide",
+       rows=[["Length", "~22 m — beam 6.1 m, draught 2.4 m"],
+             ["Propulsion", "wind and solar; diesel-electric on some hulls"],
+             ["Endurance", "months, limited by fouling and machinery, not by stores"],
+             ["Crew", "none"],
+             ["What it is for", "survey, hydrography, ocean monitoring, naval picket"]],
+       attestation="generated", confidence="fair",
+       text="Every other hull in this model exists to carry people across water. This one does "
+            "not carry anyone at all.\n\n"
+            "That changes the constraint completely. A crewed ship's endurance is set by food, "
+            "water and human tolerance; take the crew off and the limits become fouling, "
+            "machinery and power. A wind-and-solar hull can stay out for **months**, and the "
+            "sea state that would be dangerous for a manned vessel is merely slow for one that "
+            "cannot drown.\n\n"
+            "It is a strange place for this story to arrive. The whole history above is people "
+            "solving the problem of getting themselves across an ocean — and the current answer, "
+            "for a growing share of the work, is not to go.",
+       cite="Wikipedia, *Unmanned surface vehicle*; Saildrone and NOAA survey programmes."),
 
 vessel(id="clipper", name="Clipper", sub="the last argument for sail", rig="square",
        era=[1845, 1890], from_=1843, to=1900, region="worldwide",
