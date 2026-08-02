@@ -164,7 +164,9 @@ HULLS = {
                   forefoot=0.22, run=0.24, riseF=0.70, riseA=0.62,
                   sheerBow=1.0, sheerStern=0.5, tumblehome=0.10,
                   stemRake=0.045, sternRake=0.055, strakes=18, topside="#6b5533",
-                  masts=[dict(at=0.42, height=1.05, rig="square", rake=2, shrouds=3)]),
+                  # Olympias's mast is ~11 m and stows on deck; Steel's rule would give 20 m on this
+                  # hull, which is what happens when an 18th-century warship formula meets L/B 9.7.
+                  masts=[dict(at=0.42, heightM=11.0, rig="square", rake=2, shrouds=3)]),
 
   # Skuldelev 2: 30 m × 3.8 m, draught ~1.0, sail 112 m². L/B 7.9 — a hull built to be rowed
   # and sailed, and shallow enough to be beached anywhere.
@@ -1409,7 +1411,31 @@ def main():
         v["from"] = v.pop("from_")
         v["polar"] = RIGS[v["rig"]]
         if v["id"] in HULLS:
-            v["hull"] = HULLS[v["id"]]
+            h = dict(HULLS[v["id"]])
+            # ── HOW MANY SAILS A MAST CARRIES IS A FUNCTION OF ITS DATE ────────────────
+            # A mast built up in fidded sections is a late invention, and each section is one
+            # more tier of sail. Before about 1400 a mast is a single spar carrying a single
+            # square sail: that is the trireme, the cog, the longship, the Roman corbita.
+            # TOPSAILS come in during the 15th century, on ships big enough that one course
+            # was more canvas than a crew could handle in one piece — a topsail can be reefed
+            # and handed separately, which is the whole point.
+            # TOPGALLANTS follow around 1580, once topmasts could be sent down.
+            #
+            # ⚠ Without this the generator gave every square mast three tiers, so the TRIREME
+            # carried a topgallant and stood 38.4 m of rig over a 36.9 m hull. A trireme has
+            # one low mast and one sail, and she strikes it and leaves it ashore before battle.
+            # A patch per ship would have left the same bug waiting for the next hull added.
+            # ⚠ Use the MIDPOINT of the type's span, not `from`. `from` is when the type first
+            # appears, and for something like the Middle Passage slaver that is 1501 — which
+            # would rig an eighteenth-century ship as a caravel-era one. The vessel drawn should
+            # be typical of the type, not its earliest possible example.
+            yr = (v["from"] + v.get("to", v["from"])) / 2
+            tiers = 1 if yr < 1400 else (2 if yr < 1580 else 3)
+            h["masts"] = [dict(m) for m in h["masts"]]
+            for m in h["masts"]:
+                if m.get("rig") == "square" and "only" not in m:
+                    m["only"] = tiers
+            v["hull"] = h
         vessels.append(v)
     missing = [v["id"] for v in vessels if "hull" not in v]
     if missing:

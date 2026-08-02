@@ -606,7 +606,12 @@ function buildRig(S, group, mats, FINE) {
        Those three ratios are conventional and are NOT confirmed from Steel's tables; they are
        marked inferred on the card. The rule itself is attested. */
     const steelMain = (S.lwl + S.beam) / 2;
-    const lower = mk.height * steelMain;
+    /* ⚠ STEEL'S RULE HAS A DOMAIN, AND IT IS 18th-CENTURY WARSHIPS AT L/B ≈ 3.9.
+       (lower deck + breadth) / 2 is dominated by LENGTH, so on a very fine hull it runs away:
+       a trireme at L/B 9.7 comes out with a 20 m mast against Olympias's measured 11 m. Where a
+       vessel has an attested mast, that measurement wins and the rule is not used at all —
+       `heightM` is metres, `height` is a share of Steel's main. */
+    const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
     /* Steel 1794, "Proportional Lengths of Masts": main topmast = 3/5 of the main mast;
        topgallant = 1/2 of its topmast. Cross-checked against Fincham 1843, whose measured
        ships give topmast 1.05–1.22 x extreme breadth and topgallant 0.57–0.70 x breadth.
@@ -659,7 +664,14 @@ function buildRig(S, group, mats, FINE) {
            30 m up a 33 m lower mast and left a two-storey hole between the deck and the lowest
            sail. A course yard is slung a little over halfway up the lower mast; the mast carries
            on above it to the hounds, the top and the cap. */
-        const yy = y + seg * (si === 0 ? 0.60 : 0.88);
+        /* Where the lowest yard is slung depends on how many tiers are above it. Under two
+           more sails a course sits a little over halfway up the lower mast; carrying the ONLY
+           sail on the mast, as a trireme or a cog does, it is slung near the masthead — there
+           is nothing above it to leave room for, and leaving the top 40% of the pole bare is
+           just a mast that is too tall. */
+        const tiers = mk.only || 3;
+        const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
+        const yy = y + seg * (si === 0 ? courseAt : 0.88);
         /* A yard is not a cylinder: it is octagonal in the middle quarters and tapers to two
            fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
            sector divisions — 1.000, 0.964, 0.900, 0.700, 0.400 — and the last of those is why

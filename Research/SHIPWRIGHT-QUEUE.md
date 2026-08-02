@@ -17,6 +17,9 @@ Working list for the `/loop` raising the Shipwright to the reference bar. Each i
 | 8 | voyaging canoe | crab claw 4x too large — Pâris's kalia rule applied to Hōkūleʻa, whose 50 m² for the pair is on her own card. Spar now **solved from the attested area** (10.8 m) | **fixed** |
 | 9 | all fore-and-aft | crab-claw leech drawn straight; it is cut deeply **hollow**, which is what lets hull-length spars carry a small area | **fixed** |
 | 10 | Shipwright camera | fitted on the X extent alone — a 5.4 m-wide double canoe ran off screen | **fixed** |
+| 12 | trireme, corbita, cog, carrack | every square mast got THREE fidded tiers regardless of date — the trireme carried a **topgallant** and stood 38.4 m of rig over a 36.9 m hull. Tiers now derive from the type's date: 1 before 1400, 2 to 1580, 3 after | **fixed** |
+| 13 | trireme | Steel's mast rule applied at L/B 9.7 gave a 20 m mast against Olympias's measured 11 m. `heightM` lets an attested mast override the rule | **fixed** |
+| 14 | single-tier rigs | the lone yard was slung at 0.60 of the mast — the position of a course under two more sails — leaving the top 40% of the pole bare | **fixed** |
 | 11 | junk, treasure ship | junk rigs fell through to the SQUARE-rig mast case and got three fidded segments. A junk steps ONE unstayed pole. The treasure ship carried a 64 m mast with a sail stopping halfway up it; now 39.7 m with the sail head at the truck | **fixed** |
 
 ## Verification
@@ -35,9 +38,13 @@ All 16 pass. The only flag is the container ship's `rigTop/LOA = 0.09`, which is
 has no rig, only a superstructure.
 
 Numbers cannot judge proportion, so ships still get looked at. **Rendered and checked:** junk,
-voyaging canoe, carrack, ship of the line, treasure ship.
-**Still to look at:** trireme · Roman merchantman · dhow · cog · caravel · fluyt · east indiaman ·
+voyaging canoe, carrack, ship of the line, treasure ship, trireme.
+**Still to look at:** Roman merchantman · dhow · cog · caravel · fluyt · east indiaman ·
 slave ship · clipper · steamer · container ship.
+
+⚠ **Steel's mast rule is still applied to the clipper**, whose L/B of 5.9 is also outside its
+domain — it gives Cutty Sark a ~38 m lower mast against a real ~29 m. `heightM` now exists to
+fix that; it needs a sourced clipper figure.
 
 ## Detail gaps against the reference bar
 
