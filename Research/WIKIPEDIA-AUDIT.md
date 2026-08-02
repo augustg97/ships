@@ -17,7 +17,7 @@ compared against it, not that the article was glanced at.
 | sewn-plank dhow | ☐ | |
 | Chinese junk | ☐ | |
 | treasure ship | ☐ | |
-| caravel | ☐ | |
+| caravel | ✅ | **too long at 23 m** — typical hulls are 12–18 m and Niña/Pinta 15–20 m, at a length-to-beam ratio of about 3.5:1. Now 20.0 × 5.8 m, L/B 3.45. Added the two rig forms (*latina* all-lateen vs *redonda* with a square foremast), Niña and Pinta's figures, and the derivation of "carvel" |
 | carrack | ☐ | |
 | fluyt | ☐ | |
 | East Indiaman | ☐ | |

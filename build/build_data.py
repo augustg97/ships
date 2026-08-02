@@ -289,7 +289,7 @@ HULLS = {
                             dict(at=0.68, height=0.84, rig="junk", rake=0, shrouds=0),
                             dict(at=0.85, height=0.60, rig="junk", rake=0, shrouds=0)]),
 
-  "caravel": hull(loa=23.0, lwl=19.5, beam=6.2, draught=2.0, freeboard=2.1, cm=0.70,
+  "caravel": hull(loa=20.0, lwl=17.2, beam=5.8, draught=2.0, freeboard=2.1, cm=0.70,
               wlPower=2.5, forefoot=0.32, run=0.32, riseF=0.52, riseA=0.46,
               sheerBow=1.0, sheerStern=0.5, tumblehome=0.07, strakes=16,
               stemRake=0.09, sternRake=0.06, topside="#6a4f30",
@@ -638,7 +638,11 @@ vessel(id="cog", name="Cog", sub="the northern workhorse", rig="square", era=[11
 vessel(id="caravel", name="Caravel", sub="caravela latina", rig="lateen", era=[1440, 1550],
        from_=1430, to=1600, region="Atlantic",
        rows=[["Length", "20–25 m"], ["Beam", "~6 m"], ["Burden", "50–60 tons"],
-             ["Crew", "20–25"], ["Draught", "~2 m"], ["Rig", "2–3 lateen masts"]],
+             ["Crew", "20–25"], ["Draught", "~2 m"], ["Rig", "2–3 lateen masts"],
+             ["Length to beam", "about 3.5 : 1 - fine for its date, and most of why it was fast and handy"],
+             ["Two rigs", "caravela LATINA, lateen throughout; caravela REDONDA, a square foremast with lateen masts abaft it"],
+             ["Nina and Pinta", "15-20 m, beam about 6 m, 60-75 tons displacement"],
+             ["Construction", "carvel - the word descends through Byzantine Greek karabos, a light ship"]],
        crew=25, attestation="generated", confidence="moderate",
        text="A small, shallow, weatherly hull carrying two or three lateen sails. Its "
             "significance is its ability to sail to windward: a square-rigged cog could run "
