@@ -65,7 +65,15 @@ Ordered by how much each closes the gap per unit of work.
    Still missing: sheets, tacks, halyards, lifts, and the topmast/topgallant shroud sets.
 3. **Head and beakhead** — headrails, gammoning, the beakhead platform. The bow currently ends
    in a bare stem with a bowsprit stuck through it.
-4. **Stern** — transom, quarter galleries, stern lights. Currently the hull simply stops.
+4. **Stern — BLOCKED ON A HULL-FORM CHANGE, and this is the finding.** `buildStern` is written
+   and its parts are right, but it is an appliqué on a hull whose planking tapers to a near-point
+   at the sternpost, so the transom reads as a slab glued to the back however it is sized. Three
+   widths were tried — an unbounded flare, an absolute 0.6 of beam, and the ship's own after-body
+   half-breadth — and all three fail identically, because **the width was never the problem**.
+   A square-sterned ship's hull FORM ends in a transom: `wl(u)` must not run to zero at u = 1.
+   That means changing `hullSurface` and re-checking every vessel's `sternFineness` against its
+   published coefficients, since a squarer stern changes Cw and therefore Cb. Own round.
+   The code stays in the file, disabled at the call site, with the reason at the call site.
 5. **Ratlines as ladders.** They are `THREE.Line` segments; at close range they read as wire.
    Thin geometry instead.
 6. **Plank seams and fastenings on the hull surface** — the shader draws strakes but no butts,

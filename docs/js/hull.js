@@ -1092,6 +1092,25 @@ const PARTS = {
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
                   + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
+  head:     { stage: 4, name: 'Head and beakhead',
+              what: 'A working platform carried out beyond the stem, and the rails that sweep up '
+                  + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
+                  + "the forestays' pull, which is the load that would otherwise tear it out of "
+                  + 'the ship. The gammoning lashes it down to the stem. And the crew\'s heads '
+                  + 'were out here, over the water, which is where the word comes from.' },
+  transom:  { stage: 2, name: 'Transom',
+              what: 'The square tuck closing the hull across the stern above the waterline. It '
+                  + 'flares as it rises, so a square-sterned ship is widest at her taffrail — '
+                  + 'which is also what gives her the flat canvas for a stern that could be '
+                  + 'recognised at a mile.' },
+  sternlight:{ stage: 3, name: 'Stern lights',
+              what: 'The great windows across the transom, and the only real glazing in the ship. '
+                  + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '
+                  + 'cabin is the one place aboard you can read without a candle.' },
+  gallery:  { stage: 3, name: 'Quarter galleries',
+              what: 'Cantilevered out at the after corners, where the hull has narrowed to nothing '
+                  + 'and there is no side left to put a window in. Light and air for the officers '
+                  + '— and the ship\'s only private necessary house.' },
   funnel:   { stage: 3, name: 'Funnel',
               what: 'Not decoration and not arbitrary: its HEIGHT is set by the draught a boiler '
                   + 'needs, because the taller the stack the harder it pulls air through the '
@@ -1499,6 +1518,129 @@ function buildContainers(S, group) {
   group.add(tag(fn, 'funnel'));
 }
 
+
+/* ── THE HEAD AND THE STERN ────────────────────────────────────────────────────────────
+ * The two ends of a ship carry almost all of its period signature, and both were simply
+ * missing: the bow ended in a bare stem with a bowsprit pushed through it, and the stern just
+ * stopped where the planking ran out.
+ *
+ * THE HEAD is not ornament. The beakhead is a working platform projecting forward of the stem,
+ * and the headrails that sweep up to it are structure — they stay the bowsprit sideways against
+ * the enormous fore-and-aft pull of the forestays, which is the load that would otherwise tear
+ * it out of the ship. The crew's heads were also out there, over the water, which is where the
+ * word comes from.
+ *
+ * THE STERN is where a ship was recognisable at a mile. The square tuck closes the hull above
+ * the waterline; the quarter galleries are the officers' light and air, cantilevered out where
+ * there is no hull to put a window in; and the stern lights are the only large glazing in the
+ * ship. All three are generated from the hull's own after sections, so they fit whatever shape
+ * the coefficients produced.
+ */
+function buildHead(S, group, mats) {
+  if (!S.bowsprit) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const g = new THREE.Group();
+  const stemX = -0.5 * L + H.rake(0.02);
+  const deck = H.sheer(0.04);
+  const reach = L * 0.085;                              // how far the head projects
+  /* the beakhead platform: a narrow deck carried out beyond the stem on knees */
+  const plat = new THREE.Mesh(
+    new THREE.BoxGeometry(reach, B * 0.018, B * 0.30), mats.woodPale);
+  plat.position.set(stemX - reach * 0.42, deck * 0.86, 0);
+  plat.rotation.z = -0.13;                              // it rises toward the bowsprit
+  g.add(plat);
+  /* the headrails, one pair, sweeping from the bow up and forward */
+  for (const sgn of [-1, 1]) {
+    const pts = [];
+    for (let i = 0; i <= 12; i++) {
+      const f = i / 12;
+      const p = surfacePoint(S, H, 0.13 * (1 - f) + 0.012, 0.92);
+      pts.push(new THREE.Vector3(
+        p[0] - f * reach * 1.05,
+        p[1] + f * f * deck * 0.30,
+        sgn * (p[2] * (1 - f * 0.55) + B * 0.012)));
+    }
+    const rail = new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, B * 0.011, 6, false),
+      mats.woodPale);
+    g.add(rail);
+  }
+  /* gammoning: the lashing that holds the bowsprit down to the stem, and the only thing
+     stopping the forestays lifting it straight out of the ship */
+  const gam = new THREE.Mesh(
+    new THREE.TorusGeometry(B * 0.055, B * 0.010, 6, 12), mats.woodDark);
+  gam.rotation.y = Math.PI / 2;
+  gam.position.set(stemX - reach * 0.15, deck * 1.02, 0);
+  g.add(gam);
+  group.add(tag(g, 'head'));
+}
+
+function buildStern(S, group, mats) {
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const g = new THREE.Group();
+  /* the transom: a panel closing the hull across the stern, from waterline to taffrail */
+  const pos = [], idx = [];
+  const NV = 14, NW = 10;
+  for (let j = 0; j <= NV; j++) {
+    const v = 0.60 + (j / NV) * 0.40;
+    /* ⚠ THE TRANSOM HAS TO GROW OUT OF THE HULL, NOT BE STUCK ONTO IT. Two earlier attempts
+       failed the same way: an absolute target width (0.30 B) and an unbounded flare both give a
+       plate wider than the planking it meets, so it reads as a wing bolted to a pointed stern.
+       The width comes from the ship's OWN after sections — the half-breadth a little forward of
+       the sternpost, where there is still hull — so the tuck is continuous with the run by
+       construction. On a fine-sterned hull it is narrow, which is correct: that ship did not
+       have a broad transom. */
+    const p = surfacePoint(S, H, 0.985, v);
+    const q = surfacePoint(S, H, 0.905, v);             // where there is still real hull
+    const half = q[2] * 0.94;
+    for (let i = 0; i <= NW; i++) {
+      const t = (i / NW) * 2 - 1;
+      pos.push(p[0] + Math.abs(t) * L * 0.010, p[1], t * half);
+    }
+  }
+  for (let j = 0; j < NV; j++)
+    for (let i = 0; i < NW; i++) {
+      const a = j * (NW + 1) + i;
+      idx.push(a, a + NW + 1, a + 1, a + 1, a + NW + 1, a + NW + 2);
+    }
+  const tg = new THREE.BufferGeometry();
+  tg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  tg.setIndex(idx); tg.computeVertexNormals();
+  g.add(tag(new THREE.Mesh(tg, mats.woodDark), 'transom'));
+
+  /* stern lights — the great windows across the transom, the only real glazing aboard */
+  if (S.gunDecks) {
+    const glass = new THREE.MeshStandardMaterial({
+      color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
+    const pTop = surfacePoint(S, H, 0.985, 0.90);
+    const halfT = pTop[2] * 3.0 + B * 0.02;
+    for (let i = 0; i < 5; i++) {
+      const w = new THREE.Mesh(
+        new THREE.BoxGeometry(L * 0.006, B * 0.075, halfT * 0.30), glass);
+      w.position.set(pTop[0] + L * 0.012, pTop[1], (i - 2) * halfT * 0.38);
+      g.add(tag(w, 'sternlight'));
+    }
+  }
+
+  /* quarter galleries: cantilevered out at the after corners, where there is no hull left
+     to put a window in and the officers live anyway */
+  if (S.gunDecks) {
+    const p = surfacePoint(S, H, 0.93, 0.86);
+    for (const sgn of [-1, 1]) {
+      const q = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.036, B * 0.048, B * 0.20, 8, 1, false, 0, Math.PI),
+        mats.woodPale);
+      q.rotation.x = Math.PI / 2;
+      q.rotation.y = sgn > 0 ? 0 : Math.PI;
+      q.position.set(p[0] + L * 0.008, p[1] * 0.96, sgn * (p[2] + B * 0.012));
+      g.add(tag(q, 'gallery'));
+    }
+  }
+  group.add(g);
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -1601,6 +1743,16 @@ function buildShip(S, opts) {
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
   if (FINE) buildFunnel(S, group);
+  /* ⚠ THE HEAD SHIPS; THE STERN DOES NOT, YET. buildStern is written and correct in its parts,
+     but it is an APPLIQUÉ on a hull whose planking tapers to a near-point at the sternpost, so
+     the transom reads as a slab glued to the back of the ship however it is sized. Three widths
+     were tried — an unbounded flare, an absolute 0.6 of beam, and the ship's own after-body
+     half-breadth — and all three fail the same way, because the problem is not the width.
+     A square-sterned ship's HULL FORM ends in a transom: `wl(u)` must not run to zero at u = 1.
+     That is a change to hullSurface and to every vessel's sternFineness, and it belongs in its
+     own round with the coefficients re-checked. Shipping the bolt-on would look worse than the
+     bare stern it replaces, so it stays off until the hull form carries it. */
+  if (FINE) buildHead(S, group, mats);
   if (FINE && S.containers) buildContainers(S, group);
 
   /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
