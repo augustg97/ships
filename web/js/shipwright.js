@@ -47,15 +47,29 @@ function swInit() {
   SW.ray = new THREE.Raycaster();
   SW.ray.params.Line = { threshold: 0.35 };
 
-  SW.scene.add(new THREE.HemisphereLight(0x93b8cc, 0x2a2418, 1.35));
-  const key = new THREE.DirectionalLight(0xfff2da, 1.45); key.position.set(70, 95, 55);
-  const fill = new THREE.DirectionalLight(0x9dc6de, 0.45); fill.position.set(-60, 30, -70);
-  SW.scene.add(key); SW.scene.add(fill);
+  /* ── LIGHTING: A MUSEUM FLOOR, NOT A CELLAR ──────────────────────────────────────────
+     The first pass lit the ship the way the globe is lit — one dim hemisphere and a weak key —
+     and every vessel came out a brown silhouette on black. A model you are meant to inspect
+     needs the light a photographer would give it: a strong warm key high on the bow quarter to
+     rake the planking and throw the frames into relief, a cool fill opposite so the shadow side
+     still reads, a low bounce standing in for light off the floor, and a rim behind to separate
+     the rigging from the background. Four lights, and the ship stops being a silhouette. */
+  SW.scene.add(new THREE.HemisphereLight(0xbcd6e6, 0x4a4536, 1.5));
+  const key = new THREE.DirectionalLight(0xfff4e2, 2.5); key.position.set(90, 120, 70);
+  const fill = new THREE.DirectionalLight(0xa8c8e0, 0.85); fill.position.set(-80, 45, -55);
+  const bounce = new THREE.DirectionalLight(0xd8c9a8, 0.40); bounce.position.set(15, -60, 25);
+  const rim = new THREE.DirectionalLight(0xdcecf6, 1.15); rim.position.set(-40, 70, -120);
+  [key, fill, bounce, rim].forEach(l => SW.scene.add(l));
+  SW.renderer.outputColorSpace = THREE.SRGBColorSpace || SW.renderer.outputColorSpace;
+  if ('toneMapping' in SW.renderer) {
+    SW.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    SW.renderer.toneMappingExposure = 1.15;
+  }
 
   /* a ground plane, so the hull reads as an object on a floor rather than in a void */
   const gg = new THREE.PlaneGeometry(1, 1);
   const gm = new THREE.Mesh(gg, new THREE.MeshStandardMaterial({
-    color: 0x0a161f, roughness: 1.0, metalness: 0.0 }));
+    color: 0x18232b, roughness: 0.95, metalness: 0.0 }));
   gm.rotation.x = -Math.PI / 2;
   SW.ground = gm; SW.scene.add(gm);
 
@@ -198,6 +212,7 @@ function swOpen(vessel) {
     ['Rig, deck to truck', U.rigTop.toFixed(1) + ' m'],
   ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
+  swFillCard(vessel);
   swApplyStage();
   swSelect(null);
   swBuildFleetStrip();
@@ -205,6 +220,38 @@ function swOpen(vessel) {
   SW.on = true;
   swResize();
   return true;
+}
+
+/* ── WHAT SHE IS, AND WHAT SHE COULD DO ────────────────────────────────────────────────
+   The dimensions say how big; they do not say what the ship was FOR or what it could actually
+   achieve. History comes from the vessel's own researched prose and its attested rows. The
+   capability figures are not prose at all — they are read straight off the polar diagram the
+   routing engine uses, so what the panel claims about a ship's sailing is the same thing the
+   model uses to cross oceans with it. If one is wrong, both are. */
+function swFillCard(v) {
+  const P = v.polar || {};
+  const cur = P.curve || {};
+  const ks = Object.keys(cur).map(Number).sort((a, b) => a - b);
+  let bestA = 0, bestV = 0;
+  ks.forEach(k => { if (cur[k] > bestV) { bestV = cur[k]; bestA = k; } });
+  const cap = [
+    [bestV.toFixed(1) + ' kn', 'best speed'],
+    [bestA + '°', 'at this angle off the wind'],
+    [(P.beatLight !== undefined ? P.beatLight + '°' : '—'), 'closest, light airs'],
+    [(P.beatHard !== undefined ? P.beatHard + '°' : '—'), 'closest, blowing hard'],
+  ];
+  document.getElementById('swCap').innerHTML =
+    '<h4>What she could do</h4><div class="cap">' +
+    cap.map(c => '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>').join('') + '</div>' +
+    (P.rigNote ? '<p style="margin-top:10px">' + P.rigNote + '</p>' : '');
+  document.getElementById('swStory').innerHTML =
+    '<h4>What she was</h4>' +
+    (v.text || '').split('\n\n').map(t => '<p>' + t + '</p>').join('');
+  document.getElementById('swRows').innerHTML = (v.rows || []).length
+    ? '<h4>On the record</h4>' + v.rows.map(r =>
+        '<div class="rw"><i>' + r[0] + '</i><b>' + r[1] + '</b></div>').join('')
+    : '';
+  document.getElementById('swCite').textContent = v.cite || '';
 }
 
 /* ── the scale strip: every hull in the model, one baseline, one scale ─────────────── */

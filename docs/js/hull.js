@@ -571,7 +571,7 @@ void main(){
  * lengths as fractions of the mast — rather than by eye. Where a rule is not attested for a
  * type, the value is marked inferred on the card.
  */
-function buildRig(S, group, mats) {
+function buildRig(S, group, mats, FINE) {
   const L = S.lwl, B = S.beam;
   const H = hullSurface(S);
   const deckAt = u => H.sheer(u);
@@ -614,6 +614,7 @@ function buildRig(S, group, mats) {
        which is why the rig stood 72 m over a 57 m hull instead of about 62. */
     const top = lower * 0.60, tg = top * 0.50;
     let y = base;
+    let prevYard = base + lower * 0.13;   // the courses' foot clears the deck by this
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
                : mk.rig === 'crabclaw' ? [lower] : [lower, top, tg];
     const radii = [B * 0.030, B * 0.020, B * 0.013];
@@ -624,6 +625,12 @@ function buildRig(S, group, mats) {
                     radii[si], radii[si] * 0.7, woodDark, -rakeRad);
       m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
 
+      /* the TOP sits at the head of the lower mast, and the topmast is fidded through it */
+      if (FINE && mk.rig === 'square' && si === 0) {
+        const tp = buildTop(B * 0.20, mats.woodPale);
+        tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
+        group.add(tp);
+      }
       if (mk.rig === 'square') {
         /* ── YARD LENGTHS, Steel 1794 p.40 ────────────────────────────
            "Proportional Lengths of Yards, in the Royal Navy":
@@ -641,7 +648,11 @@ function buildRig(S, group, mats) {
         const yardLen = si === 0 ? lower * 0.875
                       : si === 1 ? lower * 0.875 * 0.714
                       : lower * 0.875 * 0.714 * 0.667;
-        const yy = y + seg * 0.94;
+        /* ⚠ 0.94 SLUNG EVERY YARD AT THE HEAD OF ITS OWN SEGMENT, which put the main course
+           30 m up a 33 m lower mast and left a two-storey hole between the deck and the lowest
+           sail. A course yard is slung a little over halfway up the lower mast; the mast carries
+           on above it to the hounds, the top and the cap. */
+        const yy = y + seg * (si === 0 ? 0.60 : 0.88);
         /* A yard is not a cylinder: it is octagonal in the middle quarters and tapers to two
            fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
            sector divisions — 1.000, 0.964, 0.900, 0.700, 0.400 — and the last of those is why
@@ -661,10 +672,17 @@ function buildRig(S, group, mats) {
         ym.rotation.x = Math.PI / 2;
         ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
         group.add(tag(ym, 'yard'));
-        /* the sail hangs from the yard and bellies to leeward; its drop is set by the gap to
-           the tier below, not by the mast segment */
+        /* ── THE DROP IS THE GAP TO THE TIER BELOW ────────────────────────────────
+           Which is what the comment here always said, while the code used a fixed fraction of
+           the mast segment and left the tiers floating apart from each other. A square sail
+           hangs from its yard down to the yard beneath it — that IS its depth, and it is why
+           the sail plan of a square-rigger reads as one continuous wall of canvas rather than
+           as separate flags. The course's "tier below" is the deck, less the clearance a foot
+           needs so the sail can be handled. */
+        const drop = yy - prevYard;
+        prevYard = yy;
         sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-                            yardLen * 0.96, seg * 0.56, canvas, group, 'square'));
+                            yardLen * 0.96, drop * 0.97, canvas, group, 'square'));
       }
 
       /* ── MASTS STACK. ⚠ THIS LINE WAS MISSING, AND NOTHING LOOKED WRONG. ──────────────
@@ -697,7 +715,16 @@ function buildRig(S, group, mats) {
          long — the rig gets its area from the spar, not from height — so deriving the mast from
          the yard reproduces the silhouette, while imposing a tall mast (which is what this did)
          forces the yard nearly upright and throws the sail off the ship. */
-      const yardLen = L * (mk.height / maxMastShare);
+      /* ⚠ THE HULL-LENGTH YARD RULE IS FOR A LATEEN MAIN, NOT FOR A LATEEN MIZZEN.
+         Pâris's baggala and patamar are lateen-RIGGED craft: the lateen is the whole engine,
+         so its yard is the length of the boat. A carrack's mizzen is a steering sail on a
+         square-rigged ship — it exists to help her lie closer and to balance the head sails,
+         and it is small. Applying the dhow rule to it gave the carrack a 36 m yard on a 42 m
+         hull and a mizzen bigger than her mainsail. The test is whether the ship carries any
+         square canvas at all; if she does, this mast is a mizzen and takes Steel's proportion
+         off its own mast instead. */
+      const mixed = (S.masts || []).some(m => m.rig === 'square');
+      const yardLen = mixed ? lower * 1.15 : L * (mk.height / maxMastShare);
       /* θ is the OBSERVABLE, and it is about 45°: that is the angle in every plate of Pâris's
          and in every photograph of a working boom or baghla. Deriving θ instead from the mast's
          fore-and-aft position (which is what the first attempt did) forced it to 65° and the
@@ -706,7 +733,7 @@ function buildRig(S, group, mats) {
          hull, slung a third of the way along at a mast set well forward, has its HEEL PROJECTING
          OUT BEYOND THE STEM. It is not an artefact — it is the most recognisable thing about
          the rig, and it falls straight out of (1) and (2) once θ is fixed. */
-      const th = 0.785;                                  // 45°, off Pâris's plates
+      const th = mixed ? 0.98 : 0.785;   // a mizzen is peaked up steeper than a dhow's main
       const dir = [Math.cos(th), Math.sin(th)];          // +x is AFT, so the yard rises aft
       const sling = [x, base + dir[1] * yardLen / 3];
       const heel = [x - dir[0] * yardLen / 3, base];
@@ -746,17 +773,26 @@ function buildRig(S, group, mats) {
          in its length the length of the canoe between the inner ends of the bow-pieces." Pâris
          also notes Fijian canoes carry LESS sail "the yards not being as long as the hull,
          which makes the mast rake more" — so the rule is diagnostic, not decorative. */
+      /* ⚠ The two spars used to CONVERGE AT THE TOP and spread at the foot — an inverted V,
+         which is the one shape a crab claw is not. Both spars radiate from a single TACK,
+         hauled down forward, and open upward and aft. The sail is the triangle between them,
+         and it is built from the spars' own endpoints so it cannot come adrift of either. */
       const sparLen = L * 0.98;
-      [-0.55, 0.30].forEach((rot, i) => {
-        const g2 = new THREE.CylinderGeometry(B * 0.008, B * 0.014, sparLen, 7);
+      const tack = [x - L * 0.22, base];
+      const tipY = [tack[0] + Math.cos(1.19) * sparLen, tack[1] + Math.sin(1.19) * sparLen];
+      const tipB = [tack[0] + Math.cos(0.46) * sparLen, tack[1] + Math.sin(0.46) * sparLen];
+      [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
+        const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
+        const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 7);
         const m2 = new THREE.Mesh(g2, woodDark);
-        m2.rotation.z = rot;
-        m2.position.set(x + Math.sin(rot) * sparLen * 0.42,
-                        base + Math.cos(rot) * sparLen * 0.42, 0);
-        group.add(m2);
+        m2.position.set((tack[0] + tip[0]) / 2, (tack[1] + tip[1]) / 2, 0);
+        m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
+        group.add(tag(m2, 'yard', nm));
       });
-      sails.push(makeSail(x, base + lower * 0.42, lower * 0.72, lower * 0.90,
-                          canvas, group, 'crabclaw'));
+      /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
+         also why it works: the deeply raked tips shed tip vortices and it out-performs a
+         triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
+      sails.push(makeTriSail(tack, tipY, tipB, group, 0.075));
     }
     if (mk.rig === 'junk') {
       /* ── THE BATTENED LUG, to Reddish's measured average ────────────
@@ -772,16 +808,23 @@ function buildRig(S, group, mats) {
       const nb = 5;
       /* 8% of the chord forward of the mast — the sail sits almost entirely abaft it */
       const off = sailW * (0.5 - 0.08);
+      /* ⚠ TWO ERRORS LIVED HERE AND BOTH WERE VISIBLE FROM ACROSS THE ROOM.
+         (1) A battened lug is a FORE-AND-AFT sail. Battens and canvas were both rotated
+             athwartships — the whole sail stood across the beam like a square course, so it
+             cut straight through the hull it was supposed to drive.
+         (2) The canvas was positioned by its CENTRE at deck level, so half of it hung below
+             the waterline. The battens, computed separately, were in the right place — which
+             is exactly how the two disagreed. One number, used twice, is the fix. */
+      const footY = base + lower * 0.14;             // the boom lies just above the deck
       for (let i = 0; i <= nb; i++) {
-        const yy = base + lower * 0.14 + sailH * (i / nb);
+        const yy = footY + sailH * (i / nb);
         const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 6);
         const bm = new THREE.Mesh(bg, woodDark);
-        bm.rotation.x = Math.PI / 2;
+        bm.rotation.z = Math.PI / 2;                 // along the hull, not across it
         bm.position.set(x + off, yy, 0);
-        group.add(tag(bm, 'yard', 'Batten'));
+        group.add(tag(bm, 'yard', i === 0 ? 'Boom' : (i === nb ? 'Yard' : 'Batten ' + i)));
       }
-      sails.push(makeSail(x + off, base + lower * 0.14 + sailH * 0.5,
-                          sailW, sailH, canvas, group, 'junk'));
+      sails.push(makeSail(x + off, footY + sailH, sailW, sailH, canvas, group, 'junk'));
     }
 
     /* standing rigging: shrouds from the channels out on the hull's side up to the masthead,
@@ -895,9 +938,10 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
   });
   const m = new THREE.Mesh(g, sailMat);
   m.position.set(x, yTop - height / 2, 0);
-  m.rotation.y = Math.PI / 2;
-  if (kind === 'lateen') m.rotation.z = 0.36;
-  if (kind === 'crabclaw') m.rotation.z = -0.20;
+  /* ⚠ Square sails hang ACROSS the ship; lug, lateen and gaff sails lie ALONG it. This
+     quarter-turn was applied unconditionally, which silently swung every fore-and-aft sail
+     broadside-on. The rig type has to decide it. */
+  if (kind === 'square') m.rotation.y = Math.PI / 2;
   m.userData.kind = kind;
   group.add(tag(m, 'sail'));
   return m;
@@ -978,6 +1022,31 @@ const PARTS = {
               what: 'The skin. In carvel work the planks meet edge to edge on the frames and the '
                   + 'seams are caulked; in clinker work they overlap and are riveted to each '
                   + 'other, and the shell is built first. Carvel can be scaled up; clinker cannot.' },
+  rail:     { stage: 3, name: 'Rail',
+              what: 'The capping timber round the deck edge, following the sheer. It finishes '
+                  + 'the tops of the frames and is what everyone aboard actually holds on to.' },
+  grating:  { stage: 3, name: 'Grating',
+              what: 'A lattice hatch cover. It has to be open, because the only ventilation for '
+                  + 'the decks below comes through it — and it has to be strong enough to walk '
+                  + 'on and to take a sea aboard. In heavy weather they were battened down under '
+                  + 'tarpaulin, which is where the phrase comes from.' },
+  capstan:  { stage: 3, name: 'Capstan',
+              what: 'A vertical winch turned by bars. It is the machine that makes a big ship '
+                  + 'workable by muscle: fourteen men on the bars can weigh an anchor no gang '
+                  + 'could lift, and the same drum warps the ship, hoists yards and heaves guns.' },
+  boat:     { stage: 3, name: "Ship's boat",
+              what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
+                  + 'the water carrier — and the only thing between the crew and the sea if the '
+                  + 'ship is lost. Bligh sailed one 6,700 km after the Bounty mutiny.' },
+  top:      { stage: 4, name: 'Top',
+              what: 'The platform at the head of the lower mast, carried on trestletrees and '
+                  + 'crosstrees. It spreads the topmast shrouds — giving the upper mast a wide '
+                  + 'enough base to be stayed at all — and doubles as a fighting platform for '
+                  + 'musketeers. Nelson was shot by a man in one.' },
+  deadeye:  { stage: 5, name: 'Deadeyes',
+              what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
+                  + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '
+                  + 'and a deadeye pair is a hand-powered turnbuckle you can adjust at sea.' },
   channel:  { stage: 5, name: 'Channels',
               what: 'Shelves bolted to the outside of the hull at deck level. They exist to push '
                   + 'the shrouds OUTBOARD, widening the angle at which the standing rigging '
@@ -1026,6 +1095,137 @@ function tag(o, key, extra) {
   const P = PARTS[key];
   o.userData.part = { key, stage: P.stage, name: extra || P.name, what: P.what };
   return o;
+}
+
+
+/* ── DECK FURNITURE AND FITTINGS ───────────────────────────────────────────────────────
+ * The difference between a hull with masts and a SHIP is almost entirely here. A ship of the
+ * line's deck carried gratings over every hatch, a capstan big enough for fourteen men, boats
+ * on the beams, a ladder at every change of level and a rail round the whole thing — and the
+ * eye reads their absence long before it can say what is missing.
+ *
+ * Everything here is placed from the vessel's own dimensions and mast stations, so nothing has
+ * to be positioned by hand per ship and nothing can land in the wrong place on a hull it was
+ * not drawn for.
+ */
+function buildFittings(S, group, mats) {
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const deckAtU = u => H.sheer(u);
+  const halfAtU = u => (H.halfB * H.wl(u)) * (1 - H.tumble(u));
+  const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
+
+  /* ── the RAIL round the deck edge: a capping timber following the sheer ───────────── */
+  {
+    const pos = [], idx = [];
+    const NU = 90; let base = 0;
+    for (const sgn of [-1, 1]) {
+      for (let i = 0; i <= NU; i++) {
+        const u = 0.035 + (i / NU) * 0.93;
+        const y = deckAtU(u), hb = halfAtU(u);
+        const x = (u - 0.5) * L + H.rake(u);
+        const r = B * 0.016;
+        pos.push(x, y, sgn * (hb - r), x, y + r * 1.6, sgn * (hb - r),
+                 x, y + r * 1.6, sgn * (hb + r * 0.3), x, y, sgn * (hb + r * 0.3));
+      }
+      for (let i = 0; i < NU; i++) {
+        const a = base + i * 4, b = a + 4;
+        for (let f = 0; f < 4; f++) {
+          const c = (f + 1) % 4;
+          idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+        }
+      }
+      base += (NU + 1) * 4;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    group.add(tag(new THREE.Mesh(g, pale), 'rail'));
+  }
+
+  /* ── HATCH GRATINGS: a lattice, because that is what they are ─────────────────────── */
+  const gratingAt = (u, w, l) => {
+    const gg = new THREE.Group();
+    const y = deckAtU(u) + B * 0.004;
+    const x = (u - 0.5) * L;
+    const n = Math.max(3, Math.round(w / (B * 0.045)));
+    for (let i = 0; i < n; i++) {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(l, B * 0.010, B * 0.012), wood);
+      bar.position.set(x, y, -w / 2 + (i + 0.5) * (w / n));
+      gg.add(bar);
+    }
+    const m2 = Math.max(3, Math.round(l / (B * 0.045)));
+    for (let i = 0; i < m2; i++) {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(B * 0.012, B * 0.014, w), wood);
+      bar.position.set(x - l / 2 + (i + 0.5) * (l / m2), y + B * 0.003, 0);
+      gg.add(bar);
+    }
+    return tag(gg, 'grating');
+  };
+  [0.30, 0.50, 0.70].forEach(u => {
+    const w = halfAtU(u) * 0.85;
+    group.add(gratingAt(u, w, L * 0.055));
+  });
+
+  /* ── the CAPSTAN: the machine that made a big ship workable by hand ───────────────── */
+  {
+    const u = 0.62, y = deckAtU(u);
+    const cg = new THREE.Group();
+    const drum = new THREE.Mesh(
+      new THREE.CylinderGeometry(B * 0.055, B * 0.070, B * 0.13, 12), wood);
+    drum.position.y = y + B * 0.065;
+    cg.add(drum);
+    for (let i = 0; i < 8; i++) {                       // the bars, shipped for heaving
+      const a = i / 8 * Math.PI * 2;
+      const bar = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.008, B * 0.010, B * 0.30, 6), pale);
+      bar.rotation.z = Math.PI / 2; bar.rotation.y = a;
+      bar.position.set(Math.cos(a) * B * 0.15, y + B * 0.115, Math.sin(a) * B * 0.15);
+      cg.add(bar);
+    }
+    cg.position.x = (u - 0.5) * L;
+    group.add(tag(cg, 'capstan'));
+  }
+
+  /* ── the SHIP'S BOAT, stowed on the beams over the main hatch ─────────────────────── */
+  if (S.lwl > 25) {
+    const u = 0.46, y = deckAtU(u);
+    const bl = L * 0.16, bb = bl * 0.30;
+    const bg = new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+    const bm = new THREE.Mesh(bg, pale);
+    bm.scale.set(bl / 2, bb * 0.62, bb / 2);
+    bm.rotation.x = Math.PI;                            // hollow side up
+    bm.position.set((u - 0.5) * L, y + bb * 0.34, 0);
+    group.add(tag(bm, 'boat'));
+  }
+}
+
+/* ── the TOP: the platform at the head of a lower mast ─────────────────────────────────
+   A signature of a square-rigged ship and the thing whose absence makes a generated rig read
+   as scaffolding. It spreads the topmast shrouds, and it is a fighting platform. */
+function buildTop(r, mat) {
+  const g = new THREE.Group();
+  const plat = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.92, r * 0.09, 14), mat);
+  g.add(plat);
+  /* the crosstrees and trestletrees under it, which are what actually carry the load */
+  for (const [rx, rz] of [[r * 1.5, r * 0.13], [r * 0.16, r * 1.9]]) {
+    const t = new THREE.Mesh(new THREE.BoxGeometry(rx, r * 0.11, rz), mat);
+    t.position.y = -r * 0.10;
+    g.add(t);
+  }
+  return tag(g, 'top');
+}
+
+/* ── DEADEYES: the blocks that set up the shrouds, in a row along each channel ───────── */
+function buildDeadeyes(n, r, mat) {
+  const g = new THREE.Group();
+  for (let i = 0; i < n; i++) {
+    const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.5, 8), mat);
+    d.rotation.x = Math.PI / 2;
+    d.position.z = (i - (n - 1) / 2) * r * 2.4;
+    g.add(d);
+  }
+  return tag(g, 'deadeye');
 }
 
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
@@ -1079,6 +1279,12 @@ function buildShip(S, opts) {
           new THREE.BoxGeometry(S.lwl * 0.075, S.beam * 0.012, S.beam * 0.055), timber);
         ch.position.set(p[0], p[1] * 0.97, sgn * (p[2] + S.beam * 0.026));
         group.add(tag(ch, 'channel'));
+        /* the deadeyes stand in a row along the channel's outer edge — this is where the
+           shrouds actually terminate, and a channel without them reads as a bare shelf */
+        const de = buildDeadeyes(Math.max(3, (mk.shrouds || 3) + 1), S.beam * 0.018, timber);
+        de.rotation.y = Math.PI / 2;
+        de.position.set(p[0], p[1] * 0.97 + S.beam * 0.016, sgn * (p[2] + S.beam * 0.046));
+        group.add(de);
       }
     });
   } else {
@@ -1089,19 +1295,29 @@ function buildShip(S, opts) {
     FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
   group.add(tag(hull, 'planking'));
 
-  const deckMat = new THREE.MeshLambertMaterial({ color: 0x9a8663, side: THREE.DoubleSide });
+  const deckMat = new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
+                                                   side: THREE.DoubleSide });
   group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck'));
 
+  /* ⚠ Lambert has no specular term at all, so every timber came out matte and the whole ship
+     read as cardboard under any lighting. Standard gives wood a low, broad sheen — which is
+     what oiled and tarred timber actually does — and lets the key light rake the planking. */
   const mats = {
-    spar: new THREE.MeshLambertMaterial({ color: 0x5a4126 }),
-    canvas: new THREE.MeshLambertMaterial({ color: 0xcfc4a8, side: THREE.DoubleSide }),
+    spar: new THREE.MeshStandardMaterial({ color: 0x6a4d2c, roughness: 0.72, metalness: 0.02 }),
+    woodDark: new THREE.MeshStandardMaterial({ color: 0x54402a, roughness: 0.78 }),
+    woodPale: new THREE.MeshStandardMaterial({ color: 0x9c8259, roughness: 0.68 }),
+    canvas: new THREE.MeshStandardMaterial({ color: 0xded3b8, roughness: 0.94,
+                                             side: THREE.DoubleSide }),
     /* ⚠ Standing rigging is NOT black. It is hemp tarred with Stockholm tar, which is a dark
        reddish-brown to golden-brown. True black rigging is a late-19th-century appearance and
        comes from PETROLEUM tar — so black shrouds on an 18th-century ship are an anachronism
        of about a hundred years. */
     rope: new THREE.LineBasicMaterial({ color: 0x4a3520, transparent: true, opacity: 0.78 }),
   };
-  const sails = buildRig(S, group, mats);
+  const sails = buildRig(S, group, mats, FINE);
+  /* the fittings are what turn a hull with masts into a ship, and they are the reason the
+     Shipwright's model is worth building separately from the globe's token */
+  if (FINE) buildFittings(S, group, mats);
 
   /* ── HOW TALL IS THE RIG? MEASURE IT, DO NOT ESTIMATE IT ─────────────────────────────
      The Yard used to reconstruct rig height from the mast data with a multiplier per rig type —
