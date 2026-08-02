@@ -477,7 +477,11 @@ function swFillCard(v) {
   const cap = [
     [v.crew !== undefined ? String(v.crew) : '—', v.crew === 0 ? 'crew — nobody aboard' : 'crew'],
     [v.pax !== undefined ? String(v.pax) : '—', v.pax === undefined ? 'passengers unrecorded' : 'passengers'],
-    [bestV.toFixed(1) + ' kn', 'best speed'],
+    /* ⚠ On a ship with no sails the polar is meaningless as a speed. Titanic's card read
+       "9.6 kn best speed" against a real 21 kn service speed, because the number was coming
+       from a rig curve she does not have. An attested speed wins where one exists. */
+    [(v.speedKn !== undefined ? v.speedKn.toFixed(1) : bestV.toFixed(1)) + ' kn',
+     v.speedKn !== undefined ? 'service speed' : 'best speed'],
     [bestA + '°', 'at this angle off the wind'],
     /* ⚠ "made good" is in the LABEL, not in a paragraph underneath. The note used to spend
        three lines explaining that these are course-made-good rather than heading, and restating

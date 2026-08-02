@@ -602,7 +602,9 @@ vessel(id="cog", name="Cog", sub="the northern workhorse", rig="square", era=[11
        rows=[["Bremen cog, 1380", "23.3 × 7.6 m, draught 2.25 m"],
              ["Displacement", "~84 t; cargo ~87 t"], ["Crew", "15–20"],
              ["Sail", "one square sail, ~200 m²"],
-             ["Windward, measured", "74–76° made good in a gentle breeze; LOSES ground in 20 kn"]],
+             ["Windward, measured", "74–76° made good in a gentle breeze; LOSES ground in 20 kn"],
+             ["Fastenings", "double-clenched iron nails — not treenails; the nail is what let a\n              clinker shell be built without a frame to fasten to"],
+             ["Construction", "clinker sides on a FLUSH-LAID bottom, built shell-first"]],
        crew=20, attestation="attested", confidence="good",
        text="Flat-bottomed so it could take the ground on a tidal flat and be unloaded at low "
             "water, which is what the Hanse ports needed. It also carries the **pintle-and-"
@@ -786,16 +788,17 @@ vessel(id="great-eastern", name="Great Eastern", sub="forty years too early", ri
 vessel(id="titanic", name="Titanic", sub="size instead of speed", rig="steam",
        era=[1900, 1930], from_=1912, to=1912, region="North Atlantic",
        rows=[["Length", "269.1 m — beam 28.2 m, draught 10.5 m"],
-             ["Tonnage", "46,328 gross register tons"],
-             ["Watertight compartments", "16 — but the bulkheads stopped at E deck"],
-             ["Design speed", "21 kn — deliberately not a record-breaker"],
-             ["Lifeboats", "20, for 1,178 people, against 2,224 aboard"]],
-       crew=892, pax=1317, attestation="generated", confidence="good",
+             ["Tonnage", "46,329 gross register tons"],
+             ["Watertight compartments", "16, with 15 bulkheads — which stopped at D deck"],
+             ["Speed", "21 kn service, 23 kn maximum — deliberately not a record-breaker"],
+             ["Funnels", "four, but only THREE drew smoke; the aftermost was a dummy"],
+             ["Lifeboats", "20, for 1,178 people, against about 2,208 aboard"]],
+       crew=866, pax=1342, speedKn=21.0, attestation="generated", confidence="good",
        text="She was not built to be fast. Cunard had the speed record and White Star chose not "
             "to compete for it — Titanic was built for **size and comfort**, on the theory that "
             "passengers would rather cross well than quickly.\n\n"
             "Her sixteen watertight compartments were real, and they were not enough for a "
-            "reason of geometry rather than engineering: **the bulkheads stopped at E deck**. "
+            "reason of geometry rather than engineering: **the bulkheads stopped at D deck**. "
             "Water filling one compartment past that level simply flowed over the top into the "
             "next. She could float with four flooded. The iceberg opened five.\n\n"
             "The lifeboat number was legal. The regulation scaled boats to a ship's TONNAGE and "
