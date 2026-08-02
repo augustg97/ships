@@ -383,6 +383,12 @@ function swOpen(vessel) {
   SW.shipX = entry.x;
   SW.panTo = entry.x;
   SW.shipSpin = 0;                                   // a new ship faces the way she was built
+  /* ⚠ Do NOT clear SW.fit here. The easing reads SW.fit AND SW.look, and clearing only one of
+     them leaves the other holding a stale or absent value — which puts NaN into the camera
+     position and stops the renderer dead, silently, with a black canvas and a fully populated
+     UI. The first open snaps by setting both to their targets, which swFrame does on its own
+     when they are undefined. */
+  if (!SW.on) { SW.panX = entry.x; SW.panTo = entry.x; }
   const idx = SW.layout.findIndex(e => e.id === vessel.id);
   document.getElementById('swNavPos').textContent = (idx + 1) + ' of ' + SW.layout.length;
   SW.sel = null;
@@ -536,17 +542,28 @@ function swFrame(now) {
   SW.lon = 0.42;      // the camera's angle is fixed; the SHIP turns instead
   /* the line stays put and the selected hull turns under the drag */
   SW.layout && SW.layout.forEach(e => { e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
+  /* ── THE CAMERA TRAVELS, AND SO DOES THE ZOOM ─────────────────────────────────────
+     The pan already eased; the ZOOM did not. `fit` was recomputed from the new ship's bounding
+     box the instant the selection changed, so stepping from the canoe to Titanic slammed the
+     camera 200 m backwards in one frame while it was still gently sliding sideways — half a
+     move, which reads as a glitch rather than as travel.
+     Both are eased now, and the zoom is the part that carries the scale: pulling visibly back
+     for a 269 m liner and closing in for a 19 m canoe IS the size comparison, felt as motion
+     rather than read off a number. Easing them at the same rate keeps them one movement. */
   const top = SW.viewTop, bot = SW.viewBot;
-  const look = bot + (top - bot) * 0.34;
-  const halfV = Math.max(top - look, look - bot);
+  const lookT = bot + (top - bot) * 0.34;
+  const halfV = Math.max(top - lookT, lookT - bot);
   const tanV = Math.tan(SW.cam.fov * Math.PI / 360);
-  const fit = SW.fit = 1.14 * Math.max(halfV / tanV, SW.viewX / 2 / (tanV * Math.max(1.2, SW.cam.aspect)));
-  const d = fit * SW.dist;
-  /* ── PAN ALONG THE LINE ───────────────────────────────────────────────────────────
-     Selecting a ship does not cut to it; the camera flies down the row, so you pass everything
-     between and the growth is something you travel through rather than read off a chart. */
+  const fitT = 1.14 * Math.max(halfV / tanV,
+                               SW.viewX / 2 / (tanV * Math.max(1.2, SW.cam.aspect)));
+  if (!isFinite(SW.fit) || !isFinite(SW.look)) { SW.fit = fitT; SW.look = lookT; }
+  const EASE = 0.055;                                  // ~1.2 s to settle, which reads as travel
+  SW.fit += (fitT - SW.fit) * EASE;
+  SW.look += (lookT - SW.look) * EASE;
+  const look = SW.look;
+  const d = SW.fit * SW.dist;
   if (SW.panX === undefined) SW.panX = SW.shipX;
-  if (SW.panTo !== undefined) SW.panX += (SW.panTo - SW.panX) * 0.075;
+  if (SW.panTo !== undefined) SW.panX += (SW.panTo - SW.panX) * EASE;
   SW.cam.position.set(SW.panX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
                       d * Math.sin(SW.lat) + look,
                       d * Math.cos(SW.lat) * Math.cos(SW.lon));
