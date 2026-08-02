@@ -209,9 +209,23 @@ function buildFramesGeometry(S, NF = 26, onlyU) {
       for (let j = 0; j <= NV; j++) {
         const v = j / NV;
         const p = surfacePoint(S, H, u, v);
-        const inb = 0.965;                          // frames sit just inside the planking
+        /* ── ⚠ THE FRAMES WERE POKING THROUGH THE PLANKING ON EVERY SHIP ────────────────
+           A 3.5% inset is not a plank thickness, it is a PROPORTION — so at the ends, where
+           the half-breadth falls to a fraction of a metre, the gap shrank to millimetres and
+           the two surfaces interpenetrated. Worse, the frames are tessellated at 26 steps and
+           the fine planking at 72: two polygonal approximations of the same curve, sampled
+           differently, cross each other wherever the curvature is strongest. The ribs then
+           show as streaks down a finished hull — which is exactly what they were doing, on
+           every vessel in the fleet, and it read as a texture bug rather than as geometry.
+
+           An inset has to be a LENGTH, because a plank is a length. Frames sit one plank
+           thickness inboard — call it 4% of the half-beam — plus a small absolute clearance
+           that does not vanish when the section narrows. */
+        const plank = S.beam * 0.020;
+        const inset = plank + S.beam * 0.006;
+        const z = Math.max(0, Math.abs(p[2]) - inset);
         for (let e = -1; e <= 1; e += 2)
-          pos.push(p[0] + e * half, p[1], sgn * p[2] * inb);
+          pos.push(p[0] + e * half, p[1], sgn * z);
       }
       for (let j = 0; j < NV; j++) {
         const a = base + j * 2;
@@ -662,8 +676,16 @@ void main(){
     float pv = v * uStrakes * 0.55, ph = u * 34.0;
     float land = smoothstep(0.03, 0.11, abs(fract(pv) - 0.5) * 2.0);
     float butt = smoothstep(0.02, 0.07, abs(fract(ph) - 0.5) * 2.0);
-    float rivet = smoothstep(0.40, 0.26,
-                    length(fract(vec2(ph * 7.0, pv * 2.0)) - 0.5));
+    /* ⚠ RIVETS GO ALONG THE SEAMS, NOT EVERYWHERE. A uniform grid of them over the whole
+       plate is not what a riveted ship looks like and, at any distance, moirés into something
+       that reads as woven mesh — which is exactly what it was doing. Rivets fasten one plate
+       to the NEXT, so they run in rows down the LANDS and across the BUTTS and nowhere else.
+       The middle of a plate is bare steel. */
+    float onLand = 1.0 - smoothstep(0.0, 0.16, abs(fract(pv) - 0.5) * 2.0);
+    float onButt = 1.0 - smoothstep(0.0, 0.10, abs(fract(ph) - 0.5) * 2.0);
+    float rowL = smoothstep(0.34, 0.16, abs(fract(ph * 3.0) - 0.5) * 2.0) * onLand;
+    float rowB = smoothstep(0.34, 0.16, abs(fract(pv * 1.6) - 0.5) * 2.0) * onButt;
+    float rivet = max(rowL, rowB);
     vec3 paint = uTopside;
     /* the boot-top: a band of anti-fouling red at the waterline, and below it the bottom */
     float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
@@ -671,7 +693,7 @@ void main(){
     col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
     col *= mix(0.90, 1.0, land);                     // the lap catches a little shadow
     col *= mix(0.955, 1.0, butt);
-    col += rivet * 0.018;                            // rivets are proud, not dark
+    col += rivet * 0.030;                            // proud, so they catch light
   }
 
   col *= taper * 0.25 + 0.75;
@@ -1352,6 +1374,12 @@ const PARTS = {
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
                   + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
+  paddle:   { stage: 4, name: 'Paddle wheels',
+              what: 'Great Eastern\'s are 17 m across — taller than a house. She carried a 7.3 m '
+                  + 'SCREW as well, and that is why she is such an odd ship: paddles are '
+                  + 'efficient in smooth water and useless the moment a roll lifts one clear, a '
+                  + 'screw works in any sea but was unproven at that size, so Brunel fitted both '
+                  + 'and let them share the work.' },
   oar:      { stage: 4, name: 'Oars',
               what: 'The sail is for fair winds; the OARS are what she is. A trireme pulls 170 '
                   + 'of them on three levels, and the whole hull exists to hold them at the '
@@ -1819,7 +1847,7 @@ function buildFunnel(S, group) {
     pipe.position.set(-r * 1.25, h * 0.46, 0);
     g.add(pipe);
     g.position.set((u - 0.5) * S.lwl, y, 0);
-    g.rotation.z = -0.045;                       // raked aft, as they almost always were
+    g.rotation.z = -0.085;                       // raked aft, as they almost always were
     group.add(tag(g, 'funnel'));
   }
 }
@@ -2101,6 +2129,54 @@ function buildOars(S, group, mat) {
   group.add(tag(g, 'oar'));
 }
 
+
+/* ── PADDLE WHEELS ─────────────────────────────────────────────────────────────────────
+ * Great Eastern's are 17 m across — taller than a house, one either side, and the single most
+ * conspicuous thing about her. She also carried a 7.3 m screw, which is why she is the odd ship
+ * she is: paddles are efficient in smooth water and useless when a roll lifts one clear, a screw
+ * works in any sea but was still unproven at that size, so Brunel fitted BOTH and let them share.
+ * The wheel is a rim on radial arms with flat floats between — and the floats are what does the
+ * work, which is why they are set square to the rim and not feathered on a ship this early.
+ */
+function buildPaddles(S, group, mats) {
+  const D = S.paddleDia || 0;
+  if (!D) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const u = S.paddleAt || 0.52;
+  const p = surfacePoint(S, H, u, 0.80);
+  const iron = mats.iron || mats.woodDark;
+  for (const sgn of [-1, 1]) {
+    const g = new THREE.Group();
+    const R = D / 2;
+    for (let i = 0; i < 24; i++) {                     // the radial arms
+      const a = i / 24 * Math.PI * 2;
+      const arm = new THREE.Mesh(
+        new THREE.BoxGeometry(B * 0.020, R * 2, B * 0.020), iron);
+      arm.rotation.z = a;
+      g.add(arm);
+      const float = new THREE.Mesh(                     // and the floats that do the work
+        new THREE.BoxGeometry(D * 0.030, D * 0.115, B * 0.30), mats.woodPale);
+      float.position.set(Math.cos(a + Math.PI / 2) * R * 0.90,
+                         Math.sin(a + Math.PI / 2) * R * 0.90, 0);
+      float.rotation.z = a;
+      g.add(float);
+    }
+    for (const r of [R, R * 0.55]) {                    // the rims
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(r, B * 0.012, 6, 30), iron);
+      g.add(rim);
+    }
+    g.rotation.y = Math.PI / 2;
+    g.position.set(p[0], p[1] * 0.55, sgn * (p[2] + B * 0.16));
+    group.add(tag(g, 'paddle'));
+    /* the sponson box that carries the wheel's weight out from the hull */
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(D * 0.62, B * 0.16, B * 0.34), iron);
+    box.position.set(p[0], p[1] * 0.95, sgn * (p[2] + B * 0.12));
+    group.add(box);
+  }
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -2213,6 +2289,7 @@ function buildShip(S, opts) {
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   if (FINE) buildOars(S, group, mats.woodPale);
+  if (FINE) buildPaddles(S, group, mats);
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the
      counter in surfacePoint. Three earlier attempts failed by sizing the plate; none of them
      could work, because the ship had no broad stern for a plate to sit on. */

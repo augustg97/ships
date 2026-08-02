@@ -405,14 +405,24 @@ HULLS = {
   # 211 m, 25.3 m beam, 32,160 GRT. Paddles AND screw AND six masts, built to steam to Australia
   # without coaling. There was no trade that needed her; she ended laying transatlantic cable,
   # which is the one job only she could do.
+  # Great Eastern, 1858 — six times the tonnage of any ship afloat, and forty years too early.
+  # Wikipedia (SS Great Eastern), checked: 692 ft / 211 m, beam 82 ft / 25 m, 18,915 GRT,
+  # draught 6.1 m light and 9.1 m laden, crew 418, 4,000 passengers, 18 lifeboats (20 after 1860).
+  # SIX masts — said to be named for the days of the week, Monday forward to Saturday aft — and
+  # FIVE funnels, later reduced to four. Rigged "similar to a topsail schooner with a main gaff
+  # sail on each mast", NOT square. Paddle wheels 17 m across AND a 7.3 m screw.
   "great-eastern": hull(build="iron", loa=211.0, lwl=207.0, beam=25.3, draught=9.1, freeboard=8.5,
                         cm=0.94, wlPower=3.6, stemFineness=0.10, sternFineness=0.22, transom=0.26,
                         forefoot=0.16, run=0.26, riseF=0.20, riseA=0.18, sheerBow=0.8,
                         sheerStern=0.5, tumblehome=0.02, stemRake=0.02, sternRake=0.02,
-                        strakes=40, iron=True, topside="#232427", funnels=2, decks=2,
-                        masts=[dict(at=0.20, height=0.34, rig="square", shrouds=4, only=2),
-                               dict(at=0.42, height=0.36, rig="square", shrouds=4, only=2),
-                               dict(at=0.64, height=0.34, rig="square", shrouds=4, only=2)]),
+                        strakes=40, iron=True, topside="#232427", funnels=5, decks=2,
+                        paddleDia=17.0, paddleAt=0.50,
+                        masts=[dict(at=0.13, heightM=34.0, rig="gaff", shrouds=4),
+                               dict(at=0.26, heightM=38.0, rig="gaff", shrouds=4),
+                               dict(at=0.40, heightM=40.0, rig="gaff", shrouds=5),
+                               dict(at=0.60, heightM=40.0, rig="gaff", shrouds=5),
+                               dict(at=0.74, heightM=38.0, rig="gaff", shrouds=4),
+                               dict(at=0.87, heightM=32.0, rig="gaff", shrouds=4)]),
 
   # Titanic, 1912 — 269.1 m, 28.2 m beam, 46,328 GRT. Not the fastest and never meant to be:
   # built for size and comfort against Cunard's speed. Sixteen watertight compartments — and the
@@ -744,11 +754,14 @@ vessel(id="preussen", name="Preussen", sub="the largest sailing ship ever built"
             "That is the ending sail actually got: not obsolescence, but a steamer in a hurry.",
        cite="Wikipedia, *Preussen (ship)*; Laeisz Flying-P line records."),
 
-vessel(id="great-eastern", name="Great Eastern", sub="forty years too early", rig="steam",
+vessel(id="great-eastern", name="Great Eastern", sub="forty years too early", rig="gaff",
        era=[1850, 1890], from_=1858, to=1889, region="worldwide",
-       rows=[["Length", "211 m — beam 25.3 m, 32,160 gross register tons"],
-             ["Scale", "six times the tonnage of any ship then afloat"],
-             ["Propulsion", "paddle wheels AND screw AND six masts of sail"],
+       rows=[["Length", "211 m — beam 25.3 m, 18,915 gross register tons"],
+             ["Scale", "six times the tonnage of any ship then afloat; unsurpassed for 40 years"],
+             ["Propulsion", "17 m paddle wheels AND a 7.3 m screw AND six masts of sail"],
+             ["Rig", "topsail schooner — a gaff sail on each of six masts"],
+             ["The masts", "named for the days of the week: Monday forward to Saturday aft"],
+             ["Boats", "18 lifeboats, 20 after 1860"],
              ["Design purpose", "steam to Australia and back without coaling"],
              ["What she actually did", "laid the transatlantic telegraph cable, 1866"]],
        crew=418, pax=4000, attestation="generated", confidence="good",
