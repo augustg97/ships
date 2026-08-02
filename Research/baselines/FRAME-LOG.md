@@ -8,3 +8,4 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-02 16:35** · `ship-junk` — New frame. Covers the battened lug, where the battens must stay inside the canvas when the sail is sheeted out — the fault August reported on 2026-08-02.
 - **2026-08-02 16:39** · `ship-dhow` — Re-baselined against the pinned Shipwright camera. The first baseline was captured mid-pan because the view's eased pan and zoom was not frozen; it is now, so the framing is stable. Also carries settee 0.30.
 - **2026-08-02 16:39** · `ship-junk` — Re-baselined against the pinned Shipwright camera; the first was captured mid-pan.
+- **2026-08-02 16:48** · `ship-junk` — Card prose only. The junk card no longer claims the battened lug among China's firsts: junks carried square sails until about the 12th century and then adopted the tanja and the fully battened rig from the southern seas. Diff confined to the WHAT SHE WAS paragraph; no geometry moved.

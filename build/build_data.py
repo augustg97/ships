@@ -609,17 +609,38 @@ vessel(id="dhow", name="Sewn-plank dhow", sub="the Indian Ocean trader", rig="la
 
 vessel(id="junk", name="Chinese junk", sub="海船", rig="junk", era=[800, 1900],
        from_=200, to=2026, region="China and the eastern seas",
-       rows=[["Quanzhou ship (sank c. 1272)", "surviving hull 24.2 × 9.15 m; reconstructed ~34 m"],
-             ["Compartments", "12 bulkheads, 13 watertight compartments"],
+       rows=[["Rig", "⚠ **the battened lug is not original.** Junks carried SQUARE sails "
+                     "before the 12th century, then adopted the tanja sail and the fully "
+                     "battened rig from the southern seas"],
+             ["What the battens cost", "full-length battens hold the sail flatter than ideal in "
+                                       "every wind, which **reduces** windward performance "
+                                       "against other fore-and-aft rigs"],
+             ["Typical trading junk, pre-1500", "20–30 m"],
+             ["Quanzhou ship (sank c. 1272)", "surviving hull 24.2 × 9.15 m; reconstructed ~34 m"],
+             ["Nanhai One (sank c. 1160)", "30.4 m"],
+             ["Song claims of 71 m", "discounted — such descriptions "
+                                     "'tend to greatly exaggerate dimensions, usually to twice "
+                                     "or more of the actual lengths'"],
+             ["Compartments", "12 bulkheads, 13 watertight compartments; first documented by "
+                              "Zhu Yu, *Pingzhou Ketan*, by 1119"],
              ["Cargo", "200–250 t"],
-             ["Sternpost rudder", "attested 1st c. AD — about a millennium before Europe"],
-             ["Compass at sea", "Zhu Yu, *Pingzhou Ketan*, 1119"]],
+             ["Sternpost rudder", "a pottery model from before the 1st c. AD carries the oldest "
+                                  "known depiction — about a millennium before Europe. On a "
+                                  "large junk it took up to 20 hands to work in a blow"],
+             ["Compass at sea", "Zhu Yu, *Pingzhou Ketan*, 1119"],
+             ["Ibn Battuta on the largest", "1,000 men — 600 sailors and 400 men-at-arms; "
+                                            "'from twelve down to three sails'"],
+             ["*Keying*", "sailed from China round the Cape of Good Hope to the United States "
+                          "and England, 1846–48"]],
        crew=30, attestation="attested", confidence="good",
-       text="Four genuine firsts in one hull: watertight transverse bulkheads, the balanced "
-            "battened lug sail, the axial sternpost rudder, and the magnetic compass used at "
-            "sea. Each of them reached Europe centuries later or was invented there "
-            "independently and later.\n\n"
-            "The battens make the sail self-reefing and allow it to set flat. A junk therefore "
+       text="A seagoing hull with watertight transverse bulkheads, an axial sternpost rudder "
+            "and the magnetic compass used at sea, each attested in China well before it "
+            "appeared in Europe. The hull descends from tapering rafts rather than from the "
+            "dugout.\n\n"
+            "⚠ The battened lug is the exception and is often miscounted among them. Junks "
+            "carried square sails until about the 12th century and then adopted the tanja sail "
+            "and the fully battened rig from the southern seas. The battens make the sail "
+            "self-reefing and allow it to set flat. A junk therefore "
             "works to windward considerably better than a square rig, and with a smaller crew: "
             "reefing is done by lowering battens onto the boom from the deck. Instrumented "
             "comparisons put a junk at 75–80% of a Bermudan rig's windward performance.",
@@ -907,14 +928,24 @@ vessel(id="titanic", name="Titanic", sub="size instead of speed", rig="steam",
 vessel(id="usv", name="Unmanned surface vessel", sub="nobody aboard", rig="motor",
        era=[2010, 2026], from_=2015, to=2026, region="worldwide",
        rows=[["Length", "~22 m — beam 6.1 m, draught 2.4 m"],
-             ["Propulsion", "wind and solar; diesel-electric on some hulls"],
+             ["Propulsion", "wind, wave and solar; diesel-electric on some hulls"],
              ["Endurance", "months, limited by fouling and machinery, not by stores"],
              ["Crew", "none"],
+             ["Saildrone SD 1021", "fastest uncrewed Atlantic crossing, Bermuda to the UK, "
+                                   "August 2019"],
+             ["Saildrone, Antarctic", "12,500 miles circumnavigated over seven months"],
+             ["Saildrone SD 1045", "sailed into Hurricane Sam, September 2021"],
+             ["*Soleil*", "first fully autonomous sea voyage — 240 km in 7 hours, 17 Jan 2022"],
+             ["MV *Yara Birkeland*", "first autonomous cargo ship, launched Nov 2021; all-electric"],
+             ["The earliest", "German remote-controlled FL-boats in the First World War; US Navy "
+                              "target and minesweeping craft in the Second"],
              ["What it is for", "survey, hydrography, ocean monitoring, naval picket"]],
        crew=0, pax=0, attestation="generated", confidence="fair",
-       text="Every other hull in this model exists to carry people across water. This one does "
-            "not carry anyone at all.\n\n"
-            "That changes the constraint completely. A crewed ship's endurance is set by food, "
+       text="A vessel that operates on the surface without a crew aboard, across a range from "
+            "remote control to full autonomy. Propulsion may be wind, wave or solar: a wave "
+            "glider takes its drive from the motion of the sea itself, and a Saildrone from wind "
+            "and sunlight.\n\n"
+            "Removing the crew changes the constraint. A crewed ship's endurance is set by food, "
             "water and human tolerance; take the crew off and the limits become fouling, "
             "machinery and power. A wind-and-solar hull can stay out for **months**, and the "
             "sea state that would be dangerous for a manned vessel is merely slow for one that "
@@ -957,10 +988,18 @@ vessel(id="steamer", name="Ocean steamer", sub="iron hull, screw propeller", rig
              ["*Great Western*, 1838", "Bristol→New York 15 d 5 h ≈ 8.2 kn"],
              ["Coal, simple engine 1850s", "4.0–5.0 lb per indicated horsepower-hour"],
              ["Compound, 1870s", "~2.0–2.5 lb/ihp-hr"],
-             ["Triple expansion, 1890", "~1.5 lb/ihp-hr"]],
+             ["Triple expansion, 1890", "~1.5 lb/ihp-hr"],
+             ["Propulsion, in order", "paddle wheels — impractical in a seaway and abandoned for "
+                                      "the screw; turbines from *Lusitania* and *Mauretania*; "
+                                      "diesel and oil firing from the early 1930s"],
+             ["Atlantic crossing, early 1840s", "under 10 kn — twelve days and more"],
+             ["By the 1870s", "about 15 kn — seven days"],
+             ["*Lusitania* and *Mauretania*", "27 kn"],
+             ["SS *United States*, 1952", "34.5 kn — 3 days 12 hours, and the record still stands"]],
        crew=90, pax=600, attestation="generated", confidence="good",
-       text="The number that changed the world is not horsepower. It is **pounds of coal per "
-            "horsepower-hour**, and it fell about threefold between 1855 and 1890.\n\n"
+       text="An iron-hulled, screw-driven steamship on a scheduled ocean route. The figure that "
+            "governs its range is not horsepower but **pounds of coal per horsepower-hour**, "
+            "which fell about threefold between 1855 and 1890.\n\n"
             "That is what made steam viable on long routes. At 1850s efficiency a ship crossing "
             "an ocean had to give up roughly half its deadweight to its own fuel; by 1890 it "
             "was 15–20%. Nothing about the engine's power mattered as much as how little coal "
@@ -971,12 +1010,19 @@ vessel(id="steamer", name="Ocean steamer", sub="iron hull, screw propeller", rig
 
 vessel(id="container", name="Container ship", sub="from Ideal X to 24,000 TEU", rig="motor",
        era=[1956, 2026], from_=1956, to=2026, region="worldwide",
-       rows=[["*Ideal X*, 26 April 1956", "converted T2 tanker; 58 trailer bodies"],
+       rows=[["*Autocarrier*, February 1931", "21 container slots — the first container ship, "
+                                              "a quarter-century before the intermodal box"],
+             ["*Ideal X*, 26 April 1956", "converted T2 tanker; 58 trailer bodies"],
+             ["The box", "40-foot units are about 90% of all container shipping"],
+             ["Share of trade", "~90% of non-bulk cargo; over 80% of world freight by volume"],
+             ["Speed", "16–25 kn; slow steaming cut this to about 21 kn in the 2010s"],
              ["*Emma Mærsk*, 2006", "397 × 56 m, 15,550 TEU"],
              ["MSC Irina class, 2023", "399.9 × 61.3 m, 24,346 TEU"],
              ["Panamax (1914 locks)", "LOA 294.13 m, beam 32.31 m, draught 12.04 m"],
-             ["Neo-Panamax (2016)", "LOA 366 m, beam 51.25 m, draught 15.2 m"],
-             ["Malaccamax", "draught 25 m"]],
+             ["Neo-Panamax (2016)", "LOA 366 m, draught 15.2 m; beam **contested** — 49 m as "
+                                   "built, raised to 51.25 m by the Canal Authority in 2018"],
+             ["Malaccamax", "draught **contested** — commonly given as 25 m, though the strait "
+                            "is also cited at about 21 m. No container ship is bound by it"]],
        crew=22, pax=0, attestation="generated", confidence="good",
        text="The last chapter of this story is not about the sea at all. A modern container "
             "ship's route is set by **lock chambers and dredged channels** — numbers written "
