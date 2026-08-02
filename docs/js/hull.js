@@ -1632,16 +1632,23 @@ function buildStern(S, group, mats) {
   tg.setIndex(idx); tg.computeVertexNormals();
   g.add(tag(new THREE.Mesh(tg, mats.woodDark), 'transom'));
 
-  /* stern lights — the great windows across the transom, the only real glazing aboard */
+  /* ── STERN LIGHTS, SET IN THE TRANSOM THEY BELONG TO ────────────────────────────────
+     ⚠ Twice now these have been sized from a formula that ran alongside the transom's own
+     geometry instead of from it, and twice they have ended up wider than the stern and off its
+     centreline. The transom mesh has just been built; measure IT. Anything derived from the
+     same numbers by a parallel route will drift the moment either route changes — which is the
+     single failure mode this project keeps rediscovering. */
   if (S.gunDecks) {
     const glass = new THREE.MeshStandardMaterial({
       color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
-    const pTop = surfacePoint(S, H, 0.985, 0.90);
-    const halfT = pTop[2] * 3.0 + B * 0.02;
+    tg.computeBoundingBox();
+    const tb = tg.boundingBox;
+    const halfT = Math.min(tb.max.z, -tb.min.z);        // the transom's own half-width
+    const yTop = tb.min.y + (tb.max.y - tb.min.y) * 0.80;
     for (let i = 0; i < 5; i++) {
       const w = new THREE.Mesh(
-        new THREE.BoxGeometry(L * 0.006, B * 0.075, halfT * 0.30), glass);
-      w.position.set(pTop[0] + L * 0.012, pTop[1], (i - 2) * halfT * 0.38);
+        new THREE.BoxGeometry(L * 0.004, (tb.max.y - tb.min.y) * 0.16, halfT * 0.24), glass);
+      w.position.set(tb.max.x + L * 0.002, yTop, (i - 2) * halfT * 0.34);
       g.add(tag(w, 'sternlight'));
     }
   }
@@ -1649,10 +1656,15 @@ function buildStern(S, group, mats) {
   /* quarter galleries: cantilevered out at the after corners, where there is no hull left
      to put a window in and the officers live anyway */
   if (S.gunDecks) {
-    const p = surfacePoint(S, H, 0.93, 0.86);
+    tg.computeBoundingBox();
+    const tb2 = tg.boundingBox;
+    const p = [tb2.max.x - L * 0.020, tb2.min.y + (tb2.max.y - tb2.min.y) * 0.62,
+               Math.min(tb2.max.z, -tb2.min.z) * 0.94];
     for (const sgn of [-1, 1]) {
+      /* a gallery is a small closet cantilevered off the quarter, not a barrel. About a
+         sixth of the beam tall and a tenth deep — big enough for a window and a seat. */
       const q = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.036, B * 0.048, B * 0.20, 8, 1, false, 0, Math.PI),
+        new THREE.CylinderGeometry(B * 0.020, B * 0.026, B * 0.11, 8, 1, false, 0, Math.PI),
         mats.woodPale);
       q.rotation.x = Math.PI / 2;
       q.rotation.y = sgn > 0 ? 0 : Math.PI;
