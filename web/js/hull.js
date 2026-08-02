@@ -112,7 +112,101 @@ function hullSurface(S) {
   return { nExp, halfB, wl, keel, sheer, tumble, rake };
 }
 
+
+/* ── THE BACKBONE AND THE RIBS ─────────────────────────────────────────────────────────
+ * A ship you cannot take apart is a picture of a ship. These generate the two members that
+ * come before the planking, so the Shipwright can build the vessel in the order a yard
+ * actually built it — and so the order itself carries information, because it is NOT the
+ * same order everywhere:
+ *
+ *   FRAME-FIRST (carvel).  Mediterranean, and northern Europe from about 1450. Lay the keel,
+ *   raise the frames, then plank onto them. The shape is decided on the drawing floor before
+ *   a plank is cut, which is what makes a 74 reproducible.
+ *
+ *   SHELL-FIRST (clinker).  Scandinavian and the northern cog. Build the planking shell FIRST,
+ *   edge-joined and riveted, and insert light frames afterwards into a hull whose shape is
+ *   already fixed. The shape lives in the shipwright's eye, not on paper.
+ *
+ * The same two members, assembled in opposite orders, and the difference is most of why the
+ * Atlantic ship of 1500 could be scaled up and the longship could not. `S.shellFirst` marks it.
+ */
+function buildKeelGeometry(S) {
+  const H = hullSurface(S);
+  const pos = [], idx = [];
+  const NU = 96, sided = 0.055 * S.beam / 2;        // moulded siding of the keel timber
+  for (let i = 0; i <= NU; i++) {
+    const u = i / NU;
+    const p = surfacePoint(S, H, u, 0);             // the rabbet line, where planking meets keel
+    const depth = i === 0 || i === NU ? 0.02 : 0.055 * S.draught + 0.02;
+    /* a rectangular section hung under the rabbet: four corners per station */
+    pos.push(p[0], p[1] - depth, -sided, p[0], p[1] - depth, sided,
+             p[0], p[1] + 0.01, sided, p[0], p[1] + 0.01, -sided);
+  }
+  for (let i = 0; i < NU; i++) {
+    const a = i * 4, b = a + 4;
+    for (let f = 0; f < 4; f++) {
+      const c = (f + 1) % 4;
+      idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
+function buildFramesGeometry(S, NF = 26) {
+  const H = hullSurface(S);
+  const pos = [], idx = [];
+  const NV = 26, half = 0.016 * S.lwl / 2;          // the room-and-space of one frame
+  let base = 0;
+  for (let f = 0; f < NF; f++) {
+    const u = 0.055 + (f / (NF - 1)) * 0.89;
+    for (let sgn = -1; sgn <= 1; sgn += 2) {        // both sides of the ship
+      for (let j = 0; j <= NV; j++) {
+        const v = j / NV;
+        const p = surfacePoint(S, H, u, v);
+        const inb = 0.965;                          // frames sit just inside the planking
+        for (let e = -1; e <= 1; e += 2)
+          pos.push(p[0] + e * half, p[1], sgn * p[2] * inb);
+      }
+      for (let j = 0; j < NV; j++) {
+        const a = base + j * 2;
+        idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+      }
+      base += (NV + 1) * 2;
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
 /* Build the hull as an indexed triangle mesh. u runs stem→stern, v runs keel→sheer. */
+/* The one place a point on the hull surface is defined. Keel, frames and planking are all
+   generated from THIS function, so the frames cannot sit proud of the planking and the keel
+   cannot float below it — they agree by construction rather than by tuning. */
+function surfacePoint(S, H, u, v) {
+  const L = S.lwl;
+  const b = H.halfB * H.wl(u);
+  const t = S.draught * H.keel(u);
+  const deckHalf = b * (1 - H.tumble(u));
+  const fb = H.sheer(u);
+  let y, z;
+  if (v <= 0.62) {
+    const k = v / 0.62;
+    z = -t * (1 - k);
+    const yy = Math.pow(Math.max(0, 1 - Math.pow(1 - k, H.nExp)), 1 / H.nExp);
+    y = b * yy;
+  } else {
+    const k = (v - 0.62) / 0.38;
+    z = fb * k;
+    y = b + (deckHalf - b) * Math.pow(k, 0.9);
+  }
+  return [(u - 0.5) * L + H.rake(u), z, y];
+}
+
 function buildHullGeometry(S, NU = 120, NV = 34) {
   const H = hullSurface(S);
   const pos = [], nor = [], uvs = [], idx = [];
@@ -396,7 +490,7 @@ function buildRig(S, group, mats) {
     const m = new THREE.Mesh(g, mat);
     m.position.set(x, y0 + h / 2, 0);
     m.rotation.z = tiltZ;
-    group.add(m);
+    group.add(tag(m, 'mast'));
     return m;
   };
 
@@ -472,7 +566,7 @@ function buildRig(S, group, mats) {
         yg.computeVertexNormals();
         ym.rotation.x = Math.PI / 2;
         ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
-        group.add(ym);
+        group.add(tag(ym, 'yard'));
         /* the sail hangs from the yard and bellies to leeward; its drop is set by the gap to
            the tier below, not by the mast segment */
         sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
@@ -537,7 +631,7 @@ function buildRig(S, group, mats) {
         new THREE.CylinderGeometry(B * 0.005, B * 0.011, ylen, 7), woodDark);
       ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
       ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
-      group.add(ym);
+      group.add(tag(ym, 'yard', 'Lateen yard'));
 
       /* The CANVAS starts at the stemhead, not at the heel: the projecting part of the yard is
          bare spar, and the tack is bowsed down to the stem. So the sail's tack is the point
@@ -590,7 +684,7 @@ function buildRig(S, group, mats) {
         const bm = new THREE.Mesh(bg, woodDark);
         bm.rotation.x = Math.PI / 2;
         bm.position.set(x + off, yy, 0);
-        group.add(bm);
+        group.add(tag(bm, 'yard', 'Batten'));
       }
       sails.push(makeSail(x + off, base + lower * 0.14 + sailH * 0.5,
                           sailW, sailH, canvas, group, 'junk'));
@@ -611,7 +705,7 @@ function buildRig(S, group, mats) {
         [1, -1].forEach((side, si2) => {
           const a = new THREE.Vector3(chX, base, side * half * 1.06);
           const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
-          group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), rope));
+          group.add(tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), rope), 'shroud'));
           shroudPts[si2].push([a, b]);
         });
       }
@@ -624,7 +718,7 @@ function buildRig(S, group, mats) {
           const t = h / rise;
           const pts = side.map(([a, b]) => new THREE.Vector3(
             a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t));
-          group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), rope));
+          group.add(tag(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), rope), 'ratline'));
         }
       });
     }
@@ -641,7 +735,7 @@ function buildRig(S, group, mats) {
     bm.rotation.z = Math.PI / 2 - steeve;
     bm.position.set(x0 - Math.cos(steeve) * len / 2,
                     deckAt(u0) + Math.sin(steeve) * len / 2, 0);
-    group.add(bm);
+    group.add(tag(bm, 'bowsprit'));
   }
 
   return sails;
@@ -711,7 +805,7 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
   if (kind === 'lateen') m.rotation.z = 0.36;
   if (kind === 'crabclaw') m.rotation.z = -0.20;
   m.userData.kind = kind;
-  group.add(m);
+  group.add(tag(m, 'sail'));
   return m;
 }
 
@@ -760,8 +854,79 @@ function makeTriSail(A, B, C, group, belly) {
                 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
   }));
   m.userData.kind = 'tri';
-  group.add(m);
+  group.add(tag(m, 'sail'));
   return m;
+}
+
+
+/* ── THE PARTS OF A SHIP ───────────────────────────────────────────────────────────────
+ * Every mesh the generator makes carries its own name, its job, and the stage of building at
+ * which it appears. That is what turns a rendered hull into something you can take apart:
+ * the Shipwright does not hold a separate list of labels that could drift out of step with
+ * the geometry — it reads the geometry's own tags.
+ *
+ * `stage` is the order of construction for a FRAME-FIRST (carvel) ship. Shell-first clinker
+ * hulls swap 1 and 2, and the vessel's own card says which tradition it belongs to.
+ */
+const PARTS = {
+  keel:     { stage: 0, name: 'Keel',
+              what: 'The backbone: one continuous timber from stem to sternpost, and the first '
+                  + 'thing laid down. Everything else is measured from it. Its depth below the '
+                  + 'planking also resists leeway — a hull without one slides sideways.' },
+  stempost: { stage: 0, name: 'Stem and sternpost',
+              what: 'The curved timbers rising from each end of the keel. The rake of the stem '
+                  + 'is one of the strongest signals of period and of where a ship was built.' },
+  frames:   { stage: 1, name: 'Frames',
+              what: 'The ribs. Each is a composite of several curved timbers scarfed together, '
+                  + 'raised on the keel at a fixed interval called the room and space. In a '
+                  + 'carvel ship these decide the shape BEFORE any plank is cut.' },
+  planking: { stage: 2, name: 'Planking',
+              what: 'The skin. In carvel work the planks meet edge to edge on the frames and the '
+                  + 'seams are caulked; in clinker work they overlap and are riveted to each '
+                  + 'other, and the shell is built first. Carvel can be scaled up; clinker cannot.' },
+  wale:     { stage: 2, name: 'Wales',
+              what: 'Thickened longitudinal strakes running the length of the hull — the girders '
+                  + 'that stop a long wooden ship from hogging, drooping at the ends under its '
+                  + 'own buoyancy distribution.' },
+  deck:     { stage: 3, name: 'Deck',
+              what: 'Not just a floor: the deck ties the two sides of the hull together against '
+                  + 'the sea trying to squeeze them in, and it is the platform the guns stand on. '
+                  + 'Its camber sheds water to the sides.' },
+  rudder:   { stage: 3, name: 'Rudder',
+              what: 'Hung on pintles down the sternpost. The stern-hung rudder reached northern '
+                  + 'Europe about 1200 and replaced the steering oar; it is what let ships grow '
+                  + 'beyond the size one person could steer with an oar over the quarter.' },
+  mast:     { stage: 4, name: 'Mast',
+              what: 'Built in stepped sections — lower mast, topmast, topgallant — each fidded '
+                  + 'alongside the head of the one below through the doubling, so it can be sent '
+                  + 'down in heavy weather. Steel 1794: the main mast is half the sum of the '
+                  + 'lower deck length and the extreme breadth.' },
+  bowsprit: { stage: 4, name: 'Bowsprit',
+              what: 'A mast lying almost flat, projecting over the bow. It is what the forestays '
+                  + 'lead to — without it the foremast has nothing pulling it forward, and the '
+                  + 'whole rig falls aft.' },
+  shroud:   { stage: 5, name: 'Shrouds',
+              what: 'Standing rigging: fixed ropes from the masthead down to the channels on the '
+                  + "hull's side, taking the sideways pull of the sails. Tarred against rot — "
+                  + 'reddish-brown, not black; black tar is petroleum and a century too late.' },
+  ratline:  { stage: 5, name: 'Ratlines',
+              what: 'Light lines seized across the shrouds to make a ladder aloft. Steel 1794 '
+                  + 'gives the spacing outright: thirteen inches, one comfortable rung.' },
+  yard:     { stage: 6, name: 'Yard',
+              what: 'The spar a square sail hangs from, slung across the mast and braced round to '
+                  + 'trim the sail to the wind. Steel 1794: the main yard is seven eighths of the '
+                  + 'main mast. It is octagonal amidships and tapers to two fifths at the arms.' },
+  sail:     { stage: 7, name: 'Sail',
+              what: 'Flax canvas, sewn from bolts twenty-four inches wide — the standard enacted '
+                  + 'in 1746 — so the cloths themselves scale the sail for you. Square sails drive '
+                  + 'a ship downwind; fore-and-aft sails let it work up to windward.' },
+};
+
+function tag(o, key, extra) {
+  if (!o) return o;
+  const P = PARTS[key];
+  o.userData.part = { key, stage: P.stage, name: extra || P.name, what: P.what };
+  return o;
 }
 
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
@@ -786,11 +951,19 @@ function buildShip(S) {
     },
   });
 
+  /* ── THE SHIP IS ASSEMBLED IN THE ORDER IT WAS BUILT ─────────────────────────────────
+     Keel, then frames, then planking. They are all generated from the same surfacePoint(),
+     so the ribs sit inside the skin and the backbone under it without a single fudge factor.
+     The Shipwright hides and shows these by their tagged stage. */
+  const timber = new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
+  group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
+  group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
+
   const hull = new THREE.Mesh(buildHullGeometry(S), hullMat);
-  group.add(hull);
+  group.add(tag(hull, 'planking'));
 
   const deckMat = new THREE.MeshLambertMaterial({ color: 0x9a8663, side: THREE.DoubleSide });
-  group.add(new THREE.Mesh(buildDeckGeometry(S), deckMat));
+  group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck'));
 
   const mats = {
     spar: new THREE.MeshLambertMaterial({ color: 0x5a4126 }),
@@ -815,5 +988,5 @@ function buildShip(S) {
   return group;
 }
 
-window.SHIPS_HULL = { buildShip, buildHullGeometry, hullSurface, exponentForCm,
+window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
                       superellipseFullness };

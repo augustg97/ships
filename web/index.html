@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ships — how we learned to cross the ocean</title>
 <meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
-<link rel="stylesheet" href="css/styles.css?v=1785605050">
-<meta name="data-version" content="1785605050">
+<link rel="stylesheet" href="css/styles.css?v=1785668471">
+<meta name="data-version" content="1785668471">
 </head>
 <body>
 
@@ -102,6 +102,7 @@
       <div class="dims" id="yardDims"></div>
     </div>
     <div id="yardCtl">
+      <button id="swOpen" class="mini">Take her apart</button>
       <button id="yardCard" class="mini">Read the card</button>
     </div>
   </div>
@@ -121,6 +122,25 @@
   <div class="cb-text" id="campText"></div>
 </div>
 
+<!-- ── the shipwright: take a ship apart, and put it together ──────── -->
+<div id="shipwright" class="hidden">
+  <canvas id="swCanvas"></canvas>
+  <button id="swClose" class="mini">Back to the sea</button>
+  <div id="swLeft">
+    <h2 id="swTitle"></h2>
+    <div class="sub" id="swSub"></div>
+    <div class="dims" id="swDims"></div>
+    <div id="swPart" class="empty"><div class="ph">Click any timber, rope or sail.</div></div>
+  </div>
+  <div id="swBuild">
+    <div class="bh"><span id="swStageName">Bent on</span>
+      <span class="ord" id="swOrder"></span></div>
+    <input type="range" id="swStage" min="0" max="7" step="1" value="7">
+    <div class="bw" id="swStageWhat"></div>
+  </div>
+  <div id="swFleet"></div>
+</div>
+
 <!-- ── about ───────────────────────────────────────────────────────── -->
 <div id="about" class="sheet hidden">
   <button id="aboutClose" class="x">×</button>
@@ -128,9 +148,10 @@
 </div>
 
 <script src="js/three.min.js"></script>
-<script src="js/hull.js?v=1785605050"></script>
-<script src="js/yard.js?v=1785605050"></script>
-<script src="js/app.js?v=1785605050"></script>
-<script src="js/route.js?v=1785605050"></script>
+<script src="js/hull.js?v=1785668471"></script>
+<script src="js/shipwright.js?v=1785668471"></script>
+<script src="js/yard.js?v=1785668471"></script>
+<script src="js/app.js?v=1785668471"></script>
+<script src="js/route.js?v=1785668471"></script>
 </body>
 </html>

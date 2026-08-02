@@ -954,6 +954,11 @@ function wireUI() {
   const yr = document.getElementById('yr');
   yr.addEventListener('input', () => { S.year = +yr.value; onTime(); });
   document.getElementById('eraAbout').onclick = openAbout;
+  document.getElementById('swOpen').onclick = () => {
+    const v = window.SHIPS_YARD.YARD.spec;
+    window.SHIPS_YARD.yardClose();
+    if (v) window.SHIPS_SW.swOpen(v);
+  };
   document.getElementById('campClose').onclick = () => {
     clearCampaign();
     document.getElementById('campBar').classList.add('hidden');
@@ -1047,6 +1052,14 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
 
+  /* ⚠ EVERY EARLY EXIT FROM THIS FUNCTION MUST RE-ARM THE LOOP FIRST. A bare `return` here
+     skipped requestAnimationFrame, so the Shipwright rendered exactly one frame and then the
+     entire app froze — including after you closed it again. */
+  if (window.SHIPS_SW && window.SHIPS_SW.SW.on) {
+    window.SHIPS_SW.swFrame(now);
+    requestAnimationFrame(frame);
+    return;
+  }
   if (window.SHIPS_YARD && window.SHIPS_YARD.YARD.on) {
     window.SHIPS_YARD.yardFrame(now);
     requestAnimationFrame(frame);
@@ -1216,15 +1229,53 @@ function startCampaign(b) {
     campGroup.add(ln);
     campWake.push({ line: ln, pts });
 
-    /* the head of each track is a generated hull of the right kind, not a marker */
+    /* ── A FLEET IS NOT ONE SHIP ────────────────────────────────────────────────────
+       The head of each track used to be a single hull, which made a 130-sail armada read
+       as a rowing boat. Each fleet is now a FORMATION — the ships it actually had, in the
+       shape it actually kept — held in a local tangent frame so the whole thing banks and
+       turns with the track.
+
+       The Armada's crescent is the formation every account describes: the strongest ships
+       in the centre, the horns trailing back and to windward, so that anything attacking a
+       straggler had to come inside the arc. The English fought in loose groups astern and
+       to windward, which is why they are drawn strung out rather than arced.
+
+       ONE hull is generated per fleet and CLONED. `clone()` shares geometry and material,
+       so twenty-six ships cost one hull's worth of vertices. */
     const vid = k === 0 ? 'carrack' : 'fluyt';
     const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === vid);
-    if (ves && ves.hull) {
-      const sh = window.SHIPS_HULL.buildShip(ves.hull);
-      const holder = new THREE.Group(); holder.add(sh);
-      holder.userData.loa = ves.hull.loa;
-      campGroup.add(holder); campShip.push(holder);
-    } else campShip.push(null);
+    if (!ves || !ves.hull) { campShip.push(null); continue; }
+    const proto = window.SHIPS_HULL.buildShip(ves.hull);
+    const fleet = new THREE.Group();
+    fleet.userData.loa = ves.hull.loa;
+    fleet.userData.holders = [];
+    const N = k === 0 ? 15 : 11;
+    for (let n = 0; n < N; n++) {
+      const holder = new THREE.Group();
+      const sh = n === 0 ? proto : proto.clone();
+      /* ⚠ THE HULL'S BOW IS AT LOCAL -X. Its stations run u = 0 at the stem to u = 1 at the
+         sternpost over x = -L/2 .. +L/2, so +x is AFT. The fleet frame has +Z forward, and
+         mapping the heading onto the hull's +Z pointed every ship BEAM-ON to its own course
+         — which is exactly what it looked like. -X onto +Z is a quarter turn about Y. */
+      sh.rotation.y = Math.PI / 2;
+      holder.add(sh);
+      /* ⚠ Offsets are in METRES — the same units as the hull — and the whole formation is
+         scaled once by the camera below. Positioning holders in world units instead left the
+         formation a fixed size while the ships shrank, so it clumped as you flew out. */
+      const L0 = ves.hull.loa;
+      const t = (n - (N - 1) / 2) / ((N - 1) / 2);         // -1 .. +1 across the front
+      if (k === 0) {
+        /* the crescent, horns swept back and the strong ships in the centre */
+        holder.position.set(t * L0 * 9.5, 0, -Math.pow(Math.abs(t), 1.7) * L0 * 8.0 + L0 * 3.0);
+      } else {
+        /* loose groups astern and to windward — the line of battle is a later idea */
+        holder.position.set(t * L0 * 7.4 + ((n % 3) - 1) * L0 * 1.6, 0,
+                            -L0 * 5.0 - (n % 4) * L0 * 2.3);
+      }
+      fleet.add(holder);
+      fleet.userData.holders.push(holder);
+    }
+    campGroup.add(fleet); campShip.push(fleet);
   }
 
   /* the wind field: streaks over the water, re-oriented and re-seeded every day */
@@ -1243,8 +1294,8 @@ function startCampaign(b) {
     ((i + 1) * 0.7548776662) % 1, ((i + 1) * 0.5698402910) % 1, ((i + 1) * 0.6180339887) % 1]);
 
   const d0 = b.campaign[0];
-  /* centred north of the action so the Channel sits clear of the campaign bar */
-  flyTo(1.2, 54.2, 132);
+  /* centred on the action; the campaign bar sits along the top, out of the way */
+  flyTo(0.4, 50.9, 118);
   showCard({ eyebrow: 'Campaign', title: b.name, sub: b.date || '',
              rows: b.rows || [], prose: b.text || '', span: b.span || '',
              cite: b.cite || '', tags: b.tags });
@@ -1275,13 +1326,35 @@ function stepCampaign(dt) {
     /* A hull on a globe is a legible TOKEN, not a scale drawing — at true scale a 42 m carrack
        is a third of a pixel. Scale it with the camera instead of with the world, so it holds
        one size on screen at every zoom rather than becoming a 250 km ship when you fly in. */
-    sh.scale.setScalar((S.dist * 0.0062) / sh.userData.loa);
-    /* stand the hull up on the sphere and point it the way it is going */
+    sh.scale.setScalar((S.dist * 0.0016) / sh.userData.loa);
+
+    /* ── HEADING, FROM THE TRACK ITSELF ─────────────────────────────────────────────
+       Not from a compass bearing computed off raw lon/lat differences — that ignores the
+       cos(lat) convergence of the meridians and is wrong by degrees at 51 N. The direction
+       the fleet is actually going is the difference of its two positions ON THE SPHERE,
+       projected into the local tangent plane. No trigonometry, no convention to get backwards. */
+    const nlo = k === 0 ? bb.lon : bb.elon, nla = k === 0 ? bb.lat : bb.elat;
+    const plo = k === 0 ? a.lon : a.elon,  pla = k === 0 ? a.lat : a.elat;
     const up = w.clone().normalize();
-    const hd = bearingVec(lo, la, Math.atan2(bb.lon - a.lon, bb.lat - a.lat) * 180 / Math.PI);
-    const m = new THREE.Matrix4();
-    m.makeBasis(hd.clone().cross(up).normalize().negate(), up, hd);
-    sh.quaternion.setFromRotationMatrix(m);
+    let fwd = lonLatToVec(nlo, nla, R).sub(lonLatToVec(plo, pla, R));
+    fwd.addScaledVector(up, -fwd.dot(up));                        // into the tangent plane
+    if (fwd.lengthSq() < 1e-9) fwd = bearingVec(lo, la, 90);
+    fwd.normalize();
+    const side = up.clone().cross(fwd).normalize();               // X = Y x Z, right-handed
+    sh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(side, up, fwd));
+
+    /* ── AND SHE HEELS ──────────────────────────────────────────────────────────────
+       A square-rigged ship lies down to a beam wind and stands up when it is dead astern,
+       so the heel is the SINE of the wind's angle off the bow. With every ship in a fleet
+       heeled the same way to the same wind, the formation reads as sailing rather than as
+       counters slid across a board — which is most of what makes it look alive. */
+    const wf = bearingVec(lo, la, a.w).negate();                  // where the wind is going
+    const rel = Math.atan2(wf.dot(side), wf.dot(fwd));            // 0 = dead astern
+    const heel = Math.sin(rel) * (0.030 + a.f * 0.011);
+    (sh.userData.holders || []).forEach((h, n) => {
+      h.rotation.z = heel * (0.82 + 0.36 * ((n * 7) % 5) / 4);    // not in lockstep
+      h.rotation.x = Math.sin(S.campT * 2.1 + n) * 0.014;         // pitch on the swell
+    });
   }
 
   /* the day's wind, blowing across the water the fleets are on */

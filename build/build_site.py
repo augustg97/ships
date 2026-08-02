@@ -176,7 +176,8 @@ def gate_budget(man):
     log("5. byte budget")
     lv0 = next(l for l in man["levels"] if l["level"] == 0)["bytes"]
     app = sum(os.path.getsize(os.path.join(WEB, p)) for p in
-              ("index.html", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js", "js/three.min.js", "css/styles.css"))
+              ("index.html", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js",
+               "js/shipwright.js", "js/three.min.js", "css/styles.css"))
     data = sum(os.path.getsize(os.path.join(WEB, "data", f))
                for f in os.listdir(os.path.join(WEB, "data")))
     months = sum(os.path.getsize(os.path.join(WEB, "fields", f"{k}_{m:02d}.png"))
@@ -203,7 +204,8 @@ def stamp_and_copy():
     import re
     html = re.sub(r'<meta name="data-version"[^>]*>\n?', '', html)
     html = html.replace("</head>", f'<meta name="data-version" content="{stamp}">\n</head>')
-    for asset in ("css/styles.css", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js"):
+    for asset in ("css/styles.css", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js",
+                  "js/shipwright.js"):
         html = re.sub(rf'({re.escape(asset)})(\?v=\d+)?', rf'\1?v={stamp}', html)
     open(idx, "w").write(html)
     log(f"   stamp {stamp}")
