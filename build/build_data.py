@@ -547,11 +547,12 @@ vessel(id="corbita", name="Roman merchantman", sub="corbita", rig="square", era=
              ["Passage, downwind", "Puteoli→Alexandria 9 days ≈ 5–6 kn (Pliny)"],
              ["Passage, upwind", "Alexandria→Rome 40–70 days ≈ 1–2 kn made good"]],
        crew=20, attestation="generated", confidence="moderate",
-       text="The asymmetry on this card is the whole argument of this model in two rows. The "
-            "same ship, on the same route, took nine days one way and forty to seventy the "
-            "other. Nothing about the hull changed. The wind did.\n\n"
-            "Rome fed itself on that asymmetry: the grain fleet ran downwind to Italy and beat "
-            "its way back, and the sailing season closed entirely in winter.",
+       text="The same ship on the same route took nine days in one direction and forty to seventy "
+            "in the other. The difference is the wind: the Etesian northerlies of the eastern "
+            "Mediterranean blow steadily down toward Egypt in summer.\n\n"
+            "The Roman grain fleet ran downwind to Italy and beat its way back, and the "
+            "sailing season closed in winter, when the *mare clausum* held from November to "
+            "March.",
        cite="Casson, *Ships and Seamanship in the Ancient World* (1971); Pliny, *Natural History*.")
 
 vessel(id="dhow", name="Sewn-plank dhow", sub="the Indian Ocean trader", rig="lateen",
@@ -583,10 +584,10 @@ vessel(id="junk", name="Chinese junk", sub="海船", rig="junk", era=[800, 1900]
             "battened lug sail, the axial sternpost rudder, and the magnetic compass used at "
             "sea. Each of them reached Europe centuries later or was invented there "
             "independently and later.\n\n"
-            "The battened sail is the underrated one. Battens make it self-reefing and let it "
-            "set flat, so a junk works to windward far better than a square rig **and needs a "
-            "fraction of the crew to do it**. Measured against modern rigs, a junk reaches "
-            "75–80% of a Bermudan's windward performance.",
+            "The battens make the sail self-reefing and allow it to set flat. A junk therefore "
+            "works to windward considerably better than a square rig, and with a smaller crew: "
+            "reefing is done by lowering battens onto the boom from the deck. Instrumented "
+            "comparisons put a junk at 75–80% of a Bermudan rig's windward performance.",
        cite="Needham, *Science and Civilisation in China* IV.3; Quanzhou ship excavation 1974; Junk Rig Association instrumented polars.")
 
 vessel(id="treasure-ship", name="Treasure ship", sub="寶船 — and how big it really was", rig="junk",
@@ -639,9 +640,10 @@ vessel(id="caravel", name="Caravel", sub="caravela latina", rig="lateen", era=[1
        rows=[["Length", "20–25 m"], ["Beam", "~6 m"], ["Burden", "50–60 tons"],
              ["Crew", "20–25"], ["Draught", "~2 m"], ["Rig", "2–3 lateen masts"]],
        crew=25, attestation="generated", confidence="moderate",
-       text="Small, shallow and weatherly — and the weatherliness is the point. The cog could "
-            "run down to Guinea on the north-east trades and then could not get home. The "
-            "caravel could work back.\n\n"
+       text="A small, shallow, weatherly hull carrying two or three lateen sails. Its "
+            "significance is its ability to sail to windward: a square-rigged cog could run "
+            "down to Guinea on the north-east trades but could not return against them, "
+            "whereas a caravel could work back.\n\n"
             "What it made possible has a name: the ***volta do mar***, the turn of the sea. "
             "To come home from West Africa you do not beat up the coast against the trades. "
             "You stand out **west** into the middle of the Atlantic, as far as the Azores, "
@@ -708,8 +710,9 @@ vessel(id="ship-of-the-line", name="Ship of the line", sub="third rate, 74 guns"
        crew=640, attestation="generated", confidence="moderate",
        text="Roughly half of all line-of-battle ships by 1800 were 74s: the point on the curve "
             "where enough guns met enough speed.\n\n"
-            "The manning ratio is the fact worth stopping on. A merchantman of the same period "
-            "carried one man per 20–30 tons. *Victory* carried one per 2.6. Guns need hands, "
+            "The manning ratio distinguishes a warship from any other vessel of the period. A "
+            "merchantman carried one man per 20–30 tons; *Victory* carried one per 2.6. Guns "
+            "need hands, "
             "and the Royal Navy went from 16,000 men in 1739 to 145,000 in 1813, roughly half "
             "the wartime lower deck pressed. Of about 103,000 deaths between 1793 and 1815, "
             "**81% were disease and accident, 13% shipwreck and fire, and 6% enemy action.**",
@@ -724,10 +727,10 @@ vessel(id="slave-ship", name="Slave ship", sub="the Middle Passage", rig="square
              ["Mortality by era", "22–30% (16th c.) → ~5% (final decade)"],
              ["Crew mortality", "~20% per voyage on British slavers"]],
        crew=35, pax=300, attestation="attested", confidence="good",
-       text="For three centuries the principal cargo of the Atlantic was people, and because "
-            "this is a model about **technology**, that belongs on a vessel card rather than in "
-            "a note.\n\n"
-            "The slave ship's between-decks was a design. It was drawn by naval architects and "
+       text="For three centuries the principal cargo carried across the Atlantic was people. "
+            "An estimated 12.5 million were embarked and 10.7 million landed.\n\n"
+            "The between-decks of a slave ship was a designed space, drawn by naval "
+            "architects and "
             "optimised for a quantity of human beings per ton, and the optimisation is legible "
             "in the numbers: mortality fell across three centuries not because conditions "
             "became humane but because passages got shorter and the loss of cargo was "

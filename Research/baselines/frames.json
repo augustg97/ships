@@ -1,0 +1,26 @@
+{
+  "base_url": "http://localhost:8149",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "device_scale_factor": 2,
+  "ready": {
+    "expr": null,
+    "timeout_ms": 45000,
+    "note": "TODO: app should set window.__FRAME_READY = true after first render"
+  },
+  "settle_ms": 3500,
+  "thresholds": {
+    "changed_frac": 0.002,
+    "mean_abs": 1.0
+  },
+  "blank_variance_floor": 4.0,
+  "frames": [
+    {
+      "name": "default-view",
+      "path": "/",
+      "note": "the frame the \u00a713 check is run on"
+    }
+  ]
+}
