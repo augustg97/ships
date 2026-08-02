@@ -1160,10 +1160,30 @@ void main(){
   /* bolt-rope and tabling darken the edges */
   float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
   col *= mix(0.78, 1.0, smoothstep(0.0, 0.035, edge));
+  /* ── LIGHTING CLOTH IS NOT LIGHTING A SOLID ────────────────────────────────────────
+     abs(dot(N, L)) lights both faces identically, which is why the sails looked like painted
+     shells: a solid has a lit side and a dark side, and canvas has neither. What it has is
+
+     TRANSMISSION. Light passes THROUGH the cloth, so the shadowed face is lit by whatever is
+     behind it — and lit warmly, because the fibres scatter long wavelengths further. A backlit
+     sail is the brightest thing on a ship and it glows amber, not white.
+
+     SUBSURFACE FALLOFF. The wrap term below is Lambert pushed past the terminator, which is
+     what any thin scattering material does: there is no hard shadow line on a sail because the
+     light does not stop at 90°, it bleeds round.
+
+     AND NO SPECULAR AT ALL. Flax has no gloss. Every highlight the old shader gave it was a
+     lie about the material, and highlights are exactly what the eye uses to decide something
+     is hard. */
   vec3 N = normalize(vN);
-  float lam = abs(dot(N, normalize(uSun)));
-  /* canvas is thin: light comes through it as much as off it */
-  col *= (0.52 + 0.62 * lam);
+  vec3 Ldir = normalize(uSun);
+  float front = max(0.0, dot(N, Ldir));
+  float backl = max(0.0, dot(-N, Ldir));
+  float wrap  = max(0.0, (dot(N, Ldir) + 0.55) / 1.55);     // scattering past the terminator
+  vec3 warm = vec3(1.06, 0.96, 0.80);                       // transmitted light runs amber
+  col = col * (0.30 + 0.62 * wrap)                          // ambient + wrapped diffuse
+      + col * warm * pow(backl, 1.35) * 0.80                // what comes THROUGH the cloth
+      + col * front * 0.14;                                 // and the little that bounces off
   gl_FragColor = vec4(pow(clamp(col,0.0,1.4), vec3(0.4545)), 1.0);
 }`;
 
@@ -1563,21 +1583,36 @@ function buildFittings(S, group, mats) {
   }
 
   /* ── HATCH GRATINGS: a lattice, because that is what they are ─────────────────────── */
+  /* ── A GRATING IS A HALVING JOINT, NOT A STACK OF STICKS ───────────────────────────
+     The battens were two crossed layers sitting on top of each other, which is a trellis. A
+     real grating is made of ledges notched HALF THROUGH so the two sets interlock flush into
+     one board — that is what makes it strong enough to walk on and to take a sea aboard, and
+     it is why the holes are square-edged and the surface is flat rather than corrugated. Both
+     sets now sit at the same height and the openings are the square holes between them. */
   const gratingAt = (u, w, l) => {
     const gg = new THREE.Group();
     const y = deckAtU(u) + B * 0.004;
     const x = (u - 0.5) * L;
-    const n = Math.max(3, Math.round(w / (B * 0.045)));
-    for (let i = 0; i < n; i++) {
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(l, B * 0.010, B * 0.012), wood);
-      bar.position.set(x, y, -w / 2 + (i + 0.5) * (w / n));
+    const t = B * 0.013;                                // the ledge, and the notch is half of it
+    const pitch = B * 0.042;
+    const nz = Math.max(3, Math.round(w / pitch));
+    const nx = Math.max(3, Math.round(l / pitch));
+    for (let i = 0; i < nz; i++) {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(l, t, t * 0.62), wood);
+      bar.position.set(x, y + t / 2, -w / 2 + (i + 0.5) * (w / nz));
       gg.add(bar);
     }
-    const m2 = Math.max(3, Math.round(l / (B * 0.045)));
-    for (let i = 0; i < m2; i++) {
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(B * 0.012, B * 0.014, w), wood);
-      bar.position.set(x - l / 2 + (i + 0.5) * (l / m2), y + B * 0.003, 0);
+    for (let i = 0; i < nx; i++) {
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(t * 0.62, t, w), wood);
+      bar.position.set(x - l / 2 + (i + 0.5) * (l / nx), y + t / 2, 0);
       gg.add(bar);
+    }
+    /* the coaming: the raised rim the grating drops into, which keeps water off the hatch */
+    for (const [dx, dz, sx, sz] of [[l / 2, 0, t * 0.9, w + t], [-l / 2, 0, t * 0.9, w + t],
+                                    [0, w / 2, l + t, t * 0.9], [0, -w / 2, l + t, t * 0.9]]) {
+      const c = new THREE.Mesh(new THREE.BoxGeometry(sx, t * 1.9, sz), pale);
+      c.position.set(x + dx, y + t * 0.55, dz);
+      gg.add(c);
     }
     return tag(gg, 'grating');
   };

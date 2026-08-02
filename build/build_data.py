@@ -349,9 +349,11 @@ HULLS = {
               sheerBow=0.95, sheerStern=0.48, tumblehome=0.024, strakes=28,
               stemRake=0.10, sternRake=0.06, copper=True, copperAge=0.25,
               topside="#22201d",
-              masts=[dict(at=0.115, height=0.996, rig="square", rake=-1, shrouds=7),
-                     dict(at=0.556, height=1.12, rig="square", rake=2, shrouds=9),
-                     dict(at=0.85, height=0.96, rig="square", rake=5, shrouds=6)],
+              # ⚠ heightM: at L/B 5.9 Steel's rule gives Cutty Sark a 38 m lower mast against a
+                 # real ~29 m. Outside its domain it is dominated by length.
+                 masts=[dict(at=0.115, heightM=26.0, rig="square", rake=-1, shrouds=7),
+                     dict(at=0.556, heightM=29.0, rig="square", rake=2, shrouds=9),
+                     dict(at=0.85, heightM=25.0, rig="square", rake=5, shrouds=6)],
               bowsprit=0.22, steeve=14),
 
   # SS Great Britain, 1843: 98 × 15.4 m, 1,930 GRT — the first iron-hulled screw Atlantic liner,
@@ -378,12 +380,12 @@ HULLS = {
                   cm=0.92, wlPower=3.2, stemFineness=0.10, sternFineness=0.22, transom=0.34,
                   forefoot=0.22, run=0.26, riseF=0.30, riseA=0.26, sheerBow=1.4, sheerStern=0.9,
                   tumblehome=0.03, stemRake=0.05, sternRake=0.03, strakes=30, topside="#3b3a36",
-                  masts=[dict(at=0.14, height=0.62, rig="gaff", shrouds=3),
-                         dict(at=0.29, height=0.66, rig="gaff", shrouds=3),
-                         dict(at=0.44, height=0.66, rig="gaff", shrouds=3),
-                         dict(at=0.58, height=0.66, rig="gaff", shrouds=3),
-                         dict(at=0.72, height=0.64, rig="gaff", shrouds=3),
-                         dict(at=0.86, height=0.60, rig="gaff", shrouds=3)]),
+                  masts=[dict(at=0.14, heightM=42.0, rig="gaff", shrouds=3),
+                         dict(at=0.29, heightM=42.0, rig="gaff", shrouds=3),
+                         dict(at=0.44, heightM=42.0, rig="gaff", shrouds=3),
+                         dict(at=0.58, heightM=42.0, rig="gaff", shrouds=3),
+                         dict(at=0.72, heightM=42.0, rig="gaff", shrouds=3),
+                         dict(at=0.86, heightM=42.0, rig="gaff", shrouds=3)]),
 
   # Preussen, 1902 — the largest sailing ship ever built and the only five-masted FULL-RIGGER.
   # LOA 147 m, LBP 122 m, beam 16.4 m, draught 8.26 m, 5,081 GRT, 47 sails (30 square, 17
@@ -395,11 +397,15 @@ HULLS = {
                    forefoot=0.20, run=0.28, riseF=0.26, riseA=0.22, sheerBow=1.1, sheerStern=0.7,
                    tumblehome=0.02, stemRake=0.04, sternRake=0.03, strakes=34, iron=True,
                    topside="#2b2b2c", bowsprit=0.10, steeve=12,
-                   masts=[dict(at=0.16, height=0.86, rig="square", shrouds=6),
-                          dict(at=0.34, height=0.92, rig="square", shrouds=7),
-                          dict(at=0.52, height=0.92, rig="square", shrouds=7),
-                          dict(at=0.70, height=0.90, rig="square", shrouds=6),
-                          dict(at=0.86, height=0.80, rig="square", shrouds=5)]),
+                   # ⚠ heightM, not height: Steel's rule assumes L/B near 3.9 and Preussen is 7.4, so the rule
+                   # runs away with her length and gives 64 m lower masts. Her mainmast stands
+                   # about 68 m over the deck ALL TOLD — lower mast, topmast, topgallant and
+                   # royal together — so the lower mast is about 30 m.
+                   masts=[dict(at=0.16, heightM=27.0, rig="square", shrouds=6),
+                          dict(at=0.34, heightM=30.0, rig="square", shrouds=7),
+                          dict(at=0.52, heightM=30.0, rig="square", shrouds=7),
+                          dict(at=0.70, heightM=29.0, rig="square", shrouds=6),
+                          dict(at=0.86, heightM=25.0, rig="square", shrouds=5)]),
 
   # Great Eastern, 1858 — six times the tonnage of any ship afloat, and forty years too early.
   # 211 m, 25.3 m beam, 32,160 GRT. Paddles AND screw AND six masts, built to steam to Australia

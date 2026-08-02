@@ -395,3 +395,11 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swNav .mini:hover{border-color:var(--edge-strong);color:var(--ink)}
 #swNavPos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
   min-width:74px;text-align:center}
+
+/* ── the true-scale ruler ─────────────────────────────────────────────────────────────── */
+#swRuler{position:absolute;left:24px;bottom:120px;z-index:4;pointer-events:none;
+  display:flex;flex-direction:column;gap:5px}
+#swRuler i{display:block;height:9px;border:1px solid var(--edge-strong);border-top:0;
+  background:linear-gradient(90deg,rgba(216,180,92,.22),rgba(216,180,92,.05))}
+#swRuler b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
+  font-weight:400}

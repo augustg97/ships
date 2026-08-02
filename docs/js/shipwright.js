@@ -259,6 +259,18 @@ function swApplyStage() {
     if (shell && p.key === 'frames') st = 2;
     if (shell && p.key === 'planking') st = 1;
     o.visible = st <= SW.stage;
+
+    /* ── ⚠ YOU CANNOT SEE THE FRAMES OF A PLANKED HULL ────────────────────────────────
+       Three rounds went into stopping the ribs poking through the skin — first a bigger
+       proportional inset, then an inset expressed as a real plank thickness — and they kept
+       coming through at the sterns, where the sections are sharpest and the two surfaces are
+       tessellated differently (26 steps against 72). Every one of those was a fix to the
+       SYMPTOM.
+       The frames are interior structure. Once the planking is on, a real ship shows none of
+       them, so drawing them and relying on the skin to occlude them was never right: it made
+       correctness depend on two independently-sampled curves never crossing, which is a
+       promise no tessellation can keep. When the planking is visible, the frames are not. */
+    if (p.key === 'frames' && SW.stage >= (shell ? 1 : 2)) o.visible = false;
   });
 
   const bb = new THREE.Box3();
@@ -410,6 +422,7 @@ function swOpen(vessel) {
   document.getElementById('swStage').value = 7;
 
   document.getElementById('shipwright').classList.remove('hidden');
+  document.getElementById('swRuler').style.display = 'flex';
   document.getElementById('swTitle').textContent = vessel.name;
   document.getElementById('swSub').textContent =
     (vessel.sub || '') + ' · ' + (vessel.hull.masts.length ? vessel.polar.rig : 'no sail');
@@ -511,6 +524,8 @@ function swBuildFleetStrip() {
 
 function swClose() {
   SW.on = false;
+  const rl = document.getElementById('swRuler');
+  if (rl) rl.style.display = 'none';
   const lay = document.getElementById('swLabels');
   if (lay) lay.querySelectorAll('.sl').forEach(d => { d.style.opacity = '0'; });
   document.getElementById('shipwright').classList.add('hidden');
@@ -616,6 +631,27 @@ function swFrame(now) {
       c.e.el.style.opacity = show ? (c.on ? '1' : '0.6') : '0';
       c.e.el.classList.toggle('on', !!c.on);
     });
+  }
+  /* ── THE TRUE-SCALE RULER ───────────────────────────────────────────────────────────
+     At true scale the early hulls are slivers, and a viewer needs to be told that is the POINT
+     rather than a rendering fault. A bar of known length, measured in the scene and drawn in
+     pixels, is the only thing that makes "this canoe really is that small beside that liner"
+     a fact rather than an impression. It picks a round number — 10, 20, 50, 100, 200 m — so
+     the label is always something you can hold in your head. */
+  {
+    const a = new THREE.Vector3(SW.panX, SW.look, 0).project(SW.cam);
+    const b = new THREE.Vector3(SW.panX + 100, SW.look, 0).project(SW.cam);
+    const el = document.getElementById('shipwright');
+    const pxPer100 = Math.abs(b.x - a.x) * 0.5 * el.clientWidth;
+    if (pxPer100 > 1) {
+      const targetPx = 190;
+      const rawM = targetPx / (pxPer100 / 100);
+      const steps = [5, 10, 20, 50, 100, 200, 500, 1000];
+      const m = steps.reduce((p, c) => Math.abs(c - rawM) < Math.abs(p - rawM) ? c : p, steps[0]);
+      const r = document.getElementById('swRuler');
+      r.querySelector('i').style.width = (m * pxPer100 / 100).toFixed(1) + 'px';
+      r.querySelector('b').textContent = m + ' metres';
+    }
   }
   SW.renderer.render(SW.scene, SW.cam);
 }
