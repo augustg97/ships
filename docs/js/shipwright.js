@@ -22,6 +22,7 @@
 
 const SW = {
   on: false, renderer: null, scene: null, cam: null, ship: null, spec: null,
+  yard: null, layout: null, shipX: 0, panX: undefined,
   lon: 0.9, lat: 0.16, dist: 1.12, spin: true, stage: 7, sel: null,
   ray: null, hit: [], t0: 0,
 };
@@ -217,6 +218,7 @@ function swApplyStage() {
 
   const bb = new THREE.Box3();
   SW.ship.traverse(o => { if (o.visible && o.userData.part) bb.expandByObject(o); });
+  bb.min.x -= SW.shipX; bb.max.x -= SW.shipX;   // the box is world-space; the camera is not
   if (!bb.isEmpty()) {
     SW.viewTop = bb.max.y; SW.viewBot = bb.min.y;
     SW.viewX = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z);
@@ -231,20 +233,87 @@ function swApplyStage() {
   document.getElementById('swOrder').textContent = trad.label;
 }
 
+
+/* ── THE SHIPYARD: EVERY HULL ON ONE AXIS, AT TRUE RELATIVE SCALE ──────────────────────
+ * Scale is the argument this project keeps failing to land. A canoe that reached Hawaii beside
+ * a 400 m box boat says more than any card can — but only if they are in the same picture, and
+ * until now you could see exactly one ship at a time, so the comparison lived in a number
+ * nobody could feel.
+ *
+ * ⚠ THE AXIS IS DATE, NOT INDEX. Laying them out evenly would make the 2,700 years between the
+ * trireme and the cog read the same as the 40 between the fluyt and the Indiaman, and that
+ * spacing is half the story: nothing much happens for two millennia and then everything happens
+ * at once.
+ *
+ * But pure date placement COLLIDES — the fluyt and the East Indiaman are both 1595, zero years
+ * apart and 82 m of hull between them. So each ship is placed at its date and then DODGED
+ * forward just enough to clear its neighbour. Where the fleet is sparse the spacing is honest
+ * time; where it bunches, the dodge takes over and the line stays readable. Which is itself
+ * legible: the crowded stretch IS the seventeenth century.
+ */
+const YEAR_M = 1.35;                                    // metres of layout per year
+
+function swBuildYard() {
+  if (SW.yard) return;
+  SW.yard = new THREE.Group();
+  SW.scene.add(SW.yard);
+  const all = ((APP.vessels && APP.vessels.vessels) || []).filter(v => v.hull)
+    .slice().sort((a, b) => (a.from || 0) - (b.from || 0));
+  SW.layout = [];
+  let cursor = -Infinity;
+  all.forEach(v => {
+    const L = v.hull.loa;
+    let x = (v.from || 0) * YEAR_M;
+    const need = cursor + L * 0.62;                     // clear the last hull, plus a little
+    if (x < need) x = need;
+    cursor = x + L * 0.62;
+    /* the coarse build for the line; the selected ship is rebuilt fine in swOpen */
+    const obj = window.SHIPS_HULL.buildShip(v.hull);
+    obj.position.x = x;
+    SW.yard.add(obj);
+    SW.layout.push({ id: v.id, v, x, loa: L, obj, fine: false });
+  });
+  const first = SW.layout[0], last = SW.layout[SW.layout.length - 1];
+  SW.yardSpan = [first.x - first.loa, last.x + last.loa];
+}
+
+/* the selected ship is rebuilt at full detail; the one it replaces goes back to coarse, so
+   only ever one 160k-triangle hull exists at a time */
+function swPromote(entry) {
+  if (entry.fine) return entry.obj;
+  SW.layout.forEach(e => {
+    if (e.fine && e !== entry) {
+      SW.yard.remove(e.obj);
+      e.obj = window.SHIPS_HULL.buildShip(e.v.hull);
+      e.obj.position.x = e.x;
+      SW.yard.add(e.obj);
+      e.fine = false;
+    }
+  });
+  SW.yard.remove(entry.obj);
+  entry.obj = window.SHIPS_HULL.buildShip(entry.v.hull, { fine: true });
+  entry.obj.position.x = entry.x;
+  SW.yard.add(entry.obj);
+  entry.fine = true;
+  return entry.obj;
+}
+
 /* ── open ──────────────────────────────────────────────────────────────────────────── */
 function swOpen(vessel) {
   swInit();
   if (!vessel || !vessel.hull) return false;
-  if (SW.ship) { SW.scene.remove(SW.ship); }
+  swBuildYard();
   SW.spec = vessel;
+  const entry = SW.layout.find(e => e.id === vessel.id);
+  if (!entry) return false;
   /* ── THE FINE BUILD ────────────────────────────────────────────────────────────────
-     The Shipwright gets its OWN model of the ship, at four times the stations and twice the
-     waterlines, with members the globe and the Yard have no use for: stem and sternpost as
-     separate timbers, wales, rudder, channels, and every frame as its own pickable object.
-     Separate model, much higher detail — but generated from the SAME spec and the same
-     surfacePoint(), so it is a finer rendering of one ship rather than a second ship. */
-  SW.ship = window.SHIPS_HULL.buildShip(vessel.hull, { fine: true });
-  SW.scene.add(SW.ship);
+     The selected ship is rebuilt at four times the stations and twice the waterlines, with
+     members the globe and the Yard have no use for. Separate model, much higher detail — but
+     generated from the SAME spec and the same surfacePoint(), so it is a finer rendering of
+     one ship rather than a second ship. Only one exists at a time: sixteen of them is two and
+     a half million triangles and will not run. */
+  SW.ship = swPromote(entry);
+  SW.shipX = entry.x;
   SW.sel = null;
 
   SW.hit = [];
@@ -252,8 +321,10 @@ function swOpen(vessel) {
 
   const U = SW.ship.userData;
   const L = vessel.hull.loa;
-  SW.ground.scale.set(L * 24, L * 24, 1);
-  SW.ground.position.y = U.keelBottom - 0.02 * L;
+  /* the floor spans the whole line, not one ship */
+  const span = SW.yardSpan[1] - SW.yardSpan[0];
+  SW.ground.scale.set(span * 1.3, span * 1.3, 1);
+  SW.ground.position.set((SW.yardSpan[0] + SW.yardSpan[1]) / 2, U.keelBottom - 0.02 * L, 0);
   SW.rigTop = U.rigTop;
   SW.spin = true; SW.dist = 1.12; SW.t0 = performance.now();
   SW.stage = 7;
@@ -378,10 +449,15 @@ function swFrame(now) {
   const tanV = Math.tan(SW.cam.fov * Math.PI / 360);
   const fit = 1.14 * Math.max(halfV / tanV, SW.viewX / 2 / (tanV * Math.max(1.2, SW.cam.aspect)));
   const d = fit * SW.dist;
-  SW.cam.position.set(d * Math.cos(SW.lat) * Math.sin(SW.lon),
+  /* ── PAN ALONG THE LINE ───────────────────────────────────────────────────────────
+     Selecting a ship does not cut to it; the camera flies down the row, so you pass everything
+     between and the growth is something you travel through rather than read off a chart. */
+  if (SW.panX === undefined) SW.panX = SW.shipX;
+  SW.panX += (SW.shipX - SW.panX) * Math.min(1, 0.055);
+  SW.cam.position.set(SW.panX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
                       d * Math.sin(SW.lat) + look,
                       d * Math.cos(SW.lat) * Math.cos(SW.lon));
-  SW.cam.lookAt(0, look, 0);
+  SW.cam.lookAt(SW.panX, look, 0);
   const hm = SW.ship.userData.hullMat;
   if (hm) hm.uniforms.uCam.value.copy(SW.cam.position);
   SW.renderer.render(SW.scene, SW.cam);
