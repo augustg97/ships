@@ -172,6 +172,10 @@ HULLS = {
                   wlPower=3.2, forefoot=0.28, run=0.30, riseF=0.55, riseA=0.50,
                   sheerBow=0.5, sheerStern=0.5, tumblehome=0.02, strakes=10,
                   stemRake=0.05, sternRake=0.05, topside="#6a4f34",
+                  # ⚠ TWO HULLS. The card has always said "Austronesian double hull"; the model drew one, which
+                  # is not a detail but the whole naval architecture — 1.05 m of beam on 19 m of length
+                  # has no stability whatever on its own. Hōkūleʻa's hulls are ~5.4 m apart.
+                  doubleHull=True, hullSep=5.4, sailAreaEach=25.0,
                   masts=[dict(at=0.46, height=0.95, rig="crabclaw", rake=6, shrouds=2)]),
 
   # Bremen cog, 1380: 23.3 × 7.6 × 2.25 m. Flat-bottomed so it could take the ground on a tidal

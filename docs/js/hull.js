@@ -588,7 +588,7 @@ function buildRig(S, group, mats, FINE) {
     return m;
   };
 
-  const sails = [];
+  const sails = [], spars = [], mastTops = [];
   const maxMastShare = S.masts.length ? Math.max(...S.masts.map(m => m.height)) : 1;
 
   S.masts.forEach(mk => {
@@ -672,6 +672,8 @@ function buildRig(S, group, mats, FINE) {
         ym.rotation.x = Math.PI / 2;
         ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
         group.add(tag(ym, 'yard'));
+        /* recorded from the spar that was actually placed, so the braces lead to real yard arms */
+        spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2 });
         /* ── THE DROP IS THE GAP TO THE TIER BELOW ────────────────────────────────
            Which is what the comment here always said, while the code used a fixed fraction of
            the mast segment and left the tiers floating apart from each other. A square sail
@@ -698,6 +700,7 @@ function buildRig(S, group, mats, FINE) {
          is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
       y += seg * 0.88;
     });
+    if (mk.rig === 'square') mastTops.push({ u, x, y: y + (lower * 0.14) });
 
     if (mk.rig === 'lateen') {
       /* ── THE LATEEN IS DETERMINED BY THE SHIP, NOT BY THE MAST ─────
@@ -777,7 +780,20 @@ function buildRig(S, group, mats, FINE) {
          which is the one shape a crab claw is not. Both spars radiate from a single TACK,
          hauled down forward, and open upward and aft. The sail is the triangle between them,
          and it is built from the spars' own endpoints so it cannot come adrift of either. */
-      const sparLen = L * 0.98;
+      /* ── TWO SOURCES THAT DO NOT AGREE, AND WHICH ONE THIS SHIP IS ────────────────
+         Pâris (1841) on the Tongan kalia: the sail "is always the same length as the boat" —
+         and the kalia was a very large double canoe. Hōkūleʻa, which is the vessel this card
+         is actually about (its own rows give "Hōkūleʻa 19.0 m" and "~50 m², two crab claws"),
+         carries far less: 25 m² a side. Hull-length spars would give her 104 m² of straight
+         triangle, four times what is recorded.
+         So the spar is SOLVED from the attested area rather than asserted from the rule, and
+         the rule is kept where it belongs — on the kalia, not on a modern reconstruction of a
+         Hawaiian voyaging canoe. `sailAreaEach` is the input; the spar falls out of it. */
+      const spread = 1.19 - 0.46;                       // the angle the two spars open to
+      const LEECH = 0.640;                              // area factor of the hollow leech at pull 0.46
+      const sparLen = S.sailAreaEach
+        ? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
+        : L * 0.98;
       const tack = [x - L * 0.22, base];
       const tipY = [tack[0] + Math.cos(1.19) * sparLen, tack[1] + Math.sin(1.19) * sparLen];
       const tipB = [tack[0] + Math.cos(0.46) * sparLen, tack[1] + Math.sin(0.46) * sparLen];
@@ -792,7 +808,7 @@ function buildRig(S, group, mats, FINE) {
       /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
          also why it works: the deeply raked tips shed tip vortices and it out-performs a
          triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
-      sails.push(makeTriSail(tack, tipY, tipB, group, 0.075));
+      sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
     }
     if (mk.rig === 'junk') {
       /* ── THE BATTENED LUG, to Reddish's measured average ────────────
@@ -875,6 +891,7 @@ function buildRig(S, group, mats, FINE) {
     group.add(tag(bm, 'bowsprit'));
   }
 
+  S.__spars = spars; S.__mastTops = mastTops;
   return sails;
 }
 
@@ -961,16 +978,31 @@ function makeSail(x, yTop, width, height, mat, group, kind) {
    and cannot come adrift of it. That is the whole fix: not an offset, a shape.
 
    Draft is a bubble that vanishes on all three edges, because all three are bolt-roped. */
-function makeTriSail(A, B, C, group, belly) {
+function makeTriSail(A, B, C, group, belly, leechPull) {
   const N = 18, pos = [], uvs = [], idx = [];
   const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
   const head = Math.hypot(B[0] - A[0], B[1] - A[1]);
+  /* ── THE CONCAVE LEECH ─────────────────────────────────────────────────────────────
+     A lateen's leech is straight; a CRAB CLAW's is cut deeply hollow, and that hollow is
+     not decoration — it is the whole reconciliation between two attested facts that look
+     contradictory. Pâris says the spars equal the length of the hull (19 m on Hōkūleʻa);
+     the sail area is recorded at ~50 m² for the pair, so ~25 m² each. A straight-edged
+     triangle on 19 m spars is 104 m² — four times too much. Hollow the leech and the same
+     spars carry the attested area, which is exactly why the rig looks like a claw.
+     Marchaj's tunnel work then explains why anyone would cut a sail away like that: the
+     raked tips shed their vortices span-wise and it out-lifts a triangle of equal area. */
+  const pull = leechPull === undefined ? 1.0 : leechPull;
+  const ctrl = [A[0] + ((B[0] + C[0]) / 2 - A[0]) * pull,
+                A[1] + ((B[1] + C[1]) / 2 - A[1]) * pull];
   for (let i = 0; i <= N; i++) {
     const sA = i / N;                                   // along the head, tack -> peak
-    const Hd = lerp(A, B, sA);
+    /* the free edge is a quadratic Bezier from peak to clew, bowed in toward the tack */
+    const w = [(1 - sA) * (1 - sA) * B[0] + 2 * sA * (1 - sA) * ctrl[0] + sA * sA * C[0],
+               (1 - sA) * (1 - sA) * B[1] + 2 * sA * (1 - sA) * ctrl[1] + sA * sA * C[1]];
+    const Hd = w;
     for (let j = 0; j <= N; j++) {
-      const t = j / N;                                  // head -> clew
-      const P = lerp(Hd, C, t);
+      const t = 1 - j / N;                              // leech -> tack
+      const P = lerp(A, Hd, t);
       pos.push(P[0], P[1], 16 * sA * (1 - sA) * t * (1 - t) * head * belly);
       uvs.push(sA, t);
     }
@@ -1022,6 +1054,30 @@ const PARTS = {
               what: 'The skin. In carvel work the planks meet edge to edge on the frames and the '
                   + 'seams are caulked; in clinker work they overlap and are riveted to each '
                   + 'other, and the shell is built first. Carvel can be scaled up; clinker cannot.' },
+  crossbeam:{ stage: 3, name: 'Crossbeams',
+              what: 'The lashed beams that tie the two hulls into one vessel. They are lashed, '
+                  + 'not fastened rigid, on purpose: the joint has to WORK in a seaway, and a '
+                  + 'rigid one would tear the hulls apart. Coir lashing can be re-served at sea; '
+                  + 'a broken iron bolt cannot.' },
+  platform: { stage: 3, name: 'Platform',
+              what: 'The deck between the hulls, and the only flat space aboard. It carries the '
+                  + 'crew, the water, the fire hearth, the breeding pigs and the seed stock — '
+                  + 'and it is what made the Pacific settleable rather than merely crossable.' },
+  gun:      { stage: 3, name: 'Great guns',
+              what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
+                  + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
+                  + 'can — which is the whole reason fleets learned to fight in line. And they '
+                  + 'are why she fights on one tack at a time: the lee ports must stay shut or '
+                  + 'she floods through them.' },
+  stay:     { stage: 5, name: 'Stays and backstays',
+              what: 'Standing rigging in the fore-and-aft plane. Stays run FORWARD from each '
+                  + 'masthead and stop it falling aft; backstays run aft and take the forward '
+                  + 'push of a following wind. The foremast stays lead to the bowsprit — which '
+                  + 'is the entire reason a bowsprit exists.' },
+  brace:    { stage: 6, name: 'Braces',
+              what: 'Running rigging from each yard ARM, leading aft. Hauling one brace and '
+                  + 'easing the other swings the yard round to meet the wind at an angle. They '
+                  + 'are the reason a square-rigger can sail anything other than dead downwind.' },
   rail:     { stage: 3, name: 'Rail',
               what: 'The capping timber round the deck edge, following the sheer. It finishes '
                   + 'the tops of the frames and is what everyone aboard actually holds on to.' },
@@ -1228,6 +1284,95 @@ function buildDeadeyes(n, r, mat) {
   return tag(g, 'deadeye');
 }
 
+
+/* ── THE GUNS, RUN OUT ─────────────────────────────────────────────────────────────────
+ * The ports are painted by the hull shader; until now nothing came out of them, and on a
+ * two-decker that is the most obvious absence on the ship. The barrels are placed from the
+ * SAME two expressions the shader uses to draw the ports —
+ *
+ *     port centre in v : uWaterline + 0.10 + deck * 0.115
+ *     ports along u    : fract(u * 26.0) == 0.5
+ *
+ * — so a barrel cannot come out of a blank plank, and if the port pattern is ever retuned the
+ * guns follow it. Two models of where a gunport is would be exactly the drift this project
+ * keeps being bitten by.
+ *
+ * A 32-pounder is 3 m long and weighs 2.7 tonnes; run out, about a third of the barrel is
+ * outside the ship. That protrusion is what a broadside looks like from outside, and it is why
+ * a ship fought on one tack at a time — the lee ports had to stay shut or she flooded.
+ */
+function buildGuns(S, group, mat) {
+  const H = hullSurface(S);
+  const decks = S.gunDecks || 0;
+  if (!decks) return;
+  const g = new THREE.Group();
+  const len = S.beam * 0.19, r = S.beam * 0.017;
+  for (let d = 0; d < decks; d++) {
+    const v = 0.62 + 0.10 + d * 0.115;                  // the shader's port centre, exactly
+    if (v > 0.985) continue;
+    for (let k = 0; k < 26; k++) {
+      const u = (k + 0.5) / 26;
+      if (u < 0.13 || u > 0.88) continue;               // the ends are too fine to carry guns
+      const p = surfacePoint(S, H, u, v);
+      for (const sgn of [-1, 1]) {
+        const bar = new THREE.Mesh(
+          new THREE.CylinderGeometry(r * 0.72, r, len, 8), mat);
+        bar.rotation.x = Math.PI / 2;                    // along the beam, pointing out
+        bar.position.set(p[0], p[1], sgn * (p[2] + len * 0.30));
+        g.add(bar);
+      }
+    }
+  }
+  group.add(tag(g, 'gun'));
+}
+
+/* ── RIGGING THAT ACTUALLY LEADS SOMEWHERE ─────────────────────────────────────────────
+ * Standing rigging holds the mast up; running rigging works the ship. The model had only the
+ * first, which is why the rig read as scaffolding: a real ship is a cobweb, and almost all of
+ * that web is rope doing a job you can name.
+ *
+ *   STAYS run FORWARD from each masthead and stop it falling aft — the fore-and-aft partner of
+ *   the shrouds. The foremast's lead to the bowsprit, which is the entire reason a bowsprit is
+ *   there at all.
+ *   BACKSTAYS run aft from the mastheads to the ship's side, taking the forward pull of a
+ *   following wind.
+ *   BRACES lead aft from each yard ARM. They are how the yard is swung round to trim the sail,
+ *   and they are the reason a square-rigger can sail anything but dead downwind.
+ */
+function buildRigging(S, group, rope, spars, mastTops) {
+  const H = hullSurface(S);
+  const L = S.lwl;
+  const line = (a, b) => {
+    const g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(a[0], a[1], a[2] || 0), new THREE.Vector3(b[0], b[1], b[2] || 0)]);
+    return new THREE.Line(g, rope);
+  };
+  const deckAt = u => H.sheer(u);
+
+  mastTops.forEach((m, i) => {
+    /* forestay: forward and down — to the bowsprit for the foremost mast, to the deck at the
+       foot of the mast ahead for the others */
+    const aheadU = i === 0 ? 0.03 : mastTops[i - 1].u;
+    const ax = (aheadU - 0.5) * L;
+    const ay = i === 0 ? deckAt(0.06) + (S.bowsprit ? S.beam * 0.20 : 0) : deckAt(aheadU);
+    group.add(tag(line([m.x, m.y], [ax, ay]), 'stay'));
+    /* backstays to the ship's side, one each way */
+    const bu = Math.min(0.96, m.u + 0.20);
+    const bx = (bu - 0.5) * L, by = deckAt(bu);
+    const hb = (H.halfB * H.wl(bu)) * (1 - H.tumble(bu));
+    for (const sgn of [-1, 1]) group.add(tag(line([m.x, m.y, 0], [bx, by, sgn * hb]), 'stay'));
+  });
+
+  /* braces: from each yard arm aft and down */
+  spars.forEach(sp => {
+    const bu = Math.min(0.97, sp.u + 0.26);
+    const bx = (bu - 0.5) * L, by = deckAt(bu);
+    for (const sgn of [-1, 1])
+      group.add(tag(line([sp.x, sp.y, sgn * sp.half], [bx, by + sp.half * 0.10, sgn * sp.half * 0.30]),
+                    'brace'));
+  });
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -1306,6 +1451,7 @@ function buildShip(S, opts) {
     spar: new THREE.MeshStandardMaterial({ color: 0x6a4d2c, roughness: 0.72, metalness: 0.02 }),
     woodDark: new THREE.MeshStandardMaterial({ color: 0x54402a, roughness: 0.78 }),
     woodPale: new THREE.MeshStandardMaterial({ color: 0x9c8259, roughness: 0.68 }),
+    iron: new THREE.MeshStandardMaterial({ color: 0x1c1c1e, roughness: 0.42, metalness: 0.72 }),
     canvas: new THREE.MeshStandardMaterial({ color: 0xded3b8, roughness: 0.94,
                                              side: THREE.DoubleSide }),
     /* ⚠ Standing rigging is NOT black. It is hemp tarred with Stockholm tar, which is a dark
@@ -1315,9 +1461,46 @@ function buildShip(S, opts) {
     rope: new THREE.LineBasicMaterial({ color: 0x4a3520, transparent: true, opacity: 0.78 }),
   };
   const sails = buildRig(S, group, mats, FINE);
+  if (FINE) {
+    buildGuns(S, group, mats.iron || mats.woodDark);
+    if (S.__spars && S.__spars.length)
+      buildRigging(S, group, mats.rope, S.__spars, S.__mastTops || []);
+  }
   /* the fittings are what turn a hull with masts into a ship, and they are the reason the
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
+
+  /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
+     The card has always said "Austronesian double hull" and the model drew one hull, which is
+     not a detail — it is the entire naval architecture. Two slender hulls carry the stability
+     that a single hull of that beam could never have (1.05 m on 19 m), and the deck between
+     them is the only flat space aboard: it is where the crew, the water, the pigs, the seed
+     stock and the mast all live. That platform is what made the Pacific settleable.
+     The rig steps on the platform, on the centreline, so it stays where it was built. */
+  if (S.doubleHull) {
+    const sep = S.hullSep || S.loa * 0.26;
+    const hullKeys = ['keel', 'frames', 'planking', 'deck', 'stempost', 'wale', 'rudder'];
+    const body = group.children.filter(o => o.userData.part && hullKeys.includes(o.userData.part.key));
+    body.forEach(o => {
+      const twin = o.clone();
+      twin.userData.part = o.userData.part;        // clone() JSON-copies it; restore the tag
+      o.position.z -= sep / 2;
+      twin.position.z += sep / 2;
+      group.add(twin);
+    });
+    const beamMat = new THREE.MeshStandardMaterial({ color: 0x6f5836, roughness: 0.82 });
+    const dk = hullSurface(S);
+    [0.30, 0.50, 0.70].forEach(u => {
+      const cb = new THREE.Mesh(
+        new THREE.BoxGeometry(S.loa * 0.035, S.beam * 0.16, sep + S.beam * 1.6), beamMat);
+      cb.position.set((u - 0.5) * S.lwl, dk.sheer(u) + S.beam * 0.08, 0);
+      group.add(tag(cb, 'crossbeam'));
+    });
+    const plat = new THREE.Mesh(
+      new THREE.BoxGeometry(S.loa * 0.34, S.beam * 0.05, sep * 0.86), beamMat);
+    plat.position.set(0, dk.sheer(0.5) + S.beam * 0.17, 0);
+    group.add(tag(plat, 'platform'));
+  }
 
   /* ── HOW TALL IS THE RIG? MEASURE IT, DO NOT ESTIMATE IT ─────────────────────────────
      The Yard used to reconstruct rig height from the mast data with a multiplier per rig type —

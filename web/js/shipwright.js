@@ -161,7 +161,11 @@ function swApplyStage() {
   const bb = new THREE.Box3();
   SW.ship.traverse(o => { if (o.visible && o.userData.part) bb.expandByObject(o); });
   if (!bb.isEmpty()) {
-    SW.viewTop = bb.max.y; SW.viewBot = bb.min.y; SW.viewX = bb.max.x - bb.min.x;
+    SW.viewTop = bb.max.y; SW.viewBot = bb.min.y;
+    /* ⚠ Fitting on the X extent alone assumes every vessel is longer than it is wide. A double
+       canoe is 5.4 m across on a 1.05 m hull, and from anywhere but dead abeam that width is
+       what runs off the screen. Fit the larger of the two horizontal extents. */
+    SW.viewX = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z);
   }
 
   const nm = STAGE_NAMES[SW.stage];
