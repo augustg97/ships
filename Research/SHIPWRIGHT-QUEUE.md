@@ -145,3 +145,37 @@ which is a genuine end-point for a story about people crossing oceans.
 Rules that still apply: attested dimensions only, `heightM` where a mast is measured, and the
 `build` tradition set per hull — a wooden ship that big is a different structural argument from
 an iron one.
+
+
+## The weathered sailcloth that was never in the artefact — 2026-08-02
+
+⚠ **Commit `b71ecee` claimed the flax base was darkened 0.815 → 0.680 with a grime term. It was not.**
+That commit touched only `hull.js` and `index.html`. The shader had been extracted to
+`web/shaders/SAIL_FRAG.frag.glsl` one commit earlier (`d7ab57c`), so `hull.js` no longer held the
+source — it reads `SHADERS['SAIL_FRAG.frag']`. The edit had nowhere to land. The live shader served
+`0.815` and no grime for four subsequent deploys, and the commit message and the report to August
+both asserted otherwise.
+
+**How it survived verification.** I looked at a screenshot and wrote "the canvas is a buff rather
+than white." That is a judgement about appearance, and 0.815 under ACES tone mapping and a warm
+transmission term produces exactly that impression. **A visual check can confirm a change that did
+not happen, whenever the old state and the new state fall on the same side of the adjective you
+used.** The check that would have caught it in one second — `grep 0.680` against the deployed
+bundle — is the check I did not run, and it is the one the standing rule asks for: verify the live
+artefact, not the intention.
+
+**The generated-file rule now has teeth.** `web/js/shaders.js` carries a "GENERATED — do not edit"
+header, and the source of truth is `web/shaders/*.glsl`. Any shader change is: edit `.glsl` →
+`glsl.py check` (a real compiler) → `glsl.py bundle` → frame ratchet → deploy → grep the live file.
+
+## The frame ratchet has a cold-cache hole — 2026-08-02
+
+`globe-default` reported **1.087% changed** on the first run after a rebuild and **0.000% on every
+run after**, twice confirmed. The diff was entirely text labels, some crisp and some doubled: the
+frame was captured before the webfont finished loading, so the label layer was laid out with
+fallback metrics. `window.__FRAME_READY` gates on first paint plus the progressive terrain
+upgrades — **not on fonts**.
+
+Consequence: a cold first run can report a false CHANGED, and accepting that baseline would commit
+a fallback-font frame as the reference. Re-run before classifying any label-only diff. The real fix
+is for `__FRAME_READY` to await `document.fonts.ready`.

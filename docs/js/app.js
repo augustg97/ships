@@ -218,11 +218,16 @@ function applyHash() {
     if (isFinite(v)) { yr.value = v; S.year = v; onTime(); }
   }
 
-  /* The view goes last: setView() closes the other renderers and opens one, so anything
-     applied after it would be overwritten by the view it belongs to. All three top-level
-     views are addressable — `#v=sea` (default), `#v=ship`, `#v=action` — which is what
-     makes the Shipwright and the Action verifiable by the frame ratchet at all. */
-  const vm = /[#&]v=(sea|ship|action)/.exec(h);
+}
+
+/* The view is applied separately and LATER than the era and year, because setView() needs
+ * the tabs wired and the vessel and battle data loaded. Called from applyHash() it ran too
+ * early, found no vessel, opened nothing — and the "shipwright" baseline was a picture of
+ * the globe. A frame that captures the wrong view is worse than no frame, because it looks
+ * like coverage. All three top-level views are addressable: `#v=sea` (default), `#v=ship`,
+ * `#v=action`. */
+function applyHashView() {
+  const vm = /[#&]v=(sea|ship|action)/.exec(location.hash);
   if (vm && typeof setView === 'function') setView(vm[1]);
 }
 
@@ -526,7 +531,7 @@ function buildChapters() {
 
   /* The URL is live state, not just a boot argument: back/forward and a pasted link both
      work, and a fragment-only navigation does not silently leave the app where it was. */
-  window.addEventListener('hashchange', applyHash);
+  window.addEventListener('hashchange', () => { applyHash(); applyHashView(); });
 }
 
 function selectEra(i, fly) {
@@ -1310,7 +1315,10 @@ function openAbout() {
   el.classList.remove('hidden');
 }
 
-boot().catch(e => {
+/* Everything the URL asks for that needs a fully-booted app. Kept out of boot() itself so
+   that a failure here cannot take the globe down with it. */
+boot().then(() => { try { applyHashView(); } catch (e) { console.warn('hash view', e); } })
+      .catch(e => {
   console.error(e);
   document.getElementById('loadnote').textContent = 'failed: ' + e.message;
 });

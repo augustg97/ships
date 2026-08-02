@@ -9,7 +9,13 @@ void main(){
   /* panels run parallel to the leech; the seam is a doubled, stitched band about an inch wide */
   float p = vUv.x * uPanels;
   float seam = smoothstep(0.030, 0.075, abs(fract(p) - 0.5) * 2.0);
-  vec3 flax = vec3(0.815, 0.775, 0.660);
+  /* ── SAILCLOTH IS NOT WHITE ─────────────────────────────────────────────────────────
+     Unbleached flax is a grey-buff, and a working sail is darker still: tanned or oiled
+     against rot on many rigs, and everywhere stained by salt, spray, tar from the rigging
+     above it and smoke from the galley funnel. New white canvas exists for about one voyage.
+     The old value here was 0.815 — near paper — which is most of why these read as bedsheets
+     rather than as gear. */
+  vec3 flax = vec3(0.680, 0.640, 0.545);
   float weather = noise(vUv * vec2(9.0, 5.0)) * 0.5 + noise(vUv * vec2(38.0, 21.0)) * 0.5;
   /* ── THE WEAVE ─────────────────────────────────────────────────────────────────────
      Flax canvas is a coarse cloth and at close range you see the threads: warp one way, weft
@@ -19,6 +25,14 @@ void main(){
   float weft = sin(vUv.y * 640.0) * 0.5 + 0.5;
   float weave = (warp * 0.55 + weft * 0.45);
   vec3 col = flax * (0.86 + 0.20 * weather) * (0.965 + 0.035 * weave);
+  /* ── AND IT IS DIRTIEST WHERE IT IS HANDLED ─────────────────────────────────────────
+     Staining is not uniform. It accumulates at the FOOT, which takes the spray and which the
+     crew hauls on, and inward from the LEECHES, which are gathered and gripped every time the
+     sail is furled or reefed. vUv.y runs 0 at the head to 1 at the foot. */
+  float low   = smoothstep(0.35, 1.0, vUv.y);
+  float side  = 1.0 - smoothstep(0.0, 0.22, min(vUv.x, 1.0 - vUv.x));
+  float grime = max(low * 0.55, side * 0.35) * (0.5 + 0.5 * weather);
+  col = mix(col, col * vec3(0.80, 0.77, 0.72), grime);
   col *= mix(1.10, 1.0, seam);                       // the seam is thicker, so it catches light
   /* ── CANVAS IS TRANSLUCENT, and that is half of why a sail reads as fabric ──────────
      A sail lit from behind GLOWS, and the spars and rigging in front of it show through as

@@ -1,0 +1,20 @@
+{
+  "note": "Every third-party asset in this project, with its source and licence. Required by SOURCING-AND-LICENSING; also what makes a future publication pass a day's work instead of a rebuild.",
+  "assets": [
+    {
+      "source": "polyhaven",
+      "slug": "kloofendal_43d_clear_puresky",
+      "name": "Kloofendal 43d Clear (Pure Sky)",
+      "type": "hdris",
+      "resolution": "1k",
+      "licence": "CC0",
+      "authors": {
+        "Greg Zaal": "All"
+      },
+      "url": "https://polyhaven.com/a/kloofendal_43d_clear_puresky",
+      "files": [
+        "web/data/assets/hdris/kloofendal_43d_clear_puresky/kloofendal_43d_clear_puresky_1k.hdr"
+      ]
+    }
+  ]
+}

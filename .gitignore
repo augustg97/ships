@@ -17,3 +17,8 @@ scratchpad/
 # the tile pyramid is REGENERABLE: build_fields.py then build_tiles.py.
 # docs/ carries the published copy; keeping the working copy out of git halves the repo.
 /web/fields/
+
+# frame-baseline scratch: `frames/` are the committed baselines, these two are per-run
+# working directories and would otherwise be swept in by any `git add -A`.
+/Research/baselines/_current/
+/Research/baselines/_diff/

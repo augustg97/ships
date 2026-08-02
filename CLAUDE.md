@@ -87,3 +87,100 @@ Plus the standing ones: a process backgrounded with `&` inside a tool call dies 
 ends; a waiter on a `pgrep` pattern can match itself — wait on a **PID**; a static host can serve
 stale JSON after a successful push, so stamp the data version before copying the app file and
 verify the live value.
+
+---
+
+## Tooling — added 2026-08-02, read this before verifying anything
+
+The Modeling Studio now has a toolchain at `~/Modeling Studio/tools/`, run with the Studio's own
+interpreter. **`pip` is not a command on this machine** — use an explicit interpreter, always:
+
+```bash
+STUDIO="/Users/augustgweon/Modeling Studio"
+"$STUDIO/.venv/bin/python" "$STUDIO/tools/<tool>.py" --help
+```
+
+### This app can now freeze, and that is what makes verification real
+
+`?frozen` pins every clock — wave drift, cloud advection, the rotating terminator, the month
+scrubber, camera flights, the splash fade — to one instant. Without it two captures of identical
+code differed by **2.659% of pixels**. With it they differ by **0.000%**.
+
+```
+?frozen        freeze at t = 0 s
+?frozen=12.5   freeze at t = 12.5 s
+```
+
+Everything time-varying reads `clockS()`. **Nothing may read `performance.now()` for appearance
+again** — if you add an animated term, route it through `clockS()` or you silently break the
+ratchet for everyone.
+
+`window.__FRAME_READY` goes true after the first painted frame — and in frozen mode only after
+the progressive terrain upgrades finish, because a capture at first paint differs from one a
+second later by ~18% of pixels.
+
+### The URL is now state
+
+This app had none until 2026-08-02. `#e=<era>&t=<year>&v=<view>`, all live via `hashchange`:
+
+```
+#e=0&t=40000          era 0, 40,000 BP
+#e=5&t=1870&v=ship    iron and steam, Shipwright open
+v = sea | ship | action
+```
+
+⚠ **Order matters and has already caused a silent failure.** `selectEra()` rewrites the year
+slider's min/max and resets `S.year`, so era must be applied before year. And `setView()` needs
+the tabs wired and vessel/battle data loaded, so it runs from `boot().then()`, not inside
+`applyHash()`. Applied too early it opened nothing and the "shipwright" baseline was a picture of
+the globe — **a frame that captures the wrong view is worse than no frame, because it looks like
+coverage.**
+
+### The frame-baseline ratchet — run it every round
+
+```bash
+"$STUDIO/.venv/bin/python" "$STUDIO/tools/frame_baseline.py" check --project ~/Ships
+```
+
+Six committed baselines in `Research/baselines/`: four globe eras, the Shipwright, the Action.
+Exits non-zero on any frame beyond `changed_frac 0.0005 / mean_abs 0.15`. Every frame is scored
+individually (§7). A near-uniform frame is flagged **BLANK** regardless of its diff — that is the
+black-canvas-with-working-panels failure. An amplified diff image lands in `_diff/`.
+
+Accepting a moved baseline requires a written reason, which is appended to
+`Research/baselines/FRAME-LOG.md`:
+
+```bash
+"$STUDIO/.venv/bin/python" "$STUDIO/tools/frame_baseline.py" accept --project ~/Ships \
+    --frame shipwright --reason "new sail cloth material; verified better against the reference"
+```
+
+**The server must be running on :8149 first.** The harness opens a fresh page per frame — a
+fragment-only navigation does not reload, so a shared page silently gives every frame the same
+picture.
+
+### Shaders live in files now
+
+`web/shaders/*.glsl` is the source of truth. `web/js/shaders.js` is **generated** — never edit it.
+
+```bash
+"$STUDIO/.venv/bin/python" "$STUDIO/tools/glsl.py" check  --project ~/Ships   # real compiler
+"$STUDIO/.venv/bin/python" "$STUDIO/tools/glsl.py" bundle --project ~/Ships --global
+```
+
+After editing any `.glsl`: **check, then bundle, then run the frame ratchet.** `shaders.js` is
+loaded in `index.html` before every app script and exposes `SHADERS['HULL_FRAG.frag']` etc.
+
+This kills the backtick class of bug by construction — the bundle JSON-escapes, so a backtick is
+just a character. `#include "x.chunk.glsl"` works, for shared noise/colour code. The checker
+injects three.js's built-in preamble (`position`, `uv`, matrices, and the precision qualifiers
+first), so vertex shaders do not falsely fail.
+
+### One thing deliberately not done
+
+**Image-based lighting is fetched but not wired.** `web/data/assets/hdris/` holds a CC0 HDRI with
+provenance in `ASSETS.json`, and the 19 `MeshStandardMaterial` uses in `hull.js` would benefit.
+But this app vendors **three.js r160 with no addons**, and `RGBELoader` is an addon. Wiring it
+needs either a vendored `RGBELoader`, or `PMREMGenerator.fromScene()` with a procedural sky (no
+new dependency, less faithful). **That is a dependency decision, not a task** — decide it before
+writing code, and A/B the result against the `shipwright` baseline rather than judging by eye.
