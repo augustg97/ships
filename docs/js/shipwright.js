@@ -106,7 +106,9 @@ function swInit() {
   cv.addEventListener('pointermove', e => {
     if (!drag) return;
     if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) drag.moved = true;
-    SW.shipSpin = drag.spin - (e.clientX - drag.x) * 0.008;
+    /* ⚠ Was inverted: dragging right turned the ship away from the cursor. Grabbing an object
+       and pulling right should bring its near side right, which is + not −. */
+    SW.shipSpin = drag.spin + (e.clientX - drag.x) * 0.008;
     SW.lat = Math.max(0.02, Math.min(0.90, drag.lat + (e.clientY - drag.y) * 0.004));
   });
   cv.addEventListener('pointerup', e => {
@@ -454,7 +456,14 @@ function swFillCard(v) {
   const ks = Object.keys(cur).map(Number).sort((a, b) => a - b);
   let bestA = 0, bestV = 0;
   ks.forEach(k => { if (cur[k] > bestV) { bestV = cur[k]; bestA = k; } });
+  /* ── WHO IS ABOARD ─────────────────────────────────────────────────────────────────
+     A ship is a place people live, and the manning is often the most surprising number on the
+     card: Wyoming carried 3,730 tons with thirteen hands, a 74 carried 640 men in 57 metres,
+     and the unmanned vessel carries nobody at all. It belongs beside the speed, not buried in
+     the prose. */
   const cap = [
+    [v.crew !== undefined ? String(v.crew) : '—', v.crew === 0 ? 'crew — nobody aboard' : 'crew'],
+    [v.pax !== undefined ? String(v.pax) : '—', v.pax === undefined ? 'passengers unrecorded' : 'passengers'],
     [bestV.toFixed(1) + ' kn', 'best speed'],
     [bestA + '°', 'at this angle off the wind'],
     /* ⚠ "made good" is in the LABEL, not in a paragraph underneath. The note used to spend

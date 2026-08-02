@@ -650,7 +650,31 @@ void main(){
       col *= mix(0.52, 1.0, seam);
       col = mix(col, vec3(0.055, 0.052, 0.050), port);   // the open port is a hole
     }
-    col *= taper * 0.25 + 0.75;
+    /* ── PAINTED STEEL IS PAINTED, AND PAINT IS EVEN ────────────────────────────────────
+     ⚠ An iron or steel hull was picking up warm blotches from the timber terms above — grain,
+     taper and plank noise are all meaningless on a plated ship, and on Titanic they read as
+     rust and damage on a vessel that was three weeks old. The colour is recomputed cleanly
+     here rather than corrected upstream, because the leak was not from one term: a plated hull
+     simply should not run through the wooden path at all.
+     What a riveted hull actually shows is the plate LANDS — the overlap where one strake laps
+     the next, a hard line every metre or so — and the rivet rows along them. Nothing else. */
+  if (uIron > 0.5) {
+    float pv = v * uStrakes * 0.55, ph = u * 34.0;
+    float land = smoothstep(0.03, 0.11, abs(fract(pv) - 0.5) * 2.0);
+    float butt = smoothstep(0.02, 0.07, abs(fract(ph) - 0.5) * 2.0);
+    float rivet = smoothstep(0.40, 0.26,
+                    length(fract(vec2(ph * 7.0, pv * 2.0)) - 0.5));
+    vec3 paint = uTopside;
+    /* the boot-top: a band of anti-fouling red at the waterline, and below it the bottom */
+    float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
+    paint = mix(paint, vec3(0.42, 0.13, 0.10), below);
+    col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
+    col *= mix(0.90, 1.0, land);                     // the lap catches a little shadow
+    col *= mix(0.955, 1.0, butt);
+    col += rivet * 0.018;                            // rivets are proud, not dark
+  }
+
+  col *= taper * 0.25 + 0.75;
   }
 
   /* ── light. One sun, a broad sky term, and a bounce off the water so the underside of the
@@ -1290,6 +1314,13 @@ const PARTS = {
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
                   + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
+  oar:      { stage: 4, name: 'Oars',
+              what: 'The sail is for fair winds; the OARS are what she is. A trireme pulls 170 '
+                  + 'of them on three levels, and the whole hull exists to hold them at the '
+                  + 'right height above the water — which is why she is 37 m long, 3.8 m wide '
+                  + 'at the waterline, and carries almost no cargo. The outrigger takes the top '
+                  + 'bank outboard, and is why her famous 5.5 m beam is measured over the '
+                  + 'outriggers rather than over the planking.' },
   anchor:   { stage: 3, name: 'Bower anchor',
               what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her '
                   + 'bow exists to move it: cathead, fish davit, capstan, and a 24-inch cable too '
@@ -1977,6 +2008,49 @@ function buildAnchor(S, group, mat) {
   }
 }
 
+
+/* ── OARS, WHICH ARE THE ENGINE ────────────────────────────────────────────────────────
+ * A trireme's sail is for fair winds; her OARS are what she is. 170 of them on three levels,
+ * and the whole hull exists to hold them at the right height above the water — which is why
+ * she is 37 m long, 3.8 m wide at the waterline, and has almost no cargo capacity at all.
+ * The outrigger (parexeiresia) carries the topmost bank outboard of the hull, and it is the
+ * reason the famous "beam 5.5 m" is measured over the outriggers rather than over the planking.
+ */
+function buildOars(S, group, mat) {
+  const n = S.oarBanks || 0;
+  if (!n) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const g = new THREE.Group();
+  const perBank = S.oarsPerBank || 27;
+  const len = B * 2.4;
+  for (let bank = 0; bank < n; bank++) {
+    const v = 0.70 + bank * 0.11;                     // each level higher up the side
+    const out = 1.0 + bank * 0.22;                    // and further outboard
+    for (let i = 0; i < perBank; i++) {
+      const u = 0.16 + (i / (perBank - 1)) * 0.62;
+      const p = surfacePoint(S, H, u, Math.min(0.99, v));
+      for (const sgn of [-1, 1]) {
+        const o = new THREE.Group();
+        const shaft = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.006, B * 0.009, len, 6), mat);
+        shaft.rotation.z = Math.PI / 2;
+        shaft.position.x = len / 2;
+        o.add(shaft);
+        const blade = new THREE.Mesh(
+          new THREE.BoxGeometry(len * 0.20, B * 0.004, B * 0.055), mat);
+        blade.position.x = len * 0.92;
+        o.add(blade);
+        o.position.set(p[0], p[1], sgn * p[2] * out);
+        o.rotation.y = sgn > 0 ? 0 : Math.PI;
+        o.rotation.z = -0.34;                          // blades down toward the water
+        g.add(o);
+      }
+    }
+  }
+  group.add(tag(g, 'oar'));
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -2088,6 +2162,7 @@ function buildShip(S, opts) {
   if (FINE) buildSuperstructure(S, group);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
+  if (FINE) buildOars(S, group, mats.woodPale);
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the
      counter in surfacePoint. Three earlier attempts failed by sizing the plate; none of them
      could work, because the ship had no broad stern for a plate to sit on. */

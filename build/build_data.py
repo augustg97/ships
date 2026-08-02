@@ -209,6 +209,7 @@ HULLS = {
                   stemRake=0.045, sternRake=0.055, strakes=18, topside="#6b5533",
                   # Olympias's mast is ~11 m and stows on deck; Steel's rule would give 20 m on this
                   # hull, which is what happens when an 18th-century warship formula meets L/B 9.7.
+                  oarBanks=3, oarsPerBank=27,
                   masts=[dict(at=0.42, heightM=11.0, rig="square", rake=2, shrouds=3)]),
 
   # Skuldelev 2: 30 m × 3.8 m, draught ~1.0, sail 112 m². L/B 7.9 — a hull built to be rowed
@@ -469,7 +470,7 @@ vessel(id="voyaging-canoe", name="Voyaging canoe", sub="Austronesian double hull
              ["Sail area", "~50 m², two crab claws"], ["Crew", "12–16"],
              ["Measured passage", "Hawaiʻi→Tahiti 1976, ~2,400 nm in 30 days at sea ≈ 3.3 kn"],
              ["Construction", "lashed-lug planking, no metal at all"]],
-       attestation="attested", confidence="good",
+       crew=14, attestation="attested", confidence="good",
        text="The technology that settled a third of the surface of the planet, and it did it "
             "**against the prevailing wind** — which is the reason this model does not put "
             "Europe at the root of the tree.\n\n"
@@ -493,7 +494,7 @@ vessel(id="trireme", name="Trireme", sub="τριήρης", rig="oar", era=[-700,
              ["Sprint, measured", "8.3 kn (not the 8.9 kn usually quoted)"],
              ["Cruise, measured", "~5.4 kn; 2.9 kn into a headwind and 1 m sea"],
              ["Turning circle", "1.9 ship-lengths; 360° in 128 s"]],
-       attestation="generated", confidence="contested",
+       crew=200, attestation="generated", confidence="contested",
        text="A hull built to carry a bronze ram at speed and to turn inside its own length. It "
             "is also the best-measured ancient ship in existence, because one was built.\n\n"
             "*Olympias* (1987) **fell short of what the ancient sources imply**, and the "
@@ -515,7 +516,7 @@ vessel(id="corbita", name="Roman merchantman", sub="corbita", rig="square", era=
              ["Construction", "shell-first, pegged mortise-and-tenon, double planking"],
              ["Passage, downwind", "Puteoli→Alexandria 9 days ≈ 5–6 kn (Pliny)"],
              ["Passage, upwind", "Alexandria→Rome 40–70 days ≈ 1–2 kn made good"]],
-       attestation="generated", confidence="moderate",
+       crew=20, attestation="generated", confidence="moderate",
        text="The asymmetry on this card is the whole argument of this model in two rows. The "
             "same ship, on the same route, took nine days one way and forty to seventy the "
             "other. Nothing about the hull changed. The wind did.\n\n"
@@ -529,7 +530,7 @@ vessel(id="dhow", name="Sewn-plank dhow", sub="the Indian Ocean trader", rig="la
              ["Baghlah / ghanjah", "30–40 m, 150–400 t, crew 40–150"],
              ["Construction", "coir stitching through drilled holes; no iron"],
              ["Sailing season", "out on the SW monsoon Apr–Sep, home on the NE Nov–Mar"]],
-       attestation="attested", confidence="good",
+       crew=20, attestation="attested", confidence="good",
        text="In the Indian Ocean the departure **date** is not a free variable. The monsoon "
             "reverses twice a year, and it is the only wind system on Earth that does, so the "
             "calendar of the whole ocean is fixed by it: Egypt to India leaving in July on the "
@@ -547,7 +548,7 @@ vessel(id="junk", name="Chinese junk", sub="海船", rig="junk", era=[800, 1900]
              ["Cargo", "200–250 t"],
              ["Sternpost rudder", "attested 1st c. AD — about a millennium before Europe"],
              ["Compass at sea", "Zhu Yu, *Pingzhou Ketan*, 1119"]],
-       attestation="attested", confidence="good",
+       crew=30, attestation="attested", confidence="good",
        text="Four genuine firsts in one hull: watertight transverse bulkheads, the balanced "
             "battened lug sail, the axial sternpost rudder, and the magnetic compass used at "
             "sea. Each of them reached Europe centuries later or was invented there "
@@ -564,7 +565,7 @@ vessel(id="treasure-ship", name="Treasure ship", sub="寶船 — and how big it 
              ["Scholarly range", "50–76 m"],
              ["Fleet, first voyage", "~317 ships, 27,800 men"],
              ["Voyages", "seven, 1405–1433"]],
-       attestation="generated", confidence="contested",
+       crew=250, attestation="generated", confidence="contested",
        text="**The famous dimensions come from a novel.** The 44-zhang figure appears first in "
             "Luo Maodeng's *Xiyang Ji* of 1597 — a work of fiction written 164 years after the "
             "last voyage, in which ships are built with divine assistance — and was carried "
@@ -586,7 +587,7 @@ vessel(id="cog", name="Cog", sub="the northern workhorse", rig="square", era=[11
              ["Displacement", "~84 t; cargo ~87 t"], ["Crew", "15–20"],
              ["Sail", "one square sail, ~200 m²"],
              ["Windward, measured", "74–76° made good in a gentle breeze; LOSES ground in 20 kn"]],
-       attestation="attested", confidence="good",
+       crew=20, attestation="attested", confidence="good",
        text="Flat-bottomed so it could take the ground on a tidal flat and be unloaded at low "
             "water, which is what the Hanse ports needed. It also carries the **pintle-and-"
             "gudgeon stern rudder**, first depicted on the Winchester font about 1180 — the "
@@ -600,7 +601,7 @@ vessel(id="caravel", name="Caravel", sub="caravela latina", rig="lateen", era=[1
        from_=1430, to=1600, region="Atlantic",
        rows=[["Length", "20–25 m"], ["Beam", "~6 m"], ["Burden", "50–60 tons"],
              ["Crew", "20–25"], ["Draught", "~2 m"], ["Rig", "2–3 lateen masts"]],
-       attestation="generated", confidence="moderate",
+       crew=25, attestation="generated", confidence="moderate",
        text="Small, shallow and weatherly — and the weatherliness is the point. The cog could "
             "run down to Guinea on the north-east trades and then could not get home. The "
             "caravel could work back.\n\n"
@@ -619,7 +620,7 @@ vessel(id="carrack", name="Carrack", sub="nau", rig="square", era=[1450, 1600],
              ["*Madre de Deus*, 1592", "1,600 t burden, 7 decks, 47 m, 900 crew"],
              ["Rig", "square fore and main, lateen mizzen"],
              ["Tonnage system", "tons burden — not comparable with register or displacement tons"]],
-       attestation="generated", confidence="moderate",
+       crew=80, attestation="generated", confidence="moderate",
        text="The hull that carried the Portuguese and Spanish empires, and the first ship type "
             "designed from the start to cross oceans with cargo and guns at the same time. The "
             "mixed rig is the compromise that made it work: square sails forward for driving "
@@ -631,7 +632,7 @@ vessel(id="fluyt", name="Fluyt", sub="the freight machine", rig="square", era=[1
        rows=[["Length", "24–40 m"], ["Length : beam", "4:1 to 6:1"],
              ["Burden", "200–500 t"],
              ["Crew", "12–15 — against ~30 for the English equivalent"]],
-       attestation="generated", confidence="good",
+       crew=12, attestation="generated", confidence="good",
        text="Not a better sailer. A cheaper one — and that turned out to matter more.\n\n"
             "Built of softwood cut by wind-powered sawmills, rigged so that a dozen men could "
             "work it where an English ship of the same burden needed thirty, and shaped with a "
@@ -646,7 +647,7 @@ vessel(id="east-indiaman", name="East Indiaman", sub="retourschip", rig="square"
              ["Passage Netherlands→Batavia", "mean 253 days (1770–75), 238 days (1783–92)"],
              ["English EIC to Batavia", "mean 173 days over the same years"],
              ["Mortality", "VOC-wide ~9–10% per voyage across the whole record"]],
-       attestation="generated", confidence="good",
+       crew=120, attestation="generated", confidence="good",
        text="The best-documented long passage in the age of sail, because the Dutch counted "
             "everything. Solar and de Zwart worked the Dutch-Asiatic Shipping database and "
             "found something the model has to reproduce and mostly cannot flatter: **VOC ships "
@@ -667,7 +668,7 @@ vessel(id="ship-of-the-line", name="Ship of the line", sub="third rate, 74 guns"
              ["Crew", "600–650"], ["Speed", "8–9 kn maximum; fleet speed ~5 kn"],
              ["Timber", "~2,000 mature oaks — a 19th-c. estimate, not a dockyard account"],
              ["*Victory*, 1765", "2,142 tons BOM, 104 guns, 821 men — 1 man per 2.6 tons"]],
-       attestation="generated", confidence="moderate",
+       crew=640, attestation="generated", confidence="moderate",
        text="Roughly half of all line-of-battle ships by 1800 were 74s: the point on the curve "
             "where enough guns met enough speed.\n\n"
             "The manning ratio is the fact worth stopping on. A merchantman of the same period "
@@ -685,7 +686,7 @@ vessel(id="slave-ship", name="Slave ship", sub="the Middle Passage", rig="square
              ["Passage length", "~60 days (17th c.) → ~40 days (19th c.)"],
              ["Mortality by era", "22–30% (16th c.) → ~5% (final decade)"],
              ["Crew mortality", "~20% per voyage on British slavers"]],
-       attestation="attested", confidence="good",
+       crew=35, pax=300, attestation="attested", confidence="good",
        text="For three centuries the principal cargo of the Atlantic was people, and because "
             "this is a model about **technology**, that belongs on a vessel card rather than in "
             "a note.\n\n"
@@ -710,7 +711,7 @@ vessel(id="wyoming", name="Wyoming", sub="the longest wooden ship ever built", r
              ["Rig", "six-masted schooner, 22 sails"],
              ["Crew", "13"],
              ["Fate", "foundered off Cape Cod, 11 March 1924, all hands"]],
-       attestation="generated", confidence="good",
+       crew=13, attestation="generated", confidence="good",
        text="Wood has a maximum length, and this is what reaching it looks like.\n\n"
             "At 110 m on deck she was too long to hold herself straight. A wooden hull resists "
             "bending only through the friction and fastenings between thousands of separate "
@@ -732,7 +733,7 @@ vessel(id="preussen", name="Preussen", sub="the largest sailing ship ever built"
              ["Rig", "five-masted full-rigger — the only one ever built"],
              ["Canvas", "47 sails, 6,806 m²"],
              ["Best day's run", "426 nautical miles (1904); 20.5 kn at her fastest"]],
-       attestation="generated", confidence="good",
+       crew=48, attestation="generated", confidence="good",
        text="The high-water mark of sail, and she was sunk by a ferry.\n\n"
             "Five masts, all square-rigged — the only ship ever built that way. 6,806 m² of "
             "canvas driving 5,081 tons round Cape Horn with nitrate, on a route where steam "
@@ -750,7 +751,7 @@ vessel(id="great-eastern", name="Great Eastern", sub="forty years too early", ri
              ["Propulsion", "paddle wheels AND screw AND six masts of sail"],
              ["Design purpose", "steam to Australia and back without coaling"],
              ["What she actually did", "laid the transatlantic telegraph cable, 1866"]],
-       attestation="generated", confidence="good",
+       crew=418, pax=4000, attestation="generated", confidence="good",
        text="Brunel built a ship six times bigger than anything afloat, and there was no trade "
             "for her.\n\n"
             "The engineering was sound and the reasoning was sound: coal is the constraint on "
@@ -770,7 +771,7 @@ vessel(id="titanic", name="Titanic", sub="size instead of speed", rig="steam",
              ["Watertight compartments", "16 — but the bulkheads stopped at E deck"],
              ["Design speed", "21 kn — deliberately not a record-breaker"],
              ["Lifeboats", "20, for 1,178 people, against 2,224 aboard"]],
-       attestation="generated", confidence="good",
+       crew=892, pax=1317, attestation="generated", confidence="good",
        text="She was not built to be fast. Cunard had the speed record and White Star chose not "
             "to compete for it — Titanic was built for **size and comfort**, on the theory that "
             "passengers would rather cross well than quickly.\n\n"
@@ -789,7 +790,7 @@ vessel(id="usv", name="Unmanned surface vessel", sub="nobody aboard", rig="motor
              ["Endurance", "months, limited by fouling and machinery, not by stores"],
              ["Crew", "none"],
              ["What it is for", "survey, hydrography, ocean monitoring, naval picket"]],
-       attestation="generated", confidence="fair",
+       crew=0, pax=0, attestation="generated", confidence="fair",
        text="Every other hull in this model exists to carry people across water. This one does "
             "not carry anyone at all.\n\n"
             "That changes the constraint completely. A crewed ship's endurance is set by food, "
@@ -809,7 +810,7 @@ vessel(id="clipper", name="Clipper", sub="the last argument for sail", rig="squa
              ["Best day's run", "363 nm — a 15.1 kn average sustained for 24 hours"],
              ["NY→San Francisco record", "*Flying Cloud*, 89 days 8 hours (1854)"],
              ["Construction", "composite — iron frames, teak and rock elm planking"]],
-       attestation="generated", confidence="good",
+       crew=30, attestation="generated", confidence="good",
        text="The fastest commercial sailing ships ever built, and they were obsolete almost "
             "immediately.\n\n"
             "The Suez Canal opened in 1869, the year *Cutty Sark* was launched. It cut "
@@ -831,7 +832,7 @@ vessel(id="steamer", name="Ocean steamer", sub="iron hull, screw propeller", rig
              ["Coal, simple engine 1850s", "4.0–5.0 lb per indicated horsepower-hour"],
              ["Compound, 1870s", "~2.0–2.5 lb/ihp-hr"],
              ["Triple expansion, 1890", "~1.5 lb/ihp-hr"]],
-       attestation="generated", confidence="good",
+       crew=90, pax=600, attestation="generated", confidence="good",
        text="The number that changed the world is not horsepower. It is **pounds of coal per "
             "horsepower-hour**, and it fell about threefold between 1855 and 1890.\n\n"
             "That is what made steam viable on long routes. At 1850s efficiency a ship crossing "
@@ -850,7 +851,7 @@ vessel(id="container", name="Container ship", sub="from Ideal X to 24,000 TEU", 
              ["Panamax (1914 locks)", "LOA 294.13 m, beam 32.31 m, draught 12.04 m"],
              ["Neo-Panamax (2016)", "LOA 366 m, beam 51.25 m, draught 15.2 m"],
              ["Malaccamax", "draught 25 m"]],
-       attestation="generated", confidence="good",
+       crew=22, pax=0, attestation="generated", confidence="good",
        text="The last chapter of this story is not about the sea at all. A modern container "
             "ship's route is set by **lock chambers and dredged channels** — numbers written "
             "down by engineers — rather than by anything the ocean does.\n\n"
