@@ -136,45 +136,69 @@ function swSelect(obj) {
 }
 
 /* ── the building slider ───────────────────────────────────────────────────────────── */
+/* ── THE THREE TRADITIONS ──────────────────────────────────────────────────────────────
+   How a hull is put together is not a detail of process — it decides what the ship can become,
+   and the assembly slider is the only place in this project that can show it. The stage ORDER
+   changes with the tradition, and so does what stage 1 and 2 are called.
+
+   ⚠ This view used to tell every visitor that every hull in the model was carvel, because the
+   shell-first flag existed and had never been set on a single ship. A feature that is wired but
+   unset is worse than one that is missing: it asserts a default with the same confidence it
+   would state a fact. */
+const TRADITION = {
+  frame: { label: 'Frame-first (carvel): frames, then planking',
+           s1: ['Frames raised', 'The ribs go up on the keel. The shape is decided now, on the '
+                              + 'drawing floor, before a single plank is cut — which is what '
+                              + 'makes a 74 reproducible by a yard that has never built one.'],
+           s2: ['Planked', 'Planks meet edge to edge on the frames and the seams are caulked.'] },
+  shell: { label: 'Shell-first: planking, then frames',
+           s1: ['Shell built', 'The planking shell goes up FIRST and holds the shape — clinker '
+                             + 'riveted, or edge-joined by mortise and tenon, or sewn. The form '
+                             + "exists only in the shipwright's eye and hands; there is no plan."],
+           s2: ['Frames inserted', 'Light frames go in afterwards, into a hull whose shape '
+                                 + 'already exists. Superb hulls — and they do not scale, '
+                                 + 'because the shell has to carry the building loads.'] },
+  iron:     { label: 'Iron frames, riveted plating',
+           s1: ['Frames erected', 'Rolled iron frames on a keel plate. Iron does not care about '
+                                + 'the length of a tree, which is the whole point: a wooden hull '
+                                + 'is limited to about 60 m by the timber available and by '
+                                + 'hogging, and iron simply is not.'],
+           s2: ['Plated', 'Plates riveted to the frames, lapped and caulked. A riveted seam is '
+                        + 'watertight and, unlike a caulked one, does not need re-caulking every '
+                        + 'few years — which is a large part of why iron won.'] },
+  bulkhead: { label: 'Bulkhead-first (Chinese): bulkheads, then planking',
+           s1: ['Bulkheads raised', 'Transverse bulkheads go up first. They are structure and '
+                                  + 'subdivision at once — which gave the junk WATERTIGHT '
+                                  + 'COMPARTMENTS centuries before Europe thought of them. Hole '
+                                  + 'one compartment and the ship swims home.'],
+           s2: ['Planked', 'The planking is fastened to the bulkheads rather than to ribs.'] },
+};
+
 function swApplyStage() {
   if (!SW.ship) return;
+  const trad = TRADITION[(SW.spec && SW.spec.hull && SW.spec.hull.build) || 'frame'];
+  const shell = trad === TRADITION.shell;
   SW.ship.traverse(o => {
-    if (o.userData && o.userData.part) o.visible = o.userData.part.stage <= SW.stage;
+    const p = o.userData && o.userData.part;
+    if (!p) return;
+    /* shell-first swaps the two: the skin is stage 1 and the frames stage 2 */
+    let st = p.stage;
+    if (shell && p.key === 'frames') st = 2;
+    if (shell && p.key === 'planking') st = 1;
+    o.visible = st <= SW.stage;
   });
-  /* ⚠ Clinker is SHELL-FIRST: the planking shell is built first and light frames go in after.
-     Showing every hull frames-then-planking would assert that all shipbuilding is carvel, which
-     is the single biggest thing this view could get wrong — the two traditions scale differently
-     and that is most of why the Atlantic ship of 1500 could grow and the longship could not. */
-  if (SW.spec && SW.spec.hull && SW.spec.hull.shellFirst) {
-    SW.ship.traverse(o => {
-      const p = o.userData && o.userData.part;
-      if (!p) return;
-      if (p.key === 'frames') o.visible = SW.stage >= 2;
-      if (p.key === 'planking') o.visible = SW.stage >= 1;
-    });
-  }
-  /* ── REFRAME ON WHAT IS ACTUALLY VISIBLE ────────────────────────────────────────────
-     A keel is 60 m long and 1 m deep; the finished rig is 61 m tall. Framing both from the
-     same box leaves the bare hull as a splinter at the bottom of the screen. The camera box
-     is recomputed from the visible meshes at every stage — the same measure-don't-estimate
-     rule that fixed the Yard, applied to a target that now changes as you drag. */
+
   const bb = new THREE.Box3();
   SW.ship.traverse(o => { if (o.visible && o.userData.part) bb.expandByObject(o); });
   if (!bb.isEmpty()) {
     SW.viewTop = bb.max.y; SW.viewBot = bb.min.y;
-    /* ⚠ Fitting on the X extent alone assumes every vessel is longer than it is wide. A double
-       canoe is 5.4 m across on a 1.05 m hull, and from anywhere but dead abeam that width is
-       what runs off the screen. Fit the larger of the two horizontal extents. */
     SW.viewX = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z);
   }
 
-  const nm = STAGE_NAMES[SW.stage];
+  const nm = SW.stage === 1 ? trad.s1 : SW.stage === 2 ? trad.s2 : STAGE_NAMES[SW.stage];
   document.getElementById('swStageName').textContent = nm[0];
   document.getElementById('swStageWhat').textContent = nm[1];
-  const order = document.getElementById('swOrder');
-  order.textContent = (SW.spec && SW.spec.hull && SW.spec.hull.shellFirst)
-    ? 'Shell-first (clinker): planking, then frames'
-    : 'Frame-first (carvel): frames, then planking';
+  document.getElementById('swOrder').textContent = trad.label;
 }
 
 /* ── open ──────────────────────────────────────────────────────────────────────────── */

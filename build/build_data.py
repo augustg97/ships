@@ -144,13 +144,35 @@ RIGS = {
 #   masts[].height  lower-mast length as a MULTIPLE OF BEAM — the rule shipwrights actually
 #                 worked to (Steel, *Elements and Practice of Rigging and Seamanship*, 1794)
 
+# ── THE THREE TRADITIONS ──────────────────────────────────────────────────────────────────
+# `build` is how the hull is put together, and it is not a detail of process — it decides what
+# the ship can become.
+#
+#   shell     The planking shell is built FIRST and holds the shape; light frames go in after,
+#             into a hull whose form exists only in the shipwright's eye and hands. Mediterranean
+#             mortise-and-tenon (trireme, corbita), northern clinker (cog), and the sewn hulls of
+#             the Indian Ocean and the Pacific all work this way. Superb hulls — and they do not
+#             scale, because the shell must carry the building loads.
+#
+#   frame     Frames are raised on the keel FIRST and the planking is fastened to them. The shape
+#             is decided on a drawing floor before a plank is cut, which is what makes a 74
+#             reproducible, contractable, and buildable by yards that have never seen one.
+#
+#   bulkhead  The Chinese way, and a third thing entirely: transverse BULKHEADS go up first and
+#             the planking is fastened to them. They are structure and subdivision at once, so a
+#             junk had watertight compartments centuries before Europe thought of them — hole one
+#             compartment and the ship swims home.
+#
+# ⚠ The Shipwright previously told every visitor that every hull in the model was carvel, because
+# the flag existed and was never set on anything.
 def hull(**k):
     d = dict(wlPower=2.4, stemFineness=0.05, sternFineness=0.12,
              forefoot=0.30, run=0.32, riseF=0.55, riseA=0.45,
              sheerBow=0.9, sheerStern=0.55, tumblehome=0.06,
              stemRake=0.03, sternRake=0.02, strakes=24,
              copper=False, copperAge=0.55, chequer=False, gunDecks=0,
-             iron=False, topside="#5b4a33", bowsprit=0.0, steeve=22, masts=[])
+             iron=False, topside="#5b4a33", bowsprit=0.0, steeve=22, masts=[],
+             build="frame")
     d.update(k)
     return d
 
@@ -159,7 +181,7 @@ HULLS = {
   # LOA 36.9, beam 5.5, draught 1.25, displacement 47 t (Olympias, as built).
   # Cb = 47/1.025/(36.9·5.5·1.25) = 0.18 — extraordinarily fine, and the reason a trireme
   # could be driven at 8 knots by muscle alone.
-  "trireme": hull(loa=36.9, lwl=35.0, beam=3.8, draught=1.25, freeboard=1.45, cm=0.52,
+  "trireme": hull(build="shell", loa=36.9, lwl=35.0, beam=3.8, draught=1.25, freeboard=1.45, cm=0.52,
                   wlPower=3.0, stemFineness=0.02, sternFineness=0.03,
                   forefoot=0.22, run=0.24, riseF=0.70, riseA=0.62,
                   sheerBow=1.0, sheerStern=0.5, tumblehome=0.10,
@@ -170,7 +192,7 @@ HULLS = {
 
   # Skuldelev 2: 30 m × 3.8 m, draught ~1.0, sail 112 m². L/B 7.9 — a hull built to be rowed
   # and sailed, and shallow enough to be beached anywhere.
-  "voyaging-canoe": hull(loa=19.0, lwl=18.0, beam=1.05, draught=0.75, freeboard=0.75, cm=0.62,
+  "voyaging-canoe": hull(build="shell", loa=19.0, lwl=18.0, beam=1.05, draught=0.75, freeboard=0.75, cm=0.62,
                   wlPower=3.2, forefoot=0.28, run=0.30, riseF=0.55, riseA=0.50,
                   sheerBow=0.5, sheerStern=0.5, tumblehome=0.02, strakes=10,
                   stemRake=0.05, sternRake=0.05, topside="#6a4f34",
@@ -182,21 +204,21 @@ HULLS = {
 
   # Bremen cog, 1380: 23.3 × 7.6 × 2.25 m. Flat-bottomed so it could take the ground on a tidal
   # flat and be unloaded at low water — which is what the Hanse ports needed.
-  "cog": hull(loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.01, cm=0.80,
+  "cog": hull(build="shell", loa=23.3, lwl=20.5, beam=7.6, draught=2.25, freeboard=2.01, cm=0.80,
               wlPower=2.0, stemFineness=0.20, sternFineness=0.24,
               forefoot=0.34, run=0.34, riseF=0.30, riseA=0.28,
               sheerBow=1.2, sheerStern=0.6, tumblehome=0.04, strakes=14,
               stemRake=0.10, sternRake=0.09, topside="#5a4227",
               masts=[dict(at=0.46, height=0.72, rig="square", rake=0, shrouds=4)]),
 
-  "corbita": hull(loa=40.0, lwl=35.0, beam=9.0, draught=3.4, freeboard=2.4, cm=0.62,
+  "corbita": hull(build="shell", loa=40.0, lwl=35.0, beam=9.0, draught=3.4, freeboard=2.4, cm=0.62,
               wlPower=2.4, forefoot=0.30, run=0.34, riseF=0.62, riseA=0.56,
               sheerBow=0.9, sheerStern=0.5, tumblehome=0.08, strakes=18,
               stemRake=0.05, sternRake=0.07, topside="#63492c",
               masts=[dict(at=0.44, height=0.62, rig="square", rake=0, shrouds=3)],
               bowsprit=0.16, steeve=12),
 
-  "dhow": hull(loa=26.0, lwl=22.5, beam=6.4, draught=2.4, freeboard=2.0, cm=0.68,
+  "dhow": hull(build="shell", loa=26.0, lwl=22.5, beam=6.4, draught=2.4, freeboard=2.0, cm=0.68,
               wlPower=2.6, stemFineness=0.03, sternFineness=0.18,
               forefoot=0.34, run=0.30, riseF=0.60, riseA=0.40,
               sheerBow=1.1, sheerStern=0.55, tumblehome=0.05, strakes=16,
@@ -206,7 +228,7 @@ HULLS = {
 
   # Quanzhou ship, sank c.1272: surviving hull 24.2 × 9.15 × 1.98, reconstructed ~34 m LOA,
   # ~380 t displacement, 12 bulkheads and 13 watertight compartments.
-  "junk": hull(loa=34.0, lwl=29.0, beam=9.8, draught=3.3, freeboard=3.0, cm=0.70,
+  "junk": hull(build="bulkhead", loa=34.0, lwl=29.0, beam=9.8, draught=3.3, freeboard=3.0, cm=0.70,
               wlPower=2.2, stemFineness=0.24, sternFineness=0.30,
               forefoot=0.30, run=0.30, riseF=0.48, riseA=0.38,
               sheerBow=1.1, sheerStern=0.9, tumblehome=0.03, strakes=20,
@@ -216,7 +238,7 @@ HULLS = {
 
   # Drawn at the DEFENSIBLE length (Church, Sleeswyk, Xin Yuan'ou: 50–76 m), not the 138 m
   # that first appears in a novel of 1597. The card carries both.
-  "treasure-ship": hull(loa=70.0, lwl=60.0, beam=18.0, draught=5.2, freeboard=5.4, cm=0.80,
+  "treasure-ship": hull(build="bulkhead", loa=70.0, lwl=60.0, beam=18.0, draught=5.2, freeboard=5.4, cm=0.80,
               wlPower=2.2, stemFineness=0.24, sternFineness=0.30,
               forefoot=0.30, run=0.30, riseF=0.32, riseA=0.24,
               sheerBow=1.6, sheerStern=1.3, tumblehome=0.03, strakes=26,
@@ -303,7 +325,7 @@ HULLS = {
 
   # SS Great Britain, 1843: 98 × 15.4 m, 1,930 GRT — the first iron-hulled screw Atlantic liner,
   # and the moment the wind stops setting the route.
-  "steamer": hull(loa=98.0, lwl=92.0, beam=15.4, draught=4.9, freeboard=6.0, cm=0.88,
+  "steamer": hull(build="iron", funnels=1, loa=98.0, lwl=92.0, beam=15.4, draught=4.9, freeboard=6.0, cm=0.88,
               wlPower=3.4, stemFineness=0.05, sternFineness=0.10,
               forefoot=0.24, run=0.30, riseF=0.36, riseA=0.34,
               sheerBow=1.4, sheerStern=0.7, tumblehome=0.05, strakes=22,

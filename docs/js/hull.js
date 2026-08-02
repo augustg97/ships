@@ -1082,6 +1082,13 @@ const PARTS = {
               what: 'The deck between the hulls, and the only flat space aboard. It carries the '
                   + 'crew, the water, the fire hearth, the breeding pigs and the seed stock — '
                   + 'and it is what made the Pacific settleable rather than merely crossable.' },
+  funnel:   { stage: 3, name: 'Funnel',
+              what: 'Not decoration and not arbitrary: its HEIGHT is set by the draught a boiler '
+                  + 'needs, because the taller the stack the harder it pulls air through the '
+                  + 'grate. That is why early steamers carry a funnel out of all proportion to '
+                  + 'the ship, and why forced draught later let them shrink. The rig alongside '
+                  + 'is not vestigial either — until compound engines cut coal consumption '
+                  + 'threefold, sail is what got you home when the bunkers ran dry.' },
   gun:      { stage: 3, name: 'Great guns',
               what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
                   + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
@@ -1392,6 +1399,44 @@ function buildRigging(S, group, rope, spars, mastTops) {
   });
 }
 
+
+/* ── THE FUNNEL ────────────────────────────────────────────────────────────────────────
+ * A steamer without one is not a steamer. It is also not decoration: the funnel's height is
+ * set by the DRAUGHT a boiler needs — the taller the stack, the harder it pulls air through
+ * the grate — which is why early steamers carry a stack out of all proportion to the ship and
+ * why forced draught later let them shrink. The rig alongside it is not vestigial either:
+ * until compound engines cut coal consumption threefold, sail was what got you home when the
+ * bunkers ran dry.
+ */
+function buildFunnel(S, group) {
+  const n = S.funnels || 0;
+  if (!n) return;
+  const H = hullSurface(S);
+  const h = S.beam * 1.55, r = S.beam * 0.115;
+  const black = new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: 0.62, metalness: 0.30 });
+  const band = new THREE.MeshStandardMaterial({ color: 0x8a3820, roughness: 0.55, metalness: 0.18 });
+  for (let i = 0; i < n; i++) {
+    const u = n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1));
+    const y = H.sheer(u);
+    const g = new THREE.Group();
+    const stack = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.93, r, h, 18), black);
+    stack.position.y = h / 2;
+    g.add(stack);
+    /* the company band at the head — the one piece of colour on a Victorian hull */
+    const bandM = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.955, r * 0.955, h * 0.17, 18), band);
+    bandM.position.y = h * 0.90;
+    g.add(bandM);
+    /* the steam pipe alongside, which is what actually roars */
+    const pipe = new THREE.Mesh(
+      new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 8), black);
+    pipe.position.set(-r * 1.25, h * 0.46, 0);
+    g.add(pipe);
+    g.position.set((u - 0.5) * S.lwl, y, 0);
+    g.rotation.z = -0.045;                       // raked aft, as they almost always were
+    group.add(tag(g, 'funnel'));
+  }
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -1488,6 +1533,7 @@ function buildShip(S, opts) {
   /* the fittings are what turn a hull with masts into a ship, and they are the reason the
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
+  if (FINE) buildFunnel(S, group);
 
   /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
      The card has always said "Austronesian double hull" and the model drew one hull, which is
