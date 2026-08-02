@@ -1194,6 +1194,13 @@ const PARTS = {
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
                   + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
+  anchor:   { stage: 3, name: 'Bower anchor',
+              what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her '
+                  + 'bow exists to move it: cathead, fish davit, capstan, and a 24-inch cable too '
+                  + 'thick to pass round the capstan at all — it has to be nipped to a lighter '
+                  + 'messenger line. The STOCK is set at right angles to the arms, and that 90° '
+                  + 'is the whole invention: it rolls the anchor over until a fluke bites. '
+                  + 'Without it the thing lies flat and drags.' },
   head:     { stage: 4, name: 'Head and beakhead',
               what: 'A working platform carried out beyond the stem, and the rails that sweep up '
                   + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -1759,6 +1766,60 @@ function buildStern(S, group, mats) {
   group.add(g);
 }
 
+
+/* ── THE BOWER ANCHOR, CATTED ──────────────────────────────────────────────────────────
+ * Hung at the cathead on the bow, which is where it lived at sea: too heavy to bring inboard
+ * and too dangerous to tow. A 74's best bower is about 3.7 tonnes, and the whole apparatus of
+ * the ship's bow — cathead, fish davit, capstan, the 24-inch cable that will not fit round the
+ * capstan and has to be nipped to a messenger — exists to move it.
+ *
+ * The Admiralty pattern is the shape everyone recognises and the reason is mechanical: the STOCK
+ * is set at right angles to the ARMS, so when the anchor lands on its side the stock rolls it
+ * until one fluke bites. Without a stock it lies flat and drags, which is why the stock is the
+ * part that had to be invented.
+ */
+function buildAnchor(S, group, mat) {
+  if (!S.bowsprit) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const shank = L * 0.115;                              // a bower's shank is ~1/8 the hull
+  for (const sgn of [-1, 1]) {
+    const g = new THREE.Group();
+    const sh = new THREE.Mesh(
+      new THREE.CylinderGeometry(B * 0.011, B * 0.016, shank, 6), mat);
+    g.add(sh);
+    /* the two arms, curving down from the crown, each ending in a fluke */
+    for (const a of [-1, 1]) {
+      const arm = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.008, B * 0.012, shank * 0.52, 6), mat);
+      arm.rotation.z = a * 1.05;
+      arm.position.set(a * shank * 0.20, -shank * 0.42, 0);
+      g.add(arm);
+      const fluke = new THREE.Mesh(
+        new THREE.ConeGeometry(B * 0.030, shank * 0.24, 4), mat);
+      fluke.rotation.z = a * 1.05;
+      fluke.position.set(a * shank * 0.40, -shank * 0.60, 0);
+      g.add(fluke);
+    }
+    /* ⚠ the STOCK is athwart the ARMS, not in their plane — that 90° is the whole invention */
+    const stock = new THREE.Mesh(
+      new THREE.BoxGeometry(B * 0.020, B * 0.020, shank * 0.82), mat);
+    stock.position.y = shank * 0.42;
+    g.add(stock);
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(B * 0.026, B * 0.007, 5, 10), mat);
+    ring.position.y = shank * 0.52;
+    g.add(ring);
+
+    /* catted: hung outboard at the bow, canted so the flukes clear the planking */
+    const p = surfacePoint(S, H, 0.09, 0.94);
+    g.position.set(p[0], p[1] - shank * 0.12, sgn * (p[2] + B * 0.05));
+    g.rotation.x = sgn * 0.30;
+    g.rotation.z = 0.42;
+    group.add(tag(g, 'anchor'));
+  }
+}
+
 /* ── assembly ──────────────────────────────────────────────────────────────────────── */
 
 function buildShip(S, opts) {
@@ -1868,6 +1929,7 @@ function buildShip(S, opts) {
   if (FINE) buildFittings(S, group, mats);
   if (FINE) buildFunnel(S, group);
   if (FINE) buildHead(S, group, mats);
+  if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the
      counter in surfacePoint. Three earlier attempts failed by sizing the plate; none of them
      could work, because the ship had no broad stern for a plate to sit on. */

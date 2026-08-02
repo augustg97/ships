@@ -91,3 +91,57 @@ Ordered by how much each closes the gap per unit of work.
   dimensions would be **drift**.
 - Capability figures in the panel come off the polar diagram the routing engine uses. If the
   panel is wrong about a ship's sailing, the ocean crossing is wrong too.
+
+---
+
+# NEW DIRECTION (August, 2026-08-02) — the Shipyard, and a much larger fleet
+
+Two things, both larger than anything above. They change what this view IS.
+
+## A. THE SHIPYARD: one line, true relative scale, camera pans along it
+
+> "ALL ships in the shipyard essentially in a long line with all ships with real life proportions
+> relative to each other — as users select different ships, the camera should pan across this line
+> to show ships of increasing size/complexity, roughly on a time axis."
+
+The bottom strip already carries the scale argument as bars. This makes it the **actual view**:
+every hull built once, laid out along a single axis in date order, at true relative size, with the
+camera flying along the line rather than cutting between isolated ships.
+
+Why it is worth the work: **scale is the argument this project keeps failing to land.** A canoe
+that reached Hawaii beside a 400 m box boat says more than any card. Right now you can only see
+one ship at a time, so the comparison lives in a number nobody feels.
+
+Design notes:
+- Lay out on **x = date**, not on index — otherwise the 2,700-year gap between the trireme and
+  the cog reads the same as the 40 years between the fluyt and the Indiaman.
+- Ships are **many thousands of triangles each**; 16 fine builds at once will not run. Build fine
+  only for the selected ship and its immediate neighbours; the rest get the coarse `buildShip`.
+- The Shipwright's part-picking and assembly slider stay bound to the SELECTED ship.
+- Keep a true-scale ruler along the line, because at true scale the small hulls are slivers and a
+  viewer needs to know that is the point rather than a bug.
+
+## B. MANY MORE SHIPS, AND NAMED ONES
+
+> "Our ships should include general classes/types of ships across time, but also notable specific
+> vessels like Titanic and others."
+
+Sources to work from — review these and find comparable ones, including their graphics and
+measured drawings for modelling:
+
+- https://en.wikipedia.org/wiki/List_of_longest_ships
+- https://en.wikipedia.org/wiki/List_of_longest_wooden_ships
+- https://en.wikipedia.org/wiki/List_of_large_sailing_vessels
+- https://en.wikipedia.org/wiki/Trireme
+- https://en.wikipedia.org/wiki/Unmanned_surface_vehicle
+
+⚠ The generator takes attested principal dimensions plus hull-form coefficients, so a NAMED ship
+is no harder than a class — it is easier, because a named ship has real numbers. `Wyoming` (the
+longest wooden ship, and she hogged so badly she leaked and sank, which is the whole argument for
+iron); `Great Eastern`; `Titanic`; `Preussen`; `Cutty Sark`. And the modern end is missing
+entirely: an unmanned surface vessel is the first hull in the model with **no crew at all**,
+which is a genuine end-point for a story about people crossing oceans.
+
+Rules that still apply: attested dimensions only, `heightM` where a mast is measured, and the
+`build` tradition set per hull — a wooden ship that big is a different structural argument from
+an iron one.
