@@ -576,7 +576,24 @@ async function boot() {
 
 /* ── data ───────────────────────────────────────────────────────────────── */
 async function loadData() {
-  const get = async u => { try { return await (await fetch(u)).json(); } catch (e) { return null; } };
+  /* ── ⚠ THE STAMP WAS PROTECTING THE CODE AND NOT THE DATA ───────────────────────────
+     index.html carries ?v=<stamp> on every script and stylesheet, and build_site.py rewrites it
+     before copying — the whole documented ritual against a static host serving stale files. The
+     JSON was fetched with a bare URL.
+     So the browser cached data/vessels.json and kept serving it after every deploy. The code was
+     always fresh and the DATA — the thing that actually changes each round — was whatever the
+     visitor happened to have. Corrections to Great Eastern's six masts, the trireme's two, the
+     treasure ship's five, Titanic's crew and every rewritten card were invisible to anyone with
+     a warm cache, while the live stamp read correct and the file on the server was correct.
+     That is the worst shape a caching bug can take: every check passes and the user sees the old
+     thing.
+     The field PNGs are deliberately NOT stamped — they are hundreds of megabytes and effectively
+     immutable, and re-fetching them on every deploy would cost far more than it protects. If a
+     field is ever regenerated, its filename must change. */
+  const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
+  const get = async u => {
+    try { return await (await fetch(u + '?v=' + DV)).json(); } catch (e) { return null; }
+  };
   APP.ports    = await get('data/ports.json')    || { ports: [] };
   APP.vessels  = await get('data/vessels.json')  || { vessels: [] };
   APP.battles  = await get('data/battles.json')  || { battles: [] };
