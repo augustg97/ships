@@ -428,6 +428,29 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
     idx.push(idx[i] + n0, idx[i + 2] + n0, idx[i + 1] + n0);   // reversed winding
   }
 
+  /* ── CLOSE THE ENDS. ⚠ THE HULL HAD AN OPEN SLOT DOWN BOTH OF THEM. ────────────────
+     The surface is built as a starboard half and mirrored to port, and the two halves only
+     meet where the half-breadth reaches zero — which it never does. `wl(0)` is stemFineness
+     and `wl(1)` is sternFineness, both deliberately non-zero because a real hull has a stem
+     and a sternpost with actual width. So the mesh was open at bow and stern and you could see
+     straight through into the inside of the ship, which is most of what read as "gaps".
+     They are closed with their own vertices and their own outward normals, because reusing the
+     hull's surface normals would light a flat end as if it were curved planking. */
+  for (const end of [0, 1]) {
+    const nx = end === 0 ? -1 : 1;
+    const base = pos.length / 3;
+    for (let j = 0; j <= NV; j++) {
+      const [x, z, y] = pointAt(end, j / NV);
+      pos.push(x, z, y);   nor.push(nx, 0, 0); uvs.push(end, j / NV);
+      pos.push(x, z, -y);  nor.push(nx, 0, 0); uvs.push(end, j / NV);
+    }
+    for (let j = 0; j < NV; j++) {
+      const a = base + j * 2;
+      if (end === 0) idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+      else           idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+    }
+  }
+
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
@@ -766,7 +789,7 @@ function buildRig(S, group, mats, FINE) {
            fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
            sector divisions — 1.000, 0.964, 0.900, 0.700, 0.400 — and the last of those is why
            a yard reads as a yard rather than a pole. */
-        const yg = new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, yardLen, 8);
+        const yg = new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, yardLen, 16);
         const ym = new THREE.Mesh(yg, woodDark);
         const yp = yg.attributes.position;
         for (let i = 0; i < yp.count; i++) {
@@ -855,13 +878,13 @@ function buildRig(S, group, mats, FINE) {
          is SHORT, because a lateen takes its area from the spar rather than from height */
       const mh = sling[1] - base;
       const mm = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.020, B * 0.032, mh, 9), woodDark);
+        new THREE.CylinderGeometry(B * 0.020, B * 0.032, mh, 18), woodDark);
       mm.position.set(x, (base + sling[1]) / 2, 0);
       group.add(mm);
 
       const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
       const ym = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.005, B * 0.011, ylen, 7), woodDark);
+        new THREE.CylinderGeometry(B * 0.005, B * 0.011, ylen, 14), woodDark);
       ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
       ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
       group.add(tag(ym, 'yard', 'Lateen yard'));
@@ -908,7 +931,7 @@ function buildRig(S, group, mats, FINE) {
       const tipB = [tack[0] + Math.cos(0.46) * sparLen, tack[1] + Math.sin(0.46) * sparLen];
       [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
         const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
-        const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 7);
+        const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
         const m2 = new THREE.Mesh(g2, woodDark);
         m2.position.set((tack[0] + tip[0]) / 2, (tack[1] + tip[1]) / 2, 0);
         m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
@@ -931,13 +954,13 @@ function buildRig(S, group, mats, FINE) {
       const peak = 0.62;                                 // the gaff's angle above horizontal
       const footY = base + lower * 0.11;
       const bm2 = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 7), woodDark);
+        new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
       bm2.rotation.z = Math.PI / 2;
       bm2.position.set(x + boomL / 2, footY, 0);
       group.add(tag(bm2, 'yard', 'Boom'));
       const gy = base + lower * 0.86;
       const gm = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 7), woodDark);
+        new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
       gm.rotation.z = -(Math.PI / 2 - peak);
       gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
       group.add(tag(gm, 'yard', 'Gaff'));
@@ -972,7 +995,7 @@ function buildRig(S, group, mats, FINE) {
       const footY = base + lower * 0.14;             // the boom lies just above the deck
       for (let i = 0; i <= nb; i++) {
         const yy = footY + sailH * (i / nb);
-        const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 6);
+        const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 14);
         const bm = new THREE.Mesh(bg, woodDark);
         bm.rotation.z = Math.PI / 2;                 // along the hull, not across it
         bm.position.set(x + off, yy, 0);
@@ -1033,7 +1056,7 @@ function buildRig(S, group, mats, FINE) {
     const x0 = -L / 2 + H.rake(u0);
     const len = L * S.bowsprit;
     const steeve = (S.steeve || 22) * Math.PI / 180;
-    const bg = new THREE.CylinderGeometry(B * 0.010, B * 0.020, len, 8);
+    const bg = new THREE.CylinderGeometry(B * 0.010, B * 0.020, len, 16);
     const bm = new THREE.Mesh(bg, woodDark);
     bm.rotation.z = Math.PI / 2 - steeve;
     bm.position.set(x0 - Math.cos(steeve) * len / 2,
@@ -1433,7 +1456,7 @@ function buildFittings(S, group, mats) {
     for (let i = 0; i < 8; i++) {                       // the bars, shipped for heaving
       const a = i / 8 * Math.PI * 2;
       const bar = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.008, B * 0.010, B * 0.30, 6), pale);
+        new THREE.CylinderGeometry(B * 0.008, B * 0.010, B * 0.30, 14), pale);
       bar.rotation.z = Math.PI / 2; bar.rotation.y = a;
       bar.position.set(Math.cos(a) * B * 0.15, y + B * 0.115, Math.sin(a) * B * 0.15);
       cg.add(bar);
@@ -1475,7 +1498,7 @@ function buildTop(r, mat) {
 function buildDeadeyes(n, r, mat) {
   const g = new THREE.Group();
   for (let i = 0; i < n; i++) {
-    const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.5, 8), mat);
+    const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.5, 16), mat);
     d.rotation.x = Math.PI / 2;
     d.position.z = (i - (n - 1) / 2) * r * 2.4;
     g.add(d);
@@ -1520,7 +1543,7 @@ function buildGuns(S, group, mat) {
       const p = surfacePoint(S, H, u, v);
       for (const sgn of [-1, 1]) {
         const bar = new THREE.Mesh(
-          new THREE.CylinderGeometry(r * 0.72, r, len, 8), mat);
+          new THREE.CylinderGeometry(r * 0.72, r, len, 16), mat);
         bar.rotation.x = Math.PI / 2;                    // along the beam, pointing out
         bar.position.set(p[0], p[1], sgn * (p[2] + len * 0.30));
         g.add(bar);
@@ -1606,7 +1629,7 @@ function buildFunnel(S, group) {
     g.add(bandM);
     /* the steam pipe alongside, which is what actually roars */
     const pipe = new THREE.Mesh(
-      new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 8), black);
+      new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 16), black);
     pipe.position.set(-r * 1.25, h * 0.46, 0);
     g.add(pipe);
     g.position.set((u - 0.5) * S.lwl, y, 0);
@@ -1815,12 +1838,12 @@ function buildAnchor(S, group, mat) {
   for (const sgn of [-1, 1]) {
     const g = new THREE.Group();
     const sh = new THREE.Mesh(
-      new THREE.CylinderGeometry(B * 0.011, B * 0.016, shank, 6), mat);
+      new THREE.CylinderGeometry(B * 0.011, B * 0.016, shank, 14), mat);
     g.add(sh);
     /* the two arms, curving down from the crown, each ending in a fluke */
     for (const a of [-1, 1]) {
       const arm = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.008, B * 0.012, shank * 0.52, 6), mat);
+        new THREE.CylinderGeometry(B * 0.008, B * 0.012, shank * 0.52, 14), mat);
       arm.rotation.z = a * 1.05;
       arm.position.set(a * shank * 0.20, -shank * 0.42, 0);
       g.add(arm);

@@ -74,16 +74,25 @@ function swInit() {
   gm.rotation.x = -Math.PI / 2;
   SW.ground = gm; SW.scene.add(gm);
 
+  /* ── DRAG WALKS THE LINE; IT DOES NOT SPIN IT ────────────────────────────────────────
+     Orbiting swung all twenty-one hulls round a single point, which looks like a carousel and
+     makes it impossible to compare anything: the ships you are comparing are on opposite sides
+     of the turn. Horizontal drag now TRAVELS along the row and vertical drag raises or lowers
+     the eye. The viewing angle stays fixed, which is exactly what a comparison needs — every
+     ship is seen the same way. */
   let drag = null;
   cv.addEventListener('pointerdown', e => {
-    drag = { x: e.clientX, y: e.clientY, lon: SW.lon, lat: SW.lat, moved: false };
+    drag = { x: e.clientX, y: e.clientY, pan: SW.panX, lat: SW.lat, moved: false };
     SW.spin = false; cv.setPointerCapture(e.pointerId);
   });
   cv.addEventListener('pointermove', e => {
     if (!drag) return;
     if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) drag.moved = true;
-    SW.lon = drag.lon - (e.clientX - drag.x) * 0.007;
-    SW.lat = Math.max(-0.35, Math.min(1.25, drag.lat + (e.clientY - drag.y) * 0.005));
+    const reach = SW.fit || 200;
+    SW.panX = drag.pan - (e.clientX - drag.x) * reach * 0.0045;
+    SW.panX = Math.max(SW.yardSpan[0], Math.min(SW.yardSpan[1], SW.panX));
+    SW.panTo = SW.panX;                                  // cancel any fly-to in progress
+    SW.lat = Math.max(0.02, Math.min(0.85, drag.lat + (e.clientY - drag.y) * 0.004));
   });
   cv.addEventListener('pointerup', e => {
     if (drag && !drag.moved) swPick(e);
@@ -91,7 +100,7 @@ function swInit() {
   });
   cv.addEventListener('wheel', e => {
     e.preventDefault();
-    SW.dist = Math.max(0.55, Math.min(6.0, SW.dist * (1 + Math.sign(e.deltaY) * 0.11)));
+    SW.dist = Math.max(0.35, Math.min(8.0, SW.dist * (1 + Math.sign(e.deltaY) * 0.11)));
   }, { passive: false });
 
   document.getElementById('swStage').addEventListener('input', e => {
@@ -251,8 +260,13 @@ function swApplyStage() {
  * time; where it bunches, the dodge takes over and the line stays readable. Which is itself
  * legible: the crowded stretch IS the seventeenth century.
  */
-const YEAR_M = 1.35;                                    // metres of layout per year
-
+/* ⚠ SPACING BY DATE-DISTANCE DID NOT WORK, and August was right about why. At 1.35 m per year
+   the canoe and the trireme ended up 3.1 km apart — two of the smallest hulls in the fleet,
+   separated by more empty water than the whole rest of the line, so the one comparison that
+   most needs to be easy became the hardest. Chronological ORDER is the time axis; the SPACING
+   should serve the comparison.
+   So the gap is now proportional to the ships it separates: small hulls sit almost shoulder to
+   shoulder, and only the big ones get room. */
 function swBuildYard() {
   if (SW.yard) return;
   SW.yard = new THREE.Group();
@@ -260,14 +274,12 @@ function swBuildYard() {
   const all = ((APP.vessels && APP.vessels.vessels) || []).filter(v => v.hull)
     .slice().sort((a, b) => (a.from || 0) - (b.from || 0));
   SW.layout = [];
-  let cursor = -Infinity;
-  all.forEach(v => {
+  let cursor = 0, prevL = 0;
+  all.forEach((v, i) => {
     const L = v.hull.loa;
-    let x = (v.from || 0) * YEAR_M;
-    const need = cursor + L * 0.62;                     // clear the last hull, plus a little
-    if (x < need) x = need;
-    cursor = x + L * 0.62;
-    /* the coarse build for the line; the selected ship is rebuilt fine in swOpen */
+    const gap = i === 0 ? 0 : Math.max(9, 0.30 * Math.max(prevL, L));
+    const x = cursor + (i === 0 ? L / 2 : prevL / 2 + gap + L / 2);
+    cursor = x; prevL = L;
     const obj = window.SHIPS_HULL.buildShip(v.hull);
     obj.position.x = x;
     SW.yard.add(obj);
@@ -314,6 +326,7 @@ function swOpen(vessel) {
      a half million triangles and will not run. */
   SW.ship = swPromote(entry);
   SW.shipX = entry.x;
+  SW.panTo = entry.x;
   SW.sel = null;
 
   SW.hit = [];
@@ -376,7 +389,11 @@ function swFillCard(v) {
   document.getElementById('swCap').innerHTML =
     '<h4>What she could do</h4><div class="cap">' +
     cap.map(c => '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>').join('') + '</div>' +
-    (P.rigNote ? '<p style="margin-top:10px">' + P.rigNote + '</p>' : '');
+    /* ⚠ NO rigNote HERE. It is a property of the RIG, not the ship, so it repeated verbatim
+       on all nine square-riggers — and it restated the two figures printed directly above it.
+       Shortening it was not enough; the whole box was boilerplate. The one thing it carried
+       that the numbers do not is now in the labels ("closest made good"). */
+    '';
   document.getElementById('swStory').innerHTML =
     '<h4>What she was</h4>' +
     (v.text || '').split('\n\n').map(t => '<p>' + t + '</p>').join('');
@@ -442,18 +459,18 @@ function swResize() {
 function swFrame(now) {
   if (!SW.on || !SW.ship) return;
   const L = SW.spec.hull.loa;
-  if (SW.spin) SW.lon += 0.0016;
+  SW.lon = 0.42;      // one fixed three-quarter view, so every hull is seen alike
   const top = SW.viewTop, bot = SW.viewBot;
   const look = bot + (top - bot) * 0.34;
   const halfV = Math.max(top - look, look - bot);
   const tanV = Math.tan(SW.cam.fov * Math.PI / 360);
-  const fit = 1.14 * Math.max(halfV / tanV, SW.viewX / 2 / (tanV * Math.max(1.2, SW.cam.aspect)));
+  const fit = SW.fit = 1.14 * Math.max(halfV / tanV, SW.viewX / 2 / (tanV * Math.max(1.2, SW.cam.aspect)));
   const d = fit * SW.dist;
   /* ── PAN ALONG THE LINE ───────────────────────────────────────────────────────────
      Selecting a ship does not cut to it; the camera flies down the row, so you pass everything
      between and the growth is something you travel through rather than read off a chart. */
   if (SW.panX === undefined) SW.panX = SW.shipX;
-  SW.panX += (SW.shipX - SW.panX) * Math.min(1, 0.055);
+  if (SW.panTo !== undefined) SW.panX += (SW.panTo - SW.panX) * 0.075;
   SW.cam.position.set(SW.panX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
                       d * Math.sin(SW.lat) + look,
                       d * Math.cos(SW.lat) * Math.cos(SW.lon));
