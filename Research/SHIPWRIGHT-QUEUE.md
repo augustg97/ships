@@ -48,7 +48,7 @@ has no rig, only a superstructure.
 Numbers cannot judge proportion, so ships still get looked at. **Rendered and checked:** junk,
 voyaging canoe, carrack, ship of the line, treasure ship, trireme, cog, caravel, steamer,
 container ship, Roman merchantman.
-**Still to look at:** dhow · fluyt · east indiaman · slave ship · clipper. All five are standard
+**Still to look at:** dhow · fluyt · east indiaman · slave ship · clipper. (East Indiaman now checked.) All remaining are standard
 three-masted square-riggers on the same code path as the verified 74, so they are the lowest-risk
 remaining — the detail gaps below are now worth more than further verification.
 
@@ -75,8 +75,7 @@ Ordered by how much each closes the gap per unit of work.
    published coefficients, since a squarer stern changes Cw and therefore Cb. Own round.
    The code stays in the file, disabled at the call site, with the reason at the call site.
 5. ~~Ratlines as ladders~~ — **done**. All standing rigging is merged prism geometry with a real diameter; 496 line objects became 6 meshes, so it is cheaper AND lit. LineBasicMaterial is unlit, which is why the old rigging never changed value in shadow.
-6. **Plank seams and fastenings on the hull surface** — the shader draws strakes but no butts,
-   no treenails, no caulking line.
+6. ~~Plank seams and fastenings~~ — **done**. Staggered butts to the shift-of-butts rule, and treenails as grain disturbance rather than dots, since they are the same wood as the plank. Both frequencies are lengths turned into counts (7 m oak, 0.78 m room-and-space), so they scale with the ship. Verified at close range and at distance for aliasing.
 7. **Furled sails** as a state, so a ship can be shown under bare poles or with courses handed —
    the references mostly show furled canvas on the yards.
 8. **Anchors** catted at the bow, with cable.

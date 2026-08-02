@@ -490,6 +490,8 @@ precision highp float;
 varying vec2 vUv; varying vec3 vN; varying vec3 vP;
 uniform vec3 uSun, uCam;
 uniform float uStrakes;      // number of planking strakes keel to sheer
+uniform float uPlankLen;     // plank butts along the hull, = LOA / plank length
+uniform float uFrames;       // frame crossings along the hull, = LOA / room-and-space
 uniform float uCopper;       // 0 = none, 1 = sheathed
 uniform float uCopperAge;    // 0 = new and bright, 1 = fully verdigris
 uniform float uWaterline;    // v coordinate of the load waterline
@@ -572,6 +574,30 @@ void main(){
                 + noise(vec2(u * 90.0, floor(sv) * 12.3)) * 0.5;
     col = uTopside * (0.84 + 0.30 * grain);
     col *= mix(0.52, 1.0, seam);                     // the caulked seam is a dark line
+
+    /* ── PLANK BUTTS, AND WHY THEY ARE STAGGERED ────────────────────────
+       A plank is a tree, so it is finite: English oak gave lengths of about 7 m, which on a
+       57 m ship means eight butts in every strake. Butts are the weak point of the skin, so
+       the shift of butts is a RULE, not a preference — no two butts in adjacent strakes may
+       fall on the same frame space, and three strakes must separate any two on the same one.
+       The stagger below is that rule: each strake's butts are offset by an irrational-ish
+       fraction of a plank so no two lines ever queue up.
+
+       ── AND THE TREENAILS. Every plank is fastened to every frame it crosses by oak pins
+       driven through and wedged, two to a frame. They are the same wood as the plank, so
+       they show as grain disturbance rather than as dots — which is exactly how they read on
+       a real hull, and why an iron-fastened ship looks so different. */
+    float strake = floor(sv);
+    float plankL = uPlankLen;                        // butts per unit u, from the real length
+    float bu = u * plankL + strake * 0.379;          // the shift of butts
+    float butt = smoothstep(0.010, 0.030, abs(fract(bu) - 0.5) * 2.0);
+    col *= mix(0.63, 1.0, butt);
+
+    /* two treenails per frame crossing, in the middle third of the plank's width */
+    float fr = u * uFrames;
+    float across = abs(fract(sv) - 0.5) * 2.0;
+    float tn = smoothstep(0.16, 0.05, length(vec2(fract(fr) - 0.5, (across - 0.45) * 2.2)));
+    col *= mix(1.0, 0.90 + 0.10 * grain, tn * seam);
 
     /* ── THE "NELSON CHEQUER", as the paint actually was ────────────────
        ⚠ NOT yellow and black. The 2015 repaint of HMS Victory was preceded by the most
@@ -1745,6 +1771,11 @@ function buildShip(S, opts) {
     uniforms: {
       uSun: { value: sun }, uCam: { value: new THREE.Vector3() },
       uStrakes: { value: S.strakes || 26 },
+      /* ⚠ Both of these are LENGTHS TURNED INTO COUNTS, so they scale with the ship instead of
+         being a texture frequency somebody liked. English oak planking ran about 7 m; the room
+         and space of an 18th-century ship is about 0.75 m, so a 57 m hull crosses 76 frames. */
+      uPlankLen: { value: Math.max(3, S.loa / (S.plankLen || 7.0)) },
+      uFrames: { value: Math.max(8, S.loa / (S.roomSpace || 0.78)) },
       uCopper: { value: S.copper ? 1 : 0 },
       uCopperAge: { value: S.copperAge !== undefined ? S.copperAge : 0.55 },
       uWaterline: { value: 0.62 },
