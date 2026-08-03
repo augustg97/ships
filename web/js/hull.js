@@ -531,6 +531,20 @@ function buildRig(S, group, mats, FINE) {
   const L = S.lwl, B = S.beam;
   const H = hullSurface(S);
   const deckAt = u => H.sheer(u);
+  /* ── ⚠ THE DECK IS NOT LEVEL, AND CLEARANCE WAS BEING TAKEN AT THE MAST ────────────
+     A sheer line RISES toward the bow and the stern — that is what sheer is — so the deck
+     under a sail's clew stands higher than the deck at the mast the sail hangs on, sometimes
+     by the better part of a metre. Every foot height here was measured from `base`, the deck
+     AT THE MAST, and then applied out at the clews. That is how sails came to hang through
+     the deck on five hulls, and bracing the yards round made it worse, because a braced sail
+     swings its clews fore and aft into precisely the part of the deck that is rising.
+     Take the HIGHEST deck under the span the sail actually occupies. */
+  const deckMax = (uA, uB) => {
+    const a = Math.max(0, Math.min(uA, uB)), b = Math.min(1, Math.max(uA, uB));
+    let m = -Infinity;
+    for (let k = 0; k <= 8; k++) m = Math.max(m, deckAt(a + (b - a) * k / 8));
+    return m;
+  };
 
   const woodDark = mats.spar, canvas = mats.canvas, rope = mats.rope;
   /* ⚠ LineBasicMaterial is UNLIT — it renders flat at whatever colour it is given, so rigging
@@ -604,7 +618,8 @@ function buildRig(S, group, mats, FINE) {
        which is why the rig stood 72 m over a 57 m hull instead of about 62. */
     const top = lower * 0.60, tg = top * 0.50;
     let y = base;
-    let prevYard = base + lower * 0.13;   // the courses' foot clears the deck by this
+    /* a braced sail reaches about a tenth of the hull either side of its own mast */
+    let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
     /* ⚠ A JUNK MAST IS A SINGLE POLE. Only a square rig is built up in fidded sections —
        lower mast, topmast, topgallant — because only a square rig needs to send its upper
        spars down in heavy weather. A junk reefs by dropping battens onto the boom and never
@@ -757,7 +772,15 @@ function buildRig(S, group, mats, FINE) {
       const th = mixed ? 0.98 : 0.785;   // a mizzen is peaked up steeper than a dhow's main
       const dir = [Math.cos(th), Math.sin(th)];          // +x is AFT, so the yard rises aft
       const sling = [x, base + dir[1] * yardLen / 3];
-      const heel = [x - dir[0] * yardLen / 3, base];
+      /* ── ⚠ THE YARD'S HEEL WAS SET TO THE DECK AT THE MAST ─────────────────────────
+         A lateen yard rakes down and FORWARD; its heel ends up a third of a yard-length ahead
+         of the mast, out over the rising forecastle. Taking its height from `base` — the deck
+         at the mast — drove the heel through the deck on every lateen and settee hull, and on
+         the dhow it finished 0.66 m under the planking and forward of the stem. The heel is
+         bowsed down ONTO the deck, not through it; take the height from the deck beneath it. */
+      const heelX = x - dir[0] * yardLen / 3;
+      const heelU = Math.max(0, Math.min(1, heelX / L + 0.5));
+      const heel = [heelX, deckMax(heelU, u) + B * 0.045];
       const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
 
       /* the mast, drawn from the deck UP TO the sling — its height is the consequence, and it
@@ -784,7 +807,11 @@ function buildRig(S, group, mats, FINE) {
       const tack = [heel[0] + dir[0] * along, heel[1] + dir[1] * along];
 
       /* the clew is sheeted aft along the deck; a settee foot runs about 0.62 of its head */
-      const clew = [tack[0] + yardLen * 0.62, base + H.sheer(0.5) * 0.10];
+      /* the clew is sheeted aft along the deck; a settee foot runs about 0.62 of its head.
+         Its height comes from the deck UNDER IT, not from the deck at the mast. */
+      const clewX = tack[0] + yardLen * 0.62;
+      const clewU = Math.max(0, Math.min(1, clewX / L + 0.5));
+      const clew = [clewX, deckMax(u, clewU) + Math.max(H.sheer(0.5) * 0.10, B * 0.10)];
       /* ── ⚠ A SETTEE IS NOT A TRIANGLE, AND THIS COMMENT KNEW IT BEFORE THE CODE DID ────
          The line above has said "a settee foot" since it was written, while the code below
          built a lateen — one triangle, tack to peak to clew. They are different sails. A
@@ -1903,7 +1930,14 @@ function buildWingSail(S, group, mats) {
   vane.position.set(0, span * 0.46, -chord * 2.7);
   wing.add(tag(vane, 'wing', 'Tail vane',
     'A weathervane for the wing. The wing pivots freely on its post and the tail holds it at a set angle to the apparent wind, so it finds and keeps its own trim with no crew.'));
-  wing.position.set(x, base, 0);
+  /* The wing turns, so it cannot sit flat on the deck: it stands on a BEARING, and that post
+     is what it pivots about. Setting it at deck level also drove its foot 0.11 m into the
+     planking — the deck is cambered and has thickness. */
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(chord * 0.075, chord * 0.095, B * 0.12, 14), dark);
+  post.position.set(x, base + B * 0.06, 0);
+  group.add(tag(post, 'wing', 'Wing bearing',
+    'The wing turns freely on this post. Nothing drives it: the tail vane sets the angle and the wind does the rest.'));
+  wing.position.set(x, base + B * 0.115, 0);
   /* trimmed for a reach. At 15 degrees the wing was almost edge-on to any side view and read
      as a bare white post; a wing sail is a WING and its face has to be visible for that to be
      legible at all. 32 degrees is a normal working trim and shows the section. */
