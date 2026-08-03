@@ -2383,7 +2383,7 @@ function buildPaddles(S, group, mats) {
       arm.rotation.z = a;
       g.add(arm);
       const float = new THREE.Mesh(                     // and the floats that do the work
-        new THREE.BoxGeometry(D * 0.030, D * 0.115, B * 0.30), mats.woodPale);
+        new THREE.BoxGeometry(D * 0.030, D * 0.115, B * 0.30), mats.woodDark || mats.woodPale);
       float.position.set(Math.cos(a + Math.PI / 2) * R * 0.90,
                          Math.sin(a + Math.PI / 2) * R * 0.90, 0);
       float.rotation.z = a;
@@ -2396,11 +2396,52 @@ function buildPaddles(S, group, mats) {
     g.rotation.y = Math.PI / 2;
     g.position.set(p[0], p[1] * 0.55, sgn * (p[2] + B * 0.16));
     group.add(tag(g, 'paddle'));
-    /* the sponson box that carries the wheel's weight out from the hull */
+    /* the sponson: the platform carrying the wheel's weight out from the hull side */
     const box = new THREE.Mesh(
       new THREE.BoxGeometry(D * 0.62, B * 0.16, B * 0.34), iron);
     box.position.set(p[0], p[1] * 0.95, sgn * (p[2] + B * 0.12));
-    group.add(box);
+    group.add(tag(box, 'paddle', 'Sponson',
+      'The platform bracketed out from the hull side that carries the wheel and its shaft bearings.'));
+
+    /* ── ⚠ THE PADDLE BOX, WHICH WAS MISSING ENTIRELY ──────────────────────────────────
+       A wheel 17 m across turning beside an open deck throws a continuous sheet of water
+       and coal-dirty spray, and it would sweep the deck clean of anything on it. So every
+       paddle steamer ever built housed the top half of the wheel in a PADDLE BOX — and
+       because it is the largest object on the ship's side, it became the thing owners
+       decorated: fluted, vented, crested, and lettered with the company's name.
+       Without it the wheel reads as loose machinery bolted to a hull; with it, the ship has
+       the silhouette that says paddle steamer from a mile off. */
+    const boxR = D * 0.60;
+    const NB = 20, bp = [], bi = [];
+    for (let i = 0; i <= NB; i++) {
+      const a = Math.PI * (i / NB);                    // a half-round over the top
+      for (let k = 0; k < 2; k++) {
+        const w = (k ? 0.5 : -0.5) * B * 0.42;
+        bp.push(Math.cos(a) * boxR, Math.sin(a) * boxR * 0.86, w);
+      }
+    }
+    for (let i = 0; i < NB; i++) {
+      const a0 = i * 2;
+      bi.push(a0, a0 + 1, a0 + 2, a0 + 1, a0 + 3, a0 + 2);
+    }
+    const bg = new THREE.BufferGeometry();
+    bg.setAttribute('position', new THREE.Float32BufferAttribute(bp, 3));
+    bg.setIndex(bi); bg.computeVertexNormals();
+    const bm = new THREE.Mesh(bg, mats.woodPale || iron);
+    bm.position.set(p[0], p[1] * 0.55, sgn * (p[2] + B * 0.16));
+    group.add(tag(bm, 'paddle', 'Paddle box',
+      'The housing over the top of the wheel. A 17 m wheel throws a sheet of water and coal dirt that would sweep the deck; the box contains it. Being the largest thing on the ship\'s side, it is also what owners decorated.'));
+    /* the vent slats along its face, which is how a real one is built and lit */
+    for (let i = 1; i < 7; i++) {
+      const a = Math.PI * (i / 7);
+      const sl = new THREE.Mesh(new THREE.BoxGeometry(D * 0.035, B * 0.012, B * 0.40), iron);
+      sl.position.set(p[0] + Math.cos(a) * boxR * 0.94,
+                      p[1] * 0.55 + Math.sin(a) * boxR * 0.81,
+                      sgn * (p[2] + B * 0.16));
+      sl.rotation.z = a;
+      group.add(tag(sl, 'paddle', 'Paddle-box vent',
+        'Slatted so the wheel does not compress the air in its own housing at every revolution.'));
+    }
   }
 }
 
