@@ -79,14 +79,24 @@ function btInit() {
   BT.scene.add(sun);
 
   /* the sea: the same wind-driven surface as the Yard, at fleet scale */
-  BT.sea = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 1, 1), new THREE.ShaderMaterial({
+  /* ── ⚠ A 120 km PLANE OF TWO TRIANGLES CANNOT HAVE WAVES IN IT ────────────────────
+     The old sea was PlaneGeometry(1,1,1,1) scaled to 120,000 m: four vertices. Every ripple
+     on it was painted by the fragment shader, so nothing was ever displaced, nothing floated,
+     and nothing could occlude anything. Real geometry is the only way a hull can sit IN the
+     water rather than on a picture of it.
+     Uniform tessellation over 120 km is impossible — a 118 m swell would want a million
+     vertices. But the haze closes the view at uScale*14, about 3.4 km, so a plane that size
+     is all anyone ever sees. Tessellate 4 km at 256 and MOVE IT WITH THE CAMERA; because the
+     wave field is a function of world position, sliding the mesh under it changes nothing
+     about where the crests are. */
+  BT.sea = new THREE.Mesh(new THREE.PlaneGeometry(4200, 4200, 256, 256), new THREE.ShaderMaterial({
     vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
     uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
                 uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
-                uWind: { value: 9 }, uScale: { value: 240 } },
+                uWind: { value: 9 }, uScale: { value: 240 },
+                uWave: { value: SHIPS_SEA.seaWaveUniform() } },
   }));
   BT.sea.rotation.x = -Math.PI / 2;
-  BT.sea.scale.set(120000, 120000, 1);
   BT.scene.add(BT.sea);
 
   /* powder smoke: quads that bloom and drift down the wind */
@@ -323,6 +333,9 @@ function btFrame(now, dt) {
   BT.sky.position.set(BT.cam.position.x, 0, BT.cam.position.z);
   BT.sea.material.uniforms.uTime.value = BT.t;
   BT.sea.material.uniforms.uCam.value.copy(BT.cam.position);
+  /* the tessellated patch rides with the camera; the wave field is a function of world
+     position, so sliding the mesh beneath it does not move a single crest */
+  BT.sea.position.set(BT.cam.position.x, 0, BT.cam.position.z);
   BT.mats.forEach(hm => hm.uniforms.uCam.value.copy(BT.cam.position));
 
   if (BT.playing) {

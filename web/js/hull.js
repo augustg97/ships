@@ -2052,6 +2052,9 @@ function buildOars(S, group, mat) {
         o.position.set(p[0], p[1], sgn * p[2] * out);
         o.rotation.y = sgn > 0 ? 0 : Math.PI;
         o.rotation.z = -0.34;                          // blades down toward the water
+        /* what the animator needs to swing this oar: which side it is, its rest angles, and
+           its bank, because the three banks do not enter the water at the same instant */
+        o.userData.oar = { sgn, restY: o.rotation.y, restZ: -0.34, bank };
         g.add(o);
       }
     }

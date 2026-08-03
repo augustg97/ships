@@ -83,12 +83,19 @@ function swInit() {
     SW.renderer.toneMappingExposure = 1.15;
   }
 
-  /* a ground plane, so the hull reads as an object on a floor rather than in a void */
-  const gg = new THREE.PlaneGeometry(1, 1);
-  const gm = new THREE.Mesh(gg, new THREE.MeshStandardMaterial({
-    color: 0x18232b, roughness: 0.95, metalness: 0.0 }));
+  /* ── ⚠ THE SHIPWRIGHT'S "SEA" WAS A MATTE GREY DISC ────────────────────────────────
+     A MeshStandardMaterial plane at roughness 0.95 — a floor, and it read as one. These are
+     ships; they belong on water. Same Gerstner surface as the Action, same wave table, so a
+     hull sits at the same height in both views. */
+  const gg = new THREE.PlaneGeometry(2600, 2600, 220, 220);
+  const gm = new THREE.Mesh(gg, new THREE.ShaderMaterial({
+    vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
+    uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
+                uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
+                uWind: { value: 6.5 }, uScale: { value: 150 },
+                uWave: { value: SHIPS_SEA.seaWaveUniform() } },
+  }));
   gm.rotation.x = -Math.PI / 2;
-  gm.receiveShadow = true;
   SW.ground = gm; SW.scene.add(gm);
 
   /* ── DRAG TURNS THE SHIP, NOT THE CAMERA ────────────────────────────────────────────
@@ -425,9 +432,21 @@ function swOpen(vessel) {
   const U = SW.ship.userData;
   const L = vessel.hull.loa;
   /* the floor spans the whole line, not one ship */
-  const span = SW.yardSpan[1] - SW.yardSpan[0];
-  SW.ground.scale.set(span * 1.3, span * 1.3, 1);
-  SW.ground.position.set((SW.yardSpan[0] + SW.yardSpan[1]) / 2, U.keelBottom - 0.02 * L, 0);
+  /* ── SHE IS LAUNCHED WHEN SHE IS FINISHED ──────────────────────────────────────────
+     Putting the sea at the waterline floats the ship, which is what a ship does — but it also
+     drowns the keel and the frames, and watching those go up is the whole purpose of this
+     view. The real process resolves it: a hull stands on the STOCKS while it is built and
+     goes into the water when it is done. So the sea sits below the keel through construction
+     and rises to the waterline at the last stage, which is also the moment the canvas is bent
+     on and she can first be driven. No scaling of the plane — it is a real 2,600 m of water
+     and stretching it would stretch the wavelengths with it. */
+  SW.dryY = U.keelBottom - 0.02 * L;
+  /* ⚠ THE WATERLINE IS NOT y = 0. Assuming it was floated the trireme to her gunwale — she
+     draws 1.25 m and was sitting in about four. The waterline is the keel bottom plus the
+     draught, taken from the hull's own numbers, so every vessel sits at the depth her card
+     claims and the two cannot disagree. */
+  SW.waterY = U.keelBottom + (vessel.hull.draught || 0);
+  SW.ground.position.set(SW.shipX, SW.stage >= 7 ? SW.waterY : SW.dryY, 0);
   SW.rigTop = U.rigTop;
   SW.spin = true; SW.dist = 1.12; SW.t0 = performance.now();
   SW.stage = 7;
@@ -577,11 +596,40 @@ function swResize() {
 }
 
 function swFrame(now) {
+  if (SW.ground && SW.ground.material.uniforms) {
+    const U2 = SW.ground.material.uniforms;
+    U2.uTime.value = clockS();
+    U2.uCam.value.copy(SW.cam.position);
+    /* follow the selected ship, and rise to the waterline once she is complete */
+    SW.ground.position.x = SW.shipX;
+    SW.ground.position.y = SW.stage >= 7 ? (SW.waterY || 0) : (SW.dryY || 0);
+  }
   if (!SW.on || !SW.ship) return;
   const L = SW.spec.hull.loa;
   SW.lon = 0.42;      // the camera's angle is fixed; the SHIP turns instead
   /* the line stays put and the selected hull turns under the drag */
   SW.layout && SW.layout.forEach(e => { e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
+  /* ── AND ONCE AFLOAT, SHE MOVES WITH THE WATER ────────────────────────────────────
+     Every hull in the line samples the SAME wave field the shader draws — one table, in
+     sea.js — so a ship is never at a height the sea disagrees with.
+     A hull does not balance on one point: it spans a length and averages the surface beneath
+     it, which is why a long ship is steady in a short sea and a small boat is not. So the
+     pitch comes from the difference between bow and stern rather than from a local normal,
+     and the canoe visibly works while Titanic barely notices the same swell. */
+  if (SW.stage >= 7 && SW.layout) {
+    const t = clockS();
+    /* the oars work whenever she is complete — a trireme under oar is the only way she moves */
+    SHIPS_SEA.animateOars(SW.ship, t);
+    SW.layout.forEach(e => {
+      const len = (e.v && e.v.hull && e.v.hull.loa) || 30;
+      const r = SHIPS_SEA.floatShip(e.obj, e.obj.position.x, 0, 0, len, t, 6.5);
+      e.obj.position.y = r.y;                      // relative to her own floating datum
+      e.obj.rotation.z = r.pitch;
+      e.obj.rotation.x = r.roll;
+    });
+  } else if (SW.layout) {
+    SW.layout.forEach(e => { e.obj.position.y = 0; e.obj.rotation.z = 0; e.obj.rotation.x = 0; });
+  }
   /* ── THE CAMERA TRAVELS, AND SO DOES THE ZOOM ─────────────────────────────────────
      The pan already eased; the ZOOM did not. `fit` was recomputed from the new ship's bounding
      box the instant the selection changed, so stepping from the canoe to Titanic slammed the
