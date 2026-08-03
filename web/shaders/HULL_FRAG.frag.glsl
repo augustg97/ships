@@ -66,14 +66,11 @@ void main(){
     col = mix(col, vec3(0.20, 0.24, 0.18),
               smoothstep(0.35, 0.9, noise(vec2(u * 34.0, v * 15.0))) * 0.55);  // weed
   } else if (uIron > 0.5) {
-    /* riveted iron plate: strakes are wider, seams are proud, and the rivets show */
-    float pv = v * uStrakes * 0.6, ph = u * 30.0;
-    float seam = smoothstep(0.04, 0.12, abs(fract(pv) - 0.5) * 2.0)
-               * smoothstep(0.03, 0.10, abs(fract(ph) - 0.5) * 2.0);
-    float rivet = smoothstep(0.42, 0.30, length(fract(vec2(ph, pv) * vec2(6.0, 2.0)) - 0.5));
-    col = uTopside * (0.86 + 0.16 * noise(vec2(u * 300.0, v * 120.0)));
-    col *= mix(0.72, 1.0, seam);
-    col += rivet * 0.05;
+    /* ⚠ DEAD. This branch used to draw a UNIFORM GRID of rivets over the whole plate, which is
+       what made an iron hull read as halftone print or perforated sheet. It was replaced by the
+       land-and-butt block further down — which assigns col outright, so everything computed
+       here was discarded anyway. Two models of one surface, one of them invisible. */
+    col = uTopside;
   } else {
     /* ── PLANKING ────────────────────────────────────────────────────────
        Carvel strakes running fore-and-aft, caulked with oakum and payed with pine tar. The
@@ -165,10 +162,43 @@ void main(){
     /* the boot-top: a band of anti-fouling red at the waterline, and below it the bottom */
     float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
     paint = mix(paint, vec3(0.42, 0.13, 0.10), below);
+
+    /* ── ⚠ A HULL IS MADE OF PLATES, AND EVERY PLATE WAS THE SAME COLOUR ───────────────
+       That is why the rivets read as a printed dot screen: they were the ONLY variation on
+       an otherwise perfectly uniform sheet, so the eye had nothing else to hold and locked
+       onto the grid. A real riveted hull is visibly assembled — each plate was rolled from a
+       different heat, faired by a different hand and painted on a different day, so no two
+       are quite the same tone, and that patchwork is what says "built from parts" before any
+       rivet is visible at all. Give each plate its own shade off the land/butt cell it sits
+       in, and the rivets stop being the whole story. */
+    vec2 cell = floor(vec2(ph, pv));
+    /* ⚠ On a BLACK hull — and Great Eastern's was black — a multiplicative tone shift of a
+       few percent is invisible: a few percent of nearly nothing is nothing. Removing the dot
+       grid without this left a flat slab, which is the same fault wearing the opposite coat.
+       The variation has to be wide enough to survive a dark base. */
+    float plateTone = 0.80 + 0.34 * hash(cell * 7.31);
+    paint *= plateTone;
+
+    /* ── AND STEEL STREAKS. ────────────────────────────────────────────────────────────
+       The most recognisable thing about a working steel hull is not its rivets, it is the
+       VERTICAL WEEPING down its sides: rust and dirt carried down by rain and spray from
+       every scupper, freeing port and seam. It runs DOWN, always, because gravity does, and
+       it is strongest under the deck edge and fades toward the water where the sea scrubs it.
+       Without it a steel hull is a painted panel; with it, it has been somewhere. */
+    float streakN = noise(vec2(u * 90.0, 0.0)) * 0.6 + noise(vec2(u * 260.0, 0.0)) * 0.4;
+    float runDown = smoothstep(0.05, 0.55, v) * (1.0 - smoothstep(0.55, 1.0, v));
+    float streak = smoothstep(0.58, 0.92, streakN) * runDown * (1.0 - below);
+    /* streaks lighten as well as darken on a dark hull — salt dries white on black paint */
+    paint = mix(paint, paint * vec3(1.55, 1.34, 1.14), streak * 0.42);
+
     col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
-    col *= mix(0.90, 1.0, land);                     // the lap catches a little shadow
-    col *= mix(0.955, 1.0, butt);
-    col += rivet * 0.030;                            // proud, so they catch light
+    /* the lap stands proud, so it shades on one side and catches light on the other —
+       that highlight is what makes a plate seam visible on a dark hull at all */
+    col *= mix(0.74, 1.06, land);
+    col *= mix(0.86, 1.02, butt);
+    /* rivets at a third of their old strength. They are 20 mm domes on a 200 m ship: at any
+       honest viewing distance they are a texture, not a feature. */
+    col += rivet * 0.011;
   }
 
   col *= taper * 0.25 + 0.75;
