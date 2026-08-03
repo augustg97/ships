@@ -160,8 +160,19 @@ void main(){
     float rivet = max(rowL, rowB);
     vec3 paint = uTopside;
     /* the boot-top: a band of anti-fouling red at the waterline, and below it the bottom */
+    /* ── ⚠ ANTI-FOULING IS NOT DARK RED ────────────────────────────────────────────
+       It was 0.42,0.13,0.10 — a modern oxide-red. The nineteenth-century composition was a
+       pale SALMON PINK, and the museum model of Great Eastern shows it clearly: the whole
+       underwater body is pink, not maroon. The colour comes from the mercuric and arsenic
+       compounds ground into the paint, and it is one of the most recognisable things about a
+       Victorian hull in dry dock.
+       Above it runs a fine GOLD SHEER LINE — a single painted stripe following the sheer,
+       which is what gives a black hull its curve. Without it the topside is a slab, and the
+       eye has nothing by which to read the sweep the shipwright worked so hard for. */
     float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
-    paint = mix(paint, vec3(0.42, 0.13, 0.10), below);
+    paint = mix(paint, vec3(0.86, 0.55, 0.47), below);
+    float sheerLine = smoothstep(0.016, 0.004, abs(v - (uWaterline + 0.30)));
+    paint = mix(paint, vec3(0.78, 0.62, 0.26), sheerLine * 0.92);
 
     /* ── ⚠ A HULL IS MADE OF PLATES, AND EVERY PLATE WAS THE SAME COLOUR ───────────────
        That is why the rivets read as a printed dot screen: they were the ONLY variation on

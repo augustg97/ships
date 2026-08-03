@@ -1897,24 +1897,30 @@ function buildFunnel(S, group) {
     casing.position.y = caseH / 2 - caseH * 0.35;       // slightly sunk, so no cap meets the deck
     g.add(tag(casing, 'funnel', 'Boiler casing',
               'The deckhouse over the fiddley. The uptakes from the boilers come up inside it.'));
-    const stack = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.93, r, h, 24), black);
+    /* ── ⚠ A FUNNEL'S COLOURS ARE PAINT, AND PAINT HAS NO THICKNESS ────────────────
+       The band was a separate ring standing 9 cm proud of a tapering stack. Three hypotheses
+       for August's flickering red tips were tested and all three failed — depth precision
+       (raising the near plane changed nothing), shadow acne (disabling shadows made it
+       slightly worse), and aliasing (the band measures 60 device pixels tall, not thin). What
+       is certain is that two nearly-coincident surfaces are the only thing that CAN fight, and
+       a funnel band is not a fitting: it is paint. So the stack is now ONE cylinder carrying
+       its livery in VERTEX COLOURS, and there is no second surface left to contend with.
+       Colours from the museum model August supplied: buff stack, black top. */
+    const sg = new THREE.CylinderGeometry(r * 0.93, r, h, 24, 24);
+    const spos = sg.attributes.position, scol = [];
+    const buff = new THREE.Color(0xd8cfbb), cap = new THREE.Color(0x1b1b1d);
+    for (let i = 0; i < spos.count; i++) {
+      const fy = spos.getY(i) / h + 0.5;               // 0 at the base, 1 at the head
+      const c = fy > 0.80 ? cap : buff;
+      scol.push(c.r, c.g, c.b);
+    }
+    sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
+    const stack = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.66, metalness: 0.10 }));
     stack.position.y = caseH * 0.55 + h / 2;
-    g.add(stack);
+    g.add(tag(stack, 'funnel', 'Funnel',
+      'Buff with a black top. Funnel colours were a shipping line\'s registered trademark: at sea a hull is a silhouette long before a name can be read, so the livery at the head of the funnel is how a ship was known hull-down on the horizon.'));
     /* the company band at the head — the one piece of colour on a Victorian hull */
-    /* ── ⚠ THE FLUTTER WAS A SUB-PIXEL SLIVER ────────────────────────────────────────
-       The band was a straight cylinder of radius 0.955r laid over a stack that TAPERS from
-       r at the base to 0.93r at the head. Over the band's own span the stack is 0.931–0.943r,
-       so the band stood proud by between 0.012r and 0.024r — a shell thinner than a pixel at
-       any normal viewing distance. Two surfaces that close, one tapering and one not, alias
-       against each other and the colour flickers between them as the camera moves.
-       A funnel band is PAINT, not a fitting. It has no thickness to speak of. But since it is
-       drawn as geometry it must be unambiguously outside the stack at every height, so it
-       tapers with it and stands clearly proud. */
-    const bandTop = r * 0.93 * 1.035, bandBot = r * 0.945 * 1.035;
-    const bandM = new THREE.Mesh(new THREE.CylinderGeometry(bandTop, bandBot, h * 0.17, 24), band);
-    bandM.position.y = caseH * 0.55 + h * 0.90;
-    g.add(tag(bandM, 'funnel', 'Company band',
-      'Funnel colours were a shipping line\'s trademark and were registered like one. At sea a hull is a silhouette long before a name can be read, so the band at the head of the funnel is how a ship was identified hull-down on the horizon.'));
     /* the steam pipe alongside, which is what actually roars */
     const pipe = new THREE.Mesh(
       new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 16), black);
@@ -2531,13 +2537,26 @@ function buildPaddles(S, group, mats) {
       const rim = new THREE.Mesh(new THREE.TorusGeometry(r, B * 0.012, 6, 30), iron);
       g.add(rim);
     }
-    g.rotation.y = Math.PI / 2;
+    /* ── ⚠ THE WHEEL WAS TURNED EDGE-ON TO THE SHIP ────────────────────────────────
+       A paddle wheel's SHAFT runs athwartships — it has to, because it is driven off an
+       engine amidships and the floats must push water sternward. So the wheel's PLANE lies
+       fore-and-aft, parallel to the hull side, and from abeam you see the whole circle: the
+       spokes, the rim, the floats coming down at the front and lifting at the back. That is
+       the image everyone has of a paddle steamer.
+       Rotating the group a quarter-turn about Y put the wheel ACROSS the ship instead, so it
+       was edge-on from the side and would have been shovelling water sideways. The arms are
+       already built in the XY plane, which is the fore-and-aft plane; they needed no rotation
+       at all. */
     g.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
     group.add(tag(g, 'paddle'));
     /* the sponson: the platform carrying the wheel's weight out from the hull side */
     const box = new THREE.Mesh(
       new THREE.BoxGeometry(D * 0.62, B * 0.16, B * 0.34), iron);
-    box.position.set(p[0], axleY + D * 0.14, sgn * (p[2] + B * 0.12));
+    /* ⚠ The sponson was sitting at axle height — a black box straight through the middle
+       of the wheel. A sponson is the PLATFORM bracketed out from the hull at deck level that
+       the paddle box stands on and the shaft bearings sit in; it belongs at the sheer, above
+       the wheel entirely, not inside it. */
+    box.position.set(p[0], H.sheer(u), sgn * (p[2] + B * 0.12));
     group.add(tag(box, 'paddle', 'Sponson',
       'The platform bracketed out from the hull side that carries the wheel and its shaft bearings.'));
 
