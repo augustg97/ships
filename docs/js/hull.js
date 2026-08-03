@@ -568,7 +568,16 @@ function buildRig(S, group, mats, FINE) {
     /* How much clear water there is abaft this mast before the next one. A fore-and-aft sail
        has to live inside it — see the boom clamp in the gaff block below. */
     const nextAt = (S.masts[mi + 1] || {}).at;
-    const gapAft = nextAt !== undefined ? (nextAt - u) * L : (0.5 - u) * L + L * 0.06;
+    /* ⚠ AND A FUNNEL STANDS IN THAT GAP. Clamping the boom to the next MAST was not enough
+       on Great Eastern, because a fore-and-aft sail and a centreline funnel occupy the SAME
+       PLANE — they cannot pass through one another, and the funnel sits at the middle of the
+       gap, so a boom reaching 86% of it went straight through the stack. The obstruction is
+       whichever comes first. */
+    let obstruct = nextAt !== undefined ? nextAt : (0.5 + 0.06);
+    (S.funnels ? funnelStations(S) : []).forEach(fu => {
+      if (fu > u + 1e-4 && fu < obstruct) obstruct = fu;
+    });
+    const gapAft = (obstruct - u) * L;
     const x = (u - 0.5) * L + H.rake(u);
     const base = deckAt(u);
     const rakeRad = (mk.rake || 0) * Math.PI / 180;
@@ -862,7 +871,10 @@ function buildRig(S, group, mats, FINE) {
          fore-and-aft sail swings about its own mast and must clear the next one, which is
          precisely why schooner booms get shorter as you add masts. Only the aftermost boom
          may overhang, and it overhangs the STERN, where there is nothing to hit. */
-      const boomL = Math.min(lower * 0.62, gapAft * 0.86), gaffL = lower * 0.42;
+      /* 0.78 rather than 0.86: a boom needs room to swing, and the clearance it needs is to
+         the FACE of the obstruction, not to its centreline. */
+      const boomL = Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
+      const gaffL = Math.min(lower * 0.42, boomL * 0.72);
       const peak = 0.62;                                 // the gaff's angle above horizontal
       const footY = base + lower * 0.11;
       const bm2 = new THREE.Mesh(
@@ -1224,6 +1236,22 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
  * hulls swap 1 and 2, and the vessel's own card says which tradition it belongs to.
  */
 const PARTS = {
+  /* ── the uncrewed vessel ─────────────────────────────────────────────────────────────
+     Its parts have no older equivalent, which is the point of them: everything here exists
+     because there is nobody aboard to do the job by hand. */
+  wing:     { stage: 6, name: 'Wing sail',
+              what: 'A rigid aerofoil in place of canvas. Nothing to sheet, nothing to reef and '
+                  + 'nothing to tear, which is what lets the vessel sail for months uncrewed. '
+                  + 'The tail vane behind it works as a weathervane: the wing pivots freely and '
+                  + 'the tail holds it at a set angle to the apparent wind, so it finds and '
+                  + 'keeps its own trim through every windshift.' },
+  solar:    { stage: 6, name: 'Solar array',
+              what: 'Power for the instruments, the computer and the satellite link. With wind '
+                  + 'for propulsion and sun for electricity, the endurance limit stops being '
+                  + 'fuel or food and becomes fouling and machinery.' },
+  sensor:   { stage: 6, name: 'Instrument mast',
+              what: 'Anemometer, satellite antenna and cameras above; echo sounders and a CTD '
+                  + 'below the waterline. The cargo of this vessel is data.' },
   keel:     { stage: 0, name: 'Keel',
               what: 'The backbone: one continuous timber from stem to sternpost, and the first '
                   + 'thing laid down. Everything else is measured from it. Its depth below the '
@@ -1717,6 +1745,21 @@ function buildSuperstructure(S, group) {
   group.add(tag(g, 'superstructure'));
 }
 
+/* ── WHERE THE FUNNELS STAND ────────────────────────────────────────────────────────────
+ * ⚠ Read by TWO callers now — the funnels themselves, and the boom clamp in the rig, which
+ * has to know what is standing in the gap it is about to swing a spar through. Defined once
+ * for exactly the reason this project keeps relearning: two independent derivations of the
+ * same station drift, and the drift shows up as a sail through a funnel.
+ */
+function funnelStations(S) {
+  const mu = (S.masts || []).map(m => m.at).sort((a, b) => a - b);
+  const slots = [];
+  if (!mu.length) return slots;
+  for (let i = 0; i < mu.length - 1; i++) slots.push((mu[i] + mu[i + 1]) / 2);
+  slots.push(Math.min(0.92, mu[mu.length - 1] + 0.14));
+  return slots;
+}
+
 function buildFunnel(S, group) {
   const n = S.funnels || 0;
   if (!n) return;
@@ -1729,15 +1772,10 @@ function buildFunnel(S, group) {
      each other. On a real auxiliary steamer the uptakes are threaded into the GAPS between the
      masts, because a boiler casing and a mast step cannot occupy the same frame. Take the mast
      positions and sit in the widest holes between them. */
-  const mu = (S.masts || []).map(m => m.at).sort((a, b) => a - b);
-  const slots = [];
-  if (mu.length) {
-    for (let i = 0; i < mu.length - 1; i++) slots.push((mu[i] + mu[i + 1]) / 2);
-    slots.push(Math.min(0.92, mu[mu.length - 1] + 0.14));
-  }
+  const slots = funnelStations(S);
   for (let i = 0; i < n; i++) {
-    const u = mu.length ? (slots[i % slots.length] || 0.50)
-                        : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
+    const u = slots.length ? (slots[i % slots.length] || 0.50)
+                           : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
     const y = H.sheer(u);
     const g = new THREE.Group();
     /* ── ⚠ THE FLICKER WAS THE FUNNEL'S OWN BASE ────────────────────────────────────
@@ -1759,7 +1797,17 @@ function buildFunnel(S, group) {
     stack.position.y = caseH * 0.55 + h / 2;
     g.add(stack);
     /* the company band at the head — the one piece of colour on a Victorian hull */
-    const bandM = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.955, r * 0.955, h * 0.17, 18), band);
+    /* ── ⚠ THE FLUTTER WAS A SUB-PIXEL SLIVER ────────────────────────────────────────
+       The band was a straight cylinder of radius 0.955r laid over a stack that TAPERS from
+       r at the base to 0.93r at the head. Over the band's own span the stack is 0.931–0.943r,
+       so the band stood proud by between 0.012r and 0.024r — a shell thinner than a pixel at
+       any normal viewing distance. Two surfaces that close, one tapering and one not, alias
+       against each other and the colour flickers between them as the camera moves.
+       A funnel band is PAINT, not a fitting. It has no thickness to speak of. But since it is
+       drawn as geometry it must be unambiguously outside the stack at every height, so it
+       tapers with it and stands clearly proud. */
+    const bandTop = r * 0.93 * 1.035, bandBot = r * 0.945 * 1.035;
+    const bandM = new THREE.Mesh(new THREE.CylinderGeometry(bandTop, bandBot, h * 0.17, 24), band);
     bandM.position.y = caseH * 0.55 + h * 0.90;
     g.add(bandM);
     /* the steam pipe alongside, which is what actually roars */
@@ -1782,6 +1830,101 @@ function buildFunnel(S, group) {
  * bridge has to see over a stack that may be twelve high — which is why it stands where it does
  * and why modern boats have moved it forward of the boxes rather than behind them.
  */
+/* ── THE RIGID WING SAIL ────────────────────────────────────────────────────────────────
+ * ⚠ The USV was a bare hull with masts=[] — nothing on deck at all, which is why it read as
+ * unfinished. It was, literally.
+ *
+ * An uncrewed sailing vessel cannot use cloth. Canvas needs hands: to sheet it, to reef it, to
+ * hand it before a squall and to repair it after. So a Saildrone carries a RIGID WING — a
+ * vertical aerofoil, the same section as an aircraft wing turned on end — which needs no
+ * sheeting at all and cannot tear.
+ *
+ * And it trims itself. The TAIL VANE on its outrigger behind the wing does what a weathervane
+ * does: the wing pivots freely on its post, and the tail holds it at a fixed angle to the
+ * apparent wind. Set the tail's angle and the wing finds and keeps its own trim, through every
+ * windshift, for months, with nobody aboard. That is the whole reason the type exists, and it
+ * is the one part that must be drawn if the vessel is to make any sense.
+ */
+function buildWingSail(S, group, mats) {
+  if (!S.wingSail) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const u = S.wingAt || 0.46;
+  const base = H.sheer(u);
+  const x = (u - 0.5) * L;
+  const span = L * S.wingSail;                      // wing height
+  const chord = span * 0.27;
+  const white = new THREE.MeshStandardMaterial({ color: 0xe9edf0, roughness: 0.42, metalness: 0.05 });
+  const dark  = new THREE.MeshStandardMaterial({ color: 0x1b2530, roughness: 0.30, metalness: 0.15 });
+
+  const wing = new THREE.Group();
+  /* ── THE AEROFOIL ─────────────────────────────────────────────────────────────────
+     Built explicitly rather than by extruding a profile: an extrusion's depth axis has to be
+     rotated into place afterwards, and the first attempt put the CHORD fore-and-aft along the
+     view axis, so the wing showed only its edge and read as a bare white post.
+     Chord along X (fore and aft), span up Y, thickness on Z. A lens section, thickest about a
+     third aft of the leading edge, and tapering in chord toward the head the way a real wing
+     sail does to keep its centre of effort low. */
+  const NC = 18, NSp = 10, wp = [], wi = [];
+  for (let j = 0; j <= NSp; j++) {
+    const v = j / NSp;
+    const taper = 1.0 - 0.32 * v * v;
+    const yy = v * span;
+    for (let side = 0; side < 2; side++) {
+      for (let i = 0; i <= NC; i++) {
+        const t = i / NC;
+        const th = 0.115 * chord * taper * Math.sin(Math.PI * Math.pow(t, 0.58));
+        wp.push((t - 0.5) * chord * taper, yy, (side ? -1 : 1) * th);
+      }
+    }
+  }
+  const rowW = (NC + 1) * 2;
+  for (let j = 0; j < NSp; j++)
+    for (let side = 0; side < 2; side++)
+      for (let i = 0; i < NC; i++) {
+        const a = j * rowW + side * (NC + 1) + i, b = a + rowW;
+        if (side === 0) wi.push(a, b, a + 1, a + 1, b, b + 1);
+        else            wi.push(a, a + 1, b, a + 1, b + 1, b);
+      }
+  const wg = new THREE.BufferGeometry();
+  wg.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3));
+  wg.setIndex(wi);
+  wg.computeVertexNormals();
+  const wm = new THREE.Mesh(wg, white);
+  wing.add(tag(wm, 'wing', 'Wing sail',
+    'A rigid aerofoil in place of canvas. Nothing to sheet, nothing to reef, nothing to tear — which is what lets the vessel sail for months with nobody aboard.'));
+  /* the tail vane, out astern on its boom: this is what trims the wing */
+  const boom = new THREE.Mesh(
+    new THREE.CylinderGeometry(B * 0.010, B * 0.010, chord * 2.6, 8), dark);
+  boom.rotation.x = Math.PI / 2;
+  boom.position.set(0, span * 0.46, -chord * 1.5);
+  wing.add(boom);
+  const vane = new THREE.Mesh(new THREE.BoxGeometry(chord * 0.045, span * 0.34, chord * 0.95), white);
+  vane.position.set(0, span * 0.46, -chord * 2.7);
+  wing.add(tag(vane, 'wing', 'Tail vane',
+    'A weathervane for the wing. The wing pivots freely on its post and the tail holds it at a set angle to the apparent wind, so it finds and keeps its own trim with no crew.'));
+  wing.position.set(x, base, 0);
+  /* trimmed for a reach. At 15 degrees the wing was almost edge-on to any side view and read
+     as a bare white post; a wing sail is a WING and its face has to be visible for that to be
+     legible at all. 32 degrees is a normal working trim and shows the section. */
+  wing.rotation.y = 0.56;
+  group.add(tag(wing, 'wing'));
+
+  /* solar panels — the other half of the endurance story, and flush with the deck */
+  const pv = new THREE.MeshStandardMaterial({ color: 0x141d2b, roughness: 0.22, metalness: 0.45 });
+  for (const uu of [0.24, 0.32, 0.62, 0.70, 0.78]) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, B * 0.42), pv);
+    p.position.set((uu - 0.5) * L, H.sheer(uu) + B * 0.010, 0);
+    group.add(tag(p, 'solar', 'Solar array',
+      'Power for the instruments, the computer and the satellite link. With wind for propulsion and sun for electricity, the endurance limit stops being fuel and becomes fouling.'));
+  }
+  /* the instrument pod: the reason the vessel is out there at all */
+  const pod = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.05, B * 0.06, B * 0.20, 12), dark);
+  pod.position.set((0.84 - 0.5) * L, H.sheer(0.84) + B * 0.10, 0);
+  group.add(tag(pod, 'sensor', 'Instrument mast',
+    'Anemometer, satellite antenna and cameras. Below the waterline the same vessel carries echo sounders and a CTD.'));
+}
+
 function buildContainers(S, group) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
@@ -2228,6 +2371,7 @@ function buildShip(S, opts) {
      could work, because the ship had no broad stern for a plate to sit on. */
   if (FINE && S.transom) buildStern(S, group, mats);
   if (FINE && S.containers) buildContainers(S, group);
+  if (S.wingSail) buildWingSail(S, group, mats);
 
   /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
      The card has always said "Austronesian double hull" and the model drew one hull, which is

@@ -57,7 +57,9 @@ function swInit() {
      rake the planking and throw the frames into relief, a cool fill opposite so the shadow side
      still reads, a low bounce standing in for light off the floor, and a rim behind to separate
      the rigging from the background. Four lights, and the ship stops being a silhouette. */
-  SW.scene.add(new THREE.HemisphereLight(0xbcd6e6, 0x4a4536, 1.5));
+  /* Sky above, sea below — the hemisphere now matches the world the ship is actually in,
+     rather than the dark room it used to hang in. */
+  SW.scene.add(new THREE.HemisphereLight(0xdCEBFF, 0x3d5a68, 2.2));
   /* ── SHADOWS ────────────────────────────────────────────────────────────────────────
      The single largest thing still separating this from a photograph. Without them a hull is a
      collection of correctly-shaped objects floating in the same light; with them the courses
@@ -67,7 +69,7 @@ function swInit() {
      Cast from the key only, and the map is fitted to the SELECTED ship rather than the whole
      2.6 km line — a shadow camera stretched over the full yard would put a 57 m ship inside
      about two texels of it. */
-  const key = new THREE.DirectionalLight(0xfff4e2, 2.5); key.position.set(90, 120, 70);
+  const key = new THREE.DirectionalLight(0xfff6e8, 3.1); key.position.set(90, 120, 70);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.bias = -0.0012;
@@ -82,6 +84,25 @@ function swInit() {
     SW.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     SW.renderer.toneMappingExposure = 1.15;
   }
+
+  /* ── ⚠ THE BACKGROUND WAS NOTHING AT ALL ───────────────────────────────────────────
+     Not a dark sky — no sky. The black was empty space, and a ship photographed against
+     black is a museum object on a plinth rather than a ship. A dome, drawn inside-out, far
+     enough out to sit behind everything, and with depth writing off so it never contests a
+     pixel with real geometry. */
+  const skyG = new THREE.SphereGeometry(18000, 32, 20);
+  const skyM = new THREE.Mesh(skyG, new THREE.ShaderMaterial({
+    vertexShader: SHADERS['SKY_VERT.vert'], fragmentShader: SHADERS['SKY_FRAG.frag'],
+    side: THREE.BackSide, depthWrite: false, depthTest: false,
+    uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
+                uTime: { value: 0 } },
+  }));
+  /* ⚠ A dome centred on the camera was being FRUSTUM-CULLED, so it compiled, sat in the
+     scene, reported itself visible, and drew nothing — the background stayed black and every
+     check said the sky was fine. Culling a sky is never right: it is always around you. */
+  skyM.frustumCulled = false;
+  skyM.renderOrder = -1000;
+  SW.sky = skyM; SW.scene.add(skyM);
 
   /* ── ⚠ THE SHIPWRIGHT'S "SEA" WAS A MATTE GREY DISC ────────────────────────────────
      A MeshStandardMaterial plane at roughness 0.95 — a floor, and it read as one. These are
@@ -596,6 +617,8 @@ function swResize() {
 }
 
 function swFrame(now) {
+  if (SW.sky) { SW.sky.material.uniforms.uTime.value = clockS();
+                SW.sky.position.copy(SW.cam.position); }
   if (SW.ground && SW.ground.material.uniforms) {
     const U2 = SW.ground.material.uniforms;
     U2.uTime.value = clockS();

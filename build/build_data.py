@@ -458,7 +458,8 @@ HULLS = {
   "usv": hull(build="steel", loa=22.0, lwl=20.5, beam=6.1, draught=2.4, freeboard=1.4, cm=0.72,
               wlPower=3.4, stemFineness=0.06, sternFineness=0.30, transom=0.30, forefoot=0.24,
               run=0.30, riseF=0.34, riseA=0.20, sheerBow=0.4, sheerStern=0.3, tumblehome=0.0,
-              stemRake=0.03, sternRake=0.01, strakes=12, iron=True, topside="#8d9498", masts=[]),
+              stemRake=0.03, sternRake=0.01, strakes=12, iron=True, topside="#8d9498", masts=[],
+              wingSail=0.62, wingAt=0.46),
 
   "container": hull(build="steel", containers=True, loa=399.9, lwl=383.0, beam=61.3, draught=16.0, freeboard=30.0, cm=0.98,
               wlPower=4.6, stemFineness=0.06, sternFineness=0.30,
@@ -925,7 +926,7 @@ vessel(id="titanic", name="Titanic", sub="size instead of speed", rig="steam",
             "had last been written when the largest ship afloat was 10,000 tons.",
        cite="Wikipedia, *RMS Titanic*; British Wreck Commissioner's Inquiry, 1912."),
 
-vessel(id="usv", name="Unmanned surface vessel", sub="nobody aboard", rig="motor",
+vessel(id="usv", name="Unmanned surface vessel", sub="nobody aboard — a rigid wing, and no canvas", rig="motor",
        era=[2010, 2026], from_=2015, to=2026, region="worldwide",
        rows=[["Length", "~22 m — beam 6.1 m, draught 2.4 m"],
              ["Propulsion", "wind, wave and solar; diesel-electric on some hulls"],
