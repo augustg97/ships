@@ -56,6 +56,21 @@
       "name": "ship-junk",
       "path": "/?frozen=1#v=ship&s=junk",
       "note": "the battened lug \u2014 battens must stay inside the canvas when the sail is sheeted out"
+    },
+    {
+      "name": "ship-canoe",
+      "path": "/?frozen=1#v=ship&s=voyaging-canoe",
+      "note": "crab claw \u2014 the triangular sail treatment"
+    },
+    {
+      "name": "ship-great-eastern",
+      "path": "/?frozen=1#v=ship&s=great-eastern",
+      "note": "funnels and gaff booms; sails must clear the stacks"
+    },
+    {
+      "name": "ship-usv",
+      "path": "/?frozen=1#v=ship&s=usv",
+      "note": "the USV, flagged as unfinished 2026-08-02"
     }
   ]
 }

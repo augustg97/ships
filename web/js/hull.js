@@ -563,8 +563,12 @@ function buildRig(S, group, mats, FINE) {
   const sails = [], spars = [], mastTops = [];
   const maxMastShare = S.masts.length ? Math.max(...S.masts.map(m => m.height)) : 1;
 
-  S.masts.forEach(mk => {
+  S.masts.forEach((mk, mi) => {
     const u = mk.at;
+    /* How much clear water there is abaft this mast before the next one. A fore-and-aft sail
+       has to live inside it — see the boom clamp in the gaff block below. */
+    const nextAt = (S.masts[mi + 1] || {}).at;
+    const gapAft = nextAt !== undefined ? (nextAt - u) * L : (0.5 - u) * L + L * 0.06;
     const x = (u - 0.5) * L + H.rake(u);
     const base = deckAt(u);
     const rakeRad = (mk.rake || 0) * Math.PI / 180;
@@ -850,7 +854,15 @@ function buildRig(S, group, mats, FINE) {
          reef it. Wyoming carried 3,730 tons on six masts with a crew of THIRTEEN, where a
          square-rigged ship of that tonnage wanted thirty or more — and that ratio, not speed,
          is why the American coal and lumber trades went to schooners. */
-      const boomL = lower * 0.62, gaffL = lower * 0.42;
+      /* ── ⚠ A BOOM CANNOT REACH THE MAST BEHIND IT ──────────────────
+         boomL was a fraction of MAST HEIGHT with no reference to what is astern of it, so on
+         a six-masted schooner — Great Eastern, Wyoming, Preussen — every boom ran straight
+         through the next mast, and through any funnel standing in the gap. That is what was
+         cutting the sails into the pipes. The constraint is physical and absolute: a
+         fore-and-aft sail swings about its own mast and must clear the next one, which is
+         precisely why schooner booms get shorter as you add masts. Only the aftermost boom
+         may overhang, and it overhangs the STERN, where there is nothing to hit. */
+      const boomL = Math.min(lower * 0.62, gapAft * 0.86), gaffL = lower * 0.42;
       const peak = 0.62;                                 // the gaff's angle above horizontal
       const footY = base + lower * 0.11;
       const bm2 = new THREE.Mesh(
@@ -942,9 +954,15 @@ function buildRig(S, group, mats, FINE) {
       const shr = ropeMesh(shroudSegs, 0.018 + B * 0.0009, ropeMat);
       if (shr) group.add(tag(shr, 'shroud'));
 
-      /* the ratlines — they are what makes shrouds read as a ladder rather than as stays */
+      /* ── ⚠ RATLINES ARE NOT A UNIVERSAL FITTING ────────────────────────────────────
+         They were rattled down on every set of shrouds regardless of rig, which put a rope
+         LADDER up the mast of a Pacific voyaging canoe, a dhow and a junk. A ratline exists
+         so hands can go aloft to work square sails on yards. A crab claw, a settee, a lug
+         and a gaff are all worked FROM THE DECK — that is the whole point of them, and it is
+         the reason Wyoming carried 3,730 tons with a crew of thirteen. Nobody climbed these
+         rigs, so nobody built a ladder up them. The shrouds stay; they are real. */
       const RAT = 0.3302;                                  // thirteen inches, in metres
-      shroudPts.forEach(side => {
+      if (mk.rig === 'square') shroudPts.forEach(side => {
         if (side.length < 2) return;
         const rise = topY - base;
         for (let h = RAT; h < rise * 0.86; h += RAT) {
@@ -1021,12 +1039,15 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
   for (let i = 0; i <= NW; i++) {
     const u = i / NW;                                  // 0 = one leech, 1 = the other
     const arch = Math.sin(Math.PI * u);
-    const halfW = width / 2 * (1 - hollow * arch * 0.0) ;
-    const xw = (u - 0.5) * width;
+    /* ⚠ `hollow` was declared, documented, and multiplied by 0.0 in both places it was used —
+       wired but unset, the same class as `shellFirst`. The leeches of a square sail ARE cut
+       hollow so the cloth does not curl and chafe on the shrouds, and it is visible: the two
+       side edges bow inward instead of running dead straight. */
+    const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
     const footY = -height + roach * height * arch;     // the roach lifts the middle of the foot
     for (let j = 0; j <= NH; j++) {
       const v = j / NH;                                // 0 = head, 1 = foot
-      const y = footY * v - hollow * height * v * (1 - v) * 0.0;
+      const y = footY * v;                               // (the second `* 0.0` term went with it)
       /* draft: peak 40% aft of the luff, growing from head to foot */
       const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
       const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
@@ -1102,7 +1123,10 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
 
    Draft is a bubble that vanishes on all three edges, because all three are bolt-roped. */
 function makeTriSail(A, B, C, group, belly, leechPull) {
-  const N = 18, pos = [], uvs = [], idx = [];
+  /* 18 could not resolve a corner crease or a scalloped luff — the detail existed in the
+     function and died in the tessellation. 30 costs ~2.8x the triangles on sails that are a
+     small fraction of a ship's geometry. */
+  const N = 30, pos = [], uvs = [], idx = [];
   const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
   const head = Math.hypot(B[0] - A[0], B[1] - A[1]);
   /* ── THE CONCAVE LEECH ─────────────────────────────────────────────────────────────
@@ -1117,16 +1141,54 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
   const pull = leechPull === undefined ? 1.0 : leechPull;
   const ctrl = [A[0] + ((B[0] + C[0]) / 2 - A[0]) * pull,
                 A[1] + ((B[1] + C[1]) / 2 - A[1]) * pull];
+  /* ── ⚠ THE OLD BELLY WAS A DRUM SKIN ───────────────────────────────────────────────
+     16 * sA(1-sA) * t(1-t) is the product of two parabolas, so it fell to ZERO ON EVERY
+     EDGE — a membrane stretched on a rigid frame. A triangular sail is attached on ONE
+     side. The luff is laced to the yard and is straight and hard; the LEECH is free
+     between peak and clew and is held by nothing at all, so it is the edge that moves
+     most. Pinning it flat is why these read as cardboard cut-outs.
+     In this fan parameterisation sA runs 0 at the luff (on the yard) to 1 at the foot,
+     and t runs 0 at the tack out to 1 at the free leech. So: */
+  const DEPTH = 1.15;                                   // rebalances the new profile to the old peak
   for (let i = 0; i <= N; i++) {
-    const sA = i / N;                                   // along the head, tack -> peak
+    const sA = i / N;                                   // luff (on the yard) -> foot
     /* the free edge is a quadratic Bezier from peak to clew, bowed in toward the tack */
     const w = [(1 - sA) * (1 - sA) * B[0] + 2 * sA * (1 - sA) * ctrl[0] + sA * sA * C[0],
                (1 - sA) * (1 - sA) * B[1] + 2 * sA * (1 - sA) * ctrl[1] + sA * sA * C[1]];
     const Hd = w;
+    /* Spanwise: zero on the yard and at the foot, which are the two attached edges, and
+       full between them. This is what keeps the three corners pinned where the spars and
+       the sheet actually hold them. */
+    const span = Math.sin(Math.PI * Math.pow(sA, 0.62));
     for (let j = 0; j <= N; j++) {
       const t = 1 - j / N;                              // leech -> tack
       const P = lerp(A, Hd, t);
-      pos.push(P[0], P[1], 16 * sA * (1 - sA) * t * (1 - t) * head * belly);
+      /* DRAFT IS NOT DEEPEST AT MID-CHORD. On a sail under load it sits about 38–40% aft
+         of the luff, which is where the old symmetric term put it only by accident of
+         being symmetric. Here it is put there on purpose. */
+      const draft = Math.sin(Math.PI * Math.pow(t, 0.72));
+      /* AND THE FREE LEECH SAGS AND TWISTS. It falls away to leeward, and it falls away
+         MORE ALOFT than it does low down, because the wind is stronger up there and there
+         is nothing above the peak holding it. On a lateen's long leech that twist is the
+         most recognisable thing about the sail at sea. */
+      const sag = Math.pow(t, 2.2) * (0.55 + 0.80 * Math.pow(1 - sA, 1.4));
+      const prof = draft * 0.82 + sag * 0.40;
+      let z = prof * span * head * belly * DEPTH;
+      /* Load enters a triangular sail at THREE POINTS and nowhere else, so the cloth
+         creases in fans running inward from the tack, the peak and the clew. */
+      const dA = t, dB = Math.hypot(sA, 1 - t), dC = Math.hypot(1 - sA, 1 - t);
+      const corner = Math.exp(-dA * 3.0) + Math.exp(-dB * 3.4) + Math.exp(-dC * 3.4);
+      z += Math.sin((sA * 7.0 + t * 11.0) * Math.PI) * corner * head * 0.016;
+      /* the luff is laced to the yard at intervals, so it scallops between the lacings */
+      z += Math.sin(t * Math.PI * 9.0) * Math.exp(-sA * 14.0) * head * 0.011;
+      /* a loose foot does the same between tack and clew */
+      z += Math.sin(t * Math.PI * 5.0) * Math.exp(-(1 - sA) * 10.0) * head * 0.009;
+      /* and cloth is never taut everywhere at once */
+      z += Math.sin(sA * 9.0 + t * 6.0) * span * Math.pow(t, 1.5) * head * 0.011;
+      pos.push(P[0], P[1], z);
+      /* uv.x = sA so the panel seams run from the yard down to the foot, which is how a
+         lateen is cut; uv.y = t puts the shader's weathering gradient on the LEECH, the
+         edge that flogs, is handled at every reef, and is genuinely the dirtiest. */
       uvs.push(sA, t);
     }
   }
@@ -1678,17 +1740,32 @@ function buildFunnel(S, group) {
                         : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
     const y = H.sheer(u);
     const g = new THREE.Group();
-    const stack = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.93, r, h, 18), black);
-    stack.position.y = h / 2;
+    /* ── ⚠ THE FLICKER WAS THE FUNNEL'S OWN BASE ────────────────────────────────────
+       The stack ran from y = 0 to y = h with its group sitting exactly on the sheer, so its
+       bottom cap was COPLANAR WITH THE DECK — z-fighting, which is what the shimmer was — and
+       the aft rake then tipped half that disc below the planking and half above, so the
+       fighting ran along a moving line as the camera turned.
+       A funnel does not grow out of flat deck anyway. It rises from a BOILER CASING, the
+       deckhouse over the fiddley that carries the uptakes; the visible stack starts at the
+       top of that. Model the casing, start the stack above it, and there is no coincident
+       surface left to fight. */
+    const caseH = h * 0.085, caseR = r * 1.34;
+    const casing = new THREE.Mesh(
+      new THREE.CylinderGeometry(caseR * 0.94, caseR, caseH, 20), black);
+    casing.position.y = caseH / 2 - caseH * 0.35;       // slightly sunk, so no cap meets the deck
+    g.add(tag(casing, 'funnel', 'Boiler casing',
+              'The deckhouse over the fiddley. The uptakes from the boilers come up inside it.'));
+    const stack = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.93, r, h, 24), black);
+    stack.position.y = caseH * 0.55 + h / 2;
     g.add(stack);
     /* the company band at the head — the one piece of colour on a Victorian hull */
     const bandM = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.955, r * 0.955, h * 0.17, 18), band);
-    bandM.position.y = h * 0.90;
+    bandM.position.y = caseH * 0.55 + h * 0.90;
     g.add(bandM);
     /* the steam pipe alongside, which is what actually roars */
     const pipe = new THREE.Mesh(
       new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 16), black);
-    pipe.position.set(-r * 1.25, h * 0.46, 0);
+    pipe.position.set(-r * 1.25, caseH * 0.55 + h * 0.46, 0);
     g.add(pipe);
     g.position.set((u - 0.5) * S.lwl, y, 0);
     g.rotation.z = -0.085;                       // raked aft, as they almost always were
