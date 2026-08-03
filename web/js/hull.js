@@ -1263,6 +1263,11 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
  * hulls swap 1 and 2, and the vessel's own card says which tradition it belongs to.
  */
 const PARTS = {
+  vent:     { stage: 4, name: 'Cowl ventilator',
+              what: 'Turned into the wind to drive air below decks. Before mechanical '
+                  + 'ventilation, a coal-fired boiler room, a galley and several hundred people '
+                  + 'all breathed through fittings like these — which is why a period deck '
+                  + 'photograph looks crowded with enormous trumpets.' },
   flightdeck: { stage: 4, name: 'Flight deck',
               what: 'The one warship surface whose shape is set by something other than the sea. '
                   + 'It overhangs the hull on both sides, and the landing strip is angled to port '
@@ -1776,10 +1781,70 @@ function buildSuperstructure(S, group) {
     const tier = new THREE.Mesh(new THREE.BoxGeometry(len, dh, wid), white);
     tier.position.set(-L * 0.02 + f * L * 0.03, base + dh * (i + 0.5), 0);
     g.add(tier);
-    /* the windows are the whole reason the deck exists */
+    /* ── ⚠ ONE CONTINUOUS BLACK STRIP IS NOT A ROW OF WINDOWS ─────────────────────────
+       It is a painted stripe, and that is exactly what it read as. A deckhouse is a row of
+       SEPARATE lights with mullions between them, and the mullions are what give the eye a
+       repeat unit and therefore a sense of the ship's SIZE — without them a 211 m deckhouse
+       and a 30 m one look identical. Cut the strip into panes at a fixed real spacing, so
+       the count follows the length instead of the length following the count. */
     const strip = new THREE.Mesh(new THREE.BoxGeometry(len * 0.97, dh * 0.34, wid * 1.006), dark);
     strip.position.set(tier.position.x, base + dh * (i + 0.55), 0);
     g.add(strip);
+    const paneW = B * 0.075;                            // a light is about this wide, always
+    const nPane = Math.max(4, Math.round(len * 0.97 / paneW));
+    for (let k = 1; k < nPane; k++) {
+      const mull = new THREE.Mesh(
+        new THREE.BoxGeometry(paneW * 0.16, dh * 0.36, wid * 1.010), white);
+      mull.position.set(tier.position.x - len * 0.485 + k * (len * 0.97 / nPane),
+                        base + dh * (i + 0.55), 0);
+      g.add(mull);
+    }
+    /* ── AND A RAILING, which is what actually breaks a box ─────────────────────────────
+       A deckhouse roof without one is a slab. With stanchions and three rails it acquires a
+       scale, a top edge that is not a hard line, and something for the light to catch. */
+    const railY = base + dh * (i + 1);
+    for (const side of [-1, 1]) {
+      const nSt = Math.max(6, Math.round(len / (B * 0.22)));
+      const segs = [];
+      for (let k = 0; k <= nSt; k++) {
+        const x = tier.position.x - len / 2 + k * (len / nSt);
+        const st = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), white);
+        st.position.set(x, railY + dh * 0.15, side * wid / 2);
+        g.add(st);
+      }
+      for (const h of [0.10, 0.20, 0.30]) {
+        const rail = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), white);
+        rail.rotation.z = Math.PI / 2;
+        rail.position.set(tier.position.x, railY + dh * h, side * wid / 2);
+        g.add(rail);
+      }
+    }
+  }
+  /* ── COWL VENTILATORS ───────────────────────────────────────────────────────────────
+     The most recognisable fitting on any Victorian steamer's deck, and there is a reason
+     there are so many of them: below decks there is a coal-fired boiler room, a galley and
+     several hundred people, and no mechanical ventilation whatever. Air is caught by turning
+     these cowls into the wind and driven below. They are why a period deck photograph looks
+     crowded with what appear to be enormous trumpets. */
+  if (S.funnels) {
+    const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
+    for (const u of [0.30, 0.38, 0.58, 0.66, 0.74]) {
+      for (const side of [-1, 1]) {
+        const cy = H.sheer(u);
+        const stem = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.017, B * 0.019, B * 0.15, 10), white);
+        stem.position.set((u - 0.5) * L, cy + B * 0.075, side * B * 0.30);
+        g.add(tag(stem, 'vent', 'Cowl ventilator'));
+        const bell = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.038, B * 0.017, B * 0.055, 12, 1, true), cowl);
+        bell.position.set((u - 0.5) * L, cy + B * 0.165, side * B * 0.30);
+        bell.rotation.z = side * 0.55;                  // turned into the wind
+        g.add(tag(bell, 'vent', 'Cowl ventilator',
+          'Turned into the wind to drive air below. With a coal-fired boiler room, a galley and several hundred people under the deck and no mechanical ventilation at all, a ship needed a great many of them.'));
+      }
+    }
   }
   group.add(tag(g, 'superstructure'));
 }
@@ -1903,7 +1968,11 @@ function buildFlightDeck(S, group, mats) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckW = S.flightDeck;                       // full flight-deck beam in metres
-  const grey = new THREE.MeshStandardMaterial({ color: 0x4a4f55, roughness: 0.92, metalness: 0.06 });
+  /* ⚠ 0x4a4f55 at roughness 0.92 still blew out to white under the Shipwright's key light,
+     which is what made the deck read as a blank slab. A flight deck is NON-SKID: a coarse
+     grit-and-epoxy coating, near-black and almost totally matt, because anything glossy up
+     there is lethal to people and aircraft alike. Dark enough to survive a 3.1-intensity key. */
+  const grey = new THREE.MeshStandardMaterial({ color: 0x23272b, roughness: 0.99, metalness: 0.0 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.80, metalness: 0.12 });
   const line = new THREE.MeshStandardMaterial({ color: 0xd6d2c4, roughness: 0.85, metalness: 0.0 });
   const y = H.sheer(0.5) + B * 0.10;
@@ -1915,12 +1984,17 @@ function buildFlightDeck(S, group, mats) {
   group.add(tag(fd, 'flightdeck', 'Flight deck',
     'It overhangs the hull on both sides — which is why a carrier\'s waterline beam and its flight-deck beam are entirely different numbers.'));
 
-  /* the angled landing strip, ~9 degrees to port */
-  const ang = new THREE.Mesh(new THREE.BoxGeometry(L * 0.62, B * 0.008, deckW * 0.20), line);
-  ang.position.set(-L * 0.10, y + B * 0.027, -deckW * 0.10);
-  ang.rotation.y = 0.157;
-  group.add(tag(ang, 'flightdeck', 'Angled landing deck',
-    'Angled about nine degrees to port so an aircraft that misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward. It is what made jet operation possible.'));
+  /* ⚠ The angled deck was drawn as a FILLED white box 15.6 m across, which is a painted
+     runway and not what a carrier looks like from anywhere. The landing area is marked by
+     LINES on the same non-skid as the rest of the deck — its two edges — and the deck inside
+     them is the same colour as the deck outside. */
+  for (const edge of [-1, 1]) {
+    const ang = new THREE.Mesh(new THREE.BoxGeometry(L * 0.62, B * 0.004, deckW * 0.010), line);
+    ang.position.set(-L * 0.10, y + B * 0.025, -deckW * 0.10 + edge * deckW * 0.105);
+    ang.rotation.y = 0.157;
+    group.add(tag(ang, 'flightdeck', 'Angled landing area',
+      'Angled about nine degrees to port so an aircraft that misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward. It is what made jet operation possible.'));
+  }
 
   /* the island: small, and to STARBOARD */
   const isl = new THREE.Group();
@@ -1934,12 +2008,63 @@ function buildFlightDeck(S, group, mats) {
   group.add(tag(isl, 'island', 'The island',
     'Everything that cannot be under the deck: bridge, flying control, uptakes and radar. It is to starboard because a going-around aircraft swings to port.'));
 
-  /* deck-edge lifts, which is where aircraft come up from the hangar */
+  /* ── ⚠ THE LIFTS STOOD PROUD LIKE BOXES ON A TABLE ─────────────────────────────────
+     A deck-edge lift is FLUSH with the deck when it is up — it is a piece of the deck that
+     moves. Sitting it on top made it read as freight. It is now let into the surface and
+     shows as a seam and a yellow-edged outline, which is all you would see from above. */
   for (const u of [0.30, 0.62]) {
-    const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.012, deckW * 0.13), dark);
-    lift.position.set((u - 0.5) * L, y + B * 0.024, deckW * 0.44);
+    const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, deckW * 0.13), dark);
+    lift.position.set((u - 0.5) * L, y + B * 0.0225, deckW * 0.44);
     group.add(tag(lift, 'flightdeck', 'Deck-edge lift',
-      'Aircraft come up from the hangar on the deck edge rather than through the middle, so a lift out of action does not cut the flight deck in half.'));
+      'Aircraft come up from the hangar on the deck edge rather than through the middle, so a lift out of action does not cut the flight deck in half. Flush with the deck when raised — it is a piece of the deck that moves.'));
+  }
+
+  /* ── THE MARKINGS, WHICH ARE MOST OF WHAT A FLIGHT DECK LOOKS LIKE ─────────────────
+     From above, a carrier is a dark deck covered in white and yellow lines, and leaving them
+     off is most of why the surface read as blank. They are not decoration: the landing
+     centreline is what a pilot flies down, and the foul lines mark the ground nobody may
+     stand inside while an aircraft is coming aboard. */
+  const paintW = new THREE.MeshStandardMaterial({ color: 0xd8d6cc, roughness: 0.95 });
+  const paintY = new THREE.MeshStandardMaterial({ color: 0xc8a63a, roughness: 0.95 });
+  const yTop = y + B * 0.024;
+  /* the landing centreline, running down the angled deck */
+  const cl = new THREE.Mesh(new THREE.BoxGeometry(L * 0.55, B * 0.003, deckW * 0.012), paintW);
+  cl.position.set(-L * 0.10, yTop, -deckW * 0.10);
+  cl.rotation.y = 0.157;
+  group.add(tag(cl, 'flightdeck', 'Landing centreline',
+    'The line a pilot flies down on approach. It runs along the angled deck, not the ship.'));
+  /* the foul line, offset to starboard of it */
+  const fl = new THREE.Mesh(new THREE.BoxGeometry(L * 0.52, B * 0.003, deckW * 0.008), paintY);
+  fl.position.set(-L * 0.09, yTop, deckW * 0.02);
+  fl.rotation.y = 0.157;
+  group.add(tag(fl, 'flightdeck', 'Foul line',
+    'Nothing and nobody may be inside this line while an aircraft is coming aboard.'));
+
+  /* ── ARRESTOR WIRES ────────────────────────────────────────────────────────────────
+     Four of them, athwart the angled deck, a few metres apart. The aircraft is stopped by a
+     hook catching one of these and paying it out against hydraulic rams below decks — from
+     about 240 km/h to nothing in roughly 100 m. */
+  for (let w = 0; w < 4; w++) {
+    const wire = new THREE.Mesh(
+      new THREE.CylinderGeometry(B * 0.0025, B * 0.0025, deckW * 0.24, 5),
+      new THREE.MeshStandardMaterial({ color: 0x1a1d20, roughness: 0.6, metalness: 0.5 }));
+    wire.rotation.x = Math.PI / 2;
+    wire.rotation.y = 0.157;
+    wire.position.set(-L * 0.26 + w * L * 0.035, yTop + B * 0.002, -deckW * 0.14);
+    group.add(tag(wire, 'flightdeck', 'Arrestor wire',
+      'A hook catches one of four and pays it out against hydraulic rams below decks: about 240 km/h to a stop in roughly a hundred metres.'));
+  }
+
+  /* ── CATAPULT TRACKS ───────────────────────────────────────────────────────────────
+     Two forward and one on the waist. On this class they are ELECTROMAGNETIC rather than
+     steam, which is the whole reason the ship exists as a new design: a linear motor can be
+     tuned to the aircraft, so it will launch something light without tearing it apart. */
+  for (const c of [[-0.30, -deckW * 0.22], [-0.30, deckW * 0.10], [-0.06, -deckW * 0.26]]) {
+    const cat = new THREE.Mesh(new THREE.BoxGeometry(L * 0.28, B * 0.003, deckW * 0.020), paintW);
+    cat.position.set(c[0] * L, yTop, c[1]);
+    if (c[0] > -0.2) cat.rotation.y = 0.157;
+    group.add(tag(cat, 'flightdeck', 'Catapult track',
+      'Electromagnetic on this class rather than steam. A linear motor can be tuned to the aircraft, so it will throw something light without tearing it apart.'));
   }
 }
 
@@ -2553,7 +2678,12 @@ function buildShip(S, opts) {
      Shipwright's model is worth building separately from the globe's token */
   if (FINE) buildFittings(S, group, mats);
   if (FINE) buildFunnel(S, group);
-  if (FINE) buildSuperstructure(S, group);
+  /* ⚠ A CARRIER HAS NO DECKHOUSE. The generic superstructure builder was stacking three
+     white passenger tiers on a ship whose entire design premise is that the deck stays
+     CLEAR — so the flight deck and a liner's deckhouse were occupying the same space, and
+     the white box winning the depth test was read as "the flight deck blows out white".
+     It was never the flight deck. A carrier's only above-deck structure is the island. */
+  if (FINE && !S.flightDeck) buildSuperstructure(S, group);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   if (FINE) buildOars(S, group, mats.woodPale);
