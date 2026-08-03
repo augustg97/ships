@@ -1913,7 +1913,8 @@ function buildFunnel(S, group) {
     const bandTop = r * 0.93 * 1.035, bandBot = r * 0.945 * 1.035;
     const bandM = new THREE.Mesh(new THREE.CylinderGeometry(bandTop, bandBot, h * 0.17, 24), band);
     bandM.position.y = caseH * 0.55 + h * 0.90;
-    g.add(bandM);
+    g.add(tag(bandM, 'funnel', 'Company band',
+      'Funnel colours were a shipping line\'s trademark and were registered like one. At sea a hull is a silhouette long before a name can be read, so the band at the head of the funnel is how a ship was identified hull-down on the horizon.'));
     /* the steam pipe alongside, which is what actually roars */
     const pipe = new THREE.Mesh(
       new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 16), black);
@@ -2497,6 +2498,18 @@ function buildPaddles(S, group, mats) {
   const L = S.lwl, B = S.beam;
   const u = S.paddleAt || 0.52;
   const p = surfacePoint(S, H, u, 0.80);
+  /* ── ⚠ THE AXLE WAS UNDER THE WATER ────────────────────────────────────────────────
+     The wheel was hung at 0.55 of a point taken 80% up the hull side, which put its centre
+     about a metre BELOW the waterline — so a 17 m wheel was submerged by more than a whole
+     radius, and its housing with it. A paddle wheel does not work that way and could not:
+     the axle rides ABOVE the water and only the lowest floats are ever immersed, dipping
+     something like a sixth of the diameter. Any deeper and the wheel is dragging its own
+     upper floats backwards through the sea, which is exactly the loss that made deep
+     immersion the classic fault of an overloaded paddle steamer.
+     Derived from stated quantities — the waterline is the sheer less the freeboard — rather
+     than from a fraction that happened to look right. */
+  const waterY = H.sheer(u) - S.freeboard;
+  const axleY = waterY + D * 0.35;
   const iron = mats.iron || mats.woodDark;
   for (const sgn of [-1, 1]) {
     const g = new THREE.Group();
@@ -2519,12 +2532,12 @@ function buildPaddles(S, group, mats) {
       g.add(rim);
     }
     g.rotation.y = Math.PI / 2;
-    g.position.set(p[0], p[1] * 0.55, sgn * (p[2] + B * 0.16));
+    g.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
     group.add(tag(g, 'paddle'));
     /* the sponson: the platform carrying the wheel's weight out from the hull side */
     const box = new THREE.Mesh(
       new THREE.BoxGeometry(D * 0.62, B * 0.16, B * 0.34), iron);
-    box.position.set(p[0], p[1] * 0.95, sgn * (p[2] + B * 0.12));
+    box.position.set(p[0], axleY + D * 0.14, sgn * (p[2] + B * 0.12));
     group.add(tag(box, 'paddle', 'Sponson',
       'The platform bracketed out from the hull side that carries the wheel and its shaft bearings.'));
 
@@ -2553,7 +2566,7 @@ function buildPaddles(S, group, mats) {
     bg.setAttribute('position', new THREE.Float32BufferAttribute(bp, 3));
     bg.setIndex(bi); bg.computeVertexNormals();
     const bm = new THREE.Mesh(bg, mats.woodPale || iron);
-    bm.position.set(p[0], p[1] * 0.55, sgn * (p[2] + B * 0.16));
+    bm.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
     group.add(tag(bm, 'paddle', 'Paddle box',
       'The housing over the top of the wheel. A 17 m wheel throws a sheet of water and coal dirt that would sweep the deck; the box contains it. Being the largest thing on the ship\'s side, it is also what owners decorated.'));
     /* the vent slats along its face, which is how a real one is built and lit */
@@ -2561,7 +2574,7 @@ function buildPaddles(S, group, mats) {
       const a = Math.PI * (i / 7);
       const sl = new THREE.Mesh(new THREE.BoxGeometry(D * 0.035, B * 0.012, B * 0.40), iron);
       sl.position.set(p[0] + Math.cos(a) * boxR * 0.94,
-                      p[1] * 0.55 + Math.sin(a) * boxR * 0.81,
+                      axleY + Math.sin(a) * boxR * 0.81,
                       sgn * (p[2] + B * 0.16));
       sl.rotation.z = a;
       group.add(tag(sl, 'paddle', 'Paddle-box vent',
