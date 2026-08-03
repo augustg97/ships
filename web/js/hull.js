@@ -1263,6 +1263,18 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
  * hulls swap 1 and 2, and the vessel's own card says which tradition it belongs to.
  */
 const PARTS = {
+  flightdeck: { stage: 4, name: 'Flight deck',
+              what: 'The one warship surface whose shape is set by something other than the sea. '
+                  + 'It overhangs the hull on both sides, and the landing strip is angled to port '
+                  + 'so a pilot who misses the wires flies off and goes round again.' },
+  island:   { stage: 4, name: 'The island',
+              what: 'Everything that cannot go under the flight deck: bridge, flying control, '
+                  + 'uptakes and radar. Small, and to starboard, because a going-around aircraft '
+                  + 'swings to port.' },
+  turret:   { stage: 4, name: 'Main battery',
+              what: 'The turret revolves on a barbette — an armoured cylinder running down to the '
+                  + 'magazine. Mounted on the centreline and superfiring, one raised behind '
+                  + 'another, so both can bear ahead.' },
   /* ── the uncrewed vessel ─────────────────────────────────────────────────────────────
      Its parts have no older equivalent, which is the point of them: everything here exists
      because there is nobody aboard to do the job by hand. */
@@ -1872,6 +1884,111 @@ function buildFunnel(S, group) {
  * windshift, for months, with nobody aboard. That is the whole reason the type exists, and it
  * is the one part that must be drawn if the vessel is to make any sense.
  */
+/* ── THE FLIGHT DECK ────────────────────────────────────────────────────────────────────
+ * A carrier is the one warship whose shape is set by something that is not the sea. Everything
+ * about it follows from needing to land an aeroplane on a moving ship.
+ *
+ * The ANGLED DECK is the whole idea, and it is a British one (Campbell and Cambell, 1951).
+ * Before it, the landing area ran straight down the ship and aircraft already parked forward
+ * were protected by a wire crash barrier; miss the wires and you hit it. Angle the landing
+ * strip a few degrees to port and a pilot who misses simply flies off the bow and goes round
+ * again. That one change is why jets could operate from carriers at all.
+ *
+ * The ISLAND is small and to STARBOARD because the deck must be clear, and to starboard
+ * because a piston engine's torque pulls a going-around aircraft to port — so you put the
+ * obstacle on the side it is least likely to swing toward.
+ */
+function buildFlightDeck(S, group, mats) {
+  if (!S.flightDeck) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const deckW = S.flightDeck;                       // full flight-deck beam in metres
+  const grey = new THREE.MeshStandardMaterial({ color: 0x4a4f55, roughness: 0.92, metalness: 0.06 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.80, metalness: 0.12 });
+  const line = new THREE.MeshStandardMaterial({ color: 0xd6d2c4, roughness: 0.85, metalness: 0.0 });
+  const y = H.sheer(0.5) + B * 0.10;
+
+  /* the deck itself: it OVERHANGS the hull on both sides, which is why a carrier's waterline
+     beam and its flight-deck beam are two very different numbers */
+  const fd = new THREE.Mesh(new THREE.BoxGeometry(L * 1.02, B * 0.045, deckW), grey);
+  fd.position.set(0, y, 0);
+  group.add(tag(fd, 'flightdeck', 'Flight deck',
+    'It overhangs the hull on both sides — which is why a carrier\'s waterline beam and its flight-deck beam are entirely different numbers.'));
+
+  /* the angled landing strip, ~9 degrees to port */
+  const ang = new THREE.Mesh(new THREE.BoxGeometry(L * 0.62, B * 0.008, deckW * 0.20), line);
+  ang.position.set(-L * 0.10, y + B * 0.027, -deckW * 0.10);
+  ang.rotation.y = 0.157;
+  group.add(tag(ang, 'flightdeck', 'Angled landing deck',
+    'Angled about nine degrees to port so an aircraft that misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward. It is what made jet operation possible.'));
+
+  /* the island: small, and to STARBOARD */
+  const isl = new THREE.Group();
+  const box = new THREE.Mesh(new THREE.BoxGeometry(L * 0.10, B * 0.28, deckW * 0.10), dark);
+  box.position.y = B * 0.14;
+  isl.add(box);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.006, B * 0.010, B * 0.30, 8), dark);
+  mast.position.y = B * 0.42;
+  isl.add(mast);
+  isl.position.set(L * 0.06, y + B * 0.022, deckW * 0.40);
+  group.add(tag(isl, 'island', 'The island',
+    'Everything that cannot be under the deck: bridge, flying control, uptakes and radar. It is to starboard because a going-around aircraft swings to port.'));
+
+  /* deck-edge lifts, which is where aircraft come up from the hangar */
+  for (const u of [0.30, 0.62]) {
+    const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.012, deckW * 0.13), dark);
+    lift.position.set((u - 0.5) * L, y + B * 0.024, deckW * 0.44);
+    group.add(tag(lift, 'flightdeck', 'Deck-edge lift',
+      'Aircraft come up from the hangar on the deck edge rather than through the middle, so a lift out of action does not cut the flight deck in half.'));
+  }
+}
+
+/* ── THE MAIN BATTERY ───────────────────────────────────────────────────────────────────
+ * A battleship's turrets are not bolted to the deck. Each sits on a BARBETTE — an armoured
+ * cylinder running down through the ship to the magazine — and the turret revolves on top of
+ * it. The barbette is the real structure; the turret is the part that turns.
+ *
+ * They are mounted on the centreline and SUPERFIRING, one raised behind another, so both can
+ * fire ahead. That arrangement is the reason a battleship has the profile it does.
+ */
+function buildTurrets(S, group, mats) {
+  const n = S.turrets || 0;
+  if (!n) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const cal = S.calibre || 0.40;                   // barrel calibre in metres
+  const barrels = S.barrels || 3;
+  const steel = new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 });
+  /* two forward superfiring, the rest aft — the standard arrangement */
+  const stations = n === 3 ? [0.24, 0.34, 0.78] : [0.22, 0.32, 0.70, 0.80].slice(0, n);
+  stations.forEach((u, i) => {
+    const base = H.sheer(u);
+    const raised = (i === 1) ? B * 0.085 : 0;       // the superfiring one stands higher
+    const R = B * 0.20;
+    const g = new THREE.Group();
+    const barb = new THREE.Mesh(new THREE.CylinderGeometry(R * 1.02, R * 1.02, B * 0.11, 20), dark);
+    barb.position.y = B * 0.055;
+    g.add(tag(barb, 'turret', 'Barbette',
+      'The armoured cylinder running down to the magazine. The turret revolves on top of it; this is the part that actually carries the load and the armour.'));
+    const tur = new THREE.Mesh(new THREE.CylinderGeometry(R, R * 1.05, B * 0.12, 20), steel);
+    tur.position.y = B * 0.17;
+    g.add(tag(tur, 'turret', 'Turret',
+      'Gunhouse for the main battery. Its face carries the heaviest armour on the ship, because that is what an enemy shell is aimed at.'));
+    for (let b = 0; b < barrels; b++) {
+      const off = (b - (barrels - 1) / 2) * cal * 2.6;
+      const gun = new THREE.Mesh(new THREE.CylinderGeometry(cal * 0.52, cal * 0.62, R * 4.4, 12), dark);
+      gun.rotation.z = Math.PI / 2;
+      gun.position.set(R * 2.0 * (u < 0.5 ? 1 : -1), B * 0.185, off);
+      g.add(tag(gun, 'turret', 'Main gun',
+        'The calibre is the ship. Everything else — the armour, the beam, the displacement — is arranged around carrying these and surviving their equals.'));
+    }
+    g.position.set((u - 0.5) * L, base + raised, 0);
+    if (u > 0.5) g.rotation.y = Math.PI;
+    group.add(tag(g, 'turret'));
+  });
+}
+
 function buildWingSail(S, group, mats) {
   if (!S.wingSail) return;
   const H = hullSurface(S);
@@ -2406,6 +2523,8 @@ function buildShip(S, opts) {
   if (FINE && S.transom) buildStern(S, group, mats);
   if (FINE && S.containers) buildContainers(S, group);
   if (S.wingSail) buildWingSail(S, group, mats);
+  if (S.flightDeck) buildFlightDeck(S, group, mats);
+  if (S.turrets) buildTurrets(S, group, mats);
 
   /* ── A DOUBLE CANOE IS TWO HULLS ───────────────────────────────────────────────────
      The card has always said "Austronesian double hull" and the model drew one hull, which is

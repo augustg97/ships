@@ -115,28 +115,42 @@ function animateOars(root, t) {
   root.traverse(o => {
     const d = o.userData && o.userData.oar;
     if (!d) return;
-    /* the banks are staggered by a small fraction of a stroke */
-    const ph = ((t / period) + d.bank * 0.055) % 1.0;
-    const DRIVE = 0.36;                                // the blade is in the water this long
-    let sweep, lift, feather;
+    const ph = ((t / period) + d.bank * 0.075) % 1.0;
+    const DRIVE = 0.36;
+
+    /* ── ⚠ THE BLADES NEVER WENT IN THE WATER ────────────────────────────────────────
+       The first version moved the oars between 19 and 9 degrees below horizontal — so they
+       stood out from the hull almost flat, all 170 of them, splayed like a fan, and not one
+       ever touched the sea. An oar that never enters the water is not rowing; it is waving.
+
+       These are the angles the geometry actually needs. The looms pivot at the thole, well
+       above the waterline, so the blade only reaches the sea at a real angle of depression:
+       BURIED through the drive, and lifted clear — but only just clear, because lifting more
+       than you must is wasted effort and a trireme's oarsmen had 170 strokes a minute between
+       them to think about. */
+    const DOWN_IN = -0.44;      // buried: about 25 degrees below horizontal
+    const DOWN_OUT = -0.10;     // recovering: blade just skimming clear
+    let sweep, tilt, feather;
     if (ph < DRIVE) {
-      /* the drive: blade buried, hauling aft, fast and even */
+      /* the drive. Blade buried, hauling aft, and the pull is EVEN — a crew that snatches
+         loses the blade. Slightly deeper at mid-stroke where the load is greatest. */
       const k = ph / DRIVE;
-      sweep = Math.cos(Math.PI * k);                   // +1 forward at the catch to -1 at the finish
-      lift = -1.0;                                     // in the water
-      feather = 0.0;
+      sweep = Math.cos(Math.PI * k);
+      tilt = DOWN_IN - 0.03 * Math.sin(Math.PI * k);
+      feather = 0.0;                                  // square in the water, or it slips
     } else {
-      /* the recovery: out of the water, swinging forward, feathered, and slower */
+      /* the recovery. Out, forward, and FEATHERED — turned flat so it does not catch the
+         wind or clip a wave top. Eased, because a body swinging a 9 m loom cannot jerk. */
       const k = (ph - DRIVE) / (1 - DRIVE);
-      const e = 0.5 - 0.5 * Math.cos(Math.PI * k);     // eased, because a body cannot jerk
+      const e = 0.5 - 0.5 * Math.cos(Math.PI * k);
       sweep = -1.0 + 2.0 * e;
-      lift = -1.0 + 1.55 * Math.sin(Math.PI * k);      // rises clear and settles back
-      feather = Math.sin(Math.PI * k);
+      tilt = DOWN_IN + (DOWN_OUT - DOWN_IN) * Math.sin(Math.PI * k);
+      /* feather in fast after the blade leaves the water, square up again before the catch */
+      feather = Math.sin(Math.PI * Math.pow(k, 0.75));
     }
-    o.rotation.y = d.restY + d.sgn * sweep * 0.30;
-    o.rotation.z = d.restZ + lift * 0.115 + 0.115;
-    /* feathering turns the loom about its own length, so the blade lies flat in the air */
-    o.rotation.x = feather * 1.25 * d.sgn;
+    o.rotation.y = d.restY + d.sgn * sweep * 0.42;     // 24 degrees of arc either side
+    o.rotation.z = tilt;
+    o.rotation.x = feather * 1.35 * d.sgn;
   });
 }
 

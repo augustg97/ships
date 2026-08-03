@@ -461,6 +461,26 @@ HULLS = {
               stemRake=0.03, sternRake=0.01, strakes=12, iron=True, topside="#8d9498", masts=[],
               wingSail=0.62, wingAt=0.46),
 
+  "dreadnought": hull(build="steel", loa=160.6, lwl=155.0, beam=25.0, draught=8.1, freeboard=7.4, cm=0.94,
+              wlPower=4.0, stemFineness=0.05, sternFineness=0.26, transom=0.22,
+              forefoot=0.20, run=0.26, riseF=0.24, riseA=0.16,
+              sheerBow=1.4, sheerStern=0.5, tumblehome=0.02, strakes=20, iron=True,
+              topside="#5a6068", masts=[dict(at=0.40, height=0.42, rig="none", rake=0, shrouds=0)],
+              funnels=2, turrets=3, barrels=2, calibre=0.305, decks=2),
+
+  "yamato": hull(build="steel", loa=263.0, lwl=256.0, beam=38.9, draught=11.0, freeboard=9.6, cm=0.96,
+              wlPower=4.2, stemFineness=0.04, sternFineness=0.24, transom=0.24,
+              forefoot=0.18, run=0.24, riseF=0.22, riseA=0.14,
+              sheerBow=1.6, sheerStern=0.4, tumblehome=0.03, strakes=22, iron=True,
+              topside="#575d64", masts=[dict(at=0.46, height=0.50, rig="none", rake=0, shrouds=0)],
+              funnels=1, turrets=3, barrels=3, calibre=0.460, decks=2),
+
+  "carrier": hull(build="steel", loa=337.0, lwl=317.0, beam=41.0, draught=12.0, freeboard=11.5, cm=0.97,
+              wlPower=4.4, stemFineness=0.05, sternFineness=0.32, transom=0.34,
+              forefoot=0.16, run=0.22, riseF=0.20, riseA=0.12,
+              sheerBow=0.8, sheerStern=0.0, tumblehome=0.0, strakes=24, iron=True,
+              topside="#4e545b", masts=[], flightDeck=78.0, decks=3),
+
   "container": hull(build="steel", containers=True, loa=399.9, lwl=383.0, beam=61.3, draught=16.0, freeboard=30.0, cm=0.98,
               wlPower=4.6, stemFineness=0.06, sternFineness=0.30,
               forefoot=0.18, run=0.22, riseF=0.20, riseA=0.14,
@@ -1008,6 +1028,68 @@ vessel(id="steamer", name="Ocean steamer", sub="iron hull, screw propeller", rig
             "Compound expansion (1854), triple expansion (A. C. Kirk, 1881), then the turbine "
             "and oil firing. Steam overtook sail on the British register around 1883.",
        cite="Griffiths, *Steam at Sea*; Kirk on triple expansion, 1881.")
+
+vessel(id="dreadnought", name="HMS Dreadnought", sub="the ship that made every other obsolete",
+       rig="steam", era=[1906, 1920], from_=1906, to=1925, region="worldwide",
+       rows=[["Dimensions", "160.6 m × 25.0 m × 8.1 m draught"],
+             ["Displacement", "18,120 t normal; 21,060 t full"],
+             ["Speed", "21 kn — turbines, the first capital ship to have them"],
+             ["Main battery", "ten 12-inch guns in five twin turrets"],
+             ["Crew", "about 700"],
+             ["Built in", "one year and one day, Portsmouth, 1905–06"]],
+       crew=700, attestation="attested", confidence="good",
+       text="A battleship carrying a uniform main battery of ten 12-inch guns and driven by steam "
+            "turbines, completed at Portsmouth in a year and a day. Both features were already "
+            "understood separately; putting them in one hull made every existing battleship in "
+            "every navy second-rate at a stroke, and the type took her name.\n\n"
+            "The all-big-gun battery follows from gunnery rather than from ambition. Fire control "
+            "works by observing the fall of shot and correcting, and that is only possible if "
+            "every splash comes from a gun of the same calibre — a mixed battery gives you two "
+            "sets of splashes and no way to tell which is which at the ranges the guns could "
+            "already reach.",
+       cite="Wikipedia, *HMS Dreadnought (1906)*; Wikipedia, *Gerald R. Ford-class* (accessed 2026-08-03).")
+
+vessel(id="yamato", name="Yamato", sub="大和 — the largest guns ever put to sea",
+       rig="steam", era=[1941, 1945], from_=1940, to=1945, region="the Pacific",
+       rows=[["Dimensions", "263.0 m × 38.9 m × 11.0 m draught"],
+             ["Displacement", "65,027 t standard; 71,659 t full"],
+             ["Main battery", "nine 46 cm (18.1 in) guns — three triple turrets"],
+             ["Armour", "belt 410 mm · deck 200–226 mm · turret face **650 mm**"],
+             ["Machinery", "150,000 shp, four shafts, 27 kn"],
+             ["Crew", "3,233"],
+             ["Launched / sunk", "8 August 1940 / 7 April 1945"]],
+       crew=3233, attestation="attested", confidence="good",
+       text="The heaviest battleship ever built, carrying the largest naval guns ever mounted: "
+            "nine 46 cm rifles in three triple turrets, behind a belt of 410 mm and a turret face "
+            "of 650 mm.\n\n"
+            "She was sunk on 7 April 1945 by carrier aircraft, having barely fired those guns at "
+            "an enemy ship. The armour was proof against the shells it was designed against, and "
+            "the attack came from above.",
+       cite="Wikipedia, *Japanese battleship Yamato* (accessed 2026-08-03).")
+
+vessel(id="carrier", name="Supercarrier", sub="Gerald R. Ford class · the deck is the weapon",
+       rig="motor", era=[2017, 2026], from_=2017, to=2026, region="worldwide",
+       rows=[["Length overall", "333–337 m"],
+             ["Beam", "41 m at the waterline — but **78 m across the flight deck**"],
+             ["Draught", "12 m"], ["Displacement", "about 100,000 t full load"],
+             ["Machinery", "two A1B reactors, four shafts, in excess of 30 kn"],
+             ["Ship's company", "508 officers and 3,789 enlisted"],
+             ["Air wing", "75+ aircraft"],
+             ["Commissioned", "USS *Gerald R. Ford*, 22 July 2017"]],
+       crew=4297, attestation="attested", confidence="good",
+       text="A nuclear-powered aircraft carrier of about 100,000 tons. Its waterline beam is 41 m "
+            "and its flight deck is 78 m across, because the deck overhangs the hull on both "
+            "sides — the two numbers describe different things and neither alone describes the "
+            "ship.\n\n"
+            "The angled deck is the feature everything else depends on. A landing strip set a few "
+            "degrees to port means a pilot who misses the arrestor wires flies off the bow and "
+            "goes round again, instead of into the aircraft parked forward behind a crash "
+            "barrier. The island is small and to starboard so the deck stays clear, and to "
+            "starboard specifically because an aircraft going around swings to port.\n\n"
+            "Two reactors remove the constraint that shaped every warship before: a hull that no "
+            "longer carries its own fuel can spend that volume and that range on aircraft "
+            "instead.",
+       cite="Wikipedia, *Gerald R. Ford-class aircraft carrier* (accessed 2026-08-03).")
 
 vessel(id="container", name="Container ship", sub="from Ideal X to 24,000 TEU", rig="motor",
        era=[1956, 2026], from_=1956, to=2026, region="worldwide",
