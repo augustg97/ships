@@ -101,6 +101,11 @@
       "name": "descent-high",
       "note": "Nine kilometres: just ABOVE the handover, so the token side of the seam is watched too. A frame on only one side of a boundary cannot see the boundary move.",
       "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000"
+    },
+    {
+      "name": "descent-coast",
+      "path": "/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260",
+      "note": "The near-field GROUND: the Strait of Gibraltar at 260 m, looking south at the Moroccan coast. The globe sphere is 192x128 \u2014 a 209 km facet \u2014 so at this eye height the backdrop is a flat plate with a polygon edge for a horizon and can never show a coast. This frame watches the displaced land patch that can."
     }
   ]
 }

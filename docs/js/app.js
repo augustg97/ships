@@ -1395,10 +1395,13 @@ function frame(now) {
     renderer.clear(true, true, true);
 
     NP.sea.visible = false;
+    const landWas = NP.land ? NP.land.visible : false;
+    if (NP.land) NP.land.visible = false;
     if (NP.fleetGroup) NP.fleetGroup.visible = false;
     renderer.render(NP.scene, NP.cam);                 // 1. the sky, filling the frame
 
     NP.sea.visible = true;
+    if (NP.land) NP.land.visible = landWas;
     if (NP.fleetGroup) NP.fleetGroup.visible = true;
     NP.sky.visible = false;
     setCameraDepthRange();

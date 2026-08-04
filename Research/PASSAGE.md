@@ -349,3 +349,37 @@ near field off and looking at the backdrop alone.
 **This is the blocker for "see the landscape of whatever region the ship is in", and it is not a
 shading problem.** It needs adaptive tessellation near the camera — a real piece of work, not a
 constant. Until it exists the followed view is honest open ocean and the note above says so.
+
+---
+
+# The ground, on the same terms as the water  (2026-08-04, round 15)
+
+The blocker was geometric: the globe sphere is 192 × 128, a facet is **209 km**, and at a 195 m
+eye height the horizon is 50 km — **a quarter of one triangle**. The planet renders as a flat
+plate with a polygon edge for a horizon, and no shading puts a coast into geometry that is not
+there.
+
+So the ground gets what the ocean already had: a radial disc anchored under the camera, in the
+metre-scale scene, **displaced by the real elevation field**. What makes a coast a coast is not
+its colour but its SKYLINE — a headland is a shape against the sky.
+
+- the land discards over water and the water discards over land, both from the same number, so
+  they tile exactly and there is no seam to hide
+- the palette is the globe's own land palette, so the near ground and the backdrop beyond it are
+  the same country
+- normals from the elevation gradient in metres, so a ridge has a light and a dark side
+- distance haze, so the near ground joins the backdrop rather than ending at it
+
+**Verified** across the Strait of Gibraltar at 260 m: the Moroccan coast rises with a ragged
+shoreline and a real skyline. New baseline `descent-coast` watches it.
+
+## ⚠ And the first test location was the fault, not the code
+
+Following a carrack off Cádiz, the coast was still invisible after the land mesh went in. The
+elevation lookup was correct all along — it read −19 m at 1 km, −1 m at 9 km and **+14 m at
+25 km**. That is the Guadalquivir marshland: genuinely flat. Fourteen metres of land twenty-five
+kilometres away, seen from a 195 m eye, is a hairline.
+
+**Before concluding a feature is broken, check that the place you are testing it has the thing
+you are looking for.** Three rounds of this project have now been spent on measurements that
+were correct about the wrong location.

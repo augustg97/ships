@@ -23,9 +23,18 @@
  * So there are two scenes and two cameras, rendered one after the other into the same frame:
  *
  *   1. THE BACKDROP — the globe itself, at planetary scale, with its camera placed at the
- *      exact equivalent position and orientation. This supplies the horizon, the distant water
- *      and any coast within sight, all computed by the same shader that draws the globe from
- *      orbit. It is not a painted sky; it is the Earth, seen from 40 m up.
+ *      exact equivalent position and orientation.
+ *
+ *      ⚠ THIS PARAGRAPH USED TO CLAIM THE BACKDROP SUPPLIED "the horizon, the distant water and
+ *      any coast within sight", AND IT SUPPLIED NOTHING. renderer.autoClear is true by default,
+ *      so the near pass cleared the COLOUR buffer as well as the depth and threw the Earth away
+ *      every frame. The composite is fixed — sky, then Earth, then near water, with only depth
+ *      cleared between them — but the backdrop still cannot show a coast from sea level, and
+ *      the reason is geometric rather than a bug: the globe sphere is 192 x 128, so a facet is
+ *      209 km, and at a 195 m eye height the horizon is 50 km away — a QUARTER OF ONE TRIANGLE.
+ *      Below about 60 km the planet is a flat plate with a straight polygon edge for a horizon.
+ *      Ground-level terrain needs adaptive tessellation near the camera; until that exists this
+ *      view is honest open ocean and nothing more.
  *   2. THE FOREGROUND — a metre-scale scene holding the sea patch and the ship, drawn after a
  *      depth clear so it always occupies the near field.
  *
@@ -135,6 +144,23 @@ function psgInit(R, globeCamera) {
   PSG.sea.rotation.x = -Math.PI / 2;
   PSG.sea.receiveShadow = true;
   PSG.scene.add(PSG.sea);
+
+  /* ── THE GROUND, ON THE SAME TERMS AS THE WATER ────────────────────────────────────────
+     A second disc, the same shape, displaced by the real elevation field. The water discards
+     over land and the ground discards over water, both from the same number, so they tile
+     exactly and there is no seam to hide. See LAND_VERT for why the globe sphere cannot do
+     this itself: at a 195 m eye height the camera is inside a quarter of one 209 km facet. */
+  const lg = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
+  PSG.land = new THREE.Mesh(lg, new THREE.ShaderMaterial({
+    vertexShader: SHADERS['LAND_VERT.vert'], fragmentShader: SHADERS['LAND_FRAG.frag'],
+    uniforms: {
+      uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
+      uSeaLevel: { value: 0 }, uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
+      uCam: { value: new THREE.Vector3() }, uMPP: { value: 10 },
+    },
+  }));
+  PSG.land.rotation.x = -Math.PI / 2;
+  PSG.scene.add(PSG.land);
 }
 
 /* A disc whose rings grow geometrically from r0 to r1: constant angular resolution as seen
@@ -274,6 +300,9 @@ function psgClose() {
    keeps paying for. */
 function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
   if (!PSG.on || !PSG.ship) return;
+  /* the Shipwright-style Passage has no globe behind it and no depth texture bound, so the
+     ground has nothing to sample and must not draw */
+  if (PSG.land) PSG.land.visible = false;
   PSG.lon = lon; PSG.lat = lat; PSG.hdg = hdgRad; PSG.u = u;
 
   const fr = psgFrame(lon, lat, R);
@@ -399,6 +428,7 @@ function psgDescentActive(altM) { return altM < DESCENT_M; }
 function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
   psgInit(R, globeCamera);
   PSG.mode = 'descent';
+  if (PSG.land) PSG.land.visible = true;
   const fr = psgFrame(lon, lat, R);
   PSG.anchor.position.copy(fr.pos);
   PSG.anchor.quaternion.setFromRotationMatrix(
@@ -451,6 +481,15 @@ function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
     PSG.sea.material.uniforms.uHasDepth.value = 1;
   }
   PSG.sea.material.uniforms.uAnchor.value.set(lon * Math.PI / 180, lat * Math.PI / 180);
+  if (PSG.land && gm) {
+    const lu = PSG.land.material.uniforms;
+    lu.uDepth.value = gm.uDepth.value;
+    lu.uSeaLevel.value = gm.uSeaLevel.value;
+    lu.uAnchor.value.copy(PSG.sea.material.uniforms.uAnchor.value);
+    lu.uSun.value.copy(lsun);
+    lu.uCam.value.copy(PSG.cam.position);
+    lu.uMPP.value = gm.uMPP.value;
+  }
   SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
 }
 
