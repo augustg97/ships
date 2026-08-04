@@ -285,6 +285,39 @@ function vecToLonLat(v) {
            lat: Math.asin(Math.max(-1, Math.min(1, n.y))) * 180 / Math.PI };
 }
 
+/* ── ⚠ STANDING A SHIP UP ON A SPHERE, AND THE CROSS PRODUCT THAT FLUNG HER INTO ORBIT ──
+ *
+ * Every object placed on the globe needs the same thing: a frame with Y along the radius and
+ * Z along the way it is pointing. Written by hand it is one line, and I wrote that line three
+ * times and got the handedness wrong in two of them:
+ *
+ *     makeBasis(fwd.cross(up), up, fwd)     // era fleet   — det = -1
+ *     makeBasis(right.cross(up), up, right) // voyage wake — det = -1
+ *     makeBasis(up.cross(fwd), up, fwd)     // campaign    — det = +1, and correct all along
+ *
+ * A left-handed basis is a REFLECTION, not a rotation, and `Quaternion.setFromRotationMatrix`
+ * does not check: it returns a perfectly valid unit quaternion that is not the transform you
+ * asked for. The group's Y came out a hundred degrees off the radius. A ship at local (0,0,0)
+ * still landed in the right place — which is why single hulls looked fine — but every consort
+ * in a convoy had its tangent-plane offset rotated into the RADIAL direction, and the fleet
+ * scattered to +1,250 km, +822 km and -646 km. Ships in orbit, and ships inside the Earth.
+ *
+ * Note the sign that falls out: in a Y-up right-handed frame with Z along the course, X is to
+ * PORT, not to starboard. That is not a choice, it is what X x Y = Z requires, and calling the
+ * variable `right` is exactly how the wrong sign got written twice.
+ *
+ * There is now one implementation. `fwd` need not be perpendicular to `up` — it is projected
+ * into the tangent plane here, so callers cannot forget to.
+ */
+function tangentBasis(up, fwd) {
+  const u = up.clone().normalize();
+  const f = fwd.clone().addScaledVector(u, -fwd.dot(u));
+  if (f.lengthSq() < 1e-12) return null;                 // heading is straight up: no frame
+  f.normalize();
+  const port = new THREE.Vector3().crossVectors(u, f);   // X = Y x Z. Right-handed by
+  return new THREE.Matrix4().makeBasis(port, u, f);      // construction, not by inspection.
+}
+
 /* ── boot ───────────────────────────────────────────────────────────────── */
 async function boot() {
   const cv = document.getElementById('gl');
@@ -727,10 +760,8 @@ function stepVoyage(dt) {
     const prev = lonLatToVec(q[0], q[1], R * 1.008);
     const fwd = w.clone().sub(prev).normalize();
     if (fwd.lengthSq() > 1e-9) {
-      const right = new THREE.Vector3().crossVectors(up, fwd).normalize();
-      const f2 = new THREE.Vector3().crossVectors(right, up).normalize();
-      const m = new THREE.Matrix4().makeBasis(f2, up, right);
-      voyShip.quaternion.setFromRotationMatrix(m);
+      const m = tangentBasis(up, fwd);
+      if (m) voyShip.quaternion.setFromRotationMatrix(m);
     }
   }
   if (S.voyT >= 1) S.voyPlaying = false;
@@ -1285,7 +1316,21 @@ function buildEraFleet() {
       holder.add(sh);
       const L0 = ves.hull.loa;
       const t = together === 1 ? 0 : (n - (together - 1) / 2);
-      holder.position.set(t * L0 * 5.0, 0, -Math.abs(t) * L0 * 4.0);
+      /* ── ⚠ A CONSORT'S STATION IS ON THE SPHERE, NOT ON THE TANGENT PLANE ────────
+         These offsets are in the group's local frame, which is flat. At the token's
+         exaggeration one ship-length is about 210 km of ocean, so the old 5-lengths
+         abeam put a consort a THOUSAND kilometres out along a plane that the Earth has
+         already curved away from — and the plane does not curve with it. Even after the
+         handedness fix that left ships 145 km up.
+
+         Two changes. The formation closes to a working squadron interval — the eye reads
+         "in company" from the ratio to the ship's own drawn length, not from absolute
+         distance — and the station is then DROPPED onto the sphere. The Earth's radius in
+         these local units is R / scale, and the drop is the sagitta of the chord; second
+         order is exact to a metre at any interval a fleet would keep.
+         Applied in stepEraFleet, because the scale changes with the camera. */
+      holder.position.set(t * L0 * 1.9, 0, -Math.abs(t) * L0 * 1.5);
+      holder.userData.station = { x: holder.position.x, z: holder.position.z };
       grp.add(holder);
     }
     grp.userData.loa = ves.hull.loa;
@@ -1487,6 +1532,18 @@ function stepEraFleet(t) {
        ON the water, and at globe scale that means the surface itself. */
     const w = lonLatToVec(lo, la, R * 1.0002);
     tr.grp.position.copy(w);
+    /* ── ⚠ THE HORIZON IS NOT AT 90 DEGREES ─────────────────────────────────────────
+       A ship on the far side of the planet still projects onto the disc, and at token
+       exaggeration she projects LARGE — which is most of why hulls appeared to hang in
+       space off the limb. From distance d the visible cap is acos(R/d): at d = 200 that
+       is 60 degrees, not 90. This is the same threshold the chart lettering uses, and it
+       was learned there when SEA OF JAPAN lettered itself across the English Channel.
+
+       Culling only hides her. Her position and course are still computed, because the
+       Passage may be standing on her deck while the globe camera is somewhere else, and a
+       ship that stops existing when nobody on the globe can see her is a worse bug than
+       the one this fixes. */
+    tr.grp.visible = w.clone().normalize().dot(camera.position.clone().normalize()) > R / S.dist;
     /* ── HOW BIG IS A CHESS PIECE? ──────────────────────────────────────────────────
        At the campaign's factor a 42 m carrack rendered about four pixels across — present,
        but below the ratchet's own 0.05% threshold, which is a fair definition of invisible.
@@ -1502,8 +1559,17 @@ function stepEraFleet(t) {
     fwd.sub(up.clone().multiplyScalar(fwd.dot(up)));
     if (fwd.lengthSq() < 1e-9) continue;
     fwd.normalize();
-    const m = new THREE.Matrix4().makeBasis(fwd.clone().cross(up).normalize(), up, fwd);
+    const m = tangentBasis(up, fwd);
+    if (!m) continue;
     tr.grp.quaternion.setFromRotationMatrix(m);
+    /* drop each consort's station onto the sphere — see the note where the stations are set */
+    const Rlocal = R / tr.grp.scale.x;
+    for (const h of tr.grp.children) {
+      const st = h.userData.station;
+      if (!st) continue;
+      const r2 = st.x * st.x + st.z * st.z;
+      h.position.y = Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal;
+    }
     /* ── WHERE SHE IS, RECORDED ONCE ────────────────────────────────────────────────
        The Passage reads these rather than recomputing them. A second copy of this
        arithmetic would be a second opinion about where the ship is, and the two would
@@ -1685,8 +1751,10 @@ function stepCampaign(dt) {
     fwd.addScaledVector(up, -fwd.dot(up));                        // into the tangent plane
     if (fwd.lengthSq() < 1e-9) fwd = bearingVec(lo, la, 90);
     fwd.normalize();
-    const side = up.clone().cross(fwd).normalize();               // X = Y x Z, right-handed
-    sh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(side, up, fwd));
+    /* this site had it right all along; it now shares the one implementation so it cannot
+       drift away from the two that had it wrong */
+    const cm = tangentBasis(up, fwd);
+    if (cm) sh.quaternion.setFromRotationMatrix(cm);
 
     /* ── AND SHE HEELS ──────────────────────────────────────────────────────────────
        A square-rigged ship lies down to a beam wind and stands up when it is dead astern,

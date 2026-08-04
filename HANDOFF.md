@@ -80,3 +80,35 @@ python3 build_site.py      # THE GATE, then web/ -> docs/. The only publication 
 ```
 
 `web/fields/` is gitignored and regenerable; `docs/` carries the published copy, levels 0–2 only.
+
+## Round 9 — 2026-08-04 — ships on the water, and the three layers
+
+**The ships were in orbit because of one cross product.** `makeBasis(fwd × up, up, fwd)` is
+LEFT-handed; `Quaternion.setFromRotationMatrix` does not check and returns a valid quaternion
+that is not the transform asked for. Written three times in this codebase, wrong in two of them.
+Consorts reached +1,250 km and −646 km; the flagship at local (0,0,0) was always right, which is
+why single hulls looked fine for eight rounds. One `tangentBasis()` now, right-handed by
+construction. Full account in `Research/PASSAGE.md`.
+
+Also: consort stations are dropped onto the SPHERE (the tangent plane leaves it at 210 km per
+ship-length), and ships beyond `acos(R/d)` are culled — the same horizon threshold the chart
+lettering learned in round 2.
+
+**Verified:** 112 hulls × 8 eras × 4 zooms, worst altitude **3.1 km** (was 1,250). 14 of 14
+tracks have Y along the radius. The cull fires on an antipodal ship and passes one underfoot.
+Passage courses 090/000/180/270 point east/north/south/west; its sun reprojects onto the globe's
+sun with dot 1.0000.
+
+**The three layers** (`Research/LAYERS.md`): "What lives in the water" was a measurable dead
+switch — 0.16 % of pixels, mean 0.008 — because its ramp put open ocean at 0.12 against an OFF
+value of 0.16. Rebuilt; 11.6 % of water pixels move over the Benguela and the upwelling ribbon
+is legible. Cloud rebuilt with parallax, wind advection, two scales and a cast shadow. Wind
+streaks elongated 6.8:1 → 19:1 with a third less amplitude, because the eye reads wind from
+elongation, not contrast.
+
+**STILL OPEN, and it is the big one:** a continuous descent from orbit to sea level. The globe
+stops at 765 km, where a 42 m ship is 0.077 px and the token has to be 1,670 × true scale. The
+Passage jumps straight to 100 m off a hull. Between them there is nothing, and that gap is what
+"a simulated ocean with simulated ships on a global scale" means. It needs: the wheel range
+extended, the token exaggeration converging to 1.0 as altitude falls, and the Passage's
+near-field water anchored under the camera rather than under one ship.

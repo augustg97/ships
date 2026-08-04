@@ -157,12 +157,19 @@ function radialDisc(r0, r1, rings, seg) {
 /* ── the local frame at a point on the globe ─────────────────────────────────────────────
    east and north are the tangent directions; up is radial. Written once here and used both to
    place the anchor and to derive the ship's heading, so the two cannot disagree. */
+/* ⚠ (east, up, north) IS LEFT-HANDED, and building the anchor from it made this frame a
+   reflection. In a Y-up right-handed basis with Z along north, X must point WEST — X x Y = Z
+   leaves no choice about it. The same wrong sign was written into the era fleet and the voyage
+   wake; see tangentBasis() in app.js for what it cost there. Here it did not scatter anything,
+   because the backdrop camera is derived from this same anchor and the two stayed consistent
+   with each other — a mirrored world that agrees with itself, which is the hardest kind to see. */
 function psgFrame(lon, lat, R) {
   const p = lon * Math.PI / 180, a = lat * Math.PI / 180;
   const up = new THREE.Vector3(Math.cos(a) * Math.sin(p), Math.sin(a), Math.cos(a) * Math.cos(p));
   const east = new THREE.Vector3(Math.cos(p), 0, -Math.sin(p));
-  const north = new THREE.Vector3().crossVectors(up, east);
-  return { up, east, north, pos: up.clone().multiplyScalar(R) };
+  const north = new THREE.Vector3().crossVectors(up, east);      // geographic north
+  const west = new THREE.Vector3().crossVectors(up, north);      // = X, so that X x Y = Z
+  return { up, east, north, west, pos: up.clone().multiplyScalar(R) };
 }
 
 function psgOpen(tr, vessel, R, globeCamera) {
@@ -252,14 +259,17 @@ function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
 
   const fr = psgFrame(lon, lat, R);
   PSG.anchor.position.copy(fr.pos);
-  /* columns: X east, Y up, Z north */
-  const m = new THREE.Matrix4().makeBasis(fr.east, fr.up, fr.north);
+  /* columns: X west, Y up, Z north — right-handed, see psgFrame */
+  const m = new THREE.Matrix4().makeBasis(fr.west, fr.up, fr.north);
   PSG.anchor.quaternion.setFromRotationMatrix(m);
   PSG.anchor.updateMatrixWorld(true);
 
   /* the sun, brought down from the globe into the local frame */
   const sl = sun.clone();
-  const lsun = new THREE.Vector3(sl.dot(fr.east), sl.dot(fr.up), sl.dot(fr.north)).normalize();
+  /* project onto THE FRAME'S OWN AXES. Using east where the anchor uses west put the sun on the
+     wrong side of every ship — the hull would be lit from the west while the globe behind her
+     was lit from the east, in the same frame. */
+  const lsun = new THREE.Vector3(sl.dot(fr.west), sl.dot(fr.up), sl.dot(fr.north)).normalize();
   PSG.sun.position.copy(lsun).multiplyScalar(PATCH_M * 0.5);
   PSG.sun.target.position.set(0, 0, 0);
   PSG.sky.material.uniforms.uSun.value.copy(lsun);
@@ -294,11 +304,16 @@ function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
      and never once leaned in it — which is the difference between floating and levitating.
      Order matters: yaw first about the world up, then pitch and roll in her own axes, so a
      ship on a southerly course rolls athwart HER beam and not athwart the map's. */
-  const bearing = Math.atan2(Math.sin(hdgRad), Math.cos(hdgRad));
+  /* ⚠ THE SIGN OF A COURSE. hdg is a compass bearing: measured from north THROUGH EAST. In
+     this frame Z is north and X is WEST, so a positive rotation about Y carries the bow from
+     north toward west — the wrong way round the compass. A ship steering 090 has to yaw -90
+     here, and getting this backwards mirrors every course in the model without moving a hull
+     off the water, which is why it would never look broken. */
+  const yaw = -hdgRad;
   PSG.ship.rotation.set(0, 0, 0);
   PSG.ship.rotation.order = 'YXZ';
-  PSG.ship.rotation.y = bearing;
-  const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, bearing, PSG.loa, t, wind);
+  PSG.ship.rotation.y = yaw;
+  const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, yaw, PSG.loa, t, wind);
   PSG.ship.rotation.z = fl.pitch;
   PSG.ship.rotation.x = fl.roll;
   if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(PSG.ship, t, PSG.loa);

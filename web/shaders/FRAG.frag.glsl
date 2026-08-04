@@ -261,14 +261,39 @@ void main(){
        Natural log over a range spanning four decades needs a gentler slope and a lower pivot.
        0.16 of the range now sits at about 0.05 mg/m3 — true open ocean — and a shelf at
        10 mg/m3 reaches the top, so the whole productive structure lies inside the ramp
-       instead of clamped off the bottom of it. */
+       instead of clamped off the bottom of it.
+
+       ── ⚠ AND IT STILL SHOWED NOTHING, FOR A SECOND AND DIFFERENT REASON ────────────
+       Measured, not guessed: toggling this layer over the mid-Pacific moved 0.16 per cent of
+       pixels by a mean of 0.008 of a level. It was a dead switch.
+
+       Two faults, and the ramp was only the first. The rebuilt ramp puts open-ocean water —
+       about 0.04 mg/m3, which is most of the ocean and therefore most of the frame — at 0.12,
+       while the layer's OFF value is a flat 0.16. The two were tuned to the same number, so
+       across the gyres the toggle was a no-op BY CONSTRUCTION.
+
+       The second fault is that the endpoints were a quarter of the distance apart they should
+       be. Real ocean colour is not a subtle thing: an oligotrophic gyre is the deepest blue on
+       the planet, so clear it is nearly violet and so lifeless it was called a desert before
+       anyone could see it from orbit; a coastal bloom is opaque green. Between those two the
+       water changes more than almost any other surface on Earth. Painting that difference is
+       not a false-colour ramp — it is the colour the water actually is.
+
+       Chlorophyll also changes how FAR you see into the water, not only its hue. Productive
+       water is turbid: it scatters more and transmits less, so a bloom reads as milky rather
+       than merely green. That is carried by kv above and by the scatter weight below. */
     float g = uLyChl > 0.5
-      ? clamp(log(max(chl, 0.004)) * 0.155 + 0.62, 0.0, 1.0)
-      : 0.16;
+      ? clamp(log(max(chl, 0.004)) * 0.170 + 0.66, 0.0, 1.0)
+      : 0.28;
     vec3 body = mix(clearBlue, greenish, g);
+    /* the far ends, beyond the ordinary range: desert gyre and true bloom */
+    body = mix(body, vec3(0.010, 0.036, 0.132), smoothstep(0.30, 0.02, g) * uLyChl);
+    body = mix(body, vec3(0.085, 0.190, 0.115), smoothstep(0.62, 0.97, g) * uLyChl);
     body = mix(body, deepBlue, smoothstep(600.0, 4200.0, depth));   // the open ocean darkens
     body *= mix(0.88, 1.16, clamp((sst + 2.0) / 34.0, 0.0, 1.0));   // warm water reads warmer
-    float sat = 1.0 - exp(-depth * 0.0042);                        // scattering builds with path
+    /* turbid water scatters sooner: a bloom is opaque within a few metres, the clearest gyre
+       water stays transparent for tens of them. Same term, keyed to the same chlorophyll. */
+    float sat = 1.0 - exp(-depth * 0.0042 * (1.0 + clamp(chl, 0.0, 8.0) * 0.22 * uLyChl));
     vec3 scattered = body * sat;
 
     col = floorCol * through + scattered;
@@ -289,17 +314,29 @@ void main(){
        zoom is several cycles per PIXEL: it aliased into television static and the Roaring
        Forties read as a broken screen rather than a breaking sea. Sub-grid detail has to be
        generated at a frequency the frame can actually resolve. */
+    /* ── ⚠ SUBTLER, AND MORE CLEARLY WIND ────────────────────────────────────────────
+       Those are not opposites, and treating them as one knob was the mistake. What made the
+       old field read as noise was not that it was too strong but that it was too ROUND: at
+       6.8 : 1 the streaks were short enough to look like static, so the only way to see them
+       was to turn the contrast up, which made them look like static more loudly.
+
+       What the eye reads as wind is ELONGATION along a direction, not contrast. At 19 : 1 the
+       streaks are unmistakably combed, and the amplitude can then come down by a third — which
+       is what "more subtle yet more clearly wind" actually asks for. The second octave runs
+       across the first at a shallower angle rather than parallel to it, because a real sea
+       surface has the wind streaks of the moment lying over the older ones. */
     vec2 sp = uv * vec2(330.0, 165.0);
     vec2 alongWind = vec2(dot(sp, wdir), dot(sp, vec2(-wdir.y, wdir.x)));
     float drift = uTime * 0.35 * (0.4 + wspd * 0.10);
-    float wave = fbm(alongWind * vec2(0.34, 2.30) + vec2(drift, 0.0));
-    float wave2 = fbm(alongWind * vec2(1.05, 4.60) - vec2(drift * 1.7, 0.0));
+    float wave = fbm(alongWind * vec2(0.24, 4.55) + vec2(drift, 0.0));
+    float wave2 = fbm(alongWind * vec2(0.78, 6.30) - vec2(drift * 1.7, drift * 0.22));
 
     float windAmp = uLyWind > 0.5 ? clamp(wspd / 14.0, 0.0, 1.2) : 0.0;
+    /* amplitude down a third: the elongation above is now carrying the legibility */
     vec3 sn = normalize(n + vec3(
-        (wave - 0.5) * 0.055 * windAmp + (wave2 - 0.5) * 0.025 * windAmp,
-        (wave2 - 0.5) * 0.045 * windAmp,
-        (wave - 0.5) * 0.055 * windAmp));
+        (wave - 0.5) * 0.036 * windAmp + (wave2 - 0.5) * 0.017 * windAmp,
+        (wave2 - 0.5) * 0.030 * windAmp,
+        (wave - 0.5) * 0.036 * windAmp));
 
     /* ── REAL WAVES, ONCE THEY ARE BIG ENOUGH TO SEE ─────────────────────────────────
        Everything above is the WIND FIELD — a monthly climatology painted at about one cycle
@@ -403,12 +440,68 @@ void main(){
 
   /* ── atmosphere ──────────────────────────────────────────────────────── */
   float sunUpG = clamp(dot(n, normalize(uSun)), 0.0, 1.0);
+  /* ══ CLOUD ═══════════════════════════════════════════════════════════════════════════════
+     The old layer was one octave of noise multiplied by the cover field and mixed toward flat
+     grey. It had no light in it, cast nothing, sat exactly on the ground, and drifted due east
+     regardless of the wind — four things that between them make cloud read as a texture printed
+     on the map rather than weather standing above an ocean. Four fixes, each doing one job:
+
+     1. PARALLAX. A cloud deck is about 8 km up. On a 6371 km sphere that is a tenth of a per
+        cent, which sounds negligible and is the single strongest cue in the frame: toward the
+        limb, clouds visibly OVERHANG the edge of the planet and slide against the sea beneath
+        them. Sampling the cloud field where the view ray crosses the shell — rather than where
+        it hits the ground — is what puts them in the sky.
+     2. THE WIND CARRIES THEM. The field already has u and v at every point; advecting the noise
+        along it means the Southern Ocean streams east, the trades stream west, and the doldrums
+        sit still, without any of that being drawn.
+     3. STRUCTURE AT TWO SCALES. Weather systems are hundreds of kilometres and the cells inside
+        them are tens. One octave gives cotton wool; a large low-frequency mass carrying a finer
+        cellular break-up gives something that reads as organised.
+     4. THEY CAST A SHADOW. Cloud over a dark ocean is only half the picture; the other half is
+        the sea going darker underneath it, offset toward the anti-solar side. Without it the
+        deck floats free of the water.  */
   if (uLyCloud > 0.5) {
-    vec3 seaC = mix(texture2D(uSeaA, uv).rgb, texture2D(uSeaB, uv).rgb, uMonthMix);
-    float cl = seaC.b;
-    float puff = fbm(uv * vec2(900.0, 450.0) + vec2(uTime * 0.012, 0.0));
-    float cover = smoothstep(0.30, 0.95, cl * (0.55 + 0.75 * puff));
-    col = mix(col, vec3(0.80, 0.82, 0.85) * (0.12 + 0.95 * sunUpG), cover * 0.72);
+    /* where the view ray crosses the cloud shell, expressed as a tangential shift */
+    const float CLOUD_KM = 8.0;
+    vec3 Vt = V - n * dot(V, n);
+    float cosv = max(dot(n, V), 0.06);
+    vec3 shifted = normalize(vPos - Vt * (CLOUD_KM / 6371.0) / cosv * length(vPos));
+    vec2 cuv = sphereUV(shifted);
+
+    vec3 cA = texture2D(uSeaA, cuv).rgb, cB = texture2D(uSeaB, cuv).rgb;
+    float cl = mix(cA.b, cB.b, uMonthMix);
+    vec3 wA = texture2D(uWindA, cuv).rgb, wB = texture2D(uWindB, cuv).rgb;
+    vec2 cw = (mix(wA, wB, uMonthMix).rg - 0.5019608) * 2.0 * 25.0;
+
+    /* advection: u is eastward (+uv.x), v is northward (-uv.y in an image whose row 0 is +90) */
+    vec2 drift = vec2(cw.x, -cw.y) * uTime * 0.00018;
+    float sysN = fbm(cuv * vec2(46.0, 23.0) + drift * 46.0);          // weather systems
+    float cellN = fbm(cuv * vec2(400.0, 200.0) + drift * 400.0);      // cells inside them
+    float dens = cl * (0.42 + 0.86 * sysN) * (0.55 + 0.62 * cellN);
+    /* ⚠ ACCURATE COVER IS NOT THE SAME AS USEFUL COVER. July really is 60-70 per cent cloud
+       over the North Atlantic, and drawing it at full opacity hid the ocean this whole view
+       exists to show. Thin cloud stays thin: the ramp starts later and the opacity is raised
+       to a power, so the overcast is still overcast while the broken edges let the sea read
+       through them — which is also what thin cloud does. */
+    float cover = pow(smoothstep(0.28, 0.86, dens), 1.35);
+
+    /* SHADOW on the sea, thrown toward the anti-solar side and softened by the deck's depth */
+    vec3 Lt = L - n * dot(L, n);
+    vec3 sh = normalize(vPos + Lt * (CLOUD_KM / 6371.0) / max(dot(n, L), 0.10) * length(vPos));
+    vec3 sA = texture2D(uSeaA, sphereUV(sh)).rgb, sB = texture2D(uSeaB, sphereUV(sh)).rgb;
+    float shd = smoothstep(0.22, 0.78, mix(sA.b, sB.b, uMonthMix) * (0.5 + 0.8 * sysN));
+    col *= 1.0 - shd * 0.30 * sunUpG;
+
+    /* LIGHT. Cloud is close to a white Lambertian sheet, so it is the brightest thing on the
+       day side and, unlike the sea, it keeps a little light right through the terminator —
+       which is why a real limb has a lit rim of cloud after the ground below has gone dark. */
+    float lit = 0.10 + 1.05 * smoothstep(-0.18, 0.42, dot(n, L));
+    vec3 top = vec3(0.985, 0.985, 0.985), base = vec3(0.60, 0.645, 0.715);
+    vec3 cc = mix(base, top, smoothstep(0.25, 0.85, cover)) * lit;
+    /* warm on the terminator, the way sunlit tops look from orbit at the day/night line */
+    cc = mix(cc, cc * vec3(1.16, 0.92, 0.78),
+             smoothstep(0.34, 0.02, abs(dot(n, L))) * 0.75);
+    col = mix(col, cc, cover * 0.93);
   }
 
   /* ── ONE day/night term, applied once ────────────────────────────────

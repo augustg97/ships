@@ -56,3 +56,65 @@ so they cannot drift.
   attempts failed on this before the third measured projected NDC instead of trusting algebra.
 - **Map labels are labels on a map.** Projected from a camera 40 m above the water they wrote
   NORTH ATLANTIC OCEAN across the sky.
+
+---
+
+# The handedness bug that put ships in orbit  (2026-08-04, round 9)
+
+August: *"some of our ships are literally floating in space."* Screenshots showed consorts
+hanging off the limb of the globe and hulls heeled at impossible angles.
+
+## One cross product, three sites
+
+Every object on the globe needs the same frame: Y along the radius, Z along the way it is
+pointing. Written by hand it is one line, and it was written three times:
+
+| site | X axis | det |
+|---|---|---|
+| era fleet | `fwd × up` | **−1** |
+| voyage wake | `(up×fwd) × up` | **−1** |
+| campaign fleet | `up × fwd` | +1 — correct all along |
+
+A left-handed basis is a **reflection, not a rotation**, and `Quaternion.setFromRotationMatrix`
+does not check. It returns a perfectly valid unit quaternion that is not the transform asked
+for. Measured: the group's Y came out **100° off the radius**.
+
+A ship at local (0,0,0) still landed in the right place, which is why single hulls looked fine
+for eight rounds. But every consort's tangent-plane offset was rotated into the RADIAL
+direction:
+
+```
+Magellan and Elcano — consort altitudes
+  +1250.7 km      (in orbit)
+     +1.2 km      (the flagship, correct)
+   −645.6 km      (inside the Earth)
+```
+
+There is now one `tangentBasis(up, fwd)` in app.js, right-handed **by construction**. The sign
+that falls out of X × Y = Z is that **X points to PORT, not starboard** — and naming the
+variable `right` is exactly how the wrong sign got written twice.
+
+The Passage's own frame `(east, up, north)` was left-handed for the same reason. It did not
+scatter anything, because the backdrop camera is derived from the same anchor and the two stayed
+consistent — **a mirrored world that agrees with itself, which is the hardest kind to see.**
+
+## Two more faults in the same class
+
+- **A consort's station is on the sphere, not on the tangent plane.** At token exaggeration one
+  ship-length is ~210 km of ocean, so 5 lengths abeam put a consort 1,000 km out along a plane
+  the Earth had already curved away from. Stations are now dropped onto the sphere by the
+  sagitta, in `stepEraFleet`, because the scale changes with the camera.
+- **The horizon is not at 90°.** From distance d the visible cap is `acos(R/d)` — at d = 200
+  that is 60°. Ships beyond it were still drawn, at token size, projecting onto the disc as
+  though they belonged. Same threshold the chart lettering learned in round 2.
+
+## Verified
+
+| | before | after |
+|---|---|---|
+| worst hull altitude, 8 eras × 4 zooms, 112 hulls | +1,250 km | **3.1 km** |
+| tracks whose Y is not the radius | 14 of 14 | **0 of 14** |
+| helper determinant | −1 | **+1** |
+| cull fires on an antipodal ship | n/a | **yes** (and passes one underfoot) |
+| course 090 / 000 / 180 / 270 in the Passage | — | **east / north / south / west** |
+| Passage sun vs globe sun, reprojected | — | **dot = 1.0000** |
