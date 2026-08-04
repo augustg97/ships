@@ -57,14 +57,30 @@ void main(){
   float g = vnoiseL(vP.xz / max(90.0, uMPP * 22.0));
   col *= 0.90 + 0.20 * g;
 
+  /* ── ⚠ AND IT HAS TO BE LIT THE WAY THE BACKDROP IS LIT ──────────────────────────
+     The first version shaded straight from the real sun and wrote the result out LINEAR, with
+     no tone curve — so a hillside at 0.2 went to the framebuffer as 0.2, which is 51 of 255.
+     The identical value on the globe becomes 115, because the globe rolls off, gammas, and
+     then applies an S-curve. The near ground rendered as a black silhouette against a lit
+     sea: not so much a lighting bug as two different pictures in one frame.
+
+     The globe's land takes its RELIEF from a fixed key — so a ridge reads at any hour — and
+     its BRIGHTNESS from the day/night term. Same here, same numbers, same ending, so the near
+     ground and the country behind it are the same country. */
   vec3 L = normalize(uSun);
-  float lam = clamp(dot(nrm, L), 0.0, 1.0);
-  col *= (0.34 + 0.92 * lam);
+  float lam = clamp(dot(nrm, normalize(vec3(0.55, 0.58, 0.55))), 0.0, 1.0);
+  col *= (0.52 + 0.80 * lam);
 
   /* distance haze, so the near ground joins the backdrop instead of ending at it */
   float dist = length(vP - uCam);
   float haze = 1.0 - exp(-dist / 90000.0);
   col = mix(col, vec3(0.60, 0.66, 0.74), haze * 0.70);
+
+  float day = smoothstep(-0.26, 0.20, L.y);
+  col *= mix(0.32, 1.00, day);
+  col = vec3(1.0) - exp(-max(col, 0.0) * 0.98);
+  col = pow(col, vec3(0.4545));
+  col = clamp((col - 0.46) * 1.26 + 0.46, 0.0, 1.0);
 
   gl_FragColor = vec4(col, 1.0);
 }

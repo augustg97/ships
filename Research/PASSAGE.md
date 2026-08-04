@@ -383,3 +383,36 @@ kilometres away, seen from a 195 m eye, is a hairline.
 **Before concluding a feature is broken, check that the place you are testing it has the thing
 you are looking for.** Three rounds of this project have now been spent on measurements that
 were correct about the wrong location.
+
+---
+
+# Lighting the near ground, and watching the coast move  (2026-08-04, round 16)
+
+## ⚠ The near land was written out LINEAR
+
+It shaded from the real sun and wrote the result straight to the framebuffer with no tone curve.
+A hillside at 0.2 arrived as **51 of 255**; the identical value on the globe becomes **115**,
+because the globe rolls off, gammas, and applies an S-curve. The result was a black silhouette
+against a lit sea — not so much a lighting bug as two different pictures in one frame.
+
+It now takes its **relief** from the same fixed key the globe's land uses, so a ridge reads at
+any hour, and its **brightness** from the same day/night term and the same three-line ending.
+The near ground and the country behind it are the same country because they are computed the
+same way.
+
+Verified off the Canaries against land rising to 852 m: a lit landscape with a real skyline.
+
+## And the landscape does change as she sails
+
+Measured while following Da Gama off Lisbon — the anchor position and a twelve-cell luma
+fingerprint of the frame, sampled every four seconds:
+
+```
+t+0s   anchor -9.2363, 38.5747
+t+4s   anchor -9.2369, 38.5738   moved 0.113 km   frame changed 2.05
+t+8s   anchor -9.2375, 38.5729   moved 0.113 km   frame changed 2.32
+t+12s  anchor -9.2381, 38.5721   moved 0.103 km   frame changed 2.28
+```
+
+The near-field anchor tracks the ship, so the ground under her is genuinely new ground: the coast
+moves past because she is moving past it.
