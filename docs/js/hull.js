@@ -633,8 +633,20 @@ function buildRig(S, group, mats, FINE) {
 
     segs.forEach((seg, si) => {
       if (mk.only && si >= mk.only) return;
+      /* ── MAST LIVERY ────────────────────────────────────────────────────────────────
+         On an iron ship the masts are painted, not oiled timber, and the museum model of
+         Great Eastern shows the scheme plainly: WHITE LOWER MASTS, BLACK ABOVE. It is not
+         decoration — the lower mast is a built iron tube kept white with the deckhouses, and
+         the topmast and above are the sending-down spars, tarred and blacked like the rigging
+         they carry. The join is at the doubling, which is exactly where the colour changes. */
+      const mastMat = S.mastLivery
+        ? (si === 0 ? (mats.mastWhite || (mats.mastWhite = new THREE.MeshStandardMaterial(
+              { color: 0xdedad0, roughness: 0.58 })))
+                    : (mats.mastBlack || (mats.mastBlack = new THREE.MeshStandardMaterial(
+              { color: 0x1e2022, roughness: 0.52, metalness: 0.20 }))))
+        : woodDark;
       const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
-                    radii[si], radii[si] * 0.7, woodDark, -rakeRad);
+                    radii[si], radii[si] * 0.7, mastMat, -rakeRad);
       m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
 
       /* the TOP sits at the head of the lower mast, and the topmast is fidded through it */
@@ -2717,6 +2729,23 @@ function buildPaddles(S, group, mats) {
     bm.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
     group.add(tag(bm, 'paddle', 'Paddle box',
       'The housing over the top of the wheel. A 17 m wheel throws a sheet of water and coal dirt that would sweep the deck; the box contains it. Being the largest thing on the ship\'s side, it is also what owners decorated.'));
+    /* ── THE FAN FACE ──────────────────────────────────────────────────────────────
+       The outboard face of a paddle box is the ship's one piece of display, and the pattern
+       is almost always RADIAL — ribs fanning from the hub out to the rim, following the very
+       spokes turning behind them. It is structural before it is ornamental: the face is a
+       large thin panel that has to resist a wheel throwing water at it, and ribs from the
+       centre are the cheapest way to stiffen a half-round. */
+    for (let i = 0; i < 11; i++) {
+      const a = Math.PI * (i / 10);
+      const rib = new THREE.Mesh(
+        new THREE.BoxGeometry(D * 0.020, boxR * 0.86, B * 0.030), mats.woodPale || iron);
+      rib.position.set(p[0] + Math.cos(a) * boxR * 0.47,
+                       axleY + Math.sin(a) * boxR * 0.40,
+                       sgn * (p[2] + B * 0.16 + B * 0.21));
+      rib.rotation.z = a - Math.PI / 2;
+      group.add(tag(rib, 'paddle', 'Paddle-box rib',
+        'The face fans from the hub because it must: a large thin panel taking the water a wheel throws at it is stiffened most cheaply by ribs running out from the centre. That it also looks well is why owners lettered and gilded it.'));
+    }
     /* the vent slats along its face, which is how a real one is built and lit */
     for (let i = 1; i < 7; i++) {
       const a = Math.PI * (i / 7);

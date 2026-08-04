@@ -210,18 +210,23 @@ void main(){
        Leave them off and a 211 m hull and a 60 m one are the same picture.
        Spaced by a real distance along the hull rather than by a fraction of it, so the count
        follows the ship instead of the ship following the count. */
-    float portRow = 0.0;
+    float portRow = 0.0, portRim = 0.0;
     for (int r = 0; r < 2; r++) {
       float rv = uWaterline + 0.42 + float(r) * 0.19;
       float dy = (v - rv) * 5.2;
       float px = fract(u * uPortholes) - 0.5;
       float d = length(vec2(px * 1.6, dy));
-      portRow = max(portRow, smoothstep(0.16, 0.09, d));
+      portRow = max(portRow, smoothstep(0.155, 0.095, d));   // the dark glass
+      /* ⚠ THE RIM WAS DEAD CODE — I wrote it as smoothstep(...)*0.0 + portRow*0.0, which is
+         zero twice over, so every porthole was a flat dark dot and vanished on a black hull at
+         any range. It is the ring that makes a porthole READ: a polished brass annulus round
+         the glass, and on a dark topside that bright ring is the only part the eye catches.
+         An annulus is two smoothsteps: inside the outer edge, outside the inner one. */
+      float rim = smoothstep(0.185, 0.150, d) * smoothstep(0.095, 0.130, d);
+      portRim = max(portRim, rim);
     }
-    paint = mix(paint, vec3(0.055, 0.060, 0.070), portRow * 0.88);
-    /* the brass rim catches the light, which is what makes them read at a distance */
-    paint = mix(paint, vec3(0.72, 0.62, 0.38), smoothstep(0.20, 0.165, 0.0) * 0.0
-                + clamp(portRow * 0.0, 0.0, 1.0));
+    paint = mix(paint, vec3(0.045, 0.050, 0.060), portRow * 0.92);
+    paint = mix(paint, vec3(0.78, 0.66, 0.38), portRim * 0.85);
 
     col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
     /* the lap stands proud, so it shades on one side and catches light on the other —
