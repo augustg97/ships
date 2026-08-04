@@ -381,7 +381,7 @@ HULLS = {
                      dict(at=0.38, height=0.46, rig="square", rake=2, shrouds=4, only=2),
                      dict(at=0.61, height=0.42, rig="square", rake=2, shrouds=4, only=2),
                      dict(at=0.845, height=0.36, rig="lateen", rake=3, shrouds=3)],
-              bowsprit=0.10, steeve=10),
+              bowsprit=0.10, steeve=10, boats=12, portholes=True),
 
   # MSC Irina class, 2023: 399.9 × 61.3 m, 24,346 TEU. Cb 0.62–0.72 for a container liner
   # (MAN, *Basic Principles of Ship Propulsion*, Table 1.01).
@@ -442,7 +442,7 @@ HULLS = {
                                dict(at=0.40, heightM=40.0, rig="gaff", shrouds=5),
                                dict(at=0.60, heightM=40.0, rig="gaff", shrouds=5),
                                dict(at=0.74, heightM=38.0, rig="gaff", shrouds=4),
-                               dict(at=0.87, heightM=32.0, rig="gaff", shrouds=4)]),
+                               dict(at=0.87, heightM=32.0, rig="gaff", shrouds=4)], boats=20, portholes=True),
 
   # Titanic, 1912 — 269.1 m, 28.2 m beam, 46,328 GRT. Not the fastest and never meant to be:
   # built for size and comfort against Cunard's speed. Sixteen watertight compartments — and the
@@ -451,7 +451,7 @@ HULLS = {
                   cm=0.95, wlPower=3.8, stemFineness=0.10, sternFineness=0.20, transom=0.22,
                   forefoot=0.14, run=0.24, riseF=0.18, riseA=0.15, sheerBow=0.7, sheerStern=0.4,
                   tumblehome=0.01, stemRake=0.02, sternRake=0.02, strakes=44, iron=True,
-                  topside="#1a1a1c", funnels=4, decks=5, masts=[]),
+                  topside="#1a1a1c", funnels=4, decks=5, masts=[], boats=20, portholes=True),
 
   # And the end of a story about people crossing oceans: a hull with NO PEOPLE ON IT.
   # Wind and solar, months at sea, no crew to feed, water, berth or lose.

@@ -1263,6 +1263,12 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
  * hulls swap 1 and 2, and the vessel's own card says which tradition it belongs to.
  */
 const PARTS = {
+  boat:     { stage: 6, name: "Ship's boat",
+              what: 'Stowed under curved davits on the boat deck. The davits curve because the '
+                  + 'boat must clear a side that flares or tumbles home on the way down. The '
+                  + 'NUMBER of them was set by Board of Trade rules scaling boats to tonnage '
+                  + 'rather than to people, unrevised as ships grew — which is how Titanic '
+                  + 'sailed legally with 20 boats for 2,224 aboard.' },
   vent:     { stage: 4, name: 'Cowl ventilator',
               what: 'Turned into the wind to drive air below decks. Before mechanical '
                   + 'ventilation, a coal-fired boiler room, a galley and several hundred people '
@@ -2004,6 +2010,62 @@ function buildFunnel(S, group) {
  * because a piston engine's torque pulls a going-around aircraft to port — so you put the
  * obstacle on the side it is least likely to swing toward.
  */
+/* ── BOATS ON DAVITS ────────────────────────────────────────────────────────────────────
+ * The row of white boats along a steamer's boat deck is one of the most recognisable things
+ * about her, and the museum model of Great Eastern is lined with them.
+ *
+ * A DAVIT is a curved arm that swings a boat from its stowed position inboard, out over the
+ * side, and lowers it. Two per boat. They are curved rather than straight for one reason: the
+ * boat must clear the ship's side on the way down, and a ship's side tumbles home or flares,
+ * so a straight arm would either foul the hull or need to be absurdly long.
+ *
+ * ⚠ And the number of them is a fact with a history. Great Eastern carried boats for a
+ * fraction of the 4,000 people she was certified for, and so did every liner after her — Board
+ * of Trade rules scaled boats to TONNAGE, not to souls, and had not been revised as ships grew.
+ * Titanic sailed under the same rule with 20 boats for 2,224 aboard. The rule changed only
+ * after she sank.
+ */
+function buildBoats(S, group, mats) {
+  const n = S.boats || 0;
+  if (!n) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const white = new THREE.MeshStandardMaterial({ color: 0xdedbd2, roughness: 0.62 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x2f3336, roughness: 0.55, metalness: 0.25 });
+  const boatL = Math.min(B * 0.42, 9.0), boatB = boatL * 0.30;
+  const perSide = Math.max(1, Math.round(n / 2));
+  for (let i = 0; i < perSide; i++) {
+    const u = 0.26 + (i / Math.max(1, perSide - 1)) * 0.46;
+    const y = H.sheer(u);
+    const half = Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
+    for (const sgn of [-1, 1]) {
+      const z = sgn * (half - B * 0.045);
+      /* the boat: a shallow hull, keel down, stowed fore-and-aft */
+      const bg = new THREE.SphereGeometry(boatL / 2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+      bg.scale(1.0, 0.42, boatB / boatL);
+      bg.rotateX(Math.PI);
+      const bt = new THREE.Mesh(bg, white);
+      bt.position.set((u - 0.5) * L, y + B * 0.075, z);
+      group.add(tag(bt, 'boat', 'Ship\'s boat',
+        'Stowed under davits on the boat deck. Board of Trade rules scaled boats to TONNAGE rather than to the number of people aboard, and were not revised as ships grew — which is why Titanic sailed legally with 20 boats for 2,224 souls.'));
+      /* two davits per boat, curved so the boat clears the side going down */
+      for (const d of [-0.34, 0.34]) {
+        const pts = [];
+        for (let k = 0; k <= 8; k++) {
+          const t = k / 8;
+          pts.push(new THREE.Vector3(0, t * B * 0.16, Math.pow(t, 2.2) * B * 0.085));
+        }
+        const dg = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 8, B * 0.007, 5, false);
+        const dv = new THREE.Mesh(dg, dark);
+        dv.position.set((u - 0.5) * L + d * boatL, y, z);
+        dv.scale.z = sgn;
+        group.add(tag(dv, 'boat', 'Davit',
+          'Curved, because the boat has to clear a ship\'s side that flares or tumbles home on its way down. A straight arm would foul the hull or have to be absurdly long.'));
+      }
+    }
+  }
+}
+
 function buildFlightDeck(S, group, mats) {
   if (!S.flightDeck) return;
   const H = hullSurface(S);
@@ -2681,6 +2743,9 @@ function buildShip(S, opts) {
     uniforms: {
       uSun: { value: sun }, uCam: { value: new THREE.Vector3() },
       uStrakes: { value: S.strakes || 26 },
+      /* portholes spaced by a REAL distance — about 3 m between centres on a liner — so the
+         count follows the ship's length rather than the length following the count */
+      uPortholes: { value: S.portholes ? Math.round(S.lwl / 3.0) : 0 },
       /* ⚠ Both of these are LENGTHS TURNED INTO COUNTS, so they scale with the ship instead of
          being a texture frequency somebody liked. English oak planking ran about 7 m; the room
          and space of an 18th-century ship is about 0.75 m, so a 57 m hull crosses 76 frames. */
@@ -2793,6 +2858,7 @@ function buildShip(S, opts) {
   if (FINE && S.transom) buildStern(S, group, mats);
   if (FINE && S.containers) buildContainers(S, group);
   if (S.wingSail) buildWingSail(S, group, mats);
+  if (FINE && S.boats) buildBoats(S, group, mats);
   if (S.flightDeck) buildFlightDeck(S, group, mats);
   if (S.turrets) buildTurrets(S, group, mats);
 

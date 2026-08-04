@@ -11,6 +11,7 @@ uniform float uChequer;      // 0 = plain, 1 = Nelson chequer with gunport bands
 uniform float uGunDecks;
 uniform vec3  uTopside;      // the paint above the waterline
 uniform float uIron;         // 0 = wood, 1 = iron/steel plate
+uniform float uPortholes;    // porthole count along the hull, 0 = none
 uniform float uTime;
 
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
@@ -201,6 +202,26 @@ void main(){
     float streak = smoothstep(0.58, 0.92, streakN) * runDown * (1.0 - below);
     /* streaks lighten as well as darken on a dark hull — salt dries white on black paint */
     paint = mix(paint, paint * vec3(1.55, 1.34, 1.14), streak * 0.42);
+
+    /* ── PORTHOLES, IN ROWS, AT A REAL SPACING ─────────────────────────────────────
+       The museum model shows two rows of them down Great Eastern's black topside, and they
+       are most of what tells you the scale of the hull: a porthole is about 400 mm whatever
+       the ship, so the number of them between bow and stern IS the length, read directly.
+       Leave them off and a 211 m hull and a 60 m one are the same picture.
+       Spaced by a real distance along the hull rather than by a fraction of it, so the count
+       follows the ship instead of the ship following the count. */
+    float portRow = 0.0;
+    for (int r = 0; r < 2; r++) {
+      float rv = uWaterline + 0.42 + float(r) * 0.19;
+      float dy = (v - rv) * 5.2;
+      float px = fract(u * uPortholes) - 0.5;
+      float d = length(vec2(px * 1.6, dy));
+      portRow = max(portRow, smoothstep(0.16, 0.09, d));
+    }
+    paint = mix(paint, vec3(0.055, 0.060, 0.070), portRow * 0.88);
+    /* the brass rim catches the light, which is what makes them read at a distance */
+    paint = mix(paint, vec3(0.72, 0.62, 0.38), smoothstep(0.20, 0.165, 0.0) * 0.0
+                + clamp(portRow * 0.0, 0.0, 1.0));
 
     col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
     /* the lap stands proud, so it shades on one side and catches light on the other —
