@@ -643,6 +643,7 @@ function swFrame(now) {
     const t = clockS();
     /* the oars work whenever she is complete — a trireme under oar is the only way she moves */
     SHIPS_SEA.animateOars(SW.ship, t);
+    SHIPS_SEA.animateWheels(SW.ship, t, (SW.spec && SW.spec.speedKn) || 8);
     SW.layout.forEach(e => {
       const len = (e.v && e.v.hull && e.v.hull.loa) || 30;
       const r = SHIPS_SEA.floatShip(e.obj, e.obj.position.x, 0, 0, len, t, 6.5);

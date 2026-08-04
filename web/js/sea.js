@@ -154,4 +154,30 @@ function animateOars(root, t) {
   });
 }
 
-window.SHIPS_SEA = { SEA_WAVES, seaWaveUniform, seaAt, floatShip, animateOars };
+/* ── THE PADDLE WHEEL TURNS ─────────────────────────────────────────────────────────────
+ * ⚠ And its rate is not free. A paddle wheel is a wheel rolling on the water: the float at
+ * the rim has to travel sternward at about the ship's own speed through the sea, or the wheel
+ * is either slipping — churning water it has already thrown — or being dragged round by the
+ * ship, which is worse. So the angular rate comes from the SHIP'S SPEED and the WHEEL'S
+ * RADIUS, not from whatever looked about right:
+ *
+ *     omega = v / R,  with a slip factor, because a real wheel always slips a little.
+ *
+ * Great Eastern made 8.2 kn = 4.2 m/s on a wheel of radius 8.5 m, which is 0.5 rad/s, or
+ * about 4.7 revolutions a minute. That is SLOW — much slower than instinct suggests — and it
+ * is why period photographs of paddle steamers under way rarely show the wheel blurred.
+ */
+function animateWheels(root, t, speedKn) {
+  if (!root) return;
+  const v = (speedKn || 8) * 0.5144;                    // knots to m/s
+  root.traverse(o => {
+    const d = o.userData && o.userData.wheel;
+    if (!d) return;
+    const omega = (v / Math.max(1, d.R)) * 0.88;        // 12% slip, which a real wheel has
+    /* the wheel turns about the athwartships axis, and the two sides turn the same way seen
+       from their own side — so the sign flips with the side you are looking from */
+    o.rotation.z = -d.sgn * omega * t;
+  });
+}
+
+window.SHIPS_SEA = { SEA_WAVES, seaWaveUniform, seaAt, floatShip, animateOars, animateWheels };

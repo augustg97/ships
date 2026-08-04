@@ -1778,7 +1778,41 @@ function buildSuperstructure(S, group) {
     const f = i / n;
     const len = L * (0.80 - f * 0.34);                  // each tier steps in fore and aft
     const wid = B * (0.92 - f * 0.16);
-    const tier = new THREE.Mesh(new THREE.BoxGeometry(len, dh, wid), white);
+    /* ── ⚠ A DECKHOUSE IS NOT A BOX ────────────────────────────────────────────────────
+       It was BoxGeometry — one constant width — sitting on a hull that narrows to a point.
+       So at the bow the house was WIDER THAN THE SHIP and hung out over open water on square
+       corners, which is exactly the jutting August photographed from ahead. It also ran past
+       the stem into nothing.
+       A deckhouse is built ON the deck, so its plan follows the deck's plan: it narrows as
+       the ship narrows and stops short of the side by a WATERWAY — the gangway the crew walk
+       and the scuppers drain along. Loft it from the hull's own half-breadth at each station
+       and it can never overhang, on any ship, at any beam. */
+    const uA = 0.5 - (len / L) / 2, uB = 0.5 + (len / L) / 2;
+    const NU = 40, tp = [], ti = [];
+    const inset = B * 0.055;                            // the waterway, each side
+    for (let k = 0; k <= NU; k++) {
+      const u = uA + (uB - uA) * k / NU;
+      const deckHalf = Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
+      const half = Math.max(B * 0.06, Math.min(wid / 2, deckHalf - inset));
+      const x = (u - 0.5) * L;
+      tp.push(x, -dh / 2, -half,  x, -dh / 2, half,
+              x,  dh / 2, -half,  x,  dh / 2, half);
+    }
+    for (let k = 0; k < NU; k++) {
+      const a = k * 4, b = a + 4;
+      ti.push(a + 2, b + 2, a + 3,  a + 3, b + 2, b + 3);   // roof
+      ti.push(a, a + 1, b,          a + 1, b + 1, b);       // sole
+      ti.push(a, b, a + 2,          a + 2, b, b + 2);       // port side
+      ti.push(a + 1, a + 3, b + 1,  a + 3, b + 3, b + 1);   // starboard side
+    }
+    /* cap the ends so the house is closed, not a tube */
+    const e0 = 0, e1 = NU * 4;
+    ti.push(e0, e0 + 2, e0 + 1, e0 + 1, e0 + 2, e0 + 3);
+    ti.push(e1, e1 + 1, e1 + 2, e1 + 1, e1 + 3, e1 + 2);
+    const tg = new THREE.BufferGeometry();
+    tg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+    tg.setIndex(ti); tg.computeVertexNormals();
+    const tier = new THREE.Mesh(tg, white);
     tier.position.set(-L * 0.02 + f * L * 0.03, base + dh * (i + 0.5), 0);
     g.add(tier);
     /* ── ⚠ ONE CONTINUOUS BLACK STRIP IS NOT A ROW OF WINDOWS ─────────────────────────
@@ -2548,6 +2582,10 @@ function buildPaddles(S, group, mats) {
        already built in the XY plane, which is the fore-and-aft plane; they needed no rotation
        at all. */
     g.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
+    /* what the animator needs to turn this wheel: which side, and its radius, because the
+       rate is not free — the float at the rim must move sternward at roughly the ship's own
+       speed through the water, or the wheel is either slipping or being dragged. */
+    g.userData.wheel = { sgn, R };
     group.add(tag(g, 'paddle'));
     /* the sponson: the platform carrying the wheel's weight out from the hull side */
     const box = new THREE.Mesh(
