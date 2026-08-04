@@ -303,9 +303,22 @@ function placeCamera() {
   const altM = Math.max(1, (d - R) * 63710);
   const tilt = Math.max(0, Math.min(1,
     1 - Math.log(altM / 2000) / Math.log(60000 / 2000)));
-  if (tilt <= 0.001) { camera.lookAt(0, 0, 0); return; }
   const sub = lonLatToVec(S.lon, S.lat, R);
   const up = sub.clone().normalize();
+  /* ── ⚠ lookAt DEGENERATES WHEN up IS PARALLEL TO THE VIEW ───────────────────────────
+     Setting camera.up to the local radial while the camera is still looking near-NADIR makes
+     up and forward almost exactly antiparallel, and lookAt's cross product collapses: the
+     orientation becomes unstable and the frame renders black. Between 56 km and 8 km — a band
+     with no baseline in it — the whole globe disappeared, and it was found by driving the
+     WHEEL rather than by assigning S.dist, which is the difference between testing the code
+     and testing the app.
+
+     Screen-up therefore blends with the same tilt that swings the aim: world Y while the view
+     is a map seen from above (which is exactly the old behaviour, so the four globe baselines
+     do not move), the local radial once the view is a horizon. The blend keeps the angle
+     between up and forward within about eleven degrees of square at every altitude. */
+  camera.up.set(0, 1, 0).lerp(up, tilt).normalize();
+  if (tilt <= 0.001) { camera.lookAt(0, 0, 0); return; }
   const east = new THREE.Vector3(Math.cos(lo), 0, -Math.sin(lo));
   const north = new THREE.Vector3().crossVectors(up, east).normalize();
   /* ⚠ AIMING AT THE HORIZON IS TOO FAR. At 1.2 km up the horizon is 124 km away, so a level
@@ -321,7 +334,6 @@ function placeCamera() {
      was doing, and it read as a flat wash rather than an ocean. */
   const dep = (90 - 79 * tilt) * Math.PI / 180;
   const aheadU = (altM / 63710) / Math.tan(dep);
-  camera.up.copy(up);
   camera.lookAt(sub.clone().addScaledVector(north, aheadU));
 }
 
@@ -981,10 +993,26 @@ function wireUI() {
   /* camera: drag to spin, wheel to zoom */
   const cv = renderer.domElement;
   let drag = null;
+  /* the direction, on the unit sphere, that a screen point is looking at — through a GIVEN
+     camera, so a drag keeps using the camera it started with rather than chasing itself */
+  function raySphereDir(clientX, clientY, cam) {
+    const rect = cv.getBoundingClientRect();
+    const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = -((clientY - rect.top) / rect.height) * 2 + 1;
+    const rc = new THREE.Raycaster();
+    rc.setFromCamera(new THREE.Vector2(nx, ny), cam);
+    const hit = new THREE.Vector3();
+    if (!rc.ray.intersectSphere(new THREE.Sphere(new THREE.Vector3(), R), hit)) return null;
+    return hit.normalize();
+  }
+
   cv.addEventListener('pointerdown', e => {
     const P = window.SHIPS_PSG ? window.SHIPS_PSG.PSG : null;
+    const frozenCam = camera.clone();
+    frozenCam.updateMatrixWorld(true);
     drag = { x: e.clientX, y: e.clientY, lon: S.lon, lat: S.lat, moved: 0,
-             orbit: P ? P.orbit : 0, elev: P ? P.elev : 0 };
+             orbit: P ? P.orbit : 0, elev: P ? P.elev : 0,
+             cam: frozenCam, grab: raySphereDir(e.clientX, e.clientY, frozenCam) };
     cv.setPointerCapture(e.pointerId);
   });
   cv.addEventListener('pointermove', e => {
@@ -1006,9 +1034,42 @@ function wireUI() {
        12 units when you are close in against 600 when you are out. That is a fiftyfold
        range, which is why a drag that felt right zoomed out threw the globe across the
        screen zoomed in. Height above the surface, not radius from the middle. */
-    const k = Math.max(0.03, (S.dist - R) / 600);
-    S.lon = drag.lon - dx * 0.28 * k;
-    S.lat = Math.max(-84, Math.min(84, drag.lat + dy * 0.28 * k));
+    /* ── ⚠ THIS GAIN HAS NOW BEEN WRONG THREE TIMES, EACH TIME FOR A NEW REASON ────
+       First it divided by S.dist, which is measured from the Earth's CENTRE and barely
+       changes near the surface. Then it used altitude with a floor of 0.03 — fine while the
+       camera could not get below 765 km, and once it could, that floor moved the ground nine
+       hundred metres per pixel across a frame a kilometre wide. Then it used metres-per-pixel
+       derived from the altitude, which is right for a camera looking straight DOWN and wrong
+       by 1/sin(depression) for one that is not: measured against an independent yardstick it
+       came out five times too slow at seven hundred metres, and 1/sin(11 degrees) is 5.24.
+
+       Three analytic models, three failures, each correct about the thing it modelled and
+       blind to the next term. So stop modelling it. GRAB THE OCEAN AND PULL IT: raycast the
+       cursor onto the sphere at pointer-down, raycast it again on every move THROUGH THE
+       CAMERA AS IT WAS AT pointer-down, and rotate the globe by whatever takes one to the other.
+       That is what dragging a map means, and it is exact at every altitude, every tilt, every
+       latitude and every field of view without knowing about any of them. */
+    if (!drag.grab) { S.lon = drag.lon; S.lat = drag.lat; placeCamera(); return; }
+    /* ⚠ AND ONE STEP IS THE WHOLE SOLUTION — I TRIED TO IMPROVE IT AND MADE IT WORSE.
+       Rotating by the angle between the two surface directions is exact when the visible patch
+       is nearly flat, which is every altitude below about a hundred kilometres: measured error
+       ZERO metres at 700 m and one metre at 1.5 km. It drifts to 0.17 per cent from a thousand
+       kilometres up, where perspective foreshortening near the limb means a degree of rotation
+       is not a degree of view.
+
+       Iterating the step to chase that residual took 700 m from 0 m of error to 643 m. The
+       reason is that placeCamera() swings the AIM as well as the position — the tilt is a
+       function of altitude and the aim a function of lon/lat — so the map being solved is not
+       the near-identity the iteration assumes, and it oscillates instead of converging. The
+       single step stays. The residual it leaves is at globe zoom, where nothing is being aimed
+       at more precisely than a continent. */
+    const cur = raySphereDir(e.clientX, e.clientY, drag.cam);
+    if (!cur) return;                                  // cursor is off the limb: nothing to hold
+    const q = new THREE.Quaternion().setFromUnitVectors(cur, drag.grab);
+    const p = lonLatToVec(drag.lon, drag.lat, 1).applyQuaternion(q);
+    const ll = vecToLonLat(p);
+    S.lon = ll.lon;
+    S.lat = Math.max(-84, Math.min(84, ll.lat));
     placeCamera();
   });
   cv.addEventListener('pointerup', ev => {

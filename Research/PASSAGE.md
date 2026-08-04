@@ -169,3 +169,58 @@ Four and a half decades of altitude and the whole surface of the Earth could not
 - exaggeration ramp monotone across 38,000 km → 500 m, exactly 1.0× at and below the handover
 - 17 baselines at **0.000 %** — the descent is entirely additive above 8 km
 - both new frames non-blank (variance 2491 and 2723 against a floor)
+
+---
+
+# Driving it, rather than testing the code that drives it  (2026-08-04, round 11)
+
+The descent was verified by assigning `S.dist` in the console. That tests the arithmetic and not
+the app. Driving the actual wheel and the actual pointer found three things the arithmetic could
+not.
+
+## 1. The measurement was against a stale page
+
+The browser tab was serving a cached `index.html` from an earlier stamp, so `setCameraDepthRange`
+was `undefined` and I spent a diagnosis chasing a black band that the current build did not have.
+**Cache-bust the PAGE, not just the stamped script query** — the stamp is on the scripts, and it
+is the document that goes stale.
+
+## 2. lookAt degenerates when up is parallel to the view
+
+Setting `camera.up` to the local radial while the view is still near-nadir makes up and forward
+almost exactly antiparallel, the cross product collapses, and the frame renders black. Screen-up
+now blends with the same `tilt` that swings the aim: world Y while the view is a map from above —
+which is bit-for-bit the old behaviour, so the four globe baselines do not move — and the local
+radial once the view is a horizon. |up · forward| stays under 0.2 at every altitude.
+
+Verified by driving the wheel from the top: **100 % lit from 2,944 km to 670 m**, no gap at the
+handover.
+
+## 3. The drag gain has now been wrong three times, each for a new reason
+
+| version | model | why it failed |
+|---|---|---|
+| 1 | divide by `S.dist` | measured from the Earth's CENTRE, barely changes near the surface |
+| 2 | altitude, floored at 0.03 | the floor dominated the last three decades: **930 m of ground per pixel** at 700 m |
+| 3 | metres-per-pixel from altitude | right for a NADIR camera; out by 1/sin(depression) once tilted — measured **5× too slow**, and 1/sin(11°) = 5.24 |
+
+Three analytic models, three failures, each correct about the thing it modelled and blind to the
+next term. So it stopped being modelled: **grab the ocean and pull it.** Raycast the cursor onto
+the sphere at pointer-down, raycast again on every move *through the camera as it was then*, and
+rotate by whatever takes one to the other. Exact at every altitude, tilt, latitude and field of
+view without knowing about any of them.
+
+Measured against an independent yardstick (two screen points projected onto the sphere):
+
+| altitude | error |
+|---|---|
+| 700 m | **0 m** |
+| 1.5 km / 5 km | 1 m |
+| 20 km | 4 m |
+| 100 km | 21 m |
+| 1,000 km | 2.1 km (0.2 %) |
+
+⚠ **And iterating it to chase the high-altitude residual made it worse** — 700 m went from 0 m to
+643 m. `placeCamera()` swings the AIM as well as the position, so the map being solved is not the
+near-identity the iteration assumes and it oscillates. The single step stays. The residual it
+leaves is at globe zoom, where nothing is aimed at more precisely than a continent.
