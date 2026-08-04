@@ -877,7 +877,26 @@ function wireUI() {
     S.lat = Math.max(-84, Math.min(84, drag.lat + dy * 0.28 * k));
     placeCamera();
   });
-  cv.addEventListener('pointerup', () => { drag = null; });
+  cv.addEventListener('pointerup', ev => {
+    /* ── CLICK A SHIP, OPEN HER ─────────────────────────────────────────────────────
+       A drag that happens to end over a hull is not a click on it, so the same `moved`
+       accumulator the port markers use guards this. Opening the Shipwright on that vessel
+       is the right destination: it is the SAME MODEL the token is drawn from, so clicking
+       the speck on the ocean takes you to the thing itself rather than to a picture of it. */
+    const wasDrag = drag && drag.moved > 6;
+    drag = null;
+    if (wasDrag) return;
+    const tr = pickShip(ev);
+    if (tr && tr.vesselId && window.SHIPS_SW) {
+      const list = APP.vessels.vessels || APP.vessels;
+      const ves = list.find(x => x.id === tr.vesselId);
+      if (ves) { setView('ship'); window.SHIPS_SW.swOpen(ves); }
+    }
+  });
+  cv.addEventListener('pointermove', ev => {
+    if (drag) return;                       // dragging the globe is not hovering a ship
+    setHover(pickShip(ev));
+  });
   cv.addEventListener('wheel', e => {
     e.preventDefault();
     fly = null;
@@ -1069,7 +1088,67 @@ function openPort(p) {
  */
 let eraFleet = null, eraTracks = [];
 
+/* ── PUTTING A TRACK ON THE WATER ────────────────────────────────────────────────────────
+ * A voyage's legs are five to twenty waypoints for a whole circumnavigation, so the straight
+ * run between two of them regularly crosses a continent — Magellan's Atlantic waypoint to his
+ * Pacific one goes through Argentina. Slerping fixed the projection but not the geography.
+ *
+ * So each leg is DENSIFIED along the great circle and every sample tested against the same
+ * depth field the seafloor layer draws. A sample on land is walked out to sea along the
+ * perpendicular to its course, trying both hands and taking the shorter — which is what
+ * standing off a headland is. The result is not a shortest-water-path solver; it is a track
+ * that follows the researched waypoints and never crosses the beach between them.
+ *
+ * ⚠ AND IT RUNS ONCE, AT BUILD. Testing the depth grid every frame for every hull would put a
+ * texture read in the animation loop for no gain: the route does not change while you watch it.
+ */
+function seaRoute(legs) {
+  const RT = window.SHIPS_ROUTE;
+  const out = [];
+  const push = (lon, lat) => {
+    const last = out[out.length - 1];
+    if (!last || Math.abs(last.lon - lon) > 0.02 || Math.abs(last.lat - lat) > 0.02)
+      out.push({ lon, lat });
+  };
+  for (let i = 0; i < legs.length - 1; i++) {
+    const a = legs[i], b = legs[i + 1];
+    const va = lonLatToVec(a.lon, a.lat, 1), vb = lonLatToVec(b.lon, b.lat, 1);
+    const ang = Math.acos(Math.max(-1, Math.min(1, va.dot(vb))));
+    /* one sample per degree of arc, so a long ocean leg gets real resolution and a short
+       coastal hop is not oversampled into hundreds of points */
+    const steps = Math.max(2, Math.round(ang * 180 / Math.PI));
+    for (let k = 0; k <= steps; k++) {
+      const f = k / steps;
+      let v;
+      if (ang < 1e-6) v = va.clone();
+      else v = va.clone().multiplyScalar(Math.sin((1 - f) * ang) / Math.sin(ang))
+                 .add(vb.clone().multiplyScalar(Math.sin(f * ang) / Math.sin(ang)));
+      v.normalize();
+      let lat = Math.asin(v.y) * 180 / Math.PI;
+      let lon = Math.atan2(v.x, v.z) * 180 / Math.PI;
+      if (RT && RT.isNavigable && !RT.isNavigable(lon, lat)) {
+        /* stand off: walk perpendicular to the course, both hands, and take the first water */
+        const brg = Math.atan2(vb.x - va.x, vb.z - va.z);
+        let best = null;
+        for (let d = 1; d <= 26 && !best; d++) {
+          for (const side of [1, -1]) {
+            const th = brg + side * Math.PI / 2;
+            const dLat = Math.cos(th) * d * 0.55;
+            const dLon = Math.sin(th) * d * 0.55 / Math.max(0.2, Math.cos(lat * Math.PI / 180));
+            const nlat = Math.max(-84, Math.min(84, lat + dLat)), nlon = lon + dLon;
+            if (RT.isNavigable(nlon, nlat)) { best = { lon: nlon, lat: nlat }; break; }
+          }
+        }
+        if (best) { lon = best.lon; lat = best.lat; } else continue;   // landlocked: drop it
+      }
+      push(lon, lat);
+    }
+  }
+  return out.length > 1 ? out : legs;
+}
+
 function clearEraFleet() {
+  setHover(null);
   if (eraFleet) { scene.remove(eraFleet); }
   eraFleet = null; eraTracks = [];
 }
@@ -1119,10 +1198,68 @@ function buildEraFleet() {
 
     /* speed is the vessel's own best, so a clipper crosses while a cog is still in the Bight */
     const kn = (ves.polar && ves.polar.best) || ves.speedKn || 6;
-    eraTracks.push({ grp, legs: v.legs, kn,
+    eraTracks.push({ grp, legs: seaRoute(v.legs), kn, vesselId: v.vessel,
                      phase: (eraTracks.length * 0.37) % 1, name: v.name });
   }
   if (eraFleet.children.length) scene.add(eraFleet); else eraFleet = null;
+}
+
+/* ── HOVER: THE SHIP, HER NAME, AND HER TRACK ───────────────────────────────────────────
+ * A token you cannot interrogate is decoration. Hovering lifts one ship out of the fleet and
+ * draws the route she is running, in the manner of a chart: a thin line, no glow, no arrows.
+ *
+ * The line is the ROUTED track — the same array of points the ship is following, already
+ * pushed clear of the land — so what you see is exactly what she sails. It cannot be a
+ * prettier version of the path, because it is the path.
+ */
+let hoverTrack = null, hoverLine = null, hoverTag = null;
+
+function makeHoverLine(pts) {
+  const v = [];
+  for (const p of pts) { const w = lonLatToVec(p.lon, p.lat, R * 1.004); v.push(w.x, w.y, w.z); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+  return new THREE.Line(g, new THREE.LineBasicMaterial({
+    color: 0xe8dcc0, transparent: true, opacity: 0.62 }));
+}
+
+function setHover(tr) {
+  if (hoverTrack === tr) return;
+  if (hoverLine) { scene.remove(hoverLine); hoverLine.geometry.dispose(); hoverLine = null; }
+  hoverTrack = tr;
+  if (!hoverTag) {
+    hoverTag = document.createElement('div');
+    hoverTag.style.cssText = 'position:fixed;pointer-events:none;z-index:60;font-size:11px;' +
+      'letter-spacing:.10em;text-transform:uppercase;color:#efe6d2;text-shadow:0 1px 3px #000;' +
+      'display:none;font-family:inherit';
+    document.body.appendChild(hoverTag);
+  }
+  if (!tr) { hoverTag.style.display = 'none'; document.body.style.cursor = ''; return; }
+  hoverLine = makeHoverLine(tr.legs);
+  scene.add(hoverLine);
+  hoverTag.textContent = tr.name;
+  hoverTag.style.display = 'block';
+  document.body.style.cursor = 'pointer';
+}
+
+/* the raycast is against a coarse sphere at each ship, not the hull: a hull is a few hundred
+   triangles of rigging and testing them all every mousemove is a cost with no benefit */
+function pickShip(ev) {
+  if (!eraFleet || !eraTracks.length) return null;
+  const cv = renderer.domElement, rect = cv.getBoundingClientRect();
+  const nx = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+  const ny = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+  const rc = new THREE.Raycaster();
+  rc.setFromCamera(new THREE.Vector2(nx, ny), camera);
+  let best = null, bestD = Infinity;
+  for (const tr of eraTracks) {
+    const c = tr.grp.position;
+    /* a ship is drawn at a camera-relative size, so its pick radius must be too */
+    const rad = (S.dist * 0.0098) * 1.6;
+    const d = rc.ray.distanceToPoint(c);
+    if (d < rad && c.distanceTo(camera.position) < bestD) { best = tr; bestD = c.distanceTo(camera.position); }
+  }
+  return best;
 }
 
 function stepEraFleet(t) {
@@ -1184,6 +1321,13 @@ function stepEraFleet(t) {
     fwd.normalize();
     const m = new THREE.Matrix4().makeBasis(fwd.clone().cross(up).normalize(), up, fwd);
     tr.grp.quaternion.setFromRotationMatrix(m);
+    if (hoverTrack === tr && hoverTag) {
+      const p = tr.grp.position.clone().project(camera);
+      const cv = renderer.domElement, rect = cv.getBoundingClientRect();
+      hoverTag.style.left = (rect.left + (p.x * 0.5 + 0.5) * rect.width + 12) + 'px';
+      hoverTag.style.top  = (rect.top + (-p.y * 0.5 + 0.5) * rect.height - 8) + 'px';
+      hoverTag.style.display = p.z < 1 ? 'block' : 'none';
+    }
     /* and she rides the swell, using the same wave field the Shipwright floats on */
     if (window.SHIPS_SEA) {
       const s = window.SHIPS_SEA.seaAt(lo * 40, la * 40, t, 7);

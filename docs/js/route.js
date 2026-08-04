@@ -420,4 +420,28 @@ function passageHours(cost, lon, lat) {
   return best;
 }
 
-window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV };
+/* ── IS THERE WATER HERE? ────────────────────────────────────────────────────────────────
+ * The nav grid already holds elevation in metres, negative at sea, at about 0.7 degrees. That
+ * is the same data the seafloor layer draws from, so a ship routed with it cannot end up on a
+ * coastline the globe does not show — the failure that ARCHITECTURE-PATTERNS §4 exists to
+ * prevent, and the one that put two carracks in the middle of Brazil.
+ *
+ * A DRAUGHT MARGIN, not a shoreline test. Asking only "is the elevation below zero" puts hulls
+ * in half a metre of water over a reef. Ships keep off soundings, so the test is for water a
+ * vessel could actually swim in, and deep enough that the 0.7-degree grid rounding a headland
+ * to seaward cannot beach her.
+ */
+function seaDepthAt(lon, lat) {
+  if (!buildNavGrid()) return -4000;                       // unknown: assume open ocean
+  let x = Math.floor(((lon + 180) % 360) / 360 * NAV_W);
+  if (x < 0) x += NAV_W;
+  const y = Math.floor((90 - lat) / 180 * NAV_H);
+  if (y < 0 || y >= NAV_H) return -4000;
+  return NAV.depth[y * NAV_W + Math.min(NAV_W - 1, x)];
+}
+
+function isNavigable(lon, lat, minDepth) {
+  return seaDepthAt(lon, lat) < -(minDepth === undefined ? 60 : minDepth);
+}
+
+window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable };
