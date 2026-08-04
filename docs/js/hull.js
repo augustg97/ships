@@ -1836,63 +1836,61 @@ function buildSuperstructure(S, group) {
        and the scuppers drain along. Loft it from the hull's own half-breadth at each station
        and it can never overhang, on any ship, at any beam. */
     const uA = 0.5 - (len / L) / 2, uB = 0.5 + (len / L) / 2;
-    const NU = 40, tp = [], ti = [];
+    /* ── ⚠ VERTEX COLOUR CANNOT PAINT A BAND THAT HAS NO VERTICES ─────────────────────
+       The first attempt at painting the windows into the house put the band at 0.30–0.66 of
+       the tier height — but the lofted wall had vertices only at the SOLE and the ROOF, so no
+       vertex was ever inside the band and the windows vanished entirely. August saw a blank
+       white slab. Same family as the multiply-by-zero faults: the feature could not express
+       itself because the mesh had no resolution where the feature lived.
+       So the wall is now built with the band's own edges AS VERTEX ROWS, and stationed finely
+       enough along the length that a 1.4 m mullion has vertices to sit between. The geometry
+       carries the openings because the openings are part of what the house IS. */
+    const paneW = B * 0.075;                            // a light is about this wide, always
+    const rows = [0.0, 0.30, 0.315, 0.645, 0.66, 1.0];  // sole, band edges, roof
+    const NU = Math.max(90, Math.round(len / (paneW * 0.5)));
     const inset = B * 0.055;                            // the waterway, each side
+    const glass = new THREE.Color(0x20242a), face = new THREE.Color(0xe4e2dc);
+    const tp = [], ti = [], tc = [];
     for (let k = 0; k <= NU; k++) {
       const u = uA + (uB - uA) * k / NU;
       const deckHalf = Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
       const half = Math.max(B * 0.06, Math.min(wid / 2, deckHalf - inset));
       const x = (u - 0.5) * L;
-      tp.push(x, -dh / 2, -half,  x, -dh / 2, half,
-              x,  dh / 2, -half,  x,  dh / 2, half);
+      /* a mullion every paneW of REAL length; between them, glass */
+      const frac = ((x / paneW) % 1 + 1) % 1;
+      const isMullion = frac < 0.34;
+      for (const rf of rows) {
+        const yy = -dh / 2 + rf * dh;
+        const inBand = rf > 0.30 && rf < 0.66;
+        const c = (inBand && !isMullion) ? glass : face;
+        tp.push(x, yy, -half,  x, yy, half);
+        tc.push(c.r, c.g, c.b,  c.r, c.g, c.b);
+      }
     }
+    const RW = rows.length * 2;
     for (let k = 0; k < NU; k++) {
-      const a = k * 4, b = a + 4;
-      ti.push(a + 2, b + 2, a + 3,  a + 3, b + 2, b + 3);   // roof
-      ti.push(a, a + 1, b,          a + 1, b + 1, b);       // sole
-      ti.push(a, b, a + 2,          a + 2, b, b + 2);       // port side
-      ti.push(a + 1, a + 3, b + 1,  a + 3, b + 3, b + 1);   // starboard side
+      const A0 = k * RW, B0 = A0 + RW;
+      for (let r = 0; r < rows.length - 1; r++) {
+        const a0 = A0 + r * 2, b0 = B0 + r * 2;
+        ti.push(a0, b0, a0 + 2,  a0 + 2, b0, b0 + 2);         // port wall
+        ti.push(a0 + 1, a0 + 3, b0 + 1,  a0 + 3, b0 + 3, b0 + 1); // starboard wall
+      }
+      const rt = (rows.length - 1) * 2;
+      ti.push(A0 + rt, A0 + rt + 1, B0 + rt,  A0 + rt + 1, B0 + rt + 1, B0 + rt); // roof
+      ti.push(A0, B0, A0 + 1,  A0 + 1, B0, B0 + 1);                                // sole
     }
-    /* cap the ends so the house is closed, not a tube */
-    const e0 = 0, e1 = NU * 4;
-    ti.push(e0, e0 + 2, e0 + 1, e0 + 1, e0 + 2, e0 + 3);
-    ti.push(e1, e1 + 1, e1 + 2, e1 + 1, e1 + 3, e1 + 2);
+    for (const e of [0, NU * RW]) {                       // close the ends
+      for (let r = 0; r < rows.length - 1; r++) {
+        const a0 = e + r * 2;
+        ti.push(a0, a0 + 2, a0 + 1,  a0 + 1, a0 + 2, a0 + 3);
+      }
+    }
     const tg = new THREE.BufferGeometry();
     tg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+    tg.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
     tg.setIndex(ti); tg.computeVertexNormals();
-    const tier = new THREE.Mesh(tg, white);
-    tier.position.set(-L * 0.02 + f * L * 0.03, base + dh * (i + 0.5), 0);
-    g.add(tier);
-    /* ── ⚠ THE WINDOWS FLICKERED, AND IT WAS THE SAME FAULT AS THE FUNNEL BAND ────────
-       August reported the funnel flicker fixed and the WINDOWS still flickering. Same cause,
-       and worse: the window strip and its mullions were BoxGeometry at a constant `wid`,
-       laid over a deckhouse I had since LOFTED to follow the hull's plan. A fixed-width box
-       over a tapering house is coincident with it SOMEWHERE along its length by construction
-       — proud at the bow, buried amidships, and fighting for the pixel wherever the two
-       surfaces cross. Nothing about that is tunable.
-
-       Windows are not a fitting bolted to a deckhouse; they are OPENINGS IN IT. So they are
-       painted into the house's own geometry as vertex colours — one surface, no second skin,
-       nothing left to contend. The mullions come free: they are simply the parts of the band
-       that are not glass, at a fixed real spacing, so the count follows the ship's length.
-       This is the third time this session that the fix has been "make it one surface". */
-    const paneW = B * 0.075;                            // a light is about this wide, always
-    const bandLo = 0.30, bandHi = 0.66;                 // the window band, as a fraction of tier height
-    const cols = [];
-    const glass = new THREE.Color(0x23262a), face = new THREE.Color(0xe4e2dc);
-    const tpos = tg.attributes.position;
-    for (let vi = 0; vi < tpos.count; vi++) {
-      const yy = tpos.getY(vi) / dh + 0.5;              // 0 at the sole, 1 at the roof
-      const xx = tpos.getX(vi);
-      const inBand = yy > bandLo && yy < bandHi;
-      /* a mullion every paneW along the real length; between them, glass */
-      const frac = ((xx / paneW) % 1 + 1) % 1;
-      const isMullion = frac < 0.20;
-      const c = (inBand && !isMullion) ? glass : face;
-      cols.push(c.r, c.g, c.b);
-    }
-    tg.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-    tier.material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.60 });
+    const tier = new THREE.Mesh(tg, new THREE.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.60 }));
     /* ── AND A RAILING, which is what actually breaks a box ─────────────────────────────
        A deckhouse roof without one is a slab. With stanchions and three rails it acquires a
        scale, a top edge that is not a hard line, and something for the light to catch. */
