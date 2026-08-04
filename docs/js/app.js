@@ -1007,51 +1007,19 @@ function openPort(p) {
     rows: p.rows || [], prose: p.text || '', span: p.span || '', cite: p.cite || '',
     tags: p.tags,
   });
-  S.reachFrom = p;
-
-  /* The card grows a hull picker: choose a ship, and the ocean fills with the time it takes
-     that ship to get anywhere from here, in the month on the dial. This is the model's own
-     output — nothing about it is drawn by hand. */
-  const host = document.getElementById('cProse');
-  const box = document.createElement('div');
-  box.style.cssText = 'margin-top:14px;border-top:1px solid var(--edge);padding-top:11px';
-  const live = vesselsAtYear(S.year);
-  box.innerHTML =
-    '<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;' +
-    'color:var(--brass);margin-bottom:7px">Sail from here</div>' +
-    '<select id="reachHull" style="width:100%;background:#1a1815;color:var(--ink);' +
-    'border:1px solid var(--edge);padding:5px;font-size:12px;border-radius:2px">' +
-    live.map(v => `<option value="${v.id}">${v.name} — ${v.polar.rig}</option>`).join('') +
-    '</select>' +
-    '<button id="reachGo" class="mini" style="margin-top:8px;width:100%">' +
-    'Compute the passage field</button>' +
-    '<button id="reachYard" class="mini" style="margin-top:6px;width:100%">' +
-    'See that hull</button>' +
-    '<div id="reachOut" style="font-size:11.5px;color:var(--ink-dim);margin-top:9px;' +
-    'line-height:1.6"></div>';
-  host.appendChild(box);
-
-  document.getElementById('reachYard').onclick = () => {
-    const id = document.getElementById('reachHull').value;
-    const v = live.find(x => x.id === id);
-    if (v && v.hull) window.SHIPS_YARD.yardOpen(v);
-  };
-
-  document.getElementById('reachGo').onclick = async () => {
-    const out = document.getElementById('reachOut');
-    out.textContent = 'solving…';
-    const id = document.getElementById('reachHull').value;
-    const r = await window.SHIPS_ROUTE.computeReachFrom(p, id);
-    if (!r) { out.textContent = 'no navigable water within reach of this port on the grid.'; return; }
-    out.innerHTML =
-      `<b>${r.vessel.name}</b>, leaving ${p.name} in ` +
-      `<b>${MONTH_NAMES[Math.floor(S.month) % 12]}</b>.<br>` +
-      `Reached <b>${r.pct.toFixed(0)}%</b> of the world ocean within 200 days ` +
-      `(${(r.ms / 1000).toFixed(1)} s).<br>` +
-      `<span style="color:var(--ink-faint)">Each band is ten days. ` +
-      `A typical passage on a monthly mean wind — not a forecast.</span>`;
-  };
+  /* ── ⚠ "SAIL FROM HERE" IS GONE, DELIBERATELY ───────────────────────────────────────
+     The panel offered a hull picker, a passage-field computation and a "See that hull"
+     button. The button opened the YARD — an older, cruder model that predates the Shipwright
+     — so following it took you from a port card to a PRIMITIVE version of a vessel you can
+     inspect properly one tab away. The picker also listed only the hulls alive in the
+     selected year, so it never showed the fleet. And the passage field, though a real
+     calculation off the model's own polars, rendered as a grey wash: a true thing that did
+     not look like anything.
+     The calculation is worth keeping and will come back in a form that earns its pixels. A
+     control that leads somewhere worse than where you already were is not worth keeping in
+     the meantime. */
 }
+
 /* ── THE CAMPAIGN: A BATTLE THAT MOVES ──────────────────────────────────────────────────
  * A battle card is a still, and a still cannot make this project's argument — that a campaign
  * IS a wind field with a fleet in it. So a battle carrying a `campaign` plays: two fleets run

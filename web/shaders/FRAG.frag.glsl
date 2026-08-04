@@ -162,7 +162,27 @@ void main(){
     vec3 clearBlue = vec3(0.016, 0.062, 0.150);
     vec3 deepBlue  = vec3(0.008, 0.030, 0.082);
     vec3 greenish  = vec3(0.046, 0.115, 0.098);
-    float g = uLyChl > 0.5 ? clamp(log(max(chl, 0.012)) * 0.28 + 0.60, 0.0, 1.0) : 0.16;
+    /* ── ⚠ THE CHLOROPHYLL LAYER SHOWED NOTHING, AND HERE IS WHY ────────────────────
+       The data was never the problem: the green channel runs 0–251 across 45% of the frame.
+       The MAPPING threw it away. log(chl)*0.28 + 0.60 on open-ocean chlorophyll — around
+       0.04 mg/m3 — gives log(0.04)*0.28 + 0.60 = -0.32, which clamps to ZERO. So switching
+       the layer on made the open ocean marginally BLUER than the 0.16 default it replaced,
+       and only a narrow coastal fringe ever went green. A toggle whose visible effect is to
+       remove a little colour is indistinguishable from a toggle that does nothing.
+
+       What it is supposed to show is the ocean's LIVING STRUCTURE, which is one of the great
+       patterns of the planet and is invisible from a ship: the subtropical gyres are deserts,
+       clearer than distilled water and almost lifeless; the equator, the subpolar seas and
+       every eastern-boundary upwelling are green with bloom; and the shelves are greenest of
+       all. Those are the fishing grounds, and they explain where fleets went.
+
+       Natural log over a range spanning four decades needs a gentler slope and a lower pivot.
+       0.16 of the range now sits at about 0.05 mg/m3 — true open ocean — and a shelf at
+       10 mg/m3 reaches the top, so the whole productive structure lies inside the ramp
+       instead of clamped off the bottom of it. */
+    float g = uLyChl > 0.5
+      ? clamp(log(max(chl, 0.004)) * 0.155 + 0.62, 0.0, 1.0)
+      : 0.16;
     vec3 body = mix(clearBlue, greenish, g);
     body = mix(body, deepBlue, smoothstep(600.0, 4200.0, depth));   // the open ocean darkens
     body *= mix(0.88, 1.16, clamp((sst + 2.0) / 34.0, 0.0, 1.0));   // warm water reads warmer
