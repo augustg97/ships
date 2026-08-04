@@ -553,6 +553,8 @@ function selectEra(i, fly) {
   const yr = document.getElementById('yr');
   yr.min = ch.from; yr.max = ch.to; yr.step = Math.max(1, Math.round((ch.to - ch.from) / 400));
   yr.value = S.year;
+  /* the shipping of the era changes with the era */
+  buildEraFleet();
 
   document.getElementById('eraHd').textContent = ch.title;
   document.getElementById('eraSm').innerHTML = ch.lede || (ch.text || '').split('\n\n')[0];
@@ -952,6 +954,7 @@ function frame(now) {
   stepFly(t);
   stepVoyage(dt);
   stepCampaign(dt);
+  stepEraFleet(t);
   updateLabels(t);
 
   if (S.monthPlaying && !FROZEN) {
@@ -1033,6 +1036,121 @@ function openPort(p) {
  * What the geometry says without a word of commentary: on twelve of thirteen days the English
  * fleet lies UPWIND of the Armada. That is the whole military story of 1588.
  */
+/* ── THE ERA FLEET: THE OCEAN WITH SHIPPING ON IT ───────────────────────────────────────
+ *
+ * An empty ocean is a map. An ocean with hulls moving on it is a period.
+ *
+ * Every ship here is the SAME MODEL the Shipwright builds — SHIPS_HULL.buildShip on the same
+ * hull record — so a vessel cannot look like one thing in one view and another thing in the
+ * next. When the Shipwright's junk gains a settee or its topmasts, the junk out on the ocean
+ * gains them in the same build. There is no second model to drift.
+ *
+ * ── AND THE ROUTES ARE REAL ────────────────────────────────────────────────────────────
+ * They come from voyages.json — the tracks already researched for this project, each tying a
+ * vessel to a chain of waypoints it actually sailed. So the dhow runs the monsoon crossing,
+ * the carracks work the Carreira da India, the clipper comes home round the Horn, and the
+ * box boat runs Asia to Europe. A ship on the wrong ocean would be worse than no ship.
+ *
+ * They loop, because the whole point of a trade route is that it repeats. A voyage is a line;
+ * a TRADE is a line travelled until the ship wears out.
+ *
+ * ── WHY THEY ARE TOKENS AND NOT SCALE MODELS ───────────────────────────────────────────
+ * At true scale a 42 m carrack on a 6,371 km globe is a third of a pixel. So the hull is
+ * scaled with the CAMERA, holding one legible size on screen at every zoom, exactly as the
+ * campaign fleets do. That is a deliberate lie about size and the only one in the view; the
+ * ROUTE, the speed and the ship itself are all true.
+ */
+let eraFleet = null, eraTracks = [];
+
+function clearEraFleet() {
+  if (eraFleet) { scene.remove(eraFleet); }
+  eraFleet = null; eraTracks = [];
+}
+
+function buildEraFleet() {
+  clearEraFleet();
+  const ch = (APP.chapters && APP.chapters.chapters) ? APP.chapters.chapters[S.era] : null;
+  if (!ch || !APP.voyages || !APP.vessels) return;
+  const from = ch.from, to = ch.to;
+  const vy = (APP.voyages.voyages || APP.voyages).filter(v =>
+    v.legs && v.legs.length > 1 && v.year >= from && v.year <= to);
+  if (!vy.length) return;
+
+  eraFleet = new THREE.Group();
+  const list = APP.vessels.vessels || APP.vessels;
+  for (const v of vy) {
+    const ves = list.find(x => x.id === v.vessel);
+    if (!ves || !ves.hull) continue;
+    let proto;
+    try { proto = window.SHIPS_HULL.buildShip(ves.hull); } catch (e) { continue; }
+
+    /* Ships sail in company where it was the practice and alone where it was not. A treasure
+       fleet, an Indies convoy and a battle squadron moved together; a clipper raced alone
+       and a lone canoe is the whole point of the Pacific story. */
+    const together = /treasure|carrack|indiaman/.test(v.vessel) ? 3
+                   : /container|steamer/.test(v.vessel) ? 1
+                   : /canoe|dugout/.test(v.vessel) ? 2 : 1;
+    const grp = new THREE.Group();
+    for (let n = 0; n < together; n++) {
+      const holder = new THREE.Group();
+      const sh = n === 0 ? proto : proto.clone();
+      /* the hull's bow is at local -X; -X onto +Z is a quarter turn about Y */
+      sh.rotation.y = -Math.PI / 2;
+      holder.add(sh);
+      const L0 = ves.hull.loa;
+      const t = together === 1 ? 0 : (n - (together - 1) / 2);
+      holder.position.set(t * L0 * 5.0, 0, -Math.abs(t) * L0 * 4.0);
+      grp.add(holder);
+    }
+    grp.userData.loa = ves.hull.loa;
+    eraFleet.add(grp);
+
+    /* speed is the vessel's own best, so a clipper crosses while a cog is still in the Bight */
+    const kn = (ves.polar && ves.polar.best) || ves.speedKn || 6;
+    eraTracks.push({ grp, legs: v.legs, kn,
+                     phase: (eraTracks.length * 0.37) % 1, name: v.name });
+  }
+  if (eraFleet.children.length) scene.add(eraFleet); else eraFleet = null;
+}
+
+function stepEraFleet(t) {
+  if (!eraFleet) return;
+  for (const tr of eraTracks) {
+    const n = tr.legs.length;
+    /* one full circuit in a time proportional to the track's length over the ship's speed,
+       so a fast hull on a short run laps a slow one on a long one, as it would */
+    const period = Math.max(40, n * 26 / Math.max(2, tr.kn) * 9);
+    const u = ((t / period) + tr.phase) % 1;
+    const f = u * (n - 1), i = Math.min(n - 2, Math.floor(f)), fr = f - i;
+    const a = tr.legs[i], b = tr.legs[i + 1];
+    const lo = a.lon + (b.lon - a.lon) * fr, la = a.lat + (b.lat - a.lat) * fr;
+    const w = lonLatToVec(lo, la, R * 1.006);
+    tr.grp.position.copy(w);
+    /* ── HOW BIG IS A CHESS PIECE? ──────────────────────────────────────────────────
+       At the campaign's factor a 42 m carrack rendered about four pixels across — present,
+       but below the ratchet's own 0.05% threshold, which is a fair definition of invisible.
+       A token has to be READ: you should be able to tell a junk from a carrack from a
+       clipper on the ocean without clicking anything, and that is the whole reason these are
+       the Shipwright's models rather than markers. Six times the campaign factor puts a
+       middling hull around twenty-five pixels — a piece on a board, not a speck.
+       The ratio between ships is still true: Titanic is still four times the caravel. */
+    tr.grp.scale.setScalar((S.dist * 0.0098) / tr.grp.userData.loa);
+    /* heading from the track on the sphere, projected into the local tangent plane */
+    const up = w.clone().normalize();
+    let fwd = lonLatToVec(b.lon, b.lat, R).sub(lonLatToVec(a.lon, a.lat, R));
+    fwd.sub(up.clone().multiplyScalar(fwd.dot(up)));
+    if (fwd.lengthSq() < 1e-9) continue;
+    fwd.normalize();
+    const m = new THREE.Matrix4().makeBasis(fwd.clone().cross(up).normalize(), up, fwd);
+    tr.grp.quaternion.setFromRotationMatrix(m);
+    /* and she rides the swell, using the same wave field the Shipwright floats on */
+    if (window.SHIPS_SEA) {
+      const s = window.SHIPS_SEA.seaAt(lo * 40, la * 40, t, 7);
+      tr.grp.translateY(s.y * 0.00002 * S.dist);
+    }
+  }
+}
+
 let campGroup = null, campWake = [], campShip = [], campWind = null;
 
 /* local east/north on the sphere, so a compass bearing becomes a direction in world space */
