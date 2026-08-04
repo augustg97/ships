@@ -169,6 +169,73 @@ void main(){
   vec3 grad = vec3((hL - hR) / max(latScale, 0.15), (hD - hU), mPerTexel / 40.0);
   vec3 nrm = normalize(grad);
 
+  /* ══ SUB-TEXEL GROUND ═══════════════════════════════════════════════════════════════════
+     ⚠ NO PYRAMID LEVEL CAN FIX A COAST SEEN FROM A KILOMETRE UP. The finest tile set here is
+     2.4 km per texel and a pixel at that altitude is under a metre: three thousand pixels
+     inside one sample. Loading it would cost 262 MB and still leave the shoreline a smooth
+     interpolated curve — the resolution needed is four decades away, and no raster this
+     project could ship is going to close it.
+
+     What closes it is the same answer the water already uses: GENERATE the detail below the
+     grid, at a frequency the frame can resolve. That is not a decoration over the data, it is
+     a truer statement than the smooth curve — a real coastline is fractal at every scale, and
+     a smooth one is a claim about the RASTER rather than about the coast.
+
+     Two rules keep it honest:
+       * it is ZERO at globe zoom, hard-gated on how many pixels a texel spans, so the shape
+         of every coastline at the scale the data actually supports is untouched — and the
+         four globe baselines do not move by a single pixel;
+       * its amplitude follows the LOCAL SLOPE, so a delta stays flat and a fjord coast gets
+         ridges. Uniform noise over everything is how procedural detail announces itself. */
+  float texelM = mPerTexel * latScale;
+  float subVis = smoothstep(6.0, 40.0, texelM / max(uMPP, 0.001));
+  float subH = 0.0;
+  vec2 gm = localMetres(vPos);
+  if (subVis > 0.002) {
+    /* coarse enough to stay above the pixel, fine enough to sit under the texel */
+    float L = max(texelM * 0.30, uMPP * 26.0);
+    float a = 1.0, f = 1.0, sum = 0.0, norm = 0.0;
+    for (int i = 0; i < 3; i++) {
+      sum += a * (vnoise(gm * f / L) - 0.5);
+      norm += a; a *= 0.5; f *= 2.17;
+    }
+    subH = sum / max(norm, 1e-4);
+    /* ── ⚠ THE AMPLITUDE COMES FROM THE DATA'S VERTICAL VARIATION, NOT ITS SPACING ──
+       The first version scaled it by texelM — the HORIZONTAL size of a sample — which on the
+       shelf meant a hundred and fifty metres of noise in seventy metres of water. The English
+       Channel came out as an archipelago of invented islands, which is a far worse lie than a
+       smooth coast.
+
+       What sets how rough a surface is below the grid is how rough it is AT the grid. Take the
+       real difference between neighbouring samples and put a fraction of it underneath: a
+       fractal surface's variation at half the scale is roughly half. A flat shelf has almost
+       no difference between neighbours, so it stays flat and no island appears; a fjord coast
+       has hundreds of metres between them, and gets hundreds of metres of ridge. The data
+       decides how much detail it is entitled to. */
+    float relief = max(abs(hL - hR), abs(hD - hU));
+    float amp = relief * 0.35 * subVis;
+    subH *= amp;
+    /* ── AND THE SHADING PERTURBATION IS DELIBERATELY NOT HERE ──────────────────────
+       Three attempts, all kept and all discarded, because the honest result is a negative:
+         * in metres-per-metre against a gradient measured in metres-per-two-texels, it
+           contributed seven hundredths of one per cent and did nothing;
+         * converted correctly into gradient units it came out three times the texel-scale
+           slope — true of fractal terrain, and Norway rendered as bubble wrap, because smooth
+           value noise has no ridges in it and at full strength you see the noise;
+         * capped at 22 per cent of the local gradient it stopped dominating and started
+           showing its own LATTICE — square patches at the noise grid, which is a different
+           artefact rather than a smaller one.
+       Ridged, domain-warped noise would do it, and that is a real piece of work rather than a
+       constant to retune. The ELEVATION perturbation below stays, because it earns its place:
+       it gives the SHORELINE its heads and inlets, which is what actually reads as
+       low-resolution from a few kilometres up, and it is measurably absent at globe zoom. */
+  }
+  /* ⚠ applied to the ELEVATION, not only to the shading, because the thing that reads as
+     low-resolution at this range is the SHORELINE — a smooth arc where there should be heads
+     and inlets. Perturbing the height is what gives the land/water boundary its detail; doing
+     it in the shading alone leaves a fractal hillside behind a drawn-with-a-compass coast. */
+  elev += subH;
+
   vec3 col;
 
   if (elev > 0.0) {
