@@ -592,7 +592,24 @@ void main(){
      of the range into the last part of the scale instead of throwing it away, which is what
      film does and what an eye does. Nothing is clipped now, so the bright side keeps its
      structure and still reads as bright. */
-  col = vec3(1.0) - exp(-max(col, 0.0) * 1.34);
+  /* ── ⚠ AND THE ROLL-OFF THEN WASHED IT OUT A SECOND TIME, DIFFERENTLY ────────────
+     Replacing the clamp stopped the clipping and left a subtler version of the same fault.
+     Measured over the disc, bucketed by how sunlit each point is:
+
+         sun-angle > 0.8   mean 143   sd 27.9
+         everywhere else   mean  93   sd 36-38
+
+     The sub-solar region came out FIFTY PER CENT BRIGHTER WITH A QUARTER LESS CONTRAST. That
+     is the shoulder doing its job in the wrong place: at 1.34 the lit hemisphere sits high on
+     the curve where the slope is lowest, so a threefold difference in incoming light arrives
+     as a 1.5-fold difference on screen and Africa stops being distinguishable from the sea.
+
+     Two changes, and both are needed. The exposure comes down so the lit side sits in the
+     steep part of the curve rather than on the shoulder; and an S-curve about mid-grey puts
+     back the separation the shoulder costs, which is what a print curve is for. The dark side
+     barely moves — it was never the problem. */
+  col = vec3(1.0) - exp(-max(col, 0.0) * 0.98);
   col = pow(col, vec3(0.4545));                       // to sRGB
+  col = clamp((col - 0.46) * 1.26 + 0.46, 0.0, 1.0);
   gl_FragColor = vec4(col, 1.0);
 }

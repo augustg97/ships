@@ -224,3 +224,76 @@ Measured against an independent yardstick (two screen points projected onto the 
 643 m. `placeCamera()` swings the AIM as well as the position, so the map being solved is not the
 near-identity the iteration assumes and it oscillates. The single step stays. The residual it
 leaves is at globe zoom, where nothing is aimed at more precisely than a continent.
+
+---
+
+# Four faults, and following a ship instead of leaving the map  (2026-08-04, round 13)
+
+## The ships on land were the CONSORTS, and my verification could not have seen them
+
+I verified 72,768 samples on the great-circle track and 112 hulls at one phase per zoom. Swept
+across **200 phases of every track in every era**, the real figure was **11.45 % of drawn hulls
+ashore — 641 of 5,600** — and every one was a consort, never the flagship.
+
+A track is a curve; a fleet is an AREA. The search puts the flagship in open water, and a consort
+is stationed abeam of it — at token exaggeration one ship-length is about 200 km of ocean, so a
+formation that reads correctly in the Pacific puts her wingmen inland in the Yellow Sea.
+
+The fix is what a real fleet does: **when the sea-room narrows, a squadron closes up.** Each
+station is tested against the mask and drawn in toward the flagship until it is afloat; with no
+room at all she takes station astern in the flagship's own water.
+
+⚠ And it only worked after refreshing `grp.matrixWorld` — three.js updates it at render, so the
+first version tested each consort against where the fleet was LAST frame and left 3.1 % ashore.
+
+**0 of 5,600 now.** The formation closes up 641 times where the water requires it — Zheng He's
+fleet 161 times through the Indonesian straits.
+
+## Every ship in the model was sailing at six knots
+
+`ves.polar.best` does not exist. The polar is a CURVE — a dict of wind angle to speed — so the
+read returned undefined, fell through `ves.speedKn` (also absent) and landed on the literal `6`
+for all twenty-five vessels. The comment above it said *a clipper crosses while a cog is still in
+the Bight*, and no clipper had been faster than any cog since the line was written.
+
+**A fallback that fires every time is not a fallback; it is the value.**
+
+## And the pace came from the number of waypoints
+
+`period = n * 26 / kn * 34` — proportional to how many POINTS a track happens to have. Survivable
+when the router emitted one point per degree; the passage search emits corners, so the counts
+changed and every voyage silently re-timed. Measured, implied speeds ran **3,400 to 23,000 knots**
+and circuits took 15 minutes to 2 hours, which is why the fleet looked painted on.
+
+Now: distance over speed, compressed by one stated constant. Circuits are 1.7–7 minutes and the
+ratios are real — the box boat covers 39,377 km in 2.2 min while the canoe takes 5.0 min for
+26,990 km.
+
+⚠ **And ten hours per second is absurd from two kilometres off.** Following a ship, she covered
+575 km in four seconds. Time now descends with the camera: 10 h/s at map scale easing to about
+sixty times real time alongside, where a treasure ship makes 4.9 knots. Measured after: **15
+apparent knots** — visibly under way, and the coast changes without being a blur.
+
+## The washed-out sun, measured
+
+| sun·n | before | after |
+|---|---|---|
+| > 0.8 | mean 143, **sd 27.9** | mean 131, **sd 31.0** |
+| elsewhere | sd 36–38 | sd 39.5–43.5 |
+
+The sub-solar region was 50 % brighter with a quarter LESS contrast — the shoulder compressing
+exactly where the light is. Exposure 1.34 → 0.98 so the lit side sits on the steep part, plus an
+S-curve about mid-grey. Dimmer and more contrast at once.
+
+## Following is a camera mode, not a separate view
+
+Clicking a hull used to open the Passage — its own scene, camera, card, and a cut. What was
+wanted is simpler: **the map goes down to her and stays with her.** The near-field water and the
+true-scale fleet already existed for the descent, so following costs one camera mode: the aim
+becomes the ship, drag walks round her, the wheel changes how far off you stand, and the terrain
+changes underneath because she is genuinely moving across the real globe. Zoom out far enough and
+she is released — no button to find.
+
+⚠ `stepFly` reads `fly.ms` and a `performance.now()` epoch. Hand-building the flight with `dur`
+and `clockS()` makes `(now - t0)/undefined = NaN`, which propagates into `S.dist`, the camera and
+every downstream measure — and presents as a **null altitude, not an error**. Use `flyTo`.

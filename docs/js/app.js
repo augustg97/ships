@@ -39,6 +39,16 @@ const R = 100;                       // globe radius in world units
 /* 500 m above the water. Below that the level-0 elevation raster is 19.5 km per texel and the
    sphere is faceted at 210 km, so there is nothing left to resolve and everything to alias. */
 const MIN_ALT = 500 / 63710;
+/* ── FOLLOWING A SHIP IS A CAMERA MODE, NOT A SEPARATE VIEW ───────────────────────────────
+   Clicking a hull used to open the Passage: its own scene, its own camera, its own card, and
+   a cut. What was actually wanted is simpler and better — the MAP goes down to her and stays
+   with her. The near-field water and the true-scale fleet already exist for the descent, so
+   following costs one camera mode and no new machinery: the aim becomes the ship instead of a
+   point to the north, drag walks round her instead of over the ground, and the terrain changes
+   underneath because she is genuinely moving across the real globe.
+     followAz  the bearing you are watching her from
+     followDep the depression, so you can drop to her waterline or look down on her deck */
+const FOLLOW_RELEASE_M = 90000;      // zoom out past this and the map takes over again
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
@@ -62,6 +72,7 @@ function yearLabel(y) {
 
 /* ── state ──────────────────────────────────────────────────────────────── */
 const S = {
+  follow: null, followAz: 2.4, followDep: 15, followDist: 200,
   era: 4,                 // index into APP.chapters.chapters
   year: 1600,
   month: 6.5,             // 0..12, fractional so the field interpolates
@@ -283,7 +294,7 @@ function sunVector(monthFrac) {
 /* ── camera ─────────────────────────────────────────────────────────────── */
 function placeCamera() {
   const la = S.lat * Math.PI / 180, lo = S.lon * Math.PI / 180;
-  const d = S.dist;
+  let d = S.dist;
   camera.position.set(
     d * Math.cos(la) * Math.sin(lo),
     d * Math.sin(la),
@@ -301,6 +312,38 @@ function placeCamera() {
      reaches the water for free and the two cannot disagree about where the eye is looking. */
   setCameraDepthRange();
   const altM = Math.max(1, (d - R) * 63710);
+
+  /* ── FOLLOW: an orbit camera around HER, not a height above the ground ─────────────────
+     What the viewer is adjusting when they follow a ship is how far off they are standing and
+     from what quarter — not their altitude, which is a consequence. So the stand-off is the
+     controlled quantity, in metres, and it starts at a few ship-lengths so she fills the frame
+     the way she would from another vessel's deck. The altitude falls out of the depression.
+
+     That also makes zooming out continuous with the map: increase the stand-off far enough and
+     you are simply high up again, and she is released. */
+  if (S.follow && S.follow.at) {
+    const shipLon = S.follow.at.lon, shipLat = S.follow.at.lat;
+    const dep = Math.max(4, Math.min(84, S.followDep)) * Math.PI / 180;
+    const standM = Math.max(20, S.followDist) * Math.cos(dep);
+    const eyeM = Math.max(6, Math.max(20, S.followDist) * Math.sin(dep));
+    S.dist = R + eyeM / 63710;
+    d = S.dist;
+    /* the camera's ground point is standM metres from her, on the reciprocal of the bearing
+       you are viewing from, so that the aim lands exactly on the ship */
+    const brg = S.followAz + Math.PI;
+    const dLat = standM * Math.cos(brg) / 111320;
+    const dLon = standM * Math.sin(brg) / (111320 * Math.max(0.05, Math.cos(shipLat * Math.PI / 180)));
+    const cLat = Math.max(-84, Math.min(84, shipLat + dLat));
+    const cLon = shipLon + dLon;
+    S.lon = cLon; S.lat = cLat;
+    camera.position.copy(lonLatToVec(cLon, cLat, d));
+    const up = lonLatToVec(cLon, cLat, 1);
+    camera.up.set(0, 1, 0).lerp(up, Math.min(1, Math.max(0, 1 - (eyeM - 2000) / 58000))).normalize();
+    /* aim a little above her waterline so the frame is her, not the water in front of her */
+    camera.lookAt(lonLatToVec(shipLon, shipLat, R + (S.follow.aimM || 12) / 63710));
+    setCameraDepthRange();
+    return;
+  }
   const tilt = Math.max(0, Math.min(1,
     1 - Math.log(altM / 2000) / Math.log(60000 / 2000)));
   const sub = lonLatToVec(S.lon, S.lat, R);
@@ -574,6 +617,7 @@ function buildMarkers() {
 
 /* Projected once per frame, on a throttle, with collision culling by importance. */
 let lblTick = 0;
+let voyT = 0;                 // the fleet's own clock — see the note in frame()
 let labelsHidden = false;
 function updateLabels(now) {
   if (!APP.markers) return;
@@ -1012,6 +1056,7 @@ function wireUI() {
     frozenCam.updateMatrixWorld(true);
     drag = { x: e.clientX, y: e.clientY, lon: S.lon, lat: S.lat, moved: 0,
              orbit: P ? P.orbit : 0, elev: P ? P.elev : 0,
+             az: S.followAz, dep: S.followDep,
              cam: frozenCam, grab: raySphereDir(e.clientX, e.clientY, frozenCam) };
     cv.setPointerCapture(e.pointerId);
   });
@@ -1020,11 +1065,13 @@ function wireUI() {
     fly = null;                                   // a hand on the globe always wins
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     drag.moved += Math.abs(dx) + Math.abs(dy);
-    if (PSGV.on) {
-      /* in the Passage, drag walks you round the ship rather than round the Earth */
-      const P = window.SHIPS_PSG.PSG;
-      P.orbit = drag.orbit - dx * 0.0075;
-      P.elev = Math.max(0.02, Math.min(3.0, drag.elev + dy * 0.0035));
+    if (S.follow) {
+      /* walking round her, not over the ground: horizontal drag changes the bearing you are
+         watching from, vertical drag raises and lowers the eye from her waterline to a view
+         down onto her deck */
+      S.followAz = drag.az - dx * 0.006;
+      S.followDep = Math.max(6, Math.min(80, drag.dep + dy * 0.13));
+      placeCamera();
       return;
     }
     /* ── ⚠ DRAG SHOULD FOLLOW THE GROUND, NOT THE CAMERA'S DISTANCE FROM THE CENTRE ──
@@ -1087,7 +1134,7 @@ function wireUI() {
     drag = null;
     if (wasDrag) return;
     const tr = pickShip(ev);
-    if (tr && tr.vesselId) openPassage(tr);
+    if (tr && tr.vesselId) followShip(tr);
   });
   cv.addEventListener('pointermove', ev => {
     if (drag) return;                       // dragging the globe is not hovering a ship
@@ -1112,6 +1159,15 @@ function wireUI() {
        forty-odd clicks across all of it, and no click ever moves more than a ninth of
        however high you already are. Same reasoning as the drag gain, which was fixed for
        the same reason two rounds ago and should have taught me this one. */
+    if (S.follow) {
+      /* following, the wheel changes how far off you stand — and zooming out is how you let go
+         of her: no button to find, the map is simply there again once she stops being the
+         subject */
+      S.followDist = Math.max(25, S.followDist * (1 + Math.sign(e.deltaY) * 0.13));
+      if (S.followDist > FOLLOW_RELEASE_M) { releaseShip(); S.dist = R + 300000 / 63710; }
+      placeCamera();
+      return;
+    }
     const alt = Math.max(MIN_ALT, S.dist - R);
     S.dist = R + Math.max(MIN_ALT, Math.min(600, alt * (1 + Math.sign(e.deltaY) * 0.11)));
     placeCamera();
@@ -1193,7 +1249,25 @@ function frame(now) {
   stepFly(t);
   stepVoyage(dt);
   stepCampaign(dt);
-  stepEraFleet(clockS());
+  /* ── ⚠ TEN HOURS PER SECOND IS RIGHT FOR A MAP AND ABSURD FROM TWO KILOMETRES OFF ──
+     The pacing that makes a voyage take three minutes at globe scale has the treasure fleet
+     covering FIVE HUNDRED AND SEVENTY KILOMETRES IN FOUR SECONDS when you are standing beside
+     her — she crosses the whole near-field patch between frames. Time has to descend with the
+     camera, the way every other scale in this view already does.
+
+     A separate voyage clock, advanced by dt times a compression that eases from 10 h/s at map
+     scale to about sixty times real time alongside — where a treasure ship makes 4.9 knots,
+     so sixty of those is a ship that visibly moves and a coast that visibly changes without
+     being a blur. In frozen mode it is pinned to clockS() exactly as before, so every baseline
+     holds. */
+  if (FROZEN) { voyT = clockS(); }
+  else {
+    const aM = Math.max(1, (camera.position.length() - R) * 63710);
+    const f = Math.max(0, Math.min(1,
+      (Math.log(aM) - Math.log(1000)) / (Math.log(120000) - Math.log(1000))));
+    voyT += dt * (1 / 600) * Math.pow(600, f);
+  }
+  stepEraFleet(voyT);
   updateLabels(t);
 
   if (S.monthPlaying && !FROZEN) {
@@ -1263,6 +1337,14 @@ function frame(now) {
      a displaced surface with the fleet standing in it at their own size. Everything needed is
      already here — the Passage's scene, its water, the one wave table — and the only change is
      what the anchor is attached to. */
+  /* she is under way, so the camera has to be re-aimed every frame or she sails out of shot */
+  if (S.follow && !fly) {
+    if (!S.follow.at) releaseShip();
+    else {
+      placeCamera();
+      passageReadout(S.follow.at.lon, S.follow.at.lat, S.follow.at.hdg, PSGV.wind);
+    }
+  }
   const altMetres = Math.max(0, (camera.position.length() - R)) * 63710;
   const descending = !PSGV.on && window.SHIPS_PSG.psgDescentActive(altMetres);
   if (descending) {
@@ -1504,9 +1586,39 @@ function buildEraFleet() {
     grp.userData.loa = ves.hull.loa;
     eraFleet.add(grp);
 
-    /* speed is the vessel's own best, so a clipper crosses while a cog is still in the Bight */
-    const kn = (ves.polar && ves.polar.best) || ves.speedKn || 6;
-    eraTracks.push({ grp, legs: seaRoute(v.legs), kn, vesselId: v.vessel,
+    /* ── ⚠ EVERY SHIP IN THE MODEL WAS SAILING AT SIX KNOTS ─────────────────────────
+       `ves.polar.best` does not exist. The polar is a CURVE — a dict of wind angle to speed —
+       so this read undefined, fell through `ves.speedKn` (also absent) and landed on the
+       literal 6 for all twenty-five vessels. The comment above it said a clipper crosses
+       while a cog is still in the Bight, and no clipper had been faster than any cog since
+       the line was written. A fallback that fires every time is not a fallback; it is the
+       value, and it should be measured rather than read past. */
+    const curve = (ves.polar && ves.polar.curve) || null;
+    const kn = curve ? Math.max.apply(null, Object.keys(curve).map(k => curve[k])) : 6;
+
+    /* ── AND THE PACE CAME FROM THE NUMBER OF WAYPOINTS ─────────────────────────────
+       The old period was `n * 26 / kn * 34` — proportional to how many POINTS the track
+       happens to have. That was survivable when the router emitted one point per degree of
+       arc; the passage search emits corners instead, so the count changed and every voyage
+       silently re-timed. Measured, the implied speeds ran from 3,400 to 23,000 knots, and
+       circuits took between fifteen minutes and two hours — which is why the fleet looked
+       painted on.
+
+       A voyage takes as long as its DISTANCE over its SPEED. That is the only formula with a
+       meaning, it makes the clipper genuinely lap the cog, and the compression to screen time
+       is a single stated constant instead of an accident of the routing. */
+    const legsR = seaRoute(v.legs);
+    let km = 0;
+    for (let i = 0; i < legsR.length - 1; i++) {
+      const A = lonLatToVec(legsR[i].lon, legsR[i].lat, 1);
+      const B = lonLatToVec(legsR[i + 1].lon, legsR[i + 1].lat, 1);
+      km += Math.acos(Math.max(-1, Math.min(1, A.dot(B)))) * 6371;
+    }
+    /* ten hours of the voyage per second of watching. Bounded so the shortest hop is still a
+       passage and the longest is not a career: 100 s to 7 minutes. */
+    const hours = km / (kn * 1.852);
+    const period = Math.max(100, Math.min(420, hours / 10));
+    eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
                      phase: (eraTracks.length * 0.37) % 1, name: v.name });
   }
   if (eraFleet.children.length) scene.add(eraFleet); else eraFleet = null;
@@ -1558,6 +1670,43 @@ function setHover(tr) {
  * second one would look entirely plausible.
  */
 const PSGV = { on: false, track: null, t: 0, card: null };
+
+/* ── GO DOWN TO HER, AND STAY WITH HER ────────────────────────────────────────────────────
+   A flight rather than a cut, because the descent is the point: you watch the token stop being
+   a token. The camera ends about nine hundred metres up and a few hundred metres off her
+   quarter, which is where the near-field water and her true-scale hull have both already
+   taken over from the map. */
+function followShip(tr) {
+  if (!tr || !tr.at) return;
+  const list = APP.vessels.vessels || APP.vessels;
+  const ves = list.find(x => x.id === tr.vesselId);
+  if (!ves || !ves.hull) return;
+  S.follow = tr;
+  S.followAz = 2.4;
+  S.followDep = 15;
+  /* a few ship-lengths off, which is where one vessel sees another */
+  S.followDist = Math.max(90, (ves.hull.loa || 40) * 3.2);
+  tr.aimM = (ves.hull.loa || 40) * 0.22;
+  setHover(null);
+  if (hoverLine) { scene.remove(hoverLine); hoverLine = null; }
+  /* ⚠ use flyTo. Hand-building the flight object with `dur` and a clockS() epoch, where
+     stepFly reads `ms` and performance.now(), makes (now - t0)/undefined = NaN, and a NaN
+     interpolation propagates into S.dist, the camera position and every downstream measure —
+     the symptom is a null altitude, not an error. */
+  const eye = Math.max(6, S.followDist * Math.sin(S.followDep * Math.PI / 180));
+  flyTo(tr.at.lon, tr.at.lat, R + eye / 63710, 2400);
+  passageCard(tr, ves);
+  document.body.classList.add('in-passage');
+}
+
+function releaseShip() {
+  if (!S.follow) return;
+  S.follow = null;
+  if (PSGV.card) PSGV.card.style.display = 'none';
+  document.body.classList.remove('in-passage');
+  window.SHIPS_PSG.psgFleetClear();
+  if (eraFleet) eraFleet.visible = true;
+}
 
 function openPassage(tr) {
   const list = APP.vessels.vessels || APP.vessels;
@@ -1669,7 +1818,7 @@ function stepEraFleet(t) {
        opposite error — a circumnavigation every second — says the sea is small, which is the
        one thing this whole project exists to deny. Several minutes per circuit: long enough
        that a ship is somewhere rather than everywhere, short enough to see it move. */
-    const period = Math.max(240, n * 26 / Math.max(2, tr.kn) * 34);
+    const period = tr.period;
     const u = ((t / period) + tr.phase) % 1;
     const f = u * (n - 1), i = Math.min(n - 2, Math.floor(f)), fr = f - i;
     const a = tr.legs[i], b = tr.legs[i + 1];
@@ -1745,13 +1894,41 @@ function stepEraFleet(t) {
     const m = tangentBasis(up, fwd);
     if (!m) continue;
     tr.grp.quaternion.setFromRotationMatrix(m);
-    /* drop each consort's station onto the sphere — see the note where the stations are set */
+    /* ── ⚠ THE TRACK IS CLEAN AND THE CONSORTS ARE NOT ─────────────────────────────
+       The passage search puts the FLAGSHIP in open water and I verified that at 72,768
+       samples. But a consort is not on the track: she is stationed abeam of it, and at token
+       exaggeration one ship-length is about two hundred kilometres of ocean, so a formation
+       that reads correctly in the Pacific puts her wingmen inland in the Yellow Sea. Swept
+       across 200 phases of every track in every era, **11.45 per cent of drawn hulls were
+       ashore** — and every one of them was a consort, never the flagship. My earlier check
+       sampled one phase per zoom level, which is exactly the coverage gap that could not see
+       this: a track is a curve and a fleet is an area.
+
+       The fix is the thing a real fleet does. **When the sea-room narrows, a squadron closes
+       up.** Each station is tested against the mask and drawn in toward the flagship until it
+       is afloat; if there is no room at all she takes station astern in the flagship's own
+       water. Nothing is invented — the formation is simply as wide as the water allows. */
     const Rlocal = R / tr.grp.scale.x;
+    const RTm = window.SHIPS_ROUTE;
+    /* ⚠ the station test transforms by grp.matrixWorld, and three.js only refreshes that at
+       render — testing a consort against where the fleet was LAST frame leaves her ashore at
+       every turn of the track, which is 3% of drawn hulls */
+    tr.grp.updateMatrixWorld(true);
     for (const h of tr.grp.children) {
       const st = h.userData.station;
       if (!st) continue;
-      const r2 = st.x * st.x + st.z * st.z;
-      h.position.y = Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal;
+      let f = 1.0;
+      for (let k = 0; k < 5; k++) {
+        const x = st.x * f, z = st.z * f;
+        const r2 = x * x + z * z;
+        h.position.set(x, Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal, z);
+        if (f === 0) break;
+        h.updateMatrix();
+        const wp = h.position.clone().applyMatrix4(tr.grp.matrixWorld);
+        const cl = vecToLonLat(wp);
+        if (!RTm || !RTm.isOcean || RTm.isOcean(cl.lon, cl.lat)) break;
+        f = k >= 3 ? 0 : f * 0.55;      // close up, then fall into the flagship's wake
+      }
     }
     /* ── WHERE SHE IS, RECORDED ONCE ────────────────────────────────────────────────
        The Passage reads these rather than recomputing them. A second copy of this
