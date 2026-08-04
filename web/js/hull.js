@@ -635,7 +635,14 @@ function buildRig(S, group, mats, FINE) {
        her white lower masts.
        That gap is also why the black-upper livery had nothing to paint: the model had no
        upper masts to be black. Structure first, colour second. */
+    /* ── THE POLE MAST ─────────────────────────────────────────────────────────────
+       A steamship still carries masts, and they carry no sail at all. Titanic's two were
+       derrick posts, lookout stations and the anchorage for the wireless aerial strung
+       between them — which is the only reason Carpathia heard her. The model gave her
+       masts=[] and therefore no masts whatever, on a ship whose silhouette is two funnels
+       plus two masts to most people who have seen a photograph of her. */
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
+               : mk.rig === 'pole' ? [lower]
                : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
                : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
                : [lower, top, tg];
@@ -659,6 +666,19 @@ function buildRig(S, group, mats, FINE) {
                     radii[si], radii[si] * 0.7, mastMat, -rakeRad);
       m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
 
+      /* ── THE CROW'S NEST ────────────────────────────────────────────────────────
+         A barrel or a bucket lashed to the mast at about two thirds of its height, reached
+         by a ladder inside the mast on the big liners. Fleet and Lee were in Titanic's when
+         they sighted the iceberg, and they had no binoculars: the ship's glasses had been
+         locked in a cabinet whose key left with an officer reassigned at Southampton. */
+      if (FINE && mk.rig === 'pole' && mk.crowsNest && si === 0) {
+        const nest = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.028, B * 0.024, B * 0.045, 12, 1, true),
+          mats.woodPale || woodDark);
+        nest.position.set(x + Math.sin(rakeRad) * (seg * 0.66), y + seg * 0.66, 0);
+        group.add(tag(nest, 'mast', "Crow's nest",
+          'The lookout station, about two thirds up the foremast. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.'));
+      }
       /* the TOP sits at the head of the lower mast, and the topmast is fidded through it */
       if (FINE && mk.rig === 'square' && si === 0) {
         const tp = buildTop(B * 0.20, mats.woodPale);
@@ -1843,24 +1863,36 @@ function buildSuperstructure(S, group) {
     const tier = new THREE.Mesh(tg, white);
     tier.position.set(-L * 0.02 + f * L * 0.03, base + dh * (i + 0.5), 0);
     g.add(tier);
-    /* ── ⚠ ONE CONTINUOUS BLACK STRIP IS NOT A ROW OF WINDOWS ─────────────────────────
-       It is a painted stripe, and that is exactly what it read as. A deckhouse is a row of
-       SEPARATE lights with mullions between them, and the mullions are what give the eye a
-       repeat unit and therefore a sense of the ship's SIZE — without them a 211 m deckhouse
-       and a 30 m one look identical. Cut the strip into panes at a fixed real spacing, so
-       the count follows the length instead of the length following the count. */
-    const strip = new THREE.Mesh(new THREE.BoxGeometry(len * 0.97, dh * 0.34, wid * 1.006), dark);
-    strip.position.set(tier.position.x, base + dh * (i + 0.55), 0);
-    g.add(strip);
+    /* ── ⚠ THE WINDOWS FLICKERED, AND IT WAS THE SAME FAULT AS THE FUNNEL BAND ────────
+       August reported the funnel flicker fixed and the WINDOWS still flickering. Same cause,
+       and worse: the window strip and its mullions were BoxGeometry at a constant `wid`,
+       laid over a deckhouse I had since LOFTED to follow the hull's plan. A fixed-width box
+       over a tapering house is coincident with it SOMEWHERE along its length by construction
+       — proud at the bow, buried amidships, and fighting for the pixel wherever the two
+       surfaces cross. Nothing about that is tunable.
+
+       Windows are not a fitting bolted to a deckhouse; they are OPENINGS IN IT. So they are
+       painted into the house's own geometry as vertex colours — one surface, no second skin,
+       nothing left to contend. The mullions come free: they are simply the parts of the band
+       that are not glass, at a fixed real spacing, so the count follows the ship's length.
+       This is the third time this session that the fix has been "make it one surface". */
     const paneW = B * 0.075;                            // a light is about this wide, always
-    const nPane = Math.max(4, Math.round(len * 0.97 / paneW));
-    for (let k = 1; k < nPane; k++) {
-      const mull = new THREE.Mesh(
-        new THREE.BoxGeometry(paneW * 0.16, dh * 0.36, wid * 1.010), white);
-      mull.position.set(tier.position.x - len * 0.485 + k * (len * 0.97 / nPane),
-                        base + dh * (i + 0.55), 0);
-      g.add(mull);
+    const bandLo = 0.30, bandHi = 0.66;                 // the window band, as a fraction of tier height
+    const cols = [];
+    const glass = new THREE.Color(0x23262a), face = new THREE.Color(0xe4e2dc);
+    const tpos = tg.attributes.position;
+    for (let vi = 0; vi < tpos.count; vi++) {
+      const yy = tpos.getY(vi) / dh + 0.5;              // 0 at the sole, 1 at the roof
+      const xx = tpos.getX(vi);
+      const inBand = yy > bandLo && yy < bandHi;
+      /* a mullion every paneW along the real length; between them, glass */
+      const frac = ((xx / paneW) % 1 + 1) % 1;
+      const isMullion = frac < 0.20;
+      const c = (inBand && !isMullion) ? glass : face;
+      cols.push(c.r, c.g, c.b);
     }
+    tg.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    tier.material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.60 });
     /* ── AND A RAILING, which is what actually breaks a box ─────────────────────────────
        A deckhouse roof without one is a slab. With stanchions and three rails it acquires a
        scale, a top edge that is not a hard line, and something for the light to catch. */

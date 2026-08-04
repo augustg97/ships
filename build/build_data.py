@@ -451,7 +451,9 @@ HULLS = {
                   cm=0.95, wlPower=3.8, stemFineness=0.10, sternFineness=0.20, transom=0.22,
                   forefoot=0.14, run=0.24, riseF=0.18, riseA=0.15, sheerBow=0.7, sheerStern=0.4,
                   tumblehome=0.01, stemRake=0.02, sternRake=0.02, strakes=44, iron=True,
-                  topside="#1a1a1c", funnels=4, decks=5, masts=[], boats=20, portholes=True, mastLivery=True),
+                  topside="#1a1a1c", funnels=4, decks=5, boats=20, portholes=True, mastLivery=True,
+                  masts=[dict(at=0.20, heightM=32.0, rig="pole", rake=0, shrouds=0, crowsNest=True),
+                         dict(at=0.66, heightM=30.0, rig="pole", rake=0, shrouds=0)]),
 
   # And the end of a story about people crossing oceans: a hull with NO PEOPLE ON IT.
   # Wind and solar, months at sea, no crew to feed, water, berth or lose.
