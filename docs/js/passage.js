@@ -544,10 +544,41 @@ function psgFleet(tracks, R, t, wind, list) {
   for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
 }
 
+/* ── BUILD HER WHILE THE CAMERA IS STILL FALLING ──────────────────────────────────────────
+ * A fine hull is 130,000 to 180,000 triangles and takes up to 102 ms to generate — six dropped
+ * frames, right at the moment the viewer is watching the descent. The flight down takes 2.4
+ * seconds, which is plenty of room to hide a tenth of one, so the ship the viewer just clicked
+ * is built at the start of the flight rather than on arrival.
+ *
+ * Ships that wander into the patch later still build lazily and still cost their six frames.
+ * That is a real remaining cost and it is stated rather than hidden: the alternative is
+ * pre-building every hull in the era, which spends fourteen hitches to avoid one.
+ */
+function psgPrebuild(tr, ves) {
+  if (!tr || !ves || !ves.hull) return false;
+  if (!PSG.scene) return false;
+  if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
+                        PSG.scene.add(PSG.fleetGroup); }
+  if (PSG.fleetPool.has(tr.name)) return true;
+  let obj = null;
+  try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: true }); } catch (e) { return false; }
+  obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  obj.rotation.y = Math.PI / 2;
+  obj.position.y = -((obj.userData.keelBottom || 0) + (ves.hull.draught || 0));
+  const holder = new THREE.Group();
+  holder.add(obj);
+  holder.rotation.order = 'YXZ';
+  holder.visible = false;
+  PSG.fleetPool.set(tr.name, { holder, loa: ves.hull.loa });
+  PSG.fleetGroup.add(holder);
+  return true;
+}
+
 function psgFleetClear() {
   if (!PSG.fleetPool) return;
   for (const [, e] of PSG.fleetPool) e.holder.visible = false;
 }
 
 window.SHIPS_PSG = { PSG, psgInit, psgOpen, psgClose, psgStep, psgFrame, PATCH_M, SEA_R,
-                     psgDescent, psgDescentActive, psgFleet, psgFleetClear, DESCENT_M };
+                     psgDescent, psgDescentActive, psgFleet, psgFleetClear, psgPrebuild,
+                     DESCENT_M };

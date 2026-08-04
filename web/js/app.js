@@ -1725,6 +1725,14 @@ function followShip(tr) {
      the symptom is a null altitude, not an error. */
   const eye = Math.max(6, S.followDist * Math.sin(S.followDep * Math.PI / 180));
   flyTo(tr.at.lon, tr.at.lat, R + eye / 63710, 2400);
+  /* Generate her hull inside the flight, where a tenth of a second cannot be seen. ONE FRAME
+     LATE deliberately: done in the click handler it is a 131 ms pause before anything moves,
+     which reads as the app thinking. Deferred by a frame, the descent has visibly begun and
+     the stall lands 16 ms into a 2.4 second fall, where the camera has barely left. Same work,
+     and the difference is entirely whether the viewer is looking at a still frame while it
+     happens. */
+  window.SHIPS_PSG.psgInit(R, camera);
+  requestAnimationFrame(() => window.SHIPS_PSG.psgPrebuild(tr, ves));
   passageCard(tr, ves);
   document.body.classList.add('in-passage');
 }

@@ -416,3 +416,42 @@ t+12s  anchor -9.2381, 38.5721   moved 0.103 km   frame changed 2.28
 
 The near-field anchor tracks the ship, so the ground under her is genuinely new ground: the coast
 moves past because she is moving past it.
+
+---
+
+# The full sweep, and the build hitch  (2026-08-04, round 17)
+
+## Every ship, every era, three phases each
+
+The recurring failure this session has been checking one location and generalising. So: follow
+each ship in each era at three points on her track, land the flight, run the real three-pass
+composite, and assert four things — the near field engages, she is in the near-field fleet, she
+is on water, and the frame is more than half lit.
+
+**42 cases. Zero problems.**
+
+## The hull build was 102 ms, and it is now hidden rather than removed
+
+| vessel | build | triangles |
+|---|---|---|
+| dugout | **102 ms** | 131,340 |
+| clipper | 87 ms | 170,278 |
+| preussen | 86 ms | 183,782 |
+| great-eastern | 78 ms | 171,812 |
+
+Six dropped frames, once per vessel, and it was landing on arrival — the moment the viewer is
+watching the descent. It now runs during the 2.4 second flight instead.
+
+⚠ **Deferred by one frame, deliberately.** Called straight from the click handler it is a 131 ms
+pause *before anything moves*, which reads as the app thinking about it. One frame later the
+descent has visibly begun and the stall lands 16 ms into a 2.4 second fall. Same work; the
+difference is entirely whether the viewer is looking at a still frame while it happens.
+
+**Still true and worth stating:** a ship that wanders into the patch later still builds lazily
+and still costs its six frames. Pre-building the whole era would spend fourteen hitches to avoid
+one, which is a worse trade.
+
+**And the dugout is the slowest hull in the fleet** — 131,340 triangles for a hollowed log,
+because the fine tessellation is 420 × 72 regardless of what is being tessellated. Nothing is
+wrong with the result; it is simply the same mesh budget spent on a boat with no rig, no deck and
+no fittings. Worth a look if build cost ever matters more than it does now.
