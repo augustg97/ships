@@ -2056,8 +2056,21 @@ function buildBoats(S, group, mats) {
   const dark = new THREE.MeshStandardMaterial({ color: 0x2f3336, roughness: 0.55, metalness: 0.25 });
   const boatL = Math.min(B * 0.42, 9.0), boatB = boatL * 0.30;
   const perSide = Math.max(1, Math.round(n / 2));
+  /* ── ⚠ THE BOATS WERE STOWED TOUCHING ────────────────────────────────────────────────
+     Found by the clearance checker on a pair I had only just added — boat against boat. Ten
+     nine-metre boats were spread across a FIXED 0.46 of the hull, which works out at 9.5 m
+     between centres: half a metre of daylight between one boat and the next.
+     No boat deck is stowed like that. A boat has to be swung OUT to be lowered, the falls
+     need room to render, and the crew have to get between them to cast off the gripes. The
+     gap is not spare space; it is working space.
+     So the SPACING is the real quantity — a boat's length and a third — and the span follows
+     from how many boats there are, the same way the trireme's oar spacing follows from the
+     interscalmium and the portholes follow from a 3 m pitch. If they do not fit, the answer
+     is fewer boats, not closer ones. */
+  const gapPitch = boatL * 1.38;
+  const span = Math.min(0.58, (perSide - 1) * gapPitch / L);
   for (let i = 0; i < perSide; i++) {
-    const u = 0.26 + (i / Math.max(1, perSide - 1)) * 0.46;
+    const u = 0.5 - span / 2 + (i / Math.max(1, perSide - 1)) * span;
     const y = H.sheer(u);
     const half = Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
     for (const sgn of [-1, 1]) {

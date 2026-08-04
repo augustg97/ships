@@ -168,6 +168,10 @@ function clearance(opts) {
         ['turret','funnel'], ['turret','bridge'], ['turret','mast'],
         ['funnel','mast'], ['funnel','bridge'], ['island','mast'],
         ['gun','boat'], ['gun','mast'],
+        /* ⚠ boat-against-boat found three ships stowing their boats touching. Added the day
+           the boats were added, and it fired immediately — a pair worth having precisely
+           because two instances of the SAME class are the easiest overlap to overlook. */
+        ['boat','boat'], ['sail','boat'], ['yard','boat'], ['boat','vent'],
       ];
       const by = {};
       g.traverse(o => { if (!o.isMesh) return; const p = o.userData && o.userData.part; if (!p) return;
