@@ -23,9 +23,18 @@
  * So there are two scenes and two cameras, rendered one after the other into the same frame:
  *
  *   1. THE BACKDROP — the globe itself, at planetary scale, with its camera placed at the
- *      exact equivalent position and orientation. This supplies the horizon, the distant water
- *      and any coast within sight, all computed by the same shader that draws the globe from
- *      orbit. It is not a painted sky; it is the Earth, seen from 40 m up.
+ *      exact equivalent position and orientation.
+ *
+ *      ⚠ THIS PARAGRAPH USED TO CLAIM THE BACKDROP SUPPLIED "the horizon, the distant water and
+ *      any coast within sight", AND IT SUPPLIED NOTHING. renderer.autoClear is true by default,
+ *      so the near pass cleared the COLOUR buffer as well as the depth and threw the Earth away
+ *      every frame. The composite is fixed — sky, then Earth, then near water, with only depth
+ *      cleared between them — but the backdrop still cannot show a coast from sea level, and
+ *      the reason is geometric rather than a bug: the globe sphere is 192 x 128, so a facet is
+ *      209 km, and at a 195 m eye height the horizon is 50 km away — a QUARTER OF ONE TRIANGLE.
+ *      Below about 60 km the planet is a flat plate with a straight polygon edge for a horizon.
+ *      Ground-level terrain needs adaptive tessellation near the camera; until that exists this
+ *      view is honest open ocean and nothing more.
  *   2. THE FOREGROUND — a metre-scale scene holding the sea patch and the ship, drawn after a
  *      depth clear so it always occupies the near field.
  *
@@ -127,6 +136,9 @@ function psgInit(R, globeCamera) {
          around a 9 m canoe is the same mistake as 260 m around a 400 m box boat. */
       uWind: { value: 7.0 }, uScale: { value: 60 },
       uWave: { value: SHIPS_SEA.seaWaveUniform() },
+      /* the globe's own elevation field, so the water can end where the land begins */
+      uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
+      uSeaLevel: { value: 0 }, uHasDepth: { value: 0 },
     },
   }));
   PSG.sea.rotation.x = -Math.PI / 2;
@@ -440,6 +452,14 @@ function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
   PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
   /* what counts as "near water" is now the eye height, not a ship's length */
   PSG.sea.material.uniforms.uScale.value = Math.max(40, altM * 0.5);
+  /* hand it the same elevation texture the globe is drawing from — one field, one coastline */
+  const gm = (typeof mat !== 'undefined' && mat) ? mat.uniforms : null;
+  if (gm) {
+    PSG.sea.material.uniforms.uDepth.value = gm.uDepth.value;
+    PSG.sea.material.uniforms.uSeaLevel.value = gm.uSeaLevel.value;
+    PSG.sea.material.uniforms.uHasDepth.value = 1;
+  }
+  PSG.sea.material.uniforms.uAnchor.value.set(lon * Math.PI / 180, lat * Math.PI / 180);
   SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
 }
 

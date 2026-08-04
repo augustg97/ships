@@ -1378,10 +1378,37 @@ function frame(now) {
        distance beyond that. */
     /* the backdrop uses the same altitude-aware range as everything else — a fixed near
        plane here would clip the planet out of the very view it is the backdrop for */
+    /* ── ⚠ THE BACKDROP HAS NEVER ONCE BEEN VISIBLE ─────────────────────────────────
+       renderer.autoClear is TRUE by default, so the second render() cleared the COLOUR buffer
+       as well as the depth — every frame of the descent and the Passage threw the globe away
+       and drew only the near field over black. What I have been calling the horizon in all of
+       these views was the near-field sky meeting the near-field water; the Earth was painted
+       and discarded a hundred times a second. It is why a carrack eleven kilometres off the
+       Spanish coast had an empty sea to the north, and why this file's own header claimed the
+       backdrop supplied "any coast within sight" when it supplied nothing at all.
+
+       The world layers sky, then Earth, then the water at your feet, so the frame is built in
+       that order with the clears done by hand. Only DEPTH is cleared between passes; clearing
+       colour is what destroyed it. */
+    const NP = window.SHIPS_PSG.PSG;
+    renderer.autoClear = false;
+    renderer.clear(true, true, true);
+
+    NP.sea.visible = false;
+    if (NP.fleetGroup) NP.fleetGroup.visible = false;
+    renderer.render(NP.scene, NP.cam);                 // 1. the sky, filling the frame
+
+    NP.sea.visible = true;
+    if (NP.fleetGroup) NP.fleetGroup.visible = true;
+    NP.sky.visible = false;
     setCameraDepthRange();
-    renderer.render(scene, camera);
     renderer.clearDepth();
-    renderer.render(window.SHIPS_PSG.PSG.scene, window.SHIPS_PSG.PSG.cam);
+    renderer.render(scene, camera);                    // 2. the Earth, where it projects
+
+    renderer.clearDepth();
+    renderer.render(NP.scene, NP.cam);                 // 3. the water she is in
+    NP.sky.visible = true;
+    renderer.autoClear = true;
 
   } else {
     renderer.render(scene, camera);

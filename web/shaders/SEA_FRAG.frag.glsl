@@ -1,12 +1,53 @@
 precision highp float;
 varying vec3 vP; varying vec2 vUv; varying vec3 vN; varying float vCrest;
 uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
+
+/* ── ⚠ THE NEAR-FIELD OCEAN WAS PAINTING OVER THE LAND ────────────────────────────────────
+   This surface is drawn after a depth clear, so it covers everything behind it — and it is a
+   260 km disc. Following a carrack eleven kilometres off the Spanish coast, the coast was
+   simply not there: an empty horizon in the Gulf of Cádiz, because the water is opaque and
+   knows nothing about where it ends.
+
+   Water ends at the shore. The patch now samples the SAME elevation field the globe draws
+   from, converts each fragment's local metres back to a longitude and latitude, and discards
+   itself over land — so the globe's own terrain shows through from behind, in the same frame,
+   at whatever resolution the backdrop has. Nothing is drawn twice and nothing is faked: the
+   coastline in the near field IS the coastline on the map, because it is the same number.
+
+   uShore fades the last stretch to nothing rather than cutting it, so a beach reads as a beach
+   instead of as a polygon edge. */
+uniform sampler2D uDepth;      // the globe's elevation field — RG is 16-bit elevation
+uniform vec2  uAnchor;         // lon, lat of the patch's origin, RADIANS
+uniform float uSeaLevel;       // metres relative to today, for deep time
+uniform float uHasDepth;       // 0 in the Shipwright, where there is no globe behind the water
+
+const float SEA_R_EARTH = 6371000.0;
+const float SEA_ELEV_MIN = -11000.0;
+const float SEA_ELEV_SPAN = 20000.0;
+
+/* local metres in the (west, up, north) frame -> the globe's equirectangular uv */
+vec2 seaUV(vec3 p, out float coslat){
+  float lat = uAnchor.y + p.z / SEA_R_EARTH;
+  coslat = max(0.05, cos(lat));
+  float lon = uAnchor.x - p.x / (SEA_R_EARTH * coslat);   // +X is WEST, so longitude decreases
+  return vec2(lon / 6.2831853 + 0.5, 0.5 - lat / 3.14159265);
+}
+float seaElevAt(vec3 p){
+  float cl;
+  vec2 uv = seaUV(p, cl);
+  vec3 t = texture2D(uDepth, fract(uv)).rgb;
+  return (t.r * 65280.0 + t.g * 255.0) / 65535.0 * SEA_ELEV_SPAN + SEA_ELEV_MIN - uSeaLevel;
+}
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
 float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.07; a*=0.5;} return v; }
 
 void main(){
+  if (uHasDepth > 0.5) {
+    float e = seaElevAt(vP);
+    if (e > 0.0) discard;                      // this is land: let the globe behind show
+  }
   vec3 V = normalize(uCam - vP);
   vec3 L = normalize(uSun);
   float dist = length(vP.xz - uCam.xz);

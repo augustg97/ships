@@ -127,6 +127,9 @@ function psgInit(R, globeCamera) {
          around a 9 m canoe is the same mistake as 260 m around a 400 m box boat. */
       uWind: { value: 7.0 }, uScale: { value: 60 },
       uWave: { value: SHIPS_SEA.seaWaveUniform() },
+      /* the globe's own elevation field, so the water can end where the land begins */
+      uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
+      uSeaLevel: { value: 0 }, uHasDepth: { value: 0 },
     },
   }));
   PSG.sea.rotation.x = -Math.PI / 2;
@@ -440,6 +443,14 @@ function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
   PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
   /* what counts as "near water" is now the eye height, not a ship's length */
   PSG.sea.material.uniforms.uScale.value = Math.max(40, altM * 0.5);
+  /* hand it the same elevation texture the globe is drawing from — one field, one coastline */
+  const gm = (typeof mat !== 'undefined' && mat) ? mat.uniforms : null;
+  if (gm) {
+    PSG.sea.material.uniforms.uDepth.value = gm.uDepth.value;
+    PSG.sea.material.uniforms.uSeaLevel.value = gm.uSeaLevel.value;
+    PSG.sea.material.uniforms.uHasDepth.value = 1;
+  }
+  PSG.sea.material.uniforms.uAnchor.value.set(lon * Math.PI / 180, lat * Math.PI / 180);
   SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
 }
 

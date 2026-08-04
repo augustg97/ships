@@ -297,3 +297,55 @@ she is released — no button to find.
 ⚠ `stepFly` reads `fly.ms` and a `performance.now()` epoch. Hand-building the flight with `dur`
 and `clockS()` makes `(now - t0)/undefined = NaN`, which propagates into `S.dist`, the camera and
 every downstream measure — and presents as a **null altitude, not an error**. Use `flyTo`.
+
+---
+
+# The backdrop was never there  (2026-08-04, round 14)
+
+Following a carrack eleven kilometres off the Spanish coast, the sea to the north was empty.
+
+## ⚠ `renderer.autoClear` is true by default
+
+The descent renders the globe, clears depth, then renders the near field. The second `render()`
+**cleared the colour buffer too** — so every frame of the descent and the Passage painted the
+Earth and immediately threw it away, drawing the near field over black.
+
+Everything I have been calling *the horizon* in these views was the near-field sky meeting the
+near-field water. The file's own header claimed the backdrop supplied "any coast within sight".
+It supplied nothing, and had never supplied anything.
+
+Measured: globe alone 118.9 mean luma; after the near pass 134; near sky alone 231.6 — the near
+pass is not compositing over the globe, it is replacing it.
+
+Fixed by building the frame in the order the world layers, with the clears done by hand:
+
+1. the sky, filling the frame
+2. the Earth, which draws only where the planet projects
+3. the near water and the ships
+
+Only DEPTH is cleared between passes.
+
+## And the water now ends at the shore
+
+The near-field patch is a 260 km opaque disc drawn after a depth clear, so it covers whatever is
+behind it. It now samples the **same elevation field the globe draws from**, converts each
+fragment's local metres back to a longitude and latitude, and discards over land. The coastline
+in the near field is the coastline on the map because it is the same number.
+
+## ⚠ But the terrain still cannot appear, and the reason is geometric
+
+| eye height | horizon | facets to the horizon |
+|---|---|---|
+| 195 m | 50 km | **0.24** |
+| 900 m | 107 km | 0.51 |
+| 8 km | 319 km | 1.53 |
+| 60 km | 874 km | 4.19 |
+
+The globe sphere is 192 × 128, so one facet is **209 km**. At a 195 m eye height the camera sits
+inside a quarter of a single triangle: the planet renders as a flat plate with a straight polygon
+edge for a horizon, and there is no geometry for a coast to be part of. Confirmed by forcing the
+near field off and looking at the backdrop alone.
+
+**This is the blocker for "see the landscape of whatever region the ship is in", and it is not a
+shading problem.** It needs adaptive tessellation near the camera — a real piece of work, not a
+constant. Until it exists the followed view is honest open ocean and the note above says so.
