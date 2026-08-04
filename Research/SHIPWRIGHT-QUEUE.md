@@ -179,3 +179,36 @@ upgrades — **not on fonts**.
 Consequence: a cold first run can report a false CHANGED, and accepting that baseline would commit
 a fallback-font frame as the reference. Re-run before classifying any label-only diff. The real fix
 is for `__FRAME_READY` to await `document.fonts.ready`.
+
+
+## ⚠ THE PROBE THAT BROKE THE THING IT WAS MEASURING — 2026-08-03
+
+I reported "THE SHIP BOB DOES NOT RUN" as a confirmed bug, with supporting measurements: `SW.on`
+true, stage 7, `clockS()` advancing 206→210, `FROZEN` false, `e.obj.position.y` pinned at
+−0.2421, and a property-setter probe recording **zero writes in 400 ms**. Every one of those
+readings was real. The conclusion was false.
+
+**The bob works.** On a clean page, hidden tab: the loop ticks, `uTime` advances 6 s, and Great
+Eastern heaves 1.76 m (−0.94 to +0.82).
+
+What happened is the worst version of this session's recurring failure. To find out who was
+writing `position.y`, I replaced it with an accessor via `Object.defineProperty`. That accessor
+threw inside the frame callback, which skipped `armNext()`, **which killed the animation loop** —
+the exact failure mode already documented in this file from an earlier round ("a bare return in
+the frame loop skipped requestAnimationFrame and froze the whole app"). I then spent the rest of
+the round measuring a dead loop and concluding the application was broken.
+
+**The instrument did not merely fail to observe the phenomenon. It created the condition I then
+diagnosed and reported.**
+
+Two rules follow, and they are cheap:
+
+1. **Never instrument inside the frame callback.** Anything that can throw in a rAF/timeout chain
+   takes the chain with it. Sample state from outside the loop instead — read the value on a
+   timer, do not intercept the write.
+2. **Before concluding a subsystem is broken, verify the loop that drives it is alive.** One
+   check: does any per-frame uniform advance? If nothing is ticking, nothing downstream can be
+   judged, and every reading below that point is a reading of a stopped machine.
+
+Related and still true: the tab was hidden throughout, and `nextFrame()`'s `setTimeout` fallback
+handled that correctly. The hidden tab was not the fault; my probe was.
