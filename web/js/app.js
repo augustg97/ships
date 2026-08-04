@@ -954,7 +954,7 @@ function frame(now) {
   stepFly(t);
   stepVoyage(dt);
   stepCampaign(dt);
-  stepEraFleet(t);
+  stepEraFleet(clockS());
   updateLabels(t);
 
   if (S.monthPlaying && !FROZEN) {
@@ -1119,12 +1119,41 @@ function stepEraFleet(t) {
     const n = tr.legs.length;
     /* one full circuit in a time proportional to the track's length over the ship's speed,
        so a fast hull on a short run laps a slow one on a long one, as it would */
-    const period = Math.max(40, n * 26 / Math.max(2, tr.kn) * 9);
+    /* ── AND THE PACE OF A VOYAGE ──────────────────────────────────────────────────
+       Da Gama took two years to reach India and get home. Nobody will watch that, but the
+       opposite error — a circumnavigation every second — says the sea is small, which is the
+       one thing this whole project exists to deny. Several minutes per circuit: long enough
+       that a ship is somewhere rather than everywhere, short enough to see it move. */
+    const period = Math.max(240, n * 26 / Math.max(2, tr.kn) * 34);
     const u = ((t / period) + tr.phase) % 1;
     const f = u * (n - 1), i = Math.min(n - 2, Math.floor(f)), fr = f - i;
     const a = tr.legs[i], b = tr.legs[i + 1];
-    const lo = a.lon + (b.lon - a.lon) * fr, la = a.lat + (b.lat - a.lat) * fr;
-    const w = lonLatToVec(lo, la, R * 1.006);
+    /* ── ⚠ AND TWO OF THEM WERE SAILING ACROSS BRAZIL ───────────────────────────────
+       Interpolating lon/lat linearly between two waypoints does not follow the sphere: it
+       cuts the chord in the map's flat coordinates, so a leg from the Atlantic side of Cape
+       Horn to the Pacific side runs straight through South America. Slerp between the two
+       positions as VECTORS ON THE SPHERE instead and the path is the great circle the ship
+       would actually have steered. It does not make the track avoid land by itself — that
+       needs denser waypoints — but it stops the interpolation inventing overland shortcuts. */
+    const va = lonLatToVec(a.lon, a.lat, 1), vb = lonLatToVec(b.lon, b.lat, 1);
+    const dot = Math.max(-1, Math.min(1, va.dot(vb)));
+    const ang = Math.acos(dot);
+    const dir = ang < 1e-6 ? va.clone()
+      : va.clone().multiplyScalar(Math.sin((1 - fr) * ang) / Math.sin(ang))
+          .add(vb.clone().multiplyScalar(Math.sin(fr * ang) / Math.sin(ang)));
+    dir.normalize();
+    const la = Math.asin(dir.y) * 180 / Math.PI;
+    /* ⚠ the inverse must match lonLatToVec exactly: x = cos(lat)sin(lon), z = cos(lat)cos(lon),
+       so longitude is atan2(x, z). Written as atan2(-z, x) first, which is a 90-degree rotation
+       and would have put every ship in the wrong ocean while still looking like a plausible
+       track. Checked against the forward transform rather than assumed. */
+    const lo = Math.atan2(dir.x, dir.z) * 180 / Math.PI;
+    /* ── ⚠ THEY WERE FLYING AT 38 KILOMETRES ────────────────────────────────────────
+       R * 1.006 is six tenths of a percent of the Earth's radius: thirty-eight kilometres
+       up, which is above the stratosphere and about where a high-altitude balloon sits. On
+       screen they read exactly as what they were — satellites, not shipping. A hull floats
+       ON the water, and at globe scale that means the surface itself. */
+    const w = lonLatToVec(lo, la, R * 1.0002);
     tr.grp.position.copy(w);
     /* ── HOW BIG IS A CHESS PIECE? ──────────────────────────────────────────────────
        At the campaign's factor a 42 m carrack rendered about four pixels across — present,
