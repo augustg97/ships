@@ -27,8 +27,11 @@ void main() {
   for (int i = 0; i < 4; i++) {
     vec2  d = normalize(uWave[i].xy);
     float L = uWave[i].z;
-    /* amplitude grows with wind; a flat calm still has an old swell running under it */
-    float A = uWave[i].w * (0.30 + 0.070 * uWind);
+    /* ⚠ THE AMPLITUDE ARRIVES FINISHED. It used to be scaled by uWind here as well as in
+       sea.js and again in the globe shader — three copies of one law, which is the divergence
+       this whole arrangement exists to prevent. seaAmp() in sea.js now folds the wind into the
+       uniform before upload, so this shader has no opinion about sea state at all. */
+    float A = uWave[i].w;
     float k = 6.2831853 / L;
     float c = sqrt(9.81 / k);                       // deep-water phase speed
     float ph = k * dot(d, P.xz) - c * k * uTime;

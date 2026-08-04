@@ -331,6 +331,11 @@ async function boot() {
       uSeaLevel: { value: 0 },
       uLySeafloor: { value: 1 }, uLyWind: { value: 1 }, uLyChl: { value: 1 },
       uLyIce: { value: 1 }, uLyCloud: { value: 0 }, uLyReach: { value: 0 },
+      /* the surface of the water — see the note at the top of FRAG.frag.glsl */
+      uZoom: { value: 0 }, uMPP: { value: 1e6 },
+      uRef: { value: new THREE.Vector2() },
+      uWave: { value: SHIPS_SEA.seaWaveUniform() },   // the one wave table, shared with sea.js
+      uWind: { value: 7.0 },
     },
   });
   APP.texA = { seaA, seaB, winA, winB };
@@ -451,8 +456,24 @@ function buildMarkers() {
 
 /* Projected once per frame, on a throttle, with collision culling by importance. */
 let lblTick = 0;
+let labelsHidden = false;
 function updateLabels(now) {
-  if (!APP.markers || now - lblTick < 90) return;
+  if (!APP.markers) return;
+  /* ── ⚠ THE OCEANS WERE WRITTEN ACROSS THE SKY ────────────────────────────────────────
+     These are labels on a map, projected from the globe camera. Down in the Passage that
+     camera is forty metres above the water, so NORTH ATLANTIC OCEAN and MEDITERRANEAN SEA
+     projected onto thin air above the horizon — cartography floating over a photograph. A
+     view of the world from inside it does not carry the names of the world seen from outside
+     it, so they go, all at once, and come back when you climb out. */
+  if (PSGV.on) {
+    if (!labelsHidden) {
+      for (const m of APP.markers) if (m.el) m.el.style.display = 'none';
+      labelsHidden = true;
+    }
+    return;
+  }
+  labelsHidden = false;
+  if (now - lblTick < 90) return;
   lblTick = now;
   const rect = renderer.domElement.getBoundingClientRect();
   const camDir = camera.position.clone().normalize();
@@ -857,7 +878,9 @@ function wireUI() {
   const cv = renderer.domElement;
   let drag = null;
   cv.addEventListener('pointerdown', e => {
-    drag = { x: e.clientX, y: e.clientY, lon: S.lon, lat: S.lat, moved: 0 };
+    const P = window.SHIPS_PSG ? window.SHIPS_PSG.PSG : null;
+    drag = { x: e.clientX, y: e.clientY, lon: S.lon, lat: S.lat, moved: 0,
+             orbit: P ? P.orbit : 0, elev: P ? P.elev : 0 };
     cv.setPointerCapture(e.pointerId);
   });
   cv.addEventListener('pointermove', e => {
@@ -865,6 +888,13 @@ function wireUI() {
     fly = null;                                   // a hand on the globe always wins
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     drag.moved += Math.abs(dx) + Math.abs(dy);
+    if (PSGV.on) {
+      /* in the Passage, drag walks you round the ship rather than round the Earth */
+      const P = window.SHIPS_PSG.PSG;
+      P.orbit = drag.orbit - dx * 0.0075;
+      P.elev = Math.max(0.02, Math.min(3.0, drag.elev + dy * 0.0035));
+      return;
+    }
     /* ── ⚠ DRAG SHOULD FOLLOW THE GROUND, NOT THE CAMERA'S DISTANCE FROM THE CENTRE ──
        S.dist runs 112 to 700 on a globe of radius 100, so dividing by it changes the gain
        only sixfold across the whole zoom range. But what the cursor is actually chasing is
@@ -878,28 +908,36 @@ function wireUI() {
     placeCamera();
   });
   cv.addEventListener('pointerup', ev => {
-    /* ── CLICK A SHIP, OPEN HER ─────────────────────────────────────────────────────
+    /* ── CLICK A SHIP, AND GO DOWN TO HER ───────────────────────────────────────────
        A drag that happens to end over a hull is not a click on it, so the same `moved`
-       accumulator the port markers use guards this. Opening the Shipwright on that vessel
-       is the right destination: it is the SAME MODEL the token is drawn from, so clicking
-       the speck on the ocean takes you to the thing itself rather than to a picture of it. */
+       accumulator the port markers use guards this.
+
+       ⚠ THIS USED TO OPEN THE SHIPWRIGHT, and that was the wrong destination. The
+       Shipwright is a hull on a plinth under studio light: going there from the ocean
+       throws away everything the click was about — where she is, what the sea is doing,
+       which way she is heading, what land is in sight. The Passage keeps all of it and
+       shows the same model at the same detail. The Shipwright is still one tab away for
+       anyone who wants to take her apart. */
     const wasDrag = drag && drag.moved > 6;
     drag = null;
     if (wasDrag) return;
     const tr = pickShip(ev);
-    if (tr && tr.vesselId && window.SHIPS_SW) {
-      const list = APP.vessels.vessels || APP.vessels;
-      const ves = list.find(x => x.id === tr.vesselId);
-      if (ves) { setView('ship'); window.SHIPS_SW.swOpen(ves); }
-    }
+    if (tr && tr.vesselId) openPassage(tr);
   });
   cv.addEventListener('pointermove', ev => {
     if (drag) return;                       // dragging the globe is not hovering a ship
+    if (PSGV.on) return;
     setHover(pickShip(ev));
   });
   cv.addEventListener('wheel', e => {
     e.preventDefault();
     fly = null;
+    if (PSGV.on) {
+      /* in the Passage the wheel changes how far off you stand, in ship-lengths */
+      const P = window.SHIPS_PSG.PSG;
+      P.dist = Math.max(0.65, Math.min(14, P.dist * (1 + Math.sign(e.deltaY) * 0.11)));
+      return;
+    }
     S.dist = Math.max(112, Math.min(700, S.dist * (1 + Math.sign(e.deltaY) * 0.11)));
     placeCamera();
   }, { passive: false });
@@ -990,12 +1028,83 @@ function frame(now) {
     setMonthTextures();
   }
 
+  /* ── THE PASSAGE ────────────────────────────────────────────────────────────────────
+     Runs BEFORE the globe's own uniforms are set, because it moves the globe camera: the
+     backdrop must be sampled from where the eye actually is, and uCam set from a camera
+     that is about to be moved is a lit-from-nowhere ocean. */
+  if (PSGV.on && PSGV.track && PSGV.track.at) {
+    const A = PSGV.track.at;
+    /* ── THE SEA SHE IS IN IS THE SEA THE GLOBE SAYS IS THERE ────────────────────────
+       Reading the wind out of the shipped climatology at her own position and month, rather
+       than picking a number that looks nice, is what makes this a view OF the model instead
+       of a view beside it: a hull in the Roaring Forties gets a Roaring Forties sea and one
+       in the doldrums gets glass, without either being arranged. Until the field is decoded
+       the fallback is stated here rather than hidden — 7 m/s, a working breeze. */
+    const w = window.SHIPS_ROUTE.windAt(A.lon, A.lat, S.month);
+    PSGV.wind = w ? Math.max(1.5, Math.min(17, w.speed)) : 7.0;
+    window.SHIPS_PSG.psgStep(clockS(), A.u, A.lon, A.lat, A.hdg, R,
+                             sunVector(S.month), PSGV.wind, camera);
+    passageReadout(A.lon, A.lat, A.hdg, PSGV.wind);
+  }
+
   mat.uniforms.uMonthMix.value = S.month - Math.floor(S.month);
   mat.uniforms.uTime.value = t / 1000;
   mat.uniforms.uSun.value.copy(sunVector(S.month));
   mat.uniforms.uCam.value.copy(camera.position);
 
-  renderer.render(scene, camera);
+  /* ── HOW MUCH OCEAN IS IN ONE PIXEL ─────────────────────────────────────────────────
+     Everything about the appearance of water follows from this one number. Half a million
+     metres per pixel and the sea is a colour; half a metre and it is a surface with a shape.
+     Deriving it rather than guessing at a zoom factor is what lets the shader decide which
+     wave components exist at all, instead of drawing detail the frame cannot resolve — the
+     failure that once turned the Roaring Forties into television static. */
+  const altU = Math.max(0.0004, camera.position.length() - R);
+  const altM = altU * (6371000 / R);
+  /* ⚠ renderer.domElement, not a bare `canvas` — that identifier is a local const in the
+     setup function and does not exist here. Reaching for it threw INSIDE the frame callback,
+     which skipped armNext() and stopped the loop dead; the symptom was a black globe with
+     working panels, which reads as a broken shader and is not one. The file already carries
+     this warning ten lines up. Read it next time. */
+  const mpp = 2 * altM * Math.tan(camera.fov * Math.PI / 360)
+              / Math.max(1, renderer.domElement.clientHeight);
+  mat.uniforms.uMPP.value = mpp;
+  /* 0 at half a continent per screen, 1 once a screen is a few kilometres of sea */
+  const lg = Math.log(Math.max(mpp, 0.02));
+  mat.uniforms.uZoom.value = Math.max(0, Math.min(1,
+    (Math.log(3000) - lg) / (Math.log(3000) - Math.log(4))));
+  mat.uniforms.uRef.value.set(S.lon * Math.PI / 180, S.lat * Math.PI / 180);
+  /* the globe's own waves take the wind under the camera's sub-point, so a sea state seen from
+     above and the same sea state seen from a deck are the same sea state */
+  {
+    const gw = window.SHIPS_ROUTE && window.SHIPS_ROUTE.windAt
+             ? window.SHIPS_ROUTE.windAt(S.lon, S.lat, S.month) : null;
+    const uw = PSGV.on ? (PSGV.wind || 7) : (gw ? Math.max(1.5, Math.min(17, gw.speed)) : 7);
+    mat.uniforms.uWind.value = uw;
+    SHIPS_SEA.updateWaveUniform(mat.uniforms.uWave.value, uw);
+  }
+
+  if (PSGV.on && window.SHIPS_PSG.PSG.on) {
+    /* ── TWO SCALES, ONE FRAME ────────────────────────────────────────────────────────
+       The Earth first, with a near plane measured in tens of kilometres, so its depth buffer
+       has the precision a planet needs. Then the depth is cleared and the ship and her water
+       are drawn with a near plane of 35 cm. Sharing one depth range between a 6371 km sphere
+       and a plank would give neither of them any precision at all — the ship would z-fight
+       with itself and the horizon would tear.
+
+       The near-field pass is drawn second and unconditionally in front, which is correct:
+       everything in it is within seven kilometres, and everything in the backdrop is the
+       distance beyond that. */
+    const keepNear = camera.near, keepFar = camera.far;
+    camera.near = 0.02; camera.far = 4000;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+    camera.near = keepNear; camera.far = keepFar;
+    camera.updateProjectionMatrix();
+    renderer.clearDepth();
+    renderer.render(window.SHIPS_PSG.PSG.scene, window.SHIPS_PSG.PSG.cam);
+  } else {
+    renderer.render(scene, camera);
+  }
   armNext();
 }
 
@@ -1102,6 +1211,20 @@ let eraFleet = null, eraTracks = [];
  * ⚠ AND IT RUNS ONCE, AT BUILD. Testing the depth grid every frame for every hull would put a
  * texture read in the animation loop for no gain: the route does not change while you watch it.
  */
+/* ── FROM A LIST OF PLACES TO A TRACK A SHIP COULD STEER ───────────────────────────────
+   A voyage is stored as the places it is known to have touched. Those are not a course: the
+   straight line from Bristol to the western approaches goes overland across Cornwall, and the
+   line from Nanjing to Champa crosses China. Each consecutive pair is handed to the passage
+   search, which returns a track through open water only.
+
+   Two rules the previous version broke, both worth naming:
+     * The SEGMENTS are what must be clear, not the samples. Checking points and then drawing
+       lines between them tests the one thing that cannot go wrong.
+     * A leg that cannot be routed must not be silently skipped. Dropping a waypoint deletes
+       a corner and the ship then runs the shortcut instead — which is precisely how a hull
+       ended up sitting on Brittany. If the search fails, the leg is kept as given and counted,
+       so the failure is visible rather than drawn as a plausible course. */
+let seaRouteMisses = 0;
 function seaRoute(legs) {
   const RT = window.SHIPS_ROUTE;
   const out = [];
@@ -1112,37 +1235,9 @@ function seaRoute(legs) {
   };
   for (let i = 0; i < legs.length - 1; i++) {
     const a = legs[i], b = legs[i + 1];
-    const va = lonLatToVec(a.lon, a.lat, 1), vb = lonLatToVec(b.lon, b.lat, 1);
-    const ang = Math.acos(Math.max(-1, Math.min(1, va.dot(vb))));
-    /* one sample per degree of arc, so a long ocean leg gets real resolution and a short
-       coastal hop is not oversampled into hundreds of points */
-    const steps = Math.max(2, Math.round(ang * 180 / Math.PI));
-    for (let k = 0; k <= steps; k++) {
-      const f = k / steps;
-      let v;
-      if (ang < 1e-6) v = va.clone();
-      else v = va.clone().multiplyScalar(Math.sin((1 - f) * ang) / Math.sin(ang))
-                 .add(vb.clone().multiplyScalar(Math.sin(f * ang) / Math.sin(ang)));
-      v.normalize();
-      let lat = Math.asin(v.y) * 180 / Math.PI;
-      let lon = Math.atan2(v.x, v.z) * 180 / Math.PI;
-      if (RT && RT.isNavigable && !RT.isNavigable(lon, lat)) {
-        /* stand off: walk perpendicular to the course, both hands, and take the first water */
-        const brg = Math.atan2(vb.x - va.x, vb.z - va.z);
-        let best = null;
-        for (let d = 1; d <= 26 && !best; d++) {
-          for (const side of [1, -1]) {
-            const th = brg + side * Math.PI / 2;
-            const dLat = Math.cos(th) * d * 0.55;
-            const dLon = Math.sin(th) * d * 0.55 / Math.max(0.2, Math.cos(lat * Math.PI / 180));
-            const nlat = Math.max(-84, Math.min(84, lat + dLat)), nlon = lon + dLon;
-            if (RT.isNavigable(nlon, nlat)) { best = { lon: nlon, lat: nlat }; break; }
-          }
-        }
-        if (best) { lon = best.lon; lat = best.lat; } else continue;   // landlocked: drop it
-      }
-      push(lon, lat);
-    }
+    const path = (RT && RT.seaPath) ? RT.seaPath(a.lon, a.lat, b.lon, b.lat) : null;
+    if (!path) { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); continue; }
+    for (const p of path) push(p.lon, p.lat);
   }
   return out.length > 1 ? out : legs;
 }
@@ -1242,6 +1337,94 @@ function setHover(tr) {
   document.body.style.cursor = 'pointer';
 }
 
+/* ══ THE PASSAGE ══════════════════════════════════════════════════════════════════════════
+ * Clicking a hull on the ocean takes you down to her. The state here is deliberately thin —
+ * which track, and how far the descent has got — because everything else lives in passage.js
+ * and everything about WHERE she is comes from the same stepEraFleet that drives the piece on
+ * the globe. Two models of one ship's position would put her in two places at once, and the
+ * second one would look entirely plausible.
+ */
+const PSGV = { on: false, track: null, t: 0, card: null };
+
+function openPassage(tr) {
+  const list = APP.vessels.vessels || APP.vessels;
+  const ves = list.find(x => x.id === tr.vesselId);
+  if (!ves || !ves.hull || !window.SHIPS_PSG) return;
+  if (!window.SHIPS_PSG.psgOpen(tr, ves, R, camera)) return;
+  PSGV.on = true; PSGV.track = tr;
+  setHover(null);
+  if (eraFleet) eraFleet.visible = false;      // the pieces are 400x scale; not from down here
+  if (hoverLine) { scene.remove(hoverLine); hoverLine = null; }
+  passageCard(tr, ves);
+  document.body.classList.add('in-passage');
+}
+
+function closePassage() {
+  if (!PSGV.on) return;
+  PSGV.on = false; PSGV.track = null;
+  window.SHIPS_PSG.psgClose();
+  if (eraFleet) eraFleet.visible = true;
+  if (PSGV.card) PSGV.card.style.display = 'none';
+  document.body.classList.remove('in-passage');
+  placeCamera();
+}
+
+/* ── THE CARD ────────────────────────────────────────────────────────────────────────────
+ * What a chart-room would tell you and nothing else: which ship, which passage, and the
+ * position she is actually at, read off the model rather than written down beside it. */
+function passageCard(tr, ves) {
+  if (!PSGV.card) {
+    const d = document.createElement('div');
+    d.id = 'psgCard';
+    d.innerHTML = '<button id="psgBack">↑ back to the ocean</button>' +
+      '<div class="pc-ship"></div><div class="pc-voy"></div>' +
+      '<table class="pc-rows"></table>';
+    document.body.appendChild(d);
+    PSGV.card = d;
+    d.querySelector('#psgBack').onclick = closePassage;
+  }
+  const c = PSGV.card;
+  c.style.display = 'block';
+  c.querySelector('.pc-ship').textContent = ves.name;
+  c.querySelector('.pc-voy').textContent = tr.name;
+  const H = ves.hull;
+  const rows = [
+    ['Length overall', H.loa.toFixed(1) + ' m'],
+    ['Beam', H.beam.toFixed(1) + ' m'],
+    ['Draught', H.draught.toFixed(2) + ' m'],
+    ['Best speed', ((ves.polar && ves.polar.best) || ves.speedKn || 6).toFixed(1) + ' kn'],
+  ];
+  c.querySelector('.pc-rows').innerHTML =
+    rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +
+    '<tr><td>Position</td><td class="pc-pos">—</td></tr>' +
+    '<tr><td>Course</td><td class="pc-crs">—</td></tr>' +
+    '<tr><td>Wind</td><td class="pc-wnd">—</td></tr>';
+}
+
+/* Beaufort, because a number in metres per second is data and a force is a sea state — and
+   the sea state is the thing actually on screen. Thresholds are the standard ones. */
+const BEAUFORT = [0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
+const BF_NAME = ['calm', 'light air', 'light breeze', 'gentle breeze', 'moderate breeze',
+  'fresh breeze', 'strong breeze', 'near gale', 'gale', 'strong gale', 'storm',
+  'violent storm', 'hurricane'];
+
+function passageReadout(lon, lat, hdgRad, wind) {
+  if (!PSGV.card) return;
+  const ns = lat >= 0 ? 'N' : 'S', ew = lon >= 0 ? 'E' : 'W';
+  const fmt = (v, s) => Math.floor(Math.abs(v)) + '° ' +
+    String(Math.round((Math.abs(v) % 1) * 60)).padStart(2, '0') + '′ ' + s;
+  const pos = PSGV.card.querySelector('.pc-pos');
+  const crs = PSGV.card.querySelector('.pc-crs');
+  const wnd = PSGV.card.querySelector('.pc-wnd');
+  if (pos) pos.textContent = fmt(lat, ns) + '  ' + fmt(lon, ew);
+  if (crs) crs.textContent = String(Math.round(((hdgRad * 180 / Math.PI) % 360 + 360) % 360))
+    .padStart(3, '0') + '°';
+  if (wnd && wind !== undefined) {
+    let f = 0; while (f < BEAUFORT.length && wind > BEAUFORT[f]) f++;
+    wnd.textContent = 'force ' + f + ', ' + BF_NAME[f];
+  }
+}
+
 /* the raycast is against a coarse sphere at each ship, not the hull: a hull is a few hundred
    triangles of rigging and testing them all every mousemove is a cost with no benefit */
 function pickShip(ev) {
@@ -1321,6 +1504,14 @@ function stepEraFleet(t) {
     fwd.normalize();
     const m = new THREE.Matrix4().makeBasis(fwd.clone().cross(up).normalize(), up, fwd);
     tr.grp.quaternion.setFromRotationMatrix(m);
+    /* ── WHERE SHE IS, RECORDED ONCE ────────────────────────────────────────────────
+       The Passage reads these rather than recomputing them. A second copy of this
+       arithmetic would be a second opinion about where the ship is, and the two would
+       diverge the moment either changed — the exact failure the wave table exists to
+       prevent. Bearing is measured from north through east, which is what a course is. */
+    const east = new THREE.Vector3(Math.cos(lo * Math.PI / 180), 0, -Math.sin(lo * Math.PI / 180));
+    const north = new THREE.Vector3().crossVectors(up, east);
+    tr.at = { lon: lo, lat: la, hdg: Math.atan2(fwd.dot(east), fwd.dot(north)), u };
     if (hoverTrack === tr && hoverTag) {
       const p = tr.grp.position.clone().project(camera);
       const cv = renderer.domElement, rect = cv.getBoundingClientRect();

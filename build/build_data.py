@@ -220,6 +220,21 @@ HULLS = {
 
   # Skuldelev 2: 30 m × 3.8 m, draught ~1.0, sail 112 m². L/B 7.9 — a hull built to be rowed
   # and sailed, and shallow enough to be beached anywhere.
+  # ── THE FIRST SEA CRAFT ────────────────────────────────────────────────────────────
+  # A single hollowed log. The Pesse canoe (Netherlands, c. 8040 BC) is the oldest boat
+  # known: 2.98 m of Scots pine. The craft that reached Sahul 65,000 years ago is not
+  # preserved and never will be, so this is inference from what a tropical hardwood log
+  # allows — but the crossing is not in doubt, and it needed something.
+  # ⚠ Beam is the TRUNK. That is the whole constraint of the type: a dugout cannot be
+  # wider than the tree it came from, which is why it is narrow, tender, and why every
+  # later tradition in this fleet exists to get past it.
+  "dugout": hull(build="dugout", loa=8.6, lwl=8.0, beam=0.86, draught=0.26, freeboard=0.34,
+              cm=0.88, wlPower=2.2, stemFineness=0.05, sternFineness=0.06,
+              forefoot=0.42, run=0.42, riseF=0.30, riseA=0.30,
+              sheerBow=0.28, sheerStern=0.24, tumblehome=0.0,
+              stemRake=0.10, sternRake=0.08, strakes=1, topside="#6b5334",
+              masts=[], paddleDia=0),
+
   "voyaging-canoe": hull(build="shell", loa=19.0, lwl=18.0, beam=1.05, draught=0.75, freeboard=0.75, cm=0.62,
                   wlPower=3.2, forefoot=0.28, run=0.30, riseF=0.55, riseA=0.50,
                   sheerBow=0.5, sheerStern=0.5, tumblehome=0.02, strakes=10,

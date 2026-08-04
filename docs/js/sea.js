@@ -28,9 +28,52 @@ const SEA_WAVES = [
   [-0.310,  0.950,  13.0, 0.14],   // and the short stuff
 ];
 
-/* Flattened for the uniform, so the shader and this file cannot fall out of step. */
-function seaWaveUniform() {
-  return SEA_WAVES.map(w => new THREE.Vector4(w[0], w[1], w[2], w[3]));
+/* ── HOW BIG THE SEA IS, FOR A GIVEN WIND ───────────────────────────────────────────────
+ * ⚠ THE FIRST LAW WAS A * (0.30 + 0.070 * U), WHICH IS BARELY A LAW AT ALL. Across the entire
+ * range this model ever sees — 2 m/s in the horse latitudes to 10 m/s in the Southern Ocean —
+ * it changes wave height by 1.7 times. So a clipper in the Roaring Forties and a steamer on a
+ * glassy July afternoon off Devon sailed in visibly the same water, and the wind field the app
+ * spends a whole layer displaying made no difference to what the sea looked like.
+ *
+ * Wave height goes with the SQUARE of wind speed, not with it. The Sverdrup–Munk–Bretschneider
+ * relation for a fully developed sea is Hs ~ 0.021 U^2: a 4 m/s breeze raises 0.34 m, 9 m/s
+ * raises 1.7 m, and a 15 m/s gale raises 4.7 m — a fourteenfold range where there was a 1.7.
+ * That is the difference between a sea state and a texture.
+ *
+ * TWO THINGS ARE NOT SCALED BY THE LOCAL WIND, and both matter:
+ *   * SWELL, which was raised somewhere else. A calm does not flatten the ocean; it leaves the
+ *     old swell running under it, and a long low swell on a windless day is one of the most
+ *     recognisable things at sea. The two swell components keep a floor.
+ *   * CHOP, which is entirely local and does go to nothing in a calm. It has no floor.
+ *
+ * ── AND IT IS COMPUTED IN ONE PLACE ────────────────────────────────────────────────────
+ * This scaling used to be written three times: here, in SEA_VERT, and again in the globe's
+ * fragment shader. Three copies of one formula is the exact failure this file's opening note
+ * warns about, so the amplitude is now folded into the uniform BEFORE upload. The shaders get
+ * a finished number and have no wind term left to disagree about. */
+const SWELL_FLOOR = [0.34, 0.22, 0.0, 0.0];        // fraction retained in a flat calm
+
+function seaAmp(i, wind) {
+  const U = wind === undefined ? 7.0 : Math.max(0, wind);
+  const hs = 0.021 * U * U;                        // significant wave height, metres
+  const ref = 0.021 * 7.0 * 7.0;                   // the table is written for a 7 m/s sea
+  const f = Math.min(4.2, hs / ref);               // capped: this is not a survival model
+  return SEA_WAVES[i][3] * Math.max(SWELL_FLOOR[i], f);
+}
+
+/* Flattened for the uniform, with the amplitude already scaled, so the shader and this file
+   cannot fall out of step — there is nothing left for them to compute independently. */
+function seaWaveUniform(wind) {
+  return SEA_WAVES.map((w, i) => new THREE.Vector4(w[0], w[1], w[2], seaAmp(i, wind)));
+}
+
+/* Re-scale an existing uniform array in place, for views whose wind changes as the camera or
+   the ship moves. Mutating beats rebuilding: a fresh array every frame would replace the
+   uniform's identity and force three.js to re-upload the whole thing. */
+function updateWaveUniform(arr, wind) {
+  if (!arr) return arr;
+  for (let i = 0; i < SEA_WAVES.length && i < arr.length; i++) arr[i].w = seaAmp(i, wind);
+  return arr;
 }
 
 /* ── seaAt: the height and slope of the water at a point ────────────────────────────────
@@ -51,7 +94,7 @@ function seaAt(x, z, t, wind) {
     const dl = Math.hypot(W[0], W[1]) || 1;
     const dx = W[0] / dl, dz = W[1] / dl;
     const L = W[2];
-    const A = W[3] * (0.30 + 0.070 * w);
+    const A = seaAmp(i, w);
     const k = 6.2831853 / L;
     const c = Math.sqrt(9.81 / k);
     const ph = k * (dx * x + dz * z) - c * k * t;
@@ -188,4 +231,5 @@ function animateWheels(root, t, speedKn) {
   });
 }
 
-window.SHIPS_SEA = { SEA_WAVES, seaWaveUniform, seaAt, floatShip, animateOars, animateWheels };
+window.SHIPS_SEA = { SEA_WAVES, seaWaveUniform, updateWaveUniform, seaAmp, seaAt, floatShip,
+                     animateOars, animateWheels };

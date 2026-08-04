@@ -4,9 +4,26 @@
     {
       "name": "ships",
       "runtimeExecutable": "/usr/bin/python3",
-      "runtimeArgs": ["-m", "http.server", "8149",
-                      "--directory", "/Users/augustgweon/Ships/web"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8149",
+        "--directory",
+        "/Users/augustgweon/Ships/web"
+      ],
       "port": 8149
+    },
+    {
+      "name": "ships-verify",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8151",
+        "--directory",
+        "/Users/augustgweon/Ships/web"
+      ],
+      "port": 8151
     }
   ]
 }

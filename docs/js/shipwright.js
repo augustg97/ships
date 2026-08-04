@@ -228,6 +228,23 @@ function swSelect(obj) {
    unset is worse than one that is missing: it asserts a default with the same confidence it
    would state a fact. */
 const TRADITION = {
+  /* ── THE ONE-PIECE HULL ───────────────────────────────────────────────────────────
+     A dugout is not assembled at all, and that is what makes it the beginning of this
+     story rather than a crude version of what follows. There is no keel, no frame, no
+     plank and no seam, because there is no JOINT: the hull is a single tree with the
+     inside taken out of it. Nothing can leak, and nothing can be repaired either.
+
+     It also fixes the ship's limits at the moment the tree is felled. Beam cannot exceed
+     the trunk, so a dugout is always narrow and always tender, and the only way to make a
+     bigger one is to find a bigger tree. Every later tradition here exists to escape that:
+     the moment you can JOIN two pieces of wood, the ship stops being the size of a plant. */
+  dugout: { label: 'One piece: a tree with the inside taken out',
+            s1: ['Log felled', 'The hull is chosen, not designed. Its beam is the trunk\'s '
+                             + 'beam and cannot exceed it, which fixes what the boat can '
+                             + 'ever be before a tool touches it.'],
+            s2: ['Hollowed', 'Burned and adzed out from above. There is no seam anywhere in '
+                           + 'the hull, so nothing can leak — and nothing can be replaced '
+                           + 'either, because there are no parts.'] },
   frame: { label: 'Frame-first (carvel): frames, then planking',
            s1: ['Frames raised', 'The ribs go up on the keel. The shape is decided now, on the '
                               + 'drawing floor, before a single plank is cut — which is what '

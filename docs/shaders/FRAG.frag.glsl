@@ -17,6 +17,35 @@ uniform float uTime;
 uniform float uSeaLevel;       // metres relative to today, for deep time
 uniform float uLySeafloor, uLyWind, uLyChl, uLyIce, uLyCloud, uLyReach;
 
+/* ── THE SURFACE OF THE WATER, AND WHY IT IS A FUNCTION OF ZOOM ───────────────────────────
+ * uZoom runs 0 at globe scale to 1 with the camera down among the shipping, and uMPP is how
+ * many metres of ocean one pixel covers. Together they decide two things this shader used to
+ * decide once and for all:
+ *
+ *  * HOW TRANSPARENT the water is. The note further down explains why the extinction is
+ *    deliberately about nine times weaker than real sea water: at globe scale the argument IS
+ *    the sea floor, and a physically exact ocean is a black disc with no Mid-Atlantic Ridge in
+ *    it. But that same choice, seen from 300 km up over the English Channel, renders 70 m of
+ *    water as pale sand — the shelf looked like a beach, because at shelf depths a ninefold
+ *    transparency shows almost the whole bottom. The departure is right at one scale and wrong
+ *    at the other, so it is now a ramp between them rather than a constant.
+ *
+ *  * WHICH WAVES EXIST. A 118 m swell is not visible from orbit and cannot be drawn there
+ *    without aliasing into static — the mistake this shader already made once at 2600 cycles
+ *    per globe. Each component fades in only once a pixel is small compared with its own
+ *    wavelength, so the sea grows detail as you descend instead of carrying detail that the
+ *    frame cannot resolve.
+ *
+ * uWave is THE SAME TABLE the Shipwright and the buoyancy code use — direction, wavelength in
+ * metres, amplitude in metres. One sea, three views. */
+uniform float uZoom;
+uniform float uMPP;            // metres of ocean per screen pixel
+uniform vec2  uRef;            // lon, lat of the camera's sub-point, radians
+uniform vec4  uWave[4];        // dirX, dirZ, wavelength m, amplitude m
+uniform float uWind;           // wind speed for the wave state, m/s
+
+const float R_EARTH_M = 6371000.0;
+
 const float PI = 3.14159265359;
 const float ELEV_MIN = -11000.0;
 const float ELEV_SPAN = 20000.0;
@@ -54,6 +83,52 @@ float fbm(vec2 p){
   float v = 0.0, a = 0.5;
   for(int i=0;i<5;i++){ v += a*vnoise(p); p *= 2.03; a *= 0.5; }
   return v;
+}
+
+/* ── A LOCAL METRIC FRAME ───────────────────────────────────────────────────────────────
+   Wave phase has to be computed in metres, and metres across a whole globe is a number no
+   float32 in a fragment shader can hold: a 27 m chop is 1.5 million cycles around the equator,
+   and the phase would quantise into banding long before it drew a wave. So position is measured
+   from the camera's own sub-point. Within a few hundred kilometres of it — which is the only
+   place waves are ever visible — the numbers stay small and exact, and the frame is a plain
+   east/north tangent plane. */
+vec2 localMetres(vec3 p){
+  vec3 n = normalize(p);
+  float lon = atan(n.x, n.z);
+  float lat = asin(clamp(n.y, -1.0, 1.0));
+  float dlon = lon - uRef.x;
+  if (dlon >  PI) dlon -= 2.0*PI;
+  if (dlon < -PI) dlon += 2.0*PI;
+  return vec2(dlon * cos(lat) * R_EARTH_M, (lat - uRef.y) * R_EARTH_M);
+}
+
+/* ── THE SEA SURFACE ────────────────────────────────────────────────────────────────────
+   Gerstner normals only. The globe is not displaced: a 1.3 m swell on a 6371 km sphere is far
+   below one pixel of relief at any zoom this view reaches, and the thing that actually makes
+   water look like water at a distance is not its shape but what its SLOPE does to the sun.
+   (The Passage view, down among the hulls, uses the same table on a real displaced surface —
+   there the shape does matter, and a ship has to sit in it.)
+
+   crest returns how near this point is to the top of a wave, which is where a sea breaks. */
+vec3 seaSurface(vec2 pm, float t, out float crest, out float amp){
+  vec3 nrmSum = vec3(0.0, 1.0, 0.0);
+  crest = 0.0; amp = 0.0;
+  for (int i = 0; i < 4; i++){
+    float L = uWave[i].z;
+    /* the resolution gate: a component appears only once a pixel is small against it */
+    float vis = smoothstep(L * 0.34, L * 0.075, uMPP);
+    if (vis <= 0.001) continue;
+    vec2 d = normalize(uWave[i].xy);
+    float A = uWave[i].w * vis;      // wind already folded in by sea.js seaAmp()
+    float k = 6.2831853 / L;
+    float c = sqrt(9.81 / k);                 // deep water: the same c as sea.js derives
+    float ph = k * dot(d, pm) - c * k * t;
+    nrmSum.x -= d.x * k * A * cos(ph);
+    nrmSum.z -= d.y * k * A * cos(ph);
+    crest += sin(ph) * A;
+    amp += A;
+  }
+  return normalize(nrmSum);
 }
 
 void main(){
@@ -156,6 +231,13 @@ void main(){
        The alternative is a beautiful, accurate, useless black disc. */
     vec3 kv = vec3(0.0026, 0.0016, 0.0011);            // colour transmission, per metre
     kv *= (1.0 + clamp(chl, 0.0, 8.0) * 0.16);         // turbid water absorbs harder
+    /* ── AND THE DEPARTURE IS CLOSED AS YOU DESCEND ─────────────────────────────────
+       Real Kd for clear ocean water is about 0.04 per metre in red — fifteen times the value
+       above. Held at the cartographic figure the shelf reads as sand seen through glass, which
+       is what made the Channel look like a beach from 300 km up. Ramping toward physics with
+       uZoom means the ridge is still legible from orbit and 70 m of water is opaque from a
+       masthead, which is what 70 m of water is. */
+    kv *= mix(1.0, 9.0, uZoom * uZoom);
     vec3 through = exp(-kv * depth);
 
     /* the body of the water: colour set by what is dissolved and suspended in it */
@@ -219,6 +301,25 @@ void main(){
         (wave2 - 0.5) * 0.045 * windAmp,
         (wave - 0.5) * 0.055 * windAmp));
 
+    /* ── REAL WAVES, ONCE THEY ARE BIG ENOUGH TO SEE ─────────────────────────────────
+       Everything above is the WIND FIELD — a monthly climatology painted at about one cycle
+       per degree, which is the right frequency for reading the trades and the Roaring Forties
+       off a whole hemisphere, and far too coarse to be water. Below is the water: the same
+       four-component sea the Shipwright floats hulls on, in metres, appearing component by
+       component as the ground scale drops past each wavelength.
+
+       The perturbed normal is rotated out of the tangent plane into world space, because
+       everything downstream — glint, Fresnel, the sky term — is in world space and a normal
+       that is right in the wrong frame lights the ocean from the wrong side. */
+    float crest, wamp;
+    vec3 wn = seaSurface(localMetres(vPos), uTime, crest, wamp);
+    /* east and north at this point, so the wave frame is the sea's frame */
+    vec3 east  = normalize(cross(vec3(0.0, 1.0, 0.0), n));
+    vec3 north = cross(n, east);
+    float seaVis = step(0.0001, wamp);
+    vec3 waveN = normalize(n + (east * wn.x + north * wn.z) * 1.0);
+    sn = normalize(mix(sn, normalize(sn + (waveN - n) * 1.35), seaVis));
+
     /* Sun glint. Blinn-Phong with a wind-broadened lobe: a glassy sea gives one hard highlight,
        a rough sea smears it wider — that difference is what the eye actually reads as "windy".
        ⚠ The exponent floor matters. At shininess 22 with a 2.6x gain the lobe covered most of
@@ -226,11 +327,26 @@ void main(){
        the lobe tight enough that glint stays a glint. */
     vec3 Hv = normalize(L + V);
     float shin = mix(420.0, 70.0, clamp(wspd / 16.0, 0.0, 1.0));
+    /* Close in the facets are resolved individually, so the lobe must TIGHTEN rather than
+       broaden: from orbit a rough sea is one smeared sheet of glare because a pixel holds a
+       million facets, and from a masthead the same sea is thousands of separate sparks. Same
+       physics, opposite appearance, and the difference is entirely how much sea is in a pixel. */
+    shin = mix(shin, 2400.0, uZoom);
     float spec = pow(clamp(dot(sn, Hv), 0.0, 1.0), shin);
     float fres = 0.02 + 0.98 * pow(1.0 - clamp(dot(sn, V), 0.0, 1.0), 5.0);
     float sunUp = clamp(dot(n, L), 0.0, 1.0);
-    col += vec3(1.0, 0.96, 0.88) * spec * (0.40 + 0.55 * windAmp) * sunUp;
-    col = mix(col, vec3(0.09, 0.14, 0.23), fres * 0.34 * (0.35 + 0.65 * sunUp));
+    col += vec3(1.0, 0.96, 0.88) * spec * (0.40 + 0.55 * windAmp) * sunUp
+           * mix(1.0, 5.5, uZoom);
+    /* ── THE SKY IS WHAT MAKES WATER LOOK WET ────────────────────────────────────────
+       A surface that only reflects the SUN is a dark mirror with a hot spot in it. Water is
+       mostly reflecting the dome above it, which is why the sea is blue on a blue day and
+       grey under cloud, and why it goes silver toward the horizon where the Fresnel term runs
+       to one. Weighted by uZoom because at globe scale you are looking almost straight down,
+       where the reflectance of water really is only two per cent. */
+    vec3 skyUp = vec3(0.30, 0.46, 0.70), skyHz = vec3(0.62, 0.72, 0.84);
+    vec3 skyCol = mix(skyUp, skyHz, pow(1.0 - clamp(dot(n, V), 0.0, 1.0), 2.2));
+    skyCol *= (0.34 + 0.80 * sunUp);
+    col = mix(col, skyCol, fres * mix(0.34, 0.86, uZoom) * (0.35 + 0.65 * sunUp));
 
     /* WHITECAPS — the single most legible thing on the frame: the Southern Ocean is white and
        the horse latitudes are glass.
@@ -245,6 +361,15 @@ void main(){
     float breakF = smoothstep(5.2, 10.0, wspd) * uLyWind;
     float foam = smoothstep(0.54 - breakF * 0.22, 0.80, wave2 * 0.55 + wave * 0.45);
     col = mix(col, vec3(0.86, 0.90, 0.94), foam * breakF * 0.70);
+    /* and once the individual waves are resolved, foam belongs on the CRESTS of those waves
+       rather than in a noise field — a sea breaks at its top, and putting the white anywhere
+       else is the tell that the water is a texture and not a surface */
+    if (wamp > 0.0001) {
+      float ct = crest / max(wamp, 0.0001);                  // -1 trough .. +1 crest
+      float lace = fbm(localMetres(vPos) * 0.06 + vec2(uTime * 0.5, 0.0));
+      float cf = smoothstep(0.58, 0.94, ct) * smoothstep(0.30, 0.62, lace);
+      col = mix(col, vec3(0.90, 0.935, 0.95), cf * (0.20 + 0.62 * breakF) * uZoom);
+    }
     /* and a broad haze of spray where it really blows, so the belt reads at globe scale
        rather than only close in */
     col = mix(col, vec3(0.55, 0.64, 0.74), smoothstep(6.8, 10.5, wspd) * 0.16 * uLyWind);

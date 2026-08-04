@@ -444,4 +444,365 @@ function isNavigable(lon, lat, minDepth) {
   return seaDepthAt(lon, lat) < -(minDepth === undefined ? 60 : minDepth);
 }
 
-window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable };
+/* ══ THE LAND MASK, AND WHY A SHIP WAS PARKED ON BRITTANY ══════════════════════════════
+ *
+ * The fleet on the globe used to place ships by interpolating a great circle between two
+ * waypoints and nudging any sample that failed `isNavigable` sideways until it found water.
+ * Three things were wrong with that at once, and they compounded:
+ *
+ *   1. The grid was NAV's 0.7 degrees — 78 km at the equator. Brittany is narrower than that
+ *      in places, so the peninsula was barely present in the data being consulted.
+ *   2. `isNavigable` defaults to 60 m of water. That is right for keeping a deep-draught hull
+ *      off soundings, and completely wrong as a shoreline test: the English Channel averages
+ *      63 m and is 30–50 m over most of its area, so the whole Channel, the North Sea, the
+ *      Yellow Sea and the Sunda Shelf all read as unnavigable — as LAND, in effect.
+ *   3. A sample that could not find water within 14 degrees was DROPPED. Dropping a point does
+ *      not remove the track; it removes the corner, and the ship then runs in a straight line
+ *      from the last surviving point to the next one — directly across whatever was in the way.
+ *
+ * So the failure was not "the check let a ship onto land". The check declared most of Europe's
+ * shelf to be land, could not route around it, gave up, and the giving-up drew the shortcut.
+ *
+ * ── WHAT REPLACES IT ──────────────────────────────────────────────────────────────────
+ * A real mask and a real search. The mask is the full level-0 elevation grid — 2048 x 1024,
+ * about 19.5 km at the equator, sixteen times the cells — thresholded at 5 m of water, and
+ * then reduced to the ONE connected ocean. That last step matters more than it sounds: Nanjing
+ * sits on the Yangtze and Bristol on the Severn, and the nearest "water" to each is river or
+ * lake water that goes nowhere. Snapping a port to unreachable water fails the search in a way
+ * that looks exactly like an impossible voyage.
+ *
+ * Between two points we run A* over that ocean, eight-connected, with a cost penalty within
+ * three cells of a coast. The penalty is not decoration: without it the cheapest path hugs
+ * every shoreline, because a coast-following path is geometrically shorter than standing off,
+ * and ships do not do that. With it, open water is preferred and narrow passages stay open,
+ * since a penalty raises the price of a strait without closing it.
+ *
+ * ── THE CARVED PASSAGES, DECLARED ─────────────────────────────────────────────────────
+ * A 19.5 km raster cannot hold a 3 km channel. The Strait of Magellan is 2 km wide at the
+ * First Narrows and the Bosphorus is 700 m, so both are solid rock in this grid, and Magellan's
+ * voyage — the one that is ABOUT a strait — could not be drawn through it. These are cut back
+ * in explicitly, by name, as data rather than as a fudge buried in the search: the model is
+ * asserting that a passage exists which its own raster is too coarse to see, and that assertion
+ * should be legible and auditable. Nothing else is carved. Suez and Panama are absent from the
+ * mask, which is correct for every voyage in this model that predates them and, for the box
+ * route, means the search finds the Cape — the same answer a closed canal gives a real fleet.
+ */
+const MASK_W = 2048, MASK_H = 1024;          // level 0 native; ~19.5 km at the equator
+const SHOAL_M = -5;                          // shallower than this is not water for routing
+
+/* Real waterways below the resolution of the elevation raster. lon/lat pairs, cut one cell
+   either side of the line. Each is here because a voyage in this model actually used it. */
+const CARVED = [
+  { name: 'Strait of Magellan', why: '2 km at the First Narrows; the raster cell is 19.5 km',
+    line: [[-68.4, -52.5], [-70.5, -53.6], [-71.4, -53.9], [-74.0, -52.9], [-75.4, -52.6]] },
+  { name: 'Bosphorus and the Dardanelles', why: '700 m at the narrowest',
+    line: [[26.2, 40.1], [29.2, 41.3], [30.0, 41.9]] },
+];
+
+const MASK = { ready: false, ocean: null, coast: null, w: MASK_W, h: MASK_H };
+
+function buildMask() {
+  if (MASK.ready) return true;
+  if (!APP.depthCanvas) return false;
+  const src = APP.depthCanvas;
+  const cw = src.width, chh = src.height;
+  const cx = src.getContext('2d', { willReadFrequently: true });
+  const img = cx.getImageData(0, 0, cw, chh).data;
+  const N = MASK_W * MASK_H;
+  const water = new Uint8Array(N);
+  for (let y = 0; y < MASK_H; y++) {
+    const sy = Math.min(chh - 1, Math.floor((y + 0.5) / MASK_H * chh));
+    for (let x = 0; x < MASK_W; x++) {
+      const sx = Math.min(cw - 1, Math.floor((x + 0.5) / MASK_W * cw));
+      const i = (sy * cw + sx) * 4;
+      const elev = (img[i] * 256 + img[i + 1]) / 65535 * 20000 - 11000;
+      water[y * MASK_W + x] = elev < SHOAL_M ? 1 : 0;
+    }
+  }
+  /* the declared passages, cut one cell either side */
+  for (const c of CARVED) {
+    for (let s = 0; s < c.line.length - 1; s++) {
+      const a = maskCell(c.line[s][0], c.line[s][1]), b = maskCell(c.line[s + 1][0], c.line[s + 1][1]);
+      const ay = (a / MASK_W) | 0, ax = a % MASK_W, by = (b / MASK_W) | 0, bx = b % MASK_W;
+      const n = Math.max(Math.abs(by - ay), Math.abs(bx - ax)) * 3 + 1;
+      for (let i = 0; i <= n; i++) {
+        const f = i / n;
+        const y = Math.round(ay + (by - ay) * f), x = Math.round(ax + (bx - ax) * f);
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const yy = Math.max(0, Math.min(MASK_H - 1, y + dy)), xx = (x + dx + MASK_W) % MASK_W;
+          water[yy * MASK_W + xx] = 1;
+        }
+      }
+    }
+  }
+  /* ONE ocean: flood from mid-Pacific, so lakes and unreachable river water are excluded */
+  const ocean = new Uint8Array(N);
+  const q = new Int32Array(N);
+  let qh = 0, qt = 0;
+  const seed = maskCell(-150, 10);
+  ocean[seed] = 1; q[qt++] = seed;
+  while (qh < qt) {
+    const k = q[qh++], y = (k / MASK_W) | 0, x = k % MASK_W;
+    for (let d = 0; d < 4; d++) {
+      const ny = y + (d === 0 ? 1 : d === 1 ? -1 : 0);
+      const nx = (x + (d === 2 ? 1 : d === 3 ? -1 : 0) + MASK_W) % MASK_W;
+      if (ny < 0 || ny >= MASK_H) continue;
+      const nk = ny * MASK_W + nx;
+      if (water[nk] && !ocean[nk]) { ocean[nk] = 1; q[qt++] = nk; }
+    }
+  }
+  /* distance to the nearest non-ocean cell, capped — the standoff cost reads this */
+  const coast = new Uint8Array(N).fill(7);
+  qh = qt = 0;
+  for (let k = 0; k < N; k++) if (!ocean[k]) { coast[k] = 0; q[qt++] = k; }
+  while (qh < qt) {
+    const k = q[qh++], c = coast[k];
+    if (c >= 6) continue;
+    const y = (k / MASK_W) | 0, x = k % MASK_W;
+    for (let d = 0; d < 4; d++) {
+      const ny = y + (d === 0 ? 1 : d === 1 ? -1 : 0);
+      const nx = (x + (d === 2 ? 1 : d === 3 ? -1 : 0) + MASK_W) % MASK_W;
+      if (ny < 0 || ny >= MASK_H) continue;
+      const nk = ny * MASK_W + nx;
+      if (coast[nk] > c + 1) { coast[nk] = c + 1; q[qt++] = nk; }
+    }
+  }
+  MASK.ocean = ocean; MASK.coast = coast; MASK.ready = true;
+  return true;
+}
+
+/* ⚠ FLOOR, NOT ROUND, AND THE TWO MUST BE EXACT INVERSES.
+   cellLonLat returns the CENTRE of a cell. With Math.round, feeding a centre back through
+   maskCell gives x + 1 and y + 1 — every point was tested one cell south-east of where it was
+   drawn. Inland that is invisible, because the neighbour of a mid-ocean cell is also ocean; on
+   a coast it is the whole error, and it was the reason three Pacific landfalls still reported
+   ashore after the search itself was already clean. Any pair of functions that convert between
+   the same two spaces has to be checked as a round trip, not read as obviously right. */
+function maskCell(lon, lat) {
+  const x = Math.min(MASK_W - 1, Math.floor((((lon + 180) % 360) + 360) % 360 / 360 * MASK_W));
+  const y = Math.max(0, Math.min(MASK_H - 1, Math.floor((90 - lat) / 180 * MASK_H)));
+  return y * MASK_W + x;
+}
+function cellLonLat(k) {
+  const y = (k / MASK_W) | 0, x = k % MASK_W;
+  return { lon: (x + 0.5) / MASK_W * 360 - 180, lat: 90 - (y + 0.5) / MASK_H * 180 };
+}
+function isOcean(lon, lat) { return buildMask() ? !!MASK.ocean[maskCell(lon, lat)] : true; }
+
+/* the nearest cell of the ONE ocean — a port given in a river mouth is walked out to sea */
+function snapToOcean(k, maxR) {
+  if (MASK.ocean[k]) return k;
+  const y0 = (k / MASK_W) | 0, x0 = k % MASK_W;
+  for (let r = 1; r <= (maxR || 40); r++) {
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.max(Math.abs(dy), Math.abs(dx)) !== r) continue;
+        const y = y0 + dy; if (y < 0 || y >= MASK_H) continue;
+        const nk = y * MASK_W + ((x0 + dx + MASK_W) % MASK_W);
+        if (MASK.ocean[nk]) return nk;
+      }
+    }
+  }
+  return -1;
+}
+
+/* ── A*, with reusable scratch ─────────────────────────────────────────────────────────
+   Allocating 2 million floats per leg would cost more than the search. The arrays are kept
+   and a monotonically increasing stamp marks which entries belong to the current run, so
+   nothing has to be cleared between calls. */
+const _AS = { g: null, from: null, stamp: null, run: 0, hk: null, hv: null, hn: 0 };
+function heapPush(k, v) {
+  let i = _AS.hn++;
+  if (i >= _AS.hk.length) {
+    const nk = new Float32Array(_AS.hk.length * 2), nv = new Int32Array(_AS.hv.length * 2);
+    nk.set(_AS.hk); nv.set(_AS.hv); _AS.hk = nk; _AS.hv = nv;
+  }
+  _AS.hk[i] = k; _AS.hv[i] = v;
+  while (i > 0) {
+    const p = (i - 1) >> 1;
+    if (_AS.hk[p] <= _AS.hk[i]) break;
+    const tk = _AS.hk[p], tv = _AS.hv[p];
+    _AS.hk[p] = _AS.hk[i]; _AS.hv[p] = _AS.hv[i]; _AS.hk[i] = tk; _AS.hv[i] = tv;
+    i = p;
+  }
+}
+function heapPop() {
+  const top = _AS.hv[0];
+  _AS.hn--;
+  if (_AS.hn > 0) {
+    _AS.hk[0] = _AS.hk[_AS.hn]; _AS.hv[0] = _AS.hv[_AS.hn];
+    let i = 0;
+    for (;;) {
+      const l = 2 * i + 1, r = l + 1;
+      let s = i;
+      if (l < _AS.hn && _AS.hk[l] < _AS.hk[s]) s = l;
+      if (r < _AS.hn && _AS.hk[r] < _AS.hk[s]) s = r;
+      if (s === i) break;
+      const tk = _AS.hk[s], tv = _AS.hv[s];
+      _AS.hk[s] = _AS.hk[i]; _AS.hv[s] = _AS.hv[i]; _AS.hk[i] = tk; _AS.hv[i] = tv;
+      i = s;
+    }
+  }
+  return top;
+}
+
+const CELL_NM = 180 / MASK_H * 60;            // one cell of latitude, in nautical miles
+
+/* Find a sea passage between two points. Returns an array of {lon, lat} that is guaranteed to
+   lie in open water at the mask's resolution, or null if there is no route at all. */
+function seaPath(lon0, lat0, lon1, lat1) {
+  if (!buildMask()) return null;
+  const a = snapToOcean(maskCell(lon0, lat0)), b = snapToOcean(maskCell(lon1, lat1));
+  if (a < 0 || b < 0) return null;
+  if (a === b) return [{ lon: lon0, lat: lat0 }, { lon: lon1, lat: lat1 }];
+
+  const N = MASK_W * MASK_H;
+  if (!_AS.g) {
+    _AS.g = new Float32Array(N); _AS.from = new Int32Array(N);
+    _AS.stamp = new Int32Array(N); _AS.hk = new Float32Array(1 << 16); _AS.hv = new Int32Array(1 << 16);
+  }
+  const run = ++_AS.run;
+  const by = (b / MASK_W) | 0, bx = b % MASK_W;
+  const h = (y, x) => {
+    const dy = Math.abs(y - by);
+    let dx = Math.abs(x - bx); if (dx > MASK_W / 2) dx = MASK_W - dx;
+    const kx = Math.cos((90 - (y + 0.5) / MASK_H * 180) * Math.PI / 180);
+    return Math.hypot(dy, dx * kx);
+  };
+  _AS.hn = 0;
+  _AS.g[a] = 0; _AS.stamp[a] = run; _AS.from[a] = -1;
+  heapPush(h((a / MASK_W) | 0, a % MASK_W), a);
+  const closed = new Set();
+  let guard = 0;
+  while (_AS.hn > 0 && guard++ < 4000000) {
+    const cur = heapPop();
+    if (closed.has(cur)) continue;
+    closed.add(cur);
+    if (cur === b) break;
+    const cy = (cur / MASK_W) | 0, cxx = cur % MASK_W;
+    const kx = Math.cos((90 - (cy + 0.5) / MASK_H * 180) * Math.PI / 180);
+    for (let dy = -1; dy <= 1; dy++) {
+      const ny = cy + dy; if (ny < 0 || ny >= MASK_H) continue;
+      for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        const nx = (cxx + dx + MASK_W) % MASK_W;
+        const nk = ny * MASK_W + nx;
+        if (!MASK.ocean[nk]) continue;
+        /* ⚠ NO CUTTING CORNERS. Eight-connected movement will happily step diagonally between
+           two land cells that meet at a corner — both the cell left and the cell arrived at are
+           water, so every point test passes, and the ship slips through a headland on the
+           diagonal. Require the two orthogonal cells that share the corner to be water as well,
+           which is the same rule a hull obeys: you cannot pass through a point. */
+        if (dx && dy && (!MASK.ocean[cy * MASK_W + nx] || !MASK.ocean[ny * MASK_W + cxx])) continue;
+        const c = MASK.coast[nk];
+        /* standing off: coast-hugging is geometrically cheaper, and ships do not do it */
+        const pen = 1 + (c <= 1 ? 2.2 : c === 2 ? 0.9 : c === 3 ? 0.35 : 0);
+        const ng = _AS.g[cur] + Math.hypot(dy, dx * kx) * pen;
+        if (_AS.stamp[nk] !== run || ng < _AS.g[nk]) {
+          _AS.stamp[nk] = run; _AS.g[nk] = ng; _AS.from[nk] = cur;
+          heapPush(ng + h(ny, nx), nk);
+        }
+      }
+    }
+  }
+  if (_AS.stamp[b] !== run) return null;
+  const cells = [];
+  for (let k = b; k >= 0; k = _AS.from[k]) { cells.push(k); if (k === a) break; }
+  cells.reverse();
+
+  /* ── STRING-PULLING ────────────────────────────────────────────────────────────────
+     A cell path is a staircase of 19.5 km steps and there are hundreds of them. Keep only
+     the corners a ship would actually turn at, by walking as far ahead as the straight line
+     between the two stays in open water. This shortens the track AND preserves the guarantee,
+     because the segment itself is what gets tested — not just its endpoints, which is exactly
+     the mistake the old code made. */
+  const out = [];
+  let i = 0;
+  while (i < cells.length - 1) {
+    let j = cells.length - 1;
+    for (; j > i + 1; j--) if (segmentClear(cells[i], cells[j])) break;
+    out.push(cells[i]);
+    i = j;
+  }
+  out.push(cells[cells.length - 1]);
+  /* ── ⚠ AND THE ENDPOINTS ARE THE PLACES, WHICH ARE ON LAND ─────────────────────────
+     The first version put the caller's own coordinates back at each end, on the reasoning
+     that a voyage should begin where it says it begins. But a waypoint is a LANDFALL — Tahiti,
+     Savai'i, Viti Levu, Bristol — and at 19.5 km an island of that size simply is a land cell.
+     Restoring it planted every track's first and last hull ashore, which accounted for all 287
+     bad samples in the first measurement and for none of the middles, since the search itself
+     was clean. A track ends in the water off a landfall. That is also what a chart draws. */
+  return out.map(cellLonLat);
+}
+
+/* ── THE TEST MUST BE THE CURVE THAT GETS DRAWN ────────────────────────────────────────
+   The fleet moves between waypoints by slerp — a great circle — because interpolating lon/lat
+   linearly sails through South America. So the clearance test walks the GREAT CIRCLE too.
+   Testing a straight line in grid coordinates and then drawing an arc through it is the same
+   error one level up as testing the endpoints and drawing the segment: whatever is checked is
+   not what appears. Over a 38-degree pull at high latitude the two curves are hundreds of
+   kilometres apart, which is more than enough to put Iceland between them. */
+function segmentClear(ka, kb) {
+  const A = cellLonLat(ka), B = cellLonLat(kb);
+  const toV = (lon, lat) => {
+    const p = lat * Math.PI / 180, l = lon * Math.PI / 180;
+    return [Math.cos(p) * Math.sin(l), Math.sin(p), Math.cos(p) * Math.cos(l)];
+  };
+  const va = toV(A.lon, A.lat), vb = toV(B.lon, B.lat);
+  const dot = Math.max(-1, Math.min(1, va[0] * vb[0] + va[1] * vb[1] + va[2] * vb[2]));
+  const ang = Math.acos(dot);
+  const degs = ang * 180 / Math.PI;
+  if (degs > 42) return false;                    // never pull a whole ocean straight
+  /* Four samples per cell of arc, and the SEQUENCE of cells is what is tested, not the samples
+     in isolation. A great circle can clip the corner of a cell in two or three kilometres, so
+     point sampling at any finite rate will eventually step over one; but a curve that leaves
+     cell A and appears in a diagonal neighbour B must have passed through the corner they
+     share, and the same rule that stops the search cutting corners applies here. */
+  const n = Math.max(2, Math.ceil(degs * MASK_H / 180 * 4));
+  const s = Math.sin(ang);
+  let prev = ka;
+  for (let i = 1; i <= n; i++) {
+    const f = i / n;
+    let x, y, z;
+    if (s < 1e-9) { x = va[0]; y = va[1]; z = va[2]; }
+    else {
+      const wa = Math.sin((1 - f) * ang) / s, wb = Math.sin(f * ang) / s;
+      x = va[0] * wa + vb[0] * wb; y = va[1] * wa + vb[1] * wb; z = va[2] * wa + vb[2] * wb;
+    }
+    const r = Math.hypot(x, y, z);
+    const lat = Math.asin(y / r) * 180 / Math.PI;
+    const lon = Math.atan2(x, z) * 180 / Math.PI;
+    const k = maskCell(lon, lat);
+    if (k === prev) continue;
+    if (!MASK.ocean[k]) return false;
+    const py = (prev / MASK_W) | 0, px = prev % MASK_W;
+    const cy = (k / MASK_W) | 0, cx = k % MASK_W;
+    let dxs = cx - px; if (dxs > MASK_W / 2) dxs -= MASK_W; else if (dxs < -MASK_W / 2) dxs += MASK_W;
+    if (cy !== py && dxs !== 0) {
+      /* diagonal (or a longer jump, which a 4-per-cell rate should not produce): both shared
+         orthogonal cells must be water too */
+      if (!MASK.ocean[py * MASK_W + cx] || !MASK.ocean[cy * MASK_W + px]) return false;
+    }
+    prev = k;
+  }
+  return true;
+}
+
+/* ── THE WIND AT A POINT, WITHOUT WAITING FOR IT ──────────────────────────────────────────
+   The Passage needs to know what it is blowing where a ship is, so that the sea she is in is
+   the sea the globe says is there rather than a decorative default. The field is already
+   fetched and cached for the reach solver; this is a synchronous read of that cache, with a
+   fetch kicked off on the first miss. It returns null until the data lands, and the caller
+   uses a stated fallback in the meantime rather than a silent one. */
+function windAt(lon, lat, monthIndex) {
+  const m = ((Math.floor(monthIndex) % 12) + 12) % 12;
+  const w = _windCache.get(m);
+  if (!w) { sampleWind(m); return null; }
+  let x = Math.floor(((lon + 180) % 360 + 360) % 360 / 360 * NAV_W);
+  const y = Math.max(0, Math.min(NAV_H - 1, Math.floor((90 - lat) / 180 * NAV_H)));
+  const k = y * NAV_W + Math.min(NAV_W - 1, x);
+  return { u: w.u[k], v: w.v[k], speed: Math.hypot(w.u[k], w.v[k]), ice: w.ice[k] };
+}
+
+window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable,
+                       buildMask, seaPath, isOcean, MASK, CARVED, maskCell, cellLonLat, windAt };
