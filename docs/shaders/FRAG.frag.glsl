@@ -292,12 +292,22 @@ void main(){
      is dark, not absent, and a globe whose far half is pure black reads as a crescent, not a
      planet. */
   float day = smoothstep(-0.26, 0.20, dot(n, normalize(uSun)));
-  col *= mix(0.30, 1.18, day);
+  /* 1.18 on the day side drove the lit hemisphere past white before the gamma even ran */
+  col *= mix(0.32, 1.00, day);
 
   /* limb haze: what makes a globe read as a planet rather than a ball */
   float rim = 1.0 - clamp(dot(normalize(vNormalW), normalize(uCam - vPos)), 0.0, 1.0);
   col += vec3(0.16, 0.30, 0.48) * pow(rim, 3.0) * (0.22 + 0.90 * sunUpG);
 
-  col = pow(clamp(col, 0.0, 1.4), vec3(0.4545));      // to sRGB
+  /* ── ⚠ A HARD CLAMP IS WHY THE SUNNY SIDE WAS WASHED OUT ────────────────────────
+     clamp(col, 0, 1.4) followed by a gamma gives 1.4^0.4545 = 1.17, which the framebuffer
+     clips to flat white — so every value from about 0.75 upward landed on the SAME pixel.
+     The sun glint, the bright shelves and the lit limb all became one featureless area.
+     Highlights have to ROLL OFF rather than stop: an exponential shoulder compresses the top
+     of the range into the last part of the scale instead of throwing it away, which is what
+     film does and what an eye does. Nothing is clipped now, so the bright side keeps its
+     structure and still reads as bright. */
+  col = vec3(1.0) - exp(-max(col, 0.0) * 1.34);
+  col = pow(col, vec3(0.4545));                       // to sRGB
   gl_FragColor = vec4(col, 1.0);
 }

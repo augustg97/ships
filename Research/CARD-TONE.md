@@ -44,3 +44,18 @@ needs no adverb.
 Applies to vessel `text`, card `rows`, rig notes, part descriptions in `PARTS`, and the
 Shipwright's stage descriptions. **Not** to code comments — those are working notes for whoever
 edits the file next, and a different register is correct there.
+
+## And it applies to the session reports, not only the cards
+
+August, 2026-08-04: *"phrases like 'and want to be straight about' should be avoided."*
+
+Announcing that one is being candid is the same fault as announcing significance. It asks for
+credit for the honesty rather than simply reporting the thing. The fact carries it.
+
+> ✗ "Two things I have not done, and want to be straight about."
+> ✓ "Two things are not done:"
+> ✗ "The honest ratio is roughly half."
+> ✓ "Roughly half."
+
+Same family: "worth noting", "worth being clear about", "the honest thing is", "I should flag".
+Cut the frame, keep the content.

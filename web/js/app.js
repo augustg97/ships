@@ -865,7 +865,14 @@ function wireUI() {
     fly = null;                                   // a hand on the globe always wins
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     drag.moved += Math.abs(dx) + Math.abs(dy);
-    const k = S.dist / 900;
+    /* ── ⚠ DRAG SHOULD FOLLOW THE GROUND, NOT THE CAMERA'S DISTANCE FROM THE CENTRE ──
+       S.dist runs 112 to 700 on a globe of radius 100, so dividing by it changes the gain
+       only sixfold across the whole zoom range. But what the cursor is actually chasing is
+       the ground, and the ground's apparent speed goes with ALTITUDE ABOVE THE SURFACE —
+       12 units when you are close in against 600 when you are out. That is a fiftyfold
+       range, which is why a drag that felt right zoomed out threw the globe across the
+       screen zoomed in. Height above the surface, not radius from the middle. */
+    const k = Math.max(0.03, (S.dist - R) / 600);
     S.lon = drag.lon - dx * 0.28 * k;
     S.lat = Math.max(-84, Math.min(84, drag.lat + dy * 0.28 * k));
     placeCamera();
@@ -1094,8 +1101,13 @@ function buildEraFleet() {
     for (let n = 0; n < together; n++) {
       const holder = new THREE.Group();
       const sh = n === 0 ? proto : proto.clone();
-      /* the hull's bow is at local -X; -X onto +Z is a quarter turn about Y */
-      sh.rotation.y = -Math.PI / 2;
+      /* ── ⚠ THEY WERE SAILING STERN-FIRST ────────────────────────────────────────
+         The hull's bow is at local -X and the holder's forward is +Z, so the map is a
+         quarter turn about Y — but a turn of +PI/2, not -PI/2. Rotating about Y by theta
+         sends x to x cos + z sin: at -PI/2 the bow (-1,0,0) lands on (0,0,-1), which is
+         DEAD ASTERN. The campaign fleets a hundred lines below had it right the whole time
+         and I wrote the opposite sign into the new one. */
+      sh.rotation.y = Math.PI / 2;
       holder.add(sh);
       const L0 = ves.hull.loa;
       const t = together === 1 ? 0 : (n - (together - 1) / 2);
