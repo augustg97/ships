@@ -128,8 +128,8 @@ function animateOars(root, t) {
        BURIED through the drive, and lifted clear — but only just clear, because lifting more
        than you must is wasted effort and a trireme's oarsmen had 170 strokes a minute between
        them to think about. */
-    const DOWN_IN = -0.44;      // buried: about 25 degrees below horizontal
-    const DOWN_OUT = -0.10;     // recovering: blade just skimming clear
+    const DOWN_IN = 0.30;       // buried: the blade end down, about 17 degrees
+    const DOWN_OUT = 0.02;      // recovering: blade just skimming clear
     let sweep, tilt, feather;
     if (ph < DRIVE) {
       /* the drive. Blade buried, hauling aft, and the pull is EVEN — a crew that snatches
@@ -148,9 +148,17 @@ function animateOars(root, t) {
       /* feather in fast after the blade leaves the water, square up again before the catch */
       feather = Math.sin(Math.PI * Math.pow(k, 0.75));
     }
-    o.rotation.y = d.restY + d.sgn * sweep * 0.42;     // 24 degrees of arc either side
-    o.rotation.z = tilt;
-    o.rotation.x = feather * 1.35 * d.sgn;
+    /* ── THE ARC COMES FROM THE ROWER, NOT FROM TASTE ────────────────────────────────
+       A seated man on a fixed thwart swings his body and draws his arms through about a
+       metre. On a loom 1.1 m inboard of the thole that is an arc of roughly 0.9 rad — call it
+       ±26 degrees either side of square. Wider than that and he has run out of body; it is
+       the reach that limits a fixed-seat stroke, which is exactly why the sliding seat was
+       such a large change when it finally came. */
+    const HANDLE_TRAVEL = 1.00, INBOARD = 1.10;
+    const ARC = HANDLE_TRAVEL / INBOARD / 2;           // half-angle, radians
+    o.rotation.y = d.restY + d.sgn * sweep * ARC;
+    o.rotation.x = tilt;                               // the oar lies along Z, so tilt is about X
+    o.rotation.z = feather * 1.35 * d.sgn;             // and feather is about its own axis
   });
 }
 

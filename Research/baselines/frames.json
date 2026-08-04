@@ -71,6 +71,21 @@
       "name": "ship-usv",
       "path": "/?frozen=1#v=ship&s=usv",
       "note": "the USV, flagged as unfinished 2026-08-02"
+    },
+    {
+      "name": "ship-trireme",
+      "path": "/?frozen=1.4#v=ship&s=trireme",
+      "note": "170 oars \u2014 they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"
+    },
+    {
+      "name": "ship-carrier",
+      "path": "/?frozen=1#v=ship&s=carrier",
+      "note": "flight deck markings, island, no passenger deckhouse"
+    },
+    {
+      "name": "ship-titanic",
+      "path": "/?frozen=1#v=ship&s=titanic",
+      "note": "lofted deckhouse must not overhang the hull; check bow-on faults here too"
     }
   ]
 }

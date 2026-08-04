@@ -2489,32 +2489,55 @@ function buildOars(S, group, mat) {
   const perBankArr = S.oarsPerBank;
   const perBankOf = b => Array.isArray(perBankArr) ? perBankArr[b]
                        : (perBankArr || 27);
-  const len = B * 2.4;
+  /* ── ⚠ THE OARS LAY ALONG THE SHIP, NOT OUT FROM IT ────────────────────────────────
+     Measured: each oar spanned 9.3 m fore-and-aft and 1.3 m outboard, on a hull 3.8 m in the
+     beam. They were lying nearly parallel to the keel — which is a ship with a hedge growing
+     out of the ends of it, not a ship under oar. rotation.y was 0 and PI, when reaching
+     outboard needs ±PI/2. The same fault as the paddle wheels: a rotation nobody checked.
+
+     ── AND THEY WERE TWICE TOO LONG ────────────────────────────────────────────────────
+     B * 2.4 = 9.1 m. Morrison and Coates give Olympias oars of about 4.2 m, thranite a little
+     longer than the two banks below. The length is not free: it follows from the
+     INTERSCALMIUM, the spacing between tholes, which Vitruvius fixes at TWO CUBITS — 0.98 m
+     on the Doric cubit. That spacing is what sets how far apart the rowers sit, and therefore
+     how much room each has to swing, and therefore the whole geometry of the stroke. The
+     thranite oar is longer only because the outrigger carries its thole further outboard, so
+     it has further to reach the same water. */
+  const INTERSCALMIUM = 0.98;                         // Vitruvius, two Doric cubits
+  const oarLen = S.oarLen || 4.2;
   for (let bank = 0; bank < n; bank++) {
     const v = 0.70 + bank * 0.11;                     // each level higher up the side
     const out = 1.0 + bank * 0.22;                    // and further outboard
     const perBank = perBankOf(bank);
     const spread = 0.62 + bank * 0.05;                  // the top bank reaches further fore and aft
     for (let i = 0; i < perBank; i++) {
-      const u = 0.16 + (i / (perBank - 1)) * spread;
+      /* rowers sit one interscalmium apart, so the tholes are spaced by a REAL LENGTH and
+         the bank's extent follows from how many men are in it — not the other way round */
+      const span = (perBank - 1) * INTERSCALMIUM / L;
+      const u = 0.5 - span / 2 + (i / (perBank - 1)) * span + bank * 0.006;
       const p = surfacePoint(S, H, u, Math.min(0.99, v));
       for (const sgn of [-1, 1]) {
         const o = new THREE.Group();
+        /* An oar is a LEVER pivoting on the thole. The loom runs INBOARD to the rower's
+           hands; the shaft runs OUTBOARD to the blade. The gearing is what the whole stroke
+           depends on: about 1.1 m inboard against 3.1 m outboard, so the handle moves a
+           metre and the blade moves nearly three. Built along +Z, which is outboard. */
+        const inb = oarLen * 0.26, outb = oarLen * 0.74;
         const shaft = new THREE.Mesh(
-          new THREE.CylinderGeometry(B * 0.006, B * 0.009, len, 6), mat);
-        shaft.rotation.z = Math.PI / 2;
-        shaft.position.x = len / 2;
+          new THREE.CylinderGeometry(B * 0.010, B * 0.014, oarLen, 6), mat);
+        shaft.rotation.x = Math.PI / 2;                 // lie the loom along Z: OUTBOARD
+        shaft.position.z = outb / 2 - inb / 2;
         o.add(shaft);
         const blade = new THREE.Mesh(
-          new THREE.BoxGeometry(len * 0.20, B * 0.004, B * 0.055), mat);
-        blade.position.x = len * 0.92;
+          new THREE.BoxGeometry(B * 0.008, B * 0.075, oarLen * 0.22), mat);
+        blade.position.z = outb * 0.90;
         o.add(blade);
         o.position.set(p[0], p[1], sgn * p[2] * out);
-        o.rotation.y = sgn > 0 ? 0 : Math.PI;
-        o.rotation.z = -0.34;                          // blades down toward the water
+        o.rotation.y = sgn > 0 ? 0 : Math.PI;          // flips +Z outboard to the other side
+        o.rotation.x = -0.34;                          // blades down toward the water
         /* what the animator needs to swing this oar: which side it is, its rest angles, and
            its bank, because the three banks do not enter the water at the same instant */
-        o.userData.oar = { sgn, restY: o.rotation.y, restZ: -0.34, bank };
+        o.userData.oar = { sgn, restY: o.rotation.y, restX: -0.34, bank };
         g.add(o);
       }
     }
