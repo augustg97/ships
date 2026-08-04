@@ -28,6 +28,71 @@
  * deck only if that vertex is genuinely underneath one. Real depths: 0.16–0.66 m. The bogus
  * measurement was four times the real one and would have been "fixed" by over-correcting.
  */
+/* ── AXIS SWEEP: IS EVERY PART LONGEST IN THE AXIS IT SHOULD BE? ────────────────────────
+ *
+ * ⚠ THE SAME FAULT WAS FOUND TWICE BY EYE AND SHOULD HAVE BEEN FOUND BY MACHINE: a rotation
+ * nobody checked. Great Eastern's paddle wheels were turned edge-on to the ship, and all 170 of
+ * the trireme's oars lay ALONG the hull instead of reaching out from it — 9.3 m fore-and-aft
+ * against 1.3 m outboard, on a hull 3.8 m in the beam. Both looked plausible from whichever
+ * angle happened to be on screen. Neither survives a measurement.
+ *
+ * X = fore-and-aft, Y = up, Z = athwartships.
+ *
+ * ── AND THE RULES TOOK THREE PASSES, WHICH IS THE POINT ────────────────────────────────
+ * The first version flagged eight parts and six were correct: a lateen yard rakes 45-60 degrees
+ * so Y may dominate; a junk's yard and its battens lie fore-and-aft; a crab claw's spars rake
+ * steeply from one tack; and a ship with a lateen mizzen ALSO carries square yards, so the rule
+ * has to judge each spar by its own name rather than by the ship's rig mix. The artemon of a
+ * Roman merchantman is raked 48 degrees forward BY DESIGN, so a mast may legitimately be longer
+ * horizontally than vertically when its rake says so.
+ * Every one of those exclusions had to be earned before the two real faults were visible.
+ */
+function axisSweep() {
+  return fetch('data/vessels.json').then(r => r.json()).then(j => {
+    const vs = (Array.isArray(j) ? j : (j.vessels || [])).filter(v => v.hull);
+    const out = [];
+    for (const v of vs) {
+      const masts = v.hull.masts || [];
+      const rigs = new Set(masts.map(m => m.rig));
+      const steepMast = masts.some(m => Math.abs(m.rake || 0) > 45);
+      const g = SHIPS_HULL.buildShip(v.hull, { fine: true });
+      g.updateMatrixWorld(true);
+      const expect = (k, nm) => {
+        if (k === 'mast')     return steepMast ? ['X', 'Y'] : ['Y'];   // the artemon is raked 48
+        if (k === 'funnel' && /^Funnel$/.test(nm)) return ['Y'];
+        if (k === 'oar')      return ['Z'];
+        if (k === 'bowsprit' || k === 'keel' || k === 'wale') return ['X'];
+        if (k === 'yard') {
+          if (/Lateen/i.test(nm))      return ['X', 'Y'];   // rakes 45-60 degrees
+          if (/Boom|Batten/i.test(nm)) return ['X'];        // lies fore-and-aft
+          if (rigs.has('square'))      return ['Z'];        // a square yard crosses the ship
+          return ['X', 'Y'];                                // lug, junk, gaff, crab claw
+        }
+        return null;
+      };
+      const seen = {};
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        const p = o.userData && o.userData.part; if (!p) return;
+        const nm = p.name || '', want = expect(p.key, nm); if (!want) return;
+        const sz = new THREE.Vector3();
+        new THREE.Box3().setFromObject(o).getSize(sz);
+        const dim = { X: sz.x, Y: sz.y, Z: sz.z };
+        let got = 'X'; if (dim.Y > dim[got]) got = 'Y'; if (dim.Z > dim[got]) got = 'Z';
+        if (!want.includes(got)) {
+          const key = p.key + '|' + nm;
+          if (!seen[key]) {
+            seen[key] = 1;
+            out.push({ ship: v.id, part: p.key, name: nm, expected: want.join('/'), actual: got,
+                       extents: [+sz.x.toFixed(1), +sz.y.toFixed(1), +sz.z.toFixed(1)] });
+          }
+        }
+      });
+    }
+    return out.length ? out : 'CLEAN — every part longest in the axis it should be, ' + vs.length + ' hulls';
+  });
+}
+
 function clearance(opts) {
   opts = opts || {};
   const samples = opts.samples || 60;

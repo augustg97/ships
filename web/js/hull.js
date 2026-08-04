@@ -2274,9 +2274,15 @@ function buildContainers(S, group) {
   const br = new THREE.Mesh(new THREE.BoxGeometry(L * 0.070, TEU_H * 1.1, B * 0.90), dark);
   br.position.set(L * 0.345, hs + TEU_H * 7.5, 0);
   group.add(tag(br, 'bridge'));
-  const fn = new THREE.Mesh(new THREE.BoxGeometry(L * 0.035, TEU_H * 3.2, B * 0.26), dark);
-  fn.position.set(L * 0.405, hs + TEU_H * 8.2, 0);
-  group.add(tag(fn, 'funnel'));
+  /* ⚠ THE FUNNEL WAS TWICE AS WIDE AS IT WAS TALL — 15.9 m across against 8.3 m high, which
+     is a squat block, not a funnel. Found by the axis sweep, not by eye: nothing about this
+     ship's profile made it obvious, and it had been shipping that way since the box boat was
+     built. A funnel is an UPTAKE: it exists to carry exhaust clear of the accommodation and
+     the deck, so it is always taller than it is broad. */
+  const fn = new THREE.Mesh(new THREE.BoxGeometry(L * 0.030, TEU_H * 5.6, B * 0.16), dark);
+  fn.position.set(L * 0.405, hs + TEU_H * 9.4, 0);
+  group.add(tag(fn, 'funnel', 'Funnel',
+    'The uptake from the main engine, carried high enough to keep exhaust clear of the bridge and the deck. On a box boat it stands abaft the accommodation because everything forward of that is cargo.'));
 }
 
 

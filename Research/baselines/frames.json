@@ -86,6 +86,11 @@
       "name": "ship-titanic",
       "path": "/?frozen=1#v=ship&s=titanic",
       "note": "lofted deckhouse must not overhang the hull; check bow-on faults here too"
+    },
+    {
+      "name": "ship-container",
+      "path": "/?frozen=1#v=ship&s=container",
+      "note": "funnel proportions (was wider than tall), bridge block, container stacks"
     }
   ]
 }
