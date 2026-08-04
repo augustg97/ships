@@ -437,12 +437,12 @@ HULLS = {
                         sheerStern=0.5, tumblehome=0.02, stemRake=0.02, sternRake=0.02,
                         strakes=40, iron=True, topside="#232427", funnels=5, decks=2,
                         paddleDia=17.0, paddleAt=0.50,
-                        masts=[dict(at=0.13, heightM=34.0, rig="gaff", shrouds=4),
-                               dict(at=0.26, heightM=38.0, rig="gaff", shrouds=4),
-                               dict(at=0.40, heightM=40.0, rig="gaff", shrouds=5),
-                               dict(at=0.60, heightM=40.0, rig="gaff", shrouds=5),
-                               dict(at=0.74, heightM=38.0, rig="gaff", shrouds=4),
-                               dict(at=0.87, heightM=32.0, rig="gaff", shrouds=4)], boats=20, portholes=True, mastLivery=True),
+                        masts=[dict(at=0.13, heightM=34.0, rig="gaff", topmast=True, shrouds=4),
+                               dict(at=0.26, heightM=38.0, rig="gaff", topmast=True, shrouds=4),
+                               dict(at=0.40, heightM=40.0, rig="gaff", topmast=True, shrouds=5),
+                               dict(at=0.60, heightM=40.0, rig="gaff", topmast=True, shrouds=5),
+                               dict(at=0.74, heightM=38.0, rig="gaff", topmast=True, shrouds=4),
+                               dict(at=0.87, heightM=32.0, rig="gaff", topmast=True, shrouds=4)], boats=20, portholes=True, mastLivery=True),
 
   # Titanic, 1912 — 269.1 m, 28.2 m beam, 46,328 GRT. Not the fastest and never meant to be:
   # built for size and comfort against Cunard's speed. Sixteen watertight compartments — and the

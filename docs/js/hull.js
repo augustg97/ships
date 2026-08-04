@@ -626,8 +626,18 @@ function buildRig(S, group, mats, FINE) {
        sends anything down, so it steps one unstayed pole and the sail hoists to its head.
        Falling through to the square-rig case gave the treasure ship a 64 m mast carrying a
        sail that stopped halfway up it. */
+    /* ── ⚠ A GAFF MAST IS NOT ALWAYS A SINGLE POLE ──────────────────────────────────
+       Every gaff rig here got one spar, which is right for a fishing schooner and wrong for
+       a big one. A pole mast is the CHEAP option: nothing to send down, nothing to fid, and
+       nothing above the gaff either. Any schooner that wanted a gaff-topsail — and every
+       large one did, because that is where the wind is — carried a TOPMAST fidded above the
+       lower, and the reference model of Great Eastern shows six of them standing bare above
+       her white lower masts.
+       That gap is also why the black-upper livery had nothing to paint: the model had no
+       upper masts to be black. Structure first, colour second. */
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
-               : (mk.rig === 'crabclaw' || mk.rig === 'junk' || mk.rig === 'gaff') ? [lower]
+               : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
+               : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
                : [lower, top, tg];
     const radii = [B * 0.030, B * 0.020, B * 0.013];
 
