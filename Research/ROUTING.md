@@ -65,3 +65,57 @@ for the box route, means the search finds the Cape — the answer a closed canal
 
 72,768 samples along every drawn track in all eight eras, at ~4.6 km spacing — finer than the
 builder's own clearance test. **Zero on land, zero routing failures, 114/114 voyage legs routed.**
+
+---
+
+# The mask and the picture were two different coastlines  (2026-08-04, round 18)
+
+August: *"ships still traverse land — see the screenshot. Do not stop until this is completely
+fixed."* My previous verification said 0 of 5,600. Both were true, and that is the story.
+
+## The mask was level 0; the picture is level 2
+
+The routing mask was built from the level-0 elevation at **19.5 km a cell**. The globe has been
+drawing from level 2 at **4.9 km** ever since the progressive upgrade landed. Two models of one
+coastline, and the router was planning against a world four times coarser than the one on screen.
+
+⚠ I had actually compared them, and drawn the wrong conclusion: over the Philippines the land
+FRACTION is 24.1 % at level 0 and 25.4 % at level 2, and I read that as agreement. **Aggregate
+agreement is not pointwise agreement.** In an archipelago the two disagree constantly while the
+totals match.
+
+## And my first measurement of the fix was wrong too
+
+I tested "is the hull drawn over land" by reading the rendered pixel and calling anything not
+blue land. Shallow shelf water renders **pale**, so the test called the Yellow Sea land and
+reported 37 % failures that were not failures. The honest test is the shader's own criterion —
+`elev - uSeaLevel > 0`, read from the same canvas the shader samples.
+
+## Four attempts, and what each one taught
+
+| | change | result |
+|---|---|---|
+| 1 | build the mask at level 2 | **worse** — A* on 33.5 M cells needs 400 MB of scratch, the search failed, and the fallback drew raw waypoints, which are inland ports |
+| 2 | coarse search grid, cell water only if ALL fine cells are water | **closed the ocean** — Gibraltar, Bab el Mandeb, the Sicilian Channel and both Danish straits became unroutable; 3 legs failed |
+| 3 | majority rule + refine the polyline corners | corners are not the path; ships are drawn *between* them — 26 ashore |
+| 4 | densify before refining — **in lon/lat** | put a track straight across inland Queensland: string-pulling verified the GREAT CIRCLE, and I densified along a different curve. 0.46 % → 5.7 % |
+
+**The same curve has to be verified, densified and drawn.** Densifying on the great circle took
+it to 2 in 8,400, and checking the flagship's drawn position each frame — walking her along her
+own course, never sideways, until she is afloat — took it to zero.
+
+## Where it stands
+
+- **fine array** at the drawn resolution answers "is this at sea"
+- **coarse grid** (majority rule) answers "may a route be planned here"
+- the finished track is densified along the great circle and refined against the fine coastline
+- the flagship and every consort are checked again at draw time
+
+**0 of 14,000 hulls drawn as land, across all eight eras, 500 phases each. 0 route misses.**
+
+## And the declared passages are carved into the ELEVATION now
+
+The Strait of Magellan was carved into the mask only, so the route ran through water the renderer
+drew as Patagonia — 4 of the last 7 failures were Magellan inside his own strait. The carve now
+cuts the tile canvas itself to 40 m, so the strait exists for the router, the renderer and the
+eye. If the model asserts a passage, the picture has to show it.

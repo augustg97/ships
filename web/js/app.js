@@ -126,6 +126,20 @@ async function loadLevel(level, manifest, note) {
     }
   }
   await Promise.all(jobs);
+
+  /* ── ⚠ IF THE MODEL ASSERTS A PASSAGE, THE PICTURE HAS TO SHOW IT ──────────────────
+     The router carves the Strait of Magellan and the Bosphorus into its mask, because a 2 km
+     channel does not exist in a 4.9 km raster and Magellan's voyage is ABOUT that strait. But
+     the carve was only ever in the mask, so the route ran through water the renderer drew as
+     Patagonia: measured, 4 hulls in 3,000 were drawn ashore and every one of them was Magellan
+     inside the strait.
+
+     Two models of one coastline again, and the fix is the same as always — carve the ELEVATION
+     the shader samples, not a private copy of the answer. The declared passages are cut to
+     40 m of water in the tile canvas itself, so the strait is there for the router, the
+     renderer and the eye, and they cannot disagree about it. */
+  if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.CARVED) carveDeclaredPassages(cv);
+
   const tex = new THREE.CanvasTexture(cv);
   setTexParams(tex);
   tex.needsUpdate = true;
@@ -133,7 +147,53 @@ async function loadLevel(level, manifest, note) {
      them out of the tiles we already fetched costs nothing and cannot disagree with what the
      shader is drawing — which is the whole point of ARCHITECTURE-PATTERNS §4. */
   if (level === 0) APP.depthCanvas = cv;
+  /* ── ⚠ THE MASK MUST BE BUILT FROM THE LEVEL THE SHADER DRAWS FROM ─────────────────
+     The routing mask was built from level 0 — 19.5 km a cell — while the globe has been
+     drawing from level 2 at 4.9 km since the progressive upgrade landed. Measured over the
+     Philippines the two agree on the land FRACTION (24.1% against 25.4%), and I took that as
+     agreement; aggregate agreement is not pointwise agreement, and in an archipelago they
+     disagree constantly. Three of fifteen hulls were drawn over land while the mask said all
+     fifteen were at sea — including the Manila galleon at 118.6E 17.9N, which is the ship in
+     August's screenshot.
+
+     Two models of one coastline, again. The finer canvas is kept so the mask can be rebuilt
+     from exactly what is on screen. */
+  APP.depthCanvasByLevel = APP.depthCanvasByLevel || {};
+  APP.depthCanvasByLevel[level] = cv;
   return { tex, w: L.w };
+}
+
+/* Cut the declared passages into an elevation canvas, to a depth a ship can swim in. One cell
+   either side of the line: the real straits are 2–30 km and a level-2 cell is 4.9 km, so a
+   three-cell corridor is the narrowest thing the raster can represent at all. */
+function carveDeclaredPassages(cv) {
+  const cx = cv.getContext('2d', { willReadFrequently: true });
+  const img = cx.getImageData(0, 0, cv.width, cv.height);
+  const d = img.data;
+  /* -40 m, encoded the way the tiles encode it: (elev + 11000) / 20000 * 65535 */
+  const u16 = Math.round((-40 + 11000) / 20000 * 65535);
+  const hi = (u16 >> 8) & 255, lo = u16 & 255;
+  const put = (x, y) => {
+    if (y < 0 || y >= cv.height) return;
+    const xx = ((x % cv.width) + cv.width) % cv.width;
+    const i = (y * cv.width + xx) * 4;
+    d[i] = hi; d[i + 1] = lo;
+  };
+  const px = (lon, lat) => [ (((lon + 180) % 360 + 360) % 360) / 360 * cv.width,
+                             (90 - lat) / 180 * cv.height ];
+  const rad = Math.max(1, Math.round(cv.width / 2048));   // one level-0 cell, whatever the level
+  for (const c of window.SHIPS_ROUTE.CARVED) {
+    for (let s = 0; s < c.line.length - 1; s++) {
+      const a = px(c.line[s][0], c.line[s][1]), b = px(c.line[s + 1][0], c.line[s + 1][1]);
+      const n = Math.max(2, Math.ceil(Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]))) * 2);
+      for (let i = 0; i <= n; i++) {
+        const f = i / n;
+        const x = Math.round(a[0] + (b[0] - a[0]) * f), y = Math.round(a[1] + (b[1] - a[1]) * f);
+        for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) put(x + dx, y + dy);
+      }
+    }
+  }
+  cx.putImageData(img, 0, 0);
 }
 
 /* ⚠ flipY MUST be false, and this is the single most expensive line in the file.
@@ -532,6 +592,20 @@ async function boot() {
         mat.uniforms.uDepth.value = z.tex;
         mat.uniforms.uTexel.value = 1.0 / z.w;
         APP.level = lv;
+        /* ── AND THE ROUTES ARE REPLANNED AGAINST THE COASTLINE NOW ON SCREEN ────────
+           The picture just got four times finer. Every route in the era was planned against
+           the coarser one, so a passage that was clear at 19.5 km may now cross an island the
+           viewer can see. Rebuild the mask from the new level and re-route — otherwise the
+           router and the renderer hold two different coastlines, which is exactly how three
+           hulls came to be drawn over the Philippines while the mask insisted they were at
+           sea. */
+        if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.maskUpgradeAvailable()) {
+          const t0 = performance.now();
+          window.SHIPS_ROUTE.buildMask(true);
+          APP.maskBuildMs = Math.round(performance.now() - t0);
+          APP.maskFineLevel = window.SHIPS_ROUTE.FINE.level;
+          buildEraFleet();
+        }
       } catch (e) { console.warn('level', lv, 'failed', e); break; }
     }
     upgradesDone = true;      // capture mode has been waiting on this
@@ -1874,17 +1948,37 @@ function stepEraFleet(t) {
       : va.clone().multiplyScalar(Math.sin((1 - fr) * ang) / Math.sin(ang))
           .add(vb.clone().multiplyScalar(Math.sin(fr * ang) / Math.sin(ang)));
     dir.normalize();
-    const la = Math.asin(dir.y) * 180 / Math.PI;
+    let la = Math.asin(dir.y) * 180 / Math.PI;
     /* ⚠ the inverse must match lonLatToVec exactly: x = cos(lat)sin(lon), z = cos(lat)cos(lon),
        so longitude is atan2(x, z). Written as atan2(-z, x) first, which is a 90-degree rotation
        and would have put every ship in the wrong ocean while still looking like a plausible
        track. Checked against the forward transform rather than assumed. */
-    const lo = Math.atan2(dir.x, dir.z) * 180 / Math.PI;
+    let lo = Math.atan2(dir.x, dir.z) * 180 / Math.PI;
     /* ── ⚠ THEY WERE FLYING AT 38 KILOMETRES ────────────────────────────────────────
        R * 1.006 is six tenths of a percent of the Earth's radius: thirty-eight kilometres
        up, which is above the stratosphere and about where a high-altitude balloon sits. On
        screen they read exactly as what they were — satellites, not shipping. A hull floats
        ON the water, and at globe scale that means the surface itself. */
+    /* ── AND THE FLAGSHIP IS CHECKED WHERE SHE IS DRAWN, NOT ONLY WHERE SHE WAS PLANNED ──
+       The track is refined against the fine coastline at five-kilometre spacing, but the ship
+       is placed by slerping BETWEEN those points, and a midpoint can still clip a fringe the
+       endpoints missed. Two hulls in 8,400 did. So the drawn position gets the same treatment
+       the consorts get: if she is over land, walk her a little along her own course until she
+       is not. Along the track, never sideways — a ship that side-steps is not sailing. */
+    {
+      const RTf = window.SHIPS_ROUTE;
+      if (RTf && RTf.isOcean && !RTf.isOcean(lo, la)) {
+        for (let k = 1; k <= 6; k++) {
+          for (const sgn of [1, -1]) {
+            const f2 = Math.min(n - 1.001, Math.max(0, f + sgn * k * 0.15));
+            const i2 = Math.min(n - 2, Math.floor(f2)), fr2 = f2 - i2;
+            const a2 = tr.legs[i2], b2 = tr.legs[i2 + 1];
+            const lo2 = a2.lon + (b2.lon - a2.lon) * fr2, la2 = a2.lat + (b2.lat - a2.lat) * fr2;
+            if (RTf.isOcean(lo2, la2)) { lo = lo2; la = la2; k = 99; break; }
+          }
+        }
+      }
+    }
     const w = lonLatToVec(lo, la, R * 1.0002);
     tr.grp.position.copy(w);
     /* ── ⚠ THE HORIZON IS NOT AT 90 DEGREES ─────────────────────────────────────────

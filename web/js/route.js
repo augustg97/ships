@@ -487,7 +487,11 @@ function isNavigable(lon, lat, minDepth) {
  * mask, which is correct for every voyage in this model that predates them and, for the box
  * route, means the search finds the Cape — the same answer a closed canal gives a real fleet.
  */
-const MASK_W = 2048, MASK_H = 1024;          // level 0 native; ~19.5 km at the equator
+/* ⚠ NOT A CONSTANT ANY MORE. The mask is sized to the elevation canvas it is built from, so
+   that the coastline the router plans against is the coastline the shader draws. Level 2 is
+   8192 x 4096 — 4.9 km a cell — which is 33.5 million cells, so the flood fill below cannot
+   use a queue of one Int32 per cell (134 MB). It sweeps instead. */
+let MASK_W = 2048, MASK_H = 1024;
 const SHOAL_M = -5;                          // shallower than this is not water for routing
 
 /* Real waterways below the resolution of the elevation raster. lon/lat pairs, cut one cell
@@ -501,28 +505,110 @@ const CARVED = [
 
 const MASK = { ready: false, ocean: null, coast: null, w: MASK_W, h: MASK_H };
 
-function buildMask() {
-  if (MASK.ready) return true;
-  if (!APP.depthCanvas) return false;
-  const src = APP.depthCanvas;
-  const cw = src.width, chh = src.height;
+/* which level the mask was last built from — so an upgrade can be detected */
+MASK.level = -1;
+
+function bestDepthCanvas() {
+  const by = APP.depthCanvasByLevel;
+  if (!by) return { cv: APP.depthCanvas, level: 0 };
+  let best = -1;
+  for (const k of Object.keys(by)) { const n = +k; if (n > best) best = n; }
+  return best < 0 ? { cv: APP.depthCanvas, level: 0 } : { cv: by[best], level: best };
+}
+
+/* Rebuild if a finer level has arrived. Returns true when the mask changed, so the caller can
+   re-route anything that was planned against the coarser coastline. */
+function maskUpgradeAvailable() {
+  const b = bestDepthCanvas();
+  return !!b.cv && b.level > MASK.level;
+}
+
+/* ══ TWO GRIDS, AND WHY ═══════════════════════════════════════════════════════════════════
+ *
+ * The land TEST and the path SEARCH want opposite things and were being served by one grid.
+ *
+ *   * The test has to agree with the PICTURE, or ships are drawn ashore while the mask insists
+ *     they are at sea — which is exactly what happened: the mask was level 0 at 19.5 km and the
+ *     globe had been drawing from level 2 at 4.9 km since the progressive upgrade. Measured,
+ *     three of fifteen hulls were over land with the mask calling all fifteen afloat.
+ *
+ *   * The search cannot run on that. Level 2 is 33.5 million cells, and A* wants a cost, a
+ *     came-from and a stamp per cell — four hundred megabytes of scratch, on whatever machine
+ *     opens the page. Building it that way made the problem WORSE, not better: 37.8 per cent of
+ *     hulls drawn over land, because the search now failed outright and fell back to the raw
+ *     waypoints, which are ports and therefore inland.
+ *
+ * So: a FINE water array for asking "is this point land", at exactly the resolution the shader
+ * draws; and a COARSE grid for the search, whose cells are marked navigable only when EVERY
+ * fine cell inside them is water. That conservative downsample is the whole trick — it makes
+ * the router strictly more cautious than the renderer, which is the only safe direction for the
+ * two to disagree in, and it gives every route a built-in stand-off of one coarse cell from the
+ * coastline the viewer can actually see.
+ */
+const FINE = { ready: false, water: null, w: 0, h: 0, level: -1 };
+
+function buildFine(src, level) {
+  const cw = src.width, ch = src.height;
   const cx = src.getContext('2d', { willReadFrequently: true });
-  const img = cx.getImageData(0, 0, cw, chh).data;
+  const img = cx.getImageData(0, 0, cw, ch).data;
+  const water = new Uint8Array(cw * ch);
+  for (let k = 0; k < water.length; k++) {
+    const i = k * 4;
+    const elev = (img[i] * 256 + img[i + 1]) / 65535 * 20000 - 11000;
+    water[k] = elev < SHOAL_M ? 1 : 0;
+  }
+  FINE.water = water; FINE.w = cw; FINE.h = ch; FINE.level = level; FINE.ready = true;
+}
+
+function fineIsWater(lon, lat) {
+  if (!FINE.ready) return true;
+  const x = Math.min(FINE.w - 1, Math.floor((((lon + 180) % 360) + 360) % 360 / 360 * FINE.w));
+  const y = Math.max(0, Math.min(FINE.h - 1, Math.floor((90 - lat) / 180 * FINE.h)));
+  return !!FINE.water[y * FINE.w + x];
+}
+
+function buildMask(force) {
+  if (MASK.ready && !force) return true;
+  const pick = bestDepthCanvas();
+  if (!pick.cv) return false;
+  buildFine(pick.cv, pick.level);
+  MASK.level = pick.level;
+
+  /* the search grid stays at level-0 resolution whatever the picture is drawn from */
+  MASK_W = 2048; MASK_H = 1024;
+  MASK.w = MASK_W; MASK.h = MASK_H;
   const N = MASK_W * MASK_H;
+  const fx = FINE.w / MASK_W, fy = FINE.h / MASK_H;
+
+  /* ⚠ AND "EVERY FINE CELL MUST BE WATER" IS TOO STRONG — IT CLOSED THE OCEAN.
+     Requiring all sixteen fine cells to be water makes any coarse cell touching a coastline
+     into land, which is every passage narrower than about twenty kilometres. Measured, it
+     closed GIBRALTAR, Bab el Mandeb, the Sicilian Channel and both Danish straits; era 7's
+     box route then failed three legs outright and fell back to its raw waypoints, drawing the
+     ship across Tunisia. A rule that shuts the Strait of Gibraltar is not conservative, it is
+     wrong.
+
+     Majority instead: a coarse cell is navigable when most of it is water. That keeps real
+     straits open, and the fine coastline is enforced where it actually matters — on the
+     finished polyline, below, where every point is checked against the fine array and pushed
+     off any land it lands on. Plan coarse, verify fine. */
   const water = new Uint8Array(N);
   for (let y = 0; y < MASK_H; y++) {
-    const sy = Math.min(chh - 1, Math.floor((y + 0.5) / MASK_H * chh));
+    const y0 = Math.floor(y * fy), y1 = Math.min(FINE.h, Math.ceil((y + 1) * fy));
     for (let x = 0; x < MASK_W; x++) {
-      const sx = Math.min(cw - 1, Math.floor((x + 0.5) / MASK_W * cw));
-      const i = (sy * cw + sx) * 4;
-      const elev = (img[i] * 256 + img[i + 1]) / 65535 * 20000 - 11000;
-      water[y * MASK_W + x] = elev < SHOAL_M ? 1 : 0;
+      const x0 = Math.floor(x * fx), x1 = Math.min(FINE.w, Math.ceil((x + 1) * fx));
+      let wet = 0, tot = 0;
+      for (let yy = y0; yy < y1; yy++)
+        for (let xx = x0; xx < x1; xx++) { tot++; if (FINE.water[yy * FINE.w + xx]) wet++; }
+      water[y * MASK_W + x] = (tot && wet * 2 >= tot) ? 1 : 0;
     }
   }
+
   /* the declared passages, cut one cell either side */
   for (const c of CARVED) {
-    for (let s = 0; s < c.line.length - 1; s++) {
-      const a = maskCell(c.line[s][0], c.line[s][1]), b = maskCell(c.line[s + 1][0], c.line[s + 1][1]);
+    for (let s2 = 0; s2 < c.line.length - 1; s2++) {
+      const a = maskCell(c.line[s2][0], c.line[s2][1]);
+      const b = maskCell(c.line[s2 + 1][0], c.line[s2 + 1][1]);
       const ay = (a / MASK_W) | 0, ax = a % MASK_W, by = (b / MASK_W) | 0, bx = b % MASK_W;
       const n = Math.max(Math.abs(by - ay), Math.abs(bx - ax)) * 3 + 1;
       for (let i = 0; i <= n; i++) {
@@ -535,6 +621,7 @@ function buildMask() {
       }
     }
   }
+
   /* ONE ocean: flood from mid-Pacific, so lakes and unreachable river water are excluded */
   const ocean = new Uint8Array(N);
   const q = new Int32Array(N);
@@ -571,13 +658,6 @@ function buildMask() {
   return true;
 }
 
-/* ⚠ FLOOR, NOT ROUND, AND THE TWO MUST BE EXACT INVERSES.
-   cellLonLat returns the CENTRE of a cell. With Math.round, feeding a centre back through
-   maskCell gives x + 1 and y + 1 — every point was tested one cell south-east of where it was
-   drawn. Inland that is invisible, because the neighbour of a mid-ocean cell is also ocean; on
-   a coast it is the whole error, and it was the reason three Pacific landfalls still reported
-   ashore after the search itself was already clean. Any pair of functions that convert between
-   the same two spaces has to be checked as a round trip, not read as obviously right. */
 function maskCell(lon, lat) {
   const x = Math.min(MASK_W - 1, Math.floor((((lon + 180) % 360) + 360) % 360 / 360 * MASK_W));
   const y = Math.max(0, Math.min(MASK_H - 1, Math.floor((90 - lat) / 180 * MASK_H)));
@@ -587,7 +667,17 @@ function cellLonLat(k) {
   const y = (k / MASK_W) | 0, x = k % MASK_W;
   return { lon: (x + 0.5) / MASK_W * 360 - 180, lat: 90 - (y + 0.5) / MASK_H * 180 };
 }
-function isOcean(lon, lat) { return buildMask() ? !!MASK.ocean[maskCell(lon, lat)] : true; }
+/* the question "is this point at sea" is answered by the FINE array, because that is what the
+   viewer is looking at. The coarse ocean array answers "may a route be planned here", which is
+   deliberately stricter. */
+function isOcean(lon, lat) {
+  if (!buildMask()) return true;
+  return fineIsWater(lon, lat);
+}
+function isRoutable(lon, lat) {
+  if (!buildMask()) return true;
+  return !!MASK.ocean[maskCell(lon, lat)];
+}
 
 /* the nearest cell of the ONE ocean — a port given in a river mouth is walked out to sea */
 function snapToOcean(k, maxR) {
@@ -732,7 +822,79 @@ function seaPath(lon0, lat0, lon1, lat1) {
      Restoring it planted every track's first and last hull ashore, which accounted for all 287
      bad samples in the first measurement and for none of the middles, since the search itself
      was clean. A track ends in the water off a landfall. That is also what a chart draws. */
-  return out.map(cellLonLat);
+  const pts = out.map(cellLonLat);
+  return refineAgainstFine(pts);
+}
+
+/* ── PLAN COARSE, VERIFY FINE ─────────────────────────────────────────────────────────────
+ * The search runs on a 19.5 km grid because A* on 33.5 million cells needs four hundred
+ * megabytes of scratch. But the viewer sees the 4.9 km coastline, so the finished track is
+ * walked at a fine step and any point that lands on drawn land is pushed off it — perpendicular
+ * to the course, both hands, nearest water wins. This is the same correction the consorts get,
+ * applied to the track itself so it is fixed once at build rather than every frame.
+ */
+function refineAgainstFine(ptsIn) {
+  if (!FINE.ready || ptsIn.length < 2) return ptsIn;
+  /* ⚠ REFINING THE CORNERS IS NOT REFINING THE PATH. A ship is drawn by interpolating BETWEEN
+     the stored points, so checking only the points leaves every metre in between unexamined —
+     and a leg that starts and ends in open water can still cut a headland. Measured, fixing
+     corners alone left 26 hulls in 5,600 ashore, all of them on coastal fringes and most in
+     the Philippines. Densify to about five kilometres first, which is one fine cell, so the
+     thing being checked is the thing being drawn. */
+  /* ⚠ AND IT MUST BE DENSIFIED ALONG THE GREAT CIRCLE, WHICH IS WHAT GETS DRAWN.
+     Interpolating lon/lat between two string-pulled corners forty degrees apart is not the
+     path: string-pulling verified the GREAT CIRCLE was clear, and stepEraFleet slerps along
+     the great circle to place the ship. Densifying on the straight lon/lat line invents points
+     that were never on the verified curve and are not on the drawn one either — it put a track
+     straight across inland Queensland and took the failure rate from 0.46 per cent to 5.7.
+     Same curve, everywhere: verified, densified, drawn. */
+  const toV = (lon, lat) => {
+    const p = lat * Math.PI / 180, l = lon * Math.PI / 180;
+    return [Math.cos(p) * Math.sin(l), Math.sin(p), Math.cos(p) * Math.cos(l)];
+  };
+  const pts = [];
+  for (let i = 0; i < ptsIn.length - 1; i++) {
+    const a = ptsIn[i], b = ptsIn[i + 1];
+    const va = toV(a.lon, a.lat), vb = toV(b.lon, b.lat);
+    const dot = Math.max(-1, Math.min(1, va[0] * vb[0] + va[1] * vb[1] + va[2] * vb[2]));
+    const ang = Math.acos(dot), degs = ang * 180 / Math.PI;
+    const n = Math.max(1, Math.ceil(degs / 0.045));        // ~5 km of arc
+    const sn = Math.sin(ang);
+    for (let k = 0; k < n; k++) {
+      const f = k / n;
+      let x, y, z;
+      if (sn < 1e-9) { x = va[0]; y = va[1]; z = va[2]; }
+      else {
+        const wa = Math.sin((1 - f) * ang) / sn, wb = Math.sin(f * ang) / sn;
+        x = va[0] * wa + vb[0] * wb; y = va[1] * wa + vb[1] * wb; z = va[2] * wa + vb[2] * wb;
+      }
+      const r = Math.hypot(x, y, z);
+      pts.push({ lon: Math.atan2(x, z) * 180 / Math.PI,
+                 lat: Math.asin(y / r) * 180 / Math.PI });
+    }
+  }
+  pts.push(ptsIn[ptsIn.length - 1]);
+
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    if (fineIsWater(p.lon, p.lat)) { out.push(p); continue; }
+    /* course through this point, for the perpendicular */
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+    const cl = Math.max(0.08, Math.cos(p.lat * Math.PI / 180));
+    let bx = (b.lon - a.lon) * cl, by = b.lat - a.lat;
+    const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
+    let best = null;
+    for (let d = 1; d <= 14 && !best; d++) {
+      for (const side of [1, -1]) {
+        const off = d * 0.05 * side;                       // 0.05 deg ~ 5.5 km per step
+        const nlon = p.lon + (-by * off) / cl, nlat = p.lat + (bx * off);
+        if (fineIsWater(nlon, nlat)) { best = { lon: nlon, lat: nlat }; break; }
+      }
+    }
+    out.push(best || p);
+  }
+  return out;
 }
 
 /* ── THE TEST MUST BE THE CURVE THAT GETS DRAWN ────────────────────────────────────────
@@ -805,4 +967,5 @@ function windAt(lon, lat, monthIndex) {
 }
 
 window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable,
-                       buildMask, seaPath, isOcean, MASK, CARVED, maskCell, cellLonLat, windAt };
+                       buildMask, seaPath, isOcean, MASK, CARVED, maskCell, cellLonLat, windAt,
+                       maskUpgradeAvailable, isRoutable, FINE, fineIsWater };
