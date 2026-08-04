@@ -49,10 +49,19 @@ const PSG = {
   M_PER_UNIT: 0,
 };
 
-/* the plane is 14 km across, which at a 40 m eye height reaches well past the true horizon of
-   22 km only in the sense that its far edge falls BELOW it — leaving a thin band of the globe's
-   own water between patch and horizon, which is exactly the handoff we want */
-const PATCH_M = 14000;
+/* ── HOW FAR THE NEAR WATER HAS TO REACH ─────────────────────────────────────────────────
+   The horizon is sqrt(2 R h): 36 km from a masthead, 196 km from three kilometres up. This one
+   surface has to serve both, because the camera now descends continuously from orbit and there
+   is no altitude at which it is allowed to be obviously wrong. 260 km of radius covers a 5 km
+   eye height with room to spare, and the radial mesh spends its vertices by angle, so reaching
+   further costs almost nothing where it matters.
+
+   ⚠ AND IT IS CURVED. A flat disc 260 km across ignores 5.3 km of Earth — the sea would run out
+   past where the horizon should be, and the globe's own limb would be hidden behind a plane
+   pretending to be an ocean. Each ring drops by the sagitta, so the surface leaves the eye line
+   at exactly the true horizon and hands off to the backdrop there. */
+const SEA_R = 260000;                 // radius of the near-field water, metres
+const PATCH_M = SEA_R * 1.15;         // sky dome and far plane
 
 function psgInit(R, globeCamera) {
   if (PSG.scene) return;
@@ -103,7 +112,10 @@ function psgInit(R, globeCamera) {
      A radial mesh with geometrically growing rings puts the vertices where the pixels are —
      about 2 m between rings alongside the hull, 30 m at a kilometre, 400 m out at the rim. The
      whole wave table is resolved where it can be seen and nothing is spent where it cannot. */
-  const g = radialDisc(2.5, PATCH_M * 0.5, 300, 256);
+  /* 2 m at the hull to 260 km at the rim is a range of 130,000, which 340 geometric rings
+     cover at 3.5 per cent growth apiece: 4 m between rings at 100 m out, 400 m at 10 km,
+     8 km at the far edge. One mesh, every altitude. */
+  const g = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
   PSG.sea = new THREE.Mesh(g, new THREE.ShaderMaterial({
     vertexShader: SHADERS['SEA_VERT.vert'], fragmentShader: SHADERS['SEA_FRAG.frag'],
     uniforms: {
@@ -125,15 +137,19 @@ function psgInit(R, globeCamera) {
 /* A disc whose rings grow geometrically from r0 to r1: constant angular resolution as seen
    from a camera near the middle, which is the only place this is ever viewed from. Built in
    the XY plane so the mesh can be laid flat by the same -PI/2 rotation a PlaneGeometry needs. */
-function radialDisc(r0, r1, rings, seg) {
+function radialDisc(r0, r1, rings, seg, curveR) {
   const pos = [], idx = [], uv = [];
   pos.push(0, 0, 0); uv.push(0.5, 0.5);
   const gr = Math.pow(r1 / r0, 1 / (rings - 1));
   for (let i = 0; i < rings; i++) {
     const r = r0 * Math.pow(gr, i);
+    /* the sagitta: how far the Earth has fallen away at this range. Built into the geometry
+       rather than applied in the shader, because the buoyancy code has to agree with it and
+       there is only one place the two can meet. */
+    const drop = curveR ? (Math.sqrt(Math.max(0, curveR * curveR - r * r)) - curveR) : 0;
     for (let j = 0; j < seg; j++) {
       const a = j / seg * Math.PI * 2;
-      pos.push(Math.cos(a) * r, Math.sin(a) * r, 0);
+      pos.push(Math.cos(a) * r, Math.sin(a) * r, drop);
       uv.push(0.5 + Math.cos(a) * 0.5 * (r / r1), 0.5 + Math.sin(a) * 0.5 * (r / r1));
     }
   }
@@ -346,4 +362,142 @@ function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
   globeCamera.updateMatrixWorld(true);
 }
 
-window.SHIPS_PSG = { PSG, psgInit, psgOpen, psgClose, psgStep, psgFrame, PATCH_M };
+/* ══ THE DESCENT ══════════════════════════════════════════════════════════════════════════
+ *
+ * The Passage anchors this scene under one ship. The descent anchors the SAME scene under the
+ * CAMERA, and that one change turns it from a destination into the bottom of a continuous zoom:
+ * the wheel now runs from thirty-eight thousand kilometres to five hundred metres without a cut,
+ * and somewhere on the way down the ocean stops being a colour and becomes a surface.
+ *
+ * ── WHERE THE HANDOVER IS, AND WHY THERE ─────────────────────────────────────────────────
+ * Two things have to arrive together or the seam shows.
+ *
+ * The globe's own shader already grows waves as the ground scale falls — the 118 m swell appears
+ * around 56 km up, where a pixel first becomes small against it. Below about 8 km a pixel is
+ * under six metres and the shader is being asked for detail a per-pixel normal cannot honestly
+ * give: the water needs real displaced geometry, because a hull has to be occluded by the wave
+ * in front of it. So 8 km is where this scene takes over the near field.
+ *
+ * And 8 km is where the fleet reaches TRUE SCALE. A ship drawn at globe zoom has to be about
+ * 1,600 times her real size to be visible at all — from 765 km a 42 m hull is eight hundredths
+ * of a pixel — so the token is an exaggeration that has to be unwound on the way down, or a
+ * 200 km carrack ends up floating on 100 m waves. The exaggeration is a geometric ramp: full
+ * token above 300 km, unity at 8 km, so by the time a hull crosses into this scene she is
+ * already her own size and nothing changes across the seam except which scene she is in.
+ *
+ * ⚠ THE DEPTH CLEAR IS WHY BOTH MUST HAPPEN AT ONCE. The near pass clears depth, so anything
+ * left in the globe scene is hidden behind the water regardless of where it is. Ships cannot
+ * cross at a different altitude from the water; they cross at the same one or they vanish.
+ */
+const DESCENT_M = 8000;              // altitude below which the near field takes over
+
+function psgDescentActive(altM) { return altM < DESCENT_M; }
+
+function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
+  psgInit(R, globeCamera);
+  PSG.mode = 'descent';
+  const fr = psgFrame(lon, lat, R);
+  PSG.anchor.position.copy(fr.pos);
+  PSG.anchor.quaternion.setFromRotationMatrix(
+    new THREE.Matrix4().makeBasis(fr.west, fr.up, fr.north));
+  PSG.anchor.userData.lon = lon; PSG.anchor.userData.lat = lat;
+  PSG.anchor.updateMatrixWorld(true);
+
+  /* the near camera IS the globe camera, expressed in the anchor's metre frame. One inverse
+     multiply, so the two cannot disagree about where the eye is — the same discipline that
+     keeps the Passage's backdrop in register, run in the other direction. */
+  const inv = new THREE.Matrix4().copy(PSG.anchor.matrixWorld).invert();
+  PSG.cam.matrix.multiplyMatrices(inv, globeCamera.matrixWorld);
+  PSG.cam.matrix.decompose(PSG.cam.position, PSG.cam.quaternion, new THREE.Vector3());
+  PSG.cam.scale.set(1, 1, 1);
+  PSG.cam.fov = globeCamera.fov;
+  PSG.cam.aspect = globeCamera.aspect;
+  /* near and far from the eye height: the horizon is sqrt(2 R h), and asking one depth buffer
+     to span half a metre and four hundred kilometres gives neither end any precision */
+  const hor = Math.sqrt(2 * 6371000 * Math.max(1, altM));
+  PSG.cam.near = Math.max(0.3, Math.min(220, altM * 0.02));
+  PSG.cam.far = Math.max(20000, Math.min(SEA_R * 1.5, hor * 1.8));
+  PSG.cam.updateProjectionMatrix();
+  PSG.cam.updateMatrixWorld(true);
+  /* ⚠ THE SKY WAS BEING CLIPPED BY THE FAR PLANE. The dome is built at 299 km and the far
+     plane now follows the horizon — 222 km at a kilometre up — so the whole sky fell outside
+     the frustum and the view had black space above the water. depthTest:false does not save
+     it: clipping is geometric, not a depth test. The dome is scaled to sit at half the far
+     plane, wherever that is this frame. */
+  PSG.sky.scale.setScalar(PSG.cam.far * 0.5 / (PATCH_M * 1.3));
+
+  const lsun = new THREE.Vector3(sun.dot(fr.west), sun.dot(fr.up), sun.dot(fr.north)).normalize();
+  PSG.sun.position.copy(lsun).multiplyScalar(hor);
+  PSG.sun.target.position.set(0, 0, 0);
+  PSG.sun.intensity = lsun.y < 0.06 ? 0.30 : 3.0 * Math.min(1, 0.35 + lsun.y * 1.5);
+  PSG.hemi.intensity = lsun.y < 0.06 ? 0.55 : 1.55;
+  PSG.sky.material.uniforms.uSun.value.copy(lsun);
+  PSG.sky.material.uniforms.uTime.value = t;
+  PSG.sky.position.copy(PSG.cam.position);
+  PSG.sea.material.uniforms.uSun.value.copy(lsun);
+  PSG.sea.material.uniforms.uTime.value = t;
+  PSG.sea.material.uniforms.uWind.value = wind;
+  PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
+  /* what counts as "near water" is now the eye height, not a ship's length */
+  PSG.sea.material.uniforms.uScale.value = Math.max(40, altM * 0.5);
+  SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
+}
+
+/* ── THE FLEET, AT ITS OWN SIZE, ON THE REAL SURFACE ──────────────────────────────────────
+ * Hulls within the patch are built once per vessel and reused. Their station is the same lon/lat
+ * the globe token has — read from tr.at, never recomputed — converted into the anchor's metre
+ * frame and dropped by the same sagitta the water carries, so a ship forty kilometres away sits
+ * in the sea rather than above where the sea used to be before the Earth curved out from under
+ * her.
+ */
+function psgFleet(tracks, R, t, wind, list) {
+  if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
+                        PSG.scene.add(PSG.fleetGroup); }
+  const seen = new Set();
+  const alat = PSG.anchor.userData.lat, alon = PSG.anchor.userData.lon;
+  for (const tr of tracks || []) {
+    if (!tr.at || !tr.vesselId) continue;
+    const ves = list.find(x => x.id === tr.vesselId);
+    if (!ves || !ves.hull) continue;
+    let dlon = tr.at.lon - alon;
+    if (dlon > 180) dlon -= 360; else if (dlon < -180) dlon += 360;
+    const east = dlon * Math.PI / 180 * Math.cos(tr.at.lat * Math.PI / 180) * 6371000;
+    const north = (tr.at.lat - alat) * Math.PI / 180 * 6371000;
+    const r2 = east * east + north * north;
+    if (r2 > (SEA_R * 0.7) * (SEA_R * 0.7)) continue;         // beyond the water
+    seen.add(tr.name);
+    let e = PSG.fleetPool.get(tr.name);
+    if (!e) {
+      let obj = null;
+      try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: true }); } catch (x) { continue; }
+      obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      obj.rotation.y = Math.PI / 2;                            // bow -X onto +Z
+      obj.position.y = -((obj.userData.keelBottom || 0) + (ves.hull.draught || 0));
+      const holder = new THREE.Group();
+      holder.add(obj);
+      holder.rotation.order = 'YXZ';
+      e = { holder, loa: ves.hull.loa };
+      PSG.fleetPool.set(tr.name, e);
+      PSG.fleetGroup.add(holder);
+    }
+    e.holder.visible = true;
+    const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - r2)) - 6371000;
+    const yaw = -tr.at.hdg;
+    e.holder.rotation.set(0, yaw, 0);
+    const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind);
+    e.holder.position.set(-east, drop + fl.y, north);
+    e.holder.rotation.z = fl.pitch;
+    e.holder.rotation.x = fl.roll;
+    if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(e.holder, t, e.loa);
+    if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
+  }
+  for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
+}
+
+function psgFleetClear() {
+  if (!PSG.fleetPool) return;
+  for (const [, e] of PSG.fleetPool) e.holder.visible = false;
+}
+
+window.SHIPS_PSG = { PSG, psgInit, psgOpen, psgClose, psgStep, psgFrame, PATCH_M, SEA_R,
+                     psgDescent, psgDescentActive, psgFleet, psgFleetClear, DESCENT_M };

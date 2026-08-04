@@ -36,6 +36,9 @@ const APP = {};
 /* ── constants ──────────────────────────────────────────────────────────── */
 const ELEV_MIN = -11000, ELEV_MAX = 9000, ELEV_SPAN = ELEV_MAX - ELEV_MIN;
 const R = 100;                       // globe radius in world units
+/* 500 m above the water. Below that the level-0 elevation raster is 19.5 km per texel and the
+   sphere is faceted at 210 km, so there is nothing left to resolve and everything to alias. */
+const MIN_ALT = 500 / 63710;
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
@@ -234,6 +237,26 @@ function applyHashView() {
      view opens, and there is nothing to select before that. */
   const sm = /[#&]s=([a-z0-9-]+)/i.exec(location.hash);
   if (sm && typeof swOpenById === 'function') swOpenById(sm[1]);
+
+  /* ── THE CAMERA IS STATE TOO, NOW THAT IT CAN DESCEND ────────────────────────────────
+     Four and a half decades of altitude and the whole surface of the Earth cannot be
+     addressed by `v=sea`, so the descent could not be captured, and an unwatched view is
+     one the ratchet cannot defend. This project has already paid for that twice — the
+     trireme's oars and the container ship's funnel were both rewritten under a green
+     ratchet that was not looking at them.
+
+       #c=<lon>,<lat>   where to stand
+       #z=<metres>      how high above the water
+
+     Ordered last because selectEra() resets the camera on its way past. */
+  const cm = /[#&]c=(-?[\d.]+),(-?[\d.]+)/.exec(location.hash);
+  const zm = /[#&]z=([\d.]+)/.exec(location.hash);
+  if (cm || zm) {
+    fly = null;
+    if (cm) { S.lon = parseFloat(cm[1]); S.lat = parseFloat(cm[2]); }
+    if (zm) S.dist = R + Math.max(MIN_ALT, Math.min(600, parseFloat(zm[1]) / 63710));
+    placeCamera();
+  }
 }
 
 function writeHash() {
@@ -266,7 +289,57 @@ function placeCamera() {
     d * Math.sin(la),
     d * Math.cos(la) * Math.cos(lo)
   );
-  camera.lookAt(0, 0, 0);
+  /* ── ⚠ A DESCENT THAT ENDS LOOKING STRAIGHT DOWN IS NOT AN ARRIVAL ──────────────────
+     Aiming at the centre of the Earth is right from orbit and absurd from five hundred
+     metres: the frame becomes a three-hundred-metre patch of water seen from directly
+     above, with no horizon in it and no way to tell you are anywhere. Nadir is a map view,
+     and this stops being a map somewhere on the way down.
+
+     So the aim point walks out from under the camera toward the horizon as the altitude
+     falls — nadir above 60 km, level with the horizon by the time the wheel bottoms out.
+     The near-field camera is derived from this one by a matrix multiply, so the tilt
+     reaches the water for free and the two cannot disagree about where the eye is looking. */
+  setCameraDepthRange();
+  const altM = Math.max(1, (d - R) * 63710);
+  const tilt = Math.max(0, Math.min(1,
+    1 - Math.log(altM / 2000) / Math.log(60000 / 2000)));
+  if (tilt <= 0.001) { camera.lookAt(0, 0, 0); return; }
+  const sub = lonLatToVec(S.lon, S.lat, R);
+  const up = sub.clone().normalize();
+  const east = new THREE.Vector3(Math.cos(lo), 0, -Math.sin(lo));
+  const north = new THREE.Vector3().crossVectors(up, east).normalize();
+  /* ⚠ AIMING AT THE HORIZON IS TOO FAR. At 1.2 km up the horizon is 124 km away, so a level
+     aim puts everything within a few kilometres — which is everything you came down to see —
+     forty-odd degrees below the bottom of the frame. What is wanted is a DEPRESSION ANGLE:
+     straight down from orbit, easing to about 22 degrees near the water, which is a low
+     aerial view with the horizon just inside the top of the frame and the sea beneath it
+     running away to it. The aim point then sits about two and a half times the eye height
+     ahead, which is where a ship you are descending on actually is. */
+  /* 11 degrees at the bottom, against a 17-degree half-frame, so the horizon sits six degrees
+     inside the top of the picture with sky above it. Anything shallower and the sea fills the
+     whole frame with no line in it to say how far away anything is — which is what 30 degrees
+     was doing, and it read as a flat wash rather than an ocean. */
+  const dep = (90 - 79 * tilt) * Math.PI / 180;
+  const aheadU = (altM / 63710) / Math.tan(dep);
+  camera.up.copy(up);
+  camera.lookAt(sub.clone().addScaledVector(north, aheadU));
+}
+
+/* ── ⚠ THE NEAR PLANE WAS A FIXED SIXTY-THREE KILOMETRES ─────────────────────────────────
+   camera.near = 1 unit, and a unit is 63.7 km. That was invisible for eight rounds because
+   the camera could not get closer to the surface than 765 km — and the moment the wheel could
+   descend, the entire planet fell inside the near plane and the globe rendered BLACK. It was
+   found by the new descent-high baseline on its very first capture, which is the whole reason
+   a frame was put on the far side of the handover: a view nothing watches is a view that can
+   be broken without anyone noticing.
+
+   Near follows the altitude, because what has to be resolvable is the ground under the camera,
+   and that is the only length in the scene that changes by four and a half decades. */
+function setCameraDepthRange() {
+  const altU = Math.max(MIN_ALT, camera.position.length() - R);
+  camera.near = Math.max(2e-5, altU * 0.05);
+  camera.far = camera.position.length() * 3 + 500;
+  camera.updateProjectionMatrix();
 }
 
 /* Matched pair with sphereUV in the fragment shader — see the handedness note there.
@@ -969,7 +1042,17 @@ function wireUI() {
       P.dist = Math.max(0.65, Math.min(14, P.dist * (1 + Math.sign(e.deltaY) * 0.11)));
       return;
     }
-    S.dist = Math.max(112, Math.min(700, S.dist * (1 + Math.sign(e.deltaY) * 0.11)));
+    /* ── ⚠ ZOOM THE ALTITUDE, NOT THE RADIUS ────────────────────────────────────────
+       S.dist is measured from the CENTRE of the Earth, so scaling it by 11 per cent near
+       the surface is a step of eleven kilometres — one wheel click took the camera from
+       765 km straight through the atmosphere to the seabed. What the eye is actually
+       changing is height above the ground, and the whole useful range of that is four and
+       a half decades: 38,000 km down to 500 m. Scaling the ALTITUDE gives an even
+       forty-odd clicks across all of it, and no click ever moves more than a ninth of
+       however high you already are. Same reasoning as the drag gain, which was fixed for
+       the same reason two rounds ago and should have taught me this one. */
+    const alt = Math.max(MIN_ALT, S.dist - R);
+    S.dist = R + Math.max(MIN_ALT, Math.min(600, alt * (1 + Math.sign(e.deltaY) * 0.11)));
     placeCamera();
   }, { passive: false });
 
@@ -1114,7 +1197,32 @@ function frame(now) {
     SHIPS_SEA.updateWaveUniform(mat.uniforms.uWave.value, uw);
   }
 
-  if (PSGV.on && window.SHIPS_PSG.PSG.on) {
+  /* ── THE DESCENT: THE SAME NEAR FIELD, ANCHORED UNDER THE CAMERA ────────────────────
+     Below the handover altitude the ocean stops being a colour computed per pixel and becomes
+     a displaced surface with the fleet standing in it at their own size. Everything needed is
+     already here — the Passage's scene, its water, the one wave table — and the only change is
+     what the anchor is attached to. */
+  const altMetres = Math.max(0, (camera.position.length() - R)) * 63710;
+  const descending = !PSGV.on && window.SHIPS_PSG.psgDescentActive(altMetres);
+  if (descending) {
+    /* ⚠ the near camera is derived from this matrix, and three.js only refreshes it during
+       render — one frame stale is one frame of the whole ocean sliding under the ship */
+    camera.updateMatrixWorld(true);
+    const dw = window.SHIPS_ROUTE.windAt(S.lon, S.lat, S.month);
+    const dws = dw ? Math.max(1.5, Math.min(17, dw.speed)) : 7.0;
+    window.SHIPS_PSG.psgDescent(clockS(), S.lon, S.lat, R, sunVector(S.month), dws,
+                                camera, altMetres);
+    window.SHIPS_PSG.psgFleet(eraTracks, R, clockS(), dws,
+                              (APP.vessels && APP.vessels.vessels) || []);
+    /* the globe tokens would be drawn into the backdrop at exaggerated size and then buried
+       by the depth clear — the same hulls, twice, one of them wrong */
+    if (eraFleet) eraFleet.visible = false;
+  } else if (!PSGV.on) {
+    window.SHIPS_PSG.psgFleetClear();
+    if (eraFleet && !PSGV.on) eraFleet.visible = true;
+  }
+
+  if ((PSGV.on && window.SHIPS_PSG.PSG.on) || descending) {
     /* ── TWO SCALES, ONE FRAME ────────────────────────────────────────────────────────
        The Earth first, with a near plane measured in tens of kilometres, so its depth buffer
        has the precision a planet needs. Then the depth is cleared and the ship and her water
@@ -1125,14 +1233,13 @@ function frame(now) {
        The near-field pass is drawn second and unconditionally in front, which is correct:
        everything in it is within seven kilometres, and everything in the backdrop is the
        distance beyond that. */
-    const keepNear = camera.near, keepFar = camera.far;
-    camera.near = 0.02; camera.far = 4000;
-    camera.updateProjectionMatrix();
+    /* the backdrop uses the same altitude-aware range as everything else — a fixed near
+       plane here would clip the planet out of the very view it is the backdrop for */
+    setCameraDepthRange();
     renderer.render(scene, camera);
-    camera.near = keepNear; camera.far = keepFar;
-    camera.updateProjectionMatrix();
     renderer.clearDepth();
     renderer.render(window.SHIPS_PSG.PSG.scene, window.SHIPS_PSG.PSG.cam);
+
   } else {
     renderer.render(scene, camera);
   }
@@ -1552,7 +1659,22 @@ function stepEraFleet(t) {
        the Shipwright's models rather than markers. Six times the campaign factor puts a
        middling hull around twenty-five pixels — a piece on a board, not a speck.
        The ratio between ships is still true: Titanic is still four times the caravel. */
-    tr.grp.scale.setScalar((S.dist * 0.0098) / tr.grp.userData.loa);
+    /* ── AND SHE SHRINKS TO HER OWN SIZE ON THE WAY DOWN ────────────────────────────
+       The token above is an exaggeration of about 1,600 : 1 — from 765 km a 42 m hull is
+       eight hundredths of a pixel, so there is no honest alternative at globe zoom. But it
+       has to be UNWOUND on the descent or a 200 km carrack ends up floating on 100 m waves.
+       Geometric blend on log altitude: full token above 300 km, unity at the handover, so a
+       hull crosses into the near-field scene already her own size and the seam has nothing
+       to show. */
+    {
+      const tok = (S.dist * 0.0098) / tr.grp.userData.loa;
+      const tru = R / 6371000;
+      const altU = Math.max(MIN_ALT, S.dist - R);
+      const hi = 300000 / 63710, lo = window.SHIPS_PSG.DESCENT_M / 63710;
+      const f = Math.max(0, Math.min(1,
+        (Math.log(altU) - Math.log(lo)) / (Math.log(hi) - Math.log(lo))));
+      tr.grp.scale.setScalar(tru * Math.pow(Math.max(tok / tru, 1e-6), f));
+    }
     /* heading from the track on the sphere, projected into the local tangent plane */
     const up = w.clone().normalize();
     let fwd = lonLatToVec(b.lon, b.lat, R).sub(lonLatToVec(a.lon, a.lat, R));

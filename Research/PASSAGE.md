@@ -118,3 +118,54 @@ consistent — **a mirrored world that agrees with itself, which is the hardest 
 | cull fires on an antipodal ship | n/a | **yes** (and passes one underfoot) |
 | course 090 / 000 / 180 / 270 in the Passage | — | **east / north / south / west** |
 | Passage sun vs globe sun, reprojected | — | **dot = 1.0000** |
+
+---
+
+# The descent: one continuous zoom from orbit to sea level  (2026-08-04, round 10)
+
+August: *"We need a simulated ocean with simulated ships on a global scale."*
+
+There were two views and nothing between them. The globe stopped at 765 km, where a 42 m hull is
+0.077 of a pixel and the token has to be about 1,600 times life size. The Passage jumped straight
+to 100 m off a hull. The gap was the whole ask.
+
+## What makes it continuous
+
+| | |
+|---|---|
+| **the wheel zooms ALTITUDE, not radius** | S.dist is measured from the Earth's centre, so an 11 % step near the surface is 11 km — one click went from 765 km through the atmosphere to the seabed. Scaling height above the ground gives ~40 even clicks across four and a half decades. |
+| **the exaggeration unwinds** | geometric ramp on log altitude: full token above 300 km, unity at 8 km. Verified 4,437× → 1.0×, monotone, with the steamer's drawn length going 435 km → 98 m. |
+| **the near field anchors under the CAMERA** | same scene, same water, same wave table as the Passage. Only the anchor changes. |
+| **the aim walks out to a depression angle** | nadir from orbit, 11° near the water, so the horizon sits 6° inside the top of the frame. Aiming at the horizon itself put everything within a few km forty degrees below the bottom of the picture. |
+| **the water curves** | each ring of the radial mesh drops by the sagitta, so the surface leaves the eye line at the true horizon and hands off to the globe backdrop there. A flat 260 km disc hides 5.3 km of Earth. |
+
+The handover is at **8 km for both the water and the fleet, and it has to be**: the near pass
+clears depth, so anything left in the globe scene is buried behind the water regardless of where
+it is. Ships cannot cross at a different altitude from the ocean.
+
+## ⚠ The near plane was a fixed 63.7 kilometres
+
+`camera.near = 1` unit, and a unit is 63.7 km. Invisible for eight rounds, because the camera
+could not get within 765 km of the surface. The moment the wheel could descend, the entire planet
+fell inside the near plane and the globe rendered **black**.
+
+It was found by the `descent-high` baseline **on its first capture** — a frame placed deliberately
+on the far side of the handover, on the principle that a boundary cannot be watched from one side
+of it. This project has paid twice for green ratchets over unwatched geometry (the trireme's oars,
+the container ship's funnel); this is the first time the lesson paid back.
+
+## The camera is URL state now
+
+Four and a half decades of altitude and the whole surface of the Earth could not be addressed by
+`v=sea`, so the descent could not be captured at all.
+
+```
+#c=<lon>,<lat>    where to stand
+#z=<metres>       how high above the water
+```
+
+## Verified
+
+- exaggeration ramp monotone across 38,000 km → 500 m, exactly 1.0× at and below the handover
+- 17 baselines at **0.000 %** — the descent is entirely additive above 8 km
+- both new frames non-blank (variance 2491 and 2723 against a floor)

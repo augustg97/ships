@@ -91,6 +91,16 @@
       "name": "ship-container",
       "path": "/?frozen=1#v=ship&s=container",
       "note": "funnel proportions (was wider than tall), bridge block, container stacks"
+    },
+    {
+      "name": "descent",
+      "note": "The near field: the Great Western at true scale on displaced water, 700 m up, horizon in frame. Nothing watched this before it existed.",
+      "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.4997&z=700"
+    },
+    {
+      "name": "descent-high",
+      "note": "Nine kilometres: just ABOVE the handover, so the token side of the seam is watched too. A frame on only one side of a boundary cannot see the boundary move.",
+      "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000"
     }
   ]
 }
