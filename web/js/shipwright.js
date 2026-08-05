@@ -113,7 +113,7 @@ function swInit() {
     vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
     uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
                 uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
-                uWind: { value: 6.5 }, uScale: { value: 150 },
+                uWind: { value: 6.5 }, uScale: { value: 150 }, uRip: { value: 3000 },
                 uWave: { value: SHIPS_SEA.seaWaveUniform() } },
   }));
   gm.rotation.x = -Math.PI / 2;
@@ -706,6 +706,9 @@ function swFrame(now) {
                       d * Math.sin(SW.lat) + look,
                       d * Math.cos(SW.lat) * Math.cos(SW.lon));
   SW.cam.lookAt(SW.panX, look, 0);
+  if (SW.ground && SW.ground.material.uniforms.uRip)
+    SW.ground.material.uniforms.uRip.value =
+      SHIPS_SEA.rippleRange(SW.cam, SW.renderer ? SW.renderer.domElement.height : 900);
   const hm = SW.ship.userData.hullMat;
   if (hm) hm.uniforms.uCam.value.copy(SW.cam.position);
   /* place the names: project each ship's foot to the screen */

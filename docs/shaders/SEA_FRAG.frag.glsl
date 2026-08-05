@@ -1,6 +1,16 @@
 precision highp float;
 varying vec3 vP; varying vec2 vUv; varying vec3 vN; varying float vCrest;
 uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
+/* ── ⚠ HOW FAR THE FINE RIPPLE IS STILL WORTH DRAWING ─────────────────────────────────────
+   This used to be uScale, which is the EYE HEIGHT — so from a deck the close-up's ripple
+   vanished two hundred metres from the hull while the Shipwright, which hard-codes uScale at
+   150, kept it to seven hundred and fifty. Same shader, same wave table, two different oceans,
+   and the Sea's was the worse one.
+   Whether a ripple is worth drawing is a question about PIXELS, not about altitude: it stops
+   being visible where its wavelength falls below one pixel, which is lambda x screenHeight /
+   (2 tan(fov/2)) away. Computed in JS and handed in, so every view that draws water gets the
+   same law and they cannot diverge again. */
+uniform float uRip;
 
 /* ── ⚠ THE NEAR-FIELD OCEAN WAS PAINTING OVER THE LAND ────────────────────────────────────
    This surface is drawn after a depth clear, so it covers everything behind it — and it is a
@@ -79,7 +89,7 @@ void main(){
   float drift = uTime * 0.30;
   float r1 = fbm(rp + vec2(drift, drift * 0.4));
   float r2 = fbm(rp * 2.9 - vec2(drift * 1.7, 0.0));
-  float rippleFade = 1.0 - smoothstep(uScale * 0.6, uScale * 5.0, dist);
+  float rippleFade = 1.0 - smoothstep(uRip * 0.22, uRip, dist);
   float rs = (0.10 + 0.030 * uWind) * rippleFade;
   vec3 N = normalize(vN + vec3((r1 - 0.5) * rs, 0.0, (r2 - 0.5) * rs));
 

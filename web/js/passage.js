@@ -134,7 +134,7 @@ function psgInit(R, globeCamera) {
          toward deep. It is the SHIP'S OWN LENGTH, set on open: what counts as near water
          depends entirely on how big the thing in the middle of it is, and 260 m of near field
          around a 9 m canoe is the same mistake as 260 m around a 400 m box boat. */
-      uWind: { value: 7.0 }, uScale: { value: 60 },
+      uWind: { value: 7.0 }, uScale: { value: 60 }, uRip: { value: 3000 },
       /* how far the anchor has moved over the ground since the passage opened, so the wave
          field belongs to the sea rather than to the ship — see SEA_VERT */
       uDrift: { value: new THREE.Vector2() },
@@ -252,6 +252,9 @@ function psgOpen(tr, vessel, R, globeCamera) {
   PSG.scene.add(holder);
 
   PSG.sea.material.uniforms.uScale.value = Math.max(14, PSG.loa * 0.7);
+  PSG.sea.material.uniforms.uRip.value =
+    SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
+                                     ? renderer.domElement.height : 900);
 
   /* ── ⚠ A SHIP IS NOT AS TALL AS SHE IS LONG, AND SHE IS NOT SHORT EITHER ─────────────
      Standing off a fixed number of ship-LENGTHS cut the rig off the top of the frame every
@@ -481,6 +484,10 @@ function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
   PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
   /* what counts as "near water" is now the eye height, not a ship's length */
   PSG.sea.material.uniforms.uScale.value = Math.max(40, altM * 0.5);
+  /* the ripple's own reach, from the camera rather than from the eye height */
+  PSG.sea.material.uniforms.uRip.value =
+    SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
+                                     ? renderer.domElement.height : 900);
   /* hand it the same elevation texture the globe is drawing from — one field, one coastline */
   const gm = (typeof mat !== 'undefined' && mat) ? mat.uniforms : null;
   if (gm) {

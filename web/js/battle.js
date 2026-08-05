@@ -93,7 +93,7 @@ function btInit() {
     vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
     uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
                 uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
-                uWind: { value: 9 }, uScale: { value: 240 },
+                uWind: { value: 9 }, uScale: { value: 240 }, uRip: { value: 3000 },
                 uWave: { value: SHIPS_SEA.seaWaveUniform() } },
   }));
   BT.sea.rotation.x = -Math.PI / 2;

@@ -70,6 +70,15 @@ function seaWaveUniform(wind) {
 /* Re-scale an existing uniform array in place, for views whose wind changes as the camera or
    the ship moves. Mutating beats rebuilding: a fresh array every frame would replace the
    uniform's identity and force three.js to re-upload the whole thing. */
+/* The distance at which a 2 m ripple falls below one pixel, which is where it stops being
+   worth drawing. One law, handed to every view that draws water — the Sea, the Passage, the
+   Shipwright and the Action — so none of them can quietly get a different ocean. */
+function rippleRange(camera, pxHeight) {
+  const fov = (camera && camera.fov) || 34;
+  const px = Math.max(200, pxHeight || 900);
+  return 2.0 * px / (2.0 * Math.tan(fov * Math.PI / 360));
+}
+
 function updateWaveUniform(arr, wind) {
   if (!arr) return arr;
   for (let i = 0; i < SEA_WAVES.length && i < arr.length; i++) arr[i].w = seaAmp(i, wind);
@@ -231,5 +240,5 @@ function animateWheels(root, t, speedKn) {
   });
 }
 
-window.SHIPS_SEA = { SEA_WAVES, seaWaveUniform, updateWaveUniform, seaAmp, seaAt, floatShip,
+window.SHIPS_SEA = { rippleRange, SEA_WAVES, seaWaveUniform, updateWaveUniform, seaAmp, seaAt, floatShip,
                      animateOars, animateWheels };
