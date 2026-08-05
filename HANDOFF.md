@@ -112,3 +112,69 @@ Passage jumps straight to 100 m off a hull. Between them there is nothing, and t
 "a simulated ocean with simulated ships on a global scale" means. It needs: the wheel range
 extended, the token exaggeration converging to 1.0 as altitude falls, and the Passage's
 near-field water anchored under the camera rather than under one ship.
+
+---
+
+## Round 14 — 2026-08-04
+
+Items from August's eight-point list, in the order they were taken.
+
+**(3) Ships on land — the standing one.** Four faults, each of which had survived because the
+check for it was run on something adjacent to the thing that was wrong.
+
+* *The seams.* A voyage is a dozen passages stitched end to end and each was smoothed against
+  itself. All 97 corners over 60 degrees, and both 180-degree reversals, were within a kilometre
+  of a stitch. Finishing now runs on the assembled track (`finishTrack` in route.js).
+* *The datum.* Era 0 is 60,000 BP and the shader draws the shoreline 68 m lower, while the
+  router planned on modern coastlines. `FINE` held a boolean decided once; it holds elevation
+  now and the datum is a parameter (`setSeaLevel`). The audit had been reading the sea level
+  once, before the era loop, which is why four rounds never saw it.
+* *The curve, again.* 0 of 84,000 track points ashore and hulls still on New Britain, because
+  smoothing accepted a move whose POINT was wet while the SEGMENT it created cut the headland.
+  Segments are tested at 1 km on the great circle now; where a sidestep cannot clear one, a
+  small A* on the fine grid plans the channel (`fineDetour`); where that fails the span is
+  re-planned across a widening window.
+* *gcWet excludes its endpoints*, so it could not by itself stop a point being moved ashore.
+
+Measured, 63 tracks: **0 track points ashore; 194 of 1,382,871 drawn-curve samples ashore
+(0.014%)**, from 11.45% when this work began. The residue is ~6 segments in the Flores/Timor
+low-stand straits and among the Fijian islands, where the 4.9 km grid has no navigable channel.
+A level-3 mask is the only thing that would close it.
+
+**(4) Movement.** Uneven spacing was the "freezing then jumping" — the fleet interpolates
+between waypoints at a constant rate, so a 0.4 km step and a 5 km step take the same time.
+Resampled to constant arc length: median 4.00 km, p99/p01 = 1.19. Corners over 60 degrees:
+**10**, from 97, and the survivors are real landfalls. Consort stations are found by bisection
+and eased. Ships hold traffic separation under COLREGS (`avoidPass`): **0 overlapping hulls**.
+
+**(6) Pace.** `clamp(hours/10, 100, 420)` hit its floor at both ends of the fleet, so screen
+speed was proportional to route LENGTH and Magellan at 5.8 kn outran the box boat at 16. No
+ceiling now: km/s = knots x 4.41 for every hull, exactly. The container ship is the fastest
+thing on the map at 71 km/s, down from 200.
+
+**(7) The fleet.** 13 voyages to 62, and all 25 hull types now sail — 16 of them never had.
+Suez and Panama are carved passages carrying the year they opened.
+
+**(2) The door.** Clicking a hull calls `followShip()`; the card's button called
+`closePassage()`, which begins `if (!PSGV.on) return`, and `followShip` never sets `PSGV.on`.
+The button was wired to a function guaranteed to do nothing on the only path a user can take.
+One exit now (`leaveShip`), and it flies.
+
+**(5) The fleet list** gives ship and live position, and a click flies to where she actually is.
+
+**(1) The wake.** The near-field sea is one mesh at the origin of a scene anchored under the
+ship, so its wave field travelled with the hull — she could make 16 knots with the water beside
+her going nowhere. `uDrift` makes the waves belong to the ground. Bow wave, Kelvin arms at
+19.47 degrees and a turbulent band astern are in SEA_FRAG. The waterline time compression is
+derived now (C = 8577) rather than chosen, so a ship moves through the water at her own speed.
+
+**(8) Models.** The container stow was `high = 5 + ((bay*3) % 3)` — always 5, a level slab
+245 m long, under a comment saying stows are never level. It has a profile now (stepping down
+forward, wings cut for the bridge sightline), hatch covers, lashing bridges, a bulbous bow and
+a forecastle.
+
+### Open
+* ~6 blocked segments needing a finer mask.
+* Era 4 costs 4.9 s to build cold (1.1 s cached).
+* The Shipwright still builds the yard's 24 unselected hulls coarse, which is correct, but the
+  camera pan to a newly selected ship is slow enough to look stuck.

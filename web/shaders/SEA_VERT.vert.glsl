@@ -1,6 +1,17 @@
 precision highp float;
 varying vec3 vP; varying vec2 vUv; varying vec3 vN; varying float vCrest;
 uniform float uTime, uWind;
+/* ── ⚠ AND THE WATER WAS FIXED TO THE SHIP ──────────────────────────────────────────────
+   The near-field sea is one mesh at the origin of its own scene, and the scene is anchored
+   under the ship. So a given vertex's world position never changes, the only thing moving the
+   surface is uTime, and the wave field travels with the hull like a carpet she is standing on.
+   She could make sixteen knots and the water beside her would not go anywhere — which is
+   exactly what August saw and called "stationary".
+   The waves belong to the GROUND, not to the ship. uDrift is how far the anchor has moved
+   over the ground since the passage opened, in metres, and adding it to the sampling position
+   makes the sea streams past at the ship's own speed without anything else having to know
+   she is moving. */
+uniform vec2 uDrift;
 /* xy = travel direction, z = wavelength in metres, w = amplitude in metres */
 uniform vec4 uWave[4];
 
@@ -34,7 +45,7 @@ void main() {
     float A = uWave[i].w;
     float k = 6.2831853 / L;
     float c = sqrt(9.81 / k);                       // deep-water phase speed
-    float ph = k * dot(d, P.xz) - c * k * uTime;
+    float ph = k * dot(d, P.xz + uDrift) - c * k * uTime;
     float s = sin(ph), co = cos(ph);
     /* steepness, held below the value at which a Gerstner wave folds through itself */
     float Q = min(0.72 / max(k * A * 4.0, 1e-4), 1.0);

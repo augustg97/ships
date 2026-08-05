@@ -135,6 +135,13 @@ function psgInit(R, globeCamera) {
          depends entirely on how big the thing in the middle of it is, and 260 m of near field
          around a 9 m canoe is the same mistake as 260 m around a 400 m box boat. */
       uWind: { value: 7.0 }, uScale: { value: 60 },
+      /* how far the anchor has moved over the ground since the passage opened, so the wave
+         field belongs to the sea rather than to the ship — see SEA_VERT */
+      uDrift: { value: new THREE.Vector2() },
+      /* her wake: position on the patch, heading, length, beam and speed */
+      uWakeP: { value: new THREE.Vector2() },
+      uWakeDir: { value: new THREE.Vector2(1, 0) },
+      uWakeLen: { value: 0 }, uWakeBeam: { value: 0 }, uWakeKn: { value: 0 },
       uWave: { value: SHIPS_SEA.seaWaveUniform() },
       /* the globe's own elevation field, so the water can end where the land begins */
       uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
@@ -291,6 +298,9 @@ function psgClose() {
   PSG.on = false;
   psgClearShip();
   PSG.track = null; PSG.vessel = null;
+  /* the ground reference is per-visit: keeping it across passages would carry a drift of
+     thousands of kilometres into the next one, and the wave phase would arrive scrambled */
+  PSG.ref = null;
 }
 
 /* ── ONE STEP ────────────────────────────────────────────────────────────────────────────
@@ -505,6 +515,21 @@ function psgFleet(tracks, R, t, wind, list) {
                         PSG.scene.add(PSG.fleetGroup); }
   const seen = new Set();
   const alat = PSG.anchor.userData.lat, alon = PSG.anchor.userData.lon;
+  /* ── THE GROUND THE WAVES BELONG TO ─────────────────────────────────────────────────
+     A reference position fixed at the moment the passage opens. Everything after is measured
+     from it, so uDrift is literally how far this patch of sea has travelled over the Earth —
+     which is the number that makes the water stream past the hull. */
+  if (PSG.ref === undefined || PSG.ref === null) PSG.ref = { lon: alon, lat: alat };
+  {
+    let dl = alon - PSG.ref.lon;
+    if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
+    const dE = dl * Math.PI / 180 * Math.cos(alat * Math.PI / 180) * 6371000;
+    const dN = (alat - PSG.ref.lat) * Math.PI / 180 * 6371000;
+    /* the same convention the hulls are placed in: x = -east, z = north */
+    if (PSG.sea && PSG.sea.material.uniforms.uDrift)
+      PSG.sea.material.uniforms.uDrift.value.set(-dE, dN);
+  }
+  let hero = null, heroR2 = Infinity;
   for (const tr of tracks || []) {
     if (!tr.at || !tr.vesselId) continue;
     const ves = list.find(x => x.id === tr.vesselId);
@@ -540,8 +565,25 @@ function psgFleet(tracks, R, t, wind, list) {
     e.holder.rotation.x = fl.roll;
     if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(e.holder, t, e.loa);
     if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
+    /* whichever hull is nearest the middle of the patch is the one being looked at, and hers
+       is the wake worth drawing — no plumbing needed to say which ship is the subject */
+    if (r2 < heroR2) { heroR2 = r2; hero = { x: -east, z: north, yaw, tr, ves }; }
   }
   for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
+
+  if (PSG.sea && PSG.sea.material.uniforms.uWakeKn) {
+    const u = PSG.sea.material.uniforms;
+    if (hero) {
+      /* the hull is built with its bow to -X and then turned +90 degrees onto +Z, so at yaw 0
+         she heads along +Z; yaw rotates about +Y. Taken from the same yaw that placed her,
+         because a wake that disagrees with the ship it comes from is worse than no wake. */
+      u.uWakeP.value.set(hero.x, hero.z);
+      u.uWakeDir.value.set(Math.sin(hero.yaw), Math.cos(hero.yaw));
+      u.uWakeLen.value = hero.ves.hull.loa;
+      u.uWakeBeam.value = hero.ves.hull.beam || hero.ves.hull.loa * 0.18;
+      u.uWakeKn.value = hero.tr.kn || 0;
+    } else u.uWakeKn.value = 0;
+  }
 }
 
 /* ── BUILD HER WHILE THE CAMERA IS STILL FALLING ──────────────────────────────────────────

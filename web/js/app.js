@@ -264,8 +264,16 @@ function clockS() { return FROZEN ? FROZEN_S : performance.now() / 1000; }
  * taken at first paint differs from one taken a second later by ~18% of pixels. That made
  * the baselines depend on capture order, which is a ratchet that only appears to work. */
 let upgradesDone = false;
+let shipSelectPending = false;
 function markReady() {
   if (FROZEN && !upgradesDone) return;
+  /* ⚠ AND NOT WHILE THE NAMED HULL IS STILL BEING FOUND. `#s=container` is applied by calling
+     window.swOpenById, which the Shipwright only defines once its view has opened — so the
+     call is a race, and it was silently skipped when lost: `typeof swOpenById === 'function'`
+     is false and nothing happens. Adding sixty-two voyages made the boot slow enough to lose
+     it, and the ship-container baseline captured the SHIP OF THE LINE, correctly framed and
+     completely wrong. A frame of the wrong ship is worse than no frame. */
+  if (FROZEN && shipSelectPending) return;
   if (!window.__FRAME_READY) window.__FRAME_READY = true;
 }
 
@@ -307,7 +315,28 @@ function applyHashView() {
      reason setView is ordered after the data load: the Shipwright builds its layout when the
      view opens, and there is nothing to select before that. */
   const sm = /[#&]s=([a-z0-9-]+)/i.exec(location.hash);
-  if (sm && typeof swOpenById === 'function') swOpenById(sm[1]);
+  if (sm) {
+    /* retried rather than attempted once, because whether the Shipwright has finished opening
+       is a matter of timing and not of intent */
+    /* ⚠ AND CALLING IT ONCE, SUCCESSFULLY, IS STILL NOT ENOUGH. setView('ship') opens the
+       Shipwright, which selects its own default hull — and it does that AFTER this line runs,
+       so the named ship was chosen and then quietly replaced. Measured: swOpenById('container')
+       returned true and the view settled on the ship of the line, panX exactly equal to shipX,
+       which is what a deliberate selection looks like. So the test is not "did the call
+       succeed" but "is the right ship selected", checked until it is. */
+    shipSelectPending = true;
+    let tries = 0;
+    const want = sm[1].toLowerCase();
+    const tryPick = () => {
+      const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
+      const entry = SWs && (SWs.layout || []).find(e => e.id.toLowerCase() === want);
+      if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) { shipSelectPending = false; return; }
+      if (typeof swOpenById === 'function') swOpenById(sm[1]);
+      if (++tries > 600) { shipSelectPending = false; console.warn('no hull named', sm[1]); return; }
+      requestAnimationFrame(tryPick);
+    };
+    tryPick();
+  }
 
   /* ── THE CAMERA IS STATE TOO, NOW THAT IT CAN DESCEND ────────────────────────────────
      Four and a half decades of altitude and the whole surface of the Earth cannot be
@@ -744,7 +773,18 @@ function updateLabels(now) {
        planet and was still being drawn, projecting onto the disc as though it belonged there —
        which is how SEA OF JAPAN came to be lettered across the English Channel. It gets worse
        the closer you fly, because the true horizon closes in while the test does not move. */
-    if (show && m.v.clone().normalize().dot(camDir) < R / S.dist) show = false;
+    /* ── AND A SLIVER OF GROUND SEEN EDGE-ON IS NOT A PLACE TO PUT A NAME ────────────
+       The horizon test above is correct and not sufficient. Right AT the limb the surface is
+       edge-on, so a thousand kilometres of coast projects into a few pixels — and every port
+       along it passes the test and stacks into a vertical column down the edge of the screen,
+       which is what the Indian Ocean looked like with sixty ports in view. A label needs
+       ground facing the camera. Inset a tenth of the way from the limb to the sub-camera
+       point, which at any altitude is the same fraction of the visible cap. */
+    {
+      const cosLimb = R / S.dist;
+      if (show && m.v.clone().normalize().dot(camDir) < cosLimb + (1 - cosLimb) * 0.10)
+        show = false;
+    }
 
     if (show) {
       const p = m.v.clone().project(camera);
@@ -1390,7 +1430,17 @@ function frame(now) {
     const aM = Math.max(1, (camera.position.length() - R) * 63710);
     const f = Math.max(0, Math.min(1,
       (Math.log(aM) - Math.log(1000)) / (Math.log(120000) - Math.log(1000))));
-    voyT += dt * (1 / 600) * Math.pow(600, f);
+    /* ── ⚠ AND THE COMPRESSION AT THE WATERLINE HAD TO MEAN SOMETHING ────────────────
+       600 was a number that felt right, and once the near water started streaming past the
+       hull it stopped being invisible: at the waterline the voyage clock ran about fourteen
+       times real time, so a 16-knot ship had 224 knots of water going by. Nobody would read
+       that as a container ship.
+       C is now derived rather than chosen. Screen speed on the map is knots x 4.41 km per
+       clock-second (see the pacing above); real speed is knots x 1.852/3600. The ratio is
+       8,577, so dividing by that at the waterline puts the ship at HER OWN SPEED through the
+       water, and the same constant as the exponent base leaves the map end exactly as it was. */
+    const C = 8577;
+    voyT += dt * (1 / C) * Math.pow(C, f);
   }
   stepEraFleet(voyT);
   refreshFleetList(t);
