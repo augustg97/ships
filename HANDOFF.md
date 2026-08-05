@@ -178,3 +178,59 @@ a forecastle.
 * Era 4 costs 4.9 s to build cold (1.1 s cached).
 * The Shipwright still builds the yard's 24 unselected hulls coarse, which is correct, but the
   camera pan to a newly selected ship is slow enough to look stuck.
+
+---
+
+## Round 19 — 2026-08-05 · performance, and the close-up as a place you go
+
+**The interaction August asked for.** The wheel used to run continuously from orbit to the
+waterline, so ordinary zooming crossed into the near field. The map has a floor now
+(`MAP_FLOOR_M` = 12 km) and the near field is engaged by `S.follow`, not by altitude — so a
+viewer who never clicks a hull never renders it. Click a ship to go aboard; zoom out inside the
+close-up to back off (clamped at 45 km, which at the standing 15° depression puts the eye at
+11.6 km — the map's own floor, so the two views join instead of jumping); the button is the way
+out and returns you to the top-down map at its lowest, over the water she is in. `#z=` still
+addresses altitude directly, which is what the descent baselines use.
+
+**Where the performance problem actually was.** Not the frame: the map costs 1.8 ms and the
+close-up 0.8 ms steady-state. (My first measurement of the descent said 9 ms; that was first-call
+shader compilation, which is why you measure twice.) It was one long stall in the place a viewer
+clicks most — routing thirteen voyages and building forty hulls inside the era button's handler.
+
+| | before | after |
+|---|---|---|
+| era click, revisit | 2,720 ms freeze | **0–1 ms** |
+| era click, first visit | 2,720 ms | 0–1 ms + a 2.4 s fill over 143 frames |
+| worst frame during the fill | — | **77 ms** |
+| near-field meshes, 5 ships in the patch | 12,850 | **2,586** |
+| near-field triangles, same | 798,520 | **247,096** |
+
+Five things got it there: the fleet build is a queue with a per-frame budget; `finishTrack`
+**yields between its passes**, because a budget alone could not help when one voyage's finishing
+is 310 ms in one lump; hulls are cached per vessel type (`buildShip` had run once per VOYAGE);
+the datum is quantised to 5 m so a half-metre era difference stops invalidating the routing grid;
+the fine elevation array is no longer rebuilt on a datum change (it holds elevation, and the datum
+is applied at every read — that was 2.3 s of the 2.4); and the four grid signatures that exist
+across the whole timeline are kept.
+
+**The close-up, looked at for the first time.** `#f=<voyage id>` makes it addressable, so it has
+baselines now (`aboard`, `aboard-off`). The first capture showed three faults: the map's chart
+lettering was drawn across the water in front of the ship; the ground and the water had **two
+different atmospheres** (the ground hazed to pale grey over 90 km, the water to dark blue over a
+distance derived from the ship's length, so the ocean went flat within a kilometre of the hull
+while a coast thirty kilometres off stayed bright); and the Kelvin arms read as searchlights.
+All three fixed. The card also read "Wind —" the whole time, because `PSGV.wind` is written only
+by the other way in.
+
+**⚠ Frozen must mean frozen for the easings.** The heading damping, the consort station and the
+traffic alteration all advanced once per FRAME regardless of dt — a clock, and pinning the others
+does not pin those. `descent` came back 1.7% different on every capture.
+
+### Open
+* **The four near-field frames flap** by ~0.5% of pixels on some full runs, a different one each
+  time, while being byte-identical when captured alone. Two settled states somewhere in the
+  near-field path. Written up in `Research/baselines/FRAME-LOG.md`; do not accept those frames
+  without looking.
+* The near ground is still flat-shaded within a texel — the 4.9 km raster has no gradient at
+  close range, and the sub-texel *shading* perturbation remains deliberately unshipped (round 12).
+* The turbulent band astern still has a straight leading edge; it reads as a sheet, not churn.
