@@ -510,7 +510,14 @@ function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
  * in the sea rather than above where the sea used to be before the Earth curved out from under
  * her.
  */
-function psgFleet(tracks, R, t, wind, list) {
+/* ── ⚠ ONE SHIP IS THE SUBJECT; THE REST ARE TRAFFIC ──────────────────────────────────────
+   Every hull in the patch was built with {fine:true} — the Shipwright's model, 2,570 separate
+   meshes and 160,000 triangles, every frame timber its own pickable object. That is right for
+   the ship you are standing on and absurd for one hull-down on the horizon, and it is paid per
+   ship: five in the patch is nearly thirteen thousand draw calls for four vessels nobody is
+   looking at. The subject is built fine, everyone else coarse — about ten meshes each — and an
+   entry is rebuilt if which one it is changes. */
+function psgFleet(tracks, R, t, wind, list, heroName) {
   if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
                         PSG.scene.add(PSG.fleetGroup); }
   const seen = new Set();
@@ -542,16 +549,22 @@ function psgFleet(tracks, R, t, wind, list) {
     if (r2 > (SEA_R * 0.7) * (SEA_R * 0.7)) continue;         // beyond the water
     seen.add(tr.name);
     let e = PSG.fleetPool.get(tr.name);
+    const wantFine = heroName ? (tr.name === heroName) : true;
+    if (e && e.fine !== wantFine) {                 /* she has become, or stopped being, the subject */
+      PSG.fleetGroup.remove(e.holder);
+      PSG.fleetPool.delete(tr.name);
+      e = null;
+    }
     if (!e) {
       let obj = null;
-      try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: true }); } catch (x) { continue; }
+      try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: wantFine }); } catch (x) { continue; }
       obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
       obj.rotation.y = Math.PI / 2;                            // bow -X onto +Z
       obj.position.y = -((obj.userData.keelBottom || 0) + (ves.hull.draught || 0));
       const holder = new THREE.Group();
       holder.add(obj);
       holder.rotation.order = 'YXZ';
-      e = { holder, loa: ves.hull.loa };
+      e = { holder, loa: ves.hull.loa, fine: wantFine };
       PSG.fleetPool.set(tr.name, e);
       PSG.fleetGroup.add(holder);
     }
@@ -567,7 +580,9 @@ function psgFleet(tracks, R, t, wind, list) {
     if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
     /* whichever hull is nearest the middle of the patch is the one being looked at, and hers
        is the wake worth drawing — no plumbing needed to say which ship is the subject */
-    if (r2 < heroR2) { heroR2 = r2; hero = { x: -east, z: north, yaw, tr, ves }; }
+    /* the named subject wins outright; otherwise whichever hull is nearest the middle */
+    const rank = (heroName && tr.name === heroName) ? -1 : r2;
+    if (rank < heroR2) { heroR2 = rank; hero = { x: -east, z: north, yaw, tr, ves }; }
   }
   for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
 
@@ -611,7 +626,7 @@ function psgPrebuild(tr, ves) {
   holder.add(obj);
   holder.rotation.order = 'YXZ';
   holder.visible = false;
-  PSG.fleetPool.set(tr.name, { holder, loa: ves.hull.loa });
+  PSG.fleetPool.set(tr.name, { holder, loa: ves.hull.loa, fine: true });
   PSG.fleetGroup.add(holder);
   return true;
 }

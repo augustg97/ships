@@ -514,7 +514,8 @@ const CARVED = [
            [-79.48, 8.80]] },
 ];
 
-const MASK = { ready: false, ocean: null, coast: null, w: MASK_W, h: MASK_H };
+const MASK = { ready: false, ocean: null, coast: null, w: MASK_W, h: MASK_H,
+               cache: new Map() };
 
 /* which level the mask was last built from — so an upgrade can be detected */
 MASK.level = -1;
@@ -595,14 +596,25 @@ function fineIsWater(lon, lat) {
 /* The era's datum, in metres relative to today. Returns true when it CHANGED, because that
    invalidates the coarse routing grid built from it — the caller rebuilds rather than this
    deciding for it, so the order of mask rebuild and fleet rebuild stays in one place. */
+/* ⚠ AND THE DATUM IS QUANTISED, because a tenth of a metre is not a coastline. Eras 1 to 7
+   carry sea levels of -0.5, -0.1 and 0 m, all of which produced DIFFERENT signatures and so
+   rebuilt the whole 2-million-cell routing grid — 350 ms inside the click — for a shift that is
+   a tenth of the 5 m shoal threshold the grid is thresholded at. Rounded to 5 m, only the ice
+   age is distinct, which is the only place the sea level is doing any work. */
 function setSeaLevel(m, year) {
-  const v = Math.round((m || 0) * 10) / 10;
+  const v = Math.round((m || 0) / 5) * 5;
   const y = year === undefined ? FINE.year : year;
   /* the signature is what the grid actually depends on: the datum, and WHICH carves apply.
      Comparing the year itself would rebuild on every drag of the slider for no change. */
   const sig = v + '|' + CARVED.map(c => (c.from === undefined || y >= c.from) ? 1 : 0).join('');
   if (sig === FINE.sig) return false;
   FINE.datum = v; FINE.year = y; FINE.sig = sig;
+  /* ── AND A GRID ALREADY BUILT FOR THIS SIGNATURE IS KEPT ────────────────────────────────
+     There are four distinct configurations across the whole timeline — the low stand, then
+     before Suez, between Suez and Panama, and after Panama — so going back to an era you have
+     already visited should cost nothing. Four megabytes each, four of them. */
+  const hit = MASK.cache && MASK.cache.get(sig);
+  if (hit) { MASK.ocean = hit.ocean; MASK.coast = hit.coast; MASK.ready = true; return false; }
   MASK.ready = false;
   return true;
 }
@@ -611,7 +623,11 @@ function buildMask(force) {
   if (MASK.ready && !force) return true;
   const pick = bestDepthCanvas();
   if (!pick.cv) return false;
-  buildFine(pick.cv, pick.level);
+  /* ⚠ AND THE FINE ARRAY DOES NOT DEPEND ON THE DATUM. It holds ELEVATION; the datum is applied
+     at every read. Rebuilding it on a sea-level change re-read 33.5 million pixels out of a
+     canvas for a number that was not going to change one of them — 2.3 s of the 2.4 s an era
+     switch cost. It is rebuilt only when the PICTURE changes, which is what it is a copy of. */
+  if (!FINE.ready || FINE.level !== pick.level) buildFine(pick.cv, pick.level);
   MASK.level = pick.level;
 
   /* the search grid stays at level-0 resolution whatever the picture is drawn from */
@@ -698,6 +714,8 @@ function buildMask(force) {
     }
   }
   MASK.ocean = ocean; MASK.coast = coast; MASK.ready = true;
+  /* keep it against its signature, so returning to an era already visited is free */
+  if (MASK.cache && FINE.sig) MASK.cache.set(FINE.sig, { ocean, coast });
   return true;
 }
 
@@ -1474,31 +1492,44 @@ function clearSegments(pts, sampleKm) {
   return cur;
 }
 
+/* ── ⚠ AND IT ALL HAPPENED IN ONE GO ─────────────────────────────────────────────────────
+   Measured on Magellan: the A* over twenty legs is 183 ms and can be pumped a leg at a time,
+   but the finishing is 310 ms in one indivisible lump — so a time budget checked between
+   voyages could not help, because one voyage overran it a hundredfold and the era switch froze
+   anyway. The passes below are already discrete, so the function YIELDS between them and the
+   caller decides how much to do this frame. finishTrack() is unchanged for every other caller:
+   it drains the iterator and returns the same track it always did. */
 function finishTrack(pts, opt) {
+  const it = finishTrackSteps(pts, opt);
+  let r = it.next();
+  while (!r.done) r = it.next();
+  return r.value;
+}
+function* finishTrackSteps(pts, opt) {
   if (!FINE.ready || !pts || pts.length < 3) return pts;
   const o = opt || {};
   const step = o.stepKm || 4;
   let t = pts.map(p => ({ lon: p.lon, lat: p.lat }));
-  t = smoothTrack(t);
+  t = smoothTrack(t); yield;
   /* ⚠ RESAMPLE BEFORE FILLETING. The fillet leaves the course d = R·tan(θ/2) before the mark
      and can never take more than half the incoming leg — so on a hairpin whose two legs are
      350 m long, d is 170 m, below the minimum, and the fillet declines. That is precisely the
      corner that needed it: measured, the 27 turns still over 60 degrees were all spikes with
      sub-kilometre legs. Spacing the track evenly first gives every corner four kilometres of
      approach to turn in, and the tool that could not reach them now can. */
-  t = resampleUniform(t, step);
+  t = resampleUniform(t, step); yield;
   /* and the fillet is LAST of the shape-defining steps — a resample after it samples the arc
      once and the turn is gone again, which is how the first attempt changed nothing. It emits
      at the track's own spacing, so evenness survives without a second pass. */
-  t = filletTurns(t, o.turnKm || 9, step);
-  t = pushOffLand(t);
-  t = smoothTrack(t);
+  t = filletTurns(t, o.turnKm || 9, step); yield;
+  t = pushOffLand(t); yield;
+  t = smoothTrack(t); yield;
   /* ⚠ last, and after everything that moves a point. Twice, with a smoothing between: the
      detour inserted to clear a segment is itself a corner, and smoothing now verifies segments
      so it can take that corner out without being able to re-block anything. */
-  t = clearSegments(t, 1);
-  t = smoothTrack(t);
-  t = clearSegments(t, 1);
+  t = clearSegments(t, 1); yield;
+  t = smoothTrack(t); yield;
+  t = clearSegments(t, 1); yield;
   /* ── AND A POINT THAT IS STILL ASHORE IS DELETED ────────────────────────────────────────
      Seventeen survived everything above. A waypoint is not sacred — it is a sample of a course,
      and if the course is clear without it then it was never carrying information. Drop it when
@@ -1513,10 +1544,12 @@ function finishTrack(pts, opt) {
     const fix = nearestWater(p, 60);
     fin.push(fix || p);
   }
-  return clearSegments(smoothTrack(fin), 1);
+  yield;
+  const sm = smoothTrack(fin); yield;
+  return clearSegments(sm, 1);
 }
 
 window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable,
                        buildMask, seaPath, isOcean, MASK, CARVED, maskCell, cellLonLat, windAt,
                        maskUpgradeAvailable, isRoutable, FINE, fineIsWater, setSeaLevel,
-                       finishTrack, gcKm, gcSlerp, turnDeg };
+                       finishTrack, finishTrackSteps, gcKm, gcSlerp, turnDeg };

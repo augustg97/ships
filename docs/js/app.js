@@ -48,7 +48,22 @@ const MIN_ALT = 500 / 63710;
    underneath because she is genuinely moving across the real globe.
      followAz  the bearing you are watching her from
      followDep the depression, so you can drop to her waterline or look down on her deck */
-const FOLLOW_RELEASE_M = 90000;      // zoom out past this and the map takes over again
+/* ── ⚠ THE MAP HAS A FLOOR NOW, AND THE CLOSE-UP IS A PLACE YOU GO ────────────────────────
+ * The wheel used to run continuously from orbit to the waterline, so ordinary zooming crossed
+ * into the near field — a displaced 174,000-triangle sea, an equal disc of land, and every hull
+ * in the patch rebuilt at 2,570 separate meshes. Measured, the descent path costs 9 ms a frame
+ * against the map's 1.8, and you paid it whenever you looked closely at anything.
+ *
+ * It is also the wrong shape for the piece. The map is a map: you zoom it in until a ship is
+ * plainly a ship, and then you CLICK her to go aboard. Zooming out inside the close-up backs
+ * off from her; the way out is the button, and it returns you to the map at its lowest.
+ *
+ * So the wheel stops at MAP_FLOOR_M, the near field is engaged by S.follow rather than by
+ * altitude, and a viewer who never clicks a hull never renders it. `#z=` still sets the
+ * altitude directly, which is what the descent baselines use and why they still work.
+ */
+const MAP_FLOOR_M = 12000;           // as close as the top-down map goes
+const FOLLOW_MAX_M = 6000;           // as far off her as the close-up will stand
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
@@ -274,6 +289,8 @@ function markReady() {
      it, and the ship-container baseline captured the SHIP OF THE LINE, correctly framed and
      completely wrong. A frame of the wrong ship is worse than no frame. */
   if (FROZEN && shipSelectPending) return;
+  /* and not on a half-built fleet */
+  if (FROZEN && fleetQueue.length) return;
   if (!window.__FRAME_READY) window.__FRAME_READY = true;
 }
 
@@ -1325,16 +1342,19 @@ function wireUI() {
        however high you already are. Same reasoning as the drag gain, which was fixed for
        the same reason two rounds ago and should have taught me this one. */
     if (S.follow) {
-      /* following, the wheel changes how far off you stand — and zooming out is how you let go
-         of her: no button to find, the map is simply there again once she stops being the
-         subject */
-      S.followDist = Math.max(25, S.followDist * (1 + Math.sign(e.deltaY) * 0.13));
-      if (S.followDist > FOLLOW_RELEASE_M) { leaveShip(); return; }
+      /* ⚠ ZOOMING OUT NO LONGER LETS GO OF HER. It used to: past 90 km the map simply took
+         over, on the reasoning that there was no button to find. But it meant the close-up
+         had no stable far end — back off to look at her against the coast and the view threw
+         you out — and it made leaving an accident rather than a decision. The button is the
+         way out, and it is on the card in front of you. */
+      S.followDist = Math.max(25, Math.min(FOLLOW_MAX_M,
+                                           S.followDist * (1 + Math.sign(e.deltaY) * 0.13)));
       placeCamera();
       return;
     }
-    const alt = Math.max(MIN_ALT, S.dist - R);
-    S.dist = R + Math.max(MIN_ALT, Math.min(600, alt * (1 + Math.sign(e.deltaY) * 0.11)));
+    const alt = Math.max(MAP_FLOOR_M / 63710, S.dist - R);
+    S.dist = R + Math.max(MAP_FLOOR_M / 63710,
+                          Math.min(600, alt * (1 + Math.sign(e.deltaY) * 0.11)));
     placeCamera();
   }, { passive: false });
 
@@ -1442,6 +1462,7 @@ function frame(now) {
     const C = 8577;
     voyT += dt * (1 / C) * Math.pow(C, f);
   }
+  pumpFleetQueue(4);
   stepEraFleet(voyT);
   refreshFleetList(t);
   updateLabels(t);
@@ -1522,7 +1543,13 @@ function frame(now) {
     }
   }
   const altMetres = Math.max(0, (camera.position.length() - R)) * 63710;
-  const descending = !PSGV.on && window.SHIPS_PSG.psgDescentActive(altMetres);
+  /* ⚠ THE NEAR FIELD IS A MODE, NOT AN ALTITUDE. Gating it on height meant every close look at
+     the map paid for a displaced ocean nobody had asked for, and it meant backing off inside
+     the close-up silently swapped the true-scale hull for a globe token halfway through a
+     movement. Following her engages it and holds it however far off you stand. The altitude
+     test remains for `#z=`, which is how the descent baselines address the view directly. */
+  const descending = !PSGV.on &&
+                     (!!S.follow || window.SHIPS_PSG.psgDescentActive(altMetres));
   if (descending) {
     /* ⚠ the near camera is derived from this matrix, and three.js only refreshes it during
        render — one frame stale is one frame of the whole ocean sliding under the ship */
@@ -1532,7 +1559,8 @@ function frame(now) {
     window.SHIPS_PSG.psgDescent(clockS(), S.lon, S.lat, R, sunVector(S.month), dws,
                                 camera, altMetres);
     window.SHIPS_PSG.psgFleet(eraTracks, R, clockS(), dws,
-                              (APP.vessels && APP.vessels.vessels) || []);
+                              (APP.vessels && APP.vessels.vessels) || [],
+                              S.follow ? S.follow.name : null);
     /* the globe tokens would be drawn into the backdrop at exaggerated size and then buried
        by the depth clear — the same hulls, twice, one of them wrong */
     if (eraFleet) eraFleet.visible = false;
@@ -1718,6 +1746,20 @@ let paceClamped = [];
    era strip is touched, is work already done. Keyed on the grid's own signature so a change of
    era or sea level invalidates it correctly rather than serving a track for the wrong coast. */
 const trackCache = new Map();
+/* ── AND THE HULLS WERE REBUILT EVERY TIME TOO ────────────────────────────────────────────
+   `buildShip` ran once per VOYAGE, so era 4's thirteen voyages built thirteen hulls for seven
+   distinct vessel types — and every one of them again on the next era switch. A coarse hull is
+   10 ms, which is nothing until it is forty of them between one click and the next frame.
+   Twenty-five types exist, so twenty-five builds is the whole budget for a session.
+   ⚠ Everything here is CLONED from the cache, including the flagship. clone() JSON-copies
+   userData, but nothing in the era fleet reads a live reference out of one — `grp.userData.loa`
+   is written from the vessel spec, and only the globe's own material has per-frame uniforms. */
+const hullProtoCache = new Map();
+function hullProto(ves) {
+  let p = hullProtoCache.get(ves.id);
+  if (!p) { p = window.SHIPS_HULL.buildShip(ves.hull); hullProtoCache.set(ves.id, p); }
+  return p;
+}
 /* ONE reading of a ship's speed, used by the pacing, the card and anything else that asks.
    Two readings is how a hull came to be paced at 16 knots and described at 6 on the same
    screen at the same moment. */
@@ -1730,6 +1772,14 @@ function shipKn(ves) {
   return (ves && ves.speedKn) || 6;
 }
 function seaRoute(legs) {
+  const it = seaRouteSteps(legs);
+  let r = it.next();
+  while (!r.done) r = it.next();
+  return r.value;
+}
+/* one leg of A* per step, then one finishing pass per step — so the largest thing this can do
+   between two frames is a single pass over a single voyage */
+function* seaRouteSteps(legs) {
   const RT = window.SHIPS_ROUTE;
   const out = [];
   const push = (lon, lat) => {
@@ -1740,12 +1790,18 @@ function seaRoute(legs) {
   for (let i = 0; i < legs.length - 1; i++) {
     const a = legs[i], b = legs[i + 1];
     const path = (RT && RT.seaPath) ? RT.seaPath(a.lon, a.lat, b.lon, b.lat) : null;
-    if (!path) { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); continue; }
-    for (const p of path) push(p.lon, p.lat);
+    if (path) { for (const p of path) push(p.lon, p.lat); }
+    else { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); }
+    yield;
   }
   /* ⚠ The finishing runs HERE, on the assembled voyage, not inside the passage search. Each
      segment was already clean against itself; every bad corner measured was at a seam. */
-  if (out.length > 2 && RT && RT.finishTrack) return RT.finishTrack(out);
+  if (out.length > 2 && RT && RT.finishTrackSteps) {
+    const it = RT.finishTrackSteps(out);
+    let r = it.next();
+    while (!r.done) { yield; r = it.next(); }
+    return r.value;
+  }
   return out.length > 1 ? out : legs;
 }
 
@@ -1753,6 +1809,7 @@ function clearEraFleet() {
   setHover(null);
   if (eraFleet) { scene.remove(eraFleet); }
   eraFleet = null; eraTracks = [];
+  fleetQueue = [];              /* an era abandoned mid-build must not finish into the next one */
 }
 
 function buildEraFleet() {
@@ -1776,12 +1833,64 @@ function buildEraFleet() {
   if (!vy.length) return;
 
   eraFleet = new THREE.Group();
-  const list = APP.vessels.vessels || APP.vessels;
-  for (const v of vy) {
+  scene.add(eraFleet);
+  /* ── ⚠ AND IT ALL HAPPENED BETWEEN ONE CLICK AND THE NEXT FRAME ────────────────────────
+     Routing thirteen voyages and building forty hulls is 1.1 to 2.7 seconds of arithmetic, and
+     it ran synchronously inside the era button's handler — so every era switch froze the whole
+     app for over a second, with no frame drawn and no way to tell it apart from a hang. That is
+     the performance problem: not the frame cost, which is under two milliseconds, but one long
+     stall in the place a viewer clicks most.
+     The work is the same; it is now a QUEUE with a time budget, pumped from the frame loop.
+     Ships appear over a second or so and the map never stops moving. ⚠ In frozen mode the
+     capture waits for the queue to drain, because a baseline of a half-built fleet is a frame
+     of the wrong world. */
+  fleetQueue = vy.map(v => ({ v }));
+  fleetQueueList = APP.vessels.vessels || APP.vessels;
+  /* ⚠ and NOT a pump here. Doing "just a little" of it inside the click handler put 2.0 s back
+     into the click, because the budget can only be honoured between steps and the first steps
+     of thirteen voyages are cheap enough that a great many of them run. The frame loop owns
+     this work; selectEra's job is to say what the era is and return. */
+}
+
+let fleetQueue = [];
+let fleetQueueList = null;
+function fleetQueueBusy() { return fleetQueue.length > 0; }
+function pumpFleetQueue(budgetMs) {
+  if (!fleetQueue.length || !eraFleet) return;
+  const t0 = performance.now();
+  const list = fleetQueueList;
+  const RTc = window.SHIPS_ROUTE;
+  const sig = (RTc && RTc.FINE && RTc.FINE.sig) || '';
+  while (fleetQueue.length && performance.now() - t0 < budgetMs) {
+    const item = fleetQueue[0];
+    if (item.legsR === undefined) {
+      if (!item.gen) {
+        item.ck = item.v.id + '|' + sig;
+        const cached = trackCache.get(item.ck);
+        if (cached) item.legsR = cached;
+        else { item.gen = seaRouteSteps(item.v.legs); continue; }
+      } else {
+        let r;
+        try { r = item.gen.next(); }
+        catch (e) { console.warn('route', item.v.name, e); r = { done: true, value: item.v.legs }; }
+        if (!r.done) continue;                   /* one pass done; check the budget again */
+        item.legsR = r.value;
+        trackCache.set(item.ck, item.legsR);
+      }
+    }
+    fleetQueue.shift();
+    try { addVoyageToFleet(item.v, list, item.legsR); }
+    catch (e) { console.warn('fleet', item.v && item.v.name, e); }
+  }
+  if (!fleetQueue.length) buildVoyageList();
+}
+
+function addVoyageToFleet(v, list, legsR) {
+  {
     const ves = list.find(x => x.id === v.vessel);
-    if (!ves || !ves.hull) continue;
+    if (!ves || !ves.hull) return;
     let proto;
-    try { proto = window.SHIPS_HULL.buildShip(ves.hull); } catch (e) { continue; }
+    try { proto = hullProto(ves); } catch (e) { return; }
 
     /* Ships sail in company where it was the practice and alone where it was not. A treasure
        fleet, an Indies convoy and a battle squadron moved together; a clipper raced alone
@@ -1792,7 +1901,7 @@ function buildEraFleet() {
     const grp = new THREE.Group();
     for (let n = 0; n < together; n++) {
       const holder = new THREE.Group();
-      const sh = n === 0 ? proto : proto.clone();
+      const sh = proto.clone();
       /* ── ⚠ THEY WERE SAILING STERN-FIRST ────────────────────────────────────────
          The hull's bow is at local -X and the holder's forward is +Z, so the map is a
          quarter turn about Y — but a turn of +PI/2, not -PI/2. Rotating about Y by theta
@@ -1843,10 +1952,7 @@ function buildEraFleet() {
        A voyage takes as long as its DISTANCE over its SPEED. That is the only formula with a
        meaning, it makes the clipper genuinely lap the cog, and the compression to screen time
        is a single stated constant instead of an accident of the routing. */
-    const RTc = window.SHIPS_ROUTE;
-    const ck = v.id + '|' + ((RTc && RTc.FINE && RTc.FINE.sig) || '');
-    let legsR = trackCache.get(ck);
-    if (!legsR) { legsR = seaRoute(v.legs); trackCache.set(ck, legsR); }
+    if (!legsR) legsR = seaRoute(v.legs);      /* only if a caller did not route it already */
     let km = 0;
     for (let i = 0; i < legsR.length - 1; i++) {
       const A = lonLatToVec(legsR[i].lon, legsR[i].lat, 1);
@@ -1877,7 +1983,6 @@ function buildEraFleet() {
     eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
                      phase: (eraTracks.length * 0.37) % 1, name: v.name });
   }
-  if (eraFleet.children.length) scene.add(eraFleet); else eraFleet = null;
 }
 
 /* ── HOVER: THE SHIP, HER NAME, AND HER TRACK ───────────────────────────────────────────
@@ -1988,7 +2093,8 @@ function leaveShip(ms) {
   if (eraFleet) eraFleet.visible = true;
   if (PSGV.card) PSGV.card.style.display = 'none';
   document.body.classList.remove('in-passage');
-  flyTo(lon, lat, R + 300000 / 63710, ms || 2200);
+  /* back to the top-down map at its lowest, over the place she is — not to orbit */
+  flyTo(lon, lat, R + MAP_FLOOR_M / 63710, ms || 1800);
 }
 
 function releaseShip() {
@@ -2428,7 +2534,7 @@ function startCampaign(b) {
     const N = k === 0 ? 15 : 11;
     for (let n = 0; n < N; n++) {
       const holder = new THREE.Group();
-      const sh = n === 0 ? proto : proto.clone();
+      const sh = proto.clone();
       /* ⚠ THE HULL'S BOW IS AT LOCAL -X. Its stations run u = 0 at the stem to u = 1 at the
          sternpost over x = -L/2 .. +L/2, so +x is AFT. The fleet frame has +Z forward, and
          mapping the heading onto the hull's +Z pointed every ship BEAM-ON to its own course
