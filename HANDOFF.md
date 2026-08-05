@@ -276,3 +276,42 @@ stand-off is 2.6 km**, from 45 km, where a 57 m hull was a single dark pixel in 
   identified and it may still appear in the close-up.
 * The `map-floor` frame at 300 km reads murky, with the wind-streak layer smearing at that zoom.
 * The near-field frames still flap (see FRAME-LOG).
+
+---
+
+## Round 21 — 2026-08-05 · three faults, none of them where they looked
+
+**The ghost ship.** Clicking a name in the era's list built its own hull, wake and animation —
+a complete second model of a voyage the era fleet was already sailing. All three symptoms follow
+from the duplication: it survived era changes because `selectEra` never touched it; it could not
+be clicked because `pickTrack` raycasts `eraTracks`; and it sailed over land because its path was
+the raw waypoints slerped at 26 points a leg, not the routed track — every coastline correction
+this project has made was in the *other* model. Deleted. The selected voyage is now a line on the
+**routed** track, drawn by the same helper the hover uses. Verified: 13 hulls before the click and
+13 after, the line's vertex count equals the track's, 0 stray hulls after an era change.
+
+**No land in the close-up — and nothing was wrong with the land.** `followAz` was the constant
+2.4 radians, so which way you faced going aboard was fixed and whether her coast was in frame was
+luck. Measured on the Athenian armada: land 121 m high 6 km away on a bearing of 79°, a camera
+looking along 137°, a 34° field of view — 58° off axis, behind the viewer's shoulder. The same
+position through `#c=`/`#z=` showed the coastline plainly. Going aboard now looks toward the
+nearest land within sight, scanned on the router's own fine coastline.
+
+⚠ **Choosing the frame was itself the lesson.** The first `aboard-coast` put the guano clipper a
+thousand kilometres off Chile. The spot was then chosen by sweeping every ship in every era at the
+frozen instant for the one nearest to *lit* land. `aboard` and `aboard-off` both sit in open water
+— a view never captured near a coast cannot defend the coast.
+
+**One ocean, not two.** `rippleFade` keyed off `uScale`, which is the eye height: from a deck the
+close-up's fine ripple was gone 200 m from the hull, while the Shipwright hard-codes 150 and kept
+it to 750. Same shader, same wave table, two different oceans. Whether a ripple is worth drawing
+is a question about pixels — it stops being visible where its wavelength falls below one, at
+`λ · screenHeight / (2 tan(fov/2))`, about 6 km. `SHIPS_SEA.rippleRange()` computes it once from
+the camera and every view that draws water is handed it.
+
+### Open
+* The near-field frames still flap (`aboard`, `aboard-coast` this run) — see FRAME-LOG.
+* The near ground is flat-shaded within a texel; ridged domain-warped noise is the real answer.
+* The grid texture at very close zoom — still unidentified, now unreachable from the map.
+* The map-floor frame at 300 km reads murky; the wind-streak layer smears at that zoom.
+* Titanic's tiers read as flat plates rather than a stepped house with windows.
