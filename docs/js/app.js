@@ -968,7 +968,6 @@ function stepFly(now) {
  * fades, the way a real one does — and the mark at the head is a small generated silhouette of
  * the hull that made the passage, heading along its own course.
  */
-let voyGroup = null, voyWake = null, voyShip = null;
 
 function buildVoyageList() {
   const host = document.getElementById('voyList');
@@ -1042,56 +1041,44 @@ function refreshFleetList(t) {
   });
 }
 
+/* ── ⚠ AND THIS USED TO BUILD A SECOND SHIP ──────────────────────────────────────────────
+ * Clicking a name in the era's list built its own hull, its own wake, and its own animation
+ * along its own path — a complete second model of a voyage the era fleet was already sailing.
+ * The two disagreed in every way that matters, and August photographed the result: a fluyt
+ * aground on Denmark near Gdansk, stationary through era changes, unclickable, and now and
+ * then darting across the Atlantic. Three symptoms, one cause, and each of them follows from
+ * the duplication rather than from a bug in the duplicate:
+ *
+ *   IT SURVIVED THE ERA. selectEra clears the era fleet and never touched this, so the hull
+ *     stayed in the scene with its animation still running while its voyage had left eraTracks.
+ *   IT COULD NOT BE CLICKED. pickTrack raycasts eraTracks, and this ship was not in it.
+ *   IT SAILED OVER LAND. Its path was the raw waypoints slerped at 26 points a leg — not the
+ *     routed track. Every coastline correction this project has made was in the OTHER model.
+ *
+ * So the second ship is gone. The era fleet already draws this voyage on her routed track, and
+ * clicking her name already flies the camera to where she actually is; what was missing was
+ * only a way to see her whole route, and that is a line, not a vessel. It is the routed track —
+ * the same array the ship is following — drawn by the same helper the hover uses, and pinned
+ * until something else is chosen.
+ */
+let voyLine = null;
 function clearVoyage() {
-  if (voyGroup) { scene.remove(voyGroup); voyGroup = null; voyWake = null; voyShip = null; }
+  if (voyLine) { scene.remove(voyLine); voyLine.geometry.dispose(); voyLine = null; }
   S.voyage = null; S.voyPlaying = false;
 }
 
 function startVoyage(v) {
   clearVoyage();
-  S.voyage = v; S.voyT = 0; S.voyPlaying = true;
-  voyGroup = new THREE.Group();
-  scene.add(voyGroup);
-
-  /* densify the waypoints along great circles so the wake curves the way a real track does */
-  const pts = [];
-  for (let i = 0; i < v.legs.length - 1; i++) {
-    const a = v.legs[i], b = v.legs[i + 1];
-    const n = 26;
-    for (let k = 0; k < n; k++) {
-      const f = k / n;
-      pts.push(slerpLonLat(a.lon, a.lat, b.lon, b.lat, f));
-    }
-  }
-  pts.push([v.legs[v.legs.length - 1].lon, v.legs[v.legs.length - 1].lat]);
-  APP.voyPts = pts;
-
-  const pos = new Float32Array(pts.length * 3);
-  const col = new Float32Array(pts.length * 3);
-  pts.forEach((p, i) => {
-    const w = lonLatToVec(p[0], p[1], R * 1.004);
-    pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z;
-  });
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  g.setDrawRange(0, 0);
-  voyWake = new THREE.Line(g, new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0.95, linewidth: 2 }));
-  voyGroup.add(voyWake);
-
-  /* the head: a small silhouette of the actual hull, not a dot */
-  const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === v.vessel);
-  if (ves && ves.hull) {
-    const s = window.SHIPS_HULL.buildShip(ves.hull);
-    const k = (R * 0.030) / ves.hull.loa;
-    s.scale.setScalar(k);
-    voyShip = new THREE.Group();
-    voyShip.add(s);
-    voyGroup.add(voyShip);
+  S.voyage = v;
+  /* the route as the ship is actually sailing it; if her track is not built yet there is
+     simply no line until it is, rather than a second guess at where she goes */
+  const tr = (eraTracks || []).find(t => t.name === v.name);
+  if (tr && tr.legs && tr.legs.length > 1) {
+    voyLine = makeHoverLine(tr.legs);
+    voyLine.material.opacity = 0.42;
+    scene.add(voyLine);
   }
   buildVoyageList();
-  flyTo(v.view ? v.view[0] : pts[0][0], v.view ? v.view[1] : pts[0][1], v.view ? v.view[2] : 300);
   showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: v.rows || [],
              prose: v.text, span: v.dates, cite: v.cite, tags: v.tags });
 }
@@ -1107,37 +1094,8 @@ function slerpLonLat(lon1, lat1, lon2, lat2, f) {
   return [ll.lon, ll.lat];
 }
 
-function stepVoyage(dt) {
-  if (!S.voyage || !voyWake) return;
-  const pts = APP.voyPts;
-  if (S.voyPlaying) S.voyT = Math.min(1, S.voyT + dt * 0.055);
-  const head = Math.max(1, Math.floor(S.voyT * (pts.length - 1)));
-  voyWake.geometry.setDrawRange(0, head + 1);
+function stepVoyage(dt) { /* the voyage is a pinned line now; the ship is the era fleet's */ }
 
-  /* the wake fades behind the ship: bright at the head, gone a long way astern */
-  const col = voyWake.geometry.attributes.color;
-  for (let i = 0; i <= head; i++) {
-    const age = (head - i) / Math.max(1, pts.length * 0.42);
-    const k = Math.max(0.06, 1 - age);
-    col.setXYZ(i, 0.92 * k + 0.05, 0.80 * k + 0.06, 0.42 * k + 0.08);
-  }
-  col.needsUpdate = true;
-
-  if (voyShip) {
-    const p = pts[head], q = pts[Math.max(0, head - 1)];
-    const w = lonLatToVec(p[0], p[1], R * 1.008);
-    voyShip.position.copy(w);
-    /* stand the hull upright on the sphere and point it along its own course */
-    const up = w.clone().normalize();
-    const prev = lonLatToVec(q[0], q[1], R * 1.008);
-    const fwd = w.clone().sub(prev).normalize();
-    if (fwd.lengthSq() > 1e-9) {
-      const m = tangentBasis(up, fwd);
-      if (m) voyShip.quaternion.setFromRotationMatrix(m);
-    }
-  }
-  if (S.voyT >= 1) S.voyPlaying = false;
-}
 
 /* ── card ───────────────────────────────────────────────────────────────── */
 function showCard(c) {
@@ -1886,6 +1844,9 @@ function clearEraFleet() {
   if (eraFleet) { scene.remove(eraFleet); }
   eraFleet = null; eraTracks = [];
   fleetQueue = [];              /* an era abandoned mid-build must not finish into the next one */
+  /* ⚠ and the selected voyage's line belongs to the era too. Nothing cleared it, which is how
+     a voyage from 1650 stayed on screen in 1950. */
+  clearVoyage();
 }
 
 function buildEraFleet() {
@@ -2108,6 +2069,25 @@ function setHover(tr) {
  */
 const PSGV = { on: false, track: null, t: 0, card: null };
 
+/* Which way is the land? Scanned outward from her on the router's own fine coastline, so the
+   answer comes from the same coastline her track was planned against. Returns a bearing in
+   radians from north through east, or null when there is nothing in sight — mid-ocean keeps
+   the standing quarter view. */
+function landwardAz(at) {
+  const RT = window.SHIPS_ROUTE;
+  if (!at || !RT || !RT.isOcean || !RT.FINE || !RT.FINE.ready) return null;
+  const cl = Math.max(0.05, Math.cos(at.lat * Math.PI / 180));
+  for (let km = 3; km <= 70; km += 3) {
+    for (let b = 0; b < 48; b++) {
+      const th = b * Math.PI / 24;
+      const lo = at.lon + Math.sin(th) * km / 111.32 / cl;
+      const la = at.lat + Math.cos(th) * km / 111.32;
+      if (!RT.isOcean(lo, la)) return th;
+    }
+  }
+  return null;
+}
+
 /* ── GO DOWN TO HER, AND STAY WITH HER ────────────────────────────────────────────────────
    A flight rather than a cut, because the descent is the point: you watch the token stop being
    a token. The camera ends about nine hundred metres up and a few hundred metres off her
@@ -2119,7 +2099,18 @@ function followShip(tr) {
   const ves = list.find(x => x.id === tr.vesselId);
   if (!ves || !ves.hull) return;
   S.follow = tr;
-  S.followAz = 2.4;
+  /* ── ⚠ AND THE CLOSE-UP USED TO POINT WHEREVER IT ALWAYS POINTED ──────────────────────
+     followAz was the constant 2.4 radians, so which way you faced when you went aboard was
+     fixed, and whether her coast was in the picture was luck. Measured on the Athenian armada:
+     land 121 m high six kilometres away on a bearing of 79 degrees, a camera looking along
+     137, and a 34-degree field of view — the coast sat 58 degrees off the axis, behind the
+     viewer's shoulder, and the frame was empty ocean on every side. Nothing was wrong with the
+     near-field ground; the same position reached through `#c=`/`#z=` shows the coastline
+     plainly. It was out of shot.
+     Going aboard now looks TOWARD the nearest land within sight, so the ship stands in the
+     foreground of the place she is actually in. Dragging still turns you anywhere. */
+  const lz = landwardAz(tr.at);
+  S.followAz = (lz === null ? 2.4 : lz);
   S.followDep = 15;
   /* a few ship-lengths off, which is where one vessel sees another */
   S.followDist = Math.max(90, (ves.hull.loa || 40) * 3.2);

@@ -121,6 +121,11 @@
    "name": "map-floor",
    "path": "/?frozen=1#e=4&t=1590&c=-9.85,36.95&z=300000",
    "note": "THE MAP AT ITS LOWEST — 300 km over Cape St Vincent, with the treasure fleet homeward bound and the Portuguese coast in the same frame. 300 km is where the token exaggeration peaks and therefore where the wheel now stops: below it the ramp unwinds the token toward true scale and the ship SHRANK, from 65 km long at 35.6% of the frame to 100 m at 2%. Watches the ship-to-coast proportion, which is the thing being asserted, and the water at that height."
+  },
+  {
+   "name": "aboard-coast",
+   "path": "/?frozen=1#e=2&f=syracuse",
+   "note": "ABOARD, CLOSE INSHORE — the Athenian armada five kilometres off the Peloponnese, with land 121 m high and the sun 65 degrees up. August reported seeing NO LAND from the close-up while the map showed the ship hugging a coast, and no frame watched it: `aboard` and `aboard-off` both happen to sit in open water, and the first attempt at this frame put the guano clipper a thousand kilometres off Chile. Chosen by sweeping every ship in every era at the frozen instant for the one nearest to lit land, rather than by guessing."
   }
  ]
 }
