@@ -1,111 +1,111 @@
 {
-  "base_url": "http://localhost:8149",
-  "viewport": {
-    "width": 1440,
-    "height": 900
+ "base_url": "http://localhost:8149",
+ "viewport": {
+  "width": 1440,
+  "height": 900
+ },
+ "device_scale_factor": 2,
+ "ready": {
+  "expr": "window.__FRAME_READY === true",
+  "timeout_ms": 60000,
+  "note": "set in app.js armNext() after the first painted frame"
+ },
+ "settle_ms": 600,
+ "thresholds": {
+  "changed_frac": 0.0005,
+  "mean_abs": 0.15
+ },
+ "blank_variance_floor": 4.0,
+ "frames": [
+  {
+   "name": "globe-default",
+   "path": "/?frozen=1",
+   "note": "the frame the §13 check is run on — Ocean Crossing era, 1590"
   },
-  "device_scale_factor": 2,
-  "ready": {
-    "expr": "window.__FRAME_READY === true",
-    "timeout_ms": 60000,
-    "note": "set in app.js armNext() after the first painted frame"
+  {
+   "name": "globe-crossing",
+   "path": "/?frozen=1#e=0&t=40000",
+   "note": "era 0 — the first crossings, low sea level and exposed shelves"
   },
-  "settle_ms": 600,
-  "thresholds": {
-    "changed_frac": 0.0005,
-    "mean_abs": 0.15
+  {
+   "name": "globe-steam",
+   "path": "/?frozen=1#e=5&t=1870",
+   "note": "era 5 — iron and steam"
   },
-  "blank_variance_floor": 4.0,
-  "frames": [
-    {
-      "name": "globe-default",
-      "path": "/?frozen=1",
-      "note": "the frame the \u00a713 check is run on \u2014 Ocean Crossing era, 1590"
-    },
-    {
-      "name": "globe-crossing",
-      "path": "/?frozen=1#e=0&t=40000",
-      "note": "era 0 \u2014 the first crossings, low sea level and exposed shelves"
-    },
-    {
-      "name": "globe-steam",
-      "path": "/?frozen=1#e=5&t=1870",
-      "note": "era 5 \u2014 iron and steam"
-    },
-    {
-      "name": "globe-modern",
-      "path": "/?frozen=1#e=7&t=2000",
-      "note": "era 7 \u2014 the box; the network at its densest"
-    },
-    {
-      "name": "shipwright",
-      "path": "/?frozen=1#v=ship",
-      "note": "hull.js shaders \u2014 HULL_VERT/FRAG, SAIL_VERT/FRAG"
-    },
-    {
-      "name": "action",
-      "path": "/?frozen=1#v=action",
-      "note": "battle view"
-    },
-    {
-      "name": "ship-dhow",
-      "path": "/?frozen=1#v=ship&s=dhow",
-      "note": "the settee rig \u2014 a quadrilateral, not the lateen triangle the code built until 2026-08-02"
-    },
-    {
-      "name": "ship-junk",
-      "path": "/?frozen=1#v=ship&s=junk",
-      "note": "the battened lug \u2014 battens must stay inside the canvas when the sail is sheeted out"
-    },
-    {
-      "name": "ship-canoe",
-      "path": "/?frozen=1#v=ship&s=voyaging-canoe",
-      "note": "crab claw \u2014 the triangular sail treatment"
-    },
-    {
-      "name": "ship-great-eastern",
-      "path": "/?frozen=1#v=ship&s=great-eastern",
-      "note": "funnels and gaff booms; sails must clear the stacks"
-    },
-    {
-      "name": "ship-usv",
-      "path": "/?frozen=1#v=ship&s=usv",
-      "note": "the USV, flagged as unfinished 2026-08-02"
-    },
-    {
-      "name": "ship-trireme",
-      "path": "/?frozen=1.4#v=ship&s=trireme",
-      "note": "170 oars \u2014 they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"
-    },
-    {
-      "name": "ship-carrier",
-      "path": "/?frozen=1#v=ship&s=carrier",
-      "note": "flight deck markings, island, no passenger deckhouse"
-    },
-    {
-      "name": "ship-titanic",
-      "path": "/?frozen=1#v=ship&s=titanic",
-      "note": "lofted deckhouse must not overhang the hull; check bow-on faults here too"
-    },
-    {
-      "name": "ship-container",
-      "path": "/?frozen=1#v=ship&s=container",
-      "note": "funnel proportions (was wider than tall), bridge block, container stacks"
-    },
-    {
-      "name": "descent",
-      "note": "The near field: the Great Western at true scale on displaced water, 700 m up, horizon in frame. Nothing watched this before it existed.",
-      "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.4997&z=700"
-    },
-    {
-      "name": "descent-high",
-      "note": "Nine kilometres: just ABOVE the handover, so the token side of the seam is watched too. A frame on only one side of a boundary cannot see the boundary move.",
-      "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000"
-    },
-    {
-      "name": "descent-coast",
-      "path": "/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260",
-      "note": "The near-field GROUND: the Strait of Gibraltar at 260 m, looking south at the Moroccan coast. The globe sphere is 192x128 \u2014 a 209 km facet \u2014 so at this eye height the backdrop is a flat plate with a polygon edge for a horizon and can never show a coast. This frame watches the displaced land patch that can."
-    }
-  ]
+  {
+   "name": "globe-modern",
+   "path": "/?frozen=1#e=7&t=2000",
+   "note": "era 7 — the box; the network at its densest"
+  },
+  {
+   "name": "shipwright",
+   "path": "/?frozen=1#v=ship",
+   "note": "hull.js shaders — HULL_VERT/FRAG, SAIL_VERT/FRAG"
+  },
+  {
+   "name": "action",
+   "path": "/?frozen=1#v=action",
+   "note": "battle view"
+  },
+  {
+   "name": "ship-dhow",
+   "path": "/?frozen=1#v=ship&s=dhow",
+   "note": "the settee rig — a quadrilateral, not the lateen triangle the code built until 2026-08-02"
+  },
+  {
+   "name": "ship-junk",
+   "path": "/?frozen=1#v=ship&s=junk",
+   "note": "the battened lug — battens must stay inside the canvas when the sail is sheeted out"
+  },
+  {
+   "name": "ship-canoe",
+   "path": "/?frozen=1#v=ship&s=voyaging-canoe",
+   "note": "crab claw — the triangular sail treatment"
+  },
+  {
+   "name": "ship-great-eastern",
+   "path": "/?frozen=1#v=ship&s=great-eastern",
+   "note": "funnels and gaff booms; sails must clear the stacks"
+  },
+  {
+   "name": "ship-usv",
+   "path": "/?frozen=1#v=ship&s=usv",
+   "note": "the USV, flagged as unfinished 2026-08-02"
+  },
+  {
+   "name": "ship-trireme",
+   "path": "/?frozen=1.4#v=ship&s=trireme",
+   "note": "170 oars — they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"
+  },
+  {
+   "name": "ship-carrier",
+   "path": "/?frozen=1#v=ship&s=carrier",
+   "note": "flight deck markings, island, no passenger deckhouse"
+  },
+  {
+   "name": "ship-titanic",
+   "path": "/?frozen=1#v=ship&s=titanic",
+   "note": "lofted deckhouse must not overhang the hull; check bow-on faults here too"
+  },
+  {
+   "name": "ship-container",
+   "path": "/?frozen=1#v=ship&s=container",
+   "note": "funnel proportions (was wider than tall), bridge block, container stacks"
+  },
+  {
+   "name": "descent",
+   "note": "The near field at 700 m: displaced water, the near/far seam and the horizon, off the Bristol Channel. ⚠ ITS NOTE USED TO CLAIM \"the Great Western at true scale\" AND NO HULL HAS EVER BEEN IN IT — checked pixelwise against the 2026-08-03 baseline on 2026-08-04: zero hull-dark pixels in either. The descent path does call psgFleet, so a hull within 182 km should draw; it does not, and that is an open bug rather than a framing accident. Until it is fixed this frame watches WATER, and nothing here defends the near-field fleet.",
+   "path": "/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700"
+  },
+  {
+   "name": "descent-high",
+   "note": "Nine kilometres: just ABOVE the handover, so the token side of the seam is watched too. A frame on only one side of a boundary cannot see the boundary move. ⚠ Do not re-point this one northward — 51.1N 3.87W is over Exmoor and the frame comes back a near-black picture of unlit ground.",
+   "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000"
+  },
+  {
+   "name": "descent-coast",
+   "path": "/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260",
+   "note": "The near-field GROUND: the Strait of Gibraltar at 260 m, looking south at the Moroccan coast. The globe sphere is 192x128 — a 209 km facet — so at this eye height the backdrop is a flat plate with a polygon edge for a horizon and can never show a coast. This frame watches the displaced land patch that can."
+  }
+ ]
 }
