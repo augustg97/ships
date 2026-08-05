@@ -63,7 +63,12 @@ const MIN_ALT = 500 / 63710;
  * altitude directly, which is what the descent baselines use and why they still work.
  */
 const MAP_FLOOR_M = 12000;           // as close as the top-down map goes
-const FOLLOW_MAX_M = 6000;           // as far off her as the close-up will stand
+/* ⚠ AND THE FAR END OF THE CLOSE-UP MEETS THE NEAR END OF THE MAP. At the standing depression
+   of 15 degrees, 45 km of stand-off puts the eye at 11.6 km — which is the map's own floor. So
+   zooming all the way out inside the close-up leaves you at the height the button returns you
+   to, and the two views join instead of jumping. It is also the answer to "we do not see much
+   of the ship's surroundings": at that height the horizon is 380 km away. */
+const FOLLOW_MAX_M = 45000;
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 
@@ -353,6 +358,38 @@ function applyHashView() {
       requestAnimationFrame(tryPick);
     };
     tryPick();
+  }
+
+  /* ── AND SO IS BEING ABOARD ONE ─────────────────────────────────────────────────────
+     `#f=<voyage id>` goes down to that ship and follows her. The close-up is the view this
+     project is most often asked about and it has never had a baseline, for the plain reason
+     that there was no way to ask for it in a URL — the same gap that left the descent unwatched
+     until `#c=`/`#z=` existed. It waits for her track to be routed, because the fleet is built
+     over several frames now and she does not exist for the first second. */
+  const fm = /[#&]f=([a-z0-9-]+)/i.exec(location.hash);
+  if (fm) {
+    shipSelectPending = true;
+    let tries = 0;
+    const wantId = fm[1].toLowerCase();
+    const board = () => {
+      const all = (APP.voyages && APP.voyages.voyages) || [];
+      const v = all.find(x => String(x.id).toLowerCase() === wantId);
+      const tr = v && eraTracks.find(t => t.name === v.name);
+      if (tr && tr.at) {
+        if (!S.follow) { followShip(tr); if (fly) fly.t0 = -1e9; }
+        /* ⚠ AND NOT READY UNTIL SHE IS IN THE WATER. followShip defers the hull build by one
+           frame on purpose — 62 ms inside a flight rather than 62 ms before anything moves —
+           so clearing the gate on the call meant a capture could land on a frame where the
+           near-field fleet was still empty. Measured: the aboard frame came back 0.47%
+           different depending on whether it was captured alone or after eighteen others. */
+        const pool = window.SHIPS_PSG && window.SHIPS_PSG.PSG.fleetPool;
+        const e = pool && pool.get(tr.name);
+        if (e && e.holder && e.holder.visible) { shipSelectPending = false; return; }
+      }
+      if (++tries > 900) { shipSelectPending = false; console.warn('no voyage', wantId); return; }
+      requestAnimationFrame(board);
+    };
+    board();
   }
 
   /* ── THE CAMERA IS STATE TOO, NOW THAT IT CAN DESCEND ────────────────────────────────
@@ -747,13 +784,20 @@ function updateLabels(now) {
      projected onto thin air above the horizon — cartography floating over a photograph. A
      view of the world from inside it does not carry the names of the world seen from outside
      it, so they go, all at once, and come back when you climb out. */
-  if (PSGV.on) {
+  /* ⚠ AND FOLLOWING A SHIP IS ALSO BEING INSIDE THE WORLD. This test named only PSGV.on — the
+     other way in — so the close-up you actually reach by clicking a hull had NORTH ATLANTIC
+     OCEAN, CARIBBEAN SEA and TRAFALGAR lettered across the water in front of the ship, forty
+     metres above it. Nothing breaks the sense of one world faster than the map's own furniture
+     floating in the middle of the picture: a view from inside the world does not carry the
+     names of the world seen from outside it. */
+  if (PSGV.on || S.follow) {
     if (!labelsHidden) {
       for (const m of APP.markers) if (m.el) m.el.style.display = 'none';
       labelsHidden = true;
     }
     return;
   }
+  if (labelsHidden) { for (const m of APP.markers) if (m.el) m.el.style.display = ''; }
   labelsHidden = false;
   if (now - lblTick < 90) return;
   lblTick = now;
@@ -1411,6 +1455,14 @@ function frame(now) {
   /* ⚠ EVERY EARLY EXIT FROM THIS FUNCTION MUST RE-ARM THE LOOP FIRST. A bare `return` here
      skipped requestAnimationFrame, so the Shipwright rendered exactly one frame and then the
      entire app froze — including after you closed it again. */
+  /* ⚠ AND IT IS PUMPED BEFORE THE VIEW SWITCH, NOT AFTER. Sitting below the early returns for
+     the Shipwright, the Action and the Yard, it never ran in any of them — so opening the
+     Shipwright with an era still building left the queue stuck forever, and the frozen capture
+     waited out its whole timeout on a readiness flag that was correctly refusing to fire on a
+     half-built fleet. The era's shipping belongs to the app, not to one view of it.
+     A capture has no viewer to keep smooth, so it takes as much as it likes per frame. */
+  pumpFleetQueue(FROZEN ? 250 : 4);
+
   if (window.SHIPS_BT && window.SHIPS_BT.BT.on) {
     window.SHIPS_BT.btFrame(t, dt);
     armNext();
@@ -1462,7 +1514,6 @@ function frame(now) {
     const C = 8577;
     voyT += dt * (1 / C) * Math.pow(C, f);
   }
-  pumpFleetQueue(4);
   stepEraFleet(voyT);
   refreshFleetList(t);
   updateLabels(t);
@@ -1539,6 +1590,14 @@ function frame(now) {
     if (!S.follow.at) releaseShip();
     else {
       placeCamera();
+      /* ⚠ the card read "Wind —" the whole time in this mode: PSGV.wind is set by the OTHER
+         way in, and following her never wrote it. The sea state on screen comes from this same
+         lookup, so a blank here meant the number and the water had no common source. */
+      {
+        const fw = window.SHIPS_ROUTE && window.SHIPS_ROUTE.windAt
+                 ? window.SHIPS_ROUTE.windAt(S.follow.at.lon, S.follow.at.lat, S.month) : null;
+        if (fw) PSGV.wind = Math.max(1.5, Math.min(17, fw.speed));
+      }
       passageReadout(S.follow.at.lon, S.follow.at.lat, S.follow.at.hdg, PSGV.wind);
     }
   }
@@ -2234,7 +2293,7 @@ function avoidPass() {
     need = Math.min(need, 500);
     const cur = tr.avoidKm || 0;
     /* she comes off her course briskly and returns to it slowly, which is how the helm is used */
-    tr.avoidKm = cur + (need - cur) * (need > cur ? 0.05 : 0.015);
+    tr.avoidKm = cur + (need - cur) * (FROZEN ? 1 : (need > cur ? 0.05 : 0.015));
   }
 }
 
@@ -2376,8 +2435,13 @@ function stepEraFleet(t) {
     if (!tr.heading) { tr.heading = want.clone(); }
     else {
       const ang = 2 * Math.acos(Math.min(1, Math.abs(tr.heading.dot(want))));
-      /* the bigger the error the harder she puts the helm over, up to a real limit */
-      const rate = Math.min(0.16, 0.02 + ang * 0.10);
+      /* the bigger the error the harder she puts the helm over, up to a real limit.
+         ⚠ AND IT IS PER FRAME, WHICH IS A CLOCK. Frozen mode pins every clock so two captures
+         of identical code match — but this damping advances once per frame regardless of dt,
+         so the drawn heading depended on HOW MANY FRAMES the harness happened to run before it
+         captured, and the descent frame came back 1.7% different every time. Same for the
+         consort easing below. A capture wants the settled value, not the journey to it. */
+      const rate = FROZEN ? 1 : Math.min(0.16, 0.02 + ang * 0.10);
       tr.heading.slerp(want, rate);
     }
     tr.grp.quaternion.copy(tr.heading);
@@ -2436,7 +2500,7 @@ function stepEraFleet(t) {
       if (h.userData.stationF === undefined) h.userData.stationF = target;
       /* ease, and ease IN faster than out — a ship closes up smartly and opens out gently */
       const cf = h.userData.stationF;
-      const rate = target < cf ? 0.020 : 0.008;
+      const rate = FROZEN ? 1 : (target < cf ? 0.020 : 0.008);
       h.userData.stationF = cf + (target - cf) * rate;
       const q = place(h.userData.stationF);
       h.position.set(q.x, q.y, q.z);

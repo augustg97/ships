@@ -6,6 +6,7 @@ precision highp float;
    ridge its light and dark side. */
 varying vec3 vP;
 varying float vElev;
+const vec3 HORIZON_C = vec3(0.360, 0.470, 0.585);
 varying vec2 vLL;
 
 uniform sampler2D uDepth;
@@ -71,13 +72,17 @@ void main(){
   float lam = clamp(dot(nrm, normalize(vec3(0.55, 0.58, 0.55))), 0.0, 1.0);
   col *= (0.52 + 0.80 * lam);
 
-  /* distance haze, so the near ground joins the backdrop instead of ending at it */
   float dist = length(vP - uCam);
-  float haze = 1.0 - exp(-dist / 90000.0);
-  col = mix(col, vec3(0.60, 0.66, 0.74), haze * 0.70);
-
   float day = smoothstep(-0.26, 0.20, L.y);
   col *= mix(0.32, 1.00, day);
+  /* ── ⚠ ONE ATMOSPHERE, OR THE HORIZON CAN NEVER JOIN ────────────────────────────────
+     The ground hazed toward a pale blue-grey over 90 km while the water beside it hazed toward
+     a dark blue over a distance derived from the SHIP'S LENGTH — so the sea went flat and dark
+     within a kilometre of the hull while a coast thirty kilometres off stayed bright, and the
+     two met along a hard line. Nothing else in the close-up broke the sense of one world as
+     completely. Both surfaces now extinguish over the same 38 km toward the same colour, which
+     is the sky's own near-horizon value, dimmed by the same day term. */
+  col = mix(col, HORIZON_C * mix(0.10, 1.0, day), 1.0 - exp(-dist / 38000.0));
   col = vec3(1.0) - exp(-max(col, 0.0) * 0.98);
   col = pow(col, vec3(0.4545));
   col = clamp((col - 0.46) * 1.26 + 0.46, 0.0, 1.0);

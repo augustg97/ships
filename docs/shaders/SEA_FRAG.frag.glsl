@@ -27,6 +27,7 @@ uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
    uWakeP is her position on this patch in metres, uWakeDir her heading, uWakeKn her speed.
    With no way on, there is no wake — the terms all scale off speed, so a ship stopped makes
    none of them. */
+const vec3 HORIZON_C = vec3(0.360, 0.470, 0.585);
 uniform vec2  uWakeP;
 uniform vec2  uWakeDir;
 uniform float uWakeLen;
@@ -135,7 +136,13 @@ void main(){
     float along  = dot(rel, -uWakeDir);                   // positive ASTERN of her
     float across = abs(dot(rel, vec2(-uWakeDir.y, uWakeDir.x)));
     float spd    = clamp(uWakeKn / 16.0, 0.25, 1.5);
-    float len    = uWakeLen * 10.0 * spd;
+    /* ⚠ TEN SHIP-LENGTHS OF FULL-STRENGTH ARM READS AS SEARCHLIGHTS, NOT AS WATER. The first
+       version ran the Kelvin arms at 0.62 over 980 m at a constant width, which on screen is a
+       pair of long straight bright lines converging on the hull — the eye calls that light, not
+       wake. A real wake is broadest and brightest in the first two lengths and is essentially
+       texture by ten. Shorter, wider with distance, and much weaker in the arms than in the
+       turbulent band, which is the part you actually see from a ship. */
+    float len    = uWakeLen * 6.0 * spd;
     float fade   = clamp(1.0 - along / len, 0.0, 1.0);
     float w = 0.0;
 
@@ -145,10 +152,12 @@ void main(){
          smoothstep(halfW, halfW * 0.30, across) *
          (0.55 + 0.45 * fbm(vec2(along * 0.06 - drift * 1.7, across * 0.10)));
 
-    /* the Kelvin arms — tan(19.47 degrees) = 0.3536, and it is not a free parameter */
+    /* the Kelvin arms — tan(19.47 degrees) = 0.3536, and it is not a free parameter. The arm
+       spreads as it goes, so it thins rather than staying a drawn line. */
     float arm = abs(across - along * 0.3536);
-    w += step(uWakeLen * 0.25, along) * fade * 0.62 *
-         smoothstep(uWakeBeam * 0.80, 0.0, arm);
+    float armW = uWakeBeam * (0.35 + 0.9 * clamp(along / len, 0.0, 1.0));
+    w += step(uWakeLen * 0.25, along) * fade * fade * 0.30 *
+         smoothstep(armW, 0.0, arm);
 
     /* the bow wave, thrown out and forward of the stem */
     float fwd = -along;                                    // positive AHEAD of her
@@ -156,14 +165,21 @@ void main(){
          smoothstep(uWakeBeam * 1.7, uWakeBeam * 0.25, across) *
          smoothstep(0.0, uWakeLen * 0.30, fwd) * 0.85 * spd;
 
-    w = clamp(w * spd, 0.0, 0.92);
+    /* and it dies into the distance with the same haze the water does, so it cannot read as a
+       hard mark lying on top of the sea */
+    w *= 1.0 - smoothstep(uScale * 2.0, uScale * 9.0, dist);
+    w = clamp(w * spd, 0.0, 0.80);
     /* aerated water is brighter, and it scatters instead of reflecting */
     col = mix(col, vec3(0.88, 0.92, 0.94), w);
   }
 
-  /* haze into the horizon so the plane reads as an ocean rather than a floor */
-  float haze = smoothstep(uScale * 3.0, uScale * 14.0, dist);
-  col = mix(col, vec3(0.10, 0.17, 0.24), haze);
+  /* ── ONE ATMOSPHERE — the same law and the same colour the near ground uses ─────────
+     uScale is the eye height, so this used to extinguish over a few hundred metres from a
+     deck: the ocean became a featureless dark plate a kilometre from the ship while the coast
+     behind it stayed bright. Distance haze is a property of the AIR, not of how high you are
+     standing, and 38 km is clear-air visibility over water. */
+  float dayS = smoothstep(-0.26, 0.20, L.y);
+  col = mix(col, HORIZON_C * mix(0.10, 1.0, dayS), 1.0 - exp(-dist / 38000.0));
 
   gl_FragColor = vec4(pow(clamp(col, 0.0, 1.5), vec3(0.4545)), 1.0);
 }

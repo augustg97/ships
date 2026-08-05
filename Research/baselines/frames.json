@@ -106,6 +106,16 @@
    "name": "descent-coast",
    "path": "/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260",
    "note": "The near-field GROUND: the Strait of Gibraltar at 260 m, looking south at the Moroccan coast. The globe sphere is 192x128 — a 209 km facet — so at this eye height the backdrop is a flat plate with a polygon edge for a horizon and can never show a coast. This frame watches the displaced land patch that can."
+  },
+  {
+   "name": "aboard",
+   "path": "/?frozen=1#e=5&f=greatwestern",
+   "note": "ABOARD: the close-up, entered the way a viewer enters it — by naming a ship. This view is what the project is most often asked about and it had no baseline at all, for the plain reason that no URL could ask for it. Watches the true-scale hull, the near-field water it floats in, her wake, and the join between that water and the globe behind it."
+  },
+  {
+   "name": "aboard-off",
+   "path": "/?frozen=1#e=7&f=boxroute",
+   "note": "ABOARD, a different era and hull: the container ship on the Asia-Europe run. Two frames rather than one because the close-up has to hold for a 400 m motor ship and a 72 m paddle steamer, and a single frame cannot see that."
   }
  ]
 }

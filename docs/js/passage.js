@@ -298,9 +298,7 @@ function psgClose() {
   PSG.on = false;
   psgClearShip();
   PSG.track = null; PSG.vessel = null;
-  /* the ground reference is per-visit: keeping it across passages would carry a drift of
-     thousands of kilometres into the next one, and the wave phase would arrive scrambled */
-  PSG.ref = null;
+  PSG.ref = null;      /* recomputed from position on the next frame; see psgFleet */
 }
 
 /* ── ONE STEP ────────────────────────────────────────────────────────────────────────────
@@ -526,7 +524,16 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
      A reference position fixed at the moment the passage opens. Everything after is measured
      from it, so uDrift is literally how far this patch of sea has travelled over the Earth —
      which is the number that makes the water stream past the hull. */
-  if (PSG.ref === undefined || PSG.ref === null) PSG.ref = { lon: alon, lat: alat };
+  /* ⚠ AND THE REFERENCE CANNOT BE THE FIRST FRAME THAT ASKED. Capturing it lazily made the
+     whole wave field depend on WHEN this function first ran — and the descent frame came back
+     0.55% different on every capture, because the first call sometimes landed before the hash
+     camera had been applied and sometimes after. A ratchet cannot be built on a picture that
+     changes without the code changing.
+     The reference is now a pure function of where you are: the anchor rounded to five degrees.
+     Deterministic, no history, and the drift stays under about 280 km so the phase keeps its
+     precision in float32. Crossing a boundary re-phases the sea once every 550 km of travel,
+     which is invisible — one patch of open ocean is statistically the same as the next. */
+  PSG.ref = { lon: Math.round(alon / 5) * 5, lat: Math.round(alat / 5) * 5 };
   {
     let dl = alon - PSG.ref.lon;
     if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
