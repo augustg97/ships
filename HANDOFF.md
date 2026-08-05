@@ -234,3 +234,45 @@ does not pin those. `descent` came back 1.7% different on every capture.
 * The near ground is still flat-shaded within a texel — the 4.9 km raster has no gradient at
   close range, and the sub-texel *shading* perturbation remains deliberately unshipped (round 12).
 * The turbulent band astern still has a straight leading edge; it reads as a sheet, not churn.
+
+---
+
+## Round 20 — 2026-08-05 · the Titanic, and a check that asks whether it is right
+
+**What happened to her.** The deckhouse tiers are built about their own centre and
+`tier.position` was never set, so every wall sat at y = 0 — below the waterline of a hull whose
+deck is 19 m up. Only the railings were positioned off `base`. The screen got a black hull under
+a lattice of white rails, and had done for as long as the deckhouse had existed. Three more, all
+class-level: funnel height was `beam × 1.55` for every vessel ever built (Titanic 43.7 m against a
+real 19, Yamato 60 against 28); funnels were threaded into the gaps *between masts*, so a liner
+with two pole masts stacked four funnels into two positions; and `rig: 'none'` fell through to the
+square-rig case and got fidded topmast and topgallant — spars whose whole purpose is to be sent
+down — putting 126 m of mast on Yamato and 56.7 on Dreadnought's stated 34.
+
+**`Research/audit-hulls.js` — the durable part.** The frame ratchet compares each view against its
+own last capture, so it catches change and is blind to wrongness. `ship-titanic` sat green for
+rounds showing a liner with no superstructure, exactly as `ship-container` sat green photographing
+the ship of the line. Eleven rules that ask questions of the model instead: air draught against the
+hull's length, with different limits for sail and motor; anything declared must be drawn; a
+deckhouse must exist **and be above the deck**; funnels may not share a station; nothing may
+overhang the side, measured against the flight deck where there is one.
+
+⚠ Four of its first thirteen findings were the audit being wrong, and each correction is a fact
+worth keeping: a square-rigger's mast truck really does approach her own length; a carrier's island
+really is her superstructure and really does overhang; a rigid wing really is sail; and **a tag
+sits on a GROUP, not on every mesh in it** — asking for `o.isMesh && userData.part` reported that
+the Titanic had no superstructure and the container ship no containers. Run it every round; add a
+rule whenever a fault gets past the ratchet.
+
+**The map floor is 300 km**, measured to be where the token exaggeration peaks. Below it the ramp
+unwinds toward true scale and the ship *shrinks*: 65 km long and 35.6% of the frame at 300 km, 17 km
+at 150, 3 km at 60, and 100 m — 2% of the frame — at the old 12 km floor. **The close-up's far
+stand-off is 2.6 km**, from 45 km, where a 57 m hull was a single dark pixel in an empty field.
+
+### Open — asked for and NOT done this round
+* **Water parity between the Sea and the Shipwright.** The Shipwright's widest view has visibly
+  better water than the close-up's. Not attempted.
+* **The grid texture** at very close zoom is now unreachable from the map, but its source was never
+  identified and it may still appear in the close-up.
+* The `map-floor` frame at 300 km reads murky, with the wind-streak layer smearing at that zoom.
+* The near-field frames still flap (see FRAME-LOG).
