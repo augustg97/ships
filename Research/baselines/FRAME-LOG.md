@@ -146,3 +146,11 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 > for the hull to actually be in the water rather than for followShip to have been called. Both
 > reduced it; neither removed it. **Do not accept these frames without looking** — the residue is
 > small enough to hide a real change of the same size.
+- **2026-08-04 23:47** · `ship-titanic` — SHE HAS A SUPERSTRUCTURE NOW, AND HAD NEVER HAD ONE ON SCREEN. The deckhouse tiers are built about their own centre and their position was never set, so every wall sat at y=0 — below her waterline — while only the railings stood correctly off the deck. What reached the screen was a black hull under a lattice of white rails. Also: four funnels evenly spaced amidships instead of cycling over two mast-gaps and piling up aft, 19.4 m of stack instead of 43.7 (beam x 1.55 was one constant for every ship from a Victorian packet to a battleship), pole masts at their stated heights, and railings on the boat deck only, following the lofted edge instead of a constant half-breadth.
+- **2026-08-04 23:47** · `ship-great-eastern` — Funnel height from the record (30 m) rather than beam x 1.55, and a two-deck superstructure that is now above her deck rather than inside her hull.
+- **2026-08-04 23:47** · `descent` — Per-frame easing residue; see the flap note in this log.
+- **2026-08-04 23:47** · `aboard` — The close-up's far stand-off is 2.6 km instead of 45 km — at 45 km a 57 m hull was a single dark pixel in a featureless field.
+- **2026-08-04 23:47** · `aboard-off` — Same.
+- **2026-08-04 23:54** · `aboard` — Close-up stand-off reduced to 2.6 km; map floor at 300 km. See the near-field flap note in this log — these frames still settle into one of two states across a full run.
+- **2026-08-04 23:54** · `aboard-off` — Close-up stand-off reduced to 2.6 km; map floor at 300 km. See the near-field flap note in this log — these frames still settle into one of two states across a full run.
+- **2026-08-04 23:54** · `map-floor` — Close-up stand-off reduced to 2.6 km; map floor at 300 km. See the near-field flap note in this log — these frames still settle into one of two states across a full run.

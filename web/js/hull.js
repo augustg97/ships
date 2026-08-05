@@ -641,8 +641,14 @@ function buildRig(S, group, mats, FINE) {
        between them — which is the only reason Carpathia heard her. The model gave her
        masts=[] and therefore no masts whatever, on a ship whose silhouette is two funnels
        plus two masts to most people who have seen a photograph of her. */
+    /* ⚠ AND `rig: 'none'` FELL THROUGH TO THE SQUARE-RIG CASE. A mast built up in fidded
+       sections — lower, topmast, topgallant — exists so the upper spars can be SENT DOWN in
+       heavy weather, which is a thing you do because they carry sail. A ship that carries none
+       has one spar. Dreadnought and Yamato were each given a lower mast plus a topmast plus a
+       topgallant they had no use for: 34 m of stated mast became 56.7 m of drawn mast on a
+       battleship whose real foretop stood about 40. */
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
-               : mk.rig === 'pole' ? [lower]
+               : (mk.rig === 'pole' || mk.rig === 'none') ? [lower]
                : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
                : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
                : [lower, top, tg];
@@ -1907,15 +1913,35 @@ function buildSuperstructure(S, group) {
     /* ── AND A RAILING, which is what actually breaks a box ─────────────────────────────
        A deckhouse roof without one is a slab. With stanchions and three rails it acquires a
        scale, a top edge that is not a hard line, and something for the light to catch. */
+    /* ── ⚠ AND EVERY TIER WAS RAILED, AT A CONSTANT WIDTH ────────────────────────────
+       Four tiers x two sides x three rails is twenty-four white bars running the full 207 m,
+       set at a fixed half-breadth while the house itself tapers with the deck — so they
+       overshot the house at both ends and, from any distance, they WERE the ship: August's
+       photograph of the Titanic is a black hull under a lattice of white lines with no
+       deckhouse visible behind it. Only the top tier is the promenade you can walk, and its
+       rail follows the same lofted edge the wall does. */
+    /* ── ⚠ AND THE HOUSE WAS INSIDE THE HULL ─────────────────────────────────────────
+       The tier's vertices are built about its own centre — yy runs -dh/2 to +dh/2 — and its
+       position was never set, so every wall sat at y = 0, which on a hull whose deck is 19 m
+       up is BELOW THE WATERLINE. The railings alone were positioned correctly, off `base`, so
+       what reached the screen was a black hull under a lattice of white rails with no
+       deckhouse behind them: exactly what August photographed and asked about. It has been
+       that way for as long as the deckhouse has existed, and no picture-diff could see it
+       because the picture never changed. */
+    tier.position.y = base + dh * i + dh / 2;
     const railY = base + dh * (i + 1);
+    if (i !== n - 1) { g.add(tag(tier, 'superstructure')); continue; }
     for (const side of [-1, 1]) {
       const nSt = Math.max(6, Math.round(len / (B * 0.22)));
       const segs = [];
       for (let k = 0; k <= nSt; k++) {
         const x = tier.position.x - len / 2 + k * (len / nSt);
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
+        const dh2 = Math.abs(surfacePoint(S, H, uu, 1.0)[2]);
+        const hw = Math.max(B * 0.06, Math.min(wid / 2, dh2 - B * 0.055));
         const st = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), white);
-        st.position.set(x, railY + dh * 0.15, side * wid / 2);
+        st.position.set(x, railY + dh * 0.15, side * hw);
         g.add(st);
       }
       for (const h of [0.10, 0.20, 0.30]) {
@@ -1961,6 +1987,13 @@ function buildSuperstructure(S, group) {
  * same station drift, and the drift shows up as a sail through a funnel.
  */
 function funnelStations(S) {
+  /* ⚠ AND WHERE THERE ARE MORE FUNNELS THAN GAPS, THEY STACKED UP IN ONE PLACE.
+     The rule below threads uptakes into the holes between masts, which is right for an
+     auxiliary steamer and wrong for a liner: Titanic has two pole masts, so two slots, and her
+     FOUR funnels cycled over them — all four crammed into the after half of a 269 m ship,
+     two of them inside each other. A ship whose funnels are her silhouette gets them from the
+     record instead, as stations along her length. */
+  if (S.funnelAt && S.funnelAt.length) return S.funnelAt.slice();
   const mu = (S.masts || []).map(m => m.at).sort((a, b) => a - b);
   const slots = [];
   if (!mu.length) return slots;
@@ -1973,7 +2006,12 @@ function buildFunnel(S, group) {
   const n = S.funnels || 0;
   if (!n) return;
   const H = hullSurface(S);
-  const h = S.beam * 1.55, r = S.beam * 0.115;
+  /* ⚠ ONE CONSTANT FOR EVERY SHIP FROM A VICTORIAN PACKET TO A BATTLESHIP. beam x 1.55 gave
+     Titanic 43.7 m of funnel against a real 19 above the boat deck, and Yamato 60 m against 28
+     — so on both of them the stacks were the tallest thing aboard and read as chimneys on a
+     factory. Height comes from the record when the record is in the data. */
+  const h = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
+  const r = S.beam * 0.115;
   const black = new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: 0.62, metalness: 0.30 });
   const band = new THREE.MeshStandardMaterial({ color: 0x8a3820, roughness: 0.55, metalness: 0.18 });
   /* ⚠ FUNNELS MUST NOT STAND WHERE MASTS DO. Fixed stations put Great Eastern's two funnels

@@ -62,13 +62,30 @@ const MIN_ALT = 500 / 63710;
  * altitude, and a viewer who never clicks a hull never renders it. `#z=` still sets the
  * altitude directly, which is what the descent baselines use and why they still work.
  */
-const MAP_FLOOR_M = 12000;           // as close as the top-down map goes
+/* ── ⚠ AND THE FLOOR GOES WHERE THE SHIP IS BIGGEST ───────────────────────────────────────
+   Measured, Zheng He's treasure ship across the whole range: 209 km long at 15,000 km up and
+   2.3% of the frame; 65 km and 35.6% at 300 km; then 17 km at 150, 3 km at 60, and ONE HUNDRED
+   METRES at the 12 km floor — 2% of the frame. So zooming in past 300 km made the ship smaller,
+   both on screen and against the coast, which is the opposite of what zooming in is for. The
+   cause is the exaggeration ramp: it starts unwinding the token toward true scale at exactly
+   300 km, and the map could descend four and a half decades past that.
+   The map now stops where the token is at its largest. At that height a hull is sixty-five
+   kilometres long — island-sized against the geography, deliberately, because that is what makes
+   a ship legible on a planet — and the frame is 180 km across, which is enough coast around her
+   to see where she is. True scale is not lost; it is where it belongs, in the close-up you reach
+   by clicking her. */
+const MAP_FLOOR_M = 300000;          // as close as the top-down map goes: the token's own peak
 /* ⚠ AND THE FAR END OF THE CLOSE-UP MEETS THE NEAR END OF THE MAP. At the standing depression
    of 15 degrees, 45 km of stand-off puts the eye at 11.6 km — which is the map's own floor. So
    zooming all the way out inside the close-up leaves you at the height the button returns you
    to, and the two views join instead of jumping. It is also the answer to "we do not see much
    of the ship's surroundings": at that height the horizon is 380 km away. */
-const FOLLOW_MAX_M = 45000;
+/* ⚠ 45 km OF STAND-OFF IS NOT A VIEW OF A SHIP, IT IS A VIEW OF NOTHING. It was chosen so the
+   close-up's far end met the map's floor, and then the map's floor moved to 300 km — but even
+   before that it was wrong: at 45 km a 57 m hull is a single dark pixel in a featureless field,
+   which is what August photographed. The Shipwright's own widest view holds a 22 m vessel at
+   about 30 boat-lengths, and that reads as a ship on an ocean. A bit further out than that. */
+const FOLLOW_MAX_M = 2600;
 const MONTH_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
 

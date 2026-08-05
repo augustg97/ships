@@ -116,6 +116,11 @@
    "name": "aboard-off",
    "path": "/?frozen=1#e=7&f=boxroute",
    "note": "ABOARD, a different era and hull: the container ship on the Asia-Europe run. Two frames rather than one because the close-up has to hold for a 400 m motor ship and a 72 m paddle steamer, and a single frame cannot see that."
+  },
+  {
+   "name": "map-floor",
+   "path": "/?frozen=1#e=4&t=1590&c=-9.85,36.95&z=300000",
+   "note": "THE MAP AT ITS LOWEST — 300 km over Cape St Vincent, with the treasure fleet homeward bound and the Portuguese coast in the same frame. 300 km is where the token exaggeration peaks and therefore where the wheel now stops: below it the ramp unwinds the token toward true scale and the ship SHRANK, from 65 km long at 35.6% of the frame to 100 m at 2%. Watches the ship-to-coast proportion, which is the thing being asserted, and the water at that height."
   }
  ]
 }
