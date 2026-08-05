@@ -501,6 +501,17 @@ const CARVED = [
     line: [[-68.4, -52.5], [-70.5, -53.6], [-71.4, -53.9], [-74.0, -52.9], [-75.4, -52.6]] },
   { name: 'Bosphorus and the Dardanelles', why: '700 m at the narrowest',
     line: [[26.2, 40.1], [29.2, 41.3], [30.0, 41.9]] },
+  /* ── AND TWO OF THEM HAVE A DATE ────────────────────────────────────────────────────────
+     A carve is a statement that water is there. For these two it is a statement that water was
+     PUT there, on a known day, and a treasure fleet that crosses the Isthmus of Panama because
+     the router was told the canal exists is a worse error than one that sails round the Horn.
+     So they open when they opened, and the search grid is rebuilt when that changes. */
+  { name: 'Suez Canal', why: 'opened 1869; 205 m wide against a 19.5 km cell', from: 1869,
+    line: [[32.30, 31.30], [32.32, 30.90], [32.31, 30.58], [32.35, 30.35], [32.55, 29.93],
+           [32.80, 29.60]] },
+  { name: 'Panama Canal', why: 'opened 1914; 33 m at the locks', from: 1914,
+    line: [[-79.92, 9.40], [-79.92, 9.27], [-79.80, 9.18], [-79.68, 9.10], [-79.55, 8.95],
+           [-79.48, 8.80]] },
 ];
 
 const MASK = { ready: false, ocean: null, coast: null, w: MASK_W, h: MASK_H };
@@ -558,7 +569,7 @@ function maskUpgradeAvailable() {
  * possible at all. Routing it on modern coastlines does not merely draw the wrong pixels, it
  * argues the wrong thing. So the array holds ELEVATION, and the datum is a parameter.
  */
-const FINE = { ready: false, elev: null, w: 0, h: 0, level: -1, datum: 0,
+const FINE = { ready: false, elev: null, w: 0, h: 0, level: -1, datum: 0, year: 3000, sig: '',
                blockedSeen: 0, detourFail: 0, unfixed: 0 };
 
 function buildFine(src, level) {
@@ -584,10 +595,14 @@ function fineIsWater(lon, lat) {
 /* The era's datum, in metres relative to today. Returns true when it CHANGED, because that
    invalidates the coarse routing grid built from it — the caller rebuilds rather than this
    deciding for it, so the order of mask rebuild and fleet rebuild stays in one place. */
-function setSeaLevel(m) {
+function setSeaLevel(m, year) {
   const v = Math.round((m || 0) * 10) / 10;
-  if (v === FINE.datum) return false;
-  FINE.datum = v;
+  const y = year === undefined ? FINE.year : year;
+  /* the signature is what the grid actually depends on: the datum, and WHICH carves apply.
+     Comparing the year itself would rebuild on every drag of the slider for no change. */
+  const sig = v + '|' + CARVED.map(c => (c.from === undefined || y >= c.from) ? 1 : 0).join('');
+  if (sig === FINE.sig) return false;
+  FINE.datum = v; FINE.year = y; FINE.sig = sig;
   MASK.ready = false;
   return true;
 }
@@ -631,8 +646,9 @@ function buildMask(force) {
     }
   }
 
-  /* the declared passages, cut one cell either side */
+  /* the declared passages, cut one cell either side — and only the ones that exist yet */
   for (const c of CARVED) {
+    if (c.from !== undefined && FINE.year < c.from) continue;
     for (let s2 = 0; s2 < c.line.length - 1; s2++) {
       const a = maskCell(c.line[s2][0], c.line[s2][1]);
       const b = maskCell(c.line[s2 + 1][0], c.line[s2 + 1][1]);
@@ -939,10 +955,17 @@ function refineAgainstFine(ptsIn) {
 function smoothTrack(pts) {
   if (!FINE.ready || pts.length < 5) return pts;
   const cur = pts.map(p => ({ lon: p.lon, lat: p.lat }));
+  /* ⚠ AND ONLY WHERE IT BENDS. The acceptance test is two great-circle segments sampled at a
+     kilometre, which is thirty-odd array reads per candidate — times twelve passes, times the
+     points on a track, times sixty-two voyages, and building the fleet took over half a minute.
+     Almost all of that work was spent proposing to move points on stretches that are already
+     straight, where the Laplacian's target is the point itself. Gate on the turn: below two
+     degrees there is nothing to smooth, and the cost falls by about twenty to one. */
   for (let pass = 0; pass < 12; pass++) {
     let moved = 0;
     for (let i = 1; i < cur.length - 1; i++) {
       const a = cur[i - 1], b = cur[i], c = cur[i + 1];
+      if (turnDeg(a, b, c) < 2) continue;
       /* mean of the neighbours, in a frame that is not distorted by longitude convergence */
       let dlonA = a.lon - b.lon, dlonC = c.lon - b.lon;
       if (dlonA > 180) dlonA -= 360; else if (dlonA < -180) dlonA += 360;

@@ -867,9 +867,60 @@ function buildVoyageList() {
   mine.forEach(v => {
     const b = document.createElement('button');
     b.className = 'voy' + (S.voyage && S.voyage.id === v.id ? ' on' : '');
-    b.innerHTML = `<span class="vn">${v.name}</span><span class="vy">${v.dates}</span>`;
-    b.onclick = () => startVoyage(v);
+    /* ── WHAT IS ACTUALLY OUT THERE, AND WHERE ─────────────────────────────────────────
+       The list used to give a name and a date, which is a bibliography. What a viewer wants
+       from a panel beside a moving map is the FLEET: which ship, and where she has got to —
+       read off the same track that is drawing her, so the panel and the globe cannot disagree.
+       A hull on the far side of the planet is marked, because "I clicked it and nothing was
+       there" is otherwise the obvious next complaint. */
+    const tr = (eraTracks || []).find(t => t.name === v.name);
+    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === v.vessel);
+    let where = '';
+    if (tr && tr._lo !== undefined) {
+      const ns = tr._la >= 0 ? 'N' : 'S', ew = tr._lo >= 0 ? 'E' : 'W';
+      where = `${Math.abs(tr._la).toFixed(0)}°${ns} ${Math.abs(tr._lo).toFixed(0)}°${ew}`;
+      if (!tr.grp.visible) where += ' · far side';
+    }
+    b.innerHTML = `<span class="vn">${v.name}</span>` +
+      `<span class="vy">${ves ? ves.name : v.vessel}${where ? ' · ' + where : ''}</span>`;
+    b.onclick = () => {
+      startVoyage(v);
+      /* ⚠ and it goes to where she IS, not to the authored view of the voyage. startVoyage
+         flies to v.view, which is a fixed picture of the whole route — so clicking a name
+         took you to a place the ship might be nowhere near. Her live position comes from the
+         track that is drawing her; the fallback is the first waypoint. */
+      const t2 = (eraTracks || []).find(t => t.name === v.name);
+      const lon = t2 && t2._lo !== undefined ? t2._lo : v.legs[0].lon;
+      const lat = t2 && t2._la !== undefined ? t2._la : v.legs[0].lat;
+      flyTo(lon, lat, R + 2200000 / 63710, 1600);      /* still the globe, from 2,200 km */
+    };
     host.appendChild(b);
+  });
+}
+
+/* The positions in the list go stale the moment the fleet moves, and a stale position beside a
+   moving ship is worse than none — it is a claim. Twice a second, and only the text, so the
+   list is not rebuilt underneath the pointer. */
+let _fleetListAt = -1;
+function refreshFleetList(t) {
+  if (t - _fleetListAt < 500) return;
+  _fleetListAt = t;
+  const host = document.getElementById('voyList');
+  if (!host) return;
+  const btns = host.querySelectorAll('button.voy');
+  if (!btns.length || !eraTracks.length) return;
+  const all = (APP.voyages && APP.voyages.voyages) || [];
+  const era = currentEra();
+  const mine = all.filter(v => era && v.year >= era.from && v.year <= era.to);
+  btns.forEach((b, i) => {
+    const v = mine[i]; if (!v) return;
+    const tr = eraTracks.find(x => x.name === v.name);
+    const el = b.querySelector('.vy'); if (!el || !tr || tr._lo === undefined) return;
+    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === v.vessel);
+    const ns = tr._la >= 0 ? 'N' : 'S', ew = tr._lo >= 0 ? 'E' : 'W';
+    el.textContent = (ves ? ves.name : v.vessel) +
+      ` · ${Math.abs(tr._la).toFixed(0)}°${ns} ${Math.abs(tr._lo).toFixed(0)}°${ew}` +
+      (tr.grp.visible ? '' : ' · far side');
   });
 }
 
@@ -1238,7 +1289,7 @@ function wireUI() {
          of her: no button to find, the map is simply there again once she stops being the
          subject */
       S.followDist = Math.max(25, S.followDist * (1 + Math.sign(e.deltaY) * 0.13));
-      if (S.followDist > FOLLOW_RELEASE_M) { releaseShip(); S.dist = R + 300000 / 63710; }
+      if (S.followDist > FOLLOW_RELEASE_M) { leaveShip(); return; }
       placeCamera();
       return;
     }
@@ -1342,6 +1393,7 @@ function frame(now) {
     voyT += dt * (1 / 600) * Math.pow(600, f);
   }
   stepEraFleet(voyT);
+  refreshFleetList(t);
   updateLabels(t);
 
   if (S.monthPlaying && !FROZEN) {
@@ -1611,6 +1663,22 @@ let eraFleet = null, eraTracks = [];
        so the failure is visible rather than drawn as a plausible course. */
 let seaRouteMisses = 0;
 let paceClamped = [];
+/* Routing a voyage is deterministic given its waypoints, the datum and which canals exist, and
+   it is the most expensive thing this app does. Sixty-two of them, recomputed every time the
+   era strip is touched, is work already done. Keyed on the grid's own signature so a change of
+   era or sea level invalidates it correctly rather than serving a track for the wrong coast. */
+const trackCache = new Map();
+/* ONE reading of a ship's speed, used by the pacing, the card and anything else that asks.
+   Two readings is how a hull came to be paced at 16 knots and described at 6 on the same
+   screen at the same moment. */
+function shipKn(ves) {
+  const curve = ves && ves.polar && ves.polar.curve;
+  if (curve) {
+    const vals = Object.keys(curve).map(k => curve[k]).filter(v => isFinite(v));
+    if (vals.length) return Math.max.apply(null, vals);
+  }
+  return (ves && ves.speedKn) || 6;
+}
 function seaRoute(legs) {
   const RT = window.SHIPS_ROUTE;
   const out = [];
@@ -1647,7 +1715,7 @@ function buildEraFleet() {
   {
     const RTs = window.SHIPS_ROUTE;
     if (RTs && RTs.setSeaLevel && mat && mat.uniforms && mat.uniforms.uSeaLevel) {
-      if (RTs.setSeaLevel(mat.uniforms.uSeaLevel.value)) RTs.buildMask(true);
+      if (RTs.setSeaLevel(mat.uniforms.uSeaLevel.value, S.year)) RTs.buildMask(true);
     }
   }
   const ch = (APP.chapters && APP.chapters.chapters) ? APP.chapters.chapters[S.era] : null;
@@ -1712,8 +1780,7 @@ function buildEraFleet() {
        while a cog is still in the Bight, and no clipper had been faster than any cog since
        the line was written. A fallback that fires every time is not a fallback; it is the
        value, and it should be measured rather than read past. */
-    const curve = (ves.polar && ves.polar.curve) || null;
-    const kn = curve ? Math.max.apply(null, Object.keys(curve).map(k => curve[k])) : 6;
+    const kn = shipKn(ves);
 
     /* ── AND THE PACE CAME FROM THE NUMBER OF WAYPOINTS ─────────────────────────────
        The old period was `n * 26 / kn * 34` — proportional to how many POINTS the track
@@ -1726,7 +1793,10 @@ function buildEraFleet() {
        A voyage takes as long as its DISTANCE over its SPEED. That is the only formula with a
        meaning, it makes the clipper genuinely lap the cog, and the compression to screen time
        is a single stated constant instead of an accident of the routing. */
-    const legsR = seaRoute(v.legs);
+    const RTc = window.SHIPS_ROUTE;
+    const ck = v.id + '|' + ((RTc && RTc.FINE && RTc.FINE.sig) || '');
+    let legsR = trackCache.get(ck);
+    if (!legsR) { legsR = seaRoute(v.legs); trackCache.set(ck, legsR); }
     let km = 0;
     for (let i = 0; i < legsR.length - 1; i++) {
       const A = lonLatToVec(legsR[i].lon, legsR[i].lat, 1);
@@ -1843,13 +1913,37 @@ function followShip(tr) {
   document.body.classList.add('in-passage');
 }
 
-function releaseShip() {
-  if (!S.follow) return;
-  S.follow = null;
+/* ── ⚠ AND THE WAY BACK UP WAS TWO HALVES OF TWO DIFFERENT DOORS ──────────────────────────
+ * Clicking a hull calls followShip(), which shows the card. The card's button called
+ * closePassage(), which begins `if (!PSGV.on) return` — and followShip never sets PSGV.on,
+ * because PSGV belongs to the OTHER way in. So the button was correctly wired to a function
+ * that was guaranteed to do nothing on the only path a user can actually take. It worked
+ * perfectly when I called openPassage() by hand from the console, which is why four rounds of
+ * testing never caught it: I was exercising a door nobody uses.
+ *
+ * One exit now, and it FLIES. The old release set S.dist directly — from the waterline to 300
+ * km between two frames, which is not a zoom-out, it is a cut to a different picture, and that
+ * is exactly what August described. The climb starts from where the eye actually is, which
+ * means reading the camera rather than trusting S.dist, since while following she is placed by
+ * the follow logic and S.dist has not been the eye's altitude for some seconds.
+ */
+function leaveShip(ms) {
+  const tr = S.follow || PSGV.track;
+  const lon = tr && tr.at ? tr.at.lon : S.lon;
+  const lat = tr && tr.at ? tr.at.lat : S.lat;
+  S.dist = Math.max(R + MIN_ALT, camera.position.length());
+  S.lon = lon; S.lat = lat;
+  if (PSGV.on) { PSGV.on = false; PSGV.track = null; window.SHIPS_PSG.psgClose(); }
+  if (S.follow) { S.follow = null; window.SHIPS_PSG.psgFleetClear(); }
+  if (eraFleet) eraFleet.visible = true;
   if (PSGV.card) PSGV.card.style.display = 'none';
   document.body.classList.remove('in-passage');
-  window.SHIPS_PSG.psgFleetClear();
-  if (eraFleet) eraFleet.visible = true;
+  flyTo(lon, lat, R + 300000 / 63710, ms || 2200);
+}
+
+function releaseShip() {
+  if (!S.follow) return;
+  leaveShip();
 }
 
 function openPassage(tr) {
@@ -1887,7 +1981,7 @@ function passageCard(tr, ves) {
       '<table class="pc-rows"></table>';
     document.body.appendChild(d);
     PSGV.card = d;
-    d.querySelector('#psgBack').onclick = closePassage;
+    d.querySelector('#psgBack').onclick = () => leaveShip();
   }
   const c = PSGV.card;
   c.style.display = 'block';
@@ -1898,7 +1992,10 @@ function passageCard(tr, ves) {
     ['Length overall', H.loa.toFixed(1) + ' m'],
     ['Beam', H.beam.toFixed(1) + ' m'],
     ['Draught', H.draught.toFixed(2) + ' m'],
-    ['Best speed', ((ves.polar && ves.polar.best) || ves.speedKn || 6).toFixed(1) + ' kn'],
+    /* ⚠ ves.polar.best does not exist — the same non-field that made every hull sail at the
+       literal fallback of six knots two rounds ago. The card was still printing "6.0 kn" for
+       a 400 m container ship while the pacing beside it used 16. One reading of one number. */
+    ['Best speed', shipKn(ves).toFixed(1) + ' kn'],
   ];
   c.querySelector('.pc-rows').innerHTML =
     rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +
