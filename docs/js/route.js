@@ -894,7 +894,71 @@ function refineAgainstFine(ptsIn) {
     }
     out.push(best || p);
   }
-  return out;
+  return smoothTrack(out);
+}
+
+/* ── A SHIP HAS A TURNING CIRCLE ──────────────────────────────────────────────────────────
+ * The refinement above pushes points sideways off the coast, one at a time, and that leaves a
+ * sawtooth: measured, every track had course changes over 60 degrees and several had a full
+ * 180 — the track doubling back on itself between one five-kilometre step and the next. No
+ * hull does that, and it is what makes the fleet look like it is being dragged rather than
+ * steered.
+ *
+ * Constrained Laplacian smoothing: pull each point toward the mean of its neighbours, and
+ * REJECT the move if it lands on land. The water constraint is what makes this safe to run —
+ * smoothing that could push a track ashore would trade one visible fault for a worse one, so
+ * every candidate is tested before it is accepted. Endpoints are pinned; they are landfalls.
+ */
+function smoothTrack(pts) {
+  if (!FINE.ready || pts.length < 5) return pts;
+  const cur = pts.map(p => ({ lon: p.lon, lat: p.lat }));
+  for (let pass = 0; pass < 12; pass++) {
+    let moved = 0;
+    for (let i = 1; i < cur.length - 1; i++) {
+      const a = cur[i - 1], b = cur[i], c = cur[i + 1];
+      /* mean of the neighbours, in a frame that is not distorted by longitude convergence */
+      let dlonA = a.lon - b.lon, dlonC = c.lon - b.lon;
+      if (dlonA > 180) dlonA -= 360; else if (dlonA < -180) dlonA += 360;
+      if (dlonC > 180) dlonC -= 360; else if (dlonC < -180) dlonC += 360;
+      const tlon = b.lon + (dlonA + dlonC) * 0.5 * 0.5;      // half-way to the midpoint
+      const tlat = b.lat + ((a.lat - b.lat) + (c.lat - b.lat)) * 0.5 * 0.5;
+      if (fineIsWater(tlon, tlat)) { b.lon = tlon; b.lat = tlat; moved++; }
+    }
+    if (!moved) break;
+  }
+
+  /* ── AND A DOUBLE-BACK IS NOT A TURN, IT IS A MISTAKE ────────────────────────────────
+     Smoothing cannot remove a kink whose fix would land on the beach — the water constraint
+     rejects the move and the sawtooth survives. Measured, 97 corners in 67,852 still turned
+     more than 60 degrees and a few reversed completely. Those points are deleted rather than
+     moved: if the two neighbours can see each other across open water, the corner between
+     them was never a course, it was an artefact of pushing one point sideways. */
+  const clear = (a, b) => {
+    const cl = Math.max(0.08, Math.cos((a.lat + b.lat) * 0.5 * Math.PI / 180));
+    const degs = Math.hypot((b.lon - a.lon) * cl, b.lat - a.lat);
+    const n = Math.max(2, Math.ceil(degs / 0.03));
+    for (let i = 1; i < n; i++) {
+      const f = i / n;
+      if (!fineIsWater(a.lon + (b.lon - a.lon) * f, a.lat + (b.lat - a.lat) * f)) return false;
+    }
+    return true;
+  };
+  const brgOf = (A, B) => {
+    const dl = (B.lon - A.lon) * Math.PI / 180, l1 = A.lat * Math.PI / 180, l2 = B.lat * Math.PI / 180;
+    return Math.atan2(Math.sin(dl) * Math.cos(l2),
+                      Math.cos(l1) * Math.sin(l2) - Math.sin(l1) * Math.cos(l2) * Math.cos(dl));
+  };
+  for (let sweep = 0; sweep < 6; sweep++) {
+    let cut = 0;
+    for (let i = 1; i < cur.length - 1; ) {
+      let d = Math.abs((brgOf(cur[i], cur[i + 1]) - brgOf(cur[i - 1], cur[i])) * 180 / Math.PI);
+      if (d > 180) d = 360 - d;
+      if (d > 45 && clear(cur[i - 1], cur[i + 1])) { cur.splice(i, 1); cut++; }
+      else i++;
+    }
+    if (!cut) break;
+  }
+  return cur;
 }
 
 /* ── THE TEST MUST BE THE CURVE THAT GETS DRAWN ────────────────────────────────────────

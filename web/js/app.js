@@ -1610,6 +1610,7 @@ let eraFleet = null, eraTracks = [];
        ended up sitting on Brittany. If the search fails, the leg is kept as given and counted,
        so the failure is visible rather than drawn as a plausible course. */
 let seaRouteMisses = 0;
+let paceClamped = [];
 function seaRoute(legs) {
   const RT = window.SHIPS_ROUTE;
   const out = [];
@@ -1624,6 +1625,9 @@ function seaRoute(legs) {
     if (!path) { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); continue; }
     for (const p of path) push(p.lon, p.lat);
   }
+  /* ⚠ The finishing runs HERE, on the assembled voyage, not inside the passage search. Each
+     segment was already clean against itself; every bad corner measured was at a seam. */
+  if (out.length > 2 && RT && RT.finishTrack) return RT.finishTrack(out);
   return out.length > 1 ? out : legs;
 }
 
@@ -1635,6 +1639,17 @@ function clearEraFleet() {
 
 function buildEraFleet() {
   clearEraFleet();
+  paceClamped = [];
+  /* ⚠ THE ROUTER MUST BE ON THE ERA'S SHORELINE, and this has to happen before any track is
+     planned. At 60,000 BP the sea is 68 m lower; routing that era against the modern coast put
+     309 drawn samples of 253,092 on land, every one of them in era 0. The coarse grid is
+     rebuilt from the fine array whenever the datum moves — a second and a half, once per era. */
+  {
+    const RTs = window.SHIPS_ROUTE;
+    if (RTs && RTs.setSeaLevel && mat && mat.uniforms && mat.uniforms.uSeaLevel) {
+      if (RTs.setSeaLevel(mat.uniforms.uSeaLevel.value)) RTs.buildMask(true);
+    }
+  }
   const ch = (APP.chapters && APP.chapters.chapters) ? APP.chapters.chapters[S.era] : null;
   if (!ch || !APP.voyages || !APP.vessels) return;
   const from = ch.from, to = ch.to;
@@ -1718,10 +1733,27 @@ function buildEraFleet() {
       const B = lonLatToVec(legsR[i + 1].lon, legsR[i + 1].lat, 1);
       km += Math.acos(Math.max(-1, Math.min(1, A.dot(B)))) * 6371;
     }
-    /* ten hours of the voyage per second of watching. Bounded so the shortest hop is still a
-       passage and the longest is not a career: 100 s to 7 minutes. */
+    /* ── AND THEN THE CLAMP ATE THE PROPORTIONALITY ────────────────────────────────────
+       `clamp(hours/10, 100, 420)` looked conservative and was the whole fault. Both ends of
+       the fleet hit the floor: a 20,000 km container circuit and a 500 km galley hop were each
+       given 100 seconds, so the box boat crossed the screen at 200 km/s and the galley at 5 —
+       screen speed proportional to ROUTE LENGTH, which is the opposite of the intent. Speed on
+       screen is speed: km/s = knots × 1.852 / C, and with no clamp that identity holds exactly.
+
+       ⚠ AND THE CEILING IS THE SAME BUG. First attempt kept a 900 s cap, and measured, it bound
+       on TEN of the routes — every circumnavigation and the container circuit alike. Inside the
+       cap, screen speed is again proportional to length, and the numbers came out backwards:
+       Magellan at 5.8 knots crossed the screen at 61.9 km/s while the box boat at 16 knots made
+       45.7. A clamp that binds on the whole interesting half of the fleet is not a bound, it is
+       the formula. So there is no ceiling. A circumnavigation takes 36 minutes to come round,
+       which is correct — it took three years, and the viewer watches a passage, not a lap.
+
+       C = 0.42 h/s, so km/s = knots × 4.41 for every hull on the map, exactly. The one bound
+       left is a floor of 45 s, which binds only on the very shortest hop. */
     const hours = km / (kn * 1.852);
-    const period = Math.max(100, Math.min(420, hours / 10));
+    const want = hours * 0.42;
+    const period = Math.max(45, want);
+    if (want < 45) paceClamped.push(v.name);
     eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
                      phase: (eraTracks.length * 0.37) % 1, name: v.name });
   }
@@ -1919,8 +1951,43 @@ function pickShip(ev) {
   return best;
 }
 
+/* ── AND TWO SHIPS MAY NOT BE IN THE SAME WATER ────────────────────────────────────────────
+ * Tracks are planned one at a time against the coast, and nothing has ever looked at what the
+ * other ships are doing — so where two sea lanes share a strait the hulls interpenetrate, which
+ * at token exaggeration means a 125 km carrack passing through a 125 km junk.
+ *
+ * The rule is the actual rule. Under COLREGS a vessel that must give way alters to STARBOARD,
+ * and two ships meeting head-on each do so, passing port to port. Both alter here by half the
+ * shortfall, which resolves the crossing case as well without needing to work out who is the
+ * stand-on vessel — and the altered position is put through the same mask every other position
+ * goes through, so a ship will hold her course and accept the near miss before she will take a
+ * sheer toward the beach. The separation asked for is in DRAWN hull lengths, because that is
+ * what a viewer sees; at globe zoom that is hundreds of kilometres and at the waterline it is
+ * metres, and both are correct for their zoom.
+ */
+function avoidPass() {
+  for (const tr of eraTracks) {
+    if (tr._lo === undefined) continue;
+    let need = 0;
+    for (const o of eraTracks) {
+      if (o === tr || o._lo === undefined) continue;
+      const dLat = (o._la - tr._la) * 111.32;
+      let dl = o._lo - tr._lo; if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
+      const dLon = dl * 111.32 * Math.cos(tr._la * Math.PI / 180);
+      const d = Math.hypot(dLat, dLon);
+      const want = 0.9 * ((tr._drawKm || 0) + (o._drawKm || 0));
+      if (d < want && d > 1e-6) need += (want - d) * 0.5;
+    }
+    need = Math.min(need, 500);
+    const cur = tr.avoidKm || 0;
+    /* she comes off her course briskly and returns to it slowly, which is how the helm is used */
+    tr.avoidKm = cur + (need - cur) * (need > cur ? 0.05 : 0.015);
+  }
+}
+
 function stepEraFleet(t) {
   if (!eraFleet) return;
+  avoidPass();
   for (const tr of eraTracks) {
     const n = tr.legs.length;
     /* one full circuit in a time proportional to the track's length over the ship's speed,
@@ -1968,9 +2035,12 @@ function stepEraFleet(t) {
     {
       const RTf = window.SHIPS_ROUTE;
       if (RTf && RTf.isOcean && !RTf.isOcean(lo, la)) {
-        for (let k = 1; k <= 6; k++) {
+        /* ⚠ ±0.9 of a leg is ±3.6 km at the finished spacing, which is not enough sea-room to
+           get clear of an island the segment clipped — it is a backstop for a metre, not for a
+           coastline. Widened to ±6 legs, and the real fix is in clearSegments(). */
+        for (let k = 1; k <= 24; k++) {
           for (const sgn of [1, -1]) {
-            const f2 = Math.min(n - 1.001, Math.max(0, f + sgn * k * 0.15));
+            const f2 = Math.min(n - 1.001, Math.max(0, f + sgn * k * 0.25));
             const i2 = Math.min(n - 2, Math.floor(f2)), fr2 = f2 - i2;
             const a2 = tr.legs[i2], b2 = tr.legs[i2 + 1];
             const lo2 = a2.lon + (b2.lon - a2.lon) * fr2, la2 = a2.lat + (b2.lat - a2.lat) * fr2;
@@ -1979,6 +2049,20 @@ function stepEraFleet(t) {
         }
       }
     }
+    /* the alteration for traffic, applied to starboard of the ship's own course and refused if
+       it would put her ashore — the mask has the last word here as everywhere else */
+    if ((tr.avoidKm || 0) > 0.5) {
+      const dl0 = ((b.lon - a.lon + 540) % 360) - 180;
+      const brgR = Math.atan2(Math.sin(dl0 * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180),
+        Math.cos(a.lat * Math.PI / 180) * Math.sin(b.lat * Math.PI / 180) -
+        Math.sin(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.cos(dl0 * Math.PI / 180));
+      const stb = brgR + Math.PI / 2;
+      const dLa = tr.avoidKm * Math.cos(stb) / 111.32;
+      const dLo = tr.avoidKm * Math.sin(stb) / (111.32 * Math.max(0.05, Math.cos(la * Math.PI / 180)));
+      const RTa = window.SHIPS_ROUTE;
+      if (!RTa || !RTa.isOcean || RTa.isOcean(lo + dLo, la + dLa)) { lo += dLo; la += dLa; }
+    }
+    tr._lo = lo; tr._la = la;
     const w = lonLatToVec(lo, la, R * 1.0002);
     tr.grp.position.copy(w);
     /* ── ⚠ THE HORIZON IS NOT AT 90 DEGREES ─────────────────────────────────────────
@@ -2016,6 +2100,9 @@ function stepEraFleet(t) {
       const f = Math.max(0, Math.min(1,
         (Math.log(altU) - Math.log(lo)) / (Math.log(hi) - Math.log(lo))));
       tr.grp.scale.setScalar(tru * Math.pow(Math.max(tok / tru, 1e-6), f));
+      /* how long this hull is ON SCREEN, in kilometres of ocean — the unit traffic separation
+         has to be measured in, since that is the overlap a viewer actually sees */
+      tr._drawKm = tr.grp.scale.x * tr.grp.userData.loa * 6371 / R;
     }
     /* heading from the track on the sphere, projected into the local tangent plane */
     const up = w.clone().normalize();
@@ -2023,9 +2110,24 @@ function stepEraFleet(t) {
     fwd.sub(up.clone().multiplyScalar(fwd.dot(up)));
     if (fwd.lengthSq() < 1e-9) continue;
     fwd.normalize();
+    /* ── ⚠ A SHIP CANNOT CHANGE HEADING INSTANTLY ────────────────────────────────────
+       Even a clean track has corners, and taking the segment bearing straight from the track
+       makes the hull snap round them between one frame and the next. A vessel swings: she has
+       a rudder, a turning circle, and a rate measured in degrees per minute. Damping the
+       heading toward the course rather than setting it gives that for free, and it also
+       absorbs whatever kinks survive the route cleanup — the geometry stops being the only
+       thing standing between the viewer and a ship that pirouettes. */
     const m = tangentBasis(up, fwd);
     if (!m) continue;
-    tr.grp.quaternion.setFromRotationMatrix(m);
+    const want = new THREE.Quaternion().setFromRotationMatrix(m);
+    if (!tr.heading) { tr.heading = want.clone(); }
+    else {
+      const ang = 2 * Math.acos(Math.min(1, Math.abs(tr.heading.dot(want))));
+      /* the bigger the error the harder she puts the helm over, up to a real limit */
+      const rate = Math.min(0.16, 0.02 + ang * 0.10);
+      tr.heading.slerp(want, rate);
+    }
+    tr.grp.quaternion.copy(tr.heading);
     /* ── ⚠ THE TRACK IS CLEAN AND THE CONSORTS ARE NOT ─────────────────────────────
        The passage search puts the FLAGSHIP in open water and I verified that at 72,768
        samples. But a consort is not on the track: she is stationed abeam of it, and at token
@@ -2046,21 +2148,45 @@ function stepEraFleet(t) {
        render — testing a consort against where the fleet was LAST frame leaves her ashore at
        every turn of the track, which is 3% of drawn hulls */
     tr.grp.updateMatrixWorld(true);
+    /* ── ⚠ AND CLOSING UP IN FIVE DISCRETE STEPS IS WHAT MADE THEM POP ────────────────
+       The first version tried station factors 1, 0.55, 0.30, 0.17, 0 and took the first that
+       was afloat. Sailing down a coast, a consort therefore SNAPPED between five fixed
+       distances from her flagship, several times a second — which reads exactly as August
+       described it: companions popping in and jumping around. A squadron closing up does it
+       by steering, over minutes.
+
+       Two changes. The factor is found by BISECTION, so it is continuous rather than one of
+       five values; and it is then eased toward, so a change of station is a movement rather
+       than a teleport. The station a consort is holding is now state that persists between
+       frames, which is what makes easing possible at all. */
     for (const h of tr.grp.children) {
       const st = h.userData.station;
       if (!st) continue;
-      let f = 1.0;
-      for (let k = 0; k < 5; k++) {
-        const x = st.x * f, z = st.z * f;
-        const r2 = x * x + z * z;
-        h.position.set(x, Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal, z);
-        if (f === 0) break;
-        h.updateMatrix();
-        const wp = h.position.clone().applyMatrix4(tr.grp.matrixWorld);
+      const place = (f) => {
+        const x = st.x * f, z = st.z * f, r2 = x * x + z * z;
+        return { x, z, y: Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal };
+      };
+      const afloat = (f) => {
+        if (f <= 0.001) return true;                       // the flagship's own water
+        const q = place(f);
+        const wp = new THREE.Vector3(q.x, q.y, q.z).applyMatrix4(tr.grp.matrixWorld);
         const cl = vecToLonLat(wp);
-        if (!RTm || !RTm.isOcean || RTm.isOcean(cl.lon, cl.lat)) break;
-        f = k >= 3 ? 0 : f * 0.55;      // close up, then fall into the flagship's wake
+        return !RTm || !RTm.isOcean || RTm.isOcean(cl.lon, cl.lat);
+      };
+      let target;
+      if (afloat(1)) target = 1;
+      else {
+        let lo = 0, hi = 1;
+        for (let b = 0; b < 7; b++) { const mid = (lo + hi) * 0.5; if (afloat(mid)) lo = mid; else hi = mid; }
+        target = lo;
       }
+      if (h.userData.stationF === undefined) h.userData.stationF = target;
+      /* ease, and ease IN faster than out — a ship closes up smartly and opens out gently */
+      const cf = h.userData.stationF;
+      const rate = target < cf ? 0.020 : 0.008;
+      h.userData.stationF = cf + (target - cf) * rate;
+      const q = place(h.userData.stationF);
+      h.position.set(q.x, q.y, q.z);
     }
     /* ── WHERE SHE IS, RECORDED ONCE ────────────────────────────────────────────────
        The Passage reads these rather than recomputing them. A second copy of this

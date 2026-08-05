@@ -545,26 +545,51 @@ function maskUpgradeAvailable() {
  * two to disagree in, and it gives every route a built-in stand-off of one coarse cell from the
  * coastline the viewer can actually see.
  */
-const FINE = { ready: false, water: null, w: 0, h: 0, level: -1 };
+/* ── ⚠ AND THE SEA HAS NOT ALWAYS BEEN AT THIS LEVEL ──────────────────────────────────────
+ * This array held a BOOLEAN — water or not — decided once against the present datum. The globe
+ * does not: era 0 is 60,000 BP and the shader draws the shoreline 68 metres lower, with Sunda a
+ * peninsula and Sahul one continent. So every route in that era was planned on a coastline that
+ * would not exist for another fifty thousand years, and measured, 309 of 253,092 drawn samples
+ * crossed land — ALL of them in era 0, and none anywhere else. The audit had been reading the
+ * sea level once, before the loop, which is why four rounds of this work never saw it.
+ *
+ * It is also the more interesting error of the two. The crossing to Sahul is in this project
+ * *because* of the low stand: the water gaps were short, and that is what made the crossing
+ * possible at all. Routing it on modern coastlines does not merely draw the wrong pixels, it
+ * argues the wrong thing. So the array holds ELEVATION, and the datum is a parameter.
+ */
+const FINE = { ready: false, elev: null, w: 0, h: 0, level: -1, datum: 0,
+               blockedSeen: 0, detourFail: 0, unfixed: 0 };
 
 function buildFine(src, level) {
   const cw = src.width, ch = src.height;
   const cx = src.getContext('2d', { willReadFrequently: true });
   const img = cx.getImageData(0, 0, cw, ch).data;
-  const water = new Uint8Array(cw * ch);
-  for (let k = 0; k < water.length; k++) {
+  const elev = new Int16Array(cw * ch);
+  for (let k = 0; k < elev.length; k++) {
     const i = k * 4;
-    const elev = (img[i] * 256 + img[i + 1]) / 65535 * 20000 - 11000;
-    water[k] = elev < SHOAL_M ? 1 : 0;
+    elev[k] = Math.max(-32768, Math.min(32767,
+      Math.round((img[i] * 256 + img[i + 1]) / 65535 * 20000 - 11000)));
   }
-  FINE.water = water; FINE.w = cw; FINE.h = ch; FINE.level = level; FINE.ready = true;
+  FINE.elev = elev; FINE.w = cw; FINE.h = ch; FINE.level = level; FINE.ready = true;
 }
 
 function fineIsWater(lon, lat) {
   if (!FINE.ready) return true;
   const x = Math.min(FINE.w - 1, Math.floor((((lon + 180) % 360) + 360) % 360 / 360 * FINE.w));
   const y = Math.max(0, Math.min(FINE.h - 1, Math.floor((90 - lat) / 180 * FINE.h)));
-  return !!FINE.water[y * FINE.w + x];
+  return FINE.elev[y * FINE.w + x] < FINE.datum + SHOAL_M;
+}
+
+/* The era's datum, in metres relative to today. Returns true when it CHANGED, because that
+   invalidates the coarse routing grid built from it — the caller rebuilds rather than this
+   deciding for it, so the order of mask rebuild and fleet rebuild stays in one place. */
+function setSeaLevel(m) {
+  const v = Math.round((m || 0) * 10) / 10;
+  if (v === FINE.datum) return false;
+  FINE.datum = v;
+  MASK.ready = false;
+  return true;
 }
 
 function buildMask(force) {
@@ -599,7 +624,9 @@ function buildMask(force) {
       const x0 = Math.floor(x * fx), x1 = Math.min(FINE.w, Math.ceil((x + 1) * fx));
       let wet = 0, tot = 0;
       for (let yy = y0; yy < y1; yy++)
-        for (let xx = x0; xx < x1; xx++) { tot++; if (FINE.water[yy * FINE.w + xx]) wet++; }
+        for (let xx = x0; xx < x1; xx++) {
+          tot++; if (FINE.elev[yy * FINE.w + xx] < FINE.datum + SHOAL_M) wet++;
+        }
       water[y * MASK_W + x] = (tot && wet * 2 >= tot) ? 1 : 0;
     }
   }
@@ -894,7 +921,74 @@ function refineAgainstFine(ptsIn) {
     }
     out.push(best || p);
   }
-  return out;
+  return smoothTrack(out);
+}
+
+/* ── A SHIP HAS A TURNING CIRCLE ──────────────────────────────────────────────────────────
+ * The refinement above pushes points sideways off the coast, one at a time, and that leaves a
+ * sawtooth: measured, every track had course changes over 60 degrees and several had a full
+ * 180 — the track doubling back on itself between one five-kilometre step and the next. No
+ * hull does that, and it is what makes the fleet look like it is being dragged rather than
+ * steered.
+ *
+ * Constrained Laplacian smoothing: pull each point toward the mean of its neighbours, and
+ * REJECT the move if it lands on land. The water constraint is what makes this safe to run —
+ * smoothing that could push a track ashore would trade one visible fault for a worse one, so
+ * every candidate is tested before it is accepted. Endpoints are pinned; they are landfalls.
+ */
+function smoothTrack(pts) {
+  if (!FINE.ready || pts.length < 5) return pts;
+  const cur = pts.map(p => ({ lon: p.lon, lat: p.lat }));
+  for (let pass = 0; pass < 12; pass++) {
+    let moved = 0;
+    for (let i = 1; i < cur.length - 1; i++) {
+      const a = cur[i - 1], b = cur[i], c = cur[i + 1];
+      /* mean of the neighbours, in a frame that is not distorted by longitude convergence */
+      let dlonA = a.lon - b.lon, dlonC = c.lon - b.lon;
+      if (dlonA > 180) dlonA -= 360; else if (dlonA < -180) dlonA += 360;
+      if (dlonC > 180) dlonC -= 360; else if (dlonC < -180) dlonC += 360;
+      const tlon = b.lon + (dlonA + dlonC) * 0.5 * 0.5;      // half-way to the midpoint
+      const tlat = b.lat + ((a.lat - b.lat) + (c.lat - b.lat)) * 0.5 * 0.5;
+      /* ⚠ AND THE TEST IS THE TWO SEGMENTS, NOT THE POINT. Accepting a move because the point
+         it lands on is wet is the same error as checking waypoints and drawing lines between
+         them — the smoothing then slides a point along a coast until the SEGMENT to its
+         neighbour cuts the headland, and every point on the track is still in the water while
+         the drawn curve crosses New Britain. Measured: 0 of 84,883 points ashore and 190 of
+         254,607 drawn samples ashore, simultaneously, which is how this was finally seen. */
+      /* ⚠ and the POINT as well as the two segments — gcWet samples a segment's interior and
+         never its ends, so on its own it will happily move a waypoint onto a beach it had a
+         clear run at. Nine points ashore came back the moment this pass was run last. */
+      const T = { lon: tlon, lat: tlat };
+      if (fineIsWater(tlon, tlat) && gcWet(a, T) && gcWet(T, c)) {
+        b.lon = tlon; b.lat = tlat; moved++;
+      }
+    }
+    if (!moved) break;
+  }
+
+  /* ── AND A DOUBLE-BACK IS NOT A TURN, IT IS A MISTAKE ────────────────────────────────
+     Smoothing cannot remove a kink whose fix would land on the beach — the water constraint
+     rejects the move and the sawtooth survives. Measured, 97 corners in 67,852 still turned
+     more than 60 degrees and a few reversed completely. Those points are deleted rather than
+     moved: if the two neighbours can see each other across open water, the corner between
+     them was never a course, it was an artefact of pushing one point sideways. */
+  const clear = gcWet;   /* ⚠ the great circle, because that is the curve the fleet is drawn on */
+  const brgOf = (A, B) => {
+    const dl = (B.lon - A.lon) * Math.PI / 180, l1 = A.lat * Math.PI / 180, l2 = B.lat * Math.PI / 180;
+    return Math.atan2(Math.sin(dl) * Math.cos(l2),
+                      Math.cos(l1) * Math.sin(l2) - Math.sin(l1) * Math.cos(l2) * Math.cos(dl));
+  };
+  for (let sweep = 0; sweep < 6; sweep++) {
+    let cut = 0;
+    for (let i = 1; i < cur.length - 1; ) {
+      let d = Math.abs((brgOf(cur[i], cur[i + 1]) - brgOf(cur[i - 1], cur[i])) * 180 / Math.PI);
+      if (d > 180) d = 360 - d;
+      if (d > 45 && clear(cur[i - 1], cur[i + 1])) { cur.splice(i, 1); cut++; }
+      else i++;
+    }
+    if (!cut) break;
+  }
+  return cur;
 }
 
 /* ── THE TEST MUST BE THE CURVE THAT GETS DRAWN ────────────────────────────────────────
@@ -966,6 +1060,440 @@ function windAt(lon, lat, monthIndex) {
   return { u: w.u[k], v: w.v[k], speed: Math.hypot(w.u[k], w.v[k]), ice: w.ice[k] };
 }
 
+/* ── A TRACK IS ONE CURVE, NOT A ROW OF SEGMENTS ──────────────────────────────────────────
+ * Every fix above operates on ONE passage — Bergen to the Faroes. But a voyage is a dozen of
+ * them stitched end to end, and the stitches are where the damage was: measured, all 97 corners
+ * over 60 degrees, and both full 180-degree reversals, sat within a kilometre of a join. Each
+ * segment had been smoothed against itself and was clean; nothing had ever looked at the seam.
+ * That is the same error as the mask and the picture, one level up — a guarantee proved on the
+ * parts and assumed for the whole.
+ *
+ * So the finishing runs on the assembled track, and it does three things a chart-drawer does:
+ *   1. smooth, with the water constraint (already written, now applied to the whole);
+ *   2. round every corner to a TURNING CIRCLE, because a hull has one and cannot pivot;
+ *   3. resample to constant arc length, because the fleet is drawn by interpolating between
+ *      consecutive points at a constant rate — so a 0.4 km step and a 5 km step take the same
+ *      time, and the ship crawls through the first and bolts through the second. That is the
+ *      "freezing then jumping" exactly: not a dropped frame, an unparameterised curve.
+ */
+const R2D = 180 / Math.PI, EARTH_KM = 6371;   /* D2R is declared at the top of this file */
+function toVec(lon, lat) {
+  const p = lat * D2R, l = lon * D2R;
+  return [Math.cos(p) * Math.sin(l), Math.sin(p), Math.cos(p) * Math.cos(l)];
+}
+function toLL(v) {
+  const n = Math.hypot(v[0], v[1], v[2]) || 1;
+  return { lon: Math.atan2(v[0] / n, v[2] / n) * R2D,
+           lat: Math.asin(Math.max(-1, Math.min(1, v[1] / n))) * R2D };
+}
+/* the fleet moves by slerp, so every measurement and every new point here is on the same curve */
+function gcSlerp(A, B, f) {
+  const a = toVec(A.lon, A.lat), b = toVec(B.lon, B.lat);
+  const d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]));
+  const t = Math.acos(d);
+  if (t < 1e-7) return { lon: A.lon, lat: A.lat };
+  const s = Math.sin(t), w0 = Math.sin((1 - f) * t) / s, w1 = Math.sin(f * t) / s;
+  return toLL([a[0] * w0 + b[0] * w1, a[1] * w0 + b[1] * w1, a[2] * w0 + b[2] * w1]);
+}
+function gcKm(A, B) {
+  const a = toVec(A.lon, A.lat), b = toVec(B.lon, B.lat);
+  const d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]));
+  return Math.acos(d) * EARTH_KM;
+}
+/* is the GREAT CIRCLE between these two points all water — sampled at a kilometre, which is a
+   quarter of the finished track's spacing and finer than the mask it is asking */
+function gcWet(A, B) {
+  const km = gcKm(A, B);
+  const n = Math.max(2, Math.ceil(km));
+  for (let i = 1; i < n; i++) {
+    const p = gcSlerp(A, B, i / n);
+    if (!fineIsWater(p.lon, p.lat)) return false;
+  }
+  return true;
+}
+function turnDeg(A, B, C) {
+  const brg = (P, Q) => {
+    const dl = (Q.lon - P.lon) * D2R, l1 = P.lat * D2R, l2 = Q.lat * D2R;
+    return Math.atan2(Math.sin(dl) * Math.cos(l2),
+                      Math.cos(l1) * Math.sin(l2) - Math.sin(l1) * Math.cos(l2) * Math.cos(dl));
+  };
+  let d = Math.abs((brg(B, C) - brg(A, B)) * R2D);
+  return d > 180 ? 360 - d : d;
+}
+
+/* Round a corner the way a ship rounds it: leave the course a distance d = R·tan(θ/2) before the
+   mark, arc through, rejoin d after. The arc is a quadratic Bézier on the sphere, which for these
+   radii is indistinguishable from the circle and cannot overshoot the corner. If any sample of it
+   would touch land the radius is halved and retried — a tighter turn is always available, and the
+   untouched corner is the last resort rather than the first. */
+/* ⚠ A TURN IS LONGER THAN ONE LEG, AND THAT IS THE WHOLE DIFFICULTY.
+   The first version took d from the two adjacent points only, so on a track spaced every 4 km
+   the widest possible turn was 2 km of arc — and the uniform resample that followed sampled it
+   once and threw the shape away. Measured, filleting changed the corner count by six in eighty
+   thousand. A ship swinging through 90 degrees at 9 km of radius uses NINE kilometres of sea
+   before the mark and nine after; the turn eats several waypoints, and the code has to eat them
+   too. So d is walked along the polyline, in both directions, and everything inside is replaced
+   by the arc — which is what a turn does to a chart. */
+function walkBack(arr, d) {
+  let acc = 0;
+  for (let j = arr.length - 1; j > 0; j--) {
+    const seg = gcKm(arr[j - 1], arr[j]);
+    if (acc + seg >= d) {
+      const f = seg > 1e-9 ? (d - acc) / seg : 1;
+      return { pt: gcSlerp(arr[j], arr[j - 1], Math.max(0, Math.min(1, f))), cut: arr.length - j };
+    }
+    acc += seg;
+  }
+  return null;                       /* the turn would eat the departure; try a tighter one */
+}
+function walkFwd(arr, i, d) {
+  let acc = 0;
+  for (let j = i; j < arr.length - 1; j++) {
+    const seg = gcKm(arr[j], arr[j + 1]);
+    if (acc + seg >= d) {
+      const f = seg > 1e-9 ? (d - acc) / seg : 1;
+      return { pt: gcSlerp(arr[j], arr[j + 1], Math.max(0, Math.min(1, f))), next: j + 1 };
+    }
+    acc += seg;
+  }
+  return null;
+}
+function filletTurns(pts, radiusKm, stepKm) {
+  if (!FINE.ready || pts.length < 5) return pts;
+  const step = stepKm || 4;
+  const out = [pts[0]];
+  let i = 1;
+  while (i < pts.length - 1) {
+    const B = pts[i];
+    const th = turnDeg(pts[i - 1], B, pts[i + 1]);
+    if (th < 18) { out.push(B); i++; continue; }
+    let placed = false;
+    for (let att = 0, R = radiusKm; att < 6 && !placed; att++, R *= 0.55) {
+      const d = Math.min(60, R * Math.tan(Math.min(84, th * 0.5) * D2R));
+      if (d < 0.25) break;
+      const back = walkBack(out, d), fwd = walkFwd(pts, i, d);
+      if (!back || !fwd) continue;
+      /* sampled at the track's own spacing, so the finished curve stays evenly paced */
+      const n = Math.max(3, Math.round(d * 2 / step));
+      const arc = []; let ok = true;
+      for (let k = 0; k <= n; k++) {
+        const t = k / n;
+        const pt = gcSlerp(gcSlerp(back.pt, B, t), gcSlerp(B, fwd.pt, t), t);
+        if (!fineIsWater(pt.lon, pt.lat)) { ok = false; break; }
+        arc.push(pt);
+      }
+      if (ok) {
+        out.length -= back.cut;
+        for (const p of arc) out.push(p);
+        i = fwd.next;
+        placed = true;
+      }
+    }
+    if (!placed) { out.push(B); i++; }
+  }
+  out.push(pts[pts.length - 1]);
+  return out;
+}
+
+/* Constant arc length. This is what makes the pacing even, and it is a property of the CURVE,
+   not of the animation — no amount of easing in the draw loop can rescue a curve whose points
+   are 0.4 km apart in one place and 5 km apart in the next. */
+function resampleUniform(pts, stepKm) {
+  if (pts.length < 2) return pts;
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + gcKm(pts[i - 1], pts[i]));
+  const total = cum[cum.length - 1];
+  if (!(total > 0)) return pts;
+  const n = Math.max(2, Math.round(total / stepKm));
+  const out = []; let j = 0;
+  for (let k = 0; k <= n; k++) {
+    const s = total * k / n;
+    while (j < cum.length - 2 && cum[j + 1] < s) j++;
+    const seg = cum[j + 1] - cum[j];
+    const f = seg > 1e-9 ? (s - cum[j]) / seg : 0;
+    out.push(gcSlerp(pts[j], pts[j + 1], Math.max(0, Math.min(1, f))));
+  }
+  return out;
+}
+
+/* Backstop: resampling walks the same great circles the search already cleared, but smoothing
+   moved points afterwards, so a new sample can land ashore. Rare, and caught here rather than
+   trusted away. Nearest water in a ring, then one more smoothing pass to take out the kink. */
+function nearestWater(p, maxRings) {
+  const cl = Math.max(0.08, Math.cos(p.lat * D2R));
+  /* 40 rings of 0.03 degrees is 1.2 degrees — about 130 km, which is enough to get off any
+     island a track can end up on. Eight rings was 27 km and left 21 points ashore. */
+  for (let r = 1; r <= (maxRings || 40); r++)
+    for (let a = 0; a < 32; a++) {
+      const th = a * Math.PI / 16, dd = r * 0.03;
+      const lo = p.lon + Math.cos(th) * dd / cl, la = p.lat + Math.sin(th) * dd;
+      if (fineIsWater(lo, la)) return { lon: lo, lat: la };
+    }
+  return null;
+}
+function pushOffLand(pts) {
+  if (!FINE.ready) return pts;
+  for (const p of pts) {
+    if (fineIsWater(p.lon, p.lat)) continue;
+    const best = nearestWater(p);
+    if (best) { p.lon = best.lon; p.lat = best.lat; }
+  }
+  return pts;
+}
+
+/* ── ⚠ AND EVERY POINT BEING WET IS NOT THE SAME AS THE TRACK BEING WET ────────────────────
+   Measured after all of the above: 0 of 84,332 track points on land, and hulls still sitting on
+   New Britain. Both are true at once, because the fleet is drawn by slerping BETWEEN points, and
+   a great circle across a four-kilometre gap can pass through an island that neither end touches.
+   This is the project's oldest mistake wearing new clothes — the string-pulling learned it, the
+   smoothing learned it, and the finished track had not. What is drawn is the CURVE.
+
+   So the last thing that happens to a track is that its segments are walked at a kilometre and
+   any dry sample has a wet point inserted at it. Four passes, because inserting one point halves
+   the segment and the halves are then checked in their turn. */
+function detourPoint(A, B, p) {
+  const cl = Math.max(0.08, Math.cos(p.lat * D2R));
+  let dl = B.lon - A.lon; if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
+  const ex = dl * cl, ey = B.lat - A.lat, L = Math.hypot(ex, ey) || 1;
+  const px = -ey / L, py = ex / L;
+  for (let r = 1; r <= 30; r++) {
+    const d = r * 0.04;
+    for (const s of [1, -1]) {
+      const X = { lon: p.lon + s * px * d / cl, lat: p.lat + s * py * d };
+      if (fineIsWater(X.lon, X.lat) && gcWet(A, X) && gcWet(X, B)) return X;
+    }
+  }
+  return null;
+}
+/* ── AND WHERE A SIDESTEP CANNOT WORK, PLAN THE CHANNEL ────────────────────────────────────
+ * Measured: 317 blocked segments, and the perpendicular detour failed on 153 of them. It fails
+ * for a reason that is obvious once seen — offering a point to one side or the other only works
+ * when the obstruction is ACROSS the course. Where the track runs the length of a coast, or into
+ * a bay with the way out behind it, every offset is either inland or still blocked, and no
+ * amount of widening the search changes that.
+ *
+ * What those need is a route, not a nudge. The coarse grid cannot give one: at 19.5 km the
+ * channel is a single cell and the search has already used it. So the fine array plans it — a
+ * small A* in a window around the blocked segment, at the 4.9 km resolution the coastline is
+ * actually drawn at, with the same no-cutting-corners rule the ocean search uses. Plan coarse,
+ * verify fine, and where fine disagrees, plan fine.
+ */
+function fineAStar(A, B, marginDeg) {
+  const W = FINE.w, H = FINE.h, cw = 360 / W, chh = 180 / H;
+  const gx = lon => Math.floor(((((lon + 180) % 360) + 360) % 360) / cw);
+  const gy = lat => Math.max(0, Math.min(H - 1, Math.floor((90 - lat) / chh)));
+  const x0 = gx(Math.min(A.lon, B.lon) - marginDeg), x1 = gx(Math.max(A.lon, B.lon) + marginDeg);
+  if (x1 <= x0) return null;                       /* straddles the seam — rare, and left alone */
+  const y0 = gy(Math.max(A.lat, B.lat) + marginDeg), y1 = gy(Math.min(A.lat, B.lat) - marginDeg);
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+  if (bw < 3 || bh < 3 || bw * bh > 90000) return null;
+  const N = bw * bh, lim = FINE.datum + SHOAL_M;
+  const wet = k => FINE.elev[(y0 + ((k / bw) | 0)) * W + (x0 + (k % bw))] < lim;
+  let sa = (gy(A.lat) - y0) * bw + (gx(A.lon) - x0);
+  let sb = (gy(B.lat) - y0) * bw + (gx(B.lon) - x0);
+  if (sa < 0 || sa >= N || sb < 0 || sb >= N) return null;
+  /* ⚠ an end that is itself ashore used to abandon the search, which is the case that most
+     needed it — the whole reason a repair was asked for. Snap it to the nearest wet cell in
+     the window instead, the way the ocean search snaps its landfalls. */
+  const snap = k => {
+    if (wet(k)) return k;
+    const ky = (k / bw) | 0, kx2 = k % bw;
+    for (let r = 1; r < Math.max(bw, bh); r++)
+      for (let dy = -r; dy <= r; dy++)
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          const ny = ky + dy, nx = kx2 + dx;
+          if (ny < 0 || ny >= bh || nx < 0 || nx >= bw) continue;
+          const nk = ny * bw + nx;
+          if (wet(nk)) return nk;
+        }
+    return -1;
+  };
+  sa = snap(sa); sb = snap(sb);
+  if (sa < 0 || sb < 0 || sa === sb) return null;
+  const kx = Math.max(0.05, Math.cos((A.lat + B.lat) * 0.5 * D2R));
+  const bx = sb % bw, by = (sb / bw) | 0;
+  const g = new Float32Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1);
+  const done = new Uint8Array(N);
+  const hk = new Float32Array(N + 8), hv = new Int32Array(N + 8); let hn = 0;
+  const push = (p, v) => { let i = hn++; hk[i] = p; hv[i] = v;
+    while (i > 0) { const par = (i - 1) >> 1; if (hk[par] <= hk[i]) break;
+      const tk = hk[par], tv = hv[par]; hk[par] = hk[i]; hv[par] = hv[i]; hk[i] = tk; hv[i] = tv; i = par; } };
+  const pop = () => { const top = hv[0]; hn--; if (hn > 0) { hk[0] = hk[hn]; hv[0] = hv[hn];
+      let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let s = i;
+        if (l < hn && hk[l] < hk[s]) s = l; if (r < hn && hk[r] < hk[s]) s = r;
+        if (s === i) break; const tk = hk[s], tv = hv[s]; hk[s] = hk[i]; hv[s] = hv[i]; hk[i] = tk; hv[i] = tv; i = s; } }
+    return top; };
+  g[sa] = 0; push(0, sa);
+  let guard = 0;
+  while (hn > 0 && guard++ < 400000) {
+    const cur = pop();
+    if (done[cur]) continue;
+    done[cur] = 1;
+    if (cur === sb) break;
+    const cy = (cur / bw) | 0, cx = cur % bw;
+    for (let dy = -1; dy <= 1; dy++) {
+      const ny = cy + dy; if (ny < 0 || ny >= bh) continue;
+      for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        const nx = cx + dx; if (nx < 0 || nx >= bw) continue;
+        const nk = ny * bw + nx;
+        if (!wet(nk)) continue;
+        /* the same rule as the ocean search: a hull cannot pass through a point */
+        if (dx && dy && (!wet(cy * bw + nx) || !wet(ny * bw + cx))) continue;
+        const ng = g[cur] + Math.hypot(dy, dx * kx);
+        if (ng < g[nk]) { g[nk] = ng; prev[nk] = cur;
+          push(ng + Math.hypot(ny - by, (nx - bx) * kx), nk); }
+      }
+    }
+  }
+  if (prev[sb] < 0 && sb !== sa) return null;
+  const cells = [];
+  for (let k = sb; k >= 0; k = prev[k]) { cells.push(k); if (k === sa) break; }
+  cells.reverse();
+  const pt = k => ({ lon: (x0 + (k % bw) + 0.5) * cw - 180,
+                     lat: 90 - (y0 + ((k / bw) | 0) + 0.5) * chh });
+  /* string-pull against the same great-circle test everything else uses, so what comes back is
+     as short as the water allows and made of the curve the fleet is actually drawn on */
+  const raw = cells.map(pt), keep = [];
+  let i = 0;
+  while (i < raw.length - 1) {
+    let j = raw.length - 1;
+    for (; j > i + 1; j--) if (gcWet(raw[i], raw[j])) break;
+    keep.push(raw[i]); i = j;
+  }
+  keep.push(raw[raw.length - 1]);
+  return keep.slice(1, -1);                        /* interior only; the ends are A and B */
+}
+function fineDetour(A, B) {
+  for (const m of [0.5, 1.5, 4]) {
+    const p = fineAStar(A, B, m);
+    if (p && p.length) {
+      let ok = gcWet(A, p[0]) && gcWet(p[p.length - 1], B);
+      for (let i = 1; ok && i < p.length; i++) ok = gcWet(p[i - 1], p[i]);
+      if (ok) return p;
+    }
+  }
+  return null;
+}
+function clearSegments(pts, sampleKm) {
+  if (!FINE.ready || pts.length < 2) return pts;
+  const stepKm = sampleKm || 1;
+  let cur = pts;
+  for (let pass = 0; pass < 4; pass++) {
+    const out = [cur[0]]; let fixed = 0;
+    for (let i = 1; i < cur.length; i++) {
+      const A = cur[i - 1], B = cur[i];
+      const n = Math.max(2, Math.ceil(gcKm(A, B) / stepKm));
+      for (let k = 1; k < n; k++) {
+        const p = gcSlerp(A, B, k / n);
+        if (!fineIsWater(p.lon, p.lat)) {
+          /* ⚠ and the repair is a DETOUR, not a nudge. Pushing the dry sample to the nearest
+             water picks whichever of sixteen directions happens to be wet, so two consecutive
+             repairs go opposite ways and the track sawtooths: measured, the nudge version put
+             corners over 60 degrees up from 25 to 483. A detour is offered perpendicular to the
+             blocked segment, at increasing distance, on both hands, and is only accepted when
+             BOTH new segments are clear — so the track goes round the obstruction the way a
+             ship does, on one side of it, and cannot be accepted into a worse position. */
+          FINE.blockedSeen++;
+          const fix = detourPoint(A, B, p);
+          if (fix) { out.push(fix); fixed++; }
+          else {
+            const way = fineDetour(A, B);
+            if (way) { for (const q of way) out.push(q); fixed++; }
+            else FINE.detourFail++;
+          }
+          break;
+        }
+      }
+      out.push(B);
+    }
+    cur = out;
+    if (!fixed) break;
+  }
+
+  /* ── AND IF ONE SEGMENT CANNOT BE CLEARED, THE STRETCH IS WRONG, NOT THE SEGMENT ─────────
+     A repair confined to A→B can only ever go round obstructions that fit between A and B. Some
+     do not: a track that runs four kilometres into a bay at the low stand has its way out
+     BEHIND it, and no point placed between those two ends is any use. So the failures are
+     re-planned across a widening span — two points either side, then five, then twelve — which
+     gives the fine search room to leave the way it came in. */
+  const blocked = i => {
+    const n = Math.max(2, Math.ceil(gcKm(cur[i - 1], cur[i]) / stepKm));
+    for (let k = 1; k < n; k++) {
+      const p = gcSlerp(cur[i - 1], cur[i], k / n);
+      if (!fineIsWater(p.lon, p.lat)) return true;
+    }
+    return false;
+  };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let bad = [];
+    for (let i = 1; i < cur.length; i++) if (blocked(i)) bad.push(i);
+    if (!bad.length) break;
+    const K = [2, 5, 12][attempt];
+    const rebuilt = []; let last = 0, any = 0;
+    for (const i of bad) {
+      const lo = Math.max(0, i - 1 - K), hi = Math.min(cur.length - 1, i + K);
+      if (lo < last) continue;                       /* spans already swallowed by an earlier one */
+      const way = fineDetour(cur[lo], cur[hi]);
+      if (!way) continue;
+      for (let j = last; j <= lo; j++) rebuilt.push(cur[j]);
+      for (const q of way) rebuilt.push(q);
+      last = hi; any++;
+    }
+    if (!any) break;
+    for (let j = last; j < cur.length; j++) rebuilt.push(cur[j]);
+    cur = rebuilt;
+  }
+
+  /* what is still blocked after everything — the number that has to reach zero */
+  for (let i = 1; i < cur.length; i++) if (blocked(i)) FINE.unfixed++;
+  return cur;
+}
+
+function finishTrack(pts, opt) {
+  if (!FINE.ready || !pts || pts.length < 3) return pts;
+  const o = opt || {};
+  const step = o.stepKm || 4;
+  let t = pts.map(p => ({ lon: p.lon, lat: p.lat }));
+  t = smoothTrack(t);
+  /* ⚠ RESAMPLE BEFORE FILLETING. The fillet leaves the course d = R·tan(θ/2) before the mark
+     and can never take more than half the incoming leg — so on a hairpin whose two legs are
+     350 m long, d is 170 m, below the minimum, and the fillet declines. That is precisely the
+     corner that needed it: measured, the 27 turns still over 60 degrees were all spikes with
+     sub-kilometre legs. Spacing the track evenly first gives every corner four kilometres of
+     approach to turn in, and the tool that could not reach them now can. */
+  t = resampleUniform(t, step);
+  /* and the fillet is LAST of the shape-defining steps — a resample after it samples the arc
+     once and the turn is gone again, which is how the first attempt changed nothing. It emits
+     at the track's own spacing, so evenness survives without a second pass. */
+  t = filletTurns(t, o.turnKm || 9, step);
+  t = pushOffLand(t);
+  t = smoothTrack(t);
+  /* ⚠ last, and after everything that moves a point. Twice, with a smoothing between: the
+     detour inserted to clear a segment is itself a corner, and smoothing now verifies segments
+     so it can take that corner out without being able to re-block anything. */
+  t = clearSegments(t, 1);
+  t = smoothTrack(t);
+  t = clearSegments(t, 1);
+  /* ── AND A POINT THAT IS STILL ASHORE IS DELETED ────────────────────────────────────────
+     Seventeen survived everything above. A waypoint is not sacred — it is a sample of a course,
+     and if the course is clear without it then it was never carrying information. Drop it when
+     its neighbours can see each other; move it when they cannot; and only then give up, so the
+     failure is one point rather than a leg. */
+  const fin = [];
+  for (let i = 0; i < t.length; i++) {
+    const p = t[i];
+    if (fineIsWater(p.lon, p.lat)) { fin.push(p); continue; }
+    const prev = fin[fin.length - 1], next = t[i + 1];
+    if (prev && next && gcWet(prev, next)) continue;
+    const fix = nearestWater(p, 60);
+    fin.push(fix || p);
+  }
+  return clearSegments(smoothTrack(fin), 1);
+}
+
 window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable,
                        buildMask, seaPath, isOcean, MASK, CARVED, maskCell, cellLonLat, windAt,
-                       maskUpgradeAvailable, isRoutable, FINE, fineIsWater };
+                       maskUpgradeAvailable, isRoutable, FINE, fineIsWater, setSeaLevel,
+                       finishTrack, gcKm, gcSlerp, turnDeg };

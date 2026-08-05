@@ -2023,9 +2023,24 @@ function stepEraFleet(t) {
     fwd.sub(up.clone().multiplyScalar(fwd.dot(up)));
     if (fwd.lengthSq() < 1e-9) continue;
     fwd.normalize();
+    /* ── ⚠ A SHIP CANNOT CHANGE HEADING INSTANTLY ────────────────────────────────────
+       Even a clean track has corners, and taking the segment bearing straight from the track
+       makes the hull snap round them between one frame and the next. A vessel swings: she has
+       a rudder, a turning circle, and a rate measured in degrees per minute. Damping the
+       heading toward the course rather than setting it gives that for free, and it also
+       absorbs whatever kinks survive the route cleanup — the geometry stops being the only
+       thing standing between the viewer and a ship that pirouettes. */
     const m = tangentBasis(up, fwd);
     if (!m) continue;
-    tr.grp.quaternion.setFromRotationMatrix(m);
+    const want = new THREE.Quaternion().setFromRotationMatrix(m);
+    if (!tr.heading) { tr.heading = want.clone(); }
+    else {
+      const ang = 2 * Math.acos(Math.min(1, Math.abs(tr.heading.dot(want))));
+      /* the bigger the error the harder she puts the helm over, up to a real limit */
+      const rate = Math.min(0.16, 0.02 + ang * 0.10);
+      tr.heading.slerp(want, rate);
+    }
+    tr.grp.quaternion.copy(tr.heading);
     /* ── ⚠ THE TRACK IS CLEAN AND THE CONSORTS ARE NOT ─────────────────────────────
        The passage search puts the FLAGSHIP in open water and I verified that at 72,768
        samples. But a consort is not on the track: she is stationed abeam of it, and at token
@@ -2046,21 +2061,45 @@ function stepEraFleet(t) {
        render — testing a consort against where the fleet was LAST frame leaves her ashore at
        every turn of the track, which is 3% of drawn hulls */
     tr.grp.updateMatrixWorld(true);
+    /* ── ⚠ AND CLOSING UP IN FIVE DISCRETE STEPS IS WHAT MADE THEM POP ────────────────
+       The first version tried station factors 1, 0.55, 0.30, 0.17, 0 and took the first that
+       was afloat. Sailing down a coast, a consort therefore SNAPPED between five fixed
+       distances from her flagship, several times a second — which reads exactly as August
+       described it: companions popping in and jumping around. A squadron closing up does it
+       by steering, over minutes.
+
+       Two changes. The factor is found by BISECTION, so it is continuous rather than one of
+       five values; and it is then eased toward, so a change of station is a movement rather
+       than a teleport. The station a consort is holding is now state that persists between
+       frames, which is what makes easing possible at all. */
     for (const h of tr.grp.children) {
       const st = h.userData.station;
       if (!st) continue;
-      let f = 1.0;
-      for (let k = 0; k < 5; k++) {
-        const x = st.x * f, z = st.z * f;
-        const r2 = x * x + z * z;
-        h.position.set(x, Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal, z);
-        if (f === 0) break;
-        h.updateMatrix();
-        const wp = h.position.clone().applyMatrix4(tr.grp.matrixWorld);
+      const place = (f) => {
+        const x = st.x * f, z = st.z * f, r2 = x * x + z * z;
+        return { x, z, y: Math.sqrt(Math.max(0, Rlocal * Rlocal - r2)) - Rlocal };
+      };
+      const afloat = (f) => {
+        if (f <= 0.001) return true;                       // the flagship's own water
+        const q = place(f);
+        const wp = new THREE.Vector3(q.x, q.y, q.z).applyMatrix4(tr.grp.matrixWorld);
         const cl = vecToLonLat(wp);
-        if (!RTm || !RTm.isOcean || RTm.isOcean(cl.lon, cl.lat)) break;
-        f = k >= 3 ? 0 : f * 0.55;      // close up, then fall into the flagship's wake
+        return !RTm || !RTm.isOcean || RTm.isOcean(cl.lon, cl.lat);
+      };
+      let target;
+      if (afloat(1)) target = 1;
+      else {
+        let lo = 0, hi = 1;
+        for (let b = 0; b < 7; b++) { const mid = (lo + hi) * 0.5; if (afloat(mid)) lo = mid; else hi = mid; }
+        target = lo;
       }
+      if (h.userData.stationF === undefined) h.userData.stationF = target;
+      /* ease, and ease IN faster than out — a ship closes up smartly and opens out gently */
+      const cf = h.userData.stationF;
+      const rate = target < cf ? 0.020 : 0.008;
+      h.userData.stationF = cf + (target - cf) * rate;
+      const q = place(h.userData.stationF);
+      h.position.set(q.x, q.y, q.z);
     }
     /* ── WHERE SHE IS, RECORDED ONCE ────────────────────────────────────────────────
        The Passage reads these rather than recomputing them. A second copy of this
