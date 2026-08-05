@@ -264,8 +264,16 @@ function clockS() { return FROZEN ? FROZEN_S : performance.now() / 1000; }
  * taken at first paint differs from one taken a second later by ~18% of pixels. That made
  * the baselines depend on capture order, which is a ratchet that only appears to work. */
 let upgradesDone = false;
+let shipSelectPending = false;
 function markReady() {
   if (FROZEN && !upgradesDone) return;
+  /* ⚠ AND NOT WHILE THE NAMED HULL IS STILL BEING FOUND. `#s=container` is applied by calling
+     window.swOpenById, which the Shipwright only defines once its view has opened — so the
+     call is a race, and it was silently skipped when lost: `typeof swOpenById === 'function'`
+     is false and nothing happens. Adding sixty-two voyages made the boot slow enough to lose
+     it, and the ship-container baseline captured the SHIP OF THE LINE, correctly framed and
+     completely wrong. A frame of the wrong ship is worse than no frame. */
+  if (FROZEN && shipSelectPending) return;
   if (!window.__FRAME_READY) window.__FRAME_READY = true;
 }
 
@@ -307,7 +315,28 @@ function applyHashView() {
      reason setView is ordered after the data load: the Shipwright builds its layout when the
      view opens, and there is nothing to select before that. */
   const sm = /[#&]s=([a-z0-9-]+)/i.exec(location.hash);
-  if (sm && typeof swOpenById === 'function') swOpenById(sm[1]);
+  if (sm) {
+    /* retried rather than attempted once, because whether the Shipwright has finished opening
+       is a matter of timing and not of intent */
+    /* ⚠ AND CALLING IT ONCE, SUCCESSFULLY, IS STILL NOT ENOUGH. setView('ship') opens the
+       Shipwright, which selects its own default hull — and it does that AFTER this line runs,
+       so the named ship was chosen and then quietly replaced. Measured: swOpenById('container')
+       returned true and the view settled on the ship of the line, panX exactly equal to shipX,
+       which is what a deliberate selection looks like. So the test is not "did the call
+       succeed" but "is the right ship selected", checked until it is. */
+    shipSelectPending = true;
+    let tries = 0;
+    const want = sm[1].toLowerCase();
+    const tryPick = () => {
+      const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
+      const entry = SWs && (SWs.layout || []).find(e => e.id.toLowerCase() === want);
+      if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) { shipSelectPending = false; return; }
+      if (typeof swOpenById === 'function') swOpenById(sm[1]);
+      if (++tries > 600) { shipSelectPending = false; console.warn('no hull named', sm[1]); return; }
+      requestAnimationFrame(tryPick);
+    };
+    tryPick();
+  }
 
   /* ── THE CAMERA IS STATE TOO, NOW THAT IT CAN DESCEND ────────────────────────────────
      Four and a half decades of altitude and the whole surface of the Earth cannot be
@@ -744,7 +773,18 @@ function updateLabels(now) {
        planet and was still being drawn, projecting onto the disc as though it belonged there —
        which is how SEA OF JAPAN came to be lettered across the English Channel. It gets worse
        the closer you fly, because the true horizon closes in while the test does not move. */
-    if (show && m.v.clone().normalize().dot(camDir) < R / S.dist) show = false;
+    /* ── AND A SLIVER OF GROUND SEEN EDGE-ON IS NOT A PLACE TO PUT A NAME ────────────
+       The horizon test above is correct and not sufficient. Right AT the limb the surface is
+       edge-on, so a thousand kilometres of coast projects into a few pixels — and every port
+       along it passes the test and stacks into a vertical column down the edge of the screen,
+       which is what the Indian Ocean looked like with sixty ports in view. A label needs
+       ground facing the camera. Inset a tenth of the way from the limb to the sub-camera
+       point, which at any altitude is the same fraction of the visible cap. */
+    {
+      const cosLimb = R / S.dist;
+      if (show && m.v.clone().normalize().dot(camDir) < cosLimb + (1 - cosLimb) * 0.10)
+        show = false;
+    }
 
     if (show) {
       const p = m.v.clone().project(camera);
@@ -867,9 +907,60 @@ function buildVoyageList() {
   mine.forEach(v => {
     const b = document.createElement('button');
     b.className = 'voy' + (S.voyage && S.voyage.id === v.id ? ' on' : '');
-    b.innerHTML = `<span class="vn">${v.name}</span><span class="vy">${v.dates}</span>`;
-    b.onclick = () => startVoyage(v);
+    /* ── WHAT IS ACTUALLY OUT THERE, AND WHERE ─────────────────────────────────────────
+       The list used to give a name and a date, which is a bibliography. What a viewer wants
+       from a panel beside a moving map is the FLEET: which ship, and where she has got to —
+       read off the same track that is drawing her, so the panel and the globe cannot disagree.
+       A hull on the far side of the planet is marked, because "I clicked it and nothing was
+       there" is otherwise the obvious next complaint. */
+    const tr = (eraTracks || []).find(t => t.name === v.name);
+    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === v.vessel);
+    let where = '';
+    if (tr && tr._lo !== undefined) {
+      const ns = tr._la >= 0 ? 'N' : 'S', ew = tr._lo >= 0 ? 'E' : 'W';
+      where = `${Math.abs(tr._la).toFixed(0)}°${ns} ${Math.abs(tr._lo).toFixed(0)}°${ew}`;
+      if (!tr.grp.visible) where += ' · far side';
+    }
+    b.innerHTML = `<span class="vn">${v.name}</span>` +
+      `<span class="vy">${ves ? ves.name : v.vessel}${where ? ' · ' + where : ''}</span>`;
+    b.onclick = () => {
+      startVoyage(v);
+      /* ⚠ and it goes to where she IS, not to the authored view of the voyage. startVoyage
+         flies to v.view, which is a fixed picture of the whole route — so clicking a name
+         took you to a place the ship might be nowhere near. Her live position comes from the
+         track that is drawing her; the fallback is the first waypoint. */
+      const t2 = (eraTracks || []).find(t => t.name === v.name);
+      const lon = t2 && t2._lo !== undefined ? t2._lo : v.legs[0].lon;
+      const lat = t2 && t2._la !== undefined ? t2._la : v.legs[0].lat;
+      flyTo(lon, lat, R + 2200000 / 63710, 1600);      /* still the globe, from 2,200 km */
+    };
     host.appendChild(b);
+  });
+}
+
+/* The positions in the list go stale the moment the fleet moves, and a stale position beside a
+   moving ship is worse than none — it is a claim. Twice a second, and only the text, so the
+   list is not rebuilt underneath the pointer. */
+let _fleetListAt = -1;
+function refreshFleetList(t) {
+  if (t - _fleetListAt < 500) return;
+  _fleetListAt = t;
+  const host = document.getElementById('voyList');
+  if (!host) return;
+  const btns = host.querySelectorAll('button.voy');
+  if (!btns.length || !eraTracks.length) return;
+  const all = (APP.voyages && APP.voyages.voyages) || [];
+  const era = currentEra();
+  const mine = all.filter(v => era && v.year >= era.from && v.year <= era.to);
+  btns.forEach((b, i) => {
+    const v = mine[i]; if (!v) return;
+    const tr = eraTracks.find(x => x.name === v.name);
+    const el = b.querySelector('.vy'); if (!el || !tr || tr._lo === undefined) return;
+    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === v.vessel);
+    const ns = tr._la >= 0 ? 'N' : 'S', ew = tr._lo >= 0 ? 'E' : 'W';
+    el.textContent = (ves ? ves.name : v.vessel) +
+      ` · ${Math.abs(tr._la).toFixed(0)}°${ns} ${Math.abs(tr._lo).toFixed(0)}°${ew}` +
+      (tr.grp.visible ? '' : ' · far side');
   });
 }
 
@@ -1238,7 +1329,7 @@ function wireUI() {
          of her: no button to find, the map is simply there again once she stops being the
          subject */
       S.followDist = Math.max(25, S.followDist * (1 + Math.sign(e.deltaY) * 0.13));
-      if (S.followDist > FOLLOW_RELEASE_M) { releaseShip(); S.dist = R + 300000 / 63710; }
+      if (S.followDist > FOLLOW_RELEASE_M) { leaveShip(); return; }
       placeCamera();
       return;
     }
@@ -1339,9 +1430,20 @@ function frame(now) {
     const aM = Math.max(1, (camera.position.length() - R) * 63710);
     const f = Math.max(0, Math.min(1,
       (Math.log(aM) - Math.log(1000)) / (Math.log(120000) - Math.log(1000))));
-    voyT += dt * (1 / 600) * Math.pow(600, f);
+    /* ── ⚠ AND THE COMPRESSION AT THE WATERLINE HAD TO MEAN SOMETHING ────────────────
+       600 was a number that felt right, and once the near water started streaming past the
+       hull it stopped being invisible: at the waterline the voyage clock ran about fourteen
+       times real time, so a 16-knot ship had 224 knots of water going by. Nobody would read
+       that as a container ship.
+       C is now derived rather than chosen. Screen speed on the map is knots x 4.41 km per
+       clock-second (see the pacing above); real speed is knots x 1.852/3600. The ratio is
+       8,577, so dividing by that at the waterline puts the ship at HER OWN SPEED through the
+       water, and the same constant as the exponent base leaves the map end exactly as it was. */
+    const C = 8577;
+    voyT += dt * (1 / C) * Math.pow(C, f);
   }
   stepEraFleet(voyT);
+  refreshFleetList(t);
   updateLabels(t);
 
   if (S.monthPlaying && !FROZEN) {
@@ -1610,6 +1712,23 @@ let eraFleet = null, eraTracks = [];
        ended up sitting on Brittany. If the search fails, the leg is kept as given and counted,
        so the failure is visible rather than drawn as a plausible course. */
 let seaRouteMisses = 0;
+let paceClamped = [];
+/* Routing a voyage is deterministic given its waypoints, the datum and which canals exist, and
+   it is the most expensive thing this app does. Sixty-two of them, recomputed every time the
+   era strip is touched, is work already done. Keyed on the grid's own signature so a change of
+   era or sea level invalidates it correctly rather than serving a track for the wrong coast. */
+const trackCache = new Map();
+/* ONE reading of a ship's speed, used by the pacing, the card and anything else that asks.
+   Two readings is how a hull came to be paced at 16 knots and described at 6 on the same
+   screen at the same moment. */
+function shipKn(ves) {
+  const curve = ves && ves.polar && ves.polar.curve;
+  if (curve) {
+    const vals = Object.keys(curve).map(k => curve[k]).filter(v => isFinite(v));
+    if (vals.length) return Math.max.apply(null, vals);
+  }
+  return (ves && ves.speedKn) || 6;
+}
 function seaRoute(legs) {
   const RT = window.SHIPS_ROUTE;
   const out = [];
@@ -1624,6 +1743,9 @@ function seaRoute(legs) {
     if (!path) { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); continue; }
     for (const p of path) push(p.lon, p.lat);
   }
+  /* ⚠ The finishing runs HERE, on the assembled voyage, not inside the passage search. Each
+     segment was already clean against itself; every bad corner measured was at a seam. */
+  if (out.length > 2 && RT && RT.finishTrack) return RT.finishTrack(out);
   return out.length > 1 ? out : legs;
 }
 
@@ -1635,6 +1757,17 @@ function clearEraFleet() {
 
 function buildEraFleet() {
   clearEraFleet();
+  paceClamped = [];
+  /* ⚠ THE ROUTER MUST BE ON THE ERA'S SHORELINE, and this has to happen before any track is
+     planned. At 60,000 BP the sea is 68 m lower; routing that era against the modern coast put
+     309 drawn samples of 253,092 on land, every one of them in era 0. The coarse grid is
+     rebuilt from the fine array whenever the datum moves — a second and a half, once per era. */
+  {
+    const RTs = window.SHIPS_ROUTE;
+    if (RTs && RTs.setSeaLevel && mat && mat.uniforms && mat.uniforms.uSeaLevel) {
+      if (RTs.setSeaLevel(mat.uniforms.uSeaLevel.value, S.year)) RTs.buildMask(true);
+    }
+  }
   const ch = (APP.chapters && APP.chapters.chapters) ? APP.chapters.chapters[S.era] : null;
   if (!ch || !APP.voyages || !APP.vessels) return;
   const from = ch.from, to = ch.to;
@@ -1697,8 +1830,7 @@ function buildEraFleet() {
        while a cog is still in the Bight, and no clipper had been faster than any cog since
        the line was written. A fallback that fires every time is not a fallback; it is the
        value, and it should be measured rather than read past. */
-    const curve = (ves.polar && ves.polar.curve) || null;
-    const kn = curve ? Math.max.apply(null, Object.keys(curve).map(k => curve[k])) : 6;
+    const kn = shipKn(ves);
 
     /* ── AND THE PACE CAME FROM THE NUMBER OF WAYPOINTS ─────────────────────────────
        The old period was `n * 26 / kn * 34` — proportional to how many POINTS the track
@@ -1711,17 +1843,37 @@ function buildEraFleet() {
        A voyage takes as long as its DISTANCE over its SPEED. That is the only formula with a
        meaning, it makes the clipper genuinely lap the cog, and the compression to screen time
        is a single stated constant instead of an accident of the routing. */
-    const legsR = seaRoute(v.legs);
+    const RTc = window.SHIPS_ROUTE;
+    const ck = v.id + '|' + ((RTc && RTc.FINE && RTc.FINE.sig) || '');
+    let legsR = trackCache.get(ck);
+    if (!legsR) { legsR = seaRoute(v.legs); trackCache.set(ck, legsR); }
     let km = 0;
     for (let i = 0; i < legsR.length - 1; i++) {
       const A = lonLatToVec(legsR[i].lon, legsR[i].lat, 1);
       const B = lonLatToVec(legsR[i + 1].lon, legsR[i + 1].lat, 1);
       km += Math.acos(Math.max(-1, Math.min(1, A.dot(B)))) * 6371;
     }
-    /* ten hours of the voyage per second of watching. Bounded so the shortest hop is still a
-       passage and the longest is not a career: 100 s to 7 minutes. */
+    /* ── AND THEN THE CLAMP ATE THE PROPORTIONALITY ────────────────────────────────────
+       `clamp(hours/10, 100, 420)` looked conservative and was the whole fault. Both ends of
+       the fleet hit the floor: a 20,000 km container circuit and a 500 km galley hop were each
+       given 100 seconds, so the box boat crossed the screen at 200 km/s and the galley at 5 —
+       screen speed proportional to ROUTE LENGTH, which is the opposite of the intent. Speed on
+       screen is speed: km/s = knots × 1.852 / C, and with no clamp that identity holds exactly.
+
+       ⚠ AND THE CEILING IS THE SAME BUG. First attempt kept a 900 s cap, and measured, it bound
+       on TEN of the routes — every circumnavigation and the container circuit alike. Inside the
+       cap, screen speed is again proportional to length, and the numbers came out backwards:
+       Magellan at 5.8 knots crossed the screen at 61.9 km/s while the box boat at 16 knots made
+       45.7. A clamp that binds on the whole interesting half of the fleet is not a bound, it is
+       the formula. So there is no ceiling. A circumnavigation takes 36 minutes to come round,
+       which is correct — it took three years, and the viewer watches a passage, not a lap.
+
+       C = 0.42 h/s, so km/s = knots × 4.41 for every hull on the map, exactly. The one bound
+       left is a floor of 45 s, which binds only on the very shortest hop. */
     const hours = km / (kn * 1.852);
-    const period = Math.max(100, Math.min(420, hours / 10));
+    const want = hours * 0.42;
+    const period = Math.max(45, want);
+    if (want < 45) paceClamped.push(v.name);
     eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
                      phase: (eraTracks.length * 0.37) % 1, name: v.name });
   }
@@ -1811,13 +1963,37 @@ function followShip(tr) {
   document.body.classList.add('in-passage');
 }
 
-function releaseShip() {
-  if (!S.follow) return;
-  S.follow = null;
+/* ── ⚠ AND THE WAY BACK UP WAS TWO HALVES OF TWO DIFFERENT DOORS ──────────────────────────
+ * Clicking a hull calls followShip(), which shows the card. The card's button called
+ * closePassage(), which begins `if (!PSGV.on) return` — and followShip never sets PSGV.on,
+ * because PSGV belongs to the OTHER way in. So the button was correctly wired to a function
+ * that was guaranteed to do nothing on the only path a user can actually take. It worked
+ * perfectly when I called openPassage() by hand from the console, which is why four rounds of
+ * testing never caught it: I was exercising a door nobody uses.
+ *
+ * One exit now, and it FLIES. The old release set S.dist directly — from the waterline to 300
+ * km between two frames, which is not a zoom-out, it is a cut to a different picture, and that
+ * is exactly what August described. The climb starts from where the eye actually is, which
+ * means reading the camera rather than trusting S.dist, since while following she is placed by
+ * the follow logic and S.dist has not been the eye's altitude for some seconds.
+ */
+function leaveShip(ms) {
+  const tr = S.follow || PSGV.track;
+  const lon = tr && tr.at ? tr.at.lon : S.lon;
+  const lat = tr && tr.at ? tr.at.lat : S.lat;
+  S.dist = Math.max(R + MIN_ALT, camera.position.length());
+  S.lon = lon; S.lat = lat;
+  if (PSGV.on) { PSGV.on = false; PSGV.track = null; window.SHIPS_PSG.psgClose(); }
+  if (S.follow) { S.follow = null; window.SHIPS_PSG.psgFleetClear(); }
+  if (eraFleet) eraFleet.visible = true;
   if (PSGV.card) PSGV.card.style.display = 'none';
   document.body.classList.remove('in-passage');
-  window.SHIPS_PSG.psgFleetClear();
-  if (eraFleet) eraFleet.visible = true;
+  flyTo(lon, lat, R + 300000 / 63710, ms || 2200);
+}
+
+function releaseShip() {
+  if (!S.follow) return;
+  leaveShip();
 }
 
 function openPassage(tr) {
@@ -1855,7 +2031,7 @@ function passageCard(tr, ves) {
       '<table class="pc-rows"></table>';
     document.body.appendChild(d);
     PSGV.card = d;
-    d.querySelector('#psgBack').onclick = closePassage;
+    d.querySelector('#psgBack').onclick = () => leaveShip();
   }
   const c = PSGV.card;
   c.style.display = 'block';
@@ -1866,7 +2042,10 @@ function passageCard(tr, ves) {
     ['Length overall', H.loa.toFixed(1) + ' m'],
     ['Beam', H.beam.toFixed(1) + ' m'],
     ['Draught', H.draught.toFixed(2) + ' m'],
-    ['Best speed', ((ves.polar && ves.polar.best) || ves.speedKn || 6).toFixed(1) + ' kn'],
+    /* ⚠ ves.polar.best does not exist — the same non-field that made every hull sail at the
+       literal fallback of six knots two rounds ago. The card was still printing "6.0 kn" for
+       a 400 m container ship while the pacing beside it used 16. One reading of one number. */
+    ['Best speed', shipKn(ves).toFixed(1) + ' kn'],
   ];
   c.querySelector('.pc-rows').innerHTML =
     rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +
@@ -1919,8 +2098,43 @@ function pickShip(ev) {
   return best;
 }
 
+/* ── AND TWO SHIPS MAY NOT BE IN THE SAME WATER ────────────────────────────────────────────
+ * Tracks are planned one at a time against the coast, and nothing has ever looked at what the
+ * other ships are doing — so where two sea lanes share a strait the hulls interpenetrate, which
+ * at token exaggeration means a 125 km carrack passing through a 125 km junk.
+ *
+ * The rule is the actual rule. Under COLREGS a vessel that must give way alters to STARBOARD,
+ * and two ships meeting head-on each do so, passing port to port. Both alter here by half the
+ * shortfall, which resolves the crossing case as well without needing to work out who is the
+ * stand-on vessel — and the altered position is put through the same mask every other position
+ * goes through, so a ship will hold her course and accept the near miss before she will take a
+ * sheer toward the beach. The separation asked for is in DRAWN hull lengths, because that is
+ * what a viewer sees; at globe zoom that is hundreds of kilometres and at the waterline it is
+ * metres, and both are correct for their zoom.
+ */
+function avoidPass() {
+  for (const tr of eraTracks) {
+    if (tr._lo === undefined) continue;
+    let need = 0;
+    for (const o of eraTracks) {
+      if (o === tr || o._lo === undefined) continue;
+      const dLat = (o._la - tr._la) * 111.32;
+      let dl = o._lo - tr._lo; if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
+      const dLon = dl * 111.32 * Math.cos(tr._la * Math.PI / 180);
+      const d = Math.hypot(dLat, dLon);
+      const want = 0.9 * ((tr._drawKm || 0) + (o._drawKm || 0));
+      if (d < want && d > 1e-6) need += (want - d) * 0.5;
+    }
+    need = Math.min(need, 500);
+    const cur = tr.avoidKm || 0;
+    /* she comes off her course briskly and returns to it slowly, which is how the helm is used */
+    tr.avoidKm = cur + (need - cur) * (need > cur ? 0.05 : 0.015);
+  }
+}
+
 function stepEraFleet(t) {
   if (!eraFleet) return;
+  avoidPass();
   for (const tr of eraTracks) {
     const n = tr.legs.length;
     /* one full circuit in a time proportional to the track's length over the ship's speed,
@@ -1968,9 +2182,12 @@ function stepEraFleet(t) {
     {
       const RTf = window.SHIPS_ROUTE;
       if (RTf && RTf.isOcean && !RTf.isOcean(lo, la)) {
-        for (let k = 1; k <= 6; k++) {
+        /* ⚠ ±0.9 of a leg is ±3.6 km at the finished spacing, which is not enough sea-room to
+           get clear of an island the segment clipped — it is a backstop for a metre, not for a
+           coastline. Widened to ±6 legs, and the real fix is in clearSegments(). */
+        for (let k = 1; k <= 24; k++) {
           for (const sgn of [1, -1]) {
-            const f2 = Math.min(n - 1.001, Math.max(0, f + sgn * k * 0.15));
+            const f2 = Math.min(n - 1.001, Math.max(0, f + sgn * k * 0.25));
             const i2 = Math.min(n - 2, Math.floor(f2)), fr2 = f2 - i2;
             const a2 = tr.legs[i2], b2 = tr.legs[i2 + 1];
             const lo2 = a2.lon + (b2.lon - a2.lon) * fr2, la2 = a2.lat + (b2.lat - a2.lat) * fr2;
@@ -1979,6 +2196,20 @@ function stepEraFleet(t) {
         }
       }
     }
+    /* the alteration for traffic, applied to starboard of the ship's own course and refused if
+       it would put her ashore — the mask has the last word here as everywhere else */
+    if ((tr.avoidKm || 0) > 0.5) {
+      const dl0 = ((b.lon - a.lon + 540) % 360) - 180;
+      const brgR = Math.atan2(Math.sin(dl0 * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180),
+        Math.cos(a.lat * Math.PI / 180) * Math.sin(b.lat * Math.PI / 180) -
+        Math.sin(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.cos(dl0 * Math.PI / 180));
+      const stb = brgR + Math.PI / 2;
+      const dLa = tr.avoidKm * Math.cos(stb) / 111.32;
+      const dLo = tr.avoidKm * Math.sin(stb) / (111.32 * Math.max(0.05, Math.cos(la * Math.PI / 180)));
+      const RTa = window.SHIPS_ROUTE;
+      if (!RTa || !RTa.isOcean || RTa.isOcean(lo + dLo, la + dLa)) { lo += dLo; la += dLa; }
+    }
+    tr._lo = lo; tr._la = la;
     const w = lonLatToVec(lo, la, R * 1.0002);
     tr.grp.position.copy(w);
     /* ── ⚠ THE HORIZON IS NOT AT 90 DEGREES ─────────────────────────────────────────
@@ -2016,6 +2247,9 @@ function stepEraFleet(t) {
       const f = Math.max(0, Math.min(1,
         (Math.log(altU) - Math.log(lo)) / (Math.log(hi) - Math.log(lo))));
       tr.grp.scale.setScalar(tru * Math.pow(Math.max(tok / tru, 1e-6), f));
+      /* how long this hull is ON SCREEN, in kilometres of ocean — the unit traffic separation
+         has to be measured in, since that is the overlap a viewer actually sees */
+      tr._drawKm = tr.grp.scale.x * tr.grp.userData.loa * 6371 / R;
     }
     /* heading from the track on the sphere, projected into the local tangent plane */
     const up = w.clone().normalize();

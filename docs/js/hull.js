@@ -1380,6 +1380,19 @@ const PARTS = {
                   + 'is — 46,328 tons of which comparatively little is hold. Each tier steps in '
                   + 'fore and aft, because the decks must taper as the hull does and because a '
                   + 'stepped profile sheds the wind that a slab would catch.' },
+  bulb:     { stage: 2, name: 'Bulbous bow',
+              what: 'A bulb below the waterline forward, making its own wave a little ahead of '
+                  + 'the bow wave and out of phase with it, so the two partly cancel. Worth '
+                  + 'several per cent on a hull burning a hundred tonnes of fuel a day, which '
+                  + 'is the entire reason every ship of this kind built since the 1960s has one.' },
+  forecast: { stage: 3, name: 'Forecastle',
+              what: 'The raised deck right forward, carrying the windlass and the mooring gear. '
+                  + 'It also keeps green water off the forward container stack — which is the '
+                  + 'stack that goes overboard when one does.' },
+  lashing:  { stage: 7, name: 'Lashing bridge',
+              what: 'A steel gantry between bays that the deck stacks are lashed to. Without it '
+                  + 'the rods can only reach the second tier, and everything above that is held '
+                  + 'down by the corner castings and hope.' },
   bridge:   { stage: 3, name: 'Accommodation and bridge',
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
@@ -2378,18 +2391,74 @@ function buildContainers(S, group) {
   const mats = pal.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.74, metalness: 0.14 }));
   const box = new THREE.BoxGeometry(TEU_L * 0.97, TEU_H * 0.95, TEU_W * 0.94);
   const stack = new THREE.Group();
-  let n = 0;
-  for (let bay = 0; bay < Math.floor(L * 0.66 / (TEU_L * 1.06)); bay++) {
-    const x = -L * 0.40 + bay * TEU_L * 1.06;
-    const high = 5 + ((bay * 3) % 3);                    // stows are not level; they never are
-    for (let c = 0; c < cols; c++)
+
+  /* ── ⚠ THE STOW WAS A RECTANGULAR BLOCK, AND MEANT NOT TO BE ──────────────────────────
+     `high = 5 + ((bay * 3) % 3)` is always 5, because three times anything is divisible by
+     three. The comment beside it said "stows are not level; they never are" and the code made
+     one perfectly level slab, 245 m long and 5 boxes high, everywhere. Nobody would read that
+     as a ship.
+     A real stow has a shape, and the shape has reasons:
+       * it is highest a little abaft amidships and steps DOWN toward the bow, because the
+         forward stack takes the weather and because trim wants the weight aft of the middle;
+       * the outboard columns are lower than the centre — SOLAS requires a line of sight from
+         the bridge to the water no more than two ship-lengths ahead, and that sightline is
+         bought by cutting the wings down;
+       * the bays are separated by hatch covers and every third one by a lashing bridge, so
+         the deck is not one continuous mass;
+       * a bay is 40 ft or two of 20 ft, and the 20 ft bays are visibly shorter.
+     None of that is decoration. Each line is a constraint the real stow is solving. */
+  const BAYS = Math.floor(L * 0.70 / (TEU_L * 1.06));
+  const hatch = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.85, metalness: 0.2 });
+  const lash = new THREE.MeshStandardMaterial({ color: 0x6d7176, roughness: 0.7, metalness: 0.45 });
+  const deckY = H.sheer(0.5);
+  for (let bay = 0; bay < BAYS; bay++) {
+    const u = bay / Math.max(1, BAYS - 1);              // 0 at the bow end of the stow, 1 aft
+    const x = -L * 0.42 + bay * TEU_L * 1.06;
+    /* the profile: 4 high at the fore end rising to 8 abaft amidships, then easing back to 6 */
+    const prof = 4 + 4 * Math.sin(Math.min(1, u * 1.15) * Math.PI * 0.62);
+    const centreHigh = Math.max(3, Math.round(prof));
+    /* hatch cover under the bay */
+    const hc = new THREE.Mesh(new THREE.BoxGeometry(TEU_L * 1.00, TEU_H * 0.22, B * 0.86), hatch);
+    hc.position.set(x, deckY + TEU_H * 0.11, 0);
+    stack.add(hc);
+    for (let c = 0; c < cols; c++) {
+      /* the wings come down: full height on the centreline, two tiers less at the rail */
+      const wing = Math.abs(c - (cols - 1) / 2) / ((cols - 1) / 2 || 1);
+      const high = Math.max(2, Math.round(centreHigh - wing * wing * 2.6));
       for (let h = 0; h < high; h++) {
         const m = new THREE.Mesh(box, mats[(bay * 7 + c * 3 + h) % mats.length]);
-        m.position.set(x, H.sheer(0.5) + TEU_H * (h + 0.5), (c - (cols - 1) / 2) * TEU_W * 1.02);
-        stack.add(m); n++;
+        m.position.set(x, deckY + TEU_H * (0.22 + h + 0.5),
+                       (c - (cols - 1) / 2) * TEU_W * 1.02);
+        stack.add(m);
       }
+    }
+    /* a lashing bridge every third bay, two tiers high, spanning the full width */
+    if (bay % 3 === 2) {
+      const lb = new THREE.Mesh(
+        new THREE.BoxGeometry(TEU_L * 0.10, TEU_H * 2.1, B * 0.88), lash);
+      lb.position.set(x + TEU_L * 0.55, deckY + TEU_H * 1.3, 0);
+      stack.add(lb);
+    }
   }
   group.add(tag(stack, 'container'));
+
+  /* ── AND THE BOW OF A MOTOR SHIP IS A BULB ────────────────────────────────────────────
+     A displacement hull driven at a fixed speed makes a bow wave, and the bow wave is most of
+     the resistance. The bulb makes a second wave a little ahead of it, out of phase, and the
+     two partly cancel — worth several per cent of fuel on a hull that burns a hundred tonnes
+     a day, which is why every ship of this kind built since the 1960s has one. It is the
+     single feature that most says "modern" about a profile, and it was missing. */
+  const bulbMat = new THREE.MeshStandardMaterial({ color: 0x8d2f26, roughness: 0.7, metalness: 0.2 });
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(S.beam * 0.115, 18, 12), bulbMat);
+  bulb.scale.set(2.5, 1.0, 1.0);
+  bulb.position.set(-L * 0.495, -S.draught * 0.62, 0);
+  group.add(tag(bulb, 'bulb'));
+
+  /* the forecastle: mooring gear, windlass and the break of the deck, right forward */
+  const steelPale = new THREE.MeshStandardMaterial({ color: 0xc8c4bb, roughness: 0.62 });
+  const fc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.048, TEU_H * 1.1, B * 0.60), steelPale);
+  fc.position.set(-L * 0.455, H.sheer(0.5) + TEU_H * 0.55, 0);
+  group.add(tag(fc, 'forecast'));
 
   /* the accommodation block and the funnel above the engine, both right aft */
   const white = new THREE.MeshStandardMaterial({ color: 0xd8d8d4, roughness: 0.55 });

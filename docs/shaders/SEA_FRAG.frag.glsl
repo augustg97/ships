@@ -16,6 +16,23 @@ uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
 
    uShore fades the last stretch to nothing rather than cutting it, so a beach reads as a beach
    instead of as a polygon edge. */
+/* ── THE SHIP'S OWN WATER ────────────────────────────────────────────────────────────────
+   A hull moving through water leaves three things, and they are three different phenomena:
+     * the BOW WAVE, thrown up and outward where the stem parts the water;
+     * the KELVIN ARMS, a pair of crests at 19.47 degrees either side of the track — an angle
+       that is the same for every displacement hull at every speed, because it falls out of
+       the dispersion of deep-water waves and not out of the ship;
+     * the TURBULENT WAKE, a band of aerated water astern, widening and dying over some ten
+       ship-lengths, which is the one you can see from a long way off.
+   uWakeP is her position on this patch in metres, uWakeDir her heading, uWakeKn her speed.
+   With no way on, there is no wake — the terms all scale off speed, so a ship stopped makes
+   none of them. */
+uniform vec2  uWakeP;
+uniform vec2  uWakeDir;
+uniform float uWakeLen;
+uniform float uWakeBeam;
+uniform float uWakeKn;
+
 uniform sampler2D uDepth;      // the globe's elevation field — RG is 16-bit elevation
 uniform vec2  uAnchor;         // lon, lat of the patch's origin, RADIANS
 uniform float uSeaLevel;       // metres relative to today, for deep time
@@ -111,6 +128,38 @@ void main(){
   float streak = fbm(vP.xz * 0.9 + vec2(drift * 1.2, 0.0));
   float foam = crestN * breakF * smoothstep(0.42, 0.78, streak);
   col = mix(col, vec3(0.86, 0.90, 0.92), clamp(foam, 0.0, 0.9));
+
+  /* ── HER WAKE ──────────────────────────────────────────────────────────────────────── */
+  if (uWakeKn > 0.15 && uWakeLen > 0.5) {
+    vec2  rel    = vP.xz - uWakeP;
+    float along  = dot(rel, -uWakeDir);                   // positive ASTERN of her
+    float across = abs(dot(rel, vec2(-uWakeDir.y, uWakeDir.x)));
+    float spd    = clamp(uWakeKn / 16.0, 0.25, 1.5);
+    float len    = uWakeLen * 10.0 * spd;
+    float fade   = clamp(1.0 - along / len, 0.0, 1.0);
+    float w = 0.0;
+
+    /* the turbulent band, widening astern and dying as it goes */
+    float halfW = uWakeBeam * (0.5 + 1.1 * clamp(along / len, 0.0, 1.0));
+    w += step(0.0, along) * fade * fade *
+         smoothstep(halfW, halfW * 0.30, across) *
+         (0.55 + 0.45 * fbm(vec2(along * 0.06 - drift * 1.7, across * 0.10)));
+
+    /* the Kelvin arms — tan(19.47 degrees) = 0.3536, and it is not a free parameter */
+    float arm = abs(across - along * 0.3536);
+    w += step(uWakeLen * 0.25, along) * fade * 0.62 *
+         smoothstep(uWakeBeam * 0.80, 0.0, arm);
+
+    /* the bow wave, thrown out and forward of the stem */
+    float fwd = -along;                                    // positive AHEAD of her
+    w += step(0.0, fwd) * step(fwd, uWakeLen * 0.60) *
+         smoothstep(uWakeBeam * 1.7, uWakeBeam * 0.25, across) *
+         smoothstep(0.0, uWakeLen * 0.30, fwd) * 0.85 * spd;
+
+    w = clamp(w * spd, 0.0, 0.92);
+    /* aerated water is brighter, and it scatters instead of reflecting */
+    col = mix(col, vec3(0.88, 0.92, 0.94), w);
+  }
 
   /* haze into the horizon so the plane reads as an ocean rather than a floor */
   float haze = smoothstep(uScale * 3.0, uScale * 14.0, dist);
