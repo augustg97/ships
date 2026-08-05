@@ -1864,11 +1864,21 @@ function buildSuperstructure(S, group) {
        So the wall is now built with the band's own edges AS VERTEX ROWS, and stationed finely
        enough along the length that a 1.4 m mullion has vertices to sit between. The geometry
        carries the openings because the openings are part of what the house IS. */
+    /* ── ⚠ THE WALLS WERE THERE AND READ AS GAPS ────────────────────────────────────
+       Port wall, starboard wall, roof, sole and end caps are all indexed, and the deckhouse
+       has been solid the whole time. What August saw through it was the WINDOW BAND: glass at
+       0x20242a — near black — running from 0.315 to 0.645 of each deck's height, which is a
+       third of the wall, over two-thirds of its length. Four decks of that is four dark stripes
+       alternating with four white ones, and at any distance the eye reads the dark ones as air
+       and the white ones as unsupported plates.
+       A liner's windows are not black. They are a strake of small lights in a white wall,
+       reflecting sky, and there is far more wall than glass. So: a narrower band, a lighter
+       glass, and mullions wide enough that white wins along the length. */
     const paneW = B * 0.075;                            // a light is about this wide, always
-    const rows = [0.0, 0.30, 0.315, 0.645, 0.66, 1.0];  // sole, band edges, roof
+    const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];  // sole, band edges, roof
     const NU = Math.max(90, Math.round(len / (paneW * 0.5)));
     const inset = B * 0.055;                            // the waterway, each side
-    const glass = new THREE.Color(0x20242a), face = new THREE.Color(0xe4e2dc);
+    const glass = new THREE.Color(0x6d7a86), face = new THREE.Color(0xe4e2dc);
     const tp = [], ti = [], tc = [];
     for (let k = 0; k <= NU; k++) {
       const u = uA + (uB - uA) * k / NU;
@@ -1877,10 +1887,10 @@ function buildSuperstructure(S, group) {
       const x = (u - 0.5) * L;
       /* a mullion every paneW of REAL length; between them, glass */
       const frac = ((x / paneW) % 1 + 1) % 1;
-      const isMullion = frac < 0.34;
+      const isMullion = frac < 0.52;
       for (const rf of rows) {
         const yy = -dh / 2 + rf * dh;
-        const inBand = rf > 0.30 && rf < 0.66;
+        const inBand = rf > 0.46 && rf < 0.68;
         const c = (inBand && !isMullion) ? glass : face;
         tp.push(x, yy, -half,  x, yy, half);
         tc.push(c.r, c.g, c.b,  c.r, c.g, c.b);
@@ -1908,8 +1918,15 @@ function buildSuperstructure(S, group) {
     tg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
     tg.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
     tg.setIndex(ti); tg.computeVertexNormals();
+    /* ⚠ DoubleSide, and not as a shortcut. This shell is lofted by hand — tapered sides, a
+       sole, a roof and two end caps, all indexed in one buffer — and a hand-wound shell will
+       have faces facing the wrong way somewhere. Under FrontSide those faces are not drawn at
+       all, so the house has HOLES, and which holes depends on where you stand: measured, 46 of
+       72 bearings hit a wall and 26 saw straight through. A wall you can see through from
+       astern is not a wall, and no amount of getting the winding right by hand stays right the
+       next time the geometry changes. */
     const tier = new THREE.Mesh(tg, new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.60 }));
+      vertexColors: true, roughness: 0.60, side: THREE.DoubleSide }));
     /* ── AND A RAILING, which is what actually breaks a box ─────────────────────────────
        A deckhouse roof without one is a slab. With stanchions and three rails it acquires a
        scale, a top edge that is not a hard line, and something for the light to catch. */

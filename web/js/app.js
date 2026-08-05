@@ -2073,19 +2073,61 @@ const PSGV = { on: false, track: null, t: 0, card: null };
    answer comes from the same coastline her track was planned against. Returns a bearing in
    radians from north through east, or null when there is nothing in sight — mid-ocean keeps
    the standing quarter view. */
-function landwardAz(at) {
+function landward(at) {
   const RT = window.SHIPS_ROUTE;
   if (!at || !RT || !RT.isOcean || !RT.FINE || !RT.FINE.ready) return null;
   const cl = Math.max(0.05, Math.cos(at.lat * Math.PI / 180));
-  for (let km = 3; km <= 70; km += 3) {
+  for (let km = 3; km <= 140; km += 3) {
     for (let b = 0; b < 48; b++) {
       const th = b * Math.PI / 24;
       const lo = at.lon + Math.sin(th) * km / 111.32 / cl;
       const la = at.lat + Math.cos(th) * km / 111.32;
-      if (!RT.isOcean(lo, la)) return th;
+      if (!RT.isOcean(lo, la)) {
+        /* how high it is, so the camera can be put where it can actually be seen */
+        let h = 0;
+        if (APP.depthCanvasByLevel && RT.FINE.level >= 0) {
+          const cv = APP.depthCanvasByLevel[RT.FINE.level];
+          if (cv) {
+            if (!landward._cx) { landward._cx = cv.getContext('2d', { willReadFrequently: true });
+                                 landward._img = landward._cx.getImageData(0, 0, cv.width, cv.height).data;
+                                 landward._w = cv.width; landward._h = cv.height; }
+            const x = Math.min(landward._w - 1,
+                     Math.floor((((lo + 180) % 360) + 360) % 360 / 360 * landward._w));
+            const y = Math.max(0, Math.min(landward._h - 1,
+                     Math.floor((90 - la) / 180 * landward._h)));
+            const i = (y * landward._w + x) * 4;
+            h = (landward._img[i] * 256 + landward._img[i + 1]) / 65535 * 20000 - 11000;
+          }
+        }
+        return { az: th, km, h: Math.max(0, h) };
+      }
     }
   }
   return null;
+}
+
+/* ── ⚠ AND STANDING ON HER DECK IS NOT ALWAYS ENOUGH TO SEE HER COAST ────────────────────
+   The horizon is sqrt(2 R h) and depends on eye height alone. Measured on Zheng He's treasure
+   fleet: land 42 km away and TWENTY METRES high, which from a 54 m eye sits at exactly the
+   horizon — present, and one pixel row of it. That is why land kept being "missing" for some
+   ships and not others: the Athenian armada had a 121 m coast six kilometres off and the
+   treasure ship had a mudflat over the curve of the Earth.
+   So the stand-off is derived rather than fixed. The eye goes high enough that her coast clears
+   the horizon with margin to be a band rather than a line — and no higher, because this is
+   still a view of a ship. Mid-ocean, and where the coast is already plain, nothing changes. */
+function standOffFor(loa, lw) {
+  const base = Math.max(90, (loa || 40) * 3.2);
+  if (!lw) return base;
+  const R_E = 6371000;
+  const dLand = Math.sqrt(2 * R_E * Math.max(1, lw.h));       // how far the land sees
+  const need = Math.max(0, lw.km * 1000 - dLand);             // the rest must be the eye's
+  /* ⚠ capped LOW, because the ground is lifted rather than the camera. Pushing the eye up
+     until a 20 m coast cleared the horizon put the camera 600 m up and shrank the ship to a
+     speck — solving the coast by losing the subject. The near ground carries a stated vertical
+     exaggeration instead (uLandLift), so a modest rise here is enough. */
+  const eye = Math.min(190, 1.6 * (need * need) / (2 * R_E));
+  const dep = 15 * Math.PI / 180;
+  return Math.max(base, Math.min(FOLLOW_MAX_M, eye / Math.sin(dep)));
 }
 
 /* ── GO DOWN TO HER, AND STAY WITH HER ────────────────────────────────────────────────────
@@ -2109,11 +2151,11 @@ function followShip(tr) {
      plainly. It was out of shot.
      Going aboard now looks TOWARD the nearest land within sight, so the ship stands in the
      foreground of the place she is actually in. Dragging still turns you anywhere. */
-  const lz = landwardAz(tr.at);
-  S.followAz = (lz === null ? 2.4 : lz);
+  const lw = landward(tr.at);
+  S.followAz = lw ? lw.az : 2.4;
   S.followDep = 15;
   /* a few ship-lengths off, which is where one vessel sees another */
-  S.followDist = Math.max(90, (ves.hull.loa || 40) * 3.2);
+  S.followDist = standOffFor(ves.hull.loa, lw);
   tr.aimM = (ves.hull.loa || 40) * 0.22;
   setHover(null);
   if (hoverLine) { scene.remove(hoverLine); hoverLine = null; }

@@ -8,6 +8,10 @@ varying vec3 vP;
 varying float vElev;
 const vec3 HORIZON_C = vec3(0.360, 0.470, 0.585);
 varying vec2 vLL;
+varying float vAmp;
+uniform float uLandLift;
+
+#include "LAND_DETAIL.chunk.glsl"
 
 uniform sampler2D uDepth;
 uniform vec2  uAnchor;
@@ -28,17 +32,28 @@ float vnoiseL(vec2 p){
              mix(hashL(i + vec2(0,1)), hashL(i + vec2(1,1)), u.x), u.y);
 }
 
-float elevAtLL(vec2 ll){
+float rasterAtLL(vec2 ll){
   vec2 uv = vec2(ll.x / 6.2831853 + 0.5, 0.5 - ll.y / 3.14159265);
   vec3 t = texture2D(uDepth, fract(uv)).rgb;
   return (t.r * 65280.0 + t.g * 255.0) / 65535.0 * LAND_ELEV_SPAN + LAND_ELEV_MIN - uSeaLevel;
+}
+/* ⚠ THE HILLSHADE DIFFERENTIATES THE HEIGHT THE VERTEX SHADER ACTUALLY DREW — raster plus the
+   same generated detail at the same amplitude, lifted by the same factor. Shading one field
+   while displacing another is what makes invented relief read as a texture laid over ground
+   instead of as ground; it is also, exactly, what round 12 tried three times and discarded. */
+float elevAtLL(vec2 ll){
+  vec2 m = vec2(ll.x * cos(ll.y), ll.y) * LAND_R_EARTH;
+  return (rasterAtLL(ll) + vAmp * ldDetail(m / 3000.0)) * uLandLift;
 }
 
 void main(){
   if (vElev <= 0.0) discard;                 // the sea patch owns this pixel
 
   /* gradient in metres, from the same field, at a step that follows the ground scale */
-  float stepM = max(120.0, uMPP * 6.0);
+  /* ⚠ and the stencil has to be FINE ENOUGH TO SEE THE DETAIL. 120 m was set for a 4.9 km
+     raster; against 1.5 km ridges and their octaves it would average the whole thing away and
+     report the smooth field again. */
+  float stepM = max(22.0, uMPP * 1.5);
   float cl = max(0.05, cos(vLL.y));
   vec2 dE = vec2(stepM / (LAND_R_EARTH * cl), 0.0);
   vec2 dN = vec2(0.0, stepM / LAND_R_EARTH);

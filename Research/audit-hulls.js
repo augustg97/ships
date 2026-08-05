@@ -124,6 +124,46 @@
         say(v.id, 'overhangs the side',
             `${k} reaches ${Math.max(-part[k].z[0], part[k].z[1]).toFixed(1)} m off centre, limit ${halfWide.toFixed(1)}`);
 
+    /* ⚠ A WALL YOU CAN SEE THROUGH FROM ASTERN IS NOT A WALL. The deckhouse shell is lofted by
+       hand — tapered sides, sole, roof, two end caps, one buffer — and a hand-wound shell has
+       faces pointing the wrong way somewhere. Under FrontSide those are simply not drawn, so
+       the house has holes and WHICH holes depends on where you stand: 46 of 72 bearings hit a
+       wall and 26 saw straight through to the funnel bases. A picture-diff cannot catch that
+       either, because the picture is taken from one place. Fire a ring of rays through the
+       LOWEST tier, which spans the whole house, and every bearing must hit something. */
+    if (H.decks && house) {
+      const g2 = g; g2.updateMatrixWorld(true);
+      const isHouse = o => { const p = tagOf(o); return !!(p && (p.key === 'superstructure' || p.key === 'island')); };
+      const hb = new THREE.Box3(); hb.makeEmpty();
+      g2.traverse(o => { if (o.isMesh && isHouse(o)) hb.expandByObject(o); });
+      /* ⚠ AND THE RAYS MUST BE AIMED AT THE HOUSE, NOT AT THE SHIP. The first version fired
+         through the hull's centreline at a nominal deck height — which is above a 0.5 m
+         steamer deckhouse entirely, and misses a carrier's island because an island is short
+         and a flight deck is long. It reported 106 of 108 and 66 of 108 for two ships that are
+         fine. Aim at the house's own centre, at fractions of the house's OWN height. */
+      /* ⚠ AND ONLY WITHIN THE LOWEST DECK. A deckhouse STEPS IN as it rises — that is what a
+         deckhouse is — so a ray at the height of the third tier passes beside it through open
+         air, correctly. Sampling the house's full height called that a hole and flagged four
+         ships that are right: 36 of 108 is exactly one of three heights, the stepped one.
+         The bottom deck always spans the whole footprint, so that is where the question "can
+         you see through the walls" actually has a yes-or-no answer. */
+      const cx = (hb.min.x + hb.max.x) / 2, cz = (hb.min.z + hb.max.z) / 2;
+      const deck1 = Math.min(H.beam * 0.105, Math.max(0.4, hb.max.y - hb.min.y));
+      const rc = new THREE.Raycaster(); let through = 0, shot = 0;
+      for (const f of [0.25, 0.5, 0.75]) {
+        const y = hb.min.y + deck1 * f;
+        for (let b = 0; b < 36; b++) {
+          const th = b * Math.PI / 18;
+          rc.set(new THREE.Vector3(cx + Math.cos(th) * 500, y, cz + Math.sin(th) * 500),
+                 new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)).normalize());
+          rc.far = 1200; shot++;
+          if (!rc.intersectObject(g2, true).some(h => isHouse(h.object))) through++;
+        }
+      }
+      if (through) say(v.id, 'you can see through the deckhouse',
+                       `${through} of ${shot} bearings pass through the lowest tier`);
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

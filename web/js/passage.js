@@ -164,6 +164,11 @@ function psgInit(R, globeCamera) {
       uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
       uSeaLevel: { value: 0 }, uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
       uCam: { value: new THREE.Vector3() }, uMPP: { value: 10 },
+      /* the stated vertical exaggeration — see LAND_VERT for why it is not 1 */
+      /* ⚠ 1.8, not 3.2 — the first value turned a 121 m Greek headland into an alpine massif.
+         The lift exists so a low coast clears the horizon at all, not so every coast becomes
+         mountains; it is a relief globe's exaggeration, and those are gentle. */
+      uLandLift: { value: 1.8 },
     },
   }));
   PSG.land.rotation.x = -Math.PI / 2;

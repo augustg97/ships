@@ -17,6 +17,23 @@ precision highp float;
 varying vec3 vP;
 varying float vElev;
 varying vec2 vLL;
+varying float vAmp;          /* the detail amplitude, computed ONCE here and used by the frag */
+
+#include "LAND_DETAIL.chunk.glsl"
+
+/* ── ⚠ AND THE LAND IS LIFTED, DELIBERATELY AND BY A STATED FACTOR ───────────────────────
+ * On the map a hull is drawn sixty-five kilometres long — a chess piece on a board — because a
+ * ship at true scale on a planet is a third of a pixel. The close-up is the other end of that
+ * bargain, and it inherits the same problem in reverse: from a deck the horizon is 26 km, so a
+ * coast that is real and near and twenty metres high sits exactly ON the horizon and reads as
+ * nothing. Zheng He's treasure fleet is the case that showed it.
+ * So the ground is lifted. It is not proportional and does not pretend to be — it is the same
+ * device a relief globe uses, and for the same reason: at any honest vertical scale the Earth
+ * is smooth and its shape cannot be seen. What must stay true is the SHAPE — where the coast
+ * runs, which way the ridges lie, which side the light is on — and all of that is preserved,
+ * because the lift is a single factor applied to a real field.
+ */
+uniform float uLandLift;
 
 uniform sampler2D uDepth;
 uniform vec2  uAnchor;        // lon, lat of the patch origin, radians
@@ -46,8 +63,31 @@ void main(){
   float e = landElev(uv);
   vElev = e;
   vLL = ll;
+
+  /* ── THE AMPLITUDE OF THE INVENTED DETAIL, FROM THE DATA'S OWN VERTICAL VARIATION ──────
+     One texel east and one north; the difference is how much this ground actually moves at the
+     scale the raster can see. A flat shelf gets nothing and a mountain coast gets a lot, which
+     is the rule round 12 arrived at after inventing an archipelago in the English Channel.
+     Computed HERE, once per vertex, and carried to the fragment — the hillshade differentiates
+     the height over a stencil, and an amplitude that varied across that stencil would be read
+     as a slope belonging to nothing. */
+  float texel = 4900.0 / LAND_R_EARTH;                 /* one raster sample, in radians */
+  vec2 llE = ll + vec2(texel / max(0.05, cos(ll.y)), 0.0);
+  vec2 llN = ll + vec2(0.0, texel);
+  float hE = landElev(vec2(llE.x / 6.2831853 + 0.5, 0.5 - llE.y / 3.14159265));
+  float hN = landElev(vec2(llN.x / 6.2831853 + 0.5, 0.5 - llN.y / 3.14159265));
+  float amp = 0.22 * (abs(hE - e) + abs(hN - e));
+  /* and it fades where the mesh can no longer carry it, so the rim does not alias */
+  float rad = length(P.xz);
+  amp *= 1.0 - smoothstep(9000.0, 34000.0, rad);
+  vAmp = amp;
+
+  /* the detail is in the HEIGHT, not in the shading — see LAND_DETAIL.chunk.glsl */
+  vec2 m = vec2(ll.x * cos(ll.y), ll.y) * LAND_R_EARTH;     /* local metres */
+  float h = e + amp * ldDetail(m / 3000.0);
+
   /* the sagitta is already in the mesh; the elevation rides on top of it */
-  P.y += max(e, 0.0);
+  P.y += max(h, 0.0) * uLandLift;
   vP = P;
   gl_Position = projectionMatrix * viewMatrix * vec4(P, 1.0);
 }
