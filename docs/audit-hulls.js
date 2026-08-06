@@ -333,6 +333,69 @@
       }
     }
 
+    /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
+       boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
+       the deck the boats are named for, and the row of white hulls read as blisters riveted
+       to the ship's side. The card said "on the boat deck" the whole time; no picture-diff
+       could disagree with it. One derivation — SHIPS_HULL.linerHouse — for the builder and
+       for this rule. */
+    if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
+      const T = SHIPS_HULL.linerHouse(H);
+      let off = 0, worst = 0;
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Ship\'s boat') return;
+        const bb2 = new THREE.Box3().setFromObject(o);
+        const d = bb2.min.y - T.top;
+        if (d < -0.6 || d > 2.2) { off++; if (Math.abs(d) > Math.abs(worst)) worst = d; }
+      });
+      if (off) say(v.id, 'boats off the boat deck',
+                   `${off} boats, worst ${worst.toFixed(1)} m from the top of the house`);
+    }
+
+    /* ⚠ A POWERED, DECKED SHIP IS CONNED FROM A BRIDGE. "Stepped plates, no fronts" was the
+       Titanic for twenty-seven rounds: tier ends closed with blank caps and nowhere to con
+       the ship from. The wheelhouse stands ON the boat deck, at the FORWARD end of the house
+       — a bridge amidships-aft is a different ship. */
+    if (H.decks && H.funnels && !H.turrets && !H.flightDeck) {
+      if (!part.bridge) say(v.id, 'no bridge', 'a decked steamer with no wheelhouse');
+      else {
+        const T = SHIPS_HULL.linerHouse(H);
+        if (Math.abs(part.bridge.y[0] - T.top) > 1.5)
+          say(v.id, 'bridge not on the boat deck',
+              `bridge base ${part.bridge.y[0].toFixed(1)} m, boat deck ${T.top.toFixed(1)} m`);
+        const frontX = (T.tiers[T.n - 1].uA - 0.5) * H.lwl;
+        if (part.bridge.x[0] > frontX + 0.12 * H.lwl)
+          say(v.id, 'bridge not at the front',
+              `bridge starts ${(part.bridge.x[0] - frontX).toFixed(1)} m abaft the house front`);
+      }
+    }
+
+    /* ⚠ THE FUNNEL STANDS ON ITS OWN DECK. funnelH is the record's number and the record
+       measures a stack above the deck it stands on; rising from the sheer, Titanic's 19 m
+       funnels spent 12 m hidden inside the house and showed 7, with the black top half the
+       visible stack instead of a fifth. Each casing must sit on the highest tier covering
+       its station — where the RECORD located the house (linerHouse().recorded). Where the
+       house is the default abstraction, the recorded height keeps the sheer as its datum:
+       raising Great Eastern's 30 m stacks onto an inferred house made them out-tower her
+       own foremast, and the funnel-height rule caught it (right, 2 for 6 lifetime). */
+    if (H.funnels && H.decks && !H.turrets && !H.flightDeck && part.funnel) {
+      const T = SHIPS_HULL.linerHouse(H);
+      const HS3 = SHIPS_HULL.hullSurface(H);
+      g.updateMatrixWorld(true);
+      let bad = 0, msg = '';
+      g.traverse(o => {
+        if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'funnel') return;
+        const bb2 = new THREE.Box3().setFromObject(o);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bb2.min.x + bb2.max.x) / 2) / H.lwl));
+        let deck = HS3.sheer(u);
+        if (T.recorded)
+          for (const t of T.tiers) if (u >= t.uA && u <= t.uB) deck = Math.max(deck, t.y1);
+        const d = bb2.min.y - deck;
+        if (d < -2.0 || d > 1.5) { bad++; msg = `casing bottom ${d.toFixed(1)} m from its deck`; }
+      });
+      if (bad) say(v.id, 'funnel does not stand on its deck', `${bad} of ${H.funnels}: ${msg}`);
+    }
+
     /* ⚠ THE DECK NARROWS AND THE CARGO MUST NARROW WITH IT. Found by the spin survey from
        every bow bearing of the container ship: the hatch covers, the forecastle and the outer
        container columns stood at one constant width on a hull whose deck tapers to the stem —

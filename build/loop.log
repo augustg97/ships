@@ -24,3 +24,18 @@ The build gate is confirmed as the publication route. Everything is staged: the 
 2026-08-06 07:03:48  round finished; HEAD is 4da220f Deploy via the Pages workflow build: the legacy builder fails undiagnosably
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 07:13:48  round starting
+Round complete. The deploy run finished **success** after the site recreation, and the live stamp carries this round's build.
+
+## What this round did
+
+**The Yamato was rendered as an ocean liner, and the fault was a class, not a vessel.** The generic deckhouse builder gave every decked steel ship four white window-banded passenger tiers over 80% of her length — which buried all three main turrets (invisible from all twelve spin bearings), plus a buff-and-black trademark funnel and a brown timber mast. Underneath, `buildTurrets` had three faults of its own: forward guns pointed at the stern (the sign error round 26 predicted), barrels were 34 m because they scaled off turret radius instead of calibre, and the superfiring turret's barbette floated 3.3 m above the deck.
+
+**Fixes, all class-level:** turreted ships now get a `buildCitadel` — grey stepped decks whose span is *derived from the turret stations* (the superstructure fills the gap between the end turrets), a stacked bridge tower with rangefinder, and secondary mounts from the record. One shared `gunhouse()` builds every mount at any calibre, guns toward the bow, barrels at 45 calibres, barbettes running down to their deck. Warship livery follows the build: grey funnel and masts. HMS Dreadnought took the whole class change and reads correctly too (verified from her own spin capture). One thing deliberately not done, logged in the handoff: the forward 15.5 cm secondary doesn't fit between turret No.2 and the tower at this abstraction without interpenetration — the aft mount is in.
+
+**Verification:** the audit grew three rules (buried gunhouse, gun direction, turret support) — one fired on my first citadel and was right, forcing a re-site. Final audit 25/25; ratchet fully green with a new committed `ship-yamato` baseline; Sea view verified aboard `#f=tenichigo`.
+
+**The live site had been stale for three rounds despite round 26's workflow migration.** The Pages *site object itself* was stuck in `status: "errored"`, and deployments from both pipelines hung against it — artifact uploaded, then `deployment_in_progress` until timeout. Deleting and recreating the Pages site (`build_type=workflow`) cleared it: the next run went green and the live stamp now reads **1786027279**, with `buildCitadel`, `turretAt`, and the new audit rules all confirmed in the live files. The remedy and the tell (stamp doesn't move within minutes of artifact upload → site object wedged again) are written into HANDOFF.md, with Titanic's tiers queued next.
+2026-08-06 08:28:34  round finished; HEAD is f4f00ca Live again: the Pages site object was wedged in 'errored'; recreate it and the workflow deploys
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 51246 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 08:38:34  round starting

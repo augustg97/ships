@@ -1861,185 +1861,267 @@ function buildRigging(S, group, rope, spars, mastTops) {
  * as drawing the container ship without her boxes.
  * Decks are stacked and stepped in from the hull's own sheer, so they follow whatever shape the
  * coefficients produced. */
+/* ── ONE DERIVATION OF THE HOUSE ───────────────────────────────────────────────────────
+ * ⚠ Read by FOUR callers — the superstructure, the boats, the funnels and the audit — for
+ * the same reason landingStrip() and turretStations() exist: two derivations of one deck
+ * drift apart, and the drift is a boat stowed four decks below its own davits.
+ *
+ * And the tiers are NOT a centred wedding cake, which is what `0.80 − f * 0.34` built: equal
+ * steps fore and aft about midships. A liner's FRONTS ALIGN, because she is conned from the
+ * forward end of her top deck and the officers' house stacks directly beneath the bridge; her
+ * AFTS CASCADE, because each roof aft of the tier above is the open promenade of the deck
+ * below. That is why a liner's profile leans forward. Where the house stands comes from the
+ * record (houseAt) when the record has it. */
+function linerHouse(S) {
+  const n = S.decks || 0;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const base = H.sheer(0.5), dh = B * 0.105, inset = B * 0.055;
+  const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
+  const tiers = [];
+  for (let i = 0; i < n; i++) {
+    const wid = B * (0.92 - (i / n) * 0.16);
+    const uA = hA + i * 0.008, uB = hB - i * 0.045;
+    /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
+       half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
+    const half = (u) => {
+      const uu = Math.max(0.001, Math.min(0.999, u));
+      return Math.max(B * 0.06, Math.min(wid / 2,
+        Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - inset));
+    };
+    tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half });
+  }
+  /* `recorded` marks a house the RECORD located (houseAt) as opposed to the default span.
+     It decides which deck a funnel's recorded height is measured from — see buildFunnel. */
+  return { n, base, dh, top: base + dh * n, tiers,
+           recorded: !!(S.houseAt && S.houseAt.length === 2) };
+}
+
 function buildSuperstructure(S, group) {
   const n = S.decks || 0;
   if (!n) return;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const white = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x2c2f33, roughness: 0.55, metalness: 0.2 });
   const g = new THREE.Group();
-  const base = H.sheer(0.5);
-  const dh = B * 0.105;                                 // one deck's height
-  for (let i = 0; i < n; i++) {
-    const f = i / n;
-    const len = L * (0.80 - f * 0.34);                  // each tier steps in fore and aft
-    const wid = B * (0.92 - f * 0.16);
-    /* ── ⚠ A DECKHOUSE IS NOT A BOX ────────────────────────────────────────────────────
-       It was BoxGeometry — one constant width — sitting on a hull that narrows to a point.
-       So at the bow the house was WIDER THAN THE SHIP and hung out over open water on square
-       corners, which is exactly the jutting August photographed from ahead. It also ran past
-       the stem into nothing.
-       A deckhouse is built ON the deck, so its plan follows the deck's plan: it narrows as
-       the ship narrows and stops short of the side by a WATERWAY — the gangway the crew walk
-       and the scuppers drain along. Loft it from the hull's own half-breadth at each station
-       and it can never overhang, on any ship, at any beam. */
-    const uA = 0.5 - (len / L) / 2, uB = 0.5 + (len / L) / 2;
-    /* ── ⚠ VERTEX COLOUR CANNOT PAINT A BAND THAT HAS NO VERTICES ─────────────────────
-       The first attempt at painting the windows into the house put the band at 0.30–0.66 of
-       the tier height — but the lofted wall had vertices only at the SOLE and the ROOF, so no
-       vertex was ever inside the band and the windows vanished entirely. August saw a blank
-       white slab. Same family as the multiply-by-zero faults: the feature could not express
-       itself because the mesh had no resolution where the feature lived.
-       So the wall is now built with the band's own edges AS VERTEX ROWS, and stationed finely
-       enough along the length that a 1.4 m mullion has vertices to sit between. The geometry
-       carries the openings because the openings are part of what the house IS. */
-    /* ── ⚠ THE WALLS WERE THERE AND READ AS GAPS ────────────────────────────────────
-       Port wall, starboard wall, roof, sole and end caps are all indexed, and the deckhouse
-       has been solid the whole time. What August saw through it was the WINDOW BAND: glass at
-       0x20242a — near black — running from 0.315 to 0.645 of each deck's height, which is a
-       third of the wall, over two-thirds of its length. Four decks of that is four dark stripes
-       alternating with four white ones, and at any distance the eye reads the dark ones as air
-       and the white ones as unsupported plates.
-       A liner's windows are not black. They are a strake of small lights in a white wall,
-       reflecting sky, and there is far more wall than glass. So: a narrower band, a lighter
-       glass, and mullions wide enough that white wins along the length. */
-    const paneW = B * 0.075;                            // a light is about this wide, always
-    const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];  // sole, band edges, roof
-    const NU = Math.max(90, Math.round(len / (paneW * 0.5)));
-    const inset = B * 0.055;                            // the waterway, each side
-    const glass = new THREE.Color(0x6d7a86), face = new THREE.Color(0xe4e2dc);
-    const tp = [], ti = [], tc = [];
-    for (let k = 0; k <= NU; k++) {
-      const u = uA + (uB - uA) * k / NU;
-      const deckHalf = Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
-      const half = Math.max(B * 0.06, Math.min(wid / 2, deckHalf - inset));
-      const x = (u - 0.5) * L;
-      /* a mullion every paneW of REAL length; between them, glass */
-      const frac = ((x / paneW) % 1 + 1) % 1;
-      const isMullion = frac < 0.52;
+  const T = linerHouse(S);
+  const paneW = B * 0.075;                            // a light is about this wide, always
+  const face = new THREE.Color(0xe4e2dc);
+  /* ⚠ A liner's windows are not black. They are a strake of small lights in a white wall,
+     reflecting sky, and there is far more wall than glass — glass at 0x20242a read as AIR and
+     the white between as unsupported plates. Lighter glass, and mullions wide enough that
+     white wins along the length. */
+  const glass = new THREE.Color(0x6d7a86);
+  const wallMat = new THREE.MeshStandardMaterial({
+    vertexColors: true, roughness: 0.60, side: THREE.DoubleSide });
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: 0xe4e2dc, roughness: 0.60, side: THREE.DoubleSide });
+
+  /* ── ⚠ VERTEX COLOUR CANNOT PAINT A BAND THAT HAS NO VERTICES ──────────────────────
+     The band's own edges are VERTEX ROWS, and the wall is stationed finely enough along its
+     run that a 1.4 m mullion has vertices to sit between (the multiply-by-zero family: a
+     feature a mesh has no resolution for simply does not appear).
+     ── AND THE END OF A TIER IS A WALL, NOT A CAP. The old shell closed its ends with one
+     blank quad-strip each — a single station's colour stretched across the whole face — so
+     from ahead the house was stepped plates with NO FRONTS. Wind ONE banded wall around the
+     whole perimeter instead: the lights march around the corners by construction, and a
+     blank front is no longer a thing this builder can build. Arc length carries the mullion
+     rhythm through the turns. */
+  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac) => {
+    const tp = [], tc = [], ti = [];
+    const R = rows.length;
+    let s = 0;
+    for (let k = 0; k < path.length; k++) {
+      if (k) s += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
+      const frac = ((s / pw) % 1 + 1) % 1;
+      const isMul = frac < mulFrac;
       for (const rf of rows) {
-        const yy = -dh / 2 + rf * dh;
-        const inBand = rf > 0.46 && rf < 0.68;
-        const c = (inBand && !isMullion) ? glass : face;
-        tp.push(x, yy, -half,  x, yy, half);
-        tc.push(c.r, c.g, c.b,  c.r, c.g, c.b);
+        const inBand = rf > band[0] && rf < band[1];
+        const c = (inBand && !isMul) ? glass : face;
+        tp.push(path[k].x, y0 + rf * (y1 - y0), path[k].z);
+        tc.push(c.r, c.g, c.b);
       }
     }
-    const RW = rows.length * 2;
-    for (let k = 0; k < NU; k++) {
-      const A0 = k * RW, B0 = A0 + RW;
-      for (let r = 0; r < rows.length - 1; r++) {
-        const a0 = A0 + r * 2, b0 = B0 + r * 2;
-        ti.push(a0, b0, a0 + 2,  a0 + 2, b0, b0 + 2);         // port wall
-        ti.push(a0 + 1, a0 + 3, b0 + 1,  a0 + 3, b0 + 3, b0 + 1); // starboard wall
+    for (let k = 0; k + 1 < path.length; k++)
+      for (let r = 0; r + 1 < R; r++) {
+        const a = k * R + r, b = (k + 1) * R + r;
+        ti.push(a, b, a + 1, a + 1, b, b + 1);
       }
-      const rt = (rows.length - 1) * 2;
-      ti.push(A0 + rt, A0 + rt + 1, B0 + rt,  A0 + rt + 1, B0 + rt + 1, B0 + rt); // roof
-      ti.push(A0, B0, A0 + 1,  A0 + 1, B0, B0 + 1);                                // sole
+    const gg = new THREE.BufferGeometry();
+    gg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+    gg.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
+    gg.setIndex(ti); gg.computeVertexNormals();
+    /* ⚠ DoubleSide, and not as a shortcut: a hand-wound wall will face the wrong way
+       somewhere, and under FrontSide those faces are holes that depend on where you stand —
+       measured once at 26 of 72 bearings seeing straight through. */
+    return new THREE.Mesh(gg, wallMat);
+  };
+
+  /* the closed perimeter of one tier: starboard forward→aft, across the stern, port aft→
+     forward, across the front, ending on the start point */
+  const perim = (t) => {
+    const pts = [];
+    const NU = Math.max(60, Math.round((t.uB - t.uA) * L / (paneW * 0.5)));
+    for (let k = 0; k <= NU; k++) {
+      const u = t.uA + (t.uB - t.uA) * k / NU;
+      pts.push({ x: (u - 0.5) * L, z: t.half(u) });
     }
-    for (const e of [0, NU * RW]) {                       // close the ends
-      for (let r = 0; r < rows.length - 1; r++) {
-        const a0 = e + r * 2;
-        ti.push(a0, a0 + 2, a0 + 1,  a0 + 1, a0 + 2, a0 + 3);
-      }
+    const hb = t.half(t.uB), NB = Math.max(6, Math.round(2 * hb / (paneW * 0.5)));
+    for (let k = 1; k <= NB; k++)
+      pts.push({ x: (t.uB - 0.5) * L, z: hb - 2 * hb * k / NB });
+    for (let k = 1; k <= NU; k++) {
+      const u = t.uB - (t.uB - t.uA) * k / NU;
+      pts.push({ x: (u - 0.5) * L, z: -t.half(u) });
     }
-    const tg = new THREE.BufferGeometry();
-    tg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
-    tg.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
-    tg.setIndex(ti); tg.computeVertexNormals();
-    /* ⚠ DoubleSide, and not as a shortcut. This shell is lofted by hand — tapered sides, a
-       sole, a roof and two end caps, all indexed in one buffer — and a hand-wound shell will
-       have faces facing the wrong way somewhere. Under FrontSide those faces are not drawn at
-       all, so the house has HOLES, and which holes depends on where you stand: measured, 46 of
-       72 bearings hit a wall and 26 saw straight through. A wall you can see through from
-       astern is not a wall, and no amount of getting the winding right by hand stays right the
-       next time the geometry changes. */
-    const tier = new THREE.Mesh(tg, new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.60, side: THREE.DoubleSide }));
-    /* ── AND A RAILING, which is what actually breaks a box ─────────────────────────────
-       A deckhouse roof without one is a slab. With stanchions and three rails it acquires a
-       scale, a top edge that is not a hard line, and something for the light to catch. */
-    /* ── ⚠ AND EVERY TIER WAS RAILED, AT A CONSTANT WIDTH ────────────────────────────
-       Four tiers x two sides x three rails is twenty-four white bars running the full 207 m,
-       set at a fixed half-breadth while the house itself tapers with the deck — so they
-       overshot the house at both ends and, from any distance, they WERE the ship: August's
-       photograph of the Titanic is a black hull under a lattice of white lines with no
-       deckhouse visible behind it. Only the top tier is the promenade you can walk, and its
-       rail follows the same lofted edge the wall does. */
-    /* ── ⚠ AND THE HOUSE WAS INSIDE THE HULL ─────────────────────────────────────────
-       The tier's vertices are built about its own centre — yy runs -dh/2 to +dh/2 — and its
-       position was never set, so every wall sat at y = 0, which on a hull whose deck is 19 m
-       up is BELOW THE WATERLINE. The railings alone were positioned correctly, off `base`, so
-       what reached the screen was a black hull under a lattice of white rails with no
-       deckhouse behind them: exactly what August photographed and asked about. It has been
-       that way for as long as the deckhouse has existed, and no picture-diff could see it
-       because the picture never changed. */
-    tier.position.y = base + dh * i + dh / 2;
-    const railY = base + dh * (i + 1);
-    /* ONE definition of where the rail line runs, read by the posts and by the rails. Two
-       derivations of one edge is how they came apart in the first place. */
-    const railHalf = (x) => {
-      const uu = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
-      const dh2 = Math.abs(surfacePoint(S, H, uu, 1.0)[2]);
-      return Math.max(B * 0.06, Math.min(wid / 2, dh2 - B * 0.055));
-    };
-    if (i !== n - 1) { g.add(tag(tier, 'superstructure')); continue; }
-    for (const side of [-1, 1]) {
-      const nSt = Math.max(6, Math.round(len / (B * 0.22)));
-      const segs = [];
-      for (let k = 0; k <= nSt; k++) {
-        const x = tier.position.x - len / 2 + k * (len / nSt);
-        const hw = railHalf(x);
-        const st = new THREE.Mesh(
-          new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), white);
-        st.position.set(x, railY + dh * 0.15, side * hw);
-        g.add(st);
-      }
-      /* ── ⚠ AND THE RAIL HAS TO FOLLOW THE SAME EDGE THE STANCHIONS DO ────────────
-         Last round the stanchions were moved onto the hull's lofted half-breadth — correct,
-         a rail runs along the deck edge and the deck edge tapers — and the rails were left as
-         one long cylinder at a CONSTANT half-breadth. So they stopped meeting: the survey
-         found the stanchions of the Great Eastern and the steamer touching nothing at all,
-         three to five metres from the nearest part, which is a handrail floating beside its
-         own posts. A rail between tapering posts is a series of short runs, not one bar. */
+    const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / (paneW * 0.5)));
+    for (let k = 1; k <= NF; k++)
+      pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
+    return pts;
+  };
+
+  /* the roof is a plate over the tier's own plan — ShapeGeometry from the same perimeter,
+     so the two cannot disagree. rotateX(+90°) maps shape-y onto world z unmirrored. */
+  const roofPlate = (t, y) => {
+    const pts = perim(t);
+    const sh = new THREE.Shape();
+    sh.moveTo(pts[0].x, pts[0].z);
+    for (let k = 1; k < pts.length; k++) sh.lineTo(pts[k].x, pts[k].z);
+    const gg = new THREE.ShapeGeometry(sh);
+    gg.rotateX(Math.PI / 2);
+    gg.translate(0, y, 0);
+    return new THREE.Mesh(gg, plateMat);
+  };
+
+  /* ── ⚠ THE RAIL FOLLOWS THE SAME EDGE THE STANCHIONS DO ─────────────────────────────
+     One polyline in, posts and bars out — resampled together, so a handrail can never float
+     beside its own posts again (the round-25 fault: rails at a constant half-breadth while
+     the posts followed the lofted edge, three to five metres apart). */
+  const up = new THREE.Vector3(0, 1, 0);
+  const railRun = (pts, y) => {
+    const step = B * 0.22, Q = [];
+    let acc = 0;
+    Q.push(pts[0]);
+    for (let k = 1; k < pts.length; k++) {
+      acc += Math.hypot(pts[k].x - pts[k - 1].x, pts[k].z - pts[k - 1].z);
+      if (acc >= step || k === pts.length - 1) { Q.push(pts[k]); acc = 0; }
+    }
+    const dh = T.dh;
+    for (const q of Q) {
+      const st = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), white);
+      st.position.set(q.x, y + dh * 0.15, q.z);
+      g.add(st);
+    }
+    for (let k = 0; k + 1 < Q.length; k++) {
+      const a = Q[k], b = Q[k + 1];
+      const len = Math.hypot(b.x - a.x, b.z - a.z);
+      if (len < 0.01) continue;
+      const dir = new THREE.Vector3(b.x - a.x, 0, b.z - a.z).normalize();
       for (const h of [0.10, 0.20, 0.30]) {
-        for (let k = 0; k < nSt; k++) {
-          const xa = tier.position.x - len / 2 + k * (len / nSt);
-          const xb = xa + len / nSt;
-          const ha = railHalf(xa), hb = railHalf(xb);
-          const mid = new THREE.Vector3((xa + xb) / 2, railY + dh * h, side * (ha + hb) / 2);
-          const seg = new THREE.Mesh(
-            new THREE.CylinderGeometry(B * 0.0035, B * 0.0035,
-              Math.hypot(xb - xa, (hb - ha)), 5), white);
-          seg.position.copy(mid);
-          seg.rotation.z = Math.PI / 2;
-          seg.rotation.y = -Math.atan2(side * (hb - ha), xb - xa);
-          g.add(seg);
+        const bar = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), white);
+        bar.position.set((a.x + b.x) / 2, y + dh * h, (a.z + b.z) / 2);
+        bar.quaternion.setFromUnitVectors(up, dir);
+        g.add(bar);
+      }
+    }
+  };
+
+  const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];  // sole, band edges, roof
+  for (let i = 0; i < T.n; i++) {
+    const t = T.tiers[i];
+    /* ⚠ built in ABSOLUTE coordinates, y0 to y1 — the old walls were built about their own
+       centre and never positioned, so the whole house sat below the waterline for as long as
+       it existed while the rails alone stood correctly. Nothing here waits to be positioned. */
+    g.add(wallLoft(perim(t), t.y0, t.y1, rows, [0.46, 0.68], paneW, 0.52));
+    g.add(roofPlate(t, t.y1));
+    if (i === T.n - 1) {
+      railRun(perim(t), t.y1);                        // the boat deck is railed all round
+    } else {
+      /* the exposed roof aft of the tier above is the promenade of this deck — railed along
+         its sides and across its aft end, like the real thing */
+      const tAbove = T.tiers[i + 1];
+      if (t.uB > tAbove.uB + 0.012) {
+        const pr = [];
+        const NP = Math.max(4, Math.round((t.uB - tAbove.uB) * L / (paneW * 0.5)));
+        for (let k = 0; k <= NP; k++) {
+          const u = tAbove.uB + (t.uB - tAbove.uB) * k / NP;
+          pr.push({ x: (u - 0.5) * L, z: t.half(u) });
         }
-        continue;
+        const hb = t.half(t.uB);
+        pr.push({ x: (t.uB - 0.5) * L, z: -hb });
+        for (let k = NP; k >= 0; k--) {
+          const u = tAbove.uB + (t.uB - tAbove.uB) * k / NP;
+          pr.push({ x: (u - 0.5) * L, z: -t.half(u) });
+        }
+        railRun(pr, t.y1);
       }
     }
   }
-  /* ── COWL VENTILATORS ───────────────────────────────────────────────────────────────
-     The most recognisable fitting on any Victorian steamer's deck, and there is a reason
-     there are so many of them: below decks there is a coal-fired boiler room, a galley and
-     several hundred people, and no mechanical ventilation whatever. Air is caught by turning
-     these cowls into the wind and driven below. They are why a period deck photograph looks
-     crowded with what appear to be enormous trumpets. */
+
+  /* ── THE BRIDGE ──────────────────────────────────────────────────────────────────────
+     "Stepped plates, no fronts" was the Titanic for twenty-seven rounds, and the front of a
+     liner is not a plate: it is where she is CONNED. A wheelhouse stands at the forward end
+     of the boat deck — more glass than wall, because it exists to be seen out of — and open
+     WINGS run from its sides to the ship's own side, because a 28 m beam has to be conned
+     from its edges when she comes alongside. */
+  const top = T.tiers[T.n - 1];
+  const bg = new THREE.Group();
+  const uW0 = top.uA + 0.004, uW1 = Math.min(top.uB, uW0 + 0.030);
+  const whHalf = Math.min(B * 0.27, top.half(uW0) - B * 0.01);
+  const whT = {
+    uA: uW0, uB: uW1, half: () => whHalf,
+  };
+  const whH = T.dh * 0.92;
+  bg.add(wallLoft(perim(whT), T.top, T.top + whH,
+                  [0.0, 0.30, 0.33, 0.82, 0.85, 1.0], [0.30, 0.85], paneW * 1.5, 0.30));
+  bg.add(roofPlate(whT, T.top + whH));
+  for (const sgn of [-1, 1]) {
+    const uMid = (uW0 + uW1) / 2;
+    const hullHalf = Math.abs(surfacePoint(S, H, uMid, 1.0)[2]);
+    if (hullHalf > whHalf + B * 0.02) {
+      const wing = new THREE.Mesh(
+        new THREE.BoxGeometry((uW1 - uW0) * L, T.dh * 0.06, hullHalf - whHalf), plateMat);
+      wing.position.set((uMid - 0.5) * L, T.top + T.dh * 0.03, sgn * (whHalf + hullHalf) / 2);
+      bg.add(wing);
+      /* the wing ends at the ship's side, railed — flush, not overhanging */
+      const wx0 = (uW0 - 0.5) * L, wx1 = (uW1 - 0.5) * L;
+      const wpts = [{ x: wx0, z: sgn * whHalf }, { x: wx0, z: sgn * hullHalf },
+                    { x: wx1, z: sgn * hullHalf }, { x: wx1, z: sgn * whHalf }];
+      railRun(wpts, T.top + T.dh * 0.06);
+    }
+  }
+  const bTag = tag(bg, 'bridge', 'Navigating bridge');
+  bTag.userData.part.what =
+    'The ship is conned from here: a wheelhouse at the forward end of the boat deck, more '
+    + 'glass than wall, with open wings running to the ship\'s sides — a 28 m beam is brought '
+    + 'alongside a pier by an officer standing at its very edge.';
+  g.add(bTag);
+
+  /* ── COWL VENTILATORS, ON THE BOAT DECK ─────────────────────────────────────────────
+     The most recognisable fitting on a Victorian steamer, and for as long as the tiers have
+     existed they stood at the SHEER, at B*0.30 off centre — which the house walls enclose —
+     so every cowl was buried inside the accommodation and none was ever seen. They stand on
+     the TOP of the house, where the air is: below decks there is a coal-fired boiler room, a
+     galley and several hundred people, and no mechanical ventilation whatever. Stationed
+     clear of the funnel casings by the funnels' own derivation. */
   if (S.funnels) {
     const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
-    for (const u of [0.30, 0.38, 0.58, 0.66, 0.74]) {
+    const fst = funnelStations(S);
+    const caseR = S.beam * 0.115 * 1.34;
+    for (const f of [0.16, 0.30, 0.44, 0.58, 0.72, 0.86]) {
+      const u = top.uA + f * (top.uB - top.uA);
+      if (fst.some(uf => Math.abs(u - uf) * L < caseR + B * 0.06)) continue;
       for (const side of [-1, 1]) {
-        const cy = H.sheer(u);
+        const z = side * top.half(u) * 0.62;
         const stem = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.017, B * 0.019, B * 0.15, 10), white);
-        stem.position.set((u - 0.5) * L, cy + B * 0.075, side * B * 0.30);
+        stem.position.set((u - 0.5) * L, T.top + B * 0.075, z);
         g.add(tag(stem, 'vent', 'Cowl ventilator'));
         const bell = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.038, B * 0.017, B * 0.055, 12, 1, true), cowl);
-        bell.position.set((u - 0.5) * L, cy + B * 0.165, side * B * 0.30);
-        bell.rotation.z = side * 0.55;                  // turned into the wind
+        bell.position.set((u - 0.5) * L, T.top + B * 0.165, z);
+        bell.rotation.z = side * 0.55;                // turned into the wind
         g.add(tag(bell, 'vent', 'Cowl ventilator',
           'Turned into the wind to drive air below. With a coal-fired boiler room, a galley and several hundred people under the deck and no mechanical ventilation at all, a ship needed a great many of them.'));
       }
@@ -2088,10 +2170,24 @@ function buildFunnel(S, group) {
      masts, because a boiler casing and a mast step cannot occupy the same frame. Take the mast
      positions and sit in the widest holes between them. */
   const slots = funnelStations(S);
+  /* ⚠ THE STACK STANDS ON ITS OWN DECK, NOT ON THE SHEER. funnelH is the record's number,
+     and the record measures a funnel above the deck it stands on — for Titanic the BOAT
+     deck. Rising from the sheer, her 19 m stacks spent 12 m hidden inside the house and
+     showed 7, with the black top half the visible funnel instead of a fifth of it. The
+     uptake exits through the highest tier covering its station — the house's own
+     derivation, so the two cannot disagree.
+     ⚠ BUT ONLY WHERE THE RECORD LOCATED THE HOUSE (houseAt). Where the house is the default
+     abstraction, the recorded funnel height keeps the SHEER as its datum: raising Great
+     Eastern's 30 m stacks onto an inferred house top made them out-tower her own foremast,
+     which no period image supports — her funnels rose from the open upper deck between low
+     houses, and the audit caught the contradiction (right, 2 for 6 lifetime). */
+  const T = (S.decks && !S.turrets && !S.flightDeck) ? linerHouse(S) : null;
   for (let i = 0; i < n; i++) {
     const u = slots.length ? (slots[i % slots.length] || 0.50)
                            : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
-    const y = H.sheer(u);
+    let y = H.sheer(u);
+    if (T && T.recorded)
+      for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);
     const g = new THREE.Group();
     /* ── ⚠ THE FLICKER WAS THE FUNNEL'S OWN BASE ────────────────────────────────────
        The stack ran from y = 0 to y = h with its group sitting exactly on the sheer, so its
@@ -2220,23 +2316,46 @@ function buildBoats(S, group, mats) {
      from how many boats there are, the same way the trireme's oar spacing follows from the
      interscalmium and the portholes follow from a 3 m pitch. If they do not fit, the answer
      is fewer boats, not closer ones. */
-  const gapPitch = boatL * 1.38;
-  const span = Math.min(0.58, (perSide - 1) * gapPitch / L);
-  for (let i = 0; i < perSide; i++) {
-    const u = 0.5 - span / 2 + (i / Math.max(1, perSide - 1)) * span;
-    const y = H.sheer(u);
-    const half = Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
+  let gapPitch = boatL * 1.38;
+  /* ── ⚠ AND THEY STOW ON THE BOAT DECK, WHICH IS A PLACE, NOT A PHRASE ───────────────
+     The card has said "stowed under davits on the boat deck" the whole time, and the builder
+     put every boat at the HULL SHEER — on a liner that is the well of the promenade, four
+     decks below the deck the boats are named for, and the row of white hulls read as blisters
+     riveted to the ship's side. The boat deck is the TOP OF THE HOUSE: taken from
+     linerHouse(), the same derivation the walls and the funnels stand on, clear of the
+     bridge at its forward end. A ship with no house keeps her boats at the sheer, which for
+     her is the boat deck. */
+  const T = S.decks ? linerHouse(S) : null;
+  const topT = T ? T.tiers[T.n - 1] : null;
+  const u0A = topT ? topT.uA + 0.045 : null, u0B = topT ? topT.uB - 0.025 : null;
+  let ps = perSide;
+  if (topT) {
+    const avail = (u0B - u0A) * L;
+    /* the pitch may close up to a boat's length and a third-of-a-third before boats are cut —
+       and then it is fewer boats, never closer ones */
+    if ((ps - 1) * gapPitch > avail)
+      gapPitch = Math.max(boatL * 1.30, avail / Math.max(1, ps - 1));
+    if ((ps - 1) * gapPitch > avail) ps = Math.floor(avail / gapPitch) + 1;
+  }
+  const span = topT ? (ps - 1) * gapPitch / L
+                    : Math.min(0.58, (ps - 1) * gapPitch / L);
+  const uMid = topT ? (u0A + u0B) / 2 : 0.5;
+  for (let i = 0; i < ps; i++) {
+    const u = uMid - span / 2 + (i / Math.max(1, ps - 1)) * span;
+    const deckY = topT ? topT.y1 : H.sheer(u);
+    const half = topT ? topT.half(u)
+                      : Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
     for (const sgn of [-1, 1]) {
       const z = sgn * (half - B * 0.045);
-      /* the boat: a shallow hull, keel down, stowed fore-and-aft */
+      /* the boat: a shallow hull, keel down, stowed fore-and-aft on its chocks */
       const bg = new THREE.SphereGeometry(boatL / 2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
       bg.scale(1.0, 0.42, boatB / boatL);
       bg.rotateX(Math.PI);
       const bt = new THREE.Mesh(bg, white);
-      bt.position.set((u - 0.5) * L, y + B * 0.075, z);
+      bt.position.set((u - 0.5) * L, deckY + boatL * 0.21 + 0.10, z);
       group.add(tag(bt, 'boat', 'Ship\'s boat',
         'Stowed under davits on the boat deck. Board of Trade rules scaled boats to TONNAGE rather than to the number of people aboard, and were not revised as ships grew — which is why Titanic sailed legally with 20 boats for 2,224 souls.'));
-      /* two davits per boat, curved so the boat clears the side going down */
+      /* two davits per boat, standing ON the deck, curved so the boat clears the side */
       for (const d of [-0.34, 0.34]) {
         const pts = [];
         for (let k = 0; k <= 8; k++) {
@@ -2245,7 +2364,7 @@ function buildBoats(S, group, mats) {
         }
         const dg = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 8, B * 0.007, 5, false);
         const dv = new THREE.Mesh(dg, dark);
-        dv.position.set((u - 0.5) * L + d * boatL, y, z);
+        dv.position.set((u - 0.5) * L + d * boatL, deckY, z);
         dv.scale.z = sgn;
         group.add(tag(dv, 'boat', 'Davit',
           'Curved, because the boat has to clear a ship\'s side that flares or tumbles home on its way down. A straight arm would foul the hull or have to be absurdly long.'));
@@ -3785,4 +3904,4 @@ function buildShip(S, opts) {
 }
 
 window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
-                      superellipseFullness, surfacePoint, landingStrip };
+                      superellipseFullness, surfacePoint, landingStrip, linerHouse };

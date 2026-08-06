@@ -2282,6 +2282,7 @@
     "boats": 20,
     "portholes": true,
     "mastLivery": true,
+    "houseAt": [0.225, 0.875],
     "funnelH": 19.0,
     "funnelAt": [
      0.335,

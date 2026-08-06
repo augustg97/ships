@@ -627,3 +627,73 @@ polling. So for the next round: the check that matters is the LIVE STAMP, and a 
 reports failure after a 10-minute status-polling hang may still have deployed — but a stamp
 that does not move within a few minutes of the artifact upload means the site object is
 wedged again, and recreating it is the remedy that worked.
+
+## Round 28 — 2026-08-06 — The tiers get their fronts, and the boats find their deck
+
+**The queue item was "titanic's tiers (stepped plates, no fronts)" and the fault was four
+class faults sharing one cause: nothing owned the house.** The tiers were a centred wedding
+cake (`0.80 − f*0.34`, equal steps fore and aft); the tier ends were blank single-colour caps;
+the boats — whose own card says "stowed under davits on the boat deck" — sat at the HULL
+SHEER, four decks below their davits' deck, reading as blisters riveted to the side; and the
+funnels rose from the sheer, so Titanic's 19 m stacks (a record number, measured above the
+boat deck) spent 12 m hidden inside the house and showed 7, with the black top half the
+visible funnel instead of a fifth. The cowl ventilators, at B×0.30 off centre at the sheer,
+have been buried inside the accommodation for as long as the tiers have existed — invisible
+from every bearing, and no one missed them.
+
+**One derivation now owns the house: `linerHouse(S)`** (the landingStrip/turretStations
+pattern), read by the superstructure, the boats, the funnels and the audit. Fronts ALIGN
+(small setback per tier — the ship is conned from the forward end of the top deck); afts
+CASCADE (each exposed roof is the promenade of the deck below, and it gets rails). The walls
+are ONE banded loft wound around the whole perimeter — arc length carries the mullion rhythm
+through the corners — so a blank front is no longer a thing the builder can build. The top
+deck carries the BRIDGE: a wheelhouse that is more glass than wall, with open wings running
+to the hull's own side at that station, flush, railed. Boats stow on the top of the house
+with their davits standing ON the deck (pitch may close from 1.38 to 1.30 boat-lengths
+before boats are cut; then it is fewer boats, never closer). Titanic's house span is from
+the plan: `houseAt: [0.225, 0.875]`.
+
+**The funnel datum is the record's datum.** Where the record locates the house (`houseAt`),
+the stack stands on the highest covering tier and funnelH keeps its recorded meaning. Where
+the house is the default abstraction, the stack keeps the SHEER datum — raising Great
+Eastern's 30 m stacks onto her inferred house top made them out-tower her own 34 m foremast,
+and the funnel-height audit rule caught it before any eye did (the audit is now right 2 of 6
+lifetime). `linerHouse().recorded` carries the distinction; builder and audit read the same
+flag.
+
+**Audit: three new rules, 25/25 clean.** (1) boats stow within chock height of the top of
+the house; (2) a powered decked ship has a bridge, on the boat deck, at the FRONT of the
+house; (3) every funnel casing sits on its own deck — covering tier where recorded, sheer
+otherwise. All keyed off SHIPS_HULL.linerHouse, so they cannot drift from the builder.
+
+**Ratchet: three frames moved, each looked at, classified, accepted.** ship-titanic 15.14%
+(the round's work — verified from 12 bearings in `_spin/titanic-after`; funnel rake proven
+aft by world-space measurement after a pixel eyeball misread it, funnel top +1.66 m toward
+the boats' end); ship-great-eastern 2.28% (class change; funnels unchanged on their sheer
+datum); aboard 0.585% (the steamer carries the class change into the Sea view — wheelhouse
+at her bow end, boats on the house). Final board all green.
+
+**globe-default flapped 1.016% and it is NOT this round's change.** The diff is label halos
+only — the exact signature frames.json already documents. Diagnosis this round: the app uses
+ONLY system fonts ("Iowan Old Style" etc.), so `document.fonts` never has a pending load and
+round 27's fonts clause in the ready expr is VACUOUS — it guards nothing. The flap is a rare
+cold-start rasterisation transient: full-suite run flapped, immediate re-check 0.000%,
+flap_test run1-vs-run2 0.000%. It can only produce a false RED, never a false green. The
+structural fix is to vendor the serif as a real webfont (OFL — then document.fonts genuinely
+governs it and rasterisation is machine-independent). That is a dependency decision like the
+RGBELoader note — decide before writing code.
+
+**Deliberately not done:** Titanic's forecastle and poop as separate raised decks with real
+well decks — the house abstraction still meets open deck at both ends without the breaks; her
+masts are unraked and white where the real ones were raked and buff; the funnel buff
+(0xd8cfbb, from the museum model) is paler than White Star buff — recolour only after an A/B
+against a dated reference, per rule 4.
+
+### Next, in order
+1. **The steel stern quarter, as a class** (carried from round 27): full-lit pale transom,
+   sternpost stripe proud of it, antifouling colour — three fleet-wide reads, see
+   `_spin/yamato-after/b315.png`.
+2. Sea-view spot check of the remaining steel ships from round 25 (aboard/steamer done this
+   round; the rest still owed).
+3. The serif-webfont dependency decision (closes the globe-default false-RED class).
+4. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
