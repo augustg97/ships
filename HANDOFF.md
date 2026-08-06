@@ -1116,3 +1116,108 @@ convention only if the card ever claims "water she needs".
 workflow run (the ffc3333 mode is still active — treat it as standing until a push-triggered
 run appears). Manual `gh workflow run pages.yml --ref main` → run 31129001186, completed
 success, live stamp 1786052194 → 1786053656, verified with a cache-busted fetch.
+
+---
+
+## Round 34 — 2026-08-06 — Titanic to her own drawings: the profile was 1.6× too tall, and the record closed on itself
+
+**Queue item 1 (the Sea-view spot check) and queue item 4 (Titanic fine structure), and the
+spot check's biggest find was inside the queue item: her whole VERTICAL model was wrong, not
+just her fittings.**
+
+**1. The spot check, seven steel hulls in the Sea close-up.** Temp frames on the voyage URLs
+(`e5&f=cable`, `e6&f=preussenvoy|titanicvoy|jutland|kidobutai|tenichigo`, `e7&f=mayflowerusv`),
+each looked at. Sound: great-eastern (funnels, masts, paddle wheel, gaff canvas all read),
+preussen (five-master under sail), yamato (pagoda, turrets, wooden deck, hull-red bottom), usv
+(small but correct). Logged for the queue: **the carrier reads near-black from every angle in
+both views** — hers, not the sun's; the Shipwright baseline shows the same charcoal hull and
+deck against a real Ford-class haze grey — and **dreadnought's dark-olive deck goes black in
+Sea light** (both now queue items below). Titanic's faults went to item 2.
+
+**2. Titanic, rebuilt against the record, class mechanisms throughout.**
+
+* **The height fault.** `freeboard: 18.5` was her BOAT-DECK height above water used as shell
+  freeboard, where the fleet convention (checked across all ten steel/iron hulls) is
+  waterline→shell deck. Four white tiers then stacked on top of it: drawn boat deck **30.3 m**
+  over the water against the record's **19**, funnel tops at 49 m against ~39, and her masts
+  (48.7 m) LEVEL with the funnels instead of 20 m above them — which is why the Sea view
+  showed a white slab with invisible masts. Now: freeboard 10.1 (C deck), three storeys of
+  house, `boatDeckM: 19.0` in the data, and the drawn boat deck derives to 18.98 m.
+* **The record closes on itself, which is the check that the mapping is right.** Forecastle
+  128 ft + well 50 + bridge superstructure 550 + well 50 + poop 106 = 884 ft against her
+  882.75 ft LOA (ggarchives/titanicandco/ET deck guides). `houseAt` moved to the record's
+  stations `[0.202, 0.849]` — the drawn house length stays exactly 550 ft (167.6 m) — and
+  with `wellM: 15.2` the forecastle break lands 37.1 m abaft the FP (record 39.0 m from the
+  stem head ✓) and the poop break 23.9 m forward of u=1 (record 32.3 m less the ~8 m counter
+  overhang the loft does not carry ✓). Fore well and aft well fall out as the record's 50 ft.
+* **`shellTiers: 1` — a house tier can be SHELL.** The 550 ft bridge superstructure was side
+  plating carried up: full-breadth, near-flush, black, a window row in black steel. Tier 0
+  now wears the topside colour at B·0.015 inset; the white house (two storeys, two window
+  rows) stands on it. This is a linerHouse/buildSuperstructure mechanism any hull can use.
+* **`buildRaisedEnds()` — forecastle and poop as data.** Walls lofted around the hull's own
+  perimeter (surfacePoint − B·0.015, so they cannot overhang by construction), following the
+  hull's own SHEER station by station, one storey high, in the hull's paint; planked deck
+  strip lofted the same way; railed all round with the one-polyline posts+bars idiom from
+  round 25. Driven by `wellM` + `houseAt`; only Titanic carries the fields this round.
+* **Masts.** Rake 9.46° aft (the record: masts and funnels raked 2 in per foot), heights so
+  the trucks stand at `mastTopM: 62.5` (circa 205 ft above the load line, the Marconi aerial
+  height); mainmast moved 0.735 → 0.878 — it stood in the AFT WELL, abaft all four funnels,
+  not mid-house. `mastLivery: 'buff'` — White Star masts wore the funnel buff, and the
+  white-lower/black-upper Great Eastern scheme was wrong on her.
+* **Funnels.** `funnelRake: 9.46` (default stays 0.085 rad for the rest of the fleet, bit
+  identical). **Buff A/B, decided by looking:** old 0xd8cfbb reads near-white cream in both
+  views; `buff: "#c9a267"` reads as the "pale orange-yellow" of the sources. The shade is
+  CONTESTED — tan ↔ orange-yellow ↔ near-pink (#f1ab91) all defended — said in the data
+  comment per rule 9.
+* **Perspective, not a fault, measured anyway:** in wide Shipwright bearings the foremast
+  APPEARS to rake forward while the mainmast rakes aft. In-page measurement: both masts lean
+  +8.7 m aft, tops at 62.2/62.6 m. Verticals far off the camera axis diverge outward at 34°
+  FOV; the eye was wrong and the measurement is on file.
+
+**3. Audit: two new DATA rules + one rule fixed, all proven live.** `house off the record`
+(freeboard + decks·(beam·0.105) must land on boatDeckM ± 0.5 — the double-counted-datum class)
+and `mast tops off the record` (built mast bb vs mastTopM ± 1.5, rake included). Broke the
+data (boatDeckM 25, mastTopM 75): both fired; restored: 25/25 clean. And `cargo off the deck
+edge` sampled the hull at ONE station (the mesh's bb centre) — the new forecastle wall is one
+mesh spanning a tapering bow, widest at its aft end, so the centre-station test flagged
+geometry that is lofted FROM surfacePoint and cannot overhang (audit wrong, 5th time; rule 8
+held). It now takes the max hull half-breadth over 5 stations across the mesh's span — the
+original container-bow fault (9 m past the side, taper across one bay ≈ 2–3 m) still trips
+by arithmetic.
+
+**Ratchet:** **28 frames, 3 moved, 2 accepted, 1 left standing.**
+`ship-titanic` 25.648% — the rebuild, accepted after 12 spin bearings (`_spin/titanic-r34/`),
+the close frame and the Sea view were each looked at. `ship-yamato` 0.179% — edge-only: the
+neighbouring COARSE titanic hull in the fleet line dropped to her corrected freeboard;
+accepted. `globe-default` 1.023% — the standing serif-webfont false-RED, diff is text labels
+only (verified), left un-accepted; it sat at 0.008% in this round's pre-flight and flaked in
+the closing check, so the class is alive and remains queued. Everything else 0.000–0.022%,
+including ship-great-eastern and ship-steamer at 0.000% — the A/B controls proving the
+linerHouse/superstructure/funnel refactors are bit-identical where no data opts in — and
+`aboard-titanic` NEW, committed as the liner's Sea-view baseline.
+
+**Rule 0 check, written:** the frames read as a rendered world — a swell with a horizon, a
+hull wet at her marks, one sun doing the lighting. Three facts off ship-titanic/b090: a
+four-funnel liner whose buff funnels and masts rake visibly aft together; black shell one
+storey above two well decks, white above it, boats at the davits; two porthole rows under a
+gilt cove on a riveted black side. Three off aboard-titanic: she is ~270 m with the house
+amidships and breaks fore and aft; her masts out-tower her funnels; red-brown antifouling
+shows only where the trough drops below her marks.
+
+### Next, in order
+1. **The carrier's tone** (r34 spot check): charcoal hull/deck against a real haze-grey
+   Ford class — near-black silhouette in the Sea view from every angle. Measure against
+   reference imagery before touching the constant; it is one material colour, not a shader.
+2. **Dreadnought's deck colour** (r34 spot check): dark olive that reads black in Sea light;
+   the record says holystoned wood decks. Check the deck material convention for pre-1920
+   warships as a class.
+3. The serif-webfont dependency decision (globe-default false-RED; 0.008% in this round's
+   pre-flight, 1.023% in the closing check — it flakes WITHIN a round, which is the class).
+4. The land in the Sea close-up: featureless brown ramp, check on a high coast.
+5. Yamato round 2: 25 mm tertiary battery, deck aircraft, boat-stowage hatches, pagoda
+   searchlight platforms.
+6. Titanic remainder, if wanted: crow's nest height from the record (drawn at 0.66 of the
+   mast, likely ~10 m high), funnel stations against the GA drawing, A-deck open promenade
+   forward (hers were enclosed — the Olympic tell), docking bridge on the poop.
+7. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
+   preussen P-liner white waterline check.

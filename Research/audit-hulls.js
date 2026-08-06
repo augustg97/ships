@@ -98,6 +98,26 @@
     if (H.iron && H.year >= 1950 && H.cove)
       say(v.id, 'anachronistic dress', `cove line declared on a ${H.year} welded hull`);
 
+    /* ── THE HOUSE STANDS AT THE RECORD'S HEIGHT (round 34). Titanic's freeboard carried her
+       BOAT-DECK height (18.5 m) where the fleet convention is waterline-to-shell-deck, so the
+       drawn boat deck stood 30.3 m over the water against the record's 19 — the whole profile
+       1.6× too tall, and her masts level with her funnels instead of 20 m over them. Where
+       the record supplies the datum (boatDeckM), the derivation the house, boats and funnels
+       all stand on — freeboard + decks·(beam·0.105) — must land on it. */
+    if (H.boatDeckM && H.decks) {
+      const top = H.freeboard + H.decks * H.beam * 0.105;
+      if (Math.abs(top - H.boatDeckM) > 0.5)
+        say(v.id, 'house off the record',
+            `boat deck derives to ${top.toFixed(1)} m over water, record says ${H.boatDeckM}`);
+    }
+    /* and the MAST TOPS likewise (mastTopM, above the load line — the aerial height the
+       record states). Measured off the built geometry, so rake and stepping are included. */
+    if (H.mastTopM && part.mast) {
+      if (Math.abs(part.mast.y[1] - H.mastTopM) > 1.5)
+        say(v.id, 'mast tops off the record',
+            `tallest mast ${part.mast.y[1].toFixed(1)} m over water, record says ${H.mastTopM}`);
+    }
+
     /* ⚠ a carrier's superstructure IS her island, and hull.js says so explicitly — the generic
        deckhouse builder is skipped for her on purpose. The rule asks for a superstructure, not
        for one particular shape of it. */
@@ -523,9 +543,18 @@
         const p = tagOf(o);
         if (!p || (p.key !== 'container' && p.key !== 'forecast')) return;
         const bb = new THREE.Box3().setFromObject(o);
-        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bb.min.x + bb.max.x) / 2) / H.lwl));
-        const allow = Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1.0)[2]) +
-                      Math.max(1.5, H.beam * 0.033);
+        /* ⚠ sampled across the mesh's SPAN, not at its centre (round 34): the forecastle
+           wall is ONE mesh lofted along a tapering bow, so its widest point is at its aft
+           end while its bb centre sits where the hull is narrow — the centre-station test
+           flagged geometry that is lofted from surfacePoint and cannot overhang. A box at
+           constant width over the bow still fires: the hull is narrow across its whole span. */
+        let allow = 0;
+        for (let s = 0; s <= 4; s++) {
+          const u = Math.max(0.001, Math.min(0.999,
+            0.5 + (bb.min.x + (s / 4) * (bb.max.x - bb.min.x)) / H.lwl));
+          allow = Math.max(allow, Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1.0)[2]));
+        }
+        allow += Math.max(1.5, H.beam * 0.033);
         const z = Math.max(-bb.min.z, bb.max.z);
         if (z > allow) { over++; worst = Math.max(worst, z - allow); }
       });

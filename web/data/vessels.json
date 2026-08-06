@@ -2258,17 +2258,17 @@
     "masts": [
      {
       "at": 0.175,
-      "heightM": 30.0,
+      "heightM": 52.2,
       "rig": "pole",
-      "rake": 0,
+      "rake": 9.46,
       "shrouds": 0,
       "crowsNest": true
      },
      {
-      "at": 0.735,
-      "heightM": 26.0,
+      "at": 0.878,
+      "heightM": 52.2,
       "rig": "pole",
-      "rake": 0,
+      "rake": 9.46,
       "shrouds": 0
      }
     ],
@@ -2277,17 +2277,17 @@
     "lwl": 259.0,
     "beam": 28.2,
     "draught": 10.5,
-    "freeboard": 18.5,
+    "freeboard": 10.1,
     "cm": 0.95,
     "transom": 0.22,
     "funnels": 4,
-    "decks": 4,
+    "decks": 3,
     "boats": 20,
     "portholes": true,
-    "mastLivery": true,
+    "mastLivery": "buff",
     "houseAt": [
-     0.225,
-     0.875
+     0.202,
+     0.849
     ],
     "funnelH": 19.0,
     "funnelAt": [
@@ -2297,7 +2297,13 @@
      0.665
     ],
     "year": 1912,
-    "cove": 1
+    "cove": 1,
+    "shellTiers": 1,
+    "wellM": 15.2,
+    "boatDeckM": 19.0,
+    "mastTopM": 62.5,
+    "buff": "#c9a267",
+    "funnelRake": 9.46
    }
   },
   {

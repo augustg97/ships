@@ -25,3 +25,6 @@ scratchpad/
 /Research/baselines/_diff/
 /Research/baselines/_spin/
 /Research/baselines/_flap/
+
+# firecrawl search caches, session-local
+.firecrawl/

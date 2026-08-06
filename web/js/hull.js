@@ -674,7 +674,12 @@ function buildRig(S, group, mats, FINE) {
          decoration — the lower mast is a built iron tube kept white with the deckhouses, and
          the topmast and above are the sending-down spars, tarred and blacked like the rigging
          they carry. The join is at the doubling, which is exactly where the colour changes. */
-      const mastMat = S.mastLivery
+      const mastMat = S.mastLivery === 'buff'
+        /* the White Star scheme: masts wore the funnel buff, whole pole — not the
+           white-lower/black-upper of the Great Eastern model */
+        ? (mats.mastBuff || (mats.mastBuff = new THREE.MeshStandardMaterial(
+              { color: new THREE.Color(S.buff || 0xd8cfbb), roughness: 0.60 })))
+        : S.mastLivery
         ? (si === 0 ? (mats.mastWhite || (mats.mastWhite = new THREE.MeshStandardMaterial(
               { color: 0xdedad0, roughness: 0.58 })))
                     : (mats.mastBlack || (mats.mastBlack = new THREE.MeshStandardMaterial(
@@ -1891,17 +1896,27 @@ function linerHouse(S) {
   const base = H.sheer(0.5), dh = B * 0.105, inset = B * 0.055;
   const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
   const tiers = [];
+  /* ── A TIER CAN BE SHELL, NOT HOUSE ────────────────────────────────────────────────
+     On the Edwardian liners the side PLATING carried up past the sheer deck: Titanic's
+     550 ft bridge superstructure was shell — black, flush with the hull side save a plate's
+     step — and the white house stood on top of it. `shellTiers` counts how many of the
+     lower tiers are that: full-breadth, nearly flush, painted the topside colour by the
+     superstructure builder. Drawing them as inset white house was why her profile showed
+     one white slab where the record shows black to B deck and white above. */
+  const ns = S.shellTiers || 0;
   for (let i = 0; i < n; i++) {
-    const wid = B * (0.92 - (i / n) * 0.16);
+    const shell = i < ns;
+    const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
+    const ins = shell ? B * 0.015 : inset;
     const uA = hA + i * 0.008, uB = hB - i * 0.045;
     /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
        half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
     const half = (u) => {
       const uu = Math.max(0.001, Math.min(0.999, u));
       return Math.max(B * 0.06, Math.min(wid / 2,
-        Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - inset));
+        Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
     };
-    tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half });
+    tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell });
   }
   /* `recorded` marks a house the RECORD located (houseAt) as opposed to the default span.
      It decides which deck a funnel's recorded height is measured from — see buildFunnel. */
@@ -1939,9 +1954,10 @@ function buildSuperstructure(S, group) {
      whole perimeter instead: the lights march around the corners by construction, and a
      blank front is no longer a thing this builder can build. Arc length carries the mullion
      rhythm through the turns. */
-  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac) => {
+  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol) => {
     const tp = [], tc = [], ti = [];
     const R = rows.length;
+    const fc = faceCol || face;
     let s = 0;
     for (let k = 0; k < path.length; k++) {
       if (k) s += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
@@ -1949,7 +1965,7 @@ function buildSuperstructure(S, group) {
       const isMul = frac < mulFrac;
       for (const rf of rows) {
         const inBand = rf > band[0] && rf < band[1];
-        const c = (inBand && !isMul) ? glass : face;
+        const c = (inBand && !isMul) ? glass : fc;
         tp.push(path[k].x, y0 + rf * (y1 - y0), path[k].z);
         tc.push(c.r, c.g, c.b);
       }
@@ -2040,12 +2056,16 @@ function buildSuperstructure(S, group) {
   };
 
   const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];  // sole, band edges, roof
+  /* a shell tier wears the hull's own paint, and its lights read as a window row cut in
+     black plating — which is exactly what C-deck's were */
+  const shellCol = new THREE.Color(S.topside || '#3a3a3c');
   for (let i = 0; i < T.n; i++) {
     const t = T.tiers[i];
     /* ⚠ built in ABSOLUTE coordinates, y0 to y1 — the old walls were built about their own
        centre and never positioned, so the whole house sat below the waterline for as long as
        it existed while the rails alone stood correctly. Nothing here waits to be positioned. */
-    g.add(wallLoft(perim(t), t.y0, t.y1, rows, [0.46, 0.68], paneW, 0.52));
+    g.add(wallLoft(perim(t), t.y0, t.y1, rows, [0.46, 0.68], paneW, 0.52,
+                   t.shell ? shellCol : null));
     g.add(roofPlate(t, t.y1));
     if (i === T.n - 1) {
       railRun(perim(t), t.y1);                        // the boat deck is railed all round
@@ -2142,6 +2162,104 @@ function buildSuperstructure(S, group) {
   group.add(tag(g, 'superstructure'));
 }
 
+/* ── THE RAISED ENDS: FORECASTLE AND POOP ──────────────────────────────────────────────
+ * A liner's sheer line was not the top of her shell. On the Olympic class the plating rose
+ * one deck above the shelter deck in three places — a 128 ft forecastle, the 550 ft bridge
+ * superstructure, and a 106 ft poop — with two ~50 ft WELL DECKS cut between them, and that
+ * alternation of black wall and open well is a large part of the recognisable profile. The
+ * record closes on itself: 128 + 50 + 550 + 50 + 106 = 884 ft against her 882.75 ft overall,
+ * so the two ends are DERIVED — the recorded house (houseAt) minus a recorded well (wellM)
+ * on each side, running out to the hull's own extremities. Their lengths then fall out at
+ * 39 m and ~26 m drawn (the counter overhang carries the rest of the poop's 32 m), and the
+ * BREAKS — the thing the eye reads — stand at the record's stations.
+ * The walls follow the hull's own half-breadth (flush shell, not inset house) and the hull's
+ * own sheer, in the hull's own paint. */
+function buildRaisedEnds(S, group) {
+  if (!(S.wellM && S.houseAt && S.houseAt.length === 2 && S.decks)) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam, dh = B * 0.105;
+  const wellU = S.wellM / L;
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(S.topside || '#3a3a3c'), roughness: 0.58, metalness: 0.22,
+    side: THREE.DoubleSide });
+  const deckMat = new THREE.MeshStandardMaterial({ color: 0xd3c9b4, roughness: 0.72, side: THREE.DoubleSide });
+  const railMat = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
+  const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.015;
+  const up = new THREE.Vector3(0, 1, 0);
+
+  const mk = (u0, u1, label, what) => {
+    const g = new THREE.Group();
+    const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
+    /* the perimeter, wound like the house's: starboard fwd→aft, aft end, port aft→fwd,
+       fwd end — each station carrying its own u so the wall can follow the sheer */
+    const path = [];
+    for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
+    path.push({ u: u1, x: (u1 - 0.5) * L, z: -halfAt(u1) });
+    for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: -halfAt(u) }); }
+    path.push({ u: u0, x: (u0 - 0.5) * L, z: halfAt(u0) });
+    /* the wall: two vertex rows, base sunk a little into the shell (no coplanar cap to
+       fight), head one deck-height over the local sheer */
+    const tp = [], ti = [];
+    for (const p of path) {
+      const ys = H.sheer(p.u);
+      tp.push(p.x, ys - dh * 0.15, p.z, p.x, ys + dh, p.z);
+    }
+    for (let k = 0; k + 1 < path.length; k++) {
+      const a = k * 2, b = a + 2;
+      ti.push(a, b, a + 1, a + 1, b, b + 1);
+    }
+    const wg = new THREE.BufferGeometry();
+    wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+    wg.setIndex(ti); wg.computeVertexNormals();
+    g.add(new THREE.Mesh(wg, wallMat));
+    /* the deck: a planked strip lofted station by station at sheer + dh, so it carries the
+       hull's own sheer out to the end rather than lying flat across it */
+    const dp = [], di = [];
+    for (let k = 0; k <= N; k++) {
+      const u = u0 + (u1 - u0) * k / N, y = H.sheer(u) + dh, h = halfAt(u);
+      dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
+    }
+    for (let k = 0; k < N; k++) { const a = k * 2, b = a + 2; di.push(a, b, a + 1, a + 1, b, b + 1); }
+    const dg = new THREE.BufferGeometry();
+    dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
+    dg.setIndex(di); dg.computeVertexNormals();
+    g.add(new THREE.Mesh(dg, deckMat));
+    /* railed all round, posts and three bars resampled from the same perimeter the wall
+       stands on (the round-25 lesson: one polyline in, posts and rails out) */
+    const step = B * 0.22, Q = [];
+    let acc = 0; Q.push(path[0]);
+    for (let k = 1; k < path.length; k++) {
+      acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
+      if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
+    }
+    for (const q of Q) {
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), railMat);
+      st.position.set(q.x, H.sheer(q.u) + dh + dh * 0.15, q.z);
+      g.add(st);
+    }
+    for (let k = 0; k + 1 < Q.length; k++) {
+      const a = Q[k], b = Q[k + 1];
+      const len = Math.hypot(b.x - a.x, b.z - a.z);
+      if (len < 0.01) continue;
+      const dir = new THREE.Vector3(b.x - a.x, 0, b.z - a.z).normalize();
+      const ym = (H.sheer(a.u) + H.sheer(b.u)) / 2 + dh;
+      for (const hf of [0.10, 0.20, 0.30]) {
+        const bar = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), railMat);
+        bar.position.set((a.x + b.x) / 2, ym + dh * hf, (a.z + b.z) / 2);
+        bar.quaternion.setFromUnitVectors(up, dir);
+        g.add(bar);
+      }
+    }
+    group.add(tag(g, 'forecast', label, what));
+  };
+
+  const [hA, hB] = S.houseAt;
+  mk(0.004, hA - wellU, 'Forecastle',
+     'The shell carried one deck higher at the bow: anchor gear, windlass and the break of the deck. Between here and the bridge superstructure lies the forward well deck — on Titanic it was Third Class open space, and the first place the sea came aboard.');
+  mk(hB + wellU, 0.996, 'Poop deck',
+     'The raised aft deck, and on Titanic the last of her to stay dry. The aft well deck between the poop and the superstructure was Third Class promenade; the docking bridge stood here, from which she was conned going astern.');
+}
+
 /* ── WHERE THE FUNNELS STAND ────────────────────────────────────────────────────────────
  * ⚠ Read by TWO callers now — the funnels themselves, and the boom clamp in the rig, which
  * has to know what is standing in the gap it is about to swing a spar through. Defined once
@@ -2231,7 +2349,11 @@ function buildFunnel(S, group) {
        LINE. Yamato wore a liner's funnel for as long as she has existed here. A navy's funnel
        is the navy's grey, black at the head where the smoke has it anyway. */
     const warship = !!S.turrets;
-    const buff = new THREE.Color(warship ? 0x596066 : 0xd8cfbb), cap = new THREE.Color(0x1b1b1d);
+    /* ⚠ THE BUFF IS THE LINE'S, NOT THE FLEET'S. One constant painted P&O and White Star the
+       same colour. Where the record supplies the line's buff it comes from the data (S.buff);
+       for White Star the exact shade is CONTESTED — tan, orange-yellow and near-pink are all
+       defended in the literature — and the data says so where it is set. */
+    const buff = new THREE.Color(warship ? 0x596066 : (S.buff || 0xd8cfbb)), cap = new THREE.Color(0x1b1b1d);
     for (let i = 0; i < spos.count; i++) {
       const fy = spos.getY(i) / h + 0.5;               // 0 at the base, 1 at the head
       const c = fy > (warship ? 0.88 : 0.80) ? cap : buff;
@@ -2250,7 +2372,10 @@ function buildFunnel(S, group) {
     pipe.position.set(-r * 1.25, caseH * 0.55 + h * 0.46, 0);
     g.add(pipe);
     g.position.set((u - 0.5) * S.lwl, y, 0);
-    g.rotation.z = -0.085;                       // raked aft, as they almost always were
+    /* raked aft, as they almost always were — and where the record states the rake it wins:
+       the Olympic class raked masts and funnels 2 inches to the foot, 9.46°, twice the
+       default here, and the lean is a large part of why her profile reads as HERS */
+    g.rotation.z = S.funnelRake !== undefined ? -S.funnelRake * Math.PI / 180 : -0.085;
     group.add(tag(g, 'funnel'));
   }
 }
@@ -3992,6 +4117,7 @@ function buildShip(S, opts) {
      the liner builder gave Yamato four white window-banded passenger tiers over 80% of her
      length, and the main battery was buried inside them. A turreted ship gets the citadel. */
   if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
+  if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
   if (FINE && S.turrets) buildCitadel(S, group, mats);
   if (FINE) buildSternAviation(S, group);
   if (FINE) buildHead(S, group, mats);

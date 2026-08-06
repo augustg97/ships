@@ -105,3 +105,18 @@ Next in the queue: the float datum (~2 m of antifouling showing above the waterl
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 10511 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 14:50:00  round starting
+Round 33 is complete and live. The summary:
+
+**The float datum (queue item 1, carried twice) is measured and fixed as a class.** Before touching anything I measured all 25 hulls in-page: the hull skin bottoms at exactly −draught on every ship, meaning `surfacePoint` puts the load waterline at local y = 0 by construction — but both views floated ships from `keelBottom + draught`, where `keelBottom` is the bounding-box floor of the whole build. That box measures the keel timber, the screw, or the bulb, so the sea sat 0.03 m (dugout) to 0.97 m (container) below every ship's marks. That, plus wave troughs and a low camera, was the "~2 m of antifouling in the air." The datum is now a recorded construction fact (`waterlineY: 0` in hull.js userData) consumed by the Shipwright and all three Passage float sites; the stale trireme-story comments claiming "the waterline is not y = 0" are rewritten, since they described a parametrisation that no longer exists.
+
+**Two more faults fell out of the measurement.** The container's bulbous bow hung 0.97 m below the keel — no ship can dry-dock like that — and now fairs its underside to the baseline. And the Shipwright drew a wind-7.0 sea while floating its ships on wind 6.5, a 14% amplitude mismatch of exactly the two-models-of-one-number class; both now use 6.5.
+
+**Two new audit rules, proven live by breaking the state first:** "skin off her marks" (fired on all 25 with the skin scaled 5%, clean restored) and "hangs below the keel" (fired on the reverted bulb, clean restored). Final audit: 25/25 clean.
+
+**Ratchet: 17 frames moved, every one looked at, all accepted with reasons** — Shipwright frames 6–13% (mostly the re-scaled drawn sea), Sea-view frames 0.7–1.4% (ships dropping off their old lift). Yamato's boot-top now touches the water with dark red only in the troughs; the trireme's blades reach the sea. Globe-default flagged once at 1.02% but the diff was text labels only — the standing serif-webfont flake, left un-accepted; a re-run came back 0.008% and all 27 frames green.
+
+**Deploy verified live:** the push again created no workflow run (the round-32 failure mode continues), so I dispatched manually — run 31129001186 succeeded and the live stamp moved to 1786053656, confirmed with a cache-busted fetch. HANDOFF.md carries the full entry, the deploy note, and the reordered queue; the tree is committed and clean.
+2026-08-06 15:28:24  round finished; HEAD is 618b36d Deploy note r33: manual dispatch again — push-triggered runs still not firing
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 17845 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 15:38:24  round starting
