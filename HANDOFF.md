@@ -777,3 +777,16 @@ guards something — is the right one and is still queued.
    `aboard` frame says it is not reaching this camera. Check on a high coast, not off the
    Peloponnese.
 6. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
+
+**⚠ AND A PUSH TO `main` CREATED NO WORKFLOW RUN AT ALL.** `2959eb4` landed on the remote —
+`git rev-parse origin/main` confirmed it — and `pages.yml` triggers on `push: branches: [main]`,
+but no run was ever created for that SHA; the newest run stayed on round 28's commit. This is a
+NEW failure mode, distinct from round 28's wedged site object (there the run existed and hung).
+`gh workflow run pages.yml --ref main` created the run immediately, so the workflow and its
+permissions are fine and only the push webhook did not fire. **For every future round: after
+pushing, confirm a run exists for YOUR sha (`gh run list --limit 1 --json headSha`) — not just
+that the push succeeded, and not just that the newest run is green, because the newest run may
+belong to the previous commit. If there is no run, dispatch one.** Three deploy failure modes
+are now on record with three different remedies: legacy builder erroring instantly (move to the
+workflow build), the site object wedged in `errored` (delete and recreate the Pages site), and
+the push trigger silently not firing (dispatch manually).
