@@ -615,3 +615,15 @@ course 257°; nine guns in three triple turrets, two forward superfiring, one af
 3. Sea-view spot check of every steel ship whose rail/deck/rudder changed in round 25 —
    still owed from the round-26 queue.
 4. The watchdog is already at 80 min (done in bae5bd3); the queue item is settled.
+
+**The deploy needed one more structural fix: the Pages SITE OBJECT was wedged.** Round 26
+moved to the workflow build; its run — and this round's first run — uploaded the artifact
+fine and then hung at `deployment_in_progress` for the action's full 10-minute timeout. The
+site's own API state was `status: "errored"`, inherited from the legacy builder's instant
+failures, and no deployment could clear it from either pipeline. The fix was to DELETE and
+recreate the Pages site (`gh api -X DELETE repos/augustg97/ships/pages`, then POST with
+`build_type=workflow`) and re-run the workflow. The stamp went live while the run was still
+polling. So for the next round: the check that matters is the LIVE STAMP, and a run that
+reports failure after a 10-minute status-polling hang may still have deployed — but a stamp
+that does not move within a few minutes of the artifact upload means the site object is
+wedged again, and recreating it is the remedy that worked.
