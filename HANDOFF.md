@@ -778,15 +778,27 @@ guards something — is the right one and is still queued.
    Peloponnese.
 6. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
 
-**⚠ AND A PUSH TO `main` CREATED NO WORKFLOW RUN AT ALL.** `2959eb4` landed on the remote —
-`git rev-parse origin/main` confirmed it — and `pages.yml` triggers on `push: branches: [main]`,
-but no run was ever created for that SHA; the newest run stayed on round 28's commit. This is a
-NEW failure mode, distinct from round 28's wedged site object (there the run existed and hung).
-`gh workflow run pages.yml --ref main` created the run immediately, so the workflow and its
-permissions are fine and only the push webhook did not fire. **For every future round: after
-pushing, confirm a run exists for YOUR sha (`gh run list --limit 1 --json headSha`) — not just
-that the push succeeded, and not just that the newest run is green, because the newest run may
-belong to the previous commit. If there is no run, dispatch one.** Three deploy failure modes
-are now on record with three different remedies: legacy builder erroring instantly (move to the
-workflow build), the site object wedged in `errored` (delete and recreate the Pages site), and
-the push trigger silently not firing (dispatch manually).
+**⚠ THIS ROUND IS COMMITTED AND PUSHED BUT NOT DEPLOYED — GITHUB ACTIONS AND PAGES WERE BOTH
+IN MAJOR OUTAGE.** `ffc3333` is on `main`; the live stamp is still `1786032589` (round 28's).
+The symptoms, in the order they appeared: two pushes to `main` created no workflow run at all,
+a `workflow_dispatch` created one that sat at `waiting` for 15+ minutes without starting a
+step, and a second dispatch returned **HTTP 500**. The Pages site object was healthy throughout
+(`build_type: workflow`, status not `errored`), so this is NOT round 28's wedged site.
+`githubstatus.com` then confirmed it: **Actions `major_outage`, Pages `major_outage`, a critical
+incident under investigation.**
+
+I first wrote this up as a repo-specific "push webhook did not fire" fault and that diagnosis
+was wrong — the API check came after. Recording the mistake because the shape of it recurs in
+this project: three symptoms that all pointed at our configuration, and the actual cause was
+upstream and global. **Check `githubstatus.com` before diagnosing a deploy, not after.**
+
+**What the next round must do:** the working tree is clean and green — do NOT redo this work.
+Confirm the live stamp; if it is still behind, dispatch `gh workflow run pages.yml --ref main`
+once Actions is operational, and verify the stamp moves.
+
+**The durable lesson, which survives the misdiagnosis:** after pushing, confirm a run exists
+for YOUR sha (`gh run list --limit 1 --json headSha`) — not merely that the push succeeded, and
+not that the newest run is green, because the newest run may belong to the previous commit.
+Deploy failure modes now on record: the legacy builder erroring instantly (move to the workflow
+build), the site object wedged in `errored` (delete and recreate the Pages site), and an
+upstream Actions outage (wait for it, and do not "fix" the repo in the meantime).
