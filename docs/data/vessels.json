@@ -2282,7 +2282,10 @@
     "boats": 20,
     "portholes": true,
     "mastLivery": true,
-    "houseAt": [0.225, 0.875],
+    "houseAt": [
+     0.225,
+     0.875
+    ],
     "funnelH": 19.0,
     "funnelAt": [
      0.335,
@@ -2939,6 +2942,18 @@
     "towerH": 30.0,
     "secondaries": [
      {
+      "at": 0.452,
+      "cal": 0.155,
+      "barrels": 3,
+      "deck": 1
+     },
+     {
+      "at": 0.545,
+      "cal": 0.155,
+      "barrels": 3,
+      "wing": true
+     },
+     {
       "at": 0.668,
       "cal": 0.155,
       "barrels": 3
@@ -2948,7 +2963,23 @@
     "funnelH": 26.0,
     "funnelAt": [
      0.5625
-    ]
+    ],
+    "aa": [
+     {
+      "at": 0.49
+     },
+     {
+      "at": 0.575
+     },
+     {
+      "at": 0.625
+     }
+    ],
+    "catapults": {
+     "at": 0.915,
+     "lenM": 19.4
+    },
+    "sternCrane": true
    }
   },
   {

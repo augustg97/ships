@@ -1360,6 +1360,16 @@ const PARTS = {
               what: 'The turret revolves on a barbette — an armoured cylinder running down to the '
                   + 'magazine. Mounted on the centreline and superfiring, one raised behind '
                   + 'another, so both can bear ahead.' },
+  aa:       { stage: 4, name: 'High-angle battery',
+              what: 'Twin high-angle guns on open mounts along the superstructure edge, barrels '
+                  + 'elevated the way no surface gun ever points. By the time this ship was laid '
+                  + 'down the fight she was built for had moved into the air, and her upperworks '
+                  + 'grew the guns to answer it.' },
+  catapult: { stage: 4, name: 'Aircraft catapult',
+              what: 'The quarterdeck is a runway eighteen metres long. A cordite charge throws a '
+                  + 'floatplane off the beam before the deck ends; the crane at the stern lifts '
+                  + 'it back aboard after it lands on the sea. Every battleship carried her own '
+                  + 'eyes — over the horizon is where the guns outrange the rangefinder.' },
   /* ── the uncrewed vessel ─────────────────────────────────────────────────────────────
      Its parts have no older equivalent, which is the point of them: everything here exists
      because there is nobody aboard to do the job by hand. */
@@ -2859,9 +2869,24 @@ function buildCitadel(S, group, mats) {
                                                 side: THREE.DoubleSide });
   const dark = new THREE.MeshStandardMaterial({ color: 0x4b5157, roughness: 0.58, metalness: 0.25 });
   const glaze = new THREE.MeshStandardMaterial({ color: 0x171b1f, roughness: 0.35, metalness: 0.30 });
+  /* ── THE CITADEL SEATS EVERY MOUNT THE RECORD DECLARES ────────────────────────────────
+     A barbette must stand on plating, so the deck runs forward or aft to cover the end
+     secondaries — on the real ship the shelter deck runs right up round No.2 barbette for
+     exactly this reason. Derived, so a record with more mounts gets a longer citadel. */
+  (S.secondaries || []).forEach(sec => {
+    if (sec.wing) return;                           // a wing pair stands abeam, inside the span
+    const rB = (B * (sec.scale || 0.085) * 1.15) / L;
+    uA = Math.min(uA, sec.at - rB);
+    uB = Math.max(uB, sec.at + rB);
+  });
   const g = new THREE.Group();
   const base = H.sheer((uA + uB) / 2);
   const dh = B * 0.080;
+  /* one half-breadth derivation for the tier walls and everything that stands at them, so a
+     mount placed "at the deck edge" is at the edge the loft actually drew */
+  const tierHalf = (u, t) => Math.max(B * 0.06,
+    Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.06
+    - t * B * 0.045);
   /* two stepped decks, lofted from the hull's own half-breadth so they cannot overhang —
      the liner house learned that rule the hard way and it holds here */
   const tiers = [[uA, uB], [uA + 0.012, uB - 0.045]];
@@ -2873,9 +2898,7 @@ function buildCitadel(S, group, mats) {
     const tp = [], ti = [];
     for (let k = 0; k <= NU; k++) {
       const u = a + (b - a) * k / NU;
-      const half = Math.max(B * 0.06,
-        Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.06
-        - t * B * 0.045);
+      const half = tierHalf(u, t);
       const x = (u - 0.5) * L;
       tp.push(x, y0, -half,  x, y0, half,  x, y1, -half,  x, y1, half);
     }
@@ -2923,18 +2946,124 @@ function buildCitadel(S, group, mats) {
   g.add(tag(rf, 'superstructure', 'Main rangefinder',
     'The primary optical rangefinder for the main battery, at the highest point that will hold one: range accuracy is baseline times height.'));
   /* ── THE SECONDARY BATTERY, from the record ──────────────────────────────────────────
-     Centreline mounts standing on the citadel decks, superfiring over the main battery. */
+     A mount trains fore-and-aft past its own end of the ship — at rest EVERY mount does,
+     which the Kure fitting-out photographs show; trained abeam the wing pair read as bare
+     drums from broadside, barrels foreshortened to nothing. `wing: true` is a PAIR at the
+     upper tier's deck edge, port and starboard. `deck` is how many levels above the citadel
+     roof the mount stands; the gunhouse riser carries its barbette down through the
+     intervening height, so a raised mount cannot float — the main battery's round-26 rule. */
   (S.secondaries || []).forEach(sec => {
     const R2 = B * (sec.scale || 0.085);
-    const sg = gunhouse(S, R2, sec.cal || 0.15, sec.barrels || 3, 0, mats);
-    /* `deck` is which citadel level the mount stands on — Yamato's forward 15.5 cm stood a
-       level above the citadel deck, superfiring the main battery from beside the tower foot */
-    const lvl = Math.min(sec.deck || 0, tierTop.length - 1);
-    sg.position.set((sec.at - 0.5) * L, tierTop[lvl] - 0.15, 0);
-    if (sec.at > towerU) sg.rotation.y = Math.PI;
-    g.add(tag(sg, 'turret'));
+    const lvl = sec.deck || 0;
+    const posns = sec.wing
+      ? [1, -1].map(sgn => ({ z: sgn * (tierHalf(sec.at, 1) - R2 * 1.15),
+                              y: tierTop[1] - 0.15,
+                              rot: sec.at > towerU ? Math.PI : 0, riser: 0 }))
+      : [{ z: 0, y: tierTop[0] + dh * lvl - 0.15,
+           rot: sec.at > towerU ? Math.PI : 0, riser: dh * lvl }];
+    posns.forEach(p => {
+      const sg = gunhouse(S, R2, sec.cal || 0.15, sec.barrels || 3, p.riser, mats);
+      sg.position.set((sec.at - 0.5) * L, p.y, p.z);
+      sg.rotation.y = p.rot;
+      g.add(tag(sg, 'turret', 'Secondary battery'));
+    });
   });
+  buildAA(S, g, { tierTop, tierHalf, dh }, mats);
   group.add(tag(g, 'superstructure'));
+}
+
+/* ── THE HIGH-ANGLE BATTERY ─────────────────────────────────────────────────────────────
+ * Twin heavy AA mounts along the upper citadel edge, mirrored port and starboard, from the
+ * record: `aa: [{at: …}, …]`, one entry per side-pair. Open mounts — a platform, a pedestal,
+ * a shield block and two barrels ELEVATED, because the elevated barrel is the whole legible
+ * difference between an AA gun and everything else on deck. */
+function buildAA(S, g, T, mats) {
+  if (!S.aa || !S.aa.length) return;
+  const B = S.beam, L = S.lwl;
+  const steel = mats.turretSteel || (mats.turretSteel =
+    new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
+  const dark = mats.turretDark || (mats.turretDark =
+    new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+  S.aa.forEach(m => {
+    const cal = m.cal || 0.127;
+    const barrelL = cal * (m.calLen || 40);
+    for (const sgn of [1, -1]) {
+      const z = sgn * (T.tierHalf(m.at, 1) - 2.0);
+      const mount = new THREE.Group();
+      /* the platform is the sponson the crew stand on */
+      const plat = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 0.35, 16), dark);
+      plat.position.y = 0.175;
+      mount.add(tag(plat, 'aa', 'Gun platform'));
+      const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.85, 1.1, 12), dark);
+      ped.position.y = 0.9;
+      mount.add(ped);
+      /* the shield: an open-backed box, face outboard */
+      const shield = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.7, 2.0), steel);
+      shield.position.y = 2.1;
+      mount.add(tag(shield, 'aa', 'High-angle mount'));
+      /* twin barrels, elevated — trained outboard like the rest of the ready battery */
+      for (const off of [-0.55, 0.55]) {
+        const gun = new THREE.Mesh(
+          new THREE.CylinderGeometry(cal * 0.55, cal * 0.7, barrelL, 8), dark);
+        gun.rotation.x = sgn * (Math.PI / 2 - 0.7);            // 40 degrees up, muzzle outboard
+        gun.position.set(off, 2.6 + Math.cos(0.7) * barrelL * 0.30,
+                         sgn * Math.sin(0.7) * barrelL * 0.35);
+        mount.add(tag(gun, 'aa', 'High-angle gun'));
+      }
+      mount.position.set((m.at - 0.5) * L, T.tierTop[1], z);
+      g.add(tag(mount, 'aa'));
+    }
+  });
+}
+
+/* ── THE STERN AVIATION DECK ────────────────────────────────────────────────────────────
+ * A battleship's quarterdeck aft of the last turret was not spare space: it was her airfield.
+ * Two trainable catapults at the deck edge, port and starboard, angled outboard so the
+ * launch clears the stern — and the crane right aft, because a floatplane lands on the SEA
+ * and has to be lifted back aboard. From the record: `catapults: {at, lenM}`, `sternCrane`.
+ * The carrier draws her own catapults; this is the QUARTERDECK kind, on the sheer. */
+function buildSternAviation(S, group) {
+  if (!S.catapults) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const dark = new THREE.MeshStandardMaterial({ color: 0x4b5157, roughness: 0.58, metalness: 0.25 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 });
+  const u = S.catapults.at || 0.92;
+  const len = S.catapults.lenM || B * 0.5;
+  const deckY = H.sheer(u);
+  const half = Math.abs(surfacePoint(S, H, u, 1.0)[2]);
+  for (const sgn of [1, -1]) {
+    const g = new THREE.Group();
+    /* the turntable pedestal the beam trains on */
+    const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 1.0, 14), dark);
+    ped.position.y = 0.5;
+    g.add(tag(ped, 'catapult', 'Catapult turntable'));
+    /* the launch beam: a box girder with the trolley rail proud on top */
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(len, 0.9, 1.4), steel);
+    beam.position.y = 1.45;
+    g.add(tag(beam, 'catapult'));
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(len * 0.96, 0.18, 0.5), dark);
+    rail.position.y = 1.99;
+    g.add(tag(rail, 'catapult', 'Launch rail'));
+    g.position.set((u - 0.5) * L, deckY, sgn * (half - 2.6));
+    g.rotation.y = -sgn * 0.6;                    // trained outboard-aft, a V opening astern
+    group.add(tag(g, 'catapult'));
+  }
+  if (S.sternCrane) {
+    const g = new THREE.Group();
+    const uC = Math.min(0.985, u + len * 0.75 / L);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.65, 9.0, 12), dark);
+    post.position.y = 4.5;
+    g.add(tag(post, 'catapult', 'Crane post'));
+    const jibL = len * 0.65;
+    const jib = new THREE.Mesh(new THREE.BoxGeometry(jibL, 0.6, 0.6), steel);
+    /* raked up and aft over the stern, where the aircraft it recovers is */
+    jib.position.set(Math.cos(0.6) * jibL / 2, 9.0 + Math.sin(0.6) * jibL / 2, 0);
+    jib.rotation.z = 0.6;
+    g.add(tag(jib, 'catapult', 'Aircraft crane'));
+    g.position.set((uC - 0.5) * L, H.sheer(uC), 0);
+    group.add(tag(g, 'catapult'));
+  }
 }
 
 function buildWingSail(S, group, mats) {
@@ -3844,6 +3973,7 @@ function buildShip(S, opts) {
      length, and the main battery was buried inside them. A turreted ship gets the citadel. */
   if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
   if (FINE && S.turrets) buildCitadel(S, group, mats);
+  if (FINE) buildSternAviation(S, group);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   if (FINE) buildOars(S, group, mats.woodPale);

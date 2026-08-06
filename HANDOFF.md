@@ -802,3 +802,80 @@ not that the newest run is green, because the newest run may belong to the previ
 Deploy failure modes now on record: the legacy builder erroring instantly (move to the workflow
 build), the site object wedged in `errored` (delete and recreate the Pages site), and an
 upstream Actions outage (wait for it, and do not "fix" the repo in the meantime).
+
+---
+
+## Round 30 — 2026-08-06 — Yamato gets her battery: the citadel was never bare, the record was
+
+**The queue said "no secondaries, no AA, no boats, no catapult" and three of the four were a
+RECORD fault, not a builder fault.** The builder has drawn declared secondaries since round 27 —
+but the record declared one of Yamato's four 15.5 cm turrets and nothing else, so the citadel
+stood bare and looked like a builder that couldn't furnish a deck. The round is therefore mostly
+data plus three small classes, all record-driven so the next battleship gets them for free:
+
+**1. The secondary battery, complete.** `secondaries` now supports `wing: true` — a PAIR at the
+upper tier's deck edge, port and starboard — and `deck: N` now means N levels above the citadel
+roof, with the gunhouse riser carrying the barbette down through the intervening height so a
+raised mount cannot float (the main battery's round-26 rule, inherited because they are one
+`gunhouse()` derivation). All mounts train fore-and-aft at rest, as the Kure fitting-out
+photographs show — trained abeam the wing pair read as bare drums from broadside, barrels
+foreshortened to nothing; that pose was tried and recaptured before being rejected. The citadel
+SPAN now derives from the secondaries as well as the main turrets: the deck runs forward to seat
+the superfiring mount's barbette, which on the real ship is exactly why the shelter deck runs
+round No.2 barbette.
+
+**2. The high-angle battery, a new class.** `aa: [{at}, …]`, one entry per side-pair, drawn
+mirrored on the upper tier edge: platform, pedestal, shield block, twin barrels ELEVATED 40° —
+the elevated barrel being the whole legible difference between an AA gun and everything else
+aboard. Six 12.7 cm twins on Yamato, stations picked clear of the wing turrets' train.
+
+**3. The stern aviation deck, a new class.** A battleship's quarterdeck aft of the last turret
+was her airfield, and 70 m of bare olive deck was wrong for a reason no "boats" item could fix:
+Yamato stowed her boats and floatplanes BELOW decks (deliberately not drawn), and what showed
+was `catapults: {at, lenM}` — two trainable box-girder catapults with launch rails at the deck
+edge, angled outboard in a V opening astern — and `sternCrane`, post and raked jib right aft,
+because a floatplane lands on the sea and must be lifted back aboard. Guarded to the sheer
+datum; the carrier keeps her own flight-deck kind.
+
+**Audit: three new rules, one rule refined, 25/25 clean both before-fix and after.** (1) the
+record's battery is the drawn battery MOUNT FOR MOUNT — mains + 1 per centreline secondary + 2
+per wing pair, no fewer, no more ("declared but not drawn" could never see three missing of
+four, because SOME secondary was drawn); (2) high-angle pairs drawn both sides, inside the beam,
+standing on the citadel; (3) catapults drawn as a mirrored pair with each turntable resting on
+the sheer, plus the crane when declared. The wrong-way-guns rule briefly grew an
+outboard-trained exemption and lost it the same round when the abeam pose was rejected — an
+exemption guarding nothing is round 29's vacuous-fonts fault wearing armour.
+
+**Ratchet: ONE frame moved, ship-yamato, 0.242%, accepted.** The diff is the citadel cluster
+and the quarterdeck and nothing else — the moved set being exactly the aimed set, again. Twelve
+bearings captured in `_spin/yamato-r30` before and after the wing-train correction; funnel
+checked from all four low bearings and it is a true 24-segment cylinder from everywhere — the
+"flat card" in the queue was not reproducible, closed as not-a-fault.
+
+**⚠ A TRAP FOUND, NOT YET FIXED: `build_data.py` no longer produces `vessels.json`.** Every
+hull refinement since round 26 — `turretAt`, `towerH`, `funnelH`, `funnelAt`, metre-based
+masts, secondaries, and now `aa`/`catapults`/`sternCrane` — exists ONLY in `web/data/
+vessels.json`, hand-edited, while `build_data.py` still holds the round-25 abstractions.
+Re-running build_data.py would silently wipe five rounds of hull work. Either fold the JSON
+state back into the generator or make the generator refuse to overwrite a newer vessels.json —
+that is a one-round chore and it should happen before anyone touches build_data.py for any
+other reason.
+
+**Deploy status: round 29's outage continued through this round's work** — Actions and Pages
+both `major_outage` at 11:40. Stamp for this round is 1786043728; see the end-of-round note
+below for what actually got live.
+
+### Next, in order
+1. **The steel stern quarter, as a class** (carried from rounds 27–29): full-lit pale transom,
+   sternpost stripe proud of it, antifouling colour — reconfirmed this round in
+   `_spin/yamato-r30/b315.png`, the pale transom wedges are impossible to miss behind the new
+   crane. Three fleet-wide reads.
+2. **Fold the hand-edited vessels.json back into build_data.py** (the trap above), or guard the
+   generator. Before anything else touches build_data.py.
+3. Sea-view spot check of the remaining steel ships from round 25.
+4. The serif-webfont dependency decision (closes the globe-default false-RED class).
+5. The land in the Sea close-up: featureless brown ramp, check on a high coast.
+6. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
+7. Yamato round 2, if her queue slot comes round again: the 25 mm tertiary battery, deck
+   aircraft, boat-stowage hatches, and the pagoda's searchlight platforms — all deliberately
+   not done this round to keep one vessel one round.

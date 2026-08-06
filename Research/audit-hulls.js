@@ -234,6 +234,64 @@
       }
     }
 
+    /* ⚠ THE RECORD'S BATTERY IS THE DRAWN BATTERY, MOUNT FOR MOUNT. Yamato declared her
+       secondaries for two rounds while the builder drew one of four — 'declared but not
+       drawn' could not see it because SOME secondary was drawn. Count them: mains plus one
+       per centreline secondary plus two per wing pair, no fewer, no more. */
+    if (H.turrets) {
+      const expect = H.turrets +
+        (H.secondaries || []).reduce((a, s) => a + (s.wing ? 2 : 1), 0);
+      const drawn = [];
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'turret')
+                          drawn.push(o); });
+      if (drawn.length !== expect)
+        say(v.id, 'battery miscounted',
+            `${expect} mounts in the record (${H.turrets} main), ${drawn.length} drawn`);
+    }
+
+    /* the high-angle battery: declared pairs are drawn BOTH sides, inside the beam, and
+       stand on the superstructure rather than in it or over it */
+    if (H.aa && H.aa.length) {
+      const mounts = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'aa')
+                          mounts.push(new THREE.Box3().setFromObject(o)); });
+      if (mounts.length !== H.aa.length * 2)
+        say(v.id, 'high-angle battery miscounted',
+            `${H.aa.length * 2} mounts in the record, ${mounts.length} drawn`);
+      for (const mb of mounts) {
+        if (Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)) > H.beam / 2 + 0.5)
+          say(v.id, 'high-angle mount outside the beam',
+              `z reaches ${Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)).toFixed(1)} m on ${(H.beam / 2).toFixed(1)} m of half-beam`);
+      }
+      if (part.superstructure && mounts.length &&
+          mounts.some(mb => mb.min.y < part.superstructure.y[0] ||
+                            mb.min.y > part.superstructure.y[1] + 1.4))
+        say(v.id, 'high-angle mount stands on nothing',
+            'a mount bottom is below the citadel or floats above its roofline');
+    }
+
+    /* ⚠ THE QUARTERDECK AVIATION DECK STANDS ON THE DECK. Declared catapults are drawn as a
+       PAIR, mirrored, each turntable resting on the sheer at its station — the class of
+       fault the funnel-attached-to-nothing audit exists for, asserted before it happens. */
+    if (H.catapults) {
+      const HS3 = SHIPS_HULL.hullSurface(H);
+      const cats = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'catapult')
+                          cats.push(new THREE.Box3().setFromObject(o)); });
+      const wanted = 2 + (H.sternCrane ? 1 : 0);
+      if (cats.length !== wanted)
+        say(v.id, 'aviation deck miscounted',
+            `${wanted} structures in the record (2 catapults${H.sternCrane ? ' + crane' : ''}), ${cats.length} drawn`);
+      for (const cb of cats) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((cb.min.x + cb.max.x) / 2) / H.lwl));
+        if (Math.abs(cb.min.y - HS3.sheer(uu)) > 1.5)
+          say(v.id, 'catapult stands on nothing',
+              `bottom at ${cb.min.y.toFixed(1)} m, sheer there ${HS3.sheer(uu).toFixed(1)} m`);
+      }
+    }
+
     /* ⚠ A SUPERFIRING TURRET'S BARBETTE RUNS TO THE DECK. The raised mount was lifted by
        moving its group up, so the barbette bottom floated exactly the raise above the
        planking — and the contact audit could not see it, because the barbette touches the
