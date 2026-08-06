@@ -126,6 +126,11 @@
    "name": "aboard-coast",
    "path": "/?frozen=1#e=2&f=syracuse",
    "note": "ABOARD, CLOSE INSHORE — the Athenian armada five kilometres off the Peloponnese, with land 121 m high and the sun 65 degrees up. August reported seeing NO LAND from the close-up while the map showed the ship hugging a coast, and no frame watched it: `aboard` and `aboard-off` both happen to sit in open water, and the first attempt at this frame put the guano clipper a thousand kilometres off Chile. Chosen by sweeping every ship in every era at the frozen instant for the one nearest to lit land, rather than by guessing."
+  },
+  {
+   "name": "sea-magnified",
+   "path": "/?frozen=1#e=7&t=2000&c=-30,35&z=10000",
+   "note": "OPEN WATER AT 10 km — magnified far past the scale the sea shader was tuned for, which is the band between the near-field handover at 8 km and the old 12 km map floor. August photographed a regular lattice of pale dashes here and no frame watched it: every other water frame is either at globe zoom or in the near field. The cause was foam laid along the crests of a FOUR-component Gerstner sum — four sinusoids are visibly periodic once resolved, and white on their crests draws that periodicity. Measured by FFT: one component at 33 px, peak-to-mean 395, now 139."
   }
  ]
 }

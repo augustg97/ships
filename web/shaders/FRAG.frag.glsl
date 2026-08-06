@@ -392,7 +392,20 @@ void main(){
        is what "more subtle yet more clearly wind" actually asks for. The second octave runs
        across the first at a shallower angle rather than parallel to it, because a real sea
        surface has the wind streaks of the moment lying over the older ones. */
-    vec2 sp = uv * vec2(330.0, 165.0);
+    /* ── ⚠ AND A FIXED WORLD FREQUENCY BECOMES A VISIBLE LATTICE WHEN YOU ZOOM INTO IT ──
+       330 cycles across the globe is right at globe zoom — the first version used 2600 and
+       aliased into television static, which is the note above. But the frequency was FIXED, so
+       zooming in magnifies it without limit, and once a noise cell is bigger than a pixel you
+       stop seeing a field and start seeing the cells: a regular lattice of small elongated
+       dashes, tilted along the wind because the streak anisotropy elongates them. That is
+       exactly the grid August photographed, and an FFT of the frame confirms it — one periodic
+       component at a peak-to-mean ratio of 395.
+       The fix is the same one the wave components already use, applied at the other end: a
+       surface texture must keep roughly constant SCREEN size, so its world frequency has to
+       follow the zoom. Anchored so that at globe zoom the multiplier is 1 and nothing changes
+       there — this is a texture that was only ever correct at one altitude. */
+    float windK = clamp(3125.0 / max(1.0, uMPP), 1.0, 2000.0);
+    vec2 sp = uv * vec2(330.0, 165.0) * windK;
     vec2 alongWind = vec2(dot(sp, wdir), dot(sp, vec2(-wdir.y, wdir.x)));
     float drift = uTime * 0.35 * (0.4 + wspd * 0.10);
     float wave = fbm(alongWind * vec2(0.24, 4.55) + vec2(drift, 0.0));
@@ -470,8 +483,21 @@ void main(){
        else is the tell that the water is a texture and not a surface */
     if (wamp > 0.0001) {
       float ct = crest / max(wamp, 0.0001);                  // -1 trough .. +1 crest
-      float lace = fbm(localMetres(vPos) * 0.06 + vec2(uTime * 0.5, 0.0));
-      float cf = smoothstep(0.58, 0.94, ct) * smoothstep(0.30, 0.62, lace);
+      /* ── ⚠ AND FOAM ON EVERY CREST ADVERTISES THAT THERE ARE ONLY FOUR OF THEM ────
+         The Gerstner sum is four components. That is plenty for a sea at any distance where
+         the waves are a texture, and it is visibly PERIODIC once they are resolved — so
+         laying bright foam along every crest draws the periodicity in white. Magnified, the
+         result is a regular lattice of pale dashes over the whole ocean, which is the grid
+         August photographed; an FFT of the frame puts it at 33 px, which is one 220 m wave
+         component at that altitude.
+         The lace meant to break it ran at one cycle per 16.7 m — far below a pixel at these
+         zooms, so it averaged to a constant and let foam through everywhere. Whitecaps are
+         intermittent ALONG a crest as well as across it: a crest breaks in patches tens to
+         hundreds of metres long, and between them the same crest is unbroken water. At a
+         wavelength that survives to the screen, that patchiness is what stops four sinusoids
+         reading as four sinusoids. */
+      float lace = fbm(localMetres(vPos) * 0.0055 + vec2(uTime * 0.5, 0.0));
+      float cf = smoothstep(0.58, 0.94, ct) * smoothstep(0.46, 0.78, lace);
       col = mix(col, vec3(0.90, 0.935, 0.95), cf * (0.20 + 0.62 * breakF) * uZoom);
     }
     /* and a broad haze of spray where it really blows, so the belt reads at globe scale
