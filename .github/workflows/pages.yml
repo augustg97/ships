@@ -1,0 +1,34 @@
+# Deploys /docs to GitHub Pages via the workflow build.
+#
+# WHY NOT THE LEGACY BUILDER. Every legacy build since 956a72b (2026-08-06 11:19Z) errored
+# instantly with the undiagnosable "Page build failed." — content was exonerated (the diff
+# between the last good and first bad build is four text files, and the site carries
+# .nojekyll), GitHub Pages was operational, and a forced rebuild of the same commit failed
+# in 0 s. The workflow build has real logs and no Jekyll pre-checks, and hands us the
+# failure reason if it ever breaks again.
+name: Deploy Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4
