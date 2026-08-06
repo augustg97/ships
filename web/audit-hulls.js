@@ -186,6 +186,82 @@
                              `${adrift.length} of ${parts.length} meshes touch no other part`);
     }
 
+    /* ⚠ A BATTLESHIP'S TURRETS ARE HER SILHOUETTE, AND FOR FOUR ROUNDS THEY WERE INSIDE THE
+       DECKHOUSE. The liner superstructure ran 80% of Yamato's length and the three main
+       turrets stood buried in it — declared, drawn, tagged, and invisible from all twelve
+       bearings. 'Declared but not drawn' cannot see it because they WERE drawn. Ask whether
+       any turret's flesh is inside the house's flesh, mesh box by mesh box.
+       ⚠ The BARBETTE is exempt: an armoured tube running down THROUGH the structure to the
+       magazine is not buried, it is doing its job. The fault is a GUNHOUSE or GUN inside. */
+    if (H.turrets && part.turret && (part.superstructure || part.island)) {
+      const houseBoxes = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && (p.key === 'superstructure' || p.key === 'island'))
+          houseBoxes.push(new THREE.Box3().setFromObject(o)); });
+      let buried = 0;
+      g.traverse(o => { const p = tagOf(o);
+        if (!o.isMesh || !p || p.key !== 'turret' || p.name === 'Barbette') return;
+        const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+        if (houseBoxes.some(hbx => hbx.containsPoint(c))) buried++; });
+      if (buried) say(v.id, 'turret buried in the superstructure',
+                      `${buried} gunhouse/gun meshes centred inside deckhouse geometry`);
+    }
+
+    /* ⚠ THE GUNS POINT PAST THE SHIP'S END, AND FOR AS LONG AS THE TURRETS HAVE EXISTED THE
+       FORWARD ONES POINTED AT THE STERN. One sign error, invisible from the baseline bearing.
+       For every turret group: the barrels must reach beyond the gunhouse toward the end of
+       the ship the mount faces — bow end for a mount forward of amidships, stern end aft.
+       (A mount trained fore-and-aft the OTHER way exists at sea, but at rest — which is what
+       the model shows — a battery points past its own end of the ship.) */
+    if (H.turrets) {
+      g.updateMatrixWorld(true);
+      const turretGroups = [];
+      g.traverse(o => { if (o.userData.part && o.userData.part.key === 'turret' && o.isGroup)
+                          turretGroups.push(o); });
+      for (const tgp of turretGroups) {
+        let guns = null, house = null;
+        tgp.traverse(o => { if (!o.isMesh || !o.userData.part) return;
+          const bbx = new THREE.Box3().setFromObject(o);
+          if (o.userData.part.name === 'Main gun') guns = guns ? guns.union(bbx) : bbx;
+          if (o.userData.part.name === 'Turret') house = house ? house.union(bbx) : bbx; });
+        if (!guns || !house) continue;
+        const u = 0.5 + ((house.min.x + house.max.x) / 2) / H.lwl;
+        const fwd = u < 0.5;
+        if (fwd ? guns.min.x > house.min.x - 0.5 : guns.max.x < house.max.x + 0.5)
+          say(v.id, 'guns point the wrong way',
+              `mount at u=${u.toFixed(2)} faces ${fwd ? 'the bow' : 'the stern'} but its barrels do not clear the gunhouse that way`);
+      }
+    }
+
+    /* ⚠ A SUPERFIRING TURRET'S BARBETTE RUNS TO THE DECK. The raised mount was lifted by
+       moving its group up, so the barbette bottom floated exactly the raise above the
+       planking — and the contact audit could not see it, because the barbette touches the
+       gunhouse above it. Each turret group's bottom must rest on ITS OWN support: the sheer
+       at its station, or a superstructure surface directly beneath it. */
+    if (H.turrets) {
+      const HS2 = SHIPS_HULL.hullSurface(H);
+      const houseBoxes2 = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && (p.key === 'superstructure' || p.key === 'island'))
+          houseBoxes2.push(new THREE.Box3().setFromObject(o)); });
+      const turretGroups2 = [];
+      g.traverse(o => { if (o.userData.part && o.userData.part.key === 'turret' && o.isGroup)
+                          turretGroups2.push(o); });
+      for (const tgp of turretGroups2) {
+        const tb = new THREE.Box3().setFromObject(tgp);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((tb.min.x + tb.max.x) / 2) / H.lwl));
+        const onSheer = Math.abs(tb.min.y - HS2.sheer(u)) < 1.4;
+        const onHouse = houseBoxes2.some(hbx =>
+          Math.abs(tb.min.y - hbx.max.y) < 1.4 &&
+          tb.max.x > hbx.min.x && tb.min.x < hbx.max.x &&
+          tb.max.z > hbx.min.z && tb.min.z < hbx.max.z);
+        if (!onSheer && !onHouse)
+          say(v.id, 'turret stands on nothing',
+              `bottom at ${tb.min.y.toFixed(1)} m, sheer there ${HS2.sheer(u).toFixed(1)} m, no deck beneath`);
+      }
+    }
+
     /* ⚠ A MOTOR SHIP'S RUDDER IS UNDER THE COUNTER, AND THE FITTINGS FOLLOW THE BUILD.
        Found on the carrier from her stern quarter: the timber-era barn door hung on the
        sternpost stood 17 m past a nuclear carrier's transom and 4 m out of the water, in

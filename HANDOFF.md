@@ -544,3 +544,74 @@ and accepted as one-time settles. Final board: all frames within tolerance.
 4. The loop watchdog still kills a full build+verify round at 50 min (two kills, then this
    round ran to the wire). Raise `sleep 3000` in build/loop-round.sh toward 4800 — the
    stale-lock clear at 90 min leaves room — or keep splitting build/land across firings.
+
+**The live site had been stale since round 25 and nobody could see it.** Every legacy
+Pages build since 956a72b (04:19 local) errored instantly with "Page build failed." and
+nothing else — content exonerated (the last-good→first-bad docs diff is four text files,
+.nojekyll present, Pages operational, a forced rebuild of the same commit failed in 0 s).
+The live stamp still said 1786012084 while three rounds pushed on top. Rule 6 exists for
+exactly this: A SUCCESSFUL PUSH IS NOT A SUCCESSFUL DEPLOY. Fixed structurally: deployment
+moved to the Pages WORKFLOW build (.github/workflows/pages.yml, build_type=workflow) which
+has real logs — if it breaks again it will say why.
+
+## Round 27 — 2026-08-06 — Yamato was a liner; now she is a battleship
+
+**The fault was the class, not the vessel.** `buildSuperstructure` is a LINER builder — white
+window-banded tiers over 80% of the length — and it ran for every decked ship without a flight
+deck. On Yamato that buried all three main turrets inside the deckhouse (invisible from all
+twelve bearings), stood a buff-and-black trademark funnel amidships and a brown timber pole for
+a mast. Under it, three more faults in `buildTurrets` itself: the forward guns pointed at the
+STERN (one sign, exactly as round 26's note predicted), the barrels were 34 m long because they
+scaled off turret radius rather than calibre (a 46 cm/45 rifle is 21 m), and the superfiring
+mount's barbette floated 3.3 m above the deck because the raise moved the whole group up.
+
+**Structural fixes, all class-level, in hull.js:**
+- A turreted ship now gets `buildCitadel`, never the liner house: two grey decks lofted from
+  the hull's own half-breadth, whose SPAN IS DERIVED from the turret stations (the
+  superstructure fills the gap between the end turrets — that is why battleships look as they
+  do), a stacked bridge tower at the mast station (`towerH` from the record), a main
+  rangefinder at its head, and secondary mounts from the record (`secondaries`).
+- One `gunhouse()` builds every mount at any calibre — main and secondary are the same object
+  at two sizes. Guns face the bow; aft mounts are turned; barrel length is `calibre × 45`;
+  the barbette runs down past the deck, and a raised mount's barbette grows by the raise.
+- `turretStations(S)` reads `turretAt` from the data (funnelStations pattern), read by both
+  the turrets and the citadel — one derivation of where the battery stands.
+- Warship livery follows the build: grey funnel (a company's buff-and-black is a trademark,
+  and a navy has none), grey steel masts. Both keyed on `S.turrets`.
+- Data: yamato gets turretAt/towerH/secondaries/second mast at real stations off the plan;
+  dreadnought gets turretAt [0.28, 0.68, 0.80] and turretRaise [0,0,0] (she predates
+  superfiring). She took the whole class change and reads correctly — checked from her own
+  spin capture, `_spin/dreadnought-after/`.
+
+**Deliberately not done:** the FORWARD 15.5 cm secondary. Between No.2's gunhouse and the
+tower foot there is not room for it at this abstraction without interpenetrating one or the
+other — tried at deck 0 (embedded in the shelter-deck face, the audit caught it), at deck 1
+(its barrels pass through No.2's roof). The real mount nests INTO the pagoda foot; modelling
+that means merging it with the tower geometry, which is a finer resolution than one round
+buys. The aft mount is in. Logged here per rule 5.
+
+**The audit grew three rules and was right once.** New in audit-hulls.js: (1) no gunhouse or
+gun mesh centred inside superstructure geometry (barbettes exempt — passing through decks is
+their job); (2) every mount's barrels must clear its gunhouse toward the end of the ship it
+faces; (3) every turret group's bottom must rest on its own support — the sheer at its
+station or a superstructure surface beneath it — which is the rule the floating superfiring
+barbette needed. Rule 1 fired on the first citadel build (fwd secondary embedded in the
+shelter deck) and the geometry was wrong, not the audit: 1 for 5 lifetime.
+
+**Measured.** Audit 25/25 clean. Ratchet: every pre-existing frame ≤ 0.022%/0.013 — the class
+change moved nothing that was not a turreted ship, and no committed frame photographed one,
+which is exactly the blindness `ship-yamato` (new baseline, accepted with reason) now closes.
+Sea view verified aboard `#f=tenichigo`. Rule 0, on that frame: it reads as a rendered world —
+wind-streaked water, coastal relief, a hull with weight; three facts a viewer can name: a WWII
+battleship with a pagoda mast, so Japanese; her position off the southern Japanese coast,
+course 257°; nine guns in three triple turrets, two forward superfiring, one aft.
+
+### Next, in order
+1. **titanic's tiers** (stepped plates, no fronts) — carried from round 26.
+2. **The steel stern quarter, as a class**: from astern every steel ship shows a full-lit pale
+   transom with the black sternpost stripe proud of it, over the pale sand of the unpainted
+   underwater body. Three separate reads (transom lighting, sternpost material, antifouling
+   colour), all fleet-wide, all visible in `_spin/yamato-after/b315.png`.
+3. Sea-view spot check of every steel ship whose rail/deck/rudder changed in round 25 —
+   still owed from the round-26 queue.
+4. The watchdog is already at 80 min (done in bae5bd3); the queue item is settled.

@@ -2793,8 +2793,19 @@
     "transom": 0.22,
     "funnels": 2,
     "turrets": 3,
+    "turretAt": [
+     0.28,
+     0.68,
+     0.8
+    ],
+    "turretRaise": [
+     0,
+     0,
+     0
+    ],
     "barrels": 2,
     "calibre": 0.305,
+    "towerH": 12.0,
     "decks": 3,
     "funnelH": 22.0,
     "funnelAt": [
@@ -2893,8 +2904,15 @@
     "steeve": 22,
     "masts": [
      {
-      "at": 0.46,
+      "at": 0.5,
       "heightM": 40.0,
+      "rig": "none",
+      "rake": 0,
+      "shrouds": 0
+     },
+     {
+      "at": 0.63,
+      "heightM": 26.0,
       "rig": "none",
       "rake": 0,
       "shrouds": 0
@@ -2910,12 +2928,25 @@
     "transom": 0.24,
     "funnels": 1,
     "turrets": 3,
+    "turretAt": [
+     0.32,
+     0.415,
+     0.73
+    ],
     "barrels": 3,
     "calibre": 0.46,
+    "towerH": 30.0,
+    "secondaries": [
+     {
+      "at": 0.668,
+      "cal": 0.155,
+      "barrels": 3
+     }
+    ],
     "decks": 4,
     "funnelH": 26.0,
     "funnelAt": [
-     0.55
+     0.5625
     ]
    }
   },

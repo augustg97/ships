@@ -88,6 +88,11 @@
    "note": "lofted deckhouse must not overhang the hull; check bow-on faults here too"
   },
   {
+   "name": "ship-yamato",
+   "path": "/?frozen=1#v=ship&s=yamato",
+   "note": "the warship citadel — turrets clear of the deckhouse, guns toward the bow; round 27"
+  },
+  {
    "name": "ship-container",
    "path": "/?frozen=1#v=ship&s=container",
    "note": "funnel proportions (was wider than tall), bridge block, container stacks"

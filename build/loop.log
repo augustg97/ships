@@ -19,3 +19,8 @@ The build gate is confirmed as the publication route. Everything is staged: the 
 /Users/augustgweon/Ships/build/loop-round.sh: line 74: 40984 Terminated: 15          ( sleep 3000; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 50 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 06:13:39  round starting
+  round overran 50 min — killing
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-06 07:03:48  round finished; HEAD is 4da220f Deploy via the Pages workflow build: the legacy builder fails undiagnosably
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 07:13:48  round starting

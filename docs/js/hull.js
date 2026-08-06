@@ -677,6 +677,10 @@ function buildRig(S, group, mats, FINE) {
               { color: 0xdedad0, roughness: 0.58 })))
                     : (mats.mastBlack || (mats.mastBlack = new THREE.MeshStandardMaterial(
               { color: 0x1e2022, roughness: 0.52, metalness: 0.20 }))))
+        /* ⚠ a warship's masts are the navy's grey, not oiled timber — Yamato carried a brown
+           wooden pole for as long as the pole has existed */
+        : S.turrets ? (mats.mastGrey || (mats.mastGrey = new THREE.MeshStandardMaterial(
+              { color: 0x5a6067, roughness: 0.55, metalness: 0.30 })))
         : woodDark;
       const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
                     radii[si], radii[si] * 0.7, mastMat, -rakeRad);
@@ -2115,10 +2119,14 @@ function buildFunnel(S, group) {
        Colours from the museum model August supplied: buff stack, black top. */
     const sg = new THREE.CylinderGeometry(r * 0.93, r, h, 24, 24);
     const spos = sg.attributes.position, scol = [];
-    const buff = new THREE.Color(0xd8cfbb), cap = new THREE.Color(0x1b1b1d);
+    /* ⚠ THE BUFF-AND-BLACK IS A SHIPPING LINE'S TRADEMARK, AND A WARSHIP HAS NO SHIPPING
+       LINE. Yamato wore a liner's funnel for as long as she has existed here. A navy's funnel
+       is the navy's grey, black at the head where the smoke has it anyway. */
+    const warship = !!S.turrets;
+    const buff = new THREE.Color(warship ? 0x596066 : 0xd8cfbb), cap = new THREE.Color(0x1b1b1d);
     for (let i = 0; i < spos.count; i++) {
       const fy = spos.getY(i) / h + 0.5;               // 0 at the base, 1 at the head
-      const c = fy > 0.80 ? cap : buff;
+      const c = fy > (warship ? 0.88 : 0.80) ? cap : buff;
       scol.push(c.r, c.g, c.b);
     }
     sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
@@ -2621,6 +2629,70 @@ function buildDeckPark(S, group, yDeck) {
  * They are mounted on the centreline and SUPERFIRING, one raised behind another, so both can
  * fire ahead. That arrangement is the reason a battleship has the profile it does.
  */
+/* Stations from the record when the record is in the data — the funnelStations rule again,
+ * and read by TWO callers: the turrets themselves and the citadel, which spans the gap the
+ * end turrets leave. Two derivations of where the battery stands is a superstructure built
+ * over a magazine. */
+function turretStations(S) {
+  const n = S.turrets || 0;
+  if (S.turretAt && S.turretAt.length) return S.turretAt.slice(0, n);
+  /* two forward superfiring, the rest aft — the standard arrangement */
+  return (n === 3 ? [0.24, 0.34, 0.78] : [0.22, 0.32, 0.70, 0.80]).slice(0, n);
+}
+
+/* One gunhouse, any calibre — the main battery and the secondaries are the same object at
+ * two sizes, so they are one derivation. Faces the BOW (−x); the caller turns an aft mount.
+ * `riser` extends the barbette downward, for a superfiring mount whose barbette has a whole
+ * extra deck level to cross before it reaches the magazine. */
+function gunhouse(S, R, cal, barrels, riser, mats) {
+  const B = S.beam;
+  const steel = mats.turretSteel || (mats.turretSteel =
+    new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
+  const dark = mats.turretDark || (mats.turretDark =
+    new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+  const g = new THREE.Group();
+  /* ⚠ THE BARBETTE RUNS TO THE DECK, ESPECIALLY WHEN THE TURRET IS RAISED. The superfiring
+     mount was lifted by moving its whole group up, so its barbette bottom floated exactly the
+     raise above the planking — attached to nothing below, and the contact audit could not see
+     it because the barbette touches the gunhouse above. The raise is extra barbette. */
+  const barbH = R * 0.55 + riser + 0.5;            // the 0.5 buries the bottom cap in the deck
+  const barb = new THREE.Mesh(new THREE.CylinderGeometry(R * 1.02, R * 1.02, barbH, 20), dark);
+  barb.position.y = R * 0.55 - barbH / 2;
+  g.add(tag(barb, 'turret', 'Barbette',
+    'The armoured cylinder running down to the magazine. The turret revolves on top of it; this is the part that actually carries the load and the armour.'));
+  /* the gunhouse: sloped sides, longer than it is wide, face toward the bow */
+  const tur = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.78, R * 1.05, R * 0.62, 20), steel);
+  tur.position.y = R * 0.83;
+  tur.scale.x = 1.28;
+  g.add(tag(tur, 'turret', 'Turret',
+    'Gunhouse for the main battery. Its face carries the heaviest armour on the ship, because that is what an enemy shell is aimed at.'));
+  /* ⚠ THE GUNS POINT PAST THE BOW, NOT THE STERN. They pointed at +x, which the carrier's
+     catapults prove is the stern — every forward turret on every battleship faced backwards.
+     And the barrel is the CALIBRE'S length, about 45 calibres for a naval rifle of the era:
+     tying it to the turret radius gave Yamato 34 m of barrel against a real 21. */
+  const barrelL = cal * (S.calLen || 45);
+  for (let b = 0; b < barrels; b++) {
+    const off = (b - (barrels - 1) / 2) * cal * 2.6;
+    const gun = new THREE.Mesh(
+      new THREE.CylinderGeometry(cal * 0.52, cal * 0.62, barrelL, 12), dark);
+    gun.rotation.z = Math.PI / 2;
+    gun.position.set(-(R * 0.85 + barrelL / 2 - R * 0.45), R * 0.90, off);
+    g.add(tag(gun, 'turret', 'Main gun',
+      'The calibre is the ship. Everything else — the armour, the beam, the displacement — is arranged around carrying these and surviving their equals.'));
+  }
+  /* the rangefinder across the gunhouse rear — the pair of ears every big-gun turret grew
+     once fire control moved into the turret itself */
+  if (cal >= 0.2) {
+    const rf = new THREE.Mesh(
+      new THREE.CylinderGeometry(cal * 0.55, cal * 0.55, R * 2.5, 10), dark);
+    rf.rotation.x = Math.PI / 2;
+    rf.position.set(R * 0.72, R * 1.05, 0);
+    g.add(tag(rf, 'turret', 'Turret rangefinder',
+      'The optical rangefinder across the rear of the gunhouse — its ears stick out both sides. Yamato\'s were 15 m across, the largest ever put in a turret.'));
+  }
+  return g;
+}
+
 function buildTurrets(S, group, mats) {
   const n = S.turrets || 0;
   if (!n) return;
@@ -2628,35 +2700,122 @@ function buildTurrets(S, group, mats) {
   const L = S.lwl, B = S.beam;
   const cal = S.calibre || 0.40;                   // barrel calibre in metres
   const barrels = S.barrels || 3;
-  const steel = new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 });
-  /* two forward superfiring, the rest aft — the standard arrangement */
-  const stations = n === 3 ? [0.24, 0.34, 0.78] : [0.22, 0.32, 0.70, 0.80].slice(0, n);
+  const stations = turretStations(S);
+  const raise = S.turretRaise || stations.map((u, i) => (n >= 3 && i === 1) ? 1 : 0);
   stations.forEach((u, i) => {
     const base = H.sheer(u);
-    const raised = (i === 1) ? B * 0.085 : 0;       // the superfiring one stands higher
+    const raised = raise[i] ? B * 0.085 : 0;       // the superfiring one stands higher
     const R = B * 0.20;
-    const g = new THREE.Group();
-    const barb = new THREE.Mesh(new THREE.CylinderGeometry(R * 1.02, R * 1.02, B * 0.11, 20), dark);
-    barb.position.y = B * 0.055;
-    g.add(tag(barb, 'turret', 'Barbette',
-      'The armoured cylinder running down to the magazine. The turret revolves on top of it; this is the part that actually carries the load and the armour.'));
-    const tur = new THREE.Mesh(new THREE.CylinderGeometry(R, R * 1.05, B * 0.12, 20), steel);
-    tur.position.y = B * 0.17;
-    g.add(tag(tur, 'turret', 'Turret',
-      'Gunhouse for the main battery. Its face carries the heaviest armour on the ship, because that is what an enemy shell is aimed at.'));
-    for (let b = 0; b < barrels; b++) {
-      const off = (b - (barrels - 1) / 2) * cal * 2.6;
-      const gun = new THREE.Mesh(new THREE.CylinderGeometry(cal * 0.52, cal * 0.62, R * 4.4, 12), dark);
-      gun.rotation.z = Math.PI / 2;
-      gun.position.set(R * 2.0 * (u < 0.5 ? 1 : -1), B * 0.185, off);
-      g.add(tag(gun, 'turret', 'Main gun',
-        'The calibre is the ship. Everything else — the armour, the beam, the displacement — is arranged around carrying these and surviving their equals.'));
-    }
+    const g = gunhouse(S, R, cal, barrels, raised, mats);
     g.position.set((u - 0.5) * L, base + raised, 0);
     if (u > 0.5) g.rotation.y = Math.PI;
     group.add(tag(g, 'turret'));
   });
+}
+
+/* ── THE CITADEL ────────────────────────────────────────────────────────────────────────
+ * ⚠ A BATTLESHIP IS NOT A LINER. The generic deckhouse gave Yamato four white passenger
+ * tiers with window bands over 80% of her length — and the main battery, the thing the ship
+ * IS, was buried inside them: not one turret visible from any of twelve bearings. The whole
+ * class was wrong, not a parameter of it.
+ * A warship's superstructure is a compact grey CITADEL, and its extent is not a styling
+ * choice: it fills the gap between the end turrets, because everywhere else the deck belongs
+ * to the guns' arcs. So its span is DERIVED from the turret stations. On top of it stand the
+ * bridge tower forward and whatever secondary mounts the record gives.
+ */
+function buildCitadel(S, group, mats) {
+  if (!S.turrets) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const stations = turretStations(S);
+  const R = B * 0.20;
+  const fwd = stations.filter(u => u < 0.5), aft = stations.filter(u => u >= 0.5);
+  const m = (R * 1.1) / L;   // the citadel front rises just abaft the end barbettes —
+                             // on the real ship they nearly abut
+  let uA = fwd.length ? Math.max(...fwd) + m : 0.36;
+  let uB = aft.length ? Math.min(...aft) - m : 0.68;
+  const towerU = (S.masts && S.masts[0]) ? S.masts[0].at : (uA + 0.03);
+  uA = Math.min(uA, towerU - (B * 0.20) / L);       // the tower stands on the citadel
+  const wall = new THREE.MeshStandardMaterial({ color: 0x666c73, roughness: 0.60, metalness: 0.22,
+                                                side: THREE.DoubleSide });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x4b5157, roughness: 0.58, metalness: 0.25 });
+  const glaze = new THREE.MeshStandardMaterial({ color: 0x171b1f, roughness: 0.35, metalness: 0.30 });
+  const g = new THREE.Group();
+  const base = H.sheer((uA + uB) / 2);
+  const dh = B * 0.080;
+  /* two stepped decks, lofted from the hull's own half-breadth so they cannot overhang —
+     the liner house learned that rule the hard way and it holds here */
+  const tiers = [[uA, uB], [uA + 0.012, uB - 0.045]];
+  const tierTop = [];
+  tiers.forEach(([a, b], t) => {
+    const NU = 40;
+    const y0 = base + dh * t - (t === 0 ? 0.4 : 0);  // ground tier sinks into the sheer
+    const y1 = base + dh * (t + 1);
+    const tp = [], ti = [];
+    for (let k = 0; k <= NU; k++) {
+      const u = a + (b - a) * k / NU;
+      const half = Math.max(B * 0.06,
+        Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.06
+        - t * B * 0.045);
+      const x = (u - 0.5) * L;
+      tp.push(x, y0, -half,  x, y0, half,  x, y1, -half,  x, y1, half);
+    }
+    for (let k = 0; k < NU; k++) {
+      const A0 = k * 4, B0 = A0 + 4;
+      ti.push(A0, B0, A0 + 2,  A0 + 2, B0, B0 + 2);          // port wall
+      ti.push(A0 + 1, A0 + 3, B0 + 1,  A0 + 3, B0 + 3, B0 + 1); // starboard wall
+      ti.push(A0 + 2, B0 + 2, A0 + 3,  A0 + 3, B0 + 2, B0 + 3); // roof
+    }
+    for (const e of [0, NU * 4]) ti.push(e, e + 2, e + 1,  e + 1, e + 2, e + 3); // end caps
+    const tg = new THREE.BufferGeometry();
+    tg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+    tg.setIndex(ti); tg.computeVertexNormals();
+    g.add(tag(new THREE.Mesh(tg, wall), 'superstructure',
+      t === 0 ? 'Citadel deck' : 'Shelter deck'));
+    tierTop.push(y1);
+  });
+  /* ── THE BRIDGE TOWER ─────────────────────────────────────────────────────────────────
+     Stacked and narrowing — the pagoda. Height from the record (`towerH`, metres above the
+     weather deck); the pole mast the rig builder steps at the same station rises out of it. */
+  const towerH = S.towerH !== undefined ? S.towerH : B * 0.55;
+  const K = Math.max(2, Math.min(6, Math.round(towerH / (B * 0.11))));
+  const tx = (towerU - 0.5) * L;
+  let y = tierTop[0];
+  for (let k = 0; k < K; k++) {
+    const f = k / Math.max(1, K - 1);
+    const w = B * (0.34 - 0.20 * f), d = B * (0.40 - 0.22 * f);
+    const lh = (base + towerH - tierTop[0]) / K;
+    const lvl = new THREE.Mesh(new THREE.BoxGeometry(d, lh, w), k % 2 ? dark : wall);
+    lvl.position.set(tx, y + lh / 2, 0);
+    g.add(tag(lvl, 'superstructure', k === K - 1 ? 'Bridge' : 'Tower level ' + (k + 1),
+      k === K - 1 ? 'The compass platform at the head of the tower. Everything below it is fire control, flag space and searchlight platforms, stacked because the centreline is the only real estate there is.' : undefined));
+    /* the top two levels carry the glazing band — proud of the face, so nothing is coplanar */
+    if (k >= K - 2) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(d * 1.03, lh * 0.30, w * 1.03), glaze);
+      band.position.set(tx, y + lh * 0.62, 0);
+      g.add(tag(band, 'superstructure', 'Bridge glazing'));
+    }
+    y += lh;
+  }
+  /* the main rangefinder across the tower head — on Yamato a 15 m pair of ears */
+  const rf = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.016, B * 0.016, B * 0.40, 10), dark);
+  rf.rotation.x = Math.PI / 2;
+  rf.position.set(tx, y + B * 0.020, 0);
+  g.add(tag(rf, 'superstructure', 'Main rangefinder',
+    'The primary optical rangefinder for the main battery, at the highest point that will hold one: range accuracy is baseline times height.'));
+  /* ── THE SECONDARY BATTERY, from the record ──────────────────────────────────────────
+     Centreline mounts standing on the citadel decks, superfiring over the main battery. */
+  (S.secondaries || []).forEach(sec => {
+    const R2 = B * (sec.scale || 0.085);
+    const sg = gunhouse(S, R2, sec.cal || 0.15, sec.barrels || 3, 0, mats);
+    /* `deck` is which citadel level the mount stands on — Yamato's forward 15.5 cm stood a
+       level above the citadel deck, superfiring the main battery from beside the tower foot */
+    const lvl = Math.min(sec.deck || 0, tierTop.length - 1);
+    sg.position.set((sec.at - 0.5) * L, tierTop[lvl] - 0.15, 0);
+    if (sec.at > towerU) sg.rotation.y = Math.PI;
+    g.add(tag(sg, 'turret'));
+  });
+  group.add(tag(g, 'superstructure'));
 }
 
 function buildWingSail(S, group, mats) {
@@ -3561,7 +3720,11 @@ function buildShip(S, opts) {
      CLEAR — so the flight deck and a liner's deckhouse were occupying the same space, and
      the white box winning the depth test was read as "the flight deck blows out white".
      It was never the flight deck. A carrier's only above-deck structure is the island. */
-  if (FINE && !S.flightDeck) buildSuperstructure(S, group);
+  /* ⚠ AND A BATTLESHIP HAS NO DECKHOUSE EITHER — the same class of fault as the carrier's:
+     the liner builder gave Yamato four white window-banded passenger tiers over 80% of her
+     length, and the main battery was buried inside them. A turreted ship gets the citadel. */
+  if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
+  if (FINE && S.turrets) buildCitadel(S, group, mats);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   if (FINE) buildOars(S, group, mats.woodPale);
