@@ -1111,3 +1111,8 @@ convention only if the card ever claims "water she needs".
    searchlight platforms.
 6. Period dress, second pass if wanted: welded-hull boot-topping band as a distinct painted
    band; weld-seam sheen A/B in raking light; preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE, stamp 1786053656.** The push of 00c7a96 again created no
+workflow run (the ffc3333 mode is still active — treat it as standing until a push-triggered
+run appears). Manual `gh workflow run pages.yml --ref main` → run 31129001186, completed
+success, live stamp 1786052194 → 1786053656, verified with a cache-busted fetch.
