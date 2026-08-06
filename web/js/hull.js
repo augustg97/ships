@@ -3841,6 +3841,20 @@ function buildShip(S, opts) {
   const group = new THREE.Group();
 
   const sun = new THREE.Vector3(0.5, 0.72, 0.42).normalize();
+  /* ── THE DRESS IS A DATE ─────────────────────────────────────────────────────────────
+     The restored plating pass painted one Victorian scheme fleet-wide — salmon antifouling,
+     gilt cove line, riveted lands — on ships from 1858 to 2017. Each of those is a dated
+     technology: mercuric/arsenical "pink" compositions give way to oxide red-browns around
+     1890; riveting gives way to all-welded construction around 1950; the gilt cove line is a
+     documented per-ship fact (Olympic-class carried one, no warship did), so it is a data
+     field, not a rule. S.year is the year the hull is DEPICTED at, set in vessels.json. */
+  const yearBuilt = S.year || 0;
+  const WELDED = !!S.iron && yearBuilt >= 1950;
+  const bottom = new THREE.Color();
+  if (S.bottom) bottom.set(S.bottom);                       // per-ship record (Yamato's IJN hull-red)
+  else if (yearBuilt >= 1955) bottom.setRGB(0.42, 0.13, 0.10);  // modern oxide red
+  else if (yearBuilt >= 1890) bottom.setRGB(0.36, 0.12, 0.09);  // early-composition red-brown
+  else bottom.setRGB(0.86, 0.55, 0.47);                     // Victorian salmon — the Great Eastern model
   const hullMat = new THREE.ShaderMaterial({
     vertexShader: HULL_VERT, fragmentShader: HULL_FRAG, side: THREE.DoubleSide,
     uniforms: {
@@ -3861,6 +3875,9 @@ function buildShip(S, opts) {
       uGunDecks: { value: S.gunDecks || 0 },
       uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
       uIron: { value: S.iron ? 1 : 0 },
+      uWeld: { value: WELDED ? 1 : 0 },
+      uBottom: { value: bottom },
+      uCove: { value: S.cove ? 1 : 0 },
       uTime: { value: 0 },
     },
   });

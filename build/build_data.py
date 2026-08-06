@@ -1942,8 +1942,41 @@ def main():
     print("\nok")
 
 
+def _all_keys(x, out):
+    if isinstance(x, dict):
+        out.update(x.keys())
+        for v in x.values():
+            _all_keys(v, out)
+    elif isinstance(x, list):
+        for v in x:
+            _all_keys(v, out)
+    return out
+
+
 def write(name, obj):
     p = os.path.join(OUT, name)
+    # ⚠ Since round 26 web/data/vessels.json has been HAND-EDITED — turretAt, towerH, funnelH,
+    # funnelAt, metre-based masts, secondaries, aa, catapults, sternCrane — while this generator
+    # still holds the round-25 abstractions. A blind rewrite silently wipes six rounds of hull
+    # work. Guard: if the file on disk uses any key this generator does not emit, the disk copy
+    # is NEWER than the generator — refuse, and require --force after folding the state back in.
+    # (A hand-edit that only changes VALUES under existing keys is invisible to this check; the
+    # recorded refinements all added keys.)
+    if os.path.exists(p) and "--force" not in sys.argv:
+        try:
+            with open(p) as f:
+                on_disk = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            on_disk = None
+        if on_disk is not None:
+            unknown = _all_keys(on_disk, set()) - _all_keys(obj, set())
+            if unknown:
+                sys.exit(
+                    f"REFUSING to overwrite {name}: it carries keys this generator does not "
+                    f"produce ({', '.join(sorted(unknown))}) — the file is newer than the "
+                    f"generator. Fold the hand-edited state back into build_data.py, or run "
+                    f"with --force to discard it."
+                )
     with open(p, "w") as f:
         json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
     print(f"  {name:16s} {os.path.getsize(p)/1024:8.1f} KB")

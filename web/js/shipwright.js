@@ -265,6 +265,19 @@ const TRADITION = {
            s2: ['Plated', 'Plates riveted to the frames, lapped and caulked. A riveted seam is '
                         + 'watertight and, unlike a caulked one, does not need re-caulking every '
                         + 'few years — which is a large part of why iron won.'] },
+  /* ── ⚠ STEEL IS NOT WELDED UNTIL ABOUT 1950. Titanic and Yamato are steel builds, and this
+     card told both of them the block-built welded story — prefabricated blocks are a post-war
+     method, and a 1912 shell is three million rivets. The lookup below picks this entry for a
+     steel hull whose year is before 1950, the same era key the plating shader dresses by. */
+  steelRiveted: { label: 'Steel: frames, riveted plating',
+           s1: ['Frames erected', 'Mild-steel frames on a keel plate, erected one by one and '
+                                + 'faired by eye — the block-built hull is a post-war invention. '
+                                + 'Steel displaced iron in the 1880s because it is stronger for '
+                                + 'the same weight, so the same ship needs fewer tons of hull.'],
+           s2: ['Plated', 'Plates riveted to the frames, lapped at every land. Titanic carried '
+                        + 'three million rivets, driven by four-man gangs — hydraulic where the '
+                        + 'shell was fair enough, by hand round the bow and stern where the '
+                        + 'machine could not reach.'] },
   steel:    { label: 'Steel: frames, then welded plate',
            s1: ['Frames erected', 'Steel frames on a keel plate — and not one at a time. A modern '
                                 + 'hull is assembled from prefabricated BLOCKS welded up elsewhere '
@@ -306,7 +319,11 @@ const ENGINE_STAGES = [
 
 function swApplyStage() {
   if (!SW.ship) return;
-  const trad = TRADITION[(SW.spec && SW.spec.hull && SW.spec.hull.build) || 'frame'];
+  const H = SW.spec && SW.spec.hull;
+  let buildKey = (H && H.build) || 'frame';
+  /* the era key: a steel hull before 1950 is riveted — same date the plating shader dresses by */
+  if (buildKey === 'steel' && H && H.year && H.year < 1950) buildKey = 'steelRiveted';
+  const trad = TRADITION[buildKey];
   const shell = trad === TRADITION.shell;
   SW.ship.traverse(o => {
     const p = o.userData && o.userData.part;

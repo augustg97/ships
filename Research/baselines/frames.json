@@ -136,6 +136,21 @@
    "name": "sea-magnified",
    "path": "/?frozen=1#e=7&t=2000&c=-30,35&z=10000",
    "note": "OPEN WATER AT 10 km — magnified far past the scale the sea shader was tuned for, which is the band between the near-field handover at 8 km and the old 12 km map floor. August photographed a regular lattice of pale dashes here and no frame watched it: every other water frame is either at globe zoom or in the near field. The cause was foam laid along the crests of a FOUR-component Gerstner sum — four sinusoids are visibly periodic once resolved, and white on their crests draws that periodicity. Measured by FFT: one component at 33 px, peak-to-mean 395, now 139."
+  },
+  {
+   "name": "ship-preussen",
+   "path": "/?frozen=1#v=ship&s=preussen",
+   "note": "riveted 1902 steel windjammer — era-keyed dress: red-brown bottom, no cove line"
+  },
+  {
+   "name": "ship-steamer",
+   "path": "/?frozen=1#v=ship&s=steamer",
+   "note": "1870 riveted iron — Victorian dress: salmon bottom, gilt cove; the era-key A/B control"
+  },
+  {
+   "name": "ship-dreadnought",
+   "path": "/?frozen=1#v=ship&s=dreadnought",
+   "note": "1906 riveted warship — red-brown bottom, no cove line"
   }
  ]
 }

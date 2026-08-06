@@ -11,6 +11,9 @@ uniform float uChequer;      // 0 = plain, 1 = Nelson chequer with gunport bands
 uniform float uGunDecks;
 uniform vec3  uTopside;      // the paint above the waterline
 uniform float uIron;         // 0 = wood, 1 = iron/steel plate
+uniform float uWeld;         // 0 = riveted lands, 1 = all-welded flush butts (≈1950 on)
+uniform vec3  uBottom;       // antifouling colour — an era fact, supplied by hull.js, not assumed here
+uniform float uCove;         // gilt cove line at the sheer — a documented per-ship fact, from the data
 uniform float uPortholes;    // porthole count along the hull, 0 = none
 uniform float uTime;
 
@@ -76,36 +79,56 @@ void main(){
        "fixed" (porthole rims, plate patchwork, streaks) was the one that never ran. The
        plated surface now has ONE branch, and it owns the whole depth: the same plates run
        from sheer to keel, painted antifouling below the boot-top instead of tallow.
-       What a riveted hull shows is the plate LANDS — the overlap where one strake laps the
-       next, a hard line every metre or so — the rivet rows along them, and nothing else.
-       The middle of a plate is bare steel. */
+       ⚠ AND THE DRESS IS A DATE. The first restoration painted one Victorian scheme on
+       ships from 1858 to 2017. Fastening, bottom colour and cove line are era facts, so
+       they arrive as uniforms (uWeld, uBottom, uCove) computed from the vessel record —
+       this shader renders a described scheme, it does not assume one. */
     float taper = 0.55 + 0.45 * (1.0 - abs(2.0 * u - 1.0));
-    float pv = v * uStrakes * 0.55, ph = u * 34.0;
-    float land = smoothstep(0.03, 0.11, abs(fract(pv) - 0.5) * 2.0);
-    float butt = smoothstep(0.02, 0.07, abs(fract(ph) - 0.5) * 2.0);
-    /* ⚠ RIVETS GO ALONG THE SEAMS, NOT EVERYWHERE. A uniform grid of them over the whole
-       plate is not what a riveted ship looks like and, at any distance, moirés into something
-       that reads as woven mesh. Rivets fasten one plate to the NEXT, so they run in rows down
-       the LANDS and across the BUTTS and nowhere else. */
-    float onLand = 1.0 - smoothstep(0.0, 0.16, abs(fract(pv) - 0.5) * 2.0);
-    float onButt = 1.0 - smoothstep(0.0, 0.10, abs(fract(ph) - 0.5) * 2.0);
-    float rowL = smoothstep(0.34, 0.16, abs(fract(ph * 3.0) - 0.5) * 2.0) * onLand;
-    float rowB = smoothstep(0.34, 0.16, abs(fract(pv * 1.6) - 0.5) * 2.0) * onButt;
-    float rivet = max(rowL, rowB);
+    float pv, ph, land, butt, rivet, landShade, buttShade, toneAmp;
+    if (uWeld < 0.5) {
+      /* ── RIVETED: what a riveted hull shows is the plate LANDS — the overlap where one
+         strake laps the next, a hard line every metre or so — the rivet rows along them,
+         and nothing else. The middle of a plate is bare steel. */
+      pv = v * uStrakes * 0.55; ph = u * 34.0;
+      land = smoothstep(0.03, 0.11, abs(fract(pv) - 0.5) * 2.0);
+      butt = smoothstep(0.02, 0.07, abs(fract(ph) - 0.5) * 2.0);
+      /* ⚠ RIVETS GO ALONG THE SEAMS, NOT EVERYWHERE. A uniform grid of them over the whole
+         plate is not what a riveted ship looks like and, at any distance, moirés into
+         something that reads as woven mesh. Rivets fasten one plate to the NEXT, so they run
+         in rows down the LANDS and across the BUTTS and nowhere else. */
+      float onLand = 1.0 - smoothstep(0.0, 0.16, abs(fract(pv) - 0.5) * 2.0);
+      float onButt = 1.0 - smoothstep(0.0, 0.10, abs(fract(ph) - 0.5) * 2.0);
+      float rowL = smoothstep(0.34, 0.16, abs(fract(ph * 3.0) - 0.5) * 2.0) * onLand;
+      float rowB = smoothstep(0.34, 0.16, abs(fract(pv * 1.6) - 0.5) * 2.0) * onButt;
+      rivet = max(rowL, rowB);
+      landShade = 0.74; buttShade = 0.86; toneAmp = 0.34;
+    } else {
+      /* ── WELDED: an all-welded shell has NO lands — plates butt flush and the seam is a
+         ground bead under paint, a hairline the eye finds mostly by its sheen. Plates are
+         wider (a strake of shell plate runs 2.5–3 m) and longer, so the grid is coarser.
+         No rivets exist to draw. What a welded hull shows instead is the HUNGRY HORSE —
+         thin shell dished inboard between frames by weld shrinkage, a soft vertical ripple
+         at frame spacing that every photo of a working container ship shows in raking
+         light. That ripple is drawn below with the frame count, not a texture frequency. */
+      pv = v * uStrakes * 0.30; ph = u * 10.0;
+      land = smoothstep(0.008, 0.030, abs(fract(pv) - 0.5) * 2.0);
+      butt = smoothstep(0.006, 0.024, abs(fract(ph) - 0.5) * 2.0);
+      rivet = 0.0;
+      landShade = 0.90; buttShade = 0.94; toneAmp = 0.14;
+    }
     vec3 paint = uTopside;
-    /* ── ⚠ ANTI-FOULING IS NOT DARK RED ────────────────────────────────────────────
-       It was 0.42,0.13,0.10 — a modern oxide-red. The nineteenth-century composition was a
-       pale SALMON PINK, and the museum model of Great Eastern shows it clearly: the whole
-       underwater body is pink, not maroon. The colour comes from the mercuric and arsenic
-       compounds ground into the paint, and it is one of the most recognisable things about a
-       Victorian hull in dry dock.
-       Above it runs a fine GOLD SHEER LINE — a single painted stripe following the sheer,
-       which is what gives a black hull its curve. Without it the topside is a slab, and the
-       eye has nothing by which to read the sweep the shipwright worked so hard for. */
+    /* ── ⚠ ANTI-FOULING IS NOT ONE COLOUR, IT IS A DATE ─────────────────────────────
+       The nineteenth-century mercuric/arsenical composition was a pale SALMON PINK — the
+       museum model of Great Eastern shows it clearly. Around 1890 the oxide red-browns take
+       over, and the modern self-polishing paints are the oxide red every dry dock shows
+       today. Yamato's record says dark IJN hull-red. The colour arrives in uBottom.
+       The GOLD SHEER LINE is a documented per-ship fact — the Olympic class carried a gilt
+       cove stripe, no warship or working box ship did — so it is gated by uCove, from the
+       vessel record. */
     float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
-    paint = mix(paint, vec3(0.86, 0.55, 0.47), below);
+    paint = mix(paint, uBottom, below);
     float sheerLine = smoothstep(0.016, 0.004, abs(v - (uWaterline + 0.30)));
-    paint = mix(paint, vec3(0.78, 0.62, 0.26), sheerLine * 0.92);
+    paint = mix(paint, vec3(0.78, 0.62, 0.26), sheerLine * 0.92 * uCove);
 
     /* ── ⚠ A HULL IS MADE OF PLATES, AND EVERY PLATE WAS THE SAME COLOUR ───────────────
        That is why the rivets read as a printed dot screen: they were the ONLY variation on
@@ -121,7 +144,7 @@ void main(){
        bottom is repainted plate by plate at every docking, and reads as a patchwork in every
        dry-dock photograph. */
     vec2 cell = floor(vec2(ph, pv));
-    float plateTone = 0.80 + 0.34 * hash(cell * 7.31);
+    float plateTone = 0.97 + toneAmp * (hash(cell * 7.31) - 0.5);
     paint *= plateTone;
 
     /* ── AND STEEL STREAKS. ────────────────────────────────────────────────────────────
@@ -163,13 +186,24 @@ void main(){
     paint = mix(paint, vec3(0.78, 0.66, 0.38), portRim * 0.85);
 
     col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
-    /* the lap stands proud, so it shades on one side and catches light on the other —
-       that highlight is what makes a plate seam visible on a dark hull at all */
-    col *= mix(0.74, 1.06, land);
-    col *= mix(0.86, 1.02, butt);
+    /* a riveted lap stands proud, so it shades on one side and catches light on the other —
+       that highlight is what makes a plate seam visible on a dark hull at all. A welded butt
+       is flush: the same expression at a fraction of the depth, a sheen line, not a step. */
+    col *= mix(landShade, uWeld < 0.5 ? 1.06 : 1.01, land);
+    col *= mix(buttShade, uWeld < 0.5 ? 1.02 : 1.005, butt);
     /* rivets at a third of their old strength. They are 20 mm domes on a 200 m ship: at any
        honest viewing distance they are a texture, not a feature. */
     col += rivet * 0.011;
+    if (uWeld > 0.5) {
+      /* the HUNGRY HORSE: weld shrinkage dishes the thin shell inboard between frames, so a
+         soft dark ripple runs down the side at web-frame spacing — every fourth frame or so,
+         hence uFrames * 0.26, a real distance, not a chosen frequency. Strongest in raking
+         light on the topside; the matte antifouling below the boot-top hides it. */
+      float bay = fract(u * uFrames * 0.26);
+      float dish = 0.5 - 0.5 * cos(bay * 6.2831853);
+      float vary = 0.6 + 0.4 * noise(vec2(floor(u * uFrames * 0.26) * 3.7, v * 2.0));
+      col *= 1.0 - 0.045 * dish * vary * (1.0 - below);
+    }
     col *= taper * 0.25 + 0.75;
   } else {
     /* ── PLANKING ────────────────────────────────────────────────────────

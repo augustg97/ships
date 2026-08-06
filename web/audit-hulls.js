@@ -87,6 +87,17 @@
                                       ['flightDeck', 'flightdeck', 'a flight deck']])
       if (H[flag] && !part[key]) say(v.id, 'declared but not drawn', label);
 
+    /* ── THE DRESS IS A DATE (round 32). The plating shader keys fastening and bottom colour
+       off the year the hull is depicted at; a steel hull with no year silently falls back to
+       the Victorian scheme, which is exactly the fleet-wide anachronism the era key was built
+       to end. And a cove line on a post-1950 hull is that anachronism declared in the data:
+       the gilt cove is Victorian/Edwardian liner dress, gone from the record by the welded
+       era. Geometry cannot show either fault, so the DATA is audited. */
+    if (H.iron && !H.year)
+      say(v.id, 'no dress era', 'iron hull without year — shader falls back to Victorian dress');
+    if (H.iron && H.year >= 1950 && H.cove)
+      say(v.id, 'anachronistic dress', `cove line declared on a ${H.year} welded hull`);
+
     /* ⚠ a carrier's superstructure IS her island, and hull.js says so explicitly — the generic
        deckhouse builder is skipped for her on purpose. The rule asks for a superstructure, not
        for one particular shape of it. */

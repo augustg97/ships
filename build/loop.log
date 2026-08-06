@@ -73,3 +73,18 @@ Waiting on the watcher — I'll pick up the deploy when it fires.
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 92464 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 12:28:17  round starting
+The round's work is complete and pushed; the deploy run is queued behind GitHub's ongoing Actions outage, with a background watcher that will report when it finishes. Interim state, in full:
+
+**The round found something much bigger than the queued stern-quarter item: the entire steel fleet had been rendering with dead code since round 27.** The three stern reads carried in HANDOFF — pale transom, proud sternpost stripe, wrong bottom colour — all traced to "two models of one surface, one invisible":
+
+- **The iron plating pass was unreachable.** Round 27's commit cut the early `uIron` branch to flat `col = uTopside`, believing the plating block "further down" took over — but that block sits inside the wooden `else`, where `uIron > 0.5` is impossible. A brace-depth trace proved it; Great Eastern's featureless black broadside confirmed it. All nine steel ships drew a flat slab above water and a **wooden tallow-and-weed bottom** below. Every subsequent "fix" (plate patchwork, porthole rims) maintained code that never ran. The pass now owns its own branch, sheer to keel — and the porthole rows had a second latent fault: they were written at `v = 1.04` and `1.23`, *above the sheer*, so they could never have drawn from any branch. They now sit in the freeboard, and Great Eastern, Titanic and the steamer carry their brass-rimmed rows — the read that tells you a hull's length.
+- **`buildHullGeometry` was a stale copy of `surfacePoint`** without the counter flare — why the transom plate stood past the hull as pale wings. Skin, end caps and deck now ask the one true surface function; the hull closes into its own full-width stern cap, painted by the hull shader, so the steel `MeshStandardMaterial` transom plate is gone (timber-only now) and welded ships' posts are drawn inside the shell.
+- **The "sternpost stripe" was never the sternpost**: forward-difference normals collapsed to `(0,0,0)` at `u=1`/`v=1`, and `normalize` of that renders black — a stripe up every stern and a rim along every deck edge, fleet-wide. Two-sided clamped differences fixed both.
+
+Verification: two new audit rules, proven live by running them against the stashed pre-fix builder (they fired) before accepting the clean 25/25; twelve-bearing spins for all nine steel ships plus two timber transom ships; ratchet moved 14 frames, every diff confined to the aimed set, all accepted with logged reasons, re-check fully green.
+
+Deploy: rounds 29–30 finally went live during this session (stamp `1786043728`); this round's `1786046545` is in the dispatched run `31127645943`, currently queued under the still-active Actions/Pages `major_outage`. HANDOFF records the exact recovery step if the run dies.
+2026-08-06 13:40:58  round finished; HEAD is 3ee28d2 The steel fleet had been flat since round 27: the plating pass was dead code inside the wooden branch
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 99451 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 13:50:59  round starting

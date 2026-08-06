@@ -2001,7 +2001,8 @@
     "freeboard": 5.0,
     "cm": 0.9,
     "transom": 0.3,
-    "mastLivery": true
+    "mastLivery": true,
+    "year": 1902
    }
   },
   {
@@ -2163,7 +2164,9 @@
      0.5,
      0.67,
      0.8
-    ]
+    ],
+    "year": 1858,
+    "cove": 1
    }
   },
   {
@@ -2292,7 +2295,9 @@
      0.445,
      0.555,
      0.665
-    ]
+    ],
+    "year": 1912,
+    "cove": 1
    }
   },
   {
@@ -2410,7 +2415,8 @@
     "cm": 0.72,
     "transom": 0.3,
     "wingSail": 0.62,
-    "wingAt": 0.46
+    "wingAt": 0.46,
+    "year": 2015
    }
   },
   {
@@ -2691,7 +2697,9 @@
     "portholes": true,
     "mastLivery": true,
     "decks": 2,
-    "funnelH": 11.0
+    "funnelH": 11.0,
+    "year": 1870,
+    "cove": 1
    }
   },
   {
@@ -2815,7 +2823,8 @@
     "funnelAt": [
      0.46,
      0.6
-    ]
+    ],
+    "year": 1906
    }
   },
   {
@@ -2979,7 +2988,9 @@
      "at": 0.915,
      "lenM": 19.4
     },
-    "sternCrane": true
+    "sternCrane": true,
+    "year": 1941,
+    "bottom": "#5c2019"
    }
   },
   {
@@ -3086,7 +3097,8 @@
     "flightDeck": 78.0,
     "screws": 4,
     "decks": 2,
-    "deckPark": 12
+    "deckPark": 12,
+    "year": 2017
    }
   },
   {
@@ -3198,7 +3210,8 @@
     "beam": 61.3,
     "draught": 16.0,
     "freeboard": 30.0,
-    "cm": 0.98
+    "cm": 0.98,
+    "year": 1991
    }
   }
  ],

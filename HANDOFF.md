@@ -961,3 +961,70 @@ BEFORE diagnosing the repo.
 7. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
 8. Yamato round 2: 25 mm tertiary battery, deck aircraft, boat-stowage hatches, pagoda
    searchlight platforms.
+
+---
+
+## Round 32 — 2026-08-06 — The dress is a date: fastening, bottom colour and cove line are now era facts
+
+**Queue items 1 and 2, both done, plus one fault found on the way.**
+
+**1. build_data.py is guarded.** `write()` now recursively compares the keys of the file on
+disk against the keys the generator emits; if the disk copy carries keys the generator does not
+produce, it refuses and names them, requiring `--force`. Proven live: running build_data.py
+against the real vessels.json refused with 27 unknown keys (turretAt, aa, catapults, lenM, the
+polar table…) and left the file byte-identical; ports.json, still generator-owned, rewrote
+byte-identically. Any future hand-edit that adds a key arms the guard automatically. Limit
+recorded in the comment: a hand-edit that only changes VALUES under existing keys is invisible
+to it — every recorded refinement added keys.
+
+**2. The steel dress is keyed off the era, as a class.** The restored plating pass painted one
+Victorian scheme (salmon bottom, gilt cove, riveted lands) on ships 1858–2017. Now: each steel
+hull carries `year` in vessels.json (the year DEPICTED, midpoint convention where the type
+spans); hull.js derives `uWeld` (welded ≥ 1950), `uBottom` (salmon pre-1890 → red-brown oxide
+1890–1955 → modern oxide red, per-ship `bottom` override for Yamato's dark IJN hull-red), and
+`uCove` from a per-ship data field (documented gilt stripes only: great-eastern, steamer,
+titanic). The shader renders the described scheme: the welded branch has flush hairline butts
+on a coarser plate grid, no rivets, weaker block-tone patchwork, and the HUNGRY HORSE — shell
+dished between web frames at uFrames·0.26, a real spacing — while the riveted branch is
+bit-identical to round 31 (plateTone rewritten as 0.97 + amp·(hash−0.5), same numbers).
+
+**3. Found on the steamer's frame: the stage card called every steel ship block-built and
+welded.** Titanic and Yamato both wore "STEEL: FRAMES, THEN WELDED PLATE" — prefabricated
+blocks are a post-war method and a 1912 shell is three million rivets. TRADITION now has a
+`steelRiveted` entry and the lookup uses the same era key: steel + year < 1950 → riveted
+story. Preussen/dreadnought/titanic/yamato get it; container/carrier/usv keep the welded one.
+
+**Audit: two new DATA rules** (geometry cannot see paint): a steel hull without `year` — the
+silent-Victorian-fallback fault — and a cove line on a ≥1950 hull. Proven live by breaking the
+data (container year deleted, carrier cove added): both fired, exit 1; restored, 25/25 clean.
+
+**Ratchet: 6 moved, 3 new, all classified and accepted; the controls sat still.** The A/B that
+matters: **ship-great-eastern 0.000%** — pre-1890 dress is pixel-identical, so the refactor
+changed only what the era rule says changes. Moved: titanic 0.503% (red-brown bottom, card),
+yamato 1.087% (dark hull-red, cove gone, card), container 0.905% / carrier 0.419% / usv 0.612%
+(welded dress), aboard-off 0.173% (the class reaching the Sea view). New baselines:
+ship-preussen, ship-steamer, ship-dreadnought — every steel hull now scored individually.
+Twelve-bearing spins in `_spin/{container,titanic,yamato}-r32/`. Wooden fleet, globes, action:
+0.000–0.016%, untouched.
+
+**Rule 0 check, written:** the frames read as a rendered world — sea, sky, a floating hull lit
+by one sun. Three facts a viewer can read off ship-yamato/low090: a pagoda-masted battleship
+with three main turrets; a dark-red antifouled bottom under a grey riveted topside; she draws
+~11 m, the boot-top drawing the load line. Off ship-container/b090: a ~400 m box ship stacked
+eight high; a white island aft; a welded blue-black shell over modern oxide red.
+
+**Deploy: stamp this round is 1786052194.** At round start Actions/Pages were still
+`major_outage` and round 31's dispatched run 31127645943 had FAILED — live stamp was stuck at
+1786043728 (round 30). See the end-of-round note below for what actually went live.
+
+### Next, in order
+1. **The float datum** (carried): every ship shows ~2 m of antifouling above the still-water
+   line in the Shipwright — clearly visible again in yamato-r32/low090. Measure before tuning.
+2. Sea-view spot check of the remaining steel ships from round 25 (aboard/aboard-off cover two).
+3. The serif-webfont dependency decision (closes the globe-default false-RED class).
+4. The land in the Sea close-up: featureless brown ramp, check on a high coast.
+5. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
+6. Yamato round 2: 25 mm tertiary battery, deck aircraft, boat-stowage hatches, pagoda
+   searchlight platforms.
+7. Period dress, second pass if wanted: welded-hull boot-topping band as a distinct painted
+   band; weld-seam sheen A/B in raking light; preussen P-liner white waterline check.
