@@ -68,3 +68,8 @@ Round complete. The deploy run finished **success** after the site recreation, a
   previous round still running — skipping this firing
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 11:38:11  round starting
+Waiting on the watcher — I'll pick up the deploy when it fires.
+2026-08-06 12:18:17  round finished; HEAD is b644aa5 Yamato's deck was bare because the record was: her four 15.5 cm turrets, the high-angle battery and the stern aviation deck, as classes
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 92464 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 12:28:17  round starting

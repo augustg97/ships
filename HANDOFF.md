@@ -879,3 +879,85 @@ below for what actually got live.
 7. Yamato round 2, if her queue slot comes round again: the 25 mm tertiary battery, deck
    aircraft, boat-stowage hatches, and the pagoda's searchlight platforms — all deliberately
    not done this round to keep one vessel one round.
+
+---
+
+## Round 31 — 2026-08-06 — The steel fleet had been flat since round 27: the plating pass was dead code
+
+**The stern-quarter read carried since round 27 was three symptoms of one fault class: two
+models of one surface, one of them invisible.** The queue item said "full-lit pale transom,
+sternpost stripe proud of it, antifouling colour" — and pulling on it found something much
+bigger than the stern.
+
+**1. The iron plating pass was UNREACHABLE, and had been since round 27's commit 4987717.**
+That commit cut the early `uIron` branch down to flat `col = uTopside` believing the
+land-and-butt block "further down" would take over — but the block further down sits inside
+the WOODEN else, where uIron cannot exceed 0.5. Brace-depth trace proved it; Great Eastern's
+broadside confirmed it empirically: no portholes, no plates, a featureless slab. So every
+"fix" landed on that block since — the plate patchwork (r27), the porthole rims (r27), the
+streaks — was maintenance on code that never ran, verified by commit message rather than by
+pixels. All nine steel/iron hulls rendered flat topside paint above water and — worse — the
+WOODEN TALLOW-AND-WEED bottom below it, because underwater-non-copper fell through to the
+18th-century branch. The pass is now its own branch owning the whole depth: plates from sheer
+to keel, antifouling below the boot-top, streaks that start at the deck edge (the old runDown
+peaked BELOW the waterline — never seen, never A/B'd), and porthole rows moved into the
+freeboard — they were written at uWaterline+0.42 and +0.61, v = 1.04 and 1.23, ABOVE THE
+SHEER, and could never have drawn even from a live branch.
+
+**2. buildHullGeometry was a stale copy of surfacePoint.** The skin (and the end caps, and
+the deck edge) had a private parametrisation WITHOUT the counter flare — so the transom plate,
+built from the true surface, stood out past the hull as a pair of pale wings. The skin, caps
+and deck now ask surfacePoint itself; the flare reaches the stern and the hull closes into its
+own full-width cap.
+
+**3. The steel transom plate and proud sternpost are gone as a class.** A steel ship's stern
+is her own shell plating: buildStern (a MeshStandardMaterial panel in scene light — the
+full-lit pale grey) is now timber-only, the hull cap is the transom, painted by the hull
+shader. The stem bar and stern frame on a steel build are drawn one thickness INSIDE the
+shell, as the castings they are — visible in the skeleton stages, closed over by the plate.
+
+**4. The "sternpost stripe" was never the sternpost.** buildHullGeometry's forward-difference
+normals collapse to zero at u=1 and v=1 (min(1,u+e) clamps to u), and normalize((0,0,0)) in
+the shader is black: a black stripe up every stern edge and a black rim along every deck edge,
+fleet-wide, timber and steel alike. Two-sided clamped differences fixed both at once.
+
+**Audit: two new rules, proven live by running them against the stashed pre-fix hull.js**
+(they fired on yamato/carrier/container et al.), then 25/25 clean on the fix: (1) no
+'transom'-tagged part on a steel/iron build; (2) stem/sternpost bbox inside the planking bbox
+on a welded hull. The dead-shader-branch class itself is NOT auditable from geometry — the
+lesson recorded instead: **a fix verified by its commit message is not verified; the round-27
+"84 distinct levels" measurement was satisfied by lighting alone.** Only the rendered pixels
+of the surface in question count.
+
+**Ratchet: 14 frames moved, every one classified, all accepted.** Steel ships 7.3–9.9% (the
+restored plating, portholes on Great Eastern/Titanic/steamer, antifouling bottoms), wooden
+ships 0.13–0.28% (deck-edge black rim gone), aboard/aboard-off/map-floor 0.10–0.24% (the same
+classes reaching the Sea view and map token). Twelve-bearing spins captured before acceptance
+for all nine steel ships plus ship-of-the-line and fluyt: `_spin/<ship>-r31/`. Diffs confined
+to the aimed set in every frame.
+
+**Deploy: BLOCKED at time of writing — the round 29–30 GitHub outage was still running**
+(Actions and Pages both `major_outage` at this round's start; live stamp still 1786032589 =
+round 28). This round's stamp is **1786046545**. Next session: if the live stamp is still
+behind, `gh workflow run pages.yml --ref main` once githubstatus.com shows Actions
+operational, then verify the stamp moves. Round 29's lesson stands: check githubstatus.com
+BEFORE diagnosing the repo.
+
+### Next, in order
+1. **Fold the hand-edited vessels.json back into build_data.py** or guard the generator
+   (carried from round 30 — build_data.py would silently wipe six rounds of hull work).
+   Before anything else touches build_data.py.
+2. **Period-correct steel dress, as a class:** the restored pass paints one Victorian scheme
+   fleet-wide — salmon antifouling, gold sheer line, riveted lands — on ships from 1858 to
+   2017. A welded 1966/2015 hull shows weld seams not riveted lands, oxide-red bottom, no
+   gold cove stripe; Yamato's bottom was dark hull-red. Key the scheme off the era.
+3. **The float datum:** every ship shows ~2 m of antifouling above the still-water line in
+   the Shipwright (visible in all r31 spins, pre-existing). Either the display trim is
+   deliberate light-load or the vertical datum is off — measure before tuning.
+4. Sea-view spot check of the remaining steel ships from round 25 (partially covered: aboard
+   and aboard-off frames now show the new plating and were accepted).
+5. The serif-webfont dependency decision (closes the globe-default false-RED class).
+6. The land in the Sea close-up: featureless brown ramp, check on a high coast.
+7. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
+8. Yamato round 2: 25 mm tertiary battery, deck aircraft, boat-stowage hatches, pagoda
+   searchlight platforms.

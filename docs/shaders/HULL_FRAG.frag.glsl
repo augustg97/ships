@@ -61,17 +61,116 @@ void main(){
        batten or a canvas roll — and THAT band, wetted and dried, is where green appears */
     c = mix(c, vec3(0.28, 0.44, 0.34), smoothstep(0.585, 0.615, v) * 0.55);
     col = c;
-  } else if (underwater) {
+  } else if (underwater && uIron < 0.5) {
     /* the unsheathed underwater body: "white stuff" — tallow, rosin and sulphur — over pitch */
     col = vec3(0.42, 0.40, 0.35) * (0.80 + 0.22 * noise(vec2(u * 160.0, v * 70.0)));
     col = mix(col, vec3(0.20, 0.24, 0.18),
               smoothstep(0.35, 0.9, noise(vec2(u * 34.0, v * 15.0))) * 0.55);  // weed
   } else if (uIron > 0.5) {
-    /* ⚠ DEAD. This branch used to draw a UNIFORM GRID of rivets over the whole plate, which is
-       what made an iron hull read as halftone print or perforated sheet. It was replaced by the
-       land-and-butt block further down — which assigns col outright, so everything computed
-       here was discarded anyway. Two models of one surface, one of them invisible. */
-    col = uTopside;
+    /* ── THE PLATED HULL, ABOVE WATER AND BELOW — ⚠ THIS PASS WAS UNREACHABLE FOR FOUR
+       ROUNDS. Round 27 cut the early uniform-rivet branch down to col = uTopside and left
+       the real plating pass where it had always lived: inside the WOODEN else, where uIron
+       cannot exceed 0.5. Every iron ship in the fleet rendered as a flat slab of topside
+       paint on a TALLOWED WOODEN BOTTOM, and the ratchet sat green because a flat slab never
+       changes. Two models of one surface again — and the one being maintained, commented and
+       "fixed" (porthole rims, plate patchwork, streaks) was the one that never ran. The
+       plated surface now has ONE branch, and it owns the whole depth: the same plates run
+       from sheer to keel, painted antifouling below the boot-top instead of tallow.
+       What a riveted hull shows is the plate LANDS — the overlap where one strake laps the
+       next, a hard line every metre or so — the rivet rows along them, and nothing else.
+       The middle of a plate is bare steel. */
+    float taper = 0.55 + 0.45 * (1.0 - abs(2.0 * u - 1.0));
+    float pv = v * uStrakes * 0.55, ph = u * 34.0;
+    float land = smoothstep(0.03, 0.11, abs(fract(pv) - 0.5) * 2.0);
+    float butt = smoothstep(0.02, 0.07, abs(fract(ph) - 0.5) * 2.0);
+    /* ⚠ RIVETS GO ALONG THE SEAMS, NOT EVERYWHERE. A uniform grid of them over the whole
+       plate is not what a riveted ship looks like and, at any distance, moirés into something
+       that reads as woven mesh. Rivets fasten one plate to the NEXT, so they run in rows down
+       the LANDS and across the BUTTS and nowhere else. */
+    float onLand = 1.0 - smoothstep(0.0, 0.16, abs(fract(pv) - 0.5) * 2.0);
+    float onButt = 1.0 - smoothstep(0.0, 0.10, abs(fract(ph) - 0.5) * 2.0);
+    float rowL = smoothstep(0.34, 0.16, abs(fract(ph * 3.0) - 0.5) * 2.0) * onLand;
+    float rowB = smoothstep(0.34, 0.16, abs(fract(pv * 1.6) - 0.5) * 2.0) * onButt;
+    float rivet = max(rowL, rowB);
+    vec3 paint = uTopside;
+    /* ── ⚠ ANTI-FOULING IS NOT DARK RED ────────────────────────────────────────────
+       It was 0.42,0.13,0.10 — a modern oxide-red. The nineteenth-century composition was a
+       pale SALMON PINK, and the museum model of Great Eastern shows it clearly: the whole
+       underwater body is pink, not maroon. The colour comes from the mercuric and arsenic
+       compounds ground into the paint, and it is one of the most recognisable things about a
+       Victorian hull in dry dock.
+       Above it runs a fine GOLD SHEER LINE — a single painted stripe following the sheer,
+       which is what gives a black hull its curve. Without it the topside is a slab, and the
+       eye has nothing by which to read the sweep the shipwright worked so hard for. */
+    float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
+    paint = mix(paint, vec3(0.86, 0.55, 0.47), below);
+    float sheerLine = smoothstep(0.016, 0.004, abs(v - (uWaterline + 0.30)));
+    paint = mix(paint, vec3(0.78, 0.62, 0.26), sheerLine * 0.92);
+
+    /* ── ⚠ A HULL IS MADE OF PLATES, AND EVERY PLATE WAS THE SAME COLOUR ───────────────
+       That is why the rivets read as a printed dot screen: they were the ONLY variation on
+       an otherwise perfectly uniform sheet, so the eye had nothing else to hold and locked
+       onto the grid. A real riveted hull is visibly assembled — each plate was rolled from a
+       different heat, faired by a different hand and painted on a different day, so no two
+       are quite the same tone, and that patchwork is what says "built from parts" before any
+       rivet is visible at all. Give each plate its own shade off the land/butt cell it sits
+       in, and the rivets stop being the whole story.
+       ⚠ On a BLACK hull — and Great Eastern's was black — a multiplicative tone shift of a
+       few percent is invisible: a few percent of nearly nothing is nothing. The variation has
+       to be wide enough to survive a dark base. It applies to the bottom too: an antifouled
+       bottom is repainted plate by plate at every docking, and reads as a patchwork in every
+       dry-dock photograph. */
+    vec2 cell = floor(vec2(ph, pv));
+    float plateTone = 0.80 + 0.34 * hash(cell * 7.31);
+    paint *= plateTone;
+
+    /* ── AND STEEL STREAKS. ────────────────────────────────────────────────────────────
+       The most recognisable thing about a working steel hull is not its rivets, it is the
+       VERTICAL WEEPING down its sides: rust and dirt carried down by rain and spray from
+       every scupper, freeing port and seam. It runs DOWN, always, because gravity does, and
+       it is strongest under the deck edge and fades toward the water where the sea scrubs it.
+       ⚠ The first version peaked its runDown term BELOW the waterline — the exact opposite of
+       the sentence above, and never seen because the branch never ran. Weeping starts where
+       the water is thrown ON: at the deck edge. */
+    float streakN = noise(vec2(u * 90.0, 0.0)) * 0.6 + noise(vec2(u * 260.0, 0.0)) * 0.4;
+    float runDown = smoothstep(uWaterline, 1.0, v);
+    float streak = smoothstep(0.58, 0.92, streakN) * runDown * (1.0 - below);
+    /* streaks lighten as well as darken on a dark hull — salt dries white on black paint */
+    paint = mix(paint, paint * vec3(1.55, 1.34, 1.14), streak * 0.42);
+
+    /* ── PORTHOLES, IN ROWS, AT A REAL SPACING ─────────────────────────────────────
+       A porthole is about 400 mm whatever the ship, so the number of them between bow and
+       stern IS the length, read directly. Spaced by a real distance along the hull rather
+       than by a fraction of it, so the count follows the ship instead of the ship following
+       the count.
+       ⚠ THE ROWS WERE WRITTEN AT uWaterline + 0.42 AND + 0.61 — v = 1.04 and 1.23, ABOVE THE
+       SHEER. No porthole could ever have drawn, even from a live branch. The rows belong in
+       the freeboard, as fractions of the distance from the load line to the deck edge. */
+    float portRow = 0.0, portRim = 0.0;
+    for (int r = 0; r < 2; r++) {
+      float rv = mix(uWaterline, 1.0, 0.40 + float(r) * 0.26);
+      float dy = (v - rv) * 5.2;
+      float px = fract(u * uPortholes) - 0.5;
+      float d = length(vec2(px * 1.6, dy));
+      portRow = max(portRow, smoothstep(0.155, 0.095, d));   // the dark glass
+      /* the ring is what makes a porthole READ: a polished brass annulus round the glass —
+         on a dark topside that bright ring is the only part the eye catches. An annulus is
+         two smoothsteps: inside the outer edge, outside the inner one. */
+      float rim = smoothstep(0.185, 0.150, d) * smoothstep(0.095, 0.130, d);
+      portRim = max(portRim, rim);
+    }
+    paint = mix(paint, vec3(0.045, 0.050, 0.060), portRow * 0.92);
+    paint = mix(paint, vec3(0.78, 0.66, 0.38), portRim * 0.85);
+
+    col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
+    /* the lap stands proud, so it shades on one side and catches light on the other —
+       that highlight is what makes a plate seam visible on a dark hull at all */
+    col *= mix(0.74, 1.06, land);
+    col *= mix(0.86, 1.02, butt);
+    /* rivets at a third of their old strength. They are 20 mm domes on a 200 m ship: at any
+       honest viewing distance they are a texture, not a feature. */
+    col += rivet * 0.011;
+    col *= taper * 0.25 + 0.75;
   } else {
     /* ── PLANKING ────────────────────────────────────────────────────────
        Carvel strakes running fore-and-aft, caulked with oakum and payed with pine tar. The
@@ -137,108 +236,7 @@ void main(){
       col *= mix(0.52, 1.0, seam);
       col = mix(col, vec3(0.055, 0.052, 0.050), port);   // the open port is a hole
     }
-    /* ── PAINTED STEEL IS PAINTED, AND PAINT IS EVEN ────────────────────────────────────
-     ⚠ An iron or steel hull was picking up warm blotches from the timber terms above — grain,
-     taper and plank noise are all meaningless on a plated ship, and on Titanic they read as
-     rust and damage on a vessel that was three weeks old. The colour is recomputed cleanly
-     here rather than corrected upstream, because the leak was not from one term: a plated hull
-     simply should not run through the wooden path at all.
-     What a riveted hull actually shows is the plate LANDS — the overlap where one strake laps
-     the next, a hard line every metre or so — and the rivet rows along them. Nothing else. */
-  if (uIron > 0.5) {
-    float pv = v * uStrakes * 0.55, ph = u * 34.0;
-    float land = smoothstep(0.03, 0.11, abs(fract(pv) - 0.5) * 2.0);
-    float butt = smoothstep(0.02, 0.07, abs(fract(ph) - 0.5) * 2.0);
-    /* ⚠ RIVETS GO ALONG THE SEAMS, NOT EVERYWHERE. A uniform grid of them over the whole
-       plate is not what a riveted ship looks like and, at any distance, moirés into something
-       that reads as woven mesh — which is exactly what it was doing. Rivets fasten one plate
-       to the NEXT, so they run in rows down the LANDS and across the BUTTS and nowhere else.
-       The middle of a plate is bare steel. */
-    float onLand = 1.0 - smoothstep(0.0, 0.16, abs(fract(pv) - 0.5) * 2.0);
-    float onButt = 1.0 - smoothstep(0.0, 0.10, abs(fract(ph) - 0.5) * 2.0);
-    float rowL = smoothstep(0.34, 0.16, abs(fract(ph * 3.0) - 0.5) * 2.0) * onLand;
-    float rowB = smoothstep(0.34, 0.16, abs(fract(pv * 1.6) - 0.5) * 2.0) * onButt;
-    float rivet = max(rowL, rowB);
-    vec3 paint = uTopside;
-    /* the boot-top: a band of anti-fouling red at the waterline, and below it the bottom */
-    /* ── ⚠ ANTI-FOULING IS NOT DARK RED ────────────────────────────────────────────
-       It was 0.42,0.13,0.10 — a modern oxide-red. The nineteenth-century composition was a
-       pale SALMON PINK, and the museum model of Great Eastern shows it clearly: the whole
-       underwater body is pink, not maroon. The colour comes from the mercuric and arsenic
-       compounds ground into the paint, and it is one of the most recognisable things about a
-       Victorian hull in dry dock.
-       Above it runs a fine GOLD SHEER LINE — a single painted stripe following the sheer,
-       which is what gives a black hull its curve. Without it the topside is a slab, and the
-       eye has nothing by which to read the sweep the shipwright worked so hard for. */
-    float below = smoothstep(uWaterline + 0.012, uWaterline - 0.012, v);
-    paint = mix(paint, vec3(0.86, 0.55, 0.47), below);
-    float sheerLine = smoothstep(0.016, 0.004, abs(v - (uWaterline + 0.30)));
-    paint = mix(paint, vec3(0.78, 0.62, 0.26), sheerLine * 0.92);
-
-    /* ── ⚠ A HULL IS MADE OF PLATES, AND EVERY PLATE WAS THE SAME COLOUR ───────────────
-       That is why the rivets read as a printed dot screen: they were the ONLY variation on
-       an otherwise perfectly uniform sheet, so the eye had nothing else to hold and locked
-       onto the grid. A real riveted hull is visibly assembled — each plate was rolled from a
-       different heat, faired by a different hand and painted on a different day, so no two
-       are quite the same tone, and that patchwork is what says "built from parts" before any
-       rivet is visible at all. Give each plate its own shade off the land/butt cell it sits
-       in, and the rivets stop being the whole story. */
-    vec2 cell = floor(vec2(ph, pv));
-    /* ⚠ On a BLACK hull — and Great Eastern's was black — a multiplicative tone shift of a
-       few percent is invisible: a few percent of nearly nothing is nothing. Removing the dot
-       grid without this left a flat slab, which is the same fault wearing the opposite coat.
-       The variation has to be wide enough to survive a dark base. */
-    float plateTone = 0.80 + 0.34 * hash(cell * 7.31);
-    paint *= plateTone;
-
-    /* ── AND STEEL STREAKS. ────────────────────────────────────────────────────────────
-       The most recognisable thing about a working steel hull is not its rivets, it is the
-       VERTICAL WEEPING down its sides: rust and dirt carried down by rain and spray from
-       every scupper, freeing port and seam. It runs DOWN, always, because gravity does, and
-       it is strongest under the deck edge and fades toward the water where the sea scrubs it.
-       Without it a steel hull is a painted panel; with it, it has been somewhere. */
-    float streakN = noise(vec2(u * 90.0, 0.0)) * 0.6 + noise(vec2(u * 260.0, 0.0)) * 0.4;
-    float runDown = smoothstep(0.05, 0.55, v) * (1.0 - smoothstep(0.55, 1.0, v));
-    float streak = smoothstep(0.58, 0.92, streakN) * runDown * (1.0 - below);
-    /* streaks lighten as well as darken on a dark hull — salt dries white on black paint */
-    paint = mix(paint, paint * vec3(1.55, 1.34, 1.14), streak * 0.42);
-
-    /* ── PORTHOLES, IN ROWS, AT A REAL SPACING ─────────────────────────────────────
-       The museum model shows two rows of them down Great Eastern's black topside, and they
-       are most of what tells you the scale of the hull: a porthole is about 400 mm whatever
-       the ship, so the number of them between bow and stern IS the length, read directly.
-       Leave them off and a 211 m hull and a 60 m one are the same picture.
-       Spaced by a real distance along the hull rather than by a fraction of it, so the count
-       follows the ship instead of the ship following the count. */
-    float portRow = 0.0, portRim = 0.0;
-    for (int r = 0; r < 2; r++) {
-      float rv = uWaterline + 0.42 + float(r) * 0.19;
-      float dy = (v - rv) * 5.2;
-      float px = fract(u * uPortholes) - 0.5;
-      float d = length(vec2(px * 1.6, dy));
-      portRow = max(portRow, smoothstep(0.155, 0.095, d));   // the dark glass
-      /* ⚠ THE RIM WAS DEAD CODE — I wrote it as smoothstep(...)*0.0 + portRow*0.0, which is
-         zero twice over, so every porthole was a flat dark dot and vanished on a black hull at
-         any range. It is the ring that makes a porthole READ: a polished brass annulus round
-         the glass, and on a dark topside that bright ring is the only part the eye catches.
-         An annulus is two smoothsteps: inside the outer edge, outside the inner one. */
-      float rim = smoothstep(0.185, 0.150, d) * smoothstep(0.095, 0.130, d);
-      portRim = max(portRim, rim);
-    }
-    paint = mix(paint, vec3(0.045, 0.050, 0.060), portRow * 0.92);
-    paint = mix(paint, vec3(0.78, 0.66, 0.38), portRim * 0.85);
-
-    col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
-    /* the lap stands proud, so it shades on one side and catches light on the other —
-       that highlight is what makes a plate seam visible on a dark hull at all */
-    col *= mix(0.74, 1.06, land);
-    col *= mix(0.86, 1.02, butt);
-    /* rivets at a third of their old strength. They are 20 mm domes on a 200 m ship: at any
-       honest viewing distance they are a texture, not a feature. */
-    col += rivet * 0.011;
-  }
-
-  col *= taper * 0.25 + 0.75;
+    col *= taper * 0.25 + 0.75;
   }
 
   /* ── light. One sun, a broad sky term, and a bounce off the water so the underside of the

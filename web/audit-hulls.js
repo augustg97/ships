@@ -335,6 +335,26 @@
             `${(part.rudder.x[1] - part.planking.x[1]).toFixed(1)} m beyond the hull`);
     }
 
+    /* ⚠ AND THE STERN QUARTER FOLLOWS THE BUILD — round 31, the read HANDOFF carried from
+       round 27. A steel ship's transom is her own shell plating: the hull mesh closes its
+       stern with a cap the hull shader paints. The fitted transom plate is a TIMBER
+       structure — it has lights and galleries in it — and drawn on a steel ship it stood in
+       scene light, full-lit pale grey against the shader-lit hull, corners past the skin.
+       And nothing stands proud of a WELDED stern: stem bar and stern frame are castings the
+       plating closes over, so on a steel build the posts must sit inside the shell. */
+    if (H.build === 'steel' || H.build === 'iron') {
+      if (part.transom)
+        say(v.id, 'timber transom on a welded ship',
+            'a fitted transom plate is timber-era; a steel stern closes with the hull cap');
+      if (part.stempost && part.planking) {
+        const past = Math.max(part.planking.x[0] - part.stempost.x[0],
+                              part.stempost.x[1] - part.planking.x[1]);
+        if (past > 0.01)
+          say(v.id, 'post proud of a welded hull',
+              `stem or sternpost stands ${past.toFixed(2)} m outside the shell`);
+      }
+    }
+
     /* declared screws must be drawn, and a screw lives under water */
     if (H.screws) {
       if (!part.screw) say(v.id, 'declared but not drawn', 'screws');

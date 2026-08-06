@@ -261,6 +261,15 @@ function buildStemGeometry(S, aft) {
   const H = hullSurface(S);
   const pos = [], idx = [];
   const N = 26, sided = 0.055 * S.beam / 2;
+  /* ⚠ A WELDED SHIP'S POSTS ARE INSIDE THE SHELL. A timber ship carries her stem and
+     sternpost proud of the planking — they are the first timbers up and the planking rabbets
+     into them. A steel ship's stem bar and stern frame are castings the PLATING CLOSES OVER:
+     nothing stands proud of a welded stern. Drawn at the timber offset, the sternpost read as
+     a dark stripe standing off Yamato's transom from every after bearing. The members are
+     pulled one thickness inboard for steel, so they show in the skeleton stages and the shell
+     covers them — which is the build order the stage card already describes. */
+  const STEEL = S.build === 'steel' || S.build === 'iron';
+  const inset = STEEL ? (aft ? -1.05 : 1.05) : 0;
   /* the timber follows the ship's own profile at the very end of the hull */
   for (let i = 0; i <= N; i++) {
     const f = i / N;
@@ -268,8 +277,9 @@ function buildStemGeometry(S, aft) {
     const v = aft ? f : 1 - f;
     const p = surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
     const t = 0.05 * S.draught;
-    pos.push(p[0] - t, p[1], -sided, p[0] - t, p[1], sided,
-             p[0] + t, p[1], sided,  p[0] + t, p[1], -sided);
+    const x0 = p[0] + (inset - 1) * t, x1 = p[0] + (inset + 1) * t;
+    pos.push(x0, p[1], -sided, x0, p[1], sided,
+             x1, p[1], sided,  x1, p[1], -sided);
   }
   for (let i = 0; i < N; i++) {
     const a = i * 4, b = a + 4;
@@ -388,30 +398,15 @@ function surfacePoint(S, H, u, v) {
 function buildHullGeometry(S, NU = 120, NV = 34) {
   const H = hullSurface(S);
   const pos = [], nor = [], uvs = [], idx = [];
-  const L = S.lwl;
 
-  const pointAt = (u, v) => {
-    const b = H.halfB * H.wl(u);
-    const t = S.draught * H.keel(u);
-    const deckHalf = b * (1 - H.tumble(u));
-    const fb = H.sheer(u);
-    let y, z;
-    if (v <= 0.62) {
-      /* underwater: the superellipse whose area is the vessel's own Cm */
-      const k = v / 0.62;                 // 0 at keel, 1 at waterline
-      z = -t * (1 - k);
-      const yy = Math.pow(Math.max(0, 1 - Math.pow(1 - k, H.nExp)), 1 / H.nExp);
-      y = b * yy;
-    } else {
-      /* topsides: waterline → deck edge, falling inward by the tumblehome */
-      const k = (v - 0.62) / 0.38;
-      z = fb * k;
-      y = b + (deckHalf - b) * Math.pow(k, 0.9);
-    }
-    /* the ends close: half-breadth goes to (nearly) zero at stem and sternpost */
-    const x = (u - 0.5) * L + H.rake(u);
-    return [x, z, y];
-  };
+  /* ⚠ THIS WAS A SECOND COPY OF surfacePoint, WITHOUT THE COUNTER FLARE. The skin was the one
+     surface in the ship built from its own private parametrisation — so when the counter was
+     added to surfacePoint (see THE COUNTER above), every part keyed to the real surface grew a
+     broad stern and the skin did not. That is why the transom plate stood out past the hull as
+     a pair of wings: the plate was built from the true surface and the plating from a stale
+     copy of it. The skin now asks the same function as the keel, the frames, the wales and the
+     fittings — the failure mode this project keeps rediscovering, closed at the source. */
+  const pointAt = (u, v) => surfacePoint(S, H, u, v);
 
   for (let i = 0; i <= NU; i++) {
     const u = i / NU;
@@ -420,11 +415,17 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
       const [x, z, y] = pointAt(u, v);
       pos.push(x, z, y);
       uvs.push(u, v);
-      /* normal by finite difference on the surface */
+      /* ⚠ normal by TWO-SIDED finite difference. The forward difference this replaces
+         collapsed to zero at u = 1 and v = 1 — min(1, u + e) clamps to u itself — so every
+         vertex on the stern edge and the sheer line carried a (0,0,0) normal, and normalize()
+         of that in the shader is black. The crisp dark stripe standing at the stern from every
+         after bearing was not the sternpost: it was this, and the same class drew the black
+         rim along every deck edge. */
       const e = 1 / (NU * 2), f = 1 / (NV * 2);
-      const a = pointAt(Math.min(1, u + e), v), c = pointAt(u, Math.min(1, v + f));
-      const du = [a[0] - x, a[1] - z, a[2] - y];
-      const dv = [c[0] - x, c[1] - z, c[2] - y];
+      const a  = pointAt(Math.min(1, u + e), v), a2 = pointAt(Math.max(0, u - e), v);
+      const c  = pointAt(u, Math.min(1, v + f)), c2 = pointAt(u, Math.max(0, v - f));
+      const du = [a[0] - a2[0], a[1] - a2[1], a[2] - a2[2]];
+      const dv = [c[0] - c2[0], c[1] - c2[1], c[2] - c2[2]];
       let nx = du[1] * dv[2] - du[2] * dv[1];
       let ny = du[2] * dv[0] - du[0] * dv[2];
       let nz = du[0] * dv[1] - du[1] * dv[0];
@@ -487,12 +488,13 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
 function buildDeckGeometry(S, NU = 120) {
   const H = hullSurface(S);
   const pos = [], nor = [], uvs = [], idx = [];
-  const L = S.lwl;
   for (let i = 0; i <= NU; i++) {
     const u = i / NU;
-    const b = H.halfB * H.wl(u) * (1 - H.tumble(u));
-    const fb = H.sheer(u);
-    const x = (u - 0.5) * L + H.rake(u);
+    /* ⚠ the deck edge is WHERE THE SKIN ENDS, asked of surfacePoint — not a parallel formula.
+       The old halfB·wl·(1−tumble) copy predated the counter flare, so on every transom stern
+       the deck stopped short of the flared skin and left a ledge round the quarter. */
+    const edge = surfacePoint(S, H, u, 1);
+    const b = edge[2], fb = edge[1], x = edge[0];
     for (let j = 0; j <= 8; j++) {
       const k = j / 8;                    // 0 = starboard edge, 1 = port edge
       const y = b * (1 - 2 * k);
@@ -3519,12 +3521,8 @@ function buildStern(S, group, mats) {
   const tg = new THREE.BufferGeometry();
   tg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   tg.setIndex(idx); tg.computeVertexNormals();
-  /* a steel ship's transom is her own plating carried across the stern, in her own paint */
-  const transomMat = (S.build === 'steel' || S.build === 'iron')
-    ? new THREE.MeshStandardMaterial({ color: new THREE.Color(S.topside || '#4e545b'),
-                                       roughness: 0.60, metalness: 0.40 })
-    : mats.woodDark;
-  g.add(tag(new THREE.Mesh(tg, transomMat), 'transom'));
+  /* timber only — a steel ship never reaches this function; her transom is the hull cap */
+  g.add(tag(new THREE.Mesh(tg, mats.woodDark), 'transom'));
 
   /* ── STERN LIGHTS, SET IN THE TRANSOM THEY BELONG TO ────────────────────────────────
      ⚠ Twice now these have been sized from a formula that ran alongside the transom's own
@@ -3982,7 +3980,15 @@ function buildShip(S, opts) {
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the
      counter in surfacePoint. Three earlier attempts failed by sizing the plate; none of them
      could work, because the ship had no broad stern for a plate to sit on. */
-  if (FINE && S.transom) buildStern(S, group, mats);
+  /* ⚠ AND A STEEL SHIP'S TRANSOM IS HER OWN SHELL PLATING, NOT A FITTED PANEL. The plate was
+     a MeshStandardMaterial in scene light — full-lit pale grey against the shader-lit hull,
+     no plating, no boot-top, corners standing past the skin — the stern-quarter read carried
+     in HANDOFF since round 27. The hull mesh already closes its ends with a cap drawn by the
+     hull shader; now that the skin flares with the counter, that cap IS the transom, in the
+     ship's own paint above the boot-top and antifouling below it. Timber ships keep the
+     fitted plate: theirs really was a separate structure, with lights and galleries in it. */
+  if (FINE && S.transom && S.build !== 'steel' && S.build !== 'iron')
+    buildStern(S, group, mats);
   if (FINE && S.containers) buildContainers(S, group);
   if (S.wingSail) buildWingSail(S, group, mats);
   if (FINE && S.boats) buildBoats(S, group, mats);
