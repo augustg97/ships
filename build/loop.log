@@ -88,3 +88,20 @@ Deploy: rounds 29–30 finally went live during this session (stamp `1786043728`
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 99451 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 13:50:59  round starting
+Round 32 is done and live. The TLDR: the steel fleet no longer wears one Victorian paint scheme from 1858 to 2017 — fastening, bottom colour and cove stripe are now era facts driven by the data — and the site deployed, ending a three-round outage backlog.
+
+**What changed**
+
+- **Era-keyed steel dress, as a class** (queue item 2). Each of the nine steel hulls now carries the year it is depicted at in `vessels.json`. From that, `hull.js` derives three new shader uniforms: welded vs riveted (welded from 1950), antifouling colour (Victorian salmon to 1890, red-brown oxide to 1955, modern oxide red after, with Yamato's dark IJN hull-red as a per-ship record), and the gilt cove line, which is now a documented per-ship field — Great Eastern, the steamer and Titanic keep theirs; no warship or modern ship has one. The welded branch of the shader draws flush hairline butts on a coarser plate grid, no rivets, and the "hungry horse" — shell dished between web frames at a real frame spacing.
+- **A third instance of the same fault, found on the way**: the Shipwright's stage card told Titanic and Yamato the welded-block construction story. Steel before 1950 now gets a riveted-plating narrative — "three million rivets", not prefabricated blocks.
+- **`build_data.py` is guarded** (queue item 1). It now refuses to overwrite a `vessels.json` that carries keys the generator doesn't produce — proven by running it: it refused, naming 27 hand-edited keys, and left the file untouched.
+
+**Verification** — audit 25/25, with two new data rules (steel hull without a year; cove on a post-1950 hull), both proven live by breaking the data before proving them clean. The ratchet's control worked exactly as designed: **Great Eastern moved 0.000%**, so the refactor changed nothing the era rule says shouldn't change, while the six aimed frames moved 0.17–1.09% and were each classified and accepted. Three new per-ship baselines (Preussen, steamer, Dreadnought) mean every steel hull is now scored individually. Twelve-bearing spins confirmed the new dress from all angles.
+
+**Deploy** — the push again created no workflow run and githubstatus still said `major_outage`, but a manual dispatch succeeded anyway: run 31128442199 completed and the live stamp moved to **1786052194**, this round's. That also carried round 31's stranded work live. The lesson went into HANDOFF: the status page is evidence about the platform, not about your run.
+
+Next in the queue: the float datum (~2 m of antifouling showing above the waterline, fleet-wide — measure before tuning), then the Sea-view spot check of the remaining steel ships.
+2026-08-06 14:40:00  round finished; HEAD is 6b62e09 Deploy note: the dispatch succeeded while the status page still said major_outage — judge by the run and the stamp
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 10511 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 14:50:00  round starting

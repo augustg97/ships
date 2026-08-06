@@ -1036,3 +1036,78 @@ failure mode, still active), but a manual `gh workflow run pages.yml --ref main`
 round's. Rounds 31 and 32 are both live. Lesson kept from round 29, sharpened: the status
 page is evidence about the platform, not about your run — during a partial outage, dispatch
 anyway and judge by the run and the stamp.
+
+---
+
+## Round 33 — 2026-08-06 — She floats at her marks: the datum was a bounding box, not a waterline
+
+**Queue item 1, the float datum, measured then fixed as a class — plus one fault found by the
+measurement and one two-models-of-one-number violation found on the way.**
+
+**1. The measurement (before touching anything).** `Research/measure-datum.js`, run in-page
+like the audit, per hull: where the skin bottoms out, where the Box3 floor is, and which part
+owns the floor. Result: **the skin bottoms at exactly -draught on all 25 hulls** (error 0.000
+fleet-wide) — surfacePoint puts the load waterline at local y = 0 by construction, so the
+paint line at v = 0.62 and the geometric waterline agree. But both views floated her from
+`keelBottom + draught`, and keelBottom is the Box3 floor of the whole group: the keel timber
+(0.055·draught + 0.02 below the rabbet), the screw, or the bulb. The sea therefore sat 0.03 m
+(dugout) to 0.97 m (container) below her marks, per hull — the "~2 m of antifouling" of
+r31–32, the rest of which is wave trough plus a low camera, both physical. The two comments
+telling the trireme-sat-in-four-metres story (shipwright.js, passage.js) date from a
+parametrisation that no longer exists; both are rewritten.
+
+**2. The fix, in one place.** hull.js userData now records `waterlineY: 0` as a construction
+fact with the r33 measurement in the comment; the Shipwright (`SW.waterY`) and all three
+passage.js float sites consume it. keelBottom stays for what it is good for: the dry-dock
+floor and the Yard's framing.
+
+**3. Found by the measurement: the container's bulb hung 0.97 m below the keel.** No ship can
+dry-dock with anything under the baseline — the blocks take her weight on the keel. The bulb
+now rides as deep as it can with its underside faired to the baseline (`max(-draught·0.62,
+bulbR - draught)`). Deepest part on all 25 hulls is now the keel.
+
+**4. The Shipwright drew one sea and floated ships on another.** Its `uWave` uniform was
+`seaWaveUniform()` — wind 7.0 by default — while its floatShip call passes 6.5: hulls rode a
+sea 14% smaller than the one drawn under them. The uniform now takes 6.5, with a comment
+binding the two numbers. (The Passage already kept them in step per frame; the Action floats
+nothing, so its 7.0 sea is self-consistent.)
+
+**Audit: two new rules, both proven live by breaking the state first.** (1) `skin off her
+marks` — the skin must bottom at -draught, guarding the construction fact the datum now relies
+on (broke surfacePoint by 5%: fired on all 25; restored: clean). (2) `hangs below the keel` —
+the keel is the deepest thing on the ship (reverted the bulb: fired on container at -16.97 vs
+keel -16.90; restored: clean). 25/25 clean at round end.
+
+**Ratchet: 17 frames moved, every one looked at, all 17 accepted.** Shipwright frames
+6.2–13.4% (the re-scaled drawn sea moves most of the pixels; the waterline band the rest),
+aboard/aboard-off/aboard-coast 0.74–1.38% (the Sea-view drop off the old lift). The pictures
+now agree from Yamato (boot-top at the water, dark red only in the troughs) to the trireme
+(blades reaching the sea). Globes, action, descent, map-floor, sea-magnified: 0.000–0.022%,
+untouched — except **globe-default at 1.02%, which is the standing serif-webfont false-RED**
+(diff is text labels only; left un-accepted; queue item unchanged).
+
+**Rule 0 check, written:** the frames read as a rendered world — a sun-lit swell, a coast
+where the frame calls for one, a hull wet to her boot-top. Three facts off ship-titanic: a
+four-funnel liner with a black riveted shell and two porthole rows; red-brown antifouling
+below a boot-top the sea actually touches; she draws ~10.5 m at her marks. Three off
+aboard-coast: a trireme under sail and oar; land ~5 km off her beam; her wake bends with her
+course.
+
+**Known limit recorded, not a fault:** floatShip averages bow/mid/aft (1,2,1)/4, so a hull
+much longer than the 118 m swell can sit with midship water a few decimetres up the boot-top
+while the ends ride high — Great Eastern at the frozen instant heaves -0.78 m with local
+surface -0.39 m. That is the model's stated long-ship behaviour, now measured. Also: stated
+draught is to the SKIN; the keel timber hangs ~5.5% of draught deeper, so the deepest point
+exceeds the card's draught by that much — invisible afloat, worth folding into the draught
+convention only if the card ever claims "water she needs".
+
+### Next, in order
+1. Sea-view spot check of the remaining steel ships from round 25 (aboard/aboard-off cover two).
+2. The serif-webfont dependency decision (closes the globe-default false-RED class — flaked
+   again this round).
+3. The land in the Sea close-up: featureless brown ramp, check on a high coast.
+4. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
+5. Yamato round 2: 25 mm tertiary battery, deck aircraft, boat-stowage hatches, pagoda
+   searchlight platforms.
+6. Period dress, second pass if wanted: welded-hull boot-topping band as a distinct painted
+   band; weld-seam sheen A/B in raking light; preussen P-liner white waterline check.

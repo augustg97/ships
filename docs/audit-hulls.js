@@ -373,6 +373,29 @@
         say(v.id, 'screws out of the water', `top at ${part.screw.y[1].toFixed(1)} m`);
     }
 
+    /* ── THE SHIP FLOATS AT HER MARKS — round 33. Both views float every hull on the
+       construction fact that surfacePoint puts the load waterline at local y = 0 and bottoms
+       the skin at exactly -draught (measured 0.000 on all 25, r33). This guards the fact: if
+       the parametrisation ever moves the skin floor off -draught, the waterlineY datum in
+       hull.js userData becomes a lie and the whole fleet floats wrong while every frame still
+       looks like a ship on water — the wrongness no picture ratchet can see. */
+    if (part.planking && H.draught &&
+        Math.abs(part.planking.y[0] + H.draught) > Math.max(0.02, H.draught * 0.01))
+      say(v.id, 'skin off her marks',
+          `skin bottoms at ${part.planking.y[0].toFixed(2)} m against a stated draught of ${H.draught} m`);
+
+    /* ── THE KEEL IS THE DEEPEST THING ON THE SHIP. She dry-docks on blocks that take her
+       weight on the keel, so nothing hangs below it — the container's bulb rode 0.97 m under
+       the baseline for as long as it existed (r33), and no ratchet bearing looks under a
+       hull. */
+    if (part.keel) {
+      let floorY = 1e9, floorPart = null;
+      for (const k in part) if (part[k].y[0] < floorY) { floorY = part[k].y[0]; floorPart = k; }
+      if (floorPart !== 'keel' && floorY < part.keel.y[0] - 0.02)
+        say(v.id, 'hangs below the keel',
+            `${floorPart} reaches ${floorY.toFixed(2)} m, keel bottom ${part.keel.y[0].toFixed(2)} m`);
+    }
+
     /* ⚠ A FLIGHT DECK STANDS ON A HANGAR, NOT ON AIR. The deck was a slab floating over the
        hull — from any low bearing you saw under it, across open air, to the sea on the far
        side. The casing must exist and must span the gap from the sheer to the slab. */

@@ -3264,9 +3264,14 @@ function buildContainers(S, group) {
      a day, which is why every ship of this kind built since the 1960s has one. It is the
      single feature that most says "modern" about a profile, and it was missing. */
   const bulbMat = new THREE.MeshStandardMaterial({ color: 0x8d2f26, roughness: 0.7, metalness: 0.2 });
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(S.beam * 0.115, 18, 12), bulbMat);
+  const bulbR = S.beam * 0.115;
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(bulbR, 18, 12), bulbMat);
   bulb.scale.set(2.5, 1.0, 1.0);
-  bulb.position.set(-L * 0.495, -S.draught * 0.62, 0);
+  /* ⚠ NOTHING HANGS BELOW THE BASELINE — she has to sit on docking blocks, and they take her
+     weight on the keel. At -draught·0.62 this bulb's underside was 0.97 m below the keel
+     (r33 measurement), which no ship ever built could dock with. The bulb rides as deep as
+     it can while its underside fairs to the baseline. */
+  bulb.position.set(-L * 0.495, Math.max(-S.draught * 0.62, bulbR - S.draught), 0);
   group.add(tag(bulb, 'bulb'));
 
   /* the forecastle: mooring gear, windlass and the break of the deck, right forward.
@@ -4052,7 +4057,17 @@ function buildShip(S, opts) {
   const bb = new THREE.Box3().setFromObject(group);
   group.userData = { hullMat, sails, spec: S,
                      rigTop: bb.max.y, keelBottom: bb.min.y,
-                     extentX: bb.max.x - bb.min.x };   // a lateen yard overhangs the stem
+                     extentX: bb.max.x - bb.min.x,     // a lateen yard overhangs the stem
+                     /* ── THE FLOAT DATUM IS A CONSTRUCTION FACT, NOT A MEASUREMENT ──────
+                        surfacePoint puts the load waterline at local y = 0 (v = 0.62 → z = 0)
+                        and bottoms the skin at exactly -draught; measured r33, the skin error
+                        is 0.000 on all 25 hulls. Float her by putting THIS at the mean water
+                        plane. keelBottom + draught is NOT the waterline: the Box3 floor is
+                        the keel timber, the screw or the bulb — appendages below the baseline
+                        — and it overstated the float by 0.03–0.97 m fleet-wide, which is the
+                        "2 m of antifouling in the air" of rounds 31–32. If the parametrisation
+                        ever moves the waterline off y = 0, change it HERE and nowhere else. */
+                     waterlineY: 0 };
   return group;
 }
 

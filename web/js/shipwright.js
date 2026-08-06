@@ -114,7 +114,9 @@ function swInit() {
     uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
                 uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
                 uWind: { value: 6.5 }, uScale: { value: 150 }, uRip: { value: 3000 },
-                uWave: { value: SHIPS_SEA.seaWaveUniform() } },
+                /* ⚠ the same wind as the floatShip call below, or the hulls ride a sea 14%
+                   smaller than the one drawn under them — the two-models-of-one-number class */
+                uWave: { value: SHIPS_SEA.seaWaveUniform(6.5) } },
   }));
   gm.rotation.x = -Math.PI / 2;
   SW.ground = gm; SW.scene.add(gm);
@@ -496,11 +498,14 @@ function swOpen(vessel) {
      on and she can first be driven. No scaling of the plane — it is a real 2,600 m of water
      and stretching it would stretch the wavelengths with it. */
   SW.dryY = U.keelBottom - 0.02 * L;
-  /* ⚠ THE WATERLINE IS NOT y = 0. Assuming it was floated the trireme to her gunwale — she
-     draws 1.25 m and was sitting in about four. The waterline is the keel bottom plus the
-     draught, taken from the hull's own numbers, so every vessel sits at the depth her card
-     claims and the two cannot disagree. */
-  SW.waterY = U.keelBottom + (vessel.hull.draught || 0);
+  /* ⚠ THE WATERLINE IS y = 0, BY CONSTRUCTION — and the bounding box is not. surfacePoint
+     puts the load waterline at local y = 0, so aligning the sea to the hull's own datum
+     floats every vessel at her marks. keelBottom + draught looked like the same number and
+     was not: the Box3 floor is the keel timber, the screw or the bulb, not the moulded skin,
+     so the sea sat 0.03–0.97 m below the marks — measured per hull in r33 — and the whole
+     fleet showed antifouling above the water. The trireme story this comment used to tell
+     dates from a parametrisation that no longer exists. */
+  SW.waterY = U.waterlineY || 0;
   SW.ground.position.set(SW.shipX, SW.stage >= 7 ? SW.waterY : SW.dryY, 0);
   SW.rigTop = U.rigTop;
   SW.spin = true; SW.dist = 1.12; SW.t0 = performance.now();

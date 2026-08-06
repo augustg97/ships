@@ -243,15 +243,14 @@ function psgOpen(tr, vessel, R, globeCamera) {
      ⚠ +PI/2. At -PI/2 the bow lands dead astern; that sign has already cost this project once. */
   const holder = new THREE.Group();
   obj.rotation.y = Math.PI / 2;
-  /* ── ⚠ THE WATERLINE IS NOT y = 0 ─────────────────────────────────────────────────────
-     A generated hull is built with its keel wherever the sections put it, and floating it at
-     the model's own origin puts a trireme in about four metres of water when she draws 1.25.
-     The Shipwright solves the same problem the other way round — it raises the SEA to
-     keelBottom + draught, because the ship is standing on stocks. Here the sea is the sea and
-     cannot move, so the ship comes down to it by the same amount. Same number, from the hull's
-     own bounding box and its own stated draught, so a vessel floats at the depth her card
-     claims in both views or in neither. */
-  obj.position.y = -((obj.userData.keelBottom || 0) + (vessel.hull.draught || 0));
+  /* ── ⚠ THE WATERLINE IS y = 0, AND THE BOUNDING BOX IS NOT ───────────────────────────
+     surfacePoint builds every hull with the load waterline at local y = 0, so she floats at
+     her marks by sitting at the datum hull.js records. keelBottom + draught was used here for
+     rounds and is a different number: the Box3 floor is the keel timber, the screw or the
+     bulb — not the moulded skin — so the whole fleet rode 0.03–0.97 m high (measured per
+     hull, r33) and showed bottom paint above the water. Same datum as the Shipwright, from
+     the same userData field, so a vessel floats identically in both views or in neither. */
+  obj.position.y = -(obj.userData.waterlineY || 0);
   holder.add(obj);
   PSG.ship = holder;
   PSG.scene.add(holder);
@@ -579,7 +578,7 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
       try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: wantFine }); } catch (x) { continue; }
       obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
       obj.rotation.y = Math.PI / 2;                            // bow -X onto +Z
-      obj.position.y = -((obj.userData.keelBottom || 0) + (ves.hull.draught || 0));
+      obj.position.y = -(obj.userData.waterlineY || 0);        // her marks: local y=0, see hull.js
       const holder = new THREE.Group();
       holder.add(obj);
       holder.rotation.order = 'YXZ';
@@ -640,7 +639,7 @@ function psgPrebuild(tr, ves) {
   try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: true }); } catch (e) { return false; }
   obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   obj.rotation.y = Math.PI / 2;
-  obj.position.y = -((obj.userData.keelBottom || 0) + (ves.hull.draught || 0));
+  obj.position.y = -(obj.userData.waterlineY || 0);            // her marks: local y=0, see hull.js
   const holder = new THREE.Group();
   holder.add(obj);
   holder.rotation.order = 'YXZ';
