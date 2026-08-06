@@ -1120,6 +1120,32 @@ function slerpLonLat(lon1, lat1, lon2, lat2, f) {
 function stepVoyage(dt) { /* the voyage is a pinned line now; the ship is the era fleet's */ }
 
 
+/* ── PROSE → HTML ───────────────────────────────────────────────────────────────────────
+ * Every piece of long copy in this app — vessel, era, port, battle — is WRITTEN in markdown,
+ * and until now nothing turned it into markup. It printed its own punctuation instead:
+ * Titanic was "built for **size and comfort**" on screen, and every journal title in a
+ * citation came out as *Nature* rather than Nature. Measured across vessels.json alone:
+ * 24 bold spans and 14 italic spans, on 20 of the 25 ships. It has been shipping that way.
+ *
+ * ⚠ ESCAPE FIRST, EMPHASISE SECOND — the order is the whole correctness argument. Escaping
+ * after emphasising would escape the tags this function has just written, and there is no way
+ * to tell those from the data's own angle brackets once they are in the same string. Escaping
+ * first leaves no `<` for the emphasis step to collide with, so the two passes cannot interact.
+ * (No copy contains & or < today; this is the guard for the copy written next.)
+ *
+ * ⚠ AND BOLD BEFORE ITALIC, which is why neither rule needs a lookbehind. Run the italic rule
+ * first and it takes one star off each `**` pair, leaving the other stranded. Run bold first
+ * and every doubled star is already consumed, so a surviving `*` can only be a single one.
+ */
+function proseHTML(src) {
+  return String(src || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .split('\n\n')
+    .map(p => '<p>' + p.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                       .replace(/\*([^*\n]+)\*/g, '<em>$1</em>') + '</p>')
+    .join('');
+}
+
 /* ── card ───────────────────────────────────────────────────────────────── */
 function showCard(c) {
   document.getElementById('cEyebrow').textContent = c.eyebrow || '';
@@ -1137,7 +1163,7 @@ function showCard(c) {
   let html = '';
   if (c.tags) html += c.tags.map(t =>
     `<span class="tag ${t.toLowerCase()}">${t}</span>`).join('') + '<br>';
-  html += (c.prose || '').split('\n\n').map(p => `<p>${p}</p>`).join('');
+  html += proseHTML(c.prose);
   prose.innerHTML = html;
   document.getElementById('cSpan').textContent = c.span || '';
   document.getElementById('cCite').textContent = c.cite || '';

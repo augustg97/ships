@@ -396,9 +396,15 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swNavPos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
   min-width:74px;text-align:center}
 
-/* ── the true-scale ruler ─────────────────────────────────────────────────────────────── */
-#swRuler{position:absolute;left:24px;bottom:120px;z-index:4;pointer-events:none;
-  display:flex;flex-direction:column;gap:5px}
+/* ── the true-scale ruler ───────────────────────────────────────────────────────────────
+   ⚠ RIGHT, NOT LEFT. At left:24px/bottom:120px this was drawn INSIDE #swPart, which starts at
+   left:18px/bottom:104px and stands at least 132px tall — so the ruler occupied the part
+   panel's first line and "500 m" printed straight through "Click any timber, rope or sail."
+   Every committed Shipwright baseline had it. The right-hand column is the free one: #swList
+   is capped at calc(100vh - 250px) from a top of 66px, so it always stops 250px short of the
+   bottom, and a ruler ending ~150px up clears it at every viewport height. */
+#swRuler{position:absolute;right:24px;bottom:120px;z-index:4;pointer-events:none;
+  display:flex;flex-direction:column;gap:5px;align-items:flex-end}
 #swRuler i{display:block;height:9px;border:1px solid var(--edge-strong);border-top:0;
   background:linear-gradient(90deg,rgba(216,180,92,.22),rgba(216,180,92,.05))}
 #swRuler b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);

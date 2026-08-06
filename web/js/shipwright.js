@@ -568,8 +568,7 @@ function swFillCard(v) {
        that the numbers do not is now in the labels ("closest made good"). */
     '';
   document.getElementById('swStory').innerHTML =
-    '<h4>What she was</h4>' +
-    (v.text || '').split('\n\n').map(t => '<p>' + t + '</p>').join('');
+    '<h4>What she was</h4>' + proseHTML(v.text);   /* app.js — markdown, not asterisks */
   document.getElementById('swRows').innerHTML = (v.rows || []).length
     ? '<h4>On the record</h4>' + v.rows.map(r =>
         '<div class="rw"><i>' + r[0] + '</i><b>' + r[1] + '</b></div>').join('')
@@ -763,11 +762,23 @@ function swFrame(now) {
     if (pxPer100 > 1) {
       const targetPx = 190;
       const rawM = targetPx / (pxPer100 / 100);
-      const steps = [5, 10, 20, 50, 100, 200, 500, 1000];
-      const m = steps.reduce((p, c) => Math.abs(c - rawM) < Math.abs(p - rawM) ? c : p, steps[0]);
+      /* ⚠ DOWN TO ONE METRE, AND CHOSEN BY RATIO. Two faults, one symptom: on the small hulls
+         the bar grew until it lay across the other panels — on the voyaging canoe a "5 metres"
+         bar was wider than half the window. (1) The series STOPPED AT 5. A 19 m canoe filling
+         the frame wants a 2.6 m bar, and with nothing below 5 the picker had to round UP, so
+         the bar came out at twice its target width — the one case where the target is not
+         approximated but abandoned. A 1 m or 2 m bar is still a number you can hold in your
+         head, which is the whole point of the round-number rule. (2) Nearest by SUBTRACTION is
+         the wrong metric on a geometric series: it is biased towards the larger step at every
+         gap (for rawM 15, both 10 and 20 are 5 away, and the bias only widens further up the
+         series). Nearest by RATIO is scale-free, which is what a log-spaced set of choices
+         wants, and it keeps every vessel's bar near 190 px instead of only the large ones. */
+      const steps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
+      const m = steps.reduce((p, c) =>
+        Math.abs(Math.log(c / rawM)) < Math.abs(Math.log(p / rawM)) ? c : p, steps[0]);
       const r = document.getElementById('swRuler');
       r.querySelector('i').style.width = (m * pxPer100 / 100).toFixed(1) + 'px';
-      r.querySelector('b').textContent = m + ' metres';
+      r.querySelector('b').textContent = m + (m === 1 ? ' metre' : ' metres');
     }
   }
   SW.renderer.render(SW.scene, SW.cam);

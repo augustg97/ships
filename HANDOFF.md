@@ -697,3 +697,83 @@ against a dated reference, per rule 4.
    round; the rest still owed).
 3. The serif-webfont dependency decision (closes the globe-default false-RED class).
 4. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
+
+---
+
+## Round 29 — 2026-08-06 — Two faults the ratchet cannot see, and a ruler that ran off the page
+
+**Run from the interactive session, not the loop.** I took `build/.loop.lock` at 09:59 so the
+10:08 firing would skip, and released it at the end. Nothing here touches the vessel queue —
+round 28 had just landed Titanic's house, and both of us rebuilding the same ship is the exact
+collision the lock exists to prevent. This round is the OTHER half of the standing task: the
+fleet-wide presentation faults, found by reading four committed baselines cold.
+
+**Why they had survived 28 rounds.** The ratchet compares each frame to its own last accepted
+version, so a fault present when a frame was FIRST accepted is invisible to it forever — it is
+a change detector pointed at a set of pictures that already contained the bug. Both faults below
+were in every committed Shipwright baseline. Neither is subtle; nobody had looked with the
+question "what is wrong here" rather than "what moved".
+
+**1. Markdown rendered as punctuation, on 20 of the 25 vessels.** Titanic's panel read "built
+for \*\*size and comfort\*\*". Measured across the data: **24 bold spans and 14 italic spans**,
+and since the italics are mostly journal titles (`*Nature*`), the citations were broken too.
+The copy is written in markdown and nothing between the data and the DOM ever parsed it. Two
+render sites, the same expression in both — `app.js:1140`, which is the SHARED card fed by era,
+port, vessel and battle text (seven call sites), and `shipwright.js:572`. One `proseHTML()` now
+serves both. It escapes FIRST and emphasises second, because escaping afterwards cannot tell the
+tags it just wrote from the data's own angle brackets; and it does bold before italic, which is
+why neither rule needs a lookbehind — every doubled star is consumed before a single one is
+looked for. Verified against all **142** strings in `web/data/*.json`: zero literal asterisks
+left, `***west***` (the caravel's volta do mar) correctly nests, and the one 182-character
+`<em>` is the slave-ship's licensing note, which really is a whole italic paragraph.
+
+**2. The scale ruler was drawn inside the part panel.** `#swRuler` at `left:24px/bottom:120px`;
+`#swPart` at `left:18px/bottom:104px` standing at least 132 px tall. The ruler occupied the part
+panel's first line and "500 m" printed through "Click any timber, rope or sail." on every ship.
+Moved to the right-hand column, which is free at every viewport height: `#swList` is capped at
+`calc(100vh - 250px)` from a top of 66 px, so it always stops 250 px short of the bottom and a
+ruler ending ~150 px up cannot reach it.
+
+**3. And moving it exposed the real fault, which was never the position.** On the voyaging canoe
+the relocated bar still lay across the *Bent on* panel, because the bar's width is unbounded.
+`steps` began at **5 m**: a 19 m hull filling the frame wants a 2.6 m bar, and with nothing
+below 5 the picker had to round UP, so the bar came out at twice its 190 px target — the one
+case where the target is not approximated but abandoned. Worse, `Math.abs(c - rawM)` is nearest
+by SUBTRACTION on a geometric series, which is biased to the larger step at every gap. Now
+`[1, 2, 5, …]` chosen by `Math.abs(Math.log(c / rawM))`, which is scale-free. Measured: dugout
+667 px → 267 px, canoe 316 px → 126 px, and trireme/dhow/titanic/container unchanged — the
+large hulls were always fine, which is why only the small ones moved. The label takes a
+singular at 1 m.
+
+**One thing checked and deliberately NOT fixed.** Dark rectangles appear to bleed past the fleet
+list in every Shipwright frame. `--panel` is `rgba(7,21,34,.90)` — 90% opaque — so that is the
+hull showing through a translucent panel, by design. It looked like a z-order bug and was not.
+
+**Measured.** Audit 25/25, 0 problems. Ratchet **24/24 green** after accepting the eleven moved
+frames (the ten `ship-*` and `shipwright`) — and the moved set being EXACTLY the Shipwright
+frames, with `aboard`, `action`, `descent*`, `map-floor`, `sea-magnified` and the globes all at
+0.000%, is itself the evidence that the change is confined to where it was aimed. Both fixes
+looked at on screen: `ship-titanic` shows **size and comfort** in bold with a clean bottom-left
+hint and "50 METRES" bottom-right; `ship-canoe` shows "1 METRE" clear of every panel.
+
+**`globe-default` is confirmed a false RED, not a regression.** It came up 1.016% — the identical
+figure round 27 logged — and the diff is PURE map labels, nothing else on the globe. It then
+returned 0.000% on the next run. The identical percentage is not a coincidence and not evidence
+of a real change: the label set is fixed, so the transient is bimodal (the halos rasterise or
+they do not), which is why it reproduces the same number rather than a scatter. Round 27's
+structural remedy — vendoring an OFL serif as a real webfont so `document.fonts` actually
+guards something — is the right one and is still queued.
+
+### Next, in order
+1. **The steel stern quarter, as a class** (carried from rounds 27–28): full-lit pale transom,
+   sternpost stripe proud of it, antifouling colour — see `_spin/yamato-after/b315.png`.
+2. **Yamato's deck is bare** — no secondaries, no AA, no boats, no catapult, and the funnel
+   reads as a flat card from some bearings; check it is not a single-sided plane, which is a
+   fault already fixed once elsewhere. She is a citadel with nothing on it.
+3. Sea-view spot check of the remaining steel ships from round 25.
+4. The serif-webfont dependency decision (closes the `globe-default` false-RED class).
+5. **The land in the Sea close-up** is a featureless brown ramp meeting the water in a straight
+   line — no ridges, no shoreline. That is what LAND_DETAIL was written to prevent, and the
+   `aboard` frame says it is not reaching this camera. Check on a high coast, not off the
+   Peloponnese.
+6. Titanic fine structure: forecastle/poop breaks, raked buff masts, funnel buff A/B.
