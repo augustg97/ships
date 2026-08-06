@@ -1221,3 +1221,9 @@ shows only where the trough drops below her marks.
    forward (hers were enclosed — the Olympic tell), docking bridge on the poop.
 7. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
    preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE, stamp 1786058340.** The push of 28c342b created no run
+within a minute — but r33's push run (31129373376) did eventually fire 36 minutes late, so
+the mode has shifted from "never fires" to "fires late"; treat a missing run as late, not
+dead, and dispatch anyway. Manual `gh workflow run pages.yml` → run 31131412718, completed
+success, live stamp verified 1786053656 → **1786058340** with a cache-busted fetch.
