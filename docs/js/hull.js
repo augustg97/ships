@@ -1947,26 +1947,47 @@ function buildSuperstructure(S, group) {
        because the picture never changed. */
     tier.position.y = base + dh * i + dh / 2;
     const railY = base + dh * (i + 1);
+    /* ONE definition of where the rail line runs, read by the posts and by the rails. Two
+       derivations of one edge is how they came apart in the first place. */
+    const railHalf = (x) => {
+      const uu = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
+      const dh2 = Math.abs(surfacePoint(S, H, uu, 1.0)[2]);
+      return Math.max(B * 0.06, Math.min(wid / 2, dh2 - B * 0.055));
+    };
     if (i !== n - 1) { g.add(tag(tier, 'superstructure')); continue; }
     for (const side of [-1, 1]) {
       const nSt = Math.max(6, Math.round(len / (B * 0.22)));
       const segs = [];
       for (let k = 0; k <= nSt; k++) {
         const x = tier.position.x - len / 2 + k * (len / nSt);
-        const uu = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
-        const dh2 = Math.abs(surfacePoint(S, H, uu, 1.0)[2]);
-        const hw = Math.max(B * 0.06, Math.min(wid / 2, dh2 - B * 0.055));
+        const hw = railHalf(x);
         const st = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), white);
         st.position.set(x, railY + dh * 0.15, side * hw);
         g.add(st);
       }
+      /* ── ⚠ AND THE RAIL HAS TO FOLLOW THE SAME EDGE THE STANCHIONS DO ────────────
+         Last round the stanchions were moved onto the hull's lofted half-breadth — correct,
+         a rail runs along the deck edge and the deck edge tapers — and the rails were left as
+         one long cylinder at a CONSTANT half-breadth. So they stopped meeting: the survey
+         found the stanchions of the Great Eastern and the steamer touching nothing at all,
+         three to five metres from the nearest part, which is a handrail floating beside its
+         own posts. A rail between tapering posts is a series of short runs, not one bar. */
       for (const h of [0.10, 0.20, 0.30]) {
-        const rail = new THREE.Mesh(
-          new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), white);
-        rail.rotation.z = Math.PI / 2;
-        rail.position.set(tier.position.x, railY + dh * h, side * wid / 2);
-        g.add(rail);
+        for (let k = 0; k < nSt; k++) {
+          const xa = tier.position.x - len / 2 + k * (len / nSt);
+          const xb = xa + len / nSt;
+          const ha = railHalf(xa), hb = railHalf(xb);
+          const mid = new THREE.Vector3((xa + xb) / 2, railY + dh * h, side * (ha + hb) / 2);
+          const seg = new THREE.Mesh(
+            new THREE.CylinderGeometry(B * 0.0035, B * 0.0035,
+              Math.hypot(xb - xa, (hb - ha)), 5), white);
+          seg.position.copy(mid);
+          seg.rotation.z = Math.PI / 2;
+          seg.rotation.y = -Math.atan2(side * (hb - ha), xb - xa);
+          g.add(seg);
+        }
+        continue;
       }
     }
   }
@@ -2530,8 +2551,18 @@ function buildContainers(S, group) {
      ship's profile made it obvious, and it had been shipping that way since the box boat was
      built. A funnel is an UPTAKE: it exists to carry exhaust clear of the accommodation and
      the deck, so it is always taller than it is broad. */
+  /* ── ⚠ AND IT WAS STANDING ON NOTHING ────────────────────────────────────────────────
+     The survey found this funnel seventeen metres from the nearest part of the ship, its base
+     forty-seven metres up, hanging abaft the deckhouse over open deck. A funnel is the top of
+     an UPTAKE: it rises out of the engine casing, which is the after part of the accommodation
+     block, and the whole column is continuous from the engine room to the sky. Build the casing
+     and the funnel has something to stand on — which is also why a real one sits where it does. */
+  const casing = new THREE.Mesh(
+    new THREE.BoxGeometry(L * 0.052, TEU_H * 7.2, B * 0.30), white);
+  casing.position.set(L * 0.393, hs + TEU_H * 3.6, 0);
+  group.add(tag(casing, 'bridge'));
   const fn = new THREE.Mesh(new THREE.BoxGeometry(L * 0.030, TEU_H * 5.6, B * 0.16), dark);
-  fn.position.set(L * 0.405, hs + TEU_H * 9.4, 0);
+  fn.position.set(L * 0.393, hs + TEU_H * 9.4, 0);
   group.add(tag(fn, 'funnel', 'Funnel',
     'The uptake from the main engine, carried high enough to keep exhaust clear of the bridge and the deck. On a box boat it stands abaft the accommodation because everything forward of that is cargo.'));
 }

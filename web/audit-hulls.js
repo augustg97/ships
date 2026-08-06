@@ -164,6 +164,28 @@
                        `${through} of ${shot} bearings pass through the lowest tier`);
     }
 
+    /* ⚠ A PART THAT TOUCHES NOTHING IS ATTACHED TO NOTHING. Found the container ship's funnel
+       hanging seventeen metres from the hull with its base forty-seven metres up, and the boat-
+       deck rails of the Great Eastern and the steamer floating three to five metres from their
+       own stanchions — the rails had been left at a constant half-breadth when the posts were
+       moved onto the lofted deck edge. Neither is visible from a single viewpoint, which is
+       what the frame ratchet is. */
+    {
+      const parts = [];
+      g.traverse(o => { if (o.isMesh && tagOf(o)) parts.push(new THREE.Box3().setFromObject(o)); });
+      const pad = Math.max(0.25, H.loa * 0.004);
+      const adrift = [];
+      for (let i = 0; i < parts.length; i++) {
+        const a = parts[i].clone().expandByScalar(pad);
+        let touches = false;
+        for (let j = 0; j < parts.length && !touches; j++)
+          if (j !== i && a.intersectsBox(parts[j])) touches = true;
+        if (!touches) adrift.push(i);
+      }
+      if (adrift.length) say(v.id, 'part attached to nothing',
+                             `${adrift.length} of ${parts.length} meshes touch no other part`);
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

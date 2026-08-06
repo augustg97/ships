@@ -315,3 +315,49 @@ the camera and every view that draws water is handed it.
 * The grid texture at very close zoom — still unidentified, now unreachable from the map.
 * The map-floor frame at 300 km reads murky; the wind-streak layer smears at that zoom.
 * Titanic's tiers read as flat plates rather than a stepped house with windows.
+
+---
+
+## Round 23 — 2026-08-06 · the fleet survey begins
+
+`Research/survey-hulls.js` — companion to the audit. The audit asks whether a ship is WRONG;
+this asks whether it is CRUDE, and neither question can be answered from a picture. It measures
+floating parts (a mesh whose box touches no other), box meshes (twelve triangles is a cube),
+triangles per metre of hull (the only fair comparison between a 400 m box boat and a 9 m
+dugout), material variety, and which part KINDS are made entirely of boxes.
+
+**The fleet, crudest first (triangles per metre of hull).** This is the work queue:
+
+| | tris/m | meshes | note |
+|---|---|---|---|
+| carrier | 384 | 54 | 337 m of ship in fifty-four meshes |
+| container | 399 | 2570 | 2,528 of those are containers, which *are* boxes |
+| yamato | 540 | 120 | |
+| titanic | 579 | 190 | |
+| great-eastern | 828 | 368 | |
+| dreadnought | 872 | 119 | |
+| wyoming | 1118 | 164 | |
+| preussen | 1250 | 209 | |
+| steamer | 1632 | 231 | |
+| treasure-ship | 2011 | 152 | |
+| …the sailing ships run 2,600–15,000 and are the best-served end | | | |
+
+The modern steel ships are the crude end, which is the opposite of where the hand-work has gone.
+`gratingx52`, `channelx4` and the like in the boxy-parts column are **not** faults — a grating
+is bars and a channel is a plank.
+
+**Fixed this round, both found by geometry and invisible from any single viewpoint:**
+* The container ship's funnel stood **17.2 m from the nearest part of the ship**, its base 47 m
+  up, hanging over open deck. A funnel is the top of an uptake; it now rises from an engine
+  casing that reaches the deck, which is also why a real one sits where it does.
+* The Great Eastern's and the steamer's boat-deck **rails floated beside their own stanchions**
+  — mine from last round: I moved the posts onto the lofted deck edge and left the rails at a
+  constant half-breadth. There is one `railHalf(x)` now, read by both.
+
+Both classes are now audit rules (13 rules; all 25 hulls pass).
+
+### Next, in order
+1. **carrier** — crudest by a wide margin, and a flight deck is mostly markings and edge detail.
+2. **yamato, titanic, dreadnought** — the boxy-superstructure family.
+3. Titanic's tiers still read as stepped plates rather than a house with real fronts.
+4. Container ship's accommodation block is still a plain white box.
