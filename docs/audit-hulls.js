@@ -221,6 +221,42 @@
             `deck slab from ${part.flightdeck.y[0].toFixed(1)}, sheer ${deckY.toFixed(1)}`);
     }
 
+    /* ⚠ THE DECK PARK PARKS CLEAR OF THE LANDING AREA. Declared aircraft must be drawn, at
+       the declared count; each must stand ON the flight deck rather than float over it or
+       sink through it; none may leave the deck; and none may sit inside the angled landing
+       area — the strip's geometry comes from the builder's own landingStrip(), one
+       derivation for the marks, the wires and this rule, so they cannot disagree. */
+    if (H.deckPark) {
+      const acs = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'aircraft')
+                          acs.push(o); });
+      if (!acs.length) say(v.id, 'declared but not drawn', 'deck park');
+      else {
+        if (acs.length !== H.deckPark)
+          say(v.id, 'deck park miscounted', `${H.deckPark} declared, ${acs.length} drawn`);
+        const LS = SHIPS_HULL.landingStrip(H);
+        const slabTop = part.flightdeck ? part.flightdeck.y[1] : 0;
+        for (const ac of acs) {
+          const ab = new THREE.Box3().setFromObject(ac);
+          const cxA = (ab.min.x + ab.max.x) / 2, czA = (ab.min.z + ab.max.z) / 2;
+          if (ab.min.y > slabTop + 1.0 || ab.min.y < slabTop - 1.8)
+            say(v.id, 'aircraft not on the deck',
+                `wheels at ${ab.min.y.toFixed(1)} m, deck about ${slabTop.toFixed(1)}`);
+          if (Math.max(-ab.min.z, ab.max.z) > H.flightDeck * 0.5 + 0.5 ||
+              Math.max(-ab.min.x, ab.max.x) > H.lwl * 0.51 + 0.5)
+            say(v.id, 'aircraft off the deck',
+                `at x ${cxA.toFixed(0)} z ${czA.toFixed(0)}`);
+          const dx = cxA - LS.cx, dz = czA - LS.cz;
+          const xl = dx * Math.cos(LS.rot) - dz * Math.sin(LS.rot);
+          const zl = dx * Math.sin(LS.rot) + dz * Math.cos(LS.rot);
+          if (Math.abs(zl) < LS.halfW + 4 && Math.abs(xl) < LS.halfLen + 9)
+            say(v.id, 'aircraft parked foul of the landing area',
+                `${zl.toFixed(1)} m off the axis at x ${cxA.toFixed(0)}`);
+        }
+      }
+    }
+
     /* ⚠ THE DECK NARROWS AND THE CARGO MUST NARROW WITH IT. Found by the spin survey from
        every bow bearing of the container ship: the hatch covers, the forecastle and the outer
        container columns stood at one constant width on a hull whose deck tapers to the stem —

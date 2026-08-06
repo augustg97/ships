@@ -1037,7 +1037,13 @@ function buildVoyageList() {
    list is not rebuilt underneath the pointer. */
 let _fleetListAt = -1;
 function refreshFleetList(t) {
-  if (t - _fleetListAt < 500) return;
+  /* ⚠ THE THROTTLE WAS THE LAST FLAP. A capture races this 500 ms window: the row meta
+     ("· 37°N 1°W · far side") is written on the first tick AFTER the fleet has positions,
+     and __FRAME_READY does not wait for it — so one run photographed the list with
+     coordinates and the next without, 0.476% apart, stable in nothing but appearance.
+     Frozen time has no reason to throttle: refresh every tick and the first painted frame
+     already carries the settled text. */
+  if (!FROZEN && t - _fleetListAt < 500) return;
   _fleetListAt = t;
   const host = document.getElementById('voyList');
   if (!host) return;

@@ -65,7 +65,10 @@ fi
 # nothing installed: it waits, then kills the round if it is still going.
 claude -p "$(cat "$PROMPT")" --permission-mode bypassPermissions --max-turns 300 &
 ROUND=$!
-( sleep 3000; kill -0 "$ROUND" 2>/dev/null && { echo "  round overran 50 min — killing"; kill "$ROUND"; } ) &
+# ⚠ 50 MINUTES KILLED TWO FULL ROUNDS mid-verification and a third finished on the wire —
+# a vessel rebuild plus two ratchet passes is ~55-70 min of real work. 80 min fits under the
+# 90-minute stale-lock clear, which is the only ceiling that matters here.
+( sleep 4800; kill -0 "$ROUND" 2>/dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } ) &
 WATCH=$!
 wait "$ROUND" || echo "  round exited non-zero — the next firing picks up from HANDOFF.md"
 kill "$WATCH" 2>/dev/null
