@@ -1344,6 +1344,10 @@ const PARTS = {
               what: 'The space between the hull and the flight deck is built, not air: the '
                   + 'hangar bays and the gallery decks around them. The deck-edge lifts open '
                   + 'into it, which is why its sides are doors.' },
+  aircraft: { stage: 7, name: 'Deck park',
+              what: 'The air wing is what the ship is FOR, and some of it lives on deck: '
+                  + 'parked with wings folded, clear of the angled deck and the foul line, '
+                  + 'because a landing aircraft owns everything inside them.' },
   screw:    { stage: 3, name: 'Screw',
               what: 'Manganese bronze, below the waterline — the one golden thing on a grey '
                   + 'hull, and what she has instead of everything the sailing fleet carried '
@@ -2294,6 +2298,16 @@ function buildScrews(S, group) {
   });
 }
 
+/* the landing area's own geometry — ONE derivation, shared with the audit. Axis centre,
+   rotation about y, half-length and half-width, in the ship's frame (bow at -x, starboard +z).
+   The aft end of the axis sits near the centreline at the round-down; the forward end reaches
+   the port deck edge just forward of amidships — nine degrees, which is the whole invention. */
+function landingStrip(S) {
+  const L = S.lwl, deckW = S.flightDeck;
+  return { cx: L * 0.14, cz: -deckW * 0.177, rot: -0.157,
+           halfLen: L * 0.31, halfW: deckW * 0.105 };
+}
+
 function buildFlightDeck(S, group, mats) {
   if (!S.flightDeck) return;
   const H = hullSurface(S);
@@ -2370,10 +2384,18 @@ function buildFlightDeck(S, group, mats) {
      runway and not what a carrier looks like from anywhere. The landing area is marked by
      LINES on the same non-skid as the rest of the deck — its two edges — and the deck inside
      them is the same colour as the deck outside. */
+  /* ⚠ AND IT RAN THE WRONG WAY ON THE WRONG HALF OF THE SHIP. The strip was centred forward
+     of amidships with its forward end drifting to STARBOARD — a mirror of the real geometry,
+     with the arrestor wires beside the bow catapults. A landing area exists so that a missed
+     wire flies off the BOW and goes round: it begins at the stern round-down near the
+     centreline and runs forward-PORT. Its geometry is one derivation now — landingStrip() —
+     shared with the audit, so the marks, the wires and the parking rule cannot disagree. */
+  const LS = landingStrip(S);
+  const aftX = Math.cos(LS.rot), aftZ = -Math.sin(LS.rot);   // unit vector down the axis, aft
   for (const edge of [-1, 1]) {
     const ang = new THREE.Mesh(new THREE.BoxGeometry(L * 0.62, B * 0.004, deckW * 0.010), line);
-    ang.position.set(-L * 0.10, y + B * 0.025, -deckW * 0.10 + edge * deckW * 0.105);
-    ang.rotation.y = 0.157;
+    ang.position.set(LS.cx, y + B * 0.025, LS.cz + edge * LS.halfW);
+    ang.rotation.y = LS.rot;
     group.add(tag(ang, 'flightdeck', 'Angled landing area',
       'Angled about nine degrees to port so an aircraft that misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward. It is what made jet operation possible.'));
   }
@@ -2483,30 +2505,32 @@ function buildFlightDeck(S, group, mats) {
   const yTop = y + B * 0.024;
   /* the landing centreline, running down the angled deck */
   const cl = new THREE.Mesh(new THREE.BoxGeometry(L * 0.55, B * 0.003, deckW * 0.012), paintW);
-  cl.position.set(-L * 0.10, yTop, -deckW * 0.10);
-  cl.rotation.y = 0.157;
+  cl.position.set(LS.cx, yTop, LS.cz);
+  cl.rotation.y = LS.rot;
   group.add(tag(cl, 'flightdeck', 'Landing centreline',
     'The line a pilot flies down on approach. It runs along the angled deck, not the ship.'));
   /* the foul line, offset to starboard of it */
   const fl = new THREE.Mesh(new THREE.BoxGeometry(L * 0.52, B * 0.003, deckW * 0.008), paintY);
-  fl.position.set(-L * 0.09, yTop, deckW * 0.02);
-  fl.rotation.y = 0.157;
+  fl.position.set(LS.cx - L * 0.01, yTop, LS.cz + deckW * 0.16);
+  fl.rotation.y = LS.rot;
   group.add(tag(fl, 'flightdeck', 'Foul line',
     'Nothing and nobody may be inside this line while an aircraft is coming aboard.'));
 
   /* ── ARRESTOR WIRES ────────────────────────────────────────────────────────────────
-     Four of them, athwart the angled deck, a few metres apart. The aircraft is stopped by a
-     hook catching one of these and paying it out against hydraulic rams below decks — from
-     about 240 km/h to nothing in roughly 100 m. */
-  for (let w = 0; w < 4; w++) {
+     THREE on this class — the AAG turbo-electric gear, down from the Nimitz's four — athwart
+     the AFT end of the landing area, which is where a hook actually crosses the deck. The
+     aircraft is stopped by catching one and paying it out against the engine below decks —
+     from about 240 km/h to nothing in roughly 100 m. */
+  for (let w = 0; w < 3; w++) {
+    const along = L * (0.185 + w * 0.04);            // down the axis from its centre, aft
     const wire = new THREE.Mesh(
       new THREE.CylinderGeometry(B * 0.0025, B * 0.0025, deckW * 0.24, 5),
       new THREE.MeshStandardMaterial({ color: 0x1a1d20, roughness: 0.6, metalness: 0.5 }));
     wire.rotation.x = Math.PI / 2;
-    wire.rotation.y = 0.157;
-    wire.position.set(-L * 0.26 + w * L * 0.035, yTop + B * 0.002, -deckW * 0.14);
+    wire.rotation.y = LS.rot;
+    wire.position.set(LS.cx + along * aftX, yTop + B * 0.002, LS.cz + along * aftZ);
     group.add(tag(wire, 'flightdeck', 'Arrestor wire',
-      'A hook catches one of four and pays it out against hydraulic rams below decks: about 240 km/h to a stop in roughly a hundred metres.'));
+      'A hook catches one of three and pays it out against the arresting engine below decks: about 240 km/h to a stop in roughly a hundred metres.'));
   }
 
   /* ── CATAPULT TRACKS ───────────────────────────────────────────────────────────────
@@ -2516,9 +2540,76 @@ function buildFlightDeck(S, group, mats) {
   for (const c of [[-0.30, -deckW * 0.22], [-0.30, deckW * 0.10], [-0.06, -deckW * 0.26]]) {
     const cat = new THREE.Mesh(new THREE.BoxGeometry(L * 0.28, B * 0.003, deckW * 0.020), paintW);
     cat.position.set(c[0] * L, yTop, c[1]);
-    if (c[0] > -0.2) cat.rotation.y = 0.157;
+    /* the waist catapult launches across the angled deck, so it lies along the same axis */
+    if (c[0] > -0.2) cat.rotation.y = LS.rot;
     group.add(tag(cat, 'flightdeck', 'Catapult track',
       'Electromagnetic on this class rather than steam. A linear motor can be tuned to the aircraft, so it will throw something light without tearing it apart.'));
+  }
+
+  if (S.deckPark) buildDeckPark(S, group, y);
+}
+
+/* ── THE DECK PARK ─────────────────────────────────────────────────────────────────────
+ * A carrier with a bare deck reads as a runway, not a warship at work. Parked aircraft go
+ * where the deck is not working: the bow park to starboard of the catapults, the street
+ * along the starboard side aft of the island, and the fantail — never inside the angled
+ * landing area and never across the foul line, which is what those lines are FOR.
+ */
+function buildAircraft(mats) {
+  /* an 18 m strike fighter in real metres — wheels on y = 0, nose toward -x, wings FOLDED,
+     which is how a parked naval fighter actually stands and the most legible single fact
+     about a deck park. Fuselage, radome, canopy, folded outer panels standing up, twin
+     canted fins, stabs, and the gear it stands on. */
+  const ac = new THREE.Group();
+  const fus = new THREE.Mesh(new THREE.BoxGeometry(13.2, 1.5, 1.9), mats.acSkin);
+  fus.position.set(0.6, 1.55, 0); ac.add(fus);
+  const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.18, 5.0, 8), mats.acSkin);
+  nose.rotation.z = -Math.PI / 2;
+  nose.position.set(-8.5, 1.55, 0); ac.add(nose);
+  const can = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.75, 1.1), mats.acGlass);
+  can.position.set(-4.6, 2.5, 0); ac.add(can);
+  for (const s of [-1, 1]) {
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.15, 3.3), mats.acSkin);
+    wing.position.set(-0.4, 2.0, s * 2.6); wing.rotation.y = s * 0.3; ac.add(wing);
+    const tip = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.13, 2.5), mats.acSkin);
+    tip.position.set(0.4, 3.05, s * 4.5); tip.rotation.x = -s * 1.25; ac.add(tip);
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.0, 0.16), mats.acSkin);
+    fin.position.set(5.2, 3.35, s * 1.15); fin.rotation.x = s * 0.35; fin.rotation.z = -0.35;
+    ac.add(fin);
+    const stab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 2.1), mats.acSkin);
+    stab.position.set(6.6, 1.7, s * 1.9); stab.rotation.y = s * 0.45; ac.add(stab);
+    const mg = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.85, 6), mats.acDark);
+    mg.position.set(1.1, 0.43, s * 1.0); ac.add(mg);
+  }
+  const ng = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 6), mats.acDark);
+  ng.position.set(-6.3, 0.43, 0); ac.add(ng);
+  return ac;
+}
+
+function buildDeckPark(S, group, yDeck) {
+  const L = S.lwl, deckW = S.flightDeck;
+  const mats = {
+    /* flat tactical grey — anything brighter blows out under the Shipwright's 3.1 key,
+       the flight-deck lesson again */
+    acSkin:  new THREE.MeshStandardMaterial({ color: 0x646b71, roughness: 0.88, metalness: 0.10 }),
+    acGlass: new THREE.MeshStandardMaterial({ color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 }),
+    acDark:  new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.70, metalness: 0.20 }),
+  };
+  /* [x/L, z/deckW, heading]: the bow park, the street, the fantail. Clear of the landing
+     area and the foul line by construction — and the audit re-checks every spot against
+     landingStrip() rather than trusting these numbers. Headings vary the way a real park
+     does, deterministically by index. */
+  const spots = [
+    [-0.43, 0.30, 2.45], [-0.38, 0.30, 2.30], [-0.33, 0.30, 2.55], [-0.28, 0.30, 2.40],
+    [ 0.19, 0.33, 1.85], [ 0.245, 0.33, 2.05], [ 0.30, 0.33, 1.90], [ 0.355, 0.33, 2.10],
+    [ 0.40, 0.23, 2.95], [ 0.455, 0.23, 3.05], [ 0.40, 0.32, 2.90], [ 0.455, 0.32, 3.10],
+  ];
+  const yTop = yDeck + S.beam * 0.0225;
+  for (let i = 0; i < Math.min(S.deckPark, spots.length); i++) {
+    const ac = buildAircraft(mats);
+    ac.position.set(spots[i][0] * L, yTop, spots[i][1] * deckW);
+    ac.rotation.y = spots[i][2];
+    group.add(tag(ac, 'aircraft'));
   }
 }
 
@@ -3531,4 +3622,4 @@ function buildShip(S, opts) {
 }
 
 window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
-                      superellipseFullness, surfacePoint };
+                      superellipseFullness, surfacePoint, landingStrip };

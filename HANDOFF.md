@@ -494,3 +494,48 @@ the second half of that split, done by hand.
    island, the fantail. Declare a `deckPark` count in data and audit it like containers.
 2. **yamato** (547 tris/m), then **titanic's tiers** (stepped plates, no fronts).
 3. Sea-view spot check of every steel ship whose rail/deck/rudder changed in round 25.
+
+---
+
+## Round 27 — 2026-08-06 · the deck park, and the landing area ran the wrong way
+
+**Landed round 26 first** (it was verified but sitting uncommitted — the watchdog killed it
+before the commit both times), then did the carrier's deck park, queue item 1.
+
+**The landing area was mirrored and on the wrong half of the ship.** Read straight off the
+code before touching the park: the strip was centred FORWARD of amidships with its forward
+end drifting to STARBOARD, and the arrestor wires sat beside the bow catapults. A landing
+area exists so a missed wire flies off the BOW: it begins at the stern round-down near the
+centreline and runs forward-port at nine degrees. Confirmed in the before-spin, fixed
+structurally: `landingStrip(S)` is now ONE derivation — exported on `SHIPS_HULL` — and the
+edge lines, centreline, foul line, wires, waist catapult and the parking audit all read it,
+so they cannot disagree again. Wires went four → THREE (Ford's AAG; four is Nimitz) and
+moved to the aft end of the strip, where a hook actually crosses the deck.
+
+**The deck park (queue item 1).** `deckPark: 12` declared in the carrier's hull data and
+drawn: an 18 m strike fighter in real metres — fuselage, radome, canopy, twin canted fins,
+stabs, gear — with wings FOLDED, the single most legible fact about a parked naval
+fighter. Three parks, clear of the strip and the foul line by construction: four on the
+starboard bow, four in the street aft of the island, four on the fantail. Verified in the
+plan view and the spin: three groups on deck, nothing floating, nothing foul of the lines.
+One audit rule (19 total): declared aircraft drawn at the declared count, standing ON the
+deck (not floating/sunk), inside the deck edge, and clear of the landing corridor — the
+corridor from the builder's own `landingStrip()`, not from copied numbers. 25/25 pass.
+
+**The last flap was a throttle.** aboard moved 0.476% and flap_test showed it LIVE (two
+fresh pages in one session disagree); descent moved 1.039% but deterministic per session.
+Cropping the two runs: one had "OCEAN STEAMER · 37°N 1°W · FAR SIDE" in the voyage row
+meta, the other just "OCEAN STEAMER" — `refreshFleetList` writes the position suffix on a
+500 ms throttle and `__FRAME_READY` never waited for it. Frozen mode now refreshes
+unthrottled, so the first painted frame already carries the settled text. (Round 26's CSS
+freeze was real but was the OTHER half of the class.)
+
+### Next, in order
+1. **yamato** (547 tris/m) — and note: `buildTurrets` points forward turrets' guns toward
+   +x, which is the STERN (bow is -x; the carrier's catapults prove the convention). Check
+   from the spin before assuming; if so the fix is one sign, but look at superfiring pairs.
+2. **titanic's tiers** (stepped plates, no fronts).
+3. Sea-view spot check of every steel ship whose rail/deck/rudder changed in round 25.
+4. The loop watchdog still kills a full build+verify round at 50 min (two kills, then this
+   round ran to the wire). Raise `sleep 3000` in build/loop-round.sh toward 4800 — the
+   stale-lock clear at 90 min leaves room — or keep splitting build/land across firings.
