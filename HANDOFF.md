@@ -1028,3 +1028,11 @@ eight high; a white island aft; a welded blue-black shell over modern oxide red.
    searchlight platforms.
 7. Period dress, second pass if wanted: welded-hull boot-topping band as a distinct painted
    band; weld-seam sheen A/B in raking light; preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE.** The push of 21ba0b9 created no workflow run (ffc3333's
+failure mode, still active), but a manual `gh workflow run pages.yml --ref main` succeeded at
+~21:50 UTC even with githubstatus still showing Actions/Pages `major_outage` — run
+31128442199, completed success, and the live stamp moved 1786043728 → **1786052194**, this
+round's. Rounds 31 and 32 are both live. Lesson kept from round 29, sharpened: the status
+page is evidence about the platform, not about your run — during a partial outage, dispatch
+anyway and judge by the run and the stamp.
