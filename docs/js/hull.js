@@ -2659,7 +2659,6 @@ function buildContainers(S, group) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const TEU_L = 12.19, TEU_W = 2.44, TEU_H = 2.59;      // the 40-ft box, in metres
-  const cols = Math.max(4, Math.floor(B * 0.86 / TEU_W));
   const pal = [0xb0442e, 0x2f5f86, 0x8a8f93, 0x3f7a55, 0xa8792c, 0x6a4a72];
   const mats = pal.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.74, metalness: 0.14 }));
   const box = new THREE.BoxGeometry(TEU_L * 0.97, TEU_H * 0.95, TEU_W * 0.94);
@@ -2680,39 +2679,82 @@ function buildContainers(S, group) {
          the deck is not one continuous mass;
        * a bay is 40 ft or two of 20 ft, and the 20 ft bays are visibly shorter.
      None of that is decoration. Each line is a constraint the real stow is solving. */
-  const BAYS = Math.floor(L * 0.70 / (TEU_L * 1.06));
+  /* ── ⚠ AND THE DECK NARROWS, WHICH THE CARGO DID NOT ─────────────────────────────────
+     Found by the spin survey, from every bow bearing: the stow, the hatch covers and the
+     forecastle were all one constant width on a hull whose deck tapers to a stem. At bay 0
+     the deck is 35 m across and the hatch cover was 53, so the cover and the outer four
+     columns of boxes stood over open water — white plates hanging in the air past the ship's
+     side. Same class as "a deckhouse is not a box" (round 22), recurring in the cargo system:
+     EVERYTHING THAT STANDS ON THE DECK FOLLOWS THE DECK'S OWN PLAN. One derivation of the
+     edge, read by every part that stands on it. */
+  const deckHalfAt = x => {
+    const u = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
+    return Math.abs(surfacePoint(S, H, u, 1.0)[2]);
+  };
+  const deckY = H.sheer(0.5);
+
+  /* ── THE LAYOUT IS SET BY THE HOUSE ──────────────────────────────────────────────────
+     The accommodation stands over the engine, right aft, so nothing blocks the crane runs;
+     the stow fills every bay of deck around it. Its stations are fixed here, first, and the
+     bays are laid around them — the reverse order is how a 30 m gap of bare deck opened
+     between the last bay and the house. */
+  const DK = 2.9;                                       // one deck of the house, in metres
+  const N_DECKS = 8;                                    // cabin decks under the wheelhouse
+  const accX = L * 0.345, accL = L * 0.050, accW = B * 0.70;
+  const casL = L * 0.042, casW = B * 0.34;
+  const casX = accX + accL / 2 + casL / 2;              // the engine casing abuts the house
+
   const hatch = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.85, metalness: 0.2 });
   const lash = new THREE.MeshStandardMaterial({ color: 0x6d7176, roughness: 0.7, metalness: 0.45 });
-  const deckY = H.sheer(0.5);
-  for (let bay = 0; bay < BAYS; bay++) {
-    const u = bay / Math.max(1, BAYS - 1);              // 0 at the bow end of the stow, 1 aft
-    const x = -L * 0.42 + bay * TEU_L * 1.06;
-    /* the profile: 4 high at the fore end rising to 8 abaft amidships, then easing back to 6 */
-    const prof = 4 + 4 * Math.sin(Math.min(1, u * 1.15) * Math.PI * 0.62);
-    const centreHigh = Math.max(3, Math.round(prof));
-    /* hatch cover under the bay */
-    const hc = new THREE.Mesh(new THREE.BoxGeometry(TEU_L * 1.00, TEU_H * 0.22, B * 0.86), hatch);
-    hc.position.set(x, deckY + TEU_H * 0.11, 0);
+  const pitch = TEU_L * 1.06;
+  const lashM = B * 0.02;                               // lashings and the walkway at the edge
+  /* a bay exists wherever six columns fit and the house does not stand */
+  const bays = [];
+  for (let x = -L * 0.44 + pitch / 2; x + pitch / 2 < L * 0.48; x += pitch) {
+    const half = Math.min(B * 0.43, deckHalfAt(x - pitch / 2), deckHalfAt(x + pitch / 2)) - lashM;
+    const nc = Math.floor((half * 2) / (TEU_W * 1.02));
+    if (nc < 6) continue;                               // forward of this is forecastle deck
+    if (x + pitch / 2 > accX - accL / 2 - 3 && x - pitch / 2 < casX + casL / 2 + 3) continue;
+    bays.push([x, nc]);
+  }
+  const foreBays = bays.filter(b => b[0] < accX).length;
+  bays.forEach(([x, nc], i) => {
+    /* the profile: 4 high at the bow rising to 8 a little abaft amidships, easing toward the
+       house; the bays abaft the funnel sit lower. ⚠ The peak is CAPPED BY THE BRIDGE — the
+       wheelhouse floor is above the tallest stack forward of it, because a bridge that cannot
+       see over its own cargo is not a bridge. That is the constraint the audit now asserts. */
+    const t = i / Math.max(1, foreBays - 1);
+    const centreHigh = x > accX ? 5
+                     : Math.max(3, Math.round(4 + 4 * Math.sin(Math.min(1, t * 1.3) * Math.PI * 0.68)));
+    const stowHalf = nc * TEU_W * 1.02 / 2;
+    /* the bay stands on the deck AT ITS OWN STATION — the bow sheer lifts the foredeck
+       1.4 m above amidships, and a stow based on the amidships height was buried in it */
+    const bayY = Math.max(H.sheer(Math.max(0.001, 0.5 + (x - pitch / 2) / L)),
+                          H.sheer(Math.min(0.999, 0.5 + (x + pitch / 2) / L)));
+    /* the hatch cover under the bay, sized to the bay it serves */
+    const hc = new THREE.Mesh(
+      new THREE.BoxGeometry(TEU_L * 1.00, TEU_H * 0.22, stowHalf * 2 + 1.0), hatch);
+    hc.position.set(x, bayY + TEU_H * 0.11, 0);
     stack.add(hc);
-    for (let c = 0; c < cols; c++) {
+    for (let c = 0; c < nc; c++) {
       /* the wings come down: full height on the centreline, two tiers less at the rail */
-      const wing = Math.abs(c - (cols - 1) / 2) / ((cols - 1) / 2 || 1);
+      const wing = Math.abs(c - (nc - 1) / 2) / ((nc - 1) / 2 || 1);
       const high = Math.max(2, Math.round(centreHigh - wing * wing * 2.6));
       for (let h = 0; h < high; h++) {
-        const m = new THREE.Mesh(box, mats[(bay * 7 + c * 3 + h) % mats.length]);
-        m.position.set(x, deckY + TEU_H * (0.22 + h + 0.5),
-                       (c - (cols - 1) / 2) * TEU_W * 1.02);
+        const m = new THREE.Mesh(box, mats[(i * 7 + c * 3 + h) % mats.length]);
+        m.position.set(x, bayY + TEU_H * (0.22 + h + 0.5),
+                       (c - (nc - 1) / 2) * TEU_W * 1.02);
         stack.add(m);
       }
     }
-    /* a lashing bridge every third bay, two tiers high, spanning the full width */
-    if (bay % 3 === 2) {
+    /* a lashing bridge every third bay, two tiers high, spanning its own bay */
+    if (i % 3 === 2 && x < accX) {
       const lb = new THREE.Mesh(
-        new THREE.BoxGeometry(TEU_L * 0.10, TEU_H * 2.1, B * 0.88), lash);
-      lb.position.set(x + TEU_L * 0.55, deckY + TEU_H * 1.3, 0);
+        new THREE.BoxGeometry(TEU_L * 0.10, TEU_H * 2.1, stowHalf * 2 + 1.2), lash);
+      lb.position.set(x + TEU_L * 0.55, bayY + TEU_H * 1.3, 0);
       stack.add(lb);
     }
-  }
+  });
   group.add(tag(stack, 'container'));
 
   /* ── AND THE BOW OF A MOTOR SHIP IS A BULB ────────────────────────────────────────────
@@ -2727,22 +2769,133 @@ function buildContainers(S, group) {
   bulb.position.set(-L * 0.495, -S.draught * 0.62, 0);
   group.add(tag(bulb, 'bulb'));
 
-  /* the forecastle: mooring gear, windlass and the break of the deck, right forward */
+  /* the forecastle: mooring gear, windlass and the break of the deck, right forward.
+     ⚠ It was 36.8 m wide on a foredeck 24 m across, and centred on the AMIDSHIPS deck height
+     while the bow sheer had lifted the deck 1.7 m above that — a box overhanging both sides
+     and sunk in the deck at once. Width and height both come from its own station now. */
   const steelPale = new THREE.MeshStandardMaterial({ color: 0xc8c4bb, roughness: 0.62 });
-  const fc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.048, TEU_H * 1.1, B * 0.60), steelPale);
-  fc.position.set(-L * 0.455, H.sheer(0.5) + TEU_H * 0.55, 0);
+  const fcX = -L * 0.46;
+  const fcY = H.sheer(Math.max(0.001, 0.5 + fcX / L));
+  const fcHalf = Math.min(deckHalfAt(fcX - L * 0.022), deckHalfAt(fcX + L * 0.022)) - B * 0.012;
+  const fc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.044, TEU_H * 1.1, fcHalf * 2), steelPale);
+  fc.position.set(fcX, fcY + TEU_H * 0.55, 0);
   group.add(tag(fc, 'forecast'));
-
-  /* the accommodation block and the funnel above the engine, both right aft */
+  /* the foremast on it — navigation lights and the lookout's mast, the only thing standing
+     forward of the stow */
   const white = new THREE.MeshStandardMaterial({ color: 0xd8d8d4, roughness: 0.55 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x2a2d31, roughness: 0.6, metalness: 0.25 });
-  const hs = H.sheer(0.5);
-  const acc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, TEU_H * 7, B * 0.72), white);
-  acc.position.set(L * 0.345, hs + TEU_H * 3.5, 0);
-  group.add(tag(acc, 'bridge'));
-  const br = new THREE.Mesh(new THREE.BoxGeometry(L * 0.070, TEU_H * 1.1, B * 0.90), dark);
-  br.position.set(L * 0.345, hs + TEU_H * 7.5, 0);
-  group.add(tag(br, 'bridge'));
+  const fm = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.45, 12, 8), white);
+  fm.position.set(fcX, fcY + TEU_H * 1.1 + 6, 0);
+  group.add(tag(fm, 'mast', 'Foremast'));
+
+  /* ── THE ACCOMMODATION IS A TOWER THE CREW LIVE IN, WITH THE WHEELHOUSE ON TOP ───────
+     It was one blank white box with a dark lid, and — measured against her own stow — the lid
+     stood 18 m above the deck while the boxes amidships reached 21: THE BRIDGE COULD NOT SEE
+     OVER THE CARGO, which is the one constraint the card text states ("the bridge has to see
+     over a stack that may be twelve high"). So the tower's height is not styling: eight cabin
+     decks put the wheelhouse floor above the tallest stack, and the audit asserts it. Each
+     cabin deck shows as a row of lights — more wall than glass, the round-22 lesson — and the
+     bridge wings run out to the ship's own side, because a berthing officer needs to see the
+     hull touch the quay. */
+  const hs = deckY;
+  const glassM = new THREE.MeshStandardMaterial({ color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
+  const houseG = new THREE.Group();
+  const blockH = N_DECKS * DK;
+  const blk = new THREE.Mesh(new THREE.BoxGeometry(accL, blockH, accW), white);
+  blk.position.set(accX, hs + blockH / 2, 0);
+  houseG.add(blk);
+  /* the window bands, fore and aft faces, one per cabin deck; deck 0 is stores and stays
+     blank steel. Shared geometries — one band and one mullion, positioned many times. */
+  const bandG = new THREE.BoxGeometry(0.28, DK * 0.30, accW * 0.86);
+  const mullG = new THREE.BoxGeometry(0.34, DK * 0.32, 0.42);
+  const nMull = Math.round(accW * 0.86 / 2.3);
+  for (let d = 1; d < N_DECKS; d++) {
+    const wy = hs + d * DK + DK * 0.62;
+    for (const side of [-1, 1]) {
+      const fx = accX + side * accL / 2;
+      const band = new THREE.Mesh(bandG, glassM);
+      band.position.set(fx, wy, 0);
+      houseG.add(band);
+      for (let m = 0; m <= nMull; m++) {
+        const mull = new THREE.Mesh(mullG, white);
+        mull.position.set(fx, wy, -accW * 0.43 + (m / nMull) * accW * 0.86);
+        houseG.add(mull);
+      }
+    }
+  }
+  /* the stair towers, a glazed strip down each side wall */
+  const stairG = new THREE.BoxGeometry(2.2, blockH * 0.82, 0.28);
+  for (const side of [-1, 1]) {
+    const st = new THREE.Mesh(stairG, glassM);
+    st.position.set(accX - accL * 0.28, hs + blockH * 0.47, side * accW / 2);
+    houseG.add(st);
+  }
+  /* the wheelhouse, and the wings out to the ship's side */
+  const whH = DK * 1.15, whY = hs + blockH;
+  const wh = new THREE.Mesh(new THREE.BoxGeometry(accL * 0.80, whH, accW), white);
+  wh.position.set(accX, whY + whH / 2, 0);
+  houseG.add(wh);
+  const whGlass = new THREE.Mesh(new THREE.BoxGeometry(0.28, whH * 0.44, accW * 0.92), glassM);
+  whGlass.position.set(accX - accL * 0.40, whY + whH * 0.60, 0);
+  houseG.add(whGlass);
+  const nWm = Math.round(accW * 0.92 / 1.7);
+  for (let m = 0; m <= nWm; m++) {
+    const mull = new THREE.Mesh(mullG, white);
+    mull.position.set(accX - accL * 0.40, whY + whH * 0.60, -accW * 0.46 + (m / nWm) * accW * 0.92);
+    houseG.add(mull);
+  }
+  const wingSpan = B * 1.05;
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(accL * 0.34, 0.4, wingSpan), white);
+  wing.position.set(accX - accL * 0.23, whY + 0.2, 0);
+  houseG.add(wing);
+  /* the wing screens — the glass windbreak at each tip — and the struts that carry the
+     cantilever back to the house wall: a wing on nothing is the lid fault over again */
+  for (const side of [-1, 1]) {
+    const scr = new THREE.Mesh(new THREE.BoxGeometry(accL * 0.30, 1.15, 0.25), glassM);
+    scr.position.set(accX - accL * 0.23, whY + 1.0, side * (wingSpan / 2 - 0.3));
+    houseG.add(scr);
+    const run = wingSpan / 2 - accW / 2;
+    const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, Math.hypot(run, DK) * 1.02, 6), white);
+    strut.position.set(accX - accL * 0.23, whY - DK / 2, side * (accW / 2 + run / 2));
+    strut.rotation.x = side * Math.atan2(run, DK);
+    houseG.add(strut);
+  }
+  group.add(tag(houseG, 'bridge'));
+  /* the radar mast on the wheelhouse roof: the pole, the two radar bars turning above
+     everything, and a signal yard */
+  const mastG = new THREE.Group();
+  const mastX = accX + accL * 0.10, mastB = whY + whH;
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.38, 8, 8), white);
+  pole.position.set(mastX, mastB + 4, 0);
+  mastG.add(pole);
+  const barG = new THREE.BoxGeometry(0.35, 0.28, 3.6);
+  const bar1 = new THREE.Mesh(barG, dark); bar1.position.set(mastX, mastB + 8.2, 0); mastG.add(bar1);
+  const bar2 = new THREE.Mesh(barG, dark); bar2.position.set(mastX, mastB + 6.4, 0);
+  bar2.rotation.y = 0.6; mastG.add(bar2);
+  const yardM = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 7, 6), white);
+  yardM.rotation.x = Math.PI / 2;
+  yardM.position.set(mastX, mastB + 5.2, 0);
+  mastG.add(yardM);
+  group.add(tag(mastG, 'mast', 'Radar mast'));
+  /* the lifeboats, one each side in davits at the second cabin deck — the orange capsule is
+     the most recognisable safety fitting on any modern ship */
+  const boatM = new THREE.MeshStandardMaterial({ color: 0xcc5a24, roughness: 0.5 });
+  for (const side of [-1, 1]) {
+    const bG = new THREE.Group();
+    const by = hs + DK * 2.2, bz = side * (accW / 2 + 1.35);
+    const boat = new THREE.Mesh(new THREE.CapsuleGeometry(1.35, 6.2, 4, 10), boatM);
+    boat.rotation.z = Math.PI / 2;
+    boat.position.set(accX + accL * 0.06, by, bz);
+    bG.add(boat);
+    for (const dx of [-2.6, 2.6]) {
+      const dav = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.4, 0.3), white);
+      dav.position.set(accX + accL * 0.06 + dx, by + 1.7, side * (accW / 2 + 0.65));
+      dav.rotation.x = side * 0.38;
+      bG.add(dav);
+    }
+    group.add(tag(bG, 'boat', 'Lifeboat'));
+  }
+
   /* ⚠ THE FUNNEL WAS TWICE AS WIDE AS IT WAS TALL — 15.9 m across against 8.3 m high, which
      is a squat block, not a funnel. Found by the axis sweep, not by eye: nothing about this
      ship's profile made it obvious, and it had been shipping that way since the box boat was
@@ -2754,13 +2907,28 @@ function buildContainers(S, group) {
      an UPTAKE: it rises out of the engine casing, which is the after part of the accommodation
      block, and the whole column is continuous from the engine room to the sky. Build the casing
      and the funnel has something to stand on — which is also why a real one sits where it does. */
-  const casing = new THREE.Mesh(
-    new THREE.BoxGeometry(L * 0.052, TEU_H * 7.2, B * 0.30), white);
-  casing.position.set(L * 0.393, hs + TEU_H * 3.6, 0);
+  const casH = DK * 4;
+  const casing = new THREE.Mesh(new THREE.BoxGeometry(casL, casH, casW), white);
+  casing.position.set(casX, hs + casH / 2, 0);
   group.add(tag(casing, 'bridge'));
-  const fn = new THREE.Mesh(new THREE.BoxGeometry(L * 0.030, TEU_H * 5.6, B * 0.16), dark);
-  fn.position.set(L * 0.393, hs + TEU_H * 9.4, 0);
-  group.add(tag(fn, 'funnel', 'Funnel',
+  const fnG = new THREE.Group();
+  const fnH = 13;
+  const fn = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.6, fnH, 20), dark);
+  fn.scale.x = 1.6;
+  fn.position.set(casX, hs + casH + fnH / 2 - 1, 0);
+  fn.rotation.z = -0.05;                                // raked, the way an uptake leans aft
+  fnG.add(fn);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 2.7, 0.9, 20), lash);
+  cap.scale.x = 1.6;
+  cap.position.set(casX + 0.6, hs + casH + fnH - 1.2, 0);
+  cap.rotation.z = -0.05;
+  fnG.add(cap);
+  for (const dz of [-1.0, 1.0]) {
+    const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 2.2, 8), dark);
+    pipe.position.set(casX + 0.7, hs + casH + fnH - 0.4, dz);
+    fnG.add(pipe);
+  }
+  group.add(tag(fnG, 'funnel', 'Funnel',
     'The uptake from the main engine, carried high enough to keep exhaust clear of the bridge and the deck. On a box boat it stands abaft the accommodation because everything forward of that is cargo.'));
 }
 
@@ -3363,4 +3531,4 @@ function buildShip(S, opts) {
 }
 
 window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
-                      superellipseFullness };
+                      superellipseFullness, surfacePoint };

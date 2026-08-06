@@ -18,7 +18,10 @@ scratchpad/
 # docs/ carries the published copy; keeping the working copy out of git halves the repo.
 /web/fields/
 
-# frame-baseline scratch: `frames/` are the committed baselines, these two are per-run
+# frame-baseline scratch: `frames/` are the committed baselines, these are per-run
 # working directories and would otherwise be swept in by any `git add -A`.
+# _spin holds spin_capture.py surveys, _flap holds flap_test.py determinism probes.
 /Research/baselines/_current/
 /Research/baselines/_diff/
+/Research/baselines/_spin/
+/Research/baselines/_flap/

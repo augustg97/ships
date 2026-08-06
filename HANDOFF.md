@@ -444,3 +444,53 @@ and may remain.
    the fantail. Declare a `deckPark` count in data and audit it like containers.
 3. **yamato** (547), then titanic's tiers (stepped plates, no fronts).
 4. Sea-view spot check of every steel ship whose rail/deck/rudder changed this round.
+
+---
+
+## Round 26 — 2026-08-06 · landing the killed round, and the flap was never fonts
+
+**The 04:45 loop firing did the container ship and was killed at 50 minutes** — after the
+acceptances, before HANDOFF/commit/push. This round verified all of it and landed it. Nothing
+in it was taken on trust: audit re-run (25/25), ratchet re-run, spin captures looked at from
+four bearings, hull.js diff read.
+
+**What the killed round built (container, 399 tris/m → the rebuild):** the stow, hatch covers
+and forecastle are lofted from the hull's own half-breadth at their own stations — at bay 0 the
+deck is 35 m across and the old constant-width cover was 53, four columns of boxes over open
+water from every bow bearing. Bays are laid around the house, not the reverse (that order is
+how a 30 m gap of bare deck opened last time). Stack height is CAPPED BY THE BRIDGE — the
+wheelhouse floor stands above the tallest box forward of it, which is the one constraint the
+ship's own card states. Eight cabin decks with mullioned window bands, stair towers, bridge
+wings out to the ship's side ON STRUTS, lifeboat capsules in davits, radar mast, raked
+elliptical funnel on the engine casing. Two new audit rules (18 total): cargo may not pass the
+hull side at its own station; the bridge must see over the stow.
+
+**The frame flap: round 25 blamed fonts, and there are no fonts to blame.** The stylesheet has
+no @font-face — the serif stack is all local (Iowan Old Style, Palatino, Georgia), so
+`document.fonts.status` is 'loaded' trivially and the ready-expr clause is a no-op. The real
+mechanism: CSS transitions run on the browser's wall clock, which `?frozen` never touched.
+`.lbl` carries `transition:opacity .35s` — every capture caught the sea/port labels at a
+different point of their fade, which is exactly the "label halos" in the globe-default diffs.
+The killed round's fix (frozen mode injects `*{transition:none;animation:none}`) is the right
+class fix. Proof this round: `Research/flap_test.py` (new tool) captures a frame twice in fresh
+pages and diffs the runs against each other — globe-default, descent, descent-high all
+**0.000% run-to-run**. Their baselines held pre-freeze mid-fade states; accepted as one-time
+settles, reasons in FRAME-LOG. Ratchet now fully green.
+
+**Two new repeatable tools** from the killed round, kept: `Research/spin_capture.py` (eight
+bearings + four low ones — the survey that catches what one baseline bearing cannot) and
+`Research/run_audit.py` (the audit without hand-driving the browser). Plus this round's
+`flap_test.py`. `_spin/` and `_flap/` are now gitignored scratch, like `_current/`.
+
+⚠ **The loop has now killed two consecutive rounds at 50 minutes.** A vessel rebuild plus
+full verification does not fit the watchdog. Either raise the watchdog past the ratchet's
+~8-minute runs, or split rounds: build one firing, verify-and-land the next. This round WAS
+the second half of that split, done by hand.
+
+### Next, in order
+1. **carrier, the deck park** — she still carries no aircraft, and a bare deck is the one
+   thing left that does not resemble the ship. Real dimensions (an 18 m fighter), parked clear
+   of the angled deck and foul line: starboard bow (z +0.28–0.42 deckW), the street aft of the
+   island, the fantail. Declare a `deckPark` count in data and audit it like containers.
+2. **yamato** (547 tris/m), then **titanic's tiers** (stepped plates, no fronts).
+3. Sea-view spot check of every steel ship whose rail/deck/rudder changed in round 25.

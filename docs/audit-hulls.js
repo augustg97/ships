@@ -221,6 +221,42 @@
             `deck slab from ${part.flightdeck.y[0].toFixed(1)}, sheer ${deckY.toFixed(1)}`);
     }
 
+    /* ⚠ THE DECK NARROWS AND THE CARGO MUST NARROW WITH IT. Found by the spin survey from
+       every bow bearing of the container ship: the hatch covers, the forecastle and the outer
+       container columns stood at one constant width on a hull whose deck tapers to the stem —
+       up to 9 m past the ship's side at their own station, over open water. The beam-limit
+       rule above cannot see it: B*0.52 is generous amidships and wrong at the bow. So ask at
+       each part's OWN station, against the hull's own half-breadth, from the same
+       surfacePoint the builder lofts from — one derivation of the edge. */
+    if (part.container || part.forecast) {
+      const H2 = SHIPS_HULL.hullSurface(H);
+      let over = 0, worst = 0;
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        const p = tagOf(o);
+        if (!p || (p.key !== 'container' && p.key !== 'forecast')) return;
+        const bb = new THREE.Box3().setFromObject(o);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bb.min.x + bb.max.x) / 2) / H.lwl));
+        const allow = Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1.0)[2]) +
+                      Math.max(1.5, H.beam * 0.033);
+        const z = Math.max(-bb.min.z, bb.max.z);
+        if (z > allow) { over++; worst = Math.max(worst, z - allow); }
+      });
+      if (over) say(v.id, 'cargo off the deck edge',
+                    `${over} meshes reach up to ${worst.toFixed(1)} m past the hull side at their own station`);
+    }
+
+    /* ⚠ THE BRIDGE MUST SEE OVER THE STOW. The ship's own card says it — "the bridge has to
+       see over a stack that may be twelve high" — and the model broke it: the stack amidships
+       reached 21.3 m above deck and the top of the house 18.1, a ship that could not be
+       conned. The wheelhouse roof stands clear above the tallest box, and this asserts the
+       clearance rather than the styling. */
+    if (H.containers && part.container && part.bridge &&
+        part.container.y[1] > part.bridge.y[1] - 2.0)
+      say(v.id, 'the bridge cannot see over the stow',
+          `stack top ${(part.container.y[1] - deckY).toFixed(1)} m above deck, ` +
+          `house top ${(part.bridge.y[1] - deckY).toFixed(1)} m`);
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

@@ -4,3 +4,18 @@
   by itself at the next firing. Nothing else is needed.
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 03:44:53  round starting
+  round overran 50 min — killing
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-06 04:35:03  round finished; HEAD is 7247369 Round 25 baselines, last frame: aboard-off is the container ship's own steel rail
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 04:45:03  round starting
+  round overran 50 min — killing
+Execution error  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-06 05:35:11  round finished; HEAD is 7247369 Round 25 baselines, last frame: aboard-off is the container ship's own steel rail
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 05:45:11  round starting
+The build gate is confirmed as the publication route. Everything is staged: the killed round's container rebuild is verified (audit 25/25, four spin bearings inspected, sea view inspected), the three flapping frames are diagnosed (CSS transitions on the browser's wall clock, not fonts), proven deterministic at 0.000% run-to-run, and re-accepted with reasons. HANDOFF has the Round 26 entry and the new scratch dirs are gitignored. Once the ratchet confirms a green board, I'll run the build, commit, push, and verify the live stamp.
+2026-08-06 06:03:39  round finished; HEAD is 7247369 Round 25 baselines, last frame: aboard-off is the container ship's own steel rail
+/Users/augustgweon/Ships/build/loop-round.sh: line 74: 40984 Terminated: 15          ( sleep 3000; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 50 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 06:13:39  round starting

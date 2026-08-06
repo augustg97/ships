@@ -292,6 +292,19 @@ const FROZEN_S = FROZEN
   ? (parseFloat(new URLSearchParams(location.search).get('frozen')) || 0)
   : 0;
 function clockS() { return FROZEN ? FROZEN_S : performance.now() / 1000; }
+/* ⚠ CSS RUNS ON A CLOCK THE FREEZE NEVER TOUCHED. clockS() pins every render-loop clock,
+   but a CSS transition interpolates against the browser's own wall time — so a flyout still
+   slides, a row still fades, and two captures of identical code catch the same element a few
+   pixels apart. That is the voyage-card ghost that survived the round-25 fonts clause: the
+   diff showed one row of the list twice, offset by half a line, in three frames that have no
+   ship in common. Frozen means EVERY clock, so frozen kills the CSS ones too. */
+if (FROZEN) {
+  const still = document.createElement('style');
+  still.textContent =
+    '*,*::before,*::after{transition:none !important;animation:none !important;' +
+    'scroll-behavior:auto !important}';
+  document.head.appendChild(still);
+}
 
 /* The signal the capture harness waits on. Set once, after something has actually been
  * painted — not after DOMContentLoaded, which is true long before the globe exists.
