@@ -389,6 +389,10 @@ function applyHashView() {
     let tries = 0;
     const wantId = fm[1].toLowerCase();
     const board = () => {
+      /* ⚠ and not before the terrain has finished streaming, because which way this view
+         faces is decided from the elevation raster. Boarding on level 0 and letting level 2
+         arrive afterwards leaves the camera pointed by data that is no longer on screen. */
+      if (!upgradesDone) { if (++tries < 900) requestAnimationFrame(board); return; }
       const all = (APP.voyages && APP.voyages.voyages) || [];
       const v = all.find(x => String(x.id).toLowerCase() === wantId);
       const tr = v && eraTracks.find(t => t.name === v.name);
@@ -1897,7 +1901,17 @@ function pumpFleetQueue(budgetMs) {
   const t0 = performance.now();
   const list = fleetQueueList;
   const RTc = window.SHIPS_ROUTE;
-  const sig = (RTc && RTc.FINE && RTc.FINE.sig) || '';
+  /* ⚠ AND THE KEY MUST CARRY THE RASTER LEVEL. FINE.sig is the datum and which canals exist —
+     both real dependencies, and both incomplete. The terrain streams in behind the first paint,
+     so a track routed before the upgrade was planned on the 19.5 km level-0 coastline and one
+     routed after on the 4.9 km level-2 one. Those are different tracks of different LENGTH, so
+     the voyage's period differs and the ship is somewhere else at the same frozen instant.
+     Measured: the aboard frame put the Great Western at 51 deg 16' N in one run and 50 deg 11'
+     N in the next — 120 km apart, 84% of pixels different, with no code change between them.
+     The mask upgrade already rebuilds the fleet; it could not help while the cache handed back
+     the old answer. */
+  const sig = ((RTc && RTc.FINE && RTc.FINE.sig) || '') +
+              '|L' + (RTc && RTc.FINE ? RTc.FINE.level : -1);
   while (fleetQueue.length && performance.now() - t0 < budgetMs) {
     const item = fleetQueue[0];
     if (item.legsR === undefined) {
@@ -2088,9 +2102,20 @@ function landward(at) {
         if (APP.depthCanvasByLevel && RT.FINE.level >= 0) {
           const cv = APP.depthCanvasByLevel[RT.FINE.level];
           if (cv) {
-            if (!landward._cx) { landward._cx = cv.getContext('2d', { willReadFrequently: true });
-                                 landward._img = landward._cx.getImageData(0, 0, cv.width, cv.height).data;
-                                 landward._w = cv.width; landward._h = cv.height; }
+            /* ⚠ KEYED ON THE PYRAMID LEVEL. This cached the pixels on first call and kept
+               them — but the terrain streams in behind the first paint, so whether the
+               snapshot was the 19.5 km level-0 raster or the 4.9 km level-2 one depended on
+               how quickly the machine got there. A coarse raster gives a different nearest
+               land, which gives a different bearing, which points the whole close-up somewhere
+               else: measured, the aboard frame came back 81% different between a solo capture
+               and one taken during a full run. That was the "flap" — not a subtle one at all
+               once it was looked at in the right place. */
+            if (landward._lvl !== RT.FINE.level) {
+              landward._lvl = RT.FINE.level;
+              landward._cx = cv.getContext('2d', { willReadFrequently: true });
+              landward._img = landward._cx.getImageData(0, 0, cv.width, cv.height).data;
+              landward._w = cv.width; landward._h = cv.height;
+            }
             const x = Math.min(landward._w - 1,
                      Math.floor((((lo + 180) % 360) + 360) % 360 / 360 * landward._w));
             const y = Math.max(0, Math.min(landward._h - 1,
