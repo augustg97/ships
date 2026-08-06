@@ -530,6 +530,11 @@ meta, the other just "OCEAN STEAMER" — `refreshFleetList` writes the position 
 unthrottled, so the first painted frame already carries the settled text. (Round 26's CSS
 freeze was real but was the OTHER half of the class.)
 
+After the fix the ratchet proved it: descent and aboard went GREEN on their own (0.022% /
+0.017%), and the frames whose baselines held the un-settled text — globe-crossing,
+aboard-off, aboard-coast — moved once by exactly the list and nothing else, each looked at
+and accepted as one-time settles. Final board: all frames within tolerance.
+
 ### Next, in order
 1. **yamato** (547 tris/m) — and note: `buildTurrets` points forward turrets' guns toward
    +x, which is the STERN (bow is -x; the carrier's catapults prove the convention). Check
