@@ -361,3 +361,36 @@ Both classes are now audit rules (13 rules; all 25 hulls pass).
 2. **yamato, titanic, dreadnought** — the boxy-superstructure family.
 3. Titanic's tiers still read as stepped plates rather than a house with real fronts.
 4. Container ship's accommodation block is still a plain white box.
+
+**Round 24 — the carrier, and why the loop kept not running.**
+
+The carrier's island was one box and one cylinder. Rebuilt as what an island actually is — the
+only part of a carrier allowed to be tall, so its shape is a list of everything that cannot go
+under an armoured flat deck: navigating bridge low and forward, flying control above and aft
+where a controller can see the landing area and the round-down behind him, uptakes carried up
+through the middle, a mast whose job is height for the radar. Three stepped tiers each standing
+on the one below, glass where the bridge and pri-fly are, two uptakes, four fixed radar faces,
+mast with yardarms. 54 meshes to 66; no floating parts; audit clean.
+
+⚠ The flight deck was NOT the reason it ranked crudest — markings, arrestor wires, catapult
+tracks and flush lifts were all already there. Worth checking what is actually missing before
+rebuilding what is not.
+
+**THE LOOP: three mechanisms tried, and why each failed.**
+1. `ScheduleWakeup` — set for 18:05, never fired.
+2. `CronCreate` at */10 — eighteen consecutive firings missed over three hours.
+   Both are session-only and fire only while the REPL is idle, which this environment never is.
+3. A cloud schedule cannot help: this work needs the local repo, the :8149 server and the
+   Playwright frame harness, none of which exist there.
+
+So: a local launchd agent, `~/Library/LaunchAgents/com.august.ships-loop.plist`, 600 s interval,
+running `build/loop-round.sh` which runs `claude -p` against `build/loop-prompt.md`. Loaded.
+⚠ It is BLOCKED on credentials — `claude -p` returns "OAuth session expired and could not be
+refreshed" because the CLI's token lives with the desktop session and a background process
+cannot refresh it. The script checks this first and logs what to do rather than failing
+silently. Once `claude` is run once interactively and signed in, the next firing starts work.
+Two smaller things the smoke test caught: macOS has no `timeout` (background watchdog instead),
+and rounds outlast the interval (atomic lock dir, 90-minute staleness clear).
+
+Next vessel: **container** (399 tris/m) — accommodation block is still a plain white box —
+then **yamato** (547).

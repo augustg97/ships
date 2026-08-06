@@ -2253,14 +2253,70 @@ function buildFlightDeck(S, group, mats) {
       'Angled about nine degrees to port so an aircraft that misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward. It is what made jet operation possible.'));
   }
 
-  /* the island: small, and to STARBOARD */
+  /* ── THE ISLAND, WHICH WAS A BOX AND A STICK ──────────────────────────────────────
+     The survey ranked this ship crudest in the fleet — 337 metres of it in fifty-four meshes —
+     and the flight deck was not the reason: its markings, wires, catapults and flush lifts
+     were all there. It was the island, drawn as one slab with a cylinder on top.
+     An island is the only part of a carrier that is allowed to be tall, so everything that
+     cannot go under an armoured flat deck is stacked into it, and its shape is a list of those
+     things: navigating bridge low and forward where the ship is conned; flying control ABOVE
+     and AFT, where a controller can see the landing area and the round-down behind him; the
+     uptakes from eight boilers or two reactors carried up through the middle; and a mast whose
+     job is height for the radar. Each level steps in from the one below because each carries
+     less, and because the whole tower has to keep its weight off the deck edge.
+     Everything below is built to touch the piece under it — the survey's other finding this
+     round was a funnel attached to nothing, and a tower is exactly where that happens. */
   const isl = new THREE.Group();
-  const box = new THREE.Mesh(new THREE.BoxGeometry(L * 0.10, B * 0.28, deckW * 0.10), dark);
-  box.position.y = B * 0.14;
-  isl.add(box);
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.006, B * 0.010, B * 0.30, 8), dark);
-  mast.position.y = B * 0.42;
+  const glassI = new THREE.MeshStandardMaterial({ color: 0x6a757f, roughness: 0.35, metalness: 0.30 });
+  const radarM = new THREE.MeshStandardMaterial({ color: 0xb9b2a4, roughness: 0.72 });
+  const islW = deckW * 0.105;
+  /* the tiers, each standing on the one below: length, width, height, and how far aft it sits */
+  const tiers = [[L * 0.115, islW,        B * 0.155, 0.0],
+                 [L * 0.090, islW * 0.90, B * 0.105, -L * 0.006],
+                 [L * 0.052, islW * 0.78, B * 0.080, -L * 0.014]];
+  let yy = 0;
+  tiers.forEach((t, ti) => {
+    const blk = new THREE.Mesh(new THREE.BoxGeometry(t[0], t[2], t[1]), dark);
+    blk.position.set(t[3], yy + t[2] / 2, 0);
+    isl.add(blk);
+    /* the bridge and flying control are mostly glass — that is what they are FOR */
+    if (ti >= 1) {
+      const win = new THREE.Mesh(
+        new THREE.BoxGeometry(t[0] * 0.94, t[2] * 0.34, t[1] * 1.02), glassI);
+      win.position.set(t[3], yy + t[2] * 0.66, 0);
+      isl.add(win);
+    }
+    yy += t[2];
+  });
+  /* the uptakes, carried up through the after end of the tower */
+  for (const zz of [-islW * 0.22, islW * 0.22]) {
+    const up = new THREE.Mesh(
+      new THREE.BoxGeometry(L * 0.020, B * 0.115, islW * 0.34), dark);
+    up.position.set(L * 0.038, tiers[0][2] + B * 0.0575, zz);
+    isl.add(up);
+  }
+  /* the flat radar arrays, fixed to the tower's faces — no rotating dish, which is the
+     single most recognisable thing about a modern warship's upperworks */
+  for (const f of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    const pan = new THREE.Mesh(
+      new THREE.BoxGeometry(f[0] ? L * 0.008 : L * 0.055, B * 0.058,
+                            f[0] ? islW * 0.62 : islW * 0.06), radarM);
+    pan.position.set(-L * 0.006 + f[0] * L * 0.046, tiers[0][2] + B * 0.052,
+                     f[1] * islW * 0.47);
+    pan.rotation.z = f[0] * 0.10;
+    isl.add(pan);
+  }
+  const mastTop = tiers.reduce((a, t) => a + t[2], 0);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.005, B * 0.011, B * 0.26, 8), dark);
+  mast.position.set(-L * 0.014, mastTop + B * 0.13, 0);
   isl.add(mast);
+  for (const yq of [0.10, 0.19]) {
+    const yard = new THREE.Mesh(
+      new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, islW * (1.05 - yq * 2.0), 6), dark);
+    yard.rotation.x = Math.PI / 2;
+    yard.position.set(-L * 0.014, mastTop + B * yq, 0);
+    isl.add(yard);
+  }
   isl.position.set(L * 0.06, y + B * 0.022, deckW * 0.40);
   group.add(tag(isl, 'island', 'The island',
     'Everything that cannot be under the deck: bridge, flying control, uptakes and radar. It is to starboard because a going-around aircraft swings to port.'));
