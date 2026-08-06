@@ -394,3 +394,53 @@ and rounds outlast the interval (atomic lock dir, 90-minute staleness clear).
 
 Next vessel: **container** (399 tris/m) — accommodation block is still a plain white box —
 then **yamato** (547).
+
+---
+
+## Round 25 — 2026-08-06 · the fittings follow the build
+
+**Round 24 said the carrier was done, and from seven of eight bearings she was not.** The island
+rebuild was verified from the one baseline bearing only. Spinning her (`SW.shipSpin`, eight
+captures) showed: a timber barn-door RUDDER hung on the sternpost, 17.5 m past the transom of a
+nuclear carrier and 4 m out of the water, in timber brown — those were the "bronze wedges" in
+the stern-quarter capture; a timber TRANSOM, timber RAIL and planked timber weather deck under
+the flight deck; the flight deck a slab FLOATING over the hull, open air visible straight
+through below it from any low bearing; and the island's "glass" reading as a 17 m cream stripe.
+
+**The class, not the instance: every hull got the timber-era fittings regardless of
+`build`.** Fixed in `buildShip` and friends, keyed off `S.build`:
+* steel/iron builds get a steel backbone (keel, frames, posts — the stage card always said
+  "STEEL: FRAMES, THEN WELDED PLATE"), steel rail, steel transom in the topside's paint.
+* the weather deck keys off what the DECK was, not the hull: Titanic and Yamato stay planked
+  (teak, hinoki — correct), a flight deck and a container ship's deck are bare steel.
+* a motor ship's rudder is a BALANCED plate under the counter, wholly below the waterline and
+  inside her own length — the stern-hung barn door is now timber-builds only.
+* declared `screws` are drawn (bronze, five blades, shafts into the run) — `screws: 4` added to
+  the carrier's data. Below water, so visible mainly in the dry-dock stages.
+* flight-deck ships get the HANGAR AND GALLERY casing, lofted from the hull's own half-breadth
+  at the sheer, hull to deck slab, with bay openings under the deck-edge lifts. The deck no
+  longer floats.
+* the island: glass is now dark panes behind mullions (the round-22 liner lesson — and the
+  sternlight glass already knew the recipe); the cream stripe was actually the RADAR strip,
+  found by raycasting the bright pixels — a SPY array face is ~4 m, not 17, and panel grey.
+
+**Three new audit rules** (16 total; all 25 hulls pass): steel/iron rudders stay below the
+waterline and inside the stern; declared screws must be drawn and stay wet; a flight deck must
+stand on a hangar casing that spans sheer-to-slab. Carrier: 66 → 123 meshes, 385 → 391 tris/m.
+
+**The flap has a second cause, and it is fonts.** globe-default moved 1.016% and the diff was
+nothing but label halos; aboard-off and descent showed voyage lists and cards ghosted a few
+pixels off. Each frame opens a COLD page; a capture before the serif arrives rasterises every
+label in the fallback font. The harness ready expr now also requires
+`document.fonts.status === 'loaded'` (frames.json). The water-flap class (round 22) is separate
+and may remain.
+
+### Next, in order
+1. **container** (399 tris/m) — the accommodation block is still a plain white box; also her
+   new steel deck/rail from this round should be looked at from all angles, not one.
+2. **carrier, the deck park** — she still carries no aircraft, and a bare deck is the one thing
+   left that does not resemble the ship. Real dimensions (an 18 m fighter), parked clear of the
+   angled deck and foul line: starboard bow (z +0.28–0.42 deckW), the street aft of the island,
+   the fantail. Declare a `deckPark` count in data and audit it like containers.
+3. **yamato** (547), then titanic's tiers (stepped plates, no fronts).
+4. Sea-view spot check of every steel ship whose rail/deck/rudder changed this round.

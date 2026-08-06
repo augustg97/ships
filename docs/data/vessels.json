@@ -3021,6 +3021,7 @@
     "cm": 0.97,
     "transom": 0.34,
     "flightDeck": 78.0,
+    "screws": 4,
     "decks": 2
    }
   },

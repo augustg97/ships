@@ -186,6 +186,41 @@
                              `${adrift.length} of ${parts.length} meshes touch no other part`);
     }
 
+    /* ⚠ A MOTOR SHIP'S RUDDER IS UNDER THE COUNTER, AND THE FITTINGS FOLLOW THE BUILD.
+       Found on the carrier from her stern quarter: the timber-era barn door hung on the
+       sternpost stood 17 m past a nuclear carrier's transom and 4 m out of the water, in
+       timber brown. No baseline bearing looks at the stern, so the ratchet sat green for as
+       long as the ship has existed. On a steel or iron build the rudder stays below the
+       waterline and inside the ship's own length. */
+    if ((H.build === 'steel' || H.build === 'iron') && part.rudder) {
+      if (part.rudder.y[1] > 0.5)
+        say(v.id, 'rudder out of the water',
+            `top at ${part.rudder.y[1].toFixed(1)} m on a ${H.build} build`);
+      if (part.planking && part.rudder.x[1] > part.planking.x[1] + H.loa * 0.01)
+        say(v.id, 'rudder hung past the stern',
+            `${(part.rudder.x[1] - part.planking.x[1]).toFixed(1)} m beyond the hull`);
+    }
+
+    /* declared screws must be drawn, and a screw lives under water */
+    if (H.screws) {
+      if (!part.screw) say(v.id, 'declared but not drawn', 'screws');
+      else if (part.screw.y[1] > 0)
+        say(v.id, 'screws out of the water', `top at ${part.screw.y[1].toFixed(1)} m`);
+    }
+
+    /* ⚠ A FLIGHT DECK STANDS ON A HANGAR, NOT ON AIR. The deck was a slab floating over the
+       hull — from any low bearing you saw under it, across open air, to the sea on the far
+       side. The casing must exist and must span the gap from the sheer to the slab. */
+    if (H.flightDeck) {
+      if (!part.hangar) say(v.id, 'flight deck stands on air', 'no hangar casing built');
+      else if (part.flightdeck &&
+               (part.hangar.y[1] < part.flightdeck.y[0] - 1.0 ||
+                part.hangar.y[0] > deckY + 1.0))
+        say(v.id, 'hangar does not span the gap',
+            `casing ${part.hangar.y[0].toFixed(1)}–${part.hangar.y[1].toFixed(1)} m, ` +
+            `deck slab from ${part.flightdeck.y[0].toFixed(1)}, sheer ${deckY.toFixed(1)}`);
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

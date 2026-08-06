@@ -314,13 +314,23 @@ function buildWaleGeometry(S, v0, thick) {
 function buildRudderGeometry(S) {
   const H = hullSurface(S);
   const p = surfacePoint(S, H, 1.0, 0);
-  const top = H.sheer(1.0) * 0.35;
-  const depth = -S.draught * 0.92;
-  const w = 0.030 * S.beam, chord = S.lwl * 0.055;
+  const STEEL = S.build === 'steel' || S.build === 'iron';
+  /* ⚠ A MOTOR SHIP'S RUDDER IS UNDER THE COUNTER, NOT HUNG PAST THE STERNPOST. The
+     stern-hung plate below is a timber shape — pintles down the post, a barn door standing
+     proud of the stern. On the carrier it stood 17 m past the transom and 4 m out of the
+     water, in timber brown, and no baseline bearing could see it. A steel ship gets a
+     balanced plate tucked wholly below the waterline and inside her own length. */
+  const top = STEEL ? -S.draught * 0.08 : H.sheer(1.0) * 0.35;
+  const depth = -S.draught * (STEEL ? 0.95 : 0.92);
+  const w = 0.030 * S.beam * (STEEL ? 0.45 : 1.0);
+  const chord = S.lwl * (STEEL ? 0.035 : 0.055);
   const pos = [], idx = [];
   /* a plate on the sternpost: wider at the foot, raked with the post */
-  const pts = [[p[0], top], [p[0] + chord * 0.55, top],
-               [p[0] + chord, depth], [p[0], depth]];
+  const pts = STEEL
+    ? [[p[0] - chord * 1.6, top], [p[0] - chord * 0.6, top],
+       [p[0] - chord * 0.75, depth], [p[0] - chord * 1.45, depth]]
+    : [[p[0], top], [p[0] + chord * 0.55, top],
+       [p[0] + chord, depth], [p[0], depth]];
   pts.forEach(q => pos.push(q[0], q[1], -w, q[0], q[1], w));
   for (let i = 0; i < 4; i++) {
     const a = i * 2, b = ((i + 1) % 4) * 2;
@@ -1330,6 +1340,14 @@ const PARTS = {
               what: 'Everything that cannot go under the flight deck: bridge, flying control, '
                   + 'uptakes and radar. Small, and to starboard, because a going-around aircraft '
                   + 'swings to port.' },
+  hangar:   { stage: 4, name: 'Hangar and gallery decks',
+              what: 'The space between the hull and the flight deck is built, not air: the '
+                  + 'hangar bays and the gallery decks around them. The deck-edge lifts open '
+                  + 'into it, which is why its sides are doors.' },
+  screw:    { stage: 3, name: 'Screw',
+              what: 'Manganese bronze, below the waterline — the one golden thing on a grey '
+                  + 'hull, and what she has instead of everything the sailing fleet carried '
+                  + 'aloft. Visible only in dry dock, which is where the Shipwright builds her.' },
   turret:   { stage: 4, name: 'Main battery',
               what: 'The turret revolves on a barbette — an armoured cylinder running down to the '
                   + 'magazine. Mounted on the centreline and superfiring, one raised behind '
@@ -1588,7 +1606,11 @@ function buildFittings(S, group, mats) {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setIndex(idx); g.computeVertexNormals();
-    group.add(tag(new THREE.Mesh(g, pale), 'rail'));
+    /* on a steel ship the capping is a steel bulwark rail, in the topside's company */
+    const railMat = (S.build === 'steel' || S.build === 'iron')
+      ? new THREE.MeshStandardMaterial({ color: 0x4a5057, roughness: 0.58, metalness: 0.42 })
+      : pale;
+    group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
   }
 
   /* ── HATCH GRATINGS: a lattice, because that is what they are ─────────────────────── */
@@ -2220,6 +2242,58 @@ function buildBoats(S, group, mats) {
   }
 }
 
+/* ── THE SCREWS ─────────────────────────────────────────────────────────────────────────
+ * Below the waterline, so afloat they are invisible — but the Shipwright builds her DRY,
+ * stage by stage, and a motor ship in dry dock with a bare run aft is missing the machinery
+ * that makes her a motor ship. Drawn only where the data declares them (S.screws), because a
+ * guessed screw count is a claim about a real ship's engine room. Manganese bronze, which is
+ * why they are the one golden thing on a grey hull.
+ */
+function buildScrews(S, group) {
+  const n = S.screws || 0;
+  if (!n) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam, D = S.draught;
+  const p = surfacePoint(S, H, 1.0, 0);
+  const bronze = new THREE.MeshStandardMaterial({ color: 0xa8845c, roughness: 0.38,
+                                                  metalness: 0.82 });
+  const r = Math.min(D * 0.55, B * 0.20) / 2;
+  const y = -D * 0.62;
+  const zs = n === 1 ? [0]
+           : n === 2 ? [-B * 0.16, B * 0.16]
+           : n === 3 ? [0, -B * 0.18, B * 0.18]
+           :           [-B * 0.10, B * 0.10, -B * 0.23, B * 0.23];
+  const bladeGeo = new THREE.SphereGeometry(1, 8, 6);
+  zs.forEach((z, i) => {
+    const scr = new THREE.Group();
+    /* outboard shafts emerge from the run further forward than the inboard pair */
+    const x = p[0] - L * (Math.abs(z) > B * 0.12 ? 0.085 : 0.060);
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.14, r * 0.20, r * 0.55, 8),
+                               bronze);
+    hub.rotation.z = Math.PI / 2;
+    scr.add(hub);
+    for (let b = 0; b < 5; b++) {
+      const arm = new THREE.Group();
+      const bl = new THREE.Mesh(bladeGeo, bronze);
+      bl.scale.set(r * 0.16, r * 0.52, r * 0.34);
+      bl.position.y = r * 0.55;
+      bl.rotation.y = 0.55;                       // the pitch, which is what a screw IS
+      arm.add(bl);
+      arm.rotation.x = b * Math.PI * 2 / 5;
+      scr.add(arm);
+    }
+    /* the shaft, running forward into the run */
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.10, r * 0.10, L * 0.035, 6),
+                                 bronze);
+    shaft.rotation.z = Math.PI / 2;
+    shaft.position.x = -L * 0.0175;
+    scr.add(shaft);
+    scr.position.set(x, y, z);
+    group.add(tag(scr, 'screw', 'Screw',
+      'Manganese bronze, below the waterline. What she has instead of everything the sailing fleet carries aloft.'));
+  });
+}
+
 function buildFlightDeck(S, group, mats) {
   if (!S.flightDeck) return;
   const H = hullSurface(S);
@@ -2240,6 +2314,57 @@ function buildFlightDeck(S, group, mats) {
   fd.position.set(0, y, 0);
   group.add(tag(fd, 'flightdeck', 'Flight deck',
     'It overhangs the hull on both sides — which is why a carrier\'s waterline beam and its flight-deck beam are entirely different numbers.'));
+
+  /* ── ⚠ THE DECK WAS A SLAB FLOATING OVER THE HULL ──────────────────────────────────
+     From any low bearing you could see under the flight deck, across open air, to the sea
+     on the far side: nothing connected the deck to the sheer. On the ship that space is
+     BUILT — the hangar and the gallery decks — and the overhang is only ever at the edges.
+     Lofted from the hull's own half-breadth, so the casing cannot disagree with the sheer
+     it stands on. */
+  const caseMat = new THREE.MeshStandardMaterial({ color: 0x363b41, roughness: 0.72,
+                                                   metalness: 0.30, side: THREE.DoubleSide });
+  const hg = new THREE.Group();
+  const NUH = 36, u0 = 0.05, u1 = 0.95;
+  const yTopC = y - B * 0.020;
+  const hzAt = u => Math.abs(surfacePoint(S, H, u, 1.0)[2]) * 0.995;
+  for (const sgn of [-1, 1]) {
+    const pos2 = [], idx2 = [];
+    for (let i = 0; i <= NUH; i++) {
+      const u = u0 + (i / NUH) * (u1 - u0);
+      const sp = surfacePoint(S, H, u, 1.0);
+      pos2.push(sp[0], sp[1] - B * 0.012, sgn * hzAt(u),
+                sp[0], yTopC,             sgn * hzAt(u));
+    }
+    for (let i = 0; i < NUH; i++) {
+      const a = i * 2;
+      idx2.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+    }
+    const wg = new THREE.BufferGeometry();
+    wg.setAttribute('position', new THREE.Float32BufferAttribute(pos2, 3));
+    wg.setIndex(idx2); wg.computeVertexNormals();
+    hg.add(new THREE.Mesh(wg, caseMat));
+  }
+  /* the casing's ends, closed across the hull */
+  for (const ue of [u0, u1]) {
+    const spe = surfacePoint(S, H, ue, 1.0);
+    const cap = new THREE.Mesh(
+      new THREE.BoxGeometry(L * 0.004, yTopC - (spe[1] - B * 0.012), 2 * hzAt(ue)), caseMat);
+    cap.position.set(spe[0], (yTopC + spe[1] - B * 0.012) / 2, 0);
+    hg.add(cap);
+  }
+  /* the hangar bay openings, flush in the casing side — under the deck-edge lifts to
+     starboard, because that is where the aircraft actually pass */
+  const openMat = new THREE.MeshStandardMaterial({ color: 0x14171b, roughness: 0.92 });
+  for (const [uo, sgn] of [[0.30, 1], [0.62, 1], [0.44, -1]]) {
+    const spo = surfacePoint(S, H, uo, 1.0);
+    const gapH = yTopC - (spo[1] - B * 0.012);
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(L * 0.045, gapH * 0.55, B * 0.006), openMat);
+    door.position.set(spo[0], spo[1] + gapH * 0.42, sgn * (hzAt(uo) + B * 0.002));
+    hg.add(door);
+  }
+  group.add(tag(hg, 'hangar', 'Hangar and gallery decks',
+    'The space between the hull and the flight deck is built, not air: the hangar bays and the gallery decks around them. The deck-edge lifts open into it, which is why its sides are doors.'));
 
   /* ⚠ The angled deck was drawn as a FILLED white box 15.6 m across, which is a painted
      runway and not what a carrier looks like from anywhere. The landing area is marked by
@@ -2267,8 +2392,14 @@ function buildFlightDeck(S, group, mats) {
      Everything below is built to touch the piece under it — the survey's other finding this
      round was a funnel attached to nothing, and a tower is exactly where that happens. */
   const isl = new THREE.Group();
-  const glassI = new THREE.MeshStandardMaterial({ color: 0x6a757f, roughness: 0.35, metalness: 0.30 });
-  const radarM = new THREE.MeshStandardMaterial({ color: 0xb9b2a4, roughness: 0.72 });
+  /* ⚠ 0x6a757f at metalness 0.30 blew out to a solid white stripe under the 3.1 key —
+     the same class as the flight-deck note above, on its first capture. Windows read DARK
+     from outside; the sternlight glass already knew the recipe. */
+  const glassI = new THREE.MeshStandardMaterial({ color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
+  /* ⚠ 0xb9b2a4 over L·0.055 was a 17 m cream stripe down the island's face, and from
+     broadside it read as the bridge glass blowing out — the raycast said radar. A SPY
+     array face is a panel about four metres across, a shade lighter than the structure. */
+  const radarM = new THREE.MeshStandardMaterial({ color: 0x6f7780, roughness: 0.85 });
   const islW = deckW * 0.105;
   /* the tiers, each standing on the one below: length, width, height, and how far aft it sits */
   const tiers = [[L * 0.115, islW,        B * 0.155, 0.0],
@@ -2279,12 +2410,22 @@ function buildFlightDeck(S, group, mats) {
     const blk = new THREE.Mesh(new THREE.BoxGeometry(t[0], t[2], t[1]), dark);
     blk.position.set(t[3], yy + t[2] / 2, 0);
     isl.add(blk);
-    /* the bridge and flying control are mostly glass — that is what they are FOR */
+    /* the bridge and flying control are mostly glass — that is what they are FOR. More
+       mullion than pane (the round-22 lesson from the liner deckhouses), so the band reads
+       as a row of windows rather than as a stripe of anything. */
     if (ti >= 1) {
+      const winH = t[2] * 0.30, winY = yy + t[2] * 0.64;
       const win = new THREE.Mesh(
-        new THREE.BoxGeometry(t[0] * 0.94, t[2] * 0.34, t[1] * 1.02), glassI);
-      win.position.set(t[3], yy + t[2] * 0.66, 0);
+        new THREE.BoxGeometry(t[0] * 0.94, winH, t[1] * 1.01), glassI);
+      win.position.set(t[3], winY, 0);
       isl.add(win);
+      const nM = Math.max(3, Math.round(t[0] / 2.2));
+      for (let m = 0; m <= nM; m++) {
+        const mull = new THREE.Mesh(
+          new THREE.BoxGeometry(B * 0.006, winH * 1.06, t[1] * 1.015), dark);
+        mull.position.set(t[3] - t[0] * 0.47 + (m / nM) * t[0] * 0.94, winY, 0);
+        isl.add(mull);
+      }
     }
     yy += t[2];
   });
@@ -2299,8 +2440,8 @@ function buildFlightDeck(S, group, mats) {
      single most recognisable thing about a modern warship's upperworks */
   for (const f of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
     const pan = new THREE.Mesh(
-      new THREE.BoxGeometry(f[0] ? L * 0.008 : L * 0.055, B * 0.058,
-                            f[0] ? islW * 0.62 : islW * 0.06), radarM);
+      new THREE.BoxGeometry(f[0] ? L * 0.008 : L * 0.016, B * 0.058,
+                            f[0] ? islW * 0.55 : islW * 0.06), radarM);
     pan.position.set(-L * 0.006 + f[0] * L * 0.046, tiers[0][2] + B * 0.052,
                      f[1] * islW * 0.47);
     pan.rotation.z = f[0] * 0.10;
@@ -2712,7 +2853,12 @@ function buildStern(S, group, mats) {
   const tg = new THREE.BufferGeometry();
   tg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   tg.setIndex(idx); tg.computeVertexNormals();
-  g.add(tag(new THREE.Mesh(tg, mats.woodDark), 'transom'));
+  /* a steel ship's transom is her own plating carried across the stern, in her own paint */
+  const transomMat = (S.build === 'steel' || S.build === 'iron')
+    ? new THREE.MeshStandardMaterial({ color: new THREE.Color(S.topside || '#4e545b'),
+                                       roughness: 0.60, metalness: 0.40 })
+    : mats.woodDark;
+  g.add(tag(new THREE.Mesh(tg, transomMat), 'transom'));
 
   /* ── STERN LIGHTS, SET IN THE TRANSOM THEY BELONG TO ────────────────────────────────
      ⚠ Twice now these have been sized from a formula that ran alongside the transom's own
@@ -3059,7 +3205,16 @@ function buildShip(S, opts) {
      Keel, then frames, then planking. They are all generated from the same surfacePoint(),
      so the ribs sit inside the skin and the backbone under it without a single fudge factor.
      The Shipwright hides and shows these by their tagged stage. */
-  const timber = new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
+  /* ── ⚠ THE FITTINGS FOLLOW THE BUILD ─────────────────────────────────────────────────
+     Found on the carrier, from her stern quarter: every hull was getting the timber-era
+     fittings — brown backbone, timber rail and transom, and a barn-door rudder hung on the
+     sternpost, standing 17 m past a nuclear carrier's stern and 4 m out of the water. The
+     baseline bearing hides the stern, so the frame ratchet sat green throughout. The stage
+     card has said "STEEL: FRAMES, THEN WELDED PLATE" all along; the geometry now listens. */
+  const STEEL = S.build === 'steel' || S.build === 'iron';
+  const timber = STEEL
+    ? new THREE.MeshStandardMaterial({ color: 0x3d4147, roughness: 0.52, metalness: 0.55 })
+    : new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
   group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
   if (FINE) {
     /* every frame its own object, so one rib can be picked out of the skeleton */
@@ -3104,8 +3259,15 @@ function buildShip(S, opts) {
     FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
   group.add(tag(hull, 'planking'));
 
-  const deckMat = new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
-                                                   side: THREE.DoubleSide });
+  /* the weather deck keys off what the DECK was, not what the hull was: liners and
+     battleships stayed planked to the end — Titanic's teak, Yamato's hinoki — but a flight
+     deck and a container ship's weather deck are bare steel */
+  const steelDeck = STEEL && (S.flightDeck || S.containers);
+  const deckMat = steelDeck
+    ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
+                                       side: THREE.DoubleSide })
+    : new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
+                                       side: THREE.DoubleSide });
   group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck'));
 
   /* ⚠ Lambert has no specular term at all, so every timber came out matte and the whole ship
@@ -3145,6 +3307,7 @@ function buildShip(S, opts) {
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   if (FINE) buildOars(S, group, mats.woodPale);
   if (FINE) buildPaddles(S, group, mats);
+  if (FINE) buildScrews(S, group);
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the
      counter in surfacePoint. Three earlier attempts failed by sizing the plate; none of them
      could work, because the ship had no broad stern for a plate to sit on. */

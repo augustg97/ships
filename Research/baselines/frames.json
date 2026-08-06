@@ -6,9 +6,9 @@
  },
  "device_scale_factor": 2,
  "ready": {
-  "expr": "window.__FRAME_READY === true",
+  "expr": "window.__FRAME_READY === true && (!document.fonts || document.fonts.status === 'loaded')",
   "timeout_ms": 60000,
-  "note": "set in app.js armNext() after the first painted frame"
+  "note": "set in app.js armNext() after the first painted frame. The fonts clause is load-bearing: each frame opens a cold page, and a capture taken before the serif arrives rasterises every label in the fallback font — globe-default moved 1.016% on 2026-08-06 and the diff was nothing but label halos and reflowed voyage lists."
  },
  "settle_ms": 600,
  "thresholds": {
