@@ -8,9 +8,10 @@
  *
  * ── THE SHIPS ARE NOT ANIMATED. THEY ARE SAILED. ───────────────────────────────────────
  * There is no keyframed path here and no tactical AI. Each ship holds a station in its fleet's
- * formation and steers for it; its speed comes from `vessel.polar.curve` — the same polar the
- * routing engine uses to cross oceans — evaluated at the angle between its heading and the
- * day's wind. So a ship close-hauled crawls, a ship with the wind on the quarter flies, and the
+ * formation and steers for it; its speed comes from the routing engine's OWN compiled polar —
+ * compilePolar and polarSpeed, the functions that cross oceans — evaluated at the angle
+ * between its heading and the day's wind. So a ship inside her beat gate stops, one with the
+ * wind on the quarter flies, and the
  * fleet to leeward genuinely cannot get back up to the fleet to windward. That last fact is the
  * whole of 1588 and nobody had to author it.
  *
@@ -25,24 +26,18 @@ const BT = {
   spec: null, wind: 225, force: 5, smoke: null, sp: [], mats: [],
 };
 
-/* ── polar: knots made good at a given angle off the true wind ─────────────────────────
-   ⚠ NAMED btPolarSpeed, not polarSpeed. route.js declares a top-level `function polarSpeed`
-   too, with a different signature — and it loads AFTER this file, so the global was silently
-   replaced and every ship in the battle was being given a speed computed from the wrong
-   arguments. Classic scripts share one global scope; a function declaration is not a warning,
-   it is an overwrite. */
-function btPolarSpeed(curve, angDeg) {
-  const a = Math.min(180, Math.abs(angDeg));
-  const ks = Object.keys(curve).map(Number).sort((x, y) => x - y);
-  if (a <= ks[0]) return curve[ks[0]];
-  for (let i = 1; i < ks.length; i++) {
-    if (a <= ks[i]) {
-      const f = (a - ks[i - 1]) / (ks[i] - ks[i - 1]);
-      return curve[ks[i - 1]] + (curve[ks[i]] - curve[ks[i - 1]]) * f;
-    }
-  }
-  return curve[ks[ks.length - 1]];
-}
+/* ── polar: the ROUTER'S model, not a second one ────────────────────────────────────────
+   Until round 50 this file kept its own interpolator over polar.curve times a linear force
+   scale — no beat gate, no oar floor, no engine rule — so a galley staged here would have
+   had her crew wind-scaled: the same B9 fault route.js was cured of in round 48, alive in a
+   second consumer. There is no second model now. Each fleet's polar is compiled once at
+   open by route.js's own compilePolar, and every frame asks route.js's polarSpeed — floor,
+   beat gate and engine rule included by construction, and a change to the model shows up
+   here without anyone remembering this file exists.
+   ⚠ LOAD ORDER: route.js loads AFTER this file, so its globals may only be touched at
+   runtime — btOpen and later — never at parse time. And this file must never DECLARE a
+   function named polarSpeed: classic scripts share one global scope and the last file to
+   load wins silently. That overwrite has already happened here once, the other way. */
 
 function btInit() {
   if (BT.renderer) return;
@@ -169,6 +164,8 @@ function btOpen(battle) {
     const ves = V.find(x => x.id === F.id);
     if (!ves || !ves.hull) return;
     const proto = window.SHIPS_HULL.buildShip(ves.hull);
+    /* one compiled polar per fleet, shared by every ship in it — route.js's own */
+    const P = compilePolar(ves.polar);
     /* ⚠ Object3D.clone() DEEP-COPIES userData THROUGH JSON. Any live object reference held
        there — a material, a Vector3, a texture — comes back as a lifeless plain object, so
        `clone.userData.hullMat.uniforms.uCam.value.copy(...)` threw "not a function" and, being
@@ -186,7 +183,7 @@ function btOpen(battle) {
       BT.scene.add(holder);
       const t = (i - (F.n - 1) / 2) / ((F.n - 1) / 2);
       BT.ships.push({
-        obj: holder, side: F.side, curve: ves.polar.curve, loa: ves.hull.loa,
+        obj: holder, side: F.side, P, loa: ves.hull.loa,
         t, x: 0, z: 0, hd: 0, spd: 0, phase: i * 1.7,
         /* station in the fleet's own frame, in metres */
         sx: F.side === 0 ? t * 260 : t * 210 + ((i % 3) - 1) * 40,
@@ -212,6 +209,9 @@ function btOpen(battle) {
 function btSetDay() {
   const C = BT.spec.campaign, d = C[BT.day];
   BT.wind = d.w; BT.force = d.f;
+  /* Beaufort to m/s once per day — v = 0.836·B^1.5, the scale's defining relation — so the
+     frame loop hands polarSpeed a true wind speed, not a force number. */
+  BT.tws = 0.836 * Math.pow(d.f, 1.5);
   BT.sea.material.uniforms.uWind.value = 2.5 + d.f * 1.9;
   const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   document.getElementById('btDate').textContent = d.d + ' 1588';
@@ -278,26 +278,34 @@ function btFrame(now, dt) {
   if (!BT.on) return;
   BT.t += dt;
   const windTo = (BT.wind + 180) * Math.PI / 180;      // where the wind is going
+  const fromWind = windTo + Math.PI;                   // where it comes from
   const action = /Action|GRAVELINES|Portland|Isle of Wight|fireships/i.test(
                    BT.spec.campaign[BT.day].t);
 
   BT.ships.forEach(s => {
-    /* steer for the station */
+    /* steer for the station — but the helm knows the gate. If the direct course would make
+       no way (a square rig ordered dead upwind), she falls to the nearer beat limb and
+       holds it, which is what a helmsman with a station to windward actually does. A hull
+       with an oar floor or an engine always makes way, so her helm is never clamped. */
     const dx = s.tx - s.x, dz = s.tz - s.z;
-    const want = Math.atan2(dx, dz);
+    let want = Math.atan2(dx, dz);
+    let rw = (want - fromWind) * 180 / Math.PI;
+    while (rw > 180) rw -= 360;
+    while (rw < -180) rw += 360;
+    if (polarSpeed(s.P, BT.tws, rw) <= 0)
+      want = fromWind + (rw < 0 ? -1 : 1) * polarBeat(s.P, BT.tws) * Math.PI / 180;
     let e = want - s.hd;
     while (e > Math.PI) e -= 2 * Math.PI;
     while (e < -Math.PI) e += 2 * Math.PI;
     s.hd += Math.max(-0.30 * dt, Math.min(0.30 * dt, e));   // a ship does not turn on a pin
 
-    /* ── SPEED FROM THE POLAR, NOT FROM A CONSTANT ────────────────────────────────
+    /* ── SPEED FROM THE POLAR — THE ROUTER'S OWN ──────────────────────────────────
        The angle that matters is between the ship's HEAD and where the wind comes FROM.
-       0 is head to wind, where she stops; 120 is a broad reach, where she is fastest. */
-    const fromWind = windTo + Math.PI;
+       0 is head to wind, where a sail ship stops and an oared one does not. */
     let rel = (s.hd - fromWind) * 180 / Math.PI;
     while (rel > 180) rel -= 360;
     while (rel < -180) rel += 360;
-    const kn = btPolarSpeed(s.curve, rel) * (0.55 + BT.force * 0.09);
+    const kn = polarSpeed(s.P, BT.tws, rel);
     s.spd += (kn * KN - s.spd) * Math.min(1, dt * 0.4);
     const dist = Math.hypot(dx, dz);
     const drive = dist < 40 ? dist / 40 : 1;

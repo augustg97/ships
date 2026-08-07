@@ -1242,6 +1242,30 @@
           say(v.id, 'card subtitle contradicts the rig',
               `rigLine gives "${rl}" but the record's rig is "${P.rig}"`);
       }
+
+      /* ── A CALM DOES NOT SLOW HER, THROUGH THE MODEL ITSELF (round 50). ────────────
+         The r48 rules above hold the DATA honest — floor present, consistent, alive in
+         its own reference wind. This one asks the running model: compile the polar with
+         route.js's own compilePolar and evaluate route.js's own polarSpeed at zero wind,
+         where a floored hull must make exactly her floor at every heading (no wind, no
+         windage; no wind, no sail). Every consumer that goes through polarSpeed — the
+         router since r48, the battle since r50 — inherits the pass; a consumer that
+         wind-scales the crew again fails it before any picture is taken. */
+      /* guarded on ALL THREE globals — polarSpeed calls polarBeat, so a missing one would
+         throw here and mask the reachability rule below, which is the one that names it */
+      if (P.floor && P.curve
+          && typeof compilePolar === 'function' && typeof polarSpeed === 'function'
+          && typeof polarBeat === 'function') {
+        const CP = compilePolar(P);
+        for (const a of [0, 90, 180]) {
+          const kn = polarSpeed(CP, 0, a);
+          if (Math.abs(kn - P.floor.kn) > 0.02) {
+            say(v.id, 'a calm slows the muscled hull',
+                `polarSpeed at 0 m/s, ${a}° gives ${kn.toFixed(2)} kn against a floor of ${P.floor.kn} — the crew is being wind-scaled`);
+            break;
+          }
+        }
+      }
     }
 
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
@@ -1261,6 +1285,24 @@
       if (curveOwner[k]) say(v.id, 'shared polar curve', 'byte-identical with ' + curveOwner[k]);
       else curveOwner[k] = v.id;
     }
+  }
+
+  /* ── AND ONE MODEL OF HOW A SHIP MOVES (round 50). ─────────────────────────────────────
+     battle.js carried its own polar interpolator, btPolarSpeed, times a linear force scale
+     — no beat gate, no oar floor, no engine rule — from the day the Action was built until
+     round 50: the B9 fault route.js was cured of in r48, alive in a second consumer. The
+     battle now compiles and evaluates through route.js's own globals at runtime, so the
+     second model must stay dead and the shared one must stay reachable. If btPolarSpeed
+     reappears (the likeliest regression is a revert), or compilePolar / polarSpeed /
+     polarBeat stop being page globals, the battle either lies again or throws at open. */
+  {
+    if (typeof btPolarSpeed !== 'undefined')
+      say('battle', 'a second speed model',
+          'btPolarSpeed exists again — the Action must ask route.js\'s polarSpeed, not its own interpolator');
+    for (const fn of ['compilePolar', 'polarSpeed', 'polarBeat'])
+      if (typeof window[fn] !== 'function')
+        say('battle', 'shared polar model unreachable',
+            fn + ' is not a page global — the battle compiles and evaluates through it at open');
   }
   return { problems, checked: rows.length, rows };
 })()

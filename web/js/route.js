@@ -162,19 +162,26 @@ function compilePolar(polar) {
            floorLoss: polar.floor ? polar.floor.lossKnPerMs : 0, head };
 }
 
+/* The beat angle worsens as it blows harder: 71° at force 2 becoming 90° at force 4 is
+   MEASURED, on GPS-instrumented replicas. Its own function because the battle's helm needs
+   the same gate polarSpeed enforces: a ship ordered dead upwind falls to this angle, she
+   does not ghost through it — one definition, so helm and speed cannot disagree. */
+function polarBeat(P, twsMs) {
+  let hard = (twsMs - 5.0) / 6.0;
+  hard = hard < 0 ? 0 : (hard > 1 ? 1 : hard);
+  return P.beatLight + (P.beatHard - P.beatLight) * hard;
+}
+
 function polarSpeed(P, twsMs, twaDeg) {
   const twa = twaDeg < 0 ? -twaDeg : twaDeg;
   const a = twa > 180 ? 180 : (twa | 0);
   const base = P.spd[a];
   if (P.isEngine) return base;
 
-  /* The beat angle worsens as it blows harder: 71° at force 2 becoming 90° at force 4 is
-     MEASURED, on GPS-instrumented replicas. Above the hard limit a sailing hull makes no
-     ground to windward at all, and the router is told so rather than allowed to cheat. */
+  /* Above the hard limit a sailing hull makes no ground to windward at all, and the
+     router is told so rather than allowed to cheat. */
   let sail = 0;
-  let hard = (twsMs - 5.0) / 6.0;
-  hard = hard < 0 ? 0 : (hard > 1 ? 1 : hard);
-  const beat = P.beatLight + (P.beatHard - P.beatLight) * hard;
+  const beat = polarBeat(P, twsMs);
   if (twa >= beat) {
     /* Speed rises roughly with the square root of wind and then saturates on the hull's own
        wave-making. */

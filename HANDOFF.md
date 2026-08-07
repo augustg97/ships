@@ -2333,3 +2333,65 @@ a839b5a — audit 25/25 with eight new rules across the two rounds, ratchet 37/3
 baselines accepted for reasons and one added. Thirteenth clean push-triggered deploy in a
 row. The procedural lesson of this round outlives it: the ratchet runs foreground,
 frame by frame — four sessions died backgrounding it.
+
+---
+
+## Round 50 — 2026-08-07 — One model of how a ship moves: the battle stops keeping its own
+
+**The queue item: B9's second consumer.** `battle.js` carried its own polar interpolator —
+`btPolarSpeed(curve, rel) * (0.55 + force·0.09)` — no beat gate, no oar floor, no engine
+rule. Harmless-looking (the only playable campaign is the Armada, both fleets sail), but it
+was the r48 fault alive in a second consumer, and its own file header claimed "one model of
+how a ship moves, used everywhere." Now that is true by construction: the second model is
+DELETED. Each fleet's polar is compiled once at open by route.js's own `compilePolar`, every
+frame asks route.js's `polarSpeed` (Beaufort → m/s by the scale's defining v = 0.836·B^1.5,
+once per day), and the beat computation moved into its own `polarBeat` in route.js so the
+battle's HELM can ask the same gate the speed model enforces: a ship whose direct course
+would make no way falls to the nearer beat limb and holds it — what a helmsman with a
+station to windward actually does. A hull with a floor or an engine always makes way, so
+her helm is never clamped. ⚠ Load order stands: route.js loads AFTER battle.js, so its
+globals are touched at runtime only (btOpen and later), never at parse time.
+
+**Measured, old formula vs new, through the page's own functions (192 points, table in
+`Research/measure-battle-r50.py` output):** the trireme in a calm made 2.0–2.9 kn under the
+old battle model (the wind-scaled crew) and makes 5.4 at every heading now — Olympias's own
+cruise; at force 7 dead upwind the old model gave her 4.4 kn (a near-gale on the nose
+HELPED her), the new gives 0.6 — the floor less windage. Force 5 head-to-wind: 2.5 kn
+against Olympias's measured ~2.9 at the 8 m/s reference. The sail fleets: inside the gate
+the old model ghosted a carrack to windward at up to 5.4 kn; new is 0, the router's own
+gate; abaft it the shift is −10% to +18% across campaign forces (√wind replacing the linear
+force scale). And the battle SAILED: unfrozen, all 40 ships making way on days 0, 3 and 9 —
+including Portland, the one NE-wind day, where the helm clamp holds them on the beat limb
+instead of stalling head to wind.
+
+**Three audit rules (r50 block), each proven by in-page break-and-restore:** (1) *a calm
+does not slow a floored hull through the RUNNING model* — compilePolar + polarSpeed at
+0 m/s must return exactly the floor; wrapping polarSpeed with a wind scale fired it on
+exactly dugout and trireme. This one would have caught the original B9 and now guards every
+consumer at once. (2) *btPolarSpeed stays dead* — redefining it fired once; the likeliest
+regression is a revert. (3) *the shared model stays reachable* — compilePolar / polarSpeed /
+polarBeat must be page globals; blanking polarBeat fired it, naming the function. The
+calm-floor rule is guarded on all three globals, because polarSpeed calls polarBeat and a
+missing one would otherwise throw the audit before the rule that names the fault can run.
+Clean run 25/25 after each restore. B9 closed in MODEL-GAPS.md with the second consumer.
+
+**Frames: 37/37 within tolerance, zero movers** — the change is behavioral (speeds over
+time) and the frozen capture pins dt = 0 over snapped stations, so no picture was owed a
+move. Ratchet run foreground, frame by frame, batches of nine (the r48/49 lesson; no
+session died this round). Two servers on :8149 again — checked both with lsof before
+capturing, both serve web/, no stale-root hazard.
+
+**Rule 0, written:** the action frame reads as a rendered world. Three facts a viewer can
+read off it: a fleet strung out hull-down on the horizon at its real 7 km separation, small
+because the view is true scale; the long white-flecked swell ranks of a force-6 day fading
+into the haze the sky shares; a card holding the record — 30 July 1588, wind WSW force 6,
+the Armada holding the weather gauge with the fleets 7.0 km apart.
+
+### Next, in order
+1. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
+   behind aboard-yamato; Titanic remainder; r43's plate gaps (corbita era plate;
+   dugout/dhow/cog plates; a globe-era-card frame); wrong-era voyage hash (#e=3&f=zhenghe)
+   hangs before first paint.
+2. A galley action is now UNBLOCKED: Salamis, Lepanto and Myeongnyang have battle cards and
+   the floor works at true scale — staging one is a campaign-data task (days, winds,
+   ranges from the record), not an engine task.

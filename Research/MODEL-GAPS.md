@@ -111,6 +111,15 @@ kn per m/s); the dugout inherits the fractional windage as a stated inference. F
 audit rules hold the class: every muscled hull carries a floor, no engine does, the
 floor sits under the curve, and it survives its own reference headwind.
 
+**The second consumer, fixed r50:** `battle.js` kept its own interpolator over
+`polar.curve` times a linear force scale — no beat gate, no floor, no engine rule — so
+any staged galley action would have replayed the fault at true scale. The second model
+is deleted: the Action compiles each fleet's polar with route.js's own `compilePolar`
+and asks route.js's `polarSpeed` every frame (Beaufort → m/s by v = 0.836·B^1.5), and
+the helm falls to `polarBeat`'s limb when the direct course would make no way. Three
+audit rules hold it: a calm must not slow a floored hull *through the running model*,
+`btPolarSpeed` must stay dead, and the three shared globals must stay reachable.
+
 The fault had a second face: both muscled hulls carried beat angles of 30/45 — better
 pointing than a modern sloop — the compensator that had let oared hulls make windward
 ground before the floor existed, and once the card said "closest made good under sail"
