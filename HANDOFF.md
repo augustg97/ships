@@ -1311,3 +1311,10 @@ wrong-looking with panels intact, check `lsof -nP -iTCP:8149` FIRST.
    enclosed A-deck promenade forward, docking bridge on the poop.
 6. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
    preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE, stamp 1786069279.** The failure mode may have healed: the
+push of d965acf created run 31141000795 within EIGHT SECONDS — but the manual dispatch fired
+on top of it and the concurrency group CANCELLED the push run, so the dispatch (31141007753,
+completed success) did the deploy. Next round: give the push run a minute before dispatching,
+because dispatching now cancels a healthy push run rather than backstopping a missing one.
+Live stamp verified 1786058340 → **1786069279** with a cache-busted fetch.
