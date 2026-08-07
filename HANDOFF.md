@@ -2008,3 +2008,9 @@ separate data work.)
 3. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
    behind aboard-yamato; Titanic remainder; items 5 & 7 (voyage/era card enrichment, tone
    pass); r43's plate gaps (corbita era plate; dugout/dhow/cog plates; a globe-era-card frame).
+
+**End-of-round deploy note: LIVE, stamp 1786115031 → 1786117132**, verified with a
+cache-busted fetch of the data-version meta tag. Ninth clean push-triggered deploy in a row.
+The globe-default 1.016% mover in the verification ratchet proved a TRANSIENT (the documented
+serif-webfont label-halo class): isolated re-capture passed twice against the committed
+baseline. Not accepted; the webfont decision stays carried.
