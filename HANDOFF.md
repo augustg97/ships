@@ -1604,3 +1604,8 @@ tripod foremast directly abaft the fore funnel with its struts planted aft.
 5. Depicted-year fittings, if ever wanted as a class: the Sea could pass a voyage year into
    buildShip and gate dated fittings (nets 1906–1914) — queue material only; today the part
    card carries the date honestly.
+
+**End-of-round deploy note: LIVE, stamp 1786083736.** Fourth clean push-triggered deploy in a
+row: the push of 7ff8738 created run 31154303774, completed success with no manual dispatch.
+Live stamp verified 1786080947 → **1786083736** with a cache-busted fetch of the data-version
+meta tag.
