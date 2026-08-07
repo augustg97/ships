@@ -594,7 +594,7 @@ function buildRig(S, group, mats, FINE) {
      One angle for the ship, applied to yard and canvas alike. Both sit on the mast centreline,
      so a rotation about Y is a brace. */
   const TRIM = S.trim !== undefined ? S.trim : 0.34;    // ~19 degrees off square
-  const sails = [], spars = [], mastTops = [];
+  const sails = [], spars = [], mastTops = [], stayMasts = [];
   const maxMastShare = S.masts.length ? Math.max(...S.masts.map(m => m.height)) : 1;
 
   S.masts.forEach((mk, mi) => {
@@ -648,6 +648,59 @@ function buildRig(S, group, mats, FINE) {
     let y = base;
     /* a braced sail reaches about a tenth of the hull either side of its own mast */
     let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
+
+    /* ── ONE CROSSED YARD, WITH ITS SAIL ──────────────────────────────────────────────
+       Factored out because a mast may cross three yards — one per fidded segment, the
+       18th-century rig — or six, from the record's own list (`yards`, below). Both paths
+       must build the identical spar, or the fleet forks into two models of one thing. */
+    const crossYard = (yy, yardLen) => {
+      /* A yard is not a cylinder: it is octagonal in the middle quarters and tapers to two
+         fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
+         sector divisions — 1.000, 0.964, 0.900, 0.700, 0.400 — and the last of those is why
+         a yard reads as a yard rather than a pole. */
+      const yg = new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, yardLen, 16);
+      const ym = new THREE.Mesh(yg, woodDark);
+      const yp = yg.attributes.position;
+      for (let i = 0; i < yp.count; i++) {
+        const t = Math.abs(yp.getY(i)) / (yardLen / 2);          // 0 slings, 1 arm
+        const taper = t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
+                    : t < 0.75 ? 0.856 - 0.256 * ((t - 0.25) / 0.5)
+                               : 0.600 - 0.200 * ((t - 0.75) / 0.25);
+        const k = taper / 0.4 * 0.9;
+        yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
+      }
+      yg.computeVertexNormals();
+      /* ── ⚠ THE YARD WAS NEVER ACTUALLY BRACED. ────────────────────────────────────────
+         `rotation.x = PI/2` lays the cylinder's axis onto Z. `rotation.z` then turns it about
+         the very axis it now lies along — a NO-OP, and the comment that used to sit here
+         asserted the opposite. So the canvas swung round to the trim angle and the spar it
+         hangs from stayed square, which is why the yard arms stood out past the cloth as bare
+         sticks in the air. A rotation composed as Euler angles is only as good as the order it
+         is read in; composed as quaternions it says what it does. Lay the spar athwartships
+         FIRST, then brace the whole thing about the vertical — which is the order a real crew
+         works in, and the only one that keeps the yard in the sail. */
+      ym.quaternion
+        .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
+        .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
+      ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
+      group.add(tag(ym, 'yard'));
+      /* recorded from the spar that was actually placed, so the braces lead to real yard arms:
+         a braced yard's arms swing FORE AND AFT as well as out, and the brace is the rope that
+         holds them there, so it has to be led to where the arm now is. */
+      spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
+                   armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
+      /* ── THE DROP IS THE GAP TO THE TIER BELOW ────────────────────────────────
+         Which is what the comment here always said, while the code used a fixed fraction of
+         the mast segment and left the tiers floating apart from each other. A square sail
+         hangs from its yard down to the yard beneath it — that IS its depth, and it is why
+         the sail plan of a square-rigger reads as one continuous wall of canvas rather than
+         as separate flags. The course's "tier below" is the deck, less the clearance a foot
+         needs so the sail can be handled. */
+      const drop = yy - prevYard;
+      prevYard = yy;
+      sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
+                          yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+    };
     /* ⚠ A JUNK MAST IS A SINGLE POLE. Only a square rig is built up in fidded sections —
        lower mast, topmast, topgallant — because only a square rig needs to send its upper
        spars down in heavy weather. A junk reefs by dropping battens onto the boom and never
@@ -728,7 +781,7 @@ function buildRig(S, group, mats, FINE) {
         tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
         group.add(tp);
       }
-      if (mk.rig === 'square') {
+      if (mk.rig === 'square' && !mk.yards) {
         /* ── YARD LENGTHS, Steel 1794 p.40 ────────────────────────────
            "Proportional Lengths of Yards, in the Royal Navy":
              main yard          = 7/8 of the main mast          (0.875)
@@ -756,53 +809,7 @@ function buildRig(S, group, mats, FINE) {
            just a mast that is too tall. */
         const tiers = mk.only || 3;
         const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
-        const yy = y + seg * (si === 0 ? courseAt : 0.88);
-        /* A yard is not a cylinder: it is octagonal in the middle quarters and tapers to two
-           fifths of its slings diameter at the arms. Murray 1754 gives the shipwrights' own
-           sector divisions — 1.000, 0.964, 0.900, 0.700, 0.400 — and the last of those is why
-           a yard reads as a yard rather than a pole. */
-        const yg = new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, yardLen, 16);
-        const ym = new THREE.Mesh(yg, woodDark);
-        const yp = yg.attributes.position;
-        for (let i = 0; i < yp.count; i++) {
-          const t = Math.abs(yp.getY(i)) / (yardLen / 2);          // 0 slings, 1 arm
-          const taper = t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
-                      : t < 0.75 ? 0.856 - 0.256 * ((t - 0.25) / 0.5)
-                                 : 0.600 - 0.200 * ((t - 0.75) / 0.25);
-          const k = taper / 0.4 * 0.9;
-          yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
-        }
-        yg.computeVertexNormals();
-        /* ── ⚠ THE YARD WAS NEVER ACTUALLY BRACED. ────────────────────────────────────────
-           `rotation.x = PI/2` lays the cylinder's axis onto Z. `rotation.z` then turns it about
-           the very axis it now lies along — a NO-OP, and the comment that used to sit here
-           asserted the opposite. So the canvas swung round to the trim angle and the spar it
-           hangs from stayed square, which is why the yard arms stood out past the cloth as bare
-           sticks in the air. A rotation composed as Euler angles is only as good as the order it
-           is read in; composed as quaternions it says what it does. Lay the spar athwartships
-           FIRST, then brace the whole thing about the vertical — which is the order a real crew
-           works in, and the only one that keeps the yard in the sail. */
-        ym.quaternion
-          .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
-          .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
-        ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
-        group.add(tag(ym, 'yard'));
-        /* recorded from the spar that was actually placed, so the braces lead to real yard arms:
-           a braced yard's arms swing FORE AND AFT as well as out, and the brace is the rope that
-           holds them there, so it has to be led to where the arm now is. */
-        spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
-                     armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
-        /* ── THE DROP IS THE GAP TO THE TIER BELOW ────────────────────────────────
-           Which is what the comment here always said, while the code used a fixed fraction of
-           the mast segment and left the tiers floating apart from each other. A square sail
-           hangs from its yard down to the yard beneath it — that IS its depth, and it is why
-           the sail plan of a square-rigger reads as one continuous wall of canvas rather than
-           as separate flags. The course's "tier below" is the deck, less the clearance a foot
-           needs so the sail can be handled. */
-        const drop = yy - prevYard;
-        prevYard = yy;
-        sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-                            yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+        crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen);
       }
 
       /* ── MASTS STACK. ⚠ THIS LINE WAS MISSING, AND NOTHING LOOKED WRONG. ──────────────
@@ -818,7 +825,41 @@ function buildRig(S, group, mats, FINE) {
          is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
       y += seg * 0.88;
     });
-    if (mk.rig === 'square') mastTops.push({ u, x, y: y + (lower * 0.14) });
+
+    /* ── THE DOUBLED RIG, FROM THE RECORD: `yards` ON THE MAST ─────────────────────────
+       One sail per fidded segment is the 18th-century rig, and it was the CEILING: three
+       cloths on a mast whose record hangs six. After about 1850 the deep topsail is split
+       in two (Howes' rig — a lower topsail yard fixed at the cap, an upper hoisting above
+       it), later the topgallant likewise, because two shallow sails need a fraction of the
+       hands one deep one does. Preussen crosses SIX yards on every mast — course, lower and
+       upper topsail, lower and upper topgallant, royal — thirty square sails, and the model
+       drew ten. So the record may now state the mast's own yard list, and the list is the
+       rig: each named yard at its conventional fraction of the whole mast, its length a
+       share of the course yard, the sail hanging to the yard below by the same drop chain
+       as every other square rig here. The fractions narrow aloft, which is why a doubled
+       rig reads as a WALL of canvas — the gaps a viewer can see through are exactly the
+       gaps the crew could not have worked. */
+    if (mk.rig === 'square' && mk.yards) {
+      const T = y - base;                     // truck height above the deck at this mast
+      const PLAN = {                          // [fraction of T, length as a share of the course yard]
+        course: [0.36, 1.000],
+        ltop:   [0.50, 0.93],
+        utop:   [0.62, 0.85],
+        top:    [0.55, 0.88],                 // the single deep topsail, for a pre-Howes list
+        ltg:    [0.73, 0.73],
+        utg:    [0.83, 0.62],
+        tg:     [0.76, 0.68],                 // single topgallant over double topsails (clipper)
+        royal:  [0.92, 0.50],
+      };
+      mk.yards.map(nm => PLAN[nm]).filter(Boolean)
+        .sort((a, b) => a[0] - b[0])
+        .forEach(([f, r]) => crossYard(base + T * f, lower * 0.875 * r));
+    }
+    if (mk.rig === 'square') {
+      mastTops.push({ u, x, y: y + (lower * 0.14) });
+      /* the staysail block below needs each square mast's own station and truck height */
+      stayMasts[mi] = { x, base, T: y - base };
+    }
     /* a gaff masthead is a stay anchorage too — the schooner's web is drawn in
        buildRigging from these, and it is a different web from a square-rigger's */
     else if (mk.rig === 'gaff' && segs.length)
@@ -1015,14 +1056,20 @@ function buildRig(S, group, mats, FINE) {
          triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
       sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
     }
-    if (mk.rig === 'gaff') {
+    if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
       /* ── THE GAFF SCHOONER ─────────────────────────────────────────
          A quadrilateral fore-and-aft sail set between a BOOM along the deck and a GAFF angled
          up from the mast. It is the rig that made the big American schooners possible, and the
          reason is crew: a gaff sail is handled entirely from the deck. Nobody goes aloft to
          reef it. Wyoming carried 3,730 tons on six masts with a crew of THIRTEEN, where a
          square-rigged ship of that tonnage wanted thirty or more — and that ratio, not speed,
-         is why the American coal and lumber trades went to schooners. */
+         is why the American coal and lumber trades went to schooners.
+         ── AND THE FULL-RIGGER'S SPANKER, FROM THE RECORD: `spanker` ON A SQUARE MAST ──
+         A full-rigged ship carries this same quadrilateral abaft her aftermost mast — the
+         one fore-and-aft sail on the ship, and the one that balances her helm. Preussen's
+         47 sails end with it. On a square mast the gaff sets LOW, under the crossed canvas:
+         the throat sits at about half the lower mast, where every photograph of the
+         P-liners puts it, not at 0.86 where a schooner's whole hoist would go. */
       /* ── ⚠ A BOOM CANNOT REACH THE MAST BEHIND IT ──────────────────
          boomL was a fraction of MAST HEIGHT with no reference to what is astern of it, so on
          a six-masted schooner — Great Eastern, Wyoming, Preussen — every boom ran straight
@@ -1042,7 +1089,7 @@ function buildRig(S, group, mats, FINE) {
       bm2.rotation.z = Math.PI / 2;
       bm2.position.set(x + boomL / 2, footY, 0);
       group.add(tag(bm2, 'yard', 'Boom'));
-      const gy = base + lower * 0.86;
+      const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
       const gm = new THREE.Mesh(
         new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
       gm.rotation.z = -(Math.PI / 2 - peak);
@@ -1170,6 +1217,40 @@ function buildRig(S, group, mats, FINE) {
     }
   });
 
+  /* ── MAST-TO-MAST STAYSAILS, FROM THE RECORD: `staysails: n` ON THE AFTER MAST ─────────
+     The canvas BETWEEN a square-rigger's masts. A late full-rigger's stays run from high on
+     each mast down and forward to the mast ahead, and they carry sail — Preussen's record is
+     47 sails and twelve of them are these, three in each of her four gaps, the staircase of
+     triangles every photograph of her shows threading the square canvas. They are not
+     decoration: staysails pull on a reach when the square sails blanket each other, and they
+     were the last canvas struck in a blow. Same rule as the jibs — each sail's luff IS its
+     stay, drawn from the same two points, so stay and sail cannot come adrift of one another.
+     The lowest stay runs topmast-head to the cap of the mast ahead; the suit climbs from
+     there toward the truck. */
+  S.masts.forEach((mk, mi) => {
+    if (!mk.staysails || !mi) return;
+    const aftM = stayMasts[mi], fwdM = stayMasts[mi - 1];
+    if (!aftM || !fwdM) return;
+    for (let k = 0; k < mk.staysails; k++) {
+      const t = mk.staysails === 1 ? 0.5 : k / (mk.staysails - 1);
+      const hi = [aftM.x, aftM.base + aftM.T * (0.55 + 0.38 * t)];
+      const lo = [fwdM.x, fwdM.base + fwdM.T * (0.33 + 0.38 * t)];
+      const st = ropeMesh([[new THREE.Vector3(lo[0], lo[1], 0),
+                            new THREE.Vector3(hi[0], hi[1], 0)]], 0.016 + B * 0.0005, ropeMat);
+      if (st) group.add(tag(st, 'stay'));
+      const at = f => [lo[0] + (hi[0] - lo[0]) * f, lo[1] + (hi[1] - lo[1]) * f];
+      /* tack near the stay's foot, head hoisted close under the after masthead, clew sheeted
+         down and aft — the leech falls steeply, the foot runs nearly level, which is the
+         shape the photographs show. Flat cloth, like the jibs: a staysail is set on a taut
+         stay, not bagged out like a course. */
+      const tack = at(0.08), head = at(0.90);
+      const clew = [hi[0] - (hi[0] - lo[0]) * 0.24, lo[1] + (hi[1] - lo[1]) * 0.10];
+      const ss = makeTriSail(tack, head, clew, group, 0.028, 0.96);
+      /* a real half-metre of z between neighbours where the suits cross, the jib rule */
+      ss.position.z = (k - (mk.staysails - 1) / 2) * B * 0.020;
+    }
+  });
+
   /* bowsprit — steeved up at an angle, and on a large ship it carries its own sail */
   if (S.bowsprit) {
     const u0 = 0.02;
@@ -1219,9 +1300,15 @@ function buildRig(S, group, mats, FINE) {
       const fbase = deckAt(fm.at);
       const hounds = fbase + flower * 0.78;
       /* the outermost stay stops at the topmast HEAD, short of the truck — hoisted to the
-         truck itself the flying jib lies in the fore topsail's own triangle */
+         truck itself the flying jib lies in the fore topsail's own triangle.
+         ⚠ A SQUARE FOREMAST HAS A TOPMAST BY CONSTRUCTION — the fidded second segment —
+         and the flying jib runs to ITS head. Capped at 0.94 of the lower mast, Preussen's
+         four jibs stacked into the bottom quarter of a 45 m foremast and read as a squashed
+         fan; the real suit climbs to the fore topmast head, which is most of what makes a
+         P-liner's head profile. */
       const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
-                                        : flower * 0.94);
+                           : fm.rig === 'square' ? flower * 0.88 + flower * 0.60 * 0.72
+                           : flower * 0.94);
       const n = S.headsails;
       for (let k = 0; k < n; k++) {
         const t = n === 1 ? 0.6 : k / (n - 1);
@@ -4789,6 +4876,8 @@ function buildShip(S, opts) {
       uWeld: { value: WELDED ? 1 : 0 },
       uBottom: { value: bottom },
       uCove: { value: S.cove ? 1 : 0 },
+      uBoot: { value: new THREE.Color(S.boot || '#ffffff') },
+      uBootOn: { value: S.boot ? 1 : 0 },
       uTime: { value: 0 },
     },
   });

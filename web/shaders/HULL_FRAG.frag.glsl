@@ -14,6 +14,8 @@ uniform float uIron;         // 0 = wood, 1 = iron/steel plate
 uniform float uWeld;         // 0 = riveted lands, 1 = all-welded flush butts (≈1950 on)
 uniform vec3  uBottom;       // antifouling colour — an era fact, supplied by hull.js, not assumed here
 uniform float uCove;         // gilt cove line at the sheer — a documented per-ship fact, from the data
+uniform vec3  uBoot;         // boot-topping band at the waterline — per-ship livery, from the data
+uniform float uBootOn;       // 0 = no band; the record declares it ('boot'), the shader only paints it
 uniform float uPortholes;    // porthole count along the hull, 0 = none
 uniform float uTime;
 
@@ -129,6 +131,17 @@ void main(){
     paint = mix(paint, uBottom, below);
     float sheerLine = smoothstep(0.016, 0.004, abs(v - (uWaterline + 0.30)));
     paint = mix(paint, vec3(0.78, 0.62, 0.26), sheerLine * 0.92 * uCove);
+    /* ── THE BOOT-TOPPING BAND, from the record ('boot') ────────────────────────────
+       A painted band riding the load line, about a metre of freeboard: the Laeisz
+       P-liners carried it WHITE between the black topside and the red antifouling —
+       "black over white over red" is the Flying-P silhouette, and without it Preussen
+       is any dark hull. Livery, not physics, so it is a data field like the cove line:
+       no ship gets a band her record does not declare. It sits ABOVE the wet line —
+       the dark waterline seam below stays, and is what keeps the band reading as
+       paint on a floating hull rather than a stripe on a model stand. */
+    float bootBand = smoothstep(uWaterline - 0.002, uWaterline + 0.010, v)
+                   * smoothstep(uWaterline + 0.115, uWaterline + 0.095, v);
+    paint = mix(paint, uBoot, bootBand * uBootOn);
 
     /* ── ⚠ A HULL IS MADE OF PLATES, AND EVERY PLATE WAS THE SAME COLOUR ───────────────
        That is why the rivets read as a printed dot screen: they were the ONLY variation on

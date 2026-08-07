@@ -1886,3 +1886,59 @@ book and the manifest both.
 
 **End-of-round deploy note: LIVE, stamp is in the r43 deploy-note commit.** Sixth and seventh
 clean push-triggered deploys in a row (the plates commit, then this fix).
+
+---
+
+## Round 44 — 2026-08-07 — Preussen: the record's 47 sails, from a stranded tree
+
+**The queue item, found built and stranded.** The tree at round start held the whole Preussen
+rig implemented by an earlier session that died waiting on its ratchet run — three successive
+rounds started, said "standing by for the ratchet report", and terminated with nothing landed.
+The lesson is in the log: **ending the turn to wait on a harness-tracked background task ends
+the round**; the fourth session waited on the ratchet PID in a foreground until-loop and the
+round completed. This round verified the stranded work independently, ran the ratchet to the
+end, classified, and shipped it.
+
+**What the work is.** One class fix and its dependents, all data-gated on the record:
+1. **Per-mast yard lists** (`yards: ["course","ltop","utop","ltg","utg","royal"]`) replace the
+   one-sail-per-fidded-segment ceiling. `crossYard` factored out so the three-tier and listed
+   paths build the identical spar; the PLAN table also carries `top`/`tg` for a pre-Howes list
+   and the clipper's single topgallant over double topsails — the next square rigger is data.
+2. **Mast-to-mast staysails** (`staysails: n` on the after mast) — luff IS the stay, drawn
+   from the same two points; twelve in her four gaps.
+3. **The full-rigger's spanker** (`spanker: true` on a square mast) reuses the gaff block with
+   the throat at 0.55 of the lower mast, where the P-liner photographs put it.
+4. **Jib stays climb to the fore topmast head** on a square foremast (they capped at 0.94 of
+   the LOWER mast — four jibs squashed into the bottom quarter of a 45 m foremast).
+5. **Boot-topping band** as data-declared shader livery (`boot: "#e2ddd3"`, uBoot/uBootOn in
+   HULL_FRAG) — black over white over red, the Flying-P silhouette; closes the r32 check.
+   Sail arithmetic closes: 30 square + 12 staysails + 4 jibs + 1 spanker = her record's 47.
+
+**Verified this round, not carried on trust:** shaders compile; bundle re-run byte-identical
+(md5 unchanged); audit copies identical in Research/, web/, docs/; audit **25/25 clean** with
+the three new rig rules (yard census per station, staysail census per gap, spanker quad abaft
+its mast); served page confirmed to be the working tree (two servers sit on :8149 — pid 3134
+serves web/ and answers localhost first; the root-serving IPv6 one is a standing hazard).
+
+**Frames.** Full ratchet run: **one mover, ship-preussen 21.081%**, diff read full-size —
+every moved pixel is the vessel, her water, her card digits and her fleet thumbnail; all
+panels black, no neighbour moved. Accepted, reason in FRAME-LOG. New `aboard-preussen`
+baseline committed; my fresh capture matched the stranded session's at **0.000%**, which is
+determinism proven across two sessions. No transients this run (r43's globe-steam/action
+shimmer did not recur).
+
+**Rule 0, written:** ship-preussen reads as a rendered world. Three facts off it: six yards
+crossed on every one of five masts with the canvas walling the gaps the crew could not have
+worked; the staysail staircase threading each gap and four jibs running to the fore topmast
+head; the white boot-topping line between black topside and red anti-fouling. (Honest fourth:
+her card still says 5.8 kn best speed — the shared-polar fault, r43's survey, still scoped
+separately as data work.)
+
+### Next, in order
+1. **steamer (1713 tris/m)** — next on the survey queue.
+2. Then **treasure-ship (2011)**.
+3. **Preussen polar** — she shares beat 80/95 / max 5.8 kn with clipper and ship-of-the-line;
+   her card row says 20.5 kn. Data work, one polar per vessel class at least.
+4. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
+   behind aboard-yamato; Titanic remainder; items 5 & 7 (voyage/era card enrichment, tone
+   pass); r43's plate gaps (corbita era plate; dugout/dhow/cog plates; a globe-era-card frame).

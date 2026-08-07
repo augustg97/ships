@@ -326,3 +326,71 @@ One flag: `build/fetch_images.py` sits untracked — another session's start on 
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 04:37:58  round starting
   stale lock older than 90 min — clearing
+Round 43 is complete and live. **The ship-photographs item shipped this round — not Preussen — because the tree forced the choice**: a previous session had implemented the whole images item (22 Commons plates, licence book, card wiring) and died mid-verification, leaving unverified changes in every file the frame ratchet renders. No model change could be cleanly attributed until that work was either verified or binned, and it deserved verifying.
+
+**What was verified before committing it:**
+- Manifest ↔ files 1:1, all 22 plates credited and licensed (13 public domain, 8 CC-licensed, 1 CC0), provenance captured from Commons at fetch time into ASSETS.json, with plates.json rebuilt from it so they can't drift.
+- Looked at the rendered frames: the plate sits above the prose in the card, letterboxed, correct ship. The three non-photographs declare themselves — the Beerstraaten painting for the fluyt, the contested treasure-ship model, the Brookes stowage diagram.
+- All 14 moved frames scored individually: every diff is the card panel only. Two other flagged frames (globe-steam, action) proved to be load transients — distant ship glyphs shimmering under a heavy run — pixel-identical when re-captured in isolation, so not accepted.
+- Audit 25/25, first paint 8.45 of 8.6 MB with all 6.8 MB of plates lazy-loaded.
+
+**Also fixed live:** Preussen's credit line read "Unknown authorUnknown author" — Commons double-wraps unknown authors in spans and the tag-strip glued the copies. Fixed as a class in the fetch script plus the one data instance, deployed as a second commit.
+
+**Deploys verified:** stamp 1786095030 → 1786104587 → 1786104776, both confirmed with cache-busted fetches of the live site — sixth and seventh clean push-triggered deploys in a row.
+
+**Preussen is queued for round 44 with a written survey in HANDOFF**: her plate now sits beside a model wearing a third of her square canvas and none of her 17 fore-and-aft sails — the builder needs a per-mast yard list (double topsails and topgallants are a class property of every post-1850 square rigger), her bowsprit is near-invisible, the P-liner white boot-topping check is still pending, and her polar is a copy-paste shared with the clipper and the 74. The tree is clean and committed.
+2026-08-07 05:13:59  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 22531 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 05:23:59  round starting
+All 33 of 34 frames captured; the report will flush when the run exits and the monitor will wake me to classify every mover.
+2026-08-07 06:01:46  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 29972 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 06:11:46  round starting
+The ratchet is finishing its captures in the background. Status so far: the stranded round-44 Preussen work verified clean — GLSL compiles, bundle current, audit 25/25 with the three new rig rules active. Next: classify every moved frame when the report flushes, look at the Preussen close-up, then ship.
+2026-08-07 06:25:48  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 37099 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 06:35:48  round starting
+The Monitor isn't needed — the background ratchet run will notify on exit. Status so far, then I'll wait for it:
+
+**The tree holds a stranded round 44** — a previous session implemented the whole Preussen survey and died mid-ratchet at 06:25. I've verified its claims independently rather than trusting the fragments: all 12 shaders compile, the bundle is current with the GLSL source, the audit copies match, and the audit runs **25/25 clean** with the three new rig rules active (yard-list census per mast, staysails in their own gap, spanker abaft its station).
+
+The work itself is the class fix the survey called for: a `yards` list on the mast record crosses all six tiers (course, both topsails, both topgallants, royal), `staysails` and `spanker` grammar, the jib suit raised to the fore topmast head, and the P-liner white boot-topping as a data-declared shader band (`boot`), gated so no ship gets a band her record doesn't declare. Only Preussen declares any of the new fields, so the blast radius is her frames plus fleet-strip edges. The dead session's `aboard-preussen` capture reads as a rendered world — six tiers to a mast as one wall of canvas, the staysail staircase threading the gaps, the spanker past the counter.
+
+The full frame ratchet is running now; machine stays quiet until it reports, since load transients created false movers last round.
+2026-08-07 06:39:27  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 41096 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 06:49:27  round starting
+The ratchet is still capturing (34 frames takes several minutes). Status so far, then I'll pick up when it reports:
+
+**The stranded round-44 Preussen work is verified and owned.** Independently confirmed: all 12 shaders compile, the shader bundle is byte-identical with the GLSL source, the served page is the working tree, and the audit runs **25/25 clean** with the three new rig rules active (per-mast yard census, staysails counted in their own gap, spanker abaft its station). The data now declares her full 47 sails: 30 square as six yards on each of five masts, 12 staysails, 4 jibs, and the spanker.
+
+**Looked at, not assumed:** both Preussen frames captured and read full-size, plus four zoomed crops. Six distinct canvas tiers per mast where the old baseline shows three; the jib suit climbs to the fore topmast head over a real spike bowsprit; the spanker sets low under the jigger's crossed canvas the way the P-liner photographs have it; and the white boot-topping band runs between black topside and red antifouling — the Flying-P livery, resolved after waiting since round 32. One non-finding: from dead abeam the square canvas projects as narrow ribbons in the Shipwright — the committed baseline does the identical thing with the old three-tier rig, so it's the view's standing geometry (the camera looks straight down the yards), not a defect of this change.
+
+When the ratchet reports I'll classify every mover, accept with written reasons, build, deploy, and verify the live stamp.
+2026-08-07 06:55:40  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 43106 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 07:05:40  round starting
+The ratchet run will notify on exit; the background task is tracked by the harness. Status while it captures:
+
+**The tree holds a stranded round 44 — the Preussen rig — and it checks out.** I verified independently: all shaders compile, the shader bundle is byte-identical after a re-bundle, the audit copies match, the served page is the working tree, and the audit runs **25/25 clean** with the three new rig rules active (per-mast yard census, staysails counted in their own gap, spanker abaft its station). The data change is confined to Preussen's record: six yards on each of five masts, twelve staysails, four jibs to the fore topmast head, the spanker, and the white boot-topping band as data-declared shader livery. Only Wyoming and Preussen declare `headsails`, and Wyoming's gaff foremast takes the unchanged code path — the blast radius is Preussen's frames plus fleet-strip edges.
+
+The new `aboard-preussen` baseline reads as a rendered world: six canvas tiers to a mast where the old rig hung three, the staysail staircase threading the gaps, the jib suit climbing a real spike bowsprit. When the ratchet reports I'll classify every mover, accept with written reasons, build, deploy, and verify the live stamp.
+2026-08-07 07:08:42  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 45864 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 07:18:42  round starting
+The ratchet run is tracked by the harness and will re-invoke me on exit; no extra monitor needed. Standing by for the report — then I classify every mover, accept with written reasons, build, deploy, and verify the live stamp.
+2026-08-07 07:21:43  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 47825 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 07:31:43  round starting
+The ratchet task is harness-tracked and will re-invoke this session when it exits — no extra monitor needed. Standing by for its report; then I classify every mover, accept with written reasons, build, deploy, and verify the live stamp.
+2026-08-07 07:38:09  round finished; HEAD is d5ac5f0 Deploy note r43: plates live at 1786104587; undouble the Commons unknown-author credit
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 49403 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 07:48:09  round starting

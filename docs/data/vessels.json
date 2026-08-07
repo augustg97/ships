@@ -1982,43 +1982,50 @@
     "gunDecks": 0,
     "iron": true,
     "topside": "#2b2b2c",
-    "bowsprit": 0.1,
-    "steeve": 12,
+    "boot": "#e2ddd3",
+    "bowsprit": 0.13,
+    "steeve": 9,
+    "headsails": 4,
     "masts": [
      {
       "at": 0.16,
       "heightM": 27.0,
       "rig": "square",
       "shrouds": 6,
-      "only": 3
+      "yards": ["course", "ltop", "utop", "ltg", "utg", "royal"]
      },
      {
       "at": 0.34,
       "heightM": 30.0,
       "rig": "square",
       "shrouds": 7,
-      "only": 3
+      "yards": ["course", "ltop", "utop", "ltg", "utg", "royal"],
+      "staysails": 3
      },
      {
       "at": 0.52,
       "heightM": 30.0,
       "rig": "square",
       "shrouds": 7,
-      "only": 3
+      "yards": ["course", "ltop", "utop", "ltg", "utg", "royal"],
+      "staysails": 3
      },
      {
       "at": 0.7,
       "heightM": 29.0,
       "rig": "square",
       "shrouds": 6,
-      "only": 3
+      "yards": ["course", "ltop", "utop", "ltg", "utg", "royal"],
+      "staysails": 3
      },
      {
       "at": 0.86,
       "heightM": 25.0,
       "rig": "square",
       "shrouds": 5,
-      "only": 3
+      "yards": ["course", "ltop", "utop", "ltg", "utg", "royal"],
+      "staysails": 3,
+      "spanker": true
      }
     ],
     "build": "steel",

@@ -363,3 +363,4 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-07 05:09** · `ship-steamer` — steamer card plate: SS Great Britain preserved at Bristol; card panel only
 - **2026-08-07 05:09** · `ship-dreadnought` — dreadnought card plate: HMS Dreadnought, 1906; card panel only
 - **2026-08-07 05:09** · `ship-wyoming` — wyoming card plate: Wyoming, 1917; card panel only
+- **2026-08-07 08:03** · `ship-preussen` — round 44 Preussen rig from the record: 47 sails — 30 square on per-mast yard lists (course, double topsails, double topgallants, royal), 12 mast-to-mast staysails, 4 jibs to the fore topmast head, gaff spanker set low on the jigger — plus the white Laeisz boot-topping band as data-declared livery. Diff verified confined to the vessel, her water, her card digits and fleet thumbnail; all panels and neighbours untouched. Audit 25/25 with three new rig rules.

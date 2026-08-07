@@ -173,6 +173,11 @@
    "path": "/?frozen=1#e=6&f=tenichigo"
   },
   {
+   "name": "aboard-preussen",
+   "path": "/?frozen=1#e=6&f=preussenvoy",
+   "note": "the doubled rig from on deck — 30 square sails, staysails, jibs and the spanker, round 44"
+  },
+  {
    "name": "ship-wyoming",
    "path": "/?frozen=1#v=ship&s=wyoming",
    "note": "the six-masted schooner — gaff quads, topsails, five headsails on the spike bowsprit, deckhouses (round 42)"

@@ -771,6 +771,62 @@
       }
     }
 
+    /* ── THE FULL-RIGGER'S RIG IS THE RECORD'S RIG (round 44, Preussen). Three rules from
+       one survey, the same class as Wyoming's: right count, in the right place, gated on
+       the record. */
+    /* (5) THE YARD LIST IS CROSSED IN FULL. `yards` on a mast is the record's own tier
+       list — Preussen's thirty square sails are six to a mast, and the segment rig drew
+       three. A misnamed yard silently drops out of the plan (the builder filters unknown
+       names), so the drawn count is audited against the declared count, per mast: every
+       square sail is positioned AT its own mast's station, so the station's census is the
+       mast's tier count. */
+    for (const mk of (H.masts || [])) {
+      if (mk.rig !== 'square' || !mk.yards) continue;
+      const mx = (mk.at - 0.5) * H.lwl;
+      let tiers = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'square' &&
+                            Math.abs(o.position.x - mx) < H.lwl * 0.045) tiers++; });
+      if (tiers !== mk.yards.length)
+        say(v.id, 'square tiers miscounted',
+            `${mk.yards.length} yards in the record at u=${mk.at}, ${tiers} sails crossed`);
+    }
+    /* (6) DECLARED STAYSAILS FLY IN THEIR OWN GAP, ALOFT. `staysails: n` on the after
+       mast is the suit on the stays to the mast ahead. A staysail lives wholly BETWEEN
+       the two stations — square canvas straddles its own mast, jibs stand before the
+       foremast, a spanker runs past the after station — and well above the deck, so the
+       gap's aloft census is the staysail count and nothing else can inflate it. */
+    (H.masts || []).forEach((mk, mi) => {
+      if (!mk.staysails || !mi) return;
+      const xF = (H.masts[mi - 1].at - 0.5) * H.lwl, xA = (mk.at - 0.5) * H.lwl;
+      let n = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.min.x > xF + 0.8 && bbx.max.x < xA - 0.8 && bbx.min.y > deckY + 4) n++;
+      } });
+      if (n !== mk.staysails)
+        say(v.id, 'staysails miscounted',
+            `${mk.staysails} in the record between u=${H.masts[mi - 1].at} and u=${mk.at}, ${n} drawn`);
+    });
+    /* (7) A DECLARED SPANKER STANDS ABAFT ITS OWN MAST. `spanker` on a square mast is the
+       full-rigger's one fore-and-aft sail; it is drawn by the gaff block, so losing it
+       leaves a complete-looking square rig — 'declared but not drawn' cannot see a sail
+       that is one of thirty-one. It is the only QUAD cloth (gaff-and-boom four-corner,
+       `kind: 'quad'`) at that station — the mast's own royal and upper topgallant drift
+       into a bare aft-of-station census through rake and belly, measured 2 of 3 hits on
+       the clean build, so the kind is the discriminant, not the box alone. */
+    for (const mk of (H.masts || [])) {
+      if (mk.rig !== 'square' || !mk.spanker) continue;
+      const mx = (mk.at - 0.5) * H.lwl;
+      let found = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'quad') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.min.x > mx - 1.5 && bbx.max.x > mx + 4) found++;
+      } });
+      if (!found)
+        say(v.id, 'spanker not set',
+            `mast at u=${mk.at} declares a spanker and no quad cloth runs aft of its station`);
+    }
+
     /* ── THE SHIP FLOATS AT HER MARKS — round 33. Both views float every hull on the
        construction fact that surfacePoint puts the load waterline at local y = 0 and bottoms
        the skin at exactly -draught (measured 0.000 on all 25, r33). This guards the fact: if
