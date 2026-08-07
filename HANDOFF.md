@@ -1942,3 +1942,6 @@ separately as data work.)
 4. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
    behind aboard-yamato; Titanic remainder; items 5 & 7 (voyage/era card enrichment, tone
    pass); r43's plate gaps (corbita era plate; dugout/dhow/cog plates; a globe-era-card frame).
+
+**End-of-round deploy note: LIVE, stamp 1786104587 → 1786115031**, verified with a
+cache-busted fetch of the data-version meta tag. Eighth clean push-triggered deploy in a row.
