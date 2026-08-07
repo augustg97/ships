@@ -83,13 +83,18 @@ def lookup(title):
         g = lambda k: (em.get(k, {}) or {}).get('value', '') or ''
         import re
         strip = lambda s: re.sub(r'<[^>]+>', '', s).strip()
+        # ⚠ Commons wraps "Unknown author" in TWO spans, and stripping the tags glues the
+        #   copies together — "Unknown authorUnknown author" reached a live credit line.
+        #   A string that is exactly its own first half twice is the double-span case.
+        undouble = lambda s: s[:len(s)//2] if s and len(s) % 2 == 0 and s[:len(s)//2] == s[len(s)//2:] else s
+        clean = lambda s: undouble(strip(s))
         return {
             'title': page['title'],
             'thumb': ii.get('thumburl') or ii.get('url'),
             'descurl': ii.get('descriptionurl', ''),
-            'licence': strip(g('LicenseShortName')) or 'see source',
-            'artist': strip(g('Artist')) or 'unknown',
-            'credit': strip(g('Credit')),
+            'licence': clean(g('LicenseShortName')) or 'see source',
+            'artist': clean(g('Artist')) or 'unknown',
+            'credit': clean(g('Credit')),
         }
     return None
 

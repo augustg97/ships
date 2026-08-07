@@ -1878,3 +1878,11 @@ the record puts a wall.** Specifically:
 2. Then **steamer (1713)**, **treasure-ship (2011)**.
 3. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
    behind aboard-yamato; Titanic remainder; items 5 & 7 (voyage/era card enrichment, tone pass).
+
+**Post-deploy fix, same round:** Preussen's live credit line read "Unknown authorUnknown
+author" — Commons wraps unknown authors in two spans and fetch_images.py's tag-strip glued the
+copies. Class fix (`undouble` in the script's extraction) plus the one data instance, in the
+book and the manifest both.
+
+**End-of-round deploy note: LIVE, stamp is in the r43 deploy-note commit.** Sixth and seventh
+clean push-triggered deploys in a row (the plates commit, then this fix).
