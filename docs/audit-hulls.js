@@ -229,6 +229,55 @@
             `record sides [${wantSides.join()}], drawn [${gotSides.join()}]`);
     }
 
+    /* ── THE NET DEFENCE IS WORN (round 39). `netDefence` hangs the anti-torpedo outfit
+       on the hull side: the shelf, the rolled net, and the record's 40 ft booms stowed in
+       the row of down-aft diagonals that is the most conspicuous thing in photograph
+       H61017. The round-37 class again — a declared fitting that silently stops producing
+       geometry, or produces it floating, level, or off the plating, is invisible to the
+       one baseline bearing. One derivation — SHIPS_HULL.netDefenceGeom — for the builder
+       and this rule. Each boom must lie ALONG the hull (fore-aft), DROOP (stowed spars
+       trail down toward the tip), ride ON the plating at its own station, stay out of the
+       water and under the deck edge; the shelf must span the declared run. */
+    if (H.netDefence) {
+      const G = SHIPS_HULL.netDefenceGeom(H);
+      const HSn = SHIPS_HULL.hullSurface(H);
+      const booms = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Net boom') booms.push(o); });
+      if (booms.length !== G.heels.length * 2)
+        say(v.id, 'net defence not worn',
+            `${G.heels.length * 2} booms derived from the record, ${booms.length} drawn`);
+      for (const o of booms) {
+        const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+        if (Math.abs(d.x) < 0.85 || Math.abs(d.y) < 0.10 || Math.abs(d.y) > 0.50)
+          say(v.id, 'net boom not stowed',
+              `a boom points (${d.x.toFixed(2)}, ${d.y.toFixed(2)}, ${d.z.toFixed(2)}) — ` +
+              'stowed spars lie fore-and-aft against the hull, drooping to the tip');
+        const bbx = new THREE.Box3().setFromObject(o);
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bbx.min.x + bbx.max.x) / 2) / H.lwl));
+        if (bbx.min.y < 0.3)
+          say(v.id, 'net boom in the water', `bottom at ${bbx.min.y.toFixed(2)} m`);
+        if (bbx.max.y > HSn.sheer(u) + 0.3)
+          say(v.id, 'net boom above the deck edge',
+              `top ${bbx.max.y.toFixed(1)} m, sheer there ${HSn.sheer(u).toFixed(1)} m`);
+        const zc = (Math.abs(bbx.min.z) + Math.abs(bbx.max.z)) / 2;
+        const k = Math.max(0, Math.min(1, (G.shelfY - G.drop / 2) / HSn.sheer(u)));
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSn, u, 0.62 + 0.38 * k)[2]);
+        if (zc < half - 0.7 || zc > half + 1.4)
+          say(v.id, 'net boom off the plating',
+              `boom centre ${zc.toFixed(1)} m off the centreline, hull side there ${half.toFixed(1)} m`);
+      }
+      if (!part.net) say(v.id, 'declared but not drawn', 'net defence');
+      else {
+        const span = part.net.x[1] - part.net.x[0];
+        const want = (G.u1 - G.u0) * H.lwl;
+        if (span < want * 0.85)
+          say(v.id, 'net shelf short',
+              `${span.toFixed(0)} m drawn against ${want.toFixed(0)} m in the record`);
+      }
+    }
+
     /* ⚠ and on a carrier the reference is the FLIGHT DECK, which overhangs the hull by design —
        that is the whole point of an angled deck. Comparing her island to the hull beam called a
        correct 35 m a fault. */

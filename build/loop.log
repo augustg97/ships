@@ -217,3 +217,20 @@ One thing seen while verifying and queued in HANDOFF: Dreadnought's foremast sta
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 55556 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 22:15:25  round starting
+Round 38 is done and live at stamp 1786080947. **Dreadnought now wears her real 1906 arrangement** — and the round itself was a rescue: the previous loop iteration had built the entire overhaul, stamped it, and then died without verifying, accepting, or committing anything, leaving ten files stranded in the tree. This round verified that work from the served files and shipped it.
+
+What the work is, now proven:
+
+- **Five turrets in the record's layout.** A new `turretSide` field stands P and Q at the deck edges — before this her card said five turrets over a drawing of three, because the builder could only draw the centreline. A calibre-derived `turretRadius` replaces beam-derived (a twin 12-inch house is now 9.4 m, Yamato's triple 46 cm 14.2 m against her real ~15), and the citadel waists between the wing barbettes the way the real ship's two-block superstructure does.
+- **Both masts are tripods** (`tripod`/`tripodRake`), the foremast standing abaft the fore funnel — the famous error that put her spotting top in the smoke, now faithfully wrong. The mainmast stands between X and Y with its feet toward X. `funnelScale` makes the aft stack fatter (it served twice the boilers), and `towerAt` unpins the bridge from the mast station.
+- **Layout verified against the record**, not memory: the Wikipedia article, the 1911 profile/plan drawing, and photograph H61017, all fetched and read this round. Every load-bearing station matched the data.
+
+Verification: audit 25/25 from the served files, with all three new rules proven by break-and-restore this session — zeroing `turretSide` fired both the wing rule and the loft-aware buried-turret rule; zeroing the strut lean fired the tripod rule on all four struts. Surveyed from four bearings via live-page captures. Ratchet: 4 of 30 frames moved, each diff read and accepted with reasons (Dreadnought is the topside rebuild over an unmoved hull; Yamato is the turret resize; the other two are card text), closing check all-clean. Third consecutive push-triggered deploy with the live stamp confirmed cache-busted.
+
+One trap got recorded in HANDOFF: during break-and-restore I ran `git checkout -- hull.js` and it silently discarded the round's own uncommitted builder work — recovered byte-identical from the built docs/ copy. On an uncommitted tree, restore by re-editing, never by checkout.
+
+Next in the queue: the serif-webfont decision, the featureless coast behind aboard-yamato, and — new this round — Dreadnought's anti-torpedo net booms, the most conspicuous thing in H61017 that our broadside still lacks.
+2026-08-06 22:47:58  round finished; HEAD is ec56ebd Deploy note r38: live at 1786080947; third clean push-triggered deploy in a row
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 61677 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 22:57:58  round starting

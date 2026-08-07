@@ -2750,6 +2750,10 @@
     [
      "Built in",
      "one year and one day, Portsmouth, 1905–06"
+    ],
+    [
+     "Net defence",
+     "steel-wire torpedo nets on 40 ft booms; landed early in WWI"
     ]
    ],
    "crew": 700,
@@ -2866,7 +2870,11 @@
      1.14
     ],
     "funnelRake": 0,
-    "year": 1906
+    "year": 1906,
+    "netDefence": {
+     "from": 0.28,
+     "to": 0.92
+    }
    }
   },
   {

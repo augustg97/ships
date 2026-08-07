@@ -1553,3 +1553,54 @@ restore by re-editing (sed back, or a stashed copy), never by git checkout.
 row: the push of 8bd536f created run 31151709154, completed success with no manual dispatch.
 Live stamp verified 1786075399 → **1786080947** with a cache-busted fetch of the data-version
 meta tag.
+
+---
+
+## Round 39 — 2026-08-06 — the net defence: Dreadnought wears her diagonals
+
+**Queue item 3 closed, as the class fix it asked for.** `netDefence` on a hull record now hangs
+the anti-torpedo outfit on the side: a net shelf riding the hull's own curve, the steel-wire
+net rolled on it, and the record's 40 ft booms (Torpedo net, Wikipedia: 12 m spars, pinned at
+or below the main-deck edge, swung against the ship at sea) stowed in the row of down-aft
+diagonals that is the most conspicuous thing in photograph H61017 — re-fetched and LOOKED AT
+this round before writing geometry. Twelve booms per side over u 0.28–0.92, spacing ~8.3 m,
+droop 14°, every heel and tip pinned to `surfacePoint` at its own station and height so the
+row follows the taper instead of standing off it. One derivation — `SHIPS_HULL.netDefenceGeom`
+— feeds the builder AND the audit rule. Dreadnought's card gains a "Net defence" row; the part
+card says the nets were landed early in WWI (net-cutters, speed), which is also the honest
+label for the one tension left: her Sea voyage is Jutland 1916, and the hull is depicted
+as-built 1906, nets and all.
+
+**Audit: 25/25 clean; the new rule proven by break-and-restore three ways** (restore by
+re-edit, never `git checkout` — last round's trap). Flattening the droop to 0° fired `net boom
+not stowed` ("a boom points (0.99, -0.00, 0.15)"); drawing 5 of 12 booms fired `net defence
+not worn` ("24 booms derived from the record, 10 drawn"); the one-side break also proved the
+count arm — and taught a smaller trap: `sed` on `for (const sgn of [1, -1])` hits every
+mirrored fitting in hull.js, so break something UNIQUE to the class under test. The rule also
+asserts each boom lies fore-and-aft against the plating at its own station (|z| within the
+hull's own half-breadth there ± tolerance), out of the water, under the deck edge, and that
+the shelf spans the declared run.
+
+**Ratchet: 1 moved of 30 — ship-dreadnought 0.325%, accepted with reason.** The diff image is
+the net defence alone: the shelf line and twelve diagonals, nothing else in the frame moved.
+Closing check pending at write time; verified before commit below. Surveyed from twelve
+bearings via spin_capture (8 high, 4 low): both sides wear the row, diagonals descend aft on
+both sides, nothing floats, nothing pierces the boot-topping, the shelf tracks the taper at
+bow and stern ends of the run.
+
+**Rule 0 check, written:** the frame reads as a rendered world. Three facts off
+ship-dreadnought: a row of a dozen spars stowed in matching down-aft diagonals along the hull
+side below a continuous shelf line; five twin-gun turrets, two of them at the deck edges; the
+tripod foremast directly abaft the fore funnel with its struts planted aft.
+
+### Next, in order
+1. The serif-webfont dependency decision (globe-default false-RED; has not fired since r35,
+   the class is still open).
+2. The land in the Sea close-up: featureless brown ramp behind aboard-yamato.
+3. Titanic remainder, if wanted: crow's nest height, funnel stations against the GA drawing,
+   enclosed A-deck promenade forward, docking bridge on the poop.
+4. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
+   preussen P-liner white waterline check.
+5. Depicted-year fittings, if ever wanted as a class: the Sea could pass a voyage year into
+   buildShip and gate dated fittings (nets 1906–1914) — queue material only; today the part
+   card carries the date honestly.

@@ -1450,6 +1450,13 @@ const PARTS = {
                   + 'floatplanes stow under the deck and come up through these flush hatches to '
                   + 'the crane — which is why her decks look so strangely empty for a ship with '
                   + 'a crew of three thousand.' },
+  net:      { stage: 4, name: 'Torpedo net defence',
+              what: 'A moored battleship\'s answer to the locomotive torpedo: steel booms forty '
+                  + 'feet long, hinged along the side, swung out at anchor to hang a steel-wire '
+                  + 'net clear of the hull. At sea the booms stow in a row of diagonals against '
+                  + 'the plating with the net rolled on its shelf — the row is most of what '
+                  + 'dates a photograph of her. Fitted from completion; landed early in the '
+                  + 'war, when net-cutting pistols and the drag on speed had beaten the idea.' },
   /* ── the uncrewed vessel ─────────────────────────────────────────────────────────────
      Its parts have no older equivalent, which is the point of them: everything here exists
      because there is nobody aboard to do the job by hand. */
@@ -3592,6 +3599,89 @@ function buildDeckHatches(S, group) {
   });
 }
 
+/* ── THE TORPEDO NET DEFENCE ───────────────────────────────────────────────────────────
+ * `netDefence` on the record hangs the anti-torpedo outfit on the hull side: a shelf along
+ * the plating with the steel-wire net rolled on it, and the 40 ft booms (Torpedo net,
+ * Wikipedia: 12 m spars, pinned at or below the main-deck edge, swung against the ship at
+ * sea) stowed in the row of down-aft diagonals that is the most conspicuous thing in
+ * photograph H61017. Everything is pinned to surfacePoint at its own station and height, so
+ * the row follows the hull's taper toward the ends instead of standing off it.
+ * One derivation — netDefenceGeom — for this builder and for the audit rule. */
+function netDefenceGeom(S) {
+  if (!S.netDefence) return null;
+  const nd = S.netDefence;
+  const u0 = nd.from !== undefined ? nd.from : 0.28;
+  const u1 = nd.to !== undefined ? nd.to : 0.92;
+  const boomM = 12.2;                          // the record's 40 ft spar
+  const slant = 14 * Math.PI / 180;            // stowed droop below horizontal, H61017
+  const du = boomM * Math.cos(slant) / S.lwl;  // fore-aft run of a stowed boom
+  const drop = boomM * Math.sin(slant);        // how far the tip hangs below the heel
+  const shelfY = hullSurface(S).sheer(0.5) * 0.58;  // the shelf line, ~main-deck edge
+  const lastHeel = u1 - du;                    // every tip stays on the run
+  const n = Math.max(3, Math.round((lastHeel - u0) * S.lwl / 8.3) + 1);
+  const heels = [];
+  for (let i = 0; i < n; i++) heels.push(u0 + (lastHeel - u0) * i / (n - 1));
+  return { u0, u1, boomM, du, drop, shelfY, heels };
+}
+
+function buildNetDefence(S, group) {
+  const G = netDefenceGeom(S);
+  if (!G) return;
+  const H = hullSurface(S);
+  const steel = new THREE.MeshStandardMaterial({ color: 0x363b41, roughness: 0.50, metalness: 0.60 });
+  const shelfMat = new THREE.MeshStandardMaterial({ color: 0x4a5057, roughness: 0.62, metalness: 0.45 });
+  const netMat = new THREE.MeshStandardMaterial({ color: 0x1f2124, roughness: 0.90, metalness: 0.15 });
+  /* the hull side at station u and height h above the load waterline — the same surface the
+     plating is lofted from, so nothing here can stand off the ship or sink into it */
+  const sideAt = (u, h) => {
+    const k = Math.max(0, Math.min(1, h / H.sheer(u)));
+    return surfacePoint(S, H, u, 0.62 + 0.38 * k);
+  };
+  const sA = G.u0 - 0.03, sB = Math.min(0.97, G.u1 + 0.01);   // the shelf runs a little past the booms
+  for (const sgn of [1, -1]) {
+    /* the shelf: a chain of plates riding the hull's own curve, each aligned to the local
+       tangent and overlapped 6% so the chain closes over it */
+    const NSEG = 18;
+    for (let i = 0; i < NSEG; i++) {
+      const ua = sA + (sB - sA) * i / NSEG, ub = sA + (sB - sA) * (i + 1) / NSEG;
+      const a = sideAt(ua, G.shelfY), b = sideAt(ub, G.shelfY);
+      const dx = b[0] - a[0], dz = sgn * (b[2] - a[2]);
+      const plate = new THREE.Mesh(
+        new THREE.BoxGeometry(Math.hypot(dx, dz) * 1.06, 0.09, 0.55), shelfMat);
+      plate.position.set((a[0] + b[0]) / 2, G.shelfY, sgn * ((a[2] + b[2]) / 2 + 0.22));
+      plate.rotation.y = Math.atan2(-dz, dx);
+      group.add(tag(plate, 'net', 'Net shelf'));
+    }
+    /* the net itself, rolled into the long sausage that lies on the shelf */
+    const pts = [];
+    for (let i = 0; i <= 40; i++) {
+      const u = sA + (sB - sA) * i / 40;
+      const p = sideAt(u, G.shelfY);
+      pts.push(new THREE.Vector3(p[0], G.shelfY + 0.23, sgn * (p[2] + 0.30)));
+    }
+    const roll = new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, 0.18, 8, false), netMat);
+    group.add(tag(roll, 'net', 'Torpedo net, rolled'));
+    /* the booms, heels pinned just under the shelf, tips trailing down-aft along the
+       plating — +x is aft, so the stowed row leans the way the photograph has it */
+    for (const uh of G.heels) {
+      const hy = G.shelfY - 0.25;
+      const a = sideAt(uh, hy), b = sideAt(uh + G.du, hy - G.drop);
+      const A = new THREE.Vector3(a[0], hy, sgn * (a[2] + 0.22));
+      const B = new THREE.Vector3(b[0], hy - G.drop, sgn * (b[2] + 0.22));
+      const dir = B.clone().sub(A);
+      const boom = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.13, 0.16, dir.length(), 10), steel);
+      boom.position.copy(A).add(B).multiplyScalar(0.5);
+      boom.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      group.add(tag(boom, 'net', 'Net boom'));
+      const hinge = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.45, 0.34), steel);
+      hinge.position.copy(A);
+      group.add(tag(hinge, 'net', 'Boom hinge'));
+    }
+  }
+}
+
 function buildWingSail(S, group, mats) {
   if (!S.wingSail) return;
   const H = hullSurface(S);
@@ -4527,6 +4617,7 @@ function buildShip(S, opts) {
   if (FINE) buildDeckHatches(S, group);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
+  if (FINE && S.netDefence) buildNetDefence(S, group);
   if (FINE) buildOars(S, group, mats.woodPale);
   if (FINE) buildPaddles(S, group, mats);
   if (FINE) buildScrews(S, group);
@@ -4603,4 +4694,4 @@ function buildShip(S, opts) {
 }
 
 window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
-                      superellipseFullness, surfacePoint, landingStrip, linerHouse };
+                      superellipseFullness, surfacePoint, landingStrip, linerHouse, netDefenceGeom };
