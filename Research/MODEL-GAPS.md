@@ -73,6 +73,9 @@ independently, and have not been.
 ## P2 — authored where it ought to be modelled
 
 ### B1. Vessel hulls are not drawn at all — the largest piece of the original ask outstanding
+**Superseded, rounds 24–46:** hulls are generated and drawn for all 25 vessels, surveyed from
+all angles, and the round-23 crudest-first queue closed with the treasure ship. Kept for the
+record of what the inputs were.
 SCOPE D3 commits to **generated hulls** from attested dimensions plus published form
 coefficients, with the inference shown. Vessels are currently cards.
 Inputs exist: MAN's *Basic Principles of Ship Propulsion* Table 1.01 for modern block
@@ -96,6 +99,13 @@ which, where it is being looked at.**
 Level 3 (2.44 km, 262 MB) is built and not shipped because the renderer never asks for it.
 SCOPE §2 promises 2.44 km. **Fix:** a detail-patch loader fetching only the z3 tiles covering
 the current view into a second texture with its own uv rect.
+
+### B9. The oar floor wind-scales — a calm slows the paddlers
+The dugout's and trireme's muscle-powered floor sits inside a sail polar, and `route.js`
+scales every sail curve by √(wind/8). So light air slows the oars and a gale speeds them,
+neither of which is how muscle works. Wrong, known, and a **router** change, not a data
+change: the polar needs a wind-independent floor term the router does not scale (r47, when
+every vessel got its own anchored curve and this became visible arithmetic).
 
 ---
 

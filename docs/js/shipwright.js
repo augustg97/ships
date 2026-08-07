@@ -628,6 +628,13 @@ function swFillCard(v) {
      card: Wyoming carried 3,730 tons with thirteen hands, a 74 carried 640 men in 57 metres,
      and the unmanned vessel carries nobody at all. It belongs beside the speed, not buried in
      the prose. */
+  /* ⚠ An engine has no polar in the sailing sense: beat 0/0 marks it, and the wind cells
+     below are meaningless for it. Titanic's card once read "closest made good, light airs:
+     0°" — a beat angle on a turbine liner. An engine card carries the speed the record
+     states and the speed the router actually crosses oceans at, labeled as what each is —
+     the steamer's 12.25 kn trial figure sat over a curve topping at 9.6 for rounds with
+     nothing on the card saying which one the model believed. */
+  const eng = P.beatLight === 0 && P.beatHard === 0;
   const cap = [
     [v.crew !== undefined ? String(v.crew) : '—', v.crew === 0 ? 'crew — nobody aboard' : 'crew'],
     [v.pax !== undefined ? String(v.pax) : '—', v.pax === undefined ? 'passengers unrecorded' : 'passengers'],
@@ -635,7 +642,12 @@ function swFillCard(v) {
        "9.6 kn best speed" against a real 21 kn service speed, because the number was coming
        from a rig curve she does not have. An attested speed wins where one exists. */
     [(v.speedKn !== undefined ? v.speedKn.toFixed(1) : bestV.toFixed(1)) + ' kn',
-     v.speedKn !== undefined ? 'service speed' : 'best speed'],
+     v.speedKn !== undefined ? 'service speed' : 'best speed, in a moderate breeze'],
+  ].concat(eng ? [
+    [bestV.toFixed(1) + ' kn', 'at sea, in the model — the router uses this'],
+    ['0°', 'closest made good — straight upwind, under power'],
+    ['—', 'the wind does not set her speed'],
+  ] : [
     [bestA + '°', 'at this angle off the wind'],
     /* ⚠ "made good" is in the LABEL, not in a paragraph underneath. The note used to spend
        three lines explaining that these are course-made-good rather than heading, and restating
@@ -643,7 +655,7 @@ function swFillCard(v) {
        already drifted from them. Put the meaning where the number is. */
     [(P.beatLight !== undefined ? P.beatLight + '°' : '—'), 'closest made good, light airs'],
     [(P.beatHard !== undefined ? P.beatHard + '°' : '—'), 'closest made good, blowing hard'],
-  ];
+  ]);
   document.getElementById('swCap').innerHTML =
     '<h4>What she could do</h4><div class="cap">' +
     cap.map(c => '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>').join('') + '</div>' +

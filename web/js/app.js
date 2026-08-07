@@ -2488,7 +2488,7 @@ function passageCard(tr, ves) {
        gap between them is the front page's stated factor of two, not a bug to hide. */
     ves.speedKn !== undefined
       ? ['Service speed', ves.speedKn.toFixed(1) + ' kn']
-      : ['Best speed', shipKn(ves).toFixed(1) + ' kn'],
+      : ['Best speed, moderate breeze', shipKn(ves).toFixed(1) + ' kn'],
   ];
   c.querySelector('.pc-rows').innerHTML =
     rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +

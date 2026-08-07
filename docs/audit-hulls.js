@@ -1122,9 +1122,74 @@
             ' — double-sided lighting flips these the wrong way');
     }
 
+    /* ── THE POLAR IS THE VESSEL'S OWN (round 47). ─────────────────────────────────────
+       25 vessels shared 8 curves: the card printed Preussen's 20.5 kn over the corbita's
+       5.8-kn curve, Yamato's 27 over a shared 9.6, and the audit could not see it because
+       no rule asked. The polar's SHAPE belongs to the rig; its SCALE must be anchored to a
+       figure from the vessel's own record, named in polar.anchor — and the arithmetic that
+       ties record to curve is route.js's own: a sail curve saturates at 1.55× reference,
+       so a logged burst must sit at the ceiling, a day's run must fit under it, and an
+       engine's curve IS its at-sea speed. */
+    {
+      const P = v.polar || {};
+      const anch = P.anchor;
+      const cmax = P.curve ? Math.max.apply(null, Object.keys(P.curve).map(k => P.curve[k])) : 0;
+      if (!anch || !(anch.kn > 0) || !anch.source)
+        say(v.id, 'polar without an anchor', 'no polar.anchor {kn, kind, source} names the record');
+      else if (P.beatLight === 0 && P.beatHard === 0) {
+        if (Math.abs(cmax - anch.kn) > 0.11)
+          say(v.id, 'engine curve off its anchor',
+              `routes at ${cmax} kn against an anchored ${anch.kn}`);
+        if (v.speedKn !== undefined && (cmax < 0.7 * v.speedKn || cmax > 1.05 * v.speedKn))
+          say(v.id, 'engine curve contradicts the card',
+              `routes at ${cmax} kn against a stated ${v.speedKn} — the steamer fault`);
+      } else if (anch.kind === 'burst') {
+        if (Math.abs(1.55 * cmax - anch.kn) > 0.15 * anch.kn)
+          say(v.id, 'burst anchor off the 1.55× ceiling',
+              `1.55 × ${cmax} = ${(1.55 * cmax).toFixed(1)} kn vs the record's ${anch.kn}`);
+      } else {
+        if (anch.kn > 1.55 * cmax)
+          say(v.id, "day's run above the hull's own ceiling",
+              `${anch.kn} kn recorded, curve ceiling ${(1.55 * cmax).toFixed(1)}`);
+        if (cmax > 2 * anch.kn)
+          say(v.id, 'polar claims twice its own record',
+              `curve max ${cmax} kn against a day's-run anchor of ${anch.kn}`);
+      }
+
+      /* And the card's PROSE is held to the same ceiling as its curve. The dugout carried
+         the trireme's whole rigNote — "8.3 kn sprint", Olympias's own measurement — for as
+         long as the two shared a paddling curve, and the shared-curve rule above cannot see
+         it because text is not a curve. A speed the note states is a claim about THIS hull;
+         it must fit under this hull's own 1.55× ceiling (engines: the curve itself). Notes
+         shared within a rig class state no figures, so they pass untouched. */
+      {
+        const eng = P.beatLight === 0 && P.beatHard === 0;
+        const ceil = (eng ? cmax : 1.55 * cmax) + 0.15;
+        const m = (P.rigNote || '').match(/\d+(?:\.\d+)?(?=\s*kn)/g) || [];
+        const over = m.map(Number).filter(kn => kn > ceil);
+        if (over.length)
+          say(v.id, "rigNote claims a speed the hull cannot make",
+              `note states ${over.join(', ')} kn over a ceiling of ${ceil.toFixed(1)} — another vessel's record pasted on`);
+      }
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });
+  }
+
+  /* ── AND NO TWO VESSELS SHARE A CURVE. ─────────────────────────────────────────────────
+     The r47 derivation gives every hull its own scale, so a byte-identical curve on two
+     vessels means someone pasted a class curve back in — the exact regression this round
+     removed. */
+  {
+    const curveOwner = {};
+    for (const v of list) {
+      if (!v.polar || !v.polar.curve) continue;
+      const k = JSON.stringify(v.polar.curve);
+      if (curveOwner[k]) say(v.id, 'shared polar curve', 'byte-identical with ' + curveOwner[k]);
+      else curveOwner[k] = v.id;
+    }
   }
   return { problems, checked: rows.length, rows };
 })()

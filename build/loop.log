@@ -434,3 +434,32 @@ Round 45 is done and live. The steamer — next on the survey queue at 1713 tris
   previous round still running — skipping this firing
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 09:35:23  round starting
+Round 46 is done and live. The treasure ship — last item on the crudest-first queue — was rebuilt from the record, and every fix landed at the class level, so the 34 m Chinese junk inherited all of it.
+
+**What the survey found (12 spin bearings, before):** five white rectangles for sails on the one rig famous for its fanned profile, a European yacht bow on a hull whose own stage card teaches "bulkheads, then planking," open uncapped shell ends, a door-sized invisible rudder, no aft castle, and no running rigging at all.
+
+**What changed, and why it's the record's call:**
+- **The sail plan.** The code had cited Reddish's measured junk proportions for eleven rounds while drawing them as a rectangle. His own numbers — yard ⅔ of the boom, leech 1.75 booms — only close as a fan with the yard near 60°. The spars are laid first and the cloth is cut to them panel by panel from the same endpoints, so spar and canvas cannot disagree. Sheetlet crowfeet and halyards are drawn, since being worked from the deck is the junk rig's whole argument.
+- **The hull ends.** Bulkhead-built hulls now end in transom caps lofted from the hull's own end sections; stem and sternpost are gated off. The bluntness itself is declared in the data as the ship's own lines, so no other hull moved.
+- **The rudder.** Sized from the Longjiang excavation's 11.07 m rudder post: chord near a tenth of the waterline, foot lowered below the bottom where it serves as the leeway board of a keel-less hull — with a documented exemption in the audit's below-the-keel rule, since she docks with it raised in its trunk.
+- **The aft castle**, tiered and latticed, lofted off the hull's own half-breadth — and the rig reads the castle from the same data, so the jigger lifts its foot over the roof and shrinks its fan, which is also the record's look.
+
+**Verification:** audit 25/25 with three new rules (bulkhead ends, junk spar census, junk rudder); its contact rule caught the rudder floating clear of the transom and was right — not a sixth wrong call. Two ratchet movers classified from full-size diffs and accepted (ship-junk 20.5% is the rebuild; ship-dhow 0.49% is the junk's fan poking into her neighbour's frame edge). Two new baselines committed, ship-treasure and aboard-treasure, both re-capturing at 0.000%. Live stamp verified 1786119344 → 1786123059. I also confirmed the previous unlogged round (card track-distance work, commit 4b59b05) live — it had been pushed without verification or a HANDOFF entry; both are now recorded.
+
+HANDOFF points the next round at the shared-polar data fault — the crudest-first geometry queue is finished, and cards claiming 12.3 kn over 9.6 kn curves are now the loudest standing wrongness. One quirk left for someday: asking for a voyage in the wrong era (`#e=3&f=zhenghe`) hangs the app before first paint; the frame note carries the warning.
+2026-08-07 10:49:38  round finished; HEAD is e080a13 Deploy note r46: the treasure ship's junk grammar live at 1786123059; verification ratchet clean across all 36 frames
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 68544 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 10:59:38  round starting
+The ratchet is still capturing (36 frames, fresh page each — it takes several minutes and its output is piped through `tail`, so nothing shows until it finishes). I'll pick this up when the background run completes.
+
+So far this round: all 25 vessels now carry their own polar, each anchored to a figure from its own record (`Research/POLARS.md` has the table, `Research/polars.py` the derivation); Great Eastern is an engine at last, the USV slowed from a phantom 16 kn to its real 4, Preussen routes at 13.2 kn reference against the corbita's 5.7; the shipwright card stopped printing beat angles on turbine liners; and four new audit rules (anchor present, engine-vs-card consistency, burst/passage arithmetic, no shared curves) pass on the real data and fire correctly on injected faults.
+2026-08-07 11:26:51  round finished; HEAD is e080a13 Deploy note r46: the treasure ship's junk grammar live at 1786123059; verification ratchet clean across all 36 frames
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 79875 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 11:36:52  round starting
+The tree holds exactly the round's work: the polar data and code, the audit with its new rules, thirty rebaselined frames, the research docs, and HANDOFF. Waiting on the verification ratchet before committing.
+2026-08-07 12:02:17  round finished; HEAD is e080a13 Deploy note r46: the treasure ship's junk grammar live at 1786123059; verification ratchet clean across all 36 frames
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 84521 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 12:12:17  round starting

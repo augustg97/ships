@@ -2116,3 +2116,85 @@ row (the tenth was the unlogged 4b59b05 round, verified late, above). Verificati
 after the accepts: **all 36 frames within tolerance, no transients this run** — and the two
 new baselines re-captured at 0.000%, so the treasure-ship and aboard-treasure frames are
 deterministic from birth.
+
+---
+
+## Round 47 — 2026-08-07 — Every vessel gets her own polar, and the card stops contradicting the router
+
+**This round inherited an uncommitted tree.** Two sessions (10:59 and 11:36 starts) did the
+polar derivation and died before verifying it — the second while the ratchet was still
+capturing, leaving seven modified files, two new Research files, and no commit. Everything
+below was verified from scratch this session before being trusted: audit re-run, every diff
+read, every moved frame classified from its image, both new Research files read against the
+data they claim to describe.
+
+**The queue item: one polar per vessel class — the shared-polar card fault, carried since
+the steamer round.** Until now 25 vessels shared 8 curves; the card printed Preussen's
+20.5 kn over the corbita's 5.8-kn curve and Yamato's 27 over a shared 9.6. The structure of
+the fix (Research/POLARS.md has the table, Research/polars.py the derivation, and the
+derivation **reruns byte-identical** against the shipped vessels.json):
+
+1. **Shape is the rig's, scale is the vessel's.** Each rig's researched angular curve,
+   normalized, times a per-vessel `max8` anchored to a figure from the vessel's own record,
+   named in `polar.anchor {kn, kind, source}` — and `kind` matters, because route.js
+   saturates sail curves at 1.55× reference: a logged **burst** anchors the ceiling
+   (Preussen 20.5/1.55 → 13.2), a **passage** must fit under it, an **engine's** curve IS
+   its at-sea speed, unscaled.
+2. **Great Eastern is an engine at last** — she routed as a pure gaff schooner that could
+   not sail within 55° of the wind, a steamer with a 7.3 m screw and 17 m paddles. Beat
+   0/0, speedKn 14, routes at 12. The USV's rig label said "diesel motorship" against a
+   card reading no canvas — now "wind, wave and solar", at her real 4 kn, not the
+   phantom 16.
+3. **The engine card stops printing beat angles.** Titanic's card once read "closest made
+   good, light airs: 0°" — a beat angle on a turbine liner. An engine card now carries the
+   record's speed AND the speed the router crosses oceans at, labeled as what each is
+   ("12.25 kn trial" beside "10.0 kn at sea, in the model — the router uses this").
+4. **The east-indiaman curve is pinned byte-for-byte** — the front page's 119-day
+   falsification test rides on it; polars.py asserts it.
+5. **Six audit rules** in the polar block: anchor present; engine curve equals its anchor;
+   engine curve vs card speedKn (the steamer fault); burst at the 1.55× ceiling; passage
+   under the ceiling and the curve under twice its record; no two vessels byte-share a
+   curve. All six tested against the live page.
+
+**Found while verifying, fixed at the class: the prose shared curves too.** The dugout
+carried the trireme's whole rigNote — "8.3 kn sprint", Olympias's own measured figure, on
+a logboat anchored at 3.0 kn — and the shared-curve rule cannot see text. Her note now
+states her own record (Kaifu's Sugime crossing: 225 km of Kuroshio in 45 h ≈ 3 kn, the
+same figure her card rows already carried), her rig reads "paddles" (the model draws no
+mast, and none is attested this early), and a **seventh rule** holds every rigNote's stated
+speeds under that hull's own 1.55× ceiling. Run against the faulty data it fired exactly
+once, on the dugout, and passed the trireme, whose record it is. Audit **25/25 clean**
+after the fix, copies verified identical in Research/, web/, docs/.
+
+**Also set right:** POLARS.md claimed the oar-floor wind-scaling gap was "logged in
+MODEL-GAPS" — it was not. It is now B9 (the muscle floor sits in a sail curve, so route.js
+slows the paddlers in a calm; a router change, not a data change). And MODEL-GAPS B1
+("vessel hulls are not drawn at all") is marked superseded by rounds 24–46 — it described
+a world three eras of work ago.
+
+**Frames: 20 movers, all classified from their full-size diffs, 30 baselines accepted with
+logged reasons.** Three classes: (a) the eight engine shipwright cards, 1.2–3.8% — the new
+card rows and the reference photo reflowed under them; (b) ten aboard/sea scenes plus
+map-floor, 1.2–56.6% — **each vessel stands elsewhere on her track at the frozen instant
+now her polar is her own** (aboard-wyoming's readout moved 42°01′N 70°22′W → 42°02′N
+70°20′W, course 098→082; the trireme rides off Cape Malea at her own 5.4 kn); (c)
+globe-default 0.057% — era-0 route markers repositioned, dugout slower, canoe faster; NOT
+the webfont transient this time, the diff shows markers, not label halos. Eight sailing
+shipwright cards moved sub-threshold (~0.03%, the "best speed, moderate breeze" label and
+the vessel's own number) and were accepted anyway to keep the baselines exact.
+
+**Rule 0, written:** ship-great-eastern reads as a rendered world. Three facts off it: a
+black iron hull pierced by a long row of portholes, driven by a midship paddle wheel under
+a fan of radial floats; six masts of fore-and-aft canvas standing between buff, black-capped
+funnels; a card that holds 14.0 kn service speed beside 12.0 kn at sea in the model, 0°
+closest made good — straight upwind, under power. (Honest fourth: her paddling ancestors
+still wind-scale — B9 — so a calm slows the dugout's crew, which is the loudest wrongness
+the polars leave behind.)
+
+### Next, in order
+1. **B9, the oar floor** — give the polar a wind-independent floor term the router does not
+   scale. The dugout and trireme are the class; the fix is in route.js, not the data.
+2. Carried: serif-webfont decision (globe-default false-RED class — note this round's
+   globe-default mover was real and accepted); featureless brown land behind aboard-yamato;
+   Titanic remainder; r43's plate gaps (corbita era plate; dugout/dhow/cog plates; a
+   globe-era-card frame); wrong-era voyage hash (#e=3&f=zhenghe) hangs before first paint.
