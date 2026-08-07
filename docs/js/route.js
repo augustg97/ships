@@ -147,30 +147,49 @@ function compilePolar(polar) {
     const f = hi === lo ? 0 : (a - lo) / (hi - lo);
     spd[a] = polar.curve[lo] * (1 - f) + polar.curve[hi] * f;
   }
+  /* The muscle floor, precompiled like everything else the inner loop touches. head[a] is
+     the fraction of the true wind that is on the nose at angle a — cosine forward of the
+     beam, zero abaft it. Windage only ever subtracts: the fair-wind help is already in the
+     curve, and adding it twice would sail the paddlers downwind on their own wake. */
+  let head = null;
+  if (polar.floor) {
+    head = new Float32Array(n);
+    for (let a = 0; a < 91; a++) head[a] = Math.cos(a * Math.PI / 180);
+  }
   return { spd, beatLight: polar.beatLight, beatHard: polar.beatHard,
-           isEngine: polar.beatLight === 0, STEP };
+           isEngine: polar.beatLight === 0, STEP,
+           floorKn: polar.floor ? polar.floor.kn : 0,
+           floorLoss: polar.floor ? polar.floor.lossKnPerMs : 0, head };
 }
 
 function polarSpeed(P, twsMs, twaDeg) {
   const twa = twaDeg < 0 ? -twaDeg : twaDeg;
+  const a = twa > 180 ? 180 : (twa | 0);
+  const base = P.spd[a];
+  if (P.isEngine) return base;
 
   /* The beat angle worsens as it blows harder: 71° at force 2 becoming 90° at force 4 is
      MEASURED, on GPS-instrumented replicas. Above the hard limit a sailing hull makes no
      ground to windward at all, and the router is told so rather than allowed to cheat. */
-  if (!P.isEngine) {
-    let hard = (twsMs - 5.0) / 6.0;
-    hard = hard < 0 ? 0 : (hard > 1 ? 1 : hard);
-    const beat = P.beatLight + (P.beatHard - P.beatLight) * hard;
-    if (twa < beat) return 0;                       // cannot be sailed, at any speed
+  let sail = 0;
+  let hard = (twsMs - 5.0) / 6.0;
+  hard = hard < 0 ? 0 : (hard > 1 ? 1 : hard);
+  const beat = P.beatLight + (P.beatHard - P.beatLight) * hard;
+  if (twa >= beat) {
+    /* Speed rises roughly with the square root of wind and then saturates on the hull's own
+       wave-making. */
+    const s = Math.sqrt((twsMs > 0.4 ? twsMs : 0.4) / 8.0);
+    sail = base * (s > 1.55 ? 1.55 : s);
   }
+  if (!P.floorKn) return sail;
 
-  const base = P.spd[twa > 180 ? 180 : (twa | 0)];
-  if (P.isEngine) return base;
-
-  /* Speed rises roughly with the square root of wind and then saturates on the hull's own
-     wave-making. */
-  const s = Math.sqrt((twsMs > 0.4 ? twsMs : 0.4) / 8.0);
-  return base * (s > 1.55 ? 1.55 : s);
+  /* The muscle floor. Oars are not a sail: a calm does not slow them and a gale does not
+     help them, so this term is never scaled by the wind — the only thing the wind does to
+     a paddled hull is stand against her, and the loss is the measured windage of hull and
+     crew per m/s of head component (Olympias: 5.4 kn cruise falling to ~2.9 into a head
+     sea). She goes straight upwind at it — no beat angle under muscle. */
+  const mus = P.floorKn - P.floorLoss * P.head[a] * twsMs;
+  return sail > mus ? sail : (mus > 0 ? mus : 0);
 }
 
 /* ── binary heap ───────────────────────────────────────────────────────────────── */

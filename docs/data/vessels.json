@@ -35,8 +35,8 @@
    "cite": "Clarkson et al. 2017; Kealy, Louys & O'Connor 2018; Kaifu experimental crossings 2016–19.",
    "from": -68000,
    "polar": {
-    "beatLight": 30,
-    "beatHard": 45,
+    "beatLight": 90,
+    "beatHard": 105,
     "curve": {
      "0": 2.9,
      "30": 3.1,
@@ -50,12 +50,17 @@
      "150": 3.9,
      "180": 3.8
     },
-    "rigNote": "Paddled. The one measured figure is a crossing, not a sprint: a 7.6 m cedar dugout took 225 km of the Kuroshio, Taiwan to Yonaguni, in 45 hours — very close to 3 kn held for two days, and that is the figure the router believes. The rise off the wind is the fair-wind mat sail of the Pacific logboats (Haddon & Hornell), set only when the wind serves; no mast is drawn, and none is attested this early.",
-    "rig": "paddles",
+    "rigNote": "Paddled. The one measured figure is a crossing, not a sprint: a 7.6 m cedar dugout took 225 km of the Kuroshio, Taiwan to Yonaguni, in 45 hours — very close to 3 kn held for two days, and that is the paddling floor the router holds in any wind, including a calm. The rise off the wind is the fair-wind mat sail of the Pacific logboats (Haddon & Hornell), set only when the wind serves; no mast is drawn, and none is attested this early.",
+    "rig": "paddles, with a mat sail for fair winds",
     "anchor": {
      "kn": 3.0,
      "kind": "passage",
      "source": "Kaifu's Sugime crossing 2019: 225 km in 45 h ≈ 3 kn; Haddon & Hornell, Canoes of Oceania, for the fair-wind sail"
+    },
+    "floor": {
+     "kn": 3.0,
+     "lossKnPerMs": 0.17,
+     "source": "Kaifu's Sugime crossing for the floor. No measured logboat headwind figure exists; the loss is Olympias's fractional windage (46% of floor at 8 m/s) carried over — an inference, stated as one"
     }
    },
    "hull": {
@@ -289,8 +294,8 @@
    "cite": "Rankov (ed.), *Trireme Olympias: The Final Report* (Oxbow, 2012); Morrison, Coates & Rankov, *The Athenian Trireme*.",
    "from": -700,
    "polar": {
-    "beatLight": 30,
-    "beatHard": 45,
+    "beatLight": 80,
+    "beatHard": 95,
     "curve": {
      "0": 3.7,
      "30": 4.0,
@@ -304,12 +309,17 @@
      "150": 5.1,
      "180": 4.8
     },
-    "rigNote": "A galley goes where it likes and not far, and the figure above is her SAILING speed — the sail is for fair winds only. Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre of sea — measured on the reconstruction Olympias, which fell short of what the ancient sources imply and is thought to be ~10% too short in the hull.",
+    "rigNote": "A galley goes where it likes and not far, and the figure above is her SAILING speed — the sail is for fair winds only. Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre of sea — measured on the reconstruction Olympias, which fell short of what the ancient sources imply and is thought to be ~10% too short in the hull. The router holds the 5.4 as her oar floor in any wind, falling to the measured 2.9 dead upwind in a fresh breeze.",
     "rig": "oars, with a square sail for fair winds",
     "anchor": {
      "kn": 8.3,
      "kind": "burst",
      "source": "Olympias Final Report: 8.3 kn \"achieved only momentarily\", cruise 5.4 under oar"
+    },
+    "floor": {
+     "kn": 5.4,
+     "lossKnPerMs": 0.31,
+     "source": "Olympias sea trials: 5.4 kn oar cruise; ~2.9 kn into a head sea at force 4–5, taken at the polar's 8 m/s reference — (5.4 − 2.9)/8"
     }
    },
    "hull": {
@@ -3381,7 +3391,7 @@
      "180": 28.1
     },
     "rigNote": "Weather is a delay, not a route.",
-    "rig": "diesel motorship",
+    "rig": "nuclear steam, four shafts",
     "anchor": {
      "kn": 30.0,
      "kind": "sea service",

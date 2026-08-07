@@ -92,6 +92,36 @@ V = {
         'source': 'class design service 21–25 kn; slow-steamed 16–18 since 2008 (Notteboom & Cariou)'}),
 }
 
+# r48 (MODEL-GAPS B9): muscle is not a sail. route.js scales sail curves by sqrt(wind/8),
+# so for as long as the paddlers' cruise sat inside a sail curve, a calm slowed the oars
+# and a gale sped them. polar.floor is thrust the router never wind-scales, less
+# lossKnPerMs per m/s of head component — the wind only ever stands AGAINST a paddled
+# hull; the fair-wind help is already in the curve. Olympias gives the one measured pair
+# (5.4 kn cruise, ~2.9 into a head sea at the 8 m/s reference → 0.31 kn per m/s); the
+# dugout has no measured headwind figure, so she inherits the fractional windage (46% of
+# floor at 8 m/s → 0.17), stated as an inference in her source line.
+FLOOR = {
+    'dugout':  {'kn': 3.0, 'lossKnPerMs': 0.17,
+        'source': "Kaifu's Sugime crossing for the floor. No measured logboat headwind figure exists; the loss is Olympias's fractional windage (46% of floor at 8 m/s) carried over — an inference, stated as one"},
+    'trireme': {'kn': 5.4, 'lossKnPerMs': 0.31,
+        'source': "Olympias sea trials: 5.4 kn oar cruise; ~2.9 kn into a head sea at force 4–5, taken at the polar's 8 m/s reference — (5.4 − 2.9)/8"},
+}
+
+# r48, second face of the same fault: the two muscled hulls carried beat angles of 30/45 —
+# tighter than a modern sloop — a compensator from before the floor existed, when impossible
+# pointing was the only way an oared hull could make windward ground at all. With the floor
+# doing the upwind work the pair became a printed falsehood ("closest made good under sail:
+# 30°" on a fair-wind square rig). The sail's beat angles are now the RIG's, the same
+# principle the r47 curves stand on: the trireme's single square sail takes the ancient-square
+# class pair already researched for the corbita (80/95 made good — Olympias's sail trials
+# found her windward ability poor, consistent with the class and nowhere near 30); the
+# dugout's occasional mat sail (Haddon & Hornell) is a fair-wind rig that claims no windward
+# ground at all — 90/105, abaft the beam only.
+BEAT = {
+    'dugout':  (90, 105),
+    'trireme': (80, 95),
+}
+
 
 def main():
     doc = json.load(open(PATH))
@@ -107,6 +137,12 @@ def main():
         curve = {a: round(base[i] / peak * max8, 1) for i, a in enumerate(ANGLES)}
         v['polar']['curve'] = curve
         v['polar']['anchor'] = anchor
+        # popped before set so a stale floor never survives on a vessel that lost one
+        v['polar'].pop('floor', None)
+        if v['id'] in FLOOR:
+            v['polar']['floor'] = FLOOR[v['id']]
+        if v['id'] in BEAT:
+            v['polar']['beatLight'], v['polar']['beatHard'] = BEAT[v['id']]
 
         if v['id'] == 'great-eastern':
             # she was routed as a pure gaff schooner that could not sail within 55°
@@ -122,13 +158,30 @@ def main():
             # she carried the trireme's whole rigNote — "8.3 kn sprint", Olympias's own
             # measurement — for as long as the two shared a paddling curve. Her record is
             # her own, and it is a crossing, not a sprint.
-            v['polar']['rig'] = 'paddles'
+            # 'paddles' alone let the card deny the mat sail her own beat rows describe —
+            # name the fair-wind rig, the way the trireme's line names her square sail.
+            v['polar']['rig'] = 'paddles, with a mat sail for fair winds'
             v['polar']['rigNote'] = ('Paddled. The one measured figure is a crossing, not ' +
                 'a sprint: a 7.6 m cedar dugout took 225 km of the Kuroshio, Taiwan to ' +
                 'Yonaguni, in 45 hours — very close to 3 kn held for two days, and that ' +
-                'is the figure the router believes. The rise off the wind is the ' +
-                'fair-wind mat sail of the Pacific logboats (Haddon & Hornell), set only ' +
-                'when the wind serves; no mast is drawn, and none is attested this early.')
+                'is the paddling floor the router holds in any wind, including a calm. ' +
+                'The rise off the wind is the fair-wind mat sail of the Pacific logboats ' +
+                '(Haddon & Hornell), set only when the wind serves; no mast is drawn, ' +
+                'and none is attested this early.')
+        if v['id'] == 'trireme':
+            # r48: the note stated the oar figures; now the router believes them too.
+            v['polar']['rigNote'] = ('A galley goes where it likes and not far, and the ' +
+                'figure above is her SAILING speed — the sail is for fair winds only. ' +
+                'Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a ' +
+                'headwind with a metre of sea — measured on the reconstruction Olympias, ' +
+                'which fell short of what the ancient sources imply and is thought to be ' +
+                '~10% too short in the hull. The router holds the 5.4 as her oar floor ' +
+                'in any wind, falling to the measured 2.9 dead upwind in a fresh breeze.')
+        if v['id'] == 'carrier':
+            # 'diesel motorship' was the shared engine-class label, invisible while the
+            # card keyed 'no sail' off her mastless hull. Now the line prints, and a
+            # Ford-class is nothing of the kind: two A1B reactors, steam to four shafts.
+            v['polar']['rig'] = 'nuclear steam, four shafts'
         if v['id'] == 'usv':
             v['polar']['rig'] = 'wind, wave and solar'
             v['polar']['rigNote'] = ('Harvests its drive from wind, wave and sun — slow ' +

@@ -574,8 +574,7 @@ function swOpen(vessel) {
   document.getElementById('shipwright').classList.remove('hidden');
   document.getElementById('swRuler').style.display = 'flex';
   document.getElementById('swTitle').textContent = vessel.name;
-  document.getElementById('swSub').textContent =
-    (vessel.sub || '') + ' · ' + (vessel.hull.masts.length ? vessel.polar.rig : 'no sail');
+  document.getElementById('swSub').textContent = rigLine(vessel);
   document.getElementById('swDims').innerHTML = [
     ['Length overall', L.toFixed(1) + ' m'],
     ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
@@ -653,9 +652,22 @@ function swFillCard(v) {
        three lines explaining that these are course-made-good rather than heading, and restating
        the numbers while it did — which made the prose a second copy of the figures, and it had
        already drifted from them. Put the meaning where the number is. */
-    [(P.beatLight !== undefined ? P.beatLight + '°' : '—'), 'closest made good, light airs'],
-    [(P.beatHard !== undefined ? P.beatHard + '°' : '—'), 'closest made good, blowing hard'],
-  ]);
+    [(P.beatLight !== undefined ? P.beatLight + '°' : '—'),
+     P.floor ? 'closest made good under sail, light airs' : 'closest made good, light airs'],
+    [(P.beatHard !== undefined ? P.beatHard + '°' : '—'),
+     P.floor ? 'closest made good under sail, blowing hard' : 'closest made good, blowing hard'],
+  ]).concat(P.floor ? (() => {
+    /* A muscled hull has a second engine that is not the wind's, so the beat angles above
+       are the SAIL's limits only: under oar she goes straight upwind, paying the measured
+       windage. The router holds the same two numbers — the floor unscaled by wind, less
+       lossKnPerMs per m/s of head component. */
+    const word = /oar/.test(P.rig || '') ? 'oar' : 'paddle';
+    return [
+      [P.floor.kn.toFixed(1) + ' kn', 'under ' + word + ', any heading — a calm does not slow her'],
+      [Math.max(0, P.floor.kn - P.floor.lossKnPerMs * 8).toFixed(1) + ' kn',
+       'made good dead upwind, fresh breeze — windage, not a beat limit'],
+    ];
+  })() : []);
   document.getElementById('swCap').innerHTML =
     '<h4>What she could do</h4><div class="cap">' +
     cap.map(c => '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>').join('') + '</div>' +
@@ -929,5 +941,16 @@ function swFrame(now) {
   SW.renderer.render(SW.scene, SW.cam);
 }
 
+/* ⚠ The subtitle is the record's rig, not the mesh's mast count. This line once keyed
+   'no sail' off hull.masts.length, so every mastless hull had its rig text overridden:
+   the dugout read "no sail" above two "closest made good under sail" rows (her mat sail
+   is real, just undrawn), and the USV read "no sail" a round after her label was fixed
+   to "wind, wave and solar". One composer for both card views; the audit runs it over
+   every hull. */
+function rigLine(vessel) {
+  return (vessel.sub || '') + ' · ' +
+         ((vessel.polar && vessel.polar.rig) ? vessel.polar.rig : 'no sail');
+}
+
 addEventListener('resize', swResize);
-window.SHIPS_SW = { swOpen, swClose, swFrame, SW };
+window.SHIPS_SW = { swOpen, swClose, swFrame, SW, rigLine };

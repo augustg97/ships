@@ -2198,3 +2198,131 @@ the polars leave behind.)
    globe-default mover was real and accepted); featureless brown land behind aboard-yamato;
    Titanic remainder; r43's plate gaps (corbita era plate; dugout/dhow/cog plates; a
    globe-era-card frame); wrong-era voyage hash (#e=3&f=zhenghe) hangs before first paint.
+
+**End-of-round deploy note (written by the r48 session, which inherited this round
+uncommitted): LIVE, stamp 1786123059 → 1786129104**, verified with a cache-busted fetch of
+the data-version meta tag. The r47 sessions died before committing; the r48 session
+re-verified everything from scratch — audit re-run 25/25, full ratchet re-run **all 36
+frames 0.000–0.007%, within tolerance** — then committed (6b9c3e5) and pushed. Twelfth
+clean push-triggered deploy in a row.
+
+---
+
+## Round 48 — 2026-08-07 — Muscle is not a sail: the oar floor, and the beat-angle compensator it exposed
+
+**This round also inherited an uncommitted tree.** The 12:12 session implemented B9
+completely — data, router, card, four audit rules, stamp — and was killed at 12:35 while
+the frame ratchet was still capturing. Everything was re-verified from scratch this
+session before being trusted: every diff read, copies confirmed identical across
+Research/, web/, docs/; `polars.py` rerun byte-stable; audit re-run **25/25 clean**; all
+four new floor rules re-fired exactly once each on faults injected in-page (mutating
+`APP.vessels` before eval'ing the audit — no data files touched); and the router measured
+old-formula-vs-new through the page's own `compilePolar`/`polarSpeed` at 96 (vessel, wind,
+angle) points.
+
+**The queue item: B9, the oar floor.** `polar.floor {kn, lossKnPerMs, source}` is thrust
+`route.js` never wind-scales, less a measured windage per m/s of head component (cosine
+forward of the beam, zero abaft — precompiled into the polar like everything else the
+inner loop touches). `polarSpeed` returns max(sail, muscle), the floor ignores the beat
+gate, and windage only ever subtracts — the fair-wind help is already in the curve.
+Measured: the trireme holds 5.4 kn in a calm at every heading (was 0–1.1), makes
+Olympias's own 2.9 dead upwind at the 8 m/s reference, and her sail still wins when a
+fresh wind serves. Sail vessels and engines byte-identical in behaviour at every sampled
+point. Trireme 5.4/0.31 from Olympias's measured pair; dugout 3.0 from the Kuroshio
+crossing, windage inherited fractionally from Olympias and stated as an inference in the
+data. Cards: beat rows labelled "under sail", plus two floor rows ("under oar, any
+heading — a calm does not slow her" / "made good dead upwind, fresh breeze — windage,
+not a beat limit"), verified by capture on both vessels.
+
+**Found while verifying, fixed at the class: the two muscled hulls carried beat angles of
+30/45 — pointing tighter than a modern sloop, while every real rig family carries its
+researched pair (square 80/95, lateen 72/84, junk 62/70, gaff 55/68, crab claw 75/82).**
+The pair was a compensator from before the floor existed: impossible pointing was the only
+way an oared hull could make windward ground, and the moment the r48 card printed
+"closest made good **under sail**: 30°" it became a stated falsehood — the router
+measurement showed the trireme making 5.7 kn to windward *under sail* in a near-gale. Now
+the floor does the upwind work, the pair is the rig's own: trireme 80/95 (her single
+square sail is the ancient-square class, the corbita's pair; Olympias's sail trials found
+her windward ability poor), dugout 90/105 (the undrawn fair-wind mat sail claims nothing
+to windward). The two fixes need each other — honest beat angles without the floor strand
+the galley at 0 kn upwind; the floor without honest beat angles keeps the card lying.
+**Two more audit rules** (six this round): every sailing hull's beat pair must equal its
+rig family's researched pair (fired exactly twice on the faulty data, on exactly the two
+hulls), and a rig outside the family table is itself a finding. Derivation recorded in
+`polars.py` (`BEAT`, applied beside `FLOOR`), reruns byte-stable.
+
+**Latent, logged, not fixed:** `battle.js` wind-scales its speeds too
+(`btPolarSpeed(...) * (0.55 + force·0.09)`) — the same B9 class in a second consumer —
+but only the Armada carries a playable campaign and both its fleets (carrack, fluyt) are
+sail, so no muscled hull is paced by it today. If a galley action (Salamis, Lepanto,
+Myeongnyang) ever gets a campaign, it needs the floor first.
+
+**A trap re-armed and cleared:** TWO servers were listening on :8149 again (one from
+Aug 2, cwd `web/`; one from Aug 6, `--directory web`). Checked both before capturing —
+both serve `web/`, so no stale-root hazard this time, but the r33 lesson stands: check
+`lsof` before trusting the port.
+
+**Frames (completed by the fifth session on this round): 36/36 captured, one mover.**
+Four consecutive sessions died mid-capture the same way: each backgrounded the ratchet and
+ended its turn to wait, and the loop harness kills the round's children when the turn ends.
+The fix is procedural and permanent: **run the ratchet in the foreground, frame by frame**
+(`check --frame <name>` in batches of nine, ~25 s each) — never background it, never wait
+on it. The one mover was ship-trireme, 2.441%, classified from its diff: entirely the card
+column — the two floor rows, the beat pair relabeled "under sail" at the rig's own 80/95,
+and the reference photo reflowed under them. Hull and sea byte-still. Accepted with reason.
+Note the per-frame harness wipes `_current/` each run, so classify a mover **immediately**
+after its check, or re-run that frame.
+
+---
+
+## Round 49 — 2026-08-07 — The card prints the rig, not the mesh: a subtitle that denied a sail the rows describe
+
+Found while looking at the new ship-dugout frame (added to the ratchet this round — the
+vessel whose data changed had no baseline): her card read "THE FIRST SEA CRAFT · **NO
+SAIL**" directly above two "closest made good **under sail**" rows. The subtitle keyed
+'no sail' off `hull.masts.length` — the mesh's mast count — so every mastless hull had
+its rig text overridden, in both card views (`shipwright.js:578`, `yard.js:108`, the same
+expression duplicated). Four hulls printed wrong or lesser lines: the dugout's
+contradiction; the USV reading "no sail" a full round after r47 set her label to "wind,
+wave and solar" (the fixed data never printed); carrier and container hiding their engine
+descriptions.
+
+**The class fix:** one composer, `SHIPS_SW.rigLine(vessel)` — always the polar's own rig,
+'no sail' only as the fallback for a hull with no rig at all — used by both views, exported
+for the audit. **Two data corrections fell out of making the line print.** The dugout's rig
+is now "paddles, with a mat sail for fair winds", naming the sail her beat rows describe
+the way the trireme's line names her square sail (the mat sail is Haddon & Hornell's, cited
+in her rigNote since r47; still undrawn, still unattested that early — the *text* no longer
+denies it). And the carrier's hidden label turned out to be **"diesel motorship" on a
+Gerald R. Ford class** — corrected to "nuclear steam, four shafts" (two A1B reactors). Both
+set in `polars.py`, which reruns byte-stable.
+
+**Two audit rules** (both in the r49 block of audit-hulls.js): every hull carries a
+nonempty `polar.rig`, and `rigLine` run over all 25 must end with it. Fired on injected
+faults in-page: blanking an engine's rig → the first rule, exactly once; restoring the old
+mast-keyed composer → the second rule on exactly the four mastless hulls, the historical
+fault reproduced and caught. Clean run **25/25** after the fix. The yard view's subtitle
+node verified returning the corrected line through the same composer.
+
+**Frames: four movers, all classified from their diffs, all accepted with logged reasons.**
+ship-dugout 1.187% and ship-container 2.276% — the longer subtitle wraps the header and
+shifts every card row one line down, diff entirely card reflow; ship-usv 0.042% and
+ship-carrier 0.046% — one-line text swaps, sub-threshold, accepted anyway to keep the
+baselines exact (r47 precedent). The ratchet grew 36 → 37 frames: ship-dugout added, first
+baseline looked at before committing.
+
+**Rule 0, written:** ship-dugout reads as a rendered world. Three facts a viewer can read
+off it: a single hollowed log, sheer-swept at both ends, riding low with a metre of
+freeboard amidships; open ocean to the horizon under a clear sky, the swell scaled to
+dwarf her; a card that holds 3.0 kn under paddle beside 4.2 kn best under her fair-wind
+mat sail, closest made good 90° — beam work only, nothing to windward.
+
+### Next, in order
+1. **B9's second consumer** — `battle.js` still wind-scales via
+   `btPolarSpeed(...) * (0.55 + force·0.09)`; harmless today (only the Armada campaign is
+   playable, both fleets sail) but any galley action (Salamis, Lepanto, Myeongnyang) needs
+   the floor first.
+2. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
+   behind aboard-yamato; Titanic remainder; r43's plate gaps (corbita era plate;
+   dugout/dhow/cog plates; a globe-era-card frame); wrong-era voyage hash
+   (#e=3&f=zhenghe) hangs before first paint.

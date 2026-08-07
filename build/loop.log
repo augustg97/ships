@@ -463,3 +463,38 @@ The tree holds exactly the round's work: the polar data and code, the audit with
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 84521 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 12:12:17  round starting
+The round-48 change is in and verified at the unit level; the frame ratchet is capturing all 36 frames in the background (about 15 minutes). Status so far:
+
+- **Round 47 (inherited uncommitted) is committed and live** — audit 25/25, all 36 frames re-verified at 0.000–0.007%, commit `6b9c3e5`, live stamp confirmed `1786129104`. Deploy note written into HANDOFF.
+- **Round 48 — B9, the oar floor — is implemented**: `polar.floor {kn, lossKnPerMs, source}` in the data (derived in `polars.py`, byte-stable rerun), a muscle term in `route.js` the router never wind-scales, windage subtracted per m/s of head component, no beat gate under oar. Measured through the page's own code: the trireme holds 5.4 kn in a calm (was ~1.2) and makes Olympias's measured 2.9 dead upwind at reference; sail vessels and engines byte-identical in behaviour. Four new audit rules each fired exactly once on injected faults; clean run 25/25. The trireme card now states the floor and labels the beat angles "under sail".
+
+When the ratchet reports, I'll classify every mover from its diff, accept with written reasons, finish HANDOFF, commit, push, and verify the live stamp.
+2026-08-07 12:35:54  round finished; HEAD is 6b9c3e5 Every vessel her own polar: shape from the rig, scale anchored to her record; the engine card stops printing beat angles
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 89109 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 12:45:54  round starting
+The B9 verification and the beat-angle class fix are done and recorded; the 36-frame ratchet is capturing in the background (~15 minutes). I'll classify the movers when it reports, then commit, push, and verify the live stamp.
+2026-08-07 13:00:36  round finished; HEAD is 6b9c3e5 Every vessel her own polar: shape from the rig, scale anchored to her record; the engine card stops printing beat angles
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 93199 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 13:10:36  round starting
+The ratchet is captured as a background task and will notify on completion (~15 min for 36 frames). Status so far, while it runs:
+
+**Inherited Round 48 work is verified from scratch and holds up:**
+- Every diff read: the oar floor in `route.js` (precompiled head-component table, floor ignores the beat gate, windage only subtracts), the trireme/dugout floor data and honest beat pairs in `vessels.json`, the six new audit rules, the card's two floor rows, the stamp bump to 1786132729.
+- `polars.py` reruns **byte-stable** against the shipped vessels.json.
+- Audit **25/25 clean** in the live page.
+- Router measured through the page's own `compilePolar`/`polarSpeed`: trireme holds 5.4 kn at every heading in a calm and makes the measured 2.9 dead upwind at reference wind; dugout 3.0 / 1.64; the engine ignores wind entirely; a sail-only hull still beat-gates and wind-scales exactly as before.
+- Copies identical across Research/, web/, docs/; both :8149 servers checked (both serve `web/`, stamp matches the tree).
+- Two doc nits fixed: POLARS.md's bold lead-in now struck through with its closed claim, MODEL-GAPS B9's comma splice.
+
+Next when the ratchet reports: classify every mover from its diff image, accept with reasons, capture the dugout card ad hoc (it has no baseline frame), finish the HANDOFF entry, commit, push, verify the live stamp.
+2026-08-07 13:25:08  round finished; HEAD is 6b9c3e5 Every vessel her own polar: shape from the rig, scale anchored to her record; the engine card stops printing beat angles
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 96099 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 13:35:09  round starting
+The ratchet is running — 4 of 36 frames captured so far. It re-invokes me when it exits; the remaining steps (classify movers, accept with reasons, HANDOFF entry, commit, push, live-stamp check) follow from its output.
+/Users/augustgweon/Ships/build/loop-round.sh: line 75: 99394 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+2026-08-07 13:38:14  round finished; HEAD is 6b9c3e5 Every vessel her own polar: shape from the rig, scale anchored to her record; the engine card stops printing beat angles
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 13:48:14  round starting

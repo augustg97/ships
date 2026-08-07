@@ -104,8 +104,7 @@ function yardOpen(vessel) {
 
   document.getElementById('yard').classList.remove('hidden');
   document.getElementById('yardTitle').textContent = vessel.name;
-  document.getElementById('yardSub').textContent =
-    (vessel.sub || '') + ' · ' + (H.masts.length ? vessel.polar.rig : 'no sail');
+  document.getElementById('yardSub').textContent = window.SHIPS_SW.rigLine(vessel);
   const dims = [
     ['Length overall', H.loa.toFixed(1) + ' m'],
     ['Beam', H.beam.toFixed(2) + ' m'],

@@ -1171,6 +1171,77 @@
           say(v.id, "rigNote claims a speed the hull cannot make",
               `note states ${over.join(', ')} kn over a ceiling of ${ceil.toFixed(1)} — another vessel's record pasted on`);
       }
+
+      /* ── MUSCLE IS NOT A SAIL (round 48, B9). ──────────────────────────────────────
+         route.js scales every sail curve by √(wind/8), so for as long as the paddlers'
+         cruise sat inside a sail curve, a calm slowed the oars and a gale sped them.
+         The fix is polar.floor {kn, lossKnPerMs, source} — thrust the router never
+         wind-scales, less a measured windage per m/s of head component. These rules keep
+         the class honest: every muscled hull must carry one, no engine may, and the floor
+         must be consistent with the curve and survive its own reference headwind. */
+      {
+        const eng = P.beatLight === 0 && P.beatHard === 0;
+        const muscled = /\b(oar|paddle)/.test(P.rig || '') && !eng;
+        const F = P.floor;
+        if (muscled && !(F && F.kn > 0 && F.lossKnPerMs >= 0 && F.source))
+          say(v.id, 'muscle vessel without an oar floor',
+              `rig says "${P.rig}" but no polar.floor {kn, lossKnPerMs, source} — route.js will wind-scale the crew`);
+        if (F && eng)
+          say(v.id, 'engine with an oar floor', 'a floor on a beat-0/0 polar is a contradiction — the engine curve already ignores the wind');
+        if (F && cmax && F.kn > cmax + 0.05)
+          say(v.id, 'oar floor above the curve',
+              `floor ${F.kn} kn over a curve topping at ${cmax} — the curve at reference wind already includes the muscle`);
+        if (F && F.kn - F.lossKnPerMs * 8 <= 0)
+          say(v.id, 'oar floor dies in its own reference wind',
+              `${F.kn} − ${F.lossKnPerMs}×8 ≤ 0 — she could never have made the crossing her anchor records`);
+      }
+
+      /* ── THE BEAT ANGLES BELONG TO THE RIG (round 48, the fault's second face). ────
+         The two muscled hulls carried 30/45 — tighter than a modern sloop — a compensator
+         from before the floor existed, when impossible pointing was the only way an oared
+         hull could make windward ground. Once the card printed "closest made good under
+         sail" the pair became a stated falsehood. Shape is the rig's (r47): every sailing
+         hull's beat pair must be its rig family's researched pair, first match wins —
+         "oars, with a square sail" is square, and pure muscle ("paddles") carries a
+         fair-wind rig that claims nothing to windward. */
+      {
+        const eng = P.beatLight === 0 && P.beatHard === 0;
+        const FAM = [
+          ['square',       80,  95],
+          ['lateen',       72,  84],
+          ['settee',       72,  84],
+          ['battened lug', 62,  70],
+          ['gaff',         55,  68],
+          ['crab claw',    75,  82],
+          ['paddles',      90, 105],
+        ];
+        const fam = FAM.find(f => (P.rig || '').indexOf(f[0]) >= 0);
+        if (!eng && fam && (P.beatLight !== fam[1] || P.beatHard !== fam[2]))
+          say(v.id, "beat angles are not the rig's",
+              `${P.beatLight}/${P.beatHard} on a "${P.rig}" — the ${fam[0]} family's measured pair is ${fam[1]}/${fam[2]}`);
+        if (!eng && !fam)
+          say(v.id, 'rig outside the beat-angle table',
+              `"${P.rig}" matches no rig family — add its researched pair to the audit table`);
+      }
+
+      /* ── THE SUBTITLE IS THE RECORD'S RIG, NOT THE MESH'S MAST COUNT (round 49). ────
+         The card's line keyed 'no sail' off hull.masts.length, so every mastless hull
+         had its rig text overridden: the dugout read "no sail" above two "closest made
+         good under sail" rows — her fair-wind mat sail is real, just undrawn — and the
+         USV read "no sail" a full round after r47 set her label to "wind, wave and
+         solar". The line is composed once, SHIPS_SW.rigLine, for both card views; run
+         it for every hull and it must end with the polar's own rig. 'no sail' is only
+         the fallback for a hull with no rig at all, and no vessel in the fleet is one. */
+      {
+        if (!(P.rig && String(P.rig).trim()))
+          say(v.id, 'no polar.rig',
+              "the card subtitle needs the record's rig; a missing one prints the 'no sail' fallback");
+        const rl = (window.SHIPS_SW && window.SHIPS_SW.rigLine)
+                   ? window.SHIPS_SW.rigLine(v) : null;
+        if (rl !== null && P.rig && !rl.endsWith(P.rig))
+          say(v.id, 'card subtitle contradicts the rig',
+              `rigLine gives "${rl}" but the record's rig is "${P.rig}"`);
+      }
     }
 
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),

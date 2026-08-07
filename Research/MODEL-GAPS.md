@@ -100,12 +100,25 @@ Level 3 (2.44 km, 262 MB) is built and not shipped because the renderer never as
 SCOPE §2 promises 2.44 km. **Fix:** a detail-patch loader fetching only the z3 tiles covering
 the current view into a second texture with its own uv rect.
 
-### B9. The oar floor wind-scales — a calm slows the paddlers
-The dugout's and trireme's muscle-powered floor sits inside a sail polar, and `route.js`
-scales every sail curve by √(wind/8). So light air slows the oars and a gale speeds them,
-neither of which is how muscle works. Wrong, known, and a **router** change, not a data
-change: the polar needs a wind-independent floor term the router does not scale (r47, when
-every vessel got its own anchored curve and this became visible arithmetic).
+### B9. ~~The oar floor wind-scales — a calm slows the paddlers~~ FIXED r48
+The dugout's and trireme's muscle-powered floor sat inside a sail polar, and `route.js`
+scaled every sail curve by √(wind/8) — light air slowed the oars and a gale sped them.
+**Fixed r48:** `polar.floor {kn, lossKnPerMs, source}` is thrust the router never
+wind-scales, less a measured windage per m/s of head component; `polarSpeed` returns
+max(sail, muscle) and the floor ignores the beat gate — under oar she goes straight
+upwind. Anchored on Olympias's own pair (5.4 kn cruise, ~2.9 into a head sea → 0.31
+kn per m/s); the dugout inherits the fractional windage as a stated inference. Four
+audit rules hold the class: every muscled hull carries a floor, no engine does, the
+floor sits under the curve, and it survives its own reference headwind.
+
+The fault had a second face: both muscled hulls carried beat angles of 30/45 — better
+pointing than a modern sloop — the compensator that had let oared hulls make windward
+ground before the floor existed, and once the card said "closest made good under sail"
+it was a printed falsehood. Now the floor does the upwind work, and the pair is the RIG's:
+trireme 80/95 (the ancient-square class pair, the corbita's), dugout 90/105 (the
+fair-wind mat sail claims nothing to windward). Two more audit rules: every sailing
+hull's beat pair must equal its rig family's researched pair, and a rig outside the
+family table is itself a finding.
 
 ---
 

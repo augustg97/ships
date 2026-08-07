@@ -73,6 +73,11 @@
    "note": "the USV, flagged as unfinished 2026-08-02"
   },
   {
+   "name": "ship-dugout",
+   "path": "/?frozen=1#v=ship&s=dugout",
+   "note": "the oldest hull; card carries the oar floor and the fair-wind mat sail claims nothing to windward"
+  },
+  {
    "name": "ship-trireme",
    "path": "/?frozen=1.4#v=ship&s=trireme",
    "note": "170 oars — they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"

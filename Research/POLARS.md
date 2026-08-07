@@ -68,9 +68,21 @@ includes port time, calms and beating, and is not commensurable with a polar.
   The one beat change is Great Eastern: 55/68 → 0/0, because she is an engine.
 - **The east-indiaman curve**, byte for byte — the front page's falsification test is
   computed on it.
-- **The oar floor still wind-scales.** The dugout's and trireme's paddling floor sits in a
-  sail curve, so `route.js` scales it by √wind and a calm slows the oars — wrong, known,
-  and a router change, not a data change. Logged in MODEL-GAPS as B9.
+- ~~**The oar floor still wind-scales.** The dugout's and trireme's paddling floor sits in
+  a sail curve, so `route.js` scales it by √wind and a calm slows the oars.~~ **Closed in
+  r48** (was MODEL-GAPS B9): `polar.floor {kn, lossKnPerMs, source}` is a muscle term the
+  router never wind-scales — the wind only ever stands against a paddled hull, at the
+  measured windage per m/s of head component. Trireme: 5.4 kn cruise, and 5.4 − 0.31×8 =
+  2.9 dead upwind at reference, Olympias's own two figures. Dugout: the 3.0 kn Kuroshio
+  floor, windage inferred from Olympias's ratio and stated as an inference in the data.
+  The floor also retired a compensator: both muscled hulls had carried beat angles of
+  30/45 — impossible pointing, the only way an oared hull could once make windward ground —
+  which the r48 card relabel ("closest made good **under sail**") turned into a stated
+  falsehood. The pair is now the rig's: trireme 80/95 (ancient square, the corbita's class
+  pair; Olympias's sail trials found her windward ability poor, nowhere near 30), dugout
+  90/105 (the fair-wind mat sail claims nothing to windward). The two need each other:
+  honest beat angles without the floor strand the galley at 0 kn upwind; the floor without
+  honest beat angles keeps the card lying about the sail.
 
 ## Found while verifying: the prose shared curves too
 
@@ -83,3 +95,18 @@ attested this early), and a sixth audit rule added: **any speed a rigNote states
 under that hull's own 1.55× ceiling** (engines: the curve itself). It fired exactly once,
 on the dugout, and passed the trireme, whose record it is. Notes shared within a rig class
 state no figures and pass untouched.
+
+## Round 49: the card prints the rig, not the mesh
+
+The subtitle keyed 'no sail' off `hull.masts.length`, so every mastless hull had its rig
+text overridden by the state of the *mesh*: the dugout read "no sail" directly above two
+"closest made good under sail" rows, and the USV read "no sail" a full round after r47 set
+her label to "wind, wave and solar" — the fixed data never printed. Composed once now
+(`SHIPS_SW.rigLine`, both card views), always the polar's own rig. Two consequences in the
+data: the dugout's rig is now **"paddles, with a mat sail for fair winds"** — naming the
+sail her beat rows describe, the way the trireme's line names her square sail — and the
+carrier's hidden label turned out to be **"diesel motorship" on a Ford-class**, corrected
+to "nuclear steam, four shafts". Two audit rules: every hull carries a nonempty
+`polar.rig`, and `rigLine` run over all 25 must end with it. Injected-fault runs: blanking
+an engine's rig fired the first exactly once; restoring the old mast-keyed composer fired
+the second on exactly the four mastless hulls.
