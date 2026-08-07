@@ -2469,3 +2469,8 @@ over a ship leaving a real wake.
 4. The survey queue proper is exhausted twice over; next-crudest without a dedicated round is
    **ship-of-the-line (3,100 tris/m)**, but she was the verified reference hull — the detail
    gaps in SHIPWRIGHT-QUEUE §"Detail gaps" (head/beakhead, stern furniture) are worth more.
+
+**End-of-round deploy note: LIVE, stamp 1786139194 → 1786142761**, verified with a cache-busted
+fetch of the data-version meta tag; the live hull.js confirmed carrying the slack factor and the
+live vessels.json the clipper's yard lists and 23.2/25.9/22.3 masts. Fifteenth clean
+push-triggered deploy in a row.
