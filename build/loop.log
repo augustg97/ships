@@ -195,3 +195,25 @@ Round 36 is complete and live at stamp 1786072100 — verified with a cache-bust
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 40654 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 20:43:41  round starting
+Round 37 is done and live at stamp 1786075399: **Yamato's funnel now wears her recorded 25° aft rake**, and the fix went to the class.
+
+The `funnelRake` field existed since the Titanic round, but the builder rotated the whole funnel group — boiler casing included — and at 25° that broke structurally: the casing is a deckhouse, vertical walls by construction, and tilting it lifted its forward base edge 2.5 m off the deck. `buildFunnel` now keeps the casing plumb and rakes only the uptake, rotated about its root, with the root sunk to the casing floor so the tilted base rim stays hidden at any recorded angle; the steam pipe's foot is pinned inside the casing footprint and raked parallel, so it can't float when the stack leans hard.
+
+Data changes: Yamato `funnelRake: 25`, and Dreadnought `funnelRake: 0` — her stacks stood plumb in the record, and vertical has to be sayable in data. Titanic keeps her 9.46°; Great Eastern and the steamer keep the mild default.
+
+The rest of the round's discipline, all verified:
+
+- **New audit rule `funnel rake not worn`**, measuring each stack's world-axis inclination against the record. Broke the builder to prove it: fired on exactly the four raked ships, passed Dreadnought. Restored: 25/25 clean from the served files.
+- **Ratchet:** 5 of 30 frames moved, each looked at and classified — the two Yamato views are the rake itself, Dreadnought is her stacks standing up straight, Titanic and Great Eastern are the plumb-casing edge of the class. All accepted with reasons; closing check fully within tolerance.
+- **Deploy:** second clean push-triggered Pages run in a row, live stamp verified 1786072100 → 1786075399 cache-busted.
+
+One thing seen while verifying and queued in HANDOFF: Dreadnought's foremast stands forward of her fore funnel here, where the real ship's tripod stood abaft it — the famous design error that put the spotting top in the funnel smoke. That's a mast-station and tripod fix, next in the queue after the serif-webfont decision and the featureless coast in the Sea close-up.
+2026-08-06 21:15:54  round finished; HEAD is 4e9e254 Deploy note r37: live at 1786075399; second clean push-triggered deploy in a row
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 49408 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 21:25:54  round starting
+
+2026-08-06 22:05:25  round finished; HEAD is 4e9e254 Deploy note r37: live at 1786075399; second clean push-triggered deploy in a row
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 55556 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 22:15:25  round starting

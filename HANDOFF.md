@@ -1473,3 +1473,78 @@ possibly a tripod builder, not a one-liner; it is queue material.
 row: the push of 82e35de created run 31146774263, in progress within seconds, completed success
 with no manual dispatch. Live stamp verified 1786072100 → **1786075399** with a cache-busted
 fetch of the data-version meta tag.
+
+---
+
+## Round 38 — 2026-08-06 — Dreadnought becomes the record's ship; a stranded round finished
+
+**This round was found abandoned in the tree.** The 21:25 and 22:15 loop rounds ended with no
+log summary, no HANDOFF entry, and ten files modified but uncommitted — the full Dreadnought
+overhaul, built and stamped but never verified, accepted, or shipped. Standing instruction is
+"do not leave the tree uncommitted"; this round's job was to verify that work honestly and
+finish it, and everything below was re-proven from the served files, not assumed.
+
+**Queue item 3 closed, and it grew into the class fix it wanted.** Dreadnought now wears her
+real arrangement, verified against three records fetched this round (the Wikipedia article, the
+1911 profile/plan drawing, photograph H61017):
+
+* **`turretSide`** (parallel to `turretRaise`): ±1 stands a main-battery mount at the deck edge.
+  Her five twin 12-inch houses now sit A–P–Q–X–Y — three centreline, P/Q on the wings giving
+  the eight-gun broadside her card always claimed. Wing mounts train fore-and-aft at rest.
+* **`tripod` / `tripodRake`** on a mast record: two struts and a spotting top, feet aft on the
+  foremast (26°, H61017), feet forward on the main (14°), landing in the X–Y gap — the mainmast
+  stands BETWEEN X and Y, which the profile drawing confirms. The foremast stands at 0.425,
+  ABAFT the fore funnel at 0.385: the famous error that put the spotting top in the smoke, now
+  faithfully wrong, and the part card says so.
+* **`turretRadius` is now the gun's, not the ship's**: R = min(beam·0.22, calibre·15.4). A twin
+  12-inch house is ~9.4 m over the plates (was 10 m), Yamato's triple 46 cm is 14.2 m against
+  her real ~15 (was 15.6). Rangefinder ears R·2+cal·2 = 15.1 m on Yamato's real 15; at 2.5R a
+  wing mount's ears out-reached the hull.
+* **The citadel waists between the wing barbettes** — only centreline turrets bound it
+  fore-and-aft; the wings pinch its width, which is why the real ship reads as two blocks
+  joined by a spine. `towerAt` unpins the bridge from masts[0], which the mast move forced.
+* **`funnelScale`**: her aft stack served twice the boilers and photographs show it plainly
+  fatter — 0.88/1.14, and the stacks stand at 0.385/0.515.
+* Engine strings corrected on three cards: Titanic "triple expansion + turbine", Dreadnought
+  "steam turbine", Yamato "geared turbines".
+
+**Audit: 25/25 clean, and the round's three new rules were each proven by break-and-restore
+this session.** Zeroing `turretSide` in the builder fired `wing turret not on the wing`
+(record [-1,0,0,0,1] vs drawn [0,0,0,0,0]) AND `turret buried in the superstructure` — the two
+coincident centreline houses landed inside the citadel, so the new loft-aware buried test sees
+through the waist. Zeroing the strut lean fired `tripod not worn` on all four struts. Restored:
+25/25 from the served files.
+
+**Surveyed from four bearings**, the broadside baseline plus stern-quarter, bow-quarter and
+near-overhead captures driven through `SW.shipSpin` in the live page: wings at the deck edge
+both sides, nothing floating, nothing interpenetrating, A and the wings trained forward, X and
+Y astern, the waist visibly narrowing beside the wing barbettes.
+
+**Ratchet: 4 moved of 30, all classified, accepted with reasons, closing check all-clean.**
+ship-dreadnought 4.347% is the whole topside rebuilt over a hull that did not move (diff shows
+only a dotted sheer trace beyond the superstructure). ship-yamato 0.472% is the three main
+houses shrinking to calibre size. ship-titanic 0.058% and aboard-yamato 0.052% are card text
+and the distant turrets respectively.
+
+**Rule 0 check, written:** the frame reads as a rendered world. Three facts off
+ship-dreadnought: a main-battery turret stands at the port deck edge amidships, trained toward
+the bow; the tripod foremast rises directly abaft the fore funnel, struts planted aft; of her
+two plumb grey stacks the after one is plainly fatter. Off the stern quarter: X and Y point
+astern with the short main tripod standing between them.
+
+**A trap paid for this round, recorded:** during break-and-restore, `git checkout -- hull.js`
+restored the COMMITTED file and silently discarded the round's own uncommitted work — recovered
+byte-identical from the built docs/ copy. On an uncommitted tree, break-and-restore must
+restore by re-editing (sed back, or a stashed copy), never by git checkout.
+
+### Next, in order
+1. The serif-webfont dependency decision (globe-default false-RED; has not fired since r35,
+   the class is still open).
+2. The land in the Sea close-up: featureless brown ramp behind aboard-yamato.
+3. **Dreadnought's anti-torpedo net booms and shelf** — the row of diagonal spars along the
+   hull is the most conspicuous thing in H61017 that our broadside lacks; period-defining
+   (fitted 1906, landed by WWI). A `netDefence` record field, class-level.
+4. Titanic remainder, if wanted: crow's nest height, funnel stations against the GA drawing,
+   enclosed A-deck promenade forward, docking bridge on the poop.
+5. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
+   preussen P-liner white waterline check.

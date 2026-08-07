@@ -812,6 +812,49 @@ function buildRig(S, group, mats, FINE) {
     });
     if (mk.rig === 'square') mastTops.push({ u, x, y: y + (lower * 0.14) });
 
+    /* ── THE TRIPOD MAST, from the record: `tripod: true` ──────────────────────────────
+       A turbine warship's pole mast vibrates — engines and gun blast both — and a fire-
+       control top needs to hold a steady line on a target ten kilometres off, so the pole
+       gets two STRUTS and becomes a tripod. Photograph H61017 (Dreadnought, 1906) fixes the
+       geometry: the vertical leg carries the SPOTTING TOP at its head, the struts plant
+       their feet on deck well ABAFT the pole and rake up forward to the join under the top,
+       splayed outboard so the three feet make a stance. On Dreadnought the whole mast stood
+       abaft the fore funnel — which put the spotting top in the funnel plume, the one
+       design error she carried her whole life. The mast station is DATA; this builder only
+       makes the declared tripod true in the drawing. */
+    if (mk.tripod && (mk.rig === 'none' || mk.rig === 'pole')) {
+      const legMat = S.turrets
+        ? (mats.mastGrey || (mats.mastGrey = new THREE.MeshStandardMaterial(
+              { color: 0x5a6067, roughness: 0.55, metalness: 0.30 })))
+        : woodDark;
+      const yJoin = base + lower * 0.62;
+      /* direction and rake are the RECORD's: Dreadnought's fore struts planted aft at a
+         hard ~26° (H61017); her main tripod mirrored, shallower, to land its feet in the
+         gap between X turret and the pole. `tripod: -1` rakes the feet forward. */
+      const dirn = mk.tripod === -1 ? -1 : 1;
+      const legRun = dirn * Math.tan((mk.tripodRake !== undefined ? mk.tripodRake : 26)
+                                     * Math.PI / 180) * (lower * 0.62);
+      const spread = Math.min(B * 0.13, lower * 0.10); // and splayed outboard
+      for (const sgn of [1, -1]) {
+        const uFoot = Math.max(0.02, Math.min(0.98, u + legRun / L));
+        const foot = new THREE.Vector3(x + legRun, deckAt(uFoot) - 0.4, sgn * spread);
+        const head = new THREE.Vector3(x, yJoin, 0);
+        const dir = new THREE.Vector3().subVectors(head, foot);
+        const len = dir.length();
+        const leg = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.011, B * 0.014, len, 8), legMat);
+        leg.position.copy(foot).addScaledVector(dir, 0.5);
+        leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+        group.add(tag(leg, 'mast', 'Tripod leg',
+          'One of the two struts that brace the pole. A pole mast on a turbine ship vibrates too much to hold a rangefinder steady, so the fire-control top stands on three legs.'));
+      }
+      const stp = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.085, B * 0.072, 2.1, 14), legMat);
+      stp.position.set(x, yJoin + 1.05, 0);
+      group.add(tag(stp, 'mast', 'Spotting top',
+        'The fire-control position at the masthead: observers here spot the fall of shot and correct the guns. On Dreadnought this mast stood abaft the fore funnel, so at speed the top filled with hot smoke — the famous flaw that her successors inherited for a decade.'));
+    }
+
     if (mk.rig === 'lateen') {
       /* ── THE LATEEN IS DETERMINED BY THE SHIP, NOT BY THE MAST ─────
          Three sourced facts, and together they leave NO free parameters:
@@ -2321,6 +2364,9 @@ function buildFunnel(S, group) {
      — so on both of them the stacks were the tallest thing aboard and read as chimneys on a
      factory. Height comes from the record when the record is in the data. */
   const h = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
+  /* ⚠ SISTER FUNNELS ARE NOT ALWAYS THE SAME FUNNEL. Dreadnought's aft stack served twice
+     the boilers of her fore one and photographs show it plainly fatter; one shared radius
+     drew them as twins. `funnelScale` is a per-funnel radius factor from the record. */
   const r = S.beam * 0.115;
   const black = new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: 0.62, metalness: 0.30 });
   const band = new THREE.MeshStandardMaterial({ color: 0x8a3820, roughness: 0.55, metalness: 0.18 });
@@ -2370,7 +2416,8 @@ function buildFunnel(S, group) {
        deckhouse over the fiddley that carries the uptakes; the visible stack starts at the
        top of that. Model the casing, start the stack above it, and there is no coincident
        surface left to fight. */
-    const caseH = h * 0.085, caseR = r * 1.34;
+    const ri = r * ((S.funnelScale || [])[i] || 1);
+    const caseH = h * 0.085, caseR = ri * 1.34;
     const casing = new THREE.Mesh(
       new THREE.CylinderGeometry(caseR * 0.94, caseR, caseH, 20), black);
     casing.position.y = caseH / 2 - caseH * 0.35;       // slightly sunk, so no cap meets the deck
@@ -2386,7 +2433,7 @@ function buildFunnel(S, group) {
        its livery in VERTEX COLOURS, and there is no second surface left to contend with.
        Colours from the museum model August supplied: buff stack, black top. */
     const rootY = -caseH * 0.35, topY = caseH * 0.55 + h, L = topY - rootY;
-    const sg = new THREE.CylinderGeometry(r * 0.93, r, L, 24, 24);
+    const sg = new THREE.CylinderGeometry(ri * 0.93, ri, L, 24, 24);
     const spos = sg.attributes.position, scol = [];
     /* ⚠ THE BUFF-AND-BLACK IS A SHIPPING LINE'S TRADEMARK, AND A WARSHIP HAS NO SHIPPING
        LINE. Yamato wore a liner's funnel for as long as she has existed here. A navy's funnel
@@ -2418,10 +2465,10 @@ function buildFunnel(S, group) {
        float when the stack leans hard */
     const Lp = L - h * 0.08;
     const pipe = new THREE.Mesh(
-      new THREE.CylinderGeometry(r * 0.13, r * 0.13, Lp, 16), black);
+      new THREE.CylinderGeometry(ri * 0.13, ri * 0.13, Lp, 16), black);
     pipe.position.y = Lp / 2;
     const pg = new THREE.Group();
-    pg.position.set(-r * 1.25, rootY, 0);
+    pg.position.set(-ri * 1.25, rootY, 0);
     pg.rotation.z = -th;
     pg.add(pipe);
     g.add(rk); g.add(pg);
@@ -2961,6 +3008,16 @@ function turretStations(S) {
   return (n === 3 ? [0.24, 0.34, 0.78] : [0.22, 0.32, 0.70, 0.80]).slice(0, n);
 }
 
+/* ⚠ A GUNHOUSE IS SIZED BY ITS GUN, NOT BY THE SHIP. beam x 0.20 drew Dreadnought's twin
+ * 12-inch houses ten metres across against a real nine — and the proof is on her own deck:
+ * the mainmast tripod stood BETWEEN X and Y turrets on the real ship, and at beam-derived
+ * size there is no gap between them to stand in. Real houses measure by calibre: a twin
+ * 12-inch about 9 m over the plates, Yamato's triple 46 cm about 13.5 m — one slope,
+ * R = calibre x 15.4, hits both. The beam cap keeps a big gun on a narrow hull sane. */
+function turretRadius(S) {
+  return Math.min(S.beam * 0.22, (S.calibre || 0.40) * 15.4);
+}
+
 /* One gunhouse, any calibre — the main battery and the secondaries are the same object at
  * two sizes, so they are one derivation. Faces the BOW (−x); the caller turns an aft mount.
  * `riser` extends the barbette downward, for a superfiring mount whose barbette has a whole
@@ -3002,10 +3059,12 @@ function gunhouse(S, R, cal, barrels, riser, mats) {
       'The calibre is the ship. Everything else — the armour, the beam, the displacement — is arranged around carrying these and surviving their equals.'));
   }
   /* the rangefinder across the gunhouse rear — the pair of ears every big-gun turret grew
-     once fire control moved into the turret itself */
+     once fire control moved into the turret itself. ⚠ Sized R*2 + calibre*2, not R*2.5:
+     Yamato's were 15 m across a 13.5 m house (this gives 15.1); at 2.5R a WING turret's
+     ears reached past the ship's own side. */
   if (cal >= 0.2) {
     const rf = new THREE.Mesh(
-      new THREE.CylinderGeometry(cal * 0.55, cal * 0.55, R * 2.5, 10), dark);
+      new THREE.CylinderGeometry(cal * 0.55, cal * 0.55, R * 2 + cal * 2, 10), dark);
     rf.rotation.x = Math.PI / 2;
     rf.position.set(R * 0.72, R * 1.05, 0);
     g.add(tag(rf, 'turret', 'Turret rangefinder',
@@ -3023,13 +3082,23 @@ function buildTurrets(S, group, mats) {
   const barrels = S.barrels || 3;
   const stations = turretStations(S);
   const raise = S.turretRaise || stations.map((u, i) => (n >= 3 && i === 1) ? 1 : 0);
+  /* ── ⚠ THE MAIN BATTERY IS NOT ALWAYS ON THE CENTRELINE ──────────────────────────────
+     Dreadnought carried ten guns in five turrets and this builder could only draw the
+     three that stood on the centreline — P and Q, the WING pair that gave her an eight-gun
+     broadside, had nowhere to stand, so her card said five turrets over a drawing of
+     three. `turretSide` is a parallel array (like `turretRaise`): 0 is the centreline,
+     ±1 stands the mount at the deck edge that side. A wing mount trains FORE-AND-AFT at
+     rest like every other mount, and photograph H61017 shows P trained toward the bow. */
+  const sides = S.turretSide || [];
   stations.forEach((u, i) => {
     const base = H.sheer(u);
     const raised = raise[i] ? B * 0.085 : 0;       // the superfiring one stands higher
-    const R = B * 0.20;
+    const R = turretRadius(S);
+    const side = sides[i] || 0;
     const g = gunhouse(S, R, cal, barrels, raised, mats);
-    g.position.set((u - 0.5) * L, base + raised, 0);
-    if (u > 0.5) g.rotation.y = Math.PI;
+    const z = side ? side * (Math.abs(surfacePoint(S, H, u, 1.0)[2]) - R * 1.02) : 0;
+    g.position.set((u - 0.5) * L, base + raised, z);
+    if (!side && u > 0.5) g.rotation.y = Math.PI;
     group.add(tag(g, 'turret'));
   });
 }
@@ -3049,13 +3118,28 @@ function buildCitadel(S, group, mats) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const stations = turretStations(S);
-  const R = B * 0.20;
-  const fwd = stations.filter(u => u < 0.5), aft = stations.filter(u => u >= 0.5);
-  const m = (R * 1.1) / L;   // the citadel front rises just abaft the end barbettes —
-                             // on the real ship they nearly abut
+  const R = turretRadius(S);
+  /* ⚠ a WING mount does not bound the citadel fore-and-aft — it stands BESIDE it. Only the
+     centreline battery decides where the house may run; the wings decide how WIDE (below). */
+  const tSides = S.turretSide || [];
+  const centre = stations.filter((u, i) => !tSides[i]);
+  const wings = stations.map((u, i) => ({ u, s: tSides[i] || 0 })).filter(w => w.s)
+    .map(w => ({ u: w.u, z: Math.abs(surfacePoint(S, H,
+        Math.max(0.001, Math.min(0.999, w.u)), 1.0)[2]) - R * 1.02 }));
+  const fwd = centre.filter(u => u < 0.5), aft = centre.filter(u => u >= 0.5);
+  /* ⚠ the gunhouse is stretched 1.28x fore-and-aft, so its half-LENGTH is 1.34R; the old
+     R*1.1 margin buried every end turret's nose a quarter-radius into the citadel face.
+     1.40 clears the house by a sliver, which is the real look — they nearly abut. */
+  const m = (R * 1.40) / L;
   let uA = fwd.length ? Math.max(...fwd) + m : 0.36;
   let uB = aft.length ? Math.min(...aft) - m : 0.68;
-  const towerU = (S.masts && S.masts[0]) ? S.masts[0].at : (uA + 0.03);
+  /* ⚠ THE BRIDGE IS NOT NAILED TO THE MAST. Deriving the tower from masts[0] was right for
+     the pagoda ships, where mast and tower are one structure — and wrong the moment the
+     record moved Dreadnought's mast to where it stood, abaft the fore funnel: the bridge
+     would have gone with it. `towerAt` is the record's own bridge station; without it the
+     old derivation holds. */
+  const towerU = S.towerAt !== undefined ? S.towerAt
+               : (S.masts && S.masts[0]) ? S.masts[0].at : (uA + 0.03);
   uA = Math.min(uA, towerU - (B * 0.20) / L);       // the tower stands on the citadel
   const wall = new THREE.MeshStandardMaterial({ color: 0x666c73, roughness: 0.60, metalness: 0.22,
                                                 side: THREE.DoubleSide });
@@ -3075,10 +3159,30 @@ function buildCitadel(S, group, mats) {
   const base = H.sheer((uA + uB) / 2);
   const dh = B * 0.080;
   /* one half-breadth derivation for the tier walls and everything that stands at them, so a
-     mount placed "at the deck edge" is at the edge the loft actually drew */
-  const tierHalf = (u, t) => Math.max(B * 0.06,
-    Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.06
-    - t * B * 0.045);
+     mount placed "at the deck edge" is at the edge the loft actually drew.
+     ── THE WAIST ⚠ ──────────────────────────────────────────────────────────────────────
+     A wing turret needs the deck it stands on, so the house PINCHES where the wings are:
+     the wall comes in to clear the barbette and its training circle, which is why the real
+     Dreadnought's superstructure is two blocks — bridge forward, shelter aft — joined by a
+     narrow spine between the wing barbettes, with the funnel casings standing proud of it.
+     Derived from the wing stations, so a record without wings keeps its full house. */
+  const tierHalf = (u, t) => {
+    const full = Math.max(B * 0.06,
+      Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.06
+      - t * B * 0.045);
+    let half = full;
+    for (const w of wings) {
+      /* the hard zone must outlast the gunhouse itself — it is stretched 1.28x, so its
+         half-length is 1.34R; easing back to full width any sooner ran the wall through
+         the house's front quarter, which the audit caught on the first build */
+      const du = Math.abs(u - w.u) * L, hard = R * 1.40, reach = R * 1.75;
+      if (du >= reach) continue;
+      const capW = Math.max(B * 0.055, w.z - R * 1.12);
+      const e = Math.max(0, (du - hard) / (reach - hard));
+      half = Math.min(half, capW + (full - capW) * e * e);
+    }
+    return half;
+  };
   /* two stepped decks, lofted from the hull's own half-breadth so they cannot overhang —
      the liner house learned that rule the hard way and it holds here */
   const tiers = [[uA, uB], [uA + 0.012, uB - 0.045]];

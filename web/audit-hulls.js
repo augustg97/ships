@@ -175,6 +175,60 @@
             `drawn ${worst.toFixed(1)}° aft, record says ${want}°`);
     }
 
+    /* ── THE TRIPOD IS WORN (round 38). `tripod` on a mast record is structure, not
+       decoration: two struts leaning to the pole and a spotting top at their join. The
+       round-37 class again — a declared build feature that silently stops producing
+       geometry, or produces it standing straight up, is invisible to every picture and
+       to 'declared but not drawn', because the MAST is drawn. Count the legs, count the
+       tops, and measure the lean of every leg the way the rake rule measures the stack:
+       the world direction of the strut's own +y axis. */
+    const tripods = (H.masts || []).filter(mk => mk.tripod).length;
+    if (tripods) {
+      let legs = 0, tops = 0, uprightLegs = 0;
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        if (o.userData.part.name === 'Tripod leg') {
+          legs++;
+          const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+          if (Math.acos(Math.min(1, Math.abs(d.y))) * 180 / Math.PI < 6) uprightLegs++;
+        }
+        if (o.userData.part.name === 'Spotting top') tops++;
+      });
+      if (legs !== tripods * 2)
+        say(v.id, 'tripod not worn',
+            `${tripods * 2} struts in the record, ${legs} drawn`);
+      if (tops !== tripods)
+        say(v.id, 'tripod not worn',
+            `${tripods} spotting tops in the record, ${tops} drawn`);
+      if (uprightLegs)
+        say(v.id, 'tripod not worn',
+            `${uprightLegs} strut(s) standing vertical — a tripod's legs LEAN`);
+    }
+
+    /* ── THE WING BATTERY IS ON THE WING (round 38). `turretSide` stands a main mount at
+       the deck edge; ignore it silently and five declared turrets still draw five groups —
+       two of them coincident on the centreline, which no count can see. The drawn battery's
+       sides must match the record's, sign for sign. */
+    if (H.turrets && H.turretAt && H.turretSide) {
+      const wantSides = H.turretAt.slice(0, H.turrets)
+        .map((u, i) => H.turretSide[i] || 0).sort();
+      const mains = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part &&
+                            o.userData.part.key === 'turret' &&
+                            o.userData.part.name === 'Main battery')
+                          mains.push(o); });
+      const gotSides = mains.map(o => {
+        const bbx = new THREE.Box3().setFromObject(o);
+        const zc = (bbx.min.z + bbx.max.z) / 2;
+        return zc > H.beam * 0.12 ? 1 : zc < -H.beam * 0.12 ? -1 : 0;
+      }).sort();
+      if (wantSides.join() !== gotSides.join())
+        say(v.id, 'wing turret not on the wing',
+            `record sides [${wantSides.join()}], drawn [${gotSides.join()}]`);
+    }
+
     /* ⚠ and on a carrier the reference is the FLIGHT DECK, which overhangs the hull by design —
        that is the whole point of an angled deck. Comparing her island to the hull beam called a
        correct 35 m a fault. */
@@ -254,16 +308,38 @@
        ⚠ The BARBETTE is exempt: an armoured tube running down THROUGH the structure to the
        magazine is not buried, it is doing its job. The fault is a GUNHOUSE or GUN inside. */
     if (H.turrets && part.turret && (part.superstructure || part.island)) {
-      const houseBoxes = [];
+      /* ⚠ A BOX OVER A WAISTED LOFT COVERS THE WAIST (round 38). The citadel pinches
+         between the wing barbettes, and its bounding box does not — the box called both
+         wing houses buried in walls that had been drawn two metres clear of them. For the
+         lofted tier meshes the test reads the loft's OWN stations: the point is inside
+         only if it is inboard of the drawn half-breadth at its own x. Boxes stay exact
+         for box geometry. */
+      const houseBoxes = [], lofts = [];
       g.updateMatrixWorld(true);
       g.traverse(o => { const p = tagOf(o);
-        if (o.isMesh && p && (p.key === 'superstructure' || p.key === 'island'))
-          houseBoxes.push(new THREE.Box3().setFromObject(o)); });
+        if (!o.isMesh || !p || (p.key !== 'superstructure' && p.key !== 'island')) return;
+        if (p.name === 'Citadel deck' || p.name === 'Shelter deck') lofts.push(o);
+        else houseBoxes.push(new THREE.Box3().setFromObject(o)); });
+      const inLoft = (mesh, c) => {
+        const pos = mesh.geometry.attributes.position;
+        const lc = mesh.worldToLocal(c.clone());
+        let best = -1, bd = Infinity;
+        for (let k = 0; k * 4 < pos.count; k++) {
+          const d = Math.abs(pos.getX(k * 4) - lc.x);
+          if (d < bd) { bd = d; best = k; }
+        }
+        if (best < 0) return false;
+        const half = Math.abs(pos.getZ(best * 4 + 1));
+        const y0 = pos.getY(best * 4), y1 = pos.getY(best * 4 + 2);
+        return bd < 2.5 && Math.abs(lc.z) < half + 0.05 &&
+               lc.y > Math.min(y0, y1) - 0.05 && lc.y < Math.max(y0, y1) + 0.05;
+      };
       let buried = 0;
       g.traverse(o => { const p = tagOf(o);
         if (!o.isMesh || !p || p.key !== 'turret' || p.name === 'Barbette') return;
         const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
-        if (houseBoxes.some(hbx => hbx.containsPoint(c))) buried++; });
+        if (houseBoxes.some(hbx => hbx.containsPoint(c)) ||
+            lofts.some(m => inLoft(m, c))) buried++; });
       if (buried) say(v.id, 'turret buried in the superstructure',
                       `${buried} gunhouse/gun meshes centred inside deckhouse geometry`);
     }

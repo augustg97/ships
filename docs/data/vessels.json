@@ -2231,7 +2231,7 @@
      "180": 9.0
     },
     "rigNote": "Does not care about the wind. Its constraint is coal: the bunker fraction, not the weather, decides where it can go.",
-    "rig": "compound steam"
+    "rig": "triple expansion + turbine"
    },
    "hull": {
     "wlPower": 3.8,
@@ -2776,7 +2776,7 @@
      "180": 9.0
     },
     "rigNote": "Does not care about the wind. Its constraint is coal: the bunker fraction, not the weather, decides where it can go.",
-    "rig": "compound steam"
+    "rig": "steam turbine"
    },
    "hull": {
     "wlPower": 4.0,
@@ -2802,11 +2802,22 @@
     "steeve": 22,
     "masts": [
      {
-      "at": 0.4,
+      "at": 0.425,
       "heightM": 34.0,
       "rig": "none",
       "rake": 0,
-      "shrouds": 0
+      "shrouds": 0,
+      "tripod": 1,
+      "tripodRake": 26
+     },
+     {
+      "at": 0.67,
+      "heightM": 26.0,
+      "rig": "none",
+      "rake": 0,
+      "shrouds": 0,
+      "tripod": -1,
+      "tripodRake": 14
      }
     ],
     "build": "steel",
@@ -2818,13 +2829,24 @@
     "cm": 0.94,
     "transom": 0.22,
     "funnels": 2,
-    "turrets": 3,
+    "turrets": 5,
     "turretAt": [
-     0.28,
-     0.68,
-     0.8
+     0.26,
+     0.45,
+     0.45,
+     0.6,
+     0.735
+    ],
+    "turretSide": [
+     0,
+     1,
+     -1,
+     0,
+     0
     ],
     "turretRaise": [
+     0,
+     0,
      0,
      0,
      0
@@ -2832,11 +2854,16 @@
     "barrels": 2,
     "calibre": 0.305,
     "towerH": 12.0,
+    "towerAt": 0.33,
     "decks": 3,
     "funnelH": 22.0,
     "funnelAt": [
-     0.46,
-     0.6
+     0.385,
+     0.515
+    ],
+    "funnelScale": [
+     0.88,
+     1.14
     ],
     "funnelRake": 0,
     "year": 1906
@@ -2915,7 +2942,7 @@
      "180": 9.0
     },
     "rigNote": "Does not care about the wind. Its constraint is coal: the bunker fraction, not the weather, decides where it can go.",
-    "rig": "compound steam"
+    "rig": "geared turbines"
    },
    "hull": {
     "wlPower": 4.2,
