@@ -1548,3 +1548,8 @@ restore by re-editing (sed back, or a stashed copy), never by git checkout.
    enclosed A-deck promenade forward, docking bridge on the poop.
 5. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
    preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE, stamp 1786080947.** Third clean push-triggered deploy in a
+row: the push of 8bd536f created run 31151709154, completed success with no manual dispatch.
+Live stamp verified 1786075399 → **1786080947** with a cache-busted fetch of the data-version
+meta tag.
