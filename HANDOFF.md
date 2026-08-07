@@ -1468,3 +1468,8 @@ possibly a tripod builder, not a one-liner; it is queue material.
    enclosed A-deck promenade forward, docking bridge on the poop.
 5. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
    preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE, stamp 1786075399.** Second clean push-triggered deploy in a
+row: the push of 82e35de created run 31146774263, in progress within seconds, completed success
+with no manual dispatch. Live stamp verified 1786072100 → **1786075399** with a cache-busted
+fetch of the data-version meta tag.
