@@ -2326,3 +2326,10 @@ mat sail, closest made good 90° — beam work only, nothing to windward.
    behind aboard-yamato; Titanic remainder; r43's plate gaps (corbita era plate;
    dugout/dhow/cog plates; a globe-era-card frame); wrong-era voyage hash
    (#e=3&f=zhenghe) hangs before first paint.
+
+**End-of-round deploy note: LIVE, stamp 1786129104 → 1786137697**, verified with a
+cache-busted fetch of the data-version meta tag. Rounds 48 and 49 shipped together in
+a839b5a — audit 25/25 with eight new rules across the two rounds, ratchet 37/37 with six
+baselines accepted for reasons and one added. Thirteenth clean push-triggered deploy in a
+row. The procedural lesson of this round outlives it: the ratchet runs foreground,
+frame by frame — four sessions died backgrounding it.
