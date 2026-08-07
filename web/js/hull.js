@@ -507,7 +507,15 @@ function buildDeckGeometry(S, NU = 120) {
   for (let i = 0; i < NU; i++) {
     for (let j = 0; j < 8; j++) {
       const a = i * 9 + j, b = a + 9, c = a + 1, d = b + 1;
-      idx.push(a, c, b, c, d, b);
+      /* ⚠ THE WINDING MUST AGREE WITH THE DECLARED NORMAL. This loop wound the deck
+         clockwise-from-above — (a,c,b) — under normals declared (0,1,0), and three.js's
+         double-sided flip trusts the WINDING: seen from above the faces were "back" faces,
+         the up normals were flipped down, and every weather deck in the fleet was lit by
+         the ground half of the hemisphere light — the round-34 "dark olive deck that goes
+         black in Sea light" was a sunlit deck lit as if it faced the sea floor. The ratchet
+         never saw it because a consistently wrong deck never changes; the audit's
+         winding-vs-normals rule now holds the class. */
+      idx.push(a, b, c, c, b, d);
     }
   }
   const g = new THREE.BufferGeometry();
@@ -2577,12 +2585,23 @@ function buildFlightDeck(S, group, mats) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckW = S.flightDeck;                       // full flight-deck beam in metres
-  /* ⚠ 0x4a4f55 at roughness 0.92 still blew out to white under the Shipwright's key light,
-     which is what made the deck read as a blank slab. A flight deck is NON-SKID: a coarse
-     grit-and-epoxy coating, near-black and almost totally matt, because anything glossy up
-     there is lethal to people and aircraft alike. Dark enough to survive a 3.1-intensity key. */
-  const grey = new THREE.MeshStandardMaterial({ color: 0x23272b, roughness: 0.99, metalness: 0.0 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.80, metalness: 0.12 });
+  /* ── THE PAINT IS AN ALBEDO, NOT A TONE (round 35). ─────────────────────────────────
+     She read as a black cutout in both views: deck 0x23272b, island 0x2b3036, casing
+     0x363b41 — soot values, each authored to LOOK right under one rig and wrong under the
+     other. (The old note here blamed a blow-out under the 3.1 key; round 26 already found
+     that blow-out was a liner deckhouse occupying the same pixels, and the deck was then
+     darkened anyway.) Measured against the 8 April 2017 sea-trials broadside (US Navy, PD):
+     the island in sun reads as bright as the wake foam (lum 197/255), the deck ~0.9× of
+     that, sunlit verticals ~0.8×, the hull shell 0.2–0.4× — the only near-black anywhere
+     on a Ford is the SHADOW under the deck-edge overhang, and the renderer casts that
+     itself. So the materials now carry the paints, not the compensations: FS 26270 haze
+     grey on every vertical, MIL-PRF-24667 non-skid on the deck. The weathered non-skid
+     shade is CONTESTED — a fresh coat is near-black, worn decks in overheads read a full
+     mid grey; 0x4e5357 sits where the trials photos do. A flight deck stays matt: anything
+     glossy up there is lethal to people and aircraft alike. */
+  const HAZE = 0x848a8e;
+  const grey = new THREE.MeshStandardMaterial({ color: 0x4e5357, roughness: 0.99, metalness: 0.0 });
+  const dark = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.70, metalness: 0.15 });
   const line = new THREE.MeshStandardMaterial({ color: 0xd6d2c4, roughness: 0.85, metalness: 0.0 });
   const y = H.sheer(0.5) + B * 0.10;
 
@@ -2599,8 +2618,11 @@ function buildFlightDeck(S, group, mats) {
      BUILT — the hangar and the gallery decks — and the overhang is only ever at the edges.
      Lofted from the hull's own half-breadth, so the casing cannot disagree with the sheer
      it stands on. */
-  const caseMat = new THREE.MeshStandardMaterial({ color: 0x363b41, roughness: 0.72,
-                                                   metalness: 0.30, side: THREE.DoubleSide });
+  /* the casing is the shell carried up — the same haze grey as everything vertical. Its
+     rendered darkness must come from the deck-edge overhang's SHADOW, as it does on the
+     ship, not from a darker paint. */
+  const caseMat = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.62,
+                                                   metalness: 0.25, side: THREE.DoubleSide });
   const hg = new THREE.Group();
   const NUH = 36, u0 = 0.05, u1 = 0.95;
   const yTopC = y - B * 0.020;
@@ -2753,7 +2775,8 @@ function buildFlightDeck(S, group, mats) {
      moves. Sitting it on top made it read as freight. It is now let into the surface and
      shows as a seam and a yellow-edged outline, which is all you would see from above. */
   for (const u of [0.30, 0.62]) {
-    const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, deckW * 0.13), dark);
+    /* a lift IS deck — it wears the non-skid, not the vertical-surface haze grey */
+    const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, deckW * 0.13), grey);
     lift.position.set((u - 0.5) * L, y + B * 0.0225, deckW * 0.44);
     group.add(tag(lift, 'flightdeck', 'Deck-edge lift',
       'Aircraft come up from the hangar on the deck edge rather than through the middle, so a lift out of action does not cut the flight deck in half. Flush with the deck when raised — it is a piece of the deck that moves.'));
@@ -4072,8 +4095,13 @@ function buildShip(S, opts) {
 
   /* the weather deck keys off what the DECK was, not what the hull was: liners and
      battleships stayed planked to the end — Titanic's teak, Yamato's hinoki — but a flight
-     deck and a container ship's weather deck are bare steel */
-  const steelDeck = STEEL && (S.flightDeck || S.containers);
+     deck and a container ship's weather deck are bare steel. ⚠ And the covering is a fact
+     of the SHIP, not of two cargo types: the round-35 winding fix lit the decks properly
+     for the first time and exposed a planked timber deck on the 2026 composite USV, which
+     the heuristic below had been guessing at invisibly. `deckSteel` in the record overrides
+     the guess. */
+  const steelDeck = STEEL && (S.deckSteel !== undefined ? S.deckSteel
+                                                        : (S.flightDeck || S.containers));
   const deckMat = steelDeck
     ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
                                        side: THREE.DoubleSide })

@@ -153,6 +153,11 @@
       "note": "1906 riveted warship \u2014 red-brown bottom, no cove line"
     },
     {
+      "name": "aboard-carrier",
+      "path": "/?frozen=1#e=7&f=csg",
+      "note": "ABOARD, THE CARRIER — the strike group on deployment. Added round 35 with the paint rebuild: she read as a black cutout in both views (deck 0x23272b, island 0x2b3036, topside #4e545b — soot albedos tuned to rigs). Watches the measured scheme — FS 26270 haze-grey verticals, weathered non-skid deck — and the deck markings, deck park and island against the reference relative pattern: island brightest, deck ~0.9×, shell 0.2–0.6×."
+    },
+    {
       "name": "aboard-titanic",
       "path": "/?frozen=1#e=6&f=titanicvoy",
       "note": "ABOARD, THE LINER \u2014 Titanic on her maiden-voyage track. Added round 34 with the era profile rebuild: black shell to B deck with the white house above, forecastle/poop breaks, 9.46\u00b0 raked buff funnels and masts whose trucks stand 62.5 m over the load line. The Sea view is where the r32 era-dress and this structure meet; no baseline watched a liner here before."

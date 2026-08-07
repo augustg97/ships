@@ -1227,3 +1227,87 @@ within a minute — but r33's push run (31129373376) did eventually fire 36 minu
 the mode has shifted from "never fires" to "fires late"; treat a missing run as late, not
 dead, and dispatch anyway. Manual `gh workflow run pages.yml` → run 31131412718, completed
 success, live stamp verified 1786053656 → **1786058340** with a cache-busted fetch.
+
+---
+
+## Round 35 — 2026-08-06 — One bug was both queue items: every deck in the fleet was lit from under the sea
+
+**Queue items 1 and 2 (the carrier's black cutout, dreadnought's black deck) turned out to be
+ONE class bug, plus a paint job.** This round ran in fragments — several sessions died waiting
+on the ratchet render and the loop restarted them — so the closing session re-verified
+everything from scratch rather than trusting the fragments' claims: audit re-run, every moved
+frame re-rendered fresh, the carrier re-measured on the new render.
+
+**1. The winding fix, hull.js `buildDeckGeometry` — the class find of the round.** The deck
+grid declared every normal `(0,1,0)` and wound its triangles `(a,c,b)` — clockwise from above.
+three.js's double-sided lighting flip trusts the WINDING: seen from above the faces were back
+faces, the up-normals were flipped down, and every weather deck in the fleet was lit by the
+GROUND half of the hemisphere light. The carrier's "charcoal deck" and dreadnought's "dark
+olive deck that goes black in Sea light" were both sunlit decks lit as if they faced the sea
+floor. No picture ratchet can catch it, because a consistently wrong deck never changes.
+Verified by hand (both triangles of the fixed `(a,b,c),(c,b,d)` cross to +Y for the deck's
+vertex layout) and empirically: the audit's new **`winding contradicts declared normals`**
+rule samples ~40 faces per MeshStandardMaterial mesh, compares geometric to declared normals,
+and fires on >50% disagreement — the killed session proved it live by reverting the fix
+(fired fleet-wide) and restoring it (25/25 clean).
+
+**2. The carrier's paint, rebuilt from compensations to albedos.** Deck 0x23272b / island
+0x2b3036 / topside #4e545b were soot values each tuned to look right under one rig and wrong
+under the other. Measured against the 8 Apr 2017 sea-trials broadside (US Navy, PD): island
+as bright as wake foam, deck ~0.9× of it, shell 0.2–0.6× — the only near-black on a Ford is
+the deck-edge overhang's shadow, which the renderer casts itself. Now: FS 26270 haze grey
+(#848a8e) on every vertical including the hangar casing (its darkness must come from the
+shadow, as on the ship), MIL-PRF-24667 non-skid 0x4e5357 on the deck — the weathered shade
+is CONTESTED (fresh coats near-black, worn decks mid grey; said in the code) — and the
+deck-edge lifts wear deck paint, not vertical-surface paint. **Measured on the fresh
+ship-carrier render: island 131 > deck 126 > shell 60 > sea 29** — the reference pattern,
+and she reads grey from all bearings in both views (spin + both baselines looked at).
+
+**3. `deckSteel` — the covering is a fact of the SHIP.** The lighting fix exposed a planked
+timber deck the 2026 composite USV had been invisibly wearing (the old heuristic guessed
+steel only from flightDeck/containers). `deckSteel` in the record now overrides the guess;
+only the USV carries it this round. Verified: her deck reads steel grey with hatch seams.
+
+**4. Ratchet: 29 frames, 16 moved, 15 accepted as one class, 1 left standing.** The 13
+ship-* frames + shipwright + aboard-coast are all the winding fix (diffs confined to deck
+surfaces and hatch gratings — each diff image looked at; ship-carrier 5.406% adds the paint,
+ship-usv 1.358% adds deckSteel). `globe-default` 1.023%/0.274 is the standing serif-webfont
+text-only flake (diff verified text-only again), left un-accepted, still queued. Passes
+include `aboard-titanic` 0.039% and **`aboard-carrier` 0.000% — the new Sea-view baseline
+committed this round, bit-identical to the interrupted session's render, which is the
+determinism proof.** Audit 25/25 clean, from the served files.
+
+**Rule 0 check, written:** the frames read as a rendered world — one sun, a swell, hulls wet
+at their marks. Three facts off ship-carrier: a Ford-class carrier in haze grey with a
+near-black non-skid deck park and white runway stripes angled to port; the island small, to
+starboard, brightest surface in frame; red antifouling at the stem where the trough drops.
+Three off ship-dreadnought: holystoned wood weather deck pale at bow and quarter; two buff
+funnels with black caps abaft a tripod-adjacent mast; main battery in grey turrets fore and
+aft with wing barbettes.
+
+**New class find, QUEUED with values (data-only, one line per vessel):** engine-driven cards
+without `speedKn` show the RIG POLAR as "best speed" — the exact fault the r34 Titanic fix
+documented (`shipwright.js` ~line 571). Live wrong numbers: carrier 16.0 kn (record's own row:
+"in excess of 30"), dreadnought 9.6 (record: 21), yamato (record: 27), steamer 9.6 (Great
+Britain: 12.25), container 16.0 (record: ~21 slow-steaming), usv 16.0 (a 22 m wing-sail
+drone; Saildrone Surveyor ~3–5 kn — CONTESTED which number is "service"). Not fixed this
+round because the card text is in every ship frame and the edit would have split the
+in-flight ratchet run; it is a six-line vessels.json edit plus one ratchet pass next round.
+
+**A trap hit and cleared:** TWO servers were listening on :8149 — the correct one (web/,
+IPv4) and a stale one serving the REPO ROOT on IPv6 from an interrupted session. A fetch of
+localhost could resolve to either stack. The root server was killed; if frames ever come back
+wrong-looking with panels intact, check `lsof -nP -iTCP:8149` FIRST.
+
+### Next, in order
+1. **speedKn for the six engine-driven records** (values above; one ratchet pass, frames
+   move by card text only).
+2. The serif-webfont dependency decision (globe-default false-RED; flaked within r34 and
+   again this round at the same 1.023%).
+3. The land in the Sea close-up: featureless brown ramp, check on a high coast.
+4. Yamato round 2: 25 mm tertiary battery, deck aircraft, boat-stowage hatches, pagoda
+   searchlight platforms.
+5. Titanic remainder, if wanted: crow's nest height, funnel stations against the GA drawing,
+   enclosed A-deck promenade forward, docking bridge on the poop.
+6. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
+   preussen P-liner white waterline check.

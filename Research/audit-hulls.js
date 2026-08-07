@@ -573,6 +573,52 @@
           `stack top ${(part.container.y[1] - deckY).toFixed(1)} m above deck, ` +
           `house top ${(part.bridge.y[1] - deckY).toFixed(1)} m`);
 
+    /* ── THE WINDING MUST AGREE WITH THE DECLARED NORMALS (round 35). ─────────────────
+       buildDeckGeometry declared every deck normal (0,1,0) and wound its triangles the other
+       way, so three.js's double-sided lighting flip — which trusts the winding — inverted
+       correct normals into wrong ones, and every weather deck in the fleet was lit as if it
+       faced the sea floor: the "dark olive deck" of rounds 34–35 was the GROUND half of the
+       hemisphere light on a sunlit deck. No picture ratchet can see it, because a
+       consistently wrong deck never changes. Checked only on materials whose lighting does
+       the flip (MeshStandardMaterial); the hull shader has no flip logic, and its mirrored
+       port half disagrees with its winding on purpose. */
+    {
+      const bad = {};
+      g.traverse(o => {
+        if (!o.isMesh || !o.material || !o.material.isMeshStandardMaterial) return;
+        const ge = o.geometry;
+        if (!ge || !ge.index || !ge.attributes.normal) return;
+        const ix = ge.index.array, nr = ge.attributes.normal.array, ps = ge.attributes.position.array;
+        const faces = ix.length / 3, step = Math.max(1, Math.floor(faces / 40));
+        let dis = 0, tot = 0;
+        for (let f = 0; f < faces; f += step) {
+          const A = ix[f * 3], B = ix[f * 3 + 1], C = ix[f * 3 + 2];
+          const ax = ps[A * 3], ay = ps[A * 3 + 1], az = ps[A * 3 + 2];
+          const e1 = [ps[B * 3] - ax, ps[B * 3 + 1] - ay, ps[B * 3 + 2] - az];
+          const e2 = [ps[C * 3] - ax, ps[C * 3 + 1] - ay, ps[C * 3 + 2] - az];
+          const gx = e1[1] * e2[2] - e1[2] * e2[1],
+                gy = e1[2] * e2[0] - e1[0] * e2[2],
+                gz = e1[0] * e2[1] - e1[1] * e2[0];
+          const gl = Math.hypot(gx, gy, gz); if (gl < 1e-9) continue;
+          const sx = (nr[A * 3] + nr[B * 3] + nr[C * 3]) / 3,
+                sy = (nr[A * 3 + 1] + nr[B * 3 + 1] + nr[C * 3 + 1]) / 3,
+                sz = (nr[A * 3 + 2] + nr[B * 3 + 2] + nr[C * 3 + 2]) / 3;
+          const sl = Math.hypot(sx, sy, sz); if (sl < 1e-6) continue;
+          tot++;
+          if ((gx * sx + gy * sy + gz * sz) / (gl * sl) < -0.2) dis++;
+        }
+        if (tot >= 8 && dis / tot > 0.5) {
+          const p = tagOf(o); const k = p ? p.key : '(untagged)';
+          bad[k] = (bad[k] || 0) + 1;
+        }
+      });
+      const keys = Object.keys(bad);
+      if (keys.length)
+        say(v.id, 'winding contradicts declared normals',
+            keys.map(k => `${bad[k]} ${k} mesh(es)`).join(', ') +
+            ' — double-sided lighting flips these the wrong way');
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

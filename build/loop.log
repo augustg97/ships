@@ -120,3 +120,48 @@ Round 33 is complete and live. The summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 17845 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 15:38:24  round starting
+Round 34 is live at stamp 1786058340. The round did queue items 1 and 4, and the spot check's biggest find was inside the queue item itself.
+
+**The Titanic's whole vertical model was wrong, not just her fittings.** Her `freeboard: 18.5` was the boat-deck height above water used where the fleet convention means waterline-to-shell-deck, and four white tiers then stacked on top of that — so her drawn boat deck stood 30.3 m over the water against the record's 19 m, and her masts came out level with her funnels instead of 20 m above them, which is why she read as a white slab with invisible masts. She now derives to 18.98 m against a new `boatDeckM: 19.0` record field the audit guards.
+
+**The record closed on itself, which is how I know the mapping is right.** Forecastle 128 ft + well 50 + bridge superstructure 550 + well 50 + poop 106 = 884 ft against her 882.75 ft length overall. With `houseAt` moved to the record's stations the drawn house stays exactly 550 ft, and the forecastle and poop — new `buildRaisedEnds()`, lofted from the hull's own perimeter and sheer so they cannot overhang or float — land their breaks at the record's stations. The 550-ft bridge superstructure is now a *shell* tier (black, full-breadth, a window row in black steel) under two white storeys, a `shellTiers` mechanism any liner can use. Masts stand at 62.5 m trucks in White Star buff, masts and funnels raked the recorded 2 in/ft (9.46°), and the funnel buff A/B settled on a warm tan `#c9a267` over the old near-white cream, with the contested range (tan ↔ orange-yellow ↔ pink) named in the data. One nice trap: the foremast *looked* forward-raked in wide bearings — in-page measurement showed both masts leaning 8.7 m aft; it was perspective divergence, and the measurement is in HANDOFF.
+
+**The seven-hull Sea-view spot check** found the rest sound and queued two class faults: the carrier reads near-black from every angle in both views (her own material, not the sun), and Dreadnought's dark-olive deck goes black in Sea light against a record of holystoned wood.
+
+Process: audit 25/25 with two new record-height rules proven live by breaking the data first, plus one audit rule fixed (its fifth wrong call — the deck-edge test sampled one station on a mesh that spans a taper); ratchet 28 frames, 3 moved, all classified — the rebuild and a neighbour-edge diff accepted with reasons, the standing serif-webfont flake on globe-default left un-accepted and re-queued since it flaked *within* this round. A new `aboard-titanic` baseline now watches a liner in the Sea view. Deploy needed a manual dispatch again, but r33's push run turned out to have fired 36 minutes late — the failure mode has shifted from "never" to "late", and HANDOFF says so. Live stamp verified cache-busted: 1786053656 → 1786058340.
+2026-08-06 16:33:40  round finished; HEAD is 782b814 Deploy note r34: live at 1786058340; push runs now fire late rather than never
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 23933 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 16:43:40  round starting
+
+2026-08-06 17:54:20  round finished; HEAD is 782b814 Deploy note r34: live at 1786058340; push runs now fire late rather than never
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 31921 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 18:04:20  round starting
+The ratchet is partway through (7 of 29 frames rendered). Everything verified so far:
+
+- **The class fix is real and proven.** The killed round found that `buildDeckGeometry` wound its deck triangles clockwise-from-above against declared up-normals, so three.js's double-sided lighting flip lit every weather deck in the fleet from the ground hemisphere — that one bug is both queue item 1 (carrier reads near-black) and queue item 2 (dreadnought's black deck). I reverted the fix temporarily and the new audit rule fired across the fleet; restored, the audit is 25/25 clean.
+- The carrier paint rebuild (FS 26270 haze grey verticals, weathered non-skid deck, lifts wearing deck paint), the `deckSteel` record override on the USV, and all web/docs/Research copies are consistent.
+
+Waiting on the ratchet to finish rendering, then I'll measure the carrier's claimed luminance pattern, look at every moved frame, and close the round.
+2026-08-06 18:15:03  round finished; HEAD is 782b814 Deploy note r34: live at 1786058340; push runs now fire late rather than never
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 42635 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 18:25:04  round starting
+The ratchet is still rendering (it notifies on completion). Status so far: audit 25/25 clean, the carrier verified from four bearings, the luminance pattern measured on-render and matching the reference claim, all file copies in sync. Next step when the ratchet finishes: classify every moved frame, accept with written reasons, write the round-35 HANDOFF entry, commit, deploy, and verify the live stamp.
+2026-08-06 18:28:28  round finished; HEAD is 782b814 Deploy note r34: live at 1786058340; push runs now fire late rather than never
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 45149 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 18:38:28  round starting
+All copies are in sync (Research/web/docs identical for the audit; web==docs for hull.js and vessels.json). The site is built at stamp 1786066889 and the 29-frame ratchet is rendering in the background — I'll classify every moved frame when it completes, then write HANDOFF, commit, and deploy.
+
+**Status so far:** the audit passes 25/25 with the new winding-vs-normals rule live in the served file, and I've looked at the carrier from three angles — the black-cutout fault is gone; she reads as haze grey with a lit non-skid deck, white runway stripes, deck park, island, and red antifouling at the waterline.
+2026-08-06 18:42:33  round finished; HEAD is 782b814 Deploy note r34: live at 1786058340; push runs now fire late rather than never
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 46791 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 18:52:33  round starting
+The ratchet is rendering all 29 frames in the background; it will notify when done. Verified so far: web/docs/Research copies in sync, audit 25/25 clean with the new winding-vs-normals rule live, the carrier paint rebuild confirmed from three angles plus a luminance measurement matching the reference pattern (island 135 > deck 131 > shell 114 > sea 99). When the ratchet completes I'll classify every moved frame, look at the images, then write HANDOFF, commit, deploy, and verify the live stamp.
+2026-08-06 18:55:47  round finished; HEAD is 782b814 Deploy note r34: live at 1786058340; push runs now fire late rather than never
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 48514 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 19:05:47  round starting

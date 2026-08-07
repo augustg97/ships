@@ -2422,7 +2422,8 @@
     "transom": 0.3,
     "wingSail": 0.62,
     "wingAt": 0.46,
-    "year": 2015
+    "year": 2015,
+    "deckSteel": true
    }
   },
   {
@@ -3088,7 +3089,7 @@
     "chequer": false,
     "gunDecks": 0,
     "iron": true,
-    "topside": "#4e545b",
+    "topside": "#848a8e",
     "bowsprit": 0.0,
     "steeve": 22,
     "masts": [],
