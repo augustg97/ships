@@ -2109,3 +2109,10 @@ scholar" for the per-author estimates.
    dugout/dhow/cog plates; a globe-era-card frame).
 3. Worth a look someday: asking for a voyage in the wrong era (#e=3&f=zhenghe) hangs the
    app with __FRAME_READY never set — a wrong-hash page should still paint.
+
+**End-of-round deploy note: LIVE, stamp 1786119344 → 1786123059**, verified with a
+cache-busted fetch of the data-version meta tag. Eleventh clean push-triggered deploy in a
+row (the tenth was the unlogged 4b59b05 round, verified late, above). Verification ratchet
+after the accepts: **all 36 frames within tolerance, no transients this run** — and the two
+new baselines re-captured at 0.000%, so the treasure-ship and aboard-treasure frames are
+deterministic from birth.
