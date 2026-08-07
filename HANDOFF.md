@@ -2395,3 +2395,7 @@ the Armada holding the weather gauge with the fleets 7.0 km apart.
 2. A galley action is now UNBLOCKED: Salamis, Lepanto and Myeongnyang have battle cards and
    the floor works at true scale — staging one is a campaign-data task (days, winds,
    ranges from the record), not an engine task.
+
+**End-of-round deploy note: LIVE, stamp 1786137697 → 1786139194**, verified with a
+cache-busted fetch of the data-version meta tag; the live battle.js confirmed carrying
+compilePolar and zero btPolarSpeed. Fourteenth clean push-triggered deploy in a row.
