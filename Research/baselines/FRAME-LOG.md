@@ -349,3 +349,17 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-07 02:44** · `aboard-cable` — new baseline left uncommitted by a previous round: Great Eastern laying the Atlantic cable, 1869 — looked at, legible, sails and paddle box present
 - **2026-08-07 02:44** · `ship-wyoming` — new baseline for the round-42 vessel: six gaff quads with topsails on fidded topmasts, five headsails on the spike bowsprit with bobstays, spring stays masthead to masthead, fore and after deckhouses, the wheel aft, spanker boom over the counter
 - **2026-08-07 02:44** · `aboard-wyoming` — new baseline: Wyoming at sea in the coal trade, era 6 close-up — the rig reads from the water, wake and hull weight visible
+- **2026-08-07 05:09** · `shipwright` — the ship-of-the-line card now carries her Commons plate (HMS Victory at Portsmouth); diff is the card panel only — model, sea and fleet untouched
+- **2026-08-07 05:09** · `ship-junk` — junk card plate: the Keying, which sailed China to London 1846-48; card panel only
+- **2026-08-07 05:09** · `ship-canoe` — voyaging-canoe card plate: Hokule'a on her 2017 homecoming; card panel only
+- **2026-08-07 05:09** · `ship-great-eastern` — great-eastern card plate: Great Eastern moored, 1866; card panel only
+- **2026-08-07 05:09** · `ship-usv` — usv card plate: a Saildrone Explorer under way; card panel only
+- **2026-08-07 05:09** · `ship-trireme` — trireme card plate: Olympias, the full-scale reconstruction, under oar; card panel only
+- **2026-08-07 05:09** · `ship-carrier` — carrier card plate: USS Gerald R. Ford under way; card panel only
+- **2026-08-07 05:09** · `ship-titanic` — titanic card plate: Titanic leaving Southampton, 10 April 1912; card panel only
+- **2026-08-07 05:09** · `ship-yamato` — yamato card plate: Yamato on trials off Bungo Strait, 1941; card panel only
+- **2026-08-07 05:09** · `ship-container` — container card plate: Maersk Mc-Kinney Moller at Busan; card panel only
+- **2026-08-07 05:09** · `ship-preussen` — preussen card plate: Preussen c.1910 (SLNSW); card panel only — the model's sparse rig now stands against the record photograph, which is the point
+- **2026-08-07 05:09** · `ship-steamer` — steamer card plate: SS Great Britain preserved at Bristol; card panel only
+- **2026-08-07 05:09** · `ship-dreadnought` — dreadnought card plate: HMS Dreadnought, 1906; card panel only
+- **2026-08-07 05:09** · `ship-wyoming` — wyoming card plate: Wyoming, 1917; card panel only

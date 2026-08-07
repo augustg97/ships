@@ -1,20 +1,372 @@
 {
-  "note": "Every third-party asset in this project, with its source and licence. Required by SOURCING-AND-LICENSING; also what makes a future publication pass a day's work instead of a rebuild.",
-  "assets": [
-    {
-      "source": "polyhaven",
-      "slug": "kloofendal_43d_clear_puresky",
-      "name": "Kloofendal 43d Clear (Pure Sky)",
-      "type": "hdris",
-      "resolution": "1k",
-      "licence": "CC0",
-      "authors": {
-        "Greg Zaal": "All"
-      },
-      "url": "https://polyhaven.com/a/kloofendal_43d_clear_puresky",
-      "files": [
-        "web/data/assets/hdris/kloofendal_43d_clear_puresky/kloofendal_43d_clear_puresky_1k.hdr"
-      ]
-    }
-  ]
+ "note": "Every third-party asset in this project, with its source and licence. Required by SOURCING-AND-LICENSING; also what makes a future publication pass a day's work instead of a rebuild.",
+ "assets": [
+  {
+   "source": "polyhaven",
+   "slug": "kloofendal_43d_clear_puresky",
+   "name": "Kloofendal 43d Clear (Pure Sky)",
+   "type": "hdris",
+   "resolution": "1k",
+   "licence": "CC0",
+   "authors": {
+    "Greg Zaal": "All"
+   },
+   "url": "https://polyhaven.com/a/kloofendal_43d_clear_puresky",
+   "files": [
+    "web/data/assets/hdris/kloofendal_43d_clear_puresky/kloofendal_43d_clear_puresky_1k.hdr"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "caravel",
+   "type": "ships",
+   "name": "File:Caravel Boa Esperanca Portugal.jpg",
+   "caption": "The caravel Boa Esperança — the hull that opened the African coast",
+   "licence": "Attribution",
+   "authors": {
+    "Brazillian Navy": "All"
+   },
+   "credit": "photo taken by Brazillian Navy",
+   "url": "https://commons.wikimedia.org/wiki/File:Caravel_Boa_Esperanca_Portugal.jpg",
+   "files": [
+    "web/data/assets/ships/caravel.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "carrack",
+   "type": "ships",
+   "name": "File:Nao Victoria.jpg",
+   "caption": "A replica of the nao Victoria, the first ship to circumnavigate",
+   "licence": "CC BY-SA 3.0",
+   "authors": {
+    "Gnsin": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Nao_Victoria.jpg",
+   "files": [
+    "web/data/assets/ships/carrack.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "carrier",
+   "type": "ships",
+   "name": "File:USS Gerald R. Ford (CVN 78) shock ttrial 1.jpg",
+   "caption": "USS Gerald R. Ford under way",
+   "licence": "Public domain",
+   "authors": {
+    "Mass Communication Specialist 3rd Class Novalee Manzella": "All"
+   },
+   "credit": "US Navy\nVIRIN: 210808-N-YD731-1361\nhttps://www.navy.mil/Resources/Photo-Gallery/igphoto/2002825462/",
+   "url": "https://commons.wikimedia.org/wiki/File:USS_Gerald_R._Ford_(CVN_78)_shock_ttrial_1.jpg",
+   "files": [
+    "web/data/assets/ships/carrier.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "clipper",
+   "type": "ships",
+   "name": "File:Cutty Sark (January 2024) 04.jpg",
+   "caption": "Cutty Sark, preserved at Greenwich",
+   "licence": "CC BY-SA 4.0",
+   "authors": {
+    "DiscoA340": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Cutty_Sark_(January_2024)_04.jpg",
+   "files": [
+    "web/data/assets/ships/clipper.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "container",
+   "type": "ships",
+   "name": "File:Mærsk Mc-Kinney Møller, making its maiden call in Busan, Korea.jpg",
+   "caption": "Mærsk Mc-Kinney Møller on her maiden call at Busan",
+   "licence": "CC BY-SA 2.0",
+   "authors": {
+    "Maersk Line": "All"
+   },
+   "credit": "The world's largest ship and our first Triple-E vessel, the Mærsk Mc-Kinney Møller, making its maiden call in Busan, Korea. Use #TripleE to watch your own Triple-E IGs on worldslargestship.com/triple-e #Maersk #MaerskLine #container #vessel #Busan #Korea",
+   "url": "https://commons.wikimedia.org/wiki/File:M%C3%A6rsk_Mc-Kinney_M%C3%B8ller,_making_its_maiden_call_in_Busan,_Korea.jpg",
+   "files": [
+    "web/data/assets/ships/container.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "dreadnought",
+   "type": "ships",
+   "name": "File:HMS Dreadnought 1906 H61017.jpg",
+   "caption": "HMS Dreadnought, 1906 — she made every other battleship obsolete",
+   "licence": "Public domain",
+   "authors": {
+    "Adam Cuerden": "All"
+   },
+   "credit": "U.S. Naval Historical Center",
+   "url": "https://commons.wikimedia.org/wiki/File:HMS_Dreadnought_1906_H61017.jpg",
+   "files": [
+    "web/data/assets/ships/dreadnought.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "east-indiaman",
+   "type": "ships",
+   "name": "File:East Indiaman Gotheborg - Tall Ships Race Helsinki Sandviken 2013 - 01.jpg",
+   "caption": "Götheborg, the East Indiaman reconstruction, under sail",
+   "licence": "CC BY-SA 4.0",
+   "authors": {
+    "Sinikka Halme": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:East_Indiaman_Gotheborg_-_Tall_Ships_Race_Helsinki_Sandviken_2013_-_01.jpg",
+   "files": [
+    "web/data/assets/ships/east-indiaman.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "fluyt",
+   "type": "ships",
+   "name": "File:Johannes Beerstraaten - A Dutch Flagship and a Fluyt Running into a Mediterranean Harbour.jpg",
+   "caption": "A fluyt running into harbour, by Beerstraaten. No fluyt survives; the type is known from paintings",
+   "licence": "Public domain",
+   "authors": {
+    "Johannes Beerstraaten (Dutch, active 17th century)": "All"
+   },
+   "credit": "National Maritime Museum official site",
+   "url": "https://commons.wikimedia.org/wiki/File:Johannes_Beerstraaten_-_A_Dutch_Flagship_and_a_Fluyt_Running_into_a_Mediterranean_Harbour.jpg",
+   "files": [
+    "web/data/assets/ships/fluyt.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "great-eastern",
+   "type": "ships",
+   "name": "File:Great Eastern 1866-crop.jpg",
+   "caption": "Great Eastern moored, 1866",
+   "licence": "Public domain",
+   "authors": {
+    "most likely Robert Edward Holloway (d. 1904) according to source": "All"
+   },
+   "credit": "http://www.library.mun.ca/qeii/cns/photos/",
+   "url": "https://commons.wikimedia.org/wiki/File:Great_Eastern_1866-crop.jpg",
+   "files": [
+    "web/data/assets/ships/great-eastern.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "junk",
+   "type": "ships",
+   "name": "File:Chinese Junk Keying.jpg",
+   "caption": "The junk Keying, which sailed from China to London in 1846–48",
+   "licence": "Public domain",
+   "authors": {
+    "Rock Bros &amp; Payne": "All"
+   },
+   "credit": "http://collections.rmg.co.uk/collections/objects/102565.html",
+   "url": "https://commons.wikimedia.org/wiki/File:Chinese_Junk_Keying.jpg",
+   "files": [
+    "web/data/assets/ships/junk.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "longship",
+   "type": "ships",
+   "name": "File:Osebergskipet 2016.jpg",
+   "caption": "The Oseberg ship, buried about 834 and raised in 1904",
+   "licence": "CC BY-SA 4.0",
+   "authors": {
+    "Petter Ulleland": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Osebergskipet_2016.jpg",
+   "files": [
+    "web/data/assets/ships/longship.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "preussen",
+   "type": "ships",
+   "name": "File:Preussen ship c. 1910 SLNSW FL20702467.jpg",
+   "caption": "Preussen — the only five-masted full-rigged ship ever built",
+   "licence": "Public domain",
+   "authors": {
+    "Unknown authorUnknown author": "All"
+   },
+   "credit": "State Library of New South Wales, PXA 1152/Vol. 8",
+   "url": "https://commons.wikimedia.org/wiki/File:Preussen_ship_c._1910_SLNSW_FL20702467.jpg",
+   "files": [
+    "web/data/assets/ships/preussen.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "ship-of-the-line",
+   "type": "ships",
+   "name": "File:HMS Victory 2007.jpg",
+   "caption": "HMS Victory, preserved at Portsmouth",
+   "licence": "Public domain",
+   "authors": {
+    "Valkyryn (talk) 18:48, 24 July 2008 (UTC)": "All"
+   },
+   "credit": "Own work (Original text: I created this work entirely by myself.)",
+   "url": "https://commons.wikimedia.org/wiki/File:HMS_Victory_2007.jpg",
+   "files": [
+    "web/data/assets/ships/ship-of-the-line.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "slave-ship",
+   "type": "ships",
+   "name": "File:Brookes slave ship, British Library.jpg",
+   "caption": "The Brookes stowage diagram, 1788, published by abolitionists as evidence",
+   "licence": "Public domain",
+   "authors": {
+    "Printed by James Phillips, George Yard, Lombard Street, London": "All"
+   },
+   "credit": "https://www.bl.uk/learning/timeline/item106661.html",
+   "url": "https://commons.wikimedia.org/wiki/File:Brookes_slave_ship,_British_Library.jpg",
+   "files": [
+    "web/data/assets/ships/slave-ship.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "steamer",
+   "type": "ships",
+   "name": "File:SS Great Britain (6726649319).jpg",
+   "caption": "SS Great Britain — iron hull and screw propeller, preserved at Bristol",
+   "licence": "CC BY-SA 2.0",
+   "authors": {
+    "Hugh Llewelyn": "All"
+   },
+   "credit": "SS Great Britain\n\nUploaded by Oxyman",
+   "url": "https://commons.wikimedia.org/wiki/File:SS_Great_Britain_(6726649319).jpg",
+   "files": [
+    "web/data/assets/ships/steamer.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "titanic",
+   "type": "ships",
+   "name": "File:RMS Titanic 3.jpg",
+   "caption": "Titanic leaving Southampton, 10 April 1912",
+   "licence": "Public domain",
+   "authors": {
+    "Francis Godolphin Osbourne Stuart": "All"
+   },
+   "credit": "http://www.uwants.com/viewthread.php?tid=3817223&amp;extra=page%3D1",
+   "url": "https://commons.wikimedia.org/wiki/File:RMS_Titanic_3.jpg",
+   "files": [
+    "web/data/assets/ships/titanic.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "treasure-ship",
+   "type": "ships",
+   "name": "File:Zheng He Treasure Ship Model (15829289311).jpg",
+   "caption": "A reconstruction model of a treasure ship — her true size is contested",
+   "licence": "CC0",
+   "authors": {
+    "Gary Todd from Xinzheng, China": "All"
+   },
+   "credit": "Zheng He Treasure Ship Model",
+   "url": "https://commons.wikimedia.org/wiki/File:Zheng_He_Treasure_Ship_Model_(15829289311).jpg",
+   "files": [
+    "web/data/assets/ships/treasure-ship.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "trireme",
+   "type": "ships",
+   "name": "File:Olympias.1.JPG",
+   "caption": "Olympias — the full-scale trireme reconstruction, under oar",
+   "licence": "Attribution",
+   "authors": {
+    "Χρήστης Templar52": "All"
+   },
+   "credit": "Φωτογράφηση εξ ιδίων",
+   "url": "https://commons.wikimedia.org/wiki/File:Olympias.1.JPG",
+   "files": [
+    "web/data/assets/ships/trireme.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "usv",
+   "type": "ships",
+   "name": "File:U.S. Navy Saildrone Explorer unmanned surface vessel sails in the Gulf of Aqaba on 6 February 2022 (220206-N-KZ419-1151).JPG",
+   "caption": "A Saildrone Explorer under way — no crew aboard",
+   "licence": "Public domain",
+   "authors": {
+    "U.S. Navy photo by Mass Communication Specialist 2nd Class Dawson Roth": "All"
+   },
+   "credit": "This image was released by the United States Navy with the ID 220206-N-KZ419-1151 (next).\nThis tag does not indicate the copyright status of the attached work. A normal copyright tag is still required. See Commons:Licensing.\n\n\nالعربية ∙ বাংলা ∙ \nBahasa Indonesia ∙ \nBahaso Jambi ∙ \nDeutsch ∙ Deutsch (Sie-Form) ∙ English ∙ español ∙ euskara ∙ فارسی ∙ français ∙ italiano ∙ 日本語 ∙ 한국어 ∙ македонски ∙ മലയാളം ∙ Plattdüütsch ∙ Nederlands ∙ polski ∙ پښتو ∙ português ∙ русский ∙ slovenščina ∙ svenska ∙ Türkçe ∙ українська ∙ 简体中文 ∙ 繁體中文 ∙ +/−",
+   "url": "https://commons.wikimedia.org/wiki/File:U.S._Navy_Saildrone_Explorer_unmanned_surface_vessel_sails_in_the_Gulf_of_Aqaba_on_6_February_2022_(220206-N-KZ419-1151).JPG",
+   "files": [
+    "web/data/assets/ships/usv.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "voyaging-canoe",
+   "type": "ships",
+   "name": "File:Hokulea Homecoming 2017 (35397403656).jpg",
+   "caption": "Hōkūleʻa, the Polynesian voyaging canoe, on her 2017 homecoming",
+   "licence": "Public domain",
+   "authors": {
+    "Region 5 Photography": "All"
+   },
+   "credit": "20170620_153001",
+   "url": "https://commons.wikimedia.org/wiki/File:Hokulea_Homecoming_2017_(35397403656).jpg",
+   "files": [
+    "web/data/assets/ships/voyaging-canoe.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "wyoming",
+   "type": "ships",
+   "name": "File:Schooner Wyoming, 1917.JPG",
+   "caption": "Wyoming, 1917 — the largest wooden schooner ever built",
+   "licence": "Public domain",
+   "authors": {
+    "not listed": "All"
+   },
+   "credit": "nblightlady",
+   "url": "https://commons.wikimedia.org/wiki/File:Schooner_Wyoming,_1917.JPG",
+   "files": [
+    "web/data/assets/ships/wyoming.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "yamato",
+   "type": "ships",
+   "name": "File:Yamato Trial 1941.jpg",
+   "caption": "Yamato on trials off Bungo Strait, 30 October 1941",
+   "licence": "Public domain",
+   "authors": {
+    "Hasuya Hirohata": "All"
+   },
+   "credit": "This photo is part of the records in the Yamato Museum (PG061427).  Search with the kanji characters of Yamato (大和) for the name (second field), and 昭和 for the period (last field).\nU.S. Naval History and Heritage Command photo NH 73092, courtesy of Kazutoshi Hando.",
+   "url": "https://commons.wikimedia.org/wiki/File:Japanese_battleship_Yamato_running_trials_off_Bungo_Strait,_20_October_1941.jpg",
+   "files": [
+    "web/data/assets/ships/yamato.jpg"
+   ]
+  }
+ ]
 }

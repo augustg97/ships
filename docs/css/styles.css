@@ -266,8 +266,32 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 #swCanvas:active{cursor:grabbing}
 #swClose{position:absolute;top:16px;right:18px;z-index:3}
+/* ⚠ AND IT HAD NO HEIGHT LIMIT AT ALL. With a long account — the ship of the line's runs to
+   four paragraphs — the panel simply grew past the bottom of the window and the text was cut
+   off mid-sentence with no way to reach the rest. It reads as a rendering fault rather than as
+   a scroll, because nothing indicates there is more. Bounded now, and it has to be: the plate
+   above the text makes every one of these panels taller. */
 #swLeft{position:absolute;top:16px;left:18px;width:min(330px,32vw);z-index:3;
+  max-height:calc(100vh - 82px - 116px);overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(216,180,92,.40) rgba(255,255,255,.05);
   background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:15px 17px 16px}
+#swLeft::-webkit-scrollbar{width:8px}
+#swLeft::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+#swLeft::-webkit-scrollbar-thumb{background:rgba(216,180,92,.38);border-radius:4px}
+
+/* ── the plate: the real ship, above the account of her ─────────────────────────────── */
+.plate{margin:0 0 14px;padding:0}
+/* ⚠ CAPPED, OR THE PHOTOGRAPH EATS THE CARD. At full width a 3:2 plate is ~220 px tall in a
+   330 px panel, which pushed "What she was" below the fold on every ship — the account of her
+   was still there and still scrollable, but the thing you came to read was off screen. A ship
+   photographed broadside survives a crop far better than a portrait would: the interesting
+   part is the length, and the length is what a letterbox keeps. */
+.plate img{display:block;width:100%;height:auto;max-height:154px;object-fit:cover;
+  object-position:center;border:1px solid var(--edge);border-radius:2px;background:#050d15}
+.plate figcaption{font-size:10.5px;line-height:1.5;color:var(--ink-faint);margin-top:6px;
+  font-style:italic}
+.plate .cr{display:block;font-style:normal;font-size:9.5px;letter-spacing:.06em;
+  color:rgba(99,121,127,.78);margin-top:3px}
 #swLeft h2{font-family:var(--serif);font-size:25px;font-style:italic;margin:0 0 3px;color:var(--ink)}
 #swLeft .sub{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--verdigris);
   margin-bottom:12px}

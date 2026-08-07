@@ -279,3 +279,50 @@ The ratchet run (31 cold-page captures) is still going in the background; it wil
   previous round still running — skipping this firing
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 01:53:32  round starting
+Round 42 is complete and live. **Wyoming — the six-masted schooner, next on the survey queue — went from six bare poles on an empty hull to the record's ship**, and every fault she surfaced was fixed as a class:
+
+**The vessel.** She had no bowsprit (`bowsprit: 0.0`, on a ship whose 140 m LOA against 110 m on deck *is* the head and spanker overhang), no topmasts, six of her 22 sails, and a bare deck. Now: fidded topmasts (white below the doubling, black above) carrying six jib-headed topsails, five headsails on a near-level spike bowsprit held down by bobstays, spring stays masthead to masthead, fore and after deckhouses with the wheel abaft the after house, and the spanker boom standing out over the counter. 1118 → 1199 tris/m, 164 → 231 meshes, nothing floating.
+
+**The four class fixes she surfaced:**
+1. **Every fleet spanker was collapsed.** The boom clamp's fallback obstruction was a station just abaft *midships*, so any aftermost mast got a negative gap and its boom fell to the floor — measured on Wyoming: `[12.9, 12.9, 12.0, 12.0, 12.0, 6.7]`, the shortest spar on the ship where photographs show her longest. Great Eastern's spanker grew from the same fix.
+2. **Every gaff and settee sail wore a slit below the peak** — the quad was two triangles whose noise terms disagree along the shared diagonal. `makeQuadSail` builds it as one cloth; the dhow's frame moved for this reason alone.
+3. **Every masted card's "deck to truck" silently carried the freeboard** — Wyoming read 46.8 m over a 42 m mast, matching the record by accident. The card now measures what its label says.
+4. **Gaff ships had no stay web at all** (mastTops was square-only) — they now get spring stays, and no backstays, which were never rigged through a boom's own arc.
+
+Great Eastern's topmasts stay bare on purpose: the topsail is gated on a `topsail` flag per mast, so the record drives it, not the geometry.
+
+**Verification.** Four new audit rules, each proven by break-and-restore (one break taught something: mutating `headsails` can't fire its own rule since builder and audit read the same record — deleting the bowsprit is the real fault class). 25/25 hulls pass. Six frames accepted with written reasons — including `aboard-cable`, a baseline a previous round left stranded — and the re-run ratchet is fully green. Deployed and verified live at stamp **1786095030**, the fifth clean push-triggered deploy in a row.
+
+One flag: `build/fetch_images.py` sits untracked — another session's start on the ship-photographs item. I left it out of this round's commit and noted it in HANDOFF. Next on the queue: **Preussen** (1248 tris/m), with her pending white-waterline check.
+2026-08-07 02:57:57  round finished; HEAD is fa977c7 Deploy note r42: live at 1786095030; fifth clean push-triggered deploy in a row
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 94463 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 03:07:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 03:17:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 03:27:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 03:37:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 03:47:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 03:57:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 04:07:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 04:17:57  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 04:27:58  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 04:37:58  round starting
+  stale lock older than 90 min — clearing

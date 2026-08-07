@@ -1797,3 +1797,84 @@ item should pick it up or bin it.
 **End-of-round deploy note: LIVE, stamp 1786095030.** Fifth clean push-triggered deploy in a
 row: the push of 6227b4a created run 31168030167, completed success, live stamp verified
 1786083736 → **1786095030** with a cache-busted fetch of the data-version meta tag.
+
+---
+
+## Round 43 — 2026-08-07 — The plates: item 6 shipped, from another session's stranded work
+
+**Not the queue item, and here is why.** Round 42 flagged `build/fetch_images.py` as untracked.
+What the tree actually held by this round's start was the whole of item 6 implemented and
+abandoned mid-verification — 22 Commons photographs fetched, `plates.json` and the ASSETS
+licence book written, card wiring in `app.js`/`shipwright.js`, the panel bounded — last touched
+02:58, the session dead and its loop lock cleared stale at 04:37. Unverified work sitting in
+every file the frame ratchet renders blocks clean attribution of ANY model change, so the round
+was: verify it, own it, ship it, and write the Preussen survey for next round. Binning a
+licence-clean implementation of a queued item would have been waste.
+
+**What it is.** `build/fetch_images.py` fetches by Commons file title: the 1280 px thumbnail
+(never the 40 MB original), with licence, artist and credit captured **in the same API call**,
+written to `web/data/assets/ASSETS.json` (the licence book), from which `web/data/plates.json`
+(the runtime manifest: caption, credit, licence) is rebuilt every run so the two cannot drift.
+`showCard` and `swFillCard` render the plate above the prose with the credit line, escaped, and
+a graceful no-plate fallback. The Shipwright left panel is now bounded and scrolls — with the
+long accounts it previously grew past the window and cut off mid-sentence. Where no photograph
+can exist the plate declares itself: the fluyt is the Beerstraaten painting ("no fluyt
+survives"), the treasure ship a museum model ("her true size is contested"), the slave ship the
+Brookes stowage diagram ("published by abolitionists as evidence").
+
+**Verified, not assumed:**
+- Manifest ↔ files 1:1 (22/22); every plate credited and licensed: 13 PD, 3 CC BY-SA 4.0,
+  1 × 3.0, 2 × 2.0, 2 Attribution, 1 CC0. Licence strings came from Commons extmetadata at
+  fetch time, recorded in the book.
+- **Looked at:** the `shipwright` and `ship-preussen` frames full-size (plate renders,
+  letterboxed, correct ship); the fluyt/slave-ship/treasure-ship JPGs against their captions;
+  all 14 diff images individually. Every diff is the card panel only — model, sea, fleet strip
+  untouched in all 14.
+- Audit 25/25 clean with the work in the tree. First paint 8.45 MB of 8.6 — plates are lazy,
+  outside first paint, 6.8 MB on disk.
+- Frame ratchet run twice. 14 movers, percentages identical across runs (deterministic), each
+  accepted with its own logged reason. Two frames (`globe-steam` 0.05%-ish, `action`) flagged in
+  the FIRST heavy run only and proved **transients**: re-captured in isolation they are
+  pixel-identical twice over and pass against the committed baseline. The class: distant-ship
+  glyphs (the Armada line, a globe marker) shimmer a hair under machine load. Not accepted.
+
+**Rule 0, written:** the shipwright frame reads as a rendered world. Three facts off it: the
+74's double gun-deck checker with her ports drawn; the photograph of Victory at Portsmouth
+above four paragraphs of her account; the fleet drawn up behind at true relative scale, the
+East Indiaman's stern towards us. (And a fourth, the honest one: Preussen's card photograph
+now stands beside a model wearing a tenth of her canvas — the plate makes the survey queue's
+case better than any audit number.)
+
+**Gaps left, deliberately, in the images item:**
+1. `ERA_PLATE` maps 'Reed & plank' → `corbita`, a plate that was never fetched — that era card
+   silently shows no image. Fetch a corbita/Roman-merchantman plate or re-key it.
+2. No plates for dugout, dhow, cog (no Commons title chosen). Card falls back cleanly.
+3. Era and voyage cards render plates live but NO baseline frame captures either (era cards
+   show only on click; the aboard frames show the readout panel, not the prose card). Same
+   `showCard` path as the vessel cards, which are captured. A `globe-era-card` frame would
+   close this.
+
+### Preussen, surveyed for round 44 (from this round's ship-preussen frame)
+
+She is next (1248 tris/m) and the frame says why: **five masts carrying scattered rags where
+the record puts a wall.** Specifically:
+1. **The builder has no double-sail grammar.** Her 30 square sails hang six to a mast — course,
+   lower+upper topsail, lower+upper topgallant, royal — on six yards. The model draws one sail
+   per fidded segment (`only: 3` → three cloths), so the rig is one-third present, with
+   two-storey holes between tiers. CLASS fix: every post-1850 square rigger (clipper too —
+   double topsails) needs a per-mast yard list, not a segment count.
+2. **No fore-and-aft canvas at all:** her record is 47 sails = 30 square + 12 staysails +
+   4 jibs + 1 gaff spanker on the jigger. Wyoming's round built the `headsails` grammar and
+   gaff stack — reuse both; mast-to-mast staysails are new grammar.
+3. **`bowsprit: 0.1`** — near-invisible, on a ship with a full spike bowsprit carrying 4 jibs.
+4. **P-liner livery check (pending since r32):** model shows black over anti-fouling red with
+   no white line; Laeisz ships carried the white boot-topping band at the waterline.
+5. **The polar is a copy-paste class fault:** preussen, clipper and ship-of-the-line share one
+   polar (beat 80/95, curve max 5.8) — her own card row says 20.5 kn, so the card is wrong
+   twice on one panel. Data work, not geometry; scope it separately.
+
+### Next, in order
+1. **preussen** (the survey above — do the rig grammar as the class fix).
+2. Then **steamer (1713)**, **treasure-ship (2011)**.
+3. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
+   behind aboard-yamato; Titanic remainder; items 5 & 7 (voyage/era card enrichment, tone pass).

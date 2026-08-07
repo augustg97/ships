@@ -758,6 +758,9 @@ async function loadData() {
   APP.battles  = await get('data/battles.json')  || { battles: [] };
   APP.chapters = await get('data/chapters.json') || { chapters: [] };
   APP.voyages  = await get('data/voyages.json')  || { voyages: [] };
+  /* the photographs' captions and credits; absent until build/fetch_images.py has run,
+     and the card simply shows no plate in that case */
+  APP.plates   = await get('data/plates.json')   || {};
   APP.about    = await get('data/about.json')    || null;
   buildChapters();
   buildMarkers();
@@ -955,7 +958,14 @@ function selectEra(i, fly) {
   buildVoyageList();
   if (fly && ch.view) flyTo(ch.view[0], ch.view[1], ch.view[2] || 330);
   if (fly) {
-    showCard({ eyebrow: 'Era', title: ch.title, sub: ch.years,
+    /* one hull per era, chosen because its existence IS the era's argument: the dugout that
+       crossed to Sahul, the trireme, the caravel that could beat back up the African coast,
+       the iron steamer, the dreadnought, the box boat. */
+    const ERA_PLATE = { 'Crossing': 'voyaging-canoe', 'Reed & plank': 'corbita',
+                        'Oar & monsoon': 'trireme', 'Longships & junks': 'longship',
+                        'Ocean crossing': 'caravel', 'Iron & steam': 'steamer',
+                        'Steel & war': 'dreadnought', 'Containers': 'container' };
+    showCard({ eyebrow: 'Era', title: ch.title, sub: ch.years, plate: ERA_PLATE[ch.short],
                rows: ch.rows || [], prose: ch.text, span: ch.years, cite: ch.cite });
   }
 }
@@ -1139,7 +1149,8 @@ function startVoyage(v) {
   }
   buildVoyageList();
   showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: v.rows || [],
-             prose: v.text, span: v.dates, cite: v.cite, tags: v.tags });
+             prose: v.text, span: v.dates, cite: v.cite, tags: v.tags,
+             plate: v.vessel });
 }
 
 /* great-circle interpolation between two lon/lat, which is the path a ship actually sails */
@@ -1262,6 +1273,19 @@ function showCard(c) {
     `<span class="tag ${t.toLowerCase()}">${t}</span>`).join('') + '<br>';
   html += proseHTML(c.prose);
   prose.innerHTML = html;
+  /* the photograph goes ABOVE the prose but is built after it, because it is prepended into
+     the same element — one innerHTML write, no second reflow */
+  const pl = c.plate && (APP.plates || {})[c.plate];
+  if (pl) {
+    const esc = t => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    prose.insertAdjacentHTML('afterbegin',
+      '<figure class="plate"><img src="data/assets/ships/' + c.plate + '.jpg" alt="" ' +
+      'loading="lazy" onerror="this.closest(\'.plate\').remove()">' +
+      '<figcaption>' + esc(pl.caption) +
+        (pl.credit ? '<span class="cr">' + esc(pl.credit) +
+                     (pl.licence ? ' · ' + esc(pl.licence) : '') + '</span>' : '') +
+      '</figcaption></figure>');
+  }
   document.getElementById('cSpan').textContent = c.span || '';
   document.getElementById('cCite').textContent = c.cite || '';
   document.getElementById('card').classList.remove('hidden');
@@ -1820,6 +1844,7 @@ function openVessel(v) {
     rows.push(['Generated from', `${H.loa} × ${H.beam} × ${H.draught} m, Cm ${H.cm}`]);
   }
   showCard({
+    plate: v.id,
     eyebrow: 'Vessel', title: v.name, sub: v.sub || '',
     rows, prose: v.text, span: v.era ? `${yearLabel(v.era[0])} – ${yearLabel(v.era[1])}` : '',
     cite: v.cite, tags: [v.attestation, v.confidence].filter(Boolean)

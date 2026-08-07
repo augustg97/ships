@@ -652,7 +652,25 @@ function swFillCard(v) {
        Shortening it was not enough; the whole box was boilerplate. The one thing it carried
        that the numbers do not is now in the labels ("closest made good"). */
     '';
+  /* ── THE SHIP HERSELF, ABOVE THE ACCOUNT OF HER ──────────────────────────────────────
+     A generated hull is an argument about proportion and structure; it is not evidence. The
+     photograph is, and putting the two together is the whole point — you can check the model
+     against the thing. Where no photograph can exist (the fluyt, the corbita) the plate is the
+     best surviving depiction and the caption says so, because a painting offered silently as a
+     photograph is the one move that would make the rest untrustworthy.
+     The credit line is not decoration: several of these are CC BY-SA, where attribution is the
+     licence condition. It is rendered from the same manifest the image came from. */
+  const pl = (APP.plates || {})[v.id];
+  const esc = t => String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
   document.getElementById('swStory').innerHTML =
+    (pl ? '<figure class="plate">' +
+            '<img src="data/assets/ships/' + v.id + '.jpg" alt="" loading="lazy" ' +
+                 'onerror="this.closest(\'.plate\').remove()">' +
+            '<figcaption>' + esc(pl.caption) +
+              (pl.credit ? '<span class="cr">' + esc(pl.credit) +
+                           (pl.licence ? ' · ' + esc(pl.licence) : '') + '</span>' : '') +
+            '</figcaption></figure>'
+        : '') +
     '<h4>What she was</h4>' + proseHTML(v.text);   /* app.js — markdown, not asterisks */
   document.getElementById('swRows').innerHTML = (v.rows || []).length
     ? '<h4>On the record</h4>' + v.rows.map(r =>
