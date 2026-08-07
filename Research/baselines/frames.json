@@ -186,6 +186,16 @@
    "name": "aboard-wyoming",
    "path": "/?frozen=1#e=6&f=wyomingvoy",
    "note": "Wyoming at sea in the coal trade, close-up — the rig from the water (round 42)"
+  },
+  {
+   "name": "ship-treasure",
+   "path": "/?frozen=1#v=ship&s=treasure-ship",
+   "note": "the junk grammar complete (round 46) — fanned battened lugs to steep yards, sheet crowfeet, bulkhead transoms both ends, the slung median rudder below the bottom, the tiered aft castle"
+  },
+  {
+   "name": "aboard-treasure",
+   "path": "/?frozen=1#e=4&f=zhenghe",
+   "note": "ABOARD, THE TREASURE FLEET — Zheng He outbound, round 46. Watches the five fans drawing at sea, the castle and the blunt ends from the water. ⚠ e must be 4: the voyage lives in Ocean Crossing 1400–1800, and asking for it in era 3 leaves the app waiting forever and __FRAME_READY never fires."
   }
  ]
 }

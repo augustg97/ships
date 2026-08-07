@@ -330,23 +330,41 @@ function buildRudderGeometry(S) {
      proud of the stern. On the carrier it stood 17 m past the transom and 4 m out of the
      water, in timber brown, and no baseline bearing could see it. A steel ship gets a
      balanced plate tucked wholly below the waterline and inside her own length. */
-  const top = STEEL ? -S.draught * 0.08 : H.sheer(1.0) * 0.35;
-  const depth = -S.draught * (STEEL ? 0.95 : 0.92);
+  const BULK = S.build === 'bulkhead';
+  /* ── AND A JUNK'S RUDDER IS A MEDIAN RUDDER, AND IT IS ENORMOUS ──────────────────────
+     Slung on the centreline abaft the stern transom, worked on tackles in a trunk rather
+     than hung on pintles, so it can be raised in shoal water — and lowered it stands well
+     below the bottom, where it is also the leeway board of a hull with no deep keel. The
+     scale is in the ground: the Longjiang yard, the treasure ships' own, yielded an 11.07 m
+     rudder post sized for a blade of roughly six metres by six. The 5.5%-of-lwl plate below
+     drew a door-sized flap on a 60 m hull, invisible from every bearing. The blade takes
+     the hull's own measures: chord near a tenth of the waterline, foot a quarter-draught
+     below the bottom, stock standing up the transom notch toward the tiller. */
+  const top = STEEL ? -S.draught * 0.08 : H.sheer(1.0) * (BULK ? 0.60 : 0.35);
+  const depth = -S.draught * (STEEL ? 0.95 : BULK ? 1.25 : 0.92);
   const w = 0.030 * S.beam * (STEEL ? 0.45 : 1.0);
-  const chord = S.lwl * (STEEL ? 0.035 : 0.055);
+  const chord = S.lwl * (STEEL ? 0.035 : BULK ? 0.095 : 0.055);
   const pos = [], idx = [];
   /* a plate on the sternpost: wider at the foot, raked with the post */
   const pts = STEEL
     ? [[p[0] - chord * 1.6, top], [p[0] - chord * 0.6, top],
        [p[0] - chord * 0.75, depth], [p[0] - chord * 1.45, depth]]
+    : BULK
+    ? [[p[0] + chord * 0.02, top], [p[0] + chord * 0.42, top],
+       [p[0] + chord * 0.92, -S.draught * 0.10], [p[0] + chord * 0.92, depth],
+       [p[0] + chord * 0.02, depth]]
     : [[p[0], top], [p[0] + chord * 0.55, top],
        [p[0] + chord, depth], [p[0], depth]];
   pts.forEach(q => pos.push(q[0], q[1], -w, q[0], q[1], w));
-  for (let i = 0; i < 4; i++) {
-    const a = i * 2, b = ((i + 1) % 4) * 2;
+  const n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const a = i * 2, b = ((i + 1) % n) * 2;
     idx.push(a, a + 1, b, b, a + 1, b + 1);
   }
-  idx.push(0, 2, 4, 0, 4, 6, 1, 5, 3, 1, 7, 5);
+  /* the two caps, fanned from vertex 0 — for four points this is exactly the index list
+     the fixed version wrote out by hand */
+  for (let i = 1; i + 1 < n; i++)
+    idx.push(0, i * 2, (i + 1) * 2, 1, (i + 1) * 2 + 1, i * 2 + 1);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx); g.computeVertexNormals();
@@ -1123,46 +1141,90 @@ function buildRig(S, group, mats, FINE) {
          Vincent Reddish scaled and averaged ELEVEN photographs of Chinese ocean-trading junks
          under sail and published the proportions (*Practical Boat Owner*, 2022): usually FIVE
          battens, rarely six; boom and battens all equal within 5%; the luff and the yard both
-         two thirds of the boom; total leech 1.75 x boom; sail area 1.10 x boom²; aspect ratio
-         1.1; and only 8% of the sail's width carried forward of the mast.
-         That 8% balance is the number to keep — modern junk rigs run 10–15% and split rigs a
-         third, but the traditional ocean junk is nearly all abaft its mast. */
-      const boom = lower * 0.78;
-      const sailW = boom, sailH = boom * 1.10;      // area 1.10 x boom², AR 1.1
-      const nb = 5;
-      /* 8% of the chord forward of the mast — the sail sits almost entirely abaft it */
-      const off = sailW * (0.5 - 0.08);
-      /* ⚠ TWO ERRORS LIVED HERE AND BOTH WERE VISIBLE FROM ACROSS THE ROOM.
-         (1) A battened lug is a FORE-AND-AFT sail. Battens and canvas were both rotated
-             athwartships — the whole sail stood across the beam like a square course, so it
-             cut straight through the hull it was supposed to drive.
-         (2) The canvas was positioned by its CENTRE at deck level, so half of it hung below
-             the waterline. The battens, computed separately, were in the right place — which
-             is exactly how the two disagreed. One number, used twice, is the fix. */
-      const footY = base + lower * 0.14;             // the boom lies just above the deck
-      /* ── ⚠ A BATTEN IS IN THE SAIL, NOT NEAR IT. ──────────────────────────────────────
-         The canvas was sheeted out to leeward about its mast and the battens were left where
-         they had been built — amidships, along the hull. A lug sail swung 29 degrees and then
-         translated along its own axis puts its centre nearly half a sail-width to leeward of
-         spars that never moved, so five straight rods stood out over open water with no cloth
-         on them. The battens are sewn into pockets ACROSS the sail; they are the one part of a
-         junk rig that cannot possibly be somewhere else. So the whole sail — boom, battens,
-         yard and canvas — is one group hung on the mast, and sheeting it is a single rotation
-         of that group. Nothing in it can now disagree with anything else in it. */
+         two thirds of the boom; total leech 1.75 x boom; sail area 1.10 x boom²; and only 8%
+         of the sail's width carried forward of the mast.
+         ⚠ THOSE NUMBERS DO NOT MAKE A RECTANGLE, AND FOR ELEVEN ROUNDS THEY WERE DRAWN AS
+         ONE. A yard two thirds of the boom with a leech 1.75 booms long can only close as a
+         FAN: the yard stands steep — near 60° in the photographs — and the battens swing up
+         progressively to meet it, which is the high-peaked profile in every picture of an
+         ocean junk, including this card's own reference photograph. Parallel battens under a
+         level head gave the right proportions and the wrong ship: the rig read as a wall of
+         white square sails. The spar angles ARE the sail plan, so the spars are laid first
+         and the cloth is cut to them, panel by panel. The straight-line leech comes out at
+         1.6 booms here; Reddish's 1.75 is measured along roached panel edges we do not cut. */
+      const nb = 5;                   // Reddish: usually five battens
+      const THB = 26 * Math.PI / 180; // the top batten's rake above the horizontal boom
+      const THY = 60 * Math.PI / 180; // the yard's — steep, and the fan's whole character
+      /* ── THE RIG STANDS CLEAR OF THE CASTLE ────────────────────────────────────────
+         The after masts of a five-master step INSIDE the aft castle's span, and a boom at
+         0.14 of the mast put their lower panels straight through the castle roof. The rig
+         reads the castle from the SAME data the castle is built from: the foot rises over
+         it, and the fan shrinks to the hoist that is left below the truck — which is also
+         the record's look, the small jigger sail standing over the poop. */
+      const castleTop = (S.poop && S.poop.length === 3 &&
+                         u >= S.poop[0] - 0.02 && u <= S.poop[1] + 0.02)
+        ? B * 0.115 * S.poop[2] * 1.10 : 0;
+      const footY = base + lower * 0.14 + castleTop;   // the boom lies just above the deck
+      /* peak height above the foot is boom x (2/3)(1 + sin THY) = 1.244 booms; the boom is
+         sized so the PEAK, not the head rope, reaches the truck */
+      const boom = Math.min(lower * 0.66, (base + lower * 0.97 - footY) / 1.244);
+      const luffH = boom * (2 / 3);
+      const yardL = boom * (2 / 3);
+      const xF = -0.08 * boom;        // 8% of the chord stands forward of the mast
+      /* ── ⚠ A BATTEN IS IN THE SAIL, NOT NEAR IT (round 11). ─────────────────────────
+         The whole rig — boom, battens, yard, canvas, sheets — is one group hung on the
+         mast, and sheeting it is a single rotation of that group. Nothing in it can
+         disagree with anything else in it. */
       const lug = new THREE.Group();
       lug.position.set(x, 0, 0);
       lug.rotation.y = -TRIM * 1.5;
       group.add(lug);
-      for (let i = 0; i <= nb; i++) {
-        const yy = footY + sailH * (i / nb);
-        const bg = new THREE.CylinderGeometry(B * 0.004, B * 0.004, sailW, 14);
-        const bm = new THREE.Mesh(bg, woodDark);
-        bm.rotation.z = Math.PI / 2;                 // along the sail's chord, not across it
-        bm.position.set(off, yy, 0);
-        lug.add(tag(bm, 'yard', i === 0 ? 'Boom' : (i === nb ? 'Yard' : 'Batten ' + i)));
+      /* every spar as its two endpoints, boom (k=0) to yard (k=nb+1); the cloth is built
+         from the SAME points, so spar and canvas cannot come adrift of each other */
+      const fwd = [], aft = [];
+      for (let k = 0; k <= nb; k++) {
+        const a = THB * Math.pow(k / nb, 1.4);   // lower battens near-level, upper ones fanned
+        const f = [xF, footY + luffH * (k / (nb + 1))];
+        fwd.push(f);
+        aft.push([f[0] + boom * Math.cos(a), f[1] + boom * Math.sin(a)]);
       }
-      const js = makeSail(off, footY + sailH, sailW, sailH, canvas, lug, 'junk');
-      sails.push(js);
+      fwd.push([xF, footY + luffH]);             // the throat, where the yard is slung
+      aft.push([xF + yardL * Math.cos(THY), footY + luffH + yardL * Math.sin(THY)]);
+      for (let k = 0; k < fwd.length; k++) {
+        const dx = aft[k][0] - fwd[k][0], dy = aft[k][1] - fwd[k][1];
+        const len = Math.hypot(dx, dy);
+        const r = B * (k === 0 ? 0.0050 : k === nb + 1 ? 0.0042 : 0.0032);
+        const bg = new THREE.CylinderGeometry(r, r, len, 12);
+        const bm = new THREE.Mesh(bg, woodDark);
+        bm.rotation.z = Math.PI / 2 + Math.atan2(dy, dx);
+        bm.position.set((fwd[k][0] + aft[k][0]) / 2, (fwd[k][1] + aft[k][1]) / 2, 0);
+        lug.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
+      }
+      /* the cloth, one panel between each pair of spars — a junk sail really is panels: the
+         batten line is a hinge in the cloth, and each panel sets nearly flat */
+      for (let k = 0; k <= nb; k++)
+        sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030));
+      /* ── THE GEAR IS WHY THE RIG WORKS, SO IT IS DRAWN ──────────────────────────────
+         A sheetlet to every batten end, gathered to one point on the deck aft — the
+         crowfoot in every photograph — and the halyard from the yard's slings to the
+         masthead. Both live in the sail's own group: the crowfoot must swing with the sail
+         it trims. The sheet lead is capped by the room the ship actually has abaft this
+         mast (gapAft), because the aftermost sail of a five-master would otherwise sheet to
+         a point past the taffrail, in the air. */
+      const shX = xF + Math.min(boom * 1.16, gapAft * 0.90);
+      /* the crowfoot lands on the castle roof where there is one — the after sheets of a
+         junk really were worked from the poop deck, not led down through it */
+      const sheetPt = new THREE.Vector3(shX, base + castleTop + B * 0.012, 0);
+      const shSegs = [];
+      for (let k = 0; k <= nb; k++)
+        shSegs.push([new THREE.Vector3(aft[k][0], aft[k][1], 0), sheetPt]);
+      const sh = ropeMesh(shSegs, 0.012 + B * 0.0005, ropeMat);
+      if (sh) lug.add(tag(sh, 'sheet'));
+      const slings = new THREE.Vector3(
+        (fwd[nb + 1][0] + aft[nb + 1][0]) / 2, (fwd[nb + 1][1] + aft[nb + 1][1]) / 2, 0);
+      const hal = ropeMesh([[slings, new THREE.Vector3(0, base + lower * 0.985, 0)]],
+                           0.016 + B * 0.0005, ropeMat);
+      if (hal) lug.add(tag(hal, 'halyard'));
     }
 
     /* standing rigging: shrouds from the channels out on the hull's side up to the masthead,
@@ -1813,6 +1875,28 @@ const PARTS = {
                   + 'flares as it rises, so a square-sterned ship is widest at her taffrail — '
                   + 'which is also what gives her the flat canvas for a stern that could be '
                   + 'recognised at a mile.' },
+  bowtransom: { stage: 2, name: 'Bow transom',
+              what: 'A bulkhead-built hull does not come to a stem. The forwardmost bulkhead is '
+                  + 'the bow, planked straight across — the flat face that makes a junk '
+                  + 'unmistakable from ahead, and the reason the build needs no keel-and-stem '
+                  + 'backbone to hang the planking on.' },
+  sterntransom: { stage: 2, name: 'Stern transom',
+              what: 'The aftermost bulkhead, planked across and carried up with the sheer. The '
+                  + 'rudder hangs just abaft it on the centreline, working in the open notch '
+                  + 'the two quarters leave between them.' },
+  poop:     { stage: 4, name: 'Aft castle',
+              what: 'The tiered quarters over the after deck. On the treasure ships this was '
+                  + 'the embassy itself: envoys, clerks, pilots and the shrine to Tianfei, the '
+                  + 'sailors\' goddess, all lived here above the helm.' },
+  sheet:    { stage: 6, name: 'Sheets',
+              what: 'The running rigging that trims a sail to the wind. A battened lug carries '
+                  + 'a sheetlet to every batten end, gathered through blocks to a single fall — '
+                  + 'the whole sail is trimmed, reefed or handed by a few hands on deck, which '
+                  + 'is why no junk ever needed men aloft.' },
+  halyard:  { stage: 6, name: 'Halyard',
+              what: 'The line that hoists the yard, and on a junk the one heavy lift aboard: '
+                  + 'sail, battens, boom and yard all rise on it to the masthead. Reefing is '
+                  + 'letting it go — the battens fold down onto the boom by their own weight.' },
   sternlight:{ stage: 3, name: 'Stern lights',
               what: 'The great windows across the transom, and the only real glazing in the ship. '
                   + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '
@@ -1884,7 +1968,12 @@ const PARTS = {
   rudder:   { stage: 3, name: 'Rudder',
               what: 'Hung on pintles down the sternpost. The stern-hung rudder reached northern '
                   + 'Europe about 1200 and replaced the steering oar; it is what let ships grow '
-                  + 'beyond the size one person could steer with an oar over the quarter.' },
+                  + 'beyond the size one person could steer with an oar over the quarter. China '
+                  + 'was there a millennium earlier: the Han pottery boat models of the first '
+                  + 'century show an axial rudder at the transom, slung on tackles in a trunk '
+                  + 'rather than hung on pintles, so it could be raised in shoal water — and on '
+                  + 'the great junks lowered below the bottom, where it is also the leeway board '
+                  + 'of a hull that has no deep keel to grip the water.' },
   mast:     { stage: 4, name: 'Mast',
               what: 'Built in stepped sections — lower mast, topmast, topgallant — each fidded '
                   + 'alongside the head of the one below through the doubling, so it can be sent '
@@ -4548,6 +4637,125 @@ function buildStern(S, group, mats) {
 }
 
 
+/* ── THE ENDS OF A BULKHEAD HULL ARE BULKHEADS ─────────────────────────────────────────
+ * A junk does not converge to a stem and a sternpost: the hull is built bulkhead-first and
+ * the outermost bulkheads ARE the ends, planked straight across. The model gave every hull
+ * the European backbone, so a ship whose own stage card teaches bulkhead-first construction
+ * wore a stem — the one member her tradition exists to do without — and ran out past it to
+ * an open, uncapped shell end. Both caps are lofted from the hull's own end sections
+ * (measure the surface, never run a parallel formula — the failure mode this project keeps
+ * rediscovering), so they meet the planking exactly at any fineness the data declares.
+ */
+function buildJunkEnds(S, group) {
+  const H = hullSurface(S);
+  const L = S.lwl;
+  const plank = new THREE.MeshStandardMaterial({
+    color: 0x4a3620, roughness: 0.88, side: THREE.DoubleSide });
+  for (const bow of [true, false]) {
+    const u0 = bow ? 0.002 : 0.998;
+    const pos = [], idx = [];
+    const NV = 16, NW = 8;
+    for (let j = 0; j <= NV; j++) {
+      const v = j / NV;
+      const p = surfacePoint(S, H, u0, v);
+      /* a slight outward lip at the centreline so the cap reads as planked proud of the
+         shell rather than flush with the cut */
+      const lip = (bow ? -1 : 1) * L * 0.004;
+      for (let i = 0; i <= NW; i++) {
+        const t = (i / NW) * 2 - 1;
+        pos.push(p[0] + (1 - Math.abs(t)) * lip, p[1], t * p[2] * 0.996);
+      }
+    }
+    for (let j = 0; j < NV; j++)
+      for (let i = 0; i < NW; i++) {
+        const a = j * (NW + 1) + i;
+        idx.push(a, a + NW + 1, a + 1, a + 1, a + NW + 1, a + NW + 2);
+      }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    group.add(tag(new THREE.Mesh(g, plank), bow ? 'bowtransom' : 'sterntransom'));
+  }
+}
+
+
+/* ── THE AFT CASTLE ────────────────────────────────────────────────────────────────────
+ * The tiered quarters over a junk's after deck, from the record's own pictures: every Ming
+ * illustration and every reconstruction of the treasure ships shows the stern built up in
+ * stepped timber tiers, because the ship was an embassy and the embassy lived aft. Declared
+ * in the data as `poop: [from, to, tiers]`; the walls follow the hull's own half-breadth
+ * and sheer (the buildRaisedEnds idiom — a wall lofted off the real surface cannot
+ * overhang), each tier steps inboard of the one below, and each carries its roof out past
+ * its walls, which is the one line of the silhouette that says China rather than Europe.
+ */
+function buildJunkCastle(S, group) {
+  if (!(S.poop && S.poop.length === 3)) return;
+  const [pA, pB, tiers] = S.poop;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const dh = B * 0.115;                               // one deck of headroom per tier
+  const wall = new THREE.MeshStandardMaterial({
+    color: 0x6a4d28, roughness: 0.82, side: THREE.DoubleSide });
+  const roofM = new THREE.MeshStandardMaterial({
+    color: 0x35281a, roughness: 0.90, side: THREE.DoubleSide });
+  const lattice = new THREE.MeshStandardMaterial({ color: 0x271c10, roughness: 0.94 });
+  const g = new THREE.Group();
+  for (let t = 0; t < tiers; t++) {
+    const u0 = pA + 0.030 * t, u1 = pB - 0.012 * t;
+    const inset = B * (0.030 + 0.055 * t);
+    const half = u => Math.max(B * 0.10,
+      Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - inset);
+    const y0 = u => H.sheer(u) + dh * t, y1 = u => H.sheer(u) + dh * (t + 1);
+    const N = Math.max(8, Math.round((u1 - u0) * L / 1.8));
+    /* the perimeter, wound once round: starboard fwd→aft, port aft→fwd, closed */
+    const path = [];
+    for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L + H.rake(u), z: half(u) }); }
+    for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L + H.rake(u), z: -half(u) }); }
+    path.push(path[0]);
+    const tp = [], ti = [];
+    for (const p of path)
+      tp.push(p.x, y0(p.u) - dh * 0.10, p.z, p.x, y1(p.u), p.z);
+    for (let k = 0; k + 1 < path.length; k++) {
+      const a = k * 2, b = a + 2;
+      ti.push(a, b, a + 1, a + 1, b, b + 1);
+    }
+    const wg = new THREE.BufferGeometry();
+    wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+    wg.setIndex(ti); wg.computeVertexNormals();
+    g.add(new THREE.Mesh(wg, wall));
+    /* the roof, lofted from the same stations and carried OUT past the walls */
+    const ov = B * 0.045;
+    const rp = [], ri = [];
+    for (let k = 0; k <= N; k++) {
+      const u = u0 + (u1 - u0) * k / N;
+      const ext = (k === 0 ? -1 : k === N ? 1 : 0) * L * 0.006;
+      rp.push((u - 0.5) * L + H.rake(u) + ext, y1(u) + dh * 0.02, -(half(u) + ov),
+              (u - 0.5) * L + H.rake(u) + ext, y1(u) + dh * 0.02, (half(u) + ov));
+    }
+    for (let k = 0; k < N; k++) { const a = k * 2, b = a + 2; ri.push(a, b, a + 1, a + 1, b, b + 1); }
+    const rg = new THREE.BufferGeometry();
+    rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3));
+    rg.setIndex(ri); rg.computeVertexNormals();
+    g.add(new THREE.Mesh(rg, roofM));
+    /* lattice openings down each side — the thing that says QUARTERS rather than crate.
+       Placed at their own stations off the same half-breadth the wall stands on, so they
+       sit in the wall's face by construction. */
+    const K = Math.max(2, Math.round((u1 - u0) * L / 3.2));
+    for (let k = 1; k < K; k++) {
+      const u = u0 + (u1 - u0) * (k / K);
+      for (const sgn of [-1, 1]) {
+        const w = new THREE.Mesh(
+          new THREE.BoxGeometry(L * 0.012, dh * 0.44, B * 0.006), lattice);
+        w.position.set((u - 0.5) * L + H.rake(u),
+                       (y0(u) + y1(u)) / 2 + dh * 0.06, sgn * half(u));
+        g.add(w);
+      }
+    }
+  }
+  group.add(tag(g, 'poop'));
+}
+
+
 /* ── THE BOWER ANCHOR, CATTED ──────────────────────────────────────────────────────────
  * Hung at the cathead on the bow, which is where it lived at sea: too heavy to bring inboard
  * and too dangerous to tow. A 74's best bower is about 3.7 tonnes, and the whole apparatus of
@@ -4913,8 +5121,15 @@ function buildShip(S, opts) {
     for (let f = 0; f < 30; f++)
       group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
                     'frames', 'Frame ' + (f + 1) + ' of 30'));
-    group.add(tag(new THREE.Mesh(buildStemGeometry(S, false), timber), 'stempost', 'Stem'));
-    group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'Sternpost'));
+    /* ⚠ A BULKHEAD-BUILT HULL HAS NO STEM AND NO STERNPOST — the outermost bulkheads are
+       the ends, planked across. Giving a junk the European backbone contradicted the stage
+       card standing right under her: "bulkheads, then planking". */
+    if (S.build === 'bulkhead') {
+      buildJunkEnds(S, group);
+    } else {
+      group.add(tag(new THREE.Mesh(buildStemGeometry(S, false), timber), 'stempost', 'Stem'));
+      group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'Sternpost'));
+    }
     /* wales are a TIMBER remedy for hogging — thickened strakes acting as girders. A steel
        hull's own plating is the girder, and putting wales on one is like bracing a bridge with
        rope. */
@@ -5004,6 +5219,7 @@ function buildShip(S, opts) {
      length, and the main battery was buried inside them. A turreted ship gets the citadel. */
   if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
   if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
+  if (FINE) buildJunkCastle(S, group);
   if (FINE && S.turrets) buildCitadel(S, group, mats);
   if (FINE) buildSternAviation(S, group);
   if (FINE) buildDeckHatches(S, group);

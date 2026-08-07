@@ -681,8 +681,8 @@
    },
    "hull": {
     "wlPower": 2.2,
-    "stemFineness": 0.24,
-    "sternFineness": 0.3,
+    "stemFineness": 0.36,
+    "sternFineness": 0.46,
     "forefoot": 0.3,
     "run": 0.3,
     "riseF": 0.48,
@@ -718,6 +718,7 @@
      }
     ],
     "build": "bulkhead",
+    "poop": [0.74, 0.985, 1],
     "loa": 34.0,
     "lwl": 29.0,
     "beam": 9.8,
@@ -755,7 +756,7 @@
      "seven, 1405–1433"
     ],
     [
-     "Scholarly range",
+     "By scholar",
      "Xin Yuan-ou 61-76 m; Barker 70 m; Sleeswyk 52.5 m; Church 50.6 m - none near the claimed 134 m"
     ],
     [
@@ -802,8 +803,8 @@
    },
    "hull": {
     "wlPower": 2.2,
-    "stemFineness": 0.24,
-    "sternFineness": 0.3,
+    "stemFineness": 0.4,
+    "sternFineness": 0.52,
     "forefoot": 0.3,
     "run": 0.3,
     "riseF": 0.32,
@@ -860,6 +861,7 @@
      }
     ],
     "build": "bulkhead",
+    "poop": [0.66, 0.985, 2],
     "loa": 70.0,
     "lwl": 60.0,
     "beam": 18.0,

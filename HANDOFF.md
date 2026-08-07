@@ -2014,3 +2014,98 @@ cache-busted fetch of the data-version meta tag. Ninth clean push-triggered depl
 The globe-default 1.016% mover in the verification ratchet proved a TRANSIENT (the documented
 serif-webfont label-halo class): isolated re-capture passed twice against the committed
 baseline. Not accepted; the webfont decision stays carried.
+
+---
+
+## Round 46 — 2026-08-07 — The treasure ship: Reddish's numbers finally drawn as the fan they describe, and the bulkhead hull given its own ends
+
+**First, the unlogged round between 45 and this one.** Commit 4b59b05 (09:28) closed carried
+items 5 and 7 — the card now measures its own track (great-circle sum over the waypoints,
+labelled "in this model"; Fuzhou tea race 13,756 nm against ~14,000 actual) and four posed
+card lines became descriptive. It was pushed but never verified live and left no HANDOFF
+entry. Verified this round: its stamp **1786119344 confirmed live** by cache-busted fetch
+before this round's build. Tenth clean deploy, verified late.
+
+**The queue item: treasure-ship (2011 tris/m) — the LAST item on the round-23 crudest-first
+table.** The survey (12 spin bearings, before) found: five white RECTANGLES for sails — the
+code cited Reddish's measured junk proportions and then drew parallel battens under a level
+head, which is a square rig's silhouette; a sharp European yacht bow on a hull whose own
+stage card says "bulkheads, then planking"; open uncapped shell ends past the stem timbers;
+a door-sized rudder invisible from every bearing; no aft castle; and a rig with no running
+rigging at all — no sheets, no halyards, on the one rig famous for being worked entirely
+from the deck.
+
+**The record, and what it forced:**
+1. **Reddish's numbers describe a FAN.** Boom and battens equal within 5%, luff and yard
+   two-thirds of the boom, leech 1.75 booms: those close only if the yard stands steep
+   (~60°) and the battens swing up progressively to meet it — the high-peaked profile in
+   the card's own reference photograph. The junk branch now lays the spars first (boom,
+   five battens fanned by `THB·(k/nb)^1.4`, yard at 60°) and cuts the cloth to them, one
+   quad panel per pair of spars, from the SAME endpoint arrays — spar and canvas cannot
+   disagree. Straight-line leech lands at 1.6 booms; Reddish's 1.75 is measured along
+   roached panel edges we do not cut, and the comment says so.
+2. **Sheets and halyard drawn** — a sheetlet to every batten end gathered to a crowfoot
+   (clamped by `gapAft` so the aftermost sail cannot sheet to a point past the taffrail),
+   halyard from the yard's slings to the masthead, both living in the sail's own group so
+   they swing with it. New PARTS entries: sheet, halyard.
+3. **A bulkhead hull ends in bulkheads** (class, both junks): `buildJunkEnds` lofts bow and
+   stern transom caps from the hull's own end sections at u=0.002/0.998; stem and sternpost
+   are gated off for `build: "bulkhead"`. Fineness raised in DATA (treasure 0.40/0.52, junk
+   0.36/0.46) — the bluntness is the ship's own lines, not a formula change, so no other
+   hull moved. New PARTS: bowtransom, sterntransom.
+4. **The median rudder at the record's scale** — the Longjiang yard's own ground gave an
+   11.07 m rudder post. `buildRudderGeometry` grew a bulkhead branch: chord 9.5% of lwl,
+   stock standing up the transom notch, foot at 1.25× draught BELOW the bottom, because
+   lowered it is the leeway board of a keel-less hull. The prism builder was generalised to
+   N points (the 4-point index table it replaces falls out as the N=4 case). The audit's
+   below-the-keel rule gets ONE documented exemption: the junk rudder drawn lowered; she
+   dry-docks with it raised in its trunk, which is what tackles-in-a-trunk are FOR. The
+   rudder.what text now also carries the Han-era precedence (pottery models, 1st c. CE).
+5. **The aft castle from the record** (`poop: [from, to, tiers]` — treasure 2 tiers, junk
+   1): walls lofted off the hull's own half-breadth and sheer, each tier stepped inboard,
+   roofs carried out past the walls, lattice openings at their own stations. And the rig
+   reads the castle from the SAME data: masts inside the poop span raise their sail foot
+   over it and shrink the fan to the hoist left below the truck — the record's small jigger
+   over the poop — and the crowfoot lands ON the roof, where the after sheets were worked.
+
+**Found while finishing, fixed at the source:** the audit's part-contact rule caught the
+new rudder floating 0.6 m clear of the transom (bbox gap) — the blade's leading edge now
+rides at 2% chord off the stern surface, in its trunk, which is also where the real one
+lived. The audit was RIGHT this time (its record stands at five wrong calls, this was not
+a sixth). Three new audit rules: bulkhead ends (caps exist, backbone absent), junk spar
+census (7 per mast — boom, five battens, yard), junk rudder (chord ≥5.5% lwl, foot below
+the bottom). Audit **25/25 clean**; copies verified identical in Research/, web/, docs/.
+
+**Frames.** Full ratchet: **two movers, both classified from full-size diffs, both
+accepted with logged reasons** — ship-junk 20.466% (the rebuild itself: both junks carry
+every class fix; her water and card move with her, panels black), ship-dhow 0.494% (the
+rebuilt junk's fan poking into the dhow frame's left edge — the r45 steamer-at-frame-edge
+class; no dhow pixels moved). **Two NEW baselines committed: ship-treasure,
+aboard-treasure** (Zheng He outbound, e=4&f=zhenghe — ⚠ era 3 leaves the app waiting
+forever and __FRAME_READY never fires; the frame note carries the warning). Shipwright
+frame did NOT move: the default vessel is neither junk, and neither stands in its frame.
+Verification ratchet re-run after the accepts: see deploy note below.
+
+**Rule 0, written:** ship-treasure reads as a rendered world. Three facts off it: five
+battened lugsails fanned to steep yards, each worked by a sheetlet crowfoot led to the
+deck; a hull that ends square at both ends with no stem, its quarters carried up into a
+two-tier latticed castle with overhanging roofs; the great median rudder slung below the
+stern transom, reaching under the bottom. (Honest fourth: her card still shares the junk
+polar curve with the 34 m coaster — 4.9 kn best on both — the shared-polar class fault,
+scoped as the next round's data work.)
+
+**Data also touched:** the duplicate "Scholarly range" row label on her card became "By
+scholar" for the per-author estimates.
+
+### Next, in order
+1. **Polars, one per vessel class** — the round-23 crudest-first queue is DONE (treasure
+   ship was its last row; the sailing ships below 2,600–15,000 tris/m are the best-served
+   end). The standing card fault is now the loudest: steamer says 12.3 kn over a 9.6 kn
+   curve, Preussen 20.5 over 5.8 shared with clipper and ship-of-the-line, treasure ship
+   and coastal junk share one junk curve. One data round, one polar per class, closes the
+   whole class.
+2. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
+   behind aboard-yamato; Titanic remainder; r43's plate gaps (corbita era plate;
+   dugout/dhow/cog plates; a globe-era-card frame).
+3. Worth a look someday: asking for a voyage in the wrong era (#e=3&f=zhenghe) hangs the
+   app with __FRAME_READY never set — a wrong-hash page should still paint.

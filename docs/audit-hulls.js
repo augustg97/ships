@@ -853,6 +853,44 @@
       }
     }
 
+    /* ── A BULKHEAD HULL ENDS IN BULKHEADS (round 46, treasure ship). The junk's own
+       stage card teaches bulkhead-first construction, while the drawn hull wore a European
+       stem and sternpost and ran out past them to open, uncapped shell ends — the bow read
+       as a yacht's. The outermost bulkheads ARE the ends, planked across: both caps must
+       exist, and the backbone members must not. */
+    if (H.build === 'bulkhead') {
+      if (!part.bowtransom) say(v.id, 'bulkhead ends', 'no bow transom drawn');
+      if (!part.sterntransom) say(v.id, 'bulkhead ends', 'no stern transom drawn');
+      if (part.stempost) say(v.id, 'bulkhead ends', 'a stem/sternpost on a bulkhead-built hull');
+      /* and the median rudder is ENORMOUS — the Longjiang yard's own ground gave an
+         11.07 m rudder post. Chord near a tenth of the waterline, and the foot BELOW the
+         bottom, because lowered it is the leeway board of a hull with no deep keel. */
+      if (!part.rudder) say(v.id, 'junk rudder', 'no rudder drawn');
+      else {
+        const c = part.rudder.x[1] - part.rudder.x[0];
+        if (c < H.lwl * 0.055)
+          say(v.id, 'junk rudder', `chord ${c.toFixed(1)} m on ${H.lwl} m of waterline`);
+        if (part.rudder.y[0] > -H.draught * 1.02)
+          say(v.id, 'junk rudder',
+              `foot at ${part.rudder.y[0].toFixed(1)} m never reaches below the bottom (draught ${H.draught} m)`);
+      }
+    }
+
+    /* ── THE JUNK RIG IS A FAN, AND ITS SPARS ARE A CENSUS (round 46). Reddish's average
+       is five battens between boom and yard — seven spars per mast — and for eleven rounds
+       the numbers were drawn as parallel battens under a level head, which read as square
+       sails. The count pins the structure; the ratchet frames pin the fan. Applies where
+       every mast is junk-rigged, so a square ship's crossed yards cannot leak in. */
+    {
+      const jm = (H.masts || []).filter(m => m.rig === 'junk').length;
+      if (jm && jm === (H.masts || []).length) {
+        const got = part.yard ? part.yard.n : 0;
+        if (got !== jm * 7)
+          say(v.id, 'junk spar census',
+              `${got} spars across ${jm} junk masts (boom + five battens + yard = ${jm * 7})`);
+      }
+    }
+
     /* ── THE SHIP FLOATS AT HER MARKS — round 33. Both views float every hull on the
        construction fact that surfacePoint puts the load waterline at local y = 0 and bottoms
        the skin at exactly -draught (measured 0.000 on all 25, r33). This guards the fact: if
@@ -871,7 +909,12 @@
     if (part.keel) {
       let floorY = 1e9, floorPart = null;
       for (const k in part) if (part[k].y[0] < floorY) { floorY = part[k].y[0]; floorPart = k; }
-      if (floorPart !== 'keel' && floorY < part.keel.y[0] - 0.02)
+      /* ⚠ ONE DOCUMENTED EXCEPTION: the junk's median rudder is drawn LOWERED, below the
+         bottom, because under way that is where it worked — it is the leeway board of a
+         keel-less hull. She dry-docks with it raised in its trunk, which is the whole
+         point of slinging a rudder on tackles instead of pintles. */
+      const lowered = H.build === 'bulkhead' && floorPart === 'rudder';
+      if (floorPart !== 'keel' && !lowered && floorY < part.keel.y[0] - 0.02)
         say(v.id, 'hangs below the keel',
             `${floorPart} reaches ${floorY.toFixed(2)} m, keel bottom ${part.keel.y[0].toFixed(2)} m`);
     }
