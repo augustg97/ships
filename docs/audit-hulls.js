@@ -84,8 +84,13 @@
                                       ['turrets', 'turret', 'turrets'],
                                       ['boats', 'boat', 'boats'],
                                       ['containers', 'container', 'containers'],
-                                      ['flightDeck', 'flightdeck', 'a flight deck']])
-      if (H[flag] && !part[key]) say(v.id, 'declared but not drawn', label);
+                                      ['flightDeck', 'flightdeck', 'a flight deck'],
+                                      ['aaLight', 'aaLight', 'the light AA battery'],
+                                      ['searchlights', 'searchlight', 'searchlights'],
+                                      ['floatplanes', 'floatplane', 'floatplanes'],
+                                      ['deckHatches', 'hatch', 'stowage hatches']])
+      if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key])
+        say(v.id, 'declared but not drawn', label);
 
     /* ── THE DRESS IS A DATE (round 32). The plating shader keys fastening and bottom colour
        off the year the hull is depicted at; a steel hull with no year silently falls back to
@@ -300,6 +305,81 @@
                             mb.min.y > part.superstructure.y[1] + 1.4))
         say(v.id, 'high-angle mount stands on nothing',
             'a mount bottom is below the citadel or floats above its roofline');
+    }
+
+    /* ── EVERY RECORD-DRIVEN FITTING IS DRAWN AT THE RECORD'S COUNT, ON ITS SUPPORT
+       (round 36). The class behind the round-35 queue items: a record field that silently
+       stops producing geometry — or produces it adrift — is invisible to every picture,
+       and 'declared but not drawn' only sees total absence. So each new fitting field
+       answers the heavy battery's three questions: right count, inside the ship, standing
+       on something. */
+    if (H.aaLight && H.aaLight.length) {
+      const mounts = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'aaLight')
+                          mounts.push(new THREE.Box3().setFromObject(o)); });
+      if (mounts.length !== H.aaLight.length * 2)
+        say(v.id, 'light battery miscounted',
+            `${H.aaLight.length * 2} mounts in the record, ${mounts.length} drawn`);
+      for (const mb of mounts) {
+        if (Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)) > H.beam / 2 + 0.5)
+          say(v.id, 'light AA mount outside the beam',
+              `z reaches ${Math.max(Math.abs(mb.min.z), Math.abs(mb.max.z)).toFixed(1)} m`);
+        if (part.superstructure && (mb.min.y < part.superstructure.y[0] ||
+                                    mb.min.y > part.superstructure.y[1] + 1.4))
+          say(v.id, 'light AA mount stands on nothing',
+              'a bandstand bottom is below the citadel or floats above its roofline');
+      }
+    }
+    if (H.searchlights) {
+      let drums = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Searchlight') drums++; });
+      if (drums !== H.searchlights)
+        say(v.id, 'searchlights miscounted',
+            `${H.searchlights} in the record, ${drums} drawn`);
+    }
+    if (H.floatplanes) {
+      const HSf = SHIPS_HULL.hullSurface(H);
+      const planes = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'floatplane')
+                          planes.push(new THREE.Box3().setFromObject(o)); });
+      if (planes.length !== H.floatplanes)
+        say(v.id, 'floatplanes miscounted',
+            `${H.floatplanes} in the record, ${planes.length} drawn`);
+      for (const pb of planes) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((pb.min.x + pb.max.x) / 2) / H.lwl));
+        const d = pb.min.y - HSf.sheer(uu);
+        /* on the deck (plus its camber) or riding a catapult beam — never higher, never
+           sunk through the planking */
+        if (d < -0.6 || d > 3.6)
+          say(v.id, 'floatplane stands on nothing',
+              `float bottom ${d.toFixed(1)} m off the sheer at its station`);
+        if (Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)) > H.beam / 2 + 0.5)
+          say(v.id, 'floatplane off the ship',
+              `z reaches ${Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)).toFixed(1)} m`);
+      }
+    }
+    if (H.deckHatches && H.deckHatches.length) {
+      const HSh = SHIPS_HULL.hullSurface(H);
+      const hs = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'hatch')
+                          hs.push(new THREE.Box3().setFromObject(o)); });
+      if (hs.length !== H.deckHatches.length)
+        say(v.id, 'stowage hatches miscounted',
+            `${H.deckHatches.length} in the record, ${hs.length} drawn`);
+      for (const hb of hs) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hb.min.x + hb.max.x) / 2) / H.lwl));
+        const zc = (hb.min.z + hb.max.z) / 2;
+        const bB = Math.abs(SHIPS_HULL.surfacePoint(H, HSh, uu, 1.0)[2]);
+        const camber = Math.cos((zc / bB) * Math.PI / 2) * bB * 0.035;
+        const d = hb.min.y - (HSh.sheer(uu) + camber);
+        if (d < -0.6 || d > 0.6)
+          say(v.id, 'hatch off the deck',
+              `coaming bottom ${d.toFixed(2)} m from the cambered deck at its station`);
+      }
     }
 
     /* ⚠ THE QUARTERDECK AVIATION DECK STANDS ON THE DECK. Declared catapults are drawn as a

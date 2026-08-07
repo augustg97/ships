@@ -2361,10 +2361,15 @@
     [
      "What it is for",
      "survey, hydrography, ocean monitoring, naval picket"
+    ],
+    [
+     "Speed",
+     "3–5 kn under wind and solar — **contested** as a 'service' figure for a hull that harvests its own drive; burst speeds are higher on diesel-electric types"
     ]
    ],
    "crew": 0,
    "pax": 0,
+   "speedKn": 4.0,
    "attestation": "generated",
    "confidence": "fair",
    "text": "A vessel that operates on the surface without a crew aboard, across a range from remote control to full autonomy. Propulsion may be wind, wave or solar: a wave glider takes its drive from the motion of the sea itself, and a Saildrone from wind and sunlight.\n\nRemoving the crew changes the constraint. A crewed ship's endurance is set by food, water and human tolerance; take the crew off and the limits become fouling, machinery and power. A wind-and-solar hull can stay out for **months**, and the sea state that would be dangerous for a manned vessel is merely slow for one that cannot drown.\n\nIt is a strange place for this story to arrive. The whole history above is people solving the problem of getting themselves across an ocean — and the current answer, for a growing share of the work, is not to go.",
@@ -2613,6 +2618,7 @@
    ],
    "crew": 90,
    "pax": 600,
+   "speedKn": 12.25,
    "attestation": "generated",
    "confidence": "good",
    "text": "An iron-hulled, screw-driven steamship on a scheduled ocean route. The figure that governs its range is not horsepower but **pounds of coal per horsepower-hour**, which fell about threefold between 1855 and 1890.\n\nThat is what made steam viable on long routes. At 1850s efficiency a ship crossing an ocean had to give up roughly half its deadweight to its own fuel; by 1890 it was 15–20%. Nothing about the engine's power mattered as much as how little coal it burned to make it.\n\nCompound expansion (1854), triple expansion (A. C. Kirk, 1881), then the turbine and oil firing. Steam overtook sail on the British register around 1883.",
@@ -2747,6 +2753,7 @@
     ]
    ],
    "crew": 700,
+   "speedKn": 21.0,
    "attestation": "attested",
    "confidence": "good",
    "text": "A battleship carrying a uniform main battery of ten 12-inch guns and driven by steam turbines, completed at Portsmouth in a year and a day. Both features were already understood separately; putting them in one hull made every existing battleship in every navy second-rate at a stroke, and the type took her name.\n\nThe all-big-gun battery follows from gunnery rather than from ambition. Fire control works by observing the fall of shot and correcting, and that is only possible if every splash comes from a gun of the same calibre — a mixed battery gives you two sets of splashes and no way to tell which is which at the ranges the guns could already reach.",
@@ -2867,6 +2874,14 @@
      "150,000 shp, four shafts, 27 kn"
     ],
     [
+     "Anti-aircraft, as completed",
+     "twelve 12.7 cm in six twin mounts; twenty-four 25 mm in eight triple mounts — by 1945 the 25 mm barrels numbered about 150"
+    ],
+    [
+     "Aircraft",
+     "up to seven floatplanes; two stern catapults and a crane. Boats and aircraft stowed BELOW decks — 46 cm muzzle blast would wreck anything left in the open"
+    ],
+    [
      "Crew",
      "3,233"
     ],
@@ -2876,6 +2891,7 @@
     ]
    ],
    "crew": 3233,
+   "speedKn": 27.0,
    "attestation": "attested",
    "confidence": "good",
    "text": "The heaviest battleship ever built, carrying the largest naval guns ever mounted: nine 46 cm rifles in three triple turrets, behind a belt of 410 mm and a turret face of 650 mm.\n\nShe was sunk on 7 April 1945 by carrier aircraft, having barely fired those guns at an enemy ship. The armour was proof against the shells it was designed against, and the attack came from above.",
@@ -2996,6 +3012,42 @@
      "lenM": 19.4
     },
     "sternCrane": true,
+    "floatplanes": 2,
+    "searchlights": 8,
+    "aaLight": [
+     {
+      "at": 0.468
+     },
+     {
+      "at": 0.535
+     },
+     {
+      "at": 0.6
+     },
+     {
+      "at": 0.645
+     }
+    ],
+    "deckHatches": [
+     {
+      "at": 0.795,
+      "z": 0.42,
+      "lenM": 9.5,
+      "widM": 3.0
+     },
+     {
+      "at": 0.795,
+      "z": -0.42,
+      "lenM": 9.5,
+      "widM": 3.0
+     },
+     {
+      "at": 0.825,
+      "z": 0,
+      "lenM": 12.0,
+      "widM": 4.6
+     }
+    ],
     "year": 1941,
     "bottom": "#5c2019"
    }
@@ -3046,6 +3098,7 @@
     ]
    ],
    "crew": 4297,
+   "speedKn": 30.0,
    "attestation": "attested",
    "confidence": "good",
    "text": "A nuclear-powered aircraft carrier of about 100,000 tons. Its waterline beam is 41 m and its flight deck is 78 m across, because the deck overhangs the hull on both sides — the two numbers describe different things and neither alone describes the ship.\n\nThe angled deck is the feature everything else depends on. A landing strip set a few degrees to port means a pilot who misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward behind a crash barrier. The island is small and to starboard so the deck stays clear, and to starboard specifically because an aircraft going around swings to port.\n\nTwo reactors remove the constraint that shaped every warship before: a hull that no longer carries its own fuel can spend that volume and that range on aircraft instead.",
@@ -3163,6 +3216,7 @@
    ],
    "crew": 22,
    "pax": 0,
+   "speedKn": 21.0,
    "attestation": "generated",
    "confidence": "good",
    "text": "The last chapter of this story is not about the sea at all. A modern container ship's route is set by **lock chambers and dredged channels** — numbers written down by engineers — rather than by anything the ocean does.\n\nPanamax is not a ship. It is the inside dimension of a lock built in 1914, and for a century the world's fleet was designed around it: 294.13 m long, 32.31 m in the beam, because that is what fits. The 2016 expansion moved the number and the fleet moved with it.\n\nGrowth has now stopped, and it stopped on port depth and canal width rather than on anything to do with naval architecture.",

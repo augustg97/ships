@@ -2330,7 +2330,14 @@ function passageCard(tr, ves) {
     /* ⚠ ves.polar.best does not exist — the same non-field that made every hull sail at the
        literal fallback of six knots two rounds ago. The card was still printing "6.0 kn" for
        a 400 m container ship while the pacing beside it used 16. One reading of one number. */
-    ['Best speed', shipKn(ves).toFixed(1) + ' kn'],
+    /* ⚠ AND THE POLAR IS THE MODEL'S SPEED, NOT THE SHIP'S. An engine-driven record with a
+       stated service speed (speedKn) was captioned with its ROUTING polar — Yamato at
+       "9.6 kn" against a record 27 — the same class the Shipwright card fixed in round 34.
+       The record's number, labelled as the record's; the pacing stays on shipKn(), and the
+       gap between them is the front page's stated factor of two, not a bug to hide. */
+    ves.speedKn !== undefined
+      ? ['Service speed', ves.speedKn.toFixed(1) + ' kn']
+      : ['Best speed', shipKn(ves).toFixed(1) + ' kn'],
   ];
   c.querySelector('.pc-rows').innerHTML =
     rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +

@@ -1385,6 +1385,28 @@ const PARTS = {
                   + 'floatplane off the beam before the deck ends; the crane at the stern lifts '
                   + 'it back aboard after it lands on the sea. Every battleship carried her own '
                   + 'eyes — over the horizon is where the guns outrange the rangefinder.' },
+  floatplane: { stage: 7, name: 'Floatplane',
+              what: 'The ship\'s reconnaissance aircraft, on a single main float so it can land '
+                  + 'on the open sea and be craned back aboard. It spots the fall of shot beyond '
+                  + 'the horizon — the guns outrange the rangefinder, and until radar this was '
+                  + 'the only answer.' },
+  aaLight:  { stage: 4, name: 'Light anti-aircraft battery',
+              what: 'Triple 25 mm automatic guns in shielded mounts on raised bandstands along '
+                  + 'the amidships structure — the close-in layer under the heavy high-angle '
+                  + 'battery. She completed with eight of these mounts; by 1945 refits had '
+                  + 'multiplied the barrels sixfold, which is a fair record of how the war at '
+                  + 'sea actually went.' },
+  searchlight: { stage: 4, name: 'Searchlight platform',
+              what: 'Arc searchlights on platforms winged out from the tower. Night action was '
+                  + 'doctrine — the battle line trained to fight in the dark, and before radar '
+                  + 'the only way to lay guns at night was to hold the enemy in one of these '
+                  + 'beams. A metre and a half of carbon-arc mirror, worked from a director.' },
+  hatch:    { stage: 4, name: 'Stowage hatch',
+              what: 'On a big-gun ship the quarterdeck gear lives BELOW. The muzzle blast of the '
+                  + 'main battery would wreck an open boat or a parked aircraft, so boats and '
+                  + 'floatplanes stow under the deck and come up through these flush hatches to '
+                  + 'the crane — which is why her decks look so strangely empty for a ship with '
+                  + 'a crew of three thousand.' },
   /* ── the uncrewed vessel ─────────────────────────────────────────────────────────────
      Its parts have no older equivalent, which is the point of them: everything here exists
      because there is nobody aboard to do the job by hand. */
@@ -3072,11 +3094,13 @@ function buildCitadel(S, group, mats) {
   const towerH = S.towerH !== undefined ? S.towerH : B * 0.55;
   const K = Math.max(2, Math.min(6, Math.round(towerH / (B * 0.11))));
   const tx = (towerU - 0.5) * L;
+  const levels = [];                                // the searchlight platforms hang off these
   let y = tierTop[0];
   for (let k = 0; k < K; k++) {
     const f = k / Math.max(1, K - 1);
     const w = B * (0.34 - 0.20 * f), d = B * (0.40 - 0.22 * f);
     const lh = (base + towerH - tierTop[0]) / K;
+    levels.push({ y0: y, lh, w, d });
     const lvl = new THREE.Mesh(new THREE.BoxGeometry(d, lh, w), k % 2 ? dark : wall);
     lvl.position.set(tx, y + lh / 2, 0);
     g.add(tag(lvl, 'superstructure', k === K - 1 ? 'Bridge' : 'Tower level ' + (k + 1),
@@ -3095,6 +3119,42 @@ function buildCitadel(S, group, mats) {
   rf.position.set(tx, y + B * 0.020, 0);
   g.add(tag(rf, 'superstructure', 'Main rangefinder',
     'The primary optical rangefinder for the main battery, at the highest point that will hold one: range accuracy is baseline times height.'));
+  /* ── THE SEARCHLIGHT PLATFORMS, from the record: `searchlights: N` ───────────────────
+     Winged out from the tower flanks in pairs, one pair per level working upward — the
+     bristling profile that made the type's silhouette. Each platform is a bracketed round
+     wing with a carbon-arc drum on a pedestal, glass face outboard. Derived from the
+     tower's own levels, so a taller or shorter pagoda carries them at its own heights. */
+  if (S.searchlights) {
+    const nPairs = Math.min(Math.ceil(S.searchlights / 2), Math.max(1, K - 2));
+    for (let p = 0; p < nPairs; p++) {
+      const lv = levels[Math.min(1 + p, K - 1)];
+      for (const sgn of [1, -1]) {
+        const zc = sgn * (lv.w / 2 + 1.25);
+        const sl = new THREE.Group();
+        /* the bracket spans from the tower face under the platform, so the wing hangs on
+           structure rather than on air */
+        const bk = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 2.6), dark);
+        bk.position.set(0, -0.55, -sgn * 0.7);
+        sl.add(tag(bk, 'searchlight', 'Platform bracket'));
+        const plat = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.35, 0.28, 12), dark);
+        sl.add(tag(plat, 'searchlight', 'Searchlight platform'));
+        const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.42, 0.65, 10), dark);
+        ped.position.y = 0.45;
+        sl.add(ped);
+        /* the drum, axis outboard, mirror face proud */
+        const dr = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.78, 0.95, 14), wall);
+        dr.rotation.x = Math.PI / 2;
+        dr.position.y = 1.35;
+        sl.add(tag(dr, 'searchlight', 'Searchlight'));
+        const face = new THREE.Mesh(new THREE.CylinderGeometry(0.70, 0.70, 0.10, 14), glaze);
+        face.rotation.x = Math.PI / 2;
+        face.position.set(0, 1.35, sgn * 0.50);
+        sl.add(tag(face, 'searchlight', 'Searchlight mirror'));
+        sl.position.set(tx, lv.y0 + 0.55, zc);
+        g.add(tag(sl, 'searchlight'));
+      }
+    }
+  }
   /* ── THE SECONDARY BATTERY, from the record ──────────────────────────────────────────
      A mount trains fore-and-aft past its own end of the ship — at rest EVERY mount does,
      which the Kure fitting-out photographs show; trained abeam the wing pair read as bare
@@ -3119,6 +3179,7 @@ function buildCitadel(S, group, mats) {
     });
   });
   buildAA(S, g, { tierTop, tierHalf, dh }, mats);
+  buildAALight(S, g, { tierTop, tierHalf, dh }, mats);
   group.add(tag(g, 'superstructure'));
 }
 
@@ -3166,6 +3227,135 @@ function buildAA(S, g, T, mats) {
   });
 }
 
+/* ── THE LIGHT BATTERY ──────────────────────────────────────────────────────────────────
+ * Triple 25 mm automatic mounts along the amidships structure, from the record:
+ * `aaLight: [{at}, …]`, one entry per side-pair — the close-in layer under the heavy
+ * high-angle guns. The BANDSTAND is the legible fact: each mount stands on a raised drum
+ * tub proud of the shelter deck, because an automatic gun needs clear sky over a deck
+ * already crowded with the heavy mounts' arcs. Shielded, as the as-completed mounts were;
+ * three slim barrels elevated together, which is what tells the eye "automatic" at a
+ * distance the barrels themselves cannot be read at. */
+function buildAALight(S, g, T, mats) {
+  if (!S.aaLight || !S.aaLight.length) return;
+  const B = S.beam, L = S.lwl;
+  const steel = mats.turretSteel || (mats.turretSteel =
+    new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
+  const dark = mats.turretDark || (mats.turretDark =
+    new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+  S.aaLight.forEach(m => {
+    for (const sgn of [1, -1]) {
+      const mount = new THREE.Group();
+      /* the bandstand: support drum rising from the shelter-deck roof, tub lip on top */
+      const drum = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.25, 2.4, 14), dark);
+      drum.position.y = 1.0;                        // base sunk 0.2 into the roof plating
+      mount.add(tag(drum, 'aaLight', 'Bandstand'));
+      const tub = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.5, 14), dark);
+      tub.position.y = 2.4;
+      mount.add(tag(tub, 'aaLight', 'Gun tub'));
+      const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 0.8, 10), dark);
+      ped.position.y = 3.0;
+      mount.add(ped);
+      /* the shield: open-backed, face outboard with the guns */
+      const shield = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.25, 1.6), steel);
+      shield.position.y = 3.9;
+      mount.add(tag(shield, 'aaLight', 'Triple 25 mm mount'));
+      /* three barrels close abreast, elevated — the automatic-battery signature */
+      for (const off of [-0.34, 0, 0.34]) {
+        const gun = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.045, 0.06, 2.1, 6), dark);
+        gun.rotation.x = sgn * (Math.PI / 2 - 0.8);   // ~46 degrees up, muzzles outboard
+        gun.position.set(off, 4.35 + Math.cos(0.8) * 0.65,
+                         sgn * Math.sin(0.8) * 0.85);
+        mount.add(tag(gun, 'aaLight', '25 mm gun'));
+      }
+      mount.position.set((m.at - 0.5) * L, T.tierTop[1],
+                         sgn * (T.tierHalf(m.at, 1) - 1.7));
+      g.add(tag(mount, 'aaLight'));
+    }
+  });
+}
+
+/* ── THE FLOATPLANE ─────────────────────────────────────────────────────────────────────
+ * A catapult observation biplane in real metres — main float bottom on y = 0, nose toward
+ * -x, about nine and a half metres of aircraft. Built the way buildAircraft builds the
+ * strike fighter: the most legible single facts first. For a floatplane those are the one
+ * big CENTRAL FLOAT under a two-bay BIPLANE, the round engine ahead of an open glazed
+ * canopy, and the red discs — so all four are geometry. */
+function buildFloatplane(fm) {
+  const ac = new THREE.Group();
+  /* the main float: what makes it a seaplane. Fatter forward, tapering aft */
+  const flt = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.30, 6.2, 10), fm.skin);
+  flt.rotation.z = Math.PI / 2;
+  flt.position.set(-0.6, 0.42, 0);
+  ac.add(tag(flt, 'floatplane', 'Main float'));
+  for (const sx of [-2.1, 0.6])                     // float struts up to the fuselage
+    for (const sz of [-0.28, 0.28]) {
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 1.35, 6), fm.dark);
+      st.position.set(sx, 1.45, sz);
+      ac.add(st);
+    }
+  const fus = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 6.6, 10), fm.skin);
+  fus.rotation.z = Math.PI / 2;
+  fus.position.set(0.4, 2.35, 0);
+  ac.add(tag(fus, 'floatplane', 'Floatplane'));
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.16, 1.5, 10), fm.skin);
+  tail.rotation.z = Math.PI / 2;
+  tail.position.set(4.45, 2.35, 0);
+  ac.add(tail);
+  const cowl = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 1.0, 12), fm.dark);
+  cowl.rotation.z = Math.PI / 2;
+  cowl.position.set(-3.3, 2.35, 0);
+  ac.add(tag(cowl, 'floatplane', 'Engine cowling'));
+  for (const r of [0, Math.PI / 2]) {               // the propeller, stopped on the cross
+    const bl = new THREE.Mesh(new THREE.BoxGeometry(0.07, 2.5, 0.28), fm.dark);
+    bl.rotation.x = r;
+    bl.position.set(-3.9, 2.35, 0);
+    ac.add(bl);
+  }
+  const can = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.55, 0.75), fm.glass);
+  can.position.set(0.3, 2.95, 0);
+  ac.add(tag(can, 'floatplane', 'Canopy'));
+  const wingLo = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.12, 10.8), fm.skin);
+  wingLo.position.set(-0.7, 1.95, 0);
+  ac.add(tag(wingLo, 'floatplane', 'Lower wing'));
+  const wingHi = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.12, 11.2), fm.skin);
+  wingHi.position.set(-1.2, 3.65, 0);
+  ac.add(tag(wingHi, 'floatplane', 'Upper wing'));
+  for (const s of [-1, 1]) {
+    for (const sx of [-1.6, -0.3]) {                // interplane struts, the two-bay pair
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.72, 6), fm.dark);
+      st.position.set(sx, 2.8, s * 4.6);
+      ac.add(st);
+    }
+    const cb = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.75, 6), fm.dark);
+    cb.position.set(-1.0, 3.2, s * 0.6);            // cabane struts at the fuselage
+    ac.add(cb);
+    const tf = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.13, 1.5, 8), fm.skin);
+    tf.rotation.z = Math.PI / 2;
+    tf.position.set(0.1, 1.05, s * 4.7);            // wingtip stabilising floats
+    ac.add(tag(tf, 'floatplane', 'Wingtip float'));
+    const ts = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 6), fm.dark);
+    ts.position.set(0.1, 1.6, s * 4.7);
+    ac.add(ts);
+    /* the hinomaru: a red disc through the fuselage and one on each upper wing panel —
+       the single most identifying mark on the aircraft, so it is geometry, not paint */
+    const wd = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.14, 16), fm.red);
+    wd.position.set(-1.2, 3.65, s * 3.4);
+    ac.add(wd);
+  }
+  const fd = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.10, 16), fm.red);
+  fd.rotation.x = Math.PI / 2;
+  fd.position.set(1.6, 2.4, 0);
+  ac.add(fd);
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.35, 0.10), fm.skin);
+  fin.position.set(4.6, 3.35, 0);
+  ac.add(tag(fin, 'floatplane', 'Fin'));
+  const stab = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.10, 3.4), fm.skin);
+  stab.position.set(4.4, 2.6, 0);
+  ac.add(stab);
+  return ac;
+}
+
 /* ── THE STERN AVIATION DECK ────────────────────────────────────────────────────────────
  * A battleship's quarterdeck aft of the last turret was not spare space: it was her airfield.
  * Two trainable catapults at the deck edge, port and starboard, angled outboard so the
@@ -3182,6 +3372,7 @@ function buildSternAviation(S, group) {
   const len = S.catapults.lenM || B * 0.5;
   const deckY = H.sheer(u);
   const half = Math.abs(surfacePoint(S, H, u, 1.0)[2]);
+  let portCat = null;
   for (const sgn of [1, -1]) {
     const g = new THREE.Group();
     /* the turntable pedestal the beam trains on */
@@ -3198,6 +3389,7 @@ function buildSternAviation(S, group) {
     g.position.set((u - 0.5) * L, deckY, sgn * (half - 2.6));
     g.rotation.y = -sgn * 0.6;                    // trained outboard-aft, a V opening astern
     group.add(tag(g, 'catapult'));
+    if (sgn === 1) portCat = g;
   }
   if (S.sternCrane) {
     const g = new THREE.Group();
@@ -3214,6 +3406,66 @@ function buildSternAviation(S, group) {
     g.position.set((uC - 0.5) * L, H.sheer(uC), 0);
     group.add(tag(g, 'catapult'));
   }
+  /* ── THE AIRCRAFT THEMSELVES, from the record: `floatplanes: N` ──────────────────────
+     One rides the port catapult, nose at the launch end — built INSIDE the catapult group
+     so plane and beam train together and cannot come apart, the lateen's lesson. The rest
+     park on the centreline forward of the catapults, seated on the deck's own camber. */
+  if (S.floatplanes) {
+    const fm = {
+      skin:  new THREE.MeshStandardMaterial({ color: 0x82877e, roughness: 0.85, metalness: 0.08 }),
+      dark:  new THREE.MeshStandardMaterial({ color: 0x2f3438, roughness: 0.70, metalness: 0.20 }),
+      glass: new THREE.MeshStandardMaterial({ color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 }),
+      red:   new THREE.MeshStandardMaterial({ color: 0x9c2f28, roughness: 0.60, metalness: 0.05 }),
+    };
+    if (portCat) {
+      const p0 = buildFloatplane(fm);
+      p0.position.y = 2.08;                       // float on the launch rail
+      p0.rotation.y = Math.PI;                    // nose at the outboard-aft launch end
+      portCat.add(tag(p0, 'floatplane'));
+    }
+    for (let i = portCat ? 1 : 0; i < S.floatplanes; i++) {
+      const p = buildFloatplane(fm);
+      const uP = u - 0.045 - 0.042 * (i - 1);
+      const bC = Math.abs(surfacePoint(S, H, uP, 1.0)[2]);
+      p.position.set((uP - 0.5) * L, H.sheer(uP) + bC * 0.035, 0);
+      p.rotation.y = (i % 2 ? -1 : 1) * 0.28;     // pushed about by hand, not ruled lines
+      group.add(tag(p, 'floatplane'));
+    }
+  }
+}
+
+/* ── THE STOWAGE HATCHES ────────────────────────────────────────────────────────────────
+ * On a big-gun ship the quarterdeck gear lives BELOW the deck: main-battery muzzle blast
+ * would wreck an open boat or a parked aircraft, so boats and floatplanes stow under
+ * armoured covers and come up to the crane through these. From the record:
+ * `deckHatches: [{at, z, lenM, widM}]`, z a signed fraction of the half-breadth at the
+ * station. Seated on the deck's own camber — the same cosine buildDeckGeometry draws — so
+ * a hatch amidships cannot float over the crown nor sink at the deck edge. */
+function buildDeckHatches(S, group) {
+  if (!S.deckHatches || !S.deckHatches.length) return;
+  const H = hullSurface(S);
+  const L = S.lwl;
+  const dark = new THREE.MeshStandardMaterial({ color: 0x3f444a, roughness: 0.66, metalness: 0.25 });
+  const cover = new THREE.MeshStandardMaterial({ color: 0x565c61, roughness: 0.72, metalness: 0.22 });
+  S.deckHatches.forEach(hc => {
+    const u = hc.at, b = Math.abs(surfacePoint(S, H, u, 1.0)[2]);
+    const zP = (hc.z || 0) * b;
+    const camber = Math.cos((zP / b) * Math.PI / 2) * b * 0.035;
+    const g = new THREE.Group();
+    const coam = new THREE.Mesh(new THREE.BoxGeometry(hc.lenM, 0.55, hc.widM), dark);
+    coam.position.y = 0.12;                       // base sunk through the camber it spans
+    g.add(tag(coam, 'hatch', 'Hatch coaming'));
+    const lid = new THREE.Mesh(new THREE.BoxGeometry(hc.lenM * 0.96, 0.16, hc.widM * 0.92), cover);
+    lid.position.y = 0.47;
+    g.add(tag(lid, 'hatch', 'Hatch cover'));
+    for (let s = 1; s <= 2; s++) {                // the cover is sections; the seams say so
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, hc.widM * 0.92), dark);
+      strip.position.set((s / 3 - 0.5) * hc.lenM * 0.96, 0.57, 0);
+      g.add(strip);
+    }
+    g.position.set((u - 0.5) * L, H.sheer(u) + camber, zP);
+    group.add(tag(g, 'hatch'));
+  });
 }
 
 function buildWingSail(S, group, mats) {
@@ -4148,6 +4400,7 @@ function buildShip(S, opts) {
   if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
   if (FINE && S.turrets) buildCitadel(S, group, mats);
   if (FINE) buildSternAviation(S, group);
+  if (FINE) buildDeckHatches(S, group);
   if (FINE) buildHead(S, group, mats);
   if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
   if (FINE) buildOars(S, group, mats.woodPale);

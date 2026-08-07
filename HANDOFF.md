@@ -1318,3 +1318,87 @@ on top of it and the concurrency group CANCELLED the push run, so the dispatch (
 completed success) did the deploy. Next round: give the push run a minute before dispatching,
 because dispatching now cancels a healthy push run rather than backstopping a missing one.
 Live stamp verified 1786058340 → **1786069279** with a cache-busted fetch.
+
+---
+
+## Round 36 — 2026-08-06 — The record's speed in both views, and Yamato's second pass
+
+**Queue item 1 closed, and it was bigger than queued: the speedKn fix was needed in TWO
+places.** The six engine-driven records got their service speeds (carrier 30.0 — the record's
+own "in excess of 30" floor; dreadnought 21.0; yamato 27.0; steamer 12.25 — Great Britain's
+own row; container 21.0 slow-steaming; usv 4.0 with a new Speed row saying **contested** for
+a hull that harvests its drive). The Shipwright card was already fixed (r34); but the NEW
+aboard-yamato baseline caught the SEA card showing "Best speed 9.6 kn" against a record 27 —
+`app.js` shipCard reads `shipKn()`, which is the ROUTING POLAR's max. Same class, second
+instance. The card now carries the record's number labelled "Service speed" where `speedKn`
+exists; the pacing stays on `shipKn()`, and the gap between them is the front page's stated
+factor of two, not a bug to hide. Verified rendered in both views (ship-yamato card 27.0,
+aboard-yamato card 27.0).
+
+**Yamato round 2 — all four queue items, record-driven and class-extensible.**
+1. **`aaLight: [{at}]`** — the 25 mm close-in battery, one entry per side-pair: eight
+   shielded triples on raised BANDSTANDS along the amidships structure (drum, tub, pedestal,
+   shield, three slim barrels elevated 46°), matching her 1941 completion fit of 24 barrels.
+   The card's new "Anti-aircraft, as completed" row carries the same numbers, and the 1945
+   ~150-barrel trajectory.
+2. **`searchlights: 8`** — platforms winged off the pagoda in pairs, one pair per tower
+   level working upward, derived from the tower's own `levels` array so a different pagoda
+   carries them at its own heights. Bracket → platform → pedestal → drum → glass face; from
+   broadside they read as the dark circles stacked up the tower that period photographs show.
+3. **`floatplanes: 2`** — a real floatplane builder (main float, two-bay biplane, cowl and
+   stopped prop, canopy, wingtip floats, hinomaru as geometry through the fuselage and on
+   the upper wing). One rides the PORT CATAPULT — built inside the catapult group so plane
+   and beam train together and cannot come apart (A11's lesson) — nose at the launch end;
+   the second parks on the centreline seated on the deck's own camber
+   (`cos((z/b)·π/2)·b·0.035`, the same cosine buildDeckGeometry draws).
+4. **`deckHatches: [{at,z,lenM,widM}]`** — three quarterdeck stowage hatches (two abeam,
+   one centreline), coaming + sectioned cover + seams, seated on the cambered deck. The
+   card's Aircraft row says WHY the decks are empty: 46 cm muzzle blast wrecks anything
+   left in the open, so boats and aircraft stow below and come up to the crane.
+
+**A survey scare resolved by measurement, not by eye:** from b270 a pale ~7 m cylinder lay
+"detached" on the port quarterdeck. Probing every mesh box in the region in the live page:
+it is the port catapult's inboard beam half trained across the deck, turntable amidships —
+real, attached, and 0.5 m clear of the parked plane's wingtip. The eye was wrong and the
+measurement is on file (rule 8's spirit, applied to a survey read).
+
+**Audit: FOUR new rules, all proven live by break-and-restore.** The class: a record field
+that silently stops producing geometry — or produces it adrift — is invisible to every
+picture. `light battery miscounted` (2× per side-pair), `searchlights miscounted`,
+`floatplane stands on nothing` (float bottom vs sheer at its own station, catapult riders
+allowed), `hatch off the deck` (coaming vs the cambered deck, the audit re-deriving the
+same cosine). Broke the data (searchlights 9) and the builder (hatch +2 m, single-side
+aaLight, plane at +6 m): all four fired, restored: 25/25 clean, from the served files.
+`declared but not drawn` also knows all four new fields now.
+
+**Ratchet: 30 frames — 12 moved or new, all classified and accepted, closing check all
+0.000–0.049 within tolerance.** `ship-yamato` 0.334% is the round (diff verified: confined
+to the new fittings + card text; hull and sea bit-identical). `aboard-yamato` NEW, committed
+with the corrected card. `aboard-titanic` 0.074% card-text-only. Five ship-* frames +
+aboard-carrier 0.027–0.040% card text (the speedKn class), accepted so the stable diff
+cannot stack under a future change. **And a baseline artefact found:** `aboard` 0.082% /
+`aboard-off` 0.055% each carried dark land-sliver wedges over the steamer's bow and stern
+decks in the r35 baselines — the fragment-close had captured a transient. Two independent
+r36 renders agree the decks are clean; accepted with the artefact named. `globe-default`
+passed at 0.013% both runs this round — the serif flake did not fire, class still queued.
+
+**Rule 0 check, written:** the frames read as a rendered world — one sun, a swell, a hull
+wet at her marks. Three facts off ship-yamato/b270: a floatplane with red hinomaru riding
+the port catapult, angled outboard over the stern; three flush stowage hatches on an
+otherwise empty quarterdeck abaft the aft turret's guns; the amidships structure crowded
+with shielded mounts, triple barrels elevated together. Three off aboard-yamato: a pagoda
+foremast out-towering a single funnel; a wood-tan weather deck between grey citadel decks;
+her card giving 27.0 kn as service speed while she stands off a brown coast.
+
+### Next, in order
+1. **Yamato's funnel is vertical; hers raked ~25° aft** — the broadside's biggest remaining
+   resemblance gap. A `funnelRake` record field on the funnel builder, class-level (Kongō,
+   Ise, most IJN capital ships rake; Dreadnought's stacks are vertical, so it must be data).
+2. The serif-webfont dependency decision (globe-default false-RED; did not fire this round,
+   the class is still open).
+3. The land in the Sea close-up: featureless brown ramp, check on a high coast (visible
+   behind aboard-yamato now — it is the next thing the eye snags on in that frame).
+4. Titanic remainder, if wanted: crow's nest height, funnel stations against the GA
+   drawing, enclosed A-deck promenade forward, docking bridge on the poop.
+5. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
+   preussen P-liner white waterline check.

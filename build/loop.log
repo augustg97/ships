@@ -165,3 +165,16 @@ The ratchet is rendering all 29 frames in the background; it will notify when do
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 48514 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 19:05:47  round starting
+**Round 35 is closed and live at stamp 1786069279.** The round had been started and killed several times by the loop while waiting on renders; I re-verified everything the fragments claimed from scratch, then finished the parts they never reached — classification, acceptance, HANDOFF, commit, deploy.
+
+**The find of the round: queue items 1 and 2 were one bug.** `buildDeckGeometry` declared every deck normal up but wound its triangles clockwise-from-above, and three.js's double-sided lighting flip trusts the winding — so every weather deck in the fleet was lit by the ground half of the hemisphere light. The carrier's black cutout and Dreadnought's "dark olive deck" were both sunlit decks lit as if they faced the sea floor. I verified the fix arithmetically (both triangles now cross to +Y) and through the new audit rule that compares geometric to declared normals, which the interrupted session had proven live by reverting the fix. Audit passes 25/25.
+
+**Verified by looking, not by trusting.** The dreadnought's deck now reads as pale holystoned planking; the USV wears steel instead of phantom timber; the 74, dhow, junk, Preussen and the rest show lit decks. The carrier's rebuilt paint measures island 131 > deck 126 > shell 60 > sea 29 on the fresh render — the sea-trials relative pattern, no black cutout from any bearing. The ratchet moved 16 of 29 frames: 15 accepted as one class (every diff image confined to deck surfaces), and globe-default left un-accepted — it's the standing serif-webfont text flake again, at the same 1.023%. The new `aboard-carrier` baseline came in at 0.000% against the interrupted session's render, which is the determinism proof.
+
+**Two things for next round, both in HANDOFF.** First, a new class fault queued with values: engine-driven cards without `speedKn` show rig-polar speeds — the carrier reads "16.0 kn" against her record's "in excess of 30", Dreadnought 9.6 against 21. It's a six-line data fix I deferred because editing card text mid-ratchet would have split the run. Second, a trap: a stale server was answering on :8149 serving the repo root over IPv6; I killed it and logged the symptom.
+
+**Deploy:** the push run fired in eight seconds this time — the "fires late" mode may have healed — but my manual dispatch cancelled it via the concurrency group, and the dispatch deployed instead. HANDOFF now says to give the push run a minute before dispatching. Live stamp verified cache-busted: 1786058340 → 1786069279.
+2026-08-06 19:23:33  round finished; HEAD is 7b30050 Deploy note r35: live at 1786069279; the push run fired in eight seconds and the dispatch cancelled it
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 50459 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 19:33:33  round starting
