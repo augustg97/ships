@@ -277,3 +277,5 @@ The ratchet run (31 cold-page captures) is still going in the background; it wil
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 01:43:32  round starting
   previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 01:53:32  round starting

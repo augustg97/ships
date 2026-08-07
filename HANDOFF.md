@@ -1708,3 +1708,88 @@ worker cannot tell whose change they are looking at.
    vessel blurbs.
 4. Then back to the ship-model survey queue: the steel stern quarter as a class, and the
    serif-webfont dependency decision that closes the `globe-default` false-RED.
+
+---
+
+## Round 42 — 2026-08-07 — Wyoming: the record's six-master, and four class fixes she surfaced
+
+**Back on the round-23 survey queue.** Carrier, container, yamato, titanic, great-eastern and
+dreadnought were done; **wyoming (1118 tris/m, 164 meshes) was next.** She was six poles with
+six gaff sails on a bare hull: no bowsprit on a ship whose 140 m LOA against 110 m on deck IS
+the head and spanker overhang, no topmasts and none of her 22 sails beyond the six lowers, no
+deckhouses on a type whose crew lived entirely on deck, and `bowsprit: 0.0` in the data. Now:
+fidded topmasts (white lower, black upper) with six jib-headed topsails, five headsails on a
+near-level spike bowsprit held down by bobstays, spring stays masthead to masthead, fore and
+after deckhouses with the wheel abaft the after house, and the spanker boom standing out over
+the counter. 1199 tris/m, 231 meshes, nothing floating; audit 25/25.
+
+### Every fault generalised — the four class fixes
+
+1. **The aftermost gaff boom collapsed to its floor, fleet-wide.** The boom clamp's fallback
+   obstruction for a mast with none astern was `0.5 + 0.06` — a station just abaft MIDSHIPS —
+   so gapAft went negative on any mast aft of it and the boom fell to `lower * 0.16`. Measured
+   on Wyoming: booms [12.9, 12.9, 12.0, 12.0, 12.0, **6.7**] — the spanker, the one boom the
+   comment two lines down says may overhang the stern, was the shortest spar on the ship. Now
+   `obstruct = 1.04` past the stern; her spanker draws 17.2 m. Great Eastern's spanker grew the
+   same way, which is one of the two reasons her frame moved.
+2. **Every gaff and settee quad wore a SLIT below the peak.** The quadrilateral was two
+   makeTriSail triangles sharing the tack→peak diagonal, and the corner-crease/scallop noise
+   scales with each triangle's own luff — the two luffs differ, so the shared edge carried two
+   different z values and the cloth hung open along it. Visible on every gaff sail in the spin
+   captures once you look. `makeQuadSail` (one parameterisation over the whole cloth, luff and
+   head laced hard, leech free with the twist growing aloft) replaces the pair for gaff and
+   settee both; the dhow's frame moved for this reason alone and looks right.
+3. **The card's "deck to truck" silently carried the freeboard.** `rigTop` is the bounding box
+   over the WATERLINE; the label says deck. Wyoming's card read 46.8 m over a 42 m mast —
+   matching the record by accident, wrong twice. Both labels ("Rig, deck to truck" and "Air
+   draught, above deck") now subtract the freeboard; every masted card's digit moved a few
+   metres toward honest, which is the small third patch in the titanic/dhow/GE diffs.
+4. **A schooner's stay web is not a square-rigger's.** mastTops was square-only, so gaff ships
+   had no stays at all; and the square rig's deck-anchored forestay would pass through the gaff
+   sail standing in that gap, its standing backstay through its own boom's arc. Gaff mastheads
+   now register and get SPRING STAYS masthead to masthead — the near-horizontal line that ties
+   the whole rig together in every six-master photograph — and no backstays, which were never
+   rigged there. The headsail stays are the foremast's forestays, drawn from the same two
+   points as each sail's luff so stay and sail cannot come adrift.
+
+**Record-driven, not implied:** the gaff topsail is gated on `topsail` per mast, NOT on the
+topmast — Great Eastern's reference model shows her six topmasts standing BARE, and she keeps
+them bare while Wyoming's record (22 sails) sets six. New data grammar this round:
+`headsails: n`, `deckhouses: [{a,b,hM,wF}]`, `helmAt`, and `topmast`/`topsail` per mast.
+
+### Audit: 4 new rules, all proven by break-and-restore
+
+(1) spanker not the shortest boom (skipped when funnels legitimately clamp it) — proven by
+moving mast 6 to u=0.99: fires at 5.4 m vs 20.8; (2) declared headsails drawn forward of the
+foremast — proven by deleting the bowsprit with the suit still declared: "5 in the record, 0
+drawn" (⚠ mutating `headsails` itself cannot fire it — builder and audit read the same record);
+(3) declared topsail flies above 0.75·lower at its own mast — proven by dropping the topmast;
+(4) deckhouses at the record's count, on the deck, inside the rail, and the wheel on the sheer
+— proven with wF=2.0: "reaches 12.2 m off centre, hull side 6.0 m". All 25 hulls pass clean.
+
+### Frames
+
+Two NEW baselines for the vessel (`ship-wyoming`, `aboard-wyoming` — era 6, `f=wyomingvoy`),
+plus `aboard-cable` accepted, which a previous round added to frames.json and left with no
+committed baseline. Three moved, every one classified and logged: ship-dhow 3.34% (the settee
+cloth), ship-great-eastern 2.09% (quads + spanker + card digit; hull/funnels/paddle untouched),
+ship-titanic 0.13% (card digit + a neighbour's rig at the frame edge).
+
+**Rule 0 check, written:** the frame reads as a rendered world. Three facts off ship-wyoming:
+six identical gaff sails carrying jib-headed topsails on fidded topmasts, white below the
+doubling and black above; a suit of five jibs running from a near-level spike bowsprit up the
+foremast; a long white after house with a row of lights, and the spanker boom standing out
+past the counter.
+
+⚠ **`build/fetch_images.py` sits UNTRACKED in the tree** — another session's start on the
+round-41 images item (Commons fetch with licence capture, 159 lines, no assets fetched yet).
+Not mine, not verified, deliberately not committed with this round; whoever owns the images
+item should pick it up or bin it.
+
+### Next, in order
+1. **preussen (1248 tris/m)** — next on the survey queue. Round 32 also left "preussen P-liner
+   white waterline check" pending.
+2. Then **steamer (1713)**, **treasure-ship (2011)**.
+3. The standing carried items: serif-webfont dependency decision (globe-default false-RED
+   class); the Sea's featureless brown land behind aboard-yamato; Titanic remainder; August's
+   items 5–7 (images/cards/tone), which are a project not a round.

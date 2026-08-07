@@ -171,6 +171,16 @@
    "name": "aboard-yamato",
    "note": "ABOARD, THE BATTLESHIP — Yamato on the Ten-ichi-go sortie. Added round 36 with her second detail pass: the 1941 close-in fit (eight shielded 25 mm triples on bandstands), searchlight platforms winged off the pagoda, stowage hatches on the quarterdeck and two floatplanes aft — one riding the port catapult. Watches the crowded amidships silhouette the record describes.",
    "path": "/?frozen=1#e=6&f=tenichigo"
+  },
+  {
+   "name": "ship-wyoming",
+   "path": "/?frozen=1#v=ship&s=wyoming",
+   "note": "the six-masted schooner — gaff quads, topsails, five headsails on the spike bowsprit, deckhouses (round 42)"
+  },
+  {
+   "name": "aboard-wyoming",
+   "path": "/?frozen=1#e=6&f=wyomingvoy",
+   "note": "Wyoming at sea in the coal trade, close-up — the rig from the water (round 42)"
   }
  ]
 }

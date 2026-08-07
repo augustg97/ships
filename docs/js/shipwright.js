@@ -581,9 +581,13 @@ function swOpen(vessel) {
     ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
     ['Draught', vessel.hull.draught.toFixed(2) + ' m'],
     /* ⚠ "deck to truck" is a MAST measurement, and it was being printed on ships with no
-       masts — Titanic's 62.3 m is her funnels and superstructure. Say what is being measured. */
+       masts — Titanic's 62.3 m is her funnels and superstructure. Say what is being measured.
+       ⚠ AND MEASURED FROM THE DECK, WHICH IS WHAT BOTH LABELS SAY. rigTop is the bounding
+       box over the WATERLINE, so every ship's number silently carried her freeboard —
+       Wyoming's "deck to truck" read 46.8 m over a 42 m mast, which happened to match the
+       record and so looked confirmed while being wrong twice. */
     [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
-     U.rigTop.toFixed(1) + ' m'],
+     (U.rigTop - vessel.hull.freeboard).toFixed(1) + ' m'],
   ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
   /* fit the shadow frustum to this ship, in her own place on the line */

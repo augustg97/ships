@@ -1825,44 +1825,56 @@
     "gunDecks": 0,
     "iron": false,
     "topside": "#3b3a36",
-    "bowsprit": 0.0,
-    "steeve": 22,
+    "bowsprit": 0.17,
+    "steeve": 10,
     "masts": [
      {
       "at": 0.14,
-      "heightM": 42.0,
+      "heightM": 33.5,
       "rig": "gaff",
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      },
      {
       "at": 0.29,
-      "heightM": 42.0,
+      "heightM": 33.5,
       "rig": "gaff",
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      },
      {
       "at": 0.44,
-      "heightM": 42.0,
+      "heightM": 33.5,
       "rig": "gaff",
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      },
      {
       "at": 0.58,
-      "heightM": 42.0,
+      "heightM": 33.5,
       "rig": "gaff",
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      },
      {
       "at": 0.72,
-      "heightM": 42.0,
+      "heightM": 33.5,
       "rig": "gaff",
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      },
      {
       "at": 0.86,
-      "heightM": 42.0,
+      "heightM": 33.5,
       "rig": "gaff",
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      }
     ],
     "build": "frame",
@@ -1873,7 +1885,23 @@
     "freeboard": 4.2,
     "cm": 0.92,
     "transom": 0.34,
-    "mastLivery": true
+    "mastLivery": true,
+    "headsails": 5,
+    "deckhouses": [
+     {
+      "a": 0.155,
+      "b": 0.225,
+      "hM": 2.3,
+      "wF": 0.6
+     },
+     {
+      "a": 0.775,
+      "b": 0.945,
+      "hM": 2.6,
+      "wF": 0.72
+     }
+    ],
+    "helmAt": 0.962
    }
   },
   {

@@ -667,6 +667,110 @@
         say(v.id, 'screws out of the water', `top at ${part.screw.y[1].toFixed(1)} m`);
     }
 
+    /* ── THE SCHOONER'S RIG IS THE RECORD'S RIG (round 42, Wyoming). Four rules from one
+       survey. (1) THE SPANKER IS NOT THE SHORTEST SPAR ON THE SHIP: the aftermost boom's
+       obstruction fallback was a station just abaft midships, so gapAft went negative and
+       the boom collapsed to its floor — Wyoming's spanker drew 6.7 m against 12.9 for her
+       sisters, on the one mast whose boom the photographs show as the LONGEST, standing out
+       over the counter. Skipped when funnels are declared: a stack abaft the aftermost mast
+       legitimately clamps that boom. */
+    const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff');
+    if (!H.funnels && gaffMasts.length >= 2 &&
+        gaffMasts.length === (H.masts || []).length) {
+      const booms = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Boom') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: bbx.max.x - bbx.min.x });
+      } });
+      if (booms.length >= 2) {
+        booms.sort((a, b) => a.cx - b.cx);
+        const aft = booms[booms.length - 1];
+        const longestFwd = Math.max(...booms.slice(0, -1).map(b => b.len));
+        if (aft.len < longestFwd * 0.9)
+          say(v.id, 'spanker boom collapsed',
+              `aftermost boom ${aft.len.toFixed(1)} m against ${longestFwd.toFixed(1)} m ` +
+              'forward of it — the one boom with nothing abaft it to hit');
+      }
+    }
+
+    /* (2) DECLARED HEADSAILS ARE DRAWN, FORWARD OF THE FOREMAST. `headsails: n` is the
+       record's suit on the bowsprit stays; a jib that silently stops being built leaves a
+       bare spar and a schooner with no front to her silhouette, and 'declared but not
+       drawn' cannot see it because SOME sail is drawn. Every sail wholly forward of the
+       foremast station is a headsail; the count must match the record. */
+    if (H.headsails && (H.masts || []).length) {
+      const fmx = (H.masts[0].at - 0.5) * H.lwl;
+      let jibs = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.max.x < fmx + 0.6) jibs++;
+      } });
+      if (jibs !== H.headsails)
+        say(v.id, 'headsail suit miscounted',
+            `${H.headsails} in the record, ${jibs} drawn forward of the foremast`);
+    }
+
+    /* (3) A DECLARED TOPSAIL FLIES ABOVE ITS OWN GAFF. `topsail` on a gaff mast is the
+       record saying the topmast carries canvas — Wyoming's 22 sails include six of these,
+       while Great Eastern's reference model shows bare topmasts and declares none. The
+       lower gaff sail's foot starts at a tenth of the mast, so canvas whose BOTTOM stands
+       above three quarters of the lower mast, at that mast's own station, can only be the
+       topsail. */
+    for (const mk of (H.masts || [])) {
+      if (mk.rig !== 'gaff' || !mk.topsail) continue;
+      const mx = (mk.at - 0.5) * H.lwl;
+      const HSt = SHIPS_HULL.hullSurface(H);
+      const lower = mk.heightM !== undefined ? mk.heightM
+                  : mk.height * (H.lwl + H.beam) / 2;
+      const floorY = HSt.sheer(mk.at) + lower * 0.75;
+      let found = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (bbx.min.y > floorY && bbx.min.x < mx + 1.0 && bbx.max.x > mx - 1.0) found++;
+      } });
+      if (!found)
+        say(v.id, 'topsail not set',
+            `mast at u=${mk.at} declares a topsail and no canvas stands above ` +
+            `${floorY.toFixed(0)} m at its station`);
+    }
+
+    /* (4) DECLARED DECKHOUSES STAND ON THE DECK, INSIDE THE RAIL — and the wheel likewise.
+       The class of every fitting rule since round 36: right count, on its support, inside
+       the ship. A house is walls sunk into a SHEERED deck, so its bottom sits below the
+       sheer and its roof well above it. */
+    if (H.deckhouses && H.deckhouses.length) {
+      const HSd = SHIPS_HULL.hullSurface(H);
+      const houses = [];
+      g.updateMatrixWorld(true);
+      g.traverse(o => { if (o.isGroup && o.userData.part &&
+                            o.userData.part.key === 'deckhouse')
+                          houses.push(new THREE.Box3().setFromObject(o)); });
+      if (houses.length !== H.deckhouses.length)
+        say(v.id, 'deckhouses miscounted',
+            `${H.deckhouses.length} in the record, ${houses.length} drawn`);
+      for (const hbx of houses) {
+        const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hbx.min.x + hbx.max.x) / 2) / H.lwl));
+        const d = HSd.sheer(uu);
+        if (hbx.min.y > d + 0.3 || hbx.max.y < d + 1.0)
+          say(v.id, 'deckhouse off the deck',
+              `house spans ${hbx.min.y.toFixed(1)}–${hbx.max.y.toFixed(1)} m, sheer there ${d.toFixed(1)} m`);
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSd, uu, 1.0)[2]);
+        if (Math.max(-hbx.min.z, hbx.max.z) > half + 0.4)
+          say(v.id, 'deckhouse over the side',
+              `reaches ${Math.max(-hbx.min.z, hbx.max.z).toFixed(1)} m off centre, hull side ${half.toFixed(1)} m`);
+      }
+    }
+    if (H.helmAt !== undefined) {
+      if (!part.helm) say(v.id, 'declared but not drawn', 'the wheel');
+      else {
+        const HSw = SHIPS_HULL.hullSurface(H);
+        if (Math.abs(part.helm.y[0] - HSw.sheer(H.helmAt)) > 1.2)
+          say(v.id, 'wheel stands on nothing',
+              `base at ${part.helm.y[0].toFixed(1)} m, sheer there ${HSw.sheer(H.helmAt).toFixed(1)} m`);
+      }
+    }
+
     /* ── THE SHIP FLOATS AT HER MARKS — round 33. Both views float every hull on the
        construction fact that surfacePoint puts the load waterline at local y = 0 and bottoms
        the skin at exactly -draught (measured 0.000 on all 25, r33). This guards the fact: if

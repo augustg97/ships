@@ -607,7 +607,15 @@ function buildRig(S, group, mats, FINE) {
        PLANE — they cannot pass through one another, and the funnel sits at the middle of the
        gap, so a boom reaching 86% of it went straight through the stack. The obstruction is
        whichever comes first. */
-    let obstruct = nextAt !== undefined ? nextAt : (0.5 + 0.06);
+    /* ⚠ AND THE AFTERMOST MAST'S OBSTRUCTION IS PAST THE STERN. The fallback here was
+       0.5 + 0.06 — a station just abaft MIDSHIPS — so on any mast standing abaft that point
+       gapAft came out NEGATIVE and the boom collapsed to its floor. Measured on Wyoming:
+       booms [12.9, 12.9, 12.0, 12.0, 12.0, 6.7] — the spanker, the one boom the comment
+       below says may overhang the stern, was the shortest spar on the ship, at exactly
+       lower * 0.16. The photographs show the opposite: the six-masters' spanker booms were
+       their LONGEST, standing well out over the counter, because aft of the taffrail there
+       is nothing to hit. */
+    let obstruct = nextAt !== undefined ? nextAt : 1.04;
     (S.funnels ? funnelStations(S) : []).forEach(fu => {
       if (fu > u + 1e-4 && fu < obstruct) obstruct = fu;
     });
@@ -811,6 +819,10 @@ function buildRig(S, group, mats, FINE) {
       y += seg * 0.88;
     });
     if (mk.rig === 'square') mastTops.push({ u, x, y: y + (lower * 0.14) });
+    /* a gaff masthead is a stay anchorage too — the schooner's web is drawn in
+       buildRigging from these, and it is a different web from a square-rigger's */
+    else if (mk.rig === 'gaff' && segs.length)
+      mastTops.push({ u, x, y: y + segs[segs.length - 1] * 0.09, gaff: true });
 
     /* ── THE TRIPOD MAST, from the record: `tripod: true` ──────────────────────────────
        A turbine warship's pole mast vibrates — engines and gun blast both — and a fire-
@@ -955,8 +967,9 @@ function buildRig(S, group, mats, FINE) {
                         tack[1] + (peakPt[1] - tack[1]) * S.settee];
         const foreft = [tack[0] + (clew[0] - tack[0]) * S.settee * 0.55,
                         tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
-        sails.push(makeTriSail(foreft, throat, peakPt, group, 0.055));
-        sails.push(makeTriSail(foreft, peakPt, clew, group, 0.055));
+        /* one cloth, same as the gaff quad — the two-triangle build tore along the shared
+           diagonal because the noise terms scale with each triangle's own edges */
+        sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075));
       } else {
         sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
       }
@@ -1039,8 +1052,24 @@ function buildRig(S, group, mats, FINE) {
          own endpoints so it cannot come adrift of either */
       const throat = [x, gy], peakPt = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
       const tack = [x, footY], clew = [x + boomL, footY];
-      sails.push(makeTriSail(tack, throat, peakPt, group, 0.045, 1.0));
-      sails.push(makeTriSail(tack, peakPt, clew, group, 0.045, 1.0));
+      /* ⚠ ONE CLOTH, NOT TWO TRIANGLES. This quad was two makeTriSail calls sharing the
+         tack→peak diagonal, and every gaff sail in the fleet wore a SLIT along it: the
+         corner-crease and scallop noise scales with each triangle's own luff length, and the
+         two triangles' luffs differ, so the shared edge disagreed with itself by up to half a
+         metre of z and the cloth tore open below the peak. A sail is one piece of canvas;
+         build it as one surface and there is no seam to disagree across. */
+      sails.push(makeQuadSail(tack, throat, peakPt, clew, group, 0.075));
+      /* ── THE GAFF TOPSAIL, FROM THE RECORD: `topsail` ON THE MAST ────────────────────
+         The jib-headed topsail fills the triangle between the topmast, the gaff and the
+         peak — the highest canvas on the ship, set where the wind is. It is the record's
+         call, not the topmast's: Wyoming's 22 sails include six of these, while the
+         reference model of Great Eastern shows her six topmasts standing BARE over white
+         lower masts — an auxiliary steamer's fore-and-aft canvas was her lowers. */
+      if (mk.topmast && mk.topsail) {
+        const topSeg = lower * 0.52;
+        const truckY = base + lower * 0.88 + topSeg * 0.96;
+        sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], peakPt, group, 0.035, 0.92));
+      }
     }
     if (mk.rig === 'junk') {
       /* ── THE BATTENED LUG, to Reddish's measured average ────────────
@@ -1153,6 +1182,68 @@ function buildRig(S, group, mats, FINE) {
     bm.position.set(x0 - Math.cos(steeve) * len / 2,
                     deckAt(u0) + Math.sin(steeve) * len / 2, 0);
     group.add(tag(bm, 'bowsprit'));
+    /* a point f of the way out along the spar, from its root at the stemhead */
+    const spritAt = f => [x0 - Math.cos(steeve) * len * f,
+                          deckAt(u0) + Math.sin(steeve) * len * f];
+
+    /* ── THE BOBSTAY, WHICH IS WHY THE SPAR STAYS IN THE SHIP ────────────────────────
+       Every stay the bowsprit anchors pulls UP on it; the bobstay is the chain from the
+       stem at the waterline that pulls back down, and a sprit carrying headsails without
+       one is a spar about to be lifted out of the ship. Two, on the big schooners —
+       inner and cap. */
+    if (S.headsails) {
+      const stemFoot = new THREE.Vector3(x0 + B * 0.03, 0.5, 0);
+      const bobSegs = [0.52, 0.93].map(f => {
+        const p = spritAt(f);
+        return [stemFoot, new THREE.Vector3(p[0], p[1] - B * 0.012, 0)];
+      });
+      const bob = ropeMesh(bobSegs, 0.030 + B * 0.0008, ropeMat);
+      if (bob) group.add(tag(bob, 'stay', 'Bobstay',
+        'The chain from the stem at the waterline that holds the bowsprit DOWN. Every '
+        + 'headsail stay pulls up on the spar; this is the counter-pull that keeps it in '
+        + 'the ship.'));
+    }
+
+    /* ── THE HEADSAILS, WHICH ARE THE FRONT OF THE SHIP'S SILHOUETTE ─────────────────
+       `headsails: n` in the record hangs n triangular sails on stays running from stations
+       along the bowsprit up the foremast: the fore staysail tacked near the stemhead and
+       hoisted to the hounds, the outermost flying jib tacked at the cap and hoisted to the
+       topmast truck. Each sail's luff IS its stay, so stay and sail are drawn from the same
+       two points and cannot come adrift of one another. On the six-masted schooners this
+       suit — worked by the hoisting engine, like everything else forward — was five sails. */
+    if (S.headsails && S.masts && S.masts.length) {
+      const fm = S.masts[0];
+      const steelMain = (S.lwl + S.beam) / 2;
+      const flower = fm.heightM !== undefined ? fm.heightM : fm.height * steelMain;
+      const fx = (fm.at - 0.5) * L + H.rake(fm.at);
+      const fbase = deckAt(fm.at);
+      const hounds = fbase + flower * 0.78;
+      /* the outermost stay stops at the topmast HEAD, short of the truck — hoisted to the
+         truck itself the flying jib lies in the fore topsail's own triangle */
+      const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
+                                        : flower * 0.94);
+      const n = S.headsails;
+      for (let k = 0; k < n; k++) {
+        const t = n === 1 ? 0.6 : k / (n - 1);
+        const tack = spritAt(0.10 + 0.86 * t);
+        const head = [fx, hounds + (truck - hounds) * t];
+        const staySeg = [new THREE.Vector3(tack[0], tack[1], 0),
+                         new THREE.Vector3(head[0], head[1], 0)];
+        const st = ropeMesh([staySeg], 0.020 + B * 0.0006, ropeMat);
+        if (st) group.add(tag(st, 'stay'));
+        const luff = Math.hypot(head[0] - tack[0], head[1] - tack[1]);
+        const clew = [tack[0] + (fx - tack[0]) * 0.52, tack[1] + luff * 0.13];
+        /* ⚠ THE CLOTH AMPLITUDE SCALES WITH THE LUFF, AND A JIB'S LUFF IS ENORMOUS.
+           makeTriSail's wrinkle terms were sized on 20–30 m sail luffs; a flying jib's stay
+           runs 45 m, and at the gaff sails' belly the suit rendered as limp laundry — five
+           deeply-creased cloths interleaving through one another. A working jib is the
+           FLATTEST sail on the ship: it is set flying on a bar-taut stay. Small belly,
+           near-straight leech, and a real half-metre of z between neighbouring sails so
+           the overlapping suit reads as separate sails. */
+        const hs = makeTriSail(tack, head, clew, group, 0.020, 0.97);
+        hs.position.z = (k - (n - 1) / 2) * B * 0.032;
+      }
+    }
   }
 
   S.__spars = spars; S.__mastTops = mastTops;
@@ -1368,6 +1459,78 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
                 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
   }));
   m.userData.kind = 'tri';
+  group.add(tag(m, 'sail'));
+  return m;
+}
+
+/* ── THE QUADRILATERAL SAIL, AS ONE CLOTH ──────────────────────────────────────────────
+ * A gaff sail and a settee are four-cornered, and both were built as two triangles on the
+ * diagonal — which put a SEAM through the middle of a single piece of canvas, and the seam
+ * showed: the crease and scallop noise in makeTriSail scales with each triangle's own luff,
+ * the two luffs differ, so the shared edge carried two different z values and the sail hung
+ * open along it. One parameterisation over the whole quad has no edge to disagree across.
+ *
+ * Corners: A tack (luff foot), B throat (luff head), C peak (outer end of the spar the head
+ * is laced to), D clew (outer end of the foot). Luff A→B and head B→C are bent to spars and
+ * lie hard; the LEECH C→D is held by nothing but the sheet, so it is the edge that sags and
+ * twists — most aloft, where the wind is stronger and the peak is the only thing above it. */
+function makeQuadSail(A, B, C, D, group, belly) {
+  const N = 30, pos = [], uvs = [], idx = [];
+  const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
+  /* draft scales with the CHORD — the foot — as it does on the real sail; the panels are
+     cut parallel to the leech, so their count comes from the chord too */
+  const chord = Math.hypot(D[0] - A[0], D[1] - A[1]);
+  const DEPTH = 1.15;
+  for (let i = 0; i <= N; i++) {
+    const su = i / N;                                   // luff -> leech, along the chord
+    const foot = lerp(A, D, su), head = lerp(B, C, su);
+    for (let j = 0; j <= N; j++) {
+      const sv = j / N;                                 // foot -> head, up the hoist
+      const P = lerp(foot, head, sv);
+      /* draft deepest about 38% aft of the luff, zero on the luff and at the leech */
+      const draft = Math.sin(Math.PI * Math.pow(su, 0.72));
+      /* zero at foot and head, which are laced to their spars */
+      const vert = Math.sin(Math.PI * Math.pow(sv, 0.62));
+      /* the free leech sags to leeward, more aloft — and dies at the laced edges */
+      const sag = Math.pow(su, 2.2) * (0.50 + 0.70 * Math.pow(sv, 1.4)) *
+                  Math.sin(Math.PI * Math.pow(sv, 0.75));
+      let z = (draft * vert * 0.82 + sag * 0.40) * chord * belly * DEPTH;
+      /* load enters at the four corners, so the cloth creases in fans running in from each */
+      const dA = Math.hypot(su, sv),         dB = Math.hypot(su, 1 - sv),
+            dC = Math.hypot(1 - su, 1 - sv), dD = Math.hypot(1 - su, sv);
+      const corner = Math.exp(-dA * 3.0) + Math.exp(-dB * 3.4) +
+                     Math.exp(-dC * 3.4) + Math.exp(-dD * 3.0);
+      z += Math.sin((su * 7.0 + sv * 11.0) * Math.PI) * corner * chord * 0.014;
+      /* the luff rides on mast hoops, the head and foot are laced — all scallop between
+         their fastenings */
+      z += Math.sin(sv * Math.PI * 9.0) * Math.exp(-su * 14.0) * chord * 0.010;
+      z += Math.sin(su * Math.PI * 7.0) * Math.exp(-(1 - sv) * 12.0) * chord * 0.008;
+      z += Math.sin(su * Math.PI * 5.0) * Math.exp(-sv * 10.0) * chord * 0.008;
+      /* and cloth is never taut everywhere at once */
+      z += Math.sin(su * 9.0 + sv * 6.0) * draft * vert * chord * 0.010;
+      pos.push(P[0], P[1], z);
+      /* seams parallel to the leech; the weathering gradient lands ON the leech, the edge
+         that flogs and is handled at every reef */
+      uvs.push(su, su);
+    }
+  }
+  const row = N + 1;
+  for (let i = 0; i < N; i++)
+    for (let j = 0; j < N; j++) {
+      const a = i * row + j;
+      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+    }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.ShaderMaterial({
+    vertexShader: SAIL_VERT, fragmentShader: SAIL_FRAG, side: THREE.DoubleSide,
+    uniforms: { uPanels: { value: Math.max(4, Math.round(chord / 0.61)) },
+                uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
+  }));
+  m.userData.kind = 'quad';
   group.add(tag(m, 'sail'));
   return m;
 }
@@ -1659,6 +1822,16 @@ const PARTS = {
               what: 'Flax canvas, sewn from bolts twenty-four inches wide — the standard enacted '
                   + 'in 1746 — so the cloths themselves scale the sail for you. Square sails drive '
                   + 'a ship downwind; fore-and-aft sails let it work up to windward.' },
+  deckhouse: { stage: 5, name: 'Deckhouse',
+              what: 'On a big wooden ship the hold is cargo, all of it, so the crew lives on '
+                  + 'deck: galley, cabins and the engine room stand in white houses on the '
+                  + 'weather deck. The forward house holds the donkey boiler and hoisting '
+                  + 'engine — the machinery that let thirteen hands work a six-master\'s gear.' },
+  helm:     { stage: 5, name: 'The wheel',
+              what: 'Right aft, in the open, where the helmsman can watch the leeches and the '
+                  + 'sea coming up astern. On the great schooners it drove the rudder through a '
+                  + 'screw gear under the wheel box — one man could hold a ship of nearly four '
+                  + 'thousand tons.' },
 };
 
 function tag(o, key, extra) {
@@ -1797,6 +1970,77 @@ function buildFittings(S, group, mats) {
     group.add(tag(cg, 'capstan'));
   }
 
+  /* ── THE DECKHOUSE, FROM THE RECORD: `deckhouses: [{a, b, hM, wF}]` ─────────────────
+     On a big wooden ship the crew does not live below — the hold is CARGO, all of it, and
+     the galley, the engine room and the cabins stand in white houses on the weather deck.
+     A six-master's profile is her hull, her rig, and these: the forward house with the
+     donkey boiler and hoisting engine, the long after house with the accommodation. Each
+     entry is a span in u (a..b), a height, and a width as a fraction of the local beam.
+     The walls are sunk half a metre into the deck because the deck SHEERS — a box set on
+     the sheer at one end floats at the other. */
+  if (S.deckhouses && S.deckhouses.length) {
+    const white = mats.houseWhite || (mats.houseWhite = new THREE.MeshStandardMaterial(
+      { color: 0xd8d3c5, roughness: 0.68 }));
+    const glass = mats.houseGlass || (mats.houseGlass = new THREE.MeshStandardMaterial(
+      { color: 0x22262c, roughness: 0.35, metalness: 0.15 }));
+    for (const hs of S.deckhouses) {
+      const um = (hs.a + hs.b) / 2;
+      const hx = (um - 0.5) * L;
+      const hl = (hs.b - hs.a) * L;
+      const hw = halfAtU(um) * 2 * (hs.wF || 0.66);
+      const yb = Math.min(deckAtU(hs.a), deckAtU(um), deckAtU(hs.b)) - 0.5;
+      const hh = hs.hM + 0.5;
+      const hg = new THREE.Group();
+      const walls = new THREE.Mesh(new THREE.BoxGeometry(hl, hh, hw), white);
+      walls.position.set(hx, yb + hh / 2, 0);
+      hg.add(walls);
+      /* the roof overhangs a hand's breadth all round, which is what throws the shadow
+         line that makes a house read as a house rather than a crate */
+      const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(hl + B * 0.024, B * 0.012, hw + B * 0.024), pale);
+      roof.position.set(hx, yb + hh + B * 0.006, 0);
+      hg.add(roof);
+      /* a row of small lights down each side, dark glass in white walls */
+      const nw = Math.max(2, Math.round(hl / 2.6));
+      for (let i = 0; i < nw; i++) {
+        const wx = hx - hl / 2 + (i + 0.5) * (hl / nw);
+        for (const sgn of [-1, 1]) {
+          const win = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.62, 0.06), glass);
+          win.position.set(wx, yb + hh * 0.68, sgn * (hw / 2 + 0.01));
+          hg.add(win);
+        }
+      }
+      group.add(tag(hg, 'deckhouse'));
+    }
+  }
+
+  /* ── THE WHEEL, FROM THE RECORD: `helmAt` ──────────────────────────────────────────
+     Right aft, in the open, where the helmsman can watch the leeches and the sea coming
+     up astern. On the great schooners it drove the rudder through a screw gear under the
+     wheel box — one man could hold a ship of nearly four thousand tons. */
+  if (S.helmAt !== undefined) {
+    const u = S.helmAt, y = deckAtU(u), x = (u - 0.5) * L;
+    const R = Math.max(0.55, B * 0.048);
+    const hg = new THREE.Group();
+    const box = new THREE.Mesh(new THREE.BoxGeometry(R * 1.6, R * 0.9, R * 0.9), pale);
+    box.position.set(x + R * 0.9, y + R * 0.45, 0);
+    hg.add(box);
+    const wg = new THREE.Group();
+    wg.position.set(x, y + R * 1.35, 0);
+    wg.rotation.y = Math.PI / 2;                       // the wheel faces fore and aft
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(R * 0.62, R * 0.055, 10, 26), wood);
+    wg.add(rim);
+    for (let i = 0; i < 5; i++) {                      // spokes, through the hub
+      const a = i * Math.PI / 5;
+      const sp = new THREE.Mesh(
+        new THREE.CylinderGeometry(R * 0.035, R * 0.035, R * 1.5, 8), wood);
+      sp.rotation.z = a;
+      wg.add(sp);
+    }
+    hg.add(wg);
+    group.add(tag(hg, 'helm'));
+  }
+
   /* ── THE SHIP'S BOAT, WHICH IS A HULL, SO IT COMES FROM THE HULL GENERATOR ──────────
      ⚠ It was half a squashed sphere — the one shape in this whole model with no argument behind
      it at all. And the fix was sitting in the file the entire time: a boat IS a hull, with a
@@ -1923,6 +2167,26 @@ function buildRigging(S, group, rope, spars, mastTops) {
   const deckAt = u => H.sheer(u);
 
   mastTops.forEach((m, i) => {
+    /* ── A SCHOONER'S WEB IS NOT A SQUARE-RIGGER'S ─────────────────────────────────────
+       The square rig's forestay leads to the DECK at the foot of the mast ahead — and on a
+       gaff rig that line passes straight through the middle of the sail standing in that
+       gap, and a standing backstay stands in the arc its own boom swings through. Neither
+       was ever rigged on a schooner. What she carries instead is the SPRING STAY, masthead
+       to masthead, above the gaffs — the near-horizontal line that ties the whole rig
+       together in every photograph of the six-masters — with the foremast stayed forward
+       to the bowsprit, which the headsail stays already do. */
+    if (m.gaff) {
+      const prev = mastTops[i - 1];
+      if (prev) group.add(tag(line([m.x, m.y], [prev.x, prev.y - 0.4]), 'stay'));
+      else if (S.bowsprit && !S.headsails) {
+        const stv = (S.steeve || 22) * Math.PI / 180;
+        const blen = L * S.bowsprit;
+        group.add(tag(line([m.x, m.y],
+          [-L / 2 - Math.cos(stv) * blen * 0.9, deckAt(0.02) + Math.sin(stv) * blen * 0.9]),
+          'stay'));
+      }
+      return;
+    }
     /* forestay: forward and down — to the bowsprit for the foremost mast, to the deck at the
        foot of the mast ahead for the others */
     const aheadU = i === 0 ? 0.03 : mastTops[i - 1].u;
