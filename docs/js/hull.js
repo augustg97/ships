@@ -2342,6 +2342,18 @@ function buildFunnel(S, group) {
      which no period image supports — her funnels rose from the open upper deck between low
      houses, and the audit caught the contradiction (right, 2 for 6 lifetime). */
   const T = (S.decks && !S.turrets && !S.flightDeck) ? linerHouse(S) : null;
+  /* ── ⚠ THE RAKE IS THE SHIP'S, AND THE CASING DOES NOT SHARE IT ────────────────────
+     funnelRake is the record's inclination in degrees aft — the Olympic class raked masts
+     and funnels 2 inches to the foot (9.46°), Yamato's single trunked uptake leaned 25°
+     and that lean is most of her broadside identity, Dreadnought's stacks stood plumb (0).
+     The default is the mild aft lean nearly every steamer wore. At 25° the old whole-group
+     rotation failed structurally: the boiler casing is a DECKHOUSE — the house over the
+     fiddley, vertical walls by construction — and tilting it with the stack lifted its
+     forward base edge 2.5 m off the deck. So the casing stands plumb and only the UPTAKE
+     rakes, rotated about its root, with the root sunk to the casing floor so the tilted
+     base rim stays hidden inside the casing at any recorded angle. */
+  const rakeDeg = S.funnelRake !== undefined ? S.funnelRake : 4.87;
+  const th = rakeDeg * Math.PI / 180;
   for (let i = 0; i < n; i++) {
     const u = slots.length ? (slots[i % slots.length] || 0.50)
                            : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
@@ -2373,7 +2385,8 @@ function buildFunnel(S, group) {
        a funnel band is not a fitting: it is paint. So the stack is now ONE cylinder carrying
        its livery in VERTEX COLOURS, and there is no second surface left to contend with.
        Colours from the museum model August supplied: buff stack, black top. */
-    const sg = new THREE.CylinderGeometry(r * 0.93, r, h, 24, 24);
+    const rootY = -caseH * 0.35, topY = caseH * 0.55 + h, L = topY - rootY;
+    const sg = new THREE.CylinderGeometry(r * 0.93, r, L, 24, 24);
     const spos = sg.attributes.position, scol = [];
     /* ⚠ THE BUFF-AND-BLACK IS A SHIPPING LINE'S TRADEMARK, AND A WARSHIP HAS NO SHIPPING
        LINE. Yamato wore a liner's funnel for as long as she has existed here. A navy's funnel
@@ -2384,28 +2397,35 @@ function buildFunnel(S, group) {
        for White Star the exact shade is CONTESTED — tan, orange-yellow and near-pink are all
        defended in the literature — and the data says so where it is set. */
     const buff = new THREE.Color(warship ? 0x596066 : (S.buff || 0xd8cfbb)), cap = new THREE.Color(0x1b1b1d);
-    for (let i = 0; i < spos.count; i++) {
-      const fy = spos.getY(i) / h + 0.5;               // 0 at the base, 1 at the head
-      const c = fy > (warship ? 0.88 : 0.80) ? cap : buff;
+    /* the cap is measured down from the HEAD, so the buried root does not stretch the livery */
+    const capFrom = topY - (warship ? 0.12 : 0.20) * h;
+    for (let j = 0; j < spos.count; j++) {
+      const ya = spos.getY(j) + (topY + rootY) / 2;
+      const c = ya > capFrom ? cap : buff;
       scol.push(c.r, c.g, c.b);
     }
     sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
     const stack = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({
       vertexColors: true, roughness: 0.66, metalness: 0.10 }));
-    stack.position.y = caseH * 0.55 + h / 2;
-    g.add(tag(stack, 'funnel', 'Funnel',
+    stack.position.y = (topY + rootY) / 2;
+    const rk = new THREE.Group();
+    rk.rotation.z = -th;
+    rk.add(tag(stack, 'funnel', 'Funnel',
       'Buff with a black top. Funnel colours were a shipping line\'s registered trademark: at sea a hull is a silhouette long before a name can be read, so the livery at the head of the funnel is how a ship was known hull-down on the horizon.'));
     /* the company band at the head — the one piece of colour on a Victorian hull */
-    /* the steam pipe alongside, which is what actually roars */
+    /* the steam pipe alongside, which is what actually roars — its foot pinned inside the
+       casing footprint and raked parallel, so it emerges through the casing top and cannot
+       float when the stack leans hard */
+    const Lp = L - h * 0.08;
     const pipe = new THREE.Mesh(
-      new THREE.CylinderGeometry(r * 0.13, r * 0.13, h * 0.92, 16), black);
-    pipe.position.set(-r * 1.25, caseH * 0.55 + h * 0.46, 0);
-    g.add(pipe);
+      new THREE.CylinderGeometry(r * 0.13, r * 0.13, Lp, 16), black);
+    pipe.position.y = Lp / 2;
+    const pg = new THREE.Group();
+    pg.position.set(-r * 1.25, rootY, 0);
+    pg.rotation.z = -th;
+    pg.add(pipe);
+    g.add(rk); g.add(pg);
     g.position.set((u - 0.5) * S.lwl, y, 0);
-    /* raked aft, as they almost always were — and where the record states the rake it wins:
-       the Olympic class raked masts and funnels 2 inches to the foot, 9.46°, twice the
-       default here, and the lean is a large part of why her profile reads as HERS */
-    g.rotation.z = S.funnelRake !== undefined ? -S.funnelRake * Math.PI / 180 : -0.085;
     group.add(tag(g, 'funnel'));
   }
 }

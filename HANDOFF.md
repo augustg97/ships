@@ -1408,3 +1408,63 @@ created its own pages run, which completed success with NO manual dispatch — t
 clean push-triggered deploy since the failure mode began. The r35 advice (give the push run
 a minute before dispatching) is now the standing procedure. Live stamp verified
 1786069279 → **1786072100** with a cache-busted fetch.
+
+---
+
+## Round 37 — 2026-08-06 — The funnel wears the record's rake
+
+**Queue item 1 closed: `funnelRake` is now worn, and wearing it properly forced a structural
+fix.** The field existed since the Titanic round (9.46°) but the builder rotated the WHOLE
+funnel group — casing included — and at Yamato's real angle that broke: the boiler casing is a
+DECKHOUSE, the house over the fiddley, vertical walls by construction, and tilting it 25° lifted
+its forward base edge 2.5 m off the deck. So buildFunnel now keeps the casing plumb and rakes
+only the UPTAKE, rotated about its root, with the root sunk to the casing floor so the tilted
+base rim stays hidden inside the casing at any recorded angle; the steam pipe's foot is pinned
+inside the casing footprint and raked parallel, so it cannot float when the stack leans hard.
+The livery cap is measured down from the HEAD so the buried root does not stretch it.
+
+**Data: Yamato `funnelRake: 25`** — her single trunked uptake's recorded inclination, and most
+of her broadside identity — and **Dreadnought `funnelRake: 0`**, because her stacks stood plumb
+and a vertical stack must be sayable in data, not by luck of a default. Titanic keeps her 9.46;
+Great Eastern and the steamer keep the mild default lean (4.87°). Verified rendered: the Yamato
+funnel leans hard aft between pagoda and mainmast in BOTH views; Dreadnought's two stacks stand
+plumb; Titanic's four still rake with plumb casings under them.
+
+**Audit: one new rule, `funnel rake not worn`, proven by break-and-restore.** The class: a
+rotation that silently stops being applied is invisible to every existing rule — the funnel is
+present, at its station, at its height, and WRONG. The stack is a cylinder along its local +y,
+so the world direction of that axis IS the drawn rake; every stack is measured and the worst
+answers, so one plumb funnel among raked sisters is caught. Broke the builder (rotation zeroed):
+fired on exactly the four raked ships and passed Dreadnought, whose record and drawing agree at
+0°. Restored: 25/25 clean from the served files.
+
+**Ratchet: 30 frames — 5 moved, all classified and accepted, closing check all within
+tolerance.** ship-yamato 0.432% and aboard-yamato 0.063% are the rake itself (diffs confined to
+the funnel). ship-dreadnought 0.829% is the two stacks standing up straight. ship-titanic 0.108%
+and ship-great-eastern 0.177% are the class edge: plumb casings, pinned pipe feet, and the cap
+boundary landing on a different vertex ring of the lengthened stack cylinder. ship-steamer moved
+0.019%, under limit, same cause.
+
+**Rule 0 check, written:** the frames read as a rendered world, not a chart. Three facts off
+ship-yamato: the funnel leans ~25° aft directly abaft the pagoda; the floatplane rides the port
+catapult angled over the stern; the aft turret's three barrels point astern over an empty
+quarterdeck with three flush hatches. Three off ship-dreadnought: two plumb buff-grey stacks
+with black heads; five turrets with twin 12-inch barrels; a single pole mast carrying its
+spotting top forward of the fore funnel.
+
+**Seen while verifying, queued rather than patched (rule 5):** Dreadnought's foremast stands
+FORWARD of her fore funnel here; the real ship's tripod stood ABAFT it — the famous design
+error that put the spotting top in the funnel smoke. That is a mast-station data fix plus
+possibly a tripod builder, not a one-liner; it is queue material.
+
+### Next, in order
+1. The serif-webfont dependency decision (globe-default false-RED; did not fire r36 or r37,
+   the class is still open).
+2. The land in the Sea close-up: featureless brown ramp behind aboard-yamato — the next thing
+   the eye snags on in that frame.
+3. **Dreadnought's foremast abaft the fore funnel** (new this round; the real ship's spotting
+   top stood in the smoke, and ours stands clear where hers did not).
+4. Titanic remainder, if wanted: crow's nest height, funnel stations against the GA drawing,
+   enclosed A-deck promenade forward, docking bridge on the poop.
+5. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
+   preussen P-liner white waterline check.

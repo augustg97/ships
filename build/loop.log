@@ -178,3 +178,20 @@ The ratchet is rendering all 29 frames in the background; it will notify when do
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 50459 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 19:33:33  round starting
+Round 36 is complete and live at stamp 1786072100 — verified with a cache-busted fetch, and for the first time since the failure mode began, the push-triggered Pages run deployed on its own with no manual dispatch.
+
+**What shipped:**
+
+1. **The speedKn fix turned out to be two fixes.** The six engine-driven records got their service speeds from their own spec rows (carrier 30.0, dreadnought 21.0, yamato 27.0, steamer 12.25, container 21.0, usv 4.0 with a new row saying the figure is contested). While verifying it in the new Sea-view baseline I found the same class bug in a second place: the Sea card in `app.js` was captioning ships with the routing polar's max — Yamato read "Best speed 9.6 kn" against a record 27. Both cards now carry the record's number labelled "Service speed"; the pacing stays on the polar, since that gap is the front page's stated factor of two.
+
+2. **Yamato's second pass — all four queue items, each a record-driven field any warship can opt into.** Eight shielded 25 mm triples on raised bandstands amidships (her 1941 fit of 24 barrels), searchlight platforms winged off the pagoda derived from the tower's own levels, three stowage hatches seated on the deck's actual camber, and two floatplanes — a proper biplane build with central float and hinomaru geometry, one riding the port catapult *inside* the catapult group so plane and beam can never come apart. The card gained rows explaining the AA fit and why her decks are empty (46 cm muzzle blast).
+
+3. **Four new audit rules, each proven live** by deliberately breaking the data and the builder (all four fired) and restoring (25/25 clean). One survey scare — a "detached cylinder" on the quarterdeck — was resolved by probing mesh boxes in the page: it's the port catapult's inboard beam half, real and attached.
+
+4. **Ratchet: 30 frames, 12 moved or new, every one classified.** `aboard-yamato` is a new committed baseline. Also found and named an artefact in the r35 `aboard`/`aboard-off` baselines (dark land-slivers over the steamer's decks from that round's fragmented close); today's renders agree the decks are clean.
+
+**Next in the queue:** Yamato's funnel is drawn vertical where hers raked ~25° aft — the biggest remaining resemblance gap, and a data-driven class change since Dreadnought's stacks must stay vertical. Then the serif-webfont decision and the featureless brown coast in the Sea close-up, which the new aboard-yamato frame makes conspicuous.
+2026-08-06 20:33:41  round finished; HEAD is 870802f Deploy note r36: live at 1786072100; the push run deployed on its own, no dispatch needed
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 40654 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 20:43:41  round starting

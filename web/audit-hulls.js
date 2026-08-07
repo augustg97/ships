@@ -151,6 +151,30 @@
         say(v.id, 'funnel height', `${fh.toFixed(0)} m above deck on a ${H.beam} m beam`);
     }
 
+    /* ── THE RAKE IS WORN (round 37). funnelRake is the record's inclination in degrees
+       aft — Yamato's trunked uptake leaned 25°, the Olympic class 9.46°, Dreadnought's
+       stacks stood plumb (0) — and a rotation that silently stops being applied is
+       invisible to every rule above: the funnel is present, at its station, at its
+       height, and WRONG. The stack is a cylinder along its local +y, so the world
+       direction of that axis IS the drawn rake; +x is aft. Every stack is measured and
+       the worst one answers, so one plumb funnel among raked sisters is caught too. */
+    if (H.funnels && part.funnel) {
+      const want = H.funnelRake !== undefined ? H.funnelRake : 4.87;
+      let worst = null;
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
+        const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+        const got = Math.atan2(d.x, d.y) * 180 / Math.PI;
+        if (worst === null || Math.abs(got - want) > Math.abs(worst - want)) worst = got;
+      });
+      if (worst === null)
+        say(v.id, 'funnel rake unmeasurable', 'no stack mesh tagged Funnel');
+      else if (Math.abs(worst - want) > 1.5)
+        say(v.id, 'funnel rake not worn',
+            `drawn ${worst.toFixed(1)}° aft, record says ${want}°`);
+    }
+
     /* ⚠ and on a carrier the reference is the FLIGHT DECK, which overhangs the hull by design —
        that is the whole point of an angled deck. Comparing her island to the hull beam called a
        correct 35 m a fault. */
