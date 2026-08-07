@@ -1793,3 +1793,7 @@ item should pick it up or bin it.
 3. The standing carried items: serif-webfont dependency decision (globe-default false-RED
    class); the Sea's featureless brown land behind aboard-yamato; Titanic remainder; August's
    items 5–7 (images/cards/tone), which are a project not a round.
+
+**End-of-round deploy note: LIVE, stamp 1786095030.** Fifth clean push-triggered deploy in a
+row: the push of 6227b4a created run 31168030167, completed success, live stamp verified
+1786083736 → **1786095030** with a cache-busted fetch of the data-version meta tag.
