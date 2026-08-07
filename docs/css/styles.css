@@ -111,8 +111,14 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 .mrow .mn{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink)}
 
 /* ── card ───────────────────────────────────────────────────── */
-#card{left:16px;top:150px;width:352px;max-height:calc(100vh - 290px);overflow-y:auto;
-  padding:16px 18px 18px}
+/* ⚠ THE TOP AND THE FOOT ARE BOTH MEASURED, NOT ASSUMED — see syncPanelInsets() in app.js.
+   top:150 ran the card under the ship's slip whenever the close-up was open, and
+   max-height:calc(100vh - 290px) ran its foot 26 px under the era strip that carries the year.
+   The fallbacks below are the old constants, so the card is still sane if the script has not
+   run yet; once it has, both numbers come from the panels actually on screen. */
+#card{left:16px;top:var(--card-top,150px);width:352px;
+  max-height:calc(100vh - var(--card-top,150px) - var(--erabar-h,140px) - 28px);
+  overflow-y:auto;padding:16px 18px 18px}
 .c-eyebrow{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--verdigris)}
 #card h2{font-family:var(--serif);font-size:26px;font-weight:400;margin:4px 0 1px;
   line-height:1.14;font-style:italic}
@@ -286,7 +292,18 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swBuild .bw{font-size:12px;line-height:1.5;color:var(--ink-dim);margin-top:7px;min-height:34px}
 #swFleet{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;gap:0;
   background:linear-gradient(0deg,rgba(3,8,14,.96),rgba(3,8,14,.55));
-  border-top:1px solid var(--edge);overflow-x:auto;padding:9px 10px}
+  border-top:1px solid var(--edge);overflow-x:auto;padding:9px 10px 5px;
+  /* ⚠ ALWAYS-VISIBLE SCROLLBAR. The strip is 2.6 m of hulls in a window that shows nineteen
+     of them, and it has always scrolled — but macOS draws overlay scrollbars only while they
+     are in motion, so the remaining ships were reachable and invisible. A bar that is drawn
+     when the strip is at rest is the whole difference between "there is more" and "that is
+     all of it". Firefox takes the two standard properties; WebKit needs its own pseudos. */
+  scrollbar-width:thin;scrollbar-color:rgba(216,180,92,.45) rgba(255,255,255,.06);
+  scroll-behavior:smooth;overscroll-behavior-x:contain}
+#swFleet::-webkit-scrollbar{height:9px}
+#swFleet::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:5px}
+#swFleet::-webkit-scrollbar-thumb{background:rgba(216,180,92,.42);border-radius:5px}
+#swFleet::-webkit-scrollbar-thumb:hover{background:rgba(216,180,92,.70)}
 .fs{flex:0 0 auto;width:104px;background:none;border:0;border-right:1px solid rgba(95,179,161,.12);
   padding:5px 9px 6px;text-align:left;cursor:pointer;color:inherit}
 .fs:hover{background:rgba(95,179,161,.07)}
@@ -415,7 +432,11 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
    learn a new place, and it carries only what someone standing on that deck would want: which
    ship, which passage, where she is and what she is steering. */
 #psgCard {
-  position: fixed; left: 22px; top: 78px; width: 292px; z-index: 55; display: none;
+  /* top is measured, not assumed — see syncPanelInsets(). At a fixed 78px this sat on top
+     of #readout, which stands from 16px and runs past it. */
+  position: fixed; left: 22px; top: var(--psg-top, 78px); width: 292px; z-index: 55;
+  display: none; max-height: calc(100vh - var(--psg-top, 78px) - var(--erabar-h, 140px) - 28px);
+  overflow-y: auto;
   background: rgba(9, 15, 22, 0.90); border: 1px solid rgba(190, 205, 220, 0.16);
   padding: 15px 17px 14px; color: #e9e2d2; backdrop-filter: blur(3px);
 }

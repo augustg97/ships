@@ -234,6 +234,9 @@ function psgOpen(tr, vessel, R, globeCamera) {
   psgClearShip();
   PSG.track = tr; PSG.vessel = vessel;
   PSG.loa = (vessel.hull && vessel.hull.loa) || 30;
+  /* her beam and draught set the roll oscillator and the athwartships length filter */
+  PSG.beam = (vessel.hull && vessel.hull.beam) || PSG.loa / 7.0;
+  PSG.draught = (vessel.hull && vessel.hull.draught) || PSG.loa / 20.0;
 
   let obj = null;
   try { obj = window.SHIPS_HULL.buildShip(vessel.hull, { fine: true }); } catch (e) { obj = null; }
@@ -376,7 +379,8 @@ function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
   PSG.ship.rotation.set(0, 0, 0);
   PSG.ship.rotation.order = 'YXZ';
   PSG.ship.rotation.y = yaw;
-  const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, yaw, PSG.loa, t, wind);
+  const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, yaw, PSG.loa, t, wind,
+                                 PSG.beam, PSG.draught);
   PSG.ship.rotation.z = fl.pitch;
   PSG.ship.rotation.x = fl.roll;
   if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(PSG.ship, t, PSG.loa);
@@ -582,7 +586,8 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
       const holder = new THREE.Group();
       holder.add(obj);
       holder.rotation.order = 'YXZ';
-      e = { holder, loa: ves.hull.loa, fine: wantFine };
+      e = { holder, loa: ves.hull.loa, beam: ves.hull.beam,
+            draught: ves.hull.draught, fine: wantFine };
       PSG.fleetPool.set(tr.name, e);
       PSG.fleetGroup.add(holder);
     }
@@ -590,7 +595,8 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
     const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - r2)) - 6371000;
     const yaw = -tr.at.hdg;
     e.holder.rotation.set(0, yaw, 0);
-    const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind);
+    const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind,
+                                   e.beam, e.draught);
     e.holder.position.set(-east, drop + fl.y, north);
     e.holder.rotation.z = fl.pitch;
     e.holder.rotation.x = fl.roll;

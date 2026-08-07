@@ -119,25 +119,111 @@ function seaAt(x, z, t, wind) {
 }
 
 /* ── float a ship on it ─────────────────────────────────────────────────────────────────
- * A hull does not sit on the water at one point. It spans a length, and what it actually does
- * is average the surface under itself — which is why a long ship is steady in a short sea and
- * a boat the length of the waves is not. So sample at the bow, amidships and the stern and
- * take the mean for heave, and take PITCH from the difference between bow and stern rather
- * than from the local normal. That one detail is the difference between a ship riding a sea
- * and a ship glued to a wobbling plane.
+ * ⚠ THE OLD VERSION SAMPLED THE SURFACE AT THREE POINTS AND A SUPERCARRIER BOBBED LIKE A
+ * DINGHY. Bow, amidships, stern, mean them for heave, bow-minus-stern for pitch. The instinct
+ * was right — a hull averages the sea under itself — but three samples cannot average a wave
+ * shorter than the ship. A 337 m carrier spans nearly three of the 118 m swells and twelve of
+ * the 27 m chop; sampled at three points, the bow and stern can sit on crests with the middle
+ * in a trough, and the "average" is then a number with no physical meaning that swings with the
+ * full amplitude of the sea. The ship had no size and no weight. It was a decal on the surface.
+ *
+ * ── WHAT A HULL ACTUALLY DOES, AND IT HAS A CLOSED FORM ────────────────────────────────
+ * Heave is the MEAN surface elevation over the waterplane, pitch and roll its first moments.
+ * For a sinusoidal wave those integrals are exact, so there is no need to sample at all:
+ *
+ *     mean over a length L of  A·sin(φ₀ + k·μ·s)  =  A·sin(φ₀) · sinc(kμL/2)
+ *
+ * with μ the cosine of the angle between the wave's direction and the hull's axis. That sinc
+ * is the whole of the "big ships are steady" phenomenon, and it is geometry, not a fudge:
+ *
+ *     carrier (337 m) in the 118 m swell, head on → sinc(8.97) = 0.049
+ *     dugout   (8.6 m) in the same swell          → sinc(0.23) = 0.991
+ *
+ * The carrier feels five per cent of a swell the dugout rides in full. Nothing was tuned to
+ * make that happen; it falls out of integrating along the hull instead of poking it three times.
+ * The moment integral for the slopes has a closed form too — `slopeFilter` below, which tends
+ * to 1 for waves long against the hull, i.e. to the plain surface slope, as it must.
+ *
+ * ── AND THEN THERE IS MASS, WHICH GEOMETRY DOES NOT CARRY ──────────────────────────────
+ * The length filter barely touches ROLL, because ships are narrow: the carrier's 41 m beam
+ * still reads 89% of the swell's athwartships slope. What actually stops her rolling is
+ * inertia. A ship is a damped oscillator with a natural period, and its response to forcing at
+ * frequency ω is the classic magnification factor 1/√((1−r²)² + (2ζr)²), r = ω/ωₙ: it follows
+ * forcing slower than itself, ignores forcing faster than itself, and resonates in between.
+ * Roll period from the IMO weather-criterion formula, T = 2CB/√GM, which for these hulls gives
+ * about 17 s for the carrier against 3.5 s for the dugout — so a 7 s sea drives one near its
+ * resonance and is far too quick for the other to answer at all.
+ *
+ * Heave and pitch are left to the length filter alone. Their natural periods are short enough
+ * (~6 s for a big hull) to sit near the sea's own, so an inertial term there would AMPLIFY;
+ * and for exactly the hulls in question the sinc has already reduced the forcing by an order
+ * of magnitude, which is the term that dominates. Modelling it would be arithmetic on a
+ * quantity that is already negligible, and it would be tuned rather than derived.
  */
-function floatShip(obj, x, z, heading, lengthM, t, wind) {
-  const hx = Math.cos(heading), hz = Math.sin(heading);
-  const half = lengthM * 0.5;
-  const bow = seaAt(x + hx * half, z + hz * half, t, wind);
-  const mid = seaAt(x, z, t, wind);
-  const aft = seaAt(x - hx * half, z - hz * half, t, wind);
-  obj.position.y = (bow.y + mid.y * 2 + aft.y) * 0.25;
-  /* pitch: bow height minus stern height, over the length between them */
-  const pitch = Math.atan2(bow.y - aft.y, lengthM);
-  /* roll: the athwartships slope of the surface under her */
-  const roll = Math.asin(Math.max(-1, Math.min(1, -mid.nx * hz + mid.nz * hx))) * 0.65;
-  return { pitch, roll, y: obj.position.y };
+function sinc(x) {
+  const a = Math.abs(x);
+  return a < 1e-3 ? 1 - x * x / 6 : Math.sin(x) / x;
+}
+
+/* The first moment of a sinusoid over a span, normalised so that it returns the plain surface
+   slope when the wave is long against the span. Derived, not fitted: the least-squares slope
+   over [-S/2, S/2] is (12/S³)∫ s·η ds, which for η = A sin(φ₀ + a s) gives
+   A cos(φ₀) · a · 3(sin u − u cos u)/u³ with u = aS/2. The series below is that expression's
+   own expansion, needed because the closed form is 0/0 at u = 0. */
+function slopeFilter(u) {
+  const a = Math.abs(u);
+  if (a < 1e-3) return 1 - u * u / 10;
+  return 3 * (Math.sin(u) - u * Math.cos(u)) / (u * u * u);
+}
+
+/* The roll oscillator's period is computed inside floatShip from her own dimensions: the IMO
+   weather-criterion form T = 2CB/√GM, with the metacentric height estimated at 0.055·B. These
+   hulls carry no GM in the data, and across the fleet that fraction spans the range real ships
+   occupy — stiff warship to tender merchantman — without inventing a number per ship that
+   nobody ever measured. */
+
+function floatShip(obj, x, z, heading, lengthM, t, wind, beamM, draughtM) {
+  const L = Math.max(0.5, lengthM);
+  const B = Math.max(0.2, beamM || L / 7.0);
+  const d = Math.max(0.05, draughtM || L / 20.0);
+
+  const hx = Math.cos(heading), hz = Math.sin(heading);   /* along the hull  */
+  const tx = -hz, tz = hx;                                /* athwartships    */
+
+  /* the roll oscillator, from her own dimensions */
+  const Troll = 2 * Math.max(0.20, 0.373 + 0.023 * (B / d) - 0.043 * (L / 100))
+                  * B / Math.sqrt(0.055 * B);
+  const wn = 6.2831853 / Math.max(0.5, Troll);
+  const ZETA = 0.10;                                      /* lightly damped, as roll is */
+
+  let y = 0, pitch = 0, roll = 0;
+  for (let i = 0; i < SEA_WAVES.length; i++) {
+    const W = SEA_WAVES[i];
+    const dl = Math.hypot(W[0], W[1]) || 1;
+    const dx = W[0] / dl, dz = W[1] / dl;
+    const A = seaAmp(i, wind);
+    const k = 6.2831853 / W[2];
+    const c = Math.sqrt(9.81 / k);
+    const ph = k * (dx * x + dz * z) - c * k * t;
+    const s = Math.sin(ph), co = Math.cos(ph);
+
+    const muL = dx * hx + dz * hz;        /* cos of the wave's angle to her axis */
+    const muB = dx * tx + dz * tz;
+    const uL = k * muL * L * 0.5, uB = k * muB * B * 0.5;
+    const fL = sinc(uL), fB = sinc(uB);
+
+    /* heave: the mean over the waterplane. The two axes separate, so it is one sinc each. */
+    y += A * s * fL * fB;
+    /* pitch and roll: first moments, each averaged across the other axis */
+    pitch += A * co * (k * muL) * slopeFilter(uL) * fB;
+    const rawRoll = A * co * (k * muB) * slopeFilter(uB) * fL;
+    /* ...and roll alone answers through her inertia rather than instantly */
+    const r = (c * k) / wn;
+    roll += rawRoll / Math.sqrt((1 - r * r) * (1 - r * r) + (2 * ZETA * r) * (2 * ZETA * r));
+  }
+
+  obj.position.y = y;
+  return { pitch: Math.atan(pitch), roll: Math.atan(roll), y };
 }
 
 /* ── THE OARSTROKE ──────────────────────────────────────────────────────────────────────

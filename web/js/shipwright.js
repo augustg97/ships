@@ -433,25 +433,73 @@ function swBuildYard() {
   SW.yardSpan = [first.x - first.loa, last.x + last.loa];
 }
 
-/* the selected ship is rebuilt at full detail; the one it replaces goes back to coarse, so
-   only ever one 160k-triangle hull exists at a time */
+/* ── HOW MANY HULLS ARE CARRIED AT FULL DETAIL ─────────────────────────────────────────
+ * ⚠ ONE WAS TOO FEW, AND IT SHOWED. Only the selected ship was ever fine and every neighbour
+ * was coarse, which is not a subtle difference: the fine build is what adds the RUDDER, the
+ * stem and sternpost, the wales and the channels, on top of four times the stations. So a
+ * neighbour was not a slightly rougher ship, it was a ship with no rudder — and pulled back far
+ * enough to see three or four hulls at once, which is the view the fleet exists to give, that
+ * is exactly what you were looking at.
+ *
+ * So a WINDOW of hulls around the selection is carried fine instead of a single one, and the
+ * swap is progressive: at most one hull is built or dropped per frame. Building nine at once
+ * on a selection would be a visible stall, and the whole reason this budget exists is that the
+ * fine build is expensive. Spread over frames the upgrade arrives while the camera is still
+ * easing toward the new ship, so it is never seen happening.
+ *
+ * The window is by POSITION along the yard, not by index, because the fleet is laid out to
+ * scale — the ships either side of a container ship are much further away in metres than the
+ * ships either side of a canoe, and it is metres the camera sees. */
+const FINE_WINDOW = 9;                     /* hulls held at full detail, selection included */
+
+function swFineWanted() {
+  if (!SW.layout || !SW.layout.length) return new Set();
+  const centre = SW.panTo !== undefined ? SW.panTo
+               : (SW.panX !== undefined ? SW.panX : SW.shipX);
+  const byNear = SW.layout.slice().sort((a, b) =>
+    Math.abs(a.x - centre) - Math.abs(b.x - centre));
+  const want = new Set(byNear.slice(0, FINE_WINDOW).map(e => e.id));
+  /* ⚠ SW.sel is the picked MESH, not the ship — and every three.js object carries a numeric
+     `.id`, so reading it here would silently add a meaningless entry to this set. The selected
+     VESSEL is SW.spec. */
+  if (SW.spec && SW.spec.id) want.add(SW.spec.id);
+  return want;
+}
+
+/* Rebuild ONE entry at the given detail, preserving its place in the yard. */
+function swRebuild(e, fine) {
+  SW.yard.remove(e.obj);
+  e.obj = window.SHIPS_HULL.buildShip(e.v.hull, fine ? { fine: true } : undefined);
+  e.obj.position.x = e.x;
+  SW.yard.add(e.obj);
+  e.fine = !!fine;
+  return e.obj;
+}
+
+/* Called once per frame: move one hull toward the wanted set. Upgrades are done before
+   downgrades, because an under-detailed ship in view is the fault being fixed and a stale
+   fine hull off to the side costs only memory. */
+function swPumpDetail() {
+  if (!SW.layout || !SW.layout.length) return;
+  const want = swFineWanted();
+  /* ⚠ FROZEN MUST MEAN FROZEN. A capture taken while this queue was still draining would
+     photograph however far it had got, and two captures of identical code would differ — the
+     exact failure the camera ease was already pinned for. In frozen mode the window is brought
+     to its final state in one go, before anything is drawn. */
+  if (typeof FROZEN !== 'undefined' && FROZEN) {
+    SW.layout.forEach(e => { if (!e.fine && want.has(e.id)) swRebuild(e, true); });
+    SW.layout.forEach(e => { if (e.fine && !want.has(e.id)) swRebuild(e, false); });
+    return;
+  }
+  const up = SW.layout.find(e => !e.fine && want.has(e.id));
+  if (up) { swRebuild(up, true); return; }
+  const down = SW.layout.find(e => e.fine && !want.has(e.id));
+  if (down) swRebuild(down, false);
+}
+
 function swPromote(entry) {
   if (entry.fine) return entry.obj;
-  SW.layout.forEach(e => {
-    if (e.fine && e !== entry) {
-      SW.yard.remove(e.obj);
-      e.obj = window.SHIPS_HULL.buildShip(e.v.hull);
-      e.obj.position.x = e.x;
-      SW.yard.add(e.obj);
-      e.fine = false;
-    }
-  });
-  SW.yard.remove(entry.obj);
-  entry.obj = window.SHIPS_HULL.buildShip(entry.v.hull, { fine: true });
-  entry.obj.position.x = entry.x;
-  SW.yard.add(entry.obj);
-  entry.fine = true;
-  return entry.obj;
+  return swRebuild(entry, true);            /* the window is maintained by swPumpDetail */
 }
 
 /* ── open ──────────────────────────────────────────────────────────────────────────── */
@@ -508,7 +556,18 @@ function swOpen(vessel) {
   SW.waterY = U.waterlineY || 0;
   SW.ground.position.set(SW.shipX, SW.stage >= 7 ? SW.waterY : SW.dryY, 0);
   SW.rigTop = U.rigTop;
-  SW.spin = true; SW.dist = 1.12; SW.t0 = performance.now();
+  /* ⚠ THE ZOOM IS RELATIVE, SO CARRY IT ACROSS SHIPS. `SW.dist` multiplies `SW.fit`, which is
+     recomputed from each vessel's own extents — so one value of dist frames the canoe and the
+     container ship identically, and resetting it to 1.12 on every selection was throwing away
+     the viewer's zoom for no gain. It also meant walking the fleet snapped back to the same
+     middle distance at every step, which reads as the camera fighting you.
+     The one thing worth overriding is a zoom so close it would CROP the next ship: below 1.0
+     the frame is inside her extents, so open out to just containing her and let the ease carry
+     the move. Zoomed out is always kept — there is no reason to pull a viewer back in. Ships
+     of very different size need no special case at all, which is the point of a relative zoom:
+     `fit` grows 46x from the dugout to the container ship and dist rides on top of it. */
+  SW.dist = Math.min(8.0, Math.max(SW.dist, 1.0));
+  SW.spin = true; SW.t0 = performance.now();
   SW.stage = 7;
   document.getElementById('swStage').value = 7;
 
@@ -614,6 +673,33 @@ function swBuildFleetStrip() {
     b.onclick = () => swOpen(v);
     strip.appendChild(b);
   });
+
+  /* ⚠ THE BAR SCROLLED AND NOBODY COULD TELL. Twenty-five hulls at 104 px is 2.6 m of strip
+     against a window that shows about nineteen, and `overflow-x:auto` was already set — so the
+     rest was reachable and completely unadvertised, because macOS draws overlay scrollbars only
+     while they are moving. Two things make it usable: a scrollbar that is always visible (in
+     the CSS), and a WHEEL that works. A mouse wheel only sends deltaY, so on a horizontal strip
+     it does nothing at all; mapping the larger of the two deltas onto scrollLeft means a wheel,
+     a trackpad swipe and a shift-wheel all move the fleet. */
+  if (!strip.dataset.wheelWired) {
+    strip.dataset.wheelWired = '1';
+    strip.addEventListener('wheel', ev => {
+      const d = Math.abs(ev.deltaX) > Math.abs(ev.deltaY) ? ev.deltaX : ev.deltaY;
+      if (!d) return;
+      const before = strip.scrollLeft;
+      strip.scrollLeft += d;
+      /* only swallow the gesture if it actually moved, so an over-scroll still reaches the page */
+      if (strip.scrollLeft !== before) ev.preventDefault();
+    }, { passive: false });
+  }
+  swScrollFleetIntoView();
+}
+
+/* Keep the selected hull on screen in the strip — walking the fleet with the arrows used to
+   leave the highlight somewhere off the end of a bar the viewer could not see was scrollable. */
+function swScrollFleetIntoView() {
+  const on = document.querySelector('#swFleet .fs.on');
+  if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 
 function swClose() {
@@ -683,8 +769,10 @@ function swFrame(now) {
     SHIPS_SEA.animateOars(SW.ship, t);
     SHIPS_SEA.animateWheels(SW.ship, t, (SW.spec && SW.spec.speedKn) || 8);
     SW.layout.forEach(e => {
-      const len = (e.v && e.v.hull && e.v.hull.loa) || 30;
-      const r = SHIPS_SEA.floatShip(e.obj, e.obj.position.x, 0, 0, len, t, 6.5);
+      const h = (e.v && e.v.hull) || {};
+      const len = h.loa || 30;
+      const r = SHIPS_SEA.floatShip(e.obj, e.obj.position.x, 0, 0, len, t, 6.5,
+                                    h.beam, h.draught);
       e.obj.position.y = r.y;                      // relative to her own floating datum
       e.obj.rotation.z = r.pitch;
       e.obj.rotation.x = r.roll;
@@ -803,6 +891,7 @@ function swFrame(now) {
       r.querySelector('b').textContent = m + (m === 1 ? ' metre' : ' metres');
     }
   }
+  swPumpDetail();          /* one hull toward the fine window, per frame */
   SW.renderer.render(SW.scene, SW.cam);
 }
 

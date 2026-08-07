@@ -730,6 +730,7 @@ async function boot() {
 
   await loadData();
   wireUI();
+  wirePanelInsets();
 }
 
 /* ── data ───────────────────────────────────────────────────────────────── */
@@ -969,6 +970,38 @@ function flyTo(lon, lat, dist, ms = 1500) {
   while (fly.b.lon - fly.a.lon > 180) fly.b.lon -= 360;
   while (fly.b.lon - fly.a.lon < -180) fly.b.lon += 360;
 }
+/* ── FOLLOWING A VOYAGE ─────────────────────────────────────────────────────────────────
+ * Clicking a voyage flew to where the ship was AT THAT INSTANT and then let go of her. On a
+ * map running ten hours a second that is a picture of an empty sea within a few seconds — the
+ * one thing a viewer who just asked for a named passage does not want.
+ *
+ * So the click arms a follow, and the camera keeps her under it until something says otherwise.
+ * Three details make it read as watching rather than as being dragged:
+ *   · it does nothing while `fly` is running, so the opening flight still arrives normally;
+ *   · it eases toward her instead of snapping, so the globe drifts under the hull rather than
+ *     locking to it — a hard lock makes the ocean look like it is sliding past a fixed ship;
+ *   · it holds ALTITUDE. Following is a pan, not a zoom, and the viewer's own zoom is theirs.
+ * The dateline is handled the way flyTo handles it: unwrap to the short way round before
+ * easing, or crossing 180° sends the camera the long way about the planet.
+ */
+function stepTrackVoyage() {
+  if (!S.trackVoyage || fly) return;
+  const tr = (eraTracks || []).find(t => t.name === S.trackVoyage);
+  if (!tr || tr._lo === undefined) return;
+  let target = tr._lo;
+  while (target - S.lon > 180) target -= 360;
+  while (target - S.lon < -180) target += 360;
+  /* frozen means frozen: arrive, so a capture is not taken mid-ease */
+  const k = FROZEN ? 1 : 0.075;
+  S.lon += (target - S.lon) * k;
+  S.lat += (tr._la - S.lat) * k;
+  placeCamera();
+}
+
+/* Any deliberate camera move by the viewer ends the follow — otherwise dragging the globe
+   fights an invisible spring and feels broken. */
+function clearTrackVoyage() { S.trackVoyage = null; }
+
 function stepFly(now) {
   if (!fly) return;
   const k = Math.min(1, (now - fly.t0) / fly.ms);
@@ -1027,6 +1060,8 @@ function buildVoyageList() {
       const lon = t2 && t2._lo !== undefined ? t2._lo : v.legs[0].lon;
       const lat = t2 && t2._la !== undefined ? t2._la : v.legs[0].lat;
       flyTo(lon, lat, R + 2200000 / 63710, 1600);      /* still the globe, from 2,200 km */
+      /* ...and stay with her once we get there, rather than watching her sail out of frame */
+      S.trackVoyage = v.name;
     };
     host.appendChild(b);
   });
@@ -1086,6 +1121,7 @@ function refreshFleetList(t) {
  */
 let voyLine = null;
 function clearVoyage() {
+  S.trackVoyage = null;   /* the era changed or the voyage went away */
   if (voyLine) { scene.remove(voyLine); voyLine.geometry.dispose(); voyLine = null; }
   S.voyage = null; S.voyPlaying = false;
 }
@@ -1146,8 +1182,69 @@ function proseHTML(src) {
     .join('');
 }
 
+/* ── PANELS MUST NOT STACK ON TOP OF EACH OTHER ─────────────────────────────────────────
+ * Two overlaps, one cause: every panel on the left was positioned against CONSTANTS, and the
+ * things it had to clear are not constant.
+ *
+ *   · #card sat at top:150 with max-height calc(100vh - 290px). Its foot therefore landed 760 px
+ *     down a 900 px window, and the era strip — which carries the year — stands from 734. The
+ *     card ran 26 px underneath it, and the era strip is the one panel in the view whose height
+ *     genuinely varies: eight era tabs wrap at narrow widths.
+ *   · #psgCard, the ship's slip in the close-up, is fixed at top:78 and is tall enough to reach
+ *     the card below it — so opening a ship buried whatever the card was showing.
+ *
+ * The fix is to stop guessing. Measure what is actually on screen, publish it as two custom
+ * properties, and let the CSS subtract them. A ResizeObserver rather than a resize listener,
+ * because the thing that changes most is the era strip's own WRAPPING, which no window event
+ * reports.
+ */
+function syncPanelInsets() {
+  const root = document.documentElement;
+  const eras = document.getElementById('eras');
+  const psg = document.getElementById('psgCard');
+  /* ⚠ NOT offsetParent. Every panel here is `position: fixed`, and a fixed element's
+     offsetParent is null by specification — so the obvious visibility test reported ALL of
+     them hidden, every measurement fell through to its fallback constant, and both overlaps
+     this function exists to fix stayed exactly as they were. It looked like the CSS variables
+     were not arriving; they were arriving with the old numbers in them. Measure the box. */
+  const shown = el => !!el && !el.classList.contains('hidden')
+                   && getComputedStyle(el).display !== 'none'
+                   && el.getBoundingClientRect().height > 1;
+
+  const erasH = shown(eras) ? eras.getBoundingClientRect().height : 0;
+  root.style.setProperty('--erabar-h', Math.round(erasH) + 'px');
+
+  /* ⚠ AND THE SLIP ITSELF SITS UNDER THE READOUT. #psgCard was fixed at top:78 and #readout
+     stands at top:16 and runs past it, so opening a ship half-buried the era-and-date panel —
+     six pixels of it showing down one side, which is the artefact that reads as a bug. The
+     whole left column is now measured in order: readout, then the slip, then the card. */
+  const ro = document.getElementById('readout');
+  const roBottom = shown(ro) ? ro.getBoundingClientRect().bottom : 62;
+  root.style.setProperty('--psg-top', Math.round(roBottom) + 14 + 'px');
+
+  /* the card starts below the ship's slip when that slip is up, and at its own top when not */
+  const psgUp = shown(psg);        /* same reason: psgCard is fixed too */
+  const top = psgUp ? Math.round(psg.getBoundingClientRect().bottom) + 12 : 150;
+  root.style.setProperty('--card-top', top + 'px');
+}
+
+function wirePanelInsets() {
+  if (wirePanelInsets.done) return;
+  wirePanelInsets.done = true;
+  syncPanelInsets();
+  addEventListener('resize', syncPanelInsets);
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(syncPanelInsets);
+    ['eras', 'psgCard', 'card'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) ro.observe(el);
+    });
+  }
+}
+
 /* ── card ───────────────────────────────────────────────────────────────── */
 function showCard(c) {
+  syncPanelInsets();
   document.getElementById('cEyebrow').textContent = c.eyebrow || '';
   document.getElementById('cTitle').textContent = c.title || '';
   document.getElementById('cSub').textContent = c.sub || '';
@@ -1346,7 +1443,7 @@ function wireUI() {
        CAMERA AS IT WAS AT pointer-down, and rotate the globe by whatever takes one to the other.
        That is what dragging a map means, and it is exact at every altitude, every tilt, every
        latitude and every field of view without knowing about any of them. */
-    if (!drag.grab) { S.lon = drag.lon; S.lat = drag.lat; placeCamera(); return; }
+    if (!drag.grab) { clearTrackVoyage(); S.lon = drag.lon; S.lat = drag.lat; placeCamera(); return; }
     /* ⚠ AND ONE STEP IS THE WHOLE SOLUTION — I TRIED TO IMPROVE IT AND MADE IT WORSE.
        Rotating by the angle between the two surface directions is exact when the visible patch
        is nearly flat, which is every altitude below about a hundred kilometres: measured error
@@ -1365,6 +1462,7 @@ function wireUI() {
     const q = new THREE.Quaternion().setFromUnitVectors(cur, drag.grab);
     const p = lonLatToVec(drag.lon, drag.lat, 1).applyQuaternion(q);
     const ll = vecToLonLat(p);
+    clearTrackVoyage();
     S.lon = ll.lon;
     S.lat = Math.max(-84, Math.min(84, ll.lat));
     placeCamera();
@@ -1508,6 +1606,7 @@ function frame(now) {
      journey. */
   if (FROZEN && fly) { fly.t0 = -1e9; }
   stepFly(t);
+  stepTrackVoyage();
   stepVoyage(dt);
   stepCampaign(dt);
   /* ── ⚠ TEN HOURS PER SECOND IS RIGHT FOR A MAP AND ABSURD FROM TWO KILOMETRES OFF ──
@@ -2271,6 +2370,7 @@ function leaveShip(ms) {
   if (S.follow) { S.follow = null; window.SHIPS_PSG.psgFleetClear(); }
   if (eraFleet) eraFleet.visible = true;
   if (PSGV.card) PSGV.card.style.display = 'none';
+  syncPanelInsets();
   document.body.classList.remove('in-passage');
   /* back to the top-down map at its lowest, over the place she is — not to orbit */
   flyTo(lon, lat, R + MAP_FLOOR_M / 63710, ms || 1800);
@@ -2300,6 +2400,7 @@ function closePassage() {
   window.SHIPS_PSG.psgClose();
   if (eraFleet) eraFleet.visible = true;
   if (PSGV.card) PSGV.card.style.display = 'none';
+  syncPanelInsets();
   document.body.classList.remove('in-passage');
   placeCamera();
 }
@@ -2317,9 +2418,12 @@ function passageCard(tr, ves) {
     document.body.appendChild(d);
     PSGV.card = d;
     d.querySelector('#psgBack').onclick = () => leaveShip();
+    /* built on demand, so it cannot be observed at boot — observe it now */
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncPanelInsets).observe(d);
   }
   const c = PSGV.card;
   c.style.display = 'block';
+  syncPanelInsets();
   c.querySelector('.pc-ship').textContent = ves.name;
   c.querySelector('.pc-voy').textContent = tr.name;
   const H = ves.hull;

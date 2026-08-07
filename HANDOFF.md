@@ -1609,3 +1609,102 @@ tripod foremast directly abaft the fore funnel with its struts planted aft.
 row: the push of 7ff8738 created run 31154303774, completed success with no manual dispatch.
 Live stamp verified 1786080947 → **1786083736** with a cache-busted fetch of the data-version
 meta tag.
+
+---
+
+## Round 41 — 2026-08-07 — August's eleven: the interaction half, and a hull that has weight
+
+**Run from the interactive session, holding `build/.loop.lock`.** ⚠ The round before this one
+**left the tree uncommitted** — the Great Eastern paddle-box rebuild, its new `paddlebox` audit
+rules and three new frames — because it ran out of turns waiting on the frame check. Its own log
+records audit 25/25 with break-and-restore proofs. **I did not verify that work and my changes
+are committed on top of it**, so the frames it moved (`ship-great-eastern`, `ship-preussen`,
+`ship-steamer`, `ship-dreadnought`) carry both causes and its next round should satisfy itself
+about the paddle box independently. Rule for the future, and the loop-prompt already says it:
+*do not leave the tree uncommitted* — a half-round is worse than no round, because the next
+worker cannot tell whose change they are looking at.
+
+### Seven of August's eleven items, done and looked at
+
+1. **The camera follows a clicked voyage** (`stepTrackVoyage`). It flew to where she was at that
+   instant and let go; on a map running ten hours a second that is a picture of empty ocean
+   within seconds. Now the click arms a follow that eases (0.075/frame, not a lock — a hard lock
+   makes the ocean look like it is sliding past a fixed ship), holds ALTITUDE because following
+   is a pan and the zoom is the viewer's, unwraps the dateline before easing, and is cancelled by
+   any deliberate camera move, era change or `clearVoyage`.
+2. **`#card` no longer runs under the era strip.** It sat at `top:150` with
+   `max-height:calc(100vh − 290px)`, so its foot landed at 760 in a 900 px window and the strip
+   that carries the year stands from 734.
+3. **The ship's slip no longer buries the readout.** `#psgCard` was fixed at `top:78`; `#readout`
+   stands from 16 and runs past it, which is the six-pixel sliver down one side that reads as a
+   bug. ⚠ My first attempt fixed the wrong pair — I moved `#card` DOWN, and the panel being
+   obscured was above, not below. Looking at the frame is what caught it.
+   ⚠⚠ AND THE SECOND ATTEMPT WAS INERT FOR A BETTER REASON, WORTH KEEPING: the visibility test
+   was `el.offsetParent !== null`, and **a `position: fixed` element's offsetParent is null by
+   specification**. Every panel in this column is fixed, so all of them reported hidden, every
+   measurement fell through to its fallback constant, and both overlaps stayed exactly as they
+   were — while the CSS variables were demonstrably present in the built file. It reads as "the
+   custom properties are not arriving"; they arrive carrying the old numbers. Test visibility by
+   measuring the box (`getBoundingClientRect().height > 1` plus a computed-display check), never
+   by offsetParent, anywhere in this codebase.
+   The whole left column is now MEASURED, in order — readout, slip, card — by `syncPanelInsets()`
+   publishing `--psg-top`, `--card-top` and `--erabar-h`. A ResizeObserver rather than a resize
+   listener, because the thing that changes most is the era strip's own wrapping, which no window
+   event reports.
+4. **A hull has weight now.** See the long note in `sea.js`. The old `floatShip` sampled three
+   points and meaned them, so a 337 m carrier spanning three swells and twelve chop wavelengths
+   got an average with no physical meaning that swung with the full amplitude of the sea. Heave
+   is the MEAN over the waterplane and pitch and roll its first moments, and for a sinusoid those
+   integrals are exact — no sampling at all. `sinc(kμL/2)` is the whole of "big ships are steady":
+   carrier in the 118 m swell → 0.049, dugout → 0.991. Then roll alone gets the damped-oscillator
+   response, because ships are narrow and the length filter barely touches roll; the IMO
+   weather-criterion period gives 16.7 s for the carrier against 3.5 s for the dugout.
+   **Measured, heave range in a 7 m/s sea:** dugout 4.35 m, canoe 4.01, trireme 3.29, titanic
+   0.37, carrier **0.21**, container 0.22. It still answers weather: carrier 0.07 / 0.21 / 0.87 m
+   at wind 2 / 7 / 15. Nothing here was tuned — the numbers fall out of integrating along the hull.
+9. **The fleet strip scrolls, visibly.** It always did — 2.6 m of hulls in a window showing
+   nineteen — but macOS draws overlay scrollbars only while they move, so the rest was reachable
+   and unadvertised. Always-visible scrollbar, a wheel handler (a mouse sends only deltaY, so on
+   a horizontal strip it did nothing), and the selection is scrolled into view.
+10. **Neighbours are built fine.** Only the selected hull was ever fine, and fine is what adds
+    the RUDDER, stem, sternpost, wales and channels — so a neighbour was not a rougher ship, it
+    was a ship with no rudder, which is exactly what you see pulled back far enough to hold three
+    or four. `FINE_WINDOW = 9` around the selection, one hull built or dropped per frame so the
+    upgrade lands while the camera is still easing. ⚠ In FROZEN mode the window is completed in
+    one go or captures would photograph a half-drained queue.
+11. **The zoom carries across ships.** `SW.dist` multiplies a per-vessel `fit`, so it was already
+    scale-relative and resetting it to 1.12 threw the viewer's zoom away at every step. Kept now,
+    floored at 1.0 so a very close zoom opens out rather than cropping the next ship. Ships of
+    very different size need no special case — `fit` grows 46× from dugout to container ship.
+8. **Era titles and ledes rewritten** toward description rather than aphorism: "The ocean crossed,
+   and taken" → "Ocean navigation, empire and the Atlantic slave trade"; "the end of the wind" →
+   "Iron hulls and steam propulsion"; "the sea as a cost line" → "Containerisation and modern
+   shipping" (tab "The box" → "Containers").
+
+### Next, in order — the four content items, which are a project not a round
+
+**5, 6 and 7 are the remaining ones and they need SOURCING, which is why they are not done here.**
+
+1. **Images on the Shipwright cards (item 6), and this is the licensing decision.** The standing
+   instruction is to source aggressively for internal use — but **this site is on a public
+   GitHub Pages URL**, and a photograph is not a paraphrase: republishing one is the exposure
+   that text never was. Do NOT resolve this by hotlinking or by scraping image search.
+   **Use Wikimedia Commons and take only PD or CC-licensed files**, which is not a compromise
+   here — most of this fleet is pre-1929 and genuinely public domain (Titanic, Great Eastern,
+   Preussen, Dreadnought, Wyoming, Yamato), and the modern ones (container ship, carrier, USV)
+   have CC-BY or CC0 files. Build `build/fetch_images.py` on the pattern already used for the
+   HDRIs: fetch by Commons file title through the API, record licence, author and source URL in
+   `web/data/ASSETS.json`, write to `web/data/assets/ships/`, and **render the credit line in the
+   card** — the credit is a requirement of the licence, not a nicety. Check the first-paint
+   budget in `build_site.py` before adding 25 photographs to it.
+2. **Voyage and era cards, richer (item 5).** Aim at a museum label rather than a Wikipedia dump:
+   the card already has `rows` (the record) and `cite`. What is missing is a picture, a route
+   diagram, and two or three more paragraphs of context. The prose pipeline now renders markdown
+   emphasis, so the copy can carry it.
+3. **The tone pass (item 7)** — engaged but objective and balanced — is a read of every `text`
+   field in `vessels.json`, `chapters.json`, `voyages.json` and `battles.json`. The era ledes are
+   done as the worked example of the register wanted. The slave-ship and empire copy is where
+   balance matters most and where it is currently best; the punchiness to remove is mostly in the
+   vessel blurbs.
+4. Then back to the ship-model survey queue: the steel stern quarter as a class, and the
+   serif-webfont dependency decision that closes the `globe-default` false-RED.

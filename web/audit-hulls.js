@@ -327,6 +327,51 @@
                        `${through} of ${shot} bearings pass through the lowest tier`);
     }
 
+    /* ── THE PADDLE BOX MUST BE THERE FROM OUTSIDE (round 40). The box was a hand-wound
+       strip whose every face pointed INWARD at the wheel. computeVertexNormals derives
+       normals from the winding, so the round-35 winding rule saw agreement; the ratchet saw
+       no change because a box that was never drawn never changes; and under FrontSide the
+       largest object on the ship's side was culled from every bearing — the ship wore a
+       naked wheel with eleven ribs floating beside it. Which way a surface faces is a
+       RENDER fact, so ask it the way the renderer does: rays from far abeam, aimed at the
+       box's own face, must strike the box FIRST — a ray that reaches the wheel arms, the
+       hull, or nothing has passed through the housing. Raycaster honours material.side,
+       which is exactly why this catches what a bounding-box test cannot. */
+    if (H.paddleDia) {
+      const pb = part.paddlebox;
+      if (!pb) say(v.id, 'paddle box not built', 'a paddle steamer with an open wheel');
+      else {
+        const D = H.paddleDia;
+        if (pb.x[1] - pb.x[0] < D * 0.9)
+          say(v.id, 'paddle box does not span its wheel',
+              `box ${(pb.x[1] - pb.x[0]).toFixed(1)} m fore-and-aft on a ${D} m wheel`);
+        if (!(pb.z[0] < 0 && pb.z[1] > 0))
+          say(v.id, 'paddle box on one side only',
+              `z ${pb.z[0].toFixed(1)}..${pb.z[1].toFixed(1)} m`);
+        g.updateMatrixWorld(true);
+        const isPB = o => { const p = tagOf(o); return !!(p && p.key === 'paddlebox'); };
+        const rc = new THREE.Raycaster();
+        const cx = (pb.x[0] + pb.x[1]) / 2, W = pb.x[1] - pb.x[0], Hh = pb.y[1] - pb.y[0];
+        let miss = 0, shot = 0, sample = '';
+        for (const sgn of [1, -1])
+          for (const fx of [-0.30, -0.15, 0, 0.15, 0.30])
+            for (const fy of [0.20, 0.40, 0.60]) {
+              rc.set(new THREE.Vector3(cx + fx * W, pb.y[0] + fy * Hh, sgn * 500),
+                     new THREE.Vector3(0, 0, -sgn));
+              rc.far = 1000; shot++;
+              const h = rc.intersectObject(g, true);
+              if (!h.length || !isPB(h[0].object)) {
+                miss++;
+                if (!sample) sample = h.length
+                  ? `first hit at (${fx}, ${fy}) is ${(tagOf(h[0].object) || { key: 'untagged' }).key}`
+                  : `the ray at (${fx}, ${fy}) hits nothing at all`;
+              }
+            }
+        if (miss) say(v.id, 'you can see through the paddle box',
+                      `${miss} of ${shot} rays from abeam do not strike the box first — ${sample}`);
+      }
+    }
+
     /* ⚠ A PART THAT TOUCHES NOTHING IS ATTACHED TO NOTHING. Found the container ship's funnel
        hanging seventeen metres from the hull with its base forty-seven metres up, and the boat-
        deck rails of the Great Eastern and the steamer floating three to five metres from their

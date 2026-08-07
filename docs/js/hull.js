@@ -1532,6 +1532,12 @@ const PARTS = {
                   + 'efficient in smooth water and useless the moment a roll lifts one clear, a '
                   + 'screw works in any sea but was unproven at that size, so Brunel fitted both '
                   + 'and let them share the work.' },
+  paddlebox:{ stage: 4, name: 'Paddle box',
+              what: 'The housing over the top half of the wheel. A 17 m wheel turning at speed '
+                  + 'throws a continuous sheet of water and coal-dirty spray that would sweep '
+                  + 'the deck clean; the box contains it. Being the largest object on the '
+                  + 'ship\'s side, it is also the one owners decorated — fluted, vented, '
+                  + 'gilded, and lettered with the company\'s name.' },
   oar:      { stage: 4, name: 'Oars',
               what: 'The sail is for fair winds; the OARS are what she is. A trireme pulls 170 '
                   + 'of them on three levels, and the whole hull exists to hold them at the '
@@ -4383,73 +4389,95 @@ function buildPaddles(S, group, mats) {
        speed through the water, or the wheel is either slipping or being dragged. */
     g.userData.wheel = { sgn, R };
     group.add(tag(g, 'paddle'));
-    /* the sponson: the platform carrying the wheel's weight out from the hull side */
-    const box = new THREE.Mesh(
-      new THREE.BoxGeometry(D * 0.62, B * 0.16, B * 0.34), iron);
-    /* ⚠ The sponson was sitting at axle height — a black box straight through the middle
-       of the wheel. A sponson is the PLATFORM bracketed out from the hull at deck level that
-       the paddle box stands on and the shaft bearings sit in; it belongs at the sheer, above
-       the wheel entirely, not inside it. */
-    box.position.set(p[0], H.sheer(u), sgn * (p[2] + B * 0.12));
-    group.add(tag(box, 'paddle', 'Sponson',
-      'The platform bracketed out from the hull side that carries the wheel and its shaft bearings.'));
+    /* ── ⚠ THE PADDLE BOX FACED INWARD, WHICH IS TO SAY IT WAS NOT THERE ─────────────────
+       The box was a hand-wound triangle strip, and every face of it pointed at the wheel.
+       computeVertexNormals derives normals FROM the winding, so normals and winding agreed —
+       the round-35 winding audit saw nothing — while under FrontSide the largest object on
+       the ship's side was culled from every bearing: twelve bearings of survey showed a naked
+       wheel with eleven ribs floating in the air beside it, and nobody could say from the
+       picture WHY there was no box. A surface's facing is a render fact, so the audit now
+       asks it with rays (`you can see through the paddle box`).
 
-    /* ── ⚠ THE PADDLE BOX, WHICH WAS MISSING ENTIRELY ──────────────────────────────────
-       A wheel 17 m across turning beside an open deck throws a continuous sheet of water
-       and coal-dirty spray, and it would sweep the deck clean of anything on it. So every
-       paddle steamer ever built housed the top half of the wheel in a PADDLE BOX — and
-       because it is the largest object on the ship's side, it became the thing owners
-       decorated: fluted, vented, crested, and lettered with the company's name.
-       Without it the wheel reads as loose machinery bolted to a hull; with it, the ship has
-       the silhouette that says paddle steamer from a mile off. */
-    const boxR = D * 0.60;
-    const NB = 20, bp = [], bi = [];
+       And the strip was the wrong OBJECT — the A11 lesson again. A paddle box is not a band
+       hung over a wheel: it is a closed drum SPRUNG FROM THE SPONSON — a circular segment,
+       chord down, standing on the platform at deck level, shut by a face at each end. The
+       band's ends hung at axle height, two and a half metres below the deck with nothing
+       under them. Built from the chord, the parts cannot come apart: the platform spans the
+       chord because the chord is where the box stops. */
+    const bw = B * 0.42;                              // housing width athwartships
+    const boxRx = D * 0.60, boxRy = D * 0.60 * 0.86;  // the crown, slightly flattened
+    const h0 = Math.min(Math.max(H.sheer(u) - axleY, boxRy * 0.12), boxRy * 0.55);
+    const th0 = Math.asin(h0 / boxRy);                // where the arc springs from the deck
+    const xc = boxRx * Math.cos(th0);                 // half the chord
+    const spon = new THREE.Mesh(
+      new THREE.BoxGeometry(xc * 2.16, B * 0.055, bw * 1.06), iron);
+    spon.position.set(p[0], axleY + h0 - B * 0.0275, sgn * (p[2] + B * 0.16));
+    group.add(tag(spon, 'paddle', 'Sponson',
+      'The platform bracketed out from the hull side at deck level that carries the wheel\'s shaft bearings and the box above. Everything over it is housing; everything under it is wheel.'));
+
+    /* one group per box, mirrored to port BY ROTATION — the same trap as the winding: a
+       negative scale re-hands every triangle it touches, and the port box would face inward
+       again. A half-turn about Y moves the geometry without re-handing it. */
+    const bg = new THREE.Group();
+    bg.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
+    if (sgn < 0) bg.rotation.y = Math.PI;
+    const NB = 22, arc = [];
     for (let i = 0; i <= NB; i++) {
-      const a = Math.PI * (i / NB);                    // a half-round over the top
-      for (let k = 0; k < 2; k++) {
-        const w = (k ? 0.5 : -0.5) * B * 0.42;
-        bp.push(Math.cos(a) * boxR, Math.sin(a) * boxR * 0.86, w);
-      }
+      const a = th0 + (Math.PI - 2 * th0) * (i / NB);
+      arc.push([Math.cos(a) * boxRx, Math.sin(a) * boxRy]);
     }
+    const bp = [], bi = [];
+    for (let i = 0; i <= NB; i++)                     // the drum, wound to face OUT
+      bp.push(arc[i][0], arc[i][1], -bw / 2, arc[i][0], arc[i][1], bw / 2);
     for (let i = 0; i < NB; i++) {
       const a0 = i * 2;
-      bi.push(a0, a0 + 1, a0 + 2, a0 + 1, a0 + 3, a0 + 2);
+      bi.push(a0, a0 + 2, a0 + 1, a0 + 1, a0 + 2, a0 + 3);
     }
-    const bg = new THREE.BufferGeometry();
-    bg.setAttribute('position', new THREE.Float32BufferAttribute(bp, 3));
-    bg.setIndex(bi); bg.computeVertexNormals();
-    const bm = new THREE.Mesh(bg, mats.woodPale || iron);
-    bm.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
-    group.add(tag(bm, 'paddle', 'Paddle box',
-      'The housing over the top of the wheel. A 17 m wheel throws a sheet of water and coal dirt that would sweep the deck; the box contains it. Being the largest thing on the ship\'s side, it is also what owners decorated.'));
+    for (const side of [1, -1]) {                     // the two faces, shut
+      const w = side * bw / 2, c0 = bp.length / 3;
+      bp.push(0, (h0 + boxRy) / 2, w);                // a fan about an interior point
+      for (const [x, y] of arc) bp.push(x, y, w);
+      for (let i = 0; i < NB; i++)
+        if (side > 0) bi.push(c0, c0 + 1 + i, c0 + 2 + i);
+        else          bi.push(c0, c0 + 2 + i, c0 + 1 + i);
+      if (side > 0) bi.push(c0, c0 + 1 + NB, c0 + 1); // the chord edge, shut on the sponson
+      else          bi.push(c0, c0 + 1, c0 + 1 + NB);
+    }
+    const bgeo = new THREE.BufferGeometry();
+    bgeo.setAttribute('position', new THREE.Float32BufferAttribute(bp, 3));
+    bgeo.setIndex(bi); bgeo.computeVertexNormals();
+    bg.add(tag(new THREE.Mesh(bgeo, iron), 'paddlebox', 'Paddle box',
+      'The housing over the top half of the wheel, sprung from the sponson at deck level. A 17 m wheel throws a sheet of water and coal dirt that would sweep the deck; the box contains it. Being the largest thing on the ship\'s side, it is also what owners decorated.'));
     /* ── THE FAN FACE ──────────────────────────────────────────────────────────────
        The outboard face of a paddle box is the ship's one piece of display, and the pattern
-       is almost always RADIAL — ribs fanning from the hub out to the rim, following the very
-       spokes turning behind them. It is structural before it is ornamental: the face is a
-       large thin panel that has to resist a wheel throwing water at it, and ribs from the
-       centre are the cheapest way to stiffen a half-round. */
-    for (let i = 0; i < 11; i++) {
-      const a = Math.PI * (i / 10);
+       is almost always RADIAL. It is structural before it is ornamental: the face is a large
+       thin panel that has to resist a wheel throwing water at it, and ribs fanning from the
+       centre are the cheapest way to stiffen a half-round. The fan roots at the BASE of the
+       face rather than the axle — the axle is below the deck, and the panel being stiffened
+       stops at the chord. */
+    for (let i = 0; i <= 10; i++) {
+      const b = Math.PI * (i / 10);
+      const A = Math.pow(Math.cos(b) / boxRx, 2) + Math.pow(Math.sin(b) / boxRy, 2);
+      const B2 = 2 * h0 * Math.sin(b) / (boxRy * boxRy);
+      const C = (h0 * h0) / (boxRy * boxRy) - 1;
+      const t = (-B2 + Math.sqrt(B2 * B2 - 4 * A * C)) / (2 * A);  // chord centre → arc
       const rib = new THREE.Mesh(
-        new THREE.BoxGeometry(D * 0.020, boxR * 0.86, B * 0.030), mats.woodPale || iron);
-      rib.position.set(p[0] + Math.cos(a) * boxR * 0.47,
-                       axleY + Math.sin(a) * boxR * 0.40,
-                       sgn * (p[2] + B * 0.16 + B * 0.21));
-      rib.rotation.z = a - Math.PI / 2;
-      group.add(tag(rib, 'paddle', 'Paddle-box rib',
-        'The face fans from the hub because it must: a large thin panel taking the water a wheel throws at it is stiffened most cheaply by ribs running out from the centre. That it also looks well is why owners lettered and gilded it.'));
+        new THREE.BoxGeometry(D * 0.020, t * 0.92, B * 0.030), mats.woodPale || iron);
+      rib.position.set(Math.cos(b) * t * 0.5, h0 + Math.sin(b) * t * 0.5, bw / 2 + B * 0.014);
+      rib.rotation.z = b - Math.PI / 2;
+      bg.add(tag(rib, 'paddlebox', 'Paddle-box rib',
+        'The face fans from its base because it must: a large thin panel taking the water a wheel throws at it is stiffened most cheaply by ribs running out from the centre. That it also looks well is why owners lettered and gilded it.'));
     }
-    /* the vent slats along its face, which is how a real one is built and lit */
+    /* the vent slats, raised louvres on the drum itself */
     for (let i = 1; i < 7; i++) {
-      const a = Math.PI * (i / 7);
-      const sl = new THREE.Mesh(new THREE.BoxGeometry(D * 0.035, B * 0.012, B * 0.40), iron);
-      sl.position.set(p[0] + Math.cos(a) * boxR * 0.94,
-                      axleY + Math.sin(a) * boxR * 0.81,
-                      sgn * (p[2] + B * 0.16));
+      const a = th0 + (Math.PI - 2 * th0) * (i / 7);
+      const sl = new THREE.Mesh(new THREE.BoxGeometry(D * 0.035, B * 0.012, bw * 0.96), iron);
+      sl.position.set(Math.cos(a) * boxRx * 1.004, Math.sin(a) * boxRy * 1.004, 0);
       sl.rotation.z = a;
-      group.add(tag(sl, 'paddle', 'Paddle-box vent',
+      bg.add(tag(sl, 'paddlebox', 'Paddle-box vent',
         'Slatted so the wheel does not compress the air in its own housing at every revolution.'));
     }
+    group.add(bg);
   }
 }
 

@@ -234,3 +234,46 @@ Next in the queue: the serif-webfont decision, the featureless coast behind aboa
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 61677 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-06 22:57:58  round starting
+Round 39 is done and live. The queue's ship-model item — Dreadnought's anti-torpedo net defence — is closed as a class fix, and the site is deployed with the stamp verified at **1786083736**.
+
+**What was built.** A `netDefence` record field now hangs the full anti-torpedo outfit on a hull: a net shelf riding the hull's own curve, the steel-wire net rolled on it, and twelve 40 ft booms per side stowed in the row of down-aft diagonals that dominates photograph H61017 — which I re-fetched and read before writing geometry. Every heel and tip is pinned to `surfacePoint` at its own station and height, so the row follows the hull's taper instead of standing off it. The record facts came fresh this round: 12 m spars pinned at or below the main-deck edge, fitted at completion, landed early in WWI — the part card says so, which also honestly labels the one tension left (her Sea voyage is Jutland 1916; the hull is depicted as-built 1906).
+
+**How it was verified.** One derivation, `SHIPS_HULL.netDefenceGeom`, feeds both the builder and a new audit rule that checks boom count, fore-aft lie on the plating at each boom's own station, droop, clearance of the water and deck edge, and shelf span. The rule was proven by break-and-restore three ways — flattened droop, missing booms, one side only — all restored by re-editing, per last round's trap. A new small trap got recorded: sed on the shared `for (const sgn of [1, -1])` line broke every mirrored fitting in the fleet, so breaks must target something unique to the class under test. Audit: 25/25 clean. Ratchet: one frame moved (ship-dreadnought, 0.325%), the diff image showing the shelf line and twelve diagonals and nothing else; accepted with a written reason, closing check all-clean. Twelve-bearing spin survey: both sides wear the row, nothing floats, nothing pierces the boot-topping.
+
+**Rule 0, answered:** the frame reads as a rendered world. Three facts a viewer can name: a dozen spars stowed in matching down-aft diagonals below a continuous shelf line along the hull; five twin-gun turrets, two at the deck edges; the tripod foremast directly abaft the fore funnel, struts planted aft.
+
+HANDOFF's queue now leads with the serif-webfont dependency decision and the featureless land behind aboard-yamato; the tree is committed and clean.
+2026-08-06 23:33:52  round finished; HEAD is 0379d75 Deploy note r39: live at 1786083736; fourth clean push-triggered deploy in a row
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 66650 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-06 23:43:52  round starting
+The ratchet run (31 cold-page captures) is still going in the background; it will notify on completion. So far this round: Great Eastern's paddle box was diagnosed as an inward-wound strip — invisible from every bearing — and rebuilt as a closed drum sprung from the sponson at deck level, with shut end faces, the fan rooted at the face's base, and the port box mirrored by rotation so it can't re-hand its triangles. Audit is 25/25 with the new `paddlebox` rules, each proven by break-and-restore (not-built, winding-flip, undersized). Waiting on the frame check before classifying diffs and finishing the round.
+2026-08-07 00:13:31  round finished; HEAD is 0379d75 Deploy note r39: live at 1786083736; fourth clean push-triggered deploy in a row
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 72432 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 00:23:31  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 00:33:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 00:43:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 00:53:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 01:03:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 01:13:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 01:23:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 01:33:32  round starting
+  previous round still running — skipping this firing
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 01:43:32  round starting
+  previous round still running — skipping this firing
