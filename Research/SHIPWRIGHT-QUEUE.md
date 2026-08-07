@@ -52,9 +52,9 @@ container ship, Roman merchantman.
 three-masted square-riggers on the same code path as the verified 74, so they are the lowest-risk
 remaining — the detail gaps below are now worth more than further verification.
 
-⚠ **Steel's mast rule is still applied to the clipper**, whose L/B of 5.9 is also outside its
-domain — it gives Cutty Sark a ~38 m lower mast against a real ~29 m. `heightM` now exists to
-fix that; it needs a sourced clipper figure.
+~~⚠ Steel's mast rule is still applied to the clipper~~ — **resolved round 51**: `heightM` set
+per mast (23.2 / 25.9 / 22.3), ratios kept, the scale anchored to RMG's attested 47 m main
+truck; the drawn card prints 46.9 m deck to truck.
 
 ## Detail gaps against the reference bar
 

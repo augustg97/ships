@@ -2399,3 +2399,73 @@ the Armada holding the weather gauge with the fleets 7.0 km apart.
 **End-of-round deploy note: LIVE, stamp 1786137697 → 1786139194**, verified with a
 cache-busted fetch of the data-version meta tag; the live battle.js confirmed carrying
 compilePolar and zero btPolarSpeed. Fourteenth clean push-triggered deploy in a row.
+
+---
+
+## Round 51 — 2026-08-07 — The clipper is Cutty Sark at last, and the creases learn what a jib is
+
+**The vessel: clipper — the r44 note "the clipper's single topgallant over double topsails —
+the next square rigger is data" closed.** She was nine cloths on the old three-tier path
+(`only: 3`), no headsails on four bare jib stays, no staysails, no spanker, bare mastheads.
+Now, all data, all grammar that already existed: `yards: [course, ltop, utop, tg, royal]` on
+each mast (the PLAN's own `tg` entry, written for her in r44, finally used), `headsails: 4`,
+`staysails: 3` in each gap, `spanker: true` on the mizzen, the two white deckhouses of every
+photograph and the open wheel right aft (`deckhouses`, `helmAt` — Wyoming's r42 grammar).
+Survey: 2,628 → 3,024 tris/m, 239 → 294 meshes, nothing floating. Audit 25/25.
+
+**The class fix the first render exposed: every crease term in `makeTriSail` scaled with the
+LUFF alone.** Tuned on the lateen's 20–30 m yards, applied to a flying jib on a 45 m stay, the
+four wrinkle terms summed to over two metres of crease and the whole head suit hung as laundry —
+the clipper made it undeniable, Preussen's committed baseline carries it milder. A crease is
+slack, and how much slack a sail carries is what `belly` already states — so the creases now
+follow the sail's own set, normalised to the lateen they were tuned on and capped there
+(`slack = min(1, belly/0.055)`, hull.js). The controls prove the tuning preserved: ship-dhow
+(lateen) and ship-canoe (crab claw) both moved **0.000%**. Six frames moved, every diff read:
+all six are tri sailcloth only — jibs, staysails, gaff topsails, on the subject and on
+frame-edge neighbours — no hull, no sea, no square canvas. Accepted with reasons.
+
+**The audit's station-gate class struck its sixth and seventh time, and the sixth kills the
+class in that rule for good.** Rule 5 (yard census) gated on a fixed radius round
+`(at−0.5)·lwl` — no hull rake shift, no allowance for a raked mast carrying its royal 3.4 m
+abaft its own foot — and reported the mizzen "5 yards in the record, 1 crossed" on a correct
+drawing. Rewritten with NO gate: every square cloth is assigned to its **nearest** square-mast
+station, so the census is exact whatever the shared bias. Rule 2 (headsail census) then counted
+the fore royal into the jib suit — the foremast rakes forward, so the royal stood wholly forward
+of the bare station — fixed the way rule 6's fifth strike was: a headsail is a `tri` cloth,
+square canvas cannot masquerade, gate scales with the hull. **Proofs, all in-page:** a misnamed
+yard (`royale`) fires rule 5 exactly once, "4 sails crossed" against 5 declared; a jib deleted
+from the drawn model (builder wrapped) fires rule 2 once, "3 drawn" against 4; the OLD gate
+re-evaled over today's data reproduces the false positive (6 counted); restored, 25/25 clean.
+
+**Scale anchored to her record.** The drawn stack (heightM 26/29/25 with the 0.60/0.50 fidded
+proportions) put the card at 52.5 m deck to truck against RMG's attested 47 m main mast, and the
+drawn sail area's 2,980 m² "match" of her record's 2,976 was the oversized rig compensating for
+the stunsails the model does not draw. heightM now 23.2/25.9/22.3 (ratios kept): card prints
+**46.9 m**, drawn area **2,463 m²** of the record's 2,976 — the honest gap is the studding-sail
+set, logged as **B10** in MODEL-GAPS. The serif-webfont false-RED fired once on globe-default
+(1.016%, diff pure text labels) and was 0.000% on rerun — the class stays open, still queue.
+
+**Frames: 37 → 39** (ship-clipper, aboard-clipper; both looked at before committing; the
+aboard note carries the era-5 warning — a wrong-era voyage hash still hangs before first
+paint). Ratchet run foreground; ⚠ new procedural lesson: the per-frame harness wipes `_diff`
+as well as `_current`, so a BATCH of nine wipes the earlier movers' diffs — classify each mover
+from its own solo re-run, immediately.
+
+**Rule 0, written:** ship-clipper reads as a rendered world. Three facts a viewer can read off
+it: a long black composite hull with copper below and a clipper bow, dwarfed by her own rig;
+five yards crossed on every mast with royals atop, four jibs running to the fore topmast head
+and the spanker standing over the counter; two white deckhouses on a flush deck, the wheel open
+right aft. Off aboard-clipper: the wool run's card — 30°13′S 38°01′W, course 018°, force 2 —
+over a ship leaving a real wake.
+
+### Next, in order
+1. Carried: serif-webfont decision (globe-default false-RED class, fired again this round);
+   featureless brown land behind aboard-yamato; Titanic remainder; r43's plate gaps (corbita
+   era plate; dugout/dhow/cog plates; a globe-era-card frame); wrong-era voyage hash hang.
+2. A galley action stays unblocked (r50): Salamis, Lepanto, Myeongnyang are campaign-data
+   tasks.
+3. **B10 if wanted:** stunsails as a builder feature — the clipper's missing ~500 m² is the
+   set her passages were famous for; applies to Preussen-class rigs too.
+4. The survey queue proper is exhausted twice over; next-crudest without a dedicated round is
+   **ship-of-the-line (3,100 tris/m)**, but she was the verified reference hull — the detail
+   gaps in SHIPWRIGHT-QUEUE §"Detail gaps" (head/beakhead, stern furniture) are worth more.

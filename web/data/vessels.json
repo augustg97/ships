@@ -2724,27 +2724,48 @@
     "masts": [
      {
       "at": 0.115,
-      "heightM": 26.0,
+      "heightM": 23.2,
       "rig": "square",
       "rake": -1,
       "shrouds": 7,
-      "only": 3
+      "yards": [
+       "course",
+       "ltop",
+       "utop",
+       "tg",
+       "royal"
+      ]
      },
      {
       "at": 0.556,
-      "heightM": 29.0,
+      "heightM": 25.9,
       "rig": "square",
       "rake": 2,
       "shrouds": 9,
-      "only": 3
+      "yards": [
+       "course",
+       "ltop",
+       "utop",
+       "tg",
+       "royal"
+      ],
+      "staysails": 3
      },
      {
       "at": 0.85,
-      "heightM": 25.0,
+      "heightM": 22.3,
       "rig": "square",
       "rake": 5,
       "shrouds": 6,
-      "only": 3
+      "yards": [
+       "course",
+       "ltop",
+       "utop",
+       "tg",
+       "royal"
+      ],
+      "staysails": 3,
+      "spanker": true
      }
     ],
     "build": "frame",
@@ -2754,7 +2775,23 @@
     "beam": 10.97,
     "draught": 6.1,
     "freeboard": 3.4,
-    "cm": 0.764
+    "cm": 0.764,
+    "headsails": 4,
+    "deckhouses": [
+     {
+      "a": 0.16,
+      "b": 0.27,
+      "hM": 2.2,
+      "wF": 0.52
+     },
+     {
+      "a": 0.6,
+      "b": 0.68,
+      "hM": 2.1,
+      "wF": 0.48
+     }
+    ],
+    "helmAt": 0.94
    }
   },
   {

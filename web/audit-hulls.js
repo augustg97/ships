@@ -698,13 +698,19 @@
        record's suit on the bowsprit stays; a jib that silently stops being built leaves a
        bare spar and a schooner with no front to her silhouette, and 'declared but not
        drawn' cannot see it because SOME sail is drawn. Every sail wholly forward of the
-       foremast station is a headsail; the count must match the record. */
+       foremast station is a headsail; the count must match the record.
+       ⚠ THE SEVENTH STRIKE OF THE STATION-GATE CLASS (round 51, clipper): her foremast
+       rakes FORWARD (−1°), so the fore royal — a small square high on the raked spar —
+       stood wholly forward of the bare station and was counted into the jib suit. Same
+       fix as rule 6's fifth strike: a headsail is a TRI cloth, square canvas cannot
+       masquerade, and the gate scales with the hull. */
     if (H.headsails && (H.masts || []).length) {
       const fmx = (H.masts[0].at - 0.5) * H.lwl;
       let jibs = 0;
-      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'tri' &&
+                            o.userData.part && o.userData.part.key === 'sail') {
         const bbx = new THREE.Box3().setFromObject(o);
-        if (bbx.max.x < fmx + 0.6) jibs++;
+        if (bbx.max.x < fmx + H.lwl * 0.03) jibs++;
       } });
       if (jibs !== H.headsails)
         say(v.id, 'headsail suit miscounted',
@@ -777,18 +783,38 @@
     /* (5) THE YARD LIST IS CROSSED IN FULL. `yards` on a mast is the record's own tier
        list — Preussen's thirty square sails are six to a mast, and the segment rig drew
        three. A misnamed yard silently drops out of the plan (the builder filters unknown
-       names), so the drawn count is audited against the declared count, per mast: every
-       square sail is positioned AT its own mast's station, so the station's census is the
-       mast's tier count. */
-    for (const mk of (H.masts || [])) {
-      if (mk.rig !== 'square' || !mk.yards) continue;
-      const mx = (mk.at - 0.5) * H.lwl;
-      let tiers = 0;
-      g.traverse(o => { if (o.isMesh && o.userData.kind === 'square' &&
-                            Math.abs(o.position.x - mx) < H.lwl * 0.045) tiers++; });
-      if (tiers !== mk.yards.length)
-        say(v.id, 'square tiers miscounted',
-            `${mk.yards.length} yards in the record at u=${mk.at}, ${tiers} sails crossed`);
+       names), so the drawn count is audited against the declared count, per mast.
+       ⚠ THE SIXTH STRIKE OF THE STATION-GATE CLASS (round 51, clipper). A fixed radius
+       around (at−0.5)·lwl missed the builder's own hull-rake shift AND the mast's rake
+       carrying its upper yards aft — a 5°-raked mizzen's royal stands 3.4 m abaft the
+       mast foot, outside any gate that still excludes the neighbouring mast. Same class
+       as rule 6's five strikes. So no gate at all: every square cloth belongs to exactly
+       one mast, so each is assigned to its NEAREST square-mast station and the per-mast
+       census is exact whatever the shared station bias. Inter-mast spacing is metres of
+       tens; the biases are single metres. */
+    {
+      const stations = (H.masts || [])
+        .map(mk => ({ mk, x: (mk.at - 0.5) * H.lwl }))
+        .filter(s => s.mk.rig === 'square');
+      if (stations.some(s => s.mk.yards)) {
+        const count = new Map(stations.map(s => [s.mk, 0]));
+        g.traverse(o => {
+          if (!o.isMesh || o.userData.kind !== 'square') return;
+          let best = null, bd = Infinity;
+          for (const s of stations) {
+            const d = Math.abs(o.position.x - s.x);
+            if (d < bd) { bd = d; best = s; }
+          }
+          if (best) count.set(best.mk, count.get(best.mk) + 1);
+        });
+        for (const s of stations) {
+          if (!s.mk.yards) continue;
+          const tiers = count.get(s.mk);
+          if (tiers !== s.mk.yards.length)
+            say(v.id, 'square tiers miscounted',
+                `${s.mk.yards.length} yards in the record at u=${s.mk.at}, ${tiers} sails crossed`);
+        }
+      }
     }
     /* (6) DECLARED STAYSAILS FLY IN THEIR OWN GAP, ALOFT. `staysails: n` on the after
        mast is the suit on the stays to the mast ahead. A staysail lives wholly BETWEEN

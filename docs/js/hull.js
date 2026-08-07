@@ -1573,17 +1573,27 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
       const sag = Math.pow(t, 2.2) * (0.55 + 0.80 * Math.pow(1 - sA, 1.4));
       const prof = draft * 0.82 + sag * 0.40;
       let z = prof * span * head * belly * DEPTH;
+      /* ── ⚠ THE CREASES IGNORED THE SET OF THE SAIL ─────────────────────────────────
+         Every crease term below scaled with the LUFF alone, tuned on the lateen's 20–30 m
+         yards — so a flying jib on a 45 m stay wore over two metres of summed wrinkle,
+         and the whole head suit of any big square-rigger hung like laundry however small
+         its `belly` said its draft was. A crease is SLACK, and how much slack a sail
+         carries is exactly what `belly` already states: a lateen bags, a jib is set
+         flying on a bar-taut stay and is the flattest cloth on the ship. So the creases
+         follow the sail's own set, normalised to the lateen they were tuned on, and a
+         sail set softer than the lateen gains nothing (the cap). */
+      const slack = Math.min(1.0, belly / 0.055);
       /* Load enters a triangular sail at THREE POINTS and nowhere else, so the cloth
          creases in fans running inward from the tack, the peak and the clew. */
       const dA = t, dB = Math.hypot(sA, 1 - t), dC = Math.hypot(1 - sA, 1 - t);
       const corner = Math.exp(-dA * 3.0) + Math.exp(-dB * 3.4) + Math.exp(-dC * 3.4);
-      z += Math.sin((sA * 7.0 + t * 11.0) * Math.PI) * corner * head * 0.016;
+      z += Math.sin((sA * 7.0 + t * 11.0) * Math.PI) * corner * head * 0.016 * slack;
       /* the luff is laced to the yard at intervals, so it scallops between the lacings */
-      z += Math.sin(t * Math.PI * 9.0) * Math.exp(-sA * 14.0) * head * 0.011;
+      z += Math.sin(t * Math.PI * 9.0) * Math.exp(-sA * 14.0) * head * 0.011 * slack;
       /* a loose foot does the same between tack and clew */
-      z += Math.sin(t * Math.PI * 5.0) * Math.exp(-(1 - sA) * 10.0) * head * 0.009;
+      z += Math.sin(t * Math.PI * 5.0) * Math.exp(-(1 - sA) * 10.0) * head * 0.009 * slack;
       /* and cloth is never taut everywhere at once */
-      z += Math.sin(sA * 9.0 + t * 6.0) * span * Math.pow(t, 1.5) * head * 0.011;
+      z += Math.sin(sA * 9.0 + t * 6.0) * span * Math.pow(t, 1.5) * head * 0.011 * slack;
       pos.push(P[0], P[1], z);
       /* uv.x = sA so the panel seams run from the yard down to the foot, which is how a
          lateen is cut; uv.y = t puts the shader's weathering gradient on the LEECH, the

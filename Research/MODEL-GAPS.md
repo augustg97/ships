@@ -142,6 +142,11 @@ family table is itself a finding.
   A century-by-century lighting of the world's coasts is one SPARQL query away.
 - **B8.** Modern shipping density: the World Bank/IMF AIS raster is **CC-BY 4.0** and would let
   the last chapter show where ships actually go now against where the wind would have sent them.
+- **B10.** Stunsails are not drawn, on any square rigger (round 51). The clipper's drawn suit is
+  26 cloths totalling 2,463 m² against her record's 32 sails / 2,976 m² — the missing ~500 m²
+  is the studding-sail set her passages were famous for. A stunsail is a boom run out from the
+  yardarm with a cloth outboard of the square sail; it is a builder feature (`stunsails` per
+  mast), not a tuning knob. Applies to clipper and preussen-class rigs when wanted.
 
 ---
 

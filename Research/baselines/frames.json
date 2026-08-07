@@ -201,6 +201,16 @@
    "name": "aboard-treasure",
    "path": "/?frozen=1#e=4&f=zhenghe",
    "note": "ABOARD, THE TREASURE FLEET — Zheng He outbound, round 46. Watches the five fans drawing at sea, the castle and the blunt ends from the water. ⚠ e must be 4: the voyage lives in Ocean Crossing 1400–1800, and asking for it in era 3 leaves the app waiting forever and __FRAME_READY never fires."
+  },
+  {
+   "name": "ship-clipper",
+   "path": "/?frozen=1#v=ship&s=clipper",
+   "note": "the record's full-rigger (round 51) — five yards to a mast with royals atop, four jibs on taut stays, six staysails, the spanker, two white deckhouses and the open wheel aft; rig scale anchored to RMG's 47 m main truck"
+  },
+  {
+   "name": "aboard-clipper",
+   "path": "/?frozen=1#e=5&f=woolrun",
+   "note": "ABOARD, THE WOOL RUN — the clipper running home, round 51. ⚠ e must be 5: woolrun is 1887 and lives in 1800–1900; a wrong era hangs the app before first paint (the treasure-fleet lesson)."
   }
  ]
 }
