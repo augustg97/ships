@@ -414,3 +414,21 @@ The arithmetic closes: 30 square + 12 staysails + 4 jibs + 1 spanker = her recor
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 51585 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 08:18:40  round starting
+Round 45 is done and live. The steamer — next on the survey queue at 1713 tris/m — was rebuilt from the record, and the survey turned up two class faults that had been sitting on every metal ship in the fleet.
+
+**The steamer.** Twelve spin bearings showed the pre-r44 rig ceiling (two scattered cloths per mast under bare poles), a Mediterranean lateen on the mizzen of a Victorian steamer, a bare 9 m bowsprit, a full-length liner house that belongs to 1910, and 10.6 m anchors laid across the forecastle. The record settled the plan: Oceanic (1871), the type-defining 1870s liner, was rigged a four-masted barque — square on three masts, fore-and-aft on the jigger — so the existing mast structure was right and the rest became data using round 44's grammar: `yards: ["course","ltop","utop","tg"]` (Howes double topsails) on the square masts, the lateen converted to a gaff spanker with topsail, two staysails per square gap, three jibs on a real bowsprit, and `houseAt: [0.28, 0.66]` pulling the house back to a midship bridge structure. The card's deck-to-truck self-measured 38.3 → 44.8 m.
+
+**Two class fixes in hull.js, not the instance:**
+- Anchors scaled linearly with the hull (`L * 0.115`, calibrated on a 74) — Preussen carried 17 m anchors. Real anchors stopped growing when hulls didn't: Titanic's centre anchor, the largest ever forged, is 5.7 m. The law now saturates past 48 m of hull, and a new audit rule bounds every anchor at 8.5 m forever.
+- Every hull with a bowsprit grew an 18th-century timber beakhead and headrails, including the iron steamer and steel Preussen. `buildHead` is now gated on `S.iron`; wooden Wyoming keeps hers.
+
+**The audit was wrong a fifth time** — it placed masts at `(at−0.5)·lwl` while the builder adds the hull's rake shift, so a correctly drawn staysail sat 6 cm outside its fixed gate and got reported missing. The gate now scales with the hull and asks the sail's kind. Audit 25/25 clean after the fix.
+
+**Ratchet:** five movers, each classified from its diff and accepted with a logged reason — ship-steamer 25.8% (the rebuild), aboard 2.2% (same hull, vessel-only pixels), shipwright 1.3% (steamer at frame edge plus forge-capped anchors along the line), ship-preussen and ship-wyoming under 0.1% (bows only). A verification re-run flagged globe-default 1.016% — the documented serif-webfont label-halo transient, proven so by two clean isolated re-captures, not accepted.
+
+**Deployed and verified:** stamp 1786115031 → 1786117132 confirmed live with a cache-busted fetch; ninth clean push-triggered deploy in a row. HANDOFF.md points the next round at the treasure ship (2011 tris/m), with the shared-polar data fault (steamer card: 12.3 kn over a 9.6 kn curve) scoped as its own round.
+2026-08-07 09:15:23  round finished; HEAD is a76ca6d Deploy note r45: steamer's barque rig live at 1786117132; globe-default mover proved the known webfont transient
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 56395 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 09:25:23  round starting
+  previous round still running — skipping this firing

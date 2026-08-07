@@ -1148,7 +1148,29 @@ function startVoyage(v) {
     scene.add(voyLine);
   }
   buildVoyageList();
-  showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: v.rows || [],
+  /* ── THE CARD MEASURES ITS OWN TRACK ─────────────────────────────────────────────────
+     Only fifteen of the sixty-two voyages stated a distance, and the other forty-seven are not
+     going to be filled in by hand — a number typed into a data file is a claim nobody can check,
+     and it would drift the moment a waypoint moved. The track is right there as a list of
+     positions, so measure it: great-circle between consecutive waypoints, summed. It is the
+     model's own output rather than an assertion about the world, which is the same standing the
+     isochrones have, and it cannot fall out of step with the line being drawn because it is
+     computed FROM that line. Labelled "in this model" for exactly that reason: it is the length
+     of the track as drawn, not a claim about the historical passage. */
+  const legRows = (v.rows || []).slice();
+  if (v.legs && v.legs.length > 1) {
+    let nm = 0;
+    for (let i = 1; i < v.legs.length; i++) {
+      const a = v.legs[i - 1], b = v.legs[i];
+      const p1 = a.lat * Math.PI / 180, p2 = b.lat * Math.PI / 180;
+      const dp = p2 - p1, dl = (b.lon - a.lon) * Math.PI / 180;
+      const h = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+      nm += 2 * 3440.065 * Math.asin(Math.min(1, Math.sqrt(h)));   // earth radius in nm
+    }
+    legRows.push(['Track in this model',
+                  `${Math.round(nm).toLocaleString()} nm over ${v.legs.length} waypoints`]);
+  }
+  showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: legRows,
              prose: v.text, span: v.dates, cite: v.cite, tags: v.tags,
              plate: v.vessel });
 }
