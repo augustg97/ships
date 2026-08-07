@@ -798,10 +798,19 @@
     (H.masts || []).forEach((mk, mi) => {
       if (!mk.staysails || !mi) return;
       const xF = (H.masts[mi - 1].at - 0.5) * H.lwl, xA = (mk.at - 0.5) * H.lwl;
+      /* ⚠ THE BUILDER RAKES THE MAST OFF ITS STATION AND THIS RULE DID NOT (wrong for the
+         fifth time, round 45). A drawn mast stands at (at−0.5)·lwl PLUS the hull's own rake
+         shift, so on the steamer the fore staysail's tack sat 6 cm outside a fixed 0.8 m
+         gate and two drawn, correct sails were reported missing. The gate scales with the
+         hull instead — and once it is wide enough for rake it is wide enough for a raked
+         mast's own narrow upper squares to drift in, so the census also asks the sail's
+         KIND: a staysail is a `tri` cloth, and square canvas cannot masquerade. */
+      const tol = H.lwl * 0.03;
       let n = 0;
-      g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
+      g.traverse(o => { if (o.isMesh && o.userData.kind === 'tri' &&
+                            o.userData.part && o.userData.part.key === 'sail') {
         const bbx = new THREE.Box3().setFromObject(o);
-        if (bbx.min.x > xF + 0.8 && bbx.max.x < xA - 0.8 && bbx.min.y > deckY + 4) n++;
+        if (bbx.min.x > xF - tol && bbx.max.x < xA + tol && bbx.min.y > deckY + 4) n++;
       } });
       if (n !== mk.staysails)
         say(v.id, 'staysails miscounted',
@@ -825,6 +834,23 @@
       if (!found)
         say(v.id, 'spanker not set',
             `mast at u=${mk.at} declares a spanker and no quad cloth runs aft of its station`);
+    }
+    /* ── THE ANCHOR IS FORGE-SIZED (round 45, steamer). The bower's shank scaled at L/8
+       for every hull, which is right at a 74's size and hung a 10.6 m anchor across the
+       92 m steamer's forecastle and a 17 m one on Preussen. Anchors stopped growing when
+       hulls did not: the largest ever hand-forged, Titanic's centre anchor, is 5.7 m over
+       all. So the drawn extent of a catted anchor is bounded by the forge, not the hull —
+       the bound is generous so only the linear-scaling absurdity trips it. */
+    {
+      const ancs = [];
+      g.traverse(o => { if (o.userData && o.userData.part && o.userData.part.key === 'anchor')
+                          ancs.push(new THREE.Box3().setFromObject(o)); });
+      for (const bb of ancs) {
+        const worst = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z);
+        if (worst > 8.5)
+          say(v.id, 'anchor out of scale',
+              `catted anchor spans ${worst.toFixed(1)} m; the largest ever forged is 5.7 m over all`);
+      }
     }
 
     /* ── THE SHIP FLOATS AT HER MARKS — round 33. Both views float every hull on the

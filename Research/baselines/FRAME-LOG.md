@@ -364,3 +364,8 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-07 05:09** · `ship-dreadnought` — dreadnought card plate: HMS Dreadnought, 1906; card panel only
 - **2026-08-07 05:09** · `ship-wyoming` — wyoming card plate: Wyoming, 1917; card panel only
 - **2026-08-07 08:03** · `ship-preussen` — round 44 Preussen rig from the record: 47 sails — 30 square on per-mast yard lists (course, double topsails, double topgallants, royal), 12 mast-to-mast staysails, 4 jibs to the fore topmast head, gaff spanker set low on the jigger — plus the white Laeisz boot-topping band as data-declared livery. Diff verified confined to the vessel, her water, her card digits and fleet thumbnail; all panels and neighbours untouched. Audit 25/25 with three new rig rules.
+- **2026-08-07 08:59** · `ship-steamer` — r45: steamer rebuilt from the record (Oceanic 1871 class): four-masted-barque rig with double topsails, gaff jigger replacing the lateen, staysails, three jibs on a real bowsprit; house pulled back to amidships (houseAt); card rig height self-measured 38.3->44.8 m; neighbours shifted by the grown hull extent
+- **2026-08-07 08:59** · `aboard` — r45: same steamer hull in the Great Western close-up; moved pixels are the vessel silhouette only
+- **2026-08-07 08:59** · `shipwright` — r45: steamer's new rig at frame edge plus forge-capped anchors on the wooden ships in the line (anchor no longer scales linearly with hull)
+- **2026-08-07 08:59** · `ship-preussen` — r45: bow only - 17 m anchors cut to forge size and the timber beakhead/headrails removed from a steel hull
+- **2026-08-07 08:59** · `ship-wyoming` — r45: anchors cut to forge size; wooden ship keeps her timber head

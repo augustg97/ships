@@ -2698,8 +2698,9 @@
     "gunDecks": 0,
     "iron": true,
     "topside": "#25282b",
-    "bowsprit": 0.1,
-    "steeve": 10,
+    "bowsprit": 0.12,
+    "steeve": 12,
+    "headsails": 3,
     "masts": [
      {
       "at": 0.13,
@@ -2707,7 +2708,7 @@
       "rig": "square",
       "rake": 2,
       "shrouds": 4,
-      "only": 2
+      "yards": ["course", "ltop", "utop", "tg"]
      },
      {
       "at": 0.38,
@@ -2715,7 +2716,8 @@
       "rig": "square",
       "rake": 2,
       "shrouds": 4,
-      "only": 2
+      "yards": ["course", "ltop", "utop", "tg"],
+      "staysails": 2
      },
      {
       "at": 0.61,
@@ -2723,14 +2725,17 @@
       "rig": "square",
       "rake": 2,
       "shrouds": 4,
-      "only": 2
+      "yards": ["course", "ltop", "utop", "tg"],
+      "staysails": 2
      },
      {
       "at": 0.845,
       "height": 0.36,
-      "rig": "lateen",
+      "rig": "gaff",
       "rake": 3,
-      "shrouds": 3
+      "shrouds": 3,
+      "topmast": true,
+      "topsail": true
      }
     ],
     "build": "iron",
@@ -2745,6 +2750,7 @@
     "portholes": true,
     "mastLivery": true,
     "decks": 2,
+    "houseAt": [0.28, 0.66],
     "funnelH": 11.0,
     "year": 1870,
     "cove": 1

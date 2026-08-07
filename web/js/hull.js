@@ -4427,7 +4427,11 @@ function buildContainers(S, group) {
  * the coefficients produced.
  */
 function buildHead(S, group, mats) {
-  if (!S.bowsprit) return;
+  /* ⚠ THE BEAKHEAD DIED WITH THE WOODEN HULL. The platform and headrails are wooden-ship
+     structure; an iron or steel ship's bowsprit is socketed and plated straight to the
+     stem — no photograph of Preussen or of any Victorian steamer shows headrails, and this
+     builder was hanging a pale timber head on both. Gated on the hull's own material. */
+  if (!S.bowsprit || S.iron) return;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const g = new THREE.Group();
@@ -4559,7 +4563,14 @@ function buildAnchor(S, group, mat) {
   if (!S.bowsprit) return;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
-  const shank = L * 0.115;                              // a bower's shank is ~1/8 the hull
+  /* ⚠ AN ANCHOR DOES NOT SCALE WITH THE SHIP. ~1/8 of the hull is right for the wooden
+     sizes the rule was calibrated on — a 74's best bower shank runs about 5.5 m on a 53 m
+     hull — but iron hulls kept growing and forged anchors did not: Titanic's centre anchor,
+     the largest ever hand-forged, is 5.7 m OVER ALL on 269 m of ship. Linear scaling hung a
+     10.6 m anchor on the 92 m steamer and a 17 m one on Preussen, laid across the whole
+     forecastle. So the shank grows with the hull up to the size a forge can make, then
+     nearly stops. */
+  const shank = Math.min(L, 48) * 0.115 + Math.max(0, L - 48) * 0.004;
   for (const sgn of [-1, 1]) {
     const g = new THREE.Group();
     const sh = new THREE.Mesh(

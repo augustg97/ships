@@ -1945,3 +1945,66 @@ separately as data work.)
 
 **End-of-round deploy note: LIVE, stamp 1786104587 → 1786115031**, verified with a
 cache-busted fetch of the data-version meta tag. Eighth clean push-triggered deploy in a row.
+
+---
+
+## Round 45 — 2026-08-07 — The steamer: an 1870 barque-rigged liner from the record, and two class faults every metal ship carried
+
+**The queue item: steamer (1713 tris/m).** The survey (12 spin bearings, before) found her
+carrying two scattered cloths per mast under bare poles (the pre-r44 ceiling), a Mediterranean
+lateen on the mizzen of a Victorian steamer, a near-invisible bowsprit with nothing on it, a
+full-length two-tier liner house (1900s shape on an 1870 hull), and 10.6 m anchors laid across
+the forecastle beside a pale timber beakhead.
+
+**The record.** Oceanic (1871) — the type-defining 1870s liner, one funnel, four masts — was
+rigged a **four-masted barque**: square on three masts, fore-and-aft on the jigger. So the
+existing mast structure was right and only the grammar was missing; all of it now exists as
+data from r42/r44:
+1. Square masts get `yards: ["course","ltop","utop","tg"]` — Howes double topsails, universal
+   on new builds by 1870, single topgallant. Twelve square cloths where six rags hung.
+2. The lateen became `rig: "gaff", topmast: true, topsail: true` — the jigger spanker and gaff
+   topsail. Deck-to-truck self-measured 38.3 → 44.8 m on the card.
+3. `staysails: 2` in each square-square gap; `headsails: 3` on a real bowsprit (0.12, steeve
+   12). The staysail grammar needs square masts both ends — the mizzen–jigger gap stays empty,
+   which is restraint, not omission.
+4. `houseAt: [0.28, 0.66]` — the midship bridge structure with the funnel at its forward end,
+   open decks fore and aft.
+
+**Two CLASS faults found by looking, fixed at the class:**
+- **Anchors scaled with the hull forever** (`shank = L * 0.115`, calibrated on a 74). Real
+  anchors stopped growing when hulls did not — Titanic's centre anchor, the largest ever
+  hand-forged, is 5.7 m over all on 269 m of ship. The law now saturates past L=48
+  (`min(L,48)*0.115 + max(0,L-48)*0.004`); Preussen's 17 m monsters, Wyoming's 15 m and the
+  steamer's 10.6 m all came down to forge size. New audit rule: no anchor spans over 8.5 m.
+- **Every hull with a bowsprit got a wooden beakhead and headrails** — 18th-century timber
+  head on iron ships. `buildHead` is now gated on `S.iron`; Preussen and the steamer lost the
+  timber head, Wyoming (wooden) keeps hers.
+
+**The audit was wrong a fifth time**, and the fix is in the file: the staysail census gated on
+mast stations at `(at−0.5)·lwl` while the builder adds the hull's own rake shift — a drawn,
+correct staysail sat 6 cm outside a fixed 0.8 m gate. The gate now scales with the hull
+(`lwl*0.03`) and asks the sail's KIND (`tri`), because once the gate admits rake it admits a
+raked mast's own narrow upper squares too. Audit **25/25 clean** with the anchor rule added.
+
+**Frames.** Full ratchet: **five movers, all classified, all accepted with logged reasons** —
+ship-steamer 25.8% (the rebuild itself, plus neighbours shifted by the grown hull extent),
+aboard 2.2% (same hull in the Great Western close-up, vessel-only), shipwright 1.3% (steamer at
+frame edge + forge-capped anchors along the line), ship-preussen 0.07% and ship-wyoming 0.06%
+(bows only: anchors, and Preussen's timber head gone). Verification ratchet re-run after the
+accepts.
+
+**Rule 0, written:** ship-steamer reads as a rendered world. Three facts off it: a black iron
+hull with gold cove line and porthole rows under a buff black-topped funnel; three square masts
+each crossing course, double topsails and topgallant, with staysails threading the gaps and
+three jibs running to the fore topmast head; white boats and red cowl ventilators on a midship
+deckhouse with open decks fore and aft. (Honest fourth: her card says 12.3 kn service speed
+over a polar whose curve tops at 9.6 — the shared-polar class fault again, still scoped as
+separate data work.)
+
+### Next, in order
+1. **treasure-ship (2011 tris/m)** — next on the survey queue.
+2. **Polars, one per vessel class** — steamer card says 12.3 kn over a 9.6 kn curve; Preussen
+   says 20.5 over 5.8 shared with clipper and ship-of-the-line. One data round closes both.
+3. Carried: serif-webfont decision (globe-default false-RED class); featureless brown land
+   behind aboard-yamato; Titanic remainder; items 5 & 7 (voyage/era card enrichment, tone
+   pass); r43's plate gaps (corbita era plate; dugout/dhow/cog plates; a globe-era-card frame).

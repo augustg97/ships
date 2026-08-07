@@ -394,3 +394,23 @@ The ratchet task is harness-tracked and will re-invoke this session when it exit
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 49403 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 07:48:09  round starting
+Round 44 is complete and live. The short version: the queue item — Preussen — was already built and stranded in the tree by an earlier session that died waiting on its frame-ratchet run (three rounds in a row ended "standing by" with nothing landed). I verified the work independently, ran the ratchet to completion by waiting on its PID in the foreground, classified the one mover, and shipped it.
+
+**What shipped** — one class fix and its dependents, all gated on the vessel record:
+- **Per-mast yard lists** (`yards: [course, ltop, utop, ltg, utg, royal]`) replace the one-sail-per-fidded-segment ceiling, so Preussen crosses six yards on each of five masts. The `crossYard` factoring means the 18th-century three-tier rig and the listed rig build the identical spar, and the PLAN table already carries the clipper's single-topgallant-over-double-topsails list for the next square rigger.
+- **Mast-to-mast staysails** (twelve, three per gap), each sail's luff drawn from the same two points as its stay.
+- **The full-rigger's spanker** on the jigger, throat set low at 0.55 of the lower mast where the P-liner photographs put it.
+- **Jibs climb to the fore topmast head** — they had been capped at 0.94 of the lower mast, squashing four jibs into the bottom quarter of a 45 m foremast.
+- **The white Laeisz boot-topping band** as data-declared shader livery — black over white over red — which closes the waterline check pending since round 32.
+
+The arithmetic closes: 30 square + 12 staysails + 4 jibs + 1 spanker = her record's 47 sails.
+
+**Verification:** shaders compile and the bundle is byte-stable; audit 25/25 clean with three new rig rules (yard census per mast station, staysail census per gap, spanker quad abaft its mast); full ratchet run produced exactly one mover — ship-preussen at 21.081% — whose diff I read full-size: every moved pixel is the vessel, her water, her card digits and fleet thumbnail, with all panels untouched. Accepted with a logged reason. The new `aboard-preussen` baseline matched my fresh capture at 0.000% against the stranded session's — determinism proven across two sessions. Both frames read as a rendered world: the six-tier canvas wall, the staysail staircases, the boot-topping line.
+
+**Deployed:** stamp 1786104587 → **1786115031**, verified live with a cache-busted fetch. Eighth clean deploy in a row.
+
+**Left for next rounds, in HANDOFF:** steamer (1713 tris/m) is next on the queue, then treasure-ship; Preussen's card still reads 5.8 kn from the polar she shares with the clipper — data work, scoped separately. Two standing hazards noted there too: a second server on :8149 serving the repo root over IPv6, and the round-killing pattern itself — ending the turn to wait on a background task ends the round.
+2026-08-07 08:08:39  round finished; HEAD is a622de8 Deploy note r44: Preussen's full rig live at 1786115031
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 51585 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 08:18:40  round starting
