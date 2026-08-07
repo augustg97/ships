@@ -1402,3 +1402,9 @@ her card giving 27.0 kn as service speed while she stands off a brown coast.
    drawing, enclosed A-deck promenade forward, docking bridge on the poop.
 5. Period dress, second pass if wanted: welded boot-topping band; weld-seam sheen A/B;
    preussen P-liner white waterline check.
+
+**End-of-round deploy note: LIVE, stamp 1786072100.** The healing held: the push of 5257c45
+created its own pages run, which completed success with NO manual dispatch — the first
+clean push-triggered deploy since the failure mode began. The r35 advice (give the push run
+a minute before dispatching) is now the standing procedure. Live stamp verified
+1786069279 → **1786072100** with a cache-busted fetch.
