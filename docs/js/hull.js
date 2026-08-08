@@ -1460,7 +1460,7 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
          the yard and the mast, pressing away from them. Aft of the mast is what a sail looks
          like when it is aback: caught on the wrong side, driving the ship astern. It is the
          one sail attitude that means the ship is in trouble, and the fleet was wearing it. */
-      let z = -Math.max(0, chord) * depth;
+      let z = Math.max(0, chord) * depth;
 
       /* ── WHAT MAKES CLOTH LOOK LIKE CLOTH ─────────────────────────────────────────
          A sail is not a smooth shell. It is a limp sheet held at a few points, and every
@@ -1484,7 +1484,16 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
       /* slack cloth low down luffs a little; taut cloth at the head does not */
       const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
       z += crease + roband + slack;
-      pos.push(xw, y, z);
+      /* ⚠ MIRRORED HERE, AFTER THE CLOTH DETAIL, AND THAT ORDER IS THE WHOLE CORRECTION.
+         The belly must end up FORWARD — see the note above — but negating it at the top of the
+         loop was wrong twice over: the crease, roband and slack terms are all written as
+         POSITIVE additions to a positive belly, so against a negative one they pushed back
+         toward the plane and through it, and the cloth crumpled through itself. The first
+         attempt produced sails that read as narrow strips instead of full courses.
+         Mirroring the finished vertex keeps every one of those relationships intact and simply
+         reflects the whole sail. computeVertexNormals() below then derives normals from the
+         reflected winding, so the lighting follows it. */
+      pos.push(xw, y, -z);
       uvs.push(u, v);
     }
   }

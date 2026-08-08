@@ -669,7 +669,7 @@ function swFillCard(v) {
     ];
   })() : []);
   document.getElementById('swCap').innerHTML =
-    '<h4>What she could do</h4><div class="cap">' +
+    '<h4>Performance under sail and power</h4><div class="cap">' +
     cap.map(c => '<div><b>' + c[0] + '</b><span>' + c[1] + '</span></div>').join('') + '</div>' +
     /* ⚠ NO rigNote HERE. It is a property of the RIG, not the ship, so it repeated verbatim
        on all nine square-riggers — and it restated the two figures printed directly above it.
@@ -695,9 +695,9 @@ function swFillCard(v) {
                            (pl.licence ? ' · ' + esc(pl.licence) : '') + '</span>' : '') +
             '</figcaption></figure>'
         : '') +
-    '<h4>What she was</h4>' + proseHTML(v.text);   /* app.js — markdown, not asterisks */
+    '<h4>History and service</h4>' + proseHTML(v.text);   /* app.js — markdown, not asterisks */
   document.getElementById('swRows').innerHTML = (v.rows || []).length
-    ? '<h4>On the record</h4>' + v.rows.map(r =>
+    ? '<h4>Measurements and sources</h4>' + v.rows.map(r =>
         '<div class="rw"><i>' + r[0] + '</i><b>' + r[1] + '</b></div>').join('')
     : '';
   document.getElementById('swCite').textContent = v.cite || '';

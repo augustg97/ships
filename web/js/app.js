@@ -1157,6 +1157,15 @@ function startVoyage(v) {
      isochrones have, and it cannot fall out of step with the line being drawn because it is
      computed FROM that line. Labelled "in this model" for exactly that reason: it is the length
      of the track as drawn, not a claim about the historical passage. */
+  showVoyageCard(v);
+}
+
+/* ⚠ ONE DEFINITION OF THE VOYAGE CARD. It was written inline here, and going aboard a ship
+   needed the same card — copying it would have been a second model of one panel, which is the
+   fault this codebase keeps finding (the rig-height estimate, the two ripple laws, the second
+   ship model). Named once, called from the voyage list and from followShip. */
+function showVoyageCard(v) {
+  if (!v) return;
   const legRows = (v.rows || []).slice();
   if (v.legs && v.legs.length > 1) {
     let nm = 0;
@@ -1255,10 +1264,17 @@ function syncPanelInsets() {
   const roBottom = shown(ro) ? ro.getBoundingClientRect().bottom : 62;
   root.style.setProperty('--psg-top', Math.round(roBottom) + 14 + 'px');
 
-  /* the card starts below the ship's slip when that slip is up, and at its own top when not */
+  /* ⚠ AND THE FALLBACK WAS THE BUG. The card dropped to a hard 150 whenever the ship's slip
+     was down — but #readout stands at top:66 (the tab bar pushes it down from 16) and with an
+     era, a date and two stat lines it runs to roughly 155-175. So on the globe, where the slip
+     is never up, the era card sat ON the date card. The constant was measured against the
+     wrong layout: 150 was right when the readout began at 16.
+     There is no fallback worth keeping here. The card starts below whatever is actually above
+     it — the slip if it is up, the readout otherwise — and both are measured. */
   const psgUp = shown(psg);        /* same reason: psgCard is fixed too */
-  const top = psgUp ? Math.round(psg.getBoundingClientRect().bottom) + 12 : 150;
-  root.style.setProperty('--card-top', top + 'px');
+  const above = psgUp ? psg.getBoundingClientRect().bottom
+              : (shown(ro) ? roBottom : 138);
+  root.style.setProperty('--card-top', Math.round(above) + 12 + 'px');
 }
 
 function wirePanelInsets() {
@@ -2390,6 +2406,13 @@ function followShip(tr) {
   window.SHIPS_PSG.psgInit(R, camera);
   requestAnimationFrame(() => window.SHIPS_PSG.psgPrebuild(tr, ves));
   passageCard(tr, ves);
+  /* ── AND THE VOYAGE ITSELF, NOT ONLY THE SHIP ────────────────────────────────────────
+     Going aboard opened the slip — which ship, where she is, what she is steering — and
+     nothing about the passage she is making. Those are different questions and both belong
+     on screen: the slip is the instrument reading, the card is what the voyage was. The card
+     stacks below the slip already, because syncPanelInsets measures the column. */
+  const voy = ((APP.voyages && APP.voyages.voyages) || []).find(v => v.name === tr.name);
+  if (voy) showVoyageCard(voy);
   document.body.classList.add('in-passage');
 }
 
