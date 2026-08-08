@@ -130,6 +130,7 @@ function swInit() {
      between ships is a separate act, on the arrows.  */
   let drag = null;
   cv.addEventListener('pointerdown', e => {
+    delete SW.viewFromDeg;      // a drag takes the helm back from the URL's bearing
     drag = { x: e.clientX, y: e.clientY, spin: SW.shipSpin || 0, lat: SW.lat, moved: false };
     cv.setPointerCapture(e.pointerId);
   });
@@ -800,6 +801,13 @@ function swFrame(now) {
   if (!SW.on || !SW.ship) return;
   const L = SW.spec.hull.loa;
   SW.lon = 0.42;      // the camera's angle is fixed; the SHIP turns instead
+  /* `#b=<degrees>` asks to see her FROM a bearing on her own compass — 0 ahead, 135 the
+     quarter. Resolved HERE, against the lon the camera actually uses, because app.js reading
+     SW.lon at selection time raced this very line: the hash was applied before the first
+     swFrame, read the constructor's 0.9, and every "ahead" frame stood 27° off. The camera
+     is at lon from world +z and the bow at (shipSpin − π/2), so spin = lon + π/2 − b. */
+  if (SW.viewFromDeg !== undefined)
+    SW.shipSpin = SW.lon + Math.PI / 2 - SW.viewFromDeg * Math.PI / 180;
   /* the line stays put and the selected hull turns under the drag */
   SW.layout && SW.layout.forEach(e => { e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
   /* ── AND ONCE AFLOAT, SHE MOVES WITH THE WATER ────────────────────────────────────

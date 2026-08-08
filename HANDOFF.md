@@ -2477,7 +2477,88 @@ push-triggered deploy in a row.
 
 ---
 
+## Rounds 52–54 — 2026-08-07 — RECOVERED LOG: three commits that never wrote their handoff
+
+These three rounds committed, deployed and moved baselines but did not append to this file, so
+the queue below carried no record of what they closed. Reconstructed from the commit bodies and
+FRAME-LOG; the next section's status marks are the durable result. *Do not repeat this omission
+— a round that does not write its handoff forces the next worker to re-derive the state of the
+queue from git archaeology, which cost this round its first hour.*
+
+- **Round 52 (`0808530`) — items 2, 3, 4, 5.** Era cards rewritten from 2,939 to 14,971
+  characters with four record rows per era, naming the polities and companies that drove each
+  era's shipbuilding; the three constructions August quoted are gone. The era-card/date-card
+  overlap was a hard-coded `--card-top: 150` fallback meeting a readout that actually starts at
+  66; measured now. Shipwright headings renamed to "History and service" / "Measurements and
+  sources" / "Performance under sail and power". Boarding a ship now opens the voyage's own
+  card beside the slip (`showVoyageCard` extracted, not copied). Also corrected round 51's sail
+  mirror: negating the belly at the top of the loop pushed the crease/roband/slack terms back
+  through the plane and the cloth crumpled; the mirror now happens once at the vertex.
+- **Round 53 (`965b33c`) — items 6, 7.** The Sea view's scene contained zero light objects —
+  every ShaderMaterial surface carried the sun as a uniform, so the omission was invisible
+  until MeshStandardMaterial hulls resolved to black. A key and hemisphere light now derive
+  from the same `sunVector(S.month)` the water uses. Consorts got independent station-keeping:
+  two incommensurate periods per axis, phased by hull index, driven by `clockS()`.
+- **Round 54 (`8bc24de`) — items 8, 10.** Eight colonisation voyages added (madagascar,
+  columbus2, saovicente, legazpi, jamestown, mayflower, capecolony, firstfleet — vinland and
+  middlepassage already existed), same schema as the existing 62. The wake's straight lines
+  were three `step()` calls, not a texture seam; every edge is now a smoothstep sized from the
+  beam, the band starts at the stern, the arms hold 19.47°, and transverse crests at
+  λ = 2πV²/g were added. Verified on aboard-clipper.
+
+---
+
+## Round 55 — 2026-08-07 — Item 1 closed: the fleet seen from ahead, and a bearing the URL can name
+
+**The task the queue actually left open.** Round 52 wrote "NOT YET CONFIRMED FROM AHEAD" on the
+sail mirror and round 53 confirmed only preussen, from one low bearing. Item 1 names five
+vessels and two bearings. All ten are now looked at: **ship-of-the-line, clipper, preussen,
+east-indiaman and carrack, each from dead ahead (b=0) and from the quarter (b=135), and every
+one carries her canvas forward of the masts.** From ahead the cloth hides its own yard and mast
+— the masts appear only in the tier gaps and above the royals, with yardarm tips at the sail
+corners; from the quarter the masts stand nearest the camera with the cloth bellied away beyond
+them, which is the exact reverse of the aback fault. The clipper and preussen show their head
+suits edge-on from dead ahead as a thin white line down the centreline — correct, that is what
+fore-and-aft canvas does at that bearing. The small bar mid-topsail on the ship of the line is
+the top platform standing proud of the near-flat head region of the sail behind it — the belly
+grows head-to-foot, so at platform height the cloth is close to the mast plane. Also physical.
+
+**The new grammar: `#b=<degrees>` names the bearing a ship is seen from,** on her own compass —
+0 ahead, 90 abeam, 135 the quarter, 180 astern. The Shipwright's camera never moves; the ship
+turns under it, so the bearing resolves to `shipSpin = lon + π/2 − b`. ⚠ **The first
+implementation was 27° off from a formula that was itself correct**, and the cause is a class
+this codebase already knows: app.js computed the spin at selection time reading `SW.lon`, but
+`swFrame` overwrites `SW.lon = 0.42` every frame and the constructor says 0.9 — the hash was
+applied before the first frame ran. State must be resolved where it is owned: app.js now
+records only the request (`SW.viewFromDeg`) and swFrame resolves it against the lon it actually
+uses. A pointerdown clears the request so the drag keeps the helm.
+
+**One frame kept as the standing guard: `shipwright-ahead`** (ship of the line, `b=0`). Every
+square sail in the fleet goes through `makeSail`, so one bow-on baseline catches the whole
+aback class if it regresses. The other nine verification captures were looked at and deleted —
+ten standing bearings would be maintenance, not coverage.
+
+**Queue status settled** (see marks in the next section): items 1–8 and 10 are done; **item 9
+— sourced running metrics on the top-left card — is the next unfinished item**, and it is a
+research task before it is a UI task: trade volume and tonnage by era need sources or
+derivations, labelled as one or the other, per rule 10. Item 11 continues the survey (steamer,
+treasure-ship, steel stern quarter, serif-webfont decision).
+
+**Rule 0, written on `shipwright-ahead`:** it reads as a rendered world — a bow-on ship at
+anchorage scale on open water, hulls of her neighbours standing off either side. Three facts a
+viewer can read off it: a 74's beakhead and head rails under a bowsprit steeved dead at the
+viewer, with the guns run out down both broadsides; five tiers of square canvas bellied toward
+the viewer, deeper at the foot than the head, yardarm tips showing at the corners; the fleet
+list and the 20-metre scale bar placing her 57 m against the dugout's 9.
+
+Audit 25/25 clean. Frames 39 → 40.
+
+---
+
 ## THE QUEUE — August's second list, 2026-08-07. Work these in order.
+
+**STATUS, written round 55: items 1–8 and 10 are DONE — 1 verified r55, 2/3/4/5 done r52,
+6/7 done r53, 8/10 done r54. Item 9 is NEXT. Item 11 is the standing survey.**
 
 **1. THE SAILS WERE ABACK ON EVERY SQUARE-RIGGER — fixed in this commit, verify it.**
 `makeSail` clamped the belly to local +z and `rotation.y = PI/2` maps that to hull +x, which

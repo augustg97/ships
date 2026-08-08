@@ -379,10 +379,21 @@ function applyHashView() {
     shipSelectPending = true;
     let tries = 0;
     const want = sm[1].toLowerCase();
+    /* `&b=<degrees>` — the bearing the ship is seen FROM, on her own compass: 0 dead ahead,
+       90 abeam, 135 the quarter, 180 astern. Only the REQUEST is recorded here; the spin is
+       resolved in swFrame against the lon the camera actually uses. Computing it here raced
+       swFrame's own `SW.lon = 0.42` and read the constructor's 0.9 — every "ahead" frame
+       stood 27° off, from a formula that was itself correct. Added for the aback
+       verification (queue item 1): "look from ahead" was not addressable in a URL, and what
+       a frame cannot name it cannot watch. */
+    const bm = /[#&]b=(-?[\d.]+)/.exec(location.hash);
     const tryPick = () => {
       const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
       const entry = SWs && (SWs.layout || []).find(e => e.id.toLowerCase() === want);
-      if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) { shipSelectPending = false; return; }
+      if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) {
+        if (bm) SWs.viewFromDeg = parseFloat(bm[1]);
+        shipSelectPending = false; return;
+      }
       if (typeof swOpenById === 'function') swOpenById(sm[1]);
       if (++tries > 600) { shipSelectPending = false; console.warn('no hull named', sm[1]); return; }
       requestAnimationFrame(tryPick);

@@ -537,4 +537,17 @@ Audit 25/25; ratchet grew 37 → 39 frames (ship-clipper and aboard-clipper, bot
 2026-08-07 16:29:24  round starting
 Execution error───────────────────────────────────────────────────────────────────────────
 2026-08-07 19:50:30  round starting
-Execution error
+Execution error───────────────────────────────────────────────────────────────────────────
+2026-08-07 21:14:05  round starting
+The ratchet run is backgrounded (task `bpnddmq09`) and will notify when it finishes all 40 frames. Status so far this round:
+
+- **Item 1 is verified and closed** — ship of the line, clipper, Preussen, East Indiaman and carrack each looked at from dead ahead and from the quarter; canvas stands forward of the masts on all ten captures.
+- Found and fixed a real bug on the way: the new `#b=<degrees>` bearing param was 27° off because app.js read `SW.lon` before `swFrame` overwrote it — the bearing request is now resolved inside `swFrame`, where the value is owned.
+- `shipwright-ahead` is kept as a standing bow-on baseline guarding the aback class; the other nine captures were reviewed and removed.
+- Audit ran 25/25 clean; site built at stamp 1786163507; HANDOFF now carries the recovered logs for rounds 52–54 (which never wrote theirs), this round's entry, and the queue status: items 1–8 and 10 done, item 9 next.
+
+Once the ratchet reports, I'll classify any movers, commit, push and verify the live stamp.
+2026-08-07 21:43:37  round finished; HEAD is 8bc24de The straight lines in the wake were three step() calls, not a texture seam
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 44621 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 21:53:37  round starting
