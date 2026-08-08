@@ -456,6 +456,8 @@ function writeHash() {
 }
 
 /* ── sun position ───────────────────────────────────────────────────────── */
+let seaKey = null, seaSky = null;   /* the Sea view's only two lights — see below */
+
 function sunVector(monthFrac) {
   // Declination through the year, plus a slow rotation so the terminator moves.
   const dayOfYear = monthFrac / 12 * 365.25;
@@ -1734,6 +1736,34 @@ function frame(now) {
   mat.uniforms.uSun.value.copy(sunVector(S.month));
   mat.uniforms.uCam.value.copy(camera.position);
 
+  /* ── ⚠ THE SEA VIEW HAD NO LIGHTS IN IT AT ALL, AND THE SHIPS WERE BLACK CUT-OUTS ────
+     Not dim, not badly lit — this scene contained zero light objects. The globe, the ocean,
+     the atmosphere and the labels are all drawn with their own ShaderMaterials, which carry
+     their sun as a uniform and need nothing from the scene graph, so the omission was
+     invisible for the entire life of the view. The HULLS are MeshStandardMaterial, and a
+     standard material in a scene with no lights resolves to black. Every ship on the map was
+     a flat silhouette of a correctly-detailed model.
+
+     Two lights, and they are driven from the SAME sun vector the water is drawn with rather
+     than from constants of their own. A second opinion about where the sun is would show up
+     immediately as a hull lit from one side and a sea glittering from the other — the
+     two-models-of-one-thing fault this project keeps finding. The hemisphere stands in for
+     sky above and water below, which is most of what actually lights a ship at sea. */
+  if (!seaKey) {
+    seaKey = new THREE.DirectionalLight(0xfff4e2, 2.6);
+    seaSky = new THREE.HemisphereLight(0xcfe4f6, 0x2e4a58, 1.5);
+    scene.add(seaKey); scene.add(seaSky);
+  }
+  {
+    const sv = sunVector(S.month);
+    /* placed far out along the sun vector: a directional light only uses its direction, but
+       three.js takes that from position minus target, and the target defaults to the origin */
+    seaKey.position.set(sv.x * R * 6, sv.y * R * 6, sv.z * R * 6);
+    /* night side: let the key fall away rather than lighting hulls the sea cannot see */
+    const up = new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z).normalize();
+    seaKey.intensity = 0.55 + 2.35 * Math.max(0, up.dot(sv));
+  }
+
   /* ── HOW MUCH OCEAN IS IN ONE PIXEL ─────────────────────────────────────────────────
      Everything about the appearance of water follows from this one number. Half a million
      metres per pixel and the sea is a colour; half a metre and it is a surface with a shape.
@@ -2185,6 +2215,8 @@ function addVoyageToFleet(v, list, legsR) {
          Applied in stepEraFleet, because the scale changes with the camera. */
       holder.position.set(t * L0 * 1.9, 0, -Math.abs(t) * L0 * 1.5);
       holder.userData.station = { x: holder.position.x, z: holder.position.z };
+      /* her own phase, so no two ships in company wander together — see stepEraFleet */
+      holder.userData.wander = n * 2.399963 + ves.hull.loa * 0.017;
       grp.add(holder);
     }
     grp.userData.loa = ves.hull.loa;
@@ -2804,6 +2836,38 @@ function stepEraFleet(t) {
       const rate = FROZEN ? 1 : (target < cf ? 0.020 : 0.008);
       h.userData.stationF = cf + (target - cf) * rate;
       const q = place(h.userData.stationF);
+
+      /* ── ⚠ A SQUADRON IS NOT A FORMATION FLIGHT ──────────────────────────────────
+         Each consort sat at an exact multiple of the flagship's length, and the only thing
+         that ever changed was ONE shared factor applied to all of them — so the group moved
+         as a single rigid body. In the Crossing era, where a voyage is two or three canoes,
+         that reads exactly as August described it: boats holding parade formation, locked
+         abeam of each other, which is the one thing small craft in open water never do.
+
+         A ship keeping station does not sit on it. She is conned onto it by eye, falls off
+         to leeward, and is brought back — a wander of minutes, not seconds, and every ship
+         in company wanders independently because every helmsman is a different person.
+         Two incommensurate periods per axis so the path never closes into a visible cycle,
+         phased off the hull's own index so no two ships share one, at a few per cent of the
+         interval. Amplitude scales with the interval, so a close formation stays close.
+
+         ⚠ Driven by clockS(), not performance.now(). Anything that reads wall-clock for
+         appearance breaks the frame ratchet for everyone — the standing rule in CLAUDE.md —
+         and a capture of a wandering fleet has to be deterministic like everything else. */
+      const ph = h.userData.wander || 0;
+      const T = (typeof clockS === 'function') ? clockS() : 0;
+      const wob = (a, b, k) => Math.sin(T / a + k) * 0.62 + Math.sin(T / b + k * 1.7) * 0.38;
+      const amp = Math.hypot(st.x, st.z) * 0.085;
+      if (amp > 0) {
+        q.x += wob(37.0, 61.0, ph) * amp;
+        q.z += wob(43.0, 71.0, ph * 1.31) * amp;
+        /* the station was dropped onto the sphere; the wandered point has to be too, or a
+           consort rides above or below the water she was just floated on */
+        const r2w = q.x * q.x + q.z * q.z;
+        q.y = Math.sqrt(Math.max(0, Rlocal * Rlocal - r2w)) - Rlocal;
+        /* and she is not steering the flagship's exact course either */
+        h.rotation.y = wob(53.0, 79.0, ph * 0.77) * 0.045;
+      }
       h.position.set(q.x, q.y, q.z);
     }
     /* ── WHERE SHE IS, RECORDED ONCE ────────────────────────────────────────────────
