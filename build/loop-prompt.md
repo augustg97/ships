@@ -3,7 +3,17 @@ This is one automated improvement round. Read ~/Ships/CLAUDE.md and the last two
 ~/Ships/HANDOFF.md first — HANDOFF.md is how rounds chain together, and the previous round left
 you a queue there.
 
-## The standing task
+## ⚠ THE STANDING TASK HAS CHANGED — WORK AUGUST'S SECOND LIST FIRST
+
+HANDOFF.md ends with a section titled **"THE QUEUE — August's second list"**, eleven numbered
+items. **That queue outranks the vessel survey below.** Take the lowest-numbered item that is
+not finished, do it properly, and only fall through to the ship-model survey when the queue is
+empty. Several of the items are WRITING rather than geometry — the era cards especially — and
+the register matters as much as the facts: August has now rejected aphoristic writing three
+times, by name. No sentence that gestures at a point instead of stating it. If you cannot say
+what a sentence means, delete it.
+
+## The older standing task, for when that queue is empty
 
 SURVEY AND IMPROVE THE SHIP MODELS, in both the Sea (close-up, `#f=<voyage id>`) and the
 Shipwright (`#v=ship&s=<vessel id>`), assessing FROM ALL ANGLES. Find and fix:
