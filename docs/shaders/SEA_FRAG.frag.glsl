@@ -146,6 +146,16 @@ void main(){
     float along  = dot(rel, -uWakeDir);                   // positive ASTERN of her
     float across = abs(dot(rel, vec2(-uWakeDir.y, uWakeDir.x)));
     float spd    = clamp(uWakeKn / 16.0, 0.25, 1.5);
+    /* ⚠ TWO DIFFERENT PHYSICS, AND THEY DO NOT SCALE THE SAME WAY WITH SPEED. Wave-making —
+       the Kelvin arms and the transverse crests — is governed by Froude number and really is
+       almost nothing at low speed: the treasure ship at 4.3 kn over 70 m sits at Fr = 0.08 and
+       makes hardly any wave at all, which is correct and should stay correct. But the WHITE
+       WATER is not wave-making. It is the boundary layer stripping off the hull and crests
+       breaking against a moving obstacle, and a hull under way makes that at any speed she is
+       actually moving. Scaling both by the same factor left a 70 m ship crossing an ocean with
+       no visible disturbance at all — physically defensible for the waves, wrong for the foam,
+       and illegible either way, which rule 0 does not allow. */
+    float churnSpd = clamp(uWakeKn / 16.0, 0.55, 1.3);
     /* ⚠ TEN SHIP-LENGTHS OF FULL-STRENGTH ARM READS AS SEARCHLIGHTS, NOT AS WATER. The first
        version ran the Kelvin arms at 0.62 over 980 m at a constant width, which on screen is a
        pair of long straight bright lines converging on the hull — the eye calls that light, not
@@ -156,29 +166,64 @@ void main(){
     float fade   = clamp(1.0 - along / len, 0.0, 1.0);
     float w = 0.0;
 
-    /* the turbulent band, widening astern and dying as it goes */
-    float halfW = uWakeBeam * (0.5 + 1.1 * clamp(along / len, 0.0, 1.0));
-    w += step(0.0, along) * fade * fade *
-         smoothstep(halfW, halfW * 0.30, across) *
-         (0.55 + 0.45 * fbm(vec2(along * 0.06 - drift * 1.7, across * 0.10)));
+    /* ⚠ THE STRAIGHT LINES WERE step(). Three of them: step(0.0, along) began the turbulent
+       band with a razor edge running dead across her heading, step(uWakeLen*0.25, along) did
+       the same for the arms, and step(fwd, uWakeLen*0.60) chopped the bow wave off with a
+       hard line ahead of the stem. A step() is a discontinuity — the eye reads a perfectly
+       straight bright edge on water as a drawing error, correctly, because nothing in a wake
+       is straight except the arms and those are not edges. Every one is a smoothstep now,
+       over a width taken from the ship rather than from a constant.
 
-    /* the Kelvin arms — tan(19.47 degrees) = 0.3536, and it is not a free parameter. The arm
-       spreads as it goes, so it thins rather than staying a drawn line. */
-    float arm = abs(across - along * 0.3536);
-    float armW = uWakeBeam * (0.35 + 0.9 * clamp(along / len, 0.0, 1.0));
-    w += step(uWakeLen * 0.25, along) * fade * fade * 0.30 *
+       AND THE GEOMETRY WAS WRONG AT BOTH ENDS. The turbulent band began at along = 0, which
+       is the ship's CENTRE — a wake starts at the stern. The bow wave was a rectangle ahead
+       of her instead of a crescent springing from the stem. */
+    float halfL  = uWakeLen * 0.5;
+    float soft   = uWakeBeam * 0.45;                  /* the softening width, her own beam */
+
+    /* ── 1. THE TURBULENT BAND, from the stern aft ────────────────────────────────────
+       White water that the hull has actually broken: aerated, chaotic, and the brightest
+       thing in a wake close to. It begins at the stern, widens astern, and decays. */
+    float aft    = along - halfL;                     /* positive ABAFT the stern */
+    float halfW  = uWakeBeam * (0.5 + 1.1 * clamp(aft / len, 0.0, 1.0));
+    float churn  = fbm(vec2(aft * 0.06 - drift * 1.7, across * 0.10));
+    w += smoothstep(-soft, soft, aft) * fade * fade * churnSpd *
+         smoothstep(halfW, halfW * 0.30, across) * (0.55 + 0.45 * churn);
+
+    /* ── 2. THE KELVIN ARMS ───────────────────────────────────────────────────────────
+       The half-angle is 19.47 degrees for every displacement hull at every speed — it falls
+       out of deep-water dispersion and is not a free parameter. tan(19.47) = 0.3536. */
+    float arm    = abs(across - along * 0.3536);
+    float armW   = uWakeBeam * (0.35 + 0.9 * clamp(along / len, 0.0, 1.0));
+    w += smoothstep(-soft * 2.0, soft * 2.0, along - uWakeLen * 0.25) * fade * fade * 0.30 *
          smoothstep(armW, 0.0, arm);
 
-    /* the bow wave, thrown out and forward of the stem */
-    float fwd = -along;                                    // positive AHEAD of her
-    w += step(0.0, fwd) * step(fwd, uWakeLen * 0.60) *
-         smoothstep(uWakeBeam * 1.7, uWakeBeam * 0.25, across) *
-         smoothstep(0.0, uWakeLen * 0.30, fwd) * 0.85 * spd;
+    /* ── 3. THE TRANSVERSE WAVES, which were missing entirely ─────────────────────────
+       Inside the arms a real wake carries crests running ACROSS the track, and their spacing
+       is not free either: a displacement hull makes waves whose phase speed equals her own,
+       so the deep-water dispersion relation fixes the wavelength at lambda = 2*pi*V^2/g.
+       That is why a slow boat leaves close-set ripples and a fast ship leaves long swells,
+       and it is the single most recognisable part of a wake seen from above. */
+    float V      = uWakeKn * 0.5144;                  /* knots to metres per second */
+    float lambda = max(2.0, 6.2831853 * V * V / 9.81);
+    float inArm  = smoothstep(0.0, armW * 2.0, along * 0.3536 - across);
+    w += smoothstep(-soft, soft, aft) * fade * fade * inArm * 0.22 *
+         (0.5 + 0.5 * cos(6.2831853 * along / lambda));
+
+    /* ── 4. THE BOW WAVE, a crescent off the stem ─────────────────────────────────────
+       Thrown out and forward as the stem parts the water, strongest right at the bow and
+       dying within a length. No hard cut anywhere: it falls off with distance from the stem
+       in both directions. */
+    vec2  stem   = uWakeDir * halfL;                  /* her stem, in patch metres */
+    float dStem  = length(rel - stem);
+    w += smoothstep(uWakeLen * 0.55, 0.0, dStem) *
+         smoothstep(uWakeBeam * 2.2, uWakeBeam * 0.4, across) * 0.85 * churnSpd;
 
     /* and it dies into the distance with the same haze the water does, so it cannot read as a
        hard mark lying on top of the sea */
     w *= 1.0 - smoothstep(uScale * 2.0, uScale * 9.0, dist);
-    w = clamp(w * spd, 0.0, 0.80);
+    /* ⚠ and NOT another * spd here — that was applying the speed twice to terms that had
+       already taken it, which is how a slow ship ended up with 7% of a wake. */
+    w = clamp(w, 0.0, 0.85);
     /* aerated water is brighter, and it scatters instead of reflecting */
     col = mix(col, vec3(0.88, 0.92, 0.94), w);
   }

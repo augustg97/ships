@@ -129,8 +129,8 @@
   },
   {
    "name": "map-floor",
-   "path": "/?frozen=1#e=4&t=1590&c=-9.85,36.95&z=300000",
-   "note": "THE MAP AT ITS LOWEST — 300 km over Cape St Vincent, with the treasure fleet homeward bound and the Portuguese coast in the same frame. 300 km is where the token exaggeration peaks and therefore where the wheel now stops: below it the ramp unwinds the token toward true scale and the ship SHRANK, from 65 km long at 35.6% of the frame to 100 m at 2%. Watches the ship-to-coast proportion, which is the thing being asserted, and the water at that height."
+   "path": "/?frozen=1#e=4&t=1590&c=-45.3,-24.1&z=300000",
+   "note": "THE MAP AT ITS LOWEST — 300 km over the Serra do Mar, with Sousa's fleet closing the Brazilian coast for São Vicente. 300 km is where the token exaggeration peaks and therefore where the wheel now stops: below it the ramp unwinds the token toward true scale and the ship SHRANK, from 65 km long at 35.6% of the frame to 100 m at 2%. Watches the ship-to-coast proportion, which is the thing being asserted, and the water at that height. ⚠ Re-pointed r54: it framed the treasure fleet off Cape St Vincent until phases became identity-keyed (a hash of the voyage name, so data insertions stop moving unrelated ships) and the flota's own phase left her mid-Atlantic. Chosen the aboard-coast way — every era-4 ship's frozen position computed, the one against a coast taken."
   },
   {
    "name": "aboard-coast",

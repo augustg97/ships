@@ -535,4 +535,6 @@ Audit 25/25; ratchet grew 37 → 39 frames (ship-clipper and aboard-clipper, bot
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 12841 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 16:29:24  round starting
+Execution error───────────────────────────────────────────────────────────────────────────
+2026-08-07 19:50:30  round starting
 Execution error

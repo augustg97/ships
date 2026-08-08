@@ -2270,8 +2270,16 @@ function addVoyageToFleet(v, list, legsR) {
     const want = hours * 0.42;
     const period = Math.max(45, want);
     if (want < 45) paceClamped.push(v.name);
+    /* ── ⚠ HER PLACE ON THE ROUTE BELONGED TO THE LIST, NOT TO HER ──────────────────
+       phase was `(eraTracks.length * 0.37) % 1` — where a ship stands along her route was
+       keyed to her POSITION IN THE ERA LIST, so inserting one voyage into the data moved
+       every ship built after it. Round 54's eight colonisation voyages emptied the
+       map-floor frame of the treasure fleet that is its subject. The phase is the
+       voyage's own: a hash of her name, stable whatever the data around her does. */
+    let ph = 0;
+    for (let i = 0; i < v.name.length; i++) ph = (ph * 31 + v.name.charCodeAt(i)) >>> 0;
     eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
-                     phase: (eraTracks.length * 0.37) % 1, name: v.name });
+                     phase: (ph % 1000) / 1000, name: v.name });
   }
 }
 

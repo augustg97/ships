@@ -1020,6 +1020,75 @@
    "cite": "*Hou Hanshu*, Chapter 88."
   },
   {
+   "id": "madagascar",
+   "name": "The Austronesian settlement of Madagascar",
+   "dates": "c. 500 – 900",
+   "year": 700,
+   "vessel": "voyaging-canoe",
+   "view": [
+    80,
+    -10,
+    340
+   ],
+   "tags": [
+    "Inferred"
+   ],
+   "legs": [
+    {
+     "lon": 114.6,
+     "lat": -3.6,
+     "name": "the Barito mouth, Borneo",
+     "date": ""
+    },
+    {
+     "lon": 105.3,
+     "lat": -6.0,
+     "name": "the Sunda Strait",
+     "date": ""
+    },
+    {
+     "lon": 88.0,
+     "lat": -8.5,
+     "name": "the trade-wind road",
+     "date": ""
+    },
+    {
+     "lon": 65.0,
+     "lat": -11.0,
+     "name": "open ocean — no islands for 3,000 km",
+     "date": ""
+    },
+    {
+     "lon": 49.4,
+     "lat": -12.0,
+     "name": "Cap d'Ambre",
+     "date": ""
+    },
+    {
+     "lon": 48.3,
+     "lat": -13.4,
+     "name": "Mahilaka",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Nearest relative of Malagasy",
+     "Ma'anyan, of the Barito valley, Borneo"
+    ],
+    [
+     "Asian founding population",
+     "about 30 women, by mitochondrial DNA"
+    ],
+    [
+     "Borneo to Madagascar",
+     "about 7,500 km"
+    ]
+   ],
+   "text": "Madagascar lies 400 km off the African coast, and its language comes from Borneo, 7,500 km to the east. Malagasy's closest relative is Ma'anyan, spoken in the Barito river valley of southern Kalimantan, with loanwords from Malay, the trade language of the ships that crossed. The genetic record agrees: Malagasy ancestry is roughly half African Bantu and half island south-east Asian, and a 2012 study of mitochondrial DNA modelled the Asian founding population at about 30 women. The crops the settlers established — rice, banana, taro, greater yam — are the Asian domesticates, and the outrigger canoes still worked on the Malagasy coast are the Austronesian type.\n\nNo account, wreck or date of any crossing survives, so the voyage itself is inference. Whether the settlers sailed direct — about a month downwind on the south-east trades and the South Equatorial Current, by modern drift modelling — or coasted round the northern Indian Ocean by way of India and the Maldives is contested. The date is contested too: the earliest widely accepted settlement traces fall between about 500 and 700 CE, and the harbour town of Mahilaka, on the north-west coast, was standing by about 1000. This was the westernmost reach of the same expansion that took the voyaging canoe east to Hawaiʻi and Rapa Nui: at its widest the one language family spanned more than half the circumference of the Earth.",
+   "cite": "Adelaar, in *The Austronesians* (1995); Cox et al., *Proc. R. Soc. B* (2012); Pierron et al., *PNAS* (2017)."
+  },
+  {
    "id": "srivijaya",
    "name": "The Srivijaya straits",
    "dates": "c. 900",
@@ -1706,6 +1775,89 @@
    "cite": "*Diario* of the first voyage (Las Casas abstract)."
   },
   {
+   "id": "columbus2",
+   "name": "The colonising fleet of 1493",
+   "dates": "1493 – 94",
+   "year": 1493,
+   "vessel": "carrack",
+   "view": [
+    -45,
+    23,
+    300
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": -6.3,
+     "lat": 36.5,
+     "name": "Cádiz, 25 September 1493",
+     "date": ""
+    },
+    {
+     "lon": -17.1,
+     "lat": 28.1,
+     "name": "La Gomera — cane and livestock",
+     "date": ""
+    },
+    {
+     "lon": -40.0,
+     "lat": 18.0,
+     "name": "the trades",
+     "date": ""
+    },
+    {
+     "lon": -61.4,
+     "lat": 15.4,
+     "name": "Dominica, 3 November",
+     "date": ""
+    },
+    {
+     "lon": -64.7,
+     "lat": 17.9,
+     "name": "north along the Lesser Antilles",
+     "date": ""
+    },
+    {
+     "lon": -66.6,
+     "lat": 17.9,
+     "name": "Puerto Rico",
+     "date": ""
+    },
+    {
+     "lon": -72.3,
+     "lat": 19.9,
+     "name": "La Navidad — found burned",
+     "date": ""
+    },
+    {
+     "lon": -71.1,
+     "lat": 19.9,
+     "name": "La Isabela, January 1494",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Ships",
+     "seventeen"
+    ],
+    [
+     "Aboard",
+     "about 1,200 — soldiers, priests, artisans; no women recorded"
+    ],
+    [
+     "La Gomera to Dominica",
+     "21 days"
+    ],
+    [
+     "In the holds",
+     "sugar cane, wheat, horses, cattle, pigs"
+    ]
+   ],
+   "text": "Columbus came home in March 1493 with gold ornaments, parrots and six captive Taíno; by September the crown had assembled seventeen ships and about 1,200 men at Cádiz. This voyage was occupation, planned as such: soldiers, priests, artisans and farmers, with wheat, vines, sugar cane cut at La Gomera, and the first horses, cattle and pigs the Americas had seen. The fleet left the Canaries on 13 October, made Dominica in 21 days on 3 November, and worked north-west along the Lesser Antilles — naming Guadeloupe and Puerto Rico — to Hispaniola.\n\nAt La Navidad, the fort built from the wrecked *Santa María*'s timbers the year before, they found the stockade burned and all 39 men dead. Columbus founded La Isabela 100 km east in January 1494 — streets, a church, a storehouse, the first town Europeans intended as permanent in the Americas. It failed within four years, of hunger, disease and mutiny, and Santo Domingo on the south coast replaced it. The pattern of the Spanish Indies was set on this voyage: crown charter, private capital, tribute assessed on the Taíno — and the cane cuttings whose descendants became the Caribbean sugar economy the slave ships supplied.",
+   "cite": "Diego Álvarez Chanca, letter to the cabildo of Seville (1494); Morison, *Admiral of the Ocean Sea* (1942)."
+  },
+  {
    "id": "dagama",
    "name": "Da Gama to India",
    "dates": "1497 – 1499",
@@ -1988,6 +2140,166 @@
    ],
    "text": "The voyage that measured the planet, and it did so by nearly killing everyone on it. Five ships and about 270 men left; one ship and eighteen men came back.\n\nThe Pacific crossing is the part that could not be planned for, because nobody knew how wide it was. **Ninety-eight days without fresh food.** They ate the leather off the yards. That the ocean was that big was the single most important thing the voyage found out.\n\nMagellan himself never completed it — he was killed at Mactan on 27 April 1521, with more than a year still to run. The circumnavigation is Elcano's.\n\n**The mutiny was not an Easter mutiny.** It broke out on the night of 1 April 1520 at Puerto San Julián — which was **Palm Sunday**, not Easter. Julian Easter that year fell on 8 April, which means Quesada was beheaded and quartered on Holy Saturday, the eve of it. The popular framing gets the liturgy exactly one week wrong.\n\n**And they came home a day early.** At Cape Verde the shore party asked what day it was and were told Thursday; the ship's log said Wednesday. Two men had kept independent logs — Pigafetta and the pilot Albo — and neither had missed a day. Sailing west with the sun, they had counted 1,023 days where a man standing still counted 1,024. It is the first empirical proof that the world needs a date line, and nobody had anticipated it.\n\n*The famous 18 is the number aboard* Victoria. *About 35 people actually went round; about 90 got back to Spain, most of them deserters who had turned for home in the strait two years earlier.*",
    "cite": "Pigafetta and Albo's log-book, in Stanley (ed.), Hakluyt Society, 1874; Navarrete's armada accounts."
+  },
+  {
+   "id": "saovicente",
+   "name": "Sousa's fleet to Brazil",
+   "dates": "1530 – 32",
+   "year": 1530,
+   "vessel": "carrack",
+   "view": [
+    -30,
+    3,
+    340
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": -9.3,
+     "lat": 38.6,
+     "name": "Lisbon, 3 December 1530",
+     "date": ""
+    },
+    {
+     "lon": -17.1,
+     "lat": 28.1,
+     "name": "La Gomera",
+     "date": ""
+    },
+    {
+     "lon": -23.5,
+     "lat": 15.0,
+     "name": "Santiago, Cape Verde",
+     "date": ""
+    },
+    {
+     "lon": -30.0,
+     "lat": -2.0,
+     "name": "the line",
+     "date": ""
+    },
+    {
+     "lon": -34.8,
+     "lat": -8.0,
+     "name": "Pernambuco — French prizes taken",
+     "date": ""
+    },
+    {
+     "lon": -38.5,
+     "lat": -13.0,
+     "name": "down the coast",
+     "date": ""
+    },
+    {
+     "lon": -43.1,
+     "lat": -22.9,
+     "name": "Guanabara Bay",
+     "date": ""
+    },
+    {
+     "lon": -46.36,
+     "lat": -23.97,
+     "name": "São Vicente, 22 January 1532",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Ships",
+     "five"
+    ],
+    [
+     "Aboard",
+     "about 400 colonists and crew"
+    ],
+    [
+     "Founded",
+     "São Vicente, 22 January 1532"
+    ],
+    [
+     "The record",
+     "Pero Lopes de Sousa's day-book of the whole voyage"
+    ]
+   ],
+   "text": "For thirty years after Cabral's landfall Portugal treated Brazil as a coast to cut dyewood from, and French ships were cutting it too. João III's answer, in December 1530, was a fleet of five ships under Martim Afonso de Sousa, about 400 people, and orders to clear the French from the coast, survey it to the Río de la Plata, and plant a settled colony. Sousa's brother Pero Lopes kept the day-book, so the voyage is documented league by league: La Gomera, Cape Verde, prizes taken off Pernambuco, the survey south.\n\nSão Vicente, founded on an island by the bar of Santos on 22 January 1532, was the first permanent Portuguese town in America: a town council, allotted fields, and sugar cane from Madeira. The first engenho — the water-driven mill a sugar estate is organised around — was grinding within two years, and the model spread north to Pernambuco and Bahia, where the soil was better. Sugar made Brazil the destination of more enslaved Africans than any other place in the Americas — about 4.9 of the 12.5 million carried across the Atlantic — and the hereditary captaincies the crown granted from 1534, São Vicente among them to Sousa, carried the colony's government for the rest of the century.",
+   "cite": "Pero Lopes de Sousa, *Diário da Navegação* (1530–32); Schwartz, *Sugar Plantations in the Formation of Brazilian Society* (1985)."
+  },
+  {
+   "id": "legazpi",
+   "name": "Legazpi to Cebu, and Urdaneta's way home",
+   "dates": "1564 – 65",
+   "year": 1564,
+   "vessel": "carrack",
+   "view": [
+    -175,
+    15,
+    380
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": -104.7,
+     "lat": 19.2,
+     "name": "Barra de Navidad, 21 November 1564",
+     "date": ""
+    },
+    {
+     "lon": -120.0,
+     "lat": 14.0,
+     "name": "down into the trades",
+     "date": ""
+    },
+    {
+     "lon": -150.0,
+     "lat": 12.0,
+     "name": "the trade-wind road",
+     "date": ""
+    },
+    {
+     "lon": 177.0,
+     "lat": 12.5,
+     "name": "the far Pacific",
+     "date": ""
+    },
+    {
+     "lon": 144.75,
+     "lat": 13.45,
+     "name": "Guam, January 1565",
+     "date": ""
+    },
+    {
+     "lon": 125.3,
+     "lat": 12.4,
+     "name": "the San Bernardino Strait",
+     "date": ""
+    },
+    {
+     "lon": 123.9,
+     "lat": 10.3,
+     "name": "Cebu, 27 April 1565",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Ships",
+     "four, about 380 men"
+    ],
+    [
+     "Navidad to Cebu",
+     "157 days, by Guam"
+    ],
+    [
+     "Urdaneta's return",
+     "Cebu to Acapulco in 130 days, north about at 39°N"
+    ],
+    [
+     "What it opened",
+     "the Manila galleon run, sailed until 1815"
+    ]
+   ],
+   "text": "Spain could reach the western Pacific but could not get back: four expeditions since Magellan had tried to recross eastward and every one had failed against the trade winds. Philip II's solution was an expedition mounted from Mexico with the return assigned to a specialist — Andrés de Urdaneta, a survivor of the Loaísa voyage of 1525 who had since become an Augustinian friar. Miguel López de Legazpi, a 60-year-old colonial administrator, sailed from Barra de Navidad on 21 November 1564 with four ships and about 380 men, took possession of Guam in January, and reached Cebu on 27 April 1565 — the first Spanish settlement in the Philippines, moved to Manila in 1571.\n\nUrdaneta took the *San Pedro* out of Cebu on 1 June 1565, stood north to about 39°N until she found the westerlies, and ran down the American coast to Acapulco on 8 October — 130 days, the crew so wasted by scurvy that the port had to send men aboard to work her in. It was the first eastward crossing of the Pacific that could be repeated, and it was repeated for 250 years: his track became the eastbound leg of the Manila galleon, drawn in this era as its own voyage. The colonisation of the islands rode on that loop — soldiers, friars and silver westbound, silk, porcelain and spices east — and the Philippines were governed through New Spain until Mexican independence.",
+   "cite": "Blair & Robertson, *The Philippine Islands 1493–1898*, vol. 2; Spate, *The Spanish Lake* (1979)."
   },
   {
    "id": "drake",
@@ -2331,6 +2643,95 @@
    "cite": "Haring, *Trade and Navigation between Spain and the Indies*."
   },
   {
+   "id": "jamestown",
+   "name": "Three ships for the Virginia Company",
+   "dates": "1606 – 07",
+   "year": 1607,
+   "vessel": "fluyt",
+   "view": [
+    -45,
+    30,
+    300
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": 0.0,
+     "lat": 51.49,
+     "name": "Blackwall, 20 December 1606",
+     "date": ""
+    },
+    {
+     "lon": 1.4,
+     "lat": 51.2,
+     "name": "the Downs — weeks wind-bound",
+     "date": ""
+    },
+    {
+     "lon": -5.0,
+     "lat": 49.5,
+     "name": "the Channel",
+     "date": ""
+    },
+    {
+     "lon": -17.1,
+     "lat": 28.1,
+     "name": "the Canaries",
+     "date": ""
+    },
+    {
+     "lon": -40.0,
+     "lat": 20.0,
+     "name": "the trades",
+     "date": ""
+    },
+    {
+     "lon": -61.0,
+     "lat": 14.7,
+     "name": "Martinique — three weeks watering in the Indies",
+     "date": ""
+    },
+    {
+     "lon": -68.0,
+     "lat": 18.6,
+     "name": "the Mona Passage",
+     "date": ""
+    },
+    {
+     "lon": -76.0,
+     "lat": 36.9,
+     "name": "Cape Henry, 26 April 1607",
+     "date": ""
+    },
+    {
+     "lon": -76.78,
+     "lat": 37.21,
+     "name": "Jamestown Island, 14 May 1607",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Ships",
+     "*Susan Constant* 120 tons, *Godspeed* 40, *Discovery* 20"
+    ],
+    [
+     "Aboard",
+     "104 colonists and about 39 crew"
+    ],
+    [
+     "Passage",
+     "144 days, by the Canaries and the West Indies"
+    ],
+    [
+     "Alive in January 1608",
+     "38 of the 104"
+    ]
+   ],
+   "text": "The Virginia Company of London was a joint-stock company chartered in April 1606, four years after the VOC showed the form: colonisation financed by shareholders expecting a return. Its first fleet — *Susan Constant*, *Godspeed* and *Discovery*, under Christopher Newport — left Blackwall on 20 December 1606 carrying 104 colonists, all of them men and boys. The route was the long southern one: down to the Canaries for the trades, three weeks' refreshment in the West Indies, then north to the Chesapeake, 144 days in all. On 14 May 1607 the colonists fortified a marshy island 60 km up the James, chosen because it could be defended against the Spanish attack the Company expected.\n\nThe site's brackish water and mosquitoes did most of the killing: 38 of the 104 were alive in January 1608. The colony survived on Company resupply, on trade and war with the Powhatan chiefdom of perhaps 15,000 people whose land it occupied, and, from 1612, on John Rolfe's sweet Trinidad tobacco strain — the first export that paid. Two arrivals in 1619 set the shape of English America: the first representative assembly in the western hemisphere met in the church in July, and in August a privateer, the *White Lion*, landed 'twenty and odd' Africans seized from a Portuguese slave ship bound for Veracruz.",
+   "cite": "Percy, *Observations* (1607); Smith, *A True Relation* (1608); Horn, *A Land as God Made It* (2005)."
+  },
+  {
    "id": "brouwer",
    "name": "The Brouwer Route to Batavia",
    "dates": "c. 1620",
@@ -2410,6 +2811,77 @@
    "cite": "VOC sailing instructions, 1617; Mutch, *The First Discovery of Australia*."
   },
   {
+   "id": "mayflower",
+   "name": "The Mayflower to Plymouth",
+   "dates": "1620",
+   "year": 1620,
+   "vessel": "fluyt",
+   "view": [
+    -40,
+    46,
+    250
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": -4.14,
+     "lat": 50.37,
+     "name": "Plymouth, 16 September 1620",
+     "date": ""
+    },
+    {
+     "lon": -20.0,
+     "lat": 48.0,
+     "name": "the open Atlantic",
+     "date": ""
+    },
+    {
+     "lon": -38.0,
+     "lat": 45.0,
+     "name": "gales — the cracked main beam",
+     "date": ""
+    },
+    {
+     "lon": -58.0,
+     "lat": 43.0,
+     "name": "the western ocean",
+     "date": ""
+    },
+    {
+     "lon": -70.18,
+     "lat": 42.03,
+     "name": "Cape Cod — the Compact signed in Provincetown harbour",
+     "date": ""
+    },
+    {
+     "lon": -70.66,
+     "lat": 41.96,
+     "name": "Plymouth — Patuxet, December",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "The ship",
+     "about 180 tons, master Christopher Jones"
+    ],
+    [
+     "Aboard",
+     "102 passengers, about 30 crew"
+    ],
+    [
+     "Passage",
+     "66 days"
+    ],
+    [
+     "First winter",
+     "45 of the 102 dead by spring"
+    ]
+   ],
+   "text": "About half the passengers were religious separatists from a congregation exiled in Leiden; the rest were recruited by the London merchant syndicate that financed the voyage and expected its money back in fish and furs. The consort *Speedwell* leaked on two attempts, so the *Mayflower* — a chartered wine ship of about 180 tons — went alone from Plymouth on 16 September 1620 with 102 passengers. The crossing took 66 days against the autumn westerlies; a main beam cracked amidships and was shored with a great iron screw the passengers had brought; one sailor and one passenger died, and one child, Oceanus Hopkins, was born at sea.\n\nLandfall on 9 November was Cape Cod, hundreds of kilometres north of the Virginia Company patent — so before landing, 41 men signed a compact to 'combine ourselves together into a civil body politic', written authority for a settlement that would otherwise have had none. The site chosen in December was Patuxet, a Wampanoag town emptied by the epidemics of 1616–19, its fields already cleared. The first winter killed 45 of the 102; the treaty made with the Wampanoag sachem Ousamequin in March 1621 held for fifty years; and the colony's survival opened the route of the Great Migration, some 20,000 English to Massachusetts Bay in the 1630s. The uncrewed ship that recrossed this track in 2022, in this model's last era, was named for her.",
+   "cite": "Bradford, *Of Plymouth Plantation*; *Mourt's Relation* (1622)."
+  },
+  {
    "id": "balticgrain",
    "name": "The fluyt in the Baltic grain trade",
    "dates": "c. 1650",
@@ -2477,6 +2949,77 @@
    "cite": "Unger, *Dutch Shipbuilding before 1800*."
   },
   {
+   "id": "capecolony",
+   "name": "The VOC plants the Cape",
+   "dates": "1651 – 52",
+   "year": 1652,
+   "vessel": "east-indiaman",
+   "view": [
+    -5,
+    5,
+    330
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": 4.8,
+     "lat": 53.0,
+     "name": "Texel, 24 December 1651",
+     "date": ""
+    },
+    {
+     "lon": -16.0,
+     "lat": 28.0,
+     "name": "the Canaries",
+     "date": ""
+    },
+    {
+     "lon": -25.0,
+     "lat": 0.0,
+     "name": "the line",
+     "date": ""
+    },
+    {
+     "lon": -30.0,
+     "lat": -20.0,
+     "name": "the trades, wide of Brazil",
+     "date": ""
+    },
+    {
+     "lon": 0.0,
+     "lat": -33.0,
+     "name": "the westerlies",
+     "date": ""
+    },
+    {
+     "lon": 18.42,
+     "lat": -33.85,
+     "name": "Table Bay, 6 April 1652",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Ships",
+     "*Drommedaris*, *Reijger*, *Goede Hoop*"
+    ],
+    [
+     "Aboard",
+     "about 90 Company servants"
+    ],
+    [
+     "Texel to Table Bay",
+     "104 days"
+    ],
+    [
+     "The purpose",
+     "fresh food for the Indies fleets — scurvy was the killer"
+    ]
+   ],
+   "text": "A VOC Indiaman took five to eight months to Batavia, and scurvy set in around the hundredth day; the Company's own casualty ledgers made a garden halfway worth paying for. When the crew of the wrecked *Haarlem* wintered in Table Bay in 1647 and reported good water, good soil and cattle-keeping Khoikhoi willing to trade, the Heeren XVII acted on it: Jan van Riebeeck sailed from Texel on 24 December 1651 with three small ships and about 90 people, his wife among them, and reached Table Bay on 6 April 1652 — 104 days, a fast passage. His orders were a fort, a garden and a cattle trade: a victualling station, expressly not a colony.\n\nIt became a colony anyway, by steps his *Daghregister* — the daily journal he kept for the Company — records one by one. In 1657 nine servants were released as 'free burghers' to farm along the Liesbeek, on land the Khoikhoi grazed, and the first frontier war followed in 1659. In 1658 two shiploads of enslaved people, one from Dahomey and one taken off a Portuguese slaver out of Angola, made slavery the settlement's labour system. Huguenot refugees arrived in 1688, and by 1700 the cattle frontier was moving inland, dispossessing the Khoikhoi as it went. The station worked as designed — Indiamen broke the passage there and landed their scurvy cases to the Company hospital — and the town it seeded is Cape Town.",
+   "cite": "Van Riebeeck, *Daghregister* (1652–62); Worden, *Slavery in Dutch South Africa* (1985)."
+  },
+  {
    "id": "middlepassage",
    "name": "The Middle Passage",
    "dates": "c. 1750",
@@ -2532,9 +3075,13 @@
     [
      "Passage",
      "six to ten weeks"
+    ],
+    [
+     "Landed in Brazil",
+     "about 4.9 million — the largest share"
     ]
    ],
-   "text": "The era's principal Atlantic cargo. Between the sixteenth century and the nineteenth about 12.5 million people were embarked and about 10.7 million landed; the difference is the crossing.\n\nIt took six to ten weeks. The ships were built or refitted for it - a slave deck inserted at half height, gratings, a barricade across the waist - and the economics were computed in advance from an assumed mortality. That calculation is the thing to understand about the design.",
+   "text": "Between 1501 and 1866 about 12.5 million people were embarked on the African coast and about 10.7 million were landed alive in the Americas; the difference, about 1.8 million, died at sea. Brazil took about 4.9 million — more than any other place — the Caribbean most of the rest, and mainland North America about 390,000. The crossing took six to ten weeks, and the ships were built or refitted for it: a slave deck inserted at half height, gratings over the hatches, a barricade across the waist. Owners and insurers in Liverpool, Bristol, Nantes and Lisbon entered an expected mortality in the venture's accounts before it sailed.\n\nThis traffic was the labour supply of the colonisation the era's other fleets carried out. The cane economy planted at São Vicente and across the Caribbean, the Chesapeake tobacco fields after the *White Lion*'s landing of 1619, the wheat and vineyards of the VOC's Cape — each ran on people brought by these ships. It was the largest forced ocean migration in history, and until the 1820s Africans carried across the Atlantic outnumbered European emigrants roughly four to one.",
    "cite": "Slave Voyages database (Emory); Rediker, *The Slave Ship* (2007)."
   },
   {
@@ -2635,6 +3182,101 @@
    ],
    "text": "A voyage that solved scurvy and was then wrecked by dysentery. Cook lost almost nobody to scurvy in two years at sea — an astonishing result for the period — and then buried about a third of his company after a few weeks refitting at Batavia.\n\nThe Barrier Reef grounding on 11 June 1770 nearly ended it: *Endeavour* was held off the bottom by a piece of coral wedged in her own hull.",
    "cite": "Cook, *Journals*, ed. Beaglehole; Royal Museums Greenwich."
+  },
+  {
+   "id": "firstfleet",
+   "name": "The First Fleet to Botany Bay",
+   "dates": "1787 – 88",
+   "year": 1787,
+   "vessel": "east-indiaman",
+   "view": [
+    45,
+    -25,
+    400
+   ],
+   "tags": [],
+   "legs": [
+    {
+     "lon": -1.1,
+     "lat": 50.75,
+     "name": "Portsmouth, 13 May 1787",
+     "date": ""
+    },
+    {
+     "lon": -16.6,
+     "lat": 28.3,
+     "name": "Tenerife",
+     "date": ""
+    },
+    {
+     "lon": -30.0,
+     "lat": 0.0,
+     "name": "the line",
+     "date": ""
+    },
+    {
+     "lon": -43.2,
+     "lat": -22.9,
+     "name": "Rio de Janeiro — a month refitting",
+     "date": ""
+    },
+    {
+     "lon": 18.4,
+     "lat": -33.9,
+     "name": "Cape Town — the floating farm loaded",
+     "date": ""
+    },
+    {
+     "lon": 60.0,
+     "lat": -42.0,
+     "name": "the roaring forties",
+     "date": ""
+    },
+    {
+     "lon": 110.0,
+     "lat": -43.5,
+     "name": "the Southern Ocean",
+     "date": ""
+    },
+    {
+     "lon": 146.8,
+     "lat": -43.9,
+     "name": "south about Van Diemen's Land",
+     "date": ""
+    },
+    {
+     "lon": 151.23,
+     "lat": -34.0,
+     "name": "Botany Bay, 18–20 January 1788",
+     "date": ""
+    },
+    {
+     "lon": 151.21,
+     "lat": -33.86,
+     "name": "Sydney Cove, 26 January 1788",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Ships",
+     "eleven — two men-of-war, six transports, three store ships"
+    ],
+    [
+     "Aboard",
+     "about 1,400 people, 778 of them convicts"
+    ],
+    [
+     "Portsmouth to Botany Bay",
+     "252 days, more than 24,000 km"
+    ],
+    [
+     "Deaths on the passage",
+     "48"
+    ]
+   ],
+   "text": "Britain had transported convicts to the American colonies for decades — about 50,000 of them — and American independence closed the outlet; by the 1780s prisoners were held in rotting hulks moored in the Thames. The site the government chose in 1786 was the Botany Bay that Cook's *Endeavour* voyage had charted sixteen years earlier, half a world away. Arthur Phillip sailed from Portsmouth on 13 May 1787 with eleven ships — HMS *Sirius* and *Supply*, six convict transports, three store ships — carrying about 1,400 people, 778 of them convicts, 193 of those women. Three provisioning stops: Tenerife, a month at Rio de Janeiro, a month at the Cape, where so much livestock, seed and plants came aboard that the ships were described as a floating farm. Eight months and a week at sea, 48 dead — about three per cent, where the cheaply contracted Second Fleet of 1790 lost a quarter.\n\nBotany Bay, reached 18–20 January 1788, was open, shallow and short of fresh water. Phillip examined the next inlet north, reported 'the finest harbour in the world, in which a thousand sail of the line may ride in the most perfect security', and moved the fleet; the flag was raised in Sydney Cove on 26 January 1788. Transportation continued for eighty years and carried about 162,000 convicts to the Australian colonies. The continent they were landed on held several hundred thousand Aboriginal people, and the smallpox epidemic of April 1789 killed perhaps half of those living around the harbour within fifteen months of the landing.",
+   "cite": "Tench, *A Narrative of the Expedition to Botany Bay* (1789); Phillip's dispatches, *Historical Records of New South Wales*."
   },
   {
    "id": "greatwestern",
