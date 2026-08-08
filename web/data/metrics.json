@@ -1,0 +1,279 @@
+{
+ "_provenance": "Every figure verified against the named source on 2026-08-07. Full sourcing and the display rules: Research/METRICS.md. Rule 10: a row is SOURCED (a named source states it) or DERIVED (computed, and the derivation is named); where neither exists the readout says so.",
+ "hideStat": [
+  0,
+  1,
+  2,
+  4,
+  7
+ ],
+ "series": [
+  {
+   "id": "trade-volume",
+   "cat": "trade",
+   "pri": 1,
+   "from": 1840,
+   "to": 2100,
+   "label": "Seaborne trade",
+   "points": [
+    {
+     "y": 1840,
+     "v": "<b>20 M tonnes</b> a year",
+     "yr": "1840",
+     "kind": "sourced",
+     "cite": "Stopford, Maritime Economics, tbl 1.2"
+    },
+    {
+     "y": 1887,
+     "v": "<b>137 M tonnes</b> a year",
+     "yr": "1887",
+     "kind": "sourced",
+     "cite": "Stopford, Maritime Economics, tbl 1.2"
+    },
+    {
+     "y": 1950,
+     "v": "<b>550 M tonnes</b> a year",
+     "yr": "1950",
+     "kind": "sourced",
+     "cite": "Stopford, Maritime Economics, tbl 1.2"
+    },
+    {
+     "y": 1960,
+     "v": "<b>1.1 bn tonnes</b> a year",
+     "yr": "1960",
+     "kind": "sourced",
+     "cite": "Stopford, Maritime Economics, tbl 1.2"
+    },
+    {
+     "y": 1970,
+     "v": "<b>2.6 bn tonnes</b> a year",
+     "yr": "1970",
+     "kind": "sourced",
+     "cite": "UNCTAD, Review of Maritime Transport"
+    },
+    {
+     "y": 2005,
+     "v": "<b>7.1 bn tonnes</b> a year",
+     "yr": "2005",
+     "kind": "sourced",
+     "cite": "Stopford, Maritime Economics, tbl 1.2"
+    },
+    {
+     "y": 2024,
+     "v": "<b>12.1 bn tonnes</b> a year",
+     "yr": "2024",
+     "kind": "sourced",
+     "cite": "UNCTADstat, goods loaded"
+    }
+   ]
+  },
+  {
+   "id": "trade-value",
+   "cat": "trade",
+   "pri": 2,
+   "from": 1950,
+   "to": 2100,
+   "label": "Worth",
+   "points": [
+    {
+     "y": 1950,
+     "v": "world merchandise exports <b>US $62 bn</b> a year",
+     "yr": "1950",
+     "kind": "sourced",
+     "cite": "WTO historical merchandise trade series"
+    },
+    {
+     "y": 2000,
+     "v": "world merchandise exports <b>US $6.4 trillion</b> a year",
+     "yr": "2000",
+     "kind": "sourced",
+     "cite": "WTO merchandise trade statistics"
+    },
+    {
+     "y": 2019,
+     "v": "seaborne trade worth over <b>US $14 trillion</b> a year",
+     "yr": "2019",
+     "kind": "sourced",
+     "cite": "International Chamber of Shipping"
+    },
+    {
+     "y": 2022,
+     "v": "world merchandise exports <b>US $24.9 trillion</b> a year",
+     "yr": "2022",
+     "kind": "sourced",
+     "cite": "WTO merchandise trade statistics"
+    }
+   ]
+  },
+  {
+   "id": "fleet-modern",
+   "cat": "fleet",
+   "pri": 3,
+   "from": 2025,
+   "to": 2100,
+   "label": "World fleet",
+   "points": [
+    {
+     "y": 2025,
+     "v": "<b>112,500 ships</b> · <b>2.44 bn DWT</b>",
+     "yr": "2025",
+     "kind": "sourced",
+     "cite": "UNCTAD, Review of Maritime Transport 2025"
+    }
+   ]
+  },
+  {
+   "id": "fleet-1945",
+   "cat": "fleet",
+   "pri": 3,
+   "from": 1945,
+   "to": 1960,
+   "label": "World fleet",
+   "points": [
+    {
+     "y": 1945,
+     "v": "≈ <b>60 M gross tons</b>",
+     "yr": "1945",
+     "kind": "derived",
+     "cite": "US 39 M GT ≈ ⅔ of world — GI Roundtable 25, 1946"
+    }
+   ]
+  },
+  {
+   "id": "rome-grain",
+   "cat": "trade",
+   "pri": 1,
+   "from": -100,
+   "to": 420,
+   "label": "Grain to Rome",
+   "points": [
+    {
+     "y": -100,
+     "v": "≈ <b>200,000 tonnes</b> a year",
+     "yr": null,
+     "kind": "derived",
+     "cite": "Rickman 1980; Garnsey 1988, from ancient testimony"
+    }
+   ]
+  },
+  {
+   "id": "rome-passage",
+   "cat": "passage",
+   "pri": 2,
+   "from": -30,
+   "to": 420,
+   "label": "Puteoli→Alexandria",
+   "points": [
+    {
+     "y": -30,
+     "v": "<b>9 days</b>; the return <b>40–70</b>",
+     "yr": null,
+     "kind": "sourced",
+     "cite": "Pliny, Natural History XIX.1"
+    }
+   ]
+  },
+  {
+   "id": "norse-passage",
+   "cat": "passage",
+   "pri": 2,
+   "from": 870,
+   "to": 1100,
+   "label": "Stad→Horn, Iceland",
+   "points": [
+    {
+     "y": 870,
+     "v": "<b>7 days'</b> sail",
+     "yr": null,
+     "kind": "sourced",
+     "cite": "Landnámabók, sailing directions"
+    }
+   ]
+  },
+  {
+   "id": "gw-passage",
+   "cat": "passage",
+   "pri": 4,
+   "from": 1838,
+   "to": 1900,
+   "label": "Bristol→New York",
+   "points": [
+    {
+     "y": 1838,
+     "v": "<b>15 days</b> under steam",
+     "yr": "1838",
+     "kind": "sourced",
+     "cite": "Great Western's maiden crossing, April 1838"
+    }
+   ]
+  },
+  {
+   "id": "voc-voyages",
+   "cat": "voyages",
+   "pri": 3,
+   "from": 1595,
+   "to": 1795,
+   "label": "VOC to Asia",
+   "points": [
+    {
+     "y": 1595,
+     "v": "<b>4,700+</b> sailings in 200 years — <b>≈ 24 a year</b>",
+     "yr": null,
+     "kind": "sourced",
+     "cite": "Dutch-Asiatic Shipping (Bruijn, Gaastra & Schöffer)"
+    }
+   ]
+  },
+  {
+   "id": "middle-passage",
+   "cat": "people",
+   "pri": 2,
+   "from": 1514,
+   "to": 1866,
+   "label": "Middle Passage",
+   "points": [
+    {
+     "y": 1514,
+     "v": "<b>12.5 M</b> people on <b>36,000+</b> voyages",
+     "yr": "1514–1866",
+     "kind": "sourced",
+     "cite": "SlaveVoyages, Trans-Atlantic Database"
+    }
+   ]
+  },
+  {
+   "id": "uluburun",
+   "cat": "trade",
+   "pri": 2,
+   "from": -1400,
+   "to": -1000,
+   "label": "One hull, c. 1320 BC",
+   "points": [
+    {
+     "y": -1400,
+     "v": "<b>10 t</b> copper, <b>1 t</b> tin",
+     "yr": null,
+     "kind": "sourced",
+     "cite": "Uluburun excavation (INA, Pulak)"
+    }
+   ]
+  },
+  {
+   "id": "trade-share",
+   "cat": "trade",
+   "pri": 3,
+   "from": 1970,
+   "to": 2100,
+   "label": "Carried by sea",
+   "points": [
+    {
+     "y": 1970,
+     "v": "about <b>80%</b> of world merchandise trade by volume",
+     "yr": "1970–",
+     "kind": "sourced",
+     "cite": "UNCTAD, Review of Maritime Transport"
+    }
+   ]
+  }
+ ]
+}

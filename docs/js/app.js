@@ -775,6 +775,8 @@ async function loadData() {
      and the card simply shows no plate in that case */
   APP.plates   = await get('data/plates.json')   || {};
   APP.about    = await get('data/about.json')    || null;
+  /* running metrics for the readout — every row sourced or derived, per Research/METRICS.md */
+  APP.metrics  = await get('data/metrics.json')  || { series: [], hideStat: [] };
   buildChapters();
   buildMarkers();
   updateReadout();
@@ -1343,6 +1345,15 @@ function showCard(c) {
 }
 
 /* ── readout ────────────────────────────────────────────────────────────── */
+/* Every number on this card is labelled sourced (a named source states it) or derived (computed,
+   and the derivation is named). The provenance record is Research/METRICS.md. Rule 10: where
+   neither exists the card says so — the first usable aggregate for world seaborne trade is
+   Stopford's 1840 figure, and before that the honest return is the standing line, not a guess. */
+function metricRow(label, pt) {
+  return `${label} ${pt.v}${pt.yr ? ` <span class="py">(${pt.yr})</span>` : ''}` +
+         `<br><span class="prov">${pt.kind} — ${pt.cite}</span>`;
+}
+
 function updateReadout() {
   const ch = currentEra();
   document.getElementById('roEra').textContent = ch ? ch.title : '—';
@@ -1350,8 +1361,31 @@ function updateReadout() {
   const mi = Math.floor(S.month) % 12;
   const rows = [`<b>${MONTH_NAMES[mi]}</b> on the water`];
   const sl = seaLevelAt(S.year);
-  if (sl < -3) rows.push(`Sea level <b>${Math.round(-sl)} m</b> lower`);
-  if (ch && ch.stat) rows.push(ch.stat);
+  if (sl < -3) rows.push(`Sea level <b>${Math.round(-sl)} m</b> lower` +
+    '<br><span class="prov">derived — Spratt &amp; Lisiecki 2016</span>');
+
+  /* A series is live when the year is inside its window; the value shown is the latest point
+     at or before the year, with that point's own date printed beside it — so a 2019 figure can
+     never appear under 1955, and a stale anchor says how stale it is. */
+  const live = [];
+  ((APP.metrics && APP.metrics.series) || []).forEach(s => {
+    if (S.year < s.from || S.year > s.to) return;
+    let pt = null;
+    s.points.forEach(p => { if (p.y <= S.year) pt = p; });
+    if (pt) live.push({ s, pt });
+  });
+  live.sort((a, b) => (a.s.pri || 9) - (b.s.pri || 9));
+  const shown = live.slice(0, 3);
+  shown.forEach(x => rows.push(metricRow(x.s.label, x.pt)));
+
+  /* the era's audited stat stays as unlabelled era flavour where the card has room and the
+     metrics do not already restate it (hideStat lists the eras where they do) */
+  const hide = (APP.metrics && APP.metrics.hideStat) || [];
+  if (ch && ch.stat && shown.length < 3 && !hide.includes(S.era)) rows.push(ch.stat);
+
+  if (!shown.some(x => x.s.cat === 'trade'))
+    rows.push('<span class="unrec">Seaborne trade: no aggregate record survives</span>');
+
   document.getElementById('roStats').innerHTML = rows.join('<br>');
 }
 
