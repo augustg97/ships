@@ -551,4 +551,5 @@ Once the ratchet reports, I'll classify any movers, commit, push and verify the 
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 44621 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 21:53:37  round starting
-Execution error
+Execution error───────────────────────────────────────────────────────────────────────────
+2026-08-07 23:03:00  round starting

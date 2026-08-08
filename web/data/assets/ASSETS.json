@@ -367,6 +367,22 @@
    "files": [
     "web/data/assets/ships/yamato.jpg"
    ]
+  },
+  {
+   "source": "google-fonts",
+   "slug": "source-serif-4",
+   "name": "Source Serif 4 (variable, latin subset)",
+   "type": "fonts",
+   "licence": "OFL-1.1",
+   "authors": {
+    "Frank Grießhammer / Adobe": "All"
+   },
+   "url": "https://fonts.google.com/specimen/Source+Serif+4",
+   "note": "Vendored so the serif rasterises identically on every machine and document.fonts governs capture readiness — closes the globe-default label-halo false-RED class (rounds 28-51). Chosen over Literata by A/B against the committed globe-default baseline: 1.555% of pixels moved vs 2.701%.",
+   "files": [
+    "web/data/assets/fonts/source-serif-4/SourceSerif4-var.woff2",
+    "web/data/assets/fonts/source-serif-4/SourceSerif4-Italic-var.woff2"
+   ]
   }
  ]
 }

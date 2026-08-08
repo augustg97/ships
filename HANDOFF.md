@@ -2555,10 +2555,44 @@ Audit 25/25 clean. Frames 39 → 40.
 
 ---
 
+## Round 56 — 2026-08-07 — RECOVERED LOG: item 9, the readout learns provenance
+
+Committed (`2395823`, 22:51) and deployed live (stamp 1786167174) but wrote no handoff — the
+same omission as rounds 52–54, reconstructed the same way, from the commit body, METRICS.md
+and FRAME-LOG. **Item 9 closed in one commit: the top-left card carries running metrics across
+time, every figure labelled sourced or derived.**
+
+- **The data**: `web/data/metrics.json` (new, 279 lines) carries the series; the provenance
+  record is `Research/METRICS.md` (new), every figure verified against its named source that
+  day. Volume: Stopford Table 1.2 spliced with UNCTAD RMT, 1840 (20 Mt) → 2024 (12.1 Gt), with
+  the 2023/2024 base revision handled so the displayed series never moves backwards. Value:
+  WTO merchandise exports 1950–2022 ($62 bn → $24.9 tn) beside the ICS 2019 seaborne figure
+  ($14 tn) — **not the same quantity**; UNCTAD's trade-share row (~80% by volume goes by sea)
+  is what lets them share a panel. Fleet (1945 derived from GI Roundtable 25, 2025 sourced from
+  RMT), Rome's grain (derived, the centre of Rickman–Garnsey–Mattingly), attested passage times
+  (Pliny, Landnámabók, Great Western), voyages per year (DAS, SlaveVoyages), Uluburun's cargo.
+- **The display rules** (app.js `updateReadout`): a row shows only inside its window and at or
+  past its earliest point, with the point's own year printed beside it — a 2019 number can
+  never appear under 1955; each row carries `sourced — <cite>` or `derived — <cite>` beneath
+  it; when no series is live the standing line is *"no aggregate record survives"*, which is
+  the finding, not filler. Nothing before 1950 for value, deliberately: pre-modern aggregates
+  are reconstructions with error bars wider than the numbers.
+- **The refusals are in the record too**: Unger's early-modern fleet series excluded because
+  the secondary quotations disagree by more than 2× and the paper is paywalled — adding it
+  needs the actual paper.
+- **Frames**: 21 baselines moved, all readout-text-only diffs, all accepted with one logged
+  reason (FRAME-LOG 22:51). Verified on globe-modern: three rows, each with its year and its
+  provenance line.
+
+---
+
 ## THE QUEUE — August's second list, 2026-08-07. Work these in order.
 
-**STATUS, written round 55: items 1–8 and 10 are DONE — 1 verified r55, 2/3/4/5 done r52,
-6/7 done r53, 8/10 done r54. Item 9 is NEXT. Item 11 is the standing survey.**
+**STATUS, updated round 57: the second list is WORKED IN FULL. Items 1–10 — 1 verified r55,
+2/3/4/5 done r52, 6/7 done r53, 8/10 done r54, 9 done r56 (recovered log above). Item 11's
+four named pieces: steamer r45, treasure-ship r46, the steel stern quarter verified settled
+r57, the serif-webfont decision decided and shipped r57. The standing vessel survey is the
+task again; the carried items live in round 57's "Next".**
 
 **1. THE SAILS WERE ABACK ON EVERY SQUARE-RIGGER — fixed in this commit, verify it.**
 `makeSail` clamped the belly to local +z and `rotation.y = PI/2` maps that to hull +x, which
@@ -2624,3 +2658,71 @@ foam field before rewriting it — the seam is likely a UV or a `localMetres` wr
 
 **11. And the standing survey continues**: steamer, treasure-ship, the steel stern quarter, the
 serif-webfont decision.
+
+---
+
+## Round 57 — 2026-08-08 — Item 11 closed out: the stern quarter was already won, and the serif stops being the machine's
+
+**First, the missing round 56 handoff was reconstructed** (recovered-log section above) — the
+same omission as rounds 52–54, found the same way, from the commit body and FRAME-LOG. Item 9
+was already closed and deployed (stamp 1786167174); only the record was missing.
+
+**The steel stern quarter (carried since round 27) is settled, by looking, not by fixing.**
+Four diagnosis captures through the r55 `#b=` grammar — yamato from the quarter (b=135) and
+dead astern (b=180), titanic and the carrier from the quarter — and all three of round 27's
+reads are already corrected in the code the fleet runs today: the transom sits in its own
+overhang shadow (the r31 counter-flare work), no black sternpost stands proud of a welded
+stern (`buildStemGeometry` pulls steel posts one thickness inboard), and the underwater body
+is era-dated oxide red, per-ship where the record says so (`buildShip`: Yamato's IJN hull-red,
+not Victorian salmon). The item had been carried by inertia through the rounds that fixed it;
+what it still needed was exactly what rule 1 demands — the after bearings rendered and looked
+at. The diagnosis frames were deleted after reading; the baseline set stays at 40.
+
+**The serif-webfont decision (carried since round 28): DECIDED — vendor, and the candidate was
+chosen by measurement.** The false-RED class: with an all-system serif stack (Iowan Old Style
+et al.), `document.fonts` had nothing to govern, and a cold-start rasterisation transient
+flapped globe-default ~1% in label halos (struck r28, r45, r51). Two OFL candidates were
+downloaded (variable weight+italic, latin subset) and A/B'd against the committed
+globe-default baseline, per the RGBELoader note's own rule — measured, not judged by eye:
+
+- Literata: 2.701% of pixels moved, mean |Δ| 2.113
+- **Source Serif 4: 1.555% moved, mean |Δ| 1.255 — chosen**, visibly the same chart register
+
+Wired as `"Ships Serif"` ahead of the old stack in `--serif` (styles.css `@font-face`,
+`font-display: block`), files at `web/data/assets/fonts/source-serif-4/` with OFL provenance
+in ASSETS.json, and — the part that closes the class — `markReady()` now refuses a frozen
+capture until `document.fonts.ready` resolves, a clause that is no longer vacuous because the
+font it waits for is one we serve. **Proof: two cold captures of identical code differ by
+0.000% of pixels, mean |Δ| 0.0000.** Residual: the two CJK glyphs on Yamato's card (大和)
+still rasterise from system fallback; the halo flap was latin label text, which is now ours
+everywhere.
+
+**All 40 baselines moved and all 40 were accepted with the class reason** — range 0.317%
+(action) to 2.177% (globe-modern), none BLANK. Four representative diffs read before
+accepting: globe-modern (labels ghosted, voyage-list rows reflowed where new letter widths
+re-wrapped a name), aboard-yamato (panels only, hull/wake/horizon black), action (tabs, the
+battle card, one row of small ghosts at the fleet line), ship-junk (card, fleet list, scale
+numbers; the junk herself untouched). Verification ratchet re-run after the accepts: 40/40
+green. Audit 25/25 clean. ⚠ Procedural, the r51 lesson sharpened: `accept` consumes the
+`_current` from the LAST check, and every solo check wipes `_current` — a batch of forty
+checks followed by forty accepts fails on all forty (silently, if you tail the output).
+Check-then-accept must be a PAIR, per frame, and the first accept batch of this round did
+fail exactly that way before the pairing fixed it.
+
+**Rule 0, written on globe-default in the new face:** it reads as a rendered world — a relief
+Atlantic under July light with fleets mid-ocean, not a chart with dots. Three facts a viewer
+can read off it: the Middle Passage's 12.5 M people on 36,000+ voyages, sourced to
+SlaveVoyages, on the 1590 card; Lisboa and the Spanish Armada standing on the coast of a
+composed Iberia; the era strip running from Crossing (70,000 BP) to Containers (1950–2026)
+with Ocean Crossing lit.
+
+### Next, in order
+1. **The survey is the standing task again.** Per r51: next-crudest is ship-of-the-line
+   (3,100 tris/m) but she is the verified reference hull — the SHIPWRIGHT-QUEUE "Detail gaps"
+   (head/beakhead, stern furniture) are worth more than her triangle count suggests.
+2. Carried: featureless brown land behind aboard-yamato; Titanic remainder (forecastle/poop
+   breaks, raked buff masts, funnel buff A/B); r43's plate gaps (corbita era plate;
+   dugout/dhow/cog plates; a globe-era-card frame); wrong-era voyage hash (#e=3&f=zhenghe)
+   hangs before first paint.
+3. A galley action stays unblocked (r50): Salamis, Lepanto, Myeongnyang are campaign-data
+   tasks. B10 stunsails if wanted (clipper's missing ~500 m²; applies to Preussen-class too).

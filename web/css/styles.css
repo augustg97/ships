@@ -10,6 +10,20 @@
  * letterspaced small capitals. It is a real convention doing real work, not decoration.
  */
 
+/* ⚠ THE SERIF IS VENDORED, AND THAT IS A CAPTURE-DETERMINISM DECISION, NOT A STYLE ONE.
+ * With an all-system stack (Iowan Old Style et al.) the frame harness photographed whatever
+ * the machine's rasteriser did on a cold start, and globe-default flapped ~1% of pixels in
+ * label halos — a false RED the handoff carried from round 28. A font we serve is the same
+ * bytes on every machine, and document.fonts genuinely governs its arrival (app.js
+ * markReady). Candidate chosen by A/B against the committed globe-default baseline, not by
+ * eye — see HANDOFF round 57. Files + licence: web/data/assets/fonts/, ASSETS.json (OFL). */
+@font-face{font-family:"Ships Serif";
+  src:url("../data/assets/fonts/source-serif-4/SourceSerif4-var.woff2") format("woff2");
+  font-weight:200 900;font-style:normal;font-display:block}
+@font-face{font-family:"Ships Serif";
+  src:url("../data/assets/fonts/source-serif-4/SourceSerif4-Italic-var.woff2") format("woff2");
+  font-weight:200 900;font-style:italic;font-display:block}
+
 :root{
   /* the sea, from the surface down */
   --abyss:#03080e;
@@ -30,7 +44,7 @@
   --edge:rgba(95,179,161,.26);
   --edge-strong:rgba(95,179,161,.5);
 
-  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --serif:"Ships Serif","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --sans:ui-sans-serif,-apple-system,"Helvetica Neue","Arial Narrow",Arial,sans-serif;
 }
 

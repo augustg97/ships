@@ -315,7 +315,16 @@ if (FROZEN) {
  * the baselines depend on capture order, which is a ratchet that only appears to work. */
 let upgradesDone = false;
 let shipSelectPending = false;
+/* ⚠ AND NOT BEFORE THE VENDORED SERIF HAS ARRIVED. Round 27 gated on document.fonts when the
+   stack was all system fonts, so the clause was vacuous and a cold-start rasterisation
+   transient could still flap globe-default by 1% of pixels (the label-halo false RED, struck
+   in rounds 28, 45 and 51). The serif is a vendored webfont now, so document.fonts genuinely
+   owns the answer: a capture before it resolves would rasterise every label in the fallback
+   face and differ from every capture after. */
+let fontsDone = false;
+document.fonts.ready.then(() => { fontsDone = true; markReady(); });
 function markReady() {
+  if (FROZEN && !fontsDone) return;
   if (FROZEN && !upgradesDone) return;
   /* ⚠ AND NOT WHILE THE NAMED HULL IS STILL BEING FOUND. `#s=container` is applied by calling
      window.swOpenById, which the Shipwright only defines once its view has opened — so the
