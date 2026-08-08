@@ -216,6 +216,11 @@
    "name": "shipwright-ahead",
    "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=0",
    "note": "the standing aback guard: bow-on via #b=0, canvas must stand FORWARD of the masts. All square sails share makeSail, so this one bearing guards the fleet against the r52 mirror class regressing. Verified 2026-08-07 on five vessels from ahead and the quarter."
+  },
+  {
+   "name": "shipwright-astern",
+   "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7",
+   "note": "the standing stern guard: the 74 dead astern, close, aimed at the hull (#z/#l/#y, the r58 camera grammar). Every timber transom ship shares buildStern, so this one bearing watches the class: two tiers of lights, quarter galleries, taffrail. The r58 fault \u2014 furniture keyed to a stale u=0.985 plate, buried inside the u=1.0 skin \u2014 was invisible from every baseline bearing that existed before this frame."
   }
  ]
 }

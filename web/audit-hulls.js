@@ -660,6 +660,28 @@
       }
     }
 
+    /* ── THE STERN FURNITURE STANDS ON THE STERN (round 58). The fitted plate was sampled
+       at u = 0.985, and when the counter flare carried the skin to u = 1.0 every light and
+       gallery keyed to the plate's bounding box ended up INSIDE the ship — the 74 showed a
+       bare stern wall from astern, and no baseline bearing looked. Whether a ship carries
+       stern lights is data (`sternLights`); what is declared must be drawn, and what is
+       drawn must stand at or abaft the planking's own aft face, because a window buried
+       behind the skin is invisible from every bearing while counting as coverage. */
+    if (H.sternLights) {
+      if (!part.sternlight) say(v.id, 'declared but not drawn', 'stern lights');
+      else if (part.planking && part.sternlight.x[1] < part.planking.x[1])
+        say(v.id, 'stern furniture buried in the hull',
+            `lights end ${(part.planking.x[1] - part.sternlight.x[1]).toFixed(2)} m inboard ` +
+            'of the aft face');
+    }
+    if (H.gunDecks && H.transom && H.build !== 'steel' && H.build !== 'iron') {
+      if (!part.gallery) say(v.id, 'declared but not drawn', 'quarter galleries');
+      else if (part.planking && part.gallery.x[1] < part.planking.x[1])
+        say(v.id, 'stern furniture buried in the hull',
+            `galleries end ${(part.planking.x[1] - part.gallery.x[1]).toFixed(2)} m inboard ` +
+            'of the aft face');
+    }
+
     /* declared screws must be drawn, and a screw lives under water */
     if (H.screws) {
       if (!part.screw) say(v.id, 'declared but not drawn', 'screws');

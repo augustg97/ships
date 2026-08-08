@@ -63,17 +63,23 @@ Ordered by how much each closes the gap per unit of work.
 1. ~~Guns run out through the ports~~ — **done**, placed off the shader's own port formula.
 2. ~~Stays, backstays and braces~~ — **done**, drawn from the spar positions actually placed.
    Still missing: sheets, tacks, halyards, lifts, and the topmast/topgallant shroud sets.
-3. **Head and beakhead** — headrails, gammoning, the beakhead platform. The bow currently ends
-   in a bare stem with a bowsprit stuck through it.
-4. **Stern — the COUNTER is in; the stern furniture wants another pass.** ~~Blocked on a hull-form change.~~ Resolved: the flare belongs entirely ABOVE the waterline, so Cw/Cp/Cb/Cm are untouched and no coefficient needed re-checking. Original diagnosis below, kept because the reasoning was the useful part. `buildStern` is written
-   and its parts are right, but it is an appliqué on a hull whose planking tapers to a near-point
-   at the sternpost, so the transom reads as a slab glued to the back however it is sized. Three
-   widths were tried — an unbounded flare, an absolute 0.6 of beam, and the ship's own after-body
-   half-breadth — and all three fail identically, because **the width was never the problem**.
-   A square-sterned ship's hull FORM ends in a transom: `wl(u)` must not run to zero at u = 1.
-   That means changing `hullSurface` and re-checking every vessel's `sternFineness` against its
-   published coefficients, since a squarer stern changes Cw and therefore Cb. Own round.
-   The code stays in the file, disabled at the call site, with the reason at the call site.
+3. ~~Head and beakhead~~ — **done** (this entry sat stale for rounds after the work shipped:
+   knee, headrails, timbers, platform and gammoning are all in `buildHead`, gated on the
+   `head:` data field, r-"the head ships"). The r58 lesson: check the CODE before trusting
+   this list.
+4. ~~Stern — the stern furniture~~ — **done, r58.** The counter flare was in (`S.transom`, in
+   `surfacePoint` itself) but the fitted plate was still sampled at u = 0.985 — and the skin
+   runs to u = 1.0, so the plate, the five lights keyed to its bounding box and the gallery
+   barrels all stood INSIDE the hull. From astern the 74 was a bare planked wall, and no
+   baseline bearing ever looked. Rebuilt off `surfacePoint(u = 1)` directly (no plate — the
+   hull's own shader-planked end cap IS the face): stern-light tiers per the new `sternLights`
+   data field (74 and Indiaman 2, fluyt 1, and deliberately none on the cog, the 1501 nau,
+   Wyoming or the clipper), mouldings banding each tier, quarter-gallery drums lofted round
+   the corner line with cornice and panes, and a taffrail with balusters. Audit rule added
+   ("stern furniture buried in the hull" + declared-but-not-drawn), proven by fault injection;
+   standing baseline `shipwright-astern` watches the class. Original diagnosis kept below in
+   git history; the useful part — the width was never the problem, the FORM was — became the
+   counter flare that already shipped.
 5. ~~Ratlines as ladders~~ — **done**. All standing rigging is merged prism geometry with a real diameter; 496 line objects became 6 meshes, so it is cheaper AND lit. LineBasicMaterial is unlit, which is why the old rigging never changed value in shadow.
 6. ~~Plank seams and fastenings~~ — **done**. Staggered butts to the shift-of-butts rule, and treenails as grain disturbance rather than dots, since they are the same wood as the plank. Both frequencies are lengths turned into counts (7 m oak, 0.78 m room-and-space), so they scale with the ship. Verified at close range and at distance for aliasing.
 7. **Furled sails** as a state, so a ship can be shown under bare poles or with courses handed —

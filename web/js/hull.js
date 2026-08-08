@@ -1936,6 +1936,11 @@ const PARTS = {
               what: 'The great windows across the transom, and the only real glazing in the ship. '
                   + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '
                   + 'cabin is the one place aboard you can read without a candle.' },
+  taffrail: { stage: 3, name: 'Taffrail',
+              what: 'The rail crowning the stern, carried up over the sheer and rising toward the '
+                  + 'centre with the poop\'s own camber. It is the highest timber of the hull '
+                  + 'proper, and on a man-of-war it carried the carved work and the stern '
+                  + 'lanterns by which one ship knew another at night.' },
   gallery:  { stage: 3, name: 'Quarter galleries',
               what: 'Cantilevered out at the after corners, where the hull has narrowed to nothing '
                   + 'and there is no side left to put a window in. Light and air for the officers '
@@ -4723,77 +4728,144 @@ function buildHead(S, group, mats) {
 }
 
 function buildStern(S, group, mats) {
+  /* ⚠ THE FURNITURE WAS BURIED INSIDE THE SHIP SHE WAS BUILT FOR. The old fitted plate was
+     sampled at u = 0.985 — and once the counter flare carried the SKIN to u = 1.0, the plate,
+     the five lights keyed to its bounding box and the gallery barrels all stood a half-metre
+     INSIDE the hull. From dead astern (the r58 `#z=`/`#y=` captures, the first ever taken)
+     the 74 showed a bare planked wall: no lights, no galleries, no taffrail, and two barrel
+     ends poking out at the quarters. The hull's own end cap — shader-planked, seamed, painted
+     — IS the transom face now, and everything here is placed off surfacePoint(u = 1), the one
+     function that owns the stern: no plate, no second parametrisation, nothing to drift. */
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const g = new THREE.Group();
-  /* the transom: a panel closing the hull across the stern, from waterline to taffrail */
-  const pos = [], idx = [];
-  const NV = 14, NW = 10;
-  for (let j = 0; j <= NV; j++) {
-    const v = 0.60 + (j / NV) * 0.40;
-    /* ⚠ THE TRANSOM HAS TO GROW OUT OF THE HULL, NOT BE STUCK ONTO IT. Two earlier attempts
-       failed the same way: an absolute target width (0.30 B) and an unbounded flare both give a
-       plate wider than the planking it meets, so it reads as a wing bolted to a pointed stern.
-       The width comes from the ship's OWN after sections — the half-breadth a little forward of
-       the sternpost, where there is still hull — so the tuck is continuous with the run by
-       construction. On a fine-sterned hull it is narrow, which is correct: that ship did not
-       have a broad transom. */
-    const p = surfacePoint(S, H, 0.985, v);
-    const half = p[2] * 0.99;                           // the hull's own width, counter included
-    for (let i = 0; i <= NW; i++) {
-      const t = (i / NW) * 2 - 1;
-      pos.push(p[0] + Math.abs(t) * L * 0.010, p[1], t * half);
+  const fb = H.sheer(1.0);
+  /* the aft face: x is constant over height at u = 1, half-breadth is not */
+  const xF = surfacePoint(S, H, 1.0, 1.0)[0];
+  const atH = zH => surfacePoint(S, H, 1.0, 0.62 + 0.38 * Math.max(0, Math.min(1, zH / fb)));
+  const halfAt = zH => atH(zH)[2];
+  const glass = new THREE.MeshStandardMaterial({
+    color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
+
+  /* ── STERN LIGHTS — rows of glazed cabin windows across the face ─────────────────────
+     Whether a ship carried them is a fact of the record, so it is DATA (`sternLights`, the
+     `head:` idiom): the 74 and the Indiaman show two tiers, the fluyt's narrow tuck one; a
+     cog, a 1501 nau, a clipper's counter and Wyoming's flat schooner transom show none.
+     Each row sits at its own height with its own width, because the counter flares as it
+     rises — the rows read the trapezoid off the surface instead of sharing one width. */
+  const rows = S.sternLights || 0;
+  const rowZ = [];
+  for (let r = 0; r < rows; r++)
+    rowZ.push(fb * (rows === 1 ? 0.55 : 0.42 + 0.30 * r));
+  const wh = fb * 0.16;                                  // one row of glazing, framed
+  for (const zc of rowZ) {
+    const hw = halfAt(zc) * 0.84;
+    const N = Math.max(3, Math.min(7, Math.round((2 * hw) / (B * 0.095))));
+    const pitch = (2 * hw) / N, ww = pitch * 0.64;
+    for (let i = 0; i < N; i++) {
+      const zi = -hw + pitch * (i + 0.5);
+      const fr = new THREE.Mesh(new THREE.BoxGeometry(B * 0.012, wh, ww), mats.woodPale);
+      fr.position.set(xF + B * 0.006, zc, zi);
+      g.add(tag(fr, 'sternlight'));
+      const gl = new THREE.Mesh(
+        new THREE.BoxGeometry(B * 0.012, wh - B * 0.016, ww - B * 0.014), glass);
+      gl.position.set(xF + B * 0.007, zc, zi);
+      g.add(tag(gl, 'sternlight'));
+      const mu = new THREE.Mesh(
+        new THREE.BoxGeometry(B * 0.013, wh - B * 0.016, B * 0.006), mats.woodPale);
+      mu.position.set(xF + B * 0.0075, zc, zi);
+      g.add(tag(mu, 'sternlight'));
+    }
+    /* the mouldings that band the stern above and below each tier — the horizontal lines
+       every stern drawing shows. Tagged as the transom: they are its structure, and they
+       keep the stage card reachable now that the face itself is the hull's own cap. */
+    for (const zm of [zc - wh * 0.80, zc + wh * 0.80]) {
+      const w2 = halfAt(zm) * 0.94;
+      const rail = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.008, B * 0.008, w2 * 2, 6), mats.woodDark);
+      rail.rotation.x = Math.PI / 2;
+      rail.position.set(xF + B * 0.004, zm, 0);
+      g.add(tag(rail, 'transom'));
     }
   }
-  for (let j = 0; j < NV; j++)
-    for (let i = 0; i < NW; i++) {
-      const a = j * (NW + 1) + i;
-      idx.push(a, a + NW + 1, a + 1, a + 1, a + NW + 1, a + NW + 2);
-    }
-  const tg = new THREE.BufferGeometry();
-  tg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  tg.setIndex(idx); tg.computeVertexNormals();
-  /* timber only — a steel ship never reaches this function; her transom is the hull cap */
-  g.add(tag(new THREE.Mesh(tg, mats.woodDark), 'transom'));
 
-  /* ── STERN LIGHTS, SET IN THE TRANSOM THEY BELONG TO ────────────────────────────────
-     ⚠ Twice now these have been sized from a formula that ran alongside the transom's own
-     geometry instead of from it, and twice they have ended up wider than the stern and off its
-     centreline. The transom mesh has just been built; measure IT. Anything derived from the
-     same numbers by a parallel route will drift the moment either route changes — which is the
-     single failure mode this project keeps rediscovering. */
-  if (S.gunDecks) {
-    const glass = new THREE.MeshStandardMaterial({
-      color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 });
-    tg.computeBoundingBox();
-    const tb = tg.boundingBox;
-    const halfT = Math.min(tb.max.z, -tb.min.z);        // the transom's own half-width
-    const yTop = tb.min.y + (tb.max.y - tb.min.y) * 0.80;
-    for (let i = 0; i < 5; i++) {
-      const w = new THREE.Mesh(
-        new THREE.BoxGeometry(L * 0.004, (tb.max.y - tb.min.y) * 0.16, halfT * 0.24), glass);
-      w.position.set(tb.max.x + L * 0.002, yTop, (i - 2) * halfT * 0.34);
-      g.add(tag(w, 'sternlight'));
+  /* ── THE TAFFRAIL — the crown rail across the top of the stern ───────────────────────
+     It rises toward the centre, because the real rail followed the poop's crown, and it is
+     what stops the stern reading as a wall that simply runs out of planks at the sheer. */
+  if (rows || S.gunDecks) {
+    const halfT = halfAt(fb) * 0.97;
+    const hR = B * 0.055;
+    const arc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(xF, fb + hR, -halfT),
+      new THREE.Vector3(xF, fb + hR * 1.35, 0),
+      new THREE.Vector3(xF, fb + hR, halfT)]);
+    g.add(tag(new THREE.Mesh(
+      new THREE.TubeGeometry(arc, 16, B * 0.011, 6, false), mats.woodDark), 'taffrail'));
+    const NB = 5;
+    for (let i = 0; i < NB; i++) {
+      const p = arc.getPoint(i / (NB - 1));
+      const h = p.y - fb;
+      const bal = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.005, B * 0.005, h, 5), mats.woodPale);
+      bal.position.set(xF, fb + h / 2, p.z);
+      g.add(tag(bal, 'taffrail'));
     }
   }
 
-  /* quarter galleries: cantilevered out at the after corners, where there is no hull left
-     to put a window in and the officers live anyway */
+  /* ── QUARTER GALLERIES — the officers' bays wrapped round the after corners ──────────
+     A drum lofted AROUND the corner line the stern face and the topside share, so every
+     edge of it lies on the surface by construction: at each height the corner is sampled
+     off surfacePoint and the bay swells aft-and-outboard from it, nothing at the bottom
+     (the finial drop every drawing shows), full at the top, capped with its own cornice.
+     Storeys follow the stern-light tiers, because the galleries were the same cabins
+     carried round the corner — their panes sit at the SAME heights as the rows. */
   if (S.gunDecks) {
-    tg.computeBoundingBox();
-    const tb2 = tg.boundingBox;
-    const p = [tb2.max.x - L * 0.020, tb2.min.y + (tb2.max.y - tb2.min.y) * 0.62,
-               Math.min(tb2.max.z, -tb2.min.z) * 0.94];
+    const zG0 = fb * 0.30, zG1 = fb * (rows >= 2 ? 0.88 : 0.62);
+    const NZ = 8, NA = 5, rMax = B * 0.052;
+    const rAt = zH => {
+      const t = (zH - zG0) / (zG1 - zG0);
+      return rMax * Math.pow(Math.min(1, t / 0.30), 0.8);
+    };
     for (const sgn of [-1, 1]) {
-      /* a gallery is a small closet cantilevered off the quarter, not a barrel. About a
-         sixth of the beam tall and a tenth deep — big enough for a window and a seat. */
-      const q = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.020, B * 0.026, B * 0.11, 8, 1, false, 0, Math.PI),
-        mats.woodPale);
-      q.rotation.x = Math.PI / 2;
-      q.rotation.y = sgn > 0 ? 0 : Math.PI;
-      q.position.set(p[0] + L * 0.008, p[1] * 0.96, sgn * (p[2] + B * 0.012));
-      g.add(tag(q, 'gallery'));
+      const gp = [], gi = [];
+      for (let j = 0; j <= NZ; j++) {
+        const zH = zG0 + (zG1 - zG0) * (j / NZ);
+        const c = atH(zH);
+        const cz = sgn * c[2] * 0.995, r = rAt(zH);
+        for (let i = 0; i <= NA; i++) {
+          const a = (i / NA) * Math.PI / 2;      // 0 → dead aft, π/2 → square outboard
+          gp.push(xF + r * Math.cos(a), zH, cz + sgn * r * Math.sin(a));
+        }
+      }
+      for (let j = 0; j < NZ; j++)
+        for (let i = 0; i < NA; i++) {
+          const a = j * (NA + 1) + i;
+          if (sgn > 0) gi.push(a, a + 1, a + NA + 1, a + 1, a + NA + 2, a + NA + 1);
+          else         gi.push(a, a + NA + 1, a + 1, a + 1, a + NA + 1, a + NA + 2);
+        }
+      const gg = new THREE.BufferGeometry();
+      gg.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3));
+      gg.setIndex(gi); gg.computeVertexNormals();
+      const bay = new THREE.Mesh(gg, new THREE.MeshStandardMaterial({
+        color: 0x9c8259, roughness: 0.68, side: THREE.DoubleSide }));
+      g.add(tag(bay, 'gallery'));
+      /* the cornice closing the drum's top */
+      const cT = atH(zG1);
+      const lid = new THREE.Mesh(
+        new THREE.CylinderGeometry(rMax * 1.12, rMax * 1.12, B * 0.012, 10), mats.woodDark);
+      lid.position.set(xF, zG1 + B * 0.006, sgn * cT[2] * 0.995);
+      g.add(tag(lid, 'gallery'));
+      /* panes at the tier heights, looking out over the quarter */
+      for (const zc of (rowZ.length ? rowZ : [(zG0 + zG1) / 2])) {
+        if (zc < zG0 + wh * 0.5 || zc > zG1 - wh * 0.4) continue;
+        const c = atH(zc), r = rAt(zc);
+        const pane = new THREE.Mesh(
+          new THREE.BoxGeometry(B * 0.010, wh * 0.8, B * 0.045), glass);
+        pane.position.set(xF + (r + B * 0.004) * Math.SQRT1_2,
+                          zc, sgn * (c[2] * 0.995 + (r + B * 0.004) * Math.SQRT1_2));
+        pane.rotation.y = -sgn * Math.PI / 4;
+        g.add(tag(pane, 'gallery'));
+      }
     }
   }
   group.add(g);

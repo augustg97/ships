@@ -2726,3 +2726,90 @@ with Ocean Crossing lit.
    hangs before first paint.
 3. A galley action stays unblocked (r50): Salamis, Lepanto, Myeongnyang are campaign-data
    tasks. B10 stunsails if wanted (clipper's missing ~500 m²; applies to Preussen-class too).
+
+---
+
+## Round 58 — 2026-08-08 — The stern was buried inside the ship she was built for
+
+**The task: SHIPWRIGHT-QUEUE "Detail gaps" per r57's pointer — and the first finding was that
+the queue file itself was stale.** Item 3 (head and beakhead) claimed "the bow currently ends
+in a bare stem"; `buildHead` has drawn the knee, rails, timbers, platform and gammoning for
+rounds, gated on the `head:` data field. Marked done in the queue with the lesson: check the
+CODE before trusting the list. Item 4 — the stern furniture — was the real work.
+
+**First, the camera had to learn to look at a hull.** The Shipwright's whole-rig framing puts
+a 57 m ship in ~250 px, and every close zoom framed the hull behind the bottom panels because
+the aim point rides at a fixed 34% of the RIG's height. Three params extend the r55 `#b=`
+grammar: **`&z=<dist>`** (the wheel's own SW.dist, set after the selection settles because
+swOpen clamps dist ≥ 1.0 as it runs), **`&l=<deg>`** (camera latitude, the drag's own SW.lat),
+**`&y=<metres>`** (the height the camera looks AT — resolved in swFrame against the extents it
+owns, the viewFromDeg pattern, because lookT is recomputed every frame). What a frame cannot
+name it cannot watch; the stern had never been watchable.
+
+**The finding, from the first stern capture ever taken: the 74 showed a bare planked wall.**
+The counter flare (`S.transom`, in `surfacePoint` itself) works and she HAS a broad stern —
+but `buildStern`'s fitted plate was still sampled at u = 0.985, and the flared skin runs to
+u = 1.0. The plate, the five lights keyed to its bounding box and the two gallery half-barrels
+all stood up to 0.9 m INSIDE the hull — invisible from every bearing, on every timber transom
+ship, for as long as the counter flare has existed. The two pale "horns" at the quarters were
+the barrels' ends poking through the skin.
+
+**The rebuild, all off `surfacePoint(u = 1)` — no plate, no second parametrisation.** The
+hull's shader-planked end cap IS the transom face (it already carries seams and paint the
+plate could not match). On it: stern-light tiers as pale frames + recessed glass + centre
+mullion, row widths read off the surface at each row's own height (the counter widens rising,
+so the upper tier is wider — the model's own trapezoid); mouldings banding each tier (tagged
+'transom', keeping that stage card reachable); a taffrail arc with balusters, rising to the
+centre; quarter-gallery drums lofted AROUND the corner line the stern face and topside share —
+every edge sampled off the surface, swelling from nothing at the foot (the finial drop) to a
+cornice lid, with panes at the same heights as the light tiers, because the galleries were the
+same cabins carried round the corner.
+
+**Whether a ship carries stern lights is a fact of the record, so it is DATA:** new
+`sternLights` field — 74: 2, East Indiaman: 2, fluyt: 1 (her narrow tuck's pair of small
+lights), and deliberately NONE on the cog (1100, unglazed), the 1501 nau, Wyoming's schooner
+transom or the clipper's counter. Galleries stay gated on `gunDecks` (74 + Indiaman), storeys
+follow the tiers. All three gainers rendered and looked at from astern and the quarter.
+
+**The audit learned the class** (the standing rule: every new fault class becomes a rule):
+"stern furniture buried in the hull" — drawn sternlight/gallery geometry must stand at or
+abaft `part.planking.x[1]` — plus declared-but-not-drawn for both fields. **Proven by fault
+injection in-page**: wrapping buildShip to shift the drawn furniture 1 m forward reproduces
+the burial on exactly the three sternLights ships (0.80–0.91 m inboard) and both gallery
+ships; sternLights declared on steel Titanic fires declared-but-not-drawn once; restored,
+25/25 clean.
+
+**Ratchet: 41 frames (40 + the new standing guard `shipwright-astern`, the 74 dead astern at
+z=0.35 l=6 y=7 — every timber transom ship shares buildStern, so one bearing watches the
+class).** Two movers, both diffs read before accepting: `shipwright` 0.115% and
+`shipwright-ahead` 0.051%, and in both the ONLY moved pixels are neighbouring hulls' sterns
+gaining their lights and taffrails — no sea, no rig, no panels. Accepted with the class
+reason. The three diagnosis frames were deleted after reading (the r55 rule: verification
+captures are not baselines).
+
+**⚠ The serif false-RED class struck an EIGHTH time, and r57's closure is dented.** Solo
+globe-default check: 1.078% / mean 0.296 — the label-halo profile — then 0.000% on four
+surrounding runs (the batch scored it clean). r57's `document.fonts.ready` gate demonstrably
+does not close the whole class. The diff was LOST before I could read it: every solo check
+wipes `_diff`, so a transient's diff must be COPIED OUT the moment it appears, before any
+further check runs — sharper form of the r51/r57 lesson. Class stays open, unclassified by
+image, matched by profile.
+
+**Rule 0, written on shipwright-astern:** it reads as a rendered world — a broad-sterned 74
+on open water from dead astern, close enough to read her cabin windows. Three facts a viewer
+can read off it: two tiers of glazed stern lights under a taffrail, the upper tier wider
+because the counter flares as it rises; quarter-gallery drums at both corners with their
+cornices; the guns run out along both broadsides beyond the stern's shoulder, with the fleet
+list and 5-metre scale bar placing her against her neighbours.
+
+**Audit 25/25 clean. Frames 40 → 41.**
+
+### Next, in order
+1. **Survey continues.** Remaining true detail gaps (SHIPWRIGHT-QUEUE, now corrected): rig
+   remainder of item 2 (sheets, tacks, halyards, lifts, topmast shroud sets), item 7 furled
+   sails as a state, item 9 wooldings/mast bands/cheeks, item 10's waterway. The r58 camera
+   grammar (`#b/#z/#l/#y`) makes any of these verifiable close-up now.
+2. Carried: serif false-RED (EIGHTH strike, see above — next flap: copy the diff out
+   immediately); featureless brown land behind aboard-yamato; Titanic remainder; r43's plate
+   gaps; wrong-era voyage hash hang.
+3. Galley action unblocked; B10 stunsails if wanted.

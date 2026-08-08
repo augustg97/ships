@@ -553,3 +553,20 @@ Once the ratchet reports, I'll classify any movers, commit, push and verify the 
 2026-08-07 21:53:37  round starting
 Execution error───────────────────────────────────────────────────────────────────────────
 2026-08-07 23:03:00  round starting
+Round 57 is done and live — stamp **1786167174 → 1786169817**, with the live CSS carrying the new @font-face and the font file serving at its exact committed size (122,168 bytes). August's second list is now worked in full.
+
+What the round did:
+
+**Round 56's missing handoff reconstructed.** The last commit before this round (item 9, the sourced trade metrics) had deployed but never wrote its HANDOFF.md entry — the same omission as rounds 52–54. It's now recorded, and the queue status marks items 1–10 done.
+
+**The steel stern quarter (carried since round 27) — settled by looking, no code change.** I captured yamato from the quarter and dead astern, plus titanic and the carrier, through the `#b=` bearing grammar. All three of the original reads — full-lit pale transom, proud black sternpost stripe, pale-sand antifouling — were already fixed at class level by the intervening steel rework; the item had been carried by inertia through the rounds that fixed it, and nobody had pointed a camera astern since. The diagnosis frames were read and deleted.
+
+**The serif-webfont decision (carried since round 28) — decided by measurement and shipped.** Two OFL candidates were A/B'd against the committed globe-default baseline: Source Serif 4 moved 1.555% of pixels vs Literata's 2.701%, so it keeps the chart register best. It's vendored as "Ships Serif" with OFL provenance in ASSETS.json, and `markReady()` now refuses a frozen capture until `document.fonts.ready` resolves — a clause that used to be vacuous because the stack was all system fonts. The proof it closes the label-halo false-RED class: two cold captures of identical code now differ by **0.000%** of pixels.
+
+**All 40 baselines re-anchored** (0.317–2.177% moved, text and reflow only — I read the globe-modern, aboard-yamato, action, and ship-junk diffs before accepting; hulls, sea, and land had zero moved pixels). Verification ratchet 40/40 green, audit 25/25 clean. One procedural lesson logged: `accept` consumes the `_current` of the last check and every solo check wipes it, so check-then-accept must be a per-frame pair — a batch of forty checks followed by forty accepts fails all forty, silently.
+
+Next round falls back to the standing vessel survey; the handoff points at the ship-of-the-line's detail gaps as the highest-value target.
+2026-08-08 00:16:31  round finished; HEAD is 6c3d344 The serif is ours now, and the stern quarter had already been won
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 53428 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-08 00:26:31  round starting

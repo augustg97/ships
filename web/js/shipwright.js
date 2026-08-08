@@ -843,7 +843,14 @@ function swFrame(now) {
      for a 269 m liner and closing in for a 19 m canoe IS the size comparison, felt as motion
      rather than read off a number. Easing them at the same rate keeps them one movement. */
   const top = SW.viewTop, bot = SW.viewBot;
-  const lookT = bot + (top - bot) * 0.34;
+  /* `#y=<metres>` aims the camera at a HEIGHT of the viewer's choosing — the default aim
+     rides at a fixed fraction of the rig, which frames a whole ship well and a hull detail
+     not at all: at any close zoom the hull sat behind the bottom panels, unreachable from a
+     URL. Resolved here, against the extents this frame actually uses, for the same reason
+     the bearing is (the r55 lesson: state is resolved where it is owned). */
+  const lookT = SW.lookAtY !== undefined
+              ? Math.max(bot, Math.min(top, SW.lookAtY))
+              : bot + (top - bot) * 0.34;
   const halfV = Math.max(top - lookT, lookT - bot);
   const tanV = Math.tan(SW.cam.fov * Math.PI / 360);
   const fitT = 1.14 * Math.max(halfV / tanV,

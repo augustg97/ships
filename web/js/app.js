@@ -396,11 +396,32 @@ function applyHashView() {
        verification (queue item 1): "look from ahead" was not addressable in a URL, and what
        a frame cannot name it cannot watch. */
     const bm = /[#&]b=(-?[\d.]+)/.exec(location.hash);
+    /* `&z=<dist>` — how close the camera stands, the wheel's own SW.dist (it multiplies the
+       per-ship fit, so one value frames the canoe and the container ship identically; 1 fills
+       the frame with the rig, 0.35 is the wheel's closest). Set HERE, after the selection has
+       settled, because swOpen clamps dist to ≥1.0 as it runs — a value written earlier is
+       destroyed by the very open it is aimed at. Unlike lon there is no per-frame overwrite,
+       so once the open is past, a direct set holds. Added for the stern-furniture survey:
+       the whole-rig frame shows a 57 m ship in ~250 px and no fitting on her can be judged
+       from it, and what a frame cannot name it cannot watch. */
+    const zm = /[#&]z=([\d.]+)/.exec(location.hash);
+    /* `&l=<degrees>` — the camera's height angle, the drag's own SW.lat: 1° is eye level off
+       the water, 51° (the drag's ceiling) looks down onto the deck. Without it a close zoom
+       always framed the hull behind the bottom panels, because the look point rides at a
+       fixed fraction of the RIG's height. */
+    const lm = /[#&]l=([\d.]+)/.exec(location.hash);
+    /* `&y=<metres>` — the height the camera looks AT, above the waterline. The default aim
+       is mid-rig; a hull survey wants the hull. Resolved in swFrame against the extents it
+       owns; only the request is recorded here. */
+    const ym = /[#&]y=(-?[\d.]+)/.exec(location.hash);
     const tryPick = () => {
       const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
       const entry = SWs && (SWs.layout || []).find(e => e.id.toLowerCase() === want);
       if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) {
         if (bm) SWs.viewFromDeg = parseFloat(bm[1]);
+        if (zm) SWs.dist = Math.max(0.35, Math.min(8.0, parseFloat(zm[1])));
+        if (lm) SWs.lat = Math.max(0.02, Math.min(0.90, parseFloat(lm[1]) * Math.PI / 180));
+        if (ym) SWs.lookAtY = parseFloat(ym[1]);
         shipSelectPending = false; return;
       }
       if (typeof swOpenById === 'function') swOpenById(sm[1]);
