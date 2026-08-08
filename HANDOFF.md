@@ -2813,3 +2813,8 @@ list and 5-metre scale bar placing her against her neighbours.
    immediately); featureless brown land behind aboard-yamato; Titanic remainder; r43's plate
    gaps; wrong-era voyage hash hang.
 3. Galley action unblocked; B10 stunsails if wanted.
+
+**End-of-round deploy note: LIVE, stamp 1786169817 → 1786176903**, verified with a cache-busted
+fetch of the data-version meta tag; the live hull.js confirmed carrying the rebuilt buildStern
+and the live vessels.json the three sternLights fields. Sixteenth clean push-triggered deploy
+in a row.
