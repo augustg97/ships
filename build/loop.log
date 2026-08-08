@@ -520,3 +520,19 @@ Round 50 is complete and live at stamp 1786139194.
 /Users/augustgweon/Ships/build/loop-round.sh: line 77:  7409 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-07 15:17:05  round starting
+Round 51 is done and live. The vessel was the clipper — the r44 handoff had already flagged her: "the clipper's single topgallant over double topsails — the next square rigger is data."
+
+**What she was:** nine cloths on the old three-tier path, four bare jib stays with no headsails, no staysails, no spanker, bare mastheads — under a card claiming ~2,970 m² of canvas and a photo of *Cutty Sark*.
+
+**What shipped:**
+- **Her rig, from the record, entirely as data** — five yards per mast (`course, ltop, utop, tg, royal` — the PLAN's `tg` entry written for her in r44 and never used), four jibs, three staysails in each gap, the spanker, the two white deckhouses of every photograph, and the open wheel aft. Survey: 2,628 → 3,024 tris/m, nothing floating.
+- **A fleet-wide class fix the first render exposed:** every crease term in `makeTriSail` scaled with the luff alone — tuned on 20–30 m lateen yards, it hung two metres of wrinkle on a 45 m jib stay, so the head suit of every big square-rigger rendered as laundry. Creases now scale with the sail's own set (`belly`), capped at the lateen they were tuned on. The dhow and canoe moved 0.000% (the controls); six frames moved, every diff classified — all six pure tri sailcloth.
+- **The audit's station-gate class killed** after striking a sixth and seventh time: the yard census now assigns each square cloth to its nearest mast station (no gate to be wrong), and the headsail census is tri-gated so a forward-raked foremast's royal can't masquerade as a jib. Both proven in-page: a misnamed yard fires once, a jib deleted from the drawn model fires once, the old gate re-evaled over today's data reproduces the false positive, restored is 25/25.
+- **Scale anchored to the record:** the drawn rig was 52.5 m deck-to-truck against RMG's 47 m; masts rescaled (ratios kept) to print 46.9 m. That exposed the old sail-area "match" as fake — the honest figure is 2,463 m² of her 2,976, the gap being the stunsails the model doesn't draw, logged as gap B10.
+
+Audit 25/25; ratchet grew 37 → 39 frames (ship-clipper and aboard-clipper, both looked at before committing); live stamp verified 1786139194 → 1786142761 with the slack factor and yard lists confirmed in the live files — fifteenth clean deploy in a row. One procedural lesson went into HANDOFF: batched ratchet runs wipe earlier movers' diffs, so movers get classified from solo re-runs.
+2026-08-07 16:19:24  round finished; HEAD is 63adeac Deploy note r51: the clipper's rig live at 1786142761
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 12841 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-07 16:29:24  round starting
+Execution error

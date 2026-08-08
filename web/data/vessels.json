@@ -1394,6 +1394,7 @@
     "iron": false,
     "topside": "#5d452a",
     "bowsprit": 0.22,
+    "head": 1,
     "steeve": 24,
     "masts": [
      {
@@ -1527,6 +1528,7 @@
     "iron": false,
     "topside": "#4a3a26",
     "bowsprit": 0.24,
+    "head": 2,
     "steeve": 22,
     "masts": [
      {
@@ -1664,6 +1666,7 @@
     "iron": false,
     "topside": "#3f3222",
     "bowsprit": 0.26,
+    "head": 2,
     "steeve": 22,
     "masts": [
      {
@@ -1802,6 +1805,7 @@
     "iron": false,
     "topside": "#4c3b28",
     "bowsprit": 0.22,
+    "head": 1,
     "steeve": 22,
     "masts": [
      {
@@ -2720,6 +2724,7 @@
     "iron": false,
     "topside": "#22201d",
     "bowsprit": 0.22,
+    "head": 1,
     "steeve": 14,
     "masts": [
      {

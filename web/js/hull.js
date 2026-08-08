@@ -1450,7 +1450,17 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
       /* draft: peak 40% aft of the luff, growing from head to foot */
       const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
       const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
-      let z = Math.max(0, chord) * depth;
+      /* ⚠ AND IT BELLIES FORWARD, NOT AFT — every square sail on every ship had this
+         backwards. The belly was clamped to local +z, and `m.rotation.y = PI/2` maps local +z
+         onto hull +x, which this file's own comments define as AFT (line ~964, "+x is AFT";
+         line ~3132, "bow at -x"). So the canvas sat permanently abaft its yard and you could
+         see the masts standing in front of the sails from ahead.
+         A square sail bellies to LEEWARD. A square-rigger's working condition is the wind
+         abaft the beam — that is the whole point of the rig — so the cloth sets FORWARD of
+         the yard and the mast, pressing away from them. Aft of the mast is what a sail looks
+         like when it is aback: caught on the wrong side, driving the ship astern. It is the
+         one sail attitude that means the ship is in trouble, and the fleet was wearing it. */
+      let z = -Math.max(0, chord) * depth;
 
       /* ── WHAT MAKES CLOTH LOOK LIKE CLOTH ─────────────────────────────────────────
          A sail is not a smooth shell. It is a limp sheet held at a few points, and every
@@ -1874,6 +1884,12 @@ const PARTS = {
                   + 'messenger line. The STOCK is set at right angles to the arms, and that 90° '
                   + 'is the whole invention: it rolls the anchor over until a fluke bites. '
                   + 'Without it the thing lies flat and drags.' },
+  cathead:  { stage: 3, name: 'Cathead',
+              what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
+                  + 'is a tackle problem: the ring must be caught, lifted clear of the water '
+                  + 'and swung outboard of the planking, and the cathead is the crane that '
+                  + 'does it — its sheaves take the cat tackle, and the anchor rides fished '
+                  + 'along the topside from its tip until the next letting-go.' },
   head:     { stage: 4, name: 'Head and beakhead',
               what: 'A working platform carried out beyond the stem, and the rails that sweep up '
                   + 'to it are STRUCTURE, not ornament: they stay the bowsprit sideways against '
@@ -4526,46 +4542,174 @@ function buildContainers(S, group) {
  * the coefficients produced.
  */
 function buildHead(S, group, mats) {
-  /* ⚠ THE BEAKHEAD DIED WITH THE WOODEN HULL. The platform and headrails are wooden-ship
-     structure; an iron or steel ship's bowsprit is socketed and plated straight to the
-     stem — no photograph of Preussen or of any Victorian steamer shows headrails, and this
-     builder was hanging a pale timber head on both. Gated on the hull's own material. */
+  /* ⚠ THE BEAKHEAD DIED WITH THE WOODEN HULL — and it was BORN with the galleon. The old
+     gate (any wooden bowsprit) hung a head on the carrack, the caravel, the corbita and a
+     1909 schooner, none of which carried one; whether a ship has a head is a fact of the
+     record, so it is DATA: `head: 1` is knee, one pair of rails and the gammoning (a
+     clipper's light head); `head: 2` adds the second rail pair, the head timbers and the
+     platform (the man-of-war's working beakhead). No field, no head.
+     ⚠ And the first drawing of it was the fault the survey caught from every bearing: a
+     platform BOX floating in air beside the stem, rails that ended short of everything.
+     Every part here now takes both its ends from geometry that exists — the stem's own
+     profile, the bowsprit's own line, the rail curves themselves — so nothing CAN float. */
+  S.__catheads = null;
   if (!S.bowsprit || S.iron) return;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
-  const g = new THREE.Group();
-  const stemX = -0.5 * L + H.rake(0.02);
-  const deck = H.sheer(0.04);
-  const reach = L * 0.085;                              // how far the head projects
-  /* the beakhead platform: a narrow deck carried out beyond the stem on knees */
-  const plat = new THREE.Mesh(
-    new THREE.BoxGeometry(reach, B * 0.018, B * 0.30), mats.woodPale);
-  plat.position.set(stemX - reach * 0.42, deck * 0.86, 0);
-  plat.rotation.z = -0.13;                              // it rises toward the bowsprit
-  g.add(plat);
-  /* the headrails, one pair, sweeping from the bow up and forward */
-  for (const sgn of [-1, 1]) {
-    const pts = [];
-    for (let i = 0; i <= 12; i++) {
-      const f = i / 12;
-      const p = surfacePoint(S, H, 0.13 * (1 - f) + 0.012, 0.92);
-      pts.push(new THREE.Vector3(
-        p[0] - f * reach * 1.05,
-        p[1] + f * f * deck * 0.30,
-        sgn * (p[2] * (1 - f * 0.55) + B * 0.012)));
+
+  /* ── CATHEADS, for every frame-built wooden hull with a bowsprit ──────────────────────
+     Catting the anchor is medieval; the beakhead is not. The carrack and caravel keep
+     their bare stems and still get the beam their anchor hangs from. The tips are stashed
+     on the spec (the __spars pattern) so buildAnchor hangs from the SAME point this drew. */
+  if (S.build === 'frame') {
+    const uc = 0.105;
+    const pd = surfacePoint(S, H, uc, 1.0);
+    const blen = B * 0.26, sq = B * 0.042, ang = 0.70;   // 40° forward of athwart
+    S.__catheads = [];
+    for (const sgn of [-1, 1]) {
+      const cg = new THREE.Group();
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, blen), mats.woodDark);
+      beam.position.z = blen / 2;
+      cg.add(beam);
+      /* the supporting knee, from the topside up to the beam's underside */
+      const kn = new THREE.Mesh(new THREE.BoxGeometry(sq * 0.7, B * 0.06, sq * 0.7), mats.woodDark);
+      kn.position.set(0, -B * 0.038, blen * 0.30);
+      cg.add(kn);
+      cg.position.set(pd[0], pd[1] + B * 0.012, sgn * pd[2] * 0.55);
+      cg.rotation.y = sgn > 0 ? -ang : Math.PI + ang;    // outboard and forward, both sides
+      cg.rotation.x = -sgn * 0.06;                       // a slight up-cant at the tip
+      group.add(tag(cg, 'cathead'));
+      /* the tip, measured through the SAME transform the beam gets — a parallel formula
+         here is the drift bug this project keeps rediscovering */
+      const tip = new THREE.Vector3(0, 0, blen).applyEuler(cg.rotation).add(cg.position);
+      S.__catheads.push({ x: tip.x, y: tip.y, z: tip.z });
     }
-    const rail = new THREE.Mesh(
-      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, B * 0.011, 6, false),
-      mats.woodPale);
-    g.add(rail);
   }
-  /* gammoning: the lashing that holds the bowsprit down to the stem, and the only thing
-     stopping the forestays lifting it straight out of the ship */
-  const gam = new THREE.Mesh(
-    new THREE.TorusGeometry(B * 0.055, B * 0.010, 6, 12), mats.woodDark);
-  gam.rotation.y = Math.PI / 2;
-  gam.position.set(stemX - reach * 0.15, deck * 1.02, 0);
-  g.add(gam);
+
+  const grade = S.head || 0;
+  if (!grade) return;
+  const g = new THREE.Group();
+
+  /* the bowsprit's own line, the same numbers buildRig used to place the spar */
+  const x0 = -L / 2 + H.rake(0.02);
+  const y0 = H.sheer(0.02);
+  const steeve = (S.steeve || 22) * Math.PI / 180;
+  const spritY = x => y0 + Math.tan(steeve) * (x0 - x);
+
+  /* ── THE KNEE OF THE HEAD ─────────────────────────────────────────────────────────────
+     The curved timber on the stem's forward face that carries the whole head. Its back
+     edge is SAMPLED off the stem (surfacePoint at u→0), its top stands just clear beneath
+     the bowsprit's own line — so it grows out of the hull and stops under the spar by
+     construction, at any rake and any steeve the data declares. */
+  const stemEdge = v => surfacePoint(S, H, 0.004, v);
+  const base = stemEdge(0.66);                          // just above the waterline
+  const top = stemEdge(1.0);                            // the stem head at the deck
+  /* the head PROJECTS — a 74's beak stands metres beyond the rabbet, and the first cut of
+     this builder put the nose 1.2 m out and the whole structure vanished against the bow */
+  const kneeX = top[0] - L * (grade >= 2 ? 0.050 : 0.034);
+  const kneeTopY = spritY(kneeX) - B * 0.020;
+  const shape = new THREE.Shape();
+  shape.moveTo(base[0], base[1]);
+  for (const v of [0.75, 0.85, 0.93, 1.0]) {
+    const p = stemEdge(v);
+    shape.lineTo(p[0], p[1]);
+  }
+  shape.lineTo(top[0] - L * 0.004, kneeTopY);           // up the stem head to the slot
+  shape.lineTo(kneeX, kneeTopY);                        // the flat the gammoning grips
+  shape.quadraticCurveTo(kneeX - L * 0.014, kneeTopY - B * 0.10,
+                         base[0] - L * 0.012, base[1] + B * 0.04);
+  shape.quadraticCurveTo(base[0] - L * 0.004, base[1] + B * 0.01, base[0], base[1]);
+  const kneeTh = B * 0.035;
+  /* pale, deliberately — the cutwater against the dark wale is how the bow profile reads */
+  const knee = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(shape, { depth: kneeTh, bevelEnabled: false }), mats.woodPale);
+  knee.position.z = -kneeTh / 2;
+  g.add(knee);
+
+  /* ── THE HEADRAILS ────────────────────────────────────────────────────────────────────
+     Aft end planted ON the skin, forward end landed ON the knee just drawn — the two
+     objects the old rails floated between. The droop in the middle is the S the real
+     rails carry. The curves are kept; everything else in the head is indexed off them. */
+  const railR = B * 0.013;
+  const rails = [];                                     // [side][pair] -> curve
+  const pairs = grade >= 2 ? 2 : 1;
+  for (const sgn of [-1, 1]) {
+    const side = [];
+    for (let r = 0; r < pairs; r++) {
+      const aftU = r === 0 ? 0.085 : 0.050;
+      const aftV = r === 0 ? 0.96 : 0.86;
+      const dropY = r === 0 ? 0.04 : 0.05;
+      const a = surfacePoint(S, H, aftU, aftV);
+      const land = new THREE.Vector3(kneeX + L * 0.006, kneeTopY - B * (0.030 + r * 0.095),
+                                     sgn * (kneeTh / 2 + railR * 0.4));
+      const p0 = new THREE.Vector3(a[0], a[1], sgn * (a[2] + railR * 0.4));
+      const mid1 = new THREE.Vector3(
+        p0.x + (land.x - p0.x) * 0.38, p0.y + (land.y - p0.y) * 0.30 - B * dropY,
+        sgn * ((a[2] + railR * 0.4) * 0.62 + Math.abs(land.z) * 0.38));
+      const mid2 = new THREE.Vector3(
+        p0.x + (land.x - p0.x) * 0.74, p0.y + (land.y - p0.y) * 0.72 - B * dropY * 0.5,
+        sgn * ((a[2] + railR * 0.4) * 0.24 + Math.abs(land.z) * 0.76));
+      const curve = new THREE.CatmullRomCurve3([p0, mid1, mid2, land]);
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 20, railR, 6, false), mats.woodPale));
+      side.push(curve);
+    }
+    rails.push(side);
+  }
+
+  if (grade >= 2) {
+    /* timbers and platform live FORWARD OF THE STEM — placed by asking the rail curve
+       itself where it passes the stem head, so nothing lands on the bow planking. The
+       first cut spaced them by blind fractions and laid planks through the bulwark. */
+    let fStem = 0.5;
+    for (let i = 0; i <= 40; i++)
+      if (rails[0][0].getPoint(i / 40).x < top[0]) { fStem = i / 40; break; }
+    /* head timbers: the verticals joining upper rail to lower, ends taken from the rail
+       curves themselves so they cannot miss */
+    for (let k = 0; k < 3; k++) {
+      const f = fStem + (0.92 - fStem) * (0.18 + k * 0.32);
+      for (const side of rails) {
+        const a = side[0].getPoint(f), b = side[1].getPoint(f);
+        const d = b.clone().sub(a);
+        const t = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.009, B * 0.009, d.length(), 6), mats.woodPale);
+        t.position.copy(a).addScaledVector(d, 0.5);
+        t.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+        g.add(t);
+      }
+    }
+    /* the platform: gratings laid athwart between the upper rails — a working deck, the
+       crew's heads, spanning rail to rail rather than floating beside the stem */
+    for (let k = 0; k < 4; k++) {
+      const f = fStem + (0.90 - fStem) * (0.12 + k * 0.25);
+      const pp = rails[0][0].getPoint(f), ps = rails[1][0].getPoint(f);
+      const plank = new THREE.Mesh(
+        new THREE.BoxGeometry(L * 0.014, B * 0.010, Math.abs(pp.z - ps.z) * 0.98 + B * 0.02),
+        mats.woodPale);
+      plank.position.set((pp.x + ps.x) / 2, (pp.y + ps.y) / 2 - railR * 0.8, (pp.z + ps.z) / 2);
+      g.add(plank);
+    }
+  }
+
+  /* ── THE GAMMONING ────────────────────────────────────────────────────────────────────
+     Rope, not timber — the turns that lash the bowsprit down onto the knee against the
+     lift of every forestay. Wound as a helix around the spar's own line and the knee top
+     it grips, three visible turns. */
+  const gx = top[0] - L * 0.012;                        // the slot, just clear of the stem head
+  const gy = spritY(gx) + B * 0.032;                    // over the spar's own line there
+  const gBot = kneeTopY - B * 0.13;                     // under the knee's gripping flat
+  const cy = (gy + gBot) / 2, semiY = (gy - gBot) / 2, semiZ = B * 0.030;
+  const gpts = [];
+  const TURNS = 3, SEG = 22;
+  for (let i = 0; i <= TURNS * SEG; i++) {
+    const t = (i / SEG) * Math.PI * 2;
+    gpts.push(new THREE.Vector3(
+      gx - B * 0.022 + (i / (TURNS * SEG)) * B * 0.055,
+      cy + semiY * Math.cos(t), semiZ * Math.sin(t)));
+  }
+  g.add(new THREE.Mesh(
+    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(gpts), TURNS * SEG, B * 0.008, 5, false),
+    mats.ropeSolid));
+
   group.add(tag(g, 'head'));
 }
 
@@ -4777,8 +4921,9 @@ function buildJunkCastle(S, group) {
  * until one fluke bites. Without a stock it lies flat and drags, which is why the stock is the
  * part that had to be invented.
  */
-function buildAnchor(S, group, mat) {
+function buildAnchor(S, group, mats) {
   if (!S.bowsprit) return;
+  const mat = mats.iron || mats.woodDark;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   /* ⚠ AN ANCHOR DOES NOT SCALE WITH THE SHIP. ~1/8 of the hull is right for the wooden
@@ -4817,7 +4962,42 @@ function buildAnchor(S, group, mat) {
     ring.position.y = shank * 0.52;
     g.add(ring);
 
-    /* catted: hung outboard at the bow, canted so the flukes clear the planking */
+    /* ── CATTED MEANS HUNG FROM THE CATHEAD ─────────────────────────────────────────────
+       The survey saw the old placement from every bearing: an anchor GLUED flat across the
+       gunports, ring in the air, hanging from nothing — the funnel-attached-to-nothing
+       class. Where buildHead drew catheads it stashed their measured tips; the ring now
+       hangs a cable's width below the tip, the shank drops clear of the planking, and the
+       cat pendant is drawn from tip to ring so the eye can see what carries the weight. */
+    const cat = S.__catheads && S.__catheads[sgn > 0 ? 1 : 0];
+    if (cat) {
+      /* CATTED AND FISHED, not dangling: hung vertically a 74's 5.5 m anchor puts its
+         flukes in the sea — the real stow is the ring at the cathead and the shank fished
+         aft-down along the topside until the flukes rest at the fore channel. Ring end and
+         fluke end are both computed onto real geometry: the measured cathead tip, and the
+         skin at the station one shank-length abaft it. */
+      const ring = new THREE.Vector3(cat.x, cat.y - B * 0.035, cat.z);
+      const uT = Math.min(0.32, 0.105 + (shank * 1.05) / L);
+      /* the fluke end rides just under the rail — the shank LIES ALONG the sheer. Dropped
+         to a fixed height it fought the rising bow line and read twice as steep as it was. */
+      const fb = H.sheer(uT);
+      const vT = Math.max(0.70, Math.min(0.95,
+        0.62 + 0.38 * ((ring.y - B * 0.10) / Math.max(0.01, fb))));
+      const tpv = surfacePoint(S, H, uT, vT);
+      const tp = new THREE.Vector3(tpv[0], tpv[1], sgn * (tpv[2] + B * 0.030));
+      const d = tp.clone().sub(ring).normalize();
+      g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().negate());
+      /* roll the crown fork toward the hull's plane — un-rolled it stands VERTICAL, one
+         fluke diving three metres down across the gunports and one spiking over the rail */
+      g.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(0, 1, 0), sgn * 1.25));
+      g.position.copy(ring).addScaledVector(d, shank * 0.52);
+      const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), ring]],
+                            0.018 + B * 0.0006, mats.ropeSolid || mat);
+      if (pend) group.add(tag(pend, 'anchor', 'Cat pendant'));
+      group.add(tag(g, 'anchor'));
+      continue;
+    }
+    /* no cathead drawn (iron bows, the shell-built corbita): stowed against the bow */
     const p = surfacePoint(S, H, 0.09, 0.94);
     g.position.set(p[0], p[1] - shank * 0.12, sgn * (p[2] + B * 0.05));
     g.rotation.x = sgn * 0.30;
@@ -5234,7 +5414,7 @@ function buildShip(S, opts) {
   if (FINE) buildSternAviation(S, group);
   if (FINE) buildDeckHatches(S, group);
   if (FINE) buildHead(S, group, mats);
-  if (FINE) buildAnchor(S, group, mats.iron || mats.woodDark);
+  if (FINE) buildAnchor(S, group, mats);
   if (FINE && S.netDefence) buildNetDefence(S, group);
   if (FINE) buildOars(S, group, mats.woodPale);
   if (FINE) buildPaddles(S, group, mats);

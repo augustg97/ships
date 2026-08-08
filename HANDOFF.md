@@ -2474,3 +2474,72 @@ over a ship leaving a real wake.
 fetch of the data-version meta tag; the live hull.js confirmed carrying the slack factor and the
 live vessels.json the clipper's yard lists and 23.2/25.9/22.3 masts. Fifteenth clean
 push-triggered deploy in a row.
+
+---
+
+## THE QUEUE — August's second list, 2026-08-07. Work these in order.
+
+**1. THE SAILS WERE ABACK ON EVERY SQUARE-RIGGER — fixed in this commit, verify it.**
+`makeSail` clamped the belly to local +z and `rotation.y = PI/2` maps that to hull +x, which
+this file defines as AFT. So the canvas sat abaft its yard on every square sail in the fleet,
+which is what a sail looks like when it is *aback* — caught on the wrong side, driving the ship
+astern. Now negated so it bellies forward, to leeward. **Look at ship-of-the-line, clipper,
+preussen, east-indiaman and the carrack from ahead and from the quarter and confirm the canvas
+is forward of the masts.** Fore-and-aft sails (`makeTriSail`, `makeQuadSail`) are NOT affected —
+they are not quarter-turned, so their belly already goes athwartships to leeward.
+
+**2. ERA CARDS: REWRITE THEM PROPERLY.** They are too short, too thin, and written in the
+aphoristic register August has now rejected three times. Banned constructions, quoted from him:
+"the ocean stops being a wind field and becomes a distance", "and it works", "it has simply
+stopped being the thing that decides". These are not intelligible sentences; they gesture at a
+point instead of stating it. Replace with **rich, detailed, Wikipedia-style, objective and
+compelling** description — several paragraphs per era, concrete, with names, dates and numbers.
+**And cover the SEAFARING SOCIETIES of each era**: which polities, civilisations and companies
+were building ships, financing voyages, colonising, and therefore driving the technology —
+Austronesian expansion, Phoenicia, Athens, Song China, the Norse, Venice and Genoa, Portugal and
+Castile, the VOC and EIC, Britain, the US, Japan, Maersk. Say who was doing it and why.
+
+**3. THE ERA CARD STILL OVERLAPS THE DATE CARD at top left.** `syncPanelInsets()` already
+measures readout → slip → card and publishes `--card-top`; the era card evidently is not
+honouring it, or is shown by a path that does not call the sync. Find why. ⚠ Do NOT test
+visibility with `offsetParent` — it is null for `position: fixed`, which already made one fix
+silently inert (round 41).
+
+**4. THE VOYAGE CARD SHOULD BE VISIBLE IN THE SEA CLOSE-UP.** Clicking a ship opens `#psgCard`
+but not the voyage's own card. Both should show — the slip for where she is, the card for what
+the passage was.
+
+**5. SHIPWRIGHT HEADINGS ARE VAGUE.** "What she was" and "On the record" go. Use descriptive
+headings that say what is under them, e.g. "History and service" / "Construction and rig" and
+"Measurements and sources". Same register rule as item 2.
+
+**6. SHIPS IN THE SEA VIEW RENDER AS BLACK SILHOUETTES.** See August's second screenshot: at
+mid zoom the hulls are flat black cut-outs, not the detailed models. Suspect the token/
+exaggerated-scale path draws an unlit proxy, or the material loses its lighting at that range.
+Establish which before changing anything.
+
+**7. THE CROSSING-ERA CANOES MOVE IN RIGID PARALLEL PAIRS.** They hold station like a formation
+flight. Consorts need independent motion — station-keeping with slack, individual heading noise,
+and separation that varies. Remember the standing instruction: these are island-sized pieces on
+a board, so exaggerate the motion to read at that scale, but make it plausible.
+
+**8. COLONISATION VOYAGES ARE MISSING FROM THE SEA VIEW.** Add the voyages that carried
+colonisation — Austronesian settlement, Norse Vinland, the Portuguese and Spanish Atlantic and
+Pacific, the Dutch and English companies, the convict and settler routes, the Middle Passage
+(already present as the slave ship — connect it). Same schema as the existing 62.
+
+**9. THE TOP-LEFT CARD SHOULD CARRY RUNNING METRICS ACROSS TIME.** Total volume and value of
+seaborne trade by era, and whatever else the model can honestly support — fleet tonnage,
+voyages per year, passage times. ⚠ These must be SOURCED or DERIVED, and labelled as one or the
+other. A number with no provenance in the readout is worse than an empty readout, and this
+project's rule 10 already says "unknown" is a legitimate return.
+
+**10. THE WAKE IN THE CLOSE-UP IS BAD.** See August's third screenshot: a hard straight line
+across the water ahead of the ship and another through the middle — a foam texture with a
+visible seam, not a wake. This needs to be a real disturbance: bow wave breaking off the stem,
+a divergent Kelvin pattern at the right half-angle (19.47°), transverse waves between the arms,
+a turbulent foam trail aft that decays, and NO straight edges anywhere. Measure the current
+foam field before rewriting it — the seam is likely a UV or a `localMetres` wrap.
+
+**11. And the standing survey continues**: steamer, treasure-ship, the steel stern quarter, the
+serif-webfont decision.
