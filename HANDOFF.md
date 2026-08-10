@@ -3054,3 +3054,98 @@ anchorage.
    dugout/dhow/cog plates; globe-era-card frame).
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+---
+
+## Round 64 — 2026-08-10 — The made mast is bound, and the top stands on its cheeks
+
+**Queue check first: August's second list remains WORKED IN FULL (status written r57), so the
+standing survey is the task. SHIPWRIGHT-QUEUE item 9 — mast bands, wooldings and the cheeks at
+the hounds — is this round's work, and it is done as a class, not a decoration pass.**
+
+**The model: no single tree yields a lower mast much over half a metre through.** A big ship's
+lower mast is MADE — several timbers coaked together — and a made mast must be hooped or it
+works apart at sea. So the threshold is the TREE (a drawn diameter past 0.55 m, and the drawn
+diameter is `beam × 0.06`) and the binding is a DATED technology: rope wooldings — about a
+dozen turns of tarred rope, each pinched between a pair of thin wooden hoops — through the
+18th century, shrunk iron hoops from about 1800. The date asked is `S.year`, the depicted
+year, which until now only the iron-era ships carried for their plating; it is set on the
+four ships in the class (carrack 1500, East Indiaman 1620, ship of the line 1780, clipper
+1869), all below the 1890 antifouling switch so the bottom-colour chain is untouched. The
+count is a length turned into a count — one binding about every 2.6 m of exposed lower mast,
+eight on a 74's main, which is what the contemporary models show. The rings are merged into
+one mesh per mast per kind (`ringMesh`, a sibling of `ropeMesh`, built because a fleet of
+little cylinders is a fleet of draw calls). Single sticks stay bare — the fluyt, the slaver,
+Endurance, and every mast under the threshold.
+
+**The cheeks: the top does not float, and it turned out the old top could not have been
+assembled.** `buildTop` drew ONE trestletree and ONE crosstree, both centred, passing THROUGH
+the mast. It now draws the real frame: a PAIR of trestletrees along each side of the masthead
+(the slot between them is where the topmast heel is fidded), a pair of crosstrees notched
+over them, and under it all two cheek knees bolted to the mast's sides — deepest at the
+trestletrees, tapering down the mast, which is the shape of the load. Every doubled square
+masthead gets two (including the iron-masted steamer and Preussen, in the mast's own livery);
+single-tier masts — cog, trireme, corbita — get none, their tops sitting on the hounds of the
+pole, so their silhouettes did not move.
+
+**The audit learned the class as six rules, all proven by fault injection:** a made mast left
+unbound (disabled the block → 4 ships); binding on a single stick or an iron tube (the r61
+copy class, standing guard); rope wooldings depicted past 1820 / iron hoops before 1780
+(inverted the era switch → clipper's wooldings and two ships' hoops flagged; the 74 at
+exactly 1780 sits on the boundary and rightly does not fire); cheek count per doubled
+masthead (disabled cheeks → 9 ships); and every cheek must TOUCH a top from below (dropped
+them 6 m → 50 flagged). 29/29 clean before and after, audit synced to web/ and docs/.
+
+**Looked at, rule 1, with my own eyes:** the 74's main masthead close-up — cheek under the
+trestletree pair, the doubling between them, woolding groups with their pale hoops down the
+made mast; the East Indiaman furled, woolding runs on fore and main; the clipper furled,
+thin dark iron hoops and correctly NO pale wooden hoops; the carrack's mainmast. That 74
+masthead frame is now the standing baseline **`shipwright-hounds`** (frames 42 → 43). The
+three other diagnosis frames were read and deleted, the r57 pattern.
+
+**Ratchet: two full runs to completion, foreground-waited on the PID (the r63 rule).** First
+run: 43 frames, 4 movers, every diff copied out and READ — shipwright-furled 0.472% is
+dotted ring columns down three masts plus masthead T's and nothing else; shipwright 0.067%
+and shipwright-astern 0.136% the same class at line distance; ship-steamer 0.073% is three
+masthead T's on her iron masts with NO rings (the ring columns at her frame edge are the
+wooden neighbours in the line strip). All four accepted with class reasons. Second run:
+**43/43 green, shipwright-hounds 0.000%.** Byte budget: first paint 8.16 MB against 8.6.
+
+**Item 10 got its LOOK, no code, as the queue ordered:** two close-ups of the 74's deck edge
+(bow quarter and high-angle broadside, furled). Camber reads — the deck is visibly crowned
+with the centreline highlight — and the deck-to-bulwark joint is clean rather than wrong.
+What would close the item fully is a stained margin plank at the waterway in the deck
+shader: a texture judgement, low priority, not a structural absence.
+
+**Found and NOT fixed this round, recorded so it is not lost: `tag(o, key, extra)` takes
+three arguments, and two call sites (crow's nest, tripod crosstrees) pass a FOURTH — a
+bespoke `what` text that is silently dropped, so their part cards show the generic mast/top
+description.** One-line fix (accept and thread a `what` override) plus the card copy; no
+pixels move. Also open: the treasure ship's junk masts at 1.08 m drawn diameter were surely
+built up and bound too, but Chinese practice differs — unstayed poles, no hounds, rattan or
+iron — and it needs its own research pass, not a copy of the European rule. And the tops the
+trireme and corbita wear on single-tier masts predate the evidence; they kept them this
+round, unchanged, but a survey round should ask whether they should exist at all.
+
+**Rule 0, written on shipwright-hounds in the final run:** it reads as a rendered world — the
+74's main masthead close from the port quarter, sea and consorts behind. Three facts a viewer
+can read off it: the lower mast carries banded wooldings at even intervals, each pinched
+between two pale wooden hoops; the top stands on a trestletree frame with a cheek knee under
+it, the topmast rising through the doubling beside the lower masthead; the fleet list at
+right runs from a dugout of 68,000 BC to the ship of the line, with her card giving 57.0 m
+and a 59.4 m rig, deck to truck.
+
+**Audit 29/29 clean, twice. Frames 42 → 43, final run 43/43 green. Deploy: stamp 1786394381,
+live verification below.**
+
+### Next, in order
+1. **Survey continues.** SHIPWRIGHT-QUEUE is now items 1–10 all closed; item 10's remainder
+   is one texture judgement (waterway margin plank, low priority). The Round 23 vessel queue
+   and the carried items are the work: featureless brown land behind aboard-yamato; Titanic
+   remainder (forecastle/poop breaks partly done — check the code first); r43's plate gaps
+   (corbita era plate; dugout/dhow/cog plates; globe-era-card frame).
+2. Small found faults: the dropped fourth argument to `tag()` (crow's nest and tripod
+   crosstrees cards show generic text); treasure-ship mast binding needs a Chinese-practice
+   research pass; trireme/corbita tops deserve an existence check.
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).

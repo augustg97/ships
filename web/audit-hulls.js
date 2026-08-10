@@ -1434,6 +1434,70 @@
       }
     }
 
+    /* ── THE MADE MAST IS BOUND, AND BOUND IN ITS OWN CENTURY (round 64) ───────────────
+       A wooden square-rig lower mast drawn past 0.55 m through is past what one tree
+       gives: it is a MADE mast, coaked timbers, and it must carry wooldings (rope, to
+       about 1800) or shrunk iron hoops (after). Four ways to be wrong, each a rule:
+       unbound; bound when it is a single stick or an iron tube (the r61 copy class);
+       rope wooldings on a ship depicted in the iron-hoop era; iron hoops on a ship
+       depicted before the technology. The year asked is H.year — the year the hull is
+       DEPICTED at — falling back to the record's own era start. */
+    {
+      const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
+      const made = !!sq && !H.iron && H.beam * 0.06 > 0.55;
+      const nW = part.woolding ? part.woolding.n : 0;
+      const nB = part.mastband ? part.mastband.n : 0;
+      if (made && nW + nB < sq)
+        say(v.id, 'a made mast left unbound',
+            `${sq} square lower masts ${(H.beam * 0.06).toFixed(2)} m through carry ` +
+            `${nW + nB} binding meshes — timber that thick is coaked, and unbound it opens`);
+      if (!made && (nW || nB))
+        say(v.id, 'binding on a single stick',
+            `${nW + nB} woolding/hoop meshes on a hull whose lower masts one tree could ` +
+            'yield, or whose masts are iron');
+      const depYear = H.year || v.from || 0;
+      if (nW && depYear >= 1820)
+        say(v.id, 'rope wooldings out of their century',
+            `depicted ${depYear}; iron hoops replaced wooldings about 1800`);
+      if (nB && depYear && depYear < 1780)
+        say(v.id, 'iron mast hoops before the technology',
+            `depicted ${depYear}; shrunk iron hoops arrive about 1800`);
+    }
+
+    /* ── AND THE TOP STANDS ON ITS CHEEKS (round 64) ───────────────────────────────────
+       Every doubled square masthead — one with a topmast to fid, mk.only !== 1 —
+       carries its top on trestletrees, and the trestletrees on two cheek knees bolted
+       to the masthead. Two per doubling, no more and no fewer; a single-tier mast
+       (cog, trireme, corbita) gets none, its top sitting on the hounds of the pole.
+       And each cheek must TOUCH a top from below — a knee adrift down the mast is the
+       floating-fitting class at the masthead. */
+    {
+      const dbl = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only !== 1).length;
+      const nC = part.cheek ? part.cheek.n : 0;
+      if (dbl && nC < dbl * 2)
+        say(v.id, 'a top standing on nothing',
+            `${nC} cheek knees for ${dbl} doubled mastheads — the trestletrees rest on air`);
+      if (!dbl && nC)
+        say(v.id, 'cheeks with no doubling to carry',
+            `${nC} cheek knees on a hull with no doubled square masthead`);
+      if (nC) {
+        const topBoxes = [], cheekBoxes = [];
+        g.traverse(o => {
+          const p = o.userData && o.userData.part;
+          if (!p) return;
+          if (p.key === 'top' && !o.isMesh) topBoxes.push(new THREE.Box3().setFromObject(o));
+          if (p.key === 'cheek' && o.isMesh) cheekBoxes.push(new THREE.Box3().setFromObject(o));
+        });
+        const slack = Math.max(0.8, H.beam * 0.06);
+        cheekBoxes.forEach((cb, i) => {
+          const cbx = cb.clone().expandByScalar(slack);
+          if (!topBoxes.some(tb => cbx.intersectsBox(tb)))
+            say(v.id, 'a cheek carrying nothing',
+                `cheek ${i} at y ${cb.min.y.toFixed(1)}–${cb.max.y.toFixed(1)} m touches no top`);
+        });
+      }
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

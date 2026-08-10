@@ -226,6 +226,11 @@
    "name": "shipwright-furled",
    "path": "/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25",
    "note": "the canvas STATE guard: the 74 from the port quarter, furled \u2014 every square roll, its gaskets and bunt, the hauled clews, and the whole yard built in the furled state behind her. One bearing watches the class; every rig type shares makeFurl."
+  },
+  {
+   "name": "shipwright-hounds",
+   "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34",
+   "note": "r64 standing guard on the masthead class: the 74's main lower masthead from the port quarter \u2014 cheeks under the trestletree pair, the doubling between them, wooldings with their wooden hoops down the made mast. Guards item 9's whole class (wooldings/iron hoops by S.year, cheeks per doubled masthead)."
   }
  ]
 }

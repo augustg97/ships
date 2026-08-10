@@ -1839,3 +1839,19 @@ When the ratchet notification arrives: classify every mover, then build, handoff
 /Users/augustgweon/Ships/build/loop-round.sh: line 77: 27682 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 12:21:19  round starting
+Round 63 is landed and live. Summary of what happened:
+
+**The situation found:** the previous two sessions had built a complete furled-sails implementation (SHIPWRIGHT-QUEUE item 7) but were cut off twice waiting for the 42-frame ratchet — each ended its turn to wait for the notification, which exits a `claude -p` process and orphans the check. 540 lines sat uncommitted with no verification loop closed.
+
+**What this round did:**
+- **Reviewed the whole diff** — `makeFurl` builds a furled sail from the sail's own area (a course stows fat, a royal thin), with gasket pinching and a bunt at the slings; every rig furls per its own practice: square sails roll on their yards with clews hauled to the quarters, gaffs drop onto boom rolls leaving topmasts bare, a junk's battens stack, the crab claw scissors shut, jibs bundle along the bowsprit. State rides in the URL as `&sail=furled` plus a nav toggle.
+- **Audit re-run: 29/29 clean**, with the five new furl rules active.
+- **Looked at three rig families by eye** — the 74's rolled yards, Wyoming's bare topmasts over boom bundles, the junk's dropped batten stack.
+- **Ratchet run to completion, twice, holding the turn open on the PID.** First run: 20 movers, all one class — the new "Furl sails" button reflowing the Shipwright nav; the diffs show nav chrome only, no scene pixels. One find inside the outlier: ship-steamer's extra 0.03% was a stale baseline cell — the Endurance fleet-strip entry from round 61 had ridden *under* tolerance unaccepted ever since, and the button pushed the frame over the limit. All 20 accepted with written reasons; verification run **42/42 green**, including the new `shipwright-furled` standing baseline at 0.000%.
+- **Shipped:** built (first paint 8.15 MB against the 8.6 budget), handoff appended, committed as 43ad138, pushed, and the live stamp verified 1786383743 → 1786392062 with the live JS confirmed carrying `swSetFurled`. Eighteenth clean deploy in a row.
+
+The handoff also records the two systemic fixes riding in the commit: the loop watchdog now kills the round's whole process group so an orphaned ratchet can never again corrupt a later run's `_current`, and the round protocol now says in writing: hold the turn open with foreground PID waits, never end it to wait for a background check. Next round: queue item 9 — mast bands, wooldings and cheeks at the hounds.
+2026-08-10 13:04:11  round finished; HEAD is 43ad138 The fleet learns to stow its canvas, and a stranded round is landed whole
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 29404 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 13:14:11  round starting

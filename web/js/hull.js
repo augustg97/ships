@@ -109,6 +109,34 @@ function ropeMesh(segs, r, mat) {
   return new THREE.Mesh(g, mat);
 }
 
+/* ── merged hoop rings, for the bands that bind a made mast ──────────────────────────
+ * Each ring is a short open cylinder round a mast axis, tilted with the mast's rake.
+ * One mesh per batch, for the same reason ropeMesh exists: a fleet of little cylinders
+ * is a fleet of draw calls. `tilt` is the same rotation.z the mast mesh itself wears. */
+function ringMesh(rings, mat) {
+  const pos = [], idx = [], N = 14;
+  rings.forEach(({ cx, cy, r, h, tilt }) => {
+    const s = Math.sin(tilt || 0), c = Math.cos(tilt || 0);
+    const base0 = pos.length / 3;
+    for (const dy of [-h / 2, h / 2])
+      for (let k = 0; k < N; k++) {
+        const a = k / N * Math.PI * 2;
+        const lx = Math.cos(a) * r;
+        pos.push(cx + lx * c - dy * s, cy + lx * s + dy * c, Math.sin(a) * r);
+      }
+    for (let k = 0; k < N; k++) {
+      const k2 = (k + 1) % N;
+      idx.push(base0 + k, base0 + N + k, base0 + k2,
+               base0 + k2, base0 + N + k, base0 + N + k2);
+    }
+  });
+  if (!pos.length) return null;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return new THREE.Mesh(g, mat);
+}
+
 /* ── the parametric hull ───────────────────────────────────────────────────────────── */
 
 function hullSurface(S) {
@@ -801,6 +829,47 @@ function buildRig(S, group, mats, FINE, FURLED) {
                     radii[si], radii[si] * 0.7, mastMat, -rakeRad);
       m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
 
+      /* ── THE MADE MAST IS BOUND, OR IT WORKS APART ─────────────────────────────────
+         No single tree yields a lower mast much over half a metre through, so a big
+         ship's lower mast is MADE — several timbers coaked together round a spindle —
+         and the assembly must be hooped or it opens at sea. The binding is a dated
+         technology: WOOLDINGS, about a dozen close turns of tarred rope hove taut and
+         nailed, each pinched between a pair of thin wooden hoops, through the 18th
+         century; iron hoops driven on hot from about 1800. So the threshold is the
+         TREE — a drawn diameter past 0.55 m is past what one stick gives — and the
+         choice is the DATE (S.year, the year the hull is depicted at). Masts under
+         the threshold are single sticks and stay bare, which is why the fluyt, the
+         slaver and Endurance carry none. The count is a length turned into a count:
+         one binding about every 2.6 m of the exposed lower mast, which puts eight on
+         a 74's main — what the contemporary models show. */
+      if (FINE && si === 0 && mk.rig === 'square' && !S.iron && radii[0] * 2 > 0.55) {
+        const ironHoops = (S.year || 0) >= 1800;
+        const rings = [], hoops = [];
+        const lo = seg * 0.14, hi = seg * 0.76;      // partners to below the hounds
+        const n = Math.max(4, Math.round((hi - lo) / 2.6));
+        for (let i = 0; i < n; i++) {
+          const t = (lo + (hi - lo) * (i + 0.5) / n) / seg;
+          const rT = radii[0] * (1 - 0.3 * t);       // the mast's own taper
+          const cx = x + Math.sin(rakeRad) * seg * t, cyy = y + seg * t;
+          if (ironHoops)
+            rings.push({ cx, cy: cyy, r: rT + 0.013, h: 0.10, tilt: -rakeRad });
+          else {
+            /* twelve turns of 3-inch rope is a band about 0.3 m deep */
+            rings.push({ cx, cy: cyy, r: rT + 0.028, h: 0.30, tilt: -rakeRad });
+            for (const sg of [-1, 1])
+              hoops.push({ cx: cx + Math.sin(rakeRad) * sg * 0.21, cy: cyy + sg * 0.21,
+                           r: rT + 0.035, h: 0.06, tilt: -rakeRad });
+          }
+        }
+        const rm = ringMesh(rings, ironHoops
+          ? (mats.ironBand || (mats.ironBand = new THREE.MeshStandardMaterial(
+                { color: 0x23262a, roughness: 0.45, metalness: 0.55 })))
+          : ropeMat);
+        if (rm) group.add(tag(rm, ironHoops ? 'mastband' : 'woolding'));
+        const hm = ringMesh(hoops, mats.woodPale || woodDark);
+        if (hm) group.add(tag(hm, 'woolding', 'Woolding hoops'));
+      }
+
       /* ── THE CROW'S NEST ────────────────────────────────────────────────────────
          A barrel or a bucket lashed to the mast at about two thirds of its height, reached
          by a ladder inside the mast on the big liners. Fleet and Lee were in Titanic's when
@@ -816,9 +885,34 @@ function buildRig(S, group, mats, FINE, FURLED) {
       }
       /* the TOP sits at the head of the lower mast, and the topmast is fidded through it */
       if (FINE && mk.rig === 'square' && si === 0) {
-        const tp = buildTop(B * 0.20, mats.woodPale);
+        const topR = B * 0.20, headR = radii[0] * 0.7;
+        const tp = buildTop(topR, mats.woodPale, headR);
         tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
         group.add(tp);
+        /* ── THE CHEEKS AT THE HOUNDS ──────────────────────────────────────────────
+           The top does not float. Bolted to either side of the masthead are two knees
+           whose upper faces carry the trestletrees, and everything above — crosstrees,
+           platform, the fidded topmast, the men in the top — bears on those two faces.
+           The knee is deepest at the trestletrees and tapers away down the mast, which
+           is the shape of the load it takes. A single-tier mast (a cog's, a trireme's)
+           gets none: with no topmast to fid there is no doubling to carry, and its top
+           sits on the hounds of the pole itself. */
+        if (mk.only !== 1) {
+          const chH = seg * 0.085, chD = radii[0] * 2.1, chW = radii[0] * 0.5;
+          const topY = seg * 0.90 - topR * 0.22;       // the trestletrees' underside
+          for (const sz of [-1, 1]) {
+            const cg = new THREE.BoxGeometry(chD, chH, chW);
+            const cp = cg.attributes.position;
+            for (let i = 0; i < cp.count; i++)
+              if (cp.getY(i) < 0) cp.setX(i, cp.getX(i) * 0.35);
+            cg.computeVertexNormals();
+            const ck = new THREE.Mesh(cg, mastMat);
+            const hy = topY - chH / 2;
+            ck.position.set(x + Math.sin(rakeRad) * hy, y + hy, sz * (headR + chW * 0.5));
+            ck.rotation.z = -rakeRad;
+            group.add(tag(ck, 'cheek'));
+          }
+        }
       }
       if (mk.rig === 'square' && !mk.yards) {
         /* ── YARD LENGTHS, Steel 1794 p.40 ────────────────────────────
@@ -2372,6 +2466,22 @@ const PARTS = {
                   + 'alongside the head of the one below through the doubling, so it can be sent '
                   + 'down in heavy weather. Steel 1794: the main mast is half the sum of the '
                   + 'lower deck length and the extreme breadth.' },
+  woolding: { stage: 4, name: 'Wooldings',
+              what: 'Rope bands hooped round the lower mast. No single tree yields a mast most '
+                  + 'of a metre through, so a big ship\'s lower mast is MADE — several timbers '
+                  + 'coaked together — and the assembly must be bound or it works apart at sea. '
+                  + 'Each woolding is about a dozen turns of tarred rope hove taut and nailed, '
+                  + 'pinched between two thin wooden hoops. Iron hoops replaced them from about '
+                  + '1800.' },
+  mastband: { stage: 4, name: 'Mast hoops',
+              what: 'Iron hoops shrunk onto a made wooden mast — driven on hot, they grip as '
+                  + 'they cool. They do the work rope wooldings did before about 1800: binding '
+                  + 'the separate timbers of a built-up lower mast into one spar.' },
+  cheek:    { stage: 4, name: 'Cheeks',
+              what: 'Timber knees bolted to either side of the masthead at the hounds. Their '
+                  + 'upper faces carry the trestletrees, and everything above — crosstrees, top '
+                  + 'platform, the fidded heel of the topmast, the men stationed aloft — bears '
+                  + 'on those two faces.' },
   bowsprit: { stage: 4, name: 'Bowsprit',
               what: 'A mast lying almost flat, projecting over the bow. It is what the forestays '
                   + 'lead to — without it the foremast has nothing pulling it forward, and the '
@@ -2650,14 +2760,25 @@ function buildFittings(S, group, mats) {
 /* ── the TOP: the platform at the head of a lower mast ─────────────────────────────────
    A signature of a square-rigged ship and the thing whose absence makes a generated rig read
    as scaffolding. It spreads the topmast shrouds, and it is a fighting platform. */
-function buildTop(r, mat) {
+function buildTop(r, mat, mastR) {
   const g = new THREE.Group();
   const plat = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.92, r * 0.09, 14), mat);
   g.add(plat);
-  /* the crosstrees and trestletrees under it, which are what actually carry the load */
-  for (const [rx, rz] of [[r * 1.5, r * 0.13], [r * 0.16, r * 1.9]]) {
-    const t = new THREE.Mesh(new THREE.BoxGeometry(rx, r * 0.11, rz), mat);
-    t.position.y = -r * 0.10;
+  /* The frame under it, as it was actually framed: a PAIR of trestletrees fore-and-aft
+     along each side of the masthead — resting on the cheeks, leaving between them the
+     slot the topmast heel is fidded into — and a pair of crosstrees notched over them,
+     carrying the platform. The first version drew one timber of each, centred, passing
+     THROUGH the mast — a frame that could not have been assembled around the spar it
+     holds. */
+  const zT = mastR ? mastR + r * 0.055 : r * 0.13;
+  for (const sz of [-1, 1]) {
+    const t = new THREE.Mesh(new THREE.BoxGeometry(r * 1.5, r * 0.13, r * 0.11), mat);
+    t.position.set(0, -r * 0.155, sz * zT);
+    g.add(t);
+  }
+  for (const sx of [-1, 1]) {
+    const t = new THREE.Mesh(new THREE.BoxGeometry(r * 0.14, r * 0.10, r * 1.9), mat);
+    t.position.set(sx * r * 0.40, -r * 0.075, 0);
     g.add(t);
   }
   return tag(g, 'top');

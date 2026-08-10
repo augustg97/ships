@@ -105,7 +105,20 @@ Ordered by how much each closes the gap per unit of work.
 8. ~~Anchors catted at the bow, with cable~~ — **already done 2026-08-02** ("Bower anchors"
    commit, `buildAnchor` + cathead + cat pendant). This entry sat stale for five rounds —
    the r58 lesson again: check the CODE before trusting this list.
-9. **Mast bands, wooldings and the cheeks** at the hounds.
+9. ~~Mast bands, wooldings and the cheeks~~ — **done, r64.** The class rule is the record's
+   own fields: a wooden square-rig lower mast drawn past 0.55 m through is a MADE mast
+   (coaked timbers) and must be bound — rope wooldings with their paired wooden hoops
+   before 1800, shrunk iron hoops after, chosen by `S.year`, the depicted year (set for
+   carrack 1500, East Indiaman 1620, 74 1780, clipper 1869). One `ringMesh` per mast per
+   kind. Cheeks: two tapered knees at every doubled square masthead, carrying a REAL
+   trestletree pair (buildTop drew one timber of each, centred, THROUGH the mast — a frame
+   that could not have been assembled). Single-tier masts (cog, trireme, corbita) stay
+   bare-headed by rule. Audit: six rules (unbound made mast; binding on a single stick;
+   wooldings past 1820; hoops before 1780; cheek count per doubling; cheek-touches-top),
+   all proven by fault injection. Standing baseline `shipwright-hounds`. Open question
+   noted: the treasure ship's junk masts at 1.08 m drawn diameter were surely built up and
+   hooped too, but Chinese practice differs (unstayed poles, no hounds) — needs its own
+   research pass, not a copy of the European rule.
 10. **Deck camber and a visible waterway** — camber and the tier waterway exist
     (`buildDeckGeometry`, and see the deck-edge comment at hull.js "stops short of the deck
     edge by a WATERWAY"); what remains, if anything, needs a LOOK first, not code.
