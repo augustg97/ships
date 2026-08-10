@@ -1546,3 +1546,7 @@ You're out of usage credits. Run /usage-credits to keep using Fable 5 or /model 
 2026-08-09 18:42:09  round starting
   NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
   by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-09 20:04:11  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.

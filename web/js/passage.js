@@ -258,41 +258,6 @@ function psgOpen(tr, vessel, R, globeCamera) {
   PSG.ship = holder;
   PSG.scene.add(holder);
 
-  /* ── AND HER CONSORTS, WHICH THE CLOSE-UP LEFT BEHIND ON THE MAP ─────────────────────
-     The Sea view sails a treasure fleet three hulls in company and a Pacific crossing two,
-     because that is how those voyages were made — and going aboard showed ONE ship, alone.
-     The fleet pool in this view is keyed by TRACK, so it carries at most one hull per voyage
-     and the subject's own companions had nowhere to live.
-     The same `together` rule the map uses, so the two views agree on how many ships a voyage
-     is, and the same station geometry — abeam by about two lengths, dropped back by one and a
-     half. Here it is in real metres rather than at token exaggeration, which is what a
-     squadron interval actually looks like. Coarse hulls: they are a few hundred metres off,
-     and a second fine build of a container ship is 160k triangles for a thumbnail. */
-  PSG.consorts = [];
-  {
-    const together = /treasure|carrack|indiaman/.test(vessel.id) ? 3
-                   : /container|steamer/.test(vessel.id) ? 1
-                   : /canoe|dugout/.test(vessel.id) ? 2 : 1;
-    const L0 = vessel.hull.loa;
-    for (let n = 1; n < together; n++) {
-      let co = null;
-      try { co = window.SHIPS_HULL.buildShip(vessel.hull); } catch (e) { break; }
-      co.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-      co.rotation.y = Math.PI / 2;
-      co.position.y = -(co.userData.waterlineY || 0);
-      const ch = new THREE.Group();
-      ch.add(co);
-      ch.rotation.order = 'YXZ';
-      const t = n - (together - 1) / 2;
-      ch.userData.station = { x: t * L0 * 1.9, z: -Math.abs(t) * L0 * 1.5 };
-      /* her own phase, so the pair does not hold parade formation — the same fault the map
-         had, and the same cure: see stepEraFleet in app.js */
-      ch.userData.wander = n * 2.399963 + L0 * 0.017;
-      PSG.consorts.push(ch);
-      PSG.scene.add(ch);
-    }
-  }
-
   PSG.sea.material.uniforms.uScale.value = Math.max(14, PSG.loa * 0.7);
   PSG.sea.material.uniforms.uRip.value =
     SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
@@ -337,7 +302,6 @@ function psgOpen(tr, vessel, R, globeCamera) {
 
 function psgClearShip() {
   if (PSG.ship) { PSG.scene.remove(PSG.ship); PSG.ship = null; }
-  if (PSG.consorts) { PSG.consorts.forEach(c => PSG.scene.remove(c)); PSG.consorts = []; }
 }
 
 function psgClose() {
@@ -417,21 +381,6 @@ function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
   PSG.ship.rotation.y = yaw;
   const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, yaw, PSG.loa, t, wind,
                                  PSG.beam, PSG.draught);
-  /* the consorts keep station on her, wandering off it independently */
-  if (PSG.consorts) for (const ch of PSG.consorts) {
-    const st = ch.userData.station, ph = ch.userData.wander || 0;
-    const wob = (a, b, k) => Math.sin(t / a + k) * 0.62 + Math.sin(t / b + k * 1.7) * 0.38;
-    const amp = Math.hypot(st.x, st.z) * 0.085;
-    const cs = Math.cos(yaw), sn = Math.sin(yaw);
-    const sx = st.x + wob(37.0, 61.0, ph) * amp;
-    const sz = st.z + wob(43.0, 71.0, ph * 1.31) * amp;
-    /* the station is in her own frame, so rotate it onto the world by her heading */
-    const wx = sx * cs + sz * sn, wz = -sx * sn + sz * cs;
-    ch.rotation.set(0, yaw + wob(53.0, 79.0, ph * 0.77) * 0.045, 0);
-    const cfl = SHIPS_SEA.floatShip(ch, wx, wz, yaw, PSG.loa, t, wind, PSG.beam, PSG.draught);
-    ch.position.set(wx, cfl.y, wz);
-    ch.rotation.z = cfl.pitch; ch.rotation.x = cfl.roll;
-  }
   PSG.ship.rotation.z = fl.pitch;
   PSG.ship.rotation.x = fl.roll;
   if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(PSG.ship, t, PSG.loa);
@@ -646,6 +595,51 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
     const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - r2)) - 6371000;
     const yaw = -tr.at.hdg;
     e.holder.rotation.set(0, yaw, 0);
+
+    /* ── ⚠ HER COMPANIONS, AND THE FIRST ATTEMPT PUT THEM IN DEAD CODE ──────────────────
+       The Sea view sails a treasure fleet three hulls in company; going aboard showed one.
+       I added consorts to psgOpen() — which is DEFINED AND NEVER CALLED. openPassage() is
+       referenced only from a comment; the live close-up runs through followShip -> this
+       function, and the pool here is keyed by track name, so one hull per voyage was all it
+       could ever hold. The lesson is the cheap one: grep for the CALL, not the definition.
+       Same `together` rule and station geometry as the map, so the two views agree on how
+       many ships a voyage is; coarse hulls, because a second fine container ship is 160k
+       triangles for something a few hundred metres off. */
+    if (!e.mates) {
+      const together = /treasure|carrack|indiaman/.test(ves.id) ? 3
+                     : /container|steamer/.test(ves.id) ? 1
+                     : /canoe|dugout/.test(ves.id) ? 2 : 1;
+      e.mates = [];
+      for (let n = 1; n < together; n++) {
+        let co = null;
+        try { co = window.SHIPS_HULL.buildShip(ves.hull); } catch (x) { break; }
+        co.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        co.rotation.y = Math.PI / 2;
+        co.position.y = -(co.userData.waterlineY || 0);
+        const mh = new THREE.Group();
+        mh.add(co); mh.rotation.order = 'YXZ';
+        const tt = n - (together - 1) / 2;
+        mh.userData.st = { x: tt * e.loa * 1.9, z: -Math.abs(tt) * e.loa * 1.5 };
+        mh.userData.ph = n * 2.399963 + e.loa * 0.017;
+        e.mates.push(mh);
+        PSG.fleetGroup.add(mh);
+      }
+    }
+    for (const mh of e.mates) {
+      mh.visible = true;
+      const st = mh.userData.st, ph = mh.userData.ph;
+      const wob = (a, b, k2) => Math.sin(t / a + k2) * 0.62 + Math.sin(t / b + k2 * 1.7) * 0.38;
+      const amp = Math.hypot(st.x, st.z) * 0.085;
+      const sx = st.x + wob(37.0, 61.0, ph) * amp;
+      const sz = st.z + wob(43.0, 71.0, ph * 1.31) * amp;
+      /* the station is in her own frame; rotate it onto the patch by her heading */
+      const cs = Math.cos(yaw), sn = Math.sin(yaw);
+      const mx = -east + sx * cs + sz * sn, mz = north - sx * sn + sz * cs;
+      mh.rotation.set(0, yaw + wob(53.0, 79.0, ph * 0.77) * 0.045, 0);
+      const mfl = SHIPS_SEA.floatShip(mh, mx, mz, yaw, e.loa, t, wind, e.beam, e.draught);
+      mh.position.set(mx, drop + mfl.y, mz);
+      mh.rotation.z = mfl.pitch; mh.rotation.x = mfl.roll;
+    }
     const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind,
                                    e.beam, e.draught);
     e.holder.position.set(-east, drop + fl.y, north);
@@ -708,7 +702,10 @@ function psgPrebuild(tr, ves) {
 
 function psgFleetClear() {
   if (!PSG.fleetPool) return;
-  for (const [, e] of PSG.fleetPool) e.holder.visible = false;
+  for (const [, e] of PSG.fleetPool) {
+    e.holder.visible = false;
+    if (e.mates) e.mates.forEach(m => { m.visible = false; });
+  }
 }
 
 window.SHIPS_PSG = { PSG, psgInit, psgOpen, psgClose, psgStep, psgFrame, PATCH_M, SEA_R,

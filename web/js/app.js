@@ -1288,6 +1288,14 @@ function stepVoyage(dt) { /* the voyage is a pinned line now; the ship is the er
  * first and it takes one star off each `**` pair, leaving the other stranded. Run bold first
  * and every doubled star is already consumed, so a surviving `*` can only be a single one.
  */
+/* the emphasis pass alone, for short strings that are not paragraphs */
+function inlineMD(src) {
+  return String(src === undefined || src === null ? '' : src)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+}
+
 function proseHTML(src) {
   return String(src || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -1374,7 +1382,10 @@ function showCard(c) {
   rows.innerHTML = '';
   (c.rows || []).forEach(r => {
     const d = document.createElement('div');
-    d.innerHTML = `<span class="k">${r[0]}</span><span class="v">${r[1]}</span>`;
+    /* ⚠ ROWS CARRY MARKDOWN TOO. proseHTML was wired to the prose and the rows were left
+       raw, so a citation inside a row printed its own asterisks — "62 treasure ships, 27,800
+       men (*Ming Shi*)". Same helper, minus the paragraph wrapper. */
+    d.innerHTML = `<span class="k">${r[0]}</span><span class="v">${inlineMD(r[1])}</span>`;
     rows.appendChild(d);
   });
   rows.style.display = (c.rows && c.rows.length) ? '' : 'none';

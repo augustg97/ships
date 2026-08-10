@@ -160,7 +160,10 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   border-bottom:1px dotted rgba(95,179,161,.14)}
 .c-rows .k{color:var(--ink-faint);flex:0 0 auto;letter-spacing:.04em}
 .c-rows .v{color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
-.c-prose{font-family:var(--serif);font-size:14px;line-height:1.66;color:#d6cfbc}
+/* ⚠ #d6cfbc IS CREAM — it was the reading colour on a dark panel, and on a light one it is
+   the washed-out text August photographed. The body of a card is the thing you are meant to
+   read; it takes the ink colour, not a dimmed one. */
+.c-prose{font-family:var(--serif);font-size:14px;line-height:1.66;color:var(--ink)}
 .c-prose p{margin:0 0 10px}
 .c-prose b{color:var(--brass)}
 .c-span{font-size:10px;color:var(--ink-faint);letter-spacing:.06em;margin-top:10px;
@@ -492,22 +495,30 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   position: fixed; left: 22px; top: var(--psg-top, 78px); width: 292px; z-index: 55;
   display: none; max-height: calc(100vh - var(--psg-top, 78px) - var(--erabar-h, 140px) - 28px);
   overflow-y: auto;
-  background: rgba(9, 15, 22, 0.90); border: 1px solid rgba(190, 205, 220, 0.16);
-  padding: 15px 17px 14px; color: #e9e2d2; backdrop-filter: blur(3px);
+  /* ⚠ THIS PANEL MISSED THE INVERSION ENTIRELY. It was written before the shared .panel
+     class and carries its own colours, so the daylight pass — which went through the custom
+     properties — never touched it and the close-up kept the night theme in one box. Same
+     tokens as every other panel now, so it cannot fall out of step again. */
+  background: var(--panel); border: 1px solid var(--edge);
+  padding: 15px 17px 14px; color: var(--ink); backdrop-filter: blur(3px);
 }
 #psgBack {
   display: block; margin: 0 0 11px; padding: 0; border: 0; background: none; cursor: pointer;
-  color: #9fb4c6; font: inherit; font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
+  color: var(--ink-dim); font: inherit; font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
 }
-#psgBack:hover { color: #e9e2d2; }
+#psgBack:hover { color: var(--ink); }
 #psgCard .pc-ship { font-size: 20px; font-style: italic; line-height: 1.15; margin-bottom: 2px; }
-#psgCard .pc-voy  { font-size: 11.5px; color: #93a6b6; letter-spacing: .05em; margin-bottom: 11px; }
+#psgCard .pc-voy  { font-size: 11.5px; color: var(--ink-faint); letter-spacing: .05em; margin-bottom: 11px; }
 #psgCard .pc-rows { width: 100%; border-collapse: collapse; font-size: 12px; }
 #psgCard .pc-rows td { padding: 3px 0; vertical-align: top; }
-#psgCard .pc-rows td:first-child { color: #8fa2b2; padding-right: 12px; }
+#psgCard .pc-rows td:first-child { color: var(--ink-faint); padding-right: 12px; }
 #psgCard .pc-rows td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 /* down among the shipping the globe's own controls are about a different scale of thing */
-body.in-passage #layers, body.in-passage #voyList { opacity: .28; pointer-events: none; }
+/* ⚠ 0.28 WAS TUNED AGAINST A DARK GROUND, where a panel at that opacity still read as a
+   panel. On paper it fades to nearly nothing — the illegible voyage list August photographed
+   in the close-up. The intent is "these belong to a different scale of thing", which is a
+   recede, not a disappearance. */
+body.in-passage #layers, body.in-passage #voyList { opacity: .62; pointer-events: none; }
 /* the era card names a century; the passage card names a ship at a position. Both at once in
    the same corner is two captions for one picture. */
 /* ⚠ THIS IS WHY THE VOYAGE CARD NEVER APPEARED IN THE CLOSE-UP. followShip calls
