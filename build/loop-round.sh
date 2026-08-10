@@ -63,12 +63,20 @@ fi
 # ⚠ macOS HAS NO `timeout`. No coreutils, no gtimeout — the first version of this line simply
 # did not run, which the smoke test caught. A watchdog in the background does the same job with
 # nothing installed: it waits, then kills the round if it is still going.
+# ⚠ THE KILL MUST TAKE THE WHOLE PROCESS GROUP. Round 63: killing only $ROUND left the round's
+# 42-frame ratchet alive as an orphan; it kept writing into _current while the NEXT round's
+# ratchet ran, overwrote that run's early captures, and crashed scoring frames the new run had
+# wiped. `set -m` puts the round in its own group so the watchdog can kill all of it, and any
+# ratchet that escaped into a new session is named and killed explicitly.
+set -m
 claude -p "$(cat "$PROMPT")" --permission-mode bypassPermissions --max-turns 300 &
 ROUND=$!
+set +m
 # ⚠ 50 MINUTES KILLED TWO FULL ROUNDS mid-verification and a third finished on the wire —
 # a vessel rebuild plus two ratchet passes is ~55-70 min of real work. 80 min fits under the
 # 90-minute stale-lock clear, which is the only ceiling that matters here.
-( sleep 4800; kill -0 "$ROUND" 2>/dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } ) &
+( sleep 4800; kill -0 "$ROUND" 2>/dev/null && { echo "  round overran 80 min — killing its process group"; \
+    kill -- -"$ROUND" 2>/dev/null; sleep 2; pkill -f "frame_baseline.py check" 2>/dev/null; } ) &
 WATCH=$!
 wait "$ROUND" || echo "  round exited non-zero — the next firing picks up from HANDOFF.md"
 kill "$WATCH" 2>/dev/null

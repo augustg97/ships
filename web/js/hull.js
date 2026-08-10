@@ -565,7 +565,7 @@ const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
  * lengths as fractions of the mast — rather than by eye. Where a rule is not attested for a
  * type, the value is marked inferred on the card.
  */
-function buildRig(S, group, mats, FINE) {
+function buildRig(S, group, mats, FINE, FURLED) {
   const L = S.lwl, B = S.beam;
   const H = hullSurface(S);
   const deckAt = u => H.sheer(u);
@@ -583,6 +583,10 @@ function buildRig(S, group, mats, FINE) {
     for (let k = 0; k <= 8; k++) m = Math.max(m, deckAt(a + (b - a) * k / 8));
     return m;
   };
+
+  /* the area of a cloth from its own corners, for sizing its furled roll */
+  const triA2 = (P, Q, R) =>
+    Math.abs((Q[0] - P[0]) * (R[1] - P[1]) - (R[0] - P[0]) * (Q[1] - P[1])) / 2;
 
   const woodDark = mats.spar, canvas = mats.canvas;
   /* ⚠ LineBasicMaterial is UNLIT — it renders flat at whatever colour it is given, so rigging
@@ -724,8 +728,17 @@ function buildRig(S, group, mats, FINE) {
       const drop = yy - prevYard;
       prevYard = yy;
       mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop });
-      sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-                          yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+      if (FURLED) {
+        /* the roll lies along the braced yard itself, between its arms, bunt at the slings */
+        const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
+        sails.push(makeFurl(
+          new THREE.Vector3(ym.position.x - sT2 * w2, yy, -cT2 * w2),
+          new THREE.Vector3(ym.position.x + sT2 * w2, yy, cT2 * w2),
+          (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
+      } else {
+        sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
+                            yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+      }
     };
     /* ⚠ A JUNK MAST IS A SINGLE POLE. Only a square rig is built up in fidded sections —
        lower mast, topmast, topgallant — because only a square rig needs to send its upper
@@ -914,9 +927,12 @@ function buildRig(S, group, mats, FINE) {
         for (const sgn of [1, -1])
           lifts.push([V3(yd.cx + sgn * sT * yd.half, yd.yy, sgn * cT * yd.half),
                       V3(mx(hL), hL, 0)]);
-        /* the sail's clews are where makeSail put them: 0.96 of the yard, at the foot */
-        const w2 = yd.half * 0.96;
-        const clewY = yd.yy - yd.drop * 0.97;
+        /* the sail's clews are where makeSail put them: 0.96 of the yard, at the foot —
+           unless the sail is furled, when the clew garnets have hauled them up under the
+           quarters of the yard, and the sheets lead from there. A sheet led to the set
+           clew of a stowed sail is a rope to a point in empty air. */
+        const w2 = yd.half * (FURLED ? 0.45 : 0.96);
+        const clewY = FURLED ? yd.yy - 0.4 : yd.yy - yd.drop * 0.97;
         for (const sgn of [1, -1]) {
           const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2);
           if (k === 0) {
@@ -1085,7 +1101,17 @@ function buildRig(S, group, mats, FINE) {
          there is far less useless cloth down where the wind is slowest and the spar is
          hardest to control. Built as two triangles on the diagonal, the same way the gaff
          quadrilateral above is built, so it shares that geometry rather than inventing one. */
-      if (S.settee) {
+      if (FURLED) {
+        /* Mediterranean and Indian Ocean practice: the yard stays aloft and the cloth is
+           brailed and rolled to it. The roll runs the canvas's own stretch of the spar —
+           tack to peak — not the bare overhanging heel. */
+        const area = S.settee
+          ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
+          : triA2(tack, peakPt, clew);
+        sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
+                            new THREE.Vector3(peakPt[0], peakPt[1], 0),
+                            area, furlMat(mats), group, {}));
+      } else if (S.settee) {
         /* ⚠ The first attempt put the throat on the line from tack to peak, which is the YARD:
            a lateen's luff IS its yard, so tack, throat and peak were collinear, the forward
            triangle had zero area, and the after one was the original lateen exactly. The render
@@ -1130,8 +1156,11 @@ function buildRig(S, group, mats, FINE) {
         ? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
         : L * 0.98;
       const tack = [x - L * 0.22, base];
+      /* a crab claw furls by CLOSING: the boom swings up against the yard and the cloth is
+         rolled between the two spars — the rig scissors shut about its own tack */
+      const aB = FURLED ? 1.09 : 0.46;
       const tipY = [tack[0] + Math.cos(1.19) * sparLen, tack[1] + Math.sin(1.19) * sparLen];
-      const tipB = [tack[0] + Math.cos(0.46) * sparLen, tack[1] + Math.sin(0.46) * sparLen];
+      const tipB = [tack[0] + Math.cos(aB) * sparLen, tack[1] + Math.sin(aB) * sparLen];
       [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
         const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
         const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
@@ -1140,10 +1169,18 @@ function buildRig(S, group, mats, FINE) {
         m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
         group.add(tag(m2, 'yard', nm));
       });
-      /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
-         also why it works: the deeply raked tips shed tip vortices and it out-performs a
-         triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
-      sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
+      if (FURLED) {
+        const area = S.sailAreaEach || 0.5 * sparLen * sparLen * Math.sin(spread) * LEECH;
+        const mid = [(tipY[0] + tipB[0]) / 2, (tipY[1] + tipB[1]) / 2];
+        sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
+                            new THREE.Vector3(mid[0], mid[1], 0),
+                            area, furlMat(mats), group, {}));
+      } else {
+        /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
+           also why it works: the deeply raked tips shed tip vortices and it out-performs a
+           triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
+        sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
+      }
     }
     if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
       /* ── THE GAFF SCHOONER ─────────────────────────────────────────
@@ -1178,33 +1215,57 @@ function buildRig(S, group, mats, FINE) {
       bm2.rotation.z = Math.PI / 2;
       bm2.position.set(x + boomL / 2, footY, 0);
       group.add(tag(bm2, 'yard', 'Boom'));
+      /* the SET geometry decides the cloth's area whichever state it is shown in — furling
+         does not change how much canvas she owns */
       const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
-      const gm = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
-      gm.rotation.z = -(Math.PI / 2 - peak);
-      gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
-      group.add(tag(gm, 'yard', 'Gaff'));
-      /* the sail is the quadrilateral: throat, peak, clew, tack — built from the two spars'
-         own endpoints so it cannot come adrift of either */
-      const throat = [x, gy], peakPt = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
+      const setThroat = [x, gy];
+      const setPeak = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
       const tack = [x, footY], clew = [x + boomL, footY];
-      /* ⚠ ONE CLOTH, NOT TWO TRIANGLES. This quad was two makeTriSail calls sharing the
-         tack→peak diagonal, and every gaff sail in the fleet wore a SLIT along it: the
-         corner-crease and scallop noise scales with each triangle's own luff length, and the
-         two triangles' luffs differ, so the shared edge disagreed with itself by up to half a
-         metre of z and the cloth tore open below the peak. A sail is one piece of canvas;
-         build it as one surface and there is no seam to disagree across. */
-      sails.push(makeQuadSail(tack, throat, peakPt, clew, group, 0.075));
-      /* ── THE GAFF TOPSAIL, FROM THE RECORD: `topsail` ON THE MAST ────────────────────
-         The jib-headed topsail fills the triangle between the topmast, the gaff and the
-         peak — the highest canvas on the ship, set where the wind is. It is the record's
-         call, not the topmast's: Wyoming's 22 sails include six of these, while the
-         reference model of Great Eastern shows her six topmasts standing BARE over white
-         lower masts — an auxiliary steamer's fore-and-aft canvas was her lowers. */
-      if (mk.topmast && mk.topsail) {
-        const topSeg = lower * 0.52;
-        const truckY = base + lower * 0.88 + topSeg * 0.96;
-        sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], peakPt, group, 0.035, 0.92));
+      const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
+      if (FURLED) {
+        /* a gaff sail is handled entirely from the deck, and it stows the same way: halyards
+           run, the GAFF COMES DOWN with the cloth folding between it and the boom, and the
+           bundle is lashed along the top of the boom. The gaff rests on the stowed sail,
+           just peaked above it. */
+        const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
+        sails.push(makeFurl(new THREE.Vector3(x, footY + r * 1.1, 0),
+                            new THREE.Vector3(x + boomL, footY + r * 1.1, 0),
+                            quadArea, furlMat(mats), group, { radius: r }));
+        const rest = 0.13;                       // the lowered gaff's slight peak
+        const gm = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
+        gm.rotation.z = -(Math.PI / 2 - rest);
+        gm.position.set(x + Math.cos(rest) * gaffL / 2,
+                        footY + r * 2.2 + Math.sin(rest) * gaffL / 2, 0);
+        group.add(tag(gm, 'yard', 'Gaff'));
+        /* the jib-headed topsail is set flying and comes DOWN to the deck when struck —
+           a furled ship shows a bare topmast, which is what the harbour photographs show */
+      } else {
+        const gm = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
+        gm.rotation.z = -(Math.PI / 2 - peak);
+        gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+        group.add(tag(gm, 'yard', 'Gaff'));
+        /* the sail is the quadrilateral: throat, peak, clew, tack — built from the two spars'
+           own endpoints so it cannot come adrift of either */
+        /* ⚠ ONE CLOTH, NOT TWO TRIANGLES. This quad was two makeTriSail calls sharing the
+           tack→peak diagonal, and every gaff sail in the fleet wore a SLIT along it: the
+           corner-crease and scallop noise scales with each triangle's own luff length, and the
+           two triangles' luffs differ, so the shared edge disagreed with itself by up to half a
+           metre of z and the cloth tore open below the peak. A sail is one piece of canvas;
+           build it as one surface and there is no seam to disagree across. */
+        sails.push(makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075));
+        /* ── THE GAFF TOPSAIL, FROM THE RECORD: `topsail` ON THE MAST ────────────────────
+           The jib-headed topsail fills the triangle between the topmast, the gaff and the
+           peak — the highest canvas on the ship, set where the wind is. It is the record's
+           call, not the topmast's: Wyoming's 22 sails include six of these, while the
+           reference model of Great Eastern shows her six topmasts standing BARE over white
+           lower masts — an auxiliary steamer's fore-and-aft canvas was her lowers. */
+        if (mk.topmast && mk.topsail) {
+          const topSeg = lower * 0.52;
+          const truckY = base + lower * 0.88 + topSeg * 0.96;
+          sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], setPeak, group, 0.035, 0.92));
+        }
       }
     }
     if (mk.rig === 'junk') {
@@ -1253,14 +1314,28 @@ function buildRig(S, group, mats, FINE) {
       /* every spar as its two endpoints, boom (k=0) to yard (k=nb+1); the cloth is built
          from the SAME points, so spar and canvas cannot come adrift of each other */
       const fwd = [], aft = [];
-      for (let k = 0; k <= nb; k++) {
-        const a = THB * Math.pow(k / nb, 1.4);   // lower battens near-level, upper ones fanned
-        const f = [xF, footY + luffH * (k / (nb + 1))];
-        fwd.push(f);
-        aft.push([f[0] + boom * Math.cos(a), f[1] + boom * Math.sin(a)]);
+      if (FURLED) {
+        /* a junk furls by DROPPING: ease the halyard and the battens stack themselves onto
+           the boom, the cloth folding between them like a closed blind. That one motion,
+           worked from the deck, is most of what the rig is FOR — and the stack it leaves,
+           spar on fold on spar just above the boom, is the whole look of a moored junk. */
+        const dyS = B * 0.014;
+        for (let k = 0; k <= nb; k++) {
+          fwd.push([xF, footY + k * dyS]);
+          aft.push([xF + boom, footY + k * dyS]);
+        }
+        fwd.push([xF, footY + (nb + 1) * dyS]);
+        aft.push([xF + yardL, footY + (nb + 1) * dyS]);   // the yard lies level atop the stack
+      } else {
+        for (let k = 0; k <= nb; k++) {
+          const a = THB * Math.pow(k / nb, 1.4); // lower battens near-level, upper ones fanned
+          const f = [xF, footY + luffH * (k / (nb + 1))];
+          fwd.push(f);
+          aft.push([f[0] + boom * Math.cos(a), f[1] + boom * Math.sin(a)]);
+        }
+        fwd.push([xF, footY + luffH]);           // the throat, where the yard is slung
+        aft.push([xF + yardL * Math.cos(THY), footY + luffH + yardL * Math.sin(THY)]);
       }
-      fwd.push([xF, footY + luffH]);             // the throat, where the yard is slung
-      aft.push([xF + yardL * Math.cos(THY), footY + luffH + yardL * Math.sin(THY)]);
       for (let k = 0; k < fwd.length; k++) {
         const dx = aft[k][0] - fwd[k][0], dy = aft[k][1] - fwd[k][1];
         const len = Math.hypot(dx, dy);
@@ -1271,10 +1346,23 @@ function buildRig(S, group, mats, FINE) {
         bm.position.set((fwd[k][0] + aft[k][0]) / 2, (fwd[k][1] + aft[k][1]) / 2, 0);
         lug.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
       }
-      /* the cloth, one panel between each pair of spars — a junk sail really is panels: the
-         batten line is a hinge in the cloth, and each panel sets nearly flat */
-      for (let k = 0; k <= nb; k++)
-        sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030));
+      if (FURLED) {
+        /* the folds: between each stacked pair the cloth pooches out both sides, one
+           bulge per gap — the striped bundle every photograph of a moored junk shows */
+        const dyS = B * 0.014;
+        for (let k = 0; k <= nb; k++) {
+          const y0 = (fwd[k][1] + fwd[k + 1][1]) / 2;
+          const lenK = Math.min(aft[k][0], aft[k + 1][0]) - xF;
+          sails.push(makeFurl(new THREE.Vector3(xF, y0, 0),
+                              new THREE.Vector3(xF + lenK, y0, 0),
+                              0, furlMat(mats), lug, { radius: dyS * 0.85 }));
+        }
+      } else {
+        /* the cloth, one panel between each pair of spars — a junk sail really is panels: the
+           batten line is a hinge in the cloth, and each panel sets nearly flat */
+        for (let k = 0; k <= nb; k++)
+          sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030));
+      }
       /* ── THE GEAR IS WHY THE RIG WORKS, SO IT IS DRAWN ──────────────────────────────
          A sheetlet to every batten end, gathered to one point on the deck aft — the
          crowfoot in every photograph — and the halyard from the yard's slings to the
@@ -1463,9 +1551,15 @@ function buildRig(S, group, mats, FINE) {
          stay, not bagged out like a course. */
       const tack = at(0.08), head = at(0.90);
       const clew = [hi[0] - (hi[0] - lo[0]) * 0.24, lo[1] + (hi[1] - lo[1]) * 0.10];
-      const ss = makeTriSail(tack, head, clew, group, 0.028, 0.96);
+      /* furled, a staysail runs DOWN its own stay: the cloth gathers along the foot of the
+         stay it hoists on and is lashed there — the stay stays, the triangle goes */
+      const ss = FURLED
+        ? makeFurl(new THREE.Vector3(at(0.04)[0], at(0.04)[1], 0),
+                   new THREE.Vector3(at(0.28)[0], at(0.28)[1], 0),
+                   triA2(tack, head, clew), furlMat(mats), group, {})
+        : makeTriSail(tack, head, clew, group, 0.028, 0.96);
       /* a real half-metre of z between neighbours where the suits cross, the jib rule */
-      ss.position.z = (k - (mk.staysails - 1) / 2) * B * 0.020;
+      if (ss) ss.position.z = (k - (mk.staysails - 1) / 2) * B * 0.020;
     }
   });
 
@@ -1545,8 +1639,24 @@ function buildRig(S, group, mats, FINE) {
            FLATTEST sail on the ship: it is set flying on a bar-taut stay. Small belly,
            near-straight leech, and a real half-metre of z between neighbouring sails so
            the overlapping suit reads as separate sails. */
-        const hs = makeTriSail(tack, head, clew, group, 0.020, 0.97);
-        hs.position.z = (k - (n - 1) / 2) * B * 0.032;
+        /* furled, a jib is downhauled to its tack and stowed in a bundle lying ALONG the
+           bowsprit — the lumpy line along the sprit in every harbour photograph of a
+           schooner. The first cut ran the bundle up the STAY instead, and the head rig
+           wore a row of standing cocoons: the downhaul brings the cloth to the tack, but
+           the crew lashes it to the SPAR, not to the wire. */
+        let hs;
+        if (FURLED) {
+          const luff2 = Math.hypot(head[0] - tack[0], head[1] - tack[1]);
+          const halfF = Math.min(0.14, (luff2 * 0.075) / len);
+          const fT = 0.10 + 0.86 * t;
+          const bA = spritAt(Math.max(0.02, fT - halfF)), bB = spritAt(Math.min(0.98, fT + halfF));
+          hs = makeFurl(new THREE.Vector3(bA[0], bA[1] + B * 0.012, 0),
+                        new THREE.Vector3(bB[0], bB[1] + B * 0.012, 0),
+                        triA2(tack, head, clew), furlMat(mats), group, {});
+        } else {
+          hs = makeTriSail(tack, head, clew, group, 0.020, 0.97);
+        }
+        if (hs) hs.position.z = (k - (n - 1) / 2) * B * 0.032;
       }
     }
   }
@@ -1867,6 +1977,90 @@ function makeQuadSail(A, B, C, D, group, belly) {
   m.userData.kind = 'quad';
   group.add(tag(m, 'sail'));
   return m;
+}
+
+
+/* ── THE FURLED SAIL ──────────────────────────────────────────────────────────────────
+ * The references mostly show ships with their canvas STOWED — rolled and gasketed along the
+ * spar it is bent to — because that is how a ship spends most of her life. A furled sail is
+ * not a smaller sail: it is a roll of cloth, and its whole character is in three things.
+ *
+ * THE RADIUS IS THE SAIL'S OWN AREA, put back on the spar: roll cross-section = cloth area x
+ * stowed thickness / roll length, so a course stows fat and a royal stows thin, from the same
+ * arithmetic. Nothing here is a chosen size.
+ *
+ * THE GASKETS PINCH IT. The roll is lashed to the spar at intervals, and the cloth bulges
+ * between the lashings — the scalloped profile is the single most recognisable thing about
+ * furled canvas at any distance.
+ *
+ * AND A SQUARE SAIL IS STOWED WITH A BUNT: the harbour stow gathers the body of the cloth
+ * into a swelling at the slings, tapering out to almost nothing at the yardarms, which is why
+ * a laid-up square-rigger's yards read as cigars and not as pipes.
+ */
+function makeFurl(A, B, area, mat, group, o) {
+  o = o || {};
+  const axis = new THREE.Vector3().subVectors(B, A);
+  const len = axis.length();
+  if (len < 0.05) return null;
+  axis.multiplyScalar(1 / len);
+  /* stowed cloth runs about 5.5 cm thick, canvas plus trapped air — a roll is loose */
+  const r0 = o.radius !== undefined ? o.radius
+           : Math.max(0.05, Math.sqrt((area * 0.055) / (Math.PI * Math.max(len, 0.1))));
+  /* two unit vectors across the roll; the guard is for near-vertical spars (a closed
+     crab claw), where projecting -Y degenerates */
+  const up = Math.abs(axis.y) > 0.94 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+  const e1 = new THREE.Vector3().crossVectors(up, axis).normalize();
+  const e2 = new THREE.Vector3().crossVectors(axis, e1).normalize();
+  const NA = Math.max(24, Math.min(64, Math.round(len / 0.5))), NR = 12;
+  const nG = Math.max(3, Math.round(len / 2.0));      // a gasket about every two metres
+  const pos = [], idx = [];
+  for (let i = 0; i <= NA; i++) {
+    const t = i / NA;
+    /* the cloth runs out toward the ends of the roll */
+    let R = r0 * Math.pow(Math.max(0, Math.sin(Math.PI * t)), 0.30);
+    if (o.bunt) R *= 0.72 + 0.68 * Math.exp(-Math.pow((t - 0.5) / 0.16, 2));
+    /* the gasket pinch, narrow at each lashing, full cloth between */
+    R *= 1 - 0.24 * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.PI * t * nG), 5.0);
+    const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len)
+      /* the roll hangs a little off the spar's own line, on the side the cloth gathers */
+      .addScaledVector(e2, -r0 * 0.30);
+    for (let j = 0; j <= NR; j++) {
+      const th = (j / NR) * Math.PI * 2;
+      /* cloth, not machined metal: shallow longitudinal creases ride round the roll */
+      const rr = R * (1 + 0.05 * Math.sin(th * 5 + t * 31) + 0.035 * Math.sin(th * 9 - t * 57));
+      pos.push(P.x + (e1.x * Math.cos(th) + e2.x * Math.sin(th)) * rr,
+               P.y + (e1.y * Math.cos(th) + e2.y * Math.sin(th)) * rr,
+               P.z + (e1.z * Math.cos(th) + e2.z * Math.sin(th)) * rr);
+    }
+  }
+  const row = NR + 1;
+  for (let i = 0; i < NA; i++)
+    for (let j = 0; j < NR; j++) {
+      const a = i * row + j;
+      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+    }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat);
+  m.userData.kind = 'furl';
+  group.add(tag(m, 'sail', o.name || 'Furled sail',
+    'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
+    + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
+    + 'stows fat and a royal thin.'));
+  return m;
+}
+
+/* one cloth material for every furled roll on a ship — the sail shader's own flax, without
+   the translucency, because a rolled sail is many layers deep and passes no light.
+   ⚠ The value is LINEAR and darker than the shader's 0.680: a MeshStandardMaterial goes
+   through ACES and the sRGB transfer, which the sail's ShaderMaterial does not, so matching
+   the NUMBER made the rolls render near paper-white against buff canvas. Matched by eye
+   against the set sails in the same light instead. */
+function furlMat(mats) {
+  return mats.furl || (mats.furl = new THREE.MeshStandardMaterial(
+    { color: new THREE.Color(0.185, 0.163, 0.118), roughness: 0.94 }));
 }
 
 
@@ -5530,6 +5724,10 @@ function buildPaddles(S, group, mats) {
 
 function buildShip(S, opts) {
   const FINE = !!(opts && opts.fine);
+  /* the canvas STATE: set (under way) or furled (stowed on the spars). A view's choice,
+     not a fact of the ship, so it arrives as an option — the record owns what canvas she
+     carries, the caller owns whether she is shown wearing it. */
+  const FURLED = !!(opts && opts.furled);
   const group = new THREE.Group();
 
   const sun = new THREE.Vector3(0.5, 0.72, 0.42).normalize();
@@ -5674,7 +5872,7 @@ function buildShip(S, opts) {
        aboard is now prism geometry in this one material, and takes the light.) */
     ropeSolid: new THREE.MeshStandardMaterial({ color: 0x5a4326, roughness: 0.88 }),
   };
-  const sails = buildRig(S, group, mats, FINE);
+  const sails = buildRig(S, group, mats, FINE, FURLED);
   if (FINE) {
     buildGuns(S, group, mats.iron || mats.woodDark);
     if (S.__spars && S.__spars.length)
@@ -5760,7 +5958,7 @@ function buildShip(S, opts) {
      lateen stopped taking its height from its mast, and cut the peak off the top of the frame.
      The bounding box is the exact answer, for every rig, including ones not written yet. */
   const bb = new THREE.Box3().setFromObject(group);
-  group.userData = { hullMat, sails, spec: S,
+  group.userData = { hullMat, sails, spec: S, furled: FURLED,
                      rigTop: bb.max.y, keelBottom: bb.min.y,
                      extentX: bb.max.x - bb.min.x,     // a lateen yard overhangs the stem
                      /* ── THE FLOAT DATUM IS A CONSTRUCTION FACT, NOT A MEASUREMENT ──────

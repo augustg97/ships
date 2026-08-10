@@ -912,6 +912,61 @@ break;
 }
 }
 }
+{
+const setKinds = ['square', 'tri', 'quad'];
+let setCloth = 0, setFurls = 0;
+g.traverse(o => { if (o.isMesh && o.userData.kind) {
+if (setKinds.includes(o.userData.kind)) setCloth++;
+if (o.userData.kind === 'furl') setFurls++;
+} });
+if (setFurls)
+say(v.id, 'a set ship carrying stowed canvas',
+`${setFurls} furled rolls drawn in the set state`);
+if (setCloth) {
+let gf = null;
+try { gf = SHIPS_HULL.buildShip(H, { furled: true }); }
+catch (e) { say(v.id, 'FURLED BUILD THREW', e.message); }
+if (gf) {
+gf.updateMatrixWorld(true);
+let worn = 0, furls = 0;
+const furlBoxes = [], sparBoxes = [];
+const sparKeys = ['yard', 'stay', 'bowsprit'];
+gf.traverse(o => {
+if (!o.isMesh) return;
+const p = tagOf(o);
+if (o.userData.kind && setKinds.includes(o.userData.kind)) worn++;
+if (o.userData.kind === 'furl') {
+furls++; furlBoxes.push(new THREE.Box3().setFromObject(o));
+} else if (p && sparKeys.includes(p.key)) {
+sparBoxes.push(new THREE.Box3().setFromObject(o));
+}
+});
+if (worn)
+say(v.id, 'furled ship still wearing canvas',
+`${worn} set cloths drawn in the furled state`);
+if (!furls)
+say(v.id, 'furled ship with no stowed canvas',
+`${setCloth} cloths when set, nothing stowed when furled`);
+const slack = Math.max(1.2, H.beam * 0.12);
+furlBoxes.forEach((fb, i) => {
+const fbx = fb.clone().expandByScalar(slack);
+if (!sparBoxes.some(sb => fbx.intersectsBox(sb)))
+say(v.id, 'a furled sail stowed on nothing',
+`furl ${i} at y ${fb.min.y.toFixed(1)}–${fb.max.y.toFixed(1)} m touches no yard, stay or bowsprit`);
+});
+if ((H.masts || []).length && (H.masts || []).every(m => m.rig === 'junk')) {
+let setTop = -1e9, furlTop = -1e9;
+g.traverse(o => { if (o.isMesh && o.userData.kind &&
+setKinds.includes(o.userData.kind))
+setTop = Math.max(setTop, new THREE.Box3().setFromObject(o).max.y); });
+furlBoxes.forEach(fb => { furlTop = Math.max(furlTop, fb.max.y); });
+if (furlTop > deckY + (setTop - deckY) * 0.6)
+say(v.id, "a junk's furled sail left hoisted",
+`stowed cloth tops at ${furlTop.toFixed(1)} m against set canvas at ${setTop.toFixed(1)} m — the battens did not drop`);
+}
+}
+}
+}
 rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
 parts: Object.keys(part).length,
 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

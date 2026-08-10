@@ -1804,3 +1804,38 @@ You're out of usage credits. Run /usage-credits to keep using Fable 5 or /model 
   by itself at the next firing. Nothing else is needed.
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 10:04:44  round starting
+Round 62 is complete and live at stamp 1786383743.
+
+**What this round found and fixed** — August's second list was already worked in full, so the round took the carried faults, and each fix was verified by rendering:
+
+1. **The "Nearest land" row finally fills.** Round 59's fill ran in `followShip` *above* the `passageCard()` call that creates the card, so on the only path a user can take the guard was always false and every slip showed the placeholder. The fill now lives in `passageCard()` itself — the function that writes the row writes its value — with honest null returns: a dash means the router isn't ready, "none within 486 nm" means the scan ran and found nothing. Verified on screen: "Cobh · 55 nm N" off the Great Western, "Tazerka Oil Terminal · 32 nm WSW" off the carrier in the Strait of Sicily.
+
+2. **The wrong-era voyage hash no longer hangs the app.** `#e=3&f=zhenghe` held `__FRAME_READY` through 900 retries hunting a 1415 voyage in an AD 500–1400 fleet. A voyage now names its own era from its year, outranking a contradictory `e=`; two more gate leaks closed alongside (unknown ids, and a give-up branch that never released the gate it held). The diagnosis frame for this fix also caught **"12° 60′ N"** on the position readout — degrees and minutes rounded separately — now rounded once, in minutes.
+
+3. **The label-flap false RED struck a ninth time, and reading the diff as an image overturned its story.** It was never font ghosting this time — the labels were *absent*, with one sea name frozen where a mid-boot camera had projected it. `markReady()` never asked whether the label layer had caught up with the camera; it now requires a settled label pass before a frozen capture can fire.
+
+Also recovered: rounds 59–61 shipped without handoffs (the recurring omission) — reconstructed in HANDOFF.md from commit bodies and FRAME-LOG. The loop prompt's stale "25 hulls" is corrected to the real rule.
+
+**Closing state:** audit 29/29 twice, ratchet 41/41 green with the four moved aboard frames classified (land-row text wrap reflowing the card, scene untouched) and accepted with reasons, globe-default 0.000% on the final run, both commits pushed, live stamp verified. Next round: the shipwright detail gaps continue — furled sails, anchors, wooldings, the waterway.
+2026-08-10 11:03:12  round finished; HEAD is f8acecc Round 62 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 18168 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 11:13:12  round starting
+The ratchet is 6/42 frames in (~2 minutes elapsed). It'll notify when done — holding until then.
+2026-08-10 11:50:43  round finished; HEAD is f8acecc Round 62 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 24411 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 12:00:43  round starting
+Status while the ratchet finishes (~15 more minutes of captures, then scoring):
+
+**The stranded round 63 is sound and I'm landing it.** The uncommitted tree was a complete furled-sails implementation (SHIPWRIGHT-QUEUE item 7) whose session was killed by the loop's 80-minute watchdog mid-ratchet. So far verified:
+
+- **Audit 29/29 clean**, with the five new furl rules active (furls must exist in the furled build, lie on a spar, not leak into the set state, and a junk's stack must drop).
+- **Three rig families looked at**: the 74's yards carry proper rolled canvas with bunt and gaskets; the junk shows bare masts with batten stacks dropped at the mast feet; Wyoming shows bare topmasts with furled bundles along the booms and the lowered gaffs resting on them. The stage card names the state in the right register.
+- **A real collision found and fixed at the system level**: the killed round's 42-frame ratchet survived as an orphan, kept writing into the shared `_current` while my check ran, and crashed scoring frames my run had wiped. `build/loop-round.sh`'s watchdog now kills the round's whole process group and any escaped `frame_baseline.py check` by name.
+
+When the ratchet notification arrives: classify every mover, then build, handoff, commit, push, and verify the live stamp (currently 1786383743 on both docs/ and live).
+2026-08-10 12:11:19  round finished; HEAD is f8acecc Round 62 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 77: 27682 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing"; kill "$ROUND"; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 12:21:19  round starting

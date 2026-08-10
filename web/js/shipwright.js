@@ -186,6 +186,8 @@ function swInit() {
   document.getElementById('swStage').addEventListener('input', e => {
     SW.stage = +e.target.value; swApplyStage();
   });
+  const fb = document.getElementById('swFurl');
+  if (fb) fb.onclick = () => swSetFurled(!SW.furled);
 }
 
 /* ── clicking a timber ─────────────────────────────────────────────────────────────── */
@@ -369,6 +371,16 @@ function swApplyStage() {
     nm = ['Loaded', 'The boxes. Eight feet by eight foot six by twenty or forty, corner castings '
                   + 'identical everywhere on earth — and the standard, not the ship, is the '
                   + 'invention.'];
+  /* the stage card says which STATE the canvas is in, because the picture does */
+  const cloth = (SW.spec.hull.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole')
+             || SW.spec.hull.headsails;
+  if (SW.stage === 7 && SW.furled && cloth)
+    nm = ['Bent on, furled', 'The canvas is bent to its spars and stowed: square sails rolled '
+                           + 'on their yards in harbour gaskets with the bunt gathered at the '
+                           + 'slings, gaff sails lowered onto their booms, a junk\'s battens '
+                           + 'dropped into their stack. This is how a ship spends most of her '
+                           + 'life — canvas wears out in use, and it was set only when she '
+                           + 'was going somewhere.'];
   document.getElementById('swStageName').textContent = nm[0];
   document.getElementById('swStageWhat').textContent = nm[1];
   document.getElementById('swOrder').textContent = trad.label;
@@ -412,10 +424,10 @@ function swBuildYard() {
     const gap = i === 0 ? 0 : Math.max(9, 0.30 * Math.max(prevL, L));
     const x = cursor + (i === 0 ? L / 2 : prevL / 2 + gap + L / 2);
     cursor = x; prevL = L;
-    const obj = window.SHIPS_HULL.buildShip(v.hull);
+    const obj = window.SHIPS_HULL.buildShip(v.hull, { furled: !!SW.furled });
     obj.position.x = x;
     SW.yard.add(obj);
-    SW.layout.push({ id: v.id, v, x, loa: L, obj, fine: false });
+    SW.layout.push({ id: v.id, v, x, loa: L, obj, fine: false, furlBuilt: !!SW.furled });
   });
   /* ── A NAME UNDER EVERY HULL ────────────────────────────────────────────────────────
      Without them the line is twenty-one anonymous silhouettes and the comparison has nothing
@@ -473,11 +485,27 @@ function swFineWanted() {
 /* Rebuild ONE entry at the given detail, preserving its place in the yard. */
 function swRebuild(e, fine) {
   SW.yard.remove(e.obj);
-  e.obj = window.SHIPS_HULL.buildShip(e.v.hull, fine ? { fine: true } : undefined);
+  e.obj = window.SHIPS_HULL.buildShip(e.v.hull, { fine: !!fine, furled: !!SW.furled });
   e.obj.position.x = e.x;
   SW.yard.add(e.obj);
   e.fine = !!fine;
+  e.furlBuilt = !!SW.furled;
+  /* ⚠ rebuilding the SELECTED hull replaces the object every other piece of state points
+     at: the raycast list, the shadow flags and the stage visibility all live on the OLD
+     build, and without this the fresh ship is unclickable, unshadowed and ignores the
+     slider — the consorts-in-dead-code class, state wired to an object that is gone. */
+  if (SW.on && SW.spec && e.id === SW.spec.id && SW.ship !== e.obj) swAdoptShip(e);
   return e.obj;
+}
+
+/* point every piece of per-ship state at this entry's current build */
+function swAdoptShip(e) {
+  SW.ship = e.obj;
+  SW.ship.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  SW.hit = [];
+  SW.ship.traverse(o => { if (o.userData && o.userData.part) SW.hit.push(o); });
+  SW.sel = null;
+  swApplyStage();
 }
 
 /* Called once per frame: move one hull toward the wanted set. Upgrades are done before
@@ -490,15 +518,34 @@ function swPumpDetail() {
      photograph however far it had got, and two captures of identical code would differ — the
      exact failure the camera ease was already pinned for. In frozen mode the window is brought
      to its final state in one go, before anything is drawn. */
+  /* a hull built in the other canvas state is stale at either detail level */
+  const stale = e => e.furlBuilt !== !!SW.furled;
   if (typeof FROZEN !== 'undefined' && FROZEN) {
-    SW.layout.forEach(e => { if (!e.fine && want.has(e.id)) swRebuild(e, true); });
-    SW.layout.forEach(e => { if (e.fine && !want.has(e.id)) swRebuild(e, false); });
+    SW.layout.forEach(e => { const f = want.has(e.id); if (e.fine !== f || stale(e)) swRebuild(e, f); });
     return;
   }
-  const up = SW.layout.find(e => !e.fine && want.has(e.id));
+  const up = SW.layout.find(e => want.has(e.id) && (!e.fine || stale(e)));
   if (up) { swRebuild(up, true); return; }
-  const down = SW.layout.find(e => e.fine && !want.has(e.id));
+  const down = SW.layout.find(e => !want.has(e.id) && (e.fine || stale(e)));
   if (down) swRebuild(down, false);
+}
+
+/* ── the canvas state: set, or furled ────────────────────────────────────────────────
+   The same fleet, stowed. A view choice rather than a fact of any ship — the record owns
+   what canvas she carries, this owns whether she is shown wearing it — so it lives here
+   and in the URL (`&sail=furled`), never in vessels.json. The selected hull rebuilds at
+   once; the rest of the yard follows through swPumpDetail, one hull per frame. */
+function swSetFurled(on) {
+  on = !!on;
+  if (!!SW.furled === on) return;
+  SW.furled = on;
+  const b = document.getElementById('swFurl');
+  if (b) { b.textContent = on ? 'Set sail' : 'Furl sails'; b.classList.toggle('on', on); }
+  if (SW.layout && SW.spec) {
+    const e = SW.layout.find(en => en.id === SW.spec.id);
+    if (e) swRebuild(e, true);
+  }
+  if (SW.on) swApplyStage();          /* the stage card names the state */
 }
 
 function swPromote(entry) {
@@ -979,4 +1026,4 @@ function rigLine(vessel) {
 }
 
 addEventListener('resize', swResize);
-window.SHIPS_SW = { swOpen, swClose, swFrame, SW, rigLine };
+window.SHIPS_SW = { swOpen, swClose, swFrame, SW, rigLine, swSetFurled };

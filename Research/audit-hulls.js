@@ -1363,6 +1363,77 @@
       }
     }
 
+    /* ── THE FURLED STATE IS A SECOND BUILD, AND IT IS AUDITED AS ONE (round 63). ──────
+       `buildShip(H, {furled:true})` must swap every cloth for stowed geometry, on the spar
+       that cloth stows to. Four rules, all provable by fault injection:
+         · a furled ship wearing SET canvas is the state simply not applied;
+         · a rigged ship whose furled build shows NO stowed cloth is declared-but-not-drawn
+           in its second state;
+         · a furl in the SET build is the state leaking the other way;
+         · a furl must LIE ON something — yard, boom, stay, mast or bowsprit — because a
+           roll of canvas in open air is the floating-fitting class in its newest clothes.
+       Coarse build: every furl path runs in it, and 29 extra fine builds would double the
+       audit's runtime for no added coverage (only the FINE-gated sheet leads differ). */
+    {
+      const setKinds = ['square', 'tri', 'quad'];
+      let setCloth = 0, setFurls = 0;
+      g.traverse(o => { if (o.isMesh && o.userData.kind) {
+        if (setKinds.includes(o.userData.kind)) setCloth++;
+        if (o.userData.kind === 'furl') setFurls++;
+      } });
+      if (setFurls)
+        say(v.id, 'a set ship carrying stowed canvas',
+            `${setFurls} furled rolls drawn in the set state`);
+      if (setCloth) {
+        let gf = null;
+        try { gf = SHIPS_HULL.buildShip(H, { furled: true }); }
+        catch (e) { say(v.id, 'FURLED BUILD THREW', e.message); }
+        if (gf) {
+          gf.updateMatrixWorld(true);
+          let worn = 0, furls = 0;
+          const furlBoxes = [], sparBoxes = [];
+          /* no 'mast' here: nothing in the fleet stows to a bare mast — a junk's stack
+             rests on its boom, a staysail on its stay — and a mast is a tall box that
+             would alibi any square furl drifted straight up */
+          const sparKeys = ['yard', 'stay', 'bowsprit'];
+          gf.traverse(o => {
+            if (!o.isMesh) return;
+            const p = tagOf(o);
+            if (o.userData.kind && setKinds.includes(o.userData.kind)) worn++;
+            if (o.userData.kind === 'furl') {
+              furls++; furlBoxes.push(new THREE.Box3().setFromObject(o));
+            } else if (p && sparKeys.includes(p.key)) {
+              sparBoxes.push(new THREE.Box3().setFromObject(o));
+            }
+          });
+          if (worn)
+            say(v.id, 'furled ship still wearing canvas',
+                `${worn} set cloths drawn in the furled state`);
+          if (!furls)
+            say(v.id, 'furled ship with no stowed canvas',
+                `${setCloth} cloths when set, nothing stowed when furled`);
+          const slack = Math.max(1.2, H.beam * 0.12);
+          furlBoxes.forEach((fb, i) => {
+            const fbx = fb.clone().expandByScalar(slack);
+            if (!sparBoxes.some(sb => fbx.intersectsBox(sb)))
+              say(v.id, 'a furled sail stowed on nothing',
+                  `furl ${i} at y ${fb.min.y.toFixed(1)}–${fb.max.y.toFixed(1)} m touches no yard, stay or bowsprit`);
+          });
+          /* and a junk's furl DROPS — the stack lies at the boom, not up the hoist */
+          if ((H.masts || []).length && (H.masts || []).every(m => m.rig === 'junk')) {
+            let setTop = -1e9, furlTop = -1e9;
+            g.traverse(o => { if (o.isMesh && o.userData.kind &&
+                                  setKinds.includes(o.userData.kind))
+              setTop = Math.max(setTop, new THREE.Box3().setFromObject(o).max.y); });
+            furlBoxes.forEach(fb => { furlTop = Math.max(furlTop, fb.max.y); });
+            if (furlTop > deckY + (setTop - deckY) * 0.6)
+              say(v.id, "a junk's furled sail left hoisted",
+                  `stowed cloth tops at ${furlTop.toFixed(1)} m against set canvas at ${setTop.toFixed(1)} m — the battens did not drop`);
+          }
+        }
+      }
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

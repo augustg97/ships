@@ -171,10 +171,15 @@ const bm = /[#&]b=(-?[\d.]+)/.exec(location.hash);
 const zm = /[#&]z=([\d.]+)/.exec(location.hash);
 const lm = /[#&]l=([\d.]+)/.exec(location.hash);
 const ym = /[#&]y=(-?[\d.]+)/.exec(location.hash);
+const fu = /[#&]sail=(furled|set)/.exec(location.hash);
 const tryPick = () => {
 const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
+if (fu && window.SHIPS_SW && window.SHIPS_SW.swSetFurled)
+window.SHIPS_SW.swSetFurled(fu[1] === 'furled');
 const entry = SWs && (SWs.layout || []).find(e => e.id.toLowerCase() === want);
-if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) {
+const settled = entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5 &&
+!(fu && (SWs.layout || []).some(e => e.furlBuilt !== !!SWs.furled));
+if (settled) {
 if (bm) SWs.viewFromDeg = parseFloat(bm[1]);
 if (zm) SWs.dist = Math.max(0.35, Math.min(8.0, parseFloat(zm[1])));
 if (lm) SWs.lat = Math.max(0.02, Math.min(0.90, parseFloat(lm[1]) * Math.PI / 180));
@@ -186,6 +191,17 @@ if (++tries > 600) { shipSelectPending = false; console.warn('no hull named', sm
 requestAnimationFrame(tryPick);
 };
 tryPick();
+} else {
+const fu = /[#&]sail=(furled|set)/.exec(location.hash);
+if (fu && vm && vm[1] === 'ship') {
+let ft = 0;
+const trySail = () => {
+if (window.SHIPS_SW && window.SHIPS_SW.swSetFurled)
+window.SHIPS_SW.swSetFurled(fu[1] === 'furled');
+else if (++ft < 600) requestAnimationFrame(trySail);
+};
+trySail();
+}
 }
 const fm = /[#&]f=([a-z0-9-]+)/i.exec(location.hash);
 if (fm) {

@@ -92,11 +92,23 @@ Ordered by how much each closes the gap per unit of work.
    counter flare that already shipped.
 5. ~~Ratlines as ladders~~ — **done**. All standing rigging is merged prism geometry with a real diameter; 496 line objects became 6 meshes, so it is cheaper AND lit. LineBasicMaterial is unlit, which is why the old rigging never changed value in shadow.
 6. ~~Plank seams and fastenings~~ — **done**. Staggered butts to the shift-of-butts rule, and treenails as grain disturbance rather than dots, since they are the same wood as the plank. Both frequencies are lengths turned into counts (7 m oak, 0.78 m room-and-space), so they scale with the ship. Verified at close range and at distance for aliasing.
-7. **Furled sails** as a state, so a ship can be shown under bare poles or with courses handed —
-   the references mostly show furled canvas on the yards.
-8. **Anchors** catted at the bow, with cable.
+7. ~~Furled sails as a state~~ — **done, r63.** `buildShip(H, {furled:true})` and `&sail=furled`
+   in the URL; a "Furl sails" toggle in the Shipwright nav. Every rig furls per its own
+   practice, from the same spar points the set sail hangs on: square sails roll on their
+   yards (radius solved from the sail's own area, gaskets pinching, bunt at the slings, clews
+   hauled to the quarters so the sheets lead somewhere real), gaff sails drop their gaff onto
+   a roll along the boom, the jib-headed topsail comes down entirely, a junk's battens stack
+   onto the boom with the cloth folding between them, the lateen and settee roll to their
+   hoisted yard, the crab claw scissors shut, staysails gather down their stays, jibs bundle
+   along the bowsprit. Audit: four rules plus the junk-drop rule, all proven by fault
+   injection; standing baseline `shipwright-furled`.
+8. ~~Anchors catted at the bow, with cable~~ — **already done 2026-08-02** ("Bower anchors"
+   commit, `buildAnchor` + cathead + cat pendant). This entry sat stale for five rounds —
+   the r58 lesson again: check the CODE before trusting this list.
 9. **Mast bands, wooldings and the cheeks** at the hounds.
-10. **Deck camber and a visible waterway** where the deck meets the frames.
+10. **Deck camber and a visible waterway** — camber and the tier waterway exist
+    (`buildDeckGeometry`, and see the deck-edge comment at hull.js "stops short of the deck
+    edge by a WATERWAY"); what remains, if anything, needs a LOOK first, not code.
 
 ## Rules this view is held to
 

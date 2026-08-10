@@ -332,7 +332,7 @@ return g;
 }
 const HULL_VERT = SHADERS['HULL_VERT.vert'];
 const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
-function buildRig(S, group, mats, FINE) {
+function buildRig(S, group, mats, FINE, FURLED) {
 const L = S.lwl, B = S.beam;
 const H = hullSurface(S);
 const deckAt = u => H.sheer(u);
@@ -342,6 +342,8 @@ let m = -Infinity;
 for (let k = 0; k <= 8; k++) m = Math.max(m, deckAt(a + (b - a) * k / 8));
 return m;
 };
+const triA2 = (P, Q, R) =>
+Math.abs((Q[0] - P[0]) * (R[1] - P[1]) - (R[0] - P[0]) * (Q[1] - P[1])) / 2;
 const woodDark = mats.spar, canvas = mats.canvas;
 const ropeMat = mats.ropeSolid || woodDark;
 const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
@@ -397,8 +399,16 @@ armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
 const drop = yy - prevYard;
 prevYard = yy;
 mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop });
+if (FURLED) {
+const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
+sails.push(makeFurl(
+new THREE.Vector3(ym.position.x - sT2 * w2, yy, -cT2 * w2),
+new THREE.Vector3(ym.position.x + sT2 * w2, yy, cT2 * w2),
+(yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
+} else {
 sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
 yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+}
 };
 const segs = mk.rig === 'lateen' ? []
 : (mk.rig === 'pole' || mk.rig === 'none') ? [lower]
@@ -478,8 +488,8 @@ const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
 for (const sgn of [1, -1])
 lifts.push([V3(yd.cx + sgn * sT * yd.half, yd.yy, sgn * cT * yd.half),
 V3(mx(hL), hL, 0)]);
-const w2 = yd.half * 0.96;
-const clewY = yd.yy - yd.drop * 0.97;
+const w2 = yd.half * (FURLED ? 0.45 : 0.96);
+const clewY = FURLED ? yd.yy - 0.4 : yd.yy - yd.drop * 0.97;
 for (const sgn of [1, -1]) {
 const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2);
 if (k === 0) {
@@ -565,7 +575,14 @@ const tack = [heel[0] + dir[0] * along, heel[1] + dir[1] * along];
 const clewX = tack[0] + yardLen * 0.62;
 const clewU = Math.max(0, Math.min(1, clewX / L + 0.5));
 const clew = [clewX, deckMax(u, clewU) + Math.max(H.sheer(0.5) * 0.10, B * 0.10)];
-if (S.settee) {
+if (FURLED) {
+const area = S.settee
+? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
+: triA2(tack, peakPt, clew);
+sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
+new THREE.Vector3(peakPt[0], peakPt[1], 0),
+area, furlMat(mats), group, {}));
+} else if (S.settee) {
 const throat = [tack[0] + (peakPt[0] - tack[0]) * S.settee,
 tack[1] + (peakPt[1] - tack[1]) * S.settee];
 const foreft = [tack[0] + (clew[0] - tack[0]) * S.settee * 0.55,
@@ -582,8 +599,9 @@ const sparLen = S.sailAreaEach
 ? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
 : L * 0.98;
 const tack = [x - L * 0.22, base];
+const aB = FURLED ? 1.09 : 0.46;
 const tipY = [tack[0] + Math.cos(1.19) * sparLen, tack[1] + Math.sin(1.19) * sparLen];
-const tipB = [tack[0] + Math.cos(0.46) * sparLen, tack[1] + Math.sin(0.46) * sparLen];
+const tipB = [tack[0] + Math.cos(aB) * sparLen, tack[1] + Math.sin(aB) * sparLen];
 [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
 const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
 const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
@@ -592,7 +610,15 @@ m2.position.set((tack[0] + tip[0]) / 2, (tack[1] + tip[1]) / 2, 0);
 m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
 group.add(tag(m2, 'yard', nm));
 });
+if (FURLED) {
+const area = S.sailAreaEach || 0.5 * sparLen * sparLen * Math.sin(spread) * LEECH;
+const mid = [(tipY[0] + tipB[0]) / 2, (tipY[1] + tipB[1]) / 2];
+sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
+new THREE.Vector3(mid[0], mid[1], 0),
+area, furlMat(mats), group, {}));
+} else {
 sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
+}
 }
 if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
 const boomL = Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
@@ -605,18 +631,34 @@ bm2.rotation.z = Math.PI / 2;
 bm2.position.set(x + boomL / 2, footY, 0);
 group.add(tag(bm2, 'yard', 'Boom'));
 const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
+const setThroat = [x, gy];
+const setPeak = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
+const tack = [x, footY], clew = [x + boomL, footY];
+const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
+if (FURLED) {
+const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
+sails.push(makeFurl(new THREE.Vector3(x, footY + r * 1.1, 0),
+new THREE.Vector3(x + boomL, footY + r * 1.1, 0),
+quadArea, furlMat(mats), group, { radius: r }));
+const rest = 0.13;
+const gm = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
+gm.rotation.z = -(Math.PI / 2 - rest);
+gm.position.set(x + Math.cos(rest) * gaffL / 2,
+footY + r * 2.2 + Math.sin(rest) * gaffL / 2, 0);
+group.add(tag(gm, 'yard', 'Gaff'));
+} else {
 const gm = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
 gm.rotation.z = -(Math.PI / 2 - peak);
 gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
 group.add(tag(gm, 'yard', 'Gaff'));
-const throat = [x, gy], peakPt = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
-const tack = [x, footY], clew = [x + boomL, footY];
-sails.push(makeQuadSail(tack, throat, peakPt, clew, group, 0.075));
+sails.push(makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075));
 if (mk.topmast && mk.topsail) {
 const topSeg = lower * 0.52;
 const truckY = base + lower * 0.88 + topSeg * 0.96;
-sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], peakPt, group, 0.035, 0.92));
+sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], setPeak, group, 0.035, 0.92));
+}
 }
 }
 if (mk.rig === 'junk') {
@@ -636,6 +678,15 @@ lug.position.set(x, 0, 0);
 lug.rotation.y = -TRIM * 1.5;
 group.add(lug);
 const fwd = [], aft = [];
+if (FURLED) {
+const dyS = B * 0.014;
+for (let k = 0; k <= nb; k++) {
+fwd.push([xF, footY + k * dyS]);
+aft.push([xF + boom, footY + k * dyS]);
+}
+fwd.push([xF, footY + (nb + 1) * dyS]);
+aft.push([xF + yardL, footY + (nb + 1) * dyS]);
+} else {
 for (let k = 0; k <= nb; k++) {
 const a = THB * Math.pow(k / nb, 1.4);
 const f = [xF, footY + luffH * (k / (nb + 1))];
@@ -644,6 +695,7 @@ aft.push([f[0] + boom * Math.cos(a), f[1] + boom * Math.sin(a)]);
 }
 fwd.push([xF, footY + luffH]);
 aft.push([xF + yardL * Math.cos(THY), footY + luffH + yardL * Math.sin(THY)]);
+}
 for (let k = 0; k < fwd.length; k++) {
 const dx = aft[k][0] - fwd[k][0], dy = aft[k][1] - fwd[k][1];
 const len = Math.hypot(dx, dy);
@@ -654,8 +706,19 @@ bm.rotation.z = Math.PI / 2 + Math.atan2(dy, dx);
 bm.position.set((fwd[k][0] + aft[k][0]) / 2, (fwd[k][1] + aft[k][1]) / 2, 0);
 lug.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
 }
+if (FURLED) {
+const dyS = B * 0.014;
+for (let k = 0; k <= nb; k++) {
+const y0 = (fwd[k][1] + fwd[k + 1][1]) / 2;
+const lenK = Math.min(aft[k][0], aft[k + 1][0]) - xF;
+sails.push(makeFurl(new THREE.Vector3(xF, y0, 0),
+new THREE.Vector3(xF + lenK, y0, 0),
+0, furlMat(mats), lug, { radius: dyS * 0.85 }));
+}
+} else {
 for (let k = 0; k <= nb; k++)
 sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030));
+}
 const shX = xF + Math.min(boom * 1.16, gapAft * 0.90);
 const sheetPt = new THREE.Vector3(shX, base + castleTop + B * 0.012, 0);
 const shSegs = [];
@@ -786,8 +849,12 @@ if (st) group.add(tag(st, 'stay'));
 const at = f => [lo[0] + (hi[0] - lo[0]) * f, lo[1] + (hi[1] - lo[1]) * f];
 const tack = at(0.08), head = at(0.90);
 const clew = [hi[0] - (hi[0] - lo[0]) * 0.24, lo[1] + (hi[1] - lo[1]) * 0.10];
-const ss = makeTriSail(tack, head, clew, group, 0.028, 0.96);
-ss.position.z = (k - (mk.staysails - 1) / 2) * B * 0.020;
+const ss = FURLED
+? makeFurl(new THREE.Vector3(at(0.04)[0], at(0.04)[1], 0),
+new THREE.Vector3(at(0.28)[0], at(0.28)[1], 0),
+triA2(tack, head, clew), furlMat(mats), group, {})
+: makeTriSail(tack, head, clew, group, 0.028, 0.96);
+if (ss) ss.position.z = (k - (mk.staysails - 1) / 2) * B * 0.020;
 }
 });
 if (S.bowsprit) {
@@ -836,8 +903,19 @@ const st = ropeMesh([staySeg], 0.020 + B * 0.0006, ropeMat);
 if (st) group.add(tag(st, 'stay'));
 const luff = Math.hypot(head[0] - tack[0], head[1] - tack[1]);
 const clew = [tack[0] + (fx - tack[0]) * 0.52, tack[1] + luff * 0.13];
-const hs = makeTriSail(tack, head, clew, group, 0.020, 0.97);
-hs.position.z = (k - (n - 1) / 2) * B * 0.032;
+let hs;
+if (FURLED) {
+const luff2 = Math.hypot(head[0] - tack[0], head[1] - tack[1]);
+const halfF = Math.min(0.14, (luff2 * 0.075) / len);
+const fT = 0.10 + 0.86 * t;
+const bA = spritAt(Math.max(0.02, fT - halfF)), bB = spritAt(Math.min(0.98, fT + halfF));
+hs = makeFurl(new THREE.Vector3(bA[0], bA[1] + B * 0.012, 0),
+new THREE.Vector3(bB[0], bB[1] + B * 0.012, 0),
+triA2(tack, head, clew), furlMat(mats), group, {});
+} else {
+hs = makeTriSail(tack, head, clew, group, 0.020, 0.97);
+}
+if (hs) hs.position.z = (k - (n - 1) / 2) * B * 0.032;
 }
 }
 }
@@ -997,6 +1075,57 @@ uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
 m.userData.kind = 'quad';
 group.add(tag(m, 'sail'));
 return m;
+}
+function makeFurl(A, B, area, mat, group, o) {
+o = o || {};
+const axis = new THREE.Vector3().subVectors(B, A);
+const len = axis.length();
+if (len < 0.05) return null;
+axis.multiplyScalar(1 / len);
+const r0 = o.radius !== undefined ? o.radius
+: Math.max(0.05, Math.sqrt((area * 0.055) / (Math.PI * Math.max(len, 0.1))));
+const up = Math.abs(axis.y) > 0.94 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+const e1 = new THREE.Vector3().crossVectors(up, axis).normalize();
+const e2 = new THREE.Vector3().crossVectors(axis, e1).normalize();
+const NA = Math.max(24, Math.min(64, Math.round(len / 0.5))), NR = 12;
+const nG = Math.max(3, Math.round(len / 2.0));
+const pos = [], idx = [];
+for (let i = 0; i <= NA; i++) {
+const t = i / NA;
+let R = r0 * Math.pow(Math.max(0, Math.sin(Math.PI * t)), 0.30);
+if (o.bunt) R *= 0.72 + 0.68 * Math.exp(-Math.pow((t - 0.5) / 0.16, 2));
+R *= 1 - 0.24 * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.PI * t * nG), 5.0);
+const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len)
+.addScaledVector(e2, -r0 * 0.30);
+for (let j = 0; j <= NR; j++) {
+const th = (j / NR) * Math.PI * 2;
+const rr = R * (1 + 0.05 * Math.sin(th * 5 + t * 31) + 0.035 * Math.sin(th * 9 - t * 57));
+pos.push(P.x + (e1.x * Math.cos(th) + e2.x * Math.sin(th)) * rr,
+P.y + (e1.y * Math.cos(th) + e2.y * Math.sin(th)) * rr,
+P.z + (e1.z * Math.cos(th) + e2.z * Math.sin(th)) * rr);
+}
+}
+const row = NR + 1;
+for (let i = 0; i < NA; i++)
+for (let j = 0; j < NR; j++) {
+const a = i * row + j;
+idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+g.setIndex(idx);
+g.computeVertexNormals();
+const m = new THREE.Mesh(g, mat);
+m.userData.kind = 'furl';
+group.add(tag(m, 'sail', o.name || 'Furled sail',
+'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
++ 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
++ 'stows fat and a royal thin.'));
+return m;
+}
+function furlMat(mats) {
+return mats.furl || (mats.furl = new THREE.MeshStandardMaterial(
+{ color: new THREE.Color(0.185, 0.163, 0.118), roughness: 0.94 }));
 }
 const PARTS = {
 boat:     { stage: 6, name: "Ship's boat",
@@ -3556,6 +3685,7 @@ group.add(bg);
 }
 function buildShip(S, opts) {
 const FINE = !!(opts && opts.fine);
+const FURLED = !!(opts && opts.furled);
 const group = new THREE.Group();
 const sun = new THREE.Vector3(0.5, 0.72, 0.42).normalize();
 const yearBuilt = S.year || 0;
@@ -3647,7 +3777,7 @@ canvas: new THREE.MeshStandardMaterial({ color: 0xded3b8, roughness: 0.94,
 side: THREE.DoubleSide }),
 ropeSolid: new THREE.MeshStandardMaterial({ color: 0x5a4326, roughness: 0.88 }),
 };
-const sails = buildRig(S, group, mats, FINE);
+const sails = buildRig(S, group, mats, FINE, FURLED);
 if (FINE) {
 buildGuns(S, group, mats.iron || mats.woodDark);
 if (S.__spars && S.__spars.length)
@@ -3699,7 +3829,7 @@ plat.position.set(0, dk.sheer(0.5) + S.beam * 0.17, 0);
 group.add(tag(plat, 'platform'));
 }
 const bb = new THREE.Box3().setFromObject(group);
-group.userData = { hullMat, sails, spec: S,
+group.userData = { hullMat, sails, spec: S, furled: FURLED,
 rigTop: bb.max.y, keelBottom: bb.min.y,
 extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };

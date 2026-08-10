@@ -2956,3 +2956,101 @@ Containers (1950–2026) with Ocean Crossing lit.
 **End-of-round deploy note: LIVE, stamp 1786341590 → 1786383743**, verified with a
 cache-busted fetch of the data-version meta tag; the live minified app.js confirmed carrying
 labelsSettled and the passageCard land fill. Seventeenth clean push-triggered deploy in a row.
+
+---
+
+## Round 63 — 2026-08-10 — The fleet learns to stow its canvas, and a stranded round is landed whole
+
+**This round began with 540 uncommitted lines in the tree: a complete furled-sails
+implementation (SHIPWRIGHT-QUEUE item 7) built by a session that was cut off waiting for its
+frame ratchet — twice.** The 11:13 and 12:00 sessions each started the ~19-minute 42-frame
+check, ended their turn to wait for the notification, and the `claude -p` process exited on
+turn end, orphaning the check mid-run. The work itself was sound; what it never got was its
+verification loop closed. This round closed it: audit re-run, both ratchet passes run to
+completion, movers classified from their diffs, built, deployed, verified live.
+**Procedural, and it matters for every future round: do not end the turn to wait for a
+background check. Hold it open with foreground waits on the PID** (a 560 s python poll per
+tool call, repeated), or the session dies and the check runs on as an orphan — which is the
+exact collision that overwrote a previous run's captures (see the loop-round.sh note below).
+
+**The work being landed: `buildShip(H, {furled:true})` — the canvas STATE, not a smaller
+sail.** A furled sail is a roll of cloth on the spar it is bent to, and `makeFurl` builds it
+from three facts: the radius is the sail's own area put back on the spar (a course stows fat,
+a royal thin, nothing hand-sized); gaskets pinch the roll at ~2 m intervals so it scallops;
+a square sail's harbour stow gathers a bunt at the slings, which is why a laid-up
+square-rigger's yards read as cigars. Every rig furls per its own practice, from the same
+spar points the set sail hangs on: square sails roll on their braced yards with clews hauled
+to the quarters (and the sheets re-led there — a sheet to a set clew on a stowed sail is a
+rope to empty air); gaff sails drop the gaff onto a roll lashed along the boom; the
+jib-headed topsail comes down entirely, leaving the topmast bare as the harbour photographs
+show; a junk eases its halyard and the battens stack onto the boom, cloth pooching between
+each pair; lateen and settee brail to their hoisted yard; the crab claw scissors shut about
+its tack; staysails gather down their stays; jibs bundle along the bowsprit — the first cut
+ran them up the stay and the head rig wore a row of standing cocoons. The roll's material is
+its own decision: matching the sail shader's flax NUMBER made the rolls near paper-white,
+because MeshStandardMaterial goes through ACES and sRGB and the sail's ShaderMaterial does
+not; matched by eye in the same light instead.
+
+**The state is a view choice, so it lives in the view: `&sail=furled` in the hash (applied
+inside the selection-settle loop, because the state triggers rebuilds that drain through
+swPumpDetail one hull per frame — settled now means "no hull is stale in either detail or
+state", or a frozen capture photographs a half-furled fleet), a "Furl sails" toggle in the
+Shipwright nav, and the stage-8 card renames itself "Bent on, furled" with the register
+August asked for.** Rebuilding the selected hull surfaced a known class a second time: the
+fresh object replaced the one the raycast list, shadow flags and stage visibility pointed
+at — the consorts-in-dead-code class — so `swAdoptShip` now re-points all per-ship state at
+the current build.
+
+**The audit learned the class as five rules, all proven by fault injection by the stranded
+session and re-run clean here (29/29, coarse build):** a furled ship wearing set canvas; a
+rigged ship whose furled build stows nothing; a furl leaking into the set state; a furl
+lying on no spar (yard, stay or bowsprit — deliberately not mast, which is a tall box that
+would alibi a drifted square furl); and a junk whose stack failed to drop.
+
+**Ratchet, two full runs to completion. First: 20 movers, every one a Shipwright-view frame
+at a near-uniform 0.545%, and the uniformity was the diagnosis — the diffs show ONLY the
+swNav strip, arrows shifted left and the new FURL SAILS button, scene pixels untouched.
+One outlier read before accepting: ship-steamer's extra 0.03% is the r61 Endurance
+fleet-strip cell (1912, sorts between Titanic and Yamato), which only this frame's strip
+window reaches — it had ridden UNDER the 0.05% limit unaccepted since r61, and is exactly
+the "0.02–0.04%, under tolerance" r62 recorded. A stale baseline can hide inside tolerance
+until an unrelated change pushes the frame over; the diff, not the number, says what moved.**
+All 20 accepted with the class reason (ship-steamer's names both). Second run: **42/42
+green.** New standing baseline `shipwright-furled` — the 74 from the port quarter, stowed —
+scored 0.000% against the committed frame in both runs.
+
+**Looked at, per rule 1, three rig families with my own eyes this session:** the 74's yards
+carrying scalloped rolls with the bunt swelling at the slings (the baseline frame); Wyoming
+showing six bare black topmasts over white lowers, bundles at boom level, the jib bundle
+lumping along the bowsprit; the junk close-up showing the batten stack lying above the boom
+like a closed blind under a bare pole. Queue corrections from the stranded session stand:
+item 8 (anchors, catted, with cable) was already done 2026-08-02 and the entry was stale —
+the r58 lesson, check the code before trusting the list — and item 10's camber/waterway
+largely exist in `buildDeckGeometry`; what remains there needs a LOOK first, not code.
+
+**Also in this commit: `build/loop-round.sh`'s watchdog now kills the round's whole process
+group (`set -m`, `kill -- -$ROUND`) and any escaped `frame_baseline.py check` by name.** The
+stranded session's orphaned ratchet had kept writing into the shared `_current` while the
+next session's check ran, overwrote its early captures, and crashed its scoring — two
+checks must never share `_current`, and the watchdog now enforces the only version of that
+this machine can.
+
+**Rule 0, written on shipwright-furled:** it reads as a rendered world — a 74 close on open
+water from the port quarter, near enough to read the stow. Three facts a viewer can read off
+it: the yards carry rolled canvas pinched by gaskets, fattest at the slings where the bunt
+is gathered; the clews are hauled up to the yards' quarters with the sheets led from the
+rolls, not from empty air; the stage card reads "Bent on, furled" over the build slider at
+frame-first (carvel), with the East Indiaman lying furled astern of her at the same
+anchorage.
+
+**Audit 29/29 clean. Frames 41 → 42. Byte budget: first paint 8.15 MB against 8.6.**
+
+### Next, in order
+1. **Survey continues.** SHIPWRIGHT-QUEUE remaining true gaps: item 9 mast bands, wooldings
+   and cheeks at the hounds; item 10 needs a LOOK at the deck edge close-up before any code
+   (camber and the tier waterway already exist in `buildDeckGeometry`).
+2. Carried: featureless brown land behind aboard-yamato; Titanic remainder (forecastle/poop
+   breaks partly done — check the code first); r43's plate gaps (corbita era plate;
+   dugout/dhow/cog plates; globe-era-card frame).
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).

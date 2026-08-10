@@ -221,6 +221,11 @@
    "name": "shipwright-astern",
    "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7",
    "note": "the standing stern guard: the 74 dead astern, close, aimed at the hull (#z/#l/#y, the r58 camera grammar). Every timber transom ship shares buildStern, so this one bearing watches the class: two tiers of lights, quarter galleries, taffrail. The r58 fault \u2014 furniture keyed to a stale u=0.985 plate, buried inside the u=1.0 skin \u2014 was invisible from every baseline bearing that existed before this frame."
+  },
+  {
+   "name": "shipwright-furled",
+   "path": "/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25",
+   "note": "the canvas STATE guard: the 74 from the port quarter, furled \u2014 every square roll, its gaskets and bunt, the hauled clews, and the whole yard built in the furled state behind her. One bearing watches the class; every rig type shares makeFurl."
   }
  ]
 }

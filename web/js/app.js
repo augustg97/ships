@@ -446,10 +446,20 @@ function applyHashView() {
        is mid-rig; a hull survey wants the hull. Resolved in swFrame against the extents it
        owns; only the request is recorded here. */
     const ym = /[#&]y=(-?[\d.]+)/.exec(location.hash);
+    /* `&sail=furled|set` — the canvas state, the same hull shown stowed or under way. A
+       view choice, so it rides in the hash with the camera grammar, never in the record.
+       Applied inside this loop because the state triggers REBUILDS that drain through
+       swPumpDetail — the selection is not settled until no hull is stale, or a frozen
+       capture photographs a half-furled fleet. */
+    const fu = /[#&]sail=(furled|set)/.exec(location.hash);
     const tryPick = () => {
       const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
+      if (fu && window.SHIPS_SW && window.SHIPS_SW.swSetFurled)
+        window.SHIPS_SW.swSetFurled(fu[1] === 'furled');
       const entry = SWs && (SWs.layout || []).find(e => e.id.toLowerCase() === want);
-      if (entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5) {
+      const settled = entry && Math.abs((SWs.shipX || 0) - entry.x) < 0.5 &&
+        !(fu && (SWs.layout || []).some(e => e.furlBuilt !== !!SWs.furled));
+      if (settled) {
         if (bm) SWs.viewFromDeg = parseFloat(bm[1]);
         if (zm) SWs.dist = Math.max(0.35, Math.min(8.0, parseFloat(zm[1])));
         if (lm) SWs.lat = Math.max(0.02, Math.min(0.90, parseFloat(lm[1]) * Math.PI / 180));
@@ -461,6 +471,18 @@ function applyHashView() {
       requestAnimationFrame(tryPick);
     };
     tryPick();
+  } else {
+    /* `&sail=` with no named ship still applies once the Shipwright exists */
+    const fu = /[#&]sail=(furled|set)/.exec(location.hash);
+    if (fu && vm && vm[1] === 'ship') {
+      let ft = 0;
+      const trySail = () => {
+        if (window.SHIPS_SW && window.SHIPS_SW.swSetFurled)
+          window.SHIPS_SW.swSetFurled(fu[1] === 'furled');
+        else if (++ft < 600) requestAnimationFrame(trySail);
+      };
+      trySail();
+    }
   }
 
   /* ── AND SO IS BEING ABOARD ONE ─────────────────────────────────────────────────────

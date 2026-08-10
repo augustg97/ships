@@ -358,6 +358,7 @@ display:flex;align-items:center;gap:14px}
 #swNav .mini{font-size:15px;line-height:1;padding:7px 16px;background:var(--panel);
 border:1px solid var(--edge)}
 #swNav .mini:hover{border-color:var(--edge-strong);color:var(--ink)}
+#swNav #swFurl{font-size:10px;letter-spacing:.13em;text-transform:uppercase;padding:9px 14px}
 #swNavPos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
 min-width:74px;text-align:center}
 #swRuler{position:absolute;right:24px;bottom:120px;z-index:4;pointer-events:none;
