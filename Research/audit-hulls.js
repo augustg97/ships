@@ -1294,6 +1294,14 @@
       {
         const eng = P.beatLight === 0 && P.beatHard === 0;
         const FAM = [
+          /* ⚠ BARQUENTINE BEFORE SQUARE, AND THAT ORDER IS THE POINT. This table is
+             matched by substring in array order, so a barquentine — which is square on
+             the fore and fore-and-aft on main and mizzen — matched 'square' and was
+             held to a full-rigged ship's 80/95. She points better than that and worse
+             than a schooner, because two of her three masts are fore-and-aft; that is
+             the whole reason the rig exists. Adding the family beats rewording the
+             ship to suit the audit. */
+          ['barquentine',  62,  78],
           ['square',       80,  95],
           ['lateen',       72,  84],
           ['settee',       72,  84],

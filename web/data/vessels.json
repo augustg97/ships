@@ -3599,6 +3599,489 @@
     "cm": 0.98,
     "year": 1991
    }
+  },
+  {
+   "id": "ever-given",
+   "name": "Ever Given",
+   "sub": "the ship that stopped the Suez Canal",
+   "rig": "none",
+   "era": [
+    2018,
+    2026
+   ],
+   "from": 2018,
+   "to": 2026,
+   "region": "global",
+   "crew": 25,
+   "pax": 0,
+   "speedKn": 22.8,
+   "attestation": "measured",
+   "confidence": "good",
+   "polar": {
+    "beatLight": 0,
+    "beatHard": 0,
+    "curve": {
+     "0": 22.8,
+     "30": 22.8,
+     "45": 22.8,
+     "60": 22.8,
+     "75": 22.8,
+     "90": 22.8,
+     "110": 22.8,
+     "120": 22.8,
+     "135": 22.8,
+     "150": 22.8,
+     "180": 22.8
+    },
+    "rig": "two-stroke diesel, single screw",
+    "rigNote": "A 2018 ultra-large container ship: one low-speed two-stroke on a single fixed-pitch screw, about 59,000 kW. Service speed is set by fuel price as much as by the hull — ships of this class slow-steam near 16 knots when bunkers are dear, which is why the routing figure and a schedule figure can honestly differ.",
+    "anchor": {
+     "kn": 22.8,
+     "kind": "trial",
+     "source": "Imabari/Evergreen published service data; AIS tracks give 16–19 kn slow-steaming in service"
+    }
+   },
+   "hull": {
+    "wlPower": 4.6,
+    "stemFineness": 0.06,
+    "sternFineness": 0.3,
+    "forefoot": 0.18,
+    "run": 0.22,
+    "riseF": 0.2,
+    "riseA": 0.14,
+    "sheerBow": 2.2,
+    "sheerStern": 0.0,
+    "tumblehome": 0.0,
+    "stemRake": 0.03,
+    "sternRake": 0.0,
+    "strakes": 16,
+    "copper": false,
+    "copperAge": 0.55,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": true,
+    "topside": "#1f4d3f",
+    "bowsprit": 0.0,
+    "steeve": 22,
+    "masts": [],
+    "build": "steel",
+    "containers": true,
+    "loa": 399.94,
+    "lwl": 383.0,
+    "beam": 59.0,
+    "draught": 15.7,
+    "freeboard": 30.0,
+    "cm": 0.98,
+    "year": 2018
+   },
+   "rows": [
+    [
+     "Built",
+     "Imabari Shipbuilding, 2018; Panama flag, Evergreen charter"
+    ],
+    [
+     "Capacity",
+     "20,124 TEU on 399.94 m — among the largest afloat"
+    ],
+    [
+     "Aground",
+     "23 March 2021, Suez Canal km 151, at 13 knots in a sandstorm"
+    ],
+    [
+     "Refloated",
+     "29 March 2021 — 163 hours, about 30,000 m³ dredged"
+    ],
+    [
+     "Queue",
+     "369 ships waiting; roughly 12% of world trade passes the canal"
+    ]
+   ],
+   "text": "Ever Given is a 20,124 TEU container ship built by Imabari Shipbuilding in 2018 and operated by Evergreen Marine. At 399.94 m she is a metre short of the 400 m at which some port and canal rules change, which is not a coincidence: the largest ships are built to the dimensions of the infrastructure that must accept them.\n\nOn the morning of 23 March 2021 she entered the Suez Canal southbound at about 13 knots in a sandstorm with gusts above 40 knots, sheered, and grounded diagonally across the channel at kilometre 151, wedging her bulbous bow into the eastern bank. The canal is single-lane along that stretch and there is no way past. She was refloated on 29 March after 163 hours, by dredging roughly 30,000 cubic metres from around the bow, fourteen tugs, and a spring tide.\n\nBy the time she moved, 369 ships were waiting at both ends. Around 12 per cent of world trade passes through the canal, and the alternative — round the Cape — adds about 9,000 km and ten days. The blockage is the clearest demonstration this model has of its own last chapter's argument: a modern route is set by the dimensions of dredged channels and lock chambers, and one hull athwart one of them stops a system that has no slack in it.",
+   "cite": "Suez Canal Authority; Marine Accident Investigation Branch interim report, 2021."
+  },
+  {
+   "id": "azzam",
+   "name": "Azzam",
+   "sub": "the largest motor yacht ever built",
+   "rig": "none",
+   "era": [
+    2013,
+    2026
+   ],
+   "from": 2013,
+   "to": 2026,
+   "region": "global",
+   "crew": 80,
+   "pax": 36,
+   "speedKn": 31.5,
+   "attestation": "measured",
+   "confidence": "fair",
+   "polar": {
+    "beatLight": 0,
+    "beatHard": 0,
+    "curve": {
+     "0": 31.5,
+     "30": 31.5,
+     "45": 31.5,
+     "60": 31.5,
+     "75": 31.5,
+     "90": 31.5,
+     "110": 31.5,
+     "120": 31.5,
+     "135": 31.5,
+     "150": 31.5,
+     "180": 31.5
+    },
+    "rig": "two gas turbines and two diesels, four waterjets",
+    "rigNote": "Combined diesel and gas turbine plant of roughly 94,000 shaft horsepower driving four waterjets. Waterjets rather than screws because she draws 4.3 m on 180.6 m and there is no room for deep shaft lines under a hull that fine.",
+    "anchor": {
+     "kn": 31.5,
+     "kind": "trial",
+     "source": "Lürssen delivery trials, 2013 — reported above 30 kn"
+    }
+   },
+   "hull": {
+    "wlPower": 2.6,
+    "stemFineness": 0.02,
+    "sternFineness": 0.22,
+    "forefoot": 0.1,
+    "run": 0.3,
+    "riseF": 0.2,
+    "riseA": 0.14,
+    "sheerBow": 1.2,
+    "sheerStern": 0.0,
+    "tumblehome": 0.0,
+    "stemRake": 0.03,
+    "sternRake": 0.0,
+    "strakes": 10,
+    "copper": false,
+    "copperAge": 0.55,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": true,
+    "topside": "#f2f0ea",
+    "bowsprit": 0.0,
+    "steeve": 22,
+    "masts": [],
+    "build": "steel",
+    "containers": false,
+    "loa": 180.6,
+    "lwl": 172.0,
+    "beam": 20.8,
+    "draught": 4.3,
+    "freeboard": 9.0,
+    "cm": 0.76,
+    "year": 2013,
+    "decks": 4
+   },
+   "rows": [
+    [
+     "Built",
+     "Lürssen, Bremen, 2013 — three years from keel to delivery"
+    ],
+    [
+     "Length",
+     "180.6 m — longer than any private vessel then afloat"
+    ],
+    [
+     "Draught",
+     "4.3 m, unusually shallow for the length, for Gulf and Red Sea waters"
+    ],
+    [
+     "Power",
+     "two gas turbines and two diesels, about 94,000 shaft horsepower"
+    ],
+    [
+     "Speed",
+     "above 30 knots — faster than most warships of her displacement"
+    ]
+   ],
+   "text": "Azzam was delivered by Lürssen in 2013 for Sheikh Khalifa bin Zayed Al Nahyan and at 180.6 m remains the longest private motor yacht built. She is included here as the end point of a line the rest of this model traces: for most of history the largest and most advanced hulls afloat were built to carry cargo, fight, or explore, and their size was justified by what they returned.\n\nHer engineering is not decorative. A combined diesel and gas turbine plant of roughly 94,000 shaft horsepower drives four waterjets to over 30 knots — faster than most warships of comparable displacement — and she draws only 4.3 m on that length, a deliberately shallow hull for Gulf and Red Sea waters that forced a very fine, wide, low-block form.\n\nThe type is a real category rather than a curiosity: yachts above 100 m are now built in numbers, and they sustain specialist yards, naval-architecture practices and a supply chain that overlaps with naval work.",
+   "cite": "Lürssen; Boat International Global Order Book."
+  },
+  {
+   "id": "endurance",
+   "name": "Endurance",
+   "sub": "crushed in the Weddell Sea, found in 2022",
+   "rig": "barquentine",
+   "era": [
+    1912,
+    1915
+   ],
+   "from": 1912,
+   "to": 1915,
+   "region": "polar",
+   "crew": 28,
+   "pax": 0,
+   "speedKn": 10.2,
+   "attestation": "measured",
+   "confidence": "good",
+   "polar": {
+    "beatLight": 62,
+    "beatHard": 78,
+    "curve": {
+     "0": 0,
+     "30": 0,
+     "45": 1.8,
+     "62": 3.6,
+     "75": 5.2,
+     "90": 6.4,
+     "110": 7.2,
+     "120": 7.4,
+     "135": 7.0,
+     "150": 6.1,
+     "180": 4.6
+    },
+    "rig": "barquentine — square on the fore, fore-and-aft on main and mizzen",
+    "rigNote": "Square canvas on the foremast only, with fore-and-aft main and mizzen, plus a 350 ihp coal-fired auxiliary. The rig is a compromise for ice work: enough square sail to run before the westerlies, few enough yards that a small crew can handle her among floes, and an engine for calms and leads.",
+    "anchor": {
+     "kn": 10.2,
+     "kind": "trial",
+     "source": "Framnæs builder's figure under steam, 1912; under sail alone she was slower"
+    },
+    "floor": {
+     "kn": 4.0,
+     "lossKnPerMs": 0.14,
+     "source": "auxiliary steam floor; no measured headwind figure survives, so the loss follows the clipper's fractional windage — an inference"
+    }
+   },
+   "hull": {
+    "wlPower": 3.0,
+    "stemFineness": 0.03,
+    "sternFineness": 0.08,
+    "forefoot": 0.3,
+    "run": 0.36,
+    "riseF": 0.5,
+    "riseA": 0.44,
+    "sheerBow": 0.95,
+    "sheerStern": 0.48,
+    "tumblehome": 0.024,
+    "stemRake": 0.1,
+    "sternRake": 0.06,
+    "strakes": 13,
+    "copper": false,
+    "copperAge": 0.25,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": false,
+    "topside": "#241c14",
+    "bowsprit": 0.22,
+    "head": 1,
+    "steeve": 14,
+    "masts": [
+     {
+      "at": 0.15,
+      "heightM": 27.5,
+      "rig": "square",
+      "rake": -1,
+      "shrouds": 6,
+      "yards": [
+       "course",
+       "ltop",
+       "utop",
+       "tg"
+      ]
+     },
+     {
+      "at": 0.52,
+      "heightM": 30.0,
+      "rig": "gaff",
+      "rake": 2,
+      "shrouds": 7
+     },
+     {
+      "at": 0.845,
+      "heightM": 25.5,
+      "rig": "gaff",
+      "rake": 4,
+      "shrouds": 5
+     }
+    ],
+    "build": "wood",
+    "transom": 0.3,
+    "loa": 44.0,
+    "lwl": 39.6,
+    "beam": 7.6,
+    "draught": 4.2,
+    "freeboard": 2.0,
+    "cm": 0.78,
+    "headsails": 4,
+    "deckhouses": [
+     {
+      "a": 0.16,
+      "b": 0.27,
+      "hM": 2.2,
+      "wF": 0.52
+     },
+     {
+      "a": 0.6,
+      "b": 0.68,
+      "hM": 2.1,
+      "wF": 0.48
+     }
+    ],
+    "helmAt": 0.94,
+    "year": 1912
+   },
+   "rows": [
+    [
+     "Built",
+     "Framnæs, Sandefjord, 1912, as *Polaris* — for Arctic tourist cruising"
+    ],
+    [
+     "Construction",
+     "oak and Norwegian fir, greenheart sheathing; stem 1.3 m thick"
+    ],
+    [
+     "Beset",
+     "19 January 1915; drifted with the pack for ten months"
+    ],
+    [
+     "Crushed",
+     "sank 21 November 1915; all 28 men survived"
+    ],
+    [
+     "Wreck found",
+     "5 March 2022, 3,008 m down, four miles from Worsley's fix"
+    ]
+   ],
+   "text": "Endurance was built at Framnæs in Sandefjord in 1912 as *Polaris*, for Arctic tourist cruising, and was designed for ice rather than merely strengthened against it: oak and Norwegian fir with greenheart sheathing, and a stem formed from a single baulk about 1.3 m thick. Shackleton bought her for the Imperial Trans-Antarctic Expedition of 1914.\n\nShe was beset in the Weddell Sea pack on 19 January 1915, one day's sail from her intended landing, and drifted with the ice for ten months. A ship built for ice can survive pressure from the sides; what destroyed her was being lifted and racked as floes converged. She was abandoned on 27 October and sank on 21 November 1915. All twenty-eight men survived, by boat to Elephant Island and then by an 800-nautical-mile passage in the 6.9 m *James Caird* to South Georgia.\n\nThe wreck was located on 5 March 2022 at 3,008 m, about four nautical miles from the position Frank Worsley recorded by sextant as she went down — a navigational fix taken from an ice floe with no land in sight, and vindicated after a century.",
+   "cite": "Endurance22 expedition; Worsley's navigational log; Alexander, *The Endurance* (1998)."
+  },
+  {
+   "id": "queen-mary-2",
+   "name": "Queen Mary 2",
+   "sub": "the last ship built to cross, not to cruise",
+   "rig": "none",
+   "era": [
+    2004,
+    2026
+   ],
+   "from": 2004,
+   "to": 2026,
+   "region": "atlantic",
+   "crew": 1253,
+   "pax": 2691,
+   "speedKn": 29.5,
+   "attestation": "measured",
+   "confidence": "good",
+   "polar": {
+    "beatLight": 0,
+    "beatHard": 0,
+    "curve": {
+     "0": 29.6,
+     "30": 29.6,
+     "45": 29.6,
+     "60": 29.6,
+     "75": 29.6,
+     "90": 29.6,
+     "110": 29.6,
+     "120": 29.6,
+     "135": 29.6,
+     "150": 29.6,
+     "180": 29.6
+    },
+    "rig": "diesel-electric and gas turbine, four azimuthing pods",
+    "rigNote": "Four azimuthing pods, two fixed and two steerable, fed by diesel-electric plant with gas turbines for the top end — about 117 MW. Pods rather than shafts because a liner hull fine enough to hold 26 knots in a North Atlantic winter has no room for four shaft lines.",
+    "anchor": {
+     "kn": 29.6,
+     "kind": "trial",
+     "source": "Chantiers de l'Atlantique sea trials, 2003"
+    }
+   },
+   "hull": {
+    "wlPower": 3.8,
+    "stemFineness": 0.1,
+    "sternFineness": 0.2,
+    "forefoot": 0.14,
+    "run": 0.24,
+    "riseF": 0.18,
+    "riseA": 0.15,
+    "sheerBow": 0.7,
+    "sheerStern": 0.4,
+    "tumblehome": 0.01,
+    "stemRake": 0.02,
+    "sternRake": 0.02,
+    "strakes": 44,
+    "copper": false,
+    "copperAge": 0.55,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": true,
+    "topside": "#1d1d1f",
+    "bowsprit": 0.0,
+    "steeve": 22,
+    "masts": [
+     {
+      "at": 0.175,
+      "heightM": 40.0,
+      "rig": "pole",
+      "rake": 9.46,
+      "shrouds": 0,
+      "crowsNest": true
+     },
+     {
+      "at": 0.878,
+      "heightM": 40.0,
+      "rig": "pole",
+      "rake": 9.46,
+      "shrouds": 0
+     }
+    ],
+    "build": "steel",
+    "loa": 345.0,
+    "lwl": 328.0,
+    "beam": 41.0,
+    "draught": 10.3,
+    "freeboard": 22.0,
+    "cm": 0.95,
+    "transom": 0.22,
+    "funnels": 1,
+    "decks": 13,
+    "portholes": true,
+    "mastLivery": "buff",
+    "houseAt": [
+     0.202,
+     0.849
+    ],
+    "funnelH": 19.0,
+    "funnelAt": [
+     0.335,
+     0.445,
+     0.555,
+     0.665
+    ],
+    "year": 2003,
+    "shellTiers": 1,
+    "wellM": 15.2,
+    "mastTopM": 62.5,
+    "buff": "#c9a267",
+    "funnelRake": 9.46
+   },
+   "rows": [
+    [
+     "Built",
+     "Chantiers de l'Atlantique, Saint-Nazaire, 2003"
+    ],
+    [
+     "Service speed",
+     "26 knots, with over 29 available — a cruise ship makes 22"
+    ],
+    [
+     "Hull",
+     "plating up to twice cruise-ship thickness; a true forecastle and flared bow"
+    ],
+    [
+     "Crossing",
+     "Southampton to New York, about 7 days"
+    ],
+    [
+     "Distinction",
+     "the only ocean liner in service, as opposed to cruise ship"
+    ]
+   ],
+   "text": "Queen Mary 2 entered service in 2004 and is the only ocean liner still in scheduled service. The distinction from a cruise ship is structural rather than commercial. A liner is built to hold a schedule across the North Atlantic in winter, which requires speed in a seaway and a hull that can take it: she has a long, fine, flared bow with a real forecastle, shell plating up to about twice the thickness of a comparable cruise ship's, and a service speed of 26 knots against the 22 a cruise ship makes.\n\nHer propulsion is four azimuthing pods, two fixed and two steerable, fed by diesel-electric and gas-turbine plant — an arrangement that gives her the power for the crossing without the shaft lines a hull of that fineness has no room for.\n\nShe is the last of the type. The transatlantic liner was killed by the jet within a decade of 1958, and everything built since for that water has been built to cruise. That one ship is still constructed to cross it is why she belongs at the end of this fleet.",
+   "cite": "Cunard; Payne, *From Track to Trestle* and Chantiers de l'Atlantique specifications."
   }
  ],
  "rigs": {

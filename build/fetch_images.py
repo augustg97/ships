@@ -59,6 +59,10 @@ PLATES = {
   'longship':       ('File:Osebergskipet 2016.jpg', 'The Oseberg ship, buried about 834 and raised in 1904'),
   'treasure-ship':  ('File:Zheng He Treasure Ship Model (15829289311).jpg', 'A reconstruction model of a treasure ship — her true size is contested'),
   'slave-ship':     ('File:Brookes slave ship, British Library.jpg', 'The Brookes stowage diagram, 1788, published by abolitionists as evidence'),
+  'ever-given':     ('File:EVER GIVEN (49643352087).jpg', 'Ever Given under way — 20,124 TEU on 399.94 m'),
+  'azzam':          ('File:Azzam bei Lürssen.JPG', 'Azzam, the longest private motor yacht built'),
+  'endurance':      ('File:Endurance trapped in pack ice.jpg', "Endurance beset in the Weddell Sea pack, photographed by Frank Hurley"),
+  'queen-mary-2':   ('File:Hamburg, Hafen, Kreuzfahrtschiff -Queen Mary 2- -- 2016 -- 3050.jpg', 'Queen Mary 2 — the only ocean liner in scheduled service'),
   'usv':            ('File:U.S. Navy Saildrone Explorer unmanned surface vessel sails in the Gulf of Aqaba on 6 February 2022 (220206-N-KZ419-1151).JPG', 'A Saildrone Explorer under way — no crew aboard'),
 }
 

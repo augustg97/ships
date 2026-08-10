@@ -383,6 +383,70 @@
     "web/data/assets/fonts/source-serif-4/SourceSerif4-var.woff2",
     "web/data/assets/fonts/source-serif-4/SourceSerif4-Italic-var.woff2"
    ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "azzam",
+   "type": "ships",
+   "name": "File:Azzam bei Lürssen.JPG",
+   "caption": "Azzam, the longest private motor yacht built",
+   "licence": "CC BY-SA 3.0",
+   "authors": {
+    "ChrisKarsten": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Azzam_bei_L%C3%BCrssen.JPG",
+   "files": [
+    "web/data/assets/ships/azzam.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "endurance",
+   "type": "ships",
+   "name": "File:Endurance trapped in pack ice.jpg",
+   "caption": "Endurance beset in the Weddell Sea pack, photographed by Frank Hurley",
+   "licence": "Public domain",
+   "authors": {
+    "Frank Hurley": "All"
+   },
+   "credit": "https://nla.gov.au/nla.obj-158918644/",
+   "url": "https://commons.wikimedia.org/wiki/File:Endurance_trapped_in_pack_ice.jpg",
+   "files": [
+    "web/data/assets/ships/endurance.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "ever-given",
+   "type": "ships",
+   "name": "File:EVER GIVEN (49643352087).jpg",
+   "caption": "Ever Given under way — 20,124 TEU on 399.94 m",
+   "licence": "CC BY-SA 2.0",
+   "authors": {
+    "kees torn": "All"
+   },
+   "credit": "EVER GIVEN",
+   "url": "https://commons.wikimedia.org/wiki/File:EVER_GIVEN_(49643352087).jpg",
+   "files": [
+    "web/data/assets/ships/ever-given.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "queen-mary-2",
+   "type": "ships",
+   "name": "File:Hamburg, Hafen, Kreuzfahrtschiff -Queen Mary 2- -- 2016 -- 3050.jpg",
+   "caption": "Queen Mary 2 — the only ocean liner in scheduled service",
+   "licence": "CC BY-SA 4.0",
+   "authors": {
+    "Dietmar Rabich": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Hamburg,_Hafen,_Kreuzfahrtschiff_-Queen_Mary_2-_--_2016_--_3050.jpg",
+   "files": [
+    "web/data/assets/ships/queen-mary-2.jpg"
+   ]
   }
  ]
 }

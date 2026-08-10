@@ -1,286 +1,212 @@
-/* Ships — the chrome around the ocean.
- *
- * The register is an Admiralty chart at night. Deep sea-black ground; chart-cream ink;
- * verdigris (the colour copper sheathing goes after a season in salt water) for structure;
- * brass for the things you turn. Nothing is neon and nothing is grey.
- *
- * TYPOGRAPHY follows chart convention rather than web convention: on a real chart, WATER is
- * lettered in italic and LAND is lettered in roman, and that distinction is used here — sea
- * areas, voyages and vessels are italic serif; ports, structures and controls are roman, in
- * letterspaced small capitals. It is a real convention doing real work, not decoration.
- */
-
-/* ⚠ THE SERIF IS VENDORED, AND THAT IS A CAPTURE-DETERMINISM DECISION, NOT A STYLE ONE.
- * With an all-system stack (Iowan Old Style et al.) the frame harness photographed whatever
- * the machine's rasteriser did on a cold start, and globe-default flapped ~1% of pixels in
- * label halos — a false RED the handoff carried from round 28. A font we serve is the same
- * bytes on every machine, and document.fonts genuinely governs its arrival (app.js
- * markReady). Candidate chosen by A/B against the committed globe-default baseline, not by
- * eye — see HANDOFF round 57. Files + licence: web/data/assets/fonts/, ASSETS.json (OFL). */
 @font-face{font-family:"Ships Serif";
-  src:url("../data/assets/fonts/source-serif-4/SourceSerif4-var.woff2") format("woff2");
-  font-weight:200 900;font-style:normal;font-display:block}
+src:url("../data/assets/fonts/source-serif-4/SourceSerif4-var.woff2") format("woff2");
+font-weight:200 900;font-style:normal;font-display:block}
 @font-face{font-family:"Ships Serif";
-  src:url("../data/assets/fonts/source-serif-4/SourceSerif4-Italic-var.woff2") format("woff2");
-  font-weight:200 900;font-style:italic;font-display:block}
-
+src:url("../data/assets/fonts/source-serif-4/SourceSerif4-Italic-var.woff2") format("woff2");
+font-weight:200 900;font-style:italic;font-display:block}
 :root{
-  /* ── DAYLIGHT, AND IT IS THE MORE AUTHENTIC REGISTER OF THE TWO ─────────────────────
-     The file's opening note calls this an Admiralty chart at night. A real chart is printed
-     on buff paper in dark ink and read in daylight, so this is the chart itself rather than
-     a screen imitating one — and the ocean, which is the subject, now sits DARK against a
-     light ground instead of dark against dark, which is why the water reads better here.
-     Every colour below is the old palette's role, re-solved for a light ground: the same
-     verdigris and brass doing the same jobs, at the contrast a pale page needs. */
-  --abyss:#efeade;        /* the page: warm chart paper, and the space behind the globe */
-  --deep:#e0d9c7;
-  --shelf:#cbc2aa;
-  --ink:#1a2730;          /* chart ink */
-  --ink-dim:#4b5b63;
-  --ink-faint:#7b8990;
-  --verdigris:#2b6a5f;    /* copper after a season in salt water — darkened for a light page */
-  --verdigris-dim:#83b4a9;
-  --brass:#8a6820;
-  --brass-dim:#c6a968;
-  --signal:#b2381c;       /* the only warm accent: battles, warnings */
-  --foam:#ffffff;
-
-  --panel:rgba(252,249,242,.93);
-  --panel-solid:#fbf8f1;
-  --edge:rgba(43,106,95,.30);
-  --edge-strong:rgba(43,106,95,.55);
-
-  --serif:"Ships Serif","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
-  --sans:ui-sans-serif,-apple-system,"Helvetica Neue","Arial Narrow",Arial,sans-serif;
+--abyss:#efeade;
+--deep:#e0d9c7;
+--shelf:#cbc2aa;
+--ink:#1a2730;
+--ink-dim:#4b5b63;
+--ink-faint:#7b8990;
+--verdigris:#2b6a5f;
+--verdigris-dim:#83b4a9;
+--brass:#8a6820;
+--brass-dim:#c6a968;
+--signal:#b2381c;
+--foam:#ffffff;
+--panel:rgba(252,249,242,.93);
+--panel-solid:#fbf8f1;
+--edge:rgba(43,106,95,.30);
+--edge-strong:rgba(43,106,95,.55);
+--serif:"Ships Serif","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+--sans:ui-sans-serif,-apple-system,"Helvetica Neue","Arial Narrow",Arial,sans-serif;
 }
-
-
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--abyss);
-  color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
-
-/* A canvas is a REPLACED element. Size it in CSS units that do not depend on layout, or the
-   width attribute and the CSS width chase each other: 1280 -> 2560 -> 5120. */
+color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
 #gl{position:fixed;top:0;left:0;width:100vw;height:100vh;display:block;touch-action:none}
-
-/* chart labels drawn over the globe — typography, not symbols */
 #labels{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
 .lbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
-  /* ⚠ THESE SIT ON THE GLOBE, NOT ON THE PAGE. Turning the chrome to daylight and taking the
-     labels with it put dark ink on a dark ocean with a pale halo — illegible, and the one
-     element where inverting was wrong. Chart lettering over water stays light with a dark
-     halo, because what is behind it is water. */
-  text-shadow:0 0 5px rgba(6,14,22,.92),0 0 12px rgba(6,14,22,.8);pointer-events:auto;
-  cursor:pointer;transition:opacity .35s ease}
+text-shadow:0 0 5px rgba(6,14,22,.92),0 0 12px rgba(6,14,22,.8);pointer-events:auto;
+cursor:pointer;transition:opacity .35s ease}
 .lbl.port{font-family:var(--sans);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
-  color:#cfd9dd}
+color:#cfd9dd}
 .lbl.port:hover{color:var(--brass)}
 .lbl.port.major{font-size:10.5px;color:#f2f6f7;letter-spacing:.17em}
 .lbl.sea{font-family:var(--serif);font-style:italic;font-size:12.5px;letter-spacing:.22em;
-  color:rgba(206,220,224,.72);text-transform:uppercase;pointer-events:none}
+color:rgba(206,220,224,.72);text-transform:uppercase;pointer-events:none}
 .lbl.battle{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-  color:#ff8b6a}
+color:#ff8b6a}
 .lbl.battle:hover{color:#f0836a}
 .lbl .tick{display:block;width:1px;height:7px;background:currentColor;opacity:.55;margin:2px auto 0}
-
 .panel{position:fixed;background:var(--panel);border:1px solid var(--edge);
-  backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
-  box-shadow:0 10px 34px rgba(26,39,48,.16)}
+backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
+box-shadow:0 10px 34px rgba(26,39,48,.16)}
 .hidden{display:none!important}
-
 button{font-family:var(--sans);cursor:pointer}
 .mini{background:transparent;border:1px solid var(--edge);color:var(--ink-dim);
-  font-size:10px;letter-spacing:.14em;padding:5px 10px;text-transform:uppercase}
+font-size:10px;letter-spacing:.14em;padding:5px 10px;text-transform:uppercase}
 .mini:hover{color:var(--brass);border-color:var(--brass-dim);background:rgba(216,180,92,.06)}
 .mini.on{color:var(--abyss);background:var(--brass);border-color:var(--brass)}
 .x{position:absolute;top:9px;right:10px;background:none;border:0;color:var(--ink-faint);
-  font-size:21px;line-height:1;padding:2px 6px}
+font-size:21px;line-height:1;padding:2px 6px}
 .x:hover{color:var(--ink)}
 h3.rule{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--verdigris);
-  margin:15px 0 8px;font-weight:600;display:flex;align-items:center;gap:9px}
+margin:15px 0 8px;font-weight:600;display:flex;align-items:center;gap:9px}
 h3.rule::after{content:"";flex:1;height:1px;background:var(--edge)}
 h3.rule:first-child{margin-top:0}
-
-/* ── splash ─────────────────────────────────────────────────── */
 #splash{position:fixed;inset:0;background:var(--abyss);z-index:90;display:flex;
-  align-items:center;justify-content:center;transition:opacity .8s ease}
+align-items:center;justify-content:center;transition:opacity .8s ease}
 #splash.gone{opacity:0;pointer-events:none}
 .sp-inner{text-align:center;max-width:460px;padding:0 24px}
 .sp-inner h1{font-family:var(--serif);font-size:66px;margin:0;letter-spacing:.2em;
-  font-weight:400;color:var(--ink);text-indent:.2em}
+font-weight:400;color:var(--ink);text-indent:.2em}
 .sp-inner .sub{font-family:var(--serif);font-style:italic;color:var(--verdigris);
-  margin:6px 0 34px;font-size:16px;letter-spacing:.06em}
+margin:6px 0 34px;font-size:16px;letter-spacing:.06em}
 .bar{height:1px;background:rgba(95,179,161,.18)}
 .bar i{display:block;height:100%;width:0;background:var(--verdigris);transition:width .3s}
 .note{color:var(--ink-faint);font-size:10.5px;letter-spacing:.12em;margin-top:14px;
-  text-transform:uppercase}
-
-/* ── readout ────────────────────────────────────────────────── */
+text-transform:uppercase}
 #readout{top:16px;left:16px;padding:12px 16px 13px;min-width:210px;max-width:262px}
 .ro-era{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--verdigris)}
 .ro-date{font-family:var(--serif);font-size:27px;margin:2px 0 8px;letter-spacing:.03em;
-  font-style:italic}
+font-style:italic}
 .ro-stats{font-size:11.5px;line-height:1.7;color:var(--ink-dim)}
 .ro-stats b{color:var(--brass);font-weight:600}
-/* provenance, printed under every metric: sourced — <who>, or derived — <how>. Rule 10 says a
-   number with no provenance is worse than an empty readout, so the label is part of the row. */
 .ro-stats .prov{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-faint);line-height:1.5}
+color:var(--ink-faint);line-height:1.5}
 .ro-stats .py{color:var(--ink-faint);font-size:10px}
 .ro-stats .unrec{color:var(--ink-faint);font-style:italic}
-
-/* ── right rail ─────────────────────────────────────────────── */
 #rail{top:16px;right:16px;padding:0;width:252px;overflow:hidden}
 .rail-body{padding:13px 16px 16px}
 .rail-body label{display:flex;align-items:center;gap:9px;font-size:11.5px;
-  color:var(--ink-dim);padding:3.5px 0;cursor:pointer;letter-spacing:.03em}
+color:var(--ink-dim);padding:3.5px 0;cursor:pointer;letter-spacing:.03em}
 .rail-body label:hover{color:var(--ink)}
 .rail-body input[type=checkbox]{accent-color:var(--verdigris);width:12px;height:12px;margin:0}
 input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 .mrow{display:flex;align-items:center;justify-content:space-between;gap:8px;
-  font-size:11px;color:var(--ink-dim);letter-spacing:.05em}
+font-size:11px;color:var(--ink-dim);letter-spacing:.05em}
 .mrow .mn{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink)}
-
-/* ── card ───────────────────────────────────────────────────── */
-/* ⚠ THE TOP AND THE FOOT ARE BOTH MEASURED, NOT ASSUMED — see syncPanelInsets() in app.js.
-   top:150 ran the card under the ship's slip whenever the close-up was open, and
-   max-height:calc(100vh - 290px) ran its foot 26 px under the era strip that carries the year.
-   The fallbacks below are the old constants, so the card is still sane if the script has not
-   run yet; once it has, both numbers come from the panels actually on screen. */
 #card{left:16px;top:var(--card-top,150px);width:352px;
-  max-height:calc(100vh - var(--card-top,150px) - var(--erabar-h,140px) - 28px);
-  overflow-y:auto;padding:16px 18px 18px}
+max-height:calc(100vh - var(--card-top,150px) - var(--erabar-h,140px) - 28px);
+overflow-y:auto;padding:16px 18px 18px}
 .c-eyebrow{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--verdigris)}
 #card h2{font-family:var(--serif);font-size:26px;font-weight:400;margin:4px 0 1px;
-  line-height:1.14;font-style:italic}
+line-height:1.14;font-style:italic}
 .c-sub{font-family:var(--sans);color:var(--ink-faint);font-size:10px;margin-bottom:12px;
-  letter-spacing:.16em;text-transform:uppercase}
+letter-spacing:.16em;text-transform:uppercase}
 .c-rows{border-top:1px solid var(--edge);padding-top:10px;margin-bottom:12px}
 .c-rows div{display:flex;justify-content:space-between;gap:14px;font-size:11.5px;padding:3px 0;
-  border-bottom:1px dotted rgba(95,179,161,.14)}
+border-bottom:1px dotted rgba(95,179,161,.14)}
 .c-rows .k{color:var(--ink-faint);flex:0 0 auto;letter-spacing:.04em}
 .c-rows .v{color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
-/* ⚠ #d6cfbc IS CREAM — it was the reading colour on a dark panel, and on a light one it is
-   the washed-out text August photographed. The body of a card is the thing you are meant to
-   read; it takes the ink colour, not a dimmed one. */
 .c-prose{font-family:var(--serif);font-size:14px;line-height:1.66;color:var(--ink)}
 .c-prose p{margin:0 0 10px}
 .c-prose b{color:var(--brass)}
 .c-span{font-size:10px;color:var(--ink-faint);letter-spacing:.06em;margin-top:10px;
-  font-style:italic}
+font-style:italic}
 .c-cite{font-size:10px;color:var(--ink-faint);margin-top:9px;border-top:1px solid var(--edge);
-  padding-top:9px;line-height:1.55}
+padding-top:9px;line-height:1.55}
 .tag{display:inline-block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
-  border:1px solid var(--edge);padding:2px 6px;margin:0 5px 6px 0;color:var(--ink-faint)}
+border:1px solid var(--edge);padding:2px 6px;margin:0 5px 6px 0;color:var(--ink-faint)}
 .tag.contested{color:var(--signal);border-color:rgba(208,86,58,.42)}
 .tag.generated{color:var(--verdigris);border-color:var(--edge-strong)}
 .tag.attested{color:var(--brass);border-color:var(--brass-dim)}
-
-/* ── the era bar, which replaced the linear scrubber ────────── */
 #eras{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;
-  width:min(1120px,calc(100vw - 32px));z-index:30}
+width:min(1120px,calc(100vw - 32px));z-index:30}
 .era-strip{display:flex;gap:1px;background:var(--edge);border:1px solid var(--edge)}
 .era{flex:1 1 0;background:var(--panel-solid);border:0;padding:9px 7px 8px;text-align:left;
-  cursor:pointer;position:relative;overflow:hidden;transition:background .25s}
+cursor:pointer;position:relative;overflow:hidden;transition:background .25s}
 .era:hover{background:#0b2233}
 .era.on{background:#0f2e42}
 .era.on::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;
-  background:var(--brass)}
+background:var(--brass)}
 .era .en{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-dim);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+color:var(--ink-dim);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .era.on .en{color:var(--brass)}
 .era .ey{display:block;font-family:var(--serif);font-style:italic;font-size:10.5px;
-  color:var(--ink-faint);margin-top:2px;white-space:nowrap}
+color:var(--ink-faint);margin-top:2px;white-space:nowrap}
 .era.on .ey{color:var(--ink-dim)}
-
 .era-detail{background:var(--panel);border:1px solid var(--edge);border-top:0;
-  padding:11px 16px 12px;display:flex;align-items:center;gap:16px;
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+padding:11px 16px 12px;display:flex;align-items:center;gap:16px;
+backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .era-detail .txt{flex:1;min-width:0}
 .era-detail .hd{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);
-  margin-bottom:2px}
+margin-bottom:2px}
 .era-detail .sm{font-size:11px;color:var(--ink-dim);line-height:1.5}
 .era-detail .yr{display:flex;align-items:center;gap:10px;flex:0 0 300px}
 .era-detail .yr input{flex:1}
 .era-detail .ylab{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--brass);
-  min-width:84px;text-align:right;font-variant-numeric:tabular-nums}
-
-/* ── voyage chooser ─────────────────────────────────────────── */
+min-width:84px;text-align:right;font-variant-numeric:tabular-nums}
 #voyages{position:fixed;right:16px;top:calc(16px + 330px);width:252px;padding:13px 16px 15px;
-  max-height:calc(100vh - 430px);overflow-y:auto}
+max-height:calc(100vh - 430px);overflow-y:auto}
 .voy{display:block;width:100%;text-align:left;background:transparent;border:0;
-  border-bottom:1px dotted rgba(95,179,161,.16);padding:7px 0;cursor:pointer;color:var(--ink-dim)}
+border-bottom:1px dotted rgba(95,179,161,.16);padding:7px 0;cursor:pointer;color:var(--ink-dim)}
 .voy:hover{color:var(--ink)}
 .voy.on{color:var(--brass)}
 .voy .vn{display:block;font-family:var(--serif);font-style:italic;font-size:13.5px;
-  line-height:1.25}
+line-height:1.25}
 .voy .vy{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-faint);margin-top:2px}
+color:var(--ink-faint);margin-top:2px}
 .voy.on .vy{color:var(--verdigris)}
-
-/* ── the yard: a vessel rendered ────────────────────────────── */
 #yard{position:fixed;inset:0;z-index:60;background:linear-gradient(#04101a,#020609);
-  display:flex;flex-direction:column}
+display:flex;flex-direction:column}
 #yardCanvas{flex:1;width:100%;display:block}
 #yardBar{position:absolute;left:0;right:0;bottom:0;padding:14px 20px 16px;
-  background:linear-gradient(transparent,rgba(239,234,222,.94) 38%);display:flex;gap:20px;
-  align-items:flex-end}
+background:linear-gradient(transparent,rgba(239,234,222,.94) 38%);display:flex;gap:20px;
+align-items:flex-end}
 #yardBar .meta{flex:1;min-width:0}
 #yardBar h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:30px;
-  margin:0 0 3px;color:var(--ink)}
+margin:0 0 3px;color:var(--ink)}
 #yardBar .sub{font-size:10px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--verdigris);margin-bottom:9px}
+color:var(--verdigris);margin-bottom:9px}
 #yardBar .dims{display:flex;gap:22px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-dim)}
 #yardBar .dims b{color:var(--ink);font-variant-numeric:tabular-nums;display:block;
-  font-size:15px;font-family:var(--serif);font-weight:400}
+font-size:15px;font-family:var(--serif);font-weight:400}
 #yardBar .dims span{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-faint);margin-top:1px}
+color:var(--ink-faint);margin-top:1px}
 #yardCtl{display:flex;flex-direction:column;gap:7px;align-items:flex-end}
 #yardClose{position:absolute;top:16px;right:18px;z-index:2}
 #yardNote{position:absolute;top:18px;left:20px;font-size:10px;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--ink-faint);max-width:340px;line-height:1.7}
-
-/* ── about sheet ────────────────────────────────────────────── */
+text-transform:uppercase;color:var(--ink-faint);max-width:340px;line-height:1.7}
 .sheet{position:fixed;inset:0;background:rgba(247,244,236,.975);z-index:70;overflow-y:auto;
-  backdrop-filter:blur(7px)}
+backdrop-filter:blur(7px)}
 .sheet-in{max-width:730px;margin:0 auto;padding:60px 26px 96px;font-family:var(--serif);
-  font-size:15px;line-height:1.7;color:#cdc6b3}
+font-size:15px;line-height:1.7;color:#cdc6b3}
 .sheet-in h2{font-size:32px;font-weight:400;margin:38px 0 10px;color:var(--ink);font-style:italic}
 .sheet-in h2:first-child{margin-top:0}
 .sheet-in h3{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--verdigris);
-  margin:28px 0 8px;font-family:var(--sans);font-weight:600}
+margin:28px 0 8px;font-family:var(--sans);font-weight:600}
 .sheet-in p{margin:0 0 14px}
 .sheet-in b{color:var(--brass)}
 .sheet-in .lede{font-size:18.5px;color:var(--ink);line-height:1.55}
 .sheet-in ul{padding-left:19px;margin:0 0 14px}
 .sheet-in li{margin-bottom:7px}
 .sheet-in table{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:12.5px;
-  margin:6px 0 18px}
+margin:6px 0 18px}
 .sheet-in th,.sheet-in td{text-align:left;padding:6px 10px 6px 0;
-  border-bottom:1px solid rgba(95,179,161,.14);vertical-align:top}
+border-bottom:1px solid rgba(95,179,161,.14);vertical-align:top}
 .sheet-in th{color:var(--verdigris);font-weight:600;font-size:9.5px;letter-spacing:.15em;
-  text-transform:uppercase}
-
+text-transform:uppercase}
 #hover{position:fixed;pointer-events:none;z-index:65;background:rgba(7,21,34,.95);
-  border:1px solid var(--edge);padding:5px 9px;font-size:11px;color:var(--ink);display:none;
-  white-space:nowrap;letter-spacing:.05em}
-
+border:1px solid var(--edge);padding:5px 9px;font-size:11px;color:var(--ink);display:none;
+white-space:nowrap;letter-spacing:.05em}
 @media (max-width:980px){
-  #rail{width:auto;right:16px;max-width:230px}
-  #voyages{display:none}
-  #card{left:16px;right:16px;width:auto;top:auto;bottom:150px;max-height:38vh}
-  #readout{min-width:0;max-width:180px;padding:9px 12px 10px}
-  .ro-date{font-size:21px}
-  .era .ey{display:none}
-  .era-detail{flex-direction:column;align-items:stretch;gap:9px}
-  .era-detail .yr{flex:1 1 auto}
-  .sp-inner h1{font-size:46px}
+#rail{width:auto;right:16px;max-width:230px}
+#voyages{display:none}
+#card{left:16px;right:16px;width:auto;top:auto;bottom:150px;max-height:38vh}
+#readout{min-width:0;max-width:180px;padding:9px 12px 10px}
+.ro-date{font-size:21px}
+.era .ey{display:none}
+.era-detail{flex-direction:column;align-items:stretch;gap:9px}
+.era-detail .yr{flex:1 1 auto}
+.sp-inner h1{font-size:46px}
 }
-
-
-/* ── the campaign bar ─────────────────────────────────────────────────────────────────── */
 #campBar{position:fixed;left:50%;transform:translateX(-50%);top:18px;width:min(560px,86vw);
-  padding:13px 16px 14px;z-index:32}
+padding:13px 16px 14px;z-index:32}
 #campBar.hidden{display:none}
 .cb-head{display:flex;align-items:baseline;gap:14px}
 .cb-day{font-family:var(--serif);font-size:20px;letter-spacing:.01em;color:var(--ink)}
@@ -288,47 +214,32 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 .cb-wind b{color:var(--ink);letter-spacing:.06em}
 #campBar .x{margin-left:auto;position:static}
 .gauge{margin:8px 0 7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-  padding:3px 9px;border-radius:2px;display:inline-block}
+padding:3px 9px;border-radius:2px;display:inline-block}
 .gauge.eng{color:#bfe3f0;background:rgba(134,199,216,.13);border:1px solid rgba(134,199,216,.34)}
 .gauge.esp{color:#f0d9a8;background:rgba(217,164,65,.13);border:1px solid rgba(217,164,65,.34)}
 .cb-text{font-size:13.5px;line-height:1.55;color:var(--ink-dim)}
-
-
-/* ── the shipwright ───────────────────────────────────────────────────────────────────── */
 #shipwright{position:fixed;inset:0;z-index:60;background:var(--abyss)}
 #shipwright.hidden{display:none}
 #swCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 #swCanvas:active{cursor:grabbing}
 #swClose{position:absolute;top:16px;right:18px;z-index:3}
-/* ⚠ AND IT HAD NO HEIGHT LIMIT AT ALL. With a long account — the ship of the line's runs to
-   four paragraphs — the panel simply grew past the bottom of the window and the text was cut
-   off mid-sentence with no way to reach the rest. It reads as a rendering fault rather than as
-   a scroll, because nothing indicates there is more. Bounded now, and it has to be: the plate
-   above the text makes every one of these panels taller. */
 #swLeft{position:absolute;top:16px;left:18px;width:min(330px,32vw);z-index:3;
-  max-height:calc(100vh - 82px - 116px);overflow-y:auto;
-  scrollbar-width:thin;scrollbar-color:rgba(138,104,32,.40) rgba(26,39,48,.06);
-  background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:15px 17px 16px}
+max-height:calc(100vh - 82px - 116px);overflow-y:auto;
+scrollbar-width:thin;scrollbar-color:rgba(138,104,32,.40) rgba(26,39,48,.06);
+background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:15px 17px 16px}
 #swLeft::-webkit-scrollbar{width:8px}
 #swLeft::-webkit-scrollbar-track{background:rgba(26,39,48,.06)}
 #swLeft::-webkit-scrollbar-thumb{background:rgba(138,104,32,.42);border-radius:4px}
-
-/* ── the plate: the real ship, above the account of her ─────────────────────────────── */
 .plate{margin:0 0 14px;padding:0}
-/* ⚠ CAPPED, OR THE PHOTOGRAPH EATS THE CARD. At full width a 3:2 plate is ~220 px tall in a
-   330 px panel, which pushed "What she was" below the fold on every ship — the account of her
-   was still there and still scrollable, but the thing you came to read was off screen. A ship
-   photographed broadside survives a crop far better than a portrait would: the interesting
-   part is the length, and the length is what a letterbox keeps. */
 .plate img{display:block;width:100%;height:auto;max-height:154px;object-fit:cover;
-  object-position:center;border:1px solid var(--edge);border-radius:2px;background:#e6e0d2}
+object-position:center;border:1px solid var(--edge);border-radius:2px;background:#e6e0d2}
 .plate figcaption{font-size:10.5px;line-height:1.5;color:var(--ink-faint);margin-top:6px;
-  font-style:italic}
+font-style:italic}
 .plate .cr{display:block;font-style:normal;font-size:9.5px;letter-spacing:.06em;
-  color:rgba(107,120,127,.85);margin-top:3px}
+color:rgba(107,120,127,.85);margin-top:3px}
 #swLeft h2{font-family:var(--serif);font-size:25px;font-style:italic;margin:0 0 3px;color:var(--ink)}
 #swLeft .sub{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--verdigris);
-  margin-bottom:12px}
+margin-bottom:12px}
 #swLeft .dims{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-bottom:13px}
 #swLeft .dims div{display:flex;flex-direction:column}
 #swLeft .dims b{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--ink)}
@@ -336,106 +247,89 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swPart{border-top:1px solid var(--edge);padding-top:12px;min-height:132px}
 #swPart .ph{font-size:12.5px;color:var(--ink-faint);font-style:italic}
 #swPart .pk{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
-  margin-bottom:5px}
+margin-bottom:5px}
 #swPart h3{font-family:var(--serif);font-size:19px;margin:0 0 7px;color:var(--ink);font-weight:400}
 #swPart p{font-size:12.5px;line-height:1.58;color:var(--ink-dim);margin:0}
 #swBuild{position:absolute;left:50%;transform:translateX(-50%);bottom:118px;z-index:3;
-  width:min(520px,74vw);background:var(--panel);border:1px solid var(--edge);border-radius:3px;
-  padding:12px 16px 13px}
+width:min(520px,74vw);background:var(--panel);border:1px solid var(--edge);border-radius:3px;
+padding:12px 16px 13px}
 #swBuild .bh{display:flex;align-items:baseline;gap:12px;margin-bottom:7px}
 #swBuild .bh span:first-child{font-family:var(--serif);font-size:18px;color:var(--ink)}
 #swBuild .ord{margin-left:auto;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--verdigris)}
+color:var(--verdigris)}
 #swBuild input[type=range]{width:100%}
 #swBuild .bw{font-size:12px;line-height:1.5;color:var(--ink-dim);margin-top:7px;min-height:34px}
 #swFleet{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;gap:0;
-  background:linear-gradient(0deg,rgba(239,234,222,.97),rgba(239,234,222,.62));
-  border-top:1px solid var(--edge);overflow-x:auto;padding:9px 10px 5px;
-  /* ⚠ ALWAYS-VISIBLE SCROLLBAR. The strip is 2.6 m of hulls in a window that shows nineteen
-     of them, and it has always scrolled — but macOS draws overlay scrollbars only while they
-     are in motion, so the remaining ships were reachable and invisible. A bar that is drawn
-     when the strip is at rest is the whole difference between "there is more" and "that is
-     all of it". Firefox takes the two standard properties; WebKit needs its own pseudos. */
-  scrollbar-width:thin;scrollbar-color:rgba(138,104,32,.45) rgba(26,39,48,.07);
-  scroll-behavior:smooth;overscroll-behavior-x:contain}
+background:linear-gradient(0deg,rgba(239,234,222,.97),rgba(239,234,222,.62));
+border-top:1px solid var(--edge);overflow-x:auto;padding:9px 10px 5px;
+scrollbar-width:thin;scrollbar-color:rgba(138,104,32,.45) rgba(26,39,48,.07);
+scroll-behavior:smooth;overscroll-behavior-x:contain}
 #swFleet::-webkit-scrollbar{height:9px}
 #swFleet::-webkit-scrollbar-track{background:rgba(26,39,48,.07);border-radius:5px}
 #swFleet::-webkit-scrollbar-thumb{background:rgba(138,104,32,.45);border-radius:5px}
 #swFleet::-webkit-scrollbar-thumb:hover{background:rgba(138,104,32,.72)}
 .fs{flex:0 0 auto;width:104px;background:none;border:0;border-right:1px solid rgba(95,179,161,.12);
-  padding:5px 9px 6px;text-align:left;cursor:pointer;color:inherit}
+padding:5px 9px 6px;text-align:left;cursor:pointer;color:inherit}
 .fs:hover{background:rgba(95,179,161,.07)}
 .fs.on{background:rgba(216,180,92,.11)}
 .fs i{display:block;height:5px;background:var(--verdigris-dim);border-radius:1px;margin-bottom:6px;
-  min-width:3px}
+min-width:3px}
 .fs.on i{background:var(--brass)}
 .fs .n{display:block;font-size:10.5px;line-height:1.3;color:var(--ink-dim);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fs .l{display:block;font-family:var(--serif);font-size:12.5px;color:var(--ink-faint);margin-top:2px}
 .fs.on .n{color:var(--ink)}
-
-
-/* ── the action ───────────────────────────────────────────────────────────────────────── */
 #battle{position:fixed;inset:0;z-index:62;background:#0b1720}
 #battle.hidden{display:none}
 #btCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
 #btCanvas:active{cursor:grabbing}
 #btClose{position:absolute;top:16px;right:18px;z-index:3}
 #btBar{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;z-index:3;
-  width:min(680px,88vw);background:var(--panel);border:1px solid var(--edge);border-radius:3px;
-  padding:13px 17px 14px}
+width:min(680px,88vw);background:var(--panel);border:1px solid var(--edge);border-radius:3px;
+padding:13px 17px 14px}
 #btBar .bh{display:flex;align-items:baseline;gap:14px;margin-bottom:9px}
 #btBar .d{font-family:var(--serif);font-size:21px;color:var(--ink)}
 #btBar .w{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--verdigris)}
 #btBar .w b{color:var(--ink);letter-spacing:.05em}
 #btBar .t{margin-left:auto;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-faint)}
+color:var(--ink-faint)}
 #btBar input[type=range]{width:100%}
 #btBar .bx{font-size:13px;line-height:1.55;color:var(--ink-dim);margin-top:9px;min-height:42px}
 #btBar .brow{display:flex;align-items:center;gap:12px;margin-bottom:9px}
 #btBar .rng{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--brass)}
-
-
-/* ── top-level tabs ───────────────────────────────────────────────────────────────────── */
 #tabs{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;justify-content:center;gap:0;
-  background:linear-gradient(180deg,rgba(239,234,222,.94),rgba(239,234,222,0));padding:0 0 16px;
-  pointer-events:none}
+background:linear-gradient(180deg,rgba(239,234,222,.94),rgba(239,234,222,0));padding:0 0 16px;
+pointer-events:none}
 #tabs .tab{pointer-events:auto;background:none;border:0;border-bottom:2px solid transparent;
-  padding:11px 22px 9px;cursor:pointer;color:inherit;text-align:center;font:inherit}
+padding:11px 22px 9px;cursor:pointer;color:inherit;text-align:center;font:inherit}
 #tabs .tab b{display:block;font-family:var(--serif);font-size:16px;font-weight:400;
-  color:var(--ink-faint);letter-spacing:.01em;transition:color .18s}
+color:var(--ink-faint);letter-spacing:.01em;transition:color .18s}
 #tabs .tab span{display:block;font-size:9px;letter-spacing:.15em;text-transform:uppercase;
-  color:transparent;margin-top:2px;transition:color .18s}
+color:transparent;margin-top:2px;transition:color .18s}
 #tabs .tab:hover b{color:var(--ink-dim)}
 #tabs .tab.on{border-bottom-color:var(--brass)}
 #tabs .tab.on b{color:var(--ink)}
 #tabs .tab.on span{color:var(--verdigris)}
-
-/* the tab bar sits above everything, so views that used the top-left corner move down */
 #readout{top:66px}
 #swLeft{top:66px}
-
-/* ── the Shipwright's own fleet list ──────────────────────────────────────────────────── */
 #swList{position:absolute;top:66px;right:18px;width:min(238px,25vw);z-index:3;
-  background:var(--panel);border:1px solid var(--edge);border-radius:3px;
-  max-height:calc(100vh - 250px);display:flex;flex-direction:column}
+background:var(--panel);border:1px solid var(--edge);border-radius:3px;
+max-height:calc(100vh - 250px);display:flex;flex-direction:column}
 #swList .hd{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--verdigris);
-  padding:12px 14px 9px;border-bottom:1px solid var(--edge)}
+padding:12px 14px 9px;border-bottom:1px solid var(--edge)}
 #swList .ls{overflow-y:auto;padding:5px 0 7px}
 .sv{display:block;width:100%;background:none;border:0;text-align:left;padding:7px 14px;
-  cursor:pointer;color:inherit;font:inherit;border-left:2px solid transparent}
+cursor:pointer;color:inherit;font:inherit;border-left:2px solid transparent}
 .sv:hover{background:rgba(95,179,161,.07)}
 .sv.on{background:rgba(216,180,92,.10);border-left-color:var(--brass)}
 .sv .n{display:block;font-family:var(--serif);font-size:14.5px;color:var(--ink-dim);line-height:1.25}
 .sv.on .n{color:var(--ink)}
 .sv .m{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--ink-faint);margin-top:2px}
-
-/* the Shipwright's left panel becomes a readable column; the part card floats free */
+color:var(--ink-faint);margin-top:2px}
 #swLeft{max-height:calc(100vh - 420px);overflow-y:auto}
 #swLeft .sect{border-top:1px solid var(--edge);padding-top:11px;margin-top:12px}
 #swLeft .sect h4{font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--verdigris);margin:0 0 7px;font-weight:400}
+color:var(--verdigris);margin:0 0 7px;font-weight:400}
 #swLeft .sect p{font-size:12.5px;line-height:1.62;color:var(--ink-dim);margin:0 0 9px}
 #swLeft .cap{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px}
 #swLeft .cap div{display:flex;flex-direction:column}
@@ -445,66 +339,43 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swLeft .rw i{flex:0 0 42%;font-style:normal;color:var(--ink-faint)}
 #swLeft .rw b{font-weight:400;color:var(--ink-dim)}
 #swLeft .cite{border-top:1px solid var(--edge);padding-top:9px;margin-top:12px;
-  font-size:10.5px;line-height:1.5;color:var(--ink-faint);font-style:italic}
+font-size:10.5px;line-height:1.5;color:var(--ink-faint);font-style:italic}
 #swPart{position:absolute;left:18px;bottom:104px;width:min(330px,32vw);z-index:4;
-  background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:13px 16px 14px;
-  border-top:0;min-height:0}
+background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:13px 16px 14px;
+border-top:0;min-height:0}
 #swPart.empty{opacity:.62}
-
-/* ── names along the line ─────────────────────────────────────────────────────────────── */
 #swLabels{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
 #swLabels .sl{position:absolute;transform:translate(-50%,0);text-align:center;white-space:nowrap;
-  transition:opacity .25s}
+transition:opacity .25s}
 #swLabels .sl b{display:block;font-family:var(--serif);font-size:13px;font-weight:400;
-  color:var(--ink-dim);letter-spacing:.01em}
+color:var(--ink-dim);letter-spacing:.01em}
 #swLabels .sl span{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--ink-faint);margin-top:1px}
+color:var(--ink-faint);margin-top:1px}
 #swLabels .sl.on b{color:var(--brass)}
 #swLabels .sl.on span{color:var(--verdigris)}
-
-/* ── stepping along the line ──────────────────────────────────────────────────────────── */
 #swNav{position:absolute;left:50%;transform:translateX(-50%);bottom:272px;z-index:5;
-  display:flex;align-items:center;gap:14px}
+display:flex;align-items:center;gap:14px}
 #swNav .mini{font-size:15px;line-height:1;padding:7px 16px;background:var(--panel);
-  border:1px solid var(--edge)}
+border:1px solid var(--edge)}
 #swNav .mini:hover{border-color:var(--edge-strong);color:var(--ink)}
 #swNavPos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
-  min-width:74px;text-align:center}
-
-/* ── the true-scale ruler ───────────────────────────────────────────────────────────────
-   ⚠ RIGHT, NOT LEFT. At left:24px/bottom:120px this was drawn INSIDE #swPart, which starts at
-   left:18px/bottom:104px and stands at least 132px tall — so the ruler occupied the part
-   panel's first line and "500 m" printed straight through "Click any timber, rope or sail."
-   Every committed Shipwright baseline had it. The right-hand column is the free one: #swList
-   is capped at calc(100vh - 250px) from a top of 66px, so it always stops 250px short of the
-   bottom, and a ruler ending ~150px up clears it at every viewport height. */
+min-width:74px;text-align:center}
 #swRuler{position:absolute;right:24px;bottom:120px;z-index:4;pointer-events:none;
-  display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+display:flex;flex-direction:column;gap:5px;align-items:flex-end}
 #swRuler i{display:block;height:9px;border:1px solid var(--edge-strong);border-top:0;
-  background:linear-gradient(90deg,rgba(216,180,92,.22),rgba(216,180,92,.05))}
+background:linear-gradient(90deg,rgba(216,180,92,.22),rgba(216,180,92,.05))}
 #swRuler b{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
-  font-weight:400}
-
-/* ── THE PASSAGE CARD ───────────────────────────────────────────────────────────────────
-   A chart-room slip, not a HUD. It sits where the era card sits so the eye does not have to
-   learn a new place, and it carries only what someone standing on that deck would want: which
-   ship, which passage, where she is and what she is steering. */
+font-weight:400}
 #psgCard {
-  /* top is measured, not assumed — see syncPanelInsets(). At a fixed 78px this sat on top
-     of #readout, which stands from 16px and runs past it. */
-  position: fixed; left: 22px; top: var(--psg-top, 78px); width: 292px; z-index: 55;
-  display: none; max-height: calc(100vh - var(--psg-top, 78px) - var(--erabar-h, 140px) - 28px);
-  overflow-y: auto;
-  /* ⚠ THIS PANEL MISSED THE INVERSION ENTIRELY. It was written before the shared .panel
-     class and carries its own colours, so the daylight pass — which went through the custom
-     properties — never touched it and the close-up kept the night theme in one box. Same
-     tokens as every other panel now, so it cannot fall out of step again. */
-  background: var(--panel); border: 1px solid var(--edge);
-  padding: 15px 17px 14px; color: var(--ink); backdrop-filter: blur(3px);
+position: fixed; left: 22px; top: var(--psg-top, 78px); width: 292px; z-index: 55;
+display: none; max-height: calc(100vh - var(--psg-top, 78px) - var(--erabar-h, 140px) - 28px);
+overflow-y: auto;
+background: var(--panel); border: 1px solid var(--edge);
+padding: 15px 17px 14px; color: var(--ink); backdrop-filter: blur(3px);
 }
 #psgBack {
-  display: block; margin: 0 0 11px; padding: 0; border: 0; background: none; cursor: pointer;
-  color: var(--ink-dim); font: inherit; font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
+display: block; margin: 0 0 11px; padding: 0; border: 0; background: none; cursor: pointer;
+color: var(--ink-dim); font: inherit; font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
 }
 #psgBack:hover { color: var(--ink); }
 #psgCard .pc-ship { font-size: 20px; font-style: italic; line-height: 1.15; margin-bottom: 2px; }
@@ -513,15 +384,4 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #psgCard .pc-rows td { padding: 3px 0; vertical-align: top; }
 #psgCard .pc-rows td:first-child { color: var(--ink-faint); padding-right: 12px; }
 #psgCard .pc-rows td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
-/* down among the shipping the globe's own controls are about a different scale of thing */
-/* ⚠ 0.28 WAS TUNED AGAINST A DARK GROUND, where a panel at that opacity still read as a
-   panel. On paper it fades to nearly nothing — the illegible voyage list August photographed
-   in the close-up. The intent is "these belong to a different scale of thing", which is a
-   recede, not a disappearance. */
 body.in-passage #layers, body.in-passage #voyList { opacity: .62; pointer-events: none; }
-/* the era card names a century; the passage card names a ship at a position. Both at once in
-   the same corner is two captions for one picture. */
-/* ⚠ THIS IS WHY THE VOYAGE CARD NEVER APPEARED IN THE CLOSE-UP. followShip calls
-   showVoyageCard, and it ran — into a display:none with !important on it. Going aboard is
-   exactly when the passage is worth reading about, and the card stacks below the ship's slip
-   already because syncPanelInsets measures the whole left column. */

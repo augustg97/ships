@@ -19,7 +19,7 @@ Run: python3 build_site.py
 from __future__ import annotations
 
 import json
-import os
+import os, sys
 import shutil
 import subprocess
 import sys
@@ -183,19 +183,26 @@ def gate_data():
         f"chapters {counts['chapters.json']} · battles {counts['battles.json']}")
 
 
-def gate_budget(man):
+def gate_budget(man, root=None):
+    """⚠ MEASURED ON WHAT IS SERVED, NOT ON THE SOURCE. This gate exists to answer one
+    question — what does a visitor pay for first paint — and the answer is whatever docs/
+    contains, because that is the directory GitHub Pages serves. Measuring web/ was an exact
+    proxy while the two were byte-identical, and stopped being one the moment the published
+    copy started being minified. Same budget, same purpose, measured in the right place; run
+    against web/ before the copy exists so an early build still gets a reading."""
     log("5. byte budget")
+    W = root or WEB
     lv0 = next(l for l in man["levels"] if l["level"] == 0)["bytes"]
-    app = sum(os.path.getsize(os.path.join(WEB, p)) for p in
+    app = sum(os.path.getsize(os.path.join(W, p)) for p in
               ("index.html", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js",
                "js/shipwright.js", "js/battle.js", "js/sea.js", "js/passage.js", "js/shaders.js", "js/three.min.js", "css/styles.css"))
-    data = sum(os.path.getsize(os.path.join(WEB, "data", f))
-               for f in os.listdir(os.path.join(WEB, "data")))
-    months = sum(os.path.getsize(os.path.join(WEB, "fields", f"{k}_{m:02d}.png"))
+    data = sum(os.path.getsize(os.path.join(W, "data", f))
+               for f in os.listdir(os.path.join(W, "data")))
+    months = sum(os.path.getsize(os.path.join(W, "fields", f"{k}_{m:02d}.png"))
                  for k in ("sea", "wind") for m in (1, 2))
     first = (lv0 + app + data + months) / 1e6
     total = sum(os.path.getsize(os.path.join(r, f))
-                for r, _, fs in os.walk(WEB) for f in fs) / 1e6
+                for r, _, fs in os.walk(W) for f in fs) / 1e6
     log(f"   first paint {first:.2f} MB (budget {BUDGET_FIRST_PAINT_MB})")
     log(f"   total       {total:.1f} MB (budget {BUDGET_TOTAL_MB})")
     if first > BUDGET_FIRST_PAINT_MB:
@@ -229,6 +236,27 @@ def stamp_and_copy():
     # in a few minutes. When the detail-patch loader lands, publish it and delete this.
     shutil.copytree(WEB, DOCS, ignore=shutil.ignore_patterns("z3"))
     open(os.path.join(DOCS, ".nojekyll"), "w").close()
+
+    # ── MINIFY THE PUBLISHED COPY ONLY ────────────────────────────────────────────────
+    # web/ keeps every comment: they are the record of what was tried and why, and several
+    # are the only place a hard-won fact is written down. Measured, they are about half the
+    # bytes shipped. Comments and indentation only — nothing is renamed, no semicolon is
+    # removed — because those are the transformations that break code, and the saving that
+    # matters is already here. See build/minify.py for why it is a scanner and not a regex.
+    sys.path.insert(0, HERE)
+    from minify import minify_js, minify_css
+    mb = ma = 0
+    for root, _, fs in os.walk(DOCS):
+        for f in fs:
+            if not f.endswith((".js", ".css")):
+                continue
+            fp = os.path.join(root, f)
+            raw = open(fp, encoding="utf-8").read()
+            out = minify_css(raw) if f.endswith(".css") else minify_js(raw)
+            open(fp, "w", encoding="utf-8").write(out)
+            mb += len(raw.encode()); ma += len(out.encode())
+    log(f"   minified docs/ {mb/1e6:.2f} MB -> {ma/1e6:.2f} MB "
+        f"({100*(mb-ma)/max(1,mb):.0f}% of script and style bytes)")
     n = sum(len(fs) for _, _, fs in os.walk(DOCS))
     log(f"   docs/ written, {n} files")
     return stamp
@@ -240,8 +268,8 @@ def main():
     man = gate_fields()
     gate_registration(man)
     gate_data()
-    gate_budget(man)
     stamp = stamp_and_copy()
+    gate_budget(man, DOCS)          # on the served copy — see the note on gate_budget
     log(f"\nPUBLISHED. data-version {stamp}")
     log("Verify the LIVE stamp after pushing — a successful push is not a successful deploy.")
     return 0

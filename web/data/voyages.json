@@ -5348,6 +5348,334 @@
    ],
    "text": "From late 2023, attacks on shipping in the southern Red Sea pushed most container traffic between Asia and Europe back round the Cape of Good Hope - an extra 6,000 km and about ten days.\n\nA canal is not a piece of geography, it is a piece of politics that geography permits; when the politics fails the geography is still there. The Cape route is the default, and Suez is the exception that has to be maintained.",
    "cite": "IMO circulars, 2024; Clarksons Research."
+  },
+  {
+   "id": "evergiven",
+   "name": "Ever Given blocks the canal",
+   "dates": "March 2021",
+   "year": 2021,
+   "vessel": "ever-given",
+   "view": [
+    40,
+    26,
+    320
+   ],
+   "tags": [
+    "Measured"
+   ],
+   "legs": [
+    {
+     "lon": 103.55,
+     "lat": 1.36,
+     "name": "Tanjung Pelepas",
+     "date": "2021-03-08"
+    },
+    {
+     "lon": 80.0,
+     "lat": 5.9,
+     "name": "off Ceylon",
+     "date": ""
+    },
+    {
+     "lon": 43.5,
+     "lat": 12.6,
+     "name": "Bab-el-Mandeb",
+     "date": ""
+    },
+    {
+     "lon": 32.56,
+     "lat": 29.93,
+     "name": "Suez, southern approach",
+     "date": "2021-03-23"
+    },
+    {
+     "lon": 32.35,
+     "lat": 30.02,
+     "name": "aground, km 151",
+     "date": "2021-03-23"
+    },
+    {
+     "lon": 32.3,
+     "lat": 31.25,
+     "name": "Port Said",
+     "date": "2021-03-30"
+    },
+    {
+     "lon": 14.5,
+     "lat": 36.0,
+     "name": "the Sicilian Channel",
+     "date": ""
+    },
+    {
+     "lon": 4.05,
+     "lat": 51.95,
+     "name": "Rotterdam",
+     "date": "2021-07-29"
+    }
+   ],
+   "rows": [
+    [
+     "Aground",
+     "23 March 2021, 07:40 local, at about 13 knots"
+    ],
+    [
+     "Wind",
+     "gusting above 40 knots in a sandstorm"
+    ],
+    [
+     "Blocked",
+     "163 hours; 369 ships waiting at both ends"
+    ],
+    [
+     "Freed",
+     "29 March, by dredging about 30,000 m³ and a spring tide"
+    ],
+    [
+     "Detained",
+     "until 7 July, over salvage compensation"
+    ]
+   ],
+   "text": "She entered the canal southbound at about 13 knots on the morning of 23 March 2021, in a sandstorm gusting over 40 knots, sheered, and grounded diagonally at kilometre 151 with her bulbous bow driven into the eastern bank. That stretch is single-lane, and there is no way past a 400 m hull lying across it.\n\nFourteen tugs, about 30,000 cubic metres of dredging and a spring tide freed her after 163 hours. By then 369 ships were waiting. Roughly 12 per cent of world trade passes through the canal; the alternative round the Cape adds about 9,000 km and ten days, and enough of the queue took it that freight rates moved worldwide. She was then held in the Great Bitter Lake until 7 July while salvage compensation was settled, and did not reach Rotterdam until 29 July.",
+   "cite": "Suez Canal Authority; MAIB interim report, 2021."
+  },
+  {
+   "id": "endurance-drift",
+   "name": "Shackleton's drift",
+   "dates": "1914–16",
+   "year": 1915,
+   "vessel": "endurance",
+   "view": [
+    -40,
+    -62,
+    300
+   ],
+   "tags": [
+    "Measured"
+   ],
+   "legs": [
+    {
+     "lon": -36.5,
+     "lat": -54.28,
+     "name": "Grytviken, South Georgia",
+     "date": "1914-12-05"
+    },
+    {
+     "lon": -20.0,
+     "lat": -60.0,
+     "name": "the pack edge",
+     "date": "1914-12-11"
+    },
+    {
+     "lon": -27.0,
+     "lat": -74.0,
+     "name": "beset, 76°34'S",
+     "date": "1915-01-19"
+    },
+    {
+     "lon": -40.0,
+     "lat": -72.0,
+     "name": "drifting north with the ice",
+     "date": ""
+    },
+    {
+     "lon": -52.0,
+     "lat": -68.0,
+     "name": "abandoned, Ocean Camp",
+     "date": "1915-10-27"
+    },
+    {
+     "lon": -55.0,
+     "lat": -61.1,
+     "name": "Elephant Island",
+     "date": "1916-04-15"
+    }
+   ],
+   "rows": [
+    [
+     "Beset",
+     "19 January 1915, one day's sail from her landing"
+    ],
+    [
+     "Drift",
+     "about 1,500 nm with the pack, over ten months"
+    ],
+    [
+     "Sank",
+     "21 November 1915"
+    ],
+    [
+     "Survived",
+     "all 28 men"
+    ],
+    [
+     "*James Caird*",
+     "800 nm to South Georgia in a 6.9 m boat, 16 days"
+    ]
+   ],
+   "text": "Endurance sailed from South Georgia on 5 December 1914 for the Weddell Sea, intending to land a party for the first crossing of Antarctica. She was beset in the pack on 19 January 1915, one day's sail short of her landing, and never came free.\n\nShe drifted with the ice for ten months. A ship built for ice can take pressure from the sides; what destroyed her was being lifted and racked as floes converged, and she was abandoned on 27 October and sank on 21 November. The party camped on the floes, then took three boats to Elephant Island, from where Shackleton and five others made 800 nautical miles to South Georgia in the 6.9 m *James Caird* in sixteen days, and crossed the island on foot.\n\nAll twenty-eight men survived. The wreck was found in 2022 within four miles of the position Frank Worsley had fixed by sextant from a floe as she went down.",
+   "cite": "Worsley's log; Endurance22; Shackleton, *South* (1919)."
+  },
+  {
+   "id": "qm2-crossing",
+   "name": "The last liner's crossing",
+   "dates": "2004–",
+   "year": 2010,
+   "vessel": "queen-mary-2",
+   "view": [
+    -40,
+    48,
+    320
+   ],
+   "tags": [
+    "Measured"
+   ],
+   "legs": [
+    {
+     "lon": -1.4,
+     "lat": 50.9,
+     "name": "Southampton",
+     "date": ""
+    },
+    {
+     "lon": -6.0,
+     "lat": 49.8,
+     "name": "the Western Approaches",
+     "date": ""
+    },
+    {
+     "lon": -25.0,
+     "lat": 48.5,
+     "name": "the great circle",
+     "date": ""
+    },
+    {
+     "lon": -45.0,
+     "lat": 45.0,
+     "name": "mid-Atlantic",
+     "date": ""
+    },
+    {
+     "lon": -63.0,
+     "lat": 42.0,
+     "name": "south of the Grand Banks",
+     "date": ""
+    },
+    {
+     "lon": -74.01,
+     "lat": 40.5,
+     "name": "New York",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Passage",
+     "about 7 days, Southampton to New York"
+    ],
+    [
+     "Service speed",
+     "26 knots; over 29 available"
+    ],
+    [
+     "Track",
+     "the great circle, adjusted south for ice in season"
+    ],
+    [
+     "Distinction",
+     "the only ocean liner in scheduled service"
+    ]
+   ],
+   "text": "Queen Mary 2 keeps a scheduled transatlantic crossing of about seven days, which is the thing that makes her a liner rather than a cruise ship. A schedule across the North Atlantic in winter has to be held in weather that a cruise itinerary would simply avoid, and that requires speed in a seaway — 26 knots in service against a cruise ship's 22 — and a hull built to take it.\n\nThe route is the great circle, pushed south in the ice season on the same reasoning the North Atlantic Track Agreements formalised after 1912. It is the last commercial passage in this model whose purpose is to arrive on a given day rather than to be at sea.",
+   "cite": "Cunard schedules; North Atlantic Track Agreement."
+  },
+  {
+   "id": "azzam-med",
+   "name": "A superyacht in the Mediterranean",
+   "dates": "2013–",
+   "year": 2018,
+   "vessel": "azzam",
+   "view": [
+    15,
+    37,
+    300
+   ],
+   "tags": [
+    "Inferred"
+   ],
+   "legs": [
+    {
+     "lon": 8.58,
+     "lat": 53.55,
+     "name": "Bremen — delivered 2013",
+     "date": ""
+    },
+    {
+     "lon": -9.5,
+     "lat": 43.0,
+     "name": "Finisterre",
+     "date": ""
+    },
+    {
+     "lon": -5.6,
+     "lat": 36.0,
+     "name": "Gibraltar",
+     "date": ""
+    },
+    {
+     "lon": 7.42,
+     "lat": 43.73,
+     "name": "Monaco",
+     "date": ""
+    },
+    {
+     "lon": 12.5,
+     "lat": 37.5,
+     "name": "the Sicilian Channel",
+     "date": ""
+    },
+    {
+     "lon": 32.3,
+     "lat": 31.25,
+     "name": "Port Said",
+     "date": ""
+    },
+    {
+     "lon": 43.2,
+     "lat": 12.8,
+     "name": "Bab-el-Mandeb",
+     "date": ""
+    },
+    {
+     "lon": 54.37,
+     "lat": 24.47,
+     "name": "Abu Dhabi",
+     "date": ""
+    }
+   ],
+   "rows": [
+    [
+     "Delivered",
+     "Lürssen, Bremen, September 2013"
+    ],
+    [
+     "Length",
+     "180.6 m — the longest private motor yacht built"
+    ],
+    [
+     "Speed",
+     "above 30 knots, on about 94,000 shaft horsepower"
+    ],
+    [
+     "Draught",
+     "4.3 m — shallow for the length, for Gulf and Red Sea waters"
+    ],
+    [
+     "Track",
+     "representative rather than recorded: yacht movements are not published"
+    ]
+   ],
+   "text": "Azzam's delivery voyage from Bremen and her subsequent movements between the Mediterranean and the Gulf are drawn here as a representative track rather than a recorded one: private yacht passages are not published, and this model does not pretend otherwise.\n\nWhat the route does show honestly is the constraint her design answers. She draws 4.3 m on 180.6 m of length — very shallow for the size — because the water she was built for is the Gulf and the Red Sea, and that single requirement drives the wide, fine, low-block hull form and the four waterjets that let her exceed 30 knots without deep-running shafts.",
+   "cite": "Lürssen; Boat International. Track inferred, not recorded."
   }
  ]
 }

@@ -1,713 +1,394 @@
-/* passage.js — THE PASSAGE: come down off the globe and stand alongside.
- *
- * The Sea shows the ocean as a planet and the fleet as pieces on it. The Shipwright shows one
- * hull as an object on a stage. Neither shows the thing the whole project is about, which is a
- * SHIP AT SEA — a real hull, at its real size, in the water it is actually crossing, at the
- * place on the Earth it has actually reached. This view is that, and it is reached by clicking
- * a ship on the globe: the camera descends until the piece becomes a vessel.
- *
- * ── WHY IT IS NOT THE SHIPWRIGHT ──────────────────────────────────────────────────────────
- * The Shipwright is a museum floor. Its light is a photographer's light, its sea is a
- * convenience, and its subject is CONSTRUCTION — you take the ship apart there. Here nothing
- * comes apart. The subject is the passage: the sun is the sun over that longitude in that
- * month, the water carries the wave state the globe says is there, the hull is on her course
- * making her own speed, and the land you can see is the land that is actually within the
- * horizon of that position. The same model, in the world instead of on a plinth.
- *
- * ── THE TWO-SCALE PROBLEM, AND HOW IT IS SOLVED ───────────────────────────────────────────
- * The globe is 100 units across for 6371 km, so one unit is 63.7 km and a 72 m hull is 0.0011
- * of a unit. Building that hull into the globe's own scene puts 0.1 m planking detail eleven
- * million times smaller than the sphere it sits on, and float32 in the vertex pipeline gives
- * up long before that: the ship would quantise into rubble, and the depth buffer would tear.
- *
- * So there are two scenes and two cameras, rendered one after the other into the same frame:
- *
- *   1. THE BACKDROP — the globe itself, at planetary scale, with its camera placed at the
- *      exact equivalent position and orientation.
- *
- *      ⚠ THIS PARAGRAPH USED TO CLAIM THE BACKDROP SUPPLIED "the horizon, the distant water and
- *      any coast within sight", AND IT SUPPLIED NOTHING. renderer.autoClear is true by default,
- *      so the near pass cleared the COLOUR buffer as well as the depth and threw the Earth away
- *      every frame. The composite is fixed — sky, then Earth, then near water, with only depth
- *      cleared between them — but the backdrop still cannot show a coast from sea level, and
- *      the reason is geometric rather than a bug: the globe sphere is 192 x 128, so a facet is
- *      209 km, and at a 195 m eye height the horizon is 50 km away — a QUARTER OF ONE TRIANGLE.
- *      Below about 60 km the planet is a flat plate with a straight polygon edge for a horizon.
- *      Ground-level terrain needs adaptive tessellation near the camera; until that exists this
- *      view is honest open ocean and nothing more.
- *   2. THE FOREGROUND — a metre-scale scene holding the sea patch and the ship, drawn after a
- *      depth clear so it always occupies the near field.
- *
- * The two cameras are locked by one matrix multiply, so they cannot drift apart. The seam is
- * where the water patch runs out, a few kilometres off, and it is hidden the way a real one
- * would be — by matching the colour of the near water to the colour the globe is drawing at
- * that same latitude, month and depth, and letting the fade land inside the haze.
- *
- * ── AND WHY THE WAVES ARE THE SAME WAVES ──────────────────────────────────────────────────
- * sea.js holds one wave table. The Shipwright's water uses it, the globe's shader uses it, the
- * buoyancy that lifts a hull uses it, and this view uses it. A ship rolls the same way in all
- * three because there is only one sea in the model.
- */
 'use strict';
-
 const PSG = {
-  on: false, scene: null, cam: null, anchor: null,
-  track: null, vessel: null, ship: null, sea: null, sky: null,
-  lon: 0, lat: 0, hdg: 0, loa: 30, u: 0,
-  orbit: 1.15, elev: 0.30, dist: 2.6, spin: true,
-  M_PER_UNIT: 0,
+on: false, scene: null, cam: null, anchor: null,
+track: null, vessel: null, ship: null, sea: null, sky: null,
+lon: 0, lat: 0, hdg: 0, loa: 30, u: 0,
+orbit: 1.15, elev: 0.30, dist: 2.6, spin: true,
+M_PER_UNIT: 0,
 };
-
-/* ── HOW FAR THE NEAR WATER HAS TO REACH ─────────────────────────────────────────────────
-   The horizon is sqrt(2 R h): 36 km from a masthead, 196 km from three kilometres up. This one
-   surface has to serve both, because the camera now descends continuously from orbit and there
-   is no altitude at which it is allowed to be obviously wrong. 260 km of radius covers a 5 km
-   eye height with room to spare, and the radial mesh spends its vertices by angle, so reaching
-   further costs almost nothing where it matters.
-
-   ⚠ AND IT IS CURVED. A flat disc 260 km across ignores 5.3 km of Earth — the sea would run out
-   past where the horizon should be, and the globe's own limb would be hidden behind a plane
-   pretending to be an ocean. Each ring drops by the sagitta, so the surface leaves the eye line
-   at exactly the true horizon and hands off to the backdrop there. */
-const SEA_R = 260000;                 // radius of the near-field water, metres
-const PATCH_M = SEA_R * 1.15;         // sky dome and far plane
-
+const SEA_R = 260000;
+const PATCH_M = SEA_R * 1.15;
 function psgInit(R, globeCamera) {
-  if (PSG.scene) return;
-  PSG.M_PER_UNIT = 6371000 / R;
-  PSG.scene = new THREE.Scene();
-  PSG.cam = new THREE.PerspectiveCamera(globeCamera.fov, 1, 0.35, PATCH_M * 1.6);
-
-  /* an empty in the GLOBE scene that carries the local frame: origin on the surface under the
-     ship, +Y radial, +Z north, +X east, scaled so one unit here is one metre */
-  PSG.anchor = new THREE.Object3D();
-  PSG.anchor.scale.setScalar(1 / PSG.M_PER_UNIT);
-
-  /* ── LIGHT ────────────────────────────────────────────────────────────────────────────
-     One sun and one sky, because that is what is out there. The Shipwright's four-light rig is
-     right for an object under inspection and wrong here: a ship at sea is lit by a single hard
-     source and a very large soft one, and the ratio between them is most of what makes a
-     photograph of the sea look like the sea. */
-  PSG.sun = new THREE.DirectionalLight(0xfff4e2, 3.0);
-  PSG.sun.castShadow = true;
-  PSG.sun.shadow.mapSize.set(2048, 2048);
-  PSG.sun.shadow.bias = -0.0016;
-  PSG.sun.shadow.normalBias = 0.6;
-  PSG.scene.add(PSG.sun, PSG.sun.target);
-  PSG.hemi = new THREE.HemisphereLight(0xcfe4ff, 0x2c4756, 1.55);
-  PSG.scene.add(PSG.hemi);
-
-  const skyG = new THREE.SphereGeometry(PATCH_M * 1.3, 40, 24);
-  PSG.sky = new THREE.Mesh(skyG, new THREE.ShaderMaterial({
-    vertexShader: SHADERS['SKY_VERT.vert'], fragmentShader: SHADERS['SKY_FRAG.frag'],
-    side: THREE.BackSide, depthWrite: false, depthTest: false,
-    uniforms: { uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) }, uTime: { value: 0 } },
-  }));
-  PSG.sky.frustumCulled = false;          // a dome centred on the eye is always around you
-  PSG.sky.renderOrder = -1000;
-  PSG.scene.add(PSG.sky);
-
-  /* ── THE WATER ────────────────────────────────────────────────────────────────────────
-     A real displaced surface, not a normal map on a plane: the hull has to be occluded by the
-     wave in front of it or nothing about the picture reads as floating.
-
-     ⚠ AND A UNIFORM GRID IS THE WRONG MESH FOR IT. The first version was 340 x 340 quads over
-     14 km — 41 m between vertices, which gives the 118 m swell three samples per wavelength and
-     gives the 61, 27 and 13 m components nothing at all. Every wave in the table below the
-     longest one simply did not exist as geometry, and the sea rendered as a flat grey field
-     with the ship apparently resting on top of it. Spending the same vertices uniformly over
-     14 km wastes almost all of them: the far half of that disc is four pixels tall.
-
-     A radial mesh with geometrically growing rings puts the vertices where the pixels are —
-     about 2 m between rings alongside the hull, 30 m at a kilometre, 400 m out at the rim. The
-     whole wave table is resolved where it can be seen and nothing is spent where it cannot. */
-  /* 2 m at the hull to 260 km at the rim is a range of 130,000, which 340 geometric rings
-     cover at 3.5 per cent growth apiece: 4 m between rings at 100 m out, 400 m at 10 km,
-     8 km at the far edge. One mesh, every altitude. */
-  const g = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
-  PSG.sea = new THREE.Mesh(g, new THREE.ShaderMaterial({
-    vertexShader: SHADERS['SEA_VERT.vert'], fragmentShader: SHADERS['SEA_FRAG.frag'],
-    uniforms: {
-      uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
-      uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
-      /* uScale sets the distance over which the fragment ripple fades and the water darkens
-         toward deep. It is the SHIP'S OWN LENGTH, set on open: what counts as near water
-         depends entirely on how big the thing in the middle of it is, and 260 m of near field
-         around a 9 m canoe is the same mistake as 260 m around a 400 m box boat. */
-      uWind: { value: 7.0 }, uScale: { value: 60 }, uRip: { value: 3000 },
-      /* how far the anchor has moved over the ground since the passage opened, so the wave
-         field belongs to the sea rather than to the ship — see SEA_VERT */
-      uDrift: { value: new THREE.Vector2() },
-      /* her wake: position on the patch, heading, length, beam and speed */
-      uWakeP: { value: new THREE.Vector2() },
-      uWakeDir: { value: new THREE.Vector2(1, 0) },
-      uWakeLen: { value: 0 }, uWakeBeam: { value: 0 }, uWakeKn: { value: 0 },
-      uWave: { value: SHIPS_SEA.seaWaveUniform() },
-      /* the globe's own elevation field, so the water can end where the land begins */
-      uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
-      uSeaLevel: { value: 0 }, uHasDepth: { value: 0 },
-    },
-  }));
-  PSG.sea.rotation.x = -Math.PI / 2;
-  PSG.sea.receiveShadow = true;
-  PSG.scene.add(PSG.sea);
-
-  /* ── THE GROUND, ON THE SAME TERMS AS THE WATER ────────────────────────────────────────
-     A second disc, the same shape, displaced by the real elevation field. The water discards
-     over land and the ground discards over water, both from the same number, so they tile
-     exactly and there is no seam to hide. See LAND_VERT for why the globe sphere cannot do
-     this itself: at a 195 m eye height the camera is inside a quarter of one 209 km facet. */
-  const lg = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
-  PSG.land = new THREE.Mesh(lg, new THREE.ShaderMaterial({
-    vertexShader: SHADERS['LAND_VERT.vert'], fragmentShader: SHADERS['LAND_FRAG.frag'],
-    uniforms: {
-      uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
-      uSeaLevel: { value: 0 }, uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
-      uCam: { value: new THREE.Vector3() }, uMPP: { value: 10 },
-      /* the stated vertical exaggeration — see LAND_VERT for why it is not 1 */
-      /* ⚠ 1.8, not 3.2 — the first value turned a 121 m Greek headland into an alpine massif.
-         The lift exists so a low coast clears the horizon at all, not so every coast becomes
-         mountains; it is a relief globe's exaggeration, and those are gentle. */
-      uLandLift: { value: 1.8 },
-    },
-  }));
-  PSG.land.rotation.x = -Math.PI / 2;
-  PSG.scene.add(PSG.land);
+if (PSG.scene) return;
+PSG.M_PER_UNIT = 6371000 / R;
+PSG.scene = new THREE.Scene();
+PSG.cam = new THREE.PerspectiveCamera(globeCamera.fov, 1, 0.35, PATCH_M * 1.6);
+PSG.anchor = new THREE.Object3D();
+PSG.anchor.scale.setScalar(1 / PSG.M_PER_UNIT);
+PSG.sun = new THREE.DirectionalLight(0xfff4e2, 3.0);
+PSG.sun.castShadow = true;
+PSG.sun.shadow.mapSize.set(2048, 2048);
+PSG.sun.shadow.bias = -0.0016;
+PSG.sun.shadow.normalBias = 0.6;
+PSG.scene.add(PSG.sun, PSG.sun.target);
+PSG.hemi = new THREE.HemisphereLight(0xcfe4ff, 0x2c4756, 1.55);
+PSG.scene.add(PSG.hemi);
+const skyG = new THREE.SphereGeometry(PATCH_M * 1.3, 40, 24);
+PSG.sky = new THREE.Mesh(skyG, new THREE.ShaderMaterial({
+vertexShader: SHADERS['SKY_VERT.vert'], fragmentShader: SHADERS['SKY_FRAG.frag'],
+side: THREE.BackSide, depthWrite: false, depthTest: false,
+uniforms: { uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) }, uTime: { value: 0 } },
+}));
+PSG.sky.frustumCulled = false;
+PSG.sky.renderOrder = -1000;
+PSG.scene.add(PSG.sky);
+const g = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
+PSG.sea = new THREE.Mesh(g, new THREE.ShaderMaterial({
+vertexShader: SHADERS['SEA_VERT.vert'], fragmentShader: SHADERS['SEA_FRAG.frag'],
+uniforms: {
+uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
+uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
+uWind: { value: 7.0 }, uScale: { value: 60 }, uRip: { value: 3000 },
+uDrift: { value: new THREE.Vector2() },
+uWakeP: { value: new THREE.Vector2() },
+uWakeDir: { value: new THREE.Vector2(1, 0) },
+uWakeLen: { value: 0 }, uWakeBeam: { value: 0 }, uWakeKn: { value: 0 },
+uWave: { value: SHIPS_SEA.seaWaveUniform() },
+uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
+uSeaLevel: { value: 0 }, uHasDepth: { value: 0 },
+},
+}));
+PSG.sea.rotation.x = -Math.PI / 2;
+PSG.sea.receiveShadow = true;
+PSG.scene.add(PSG.sea);
+const lg = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
+PSG.land = new THREE.Mesh(lg, new THREE.ShaderMaterial({
+vertexShader: SHADERS['LAND_VERT.vert'], fragmentShader: SHADERS['LAND_FRAG.frag'],
+uniforms: {
+uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
+uSeaLevel: { value: 0 }, uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
+uCam: { value: new THREE.Vector3() }, uMPP: { value: 10 },
+uLandLift: { value: 1.8 },
+},
+}));
+PSG.land.rotation.x = -Math.PI / 2;
+PSG.scene.add(PSG.land);
 }
-
-/* A disc whose rings grow geometrically from r0 to r1: constant angular resolution as seen
-   from a camera near the middle, which is the only place this is ever viewed from. Built in
-   the XY plane so the mesh can be laid flat by the same -PI/2 rotation a PlaneGeometry needs. */
 function radialDisc(r0, r1, rings, seg, curveR) {
-  const pos = [], idx = [], uv = [];
-  pos.push(0, 0, 0); uv.push(0.5, 0.5);
-  const gr = Math.pow(r1 / r0, 1 / (rings - 1));
-  for (let i = 0; i < rings; i++) {
-    const r = r0 * Math.pow(gr, i);
-    /* the sagitta: how far the Earth has fallen away at this range. Built into the geometry
-       rather than applied in the shader, because the buoyancy code has to agree with it and
-       there is only one place the two can meet. */
-    const drop = curveR ? (Math.sqrt(Math.max(0, curveR * curveR - r * r)) - curveR) : 0;
-    for (let j = 0; j < seg; j++) {
-      const a = j / seg * Math.PI * 2;
-      pos.push(Math.cos(a) * r, Math.sin(a) * r, drop);
-      uv.push(0.5 + Math.cos(a) * 0.5 * (r / r1), 0.5 + Math.sin(a) * 0.5 * (r / r1));
-    }
-  }
-  for (let j = 0; j < seg; j++) idx.push(0, 1 + j, 1 + (j + 1) % seg);
-  for (let i = 0; i < rings - 1; i++) {
-    const a0 = 1 + i * seg, b0 = 1 + (i + 1) * seg;
-    for (let j = 0; j < seg; j++) {
-      const jn = (j + 1) % seg;
-      idx.push(a0 + j, b0 + j, b0 + jn);
-      idx.push(a0 + j, b0 + jn, a0 + jn);
-    }
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  return g;
+const pos = [], idx = [], uv = [];
+pos.push(0, 0, 0); uv.push(0.5, 0.5);
+const gr = Math.pow(r1 / r0, 1 / (rings - 1));
+for (let i = 0; i < rings; i++) {
+const r = r0 * Math.pow(gr, i);
+const drop = curveR ? (Math.sqrt(Math.max(0, curveR * curveR - r * r)) - curveR) : 0;
+for (let j = 0; j < seg; j++) {
+const a = j / seg * Math.PI * 2;
+pos.push(Math.cos(a) * r, Math.sin(a) * r, drop);
+uv.push(0.5 + Math.cos(a) * 0.5 * (r / r1), 0.5 + Math.sin(a) * 0.5 * (r / r1));
 }
-
-/* ── the local frame at a point on the globe ─────────────────────────────────────────────
-   east and north are the tangent directions; up is radial. Written once here and used both to
-   place the anchor and to derive the ship's heading, so the two cannot disagree. */
-/* ⚠ (east, up, north) IS LEFT-HANDED, and building the anchor from it made this frame a
-   reflection. In a Y-up right-handed basis with Z along north, X must point WEST — X x Y = Z
-   leaves no choice about it. The same wrong sign was written into the era fleet and the voyage
-   wake; see tangentBasis() in app.js for what it cost there. Here it did not scatter anything,
-   because the backdrop camera is derived from this same anchor and the two stayed consistent
-   with each other — a mirrored world that agrees with itself, which is the hardest kind to see. */
+}
+for (let j = 0; j < seg; j++) idx.push(0, 1 + j, 1 + (j + 1) % seg);
+for (let i = 0; i < rings - 1; i++) {
+const a0 = 1 + i * seg, b0 = 1 + (i + 1) * seg;
+for (let j = 0; j < seg; j++) {
+const jn = (j + 1) % seg;
+idx.push(a0 + j, b0 + j, b0 + jn);
+idx.push(a0 + j, b0 + jn, a0 + jn);
+}
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+g.setIndex(idx);
+g.computeVertexNormals();
+return g;
+}
 function psgFrame(lon, lat, R) {
-  const p = lon * Math.PI / 180, a = lat * Math.PI / 180;
-  const up = new THREE.Vector3(Math.cos(a) * Math.sin(p), Math.sin(a), Math.cos(a) * Math.cos(p));
-  const east = new THREE.Vector3(Math.cos(p), 0, -Math.sin(p));
-  const north = new THREE.Vector3().crossVectors(up, east);      // geographic north
-  const west = new THREE.Vector3().crossVectors(up, north);      // = X, so that X x Y = Z
-  return { up, east, north, west, pos: up.clone().multiplyScalar(R) };
+const p = lon * Math.PI / 180, a = lat * Math.PI / 180;
+const up = new THREE.Vector3(Math.cos(a) * Math.sin(p), Math.sin(a), Math.cos(a) * Math.cos(p));
+const east = new THREE.Vector3(Math.cos(p), 0, -Math.sin(p));
+const north = new THREE.Vector3().crossVectors(up, east);
+const west = new THREE.Vector3().crossVectors(up, north);
+return { up, east, north, west, pos: up.clone().multiplyScalar(R) };
 }
-
 function psgOpen(tr, vessel, R, globeCamera) {
-  psgInit(R, globeCamera);
-  psgClearShip();
-  PSG.track = tr; PSG.vessel = vessel;
-  PSG.loa = (vessel.hull && vessel.hull.loa) || 30;
-  /* her beam and draught set the roll oscillator and the athwartships length filter */
-  PSG.beam = (vessel.hull && vessel.hull.beam) || PSG.loa / 7.0;
-  PSG.draught = (vessel.hull && vessel.hull.draught) || PSG.loa / 20.0;
-
-  let obj = null;
-  try { obj = window.SHIPS_HULL.buildShip(vessel.hull, { fine: true }); } catch (e) { obj = null; }
-  if (!obj) return false;
-  obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-  /* bow at local -X, and this view's forward is +Z — the same quarter turn the fleet uses.
-     ⚠ +PI/2. At -PI/2 the bow lands dead astern; that sign has already cost this project once. */
-  const holder = new THREE.Group();
-  obj.rotation.y = Math.PI / 2;
-  /* ── ⚠ THE WATERLINE IS y = 0, AND THE BOUNDING BOX IS NOT ───────────────────────────
-     surfacePoint builds every hull with the load waterline at local y = 0, so she floats at
-     her marks by sitting at the datum hull.js records. keelBottom + draught was used here for
-     rounds and is a different number: the Box3 floor is the keel timber, the screw or the
-     bulb — not the moulded skin — so the whole fleet rode 0.03–0.97 m high (measured per
-     hull, r33) and showed bottom paint above the water. Same datum as the Shipwright, from
-     the same userData field, so a vessel floats identically in both views or in neither. */
-  obj.position.y = -(obj.userData.waterlineY || 0);
-  holder.add(obj);
-  PSG.ship = holder;
-  PSG.scene.add(holder);
-
-  PSG.sea.material.uniforms.uScale.value = Math.max(14, PSG.loa * 0.7);
-  PSG.sea.material.uniforms.uRip.value =
-    SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
-                                     ? renderer.domElement.height : 900);
-
-  /* ── ⚠ A SHIP IS NOT AS TALL AS SHE IS LONG, AND SHE IS NOT SHORT EITHER ─────────────
-     Standing off a fixed number of ship-LENGTHS cut the rig off the top of the frame every
-     time, because a clipper's main truck is most of her length above the water and the
-     hull's loa says nothing about it. A tea clipper is 65 m long and 50 m tall; a container
-     ship is 400 m long and 60 m tall. Fit the whole VESSEL — the real bounding sphere of the
-     built model — into the vertical field, with a margin, and both are framed correctly with
-     no per-ship tuning. */
-  const bb = new THREE.Box3().setFromObject(holder);
-  /* ── ⚠ FIT THE SPHERE, NOT THE BOX ────────────────────────────────────────────────────
-     Two earlier attempts both framed wrong, and for the same underlying reason. The first
-     used the distance from the model's ORIGIN to a corner, which double-counts rig height
-     because a hull's origin is at the waterline amidships. The second used the box's half
-     extents about its own centre — better, and still wrong, because the corner of a box is
-     not at the centre's distance from the camera. A junk's masthead sits 13 m nearer the eye
-     than her middle does, so it projects eleven per cent larger than the height sum predicts,
-     and the truck went out of the top of the frame with the arithmetic insisting it fitted.
-
-     The bounding SPHERE about her centre has no corners and no orientation, so the fit holds
-     from every angle the orbit can reach. rad / sin(fov/2) is the exact tangent distance; the
-     margin is the only free number left, and it is small. */
-  const ctr = new THREE.Vector3(); bb.getCenter(ctr);
-  const rad = Math.max(1, bb.max.distanceTo(ctr));
-  const vfov = globeCamera.fov * Math.PI / 180;
-  const aspect = Math.max(0.5, globeCamera.aspect || 1.5);
-  /* whichever half-angle is the tighter — vertical on a wide window, horizontal on a tall one */
-  const half = Math.min(vfov * 0.5, Math.atan(Math.tan(vfov * 0.5) * aspect));
-  PSG.dist = Math.max(0.9, (rad / Math.sin(half) * 1.06) / PSG.loa);
-  PSG.elev = Math.min(0.42, Math.max(0.09, (bb.max.y * 0.26) / PSG.loa));
-  /* the era bar covers the bottom seventh of the canvas, so the aim drops by that much of the
-     visible half-height — otherwise the waterline, the one line that has to be seen, is behind
-     the furniture */
-  PSG.aim = ctr.y - PSG.dist * PSG.loa * Math.tan(vfov * 0.5) * 0.13;
-  PSG.orbit = 1.15;
-  PSG.on = true;
-  return true;
+psgInit(R, globeCamera);
+psgClearShip();
+PSG.track = tr; PSG.vessel = vessel;
+PSG.loa = (vessel.hull && vessel.hull.loa) || 30;
+PSG.beam = (vessel.hull && vessel.hull.beam) || PSG.loa / 7.0;
+PSG.draught = (vessel.hull && vessel.hull.draught) || PSG.loa / 20.0;
+let obj = null;
+try { obj = window.SHIPS_HULL.buildShip(vessel.hull, { fine: true }); } catch (e) { obj = null; }
+if (!obj) return false;
+obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+const holder = new THREE.Group();
+obj.rotation.y = Math.PI / 2;
+obj.position.y = -(obj.userData.waterlineY || 0);
+holder.add(obj);
+PSG.ship = holder;
+PSG.scene.add(holder);
+PSG.sea.material.uniforms.uScale.value = Math.max(14, PSG.loa * 0.7);
+PSG.sea.material.uniforms.uRip.value =
+SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
+? renderer.domElement.height : 900);
+const bb = new THREE.Box3().setFromObject(holder);
+const ctr = new THREE.Vector3(); bb.getCenter(ctr);
+const rad = Math.max(1, bb.max.distanceTo(ctr));
+const vfov = globeCamera.fov * Math.PI / 180;
+const aspect = Math.max(0.5, globeCamera.aspect || 1.5);
+const half = Math.min(vfov * 0.5, Math.atan(Math.tan(vfov * 0.5) * aspect));
+PSG.dist = Math.max(0.9, (rad / Math.sin(half) * 1.06) / PSG.loa);
+PSG.elev = Math.min(0.42, Math.max(0.09, (bb.max.y * 0.26) / PSG.loa));
+PSG.aim = ctr.y - PSG.dist * PSG.loa * Math.tan(vfov * 0.5) * 0.13;
+PSG.orbit = 1.15;
+PSG.on = true;
+return true;
 }
-
 function psgClearShip() {
-  if (PSG.ship) { PSG.scene.remove(PSG.ship); PSG.ship = null; }
+if (PSG.ship) { PSG.scene.remove(PSG.ship); PSG.ship = null; }
 }
-
 function psgClose() {
-  PSG.on = false;
-  psgClearShip();
-  PSG.track = null; PSG.vessel = null;
-  PSG.ref = null;      /* recomputed from position on the next frame; see psgFleet */
+PSG.on = false;
+psgClearShip();
+PSG.track = null; PSG.vessel = null;
+PSG.ref = null;
 }
-
-/* ── ONE STEP ────────────────────────────────────────────────────────────────────────────
-   Called from the frame loop with the same clock the fleet uses, so the ship in this view is at
-   the same point of the same voyage as the piece on the globe. u, the fraction along the track,
-   is handed in rather than recomputed — two models of one number is the error this project
-   keeps paying for. */
 function psgStep(t, u, lon, lat, hdgRad, R, sun, wind, globeCamera, drag) {
-  if (!PSG.on || !PSG.ship) return;
-  /* the Shipwright-style Passage has no globe behind it and no depth texture bound, so the
-     ground has nothing to sample and must not draw */
-  if (PSG.land) PSG.land.visible = false;
-  PSG.lon = lon; PSG.lat = lat; PSG.hdg = hdgRad; PSG.u = u;
-
-  const fr = psgFrame(lon, lat, R);
-  PSG.anchor.position.copy(fr.pos);
-  /* columns: X west, Y up, Z north — right-handed, see psgFrame */
-  const m = new THREE.Matrix4().makeBasis(fr.west, fr.up, fr.north);
-  PSG.anchor.quaternion.setFromRotationMatrix(m);
-  PSG.anchor.updateMatrixWorld(true);
-
-  /* the sun, brought down from the globe into the local frame */
-  const sl = sun.clone();
-  /* project onto THE FRAME'S OWN AXES. Using east where the anchor uses west put the sun on the
-     wrong side of every ship — the hull would be lit from the west while the globe behind her
-     was lit from the east, in the same frame. */
-  const lsun = new THREE.Vector3(sl.dot(fr.west), sl.dot(fr.up), sl.dot(fr.north)).normalize();
-  PSG.sun.position.copy(lsun).multiplyScalar(PATCH_M * 0.5);
-  PSG.sun.target.position.set(0, 0, 0);
-  PSG.sky.material.uniforms.uSun.value.copy(lsun);
-  PSG.sky.material.uniforms.uTime.value = t;
-  PSG.sea.material.uniforms.uSun.value.copy(lsun);
-  PSG.sea.material.uniforms.uTime.value = t;
-  PSG.sea.material.uniforms.uWind.value = wind;
-  /* the sea state follows her round the world: the same table, re-scaled to the wind actually
-     blowing at this position and month */
-  SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
-  /* ⚠ the sun is BELOW the horizon on the night side, and a ship lit from underneath by a
-     directional light looks like a horror film. Lift the key to a grazing angle and drop it
-     to a moonlit level rather than letting it go under. */
-  if (lsun.y < 0.06) {
-    PSG.sun.intensity = 0.30;
-    PSG.hemi.intensity = 0.55;
-    PSG.sun.position.set(lsun.x, 0.10, lsun.z).normalize().multiplyScalar(PATCH_M * 0.5);
-  } else {
-    PSG.sun.intensity = 3.0 * Math.min(1, 0.35 + lsun.y * 1.5);
-    PSG.hemi.intensity = 1.55;
-  }
-
-  /* the sea patch follows the ship so she is never near its edge, and it moves in WHOLE
-     WAVELENGTHS of the longest component so the pattern does not visibly jump when it does */
-  PSG.sea.position.set(0, 0, 0);
-
-  /* ── float her ───────────────────────────────────────────────────────────────────────
-     Heading in the local frame: the track's bearing, with +Z north and +X east, so a course of
-     090 is +X. The hull is on the same wave table as the water she is in. */
-  /* ⚠ floatShip RETURNS pitch and roll; it does not apply them. The Shipwright's own call site
-     assigns all three, and reading only position.y here gave a ship that heaved with the sea
-     and never once leaned in it — which is the difference between floating and levitating.
-     Order matters: yaw first about the world up, then pitch and roll in her own axes, so a
-     ship on a southerly course rolls athwart HER beam and not athwart the map's. */
-  /* ⚠ THE SIGN OF A COURSE. hdg is a compass bearing: measured from north THROUGH EAST. In
-     this frame Z is north and X is WEST, so a positive rotation about Y carries the bow from
-     north toward west — the wrong way round the compass. A ship steering 090 has to yaw -90
-     here, and getting this backwards mirrors every course in the model without moving a hull
-     off the water, which is why it would never look broken. */
-  const yaw = -hdgRad;
-  PSG.ship.rotation.set(0, 0, 0);
-  PSG.ship.rotation.order = 'YXZ';
-  PSG.ship.rotation.y = yaw;
-  const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, yaw, PSG.loa, t, wind,
-                                 PSG.beam, PSG.draught);
-  PSG.ship.rotation.z = fl.pitch;
-  PSG.ship.rotation.x = fl.roll;
-  if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(PSG.ship, t, PSG.loa);
-  if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(PSG.ship, t, 4.5);
-
-  /* ── the camera, and the backdrop camera locked to it ───────────────────────────────── */
-  const d = PSG.loa * PSG.dist;
-  const ex = Math.sin(PSG.orbit) * d, ez = Math.cos(PSG.orbit) * d;
-  const ey = Math.max(PSG.loa * 0.06, PSG.loa * PSG.elev);
-  PSG.cam.position.set(ex, ey, ez);
-  /* aim a little above the waterline, at about a third of the rig — centring on the hull puts
-     half the frame under the horizon and the masts out of the top of it */
-  PSG.cam.lookAt(0, PSG.aim || PSG.loa * 0.10, 0);
-  /* ⚠ ASPECT. This camera was built with aspect 1 and never told otherwise, so every frame was
-     projected square into a 3:2 viewport — the whole scene stretched horizontally, which reads
-     as "the camera is too close" and is not. It has to track the globe camera every frame, not
-     once at construction, because the window can be resized at any time. */
-  PSG.cam.fov = globeCamera.fov;
-  PSG.cam.aspect = globeCamera.aspect;
-  PSG.cam.updateProjectionMatrix();
-  PSG.cam.updateMatrixWorld(true);
-  PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
-  PSG.sky.position.copy(PSG.cam.position);
-
-  /* ONE multiply keeps the Earth behind the ship in register with the ship. If this drifts the
-     horizon slides out from under the water and the whole illusion goes at once. */
-  globeCamera.matrix.multiplyMatrices(PSG.anchor.matrixWorld, PSG.cam.matrix);
-  globeCamera.matrix.decompose(globeCamera.position, globeCamera.quaternion, new THREE.Vector3());
-  globeCamera.scale.set(1, 1, 1);
-  globeCamera.updateMatrixWorld(true);
+if (!PSG.on || !PSG.ship) return;
+if (PSG.land) PSG.land.visible = false;
+PSG.lon = lon; PSG.lat = lat; PSG.hdg = hdgRad; PSG.u = u;
+const fr = psgFrame(lon, lat, R);
+PSG.anchor.position.copy(fr.pos);
+const m = new THREE.Matrix4().makeBasis(fr.west, fr.up, fr.north);
+PSG.anchor.quaternion.setFromRotationMatrix(m);
+PSG.anchor.updateMatrixWorld(true);
+const sl = sun.clone();
+const lsun = new THREE.Vector3(sl.dot(fr.west), sl.dot(fr.up), sl.dot(fr.north)).normalize();
+PSG.sun.position.copy(lsun).multiplyScalar(PATCH_M * 0.5);
+PSG.sun.target.position.set(0, 0, 0);
+PSG.sky.material.uniforms.uSun.value.copy(lsun);
+PSG.sky.material.uniforms.uTime.value = t;
+PSG.sea.material.uniforms.uSun.value.copy(lsun);
+PSG.sea.material.uniforms.uTime.value = t;
+PSG.sea.material.uniforms.uWind.value = wind;
+SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
+if (lsun.y < 0.06) {
+PSG.sun.intensity = 0.30;
+PSG.hemi.intensity = 0.55;
+PSG.sun.position.set(lsun.x, 0.10, lsun.z).normalize().multiplyScalar(PATCH_M * 0.5);
+} else {
+PSG.sun.intensity = 3.0 * Math.min(1, 0.35 + lsun.y * 1.5);
+PSG.hemi.intensity = 1.55;
 }
-
-/* ══ THE DESCENT ══════════════════════════════════════════════════════════════════════════
- *
- * The Passage anchors this scene under one ship. The descent anchors the SAME scene under the
- * CAMERA, and that one change turns it from a destination into the bottom of a continuous zoom:
- * the wheel now runs from thirty-eight thousand kilometres to five hundred metres without a cut,
- * and somewhere on the way down the ocean stops being a colour and becomes a surface.
- *
- * ── WHERE THE HANDOVER IS, AND WHY THERE ─────────────────────────────────────────────────
- * Two things have to arrive together or the seam shows.
- *
- * The globe's own shader already grows waves as the ground scale falls — the 118 m swell appears
- * around 56 km up, where a pixel first becomes small against it. Below about 8 km a pixel is
- * under six metres and the shader is being asked for detail a per-pixel normal cannot honestly
- * give: the water needs real displaced geometry, because a hull has to be occluded by the wave
- * in front of it. So 8 km is where this scene takes over the near field.
- *
- * And 8 km is where the fleet reaches TRUE SCALE. A ship drawn at globe zoom has to be about
- * 1,600 times her real size to be visible at all — from 765 km a 42 m hull is eight hundredths
- * of a pixel — so the token is an exaggeration that has to be unwound on the way down, or a
- * 200 km carrack ends up floating on 100 m waves. The exaggeration is a geometric ramp: full
- * token above 300 km, unity at 8 km, so by the time a hull crosses into this scene she is
- * already her own size and nothing changes across the seam except which scene she is in.
- *
- * ⚠ THE DEPTH CLEAR IS WHY BOTH MUST HAPPEN AT ONCE. The near pass clears depth, so anything
- * left in the globe scene is hidden behind the water regardless of where it is. Ships cannot
- * cross at a different altitude from the water; they cross at the same one or they vanish.
- */
-const DESCENT_M = 8000;              // altitude below which the near field takes over
-
+PSG.sea.position.set(0, 0, 0);
+const yaw = -hdgRad;
+PSG.ship.rotation.set(0, 0, 0);
+PSG.ship.rotation.order = 'YXZ';
+PSG.ship.rotation.y = yaw;
+const fl = SHIPS_SEA.floatShip(PSG.ship, 0, 0, yaw, PSG.loa, t, wind,
+PSG.beam, PSG.draught);
+PSG.ship.rotation.z = fl.pitch;
+PSG.ship.rotation.x = fl.roll;
+if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(PSG.ship, t, PSG.loa);
+if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(PSG.ship, t, 4.5);
+const d = PSG.loa * PSG.dist;
+const ex = Math.sin(PSG.orbit) * d, ez = Math.cos(PSG.orbit) * d;
+const ey = Math.max(PSG.loa * 0.06, PSG.loa * PSG.elev);
+PSG.cam.position.set(ex, ey, ez);
+PSG.cam.lookAt(0, PSG.aim || PSG.loa * 0.10, 0);
+PSG.cam.fov = globeCamera.fov;
+PSG.cam.aspect = globeCamera.aspect;
+PSG.cam.updateProjectionMatrix();
+PSG.cam.updateMatrixWorld(true);
+PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
+PSG.sky.position.copy(PSG.cam.position);
+globeCamera.matrix.multiplyMatrices(PSG.anchor.matrixWorld, PSG.cam.matrix);
+globeCamera.matrix.decompose(globeCamera.position, globeCamera.quaternion, new THREE.Vector3());
+globeCamera.scale.set(1, 1, 1);
+globeCamera.updateMatrixWorld(true);
+}
+const DESCENT_M = 8000;
 function psgDescentActive(altM) { return altM < DESCENT_M; }
-
 function psgDescent(t, lon, lat, R, sun, wind, globeCamera, altM) {
-  psgInit(R, globeCamera);
-  PSG.mode = 'descent';
-  if (PSG.land) PSG.land.visible = true;
-  const fr = psgFrame(lon, lat, R);
-  PSG.anchor.position.copy(fr.pos);
-  PSG.anchor.quaternion.setFromRotationMatrix(
-    new THREE.Matrix4().makeBasis(fr.west, fr.up, fr.north));
-  PSG.anchor.userData.lon = lon; PSG.anchor.userData.lat = lat;
-  PSG.anchor.updateMatrixWorld(true);
-
-  /* the near camera IS the globe camera, expressed in the anchor's metre frame. One inverse
-     multiply, so the two cannot disagree about where the eye is — the same discipline that
-     keeps the Passage's backdrop in register, run in the other direction. */
-  const inv = new THREE.Matrix4().copy(PSG.anchor.matrixWorld).invert();
-  PSG.cam.matrix.multiplyMatrices(inv, globeCamera.matrixWorld);
-  PSG.cam.matrix.decompose(PSG.cam.position, PSG.cam.quaternion, new THREE.Vector3());
-  PSG.cam.scale.set(1, 1, 1);
-  PSG.cam.fov = globeCamera.fov;
-  PSG.cam.aspect = globeCamera.aspect;
-  /* near and far from the eye height: the horizon is sqrt(2 R h), and asking one depth buffer
-     to span half a metre and four hundred kilometres gives neither end any precision */
-  const hor = Math.sqrt(2 * 6371000 * Math.max(1, altM));
-  PSG.cam.near = Math.max(0.3, Math.min(220, altM * 0.02));
-  PSG.cam.far = Math.max(20000, Math.min(SEA_R * 1.5, hor * 1.8));
-  PSG.cam.updateProjectionMatrix();
-  PSG.cam.updateMatrixWorld(true);
-  /* ⚠ THE SKY WAS BEING CLIPPED BY THE FAR PLANE. The dome is built at 299 km and the far
-     plane now follows the horizon — 222 km at a kilometre up — so the whole sky fell outside
-     the frustum and the view had black space above the water. depthTest:false does not save
-     it: clipping is geometric, not a depth test. The dome is scaled to sit at half the far
-     plane, wherever that is this frame. */
-  PSG.sky.scale.setScalar(PSG.cam.far * 0.5 / (PATCH_M * 1.3));
-
-  const lsun = new THREE.Vector3(sun.dot(fr.west), sun.dot(fr.up), sun.dot(fr.north)).normalize();
-  PSG.sun.position.copy(lsun).multiplyScalar(hor);
-  PSG.sun.target.position.set(0, 0, 0);
-  PSG.sun.intensity = lsun.y < 0.06 ? 0.30 : 3.0 * Math.min(1, 0.35 + lsun.y * 1.5);
-  PSG.hemi.intensity = lsun.y < 0.06 ? 0.55 : 1.55;
-  PSG.sky.material.uniforms.uSun.value.copy(lsun);
-  PSG.sky.material.uniforms.uTime.value = t;
-  PSG.sky.position.copy(PSG.cam.position);
-  PSG.sea.material.uniforms.uSun.value.copy(lsun);
-  PSG.sea.material.uniforms.uTime.value = t;
-  PSG.sea.material.uniforms.uWind.value = wind;
-  PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
-  /* what counts as "near water" is now the eye height, not a ship's length */
-  PSG.sea.material.uniforms.uScale.value = Math.max(40, altM * 0.5);
-  /* the ripple's own reach, from the camera rather than from the eye height */
-  PSG.sea.material.uniforms.uRip.value =
-    SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
-                                     ? renderer.domElement.height : 900);
-  /* hand it the same elevation texture the globe is drawing from — one field, one coastline */
-  const gm = (typeof mat !== 'undefined' && mat) ? mat.uniforms : null;
-  if (gm) {
-    PSG.sea.material.uniforms.uDepth.value = gm.uDepth.value;
-    PSG.sea.material.uniforms.uSeaLevel.value = gm.uSeaLevel.value;
-    PSG.sea.material.uniforms.uHasDepth.value = 1;
-  }
-  PSG.sea.material.uniforms.uAnchor.value.set(lon * Math.PI / 180, lat * Math.PI / 180);
-  if (PSG.land && gm) {
-    const lu = PSG.land.material.uniforms;
-    lu.uDepth.value = gm.uDepth.value;
-    lu.uSeaLevel.value = gm.uSeaLevel.value;
-    lu.uAnchor.value.copy(PSG.sea.material.uniforms.uAnchor.value);
-    lu.uSun.value.copy(lsun);
-    lu.uCam.value.copy(PSG.cam.position);
-    lu.uMPP.value = gm.uMPP.value;
-  }
-  SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
+psgInit(R, globeCamera);
+PSG.mode = 'descent';
+if (PSG.land) PSG.land.visible = true;
+const fr = psgFrame(lon, lat, R);
+PSG.anchor.position.copy(fr.pos);
+PSG.anchor.quaternion.setFromRotationMatrix(
+new THREE.Matrix4().makeBasis(fr.west, fr.up, fr.north));
+PSG.anchor.userData.lon = lon; PSG.anchor.userData.lat = lat;
+PSG.anchor.updateMatrixWorld(true);
+const inv = new THREE.Matrix4().copy(PSG.anchor.matrixWorld).invert();
+PSG.cam.matrix.multiplyMatrices(inv, globeCamera.matrixWorld);
+PSG.cam.matrix.decompose(PSG.cam.position, PSG.cam.quaternion, new THREE.Vector3());
+PSG.cam.scale.set(1, 1, 1);
+PSG.cam.fov = globeCamera.fov;
+PSG.cam.aspect = globeCamera.aspect;
+const hor = Math.sqrt(2 * 6371000 * Math.max(1, altM));
+PSG.cam.near = Math.max(0.3, Math.min(220, altM * 0.02));
+PSG.cam.far = Math.max(20000, Math.min(SEA_R * 1.5, hor * 1.8));
+PSG.cam.updateProjectionMatrix();
+PSG.cam.updateMatrixWorld(true);
+PSG.sky.scale.setScalar(PSG.cam.far * 0.5 / (PATCH_M * 1.3));
+const lsun = new THREE.Vector3(sun.dot(fr.west), sun.dot(fr.up), sun.dot(fr.north)).normalize();
+PSG.sun.position.copy(lsun).multiplyScalar(hor);
+PSG.sun.target.position.set(0, 0, 0);
+PSG.sun.intensity = lsun.y < 0.06 ? 0.30 : 3.0 * Math.min(1, 0.35 + lsun.y * 1.5);
+PSG.hemi.intensity = lsun.y < 0.06 ? 0.55 : 1.55;
+PSG.sky.material.uniforms.uSun.value.copy(lsun);
+PSG.sky.material.uniforms.uTime.value = t;
+PSG.sky.position.copy(PSG.cam.position);
+PSG.sea.material.uniforms.uSun.value.copy(lsun);
+PSG.sea.material.uniforms.uTime.value = t;
+PSG.sea.material.uniforms.uWind.value = wind;
+PSG.sea.material.uniforms.uCam.value.copy(PSG.cam.position);
+PSG.sea.material.uniforms.uScale.value = Math.max(40, altM * 0.5);
+PSG.sea.material.uniforms.uRip.value =
+SHIPS_SEA.rippleRange(PSG.cam, (typeof renderer !== 'undefined' && renderer.domElement)
+? renderer.domElement.height : 900);
+const gm = (typeof mat !== 'undefined' && mat) ? mat.uniforms : null;
+if (gm) {
+PSG.sea.material.uniforms.uDepth.value = gm.uDepth.value;
+PSG.sea.material.uniforms.uSeaLevel.value = gm.uSeaLevel.value;
+PSG.sea.material.uniforms.uHasDepth.value = 1;
 }
-
-/* ── THE FLEET, AT ITS OWN SIZE, ON THE REAL SURFACE ──────────────────────────────────────
- * Hulls within the patch are built once per vessel and reused. Their station is the same lon/lat
- * the globe token has — read from tr.at, never recomputed — converted into the anchor's metre
- * frame and dropped by the same sagitta the water carries, so a ship forty kilometres away sits
- * in the sea rather than above where the sea used to be before the Earth curved out from under
- * her.
- */
-/* ── ⚠ ONE SHIP IS THE SUBJECT; THE REST ARE TRAFFIC ──────────────────────────────────────
-   Every hull in the patch was built with {fine:true} — the Shipwright's model, 2,570 separate
-   meshes and 160,000 triangles, every frame timber its own pickable object. That is right for
-   the ship you are standing on and absurd for one hull-down on the horizon, and it is paid per
-   ship: five in the patch is nearly thirteen thousand draw calls for four vessels nobody is
-   looking at. The subject is built fine, everyone else coarse — about ten meshes each — and an
-   entry is rebuilt if which one it is changes. */
+PSG.sea.material.uniforms.uAnchor.value.set(lon * Math.PI / 180, lat * Math.PI / 180);
+if (PSG.land && gm) {
+const lu = PSG.land.material.uniforms;
+lu.uDepth.value = gm.uDepth.value;
+lu.uSeaLevel.value = gm.uSeaLevel.value;
+lu.uAnchor.value.copy(PSG.sea.material.uniforms.uAnchor.value);
+lu.uSun.value.copy(lsun);
+lu.uCam.value.copy(PSG.cam.position);
+lu.uMPP.value = gm.uMPP.value;
+}
+SHIPS_SEA.updateWaveUniform(PSG.sea.material.uniforms.uWave.value, wind);
+}
 function psgFleet(tracks, R, t, wind, list, heroName) {
-  if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
-                        PSG.scene.add(PSG.fleetGroup); }
-  const seen = new Set();
-  const alat = PSG.anchor.userData.lat, alon = PSG.anchor.userData.lon;
-  /* ── THE GROUND THE WAVES BELONG TO ─────────────────────────────────────────────────
-     A reference position fixed at the moment the passage opens. Everything after is measured
-     from it, so uDrift is literally how far this patch of sea has travelled over the Earth —
-     which is the number that makes the water stream past the hull. */
-  /* ⚠ AND THE REFERENCE CANNOT BE THE FIRST FRAME THAT ASKED. Capturing it lazily made the
-     whole wave field depend on WHEN this function first ran — and the descent frame came back
-     0.55% different on every capture, because the first call sometimes landed before the hash
-     camera had been applied and sometimes after. A ratchet cannot be built on a picture that
-     changes without the code changing.
-     The reference is now a pure function of where you are: the anchor rounded to five degrees.
-     Deterministic, no history, and the drift stays under about 280 km so the phase keeps its
-     precision in float32. Crossing a boundary re-phases the sea once every 550 km of travel,
-     which is invisible — one patch of open ocean is statistically the same as the next. */
-  PSG.ref = { lon: Math.round(alon / 5) * 5, lat: Math.round(alat / 5) * 5 };
-  {
-    let dl = alon - PSG.ref.lon;
-    if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
-    const dE = dl * Math.PI / 180 * Math.cos(alat * Math.PI / 180) * 6371000;
-    const dN = (alat - PSG.ref.lat) * Math.PI / 180 * 6371000;
-    /* the same convention the hulls are placed in: x = -east, z = north */
-    if (PSG.sea && PSG.sea.material.uniforms.uDrift)
-      PSG.sea.material.uniforms.uDrift.value.set(-dE, dN);
-  }
-  let hero = null, heroR2 = Infinity;
-  for (const tr of tracks || []) {
-    if (!tr.at || !tr.vesselId) continue;
-    const ves = list.find(x => x.id === tr.vesselId);
-    if (!ves || !ves.hull) continue;
-    let dlon = tr.at.lon - alon;
-    if (dlon > 180) dlon -= 360; else if (dlon < -180) dlon += 360;
-    const east = dlon * Math.PI / 180 * Math.cos(tr.at.lat * Math.PI / 180) * 6371000;
-    const north = (tr.at.lat - alat) * Math.PI / 180 * 6371000;
-    const r2 = east * east + north * north;
-    if (r2 > (SEA_R * 0.7) * (SEA_R * 0.7)) continue;         // beyond the water
-    seen.add(tr.name);
-    let e = PSG.fleetPool.get(tr.name);
-    const wantFine = heroName ? (tr.name === heroName) : true;
-    if (e && e.fine !== wantFine) {                 /* she has become, or stopped being, the subject */
-      PSG.fleetGroup.remove(e.holder);
-      PSG.fleetPool.delete(tr.name);
-      e = null;
-    }
-    if (!e) {
-      let obj = null;
-      try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: wantFine }); } catch (x) { continue; }
-      obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-      obj.rotation.y = Math.PI / 2;                            // bow -X onto +Z
-      obj.position.y = -(obj.userData.waterlineY || 0);        // her marks: local y=0, see hull.js
-      const holder = new THREE.Group();
-      holder.add(obj);
-      holder.rotation.order = 'YXZ';
-      e = { holder, loa: ves.hull.loa, beam: ves.hull.beam,
-            draught: ves.hull.draught, fine: wantFine };
-      PSG.fleetPool.set(tr.name, e);
-      PSG.fleetGroup.add(holder);
-    }
-    e.holder.visible = true;
-    const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - r2)) - 6371000;
-    const yaw = -tr.at.hdg;
-    e.holder.rotation.set(0, yaw, 0);
-
-    /* ── ⚠ HER COMPANIONS, AND THE FIRST ATTEMPT PUT THEM IN DEAD CODE ──────────────────
-       The Sea view sails a treasure fleet three hulls in company; going aboard showed one.
-       I added consorts to psgOpen() — which is DEFINED AND NEVER CALLED. openPassage() is
-       referenced only from a comment; the live close-up runs through followShip -> this
-       function, and the pool here is keyed by track name, so one hull per voyage was all it
-       could ever hold. The lesson is the cheap one: grep for the CALL, not the definition.
-       Same `together` rule and station geometry as the map, so the two views agree on how
-       many ships a voyage is; coarse hulls, because a second fine container ship is 160k
-       triangles for something a few hundred metres off. */
-    if (!e.mates) {
-      const together = /treasure|carrack|indiaman/.test(ves.id) ? 3
-                     : /container|steamer/.test(ves.id) ? 1
-                     : /canoe|dugout/.test(ves.id) ? 2 : 1;
-      e.mates = [];
-      for (let n = 1; n < together; n++) {
-        let co = null;
-        try { co = window.SHIPS_HULL.buildShip(ves.hull); } catch (x) { break; }
-        co.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-        co.rotation.y = Math.PI / 2;
-        co.position.y = -(co.userData.waterlineY || 0);
-        const mh = new THREE.Group();
-        mh.add(co); mh.rotation.order = 'YXZ';
-        const tt = n - (together - 1) / 2;
-        mh.userData.st = { x: tt * e.loa * 1.9, z: -Math.abs(tt) * e.loa * 1.5 };
-        mh.userData.ph = n * 2.399963 + e.loa * 0.017;
-        e.mates.push(mh);
-        PSG.fleetGroup.add(mh);
-      }
-    }
-    for (const mh of e.mates) {
-      mh.visible = true;
-      const st = mh.userData.st, ph = mh.userData.ph;
-      const wob = (a, b, k2) => Math.sin(t / a + k2) * 0.62 + Math.sin(t / b + k2 * 1.7) * 0.38;
-      const amp = Math.hypot(st.x, st.z) * 0.085;
-      const sx = st.x + wob(37.0, 61.0, ph) * amp;
-      const sz = st.z + wob(43.0, 71.0, ph * 1.31) * amp;
-      /* the station is in her own frame; rotate it onto the patch by her heading */
-      const cs = Math.cos(yaw), sn = Math.sin(yaw);
-      const mx = -east + sx * cs + sz * sn, mz = north - sx * sn + sz * cs;
-      mh.rotation.set(0, yaw + wob(53.0, 79.0, ph * 0.77) * 0.045, 0);
-      const mfl = SHIPS_SEA.floatShip(mh, mx, mz, yaw, e.loa, t, wind, e.beam, e.draught);
-      mh.position.set(mx, drop + mfl.y, mz);
-      mh.rotation.z = mfl.pitch; mh.rotation.x = mfl.roll;
-    }
-    const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind,
-                                   e.beam, e.draught);
-    e.holder.position.set(-east, drop + fl.y, north);
-    e.holder.rotation.z = fl.pitch;
-    e.holder.rotation.x = fl.roll;
-    if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(e.holder, t, e.loa);
-    if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
-    /* whichever hull is nearest the middle of the patch is the one being looked at, and hers
-       is the wake worth drawing — no plumbing needed to say which ship is the subject */
-    /* the named subject wins outright; otherwise whichever hull is nearest the middle */
-    const rank = (heroName && tr.name === heroName) ? -1 : r2;
-    if (rank < heroR2) { heroR2 = rank; hero = { x: -east, z: north, yaw, tr, ves }; }
-  }
-  for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
-
-  if (PSG.sea && PSG.sea.material.uniforms.uWakeKn) {
-    const u = PSG.sea.material.uniforms;
-    if (hero) {
-      /* the hull is built with its bow to -X and then turned +90 degrees onto +Z, so at yaw 0
-         she heads along +Z; yaw rotates about +Y. Taken from the same yaw that placed her,
-         because a wake that disagrees with the ship it comes from is worse than no wake. */
-      u.uWakeP.value.set(hero.x, hero.z);
-      u.uWakeDir.value.set(Math.sin(hero.yaw), Math.cos(hero.yaw));
-      u.uWakeLen.value = hero.ves.hull.loa;
-      u.uWakeBeam.value = hero.ves.hull.beam || hero.ves.hull.loa * 0.18;
-      u.uWakeKn.value = hero.tr.kn || 0;
-    } else u.uWakeKn.value = 0;
-  }
+if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
+PSG.scene.add(PSG.fleetGroup); }
+const seen = new Set();
+const alat = PSG.anchor.userData.lat, alon = PSG.anchor.userData.lon;
+PSG.ref = { lon: Math.round(alon / 5) * 5, lat: Math.round(alat / 5) * 5 };
+{
+let dl = alon - PSG.ref.lon;
+if (dl > 180) dl -= 360; else if (dl < -180) dl += 360;
+const dE = dl * Math.PI / 180 * Math.cos(alat * Math.PI / 180) * 6371000;
+const dN = (alat - PSG.ref.lat) * Math.PI / 180 * 6371000;
+if (PSG.sea && PSG.sea.material.uniforms.uDrift)
+PSG.sea.material.uniforms.uDrift.value.set(-dE, dN);
 }
-
-/* ── BUILD HER WHILE THE CAMERA IS STILL FALLING ──────────────────────────────────────────
- * A fine hull is 130,000 to 180,000 triangles and takes up to 102 ms to generate — six dropped
- * frames, right at the moment the viewer is watching the descent. The flight down takes 2.4
- * seconds, which is plenty of room to hide a tenth of one, so the ship the viewer just clicked
- * is built at the start of the flight rather than on arrival.
- *
- * Ships that wander into the patch later still build lazily and still cost their six frames.
- * That is a real remaining cost and it is stated rather than hidden: the alternative is
- * pre-building every hull in the era, which spends fourteen hitches to avoid one.
- */
+let hero = null, heroR2 = Infinity;
+for (const tr of tracks || []) {
+if (!tr.at || !tr.vesselId) continue;
+const ves = list.find(x => x.id === tr.vesselId);
+if (!ves || !ves.hull) continue;
+let dlon = tr.at.lon - alon;
+if (dlon > 180) dlon -= 360; else if (dlon < -180) dlon += 360;
+const east = dlon * Math.PI / 180 * Math.cos(tr.at.lat * Math.PI / 180) * 6371000;
+const north = (tr.at.lat - alat) * Math.PI / 180 * 6371000;
+const r2 = east * east + north * north;
+if (r2 > (SEA_R * 0.7) * (SEA_R * 0.7)) continue;
+seen.add(tr.name);
+let e = PSG.fleetPool.get(tr.name);
+const wantFine = heroName ? (tr.name === heroName) : true;
+if (e && e.fine !== wantFine) {
+PSG.fleetGroup.remove(e.holder);
+PSG.fleetPool.delete(tr.name);
+e = null;
+}
+if (!e) {
+let obj = null;
+try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: wantFine }); } catch (x) { continue; }
+obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+obj.rotation.y = Math.PI / 2;
+obj.position.y = -(obj.userData.waterlineY || 0);
+const holder = new THREE.Group();
+holder.add(obj);
+holder.rotation.order = 'YXZ';
+e = { holder, loa: ves.hull.loa, beam: ves.hull.beam,
+draught: ves.hull.draught, fine: wantFine };
+PSG.fleetPool.set(tr.name, e);
+PSG.fleetGroup.add(holder);
+}
+e.holder.visible = true;
+const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - r2)) - 6371000;
+const yaw = -tr.at.hdg;
+e.holder.rotation.set(0, yaw, 0);
+if (!e.mates) {
+const together = /treasure|carrack|indiaman/.test(ves.id) ? 3
+: /container|steamer/.test(ves.id) ? 1
+: /canoe|dugout/.test(ves.id) ? 2 : 1;
+e.mates = [];
+for (let n = 1; n < together; n++) {
+let co = null;
+try { co = window.SHIPS_HULL.buildShip(ves.hull); } catch (x) { break; }
+co.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+co.rotation.y = Math.PI / 2;
+co.position.y = -(co.userData.waterlineY || 0);
+const mh = new THREE.Group();
+mh.add(co); mh.rotation.order = 'YXZ';
+const tt = n - (together - 1) / 2;
+mh.userData.st = { x: tt * e.loa * 1.9, z: -Math.abs(tt) * e.loa * 1.5 };
+mh.userData.ph = n * 2.399963 + e.loa * 0.017;
+e.mates.push(mh);
+PSG.fleetGroup.add(mh);
+}
+}
+for (const mh of e.mates) {
+mh.visible = true;
+const st = mh.userData.st, ph = mh.userData.ph;
+const wob = (a, b, k2) => Math.sin(t / a + k2) * 0.62 + Math.sin(t / b + k2 * 1.7) * 0.38;
+const amp = Math.hypot(st.x, st.z) * 0.085;
+const sx = st.x + wob(37.0, 61.0, ph) * amp;
+const sz = st.z + wob(43.0, 71.0, ph * 1.31) * amp;
+const cs = Math.cos(yaw), sn = Math.sin(yaw);
+const mx = -east + sx * cs + sz * sn, mz = north - sx * sn + sz * cs;
+mh.rotation.set(0, yaw + wob(53.0, 79.0, ph * 0.77) * 0.045, 0);
+const mfl = SHIPS_SEA.floatShip(mh, mx, mz, yaw, e.loa, t, wind, e.beam, e.draught);
+mh.position.set(mx, drop + mfl.y, mz);
+mh.rotation.z = mfl.pitch; mh.rotation.x = mfl.roll;
+}
+const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind,
+e.beam, e.draught);
+e.holder.position.set(-east, drop + fl.y, north);
+e.holder.rotation.z = fl.pitch;
+e.holder.rotation.x = fl.roll;
+if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(e.holder, t, e.loa);
+if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
+const rank = (heroName && tr.name === heroName) ? -1 : r2;
+if (rank < heroR2) { heroR2 = rank; hero = { x: -east, z: north, yaw, tr, ves }; }
+}
+for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
+if (PSG.sea && PSG.sea.material.uniforms.uWakeKn) {
+const u = PSG.sea.material.uniforms;
+if (hero) {
+u.uWakeP.value.set(hero.x, hero.z);
+u.uWakeDir.value.set(Math.sin(hero.yaw), Math.cos(hero.yaw));
+u.uWakeLen.value = hero.ves.hull.loa;
+u.uWakeBeam.value = hero.ves.hull.beam || hero.ves.hull.loa * 0.18;
+u.uWakeKn.value = hero.tr.kn || 0;
+} else u.uWakeKn.value = 0;
+}
+}
 function psgPrebuild(tr, ves) {
-  if (!tr || !ves || !ves.hull) return false;
-  if (!PSG.scene) return false;
-  if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
-                        PSG.scene.add(PSG.fleetGroup); }
-  if (PSG.fleetPool.has(tr.name)) return true;
-  let obj = null;
-  try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: true }); } catch (e) { return false; }
-  obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-  obj.rotation.y = Math.PI / 2;
-  obj.position.y = -(obj.userData.waterlineY || 0);            // her marks: local y=0, see hull.js
-  const holder = new THREE.Group();
-  holder.add(obj);
-  holder.rotation.order = 'YXZ';
-  holder.visible = false;
-  PSG.fleetPool.set(tr.name, { holder, loa: ves.hull.loa, fine: true });
-  PSG.fleetGroup.add(holder);
-  return true;
+if (!tr || !ves || !ves.hull) return false;
+if (!PSG.scene) return false;
+if (!PSG.fleetPool) { PSG.fleetPool = new Map(); PSG.fleetGroup = new THREE.Group();
+PSG.scene.add(PSG.fleetGroup); }
+if (PSG.fleetPool.has(tr.name)) return true;
+let obj = null;
+try { obj = window.SHIPS_HULL.buildShip(ves.hull, { fine: true }); } catch (e) { return false; }
+obj.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+obj.rotation.y = Math.PI / 2;
+obj.position.y = -(obj.userData.waterlineY || 0);
+const holder = new THREE.Group();
+holder.add(obj);
+holder.rotation.order = 'YXZ';
+holder.visible = false;
+PSG.fleetPool.set(tr.name, { holder, loa: ves.hull.loa, fine: true });
+PSG.fleetGroup.add(holder);
+return true;
 }
-
 function psgFleetClear() {
-  if (!PSG.fleetPool) return;
-  for (const [, e] of PSG.fleetPool) {
-    e.holder.visible = false;
-    if (e.mates) e.mates.forEach(m => { m.visible = false; });
-  }
+if (!PSG.fleetPool) return;
+for (const [, e] of PSG.fleetPool) {
+e.holder.visible = false;
+if (e.mates) e.mates.forEach(m => { m.visible = false; });
 }
-
+}
 window.SHIPS_PSG = { PSG, psgInit, psgOpen, psgClose, psgStep, psgFrame, PATCH_M, SEA_R,
-                     psgDescent, psgDescentActive, psgFleet, psgFleetClear, psgPrebuild,
-                     DESCENT_M };
+psgDescent, psgDescentActive, psgFleet, psgFleetClear, psgPrebuild,
+DESCENT_M };
