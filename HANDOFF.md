@@ -2952,3 +2952,7 @@ Containers (1950–2026) with Ocean Crossing lit.
    r43's plate gaps (corbita era plate; dugout/dhow/cog plates; globe-era-card frame).
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted.
+
+**End-of-round deploy note: LIVE, stamp 1786341590 → 1786383743**, verified with a
+cache-busted fetch of the data-version meta tag; the live minified app.js confirmed carrying
+labelsSettled and the passageCard land fill. Seventeenth clean push-triggered deploy in a row.
