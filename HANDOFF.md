@@ -3268,3 +3268,8 @@ continuously into the water that breaks at its foot, with a lit face and a shado
    research pass; trireme/corbita tops deserve an existence check.
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+**End-of-round deploy note: LIVE, stamp 1786394381 → 1786399633**, verified with a
+cache-busted fetch of the data-version meta tag on the second poll (~30 s after push), and
+the live shaders.js confirmed carrying atmoBright, ldLand and vRest. Nineteenth clean
+push-triggered deploy in a row.
