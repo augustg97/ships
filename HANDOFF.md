@@ -3135,8 +3135,14 @@ it, the topmast rising through the doubling beside the lower masthead; the fleet
 right runs from a dugout of 68,000 BC to the ship of the line, with her card giving 57.0 m
 and a 59.4 m rig, deck to truck.
 
-**Audit 29/29 clean, twice. Frames 42 → 43, final run 43/43 green. Deploy: stamp 1786394381,
-live verification below.**
+**Audit 29/29 clean, twice. Frames 42 → 43, final run 43/43 green.**
+
+**End-of-round deploy note: LIVE, stamp 1786392062 → 1786394381**, verified with a
+cache-busted fetch of the data-version meta tag on the third poll (~60 s after push), and
+the live hull.js confirmed carrying ringMesh, wooldings and cheeks. Note for the record:
+the live stamp BEFORE this push was 1786392062, not the 1786383743 round 63 recorded — a
+deploy landed between rounds that no handoff owns. Eighteenth clean push-triggered deploy
+in a row.
 
 ### Next, in order
 1. **Survey continues.** SHIPWRIGHT-QUEUE is now items 1–10 all closed; item 10's remainder
