@@ -671,7 +671,35 @@ async function boot() {
   const cv = document.getElementById('gl');
   renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  /* ⚠ THE CANVAS CLEARS ITSELF, SO THE PAGE COLOUR NEVER SHOWED THROUGH IT. With alpha:false
+     the renderer clears to its own colour — black by default — and the body's background is
+     simply covered. Turning the whole chrome to daylight therefore left the globe sitting in
+     a black square, which is the one place the old theme survived. Cleared to the page colour
+     instead, read FROM the stylesheet rather than repeated here: two spellings of one colour
+     is how a theme drifts, and this file already has that lesson from the sun vector. */
+  {
+    const paper = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--abyss').trim() || '#efeade';
+    renderer.setClearColor(new THREE.Color(paper), 1);
+    /* ⚠ AND scene.background TOO. setClearColor alone left the globe in a black square: the
+       clear colour is what the canvas is wiped to, and anything that renders a second pass, or
+       any path that sets autoClear false, paints over it. scene.background is the property
+       three.js actually honours for "what is behind everything", and setting both means no
+       render path can leave the old night sky behind. */
+  }
   scene = new THREE.Scene();
+  /* ⚠ AFTER the scene exists, not with the renderer. setClearColor alone left the globe in a
+     black square, because this view renders in TWO passes with renderer.autoClear = false
+     (see the near-field note below) — the second pass paints over whatever the clear left.
+     scene.background is what three.js honours for "behind everything" and survives that.
+     Setting it up beside the renderer, where the clear colour is set, threw: `scene` is
+     assigned on this line, so the property write ran against undefined, boot died, and the
+     frame harness got zero frames rather than a wrong colour. */
+  {
+    const paper = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--abyss').trim() || '#efeade';
+    scene.background = new THREE.Color(paper);
+  }
   camera = new THREE.PerspectiveCamera(34, 1, 1, 6000);
   raycaster = new THREE.Raycaster();
 
@@ -685,7 +713,7 @@ async function boot() {
   note.textContent = 'reading the sea floor…';
   const z0 = await loadLevel(0, manifest, p => setP(p * 0.55));
 
-  note.textContent = 'wind, temperature and what lives in the water…';
+  note.textContent = 'reading the surface fields…';
   const mi = Math.floor(S.month) % 12;
   const seaA = await loadTex(`fields/sea_${String(mi + 1).padStart(2, '0')}.png`);
   const seaB = await loadTex(`fields/sea_${String((mi + 1) % 12 + 1).padStart(2, '0')}.png`);
@@ -2413,7 +2441,20 @@ function landward(at) {
   const RT = window.SHIPS_ROUTE;
   if (!at || !RT || !RT.isOcean || !RT.FINE || !RT.FINE.ready) return null;
   const cl = Math.max(0.05, Math.cos(at.lat * Math.PI / 180));
-  for (let km = 3; km <= 140; km += 3) {
+  /* ── ⚠ 140 km FOUND NOTHING IN THE OPEN OCEAN, WHICH IS WHERE SHIPS ARE ──────────────
+     The search stopped at 140 km, and a ship on passage is by definition rarely that close to
+     anything — so the close-up returned null and drew an empty horizon almost everywhere,
+     which is exactly the "I cannot see land" August reported. Out to 900 km now, coarsening
+     the step as it goes so the cost stays about what it was: near coasts are still found to
+     3 km, and a mid-ocean position finds the continent it is actually crossing toward.
+     ⚠ AND THE DRAWN DISTANCE IS NOT THE FOUND DISTANCE. This view is explicitly not to
+     scale — August's own framing is island-sized pieces on a board — so a coast 600 km off is
+     drawn at the edge of the near field rather than over the horizon, where at true scale it
+     would be invisible by geometry alone. `km` is the range used to PLACE it; `trueKm` is
+     what it really is, so the card can say so rather than implying the ship is closer than
+     she is. */
+  const REACH = 900, NEAR = 140;
+  for (let km = 3; km <= REACH; km += (km < NEAR ? 3 : 18)) {
     for (let b = 0; b < 48; b++) {
       const th = b * Math.PI / 24;
       const lo = at.lon + Math.sin(th) * km / 111.32 / cl;
@@ -2446,7 +2487,9 @@ function landward(at) {
             h = (landward._img[i] * 256 + landward._img[i + 1]) / 65535 * 20000 - 11000;
           }
         }
-        return { az: th, km, h: Math.max(0, h) };
+        /* compress anything beyond the near field into it, and keep the honest range */
+        const drawKm = km <= NEAR ? km : NEAR * (0.72 + 0.28 * Math.min(1, NEAR / km));
+        return { az: th, km: drawKm, trueKm: km, h: Math.max(0, h) };
       }
     }
   }
@@ -2499,6 +2542,26 @@ function followShip(tr) {
      Going aboard now looks TOWARD the nearest land within sight, so the ship stands in the
      foreground of the place she is actually in. Dragging still turns you anywhere. */
   const lw = landward(tr.at);
+  /* name the coast from the gazetteer, and say how far it really is */
+  if (PSGV.card && lw) {
+    const cell = PSGV.card.querySelector('.pc-land');
+    if (cell) {
+      const ports = (APP.ports && APP.ports.ports) || [];
+      let best = null, bestD = 1e9;
+      const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
+      for (const pt of ports) {
+        const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
+        const d = dx * dx + dy * dy;
+        if (d < bestD) { bestD = d; best = pt; }
+      }
+      const km = Math.round(lw.trueKm || lw.km);
+      const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
+                       'S','SSW','SW','WSW','W','WNW','NW','NNW'];
+      const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
+      cell.textContent = (best ? best.name + ' · ' : '') +
+                         Math.round(km / 1.852) + ' nm ' + pt8;
+    }
+  }
   S.followAz = lw ? lw.az : 2.4;
   S.followDep = 15;
   /* a few ship-lengths off, which is where one vessel sees another */
@@ -2632,7 +2695,14 @@ function passageCard(tr, ves) {
     rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +
     '<tr><td>Position</td><td class="pc-pos">—</td></tr>' +
     '<tr><td>Course</td><td class="pc-crs">—</td></tr>' +
-    '<tr><td>Wind</td><td class="pc-wnd">—</td></tr>';
+    '<tr><td>Wind</td><td class="pc-wnd">—</td></tr>' +
+    /* ── WHAT THE LAND ON THE HORIZON IS ─────────────────────────────────────────────
+       The close-up draws a coast but never said what it was, so it read as scenery rather
+       than as a place. The name comes from the nearest PORT in the model's own gazetteer —
+       real data, not a label invented for the view — and the range printed is the TRUE one
+       even though the coast is drawn compressed into the near field, because the picture is
+       admittedly not to scale and the number should not pretend otherwise. */
+    '<tr><td>Nearest land</td><td class="pc-land">—</td></tr>';
 }
 
 /* Beaufort, because a number in metres per second is data and a force is a sea state — and

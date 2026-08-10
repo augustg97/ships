@@ -148,7 +148,12 @@ function swInit() {
   });
   cv.addEventListener('wheel', e => {
     e.preventDefault();
-    SW.dist = Math.max(0.35, Math.min(8.0, SW.dist * (1 + Math.sign(e.deltaY) * 0.11)));
+    /* ⚠ 8x WAS NOT FAR ENOUGH TO SEE THE FLEET. The yard is 2.6 km of hulls laid on one
+       baseline, and the whole argument of that line is the comparison along it — a dugout
+       against a container ship. Capped at 8x the selected ship's own fit, a canoe's fit is so
+       small that 8x still showed only her neighbours. 26x lets the camera pull back to the
+       whole line from any vessel; the near limit is unchanged. */
+    SW.dist = Math.max(0.35, Math.min(26.0, SW.dist * (1 + Math.sign(e.deltaY) * 0.11)));
   }, { passive: false });
 
   /* ── stepping along the line ──────────────────────────────────────────────────────── */
@@ -203,21 +208,19 @@ function swSelect(obj) {
     SW.sel.userData.emissiveWas = undefined;
   }
   SW.sel = obj;
-  const box = document.getElementById('swPart');
-  if (!obj || !obj.userData.part) {
-    box.classList.add('empty');
-    box.innerHTML = '<div class="ph">Click any timber, rope or sail.</div>';
-    return;
-  }
-  if (obj.material && obj.material.emissive) {
+  /* ── ⚠ THE PART CARD IS GONE, DELIBERATELY ───────────────────────────────────────────
+     Clicking a hull raised a panel headed "Deck", "Planking" or "Rail" — a caption naming a
+     thing the viewer is already looking at, which spends a large panel on the least
+     surprising fact on screen. It also competed with the vessel card for the same corner.
+     The GEOMETRY TAGS STAY. Every mesh still carries its own userData.part, the audit still
+     reads them, and the build-stage slider still works off them — removing the panel removes
+     a caption, not the model's knowledge of itself. The highlight stays too, so a click still
+     tells you what you hit. */
+  if (obj && obj.material && obj.material.emissive) {
     obj.userData.emissiveWas = obj.material.emissive.getHex();
     obj.material = obj.material.clone();
     obj.material.emissive.setHex(0x3a2c10);
   }
-  const P = obj.userData.part;
-  box.classList.remove('empty');
-  box.innerHTML = '<div class="pk">' + STAGE_NAMES[P.stage][0] + '</div>' +
-                  '<h3>' + P.name + '</h3><p>' + P.what + '</p>';
 }
 
 /* ── the building slider ───────────────────────────────────────────────────────────── */
@@ -567,7 +570,7 @@ function swOpen(vessel) {
      the move. Zoomed out is always kept — there is no reason to pull a viewer back in. Ships
      of very different size need no special case at all, which is the point of a relative zoom:
      `fit` grows 46x from the dugout to the container ship and dist rides on top of it. */
-  SW.dist = Math.min(8.0, Math.max(SW.dist, 1.0));
+  SW.dist = Math.min(26.0, Math.max(SW.dist, 1.0));
   SW.spin = true; SW.t0 = performance.now();
   SW.stage = 7;
   document.getElementById('swStage').value = 7;
@@ -707,7 +710,12 @@ function swFillCard(v) {
 /* ── the scale strip: every hull in the model, one baseline, one scale ─────────────── */
 function swBuildFleetStrip() {
   const strip = document.getElementById('swFleet');
-  const all = ((APP.vessels && APP.vessels.vessels) || []).filter(v => v.hull);
+  /* ⚠ THE SAME ORDER AS THE FLEET LIST, AND FOR THE SAME REASON. The list sorts by date and
+     the strip used raw data order, so walking one and reading the other put you in two
+     different fleets — a viewer who finds Titanic ninth in the list and fourteenth along the
+     bar has no way to know they are the same set. Sorted here by the same key. */
+  const all = ((APP.vessels && APP.vessels.vessels) || []).filter(v => v.hull)
+    .slice().sort((a, b) => (a.from || 0) - (b.from || 0));
   const max = Math.max(...all.map(v => v.hull.loa));
   strip.innerHTML = '';
   all.forEach(v => {
@@ -898,7 +906,10 @@ function swFrame(now) {
       const sx = (v.x * 0.5 + 0.5) * w, sy = (-v.y * 0.5 + 0.5) * h;
       const on = SW.spec && e.id === SW.spec.id;
       const near = Math.abs(e.x - SW.panX);
-      const vis = v.z < 1 && sx > -40 && sx < w + 40 && near < (SW.fit || 200) * 4;
+      /* the cull scales with how far back the camera actually is, not with the selected
+         ship's fit alone — pulling out to see the fleet used to drop every name off it */
+      const vis = v.z < 1 && sx > -40 && sx < w + 40 &&
+                  near < (SW.fit || 200) * 4 * Math.max(1, SW.dist || 1);
       cand.push({ e, sx, sy, on, near, vis });
     });
     cand.sort((a, b) => (b.on ? 1 : 0) - (a.on ? 1 : 0) || a.near - b.near);

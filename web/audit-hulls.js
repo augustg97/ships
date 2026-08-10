@@ -883,6 +883,45 @@
         say(v.id, 'spanker not set',
             `mast at u=${mk.at} declares a spanker and no quad cloth runs aft of its station`);
     }
+    /* ── THE CROSSED YARD IS WORKED, AND THE UPPER MASTS ARE STAYED (round 59). Item 2's
+       standing remainder: a yard without lifts is held up by nothing, a sail without sheets
+       is trimmed by nothing, and every topmast in the fleet stood as an unstayed pole —
+       none of it visible to a ratchet that only sees change, because gear that never
+       existed never changes. The builder merges each category into ONE mesh per square
+       mast, so the census is exact: lifts, sheets, tacks and a halyard fall per square
+       mast (a junk mast adds its own crowfoot sheet and halyard), and above one drawn tier
+       the topmast shroud set with its futtocks, above two the topgallant set. Counted on
+       the fine build, where the gear is drawn. */
+    {
+      const sq = (H.masts || []).filter(mk => mk.rig === 'square');
+      if (sq.length) {
+        const jm = (H.masts || []).filter(mk => mk.rig === 'junk').length;
+        for (const [key, label] of [['lift', 'lift'], ['sheet', 'sheet'],
+                                    ['tack', 'tack'], ['halyard', 'halyard']]) {
+          const want = sq.length + ((key === 'sheet' || key === 'halyard') ? jm : 0);
+          const got = part[key] ? part[key].n : 0;
+          if (got !== want)
+            say(v.id, 'yard gear missing',
+                `${want} ${label} mesh(es) for ${sq.length} square mast(s), ${got} drawn`);
+        }
+        const tiers = mk => mk.only ? Math.min(mk.only, 3) : 3;
+        const wantTop = sq.filter(mk => mk.shrouds && tiers(mk) >= 2).length;
+        const wantTg = sq.filter(mk => mk.shrouds && tiers(mk) >= 3).length;
+        let gotTop = 0, gotFut = 0, gotTg = 0;
+        g.traverse(o => { if (!o.isMesh || !o.userData.part) return;
+          const nm = o.userData.part.name;
+          if (nm === 'Topmast shrouds') gotTop++;
+          if (nm === 'Futtock shrouds') gotFut++;
+          if (nm === 'Topgallant shrouds') gotTg++; });
+        if (gotTop !== wantTop || gotFut !== wantTop)
+          say(v.id, 'topmast unstayed',
+              `${wantTop} topmast shroud set(s) wanted with futtocks, ` +
+              `${gotTop} drawn (${gotFut} futtock)`);
+        if (gotTg !== wantTg)
+          say(v.id, 'topgallant unstayed',
+              `${wantTg} topgallant set(s) wanted, ${gotTg} drawn`);
+      }
+    }
     /* ── THE ANCHOR IS FORGE-SIZED (round 45, steamer). The bower's shank scaled at L/8
        for every hull, which is right at a 74's size and hung a 10.6 m anchor across the
        92 m steamer's forecastle and a 17 m one on Preussen. Anchors stopped growing when

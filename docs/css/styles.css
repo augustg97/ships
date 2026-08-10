@@ -25,28 +25,35 @@
   font-weight:200 900;font-style:italic;font-display:block}
 
 :root{
-  /* the sea, from the surface down */
-  --abyss:#03080e;
-  --deep:#071522;
-  --shelf:#0d2739;
-  --ink:#eae2cd;          /* chart cream */
-  --ink-dim:#9db0b4;
-  --ink-faint:#63797f;
-  --verdigris:#5fb3a1;
-  --verdigris-dim:#2f6b60;
-  --brass:#d8b45c;
-  --brass-dim:#8a7333;
-  --signal:#d0563a;       /* the only warm accent: battles, warnings */
-  --foam:#eef4f3;
+  /* ── DAYLIGHT, AND IT IS THE MORE AUTHENTIC REGISTER OF THE TWO ─────────────────────
+     The file's opening note calls this an Admiralty chart at night. A real chart is printed
+     on buff paper in dark ink and read in daylight, so this is the chart itself rather than
+     a screen imitating one — and the ocean, which is the subject, now sits DARK against a
+     light ground instead of dark against dark, which is why the water reads better here.
+     Every colour below is the old palette's role, re-solved for a light ground: the same
+     verdigris and brass doing the same jobs, at the contrast a pale page needs. */
+  --abyss:#efeade;        /* the page: warm chart paper, and the space behind the globe */
+  --deep:#e0d9c7;
+  --shelf:#cbc2aa;
+  --ink:#1a2730;          /* chart ink */
+  --ink-dim:#4b5b63;
+  --ink-faint:#7b8990;
+  --verdigris:#2b6a5f;    /* copper after a season in salt water — darkened for a light page */
+  --verdigris-dim:#83b4a9;
+  --brass:#8a6820;
+  --brass-dim:#c6a968;
+  --signal:#b2381c;       /* the only warm accent: battles, warnings */
+  --foam:#ffffff;
 
-  --panel:rgba(7,21,34,.90);
-  --panel-solid:#071522;
-  --edge:rgba(95,179,161,.26);
-  --edge-strong:rgba(95,179,161,.5);
+  --panel:rgba(252,249,242,.93);
+  --panel-solid:#fbf8f1;
+  --edge:rgba(43,106,95,.30);
+  --edge-strong:rgba(43,106,95,.55);
 
   --serif:"Ships Serif","Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --sans:ui-sans-serif,-apple-system,"Helvetica Neue","Arial Narrow",Arial,sans-serif;
 }
+
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--abyss);
@@ -59,22 +66,26 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--abyss)
 /* chart labels drawn over the globe — typography, not symbols */
 #labels{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
 .lbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
-  text-shadow:0 0 5px rgba(3,8,14,.95),0 0 11px rgba(3,8,14,.85);pointer-events:auto;
+  /* ⚠ THESE SIT ON THE GLOBE, NOT ON THE PAGE. Turning the chrome to daylight and taking the
+     labels with it put dark ink on a dark ocean with a pale halo — illegible, and the one
+     element where inverting was wrong. Chart lettering over water stays light with a dark
+     halo, because what is behind it is water. */
+  text-shadow:0 0 5px rgba(6,14,22,.92),0 0 12px rgba(6,14,22,.8);pointer-events:auto;
   cursor:pointer;transition:opacity .35s ease}
 .lbl.port{font-family:var(--sans);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--ink-dim)}
+  color:#cfd9dd}
 .lbl.port:hover{color:var(--brass)}
-.lbl.port.major{font-size:10.5px;color:var(--ink);letter-spacing:.17em}
+.lbl.port.major{font-size:10.5px;color:#f2f6f7;letter-spacing:.17em}
 .lbl.sea{font-family:var(--serif);font-style:italic;font-size:12.5px;letter-spacing:.22em;
-  color:rgba(157,176,180,.62);text-transform:uppercase;pointer-events:none}
+  color:rgba(206,220,224,.72);text-transform:uppercase;pointer-events:none}
 .lbl.battle{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--signal)}
+  color:#ff8b6a}
 .lbl.battle:hover{color:#f0836a}
 .lbl .tick{display:block;width:1px;height:7px;background:currentColor;opacity:.55;margin:2px auto 0}
 
 .panel{position:fixed;background:var(--panel);border:1px solid var(--edge);
   backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
-  box-shadow:0 14px 48px rgba(0,0,0,.6)}
+  box-shadow:0 10px 34px rgba(26,39,48,.16)}
 .hidden{display:none!important}
 
 button{font-family:var(--sans);cursor:pointer}
@@ -209,7 +220,7 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   display:flex;flex-direction:column}
 #yardCanvas{flex:1;width:100%;display:block}
 #yardBar{position:absolute;left:0;right:0;bottom:0;padding:14px 20px 16px;
-  background:linear-gradient(transparent,rgba(3,8,14,.92) 38%);display:flex;gap:20px;
+  background:linear-gradient(transparent,rgba(239,234,222,.94) 38%);display:flex;gap:20px;
   align-items:flex-end}
 #yardBar .meta{flex:1;min-width:0}
 #yardBar h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:30px;
@@ -227,7 +238,7 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
   text-transform:uppercase;color:var(--ink-faint);max-width:340px;line-height:1.7}
 
 /* ── about sheet ────────────────────────────────────────────── */
-.sheet{position:fixed;inset:0;background:rgba(3,8,14,.975);z-index:70;overflow-y:auto;
+.sheet{position:fixed;inset:0;background:rgba(247,244,236,.975);z-index:70;overflow-y:auto;
   backdrop-filter:blur(7px)}
 .sheet-in{max-width:730px;margin:0 auto;padding:60px 26px 96px;font-family:var(--serif);
   font-size:15px;line-height:1.7;color:#cdc6b3}
@@ -293,11 +304,11 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
    above the text makes every one of these panels taller. */
 #swLeft{position:absolute;top:16px;left:18px;width:min(330px,32vw);z-index:3;
   max-height:calc(100vh - 82px - 116px);overflow-y:auto;
-  scrollbar-width:thin;scrollbar-color:rgba(216,180,92,.40) rgba(255,255,255,.05);
+  scrollbar-width:thin;scrollbar-color:rgba(138,104,32,.40) rgba(26,39,48,.06);
   background:var(--panel);border:1px solid var(--edge);border-radius:3px;padding:15px 17px 16px}
 #swLeft::-webkit-scrollbar{width:8px}
-#swLeft::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
-#swLeft::-webkit-scrollbar-thumb{background:rgba(216,180,92,.38);border-radius:4px}
+#swLeft::-webkit-scrollbar-track{background:rgba(26,39,48,.06)}
+#swLeft::-webkit-scrollbar-thumb{background:rgba(138,104,32,.42);border-radius:4px}
 
 /* ── the plate: the real ship, above the account of her ─────────────────────────────── */
 .plate{margin:0 0 14px;padding:0}
@@ -307,11 +318,11 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
    photographed broadside survives a crop far better than a portrait would: the interesting
    part is the length, and the length is what a letterbox keeps. */
 .plate img{display:block;width:100%;height:auto;max-height:154px;object-fit:cover;
-  object-position:center;border:1px solid var(--edge);border-radius:2px;background:#050d15}
+  object-position:center;border:1px solid var(--edge);border-radius:2px;background:#e6e0d2}
 .plate figcaption{font-size:10.5px;line-height:1.5;color:var(--ink-faint);margin-top:6px;
   font-style:italic}
 .plate .cr{display:block;font-style:normal;font-size:9.5px;letter-spacing:.06em;
-  color:rgba(99,121,127,.78);margin-top:3px}
+  color:rgba(107,120,127,.85);margin-top:3px}
 #swLeft h2{font-family:var(--serif);font-size:25px;font-style:italic;margin:0 0 3px;color:var(--ink)}
 #swLeft .sub{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--verdigris);
   margin-bottom:12px}
@@ -335,19 +346,19 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swBuild input[type=range]{width:100%}
 #swBuild .bw{font-size:12px;line-height:1.5;color:var(--ink-dim);margin-top:7px;min-height:34px}
 #swFleet{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;gap:0;
-  background:linear-gradient(0deg,rgba(3,8,14,.96),rgba(3,8,14,.55));
+  background:linear-gradient(0deg,rgba(239,234,222,.97),rgba(239,234,222,.62));
   border-top:1px solid var(--edge);overflow-x:auto;padding:9px 10px 5px;
   /* ⚠ ALWAYS-VISIBLE SCROLLBAR. The strip is 2.6 m of hulls in a window that shows nineteen
      of them, and it has always scrolled — but macOS draws overlay scrollbars only while they
      are in motion, so the remaining ships were reachable and invisible. A bar that is drawn
      when the strip is at rest is the whole difference between "there is more" and "that is
      all of it". Firefox takes the two standard properties; WebKit needs its own pseudos. */
-  scrollbar-width:thin;scrollbar-color:rgba(216,180,92,.45) rgba(255,255,255,.06);
+  scrollbar-width:thin;scrollbar-color:rgba(138,104,32,.45) rgba(26,39,48,.07);
   scroll-behavior:smooth;overscroll-behavior-x:contain}
 #swFleet::-webkit-scrollbar{height:9px}
-#swFleet::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:5px}
-#swFleet::-webkit-scrollbar-thumb{background:rgba(216,180,92,.42);border-radius:5px}
-#swFleet::-webkit-scrollbar-thumb:hover{background:rgba(216,180,92,.70)}
+#swFleet::-webkit-scrollbar-track{background:rgba(26,39,48,.07);border-radius:5px}
+#swFleet::-webkit-scrollbar-thumb{background:rgba(138,104,32,.45);border-radius:5px}
+#swFleet::-webkit-scrollbar-thumb:hover{background:rgba(138,104,32,.72)}
 .fs{flex:0 0 auto;width:104px;background:none;border:0;border-right:1px solid rgba(95,179,161,.12);
   padding:5px 9px 6px;text-align:left;cursor:pointer;color:inherit}
 .fs:hover{background:rgba(95,179,161,.07)}
@@ -384,7 +395,7 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 
 /* ── top-level tabs ───────────────────────────────────────────────────────────────────── */
 #tabs{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;justify-content:center;gap:0;
-  background:linear-gradient(180deg,rgba(3,8,14,.93),rgba(3,8,14,0));padding:0 0 16px;
+  background:linear-gradient(180deg,rgba(239,234,222,.94),rgba(239,234,222,0));padding:0 0 16px;
   pointer-events:none}
 #tabs .tab{pointer-events:auto;background:none;border:0;border-bottom:2px solid transparent;
   padding:11px 22px 9px;cursor:pointer;color:inherit;text-align:center;font:inherit}
@@ -499,4 +510,7 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 body.in-passage #layers, body.in-passage #voyList { opacity: .28; pointer-events: none; }
 /* the era card names a century; the passage card names a ship at a position. Both at once in
    the same corner is two captions for one picture. */
-body.in-passage #card { display: none !important; }
+/* ⚠ THIS IS WHY THE VOYAGE CARD NEVER APPEARED IN THE CLOSE-UP. followShip calls
+   showVoyageCard, and it ran — into a display:none with !important on it. Going aboard is
+   exactly when the passage is worth reading about, and the card stacks below the ship's slip
+   already because syncPanelInsets measures the whole left column. */

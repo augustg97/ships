@@ -584,7 +584,7 @@ function buildRig(S, group, mats, FINE) {
     return m;
   };
 
-  const woodDark = mats.spar, canvas = mats.canvas, rope = mats.rope;
+  const woodDark = mats.spar, canvas = mats.canvas;
   /* ⚠ LineBasicMaterial is UNLIT — it renders flat at whatever colour it is given, so rigging
      drawn with it stayed the same value whether it was in sunlight or in the shadow of a sail.
      Rope that is actually geometry can take the light like everything else. */
@@ -664,6 +664,13 @@ function buildRig(S, group, mats, FINE) {
        which is why the rig stood 72 m over a 57 m hull instead of about 62. */
     const top = lower * 0.60, tg = top * 0.50;
     let y = base;
+    /* capY tracks the HEAD of the highest drawn segment — the cap the lifts lead to. It is
+       not `y`, because y advances by 0.88 of each segment (the doubling) and so ends BELOW
+       the truck; a single-tier mast's one yard is slung above it. */
+    let capY = base;
+    /* every yard this mast crosses, recorded as built — the running rigging below is led
+       from these, the braces' own rule: rope goes to where the spar actually is */
+    const mastYards = [];
     /* a braced sail reaches about a tenth of the hull either side of its own mast */
     let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
 
@@ -716,6 +723,7 @@ function buildRig(S, group, mats, FINE) {
          needs so the sail can be handled. */
       const drop = yy - prevYard;
       prevYard = yy;
+      mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop });
       sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
                           yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
     };
@@ -841,6 +849,7 @@ function buildRig(S, group, mats, FINE) {
          The heel of a topmast is not at the head of the mast below it — the two are fidded
          side by side and overlap through the DOUBLING, about an eighth of the lower spar. That
          is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
+      capY = y + seg;
       y += seg * 0.88;
     });
 
@@ -873,6 +882,68 @@ function buildRig(S, group, mats, FINE) {
         .sort((a, b) => a[0] - b[0])
         .forEach(([f, r]) => crossYard(base + T * f, lower * 0.875 * r));
     }
+
+    /* ── THE GEAR THE YARDS ARE WORKED BY ──────────────────────────────────────────────
+       The braces (buildRigging) swing a yard round; everything else that holds and works it
+       was missing, which is why the rig still read as spars in air rather than a machine.
+       LIFTS run from each yardarm up to the mast — they carry the yard's weight, and the V
+       over every tier is in every sail plan ever drawn. Each upper sail SHEETS its clews to
+       the arms of the yard below (the sheave in the yardarm is what the arm is FOR); the
+       course, with no yard beneath it, sheets aft to the rail and hauls its TACK forward.
+       And a hoisting yard rides a HALYARD whose fall comes down to the rail — on a
+       single-yard mast that is the course itself, hoisted to the masthead to set sail.
+       Every line is led from a point this builder has already placed — arm, clew, slings,
+       cap — the braces' own rule, so nothing can lead to where a spar is not. One merged
+       mesh per category per mast, which is also what the audit counts. */
+    if (FINE && mk.rig === 'square' && mastYards.length) {
+      const mx = h => x + Math.sin(rakeRad) * (h - base);
+      const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
+      const V3 = (px, py, pz) => new THREE.Vector3(px, py, pz);
+      /* the deck attachment: the bulwark at station uu, on side sgn */
+      const rail = (uu, sgn) => {
+        const uc = Math.max(0.03, Math.min(0.965, uu));
+        const hz = H.halfB * H.wl(uc) * (1 - H.tumble(uc)) * 0.96;
+        return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
+      };
+      const lifts = [], sheets = [], tacks = [], hals = [];
+      mastYards.forEach((yd, k) => {
+        const above = mastYards[k + 1];
+        /* the lift leads to the next yard's slings — which is where the cap of this yard's
+           own mast section stands in the drop chain — or to the cap itself for the topmost */
+        const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
+        for (const sgn of [1, -1])
+          lifts.push([V3(yd.cx + sgn * sT * yd.half, yd.yy, sgn * cT * yd.half),
+                      V3(mx(hL), hL, 0)]);
+        /* the sail's clews are where makeSail put them: 0.96 of the yard, at the foot */
+        const w2 = yd.half * 0.96;
+        const clewY = yd.yy - yd.drop * 0.97;
+        for (const sgn of [1, -1]) {
+          const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2);
+          if (k === 0) {
+            sheets.push([clew, rail(u + 0.17, sgn)]);
+            tacks.push([clew, rail(u - 0.15, sgn)]);
+          } else {
+            const below = mastYards[k - 1];
+            sheets.push([clew, V3(below.cx + sgn * sT * below.half, below.yy,
+                                  sgn * cT * below.half)]);
+          }
+        }
+        /* the halyard fall, slings to the rail, sides alternating by tier. The course of a
+           multi-tier rig hangs from fixed jeers and gets none; a single-tier mast's one
+           yard is itself the hoisting yard. */
+        if (k > 0 || mastYards.length === 1) {
+          const sgn = k % 2 ? 1 : -1;
+          hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0),
+                     rail(u + 0.05 + 0.015 * k, sgn)]);
+        }
+      });
+      const rr = B * 0.0004;
+      const lm = ropeMesh(lifts, 0.012 + rr, ropeMat);  if (lm) group.add(tag(lm, 'lift'));
+      const sm = ropeMesh(sheets, 0.013 + rr, ropeMat); if (sm) group.add(tag(sm, 'sheet'));
+      const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(tag(tm, 'tack'));
+      const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(tag(hm, 'halyard'));
+    }
+
     if (mk.rig === 'square') {
       mastTops.push({ u, x, y: y + (lower * 0.14) });
       /* the staysail block below needs each square mast's own station and truck height */
@@ -1276,6 +1347,91 @@ function buildRig(S, group, mats, FINE) {
          the ratlines would simply be faint. */
       const rats = ropeMesh(ratSegs, 0.017 + B * 0.0006, ropeMat);
       if (rats) group.add(tag(rats, 'ratline'));
+
+      /* ── THE UPPER MASTS ARE STAYED TOO ─────────────────────────────────────────────
+         The shrouds above stopped at the lower masthead, so every topmast and topgallant
+         in the fleet stood as an unstayed pole — the one thing a fidded mast can never be,
+         since sending it up is only possible because its rigging comes up after it. A
+         topmast is stayed exactly as its lower mast is, one storey up: FUTTOCK shrouds run
+         from the stave on the lower shrouds out to the RIM of the top — the overhang every
+         hand climbed leaning backwards — where the TOPMAST shrouds set up on their own
+         deadeye row and run to the topmast head, rattled down because the topsail yards
+         are worked from them. The TOPGALLANT set above is a light pair set up at the
+         crosstrees, no ratlines. FINE only, like the stays and braces: the coarse token
+         keeps the lower rig. */
+      const tiersDrawn = mk.rig === 'square'
+        ? (mk.only ? Math.min(mk.only, segs.length) : segs.length) : 1;
+      if (FINE && mk.rig === 'square' && tiersDrawn >= 2) {
+        const platX = x + Math.sin(rakeRad) * lower;         // where buildTop stands
+        const platY = base + lower * 0.90;
+        const platR = B * 0.20;
+        const mxAt = h => x + Math.sin(rakeRad) * (h - base);
+        const topHead = base + lower * 0.88 + top * 0.97;
+        const futt = [], upPts = [[], []], upSegs = [], upRats = [], tgSegs = [];
+        for (let s = 0; s < mk.shrouds; s++) {
+          const f = (s + 1) / (mk.shrouds + 1);
+          [1, -1].forEach((side, si2) => {
+            const [a, b] = shroudPts[si2][s];
+            const stave = new THREE.Vector3().lerpVectors(a, b, 0.80);
+            futt.push([stave, new THREE.Vector3(platX + (f - 0.5) * platR * 0.9,
+                                                platY, side * platR * 0.85)]);
+          });
+        }
+        const nT = Math.max(2, Math.round(mk.shrouds * 0.6));
+        for (let s = 0; s < nT; s++) {
+          const f = (s + 1) / (nT + 1);
+          [1, -1].forEach((side, si2) => {
+            const a = new THREE.Vector3(platX + (f - 0.5) * platR * 1.0,
+                                        platY + B * 0.01, side * platR * 0.85);
+            const b = new THREE.Vector3(mxAt(topHead), topHead, side * B * 0.022);
+            upSegs.push([a, b]);
+            upPts[si2].push([a, b]);
+          });
+        }
+        upPts.forEach(side => {
+          if (side.length < 2) return;
+          const rise = topHead - platY;
+          for (let h = RAT; h < rise * 0.86; h += RAT) {
+            const t = h / rise;
+            const pts = side.map(([a, b]) => new THREE.Vector3().lerpVectors(a, b, t));
+            for (let i = 0; i < pts.length - 1; i++) upRats.push([pts[i], pts[i + 1]]);
+          }
+        });
+        if (tiersDrawn >= 3) {
+          const ctR = B * 0.085;
+          /* the crosstrees at the topmast head — the spread without which a topgallant
+             shroud would run straight down its own mast and stay nothing */
+          const ct = new THREE.Group();
+          for (const dx of [-1, 1]) {
+            const bar = new THREE.Mesh(
+              new THREE.BoxGeometry(B * 0.022, B * 0.014, ctR * 2.3),
+              mats.woodPale || woodDark);
+            bar.position.set(mxAt(topHead) + dx * B * 0.020, topHead, 0);
+            ct.add(bar);
+          }
+          group.add(tag(ct, 'top', 'Crosstrees',
+            'The light spreaders at the topmast head — trestletrees and crosstrees without '
+            + 'a platform. They spread the topgallant shrouds the way the top spreads the '
+            + "topmast's, one storey further up."));
+          const tgHead = base + (lower + top) * 0.88 + tg * 0.95;
+          const nG = Math.max(2, Math.round(mk.shrouds * 0.35));
+          for (let s = 0; s < nG; s++) {
+            const f = (s + 1) / (nG + 1);
+            for (const side of [1, -1])
+              tgSegs.push([new THREE.Vector3(mxAt(topHead) + (f - 0.5) * ctR,
+                                             topHead + B * 0.008, side * ctR * 0.9),
+                           new THREE.Vector3(mxAt(tgHead), tgHead, side * B * 0.014)]);
+          }
+        }
+        const fu = ropeMesh(futt, 0.014 + B * 0.0006, ropeMat);
+        if (fu) group.add(tag(fu, 'shroud', 'Futtock shrouds'));
+        const up = ropeMesh(upSegs, 0.014 + B * 0.0007, ropeMat);
+        if (up) group.add(tag(up, 'shroud', 'Topmast shrouds'));
+        const ur = ropeMesh(upRats, 0.014 + B * 0.0005, ropeMat);
+        if (ur) group.add(tag(ur, 'ratline', 'Topmast ratlines'));
+        const tgm = ropeMesh(tgSegs, 0.010 + B * 0.0004, ropeMat);
+        if (tgm) group.add(tag(tgm, 'shroud', 'Topgallant shrouds'));
+      }
     }
   });
 
@@ -1924,14 +2080,17 @@ const PARTS = {
                   + 'the embassy itself: envoys, clerks, pilots and the shrine to Tianfei, the '
                   + 'sailors\' goddess, all lived here above the helm.' },
   sheet:    { stage: 6, name: 'Sheets',
-              what: 'The running rigging that trims a sail to the wind. A battened lug carries '
-                  + 'a sheetlet to every batten end, gathered through blocks to a single fall — '
-                  + 'the whole sail is trimmed, reefed or handed by a few hands on deck, which '
-                  + 'is why no junk ever needed men aloft.' },
+              what: 'The rope at each clew — a sail\'s lower corner — that trims it to the '
+                  + 'wind. Each square sail sheets to the arms of the yard below it (the '
+                  + 'sheave in the yardarm is what the arm is for); the course sheets aft to '
+                  + 'the rail. A battened lug carries a sheetlet to every batten end, gathered '
+                  + 'through blocks to a single fall — the whole sail worked by a few hands on '
+                  + 'deck, which is why no junk ever needed men aloft.' },
   halyard:  { stage: 6, name: 'Halyard',
-              what: 'The line that hoists the yard, and on a junk the one heavy lift aboard: '
-                  + 'sail, battens, boom and yard all rise on it to the masthead. Reefing is '
-                  + 'letting it go — the battens fold down onto the boom by their own weight.' },
+              what: 'The line that hoists the yard. On a square-rigger the upper yards ride '
+                  + 'up and down their masts by it and its fall comes down to the rail; on a '
+                  + 'junk it is the one heavy lift aboard — sail, battens, boom and yard all '
+                  + 'rise on it, and reefing is simply letting it go.' },
   sternlight:{ stage: 3, name: 'Stern lights',
               what: 'The great windows across the transom, and the only real glazing in the ship. '
                   + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '
@@ -2030,6 +2189,16 @@ const PARTS = {
   ratline:  { stage: 5, name: 'Ratlines',
               what: 'Light lines seized across the shrouds to make a ladder aloft. Steel 1794 '
                   + 'gives the spacing outright: thirteen inches, one comfortable rung.' },
+  lift:     { stage: 6, name: 'Lifts',
+              what: 'The ropes from each yardarm up to the masthead that carry the yard\'s '
+                  + 'weight and hold it square. With the sail furled they are all that holds '
+                  + 'the arms up, and they are why every sail plan ever drawn shows a V of '
+                  + 'rope over each tier of canvas.' },
+  tack:     { stage: 6, name: 'Tacks',
+              what: 'The rope that hauls a course\'s clew forward and down. On the wind the '
+                  + 'weather tack is hauled hard to the bow: it gives the lowest sail a taut '
+                  + 'leading edge, which is what turns loose canvas into something that can '
+                  + 'drive a ship across the wind rather than only before it.' },
   yard:     { stage: 6, name: 'Yard',
               what: 'The spar a square sail hangs from, slung across the mast and braced round to '
                   + 'trim the sail to the wind. Steel 1794: the main yard is seven eighths of the '
@@ -2372,14 +2541,18 @@ function buildGuns(S, group, mat) {
  *   BRACES lead aft from each yard ARM. They are how the yard is swung round to trim the sail,
  *   and they are the reason a square-rigger can sail anything but dead downwind.
  */
-function buildRigging(S, group, rope, spars, mastTops) {
+function buildRigging(S, group, mats, spars, mastTops) {
   const H = hullSurface(S);
-  const L = S.lwl;
-  const line = (a, b) => {
-    const g = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(a[0], a[1], a[2] || 0), new THREE.Vector3(b[0], b[1], b[2] || 0)]);
-    return new THREE.Line(g, rope);
-  };
+  const L = S.lwl, B = S.beam;
+  /* ⚠ These were THREE.Line objects in LineBasicMaterial — the one survivor of the round
+     that turned the standing rigging into lit prism geometry, so the stays and braces
+     stayed flat unlit hairlines beside shrouds that take the light. Same rope, same model:
+     merged prisms, one mesh per category, with a real diameter — a 74's mainstay is the
+     thickest rope on the ship. */
+  const ropeMat = mats.ropeSolid || mats.spar;
+  const staySegs = [], braceSegs = [];
+  const line = (a, b) => [new THREE.Vector3(a[0], a[1], a[2] || 0),
+                          new THREE.Vector3(b[0], b[1], b[2] || 0)];
   const deckAt = u => H.sheer(u);
 
   mastTops.forEach((m, i) => {
@@ -2393,13 +2566,12 @@ function buildRigging(S, group, rope, spars, mastTops) {
        to the bowsprit, which the headsail stays already do. */
     if (m.gaff) {
       const prev = mastTops[i - 1];
-      if (prev) group.add(tag(line([m.x, m.y], [prev.x, prev.y - 0.4]), 'stay'));
+      if (prev) staySegs.push(line([m.x, m.y], [prev.x, prev.y - 0.4]));
       else if (S.bowsprit && !S.headsails) {
         const stv = (S.steeve || 22) * Math.PI / 180;
         const blen = L * S.bowsprit;
-        group.add(tag(line([m.x, m.y],
-          [-L / 2 - Math.cos(stv) * blen * 0.9, deckAt(0.02) + Math.sin(stv) * blen * 0.9]),
-          'stay'));
+        staySegs.push(line([m.x, m.y],
+          [-L / 2 - Math.cos(stv) * blen * 0.9, deckAt(0.02) + Math.sin(stv) * blen * 0.9]));
       }
       return;
     }
@@ -2408,12 +2580,12 @@ function buildRigging(S, group, rope, spars, mastTops) {
     const aheadU = i === 0 ? 0.03 : mastTops[i - 1].u;
     const ax = (aheadU - 0.5) * L;
     const ay = i === 0 ? deckAt(0.06) + (S.bowsprit ? S.beam * 0.20 : 0) : deckAt(aheadU);
-    group.add(tag(line([m.x, m.y], [ax, ay]), 'stay'));
+    staySegs.push(line([m.x, m.y], [ax, ay]));
     /* backstays to the ship's side, one each way */
     const bu = Math.min(0.96, m.u + 0.20);
     const bx = (bu - 0.5) * L, by = deckAt(bu);
     const hb = (H.halfB * H.wl(bu)) * (1 - H.tumble(bu));
-    for (const sgn of [-1, 1]) group.add(tag(line([m.x, m.y, 0], [bx, by, sgn * hb]), 'stay'));
+    for (const sgn of [-1, 1]) staySegs.push(line([m.x, m.y, 0], [bx, by, sgn * hb]));
   });
 
   /* braces: from each yard arm aft and down */
@@ -2421,10 +2593,14 @@ function buildRigging(S, group, rope, spars, mastTops) {
     const bu = Math.min(0.97, sp.u + 0.26);
     const bx = (bu - 0.5) * L, by = deckAt(bu);
     for (const sgn of [-1, 1])
-      group.add(tag(line([sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half)],
-                         [bx, by + sp.half * 0.10, sgn * sp.half * 0.30]),
-                    'brace'));
+      braceSegs.push(line([sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half)],
+                          [bx, by + sp.half * 0.10, sgn * sp.half * 0.30]));
   });
+
+  const st = ropeMesh(staySegs, 0.020 + B * 0.0009, ropeMat);
+  if (st) group.add(tag(st, 'stay'));
+  const br = ropeMesh(braceSegs, 0.010 + B * 0.0004, ropeMat);
+  if (br) group.add(tag(br, 'brace'));
 }
 
 
@@ -4255,7 +4431,7 @@ function buildWingSail(S, group, mats) {
     'Anemometer, satellite antenna and cameras. Below the waterline the same vessel carries echo sounders and a CTD.'));
 }
 
-function buildContainers(S, group) {
+function buildContainers(S, group, coarse) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const TEU_L = 12.19, TEU_W = 2.44, TEU_H = 2.59;      // the 40-ft box, in metres
@@ -4336,15 +4512,43 @@ function buildContainers(S, group) {
       new THREE.BoxGeometry(TEU_L * 1.00, TEU_H * 0.22, stowHalf * 2 + 1.0), hatch);
     hc.position.set(x, bayY + TEU_H * 0.11, 0);
     stack.add(hc);
-    for (let c = 0; c < nc; c++) {
+    const highAt = c => {
       /* the wings come down: full height on the centreline, two tiers less at the rail */
       const wing = Math.abs(c - (nc - 1) / 2) / ((nc - 1) / 2 || 1);
-      const high = Math.max(2, Math.round(centreHigh - wing * wing * 2.6));
-      for (let h = 0; h < high; h++) {
-        const m = new THREE.Mesh(box, mats[(i * 7 + c * 3 + h) % mats.length]);
-        m.position.set(x, bayY + TEU_H * (0.22 + h + 0.5),
-                       (c - (nc - 1) / 2) * TEU_W * 1.02);
+      return Math.max(2, Math.round(centreHigh - wing * wing * 2.6));
+    };
+    if (coarse) {
+      /* ── ⚠ THE MAP HAD NO CONTAINERS AT ALL, AND A CONTAINER SHIP IS HER CARGO ────────
+         buildContainers was gated on FINE, so the Sea view — which builds the coarse hull —
+         drew a 400 m box boat as a bare black hull. The deck cargo IS the silhouette of that
+         ship; without it there is nothing to recognise, which is exactly what August saw
+         looking down at one.
+         Drawing two thousand individual boxes per hull on a map carrying a whole era's fleet
+         is not the answer either. At map scale a single container is far below a pixel, and
+         what actually reads is the STEPPED PROFILE — the stow rising from the bow, the wings
+         coming down at the rail. So the coarse build emits one box per TIER spanning the
+         columns that reach it: the same silhouette, the same colours, about a tenth of the
+         meshes. */
+      for (let hI = 0; hI < centreHigh; hI++) {
+        let n = 0;
+        for (let c = 0; c < nc; c++) if (highAt(c) > hI) n++;
+        if (!n) continue;
+        const w = n * TEU_W * 1.02;
+        const m = new THREE.Mesh(
+          new THREE.BoxGeometry(TEU_L * 0.97, TEU_H * 0.95, w),
+          mats[(i * 7 + hI * 3) % mats.length]);
+        m.position.set(x, bayY + TEU_H * (0.22 + hI + 0.5), 0);
         stack.add(m);
+      }
+    } else {
+      for (let c = 0; c < nc; c++) {
+        const high = highAt(c);
+        for (let h = 0; h < high; h++) {
+          const m = new THREE.Mesh(box, mats[(i * 7 + c * 3 + h) % mats.length]);
+          m.position.set(x, bayY + TEU_H * (0.22 + h + 0.5),
+                         (c - (nc - 1) / 2) * TEU_W * 1.02);
+          stack.add(m);
+        }
       }
     }
     /* a lashing bridge every third bay, two tiers high, spanning its own bay */
@@ -5466,15 +5670,15 @@ function buildShip(S, opts) {
     /* ⚠ Standing rigging is NOT black. It is hemp tarred with Stockholm tar, which is a dark
        reddish-brown to golden-brown. True black rigging is a late-19th-century appearance and
        comes from PETROLEUM tar — so black shrouds on an 18th-century ship are an anachronism
-       of about a hundred years. */
-    rope: new THREE.LineBasicMaterial({ color: 0x4a3520, transparent: true, opacity: 0.78 }),
+       of about a hundred years. (The old unlit LineBasicMaterial `rope` is gone: every line
+       aboard is now prism geometry in this one material, and takes the light.) */
     ropeSolid: new THREE.MeshStandardMaterial({ color: 0x5a4326, roughness: 0.88 }),
   };
   const sails = buildRig(S, group, mats, FINE);
   if (FINE) {
     buildGuns(S, group, mats.iron || mats.woodDark);
     if (S.__spars && S.__spars.length)
-      buildRigging(S, group, mats.rope, S.__spars, S.__mastTops || []);
+      buildRigging(S, group, mats, S.__spars, S.__mastTops || []);
   }
   /* the fittings are what turn a hull with masts into a ship, and they are the reason the
      Shipwright's model is worth building separately from the globe's token */
@@ -5512,7 +5716,7 @@ function buildShip(S, opts) {
      fitted plate: theirs really was a separate structure, with lights and galleries in it. */
   if (FINE && S.transom && S.build !== 'steel' && S.build !== 'iron')
     buildStern(S, group, mats);
-  if (FINE && S.containers) buildContainers(S, group);
+  if (S.containers) buildContainers(S, group, !FINE);   /* the map needs her cargo too */
   if (S.wingSail) buildWingSail(S, group, mats);
   if (FINE && S.boats) buildBoats(S, group, mats);
   if (S.flightDeck) buildFlightDeck(S, group, mats);

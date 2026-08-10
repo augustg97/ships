@@ -62,7 +62,17 @@ Ordered by how much each closes the gap per unit of work.
 
 1. ~~Guns run out through the ports~~ — **done**, placed off the shader's own port formula.
 2. ~~Stays, backstays and braces~~ — **done**, drawn from the spar positions actually placed.
-   Still missing: sheets, tacks, halyards, lifts, and the topmast/topgallant shroud sets.
+   ~~Still missing: sheets, tacks, halyards, lifts, and the topmast/topgallant shroud sets~~ —
+   **done, r59.** Lifts from every yardarm to the mast at the next tier (the cap for the
+   topmost); each upper sail sheets its clews to the arms of the yard below, the course
+   sheets aft to the rail and hauls its tack forward; hoisting yards get halyard falls to
+   the rail, sides alternating. Futtock shrouds from the stave to the top's rim, topmast
+   shrouds (rattled — crews work the topsail yards from them) to the topmast head, and a
+   light topgallant set from new crosstrees. All led from points the builder already placed
+   — arm, clew, slings, cap — the braces' own rule. One merged mesh per category per mast,
+   which is what the audit's round-59 census counts. And buildRigging's stays/braces are no
+   longer unlit THREE.Line hairlines: converted to the same lit prism ropeMesh as the
+   shrouds, killing the last LineBasicMaterial in the fleet.
 3. ~~Head and beakhead~~ — **done** (this entry sat stale for rounds after the work shipped:
    knee, headrails, timbers, platform and gammoning are all in `buildHead`, gated on the
    `head:` data field, r-"the head ships"). The r58 lesson: check the CODE before trusting
