@@ -1,5 +1,6 @@
 precision highp float;
 varying vec3 vP; varying vec2 vUv; varying vec3 vN; varying float vCrest;
+varying vec2 vRest;          /* pre-Gerstner ground position — see SEA_VERT */
 uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
 /* ── ⚠ HOW FAR THE FINE RIPPLE IS STILL WORTH DRAWING ─────────────────────────────────────
    This used to be uScale, which is the EYE HEIGHT — so from a deck the close-up's ripple
@@ -11,6 +12,8 @@ uniform vec3 uSun, uCam; uniform float uTime, uWind, uScale;
    (2 tan(fov/2)) away. Computed in JS and handed in, so every view that draws water gets the
    same law and they cannot diverge again. */
 uniform float uRip;
+
+#include "ATMO.chunk.glsl"
 
 /* ── ⚠ THE NEAR-FIELD OCEAN WAS PAINTING OVER THE LAND ────────────────────────────────────
    This surface is drawn after a depth clear, so it covers everything behind it — and it is a
@@ -73,8 +76,9 @@ float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<5;i++){ v+=a*noise(p); p*=2.
 
 void main(){
   if (uHasDepth > 0.5) {
-    float e = seaElevAt(vP);
-    if (e > 0.0) discard;                      // this is land: let the globe behind show
+    /* at the REST position: the wave must not carry the coastline with it */
+    float e = seaElevAt(vec3(vRest.x, 0.0, vRest.y));
+    if (e > 0.0) discard;                      // this is land: let the ground own the pixel
   }
   vec3 V = normalize(uCam - vP);
   vec3 L = normalize(uSun);
@@ -233,8 +237,12 @@ void main(){
      deck: the ocean became a featureless dark plate a kilometre from the ship while the coast
      behind it stayed bright. Distance haze is a property of the AIR, not of how high you are
      standing, and 38 km is clear-air visibility over water. */
-  float dayS = smoothstep(-0.26, 0.20, L.y);
-  col = mix(col, HORIZON_C * mix(0.10, 1.0, dayS), 1.0 - exp(-dist / 38000.0));
+  col = mix(col, HORIZON_C, 1.0 - exp(-dist / 38000.0));
+  /* night — one factor on the finished water, the same the sky and the ground hold, so a
+     moonlit sea sits under a moonlit sky instead of keeping its noon body. The old form
+     dimmed only the haze TARGET, and to 0.10 — darker than anything else in the frame kept
+     itself, and applied to nothing nearer than the haze. See ATMO.chunk.glsl. */
+  col *= atmoBright(L);
 
   gl_FragColor = vec4(pow(clamp(col, 0.0, 1.5), vec3(0.4545)), 1.0);
 }

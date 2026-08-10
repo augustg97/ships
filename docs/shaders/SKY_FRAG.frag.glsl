@@ -3,6 +3,8 @@ varying vec3 vDir;
 uniform vec3 uSun;
 uniform float uTime;
 
+#include "ATMO.chunk.glsl"
+
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
@@ -48,6 +50,9 @@ void main() {
   float lit = 0.5 + 0.5 * cosA;
   vec3 cloud = mix(vec3(0.62, 0.66, 0.72), vec3(1.0, 0.99, 0.96), lit);
   col = mix(col, cloud, cover * 0.92);
+
+  /* night — the one hour the whole near field keeps; see ATMO.chunk.glsl */
+  col *= atmoBright(uSun);
 
   gl_FragColor = vec4(pow(clamp(col, 0.0, 1.6), vec3(0.4545)), 1.0);
 }

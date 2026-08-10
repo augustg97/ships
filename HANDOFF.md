@@ -3155,3 +3155,116 @@ in a row.
    research pass; trireme/corbita tops deserve an existence check.
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+---
+
+## Round 65 — 2026-08-10 — One hour falls on the whole near field, and the coast stops being paper
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey's carried
+list is the task, and its first entry — the featureless brown land behind aboard-yamato,
+carried since 2026-08-04 — is this round's work. It came apart into five classes, every one
+measured before it was touched (`Research/probe-land.py`, new, reads the land uniforms and
+walks the elevation raster along the sightline inside the live page; `probe-landsea.py`, new,
+captures a close-up three ways — as-is, land hidden, sea hidden — to attribute each pixel band
+at the waterline to the surface that draws it).**
+
+**Class 1 — three times of day in one frame.** The Ten-ichi-go close-up is night at 132°E:
+the local sun is 19° under the horizon (probe: sun.y −0.329, day term 0). The lights already
+modelled night — psgStep drops the key to a moonlit level — but the shaders never got the same
+model: SKY_FRAG had no hour at all, SEA_FRAG dimmed only its haze TARGET and to 0.10, and
+LAND_FRAG multiplied its body to 0.32 AND hazed to 0.10 — so the frame carried a noon sky over
+a noon-bodied sea over a near-black coast. **The hour is now one fact: `ATMO.chunk.glsl`
+defines the day term and a 0.32 moonlit floor — the light rig's own (hemi 0.55/1.55) — and
+sky, sea and ground each apply it once, as the last factor. At day = 1 every factor is
+identity, which is why 32 of 43 frames did not move a pixel.**
+
+**Class 2 — bathymetry drove the invented relief.** The detail amplitude differenced raw
+raster samples, and at a shoreline texel that measures the land against the SEABED next to
+it: 388 m of "variation" on the 121 m headland off Cape Malea, because the Aegean beside it
+is 360 m deep (probe, measured). Every sample in the amplitude stencil now clamps to the
+beach first — only the land's own movement sets the amplitude.
+
+**Class 3 — the detail faded out exactly where coasts live.** vAmp died over 9–34 km from the
+anchor, correctly for GEOMETRY (ring spacing passes 1.2 km near 34 km; displacement past
+Nyquist is facet garbage — the low-poly Peloponnese of the first tuning), but the fragment
+shaded the same faded number, so every coast past 34 km — Kyushu stands 30–50 km off in the
+target frame — shaded the bare 4.9 km raster and rendered as a smooth ramp. The amplitudes
+are now split: geometry keeps the 9–34 km fade, shading (`vAmpS`) keeps its ridges to the
+60–160 km rim, the sea's own rule — detail the mesh cannot carry arrives as shading. The
+hillshade stencil also widens with range (`stepM ≥ dist·0.006`) so the finest octave averages
+instead of speckling.
+
+**Class 4 — the detail could redraw the coastline.** `h = e + amp·detail` changes the SIGN of
+the ground both ways: seaward it can raise skerries out of open water (the round-12
+archipelago, still latent), landward it sank whole foreshores — e of 5–25 m against ±50 m of
+detail, clamped flat to the water, which is what cut the drawn coast off above the sea off
+Cape Malea. `ldLand()` in LAND_DETAIL.chunk.glsl is now the one place both shaders get their
+height: under the sea the detail does nothing, over land the ground keeps at least a quarter
+of the raster's own height. The coastline is data; the detail is inference and may not
+redraw the data.
+
+**Class 5 — the waterline leaked backdrop paper, and it took three tries to say why.** The
+old land discard tested vertex-interpolated height: at 40 km a land triangle spans over a
+kilometre, its interpolated zero crosses far from the raster's, and notches of paper opened
+at the foot of the Kyushu coast. A per-fragment RESAMPLE (try two) closed those and opened
+holes through every steep coastal face instead — a lifted headland's wall hangs over a map
+footprint metres wide, so half the wall re-read "sea" and discarded itself. Passing the
+pre-clamp height as the varying (try three) cut the bottom 135 m off every coastal ramp —
+it interpolates from a deeply negative sea-side vertex and crosses zero far up a wall whose
+drawn base the clamp had already put at the water; measured as an unmoving 0.187% band that
+survived two shader bundles because none of the tries touched the pixels that mattered.
+**The rule that holds: the drawn surface decides what it is, the map decides only where
+surfaces exist. The varying is the DRAWN post-clamp height; a fragment is ground if the
+geometry drew it above the water OR the raster says the column under it is land; the sea
+discards on the same raster from its REST position (`vRest`, new varying — the coastline is
+a property of the ground, and sampling at the Gerstner-displaced position dragged it about
+with the phase). The two rules partition every pixel; nothing is left to the paper.**
+
+**And one class outside the shaders: the card's land row was a snapshot of a boot race.**
+A solo capture of aboard-yamato filled "Kagoshima Ko · 16 nm WNW" while four full-run
+captures of identical code left the dash — the row was written once, at card creation, from
+whatever state the FINE router happened to be in. `fillLandRow()` now re-asks from the
+readout loop whenever the router's key moves (readiness, pyramid level, datum, and her own
+position at quarter-degree grain, so a ship under way re-asks about every 25 km) and stops
+while the key stands. The dash now means "unknown" about the DATA, never about the schedule.
+landward() learned this exact lesson at the raster level in its level-keyed cache; the DOM
+row was the same bug one layer up.
+
+**Audit 29/29 clean. No new audit rule: these are frame-level compositing classes the hull
+audit cannot see — their standing watch is the baselines themselves (aboard-coast watches
+the shore seam and the day-side face, aboard-yamato the night hour and the far-coast
+shading, descent-coast the seam from altitude).**
+
+**Ratchet, two full runs to completion, both foreground-held on the PID (r63 rule). First:
+43 captured, 4 over limit — aboard-yamato 47.7% (the target frame: hour + coast + land row),
+aboard-off 44.4% (night off Sumatra + "Dumai · 24 nm NE"), descent-coast 2.14% (the closed
+shore seam is the white ribbon in the diff), aboard-coast 0.19% (the paper band under the
+headland, closed) — plus three under-limit frames whose diffs are the deterministic land row
+(aboard-cable "none within 486 nm", aboard-titanic, aboard-treasure "Al Mukha · 23 nm W"),
+accepted with the movers under the r63 rule that a stale baseline must not ride inside
+tolerance. Every diff read as an image before accepting; all seven reasons in FRAME-LOG.
+Second run: 43/43 green.** Residue, recorded: ten frames hold identical sub-tolerance
+offsets in both runs (largest: ship-preussen 0.047%/0.020, descent 0.043%/0.008, ship-clipper
+0.031%) — deterministic precision drift from the recompiled sea/land shaders (a new varying
+reallocates registers), not content and not flutter. If descent ever crosses the limit,
+its 0.043 base is this offset; read the diff against that.
+
+**Rule 0, written on the new aboard-yamato baseline: it reads as a rendered world — a
+moonlit battleship on open water, the coast lying along the horizon. Three facts a viewer
+can read off it: the Kyushu coast shows a low shore range in front of higher interior
+mountains, two distinct ridge lines; the card and the picture agree the nearest land is
+Kagoshima Ko, 16 nm WNW; the frame keeps one hour everywhere — dimmed sea, moonlit coast,
+the ship lit at the same floor. And on aboard-coast: the Cape Malea headland now runs
+continuously into the water that breaks at its foot, with a lit face and a shadowed flank.**
+
+**Build stamp 1786399633, first paint 8.17 MB against 8.6.**
+
+### Next, in order
+1. **Survey continues, carried:** Titanic remainder (forecastle/poop breaks partly done —
+   check the code first); r43's plate gaps (corbita era plate; dugout/dhow/cog plates;
+   globe-era-card frame).
+2. Small found faults: the dropped fourth argument to `tag()` (crow's nest and tripod
+   crosstrees cards show generic text); treasure-ship mast binding needs a Chinese-practice
+   research pass; trireme/corbita tops deserve an existence check.
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).

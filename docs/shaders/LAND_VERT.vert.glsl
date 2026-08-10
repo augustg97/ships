@@ -15,9 +15,14 @@ precision highp float;
  * which costs nothing and means the interpolation is the limit rather than the tessellation.
  */
 varying vec3 vP;
-varying float vElev;
 varying vec2 vLL;
-varying float vAmp;          /* the detail amplitude, computed ONCE here and used by the frag */
+varying float vAmpS;         /* the detail amplitude, computed ONCE here and used by the frag */
+varying float vH;            /* the DRAWN height — after the sea-level clamp, exactly what
+                                the vertex position used, so the interpolated varying is the
+                                interpolated surface. Passing the PRE-clamp height here cut
+                                the bottom 135 m off every coastal ramp: it interpolates from
+                                a deeply negative sea-side vertex and crosses zero far up a
+                                wall whose drawn base the clamp had already put at the water. */
 
 #include "LAND_DETAIL.chunk.glsl"
 
@@ -61,33 +66,44 @@ void main(){
   vec2 ll;
   vec2 uv = landUV(P, ll);
   float e = landElev(uv);
-  vElev = e;
   vLL = ll;
 
-  /* ── THE AMPLITUDE OF THE INVENTED DETAIL, FROM THE DATA'S OWN VERTICAL VARIATION ──────
+  /* ── THE AMPLITUDE OF THE INVENTED DETAIL, FROM THE LAND'S OWN VERTICAL VARIATION ──────
      One texel east and one north; the difference is how much this ground actually moves at the
      scale the raster can see. A flat shelf gets nothing and a mountain coast gets a lot, which
      is the rule round 12 arrived at after inventing an archipelago in the English Channel.
+     ⚠ AND EVERY SAMPLE CLAMPS TO THE BEACH BEFORE DIFFERENCING. At a shoreline texel the raw
+     difference measures the land against the SEABED of the texel beside it — 388 m of
+     "variation" on the 121 m headland off Cape Malea, measured, because the Aegean next to it
+     is 360 m deep. Bathymetry is not relief; only the land's own movement sets the amplitude.
      Computed HERE, once per vertex, and carried to the fragment — the hillshade differentiates
      the height over a stencil, and an amplitude that varied across that stencil would be read
      as a slope belonging to nothing. */
   float texel = 4900.0 / LAND_R_EARTH;                 /* one raster sample, in radians */
   vec2 llE = ll + vec2(texel / max(0.05, cos(ll.y)), 0.0);
   vec2 llN = ll + vec2(0.0, texel);
-  float hE = landElev(vec2(llE.x / 6.2831853 + 0.5, 0.5 - llE.y / 3.14159265));
-  float hN = landElev(vec2(llN.x / 6.2831853 + 0.5, 0.5 - llN.y / 3.14159265));
-  float amp = 0.22 * (abs(hE - e) + abs(hN - e));
-  /* and it fades where the mesh can no longer carry it, so the rim does not alias */
+  float hE = max(landElev(vec2(llE.x / 6.2831853 + 0.5, 0.5 - llE.y / 3.14159265)), 0.0);
+  float hN = max(landElev(vec2(llN.x / 6.2831853 + 0.5, 0.5 - llN.y / 3.14159265)), 0.0);
+  float e0 = max(e, 0.0);
+  float amp = 0.22 * (abs(hE - e0) + abs(hN - e0));
   float rad = length(P.xz);
+  /* the SHADING keeps its ridges at every range the eye can reach — the fragment carries
+     detail the mesh cannot, the way the sea carries sub-vertex ripple as normal detail —
+     and lets go only out at the descent's rim, where a ridge is under a pixel */
+  vAmpS = amp * (1.0 - smoothstep(60000.0, 160000.0, rad));
+  /* the GEOMETRY fades far sooner, where the mesh stops being able to carry a 3 km octave:
+     ring spacing passes 1.2 km near 34 km out, and displacement past Nyquist is facet
+     garbage, not terrain — the low-poly Peloponnese of the first tuning */
   amp *= 1.0 - smoothstep(9000.0, 34000.0, rad);
-  vAmp = amp;
 
-  /* the detail is in the HEIGHT, not in the shading — see LAND_DETAIL.chunk.glsl */
+  /* the detail is in the HEIGHT, not in the shading — see LAND_DETAIL.chunk.glsl.
+     ldLand, not a raw sum: the detail must not move the coastline the raster states. */
   vec2 m = vec2(ll.x * cos(ll.y), ll.y) * LAND_R_EARTH;     /* local metres */
-  float h = e + amp * ldDetail(m / 3000.0);
+  float h = max(ldLand(e, amp, m), 0.0);
+  vH = h;
 
   /* the sagitta is already in the mesh; the elevation rides on top of it */
-  P.y += max(h, 0.0) * uLandLift;
+  P.y += h * uLandLift;
   vP = P;
   gl_Position = projectionMatrix * viewMatrix * vec4(P, 1.0);
 }

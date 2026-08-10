@@ -2772,8 +2772,34 @@ function passageCard(tr, ves, lw) {
      write, and every card showed the placeholder. Same lesson as the consorts in r60: the
      code was correct and wired to a moment that never exists. The value and the row it
      lives in are now written by the same function, so no caller can open the card empty. */
-  if (lw === undefined) lw = landward(tr.at);
-  const cell = c.querySelector('.pc-land');
+  PSGV.landKey = undefined;                    /* a fresh row: force the first fill */
+  fillLandRow(c, tr, lw);
+}
+
+/* ── ⚠ AND THE ROW CONVERGES; IT IS NOT A SNAPSHOT ──────────────────────────────────────
+   The fill above fixed the null-card path and left the row a ONE-SHOT read of the FINE
+   router, which is built behind the first paint. So whether the row said "Kagoshima Ko ·
+   16 nm WNW" or "—" depended on whether the mask build beat the card: measured this round,
+   a solo capture of aboard-yamato filled the row while four full-run captures of identical
+   code had left the dash. landward() learned this lesson at the raster level in its
+   level-keyed cache; the row now learns it at the DOM level. The readout loop re-asks
+   whenever the router's answer could have changed — readiness, pyramid level or datum —
+   and stops asking while the key stands. The dash still means exactly "unknown" (rule 10);
+   it is now a statement about the data, never about the schedule. */
+function fillLandRow(c, tr, lw) {
+  const cell = c && c.querySelector('.pc-land');
+  if (!cell || !tr || !tr.at) return;
+  const RT = window.SHIPS_ROUTE;
+  /* the key carries her position at quarter-degree grain, so a ship under way re-asks
+     about every 25 km of passage rather than keeping her departure's answer all voyage */
+  const key = (RT && RT.FINE
+    ? (RT.FINE.ready ? 'r' : 'w') + RT.FINE.level + '|' + RT.FINE.sig : '')
+    + '|' + Math.round(tr.at.lon * 4) + ',' + Math.round(tr.at.lat * 4);
+  if (lw === undefined) {
+    if (PSGV.landKey === key) return;
+    lw = landward(tr.at);
+  }
+  PSGV.landKey = key;
   if (lw) {
     /* name the coast from the gazetteer, and say how far it really is */
     const ports = (APP.ports && APP.ports.ports) || [];
@@ -2789,11 +2815,10 @@ function passageCard(tr, ves, lw) {
     const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
     cell.textContent = (best ? best.name + ' · ' : '') +
                        Math.round((lw.trueKm || lw.km) / 1.852) + ' nm ' + pt8;
-  } else if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.FINE && window.SHIPS_ROUTE.FINE.ready) {
+  } else if (RT && RT.FINE && RT.FINE.ready) {
     /* the scan ran and found nothing: that is an answer with a number, not a missing value */
     cell.textContent = 'none within ' + Math.round(LAND_REACH_KM / 1.852) + ' nm';
-  }
-  /* router not ready yet: the dash stays, and it means "unknown" — rule 10 */
+  } else cell.textContent = '—';
 }
 
 /* Beaufort, because a number in metres per second is data and a force is a sea state — and
@@ -2823,6 +2848,8 @@ function passageReadout(lon, lat, hdgRad, wind) {
     let f = 0; while (f < BEAUFORT.length && wind > BEAUFORT[f]) f++;
     wnd.textContent = 'force ' + f + ', ' + BF_NAME[f];
   }
+  /* the land row re-asks only when the router's key moves — see fillLandRow */
+  if (PSGV.track) fillLandRow(PSGV.card, PSGV.track);
 }
 
 /* the raycast is against a coarse sphere at each ship, not the hull: a hull is a few hundred

@@ -1489,8 +1489,21 @@ rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +
 '<tr><td>Course</td><td class="pc-crs">—</td></tr>' +
 '<tr><td>Wind</td><td class="pc-wnd">—</td></tr>' +
 '<tr><td>Nearest land</td><td class="pc-land">—</td></tr>';
-if (lw === undefined) lw = landward(tr.at);
-const cell = c.querySelector('.pc-land');
+PSGV.landKey = undefined;
+fillLandRow(c, tr, lw);
+}
+function fillLandRow(c, tr, lw) {
+const cell = c && c.querySelector('.pc-land');
+if (!cell || !tr || !tr.at) return;
+const RT = window.SHIPS_ROUTE;
+const key = (RT && RT.FINE
+? (RT.FINE.ready ? 'r' : 'w') + RT.FINE.level + '|' + RT.FINE.sig : '')
++ '|' + Math.round(tr.at.lon * 4) + ',' + Math.round(tr.at.lat * 4);
+if (lw === undefined) {
+if (PSGV.landKey === key) return;
+lw = landward(tr.at);
+}
+PSGV.landKey = key;
 if (lw) {
 const ports = (APP.ports && APP.ports.ports) || [];
 let best = null, bestD = 1e9;
@@ -1505,9 +1518,9 @@ const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
 const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
 cell.textContent = (best ? best.name + ' · ' : '') +
 Math.round((lw.trueKm || lw.km) / 1.852) + ' nm ' + pt8;
-} else if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.FINE && window.SHIPS_ROUTE.FINE.ready) {
+} else if (RT && RT.FINE && RT.FINE.ready) {
 cell.textContent = 'none within ' + Math.round(LAND_REACH_KM / 1.852) + ' nm';
-}
+} else cell.textContent = '—';
 }
 const BEAUFORT = [0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
 const BF_NAME = ['calm', 'light air', 'light breeze', 'gentle breeze', 'moderate breeze',
@@ -1530,6 +1543,7 @@ if (wnd && wind !== undefined) {
 let f = 0; while (f < BEAUFORT.length && wind > BEAUFORT[f]) f++;
 wnd.textContent = 'force ' + f + ', ' + BF_NAME[f];
 }
+if (PSGV.track) fillLandRow(PSGV.card, PSGV.track);
 }
 function pickShip(ev) {
 if (!eraFleet || !eraTracks.length) return null;

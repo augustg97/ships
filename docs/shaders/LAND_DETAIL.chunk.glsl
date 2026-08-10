@@ -51,6 +51,7 @@ vec2 ldWarp(vec2 p){
 /* Four ridged octaves over the warped domain, returned centred on zero. p is in units of the
    coarsest ridge spacing, so the caller sets the scale in metres. */
 float ldDetail(vec2 p){
+  /* (see ldLand below for the one rule about where this detail is allowed to act) */
   /* ⚠ THREE OCTAVES, NOT FOUR, AND A LONGER BASE. The disc's rings grow geometrically, so at
      five kilometres out the mesh already has hundreds of metres between vertices. An octave
      finer than that cannot be carried by the geometry and comes out as hard triangular facets —
@@ -66,4 +67,20 @@ float ldDetail(vec2 p){
     a *= 0.52;
   }
   return s / w - 0.55;
+}
+
+/* ── ⚠ THE COASTLINE IS DATA; THE DETAIL IS INFERENCE, AND IT MAY NOT REDRAW THE DATA ─────
+ * The height the shaders draw, in one place so geometry and shading cannot diverge. Adding
+ * amp·ldDetail to the raw raster let the detail change the SIGN of the ground, in both
+ * directions. Seaward it can raise a skerry out of water the map says is open — the round-12
+ * archipelago, still latent. Landward it sank whole foreshores: e of 5–25 m against ±50 m of
+ * detail took the drawn coast below sea level, the vertex clamp flattened it to the water,
+ * and the low strip in front of every headland vanished — measured off Cape Malea, where the
+ * band between the wedge and the sea rendered as backdrop paper because the ground that
+ * should have stood there had been carved away. So: under the sea the detail does nothing at
+ * all, and over land the drawn ground keeps at least a quarter of the raster's own height —
+ * detail may cut valleys into a coast, it may not delete the coast. */
+float ldLand(float e, float amp, vec2 m){
+  if (e <= 0.0) return e;
+  return max(e + amp * ldDetail(m / 3000.0), e * 0.25);
 }

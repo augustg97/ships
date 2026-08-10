@@ -1,5 +1,10 @@
 precision highp float;
 varying vec3 vP; varying vec2 vUv; varying vec3 vN; varying float vCrest;
+/* the REST position, before the Gerstner displacement. The coastline is a property of the
+   GROUND: the land/water decision must be made where the water column stands, not where
+   this instant's wave has carried its surface — sampling at the displaced position opened
+   a one-wave-wide seam of backdrop along every coast, flickering with the phase. */
+varying vec2 vRest;
 uniform float uTime, uWind;
 /* ── ⚠ AND THE WATER WAS FIXED TO THE SHIP ──────────────────────────────────────────────
    The near-field sea is one mesh at the origin of its own scene, and the scene is anchored
@@ -32,6 +37,7 @@ uniform vec4 uWave[4];
 void main() {
   vUv = uv;
   vec3 P = (modelMatrix * vec4(position, 1.0)).xyz;
+  vRest = P.xz;
   vec3 acc = vec3(0.0);
   vec3 nrm = vec3(0.0, 1.0, 0.0);
   float crest = 0.0;
