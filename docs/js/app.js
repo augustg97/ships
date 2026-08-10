@@ -132,14 +132,27 @@ if (FROZEN && !fontsDone) return;
 if (FROZEN && !upgradesDone) return;
 if (FROZEN && shipSelectPending) return;
 if (FROZEN && fleetQueue.length) return;
+if (FROZEN && (!APP.view || APP.view === 'sea') && APP.markers && !labelsSettled) return;
 if (!window.__FRAME_READY) window.__FRAME_READY = true;
 }
 function applyHash() {
 const h = location.hash;
 const em = /[#&]e=(\d+)/.exec(h);
 const tm = /[#&]t=(-?[\d.]+)/.exec(h);
-if (!em && !tm) return;
-if (em) selectEra(Math.max(0, Math.min((APP.chapters.chapters || []).length - 1, +em[1])), false);
+const fm = /[#&]f=([a-z0-9-]+)/i.exec(h);
+if (!em && !tm && !fm) return;
+const chs = APP.chapters.chapters || [];
+let era = em ? Math.max(0, Math.min(chs.length - 1, +em[1])) : null;
+if (fm && APP.voyages) {
+const wantId = fm[1].toLowerCase();
+const v = ((APP.voyages.voyages || APP.voyages) || [])
+.find(x => String(x.id).toLowerCase() === wantId);
+if (v && v.year !== undefined) {
+const own = chs.findIndex(c => v.year >= c.from && v.year <= c.to);
+if (own >= 0) era = own;
+}
+}
+if (era !== null && (em || era !== S.era)) selectEra(era, false);
 if (tm) {
 const yr = document.getElementById('yr');
 const v = Math.max(+yr.min, Math.min(+yr.max, parseFloat(tm[1])));
@@ -176,21 +189,26 @@ tryPick();
 }
 const fm = /[#&]f=([a-z0-9-]+)/i.exec(location.hash);
 if (fm) {
+const wantId = fm[1].toLowerCase();
+const v = ((APP.voyages && APP.voyages.voyages) || [])
+.find(x => String(x.id).toLowerCase() === wantId);
+if (!v) { console.warn('no voyage', wantId); return; }
 shipSelectPending = true;
 let tries = 0;
-const wantId = fm[1].toLowerCase();
 const board = () => {
-if (!upgradesDone) { if (++tries < 900) requestAnimationFrame(board); return; }
-const all = (APP.voyages && APP.voyages.voyages) || [];
-const v = all.find(x => String(x.id).toLowerCase() === wantId);
-const tr = v && eraTracks.find(t => t.name === v.name);
+if (!upgradesDone) {
+if (++tries < 900) requestAnimationFrame(board);
+else { shipSelectPending = false; console.warn('terrain never settled for', wantId); }
+return;
+}
+const tr = eraTracks.find(t => t.name === v.name);
 if (tr && tr.at) {
 if (!S.follow) { followShip(tr); if (fly) fly.t0 = -1e9; }
 const pool = window.SHIPS_PSG && window.SHIPS_PSG.PSG.fleetPool;
 const e = pool && pool.get(tr.name);
 if (e && e.holder && e.holder.visible) { shipSelectPending = false; return; }
 }
-if (++tries > 900) { shipSelectPending = false; console.warn('no voyage', wantId); return; }
+if (++tries > 900) { shipSelectPending = false; console.warn('voyage never sailed', wantId); return; }
 requestAnimationFrame(board);
 };
 board();
@@ -436,6 +454,7 @@ push('port', p, 'port' + (p.kind === 'historic' ? ' major' : '')));
 let lblTick = 0;
 let voyT = 0;
 let labelsHidden = false;
+let labelsSettled = false;
 function updateLabels(now) {
 if (!APP.markers) return;
 if (PSGV.on || S.follow) {
@@ -443,6 +462,7 @@ if (!labelsHidden) {
 for (const m of APP.markers) if (m.el) m.el.style.display = 'none';
 labelsHidden = true;
 }
+labelsSettled = true;
 return;
 }
 if (labelsHidden) { for (const m of APP.markers) if (m.el) m.el.style.display = ''; }
@@ -491,6 +511,7 @@ m.el.style.top = sy + 'px';
 m.el.style.opacity = show ? '1' : '0';
 m.el.style.pointerEvents = show ? 'auto' : 'none';
 }
+if (!fly) labelsSettled = true;
 }
 function markersVisible() { lblTick = 0; }
 function currentEra() {
@@ -1311,11 +1332,12 @@ hoverTag.style.display = 'block';
 document.body.style.cursor = 'pointer';
 }
 const PSGV = { on: false, track: null, t: 0, card: null };
+const LAND_REACH_KM = 900;
 function landward(at) {
 const RT = window.SHIPS_ROUTE;
 if (!at || !RT || !RT.isOcean || !RT.FINE || !RT.FINE.ready) return null;
 const cl = Math.max(0.05, Math.cos(at.lat * Math.PI / 180));
-const REACH = 900, NEAR = 140;
+const REACH = LAND_REACH_KM, NEAR = 140;
 for (let km = 3; km <= REACH; km += (km < NEAR ? 3 : 18)) {
 for (let b = 0; b < 48; b++) {
 const th = b * Math.PI / 24;
@@ -1364,25 +1386,6 @@ const ves = list.find(x => x.id === tr.vesselId);
 if (!ves || !ves.hull) return;
 S.follow = tr;
 const lw = landward(tr.at);
-if (PSGV.card && lw) {
-const cell = PSGV.card.querySelector('.pc-land');
-if (cell) {
-const ports = (APP.ports && APP.ports.ports) || [];
-let best = null, bestD = 1e9;
-const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
-for (const pt of ports) {
-const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
-const d = dx * dx + dy * dy;
-if (d < bestD) { bestD = d; best = pt; }
-}
-const km = Math.round(lw.trueKm || lw.km);
-const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
-'S','SSW','SW','WSW','W','WNW','NW','NNW'];
-const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
-cell.textContent = (best ? best.name + ' · ' : '') +
-Math.round(km / 1.852) + ' nm ' + pt8;
-}
-}
 S.followAz = lw ? lw.az : 2.4;
 S.followDep = 15;
 S.followDist = standOffFor(ves.hull.loa, lw);
@@ -1393,7 +1396,7 @@ const eye = Math.max(6, S.followDist * Math.sin(S.followDep * Math.PI / 180));
 flyTo(tr.at.lon, tr.at.lat, R + eye / 63710, 2400);
 window.SHIPS_PSG.psgInit(R, camera);
 requestAnimationFrame(() => window.SHIPS_PSG.psgPrebuild(tr, ves));
-passageCard(tr, ves);
+passageCard(tr, ves, lw);
 const voy = ((APP.voyages && APP.voyages.voyages) || []).find(v => v.name === tr.name);
 if (voy) showVoyageCard(voy);
 document.body.classList.add('in-passage');
@@ -1438,7 +1441,7 @@ syncPanelInsets();
 document.body.classList.remove('in-passage');
 placeCamera();
 }
-function passageCard(tr, ves) {
+function passageCard(tr, ves, lw) {
 if (!PSGV.card) {
 const d = document.createElement('div');
 d.id = 'psgCard';
@@ -1470,6 +1473,25 @@ rows.map(r => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>').join('') +
 '<tr><td>Course</td><td class="pc-crs">—</td></tr>' +
 '<tr><td>Wind</td><td class="pc-wnd">—</td></tr>' +
 '<tr><td>Nearest land</td><td class="pc-land">—</td></tr>';
+if (lw === undefined) lw = landward(tr.at);
+const cell = c.querySelector('.pc-land');
+if (lw) {
+const ports = (APP.ports && APP.ports.ports) || [];
+let best = null, bestD = 1e9;
+const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
+for (const pt of ports) {
+const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
+const d = dx * dx + dy * dy;
+if (d < bestD) { bestD = d; best = pt; }
+}
+const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
+'S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
+cell.textContent = (best ? best.name + ' · ' : '') +
+Math.round((lw.trueKm || lw.km) / 1.852) + ' nm ' + pt8;
+} else if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.FINE && window.SHIPS_ROUTE.FINE.ready) {
+cell.textContent = 'none within ' + Math.round(LAND_REACH_KM / 1.852) + ' nm';
+}
 }
 const BEAUFORT = [0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
 const BF_NAME = ['calm', 'light air', 'light breeze', 'gentle breeze', 'moderate breeze',
@@ -1478,8 +1500,10 @@ const BF_NAME = ['calm', 'light air', 'light breeze', 'gentle breeze', 'moderate
 function passageReadout(lon, lat, hdgRad, wind) {
 if (!PSGV.card) return;
 const ns = lat >= 0 ? 'N' : 'S', ew = lon >= 0 ? 'E' : 'W';
-const fmt = (v, s) => Math.floor(Math.abs(v)) + '° ' +
-String(Math.round((Math.abs(v) % 1) * 60)).padStart(2, '0') + '′ ' + s;
+const fmt = (v, s) => {
+const min = Math.round(Math.abs(v) * 60);
+return Math.floor(min / 60) + '° ' + String(min % 60).padStart(2, '0') + '′ ' + s;
+};
 const pos = PSGV.card.querySelector('.pc-pos');
 const crs = PSGV.card.querySelector('.pc-crs');
 const wnd = PSGV.card.querySelector('.pc-wnd');

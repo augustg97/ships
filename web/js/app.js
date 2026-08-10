@@ -335,6 +335,16 @@ function markReady() {
   if (FROZEN && shipSelectPending) return;
   /* and not on a half-built fleet */
   if (FROZEN && fleetQueue.length) return;
+  /* ── ⚠ AND NOT WHILE THE LABELS LAG THE CAMERA ───────────────────────────────────────
+     r62, on the NINTH strike of the "label flap" false RED — and the first one whose diff
+     was read as an image: the labels were not ghosted, they were GONE, with one sea name
+     frozen at the bottom corner where a mid-boot camera had projected it. The class was
+     called a font transient for eleven rounds because its profile (label-only diff, clean
+     on re-run) fit that story too. Nothing in this gate ever asked whether the label layer
+     had caught up with the camera it projects from, so a capture under batch load could
+     fire between the camera settling and the next 90 ms label pass. Sea view only: the
+     other views never run updateLabels, and a gate they cannot satisfy is a hang. */
+  if (FROZEN && (!APP.view || APP.view === 'sea') && APP.markers && !labelsSettled) return;
   if (!window.__FRAME_READY) window.__FRAME_READY = true;
 }
 
@@ -347,13 +357,35 @@ function applyHash() {
   const h = location.hash;
   const em = /[#&]e=(\d+)/.exec(h);
   const tm = /[#&]t=(-?[\d.]+)/.exec(h);
-  if (!em && !tm) return;
+  const fm = /[#&]f=([a-z0-9-]+)/i.exec(h);
+  if (!em && !tm && !fm) return;
 
   /* The era must be applied first. selectEra() rewrites the year slider's own min/max to
      the era's span and resets S.year to the era's seek point — so a year applied before it
      is silently thrown away. That is exactly what happened on the first attempt at this,
      and it produced three "different" baseline frames that were byte-identical. */
-  if (em) selectEra(Math.max(0, Math.min((APP.chapters.chapters || []).length - 1, +em[1])), false);
+  const chs = APP.chapters.chapters || [];
+  let era = em ? Math.max(0, Math.min(chs.length - 1, +em[1])) : null;
+  /* ── ⚠ A VOYAGE NAMES ITS OWN ERA ────────────────────────────────────────────────────
+     #e=3&f=zhenghe asked for a 1415 voyage in AD 500–1400, whose fleet can never contain
+     her — applyHashView's board loop held __FRAME_READY through its 900 retries, the
+     "wrong-era voyage hash hangs before first paint" carried since r43. And `#f=` with no
+     `#e=` at all only ever worked when the BOOT DEFAULT era happened to contain the
+     voyage — the same fault with the wrong era supplied by luck. The voyage record
+     carries a year and the chapters carry their spans, so the era is derivable, and a
+     derivable value outranks a contradictory hand-typed one: the voyage wins. */
+  if (fm && APP.voyages) {
+    const wantId = fm[1].toLowerCase();
+    const v = ((APP.voyages.voyages || APP.voyages) || [])
+      .find(x => String(x.id).toLowerCase() === wantId);
+    if (v && v.year !== undefined) {
+      const own = chs.findIndex(c => v.year >= c.from && v.year <= c.to);
+      if (own >= 0) era = own;
+    }
+  }
+  /* pure-#f= links skip a same-era re-select: selectEra already ran at boot with this era,
+     and running it again rebuilds the whole fleet for nothing */
+  if (era !== null && (em || era !== S.era)) selectEra(era, false);
 
   if (tm) {
     const yr = document.getElementById('yr');
@@ -439,17 +471,28 @@ function applyHashView() {
      over several frames now and she does not exist for the first second. */
   const fm = /[#&]f=([a-z0-9-]+)/i.exec(location.hash);
   if (fm) {
+    const wantId = fm[1].toLowerCase();
+    /* ⚠ whether the RECORD exists is knowable right now; only the TRACK needs the retries.
+       An id that is in no voyages.json at all used to hold __FRAME_READY through the full
+       900-frame loop before admitting it — say so once and never take the gate. */
+    const v = ((APP.voyages && APP.voyages.voyages) || [])
+      .find(x => String(x.id).toLowerCase() === wantId);
+    if (!v) { console.warn('no voyage', wantId); return; }
     shipSelectPending = true;
     let tries = 0;
-    const wantId = fm[1].toLowerCase();
     const board = () => {
       /* ⚠ and not before the terrain has finished streaming, because which way this view
          faces is decided from the elevation raster. Boarding on level 0 and letting level 2
-         arrive afterwards leaves the camera pointed by data that is no longer on screen. */
-      if (!upgradesDone) { if (++tries < 900) requestAnimationFrame(board); return; }
-      const all = (APP.voyages && APP.voyages.voyages) || [];
-      const v = all.find(x => String(x.id).toLowerCase() === wantId);
-      const tr = v && eraTracks.find(t => t.name === v.name);
+         arrive afterwards leaves the camera pointed by data that is no longer on screen.
+         ⚠ And a give-up path must RELEASE THE GATE IT HOLDS: this branch used to stop
+         rearming at 900 tries with shipSelectPending still true, which is a permanent hang
+         of every frozen capture — the same shape as the wrong-era hang, one level up. */
+      if (!upgradesDone) {
+        if (++tries < 900) requestAnimationFrame(board);
+        else { shipSelectPending = false; console.warn('terrain never settled for', wantId); }
+        return;
+      }
+      const tr = eraTracks.find(t => t.name === v.name);
       if (tr && tr.at) {
         if (!S.follow) { followShip(tr); if (fly) fly.t0 = -1e9; }
         /* ⚠ AND NOT READY UNTIL SHE IS IN THE WATER. followShip defers the hull build by one
@@ -461,7 +504,7 @@ function applyHashView() {
         const e = pool && pool.get(tr.name);
         if (e && e.holder && e.holder.visible) { shipSelectPending = false; return; }
       }
-      if (++tries > 900) { shipSelectPending = false; console.warn('no voyage', wantId); return; }
+      if (++tries > 900) { shipSelectPending = false; console.warn('voyage never sailed', wantId); return; }
       requestAnimationFrame(board);
     };
     board();
@@ -887,6 +930,9 @@ function buildMarkers() {
 let lblTick = 0;
 let voyT = 0;                 // the fleet's own clock — see the note in frame()
 let labelsHidden = false;
+/* true once the label layer has completed a pass with the camera at rest (or hidden them
+   deliberately, which is also a settled state) — the condition markReady() waits on */
+let labelsSettled = false;
 function updateLabels(now) {
   if (!APP.markers) return;
   /* ── ⚠ THE OCEANS WERE WRITTEN ACROSS THE SKY ────────────────────────────────────────
@@ -906,6 +952,7 @@ function updateLabels(now) {
       for (const m of APP.markers) if (m.el) m.el.style.display = 'none';
       labelsHidden = true;
     }
+    labelsSettled = true;      // hidden on purpose is settled
     return;
   }
   if (labelsHidden) { for (const m of APP.markers) if (m.el) m.el.style.display = ''; }
@@ -979,6 +1026,8 @@ function updateLabels(now) {
     m.el.style.opacity = show ? '1' : '0';
     m.el.style.pointerEvents = show ? 'auto' : 'none';
   }
+  /* a pass that ran while the camera was still flying is not the settled picture */
+  if (!fly) labelsSettled = true;
 }
 
 function markersVisible() { lblTick = 0; }
@@ -2448,6 +2497,7 @@ const PSGV = { on: false, track: null, t: 0, card: null };
    answer comes from the same coastline her track was planned against. Returns a bearing in
    radians from north through east, or null when there is nothing in sight — mid-ocean keeps
    the standing quarter view. */
+const LAND_REACH_KM = 900;   // the scan's limit, and the figure the card prints when it finds nothing
 function landward(at) {
   const RT = window.SHIPS_ROUTE;
   if (!at || !RT || !RT.isOcean || !RT.FINE || !RT.FINE.ready) return null;
@@ -2464,7 +2514,7 @@ function landward(at) {
      would be invisible by geometry alone. `km` is the range used to PLACE it; `trueKm` is
      what it really is, so the card can say so rather than implying the ship is closer than
      she is. */
-  const REACH = 900, NEAR = 140;
+  const REACH = LAND_REACH_KM, NEAR = 140;
   for (let km = 3; km <= REACH; km += (km < NEAR ? 3 : 18)) {
     for (let b = 0; b < 48; b++) {
       const th = b * Math.PI / 24;
@@ -2553,26 +2603,6 @@ function followShip(tr) {
      Going aboard now looks TOWARD the nearest land within sight, so the ship stands in the
      foreground of the place she is actually in. Dragging still turns you anywhere. */
   const lw = landward(tr.at);
-  /* name the coast from the gazetteer, and say how far it really is */
-  if (PSGV.card && lw) {
-    const cell = PSGV.card.querySelector('.pc-land');
-    if (cell) {
-      const ports = (APP.ports && APP.ports.ports) || [];
-      let best = null, bestD = 1e9;
-      const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
-      for (const pt of ports) {
-        const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
-        const d = dx * dx + dy * dy;
-        if (d < bestD) { bestD = d; best = pt; }
-      }
-      const km = Math.round(lw.trueKm || lw.km);
-      const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
-                       'S','SSW','SW','WSW','W','WNW','NW','NNW'];
-      const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
-      cell.textContent = (best ? best.name + ' · ' : '') +
-                         Math.round(km / 1.852) + ' nm ' + pt8;
-    }
-  }
   S.followAz = lw ? lw.az : 2.4;
   S.followDep = 15;
   /* a few ship-lengths off, which is where one vessel sees another */
@@ -2594,7 +2624,7 @@ function followShip(tr) {
      happens. */
   window.SHIPS_PSG.psgInit(R, camera);
   requestAnimationFrame(() => window.SHIPS_PSG.psgPrebuild(tr, ves));
-  passageCard(tr, ves);
+  passageCard(tr, ves, lw);
   /* ── AND THE VOYAGE ITSELF, NOT ONLY THE SHIP ────────────────────────────────────────
      Going aboard opened the slip — which ship, where she is, what she is steering — and
      nothing about the passage she is making. Those are different questions and both belong
@@ -2667,7 +2697,7 @@ function closePassage() {
 /* ── THE CARD ────────────────────────────────────────────────────────────────────────────
  * What a chart-room would tell you and nothing else: which ship, which passage, and the
  * position she is actually at, read off the model rather than written down beside it. */
-function passageCard(tr, ves) {
+function passageCard(tr, ves, lw) {
   if (!PSGV.card) {
     const d = document.createElement('div');
     d.id = 'psgCard';
@@ -2714,6 +2744,34 @@ function passageCard(tr, ves) {
        even though the coast is drawn compressed into the near field, because the picture is
        admittedly not to scale and the number should not pretend otherwise. */
     '<tr><td>Nearest land</td><td class="pc-land">—</td></tr>';
+  /* ── ⚠ THE LAND ROW IS FILLED HERE, BY THE FUNCTION THAT WRITES THE ROW ─────────────────
+     r59 shipped this fill inside followShip, ABOVE the passageCard call that creates the
+     card — so on the only path a user can take, PSGV.card was null, the guard skipped the
+     write, and every card showed the placeholder. Same lesson as the consorts in r60: the
+     code was correct and wired to a moment that never exists. The value and the row it
+     lives in are now written by the same function, so no caller can open the card empty. */
+  if (lw === undefined) lw = landward(tr.at);
+  const cell = c.querySelector('.pc-land');
+  if (lw) {
+    /* name the coast from the gazetteer, and say how far it really is */
+    const ports = (APP.ports && APP.ports.ports) || [];
+    let best = null, bestD = 1e9;
+    const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
+    for (const pt of ports) {
+      const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
+      const d = dx * dx + dy * dy;
+      if (d < bestD) { bestD = d; best = pt; }
+    }
+    const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
+                     'S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
+    cell.textContent = (best ? best.name + ' · ' : '') +
+                       Math.round((lw.trueKm || lw.km) / 1.852) + ' nm ' + pt8;
+  } else if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.FINE && window.SHIPS_ROUTE.FINE.ready) {
+    /* the scan ran and found nothing: that is an answer with a number, not a missing value */
+    cell.textContent = 'none within ' + Math.round(LAND_REACH_KM / 1.852) + ' nm';
+  }
+  /* router not ready yet: the dash stays, and it means "unknown" — rule 10 */
 }
 
 /* Beaufort, because a number in metres per second is data and a force is a sea state — and
@@ -2726,8 +2784,13 @@ const BF_NAME = ['calm', 'light air', 'light breeze', 'gentle breeze', 'moderate
 function passageReadout(lon, lat, hdgRad, wind) {
   if (!PSGV.card) return;
   const ns = lat >= 0 ? 'N' : 'S', ew = lon >= 0 ? 'E' : 'W';
-  const fmt = (v, s) => Math.floor(Math.abs(v)) + '° ' +
-    String(Math.round((Math.abs(v) % 1) * 60)).padStart(2, '0') + '′ ' + s;
+  /* ⚠ round ONCE, in minutes, and derive degrees from the result — rounding the minutes
+     after the degrees were already floored printed "12° 60′ N" on the treasure fleet,
+     because 12.9999° is 12° plus sixty minutes if the two fields round separately */
+  const fmt = (v, s) => {
+    const min = Math.round(Math.abs(v) * 60);
+    return Math.floor(min / 60) + '° ' + String(min % 60).padStart(2, '0') + '′ ' + s;
+  };
   const pos = PSGV.card.querySelector('.pc-pos');
   const crs = PSGV.card.querySelector('.pc-crs');
   const wnd = PSGV.card.querySelector('.pc-wnd');

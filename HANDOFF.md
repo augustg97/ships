@@ -2818,3 +2818,137 @@ list and 5-metre scale bar placing her against her neighbours.
 fetch of the data-version meta tag; the live hull.js confirmed carrying the rebuilt buildStern
 and the live vessels.json the three sternLights fields. Sixteenth clean push-triggered deploy
 in a row.
+
+---
+
+## Rounds 59–61 — 2026-08-09 — RECOVERED LOG, written round 62
+
+**The handoff was omitted for three consecutive rounds — the same omission as rounds 52–54
+and 56, reconstructed the same way, from the commit bodies and FRAME-LOG.** All three rounds
+built, deployed and verified; only the record was missing.
+
+**Round 59 (`a0501e3`) — the rig remainder, the daylight theme, and August's eight items.**
+Two large pieces in one round. First, SHIPWRIGHT-QUEUE detail-gap item 2 closed: lifts from
+every yardarm, sheets and tacks for every course, halyard falls to the rail, futtock shrouds,
+rattled topmast shrouds and a light topgallant set from new crosstrees — all led from points
+the builder already placed, one merged mesh per category per mast, and buildRigging's last
+unlit THREE.Line hairlines converted to lit prism ropeMesh. Second, the palette inverted into
+the daylight register of an Admiralty chart — dark ink on buff paper, the ocean dark against a
+light ground. The globe lettering deliberately did NOT invert (it sits on water, not page),
+and the background needed setClearColor AND scene.background because the sea view renders two
+passes with autoClear=false. ⚠ The first attempt set scene.background before scene existed,
+which killed boot and returned ZERO frames — a colour change that kills boot looks exactly
+like one that did not apply. Also in the round, from August's list: landward() reach 140 →
+900 km with the drawn coast compressed into the near field and the TRUE range printed on the
+card; containers on the coarse hull (the Sea view had drawn a 400 m box boat bare); the
+voyage card unblocked in the close-up (body.in-passage #card was display:none !important);
+consorts pooled per track; Shipwright part cards removed, fleet strip chronological, zoom-out
+to 26×; the splash subtitle removed and the loading note rewritten. All 41 baselines moved
+with the theme and were accepted with the class reason.
+
+**Round 60 (`7f4793b`) — the close-up kept the night theme in three places, and the consorts
+were in dead code.** The consorts had been reported done twice; the first fix was added to
+psgOpen(), which is defined and never called. The live path is followShip → psgFleet, keyed
+by track name, so one hull per voyage was all it could hold. Moved into psgFleet with the
+same `together` rule the map uses. The three contrast faults were one class: colours that
+never went through the custom properties, so the daylight pass swept past them — .c-prose
+cream on paper, #psgCard carrying its own pre-.panel night palette, #voyList receding to
+opacity .28 tuned against a dark ground (now .62). Row cells gained the same markdown
+emphasis pass as prose, so a *Ming Shi* citation stops printing its asterisks. **Left open,
+explicitly: the "Nearest land" row renders its placeholder — the cell is not filled on the
+live path.**
+
+**Round 61 (`e343c48`) — four ships, a minifier, and eight things the audit would not let
+past.** EVER GIVEN, AZZAM, ENDURANCE, QUEEN MARY 2: hull data, voyages with real waypoints,
+prose, Commons plates with licences. The byte budget refused to publish at 8.62 against 8.6,
+and the remaining fat was this project's own comments — so docs/ is minified and web/ is not
+(a SCANNER, not a regex, because // inside a string is not a comment): 1.71 → 1.19 MB, first
+paint 8.62 → 8.14. The audit found eight faults on the new hulls, all from copying an
+existing ship — shared polars, wind floors on motor ships, Titanic's cove line on a welded
+liner — and one fault was the AUDIT'S: its rig table had no barquentine, so Endurance was held
+to a full-rigged ship's polar. Audit 29/29 after fixes. The fleet is 29 hulls now, not 25 —
+**the finishing rule's "all 25 hulls" is stale; the number that matters is ALL of them.**
+
+---
+
+## Round 62 — 2026-08-10 — Three cards told the truth at last, and the ninth strike of the label flap was read as an image
+
+**First, the record: rounds 59–61 had no handoff.** Reconstructed above from the commit
+bodies and FRAME-LOG, the same recovery as rounds 52–54 and 56. The r61 deploy was verified
+live this round (stamp 1786341590 matched docs/ before any work began).
+
+**The "Nearest land" row now fills on the path users take (r60's carry).** The fill shipped
+in r59 inside followShip, ABOVE the passageCard() call that creates the card — so
+`if (PSGV.card && lw)` was false on every real boarding and the placeholder survived. Same
+lesson as r60's consorts: correct code wired to a moment that never exists. The fill moved
+into passageCard(), which owns the row; every caller gets it now, and the null cases are
+honest per rule 10 — router not ready keeps the dash ("unknown"), a scan that found nothing
+prints "none within 486 nm" (the scan's own 900 km reach, derived from LAND_REACH_KM, not a
+second copy of the number). Verified on screen: the Great Western's slip reads
+"Cobh · 55 nm N" off the Irish coast; the carrier's reads "Tazerka Oil Terminal · 32 nm WSW"
+in the Strait of Sicily.
+
+**The wrong-era voyage hash no longer hangs the app (r43's carry).** #e=3&f=zhenghe asked for
+a 1415 voyage in AD 500–1400, whose fleet can never contain her; applyHashView's board loop
+held __FRAME_READY through 900 retries. The class fix is in applyHash: a voyage names its own
+era — the record carries a year, the chapters carry spans, and a derivable era outranks a
+contradictory hand-typed one. This also fixes `#f=` with no `#e=` at all, which only ever
+worked when the boot default era happened to contain the voyage. Two more gate leaks closed in
+the same block: an id in no voyages.json used to take the gate before discovering it could
+never clear it (existence is knowable immediately; only the TRACK needs retries), and the
+upgradesDone wait's give-up branch stopped rearming with shipSelectPending still true — a
+give-up path must release the gate it holds. Verified by rendering #e=3&f=zhenghe: it paints
+the treasure fleet in era 4, consort under sail, both cards up.
+
+**The diagnosis frame caught a third fault: "12° 60′ N".** passageReadout floored the degrees
+and rounded the minutes separately, so 12.9999° printed as 12° plus sixty minutes. Round ONCE,
+in minutes, and derive both fields from the result. Verified: the same position reads
+"13° 00′ N 45° 56′ E".
+
+**⚠ THE LABEL FLAP STRUCK A NINTH TIME, AND THE DIFF WAS FINALLY READ AS AN IMAGE — the
+"serif transient" story was wrong, or at least incomplete.** globe-default flagged
+1.145%/0.337 in the first full run. The r58 rule (copy the diff out before anything wipes it)
+was followed, and the picture is not ghosting: the labels are ABSENT — every sea name, port
+and battle gone, except one sea-name fragment frozen at the bottom corner, where a mid-boot
+camera would have projected it. Three cold probe runs showed the healthy state (451 markers,
+10 visible, zero page errors), so the strike is a batch-load race: nothing in markReady()
+ever asked whether the label layer had caught up with the camera it projects from. The gate
+now requires `labelsSettled` — one completed updateLabels pass with no flight active (or the
+deliberate hidden state of the close-up, which is also settled) — on the sea view only,
+because the other views never run updateLabels and a gate they cannot satisfy is a hang.
+The serif work (r57) stays: the r43 fallback-metrics doubling was real. But the class that
+kept striking through the fonts.ready clause now has a mechanism that explains why fonts
+could not close it, and a gate aimed at that mechanism. **If it strikes a tenth time, the
+first question is whether the diff shows ABSENT labels or MOVED labels — they are different
+faults.**
+
+**Ratchet: two full runs.** First run flagged five: globe-default (above, transient, NOT
+accepted — the second run scored it 0.000% against the unchanged baseline) and four aboard
+frames (carrier, preussen, wyoming, clipper) at 1.0–1.8%, which are the land-row fill where
+the port name wraps to a second line and reflows the card — diffs read before accepting: card
+text and reflow only, scene untouched. Accepted with the class reason. The seven aboard
+frames whose text fits one line moved 0.02–0.04%, under tolerance. Final run: **41/41 green,
+globe-default 0.000%.** Audit 29/29 clean, twice (before and after the gate work).
+⚠ Procedural: a full 41-frame check now takes ~19 minutes on a loaded machine and outlives
+the 600 s tool timeout — run it as a background task writing to a log, and wait on the PID or
+the log, not on a sleep.
+
+**Also: build/loop-prompt.md's finishing rule said "all 25 hulls" — stale since r61 made it
+29.** Now says every hull, with the count dated.
+
+**Rule 0, written on globe-default in the final run:** it reads as a rendered world — the
+July Atlantic in relief under daylight, fleets mid-ocean between composed coasts, dark water
+on chart paper. Three facts a viewer can read off it: the Middle Passage's 12.5 M people on
+36,000+ voyages, sourced to SlaveVoyages, on the 1590 card; LISBOA standing on the Iberian
+coast with a tick to its harbour; the era strip running Crossing (70,000–8,000 BP) to
+Containers (1950–2026) with Ocean Crossing lit.
+
+### Next, in order
+1. **Survey continues.** SHIPWRIGHT-QUEUE remaining true gaps: item 7 furled sails as a
+   state, item 8 anchors catted with cable, item 9 mast bands/wooldings/cheeks, item 10 deck
+   camber and waterway. The r58 camera grammar makes each verifiable close-up.
+2. Carried: featureless brown land behind aboard-yamato; Titanic remainder
+   (forecastle/poop breaks already partly done — check the code first, the r58 lesson);
+   r43's plate gaps (corbita era plate; dugout/dhow/cog plates; globe-era-card frame).
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted.

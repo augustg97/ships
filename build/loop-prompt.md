@@ -44,7 +44,7 @@ Take the next unfinished vessel. Do ONE vessel properly rather than three badly.
 
 ## Finishing a round — all of it, every time
 
-1. Run the audit; all 25 hulls must pass.
+1. Run the audit; every hull must pass (29 as of round 61 — the count grows, the rule is ALL).
 2. `python3 build/build_site.py` — Pages serves /docs and this is the ONLY publication route.
 3. Frame ratchet: `"$HOME/Modeling Studio/.venv/bin/python" "$HOME/Modeling Studio/tools/frame_baseline.py" check --project ~/Ships`
    Classify every moved frame and accept it with a written reason. LOOK at the images.
