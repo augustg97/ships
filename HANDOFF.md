@@ -3680,3 +3680,92 @@ a finer entry, the funnel moved aft.
 **And the rule for any vessel added from here:** build it, spin it, and LOOK at it beside the
 plate before committing. The plate is already in the card — the comparison costs nothing and it
 is the only check that catches this class.
+
+---
+
+## Round 70 — 2026-08-11 — A rake is a lean, Queen Mary 2 becomes her own ship, and two sessions met in one tree
+
+**The collision first, because it shaped the round.** A desktop agent session (Opus, launched
+00:16) and this automated round (launched 00:20 by launchd) worked the same tree at once. The
+desktop session's lock check was an `&&`/`||` chain whose last echo printed unconditionally, so
+it read "lock taken" off a lock this round held; it discovered the collision itself at 00:38 and
+wrote the lesson into CLAUDE.md ("a lock check must be one atomic test whose exit status is the
+answer"). Its edits — QM2 entry fineness (stemFineness 0.03, forefoot 0.30, run 0.30,
+sternFineness 0.34), Azzam's four tenders and transom 0.30, the CLAUDE.md section — were left in
+place, verified here by audit and by looking, and are in this round's commit. It went quiet at
+00:38 and stayed quiet; nothing of its work was lost. The unresolvable part is stated plainly:
+an interactive session and the launchd loop have no shared lock protocol. Until one exists, a
+person starting a session should either stop the loop (`launchctl unload
+build/com.august.ships-loop.plist`) or take the loop's own lock (`mkdir build/.loop.lock`) and
+remove it after.
+
+**The class bug behind August's blunt bow, found and fixed at the source.** `H.rake(u)` offset
+x by u alone — the same shift at keel and truck — so a "raked" stem was a vertical stem pushed
+bodily forward. That is why stemRake 0.085 drew QM2 no rake at all, and why every drawn
+waterline ran LONGER than its record's lwl (the underwater body carried the whole offset).
+Rake now scales with height above the load waterline: zero at the water — that is what lwl
+means — rising to the record's full overhang at the deck. Deck-level callers (mast feet,
+bowsprit root, head knee, rails) read `H.rake` unchanged and stay correct by construction; the
+wooden and junk rudders lean with the posts they hang on; keel, frames, stempost and knee
+follow because they sample surfacePoint. Every raked hull's underwater ends pull in to lwl —
+a fleet-wide veracity correction, e.g. the dhow's drawn waterline was 20% over her record.
+
+**The audit learned the class, injection-proven:** 'a recorded rake drawn vertical' measures
+the drawn lean off the planking's own vertices (foremost point at the waterline against
+foremost at each end's own sheer band) and compares it with stemRake·loa / sternRake·loa.
+Reverting to uniform rake fires it 45 times across the fleet; the fixed build is 29/29 clean,
+twice. Two audit bugs were found by rule 8 on the way (check the audit first — now 6 lifetime):
+the first cut measured the stern band from the GLOBAL sheer top, which on a bow-sheer-only hull
+is empty and read −287 m of lean; and the old 'boats off the boat deck' rule assumed boats on
+the roof, which recessed boats correctly are not.
+
+**Queen Mary 2, rebuilt from her record (all four OWED items closed):**
+- *Bow:* stem lean 14 m over 345 m LOA (loa − lwl − ~3 m stern overhang), and `bowFlare` —
+  the counter's mirror, entirely above v = 0.62 so the waterplane and every published
+  coefficient are untouched. The stem now visibly leans and flares from every bearing.
+- *Boats:* 22 recessed 11.92 m Schat-Harding boat-tenders (Cunard/Schat-Harding record) at the
+  Deck 8 gallery — `boatsRecessed` marks the first house tier as the gallery, the wall builder
+  paints its void dark, the boats stow onto its sole by the same derivation the walls stand on,
+  and the audit's boat datum moves with the class. `boatLM` carries the recorded boat length.
+- *Stern:* Costanzi — `sternRound` closes the plan toward the centreline as the topsides rise,
+  over a small `transom` (0.10) kept for the pods, which is the stern the record describes.
+- *Verticals:* the whole ship was drawn half again too tall and audit-green — beam·0.105 dealt
+  4.3 m decks from her 41 m beam. `deckM` 3.2 (72.0 m keel-to-funnel over 18 decks, Wikipedia/
+  Cunard) puts the funnel top at 61.7 m over water (was ~100), freeboard 17.0, ten house tiers,
+  funnelH 12.7, funnelScale 2.0 for the broad casing. boatDeckM 17.0 and mastTopM 62.0 are now
+  audit data; the audit's house formula honours deckM and the recess datum.
+- *Mast:* the two Titanic poles at Titanic's stations and rake are gone; one dark signal mast
+  stands at the bridge (at 0.135, top 62 m over water). `mastLivery: 'buff'` means the funnel's
+  paint pot, which on Cunard red drew a scarlet mast — a livery that is a colour string is now
+  the mast's own paint.
+- *Cowl ventilators* era-gated at year 1950 alongside the cove rule: forced draught took the
+  job, and cowls on a 2003 roof were the cove-line anachronism as fittings.
+- *wellM removed* — Titanic's well decks were still being drawn on her.
+
+**Looked at, rule 1: QM2 spin-captured twice (8+4 bearings each pass), before and after the
+funnel/mast/cowl fixes; Azzam spin-captured once (12 bearings) against her plate.** Azzam
+reads: white hull, long foredeck, aft-cascading tiers, raked stem, four tenders on the aft
+deck matching the photograph. What she still lacks is the dark raked stack-and-radome cluster
+amidships — nothing published gives its heights, so it needs a plate-derived record pass,
+queued below, labelled derived when drawn (rule 10).
+
+**Audit 29/29 clean after every change. Deploy: LIVE, stamp 1786426912 → 1786434902, verified
+with a cache-busted fetch ~90 s after push. Twenty-fourth clean push-triggered deploy in a row.**
+
+**What this round did NOT do, stated exactly: the frame-ratchet accepts.** The rake class
+change moves the underwater ends of every raked hull in every ship frame, and the r63 rule —
+two full runs to completion on a quiet tree — could not be met inside this round's 80-minute
+watchdog with a second session sharing the tree. Run 1 was launched at 00:57 as reconnaissance;
+its mover list and classification, if it completed before this session ended, are appended
+below. The next round's FIRST task is the full two-run ratchet: expect movers confined to bow
+and stern profiles below the deck line on raked hulls, plus ship-queen-mary-2-adjacent frames
+moving for everything above (this round's whole point), and globe/descent/aboard frames holding.
+Classify every one against that prediction and accept with the class reason; anything moving
+OUTSIDE the ends-below-deck class is not this change and must be investigated, not accepted.
+
+### Next, in order
+1. **Frame ratchet, two full runs, classify and accept per the paragraph above.**
+2. **Azzam's stack/radome cluster** — plate-derived record pass, drawn labelled derived.
+3. Carried: QM2 hull window rows (portholes are false; her record is long window bands);
+   trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
+4. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
