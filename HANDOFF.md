@@ -4252,3 +4252,8 @@ waterjets.
 2. Trireme/corbita masthead sheave gear; waterway margin plank.
 3. Galley action (campaign-data tasks); B10 stunsails if wanted.
 
+**End-of-round deploy note: LIVE, stamp 1786462222 → 1786468280**, verified with cache-busted
+fetches — the live vessels.json carries boatsInboard with the count removed and the Tenders
+row present, and the live minified hull.js carries the inboard guard (one match by code
+pattern). The Pages run started in seconds this time; round 75's runner backlog did not
+recur. Twenty-ninth clean push-triggered deploy in a row.
