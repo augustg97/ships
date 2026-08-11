@@ -3559,3 +3559,82 @@ of 68000 BC to ships of 98 m with her card giving 57.0 m overall and a 59.4 m ri
 cache-busted fetch of the data-version meta tag on the first poll (~90 s after push); the
 live hull.js confirmed carrying the per-mast dScale rule and the live audit-hulls.js the
 'every mast from one tree' rule. Twenty-second clean push-triggered deploy in a row.
+
+---
+
+## Round 69 — 2026-08-10 — The iron mast stops pretending to be a tree, and a third stranded round is landed whole
+
+**This round began with 227 uncommitted lines in the tree: a complete iron-mast implementation
+with its research doc (`Research/IRON-MASTS.md`), built across at least four sessions (20:27,
+21:08, 21:26, 21:42) that each armed a wait on the frame ratchet and died at turn end — the
+r63/r66 stranding, a third time, r63's own rule unfollowed again.** This round landed it: audit
+re-run and the new rule injection-proven, both ratchet passes run to completion foreground-held
+on the PID, twelve movers classified from read diffs, diagnosis frames read and deleted, built,
+deployed, verified live.
+
+**The work being landed — the other half of r68's diameter question. A plated tube is not a
+tree; its diameter is whatever the builder rolled, and that is a record question.** The records
+are in IRON-MASTS.md: Great Eastern 1858 is the one fully attested set (six masts named Monday
+to Saturday, 2 ft 9 in – 3 ft 6 in through, the aftermost wooden because the compass stood near
+it), and her tubes hold pole-length/diameter near 55 on the model's own measure. So the law:
+an attested `diaM` on the mast record is drawn outright (this round only her six carry it); an
+iron mast without one derives its tube at poleM/55, and its part card SAYS derived (rule 10 — a
+number with no provenance is worse than none). From about 1890 a steel square-rigger's lower and
+topmast are one tube (Preussen's record: all masts and spars of steel tube except the wooden
+spanker gaff), so only her topgallant stenge steps down, at the heel proportion of Peking's
+surviving stengen; earlier iron ships keep the separate sent-down wooden topmast, which is what
+the white-lower/black-upper livery joint has marked all along. What the fleet gained, measured:
+Great Eastern 1.21–1.52 → 0.84–1.07 attested; Titanic 1.69 → 0.95; Dreadnought 1.50 → 0.62;
+Yamato 1.52 → 0.73; QM2 → 0.73; the steamer 0.92 → 0.85; Preussen 0.98 → 1.04 — the one that
+GREW, because her 57 m one-piece pole asks more tube than beam×0.06 gave her.
+
+**The audit learned the class — 'an iron mast grown from a tree': absolute diameters, not
+ratios.** It recomputes the expected tube per mast (attested diaM or poleM/55 from the data's
+own segment stack) and fires on a drawn iron lower more than 25% off; a declared diaM with no
+drawn mast at its station fires 'a recorded mast not drawn'. Proven by fault injection this
+round: disabling the iron branch reproduces the tree law and fires on Yamato, QM2 and the other
+divergent hulls, while the steamer (~8% off) and Preussen (~6%) rightly stay quiet. 29/29 clean
+before and after, twice.
+
+**Looked at, rule 1, four diagnosis frames read and deleted (r55 rule):** Great Eastern from
+the quarter — six tubes of two attested girths, white iron below the paint joint, black wood
+above; Preussen — five one-piece white tubes running unbroken through the doubling, dark
+stengen above; Titanic's bow — slim raked buff poles tapering hard to the truck; Yamato — the
+after mast a light navy pole behind the funnel.
+
+**Ratchet: two full runs to completion, both foreground-held on the PID (r63 rule). Run 1: 8
+over-limit movers, every one an iron ship, every diff read as an image — all are mast columns,
+the stays and aerials led to them, and nothing else. The negative controls held: every wooden
+hull moved 0.000%.** Four more frames rode UNDER tolerance and were read per the r63
+stale-inside-tolerance rule, and two of them were older debts surfacing: aboard-treasure
+(0.050%) is the r68 per-mast class unaccepted since round 68 — strap-dash columns down the
+five masts; and **aboard (0.029%) had been stale since round 62: the baseline held the land
+row's DASH while the app has filled "Cobh · 55 nm N" since the r62/r65 fixes** — verified by
+cropping both images, the capture holds the truth, the small text simply never crossed the
+limit on its own. Twelve accepts, all reasons in FRAME-LOG. Run 2: **45/45 green, all twelve
+accepts 0.000%, globe-default 0.002% (no label flap), descent holding its recorded r65
+precision-drift residue at 0.043% exactly.**
+
+**Audit 29/29 clean, twice. Frames stay at 45 (four diagnosis frames added and removed).
+Byte budget: first paint 8.18 MB against 8.6, docs/ minified 1.78 → 1.23 MB.**
+
+**Rule 0, written on the new ship-great-eastern baseline:** it reads as a rendered world — the
+Great Eastern broadside on open water under gaff canvas, the paddle box amidships. Three facts
+a viewer can read off it: she carries six masts, white iron lowers under black wooden topmasts
+with the paint joint marking where the iron ends; a paddle wheel AND screw drive a 211 m iron
+hull carrying 4,000 passengers (the card); the build slider stands at iron frames, riveted
+plating, in a fleet list running from a dugout of 68000 BC to the ship of the line.
+
+### Next, in order
+1. **Survey continues, candidates from IRON-MASTS.md §7, in order of attestation:** steel
+   yards are length/50 at the slings, length/100 at the arms — attested twice (Peking 1911
+   exact on six spar classes, Great Eastern 1858 at 50.4) — and the drawn iron-ship yards are
+   several times too thin; Great Eastern's rig is wrong in KIND (Tuesday and Wednesday were
+   square-rigged, the model draws all six gaff; her mast-height curve is also flatter than the
+   record's); iron hulls draw no bowsprit (Preussen's klüverbaum is missing); QM2's mast data
+   looks copied from Titanic (two poles at her exact stations and rake — the real fit is a
+   single signal mast atop the bridge; needs its own record pass).
+2. Carried: trireme/corbita masthead sheave gear (implied, not drawn); item 10 remainder
+   (waterway margin plank, low priority).
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).

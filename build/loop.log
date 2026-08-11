@@ -1930,3 +1930,34 @@ Round 67 is done and live — stamp 1786406602 → 1786411221, all three carried
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 53940 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 19:11:43  round starting
+Round 68 is done and live — stamp 1786411221 → 1786418078, tree clean, audit 29/29 twice, ratchet 45/45 green on the second run.
+
+**What the round did.** The survey's first candidate from round 67 turned out to be a one-line fault with a fleet-wide reach: mast radii were per-ship (`beam × 0.06` for every mast), so the treasure ship's 0.6-share mizzen drew as fat as her main and the caravel's three lateens were one tree three times. The research pass came first — Steel 1794 p.39 read in the full text at maritime.org: diameter follows the spar's own length at an inch per yard, and the mizzen is thinner still, 3/5 of the main's diameter. Measured before tuning, the old beam rule already lands within a few percent of Steel's inch-per-yard for the tallest mast, so that calibration stands and every other mast now scales by its own length, with Steel's mizzen clause on the aftermost station of wooden square-canvased three-masters. Junk and crabclaw poles take length scaling only — China is not rigged by Steel's tables. Bindings, cheeks, tops and the corbis all followed automatically, so the 74's and clipper's mizzens and the junk's after pole drop under the one-tree threshold and rightly go bare.
+
+**Verified.** Three new audit rules proven by fault injection — the pairwise girth-ratio test (uniformity testing misses an injected carrack whose lateen mizzen draws *fatter* than her mains), per-mast binding counts, and bound-masts-not-meshes, where the audit itself was wrong first: rope wooldings draw two meshes per mast, and the initial over-binding rule counted meshes. Four diagnosis frames rendered, read and deleted; sixteen ratchet movers accepted from read diffs (twelve over limit, four riding under tolerance per the r63 rule), every diff being mast columns and fittings only. The negative controls held — Wyoming, Titanic and QM2, whose masts are equal, moved 0.000%.
+
+**Next round:** the iron-ship anchor is the remaining half of the question — `beam × 0.06` gives Yamato a 2.33 m and QM2 a 2.46 m pole, and a steel tube's diameter is a record question; check the records first. The trireme/corbita masthead sheave gear carry also stands.
+2026-08-10 20:17:36  round finished; HEAD is ab126cd Round 68 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 59696 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 20:27:36  round starting
+Run 1 is still capturing (49 cold pages at ~20 s each — roughly 15 minutes). The harness will wake me when it exits; the audit side of the round is already done and proven, so the remaining work — reading the diagnosis frames, classifying movers, accepting with reasons, build, deploy — resumes on that notification.
+2026-08-10 20:58:16  round finished; HEAD is ab126cd Round 68 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 65536 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 21:08:16  round starting
+
+2026-08-10 21:16:23  round finished; HEAD is ab126cd Round 68 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 70940 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 21:26:23  round starting
+Capture is under way (3 of 49 frames so far). Waiting on the monitor.
+2026-08-10 21:32:30  round finished; HEAD is ab126cd Round 68 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 72548 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 21:42:30  round starting
+The capture is running quietly (output is piped through tail, so it appears at completion). Waiting on the background task — it will re-invoke me when the run finishes, and the remaining chain is: read the four diagnosis frames, injection-check the new audit rule, accept movers, run 2, build, deploy.
+2026-08-10 21:45:27  round finished; HEAD is ab126cd Round 68 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 73634 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 21:55:28  round starting

@@ -827,7 +827,42 @@ function buildRig(S, group, mats, FINE, FURLED) {
                : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
                : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
                : [lower, top, tg];
-    const radii = [B * 0.030 * dScale[0], B * 0.020 * dScale[1], B * 0.013 * dScale[2]];
+    /* ── AN IRON MAST IS A TUBE, AND ITS DIAMETER IS THE RECORD'S ─────────────────────
+       beam x 0.06 was the wooden law's calibration point, and on an iron hull it kept the
+       wooden law's number with the wooden law's justification removed: a plated tube is
+       not a tree, and its diameter is whatever the builder rolled. The one fleet member
+       whose tubes are all attested is Great Eastern — Monday 2 ft 9 in through, Tuesday/
+       Wednesday/Thursday 3 ft 6 in, Friday and the wooden Saturday 2 ft 9 in, keel-truck
+       heights alongside — and on the model's own measure those tubes hold pole-length /
+       diameter near 55. So: an attested `diaM` on the mast record is drawn outright; an
+       iron mast without one derives its tube at poleM / 55, and its card says derived.
+       An 1858 tube carries a separate wooden topmast sent down like any other spar (the
+       white-lower/black-upper livery joint IS that fitting); from about 1890 a steel
+       square-rigger's lower and topmast are ONE TUBE — Preussen's record says so in as
+       many words — and only the topgallant stenge above steps down, at the heel
+       proportion of Peking's surviving stengen (500 mm on a 20 m spar). The tube runs
+       near-parallel to the doubling; a single-segment liner pole tapers hard to the
+       truck, as every photograph of Titanic's masts shows. Research/IRON-MASTS.md. */
+    const poleM = segs.reduce((a2, s2) => a2 + s2, 0);
+    let segR;
+    if (S.iron && mk.rig !== 'lateen') {
+      const tubeDia = mk.diaM !== undefined ? mk.diaM : poleM / 55;
+      const r0 = tubeDia / 2;
+      const oneTube = mk.rig === 'square' && (S.year || 0) >= 1890;
+      segR = segs.map((s2, si2) =>
+        si2 === 0 ? (segs.length > 1 ? { a: r0, b: r0 * 0.96 }
+                                     : { a: r0, b: r0 * 0.38 })
+      : si2 === 1 ? (oneTube ? { a: r0 * 0.96, b: r0 * 0.58 }
+                             : { a: r0 * 0.52, b: r0 * 0.36 })
+                  : { a: r0 * 0.48, b: r0 * 0.14 });
+    } else {
+      segR = segs.map((s2, si2) => {
+        const rr = [B * 0.030 * dScale[0], B * 0.020 * dScale[1],
+                    B * 0.013 * dScale[2]][si2];
+        return { a: rr, b: rr * 0.7 };
+      });
+    }
+    const radii = segR.map(s2 => s2.a);
 
     segs.forEach((seg, si) => {
       if (mk.only && si >= mk.only) return;
@@ -853,8 +888,34 @@ function buildRig(S, group, mats, FINE, FURLED) {
               { color: 0x5a6067, roughness: 0.55, metalness: 0.30 })))
         : woodDark;
       const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
-                    radii[si], radii[si] * 0.7, mastMat, -rakeRad);
+                    segR[si].a, segR[si].b, mastMat, -rakeRad);
       m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
+      /* the iron mast's card carries its provenance: attested diameters are the record's,
+         derived ones say derived — a number with no provenance is worse than none */
+      if (S.iron) m.userData.part = { ...m.userData.part,
+        name: mk.wood ? 'Wooden mast' : S.build === 'steel' ? 'Steel mast' : 'Iron mast',
+        what: mk.diaM !== undefined
+          ? (mk.wood
+             ? 'The one wooden mast on the ship, and it is wooden for a reason: the standard '
+               + 'compass stood near it, and a wrought-iron tube alongside would have pulled '
+               + 'the needle. Her diameter is the record\'s — 2 ft 9 in — and her stays were '
+               + 'hemp where every iron mast carried 7½-inch wire.'
+             : 'A wrought-iron tube, not a tree: two half-round plates butt-riveted, with '
+               + 'iron discs riveted inside for stiffness. The diameter drawn here is the '
+               + 'recorded one — Great Eastern\'s six masts, named Monday to Saturday, are '
+               + 'on the record at 2 ft 9 in to 3 ft 6 in through. The wooden topmast above '
+               + 'the tube is a sending-down spar, and the white-to-black paint joint marks '
+               + 'where the iron ends and the wood begins.')
+          : (mk.rig === 'square' && (S.year || 0) >= 1890)
+          ? 'A rolled steel tube. Lower mast and topmast are one piece — Preussen\'s record: '
+            + 'all masts and spars of steel tube except the wooden spanker gaff — and only '
+            + 'the topgallant stenge above the doubling steps down and can be struck. No '
+            + 'record of this tube\'s diameter was in reach, so it is DERIVED at pole '
+            + 'length / 55, the proportion Great Eastern\'s attested tubes hold.'
+          : 'A riveted ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube. No record of '
+            + 'its diameter was in reach of this model, so the drawn figure is DERIVED at '
+            + 'pole length / 55, the proportion held by the one attested set of iron tubes '
+            + '(Great Eastern\'s, 1858). A derived figure, labelled as one.' };
 
       /* ── THE MADE MAST IS BOUND, OR IT WORKS APART ─────────────────────────────────
          No single tree yields a lower mast much over half a metre through, so a big

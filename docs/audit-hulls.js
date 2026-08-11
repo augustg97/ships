@@ -1121,6 +1121,43 @@ say(v.id, 'every mast from one tree',
 "diameter follows the spar's own length (Steel 1794 p.39)");
 }
 }
+{
+if (H.iron && (H.masts || []).length) {
+const steelMainC = (H.lwl + H.beam) / 2;
+const colsC = [];
+g.traverse(o => {
+if (!o.isMesh || !o.userData.part) return;
+if (o.userData.part.key !== 'mast') return;
+if (!/^(Iron|Steel|Wooden) mast$/.test(o.userData.part.name || '')) return;
+const bb = new THREE.Box3().setFromObject(o);
+if (bb.max.y - bb.min.y < Math.min(3, H.beam * 0.35)) return;
+colsC.push({ x: (bb.min.x + bb.max.x) / 2, d: bb.max.z - bb.min.z });
+});
+(H.masts || []).forEach((mm, i) => {
+const lo = mm.heightM !== undefined ? mm.heightM
+: (mm.height || 0) * steelMainC;
+const pole = mm.rig === 'square' ? lo * 1.9
+: mm.rig === 'gaff' ? (mm.topmast ? lo * 1.52 : lo)
+: lo;
+const expDia = mm.diaM !== undefined ? mm.diaM : pole / 55;
+let drawn = 0;
+colsC.forEach(c => {
+if (Math.abs(c.x - ((mm.at || 0) - 0.5) * H.lwl) < H.lwl * 0.12)
+drawn = Math.max(drawn, c.d);
+});
+if (!drawn)
+say(v.id, 'a recorded mast not drawn',
+`mast ${i} at u=${mm.at} declares ${expDia.toFixed(2)} m through and no ` +
+'iron mast stands at its station');
+else if (Math.abs(Math.log(drawn / expDia)) > Math.log(1.25))
+say(v.id, 'an iron mast grown from a tree',
+`mast ${i} drawn ${drawn.toFixed(2)} m through where ` +
+(mm.diaM !== undefined ? 'the record says' : 'the tube law derives') +
+` ${expDia.toFixed(2)} m — an iron mast's diameter is the record's, or ` +
+'poleM/55 labelled derived (Research/IRON-MASTS.md)');
+});
+}
+}
 rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
 parts: Object.keys(part).length,
 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });

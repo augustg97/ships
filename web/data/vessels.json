@@ -2297,6 +2297,7 @@
      {
       "at": 0.13,
       "heightM": 34.0,
+      "diaM": 0.838,
       "rig": "gaff",
       "topmast": true,
       "shrouds": 4
@@ -2304,6 +2305,7 @@
      {
       "at": 0.26,
       "heightM": 38.0,
+      "diaM": 1.067,
       "rig": "gaff",
       "topmast": true,
       "shrouds": 4
@@ -2311,6 +2313,7 @@
      {
       "at": 0.4,
       "heightM": 40.0,
+      "diaM": 1.067,
       "rig": "gaff",
       "topmast": true,
       "shrouds": 5
@@ -2318,6 +2321,7 @@
      {
       "at": 0.6,
       "heightM": 40.0,
+      "diaM": 1.067,
       "rig": "gaff",
       "topmast": true,
       "shrouds": 5
@@ -2325,6 +2329,7 @@
      {
       "at": 0.74,
       "heightM": 38.0,
+      "diaM": 0.838,
       "rig": "gaff",
       "topmast": true,
       "shrouds": 4
@@ -2332,6 +2337,8 @@
      {
       "at": 0.87,
       "heightM": 32.0,
+      "diaM": 0.838,
+      "wood": true,
       "rig": "gaff",
       "topmast": true,
       "shrouds": 4

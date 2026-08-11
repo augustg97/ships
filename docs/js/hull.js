@@ -448,7 +448,26 @@ const segs = mk.rig === 'lateen' ? []
 : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
 : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
 : [lower, top, tg];
-const radii = [B * 0.030 * dScale[0], B * 0.020 * dScale[1], B * 0.013 * dScale[2]];
+const poleM = segs.reduce((a2, s2) => a2 + s2, 0);
+let segR;
+if (S.iron && mk.rig !== 'lateen') {
+const tubeDia = mk.diaM !== undefined ? mk.diaM : poleM / 55;
+const r0 = tubeDia / 2;
+const oneTube = mk.rig === 'square' && (S.year || 0) >= 1890;
+segR = segs.map((s2, si2) =>
+si2 === 0 ? (segs.length > 1 ? { a: r0, b: r0 * 0.96 }
+: { a: r0, b: r0 * 0.38 })
+: si2 === 1 ? (oneTube ? { a: r0 * 0.96, b: r0 * 0.58 }
+: { a: r0 * 0.52, b: r0 * 0.36 })
+: { a: r0 * 0.48, b: r0 * 0.14 });
+} else {
+segR = segs.map((s2, si2) => {
+const rr = [B * 0.030 * dScale[0], B * 0.020 * dScale[1],
+B * 0.013 * dScale[2]][si2];
+return { a: rr, b: rr * 0.7 };
+});
+}
+const radii = segR.map(s2 => s2.a);
 segs.forEach((seg, si) => {
 if (mk.only && si >= mk.only) return;
 const mastMat = S.mastLivery === 'buff'
@@ -463,8 +482,32 @@ const mastMat = S.mastLivery === 'buff'
 { color: 0x5a6067, roughness: 0.55, metalness: 0.30 })))
 : woodDark;
 const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
-radii[si], radii[si] * 0.7, mastMat, -rakeRad);
+segR[si].a, segR[si].b, mastMat, -rakeRad);
 m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
+if (S.iron) m.userData.part = { ...m.userData.part,
+name: mk.wood ? 'Wooden mast' : S.build === 'steel' ? 'Steel mast' : 'Iron mast',
+what: mk.diaM !== undefined
+? (mk.wood
+? 'The one wooden mast on the ship, and it is wooden for a reason: the standard '
++ 'compass stood near it, and a wrought-iron tube alongside would have pulled '
++ 'the needle. Her diameter is the record\'s — 2 ft 9 in — and her stays were '
++ 'hemp where every iron mast carried 7½-inch wire.'
+: 'A wrought-iron tube, not a tree: two half-round plates butt-riveted, with '
++ 'iron discs riveted inside for stiffness. The diameter drawn here is the '
++ 'recorded one — Great Eastern\'s six masts, named Monday to Saturday, are '
++ 'on the record at 2 ft 9 in to 3 ft 6 in through. The wooden topmast above '
++ 'the tube is a sending-down spar, and the white-to-black paint joint marks '
++ 'where the iron ends and the wood begins.')
+: (mk.rig === 'square' && (S.year || 0) >= 1890)
+? 'A rolled steel tube. Lower mast and topmast are one piece — Preussen\'s record: '
++ 'all masts and spars of steel tube except the wooden spanker gaff — and only '
++ 'the topgallant stenge above the doubling steps down and can be struck. No '
++ 'record of this tube\'s diameter was in reach, so it is DERIVED at pole '
++ 'length / 55, the proportion Great Eastern\'s attested tubes hold.'
+: 'A riveted ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube. No record of '
++ 'its diameter was in reach of this model, so the drawn figure is DERIVED at '
++ 'pole length / 55, the proportion held by the one attested set of iron tubes '
++ '(Great Eastern\'s, 1858). A derived figure, labelled as one.' };
 if (FINE && si === 0 && mk.rig === 'square' && !S.iron && radii[0] * 2 > 0.55) {
 const ironHoops = (S.year || 0) >= 1800;
 const rings = [], hoops = [];
