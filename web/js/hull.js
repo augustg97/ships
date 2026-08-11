@@ -3187,7 +3187,16 @@ function linerHouse(S) {
     const shell = i < ns;
     const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
     const ins = shell ? B * 0.015 : inset;
-    const uA = hA + i * 0.008, uB = hB - i * 0.045;
+    /* ── ⚠ THE AFT STEP-BACK IS A FRACTION OF THE HOUSE, NOT A FIXED SLICE PER DECK ────
+       This was `hB - i * 0.045`: every tier ended 4.5% of the SHIP'S LENGTH further forward
+       than the one below. On Titanic's three decks that is a gentle 13% total and looks
+       right, which is why it survived. On a modern liner's thirteen it is 58% — the top of
+       the house ends past midships — and Queen Mary 2 came out as a thirteen-step ziggurat
+       instead of the near-vertical slab she is. The quantity that should be constant is the
+       TOTAL set-back of the house, not the set-back per deck: a tall house steps the same
+       distance overall, in smaller steps. 0.14 reproduces the old figure at n=3 (0.047 a
+       tier) and stops the staircase at any height. */
+    const uA = hA + (i / n) * 0.024, uB = hB - (i / n) * 0.14;
     /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
        half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
     const half = (u) => {

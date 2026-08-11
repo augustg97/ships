@@ -3760,17 +3760,17 @@
     }
    },
    "hull": {
-    "wlPower": 2.6,
-    "stemFineness": 0.02,
+    "wlPower": 2.1,
+    "stemFineness": 0.015,
     "sternFineness": 0.22,
-    "forefoot": 0.1,
-    "run": 0.3,
+    "forefoot": 0.05,
+    "run": 0.36,
     "riseF": 0.2,
     "riseA": 0.14,
-    "sheerBow": 1.2,
+    "sheerBow": 0.25,
     "sheerStern": 0.0,
     "tumblehome": 0.0,
-    "stemRake": 0.03,
+    "stemRake": 0.015,
     "sternRake": 0.0,
     "strakes": 10,
     "copper": false,
@@ -3778,7 +3778,7 @@
     "chequer": false,
     "gunDecks": 0,
     "iron": true,
-    "topside": "#f2f0ea",
+    "topside": "#f4f2ec",
     "bowsprit": 0.0,
     "steeve": 22,
     "masts": [],
@@ -3789,9 +3789,14 @@
     "beam": 20.8,
     "draught": 4.3,
     "freeboard": 9.0,
-    "cm": 0.76,
+    "cm": 0.68,
     "year": 2013,
-    "decks": 4
+    "decks": 5,
+    "houseAt": [
+     0.3,
+     0.86
+    ],
+    "shellTiers": 1
    },
    "rows": [
     [
@@ -4009,17 +4014,17 @@
     }
    },
    "hull": {
-    "wlPower": 3.8,
+    "wlPower": 2.9,
     "stemFineness": 0.1,
     "sternFineness": 0.2,
     "forefoot": 0.14,
     "run": 0.24,
     "riseF": 0.18,
     "riseA": 0.15,
-    "sheerBow": 0.7,
-    "sheerStern": 0.4,
+    "sheerBow": 0.35,
+    "sheerStern": 0.0,
     "tumblehome": 0.01,
-    "stemRake": 0.02,
+    "stemRake": 0.085,
     "sternRake": 0.02,
     "strakes": 44,
     "copper": false,
@@ -4057,24 +4062,19 @@
     "transom": 0.22,
     "funnels": 1,
     "decks": 13,
-    "portholes": true,
+    "portholes": false,
     "mastLivery": "buff",
     "houseAt": [
-     0.202,
-     0.849
+     0.06,
+     0.94
     ],
-    "funnelH": 19.0,
-    "funnelAt": [
-     0.335,
-     0.445,
-     0.555,
-     0.665
-    ],
+    "funnelH": 22.0,
+    "funnelAt": 0.62,
     "year": 2003,
-    "shellTiers": 1,
+    "shellTiers": 2,
     "wellM": 15.2,
     "mastTopM": 62.5,
-    "buff": "#c9a267",
+    "buff": 13111342,
     "funnelRake": 9.46
    },
    "rows": [

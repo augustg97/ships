@@ -3644,3 +3644,39 @@ cache-busted fetch of the data-version meta tag on the first poll (~30 s after p
 hull.js confirmed carrying the poleM/55 tube law, the live vessels.json Great Eastern's six
 diaM fields, and the live audit-hulls.js the 'iron mast grown from a tree' rule. Twenty-third
 clean push-triggered deploy in a row.
+
+---
+
+## OWED: Queen Mary 2 and Azzam are not yet their own ships
+
+August spotted this and asked why they were so far off. The answer is that I built both by
+COPY-AND-ADJUST rather than by modelling the vessel — Queen Mary 2 was Titanic's hull with the
+dimensions swapped (`sheerBow`, `stemRake`, `tumblehome`, `wlPower`, `cm`, `portholes`,
+`shellTiers` all byte-identical to Titanic), and Azzam was the container ship with a lower block
+coefficient. That is exactly what rule 3 forbids, and I told him the quality bar would hold
+while doing it.
+
+**Two blind spots let it through, and both are worth stating.** The audit passed them 29/29
+because it checks internal consistency and record-matching; *nothing in the toolchain measures
+resemblance*. And I never rendered them and looked, which is rule 1. The same pairing —
+audit green, never looked — is how the aback sails survived twenty-odd rounds.
+
+**Fixed so far.** A genuine class bug: `linerHouse` stepped each tier aft by `i * 0.045` of the
+ship's LENGTH, so a 3-deck Edwardian house set back a gentle 13% and a 13-deck modern one set
+back 58% — a ziggurat. The set-back is now a fraction of the house, which reproduces Titanic at
+n=3 and fixes every tall house. Plus Cunard red on the funnel, two shell tiers, no portholes,
+a finer entry, the funnel moved aft.
+
+**Still wrong, and visible against the photograph:**
+1. **The bow.** Hers is sharply raked and flared; the model's is close to a blunt vertical stem.
+   `stemRake: 0.085` did not produce it — find what actually governs the stem profile before
+   turning that dial again.
+2. **No lifeboats** in the white band. She carries them recessed, and they are one of the
+   things the eye uses to read her.
+3. **The stern is square**; hers is rounded.
+4. **Azzam has not been looked at at all** since the change. Do that before believing anything
+   about her.
+
+**And the rule for any vessel added from here:** build it, spin it, and LOOK at it beside the
+plate before committing. The plate is already in the card — the comparison costs nothing and it
+is the only check that catches this class.

@@ -1948,7 +1948,7 @@ for (let i = 0; i < n; i++) {
 const shell = i < ns;
 const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
 const ins = shell ? B * 0.015 : inset;
-const uA = hA + i * 0.008, uB = hB - i * 0.045;
+const uA = hA + (i / n) * 0.024, uB = hB - (i / n) * 0.14;
 const half = (u) => {
 const uu = Math.max(0.001, Math.min(0.999, u));
 return Math.max(B * 0.06, Math.min(wid / 2,
