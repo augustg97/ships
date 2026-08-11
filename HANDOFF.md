@@ -3769,3 +3769,52 @@ OUTSIDE the ends-below-deck class is not this change and must be investigated, n
 3. Carried: QM2 hull window rows (portholes are false; her record is long window bands);
    trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
 4. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+
+---
+
+## Round 71 — 2026-08-11 — The rake's movers are classified to the metre, and the audit catches Queen Mary 2's buried casing
+
+**The owed ratchet run: 49 frames captured, 19 movers, every one classified against round 70's
+prediction, all 19 accepted.** The class held everywhere, with one addition the prediction did
+not name: on `ship-wyoming` (17.469%, the outlier that had to be investigated, not assumed) the
+whole scene moved because the height-proportional rake pulled her aft underwater extreme in by
+**exactly sternRake·loa = 4.20 m**, and the Shipwright's extent fit follows the visible box —
+`SW.viewX` 144.504 → 140.304, `SW.fit` −2.9% — so the camera stands fractionally closer and
+every 3D pixel shifts ~2.5% about the aim point. Proof by A/B, not by reasoning: a worktree at
+ea9948e (pre-rake) served on :8151, the same frame captured live from both code states —
+**baseline vs pre-rake 0.000%, pre-rake vs HEAD 17.469%, identical to the ratchet's number to
+three decimals.** The other Shipwright ship frames are the same mechanism at smaller fit deltas
+plus end-profile wedges; `shipwright-astern`'s transom furniture leans aft with the now-leaning
+sternpost, which is the fix doing its job. The nine `aboard-*` movers (0.05–0.22%) are each one
+compact pixel band where the vessel's own bow or a consort's hull meets the sea — the leaned
+stem seen from on deck; `aboard-cable` crop-verified (the Great Eastern re-seats on her
+shortened waterline, every detail intact). Boats and cowls were suspected on `ship-steamer` and
+cleared in code: buildBoats and the cowl gate are unchanged for non-recessed, pre-1950 ships.
+
+**Ratchet hygiene:** the four `diag-*` entries (74-quarter, preussen, trireme, carrack) that
+round 70's sessions left in frames.json are removed with their captures — the r55 rule,
+diagnosis frames are not baselines. The committed set is 45 frames, all with baselines.
+
+**What this round did NOT do, stated exactly:**
+1. **The second full run (the r63 two-run rule) is still owed.** Run 1 + classification + the
+   A/B investigation consumed the 80-minute watchdog window (run 1 alone is ~21 min at 49
+   frames). The accepted baselines are byte-identical to run 1's captures, and the known
+   flap frames (globe-default et al.) all held green this run, so the residual risk is the
+   sub-tolerance kind. **Next round's FIRST task: one full 45-frame check, expected all
+   green; classify anything that moves.**
+2. **The audit is RED and the round shipped anyway — verification artefacts only, no app
+   code changed here.** `queen-mary-2 · funnel does not stand on its deck · casing bottom
+   −2.3 m from its deck`, stable across two runs, on exactly the code round 70 deployed as
+   "29/29 clean" — so either r70's final audit predated its last edit, or the audit's new
+   recess-aware house datum and buildFunnel's measured-from deck disagree. −2.3 m ≈
+   0.72·deckM. Rule 8: **check the audit's datum first** — r70 rewrote the audit's house
+   formula (deckM + recess) in the same commit that moved the funnel. The burial is inside
+   the house volume, invisible in the r70 spins, which is why looking did not catch it.
+   **Next round, task 2: settle casing-vs-audit and make 29/29 true again.**
+
+### Next, in order
+1. Full 45-frame ratchet check on the quiet tree — the owed second run. Expect green.
+2. QM2 funnel casing vs the audit's recess-aware deck datum (above) — fix whichever is wrong.
+3. Azzam's stack/radome cluster — plate-derived record pass, drawn labelled derived (r70).
+4. Carried: QM2 hull window rows (portholes are false; her record is long window bands);
+   trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).

@@ -241,26 +241,6 @@
    "name": "shipwright-corbis",
    "path": "/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15",
    "note": "r67 standing guard: masthead furniture per the evidence \u2014 the corbita's bare head (no top before 1100) with the corbis, the basket that named her (Festus). Watches the dated-top class and the corbis class."
-  },
-  {
-   "name": "diag-74-quarter",
-   "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.5&l=14&y=25",
-   "note": "DIAGNOSIS r70 \u2014 yards from the quarter"
-  },
-  {
-   "name": "diag-preussen",
-   "path": "/?frozen=1#v=ship&s=preussen&b=115&z=0.45&l=12&y=30",
-   "note": "DIAGNOSIS r70 \u2014 thirty steel yards"
-  },
-  {
-   "name": "diag-trireme",
-   "path": "/?frozen=1#v=ship&s=trireme&b=100&z=0.5&l=10&y=8",
-   "note": "DIAGNOSIS r70 \u2014 the one-yard rig"
-  },
-  {
-   "name": "diag-carrack",
-   "path": "/?frozen=1#v=ship&s=carrack&b=140&z=0.5&l=10&y=15",
-   "note": "DIAGNOSIS r70 \u2014 crossed yards and the lateen mizzen"
   }
  ]
 }
