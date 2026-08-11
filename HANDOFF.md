@@ -4455,3 +4455,18 @@ diff (this note is the untangling aid).
    sheave as its Chinese sibling — one research pass covers both.
 2. Galley action (campaign-data tasks); B10 stunsails if wanted.
 3. QM2 small items above, only if a round is otherwise light.
+
+**Run 2 result and one flap struck, the r51 way:** 46/47 green with all three accepts at
+green; the one mover was globe-default at 1.156%, mean |Δ| 0.340 — the SAME figures as
+r77's flap, and the diff is nothing but label halos and track-glyph ghosts, the
+r28/r45/r51 font-rasterisation transient. Run 1 of this very tree captured the frame
+green at 0.012% against the same committed baseline minutes earlier, which is the
+two-capture transient proof; struck, baseline untouched. Third strike with identical
+numbers: the capture gate needs a stronger condition than document.fonts.status, and that
+is now a real (small) queue item, not a footnote.
+
+**End-of-round deploy note: LIVE, stamp 1786473765 → 1786476366**, verified with
+cache-busted fetches inside the round — the live vessels.json carries both deckLaid
+records, and the live hull.js carries karchesion, waterway and deckIsSteel (all by code
+pattern). The Pages run started in seconds. Thirty-first clean push-triggered deploy in
+a row.
