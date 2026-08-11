@@ -93,6 +93,48 @@ evidence.
   treasure-ship 1410). The audit now requires a year on any square- or junk-rigged hull,
   because three dated technologies (tops, wooldings/hoops, iron straps) hang off it.
 
+## 3. The ancient masthead is the karchesion, and it is halyard gear (round 78)
+
+**The question.** Round 67 stripped the trireme's and corbita's mastheads of their medieval
+tops and left them bare. But the bare pole understates what was there: the yard HOISTED, so
+the head carried the sheave the halyard ran over — r67's own survey noted "every
+reconstruction drawing and *Olympias* itself carries a bare masthead with halyard sheaves"
+and flagged the gear as implied, not drawn. The rig code confirmed the gap the hard way: the
+single-yard halyard was drawn slings-to-rail direct, never touching the masthead — a rope
+that could hoist nothing, on the trireme, the corbita and the cog alike.
+
+**What the sources say.**
+
+- Athenaeus, *Deipnosophistae* 11.49 (474e–475a), quoting Asclepiades of Myrlea (read this
+  round, attalus.org text): "The lowest part of the mast is called the heel, which drops
+  into the socket; the part approximately in the middle is the neck, and that at the top is
+  the **karchesion**." Asclepiades derives the CUP called karchesion from the mast part —
+  the masthead is the primary sense. His description continues: the karchesion carries the
+  yard gear, and on the (large, Hellenistic-era) ships he describes, a *thorakion* stands
+  on it.
+- The thorakion caveat: Asclepiades attests a masthead structure on big ships of his own
+  era, which is consistent with §2's Medinet Habu note — "no tops in antiquity" is false as
+  a universal. It stays true of THIS fleet's two ancient hulls: the Torlonia relief (the
+  corbita's own plate) shows no masthead platform, and the trireme struck her masts before
+  action. The r67 gate stands.
+- Form: no ancient masthead survives. The reconstruction *Olympias* carries halyard sheaves
+  at a plain masthead (r67 survey, §2). The block drawn here — a squared head with a sheave
+  slot and pin, slightly flared at the lip — is DERIVED from the pole's own diameter, and
+  the part card says derived.
+- Pollux, *Onomasticon* I.91 reportedly lists the karchesion among the mast's parts; the
+  passage was NOT verifiable in an accessible edition this round and is not cited in the
+  app.
+
+**What this fixes, as classes.**
+
+- Every single-tier square mast on a hull depicted before 1100 carries a karchesion at its
+  head — the trireme's two (including the raked akateion at the bow) and the corbita's two
+  (including the artemon). The gate is the mirror of the top's: the two fittings never
+  share a pole, and a hull with no stated year gets neither.
+- The single-yard halyard now leads slings → masthead → rail, over the sheave that is the
+  karchesion's whole function (and the top's sheave on the cog). The multi-tier halyard
+  lead (ties and jeers at the doubling) is a separate mechanism, unchanged this round.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent
@@ -102,3 +144,7 @@ evidence.
   an absence, so stated as "no evidence", not "proof of absence").
 - The corbis: **sourced** (Festus/Paulus, three editions), though whether it hung always or
   only in harbour is unknown; drawn hanging, which is what the source says it did.
+- The karchesion as the masthead's name and place: **sourced** (Asclepiades of Myrlea in
+  Athenaeus 11.49, read this round). Its form and size: **derived** from the pole, stated
+  as derived on the card. The halyard leading over the head: mechanical necessity — the
+  yard cannot hoist otherwise.

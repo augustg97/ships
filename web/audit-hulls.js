@@ -1756,6 +1756,90 @@
       }
     }
 
+    /* ── THE ANCIENT MASTHEAD CARRIES ITS OWN GEAR (round 78) ──────────────────────────
+       The other side of the r67 gate: a top is forbidden before 1100, but the masthead
+       was not bare — the yard hoisted, so the head carried the halyard sheave, and its
+       ancient name is the karchesion (Asclepiades of Myrlea in Athenaeus 11.49: heel,
+       neck, and at the head the karchesion). So every single-tier square mast on a hull
+       depicted before 1100 must carry one; one on a hull at or after 1100 — or with no
+       stated year — is the fitting out of its age, the top's mirror rule. And it must
+       stand AT the head, not adrift down the pole. Then the rope: on any hull whose
+       square masts are all single-tier, the one yard IS the hoisting yard, so the
+       halyard must REACH the masthead it hoists to — drawn slings-to-rail direct it
+       was a rope that could hoist nothing, on the trireme, the corbita and the cog. */
+    {
+      const anc = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only === 1);
+      const depYear = H.year || v.from || 0;
+      const headM = mm => mm.heightM || (H.lwl + H.beam) / 2 * (mm.height || 0);
+      /* one karchesion is one tagged GROUP of several meshes — count groups, not meshes,
+         or one drawn masthead would satisfy a two-masted hull's rule by mesh count */
+      let nK = 0;
+      g.traverse(o => { const p = o.userData && o.userData.part;
+                        if (p && p.key === 'karchesion' && !o.isMesh) nK++; });
+      const preTop = H.year !== undefined && H.year < 1100;
+      if (preTop && anc.length && nK < anc.length)
+        say(v.id, 'an ancient masthead with no karchesion',
+            `${nK} karchesion mesh groups for ${anc.length} single-tier square masts ` +
+            `depicted ${depYear} — the yard hoists to a sheave the drawing does not carry`);
+      if (!preTop && nK)
+        say(v.id, 'a karchesion out of its age',
+            `${nK} karchesion meshes on a hull depicted ${depYear || 'undated'} — after ` +
+            '1100 the masthead carries a top, and the two never share a pole');
+      if (preTop && anc.length && nK) {
+        /* the block is the head itself: the tallest one must reach the tallest masthead,
+           and none may sit below the shortest mast's hounds */
+        const heads = anc.map(headM);
+        const hi = Math.max(...heads), lo = Math.min(...heads);
+        if (part.karchesion.y[1] < deckY + hi * 0.80)
+          say(v.id, 'a karchesion adrift down the mast',
+              `karchesion tops at ${part.karchesion.y[1].toFixed(1)} m against a ` +
+              `~${hi.toFixed(0)} m masthead`);
+        if (part.karchesion.y[0] < deckY + lo * 0.45)
+          say(v.id, 'a karchesion below the hounds',
+              `karchesion base at ${part.karchesion.y[0].toFixed(1)} m on masts of ` +
+              `${lo.toFixed(0)}–${hi.toFixed(0)} m`);
+      }
+      const sqAll = (H.masts || []).filter(mm => mm.rig === 'square');
+      if (sqAll.length && sqAll.every(mm => mm.only === 1) && part.halyard) {
+        const hi = Math.max(...sqAll.map(headM));
+        if (part.halyard.y[1] < deckY + hi * 0.85)
+          say(v.id, 'a halyard that reaches no masthead',
+              `halyard tops at ${part.halyard.y[1].toFixed(1)} m against a ` +
+              `~${hi.toFixed(0)} m masthead — the fall must lead over the head sheave`);
+      }
+    }
+
+    /* ── AND THE LAID DECK HAS ITS WATERWAY (round 78) ─────────────────────────────────
+       The margin plank at the deck edge: every laid plank deck carries one — a
+       teak-decked liner as much as a seventy-four — a bare steel deck (deckSteel, a
+       flight deck, a container top) does not, and a hull with no laid deck at all,
+       the record's deckLaid: false, has no margin to plank. Where it exists it stands
+       at the deck EDGE: a band that stops short of the skin, or floats clear of the
+       deck, is the floating-fitting class at deck level. */
+    {
+      const steel = H.build === 'steel' || H.build === 'iron';
+      const steelDeck = steel && (H.deckSteel !== undefined ? H.deckSteel
+                                                            : !!(H.flightDeck || H.containers));
+      const laid = !steelDeck && H.deckLaid !== false;
+      const ww = part.waterway;
+      if (laid && part.deck && !ww)
+        say(v.id, 'a laid deck with no waterway',
+            'a planked weather deck and no margin plank at its edge');
+      if (!laid && ww)
+        say(v.id, 'a margin plank on a deck that has none',
+            `${ww.n} waterway meshes on a ` +
+            (steelDeck ? 'bare steel deck' : 'hull with no laid deck (deckLaid: false)'));
+      if (laid && ww && part.deck) {
+        if (Math.abs(ww.z[1] - part.deck.z[1]) > 0.15 || Math.abs(ww.z[0] - part.deck.z[0]) > 0.15)
+          say(v.id, 'a waterway off the deck edge',
+              `waterway spans z ${ww.z[0].toFixed(2)}..${ww.z[1].toFixed(2)} m against a deck at ` +
+              `${part.deck.z[0].toFixed(2)}..${part.deck.z[1].toFixed(2)} m`);
+        if (ww.y[1] > deckY + 0.25 || ww.y[1] < deckY - 1.5)
+          say(v.id, 'a waterway adrift of its deck',
+              `waterway tops at ${ww.y[1].toFixed(2)} m against a deck crown at ${deckY.toFixed(2)} m`);
+      }
+    }
+
     /* ── AND THE TOP STANDS ON ITS CHEEKS (round 64) ───────────────────────────────────
        Every doubled square masthead — one with a topmast to fid, mk.only !== 1 —
        carries its top on trestletrees, and the trestletrees on two cheek knees bolted

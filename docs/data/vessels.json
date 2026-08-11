@@ -93,7 +93,8 @@
     "draught": 0.26,
     "freeboard": 0.34,
     "cm": 0.88,
-    "paddleDia": 0
+    "paddleDia": 0,
+    "deckLaid": false
    }
   },
   {
@@ -219,7 +220,8 @@
     "cm": 0.62,
     "doubleHull": true,
     "hullSep": 5.4,
-    "sailAreaEach": 25.0
+    "sailAreaEach": 25.0,
+    "deckLaid": false
    }
   },
   {

@@ -575,6 +575,13 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
 }
 
 /* The deck: a cap across the sheer line, slightly cambered as a real deck is. */
+/* the weather deck keys off what the DECK was, not what the hull was — one judgement,
+   asked in one place, so the deck material and the deck furniture cannot disagree */
+function deckIsSteel(S) {
+  return (S.build === 'steel' || S.build === 'iron')
+      && (S.deckSteel !== undefined ? S.deckSteel : !!(S.flightDeck || S.containers));
+}
+
 function buildDeckGeometry(S, NU = 120) {
   const H = hullSurface(S);
   const pos = [], nor = [], uvs = [], idx = [];
@@ -1129,6 +1136,48 @@ function buildRig(S, group, mats, FINE, FURLED) {
         }
       }
 
+      /* ── THE KARCHESION — the ancient masthead, drawn as the fitting it was ──────────
+         What stood at an ancient masthead instead of a top: the karchesion. Asclepiades
+         of Myrlea (in Athenaeus 11.49): the mast's foot is the heel, its middle the neck,
+         and its head the karchesion — the same word as the two-handled cup, which is
+         about its shape. It is the block the yard hoists to: the halyard runs over a
+         sheave in the head and falls to the deck, and without it the lines the rig
+         already draws converged on a bare pole that could hoist nothing. Gated like the
+         top but on the OTHER side of 1100 — the two fittings are mutually exclusive at
+         one masthead — and only on a single-tier pole, which every ancient mast is.
+         Form and size are DERIVED from the pole (no ancient masthead survives); the
+         card says so. Research/MASTHEADS.md §3. */
+      if (FINE && mk.rig === 'square' && si === 0 && mk.only === 1
+          && S.year !== undefined && S.year < 1100) {
+        const hR = radii[0] * 0.7;                     // the pole at the hounds
+        const kg = new THREE.Group();
+        /* the head block, its lip flaring above the sheave — the cup the name draws */
+        const blkH = hR * 4.2, blkW = hR * 3.0, blkD = hR * 2.2;
+        const blk = new THREE.Mesh(new THREE.BoxGeometry(blkD, blkH, blkW), mastMat);
+        kg.add(blk);
+        const lip = new THREE.Mesh(
+          new THREE.BoxGeometry(blkD * 1.18, hR * 0.7, blkW * 1.18), mastMat);
+        lip.position.y = blkH / 2 - hR * 0.35;
+        kg.add(lip);
+        /* the sheave slot, dark through the block fore and aft, and the pin it turns on */
+        const slotMat = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+          { color: 0x17120c, roughness: 0.95 }));
+        const slot = new THREE.Mesh(
+          new THREE.BoxGeometry(blkD * 1.02, blkH * 0.52, hR * 0.42), slotMat);
+        slot.position.y = -hR * 0.3;
+        kg.add(slot);
+        const pin = new THREE.Mesh(
+          new THREE.CylinderGeometry(hR * 0.26, hR * 0.26, blkW * 1.12, 8), slotMat);
+        pin.rotation.x = Math.PI / 2;
+        pin.position.y = -hR * 0.3;
+        kg.add(pin);
+        /* the block IS the head: its top face is the truck of the pole */
+        const hY = y + seg - blkH / 2;
+        kg.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+        kg.rotation.z = -rakeRad;
+        group.add(tag(kg, 'karchesion'));
+      }
+
       /* ── THE CORBIS — the basket that named the ship ─────────────────────────────────
          Paulus' epitome of Festus: "Corbitae dicuntur naves onerariae, quod in malo earum
          summo pro signo corbes solerent suspendi" — cargo ships are called corbitae
@@ -1293,8 +1342,19 @@ function buildRig(S, group, mats, FINE, FURLED) {
            yard is itself the hoisting yard. */
         if (k > 0 || mastYards.length === 1) {
           const sgn = k % 2 ? 1 : -1;
-          hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0),
-                     rail(u + 0.05 + 0.015 * k, sgn)]);
+          if (mastYards.length === 1) {
+            /* ⚠ the one yard hoists to the MASTHEAD, so its halyard must go there: up
+               from the slings, over the sheave at the head — the karchesion on an
+               ancient pole, the top's sheave after 1100 — and only then down to the
+               rail. Drawn slings-to-rail direct, it was a rope that could hoist
+               nothing, and the masthead gear it implies was missing from two hulls. */
+            const hd = V3(mx(capY), capY, 0);
+            hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
+                      [hd, rail(u + 0.05, sgn)]);
+          } else {
+            hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0),
+                       rail(u + 0.05 + 0.015 * k, sgn)]);
+          }
         }
       });
       const rr = B * 0.0004;
@@ -2684,6 +2744,13 @@ const PARTS = {
   rail:     { stage: 3, name: 'Rail',
               what: 'The capping timber round the deck edge, following the sheer. It finishes '
                   + 'the tops of the frames and is what everyone aboard actually holds on to.' },
+  waterway: { stage: 3, name: 'Waterway',
+              what: 'The margin plank at the deck edge, thicker than the deck it borders and '
+                  + 'standing a little proud of it. The gutter its inboard edge makes against '
+                  + 'the deck carries shipped water aft along the bulwark to the scuppers, '
+                  + 'which is what names it. It is tarred with the seams, so it reads as a '
+                  + 'dark band framing the deck — on a teak-decked liner as much as on a '
+                  + 'seventy-four.' },
   grating:  { stage: 3, name: 'Grating',
               what: 'A lattice hatch cover. It has to be open, because the only ventilation for '
                   + 'the decks below comes through it — and it has to be strong enough to walk '
@@ -2711,6 +2778,15 @@ const PARTS = {
                   + 'masthead platform at all; the lookout stood at the bow, and the masthead '
                   + 'carried the halyard sheaves, the lifts — and, on this type, its own name '
                   + 'in wicker.' },
+  karchesion:{ stage: 4, name: 'Karchesion',
+              what: 'The masthead itself, by its ancient name. Asclepiades of Myrlea, quoted '
+                  + 'by Athenaeus: the foot of the mast is the heel, the middle is the neck, '
+                  + 'and the head is the karchesion — the same word as a two-handled drinking '
+                  + 'cup, which is roughly its shape. It is the block the yard hoists to: a '
+                  + 'sheave turns on a pin through the head, the halyard runs over it and '
+                  + 'falls to the rail. No ancient masthead survives, so the block\'s form and '
+                  + 'size here are DERIVED from the pole; the reconstruction Olympias carries '
+                  + 'the same gear in the same place.' },
   deadeye:  { stage: 5, name: 'Deadeyes',
               what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
                   + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '
@@ -2864,6 +2940,45 @@ function buildFittings(S, group, mats) {
       ? new THREE.MeshStandardMaterial({ color: 0x4a5057, roughness: 0.58, metalness: 0.42 })
       : pale;
     group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
+  }
+
+  /* ── THE WATERWAY: the margin plank at the deck edge ──────────────────────────────
+     A laid deck does not run its planks to the skin: the outermost timber is the
+     waterway, thicker than the deck, standing proud of it, tarred with the seams —
+     the dark band framing every planked deck, and the gutter that carries shipped
+     water aft to the scuppers. So it belongs to the DECK, not the hull: any planked
+     weather deck gets one (a teak-decked liner as much as a seventy-four), a bare
+     steel deck does not, and a hull with no laid deck at all — the record's
+     deckLaid: false, the dugout and the voyaging canoe — has no margin to plank.
+     It hugs the deck's own edge, asked of surfacePoint like the deck itself. */
+  if (!deckIsSteel(S) && S.deckLaid !== false) {
+    const pos = [], idx = [];
+    const NU = 90; let vbase = 0;
+    const w = Math.min(Math.max(B * 0.02, 0.15), 0.45);   // a plank's width, from the beam
+    for (const sgn of [-1, 1]) {
+      for (let i = 0; i <= NU; i++) {
+        const u = 0.035 + (i / NU) * 0.93;
+        const e = surfacePoint(S, H, u, 1);
+        const x = e[0], fb = e[1], hb = e[2];
+        const wu = Math.min(w, hb * 0.55);
+        const yT = fb + 0.034, yB = fb - 0.012;           // proud of the deck, heel buried
+        pos.push(x, yT, sgn * (hb - wu), x, yT, sgn * hb,
+                 x, yB, sgn * hb,       x, yB, sgn * (hb - wu));
+      }
+      for (let i = 0; i < NU; i++) {
+        const a = vbase + i * 4, b = a + 4;
+        for (let f = 0; f < 4; f++) {
+          const c = (f + 1) % 4;
+          idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+        }
+      }
+      vbase += (NU + 1) * 4;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    const wwMat = new THREE.MeshStandardMaterial({ color: 0x3a2c1c, roughness: 0.88 });
+    group.add(tag(new THREE.Mesh(g, wwMat), 'waterway'));
   }
 
   /* ── HATCH GRATINGS: a lattice, because that is what they are ─────────────────────── */
@@ -6665,8 +6780,7 @@ function buildShip(S, opts) {
      for the first time and exposed a planked timber deck on the 2026 composite USV, which
      the heuristic below had been guessing at invisibly. `deckSteel` in the record overrides
      the guess. */
-  const steelDeck = STEEL && (S.deckSteel !== undefined ? S.deckSteel
-                                                        : (S.flightDeck || S.containers));
+  const steelDeck = deckIsSteel(S);
   const deckMat = steelDeck
     ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
                                        side: THREE.DoubleSide })

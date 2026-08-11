@@ -340,6 +340,10 @@ g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx);
 return g;
 }
+function deckIsSteel(S) {
+return (S.build === 'steel' || S.build === 'iron')
+&& (S.deckSteel !== undefined ? S.deckSteel : !!(S.flightDeck || S.containers));
+}
 function buildDeckGeometry(S, NU = 120) {
 const H = hullSurface(S);
 const pos = [], nor = [], uvs = [], idx = [];
@@ -616,6 +620,33 @@ group.add(tag(ck, 'cheek'));
 }
 }
 }
+if (FINE && mk.rig === 'square' && si === 0 && mk.only === 1
+&& S.year !== undefined && S.year < 1100) {
+const hR = radii[0] * 0.7;
+const kg = new THREE.Group();
+const blkH = hR * 4.2, blkW = hR * 3.0, blkD = hR * 2.2;
+const blk = new THREE.Mesh(new THREE.BoxGeometry(blkD, blkH, blkW), mastMat);
+kg.add(blk);
+const lip = new THREE.Mesh(
+new THREE.BoxGeometry(blkD * 1.18, hR * 0.7, blkW * 1.18), mastMat);
+lip.position.y = blkH / 2 - hR * 0.35;
+kg.add(lip);
+const slotMat = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+{ color: 0x17120c, roughness: 0.95 }));
+const slot = new THREE.Mesh(
+new THREE.BoxGeometry(blkD * 1.02, blkH * 0.52, hR * 0.42), slotMat);
+slot.position.y = -hR * 0.3;
+kg.add(slot);
+const pin = new THREE.Mesh(
+new THREE.CylinderGeometry(hR * 0.26, hR * 0.26, blkW * 1.12, 8), slotMat);
+pin.rotation.x = Math.PI / 2;
+pin.position.y = -hR * 0.3;
+kg.add(pin);
+const hY = y + seg - blkH / 2;
+kg.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+kg.rotation.z = -rakeRad;
+group.add(tag(kg, 'karchesion'));
+}
 if (FINE && S.corbis && si === 0 && mk.height === maxMastShare) {
 const wicker = mats.wicker || (mats.wicker = new THREE.MeshStandardMaterial(
 { color: 0x8a7148, roughness: 0.92, side: THREE.DoubleSide }));
@@ -699,8 +730,14 @@ sgn * cT * below.half)]);
 }
 if (k > 0 || mastYards.length === 1) {
 const sgn = k % 2 ? 1 : -1;
+if (mastYards.length === 1) {
+const hd = V3(mx(capY), capY, 0);
+hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
+[hd, rail(u + 0.05, sgn)]);
+} else {
 hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0),
 rail(u + 0.05 + 0.015 * k, sgn)]);
+}
 }
 });
 const rr = B * 0.0004;
@@ -1580,6 +1617,13 @@ what: 'Running rigging from each yard ARM, leading aft. Hauling one brace and '
 rail:     { stage: 3, name: 'Rail',
 what: 'The capping timber round the deck edge, following the sheer. It finishes '
 + 'the tops of the frames and is what everyone aboard actually holds on to.' },
+waterway: { stage: 3, name: 'Waterway',
+what: 'The margin plank at the deck edge, thicker than the deck it borders and '
++ 'standing a little proud of it. The gutter its inboard edge makes against '
++ 'the deck carries shipped water aft along the bulwark to the scuppers, '
++ 'which is what names it. It is tarred with the seams, so it reads as a '
++ 'dark band framing the deck — on a teak-decked liner as much as on a '
++ 'seventy-four.' },
 grating:  { stage: 3, name: 'Grating',
 what: 'A lattice hatch cover. It has to be open, because the only ventilation for '
 + 'the decks below comes through it — and it has to be strong enough to walk '
@@ -1607,6 +1651,15 @@ what: 'The basket hung at the mainmast head — the thing that named the ship. '
 + 'masthead platform at all; the lookout stood at the bow, and the masthead '
 + 'carried the halyard sheaves, the lifts — and, on this type, its own name '
 + 'in wicker.' },
+karchesion:{ stage: 4, name: 'Karchesion',
+what: 'The masthead itself, by its ancient name. Asclepiades of Myrlea, quoted '
++ 'by Athenaeus: the foot of the mast is the heel, the middle is the neck, '
++ 'and the head is the karchesion — the same word as a two-handled drinking '
++ 'cup, which is roughly its shape. It is the block the yard hoists to: a '
++ 'sheave turns on a pin through the head, the halyard runs over it and '
++ 'falls to the rail. No ancient masthead survives, so the block\'s form and '
++ 'size here are DERIVED from the pole; the reconstruction Olympias carries '
++ 'the same gear in the same place.' },
 deadeye:  { stage: 5, name: 'Deadeyes',
 what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
 + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '
@@ -1737,6 +1790,35 @@ const railMat = (S.build === 'steel' || S.build === 'iron')
 ? new THREE.MeshStandardMaterial({ color: 0x4a5057, roughness: 0.58, metalness: 0.42 })
 : pale;
 group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
+}
+if (!deckIsSteel(S) && S.deckLaid !== false) {
+const pos = [], idx = [];
+const NU = 90; let vbase = 0;
+const w = Math.min(Math.max(B * 0.02, 0.15), 0.45);
+for (const sgn of [-1, 1]) {
+for (let i = 0; i <= NU; i++) {
+const u = 0.035 + (i / NU) * 0.93;
+const e = surfacePoint(S, H, u, 1);
+const x = e[0], fb = e[1], hb = e[2];
+const wu = Math.min(w, hb * 0.55);
+const yT = fb + 0.034, yB = fb - 0.012;
+pos.push(x, yT, sgn * (hb - wu), x, yT, sgn * hb,
+x, yB, sgn * hb,       x, yB, sgn * (hb - wu));
+}
+for (let i = 0; i < NU; i++) {
+const a = vbase + i * 4, b = a + 4;
+for (let f = 0; f < 4; f++) {
+const c = (f + 1) % 4;
+idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+}
+}
+vbase += (NU + 1) * 4;
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+g.setIndex(idx); g.computeVertexNormals();
+const wwMat = new THREE.MeshStandardMaterial({ color: 0x3a2c1c, roughness: 0.88 });
+group.add(tag(new THREE.Mesh(g, wwMat), 'waterway'));
 }
 const gratingAt = (u, w, l) => {
 const gg = new THREE.Group();
@@ -4244,8 +4326,7 @@ group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
 const hull = new THREE.Mesh(
 FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
 group.add(tag(hull, 'planking'));
-const steelDeck = STEEL && (S.deckSteel !== undefined ? S.deckSteel
-: (S.flightDeck || S.containers));
+const steelDeck = deckIsSteel(S);
 const deckMat = steelDeck
 ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
 side: THREE.DoubleSide })

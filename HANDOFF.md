@@ -4365,3 +4365,93 @@ cache-busted fetches inside the round — the live vessels.json carries tierAftU
 onTier declarations and fairFootTier, and the live hull.js carries the pinned interpolation
 and footing code (four matches by pattern). The Pages run started in seconds. Thirtieth
 clean push-triggered deploy in a row.
+
+---
+
+## Round 78 — 2026-08-11 — The ancient masthead gets its gear and its name, and the laid deck gets its margin plank
+
+**The queue head (trireme/corbita masthead sheave gear, carried since r67; and the item-10
+remainder, the waterway margin plank) is closed — both as classes, research first.**
+
+**The research pass is `Research/MASTHEADS.md` §3.** Asclepiades of Myrlea, quoted by
+Athenaeus (11.49, 474e–475a, read verbatim this round at attalus.org): the mast's foot is
+the heel, its middle the neck, and its head the **karchesion** — the masthead is the
+primary sense of the word, and the cup is named for it. His larger ships carry a thorakion
+ON the karchesion, which is recorded as a caveat beside r67's Medinet Habu note: "no tops
+in antiquity" stays false as a universal and true of this fleet's two ancient hulls (the
+Torlonia relief shows none; the trireme struck her masts). Pollux I.91 reportedly lists the
+karchesion among mast parts but was not verifiable in an accessible edition and is NOT
+cited. Form is DERIVED from the pole (no ancient masthead survives; Olympias carries plain
+halyard sheaves at hers) and the part card says derived.
+
+**The drawing, three classes:**
+1. **The karchesion** — every single-tier square mast on a hull depicted before 1100
+   carries at its head a squared block with a dark sheave slot, a pin with visible ends,
+   and a flared lip (the cup the name draws). The gate is the mirror of buildTop's: the
+   two fittings never share a pole, and a hull with no stated year gets neither. Four
+   mastheads wear it: the trireme's two (the raked akateion included) and the corbita's
+   two (the artemon included).
+2. **The single-yard halyard leads over the masthead** — slings → head sheave → rail. It
+   was drawn slings-to-rail direct on the trireme, the corbita AND the cog: a rope that
+   could hoist nothing. The multi-tier lead (ties and jeers at the doubling) is a separate
+   mechanism, untouched and noted below.
+3. **The waterway** — the margin plank at the deck edge, a swept solid strip standing
+   34 mm proud with its heel buried, tarred dark, hugging the deck's own edge via
+   surfacePoint (the deck rule, not the rail's parallel-formula copy). It belongs to the
+   DECK: every planked weather deck gets one (teak liners included), a bare steel deck
+   (deckSteel/flightDeck/containers) does not, and a hull with no laid deck at all — new
+   record fact `deckLaid: false` on the dugout and the voyaging canoe — has no margin to
+   plank. The steel-deck judgement was hoisted into one `deckIsSteel(S)` used by both the
+   deck material and the fittings, so the two cannot disagree.
+
+**The audit learned the classes — seven injection proofs, each against the healthy other
+half:** (A) karchesion groups stripped after build → 'an ancient masthead with no
+karchesion' on trireme and corbita alone (groups counted, not meshes — one drawn masthead
+must not satisfy a two-masted hull); (B) a karchesion grafted onto the cog → 'a karchesion
+out of its age' on cog alone; (C) the blocks slid 4 m down their poles
+(updateMatrixWorld, the r67 lesson) → both adrift rules; (D) the halyard translated down
+0.10·seg — the exact historical fault — → 'a halyard that reaches no masthead' on all
+three single-yard hulls, and the thresholds were MEASURED first (healthy margins
++0.66/+1.15/+0.30 m, fault margins −0.44/−0.22/−0.71 m, threshold 0.85·head); (E) the
+waterway stripped → 'a laid deck with no waterway' on exactly the 23 laid-deck hulls;
+(F) a waterway grafted onto the USV's bare steel deck → fires on usv alone; (G) the
+deckLaid guard cut from the audit text → dugout and canoe fire, so the guard is
+load-bearing. Healthy build: **29 hulls, 0 problems** (before the ratchet and after run 2).
+
+**Looked at, rule 1 (diagnosis shots in /tmp, outside the repo):** the trireme's main head
+— the block at the very head with the dark slot, halyard over it and down; the corbita's
+head — the block above the hanging corbis, nothing interpenetrating; the 74's furled waist
+— the dark margin plank framing the deck the length of the starboard bulwark. The
+artemon's block was verified programmatically (group count, per-mast adrift bands) and
+appears in the shipwright-corbis diff; a framed close-up of it defeated the camera grammar
+twice and is left for any future round that touches her bow.
+
+**Ratchet, 47 frames, two runs. Run 1: 44 green, exactly three movers, all intended** —
+ship-trireme 0.185% (diff read: masthead dots, the new halyard legs, the waterway streak
+along the sheer — no sea, no cards), shipwright-corbis 0.274% (the block above the corbis
+and the halyard lead, alone), shipwright-furled 0.052% (the waterway line along the 74's
+deck edge, alone). All three accepted with class reasons in FRAME-LOG. **The exclusion set
+is the proof the greens carry the class too:** ship-usv, ship-dugout, ship-canoe and
+aboard-carrier — exactly the four decks the waterway rules exclude — sat at 0.000%, while
+every planked hull's frame reads 0.01–0.045%, inside tolerance. Those greens were NOT
+accepted, following the r65 residue precedent; their values are the new standing residue
+and the next change to any planked hull should expect the waterway line in a compound
+diff (this note is the untangling aid).
+
+**Carried, restated exactly (none closed silently):**
+1. The multi-tier halyard lead: upper yards' falls still run slings→rail without touching
+   their own mastheads — the tie-and-jeer mechanism at the doubling is a research-then-draw
+   item of the same shape as this round's.
+2. The junk masthead sheave (Needham: "sheave pins passing through both masts") — implied,
+   not drawn; same class family, Chinese practice.
+3. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+4. r75's small QM2 items: balcony-band pier rhythm; strake windows vs the mooring-deck
+   openings — both inside the derivation's error bar.
+5. r77's small item: the Azzam dome pairs' athwartships stance is a derivation; an
+   overhead photograph with stated scale could pin it.
+
+### Next, in order
+1. Multi-tier halyard lead (ties/jeers at the doubling), with the junk's through-pole
+   sheave as its Chinese sibling — one research pass covers both.
+2. Galley action (campaign-data tasks); B10 stunsails if wanted.
+3. QM2 small items above, only if a round is otherwise light.

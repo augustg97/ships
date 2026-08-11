@@ -1182,6 +1182,66 @@ say(v.id, 'a corbis adrift down the mast',
 }
 }
 {
+const anc = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only === 1);
+const depYear = H.year || v.from || 0;
+const headM = mm => mm.heightM || (H.lwl + H.beam) / 2 * (mm.height || 0);
+let nK = 0;
+g.traverse(o => { const p = o.userData && o.userData.part;
+if (p && p.key === 'karchesion' && !o.isMesh) nK++; });
+const preTop = H.year !== undefined && H.year < 1100;
+if (preTop && anc.length && nK < anc.length)
+say(v.id, 'an ancient masthead with no karchesion',
+`${nK} karchesion mesh groups for ${anc.length} single-tier square masts ` +
+`depicted ${depYear} — the yard hoists to a sheave the drawing does not carry`);
+if (!preTop && nK)
+say(v.id, 'a karchesion out of its age',
+`${nK} karchesion meshes on a hull depicted ${depYear || 'undated'} — after ` +
+'1100 the masthead carries a top, and the two never share a pole');
+if (preTop && anc.length && nK) {
+const heads = anc.map(headM);
+const hi = Math.max(...heads), lo = Math.min(...heads);
+if (part.karchesion.y[1] < deckY + hi * 0.80)
+say(v.id, 'a karchesion adrift down the mast',
+`karchesion tops at ${part.karchesion.y[1].toFixed(1)} m against a ` +
+`~${hi.toFixed(0)} m masthead`);
+if (part.karchesion.y[0] < deckY + lo * 0.45)
+say(v.id, 'a karchesion below the hounds',
+`karchesion base at ${part.karchesion.y[0].toFixed(1)} m on masts of ` +
+`${lo.toFixed(0)}–${hi.toFixed(0)} m`);
+}
+const sqAll = (H.masts || []).filter(mm => mm.rig === 'square');
+if (sqAll.length && sqAll.every(mm => mm.only === 1) && part.halyard) {
+const hi = Math.max(...sqAll.map(headM));
+if (part.halyard.y[1] < deckY + hi * 0.85)
+say(v.id, 'a halyard that reaches no masthead',
+`halyard tops at ${part.halyard.y[1].toFixed(1)} m against a ` +
+`~${hi.toFixed(0)} m masthead — the fall must lead over the head sheave`);
+}
+}
+{
+const steel = H.build === 'steel' || H.build === 'iron';
+const steelDeck = steel && (H.deckSteel !== undefined ? H.deckSteel
+: !!(H.flightDeck || H.containers));
+const laid = !steelDeck && H.deckLaid !== false;
+const ww = part.waterway;
+if (laid && part.deck && !ww)
+say(v.id, 'a laid deck with no waterway',
+'a planked weather deck and no margin plank at its edge');
+if (!laid && ww)
+say(v.id, 'a margin plank on a deck that has none',
+`${ww.n} waterway meshes on a ` +
+(steelDeck ? 'bare steel deck' : 'hull with no laid deck (deckLaid: false)'));
+if (laid && ww && part.deck) {
+if (Math.abs(ww.z[1] - part.deck.z[1]) > 0.15 || Math.abs(ww.z[0] - part.deck.z[0]) > 0.15)
+say(v.id, 'a waterway off the deck edge',
+`waterway spans z ${ww.z[0].toFixed(2)}..${ww.z[1].toFixed(2)} m against a deck at ` +
+`${part.deck.z[0].toFixed(2)}..${part.deck.z[1].toFixed(2)} m`);
+if (ww.y[1] > deckY + 0.25 || ww.y[1] < deckY - 1.5)
+say(v.id, 'a waterway adrift of its deck',
+`waterway tops at ${ww.y[1].toFixed(2)} m against a deck crown at ${deckY.toFixed(2)} m`);
+}
+}
+{
 const dbl = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only !== 1).length;
 const nC = part.cheek ? part.cheek.n : 0;
 if (dbl && nC < dbl * 2)
