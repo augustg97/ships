@@ -4150,3 +4150,13 @@ dugout to Ever Given with her at 25 of 29.
 1. Azzam's tenders to the aft deck (carried finding 1 above, with the dome-base check).
 2. Trireme/corbita masthead sheave gear; waterway margin plank.
 3. Galley action (campaign-data tasks); B10 stunsails if wanted.
+
+**End-of-round deploy note: PUSH CLEAN, DEPLOY QUEUED SERVER-SIDE AT ROUND END.** Commit
+28292bf pushed at 15:54 UTC; the Deploy Pages workflow (run 31509563781) sat **queued on
+GitHub's runner backlog for 15+ minutes** — round 74's identical run started in seconds and
+took 59 s — and the live stamp still read 1786459278 when the 80-minute window closed. The
+docs/ tree in the pushed commit carries stamp 1786462222 with tierBands/shellBands verified
+present in the minified js and both derived records in the published data (checked pre-push).
+⚠ **Next round: FIRST verify the live stamp is 1786462222** (this note's own push triggers a
+second run that deploys the same tree); if it is not live, check `gh run list` before
+touching anything else.
