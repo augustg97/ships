@@ -3456,3 +3456,9 @@ places her at 300 BC · 40 m between the trireme and the Chinese junk, and her c
    priority.
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+**End-of-round deploy note: LIVE, stamp 1786406602 → 1786411221**, verified with a
+cache-busted fetch of the data-version meta tag on the third poll (~60 s after push); the
+live hull.js confirmed carrying the iron-strap and corbis code, and the live vessels.json
+the new depicted years (trireme −480, corbita 200 with corbis, treasure ship 1410).
+Twenty-first clean push-triggered deploy in a row.
