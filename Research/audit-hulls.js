@@ -1434,24 +1434,36 @@
       }
     }
 
-    /* ── THE MADE MAST IS BOUND, AND BOUND IN ITS OWN CENTURY (round 64) ───────────────
-       A wooden square-rig lower mast drawn past 0.55 m through is past what one tree
-       gives: it is a MADE mast, coaked timbers, and it must carry wooldings (rope, to
-       about 1800) or shrunk iron hoops (after). Four ways to be wrong, each a rule:
-       unbound; bound when it is a single stick or an iron tube (the r61 copy class);
-       rope wooldings on a ship depicted in the iron-hoop era; iron hoops on a ship
-       depicted before the technology. The year asked is H.year — the year the hull is
-       DEPICTED at — falling back to the record's own era start. */
+    /* ── THE MADE MAST IS BOUND, AND BOUND IN ITS OWN PRACTICE (rounds 64, 67) ─────────
+       A wooden lower mast drawn past 0.55 m through is past what one tree gives: it is a
+       MADE mast and it must be bound or it opens at sea. The binding belongs to the
+       CULTURE as well as the century. European square rig: rope wooldings pinched
+       between pale wooden hoops to about 1800, shrunk iron hoops after. Chinese junk
+       rig: compound spars "bound together with iron straps" (Needham IV:3 — an 1842
+       Shanghai mainmast measured 1.12 m through, no shrouds or stays), and NEVER the
+       European signature. The year asked is H.year — the year the hull is DEPICTED at —
+       falling back to the record's own era start. Research/MASTHEADS.md. */
     {
       const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
-      const made = !!sq && !H.iron && H.beam * 0.06 > 0.55;
+      const jk = (H.masts || []).filter(mm => mm.rig === 'junk').length;
+      const thick = H.beam * 0.06 > 0.55;
+      const madeSq = !!sq && !H.iron && thick;
+      const madeJk = !!jk && !H.iron && thick;
       const nW = part.woolding ? part.woolding.n : 0;
       const nB = part.mastband ? part.mastband.n : 0;
-      if (made && nW + nB < sq)
+      if (madeSq && nW + nB < sq)
         say(v.id, 'a made mast left unbound',
             `${sq} square lower masts ${(H.beam * 0.06).toFixed(2)} m through carry ` +
             `${nW + nB} binding meshes — timber that thick is coaked, and unbound it opens`);
-      if (!made && (nW || nB))
+      if (madeJk && nB < jk)
+        say(v.id, 'a made junk mast left unbound',
+            `${jk} junk masts ${(H.beam * 0.06).toFixed(2)} m through carry ${nB} iron-strap ` +
+            'meshes — a compound pole with no shrouds is held together by its straps alone');
+      if (madeJk && nW)
+        say(v.id, 'European wooldings on a junk',
+            `${nW} woolding meshes on a junk-rigged hull — the r61 copy class; Chinese ` +
+            'practice is flat iron straps, no rope bands, no pale pinch-hoops');
+      if (!madeSq && !madeJk && (nW || nB))
         say(v.id, 'binding on a single stick',
             `${nW + nB} woolding/hoop meshes on a hull whose lower masts one tree could ` +
             'yield, or whose masts are iron');
@@ -1459,9 +1471,57 @@
       if (nW && depYear >= 1820)
         say(v.id, 'rope wooldings out of their century',
             `depicted ${depYear}; iron hoops replaced wooldings about 1800`);
-      if (nB && depYear && depYear < 1780)
+      /* the European iron-hoop date applies to the European practice only — a junk's
+         iron straps are attested throughout the span this fleet depicts */
+      if (nB && sq && depYear && depYear < 1780)
         say(v.id, 'iron mast hoops before the technology',
             `depicted ${depYear}; shrunk iron hoops arrive about 1800`);
+      /* three dated technologies hang off the depicted year (tops, wooldings/hoops,
+         straps), so a hull that carries a dated rig must state its year — a silent
+         fallback here is the round-32 class at the masthead */
+      if ((sq || jk) && !H.year)
+        say(v.id, 'a dated rig with no date',
+            `${sq + jk} square/junk masts and no H.year — tops and bindings key off it`);
+    }
+
+    /* ── THE TOP IS A DATED TECHNOLOGY (round 67) ──────────────────────────────────────
+       No classical ship carried a masthead platform: the trireme struck her masts before
+       battle, the Roman lookout stood at the bow, and the earliest tops among this
+       fleet's types are the cog's on the 13th-century town seals. So top platforms
+       (part key 'top', name 'Top' — the crosstrees share the key but not the name) are
+       forbidden before 1100 and REQUIRED on every square lower mast after it. And the
+       corbita hung a corbis — the basket that named her (Festus) — which is DATA:
+       declared it must be drawn at the masthead, drawn it must be declared. */
+    {
+      const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
+      const depYear = H.year || v.from || 0;
+      let tops = 0;
+      g.traverse(o => {
+        const p = o.userData && o.userData.part;
+        if (p && p.key === 'top' && p.name === 'Top' && !o.isMesh) tops++;
+      });
+      if (tops && depYear < 1100)
+        say(v.id, 'a top before the evidence',
+            `${tops} masthead platforms on a hull depicted ${depYear} — no classical ` +
+            'ship carried one; the earliest here are the cog seals, 13th century');
+      if (sq && depYear >= 1100 && tops < sq)
+        say(v.id, 'a masthead left bare',
+            `${tops} top platforms for ${sq} square lower masts, depicted ${depYear}`);
+      const nCb = part.corbis ? part.corbis.n : 0;
+      if (H.corbis && !nCb)
+        say(v.id, 'declared but not drawn', 'the corbis at the masthead');
+      if (!H.corbis && nCb)
+        say(v.id, 'a corbis nobody attested',
+            `${nCb} basket meshes on a hull whose record does not carry the corbis field`);
+      if (H.corbis && nCb) {
+        /* the basket hangs at the head of the tallest mast, not adrift down the pole —
+           the floating-fitting class. Expected head height from the mast rule itself. */
+        const maxShare = Math.max(...(H.masts || []).map(mm => mm.height || 0), 0);
+        const head = (H.lwl + H.beam) / 2 * maxShare;
+        if (part.corbis.y[1] < deckY + head * 0.7)
+          say(v.id, 'a corbis adrift down the mast',
+              `basket tops at ${part.corbis.y[1].toFixed(1)} m against a ~${head.toFixed(0)} m masthead`);
+      }
     }
 
     /* ── AND THE TOP STANDS ON ITS CHEEKS (round 64) ───────────────────────────────────

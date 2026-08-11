@@ -1897,3 +1897,19 @@ Both the ratchet task and a waiter on its output are armed — I'll pick up the 
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 48019 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 16:59:07  round starting
+Round 66 is done, live, and the tree is clean. The round's work was landing a stranded session whole — the same failure r63 documented, repeated: the 15:58 session built the complete r43 plate-gaps fix, then ended its turn to wait for the frame ratchet and died, and a 16:31 session died the same way waiting on the same check.
+
+What was landed, verified piece by piece:
+
+- **Five Commons plates**, each looked at against its caption: the Pesse canoe (dugout), the Torlonia relief (corbita), Jewel of Muscat (dhow), the Bremen cog, and the Khufu ship. `fetch_images.py` gained a mechanism for recording the attribution party when Commons' Artist field is empty, since an empty field is not an unknown author.
+- **The era-plate table now tells the truth about time.** The "Reed & plank, 8000–1000 BC" card had shown a Roman ship of AD 200; it now shows the Khufu ship of 2560 BC, and Crossing shows the Pesse dugout with the caption owning the 60,000-year gap to Sahul.
+- **`&card=era` joins the hash grammar**, so the era card — previously reachable only by click, which is why no frame ever watched it — has a standing baseline, `globe-era-card` (frames 43 → 44).
+- **A three-prong plates gate in build_site.py**: every vessel must have a plate, every era slug an entry, every entry its jpg. The four vessel cards that shipped plateless since r43 because the card's onerror made the absence look deliberate cannot recur silently.
+
+Also closed: the carried Titanic remainder was already done in code — `buildRaisedEnds` draws the three-island profile at the record's stations, masts wear White Star buff, funnels rake 9.46°. A stale queue entry, the r58 lesson a third time.
+
+Verification: audit 29/29 clean; ratchet run 1 found one NEW frame and two movers (ship-dhow 2.401%, ship-dugout 0.269%), both diffs read as images — card regions only, scene pixels untouched — and accepted with class reasons; run 2 came back 44/44 green with globe-default at 0.000%, no label flap. Both runs were held open in the foreground on their logs, per the r63 rule the stranded sessions broke. Deploy verified live: stamp 1786399633 → 1786406602, with the live app.js, plates.json and khufu-ship.jpg all confirmed carrying the change — the twentieth clean deploy in a row. HANDOFF leaves the next queue: treasure-ship mast binding research, the trireme/corbita tops existence check, and the dropped fourth argument to `tag()`.
+2026-08-10 17:43:38  round finished; HEAD is 9e73a06 Round 66 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 50240 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 17:53:38  round starting

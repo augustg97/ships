@@ -3356,3 +3356,103 @@ cache-busted fetch of the data-version meta tag on the third poll (~60 s after p
 live app.js confirmed carrying the `&card=era` grammar and showEraCard, the live
 plates.json all 31 entries including the five new slugs, and khufu-ship.jpg serving 200.
 Twentieth clean push-triggered deploy in a row.
+
+---
+
+## Round 67 — 2026-08-10 — The junk's mast is bound in its own practice, and the ancient mastheads stop wearing medieval furniture
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey's carried
+list was the task — and all three r64/r66 carried items are closed this round: the
+treasure-ship mast binding (with its own research pass), the trireme/corbita tops existence
+check, and the dropped fourth argument to `tag()`.**
+
+**The research pass came first and is written up in `Research/MASTHEADS.md` — sources read in
+full text before any code moved.** Needham IV:3 settles the Chinese question in two passages:
+heavy junk masts are compound, "built up of several separate longitudinal spars **bound
+together with iron straps**", and an 1842 Shanghai junk's mainmast measured 11 ft 6 in round a
+little above the deck — **1.12 m through, no shrouds or stays** — which puts the treasure
+ship's 1.08 m drawn diameter inside the attested envelope, not past it. A Waters Collection
+photo caption calls iron bands "the usual" fittings on a working junk's mast. So the binding
+is flat dark iron straps at a derived structural interval — and none of the European
+signature: no rope wooldings, no paired pale pinch-hoops. Rattan, floated as a possibility in
+r64's note, was not substantiated and is not modelled. For the ancient mastheads: a top is
+"rare in the ancient world when masts were struck or disembarked before battle"; no Greek
+warship or Roman merchantman depiction shows one; and Paulus' Festus (verified in three
+editions) says corbitae are NAMED for the baskets hung at their masthead as their sign —
+"in malo earum summo pro signo corbes solerent suspendi".
+
+**The drawing followed the sources, as classes.** New junk-binding block beside the European
+one in buildRig: same tree threshold (a pole past 0.55 m through is past one shan-mu), iron
+straps only, tagged with a bespoke card via the fixed `tag()`. The top platform became a
+DATED technology like the woolding/iron-hoop switch: `buildTop` is gated on `S.year >= 1100`,
+and the fail-safe runs the honest way — a hull with NO stated year gets no top, because
+absence of data does not invent furniture. The corbita hangs her corbis (wicker basket,
+lanyard to the masthead cap) at the head of her tallest mast, from a new `corbis` data field
+with its own part card telling the Festus story. **Depicted years became data on seven more
+hulls** (trireme −480, corbita 200 — the Torlonia relief's own century — junk 1200, treasure
+ship 1410, cog 1380 the Bremen cog, fluyt 1620, slave ship 1590); every square- and
+junk-rigged hull now states one, and the audit requires it. Bronze Age crow's nests exist
+(Medinet Habu) but no hull here carries a mast in that gap — recorded in MASTHEADS.md so the
+1100 gate is not mistaken for a universal.
+
+**`tag(o, key, extra, what)` accepts its fourth argument at last** — the crow's nest and
+topmast-crosstrees call sites had passed bespoke card text for rounds and it was silently
+dropped. Verified in-page: Titanic's crow's nest card now carries Fleet and Lee, Preussen's
+crosstrees card its spreader text. The junk strap card is the first NEW user of the argument.
+
+**The audit learned the classes — the r64 binding block rewritten to know both practices, a
+new r67 masthead block, seven rules proven by fault injection:** a made junk mast left
+unbound (junk + treasure ship when the block is disabled); European wooldings on a junk (the
+r61 copy class — retagging straps as wooldings fires it); a top before the evidence (a fake
+platform grafted onto the trireme); a masthead left bare (square rig after 1100 must carry
+its tops); a dated rig with no date (deleting trireme's year fires it); the corbis
+declared-but-not-drawn and drawn-but-unattested, both ways; and a corbis adrift down the
+mast. ⚠ **Injection lesson, recorded for every future harness: a moved GROUP is invisible to
+the audit's per-mesh bboxes until `g.updateMatrixWorld(true)` runs** — Box3.setFromObject
+refreshes the mesh's own matrix but trusts the parent's, so the first corbis-adrift injection
+moved the basket and the audit read its stale position. The European date rules were also
+scoped to square rig, or the junk's straps would have fired "iron hoops before the
+technology" at 1200 — the audit disagreeing with the app, checked at the audit first, per
+rule 8.
+
+**Looked at, rule 1, with my own eyes, four diagnosis frames read and deleted:** the treasure
+ship furled — three bare poles carrying evenly spaced dark straps, tapering with the pole,
+bare above the last strap where the sheave lives; the junk furled — straps on both masts over
+the dropped batten stacks; the trireme masthead — a clean bare head where yard, halyards and
+three shrouds converge, no platform; the corbita masthead — the basket hanging beside the
+bare head, with the Torlonia relief on her card beside it. **New standing baseline
+`shipwright-corbis`** (frames 44 → 45) watches the class: the dated-top absence and the
+corbis, in one bearing.
+
+**Ratchet: two full runs to completion, both foreground-held on the PID (r63 rule). Run 1:
+45 frames, ALL under tolerance — and that was the finding, not the relief.** The change
+itself was riding inside the limit: ship-trireme 0.036%, ship-treasure 0.021%, ship-junk
+0.016%, all under the 0.05% gate. The r63 rule (a stale baseline must not hide inside
+tolerance) was applied: all three diffs generated and READ as images — the trireme's is
+exactly the two removed masthead patches, the treasure's is strap dashes down the mast lines,
+the junk's the same on both poles — and all three were accepted with class reasons in
+FRAME-LOG. Run 2: **45/45 green, the three accepts and shipwright-corbis all 0.000%,
+globe-default 0.000% — no label flap this round.** The r65 precision-drift residue holds its
+recorded values (ship-clipper 0.031%, shipwright-ahead 0.018%), untouched.
+
+**Audit 29/29 clean, twice (before the ratchet and after run 2). Byte budget: first paint
+8.17 MB against 8.6, docs/ minified 1.77 → 1.22 MB.**
+
+**Rule 0, written on shipwright-corbis:** it reads as a rendered world — the corbita's
+masthead close against open water, near enough to read the weave of the light. Three facts a
+viewer can read off it: the mainmast head carries a hanging basket and no platform, halyards
+and forestays leading to the bare head; the card beside it shows the Torlonia relief — the
+type is known from reliefs and mosaics, no Roman merchantman surviving whole; the fleet list
+places her at 300 BC · 40 m between the trireme and the Chinese junk, and her card gives
+40.0 m overall, 13.9 m rig deck to truck, 20 crew.
+
+### Next, in order
+1. **Survey continues.** The carried list is empty for the first time since r64; the Round 23
+   vessel queue and the standing survey are the work. Candidates from this round's own
+   looking: the treasure ship's five masts share one drawn diameter (radii are per-ship, not
+   per-mast — a 0.6-share mizzen draws as thick as the main); trireme/corbita masthead gear
+   (halyard sheaves, the karchesion) is implied, not drawn.
+2. Item 10 remainder: waterway margin plank in the deck shader — a texture judgement, low
+   priority.
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).

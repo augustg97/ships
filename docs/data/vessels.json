@@ -363,6 +363,7 @@
      }
     ],
     "build": "shell",
+    "year": -480,
     "loa": 36.9,
     "lwl": 35.0,
     "beam": 3.8,
@@ -501,6 +502,8 @@
      }
     ],
     "build": "shell",
+    "year": 200,
+    "corbis": true,
     "loa": 40.0,
     "lwl": 35.0,
     "beam": 9.0,
@@ -758,6 +761,7 @@
      }
     ],
     "build": "bulkhead",
+    "year": 1200,
     "poop": [
      0.74,
      0.985,
@@ -911,6 +915,7 @@
      }
     ],
     "build": "bulkhead",
+    "year": 1410,
     "poop": [
      0.66,
      0.985,
@@ -1028,6 +1033,7 @@
      }
     ],
     "build": "shell",
+    "year": 1380,
     "transom": 0.3,
     "loa": 23.3,
     "lwl": 20.5,
@@ -1423,6 +1429,7 @@
      }
     ],
     "build": "frame",
+    "year": 1620,
     "transom": 0.46,
     "loa": 32.0,
     "lwl": 27.5,
@@ -1840,6 +1847,7 @@
      }
     ],
     "build": "frame",
+    "year": 1590,
     "transom": 0.38,
     "loa": 30.0,
     "lwl": 26.0,

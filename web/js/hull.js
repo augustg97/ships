@@ -870,6 +870,40 @@ function buildRig(S, group, mats, FINE, FURLED) {
         if (hm) group.add(tag(hm, 'woolding', 'Woolding hoops'));
       }
 
+      /* ── AND THE CHINESE MADE MAST IS BOUND IN ITS OWN PRACTICE ────────────────────
+         The tree rule holds in China too — a pole drawn past 0.55 m through is past what
+         one shan-mu gives — but the binding is not Europe's. Needham (IV:3): the heavy
+         masts are compound, "built up of several separate longitudinal spars bound
+         together with iron straps", and an 1842 Shanghai junk's mainmast measured
+         11 ft 6 in round a little above the deck — 1.12 m through, no shrouds or stays.
+         Iron bands "and wedges" were the USUAL fittings on a working junk's mast
+         (Needham, Fig. 938 caption). So: flat dark iron straps at a structural interval,
+         and none of the European signature — no rope wooldings, no paired pale
+         pinch-hoops. The interval is DERIVED (no source gives spacing); the straps'
+         existence and material are sourced. See Research/MASTHEADS.md. */
+      if (FINE && si === 0 && mk.rig === 'junk' && !S.iron && radii[0] * 2 > 0.55) {
+        const rings = [];
+        const lo = seg * 0.10, hi = seg * 0.86;      // step to just under the halyard sheave
+        const n = Math.max(3, Math.round((hi - lo) / 2.6));
+        for (let i = 0; i < n; i++) {
+          const t = (lo + (hi - lo) * (i + 0.5) / n) / seg;
+          const rT = radii[0] * (1 - 0.3 * t);       // the pole's own taper
+          rings.push({ cx: x + Math.sin(rakeRad) * seg * t, cy: y + seg * t,
+                       r: rT + 0.015, h: 0.14, tilt: -rakeRad });
+        }
+        const rm = ringMesh(rings, mats.ironBand || (mats.ironBand =
+          new THREE.MeshStandardMaterial(
+            { color: 0x23262a, roughness: 0.45, metalness: 0.55 })));
+        if (rm) group.add(tag(rm, 'mastband', 'Iron mast straps',
+          'A great junk\'s mast is compound — no single fir yields a pole a metre through, '
+          + 'so several spars are bound together with flat iron straps, the usual fitting '
+          + 'on a working junk\'s mast. An 1842 Shanghai junk\'s mainmast measured 1.12 m '
+          + 'through a little above the deck, and carried no shrouds or stays at all: the '
+          + 'unstayed pole and its straps take the whole thrust of the sail. Strap spacing '
+          + 'here is derived from the structural interval; the straps themselves are the '
+          + 'record\'s (Needham, Science and Civilisation in China IV:3).'));
+      }
+
       /* ── THE CROW'S NEST ────────────────────────────────────────────────────────
          A barrel or a bucket lashed to the mast at about two thirds of its height, reached
          by a ladder inside the mast on the big liners. Fleet and Lee were in Titanic's when
@@ -883,8 +917,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
         group.add(tag(nest, 'mast', "Crow's nest",
           'The lookout station, about two thirds up the foremast. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.'));
       }
-      /* the TOP sits at the head of the lower mast, and the topmast is fidded through it */
-      if (FINE && mk.rig === 'square' && si === 0) {
+      /* ── THE TOP IS A DATED TECHNOLOGY, like the woolding and the iron hoop ──────────
+         The trireme struck her masts before battle and left them ashore; no Greek warship
+         or Roman merchantman depiction shows a masthead platform, and lookout duty in
+         antiquity was at the BOW. The earliest tops among this fleet's types are the
+         cog's, on the 13th-century town seals. So the gate is S.year, the depicted year,
+         and the fail-safe runs the honest way: a hull with no stated year gets NO top —
+         absence of data does not invent furniture. (Bronze Age crow's nests existed —
+         Medinet Habu — but no hull here carries a mast in that gap. Research/MASTHEADS.md.)
+         The TOP sits at the head of the lower mast, and the topmast is fidded through it. */
+      if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100) {
         const topR = B * 0.20, headR = radii[0] * 0.7;
         const tp = buildTop(topR, mats.woodPale, headR);
         tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
@@ -913,6 +955,36 @@ function buildRig(S, group, mats, FINE, FURLED) {
             group.add(tag(ck, 'cheek'));
           }
         }
+      }
+
+      /* ── THE CORBIS — the basket that named the ship ─────────────────────────────────
+         Paulus' epitome of Festus: "Corbitae dicuntur naves onerariae, quod in malo earum
+         summo pro signo corbes solerent suspendi" — cargo ships are called corbitae
+         because baskets were hung at the top of their mast as their sign. The type's own
+         name, hoisted as an object. It is DATA (`corbis` on the hull record): only the
+         hull whose record attests it wears one, at the head of her tallest mast. */
+      if (FINE && S.corbis && si === 0 && mk.height === maxMastShare) {
+        const wicker = mats.wicker || (mats.wicker = new THREE.MeshStandardMaterial(
+          { color: 0x8a7148, roughness: 0.92, side: THREE.DoubleSide }));
+        const cb = new THREE.Group();
+        const bk = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.34, 0.25, 0.52, 12, 1, true), wicker);
+        const bt = new THREE.Mesh(new THREE.CircleGeometry(0.25, 12), wicker);
+        bt.rotation.x = -Math.PI / 2; bt.position.y = -0.26;
+        bk.add(bt);
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.03, 6, 16), wicker);
+        rim.rotation.x = Math.PI / 2; rim.position.y = 0.26;
+        bk.add(rim);
+        cb.add(bk);
+        /* hung off the pole's side on a short lanyard to the masthead cap */
+        const hang = radii[0] * 0.7 + 0.42;
+        const lan = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.012, 0.012, 1.0, 5), ropeMat);
+        lan.position.set(0, 0.54, -hang * 0.5);
+        lan.rotation.x = -0.96;
+        cb.add(lan);
+        cb.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.94, hang);
+        group.add(tag(cb, 'corbis'));
       }
       if (mk.rig === 'square' && !mk.yards) {
         /* ── YARD LENGTHS, Steel 1794 p.40 ────────────────────────────
@@ -2434,7 +2506,16 @@ const PARTS = {
               what: 'The platform at the head of the lower mast, carried on trestletrees and '
                   + 'crosstrees. It spreads the topmast shrouds — giving the upper mast a wide '
                   + 'enough base to be stayed at all — and doubles as a fighting platform for '
-                  + 'musketeers. Nelson was shot by a man in one.' },
+                  + 'musketeers. Nelson was shot by a man in one. It is a medieval invention: '
+                  + 'no classical ship carried one, and the earliest among these types are on '
+                  + 'the 13th-century seals of the cog towns.' },
+  corbis:   { stage: 4, name: 'The corbis',
+              what: 'The basket hung at the mainmast head — the thing that named the ship. '
+                  + 'Festus: cargo ships are called corbitae "because baskets used to be hung '
+                  + 'at the top of their mast as their sign". Roman merchantmen carried no '
+                  + 'masthead platform at all; the lookout stood at the bow, and the masthead '
+                  + 'carried the halyard sheaves, the lifts — and, on this type, its own name '
+                  + 'in wicker.' },
   deadeye:  { stage: 5, name: 'Deadeyes',
               what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
                   + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '
@@ -2523,10 +2604,12 @@ const PARTS = {
                   + 'thousand tons.' },
 };
 
-function tag(o, key, extra) {
+function tag(o, key, extra, what) {
   if (!o) return o;
   const P = PARTS[key];
-  o.userData.part = { key, stage: P.stage, name: extra || P.name, what: P.what };
+  /* ⚠ the fourth argument existed at two call sites (crow's nest, topmast crosstrees) for
+     rounds before the signature accepted it — a bespoke card text silently dropped. */
+  o.userData.part = { key, stage: P.stage, name: extra || P.name, what: what || P.what };
   return o;
 }
 
