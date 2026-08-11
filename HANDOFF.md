@@ -3890,3 +3890,8 @@ anything runs — wait in the foreground.
 4. r71's A/B contamination question is CLOSED by this round's finding (the nine pre-rake
    baselines), but the procedural rule stands: an A/B capture must never share _current or
    :8149 with the ratchet.
+
+**End-of-round deploy note: LIVE, stamp 1786443873 → 1786450589**, verified with a cache-busted
+poll ~90 s after push; the live hull.js carries both shear applyMatrix4 calls (the published js
+is minified, so verify by code pattern, not by comment text). Twenty-fifth clean push-triggered
+deploy in a row.
