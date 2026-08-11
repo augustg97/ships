@@ -4116,6 +4116,14 @@ function buildCluster(S, group) {
  * after she sank.
  */
 function buildBoats(S, group, mats) {
+  /* ── ⚠ A MODERN YACHT'S TENDERS STOW INSIDE THE SHELL ────────────────────────────────
+     boatsInboard: the record says the boats live in a garage within the hull. Azzam grew
+     from a 145 m concept to 180.6 m partly to make room for tenders INSIDE, and her
+     delivery photograph shows a bare topside — the four white boats this builder used to
+     stand on her crest contradicted the ship's own photograph on the card beside her.
+     An inboard record draws nothing topside, whatever the count says; the card carries
+     the stowage instead. */
+  if (S.boatsInboard) return;
   const n = S.boats || 0;
   if (!n) return;
   const H = hullSurface(S);

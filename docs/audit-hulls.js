@@ -42,7 +42,8 @@ for (const [flag, key, label] of [['funnels', 'funnel', 'funnels'],
 ['searchlights', 'searchlight', 'searchlights'],
 ['floatplanes', 'floatplane', 'floatplanes'],
 ['deckHatches', 'hatch', 'stowage hatches']])
-if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key])
+if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key]
+&& !(flag === 'boats' && H.boatsInboard))
 say(v.id, 'declared but not drawn', label);
 if (H.iron && !H.year)
 say(v.id, 'no dress era', 'iron hull without year — shader falls back to Victorian dress');
@@ -126,6 +127,9 @@ if (H.boatDeckM && H.boats && part.boat)
 if (Math.abs(part.boat.y[0] - H.boatDeckM) > 1.5)
 say(v.id, 'boats off their recorded deck',
 `lowest boat at ${part.boat.y[0].toFixed(1)} m over water, record says ${H.boatDeckM}`);
+if (H.boatsInboard && part.boat)
+say(v.id, 'boats drawn against an inboard record',
+`${part.boat.n} boat meshes topside; the record stows the tenders inside the shell`);
 {
 let pk = null;
 g.traverse(o => { if (!pk && o.isMesh && tagOf(o) && tagOf(o).key === 'planking') pk = o; });

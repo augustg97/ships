@@ -89,7 +89,10 @@
                                       ['searchlights', 'searchlight', 'searchlights'],
                                       ['floatplanes', 'floatplane', 'floatplanes'],
                                       ['deckHatches', 'hatch', 'stowage hatches']])
-      if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key])
+      if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key]
+          /* a boatsInboard record EXPLAINS the absence: the tenders live in a garage
+             inside the shell, so a declared count rightly draws nothing topside */
+          && !(flag === 'boats' && H.boatsInboard))
         say(v.id, 'declared but not drawn', label);
 
     /* ── THE DRESS IS A DATE (round 32). The plating shader keys fastening and bottom colour
@@ -228,6 +231,17 @@
       if (Math.abs(part.boat.y[0] - H.boatDeckM) > 1.5)
         say(v.id, 'boats off their recorded deck',
             `lowest boat at ${part.boat.y[0].toFixed(1)} m over water, record says ${H.boatDeckM}`);
+
+    /* ── AND AN INBOARD RECORD KEEPS THE TOPSIDE BARE (round 76). Azzam's four builder-
+       default boats rode her crest for six rounds while the published accounts stow her
+       tenders in a garage inside the hull — the design grew 35 m partly to fit them — and
+       her own delivery photograph shows no boat on any deck. Where the record says
+       boatsInboard, a drawn boat is the builder contradicting the ship's photograph. The
+       declared-but-not-drawn rule above skips boats for the same record, so a ship with a
+       published count AND a garage cannot deadlock the two rules. */
+    if (H.boatsInboard && part.boat)
+      say(v.id, 'boats drawn against an inboard record',
+          `${part.boat.n} boat meshes topside; the record stows the tenders inside the shell`);
 
     /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem
        head PAST the waterline ending — Queen Mary 2 declared 0.085 and drew a blunt

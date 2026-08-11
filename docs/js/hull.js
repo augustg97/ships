@@ -2511,6 +2511,7 @@ g.add(tag(whip, 'mast', 'Masthead whip',
 group.add(tag(g, 'cluster'));
 }
 function buildBoats(S, group, mats) {
+if (S.boatsInboard) return;
 const n = S.boats || 0;
 if (!n) return;
 const H = hullSurface(S);

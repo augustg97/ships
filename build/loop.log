@@ -2089,3 +2089,18 @@ Round 74 is done and live: stamp 1786453343 → 1786459278 verified on the deplo
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 26948 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 07:54:50  round starting
+Round 75 is done and live: stamp 1786459278 → 1786462222 verified on the deployed site, with `tierBands` and `shellBands` confirmed in the published minified js and both derived records in the published data.
+
+**What the round did** — closed the carried window-band item (Queen Mary 2 + Azzam) as one class:
+
+- **The window band is now a record.** `tierBands` declares which tiers wear a continuous dark glazing band — band edges, divider pitch, pier fraction, kind (`balcony` / `glass`) — and the same `wallLoft` that draws the Edwardian small-lights ribbon draws it. Azzam's five tiers wear her plate's tinted glazing runs; QM2's tiers above the boats wear her balcony rows.
+- **The derivation overturned the r70 note.** A broadside photograph (Paul Coueslant, geograph 5649661, CC BY-SA 2.0), measured by luminance profile with her own deck module as the scale, shows her "hull window rows" were never on the black: the black tops out at the recorded 17 m, a **two-deck white shell strake with a square-window colonnade** stands above it, and the boat gallery sits on the strake at 23.4 m. The model had the boats **two decks low** with a record (`boatDeckM 17.0`, `shellTiers 0`) that was self-consistent and wrong together, which is why the existing datum rule never fired. Record now: `shellTiers 2`, `shellTopside`, `boatDeckM 23.4`, plus `shellBands` for the colonnade — provenance in the data, House/Glazing rows on both cards.
+- **Two builder classes rode along:** a banded wall is stationed from its own pier width (the first capture showed 0.31 m piers aliasing into blocky dashes at the default 1.54 m stations), and a shell tier may wear a recorded livery other than the hull's.
+- **The audit learned three rules, all injection-proven** — band worn, strake paint honoured, boats on their recorded deck — and the first injection taught the round's sharpest lesson: it didn't fire because **three.js returns vertex colours in linear space**, so my sRGB threshold counted every default light as band glass. The rule was wrong, not the build (rule 8); thresholds now live in linear space with the reasoning in the comment. Healthy audit: 29 hulls, 0 problems.
+- **Ratchet, 47 frames: 45 green at 0.000–0.045%, exactly the two intended movers.** QM2 4.57% (house, strake, boats only), Azzam 1.60% (five tier walls alone). Both accepted with reasons and reproduced within tolerance on a second run.
+
+The deploy sat queued on GitHub's runner backlog for ~18 minutes — the handoff records both the wait and the final verification. Next in the queue: Azzam's tenders to the aft deck, with the r74 dome-base half-deck check while in there.
+2026-08-11 09:12:31  round finished; HEAD is f8ac1f9 Round 75 amendment: stamp 1786462222 verified live, tierBands/shellBands confirmed in the published js
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 33223 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 09:22:31  round starting

@@ -4165,3 +4165,90 @@ touching anything else.
 LIVE.** Stamp 1786462222 confirmed with a cache-busted fetch; the live minified hull.js
 carries tierBands and shellBands (one match each by code pattern). The runner backlog cleared
 after ~18 minutes. Twenty-eighth clean push-triggered deploy in a row, delayed but verified.
+
+---
+
+## Round 76 — 2026-08-11 — The tenders were never on deck, and the carried note is corrected against the plate
+
+**The queue head (Azzam's tenders to the aft deck) is closed — by refuting its own premise.
+The carried note said "her plate stows them on the low aft deck"; the plate was read again and
+it does not.** The delivery photograph shows no boat on any deck: the crest roof carries only
+radomes, the terraces are bare, and the low aft deck is an open working deck with a railed
+stern step. The published record agrees and says where the tenders really are — INSIDE the
+hull. The design accounts (Nauta's history via Boat International and YachtBuyer, which lists
+her tender garage) record that the concept grew from 145 m to 180.6 m partly to make room for
+tenders, fuel and machinery within the shell. Her four white builder-default boats had ridden
+the crest since round 70, contradicting the photograph on the card beside her.
+
+**The fix is the class, not the instance: `boatsInboard`.** The record declares the stowage;
+buildBoats draws nothing topside whatever the count says; the card carries a Tenders row
+stating the garage and that the complement is not published (rules 9/10 — the unsourced
+`boats: 4` is deleted rather than kept, because no source gives a count). Provenance is in
+the data (`boatsProvenance`).
+
+**The audit learned the class, injection-proven three ways:** new rule `boats drawn against
+an inboard record` (any topside 'boat' mesh on a boatsInboard record), and the
+declared-but-not-drawn rule now skips boats where boatsInboard explains the absence — so a
+future ship with a PUBLISHED count and a garage deadlocks neither rule. Proofs: (A) buildShip
+wrapped to force 4 boats onto her crest while the record keeps boatsInboard → the new rule
+fired on azzam alone, 12 boat meshes; (B) count + garage on the record, healthy code →
+zero problems; (C) the same record with the skip clause cut out of the audit text →
+'declared but not drawn: boats' fired, so the skip is load-bearing, not vacuous.
+Healthy build: **29 hulls, 0 problems.**
+
+**The dome-base half-deck question (r74 finding 3) is ANSWERED — measured, not fixed, and
+next round has everything it needs.** Luminance profile over the plate (0.1575 m/px, the r75
+tilted waterline): the two 4.7 m dome pairs read diameter 4.9 m with bases at 19.6–19.8 m,
+and the 2.2 m dome's base reads 19.5 m — ALL THREE stand on the tier-3 terrace (the model's
+own 19.4 m: freeboard 9.0 + 4 × 2.6), a FULL deck module below the 22 m house top they are
+footed on today. Supporting reads, all written down for the implementer:
+- sphere centres read u 0.705 / 0.675 / 0.725 against recorded 0.693 / 0.659 / 0.727 — the
+  pairs sit a consistent +0.014 aft of the record (≈15 px; possibly r73 marked forward edges);
+- the crest's full-height wall ends near u 0.66 (continuous-bright edge at 20.9 m height);
+  the 19.4 m terrace roofline runs aft to u ≈ 0.73;
+- so the fairing must sweep from the block top down to the TERRACE (19.4 m), not to the crest
+  roof (22 m) as buildCluster draws it now, crossing 22 m at u ≈ 0.679.
+**Why not fixed this round:** terrace-footing the domes forces the crest aft span from 0.73
+to ≈ 0.66 (its 0.73 was set in r74 PRECISELY to keep the 2.2 m dome roof-footed — a prop the
+plate has now kicked away), which moves every interpolated tier edge, re-aims the fairing
+foot, and re-fires the r74 'cluster foot off the crest' audit rule for the 0.725 dome vs the
+interpolated tier-3 edge (0.71 vs a measured ≈ 0.73 — the straight houseAt→houseCrest
+interpolation is the approximation at fault at the top step). That is one coherent rebuild —
+record + builder + audit — and it deserves a round, not a rider. The measurements above are
+the round's deliverable.
+
+**Looked at, rule 1:** ship-azzam rendered after the change — the crest carries the block,
+stack, mast and radomes with no white hulls outboard of the blocks; the terraces and aft deck
+are bare, as the photograph shows. The Tenders row confirmed rendering in the card DOM (it
+sits below the photograph's fold in the scrollable card). **Ratchet, full 47 frames: 46 green
+at 0.000–0.045%, exactly one mover, the intended ship** — ship-azzam 0.076% of pixels, mean
+|Δ| 0.040, and the amplified diff is the two visible boat hulls and their davit strokes
+vanishing from the crest, nothing else: no sea, no house, no cards. Accepted with the reason
+in FRAME-LOG; the full run after the accept is 47/47 green, ship-azzam 0.000% (r63 two-run
+rule).
+
+**Rule 0, written on the accepted ship-azzam frame:** it reads as a rendered world — the
+yacht seen from the bow quarter on open textured water, her delivery photograph on the card
+beside her, the fleet list running dugout canoe to Ever Given with her at 26 of 29. Three
+facts a viewer can read off it: her topside is bare of boats, matching the photograph, and
+the card says why — the tenders stow in a garage inside the hull and no complement is
+published; five glazed tiers ramp aft to a crest abaft midships carrying four polished
+exhausts, a black casing fin and paired radomes around the raked mast; the card gives
+180.6 m overall, 4.3 m draught, 31.5 kn on two gas turbines and two diesels driving four
+waterjets.
+
+**Carried, restated exactly (none closed silently):**
+1. The dome/crest/fairing rebuild above — measured and specified, next round's queue head.
+2. Trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
+3. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+4. r75's small QM2 items: balcony-band pier rhythm variation; strake windows vs the
+   mooring-deck openings right forward — both inside the derivation's error bar.
+
+### Next, in order
+1. The Azzam aft-cluster rebuild: terrace-foot the three domes (tier-3), crest aft 0.73 →
+   ≈ 0.66, fairing foot to the terrace, dome stations re-derived (pairs ≈ 0.705/0.675),
+   audit rule extended to tier-footed cluster elements. All measurements in this round's
+   dome section.
+2. Trireme/corbita masthead sheave gear; waterway margin plank.
+3. Galley action (campaign-data tasks); B10 stunsails if wanted.
+
