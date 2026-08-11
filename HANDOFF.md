@@ -4558,3 +4558,9 @@ globe-default font flap did NOT strike** (0.012%, its standing residue).
 1. Galley action (campaign-data tasks); B10 stunsails if wanted.
 2. QM2 small items above, only if a round is otherwise light.
 3. The capture-gate hardening, if the font flap strikes again.
+
+**End-of-round deploy note: LIVE, stamp 1786476366 → 1786482330**, verified with
+cache-busted fetches inside the round — the live hull.js carries the hoist record, segHeads,
+the jeers drawing and the junk sheave (12 matches by pattern), and the live audit-hulls.js
+carries all three new rules by name. The Pages run started in seconds. Thirty-second clean
+push-triggered deploy in a row.
