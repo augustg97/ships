@@ -2275,7 +2275,7 @@ new THREE.CylinderGeometry(caseR * 0.94, caseR, caseH, 20), black);
 casing.position.y = caseH / 2 - caseH * 0.35;
 g.add(tag(casing, 'funnel', 'Boiler casing',
 'The deckhouse over the fiddley. The uptakes from the boilers come up inside it.'));
-const rootY = -caseH * 0.35, topY = caseH * 0.55 + h, L = topY - rootY;
+const rootY = -caseH * 0.30, topY = caseH * 0.55 + h, L = topY - rootY;
 const sg = new THREE.CylinderGeometry(ri * 0.93, ri, L, 24, 24);
 const spos = sg.attributes.position, scol = [];
 const warship = !!S.turrets;
@@ -2287,22 +2287,27 @@ const c = ya > capFrom ? cap : buff;
 scol.push(c.r, c.g, c.b);
 }
 sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
+const shear = Math.tan(th);
+sg.applyMatrix4(new THREE.Matrix4().set(
+1, shear, 0, shear * L / 2,
+0, 1,     0, 0,
+0, 0,     1, 0,
+0, 0,     0, 1));
 const stack = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({
 vertexColors: true, roughness: 0.66, metalness: 0.10 }));
 stack.position.y = (topY + rootY) / 2;
-const rk = new THREE.Group();
-rk.rotation.z = -th;
-rk.add(tag(stack, 'funnel', 'Funnel',
+g.add(tag(stack, 'funnel', 'Funnel',
 'Buff with a black top. Funnel colours were a shipping line\'s registered trademark: at sea a hull is a silhouette long before a name can be read, so the livery at the head of the funnel is how a ship was known hull-down on the horizon.'));
 const Lp = L - h * 0.08;
-const pipe = new THREE.Mesh(
-new THREE.CylinderGeometry(ri * 0.13, ri * 0.13, Lp, 16), black);
-pipe.position.y = Lp / 2;
-const pg = new THREE.Group();
-pg.position.set(-ri * 1.25, rootY, 0);
-pg.rotation.z = -th;
-pg.add(pipe);
-g.add(rk); g.add(pg);
+const pgeo = new THREE.CylinderGeometry(ri * 0.13, ri * 0.13, Lp, 16);
+pgeo.applyMatrix4(new THREE.Matrix4().set(
+1, shear, 0, shear * Lp / 2,
+0, 1,     0, 0,
+0, 0,     1, 0,
+0, 0,     0, 1));
+const pipe = new THREE.Mesh(pgeo, black);
+pipe.position.set(-ri * 1.25, rootY + Lp / 2, 0);
+g.add(pipe);
 g.position.set((u - 0.5) * S.lwl, y, 0);
 group.add(tag(g, 'funnel'));
 }

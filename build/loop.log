@@ -2019,3 +2019,28 @@ System<system-warning>Context low (4% remaining). Respond as concisely as possib
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 02:37:52  round starting
   stale lock older than 90 min — clearing
+**Round 71 is complete and live — stamp 1786443873 verified on the deployed site.**
+
+The round worked the queue head from round 70: the owed frame ratchet. Run 1 captured all 49 frames and flagged 19 movers, and every one was classified individually against round 70's prediction before accepting.
+
+**The outlier earned its investigation.** `ship-wyoming` moved 17.5% — far beyond an "ends below the deck" change — and the diff showed the whole scene shifted. Measurement, not assumption, found the mechanism: the height-proportional rake pulled her aft underwater extreme in by **exactly sternRake·loa = 4.20 m**, and the Shipwright camera fits the visible extents, so `SW.viewX` went 144.504 → 140.304 (fit −2.9%) and every scene pixel shifted ~2.5% about the aim point. Proof was an A/B worktree at the pre-rake commit served on a second port: baseline vs pre-rake code = **0.000%**, pre-rake vs HEAD = **17.469%** — the ratchet's number to three decimals. The other ship frames are the same mechanism at smaller deltas; the nine `aboard-*` movers are each one compact band where a bow meets the sea — the leaned stem seen from deck level. A suspected boat/cowl regression on `ship-steamer` was cleared in code: both paths are unchanged for non-recessed, pre-1950 ships. All 19 accepted with class reasons in FRAME-LOG; the four `diag-*` leftovers were removed per the r55 rule, leaving a clean committed set of 45.
+
+**Two things are owed, stated in HANDOFF for the next firing:** (1) the second full ratchet run — run 1 plus the investigation filled the 80-minute watchdog window; the accepted baselines are byte-identical to run 1's captures, so it's expected green. (2) The audit is RED: `queen-mary-2 · funnel casing bottom −2.3 m from its deck`, stable across two runs, on the exact code round 70 shipped as "29/29 clean". Since round 70 rewrote the audit's house datum in the same commit that moved the funnel, rule 8 applies — check the audit's datum first. No app code changed this round, so the deploy carries only verification artefacts.
+2026-08-11 03:26:21  round finished; HEAD is 272f1be Round 71: the rake's 19 movers classified to the metre and accepted; the diag frames leave the baseline set
+/Users/augustgweon/Ships/build/loop-round.sh: line 85:  5174 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 03:36:22  round starting
+Run 2 is at 20/45 frames with everything prepared for the moment it completes: the vertex-based rake measurement is written, synced, and proven against the old build (it reproduces round 71's audit to the digit — one problem, QM2's casing −2.3 m, rake quiet fleet-wide). The hull.js fix is drafted and waits only for the quiet-tree window to close.
+
+The finding so far, in short: the audit is right and the geometry is wrong. The rigid-rotated uptake swings its base rim below its own root by r·sin(rake) — on QM2's 9.4 m casing at 12° that is 2.33 m below the deck, matching the audit's −2.3 exactly. The structural fix is to model what a yard actually builds: an inclined cylinder cut horizontal at base and head, baked into the vertices, so a rim below the deck becomes undrawable — which also quietly fixes Titanic's four stacks (each ~1.1 m into her house, just under tolerance) and Yamato's 25° uptake.
+
+I'll pick up the moment the ratchet notifies.
+2026-08-11 03:47:37  round finished; HEAD is 272f1be Round 71: the rake's 19 movers classified to the metre and accepted; the diag frames leave the baseline set
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 11242 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 03:57:37  round starting
+Run 1 is capturing with a stall monitor armed (3-minute threshold, a correct pgrep this time). The funnel-shear edits, the QM2 frame entry, and the audit expectations are all prepared. Next action comes when the run completes (~04:23): classify run 1, apply the fix, audit, full run 2, accept, deploy.
+2026-08-11 04:08:28  round finished; HEAD is 272f1be Round 71: the rake's 19 movers classified to the metre and accepted; the diag frames leave the baseline set
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 13193 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 04:18:28  round starting

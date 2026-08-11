@@ -29,6 +29,12 @@ Take the next unfinished vessel. Do ONE vessel properly rather than three badly.
 
 ## Method that works here — use it, it was learned the hard way
 
+* ⚠ NEVER end your turn while anything is still running. You are `claude -p`: the process
+  exits when your turn ends, and the ratchet run you backgrounded dies with it. Two rounds
+  (2026-08-11, 03:36 and 03:57) each launched a run, said "I'll pick up when it notifies,"
+  ended the turn and were dead eleven minutes in, nothing committed. Wait in the foreground —
+  an `until [ -s <output-file> ]; do sleep 10; done` loop — and keep working between polls.
+
 * The Browser pane cannot render (0x0 canvas). The frame harness is the ONLY renderer:
   add a frame to Research/baselines/frames.json and LOOK at Research/baselines/_current/<name>.png
   with the Read tool. A change you have not looked at is not done.

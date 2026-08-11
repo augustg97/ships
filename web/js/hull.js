@@ -3682,12 +3682,18 @@ function buildFunnel(S, group) {
      funnelRake is the record's inclination in degrees aft — the Olympic class raked masts
      and funnels 2 inches to the foot (9.46°), Yamato's single trunked uptake leaned 25°
      and that lean is most of her broadside identity, Dreadnought's stacks stood plumb (0).
-     The default is the mild aft lean nearly every steamer wore. At 25° the old whole-group
-     rotation failed structurally: the boiler casing is a DECKHOUSE — the house over the
-     fiddley, vertical walls by construction — and tilting it with the stack lifted its
-     forward base edge 2.5 m off the deck. So the casing stands plumb and only the UPTAKE
-     rakes, rotated about its root, with the root sunk to the casing floor so the tilted
-     base rim stays hidden inside the casing at any recorded angle. */
+     The default is the mild aft lean nearly every steamer wore. The casing stands plumb —
+     it is a DECKHOUSE, the house over the fiddley, vertical walls by construction — and
+     only the UPTAKE rakes.
+     ⚠ AND THE RAKE IS A SHEAR, NOT A ROTATION (round 72). A yard builds an inclined
+     cylinder CUT HORIZONTAL at base and head; rotating a straight stack instead swung its
+     base rim r·sinθ below the deck — Queen Mary 2's 9.4 m casing at 12° buried its rim
+     2.3 m into her house (the audit's find), Titanic's four sat 1.1 m into hers — and
+     shortened the drawn stack to h·cosθ when the record's height is measured vertically.
+     The shear is baked into the vertices: every horizontal section stays horizontal, the
+     base rim lies flat near the casing floor where it cannot leave the ship, and the head
+     stands at the record's height exactly. The audit reads the lean off these same
+     vertices, so a shear, a tilt or any future mechanism measures alike. */
   const rakeDeg = S.funnelRake !== undefined ? S.funnelRake : 4.87;
   const th = rakeDeg * Math.PI / 180;
   for (let i = 0; i < n; i++) {
@@ -3722,7 +3728,10 @@ function buildFunnel(S, group) {
        a funnel band is not a fitting: it is paint. So the stack is now ONE cylinder carrying
        its livery in VERTEX COLOURS, and there is no second surface left to contend with.
        Colours from the museum model August supplied: buff stack, black top. */
-    const rootY = -caseH * 0.35, topY = caseH * 0.55 + h, L = topY - rootY;
+    /* the root sits just above the casing floor: at the floor itself the stack's flat base
+       cap would be coplanar with the casing's own bottom disc — the two-surface fight the
+       casing was built to end */
+    const rootY = -caseH * 0.30, topY = caseH * 0.55 + h, L = topY - rootY;
     const sg = new THREE.CylinderGeometry(ri * 0.93, ri, L, 24, 24);
     const spos = sg.attributes.position, scol = [];
     /* ⚠ THE BUFF-AND-BLACK IS A SHIPPING LINE'S TRADEMARK, AND A WARSHIP HAS NO SHIPPING
@@ -3742,26 +3751,33 @@ function buildFunnel(S, group) {
       scol.push(c.r, c.g, c.b);
     }
     sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
+    /* the shear: x' = x + tan(θ)·(height above the base cut). applyMatrix4 carries the
+       normals through the inverse transpose, so the shading is the inclined surface's own */
+    const shear = Math.tan(th);
+    sg.applyMatrix4(new THREE.Matrix4().set(
+      1, shear, 0, shear * L / 2,
+      0, 1,     0, 0,
+      0, 0,     1, 0,
+      0, 0,     0, 1));
     const stack = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({
       vertexColors: true, roughness: 0.66, metalness: 0.10 }));
     stack.position.y = (topY + rootY) / 2;
-    const rk = new THREE.Group();
-    rk.rotation.z = -th;
-    rk.add(tag(stack, 'funnel', 'Funnel',
+    g.add(tag(stack, 'funnel', 'Funnel',
       'Buff with a black top. Funnel colours were a shipping line\'s registered trademark: at sea a hull is a silhouette long before a name can be read, so the livery at the head of the funnel is how a ship was known hull-down on the horizon.'));
     /* the company band at the head — the one piece of colour on a Victorian hull */
     /* the steam pipe alongside, which is what actually roars — its foot pinned inside the
-       casing footprint and raked parallel, so it emerges through the casing top and cannot
+       casing footprint and sheared parallel, so it emerges through the casing top and cannot
        float when the stack leans hard */
     const Lp = L - h * 0.08;
-    const pipe = new THREE.Mesh(
-      new THREE.CylinderGeometry(ri * 0.13, ri * 0.13, Lp, 16), black);
-    pipe.position.y = Lp / 2;
-    const pg = new THREE.Group();
-    pg.position.set(-ri * 1.25, rootY, 0);
-    pg.rotation.z = -th;
-    pg.add(pipe);
-    g.add(rk); g.add(pg);
+    const pgeo = new THREE.CylinderGeometry(ri * 0.13, ri * 0.13, Lp, 16);
+    pgeo.applyMatrix4(new THREE.Matrix4().set(
+      1, shear, 0, shear * Lp / 2,
+      0, 1,     0, 0,
+      0, 0,     1, 0,
+      0, 0,     0, 1));
+    const pipe = new THREE.Mesh(pgeo, black);
+    pipe.position.set(-ri * 1.25, rootY + Lp / 2, 0);
+    g.add(pipe);
     g.position.set((u - 0.5) * S.lwl, y, 0);
     group.add(tag(g, 'funnel'));
   }

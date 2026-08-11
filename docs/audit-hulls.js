@@ -111,7 +111,22 @@ let worst = null;
 g.updateMatrixWorld(true);
 g.traverse(o => {
 if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
-const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+const pos = o.geometry.attributes.position;
+o.geometry.computeBoundingBox();
+const bbL = o.geometry.boundingBox, span = bbL.max.y - bbL.min.y;
+if (!pos || span < 1e-6) return;
+const lo = bbL.min.y + span * 0.15, hi = bbL.max.y - span * 0.15;
+const a = new THREE.Vector3(), b = new THREE.Vector3(), v = new THREE.Vector3();
+let na = 0, nb = 0;
+for (let j = 0; j < pos.count; j++) {
+v.fromBufferAttribute(pos, j);
+if (v.y <= lo) { a.add(v); na++; }
+else if (v.y >= hi) { b.add(v); nb++; }
+}
+if (!na || !nb) return;
+a.divideScalar(na).applyMatrix4(o.matrixWorld);
+b.divideScalar(nb).applyMatrix4(o.matrixWorld);
+const d = b.sub(a);
 const got = Math.atan2(d.x, d.y) * 180 / Math.PI;
 if (worst === null || Math.abs(got - want) > Math.abs(worst - want)) worst = got;
 });

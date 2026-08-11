@@ -194,20 +194,39 @@
         say(v.id, 'funnel height', `${fh.toFixed(0)} m above deck on a ${H.beam} m beam`);
     }
 
-    /* ── THE RAKE IS WORN (round 37). funnelRake is the record's inclination in degrees
-       aft — Yamato's trunked uptake leaned 25°, the Olympic class 9.46°, Dreadnought's
-       stacks stood plumb (0) — and a rotation that silently stops being applied is
-       invisible to every rule above: the funnel is present, at its station, at its
-       height, and WRONG. The stack is a cylinder along its local +y, so the world
-       direction of that axis IS the drawn rake; +x is aft. Every stack is measured and
-       the worst one answers, so one plumb funnel among raked sisters is caught too. */
+    /* ── THE RAKE IS WORN (round 37; measurement rebuilt round 72). funnelRake is the
+       record's inclination in degrees aft — Yamato's trunked uptake leaned 25°, the
+       Olympic class 9.46°, Dreadnought's stacks stood plumb (0) — and a lean that
+       silently stops being applied is invisible to every rule above: the funnel is
+       present, at its station, at its height, and WRONG. The lean is measured off the
+       stack's own VERTICES — the centroid of its bottom height band against the centroid
+       of its top band, both taken to world space — because round 72 bakes the rake into
+       the geometry as a horizontal-cut incline, and a matrix-axis reading of a sheared
+       mesh is 0° forever. Vertices are what the viewer sees; a tilt, a shear, or any
+       future mechanism measures the same. +x is aft. Every stack is measured and the
+       worst one answers, so one plumb funnel among raked sisters is caught too. */
     if (H.funnels && part.funnel) {
       const want = H.funnelRake !== undefined ? H.funnelRake : 4.87;
       let worst = null;
       g.updateMatrixWorld(true);
       g.traverse(o => {
         if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
-        const d = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+        const pos = o.geometry.attributes.position;
+        o.geometry.computeBoundingBox();
+        const bbL = o.geometry.boundingBox, span = bbL.max.y - bbL.min.y;
+        if (!pos || span < 1e-6) return;
+        const lo = bbL.min.y + span * 0.15, hi = bbL.max.y - span * 0.15;
+        const a = new THREE.Vector3(), b = new THREE.Vector3(), v = new THREE.Vector3();
+        let na = 0, nb = 0;
+        for (let j = 0; j < pos.count; j++) {
+          v.fromBufferAttribute(pos, j);
+          if (v.y <= lo) { a.add(v); na++; }
+          else if (v.y >= hi) { b.add(v); nb++; }
+        }
+        if (!na || !nb) return;
+        a.divideScalar(na).applyMatrix4(o.matrixWorld);
+        b.divideScalar(nb).applyMatrix4(o.matrixWorld);
+        const d = b.sub(a);
         const got = Math.atan2(d.x, d.y) * 180 / Math.PI;
         if (worst === null || Math.abs(got - want) > Math.abs(worst - want)) worst = got;
       });

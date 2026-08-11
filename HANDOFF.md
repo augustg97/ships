@@ -3818,3 +3818,75 @@ diagnosis frames are not baselines. The committed set is 45 frames, all with bas
 3. Azzam's stack/radome cluster — plate-derived record pass, drawn labelled derived (r70).
 4. Carried: QM2 hull window rows (portholes are false; her record is long window bands);
    trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
+
+---
+
+## Round 72 — 2026-08-11 — The funnel rake becomes a shear, and the nine "unmoved" frames were pre-rake baselines
+
+**Two firings died before this one, the same way.** The 03:36 and 03:57 rounds each backgrounded
+the ratchet, ended their turn saying "I'll pick up when it notifies," and `claude -p` exited on
+the turn's end — killing the round and the run with it. Eleven minutes each, nothing committed.
+The lesson for a headless round: **never end the turn while anything is running.** This round
+waited on foreground `until` loops instead, and everything below happened inside one turn.
+
+**The owed second ratchet run was NOT green, and the reason closes round 71's open anomaly.**
+Run 1 on the quiet tree: 36 of 45 frames at 0.000–0.045%, nine movers — shipwright, ship-dhow,
+ship-junk, ship-canoe, ship-great-eastern, ship-usv, ship-dugout, ship-trireme, ship-titanic
+(0.111% to 15.494%). Investigated, not accepted on trust: phase correlation shows no global
+shift; the trireme's full-scene diff, the titanic boat-deck zoom (fittings displacing as a body,
+funnels leaning apart about midship) and a byte-identity test — run-1 capture, a solo recapture
+14 minutes later, and a capture under 3-core artificial load are IDENTICAL to the byte — prove
+the committed code draws exactly one picture, and the baseline holds another. Then
+`git show --stat 272f1be` ended the mystery: **round 71 re-accepted exactly 19 baselines, and
+today's nine movers are precisely the frames it did not touch. Their baselines are pre-rake
+pixels.** These are the r70 rake-class movers (underwater ends pull in to lwl, the extent fit
+follows, the scene shifts about the aim point) arriving one round late; r71's run scored them
+green because its early captures matched pre-rake state — captures that can only have come from
+its A/B worktree contamination, since the committed code cannot reproduce them under any tested
+condition. All nine accepted with the class reason in FRAME-LOG. Under an 8-core load, for the
+record, `__FRAME_READY` correctly refuses to fire at all — the gate held.
+
+**Queen Mary 2's buried casing: the audit was right, the geometry was wrong, and the fix is the
+class (queue item 2, closed).** The uptake was a straight cylinder rigid-rotated about deck
+level, so its base rim swung ri·sinθ below the deck — QM2's 9.43 m casing at 12° buried its rim
+2.33 m into her house, the audit's −2.3 to the decimetre; Titanic's four sat ~1.1 m into hers,
+passing at just under tolerance. Rotation also drew every stack h·cosθ short when the record's
+height is vertical (Yamato's 25° uptake lost 9%). buildFunnel now BAKES the rake as a shear —
+x' = x + tanθ·(height above the base cut), applied to the geometry so normals follow — which is
+what a yard actually builds: an inclined cylinder cut horizontal at base and head. The base rim
+lies flat just above the casing floor (0.05·caseH clearance, so its cap and the casing's bottom
+disc cannot z-fight) and cannot leave the ship at any recorded angle; the head stands at the
+record's height exactly. The steam pipe shears in parallel. The audit's rake rule (rebuilt by
+the dead 03:36 round, kept and verified here) measures the lean off the stack's own vertices —
+bottom-band centroid to top-band centroid in world space — so rotation, shear or any future
+mechanism reads alike. **Audit after the fix: 29 hulls, 0 problems.**
+
+**New frame: ship-queen-mary-2** (`#v=ship&s=queen-mary-2`) — the ship rebuilt in r70 had no
+frame of her own, which is how her buried casing survived a "looked at" round. 46 frames now.
+
+**Ratchet run 2, post-fix, 46 frames: the nine re-accepts all reproduce at 0.000–0.010% — the
+r63 two-run rule is satisfied for them inside this round. Three movers, classified and accepted:
+ship-great-eastern 0.181%, ship-titanic 0.114%, ship-yamato 0.143% — each diff is the stacks
+alone (five, four, and the 25° trunk), hull, sea and fittings untouched. The dreadnought
+control (rake 0, shear = identity) held at 0.002%, ship-steamer's single short stack stayed
+under tolerance at 0.022%, every aboard frame ≤0.031%. ship-queen-mary-2 accepted as her first
+baseline and LOOKED at: the Cunard funnel stands on the house and leans, the boats ride their
+recessed gallery.**
+
+**Rule 0, written on the new ship-queen-mary-2 baseline:** it reads as a rendered world — the
+liner on open water off her port bow. Three facts a viewer can read off it: Cunard's red-and-
+black funnel, raked aft, amidships on a black-hulled white-housed 345 m ship; her lifeboats
+ride recessed in a dark gallery low in the house, not on davits on the roof; the fleet list
+runs from a dugout of 68000 BC to Ever Given at 400 m, with Queen Mary 2 at 25 of 29.
+
+**The loop-prompt now warns the class behind the two dead firings:** never end the turn while
+anything runs — wait in the foreground.
+
+### Next, in order
+1. **Azzam's stack/radome cluster** — plate-derived record pass, drawn labelled derived (r70).
+2. Carried: QM2 hull window rows (portholes are false; her record is long window bands);
+   trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
+3. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+4. r71's A/B contamination question is CLOSED by this round's finding (the nine pre-rake
+   baselines), but the procedural rule stands: an A/B capture must never share _current or
+   :8149 with the ratchet.
