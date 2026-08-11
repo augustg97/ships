@@ -60,6 +60,23 @@ if (Math.abs(part.mast.y[1] - H.mastTopM) > 1.5)
 say(v.id, 'mast tops off the record',
 `tallest mast ${part.mast.y[1].toFixed(1)} m over water, record says ${H.mastTopM}`);
 }
+if (H.cluster) {
+const cl = part.cluster;
+if (!cl) say(v.id, 'cluster declared but not drawn', 'cluster record with no geometry');
+else {
+const dh2 = H.deckM || H.beam * 0.105;
+const roofY = H.freeboard + (H.decks || 0) * dh2;
+if (cl.y[0] < roofY - 1.5)
+say(v.id, 'cluster reaches into the house',
+`lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, house top ${roofY.toFixed(1)}`);
+if (cl.y[0] > roofY + 0.6)
+say(v.id, 'cluster floats above its roof',
+`lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, house top ${roofY.toFixed(1)}`);
+if (H.cluster.stack && Math.abs(cl.y[1] - H.cluster.stack.topFwdM) > 1.5)
+say(v.id, 'cluster off its derived height',
+`tallest cluster vertex ${cl.y[1].toFixed(1)} m over water, derived record says ${H.cluster.stack.topFwdM}`);
+}
+}
 {
 let pk = null;
 g.traverse(o => { if (!pk && o.isMesh && tagOf(o) && tagOf(o).key === 'planking') pk = o; });

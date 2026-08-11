@@ -2044,3 +2044,18 @@ Run 1 is capturing with a stall monitor armed (3-minute threshold, a correct pgr
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 13193 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 04:18:28  round starting
+The round is complete and live — stamp 1786450589 verified on the deployed site at 05:17, tree clean, well inside the watchdog window.
+
+**What this round did:**
+
+**The owed second ratchet run was not green, and the failure closed round 71's open anomaly.** Nine frames moved on a supposedly quiet tree. Instead of accepting on trust, I proved the current code draws exactly one picture — run-1 capture, a solo recapture 14 minutes later, and a capture under 3-core artificial load are byte-identical — then `git show --stat 272f1be` ended it: round 71 re-accepted exactly 19 baselines, and the nine movers are precisely the frames it never touched. **Their baselines were pre-rake pixels** — the round-70 rake class arriving a round late. Round 71's run scored them green because its early captures matched pre-rake state, which can only have come from its A/B worktree contamination. All nine re-anchored with the class reason; run 2 reproduced every one at 0.000–0.010%. Under 8-core load, for the record, `__FRAME_READY` correctly refuses to fire — the gate held.
+
+**Queen Mary 2's buried casing (the audit RED): the audit was right, the geometry was wrong, fixed as a class.** The uptake was rigid-rotated about deck level, swinging its base rim `ri·sinθ` below the deck — 2.33 m on QM2 at 12°, the audit's −2.3 to the decimetre; Titanic's four sat ~1.1 m into her house, passing just under tolerance. Rotation also drew every stack `h·cosθ` short of its recorded vertical height (Yamato's 25° trunk lost 9%). `buildFunnel` now bakes the rake as a vertex shear — an inclined cylinder cut horizontal at base and head, which is what a yard builds — so the rim cannot leave the ship at any recorded angle. **Audit: 29 hulls, 0 problems.** Run 2 isolated the change to the three big funnel carriers (great-eastern 0.18%, yamato 0.14%, titanic 0.11% — diffs are the stacks alone), with the rake-0 dreadnought holding at 0.002% as the control.
+
+**Two housekeeping fixes:** `ship-queen-mary-2` joined the frame set (46 now) — she had no frame of her own, which is how the buried casing survived a "looked-at" round — and the loop prompt now warns the class that killed the 03:36 and 03:57 firings: a `claude -p` round dies the moment it ends its turn to "wait for a notification," so waits happen in the foreground.
+
+**Next round's queue head:** Azzam's stack/radome cluster (plate-derived record pass, drawn labelled derived), then QM2's window rows.
+2026-08-11 05:18:39  round finished; HEAD is 52dd41d Round 72 deploy note: stamp 1786450589 live, shear verified in the published minified js
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 14920 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 05:28:39  round starting

@@ -127,6 +127,33 @@
             `tallest mast ${part.mast.y[1].toFixed(1)} m over water, record says ${H.mastTopM}`);
     }
 
+    /* ── THE CLUSTER HONOURS ITS DERIVED RECORD (round 73). A `cluster` record is
+       plate-derived — every number in it was measured off the vessel's own photograph and
+       the card says so — and Azzam shipped three rounds as a bare white wedge because
+       nothing asked for the cluster she needed. So: it must be DRAWN; it must STAND ON
+       the house roof it claims (the linerHouse derivation — freeboard + decks·deckM),
+       neither floating above it nor reaching down inside the house; and its tallest
+       fixed structure must top out at the derived pipe height (the upper radome pair
+       derives to the same height on the plate, hence the tolerance). The MAST is tagged
+       'mast' and the existing mastTopM rule measures it. */
+    if (H.cluster) {
+      const cl = part.cluster;
+      if (!cl) say(v.id, 'cluster declared but not drawn', 'cluster record with no geometry');
+      else {
+        const dh2 = H.deckM || H.beam * 0.105;
+        const roofY = H.freeboard + (H.decks || 0) * dh2;
+        if (cl.y[0] < roofY - 1.5)
+          say(v.id, 'cluster reaches into the house',
+              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, house top ${roofY.toFixed(1)}`);
+        if (cl.y[0] > roofY + 0.6)
+          say(v.id, 'cluster floats above its roof',
+              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, house top ${roofY.toFixed(1)}`);
+        if (H.cluster.stack && Math.abs(cl.y[1] - H.cluster.stack.topFwdM) > 1.5)
+          say(v.id, 'cluster off its derived height',
+              `tallest cluster vertex ${cl.y[1].toFixed(1)} m over water, derived record says ${H.cluster.stack.topFwdM}`);
+      }
+    }
+
     /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem
        head PAST the waterline ending — Queen Mary 2 declared 0.085 and drew a blunt
        vertical bow for three rounds, because the offset was applied uniformly at every

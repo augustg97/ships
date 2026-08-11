@@ -3895,3 +3895,93 @@ anything runs — wait in the foreground.
 poll ~90 s after push; the live hull.js carries both shear applyMatrix4 calls (the published js
 is minified, so verify by code pattern, not by comment text). Twenty-fifth clean push-triggered
 deploy in a row.
+
+---
+
+## Round 73 — 2026-08-11 — Azzam gets her cluster, measured off her own photograph and labelled derived
+
+**The queue head (Azzam's stack/radome cluster, owed since r70) is closed, and the method was
+the one the note prescribed: a plate-derived record pass.** Nothing published gives the heights
+of anything above her house, so the delivery photograph on her own card (ChrisKarsten, Commons,
+the Lürssen fitting-out berth) was measured pixel by pixel: gridded crops at 3× to 9×, the
+scale fixed by her waterline span against the recorded 180.6 m (0.157 m per pixel), and
+cross-checked against her 9.0 m freeboard — the plate's 59 px of freeboard scales to 9.25 m,
+3% off the record, which is the derivation's honest error bar. Bow identification mattered and
+was settled twice over: the anchor slash low at the stem and the overhanging raked entry
+against the near-vertical transom cut (bow right in the plate).
+
+**What the plate gave, drawn and in the data as `cluster` on her hull record with a
+`provenance` field stating the derivation (rule 10):**
+- **Four polished exhaust pipes raked 15° FORWARD** — the plate is unambiguous, every pipe
+  edge leans toward the stem — with red bands at the heads, tops staggered 32.3 m (aft) to
+  34.4 m (fwd) over water, and the dark casing fin abaft the rank, top 33.1 m.
+- **Five radome stations on two roof levels**: two athwartships pairs of 4.7 m spheres plus a
+  2.2 m single on the house top (22 m), a 4.5 m single and a 5.0 m pair on the mast block roof
+  (28.9 m). The pairing is itself a derivation: the plate's blobs are wider than they are
+  tall, and a sphere projects equal — two overlapped spheres resolve the width.
+- **The signal mast**, base 2.7 m through, raked 8.5° aft, structural head 45.4 m, whip to
+  47.2 m, three slender spreader tiers; `mastTopM: 47.2` so the existing audit rule measures it.
+- **The mast block and equipment block** with the swept dark-glass sheet forward — the long
+  black parallelogram every photograph of her shows — and the fairing sweeping the roof down
+  aft of the stack.
+- **`deckM: 2.6`, also derived**: the plate's house-top roof sits at 22.1 m over water, and
+  five tiers from a 9.0 m sheer land there at 2.6 m a deck. Her tween-deck was previously the
+  beam heuristic's 2.18.
+
+**The mechanism is the class, not the instance (rule 2):** `buildCluster` in hull.js draws ANY
+vessel's `cluster` record — blocks, glass, fairing, pipe rank, domes, mast — standing on the
+linerHouse roof, the same derivation her walls and boats stand on, so a re-derived house
+carries the cluster with it and it cannot float or bury (the r72 class). Rakes are shears with
+horizontal base cuts (r72), so the pipe rank's feet lie flat in the casing at any angle and
+the heads stand at the record's heights exactly. Every part card states the figures are
+derived from the photograph; the Shipwright card carries a `Cluster` row saying the same.
+
+**The audit learned the class, injection-proven:** `cluster declared but not drawn`,
+`cluster reaches into the house` / `cluster floats above its roof` (both sides of the datum),
+and `cluster off its derived height` (drawn tallest vertex vs the record's pipe head). A
+record-value injection cannot fire these — the builder draws FROM the record, so drawn and
+asserted move together — which is the right shape: they guard BUILDER faults. A builder
+injection (whole cluster shifted down 5 m) fired three rules at once, the two new ones plus
+the existing `mast tops off the record` catching the mast riding down. Audit after the real
+build: **29 hulls, 0 problems.**
+
+**Looked at, rule 1:** beam (b=90, the plate's own bearing) and quarter (b=135) diagnosis
+captures, iterated twice — first pass found the spreader platforms drawn deep enough to read
+as a stacked radar tower and the whip fat enough to read as an obelisk (both slimmed), second
+pass found the casing fin standing amid the pipe rank hiding the aft two pipes (moved aft in
+the record, 0.651 → 0.664). Diagnosis frames deleted after reading, per the r55 rule.
+**New committed frame `ship-azzam` (47 now)** — she had no frame of her own, which is how a
+yacht with no cluster at all shipped as looked-at; the r72 QM2 lesson applied. Rule 0 on that
+frame, written: it reads as a rendered world, and a viewer can name the forward-raked polished
+exhaust rank with its black fin, the paired radome spheres at two levels around the raked
+mast, and the card's 180.6 m / 38.2 m air draught.
+
+**Found against the plate and NOT done this round, stated exactly:**
+1. **The house cascade runs the wrong way.** linerHouse crests at the house's forward end and
+   steps down aft — the plate ramps UP from a long low foredeck through tiers to an aft-third
+   crest (u 0.59–0.71) and drops to a low tender deck. The model reads as a liner's wedding
+   cake wearing Azzam's cluster. The fix is a linerHouse direction/profile option, a class
+   change touching QM2 and every `decks` hull — not a squeeze-in at the end of a round.
+2. **Her tiers wear liner porthole ribbons; the record shows long dark window bands.** Same
+   carried class as QM2's window rows (r70 queue) — one fix should serve both.
+3. **The four tenders are drawn on the crest roof; the plate stows them on the low aft deck**
+   near the stern. buildBoats' boat-deck default, wrong for a yacht.
+4. Block widths and dome pairing are stated as derived from the beam on the cards — a profile
+   photograph carries no width, and rule 10 says say so rather than pretend.
+
+**Ratchet, full 47-frame check on the quiet tree: ALL GREEN — 46 committed baselines at
+0.000–0.045%, none BLANK, zero movers to classify.** The prediction held: `buildCluster` is
+gated on the `cluster` record and the data change is Azzam's alone, so nothing else could
+move, and nothing else did. `ship-azzam` reproduces her fresh baseline at 0.000% — three
+byte-consistent captures of this code (baseline, beam iteration, this check). No accepts
+happened this round, so the r63 two-run rule has nothing pending: an all-green check against
+unchanged committed baselines is its own confirmation.
+
+### Next, in order
+1. **The house cascade direction** (finding 1 above): linerHouse crests forward, her plate
+   crests aft-third. A class change — design the option, A/B against QM2 and Titanic frames,
+   expect ship-azzam and possibly ship-queen-mary-2 to move and classify them.
+2. Carried: QM2 hull window rows + Azzam's porthole ribbons (finding 2 — one window-band fix
+   should serve both); tenders to the aft deck (finding 3); trireme/corbita masthead sheave
+   gear; item 10 remainder (waterway margin plank).
+3. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.

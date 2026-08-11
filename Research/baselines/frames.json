@@ -246,6 +246,11 @@
    "name": "shipwright-corbis",
    "path": "/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15",
    "note": "r67 standing guard: masthead furniture per the evidence — the corbita's bare head (no top before 1100) with the corbis, the basket that named her (Festus). Watches the dated-top class and the corbis class."
+  },
+  {
+   "name": "ship-azzam",
+   "path": "/?frozen=1#v=ship&s=azzam",
+   "note": "the 2013 Lürssen yacht with her plate-derived mast/stack/radome cluster (r73) — every height derived from the delivery photograph, labelled so"
   }
  ]
 }

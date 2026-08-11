@@ -1555,6 +1555,13 @@ what: 'Not decoration and not arbitrary: its HEIGHT is set by the draught a boil
 + 'the ship, and why forced draught later let them shrink. The rig alongside '
 + 'is not vestigial either — until compound engines cut coal consumption '
 + 'threefold, sail is what got you home when the bunkers ran dry.' },
+cluster:  { stage: 3, name: 'Mast and stack cluster',
+what: 'The exhaust rank, signal mast and communications radomes, packed amidships '
++ 'in one sculpted cluster — a modern motor vessel’s whole topside identity '
++ 'in one place, as much her silhouette as four buff funnels were Titanic’s. '
++ 'No published drawing gives these heights: every figure is DERIVED from the '
++ 'photograph on this card, scaled against the recorded length. Derived '
++ 'figures, labelled as such.' },
 gun:      { stage: 3, name: 'Great guns',
 what: 'A 32-pounder is three metres long and weighs 2.7 tonnes; run out, a third '
 + 'of the barrel stands outside the ship. They cannot be aimed — only the ship '
@@ -2311,6 +2318,172 @@ g.add(pipe);
 g.position.set((u - 0.5) * S.lwl, y, 0);
 group.add(tag(g, 'funnel'));
 }
+}
+function buildCluster(S, group) {
+const C = S.cluster;
+if (!C) return;
+const L = S.lwl, B = S.beam;
+const T = S.decks ? linerHouse(S) : null;
+const roof = T ? T.top : hullSurface(S).sheer(0.5);
+const X = u => (u - 0.5) * L;
+const g = new THREE.Group();
+const white  = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60,
+side: THREE.DoubleSide });
+const glass  = new THREE.MeshStandardMaterial({ color: 0x14181d, roughness: 0.22,
+metalness: 0.55 });
+const domeMt = new THREE.MeshStandardMaterial({ color: 0xeae8e2, roughness: 0.45 });
+const finMt  = new THREE.MeshStandardMaterial({ color: 0x1b1d20, roughness: 0.32,
+metalness: 0.45 });
+const wLower = B * 0.62, wUpper = B * 0.40;
+if (C.blockU) {
+const [uA, uB] = C.blockU;
+const h = C.blockTopM - roof;
+const blk = new THREE.Mesh(new THREE.BoxGeometry((uB - uA) * L, h + 0.3, wLower), white);
+blk.position.set((X(uA) + X(uB)) / 2, roof - 0.3 + (h + 0.3) / 2, 0);
+g.add(tag(blk, 'cluster', 'Equipment block',
+'The raised tier the cluster stands on. Its extent and height are derived from the plate; its width from the beam, a profile photograph having no width in it.'));
+}
+if (C.upperU) {
+const [uA, uB] = C.upperU;
+const h = C.upperTopM - C.blockTopM;
+const blk = new THREE.Mesh(new THREE.BoxGeometry((uB - uA) * L, h + 0.2, wUpper), white);
+blk.position.set((X(uA) + X(uB)) / 2, C.blockTopM - 0.2 + (h + 0.2) / 2, 0);
+g.add(tag(blk, 'cluster', 'Mast block',
+'The upper block the mast and forward radomes stand on. Derived from the plate.'));
+}
+if (C.glassFootU !== undefined && C.upperU) {
+const x0 = X(C.glassFootU), y0 = C.blockTopM;
+const x1 = X(C.upperU[0]),  y1 = C.upperTopM;
+const run = x1 - x0, rise = y1 - y0, len = Math.hypot(run, rise);
+const sheet = new THREE.Mesh(new THREE.BoxGeometry(len + 0.4, 0.18, wUpper * 0.98), glass);
+sheet.rotation.z = Math.atan2(rise, run);
+sheet.position.set((x0 + x1) / 2, (y0 + y1) / 2 + 0.05, 0);
+g.add(tag(sheet, 'cluster', 'Glass sweep',
+'The raked dark-glass sheet forward of the mast block. Angle and extent derived from the plate.'));
+}
+if (C.fairAftU !== undefined && C.blockU) {
+const x0 = X(C.blockU[1]), x1 = X(C.fairAftU);
+const hw = wLower * 0.42;
+const A0 = [x0, roof - 0.25, -hw], Btop = [x0, C.blockTopM, -hw], C0 = [x1, roof - 0.25, -hw];
+const A1 = [x0, roof - 0.25,  hw], B1 = [x0, C.blockTopM,  hw], C1 = [x1, roof - 0.25,  hw];
+const v = [];
+const put = (...ps) => ps.forEach(p => v.push(...p));
+put(A0, Btop, C0,  A1, C1, B1);
+put(Btop, B1, C1,  Btop, C1, C0);
+put(A0, C0, C1,  A0, C1, A1);
+put(A0, A1, B1,  A0, B1, Btop);
+const wg = new THREE.BufferGeometry();
+wg.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+wg.computeVertexNormals();
+g.add(tag(new THREE.Mesh(wg, white), 'cluster', 'Stack fairing',
+'The swept fairing running the roof down aft of the stack. Profile derived from the plate.'));
+}
+if (C.stack) {
+const K = C.stack;
+const rakeF = -Math.tan((K.rakeFwdDeg || 0) * Math.PI / 180);
+const rootY = C.blockTopM - 1.2;
+if (K.finU !== undefined) {
+const finH = K.finTopM - (rootY - 0.6);
+const fg = new THREE.BoxGeometry(K.finChordM || 4.2, finH, 3.4);
+fg.applyMatrix4(new THREE.Matrix4().set(
+1, rakeF, 0, rakeF * finH / 2,
+0, 1,     0, 0,
+0, 0,     1, 0,
+0, 0,     0, 1));
+const fin = new THREE.Mesh(fg, finMt);
+fin.position.set(X(K.finU), (rootY - 0.6) + finH / 2, 0);
+g.add(tag(fin, 'cluster', 'Stack casing',
+'The dark raked casing the uptakes rise through. Height and rake derived from the plate.'));
+}
+const n = K.pipes || 4;
+const [u0, u1] = K.uBase;
+const steel = new THREE.Color(0xb9bcbf), band = new THREE.Color(0x9c2f24),
+rim = new THREE.Color(0x2a2c2e);
+for (let i = 0; i < n; i++) {
+const f = n === 1 ? 0 : i / (n - 1);
+const u = u0 + (u1 - u0) * f;
+const top = K.topFwdM + (K.topAftM - K.topFwdM) * f;
+const Lp = top - rootY, r = (K.pipeDiaM || 1.4) / 2;
+const pg = new THREE.CylinderGeometry(r * 0.96, r, Lp, 20, 24);
+const pos = pg.attributes.position, col = [];
+for (let j = 0; j < pos.count; j++) {
+const ya = pos.getY(j) + Lp / 2;
+const c = ya > Lp - 0.25 ? rim : (ya > Lp - 1.6 && ya < Lp - 0.9) ? band : steel;
+col.push(c.r, c.g, c.b);
+}
+pg.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+pg.applyMatrix4(new THREE.Matrix4().set(
+1, rakeF, 0, rakeF * Lp / 2,
+0, 1,     0, 0,
+0, 0,     1, 0,
+0, 0,     0, 1));
+const pipe = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({
+vertexColors: true, roughness: 0.30, metalness: 0.85 }));
+pipe.position.set(X(u), rootY + Lp / 2, 0);
+g.add(tag(pipe, 'cluster', 'Exhaust pipe',
+'One of the polished uptakes, raked forward as the plate shows — the lean measured off the photograph at about fifteen degrees, drawn as a shear so the base sits flat in its casing and the head stands at the derived height. The heights are derived; no drawing of this plant is published.'));
+}
+}
+for (const d of C.domes || []) {
+const base = d.upper ? C.upperTopM : roof;
+const stations = d.pair ? [[d.dM / 2 + 0.25, 0.55], [-(d.dM / 2 + 0.25), -0.55]] : [[0, 0]];
+for (const [dz, dx] of stations) {
+const ped = new THREE.Mesh(
+new THREE.CylinderGeometry(d.dM * 0.16, d.dM * 0.19, 1.1, 12), white);
+ped.position.set(X(d.u) + dx, base - 0.25 + 0.55, dz);
+g.add(tag(ped, 'cluster', 'Radome pedestal',
+'Stands the dome clear of the deck wash. Derived from the plate.'));
+const dome = new THREE.Mesh(new THREE.SphereGeometry(d.dM / 2, 24, 16), domeMt);
+dome.position.set(X(d.u) + dx, base - 0.25 + 1.1 + d.dM * 0.44, dz);
+g.add(tag(dome, 'cluster', 'Radome',
+'A weatherproof shell over a stabilised satellite dish — the sphere is the cheapest shape that lets the antenna inside slew freely. Diameter and station derived from the plate against the recorded length.'));
+}
+}
+if (C.mast) {
+const M = C.mast;
+const rakeA = Math.tan((M.rakeAftDeg || 0) * Math.PI / 180);
+const baseY = C.upperTopM - 0.4, headY = M.topM;
+const Lm = headY - baseY, r0 = (M.baseDiaM || 2.7) / 2;
+const mg = new THREE.CylinderGeometry(r0 * 0.22, r0, Lm, 20, 16);
+mg.applyMatrix4(new THREE.Matrix4().set(
+1, rakeA, 0, rakeA * Lm / 2,
+0, 1,     0, 0,
+0, 0,     1, 0,
+0, 0,     0, 1));
+const mastMesh = new THREE.Mesh(mg, white);
+mastMesh.position.set(X(M.u), baseY + Lm / 2, 0);
+g.add(tag(mastMesh, 'mast', 'Signal mast',
+'The communications tower: no sail ever hung here. Height over water and the aft rake are derived from the plate — no published drawing gives them. A derived figure, labelled as one.'));
+const axisX = y => X(M.u) + rakeA * (y - baseY);
+(M.yardsM || []).forEach((yh, i) => {
+const chord = 1.1 - i * 0.15, span = 7.5 - i * 1.5;
+const plat = new THREE.Mesh(new THREE.BoxGeometry(chord, 0.14, span), white);
+plat.position.set(axisX(yh), yh, 0);
+g.add(tag(plat, 'mast', 'Spreader platform',
+'Carries the aerials that must see past the mast. Heights derived from the plate.'));
+if (i === (M.yardsM || []).length - 1) {
+for (const dz of [-1.4, 1.4]) {
+const sm = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 12), domeMt);
+sm.position.set(axisX(yh), yh + 0.6, dz);
+g.add(tag(sm, 'mast', 'Aerial dome', 'Small radome on the upper spreader. Derived.'));
+}
+}
+});
+if (M.whipM) {
+const Lw = M.whipM - (headY - 0.3);
+const wg2 = new THREE.CylinderGeometry(0.025, 0.05, Lw, 8);
+wg2.applyMatrix4(new THREE.Matrix4().set(
+1, rakeA, 0, rakeA * Lw / 2,
+0, 1,     0, 0,
+0, 0,     1, 0,
+0, 0,     0, 1));
+const whip = new THREE.Mesh(wg2, white);
+whip.position.set(axisX(headY - 0.3), (headY - 0.3) + Lw / 2, 0);
+g.add(tag(whip, 'mast', 'Masthead whip',
+'The HF whip at the truck — the highest fitting aboard. Derived from the plate.'));
+}
+}
+group.add(tag(g, 'cluster'));
 }
 function buildBoats(S, group, mats) {
 const n = S.boats || 0;
@@ -4030,6 +4203,7 @@ buildRigging(S, group, mats, S.__spars, S.__mastTops || []);
 if (FINE) buildFittings(S, group, mats);
 if (FINE) buildFunnel(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
+if (FINE && S.cluster) buildCluster(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
 if (FINE) buildJunkCastle(S, group);
 if (FINE && S.turrets) buildCitadel(S, group, mats);
