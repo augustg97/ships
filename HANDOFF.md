@@ -3638,3 +3638,9 @@ plating, in a fleet list running from a dugout of 68000 BC to the ship of the li
    (waterway margin plank, low priority).
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+**End-of-round deploy note: LIVE, stamp 1786418078 → 1786426912**, verified with a
+cache-busted fetch of the data-version meta tag on the first poll (~30 s after push); the live
+hull.js confirmed carrying the poleM/55 tube law, the live vessels.json Great Eastern's six
+diaM fields, and the live audit-hulls.js the 'iron mast grown from a tree' rule. Twenty-third
+clean push-triggered deploy in a row.
