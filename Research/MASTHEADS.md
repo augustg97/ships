@@ -135,6 +135,68 @@ that could hoist nothing, on the trireme, the corbita and the cog alike.
   karchesion's whole function (and the top's sheave on the cog). The multi-tier halyard
   lead (ties and jeers at the doubling) is a separate mechanism, unchanged this round.
 
+## 4. The multi-tier lead: jeers for the lower yard, a tie through the topmast head (round 79)
+
+**The question.** Round 78 fixed the single-yard halyard (slings → head sheave → rail) and
+carried the multi-tier case: on every mast with more than one yard, the upper yards' falls
+still ran slings-to-rail direct, touching no masthead — the same rope-that-hoists-nothing
+fault one tier up. And the junk's halyard ran from the slings to a bare masthead and stopped:
+no sheave drawn in the pole, no fall to haul on.
+
+**What the sources say.**
+
+- Falconer, *An Universal Dictionary of the Marine* (1780 ed., Project Gutenberg #57705,
+  read verbatim this round), **JEARS**: "an assemblage of tackles, by which the lower yards
+  of a ship are hoisted up along the mast to their usual station, or lowered from thence as
+  occasion requires... In a ship of war, the jears are usually composed of two strong
+  tackles, each of which has two blocks, viz. one fastened to the lower-mast-head, and the
+  other to the middle of the yard... The two ropes, which communicate with these tackles,
+  lead down to the deck." The lower yard does not ride a halyard to the rail: it hangs in a
+  PAIR of tackles between the lower masthead and its own slings, with falls at the deck.
+- Falconer, **TYE**: "a sort of runner or thick rope, used to transmit the effort of a
+  tackle to any yard or gaff... The tye is either passed through a block fixed to the
+  mast-head, and afterwards through another block moveable upon the yard or gaff intended
+  to be hoisted; or the end of it is simply fastened to the said yard or gaff, after
+  communicating with the block at the mast-head."
+- Falconer, French glossary, **ENCORNAIL**: "the sheave-hole in a top-mast-head, through
+  which the top-sail-tye is reeved, to hoist or lower the top-sail along the mast." The
+  topsail yard's tie runs through the head of ITS OWN mast — the topmast — not the lower
+  masthead and not the rail. Falconer's TOP-SAILS entry extends the mechanism up the rig:
+  "The top-gallant sails are expanded above the topsail-yard, in the same manner as the
+  latter are extended above the lower yard."
+- The crossjack is the exception among lower yards: Falconer under CROSS-JACK calls it a
+  yard whose sail is rarely set, and Steel's tables (already in the codebase, r70) rate it
+  as a lighter spar; it hung in standing slings, not on jeers. Drawn accordingly: no jeers,
+  no fall on the mizzen's lowest yard.
+- The doubled rig (post-1850) changes which yards hoist at all: the lower topsail and lower
+  topgallant yards are FIXED at the caps (the Howes arrangement already in the drawing —
+  hull.js r48 comment: "a lower topsail yard fixed at the cap, an upper hoisting above
+  it"), and by that date the lower yards sit on trusses, jeers having left the rig. So the
+  jeers gate is the rig form itself: a mast with a `yards` list (the doubled rig) draws
+  none; the classic fidded three-segment rig draws them on fore and main courses.
+- Needham IV:3, Fig. 927 key, item 34 (already read in full, r67): junk halyards run
+  through "sheave pins passing through both masts and securing double halyard sheaves" —
+  the Chinese masthead is a sheave IN the pole, a slot cut through the masthead with the
+  pin through both cheeks, no external block and no karchesion. The fall comes down to the
+  deck abaft the mast, where the sail is worked.
+
+**What this fixes, as classes.**
+
+- Every HOISTING yard's fall now leads slings → the sheave at the head of its own mast
+  section → down to the rail: the topsail over the topmast head (Falconer's encornail),
+  the topgallant over the topgallant head, the upper topsail/topgallant and royal of a
+  doubled rig over theirs. Fixed yards — the course of a doubled rig, the lower topsail,
+  the lower topgallant, the crossjack — get NO fall, where before every yard above the
+  course drew one.
+- The course of a classic multi-tier rig gets its JEERS: two tackles from the lower
+  masthead under the top down to the slings, falls to the deck beside the mast — Falconer's
+  ship-of-war form, simplified to same-side falls.
+- The junk masthead gets its through-pole sheave — two dark slots and a pin with proud
+  ends, Needham's double sheave — and the junk halyard leads over it and falls to the deck.
+- Rope ties are drawn on the doubled rigs too, where the 1902 reality is chain and wire;
+  running rigging is rope everywhere in this model. A known simplification, applied to the
+  whole class.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent
@@ -148,3 +210,9 @@ that could hoist nothing, on the trireme, the corbita and the cog alike.
   Athenaeus 11.49, read this round). Its form and size: **derived** from the pole, stated
   as derived on the card. The halyard leading over the head: mechanical necessity — the
   yard cannot hoist otherwise.
+- Jeers on the lower yards, ties through the mast sections' own heads: **sourced**
+  (Falconer 1780: JEARS, TYE, ENCORNAIL, TOP-SAILS — all read verbatim, round 79). The
+  same-side jeer falls: **simplification** (Falconer's ship-of-war falls cross to the
+  opposite side of the mast). Fixed lower topsail/topgallant yards on the doubled rig:
+  established in-project (r48, Howes rig). The junk's through-pole sheave: **sourced**
+  (Needham IV:3 Fig. 927 key item 34, read r67); its drawn size: **derived** from the pole.

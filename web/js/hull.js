@@ -781,6 +781,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
     /* every yard this mast crosses, recorded as built — the running rigging below is led
        from these, the braces' own rule: rope goes to where the spar actually is */
     const mastYards = [];
+    /* the HEAD of each drawn segment, by section — the sheave a hoisting yard's tie runs
+       over is in the head of its OWN mast section (Falconer's encornail: "the sheave-hole
+       in a top-mast-head, through which the top-sail-tye is reeved"), so the running gear
+       below needs every section's head, not just the highest one that capY keeps */
+    const segHeads = [];
     /* a braced sail reaches about a tenth of the hull either side of its own mast */
     let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
 
@@ -788,7 +793,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
        Factored out because a mast may cross three yards — one per fidded segment, the
        18th-century rig — or six, from the record's own list (`yards`, below). Both paths
        must build the identical spar, or the fleet forks into two models of one thing. */
-    const crossYard = (yy, yardLen, kind) => {
+    /* `hoist` records how the yard is gotten up and held — {tie: si} for a yard that
+       hoists on section si (its fall must lead over that section's head), 'jeers' for a
+       course swayed up in tackles at the lower masthead, 'fixed' for a yard slung or
+       trussed in place with no fall at all (crossjack, doubled-rig course, lower topsail,
+       lower topgallant). The running gear below draws from this record, so a rope can
+       only ever lead to the mechanism the yard actually rides. */
+    const crossYard = (yy, yardLen, kind, hoist) => {
       /* ── A YARD IS AS THICK AS ITS OWN LENGTH ASKS — THE SPAR-MAKER'S OWN RATES ──────
          Steel 1794, "Proportional Diameters of Yards" (maritime.org full text): main and
          fore yards 7/10 of an inch to every yard of the length at the slings; topsail
@@ -866,7 +877,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          needs so the sail can be handled. */
       const drop = yy - prevYard;
       prevYard = yy;
-      mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop });
+      mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop, hoist });
       if (FURLED) {
         /* the roll lies along the braced yard itself, between its arms, bunt at the slings */
         const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
@@ -1178,6 +1189,34 @@ function buildRig(S, group, mats, FINE, FURLED) {
         group.add(tag(kg, 'karchesion'));
       }
 
+      /* ── THE JUNK MASTHEAD IS A SHEAVE THROUGH THE POLE ──────────────────────────────
+         Needham IV:3 (Fig. 927 key, item 34): junk halyards run through "sheave pins
+         passing through both masts and securing double halyard sheaves" — no external
+         block, no karchesion, no top. The sheaves turn in slots cut through the masthead
+         itself, on a pin through both cheeks. Drawn as the two dark slots and the proud
+         pin ends; sizes are DERIVED from the pole (no measured junk masthead was in
+         reach) and the card says so. Research/MASTHEADS.md §4. */
+      if (FINE && mk.rig === 'junk' && si === 0) {
+        const hR = segR[0].b;                          // the pole at the head
+        const sg2 = new THREE.Group();
+        const slotMat2 = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+          { color: 0x17120c, roughness: 0.95 }));
+        for (const zz of [1, -1]) {
+          const slot = new THREE.Mesh(
+            new THREE.BoxGeometry(hR * 3.4, hR * 1.5, hR * 0.42), slotMat2);
+          slot.position.z = zz * hR * 0.33;
+          sg2.add(slot);
+        }
+        const pin = new THREE.Mesh(
+          new THREE.CylinderGeometry(hR * 0.26, hR * 0.26, hR * 2.9, 8), slotMat2);
+        pin.rotation.x = Math.PI / 2;
+        sg2.add(pin);
+        const hY = y + seg * 0.965;
+        sg2.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+        sg2.rotation.z = -rakeRad;
+        group.add(tag(sg2, 'sheave'));
+      }
+
       /* ── THE CORBIS — the basket that named the ship ─────────────────────────────────
          Paulus' epitome of Festus: "Corbitae dicuntur naves onerariae, quod in malo earum
          summo pro signo corbes solerent suspendi" — cargo ships are called corbitae
@@ -1238,9 +1277,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
         /* the mizzen's lowest yard is the CROSSJACK, and Steel sets its diameter at the
            fore-topsail-yard's rate — a 74 crossed no mizzen course, and the spar that
            spread her mizzen topsail's foot was a lighter stick than a course yard */
+        /* how this yard gets up, from the sources (Research/MASTHEADS.md §4): the one
+           yard of a single-tier mast hoists to its own masthead; a course under upper
+           tiers hangs in JEERS — Falconer: "an assemblage of tackles, by which the lower
+           yards of a ship are hoisted up along the mast" — except the crossjack, which
+           hung in standing slings and gets nothing; every upper yard rides a TIE over
+           the sheave in its own section's head. */
         crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
                   si === 0 ? (isMizzen ? 'topsail' : 'course')
-                : si === 1 ? 'topsail' : 'topgallant');
+                : si === 1 ? 'topsail' : 'topgallant',
+                  si > 0 || tiers === 1 ? { tie: si }
+                : isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers');
       }
 
       /* ── MASTS STACK. ⚠ THIS LINE WAS MISSING, AND NOTHING LOOKED WRONG. ──────────────
@@ -1255,6 +1302,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          side by side and overlap through the DOUBLING, about an eighth of the lower spar. That
          is why 32.8 + 19.7 + 9.8 m of timber makes a 56 m rig and not a 62 m one. */
       capY = y + seg;
+      segHeads[si] = capY;
       y += seg * 0.88;
     });
 
@@ -1283,10 +1331,21 @@ function buildRig(S, group, mats, FINE, FURLED) {
         tg:     [0.76, 0.68, 'topgallant'],   // single topgallant over double topsails (clipper)
         royal:  [0.92, 0.50, 'royal'],
       };
-      mk.yards.map(nm => PLAN[nm]).filter(Boolean)
-        .sort((a, b) => a[0] - b[0])
-        .forEach(([f, r, kind]) => crossYard(base + T * f, lower * 0.875 * r,
-                  kind === 'course' && isMizzen ? 'topsail' : kind));
+      /* which of these yards HOIST is the Howes arrangement itself: the course sits on
+         its truss and the lower topsail and lower topgallant hang fixed at the caps —
+         that is the whole point of doubling, the fixed yard needs no hands to sway it —
+         while each upper yard rides a tie over the head of its own section: the deep or
+         upper topsail on the topmast, the topgallants and the royal on the spar above
+         the second doubling. Jeers are gone from this rig; by its date the lower yards
+         sit on iron trusses. Research/MASTHEADS.md §4. */
+      const HOIST = { course: 'fixed', ltop: 'fixed', ltg: 'fixed',
+                      top: { tie: 1 }, utop: { tie: 1 },
+                      tg: { tie: 2 }, utg: { tie: 2 }, royal: { tie: 2 } };
+      mk.yards.filter(nm => PLAN[nm])
+        .sort((a, b) => PLAN[a][0] - PLAN[b][0])
+        .forEach(nm => { const [f, r, kind] = PLAN[nm];
+          crossYard(base + T * f, lower * 0.875 * r,
+                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm]); });
     }
 
     /* ── THE GEAR THE YARDS ARE WORKED BY ──────────────────────────────────────────────
@@ -1311,7 +1370,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const hz = H.halfB * H.wl(uc) * (1 - H.tumble(uc)) * 0.96;
         return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
       };
-      const lifts = [], sheets = [], tacks = [], hals = [];
+      const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
       mastYards.forEach((yd, k) => {
         const above = mastYards[k + 1];
         /* the lift leads to the next yard's slings — which is where the cap of this yard's
@@ -1337,23 +1396,34 @@ function buildRig(S, group, mats, FINE, FURLED) {
                                   sgn * cT * below.half)]);
           }
         }
-        /* the halyard fall, slings to the rail, sides alternating by tier. The course of a
-           multi-tier rig hangs from fixed jeers and gets none; a single-tier mast's one
-           yard is itself the hoisting yard. */
-        if (k > 0 || mastYards.length === 1) {
+        /* the fall, from the mechanism the yard was recorded to ride (crossYard's
+           `hoist`), sides alternating by tier. A HOISTING yard's tie leads up from the
+           slings, over the sheave in the head of its OWN mast section — the karchesion
+           on an ancient pole, the top's sheave on the cog, Falconer's encornail in the
+           topmast head, and each section above likewise — and only then down to the
+           rail. ⚠ Drawn slings-to-rail direct, as every upper yard was through r78, it
+           is a rope that could hoist nothing: the r78 fault one tier up. A FIXED yard
+           (crossjack, doubled-rig course, lower topsail, lower topgallant) gets no fall
+           at all, and the course of a classic multi-tier rig hangs in its JEERS below. */
+        if (yd.hoist && yd.hoist.tie !== undefined) {
           const sgn = k % 2 ? 1 : -1;
-          if (mastYards.length === 1) {
-            /* ⚠ the one yard hoists to the MASTHEAD, so its halyard must go there: up
-               from the slings, over the sheave at the head — the karchesion on an
-               ancient pole, the top's sheave after 1100 — and only then down to the
-               rail. Drawn slings-to-rail direct, it was a rope that could hoist
-               nothing, and the masthead gear it implies was missing from two hulls. */
-            const hd = V3(mx(capY), capY, 0);
-            hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
-                      [hd, rail(u + 0.05, sgn)]);
-          } else {
-            hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0),
-                       rail(u + 0.05 + 0.015 * k, sgn)]);
+          const hy = segHeads[yd.hoist.tie] !== undefined ? segHeads[yd.hoist.tie] : capY;
+          const hd = V3(mx(hy), hy, 0);
+          hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
+                    [hd, rail(u + 0.05 + 0.015 * k, sgn)]);
+        } else if (yd.hoist === 'jeers' && segHeads[0] !== undefined) {
+          /* Falconer's JEARS: "two strong tackles, each of which has two blocks, viz.
+             one fastened to the lower-mast-head, and the other to the middle of the
+             yard", the falls leading down to the deck. Drawn as the pair either side of
+             the slings — block to block, then the fall to the deck beside the mast —
+             with same-side falls, a stated simplification of Falconer's crossed ones. */
+          const jb = base + (segHeads[0] - base) * 0.86;   // just under the top
+          const zo = Math.max(0.25, B * 0.03);
+          const dY = deckAt(u) + B * 0.012;
+          for (const sgn of [1, -1]) {
+            const blk = V3(yd.cx + sgn * sT * zo * 1.5, yd.yy, sgn * cT * zo * 1.5);
+            jeers.push([V3(mx(jb), jb, sgn * zo), blk],
+                       [blk, V3((u + 0.02 - 0.5) * L, dY, sgn * zo)]);
           }
         }
       });
@@ -1362,6 +1432,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const sm = ropeMesh(sheets, 0.013 + rr, ropeMat); if (sm) group.add(tag(sm, 'sheet'));
       const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(tag(tm, 'tack'));
       const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(tag(hm, 'halyard'));
+      /* the jeers are the heaviest purchase on the ship, and draw a little heavier */
+      const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(tag(jm2, 'jeers'));
     }
 
     if (mk.rig === 'square') {
@@ -1795,7 +1867,15 @@ function buildRig(S, group, mats, FINE, FURLED) {
       if (sh) lug.add(tag(sh, 'sheet'));
       const slings = new THREE.Vector3(
         (fwd[nb + 1][0] + aft[nb + 1][0]) / 2, (fwd[nb + 1][1] + aft[nb + 1][1]) / 2, 0);
-      const hal = ropeMesh([[slings, new THREE.Vector3(0, base + lower * 0.985, 0)]],
+      /* ⚠ the halyard leads OVER the sheave in the masthead — Needham's "sheave pins
+         passing through both masts" — and its fall comes down to the deck abaft the
+         mast, where the sail is worked. Drawn slings-to-masthead and stopped, it was a
+         rope with no fall to haul on: the r78 fault in Chinese dress. The sheave the
+         lead implies is drawn on the pole itself, in the mast build above. */
+      const shv = new THREE.Vector3(0, base + lower * 0.965, 0);
+      const hal = ropeMesh([[slings, shv],
+                            [shv, new THREE.Vector3(B * 0.05, base + castleTop + B * 0.012,
+                                                    B * 0.03)]],
                            0.016 + B * 0.0005, ropeMat);
       if (hal) lug.add(tag(hal, 'halyard'));
     }
@@ -2695,10 +2775,29 @@ const PARTS = {
                   + 'through blocks to a single fall — the whole sail worked by a few hands on '
                   + 'deck, which is why no junk ever needed men aloft.' },
   halyard:  { stage: 6, name: 'Halyard',
-              what: 'The line that hoists the yard. On a square-rigger the upper yards ride '
-                  + 'up and down their masts by it and its fall comes down to the rail; on a '
-                  + 'junk it is the one heavy lift aboard — sail, battens, boom and yard all '
-                  + 'rise on it, and reefing is simply letting it go.' },
+              what: 'The line that hoists the yard, and it must go over a masthead to do it: '
+                  + 'the tie leads up from the yard\'s slings, through the sheave in the head '
+                  + 'of the yard\'s own mast section — Falconer\'s 1780 dictionary keeps a '
+                  + 'word just for the topmast\'s, the encornail, "the sheave-hole in a '
+                  + 'top-mast-head, through which the top-sail-tye is reeved" — and only then '
+                  + 'falls to the rail. On a junk it is the one heavy lift aboard: sail, '
+                  + 'battens, boom and yard all rise on it over the sheave in the pole\'s own '
+                  + 'head, and reefing is simply letting it go.' },
+  jeers:    { stage: 6, name: 'Jeers',
+              what: 'The heaviest purchase on the ship. Falconer, 1780: "an assemblage of '
+                  + 'tackles, by which the lower yards of a ship are hoisted up along the '
+                  + 'mast" — in a ship of war "two strong tackles, each of which has two '
+                  + 'blocks, viz. one fastened to the lower-mast-head, and the other to the '
+                  + 'middle of the yard", the falls leading down to the deck. The course '
+                  + 'yard, tons of timber, hangs in these; the drawing leads both falls down '
+                  + 'their own side where Falconer crosses them behind the mast.' },
+  sheave:   { stage: 4, name: 'Masthead sheave',
+              what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave '
+                  + 'turns in a slot cut through the head of the pole itself, on a pin '
+                  + 'through both cheeks. Needham records junk halyards running through '
+                  + '"sheave pins passing through both masts and securing double halyard '
+                  + 'sheaves", so two slots are drawn. Sizes are DERIVED from the pole; no '
+                  + 'measured junk masthead was in reach of this model.' },
   sternlight:{ stage: 3, name: 'Stern lights',
               what: 'The great windows across the transom, and the only real glazing in the ship. '
                   + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '

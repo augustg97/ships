@@ -428,8 +428,9 @@ const top = lower * 0.60, tg = top * 0.50;
 let y = base;
 let capY = base;
 const mastYards = [];
+const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
-const crossYard = (yy, yardLen, kind) => {
+const crossYard = (yy, yardLen, kind, hoist) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
 : yardLen * (RATE[kind] || 0.625) / 36;
@@ -462,7 +463,7 @@ spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
 armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
 const drop = yy - prevYard;
 prevYard = yy;
-mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop });
+mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop, hoist });
 if (FURLED) {
 const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
 sails.push(makeFurl(
@@ -647,6 +648,26 @@ kg.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
 kg.rotation.z = -rakeRad;
 group.add(tag(kg, 'karchesion'));
 }
+if (FINE && mk.rig === 'junk' && si === 0) {
+const hR = segR[0].b;
+const sg2 = new THREE.Group();
+const slotMat2 = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+{ color: 0x17120c, roughness: 0.95 }));
+for (const zz of [1, -1]) {
+const slot = new THREE.Mesh(
+new THREE.BoxGeometry(hR * 3.4, hR * 1.5, hR * 0.42), slotMat2);
+slot.position.z = zz * hR * 0.33;
+sg2.add(slot);
+}
+const pin = new THREE.Mesh(
+new THREE.CylinderGeometry(hR * 0.26, hR * 0.26, hR * 2.9, 8), slotMat2);
+pin.rotation.x = Math.PI / 2;
+sg2.add(pin);
+const hY = y + seg * 0.965;
+sg2.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+sg2.rotation.z = -rakeRad;
+group.add(tag(sg2, 'sheave'));
+}
 if (FINE && S.corbis && si === 0 && mk.height === maxMastShare) {
 const wicker = mats.wicker || (mats.wicker = new THREE.MeshStandardMaterial(
 { color: 0x8a7148, roughness: 0.92, side: THREE.DoubleSide }));
@@ -677,9 +698,12 @@ const tiers = mk.only || 3;
 const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
 crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
 si === 0 ? (isMizzen ? 'topsail' : 'course')
-: si === 1 ? 'topsail' : 'topgallant');
+: si === 1 ? 'topsail' : 'topgallant',
+si > 0 || tiers === 1 ? { tie: si }
+: isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers');
 }
 capY = y + seg;
+segHeads[si] = capY;
 y += seg * 0.88;
 });
 if (mk.rig === 'square' && mk.yards) {
@@ -694,10 +718,14 @@ utg:    [0.83, 0.62, 'topgallant'],
 tg:     [0.76, 0.68, 'topgallant'],
 royal:  [0.92, 0.50, 'royal'],
 };
-mk.yards.map(nm => PLAN[nm]).filter(Boolean)
-.sort((a, b) => a[0] - b[0])
-.forEach(([f, r, kind]) => crossYard(base + T * f, lower * 0.875 * r,
-kind === 'course' && isMizzen ? 'topsail' : kind));
+const HOIST = { course: 'fixed', ltop: 'fixed', ltg: 'fixed',
+top: { tie: 1 }, utop: { tie: 1 },
+tg: { tie: 2 }, utg: { tie: 2 }, royal: { tie: 2 } };
+mk.yards.filter(nm => PLAN[nm])
+.sort((a, b) => PLAN[a][0] - PLAN[b][0])
+.forEach(nm => { const [f, r, kind] = PLAN[nm];
+crossYard(base + T * f, lower * 0.875 * r,
+kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm]); });
 }
 if (FINE && mk.rig === 'square' && mastYards.length) {
 const mx = h => x + Math.sin(rakeRad) * (h - base);
@@ -708,7 +736,7 @@ const uc = Math.max(0.03, Math.min(0.965, uu));
 const hz = H.halfB * H.wl(uc) * (1 - H.tumble(uc)) * 0.96;
 return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
 };
-const lifts = [], sheets = [], tacks = [], hals = [];
+const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
 mastYards.forEach((yd, k) => {
 const above = mastYards[k + 1];
 const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
@@ -728,15 +756,20 @@ sheets.push([clew, V3(below.cx + sgn * sT * below.half, below.yy,
 sgn * cT * below.half)]);
 }
 }
-if (k > 0 || mastYards.length === 1) {
+if (yd.hoist && yd.hoist.tie !== undefined) {
 const sgn = k % 2 ? 1 : -1;
-if (mastYards.length === 1) {
-const hd = V3(mx(capY), capY, 0);
+const hy = segHeads[yd.hoist.tie] !== undefined ? segHeads[yd.hoist.tie] : capY;
+const hd = V3(mx(hy), hy, 0);
 hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
-[hd, rail(u + 0.05, sgn)]);
-} else {
-hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0),
-rail(u + 0.05 + 0.015 * k, sgn)]);
+[hd, rail(u + 0.05 + 0.015 * k, sgn)]);
+} else if (yd.hoist === 'jeers' && segHeads[0] !== undefined) {
+const jb = base + (segHeads[0] - base) * 0.86;
+const zo = Math.max(0.25, B * 0.03);
+const dY = deckAt(u) + B * 0.012;
+for (const sgn of [1, -1]) {
+const blk = V3(yd.cx + sgn * sT * zo * 1.5, yd.yy, sgn * cT * zo * 1.5);
+jeers.push([V3(mx(jb), jb, sgn * zo), blk],
+[blk, V3((u + 0.02 - 0.5) * L, dY, sgn * zo)]);
 }
 }
 });
@@ -745,6 +778,7 @@ const lm = ropeMesh(lifts, 0.012 + rr, ropeMat);  if (lm) group.add(tag(lm, 'lif
 const sm = ropeMesh(sheets, 0.013 + rr, ropeMat); if (sm) group.add(tag(sm, 'sheet'));
 const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(tag(tm, 'tack'));
 const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(tag(hm, 'halyard'));
+const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(tag(jm2, 'jeers'));
 }
 if (mk.rig === 'square') {
 mastTops.push({ u, x, y: y + (lower * 0.14) });
@@ -964,7 +998,10 @@ const sh = ropeMesh(shSegs, 0.012 + B * 0.0005, ropeMat);
 if (sh) lug.add(tag(sh, 'sheet'));
 const slings = new THREE.Vector3(
 (fwd[nb + 1][0] + aft[nb + 1][0]) / 2, (fwd[nb + 1][1] + aft[nb + 1][1]) / 2, 0);
-const hal = ropeMesh([[slings, new THREE.Vector3(0, base + lower * 0.985, 0)]],
+const shv = new THREE.Vector3(0, base + lower * 0.965, 0);
+const hal = ropeMesh([[slings, shv],
+[shv, new THREE.Vector3(B * 0.05, base + castleTop + B * 0.012,
+B * 0.03)]],
 0.016 + B * 0.0005, ropeMat);
 if (hal) lug.add(tag(hal, 'halyard'));
 }
@@ -1568,10 +1605,29 @@ what: 'The rope at each clew — a sail\'s lower corner — that trims it to the
 + 'through blocks to a single fall — the whole sail worked by a few hands on '
 + 'deck, which is why no junk ever needed men aloft.' },
 halyard:  { stage: 6, name: 'Halyard',
-what: 'The line that hoists the yard. On a square-rigger the upper yards ride '
-+ 'up and down their masts by it and its fall comes down to the rail; on a '
-+ 'junk it is the one heavy lift aboard — sail, battens, boom and yard all '
-+ 'rise on it, and reefing is simply letting it go.' },
+what: 'The line that hoists the yard, and it must go over a masthead to do it: '
++ 'the tie leads up from the yard\'s slings, through the sheave in the head '
++ 'of the yard\'s own mast section — Falconer\'s 1780 dictionary keeps a '
++ 'word just for the topmast\'s, the encornail, "the sheave-hole in a '
++ 'top-mast-head, through which the top-sail-tye is reeved" — and only then '
++ 'falls to the rail. On a junk it is the one heavy lift aboard: sail, '
++ 'battens, boom and yard all rise on it over the sheave in the pole\'s own '
++ 'head, and reefing is simply letting it go.' },
+jeers:    { stage: 6, name: 'Jeers',
+what: 'The heaviest purchase on the ship. Falconer, 1780: "an assemblage of '
++ 'tackles, by which the lower yards of a ship are hoisted up along the '
++ 'mast" — in a ship of war "two strong tackles, each of which has two '
++ 'blocks, viz. one fastened to the lower-mast-head, and the other to the '
++ 'middle of the yard", the falls leading down to the deck. The course '
++ 'yard, tons of timber, hangs in these; the drawing leads both falls down '
++ 'their own side where Falconer crosses them behind the mast.' },
+sheave:   { stage: 4, name: 'Masthead sheave',
+what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave '
++ 'turns in a slot cut through the head of the pole itself, on a pin '
++ 'through both cheeks. Needham records junk halyards running through '
++ '"sheave pins passing through both masts and securing double halyard '
++ 'sheaves", so two slots are drawn. Sizes are DERIVED from the pole; no '
++ 'measured junk masthead was in reach of this model.' },
 sternlight:{ stage: 3, name: 'Stern lights',
 what: 'The great windows across the transom, and the only real glazing in the ship. '
 + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '

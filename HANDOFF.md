@@ -4470,3 +4470,91 @@ cache-busted fetches inside the round — the live vessels.json carries both dec
 records, and the live hull.js carries karchesion, waterway and deckIsSteel (all by code
 pattern). The Pages run started in seconds. Thirty-first clean push-triggered deploy in
 a row.
+
+---
+
+## Round 79 — 2026-08-11 — Every hoisting yard gets its tie, the course gets its jeers, and the junk masthead gets its through-pole sheave
+
+**The queue head (the multi-tier halyard lead, carried from r78; and the junk sheave, its
+Chinese sibling) is closed — both as classes, research first, one pass covering both.**
+
+**The research pass is `Research/MASTHEADS.md` §4.** Falconer's *Universal Dictionary of the
+Marine* (1780 ed., Gutenberg #57705) read verbatim this round, three entries: **JEARS** — "an
+assemblage of tackles, by which the lower yards of a ship are hoisted up along the mast...
+two strong tackles, each of which has two blocks, viz. one fastened to the lower-mast-head,
+and the other to the middle of the yard", falls to the deck; **TYE** — the runner that
+transmits the tackle's effort to the yard "after communicating with the block at the
+mast-head"; and **ENCORNAIL** — "the sheave-hole in a top-mast-head, through which the
+top-sail-tye is reeved", the sheave in the yard's OWN section's head. The crossjack hung in
+standing slings and hoists nothing. The doubled rig's fixed lower topsail/topgallant is
+already in-project (r48); Needham's junk sheave quote ("sheave pins passing through both
+masts and securing double halyard sheaves") was read in full at r67 and only needed drawing.
+
+**The drawing, three classes:**
+1. **Every crossed yard now records how it is gotten up** — crossYard takes `hoist`:
+   `{tie: si}` (hoists on section si), `'jeers'`, or `'fixed'`. Both builder paths declare
+   it: the segment rig (course=jeers, crossjack=fixed, upper yards tie on their own
+   sections) and the yards-list rig (course/ltop/ltg fixed on their trusses and caps,
+   top/utop tie on the topmast, tg/utg/royal on the section above). A HOISTING yard's fall
+   leads slings → the sheave in its own section's head (`segHeads`, recorded per drawn
+   segment) → the rail; a FIXED yard gets no fall at all, where before every yard above the
+   course drew a slings-to-rail rope that could hoist nothing — the r78 fault one tier up.
+2. **The classic rig's fore and main courses hang in jeers** — a pair of tackles either
+   side of the slings, from the lower masthead under the top down to the yard and on to the
+   deck, drawn same-side (Falconer's ship-of-war falls cross behind the mast — a stated
+   simplification). Gated by rig form: a `yards` list means trusses and no jeers; iron means
+   the same; the mizzen's crossjack gets none on any rig.
+3. **The junk masthead is a sheave through the pole** — two dark slots and a proud-ended
+   pin at 0.965 of the head (Needham's double sheaves), sizes derived from the pole and the
+   card says so; and the junk halyard now leads OVER it and falls to the deck abaft the
+   mast, where before it ran slings-to-masthead and stopped. Rope ties are drawn on the
+   1902 steel rigs where the reality is chain and wire — a known simplification, applied to
+   the whole class and noted in §4.
+
+**The audit learned the classes — six injection proofs, each against the healthy other
+half:** the halyard census is now EXACT — ropeMesh builds every leg as an 8-vertex prism, so
+legs = vertices/8, and the record says what the count must be (2 per hoisting yard, junk
+masts included). (A) every tie's masthead leg cut — the exact historical geometry — →
+'a hoisting yard without its tie' on all 14 square/junk hulls; (B) jeers stripped → 'a
+course without its jeers' on exactly the 5 classic-rig hulls (carrack, fluyt,
+east-indiaman, ship-of-the-line, slave-ship); (C) jeers grafted onto the doubled rigs →
+'jeers out of their age' on exactly the 4 (clipper, preussen, steamer, endurance); (D)
+sheaves stripped → 'a junk masthead with no sheave' on junk and treasure-ship alone; (E)
+sheaves slid down the poles (updateMatrixWorld, the r67 lesson) → both adrift bands fire;
+(F) an extra fall grafted → the same census rule fires from ABOVE the mark (a fall on a
+fixed yard). The jeers mizzen test replicates the builder's isMizzen and says so in a
+comment — rule 8 points there first. Healthy build: **29 hulls, 0 problems.**
+
+**Looked at, rule 1 (diagnosis shots in /tmp, deleted after reading):** the furled 74's
+mainmast band — the gear naked, ties up the mastheads, the jeer pair to the deck; the
+junk's masthead — the dark sheave block with proud pin ends at the very head, the fall
+descending; Preussen's five-mast rig — no artefacts, no interpenetration. All 11 accepted
+diffs read and classified: every changed pixel is rope, a new masthead fitting, or a pixel
+a removed rope used to cross (the steamer's funnel and the 74's stowed boat both "ghost"
+where the old slings-to-rail diagonals crossed them).
+
+**Ratchet, 47 frames, two runs. Run 1: 36 green, 11 movers, all intended** — shipwright
+0.272%, shipwright-ahead 0.068%, shipwright-astern 0.251%, shipwright-furled 0.938%,
+shipwright-hounds 0.692%, ship-preussen 0.637%, aboard-preussen 0.139%, ship-steamer
+0.336%, ship-clipper 0.348%, ship-junk 0.085%, ship-treasure 0.080%. **The exclusion set is
+the proof the class is scoped right:** ship-trireme and shipwright-corbis — the single-tier
+hulls whose lead r78 already fixed — sat at exactly 0.000%, byte-identical rope geometry by
+construction ({tie: 0} reproduces the old masthead lead bit for bit). All 11 accepted with
+class reasons in FRAME-LOG. **Run 2: 47/47 green, all 11 accepts at 0.000%, and the
+globe-default font flap did NOT strike** (0.012%, its standing residue).
+
+**Carried, restated exactly (none closed silently):**
+1. The r78 capture-gate item stands although the flap did not strike this round: the gate
+   still needs a stronger condition than document.fonts.status if it strikes again.
+2. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+3. r75's small QM2 items: balcony-band pier rhythm; strake windows vs the mooring-deck
+   openings — both inside the derivation's error bar.
+4. r77's small item: the Azzam dome pairs' athwartships stance is a derivation; an overhead
+   photograph with stated scale could pin it.
+5. New, small: jeer falls are drawn same-side; Falconer's ship-of-war form crosses them
+   behind the mast to the opposite deck side — a finer drawing if a round wants it.
+
+### Next, in order
+1. Galley action (campaign-data tasks); B10 stunsails if wanted.
+2. QM2 small items above, only if a round is otherwise light.
+3. The capture-gate hardening, if the font flap strikes again.

@@ -1242,6 +1242,76 @@ say(v.id, 'a waterway adrift of its deck',
 }
 }
 {
+const legsOf = key => { let n = 0;
+g.traverse(o => { if (!o.isMesh) return; const p = tagOf(o);
+if (p && p.key === key) n += o.geometry.attributes.position.count; });
+return Math.round(n / 8); };
+const HOISTY = { top: 1, utop: 1, tg: 1, utg: 1, royal: 1 };
+const sq = (H.masts || []).filter(m => m.rig === 'square');
+const jmM = (H.masts || []).filter(m => m.rig === 'junk');
+if (sq.length || jmM.length) {
+let want = 0, nHoist = 0;
+for (const m of sq) {
+const tiers = m.only ? Math.min(m.only, 3) : 3;
+const nh = m.yards ? m.yards.filter(nm => HOISTY[nm]).length
+: Math.max(1, tiers - 1);
+nHoist += nh; want += 2 * nh;
+}
+nHoist += jmM.length; want += 2 * jmM.length;
+const got = legsOf('halyard');
+if (got !== want)
+say(v.id, 'a hoisting yard without its tie',
+`${nHoist} hoisting yards want ${want} halyard legs (slings to the head, ` +
+`head to the rail), ${got} drawn — a count below the mark is a fall that ` +
+`misses its masthead, above it is a fall on a fixed yard`);
+}
+const vv = m => m.heightM !== undefined ? m.heightM
+: (H.lwl + H.beam) / 2 * (m.height || 0);
+const seg3 = sq.filter(m => !m.yards && (m.only ? Math.min(m.only, 3) : 3) >= 2);
+let wantJ = 0;
+if (seg3.length && !H.iron) {
+const atMax = Math.max(...(H.masts || []).map(m => m.at));
+const mainH = Math.max(...(H.masts || []).map(vv));
+wantJ = seg3.filter(m => !((H.masts || []).length >= 3 && m.at === atMax
+&& vv(m) < mainH * 0.95)).length;
+}
+const gotJ = part.jeers ? part.jeers.n : 0;
+if (gotJ < wantJ)
+say(v.id, 'a course without its jeers',
+`${wantJ} coursed mast(s) on a classic rig want jeer tackles at the lower ` +
+`masthead, ${gotJ} jeers mesh(es) drawn`);
+if (gotJ > wantJ)
+say(v.id, 'jeers out of their age',
+`${gotJ} jeers mesh(es) for ${wantJ} wanted — the doubled rig sits its ` +
+`lower yards on trusses, and the crossjack hangs in slings`);
+if (wantJ && gotJ === wantJ && legsOf('jeers') !== 4 * wantJ)
+say(v.id, 'jeers short of their tackle',
+`${legsOf('jeers')} jeer legs for ${wantJ} coursed mast(s) — each pair is ` +
+`four: block to slings and fall to the deck, both sides`);
+let nS = 0;
+g.traverse(o => { const p = o.userData && o.userData.part;
+if (p && p.key === 'sheave' && !o.isMesh) nS++; });
+if (jmM.length && nS < jmM.length)
+say(v.id, 'a junk masthead with no sheave',
+`${nS} sheave groups for ${jmM.length} junk masts — the halyard leads over ` +
+`a sheave the pole does not carry`);
+if (!jmM.length && nS)
+say(v.id, 'a sheave out of its rig',
+`${nS} through-pole sheave(s) on a hull with no junk mast`);
+if (jmM.length && part.sheave) {
+const heads = jmM.map(vv);
+const hiJ = Math.max(...heads), loJ = Math.min(...heads);
+if (part.sheave.y[1] < deckY + hiJ * 0.85)
+say(v.id, 'a sheave adrift down the mast',
+`sheaves top at ${part.sheave.y[1].toFixed(1)} m against a ` +
+`~${hiJ.toFixed(0)} m masthead`);
+if (part.sheave.y[0] < deckY + loJ * 0.55)
+say(v.id, 'a sheave below the hounds',
+`sheave base at ${part.sheave.y[0].toFixed(1)} m on poles of ` +
+`${loJ.toFixed(0)}–${hiJ.toFixed(0)} m`);
+}
+}
+{
 const dbl = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only !== 1).length;
 const nC = part.cheek ? part.cheek.n : 0;
 if (dbl && nC < dbl * 2)
