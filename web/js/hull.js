@@ -383,7 +383,15 @@ function buildRudderGeometry(S) {
        [p[0] + chord * 0.02, depth]]
     : [[p[0], top], [p[0] + chord * 0.55, top],
        [p[0] + chord, depth], [p[0], depth]];
-  pts.forEach(q => pos.push(q[0], q[1], -w, q[0], q[1], w));
+  /* ── ⚠ THE POST NOW LEANS, AND A HUNG RUDDER LEANS WITH IT ──────────────────────────
+     Rake is height-proportional (see surfacePoint), so above the waterline the sternpost
+     runs aft with height. A stern-hung rudder's stock is pintled DOWN THAT POST — its
+     leading edge is the post's own line — and the junk's median rudder stands up the raked
+     transom notch the same way. Without this shear the wooden rudders' vertical leading
+     edges would open a wedge of daylight against the post they hang on. The steel plate
+     lives wholly below the waterline, where the offset is zero by construction. */
+  const postLean = q => q[1] > 0 ? S.sternRake * S.loa * Math.min(1, q[1] / H.sheer(1.0)) : 0;
+  pts.forEach(q => pos.push(q[0] + postLean(q), q[1], -w, q[0] + postLean(q), q[1], w));
   const n = pts.length;
   for (let i = 0; i < n; i++) {
     const a = i * 2, b = ((i + 1) % n) * 2;
@@ -409,7 +417,17 @@ function surfacePoint(S, H, u, v) {
   const t = S.draught * H.keel(u);
   const deckHalf = b * (1 - H.tumble(u));
   const fb = H.sheer(u);
-  let y, z;
+  /* ── ⚠ RAKE IS A LEAN, NOT A SHIFT ──────────────────────────────────────────────────
+     H.rake(u) used to offset x uniformly at every height, so a "raked" stem was a vertical
+     stem pushed bodily forward: the leading edge at u = 0 ran straight up and down at
+     -lwl/2 - stemRake·loa, which is the blunt vertical bow Queen Mary 2 was called out on
+     — stemRake 0.085 and no rake on screen — and it also drew every WATERLINE longer than
+     the record's lwl, because the underwater body carried the whole offset too.
+     A raked end leans: zero at the load waterline (that is what lwl MEANS), growing with
+     height to the record's full overhang at the deck. rakeF below is that height fraction.
+     H.rake(u) itself still returns the full deck-level rake, so the six deck-level callers
+     (mast feet, bowsprit root, head knee, rails, deck strake) stay correct unchanged. */
+  let y, z, rakeF = 0;
   if (v <= 0.62) {
     const k = v / 0.62;
     z = -t * (1 - k);
@@ -418,6 +436,7 @@ function surfacePoint(S, H, u, v) {
   } else {
     const k = (v - 0.62) / 0.38;
     z = fb * k;
+    rakeF = k;
     y = b + (deckHalf - b) * Math.pow(k, 0.9);
     /* ── THE COUNTER ────────────────────────────────────────────────────────────────
        A square-sterned ship is FINE AT THE WATERLINE AND BROAD AT THE TAFFRAIL. The run
@@ -437,8 +456,33 @@ function surfacePoint(S, H, u, v) {
         y += (S.beam / 2) * S.transom * t * t * Math.pow(k, 0.75);
       }
     }
+    /* ── BOW FLARE, the counter's mirror. A liner or box boat built to drive into head
+       seas widens ABOVE the waterline forward: the V-sections throw water down and out,
+       and the forecastle deck stands well wider than the fine entry under it. Same
+       contract as the counter: entirely above v = 0.62, so the waterplane and every
+       published coefficient are untouched. From the record where the record has it
+       (S.bowFlare, fraction of half-beam gained at the deck at the stem). */
+    if (S.bowFlare) {
+      const span = Math.max(S.forefoot, 0.18);
+      if (u < span) {
+        const kb = (span - u) / span;
+        y += (S.beam / 2) * S.bowFlare * Math.pow(kb, 1.7) * Math.pow(k, 1.3);
+      }
+    }
+    /* ── A ROUNDED STERN rounds in PLAN: the topsides aft draw in toward the centreline
+       as they rise, so the quarters curve and the taffrail is a metre or three across
+       instead of the full transom width. Costanzi form (Queen Mary 2): a broad shallow
+       transom at the water for the pods — that is what S.transom still draws — with the
+       decks above closing to a rounded stern. Above v = 0.62 only, waterplane untouched. */
+    if (S.sternRound) {
+      const runStart = 1 - S.run;
+      if (u > runStart) {
+        const t = (u - runStart) / S.run;
+        y *= 1 - S.sternRound * Math.pow(t, 2.0) * Math.pow(k, 1.5);
+      }
+    }
   }
-  return [(u - 0.5) * L + H.rake(u), z, y];
+  return [(u - 0.5) * L + H.rake(u) * rakeF, z, y];
 }
 
 function buildHullGeometry(S, NU = 120, NV = 34) {
@@ -907,9 +951,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
          they carry. The join is at the doubling, which is exactly where the colour changes. */
       const mastMat = S.mastLivery === 'buff'
         /* the White Star scheme: masts wore the funnel buff, whole pole — not the
-           white-lower/black-upper of the Great Eastern model */
+           white-lower/black-upper of the Great Eastern model.
+           ⚠ 'buff' MEANS THE FUNNEL'S PAINT, so it is only right where masts and funnel
+           genuinely shared a pot — Cunard's red funnel with 'buff' masts drew Queen Mary 2
+           a scarlet signal mast. A livery that is a colour STRING is the mast's own paint,
+           drawn as given. */
         ? (mats.mastBuff || (mats.mastBuff = new THREE.MeshStandardMaterial(
               { color: new THREE.Color(S.buff || 0xd8cfbb), roughness: 0.60 })))
+        : (typeof S.mastLivery === 'string' && S.mastLivery[0] === '#')
+        ? (mats.mastOwn || (mats.mastOwn = new THREE.MeshStandardMaterial(
+              { color: new THREE.Color(S.mastLivery), roughness: 0.55, metalness: 0.15 })))
         : S.mastLivery
         ? (si === 0 ? (mats.mastWhite || (mats.mastWhite = new THREE.MeshStandardMaterial(
               { color: 0xdedad0, roughness: 0.58 })))
@@ -3172,7 +3223,15 @@ function linerHouse(S) {
   const n = S.decks || 0;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
-  const base = H.sheer(0.5), dh = B * 0.105, inset = B * 0.055;
+  /* ── ⚠ A TWEEN-DECK IS A HEIGHT, NOT A BEAM ──────────────────────────────────────────
+     beam·0.105 gives Titanic 2.96 m a deck, which is the Edwardian tween-deck and why it
+     survived — but it is a coincidence of her proportions, not a law. On Queen Mary 2's
+     41 m beam it dealt 4.3 m decks, and thirteen of them put her funnel top near 100 m
+     over the water against the record's 61.7: the whole ship drawn half again too tall,
+     audit-green, because nothing compared a height with a record. Where the record gives
+     the tween-deck (deckM — hers derives from 72 m keel-to-funnel over 18 decks), use it;
+     the derivation stays for hulls whose proportions it was calibrated on. */
+  const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
   const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
   const tiers = [];
   /* ── A TIER CAN BE SHELL, NOT HOUSE ────────────────────────────────────────────────
@@ -3183,6 +3242,14 @@ function linerHouse(S) {
      superstructure builder. Drawing them as inset white house was why her profile showed
      one white slab where the record shows black to B deck and white above. */
   const ns = S.shellTiers || 0;
+  /* ── A MODERN LINER'S BOATS LIVE IN A RECESS, NOT ON THE ROOF ─────────────────────────
+     SOLAS moved them down: Queen Mary 2 carries her 22 boats on Deck 8, in an open gallery
+     cut into the bottom of the white house, and that dark band with white hulls in it is
+     one of the things the eye uses to read her. boatsRecessed marks the first house tier
+     above the shell as that gallery; buildBoats stows into it and the wall builder paints
+     its void dark. The boats then hang at recess height by the same derivation the walls
+     stand on. */
+  const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
   for (let i = 0; i < n; i++) {
     const shell = i < ns;
     const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
@@ -3204,7 +3271,8 @@ function linerHouse(S) {
       return Math.max(B * 0.06, Math.min(wid / 2,
         Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
     };
-    tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell });
+    tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
+                 recess: i === recessTier });
   }
   /* `recorded` marks a house the RECORD located (houseAt) as opposed to the default span.
      It decides which deck a funnel's recorded height is measured from — see buildFunnel. */
@@ -3347,13 +3415,16 @@ function buildSuperstructure(S, group) {
   /* a shell tier wears the hull's own paint, and its lights read as a window row cut in
      black plating — which is exactly what C-deck's were */
   const shellCol = new THREE.Color(S.topside || '#3a3a3c');
+  /* a boat gallery is an OPENING: its back wall stands in shadow behind the boats, so the
+     tier is drawn dark and unglazed, and the boats hang in front of it */
+  const recessCol = new THREE.Color(0x24272b);
   for (let i = 0; i < T.n; i++) {
     const t = T.tiers[i];
     /* ⚠ built in ABSOLUTE coordinates, y0 to y1 — the old walls were built about their own
        centre and never positioned, so the whole house sat below the waterline for as long as
        it existed while the rails alone stood correctly. Nothing here waits to be positioned. */
-    g.add(wallLoft(perim(t), t.y0, t.y1, rows, [0.46, 0.68], paneW, 0.52,
-                   t.shell ? shellCol : null));
+    g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
+                   t.recess ? recessCol : (t.shell ? shellCol : null)));
     g.add(roofPlate(t, t.y1));
     if (i === T.n - 1) {
       railRun(perim(t), t.y1);                        // the boat deck is railed all round
@@ -3424,8 +3495,12 @@ function buildSuperstructure(S, group) {
      so every cowl was buried inside the accommodation and none was ever seen. They stand on
      the TOP of the house, where the air is: below decks there is a coal-fired boiler room, a
      galley and several hundred people, and no mechanical ventilation whatever. Stationed
-     clear of the funnel casings by the funnels' own derivation. */
-  if (S.funnels) {
+     clear of the funnel casings by the funnels' own derivation.
+     ⚠ AND THE COWL DIED WITH THAT FACT. Forced-draught fans took the job by mid-century;
+     a welded post-1950 ship breathes through louvres in her casings, and cowls on Queen
+     Mary 2's roof were the same anachronism as a gilt cove on her hull — the audit's
+     year-1950 dress gate, applied to fittings. */
+  if (S.funnels && !(S.year >= 1950)) {
     const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
     const fst = funnelStations(S);
     const caseR = S.beam * 0.115 * 1.34;
@@ -3465,7 +3540,7 @@ function buildSuperstructure(S, group) {
 function buildRaisedEnds(S, group) {
   if (!(S.wellM && S.houseAt && S.houseAt.length === 2 && S.decks)) return;
   const H = hullSurface(S);
-  const L = S.lwl, B = S.beam, dh = B * 0.105;
+  const L = S.lwl, B = S.beam, dh = S.deckM || B * 0.105;
   const wellU = S.wellM / L;
   const wallMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color(S.topside || '#3a3a3c'), roughness: 0.58, metalness: 0.22,
@@ -3752,7 +3827,9 @@ function buildBoats(S, group, mats) {
   const L = S.lwl, B = S.beam;
   const white = new THREE.MeshStandardMaterial({ color: 0xdedbd2, roughness: 0.62 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x2f3336, roughness: 0.55, metalness: 0.25 });
-  const boatL = Math.min(B * 0.42, 9.0), boatB = boatL * 0.30;
+  /* the 9 m cap is Titanic's 30-footers; a modern liner's boat-tender is a recorded size
+     (Queen Mary 2: 11.92 m Schat-Harding boats), so the record overrides where it speaks */
+  const boatL = S.boatLM || Math.min(B * 0.42, 9.0), boatB = boatL * 0.30;
   const perSide = Math.max(1, Math.round(n / 2));
   /* ── ⚠ THE BOATS WERE STOWED TOUCHING ────────────────────────────────────────────────
      Found by the clearance checker on a pair I had only just added — boat against boat. Ten
@@ -3775,7 +3852,10 @@ function buildBoats(S, group, mats) {
      bridge at its forward end. A ship with no house keeps her boats at the sheer, which for
      her is the boat deck. */
   const T = S.decks ? linerHouse(S) : null;
-  const topT = T ? T.tiers[T.n - 1] : null;
+  /* recessed boats stow in the gallery tier linerHouse marked, not on the roof —
+     same object, same derivation, so the boats cannot drift from their own recess */
+  const recT = T ? T.tiers.find(t => t.recess) : null;
+  const topT = recT || (T ? T.tiers[T.n - 1] : null);
   const u0A = topT ? topT.uA + 0.045 : null, u0B = topT ? topT.uB - 0.025 : null;
   let ps = perSide;
   if (topT) {
@@ -3791,11 +3871,14 @@ function buildBoats(S, group, mats) {
   const uMid = topT ? (u0A + u0B) / 2 : 0.5;
   for (let i = 0; i < ps; i++) {
     const u = uMid - span / 2 + (i / Math.max(1, ps - 1)) * span;
-    const deckY = topT ? topT.y1 : H.sheer(u);
+    /* in a recess the boat stands on the gallery SOLE (y0), under the decks above;
+       on an open boat deck it stands on the roof (y1) */
+    const deckY = recT ? recT.y0 + 0.15 : (topT ? topT.y1 : H.sheer(u));
     const half = topT ? topT.half(u)
                       : Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
     for (const sgn of [-1, 1]) {
-      const z = sgn * (half - B * 0.045);
+      /* recessed boats hang proud of the gallery's dark back wall, inside the hull side */
+      const z = sgn * (recT ? half + boatB * 0.35 : half - B * 0.045);
       /* the boat: a shallow hull, keel down, stowed fore-and-aft on its chocks */
       const bg = new THREE.SphereGeometry(boatL / 2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
       bg.scale(1.0, 0.42, boatB / boatL);
@@ -3803,8 +3886,13 @@ function buildBoats(S, group, mats) {
       const bt = new THREE.Mesh(bg, white);
       bt.position.set((u - 0.5) * L, deckY + boatL * 0.21 + 0.10, z);
       group.add(tag(bt, 'boat', 'Ship\'s boat',
-        'Stowed under davits on the boat deck. Board of Trade rules scaled boats to TONNAGE rather than to the number of people aboard, and were not revised as ships grew — which is why Titanic sailed legally with 20 boats for 2,224 souls.'));
-      /* two davits per boat, standing ON the deck, curved so the boat clears the side */
+        recT
+          ? 'Stowed in an open gallery cut into the superstructure — SOLAS pushed a modern liner\'s boats down from the roof to where the sea is nearer and the embarkation shorter. On Queen Mary 2 the drop is still about 24 m, among the longest afloat, and she carries a rating for it.'
+          : 'Stowed under davits on the boat deck. Board of Trade rules scaled boats to TONNAGE rather than to the number of people aboard, and were not revised as ships grew — which is why Titanic sailed legally with 20 boats for 2,224 souls.'));
+      /* in a recess the davit gear lives in the gallery ceiling and does not read at hull
+         scale; on an open deck, two davits per boat, standing ON the deck, curved so the
+         boat clears the side */
+      if (recT) continue;
       for (const d of [-0.34, 0.34]) {
         const pts = [];
         for (let k = 0; k <= 8; k++) {

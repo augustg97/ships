@@ -3796,7 +3796,9 @@
      0.3,
      0.86
     ],
-    "shellTiers": 1
+    "shellTiers": 1,
+    "boats": 4,
+    "transom": 0.3
    },
    "rows": [
     [
@@ -4015,17 +4017,17 @@
    },
    "hull": {
     "wlPower": 2.9,
-    "stemFineness": 0.1,
-    "sternFineness": 0.2,
-    "forefoot": 0.14,
-    "run": 0.24,
+    "stemFineness": 0.03,
+    "sternFineness": 0.34,
+    "forefoot": 0.3,
+    "run": 0.3,
     "riseF": 0.18,
     "riseA": 0.15,
-    "sheerBow": 0.35,
+    "sheerBow": 2.0,
     "sheerStern": 0.0,
     "tumblehome": 0.01,
-    "stemRake": 0.085,
-    "sternRake": 0.02,
+    "stemRake": 0.041,
+    "sternRake": 0.01,
     "strakes": 44,
     "copper": false,
     "copperAge": 0.55,
@@ -4037,18 +4039,10 @@
     "steeve": 22,
     "masts": [
      {
-      "at": 0.175,
-      "heightM": 40.0,
+      "at": 0.135,
+      "heightM": 45.0,
       "rig": "pole",
-      "rake": 9.46,
-      "shrouds": 0,
-      "crowsNest": true
-     },
-     {
-      "at": 0.878,
-      "heightM": 40.0,
-      "rig": "pole",
-      "rake": 9.46,
+      "rake": 5.0,
       "shrouds": 0
      }
     ],
@@ -4057,25 +4051,36 @@
     "lwl": 328.0,
     "beam": 41.0,
     "draught": 10.3,
-    "freeboard": 22.0,
+    "freeboard": 17.0,
     "cm": 0.95,
-    "transom": 0.22,
+    "transom": 0.1,
     "funnels": 1,
-    "decks": 13,
+    "decks": 10,
     "portholes": false,
-    "mastLivery": "buff",
+    "mastLivery": "#26282b",
     "houseAt": [
-     0.06,
-     0.94
+     0.115,
+     0.945
     ],
-    "funnelH": 22.0,
-    "funnelAt": 0.62,
+    "funnelH": 12.7,
+    "funnelAt": [
+     0.58
+    ],
     "year": 2003,
-    "shellTiers": 2,
-    "wellM": 15.2,
-    "mastTopM": 62.5,
+    "shellTiers": 0,
+    "mastTopM": 62.0,
     "buff": 13111342,
-    "funnelRake": 9.46
+    "funnelRake": 12.0,
+    "boats": 22,
+    "bowFlare": 0.22,
+    "sternRound": 0.65,
+    "deckM": 3.2,
+    "boatsRecessed": true,
+    "boatLM": 11.92,
+    "boatDeckM": 17.0,
+    "funnelScale": [
+     2.0
+    ]
    },
    "rows": [
     [

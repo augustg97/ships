@@ -108,9 +108,13 @@
        drawn boat deck stood 30.3 m over the water against the record's 19 — the whole profile
        1.6× too tall, and her masts level with her funnels instead of 20 m over them. Where
        the record supplies the datum (boatDeckM), the derivation the house, boats and funnels
-       all stand on — freeboard + decks·(beam·0.105) — must land on it. */
+       all stand on — freeboard + decks·(deckM, or beam·0.105 where no tween-deck is
+       recorded) — must land on it. Recessed boats (boatsRecessed) stow at the FOOT of the
+       house, on the first tier above the shell, so their datum is that sole, not the roof
+       — Queen Mary 2's Deck 8 gallery, not a boat deck she does not have. */
     if (H.boatDeckM && H.decks) {
-      const top = H.freeboard + H.decks * H.beam * 0.105;
+      const dh = H.deckM || H.beam * 0.105;
+      const top = H.freeboard + (H.boatsRecessed ? (H.shellTiers || 0) : H.decks) * dh;
       if (Math.abs(top - H.boatDeckM) > 0.5)
         say(v.id, 'house off the record',
             `boat deck derives to ${top.toFixed(1)} m over water, record says ${H.boatDeckM}`);
@@ -121,6 +125,45 @@
       if (Math.abs(part.mast.y[1] - H.mastTopM) > 1.5)
         say(v.id, 'mast tops off the record',
             `tallest mast ${part.mast.y[1].toFixed(1)} m over water, record says ${H.mastTopM}`);
+    }
+
+    /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem
+       head PAST the waterline ending — Queen Mary 2 declared 0.085 and drew a blunt
+       vertical bow for three rounds, because the offset was applied uniformly at every
+       height: a vertical stem pushed bodily forward, which no picture-diff and no
+       record-match can see. So the lean is measured off the planking's own vertices —
+       foremost point at the waterline against foremost at the sheer, and the same aft.
+       Skipped where the recorded overhang is under 1.5 m: at that size the lean is inside
+       the mesh's own discretization. */
+    {
+      let pk = null;
+      g.traverse(o => { if (!pk && o.isMesh && tagOf(o) && tagOf(o).key === 'planking') pk = o; });
+      if (pk && pk.geometry && pk.geometry.attributes.position) {
+        const P = pk.geometry.attributes.position;
+        const wlBand = Math.min(0.6, 0.25 * H.draught + 0.1);
+        /* ⚠ each end's deck band is measured from that END's own sheer height — one global
+           top-y band lands only where the sheer is highest, and on a bow-sheer-only hull
+           (Queen Mary 2) the stern band was empty and the rule read -287 m of lean */
+        let topB = -1e9, topS = -1e9;
+        for (let i = 0; i < P.count; i++) {
+          const x = P.getX(i), y = P.getY(i);
+          if (x < 0) topB = Math.max(topB, y); else topS = Math.max(topS, y);
+        }
+        let foreWL = 1e9, foreDk = 1e9, aftWL = -1e9, aftDk = -1e9;
+        for (let i = 0; i < P.count; i++) {
+          const x = P.getX(i), y = P.getY(i);
+          if (Math.abs(y) < wlBand) { foreWL = Math.min(foreWL, x); aftWL = Math.max(aftWL, x); }
+          if (x < 0 && y > topB - 1.2) foreDk = Math.min(foreDk, x);
+          if (x > 0 && y > topS - 1.2) aftDk = Math.max(aftDk, x);
+        }
+        for (const [name, want, got] of [
+            ['stem', H.stemRake * H.loa, foreWL - foreDk],
+            ['sternpost', H.sternRake * H.loa, aftDk - aftWL]]) {
+          if (want > 1.5 && Math.abs(got - want) > Math.max(1.2, want * 0.4))
+            say(v.id, 'a recorded rake drawn vertical',
+                `${name}: record asks a ${want.toFixed(1)} m lean, drawn ${got.toFixed(1)} m`);
+        }
+      }
     }
 
     /* ⚠ a carrier's superstructure IS her island, and hull.js says so explicitly — the generic
@@ -1063,15 +1106,19 @@
        for this rule. */
     if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
       const T = SHIPS_HULL.linerHouse(H);
+      /* recessed boats (round 70) stow at the SOLE of the gallery tier, not on the roof —
+         the datum moves with the class, or Queen Mary 2's Deck 8 boats read as 32 m adrift */
+      const rec = T.tiers.find(t => t.recess);
+      const datum = rec ? rec.y0 : T.top;
       let off = 0, worst = 0;
       g.traverse(o => {
         if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Ship\'s boat') return;
         const bb2 = new THREE.Box3().setFromObject(o);
-        const d = bb2.min.y - T.top;
+        const d = bb2.min.y - datum;
         if (d < -0.6 || d > 2.2) { off++; if (Math.abs(d) > Math.abs(worst)) worst = d; }
       });
       if (off) say(v.id, 'boats off the boat deck',
-                   `${off} boats, worst ${worst.toFixed(1)} m from the top of the house`);
+                   `${off} boats, worst ${worst.toFixed(1)} m from the boat deck datum`);
     }
 
     /* ⚠ A POWERED, DECKED SHIP IS CONNED FROM A BRIDGE. "Stepped plates, no fronts" was the

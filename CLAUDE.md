@@ -184,3 +184,27 @@ But this app vendors **three.js r160 with no addons**, and `RGBELoader` is an ad
 needs either a vendored `RGBELoader`, or `PMREMGenerator.fromScene()` with a procedural sky (no
 new dependency, less faithful). **That is a dependency decision, not a task** — decide it before
 writing code, and A/B the result against the `shipwright` baseline rather than judging by eye.
+
+### A lock check must be one atomic test whose EXIT STATUS is the answer
+
+Round 71 collided with a running round because of this line:
+
+```
+ls -d build/.loop.lock >/dev/null 2>&1 && echo "lock held" || mkdir build/.loop.lock && echo "lock taken"
+```
+
+`&&` and `||` have EQUAL precedence and associate left to right, so it parses as
+`((ls && echo) || mkdir) && echo "lock taken"` — the last echo is UNCONDITIONAL. It printed
+"lock taken" while a round held the lock, and the tree was edited by two writers at once.
+Three failures stacked: a status line that prints in both cases; "lock held" not saying by
+WHOM; and the last line being read as the answer because it agreed with a prior belief.
+
+`mkdir` is atomic, which is the whole reason the lock is a directory. Use its exit status and
+nothing else:
+
+```bash
+if mkdir build/.loop.lock 2>/dev/null; then echo "GOT the lock"; else echo "someone else holds it"; fi
+```
+
+Never compose a lock check from `&&`/`||` chains, and never accept a check whose output looks
+the same whether it passed or failed.

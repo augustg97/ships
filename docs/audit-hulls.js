@@ -49,7 +49,8 @@ say(v.id, 'no dress era', 'iron hull without year — shader falls back to Victo
 if (H.iron && H.year >= 1950 && H.cove)
 say(v.id, 'anachronistic dress', `cove line declared on a ${H.year} welded hull`);
 if (H.boatDeckM && H.decks) {
-const top = H.freeboard + H.decks * H.beam * 0.105;
+const dh = H.deckM || H.beam * 0.105;
+const top = H.freeboard + (H.boatsRecessed ? (H.shellTiers || 0) : H.decks) * dh;
 if (Math.abs(top - H.boatDeckM) > 0.5)
 say(v.id, 'house off the record',
 `boat deck derives to ${top.toFixed(1)} m over water, record says ${H.boatDeckM}`);
@@ -58,6 +59,33 @@ if (H.mastTopM && part.mast) {
 if (Math.abs(part.mast.y[1] - H.mastTopM) > 1.5)
 say(v.id, 'mast tops off the record',
 `tallest mast ${part.mast.y[1].toFixed(1)} m over water, record says ${H.mastTopM}`);
+}
+{
+let pk = null;
+g.traverse(o => { if (!pk && o.isMesh && tagOf(o) && tagOf(o).key === 'planking') pk = o; });
+if (pk && pk.geometry && pk.geometry.attributes.position) {
+const P = pk.geometry.attributes.position;
+const wlBand = Math.min(0.6, 0.25 * H.draught + 0.1);
+let topB = -1e9, topS = -1e9;
+for (let i = 0; i < P.count; i++) {
+const x = P.getX(i), y = P.getY(i);
+if (x < 0) topB = Math.max(topB, y); else topS = Math.max(topS, y);
+}
+let foreWL = 1e9, foreDk = 1e9, aftWL = -1e9, aftDk = -1e9;
+for (let i = 0; i < P.count; i++) {
+const x = P.getX(i), y = P.getY(i);
+if (Math.abs(y) < wlBand) { foreWL = Math.min(foreWL, x); aftWL = Math.max(aftWL, x); }
+if (x < 0 && y > topB - 1.2) foreDk = Math.min(foreDk, x);
+if (x > 0 && y > topS - 1.2) aftDk = Math.max(aftDk, x);
+}
+for (const [name, want, got] of [
+['stem', H.stemRake * H.loa, foreWL - foreDk],
+['sternpost', H.sternRake * H.loa, aftDk - aftWL]]) {
+if (want > 1.5 && Math.abs(got - want) > Math.max(1.2, want * 0.4))
+say(v.id, 'a recorded rake drawn vertical',
+`${name}: record asks a ${want.toFixed(1)} m lean, drawn ${got.toFixed(1)} m`);
+}
+}
 }
 const house = part.superstructure || part.island;
 if (H.decks && !house)
@@ -716,15 +744,17 @@ say(v.id, 'aircraft parked foul of the landing area',
 }
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
+const rec = T.tiers.find(t => t.recess);
+const datum = rec ? rec.y0 : T.top;
 let off = 0, worst = 0;
 g.traverse(o => {
 if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Ship\'s boat') return;
 const bb2 = new THREE.Box3().setFromObject(o);
-const d = bb2.min.y - T.top;
+const d = bb2.min.y - datum;
 if (d < -0.6 || d > 2.2) { off++; if (Math.abs(d) > Math.abs(worst)) worst = d; }
 });
 if (off) say(v.id, 'boats off the boat deck',
-`${off} boats, worst ${worst.toFixed(1)} m from the top of the house`);
+`${off} boats, worst ${worst.toFixed(1)} m from the boat deck datum`);
 }
 if (H.decks && H.funnels && !H.turrets && !H.flightDeck) {
 if (!part.bridge) say(v.id, 'no bridge', 'a decked steamer with no wheelhouse');

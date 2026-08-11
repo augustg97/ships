@@ -224,7 +224,8 @@ const pts = STEEL
 [p[0] + chord * 0.02, depth]]
 : [[p[0], top], [p[0] + chord * 0.55, top],
 [p[0] + chord, depth], [p[0], depth]];
-pts.forEach(q => pos.push(q[0], q[1], -w, q[0], q[1], w));
+const postLean = q => q[1] > 0 ? S.sternRake * S.loa * Math.min(1, q[1] / H.sheer(1.0)) : 0;
+pts.forEach(q => pos.push(q[0] + postLean(q), q[1], -w, q[0] + postLean(q), q[1], w));
 const n = pts.length;
 for (let i = 0; i < n; i++) {
 const a = i * 2, b = ((i + 1) % n) * 2;
@@ -243,7 +244,7 @@ const b = H.halfB * H.wl(u);
 const t = S.draught * H.keel(u);
 const deckHalf = b * (1 - H.tumble(u));
 const fb = H.sheer(u);
-let y, z;
+let y, z, rakeF = 0;
 if (v <= 0.62) {
 const k = v / 0.62;
 z = -t * (1 - k);
@@ -252,6 +253,7 @@ y = b * yy;
 } else {
 const k = (v - 0.62) / 0.38;
 z = fb * k;
+rakeF = k;
 y = b + (deckHalf - b) * Math.pow(k, 0.9);
 if (S.transom) {
 const runStart = 1 - S.run;
@@ -260,8 +262,22 @@ const t = (u - runStart) / S.run;
 y += (S.beam / 2) * S.transom * t * t * Math.pow(k, 0.75);
 }
 }
+if (S.bowFlare) {
+const span = Math.max(S.forefoot, 0.18);
+if (u < span) {
+const kb = (span - u) / span;
+y += (S.beam / 2) * S.bowFlare * Math.pow(kb, 1.7) * Math.pow(k, 1.3);
 }
-return [(u - 0.5) * L + H.rake(u), z, y];
+}
+if (S.sternRound) {
+const runStart = 1 - S.run;
+if (u > runStart) {
+const t = (u - runStart) / S.run;
+y *= 1 - S.sternRound * Math.pow(t, 2.0) * Math.pow(k, 1.5);
+}
+}
+}
+return [(u - 0.5) * L + H.rake(u) * rakeF, z, y];
 }
 function buildHullGeometry(S, NU = 120, NV = 34) {
 const H = hullSurface(S);
@@ -484,6 +500,9 @@ if (mk.only && si >= mk.only) return;
 const mastMat = S.mastLivery === 'buff'
 ? (mats.mastBuff || (mats.mastBuff = new THREE.MeshStandardMaterial(
 { color: new THREE.Color(S.buff || 0xd8cfbb), roughness: 0.60 })))
+: (typeof S.mastLivery === 'string' && S.mastLivery[0] === '#')
+? (mats.mastOwn || (mats.mastOwn = new THREE.MeshStandardMaterial(
+{ color: new THREE.Color(S.mastLivery), roughness: 0.55, metalness: 0.15 })))
 : S.mastLivery
 ? (si === 0 ? (mats.mastWhite || (mats.mastWhite = new THREE.MeshStandardMaterial(
 { color: 0xdedad0, roughness: 0.58 })))
@@ -1940,10 +1959,11 @@ function linerHouse(S) {
 const n = S.decks || 0;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
-const base = H.sheer(0.5), dh = B * 0.105, inset = B * 0.055;
+const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
 const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
 const tiers = [];
 const ns = S.shellTiers || 0;
+const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
 for (let i = 0; i < n; i++) {
 const shell = i < ns;
 const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
@@ -1954,7 +1974,8 @@ const uu = Math.max(0.001, Math.min(0.999, u));
 return Math.max(B * 0.06, Math.min(wid / 2,
 Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
 };
-tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell });
+tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
+recess: i === recessTier });
 }
 return { n, base, dh, top: base + dh * n, tiers,
 recorded: !!(S.houseAt && S.houseAt.length === 2) };
@@ -2062,10 +2083,11 @@ g.add(bar);
 };
 const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];
 const shellCol = new THREE.Color(S.topside || '#3a3a3c');
+const recessCol = new THREE.Color(0x24272b);
 for (let i = 0; i < T.n; i++) {
 const t = T.tiers[i];
-g.add(wallLoft(perim(t), t.y0, t.y1, rows, [0.46, 0.68], paneW, 0.52,
-t.shell ? shellCol : null));
+g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
+t.recess ? recessCol : (t.shell ? shellCol : null)));
 g.add(roofPlate(t, t.y1));
 if (i === T.n - 1) {
 railRun(perim(t), t.y1);
@@ -2119,7 +2141,7 @@ bTag.userData.part.what =
 + 'glass than wall, with open wings running to the ship\'s sides — a 28 m beam is brought '
 + 'alongside a pier by an officer standing at its very edge.';
 g.add(bTag);
-if (S.funnels) {
+if (S.funnels && !(S.year >= 1950)) {
 const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
 const fst = funnelStations(S);
 const caseR = S.beam * 0.115 * 1.34;
@@ -2146,7 +2168,7 @@ group.add(tag(g, 'superstructure'));
 function buildRaisedEnds(S, group) {
 if (!(S.wellM && S.houseAt && S.houseAt.length === 2 && S.decks)) return;
 const H = hullSurface(S);
-const L = S.lwl, B = S.beam, dh = B * 0.105;
+const L = S.lwl, B = S.beam, dh = S.deckM || B * 0.105;
 const wellU = S.wellM / L;
 const wallMat = new THREE.MeshStandardMaterial({
 color: new THREE.Color(S.topside || '#3a3a3c'), roughness: 0.58, metalness: 0.22,
@@ -2292,11 +2314,12 @@ const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const white = new THREE.MeshStandardMaterial({ color: 0xdedbd2, roughness: 0.62 });
 const dark = new THREE.MeshStandardMaterial({ color: 0x2f3336, roughness: 0.55, metalness: 0.25 });
-const boatL = Math.min(B * 0.42, 9.0), boatB = boatL * 0.30;
+const boatL = S.boatLM || Math.min(B * 0.42, 9.0), boatB = boatL * 0.30;
 const perSide = Math.max(1, Math.round(n / 2));
 let gapPitch = boatL * 1.38;
 const T = S.decks ? linerHouse(S) : null;
-const topT = T ? T.tiers[T.n - 1] : null;
+const recT = T ? T.tiers.find(t => t.recess) : null;
+const topT = recT || (T ? T.tiers[T.n - 1] : null);
 const u0A = topT ? topT.uA + 0.045 : null, u0B = topT ? topT.uB - 0.025 : null;
 let ps = perSide;
 if (topT) {
@@ -2310,18 +2333,21 @@ const span = topT ? (ps - 1) * gapPitch / L
 const uMid = topT ? (u0A + u0B) / 2 : 0.5;
 for (let i = 0; i < ps; i++) {
 const u = uMid - span / 2 + (i / Math.max(1, ps - 1)) * span;
-const deckY = topT ? topT.y1 : H.sheer(u);
+const deckY = recT ? recT.y0 + 0.15 : (topT ? topT.y1 : H.sheer(u));
 const half = topT ? topT.half(u)
 : Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
 for (const sgn of [-1, 1]) {
-const z = sgn * (half - B * 0.045);
+const z = sgn * (recT ? half + boatB * 0.35 : half - B * 0.045);
 const bg = new THREE.SphereGeometry(boatL / 2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
 bg.scale(1.0, 0.42, boatB / boatL);
 bg.rotateX(Math.PI);
 const bt = new THREE.Mesh(bg, white);
 bt.position.set((u - 0.5) * L, deckY + boatL * 0.21 + 0.10, z);
 group.add(tag(bt, 'boat', 'Ship\'s boat',
-'Stowed under davits on the boat deck. Board of Trade rules scaled boats to TONNAGE rather than to the number of people aboard, and were not revised as ships grew — which is why Titanic sailed legally with 20 boats for 2,224 souls.'));
+recT
+? 'Stowed in an open gallery cut into the superstructure — SOLAS pushed a modern liner\'s boats down from the roof to where the sea is nearer and the embarkation shorter. On Queen Mary 2 the drop is still about 24 m, among the longest afloat, and she carries a rating for it.'
+: 'Stowed under davits on the boat deck. Board of Trade rules scaled boats to TONNAGE rather than to the number of people aboard, and were not revised as ships grew — which is why Titanic sailed legally with 20 boats for 2,224 souls.'));
+if (recT) continue;
 for (const d of [-0.34, 0.34]) {
 const pts = [];
 for (let k = 0; k <= 8; k++) {
