@@ -358,7 +358,12 @@ function applyHash() {
   const em = /[#&]e=(\d+)/.exec(h);
   const tm = /[#&]t=(-?[\d.]+)/.exec(h);
   const fm = /[#&]f=([a-z0-9-]+)/i.exec(h);
-  if (!em && !tm && !fm) return;
+  /* `&card=era` — the era card, openable by URL. It only ever showed on the click path
+     (selectEra's fly branch), so no baseline frame could capture one — the r43 gap. What a
+     frame cannot name it cannot watch. Read-only grammar like `b=`/`z=`: writeHash never
+     emits it. */
+  const cm = /[#&]card=era\b/.exec(h);
+  if (!em && !tm && !fm && !cm) return;
 
   /* The era must be applied first. selectEra() rewrites the year slider's own min/max to
      the era's span and resets S.year to the era's seek point — so a year applied before it
@@ -393,6 +398,8 @@ function applyHash() {
     if (isFinite(v)) { yr.value = v; S.year = v; onTime(); }
   }
 
+  /* after era and year, so the card describes the era the hash actually lands on */
+  if (cm && chs[S.era]) showEraCard(chs[S.era]);
 }
 
 /* The view is applied separately and LATER than the era and year, because setView() needs
@@ -1101,17 +1108,23 @@ function selectEra(i, fly) {
   onTime();
   buildVoyageList();
   if (fly && ch.view) flyTo(ch.view[0], ch.view[1], ch.view[2] || 330);
-  if (fly) {
-    /* one hull per era, chosen because its existence IS the era's argument: the dugout that
-       crossed to Sahul, the trireme, the caravel that could beat back up the African coast,
-       the iron steamer, the dreadnought, the box boat. */
-    const ERA_PLATE = { 'Crossing': 'voyaging-canoe', 'Reed & plank': 'corbita',
-                        'Oar & monsoon': 'trireme', 'Longships & junks': 'longship',
-                        'Ocean crossing': 'caravel', 'Iron & steam': 'steamer',
-                        'Steel & war': 'dreadnought', 'Containers': 'container' };
-    showCard({ eyebrow: 'Era', title: ch.title, sub: ch.years, plate: ERA_PLATE[ch.short],
-               rows: ch.rows || [], prose: ch.text, span: ch.years, cite: ch.cite });
-  }
+  if (fly) showEraCard(ch);
+}
+
+/* ── THE ERA CARD ───────────────────────────────────────────────────────────────────────
+ * One plate per era, chosen because its existence IS the era's argument — the dugout that
+ * crossed to Sahul, the plank-sewn Khufu ship, the trireme, the caravel that could beat back
+ * up the African coast, the iron steamer, the dreadnought, the box boat. Every plate lies
+ * inside its own era's span (the Pesse canoe sits on Crossing's 8000 BC boundary and its
+ * caption owns the gap) — the card said "Reed & plank, 8000–1000 BC" over a Roman ship of
+ * AD 200 until 2026-08-10. */
+const ERA_PLATE = { 'Crossing': 'dugout', 'Reed & plank': 'khufu-ship',
+                    'Oar & monsoon': 'trireme', 'Longships & junks': 'longship',
+                    'Ocean crossing': 'caravel', 'Iron & steam': 'steamer',
+                    'Steel & war': 'dreadnought', 'Containers': 'container' };
+function showEraCard(ch) {
+  showCard({ eyebrow: 'Era', title: ch.title, sub: ch.years, plate: ERA_PLATE[ch.short],
+             rows: ch.rows || [], prose: ch.text, span: ch.years, cite: ch.cite });
 }
 
 /* ── the camera flies, rather than cutting ─────────────────────────────── */

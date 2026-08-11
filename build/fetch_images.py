@@ -37,6 +37,12 @@ WIDTH = 1280
 # the real proportions, the real surface, and the ship in her own weather. Where a vessel is a
 # TYPE rather than a named ship (the cog, the dhow, the trireme) the plate is the best surviving
 # example or the accepted full-scale reconstruction, and the caption says which.
+#
+# ⚠ A third element, where present, is the ATTRIBUTION PARTY, used when Commons' Artist field
+# is empty. Empty Artist does not mean unknown author: the Jewel of Muscat file names its
+# photographer in the free-text Credit field, and the Pesse canoe file is the Drents Museum's
+# own collection image. CC BY requires the name, so it is read off the file page by a human
+# once and recorded here; 'unknown' in a credit line is reserved for authorship nobody has.
 PLATES = {
   'titanic':        ('File:RMS Titanic 3.jpg', 'Titanic leaving Southampton, 10 April 1912'),
   'great-eastern':  ('File:Great Eastern 1866-crop.jpg', 'Great Eastern moored, 1866'),
@@ -64,6 +70,11 @@ PLATES = {
   'endurance':      ('File:Endurance trapped in pack ice.jpg', "Endurance beset in the Weddell Sea pack, photographed by Frank Hurley"),
   'queen-mary-2':   ('File:Hamburg, Hafen, Kreuzfahrtschiff -Queen Mary 2- -- 2016 -- 3050.jpg', 'Queen Mary 2 — the only ocean liner in scheduled service'),
   'usv':            ('File:U.S. Navy Saildrone Explorer unmanned surface vessel sails in the Gulf of Aqaba on 6 February 2022 (220206-N-KZ419-1151).JPG', 'A Saildrone Explorer under way — no crew aboard'),
+  'dugout':         ('File:Boomstamkano van Pesse, Drents Museum, 1955-VIII-2.jpg', 'The Pesse canoe, about 8000 BC — the oldest boat ever recovered. The dugouts that crossed to Sahul are 60,000 years older still, known only from the fact of the crossing', 'Drents Museum'),
+  'corbita':        ('File:Relief with Portus August Torlonia Collection MT430 n05.jpg', 'A merchantman entering Portus under sail, on the Torlonia relief, about AD 200. No Roman merchantman survives whole; the type is known from reliefs, mosaics and wrecks'),
+  'dhow':           ('File:Jewel of Muscat, Maritime Experiential Museum & Aquarium, Singapore - 20120102-02.jpg', 'Jewel of Muscat — a reconstruction of the ninth-century Belitung ship, her planks sewn with coconut-fibre rope, not a nail in the hull', 'Jacklee'),
+  'cog':            ('File:Bremer Kogge im Schifffahrtmuseum Bremerhaven.jpg', 'The Bremen cog of 1380, the most complete cog recovered — lost unfinished in a Weser flood and found in 1962'),
+  'khufu-ship':     ('File:Giseh Sonnenbarke 01.jpg', 'The Khufu ship, buried beside the Great Pyramid about 2560 BC and the oldest intact ship in the world — cedar planks sewn together with rope'),
 }
 
 
@@ -109,7 +120,9 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     recs, missing, kept = [], [], 0
 
-    for vid, (title, caption) in sorted(PLATES.items()):
+    for vid, entry in sorted(PLATES.items()):
+        title, caption = entry[0], entry[1]
+        attrib = entry[2] if len(entry) > 2 else None
         dest = os.path.join(OUT, vid + '.jpg')
         if os.path.exists(dest) and not force:
             kept += 1
@@ -124,9 +137,10 @@ def main():
             data = r.read()
         with open(dest, 'wb') as f:
             f.write(data)
+        author = info['artist'] if info['artist'] != 'unknown' else (attrib or 'unknown')
         recs.append({'source': 'wikimedia-commons', 'slug': vid, 'type': 'ships',
                      'name': info['title'], 'caption': caption,
-                     'licence': info['licence'], 'authors': {info['artist']: 'All'},
+                     'licence': info['licence'], 'authors': {author: 'All'},
                      'credit': info['credit'], 'url': info['descurl'],
                      'files': [f'web/data/assets/ships/{vid}.jpg']})
         print(f'  fetched  {vid:18s} {len(data)/1024:7.0f} kB  {info["licence"]}')

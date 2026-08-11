@@ -447,6 +447,86 @@
    "files": [
     "web/data/assets/ships/queen-mary-2.jpg"
    ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "cog",
+   "type": "ships",
+   "name": "File:Bremer Kogge im Schifffahrtmuseum Bremerhaven.jpg",
+   "caption": "The Bremen cog of 1380, the most complete cog recovered — lost unfinished in a Weser flood and found in 1962",
+   "licence": "CC BY-SA 4.0",
+   "authors": {
+    "Olga Ernst": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Bremer_Kogge_im_Schifffahrtmuseum_Bremerhaven.jpg",
+   "files": [
+    "web/data/assets/ships/cog.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "corbita",
+   "type": "ships",
+   "name": "File:Relief with Portus August Torlonia Collection MT430 n05.jpg",
+   "caption": "A merchantman entering Portus under sail, on the Torlonia relief, about AD 200. No Roman merchantman survives whole; the type is known from reliefs, mosaics and wrecks",
+   "licence": "Public domain",
+   "authors": {
+    "Marie-Lan Taÿ Pamart": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Relief_with_Portus_August_Torlonia_Collection_MT430_n05.jpg",
+   "files": [
+    "web/data/assets/ships/corbita.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "khufu-ship",
+   "type": "ships",
+   "name": "File:Giseh Sonnenbarke 01.jpg",
+   "caption": "The Khufu ship, buried beside the Great Pyramid about 2560 BC and the oldest intact ship in the world — cedar planks sewn together with rope",
+   "licence": "CC BY 3.0",
+   "authors": {
+    "Olaf Tausch": "All"
+   },
+   "credit": "Own work",
+   "url": "https://commons.wikimedia.org/wiki/File:Giseh_Sonnenbarke_01.jpg",
+   "files": [
+    "web/data/assets/ships/khufu-ship.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "dhow",
+   "type": "ships",
+   "name": "File:Jewel of Muscat, Maritime Experiential Museum & Aquarium, Singapore - 20120102-02.jpg",
+   "caption": "Jewel of Muscat — a reconstruction of the ninth-century Belitung ship, her planks sewn with coconut-fibre rope, not a nail in the hull",
+   "licence": "CC BY-SA 3.0",
+   "authors": {
+    "Jacklee": "All"
+   },
+   "credit": "Photographed by Jacklee on 2 January 2010, 10:41.",
+   "url": "https://commons.wikimedia.org/wiki/File:Jewel_of_Muscat,_Maritime_Experiential_Museum_%26_Aquarium,_Singapore_-_20120102-02.jpg",
+   "files": [
+    "web/data/assets/ships/dhow.jpg"
+   ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "dugout",
+   "type": "ships",
+   "name": "File:Boomstamkano van Pesse, Drents Museum, 1955-VIII-2.jpg",
+   "caption": "The Pesse canoe, about 8000 BC — the oldest boat ever recovered. The dugouts that crossed to Sahul are 60,000 years older still, known only from the fact of the crossing",
+   "licence": "CC BY 3.0",
+   "authors": {
+    "Drents Museum": "All"
+   },
+   "credit": "http://museaindrenthe.nl/collectie/object/27368409-69dc-0888-ab8e-252b1d4f5760",
+   "url": "https://commons.wikimedia.org/wiki/File:Boomstamkano_van_Pesse,_Drents_Museum,_1955-VIII-2.jpg",
+   "files": [
+    "web/data/assets/ships/dugout.jpg"
+   ]
   }
  ]
 }

@@ -140,7 +140,8 @@ const h = location.hash;
 const em = /[#&]e=(\d+)/.exec(h);
 const tm = /[#&]t=(-?[\d.]+)/.exec(h);
 const fm = /[#&]f=([a-z0-9-]+)/i.exec(h);
-if (!em && !tm && !fm) return;
+const cm = /[#&]card=era\b/.exec(h);
+if (!em && !tm && !fm && !cm) return;
 const chs = APP.chapters.chapters || [];
 let era = em ? Math.max(0, Math.min(chs.length - 1, +em[1])) : null;
 if (fm && APP.voyages) {
@@ -158,6 +159,7 @@ const yr = document.getElementById('yr');
 const v = Math.max(+yr.min, Math.min(+yr.max, parseFloat(tm[1])));
 if (isFinite(v)) { yr.value = v; S.year = v; onTime(); }
 }
+if (cm && chs[S.era]) showEraCard(chs[S.era]);
 }
 function applyHashView() {
 const vm = /[#&]v=(sea|ship|action)/.exec(location.hash);
@@ -566,14 +568,15 @@ document.getElementById('eraSm').innerHTML = ch.lede || (ch.text || '').split('\
 onTime();
 buildVoyageList();
 if (fly && ch.view) flyTo(ch.view[0], ch.view[1], ch.view[2] || 330);
-if (fly) {
-const ERA_PLATE = { 'Crossing': 'voyaging-canoe', 'Reed & plank': 'corbita',
+if (fly) showEraCard(ch);
+}
+const ERA_PLATE = { 'Crossing': 'dugout', 'Reed & plank': 'khufu-ship',
 'Oar & monsoon': 'trireme', 'Longships & junks': 'longship',
 'Ocean crossing': 'caravel', 'Iron & steam': 'steamer',
 'Steel & war': 'dreadnought', 'Containers': 'container' };
+function showEraCard(ch) {
 showCard({ eyebrow: 'Era', title: ch.title, sub: ch.years, plate: ERA_PLATE[ch.short],
 rows: ch.rows || [], prose: ch.text, span: ch.years, cite: ch.cite });
-}
 }
 let fly = null;
 function flyTo(lon, lat, dist, ms = 1500) {

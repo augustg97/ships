@@ -3273,3 +3273,80 @@ continuously into the water that breaks at its foot, with a lit face and a shado
 cache-busted fetch of the data-version meta tag on the second poll (~30 s after push), and
 the live shaders.js confirmed carrying atmoBright, ldLand and vRest. Nineteenth clean
 push-triggered deploy in a row.
+
+---
+
+## Round 66 — 2026-08-10 — Every era card shows a ship of its own century, and a second stranded round is landed whole
+
+**This round began with ~380 uncommitted lines and ten new files in the tree: a complete
+r43-plate-gaps implementation built by the 15:58 session, which was cut off waiting for its
+frame ratchet — and a 16:31 session that armed a waiter on the same check and died the same
+way. The r63 stranding, repeated exactly, r63's own rule unfollowed: the turn must be HELD
+OPEN with foreground waits on the check, never ended to wait for its notification.** This
+round landed the work: every piece verified with my own eyes, audit run, both ratchet passes
+run to completion foreground-held, built, deployed, verified live.
+
+**The work being landed — the r43 plate gaps, all three, closed as a class:**
+
+- **Five Commons plates with licences**, each looked at against its caption this round: the
+  Pesse canoe (`dugout`, CC BY 3.0 — the oldest boat ever recovered, and the caption owns the
+  60,000-year gap to the Sahul crossings), the Torlonia relief (`corbita`, PD — no Roman
+  merchantman survives whole, and the caption says the type is known from reliefs, mosaics
+  and wrecks), Jewel of Muscat (`dhow`, CC BY-SA 3.0), the Bremen cog (`cog`, CC BY-SA 4.0)
+  and the Khufu ship (`khufu-ship`, CC BY 3.0). `fetch_images.py` gained an attribution-party
+  mechanism: Commons' empty Artist field does not mean unknown author — the Jewel of Muscat
+  names its photographer in free-text Credit, the Pesse file is the Drents Museum's own
+  collection image — so a third tuple element records the party a human read off the file
+  page, and 'unknown' in a credit line is reserved for authorship nobody has.
+- **The era-plate table told the truth about time.** `ERA_PLATE` sent Crossing to the
+  voyaging canoe (3000 BC in a 70,000–8,000 BP era) and Reed & plank to the corbita — the
+  card said "8000–1000 BC" over a Roman ship of AD 200. Now Crossing → the Pesse dugout
+  (on the era's own boundary, caption owning the gap) and Reed & plank → the Khufu ship
+  (2560 BC, inside the span). Every era plate now lies inside its era.
+- **The era card is state: `&card=era` joins the hash grammar** (read-only, the `b=`/`z=`
+  pattern — writeHash never emits it), applied after era and year so the card describes the
+  era the hash lands on. `showEraCard()` extracted from selectEra's fly branch, which was
+  the only path that ever showed the card — which is WHY no frame could watch it. New
+  standing baseline **`globe-era-card`** (frames 43 → 44).
+- **Four vessel cards had shipped plateless since r43 — dugout, corbita, dhow, cog — and
+  looked deliberate**, because the card's onerror removes the figure. A three-prong gate in
+  `build_site.py` now fails the build on any vessel without a plates.json entry, any
+  ERA_PLATE slug without one, and any entry whose jpg is missing (the stranded session
+  proved all three prongs by fault injection; the gate passed clean on this round's build,
+  31 plates).
+
+**The carried Titanic remainder is CLOSED — stale entry, the r58 lesson a third time.**
+Checked the code before trusting the list: `buildRaisedEnds` (hull.js) draws the
+three-island profile — 128 ft forecastle, 550 ft bridge house, 106 ft poop, two well decks,
+ends DERIVED from the record so the breaks stand at the record's stations; masts wear the
+White Star funnel buff (`mastLivery`); funnels rake the record's 9.46°. The r34
+aboard-titanic baseline has been watching all of it.
+
+**Verification, all of it this round:** audit 29/29 clean (`run_audit.py`). Ratchet run 1:
+44 frames — `globe-era-card` NEW, read as an image (card, rows, Khufu plate with credit,
+prose, no date-card overlap); two movers, both diffs read: ship-dhow 2.401% is the card
+gaining the Jewel of Muscat figure with prose reflowed, scene untouched; ship-dugout 0.269%
+is one heading strip where the Pesse figure's top edge pushes "History and service" below
+the card's clamped fold. All three accepted with class reasons in FRAME-LOG. Run 2:
+**44/44 green, globe-default 0.000% — no label flap this round.**
+
+**Rule 0, written on globe-era-card:** it reads as a rendered world — the July Atlantic in
+relief with a museum ship on a card standing over it, dark water on chart paper. Three facts
+a viewer can read off it: the Uluburun cargo carried 354 copper ingots (10 t) and about a
+tonne of tin, c. 1320 BC; the Khufu ship is 43.6 m of cedar in 1,224 pieces with no keel and
+no frames, sewn with rope, buried about 2560 BC; Bronze Age hulls were built shell-first,
+mortise-and-tenon or sewn, in the era running 8000–1000 BC on the lit strip.
+
+**Audit 29/29 clean. Frames 43 → 44, final run 44/44 green. Byte budget: first paint
+8.17 MB against 8.6, docs/ minified 1.76 → 1.21 MB.**
+
+### Next, in order
+1. **Survey continues.** The carried list is now: treasure-ship mast binding (needs its own
+   Chinese-practice research pass — unstayed poles, no hounds, rattan or iron, NOT a copy of
+   the European woolding rule); trireme/corbita tops existence check (they predate the
+   evidence); the dropped fourth argument to `tag()` (crow's nest and tripod crosstrees
+   cards show generic text — one-line fix plus card copy).
+2. Item 10 remainder: waterway margin plank in the deck shader — a texture judgement, low
+   priority.
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).

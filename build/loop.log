@@ -1868,3 +1868,32 @@ Live: stamp 1786394381 verified with a cache-busted fetch, and the live `hull.js
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 33774 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 14:29:35  round starting
+Round 65 is done and live. The carried item — the featureless land behind aboard-yamato — came apart into five measured classes, all fixed at the class level, and the deploy is verified (stamp 1786394381 → 1786399633, live shaders.js carrying the new code).
+
+**What was actually wrong, measured before touching anything:**
+
+1. **Three times of day in one frame.** The Yamato close-up is night at 132°E (probed: sun 19° below the horizon). The sky shader had no hour at all, the sea dimmed only its haze target, and the land dimmed twice — so a noon sky sat over a noon sea over a near-black coast. A new `ATMO.chunk.glsl` gives all three shaders one day term and one 0.32 moonlit floor, the light rig's own value. At day = 1 every factor is identity, which is why 32 of 43 frames didn't move a pixel.
+2. **Bathymetry drove the invented relief** — 388 m of "variation" on a 121 m Greek headland because the Aegean beside it is 360 m deep. The amplitude now measures the land alone.
+3. **The relief detail faded out over 9–34 km — exactly where coasts sit in this view** (Kyushu is 30–50 km off). Geometry keeps that fade (mesh Nyquist is real); the shading keeps its ridges to the rim, the same rule the sea uses for sub-vertex ripple.
+4. **The detail could redraw the coastline** — sinking foreshores and (latently) raising skerries. `ldLand()` now confines it: the coastline is data, the detail is inference inside it.
+5. **The waterline leaked backdrop paper**, and it took three diagnosed-and-rejected attempts to find the rule that holds: the drawn post-clamp height decides what a fragment is, the raster decides only where surfaces exist, and the sea discards from its rest position so the coastline stops riding the wave phase.
+
+A sixth class turned up outside the shaders: the card's "Nearest land" row was a one-shot snapshot of a boot race — a solo capture filled it while full-run captures left the dash. It now converges on the router's answer, keyed on readiness, raster level, datum, and the ship's own position.
+
+**Verification:** audit 29/29 clean; two full ratchet runs held open on their PIDs; run 1's four over-limit movers plus three deterministic land-row frames accepted with written reasons after reading every diff as an image; run 2 came back 43/43 green. Ten frames hold identical sub-tolerance precision offsets in both runs (recompiled-shader register drift, recorded in the handoff with values). The handoff also leaves the next queue: Titanic remainder, the r43 plate gaps, and the small found faults from round 64.
+2026-08-10 15:48:03  round finished; HEAD is fd29ce3 Round 65 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 39065 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 15:58:03  round starting
+The ratchet is mid-capture and the server serves the working tree live, so I'm not touching any web/ file until it finishes. Waiting on its completion notification.
+
+**Status so far:** the Titanic carried item was already closed in code and on screen (stale entry — recorded for HANDOFF). This round's work is the r43 plate gaps: five plates fetched from Commons with licences (corbita/Torlonia relief PD, dugout/Pesse CC BY 3.0, dhow/Jewel of Muscat CC BY-SA 3.0, cog/Bremen cog CC BY-SA 4.0, khufu-ship CC BY 3.0), the era card re-keyed so every era plate lies inside its own span, `&card=era` added to the hash grammar, a `globe-era-card` frame added (44 total), and a three-prong plates gate in build_site.py proven by fault injection. Audit 29/29 clean, build published at stamp 1786403428.
+/Users/augustgweon/Ships/build/loop-round.sh: line 83: 45673 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+2026-08-10 16:21:52  round finished; HEAD is fd29ce3 Round 65 deploy note: live stamp verified
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 16:31:52  round starting
+Both the ratchet task and a waiter on its output are armed — I'll pick up the results when the notification lands.
+2026-08-10 16:49:07  round finished; HEAD is fd29ce3 Round 65 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 48019 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 16:59:07  round starting

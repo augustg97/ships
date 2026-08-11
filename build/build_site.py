@@ -179,8 +179,27 @@ def gate_data():
         for it in json.load(open(os.path.join(WEB, "data", fn)))[key]:
             if not it.get("cite"):
                 fail(f"{fn}: '{it.get('name') or it.get('title')}' has no citation")
+    # every vessel carries a plate, every plate an era card names exists, and every plate
+    # entry has its file. The card's onerror removes the figure, so a missing image looks
+    # like a design choice — corbita/dugout/dhow/cog shipped that way from r43 to r66.
+    import re
+    plates = json.load(open(os.path.join(WEB, "data", "plates.json")))
+    for v in ves:
+        if v["id"] not in plates:
+            fail(f"vessel {v['id']} has no plate — add it to build/fetch_images.py PLATES")
+    m = re.search(r"ERA_PLATE\s*=\s*\{([^}]*)\}",
+                  open(os.path.join(WEB, "js", "app.js")).read())
+    if not m:
+        fail("app.js: ERA_PLATE literal not found — this gate needs re-pointing")
+    for slug in re.findall(r":\s*'([a-z0-9-]+)'", m.group(1)):
+        if slug not in plates:
+            fail(f"era plate '{slug}' has no plates.json entry")
+    for slug in plates:
+        if not os.path.exists(os.path.join(WEB, "data", "assets", "ships", slug + ".jpg")):
+            fail(f"plate '{slug}' is in plates.json but its jpg is missing")
     log(f"   ports {counts['ports.json']} · vessels {len(ves)} · "
-        f"chapters {counts['chapters.json']} · battles {counts['battles.json']}")
+        f"chapters {counts['chapters.json']} · battles {counts['battles.json']} · "
+        f"plates {len(plates)}")
 
 
 def gate_budget(man, root=None):
