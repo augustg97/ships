@@ -4160,3 +4160,8 @@ present in the minified js and both derived records in the published data (check
 ⚠ **Next round: FIRST verify the live stamp is 1786462222** (this note's own push triggers a
 second run that deploys the same tree); if it is not live, check `gh run list` before
 touching anything else.
+
+**Amendment, minutes later and still inside the round: THE DEPLOY LANDED AND IS VERIFIED
+LIVE.** Stamp 1786462222 confirmed with a cache-busted fetch; the live minified hull.js
+carries tierBands and shellBands (one match each by code pattern). The runner backlog cleared
+after ~18 minutes. Twenty-eighth clean push-triggered deploy in a row, delayed but verified.
