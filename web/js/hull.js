@@ -3251,6 +3251,26 @@ function linerHouse(S) {
      exactly — hA + 0.024·i/n forward, hB − 0.14·i/n aft. */
   const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
     : [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
+  /* ── ⚠ A MEASURED TIER EDGE PINS THE INTERPOLATION ───────────────────────────────────
+     The straight houseAt→houseCrest line is a derivation, and on Azzam it missed the top
+     step: her tier-3 terrace roofline reads u 0.73 on the plate while the line puts it
+     at 0.71, because the crest's own wall stops at 0.66 and the last step aft is bigger
+     than the steps below it. tierAftU records the aft edges the photograph actually
+     gives, keyed by tier index; tiers between pinned points interpolate straight, so a
+     record with no pins reproduces the single line exactly. */
+  const aftPin = { 0: hB, [n - 1]: crest[1] };
+  for (const k in (S.tierAftU || {})) {
+    const ti = +k;
+    if (ti > 0 && ti < n - 1) aftPin[ti] = S.tierAftU[k];
+  }
+  const pinIdx = Object.keys(aftPin).map(Number).sort((a, b) => a - b);
+  const aftAt = i => {
+    if (aftPin[i] !== undefined) return aftPin[i];
+    let lo = pinIdx[0], hi = pinIdx[pinIdx.length - 1];
+    for (const p of pinIdx) if (p < i) lo = p;
+    for (let j = pinIdx.length - 1; j >= 0; j--) if (pinIdx[j] > i) hi = pinIdx[j];
+    return aftPin[lo] + (aftPin[hi] - aftPin[lo]) * (i - lo) / (hi - lo);
+  };
   const tiers = [];
   /* ── A TIER CAN BE SHELL, NOT HOUSE ────────────────────────────────────────────────
      On the Edwardian liners the side PLATING carried up past the sheer deck: Titanic's
@@ -3282,7 +3302,7 @@ function linerHouse(S) {
        distance overall, in smaller steps. 0.14 reproduces the old figure at n=3 (0.047 a
        tier) and stops the staircase at any height. */
     const f = n > 1 ? i / (n - 1) : 0;
-    const uA = hA + (crest[0] - hA) * f, uB = hB + (crest[1] - hB) * f;
+    const uA = hA + (crest[0] - hA) * f, uB = aftAt(i);
     /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
        half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
     const half = (u) => {
@@ -3894,6 +3914,37 @@ function buildCluster(S, group) {
      derivation is stated here: the lower block a house tier's width, the mast block
      narrower, as every overhead photograph of a vessel of this type shows. */
   const wLower = B * 0.62, wUpper = B * 0.40;
+
+  /* ── WHAT EACH ELEMENT STANDS ON ──────────────────────────────────────────────────────
+     A cluster element declares its footing: onTier (a dome standing on that tier's roof
+     terrace) or fairFootTier (the terrace the fairing lands on). Azzam's plate reads all
+     three aft domes with bases at 19.5–19.8 m — the tier-3 terrace, a full deck module
+     below the crest roof they were footed on through round 76 — and the fairing's swept
+     line crosses 22 m at u 0.679 on its way down to the same terrace. */
+  const tierRoof = ti => (T && T.tiers[ti]) ? T.tiers[ti].y1 : roof;
+  const fairFootY = (C.fairFootTier !== undefined ? tierRoof(C.fairFootTier) : roof) - 0.25;
+  /* the local surface the stack rises from: the block's roof forward of its aft end, the
+     fairing's sloping top over the tail, the footing terrace abaft the foot. Roots bury
+     a fixed depth below this — a root hung from blockTopM would stand the aft pipes and
+     the casing fin in the air once the fairing sweeps to the terrace. */
+  const supportAt = u => {
+    if (!C.blockU) return roof;
+    if (u <= C.blockU[1]) return C.blockTopM;
+    if (C.fairAftU !== undefined && u <= C.fairAftU) {
+      const s = (u - C.blockU[1]) / (C.fairAftU - C.blockU[1]);
+      return C.blockTopM + (fairFootY - C.blockTopM) * s;
+    }
+    return C.fairFootTier !== undefined ? tierRoof(C.fairFootTier) : roof;
+  };
+  /* the fairing's plan half-width at a station — the quadratic ogive taper the tail
+     shows from above. Zero abaft the foot; the full block width forward of the tail. */
+  const spineHalfAt = u => {
+    if (!C.blockU || C.fairAftU === undefined) return 0;
+    if (u <= C.blockU[1]) return wLower / 2;
+    if (u >= C.fairAftU) return 0;
+    const s = (u - C.blockU[1]) / (C.fairAftU - C.blockU[1]);
+    return 0.9 + (wLower * 0.42 - 0.9) * (1 - s) * (1 - s);
+  };
   if (C.blockU) {
     const [uA, uB] = C.blockU;
     const h = C.blockTopM - roof;
@@ -3922,23 +3973,36 @@ function buildCluster(S, group) {
     g.add(tag(sheet, 'cluster', 'Glass sweep',
       'The raked dark-glass sheet forward of the mast block. Angle and extent derived from the plate.'));
   }
-  /* the fairing sweeping the lower block's roof down aft — the tail the stack rises from */
+  /* the fairing sweeping the lower block's roof down aft — the tail the stack rises from.
+     ⚠ IT LANDS ON THE TERRACE, NOT THE CREST ROOF: the plate's swept line crosses 22 m at
+     u 0.679 and reaches the tier-3 terrace at its foot. And it is a TAIL in plan, not a
+     prism — it narrows from the block's width to a spine at the foot, because the
+     terrace-footed radome pairs stand either side of it, and a constant-width wedge at
+     terrace height would pass straight through their shells. The profile is the plate's;
+     the plan taper is derived, a profile photograph having no width in it. */
   if (C.fairAftU !== undefined && C.blockU) {
     const x0 = X(C.blockU[1]), x1 = X(C.fairAftU);
     const hw = wLower * 0.42;
-    const A0 = [x0, roof - 0.25, -hw], Btop = [x0, C.blockTopM, -hw], C0 = [x1, roof - 0.25, -hw];
-    const A1 = [x0, roof - 0.25,  hw], B1 = [x0, C.blockTopM,  hw], C1 = [x1, roof - 0.25,  hw];
-    const v = [];
-    const put = (...ps) => ps.forEach(p => v.push(...p));
-    put(A0, Btop, C0,  A1, C1, B1);                      // the two triangular ends
-    put(Btop, B1, C1,  Btop, C1, C0);                    // the sloping top
-    put(A0, C0, C1,  A0, C1, A1);                        // the bottom, buried in the roof
-    put(A0, A1, B1,  A0, B1, Btop);                      // the face against the block
+    const sTop = s => C.blockTopM + (fairFootY - C.blockTopM) * s;
+    const sHalf = s => 0.9 + (hw - 0.9) * (1 - s) * (1 - s);
+    const N = 12, v = [];
+    const quad = (a, b, c, d) => { v.push(...a, ...b, ...c, ...a, ...c, ...d); };
+    for (let i = 0; i < N; i++) {
+      const s0 = i / N, s1 = (i + 1) / N;
+      const xA = x0 + (x1 - x0) * s0, xB = x0 + (x1 - x0) * s1;
+      const wA = sHalf(s0), wB = sHalf(s1);
+      const tA = sTop(s0), tB = sTop(s1);
+      quad([xA, tA, -wA], [xB, tB, -wB], [xB, fairFootY, -wB], [xA, fairFootY, -wA]);
+      quad([xA, fairFootY, wA], [xB, fairFootY, wB], [xB, tB, wB], [xA, tA, wA]);
+      quad([xA, tA, wA], [xB, tB, wB], [xB, tB, -wB], [xA, tA, -wA]);
+      quad([xA, fairFootY, -wA], [xB, fairFootY, -wB], [xB, fairFootY, wB], [xA, fairFootY, wA]);
+    }
+    quad([x0, fairFootY, -hw], [x0, C.blockTopM, -hw], [x0, C.blockTopM, hw], [x0, fairFootY, hw]);
     const wg = new THREE.BufferGeometry();
     wg.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
     wg.computeVertexNormals();
     g.add(tag(new THREE.Mesh(wg, white), 'cluster', 'Stack fairing',
-      'The swept fairing running the roof down aft of the stack. Profile derived from the plate.'));
+      'The swept tail running the block roof down to the aft terrace. Profile derived from the plate — it crosses 22 m at u 0.679 and lands at the recorded foot; the plan taper is derived, the radome pairs standing either side of the spine.'));
   }
 
   /* the stack: a dark raked casing fin carrying a close rank of polished uptake pipes.
@@ -3947,9 +4011,12 @@ function buildCluster(S, group) {
   if (C.stack) {
     const K = C.stack;
     const rakeF = -Math.tan((K.rakeFwdDeg || 0) * Math.PI / 180);   // forward is -x
-    const rootY = C.blockTopM - 1.2;
+    /* each element roots a fixed depth below its own supporting surface — over the swept
+       tail that surface falls away aft, and a root hung from the block top would stand
+       the aft pipes and the fin in the air above it */
     if (K.finU !== undefined) {
-      const finH = K.finTopM - (rootY - 0.6);
+      const finRoot = supportAt(K.finU) - 1.8;
+      const finH = K.finTopM - finRoot;
       const fg = new THREE.BoxGeometry(K.finChordM || 4.2, finH, 3.4);
       fg.applyMatrix4(new THREE.Matrix4().set(
         1, rakeF, 0, rakeF * finH / 2,
@@ -3957,7 +4024,7 @@ function buildCluster(S, group) {
         0, 0,     1, 0,
         0, 0,     0, 1));
       const fin = new THREE.Mesh(fg, finMt);
-      fin.position.set(X(K.finU), (rootY - 0.6) + finH / 2, 0);
+      fin.position.set(X(K.finU), finRoot + finH / 2, 0);
       g.add(tag(fin, 'cluster', 'Stack casing',
         'The dark raked casing the uptakes rise through. Height and rake derived from the plate.'));
     }
@@ -3969,6 +4036,7 @@ function buildCluster(S, group) {
       const f = n === 1 ? 0 : i / (n - 1);                // 0 forward, 1 aft
       const u = u0 + (u1 - u0) * f;
       const top = K.topFwdM + (K.topAftM - K.topFwdM) * f;
+      const rootY = supportAt(u) - 1.2;
       const Lp = top - rootY, r = (K.pipeDiaM || 1.4) / 2;
       const pg = new THREE.CylinderGeometry(r * 0.96, r, Lp, 20, 24);
       const pos = pg.attributes.position, col = [];
@@ -3993,20 +4061,28 @@ function buildCluster(S, group) {
 
   /* the radomes: paired or single spheres on short pedestals. A pair reads from abeam as
      one blob wider than it is tall, which is exactly what the plate shows — the sphere
-     DIAMETER is the plate's vertical measure, the pairing resolves its width. */
+     DIAMETER is the plate's vertical measure, the ±0.55 m fore-aft stagger resolves the
+     blob's width. A dome with onTier stands on that tier's roof terrace; the plate reads
+     the shells almost on the deck (bases 19.5–19.8 m over a 19.4 m terrace), so the
+     sphere bottom sits 0.3 m over its footing and the pedestal hides under the bulge.
+     A pair amidst the fairing's run takes its athwartships stance off the spine's local
+     half-width plus a working clearance — the stance is derived, the profile photograph
+     having no width in it. */
   for (const d of C.domes || []) {
-    const base = d.upper ? C.upperTopM : roof;
-    const stations = d.pair ? [[d.dM / 2 + 0.25, 0.55], [-(d.dM / 2 + 0.25), -0.55]] : [[0, 0]];
+    const base = d.upper ? C.upperTopM : (d.onTier !== undefined ? tierRoof(d.onTier) : roof);
+    const spine = (!d.upper && supportAt(d.u) > base + 0.1) ? spineHalfAt(d.u) : 0;
+    const off = Math.max(d.dM / 2 + 0.25, spine + d.dM / 2 + 0.5);
+    const stations = d.pair ? [[off, 0.55], [-off, -0.55]] : [[0, 0]];
     for (const [dz, dx] of stations) {
       const ped = new THREE.Mesh(
-        new THREE.CylinderGeometry(d.dM * 0.16, d.dM * 0.19, 1.1, 12), white);
-      ped.position.set(X(d.u) + dx, base - 0.25 + 0.55, dz);
+        new THREE.CylinderGeometry(d.dM * 0.16, d.dM * 0.19, 0.9, 12), white);
+      ped.position.set(X(d.u) + dx, base + 0.2, dz);
       g.add(tag(ped, 'cluster', 'Radome pedestal',
         'Stands the dome clear of the deck wash. Derived from the plate.'));
       const dome = new THREE.Mesh(new THREE.SphereGeometry(d.dM / 2, 24, 16), domeMt);
-      dome.position.set(X(d.u) + dx, base - 0.25 + 1.1 + d.dM * 0.44, dz);
+      dome.position.set(X(d.u) + dx, base + 0.3 + d.dM / 2, dz);
       g.add(tag(dome, 'cluster', 'Radome',
-        'A weatherproof shell over a stabilised satellite dish — the sphere is the cheapest shape that lets the antenna inside slew freely. Diameter and station derived from the plate against the recorded length.'));
+        'A weatherproof shell over a stabilised satellite dish — the sphere is the cheapest shape that lets the antenna inside slew freely. Diameter, station and base height derived from the plate against the recorded length.'));
     }
   }
 

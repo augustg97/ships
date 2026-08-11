@@ -4257,3 +4257,110 @@ fetches — the live vessels.json carries boatsInboard with the count removed an
 row present, and the live minified hull.js carries the inboard guard (one match by code
 pattern). The Pages run started in seconds this time; round 75's runner backlog did not
 recur. Twenty-ninth clean push-triggered deploy in a row.
+
+---
+
+## Round 77 — 2026-08-11 — The domes come down to their terrace, and a measured edge can pin the interpolation
+
+**The queue head (the Azzam aft-cluster rebuild, measured and specified by round 76) is
+closed — record, builder and audit moved together, every number the plate's.** The three aft
+domes stand on the tier-3 terrace at 19.4 m, where their bases read 19.5–19.8 m on the
+delivery photograph, a full deck module below the 22 m crest roof they were footed on since
+round 73. The crest's full-height wall now ends at u 0.66, the continuous-bright edge the
+plate reads at 20.9 m — its 0.73 was set in r74 precisely to keep the 2.2 m dome roof-footed,
+the prop r76 kicked away. The 4.7 m pairs move to their measured centres, u 0.705 and 0.675
+(+0.014 aft; r73 likely marked forward edges); the 2.2 m dome stays at 0.727 (read 0.725,
+two pixels, noise). The fairing sweeps from the block top down to the terrace, crossing 22 m
+at u 0.679 exactly as the plate's line does — its straight profile lands at the recorded
+foot, u 0.723, unchanged.
+
+**Three record classes were born, none of them Azzam-shaped:**
+1. **`tierAftU` — a measured tier edge pins the interpolation.** The straight
+   houseAt→houseCrest line puts the tier-3 terrace edge at 0.71; the plate reads 0.73. The
+   record now pins aft edges by tier index, and linerHouse interpolates straight BETWEEN
+   pinned points — tiers 1–2 land at 0.817/0.773, inside the r73 derivation's 4 m validation
+   band, and a record with no pins reproduces the single line bit-for-bit (46 other frames
+   at 0.000% prove it).
+2. **`onTier` — a dome declares the tier roof it stands on**, and buildCluster foots it
+   there. The pedestal shortens and the shell sits 0.3 m over its footing, which is what
+   the measured bases say (19.5–19.8 m over a 19.4 m terrace) — the sphere's bulge hides
+   the pedestal, as the photograph shows.
+3. **`fairFootTier` — the fairing declares the terrace it lands on.**
+
+**Two builder classes rode along, both consequences the geometry forced:**
+- **The fairing is a tail in plan, not a prism.** A constant-width wedge swept to terrace
+  height passes straight through the terrace-footed pairs' shells. It now lofts a quadratic
+  ogive from the block's width to a 1.8 m spine at the foot, and a pair amidst its run takes
+  its athwartships stance from the spine's local half-width plus a working clearance — the
+  stance is derived, a profile photograph having no width in it; the ±0.55 m fore-aft
+  stagger, which is what the plate does measure (the blob wider than tall), is untouched.
+- **Stack elements root in their own supporting surface.** Fin and pipes hung their roots
+  from blockTopM; over the swept tail that surface falls away, and the aft pipes and the
+  casing fin would have stood in the air above it. supportAt(u) — block roof, then the
+  tail's sloping top, then the terrace — and each element buries a fixed depth below it.
+
+**The audit learned the class, injection-proven four ways.** The height floor is now the
+LOWEST declared footing (onTier/fairFootTier tier roofs, else the house top), and the r74
+crest rule became 'cluster foot off its tier': every foot — block ends, domes, now the
+fairing foot too — is checked against ITS OWN tier's u-span, with a guard for a declared
+tier the house does not have. Proofs, each a data or build injection against the healthy
+other half: (A) the 2.2 m dome moved to u 0.75 → 'cluster foot off its tier' on azzam
+alone, tier 3 spans 0.367–0.730; (B) the tierAftU pin cut from the record → the dome at
+0.727 AND the fairing foot at 0.723 both fire against the unpinned 0.710 edge — the pin is
+load-bearing; (C) the r76 build (everything crest-footed) against the new record →
+'cluster floats above its roof', lowest vertex 21.7 m over a 19.4 m declared footing — the
+audit now sees the exact fault this round fixed; (D) onTier: 9 → the nonexistent-tier
+guard, 'the house has tiers 0–4'. Healthy build: **29 hulls, 0 problems.**
+
+**Looked at, rule 1:** three angles — the bow-quarter baseline, plus b=90 and b=135
+diagnosis frames (deleted after reading, r55 rule). The beam view against the plate: the
+dome group sits low on the aft terrace with bases at the roofline, the swept tail descends
+from the crest through the dome band as the photograph's line does, the fin roots into the
+tail. The stern quarter: the pairs stand clear of the spine on their own stances, nothing
+interpenetrates, nothing overhangs the deck edge, the small dome abaft the pairs on the
+centreline.
+
+**Ratchet, full 47 frames: 46 green at 0.000–0.045%, exactly one mover, the intended ship** —
+ship-azzam 1.153% of pixels, mean |Δ| 0.778, and the amplified diff is the ship alone: the
+aft dome group at its old crest station and its new terrace one, the crest contraction and
+the swept tail, the fin edge, the upper radomes settling 0.25 m under the one dome formula,
+and the tier aft edges the pinned interpolation moved — no sea, no sky, no cards, no other
+vessel. The 46 zeros are themselves a proof: every other hull runs the default interpolation
+and not one pixel of it moved. Accepted with the reason in FRAME-LOG; the full run after the
+accept came back green (r63 two-run rule).
+
+**Rule 0, written on the accepted ship-azzam frame:** it reads as a rendered world — the
+yacht from the bow quarter on open textured water, her delivery photograph on the card
+beside her, the fleet list running dugout canoe to Ever Given with her at 26 of 29. Three
+facts a viewer can read off it: the radome cluster stands LOW on an aft terrace now, a deck
+module below the crest the exhausts rise from, matching the photograph's descending profile;
+the glazed tiers still ramp aft to the compact crest abaft midships with four polished
+uptakes and the black casing fin; the card gives 180.6 m overall, 4.3 m draught, 31.5 kn,
+and a Tenders row that says the boats stow in a garage inside the hull.
+
+**Carried, restated exactly (none closed silently):**
+1. Trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
+2. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+3. r75's small QM2 items: balcony-band pier rhythm variation; strake windows vs the
+   mooring-deck openings right forward — both inside the derivation's error bar.
+4. New, small: the aft dome pairs' athwartships stance is a builder derivation (spine
+   clearance), not a measurement — an overhead photograph with a stated scale could pin
+   it, if one with clear provenance ever surfaces.
+
+### Next, in order
+1. Trireme/corbita masthead sheave gear; waterway margin plank (carried since r74).
+2. Galley action (campaign-data tasks); B10 stunsails if wanted.
+3. QM2 small items above, only if a round is otherwise light.
+
+**One flap struck, the r51 way:** run 2 of the ratchet showed globe-default at 1.156%,
+mean |Δ| 0.340 — a frame no change this round touches, green in run 1 minutes earlier. The
+amplified diff is nothing but label halos and small track-glyph ghosts: the r28/r45/r51
+font-rasterisation transient, at low frequency even after the r57 vendored-serif fix. A solo
+re-check against the committed baseline came back green, so the baseline stands and nothing
+was accepted. The class is not fully closed; if it strikes again, the capture gate needs a
+stronger condition than document.fonts.status.
+
+**End-of-round deploy note: stamp 1786468280 → 1786473765.** Push at round end against the
+80-minute window; the live stamp to be verified either by this round's tail or by the next
+round FIRST (the r75 rule — a successful push is not a successful deploy; check
+`gh run list` before touching anything else if it is not live).

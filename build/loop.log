@@ -2104,3 +2104,18 @@ The deploy sat queued on GitHub's runner backlog for ~18 minutes — the handoff
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 33223 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 09:22:31  round starting
+Round 76 is complete and deployed. The summary:
+
+**The queue head (Azzam's tenders) is closed — by refuting its own premise.** The carried note said her plate stows the tenders on the low aft deck. I re-read the plate: no boat stands on any deck — the crest carries only radomes, the terraces and aft deck are bare. The published record explains why: her tenders stow in a garage *inside* the hull, and the design accounts say the concept grew from 145 m to 180.6 m partly to make room for tenders, fuel and machinery within the shell. The four white builder-default boats had ridden her crest since round 70, contradicting the photograph on the card beside her.
+
+**The fix is the class:** a new `boatsInboard` record field — buildBoats draws nothing topside for an inboard record whatever the count says; the unsourced `boats: 4` is deleted (no source publishes a complement); her card carries a Tenders row with the provenance. The audit learned the class, injection-proven three ways: forcing boats onto her crest fired the new rule on azzam alone; a count-plus-garage record stays silent; cutting the skip clause out of the audit text made declared-but-not-drawn fire, proving the skip load-bearing. Healthy: 29 hulls, 0 problems.
+
+**The dome-base question (r74 finding 3) is answered by measurement, not fixed.** Luminance profile over the plate: all three aft domes stand on the 19.4 m tier-3 terrace, a full deck module below the 22 m house top they're footed on today. Fixing it drags the crest span (0.73 → ≈0.66), the fairing foot, dome stations and the r74 audit rule with it — one coherent rebuild that deserves its own round. Every measurement the implementer needs is in the handoff; it's next round's queue head.
+
+**Verification:** ratchet 47 frames, exactly one mover — ship-azzam 0.076%, the diff being the two visible boat hulls and davits and nothing else — accepted with reason, then 47/47 green on the second run. Deployed and verified live: stamp 1786468280, `boatsInboard` confirmed in the live data and minified js, the Tenders row live. Twenty-ninth clean deploy in a row.
+
+Sources: [Boat International — Azzam facts](https://www.boatinternational.com/yachts/editorial-features/azzam-lurssen-motor-yacht-facts), [YachtBuyer — Azzam](https://www.yachtbuyer.com/en/fleet/azzam-592-lurssen), [Pascoe International](https://www.pascoeinternational.com/blog/top-6-largest-superyachts-with-pasoce-tenders)
+2026-08-11 10:22:26  round finished; HEAD is a69f078 Round 76 deploy note: stamp 1786468280 verified live, boatsInboard confirmed in the published data and js
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 41231 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 10:32:26  round starting

@@ -145,33 +145,58 @@
       else {
         const dh2 = H.deckM || H.beam * 0.105;
         const roofY = H.freeboard + (H.decks || 0) * dh2;
-        if (cl.y[0] < roofY - 1.5)
+        /* ── THE FLOOR IS THE LOWEST DECLARED FOOTING (round 77). A dome's onTier and
+           the fairing's fairFootTier land on that tier's roof — freeboard + (tier+1)·deck
+           — a full module below the house top the rest of the cluster stands on. Azzam's
+           aft domes and fairing foot the tier-3 terrace at 19.4 m; against a 22 m house
+           top alone that healthy geometry would read as 'reaches into the house'. */
+        const tierRoofY = ti => H.freeboard + (ti + 1) * dh2;
+        let floorY = roofY;
+        for (const d of H.cluster.domes || [])
+          if (!d.upper && d.onTier !== undefined) floorY = Math.min(floorY, tierRoofY(d.onTier));
+        if (H.cluster.fairFootTier !== undefined)
+          floorY = Math.min(floorY, tierRoofY(H.cluster.fairFootTier));
+        if (cl.y[0] < floorY - 1.5)
           say(v.id, 'cluster reaches into the house',
-              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, house top ${roofY.toFixed(1)}`);
-        if (cl.y[0] > roofY + 0.6)
+              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, lowest declared footing ${floorY.toFixed(1)}`);
+        if (cl.y[0] > floorY + 0.6)
           say(v.id, 'cluster floats above its roof',
-              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, house top ${roofY.toFixed(1)}`);
+              `lowest cluster vertex ${cl.y[0].toFixed(1)} m over water, lowest declared footing ${floorY.toFixed(1)}`);
         if (H.cluster.stack && Math.abs(cl.y[1] - H.cluster.stack.topFwdM) > 1.5)
           say(v.id, 'cluster off its derived height',
               `tallest cluster vertex ${cl.y[1].toFixed(1)} m over water, derived record says ${H.cluster.stack.topFwdM}`);
       }
-      /* ── AND THE CREST IS UNDER ITS FEET (round 74). houseCrest narrows the top tier,
-         and every cluster element footed on the house roof — the block ends, the non-upper
-         domes — must have that tier's roof beneath it, or its pedestal stands at roof
-         HEIGHT with air below (the height rules above cannot see this: the lowest cluster
-         vertex is the fairing, which stays on the roof while a dome hangs past the edge).
-         Both derivations are the record's, so this fires on the narrowing mistake, not on
+      /* ── AND EACH FOOT HAS ITS OWN TIER UNDER IT (round 74, tier-footed round 77).
+         houseCrest narrows the top tier and tierAftU pins a measured terrace edge, and
+         every cluster element stands on SOME tier's roof — the block ends and undeclared
+         domes on the crest, a dome with onTier or the fairing foot with fairFootTier on
+         that tier's terrace. Each foot must land inside its own tier's u-span, or its
+         pedestal stands at deck height with air below (the height rules above cannot see
+         this: the lowest cluster vertex stays on a deck while one dome hangs past an
+         edge). Both derivations are the record's, so this fires on the mismatch, not on
          a healthy build. */
       if (H.decks && SHIPS_HULL.linerHouse) {
         const T2 = SHIPS_HULL.linerHouse(H);
-        const topT = T2.tiers[T2.n - 1];
+        const top = T2.n - 1;
         const feet = [];
-        if (H.cluster.blockU) feet.push(['block fwd', H.cluster.blockU[0]], ['block aft', H.cluster.blockU[1]]);
-        for (const d of H.cluster.domes || []) if (!d.upper) feet.push(['dome', d.u]);
-        for (const [what, u] of feet)
-          if (u < topT.uA - 0.005 || u > topT.uB + 0.005)
-            say(v.id, 'cluster foot off the crest',
-                `${what} at u ${u.toFixed(3)}, top tier spans ${topT.uA.toFixed(3)}–${topT.uB.toFixed(3)}`);
+        if (H.cluster.blockU)
+          feet.push(['block fwd', H.cluster.blockU[0], top], ['block aft', H.cluster.blockU[1], top]);
+        for (const d of H.cluster.domes || [])
+          if (!d.upper) feet.push(['dome', d.u, d.onTier !== undefined ? d.onTier : top]);
+        if (H.cluster.fairAftU !== undefined)
+          feet.push(['fairing foot', H.cluster.fairAftU,
+                     H.cluster.fairFootTier !== undefined ? H.cluster.fairFootTier : top]);
+        for (const [what, u, ti] of feet) {
+          const t = T2.tiers[ti];
+          if (!t) {
+            say(v.id, 'cluster foot on a tier the house does not have',
+                `${what} declares tier ${ti}, the house has tiers 0–${top}`);
+            continue;
+          }
+          if (u < t.uA - 0.005 || u > t.uB + 0.005)
+            say(v.id, 'cluster foot off its tier',
+                `${what} at u ${u.toFixed(3)}, tier ${ti}${ti === top ? ' (crest)' : ''} spans ${t.uA.toFixed(3)}–${t.uB.toFixed(3)}`);
+        }
       }
     }
 

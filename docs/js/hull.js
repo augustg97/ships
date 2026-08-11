@@ -1970,6 +1970,19 @@ const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
 const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
 const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
 : [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
+const aftPin = { 0: hB, [n - 1]: crest[1] };
+for (const k in (S.tierAftU || {})) {
+const ti = +k;
+if (ti > 0 && ti < n - 1) aftPin[ti] = S.tierAftU[k];
+}
+const pinIdx = Object.keys(aftPin).map(Number).sort((a, b) => a - b);
+const aftAt = i => {
+if (aftPin[i] !== undefined) return aftPin[i];
+let lo = pinIdx[0], hi = pinIdx[pinIdx.length - 1];
+for (const p of pinIdx) if (p < i) lo = p;
+for (let j = pinIdx.length - 1; j >= 0; j--) if (pinIdx[j] > i) hi = pinIdx[j];
+return aftPin[lo] + (aftPin[hi] - aftPin[lo]) * (i - lo) / (hi - lo);
+};
 const tiers = [];
 const ns = S.shellTiers || 0;
 const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
@@ -1978,7 +1991,7 @@ const shell = i < ns;
 const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
 const ins = shell ? B * 0.015 : inset;
 const f = n > 1 ? i / (n - 1) : 0;
-const uA = hA + (crest[0] - hA) * f, uB = hB + (crest[1] - hB) * f;
+const uA = hA + (crest[0] - hA) * f, uB = aftAt(i);
 const half = (u) => {
 const uu = Math.max(0.001, Math.min(0.999, u));
 return Math.max(B * 0.06, Math.min(wid / 2,
@@ -2360,6 +2373,24 @@ const domeMt = new THREE.MeshStandardMaterial({ color: 0xeae8e2, roughness: 0.45
 const finMt  = new THREE.MeshStandardMaterial({ color: 0x1b1d20, roughness: 0.32,
 metalness: 0.45 });
 const wLower = B * 0.62, wUpper = B * 0.40;
+const tierRoof = ti => (T && T.tiers[ti]) ? T.tiers[ti].y1 : roof;
+const fairFootY = (C.fairFootTier !== undefined ? tierRoof(C.fairFootTier) : roof) - 0.25;
+const supportAt = u => {
+if (!C.blockU) return roof;
+if (u <= C.blockU[1]) return C.blockTopM;
+if (C.fairAftU !== undefined && u <= C.fairAftU) {
+const s = (u - C.blockU[1]) / (C.fairAftU - C.blockU[1]);
+return C.blockTopM + (fairFootY - C.blockTopM) * s;
+}
+return C.fairFootTier !== undefined ? tierRoof(C.fairFootTier) : roof;
+};
+const spineHalfAt = u => {
+if (!C.blockU || C.fairAftU === undefined) return 0;
+if (u <= C.blockU[1]) return wLower / 2;
+if (u >= C.fairAftU) return 0;
+const s = (u - C.blockU[1]) / (C.fairAftU - C.blockU[1]);
+return 0.9 + (wLower * 0.42 - 0.9) * (1 - s) * (1 - s);
+};
 if (C.blockU) {
 const [uA, uB] = C.blockU;
 const h = C.blockTopM - roof;
@@ -2389,26 +2420,33 @@ g.add(tag(sheet, 'cluster', 'Glass sweep',
 if (C.fairAftU !== undefined && C.blockU) {
 const x0 = X(C.blockU[1]), x1 = X(C.fairAftU);
 const hw = wLower * 0.42;
-const A0 = [x0, roof - 0.25, -hw], Btop = [x0, C.blockTopM, -hw], C0 = [x1, roof - 0.25, -hw];
-const A1 = [x0, roof - 0.25,  hw], B1 = [x0, C.blockTopM,  hw], C1 = [x1, roof - 0.25,  hw];
-const v = [];
-const put = (...ps) => ps.forEach(p => v.push(...p));
-put(A0, Btop, C0,  A1, C1, B1);
-put(Btop, B1, C1,  Btop, C1, C0);
-put(A0, C0, C1,  A0, C1, A1);
-put(A0, A1, B1,  A0, B1, Btop);
+const sTop = s => C.blockTopM + (fairFootY - C.blockTopM) * s;
+const sHalf = s => 0.9 + (hw - 0.9) * (1 - s) * (1 - s);
+const N = 12, v = [];
+const quad = (a, b, c, d) => { v.push(...a, ...b, ...c, ...a, ...c, ...d); };
+for (let i = 0; i < N; i++) {
+const s0 = i / N, s1 = (i + 1) / N;
+const xA = x0 + (x1 - x0) * s0, xB = x0 + (x1 - x0) * s1;
+const wA = sHalf(s0), wB = sHalf(s1);
+const tA = sTop(s0), tB = sTop(s1);
+quad([xA, tA, -wA], [xB, tB, -wB], [xB, fairFootY, -wB], [xA, fairFootY, -wA]);
+quad([xA, fairFootY, wA], [xB, fairFootY, wB], [xB, tB, wB], [xA, tA, wA]);
+quad([xA, tA, wA], [xB, tB, wB], [xB, tB, -wB], [xA, tA, -wA]);
+quad([xA, fairFootY, -wA], [xB, fairFootY, -wB], [xB, fairFootY, wB], [xA, fairFootY, wA]);
+}
+quad([x0, fairFootY, -hw], [x0, C.blockTopM, -hw], [x0, C.blockTopM, hw], [x0, fairFootY, hw]);
 const wg = new THREE.BufferGeometry();
 wg.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
 wg.computeVertexNormals();
 g.add(tag(new THREE.Mesh(wg, white), 'cluster', 'Stack fairing',
-'The swept fairing running the roof down aft of the stack. Profile derived from the plate.'));
+'The swept tail running the block roof down to the aft terrace. Profile derived from the plate — it crosses 22 m at u 0.679 and lands at the recorded foot; the plan taper is derived, the radome pairs standing either side of the spine.'));
 }
 if (C.stack) {
 const K = C.stack;
 const rakeF = -Math.tan((K.rakeFwdDeg || 0) * Math.PI / 180);
-const rootY = C.blockTopM - 1.2;
 if (K.finU !== undefined) {
-const finH = K.finTopM - (rootY - 0.6);
+const finRoot = supportAt(K.finU) - 1.8;
+const finH = K.finTopM - finRoot;
 const fg = new THREE.BoxGeometry(K.finChordM || 4.2, finH, 3.4);
 fg.applyMatrix4(new THREE.Matrix4().set(
 1, rakeF, 0, rakeF * finH / 2,
@@ -2416,7 +2454,7 @@ fg.applyMatrix4(new THREE.Matrix4().set(
 0, 0,     1, 0,
 0, 0,     0, 1));
 const fin = new THREE.Mesh(fg, finMt);
-fin.position.set(X(K.finU), (rootY - 0.6) + finH / 2, 0);
+fin.position.set(X(K.finU), finRoot + finH / 2, 0);
 g.add(tag(fin, 'cluster', 'Stack casing',
 'The dark raked casing the uptakes rise through. Height and rake derived from the plate.'));
 }
@@ -2428,6 +2466,7 @@ for (let i = 0; i < n; i++) {
 const f = n === 1 ? 0 : i / (n - 1);
 const u = u0 + (u1 - u0) * f;
 const top = K.topFwdM + (K.topAftM - K.topFwdM) * f;
+const rootY = supportAt(u) - 1.2;
 const Lp = top - rootY, r = (K.pipeDiaM || 1.4) / 2;
 const pg = new THREE.CylinderGeometry(r * 0.96, r, Lp, 20, 24);
 const pos = pg.attributes.position, col = [];
@@ -2450,18 +2489,20 @@ g.add(tag(pipe, 'cluster', 'Exhaust pipe',
 }
 }
 for (const d of C.domes || []) {
-const base = d.upper ? C.upperTopM : roof;
-const stations = d.pair ? [[d.dM / 2 + 0.25, 0.55], [-(d.dM / 2 + 0.25), -0.55]] : [[0, 0]];
+const base = d.upper ? C.upperTopM : (d.onTier !== undefined ? tierRoof(d.onTier) : roof);
+const spine = (!d.upper && supportAt(d.u) > base + 0.1) ? spineHalfAt(d.u) : 0;
+const off = Math.max(d.dM / 2 + 0.25, spine + d.dM / 2 + 0.5);
+const stations = d.pair ? [[off, 0.55], [-off, -0.55]] : [[0, 0]];
 for (const [dz, dx] of stations) {
 const ped = new THREE.Mesh(
-new THREE.CylinderGeometry(d.dM * 0.16, d.dM * 0.19, 1.1, 12), white);
-ped.position.set(X(d.u) + dx, base - 0.25 + 0.55, dz);
+new THREE.CylinderGeometry(d.dM * 0.16, d.dM * 0.19, 0.9, 12), white);
+ped.position.set(X(d.u) + dx, base + 0.2, dz);
 g.add(tag(ped, 'cluster', 'Radome pedestal',
 'Stands the dome clear of the deck wash. Derived from the plate.'));
 const dome = new THREE.Mesh(new THREE.SphereGeometry(d.dM / 2, 24, 16), domeMt);
-dome.position.set(X(d.u) + dx, base - 0.25 + 1.1 + d.dM * 0.44, dz);
+dome.position.set(X(d.u) + dx, base + 0.3 + d.dM / 2, dz);
 g.add(tag(dome, 'cluster', 'Radome',
-'A weatherproof shell over a stabilised satellite dish — the sphere is the cheapest shape that lets the antenna inside slew freely. Diameter and station derived from the plate against the recorded length.'));
+'A weatherproof shell over a stabilised satellite dish — the sphere is the cheapest shape that lets the antenna inside slew freely. Diameter, station and base height derived from the plate against the recorded length.'));
 }
 }
 if (C.mast) {

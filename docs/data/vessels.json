@@ -3798,9 +3798,12 @@
     ],
     "houseCrest": [
      0.43,
-     0.73
+     0.66
     ],
-    "houseProvenance": "DERIVED from the delivery photograph: the lowest tier's windows run forward to 0.157 m/px pixel 1010 (u 0.18) and its roof tip lands at u 0.87; the crest's forward face is the block's glass foot (u 0.437) and its roof sweeps down at the recorded fairing (u 0.723). Tiers between interpolate straight, which matches the read faces within 4 m.",
+    "tierAftU": {
+     "3": 0.73
+    },
+    "houseProvenance": "DERIVED from the delivery photograph: the lowest tier's windows run forward to 0.157 m/px pixel 1010 (u 0.18) and its roof tip lands at u 0.87; the crest's forward face is the block's glass foot (u 0.437) and its full-height wall ends at u 0.66, the continuous-bright edge read at 20.9 m. The tier-3 terrace roofline is pinned where the photograph puts it, u 0.73 (tierAftU); tiers between measured points interpolate straight, which matches the read faces within 4 m.",
     "shellTiers": 1,
     "boatsInboard": true,
     "boatsProvenance": "INBOARD: her tenders stow in a garage within the hull, not on deck. The design accounts record the concept grew from 145 m to 180.6 m partly to make room for tenders, fuel and machinery inside (Nauta design history via Boat International and YachtBuyer, which lists her tender garage), and the delivery photograph on this card shows a bare topside — no boat stands on any deck. Her tender complement is not published, so no count is claimed.",
@@ -3808,13 +3811,14 @@
     "deckM": 2.6,
     "mastTopM": 47.2,
     "cluster": {
-     "provenance": "DERIVED from the delivery photograph on this card (ChrisKarsten, Wikimedia Commons), scaled against the recorded 180.6 m length; the scale was fixed by waterline and stem and cross-checked against her 9.0 m freeboard. No published drawing gives these heights.",
+     "provenance": "DERIVED from the delivery photograph on this card (ChrisKarsten, Wikimedia Commons), scaled against the recorded 180.6 m length; the scale was fixed by waterline and stem and cross-checked against her 9.0 m freeboard. No published drawing gives these heights. The three aft domes stand on the tier-3 terrace (19.4 m) — their bases read 19.5–19.8 m on the photograph — and the stack fairing sweeps from the block top down to that terrace, crossing 22 m at u 0.679 on the way to its foot at u 0.723.",
      "blockU": [
       0.437,
       0.617
      ],
      "blockTopM": 25.7,
      "fairAftU": 0.723,
+     "fairFootTier": 3,
      "upperU": [
       0.48,
       0.602
@@ -3838,17 +3842,20 @@
      "domes": [
       {
        "u": 0.727,
-       "dM": 2.2
+       "dM": 2.2,
+       "onTier": 3
       },
       {
-       "u": 0.693,
+       "u": 0.705,
        "dM": 4.7,
-       "pair": true
+       "pair": true,
+       "onTier": 3
       },
       {
-       "u": 0.659,
+       "u": 0.675,
        "dM": 4.7,
-       "pair": true
+       "pair": true,
+       "onTier": 3
       },
       {
        "u": 0.579,
