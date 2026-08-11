@@ -1961,3 +1961,24 @@ The capture is running quietly (output is piped through tail, so it appears at c
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 73634 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 21:55:28  round starting
+Round 69 is done and live — stamp 1786418078 → 1786426912, tree clean, audit 29/29 twice, ratchet 45/45 green on the second run.
+
+**What the round was.** It began with 227 uncommitted lines: a complete iron-mast implementation plus its research doc, built by at least four sessions last night that each armed a wait on the frame ratchet and died at turn end — the same stranding as rounds 63 and 66, a third time. This round landed the work whole rather than redoing it: audit re-run, the new rule injection-proven, both ratchet passes run to completion foreground-held on the PID, every mover classified from a read diff, built, deployed, verified live.
+
+**The work itself** closes the other half of round 68's mast-diameter question. A plated tube is not a tree, so `beam × 0.06` had no authority on iron hulls; the diameter is a record question. Great Eastern's six masts are the one fully attested set (2 ft 9 in – 3 ft 6 in, named Monday to Saturday, the aftermost wooden for the compass) and are drawn at the record's figures; every other iron mast derives its tube at pole-length/55 — the proportion her attested tubes hold — and its part card says "derived," per rule 10. From 1890 a steel square-rigger's lower and topmast are one tube, which is Preussen's record in as many words; she is the one ship whose mast grew (0.98 → 1.04 m). Titanic slimmed 1.69 → 0.95, Dreadnought 1.50 → 0.62, Yamato 1.52 → 0.73.
+
+**Verification found two older debts hiding inside tolerance.** All eight over-limit movers were iron ships and every diff was mast columns and their rigging only, with wooden hulls at exactly 0.000%. But reading the under-tolerance diffs per the round-63 rule surfaced: aboard-treasure still carrying round 68's strap-dash class unaccepted, and **aboard stale since round 62** — its baseline held the land row's dash while the app has printed "Cobh · 55 nm N" ever since, the small text never crossing the limit on its own. Both verified by cropping the actual images before accepting. Twelve accepts total, reasons in FRAME-LOG.
+
+**Next round's queue**, from the research doc's own findings: steel yards should be length/50 at the slings (attested twice, drawn several times too thin); Great Eastern's rig is wrong in kind (Tuesday and Wednesday were square-rigged, the model draws all six gaff); iron hulls are missing their bowsprits; QM2's mast data looks copied from Titanic and needs its own record pass.
+2026-08-10 22:44:18  round finished; HEAD is e2bb383 Round 69 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 74462 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 22:54:18  round starting
+Run 1 is capturing 49 frames (about 20 minutes). Status so far this round:
+
+- **The law**: yard diameters now follow the spar's own length — Steel 1794's rates for wood (course 7/10 in per yard of length, topsail 5/8, topgallant 6/10, crossjack at the topsail rate, lateen mizzen at 2/3 of the main yard), length/50 for iron and steel hulls (Peking 1911, Great Eastern 1858). Previously every yard drew at `beam × 0.0063`, L/D 100–500 against the records' 50–60.
+- **A second fault found under the first**: the Murray taper was dead code — `CylinderGeometry` defaults to one height segment, so the taper evaluated at the arms for every vertex and each yard drew as a uniform stick. Eight height segments make the octagonal-waist profile real for the first time.
+- **Audit**: new rule "a yard cut from the ship's beam", injection-proven — reverting the law fires 103 problems across all 12 square-yard ships, every yard individually; the fixed build is 29/29 clean.
+- **Research**: `Research/YARDS.md` records the primary-source read; IRON-MASTS.md §7 item 1 marked done.
+
+Waiting on the ratchet to classify movers.

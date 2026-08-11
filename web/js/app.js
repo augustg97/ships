@@ -957,6 +957,7 @@ function buildMarkers() {
 
 /* Projected once per frame, on a throttle, with collision culling by importance. */
 let lblTick = 0;
+let lblCamKey = '';   /* the camera pose the labels were last laid out for */
 let voyT = 0;                 // the fleet's own clock — see the note in frame()
 let labelsHidden = false;
 /* true once the label layer has completed a pass with the camera at rest (or hidden them
@@ -988,16 +989,28 @@ function updateLabels(now) {
   labelsHidden = false;
   if (now - lblTick < 90) return;
   lblTick = now;
+  /* ⚠ AND SKIP IT ALTOGETHER WHEN NOTHING CAN HAVE MOVED. These markers are ports, seas and
+     battles: fixed points on the globe. Their screen positions are a function of the camera
+     and nothing else, so if the camera is where it was last pass there is no work to do —
+     which is the common case, because the globe sits still whenever the viewer is reading. */
+  const camKey = camera.position.x.toFixed(1) + ',' + camera.position.y.toFixed(1) + ',' +
+                 camera.position.z.toFixed(1) + ',' + S.era + ',' + S.year;
+  if (camKey === lblCamKey) return;
+  lblCamKey = camKey;
   const rect = renderer.domElement.getBoundingClientRect();
   const camDir = camera.position.clone().normalize();
   const taken = [];
   const era = currentEra();
 
-  /* nearest first, so the important thing wins a collision */
-  const order = APP.markers.slice().sort((a, b) => {
+  /* ⚠ SORTED ONCE, NOT ELEVEN TIMES A SECOND. The rank is a pure function of the marker's
+     own kind and never changes, so slicing and sorting 451 of them on every pass was pure
+     allocation. Cached on the array it came from, and invalidated when that array is rebuilt. */
+  if (APP._lblOrder !== APP.markers) {
+    APP._lblOrder = APP.markers;
     const rank = m => m.kind === 'sea' ? 0 : (m.kind === 'battle' ? 1 : (m.major ? 2 : 3));
-    return rank(a) - rank(b);
-  });
+    APP._lblSorted = APP.markers.slice().sort((a, b) => rank(a) - rank(b));
+  }
+  const order = APP._lblSorted;
 
   for (const m of order) {
     let show = true;
@@ -1047,13 +1060,28 @@ function updateLabels(now) {
         }
         if (show) {
           taken.push([sx, sy]);
-          m.el.style.left = sx + 'px';
-          m.el.style.top = sy + 'px';
+          /* ── ⚠ transform, NOT left/top ────────────────────────────────────────────────
+             left and top are layout properties: writing them invalidates layout for the
+             element and everything that depends on it, and this loop was doing that to 451
+             labels at once. transform is composited — the browser moves the layer without
+             re-laying anything out. Measured before the change: labels cost 0.00 ms at the
+             MEDIAN and +20.8 ms at p95, with 24 frames over 25 ms against 1 with them off.
+             That signature — no steady cost, large spikes — is layout thrash, not volume.
+             The -50% centring moves into the same transform, since there can only be one. */
+          const tf = 'translate3d(' + (sx | 0) + 'px,' + (sy | 0) + 'px,0) translate(-50%,-50%)';
+          if (m._tf !== tf) { m._tf = tf; m.el.style.transform = tf; }
         }
       }
     }
-    m.el.style.opacity = show ? '1' : '0';
-    m.el.style.pointerEvents = show ? 'auto' : 'none';
+    /* ⚠ AND ONLY WRITE WHAT CHANGED. A style assignment costs whether or not the value is
+       new, and opacity and pointer-events are the same on almost every pass — 900 of the
+       ~1,800 writes per pass were setting a property to the value it already held. */
+    const op = show ? '1' : '0';
+    if (m._op !== op) {
+      m._op = op;
+      m.el.style.opacity = op;
+      m.el.style.pointerEvents = show ? 'auto' : 'none';
+    }
   }
   /* a pass that ran while the camera was still flying is not the settled picture */
   if (!fly) labelsSettled = true;

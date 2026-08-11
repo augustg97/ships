@@ -134,6 +134,8 @@ already agrees with the record's 58.
 1. **Steel yards are length/50 at the slings, length/100 at the arms** — attested twice
    (Peking 1911 exact on six spar classes, Great Eastern 1858 at 50.4). The drawn iron-ship
    yards are several times too thin. Next class for the survey.
+   → **DONE round 70**, fleet-wide (the wooden rates read in Steel 1794 the same round):
+   see `Research/YARDS.md`.
 2. **Great Eastern's rig is wrong in kind**: Tuesday and Wednesday were square-rigged (the
    record above), the model draws all six gaff. Also the aftermost mast is wood (the compass),
    hemp-stayed.

@@ -470,6 +470,7 @@ push('port', p, 'port' + (p.kind === 'historic' ? ' major' : '')));
 (APP.battles.battles || []).forEach(b => push('battle', b, 'battle'));
 }
 let lblTick = 0;
+let lblCamKey = '';
 let voyT = 0;
 let labelsHidden = false;
 let labelsSettled = false;
@@ -487,14 +488,20 @@ if (labelsHidden) { for (const m of APP.markers) if (m.el) m.el.style.display = 
 labelsHidden = false;
 if (now - lblTick < 90) return;
 lblTick = now;
+const camKey = camera.position.x.toFixed(1) + ',' + camera.position.y.toFixed(1) + ',' +
+camera.position.z.toFixed(1) + ',' + S.era + ',' + S.year;
+if (camKey === lblCamKey) return;
+lblCamKey = camKey;
 const rect = renderer.domElement.getBoundingClientRect();
 const camDir = camera.position.clone().normalize();
 const taken = [];
 const era = currentEra();
-const order = APP.markers.slice().sort((a, b) => {
+if (APP._lblOrder !== APP.markers) {
+APP._lblOrder = APP.markers;
 const rank = m => m.kind === 'sea' ? 0 : (m.kind === 'battle' ? 1 : (m.major ? 2 : 3));
-return rank(a) - rank(b);
-});
+APP._lblSorted = APP.markers.slice().sort((a, b) => rank(a) - rank(b));
+}
+const order = APP._lblSorted;
 for (const m of order) {
 let show = true;
 if (m.kind !== 'sea' && !S.layers.ports) show = false;
@@ -521,13 +528,17 @@ if (Math.abs(t[0] - sx) < pad && Math.abs(t[1] - sy) < vpad) { show = false; bre
 }
 if (show) {
 taken.push([sx, sy]);
-m.el.style.left = sx + 'px';
-m.el.style.top = sy + 'px';
+const tf = 'translate3d(' + (sx | 0) + 'px,' + (sy | 0) + 'px,0) translate(-50%,-50%)';
+if (m._tf !== tf) { m._tf = tf; m.el.style.transform = tf; }
 }
 }
 }
-m.el.style.opacity = show ? '1' : '0';
+const op = show ? '1' : '0';
+if (m._op !== op) {
+m._op = op;
+m.el.style.opacity = op;
 m.el.style.pointerEvents = show ? 'auto' : 'none';
+}
 }
 if (!fly) labelsSettled = true;
 }

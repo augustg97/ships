@@ -409,16 +409,20 @@ let y = base;
 let capY = base;
 const mastYards = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
-const crossYard = (yy, yardLen) => {
-const yg = new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, yardLen, 16);
+const crossYard = (yy, yardLen, kind) => {
+const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
+const slingsD = S.iron ? yardLen / 50
+: yardLen * (RATE[kind] || 0.625) / 36;
+const yg = new THREE.CylinderGeometry(slingsD / 2, slingsD / 2, yardLen, 16, 8);
 const ym = new THREE.Mesh(yg, woodDark);
 const yp = yg.attributes.position;
 for (let i = 0; i < yp.count; i++) {
 const t = Math.abs(yp.getY(i)) / (yardLen / 2);
-const taper = t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
+const k = S.iron
+? (t < 0.5 ? 1.0 : 1.0 - ((t - 0.5) / 0.5) * 0.5)
+: (t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
 : t < 0.75 ? 0.856 - 0.256 * ((t - 0.25) / 0.5)
-: 0.600 - 0.200 * ((t - 0.75) / 0.25);
-const k = taper / 0.4 * 0.9;
+: 0.600 - 0.200 * ((t - 0.75) / 0.25));
 yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
 }
 yg.computeVertexNormals();
@@ -427,6 +431,13 @@ ym.quaternion
 .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
 ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
 group.add(tag(ym, 'yard'));
+if (S.iron) ym.userData.part = { ...ym.userData.part,
+what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
++ 'through its middle half and coned to half its slings diameter at the arms. '
++ 'Cut at length/50 at the slings, length/100 at the arms — the rate the Peking '
++ 're-masting cut every steel yard to in 2017, and Great Eastern\'s 1858 iron '
++ 'lower yard holds at 50.4. An attested rate applied to this spar\'s own '
++ 'length: the rate is the record\'s, the figure DERIVED from it.' };
 spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
 armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
 const drop = yy - prevYard;
@@ -614,7 +625,9 @@ const yardLen = si === 0 ? lower * 0.875
 : lower * 0.875 * 0.714 * 0.667;
 const tiers = mk.only || 3;
 const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
-crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen);
+crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
+si === 0 ? (isMizzen ? 'topsail' : 'course')
+: si === 1 ? 'topsail' : 'topgallant');
 }
 capY = y + seg;
 y += seg * 0.88;
@@ -622,18 +635,19 @@ y += seg * 0.88;
 if (mk.rig === 'square' && mk.yards) {
 const T = y - base;
 const PLAN = {
-course: [0.36, 1.000],
-ltop:   [0.50, 0.93],
-utop:   [0.62, 0.85],
-top:    [0.55, 0.88],
-ltg:    [0.73, 0.73],
-utg:    [0.83, 0.62],
-tg:     [0.76, 0.68],
-royal:  [0.92, 0.50],
+course: [0.36, 1.000, 'course'],
+ltop:   [0.50, 0.93, 'topsail'],
+utop:   [0.62, 0.85, 'topsail'],
+top:    [0.55, 0.88, 'topsail'],
+ltg:    [0.73, 0.73, 'topgallant'],
+utg:    [0.83, 0.62, 'topgallant'],
+tg:     [0.76, 0.68, 'topgallant'],
+royal:  [0.92, 0.50, 'royal'],
 };
 mk.yards.map(nm => PLAN[nm]).filter(Boolean)
 .sort((a, b) => a[0] - b[0])
-.forEach(([f, r]) => crossYard(base + T * f, lower * 0.875 * r));
+.forEach(([f, r, kind]) => crossYard(base + T * f, lower * 0.875 * r,
+kind === 'course' && isMizzen ? 'topsail' : kind));
 }
 if (FINE && mk.rig === 'square' && mastYards.length) {
 const mx = h => x + Math.sin(rakeRad) * (h - base);
@@ -728,8 +742,10 @@ woodDark);
 mm.position.set(x, (base + sling[1]) / 2, 0);
 group.add(tag(mm, 'mast'));
 const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
+const mzD = mixed ? (mainLower * 0.875 * 0.700 / 36) * 2 / 3 : 0;
 const ym = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.005, B * 0.011, ylen, 14), woodDark);
+new THREE.CylinderGeometry(mixed ? mzD * 0.21 : B * 0.005,
+mixed ? mzD * 0.50 : B * 0.011, ylen, 14), woodDark);
 ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
 ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
 group.add(tag(ym, 'yard', 'Lateen yard'));
@@ -1636,7 +1652,9 @@ what: 'The rope that hauls a course\'s clew forward and down. On the wind the '
 yard:     { stage: 6, name: 'Yard',
 what: 'The spar a square sail hangs from, slung across the mast and braced round to '
 + 'trim the sail to the wind. Steel 1794: the main yard is seven eighths of the '
-+ 'main mast. It is octagonal amidships and tapers to two fifths at the arms.' },
++ 'main mast, and as thick as its own length asks — seven tenths of an inch to '
++ 'every yard of length at the slings for a course yard, lighter rates aloft. '
++ 'It is octagonal amidships and tapers to two fifths at the arms.' },
 sail:     { stage: 7, name: 'Sail',
 what: 'Flax canvas, sewn from bolts twenty-four inches wide — the standard enacted '
 + 'in 1746 — so the cloths themselves scale the sail for you. Square sails drive '

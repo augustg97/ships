@@ -1699,6 +1699,72 @@
       }
     }
 
+    /* ── AND NO YARD IS CUT FROM THE SHIP'S BEAM (round 70) ────────────────────────────
+       A yard's diameter follows the SPAR'S OWN LENGTH, by the spar-maker's own rates:
+       Steel 1794, "Proportional Diameters of Yards" — main and fore yards 7/10 of an inch
+       to every yard of length at the slings, topsail yards 5/8, topgallant yards 6/10,
+       the crossjack at the fore-topsail's rate — and a steel yard is length/50 at the
+       slings, attested twice (Peking's 2017 re-masting delivery list, six spar classes
+       exact; Great Eastern's 1858 iron lower yard at 50.4; Research/IRON-MASTS.md §2).
+       The old fault drew every yard at beam x 0.0035, one girth per ship, L/D 100–500
+       across the fleet. The audit measures the DRAWN spars: a crossed yard lies
+       ATHWARTSHIPS (junk and crab-claw head spars share the 'Yard' name but rake along
+       the ship, and a lateen yard carries its own name); a horizontal spar's box is as
+       tall as its slings diameter, the fattest station; and yards rank by height at
+       their own mast station — lowest is the course (the crossjack, at the topsail rate,
+       on a wooden mizzen), the next two topsails, the rest topgallants and royals. More
+       than 35% off the rate is the beam law creeping back. */
+    {
+      const steelMainD = (H.lwl + H.beam) / 2;
+      const lowersD = (H.masts || []).map(mm =>
+        mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainD);
+      const mainLowerD = Math.max(...lowersD, 0) || 1;
+      const aftAtD = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
+      const mixedSqD = (H.masts || []).some(mm => mm.rig === 'square');
+      const yardsD = [];
+      g.traverse(o => {
+        if (!o.isMesh) return;
+        const p = tagOf(o);
+        if (!p || p.key !== 'yard' || p.name !== 'Yard') return;
+        const bb = new THREE.Box3().setFromObject(o);
+        const xE = bb.max.x - bb.min.x, yE = bb.max.y - bb.min.y, zE = bb.max.z - bb.min.z;
+        if (zE <= xE || yE > zE * 0.25) return;
+        yardsD.push({ x: (bb.min.x + bb.max.x) / 2, y: (bb.min.y + bb.max.y) / 2,
+                      len: Math.hypot(xE, zE), d: yE });
+      });
+      const byStation = new Map();
+      yardsD.forEach(yd => {
+        let bi = -1, bd = 1e9;
+        (H.masts || []).forEach((mm, i) => {
+          const dx = Math.abs(yd.x - ((mm.at || 0) - 0.5) * H.lwl);
+          if (dx < bd) { bd = dx; bi = i; }
+        });
+        /* 0.18, wider than the mast rules' 0.12 — a hard-raked bow mast (the corbita's
+           artemon) carries its yard well ahead of its own step; unmatched yards drop
+           rather than fire */
+        if (bi < 0 || bd > H.lwl * 0.18) return;
+        if (!byStation.has(bi)) byStation.set(bi, []);
+        byStation.get(bi).push(yd);
+      });
+      byStation.forEach((ys, mi) => {
+        const mm = H.masts[mi];
+        const mz = mm.at === aftAtD && (H.masts || []).length >= 3 && !H.iron && mixedSqD
+          && lowersD[mi] < mainLowerD * 0.95
+          && (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+        ys.sort((a, b) => a.y - b.y).forEach((yd, rank) => {
+          const rate = rank === 0 ? (mz ? 0.625 : 0.700) : rank <= 2 ? 0.625 : 0.600;
+          const exp = H.iron ? yd.len / 50 : yd.len * rate / 36;
+          if (Math.abs(Math.log(yd.d / exp)) > Math.log(1.35))
+            say(v.id, "a yard cut from the ship's beam",
+                `yard at u=${mm.at} tier ${rank}, ${yd.len.toFixed(1)} m long, drawn ` +
+                `${yd.d.toFixed(2)} m through where its own length asks ${exp.toFixed(2)} — ` +
+                (H.iron ? 'a steel yard is length/50 at the slings (Peking 1911, Great Eastern 1858)'
+                        : "yard diameter follows the spar's own length (Steel 1794, " +
+                          '"Proportional Diameters of Yards")'));
+        });
+      });
+    }
+
     rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),
                 parts: Object.keys(part).length,
                 funnelH: part.funnel ? +(part.funnel.y[1] - deckY).toFixed(1) : null });
