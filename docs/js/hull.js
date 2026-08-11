@@ -1968,6 +1968,8 @@ const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
 const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
+const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
+: [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
 const tiers = [];
 const ns = S.shellTiers || 0;
 const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
@@ -1975,7 +1977,8 @@ for (let i = 0; i < n; i++) {
 const shell = i < ns;
 const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
 const ins = shell ? B * 0.015 : inset;
-const uA = hA + (i / n) * 0.024, uB = hB - (i / n) * 0.14;
+const f = n > 1 ? i / (n - 1) : 0;
+const uA = hA + (crest[0] - hA) * f, uB = hB + (crest[1] - hB) * f;
 const half = (u) => {
 const uu = Math.max(0.001, Math.min(0.999, u));
 return Math.max(B * 0.06, Math.min(wid / 2,
@@ -2118,6 +2121,7 @@ railRun(pr, t.y1);
 }
 }
 const top = T.tiers[T.n - 1];
+if (S.cluster && S.cluster.blockU) { group.add(tag(g, 'superstructure')); return; }
 const bg = new THREE.Group();
 const uW0 = top.uA + 0.004, uW1 = Math.min(top.uB, uW0 + 0.030);
 const whHalf = Math.min(B * 0.27, top.half(uW0) - B * 0.01);

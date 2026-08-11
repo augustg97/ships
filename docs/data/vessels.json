@@ -3793,9 +3793,14 @@
     "year": 2013,
     "decks": 5,
     "houseAt": [
-     0.3,
+     0.18,
      0.86
     ],
+    "houseCrest": [
+     0.43,
+     0.73
+    ],
+    "houseProvenance": "DERIVED from the delivery photograph: the lowest tier's windows run forward to 0.157 m/px pixel 1010 (u 0.18) and its roof tip lands at u 0.87; the crest's forward face is the block's glass foot (u 0.437) and its roof sweeps down at the recorded fairing (u 0.723). Tiers between interpolate straight, which matches the read faces within 4 m.",
     "shellTiers": 1,
     "boats": 4,
     "transom": 0.3,
@@ -3894,6 +3899,10 @@
     [
      "Cluster",
      "mast to 45 m over water, exhausts to 34 m raked forward — derived from the photograph; no drawing of her is published"
+    ],
+    [
+     "House",
+     "five tiers ramping aft from a long foredeck to a crest abaft midships, then terracing down to the stern — spans derived from the photograph"
     ]
    ],
    "text": "Azzam was delivered by Lürssen in 2013 for Sheikh Khalifa bin Zayed Al Nahyan and at 180.6 m remains the longest private motor yacht built. She is included here as the end point of a line the rest of this model traces: for most of history the largest and most advanced hulls afloat were built to carry cargo, fight, or explore, and their size was justified by what they returned.\n\nHer engineering is not decorative. A combined diesel and gas turbine plant of roughly 94,000 shaft horsepower drives four waterjets to over 30 knots — faster than most warships of comparable displacement — and she draws only 4.3 m on that length, a deliberately shallow hull for Gulf and Red Sea waters that forced a very fine, wide, low-block form.\n\nThe type is a real category rather than a curiosity: yachts above 100 m are now built in numbers, and they sustain specialist yards, naval-architecture practices and a supply chain that overlaps with naval work.",

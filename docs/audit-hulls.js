@@ -76,6 +76,17 @@ if (H.cluster.stack && Math.abs(cl.y[1] - H.cluster.stack.topFwdM) > 1.5)
 say(v.id, 'cluster off its derived height',
 `tallest cluster vertex ${cl.y[1].toFixed(1)} m over water, derived record says ${H.cluster.stack.topFwdM}`);
 }
+if (H.decks && SHIPS_HULL.linerHouse) {
+const T2 = SHIPS_HULL.linerHouse(H);
+const topT = T2.tiers[T2.n - 1];
+const feet = [];
+if (H.cluster.blockU) feet.push(['block fwd', H.cluster.blockU[0]], ['block aft', H.cluster.blockU[1]]);
+for (const d of H.cluster.domes || []) if (!d.upper) feet.push(['dome', d.u]);
+for (const [what, u] of feet)
+if (u < topT.uA - 0.005 || u > topT.uB + 0.005)
+say(v.id, 'cluster foot off the crest',
+`${what} at u ${u.toFixed(3)}, top tier spans ${topT.uA.toFixed(3)}–${topT.uB.toFixed(3)}`);
+}
 }
 {
 let pk = null;

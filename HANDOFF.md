@@ -3990,3 +3990,75 @@ unchanged committed baselines is its own confirmation.
 fetch — the live hull.js carries buildCluster (2 matches by code pattern) and the live
 vessels.json carries her cluster record (mast 45.4 m, rake 15° forward). Twenty-sixth clean
 push-triggered deploy in a row.
+
+---
+
+## Round 74 — 2026-08-11 — The house learns which way it runs, and Azzam stops being a wedding cake
+
+**The queue head (round 73's finding 1, the house cascade direction) is closed, and the fix is
+the class.** linerHouse built every house the liner's way — fronts aligned under the bridge,
+afts cascading — because that rule was written for ships conned from the forward end of the top
+deck. A motor yacht is built the other way about: a long low foredeck, each tier's front further
+aft than the one below, the crest abaft midships, the afts terracing down to a low stern deck.
+Which way the house runs is a fact about the ship, so it now comes from the record:
+**`houseCrest` is the TOP tier's u-span**, tiers interpolate straight from `houseAt` (tier 0)
+to it, and with no `houseCrest` the default reproduces the old liner formula algebraically —
+`hA + 0.024·i/n` forward, `hB − 0.14·i/n` aft. The ratchet proved the identity in pixels:
+**QM2 and Titanic both 0.000%**, every default-path frame 0.000–0.045%, no accepts among them.
+
+**Azzam's spans were measured off her plate again, not taken from the r73 note.** Same frame as
+r73's derivation: waterline endpoints x 1207/115 → 0.1575 m/px (r73 said 0.157), the map checked
+against the recorded cluster (stack mid predicted x 516, read ~513; mast within 8 px). Tilt
+matters — the waterline runs y 362 at the stem to 380 at the transom, and a flat read misplaces
+a tier by half a deck. Read: tier-0 windows run forward to u 0.18 (its roof tip lands at 0.87,
+confirming the recorded 0.86 aft); the crest's forward face is the block's own glass foot
+(u 0.437) and its roof ends at the fairing (recorded 0.723). So `houseAt` [0.30, 0.86] →
+**[0.18, 0.86]**, plus **`houseCrest` [0.43, 0.73]** — linear interpolation lands every
+intermediate face within ~4 m of the plate, inside the derivation's stated 3% error bar. The
+crest aft went to 0.73 rather than the note's 0.71 so the roof-footed 2.2 m dome at u 0.727
+keeps its footing; the r73 note's "crest 0.59–0.71" described the stack region, not the roof.
+Provenance is in the data (`houseProvenance`) and the card carries a House row saying the spans
+are derived from the photograph (rules 9/10).
+
+**Two consequential class fixes rode along:**
+1. **A cluster with a block is the bridge.** buildSuperstructure planted its generic wheelhouse
+   at the crest's forward end — which is now the block's own forward face, so the two boxes
+   occupied the same air. Where the record declares `cluster.blockU`, the wheelhouse (and its
+   wings) yields; the block cons the ship. Cowls were already year-gated.
+2. **The audit learned the class, injection-proven:** `cluster foot off the crest` — every
+   roof-footed cluster element (block ends, non-upper domes) must have the top tier's span
+   beneath it. The height rules cannot see this fault: a dome hanging past the roof edge keeps
+   its pedestal at roof HEIGHT, and the lowest cluster vertex stays on the roof. Injected
+   houseCrest [0.43, 0.66] fired it twice (domes 0.693, 0.727, details to the millimetre of u);
+   the healthy build passes. **Audit: 29 hulls, 0 problems.**
+
+**Looked at, rule 1:** full spin (8 bearings + 4 low) of the rebuilt ship. Beam: the ramp reads
+— foredeck, five rising tiers, cluster riding the compact crest, terraces astern; the glass
+sweep faces forward; the pipes lean toward the stem. Quarter: railed terraces descend from the
+crest to the foredeck. No wheelhouse box inside the block. Diff classified: house walls/roofs,
+boats riding the narrowed crest, the removed wheelhouse ghost, railings — hull, sea, cluster
+heights and cards all black.
+
+**Rule 0, on the accepted ship-azzam frame:** it reads as a rendered world — the yacht on open
+textured water, her delivery photograph on the card beside her. Three facts a viewer can read:
+the house ramps from a long foredeck to its crest abaft midships and terraces to the stern,
+matching the photograph on her own card; four polished exhausts raked toward the bow stand
+ahead of a black casing fin, with paired radome spheres at two roof levels around the raked
+mast; the card gives 180.6 m overall, 38.2 m air draught, 31.5 kn.
+
+**Carried findings, restated exactly (none closed silently):**
+1. QM2 hull window rows + Azzam's porthole ribbons — one window-band fix should serve both.
+2. Tenders on the crest roof; her plate stows them on the low aft deck (buildBoats' boat-deck
+   default). They now ride the narrowed crest outboard of the blocks — clear laterally
+   (z ≈ 7.7 m vs block half-width 6.4 m), still the wrong deck.
+3. My re-read of the plate puts the two 4.7 m dome pairs' bases near 19.6 m over water (the
+   tier-3 terrace), not the recorded 22 m house top — a half-deck disagreement with r73's
+   derivation, inside its error bar, worth one look when the domes are next touched.
+4. Trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank); galley
+   action unblocked; B10 stunsails if wanted.
+
+### Next, in order
+1. Carried window bands (QM2 + Azzam, one fix — finding 1 above).
+2. Tenders to the aft deck (finding 2); check the dome-base half-deck question (finding 3)
+   while in there.
+3. Trireme/corbita masthead sheave gear; waterway margin plank.

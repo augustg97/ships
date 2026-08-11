@@ -2059,3 +2059,18 @@ The round is complete and live — stamp 1786450589 verified on the deployed sit
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 14920 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 05:28:39  round starting
+Round 73 is complete and live. The summary:
+
+**The queue head is closed: Azzam has her stack/radome cluster, every dimension measured off her own delivery photograph and labelled derived.** Nothing published gives heights for anything above her house, so the plate on her card was gridded and measured at 3×–9× zoom — scale fixed by her waterline span against the recorded 180.6 m (0.157 m/px), cross-checked against her 9.0 m freeboard to 3%. The measurement settled her bow orientation twice over (anchor slash at the stem, overhanging raked entry vs vertical transom cut) and produced one finding I did not expect: **her exhaust pipes rake 15° forward** — every pipe edge in the plate leans toward the stem — and they are drawn that way.
+
+What went in: four polished pipes with red bands (tops staggered 32.3–34.4 m), the black casing fin abaft them, five radome stations on two roof levels (the plate's blobs are wider than tall, so the big domes are athwartships pairs), the 45.4 m signal mast raked 8.5° aft with whip to 47.2 m, the mast block, and the swept dark-glass sheet. `deckM 2.6` was also derived — five tiers from her 9 m sheer land on the plate's 22.1 m roof.
+
+The mechanism is the class: `buildCluster` draws any vessel's `cluster` record standing on the linerHouse roof (the derivation her walls and boats already stand on), with rakes as r72 shears. The audit learned it — two new rules, proven by a builder-fault injection that fired three rules at once — and runs 29/29 clean. Visual iteration through beam and quarter captures caught and fixed three composition faults (deep spreaders, fat whip, fin hiding the aft pipes). New committed frame `ship-azzam`; full ratchet 47/47 green with zero movers, exactly as predicted.
+
+**Found against the plate and queued, not squeezed in**: the house cascade runs the wrong way (linerHouse crests forward, her plate crests aft-third), her tiers wear liner porthole ribbons instead of window bands (same class as QM2's carried item), and the tenders sit on the crest roof instead of the aft deck. All three are in the handoff with evidence.
+
+Deploy verified: stamp 1786450589 → 1786453343 live, `buildCluster` present in the published js and the derived record in the published data. Twenty-sixth clean deploy in a row.
+2026-08-11 06:31:05  round finished; HEAD is 1b8a268 Round 73 deploy note: stamp 1786453343 live, buildCluster verified in the published js and the derived record in the published data
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 20909 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 06:41:06  round starting

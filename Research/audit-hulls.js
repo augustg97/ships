@@ -152,6 +152,24 @@
           say(v.id, 'cluster off its derived height',
               `tallest cluster vertex ${cl.y[1].toFixed(1)} m over water, derived record says ${H.cluster.stack.topFwdM}`);
       }
+      /* ── AND THE CREST IS UNDER ITS FEET (round 74). houseCrest narrows the top tier,
+         and every cluster element footed on the house roof — the block ends, the non-upper
+         domes — must have that tier's roof beneath it, or its pedestal stands at roof
+         HEIGHT with air below (the height rules above cannot see this: the lowest cluster
+         vertex is the fairing, which stays on the roof while a dome hangs past the edge).
+         Both derivations are the record's, so this fires on the narrowing mistake, not on
+         a healthy build. */
+      if (H.decks && SHIPS_HULL.linerHouse) {
+        const T2 = SHIPS_HULL.linerHouse(H);
+        const topT = T2.tiers[T2.n - 1];
+        const feet = [];
+        if (H.cluster.blockU) feet.push(['block fwd', H.cluster.blockU[0]], ['block aft', H.cluster.blockU[1]]);
+        for (const d of H.cluster.domes || []) if (!d.upper) feet.push(['dome', d.u]);
+        for (const [what, u] of feet)
+          if (u < topT.uA - 0.005 || u > topT.uB + 0.005)
+            say(v.id, 'cluster foot off the crest',
+                `${what} at u ${u.toFixed(3)}, top tier spans ${topT.uA.toFixed(3)}–${topT.uB.toFixed(3)}`);
+      }
     }
 
     /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem

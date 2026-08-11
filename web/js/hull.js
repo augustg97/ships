@@ -3240,6 +3240,17 @@ function linerHouse(S) {
      the derivation stays for hulls whose proportions it was calibrated on. */
   const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
   const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
+  /* ── ⚠ NOT EVERY HOUSE CRESTS FORWARD ────────────────────────────────────────────────
+     The aligned-fronts/cascading-afts rule below is the LINER's logic — conned from the
+     forward end of her top deck. A motor yacht is built the other way about: a long low
+     foredeck, each tier's front further AFT than the one below (the ramp every profile of
+     Azzam shows), the compact top abaft midships, and the afts terracing down to a low
+     stern deck. Which way the house runs is a fact about the ship, so it comes from the
+     RECORD: houseCrest is the TOP tier's u-span, tiers interpolate straight from houseAt
+     (tier 0) to it, and with no houseCrest the default reproduces the liner formula
+     exactly — hA + 0.024·i/n forward, hB − 0.14·i/n aft. */
+  const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
+    : [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
   const tiers = [];
   /* ── A TIER CAN BE SHELL, NOT HOUSE ────────────────────────────────────────────────
      On the Edwardian liners the side PLATING carried up past the sheer deck: Titanic's
@@ -3270,7 +3281,8 @@ function linerHouse(S) {
        TOTAL set-back of the house, not the set-back per deck: a tall house steps the same
        distance overall, in smaller steps. 0.14 reproduces the old figure at n=3 (0.047 a
        tier) and stops the staircase at any height. */
-    const uA = hA + (i / n) * 0.024, uB = hB - (i / n) * 0.14;
+    const f = n > 1 ? i / (n - 1) : 0;
+    const uA = hA + (crest[0] - hA) * f, uB = hB + (crest[1] - hB) * f;
     /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
        half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
     const half = (u) => {
@@ -3464,6 +3476,13 @@ function buildSuperstructure(S, group) {
      WINGS run from its sides to the ship's own side, because a 28 m beam has to be conned
      from its edges when she comes alongside. */
   const top = T.tiers[T.n - 1];
+  /* ── ⚠ A CLUSTER WITH A BLOCK IS THE BRIDGE ─────────────────────────────────────────
+     Where the record declares a cluster block (blockU), that block IS the conning
+     structure — Azzam's bridge is the glass front of her equipment block — and the
+     generic wheelhouse would stand inside it: with her crest at the block's own forward
+     face, the two boxes occupy the same air. The record already says who cons the ship;
+     honour it. */
+  if (S.cluster && S.cluster.blockU) { group.add(tag(g, 'superstructure')); return; }
   const bg = new THREE.Group();
   const uW0 = top.uA + 0.004, uW1 = Math.min(top.uB, uW0 + 0.030);
   const whHalf = Math.min(B * 0.27, top.half(uW0) - B * 0.01);
