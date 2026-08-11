@@ -3350,3 +3350,9 @@ mortise-and-tenon or sewn, in the era running 8000–1000 BC on the lit strip.
    priority.
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+**End-of-round deploy note: LIVE, stamp 1786399633 → 1786406602**, verified with a
+cache-busted fetch of the data-version meta tag on the third poll (~60 s after push); the
+live app.js confirmed carrying the `&card=era` grammar and showEraCard, the live
+plates.json all 31 entries including the five new slugs, and khufu-ship.jpg serving 200.
+Twentieth clean push-triggered deploy in a row.
