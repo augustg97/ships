@@ -3985,3 +3985,8 @@ unchanged committed baselines is its own confirmation.
    should serve both); tenders to the aft deck (finding 3); trireme/corbita masthead sheave
    gear; item 10 remainder (waterway margin plank).
 3. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+
+**End-of-round deploy note: LIVE, stamp 1786450589 → 1786453343**, verified with a cache-busted
+fetch — the live hull.js carries buildCluster (2 matches by code pattern) and the live
+vessels.json carries her cluster record (mast 45.4 m, rake 15° forward). Twenty-sixth clean
+push-triggered deploy in a row.
