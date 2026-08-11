@@ -215,8 +215,8 @@ padding:13px 16px 14px;z-index:32}
 #campBar .x{margin-left:auto;position:static}
 .gauge{margin:8px 0 7px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
 padding:3px 9px;border-radius:2px;display:inline-block}
-.gauge.eng{color:#bfe3f0;background:rgba(134,199,216,.13);border:1px solid rgba(134,199,216,.34)}
-.gauge.esp{color:#f0d9a8;background:rgba(217,164,65,.13);border:1px solid rgba(217,164,65,.34)}
+.gauge.blue{color:#bfe3f0;background:rgba(134,199,216,.13);border:1px solid rgba(134,199,216,.34)}
+.gauge.gold{color:#f0d9a8;background:rgba(217,164,65,.13);border:1px solid rgba(217,164,65,.34)}
 .cb-text{font-size:13.5px;line-height:1.55;color:var(--ink-dim)}
 #shipwright{position:fixed;inset:0;z-index:60;background:var(--abyss)}
 #shipwright.hidden{display:none}

@@ -251,6 +251,11 @@
    "name": "ship-azzam",
    "path": "/?frozen=1#v=ship&s=azzam",
    "note": "the 2013 Lürssen yacht with her plate-derived mast/stack/radome cluster (r73) — every height derived from the delivery photograph, labelled so"
+  },
+  {
+   "name": "action-salamis",
+   "path": "/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16",
+   "note": "the galley action: Salamis at the crush, 130 m, both fleets triremes under bare spars — guards the data-driven campaign class (fleets/formation/powder/year from the record)"
   }
  ]
 }

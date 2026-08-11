@@ -492,6 +492,52 @@ function applyHashView() {
     }
   }
 
+  /* `#v=action&bt=<battle id>&day=<n>` — the Action, addressed to a battle and a day of
+     its campaign. The tab's default is the first campaign in the data, so the second
+     staged battle was unreachable by URL the moment it existed — and what a frame cannot
+     name it cannot watch. `day` snaps the fleets onto that day's stations (btGoDay).
+     Read-only grammar like `b=`/`z=`: writeHash never emits either. Retried on the same
+     latch the Shipwright's named-hull loop holds, so a frozen capture cannot fire while
+     the named battle is still being found — the ship-container lesson, one view over. */
+  const btm = /[#&]bt=([a-z0-9-]+)/i.exec(location.hash);
+  const dm = /[#&]day=(\d+)/.exec(location.hash);
+  if ((btm || dm) && vm && vm[1] === 'action') {
+    shipSelectPending = true;
+    let bTries = 0;
+    const wantB = btm && btm[1].toLowerCase();
+    const tryBattle = () => {
+      const BTs = window.SHIPS_BT && window.SHIPS_BT.BT;
+      const list = (APP.battles && APP.battles.battles) || [];
+      const b = wantB
+        ? list.find(x => String(x.id).toLowerCase() === wantB && x.campaign)
+        : (BTs && BTs.spec);
+      if (b && BTs) {
+        if (wantB && BTs.spec !== b) window.SHIPS_BT.btOpen(b);
+        if (BTs.spec && (!wantB || BTs.spec.id === b.id)) {
+          if (dm) window.SHIPS_BT.btGoDay(+dm[1]);
+          /* `&cb=<deg>&cd=<m>&ch=<deg>` — where the camera stands: bearing round the
+             fleets, distance off, height angle; the drag and wheel's own BT.lon/dist/lat.
+             The default azimuth is fixed in the world while the separation axis follows
+             the day's wind, so at Salamis it looked nearly END-ON down the 130 m gap and
+             the line and the column read as one crowd. The same grammar the Shipwright
+             grew as b/z/l, for the same reason: what a frame cannot name it cannot watch. */
+          const cb = /[#&]cb=(-?[\d.]+)/.exec(location.hash);
+          const cd = /[#&]cd=([\d.]+)/.exec(location.hash);
+          const ch = /[#&]ch=([\d.]+)/.exec(location.hash);
+          if (cb) BTs.lon = parseFloat(cb[1]) * Math.PI / 180;
+          if (cd) BTs.dist = Math.max(90, Math.min(6000, parseFloat(cd[1])));
+          if (ch) BTs.lat = Math.max(0.012, Math.min(0.85, parseFloat(ch[1]) * Math.PI / 180));
+          shipSelectPending = false; return;
+        }
+      }
+      if (++bTries > 600) {
+        shipSelectPending = false; console.warn('action hash unresolved:', wantB); return;
+      }
+      requestAnimationFrame(tryBattle);
+    };
+    tryBattle();
+  }
+
   /* ── AND SO IS BEING ABOARD ONE ─────────────────────────────────────────────────────
      `#f=<voyage id>` goes down to that ship and follows her. The close-up is the view this
      project is most often asked about and it has never had a baseline, for the plain reason
@@ -3234,10 +3280,23 @@ function startCampaign(b) {
   campGroup = new THREE.Group();
   scene.add(campGroup);
 
-  /* two tracks: the Armada, and the English fleet that spends the fortnight to windward of it */
+  /* two tracks, one per fleet of the battle's own record — until round 80 this loop was
+     hardwired to the Armada (carrack tokens, fluyt tokens, gold and blue, a Channel
+     camera), so the board could stage exactly one campaign ever */
   const track = k => b.campaign.map(d => k === 0 ? [d.lon, d.lat] : [d.elon, d.elat]);
-  const COL = [[0xd9a441, 'Armada'], [0x86c7d8, 'English fleet']];
+  const FLEETS = b.fleets || [];
+  /* the campaign's own extent, in degrees — the wind box, the formation fits-test and
+     nothing else; the CAMERA is authored (see below) */
+  let lo0 = 1e9, lo1 = -1e9, la0 = 1e9, la1 = -1e9;
+  b.campaign.forEach(q => {
+    lo0 = Math.min(lo0, q.lon, q.elon); lo1 = Math.max(lo1, q.lon, q.elon);
+    la0 = Math.min(la0, q.lat, q.elat); la1 = Math.max(la1, q.lat, q.elat);
+  });
+  const midLa = (la0 + la1) / 2 * Math.PI / 180;
+  const stageU = Math.hypot((lo1 - lo0) * Math.cos(midLa), la1 - la0) * R * Math.PI / 180;
   for (let k = 0; k < 2; k++) {
+    const F = FLEETS[k];
+    if (!F) { campShip.push(null); continue; }
     const pts = [];
     const raw = track(k);
     for (let i = 0; i < raw.length - 1; i++)
@@ -3253,7 +3312,7 @@ function startCampaign(b) {
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setDrawRange(0, 0);
     const ln = new THREE.Line(g, new THREE.LineBasicMaterial({
-      color: COL[k][0], transparent: true, opacity: 0.95 }));
+      color: parseInt(F.color, 16), transparent: true, opacity: 0.95 }));
     campGroup.add(ln);
     campWake.push({ line: ln, pts });
 
@@ -3270,15 +3329,27 @@ function startCampaign(b) {
 
        ONE hull is generated per fleet and CLONED. `clone()` shares geometry and material,
        so twenty-six ships cost one hull's worth of vertices. */
-    const vid = k === 0 ? 'carrack' : 'fluyt';
-    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === vid);
+    const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === F.id);
     if (!ves || !ves.hull) { campShip.push(null); continue; }
-    const proto = window.SHIPS_HULL.buildShip(ves.hull);
+    const proto = window.SHIPS_HULL.buildShip(ves.hull, { furled: !!F.furled });
     const fleet = new THREE.Group();
     fleet.userData.loa = ves.hull.loa;
     fleet.userData.holders = [];
-    const N = k === 0 ? 15 : 11;
-    for (let n = 0; n < N; n++) {
+    /* bare spars barely heel — stepCampaign reads this */
+    fleet.userData.heelK = F.furled ? 0.2 : 1;
+    /* ── DOES THE FORMATION FIT THE STAGE? ──────────────────────────────────────────
+       Tokens are legibility-scaled ~100x, so a drawn formation front is form.front
+       metres at TOKEN scale — 150 km for the Armada, absorbed by a 700 km Channel
+       stage. Salamis's whole theatre is 20 km, and the same drawing sprawled trireme
+       tokens across Attica, over land, three fleets deep. The board's own header has
+       the rule: at any zoom that fits the theatre, a strait battle is ONE piece on the
+       board. So: full formation when the stage holds it, a single piece when it cannot
+       — the spatial story then belongs entirely to the Action, which draws the same
+       record at true scale. */
+    const camAlt = b.cam[2] / 63.71;
+    const frontU = F.form.front * camAlt * 0.0105 / ves.hull.loa;
+    const nDraw = frontU <= 0.5 * stageU ? F.n : 1;
+    for (let n = 0; n < nDraw; n++) {
       const holder = new THREE.Group();
       const sh = proto.clone();
       /* ⚠ THE HULL'S BOW IS AT LOCAL -X. Its stations run u = 0 at the stem to u = 1 at the
@@ -3289,17 +3360,13 @@ function startCampaign(b) {
       holder.add(sh);
       /* ⚠ Offsets are in METRES — the same units as the hull — and the whole formation is
          scaled once by the camera below. Positioning holders in world units instead left the
-         formation a fixed size while the ships shrank, so it clumped as you flew out. */
-      const L0 = ves.hull.loa;
-      const t = (n - (N - 1) / 2) / ((N - 1) / 2);         // -1 .. +1 across the front
-      if (k === 0) {
-        /* the crescent, horns swept back and the strong ships in the centre */
-        holder.position.set(t * L0 * 9.5, 0, -Math.pow(Math.abs(t), 1.7) * L0 * 8.0 + L0 * 3.0);
-      } else {
-        /* loose groups astern and to windward — the line of battle is a later idea */
-        holder.position.set(t * L0 * 7.4 + ((n % 3) - 1) * L0 * 1.6, 0,
-                            -L0 * 5.0 - (n % 4) * L0 * 2.3);
-      }
+         formation a fixed size while the ships shrank, so it clumped as you flew out.
+         The SHAPE is the battle record's own formation block, drawn by the one
+         implementation the Action draws at true scale — the board and the water can no
+         longer disagree about what shape a fleet kept. */
+      const t = nDraw === 1 ? 0 : (n - (nDraw - 1) / 2) / ((nDraw - 1) / 2);
+      const st = nDraw === 1 ? { x: 0, z: 0 } : window.SHIPS_BT.formStation(F.form, t, n);
+      holder.position.set(st.x, 0, st.z);
       fleet.add(holder);
       fleet.userData.holders.push(holder);
     }
@@ -3320,17 +3387,25 @@ function startCampaign(b) {
      reaching for: irrational multipliers, so the sequence never repeats and fills evenly. */
   campWind.userData.seed = Array.from({ length: NW }, (_, i) => [
     ((i + 1) * 0.7548776662) % 1, ((i + 1) * 0.5698402910) % 1, ((i + 1) * 0.6180339887) % 1]);
+  /* the streak box is the campaign's own extent plus a margin — it was the CHANNEL's
+     box, hardcoded, which for Salamis would have drawn the day's wind over 800 km of
+     Aegean the battle never touched */
+  const mLo = (lo1 - lo0) * 0.25 + 0.2, mLa = (la1 - la0) * 0.25 + 0.2;
+  campWind.userData.box = { lo: lo0 - mLo, la: la0 - mLa,
+                            dLo: (lo1 - lo0) + 2 * mLo, dLa: (la1 - la0) + 2 * mLa };
 
-  const d0 = b.campaign[0];
-  /* centred on the action; the campaign bar sits along the top, out of the way */
-  flyTo(0.4, 50.9, 118);
+  /* centred on the action; the campaign bar sits along the top, out of the way. The
+     camera is the battle record's own `cam` — [lon, lat, altitude km] — because what to
+     frame is an editorial fact of each campaign (the Armada's authored frame is the
+     Channel, cutting the Scotland leg), not something extents can derive. */
+  flyTo(b.cam[0], b.cam[1], R + b.cam[2] / 63.71);
   showCard({ eyebrow: 'Campaign', title: b.name, sub: b.date || '',
              rows: b.rows || [], prose: b.text || '', span: b.span || '',
              cite: b.cite || '', tags: b.tags });
   document.getElementById('campBar').classList.remove('hidden');
 }
 
-const CAMP_DAY = 2.3;                       // seconds of animation per day of 1588
+const CAMP_DAY = 2.3;                       // seconds of animation per campaign day
 
 function stepCampaign(dt) {
   if (!S.camp || !campGroup) return;
@@ -3353,8 +3428,13 @@ function stepCampaign(dt) {
     sh.position.copy(w);
     /* A hull on a globe is a legible TOKEN, not a scale drawing — at true scale a 42 m carrack
        is a third of a pixel. Scale it with the camera instead of with the world, so it holds
-       one size on screen at every zoom rather than becoming a 250 km ship when you fly in. */
-    sh.scale.setScalar((S.dist * 0.0016) / sh.userData.loa);
+       one size on screen at every zoom rather than becoming a 250 km ship when you fly in.
+       ⚠ With the camera's ALTITUDE, not its distance from the earth's centre: S.dist·k is
+       dominated by R at close zoom, so a token sized by it stops shrinking as you descend —
+       tolerable over the Channel at 1,100 km up, but at Salamis's 30 km frame it drew each
+       trireme the size of the strait. 0.0105 = 118·0.0016/18, the old constant re-expressed
+       at the Armada's own authored camera, so that board is unchanged. */
+    sh.scale.setScalar(((S.dist - R) * 0.0105) / sh.userData.loa);
 
     /* ── HEADING, FROM THE TRACK ITSELF ─────────────────────────────────────────────
        Not from a compass bearing computed off raw lon/lat differences — that ignores the
@@ -3372,6 +3452,13 @@ function stepCampaign(dt) {
        drift away from the two that had it wrong */
     const cm = tangentBasis(up, fwd);
     if (cm) sh.quaternion.setFromRotationMatrix(cm);
+    /* ⚠ the port direction, which the heel below reads. The tangentBasis refactor
+       (2026-08-02) deleted the old hand-built basis INCLUDING this vector's definition,
+       and left the read — so stepCampaign threw ReferenceError on its first frame and the
+       whole render loop died the moment ANY campaign was opened from the globe. Nine days
+       unnoticed, because no baseline frame can name the board. Found round 80 by running
+       the board for Salamis; the audit now steps every campaign for exactly this. */
+    const side = new THREE.Vector3().crossVectors(up, fwd);
 
     /* ── AND SHE HEELS ──────────────────────────────────────────────────────────────
        A square-rigged ship lies down to a beam wind and stands up when it is dead astern,
@@ -3380,7 +3467,7 @@ function stepCampaign(dt) {
        counters slid across a board — which is most of what makes it look alive. */
     const wf = bearingVec(lo, la, a.w).negate();                  // where the wind is going
     const rel = Math.atan2(wf.dot(side), wf.dot(fwd));            // 0 = dead astern
-    const heel = Math.sin(rel) * (0.030 + a.f * 0.011);
+    const heel = Math.sin(rel) * (0.030 + a.f * 0.011) * (sh.userData.heelK || 1);
     (sh.userData.holders || []).forEach((h, n) => {
       h.rotation.z = heel * (0.82 + 0.36 * ((n * 7) % 5) / 4);    // not in lockstep
       h.rotation.x = Math.sin(S.campT * 2.1 + n) * 0.014;         // pitch on the swell
@@ -3391,12 +3478,15 @@ function stepCampaign(dt) {
   const wdir = a.w, force = a.f;
   const wp = campWind.geometry.attributes.position;
   const drift = (S.campT * 0.55) % 1;
+  const box = campWind.userData.box;
   campWind.userData.seed.forEach((sd, j) => {
-    const lon = -7.0 + sd[0] * 13.0, lat = 49.2 + sd[1] * 7.6;
+    const lon = box.lo + sd[0] * box.dLo, lat = box.la + sd[1] * box.dLa;
     const dir = bearingVec(lon, lat, wdir + 180);
     const base = lonLatToVec(lon, lat, R * 1.0045);
     const ph = (sd[2] + drift) % 1;
-    const len = R * 0.018 * (0.5 + force / 8);
+    /* streak length rides the box, so the wind reads at the board's own scale:
+       0.00144·dLo reproduces the old R·0.018 at the Channel's 12.5-degree box */
+    const len = R * box.dLo * 0.00144 * (0.5 + force / 8);
     const p0 = base.clone().addScaledVector(dir, len * (ph * 6 - 1.0));
     const p1 = p0.clone().addScaledVector(dir, len);
     wp.setXYZ(j * 2, p0.x, p0.y, p0.z);
@@ -3407,18 +3497,19 @@ function stepCampaign(dt) {
 
   const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   const pt = CARD[Math.round(wdir / 22.5) % 16];
-  document.getElementById('campDay').textContent = a.d + ' 1588';
+  document.getElementById('campDay').textContent =
+    a.d + ' ' + window.SHIPS_BT.btYear(S.camp.year);
   document.getElementById('campWind').innerHTML =
     '<b>' + pt + '</b> force ' + force;
   document.getElementById('campText').textContent = a.t;
   const gauge = document.getElementById('campGauge');
-  /* which fleet holds the weather gauge — computed from the geometry, not asserted */
+  /* which fleet holds the weather gauge — computed from the geometry, not asserted, and
+     named from the battle's own fleet records */
   const toWind = bearingVec(a.lon, a.lat, wdir);
   const sep = lonLatToVec(a.elon, a.elat, 1).sub(lonLatToVec(a.lon, a.lat, 1));
-  gauge.textContent = sep.dot(toWind) > 0
-    ? 'English fleet holds the weather gauge'
-    : 'Armada holds the weather gauge';
-  gauge.className = 'gauge ' + (sep.dot(toWind) > 0 ? 'eng' : 'esp');
+  const gf = (S.camp.fleets || [])[sep.dot(toWind) > 0 ? 1 : 0];
+  gauge.textContent = gf ? gf.name + ' holds the weather gauge' : '';
+  gauge.className = 'gauge ' + ((gf && gf.chip) || '');
 }
 
 

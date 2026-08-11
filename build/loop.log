@@ -2153,3 +2153,28 @@ Round 78 is complete, deployed and verified live. The summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85:  3187 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 13:18:29  round starting
+Those two failure notifications are the waiter loops I killed — expected. The round is complete, the tree clean, nothing running.
+
+## Round 79 — done and live
+
+**The queue head is closed: the multi-tier halyard lead (ties and jeers) and the junk's through-pole sheave, one research pass covering both, exactly as round 78 left it.**
+
+**Research first** (`Research/MASTHEADS.md` §4): Falconer's 1780 *Universal Dictionary of the Marine* read verbatim — **JEARS** (the lower yard hangs in two tackles between the lower masthead and its slings, falls to the deck), **TYE** (the runner that transmits the tackle's effort after passing the masthead block), and **ENCORNAIL** ("the sheave-hole in a top-mast-head, through which the top-sail-tye is reeved"). The crossjack hung in standing slings; Needham's junk quote was already read in full at round 67.
+
+**The drawing, as classes:** every crossed yard now records its hoist mechanism (`{tie: section}` / `'jeers'` / `'fixed'`) in both builder paths. Hoisting yards' falls lead slings → the sheave in their own section's head → the rail, where before every upper yard drew a slings-to-rail rope that could hoist nothing — the round-78 fault one tier up. Fixed yards (crossjack, doubled-rig course, lower topsail, lower topgallant) lose their false falls. The classic rig's fore and main courses get their jeer pairs. The junk masthead gets the through-pole sheave — two dark slots and a proud pin — and its halyard now falls to the deck where it used to stop dead at a bare pole.
+
+**The audit learned it, six injection proofs:** the halyard census is exact to the rope leg (ropeMesh builds 8-vertex prisms, legs = vertices/8). Ties cut → fires on all 14 square/junk hulls; jeers stripped → the 5 classic-rig hulls; jeers grafted → the 4 doubled-rig hulls; sheaves stripped → the 2 junks; sheaves slid → both adrift bands; an extra fall grafted → the census fires from above the mark. Healthy: **29 hulls, 0 problems**.
+
+**Ratchet, two runs:** run 1 had 11 movers, every one an intended ship, every diff read — pure rope lines, new masthead fittings, and reveal pixels where removed ropes crossed the steamer's funnel and the 74's boats. The proof set: ship-trireme and shipwright-corbis, the single-tier hulls round 78 already fixed, sat at exactly 0.000%. All 11 accepted with class reasons; **run 2 came back 47/47 green with the accepts at 0.000% and no font flap**.
+
+**Deployed and verified live: stamp 1786476366 → 1786482330**, with the hoist record, jeers, sheave, and all three new audit rules confirmed in the published js by cache-busted fetch. Thirty-second clean deploy in a row. Next round's queue head: the galley action campaign-data tasks.
+2026-08-11 14:29:58  round finished; HEAD is 6888464 Round 79 deploy note: stamp 1786482330 verified live, the hoist record/jeers/sheave confirmed in the published js and the three new audit rules by name; run 2 47/47 green with all 11 accepts at 0.000% and no font flap
+/Users/augustgweon/Ships/build/loop-round.sh: line 85:  9702 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 14:39:58  round starting
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-11 16:00:11  round finished; HEAD is 6888464 Round 79 deploy note: stamp 1786482330 verified live, the hoist record/jeers/sheave confirmed in the published js and the three new audit rules by name; run 2 47/47 green with all 11 accepts at 0.000% and no font flap
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 16902 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 16:10:11  round starting

@@ -147,23 +147,41 @@ function lonLatUpwind(d) {
   return (dx * Math.sin(toWind) + dz * Math.cos(toWind)) > 0 ? 1 : -1;
 }
 
+/* ── a station in the fleet's own frame, from the record's formation block ──────────
+   Until round 80 the composition and the shape were HARDCODED here — carrack times 22 in
+   a crescent, fluyt times 18 in ranks — so the Action could only ever stage 1588. The
+   fleets are battle DATA now (`battle.fleets`), and this is the one implementation of a
+   formation, drawn by the Action at true scale and by the globe's campaign board at token
+   scale. Two shapes cover every fleet staged so far: `crescent` — horns swept back, the
+   strong ships in the centre, the Armada's own — and `ranks` — a front so many metres
+   across, so many rows deep. Params are metres. t runs -1..+1 across the front. */
+function formStation(form, t, i) {
+  if (form.shape === 'crescent')
+    return { x: t * form.front / 2,
+             z: -Math.pow(Math.abs(t), 1.7) * form.depth + form.lead };
+  return { x: t * form.front / 2 + ((i % 3) - 1) * (form.jx || 0),
+           z: -(form.back || 0) - (i % form.rows) * form.gap };
+}
+
+/* negative years are years BC — the same convention the vessel records use */
+function btYear(y) { return y < 0 ? (-y) + ' BC' : '' + y; }
+
 /* ── open ──────────────────────────────────────────────────────────────────────────── */
 function btOpen(battle) {
   btInit();
-  if (!battle || !battle.campaign) return false;
+  if (!battle || !battle.campaign || !battle.fleets) return false;
   BT.spec = battle;
   BT.ships.forEach(s => BT.scene.remove(s.obj));
   BT.ships = []; BT.mats = [];
 
   const V = (APP.vessels && APP.vessels.vessels) || [];
-  const FLEETS = [
-    { id: 'carrack', n: 22, side: 0, name: 'Armada' },
-    { id: 'fluyt',   n: 18, side: 1, name: 'English fleet' },
-  ];
-  FLEETS.forEach(F => {
+  battle.fleets.forEach((F, side) => {
     const ves = V.find(x => x.id === F.id);
     if (!ves || !ves.hull) return;
-    const proto = window.SHIPS_HULL.buildShip(ves.hull);
+    /* `furled` is the fleet record's canvas state: a trireme fought under oar with her
+       sails struck — often with no mast aboard at all, so bare spars are themselves a
+       stated simplification (Research/SALAMIS.md) */
+    const proto = window.SHIPS_HULL.buildShip(ves.hull, { furled: !!F.furled });
     /* one compiled polar per fleet, shared by every ship in it — route.js's own */
     const P = compilePolar(ves.polar);
     /* ⚠ Object3D.clone() DEEP-COPIES userData THROUGH JSON. Any live object reference held
@@ -182,13 +200,17 @@ function btOpen(battle) {
       holder.add(o);
       BT.scene.add(holder);
       const t = (i - (F.n - 1) / 2) / ((F.n - 1) / 2);
+      const st = formStation(F.form, t, i);
       BT.ships.push({
-        obj: holder, side: F.side, P, loa: ves.hull.loa,
+        obj: holder, side, P, loa: ves.hull.loa,
         t, x: 0, z: 0, hd: 0, spd: 0, phase: i * 1.7,
-        /* station in the fleet's own frame, in metres */
-        sx: F.side === 0 ? t * 260 : t * 210 + ((i % 3) - 1) * 40,
-        sz: F.side === 0 ? -Math.pow(Math.abs(t), 1.7) * 230 + 90
-                         : -430 - (i % 4) * 70,
+        /* `face` turns the fleet on its snap heading: 1588's fleets ran the same course
+           in line ahead, but at Salamis the column met the line BOW TO BOW, and a line
+           snapped stern-to its enemy is the aback fault at fleet scale */
+        face: (F.face || 0) * Math.PI / 180,
+        /* bare spars barely heel: most of the heeling moment IS the canvas */
+        heelK: F.furled ? 0.2 : 1,
+        sx: st.x, sz: st.z,
       });
     }
   });
@@ -214,7 +236,7 @@ function btSetDay() {
   BT.tws = 0.836 * Math.pow(d.f, 1.5);
   BT.sea.material.uniforms.uWind.value = 2.5 + d.f * 1.9;
   const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  document.getElementById('btDate').textContent = d.d + ' 1588';
+  document.getElementById('btDate').textContent = d.d + ' ' + btYear(BT.spec.year);
   document.getElementById('btWind').innerHTML =
     '<b>' + CARD[Math.round(d.w / 22.5) % 16] + '</b> force ' + d.f;
   document.getElementById('btText').textContent = d.t;
@@ -231,16 +253,21 @@ function btSetDay() {
   const toWind = (d.w) * Math.PI / 180;               // bearing the wind comes FROM
   const engSep = lonLatUpwind(d);
   BT.sep = { x: Math.sin(toWind) * d.rng * engSep, z: Math.cos(toWind) * d.rng * engSep };
-  BT.gauge = engSep > 0 ? 'English fleet holds the weather gauge'
-                        : 'Armada holds the weather gauge';
-  BT.fleetHd = 90;                          // both fleets running east up the Channel
-  if (BT.day < C.length - 1) {
-    const n = C[BT.day + 1];
-    const mLat = 111132, mLon = 111320 * Math.cos(d.lat * Math.PI / 180);
-    BT.fleetHd = Math.atan2((n.lon - d.lon) * mLon, (n.lat - d.lat) * mLat) * 180 / Math.PI;
+  const FL = BT.spec.fleets, gaugeFleet = engSep > 0 ? FL[1] : FL[0];
+  BT.gauge = gaugeFleet.name + ' holds the weather gauge';
+  /* the course is the track's own bearing, this day to the next — and on the LAST day the
+     previous day to this one, the heading the fleet arrived on. The old fallback was a
+     hardcoded 90, east up the Channel, which pointed the Armada at Norway on the one day
+     its record says it ran north about Scotland. */
+  BT.fleetHd = 90;
+  if (C.length > 1) {
+    const j = Math.min(BT.day, C.length - 2);
+    const p = C[j], n = C[j + 1];
+    const mLat = 111132, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
+    BT.fleetHd = Math.atan2((n.lon - p.lon) * mLon, (n.lat - p.lat) * mLat) * 180 / Math.PI;
   }
   document.getElementById('btGauge').textContent = BT.gauge;
-  document.getElementById('btGauge').className = 'gauge ' + (engSep > 0 ? 'eng' : 'esp');
+  document.getElementById('btGauge').className = 'gauge ' + (gaugeFleet.chip || '');
   document.getElementById('btRange').textContent =
     d.rng >= 1000 ? (d.rng / 1000).toFixed(1) + ' km apart' : d.rng + ' m apart';
   btPlace(false);
@@ -254,8 +281,21 @@ function btPlace(snap) {
     /* station rotated into the fleet's heading */
     s.tx = ox + s.sx * Math.cos(h) + s.sz * Math.sin(h);
     s.tz = oz - s.sx * Math.sin(h) + s.sz * Math.cos(h);
-    if (snap) { s.x = s.tx; s.z = s.tz; s.hd = h; }
+    if (snap) { s.x = s.tx; s.z = s.tz; s.hd = h + s.face; }
   });
+}
+
+/* jump to a campaign day and SNAP the fleets onto that day's stations — the hash's
+   `&day=` uses this, because a frozen capture of ships mid-passage between two days'
+   stations is a picture of nothing the record says */
+function btGoDay(n) {
+  const C = BT.spec && BT.spec.campaign;
+  if (!C) return;
+  BT.day = Math.max(0, Math.min(C.length - 1, n | 0));
+  const sl = document.getElementById('btDay');
+  if (sl) sl.value = BT.day;
+  btSetDay();
+  btPlace(true);
 }
 
 function btClose() {
@@ -279,8 +319,12 @@ function btFrame(now, dt) {
   BT.t += dt;
   const windTo = (BT.wind + 180) * Math.PI / 180;      // where the wind is going
   const fromWind = windTo + Math.PI;                   // where it comes from
-  const action = /Action|GRAVELINES|Portland|Isle of Wight|fireships/i.test(
-                   BT.spec.campaign[BT.day].t);
+  /* Gunfire on the days the record FLAGS action, in fleets whose record carries powder.
+     The old test was a regex over the day's prose, and it fired on "A day of no action" —
+     5 Aug, the empty day off Beachy Head, drew broadsides for as long as the Action has
+     existed, because "no action" contains "Action". And 480 BC has no guns at all, which
+     is a fact of the battle record (`powder`), not of the prose. */
+  const action = !!BT.spec.campaign[BT.day].a && !!BT.spec.powder;
 
   BT.ships.forEach(s => {
     /* steer for the station — but the helm knows the gate. If the direct course would make
@@ -315,8 +359,10 @@ function btFrame(now, dt) {
     const o = s.obj;
     o.position.set(s.x, 0, s.z);
     o.rotation.set(0, s.hd, 0);
-    /* she heels away from the wind by the sine of its angle off the bow, and lifts on the swell */
-    const heel = Math.sin(rel * Math.PI / 180) * (0.035 + BT.force * 0.013);
+    /* she heels away from the wind by the sine of its angle off the bow, and lifts on the
+       swell — scaled down to windage alone when her canvas is stowed, because most of the
+       heeling moment IS the canvas */
+    const heel = Math.sin(rel * Math.PI / 180) * (0.035 + BT.force * 0.013) * s.heelK;
     o.rotateZ(-heel);
     o.rotateX(Math.sin(BT.t * 0.7 + s.phase) * 0.016);
     o.position.y = Math.sin(BT.t * 0.62 + s.phase) * 0.45 - 0.2;
@@ -393,4 +439,4 @@ function btStepSmoke(dt, windTo) {
 }
 
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, BT };

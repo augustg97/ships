@@ -4564,3 +4564,105 @@ cache-busted fetches inside the round — the live hull.js carries the hoist rec
 the jeers drawing and the junk sheave (12 matches by pattern), and the live audit-hulls.js
 carries all three new rules by name. The Pages run started in seconds. Thirty-second clean
 push-triggered deploy in a row.
+
+---
+
+## Round 80 — 2026-08-11 — The first galley action: Salamis, and the campaign stops being the Armada's private property
+
+**The queue head (galley action, unblocked since r50) is closed — Salamis is staged, and the
+staging tore the last of 1588 out of the campaign code.** The battle and board systems
+hardcoded the Armada in eight places: fleet vessels and counts, both formations, track colors,
+fleet names, the year suffix "1588", the gunfire test, the Channel wind box and the Channel
+camera. All of it is battle DATA now (`fleets` with per-fleet form/color/chip/furled/face,
+`powder`, `cam`, per-day `a`), and both consumers — the Action at true scale, the globe board
+at token scale — draw the one formation implementation, `SHIPS_BT.formStation`. Proof the
+refactor moved nothing it did not intend: the `action` baseline scored 0.009% (the run's own
+noise band — untouched frames scored to 0.033%), and the armada's labels, gauge and chip
+render byte-identical strings through the data path.
+
+**The research is `Research/SALAMIS.md`** — Herodotus VIII (Rawlinson) fetched and quoted
+verbatim (8.60 "to fight in a narrow space is favourable to us — in an open sea, to them";
+8.48's 378; 8.76 the encirclement; 8.89 the drownings), Plutarch Themistocles 14 (Dryden) for
+the wind record the fighting phases' force 4 southerly rests on, Aeschylus' Persae in Greek
+from Perseus (382–4 the all-night rowing, 388–91 the paean's echo). Numbers, date, the
+Egyptian squadron and the dead admiral's name are all carried as contested with their sources.
+Nine campaign phases, each tied to its passage; authored by `Research/author-salamis-r80.py`,
+which asserts the geometry before writing: gauge sign stable (+1, Persians upwind — Plutarch's
+breeze from the open sea) on every phase, fleet heading within 35° of the enemy bearing on the
+approach and fight phases, every field the Action reads present on every day of both battles.
+
+**Two real bugs found by the work, both older than the round:**
+1. **The Action has drawn broadsides on "A day of no action" since it was built.** The gunfire
+   test was a regex over the day's prose (`/Action|.../`), and "no action" contains "Action" —
+   5 Aug, the empty day off Beachy Head, fired guns every round. The record's `a` flag on the
+   five real gunfire days replaces it, gated further on `powder` (480 BC has no guns; the
+   smoke path asks the record now).
+2. **The globe campaign board has been dead since 2026-08-02.** The tangentBasis refactor
+   (c66c703) deleted the `side` vector its own heel line still read, so stepCampaign threw
+   ReferenceError on its first frame and the render loop died whenever ANY campaign was opened
+   from the globe. Nine days unnoticed because no baseline frame can name the board. Found by
+   running the board for Salamis; fixed (side = up × fwd, the port direction the basis already
+   implies), and the audit now OPENS AND STEPS every campaign in the data — that rule alone
+   would have caught this the day it shipped.
+
+**Board changes that follow from a 20 km theatre:** token scale now uses camera ALTITUDE, not
+distance-from-earth-centre (S.dist·k is dominated by R at close zoom; 0.0105 re-expresses the
+old constant exactly at the Armada's authored camera, so that board is unchanged); the wind
+streak box and length derive from the campaign's own extent; the board camera is authored
+per-battle data (`cam`, [lon, lat, alt km] — armada carries its old 0.4/50.9/118 verbatim);
+and a fits-test draws the full formation only when the stage holds it — Salamis, whose 150 km
+of token formation sprawled across Attica, draws ONE piece per fleet, per the board's own
+header rule that at any zoom fitting the theatre a strait battle is one token. Salamis's cam
+is 450 km: measured against captures at 30 and 250 km, that is where the globe's terrain still
+reads as coastline; below it the substrate is mush and rule 0 fails on the board itself.
+
+**The Action's hash grammar grew `&bt=<battle>&day=<n>` and `&cb=<deg>&cd=<m>&ch=<deg>`**
+(battle, campaign day snapped onto stations, camera bearing/distance/height) — the second
+staged battle was unreachable by URL the moment it existed, and the default camera azimuth is
+fixed in the world while the separation axis follows the wind, so Salamis's line and column
+read end-on as one crowd until the frame could name a broadside view. Same latch as the named-
+hull loop, so a frozen capture cannot fire mid-selection. writeHash emits none of it.
+
+**Audit: 6 → 7 battle-block rules plus the campaign-record block, ELEVEN injections, each
+firing its named rule against the healthy other half:** ghost fleet id (empty-sea class), no
+powder, broken formation, impossible weather, missing cam, one fleet, the gunfire regex
+resurrected, gunfire gated on nothing, the board's own formation implementation, a year that
+cannot go BC, and the board step dying (the c66c703 class, which fires on both campaigns).
+Healthy pass 29 hulls / 0 problems — and the healthy pass now exercises startCampaign +
+stepCampaign on every campaign in the data. ⚠ Lesson for injection snippets: playwright's
+evaluate() CALLS a script whose completion value is a function — a snippet ending in
+`x = function(){throw}` executes the throw at injection time; end such snippets with `null;`.
+⚠ And the audit's data rules must read bare `APP` under `typeof` — `const APP` is a global
+lexical binding, `window.APP` is undefined, and a window-guarded read skipped every data rule
+silently while the function-source rules still ran.
+
+**Frames 47 → 48: `action-salamis` added** — day 5 (mid-morning, the crush) at 130 m from
+cb=60/cd=950/ch=16, chosen from four composed candidates read as images. Full ratchet before
+it: 47/47 within tolerance, zero accepts needed. **Rule 0, written on action-salamis:** it
+reads as a rendered world — a force-4 sea under a shared haze, two fleets of oared hulls
+riding it. Three facts a viewer can read off it: the date and wind line, Mid-morning 480 BC,
+SSE force 4, on a card whose text is Plutarch's swell; the fleets stand 130 m apart — an
+ordered double line against a column crowded three deep, which is Herodotus 8.60 as distance;
+every ship is under bare spars, canvas struck for action, and no powder smoke anywhere because
+the record says none existed. Known gap, carried openly: the strait's SHORES — Kynosoura,
+Psyttaleia, Aigaleos stood inside the view's 3.4 km haze and framed the real fight; the
+Action's water is open sea. That is the next real piece of work on this view.
+
+**Carried, restated exactly (none closed silently):**
+1. The Salamis strait has no shores in the Action (above) — needs a terrain treatment worthy
+   of rule 0(a), not a cardboard ridge.
+2. The globe board is still not hash-addressable, so no frame can watch it; the audit's
+   step-every-campaign rule is the interim watch. A `#battle=` grammar + a board frame would
+   close it properly. Related, pre-existing: flyTo never arrives under ?frozen (fly lerp reads
+   the wall clock), so a frozen board capture photographs mid-flight; and campBar day labels
+   longer than the Armada's wrap into the tab strip (cosmetic).
+3. Lepanto and Myeongnyang stay campaign-data tasks, but both need hulls the fleet lacks
+   (a 16th-c galley/galleass; panokseon and Japanese sekibune) — vessel work before campaign
+   work.
+4. r78 capture-gate hardening if the font flap strikes again (it did not strike this round).
+5. r75 QM2 small items; r77 Azzam dome-stance derivation; r79 jeer falls drawn same-side.
+
+### Next, in order
+1. The Salamis shores, if the Action is to keep its rule-0 claim in a strait (carried 1).
+2. B10 stunsails if wanted; or the board's `#battle=` grammar + frame (carried 2).
+3. QM2/Azzam/jeer small items only if a round is otherwise light.

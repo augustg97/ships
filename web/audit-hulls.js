@@ -2183,5 +2183,114 @@
         say('battle', 'shared polar model unreachable',
             fn + ' is not a page global — the battle compiles and evaluates through it at open');
   }
+
+  /* ── AND A CAMPAIGN IS A COMPLETE RECORD (round 80). ───────────────────────────────────
+     Staging Salamis meant tearing the Armada out of the code: fleets, formations, powder,
+     the year and the board camera are battle DATA now, and the Action opens whatever
+     campaign the data carries. Which means the data can now be wrong in ways the code used
+     to make impossible — a fleet id no vessel answers to draws an EMPTY SEA with a working
+     UI over it, the quietest possible failure. Every field the two consumers read is
+     checked here, per battle, per fleet, per day. */
+  {
+    /* ⚠ bare APP, tested with typeof, same as the audit's own header: `const APP` is a
+       global LEXICAL binding, so window.APP is undefined and a window-guarded read here
+       silently skipped every data rule while the function-source rules still ran */
+    const BATS = (typeof APP !== 'undefined' && APP.battles && APP.battles.battles) || [];
+    const VS = (typeof APP !== 'undefined' && APP.vessels && APP.vessels.vessels) || [];
+    for (const b of BATS) {
+      if (!b.campaign) continue;
+      const bid = 'battle-' + b.id;
+      if (!Array.isArray(b.fleets) || b.fleets.length !== 2)
+        say(bid, 'a campaign without its two fleets',
+            'the Action and the board both draw exactly two sides from battle.fleets');
+      if (typeof b.powder !== 'boolean')
+        say(bid, 'a campaign without an armament record',
+            'powder must be true or false — the gunfire path asks it, and absence is not an answer');
+      if (typeof b.year !== 'number')
+        say(bid, 'a campaign without a year', 'the date line is d.d + btYear(year)');
+      if (!Array.isArray(b.cam) || b.cam.length !== 3 || !b.cam.every(isFinite))
+        say(bid, 'a campaign without a board camera', 'cam is [lon, lat, altitude km]');
+      for (const F of (b.fleets || [])) {
+        const ves = VS.find(x => x.id === F.id);
+        if (!ves || !ves.hull || !ves.polar)
+          say(bid, 'a fleet no vessel answers to',
+              `fleet "${F.name}" asks for vessel "${F.id}" — not in the vessel list with hull ` +
+              'and polar, so the Action would draw an empty sea under a working UI');
+        if (!(F.n >= 1) || !F.name || !/^[0-9a-f]{6}$/i.test(F.color || '') || !F.chip)
+          say(bid, 'a fleet with a broken record',
+              `"${F.id}": n ≥ 1, name, 6-digit color and chip are all required`);
+        const fm = F.form || {};
+        const formOk = fm.shape === 'crescent'
+          ? [fm.front, fm.depth, fm.lead].every(isFinite)
+          : fm.shape === 'ranks'
+            ? [fm.front, fm.rows, fm.gap].every(isFinite) && fm.rows >= 1
+            : false;
+        if (!formOk)
+          say(bid, 'a fleet with no formation',
+              `"${F.id}": form.shape must be crescent (front/depth/lead) or ranks (front/rows/gap)`);
+      }
+      const C = b.campaign;
+      if (C.length < 2)
+        say(bid, 'a campaign of one day', 'the fleet heading is the track\'s own bearing, day to day');
+      C.forEach((day, i) => {
+        for (const k of ['lon', 'lat', 'elon', 'elat'])
+          if (!isFinite(day[k])) say(bid, 'a campaign day off the map', `day ${i} ("${day.d}") ${k}`);
+        if (!(day.rng > 0)) say(bid, 'a campaign day without a range', `day ${i} ("${day.d}")`);
+        if (!(day.w >= 0 && day.w <= 360) || !(day.f >= 0 && day.f <= 12))
+          say(bid, 'a campaign day with impossible weather',
+              `day ${i} ("${day.d}") w=${day.w} f=${day.f}`);
+        if (!day.d || !day.t) say(bid, 'a campaign day with no record', `day ${i}`);
+        if (day.a !== undefined && day.a !== true)
+          say(bid, 'an action flag that is not a flag', `day ${i} ("${day.d}") a=${day.a}`);
+      });
+    }
+
+    /* the gunfire path must ask the RECORD. The old test was a regex over the day's prose
+       that fired on "A day of no action" — 5 Aug drew broadsides for as long as the Action
+       existed. The regex must stay dead and the record must be what the frame reads. */
+    if (window.SHIPS_BT) {
+      const src = String(SHIPS_BT.btFrame);
+      if (/GRAVELINES/.test(src))
+        say('battle', 'gunfire by regex again',
+            'btFrame matches the day\'s prose for GRAVELINES — the a flag and powder are the record');
+      if (!/\.a\b/.test(src) || !/powder/.test(src))
+        say('battle', 'gunfire not asking the record',
+            'btFrame must gate its broadsides on the day\'s a flag and the battle\'s powder field');
+      /* one formation implementation, drawn by both views */
+      if (typeof SHIPS_BT.formStation !== 'function')
+        say('battle', 'the formation model unreachable',
+            'SHIPS_BT.formStation is the one implementation both views draw');
+      if (typeof startCampaign === 'function' && !/formStation/.test(String(startCampaign)))
+        say('battle', 'the board keeps its own formation',
+            'startCampaign no longer draws SHIPS_BT.formStation — two shapes for one fleet');
+      /* years BC label as years BC */
+      if (typeof SHIPS_BT.btYear !== 'function' || SHIPS_BT.btYear(-480) !== '480 BC'
+          || SHIPS_BT.btYear(1588) !== '1588')
+        say('battle', 'a year that cannot go BC',
+            'btYear(-480) must read "480 BC" — Salamis is dated like the vessels are');
+    }
+
+    /* the BOARD must survive a step of every campaign. No baseline frame can name the
+       globe's campaign board, and that blindness hid a nine-day total failure: the
+       tangentBasis refactor (2026-08-02) deleted the `side` vector its own heel still
+       read, so stepCampaign threw on its first frame and the render loop died whenever
+       any campaign was opened from the globe. Opening and stepping each campaign here is
+       the cheapest watch that class gets. */
+    if (typeof startCampaign === 'function' && typeof stepCampaign === 'function'
+        && typeof clearCampaign === 'function') {
+      for (const b of BATS) {
+        if (!b.campaign || !b.fleets) continue;
+        try {
+          startCampaign(b);
+          stepCampaign(0.001);
+        } catch (e) {
+          say('battle-' + b.id, 'a board that cannot draw its campaign',
+              'startCampaign/stepCampaign threw: ' + e.message);
+        } finally {
+          try { clearCampaign(); } catch (e) { /* already said */ }
+        }
+      }
+    }
+  }
   return { problems, checked: rows.length, rows };
 })()

@@ -86,21 +86,25 @@ const toWind = d.w * Math.PI / 180;
 const dx = (d.elon - d.lon) * Math.cos(d.lat * Math.PI / 180), dz = d.elat - d.lat;
 return (dx * Math.sin(toWind) + dz * Math.cos(toWind)) > 0 ? 1 : -1;
 }
+function formStation(form, t, i) {
+if (form.shape === 'crescent')
+return { x: t * form.front / 2,
+z: -Math.pow(Math.abs(t), 1.7) * form.depth + form.lead };
+return { x: t * form.front / 2 + ((i % 3) - 1) * (form.jx || 0),
+z: -(form.back || 0) - (i % form.rows) * form.gap };
+}
+function btYear(y) { return y < 0 ? (-y) + ' BC' : '' + y; }
 function btOpen(battle) {
 btInit();
-if (!battle || !battle.campaign) return false;
+if (!battle || !battle.campaign || !battle.fleets) return false;
 BT.spec = battle;
 BT.ships.forEach(s => BT.scene.remove(s.obj));
 BT.ships = []; BT.mats = [];
 const V = (APP.vessels && APP.vessels.vessels) || [];
-const FLEETS = [
-{ id: 'carrack', n: 22, side: 0, name: 'Armada' },
-{ id: 'fluyt',   n: 18, side: 1, name: 'English fleet' },
-];
-FLEETS.forEach(F => {
+battle.fleets.forEach((F, side) => {
 const ves = V.find(x => x.id === F.id);
 if (!ves || !ves.hull) return;
-const proto = window.SHIPS_HULL.buildShip(ves.hull);
+const proto = window.SHIPS_HULL.buildShip(ves.hull, { furled: !!F.furled });
 const P = compilePolar(ves.polar);
 if (proto.userData.hullMat) BT.mats.push(proto.userData.hullMat);
 for (let i = 0; i < F.n; i++) {
@@ -110,12 +114,13 @@ o.rotation.y = Math.PI / 2;
 holder.add(o);
 BT.scene.add(holder);
 const t = (i - (F.n - 1) / 2) / ((F.n - 1) / 2);
+const st = formStation(F.form, t, i);
 BT.ships.push({
-obj: holder, side: F.side, P, loa: ves.hull.loa,
+obj: holder, side, P, loa: ves.hull.loa,
 t, x: 0, z: 0, hd: 0, spd: 0, phase: i * 1.7,
-sx: F.side === 0 ? t * 260 : t * 210 + ((i % 3) - 1) * 40,
-sz: F.side === 0 ? -Math.pow(Math.abs(t), 1.7) * 230 + 90
-: -430 - (i % 4) * 70,
+face: (F.face || 0) * Math.PI / 180,
+heelK: F.furled ? 0.2 : 1,
+sx: st.x, sz: st.z,
 });
 }
 });
@@ -136,23 +141,24 @@ BT.wind = d.w; BT.force = d.f;
 BT.tws = 0.836 * Math.pow(d.f, 1.5);
 BT.sea.material.uniforms.uWind.value = 2.5 + d.f * 1.9;
 const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-document.getElementById('btDate').textContent = d.d + ' 1588';
+document.getElementById('btDate').textContent = d.d + ' ' + btYear(BT.spec.year);
 document.getElementById('btWind').innerHTML =
 '<b>' + CARD[Math.round(d.w / 22.5) % 16] + '</b> force ' + d.f;
 document.getElementById('btText').textContent = d.t;
 const toWind = (d.w) * Math.PI / 180;
 const engSep = lonLatUpwind(d);
 BT.sep = { x: Math.sin(toWind) * d.rng * engSep, z: Math.cos(toWind) * d.rng * engSep };
-BT.gauge = engSep > 0 ? 'English fleet holds the weather gauge'
-: 'Armada holds the weather gauge';
+const FL = BT.spec.fleets, gaugeFleet = engSep > 0 ? FL[1] : FL[0];
+BT.gauge = gaugeFleet.name + ' holds the weather gauge';
 BT.fleetHd = 90;
-if (BT.day < C.length - 1) {
-const n = C[BT.day + 1];
-const mLat = 111132, mLon = 111320 * Math.cos(d.lat * Math.PI / 180);
-BT.fleetHd = Math.atan2((n.lon - d.lon) * mLon, (n.lat - d.lat) * mLat) * 180 / Math.PI;
+if (C.length > 1) {
+const j = Math.min(BT.day, C.length - 2);
+const p = C[j], n = C[j + 1];
+const mLat = 111132, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
+BT.fleetHd = Math.atan2((n.lon - p.lon) * mLon, (n.lat - p.lat) * mLat) * 180 / Math.PI;
 }
 document.getElementById('btGauge').textContent = BT.gauge;
-document.getElementById('btGauge').className = 'gauge ' + (engSep > 0 ? 'eng' : 'esp');
+document.getElementById('btGauge').className = 'gauge ' + (gaugeFleet.chip || '');
 document.getElementById('btRange').textContent =
 d.rng >= 1000 ? (d.rng / 1000).toFixed(1) + ' km apart' : d.rng + ' m apart';
 btPlace(false);
@@ -163,8 +169,17 @@ const h = BT.fleetHd * Math.PI / 180;
 const ox = s.side === 0 ? 0 : BT.sep.x, oz = s.side === 0 ? 0 : BT.sep.z;
 s.tx = ox + s.sx * Math.cos(h) + s.sz * Math.sin(h);
 s.tz = oz - s.sx * Math.sin(h) + s.sz * Math.cos(h);
-if (snap) { s.x = s.tx; s.z = s.tz; s.hd = h; }
+if (snap) { s.x = s.tx; s.z = s.tz; s.hd = h + s.face; }
 });
+}
+function btGoDay(n) {
+const C = BT.spec && BT.spec.campaign;
+if (!C) return;
+BT.day = Math.max(0, Math.min(C.length - 1, n | 0));
+const sl = document.getElementById('btDay');
+if (sl) sl.value = BT.day;
+btSetDay();
+btPlace(true);
 }
 function btClose() {
 BT.on = false;
@@ -183,8 +198,7 @@ if (!BT.on) return;
 BT.t += dt;
 const windTo = (BT.wind + 180) * Math.PI / 180;
 const fromWind = windTo + Math.PI;
-const action = /Action|GRAVELINES|Portland|Isle of Wight|fireships/i.test(
-BT.spec.campaign[BT.day].t);
+const action = !!BT.spec.campaign[BT.day].a && !!BT.spec.powder;
 BT.ships.forEach(s => {
 const dx = s.tx - s.x, dz = s.tz - s.z;
 let want = Math.atan2(dx, dz);
@@ -209,7 +223,7 @@ s.z += Math.cos(s.hd) * s.spd * drive * dt;
 const o = s.obj;
 o.position.set(s.x, 0, s.z);
 o.rotation.set(0, s.hd, 0);
-const heel = Math.sin(rel * Math.PI / 180) * (0.035 + BT.force * 0.013);
+const heel = Math.sin(rel * Math.PI / 180) * (0.035 + BT.force * 0.013) * s.heelK;
 o.rotateZ(-heel);
 o.rotateX(Math.sin(BT.t * 0.7 + s.phase) * 0.016);
 o.position.y = Math.sin(BT.t * 0.62 + s.phase) * 0.45 - 0.2;
@@ -269,4 +283,4 @@ al.setX(i, Math.sin(Math.min(1, f * 3.2) * Math.PI * 0.5) * (1 - f));
 p.needsUpdate = true; sz.needsUpdate = true; al.needsUpdate = true;
 }
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, BT };
