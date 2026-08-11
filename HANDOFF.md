@@ -4062,3 +4062,8 @@ mast; the card gives 180.6 m overall, 38.2 m air draught, 31.5 kn.
 2. Tenders to the aft deck (finding 2); check the dome-base half-deck question (finding 3)
    while in there.
 3. Trireme/corbita masthead sheave gear; waterway margin plank.
+
+**End-of-round deploy note: LIVE, stamp 1786453343 → 1786459278**, verified with cache-busted
+fetches — the live hull.js carries houseCrest (1 match by code pattern in the minified js) and
+the live vessels.json carries houseAt [0.18, 0.86] / houseCrest [0.43, 0.73]. Twenty-seventh
+clean push-triggered deploy in a row.
