@@ -3329,7 +3329,11 @@ function buildSuperstructure(S, group) {
      whole perimeter instead: the lights march around the corners by construction, and a
      blank front is no longer a thing this builder can build. Arc length carries the mullion
      rhythm through the turns. */
-  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol) => {
+  /* glassSpec, when given, replaces the liner's small-light glass with a CONTINUOUS band:
+     dark at the sill, lightening toward the head, because a long run of tinted glazing
+     reflects more sky the higher the eye's line strikes it. Without it the colours are
+     byte-identical to the old path — the band style is a record's choice, never a default. */
+  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec) => {
     const tp = [], tc = [], ti = [];
     const R = rows.length;
     const fc = faceCol || face;
@@ -3340,7 +3344,12 @@ function buildSuperstructure(S, group) {
       const isMul = frac < mulFrac;
       for (const rf of rows) {
         const inBand = rf > band[0] && rf < band[1];
-        const c = (inBand && !isMul) ? glass : fc;
+        const c = (inBand && !isMul)
+          ? (glassSpec
+              ? glassSpec.lo.clone().lerp(glassSpec.hi,
+                  (rf - band[0]) / Math.max(0.001, band[1] - band[0]))
+              : glass)
+          : fc;
         tp.push(path[k].x, y0 + rf * (y1 - y0), path[k].z);
         tc.push(c.r, c.g, c.b);
       }
@@ -3361,22 +3370,28 @@ function buildSuperstructure(S, group) {
   };
 
   /* the closed perimeter of one tier: starboard forward→aft, across the stern, port aft→
-     forward, across the front, ending on the start point */
-  const perim = (t) => {
+     forward, across the front, ending on the start point.
+     ⚠ THE STATIONS MUST RESOLVE THE RHYTHM THEY CARRY. The default step, paneW·0.5, is
+     exactly two stations per mullion period — the small-lights rhythm samples cleanly by
+     construction. A band with its own pitch (tierBands) sampled at that step ALIASES: 0.3 m
+     balcony dividers on a 2.6 m pitch landed wherever the 1.5 m stations happened to fall,
+     and the band read as blocky dashes. A banded wall is stationed from its own pier width. */
+  const perim = (t, step) => {
+    const st = step || paneW * 0.5;
     const pts = [];
-    const NU = Math.max(60, Math.round((t.uB - t.uA) * L / (paneW * 0.5)));
+    const NU = Math.max(60, Math.round((t.uB - t.uA) * L / st));
     for (let k = 0; k <= NU; k++) {
       const u = t.uA + (t.uB - t.uA) * k / NU;
       pts.push({ x: (u - 0.5) * L, z: t.half(u) });
     }
-    const hb = t.half(t.uB), NB = Math.max(6, Math.round(2 * hb / (paneW * 0.5)));
+    const hb = t.half(t.uB), NB = Math.max(6, Math.round(2 * hb / st));
     for (let k = 1; k <= NB; k++)
       pts.push({ x: (t.uB - 0.5) * L, z: hb - 2 * hb * k / NB });
     for (let k = 1; k <= NU; k++) {
       const u = t.uB - (t.uB - t.uA) * k / NU;
       pts.push({ x: (u - 0.5) * L, z: -t.half(u) });
     }
-    const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / (paneW * 0.5)));
+    const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / st));
     for (let k = 1; k <= NF; k++)
       pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
     return pts;
@@ -3432,18 +3447,48 @@ function buildSuperstructure(S, group) {
 
   const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];  // sole, band edges, roof
   /* a shell tier wears the hull's own paint, and its lights read as a window row cut in
-     black plating — which is exactly what C-deck's were */
-  const shellCol = new THREE.Color(S.topside || '#3a3a3c');
+     black plating — which is exactly what C-deck's were.
+     ⚠ UNLESS THE RECORD PAINTS THE STRAKE ITSELF: Queen Mary 2's shell carries up TWO decks
+     past the black in a WHITE sheer strake with a square-window colonnade on each — the
+     photograph shows black to 17 m and white plating above — so the paint of the shell
+     tiers is a recorded livery (shellTopside), not always the topside's. */
+  const shellCol = new THREE.Color(S.shellTopside || S.topside || '#3a3a3c');
   /* a boat gallery is an OPENING: its back wall stands in shadow behind the boats, so the
      tier is drawn dark and unglazed, and the boats hang in front of it */
   const recessCol = new THREE.Color(0x24272b);
+  /* ── A MODERN TIER WEARS A WINDOW BAND, NOT A STRAKE OF SMALL LIGHTS ────────────────
+     The small-lights-with-wide-mullions treatment is the Edwardian liner's: more wall than
+     glass. Queen Mary 2's tiers above the boats are BALCONY rows — a dark void over most of
+     the tier height, divided at cabin pitch — and Azzam's are long runs of tinted glazing.
+     Both are the same class: a continuous dark band the record declares (tierBands: which
+     tiers, band edges as tier-height fractions, divider pitch in metres, pier fraction,
+     kind 'balcony' | 'glass'), drawn by the same wallLoft the ribbon uses. The recess tier
+     never bands — it is an opening, not a wall. */
+  const TB = S.tierBands;
+  /* the shell strake may carry its own recorded row — Queen Mary 2's white strake wears a
+     colonnade of ~1.4 m square windows at 2.5 m pitch, twice the height of the Edwardian
+     C-deck lights the default draws — same band mechanism, its own record (shellBands) */
+  const SB = S.shellBands;
   for (let i = 0; i < T.n; i++) {
     const t = T.tiers[i];
     /* ⚠ built in ABSOLUTE coordinates, y0 to y1 — the old walls were built about their own
        centre and never positioned, so the whole house sat below the waterline for as long as
        it existed while the rails alone stood correctly. Nothing here waits to be positioned. */
-    g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
-                   t.recess ? recessCol : (t.shell ? shellCol : null)));
+    const bandRec = (TB && !t.recess && i >= TB.from && i <= TB.to) ? TB
+                  : ((SB && t.shell && !t.recess) ? SB : null);
+    if (bandRec) {
+      const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
+      const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
+      const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec.top, 1.0];
+      const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
+      const bStep = Math.max(0.25, (bandRec.pitchM || paneW) * Math.min(0.5, pf || 0.5));
+      g.add(wallLoft(perim(t, bStep), t.y0, t.y1, bRows, [bandRec.bot, bandRec.top],
+                     bandRec.pitchM || paneW, pf,
+                     t.shell ? shellCol : null, { lo, hi }));
+    } else {
+      g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
+                     t.recess ? recessCol : (t.shell ? shellCol : null)));
+    }
     g.add(roofPlate(t, t.y1));
     if (i === T.n - 1) {
       railRun(perim(t), t.y1);                        // the boat deck is railed all round

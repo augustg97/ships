@@ -2074,3 +2074,18 @@ Deploy verified: stamp 1786450589 → 1786453343 live, `buildCluster` present in
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 20909 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 06:41:06  round starting
+Round 74 is done and live: stamp 1786453343 → 1786459278 verified on the deployed site, with `houseCrest` confirmed in the published js and Azzam's new spans in the published data.
+
+**What the round did** — closed round 73's queue head, the house cascade direction, as a class change:
+
+- **`linerHouse` now takes the cascade direction from the record.** The old rule — fronts aligned, afts cascading — is the liner's logic, and it dressed Azzam as a wedding cake. A new `houseCrest` field gives the top tier's u-span; tiers interpolate linearly from `houseAt` to it. With no `houseCrest`, the default reproduces the old formula algebraically, and both ratchet runs proved that in pixels: Queen Mary 2 and Titanic at 0.000%, all 46 default-path frames green.
+- **Azzam's spans were re-measured off her delivery photograph**, in the same u-frame as round 73's cluster derivation (the map reproduces her recorded stack position within 4 px). The tilt of the waterline across the plate matters — half a deck if ignored. Result: `houseAt` forward moves 0.30 → 0.18 (her long foredeck house), `houseCrest` [0.43, 0.73], with the crest's forward face at the block's own glass foot and its aft end at the recorded fairing. Provenance is stated in the data and on her card.
+- **The generic wheelhouse yields where the record declares a cluster block** — the block is her bridge, and the two boxes would otherwise have occupied the same air at the new crest front.
+- **The audit learned the new fault class**, injection-proven: `cluster foot off the crest` catches a roof-footed cluster element left standing past a narrowed crest — invisible to the height rules because the pedestal stays at roof height. A narrowed-crest injection fired it twice; the real build passes. Audit: 29 hulls, 0 problems.
+- **Looked at from all twelve spin bearings**: the ramp from foredeck to crest reads at beam and quarter, matching the plate beside it on her own card. The `ship-azzam` baseline was re-accepted with the classification in FRAME-LOG, and the second ratchet run reproduced it at 0.000%.
+
+**Carried, stated in the handoff**: the window-band fix (QM2 + Azzam, one class), tenders to the aft deck, and one new observation — my re-read puts the aft dome pairs' bases a half-deck below round 73's recorded 22 m, inside its error bar but worth a look when the domes are next touched.
+2026-08-11 07:44:50  round finished; HEAD is 3df8d71 Round 74 deploy note: stamp 1786459278 live, houseCrest verified in the published js and Azzam's spans in the published data
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 26948 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 07:54:50  round starting

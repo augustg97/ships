@@ -88,6 +88,44 @@ say(v.id, 'cluster foot off the crest',
 `${what} at u ${u.toFixed(3)}, top tier spans ${topT.uA.toFixed(3)}–${topT.uB.toFixed(3)}`);
 }
 }
+if ((H.tierBands || H.shellBands) && H.decks && SHIPS_HULL.linerHouse) {
+const T3 = SHIPS_HULL.linerHouse(H);
+const walls = [];
+g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'superstructure'
+&& o.geometry.attributes && o.geometry.attributes.color) walls.push(o); });
+const scan = (y0, y1) => {
+let dark = 0, light = 0, all = 0;
+for (const m of walls) {
+const P = m.geometry.attributes.position, C = m.geometry.attributes.color;
+for (let i = 0; i < P.count; i++) {
+const y = P.getY(i);
+if (y < y0 + 0.05 || y > y1 - 0.05) continue;
+all++;
+const l = 0.2126 * C.getX(i) + 0.7152 * C.getY(i) + 0.0722 * C.getZ(i);
+if (l < 0.10) dark++; else if (l > 0.4) light++;
+}
+}
+return { dark, light, all };
+};
+for (let i = 0; i < T3.n; i++) {
+const t = T3.tiers[i];
+const TBr = H.tierBands, SBr = H.shellBands;
+const b = (TBr && !t.recess && i >= TBr.from && i <= TBr.to) ? TBr
+: ((SBr && t.shell && !t.recess) ? SBr : null);
+if (!b) continue;
+const r = scan(t.y0, t.y1);
+if (!r.all || r.dark / Math.max(1, r.all) < 0.08)
+say(v.id, 'band declared but not worn',
+`tier ${i}: ${r.dark} of ${r.all} wall vertices carry band glass`);
+if (t.shell && H.shellTopside && r.all && r.light / r.all < 0.3)
+say(v.id, 'strake off its recorded paint',
+`tier ${i}: ${r.light} of ${r.all} wall vertices carry the shellTopside livery`);
+}
+}
+if (H.boatDeckM && H.boats && part.boat)
+if (Math.abs(part.boat.y[0] - H.boatDeckM) > 1.5)
+say(v.id, 'boats off their recorded deck',
+`lowest boat at ${part.boat.y[0].toFixed(1)} m over water, record says ${H.boatDeckM}`);
 {
 let pk = null;
 g.traverse(o => { if (!pk && o.isMesh && tagOf(o) && tagOf(o).key === 'planking') pk = o; });

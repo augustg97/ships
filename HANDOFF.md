@@ -4067,3 +4067,86 @@ mast; the card gives 180.6 m overall, 38.2 m air draught, 31.5 kn.
 fetches — the live hull.js carries houseCrest (1 match by code pattern in the minified js) and
 the live vessels.json carries houseAt [0.18, 0.86] / houseCrest [0.43, 0.73]. Twenty-seventh
 clean push-triggered deploy in a row.
+
+---
+
+## Round 75 — 2026-08-11 — The window band becomes a record, and Queen Mary 2's boats climb two decks
+
+**The queue head (the carried window-band item, QM2 + Azzam, one fix for both) is closed, and
+the fix is one class: `tierBands` — a photograph-derived record of which tiers wear a
+continuous dark glazing band, drawn by the same wallLoft that draws the liner ribbon.** The
+Edwardian small-lights treatment (glass 1.5 m in 3.1, more wall than glass) was dressing a
+2013 yacht and a 2004 liner; both records now declare what their photographs show.
+
+**The derivation overturned the r70 note's framing.** A broadside photograph (Paul Coueslant,
+Southampton Water, geograph.org.uk 5649661, CC BY-SA 2.0, 2018) was measured by luminance
+profile with the deck module as the vertical scale (balcony tiers repeat at 28–30 px = 3.2 m).
+What it shows: the black tops out at the RECORDED 17 m sheer — the record was already right —
+then a **two-deck WHITE shell strake with a continuous ~1.4 m square-window colonnade on each
+deck**, then the boat gallery standing ON the strake at 23.4 m (17 + 2·3.2; the photograph
+reads ~24 m), then balcony bands on every tier to the top. Her "hull window rows" were never
+on the black at all: the black carries only sparse broken groups amidships and is correctly
+drawn plain. The model had `shellTiers 0, boatDeckM 17.0` — self-consistent and wrong
+together, so the r34 datum rule agreed with the fault — and her boats hung TWO DECKS LOW for
+five rounds. Record now: `shellTiers 2, shellTopside #e9e7df, boatDeckM 23.4, tierBands
+(balcony, tiers 3–9), shellBands (the strake colonnade)`, provenance stated in the data and a
+House row on her card. The audit's "recess sits on the first tier above the shell" formula
+survives unchanged — it was the record that was wrong, and boats/gallery moved together
+because buildBoats stows into the tier linerHouse marks.
+
+**Azzam wears her plate's glazing:** `tierBands` (glass kind, tiers 0–4, mid-tier band 0.32–
+0.78, units ~2.2 m with 0.6 m piers, derived at the r73 scale of 0.157 m/px, stated in the
+data and a Glazing row on the card).
+
+**Two builder classes rode along:**
+1. **A banded wall is stationed from its own pier width.** perim()'s default step, paneW·0.5,
+   is exactly two stations per mullion period — the ribbon samples cleanly by construction.
+   A 2.6 m band rhythm with 0.31 m piers sampled at 1.54 m ALIASED into blocky dashes; the
+   banded wall now takes its station step from pitch·pierFrac. First capture showed it,
+   second confirmed the fix.
+2. **`shellTopside`:** a shell tier may wear a recorded livery other than the hull's — QM2's
+   strake is shell in form, white in paint.
+
+**The audit learned the class and taught a lesson in colour spaces.** Three new rules, all
+injection-proven: `band declared but not worn` (per-tier vertex scan of the superstructure
+walls), `strake off its recorded paint` (shellTopside vs drawn wall colour), `boats off their
+recorded deck` (lowest drawn boat vs boatDeckM — this one names exactly the two-decks-low
+fault this round fixed, and the r34 data rule could never see it because record and default
+were wrong together). ⚠ **The first injection did not fire and the rule was wrong, not the
+build: three.js returns vertex colours LINEAR, not sRGB** — the liner glass 0x6d7a86 reads
+0.185 luminance in linear space and my 0.25 "dark" threshold counted every default light as
+band glass, a vacuously green rule. Thresholds now live in linear space (band glass < 0.07,
+liner glass 0.185, faces 0.75; dark means < 0.10) and the comment says so. Injections: band
+branch disabled → fired on all 12 banded tiers of both ships and nothing else; boats −6 m →
+fired the new boat rule AND the existing 'boats off the boat deck'; strake painted the hull's
+black → fired twice (both shell tiers). Healthy build: **29 hulls, 0 problems.**
+
+**Looked at, rule 1:** QM2 at beam and quarter (b=90/135 diagnosis frames, deleted after
+reading, r55 rule), Azzam at beam, both against their photographs; iterated twice (the
+aliasing fix, then the strake colonnade whose default rows drew half the photographed window
+height). **Ratchet, full 47 frames: 45 green at 0.000–0.045%, exactly two movers, both the
+intended ships** — ship-queen-mary-2 4.570% (house walls, strake, boats and the wheelhouse
+patch; hull/sea/funnel/cards black), ship-azzam 1.600% (the five tier walls alone). Both
+accepted with reasons in FRAME-LOG and both reproduced within tolerance on the second run
+(r63 two-run rule).
+
+**Rule 0, written on the accepted ship-queen-mary-2 frame:** it reads as a rendered world —
+the liner on open water, her photograph on the card beside her. Three facts a viewer can read:
+the hull is black to the sheer and then a white strake with two square-window rows carries the
+boat gallery, matching the photograph; every tier above the boats is a balcony band, not a
+wall of portholes; the card gives 345 m, 10.3 m draught, 29.5 kn, and the fleet list runs
+dugout to Ever Given with her at 25 of 29.
+
+**Carried, restated exactly (none closed silently):**
+1. Azzam's tenders still ride the crest; her plate stows them on the low aft deck (buildBoats'
+   boat-deck default). Check the r74 dome-base half-deck question while in there.
+2. Trireme/corbita masthead sheave gear; item 10 remainder (waterway margin plank).
+3. Galley action unblocked (campaign-data tasks); B10 stunsails if wanted.
+4. New, small: QM2's balcony-band piers could carry a per-cabin divider rhythm variation and
+   her strake windows stop short of the mooring-deck openings right forward — both inside the
+   derivation's error bar, neither worth a round alone.
+
+### Next, in order
+1. Azzam's tenders to the aft deck (carried finding 1 above, with the dome-base check).
+2. Trireme/corbita masthead sheave gear; waterway margin plank.
+3. Galley action (campaign-data tasks); B10 stunsails if wanted.

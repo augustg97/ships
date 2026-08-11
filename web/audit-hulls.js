@@ -172,6 +172,63 @@
       }
     }
 
+    /* ── A DECLARED BAND IS WORN (round 75). tierBands/shellBands are photograph-derived —
+       Queen Mary 2's balcony rows and strake colonnade, Azzam's tinted glazing runs — and
+       both ships shipped for rounds wearing the Edwardian small-lights default because
+       nothing asked the walls what colour they actually carry. So ask the vertices: in every
+       banded tier's own y-span, a floor fraction of the superstructure wall vertices must
+       carry band glass. ⚠ VERTEX COLOURS READ BACK LINEAR, not sRGB — three.js converts on
+       set — so the thresholds live in linear space: band glass is under 0.07 luminance there,
+       the liner's small-light glass is 0.185, white faces 0.75. Dark means < 0.10, which a
+       builder that skips the band branch cannot reach. The recess tier never bands. */
+    if ((H.tierBands || H.shellBands) && H.decks && SHIPS_HULL.linerHouse) {
+      const T3 = SHIPS_HULL.linerHouse(H);
+      const walls = [];
+      g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'superstructure'
+                        && o.geometry.attributes && o.geometry.attributes.color) walls.push(o); });
+      const scan = (y0, y1) => {
+        let dark = 0, light = 0, all = 0;
+        for (const m of walls) {
+          const P = m.geometry.attributes.position, C = m.geometry.attributes.color;
+          for (let i = 0; i < P.count; i++) {
+            const y = P.getY(i);
+            if (y < y0 + 0.05 || y > y1 - 0.05) continue;
+            all++;
+            const l = 0.2126 * C.getX(i) + 0.7152 * C.getY(i) + 0.0722 * C.getZ(i);
+            if (l < 0.10) dark++; else if (l > 0.4) light++;
+          }
+        }
+        return { dark, light, all };
+      };
+      for (let i = 0; i < T3.n; i++) {
+        const t = T3.tiers[i];
+        const TBr = H.tierBands, SBr = H.shellBands;
+        const b = (TBr && !t.recess && i >= TBr.from && i <= TBr.to) ? TBr
+                : ((SBr && t.shell && !t.recess) ? SBr : null);
+        if (!b) continue;
+        const r = scan(t.y0, t.y1);
+        if (!r.all || r.dark / Math.max(1, r.all) < 0.08)
+          say(v.id, 'band declared but not worn',
+              `tier ${i}: ${r.dark} of ${r.all} wall vertices carry band glass`);
+        /* and a shell strake wears its RECORDED paint — shellTopside declared white and a
+           builder that ignores it paints the strake the hull's black, which the band rule
+           cannot see (the glass is dark either way) */
+        if (t.shell && H.shellTopside && r.all && r.light / r.all < 0.3)
+          say(v.id, 'strake off its recorded paint',
+              `tier ${i}: ${r.light} of ${r.all} wall vertices carry the shellTopside livery`);
+      }
+    }
+
+    /* ── AND THE BOATS STAND ON THEIR RECORDED DECK (round 75). The boatDeckM datum rule
+       above checks the DATA is self-consistent; this one asks the BUILT boats. Queen Mary 2
+       hung her gallery two decks low for five rounds — record 17.0, first-tier default,
+       both wrong together, so the datum rule agreed with the fault. The photograph put the
+       gallery at 23.4 m; now the lowest drawn boat must sit on the recorded deck. */
+    if (H.boatDeckM && H.boats && part.boat)
+      if (Math.abs(part.boat.y[0] - H.boatDeckM) > 1.5)
+        say(v.id, 'boats off their recorded deck',
+            `lowest boat at ${part.boat.y[0].toFixed(1)} m over water, record says ${H.boatDeckM}`);
+
     /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem
        head PAST the waterline ending — Queen Mary 2 declared 0.085 and drew a blunt
        vertical bow for three rounds, because the offset was applied uniformly at every

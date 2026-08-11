@@ -2005,7 +2005,7 @@ const wallMat = new THREE.MeshStandardMaterial({
 vertexColors: true, roughness: 0.60, side: THREE.DoubleSide });
 const plateMat = new THREE.MeshStandardMaterial({
 color: 0xe4e2dc, roughness: 0.60, side: THREE.DoubleSide });
-const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol) => {
+const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec) => {
 const tp = [], tc = [], ti = [];
 const R = rows.length;
 const fc = faceCol || face;
@@ -2016,7 +2016,12 @@ const frac = ((s / pw) % 1 + 1) % 1;
 const isMul = frac < mulFrac;
 for (const rf of rows) {
 const inBand = rf > band[0] && rf < band[1];
-const c = (inBand && !isMul) ? glass : fc;
+const c = (inBand && !isMul)
+? (glassSpec
+? glassSpec.lo.clone().lerp(glassSpec.hi,
+(rf - band[0]) / Math.max(0.001, band[1] - band[0]))
+: glass)
+: fc;
 tp.push(path[k].x, y0 + rf * (y1 - y0), path[k].z);
 tc.push(c.r, c.g, c.b);
 }
@@ -2032,21 +2037,22 @@ gg.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
 gg.setIndex(ti); gg.computeVertexNormals();
 return new THREE.Mesh(gg, wallMat);
 };
-const perim = (t) => {
+const perim = (t, step) => {
+const st = step || paneW * 0.5;
 const pts = [];
-const NU = Math.max(60, Math.round((t.uB - t.uA) * L / (paneW * 0.5)));
+const NU = Math.max(60, Math.round((t.uB - t.uA) * L / st));
 for (let k = 0; k <= NU; k++) {
 const u = t.uA + (t.uB - t.uA) * k / NU;
 pts.push({ x: (u - 0.5) * L, z: t.half(u) });
 }
-const hb = t.half(t.uB), NB = Math.max(6, Math.round(2 * hb / (paneW * 0.5)));
+const hb = t.half(t.uB), NB = Math.max(6, Math.round(2 * hb / st));
 for (let k = 1; k <= NB; k++)
 pts.push({ x: (t.uB - 0.5) * L, z: hb - 2 * hb * k / NB });
 for (let k = 1; k <= NU; k++) {
 const u = t.uB - (t.uB - t.uA) * k / NU;
 pts.push({ x: (u - 0.5) * L, z: -t.half(u) });
 }
-const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / (paneW * 0.5)));
+const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / st));
 for (let k = 1; k <= NF; k++)
 pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
 return pts;
@@ -2092,12 +2098,27 @@ g.add(bar);
 }
 };
 const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];
-const shellCol = new THREE.Color(S.topside || '#3a3a3c');
+const shellCol = new THREE.Color(S.shellTopside || S.topside || '#3a3a3c');
 const recessCol = new THREE.Color(0x24272b);
+const TB = S.tierBands;
+const SB = S.shellBands;
 for (let i = 0; i < T.n; i++) {
 const t = T.tiers[i];
+const bandRec = (TB && !t.recess && i >= TB.from && i <= TB.to) ? TB
+: ((SB && t.shell && !t.recess) ? SB : null);
+if (bandRec) {
+const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
+const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
+const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec.top, 1.0];
+const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
+const bStep = Math.max(0.25, (bandRec.pitchM || paneW) * Math.min(0.5, pf || 0.5));
+g.add(wallLoft(perim(t, bStep), t.y0, t.y1, bRows, [bandRec.bot, bandRec.top],
+bandRec.pitchM || paneW, pf,
+t.shell ? shellCol : null, { lo, hi }));
+} else {
 g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
 t.recess ? recessCol : (t.shell ? shellCol : null)));
+}
 g.add(roofPlate(t, t.y1));
 if (i === T.n - 1) {
 railRun(perim(t), t.y1);
