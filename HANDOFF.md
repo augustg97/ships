@@ -4360,7 +4360,8 @@ re-check against the committed baseline came back green, so the baseline stands 
 was accepted. The class is not fully closed; if it strikes again, the capture gate needs a
 stronger condition than document.fonts.status.
 
-**End-of-round deploy note: stamp 1786468280 → 1786473765.** Push at round end against the
-80-minute window; the live stamp to be verified either by this round's tail or by the next
-round FIRST (the r75 rule — a successful push is not a successful deploy; check
-`gh run list` before touching anything else if it is not live).
+**End-of-round deploy note: LIVE, stamp 1786468280 → 1786473765**, verified with
+cache-busted fetches inside the round — the live vessels.json carries tierAftU, the three
+onTier declarations and fairFootTier, and the live hull.js carries the pinned interpolation
+and footing code (four matches by pattern). The Pages run started in seconds. Thirtieth
+clean push-triggered deploy in a row.
