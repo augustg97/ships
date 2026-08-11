@@ -1913,3 +1913,20 @@ Verification: audit 29/29 clean; ratchet run 1 found one NEW frame and two mover
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 50240 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-10 17:53:38  round starting
+Round 67 is done and live — stamp 1786406602 → 1786411221, all three carried items closed, audit 29/29 twice, ratchet 45/45 green.
+
+**What the round did.** The three items carried since round 64 were all in the mast/masthead area of hull.js, and each got closed properly:
+
+- **The treasure ship's masts are now bound in Chinese practice, not Europe's.** The research pass came first (written up in `Research/MASTHEADS.md`): Needham IV:3 says heavy junk masts are compound, "bound together with iron straps," and records an 1842 Shanghai mainmast at 1.12 m through with no shrouds or stays — which puts the treasure ship's 1.08 m drawn diameter inside the attested envelope. Both junk-rigged hulls now carry flat dark iron straps at a derived interval, with none of the European signature (no rope wooldings, no pale pinch-hoops). Rattan was not substantiated in any source read, so it isn't modelled.
+- **The trireme and corbita lose the tops no classical ship carried.** The masthead platform became a dated technology like the woolding/iron-hoop switch, gated on the depicted year at 1100 (the cog seals are the earliest evidence among this fleet's types). The corbita instead hangs the corbis — the basket that named her, per Festus, verified in three Latin editions — as a new data field with its own card. Seven hulls gained depicted years, and the audit now requires one on any square- or junk-rigged hull.
+- **`tag()` accepts its fourth argument**, so the crow's nest and crosstrees cards finally show the bespoke text they'd been passing for rounds.
+
+**Verified.** Seven audit rules proven by fault injection (one injection initially failed and taught a lesson now recorded in the handoff: a moved group is invisible to the audit's bboxes until `updateMatrixWorld` runs). Four diagnosis frames rendered and read — straps, bare trireme head, hanging basket all confirmed by eye — then deleted per the r55 rule. One new standing baseline, `shipwright-corbis`, watches the class.
+
+**The ratchet finding worth noting:** run 1 came back all-green, and that was the trap, not the relief — the change itself was riding under the 0.05% tolerance (trireme 0.036%, treasure 0.021%, junk 0.016%). Per the r63 rule I generated and read all three diffs as images — they are exactly the removed tops and the strap dashes — and accepted them with reasons so the baselines carry the new truth. Run 2: 45/45 green, no label flap.
+
+**Next round:** the carried list is empty for the first time since round 64. The standing vessel survey resumes, with two candidates surfaced by this round's own looking: the treasure ship's five masts share one drawn diameter (radii are per-ship, not per-mast), and the ancient mastheads' sheave gear is implied rather than drawn.
+2026-08-10 19:01:43  round finished; HEAD is cc2e3aa Round 67 deploy note: live stamp verified
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 53940 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-10 19:11:43  round starting

@@ -970,27 +970,44 @@ say(v.id, "a junk's furled sail left hoisted",
 {
 const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
 const jk = (H.masts || []).filter(mm => mm.rig === 'junk').length;
-const thick = H.beam * 0.06 > 0.55;
-const madeSq = !!sq && !H.iron && thick;
-const madeJk = !!jk && !H.iron && thick;
+const steelMainA = (H.lwl + H.beam) / 2;
+const lowersA = (H.masts || []).map(mm =>
+mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainA);
+const mainLowerA = Math.max(...lowersA, 0) || 1;
+const aftAt = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
+const mixedSqA = (H.masts || []).some(mm => mm.rig === 'square');
+const drawnD = i => {
+const mm = H.masts[i], lo = lowersA[i];
+const mz = mm.at === aftAt && (H.masts || []).length >= 3 && !H.iron
+&& mixedSqA && lo < mainLowerA * 0.95
+&& (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+return H.beam * 0.06 * (mz ? Math.min(lo / mainLowerA, 0.60) : lo / mainLowerA);
+};
+const sqThick = (H.masts || []).filter((mm, i) =>
+mm.rig === 'square' && !H.iron && drawnD(i) > 0.55).length;
+const jkThick = (H.masts || []).filter((mm, i) =>
+mm.rig === 'junk' && !H.iron && drawnD(i) > 0.55).length;
 const nW = part.woolding ? part.woolding.n : 0;
 const nB = part.mastband ? part.mastband.n : 0;
-if (madeSq && nW + nB < sq)
+const depYearA = H.year || v.from || 0;
+const perMast = depYearA >= 1800 || jk ? 1 : 2;
+const bound = Math.round((nW + nB) / perMast);
+if (bound < sqThick + jkThick)
 say(v.id, 'a made mast left unbound',
-`${sq} square lower masts ${(H.beam * 0.06).toFixed(2)} m through carry ` +
-`${nW + nB} binding meshes — timber that thick is coaked, and unbound it opens`);
-if (madeJk && nB < jk)
+`${sqThick + jkThick} lower masts past 0.55 m through, ${bound} bound — ` +
+'timber that thick is coaked, and unbound it opens');
+if (jkThick && nB < jkThick)
 say(v.id, 'a made junk mast left unbound',
-`${jk} junk masts ${(H.beam * 0.06).toFixed(2)} m through carry ${nB} iron-strap ` +
+`${jkThick} junk masts past 0.55 m through carry ${nB} iron-strap ` +
 'meshes — a compound pole with no shrouds is held together by its straps alone');
-if (madeJk && nW)
+if (jk && nW)
 say(v.id, 'European wooldings on a junk',
 `${nW} woolding meshes on a junk-rigged hull — the r61 copy class; Chinese ` +
 'practice is flat iron straps, no rope bands, no pale pinch-hoops');
-if (!madeSq && !madeJk && (nW || nB))
+if (bound > sqThick + jkThick)
 say(v.id, 'binding on a single stick',
-`${nW + nB} woolding/hoop meshes on a hull whose lower masts one tree could ` +
-'yield, or whose masts are iron');
+`${bound} masts bound for ${sqThick + jkThick} past one tree — a stick one ` +
+'tree yields, or an iron tube, is not bound');
 const depYear = H.year || v.from || 0;
 if (nW && depYear >= 1820)
 say(v.id, 'rope wooldings out of their century',
@@ -1055,6 +1072,53 @@ if (!topBoxes.some(tb => cbx.intersectsBox(tb)))
 say(v.id, 'a cheek carrying nothing',
 `cheek ${i} at y ${cb.min.y.toFixed(1)}–${cb.max.y.toFixed(1)} m touches no top`);
 });
+}
+}
+{
+const steelMainB = (H.lwl + H.beam) / 2;
+const lowersB = (H.masts || []).map(mm =>
+mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainB);
+const mainLowerB = Math.max(...lowersB, 0) || 1;
+const aftAtB = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
+const mixedSqB = (H.masts || []).some(mm => mm.rig === 'square');
+const expD = (H.masts || []).map((mm, i) => {
+const lo = lowersB[i];
+const mz = mm.at === aftAtB && H.masts.length >= 3 && !H.iron && mixedSqB
+&& lo < mainLowerB * 0.95
+&& (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+return mz ? Math.min(lo / mainLowerB, 0.60) : lo / mainLowerB;
+});
+if ((H.masts || []).length >= 2) {
+const cols = [];
+g.traverse(o => {
+if (!o.isMesh || !o.userData.part) return;
+if (o.userData.part.key !== 'mast' || o.userData.part.name !== 'Mast') return;
+const bb = new THREE.Box3().setFromObject(o);
+if (bb.max.y - bb.min.y < Math.min(3, H.beam * 0.35)) return;
+cols.push({ x: (bb.min.x + bb.max.x) / 2, d: bb.max.z - bb.min.z });
+});
+const drawn = (H.masts || []).map(() => 0);
+cols.forEach(c => {
+let bi = -1, bd = 1e9;
+(H.masts || []).forEach((mm, i) => {
+const dx = Math.abs(c.x - ((mm.at || 0) - 0.5) * H.lwl);
+if (dx < bd) { bd = dx; bi = i; }
+});
+if (bi >= 0 && bd < H.lwl * 0.12) drawn[bi] = Math.max(drawn[bi], c.d);
+});
+const seen = drawn.map((d, i) => ({ d, e: expD[i] })).filter(s => s.d > 0);
+let worst = null;
+for (let i = 0; i < seen.length; i++)
+for (let j = i + 1; j < seen.length; j++) {
+const r = (seen[i].d / seen[j].d) / (seen[i].e / seen[j].e);
+const off = Math.abs(Math.log(r));
+if (!worst || off > worst.off) worst = { off, i, j };
+}
+if (worst && worst.off > Math.log(1.35))
+say(v.id, 'every mast from one tree',
+`lower masts drawn ${seen.map(s => s.d.toFixed(2)).join('/')} m through ` +
+`where their lengths ask ${seen.map(s => (H.beam * 0.06 * s.e).toFixed(2)).join('/')} — ` +
+"diameter follows the spar's own length (Steel 1794 p.39)");
 }
 }
 rows.push({ id: v.id, loa: H.loa, airAboveDeck: +airM.toFixed(1),

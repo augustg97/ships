@@ -689,6 +689,33 @@ function buildRig(S, group, mats, FINE, FURLED) {
        vessel has an attested mast, that measurement wins and the rule is not used at all —
        `heightM` is metres, `height` is a share of Steel's main. */
     const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+    /* ── A MAST IS AS THICK AS ITS OWN LENGTH ASKS, NOT AS ITS SHIP'S BEAM ─────────────
+       Every mast on a ship drew the same diameter — beam x 0.06 — so the treasure ship's
+       0.6-share mizzen stood as fat as her main, and the corbita's little artemon as fat
+       as the mast that carries her whole sail. Steel 1794 p.39 gives the law: "The main
+       and foremasts of ships of 100 to 64 guns ... are one inch in diameter at the
+       partners to every yard in length" — diameter follows the SPAR'S OWN LENGTH, and on
+       these hulls' proportions beam x 0.06 lands within a few percent of that inch-per-yard
+       for the TALLEST mast. So the calibration stands and every other mast scales by its
+       own length. Steel's one exception is attested and large: "The mizen-masts of ships
+       of 100 to 64 guns ... 3/5 of the diameter of the main-mast" (topmast 7/10) — the
+       mizzen is thinner than even its length would give, because it is a lighter machine.
+       Applied to the aftermost mast of a wooden three-master that carries square canvas;
+       extending it past Steel's 64-100-gun domain (to the carrack's or Endurance's
+       mizzen) is inference, like the height shares themselves. Junk and crabclaw masts
+       take the length scaling only — China is not rigged by Steel's tables. */
+    const mainLower = S.masts.reduce((mx, m2) =>
+      Math.max(mx, m2.heightM !== undefined ? m2.heightM : (m2.height || 0) * steelMain), 0)
+      || lower || 1;
+    /* the mizzen is the AFTERMOST STATION, not the last list entry — the corbita and the
+       trireme list their mains first and their bow masts second */
+    const isMizzen = mk.at === Math.max(...S.masts.map(m2 => m2.at)) && S.masts.length >= 3
+      && !S.iron && S.masts.some(m2 => m2.rig === 'square') && lower < mainLower * 0.95
+      && (mk.rig === 'square' || mk.rig === 'gaff' || mk.rig === 'lateen');
+    const mScale = lower / mainLower;
+    const dScale = [isMizzen ? Math.min(mScale, 0.60) : mScale,
+                    isMizzen ? Math.min(mScale, 0.70) : mScale,
+                    isMizzen ? Math.min(mScale, 0.70) : mScale];
     /* Steel 1794, "Proportional Lengths of Masts": main topmast = 3/5 of the main mast;
        topgallant = 1/2 of its topmast. Cross-checked against Fincham 1843, whose measured
        ships give topmast 1.05–1.22 x extreme breadth and topgallant 0.57–0.70 x breadth.
@@ -800,7 +827,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
                : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
                : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
                : [lower, top, tg];
-    const radii = [B * 0.030, B * 0.020, B * 0.013];
+    const radii = [B * 0.030 * dScale[0], B * 0.020 * dScale[1], B * 0.013 * dScale[2]];
 
     segs.forEach((seg, si) => {
       if (mk.only && si >= mk.only) return;
@@ -1230,10 +1257,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* the mast, drawn from the deck UP TO the sling — its height is the consequence, and it
          is SHORT, because a lateen takes its area from the spar rather than from height */
       const mh = sling[1] - base;
+      /* the same per-mast thickness rule as the square masts above — a caravel's three
+         lateens are three different trees — and the spar is tagged like every other mast */
       const mm = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.020, B * 0.032, mh, 18), woodDark);
+        new THREE.CylinderGeometry(B * 0.020 * dScale[0], B * 0.032 * dScale[0], mh, 18),
+        woodDark);
       mm.position.set(x, (base + sling[1]) / 2, 0);
-      group.add(mm);
+      group.add(tag(mm, 'mast'));
 
       const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
       const ym = new THREE.Mesh(

@@ -394,6 +394,16 @@ const base = deckAt(u);
 const rakeRad = (mk.rake || 0) * Math.PI / 180;
 const steelMain = (S.lwl + S.beam) / 2;
 const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+const mainLower = S.masts.reduce((mx, m2) =>
+Math.max(mx, m2.heightM !== undefined ? m2.heightM : (m2.height || 0) * steelMain), 0)
+|| lower || 1;
+const isMizzen = mk.at === Math.max(...S.masts.map(m2 => m2.at)) && S.masts.length >= 3
+&& !S.iron && S.masts.some(m2 => m2.rig === 'square') && lower < mainLower * 0.95
+&& (mk.rig === 'square' || mk.rig === 'gaff' || mk.rig === 'lateen');
+const mScale = lower / mainLower;
+const dScale = [isMizzen ? Math.min(mScale, 0.60) : mScale,
+isMizzen ? Math.min(mScale, 0.70) : mScale,
+isMizzen ? Math.min(mScale, 0.70) : mScale];
 const top = lower * 0.60, tg = top * 0.50;
 let y = base;
 let capY = base;
@@ -438,7 +448,7 @@ const segs = mk.rig === 'lateen' ? []
 : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
 : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
 : [lower, top, tg];
-const radii = [B * 0.030, B * 0.020, B * 0.013];
+const radii = [B * 0.030 * dScale[0], B * 0.020 * dScale[1], B * 0.013 * dScale[2]];
 segs.forEach((seg, si) => {
 if (mk.only && si >= mk.only) return;
 const mastMat = S.mastLivery === 'buff'
@@ -670,9 +680,10 @@ const heel = [heelX, deckMax(heelU, u) + B * 0.045];
 const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
 const mh = sling[1] - base;
 const mm = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.020, B * 0.032, mh, 18), woodDark);
+new THREE.CylinderGeometry(B * 0.020 * dScale[0], B * 0.032 * dScale[0], mh, 18),
+woodDark);
 mm.position.set(x, (base + sling[1]) / 2, 0);
-group.add(mm);
+group.add(tag(mm, 'mast'));
 const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
 const ym = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.005, B * 0.011, ylen, 14), woodDark);

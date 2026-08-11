@@ -3462,3 +3462,95 @@ cache-busted fetch of the data-version meta tag on the third poll (~60 s after p
 live hull.js confirmed carrying the iron-strap and corbis code, and the live vessels.json
 the new depicted years (trireme −480, corbita 200 with corbis, treasure ship 1410).
 Twenty-first clean push-triggered deploy in a row.
+
+---
+
+## Round 68 — 2026-08-10 — Every mast is its own tree at last
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), the carried list was
+emptied by r67, so the standing survey is the task — and its first candidate, surfaced by
+r67's own looking, is this round's work: mast radii were PER SHIP, not per mast.** Line 803
+of hull.js drew every mast on a hull at `beam × 0.06` through, so the treasure ship's
+0.6-share mizzen stood as fat as her main, the corbita's little artemon as fat as the mast
+that carries her whole sail, and the caravel's three lateens were one tree three times.
+
+**The research came first, and the law was read in the primary source before any code moved
+(the r67 pattern).** Steel 1794, *Elements and Practice of Rigging and Seamanship*, p.39
+(maritime.org's full text, "The diameters in proportion to the length, in the royal navy"):
+main and fore masts of 64–100-gun ships are **one inch in diameter at the partners to every
+yard in length** — diameter follows the SPAR'S OWN LENGTH — and the one attested exception
+is large: **"The mizen-masts of ships of 100 to 64 guns, inclusive, 3/5 of the diameter of
+the main-mast"** (mizzen topmast 7/10 of the main topmast). Measured before tuning: on these
+hulls' proportions the old `beam × 0.06` lands within a few percent of Steel's inch-per-yard
+for the TALLEST mast (the 74's main: drawn 0.876 m, Steel 0.911), so the calibration stands
+and every other mast now scales by its own lower length over the ship's longest. The mizzen
+clause applies to the aftermost STATION (not the last list entry — the corbita and trireme
+list their mains first) of a wooden three-master carrying square canvas; extending it past
+Steel's gun-rate domain (carrack 1500, Endurance 1912) is inference, recorded as such in the
+code. **Junk and crabclaw masts take the length scaling only — China is not rigged by
+Steel's tables** (the r67 lesson standing guard). The lateen branch, which drew its own
+B-based mast, takes the same per-mast scale, and its spar is finally `tag`ged 'mast' like
+every other.
+
+**What the fleet gained, measured (drawn lower diameters, m):** treasure ship mizzens
+1.08 → 0.65/0.67 with the main standing at 1.08 (the r67 finding, closed); 74 fore
+0.88 → 0.78, mizzen → 0.53 — under the 0.55 one-tree threshold, so she rightly loses her
+mizzen wooldings (Steel's 3/5 of 36 in is ~22 in, one stick's work); corbita artemon
+0.54 → 0.26; trireme boat mast 0.23 → 0.12; caravel 0.35/0.29/0.20; junk's after pole
+0.59 → 0.40, one shan-mu's work, strapless; clipper mizzen loses its iron hoops the same
+way; Great Eastern's six iron tubes 1.52 → 1.21–1.52 per their own lengths; Yamato's after
+mast 2.33 → 1.52. Wooldings, straps, cheeks, the top's trestletree gap and the corbis
+lanyard all follow automatically because they were already sized off `radii[0]` inside the
+per-mast loop.
+
+**The audit learned the class three ways, all proven by fault injection:** (1) **'every
+mast from one tree'** — generic 'Mast' cylinders clustered to their nearest data station,
+widest mesh per station being the lower; the test is PAIRWISE (drawn girth ratio of any two
+masts vs the ratio their lengths ask, 35% tolerance), because uniformity misses an injected
+carrack whose lateen mizzen draws FATTER than her mains (base beam×0.032 vs 0.030) — the
+min/max spread never moves while the ratio is 72% wrong. Reverting dScale to [1,1,1] fires
+it on 14 ships; the fixed build is clean. A second lesson inside the rule: the stub-height
+cut must scale with the hull (`min(3, beam*0.35)` m) or the caravel's 2.3 m mizzen column
+is invisible. (2) **Binding counts are now per-mast**: only masts whose OWN drawn diameter
+passes 0.55 m need binding, and the injection (threshold pushed to 9.55) fires unbound on
+all six binding ships. (3) **Bound MASTS, not meshes**: rope wooldings draw TWO meshes per
+bound mast (bands + pale pinch-hoops), iron hoops and straps one — the first audit run
+flagged the 74, Indiaman and carrack for "4 meshes on 2 masts" and the audit was wrong (rule
+8: checked the audit first), so the counts are read in mast units via the epoch's
+meshes-per-mast. Over-binding now fires ('binding on a single stick', mizzens re-bound under
+injection on 4 ships). **29/29 clean twice after restore.**
+
+**Looked at, rule 1, four diagnosis frames read and deleted (r55 rule):** the treasure ship
+furled — five masts, five girths, straps on all five; the 74 from the quarter — the mizzen
+a visibly lighter spar between her stout fore and main; the caravel — three lateens stepped
+down toward the poop; the corbita broadside. **Ratchet: two full runs to completion, both
+foreground-held on the PID (r63 rule). Run 1: 12 over-limit movers, every diff read as an
+image — all are mast columns, binding dashes and masthead fittings ONLY, no sea, no hull,
+no panels — plus four movers riding UNDER tolerance (ship-trireme 0.048%, ship-yamato
+0.029%, ship-dhow 0.019%, aboard-preussen 0.031%) whose amplified diffs show the same class,
+accepted under the r63 stale-inside-tolerance rule. Sixteen accepts, one class reason,
+logged in FRAME-LOG. The negative controls held: Wyoming (six equal masts), Titanic and QM2
+(equal poles) moved 0.000% — the model predicts zero there and zero is what happened. Run 2:
+45/45 green, globe-default 0.002% (no label flap), descent holding its recorded r65
+precision-drift residue at 0.043% exactly.**
+
+**Rule 0, written on the new shipwright baseline:** it reads as a rendered world — the 74
+under sail on open water, her fleet anchored around her on dark water under a daylight sky.
+Three facts a viewer can read off it: her three masts are three different trees, the main
+stoutest and the mizzen a light bare stick where fore and main carry banded wooldings; the
+canvas bellies forward of the yards on all three; the fleet list at right runs from a dugout
+of 68000 BC to ships of 98 m with her card giving 57.0 m overall and a 59.4 m rig.
+
+**Audit 29/29 clean, twice. Frames 45/45 green, second run. Byte budget: first paint
+8.18 MB against 8.6.**
+
+### Next, in order
+1. **Survey continues.** Candidates from this round's looking: the IRON-ship anchor is the
+   remaining half of the diameter question — `beam × 0.06` on the tallest mast gives Yamato
+   a 2.33 m and QM2 a 2.46 m pole, and a steel tube's diameter is a record question, not a
+   tree question; check the records before touching it. Carried from r67: trireme/corbita
+   masthead sheave gear (halyard sheaves, the karchesion) is implied, not drawn.
+2. Item 10 remainder: waterway margin plank in the deck shader — a texture judgement, low
+   priority.
+3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
+   stunsails if wanted (clipper ~500 m²; applies to Preussen too).
