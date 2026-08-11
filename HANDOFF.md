@@ -4666,3 +4666,77 @@ Action's water is open sea. That is the next real piece of work on this view.
 1. The Salamis shores, if the Action is to keep its rule-0 claim in a strait (carried 1).
 2. B10 stunsails if wanted; or the board's `#battle=` grammar + frame (carried 2).
 3. QM2/Azzam/jeer small items only if a round is otherwise light.
+
+---
+
+## Round 81 — 2026-08-11 — Recovery: round 80 verified independently and shipped
+
+**Round 80 did all of its work and none of its shipping.** The 80-minute ceiling killed its
+process at 16:00 with the tree uncommitted: the HANDOFF section written, the Salamis staging,
+the campaign de-hardcoding, the audit rules and the action-salamis baseline all in the working
+tree, and nothing in git. This round verified the work instead of trusting the write-up, then
+shipped it as round 80's own commit (8ac565b).
+
+**Verification, from scratch:** the audit re-run — 29 hulls, 0 problems, with the r80 battle
+and campaign blocks active (the healthy pass opens and steps both campaigns). The full ratchet
+re-run — 48/48 within tolerance, zero accepts needed, action-salamis at 0.000% against the
+baseline r80 created, globe-default at its 0.012% standing residue with no font flap. The
+action-salamis baseline read as an image: two fleets of oared hulls under bare spars on a
+force-4 sea, the card carrying Plutarch's swell, "PERSIAN FLEET HOLDS THE WEATHER GAUGE",
+130 M APART, no smoke. Round 80's diff read hunk by hunk: battle.js (formStation, the
+record-gated gunfire, heelK, btGoDay), app.js (the bt/day/cb/cd/ch grammar, the board's
+altitude-scaled tokens, the revived stepCampaign), audit-hulls.js (the campaign-record block,
+the regex-resurrection and board-step rules).
+
+**One number in r80's handoff corrected:** the armada's board camera is `cam: [0.4, 50.9,
+1147]` in the data, not "0.4/50.9/118 verbatim". 118 was the old S.dist in world units
+(R = 100); the record stores altitude in km, and (118 − 100) × 63.71 = 1146.8. Same camera,
+different unit — checked against startCampaign's own consumption, `flyTo(b.cam[0], b.cam[1],
+R + b.cam[2] / 63.71)`.
+
+**One carried claim corrected:** "flyTo never arrives under ?frozen (fly lerp reads the wall
+clock)" is already false in the shipped code — app.js:1943 reads `if (FROZEN && fly)
+{ fly.t0 = -1e9; }` immediately before stepFly, so any flight arrives on the first rAF after
+it starts, and the clause predates r80. What a frozen board capture actually lacks is a
+READINESS gate: `__FRAME_READY` can go true before the campaign has opened at all, so a
+`#battle=` frame without a latch photographs whatever the boot landed on.
+
+**Housekeeping:** frames.json re-serialized with ensure_ascii=False — r80's authoring script
+had rewritten the whole file with — escapes, burying the one real change (the
+action-salamis entry, now a five-line diff). build/ratchet-r81-run1.log, committed by accident
+with the recovery, removed from tracking.
+
+**Deploy: LIVE, stamp 1786482330 → 1786491145**, verified with cache-busted fetches: the live
+battles.json carries salamis (−480, 9 days, 2 fleets, powder false, cam [23.6, 37.9, 450])
+and the armada's converted fleet records; the live battle.js and app.js carry formStation,
+btGoDay and stepCampaign by pattern; the live audit carries the gunfire-regex and board-step
+rules by name. Thirty-third clean push-triggered deploy in a row.
+
+**The next round's queue head, scouted to the line number — the board's `#battle=` grammar
+and a board frame (r80's carried 2):**
+1. `applyHash` (app.js:356): if `#battle=<id>` names a battle in APP.battles with a campaign,
+   derive the era from its year exactly as voyages do at app.js:382 (salamis −480 → era 2,
+   spans −1000..500) — a derivable era outranks a hand-typed one, and the battle grammar must
+   not repeat the wrong-era voyage hang carried since r43.
+2. `applyHashView` (app.js:411): after the view block, find the battle and call
+   `openBattle(b)` (app.js:3546) — it already routes campaigns to startCampaign. Set a
+   `battleOpenPending` latch first.
+3. `markReady` (app.js:326): hold `__FRAME_READY` on the latch beside shipSelectPending
+   (app.js:335). Clear it tryPick-style (the retry pattern at app.js:462): settled means
+   `S.camp` is the named battle AND `fly === null` — the flight has arrived. labelsSettled
+   (app.js:347) already covers the label pass after the camera lands.
+4. Under frozen the board is deterministic at day 0: dt = 0 (app.js:1910) so S.campT stays 0.
+5. Frame: `board-salamis`, path `/?frozen=1#e=2&battle=salamis`; writeHash emits none of it
+   (read-only grammar, the b=/z= precedent). Baseline via check, FRAME-LOG reason, rule 0
+   written on the image.
+6. r80's cosmetic note rides along: campBar day labels longer than the Armada's wrap into the
+   tab strip — the board frame will show whether it bites.
+
+### Next, in order
+1. The board `#battle=` grammar + board-salamis frame, scouted above (r80 carried 2).
+2. The Salamis shores in the Action (r80 carried 1) — a terrain treatment worthy of rule 0(a),
+   not a cardboard ridge.
+3. Lepanto and Myeongnyang need hulls first (a 16th-c galley/galleass; panokseon and sekibune)
+   — vessel work before campaign work (r80 carried 3).
+4. r78 capture-gate hardening if the font flap strikes again; r75 QM2, r77 Azzam and r79 jeer
+   small items only if a round is otherwise light.
