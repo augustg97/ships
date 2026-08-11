@@ -3554,3 +3554,8 @@ of 68000 BC to ships of 98 m with her card giving 57.0 m overall and a 59.4 m ri
    priority.
 3. Galley action unblocked (Salamis, Lepanto, Myeongnyang are campaign-data tasks); B10
    stunsails if wanted (clipper ~500 m²; applies to Preussen too).
+
+**End-of-round deploy note: LIVE, stamp 1786411221 → 1786418078**, verified with a
+cache-busted fetch of the data-version meta tag on the first poll (~90 s after push); the
+live hull.js confirmed carrying the per-mast dScale rule and the live audit-hulls.js the
+'every mast from one tree' rule. Twenty-second clean push-triggered deploy in a row.
