@@ -5216,3 +5216,12 @@ ship-galleass NEW + the two classes above, accept with the reasons written here.
 1. The Lepanto campaign in the Action — both hulls exist now. Fleets, days, board, an
    Ionian shore block. Or the panokseon, if Myeongnyang is preferred.
 2. Small items (carried 2) only if a round is otherwise light.
+
+**r87 postscript, 23:03.** The accepts all landed this round after all: the parallel session
+(commit 0d6032e, "the ratchet the rake round owed" — a RESUMED session holding round-70-era
+context) accepted the 25 moved frames itself, with reasons from its own past; the pixels are
+r87's and correct (re-verified moved:0/new:1 by build/staging/compare-r87.py), the prose is
+corrected in FRAME-LOG's 23:03 entry. ship-galleass accepted with the true reason (d6f7abc).
+Ratchet stands 52/52. Live stamp 1786513014 verified, 31 vessels live. Next round: no debt —
+start directly at "Next, in order" above; treat any fresh shipwright-frame movement as
+suspect against BOTH writers' histories before touching geometry.
