@@ -261,6 +261,11 @@
    "name": "board-salamis",
    "path": "/?frozen=1#e=2&battle=salamis",
    "note": "the globe CAMPAIGN BOARD, addressable at last (r82) — Salamis day 0 at the record's own cam (450 km over the Saronic Gulf), one token per fleet per the fits-test, tracks, wind streaks and the campaign bar. The board was dead for nine days (c66c703) because no frame could name it; this one guards the class the audit's step-every-campaign rule only smoke-tests."
+  },
+  {
+   "name": "action-gravelines",
+   "path": "/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11",
+   "note": "GRAVELINES from the water, day 9 at 110 m — the only close action of the Armada campaign, with the r84 DEM coast wearing the r85 data-keyed polder palette (pasture green, dune-sand waterline, Dunkirk dunes as fogged headlands E). Guards the shore-palette class: a coast wearing another climate's colours moves this frame."
   }
  ]
 }

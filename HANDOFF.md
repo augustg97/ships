@@ -4970,3 +4970,78 @@ off the Lizard that morning.
 2. The live day-param question (carried 3) — cheap to settle, do it first if short.
 3. Vessel queue per r51 (ship-of-the-line detail, B10 stunsails) or Lepanto/Myeongnyang
    hulls (carried 4).
+
+## Round 85 — 2026-08-11 — The coast dresses for its climate, and the day the URL names stays
+
+**r84's queue worked in order: carried 3 settled first, then carried 1 and 2 closed together.**
+
+**The live day-param question (carried 3) is settled, with a measurement.** The param never
+died: probed live at one-second intervals, `#v=action&bt=salamis&day=5` UNFROZEN sits on day 0
+only while the shore DEM loads (shoreReady goes true ~9 s in; the hash's tryBattle gate holds
+btGoDay behind it, r83's own wrong-view guard), then lands on day 5 exactly as addressed —
+r84's probe read the day inside that first window. The REAL fault was after: btOpen switches
+autoplay on unconditionally, and btFrame advances the day every 9 s of play, wrapping modulo
+the campaign — so the day the URL named survived nine seconds before the slideshow marched
+past it and wrapped through 0. The slider had the same fault: drag to a day, autoplay
+overrides it within 9 s. Fixed as one class: every EXPLICIT day choice — the slider, the
+`&day=` hash via btGoDay — routes through a new single writer btSetPlaying(false), pausing
+the slideshow (the Play button, already there, resumes it); btOpen's autoplay-on default now
+routes through the same writer, so the button text can never disagree with the clock (it
+could before: pause, close, reopen left "Play" over a running slideshow). Probed live after:
+day 5 held at +16 s, playing false, button offering Play. Unaddressed opens keep the
+slideshow, by construction.
+
+**The shore palette is data now (carried 1).** BT_LAND_FRAG carried the Attic coast as
+constants — phrygana scrub, limestone, a Greek-September waterline — and r84's Gravelines
+DEM shipped wearing all of it. The palette moved into uniforms fed from SHORE_PALS in
+battle.js, keyed by a new `veg` field in the shore block: the record names its ground cover,
+the app resolves the name. Two palettes exist: `phrygana` (the r83 Attic set, values
+unchanged) and `polder` (the Flemish coast in August: pasture green, chalk where the ground
+cliffs, a wide dune-sand waterline to ~9 m, no bare-summit band on a coast that grazes
+150 m). An unknown or missing name warns in the console, renders phrygana as a LABELLED
+fallback, and CONVICTS in the audit — new rule "a shore in another climate's clothes",
+proven alive by injection: veg "tundra" on the armada convicts naming the known palettes.
+action-salamis moved 0.038%/0.028 under the refactor — same values through uniforms instead
+of folded constants, a different compiled arithmetic path on land pixels only, within
+tolerance and classified here.
+
+**The Gravelines coast is watched (carried 2): `action-gravelines` is the 50th baseline.**
+Day 9, the nine-hours-at-musket-range day, 110 m. Five camera candidates composed and read
+as images (the r83 method); cb=15/cd=1500/ch=11 chosen — both fleets whole, the crescent
+center-left, the English squadrons to windward at right, the coast in the haze south. The
+first candidates showed flat grey-blue masses on the water NE of the fleets; probed the
+loaded grid before trusting them (rule 8 instinct, aimed at the app this time): they are the
+REAL coast — the shoreline bends north-east past Gravelines toward Dunkirk, land to 25.6 m
+at (2.298, 51.042), the dune belt — standing 4–10 km deep in the Action's own fog. The
+picture is the data.
+
+**Rule 0, written on action-gravelines:** it reads as a rendered world — a whitecapped
+force-6 sea, two fleets within gunshot, a low green coast with a sand waterline dissolving
+into haze. Three facts a viewer can read off it: the date and the contested wind (8 Aug
+1588, NW force 6, Wynter's SSW dissent on the card); the range — 110 m, the campaign's only
+close action; the geography that decided the day — a lee shore south of the Armada, the
+Dunkirk banks east, the English holding the weather gauge to the north-west.
+
+**Verification:** audit 29 hulls / 0 problems, shore witnesses testifying on both battles,
+the veg injection convicting on demand. Full 49-frame ratchet BEFORE accept: all within
+tolerance, action-salamis 0.038% (classified above), board-salamis and action 0.000%,
+globe-default at its standing residue. action-gravelines accepted with the FRAME-LOG
+reason, LOOKED at, at the harness's own size. A post-accept full re-run confirms 50/50.
+Housekeeping: /build/staging PNGs, tiles and ratchet logs gitignored as regenerable scratch
+(the inj-*.js proof snippets stay committed, r84's convention).
+
+**Carried, restated exactly (none closed silently):**
+1. Lepanto and Myeongnyang stay blocked on hulls (16th-c galley/galleass; panokseon and
+   sekibune) — vessel work before campaign work (r80 carried).
+2. r78 capture-gate hardening if the font flap strikes (it did not strike in three runs this
+   round); r75 QM2, r77 Azzam, r79 jeer small items only if a round is light.
+3. New: the polder palette's values are first-authored, judged on the frame only — an A/B
+   against photographic reference of the Opal Coast/Flemish dunes (the r51 method) would
+   firm them, and a third coast (Lepanto's Ionian limestone likely reuses phrygana; a
+   future Baltic or tropical shore will not) will test the table's reach.
+
+### Next, in order
+1. Vessel queue per r51 (ship-of-the-line detail gaps, B10 stunsails — clipper ~500 m²,
+   Preussen-class too) or the Lepanto/Myeongnyang hulls (carried 1) — the campaign arc is
+   closed until those exist.
+2. Small items (carried 2) only if a round is otherwise light.

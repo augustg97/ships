@@ -28,3 +28,11 @@ scratchpad/
 
 # firecrawl search caches, session-local
 .firecrawl/
+
+# per-run scratch under build/: candidate captures and bake intermediates are
+# regenerable (bake-shore.py; the committed artefact is web/data/terrain/*.png),
+# ratchet logs are recorded in HANDOFF + FRAME-LOG. inj-*.js ARE committed — they
+# are the proof a rule can fire.
+/build/staging/*.png
+/build/staging/tiles/
+/build/ratchet-*.log

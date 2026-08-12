@@ -1,8 +1,13 @@
 precision highp float;
 
-/* The Attic coast in late September, lit by the Action's own sky. The normal is the gradient
- * of the height field the vertex stage actually drew — the LAND_DETAIL rule, held to here even
- * though the detail is all real: differentiate the height, never wobble a normal.
+/* A coast lit by the Action's own sky. The normal is the gradient of the height field the
+ * vertex stage actually drew — the LAND_DETAIL rule, held to here even though the detail is
+ * all real: differentiate the height, never wobble a normal.
+ *
+ * ⚠ THE PALETTE IS DATA. The shore block names its ground cover (veg), battle.js resolves
+ * the name in SHORE_PALS, and these uniforms carry the set. r84 shipped the Gravelines DEM
+ * wearing Attic phrygana and limestone because the palette lived here as constants — one
+ * coast's dress hardcoded onto every coast to come.
  *
  * ⚠ ONE ATMOSPHERE. The Action's fog is FogExp2(0xa9bcc6, 0.00042) and every hull in the scene
  * fades by three.js's own squared-exponent law. The ground must fade by the SAME law to the
@@ -18,6 +23,13 @@ uniform vec3  uSun;
 uniform vec3  uCam;
 uniform vec3  uFogC;
 uniform float uFogD;
+uniform vec3  uVegLo;   /* vegetation, the sparse end of the patchiness   */
+uniform vec3  uVegHi;   /* vegetation, the dense end                      */
+uniform vec3  uRock;    /* the steep-ground material — limestone, chalk   */
+uniform vec3  uShoreC;  /* the waterline band — beach sand, wet shingle   */
+uniform vec2  uRockS;   /* slope where rock takes over: smoothstep lo/hi  */
+uniform vec3  uBare;    /* bare-summit band: lo m, hi m, strength         */
+uniform float uShoreHi; /* the waterline band's upper edge, metres        */
 
 const float BTL_R = 6371000.0;
 
@@ -56,17 +68,16 @@ void main(){
   /* +X is WEST: d(height)/dX runs against longitude, so the east sample carries the +x sign */
   vec3 nrm = normalize(vec3((hE - hW) / (2.0 * stepM), 1.0, -(hN - hS) / (2.0 * stepM)));
 
-  /* dry-country palette: phrygana scrub on the slopes, grey-buff limestone where it steepens,
-     a pale shore band where the ground meets the water. September, no snow, no alpine belt. */
+  /* the named palette: vegetation on the gentle ground, the rock material where the slope
+     passes its own threshold, a waterline band where the ground meets the sea */
   float e0 = max(vE, 0.0);
   float slope = 1.0 - nrm.y;                       /* 0 flat .. ~1 cliff */
   float g1 = vnoiseB(vP.xz * 0.011);               /* vegetation patchiness, ~90 m */
   float g2 = vnoiseB(vP.xz * 0.09);                /* ground grain, ~11 m */
-  vec3 scrub = mix(vec3(0.335, 0.330, 0.230), vec3(0.420, 0.385, 0.270), g1);
-  vec3 rock  = vec3(0.520, 0.480, 0.415);
-  vec3 col = mix(scrub, rock, smoothstep(0.10, 0.38, slope));
-  col = mix(col, rock * 1.06, smoothstep(220.0, 420.0, e0) * 0.4);   /* bare upper Aigaleo */
-  col = mix(vec3(0.560, 0.520, 0.450), col, smoothstep(0.8, 4.0, e0)); /* the shore band */
+  vec3 veg = mix(uVegLo, uVegHi, g1);
+  vec3 col = mix(veg, uRock, smoothstep(uRockS.x, uRockS.y, slope));
+  col = mix(col, uRock * 1.06, smoothstep(uBare.x, uBare.y, e0) * uBare.z);
+  col = mix(uShoreC, col, smoothstep(0.8, uShoreHi, e0));
   col *= 0.88 + 0.24 * g2;
 
   /* underwater ground: wet dark rock, so the seabed seen through a wave trough is not beige */

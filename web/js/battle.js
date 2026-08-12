@@ -144,11 +144,11 @@ function btInit() {
     BT.dist = Math.max(90, Math.min(6000, BT.dist * (1 + Math.sign(e.deltaY) * 0.11)));
   }, { passive: false });
 
-  document.getElementById('btPlay').onclick = () => {
-    BT.playing = !BT.playing;
-    document.getElementById('btPlay').textContent = BT.playing ? 'Pause' : 'Play';
-  };
+  document.getElementById('btPlay').onclick = () => btSetPlaying(!BT.playing);
   document.getElementById('btDay').addEventListener('input', e => {
+    /* an explicit day choice pauses the slideshow — without this the autoplay overrode
+       the user's day within 9 s and wrapped on through 0 (measured live, r85) */
+    btSetPlaying(false);
     BT.day = +e.target.value; btSetDay();
   });
 }
@@ -230,7 +230,7 @@ function btOpen(battle) {
   });
 
   btShoreLoad(battle);
-  BT.day = 0; BT.t = 0; BT.playing = true;
+  BT.day = 0; BT.t = 0; btSetPlaying(true);
   const sl = document.getElementById('btDay');
   sl.max = battle.campaign.length - 1; sl.value = 0;
   document.getElementById('battle').classList.remove('hidden');
@@ -343,6 +343,26 @@ function btShoreElev(lonDeg, latDeg) {
   return a * (1 - fy) + b * fy;
 }
 
+/* ── the shore's dress is DATA, not code ────────────────────────────────────────────────
+   A shore block names its ground cover with `veg`, and each name here is a complete palette
+   for BT_LAND_FRAG. r84 shipped the Gravelines DEM wearing the Attic set — phrygana scrub
+   and limestone on Flemish chalk, dune and polder — because the palette lived in the shader
+   as constants. An unknown or missing name warns here and CONVICTS in the audit; the render
+   falls back to phrygana and says so, rather than drawing nothing. */
+const SHORE_PALS = {
+  /* dry limestone Greece, late September: phrygana scrub, grey-buff rock going bare above
+     ~220 m (upper Aigaleo), a narrow pale-rock waterline */
+  phrygana: { vegLo: [0.335, 0.330, 0.230], vegHi: [0.420, 0.385, 0.270],
+              rock: [0.520, 0.480, 0.415], shoreC: [0.560, 0.520, 0.450],
+              rockS: [0.10, 0.38], bare: [220, 420, 0.4], shoreHi: 4.0 },
+  /* the Flemish coast in August: green polder pasture, chalk where the ground cliffs (Cap
+     Blanc-Nez), a wide dune-sand waterline — the dune belt runs to ~10 m — and no bare-summit
+     band on a coast whose highest point grazes 150 m */
+  polder:   { vegLo: [0.238, 0.318, 0.186], vegHi: [0.330, 0.402, 0.226],
+              rock: [0.760, 0.755, 0.700], shoreC: [0.695, 0.655, 0.545],
+              rockS: [0.18, 0.45], bare: [1e5, 2e5, 0.0], shoreHi: 9.0 },
+};
+
 /* ── the shore: a battle that carries a DEM patch gets its coast staged around the fleets ──
    Loaded once per battle through the app's own tile discipline (createImageBitmap with
    colorSpaceConversion 'none' — these PNGs are DATA, and a colour-managed browser quietly
@@ -388,6 +408,10 @@ function btShoreLoad(battle) {
               uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
               uCam: { value: new THREE.Vector3() },
               uFogC: { value: new THREE.Color(0xa9bcc6) }, uFogD: { value: 0.00042 },
+              uVegLo: { value: new THREE.Vector3() }, uVegHi: { value: new THREE.Vector3() },
+              uRock: { value: new THREE.Vector3() }, uShoreC: { value: new THREE.Vector3() },
+              uRockS: { value: new THREE.Vector2() }, uBare: { value: new THREE.Vector3() },
+              uShoreHi: { value: 4.0 },
             },
           }));
         BT.land.rotation.x = -Math.PI / 2;
@@ -408,6 +432,13 @@ function btShoreLoad(battle) {
       U.uShore.value = tex;
       U.uB.value.set(sh.lon0, sh.lat0, sh.lon1, sh.lat1);
       U.uDay.value.set(BT.dayLonR, BT.dayLatR);
+      if (!SHORE_PALS[sh.veg])
+        console.warn('shore veg "' + sh.veg + '" names no palette — wearing phrygana as a LABELLED fallback');
+      const pal = SHORE_PALS[sh.veg] || SHORE_PALS.phrygana;
+      U.uVegLo.value.fromArray(pal.vegLo); U.uVegHi.value.fromArray(pal.vegHi);
+      U.uRock.value.fromArray(pal.rock);   U.uShoreC.value.fromArray(pal.shoreC);
+      U.uRockS.value.fromArray(pal.rockS); U.uBare.value.fromArray(pal.bare);
+      U.uShoreHi.value = pal.shoreHi;
       BT.land.visible = true;
       BT.shoreReady = true;
       /* re-place onto grounded-checked stations: a snap under ?frozen so the capture is the
@@ -425,11 +456,23 @@ function btShoreLoad(battle) {
 function btGoDay(n) {
   const C = BT.spec && BT.spec.campaign;
   if (!C) return;
+  btSetPlaying(false);
   BT.day = Math.max(0, Math.min(C.length - 1, n | 0));
   const sl = document.getElementById('btDay');
   if (sl) sl.value = BT.day;
   btSetDay();
   btPlace(true);
+}
+
+/* one writer for the play state, so the button text can never disagree with the clock.
+   Every EXPLICIT day choice — the slider, the `&day=` hash — routes through
+   btSetPlaying(false): autoplay is the default show for an unaddressed open, but a named
+   day is an address, and the slideshow must not wrap it back to 0 nine seconds later. */
+function btSetPlaying(on) {
+  BT.playing = on;
+  BT.dayT = 0;
+  const b = document.getElementById('btPlay');
+  if (b) b.textContent = on ? 'Pause' : 'Play';
 }
 
 function btClose() {
@@ -584,4 +627,4 @@ function btStepSmoke(dt, windTo) {
 }
 
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, btShoreLoad, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, btShoreLoad, SHORE_PALS, BT };

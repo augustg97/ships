@@ -75,11 +75,9 @@ cv.addEventListener('wheel', e => {
 e.preventDefault();
 BT.dist = Math.max(90, Math.min(6000, BT.dist * (1 + Math.sign(e.deltaY) * 0.11)));
 }, { passive: false });
-document.getElementById('btPlay').onclick = () => {
-BT.playing = !BT.playing;
-document.getElementById('btPlay').textContent = BT.playing ? 'Pause' : 'Play';
-};
+document.getElementById('btPlay').onclick = () => btSetPlaying(!BT.playing);
 document.getElementById('btDay').addEventListener('input', e => {
+btSetPlaying(false);
 BT.day = +e.target.value; btSetDay();
 });
 }
@@ -127,7 +125,7 @@ sx: st.x, sz: st.z,
 }
 });
 btShoreLoad(battle);
-BT.day = 0; BT.t = 0; BT.playing = true;
+BT.day = 0; BT.t = 0; btSetPlaying(true);
 const sl = document.getElementById('btDay');
 sl.max = battle.campaign.length - 1; sl.value = 0;
 document.getElementById('battle').classList.remove('hidden');
@@ -206,6 +204,14 @@ const a = G[yi * W + xi] * (1 - fx) + G[yi * W + xi + 1] * fx;
 const b = G[(yi + 1) * W + xi] * (1 - fx) + G[(yi + 1) * W + xi + 1] * fx;
 return a * (1 - fy) + b * fy;
 }
+const SHORE_PALS = {
+phrygana: { vegLo: [0.335, 0.330, 0.230], vegHi: [0.420, 0.385, 0.270],
+rock: [0.520, 0.480, 0.415], shoreC: [0.560, 0.520, 0.450],
+rockS: [0.10, 0.38], bare: [220, 420, 0.4], shoreHi: 4.0 },
+polder:   { vegLo: [0.238, 0.318, 0.186], vegHi: [0.330, 0.402, 0.226],
+rock: [0.760, 0.755, 0.700], shoreC: [0.695, 0.655, 0.545],
+rockS: [0.18, 0.45], bare: [1e5, 2e5, 0.0], shoreHi: 9.0 },
+};
 function btShoreLoad(battle) {
 const sh = battle.shore;
 BT.shoreReady = false; BT.shoreGrid = null; BT.shoreFor = battle.id;
@@ -236,6 +242,10 @@ uDay: { value: new THREE.Vector2() },
 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
 uCam: { value: new THREE.Vector3() },
 uFogC: { value: new THREE.Color(0xa9bcc6) }, uFogD: { value: 0.00042 },
+uVegLo: { value: new THREE.Vector3() }, uVegHi: { value: new THREE.Vector3() },
+uRock: { value: new THREE.Vector3() }, uShoreC: { value: new THREE.Vector3() },
+uRockS: { value: new THREE.Vector2() }, uBare: { value: new THREE.Vector3() },
+uShoreHi: { value: 4.0 },
 },
 }));
 BT.land.rotation.x = -Math.PI / 2;
@@ -251,6 +261,13 @@ const U = BT.land.material.uniforms;
 U.uShore.value = tex;
 U.uB.value.set(sh.lon0, sh.lat0, sh.lon1, sh.lat1);
 U.uDay.value.set(BT.dayLonR, BT.dayLatR);
+if (!SHORE_PALS[sh.veg])
+console.warn('shore veg "' + sh.veg + '" names no palette — wearing phrygana as a LABELLED fallback');
+const pal = SHORE_PALS[sh.veg] || SHORE_PALS.phrygana;
+U.uVegLo.value.fromArray(pal.vegLo); U.uVegHi.value.fromArray(pal.vegHi);
+U.uRock.value.fromArray(pal.rock);   U.uShoreC.value.fromArray(pal.shoreC);
+U.uRockS.value.fromArray(pal.rockS); U.uBare.value.fromArray(pal.bare);
+U.uShoreHi.value = pal.shoreHi;
 BT.land.visible = true;
 BT.shoreReady = true;
 btPlace(typeof FROZEN !== 'undefined' && FROZEN);
@@ -260,11 +277,18 @@ btPlace(typeof FROZEN !== 'undefined' && FROZEN);
 function btGoDay(n) {
 const C = BT.spec && BT.spec.campaign;
 if (!C) return;
+btSetPlaying(false);
 BT.day = Math.max(0, Math.min(C.length - 1, n | 0));
 const sl = document.getElementById('btDay');
 if (sl) sl.value = BT.day;
 btSetDay();
 btPlace(true);
+}
+function btSetPlaying(on) {
+BT.playing = on;
+BT.dayT = 0;
+const b = document.getElementById('btPlay');
+if (b) b.textContent = on ? 'Pause' : 'Play';
 }
 function btClose() {
 BT.on = false;
@@ -371,4 +395,4 @@ al.setX(i, Math.sin(Math.min(1, f * 3.2) * Math.PI * 0.5) * (1 - f));
 p.needsUpdate = true; sz.needsUpdate = true; al.needsUpdate = true;
 }
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, btShoreLoad, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, btShoreLoad, SHORE_PALS, BT };

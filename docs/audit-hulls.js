@@ -1557,6 +1557,11 @@ if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function
 || typeof SHIPS_BT.btShoreLoad !== 'function')
 say(bid, 'a shore the Action cannot sample',
 'SHIPS_BT.btShoreElev / btShoreLoad missing');
+if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.SHORE_PALS
+&& !SHIPS_BT.SHORE_PALS[sh.veg])
+say(bid, 'a shore in another climate\'s clothes',
+`shore.veg "${sh.veg}" names no palette in SHORE_PALS — ` +
+`known: ${Object.keys(SHIPS_BT.SHORE_PALS).join(', ')}`);
 else {
 const B = SHIPS_BT.BT;
 if (!B.shoreGrid || B.shoreFor !== b.id) {

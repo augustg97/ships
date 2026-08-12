@@ -2272,6 +2272,14 @@
             || typeof SHIPS_BT.btShoreLoad !== 'function')
           say(bid, 'a shore the Action cannot sample',
               'SHIPS_BT.btShoreElev / btShoreLoad missing');
+        /* the shore's dress is data too (round 85): `veg` must name a palette the app
+           actually has, or the coast silently wears another climate's colours — which is
+           exactly how the Gravelines chalk shipped dressed in Attic phrygana in r84 */
+        if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.SHORE_PALS
+            && !SHIPS_BT.SHORE_PALS[sh.veg])
+          say(bid, 'a shore in another climate\'s clothes',
+              `shore.veg "${sh.veg}" names no palette in SHORE_PALS — ` +
+              `known: ${Object.keys(SHIPS_BT.SHORE_PALS).join(', ')}`);
         /* ── THE WITNESSES TESTIFY, ALWAYS (round 84). ─────────────────────────────────
            The round-83 version ran the probes only "with the grid loaded", and in a
            standard audit run the Action has no battle open — so the probes had never
