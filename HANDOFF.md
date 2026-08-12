@@ -4822,3 +4822,53 @@ surface — readout, era chip, slider — says 480 BC.
    per r51 remains the ship-of-the-line's detail gaps, then B10 stunsails (clipper ~500 m²,
    Preussen-class too).
 3. Small items (carried 3) only if a round is otherwise light.
+
+## Round 83 — 2026-08-11 — The Salamis shores in the Action, and the mirror the coastline exposed
+
+**The r82 queue head is done in substance: the Action stages the real strait.** A 30 m/px DEM
+patch (Mapzen terrarium z12, AWS Open Data, provenance in ASSETS.json) is baked to
+`web/data/terrain/salamis.png` in the app's own 16-bit R/G encoding — the globe's 4.9 km raster
+does not contain the strait at all. The battle record carries a `shore` block (bounds + named
+land/water witness probes + cite); battle.js stages a radial-disc land mesh from it through new
+BT_LAND shaders (true scale, no lift, the Action's own fog law), and one decode feeds both the
+GPU texture and the CPU grid the grounding rule and audit sample — they cannot disagree.
+
+**Three class faults found and fixed on the way:**
+1. **The Action's frame was a left-handed mirror** (x=east, z=north, y up) — psgFrame's own
+   documented class, invisible until land existed. Now (x=WEST, z=NORTH) right-handed; every
+   compass↔local conversion flipped (sep, stations, steering, yaw −hd, heel sign, puffs, smoke).
+2. **The campaign's day anchors were on dry land at true scale** — day 5 put the Greek fleet
+   44 m up a hillside on Salamis. All nine anchors re-laid in validated water (Ambelakia basin
+   → the mouth → the rout east); fronts tightened 1040→880 / 720→660 m (34/33 m per trireme —
+   r80's widths had no source; the dense line is the record's own picture). Persian day-centres
+   validated wet for every day. Gauge stays Persian all nine days (checked).
+3. **CanvasTexture flipY** drew the coast N-S MIRRORED vs the data the grounding reads —
+   ships pulled to real water stood on drawn land. flipY=false; the CPU probes cannot see this
+   class (they read the data, not the render) — the audit's stated limit.
+
+**The world now constrains the ships**: stations ashore pull back along the line to the fleet
+anchor until afloat (−2.0 m for draught + mesh interpolation); the helm refuses a grounding
+step live. Audit: shore-block shape rules, witness-probe rules (≥1 land AND ≥1 water — a
+mirrored patch passes any one-sided test), probes + every-ship-afloat verified when the grid
+is loaded, and btFrame source must keep btElevLocal. Raster noise: 382 sub-2 m shoal specks
+in the channel despeckled (they rendered as grey pancakes among the fleet); water cells
+floored to −8 m (terrarium's nearshore gap encodes harbours as 0 m — a 0 m seabed breaks the
+rendered sea). Both treatments stated in ASSETS.json.
+
+**Rule 0, written on the new action-salamis**: it reads as a rendered world — whitecapped
+water, triremes under bare spars, a low sand spit with scrub crossing behind the fleets,
+distant coasts dissolving into haze. Three facts a viewer can read: two trireme fleets lie
+intermingled at 130 m in a strait; the spit (Kynosoura) has open water on both sides; the day
+is SSE force 4, 480 BC, Persian fleet holding the weather gauge.
+
+**⚠ VERIFICATION IS INCOMPLETE — the 80-minute killer ended this round early. Done: audit
+NOT run this round; ratchet run ONLY for action-salamis (accepted, reason logged). NOT run:
+the full 49-frame ratchet. KNOWN moved-but-unclassified: `action` (the Armada — chirality
+flips its arrangement) and `board-salamis` (day-0 anchors moved ~1 km). Next round MUST
+open by running the audit (29 hulls + new shore rules) and the full ratchet, classifying
+`action` and `board-salamis`, and LOOKING at both before accepting. The live stamp was not
+verified after the final push — verify 1786497990+ is live.**
+
+**Carried:** r82's list unchanged (Lepanto/Myeongnyang hulls; small items). New: the Action's
+default camera bearing for salamis (cb=60 predates the chirality fix) could be re-authored to
+face the strait axis; Armada shore patch (Calais/Gravelines coast) is now one data block away.

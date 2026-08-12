@@ -38,6 +38,13 @@ float vnoiseB(vec2 p){
 }
 
 void main(){
+  /* underwater ground belongs to the SEA's picture, not this one. The sea patch rides with
+     the camera and ends at 2.1 km; beyond it, seabed fragments drawn here painted a darker
+     water than the sea's own haze and turned the patch edge into a hard line across the
+     strait. Discarded, the background — the same horizon colour the sea fades to — owns
+     every water pixel past the patch, exactly as it did before the shore existed, and the
+     land above it still stands. The -1 m skirt keeps the waterline seam closed inshore. */
+  if (vE < -1.0) discard;
   float dist = length(vP - uCam);
   /* the stencil follows the ground one pixel covers: the data is ~30 m, so never finer */
   float stepM = max(30.0, dist * 0.02);
