@@ -2762,6 +2762,10 @@ const PARTS = {
                   + 'sides at gun height are full of oars. At Lepanto the fire from six of '
                   + 'these decks broke up the Ottoman line\'s order before the fleets '
                   + 'touched, which is why the galleasses were stationed ahead of the line.' },
+  sama:     { stage: 5, name: 'Sama',
+              what: 'A loophole cut in the shield wall, one of a row down each side — the '
+                  + 'arquebus and the bow fire from behind the planking. On a hull too light '
+                  + 'to bear cannon recoil, these slots are the broadside.' },
   tower:    { stage: 5, name: 'Commander\'s tower',
               what: 'The janggundae, the roofed pavilion standing on the fighting deck '
                   + 'amidships. The commander fights the ship from it, in sight of his own '
@@ -6648,11 +6652,14 @@ function buildOars(S, group, mat) {
         if (AP) o.position.set(p[0], apY, sgn * apZ);
         else o.position.set(p[0], p[1], sgn * p[2] * out);
         o.rotation.y = sgn > 0 ? 0 : Math.PI;          // flips +Z outboard to the other side
-        /* the rest angle is GEOMETRY, not a constant: the blade must reach the water, so the
-           slope follows from the thole's height over it and the oar's outboard reach. An
-           apostis thole sits ~1.3 m up with 8 m of oar outboard — a shallow 9° — where the
-           trireme's short oars from low tholes need the steeper original angle. */
-        const restX = AP ? -Math.atan2(apY + B * 0.02, outb) : -0.34;
+        /* the rest angle is GEOMETRY, not a constant: the blade rests AWASH, so the slope
+           follows from the thole's height over the water and the oar's outboard reach —
+           the same law for a hull-side thole as for an apostis thole. The old branch held
+           the hull-side case at the trireme's −0.34 constant, which the comment above it
+           already contradicted: on the panokseon it buried every blade a metre deep, and
+           on the 1.2 m-draught sekibune the audit caught the blades below her own keel. */
+        const restX = AP ? -Math.atan2(apY + B * 0.02, outb)
+                         : -Math.atan2(Math.max(0.15, p[1]) + B * 0.02, outb);
         o.rotation.x = restX;
         /* what the animator needs to swing this oar: which side it is, its rest angles, and
            its bank, because the three banks do not enter the water at the same instant */
@@ -6810,7 +6817,7 @@ function buildGalleyWorks(S, group, mats) {
     const dg = new THREE.BufferGeometry();
     dg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     dg.setIndex(idx); dg.computeVertexNormals();
-    group.add(tag(new THREE.Mesh(dg, pale), 'gundeck'));
+    group.add(tag(new THREE.Mesh(dg, pale), 'gundeck', GD.name, GD.what));
     const surfY = gdY + B * 0.007;
     const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
     for (const sgn of [-1, 1]) {
@@ -6846,12 +6853,29 @@ function buildGalleyWorks(S, group, mats) {
       panel.position.set(pd[0], surfY + shH / 2, 0);
       group.add(tag(panel, 'gundeck', 'End bulwark'));
     }
+    const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
+    /* the sama: loopholes for bows and arquebuses in a row along the bulwark — what the
+       wall is FOR on a hull that mounts no broadside. Record-driven: GD.loops a side.
+       Each is a dark plate straddling the plank, laid to the wall's own run at its
+       station, so the row follows the rail line the bulwark itself follows. Source:
+       ja "sekibune": the tate-ita carry sama (狭間), firing slots for bow and arquebus. */
+    const nL = Math.max(0, GD.loops | 0);
+    if (nL) {
+      const du = 0.05 / L;
+      for (const sgn of [-1, 1]) for (let j = 0; j < nL; j++) {
+        const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nL;
+        const p1 = surfacePoint(S, H, u - du, 1.0), p2 = surfacePoint(S, H, u + du, 1.0);
+        const yL = surfY + shH * 0.60;
+        const a = new THREE.Vector3(p1[0], yL, sgn * (Math.abs(p1[2]) + over - B * 0.006));
+        const b = new THREE.Vector3(p2[0], yL, sgn * (Math.abs(p2[2]) + over - B * 0.006));
+        group.add(tag(beamAB(a, b, shH * 0.24, B * 0.026, portMat), 'sama'));
+      }
+    }
     /* the battery: gunsPerSide pieces a side, each firing THROUGH a port cut low in the
        bulwark — the muzzle pierces the plank and a dark port frames it on the outer face,
        which is what a panokseon's broadside looks like from outside: a row of square
        ports with muzzles standing out of them, under an unbroken bulwark top */
     const nG = Math.max(0, GD.gunsPerSide | 0);
-    const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
     for (const sgn of [-1, 1]) for (let j = 0; j < nG; j++) {
       const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nG;
       const pd = surfacePoint(S, H, u, 1.0);
@@ -6977,8 +7001,10 @@ function buildGalleyWorks(S, group, mats) {
     roof.rotation.y = Math.PI / 4;                     // flats fore-and-aft, hips at the corners
     roof.position.set(xC, roofY + roofH / 2, 0);
     tg.add(roof);
-    group.add(tag(tg, 'tower', 'Commander\'s tower',
-      'The janggundae, the roofed pavilion amidships the commander fights the ship from. '
+    /* the record may name its own tower — the sekibune's yakata is not a janggundae —
+       and the Joseon text stays as the default the class was built from */
+    group.add(tag(tg, 'tower', T.name, T.what
+      || 'The janggundae, the roofed pavilion amidships the commander fights the ship from. '
       + 'At Myeongnyang Yi Sun-sin stood on one of these, in the first ship in the line, '
       + 'for most of a day, in sight of thirteen crews who had watched the rest of their '
       + 'navy destroyed eight weeks before.'));
@@ -7341,7 +7367,10 @@ function buildShip(S, opts) {
        up to. Positioned from the mast stations, so they cannot land in the wrong place. */
     const HS = hullSurface(S);
     (S.masts || []).forEach(mk => {
-      if (mk.rig !== 'square') return;
+      /* a mast that declares NO shrouds carries no channels — the trireme's artemon, the
+         corbita's, the wasen mast held by running stays: chainplates and deadeyes are
+         northern-European standing rigging, and a channel without shrouds is a bare shelf */
+      if (mk.rig !== 'square' || mk.shrouds === 0) return;
       for (const sgn of [-1, 1]) {
         const p = surfacePoint(S, HS, mk.at, 0.985);
         const ch = new THREE.Mesh(

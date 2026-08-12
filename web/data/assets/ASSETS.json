@@ -595,6 +595,18 @@
    "files": [
     "web/data/assets/ships/panokseon.jpg"
    ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "sekibune",
+   "type": "ships",
+   "name": "File:Atakebune4.jpg",
+   "caption": "The Kuki fleet in the boat barrier at Busan, 1593 - sekibune and atakebune drawn in period, during the Imjin War itself",
+   "licence": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:Atakebune4.jpg",
+   "files": [
+    "web/data/assets/ships/sekibune.jpg"
+   ]
   }
  ]
 }

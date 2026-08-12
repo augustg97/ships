@@ -75,6 +75,20 @@ say(v.id, 'gun deck off its declared height',
 `deck plane derives to ${planeY.toFixed(1)} m over water, drawn band ` +
 `${gd.y[0].toFixed(1)}–${gd.y[1].toFixed(1)}`);
 }
+if (H.gunDeck.loops) {
+const sm = part.sama;
+if (!sm) say(v.id, 'loopholes declared but not drawn', 'GD.loops with no sama geometry');
+else {
+if (sm.n !== 2 * H.gunDeck.loops)
+say(v.id, 'loophole count off its record',
+`${sm.n} sama drawn, record declares ${H.gunDeck.loops} a side`);
+const bandTop = planeY + (H.gunDeck.screenH || 0) + 0.3;
+if (sm.y[0] < planeY - 0.1 || sm.y[1] > bandTop)
+say(v.id, 'loopholes out of the bulwark band',
+`sama band ${sm.y[0].toFixed(1)}–${sm.y[1].toFixed(1)} m, bulwark ` +
+`${planeY.toFixed(1)}–${bandTop.toFixed(1)}`);
+}
+}
 if (H.tower) {
 const tw = part.tower;
 if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');

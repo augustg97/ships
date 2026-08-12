@@ -1798,6 +1798,164 @@
    }
   },
   {
+   "id": "sekibune",
+   "name": "Sekibune",
+   "sub": "barrier ship",
+   "rig": "oar",
+   "era": [
+    1560,
+    1868
+   ],
+   "from": 1560,
+   "to": 1868,
+   "region": "Japan",
+   "rows": [
+    [
+     "Class",
+     "the middle of the Sengoku navy's three — kobaya below 40 oars, sekibune 40–80, atakebune above — the classes are counted in oars, not tons"
+    ],
+    [
+     "Length",
+     "~25 m for a 40-oar ship (derived from the oar stations; no Sengoku example survives); the class ran roughly 20–30 m"
+    ],
+    [
+     "Beam",
+     "~5 m — length to beam about 5, against the panokseon's 3.4: a hull drawn out for speed"
+    ],
+    [
+     "Draught",
+     "~1.2 m (derived) — lightly framed and shallow; she works the anchorages the tide leaves"
+    ],
+    [
+     "Fighting deck",
+     "the sō-yagura, a deck laid over nearly the whole hull, walled with tate-ita shield planks — thinner than an atakebune's — pierced by sama loopholes"
+    ],
+    [
+     "Oars",
+     "40 ro — the sculling oar of Japan and Korea both — one man each, worked standing, stem to stern"
+    ],
+    [
+     "Under oars",
+     "~4 kn (derived) — the one attested speed fact of the Imjin sea war is relative: both fleets' accounts call the Japanese ships the faster"
+    ],
+    [
+     "Rig",
+     "one mast, one square sail; the mast is unstepped and laid down the yagura roof before action"
+    ],
+    [
+     "Weapons",
+     "arquebuses and bows through the sama, and a few light pieces at most — a lightly framed hull cannot bear big-gun recoil. The ship herself closes and boards"
+    ],
+    [
+     "Crew",
+     "about 40 at the oars and 30–40 fighting men"
+    ],
+    [
+     "At Myeongnyang",
+     "the fleet that entered the strait — 133 warships, mostly this class; the deep-draughted atakebune stayed out of the race"
+    ]
+   ],
+   "crew": 75,
+   "attestation": "generated",
+   "confidence": "moderate",
+   "text": "The standard warship of Japan from the Sengoku wars to the end of the Edo bakufu. The name means \"barrier ship\": the ships that enforced the toll barriers (seki) the lords of the Inland Sea — above all the Murakami houses — maintained across their straits, stopping, taxing and if need be taking every hull that passed. A navy's ships were counted by their oars: under forty a kobaya, a scout and messenger; forty to eighty a sekibune; above that, with beam to carry a castle, an atakebune. The sekibune is the cruiser of the three — a long, narrow hull on a single sharp stem, lightly framed, shallow, and by every account of the Imjin War faster through the water than anything Korea sent against her.\n\nHer construction is the Japanese coastal tradition put to war. A wasen carries no keel: a heavy flat bottom plank, broad side strakes edge-fastened with iron staples and nails, crossbeams whose ends pierce the planking, a square stern with a great hanging median rudder that can be raised in shoal water, and the sharp raked stem — a single plank, the mizu-oshi — that parts the water. Over nearly the whole length of the hull the shipwrights laid the sō-yagura, a full fighting deck, and walled it with tate-ita, shield planks pierced by sama — loopholes for bows and arquebuses. The single mast is unstepped before action and laid down the yagura roof, and the ship fights under her forty sculling ro alone, one man standing at each.\n\nHer doctrine was the opposite of the panokseon's, and the two argued it out across the Imjin War (1592–1598). A sekibune's light frame cannot bear the recoil of heavy cannon, so she carried almost none: her weapons were the arquebus through the loophole and the grappling iron over the rail, and her speed existed to close the range and put swordsmen on the enemy's deck. Against Chinese and Korean coasters, and in the fleet actions of the Inland Sea, it worked. Against a Joseon line that stood off behind high timber and fired cannon, it mostly did not. At Myeongnyang on 26 October 1597 the tidal race barred the deep atakebune, so the 133 warships that entered the strait were led by sekibune — and thirteen panokseon anchored across the narrows destroyed about thirty of them, killing the fleet's van commander Kurushima Michifusa, without losing a ship.\n\nThe type outlived the war by two and a half centuries, because the Tokugawa peace was built partly on its back. In 1609 the shogunate confiscated every atakebune in Japan and capped the daimyo at ships of 500 koku, which made the sekibune the largest warship a lord could own; the great houses built them to the limit, lacquered and gilded them into gozabune, and rowed their lords to Edo in them on the alternate-attendance processions. The shogun's own, the red-lacquered Tenchi-maru of 1630 — 500 koku, 76 oars — served for 230 years and was broken up only in the 1860s, when the navy that replaced her class ran on steam.",
+   "cite": "Turnbull, Fighting Ships of the Far East (2): Japan and Korea AD 612–1639 (Osprey, 2003); Hawley, The Imjin War (RAS Korea, 2005); Museum of Maritime Science, Tokyo (Tenchi-maru); the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), the card's own plate. No Sengoku sekibune survives; the classification by oar count is recorded, and every dimension here is a reconstruction from it, labelled derived where it is inference.",
+   "polar": {
+    "beatLight": 80,
+    "beatHard": 95,
+    "curve": {
+     "0": 0.9,
+     "30": 1.3,
+     "45": 1.9,
+     "60": 2.7,
+     "75": 3.5,
+     "90": 4.2,
+     "110": 4.7,
+     "120": 4.9,
+     "135": 5.0,
+     "150": 4.8,
+     "180": 4.2
+    },
+    "rigNote": "The figures are her SAILING speed in a moderate breeze, the single square sail set for passage — a fair-wind rig on a shallow, leeway-prone hull, struck and laid down the yagura before action. Under oars: about 4 kn (derived), 40 sculling ro with one man standing at each. No measured sekibune passage exists; the only speed attestation of the Imjin sea war is relative — both fleets' accounts agree the Japanese ships were faster — so her figures are set above the panokseon's, which are themselves derived and labelled so. The router holds 3.5 kn as her oar floor.",
+    "rig": "oars, with one square-rigged mast for passage",
+    "anchor": {
+     "kn": 5.0,
+     "kind": "passage",
+     "source": "derived: no measured sekibune passage exists; set half a knot above the panokseon's derived 4.5 — the one attested speed comparison of the Imjin sea war is relative, both fleets calling the Japanese ships faster"
+    },
+    "floor": {
+     "kn": 3.5,
+     "lossKnPerMs": 0.2,
+     "source": "derived: a knot above the panokseon's 2.5 for the attested relative difference, level with the Mediterranean galley's cruise on a hull of similar slenderness; headwind loss carried from Olympias's measured ratio, the galley's own method"
+    }
+   },
+   "hull": {
+    "wlPower": 3.2,
+    "stemFineness": 0.03,
+    "sternFineness": 0.3,
+    "forefoot": 0.2,
+    "run": 0.24,
+    "riseF": 0.22,
+    "riseA": 0.2,
+    "sheerBow": 1.1,
+    "sheerStern": 0.7,
+    "tumblehome": 0.0,
+    "stemRake": 0.22,
+    "sternRake": 0.12,
+    "strakes": 9,
+    "copper": false,
+    "copperAge": 0.55,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": false,
+    "topside": "#8f7448",
+    "bowsprit": 0.0,
+    "steeve": 0,
+    "masts": [
+     {
+      "at": 0.47,
+      "heightM": 13.0,
+      "rig": "square",
+      "rake": 0,
+      "shrouds": 0,
+      "only": 1
+     }
+    ],
+    "build": "shell",
+    "year": 1597,
+    "loa": 25.0,
+    "lwl": 22.5,
+    "beam": 5.0,
+    "draught": 1.2,
+    "freeboard": 1.4,
+    "cm": 0.7,
+    "oarBanks": 1,
+    "oarsPerBank": [
+     20
+    ],
+    "oarLen": 6.0,
+    "interscalmium": 1.05,
+    "gunDeck": {
+     "from": 0.1,
+     "to": 0.9,
+     "height": 1.2,
+     "gunsPerSide": 0,
+     "screenH": 1.5,
+     "over": 0.35,
+     "loops": 13,
+     "name": "Sō-yagura",
+     "what": "The full-length fighting deck the class is built around, laid over the hull on stanchions and walled with tate-ita — shield planks pierced by sama loopholes for bows and arquebuses. The rowers work beneath it; the fighting men stand on it; the mast lies down it before action."
+    },
+    "tower": {
+     "at": 0.66,
+     "w": 2.8,
+     "h": 1.6,
+     "name": "Yakata",
+     "what": "The roofed cabin standing on the yagura abaft the mast, where the ship is commanded from. The Busan scroll of 1593 draws one on hull after hull of the anchored fleet; in the Edo peace it grew into the lacquered state cabin of the gozabune."
+    }
+   }
+  },
+  {
    "id": "fluyt",
    "name": "Fluyt",
    "sub": "the freight machine",

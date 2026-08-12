@@ -5403,3 +5403,83 @@ the r51/57/87 lesson held.
 1. The sekibune (and atakebune?) — the Japanese hulls Myeongnyang needs; or the
    galley/galleass/panokseon raycast survey.
 2. Small items (carried 4) only if a round is otherwise light.
+
+## Round 90 — 2026-08-12 — The 33rd hull: the sekibune, and the rest angle the oars always claimed
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so this round took
+Round 89's "Next, in order" item 1: the sekibune — Myeongnyang's other hull. Audit 33 hulls /
+0 problems, all three new loophole rules proven by injection, ratchet 22 movers all classified
++ ship-sekibune NEW, post-accept run clean, live stamp verified.**
+
+**The record (all reconstruction, and the card says so).** The one recorded fact of the class
+is its own definition: a navy counted its ships in oars — under forty a kobaya, forty to
+eighty a sekibune, above that an atakebune (the Edo classification; the types are Sengoku).
+Every dimension derives from it and is labelled: 40 ro at 1.05 m stations → 25 m × 5 m,
+1.2 m draught on a lightly framed hull; sō-yagura fighting deck over nearly the whole length,
+walled with tate-ita pierced by sama; one removable square-rigged mast, laid down the yagura
+before action; the fleet fought under oars. Beat pair 80/95 — the square family's measured
+pair, the audit's own table (my 76/88 guess was convicted first run). Polar: 5.0 kn passage /
+3.5 kn oar floor, both derived and labelled — the only speed attestation of the Imjin sea war
+is relative, both fleets calling the Japanese ships faster. era 1560–1868: the type outlived
+the war as the 500-koku-capped Edo warship (Tenchi-maru, 76 oars, the shogun's gozabune for
+230 years). Cites: Turnbull FSFE2; Hawley; the Museum of Maritime Science sheet; ja sources
+for the yagura/tate-ita/sama structure. Plate: the Busan boat-barrier scroll of 1593 (PD,
+Univ. of Tokyo) — the Imjin fleet drawn in period, and the model's own reference for the
+yakata the scroll draws on hull after hull.
+
+**Class work, no bespoke geometry:**
+1. `gunDeck` learned `loops` — sama drawn as dark plates straddling the bulwark, each laid
+   to the wall's own run at its station (surfacePoint u±δ), own part key and card.
+2. `gunDeck` and `tower` learned record-driven cards (`name`/`what`) — the sekibune's
+   sō-yagura and yakata are not a sangjang and a janggundae; the Joseon texts stay as the
+   class defaults.
+3. A square mast that declares `shrouds: 0` no longer grows channels and deadeyes — the
+   trireme's and corbita's artemons had carried them for the whole project (the trireme's
+   removal shows in her diff as one bright streak; the corbita's fell under threshold).
+4. **The oar rest angle is now the geometry its own comment always claimed** —
+   atan2(thole height over water, outboard reach), the same law the apostis branch already
+   used — instead of the trireme's −0.34 constant hardcoded in the hull-side branch. The
+   audit caught the sekibune's blades below her own keel (−1.43 m vs −1.29); the fix then
+   revealed the panokseon's blades had rested a metre under HER keel since r89. All three
+   no-apostis oared hulls verified by spin capture: blades trail awash, which is also what
+   a resting scull actually does.
+
+**Two faults found by LOOKING (12 spin bearings), both before any baseline existed:** the
+square rig drew three fidded sections and three sails — 23.6 m of European mast on a record
+saying 13 (`only: 1`, the cog's own field, was the fix); and the yakata drowned behind the
+1.5 m bulwark (h 1.0 → 1.6, platform now standing just over the wall the way the scroll
+draws it).
+
+**The audit learned the classes it can see:** 'loopholes declared but not drawn' /
+'loophole count off its record' (exactly 2 × loops meshes) / 'loopholes out of the bulwark
+band'. Proven by injection (build/staging/inj-sama-missing.js): the galleass's record
+declaring loops convicts — her apostis gun deck draws no sama; the sekibune's drawn sama
+lifted 2 m convict on band. Clean run after: 33/0, first try.
+
+**Ratchet (build/ratchet-r90-run1.log): 22 moved + 1 NEW, three classes, every one read:**
+18 berth-shift frames 17–38% (every ship berthed after 1560 stands one berth down — the
+r86/87/89 class, diff read on shipwright-furled); ship-trireme 0.056% (the channel fix,
+one streak); ship-panokseon 0.256% (oars awash + the sekibune ghosting at the next berth);
+ship-galley/galleass 0.09/0.16% (labels and panel only). Post-accept full run2
+(build/ratchet-r90-run2.log) clean. Check-then-accept kept as a pair from one _current.
+
+**Carried, restated (none closed silently):**
+1. Myeongnyang has BOTH its hulls now (panokseon r89, sekibune r90) — the campaign itself
+   is next (r80): the strait, the 10 kn reversing race that is the battle's own hinge, the
+   thirteen against 133.
+2. Sekibune gaps, honest: the ro are still drawn as pulling sweeps (now resting awash, but
+   not the stern-raked working scull — the stated class simplification); no swivel pieces
+   or bow gun; no Sea voyage — like the Lepanto hulls she exists only where her battle
+   will stage. An atakebune, if Busan or the Kizugawaguchi battles ever stage, is this
+   same class kit: loops, tower, heavier walls.
+3. The raycast survey (survey-hulls rings) has still not run against galley, galleass,
+   panokseon or sekibune (r86 carried, grows again).
+4. Lepanto gaps stand (r88 carried 2): galleass stern chasers, bow fortress, galliot type.
+5. r78 capture-gate hardening if the font flap strikes (zero flaps this round across two
+   full runs and 23 accepts); r75 QM2, r77 Azzam, r79 jeer small items; the polder
+   photographic A/B (r85). The two-writer lock convention stays August's decision (r87).
+
+### Next, in order
+1. The Myeongnyang campaign in the Action — both hulls exist; the tidal race is the model's
+   real problem to state honestly. Or the four-hull raycast survey if the round is short.
+2. Small items (carried 5) only if a round is otherwise light.

@@ -103,6 +103,11 @@
    "note": "the 32nd hull, r89 - the panok fighting deck on the hull rail (no apostis), plank bulwark, janggundae tower, two battened lugs; Myeongnyang's ship"
   },
   {
+   "name": "ship-sekibune",
+   "path": "/?frozen=1#v=ship&s=sekibune",
+   "note": "the 33rd hull, r90 - the sekibune: so-yagura on the gunDeck class with sama loopholes, yakata tower, one-tier square mast (only:1, no shrouds), oar rest angle now geometric fleet-wide"
+  },
+  {
    "name": "ship-carrier",
    "path": "/?frozen=1#v=ship&s=carrier",
    "note": "flight deck markings, island, no passenger deckhouse"
