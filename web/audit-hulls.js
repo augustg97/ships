@@ -124,6 +124,44 @@
           && !(flag === 'boats' && H.boatsInboard))
         say(v.id, 'declared but not drawn', label);
 
+    /* ── THE UPPER DECK STANDS ON WHAT IT CLAIMS (round 89). A gunDeck record now has two
+       laws: over the apostis (the galleass) or on the hull's own rail (the panokseon — no
+       frame exists, so the stanchions stand on the gunwale and the deck edge follows the
+       rail line). Either way it must be DRAWN, its deck plane must sit at the declared
+       height over the water, and nothing of it may reach below the waterline. And a tower
+       record (the janggundae) must be drawn AND must stand on the fighting deck it claims
+       — the r58 stern-furniture class in Korean dress: furniture buried in the hull or
+       floating over it is invisible from every bearing, and the frame ratchet cannot see
+       wrongness, only change. Datum: y is metres over water, deck plane derives as
+       freeboard + gunDeck.height (rail amidships IS the freeboard, the fleet convention). */
+    if (H.gunDeck) {
+      const gd = part.gundeck;
+      const planeY = H.freeboard + H.gunDeck.height;
+      if (!gd) say(v.id, 'gun deck declared but not drawn', 'gunDeck record with no geometry');
+      else {
+        if (gd.y[0] < 0)
+          say(v.id, 'gun deck under water',
+              `lowest gun-deck vertex ${gd.y[0].toFixed(1)} m over water`);
+        if (planeY < gd.y[0] - 0.3 || planeY > gd.y[1] + 0.3)
+          say(v.id, 'gun deck off its declared height',
+              `deck plane derives to ${planeY.toFixed(1)} m over water, drawn band ` +
+              `${gd.y[0].toFixed(1)}–${gd.y[1].toFixed(1)}`);
+      }
+      if (H.tower) {
+        const tw = part.tower;
+        if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');
+        else {
+          if (Math.abs(tw.y[0] - planeY) > 0.6)
+            say(v.id, tw.y[0] < planeY ? 'tower buried in the deck' : 'tower floats above the deck',
+                `tower foot ${tw.y[0].toFixed(1)} m over water, fighting deck at ${planeY.toFixed(1)}`);
+          if (tw.y[1] < planeY + (H.tower.h || 0))
+            say(v.id, 'tower short of its record',
+                `tower top ${tw.y[1].toFixed(1)} m, record claims ${(planeY + H.tower.h).toFixed(1)}+`);
+        }
+      }
+    } else if (H.tower)
+      say(v.id, 'tower without a deck', 'tower record on a hull with no gunDeck to stand on');
+
     /* ── THE DRESS IS A DATE (round 32). The plating shader keys fastening and bottom colour
        off the year the hull is depicted at; a steel hull with no year silently falls back to
        the Victorian scheme, which is exactly the fleet-wide anachronism the era key was built

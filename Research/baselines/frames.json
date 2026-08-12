@@ -98,6 +98,11 @@
    "note": "the 31st hull, r87 - the gun deck over the rowers; the type that opened Lepanto"
   },
   {
+   "name": "ship-panokseon",
+   "path": "/?frozen=1#v=ship&s=panokseon",
+   "note": "the 32nd hull, r89 - the panok fighting deck on the hull rail (no apostis), plank bulwark, janggundae tower, two battened lugs; Myeongnyang's ship"
+  },
+  {
    "name": "ship-carrier",
    "path": "/?frozen=1#v=ship&s=carrier",
    "note": "flight deck markings, island, no passenger deckhouse"

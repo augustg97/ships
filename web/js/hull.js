@@ -2762,6 +2762,12 @@ const PARTS = {
                   + 'sides at gun height are full of oars. At Lepanto the fire from six of '
                   + 'these decks broke up the Ottoman line\'s order before the fleets '
                   + 'touched, which is why the galleasses were stationed ahead of the line.' },
+  tower:    { stage: 5, name: 'Commander\'s tower',
+              what: 'The janggundae, the roofed pavilion standing on the fighting deck '
+                  + 'amidships. The commander fights the ship from it, in sight of his own '
+                  + 'crew and the rest of the squadron — a Joseon fleet was signalled by '
+                  + 'flag and drum from these towers. Every surviving drawing of a '
+                  + 'panokseon shows it standing clear above the bulwarks.' },
   arrumbada: { stage: 3, name: 'Bow platform',
               what: 'The fighting platform over the bow, spanning the full width of the rowing '
                   + 'frame. The guns stand on it and the boarding party masses on it, over the '
@@ -6674,7 +6680,7 @@ function buildOars(S, group, mat) {
  */
 function buildGalleyWorks(S, group, mats) {
   const AP = S.apostis;
-  if (!S.spur && !AP) return;
+  if (!S.spur && !AP && !S.gunDeck && !S.tower) return;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const timber = mats.woodDark, pale = mats.woodPale;
@@ -6769,6 +6775,110 @@ function buildGalleyWorks(S, group, mats) {
      Record-driven: gunDeck {from, to, height (m over the deck edge), gunsPerSide}.
      Sources: Guilmartin, Gunpowder and Galleys; Morrison (ed.), The Age of the Galley;
      Grevenbroeck's drawing of a Venetian galleass (the card's own plate). */
+  if (S.gunDeck && !AP) {
+    /* ── THE PANOK: THE SAME DECK, WITHOUT THE FRAME ─────────────────────────────────
+       The Korean answer to the galleass's problem, half a century earlier. A panokseon
+       carries no apostis — her oars pivot at the hull's own side — so the fighting deck
+       (the sangjang, the "board roof" the ship is NAMED for) stands on stanchions rising
+       from the gunwale itself, and its beam-ends overhang the side (GD.over, metres) the
+       way every crossbeam in a Korean hull pierces the planking. Its width therefore
+       follows the hull's own rail line, station by station off surfacePoint — not a
+       constant frame width, which would float off both ends of a hull this full — the
+       head-timbers' law again. And the screen is no waist-high rail but a plank BULWARK
+       (GD.screenH, metres): the storey a Japanese boarding party would have to climb,
+       which is the whole argument of the type. Sources: Hong Sun-jae, 'Understanding
+       the Structure of the Panokseon' (Military History 135, 2025); Underwood, Korean
+       Boats and Ships (1934). */
+    const GD = S.gunDeck;
+    const gdY = deckY + GD.height;
+    const over = GD.over !== undefined ? GD.over : B * 0.045;
+    const N = 22;
+    const sx = [], railY = [], halfW = [];
+    for (let i = 0; i <= N; i++) {
+      const u = GD.from + (GD.to - GD.from) * i / N;
+      const pd = surfacePoint(S, H, u, 1.0);
+      sx.push(pd[0]); railY.push(pd[1]); halfW.push(Math.abs(pd[2]) + over);
+    }
+    /* the deck: one lofted strip between the two edge curves, faced both ways so the
+       rowers' side of their own roof is not a hole */
+    const pos = [], idx = [];
+    for (let i = 0; i <= N; i++) {
+      pos.push(sx[i], gdY, -halfW[i], sx[i], gdY, halfW[i]);
+      if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2,
+                                               a + 2, a + 1, a, a + 2, a + 3, a + 1); }
+    }
+    const dg = new THREE.BufferGeometry();
+    dg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    dg.setIndex(idx); dg.computeVertexNormals();
+    group.add(tag(new THREE.Mesh(dg, pale), 'gundeck'));
+    const surfY = gdY + B * 0.007;
+    const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
+    for (const sgn of [-1, 1]) {
+      for (let i = 0; i <= N; i += 2) {
+        /* stanchions stand ON the rail — foot at the gunwale the surface owns */
+        const a = new THREE.Vector3(sx[i], railY[i], sgn * (halfW[i] - over));
+        const b = new THREE.Vector3(sx[i], gdY, sgn * (halfW[i] - B * 0.020));
+        group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'gundeck', 'Stanchion'));
+      }
+      for (let i = 0; i < N; i++) {
+        /* the edge beam under the deck lip, and the bulwark above it, segment by
+           segment along the curved edge */
+        const ca = new THREE.Vector3(sx[i], gdY - B * 0.016, sgn * (halfW[i] - B * 0.014));
+        const cb = new THREE.Vector3(sx[i + 1], gdY - B * 0.016, sgn * (halfW[i + 1] - B * 0.014));
+        group.add(tag(beamAB(ca, cb, B * 0.030, B * 0.028, timber), 'gundeck', 'Deck clamp'));
+        const ba = new THREE.Vector3(sx[i], surfY + shH / 2, sgn * (halfW[i] - B * 0.006));
+        const bb = new THREE.Vector3(sx[i + 1], surfY + shH / 2, sgn * (halfW[i + 1] - B * 0.006));
+        group.add(tag(beamAB(ba, bb, shH, B * 0.012, timber), 'gundeck', 'Bulwark',
+          'Heavy plank, chest-high, around the whole fighting deck — the rowers below it, '
+          + 'the marines behind it, and the reason boarding a panokseon means climbing.'));
+      }
+    }
+    /* and the ends CLOSE: an athwartships panel at each end of the fighting deck. Every
+       drawing shows the bulwark wrapping the bow and stern of the panok; an open end
+       would hand a boarding party the one unwalled way in. Seen from dead ahead or dead
+       astern — the bearings a fleet actually met her on — these two panels are most of
+       what shows. */
+    for (const uE of [GD.from, GD.to]) {
+      const pd = surfacePoint(S, H, uE, 1.0);
+      const hwE = Math.abs(pd[2]) + over;
+      const panel = new THREE.Mesh(
+        new THREE.BoxGeometry(B * 0.012, shH, hwE * 2 - B * 0.012), timber);
+      panel.position.set(pd[0], surfY + shH / 2, 0);
+      group.add(tag(panel, 'gundeck', 'End bulwark'));
+    }
+    /* the battery: gunsPerSide pieces a side, each firing THROUGH a port cut low in the
+       bulwark — the muzzle pierces the plank and a dark port frames it on the outer face,
+       which is what a panokseon's broadside looks like from outside: a row of square
+       ports with muzzles standing out of them, under an unbroken bulwark top */
+    const nG = Math.max(0, GD.gunsPerSide | 0);
+    const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
+    for (const sgn of [-1, 1]) for (let j = 0; j < nG; j++) {
+      const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nG;
+      const pd = surfacePoint(S, H, u, 1.0);
+      const hw = Math.abs(pd[2]) + over;
+      const len = B * 0.22, r = B * 0.014;
+      const g = new THREE.Group();
+      const bar = new THREE.Mesh(
+        new THREE.CylinderGeometry(r * 0.72, r, len, 12), mats.iron);
+      bar.rotation.x = sgn * Math.PI / 2;              // +Y to ±Z: muzzle outboard
+      g.add(bar);
+      const carr = new THREE.Mesh(
+        new THREE.BoxGeometry(r * 3.2, r * 2.4, len * 0.48), timber);
+      carr.position.set(0, -r * 2.0, -sgn * len * 0.18);
+      g.add(carr);
+      const port = new THREE.Mesh(
+        new THREE.BoxGeometry(B * 0.055, B * 0.055, B * 0.020), portMat);
+      port.position.set(0, 0, sgn * (len * 0.30 - B * 0.004));
+      g.add(port);
+      g.position.set((u - 0.5) * L, surfY + r * 3.0, sgn * (hw - len * 0.30));
+      group.add(tag(g, 'gun', 'Deck piece',
+        'A bronze chongtong — cheonja, jija, hyeonja or hwangja, "heaven, earth, black, '
+        + 'yellow", by size — on a timber bed, firing iron shot or the daejanggunjeon '
+        + 'heavy arrow over the bulwark. The Joseon navy fought at range with these; '
+        + 'the Japanese fleet it faced carried almost no shipboard cannon at all.'));
+    }
+  }
+
   if (S.gunDeck && AP) {
     const GD = S.gunDeck;
     const xF = (GD.from - 0.5) * L, xT = (GD.to - 0.5) * L;
@@ -6819,6 +6929,59 @@ function buildGalleyWorks(S, group, mats) {
         'A sacre or demi-culverin on the gun deck, firing over the oars. Eight or nine '
         + 'a side is a weight of metal no galley can answer: her guns all face forward.'));
     }
+  }
+
+  /* ── THE COMMANDER'S TOWER ─────────────────────────────────────────────────────────
+     The janggundae: a roofed pavilion on posts, standing on the fighting deck amidships,
+     where the commanding officer stands through the action — visible to his whole crew
+     and to the rest of the squadron, which is how a Joseon fleet was signalled. Every
+     drawing of a panokseon shows it: the Gakseon dobon draws the pavilion with its
+     hipped roof standing clear above the bulwarks. Record-driven: tower {at, w, h}. */
+  if (S.tower) {
+    const T = S.tower;
+    const xC = (T.at - 0.5) * L;
+    const baseY = S.gunDeck ? deckY + S.gunDeck.height + B * 0.007 : deckY;
+    const platY = baseY + T.h;
+    const hw = T.w / 2;
+    const tg = new THREE.Group();
+    for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
+      const a = new THREE.Vector3(xC + dx, baseY, dz);
+      const b = new THREE.Vector3(xC + dx, platY, dz);
+      tg.add(beamAB(a, b, B * 0.022, B * 0.022, timber));
+    }
+    const plat = new THREE.Mesh(
+      new THREE.BoxGeometry(T.w * 1.15, B * 0.012, T.w * 1.15), pale);
+    plat.position.set(xC, platY, 0);
+    tg.add(plat);
+    /* the railing round the platform — the commander stands, he does not hide */
+    const railH = 0.95, rw = T.w * 1.15;
+    for (const [px, pz, rx, rz] of [[0, rw / 2, rw, B * 0.010], [0, -rw / 2, rw, B * 0.010],
+                                    [rw / 2, 0, B * 0.010, rw], [-rw / 2, 0, B * 0.010, rw]]) {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(rx, B * 0.008, rz), timber);
+      rail.position.set(xC + px, platY + railH, pz);
+      tg.add(rail);
+      const mid = new THREE.Mesh(new THREE.BoxGeometry(rx, B * 0.006, rz), timber);
+      mid.position.set(xC + px, platY + railH * 0.5, pz);
+      tg.add(mid);
+    }
+    /* roof posts at the platform corners, and the hipped roof over them */
+    const roofY = platY + 1.9;
+    for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
+      const a = new THREE.Vector3(xC + dx, platY, dz);
+      const b = new THREE.Vector3(xC + dx, roofY, dz);
+      tg.add(beamAB(a, b, B * 0.016, B * 0.016, timber));
+    }
+    const roofH = T.w * 0.30;
+    const roof = new THREE.Mesh(
+      new THREE.ConeGeometry(T.w * 0.85, roofH, 4), timber);
+    roof.rotation.y = Math.PI / 4;                     // flats fore-and-aft, hips at the corners
+    roof.position.set(xC, roofY + roofH / 2, 0);
+    tg.add(roof);
+    group.add(tag(tg, 'tower', 'Commander\'s tower',
+      'The janggundae, the roofed pavilion amidships the commander fights the ship from. '
+      + 'At Myeongnyang Yi Sun-sin stood on one of these, in the first ship in the line, '
+      + 'for most of a day, in sight of thirteen crews who had watched the rest of their '
+      + 'navy destroyed eight weeks before.'));
   }
 
   /* ── THE ARRUMBADA, AND THE GUNS THAT FACE FORWARD ─────────────────────────────────

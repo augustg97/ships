@@ -583,6 +583,18 @@
    "license": "Public domain / open data per the Terrain Tiles on AWS usage terms; the underlying SRTM is US government public domain",
    "fetched": "2026-08-11",
    "treatment": "Mercator tiles mosaicked and resampled to an equirectangular grid; water cells (elev <= 0) floored to -8 m because the raster's nearshore bathymetry gap encodes harbour water as 0 m and a 0 m seabed breaks the rendered sea surface; 38,186 land cells in components never reaching 2 m despeckled to -8 m (shoal noise off the delta). The coastline - the 0-crossing - is the raster's own."
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "panokseon",
+   "type": "ships",
+   "name": "File:Panokseon.jpg",
+   "caption": "An old painting of a panokseon, the Joseon navy's standard warship",
+   "licence": "Public domain",
+   "url": "https://commons.wikimedia.org/wiki/File:Panokseon.jpg",
+   "files": [
+    "web/data/assets/ships/panokseon.jpg"
+   ]
   }
  ]
 }

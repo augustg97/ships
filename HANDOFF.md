@@ -5326,3 +5326,80 @@ house, mast and radar domes.
 **Still short of the fleet's best, and worth a later round:** Azzam's house steps like a cruise
 ship where hers is a lower sleeker block, and her exhausts read as funnels. Queen Mary 2's bridge
 front is not the distinctive rounded wheelhouse.
+
+## Round 89 — 2026-08-12 — The 32nd hull: the panokseon, and the fighting deck that learned to stand on the hull's own rail
+
+**The queue's item 1 taken: the panokseon (`panokseon`, board-roofed ship, hull year 1597,
+berth 1555) — Myeongnyang's hull, the first of the two Myeongnyang needs (r80). Audit 32
+hulls / 0 problems on her first clean run, both new audit rules proven by fault injection,
+ratchet 54/54 after 21 classified accepts + 1 NEW.**
+
+**The record (all reconstruction, and the card says so).** No panokseon survives and the
+2025 KCI paper (Hong Sun-jae, *Military History* 135) says plainly that structure must be
+reconstructed from text; every dimension is labelled derived where it is inference. Large
+ship: ~32 m on deck / 9.4 m beam (L/B 3.4) / ~1.8 m draught on a dead-flat bottom /
+2.0 m to the gunwale, 3.6 m to the fighting deck. Three levels — hold, protected oar deck,
+fighting deck. 8–10 sculling ro a side worked standing (9 modelled, interscalmium 2.4 m,
+oars 7.5 m); 50–60 rowers, ~125 marines. Two battened-lug masts (the junk family's own
+engineering; beat pair 62/70 from the audit's table). Polar: anchor 4.5 kn passage,
+derived off Worcester's junk figure; floor 2.5 kn — the only speed attestation is
+relative, both Imjin fleets agreeing the Japanese ships were faster. Cite: Hong 2025;
+Hawley, *The Imjin War*; Underwood 1934. Plate: the public-domain panokseon painting
+(Commons), provenance in ASSETS.json.
+
+**The geometry — the gunDeck class learned its second law, and one new class:**
+- `gunDeck` without `apostis` (new law, buildGalleyWorks): the fighting deck stands on
+  stanchions rising from the hull's OWN rail, its edge lofted station-by-station along the
+  rail line plus overhanging beam-ends (`over`, metres — the crossbeam ends that pierce a
+  Korean hull), a plank BULWARK (`screenH`, metres) instead of the galleass's waist-high
+  screen, and athwartships end panels closing both ends — an open end would hand a
+  boarding party the one unwalled way in, and dead ahead/astern are the bearings a fleet
+  met her on. The battery fires THROUGH the bulwark: each muzzle pierces the plank inside
+  a dark port frame on the outer face. The AP law (galleass) is untouched — her frames
+  moved only by berth shift.
+- `tower {at, w, h}` (new class): the janggundae — posts, railed platform, four roof
+  posts, hipped roof — standing ON the fighting deck. Stage card written. At 0.62, clear
+  of the mainsail's sweep (at 0.55 the leech brushed its forward posts — moved after
+  looking, not after guessing).
+- The bulkhead build gives her the junk-family flat ends and the median rudder for free.
+
+**Three faults found by LOOKING (two bearings beyond the berth), all fixed in-round:**
+the fighting deck's ends stood open (seen dead astern — the whole deck was a corridor);
+the gun barrels pierced the bulwark plank with no port drawn (seen from the bow quarter);
+the mainsail swept the tower's forward posts. The audit could see none of these — it
+learned the classes it could: **'gun deck declared but not drawn' / 'off its declared
+height' / 'under water', 'tower declared but not drawn' / 'buried' / 'floats' / 'short of
+its record' / 'without a deck'** — and the two live ones were proven by injection
+(build/staging/inj-tower-adrift.js): lift the drawn tower 1 m → 'tower floats above the
+deck' (foot 4.7 m vs deck 3.6); declare a tower on the galley → 'tower without a deck'.
+Clean run after: 32/0.
+
+**Ratchet (build/ratchet-r89-run1.log): 21 moved, all classified, plus ship-panokseon
+NEW.** 18 frames 15.9–37.7% — every ship berthed after 1555 stands one berth further
+down, the r86/87 class, diff read on shipwright-furled (scene ghosts one berth over,
+labels reflow, nothing else). 3 frames 0.058–0.885% — the fleet panel's Panokseon row and
+the OF-32 counter on pre-1555 ships; diff read on ship-galleass: her NEIGHBOURING berth
+now holds the panokseon (lug rig ghosting at frame edge), the galleass herself untouched.
+Globe, sea, action, board, aboard frames: 0.000. Post-accept full run2
+(build/ratchet-r89-run2.log) clean. Check-then-accept kept as a PAIR from one _current —
+the r51/57/87 lesson held.
+
+**Carried, restated (none closed silently):**
+1. Myeongnyang: panokseon DONE (this round); the sekibune (and Japanese side) still
+   needed, then the campaign itself (r80).
+2. Panokseon gaps, honest: oars drawn as pulling sweeps at the galley's rest angle where
+   the Korean ro is a stern-raked scull worked more vertically (stated simplification);
+   no swivel pieces on the bulwark top; no hwacha modelled; survey-hulls raycast rings
+   have not run against galley, galleass or panokseon (r86 carried 4 grows).
+3. Lepanto gaps (r88 carried 2) stand: galleass stern chasers, bow fortress, galliot
+   type, no Sea voyages for the campaign hulls.
+4. r78 capture-gate hardening if the font flap strikes (it did NOT strike this round —
+   22 solo-accept captures and two full runs, zero flaps); r75 QM2, r77 Azzam, r79 jeer
+   small items only if a round is light. The polder photographic A/B (r85) still wants
+   doing.
+5. The two-writer lock convention stays a decision for August (r87 carried 5).
+
+### Next, in order
+1. The sekibune (and atakebune?) — the Japanese hulls Myeongnyang needs; or the
+   galley/galleass/panokseon raycast survey.
+2. Small items (carried 4) only if a round is otherwise light.

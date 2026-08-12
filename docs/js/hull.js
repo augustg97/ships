@@ -1585,6 +1585,12 @@ what: 'The deck built across the rowing frame, over the rowers\' heads — the '
 + 'sides at gun height are full of oars. At Lepanto the fire from six of '
 + 'these decks broke up the Ottoman line\'s order before the fleets '
 + 'touched, which is why the galleasses were stationed ahead of the line.' },
+tower:    { stage: 5, name: 'Commander\'s tower',
+what: 'The janggundae, the roofed pavilion standing on the fighting deck '
++ 'amidships. The commander fights the ship from it, in sight of his own '
++ 'crew and the rest of the squadron — a Joseon fleet was signalled by '
++ 'flag and drum from these towers. Every surviving drawing of a '
++ 'panokseon shows it standing clear above the bulwarks.' },
 arrumbada: { stage: 3, name: 'Bow platform',
 what: 'The fighting platform over the bow, spanning the full width of the rowing '
 + 'frame. The guns stand on it and the boarding party masses on it, over the '
@@ -4251,7 +4257,7 @@ group.add(tag(g, 'oar'));
 }
 function buildGalleyWorks(S, group, mats) {
 const AP = S.apostis;
-if (!S.spur && !AP) return;
+if (!S.spur && !AP && !S.gunDeck && !S.tower) return;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const timber = mats.woodDark, pale = mats.woodPale;
@@ -4320,6 +4326,82 @@ group.add(tag(corsia, 'apostis', 'Corsia',
 'The raised gangway down the centreline, the only way fore and aft on a deck that '
 + 'is otherwise benches. The boatswain walks it; so does everyone going forward to fight.'));
 }
+if (S.gunDeck && !AP) {
+const GD = S.gunDeck;
+const gdY = deckY + GD.height;
+const over = GD.over !== undefined ? GD.over : B * 0.045;
+const N = 22;
+const sx = [], railY = [], halfW = [];
+for (let i = 0; i <= N; i++) {
+const u = GD.from + (GD.to - GD.from) * i / N;
+const pd = surfacePoint(S, H, u, 1.0);
+sx.push(pd[0]); railY.push(pd[1]); halfW.push(Math.abs(pd[2]) + over);
+}
+const pos = [], idx = [];
+for (let i = 0; i <= N; i++) {
+pos.push(sx[i], gdY, -halfW[i], sx[i], gdY, halfW[i]);
+if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2,
+a + 2, a + 1, a, a + 2, a + 3, a + 1); }
+}
+const dg = new THREE.BufferGeometry();
+dg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+dg.setIndex(idx); dg.computeVertexNormals();
+group.add(tag(new THREE.Mesh(dg, pale), 'gundeck'));
+const surfY = gdY + B * 0.007;
+const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
+for (const sgn of [-1, 1]) {
+for (let i = 0; i <= N; i += 2) {
+const a = new THREE.Vector3(sx[i], railY[i], sgn * (halfW[i] - over));
+const b = new THREE.Vector3(sx[i], gdY, sgn * (halfW[i] - B * 0.020));
+group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'gundeck', 'Stanchion'));
+}
+for (let i = 0; i < N; i++) {
+const ca = new THREE.Vector3(sx[i], gdY - B * 0.016, sgn * (halfW[i] - B * 0.014));
+const cb = new THREE.Vector3(sx[i + 1], gdY - B * 0.016, sgn * (halfW[i + 1] - B * 0.014));
+group.add(tag(beamAB(ca, cb, B * 0.030, B * 0.028, timber), 'gundeck', 'Deck clamp'));
+const ba = new THREE.Vector3(sx[i], surfY + shH / 2, sgn * (halfW[i] - B * 0.006));
+const bb = new THREE.Vector3(sx[i + 1], surfY + shH / 2, sgn * (halfW[i + 1] - B * 0.006));
+group.add(tag(beamAB(ba, bb, shH, B * 0.012, timber), 'gundeck', 'Bulwark',
+'Heavy plank, chest-high, around the whole fighting deck — the rowers below it, '
++ 'the marines behind it, and the reason boarding a panokseon means climbing.'));
+}
+}
+for (const uE of [GD.from, GD.to]) {
+const pd = surfacePoint(S, H, uE, 1.0);
+const hwE = Math.abs(pd[2]) + over;
+const panel = new THREE.Mesh(
+new THREE.BoxGeometry(B * 0.012, shH, hwE * 2 - B * 0.012), timber);
+panel.position.set(pd[0], surfY + shH / 2, 0);
+group.add(tag(panel, 'gundeck', 'End bulwark'));
+}
+const nG = Math.max(0, GD.gunsPerSide | 0);
+const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
+for (const sgn of [-1, 1]) for (let j = 0; j < nG; j++) {
+const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nG;
+const pd = surfacePoint(S, H, u, 1.0);
+const hw = Math.abs(pd[2]) + over;
+const len = B * 0.22, r = B * 0.014;
+const g = new THREE.Group();
+const bar = new THREE.Mesh(
+new THREE.CylinderGeometry(r * 0.72, r, len, 12), mats.iron);
+bar.rotation.x = sgn * Math.PI / 2;
+g.add(bar);
+const carr = new THREE.Mesh(
+new THREE.BoxGeometry(r * 3.2, r * 2.4, len * 0.48), timber);
+carr.position.set(0, -r * 2.0, -sgn * len * 0.18);
+g.add(carr);
+const port = new THREE.Mesh(
+new THREE.BoxGeometry(B * 0.055, B * 0.055, B * 0.020), portMat);
+port.position.set(0, 0, sgn * (len * 0.30 - B * 0.004));
+g.add(port);
+g.position.set((u - 0.5) * L, surfY + r * 3.0, sgn * (hw - len * 0.30));
+group.add(tag(g, 'gun', 'Deck piece',
+'A bronze chongtong — cheonja, jija, hyeonja or hwangja, "heaven, earth, black, '
++ 'yellow", by size — on a timber bed, firing iron shot or the daejanggunjeon '
++ 'heavy arrow over the bulwark. The Joseon navy fought at range with these; '
++ 'the Japanese fleet it faced carried almost no shipboard cannon at all.'));
+}
+}
 if (S.gunDeck && AP) {
 const GD = S.gunDeck;
 const xF = (GD.from - 0.5) * L, xT = (GD.to - 0.5) * L;
@@ -4366,6 +4448,50 @@ group.add(tag(g, 'gun', 'Broadside piece',
 'A sacre or demi-culverin on the gun deck, firing over the oars. Eight or nine '
 + 'a side is a weight of metal no galley can answer: her guns all face forward.'));
 }
+}
+if (S.tower) {
+const T = S.tower;
+const xC = (T.at - 0.5) * L;
+const baseY = S.gunDeck ? deckY + S.gunDeck.height + B * 0.007 : deckY;
+const platY = baseY + T.h;
+const hw = T.w / 2;
+const tg = new THREE.Group();
+for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
+const a = new THREE.Vector3(xC + dx, baseY, dz);
+const b = new THREE.Vector3(xC + dx, platY, dz);
+tg.add(beamAB(a, b, B * 0.022, B * 0.022, timber));
+}
+const plat = new THREE.Mesh(
+new THREE.BoxGeometry(T.w * 1.15, B * 0.012, T.w * 1.15), pale);
+plat.position.set(xC, platY, 0);
+tg.add(plat);
+const railH = 0.95, rw = T.w * 1.15;
+for (const [px, pz, rx, rz] of [[0, rw / 2, rw, B * 0.010], [0, -rw / 2, rw, B * 0.010],
+[rw / 2, 0, B * 0.010, rw], [-rw / 2, 0, B * 0.010, rw]]) {
+const rail = new THREE.Mesh(new THREE.BoxGeometry(rx, B * 0.008, rz), timber);
+rail.position.set(xC + px, platY + railH, pz);
+tg.add(rail);
+const mid = new THREE.Mesh(new THREE.BoxGeometry(rx, B * 0.006, rz), timber);
+mid.position.set(xC + px, platY + railH * 0.5, pz);
+tg.add(mid);
+}
+const roofY = platY + 1.9;
+for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
+const a = new THREE.Vector3(xC + dx, platY, dz);
+const b = new THREE.Vector3(xC + dx, roofY, dz);
+tg.add(beamAB(a, b, B * 0.016, B * 0.016, timber));
+}
+const roofH = T.w * 0.30;
+const roof = new THREE.Mesh(
+new THREE.ConeGeometry(T.w * 0.85, roofH, 4), timber);
+roof.rotation.y = Math.PI / 4;
+roof.position.set(xC, roofY + roofH / 2, 0);
+tg.add(roof);
+group.add(tag(tg, 'tower', 'Commander\'s tower',
+'The janggundae, the roofed pavilion amidships the commander fights the ship from. '
++ 'At Myeongnyang Yi Sun-sin stood on one of these, in the first ship in the line, '
++ 'for most of a day, in sight of thirteen crews who had watched the rest of their '
++ 'navy destroyed eight weeks before.'));
 }
 if (S.bowGuns) {
 const u0 = 0.030, u1 = AP ? AP.from : 0.17;
