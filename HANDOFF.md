@@ -5301,3 +5301,28 @@ close enough to testify on screen.
 1. The panokseon (Myeongnyang's hull), or the galley/galleass raycast survey — whichever
    the round can finish properly.
 2. Small items (carried 3) only if a round is otherwise light.
+
+**Round 88 — "oddly thin" was wlPower, and I had the parameter backwards.** August said both new
+ships looked thin. He was right and the cause was one number used wrongly on both.
+
+`fullness(u,p,endF,endA) = end + (1-end)(1 - |2u-1|^p)`. A LOW p tapers the hull continuously
+from amidships to both ends — a spindle. A HIGH p holds full beam along most of the length and
+fines only near the ends, which is a PARALLEL MIDDLE BODY, and that is what every real long ship
+has. The fleet says so plainly: every low-p hull is short and beamy (cog 2.0 at L/B 3.1, junk 2.2
+at 3.5, carrack 2.2 at 3.8) and every long modern one is high (Titanic 3.8 at L/B 9.5, carrier
+4.4, container 4.6).
+
+I read "fine entry" and lowered the number that governs the WHOLE waterline — Azzam to 2.1 at
+L/B 8.7, Queen Mary 2 to 2.9 at 8.4. The fine entry belongs to `stemFineness` and `forefoot`,
+which act only at the ends. Corrected to 3.8 and 3.5, with the fineness moved to the ends where
+it belongs. Azzam had the same error twice over: `cm` 0.68 is a deep-V racing section on a hull
+that draws 4.3 m on 20.8 m of beam, which is nearly rectangular — now 0.86.
+
+**Both looked at, and both now read as themselves.** Queen Mary 2: long black hull with the red
+boot topping carrying full beam most of her length, tiers of balconies, lifeboats in a row along
+the white band, red Cunard funnel, raked bow. Azzam: a full white motor yacht with a stepped
+house, mast and radar domes.
+
+**Still short of the fleet's best, and worth a later round:** Azzam's house steps like a cruise
+ship where hers is a lower sleeker block, and her exhausts read as funnels. Queen Mary 2's bridge
+front is not the distinctive rounded wheelhouse.

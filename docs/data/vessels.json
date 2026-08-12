@@ -1564,9 +1564,9 @@
     "wlPower": 2.7,
     "stemFineness": 0.04,
     "sternFineness": 0.07,
-    "forefoot": 0.20,
+    "forefoot": 0.2,
     "run": 0.24,
-    "riseF": 0.50,
+    "riseF": 0.5,
     "riseA": 0.55,
     "sheerBow": 0.6,
     "sheerStern": 0.95,
@@ -1598,7 +1598,7 @@
       "shrouds": 4
      },
      {
-      "at": 0.80,
+      "at": 0.8,
       "heightM": 10.0,
       "rig": "lateen",
       "rake": 2,
@@ -4093,9 +4093,9 @@
     }
    },
    "hull": {
-    "wlPower": 2.1,
-    "stemFineness": 0.015,
-    "sternFineness": 0.22,
+    "wlPower": 3.5,
+    "stemFineness": 0.03,
+    "sternFineness": 0.55,
     "forefoot": 0.05,
     "run": 0.36,
     "riseF": 0.2,
@@ -4122,7 +4122,7 @@
     "beam": 20.8,
     "draught": 4.3,
     "freeboard": 9.0,
-    "cm": 0.68,
+    "cm": 0.86,
     "year": 2013,
     "decks": 5,
     "houseAt": [
@@ -4458,9 +4458,9 @@
     }
    },
    "hull": {
-    "wlPower": 2.9,
-    "stemFineness": 0.03,
-    "sternFineness": 0.34,
+    "wlPower": 3.8,
+    "stemFineness": 0.045,
+    "sternFineness": 0.3,
     "forefoot": 0.3,
     "run": 0.3,
     "riseF": 0.18,
