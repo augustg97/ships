@@ -231,7 +231,7 @@ const b = wantB
 : (BTs && BTs.spec);
 if (b && BTs) {
 if (wantB && BTs.spec !== b) window.SHIPS_BT.btOpen(b);
-if (BTs.spec && (!wantB || BTs.spec.id === b.id)) {
+if (BTs.spec && (!wantB || BTs.spec.id === b.id) && (!BTs.spec.shore || BTs.shoreReady)) {
 if (dm) window.SHIPS_BT.btGoDay(+dm[1]);
 const cb = /[#&]cb=(-?[\d.]+)/.exec(location.hash);
 const cd = /[#&]cd=([\d.]+)/.exec(location.hash);

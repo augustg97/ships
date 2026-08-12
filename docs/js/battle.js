@@ -3,6 +3,8 @@ const BT = {
 on: false, renderer: null, scene: null, cam: null, sea: null,
 ships: [], day: 0, t: 0, playing: true, lon: 0.6, lat: 0.10, dist: 900, eye: 26,
 spec: null, wind: 225, force: 5, smoke: null, sp: [], mats: [],
+land: null, shoreReady: false, shoreFor: null, shoreGrid: null,
+shoreW: 0, shoreH: 0, shoreB: null, dayLonR: 0, dayLatR: 0,
 };
 function btInit() {
 if (BT.renderer) return;
@@ -124,6 +126,7 @@ sx: st.x, sz: st.z,
 });
 }
 });
+btShoreLoad(battle);
 BT.day = 0; BT.t = 0; BT.playing = true;
 const sl = document.getElementById('btDay');
 sl.max = battle.campaign.length - 1; sl.value = 0;
@@ -147,7 +150,9 @@ document.getElementById('btWind').innerHTML =
 document.getElementById('btText').textContent = d.t;
 const toWind = (d.w) * Math.PI / 180;
 const engSep = lonLatUpwind(d);
-BT.sep = { x: Math.sin(toWind) * d.rng * engSep, z: Math.cos(toWind) * d.rng * engSep };
+BT.sep = { x: -Math.sin(toWind) * d.rng * engSep, z: Math.cos(toWind) * d.rng * engSep };
+BT.dayLonR = d.lon * Math.PI / 180; BT.dayLatR = d.lat * Math.PI / 180;
+if (BT.land) BT.land.material.uniforms.uDay.value.set(BT.dayLonR, BT.dayLatR);
 const FL = BT.spec.fleets, gaugeFleet = engSep > 0 ? FL[1] : FL[0];
 BT.gauge = gaugeFleet.name + ' holds the weather gauge';
 BT.fleetHd = 90;
@@ -167,10 +172,89 @@ function btPlace(snap) {
 BT.ships.forEach(s => {
 const h = BT.fleetHd * Math.PI / 180;
 const ox = s.side === 0 ? 0 : BT.sep.x, oz = s.side === 0 ? 0 : BT.sep.z;
-s.tx = ox + s.sx * Math.cos(h) + s.sz * Math.sin(h);
+s.tx = ox - (s.sx * Math.cos(h) + s.sz * Math.sin(h));
 s.tz = oz - s.sx * Math.sin(h) + s.sz * Math.cos(h);
+if (BT.shoreGrid && btElevLocal(s.tx, s.tz) > -2.0) {
+const vx = ox - s.tx, vz = oz - s.tz;
+const len = Math.hypot(vx, vz), n = Math.max(1, Math.ceil(len / 25));
+for (let k = 1; k <= n; k++) {
+const px = s.tx + vx * k / n, pz = s.tz + vz * k / n;
+if (btElevLocal(px, pz) <= -2.0) { s.tx = px; s.tz = pz; break; }
+}
+}
 if (snap) { s.x = s.tx; s.z = s.tz; s.hd = h + s.face; }
 });
+}
+function btElevLocal(x, z) {
+if (!BT.shoreGrid) return -30;
+const R = 6371000.0;
+const lat = BT.dayLatR + z / R;
+const lon = BT.dayLonR - x / (R * Math.max(0.05, Math.cos(lat)));
+return btShoreElev(lon * 180 / Math.PI, lat * 180 / Math.PI);
+}
+function btShoreElev(lonDeg, latDeg) {
+const B = BT.shoreB;
+if (!B || !BT.shoreGrid) return -30;
+const u = (lonDeg - B.lon0) / (B.lon1 - B.lon0);
+const v = (latDeg - B.lat0) / (B.lat1 - B.lat0);
+if (u <= 0 || u >= 1 || v <= 0 || v >= 1) return -30;
+const x = Math.min(BT.shoreW - 1.001, Math.max(0, u * BT.shoreW - 0.5));
+const y = Math.min(BT.shoreH - 1.001, Math.max(0, (1 - v) * BT.shoreH - 0.5));
+const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi;
+const G = BT.shoreGrid, W = BT.shoreW;
+const a = G[yi * W + xi] * (1 - fx) + G[yi * W + xi + 1] * fx;
+const b = G[(yi + 1) * W + xi] * (1 - fx) + G[(yi + 1) * W + xi + 1] * fx;
+return a * (1 - fy) + b * fy;
+}
+function btShoreLoad(battle) {
+const sh = battle.shore;
+BT.shoreReady = false; BT.shoreGrid = null; BT.shoreFor = battle.id;
+if (BT.land) BT.land.visible = false;
+if (!sh) { BT.shoreReady = true; return; }
+fetch(sh.src).then(r => r.blob())
+.then(b => createImageBitmap(b, { colorSpaceConversion: 'none' }))
+.then(img => {
+if (BT.shoreFor !== battle.id) return;
+const cv = document.createElement('canvas');
+cv.width = img.width; cv.height = img.height;
+const cx = cv.getContext('2d', { willReadFrequently: true });
+cx.drawImage(img, 0, 0);
+const px = cx.getImageData(0, 0, cv.width, cv.height).data;
+const G = new Float32Array(cv.width * cv.height);
+for (let i = 0; i < G.length; i++)
+G[i] = (px[i * 4] * 65280 + px[i * 4 + 1] * 255) / 65535 * 20000 - 11000;
+BT.shoreGrid = G; BT.shoreW = cv.width; BT.shoreH = cv.height;
+BT.shoreB = { lon0: sh.lon0, lat0: sh.lat0, lon1: sh.lon1, lat1: sh.lat1 };
+if (!BT.land) {
+BT.land = new THREE.Mesh(radialDisc(6, 42000, 240, 288, 6371000.0),
+new THREE.ShaderMaterial({
+vertexShader: SHADERS['BT_LAND_VERT.vert'], fragmentShader: SHADERS['BT_LAND_FRAG.frag'],
+uniforms: {
+uShore: { value: null }, uB: { value: new THREE.Vector4() },
+uDay: { value: new THREE.Vector2() },
+uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
+uCam: { value: new THREE.Vector3() },
+uFogC: { value: new THREE.Color(0xa9bcc6) }, uFogD: { value: 0.00042 },
+},
+}));
+BT.land.rotation.x = -Math.PI / 2;
+BT.land.frustumCulled = false;
+BT.scene.add(BT.land);
+}
+const tex = new THREE.CanvasTexture(cv);
+tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
+tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping; tex.generateMipmaps = false;
+tex.colorSpace = THREE.NoColorSpace;
+tex.flipY = false;
+const U = BT.land.material.uniforms;
+U.uShore.value = tex;
+U.uB.value.set(sh.lon0, sh.lat0, sh.lon1, sh.lat1);
+U.uDay.value.set(BT.dayLonR, BT.dayLatR);
+BT.land.visible = true;
+BT.shoreReady = true;
+btPlace(typeof FROZEN !== 'undefined' && FROZEN);
+})
+.catch(e => { console.warn('shore failed to load:', e); BT.shoreReady = true; });
 }
 function btGoDay(n) {
 const C = BT.spec && BT.spec.campaign;
@@ -201,7 +285,7 @@ const fromWind = windTo + Math.PI;
 const action = !!BT.spec.campaign[BT.day].a && !!BT.spec.powder;
 BT.ships.forEach(s => {
 const dx = s.tx - s.x, dz = s.tz - s.z;
-let want = Math.atan2(dx, dz);
+let want = Math.atan2(-dx, dz);
 let rw = (want - fromWind) * 180 / Math.PI;
 while (rw > 180) rw -= 360;
 while (rw < -180) rw += 360;
@@ -218,13 +302,15 @@ const kn = polarSpeed(s.P, BT.tws, rel);
 s.spd += (kn * KN - s.spd) * Math.min(1, dt * 0.4);
 const dist = Math.hypot(dx, dz);
 const drive = dist < 40 ? dist / 40 : 1;
-s.x += Math.sin(s.hd) * s.spd * drive * dt;
-s.z += Math.cos(s.hd) * s.spd * drive * dt;
+const nx = s.x - Math.sin(s.hd) * s.spd * drive * dt;
+const nz = s.z + Math.cos(s.hd) * s.spd * drive * dt;
+if (!BT.shoreGrid || btElevLocal(nx, nz) <= -2.0) { s.x = nx; s.z = nz; }
+else s.spd *= 0.85;
 const o = s.obj;
 o.position.set(s.x, 0, s.z);
-o.rotation.set(0, s.hd, 0);
+o.rotation.set(0, -s.hd, 0);
 const heel = Math.sin(rel * Math.PI / 180) * (0.035 + BT.force * 0.013) * s.heelK;
-o.rotateZ(-heel);
+o.rotateZ(heel);
 o.rotateX(Math.sin(BT.t * 0.7 + s.phase) * 0.016);
 o.position.y = Math.sin(BT.t * 0.62 + s.phase) * 0.45 - 0.2;
 if (action && Math.random() < dt * 1.9) btPuff(s.x, s.z, s.hd, s.loa);
@@ -239,6 +325,7 @@ BT.sea.position.set(cx, 0, cz);
 BT.sky.position.set(BT.cam.position.x, 0, BT.cam.position.z);
 BT.sea.material.uniforms.uTime.value = BT.t;
 BT.sea.material.uniforms.uCam.value.copy(BT.cam.position);
+if (BT.land && BT.land.visible) BT.land.material.uniforms.uCam.value.copy(BT.cam.position);
 BT.sea.position.set(BT.cam.position.x, 0, BT.cam.position.z);
 BT.mats.forEach(hm => hm.uniforms.uCam.value.copy(BT.cam.position));
 if (BT.playing) {
@@ -257,11 +344,11 @@ const s = BT.sp.find(p => p.life < 0);
 if (!s) return;
 const side = Math.random() < 0.5 ? 1 : -1;
 const along = (Math.random() - 0.5) * loa * 0.8;
-s.x = x + Math.sin(hd) * along + Math.cos(hd) * side * loa * 0.16;
+s.x = x - Math.sin(hd) * along - Math.cos(hd) * side * loa * 0.16;
 s.z = z + Math.cos(hd) * along - Math.sin(hd) * side * loa * 0.16;
 s.y = 4 + Math.random() * 4;
 s.life = 0; s.max = 7.0 + Math.random() * 5.0;
-s.vx = Math.cos(hd) * side * 7; s.vz = -Math.sin(hd) * side * 7;
+s.vx = -Math.cos(hd) * side * 7; s.vz = -Math.sin(hd) * side * 7;
 }
 function btStepSmoke(dt, windTo) {
 const g = BT.smoke.geometry;
@@ -273,7 +360,7 @@ s.life += dt;
 if (s.life > s.max) { s.life = -1; al.setX(i, 0); return; }
 const f = s.life / s.max;
 s.vx *= 0.94; s.vz *= 0.94;
-s.x += (s.vx + Math.sin(windTo) * w) * dt;
+s.x += (s.vx - Math.sin(windTo) * w) * dt;
 s.z += (s.vz + Math.cos(windTo) * w) * dt;
 s.y += 1.5 * dt;
 p.setXYZ(i, s.x, s.y, s.z);
@@ -283,4 +370,4 @@ al.setX(i, Math.sin(Math.min(1, f * 3.2) * Math.PI * 0.5) * (1 - f));
 p.needsUpdate = true; sz.needsUpdate = true; al.needsUpdate = true;
 }
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, BT };

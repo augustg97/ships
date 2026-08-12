@@ -540,7 +540,11 @@ function applyHashView() {
         : (BTs && BTs.spec);
       if (b && BTs) {
         if (wantB && BTs.spec !== b) window.SHIPS_BT.btOpen(b);
-        if (BTs.spec && (!wantB || BTs.spec.id === b.id)) {
+        /* ⚠ and not before the battle's SHORE has arrived: the DEM patch loads async, and a
+           frozen capture between open and load would stage the strait on open ocean — the
+           wrong-view class again, a frame that looks like coverage and shows a world the
+           record contradicts. shoreReady is latched true immediately for shoreless battles. */
+        if (BTs.spec && (!wantB || BTs.spec.id === b.id) && (!BTs.spec.shore || BTs.shoreReady)) {
           if (dm) window.SHIPS_BT.btGoDay(+dm[1]);
           /* `&cb=<deg>&cd=<m>&ch=<deg>` — where the camera stands: bearing round the
              fleets, distance off, height angle; the drag and wheel's own BT.lon/dist/lat.

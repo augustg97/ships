@@ -2243,6 +2243,54 @@
         if (day.a !== undefined && day.a !== true)
           say(bid, 'an action flag that is not a flag', `day ${i} ("${day.d}") a=${day.a}`);
       });
+
+      /* ── A SHORE IS A CHECKED FACT (round 83). ─────────────────────────────────────────
+         A battle may carry a DEM patch (`shore`) and the Action stages the real coast from
+         it — which opens three new ways to be wrong: a mirrored or misplaced patch (the
+         chirality class psgFrame warns about, now visible the moment land exists), a fleet
+         staged on dry land (Salamis day 5 was 44 m up a hillside before round 83 re-laid
+         the anchors), and a patch that silently fails to load, staging the strait on open
+         ocean under a working UI. The record carries named probes — points that must be
+         land and points that must be water — so the data can convict its own placement. */
+      if (b.shore) {
+        const sh = b.shore;
+        if (!sh.src || ![sh.lon0, sh.lat0, sh.lon1, sh.lat1].every(isFinite)
+            || !(sh.lon1 > sh.lon0) || !(sh.lat1 > sh.lat0))
+          say(bid, 'a shore without bounds', 'shore needs src and lon0<lon1, lat0<lat1');
+        const pr = sh.probes || [];
+        if (!pr.some(p => p.land === true) || !pr.some(p => p.land === false))
+          say(bid, 'a shore without witnesses',
+              'probes must name at least one point that is land and one that is water — ' +
+              'a mirrored patch passes any test that only asks one side');
+        for (const p of pr)
+          if (!isFinite(p.lon) || !isFinite(p.lat) || typeof p.land !== 'boolean'
+              || p.lon <= sh.lon0 || p.lon >= sh.lon1 || p.lat <= sh.lat0 || p.lat >= sh.lat1)
+            say(bid, 'a probe off its own patch', `"${p.n}"`);
+        if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function')
+          say(bid, 'a shore the Action cannot sample', 'SHIPS_BT.btShoreElev missing');
+        /* with the grid loaded (the Action has opened this battle), the probes testify */
+        if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.BT && SHIPS_BT.BT.shoreGrid
+            && SHIPS_BT.BT.shoreFor === b.id) {
+          for (const p of pr) {
+            const el = SHIPS_BT.btShoreElev(p.lon, p.lat);
+            if (p.land !== (el > 0))
+              say(bid, 'a shore that contradicts its witnesses',
+                  `"${p.n}" (${p.lon}, ${p.lat}) reads ${el.toFixed(1)} m but must be ${p.land ? 'land' : 'water'} — ` +
+                  'mirrored, misplaced or misdecoded patch');
+          }
+          /* and every staged ship floats: the grounding rule is a fact, not an intention */
+          for (const s of SHIPS_BT.BT.ships) {
+            const el = SHIPS_BT.btElevLocal(s.x, s.z);
+            if (el > 0)
+              say(bid, 'a ship on dry land',
+                  `side ${s.side} at local (${s.x.toFixed(0)}, ${s.z.toFixed(0)}) sits on ${el.toFixed(1)} m of ground`);
+          }
+        }
+        if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.btFrame
+            && !/btElevLocal/.test(String(SHIPS_BT.btFrame)))
+          say(bid, 'a helm that ignores the shore',
+              'btFrame no longer refuses a grounding step — ships will sail up the hillsides');
+      }
     }
 
     /* the gunfire path must ask the RECORD. The old test was a regex over the day's prose

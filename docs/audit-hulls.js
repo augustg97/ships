@@ -1539,6 +1539,43 @@ if (!day.d || !day.t) say(bid, 'a campaign day with no record', `day ${i}`);
 if (day.a !== undefined && day.a !== true)
 say(bid, 'an action flag that is not a flag', `day ${i} ("${day.d}") a=${day.a}`);
 });
+if (b.shore) {
+const sh = b.shore;
+if (!sh.src || ![sh.lon0, sh.lat0, sh.lon1, sh.lat1].every(isFinite)
+|| !(sh.lon1 > sh.lon0) || !(sh.lat1 > sh.lat0))
+say(bid, 'a shore without bounds', 'shore needs src and lon0<lon1, lat0<lat1');
+const pr = sh.probes || [];
+if (!pr.some(p => p.land === true) || !pr.some(p => p.land === false))
+say(bid, 'a shore without witnesses',
+'probes must name at least one point that is land and one that is water — ' +
+'a mirrored patch passes any test that only asks one side');
+for (const p of pr)
+if (!isFinite(p.lon) || !isFinite(p.lat) || typeof p.land !== 'boolean'
+|| p.lon <= sh.lon0 || p.lon >= sh.lon1 || p.lat <= sh.lat0 || p.lat >= sh.lat1)
+say(bid, 'a probe off its own patch', `"${p.n}"`);
+if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function')
+say(bid, 'a shore the Action cannot sample', 'SHIPS_BT.btShoreElev missing');
+if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.BT && SHIPS_BT.BT.shoreGrid
+&& SHIPS_BT.BT.shoreFor === b.id) {
+for (const p of pr) {
+const el = SHIPS_BT.btShoreElev(p.lon, p.lat);
+if (p.land !== (el > 0))
+say(bid, 'a shore that contradicts its witnesses',
+`"${p.n}" (${p.lon}, ${p.lat}) reads ${el.toFixed(1)} m but must be ${p.land ? 'land' : 'water'} — ` +
+'mirrored, misplaced or misdecoded patch');
+}
+for (const s of SHIPS_BT.BT.ships) {
+const el = SHIPS_BT.btElevLocal(s.x, s.z);
+if (el > 0)
+say(bid, 'a ship on dry land',
+`side ${s.side} at local (${s.x.toFixed(0)}, ${s.z.toFixed(0)}) sits on ${el.toFixed(1)} m of ground`);
+}
+}
+if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.btFrame
+&& !/btElevLocal/.test(String(SHIPS_BT.btFrame)))
+say(bid, 'a helm that ignores the shore',
+'btFrame no longer refuses a grounding step — ships will sail up the hillsides');
+}
 }
 if (window.SHIPS_BT) {
 const src = String(SHIPS_BT.btFrame);
