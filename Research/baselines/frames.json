@@ -256,6 +256,11 @@
    "name": "action-salamis",
    "path": "/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16",
    "note": "the galley action: Salamis at the crush, 130 m, both fleets triremes under bare spars — guards the data-driven campaign class (fleets/formation/powder/year from the record)"
+  },
+  {
+   "name": "board-salamis",
+   "path": "/?frozen=1#e=2&battle=salamis",
+   "note": "the globe CAMPAIGN BOARD, addressable at last (r82) — Salamis day 0 at the record's own cam (450 km over the Saronic Gulf), one token per fleet per the fits-test, tracks, wind streaks and the campaign bar. The board was dead for nine days (c66c703) because no frame could name it; this one guards the class the audit's step-every-campaign rule only smoke-tests."
   }
  ]
 }

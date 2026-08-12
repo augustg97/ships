@@ -4740,3 +4740,85 @@ and a board frame (r80's carried 2):**
    — vessel work before campaign work (r80 carried 3).
 4. r78 capture-gate hardening if the font flap strikes again; r75 QM2, r77 Azzam and r79 jeer
    small items only if a round is otherwise light.
+
+---
+
+## Round 82 — 2026-08-11 — The board becomes addressable, and the label layer stops trusting last frame's camera
+
+**The queue head (r81's scout, r80's carried 2) is closed: `#battle=<id>` opens the globe's
+campaign board from a URL, and `board-salamis` is the 49th baseline.** Built exactly to the
+scout: the era is derived from the battle's year the way voyages derive theirs (salamis −480 →
+era 2), so the grammar cannot repeat the wrong-era hang carried since r43; an unknown id warns
+once and never takes the readiness gate (the r43 voyage lesson); a `battleOpenPending` latch
+beside shipSelectPending holds `__FRAME_READY` until S.camp is the named battle AND fly ===
+null — and openBattle is called ONCE, not per-retry, because startCampaign restarts the
+flight and a per-retry call would hold `fly` non-null forever. Proven by three playwright
+paths: bare `#battle=salamis` (era 2 derived, year −480, flight arrived), `#battle=
+nosuchbattle` (ready fires, no board), `#battle=armada` (era 4, year 1588, the other campaign
+through the same grammar). writeHash emits none of it — read-only grammar, the b=/z=
+precedent.
+
+**Two label-layer faults found under the new frame, both older than the round and both
+invisible to every existing frame because none flies the globe camera:**
+1. **Under ?frozen the 90 ms label throttle blocked every pass after the first** — `now`
+   never advances, so `now - lblTick < 90` stayed true forever once one pass had run, and a
+   camera flight landing after that pass left the labels projected from the boot camera.
+   Frozen now skips the time throttle; the camKey test already makes a settled frozen pass
+   free.
+2. **The pass that runs on the frame a flight ARRIVES projects every label through LAST
+   frame's camera.** `.project()` reads matrixWorldInverse, which renderer.render refreshes
+   at the END of the frame — so the arrival pass hid every label as off-screen, recorded the
+   LANDED camera in lblCamKey, and no later pass would ever re-run. Live mode re-passes
+   within 90 ms and self-heals, which is why nine months of interactive use never showed it;
+   a frozen capture keyed on lblCamKey and never healed. labelsSettled was declared true on
+   that stale pass — the r62 class, one layer deeper than the gate that named it.
+   updateLabels now updates the camera's matrices itself before projecting, so the pass is
+   correct whatever the call order. Measured on the board: SALAMIS labels visible 0 → 1.
+
+**Two board legibility faults, seen on the first capture ever taken of it, fixed as
+classes:**
+- **The campaign bar overlapped the view tabs** — campBar top:18px/z 32 under tabs
+  top:0/z 80, with the active tab's brass underline crossing the day label. The Armada's
+  short labels made r80 file it as a wrap cosmetic; the capture showed plain overlap, for
+  every campaign. campBar sits at top:60px now, below the strip, and .cb-head wraps as UNITS
+  (flex-wrap), so "The week before 480 BC" pushes the buttons to their own row rather than
+  breaking mid-phrase into the tabs. The Armada's one-line head is unchanged by construction.
+- **The year readout said 300 BC (the era's seek point) over a board staging late September
+  480 BC** — the surface contradicting itself. startCampaign now sets S.year to the battle's
+  own year, clamped to the era span (the #t= guard), so the click path and the hash path
+  both land the readout on the record. The Armada board reads 1588 for the same reason.
+
+**Verification:** audit 29 hulls / 0 problems, the healthy pass stepping both campaigns
+through the new year-setting path. Full ratchet before accept: 48/48 within tolerance —
+every globe frame that runs through the reworked updateLabels at its standing residue
+(globe-default 0.012%, no font flap), action-salamis 0.000%. board-salamis accepted with the
+FRAME-LOG reason, then the verification re-run: 49/49 green, board-salamis 0.000% against
+its own baseline.
+
+**Rule 0, written on board-salamis:** it reads as a rendered world — relief Attica and the
+Peloponnese in brown-grey under July light, the Saronic Gulf's bathymetry blue through the
+water, two gold fleet tokens by the strait under the day's wind streaks. Three facts a
+viewer can read off it: SALAMIS lettered at the battle's own place, with the week-before
+day text — Athens empty, the Acropolis burning, the Persian fleet beached at Phalerum nine
+kilometres east; the strait is 1,370–1,600 m at the narrows, on a card that carries 310
+(Aeschylus, an eyewitness) against 378 (Herodotus) and the 1,207 flagged CONTESTED; the
+Persian fleet holds the weather gauge under a force-2 southerly, and every clock on the
+surface — readout, era chip, slider — says 480 BC.
+
+**Carried, restated exactly (none closed silently):**
+1. The Salamis strait still has no shores in the ACTION (r80 carried 1) — the board now
+   shows the real coast from 450 km, but the from-the-water view is open sea; needs a
+   terrain treatment worthy of rule 0(a), not a cardboard ridge.
+2. Lepanto and Myeongnyang stay campaign-data tasks blocked on hulls (a 16th-c
+   galley/galleass; panokseon and sekibune) — vessel work before campaign work.
+3. r78 capture-gate hardening if the font flap strikes again (it did not strike in either
+   run this round); r75 QM2, r77 Azzam and r79 jeer small items only if a round is light.
+4. r80's campBar cosmetic note is CLOSED above (it was overlap, not wrap).
+
+### Next, in order
+1. The Salamis shores in the Action (carried 1) — the last piece of the r80 galley-action
+   arc, and the open rule-0 gap on that view.
+2. A survey round on the standing vessel queue if the shores need research first: next-crudest
+   per r51 remains the ship-of-the-line's detail gaps, then B10 stunsails (clipper ~500 m²,
+   Preussen-class too).
+3. Small items (carried 3) only if a round is otherwise light.

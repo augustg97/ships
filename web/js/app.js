@@ -315,6 +315,9 @@ if (FROZEN) {
  * the baselines depend on capture order, which is a ratchet that only appears to work. */
 let upgradesDone = false;
 let shipSelectPending = false;
+/* the globe's campaign board, opening from `#battle=` — same job as shipSelectPending, one
+   view over: __FRAME_READY must not fire while the named campaign is still being found */
+let battleOpenPending = false;
 /* ⚠ AND NOT BEFORE THE VENDORED SERIF HAS ARRIVED. Round 27 gated on document.fonts when the
    stack was all system fonts, so the clause was vacuous and a cold-start rasterisation
    transient could still flap globe-default by 1% of pixels (the label-halo false RED, struck
@@ -333,6 +336,12 @@ function markReady() {
      it, and the ship-container baseline captured the SHIP OF THE LINE, correctly framed and
      completely wrong. A frame of the wrong ship is worse than no frame. */
   if (FROZEN && shipSelectPending) return;
+  /* ⚠ AND NOT WHILE THE CAMPAIGN BOARD IS STILL OPENING. `#battle=` starts a camera flight
+     and builds the board; __FRAME_READY could go true before either, so a board frame
+     photographed whatever the boot landed on. Settled means S.camp is the named battle AND
+     the flight has arrived (fly === null) — under ?frozen the flight snaps to its
+     destination on the first frame, so this gate clears immediately after the open. */
+  if (FROZEN && battleOpenPending) return;
   /* and not on a half-built fleet */
   if (FROZEN && fleetQueue.length) return;
   /* ── ⚠ AND NOT WHILE THE LABELS LAG THE CAMERA ───────────────────────────────────────
@@ -363,7 +372,11 @@ function applyHash() {
      frame cannot name it cannot watch. Read-only grammar like `b=`/`z=`: writeHash never
      emits it. */
   const cm = /[#&]card=era\b/.exec(h);
-  if (!em && !tm && !fm && !cm) return;
+  /* `#battle=<id>` — the globe's campaign board. Parsed here only for its ERA: the board
+     itself opens in applyHashView, which runs after the data and tabs exist. Read-only
+     grammar like `b=`/`z=`: writeHash never emits it. */
+  const bm = /[#&]battle=([a-z0-9-]+)/i.exec(h);
+  if (!em && !tm && !fm && !cm && !bm) return;
 
   /* The era must be applied first. selectEra() rewrites the year slider's own min/max to
      the era's span and resets S.year to the era's seek point — so a year applied before it
@@ -385,6 +398,20 @@ function applyHash() {
       .find(x => String(x.id).toLowerCase() === wantId);
     if (v && v.year !== undefined) {
       const own = chs.findIndex(c => v.year >= c.from && v.year <= c.to);
+      if (own >= 0) era = own;
+    }
+  }
+  /* ── AND SO DOES A BATTLE ────────────────────────────────────────────────────────────
+     The same rule for the same reason: salamis is −480, and a hash that puts her board in
+     the wrong era would hang exactly as the wrong-era voyage hash did (carried since r43).
+     The battle record carries a year and the chapters carry their spans, so the era is
+     derivable, and a derivable value outranks a contradictory hand-typed one. */
+  if (bm && APP.battles) {
+    const wantId = bm[1].toLowerCase();
+    const b = (APP.battles.battles || [])
+      .find(x => String(x.id).toLowerCase() === wantId);
+    if (b && b.year !== undefined) {
+      const own = chs.findIndex(c => b.year >= c.from && b.year <= c.to);
       if (own >= 0) era = own;
     }
   }
@@ -536,6 +563,42 @@ function applyHashView() {
       requestAnimationFrame(tryBattle);
     };
     tryBattle();
+  }
+
+  /* ── `#battle=<id>` — THE GLOBE'S CAMPAIGN BOARD, ADDRESSED BY URL ──────────────────
+     The board had no grammar at all, so no frame could watch it — which is how it stayed
+     dead for nine days after c66c703 (found r80 only by running it by hand). The era was
+     already derived from the battle's year in applyHash; this opens the board itself.
+     openBattle routes campaigns to startCampaign, which flies the camera to the record's
+     own `cam`. Only in the sea view: the board is the globe's, and a `#v=ship` or
+     `#v=action` hash has claimed the screen for a different renderer.
+     ⚠ Whether the RECORD exists is knowable right now; only the OPEN needs the retries —
+     an unknown id says so once and never takes the gate (the r43 voyage lesson). */
+  const glm = /[#&]battle=([a-z0-9-]+)/i.exec(location.hash);
+  if (glm && (!vm || vm[1] === 'sea')) {
+    const wantC = glm[1].toLowerCase();
+    const bb = ((APP.battles && APP.battles.battles) || [])
+      .find(x => String(x.id).toLowerCase() === wantC);
+    if (!bb) { console.warn('no battle', wantC); }
+    else {
+      battleOpenPending = true;
+      let cTries = 0;
+      const tryBoard = () => {
+        /* called once — startCampaign restarts the flight, so calling it per-retry would
+           hold `fly` non-null forever and the latch would never clear */
+        if (S.camp !== bb && bb.campaign) openBattle(bb);
+        const settled = bb.campaign ? (S.camp === bb && !fly) : true;
+        if (settled) {
+          if (!bb.campaign) openBattle(bb);      // a plain battle is just its card
+          battleOpenPending = false; return;
+        }
+        if (++cTries > 600) {
+          battleOpenPending = false; console.warn('campaign board unresolved:', wantC); return;
+        }
+        requestAnimationFrame(tryBoard);
+      };
+      tryBoard();
+    }
   }
 
   /* ── AND SO IS BEING ABOARD ONE ─────────────────────────────────────────────────────
@@ -1033,7 +1096,13 @@ function updateLabels(now) {
   }
   if (labelsHidden) { for (const m of APP.markers) if (m.el) m.el.style.display = ''; }
   labelsHidden = false;
-  if (now - lblTick < 90) return;
+  /* ⚠ UNDER ?frozen THE CLOCK NEVER ADVANCES, so this throttle passed once and then blocked
+     every pass forever — and a camera flight that lands after that first pass (the `#battle=`
+     board flying to its authored cam) leaves the labels projected from the BOOT camera, which
+     is the r62 class exactly. No earlier frame hit it because none flies the globe camera:
+     `#e=` selects without flying and the close-ups hide the labels. Frozen skips the time
+     throttle; the camKey test below already makes a settled frozen pass free. */
+  if (!FROZEN && now - lblTick < 90) return;
   lblTick = now;
   /* ⚠ AND SKIP IT ALTOGETHER WHEN NOTHING CAN HAVE MOVED. These markers are ports, seas and
      battles: fixed points on the globe. Their screen positions are a function of the camera
@@ -1043,6 +1112,15 @@ function updateLabels(now) {
                  camera.position.z.toFixed(1) + ',' + S.era + ',' + S.year;
   if (camKey === lblCamKey) return;
   lblCamKey = camKey;
+  /* ⚠ PROJECT THROUGH THE CAMERA'S CURRENT POSE, NOT LAST FRAME'S. .project() reads
+     matrixWorldInverse, which renderer.render only refreshes at the END of the frame — so
+     the pass that runs on the frame a flight ARRIVES projects every label from the
+     pre-flight pose, hides the lot as off-screen, and records the landed camera in
+     lblCamKey. Live mode re-passes within 90 ms and self-heals; a frozen capture keys on
+     lblCamKey and never re-runs, which is how the board frame lost its Salamis label with
+     labelsSettled true — the r62 class, one layer deeper than the gate that named it. */
+  camera.updateMatrixWorld();
+  camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
   const rect = renderer.domElement.getBoundingClientRect();
   const camDir = camera.position.clone().normalize();
   const taken = [];
@@ -3277,6 +3355,14 @@ function clearCampaign() {
 function startCampaign(b) {
   clearVoyage(); clearCampaign();
   S.camp = b; S.campT = 0;
+  /* the board stages a DATED event, so the year readout follows it — the Salamis board over
+     a readout saying 300 BC (the era's seek point) was the surface contradicting itself.
+     Clamped to the era's own span, the same guard the #t= grammar applies. */
+  if (isFinite(b.year)) {
+    const yr = document.getElementById('yr');
+    const v = Math.max(+yr.min, Math.min(+yr.max, b.year));
+    yr.value = v; S.year = v; onTime();
+  }
   campGroup = new THREE.Group();
   scene.add(campGroup);
 

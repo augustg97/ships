@@ -279,10 +279,16 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 
 
 /* ── the campaign bar ─────────────────────────────────────────────────────────────────── */
-#campBar{position:fixed;left:50%;transform:translateX(-50%);top:18px;width:min(560px,86vw);
+/* ⚠ top clears the TAB STRIP (fixed, top:0, z-index 80, ~54px tall) — at top:18px the tabs
+   rendered straight through the bar's head, with the active tab's brass underline crossing
+   the day label. The Armada's short labels made it look like a wrap problem; the r82 board
+   frame showed it is plain overlap, for every campaign. */
+#campBar{position:fixed;left:50%;transform:translateX(-50%);top:60px;width:min(560px,86vw);
   padding:13px 16px 14px;z-index:32}
 #campBar.hidden{display:none}
-.cb-head{display:flex;align-items:baseline;gap:14px}
+/* wrap as UNITS: a day label longer than the Armada's ("The week before 480 BC") pushes the
+   wind chip and buttons onto their own row, never breaking mid-phrase into the strip */
+.cb-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;row-gap:2px}
 .cb-day{font-family:var(--serif);font-size:20px;letter-spacing:.01em;color:var(--ink)}
 .cb-wind{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--verdigris)}
 .cb-wind b{color:var(--ink);letter-spacing:.06em}

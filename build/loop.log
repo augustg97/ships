@@ -2178,3 +2178,20 @@ Those two failure notifications are the waiter loops I killed — expected. The 
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 16902 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 16:10:11  round starting
+The round is complete. Round 80's stranded work — the Salamis campaign — is now verified and live.
+
+**What happened:** The previous round finished all of round 80's work (Salamis staged from Herodotus, Plutarch and Aeschylus; the campaign system de-hardcoded from the Armada into battle data; the "no action" gunfire regex bug and the nine-days-dead globe board both fixed; eleven injection proofs; the `action-salamis` baseline) but hit the 80-minute ceiling at 16:00 and was killed with nothing committed.
+
+**This round verified it from scratch, then shipped it:**
+- Audit: 29 hulls, 0 problems, with the new battle and campaign blocks active.
+- Full ratchet: 48/48 within tolerance, zero accepts needed, `action-salamis` byte-stable at 0.000%. The baseline read as an image: two oared fleets under bare spars on a force-4 sea, Plutarch's swell on the card, no powder smoke because the record says none existed.
+- Round 80's diff read hunk by hunk before committing.
+- Deployed as two commits (8ac565b work, f576460 deploy note); live stamp **1786482330 → 1786491145**, with salamis, the armada's converted fleet records, `formStation` and both new audit rules all confirmed in the published artefacts by cache-busted fetch. Thirty-third clean deploy in a row.
+
+**Two corrections to round 80's handoff, recorded in round 81's section:** the armada board camera figure was in the wrong unit (the data carries 1147 km altitude, which is the old S.dist 118 world units exactly), and the carried claim that flyTo never arrives under `?frozen` is false — `app.js:1943` already forces arrival; what a board frame actually needs is a readiness latch.
+
+**Deliberately not started:** the `#battle=` board grammar. At 16:36 with the kill ceiling at 17:30, its code + full ratchet + second deploy would have reproduced exactly the overrun that killed round 80. Instead the handoff hands the next round the implementation scouted to the line number — the applyHash era derivation, the `battleOpenPending` latch beside shipSelectPending in markReady, the tryPick-style settle test, and the `board-salamis` frame path — so it starts with a 20-minute head start and a full budget.
+2026-08-11 16:35:28  round finished; HEAD is f576460 Round 81 deploy note: round 80 recovered from the killed round's uncommitted tree, verified from scratch (audit 29/0, ratchet 48/48 with action-salamis at 0.000%) and shipped; stamp 1786491145 verified live with salamis, the armada's fleet records, formStation and both new audit rules confirmed in the published artefacts; two r80 handoff claims corrected (cam units, flyTo-under-frozen) and the #battle= board grammar scouted to the line number for the next round
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 23988 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 16:45:28  round starting

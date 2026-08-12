@@ -125,12 +125,14 @@ document.head.appendChild(still);
 }
 let upgradesDone = false;
 let shipSelectPending = false;
+let battleOpenPending = false;
 let fontsDone = false;
 document.fonts.ready.then(() => { fontsDone = true; markReady(); });
 function markReady() {
 if (FROZEN && !fontsDone) return;
 if (FROZEN && !upgradesDone) return;
 if (FROZEN && shipSelectPending) return;
+if (FROZEN && battleOpenPending) return;
 if (FROZEN && fleetQueue.length) return;
 if (FROZEN && (!APP.view || APP.view === 'sea') && APP.markers && !labelsSettled) return;
 if (!window.__FRAME_READY) window.__FRAME_READY = true;
@@ -141,7 +143,8 @@ const em = /[#&]e=(\d+)/.exec(h);
 const tm = /[#&]t=(-?[\d.]+)/.exec(h);
 const fm = /[#&]f=([a-z0-9-]+)/i.exec(h);
 const cm = /[#&]card=era\b/.exec(h);
-if (!em && !tm && !fm && !cm) return;
+const bm = /[#&]battle=([a-z0-9-]+)/i.exec(h);
+if (!em && !tm && !fm && !cm && !bm) return;
 const chs = APP.chapters.chapters || [];
 let era = em ? Math.max(0, Math.min(chs.length - 1, +em[1])) : null;
 if (fm && APP.voyages) {
@@ -150,6 +153,15 @@ const v = ((APP.voyages.voyages || APP.voyages) || [])
 .find(x => String(x.id).toLowerCase() === wantId);
 if (v && v.year !== undefined) {
 const own = chs.findIndex(c => v.year >= c.from && v.year <= c.to);
+if (own >= 0) era = own;
+}
+}
+if (bm && APP.battles) {
+const wantId = bm[1].toLowerCase();
+const b = (APP.battles.battles || [])
+.find(x => String(x.id).toLowerCase() === wantId);
+if (b && b.year !== undefined) {
+const own = chs.findIndex(c => b.year >= c.from && b.year <= c.to);
 if (own >= 0) era = own;
 }
 }
@@ -236,6 +248,30 @@ shipSelectPending = false; console.warn('action hash unresolved:', wantB); retur
 requestAnimationFrame(tryBattle);
 };
 tryBattle();
+}
+const glm = /[#&]battle=([a-z0-9-]+)/i.exec(location.hash);
+if (glm && (!vm || vm[1] === 'sea')) {
+const wantC = glm[1].toLowerCase();
+const bb = ((APP.battles && APP.battles.battles) || [])
+.find(x => String(x.id).toLowerCase() === wantC);
+if (!bb) { console.warn('no battle', wantC); }
+else {
+battleOpenPending = true;
+let cTries = 0;
+const tryBoard = () => {
+if (S.camp !== bb && bb.campaign) openBattle(bb);
+const settled = bb.campaign ? (S.camp === bb && !fly) : true;
+if (settled) {
+if (!bb.campaign) openBattle(bb);
+battleOpenPending = false; return;
+}
+if (++cTries > 600) {
+battleOpenPending = false; console.warn('campaign board unresolved:', wantC); return;
+}
+requestAnimationFrame(tryBoard);
+};
+tryBoard();
+}
 }
 const fm = /[#&]f=([a-z0-9-]+)/i.exec(location.hash);
 if (fm) {
@@ -518,12 +554,14 @@ return;
 }
 if (labelsHidden) { for (const m of APP.markers) if (m.el) m.el.style.display = ''; }
 labelsHidden = false;
-if (now - lblTick < 90) return;
+if (!FROZEN && now - lblTick < 90) return;
 lblTick = now;
 const camKey = camera.position.x.toFixed(1) + ',' + camera.position.y.toFixed(1) + ',' +
 camera.position.z.toFixed(1) + ',' + S.era + ',' + S.year;
 if (camKey === lblCamKey) return;
 lblCamKey = camKey;
+camera.updateMatrixWorld();
+camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
 const rect = renderer.domElement.getBoundingClientRect();
 const camDir = camera.position.clone().normalize();
 const taken = [];
@@ -1772,6 +1810,11 @@ if (cb) cb.classList.add('hidden');
 function startCampaign(b) {
 clearVoyage(); clearCampaign();
 S.camp = b; S.campT = 0;
+if (isFinite(b.year)) {
+const yr = document.getElementById('yr');
+const v = Math.max(+yr.min, Math.min(+yr.max, b.year));
+yr.value = v; S.year = v; onTime();
+}
 campGroup = new THREE.Group();
 scene.add(campGroup);
 const track = k => b.campaign.map(d => k === 0 ? [d.lon, d.lat] : [d.elon, d.elat]);
