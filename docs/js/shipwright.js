@@ -191,9 +191,9 @@ null, null, null,
 ['Accommodation', 'The house and bridge, pushed to one end so nothing blocks the crane runs.'],
 ['Funnel and uptakes', 'What a mast used to be, doing what a mast never did: taking the exhaust '
 + 'of about 80 megawatts out of the top of the ship.'],
-['Loaded', 'Cargo and stores aboard. What she carries is what she is for — and on a liner that '
-+ 'includes the people, which is why so much of her volume is accommodation rather '
-+ 'than hold.'],
+['Loaded', 'Cargo, stores and people aboard. What a hull is built to carry is what decides '
++ 'her proportions: how much of her volume is hold, how much is accommodation, and '
++ 'how deep she floats when it is all in.'],
 ];
 function swApplyStage() {
 if (!SW.ship) return;

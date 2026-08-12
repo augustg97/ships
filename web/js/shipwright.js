@@ -320,9 +320,12 @@ const ENGINE_STAGES = [
   /* ⚠ THIS LAST STAGE WAS WRITTEN FOR THE CONTAINER SHIP AND SHOWN ON ALL OF THEM. Titanic
      and Great Eastern were both being told about corner castings and the 1968 box standard.
      The generic line is below; the box boat gets its own, keyed off S.containers. */
-  ['Loaded', 'Cargo and stores aboard. What she carries is what she is for — and on a liner that '
-           + 'includes the people, which is why so much of her volume is accommodation rather '
-           + 'than hold.'],
+  /* ⚠ AND THE GENERIC LINE HAD THE SAME FAULT ONE LEVEL DOWN: it says "on a liner", so the
+     yacht was being told about liner accommodation. The honest generic sentence names no type
+     at all — every hull in the fleet loads something, and what it is differs. */
+  ['Loaded', 'Cargo, stores and people aboard. What a hull is built to carry is what decides '
+           + 'her proportions: how much of her volume is hold, how much is accommodation, and '
+           + 'how deep she floats when it is all in.'],
 ];
 
 function swApplyStage() {

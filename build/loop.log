@@ -2262,3 +2262,16 @@ Round 85 is complete and live. Deploy 1786500656 → 1786502257, commit e74d34f,
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 37465 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 20:31:23  round starting
+Round 86 is shipped and live. The fleet has its 30th hull: the 16th-century Mediterranean war galley, the vessel that half-unblocks the Lepanto campaign.
+
+**What was built.** A full vessel record (galia sottile, 1571 — dimensions, rows, polar, and card text from Guilmartin and *The Age of the Galley*), plus four new record-driven geometry classes in hull.js that the next galley-family hulls will reuse: the spur (a boarding beak with iron shoe and cheek knees tied to the hull's own skin), the apostis rowing frame (rails, a crossbeam and bench at every oar station, the corsia gangway), the arrumbada bow platform with all five guns firing forward, and the stern tent whose canvas feet follow the deck edge. Oar spacing became a record field, and where a record carries an apostis the tholes stand on it — measured after build, all 48 pivots sit at 3.290 m against the rail's own 3.294.
+
+**The class bug the galley exposed.** Her lateen masts are the first with attested heights in metres, and the yard-length formula assumed the Steel-share record form — both masts, yards, and sails built with NaN in every vertex, which poisoned the bounding box and camera fit: a black canvas behind working panels. Fixed for both record forms, and the audit now walks every vertex of every mesh on every hull — one non-finite float convicts, proven by injection (`inj-nan-mast.js` convicts naming Mast, Lateen yard, Sail, Shrouds).
+
+**Verification.** Audit 30 hulls / 0 problems — including two convictions of my own first-draft polar, both fixed in data. Full 51-frame ratchet: globe, sea, action, and board frames untouched; 24 shipwright frames moved in two verified classes (the fleet panel/counter at ~0.24% on berths before hers; the berth shift at 17–37% on ships after her, since the dry dock is one line) and all were accepted with reasons. `ship-galley` is the 51st baseline, looked at. Live stamp confirmed at 1786506860 with 30 vessels.
+
+One gap, recorded honestly in HANDOFF: the post-accept confirming re-run was still capturing when the round's 80-minute watchdog closed, so next round's first act is a ratchet check expecting 51/51. The queue for next round: the galleass — Lepanto's other hull, which reuses this round's classes and adds the gun deck above the rowers.
+2026-08-11 21:37:24  round finished; HEAD is 1213963 Round 86 postscript: confirming re-run killed by the round clock; next round verifies 51/51 first.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 41890 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 21:47:24  round starting

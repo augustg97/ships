@@ -1578,6 +1578,13 @@ what: 'One bench, one great oar, three to four men — rowing a scaloccio, stand
 + 'separate oars on each bench with one skilled man on each; a scaloccio '
 + 'needs only the inboard man to be a rower, and the rest to pull. That is '
 + 'why every fleet converted to it, and why chained men could row it.' },
+gundeck:  { stage: 5, name: 'Gun deck',
+what: 'The deck built across the rowing frame, over the rowers\' heads — the '
++ 'reason the galleass exists. Guns stand on it and fire outboard over the '
++ 'oars, the broadside a war galley structurally cannot mount because her '
++ 'sides at gun height are full of oars. At Lepanto the fire from six of '
++ 'these decks broke up the Ottoman line\'s order before the fleets '
++ 'touched, which is why the galleasses were stationed ahead of the line.' },
 arrumbada: { stage: 3, name: 'Bow platform',
 what: 'The fighting platform over the bow, spanning the full width of the rowing '
 + 'frame. The guns stand on it and the boarding party masses on it, over the '
@@ -4313,10 +4320,58 @@ group.add(tag(corsia, 'apostis', 'Corsia',
 'The raised gangway down the centreline, the only way fore and aft on a deck that '
 + 'is otherwise benches. The boatswain walks it; so does everyone going forward to fight.'));
 }
+if (S.gunDeck && AP) {
+const GD = S.gunDeck;
+const xF = (GD.from - 0.5) * L, xT = (GD.to - 0.5) * L;
+const gdY = deckY + GD.height;
+const width = 2 * apZ + B * 0.05;
+const plank = new THREE.Mesh(
+new THREE.BoxGeometry(xT - xF, B * 0.014, width), pale);
+plank.position.set((xF + xT) / 2, gdY, 0);
+group.add(tag(plank, 'gundeck'));
+const surfY = gdY + B * 0.007;
+for (const sgn of [-1, 1]) {
+const clamp = new THREE.Mesh(
+new THREE.BoxGeometry(xT - xF, B * 0.032, B * 0.030), timber);
+clamp.position.set((xF + xT) / 2, gdY - B * 0.023, sgn * (width / 2 - B * 0.025));
+group.add(tag(clamp, 'gundeck', 'Deck clamp'));
+const nPost = 12;
+for (let i = 0; i <= nPost; i++) {
+const x = xF + (xT - xF) * i / nPost;
+const a = new THREE.Vector3(x, apY, sgn * apZ);
+const b = new THREE.Vector3(x, gdY - B * 0.023, sgn * (width / 2 - B * 0.025));
+group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'gundeck', 'Stanchion'));
+}
+const screen = new THREE.Mesh(
+new THREE.BoxGeometry(xT - xF, B * 0.042, B * 0.012), timber);
+screen.position.set((xF + xT) / 2, surfY + B * 0.021, sgn * (width / 2 - B * 0.006));
+group.add(tag(screen, 'gundeck', 'Screen'));
+}
+const nG = Math.max(0, GD.gunsPerSide | 0);
+for (const sgn of [-1, 1]) for (let j = 0; j < nG; j++) {
+const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nG;
+const x = (u - 0.5) * L;
+const len = B * 0.42, r = B * 0.017;
+const g = new THREE.Group();
+const bar = new THREE.Mesh(
+new THREE.CylinderGeometry(r * 0.72, r, len, 12), mats.iron);
+bar.rotation.x = sgn * Math.PI / 2;
+g.add(bar);
+const carr = new THREE.Mesh(
+new THREE.BoxGeometry(r * 3.2, r * 2.4, len * 0.48), timber);
+carr.position.set(0, -r * 2.0, -sgn * len * 0.18);
+g.add(carr);
+g.position.set(x, surfY + r * 3.0, sgn * (width / 2 - len * 0.30));
+group.add(tag(g, 'gun', 'Broadside piece',
+'A sacre or demi-culverin on the gun deck, firing over the oars. Eight or nine '
++ 'a side is a weight of metal no galley can answer: her guns all face forward.'));
+}
+}
 if (S.bowGuns) {
 const u0 = 0.030, u1 = AP ? AP.from : 0.17;
 const pA0 = surfacePoint(S, H, u0, 1.0), pA1 = surfacePoint(S, H, u1, 1.0);
-const topY = Math.max(pA0[1], pA1[1]) + B * 0.023;
+const topY = (S.gunDeck ? deckY + S.gunDeck.height
+: Math.max(pA0[1], pA1[1])) + B * 0.023;
 const width = 2 * apZ - B * 0.038;
 const plat = new THREE.Mesh(
 new THREE.BoxGeometry(pA1[0] - pA0[0], B * 0.019, width), timber);
@@ -4326,6 +4381,16 @@ const breast = new THREE.Mesh(
 new THREE.BoxGeometry(B * 0.016, B * 0.082, width), timber);
 breast.position.set(pA0[0] + B * 0.008, topY + B * 0.048, 0);
 group.add(tag(breast, 'arrumbada', 'Breastwork'));
+if (S.gunDeck) {
+for (const u of [u0 + 0.012, u1 - 0.012]) for (const sgn of [-1, 1]) {
+const pd = surfacePoint(S, H, u, 1.0);
+const zP = sgn * Math.max(B * 0.06, Math.abs(pd[2]) - B * 0.03);
+const a = new THREE.Vector3(pd[0], pd[1], zP);
+const b = new THREE.Vector3(pd[0], topY - B * 0.010, zP);
+group.add(tag(beamAB(a, b, B * 0.024, B * 0.024, timber),
+'arrumbada', 'Platform post'));
+}
+}
 if (AP) {
 const xF = (AP.from - 0.5) * L;
 for (const sgn of [-1, 1]) {

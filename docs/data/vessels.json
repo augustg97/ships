@@ -1469,6 +1469,176 @@
    }
   },
   {
+   "id": "galleass",
+   "name": "Galleass",
+   "sub": "galeazza",
+   "rig": "oar",
+   "era": [
+    1540,
+    1716
+   ],
+   "to": 1716,
+   "region": "Mediterranean",
+   "rows": [
+    [
+     "Length on deck",
+     "~47 m; about 51 m over the spur"
+    ],
+    [
+     "Beam of the HULL",
+     "~8 m; about 9.4 m over the rowing frame"
+    ],
+    [
+     "Length : beam",
+     "5.9 — a merchant hull's proportions, against the war galley's 8.1"
+    ],
+    [
+     "Draught",
+     "~2.6 m"
+    ],
+    [
+     "Displacement",
+     "perhaps 600 t loaded — three times a war galley"
+    ],
+    [
+     "Freeboard",
+     "about 2.8 m to the gun deck, against a galley's 1.1 — her deck must be climbed, not stepped onto"
+    ],
+    [
+     "Oars",
+     "26 benches a side, one great oar to a bench, five or more men on each"
+    ],
+    [
+     "Under oars",
+     "about 3 kn, briefly; at Lepanto each was towed into position by two galleys"
+    ],
+    [
+     "Guns",
+     "about 30: a five-piece bow battery, eight or nine lighter pieces a side firing over the oars, chasers aft"
+    ],
+    [
+     "Crew",
+     "250–300 at the oars, about 70 sailors and gunners; up to 250 soldiers embarked"
+    ],
+    [
+     "Rig",
+     "three lateen masts — the merchant great galley's sail plan, kept in the conversion"
+    ]
+   ],
+   "crew": 500,
+   "attestation": "generated",
+   "confidence": "moderate",
+   "text": "A merchant great galley's hull converted into a floating battery — the heaviest thing under oars in the sixteenth-century Mediterranean, and the type that opened Lepanto. Venice built her out of the reserve of galee grosse, the three-masted merchant galleys that had carried the Flanders and Levant trades, and the six that the Arsenal finished converting in 1570–71 fought at the front of the Christian line on 7 October 1571.\n\nStructurally she inverts the war galley's one hard constraint. A galia sottile carries her whole battery at the bow because her sides at gun height are full of oars. The great galley's hull is deep enough to carry a second deck clear over the rowers' heads, spanning the full width of the rowing frame, and the guns stand on that deck and fire outboard over the oars — eight or nine pieces a side, with the five-piece heavy battery at the bow and chasers aft, about thirty guns in all. Her freeboard, about 2.8 m to the gun deck against a galley's 1.1, means a galley alongside cannot board her without climbing.\n\nAt Lepanto the six galleasses were towed into position in pairs ahead of the Christian line, and the Ottoman fleet had to row past them to come to grips. Their fire — the first sustained heavy-gun bombardment an Ottoman galley fleet had ever taken from shipboard — sank or damaged a number of galleys and, what mattered more, broke up the dressing of the Ottoman line before contact. Guilmartin's judgment is that the galleasses did not win the battle by gunfire; they disordered the attack that the Christian galleys then destroyed at close quarters.\n\nShe was too heavy to row effectively — about three knots in a burst, towed whenever the fleet manoeuvred — and depended on her lateen rig for passage. Spain sent four galleasses of the Naples squadron with the 1588 Armada, where one, Girona, was wrecked on the Antrim coast with some 1,300 men lost. Venice kept galleasses in commission into the early eighteenth century, but the broadside's future belonged to the pure sailing ship, which carried more guns further on a fraction of the crew.",
+   "cite": "Guilmartin, *Gunpowder and Galleys* (rev. ed., Naval Institute Press, 2003); Morrison (ed.), *The Age of the Galley* (Conway, 1995).",
+   "from": 1540,
+   "polar": {
+    "beatLight": 72,
+    "beatHard": 84,
+    "curve": {
+     "0": 1.1,
+     "30": 1.5,
+     "45": 1.9,
+     "60": 2.5,
+     "75": 2.9,
+     "90": 3.4,
+     "110": 3.7,
+     "120": 4.0,
+     "135": 4.2,
+     "150": 3.9,
+     "180": 3.4
+    },
+    "rigNote": "The figures are her SAILING speed in a moderate breeze, three lateens standing — the war galley's own lateen curve shape, scaled down for a hull of three times the displacement on barely more canvas per ton. Under oars she is the slowest fighting ship of her century: about 3 kn in a burst, and at Lepanto each galleass was towed into position by two galleys so the rowers would arrive fresh. No instrumented galleass trial exists; every oar figure here is inference and labelled so.",
+    "rig": "oars, with three lateen masts",
+    "anchor": {
+     "kn": 4.0,
+     "kind": "passage",
+     "source": "day's-run averages of the Venetian merchant great galleys, 3–5 kn on passage (Pryor, in Morrison ed., The Age of the Galley); the Lepanto conversions kept the merchant hull and its three-masted lateen rig"
+    },
+    "floor": {
+     "kn": 2.5,
+     "lossKnPerMs": 0.18,
+     "source": "derived: set below the war galley's 3.5 kn cruise for three times her displacement on 8% more oars; the attestation is the towing at Lepanto (Guilmartin). Headwind loss carried from Olympias's measured ratio, the galley's own method"
+    }
+   },
+   "hull": {
+    "wlPower": 2.7,
+    "stemFineness": 0.04,
+    "sternFineness": 0.07,
+    "forefoot": 0.20,
+    "run": 0.24,
+    "riseF": 0.50,
+    "riseA": 0.55,
+    "sheerBow": 0.6,
+    "sheerStern": 0.95,
+    "tumblehome": 0.08,
+    "stemRake": 0.04,
+    "sternRake": 0.07,
+    "strakes": 17,
+    "copper": false,
+    "copperAge": 0.55,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": false,
+    "topside": "#3f3222",
+    "bowsprit": 0.0,
+    "steeve": 0,
+    "masts": [
+     {
+      "at": 0.44,
+      "heightM": 19.0,
+      "rig": "lateen",
+      "rake": 0,
+      "shrouds": 5
+     },
+     {
+      "at": 0.14,
+      "heightM": 13.0,
+      "rig": "lateen",
+      "rake": -4,
+      "shrouds": 4
+     },
+     {
+      "at": 0.80,
+      "heightM": 10.0,
+      "rig": "lateen",
+      "rake": 2,
+      "shrouds": 3
+     }
+    ],
+    "build": "frame",
+    "year": 1571,
+    "loa": 47.0,
+    "lwl": 44.0,
+    "beam": 8.0,
+    "draught": 2.6,
+    "freeboard": 2.8,
+    "cm": 0.76,
+    "oarBanks": 1,
+    "oarsPerBank": [
+     26
+    ],
+    "oarLen": 13.0,
+    "interscalmium": 1.2,
+    "apostis": {
+     "out": 0.7,
+     "from": 0.16,
+     "to": 0.86
+    },
+    "spur": 4.5,
+    "bowGuns": 5,
+    "gunDeck": {
+     "from": 0.16,
+     "to": 0.86,
+     "height": 2.2,
+     "gunsPerSide": 8
+    },
+    "sternCanopy": {
+     "from": 0.88,
+     "to": 0.985
+    }
+   }
+  },
+  {
    "id": "fluyt",
    "name": "Fluyt",
    "sub": "the freight machine",

@@ -93,6 +93,11 @@
    "note": "the spur, the apostis and the forward battery — the rowing frame stands wider than the hull, and every gun faces the bow"
   },
   {
+   "name": "ship-galleass",
+   "path": "/?frozen=1#v=ship&s=galleass",
+   "note": "the 31st hull, r87 - the gun deck over the rowers; the type that opened Lepanto"
+  },
+  {
    "name": "ship-carrier",
    "path": "/?frozen=1#v=ship&s=carrier",
    "note": "flight deck markings, island, no passenger deckhouse"

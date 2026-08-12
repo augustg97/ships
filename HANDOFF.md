@@ -5124,3 +5124,95 @@ every accept is committed; the confirming re-run was still capturing when the ro
 watchdog window closed. Next round's first act: run the ratchet check — it should report
 51/51 green, and if any shipwright frame moved again the berth-shift classification above is
 the first suspect, not the galley's geometry.
+
+**Round 71 pickup — QM2 and Azzam looked at, at last.** Both spun and read against their plates,
+which is the step whose absence caused the whole episode.
+
+* **Queen Mary 2 now reads as herself.** The round's rake-as-a-lean fix is the one that did it —
+  raked flared bow with a real forefoot curve, black hull and red boot topping, near-vertical
+  white tiers instead of a ziggurat, one red Cunard funnel, and the lifeboats fell into the
+  white band on their own once the house stopped being a staircase. Air draught 47 m, inside her
+  62 m Verrazzano limit.
+* **Azzam is a motor yacht now rather than a container ship** — white hull, low profile, tenders,
+  no cargo. STILL NOT RIGHT, and specifically: her bow is blunter than the real ship's long fine
+  entry, and the superstructure steps like a cruise liner where hers is a low sleek block. She is
+  defensible, not finished.
+* Fixed on the way: the 'Loaded' build stage said "on a liner" for every hull in the fleet, so
+  the yacht was being told about liner accommodation. The generic line now names no type.
+
+## Round 87 — 2026-08-11 — The galleass: Lepanto's other hull, and the second writer the lock could not see
+
+**First act, as r86's postscript ordered: the full 51-frame ratchet ran clean — 51/51 within
+tolerance, exit 0 — confirming every r86 berth-shift accept. Then the round took the survey
+queue's item 1: the galleass (`galleass`, galeazza, hull year 1571, berth 1540), the second
+of the two hulls that block the Lepanto campaign. Lepanto is now unblocked on hulls.**
+
+**The record.** A merchant great galley's hull converted to a floating battery: ~47 m on deck
+/ 8.0 m hull beam (~9.4 m over the rowing frame) / 2.6 m draught / 2.8 m freeboard to the gun
+deck against the galley's 1.1; 26 benches a side a scaloccio at the galley's own 1.2 m
+interscalmium; about thirty guns — the five-piece bow battery, eight or nine a side firing
+over the oars, chasers aft (chasers not modelled, carried below); three lateen masts with
+attested-form heights 19.0/13.0/10.0 m. Polar: lateen family 72/84; the anchor is a PASSAGE
+figure, 4.0 kn from the merchant great galleys' 3–5 kn day's runs (Pryor, in Morrison ed.),
+because no galleass burst figure exists — under oars she made about 3 kn briefly and was
+towed into position at Lepanto (Guilmartin), so the floor is 2.5 kn, labelled derived in the
+record itself. The plate is Grevenbroeck's eighteenth-century drawing of a Venetian galleass
+(Public domain, Museo Correr manuscript), fetched with provenance into ASSETS.json.
+
+**The geometry — one new class in hull.js, and one law extended:**
+- `gunDeck {from, to, height, gunsPerSide}` — the deck built across the rowing frame over
+  the rowers' heads, riding on stanchions that stand on the apostis rails (the same members
+  the tholes pivot on carry the deck's weight), a solid waist-high screen along each edge,
+  and the broadside pieces on top, muzzles over the screen. Record-driven; nothing
+  galleass-hardcoded.
+- The arrumbada learns one conditional: where a gun deck exists the bow platform rides at
+  the gun deck's own height — the galleass fights her bow battery from forecastle level and
+  the two decks meet in one line. A raised platform cannot float, so it gains posts to the
+  bow deck where the deck actually is (the head-timbers' law).
+
+**Verification.** Audit 31 hulls / 0 problems on first run — the r86 NaN-vertex rule, the
+thole/apostis agreement and the polar rules all walked her. Looked at from two bearings
+before the full run (the berth broadside; b=140 bow quarter, a temp frame deleted after
+reading): oar fan pivots below the deck on the frame, eight pieces a side behind the screen
+with muzzles clear, bow battery on the raised platform, tent aft. Full 52-frame ratchet
+(run2, build/ratchet-r87-run2.log): ship-galleass NEW; 17 frames moved 17.9–37.5% — every
+berth abaft the new 1540 slot standing one berth further down, the r86-proven class,
+verified there on shipwright-furled; 5 frames moved 0.108–0.222% — the fleet panel's new
+row and the OF-31 counter on earlier berths (identical 0.108%/0.085 triples are the counter
+digit alone). Nothing else moved: globe, sea, action, board and aboard frames 0.000.
+
+**⚠ THE SECOND WRITER, recorded because the lock cannot see this class.** At 22:36:54,
+mid-round, a parallel interactive Claude session (desktop agent, not a loop round — the
+build/.loop.lock only binds loop-round.sh) edited web/js/shipwright.js: the generic 'Loaded'
+stage caption said "on a liner", so the yacht was being told about liner accommodation; the
+edit makes the sentence name no type at all. The same session ran build_site (stamp
+1786513014 — which is why this round's deploy carries that stamp and swept the galleass into
+docs/ with it) and launched its own full frame_baseline check at 22:37, which deleted run2's
+_current and _diff mid-classification (a check rmtree's both at start). This round therefore
+commits BOTH changes, classified: the caption edit shows only in engine-hull shipwright
+frames, all of which are already in the berth-shift class. The accepts consume the parallel
+check's captures, scored independently with the harness's own arithmetic
+(build/staging/compare-r87.py) before accepting. If the accepts are missing below, the
+80-minute clock closed first and the next round's first act is: run the check, expect
+ship-galleass NEW + the two classes above, accept with the reasons written here.
+
+**Carried, restated exactly (none closed silently):**
+1. Lepanto is unblocked on hulls (galley r86, galleass r87) — the campaign itself (fleets,
+   day set, board, an Ionian shore; limestone likely reuses phrygana per r85 carried 3) is
+   the next big arc. Myeongnyang still needs panokseon and sekibune (r80 carried).
+2. r78 capture-gate hardening if the font flap strikes; r75 QM2, r77 Azzam, r79 jeer small
+   items only if a round is light.
+3. r85 carried 3 stands: the polder palette wants a photographic A/B; SHORE_PALS' third
+   coast will test the table's reach.
+4. Galleass gaps, honest: no stern chasers (the record says "chasers aft"; the model stops
+   at the broadside); the Lepanto conversions' rounded bow fortress is simplified to the
+   raised platform; no voyage or Sea presence until the Lepanto campaign places her;
+   survey-hulls raycast rings have not run against her or the galley (r86 carried 4).
+5. New: two writers shared this tree for 40 minutes. The loop lock binds only loop rounds.
+   If parallel desktop sessions on ~/Ships become regular, the lock protocol needs a shared
+   convention (e.g. both writers take build/.loop.lock) — a decision for August, not a task.
+
+### Next, in order
+1. The Lepanto campaign in the Action — both hulls exist now. Fleets, days, board, an
+   Ionian shore block. Or the panokseon, if Myeongnyang is preferred.
+2. Small items (carried 2) only if a round is otherwise light.

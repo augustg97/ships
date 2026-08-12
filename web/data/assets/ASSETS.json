@@ -559,6 +559,22 @@
    "files": [
     "web/data/assets/ships/galley.jpg"
    ]
+  },
+  {
+   "source": "wikimedia-commons",
+   "slug": "galleass",
+   "type": "ships",
+   "name": "File:Jan van Grevenbroeck - Venetian galleass.jpg",
+   "caption": "A Venetian galleass, drawn by Jan van Grevenbroeck in the eighteenth century for his manuscript on Venetian customs. No galleass survives; the type is known from drawings like this one, from Arsenal records, and from the battle accounts",
+   "licence": "Public domain",
+   "authors": {
+    "Jan van Grevenbroeck (1731-1807)": "All"
+   },
+   "credit": "[1], from Gli Abiti de' Veneziani di quasi ogni età con diligenza raccolti e dipinti nel secolo XVIII",
+   "url": "https://commons.wikimedia.org/wiki/File:Jan_van_Grevenbroeck_-_Venetian_galleass.jpg",
+   "files": [
+    "web/data/assets/ships/galleass.jpg"
+   ]
   }
  ]
 }
