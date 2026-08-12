@@ -785,3 +785,15 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-11 23:00** · `shipwright-hounds` — The rake class fix (a raked stem leans with height instead of shifting the whole bow forward, and no longer draws every waterline longer than the recorded lwl) reaches every hull in the fleet, so most frames move. Plus Queen Mary 2 made her own ship rather than a stretched Titanic, Azzam off the container hull, and the 'Loaded' build stage no longer calls every vessel a liner.
 - **2026-08-11 23:00** · `shipwright-corbis` — The rake class fix (a raked stem leans with height instead of shifting the whole bow forward, and no longer draws every waterline longer than the recorded lwl) reaches every hull in the fleet, so most frames move. Plus Queen Mary 2 made her own ship rather than a stretched Titanic, Azzam off the container hull, and the 'Loaded' build stage no longer calls every vessel a liner.
 - **2026-08-11 23:00** · `ship-azzam` — The rake class fix (a raked stem leans with height instead of shifting the whole bow forward, and no longer draws every waterline longer than the recorded lwl) reaches every hull in the fleet, so most frames move. Plus Queen Mary 2 made her own ship rather than a stretched Titanic, Azzam off the container hull, and the 'Loaded' build stage no longer calls every vessel a liner.
+- **2026-08-11 23:02** · `ship-galleass` — NEW: the 31st hull — the galleass (galeazza, 1571 Venetian conversion): gunDeck class — deck across the rowing frame on stanchions standing on the apostis rails, screen at the edges, 8 pieces a side firing over the oars; arrumbada raised to gun-deck level on posts; three heightM lateens; Grevenbroeck plate. Audit 31/0; looked at from the berth and from b=140
+- **2026-08-11 23:03 · CORRECTION, r87** — the 25 accepts stamped 22:57–23:00 above carry a
+  WRONG reason. They were written by a resumed desktop session holding round-70-era context
+  ("the rake class fix… QM2… Azzam" — work committed days ago and already baselined). The
+  moves those accepts consumed are r87's, classified in run2 (build/ratchet-r87-run2.log)
+  BEFORE that session's check overwrote _current: the dry dock gained a 31st berth at 1540
+  (the galleass), so every ship abaft it stands one berth further down, the camera with her —
+  17.9–37.5% on those frames; the fleet panel's new row and the OF-31 counter moved earlier
+  berths 0.108–0.222%; and engine hulls additionally carry that session's own (real, good)
+  edit: the 'Loaded' caption no longer says "on a liner". The accepted PIXELS are correct —
+  captures of the same tree run2 scored, re-verified frame-by-frame with the harness's own
+  arithmetic (build/staging/compare-r87.py: moved 0, new 1) — only the prose above is false.
