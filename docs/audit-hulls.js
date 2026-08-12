@@ -89,6 +89,36 @@ say(v.id, 'loopholes out of the bulwark band',
 `${planeY.toFixed(1)}–${bandTop.toFixed(1)}`);
 }
 }
+{
+const WALL = ['Bulwark', 'End bulwark', 'Screen'];
+const wallB = new THREE.Box3(); wallB.makeEmpty(); let nWall = 0;
+g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && WALL.includes(p.name)) { wallB.expandByObject(o); nWall++; } });
+if (!nWall) say(v.id, 'gun deck without a wall',
+'a gunDeck hull with no bulwark or screen mesh at all');
+else {
+const cx = (wallB.min.x + wallB.max.x) / 2, cz = (wallB.min.z + wallB.max.z) / 2;
+const bandH = wallB.max.y - wallB.min.y;
+const rc = new THREE.Raycaster(); let through = 0, shot = 0, first = '';
+for (const f of [0.25, 0.5, 0.8]) {
+const y = wallB.min.y + bandH * f;
+for (let b = 0; b < 72; b++) {
+const th = b * Math.PI / 36;
+rc.set(new THREE.Vector3(cx + Math.cos(th) * 400, y, cz + Math.sin(th) * 400),
+new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)).normalize());
+rc.far = 900; shot++;
+if (!rc.intersectObject(g, true).length) {
+through++;
+if (!first) first = `first at bearing ${Math.round(th * 180 / Math.PI)}°, ` +
+`y ${y.toFixed(1)} m`;
+}
+}
+}
+if (through) say(v.id, 'you can see through the gun-deck wall',
+`${through} of ${shot} bearings at the wall band strike nothing — ${first}`);
+}
+}
 if (H.tower) {
 const tw = part.tower;
 if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');

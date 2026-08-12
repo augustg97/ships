@@ -5483,3 +5483,59 @@ ship-galley/galleass 0.09/0.16% (labels and panel only). Post-accept full run2
 1. The Myeongnyang campaign in the Action — both hulls exist; the tidal race is the model's
    real problem to state honestly. Or the four-hull raycast survey if the round is short.
 2. Small items (carried 5) only if a round is otherwise light.
+
+## Round 91 — 2026-08-12 — Round 90 landed, and the wall learns to answer from every bearing
+
+**Round 90 died before its commit.** The 04:11 firing found HEAD still at round 89 and the
+whole sekibune round uncommitted; `build/ratchet-r90-run2.log` — the file the round 90
+section above cites as "clean" — existed and was EMPTY (created 03:40, zero bytes), and the
+"live stamp verified" claim could not have been true with nothing pushed. The observables:
+loop.log records the round exiting non-zero at 04:01, twenty-one minutes after run2's empty
+file appeared, which is consistent with the documented failure mode — a verification run
+dying with the turn that launched it. This round made the claims true before repeating them:
+audit re-run 33/0, site rebuilt, the full post-accept ratchet run INTO the same log —
+**55/55 green, exit 0** — and the sekibune's own frame read: one sail on one mast, the
+yakata standing over the wall, oars resting awash. Round 90 then landed as its own commit
+(7c4b196), this round's work as the next.
+
+**The r86 carried item CLOSES: the ring survey ran against all four oared hulls.**
+`Research/ring_survey.py` — two rings per hull, 72 bearings x 3 heights each: the topside
+ring in the metre above the waterline, and the works ring inside the gun-deck wall's own
+vertical band (the box of the Bulwark / End bulwark / Screen meshes). galley, galleass,
+panokseon, sekibune: **zero see-through bearings, 216/216 everywhere the ring aimed.** The
+galleass's screen band sits 5.06–5.39 m over water, the panokseon's bulwark 3.66–4.87, the
+sekibune's tate-ita 2.63–4.14 — each exactly where its record derives it.
+
+**And the audit keeps the ring**, because the atakebune is already anticipated with
+"heavier walls" and the next gunDeck hull should be born checked. Two rules, after the
+loophole block: **'you can see through the gun-deck wall'** (the deckhouse ring aimed at
+the wall band; every ray must strike the ship) and **'gun deck without a wall'** (a gunDeck
+hull with no wall mesh at all). Proven by injection (`build/staging/inj-wall-ring.js`):
+the panokseon's end panels removed → 10 of 216 bearings strike nothing, first at 10° —
+r89's open corridor, found then by eye, now visible to the audit; the sekibune's wall
+removed entirely → 'gun deck without a wall', and the standing floating-part rule joins in
+coherently (6 meshes touch nothing once the wall under her sama is gone). Clean run after:
+**33/0**.
+
+**Ratchet: no frames moved this round** — the audit is not geometry. Nothing to accept,
+FRAME-LOG untouched. Deploy stamp verified live at the end of the round.
+
+**Worth August's eye:** round 90 is the third round killed mid-verification (after the two
+on 2026-08-11). A full ratchet run is ~30 minutes of the 80-minute budget; a round that
+starts one late has no margin. The two-writer lock decision (r87 carried 5) is adjacent.
+
+**Carried, restated (none closed silently):**
+1. The Myeongnyang campaign in the Action (r80) — both hulls now committed and live; the
+   strait and its 10 kn reversing race are the model's real problem to state honestly.
+2. Sekibune/panokseon gaps stand (r90 carried 2): ro drawn as pulling sweeps, not the
+   stern-raked working scull; no swivel pieces or bow gun; no Sea voyages for either.
+3. The raycast survey (r86 carried) is CLOSED by this round.
+4. Lepanto gaps stand (r88 carried 2): galleass stern chasers, bow fortress, galliot type.
+5. r78 capture-gate hardening if the font flap strikes (zero flaps again — a 55-frame run
+   and no flap); r75 QM2, r77 Azzam, r79 jeer small items; the polder photographic A/B
+   (r85). The two-writer lock convention stays August's decision (r87).
+
+### Next, in order
+1. The Myeongnyang campaign in the Action (r80): eleven ships against 133 in a strait
+   whose tide reverses the battle — the panokseon and sekibune both exist and are live.
+2. Small items (carried 5) only if a round is otherwise light.

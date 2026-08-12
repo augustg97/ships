@@ -2314,3 +2314,26 @@ Round 88 is complete, pushed, and verified live — finished inside the watchdog
 **Carried forward in HANDOFF:** the panokseon (Myeongnyang) or the galley/galleass raycast survey next; galleass stern chasers and the bow-fortress simplification stated; the polder photographic A/B still open; the two-writer lock convention remains August's decision.
 ───────────────────────────────────────────────────────────────────────────
 2026-08-12 01:14:56  round starting
+**Round 89 shipped: the panokseon, the fleet's 32nd hull — Myeongnyang's ship, the first of the two that battle needs.** Live at stamp 1786526986, ratchet 54/54, audit 32 hulls / 0 problems.
+
+What the round did:
+
+**The record** (vessels.json, plate, ASSETS): a large panokseon of 1597 — 32 m on a dead-flat bottom, 9.4 m beam, three levels, 9 sculling oars a side, two battened-lug masts, the four-calibre chongtong battery. No panokseon survives and the card says so; speeds are labelled derived, and the only attested speed fact — both Imjin fleets agreed the Japanese ships were faster — anchors the 2.5 kn oar floor. Cites: Hong Sun-jae 2025, Hawley, Underwood. The public-domain painting is her plate.
+
+**The geometry** is a class extension, not a bespoke ship: the galleass's `gunDeck` learned its second law. With no apostis, the fighting deck stands on stanchions rising from the hull's own rail, lofted along the rail line with overhanging beam-ends, walled by a chest-high plank bulwark whose battery fires through dark-framed gunports, closed athwartships at both ends. New `tower` class for the janggundae — posts, railed platform, hipped roof — with its own stage card. The bulkhead build gave her the flat ends and median rudder for free.
+
+**Three faults were found by looking, not by the audit**: the deck's ends stood open (seen dead astern), the barrels pierced the bulwark with no port drawn (bow quarter), and the mainsail brushed the tower, which moved aft after the render showed it. The audit then learned the classes it *can* see — eight new tower/gun-deck rules — and two were proven by fault injection: a tower lifted 1 m convicts as floating (foot 4.7 m vs deck 3.6), a tower declared on the galley convicts as having no deck.
+
+**The ratchet**: 21 movers, all classified into the two known classes — 18 berth-shift frames (every ship berthed after 1555 stands one berth down, 16–38%, diff read on shipwright-furled) and 3 fleet-panel/counter frames (diff read on ship-galleass: her neighbouring berth now holds the panokseon herself). Accepted with reasons in FRAME-LOG from the same check's captures; the post-accept full run came back 54/54.
+
+HANDOFF carries the honest gaps: the oars are drawn as pulling sweeps where the Korean ro is a stern-raked scull, no swivel pieces or hwacha, and the raycast survey still hasn't run against the three oared hulls. Next round's queue: the sekibune — the Japanese hull Myeongnyang needs — or that raycast survey.
+2026-08-12 02:31:31  round finished; HEAD is fd7659f Round 89: the panokseon — the 32nd hull. The gunDeck class learns to stand on the hull's own rail (no apostis): lofted fighting deck with overhanging beam-ends, plank bulwark with gunports, closed ends; the janggundae tower class; two battened lugs; the audit's tower/gun-deck rules proven by injection. Ratchet 54/54, audit 32/0.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 75802 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-12 02:41:31  round starting
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-12 04:01:45  round finished; HEAD is fd7659f Round 89: the panokseon — the 32nd hull. The gunDeck class learns to stand on the hull's own rail (no apostis): lofted fighting deck with overhanging beam-ends, plank bulwark with gunports, closed ends; the janggundae tower class; two battened lugs; the audit's tower/gun-deck rules proven by injection. Ratchet 54/54, audit 32/0.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 81246 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-12 04:11:45  round starting
