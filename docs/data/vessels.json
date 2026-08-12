@@ -1308,6 +1308,167 @@
    }
   },
   {
+   "id": "galley",
+   "name": "War galley",
+   "sub": "galia sottile",
+   "rig": "oar",
+   "era": [
+    1500,
+    1720
+   ],
+   "to": 1720,
+   "region": "Mediterranean",
+   "rows": [
+    [
+     "Length on deck",
+     "~42 m; about 48 m over the spur"
+    ],
+    [
+     "Beam of the HULL",
+     "5.2 m — but the rowing frame stands wider, about 6.9 m overall"
+    ],
+    [
+     "Length : beam",
+     "8.1 on the hull proper"
+    ],
+    [
+     "Draught",
+     "~1.7 m"
+    ],
+    [
+     "Displacement",
+     "about 200 t loaded"
+    ],
+    [
+     "Freeboard amidships",
+     "about 1.1 m — the sea is at the rower's elbow"
+    ],
+    [
+     "Oars",
+     "24 benches a side, one great oar to a bench (a scaloccio), each ~11.5 m and pulled by 3–4 men"
+    ],
+    [
+     "Dash",
+     "just over 7 kn, held for perhaps twenty minutes"
+    ],
+    [
+     "Cruise under oars",
+     "3–4 kn; the fleet's day is set by the rowers' drinking water"
+    ],
+    [
+     "Guns",
+     "five at the bow, all firing forward: a centreline 50-pounder courser flanked by four lighter pieces"
+    ],
+    [
+     "Crew",
+     "~150 at the oars, 20–30 sailors; up to 100 soldiers embarked for battle"
+    ],
+    [
+     "Rig",
+     "two lateen masts; the main yard is two spars fished together, longer than its own mast"
+    ]
+   ],
+   "crew": 280,
+   "attestation": "generated",
+   "confidence": "moderate",
+   "text": "The standard Mediterranean warship for four hundred years after gunpowder, and the ship that fought Lepanto — about 400 of them on one afternoon in October 1571, the largest galley action ever fought.\n\nHer armament faces FORWARD. The heavy gun sits on the centreline at the bow, aimed by aiming the ship, and it fired once — at fifty metres or less, immediately before boarding. The broadside that was re-organising Atlantic warfare in the same century has no place here: the sides are full of oars.\n\nThe dimensions of a fighting fact: 42 m of hull carries only 1.1 m of freeboard, so the rowing frame — the *apostis*, the rectangular outrigger the oars actually pivot on — stands wider than the hull itself, and the spur at the bow is a boarding bridge, not a ram. At Lepanto the two systems of rowing met: Venice still rowed *alla sensile*, three separate oars to a bench; Spain and Genoa had gone *a scaloccio*, one great oar pulled by three to five men. Everyone converted after the battle, because a scaloccio can be rowed by chained men and sensile cannot.\n\nGuilmartin's central measurement is logistical: a galley dashes at 7 knots for twenty minutes, cruises at 3–4, and carries water for a few days at most — 150 rowers working in a Mediterranean summer drink tons of it. Galley war is therefore amphibious war, fought port to port along coasts, and it ended not when sailing ships got better guns but when the round ship could finally keep the sea in winter.",
+   "cite": "Guilmartin, *Gunpowder and Galleys* (rev. ed., Naval Institute Press, 2003); Morrison (ed.), *The Age of the Galley* (Conway, 1995).",
+   "from": 1500,
+   "polar": {
+    "beatLight": 72,
+    "beatHard": 84,
+    "curve": {
+     "0": 1.2,
+     "30": 1.6,
+     "45": 2.1,
+     "60": 2.7,
+     "75": 3.2,
+     "90": 3.7,
+     "110": 4.1,
+     "120": 4.4,
+     "135": 4.6,
+     "150": 4.3,
+     "180": 3.7
+    },
+    "rigNote": "The figures above are her SAILING speed in a moderate breeze, lateen canvas on both masts — passage-making rig, struck and sent ashore before battle, and a poor sailer even so: the hull is built for oars, shallow and leeway-prone. In strong fair winds the router lets the curve saturate at her recorded 7.2 kn. Under oars: a dash of just over 7 kn held for perhaps twenty minutes, cruise 3–4 kn (Guilmartin). The router holds 3.5 kn as her oar floor in any wind. No instrumented galley trial exists; the headwind loss is carried over from Olympias's measured ratio, scaled to this cruise.",
+    "rig": "oars, with two lateen masts for passage",
+    "anchor": {
+     "kn": 7.2,
+     "kind": "burst",
+     "source": "Guilmartin, Gunpowder and Galleys: a dash of just over 7 kn, sustainable for about twenty minutes; cruise 3–4 kn under oars"
+    },
+    "floor": {
+     "kn": 3.5,
+     "lossKnPerMs": 0.2,
+     "source": "cruise per Guilmartin; headwind loss inferred from Olympias's measured (5.4−2.9)/8, scaled to a 3.5 kn cruise — no instrumented galley trial exists"
+    }
+   },
+   "hull": {
+    "wlPower": 2.9,
+    "stemFineness": 0.02,
+    "sternFineness": 0.05,
+    "forefoot": 0.18,
+    "run": 0.22,
+    "riseF": 0.55,
+    "riseA": 0.6,
+    "sheerBow": 0.55,
+    "sheerStern": 0.95,
+    "tumblehome": 0.06,
+    "stemRake": 0.03,
+    "sternRake": 0.07,
+    "strakes": 15,
+    "copper": false,
+    "copperAge": 0.55,
+    "chequer": false,
+    "gunDecks": 0,
+    "iron": false,
+    "topside": "#3f3222",
+    "bowsprit": 0.0,
+    "steeve": 0,
+    "masts": [
+     {
+      "at": 0.42,
+      "heightM": 16.0,
+      "rig": "lateen",
+      "rake": 0,
+      "shrouds": 4
+     },
+     {
+      "at": 0.13,
+      "heightM": 10.5,
+      "rig": "lateen",
+      "rake": -4,
+      "shrouds": 3
+     }
+    ],
+    "build": "frame",
+    "year": 1571,
+    "loa": 42.0,
+    "lwl": 39.5,
+    "beam": 5.2,
+    "draught": 1.7,
+    "freeboard": 1.1,
+    "cm": 0.64,
+    "oarBanks": 1,
+    "oarsPerBank": [
+     24
+    ],
+    "oarLen": 11.5,
+    "interscalmium": 1.2,
+    "apostis": {
+     "out": 0.85,
+     "from": 0.17,
+     "to": 0.87
+    },
+    "spur": 6.0,
+    "bowGuns": 5,
+    "sternCanopy": {
+     "from": 0.87,
+     "to": 0.985
+    }
+   }
+  },
+  {
    "id": "fluyt",
    "name": "Fluyt",
    "sub": "the freight machine",

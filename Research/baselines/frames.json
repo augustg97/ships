@@ -88,6 +88,11 @@
    "note": "170 oars — they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"
   },
   {
+   "name": "ship-galley",
+   "path": "/?frozen=1#v=ship&s=galley",
+   "note": "the spur, the apostis and the forward battery — the rowing frame stands wider than the hull, and every gun faces the bow"
+  },
+  {
    "name": "ship-carrier",
    "path": "/?frozen=1#v=ship&s=carrier",
    "note": "flight deck markings, island, no passenger deckhouse"

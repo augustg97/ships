@@ -12,6 +12,23 @@ catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }
 const tagOf = o => { for (let e = o; e; e = e.parent)
 if (e.userData && e.userData.part) return e.userData.part;
 return null; };
+{
+const bad = {};
+g.traverse(o => {
+if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+const a = o.geometry.attributes.position.array;
+for (let i = 0; i < a.length; i++)
+if (!Number.isFinite(a[i])) {
+const p = tagOf(o);
+bad[(p && p.name) || o.geometry.type] = true;
+return;
+}
+});
+const names = Object.keys(bad);
+if (names.length)
+say(v.id, 'geometry with non-finite vertices',
+`NaN positions in: ${names.join(', ')} — the black-canvas class`);
+}
 const part = {};
 g.traverse(o => {
 if (!o.isMesh) return;

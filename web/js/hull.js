@@ -696,8 +696,6 @@ function buildRig(S, group, mats, FINE, FURLED) {
      so a rotation about Y is a brace. */
   const TRIM = S.trim !== undefined ? S.trim : 0.34;    // ~19 degrees off square
   const sails = [], spars = [], mastTops = [], stayMasts = [];
-  const maxMastShare = S.masts.length ? Math.max(...S.masts.map(m => m.height)) : 1;
-
   S.masts.forEach((mk, mi) => {
     const u = mk.at;
     /* How much clear water there is abaft this mast before the next one. A fore-and-aft sail
@@ -1223,7 +1221,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
          because baskets were hung at the top of their mast as their sign. The type's own
          name, hoisted as an object. It is DATA (`corbis` on the hull record): only the
          hull whose record attests it wears one, at the head of her tallest mast. */
-      if (FINE && S.corbis && si === 0 && mk.height === maxMastShare) {
+      /* "tallest mast" via lower === mainLower: form-independent, same class as the yard's
+         share — `mk.height === maxMastShare` was NaN against a heightM record */
+      if (FINE && S.corbis && si === 0 && lower === mainLower) {
         const wicker = mats.wicker || (mats.wicker = new THREE.MeshStandardMaterial(
           { color: 0x8a7148, roughness: 0.92, side: THREE.DoubleSide }));
         const cb = new THREE.Group();
@@ -1514,7 +1514,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
          square canvas at all; if she does, this mast is a mizzen and takes Steel's proportion
          off its own mast instead. */
       const mixed = (S.masts || []).some(m => m.rig === 'square');
-      const yardLen = mixed ? lower * 1.15 : L * (mk.height / maxMastShare);
+      /* ⚠ THE YARD'S SHARE MUST NOT ASSUME THE RECORD'S FORM. `mk.height / maxMastShare`
+         is the same ratio as `lower / mainLower` when heights are Steel shares — but a
+         record with an ATTESTED height in metres (`heightM`) has no `height` at all, and
+         the first galley arrived with NaN in both masts, both yards and both sails, a
+         black canvas with working panels. mScale is the identical ratio computed from
+         whichever form the record actually carries. */
+      const yardLen = mixed ? lower * 1.15 : L * mScale;
       /* θ is the OBSERVABLE, and it is about 45°: that is the angle in every plate of Pâris's
          and in every photograph of a working boom or baghla. Deriving θ instead from the mast's
          fore-and-aft position (which is what the first attempt did) forced it to 65° and the
@@ -2730,6 +2736,34 @@ const PARTS = {
                   + 'at the waterline, and carries almost no cargo. The outrigger takes the top '
                   + 'bank outboard, and is why her famous 5.5 m beam is measured over the '
                   + 'outriggers rather than over the planking.' },
+  spur:     { stage: 3, name: 'Spur',
+              what: 'The long beak at the bow, riding above the water. It is NOT a ram: the '
+                  + 'underwater bronze ram died with antiquity, and what replaced it is a '
+                  + 'boarding bridge — the spur crosses the enemy\'s rail, locks the two hulls '
+                  + 'together, and the soldiers go over it. Its length also fixes the gun\'s '
+                  + 'minimum range: the courser fires past it at a target the spur is about '
+                  + 'to touch.' },
+  apostis:  { stage: 3, name: 'Rowing frame',
+              what: 'The rectangular frame the oars actually pivot on, standing well outboard '
+                  + 'of the planking on crossbeams — the reason a galley\'s fighting beam is '
+                  + 'nearly two metres more than her hull\'s. The hull is a canoe; the frame '
+                  + 'is the engine room bolted on top of it. Between the benches runs the '
+                  + 'corsia, the raised central gangway, the only way fore and aft.' },
+  bench:    { stage: 4, name: 'Rowing bench',
+              what: 'One bench, one great oar, three to four men — rowing a scaloccio, standing '
+                  + 'into the stroke and falling back. The older way, alla sensile, put three '
+                  + 'separate oars on each bench with one skilled man on each; a scaloccio '
+                  + 'needs only the inboard man to be a rower, and the rest to pull. That is '
+                  + 'why every fleet converted to it, and why chained men could row it.' },
+  arrumbada: { stage: 3, name: 'Bow platform',
+              what: 'The fighting platform over the bow, spanning the full width of the rowing '
+                  + 'frame. The guns stand on it and the boarding party masses on it, over the '
+                  + 'heel of the spur. All of a galley\'s violence is concentrated on these few '
+                  + 'square metres of deck; everything abaft it is propulsion.' },
+  canopy:   { stage: 7, name: 'Stern awning',
+              what: 'Canvas arched over the poop, where the captain and the officers live — '
+                  + 'the only cover aboard a ship whose entire deck is benches. Struck before '
+                  + 'action, like the rig.' },
   anchor:   { stage: 3, name: 'Bower anchor',
               what: 'A 74\'s best bower weighs about 3.7 tonnes, and half the machinery in her '
                   + 'bow exists to move it: cathead, fish davit, capstan, and a 24-inch cable too '
@@ -6554,8 +6588,22 @@ function buildOars(S, group, mat) {
      how much room each has to swing, and therefore the whole geometry of the stroke. The
      thranite oar is longer only because the outrigger carries its thole further outboard, so
      it has further to reach the same water. */
-  const INTERSCALMIUM = 0.98;                         // Vitruvius, two Doric cubits
+  /* ⚠ THE SPACING IS A FACT OF THE VESSEL, NOT A UNIVERSAL. Vitruvius's two Doric cubits
+     (0.98 m) is the TRIREME'S interscalmium; a sixteenth-century galley's benches sit about
+     1.2 m apart, because four men swing on one loom instead of one man on his own oar. The
+     record carries it; the default stays Vitruvius for the hulls that predate records. */
+  const INTERSCALMIUM = S.interscalmium || 0.98;      // Vitruvius, two Doric cubits
   const oarLen = S.oarLen || 4.2;
+  /* ── A GALLEY ROWS THROUGH HER FRAME, NOT THROUGH HER SIDE ───────────────────────────
+     Where the record carries an apostis, the tholes stand ON it: the pivot is the frame's
+     own outboard beam, at the frame's height, outboard of the planking — which is the whole
+     reason the frame exists. The trireme keeps her hull-side tholes; her outrigger carries
+     only the top bank, and that offset is already in `out` below. buildGalleyWorks draws
+     the beam these oars pivot on, from the same record fields, so they cannot disagree. */
+  const AP = S.apostis;
+  const pdMid = AP && surfacePoint(S, H, 0.5, 1.0);
+  const apZ = AP && Math.abs(pdMid[2]) + AP.out;
+  const apY = AP && pdMid[1] + B * 0.115;             // the frame rides at gunwale height
   for (let bank = 0; bank < n; bank++) {
     const v = 0.70 + bank * 0.11;                     // each level higher up the side
     const out = 1.0 + bank * 0.22;                    // and further outboard
@@ -6565,7 +6613,8 @@ function buildOars(S, group, mat) {
       /* rowers sit one interscalmium apart, so the tholes are spaced by a REAL LENGTH and
          the bank's extent follows from how many men are in it — not the other way round */
       const span = (perBank - 1) * INTERSCALMIUM / L;
-      const u = 0.5 - span / 2 + (i / (perBank - 1)) * span + bank * 0.006;
+      const uc = AP ? (AP.from + AP.to) / 2 : 0.5;    // the frame's own middle, else amidships
+      const u = uc - span / 2 + (i / (perBank - 1)) * span + bank * 0.006;
       const p = surfacePoint(S, H, u, Math.min(0.99, v));
       for (const sgn of [-1, 1]) {
         const o = new THREE.Group();
@@ -6583,17 +6632,212 @@ function buildOars(S, group, mat) {
           new THREE.BoxGeometry(B * 0.008, B * 0.075, oarLen * 0.22), mat);
         blade.position.z = outb * 0.90;
         o.add(blade);
-        o.position.set(p[0], p[1], sgn * p[2] * out);
+        if (AP) o.position.set(p[0], apY, sgn * apZ);
+        else o.position.set(p[0], p[1], sgn * p[2] * out);
         o.rotation.y = sgn > 0 ? 0 : Math.PI;          // flips +Z outboard to the other side
-        o.rotation.x = -0.34;                          // blades down toward the water
+        /* the rest angle is GEOMETRY, not a constant: the blade must reach the water, so the
+           slope follows from the thole's height over it and the oar's outboard reach. An
+           apostis thole sits ~1.3 m up with 8 m of oar outboard — a shallow 9° — where the
+           trireme's short oars from low tholes need the steeper original angle. */
+        const restX = AP ? -Math.atan2(apY + B * 0.02, outb) : -0.34;
+        o.rotation.x = restX;
         /* what the animator needs to swing this oar: which side it is, its rest angles, and
            its bank, because the three banks do not enter the water at the same instant */
-        o.userData.oar = { sgn, restY: o.rotation.y, restX: -0.34, bank };
+        o.userData.oar = { sgn, restY: o.rotation.y, restX, bank };
         g.add(o);
       }
     }
   }
   group.add(tag(g, 'oar'));
+}
+
+
+/* ── THE GALLEY'S MACHINERY ────────────────────────────────────────────────────────────
+ * What separates a sixteenth-century war galley from a big trireme is all above the deck,
+ * and all of it is in the record: the SPUR (a boarding bridge where antiquity carried a
+ * ram), the APOSTIS (the rectangular rowing frame standing outboard of the planking — the
+ * hull is a canoe, the frame is the engine room bolted on top), the ARRUMBADA (the bow
+ * fighting platform the guns stand on — a galley's guns all bear FORWARD, aimed by aiming
+ * the ship), and the tent over the poop. Sources: Guilmartin, Gunpowder and Galleys;
+ * Morrison (ed.), The Age of the Galley. No complete hull survives; the proportions here
+ * follow the arsenal records those works reprint.
+ *
+ * Everything takes both its ends from geometry that exists — the stem's own profile, the
+ * deck edge's own curve — the head-timbers' law: nothing CAN float.
+ */
+function buildGalleyWorks(S, group, mats) {
+  const AP = S.apostis;
+  if (!S.spur && !AP) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const timber = mats.woodDark, pale = mats.woodPale;
+
+  /* one beam between two computed points — quaternion from the segment itself */
+  const beamAB = (a, b, w, h, mat) => {
+    const d = b.clone().sub(a), len = d.length();
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, len, h), mat);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    m.position.copy(a).addScaledVector(d, len / 2);
+    return m;
+  };
+
+  const pdMid = surfacePoint(S, H, 0.5, 1.0);
+  const deckY = pdMid[1];
+  const apZ = AP ? Math.abs(pdMid[2]) + AP.out : Math.abs(pdMid[2]);
+  const apY = deckY + B * 0.115;                       // same law as the tholes in buildOars
+
+  /* ── THE SPUR ──────────────────────────────────────────────────────────────────────
+     A tapered square-sectioned spar from the stem head, riding above the water, tip a
+     little high. Heel buried in the bow so it grows out of structure, iron-shod at the
+     point. Its two cheek knees run back to the hull's own skin. */
+  if (S.spur) {
+    const p0 = surfacePoint(S, H, 0.002, 1.0);
+    const heel = new THREE.Vector3(p0[0] + B * 0.20, p0[1] * 0.62, 0);
+    const tip = new THREE.Vector3(p0[0] - S.spur, p0[1] * 0.62 + S.spur * 0.10, 0);
+    const dir = tip.clone().sub(heel).normalize();
+    const slen = heel.distanceTo(tip);
+    const sg = new THREE.CylinderGeometry(B * 0.020, B * 0.042, slen, 4, 1);
+    const spar = new THREE.Mesh(sg, timber);
+    spar.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    spar.rotation.z += 0; spar.rotateY(Math.PI / 4);   // square section, flats up
+    spar.position.copy(heel).addScaledVector(dir, slen / 2);
+    group.add(tag(spar, 'spur'));
+    const shoe = new THREE.Mesh(new THREE.ConeGeometry(B * 0.018, B * 0.10, 4), mats.iron);
+    shoe.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    shoe.position.copy(tip).addScaledVector(dir, B * 0.04);
+    group.add(tag(shoe, 'spur', 'Spur shoe'));
+    for (const sgn of [-1, 1]) {
+      const pk = surfacePoint(S, H, 0.030, 0.90);
+      const a = new THREE.Vector3(pk[0], pk[1], sgn * pk[2]);
+      const b = heel.clone().addScaledVector(dir, slen * 0.30);
+      group.add(tag(beamAB(a, b, B * 0.026, B * 0.030, timber), 'spur', 'Cheek knee'));
+    }
+  }
+
+  /* ── THE APOSTIS, WITH ITS BENCHES AND THE CORSIA ──────────────────────────────────
+     The outboard beam the tholes stand on (drawn at exactly the height and offset the
+     oars in buildOars pivot at — same fields, same law, so they cannot disagree), the
+     crossbeams that carry it, a bench at every station, and the raised central gangway. */
+  if (AP) {
+    const xF = (AP.from - 0.5) * L, xT = (AP.to - 0.5) * L;
+    const inter = S.interscalmium || 0.98;
+    const perBank = Array.isArray(S.oarsPerBank) ? S.oarsPerBank[0] : (S.oarsPerBank || 24);
+    for (const sgn of [-1, 1]) {
+      const rail = new THREE.Mesh(
+        new THREE.BoxGeometry(xT - xF, B * 0.040, B * 0.034), timber);
+      rail.position.set((xF + xT) / 2, apY, sgn * apZ);
+      group.add(tag(rail, 'apostis'));
+      /* crossbeams at the oar stations — the same interscalmium arithmetic as buildOars */
+      const span = (perBank - 1) * inter / L;
+      const uc = (AP.from + AP.to) / 2;
+      for (let i = 0; i < perBank; i++) {
+        const u = uc - span / 2 + (i / (perBank - 1)) * span;
+        const pd = surfacePoint(S, H, u, 1.0);
+        const a = new THREE.Vector3(pd[0], apY - B * 0.012, sgn * (Math.abs(pd[2]) - B * 0.05));
+        const b = new THREE.Vector3(pd[0], apY - B * 0.012, sgn * (apZ + B * 0.017));
+        group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'apostis', 'Crossbeam'));
+        /* the bench: gangway to frame, outer end trailing aft — the rower faces the stern */
+        const bLen = apZ - B * 0.088;
+        const bench = new THREE.Mesh(new THREE.BoxGeometry(B * 0.055, B * 0.014, bLen), pale);
+        bench.position.set(pd[0], deckY + B * 0.073, sgn * (B * 0.088 + bLen / 2));
+        bench.rotation.y = sgn * -0.17;
+        group.add(tag(bench, 'bench'));
+      }
+    }
+    const corsia = new THREE.Mesh(
+      new THREE.BoxGeometry(xT - xF, B * 0.086, B * 0.17), timber);
+    corsia.position.set((xF + xT) / 2, deckY + B * 0.043, 0);
+    group.add(tag(corsia, 'apostis', 'Corsia',
+      'The raised gangway down the centreline, the only way fore and aft on a deck that '
+      + 'is otherwise benches. The boatswain walks it; so does everyone going forward to fight.'));
+  }
+
+  /* ── THE ARRUMBADA, AND THE GUNS THAT FACE FORWARD ─────────────────────────────────
+     The platform spans the rowing frame's full width over the spur's heel. The courser
+     sits on the centreline; the flankers beside it. Aimed by aiming the ship. */
+  if (S.bowGuns) {
+    const u0 = 0.030, u1 = AP ? AP.from : 0.17;
+    const pA0 = surfacePoint(S, H, u0, 1.0), pA1 = surfacePoint(S, H, u1, 1.0);
+    const topY = Math.max(pA0[1], pA1[1]) + B * 0.023;
+    const width = 2 * apZ - B * 0.038;
+    const plat = new THREE.Mesh(
+      new THREE.BoxGeometry(pA1[0] - pA0[0], B * 0.019, width), timber);
+    plat.position.set((pA0[0] + pA1[0]) / 2, topY, 0);
+    group.add(tag(plat, 'arrumbada'));
+    /* breastwork across the front — the boarding party crouches behind it */
+    const breast = new THREE.Mesh(
+      new THREE.BoxGeometry(B * 0.016, B * 0.082, width), timber);
+    breast.position.set(pA0[0] + B * 0.008, topY + B * 0.048, 0);
+    group.add(tag(breast, 'arrumbada', 'Breastwork'));
+    /* the platform's edge beams run aft to the apostis rails — tied into the frame */
+    if (AP) {
+      const xF = (AP.from - 0.5) * L;
+      for (const sgn of [-1, 1]) {
+        const a = new THREE.Vector3(pA0[0] + B * 0.06, topY - B * 0.012, sgn * (width / 2 - B * 0.02));
+        const b = new THREE.Vector3(xF + B * 0.02, apY, sgn * apZ);
+        group.add(tag(beamAB(a, b, B * 0.022, B * 0.022, timber), 'arrumbada', 'Edge beam'));
+      }
+    }
+    /* the battery: centreline courser, then flankers in pairs, every muzzle forward */
+    const gmat = mats.iron;
+    const mkGun = (len, r, z, yaw) => {
+      const g = new THREE.Group();
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 14), gmat);
+      bar.rotation.z = Math.PI / 2;                    // +Y to −X: muzzle toward the bow
+      g.add(bar);
+      const carriage = new THREE.Mesh(
+        new THREE.BoxGeometry(len * 0.48, r * 2.4, r * 3.2), timber);
+      carriage.position.set(len * 0.18, -r * 2.0, 0);
+      g.add(carriage);
+      g.position.set(pA0[0] + len / 2 - B * 0.19, topY + r * 3.0, z);
+      g.rotation.y = yaw;
+      return g;
+    };
+    group.add(tag(mkGun(B * 0.65, B * 0.028, 0, 0), 'gun', 'Courser',
+      'The centreline heavy gun — a full cannon throwing a 50-pound ball. It is laid by '
+      + 'steering the galley, and fired once, at fifty metres or less, as the spur came on.'));
+    const flankers = Math.max(0, (S.bowGuns | 0) - 1);
+    for (let j = 0; j < flankers; j++) {
+      const side = j % 2 ? -1 : 1, rank = Math.floor(j / 2);
+      const z = side * (B * 0.115 + rank * B * 0.105);
+      group.add(tag(mkGun(B * 0.42, B * 0.017, z, side * 0.05), 'gun', 'Flanking piece'));
+    }
+  }
+
+  /* ── THE TENT OVER THE POOP ────────────────────────────────────────────────────────
+     A ridge of canvas on a pole, feet on the deck edge at every station — it follows the
+     sheer and the narrowing quarter, so it cannot stand off the hull. */
+  if (S.sternCanopy) {
+    const C = S.sternCanopy, N = 10;
+    const ridgeH = B * 0.20;
+    const pos = [], idx = [];
+    const ridge = [];
+    for (let k = 0; k <= N; k++) {
+      const u = C.from + (C.to - C.from) * k / N;
+      const pd = surfacePoint(S, H, u, 1.0);
+      const zE = Math.abs(pd[2]) - B * 0.006;
+      const yR = pd[1] + ridgeH;
+      ridge.push(new THREE.Vector3(pd[0], yR, 0));
+      pos.push(pd[0], pd[1], zE, pd[0], yR, 0, pd[0], pd[1], -zE);
+    }
+    for (let k = 0; k < N; k++) {
+      const a = k * 3, b = a + 3;
+      idx.push(a, b, a + 1, a + 1, b, b + 1, a + 1, b + 1, a + 2, a + 2, b + 1, b + 2);
+    }
+    const cg = new THREE.BufferGeometry();
+    cg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    cg.setIndex(idx); cg.computeVertexNormals();
+    group.add(tag(new THREE.Mesh(cg, mats.canvas), 'canopy'));
+    group.add(tag(beamAB(ridge[0], ridge[N], B * 0.016, B * 0.016, timber),
+                  'canopy', 'Ridgepole'));
+    for (const k of [0, N]) {
+      const u = C.from + (C.to - C.from) * k / N;
+      const pd = surfacePoint(S, H, u, 1.0);
+      const foot = new THREE.Vector3(pd[0], pd[1], 0);
+      group.add(tag(beamAB(foot, ridge[k], B * 0.014, B * 0.014, timber),
+                    'canopy', 'Tent post'));
+    }
+  }
 }
 
 
@@ -6933,6 +7177,7 @@ function buildShip(S, opts) {
   if (FINE) buildAnchor(S, group, mats);
   if (FINE && S.netDefence) buildNetDefence(S, group);
   if (FINE) buildOars(S, group, mats.woodPale);
+  if (FINE) buildGalleyWorks(S, group, mats);
   if (FINE) buildPaddles(S, group, mats);
   if (FINE) buildScrews(S, group);
   /* the transom is now continuous with the hull because the hull FLARES to meet it — see the

@@ -5045,3 +5045,76 @@ Housekeeping: /build/staging PNGs, tiles and ratchet logs gitignored as regenera
    Preussen-class too) or the Lepanto/Myeongnyang hulls (carried 1) — the campaign arc is
    closed until those exist.
 2. Small items (carried 2) only if a round is otherwise light.
+
+## Round 86 — 2026-08-11 — The fleet's 30th hull: the war galley, and the audit learns to see NaN
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so this round took the
+survey's carried item 1 — the hulls that block the Lepanto and Myeongnyang campaigns. One
+vessel done properly: the 16th-century Mediterranean war galley (`galley`, galia sottile,
+year 1571), the type that fought Lepanto on both sides.**
+
+**The record.** Hull ~42 m on deck / 5.2 m beam / 1.7 m draught / 1.1 m freeboard; 24 benches
+a side rowed a scaloccio (one 11.5 m oar per bench, bench spacing 1.2 m); five guns at the
+bow, all firing forward, a 50-pdr courser on the centreline; two lateen masts with ATTESTED
+heights (16.0 / 10.5 m — `heightM`, the first lateen record in that form); dash 7.2 kn
+burst / cruise 3.5 kn floor per Guilmartin (Gunpowder and Galleys, rev. 2003; Morrison ed.,
+The Age of the Galley). The polar's curve was first drafted too fast (6.9 kn) and the audit
+convicted it twice on arrival — burst anchor off the 1.55× ceiling, beat angles not the
+lateen family's 72/84 — both fixed in data: curve max 4.6, so 1.55 × 4.6 ≈ her 7.2 dash,
+the trireme's own calibration. The plate is the Barcelona replica of the Real (Commons,
+CC BY-SA 4.0), captioned as the flagship she is, not the ordinaria the model is.
+
+**The geometry — four new classes in hull.js, all record-driven, none galley-hardcoded:**
+`spur` (the boarding beak: tapered square spar from the stem, iron-shod, two cheek knees
+running to the hull's own skin), `apostis` (the rowing frame: outboard rails, a crossbeam
+and a bench at every oar station, the corsia down the centreline), `bowGuns` + arrumbada
+(platform spanning the frame's width, breastwork, courser + flankers, every muzzle forward),
+`sternCanopy` (a ridge tent whose canvas feet sit on the deck edge at every station).
+buildOars: interscalmium is now a RECORD field (default stays Vitruvius's 0.98), and where a
+record carries an apostis the tholes stand ON it — measured after build: all 48 pivots at
+|z| = 3.290 m, the frame rail's own 3.294, 0.85 m outboard of the 2.44 m deck edge; spur tip
+5.9 m beyond the foremost hull point; the rest angle is geometry (atan of thole height over
+oar outboard reach), not the trireme's constant.
+
+**The class bug the galley exposed, and the rule that now guards it.** The first capture was
+the black-canvas-with-working-panels failure: the lateen yard's length was
+`L * (mk.height / maxMastShare)` — a formula that assumes the Steel-share form of the record
+— so the first `heightM` lateen built NaN into both masts, both yards and both sails, the
+ship's Box3 went NaN, and the camera fit died of it. Fixed as the class: yard share is now
+`lower / mainLower` (identical arithmetic for every share-based record, correct for metres;
+the corbis "tallest mast" test was the same assumption one line deeper). And the AUDIT now
+walks every vertex of every mesh on every hull — one non-finite float is a conviction naming
+the parts. Proven by injection: build/staging/inj-nan-mast.js deletes the galley main's
+heightM, the rule convicts "Mast, Lateen yard, Sail, Shrouds". Side effect of the fix: a
+one-ulp hairline on the dhow's yard (h1/h2 vs (h1·s)/(h2·s), the r85 different-compiled-path
+class), classified and accepted.
+
+**Verification.** Audit 30 hulls / 0 problems (was 29). Full 51-frame ratchet: globe, sea,
+action, board frames all 0.000–0.038 (untouched, as they should be — the galley has no
+voyage and no battle yet). 24 shipwright frames moved in two classes, every one looked at or
+spot-verified and accepted with reasons: ~0.24% on berths BEFORE the galley (the fleet panel
+below Carrack, the film strip, the N-OF-30 counter), 17–37% on berths AFTER her (the dry
+dock is one line; a 30th berth at 1571 moves every later ship one berth down, the camera
+with her — the ships render identically, the sea and neighbours shift; verified on
+shipwright-furled: the 74 whole and correct). ship-galley is the 51st baseline, looked at:
+she reads as a galley — black low hull, the frame wider than the planking, the oar fan at
+9° to the water, spur and forward battery, tent aft, two lateen sails outreaching their
+masts.
+
+**Carried, restated exactly (none closed silently):**
+1. Lepanto is now HALF unblocked: the galley exists; the galleass does not (six at Lepanto,
+   and the battle's opening is theirs). Myeongnyang still needs panokseon and sekibune.
+   Vessel work before campaign work (r80 carried).
+2. r78 capture-gate hardening if the font flap strikes; r75 QM2, r77 Azzam, r79 jeer small
+   items only if a round is light.
+3. r85 carried 3 stands: the polder palette wants a photographic A/B, and a third coast will
+   test SHORE_PALS' reach (Lepanto's Ionian limestone likely reuses phrygana).
+4. New: the galley has no voyage and no Sea presence — she is Shipwright-only until a
+   campaign or passage places her. The Shipwright camera composes her at frame scale only;
+   a closer survey pass (survey-hulls.js raycast rings) has not yet run against her.
+
+### Next, in order
+1. The galleass (Lepanto's other hull), reusing this round's spur/apostis/bowGuns classes —
+   she adds the gun deck ABOVE the rowers that makes her the type that opened the battle.
+   Or the panokseon, if Myeongnyang is preferred.
+2. Small items (carried 2) only if a round is otherwise light.

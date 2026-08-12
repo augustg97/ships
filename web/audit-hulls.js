@@ -53,6 +53,33 @@
     const tagOf = o => { for (let e = o; e; e = e.parent)
                            if (e.userData && e.userData.part) return e.userData.part;
                          return null; };
+
+    /* ── NOTHING ABOARD IS NaN ──────────────────────────────────────────────────────────
+       Round 86: the first lateen mast with an ATTESTED height (`heightM`, the galley) hit
+       a yard-share formula that assumed the Steel-share form of the record; both masts,
+       both yards and both sails built with NaN in every position, the ship's bounding box
+       went NaN with them, the camera fit died of it, and the Shipwright showed a black
+       canvas behind working panels. The ratchet cannot convict a NEW frame (no baseline),
+       and no proportion rule fires on a value that is not a number — so the audit walks
+       every vertex of every mesh. One non-finite float anywhere is a conviction. */
+    {
+      const bad = {};
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry || !o.geometry.attributes.position) return;
+        const a = o.geometry.attributes.position.array;
+        for (let i = 0; i < a.length; i++)
+          if (!Number.isFinite(a[i])) {
+            const p = tagOf(o);
+            bad[(p && p.name) || o.geometry.type] = true;
+            return;
+          }
+      });
+      const names = Object.keys(bad);
+      if (names.length)
+        say(v.id, 'geometry with non-finite vertices',
+            `NaN positions in: ${names.join(', ')} — the black-canvas class`);
+    }
+
     const part = {};
     g.traverse(o => {
       if (!o.isMesh) return;
