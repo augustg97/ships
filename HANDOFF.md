@@ -5118,3 +5118,9 @@ masts.
    she adds the gun deck ABOVE the rowers that makes her the type that opened the battle.
    Or the panokseon, if Myeongnyang is preferred.
 2. Small items (carried 2) only if a round is otherwise light.
+
+**Post-accept re-run: KILLED BY THE CLOCK, not by a frame.** Run 1 was fully classified and
+every accept is committed; the confirming re-run was still capturing when the round's 80-min
+watchdog window closed. Next round's first act: run the ratchet check — it should report
+51/51 green, and if any shipwright frame moved again the berth-shift classification above is
+the first suspect, not the galley's geometry.
