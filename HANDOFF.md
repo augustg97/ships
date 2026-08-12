@@ -4872,3 +4872,101 @@ verified after the final push — verify 1786497990+ is live.**
 **Carried:** r82's list unchanged (Lepanto/Myeongnyang hulls; small items). New: the Action's
 default camera bearing for salamis (cb=60 predates the chirality fix) could be re-authored to
 face the strait axis; Armada shore patch (Calais/Gravelines coast) is now one data block away.
+
+## Round 84 — 2026-08-11 — The audit's witnesses learn to speak, and the decode they convict
+
+**First act, as r83 ordered: its verification completed.** Live stamp 1786497990 confirmed
+before any edit. Audit 29 hulls / 0 problems. Full 49-frame ratchet: 47 within tolerance
+(action-salamis 0.000% against its r83 baseline, globe-default at its standing 0.012%, no
+font flap), and exactly the two frames r83 pre-flagged moved — `board-salamis` (0.298%: the
+day-0 tokens and their wind streaks shifted the ~1 km of the anchor re-lay, everything else
+pixel-identical) and `action` (35.6%: the chirality mirror, plus a fault the number alone
+did not show — see below). Both LOOKED at, classified, accepted with reasons in FRAME-LOG.
+
+**The round's find: battle.js decoded the shore PNG 255x too large, and the audit that
+claimed to check it had never once run the check.** The CPU decode at btShoreLoad copied the
+shader's `(t.r * 65280 + t.g * 255) / 65535` verbatim — correct for GLSL's NORMALIZED
+channels (t.r = R/255), 255x off for getImageData's raw bytes. Every point on Earth read as
++2.8 million metres of land: the grounding rule could never find water to pull a station
+back to (it silently left every drawn station where it was), and the live helm refused every
+step — at Salamis live, 56 ships nailed in place since r83 shipped. No picture showed it:
+frozen frames snap stations, and the RENDER was right all along (the GPU decodes normalized
+channels). The audit's shore witnesses would have convicted instantly — but the r83 rule ran
+only "with the grid loaded", and in a standard audit run (ship view, Action closed) the grid
+never is. The probes had never fired. A conditional check that cannot run in the standard
+pass is a green light wired to nothing.
+
+**Fixed as classes, both layers:**
+1. battle.js:369 decodes bytes as `(R*256 + G) / 65535 * 20000 - 11000`, with the trap
+   written above the line.
+2. The audit is ASYNC now and drives the app's own loader (`SHIPS_BT.btShoreLoad`, exported
+   this round; btShoreLoad gained a scene guard so it can run headless, grid-only) — the
+   witnesses testify in EVERY audit on every battle that carries a shore. New rule beside
+   them: 'a campaign day anchored on dry land' checks every campaign day's anchor against
+   the loaded grid. THREE INJECTIONS prove the rules alive: a flipped witness convicts
+   (Aigaleo "must be water" at 274.6 m), a dry anchor convicts (day 8 at the pre-wiring
+   point reads 5.7 m), and the round's own bug re-introduced verbatim convicts loudly
+   (water reading 2,791,957 m on both battles).
+
+**The default Action camera stopped orbiting the space between fleets.** The r83 chirality
+fix left the interim `action` capture staging pure empty sea: the camera orbited the
+MIDPOINT of the two fleets, and at the Armada sighting's 7 km range both fleets stood 75°
+off-axis — invisible even in the OLD left-handed baseline, which clipped one fleet at the
+frame's left edge. The camera now orbits fleet 0's own center ("off the title fleet's
+flank", as its comment always claimed): the default Action opens on the crescent, 22
+carracks under sail on a force-6 sea. At Gravelines' 110 m the change is invisible; at
+Salamis's 130 m it moved the accepted action-salamis frame 65 m (re-captured, LOOKED at,
+accepted — same composition, and the now-real grounding rule moved NO station, which is
+r83's anchor re-lay verified in the app itself).
+
+**The Armada has its coast: the r83 shore class extended to Gravelines.** The bake is a
+committed tool now — `Research/bake-shore.py` (the Salamis bake was an uncommitted one-off)
+— and it wrote `web/data/terrain/gravelines.png`: Calais to Dunkirk, lon 1.55–2.55, lat
+50.85–51.15, 2335x1111 at ~30 m/px, terrarium z12 tiles x2065-2077 y1368-1373, provenance
+in ASSETS.json. Water floored to -8 m; land components never reaching 2 m drowned as shoal
+noise (8368 cells, mostly the tidal Flemish banks). Witness probes: Cap Blanc-Nez 112.8 m,
+Calais town 8.2 m, Gravelines town 9.1 m against Calais Roads -12.9 m and two open-water
+points. And the class fault repeated ON SCHEDULE: day 8's anchor stood 6.0 m up the sand
+east of Calais and day 7 put the English fleet on the beach at 2.1 m — both caught by
+probing the staged patch BEFORE wiring, both re-laid into validated water (day 7 →
+(1.87, 51.00), Calais Roads proper; day 8 → (1.87, 50.99)), both fleets probed wet on
+every in-patch day, and the new audit rule now guards the whole class for every future
+campaign. Days 0–6 and 10–12 stand outside the patch: open sea, the shaders discard, the
+default `action` frame (day 0 off the Lizard) is untouched by construction.
+
+**Live verification, not just frozen:** at Salamis day 5 live, the ships sail to their
+stations (50–64 m of way in the approach), arrive (max distance to station 0 m), hold, and
+all 56 float at -8 m — the picture the broken decode made impossible. The shore grid loads
+live ~6 s after open; ships stage first and the grounding re-check snaps under frozen only.
+
+**Rule 0, written on the new `action` baseline:** it reads as a rendered world — a crescent
+of carracks under full sail riding a whitecapped force-6 sea into haze. Three facts a viewer
+can read off it: the date and wind, 30 July 1588, WSW force 6; the Armada holds the weather
+gauge with the English 7.0 km off — the card's range, and the reason the sea behind the
+crescent is empty; the formation itself, the double-arced crescent the record says formed
+off the Lizard that morning.
+
+**Deploy: stamp 1786497990 → 1786500656.**
+
+**Carried, restated exactly (none closed silently):**
+1. The BT_LAND palette is written for the Attic coast — phrygana scrub and limestone — and
+   now dresses the Gravelines chalk, dunes and polder in Greek September. Needs a
+   data-keyed palette (a `veg`/climate hint in the shore block, or latitude-derived), not
+   a second hardcoded coast.
+2. No frame watches the Gravelines coast yet: an `action-gravelines` frame (day 9, rng 110,
+   the nine-hours-at-musket-range day, coast in the haze south of the fleets) needs a
+   composed camera — candidates read as images, the r83 method.
+3. Observed in the live probe, unexplained: `#v=action&bt=salamis&day=5` UNFROZEN lands on
+   day 0 (frozen lands day 5, which is what the baseline guards). May be deliberate
+   autoplay-from-0; find where the day param dies live before calling it a bug.
+4. Lepanto and Myeongnyang stay blocked on hulls (16th-c galley/galleass; panokseon and
+   sekibune) — vessel work before campaign work (r80 carried).
+5. r78 capture-gate hardening if the font flap strikes; r75 QM2, r77 Azzam, r79 jeer small
+   items only if a round is light.
+
+### Next, in order
+1. The Gravelines palette + frame (carried 1+2) — the coast exists, make it native and
+   watched.
+2. The live day-param question (carried 3) — cheap to settle, do it first if short.
+3. Vessel queue per r51 (ship-of-the-line detail, B10 stunsails) or Lepanto/Myeongnyang
+   hulls (carried 4).

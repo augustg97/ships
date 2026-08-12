@@ -25,7 +25,9 @@
  * Add a rule whenever a fault gets past the ratchet. That is the whole discipline: the picture
  * ratchet defends against regression, this defends against being wrong in the first place.
  */
-(function auditHulls() {
+(async function auditHulls() {
+  /* async since round 84: the shore rules drive the app's own patch loader and must await
+     it. Both runners eval this and get the promise; playwright resolves promises itself. */
   /* ⚠ NOT window.APP. Classic scripts share one global SCOPE, but a top-level `const` creates
      a lexical binding rather than a property of window — so `window.APP` is undefined while
      bare `APP` resolves. This project has been caught by that twice; the audit was caught by it
@@ -2266,24 +2268,57 @@
           if (!isFinite(p.lon) || !isFinite(p.lat) || typeof p.land !== 'boolean'
               || p.lon <= sh.lon0 || p.lon >= sh.lon1 || p.lat <= sh.lat0 || p.lat >= sh.lat1)
             say(bid, 'a probe off its own patch', `"${p.n}"`);
-        if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function')
-          say(bid, 'a shore the Action cannot sample', 'SHIPS_BT.btShoreElev missing');
-        /* with the grid loaded (the Action has opened this battle), the probes testify */
-        if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.BT && SHIPS_BT.BT.shoreGrid
-            && SHIPS_BT.BT.shoreFor === b.id) {
-          for (const p of pr) {
-            const el = SHIPS_BT.btShoreElev(p.lon, p.lat);
-            if (p.land !== (el > 0))
-              say(bid, 'a shore that contradicts its witnesses',
-                  `"${p.n}" (${p.lon}, ${p.lat}) reads ${el.toFixed(1)} m but must be ${p.land ? 'land' : 'water'} — ` +
-                  'mirrored, misplaced or misdecoded patch');
+        if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function'
+            || typeof SHIPS_BT.btShoreLoad !== 'function')
+          say(bid, 'a shore the Action cannot sample',
+              'SHIPS_BT.btShoreElev / btShoreLoad missing');
+        /* ── THE WITNESSES TESTIFY, ALWAYS (round 84). ─────────────────────────────────
+           The round-83 version ran the probes only "with the grid loaded", and in a
+           standard audit run the Action has no battle open — so the probes had never
+           once fired, and the audit said pass over a CPU grid whose decode was 255x off
+           (the GLSL normalized-channel formula applied to raw bytes: every point on
+           Earth read as +2.8 million metres of land, the grounding rule inert, the live
+           helm refusing every step). A conditional check that cannot run in the standard
+           pass is a green light wired to nothing. The audit now drives the app's own
+           loader — the same fetch, the same decode, the same grid the grounding reads —
+           and the witnesses speak in every audit, on every battle that carries a shore. */
+        else {
+          const B = SHIPS_BT.BT;
+          if (!B.shoreGrid || B.shoreFor !== b.id) {
+            try { SHIPS_BT.btShoreLoad(b); } catch (e) { /* judged by the grid below */ }
+            for (let w = 0; w < 200 && !B.shoreReady; w++)
+              await new Promise(r => setTimeout(r, 50));
           }
-          /* and every staged ship floats: the grounding rule is a fact, not an intention */
-          for (const s of SHIPS_BT.BT.ships) {
-            const el = SHIPS_BT.btElevLocal(s.x, s.z);
-            if (el > 0)
-              say(bid, 'a ship on dry land',
-                  `side ${s.side} at local (${s.x.toFixed(0)}, ${s.z.toFixed(0)}) sits on ${el.toFixed(1)} m of ground`);
+          if (!B.shoreGrid || B.shoreFor !== b.id)
+            say(bid, 'a shore that did not load',
+                `${sh.src} — no grid after btShoreLoad (staging the strait on open ocean)`);
+          else {
+            for (const p of pr) {
+              const el = SHIPS_BT.btShoreElev(p.lon, p.lat);
+              if (p.land !== (el > 0))
+                say(bid, 'a shore that contradicts its witnesses',
+                    `"${p.n}" (${p.lon}, ${p.lat}) reads ${el.toFixed(1)} m but must be ${p.land ? 'land' : 'water'} — ` +
+                    'mirrored, misplaced or misdecoded patch');
+            }
+            /* every campaign day must anchor in validated water: Salamis day 5 was 44 m
+               up a hillside before round 83, and the Gravelines wiring repeated the class
+               on day 8 within the hour. Outside the patch btShoreElev is -30, open sea. */
+            (b.campaign || []).forEach((d, i) => {
+              const el = SHIPS_BT.btShoreElev(d.lon, d.lat);
+              if (el > -2.0)
+                say(bid, 'a campaign day anchored on dry land',
+                    `day ${i} ("${d.d}") at (${d.lon}, ${d.lat}) reads ${el.toFixed(1)} m`);
+            });
+          }
+          /* and every staged ship floats — only when the Action itself has THIS battle
+             open, so a grid the audit loaded is never paired with another battle's ships */
+          if (B.spec && B.spec.id === b.id && B.shoreFor === b.id && B.shoreGrid) {
+            for (const s of B.ships) {
+              const el = SHIPS_BT.btElevLocal(s.x, s.z);
+              if (el > 0)
+                say(bid, 'a ship on dry land',
+                    `side ${s.side} at local (${s.x.toFixed(0)}, ${s.z.toFixed(0)}) sits on ${el.toFixed(1)} m of ground`);
+            }
           }
         }
         if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.btFrame

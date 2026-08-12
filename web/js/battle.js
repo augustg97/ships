@@ -365,10 +365,19 @@ function btShoreLoad(battle) {
       cx.drawImage(img, 0, 0);
       const px = cx.getImageData(0, 0, cv.width, cv.height).data;
       const G = new Float32Array(cv.width * cv.height);
+      /* ⚠ px holds BYTES, 0-255. The shader's decode `(t.r * 65280 + t.g * 255) / 65535`
+         is written for GLSL's NORMALIZED channels (t.r = R/255, so t.r * 65280 = R * 256);
+         copied here verbatim it read 255x too large — every point on Earth was +2.8
+         million metres of land, the grounding rule could never find water to pull a ship
+         back to, and the live helm refused every step. The byte form of the same decode: */
       for (let i = 0; i < G.length; i++)
-        G[i] = (px[i * 4] * 65280 + px[i * 4 + 1] * 255) / 65535 * 20000 - 11000;
+        G[i] = (px[i * 4] * 256 + px[i * 4 + 1]) / 65535 * 20000 - 11000;
       BT.shoreGrid = G; BT.shoreW = cv.width; BT.shoreH = cv.height;
       BT.shoreB = { lon0: sh.lon0, lat0: sh.lat0, lon1: sh.lon1, lat1: sh.lat1 };
+      /* the GPU half needs the Action's scene; the audit drives this loader headless
+         (ship view, no scene) to make the shore witnesses testify on every run, and it
+         only needs the grid above. btOpen loads again with the scene up. */
+      if (!BT.scene) { BT.shoreReady = true; return; }
       if (!BT.land) {
         BT.land = new THREE.Mesh(radialDisc(6, 42000, 240, 288, 6371000.0),
           new THREE.ShaderMaterial({
@@ -507,8 +516,13 @@ function btFrame(now, dt) {
 
   btStepSmoke(dt, windTo);
 
-  /* the camera floats above the water, off the Armada's flank */
-  const cx = BT.sep.x * 0.5, cz = BT.sep.z * 0.5;
+  /* The camera floats above the water, off the title fleet's flank — fleet 0's own
+     center, the local origin. It orbited the MIDPOINT of the two fleets until round 84,
+     which was indistinguishable at Gravelines' 110 m and staged pure empty sea at the
+     Armada sighting's 7 km: both fleets 3.5 km away at right angles to a view centred
+     on the water between them. A fleet is the subject; the range to the other one is
+     the card's number and the background's business. */
+  const cx = 0, cz = 0;
   BT.cam.position.set(cx + BT.dist * Math.cos(BT.lat) * Math.sin(BT.lon),
                       BT.eye + BT.dist * Math.sin(BT.lat) + Math.sin(BT.t * 0.5) * 1.2,
                       cz + BT.dist * Math.cos(BT.lat) * Math.cos(BT.lon));
@@ -570,4 +584,4 @@ function btStepSmoke(dt, windTo) {
 }
 
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, btShoreLoad, BT };

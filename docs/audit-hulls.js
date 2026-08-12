@@ -1,4 +1,4 @@
-(function auditHulls() {
+(async function auditHulls() {
 const list = (typeof APP !== 'undefined' && (APP.vessels.vessels || APP.vessels)) || [];
 const problems = [];
 const rows = [];
@@ -1553,10 +1553,21 @@ for (const p of pr)
 if (!isFinite(p.lon) || !isFinite(p.lat) || typeof p.land !== 'boolean'
 || p.lon <= sh.lon0 || p.lon >= sh.lon1 || p.lat <= sh.lat0 || p.lat >= sh.lat1)
 say(bid, 'a probe off its own patch', `"${p.n}"`);
-if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function')
-say(bid, 'a shore the Action cannot sample', 'SHIPS_BT.btShoreElev missing');
-if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.BT && SHIPS_BT.BT.shoreGrid
-&& SHIPS_BT.BT.shoreFor === b.id) {
+if (typeof SHIPS_BT === 'undefined' || typeof SHIPS_BT.btShoreElev !== 'function'
+|| typeof SHIPS_BT.btShoreLoad !== 'function')
+say(bid, 'a shore the Action cannot sample',
+'SHIPS_BT.btShoreElev / btShoreLoad missing');
+else {
+const B = SHIPS_BT.BT;
+if (!B.shoreGrid || B.shoreFor !== b.id) {
+try { SHIPS_BT.btShoreLoad(b); } catch (e) {  }
+for (let w = 0; w < 200 && !B.shoreReady; w++)
+await new Promise(r => setTimeout(r, 50));
+}
+if (!B.shoreGrid || B.shoreFor !== b.id)
+say(bid, 'a shore that did not load',
+`${sh.src} — no grid after btShoreLoad (staging the strait on open ocean)`);
+else {
 for (const p of pr) {
 const el = SHIPS_BT.btShoreElev(p.lon, p.lat);
 if (p.land !== (el > 0))
@@ -1564,11 +1575,20 @@ say(bid, 'a shore that contradicts its witnesses',
 `"${p.n}" (${p.lon}, ${p.lat}) reads ${el.toFixed(1)} m but must be ${p.land ? 'land' : 'water'} — ` +
 'mirrored, misplaced or misdecoded patch');
 }
-for (const s of SHIPS_BT.BT.ships) {
+(b.campaign || []).forEach((d, i) => {
+const el = SHIPS_BT.btShoreElev(d.lon, d.lat);
+if (el > -2.0)
+say(bid, 'a campaign day anchored on dry land',
+`day ${i} ("${d.d}") at (${d.lon}, ${d.lat}) reads ${el.toFixed(1)} m`);
+});
+}
+if (B.spec && B.spec.id === b.id && B.shoreFor === b.id && B.shoreGrid) {
+for (const s of B.ships) {
 const el = SHIPS_BT.btElevLocal(s.x, s.z);
 if (el > 0)
 say(bid, 'a ship on dry land',
 `side ${s.side} at local (${s.x.toFixed(0)}, ${s.z.toFixed(0)}) sits on ${el.toFixed(1)} m of ground`);
+}
 }
 }
 if (typeof SHIPS_BT !== 'undefined' && SHIPS_BT.btFrame

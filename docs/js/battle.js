@@ -222,9 +222,10 @@ cx.drawImage(img, 0, 0);
 const px = cx.getImageData(0, 0, cv.width, cv.height).data;
 const G = new Float32Array(cv.width * cv.height);
 for (let i = 0; i < G.length; i++)
-G[i] = (px[i * 4] * 65280 + px[i * 4 + 1] * 255) / 65535 * 20000 - 11000;
+G[i] = (px[i * 4] * 256 + px[i * 4 + 1]) / 65535 * 20000 - 11000;
 BT.shoreGrid = G; BT.shoreW = cv.width; BT.shoreH = cv.height;
 BT.shoreB = { lon0: sh.lon0, lat0: sh.lat0, lon1: sh.lon1, lat1: sh.lat1 };
+if (!BT.scene) { BT.shoreReady = true; return; }
 if (!BT.land) {
 BT.land = new THREE.Mesh(radialDisc(6, 42000, 240, 288, 6371000.0),
 new THREE.ShaderMaterial({
@@ -316,7 +317,7 @@ o.position.y = Math.sin(BT.t * 0.62 + s.phase) * 0.45 - 0.2;
 if (action && Math.random() < dt * 1.9) btPuff(s.x, s.z, s.hd, s.loa);
 });
 btStepSmoke(dt, windTo);
-const cx = BT.sep.x * 0.5, cz = BT.sep.z * 0.5;
+const cx = 0, cz = 0;
 BT.cam.position.set(cx + BT.dist * Math.cos(BT.lat) * Math.sin(BT.lon),
 BT.eye + BT.dist * Math.sin(BT.lat) + Math.sin(BT.t * 0.5) * 1.2,
 cz + BT.dist * Math.cos(BT.lat) * Math.cos(BT.lon));
@@ -370,4 +371,4 @@ al.setX(i, Math.sin(Math.min(1, f * 3.2) * Math.PI * 0.5) * (1 - f));
 p.needsUpdate = true; sz.needsUpdate = true; al.needsUpdate = true;
 }
 addEventListener('resize', btResize);
-window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, BT };
+window.SHIPS_BT = { btOpen, btClose, btFrame, btGoDay, btYear, formStation, btShoreElev, btElevLocal, btShoreLoad, BT };

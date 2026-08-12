@@ -2213,3 +2213,22 @@ Round 82 is complete and live. Summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 27343 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 17:52:46  round starting
+The push is in; GitHub Pages still serves round 82's stamp (1786492825) — the deploy is seconds old and the handoff directs the next round to verify 1786497990 goes live. The 80-minute wrapper kills this round now, so here is the round's account.
+
+## Round 83 — the Salamis shores in the Action
+
+The queue (August's second list) has been closed since round 57, so this round took round 82's head item: the Action staged the Battle of Salamis on open ocean, and the battle *was* the strait. The strait is now there — a real 30 m/px DEM of the Saronic (Mapzen terrarium tiles, AWS Open Data, provenance and treatments recorded in ASSETS.json), carried as a `shore` block in the battle record so any battle can have a coast, staged as a camera-dense land mesh through new BT_LAND shaders at true scale with the Action's own fog.
+
+Putting a real coastline into that view exposed three faults older than the round, each fixed as a class:
+
+1. **The Action's frame was a mirror.** It mapped bearings as (x=east, z=north, y=up) — left-handed, so the whole view rendered geography reflected. Invisible with only fleets and wind; a real strait made it visible. The frame is now (x=west, z=north), the project's own convention, with every compass conversion flipped.
+2. **The campaign's fleet positions were on dry land.** Day 5 — the baseline frame — had the Greek line 44 m up a hillside; the coordinates were drawn for the 450 km board. All nine day anchors were re-laid in validated water, and the fronts tightened to 34 m per trireme (the old widths had no source; the sources describe a dense line).
+3. **CanvasTexture's default flipY drew the coast north-south mirrored** against the very data the grounding logic reads — ships pulled to real water stood on drawn land. One flag, plus a stated audit limit: CPU probes read the data, not the render.
+
+The ships now obey the world: a station on dry land pulls back to the water's edge, and the helm refuses a grounding step. The audit gained shore rules — named land *and* water witness probes (a mirrored patch passes any one-sided test), every-ship-afloat, and a source check that the helm keeps its grounding test.
+
+**Honest status:** the round ran out its 80-minute budget before the full protocol. The new frame was verified by eye and accepted with a logged reason, and everything is committed and pushed — but the full 49-frame ratchet and the audit did not run, and two frames are known-moved-but-unclassified (`action`, whose Armada arrangement the chirality fix rearranges, and `board-salamis`, whose tokens moved ~1 km). The handoff's closing section directs the next round to open with exactly that verification, and to confirm the live stamp.
+2026-08-11 18:28:31  round finished; HEAD is 32f2ca4 Round 83: the Salamis shores in the Action — final fixes (flipY N-S mirror, underwater discard at the patch edge, -2 m grounding threshold, despeckle), action-salamis accepted with reason. Ratchet INCOMPLETE: audit + full run + action/board-salamis classification are next round's first act.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 31452 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 18:38:32  round starting

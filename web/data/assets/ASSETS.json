@@ -535,6 +535,14 @@
       "license": "Public domain / CC0-equivalent per the Terrain Tiles on AWS attribution terms; underlying SRTM is US government public domain",
       "fetched": "2026-08-11",
       "treatment": "Mercator tiles mosaicked and resampled to an equirectangular grid; water cells (elev <= 0) floored to -8 m because the raster's nearshore bathymetry gap encodes harbour water as 0 m and a 0 m seabed breaks the rendered sea surface. The coastline - the 0-crossing - is the raster's own."
+    },
+    {
+      "path": "web/data/terrain/gravelines.png",
+      "what": "Elevation patch for the Calais-Gravelines-Dunkirk coast (lon 1.55-2.55, lat 50.85-51.15, 2335x1111, ~30 m/px), 16-bit metres in the app's own (elev+11000)/20000 R/G encoding",
+      "source": "Terrain Tiles on AWS (Mapzen 'terrarium' tiles, zoom 12, tiles x2065-2077 y1368-1373), an AWS Open Data set; land heights from SRTM/EU-DEM, offshore from ETOPO1",
+      "license": "Public domain / CC0-equivalent per the Terrain Tiles on AWS attribution terms; underlying SRTM is US government public domain",
+      "fetched": "2026-08-11",
+      "treatment": "Mercator tiles mosaicked and resampled to an equirectangular grid by Research/bake-shore.py; water cells (elev <= 0) floored to -8 m; land components never reaching 2 m drowned as shoal noise (8368 cells, mostly the tidal Flemish banks, which the sea surface owns). The coastline - the 0-crossing - is the raster's own."
     }
   ]
 }
