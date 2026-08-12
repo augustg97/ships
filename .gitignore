@@ -36,3 +36,4 @@ scratchpad/
 /build/staging/*.png
 /build/staging/tiles/
 /build/ratchet-*.log
+/build/staging/*.log

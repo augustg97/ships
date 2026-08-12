@@ -2229,9 +2229,25 @@
     for (const b of BATS) {
       if (!b.campaign) continue;
       const bid = 'battle-' + b.id;
-      if (!Array.isArray(b.fleets) || b.fleets.length !== 2)
+      if (!Array.isArray(b.fleets) || b.fleets.length < 2)
         say(bid, 'a campaign without its two fleets',
-            'the Action and the board both draw exactly two sides from battle.fleets');
+            'the Action and the board need the two principals in battle.fleets[0] and [1]');
+      else {
+        /* the first two blocks are the PRINCIPALS — the gauge line names FL[0]/FL[1] by
+           index — so neither may re-side itself; every block after them is an attachment
+           (Lepanto's galleasses) and must say which side it fights on, or both views
+           would guess from its index and stage it with the enemy */
+        b.fleets.slice(0, 2).forEach((F, i) => {
+          if (F.side !== undefined && F.side !== i)
+            say(bid, 'a principal fleet on the wrong side',
+                `fleets[${i}] ("${F.name}") declares side ${F.side} — the gauge names FL[0]/FL[1] by index`);
+        });
+        b.fleets.slice(2).forEach(F => {
+          if (F.side !== 0 && F.side !== 1)
+            say(bid, 'an attached fleet with no side',
+                `"${F.name}": a third fleet block must declare side 0 or 1 explicitly`);
+        });
+      }
       if (typeof b.powder !== 'boolean')
         say(bid, 'a campaign without an armament record',
             'powder must be true or false — the gunfire path asks it, and absence is not an answer');
@@ -2271,6 +2287,9 @@
         if (!day.d || !day.t) say(bid, 'a campaign day with no record', `day ${i}`);
         if (day.a !== undefined && day.a !== true)
           say(bid, 'an action flag that is not a flag', `day ${i} ("${day.d}") a=${day.a}`);
+        if (day.hd !== undefined && !(day.hd >= 0 && day.hd <= 360))
+          say(bid, 'a day with an impossible facing',
+              `day ${i} ("${day.d}") hd=${day.hd} — an authored fleet heading is a compass bearing`);
       });
 
       /* ── A SHORE IS A CHECKED FACT (round 83). ─────────────────────────────────────────

@@ -2275,3 +2275,29 @@ One gap, recorded honestly in HANDOFF: the post-accept confirming re-run was sti
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 41890 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-11 21:47:24  round starting
+Round 87 is complete, pushed, and live — finished at 23:03, four minutes ahead of the round's watchdog.
+
+**What shipped: the galleass, the fleet's 31st hull, and Lepanto is now unblocked on hulls.**
+
+- **First act (r86's debt):** the full ratchet ran clean — 51/51 within tolerance — confirming last round's berth-shift accepts.
+- **The vessel:** a merchant great galley converted to a floating battery — 47 m, 26 benches a side, about thirty guns, three lateen masts from attested heights. The polar is anchored on a *passage* figure (4.0 kn, Pryor's merchant great-galley day's runs) because no galleass burst figure exists; the 2.5 kn oar floor is labelled derived, with the towing at Lepanto as its attestation. The audit passed her 31/0 on the first run. Plate: Grevenbroeck's drawing, public domain, provenance recorded.
+- **The geometry, as classes:** a new record-driven `gunDeck {from, to, height, gunsPerSide}` — the deck across the rowing frame on stanchions standing on the apostis rails, a screen at the edges, eight pieces a side firing over the oars — and the bow platform now rides at gun-deck height when one exists, on posts to the deck. Nothing galleass-hardcoded. Verified visually from two bearings.
+
+**The event worth knowing about: a second writer shared the tree mid-round.** A resumed desktop Claude session holding round-70-era context woke at 22:32, made one genuinely good edit (the Shipwright's 'Loaded' caption no longer calls every vessel a liner), ran its own build and ratchet check — which destroyed my run's classification artifacts — then accepted 25 of *my* moved frames with reasons from its own months-old story ("the rake class fix… QM2… Azzam"). The pixels it accepted are correct (I re-verified every frame against the same tree my run had classified: moved 0, new 1), but the written reasons were false history. I appended a dated correction to FRAME-LOG, accepted ship-galleass with the true reason, and documented the whole collision in HANDOFF — including the structural point that `build/.loop.lock` only binds loop rounds, which is a convention decision for you if parallel desktop sessions on ~/Ships become regular.
+
+**End state:** ratchet 52/52, audit 31/0, live stamp 1786513014 verified with 31 vessels and the galleass in the live data. Next round starts with no debt: the Lepanto campaign itself, or the panokseon.
+2026-08-11 23:03:23  round finished; HEAD is 7b2a95a Round 87 postscript in HANDOFF: accepts landed (both writers), ratchet 52/52, no debt carried.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 47171 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 23:13:23  round starting
+Standing down — this session is a duplicate launch. Here's what happened:
+
+Two copies of this round were started at the same moment (23:13). The other one, PID 55345, took `build/.loop.lock` atomically first and is alive and working — 41 seconds in, accumulating CPU time, running the identical round prompt against the same queue. The lock check was done the correct way, on `mkdir`'s exit status alone, and it says someone else holds it.
+
+The one thing this project has been burned by hardest is two writers editing the tree at once (round 71), and round 86's postscript records the established handling for exactly this situation: the duplicate run dies and the live one finishes the round. So I made no edits, no commits, and left the lock untouched — it belongs to PID 55345, which will remove it when its round ends. The only pre-existing local change, `M build/loop.log`, is the loop launcher's own file and I left it alone too.
+
+August's queue item will be picked up by the live session; nothing from this round chains forward except this note, which I'm deliberately not writing into HANDOFF.md because the tree is the other writer's while it holds the lock.
+2026-08-11 23:14:21  round finished; HEAD is 7b2a95a Round 87 postscript in HANDOFF: accepts landed (both writers), ratchet 52/52, no debt carried.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 55346 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-11 23:24:21  round starting

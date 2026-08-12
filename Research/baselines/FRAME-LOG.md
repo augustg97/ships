@@ -797,3 +797,4 @@ Every accepted change, with the reason. A baseline moved without a reason here i
   edit: the 'Loaded' caption no longer says "on a liner". The accepted PIXELS are correct —
   captures of the same tree run2 scored, re-verified frame-by-frame with the harness's own
   arithmetic (build/staging/compare-r87.py: moved 0, new 1) — only the prose above is false.
+- **2026-08-12 00:25** · `action-lepanto` — NEW baseline, round 88: the Lepanto campaign staged — day 7 (early afternoon, the north flank), Barbarigo's and Scirocco's wings locked at 200 m under the Scropha rise with the delta spit at the waterline from lepanto.png. Watches the third-fleet side:0 staging (the six galleasses), the authored day heading (hd), the shore render and the grounding rule. Verified against the record: W force 2 after the noon shift, League holds the gauge, 200 m range.

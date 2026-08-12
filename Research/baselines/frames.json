@@ -276,6 +276,11 @@
    "name": "action-gravelines",
    "path": "/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11",
    "note": "GRAVELINES from the water, day 9 at 110 m — the only close action of the Armada campaign, with the r84 DEM coast wearing the r85 data-keyed polder palette (pasture green, dune-sand waterline, Dunkirk dunes as fogged headlands E). Guards the shore-palette class: a coast wearing another climate's colours moves this frame."
+  },
+  {
+   "name": "action-lepanto",
+   "path": "/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9",
+   "note": "Lepanto, early afternoon 7 October 1571 — the north flank: Barbarigo's wing and Scirocco's locked at 200 m under the Scropha rise, the delta spit at the waterline. Watches the lepanto.png shore render, the grounding rule, the third-fleet (side:0) staging and the authored day heading (hd)."
   }
  ]
 }

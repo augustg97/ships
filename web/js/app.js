@@ -3384,27 +3384,34 @@ function startCampaign(b) {
   });
   const midLa = (la0 + la1) / 2 * Math.PI / 180;
   const stageU = Math.hypot((lo1 - lo0) * Math.cos(midLa), la1 - la0) * R * Math.PI / 180;
-  for (let k = 0; k < 2; k++) {
+  for (let k = 0; k < FLEETS.length; k++) {
     const F = FLEETS[k];
-    if (!F) { campShip.push(null); continue; }
-    const pts = [];
-    const raw = track(k);
-    for (let i = 0; i < raw.length - 1; i++)
-      for (let j = 0; j < 20; j++)
-        pts.push(slerpLonLat(raw[i][0], raw[i][1], raw[i + 1][0], raw[i + 1][1], j / 20));
-    pts.push(raw[raw.length - 1]);
-    const pos = new Float32Array(pts.length * 3);
-    pts.forEach((q, i) => {
-      const w = lonLatToVec(q[0], q[1], R * 1.004);
-      pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z;
-    });
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    g.setDrawRange(0, 0);
-    const ln = new THREE.Line(g, new THREE.LineBasicMaterial({
-      color: parseInt(F.color, 16), transparent: true, opacity: 0.95 }));
-    campGroup.add(ln);
-    campWake.push({ line: ln, pts });
+    if (!F) { campShip.push(null); campWake.push(null); continue; }
+    /* the record's own side where it says so (Lepanto's galleasses: a third block, side 0);
+       otherwise the block's index, which is every two-fleet battle unchanged */
+    const side = F.side !== undefined ? F.side : Math.min(k, 1);
+    /* one wake line per PRINCIPAL: an attached fleet rides its side's track, and drawing
+       that track twice in a second colour would be two histories of one passage */
+    if (k < 2) {
+      const pts = [];
+      const raw = track(side);
+      for (let i = 0; i < raw.length - 1; i++)
+        for (let j = 0; j < 20; j++)
+          pts.push(slerpLonLat(raw[i][0], raw[i][1], raw[i + 1][0], raw[i + 1][1], j / 20));
+      pts.push(raw[raw.length - 1]);
+      const pos = new Float32Array(pts.length * 3);
+      pts.forEach((q, i) => {
+        const w = lonLatToVec(q[0], q[1], R * 1.004);
+        pos[i * 3] = w.x; pos[i * 3 + 1] = w.y; pos[i * 3 + 2] = w.z;
+      });
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      g.setDrawRange(0, 0);
+      const ln = new THREE.Line(g, new THREE.LineBasicMaterial({
+        color: parseInt(F.color, 16), transparent: true, opacity: 0.95 }));
+      campGroup.add(ln);
+      campWake.push({ line: ln, pts });
+    } else campWake.push(null);
 
     /* ── A FLEET IS NOT ONE SHIP ────────────────────────────────────────────────────
        The head of each track used to be a single hull, which made a 130-sail armada read
@@ -3425,6 +3432,7 @@ function startCampaign(b) {
     const fleet = new THREE.Group();
     fleet.userData.loa = ves.hull.loa;
     fleet.userData.holders = [];
+    fleet.userData.side = side;           // stepCampaign picks its track by this
     /* bare spars barely heel — stepCampaign reads this */
     fleet.userData.heelK = F.furled ? 0.2 : 1;
     /* ── DOES THE FORMATION FIT THE STAGE? ──────────────────────────────────────────
@@ -3506,14 +3514,19 @@ function stepCampaign(dt) {
   const i = Math.min(C.length - 2, Math.floor(f)), fr = Math.min(1, f - i);
   const a = C[i], bb = C[i + 1];
 
-  for (let k = 0; k < 2; k++) {
+  for (let k = 0; k < campShip.length; k++) {
     const wk = campWake[k];
-    const n = Math.max(2, Math.round((i + fr) * 20) + 1);
-    wk.line.geometry.setDrawRange(0, Math.min(n, wk.pts.length));
+    if (wk) {
+      const n = Math.max(2, Math.round((i + fr) * 20) + 1);
+      wk.line.geometry.setDrawRange(0, Math.min(n, wk.pts.length));
+    }
     const sh = campShip[k];
     if (!sh) continue;
-    const lo = k === 0 ? a.lon + (bb.lon - a.lon) * fr : a.elon + (bb.elon - a.elon) * fr;
-    const la = k === 0 ? a.lat + (bb.lat - a.lat) * fr : a.elat + (bb.elat - a.elat) * fr;
+    /* the fleet's SIDE picks its track — an attached third block (Lepanto's galleasses,
+       side 0) rides the League's own lon/lat, not the enemy's */
+    const s0 = sh.userData.side === 0;
+    const lo = s0 ? a.lon + (bb.lon - a.lon) * fr : a.elon + (bb.elon - a.elon) * fr;
+    const la = s0 ? a.lat + (bb.lat - a.lat) * fr : a.elat + (bb.elat - a.elat) * fr;
     const w = lonLatToVec(lo, la, R * 1.006);
     sh.position.copy(w);
     /* A hull on a globe is a legible TOKEN, not a scale drawing — at true scale a 42 m carrack
@@ -3531,8 +3544,8 @@ function stepCampaign(dt) {
        cos(lat) convergence of the meridians and is wrong by degrees at 51 N. The direction
        the fleet is actually going is the difference of its two positions ON THE SPHERE,
        projected into the local tangent plane. No trigonometry, no convention to get backwards. */
-    const nlo = k === 0 ? bb.lon : bb.elon, nla = k === 0 ? bb.lat : bb.elat;
-    const plo = k === 0 ? a.lon : a.elon,  pla = k === 0 ? a.lat : a.elat;
+    const nlo = s0 ? bb.lon : bb.elon, nla = s0 ? bb.lat : bb.elat;
+    const plo = s0 ? a.lon : a.elon,  pla = s0 ? a.lat : a.elat;
     const up = w.clone().normalize();
     let fwd = lonLatToVec(nlo, nla, R).sub(lonLatToVec(plo, pla, R));
     fwd.addScaledVector(up, -fwd.dot(up));                        // into the tangent plane

@@ -5225,3 +5225,79 @@ corrected in FRAME-LOG's 23:03 entry. ship-galleass accepted with the true reaso
 Ratchet stands 52/52. Live stamp 1786513014 verified, 31 vessels live. Next round: no debt —
 start directly at "Next, in order" above; treat any fresh shipwright-frame movement as
 suspect against BOTH writers' histories before touching geometry.
+
+## Round 88 — 2026-08-12 — Lepanto staged: the campaign, the third fleet block, and the Ionian shore
+
+**The queue's item 1 taken as written: the Lepanto campaign is in the Action and on the board.
+The battle that r86–87 built its two hulls for now exists as a place and a sequence — eleven
+days from Messina to the evening after, fleets, formations, an authored camera and a baked
+Ionian coast. Ratchet 53/53, audit 31/0, stamp 1786518973 verified live.**
+
+**The record, as data (battles.json `lepanto`):** `powder: true`, `cam` on the gulf mouth,
+eleven campaign days — Messina (16 Sept), Corfu (27 Sept), the Famagusta news off Cephalonia
+(5 Oct), Petala and Kara Hodja's undercount (6 Oct), then 7 October as six days: dawn, the
+crescent and the towing-out at mid-morning, noon (the wind shift and the galleasses' fire),
+the north flank, the centre, the south, and the evening after. The attested weather is the
+spine: E force 3 at dawn at the Ottomans' backs, falling, then the noon shift to W — so the
+computed gauge line flips from "Ottoman fleet holds the weather gauge" to the League's mid-
+battle, which is the battle's own hinge, derived not asserted. Day texts are concrete —
+Bragadin's flaying dated, Barbarigo's visor, the tercio of Sardinia, the 28,900-name banner,
+Cervantes' hand — no aphorisms.
+
+**Two structural extensions, both record-driven, both audited:**
+1. **A fleet block can declare its `side`.** Lepanto needs three blocks — League galleys,
+   Ottoman galleys, and the six galleasses, which are their own hull and formation but League
+   ships anchored at fleet 0's origin, staged 950 m ahead of the line (`form.back: -950`).
+   `btOpen`/`btPlace` and the board's `startCampaign`/`stepCampaign` all honour `F.side`
+   (default: block index, so every two-fleet battle is bit-identical — proven by the run:
+   action-gravelines, action-salamis, board-salamis all 0.000%). The board draws wake lines
+   only for the two principals; an attached block rides its side's track. The audit's
+   fleets-length rule became: ≥2 blocks, principals may not re-side themselves, every block
+   past [1] must declare side 0 or 1.
+2. **A campaign day can carry an authored heading `hd`.** The track-bearing rule reads the
+   NEXT day's anchor, and Lepanto's battle days walk the STORY across the field (noon →
+   north flank → centre → south), so the derived course pointed the League line north-west
+   at a crescent standing east. Days 6–9 carry attested facings (80/45/80/120); the track
+   bearing stays the fallback everywhere else. Audit: hd, when present, must be 0–360.
+
+**The shore: `web/data/terrain/lepanto.png`** baked by Research/bake-shore.py (its header
+already named Lepanto as its purpose) — lon 20.95–21.65, lat 38.05–38.48, 2039×1593 at
+~30 m/px, 72 terrarium tiles, 38,186 shoal-noise cells despeckled, provenance in ASSETS.json.
+Probed BEFORE authoring: my remembered island positions were wrong by ~0.05°, so the eight
+witnesses (Oxeia, the Scropha rise, Petalas, Varassova, the Araxos shore; three waters) and
+all eleven day anchors were placed from the raster's own land components and verified -8 m
+water / >0 land in the same decode the app reads. veg: phrygana (r85 carried 3 answered —
+the palette's third coast is limestone Greece again; the Acheloos delta wetland wears scrub,
+a stated simplification).
+
+**Verification.** Audit 31 hulls / 0 problems first run — it walked the new campaign record,
+loaded the shore, heard all eight witnesses, stepped the three-fleet board. Frames: FIVE
+camera stations rendered and READ before choosing (day 6 at three azimuths — one had my
+azimuth arithmetic backwards, cb=210 stands EAST of the fleet, not south-west; day 5's
+three-band towed-out picture; day 7 against the shore). The committed baseline is
+**action-lepanto** = day 7, the north flank: both wings locked at 200 m under the Scropha
+rise, the delta spit on the waterline, W force 2, League gauge — it watches the shore
+render, the grounding compression, side:0 staging and hd in one frame. Full run
+(build/ratchet-r88-run1.log): 52/52 within tolerance, action-lepanto NEW; accepted with
+reason (FRAME-LOG); post-accept single-frame check 0.000%. Note Salamis-class truth: at
+Lepanto the fleets stood 5–10 km off the coast, so land is a haze silhouette from most
+stations — the atmosphere model, not a failure; day 7 is the station where the shore is
+close enough to testify on screen.
+
+**Carried, restated (none closed silently):**
+1. Myeongnyang still needs panokseon and sekibune (r80) — next vessel arc.
+2. Lepanto gaps, honest: no stern chasers on the galleass; the rounded bow fortress
+   simplified to the raised platform (r87 carried 4); survey-hulls raycast rings still have
+   not run against galley or galleass (r86 carried 4); the galleasses and galley have no
+   Sea-view voyage — the campaign is their only stage; the Ottoman right's lighter galliots
+   are not a staged type (28 galley tokens stand for 222 galleys + 56 galliots).
+3. r78 capture-gate hardening if the font flap strikes; r75 QM2, r77 Azzam, r79 jeer small
+   items only if a round is light.
+4. r85 carried 3 half-stands: phrygana got its third coast (this round); the polder
+   photographic A/B still wants doing.
+5. r87 carried 5 stands: the two-writer lock convention is a decision for August.
+
+### Next, in order
+1. The panokseon (Myeongnyang's hull), or the galley/galleass raycast survey — whichever
+   the round can finish properly.
+2. Small items (carried 3) only if a round is otherwise light.

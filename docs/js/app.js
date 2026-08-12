@@ -1826,11 +1826,13 @@ la0 = Math.min(la0, q.lat, q.elat); la1 = Math.max(la1, q.lat, q.elat);
 });
 const midLa = (la0 + la1) / 2 * Math.PI / 180;
 const stageU = Math.hypot((lo1 - lo0) * Math.cos(midLa), la1 - la0) * R * Math.PI / 180;
-for (let k = 0; k < 2; k++) {
+for (let k = 0; k < FLEETS.length; k++) {
 const F = FLEETS[k];
-if (!F) { campShip.push(null); continue; }
+if (!F) { campShip.push(null); campWake.push(null); continue; }
+const side = F.side !== undefined ? F.side : Math.min(k, 1);
+if (k < 2) {
 const pts = [];
-const raw = track(k);
+const raw = track(side);
 for (let i = 0; i < raw.length - 1; i++)
 for (let j = 0; j < 20; j++)
 pts.push(slerpLonLat(raw[i][0], raw[i][1], raw[i + 1][0], raw[i + 1][1], j / 20));
@@ -1847,12 +1849,14 @@ const ln = new THREE.Line(g, new THREE.LineBasicMaterial({
 color: parseInt(F.color, 16), transparent: true, opacity: 0.95 }));
 campGroup.add(ln);
 campWake.push({ line: ln, pts });
+} else campWake.push(null);
 const ves = ((APP.vessels && APP.vessels.vessels) || []).find(x => x.id === F.id);
 if (!ves || !ves.hull) { campShip.push(null); continue; }
 const proto = window.SHIPS_HULL.buildShip(ves.hull, { furled: !!F.furled });
 const fleet = new THREE.Group();
 fleet.userData.loa = ves.hull.loa;
 fleet.userData.holders = [];
+fleet.userData.side = side;
 fleet.userData.heelK = F.furled ? 0.2 : 1;
 const camAlt = b.cam[2] / 63.71;
 const frontU = F.form.front * camAlt * 0.0105 / ves.hull.loa;
@@ -1897,19 +1901,22 @@ if (S.campT > C.length - 1 + 1.4) S.campT = 0;
 const f = Math.min(S.campT, C.length - 1);
 const i = Math.min(C.length - 2, Math.floor(f)), fr = Math.min(1, f - i);
 const a = C[i], bb = C[i + 1];
-for (let k = 0; k < 2; k++) {
+for (let k = 0; k < campShip.length; k++) {
 const wk = campWake[k];
+if (wk) {
 const n = Math.max(2, Math.round((i + fr) * 20) + 1);
 wk.line.geometry.setDrawRange(0, Math.min(n, wk.pts.length));
+}
 const sh = campShip[k];
 if (!sh) continue;
-const lo = k === 0 ? a.lon + (bb.lon - a.lon) * fr : a.elon + (bb.elon - a.elon) * fr;
-const la = k === 0 ? a.lat + (bb.lat - a.lat) * fr : a.elat + (bb.elat - a.elat) * fr;
+const s0 = sh.userData.side === 0;
+const lo = s0 ? a.lon + (bb.lon - a.lon) * fr : a.elon + (bb.elon - a.elon) * fr;
+const la = s0 ? a.lat + (bb.lat - a.lat) * fr : a.elat + (bb.elat - a.elat) * fr;
 const w = lonLatToVec(lo, la, R * 1.006);
 sh.position.copy(w);
 sh.scale.setScalar(((S.dist - R) * 0.0105) / sh.userData.loa);
-const nlo = k === 0 ? bb.lon : bb.elon, nla = k === 0 ? bb.lat : bb.elat;
-const plo = k === 0 ? a.lon : a.elon,  pla = k === 0 ? a.lat : a.elat;
+const nlo = s0 ? bb.lon : bb.elon, nla = s0 ? bb.lat : bb.elat;
+const plo = s0 ? a.lon : a.elon,  pla = s0 ? a.lat : a.elat;
 const up = w.clone().normalize();
 let fwd = lonLatToVec(nlo, nla, R).sub(lonLatToVec(plo, pla, R));
 fwd.addScaledVector(up, -fwd.dot(up));

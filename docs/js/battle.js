@@ -101,7 +101,8 @@ BT.spec = battle;
 BT.ships.forEach(s => BT.scene.remove(s.obj));
 BT.ships = []; BT.mats = [];
 const V = (APP.vessels && APP.vessels.vessels) || [];
-battle.fleets.forEach((F, side) => {
+battle.fleets.forEach((F, fi) => {
+const side = F.side !== undefined ? F.side : fi;
 const ves = V.find(x => x.id === F.id);
 if (!ves || !ves.hull) return;
 const proto = window.SHIPS_HULL.buildShip(ves.hull, { furled: !!F.furled });
@@ -154,7 +155,8 @@ if (BT.land) BT.land.material.uniforms.uDay.value.set(BT.dayLonR, BT.dayLatR);
 const FL = BT.spec.fleets, gaugeFleet = engSep > 0 ? FL[1] : FL[0];
 BT.gauge = gaugeFleet.name + ' holds the weather gauge';
 BT.fleetHd = 90;
-if (C.length > 1) {
+if (isFinite(d.hd)) BT.fleetHd = d.hd;
+else if (C.length > 1) {
 const j = Math.min(BT.day, C.length - 2);
 const p = C[j], n = C[j + 1];
 const mLat = 111132, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);

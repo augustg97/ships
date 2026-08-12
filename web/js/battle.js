@@ -189,7 +189,12 @@ function btOpen(battle) {
   BT.ships = []; BT.mats = [];
 
   const V = (APP.vessels && APP.vessels.vessels) || [];
-  battle.fleets.forEach((F, side) => {
+  battle.fleets.forEach((F, fi) => {
+    /* which SIDE a fleet fights on is the record's own field where it says so — Lepanto's
+       galleasses are a third fleet block (their own hull, their own formation, a station
+       ahead of the line) but they are League ships, anchored at fleet 0's origin. Without
+       `side` the block's index is its side, which is every two-fleet battle unchanged. */
+    const side = F.side !== undefined ? F.side : fi;
     const ves = V.find(x => x.id === F.id);
     if (!ves || !ves.hull) return;
     /* `furled` is the fleet record's canvas state: a trireme fought under oar with her
@@ -277,9 +282,16 @@ function btSetDay() {
   /* the course is the track's own bearing, this day to the next — and on the LAST day the
      previous day to this one, the heading the fleet arrived on. The old fallback was a
      hardcoded 90, east up the Channel, which pointed the Armada at Norway on the one day
-     its record says it ran north about Scotland. */
+     its record says it ran north about Scotland.
+     ⚠ UNLESS THE DAY SAYS OTHERWISE. Lepanto's battle days walk the STORY across the
+     field — noon at the galleasses, then the north flank, then the centre, then the
+     south — so the track's bearing is the order of telling, not the fleet's facing, and
+     it pointed the League line north-west at a crescent standing to the east. Where the
+     record attests a facing (the League met the crescent head-on, heading east into the
+     mouth), the day carries it as `hd` and the track bearing is only the fallback. */
   BT.fleetHd = 90;
-  if (C.length > 1) {
+  if (isFinite(d.hd)) BT.fleetHd = d.hd;
+  else if (C.length > 1) {
     const j = Math.min(BT.day, C.length - 2);
     const p = C[j], n = C[j + 1];
     const mLat = 111132, mLon = 111320 * Math.cos(p.lat * Math.PI / 180);
