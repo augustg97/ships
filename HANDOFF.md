@@ -5539,3 +5539,44 @@ starts one late has no margin. The two-writer lock decision (r87 carried 5) is a
 1. The Myeongnyang campaign in the Action (r80): eleven ships against 133 in a strait
    whose tide reverses the battle — the panokseon and sekibune both exist and are live.
 2. Small items (carried 5) only if a round is otherwise light.
+
+## Round 89 — deck height is headroom, not a fraction of beam
+
+August compared Queen Mary 2 against three photographs and said she was way off. The dominant
+cause was one default:
+
+`dh = B * 0.105`. That is right for Titanic (28.2 m beam → 2.96 m) and right for nothing else
+except by coincidence. Queen Mary 2's 41 m beam gave **4.30 m decks** — 45% too tall — so ten
+decks made 43 m of house standing on 17 m of freeboard, and she towered over her own hull
+instead of the roughly 40 % hull / 60 % house the profile plate shows. Azzam's 20.8 m gave
+2.18 m, too short to stand up in. **A deck is sized by the person walking through it and has
+been about three metres since iron, on any beam.**
+
+Fixed as a class: the default is now `min(B * 0.105, 3.0)`, and every hull that already carried
+decks is pinned in the data to the value it rendered at, so nothing that was right has moved.
+Any vessel added from here inherits the human dimension. Queen Mary 2 → 2.95, Azzam → 3.05.
+
+Also: `houseCrest [0.26, 0.70]` and `houseAt [0.155, 0.94]` on Queen Mary 2, and my `foreStep`
+field was REMOVED as inert — the round-8x `houseCrest`/`tierAftU` mechanism already does forward
+terracing, and a second parameter for one thing is the drift this project keeps finding.
+
+### Still short of the plates, and the way to close it is to MEASURE, not to guess
+
+`tierAftU` takes tier edges read off the photograph, which is how Azzam's tier-3 terrace was
+pinned. Nothing below should be dialled in by eye; these are the reads to take off the three
+plates August supplied (bow-on, three-quarter bow, full profile):
+
+1. **The black foredeck.** On the profile she is black hull from the stem to about u 0.15, with
+   an open foredeck and a breakwater. The model still runs white close to the stem.
+2. **The forward terrace shape.** Hers steps up in three or four short, steep terraces from the
+   foredeck to the bridge front, over roughly u 0.15–0.26 — not a long shallow staircase.
+3. **The bridge front is a ROUNDED wheelhouse** with bridge wings overhanging the shell, and
+   black window bands wrapping the forward corners. This is her single most recognisable
+   feature from ahead and the model has a flat face.
+4. **The bow flare.** The bow-on plate shows the deck edge far outboard of the waterline — a
+   dramatic flare. `stemRake` now leans correctly but the flare itself is not modelled.
+5. **The funnel** sits about u 0.62, is squat, and is larger relative to the house than the
+   model's.
+
+Azzam, from her own plate: the house is a LOWER, SLEEKER block than the model's cruise-ship
+stepping, and her exhausts read as funnels where they should be slim uptakes abaft the mast.

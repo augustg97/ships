@@ -3503,7 +3503,16 @@ function linerHouse(S) {
      audit-green, because nothing compared a height with a record. Where the record gives
      the tween-deck (deckM — hers derives from 72 m keel-to-funnel over 18 decks), use it;
      the derivation stays for hulls whose proportions it was calibrated on. */
-  const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
+  /* ── ⚠ A DECK'S HEIGHT IS HEADROOM, NOT A FRACTION OF BEAM ──────────────────────────
+     The default was B * 0.105, which is right for Titanic (28.2 m beam -> 2.96 m) and right
+     for nothing else by anything but coincidence. Queen Mary 2's 41 m beam gave 4.30 m decks —
+     45% too tall — so ten decks made 43 m of house on 17 m of freeboard and she towered over
+     her own hull; Azzam's 20.8 m gave 2.18 m, too short to stand up in. A deck is sized by the
+     person walking through it and has been about three metres since iron, on any beam.
+     Every hull that already carried decks has been pinned to its current value in the data, so
+     this change moves nothing that was right; the DEFAULT is now the human dimension, which is
+     what any vessel added from here inherits. */
+  const base = H.sheer(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B * 0.055;
   const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
   /* ── ⚠ NOT EVERY HOUSE CRESTS FORWARD ────────────────────────────────────────────────
      The aligned-fronts/cascading-afts rule below is the LINER's logic — conned from the

@@ -3018,7 +3018,8 @@
      0.8
     ],
     "year": 1858,
-    "cove": 1
+    "cove": 1,
+    "deckM": 2.66
    },
    "speedKn": 14.0
   },
@@ -3161,7 +3162,8 @@
     "boatDeckM": 19.0,
     "mastTopM": 62.5,
     "buff": "#c9a267",
-    "funnelRake": 9.46
+    "funnelRake": 9.46,
+    "deckM": 2.96
    }
   },
   {
@@ -3649,7 +3651,8 @@
     ],
     "funnelH": 11.0,
     "year": 1870,
-    "cove": 1
+    "cove": 1,
+    "deckM": 1.62
    }
   },
   {
@@ -3816,7 +3819,8 @@
     "netDefence": {
      "from": 0.28,
      "to": 0.92
-    }
+    },
+    "deckM": 2.62
    }
   },
   {
@@ -4033,7 +4037,8 @@
      }
     ],
     "year": 1941,
-    "bottom": "#5c2019"
+    "bottom": "#5c2019",
+    "deckM": 4.08
    }
   },
   {
@@ -4147,7 +4152,8 @@
     "screws": 4,
     "decks": 2,
     "deckPark": 12,
-    "year": 2017
+    "year": 2017,
+    "deckM": 4.3
    }
   },
   {
@@ -4443,8 +4449,8 @@
     "year": 2013,
     "decks": 5,
     "houseAt": [
-     0.18,
-     0.86
+     0.34,
+     0.88
     ],
     "houseCrest": [
      0.43,
@@ -4458,7 +4464,7 @@
     "boatsInboard": true,
     "boatsProvenance": "INBOARD: her tenders stow in a garage within the hull, not on deck. The design accounts record the concept grew from 145 m to 180.6 m partly to make room for tenders, fuel and machinery inside (Nauta design history via Boat International and YachtBuyer, which lists her tender garage), and the delivery photograph on this card shows a bare topside — no boat stands on any deck. Her tender complement is not published, so no count is claimed.",
     "transom": 0.3,
-    "deckM": 2.6,
+    "deckM": 3.05,
     "mastTopM": 47.2,
     "cluster": {
      "provenance": "DERIVED from the delivery photograph on this card (ChrisKarsten, Wikimedia Commons), scaled against the recorded 180.6 m length; the scale was fixed by waterline and stem and cross-checked against her 9.0 m freeboard. No published drawing gives these heights. The three aft domes stand on the tier-3 terrace (19.4 m) — their bases read 19.5–19.8 m on the photograph — and the stack fairing sweeps from the block top down to that terrace, crossing 22 m at u 0.679 on the way to its foot at u 0.723.",
@@ -4818,8 +4824,8 @@
     "portholes": false,
     "mastLivery": "#26282b",
     "houseAt": [
-     0.115,
-     0.945
+     0.155,
+     0.94
     ],
     "funnelH": 12.7,
     "funnelAt": [
@@ -4833,7 +4839,7 @@
     "boats": 22,
     "bowFlare": 0.22,
     "sternRound": 0.65,
-    "deckM": 3.2,
+    "deckM": 2.95,
     "boatsRecessed": true,
     "boatLM": 11.92,
     "boatDeckM": 23.4,
@@ -4859,7 +4865,11 @@
      "pitchM": 2.5,
      "pierFrac": 0.3,
      "kind": "glass"
-    }
+    },
+    "houseCrest": [
+     0.26,
+     0.7
+    ]
    },
    "rows": [
     [

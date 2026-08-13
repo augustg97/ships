@@ -2148,7 +2148,7 @@ function linerHouse(S) {
 const n = S.decks || 0;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
-const base = H.sheer(0.5), dh = S.deckM || B * 0.105, inset = B * 0.055;
+const base = H.sheer(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B * 0.055;
 const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
 const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
 : [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
