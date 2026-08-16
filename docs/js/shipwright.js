@@ -52,7 +52,7 @@ uTime: { value: 0 } },
 skyM.frustumCulled = false;
 skyM.renderOrder = -1000;
 SW.sky = skyM; SW.scene.add(skyM);
-const gg = new THREE.PlaneGeometry(2600, 2600, 220, 220);
+const gg = window.SHIPS_PSG.radialDisc(40, 26000, 150, 192, 6371000);
 const gm = new THREE.Mesh(gg, new THREE.ShaderMaterial({
 vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
 uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
@@ -61,7 +61,32 @@ uWind: { value: 6.5 }, uScale: { value: 150 }, uRip: { value: 3000 },
 uWave: { value: SHIPS_SEA.seaWaveUniform(6.5) } },
 }));
 gm.rotation.x = -Math.PI / 2;
+gm.frustumCulled = false;
 SW.ground = gm; SW.scene.add(gm);
+{
+const R0 = 15000, seg = 220, pos = [], idx = [];
+for (let j = 0; j <= seg; j++) {
+const a = (-0.55 + 1.10 * j / seg);
+const x = Math.sin(a) * R0, z = -Math.cos(a) * R0;
+const t = j / seg * 9.0;
+const h = 120 + 190 * (0.5 + 0.5 * Math.sin(t * 1.7))
+*  (0.6 + 0.4 * Math.sin(t * 0.61 + 1.3))
++  70 * Math.sin(t * 3.1 + 0.7);
+const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - R0 * R0)) - 6371000;
+pos.push(x, drop, z, x, drop + h, z);
+}
+for (let j = 0; j < seg; j++) {
+const a0 = j * 2, b0 = a0 + 2;
+idx.push(a0, b0, a0 + 1, a0 + 1, b0, b0 + 1);
+}
+const lg = new THREE.BufferGeometry();
+lg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+lg.setIndex(idx); lg.computeVertexNormals();
+const lm = new THREE.MeshBasicMaterial({ color: 0x8fa2ad, fog: false });
+const land = new THREE.Mesh(lg, lm);
+land.frustumCulled = false; land.renderOrder = -900;
+SW.shore = land; SW.scene.add(land);
+}
 let drag = null;
 cv.addEventListener('pointerdown', e => {
 delete SW.viewFromDeg;

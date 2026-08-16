@@ -710,4 +710,4 @@ function psgFleetClear() {
 
 window.SHIPS_PSG = { PSG, psgInit, psgOpen, psgClose, psgStep, psgFrame, PATCH_M, SEA_R,
                      psgDescent, psgDescentActive, psgFleet, psgFleetClear, psgPrebuild,
-                     DESCENT_M };
+                     DESCENT_M, radialDisc };   /* the Shipwright's sea uses this too */

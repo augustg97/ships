@@ -5580,3 +5580,41 @@ plates August supplied (bow-on, three-quarter bow, full profile):
 
 Azzam, from her own plate: the house is a LOWER, SLEEKER block than the model's cruise-ship
 stepping, and her exhausts read as funnels where they should be slim uptakes abaft the mast.
+
+## Round 92 — the Shipwright goes to sea, and is now the default view
+
+* **"take a ship apart" removed** from the tab.
+* **The Shipwright is the default view.** An explicit `#v=` still wins, which matters: every
+  committed baseline names its own view and the harness would otherwise photograph the
+  Shipwright thirty-odd times over.
+* **The floating square of water is gone.** The sea was `PlaneGeometry(2600, 2600)` — from a
+  camera framing a 345 m liner the far edge of that square is well inside the view, so the ship
+  sat on a tile of ocean with sky under its corners. It is the Passage's own `radialDisc` now,
+  graded 40 m → 26 km and carrying the sagitta, so the far edge DROPS below eye level and reads
+  as a horizon. `radialDisc` is exported rather than copied: two discs would be two models of
+  one sea. Plus a hazed shore at 15 km on a 63° arc — a coast, not a coastline: no place name,
+  no card, nondescript on purpose. The sky dome already carried clouds.
+
+### ⚠ QUEEN MARY 2 AND AZZAM ARE STILL NOT FINISHED, AND I HAVE NOW GUESSED WRONG TWICE
+
+August has asked three times. What has genuinely closed: the ziggurat (house step-back is a
+fraction of the house), the bow (rake leans with height), the spindle (wlPower is the middle
+body, not the entry), the proportions (a deck is headroom, not a fraction of beam). Each was a
+real class bug and each is fixed for the whole fleet.
+
+What has NOT closed is her FORM, and the reason is that I keep dialling parameters by eye
+instead of measuring the plate. The mechanism to do it properly already exists — `houseCrest`
+plus `tierAftU`, which takes tier edges read off a photograph, and which a round already used to
+pin Azzam's tier-3 terrace. **Take these off the plates rather than estimating them:**
+
+1. The black foredeck: hull to about u 0.15, open deck, breakwater.
+2. Three or four SHORT STEEP forward terraces over u 0.15–0.26, not a long shallow staircase.
+3. **The rounded wheelhouse** with bridge wings overhanging the shell and black window bands
+   wrapping the forward corners. Her most recognisable feature from ahead; the model is a flat
+   face. This probably needs new geometry, not a parameter.
+4. **Bow flare** — the bow-on plate shows the deck edge far outboard of the waterline. `stemRake`
+   leans correctly now but flare is not modelled at all, on any hull.
+5. Funnel at u 0.62, squat, larger relative to the house than the model's.
+
+Azzam: a lower sleeker house than the current cruise-ship stepping, and slim uptakes abaft the
+mast rather than funnels.

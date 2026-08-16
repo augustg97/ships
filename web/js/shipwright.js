@@ -108,7 +108,16 @@ function swInit() {
      A MeshStandardMaterial plane at roughness 0.95 — a floor, and it read as one. These are
      ships; they belong on water. Same Gerstner surface as the Action, same wave table, so a
      hull sits at the same height in both views. */
-  const gg = new THREE.PlaneGeometry(2600, 2600, 220, 220);
+  /* ── ⚠ A 2.6 km SQUARE OF WATER IS A FLOATING SQUARE OF WATER ──────────────────────
+     The sea here was PlaneGeometry(2600, 2600). From a camera set to frame a 345 m liner the
+     far edge of that square is comfortably inside the view, so the ship sat on a visible tile
+     of ocean with sky under its corners — which is exactly what it looked like.
+     A horizon is not a bigger square. It is the water running out to where the Earth curves
+     away, so this is the Passage's own radial disc, geometrically graded from 40 m at the
+     hull to 26 km, carrying the sagitta so the far edge DROPS below eye level and reads as a
+     horizon rather than as an edge. Same helper, exported rather than copied: two discs would
+     be two models of one sea and they would drift. */
+  const gg = window.SHIPS_PSG.radialDisc(40, 26000, 150, 192, 6371000);
   const gm = new THREE.Mesh(gg, new THREE.ShaderMaterial({
     vertexShader: SEA_VERT, fragmentShader: SEA_FRAG,
     uniforms: { uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
@@ -119,7 +128,41 @@ function swInit() {
                 uWave: { value: SHIPS_SEA.seaWaveUniform(6.5) } },
   }));
   gm.rotation.x = -Math.PI / 2;
+  gm.frustumCulled = false;      /* a horizon is always around you, like the sky */
   SW.ground = gm; SW.scene.add(gm);
+
+  /* ── AND SOMETHING TO BE OFF ────────────────────────────────────────────────────────
+     Open water to every horizon reads as a test scene. A low, hazed shore on one bearing
+     gives the eye a distance to measure the ship against and says "this is somewhere",
+     without pretending to be anywhere in particular: it carries no place name and appears
+     in no card. Nondescript on purpose — a coast, not a coastline. */
+  {
+    const R0 = 15000, seg = 220, pos = [], idx = [];
+    for (let j = 0; j <= seg; j++) {
+      const a = (-0.55 + 1.10 * j / seg);                 // a 63-degree arc of shore
+      const x = Math.sin(a) * R0, z = -Math.cos(a) * R0;
+      /* a ridge line from three incommensurate waves, so it never repeats visibly */
+      const t = j / seg * 9.0;
+      const h = 120 + 190 * (0.5 + 0.5 * Math.sin(t * 1.7))
+                    *  (0.6 + 0.4 * Math.sin(t * 0.61 + 1.3))
+                    +  70 * Math.sin(t * 3.1 + 0.7);
+      const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - R0 * R0)) - 6371000;
+      pos.push(x, drop, z, x, drop + h, z);
+    }
+    for (let j = 0; j < seg; j++) {
+      const a0 = j * 2, b0 = a0 + 2;
+      idx.push(a0, b0, a0 + 1, a0 + 1, b0, b0 + 1);
+    }
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    lg.setIndex(idx); lg.computeVertexNormals();
+    /* the colour is the horizon's own haze, lightly darkened — at fifteen kilometres almost
+       all of what reaches the eye is scattered air rather than ground */
+    const lm = new THREE.MeshBasicMaterial({ color: 0x8fa2ad, fog: false });
+    const land = new THREE.Mesh(lg, lm);
+    land.frustumCulled = false; land.renderOrder = -900;
+    SW.shore = land; SW.scene.add(land);
+  }
 
   /* ── DRAG TURNS THE SHIP, NOT THE CAMERA ────────────────────────────────────────────
      Orbiting the camera swung all twenty-one hulls about a point, which reads as a carousel.

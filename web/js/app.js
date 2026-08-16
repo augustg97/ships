@@ -437,7 +437,11 @@ function applyHash() {
  * `#v=action`. */
 function applyHashView() {
   const vm = /[#&]v=(sea|ship|action)/.exec(location.hash);
-  if (vm && typeof setView === 'function') setView(vm[1]);
+  /* ⚠ THE SHIPWRIGHT IS THE DEFAULT NOW, AND THE HASH STILL WINS. An explicit #v= is a
+     request and must be honoured — every committed baseline names its own view, and the
+     frame harness would otherwise photograph the Shipwright thirty-odd times over. So the
+     default applies only when the hash asks for nothing. */
+  if (typeof setView === 'function') setView(vm ? vm[1] : 'ship');
   /* `#v=ship&s=<id>` names a hull, e.g. #v=ship&s=dhow. Ordered after setView for the same
      reason setView is ordered after the data load: the Shipwright builds its layout when the
      view opens, and there is nothing to select before that. */

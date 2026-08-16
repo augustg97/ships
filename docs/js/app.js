@@ -175,7 +175,7 @@ if (cm && chs[S.era]) showEraCard(chs[S.era]);
 }
 function applyHashView() {
 const vm = /[#&]v=(sea|ship|action)/.exec(location.hash);
-if (vm && typeof setView === 'function') setView(vm[1]);
+if (typeof setView === 'function') setView(vm ? vm[1] : 'ship');
 const sm = /[#&]s=([a-z0-9-]+)/i.exec(location.hash);
 if (sm) {
 shipSelectPending = true;
