@@ -440,8 +440,24 @@ function applyHashView() {
   /* ⚠ THE SHIPWRIGHT IS THE DEFAULT NOW, AND THE HASH STILL WINS. An explicit #v= is a
      request and must be honoured — every committed baseline names its own view, and the
      frame harness would otherwise photograph the Shipwright thirty-odd times over. So the
-     default applies only when the hash asks for nothing. */
-  if (typeof setView === 'function') setView(vm ? vm[1] : 'ship');
+     default applies only when the hash asks for nothing.
+     ⚠ AND A HASH CAN NAME A VIEW WITHOUT SAYING `v=`. This is the round-92 regression, and
+     it is the "wrong view is worse than no frame" trap one level up. `#e=5&f=greatwestern`
+     asks to go down to a ship at sea; `#e=0&t=40000` and `#e=1&card=era` are the globe;
+     `#battle=` and `#c=`/`#z=` likewise. When the default flipped to the Shipwright, ALL of
+     them opened the Shipwright: the four globe baselines and the era card quietly became
+     five identical pictures of a hull (byte-identical file sizes, which is what gave it
+     away), and `aboard` HUNG — its board loop waited on a globe that was never going to
+     stream, `__FRAME_READY` never fired, and one frame's 60 s timeout took the whole ratchet
+     run down with it. The default is for a hash that asks for NOTHING, and "nothing" has to
+     mean nothing, not merely "no v=". `z=` is shared (the Shipwright's zoom and the sea's),
+     so it is read only alongside a key that is not. */
+  const h = location.hash;
+  const askedShip  = /[#&](s|sail|b)=/i.test(h);
+  const askedOther = /[#&](e|t|card|f|battle|c|bt|day)=/i.test(h);
+  const fallback = (askedShip || !askedOther) ? 'ship'
+                 : (/[#&](bt|day)=/i.test(h) ? 'action' : 'sea');
+  if (typeof setView === 'function') setView(vm ? vm[1] : fallback);
   /* `#v=ship&s=<id>` names a hull, e.g. #v=ship&s=dhow. Ordered after setView for the same
      reason setView is ordered after the data load: the Shipwright builds its layout when the
      view opens, and there is nothing to select before that. */

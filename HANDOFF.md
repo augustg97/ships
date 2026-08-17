@@ -5618,3 +5618,111 @@ pin Azzam's tier-3 terrace. **Take these off the plates rather than estimating t
 
 Azzam: a lower sleeker house than the current cruise-ship stepping, and slim uptakes abaft the
 mast rather than funnels.
+
+## Round 93 — Queen Mary 2 and Azzam, measured off plates instead of judged by eye
+
+**Why this round exists.** August had said three times that Queen Mary 2 looked wrong, and three
+times she was adjusted and re-rendered and still looked wrong. The reason is in the tooling, not
+in the parameters: every judgement was made on a `spin_capture` frame, and that harness uses the
+app's own **34° lens**, which magnifies the near half of a 345 m ship by about a third. A pixel
+measurement off a frame like that is out by a quarter of the ship. Nothing could be corrected
+from it, so nothing was.
+
+### Two instruments, and they are the round
+
+- **`Research/profile_capture.py`** — the same page at **3° of field**, which is orthographic to
+  about a percent over a ship's length, with the UI hidden and a **u-ruler painted along the load
+  waterline**. The ticks sit *on* y = 0, so the frame carries its own vertical datum and its own
+  scale; a feature can be READ off it rather than estimated. Two bugs worth remembering: `const SW
+  = …` at the top level of a classic script is a global **binding** and not a property of
+  `window`, so `window.SW` is undefined while `SW` resolves (the first run drew no ruler and
+  reported "no spec"); and `swFrame` derives `SW.fit` from `tan(fov/2)` every frame, so shrinking
+  the fov already pushes the camera back — scaling `SW.dist` as well backs off twice and frames
+  the whole fleet at postage-stamp size.
+- **`Research/measure_ship.py`** — the built hull's own scene graph, part by part, **in metres**,
+  in hull space. This is what found the things the eye had been arguing about: her 22 boats
+  hanging **4.4 m outside a 41 m beam**, and Azzam's mast standing **12 m** taller than the ship.
+
+### And the reference is segmented, not squinted at
+
+The plate is the Titanic/Queen Mary 2 scale comparison (Wikimedia Commons, `En mary titanic.svg`,
+Yzmo, CC BY-SA 3.0) — a true orthographic profile. Segment her silhouette, then read, **at every
+metre of height above the waterline, the most-forward and the most-aft column still standing at
+that height**. That turns "the front looks wrong" into eight numbers: her front is not a ramp and
+not a wall but **three vertical faces with two setbacks** (u 0.042 to 25 m, u 0.078 to 32 m,
+u 0.125 to 44 m), her top deck runs to u 0.80 and her aft terraces are only the last fifth of
+her, and her funnel is at u 0.533–0.607, 24.3 m fore-and-aft, topping at 62.9 m.
+
+### What the class learned
+
+- **`houseTaper`** — the per-tier lateral set-in as a fraction of beam over the whole house.
+  It was hard-wired at 0.16, which on Titanic's three decks is 0.4 m nobody can see and on Queen
+  Mary 2's ten is a **0.66 m ledge at every deck for the whole length of the ship** — and each
+  ledge gets its own roof plate, so her profile came out as eleven white lips with dark bands
+  between. A stack of pancakes. She is 0.02; Azzam 0.03; every other hull keeps 0.16 and the
+  formula reproduces the old curve exactly (`1 − taper·(0.5 + i/n)` ≡ `0.92 − i/n·0.16`).
+- **`bridgeBeamM`** — the recorded breadth ACROSS the wings, because a modern bridge wing
+  **overhangs**: she is 41 m on the waterline and 45 m across the wings, and that pair of
+  shoulders is one of the two or three things the eye knows her by. The old code stopped the
+  wings at the ship's side under a comment that said so ("flush, not overhanging"), which is
+  right for a hull conned from inside her sheer and wrong for everything since the war. A
+  cantilevered wing gets a solid parapet, not open rail.
+- **`funnelOval`** — the fore-and-aft axis as a multiple of the athwartships one. Round is the
+  easy solid, and drawn round she was either too narrow to see or a barrel wider than her own
+  bridge. Hers is 24 m by 12 m. The oval goes on BEFORE the rake shear, or the two multiply.
+- **`stack.bandCol`** — the red band on Azzam's uptakes is now a record's declaration and nothing
+  wears one by default. See below.
+- **A recess is a hole, and what stows in it is inboard of the side.** `half + boatB * 0.35`,
+  under a comment reading *"inside the hull side"*. The comment was right and the arithmetic was
+  the other sign; only a measured breadth could tell them apart.
+
+### Azzam: a derivation off a small photograph was a sixth of the ship out
+
+Re-measured off a clean broadside (Commons, `Azzam IMO 9693367 S Bremen 09-05-2014.jpg`, Wolfgang
+Fricke, CC BY 3.0) with stem, transom and waterline as the three anchors — 8.33 px per metre. The
+earlier derivation, off the small delivery photograph on her card, put her mast at **u 0.542 and
+47.2 m** over the water. The broadside reads **u 0.638 and 36.2 m**. That is a sixth of her length
+and a quarter of her air draught, and it drew her with a radio tower amidships. Her house is
+**four decks, not five** — the crest reads 21 m against the five-deck stack's 24.25 — and it runs
+u 0.275 to 0.929, not 0.34 to 0.88. At six times the earlier resolution her uptakes are four plain
+steel pipes with **no red band**; the band was the single thing making a motor yacht's exhausts
+read as a liner's funnel.
+
+**The general lesson: a photograph's resolution bounds the precision of everything derived from
+it, and nothing in the record carried that bound.** Both derivations were honest reads of what
+their plate could show. Provenance now names the plate AND its scale in px/m.
+
+### Gates
+
+Audit **33 hulls, 0 problems** (Azzam's cluster failed twice on the first pass — the fairing foot
+and the upper domes — and both were real: the domes stood 3.5 m proud of anything on the plate).
+
+### And the ratchet caught round 92, which round 92 had reported clean
+
+Round 92 made the Shipwright the default view, and its own capture reported **"captured 26,
+moved 0"** — an anomaly flagged at the time and not chased. Two things were hiding behind it.
+
+**A hash can name a view without saying `v=`.** `#e=0&t=40000` is the globe; `#e=1&card=era` is
+the era card; `#e=5&f=greatwestern` asks to go down to a ship at sea. When the default flipped,
+all of them opened the Shipwright: the four globe baselines and the era card became five
+identical pictures of a hull — *byte-identical file sizes* were what gave it away — and `aboard`
+did not merely capture the wrong thing, it **hung**. Its board loop waits for the terrain to
+finish streaming, the Shipwright never streams a globe, `__FRAME_READY` never fired, and one
+frame's 60-second timeout took the whole ratchet run down with it. That is why three consecutive
+runs died on `aboard` with no report. `applyHashView` now reads the hash for what it asks:
+`s|b|sail` are the Shipwright, `bt|day` the Action, `e|t|card|f|battle|c` the globe and the sea,
+and the default is for a hash that asks for **nothing**. Verified across eight hash shapes — each
+opens the right view and reaches ready. `globe-default` was `/?frozen=1`, which by design can no
+longer be the globe, so the manifest now names `#v=sea` for it.
+
+**And 27 Shipwright baselines had been carrying the OLD flat water tile** ever since. The diff is
+the proof the hulls did not move: Titanic and Dreadnought read pure black over the entire hull and
+rig, with every changed pixel in the sea, the horizon, the ghosted subtitle and the reordered
+fleet list.
+
+**The general shape: a capture that reports "0 moved" when a large change just landed is not a
+pass, it is a broken capture.** It looked like coverage for a whole round.
+
+Ratchet: 55 frames, all scored individually, three classes with three written reasons —
+2 rebuilt hulls, 27 round-92 sea, 26 sub-visual dither (0.07–0.15% at mean |Δ| ≤ 0.06 against a
+0.15 limit). Re-run after accepting: **55/55 at 0.000%.**

@@ -208,3 +208,43 @@ if mkdir build/.loop.lock 2>/dev/null; then echo "GOT the lock"; else echo "some
 
 Never compose a lock check from `&&`/`||` chains, and never accept a check whose output looks
 the same whether it passed or failed.
+
+### A 34° lens is not a plate — measure the hull, do not judge the frame
+
+Queen Mary 2 was reported wrong three times, adjusted three times and was still wrong, because
+every judgement was made on a `spin_capture` frame. That harness uses the app's own **34° field**,
+which magnifies the near half of a 345 m ship by about a third: a pixel measurement off it is out
+by a quarter of the ship, so no correction taken from it can be right. Two tools exist now and a
+hull is not "looked at" until both have been run:
+
+```bash
+"$STUDIO/.venv/bin/python" Research/profile_capture.py --ship queen-mary-2   # 3° near-ortho + u-ruler
+"$STUDIO/.venv/bin/python" Research/measure_ship.py   --ship queen-mary-2   # every part, in metres
+```
+
+`profile_capture` paints its u-ruler ON the load waterline, so the frame carries its own datum and
+scale. `measure_ship` walks the built scene graph part by part in hull space — that is what found
+22 boats hanging 4.4 m outside a 41 m beam, and a mast 12 m taller than its own ship, after weeks
+of arguing about them by eye.
+
+**And segment the reference too.** Reading a scale profile's most-forward and most-aft standing
+column at every metre of height turns "the front looks wrong" into eight numbers. Squinting at a
+photograph is the same failure as squinting at a render.
+
+### A photograph's resolution bounds everything derived from it, and the record must say so
+
+Azzam's cluster was derived off the small delivery photograph on her card: mast at u 0.542, 47.2 m
+over the water, a red band on her uptakes. A clean broadside at six times that scale reads u 0.638
+and 36.2 m, and four plain steel pipes with no band. That is a sixth of her length and a quarter of
+her air draught, and it drew a motor yacht with a radio tower amidships and a liner's funnel.
+
+Both derivations were honest reads of what their plate could show. Neither the numbers nor the
+provenance carried the bound. **A derivation's provenance now names the plate AND its scale in
+px/m**, so the next reader knows what precision the source can actually support.
+
+### A comment can be right while its arithmetic is the other sign
+
+`const z = sgn * (recT ? half + boatB * 0.35 : …)` sat under a comment reading *"recessed boats
+hang proud of the gallery's dark back wall, inside the hull side"*. The comment describes the
+intent exactly; the `+` puts every boat OUTSIDE the wall. Nothing in the audit could see it — only
+a measured breadth (45.4 m across a 41 m beam) could tell the comment and the code apart.

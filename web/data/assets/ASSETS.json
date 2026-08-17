@@ -436,17 +436,18 @@
    "source": "wikimedia-commons",
    "slug": "queen-mary-2",
    "type": "ships",
-   "name": "File:Hamburg, Hafen, Kreuzfahrtschiff -Queen Mary 2- -- 2016 -- 3050.jpg",
-   "caption": "Queen Mary 2 — the only ocean liner in scheduled service",
+   "name": "File:Qm2 portboston (cropped).jpg",
+   "caption": "Queen Mary 2 arriving at Boston — the only ocean liner in scheduled service",
    "licence": "CC BY-SA 4.0",
    "authors": {
-    "Dietmar Rabich": "All"
+    "Oceanhistory46": "All"
    },
    "credit": "Own work",
-   "url": "https://commons.wikimedia.org/wiki/File:Hamburg,_Hafen,_Kreuzfahrtschiff_-Queen_Mary_2-_--_2016_--_3050.jpg",
+   "url": "https://commons.wikimedia.org/wiki/File:Qm2_portboston_(cropped).jpg",
    "files": [
     "web/data/assets/ships/queen-mary-2.jpg"
-   ]
+   ],
+   "note": "Replaced the Hamburg yard view 2026-08-16: the ship stood half a mile off behind six harbour cranes and neither her bow, her bridge nor her stern was readable. This one is a bow-quarter arrival at 3742 px, and it is also the plate her bridge wings and boat gallery were checked against."
   },
   {
    "source": "wikimedia-commons",

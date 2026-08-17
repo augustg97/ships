@@ -3532,19 +3532,32 @@ function linerHouse(S) {
      than the steps below it. tierAftU records the aft edges the photograph actually
      gives, keyed by tier index; tiers between pinned points interpolate straight, so a
      record with no pins reproduces the single line exactly. */
-  const aftPin = { 0: hB, [n - 1]: crest[1] };
-  for (const k in (S.tierAftU || {})) {
-    const ti = +k;
-    if (ti > 0 && ti < n - 1) aftPin[ti] = S.tierAftU[k];
-  }
-  const pinIdx = Object.keys(aftPin).map(Number).sort((a, b) => a - b);
-  const aftAt = i => {
-    if (aftPin[i] !== undefined) return aftPin[i];
-    let lo = pinIdx[0], hi = pinIdx[pinIdx.length - 1];
-    for (const p of pinIdx) if (p < i) lo = p;
-    for (let j = pinIdx.length - 1; j >= 0; j--) if (pinIdx[j] > i) hi = pinIdx[j];
-    return aftPin[lo] + (aftPin[hi] - aftPin[lo]) * (i - lo) / (hi - lo);
+  /* ⚠ AND THE FORWARD EDGES NEED PINNING FOR THE SAME REASON THE AFT ONES DID. The straight
+     houseAt→houseCrest interpolation makes the front of the house a constant-slope staircase.
+     That is right for a ship whose front IS a ramp, and wrong for Queen Mary 2, whose plates
+     show something quite different: four SHORT STEEP terraces climbing off the foredeck over
+     about a tenth of her length, and then a near-vertical block carrying the bridge. A single
+     slope cannot be both, and averaging them is what has made her look wrong three times.
+     tierForeU is tierAftU's mirror: forward edges read off the photograph, keyed by tier, with
+     straight interpolation between pins — so a record with no pins reproduces the old single
+     line exactly and no existing hull moves. */
+  const mkPin = (edge, first, last, rec) => {
+    const pin = { 0: first, [n - 1]: last };
+    for (const k in (rec || {})) {
+      const ti = +k;
+      if (ti > 0 && ti < n - 1) pin[ti] = rec[k];
+    }
+    const idx = Object.keys(pin).map(Number).sort((a, b) => a - b);
+    return i => {
+      if (pin[i] !== undefined) return pin[i];
+      let lo = idx[0], hi = idx[idx.length - 1];
+      for (const q of idx) if (q < i) lo = q;
+      for (let j = idx.length - 1; j >= 0; j--) if (idx[j] > i) hi = idx[j];
+      return pin[lo] + (pin[hi] - pin[lo]) * (i - lo) / (hi - lo);
+    };
   };
+  const aftAt  = mkPin('aft',  hB, crest[1], S.tierAftU);
+  const foreAt = mkPin('fore', hA, crest[0], S.tierForeU);
   const tiers = [];
   /* ── A TIER CAN BE SHELL, NOT HOUSE ────────────────────────────────────────────────
      On the Edwardian liners the side PLATING carried up past the sheer deck: Titanic's
@@ -3562,10 +3575,21 @@ function linerHouse(S) {
      its void dark. The boats then hang at recess height by the same derivation the walls
      stand on. */
   const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
+  /* ── ⚠ A MODERN HOUSE IS FLUSH-SIDED, AND THE TAPER IS WHAT MADE HER A ZIGGURAT ──────
+     Every tier was drawn 1.6% of the beam narrower than the one below (0.92 − i/n·0.16),
+     which on Titanic's three decks is a 0.4 m total set-in nobody can see, and on Queen
+     Mary 2's ten is a 0.66 m LEDGE at every deck for the whole length of the ship. Each
+     ledge gets its own roofPlate, so the profile came out as eleven white lips with dark
+     bands between — a stack of pancakes, and the single loudest reason three attempts at
+     her read as wrong. A liner built since SOLAS moved the boats down has ONE plane from
+     the boat gallery to the top terrace, with the balconies recessed INTO it; the plan
+     steps fore and aft, never sideways. houseTaper is that set-in as a fraction of the
+     beam over the whole house; 0.16 is the old value and every existing hull keeps it. */
+  const taper = S.houseTaper !== undefined ? S.houseTaper : 0.16;
   for (let i = 0; i < n; i++) {
     const shell = i < ns;
-    const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
-    const ins = shell ? B * 0.015 : inset;
+    const wid = shell ? B : B * (1 - taper * (0.5 + i / n));   // ≡ 0.92 − i/n·0.16 at 0.16
+    const ins = shell ? B * 0.015 : (taper < 0.06 ? B * 0.015 : inset);
     /* ── ⚠ THE AFT STEP-BACK IS A FRACTION OF THE HOUSE, NOT A FIXED SLICE PER DECK ────
        This was `hB - i * 0.045`: every tier ended 4.5% of the SHIP'S LENGTH further forward
        than the one below. On Titanic's three decks that is a gentle 13% total and looks
@@ -3576,7 +3600,7 @@ function linerHouse(S) {
        distance overall, in smaller steps. 0.14 reproduces the old figure at n=3 (0.047 a
        tier) and stops the staircase at any height. */
     const f = n > 1 ? i / (n - 1) : 0;
-    const uA = hA + (crest[0] - hA) * f, uB = aftAt(i);
+    const uA = foreAt(i), uB = aftAt(i);
     /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
        half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
     const half = (u) => {
@@ -3822,9 +3846,23 @@ function buildSuperstructure(S, group) {
      face, the two boxes occupy the same air. The record already says who cons the ship;
      honour it. */
   if (S.cluster && S.cluster.blockU) { group.add(tag(g, 'superstructure')); return; }
+  /* ── ⚠ A BRIDGE WING OVERHANGS, AND THE PIER IS WHY ─────────────────────────────────
+     The wings were built to stop at the ship's own side ("flush, not overhanging"), which
+     is right for a hull conned from a deck inside her sheer and wrong for every ship since
+     the war: an officer laying a 41 m beam against a quay has to see the shell plating go
+     home, so the wing is cantilevered OUT past it — Queen Mary 2 is 41 m on the waterline
+     and 45 m across the bridge wings, and that pair of shoulders is one of the two or three
+     things the eye uses to know her. bridgeBeamM is the recorded breadth ACROSS the wings,
+     in metres — the number a register actually carries — not a delta from a hull half-
+     breadth that varies with where the bridge happens to stand; unset keeps the flush wing
+     every earlier hull was built with.
+     The wheelhouse itself is sized by the record too — bridgeM is its fore-and-aft depth in
+     metres and bridgeHalf its half-breadth as a fraction of the beam — because a 10 m box
+     on a 345 m ship is a hut, and hers runs nearly the full width of the deck. */
   const bg = new THREE.Group();
-  const uW0 = top.uA + 0.004, uW1 = Math.min(top.uB, uW0 + 0.030);
-  const whHalf = Math.min(B * 0.27, top.half(uW0) - B * 0.01);
+  const uW0 = top.uA + 0.004;
+  const uW1 = Math.min(top.uB, uW0 + (S.bridgeM ? S.bridgeM / L : 0.030));
+  const whHalf = Math.min(B * (S.bridgeHalf || 0.27), top.half(uW0) - B * 0.01);
   const whT = {
     uA: uW0, uB: uW1, half: () => whHalf,
   };
@@ -3832,26 +3870,41 @@ function buildSuperstructure(S, group) {
   bg.add(wallLoft(perim(whT), T.top, T.top + whH,
                   [0.0, 0.30, 0.33, 0.82, 0.85, 1.0], [0.30, 0.85], paneW * 1.5, 0.30));
   bg.add(roofPlate(whT, T.top + whH));
+  const wingBeam = S.bridgeBeamM || 0;
   for (const sgn of [-1, 1]) {
     const uMid = (uW0 + uW1) / 2;
-    const hullHalf = Math.abs(surfacePoint(S, H, uMid, 1.0)[2]);
+    const hullHalf = wingBeam ? wingBeam / 2
+                              : Math.abs(surfacePoint(S, H, uMid, 1.0)[2]);
     if (hullHalf > whHalf + B * 0.02) {
       const wing = new THREE.Mesh(
         new THREE.BoxGeometry((uW1 - uW0) * L, T.dh * 0.06, hullHalf - whHalf), plateMat);
       wing.position.set((uMid - 0.5) * L, T.top + T.dh * 0.03, sgn * (whHalf + hullHalf) / 2);
       bg.add(wing);
-      /* the wing ends at the ship's side, railed — flush, not overhanging */
       const wx0 = (uW0 - 0.5) * L, wx1 = (uW1 - 0.5) * L;
       const wpts = [{ x: wx0, z: sgn * whHalf }, { x: wx0, z: sgn * hullHalf },
                     { x: wx1, z: sgn * hullHalf }, { x: wx1, z: sgn * whHalf }];
-      railRun(wpts, T.top + T.dh * 0.06);
+      /* a cantilevered wing carries a solid parapet, not open rail: it is a working deck
+         over the ship's side and the thing that reads in profile is its shoulder */
+      if (wingBeam > 0) {
+        const par = new THREE.Mesh(
+          new THREE.BoxGeometry((uW1 - uW0) * L, T.dh * 0.34, B * 0.012), plateMat);
+        par.position.set((uMid - 0.5) * L, T.top + T.dh * 0.23, sgn * hullHalf);
+        bg.add(par);
+        const end = new THREE.Mesh(
+          new THREE.BoxGeometry(B * 0.012, T.dh * 0.34, hullHalf - whHalf), plateMat);
+        end.position.set((uW0 - 0.5) * L, T.top + T.dh * 0.23, sgn * (whHalf + hullHalf) / 2);
+        bg.add(end);
+      } else {
+        railRun(wpts, T.top + T.dh * 0.06);
+      }
     }
   }
   const bTag = tag(bg, 'bridge', 'Navigating bridge');
   bTag.userData.part.what =
     'The ship is conned from here: a wheelhouse at the forward end of the boat deck, more '
-    + 'glass than wall, with open wings running to the ship\'s sides — a 28 m beam is brought '
-    + 'alongside a pier by an officer standing at its very edge.';
+    + 'glass than wall, with wings running out to — and on a modern ship past — her sides, '
+    + 'because a beam this wide is brought alongside a pier by an officer standing at its '
+    + 'very edge, watching the plating go home.';
   g.add(bTag);
 
   /* ── COWL VENTILATORS, ON THE BOAT DECK ─────────────────────────────────────────────
@@ -4078,9 +4131,19 @@ function buildFunnel(S, group) {
        top of that. Model the casing, start the stack above it, and there is no coincident
        surface left to fight. */
     const ri = r * ((S.funnelScale || [])[i] || 1);
+    /* ── ⚠ A FUNNEL IS AN OVAL, AND ON A MODERN LINER A VERY LONG ONE ──────────────────
+       Round is the easy solid and it is what every stack here has been. A real uptake
+       casing is longer fore-and-aft than athwartships, because that is the shape the
+       boiler flat under it has and the shape that costs least in wind resistance: Queen
+       Mary 2's measures 24 m fore-and-aft on a 12 m width, and drawn round she came out
+       either too narrow to see (at the true width) or a barrel wider than her own bridge
+       (at the true length). funnelOval is the fore-and-aft axis as a multiple of the
+       athwartships one; 1 is round and is what every existing funnel keeps. */
+    const oval = S.funnelOval || 1;
     const caseH = h * 0.085, caseR = ri * 1.34;
     const casing = new THREE.Mesh(
       new THREE.CylinderGeometry(caseR * 0.94, caseR, caseH, 20), black);
+    if (oval !== 1) casing.scale.x = oval;
     casing.position.y = caseH / 2 - caseH * 0.35;       // slightly sunk, so no cap meets the deck
     g.add(tag(casing, 'funnel', 'Boiler casing',
               'The deckhouse over the fiddley. The uptakes from the boilers come up inside it.'));
@@ -4116,6 +4179,9 @@ function buildFunnel(S, group) {
       scol.push(c.r, c.g, c.b);
     }
     sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
+    /* the oval goes on BEFORE the shear: x' = oval·x + tan(θ)·y keeps the lean the record's
+       number, where shearing first and stretching after would multiply the two */
+    if (oval !== 1) sg.scale(oval, 1, 1);
     /* the shear: x' = x + tan(θ)·(height above the base cut). applyMatrix4 carries the
        normals through the inverse transpose, so the shading is the inclined surface's own */
     const shear = Math.tan(th);
@@ -4304,7 +4370,14 @@ function buildCluster(S, group) {
     }
     const n = K.pipes || 4;
     const [u0, u1] = K.uBase;                             // forward, aft
-    const steel = new THREE.Color(0xb9bcbf), band = new THREE.Color(0x9c2f24),
+    /* ⚠ A RED BAND IS A LIVERY AND A LIVERY HAS TO BE SEEN TO BE CLAIMED. This was
+       painted on unconditionally, read off the small delivery photograph; the Bremen
+       broadside at six times that scale shows four plain steel uptakes behind the white
+       fairing with no band on any of them, and the band was the one thing making a motor
+       yacht's exhausts read as a liner's funnel. It is a record's declaration now
+       (stack.bandCol) and nothing wears one by default. */
+    const steel = new THREE.Color(0xb9bcbf),
+          band = K.bandCol ? new THREE.Color(K.bandCol) : null,
           rim = new THREE.Color(0x2a2c2e);
     for (let i = 0; i < n; i++) {
       const f = n === 1 ? 0 : i / (n - 1);                // 0 forward, 1 aft
@@ -4316,7 +4389,8 @@ function buildCluster(S, group) {
       const pos = pg.attributes.position, col = [];
       for (let j = 0; j < pos.count; j++) {
         const ya = pos.getY(j) + Lp / 2;                  // 0 at base, Lp at head
-        const c = ya > Lp - 0.25 ? rim : (ya > Lp - 1.6 && ya < Lp - 0.9) ? band : steel;
+        const c = ya > Lp - 0.25 ? rim
+                : (band && ya > Lp - 1.6 && ya < Lp - 0.9) ? band : steel;
         col.push(c.r, c.g, c.b);
       }
       pg.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
@@ -4530,8 +4604,15 @@ function buildBoats(S, group, mats) {
     const half = topT ? topT.half(u)
                       : Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
     for (const sgn of [-1, 1]) {
-      /* recessed boats hang proud of the gallery's dark back wall, inside the hull side */
-      const z = sgn * (recT ? half + boatB * 0.35 : half - B * 0.045);
+      /* ⚠ A RECESS IS A HOLE, AND WHAT STOWS IN IT IS INBOARD OF THE SIDE. This read
+         `half + boatB * 0.35` under a comment saying "inside the hull side", and it is the
+         other sign: it hung all 22 boats OUTSIDE the tier wall, so Queen Mary 2 measured
+         45.4 m across a 41 m beam and her boats stood off her flank like panniers. They
+         belong in the gallery — outer flank just proud of the dark back wall so they read,
+         the whole boat inside the ship's own side, which is the point of putting them
+         there. (The comment was right and the arithmetic was not; only a measured breadth
+         could tell them apart.) */
+      const z = sgn * (recT ? half - boatB * 0.35 : half - B * 0.045);
       /* the boat: a shallow hull, keel down, stowed fore-and-aft on its chocks */
       const bg = new THREE.SphereGeometry(boatL / 2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
       bg.scale(1.0, 0.42, boatB / boatL);

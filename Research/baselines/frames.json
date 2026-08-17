@@ -19,8 +19,8 @@
  "frames": [
   {
    "name": "globe-default",
-   "path": "/?frozen=1",
-   "note": "the frame the §13 check is run on — Ocean Crossing era, 1590"
+   "path": "/?frozen=1#v=sea",
+   "note": "The app's default view is the Shipwright since round 92, so a bare '/' no longer opens the globe. This frame exists to watch the GLOBE at its default era, so it names the view it means."
   },
   {
    "name": "globe-crossing",

@@ -2152,28 +2152,33 @@ const base = H.sheer(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B *
 const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
 const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
 : [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
-const aftPin = { 0: hB, [n - 1]: crest[1] };
-for (const k in (S.tierAftU || {})) {
+const mkPin = (edge, first, last, rec) => {
+const pin = { 0: first, [n - 1]: last };
+for (const k in (rec || {})) {
 const ti = +k;
-if (ti > 0 && ti < n - 1) aftPin[ti] = S.tierAftU[k];
+if (ti > 0 && ti < n - 1) pin[ti] = rec[k];
 }
-const pinIdx = Object.keys(aftPin).map(Number).sort((a, b) => a - b);
-const aftAt = i => {
-if (aftPin[i] !== undefined) return aftPin[i];
-let lo = pinIdx[0], hi = pinIdx[pinIdx.length - 1];
-for (const p of pinIdx) if (p < i) lo = p;
-for (let j = pinIdx.length - 1; j >= 0; j--) if (pinIdx[j] > i) hi = pinIdx[j];
-return aftPin[lo] + (aftPin[hi] - aftPin[lo]) * (i - lo) / (hi - lo);
+const idx = Object.keys(pin).map(Number).sort((a, b) => a - b);
+return i => {
+if (pin[i] !== undefined) return pin[i];
+let lo = idx[0], hi = idx[idx.length - 1];
+for (const q of idx) if (q < i) lo = q;
+for (let j = idx.length - 1; j >= 0; j--) if (idx[j] > i) hi = idx[j];
+return pin[lo] + (pin[hi] - pin[lo]) * (i - lo) / (hi - lo);
 };
+};
+const aftAt  = mkPin('aft',  hB, crest[1], S.tierAftU);
+const foreAt = mkPin('fore', hA, crest[0], S.tierForeU);
 const tiers = [];
 const ns = S.shellTiers || 0;
 const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
+const taper = S.houseTaper !== undefined ? S.houseTaper : 0.16;
 for (let i = 0; i < n; i++) {
 const shell = i < ns;
-const wid = shell ? B : B * (0.92 - (i / n) * 0.16);
-const ins = shell ? B * 0.015 : inset;
+const wid = shell ? B : B * (1 - taper * (0.5 + i / n));
+const ins = shell ? B * 0.015 : (taper < 0.06 ? B * 0.015 : inset);
 const f = n > 1 ? i / (n - 1) : 0;
-const uA = hA + (crest[0] - hA) * f, uB = aftAt(i);
+const uA = foreAt(i), uB = aftAt(i);
 const half = (u) => {
 const uu = Math.max(0.001, Math.min(0.999, u));
 return Math.max(B * 0.06, Math.min(wid / 2,
@@ -2339,8 +2344,9 @@ railRun(pr, t.y1);
 const top = T.tiers[T.n - 1];
 if (S.cluster && S.cluster.blockU) { group.add(tag(g, 'superstructure')); return; }
 const bg = new THREE.Group();
-const uW0 = top.uA + 0.004, uW1 = Math.min(top.uB, uW0 + 0.030);
-const whHalf = Math.min(B * 0.27, top.half(uW0) - B * 0.01);
+const uW0 = top.uA + 0.004;
+const uW1 = Math.min(top.uB, uW0 + (S.bridgeM ? S.bridgeM / L : 0.030));
+const whHalf = Math.min(B * (S.bridgeHalf || 0.27), top.half(uW0) - B * 0.01);
 const whT = {
 uA: uW0, uB: uW1, half: () => whHalf,
 };
@@ -2348,9 +2354,11 @@ const whH = T.dh * 0.92;
 bg.add(wallLoft(perim(whT), T.top, T.top + whH,
 [0.0, 0.30, 0.33, 0.82, 0.85, 1.0], [0.30, 0.85], paneW * 1.5, 0.30));
 bg.add(roofPlate(whT, T.top + whH));
+const wingBeam = S.bridgeBeamM || 0;
 for (const sgn of [-1, 1]) {
 const uMid = (uW0 + uW1) / 2;
-const hullHalf = Math.abs(surfacePoint(S, H, uMid, 1.0)[2]);
+const hullHalf = wingBeam ? wingBeam / 2
+: Math.abs(surfacePoint(S, H, uMid, 1.0)[2]);
 if (hullHalf > whHalf + B * 0.02) {
 const wing = new THREE.Mesh(
 new THREE.BoxGeometry((uW1 - uW0) * L, T.dh * 0.06, hullHalf - whHalf), plateMat);
@@ -2359,14 +2367,26 @@ bg.add(wing);
 const wx0 = (uW0 - 0.5) * L, wx1 = (uW1 - 0.5) * L;
 const wpts = [{ x: wx0, z: sgn * whHalf }, { x: wx0, z: sgn * hullHalf },
 { x: wx1, z: sgn * hullHalf }, { x: wx1, z: sgn * whHalf }];
+if (wingBeam > 0) {
+const par = new THREE.Mesh(
+new THREE.BoxGeometry((uW1 - uW0) * L, T.dh * 0.34, B * 0.012), plateMat);
+par.position.set((uMid - 0.5) * L, T.top + T.dh * 0.23, sgn * hullHalf);
+bg.add(par);
+const end = new THREE.Mesh(
+new THREE.BoxGeometry(B * 0.012, T.dh * 0.34, hullHalf - whHalf), plateMat);
+end.position.set((uW0 - 0.5) * L, T.top + T.dh * 0.23, sgn * (whHalf + hullHalf) / 2);
+bg.add(end);
+} else {
 railRun(wpts, T.top + T.dh * 0.06);
+}
 }
 }
 const bTag = tag(bg, 'bridge', 'Navigating bridge');
 bTag.userData.part.what =
 'The ship is conned from here: a wheelhouse at the forward end of the boat deck, more '
-+ 'glass than wall, with open wings running to the ship\'s sides — a 28 m beam is brought '
-+ 'alongside a pier by an officer standing at its very edge.';
++ 'glass than wall, with wings running out to — and on a modern ship past — her sides, '
++ 'because a beam this wide is brought alongside a pier by an officer standing at its '
++ 'very edge, watching the plating go home.';
 g.add(bTag);
 if (S.funnels && !(S.year >= 1950)) {
 const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
@@ -2496,9 +2516,11 @@ if (T && T.recorded)
 for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);
 const g = new THREE.Group();
 const ri = r * ((S.funnelScale || [])[i] || 1);
+const oval = S.funnelOval || 1;
 const caseH = h * 0.085, caseR = ri * 1.34;
 const casing = new THREE.Mesh(
 new THREE.CylinderGeometry(caseR * 0.94, caseR, caseH, 20), black);
+if (oval !== 1) casing.scale.x = oval;
 casing.position.y = caseH / 2 - caseH * 0.35;
 g.add(tag(casing, 'funnel', 'Boiler casing',
 'The deckhouse over the fiddley. The uptakes from the boilers come up inside it.'));
@@ -2514,6 +2536,7 @@ const c = ya > capFrom ? cap : buff;
 scol.push(c.r, c.g, c.b);
 }
 sg.setAttribute('color', new THREE.Float32BufferAttribute(scol, 3));
+if (oval !== 1) sg.scale(oval, 1, 1);
 const shear = Math.tan(th);
 sg.applyMatrix4(new THREE.Matrix4().set(
 1, shear, 0, shear * L / 2,
@@ -2642,7 +2665,8 @@ g.add(tag(fin, 'cluster', 'Stack casing',
 }
 const n = K.pipes || 4;
 const [u0, u1] = K.uBase;
-const steel = new THREE.Color(0xb9bcbf), band = new THREE.Color(0x9c2f24),
+const steel = new THREE.Color(0xb9bcbf),
+band = K.bandCol ? new THREE.Color(K.bandCol) : null,
 rim = new THREE.Color(0x2a2c2e);
 for (let i = 0; i < n; i++) {
 const f = n === 1 ? 0 : i / (n - 1);
@@ -2654,7 +2678,8 @@ const pg = new THREE.CylinderGeometry(r * 0.96, r, Lp, 20, 24);
 const pos = pg.attributes.position, col = [];
 for (let j = 0; j < pos.count; j++) {
 const ya = pos.getY(j) + Lp / 2;
-const c = ya > Lp - 0.25 ? rim : (ya > Lp - 1.6 && ya < Lp - 0.9) ? band : steel;
+const c = ya > Lp - 0.25 ? rim
+: (band && ya > Lp - 1.6 && ya < Lp - 0.9) ? band : steel;
 col.push(c.r, c.g, c.b);
 }
 pg.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
@@ -2764,7 +2789,7 @@ const deckY = recT ? recT.y0 + 0.15 : (topT ? topT.y1 : H.sheer(u));
 const half = topT ? topT.half(u)
 : Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
 for (const sgn of [-1, 1]) {
-const z = sgn * (recT ? half + boatB * 0.35 : half - B * 0.045);
+const z = sgn * (recT ? half - boatB * 0.35 : half - B * 0.045);
 const bg = new THREE.SphereGeometry(boatL / 2, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
 bg.scale(1.0, 0.42, boatB / boatL);
 bg.rotateX(Math.PI);
