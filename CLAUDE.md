@@ -248,3 +248,36 @@ px/m**, so the next reader knows what precision the source can actually support.
 hang proud of the gallery's dark back wall, inside the hull side"*. The comment describes the
 intent exactly; the `+` puts every boat OUTSIDE the wall. Nothing in the audit could see it — only
 a measured breadth (45.4 m across a 41 m beam) could tell the comment and the code apart.
+
+### A colour that lives on a vertex cannot have an edge
+
+Queen Mary 2's balcony pier is 12% of a 2.6 m cabin pitch — 31 cm of white between balconies. It
+was drawn by stationing the wall every 31 cm and painting one station white, which sounds right
+and is not: a strip INTERPOLATES between vertices, so one white station bleeds a full quad each
+way and the pier arrives 93 cm wide. White then wins a third of the run and she read as a
+spreadsheet — a lattice of pale boxes rather than a dark balcony wall with thin dividers.
+
+Widening the mullion, narrowing it, or stationing finer all trade one blur for another, **because
+the quantity has no edge to sharpen.** Give it one: insert a PAIR of stations a millimetre apart
+at every boundary (`snapBand`). The quad between them is 2 mm wide, so the gradient has nowhere to
+spread and the feature lands at its recorded width, on any pitch, at any beam.
+
+### Flicker is two surfaces, and the way to find it is to remove things one at a time
+
+The tear crawling along Queen Mary 2's strake was the hull's own **capping rail** — it ran the
+whole length on every hull, so on a ship whose house carries out to the shell it sat 16 cm
+outboard of the white wall. Reading the code did not find it; a fixed camera with parts hidden one
+at a time did, in about two minutes. A rail caps a deck EDGE, and there is no edge where the
+superstructure IS the ship's side.
+
+**Generalise the shape:** a fitting written for "every ship" that is placed relative to the HULL
+will collide with anything placed relative to the HOUSE, and the collision is invisible until two
+surfaces get within a pixel of each other at some viewing distance.
+
+### The record beats a derivation from the record
+
+The audit flagged the masthead at 63.8 m against a recorded 62. The 63.8 was my own silhouette
+segmentation — a metre of reading error on top of the drawing's own; 62 m is Cunard's attested air
+draught. Rule 8 says check the audit first, and the audit was right. **Where a measurement and the
+record disagree, and the measurement was taken FROM a source the record already summarises, the
+record wins.**
