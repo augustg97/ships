@@ -24,6 +24,17 @@ uniform float uPortholes;    // porthole count along the hull, 0 = none
    declares it (faired); everything below the boot-top and at the waterline stays. */
 uniform float uFaired;       // 0 = working steel shows its plates, 1 = faired and coated
 uniform float uTime;
+/* ── HULL-SIDE GLAZING FROM THE RECORD: rows of windows and portholes in GROUPS ──────
+   uHGrpA[g] = (u0, u1, v0, v1): the group's span along the hull and its height band in
+   the loft's v (sill and head, mapped from metres over the waterline by hull.js).
+   uHGrpB[g] = (pitchM, lightM, kind, 0): centre pitch and light size in METRES; kind
+   0 = round porthole with a painted ring, 1 = rectangular window, 2 = continuous tinted
+   band. Distances convert through uHullDims = (hull length m, freeboard m), so a 0.45 m
+   glass is 0.45 m on any hull. A record with no rows uploads uHGrpN = 0. */
+uniform int  uHGrpN;
+uniform vec4 uHGrpA[16];
+uniform vec4 uHGrpB[16];
+uniform vec2 uHullDims;
 
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
@@ -203,6 +214,40 @@ void main(){
     }
     paint = mix(paint, vec3(0.045, 0.050, 0.060), portRow * 0.92);
     paint = mix(paint, vec3(0.78, 0.66, 0.38), portRim * 0.85);
+
+    /* ── THE RECORD'S OWN ROWS: grouped windows, portholes and bands (see header) ──
+       Each group phases from its own forward edge, so the first light lands where the
+       plate puts it, and between groups the paint is just paint. */
+    for (int gi = 0; gi < 16; gi++) {
+      if (gi >= uHGrpN) break;
+      vec4 A = uHGrpA[gi];
+      vec4 Bv = uHGrpB[gi];
+      if (u < A.x || u > A.y || v < A.z || v > A.w) continue;
+      float mPerV = uHullDims.y / (1.0 - uWaterline);   // metres per v in the freeboard
+      float hM = (v - A.z) * mPerV;                     // metres above the group's sill
+      float rowHM = (A.w - A.z) * mPerV;
+      float duM = (u - A.x) * uHullDims.x;              // metres abaft the group's edge
+      float gwM = (A.y - A.x) * uHullDims.x;
+      if (Bv.z < 0.5) {                                 // round porthole
+        float cell = Bv.x > 0.0 ? mod(duM, Bv.x) - Bv.x * 0.5 : duM - gwM * 0.5;
+        float dd = length(vec2(cell, hM - rowHM * 0.5));
+        float r = Bv.y * 0.5;
+        paint = mix(paint, vec3(0.055, 0.060, 0.070), smoothstep(r, r * 0.7, dd) * 0.92);
+        /* a modern porthole ring is painted steel, a quiet grey ring, not Victorian brass */
+        float rim = smoothstep(r * 1.5, r * 1.1, dd) * smoothstep(r * 0.7, r * 1.05, dd);
+        paint = mix(paint, vec3(0.60, 0.59, 0.56), rim * 0.5);
+      } else if (Bv.z < 1.5) {                          // rectangular window
+        float cell = Bv.x > 0.0 ? mod(duM, Bv.x) : duM;
+        float inW = smoothstep(0.0, 0.06, cell) * smoothstep(Bv.y, Bv.y - 0.06, cell);
+        float inH = smoothstep(0.0, 0.10, hM) * smoothstep(rowHM, rowHM - 0.10, hM);
+        paint = mix(paint, vec3(0.050, 0.056, 0.066), inW * inH * 0.94);
+      } else {                                          // continuous tinted band
+        float inH = smoothstep(0.0, 0.08, hM) * smoothstep(rowHM, rowHM - 0.08, hM);
+        vec3 bandCol = mix(vec3(0.10, 0.12, 0.14), vec3(0.24, 0.28, 0.32),
+                           hM / max(rowHM, 0.001));
+        paint = mix(paint, bandCol, inH * 0.92);
+      }
+    }
 
     col = paint * (0.965 + 0.035 * noise(vec2(u * 60.0, v * 26.0)));
     /* a riveted lap stands proud, so it shades on one side and catches light on the other —

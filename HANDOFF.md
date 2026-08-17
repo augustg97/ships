@@ -5847,3 +5847,63 @@ of forward portholes in the photograph; the model's freeboard is bare. Both are 
 window-geometry work (the tierBands mechanism already carries pitch/pier — it needs u-span
 GROUPS). And the r94 leftover stands: the foredeck's dark cap strip reads thicker than the
 photograph's.
+
+## Round 96 — 2026-08-17 — the ribbons become the record's own window groups, and the freeboard stops being bare
+
+Round 95's opening debt was paid first: the ratchet's first run of the round came back 55/55 at
+0.000%, ship-azzam included, which closes the accept that round had no time to confirm.
+
+**The task was round 95's last paragraph**, and all three named items are done:
+
+**THE GLAZING IS GROUPS, NOT A RIBBON.** The broadside was re-segmented at 8.96 px/m (this
+file's own scale — stem x332, transom x1950, waterline y941; the r95 "8.33" belongs to a
+different-resolution copy of the same Commons file, which is exactly why a provenance carries
+its plate AND its scale). Row by gated row it reads: tier 0 carries six 4.1 m lights at 6.1 m
+pitch from u 0.31 to 0.50, small lights amidships, a 23 m run at 0.68–0.81 and two more aft;
+tier 1 four 3.2 m lights then smalls then a 29 m run; tier 2 one 10 m run forward and one aft
+group; the crest its raked front glass and one aft run. `tierBands.groups` now records that —
+[uStart, uEnd, pitchM, pierFrac] per tier, pitchM 0 a continuous run — and the wall builder
+gained `snapGroupsX`, snapBand's sibling: 1 mm vertex pairs at every group edge and every
+light/pier boundary, positioned by hull-u rather than by arc rhythm, each group phasing from
+its own forward edge. Between groups the wall is just wall. The old snapBand path is untouched
+and every non-grouped banded hull (Queen Mary 2) is vertex-identical.
+
+**THE FREEBOARD CARRIES ITS ROWS.** New record field `hullRows`: window and porthole GROUPS
+with u-spans, heights in metres over the waterline, pitches and light sizes — five clusters of
+1.0 m windows at 1.9 m pitch (sills 4.9 m, heads 6.9 m) between u 0.26 and 0.49, two dark side
+doors, porthole triads at 3.0 m over the water, one porthole forward at u 0.11, a small window
+aft, and the broken tinted band at 8.2–8.7 m under the aft deck edge. HULL_FRAG draws them from
+16 denormalised vec4 group slots (u-span, v-span / pitch, light size, kind), all distances in
+metres so a 0.45 m glass is 0.45 m on any hull; a hull without the record uploads uHGrpN 0 and
+the loop breaks before reading a slot. The old uPortholes path is unchanged for the liners.
+
+**THE CAP STRIP IS A RECORDED DIMENSION.** The deck-edge capping was B·0.016 — 0.33 m of
+section, a 0.53 m dark face on her profile — against 0.11–0.33 m (median 0.2) measured at the
+sheer on the plate. New record field `capM`: the measured face height, record-gated, so every
+unmeasured hull keeps the beam derivation and stays vertex-identical. Azzam's renders 0.15–0.29 m.
+
+**Audit: two new record-level rules** — 'window group outside its wall' and 'hull row beyond
+the freeboard' — because a group past the surface's own span silently never draws, which no
+picture-diff can see. Both fire 1-for-1 under injection (run_audit_inject.py, a pushed-out
+tier group and an 11.5 m hull row); clean sweep stays 33/0.
+
+**Gates.** measure_ship: extent 181.45 vs LOA 180.6, beam 20.84 vs 20.8, masthead 37.50 —
+unmoved from r95. Ratchet: 55 frames, ONE moved — ship-azzam 1.005% / 1.120, diff read and
+confined to the yacht (tier glazing regrouped, hull rows added, cap thinned), 54 at 0.000%.
+Accepted with the class reason. Profile harness re-run: both broadsides, segmented against the
+plate — groups land on their measured u-spans, rendered cap 0.15–0.29 m vs plate 0.11–0.33.
+
+**Left deliberately un-run, same as r95: the post-accept confirming ratchet pass.** The accept
+consumed the check that was just read and nothing changed after it; round 97's opening check
+confirms it for free. If round 97 opens with ship-azzam green, this is closed.
+
+**Still wrong on Azzam, stated for round 97:** the model's tier heights are deckM 3.05 m while
+the photo's bands sit at 10.9–12.6, 14.8–16.7, 18.1–19.5 and 21.2–22.8 m over the water — real
+tiers nearer 3.5–4 m, so the model's house top sits ~1.2 m low against blockTopM 22.5 (the
+audit's crest checks pass because the cluster blocks are pinned to the record separately). That
+is a linerHouse tier-height question, not a window question. And the stern quarter itself: the
+photo's terraces step down to a low aft deck and swim platform aft of u 0.93; the model ends the
+house at 0.929 and runs plain sheer to the transom.
+
+Next vessel in the standing survey queue, if the Azzam thread is judged done: per round 51's
+list the next-crudest unfinished is ship-of-the-line.

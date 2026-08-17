@@ -1892,7 +1892,7 @@ const flush = () => {
 if (run.length < 2) { run = []; return; }
 const start = base;
 for (const q of run) {
-const r = B * 0.016;
+const r = S.capM ? S.capM / 1.6 : B * 0.016;
 pos.push(q.x, q.y, sgn * (q.hb - r), q.x, q.y + r * 1.6, sgn * (q.hb - r),
 q.x, q.y + r * 1.6, sgn * (q.hb + r * 0.3), q.x, q.y, sgn * (q.hb + r * 0.3));
 }
@@ -2240,7 +2240,7 @@ const wallMat = new THREE.MeshStandardMaterial({
 vertexColors: true, roughness: 0.60, side: THREE.DoubleSide });
 const plateMat = new THREE.MeshStandardMaterial({
 color: 0xe4e2dc, roughness: 0.60, side: THREE.DoubleSide });
-const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec, shear) => {
+const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec, shear, grp) => {
 const tp = [], tc = [], ti = [];
 const R = rows.length;
 const fc = faceCol || face;
@@ -2251,7 +2251,21 @@ const frac = ((s / pw) % 1 + 1) % 1;
 const isMul = frac < mulFrac;
 for (const rf of rows) {
 const inBand = rf > band[0] && rf < band[1];
-const c = (inBand && !isMul)
+let glazed = !isMul;
+if (grp) {
+const uu = (path[k].x + (shear ? shear(path[k], rf) : 0)) / grp.L + 0.5;
+glazed = false;
+for (const gr of grp.groups) {
+const relM = (uu - gr[0]) * grp.L;
+const spanM = (gr[1] - gr[0]) * grp.L;
+if (relM > 2e-4 && relM < spanM - 2e-4) {
+const p = gr[2] || 0;
+glazed = !p || relM % p <= p * (1 - (gr[3] || 0)) + 1e-3;
+break;
+}
+}
+}
+const c = (inBand && glazed)
 ? (glassSpec
 ? glassSpec.lo.clone().lerp(glassSpec.hi,
 (rf - band[0]) / Math.max(0.001, band[1] - band[0]))
@@ -2319,6 +2333,42 @@ out.push(b);
 }
 return out;
 };
+const snapGroupsX = (pts, groups, spanL) => {
+const edges = [];
+for (const gr of groups) {
+const x0 = (gr[0] - 0.5) * spanL, x1 = (gr[1] - 0.5) * spanL;
+edges.push(x0, x1);
+const pitch = gr[2] || 0;
+if (pitch > 0) {
+const light = pitch * (1 - (gr[3] || 0));
+const span = (gr[1] - gr[0]) * spanL;
+for (let sM = 0; sM <= span; sM += pitch) {
+if (sM > 0) edges.push(x0 + sM);
+if (sM + light < span) edges.push(x0 + sM + light);
+}
+}
+}
+const eps = 0.001, out = [pts[0]];
+for (let k = 1; k < pts.length; k++) {
+const a = pts[k - 1], b = pts[k];
+const dx = b.x - a.x;
+if (Math.abs(dx) > 1e-9) {
+const cross = edges
+.map(xe => (xe - a.x) / dx)
+.filter(t2 => t2 > 1e-6 && t2 < 1 - 1e-6)
+.sort((p, q) => p - q);
+for (const t2 of cross) {
+for (const d of [-eps, +eps]) {
+const tt = t2 + d / Math.abs(dx);
+if (tt <= 0 || tt >= 1) continue;
+out.push({ x: a.x + dx * tt, z: a.z + (b.z - a.z) * tt });
+}
+}
+}
+out.push(b);
+}
+return out;
+};
 const roofPlate = (t, y) => {
 const pts = perim(t);
 const sh = new THREE.Shape();
@@ -2381,9 +2431,17 @@ const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec
 const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
 const pitch = bandRec.pitchM || paneW;
 const bStep = Math.max(0.6, pitch * 0.5);
+const grpList = bandRec.groups ? bandRec.groups[i] : null;
+if (grpList) {
+g.add(wallLoft(snapGroupsX(perim(t, bStep), grpList, L), t.y0, t.y1, bRows,
+[bandRec.bot, bandRec.top], pitch, pf,
+t.shell ? shellCol : null, { lo, hi }, rampShear,
+{ L, groups: grpList }));
+} else {
 g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
 [bandRec.bot, bandRec.top], pitch, pf,
 t.shell ? shellCol : null, { lo, hi }, rampShear));
+}
 } else {
 g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
 t.recess ? recessCol : (t.shell ? shellCol : null), null, rampShear));
@@ -4852,6 +4910,29 @@ uniforms: {
 uSun: { value: sun }, uCam: { value: new THREE.Vector3() },
 uStrakes: { value: S.strakes || 26 },
 uPortholes: { value: S.portholes ? Math.round(S.lwl / 3.0) : 0 },
+...(() => {
+const HR = (S.hullRows && S.hullRows.groups) ? S.hullRows.groups.slice(0, 16) : [];
+const fb = S.freeboard || 6;
+const gA = [], gB = [];
+for (let gi = 0; gi < 16; gi++) {
+const gr = HR[gi];
+if (gr) {
+gA.push(new THREE.Vector4(gr.u[0], gr.u[1],
+0.62 + 0.38 * (gr.hM[0] / fb), 0.62 + 0.38 * (gr.hM[1] / fb)));
+gB.push(new THREE.Vector4(gr.pitchM || 0, gr.lightWM || 0,
+gr.kind === 'porthole' ? 0 : (gr.kind === 'band' ? 2 : 1), 0));
+} else {
+gA.push(new THREE.Vector4(0, 0, 0, 0));
+gB.push(new THREE.Vector4(0, 0, 0, 0));
+}
+}
+return {
+uHGrpN: { value: HR.length },
+uHGrpA: { value: gA },
+uHGrpB: { value: gB },
+uHullDims: { value: new THREE.Vector2(S.loa || S.lwl, fb) },
+};
+})(),
 uPlankLen: { value: Math.max(3, S.loa / (S.plankLen || 7.0)) },
 uFrames: { value: Math.max(8, S.loa / (S.roomSpace || 0.78)) },
 uCopper: { value: S.copper ? 1 : 0 },

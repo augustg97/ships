@@ -5430,3 +5430,18 @@ You're out of usage credits. Run /usage-credits to keep using Fable 5 or /model 
   by itself at the next firing. Nothing else is needed.
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 10:00:21  round starting
+Deployed and verified live — stamp `1786989994` is serving. Round 95 is committed (`c4df774`), pushed, with nine minutes of watchdog margin. Summary of the round:
+
+**The queue was already closed** (August's second list finished at round 57), so I took round 94's explicit pointer: Azzam's slab topside and stepped superstructure, to be fixed off a fresh broadside measurement.
+
+**The measuring instrument came first, because it was broken.** The profile harness had never taken a true broadside: it wrote `SW.shipSpin` directly while `swFrame` had moved to a fixed-camera convention, leaving every round-93/94 "plate" foreshortened 66° off the beam — measured off the frame itself (16.1 px/m vertical against a 67.6 m tick span, cos θ = 0.39) before finding it in the code. It now drives `SW.viewFromDeg`, the app's own bearing grammar. Separately, the 3° lens needed its near plane raised: at 3.3 km with a sub-metre near plane, the depth buffer resolved only ~1 m at the hull, which manufactured the "black arc and speckle" at Azzam's stem.
+
+**The stem arc was two faults layered.** The steel stem bar's fixed 5.5%-of-beam siding genuinely pierced fine bows (injection proof: Yamato's post stood 0.15 m proud) — it now tapers per-face to half the shell's local breadth. The rest was the instrument's depth precision. A new audit rule, *post proud of a welded shell*, fires 1-for-1 under injection and is silent on all 33 hulls today.
+
+**Azzam herself, off the re-fetched (and this time kept) Fricke broadside:** `houseRamp` rakes every tier front onto the next front's foot — one continuous sculpted sweep where there were four vertical steps; `faired` removes plate patchwork, rust streaks and hungry-horse dishing from a long-boarded gloss shell; `bowFlare` 0.14 (the field already existed — I first duplicated it, then caught and reverted that). All record-gated: every other hull is vertex-identical, which the ratchet confirmed — 55 frames, only ship-azzam moved (0.398%, diff read and confined to the yacht), 54 at exactly 0.000%.
+
+**Left honest in HANDOFF:** the post-accept confirming ratchet pass didn't fit inside the 80-minute watchdog — round 96's opening check confirms it for free — and the named leftovers are the continuous window ribbons (the photo shows grouped punched windows) and her bare freeboard missing its hull-window rows.
+2026-08-17 11:14:32  round finished; HEAD is c4df774 Round 95: the profile lens was 66 degrees off the beam, and Azzam's front becomes one sweep
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 59381 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 11:24:32  round starting

@@ -6,6 +6,26 @@ const say = (id, rule, detail) => problems.push({ id, rule, detail });
 for (const v of list) {
 if (!v.hull) continue;
 const H = v.hull;
+if (H.tierBands && H.tierBands.groups) {
+const [hA2, hB2] = H.houseAt || [0.10, 0.90];
+for (const ti in H.tierBands.groups)
+for (const gr of H.tierBands.groups[ti]) {
+if (!(gr[0] < gr[1]))
+say(v.id, 'window group inverted', `tier ${ti} group [${gr[0]}, ${gr[1]}]`);
+if (gr[0] < hA2 - 0.03 || gr[1] > hB2 + 0.03)
+say(v.id, 'window group outside its wall',
+`tier ${ti} group [${gr[0]}, ${gr[1]}] vs house ${hA2}-${hB2}`);
+}
+}
+if (H.hullRows && H.hullRows.groups) {
+for (const gr of H.hullRows.groups) {
+if (!(gr.u[0] < gr.u[1]) || gr.u[0] < 0 || gr.u[1] > 1)
+say(v.id, 'hull row group off the hull', `u [${gr.u[0]}, ${gr.u[1]}]`);
+if (gr.hM[1] > (H.freeboard || 6) + 0.01 || gr.hM[0] < 0 || !(gr.hM[0] < gr.hM[1]))
+say(v.id, 'hull row beyond the freeboard',
+`hM [${gr.hM[0]}, ${gr.hM[1]}] vs freeboard ${H.freeboard}`);
+}
+}
 let g = null;
 try { g = SHIPS_HULL.buildShip(H, { fine: true }); }
 catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }

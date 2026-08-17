@@ -3139,7 +3139,12 @@ function buildFittings(S, group, mats) {
         if (run.length < 2) { run = []; return; }
         const start = base;
         for (const q of run) {
-          const r = B * 0.016;
+          /* ── ⚠ A CAPPING IS A ROLLED SECTION, NOT A FRACTION OF BEAM ────────────────
+             B·0.016 deals Azzam a 0.33 m section whose dark face reads 0.53 m in profile;
+             her broadside measures the deck-edge strip at 0.11–0.33 m (median 0.2). capM
+             is that measured face height, where a plate has given one — record-gated, so
+             every unmeasured hull keeps the derivation and stays vertex-identical. */
+          const r = S.capM ? S.capM / 1.6 : B * 0.016;
           pos.push(q.x, q.y, sgn * (q.hb - r), q.x, q.y + r * 1.6, sgn * (q.hb - r),
                    q.x, q.y + r * 1.6, sgn * (q.hb + r * 0.3), q.x, q.y, sgn * (q.hb + r * 0.3));
         }
@@ -3745,7 +3750,14 @@ function buildSuperstructure(S, group) {
      raked front is wound without breaking the loop: the front-leg stations lean back with
      height while the side stations stand, and the one quad at each corner carries the twist.
      Shared topology means the wall can never open a seam against itself. */
-  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec, shear) => {
+  /* `grp` ({L, groups}), when given, replaces the arc-length mullion rhythm with the
+     record's own WINDOW GROUPS: [uStart, uEnd, pitchM, pierFrac] in hull u, pitchM 0 a
+     continuous run. The glazing then exists only inside a group — long blank wall between
+     groups, which is what the broadside of a yacht actually shows — and the light/pier
+     rhythm phases from each group's own forward edge, so the first light lands where the
+     plate puts it. Membership is decided on the SHEARED x, so a raked front whose head
+     crosses into a group glazes with it. */
+  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec, shear, grp) => {
     const tp = [], tc = [], ti = [];
     const R = rows.length;
     const fc = faceCol || face;
@@ -3756,7 +3768,23 @@ function buildSuperstructure(S, group) {
       const isMul = frac < mulFrac;
       for (const rf of rows) {
         const inBand = rf > band[0] && rf < band[1];
-        const c = (inBand && !isMul)
+        let glazed = !isMul;
+        if (grp) {
+          const uu = (path[k].x + (shear ? shear(path[k], rf) : 0)) / grp.L + 0.5;
+          glazed = false;
+          for (const gr of grp.groups) {
+            const relM = (uu - gr[0]) * grp.L;
+            const spanM = (gr[1] - gr[0]) * grp.L;
+            /* 0.2 mm slack against the 1 mm snap pairs: the vertex this side of a
+               boundary resolves cleanly, the one beyond it resolves cleanly */
+            if (relM > 2e-4 && relM < spanM - 2e-4) {
+              const p = gr[2] || 0;
+              glazed = !p || relM % p <= p * (1 - (gr[3] || 0)) + 1e-3;
+              break;
+            }
+          }
+        }
+        const c = (inBand && glazed)
           ? (glassSpec
               ? glassSpec.lo.clone().lerp(glassSpec.hi,
                   (rf - band[0]) / Math.max(0.001, band[1] - band[0]))
@@ -3844,6 +3872,49 @@ function buildSuperstructure(S, group) {
           }
         }
         s += seg;
+      }
+      out.push(b);
+    }
+    return out;
+  };
+
+  /* snapBand's sibling for GROUPED walls: the colour edges live at hull-u positions (group
+     ends, and every light/pier boundary inside a group), not on an arc-length rhythm — so
+     the pairs go in where a leg CROSSES those x stations. Front and stern cross-legs never
+     cross one (their x is constant), which is what lets a group that reaches a tier's end
+     glaze the whole end face. Same 1 mm pairs, same reason: a colour on a vertex cannot
+     have an edge unless the vertices give it one. */
+  const snapGroupsX = (pts, groups, spanL) => {
+    const edges = [];
+    for (const gr of groups) {
+      const x0 = (gr[0] - 0.5) * spanL, x1 = (gr[1] - 0.5) * spanL;
+      edges.push(x0, x1);
+      const pitch = gr[2] || 0;
+      if (pitch > 0) {
+        const light = pitch * (1 - (gr[3] || 0));
+        const span = (gr[1] - gr[0]) * spanL;
+        for (let sM = 0; sM <= span; sM += pitch) {
+          if (sM > 0) edges.push(x0 + sM);
+          if (sM + light < span) edges.push(x0 + sM + light);
+        }
+      }
+    }
+    const eps = 0.001, out = [pts[0]];
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], b = pts[k];
+      const dx = b.x - a.x;
+      if (Math.abs(dx) > 1e-9) {
+        const cross = edges
+          .map(xe => (xe - a.x) / dx)
+          .filter(t2 => t2 > 1e-6 && t2 < 1 - 1e-6)
+          .sort((p, q) => p - q);
+        for (const t2 of cross) {
+          for (const d of [-eps, +eps]) {
+            const tt = t2 + d / Math.abs(dx);
+            if (tt <= 0 || tt >= 1) continue;
+            out.push({ x: a.x + dx * tt, z: a.z + (b.z - a.z) * tt });
+          }
+        }
       }
       out.push(b);
     }
@@ -3949,9 +4020,18 @@ function buildSuperstructure(S, group) {
       /* the wall's own stations only have to follow the SHAPE now — snapBand puts the
          colour edges in, so the step is a geometry choice rather than a rhythm one */
       const bStep = Math.max(0.6, pitch * 0.5);
-      g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
-                     [bandRec.bot, bandRec.top], pitch, pf,
-                     t.shell ? shellCol : null, { lo, hi }, rampShear));
+      const grpList = bandRec.groups ? bandRec.groups[i] : null;
+      if (grpList) {
+        /* the record gives this tier its own window GROUPS — blank wall between them */
+        g.add(wallLoft(snapGroupsX(perim(t, bStep), grpList, L), t.y0, t.y1, bRows,
+                       [bandRec.bot, bandRec.top], pitch, pf,
+                       t.shell ? shellCol : null, { lo, hi }, rampShear,
+                       { L, groups: grpList }));
+      } else {
+        g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
+                       [bandRec.bot, bandRec.top], pitch, pf,
+                       t.shell ? shellCol : null, { lo, hi }, rampShear));
+      }
     } else {
       g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
                      t.recess ? recessCol : (t.shell ? shellCol : null), null, rampShear));
@@ -7610,6 +7690,37 @@ function buildShip(S, opts) {
       /* portholes spaced by a REAL distance — about 3 m between centres on a liner — so the
          count follows the ship's length rather than the length following the count */
       uPortholes: { value: S.portholes ? Math.round(S.lwl / 3.0) : 0 },
+      /* ── THE FREEBOARD CARRIES THE ROWS THE PLATE SHOWS, WHERE IT SHOWS THEM ────────
+         hullRows is the record's own read of the hull-side glazing: window and porthole
+         GROUPS with real u-spans, heights over the waterline in metres, real pitches —
+         not a count marching the whole length. Heights map into the loft's freeboard band
+         (v from uWaterline at the load line to 1.0 at the deck edge), so the rows parallel
+         the sheer. Sixteen group slots; a hull without the record uploads zeros and the
+         shader's loop breaks before reading one. */
+      ...(() => {
+        const HR = (S.hullRows && S.hullRows.groups) ? S.hullRows.groups.slice(0, 16) : [];
+        const fb = S.freeboard || 6;
+        const gA = [], gB = [];
+        for (let gi = 0; gi < 16; gi++) {
+          const gr = HR[gi];
+          if (gr) {
+            /* 0.62 is uWaterline: the freeboard band is v 0.62..1.0 over fb metres */
+            gA.push(new THREE.Vector4(gr.u[0], gr.u[1],
+              0.62 + 0.38 * (gr.hM[0] / fb), 0.62 + 0.38 * (gr.hM[1] / fb)));
+            gB.push(new THREE.Vector4(gr.pitchM || 0, gr.lightWM || 0,
+              gr.kind === 'porthole' ? 0 : (gr.kind === 'band' ? 2 : 1), 0));
+          } else {
+            gA.push(new THREE.Vector4(0, 0, 0, 0));
+            gB.push(new THREE.Vector4(0, 0, 0, 0));
+          }
+        }
+        return {
+          uHGrpN: { value: HR.length },
+          uHGrpA: { value: gA },
+          uHGrpB: { value: gB },
+          uHullDims: { value: new THREE.Vector2(S.loa || S.lwl, fb) },
+        };
+      })(),
       /* ⚠ Both of these are LENGTHS TURNED INTO COUNTS, so they scale with the ship instead of
          being a texture frequency somebody liked. English oak planking ran about 7 m; the room
          and space of an 18th-century ship is about 0.75 m, so a 57 m hull crosses 76 frames. */

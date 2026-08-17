@@ -4535,15 +4535,43 @@
      }
     },
     "tierBands": {
-     "provenance": "DERIVED from the delivery photograph on this card: each tier carries a mid-height run of dark tinted glazing about 0.45 of the tier tall, in units of roughly 2.2 m with piers of about 0.6 m between — read at 0.157 m per pixel with a stated 3% error bar.",
+     "provenance": "RE-MEASURED 2026-08-17 off the kept broadside (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) at 8.96 px/m with stem x332 / transom x1950 / waterline y941 as anchors. The glazing is not a continuous ribbon: each tier carries GROUPS of punched lights with long blank wall runs between, different per tier. groups[tier] = [uStart, uEnd, pitchM, pierFrac]; pitchM 0 is one continuous run. Tier 0: six 4.1 m lights at 6.1 m pitch forward, small lights amidships, a 23 m run and two shorter ones aft. Tier 1: four 3.2 m lights forward, small lights, a 29 m aft run. Tier 2: a 10 m forward run and an aft group. Crest: the raked front glass and one 12 m aft run. Aft groups reach each tier's aft edge because her terrace fronts are glazed doors; the broadside cannot see the transoms, so that extension is DERIVED, not measured.",
      "from": 0,
      "to": 3,
      "bot": 0.32,
      "top": 0.78,
      "pitchM": 2.8,
      "pierFrac": 0.22,
-     "kind": "glass"
+     "kind": "glass",
+     "groups": {
+      "0": [[0.308, 0.503, 6.1, 0.33], [0.545, 0.676, 3.9, 0.67], [0.678, 0.808, 0, 0], [0.815, 0.860, 4.3, 0.30], [0.864, 0.930, 0, 0]],
+      "1": [[0.360, 0.505, 5.9, 0.45], [0.536, 0.667, 3.9, 0.66], [0.675, 0.835, 0, 0], [0.848, 0.889, 4.0, 0.40]],
+      "2": [[0.563, 0.620, 0, 0], [0.722, 0.822, 4.5, 0.20]],
+      "3": [[0.510, 0.560, 0, 0], [0.678, 0.745, 0, 0]]
+     }
     },
+    "hullRows": {
+     "provenance": "READ 2026-08-17 off the same broadside at 8.96 px/m. The freeboard is not bare: an upper row of ~1.0 m rectangular windows, sills 4.9 m and heads 6.9 m over the waterline, in five clusters at ~1.9 m pitch between u 0.26 and 0.49, with two dark side doors aft of them; a low porthole line, ~0.45 m glasses about 3.0 m over the water, in clusters of three or four between u 0.25 and 0.52 plus one forward at u 0.11; and a long tinted band 8.2-8.7 m over the water under the aft deck edge, broken once, u 0.60-0.77. Heights are placed as fractions of the recorded 9.0 m freeboard, so the rows parallel the deck line as the photograph shows.",
+     "groups": [
+      { "u": [0.259, 0.330], "hM": [4.9, 6.9], "kind": "window", "pitchM": 1.9, "lightWM": 1.0 },
+      { "u": [0.348, 0.365], "hM": [4.9, 6.9], "kind": "window", "pitchM": 1.9, "lightWM": 1.0 },
+      { "u": [0.380, 0.398], "hM": [4.9, 6.9], "kind": "window", "pitchM": 1.9, "lightWM": 1.0 },
+      { "u": [0.415, 0.456], "hM": [4.9, 6.9], "kind": "window", "pitchM": 2.0, "lightWM": 1.0 },
+      { "u": [0.472, 0.490], "hM": [4.9, 6.9], "kind": "window", "pitchM": 1.9, "lightWM": 1.0 },
+      { "u": [0.615, 0.623], "hM": [4.9, 6.9], "kind": "window", "pitchM": 0, "lightWM": 1.5 },
+      { "u": [0.664, 0.670], "hM": [4.9, 6.9], "kind": "window", "pitchM": 0, "lightWM": 1.1 },
+      { "u": [0.595, 0.697], "hM": [8.2, 8.7], "kind": "band" },
+      { "u": [0.719, 0.769], "hM": [8.2, 8.7], "kind": "band" },
+      { "u": [0.254, 0.295], "hM": [2.75, 3.25], "kind": "porthole", "pitchM": 2.45, "lightWM": 0.45 },
+      { "u": [0.301, 0.347], "hM": [2.75, 3.25], "kind": "porthole", "pitchM": 2.75, "lightWM": 0.45 },
+      { "u": [0.353, 0.400], "hM": [2.75, 3.25], "kind": "porthole", "pitchM": 2.85, "lightWM": 0.45 },
+      { "u": [0.400, 0.462], "hM": [2.75, 3.25], "kind": "porthole", "pitchM": 3.7, "lightWM": 0.45 },
+      { "u": [0.477, 0.519], "hM": [3.2, 3.7], "kind": "porthole", "pitchM": 2.5, "lightWM": 0.45 },
+      { "u": [0.106, 0.120], "hM": [2.75, 3.25], "kind": "porthole", "pitchM": 0, "lightWM": 0.45 },
+      { "u": [0.822, 0.836], "hM": [3.6, 4.2], "kind": "window", "pitchM": 0, "lightWM": 1.0 }
+     ]
+    },
+    "capM": 0.2,
     "tierForeU": {
      "1": 0.349,
      "2": 0.47
@@ -4553,7 +4581,7 @@
     "houseRamp": true,
     "faired": true,
     "bowFlare": 0.14,
-    "formProvenance": "READ off the same broadside at 8.33 px/m (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0). houseRamp: every tier front is raked so its head lands on the next front's foot, one continuous sweep from the foredeck to the crest, where the model had four vertical steps. faired: the topside between the waterline and the sheer is an unbroken gloss surface with no visible plate lands, tone patchwork or streaking anywhere along her 180.6 m. bowFlare 0.14: the topsides lean out over the fine entry; the plate cannot give a number at this bearing, so this is set to the smallest value that reads as flare in the bow capture and is marked DERIVED, not measured.",
+    "formProvenance": "READ off the same broadside at 8.33 px/m (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0). houseRamp: every tier front is raked so its head lands on the next front's foot, one continuous sweep from the foredeck to the crest, where the model had four vertical steps. faired: the topside between the waterline and the sheer is an unbroken gloss surface with no visible plate lands, tone patchwork or streaking anywhere along her 180.6 m. bowFlare 0.14: the topsides lean out over the fine entry; the plate cannot give a number at this bearing, so this is set to the smallest value that reads as flare in the bow capture and is marked DERIVED, not measured. capM 0.2: the dark strip at the deck edge measures 0.11-0.33 m on the broadside (median 0.2) where the model's beam-derived capping drew 0.53 m.",
     "deckSteel": true
    },
    "rows": [
@@ -4587,7 +4615,7 @@
     ],
     [
      "Glazing",
-     "long runs of dark tinted glass at mid-tier on every deck — derived from the photograph"
+     "grouped runs of dark tinted glass at mid-tier, different on every deck, with two window rows and a porthole line in the hull side — measured from the 2014 broadside"
     ],
     [
      "Tenders",
