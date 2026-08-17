@@ -914,12 +914,20 @@ const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(tag(tm, 'tac
 const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(tag(hm, 'halyard'));
 const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(tag(jm2, 'jeers'));
 }
+const segL = segHeads.length ? (segs[segHeads.length - 1] || 0) : 0;
+const cosR = Math.cos(rakeRad), sinR = Math.sin(rakeRad);
+const truckY = segHeads.length
+? segHeads[segHeads.length - 1] - (1 - cosR) * segL / 2 - cosR * segL * 0.04
+: y + (lower * 0.14);
+const truckX = segHeads.length
+? x + sinR * (segHeads[segHeads.length - 1] - base) - sinR * segL * 0.04
+: x + sinR * (truckY - base);
 if (mk.rig === 'square') {
-mastTops.push({ u, x, y: y + (lower * 0.14) });
+mastTops.push({ u, x: truckX, y: truckY });
 stayMasts[mi] = { x, base, T: y - base };
 }
 else if (mk.rig === 'gaff' && segs.length)
-mastTops.push({ u, x, y: y + segs[segs.length - 1] * 0.09, gaff: true });
+mastTops.push({ u, x: truckX, y: truckY, gaff: true });
 if (mk.tripod && (mk.rig === 'none' || mk.rig === 'pole')) {
 const legMat = S.turrets
 ? (mats.mastGrey || (mats.mastGrey = new THREE.MeshStandardMaterial(
@@ -2203,7 +2211,7 @@ for (const d of [-0.30, 0.30]) {
 const sk = new THREE.Mesh(
 new THREE.BoxGeometry(B * 0.030, B * 0.022, bl / 3.4 * 1.5), wood);
 sk.position.set((u - 0.5) * L + d * bl, deckAtU(u) + bl * 0.012, 0);
-group.add(sk);
+group.add(tag(sk, 'boat', 'Boat skids'));
 }
 }
 }
@@ -4524,9 +4532,17 @@ const vT = Math.max(0.70, Math.min(0.95,
 const tpv = surfacePoint(S, H, uT, vT);
 const tp = new THREE.Vector3(tpv[0], tpv[1], sgn * (tpv[2] + B * 0.030));
 const d = tp.clone().sub(ring).normalize();
-g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().negate());
-g.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(
-new THREE.Vector3(0, 1, 0), sgn * 1.25));
+const nu = surfacePoint(S, H, Math.min(1, uT + 0.01), vT);
+const nv = surfacePoint(S, H, uT, Math.min(0.99, vT + 0.02));
+const tU = new THREE.Vector3(nu[0] - tpv[0], nu[1] - tpv[1], nu[2] - tpv[2]);
+const tV = new THREE.Vector3(nv[0] - tpv[0], nv[1] - tpv[1], nv[2] - tpv[2]);
+const nrm = tU.cross(tV).normalize();
+if (nrm.z < 0) nrm.negate();
+nrm.z *= sgn;
+const yA = d.clone().negate();
+const xA = new THREE.Vector3().crossVectors(yA, nrm).normalize();
+const zA = new THREE.Vector3().crossVectors(xA, yA).normalize();
+g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
 g.position.copy(ring).addScaledVector(d, shank * 0.52);
 const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), ring]],
 0.018 + B * 0.0006, mats.ropeSolid || mat);

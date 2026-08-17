@@ -110,6 +110,44 @@ e.z[0] = Math.min(e.z[0], bb.min.z); e.z[1] = Math.max(e.z[1], bb.max.z);
 const deckY = part.deck ? part.deck.y[1] : 0;
 const bb = new THREE.Box3().setFromObject(g);
 const airM = bb.max.y - deckY;
+if (H.__mastTops && H.__mastTops.length) {
+const mastBoxes = [];
+g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast')
+mastBoxes.push(new THREE.Box3().setFromObject(o)); });
+H.__mastTops.forEach((mt, i) => {
+let my = -1e9;
+mastBoxes.forEach(b2 => {
+if (mt.x > b2.min.x - 3 && mt.x < b2.max.x + 3) my = Math.max(my, b2.max.y);
+});
+if (my > -1e9 && mt.y - my > 0.5)
+say(v.id, 'stay anchored above its own truck',
+`mast ${i} stay collar at ${mt.y.toFixed(1)} m vs drawn truck ${my.toFixed(1)} m`);
+});
+}
+g.traverse(o => {
+if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
+const flukes = [];
+o.traverse(m => { if (m.isMesh && m.geometry && m.geometry.type === 'ConeGeometry')
+flukes.push(Math.abs(new THREE.Box3().setFromObject(m)
+.getCenter(new THREE.Vector3()).z)); });
+if (flukes.length === 2 && Math.abs(flukes[0] - flukes[1]) > 1.5)
+say(v.id, 'anchor fork athwart the ship',
+`flukes at ${flukes[0].toFixed(1)} and ${flukes[1].toFixed(1)} m off centre — `
++ 'one in the planking or one in the air');
+});
+{
+let untagged = 0, first = null;
+g.traverse(o => {
+if (!o.isMesh || tagOf(o)) return;
+untagged++;
+if (!first) {
+const b2 = new THREE.Box3().setFromObject(o);
+first = `${o.geometry ? o.geometry.type : '?'} at x ${b2.min.x.toFixed(1)}..${b2.max.x.toFixed(1)}`;
+}
+});
+if (untagged)
+say(v.id, 'mesh with no part tag', `${untagged} untagged mesh(es); first: ${first}`);
+}
 if (H.sternSteps) {
 const ss = H.sternSteps.steps || [];
 const spanDev = ss.map(() => -1e9);

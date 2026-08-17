@@ -5489,3 +5489,20 @@ The queue is long closed, so this round worked round 96's two named leftovers on
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 70714 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 14:01:05  round starting
+Live stamp **1787002237** confirmed — the deploy is real, the round is complete.
+
+## Round 98 summary
+
+The queue stands worked in full (r57), so this round took round 97's named leftover: **Azzam's stern terraces**, the last big silhouette gap between the model and the broadside.
+
+**The measurement came first, and it corrected round 97's read.** A 0.0025-u envelope scan of the Fricke broadside resolved the main-deck bulwark ending at u 0.884 — the 9.93 m reading at exactly 0.900 is an occluder standing on the terrace — and showed every terrace cap **raking** down toward its own break: 9.9→9.6 m, then 6.9→7.0, 6.6→6.1, 5.7→4.9, 4.9→4.2, and 3.5→3.0 m at the transom. That went into a new `sternSteps` record: measured cap lines per span, derived decks behind them (the plate cannot see decks behind their own bulwarks, and the provenance says so).
+
+**The build is hull-sheer surgery, record-gated end to end.** `sheer()` steps the deck line span by span; `hullStations()` inserts 4 mm snap-pair stations at every break — the snapBand lesson in its third guise, a height on a vertex cannot have an edge — and shell, deck and frames follow because they all ask `surfacePoint`. New `buildSternTerraces()` closes each break with a cambered riser, walks solid parapets flush with the shell (counter flare included), rides a dark cap along every top, and walls the transom. The old deck-edge rail is suppressed there — the bulwark owns that edge now.
+
+**Verification:** the profile harness with a per-column waterline datum (the 3° lens tilts the datum ~0.6 m across the frame) reads the model on the recorded cap line within instrument noise; astern and quarter captures show closed, walkable steps with no z-fighting; measure_ship gates unmoved. Five new audit rules, all injection-proven — the first version of the vertex rule convicted every raked cap of being its own rake short, and was fixed under rule 8 before anything else moved. Clean sweep 33/0. Ratchet 54/55 at 0.000% (closing r97's deferral); ship-azzam classified, read, and accepted with reason.
+
+**Handed to round 99:** ship-of-the-line is next in the survey queue; Azzam residuals (riser glazing, terrace furniture, parapet tone) and a found-but-deferred class fault — the rail loft still uses a pre-flare half-breadth formula, which needs its own round because fixing it moves every flared hull's rail.
+2026-08-17 14:54:39  round finished; HEAD is 7355adc Round 98: the stern comes down to the water, in six measured terraces
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 75394 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 15:04:39  round starting

@@ -6038,3 +6038,84 @@ before/after — not a side effect of this one.
 **Next:** the Azzam thread is at diminishing returns for silhouette work; per round 51's list the
 next-crudest unfinished vessel in the standing survey is **ship-of-the-line**. If a future round
 returns to Azzam: riser glazing, terrace furniture, and the parapet/shell tone match.
+
+## Round 99 — 2026-08-17 — the 74 gets the canvas her record lists, and the whole fleet's stays land on real spars
+
+**Round 98's deferred confirming pass is closed**: the opening ratchet ran 49/55 at 0.000%
+with ship-azzam green. The six late CHANGED frames were this round's own edits landing while
+the check was still rendering (the r97/r98 situation exactly); every one was re-checked and
+accepted at end of round.
+
+**The task was the standing survey's next vessel: ship-of-the-line.** Surveyed from twelve
+bearings (spin_capture), measured part by part (measure_ship), and probed in the page. Three
+faults found, all fixed at class level; one record gap closed; one clamp found and deferred.
+
+**THE FLEET'S STAYS CONVERGED ON EMPTY AIR.** buildRigging anchors every stay and backstay at
+`__mastTops`, and those points were `y + lower*0.14` — measured against the mast meshes
+themselves, 3.0 / 3.4 / 3+ m above the trucks the mast loop actually drew, on every square-
+rigged hull in the fleet. Invisible because a rope is thin and nothing else stood at that
+height to disagree. The fix anchors on the DRAWN truck: segHeads' last entry is the cap of the
+last drawn segment, the collar sits 4% of that segment below it, at the raked masthead's own x
+(the un-raked station x had also put a 5°-raked mizzen's stay head 3 m forward of its truck).
+Two sub-cases the audit caught in the first cut: a tilted segment's cap stands (1−cos)·seg/2
+below capY — 0.2 mm at 5° of rake, 0.93 m at the corbita's 48° artemon — and `only` truncates
+the drawn stack short of the record's segment list, so the top drawn segment is segHeads'
+last, not segs'. Verified in-page: collars now 0.34–0.41 m BELOW their trucks on the 74's
+three masts, topmost stay vertex 61.04 on a 61.44 truck. The card's "rig, deck to truck"
+self-corrected 59.4 → 56.0 m because that stat reads the same points.
+
+**THE BOWER'S FORK WAS ATHWARTSHIPS.** buildAnchor rolled the catted-and-fished anchor about
+its shank by a fixed 1.25 rad, which left one fluke buried two metres INSIDE the planking
+(z 2.38 on a station whose skin is ~5.0) and the other 3.0 m off the ship in open air
+(z 8.40). No bearing could tell — a black anchor against a dark wale reads as an anchor. The
+stow every broadside photograph of a preserved two-decker shows is the anchor's full profile
+flat along the topside, which REQUIRES the fork's plane parallel to the skin, stock athwart at
+the ring end where the bow has narrowed away. That orientation is the hull's outward normal at
+the fluke station, so the anchor's frame is now built FROM the surface (finite-difference
+normal off surfacePoint, orthonormal basis: shank along the fished lead, arms across the
+normal, stock along it). Measured after: both flukes at z 5.0–6.1 against a ~5.2 skin, fork
+spread up the side (y 2.2–8.3), stock athwart at the cathead. Class fix — every catted hull.
+
+**THE 74 SET ONLY SQUARE CLOTH; STEEL 1794 LISTS HER SEVEN FORE-AND-AFT SAILS.** The record
+never declared what the machinery already supported: `headsails: 2` (jib and fore topmast
+staysail), `staysails: 3` on the main, `staysails: 2` on the mizzen, `spanker: true` (the
+boomed driver, throat at 0.55 of the lower mast). One new card row cites Steel. Looked at
+from twelve bearings set and from the furled state: jibs flat on taut stays, suits separated,
+driver standing over the counter, and the furl grammar covers all of it unchanged (jibs
+bundle on the sprit, staysails gather down their stays, the gaff drops onto its boom).
+
+**Also: the fleet's one pair of untagged meshes** (the 74's boat skids, hull.js:3552) now
+carries `tag('boat', 'Boat skids')` — the stated rule is the geometry is the source of the
+labels.
+
+**Audit: three new rules, all injection-proven** (run_audit_inject.py): 'stay anchored above
+its own truck' (fired 46× under a +3 m shift — and caught the corbita twice during the fix
+itself, which is the system working), 'anchor fork athwart the ship' (two cones on one anchor
+group must stand at the same |z|; fired 22× under the old 1.25 rad roll), 'mesh with no part
+tag' (fired 33/33 under an injected bare box). Clean sweep 33/0.
+
+**Gates.** measure_ship: extent 71.33 (bowsprit included), mast truck 61.44 over the water vs
+Victory's ~62.5 attested, beam 14.62 vs 14.6. The 63.11 'stays' figure in the part table is
+axis-aligned-box inflation on the merged rope mesh (topmost actual vertex 61.04) — noted so
+the next reader does not chase it. Ratchet: 55 frames, 14 moved, every one read and accepted
+with its reason — the five 74 frames and shipwright-corbis carry the vessel work; the eight
+square-rigger frames (clipper, preussen, steamer, trireme, sekibune, galley, galleass,
+aboard-preussen) are the stays class fix plus the camera fit following the corrected bounding
+box (the whole-ship ghost in every diff is the reframe, read on ship-preussen). Deck look
+(SHIPWRIGHT-QUEUE item 10) taken: camber, gratings, jeer bitts, run-out battery all read;
+nothing built.
+
+**Found and deliberately not taken: the aftermost boom clamp.** `gapAft * 0.78` discounts
+swing clearance against a stern that is not an obstruction, so the 74's driver boom draws
+7.6 m where Steel gives 13–17. Fixing it moves every gaff spanker in the fleet (Wyoming,
+Great Eastern, Preussen) — its own round, with its own before/after. Same standing item: the
+deck-edge rail's pre-flare half-breadth formula (r98).
+
+**Left un-run, same as r95–r98: the post-accept confirming ratchet pass.** Round 100's opening
+check confirms it for free; if it opens with the fourteen accepted frames green, this is
+closed.
+
+**Next:** the survey queue past ship-of-the-line is exhausted per r51's ordering — the two
+deferred class fixes above (rail half-breadth, boom clamp) are the highest-value known work,
+each a one-round job with fleet-wide before/after. Azzam residuals (riser glazing, terrace
+furniture, parapet tone) remain from r98.

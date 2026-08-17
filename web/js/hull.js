@@ -1649,15 +1649,36 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(tag(jm2, 'jeers'));
     }
 
+    /* ⚠ STAYS ANCHOR ON THE DRAWN TRUCK, NOT ON AN ESTIMATE OF IT. `y + lower*0.14` stood
+       3.0 / 3.4 / 9.3 m above the built mastheads on the 74's three masts (measured against
+       the mast meshes themselves, r99), so every stay and backstay in the square fleet
+       converged on a point in open air — invisible from a distance because a rope is thin.
+       segHeads holds the cap of every segment this loop actually drew; the last one IS the
+       truck. The collar sits a few percent of that segment below the cap, at the raked
+       masthead's own x — the un-raked station x put a 5°-raked mizzen's stay head 3 m
+       forward of its truck. */
+    /* the segment cylinder tilts about its own CENTRE, so a raked cap stands below capY by
+       (1 − cos)·seg/2 — 0.2 mm at 5° of rake and 0.93 m at the corbita's 48° artemon,
+       which is exactly where the audit caught the first version of this fix */
+    /* `only` truncates the DRAWN stack short of the record's segment list, so the top
+       drawn segment is segHeads' last entry, not segs' — the corbita draws one of two */
+    const segL = segHeads.length ? (segs[segHeads.length - 1] || 0) : 0;
+    const cosR = Math.cos(rakeRad), sinR = Math.sin(rakeRad);
+    const truckY = segHeads.length
+      ? segHeads[segHeads.length - 1] - (1 - cosR) * segL / 2 - cosR * segL * 0.04
+      : y + (lower * 0.14);
+    const truckX = segHeads.length
+      ? x + sinR * (segHeads[segHeads.length - 1] - base) - sinR * segL * 0.04
+      : x + sinR * (truckY - base);
     if (mk.rig === 'square') {
-      mastTops.push({ u, x, y: y + (lower * 0.14) });
+      mastTops.push({ u, x: truckX, y: truckY });
       /* the staysail block below needs each square mast's own station and truck height */
       stayMasts[mi] = { x, base, T: y - base };
     }
     /* a gaff masthead is a stay anchorage too — the schooner's web is drawn in
        buildRigging from these, and it is a different web from a square-rigger's */
     else if (mk.rig === 'gaff' && segs.length)
-      mastTops.push({ u, x, y: y + segs[segs.length - 1] * 0.09, gaff: true });
+      mastTops.push({ u, x: truckX, y: truckY, gaff: true });
 
     /* ── THE TRIPOD MAST, from the record: `tripod: true` ──────────────────────────────
        A turbine warship's pole mast vibrates — engines and gun blast both — and a fire-
@@ -3553,7 +3574,10 @@ function buildFittings(S, group, mats) {
       const sk = new THREE.Mesh(
         new THREE.BoxGeometry(B * 0.030, B * 0.022, bl / 3.4 * 1.5), wood);
       sk.position.set((u - 0.5) * L + d * bl, deckAtU(u) + bl * 0.012, 0);
-      group.add(sk);
+      /* the one pair of meshes in the fleet that carried no part tag (r99) — and the rule
+         is a rule: the geometry is the source of the labels, so an untagged mesh is a part
+         the picker cannot name */
+      group.add(tag(sk, 'boat', 'Boat skids'));
     }
   }
 }
@@ -7131,11 +7155,27 @@ function buildAnchor(S, group, mats) {
       const tpv = surfacePoint(S, H, uT, vT);
       const tp = new THREE.Vector3(tpv[0], tpv[1], sgn * (tpv[2] + B * 0.030));
       const d = tp.clone().sub(ring).normalize();
-      g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().negate());
-      /* roll the crown fork toward the hull's plane — un-rolled it stands VERTICAL, one
-         fluke diving three metres down across the gunports and one spiking over the rail */
-      g.quaternion.multiply(new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(0, 1, 0), sgn * 1.25));
+      /* ⚠ THE ARM PLANE LIES IN THE HULL'S OWN TANGENT PLANE. The fixed 1.25 rad roll here
+         left the fork nearly athwartships: one fluke buried two metres INSIDE the planking
+         and the other standing 3.0 m proud of the side in open air (measured, r99, on a
+         14.6 m beam whose skin at that station is 5 m from centre). The stow every broadside
+         photograph of a preserved two-decker shows is the anchor's full profile flat against
+         the topside — which requires the fork's plane parallel to the skin — with the stock
+         athwart at the ring end, where the bow has already narrowed away from it. That
+         orientation is not a constant roll; it is the hull's outward normal at the fluke
+         station, so the anchor's frame is built FROM the surface: shank along the fished
+         lead, arms across the outward normal, stock along it. */
+      const nu = surfacePoint(S, H, Math.min(1, uT + 0.01), vT);
+      const nv = surfacePoint(S, H, uT, Math.min(0.99, vT + 0.02));
+      const tU = new THREE.Vector3(nu[0] - tpv[0], nu[1] - tpv[1], nu[2] - tpv[2]);
+      const tV = new THREE.Vector3(nv[0] - tpv[0], nv[1] - tpv[1], nv[2] - tpv[2]);
+      const nrm = tU.cross(tV).normalize();
+      if (nrm.z < 0) nrm.negate();                       // outward on the +z surface
+      nrm.z *= sgn;                                      // mirrored to this side
+      const yA = d.clone().negate();                     // local +Y: ring end of the shank
+      const xA = new THREE.Vector3().crossVectors(yA, nrm).normalize();  // fork, along the side
+      const zA = new THREE.Vector3().crossVectors(xA, yA).normalize();   // stock, off the side
+      g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
       g.position.copy(ring).addScaledVector(d, shank * 0.52);
       const pend = ropeMesh([[new THREE.Vector3(cat.x, cat.y, cat.z), ring]],
                             0.018 + B * 0.0006, mats.ropeSolid || mat);

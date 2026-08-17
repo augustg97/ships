@@ -119,9 +119,17 @@ Ordered by how much each closes the gap per unit of work.
    noted: the treasure ship's junk masts at 1.08 m drawn diameter were surely built up and
    hooped too, but Chinese practice differs (unstayed poles, no hounds) — needs its own
    research pass, not a copy of the European rule.
-10. **Deck camber and a visible waterway** — camber and the tier waterway exist
-    (`buildDeckGeometry`, and see the deck-edge comment at hull.js "stops short of the deck
-    edge by a WATERWAY"); what remains, if anything, needs a LOOK first, not code.
+10. ~~Deck camber and a visible waterway~~ — **looked at, r99**, which is all this entry
+    asked for: a deck-level capture from the bow quarter shows camber in the rail sweep,
+    gratings, jeer bitts and the run-out battery reading correctly. Nothing built.
+11. ~~The fore-and-aft canvas~~ — **done, r99.** The 74 set only square cloth; Steel 1794
+    lists her jib, fore topmast staysail, staysails and driver. All record-driven through
+    machinery that already existed (`headsails: 2`, `staysails: 3/2`, `spanker: true` on
+    the mizzen) — the record had simply never declared them. Residual, deliberately not
+    taken: the aftermost boom clamp discounts swing clearance (`gapAft * 0.78`) against a
+    stern that is not an obstruction, so the driver boom draws 7.6 m where Steel gives a
+    74 boom of 13–17 m. Fixing the clamp moves every gaff spanker in the fleet (Wyoming,
+    Great Eastern, Preussen) — its own round, with its own before/after.
 
 ## Rules this view is held to
 

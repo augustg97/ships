@@ -189,6 +189,66 @@
     const bb = new THREE.Box3().setFromObject(g);
     const airM = bb.max.y - deckY;
 
+    /* ── A STAY ENDS ON A SPAR, NOT ON AN ESTIMATE OF ONE (round 99) ────────────────────
+       buildRigging anchors every stay and backstay at __mastTops; for rounds those points
+       were `y + lower*0.14` — 3.0 to 3.4 m ABOVE the trucks the mast loop actually drew, so
+       the whole fleet's standing rigging converged on empty air. Invisible to the ratchet
+       (a rope is thin, and it moved with everything else) and invisible from the deck. The
+       question is geometric: near each anchor's own x there must be mast mesh reaching it. */
+    if (H.__mastTops && H.__mastTops.length) {
+      const mastBoxes = [];
+      g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast')
+                          mastBoxes.push(new THREE.Box3().setFromObject(o)); });
+      H.__mastTops.forEach((mt, i) => {
+        let my = -1e9;
+        mastBoxes.forEach(b2 => {
+          if (mt.x > b2.min.x - 3 && mt.x < b2.max.x + 3) my = Math.max(my, b2.max.y);
+        });
+        if (my > -1e9 && mt.y - my > 0.5)
+          say(v.id, 'stay anchored above its own truck',
+              `mast ${i} stay collar at ${mt.y.toFixed(1)} m vs drawn truck ${my.toFixed(1)} m`);
+      });
+    }
+
+    /* ── A STOWED BOWER LIES FLAT ALONG THE SIDE (round 99) ─────────────────────────────
+       The fished anchor's fork plane is parallel to the planking — that is why broadside
+       photographs of a preserved two-decker show the anchor's whole profile. A fixed roll
+       constant had the fork athwartships instead: one fluke buried two metres INSIDE the
+       skin, the other 3.0 m off the ship in open air, and no bearing in the baseline set
+       could tell, because a black anchor against a dark wale reads as an anchor. The two
+       flukes are the fork's own witnesses: cones on one anchor group must stand at the
+       same distance off the centreline, or the fork is rotated off the side. */
+    g.traverse(o => {
+      if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
+      const flukes = [];
+      o.traverse(m => { if (m.isMesh && m.geometry && m.geometry.type === 'ConeGeometry')
+                          flukes.push(Math.abs(new THREE.Box3().setFromObject(m)
+                            .getCenter(new THREE.Vector3()).z)); });
+      if (flukes.length === 2 && Math.abs(flukes[0] - flukes[1]) > 1.5)
+        say(v.id, 'anchor fork athwart the ship',
+            `flukes at ${flukes[0].toFixed(1)} and ${flukes[1].toFixed(1)} m off centre — `
+            + 'one in the planking or one in the air');
+    });
+
+    /* ── EVERY MESH HAS A PART (round 99) ───────────────────────────────────────────────
+       The stated rule of this view: the geometry is the source of the labels, no second
+       list. A mesh with no tagged ancestor is invisible to the part picker, uncounted by
+       every census in this audit, and unnameable by a viewer — the 74 carried her boat
+       skids that way for sixty rounds. */
+    {
+      let untagged = 0, first = null;
+      g.traverse(o => {
+        if (!o.isMesh || tagOf(o)) return;
+        untagged++;
+        if (!first) {
+          const b2 = new THREE.Box3().setFromObject(o);
+          first = `${o.geometry ? o.geometry.type : '?'} at x ${b2.min.x.toFixed(1)}..${b2.max.x.toFixed(1)}`;
+        }
+      });
+      if (untagged)
+        say(v.id, 'mesh with no part tag', `${untagged} untagged mesh(es); first: ${first}`);
+    }
+
     /* ── THE BUILT CAP LINE STANDS WHERE THE RECORD READS IT (round 98) ─────────────────
        The record can be right and the build still wrong — a dropped gate, a stale copy of
        the sheer, a loft fed the deck instead of the cap. So ask the MESHES: inside each

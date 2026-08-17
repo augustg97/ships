@@ -2274,6 +2274,10 @@
     [
      "*Victory*, 1765",
      "2,142 tons BOM, 104 guns, 821 men — 1 man per 2.6 tons"
+    ],
+    [
+     "Fore-and-aft canvas",
+     "jib and fore topmast staysail on the head stays; staysails between the masts; boomed driver on the mizzen (Steel, 1794)"
     ]
    ],
    "crew": 640,
@@ -2344,7 +2348,8 @@
       "rig": "square",
       "rake": 1,
       "shrouds": 9,
-      "only": 3
+      "only": 3,
+      "staysails": 3
      },
      {
       "at": 0.85,
@@ -2352,7 +2357,9 @@
       "rig": "square",
       "rake": 5,
       "shrouds": 6,
-      "only": 3
+      "only": 3,
+      "staysails": 2,
+      "spanker": true
      }
     ],
     "build": "frame",
@@ -2364,7 +2371,8 @@
     "draught": 6.6,
     "freeboard": 5.4,
     "cm": 0.8,
-    "sternLights": 2
+    "sternLights": 2,
+    "headsails": 2
    }
   },
   {
