@@ -5445,3 +5445,28 @@ Deployed and verified live — stamp `1786989994` is serving. Round 95 is commit
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 59381 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 11:24:32  round starting
+Live stamp confirmed: **1786994494** is serving. The round is complete.
+
+## Round 96 summary
+
+The queue itself is long closed, so this round worked round 95's stated leftovers on Azzam — all three, plus the deferred verification:
+
+**Round 95's accept is confirmed.** The opening ratchet ran 55/55 at 0.000%, ship-azzam included, which closes the confirming pass round 95 had no time for.
+
+**The tier glazing became the record's own groups.** I re-segmented the Fricke broadside programmatically at 8.96 px/m (this file's own scale — the anchors and scale are now in the provenance) and read each tier's windows as numbers: tier 0 carries six 4.1 m lights at 6.1 m pitch forward and a 23 m run aft, tier 1 four 3.2 m lights and a 29 m run, tier 2 two runs, the crest its raked front glass and one aft run. `tierBands.groups` records that, and the wall builder gained `snapGroupsX` — vertex pairs at hull-u positions so each colour edge has geometry to land on, each group phasing from its own forward edge. Queen Mary 2 and every other banded hull is vertex-identical.
+
+**The bare freeboard got its rows.** New `hullRows` record: five clusters of 1 m windows (sills 4.9 m, heads 6.9 m), two side doors, porthole triads at 3 m over the water, and the broken tinted band under the aft deck edge — drawn by the hull shader from metre-true group slots, no-op for every hull without the record.
+
+**The cap strip is a recorded dimension.** The photo measures 0.11–0.33 m where the beam-derived capping drew 0.53 m; new record-gated `capM` renders it at 0.15–0.29 m.
+
+**Gates:** audit 33/0 with two new record-level rules ("window group outside its wall", "hull row beyond the freeboard"), both proven by injection. measure_ship extents unmoved. Ratchet: one frame moved (ship-azzam, 1.005%, diff confined to the yacht), 54 at 0.000%, accepted with reason. Committed `f0e3955`, pushed, live stamp verified.
+
+**For round 97, stated in HANDOFF:** the model's 3.05 m tiers sit ~1.2 m low against the photo's band heights (a linerHouse tier-height question), and the stern quarter aft of u 0.93 still lacks its terraces and swim platform. The opening check will confirm this round's accept for free.
+/Users/augustgweon/Ships/build/loop-round.sh: line 83: 65331 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+2026-08-17 12:26:07  round finished; HEAD is f0e3955 Round 96: the ribbons become the record's window groups, and the freeboard gets its rows
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 12:36:07  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 12:46:14  round starting

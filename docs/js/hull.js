@@ -2199,6 +2199,10 @@ return pin[lo] + (pin[hi] - pin[lo]) * (i - lo) / (hi - lo);
 };
 const aftAt  = mkPin('aft',  hB, crest[1], S.tierAftU);
 const foreAt = mkPin('fore', hA, crest[0], S.tierForeU);
+const floorY = i => (i >= n) ? (S.houseTopM !== undefined ? S.houseTopM : base + dh * n)
+: (i <= 0) ? base
+: (S.tierFloorsM && S.tierFloorsM[i - 1] !== undefined) ? S.tierFloorsM[i - 1]
+: base + dh * i;
 const tiers = [];
 const ns = S.shellTiers || 0;
 const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
@@ -2219,10 +2223,10 @@ const uAHead = S.houseRamp
 : Math.min(uA + (n > 1 ? uA - foreAt(n - 2) : 0.02),
 uA + (uB - uA) * 0.45))
 : undefined;
-tiers.push({ uA, uB, uAHead, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
+tiers.push({ uA, uB, uAHead, y0: floorY(i), y1: floorY(i + 1), half, shell,
 recess: i === recessTier });
 }
-return { n, base, dh, top: base + dh * n, tiers,
+return { n, base, dh, top: floorY(n), tiers,
 recorded: !!(S.houseAt && S.houseAt.length === 2) };
 }
 function buildSuperstructure(S, group) {
@@ -2427,19 +2431,23 @@ const tCeil = t.uAHead !== undefined
 if (bandRec) {
 const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
 const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
-const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec.top, 1.0];
+const bm = bandRec.bandsM ? bandRec.bandsM[i] : null;
+const tierH = t.y1 - t.y0;
+const bBot = bm ? Math.max(0.02, (bm[0] - t.y0) / tierH) : bandRec.bot;
+const bTop = bm ? Math.min(0.98, (bm[1] - t.y0) / tierH) : bandRec.top;
+const bRows = [0.0, bBot, bBot + 0.02, bTop - 0.02, bTop, 1.0];
 const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
 const pitch = bandRec.pitchM || paneW;
 const bStep = Math.max(0.6, pitch * 0.5);
 const grpList = bandRec.groups ? bandRec.groups[i] : null;
 if (grpList) {
 g.add(wallLoft(snapGroupsX(perim(t, bStep), grpList, L), t.y0, t.y1, bRows,
-[bandRec.bot, bandRec.top], pitch, pf,
+[bBot, bTop], pitch, pf,
 t.shell ? shellCol : null, { lo, hi }, rampShear,
 { L, groups: grpList }));
 } else {
 g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
-[bandRec.bot, bandRec.top], pitch, pf,
+[bBot, bTop], pitch, pf,
 t.shell ? shellCol : null, { lo, hi }, rampShear));
 }
 } else {
@@ -2768,7 +2776,7 @@ if (u >= C.fairAftU) return 0;
 const s = (u - C.blockU[1]) / (C.fairAftU - C.blockU[1]);
 return 0.9 + (wLower * 0.42 - 0.9) * (1 - s) * (1 - s);
 };
-if (C.blockU) {
+if (C.blockU && C.blockTopM - roof > 0.05) {
 const [uA, uB] = C.blockU;
 const h = C.blockTopM - roof;
 const blk = new THREE.Mesh(new THREE.BoxGeometry((uB - uA) * L, h + 0.3, wLower), white);

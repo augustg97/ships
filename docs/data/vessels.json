@@ -4450,17 +4450,23 @@
     "decks": 4,
     "houseAt": [
      0.275,
-     0.929
+     0.82
     ],
     "houseCrest": [
      0.522,
-     0.744
+     0.708
     ],
     "tierAftU": {
-     "1": 0.888,
-     "2": 0.821
+     "1": 0.795,
+     "2": 0.744
     },
-    "houseProvenance": "DERIVED from the delivery photograph: the lowest tier's windows run forward to 0.157 m/px pixel 1010 (u 0.18) and its roof tip lands at u 0.87; the crest's forward face is the block's glass foot (u 0.437) and its full-height wall ends at u 0.66, the continuous-bright edge read at 20.9 m. The tier-3 terrace roofline is pinned where the photograph puts it, u 0.73 (tierAftU); tiers between measured points interpolate straight, which matches the read faces within 4 m.",
+    "tierFloorsM": [
+     13.5,
+     17.4,
+     20.0
+    ],
+    "houseTopM": 22.5,
+    "houseProvenance": "DERIVED from the delivery photograph: the lowest tier's windows run forward to 0.157 m/px pixel 1010 (u 0.18) and its roof tip lands at u 0.87; the crest's forward face is the block's glass foot (u 0.437) and its full-height wall ends at u 0.66, the continuous-bright edge read at 20.9 m. SUPERSEDED for the house spans and tier edges by housePlateProvenance (round 97, the 8.96 px/m broadside): the 0.87 roof tip this small plate gave is the ensign flying just aft of the real 0.82 roof end, a misread its resolution could not avoid.",
     "shellTiers": 1,
     "boatsInboard": true,
     "boatsProvenance": "INBOARD: her tenders stow in a garage within the hull, not on deck. The design accounts record the concept grew from 145 m to 180.6 m partly to make room for tenders, fuel and machinery inside (Nauta design history via Boat International and YachtBuyer, which lists her tender garage), and the delivery photograph on this card shows a bare topside — no boat stands on any deck. Her tender complement is not published, so no count is claimed.",
@@ -4468,7 +4474,7 @@
     "deckM": 3.05,
     "mastTopM": 37.5,
     "cluster": {
-     "provenance": "RE-MEASURED 2026-08-16 off a clean broadside (Wikimedia Commons, File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) with the stem, transom and waterline as the three anchors and her recorded 180.6 m as the scale — 8.33 px per metre. The earlier derivation, off the smaller delivery photograph, put her mast at u 0.542 and 47.2 m over the water; the broadside reads u 0.638 and 36.2 m, which is a sixth of her length and a quarter of her air draught, and drew her with a radio tower amidships. Her house is FOUR decks, not five: the crest reads 21 m over the water against the five-deck stack's 24.25.",
+     "provenance": "RE-MEASURED 2026-08-16 off a clean broadside (Wikimedia Commons, File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) with the stem, transom and waterline as the three anchors and her recorded 180.6 m as the scale — 8.33 px per metre. The earlier derivation, off the smaller delivery photograph, put her mast at u 0.542 and 47.2 m over the water; the broadside reads u 0.638 and 36.2 m, which is a sixth of her length and a quarter of her air draught, and drew her with a radio tower amidships. Her house is FOUR decks, not five: the crest reads 21 m over the water against the five-deck stack's 24.25. AFT DOMES CORRECTED 2026-08-17 (round 97): a strip scan at 17.8-23.0 m over the water, anchors x332/x1950/y941 at 8.96 px/m, finds white mass aft of the block only at u 0.700-0.721 (the 3.4 m pair) and 0.731-0.744 (the 2.2 m single) — nothing stands at the earlier 0.763/0.803, which would float past the fairing foot now that tier 2's wall is measured to end there. Their bases stay on the tier-2 roof terrace, which the tierFloorsM correction raises to the 19.5-19.8 m this provenance already reads. The mast u could NOT be re-verified the same way: the yard crane's lattice crosses the 29.5-33 m strip behind her, so 0.638 stands on the r95 read.",
      "blockU": [
       0.553,
       0.708
@@ -4498,12 +4504,12 @@
      },
      "domes": [
       {
-       "u": 0.803,
+       "u": 0.737,
        "dM": 2.2,
        "onTier": 2
       },
       {
-       "u": 0.763,
+       "u": 0.71,
        "dM": 3.4,
        "pair": true,
        "onTier": 2
@@ -4535,7 +4541,25 @@
      }
     },
     "tierBands": {
-     "provenance": "RE-MEASURED 2026-08-17 off the kept broadside (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) at 8.96 px/m with stem x332 / transom x1950 / waterline y941 as anchors. The glazing is not a continuous ribbon: each tier carries GROUPS of punched lights with long blank wall runs between, different per tier. groups[tier] = [uStart, uEnd, pitchM, pierFrac]; pitchM 0 is one continuous run. Tier 0: six 4.1 m lights at 6.1 m pitch forward, small lights amidships, a 23 m run and two shorter ones aft. Tier 1: four 3.2 m lights forward, small lights, a 29 m aft run. Tier 2: a 10 m forward run and an aft group. Crest: the raked front glass and one 12 m aft run. Aft groups reach each tier's aft edge because her terrace fronts are glazed doors; the broadside cannot see the transoms, so that extension is DERIVED, not measured.",
+     "provenance": "RE-MEASURED 2026-08-17 off the kept broadside (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) at 8.96 px/m with stem x332 / transom x1950 / waterline y941 as anchors. The glazing is not a continuous ribbon: each tier carries GROUPS of punched lights with long blank wall runs between, different per tier. groups[tier] = [uStart, uEnd, pitchM, pierFrac]; pitchM 0 is one continuous run. Tier 0: six 4.1 m lights at 6.1 m pitch forward, small lights amidships, a 23 m run aft. Tier 1: four 3.2 m lights forward, small lights, a long aft run. Tier 2: a 10 m forward run and a short aft group under the fairing. Crest: the raked front glass and one aft run. AFT EXTENTS CORRECTED round 97: the r96 row scan read dark BACKGROUND over the stepped-down stern as glazing, because with every tier drawn ~3 m the walls were assumed to reach the old aft edges — the silhouette envelope shows tier 0's wall ends at u 0.82, tier 1's at 0.795, tier 2's at the fairing foot 0.744 and the crest's at the block face 0.708, so the groups that ran past those edges (t0 to 0.93, t1 to 0.889, t2 to 0.822, crest to 0.745) are trimmed or dropped. What stands aft of each wall is open terrace, and glazing there is UNKNOWN, not asserted. bandsM[tier] = [sill, head] in metres over the waterline, straight from the plate: 10.9-12.6 / 14.8-16.7 / 18.1-19.5 / 21.2-22.4 — the crest head read 22.8 exceeds the 22.5 roof by less than the read noise and is clipped under it.",
+     "bandsM": {
+      "0": [
+       10.9,
+       12.6
+      ],
+      "1": [
+       14.8,
+       16.7
+      ],
+      "2": [
+       18.1,
+       19.5
+      ],
+      "3": [
+       21.2,
+       22.4
+      ]
+     },
      "from": 0,
      "to": 3,
      "bot": 0.32,
@@ -4544,10 +4568,10 @@
      "pierFrac": 0.22,
      "kind": "glass",
      "groups": {
-      "0": [[0.308, 0.503, 6.1, 0.33], [0.545, 0.676, 3.9, 0.67], [0.678, 0.808, 0, 0], [0.815, 0.860, 4.3, 0.30], [0.864, 0.930, 0, 0]],
-      "1": [[0.360, 0.505, 5.9, 0.45], [0.536, 0.667, 3.9, 0.66], [0.675, 0.835, 0, 0], [0.848, 0.889, 4.0, 0.40]],
-      "2": [[0.563, 0.620, 0, 0], [0.722, 0.822, 4.5, 0.20]],
-      "3": [[0.510, 0.560, 0, 0], [0.678, 0.745, 0, 0]]
+      "0": [[0.308, 0.503, 6.1, 0.33], [0.545, 0.676, 3.9, 0.67], [0.678, 0.808, 0, 0]],
+      "1": [[0.360, 0.505, 5.9, 0.45], [0.536, 0.667, 3.9, 0.66], [0.675, 0.790, 0, 0]],
+      "2": [[0.563, 0.620, 0, 0], [0.722, 0.744, 4.5, 0.20]],
+      "3": [[0.510, 0.560, 0, 0], [0.678, 0.708, 0, 0]]
      }
     },
     "hullRows": {
@@ -4577,7 +4601,7 @@
      "2": 0.47
     },
     "houseTaper": 0.03,
-    "housePlateProvenance": "MEASURED off the same broadside: houseAt 0.275-0.929, houseCrest 0.522-0.744, the two intermediate tier edges, and houseTaper 0.03 because a motor yacht's topsides are one flush surface, not a stack of stepped ledges.",
+    "housePlateProvenance": "RE-MEASURED 2026-08-17 (round 97) off the kept broadside at 8.96 px/m, by reading the upper silhouette envelope column by column with a ship-white classifier rather than matching window rows. The aft staircase was previously misattributed by two tiers because every tier was drawn ~3 m and the real tiers are 4.5/3.9/2.6/2.5 m: the 0.821 edge is TIER 0's roof end (roof 13.5 m, visible terminating at u 0.819), 0.888 is the main-deck bulwark run-out, and tier 2's wall in fact ends at the fairing foot 0.744. tierFloorsM 13.5/17.4/20.0 and houseTopM 22.5 are the envelope's roof reads, each confirmed at two or more exposed spans fore and aft (tier 0: 13.3-13.7 fore, 13.5-13.8 aft; tier 1: 17.3-17.9 fore, 17.3-17.4 aft; tier 2: white to ~20 under the crest's raked glass; top = blockTopM). The UAE ensign occludes u 0.83-0.87 at 10-15 m; the tier-0 aft edge 0.82 is the roofline's visible termination just forward of it. houseTaper 0.03 stands. Aft of the house the stern terraces down — bulwark tops 9.7 m to u 0.90, then 6.9 (0.905-0.93), 6.3, 5.4, 4.5, 3.1 m at the transom — which the model does not yet build; the read is recorded here for when it does.",
     "houseRamp": true,
     "faired": true,
     "bowFlare": 0.14,
@@ -4607,11 +4631,11 @@
     ],
     [
      "Cluster",
-     "mast to 45 m over water, exhausts to 34 m raked forward — derived from the photograph; no drawing of her is published"
+     "mast to 37.5 m over water, uptakes to 25.5 m raked forward — measured from the 2014 broadside; no drawing of her is published"
     ],
     [
      "House",
-     "five tiers ramping aft from a long foredeck to a crest abaft midships, then terracing down to the stern — spans derived from the photograph"
+     "four tiers ramping aft from a long foredeck to a 22.5 m crest abaft midships, then terracing down to the stern — measured from the 2014 broadside"
     ],
     [
      "Glazing",

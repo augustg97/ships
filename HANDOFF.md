@@ -5907,3 +5907,70 @@ house at 0.929 and runs plain sheer to the transom.
 
 Next vessel in the standing survey queue, if the Azzam thread is judged done: per round 51's
 list the next-crudest unfinished is ship-of-the-line.
+
+## Round 97 — 2026-08-17 — the tiers stand at the plate's own floors, and the aft staircase was mislabelled by two decks
+
+**Round 96's deferred confirming pass is closed**: the opening ratchet ran 54/55 at 0.000%.
+ship-azzam read 2.638% because this round's record edits landed while the check was still
+rendering and its frame captured mid-edit — the diff was read and is confined to the yacht.
+
+**The task was round 96's two named leftovers. The first is done; the second is measured and
+deliberately not built.**
+
+**THE TIER HEIGHTS ARE THE RECORD'S NOW.** A new envelope segmentation
+(`Research/segment-azzam-envelope.py`) reads the broadside's upper silhouette column by column
+with a ship-white classifier — the yard backdrop defeats any sky-difference scan — and takes
+each tier's roof where that roof is exposed. Fore and aft reads agree within 0.4 m: floors at
+**13.5, 17.4 and 20.0 m** over the water beneath the 22.5 m top, i.e. tiers of 4.5/3.9/2.6/2.5 m
+where deckM stacked four at 3.05. `linerHouse` now takes record-gated `tierFloorsM` +
+`houseTopM` (absent → the old dh stack, every other hull vertex-identical), and `tierBands`
+gained `bandsM` — per-tier [sill, head] in METRES over the waterline, exactly what the plate
+gives, converted to tier fractions against the tier's own floors at build. The glazing lands at
+10.9–12.6 / 14.8–16.7 / 18.1–19.5 / 21.2–22.4 measured, and the profile harness confirms:
+segmented model rooflines 13.59 / 17.40 / 19.94 vs plate 13.5 / 17.4 / 20.0.
+
+**THE AFT STAIRCASE WAS MISATTRIBUTED BY TWO TIERS.** With every tier ~3 m the old record
+matched silhouette edges to the wrong decks: the 0.821 "tier 2 edge" is TIER 0's roof end
+(13.5 m roofline, visibly terminating at u 0.819), 0.888 is the main-deck bulwark run-out, and
+the r96 aft glazing extensions were dark BACKGROUND over the stepped-down stern read as glass
+(their provenance had already marked them DERIVED). Corrected off the envelope: houseAt aft
+0.929→0.82, tierAftU {1: 0.795, 2: 0.744}, houseCrest aft 0.744→0.708 (the block's own aft
+face; the fairing sweeps beyond it to 0.744), groups trimmed to their walls. The old delivery-
+photo houseProvenance's "roof tip u 0.87" is the ENSIGN, which occludes u 0.83–0.87 at 10–15 m
+— noted as superseded in the record.
+
+**THE AFT DOMES WERE NOT WHERE THE RECORD PUT THEM.** A strip scan at 17.8–23.0 m finds white
+mass aft of the block only at u 0.700–0.721 and 0.731–0.744; nothing stands at the recorded
+0.763/0.803, which after the aft-edge correction would have floated past their own terrace.
+Moved to 0.710 (3.4 m pair) and 0.737 (2.2 m single); their pedestals now stand at 19.74 m —
+the 19.5–19.8 the cluster provenance itself reads. The mast u 0.638 could NOT be re-verified
+(the yard crane's lattice crosses the 29.5–33 m strip); it stands on r95's read — if the
+cluster grid is ever re-anchored, start with the mast.
+
+**Model changes, all record-gated:** linerHouse tierFloorsM/houseTopM; wallLoft bandsM
+conversion; buildCluster skips the filler block when houseTopM puts the roof AT blockTopM
+(a zero-height box would lay its cap coplanar with the crest roof plate — the two-surfaces
+flicker by construction). Queen Mary 2 and every other hull: vertex-identical, 54/55 at 0.000%.
+
+**Audit: two new record-level rules + one fixed derivation.** 'tier band outside its tier'
+(bandsM vs the tier's own floors) and 'dome past its terrace' (onTier u vs the terrace's aft
+edge) both fire 1-for-1 under injection (/tmp snippet pattern, run_audit_inject.py). And the
+'cluster floats above its roof' rule was still deriving footings from freeboard+deckM stacking —
+rule 8 exactly: the audit disagreed because the AUDIT was running the old arithmetic; it now
+stacks the same recorded floors the model does. Clean sweep 33/0.
+
+**Gates.** measure_ship: extent 181.45 / beam 20.84 / masthead 37.50 unmoved; superstructure
+0.275–0.820, fairing foot 19.72, pipes to 25.51. Card rows fixed: "five tiers"→four,
+"mast to 45 m, exhausts to 34 m"→37.5/25.5 measured.
+
+**Left for round 98, measured this round and stated in housePlateProvenance: THE STERN
+TERRACES.** The plate reads bulwark tops 9.7 m to u 0.90, then 6.9 (u 0.905–0.93), 6.3, 5.4,
+4.5, and 3.1 m at the transom — the terraced beach-club descent every photograph of her shows.
+The model still runs plain 8.9 m sheer from the house end to the transom; the profile harness
+quantifies the gap (model 8.83 at u 0.95 vs plate 5.4). That is hull-sheer surgery (stepped
+aft deck with snap stations at each break), not house work — which is why it did not fit
+this round. The aft deck aft of u 0.82 is also still bare.
+
+**Left un-run, same as r95/r96: the post-accept confirming ratchet pass.** The accept consumed
+the check just read and nothing changed after it; round 98's opening check confirms it for
+free. If round 98 opens with ship-azzam green, this is closed.

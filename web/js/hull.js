@@ -3641,6 +3641,17 @@ function linerHouse(S) {
   };
   const aftAt  = mkPin('aft',  hB, crest[1], S.tierAftU);
   const foreAt = mkPin('fore', hA, crest[0], S.tierForeU);
+  /* ── ⚠ A TWEEN-DECK IS ONE NUMBER, AND A YACHT'S TIERS ARE NOT ALL THE SAME HEIGHT ──
+     deckM stacked Azzam's four tiers at 3.05 m each and every deck line landed 1.2-2.3 m
+     below the plate: the broadside's silhouette, read where each roof is exposed, puts her
+     floors at 13.5, 17.4 and 20.0 m over the water beneath a 22.5 m top — one 4.5 m main
+     tier under three shorter ones, which no single deckM can spell. tierFloorsM records
+     the measured floor heights (tiers 1..n-1, metres over the waterline) and houseTopM
+     the roof; a record without them stacks dh exactly as before, so no other hull moves. */
+  const floorY = i => (i >= n) ? (S.houseTopM !== undefined ? S.houseTopM : base + dh * n)
+    : (i <= 0) ? base
+    : (S.tierFloorsM && S.tierFloorsM[i - 1] !== undefined) ? S.tierFloorsM[i - 1]
+    : base + dh * i;
   const tiers = [];
   /* ── A TIER CAN BE SHELL, NOT HOUSE ────────────────────────────────────────────────
      On the Edwardian liners the side PLATING carried up past the sheer deck: Titanic's
@@ -3703,12 +3714,12 @@ function linerHouse(S) {
                    : Math.min(uA + (n > 1 ? uA - foreAt(n - 2) : 0.02),
                               uA + (uB - uA) * 0.45))
       : undefined;
-    tiers.push({ uA, uB, uAHead, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
+    tiers.push({ uA, uB, uAHead, y0: floorY(i), y1: floorY(i + 1), half, shell,
                  recess: i === recessTier });
   }
   /* `recorded` marks a house the RECORD located (houseAt) as opposed to the default span.
      It decides which deck a funnel's recorded height is measured from — see buildFunnel. */
-  return { n, base, dh, top: base + dh * n, tiers,
+  return { n, base, dh, top: floorY(n), tiers,
            recorded: !!(S.houseAt && S.houseAt.length === 2) };
 }
 
@@ -4014,7 +4025,16 @@ function buildSuperstructure(S, group) {
     if (bandRec) {
       const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
       const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
-      const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec.top, 1.0];
+      /* ── A GLAZING SILL IS A HEIGHT THE PLATE GIVES, NOT A FRACTION OF A TIER ────────
+         bot/top place the band as fractions of whatever tier height the model happens to
+         have, so a mis-sized tier drags its glazing with it. bandsM, keyed by tier index,
+         records what the plate actually reads — [sill, head] in metres over the waterline —
+         and converts here against the tier's own floors. Absent, the fractions stand. */
+      const bm = bandRec.bandsM ? bandRec.bandsM[i] : null;
+      const tierH = t.y1 - t.y0;
+      const bBot = bm ? Math.max(0.02, (bm[0] - t.y0) / tierH) : bandRec.bot;
+      const bTop = bm ? Math.min(0.98, (bm[1] - t.y0) / tierH) : bandRec.top;
+      const bRows = [0.0, bBot, bBot + 0.02, bTop - 0.02, bTop, 1.0];
       const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
       const pitch = bandRec.pitchM || paneW;
       /* the wall's own stations only have to follow the SHAPE now — snapBand puts the
@@ -4024,12 +4044,12 @@ function buildSuperstructure(S, group) {
       if (grpList) {
         /* the record gives this tier its own window GROUPS — blank wall between them */
         g.add(wallLoft(snapGroupsX(perim(t, bStep), grpList, L), t.y0, t.y1, bRows,
-                       [bandRec.bot, bandRec.top], pitch, pf,
+                       [bBot, bTop], pitch, pf,
                        t.shell ? shellCol : null, { lo, hi }, rampShear,
                        { L, groups: grpList }));
       } else {
         g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
-                       [bandRec.bot, bandRec.top], pitch, pf,
+                       [bBot, bTop], pitch, pf,
                        t.shell ? shellCol : null, { lo, hi }, rampShear));
       }
     } else {
@@ -4581,7 +4601,11 @@ function buildCluster(S, group) {
     const s = (u - C.blockU[1]) / (C.fairAftU - C.blockU[1]);
     return 0.9 + (wLower * 0.42 - 0.9) * (1 - s) * (1 - s);
   };
-  if (C.blockU) {
+  /* the filler exists to carry the cluster's footing UP from a house roof that stops short
+     of the block top. Where the record's houseTopM puts the roof AT the block top, there is
+     no gap to fill — and a zero-height box would lay its cap in the crest roof plate's own
+     plane, which is the two-surfaces flicker by construction. */
+  if (C.blockU && C.blockTopM - roof > 0.05) {
     const [uA, uB] = C.blockU;
     const h = C.blockTopM - roof;
     const blk = new THREE.Mesh(new THREE.BoxGeometry((uB - uA) * L, h + 0.3, wLower), white);

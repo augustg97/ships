@@ -26,6 +26,29 @@ say(v.id, 'hull row beyond the freeboard',
 `hM [${gr.hM[0]}, ${gr.hM[1]}] vs freeboard ${H.freeboard}`);
 }
 }
+if (H.tierBands && H.tierBands.bandsM && H.tierFloorsM) {
+const nT = H.decks || 0;
+const fl = i => i <= 0 ? (H.freeboard || 0)
+: i >= nT ? (H.houseTopM !== undefined ? H.houseTopM : Infinity)
+: (H.tierFloorsM[i - 1] !== undefined ? H.tierFloorsM[i - 1] : Infinity);
+for (const ti in H.tierBands.bandsM) {
+const bm = H.tierBands.bandsM[ti], i = +ti;
+if (!(bm[0] < bm[1]) || bm[0] < fl(i) - 0.01 || bm[1] > fl(i + 1) + 0.01)
+say(v.id, 'tier band outside its tier',
+`tier ${ti} band ${bm[0]}-${bm[1]} m vs floors ${fl(i)}-${fl(i + 1)}`);
+}
+}
+if (H.cluster && H.cluster.domes) {
+const [hA3, hB3] = H.houseAt || [0.10, 0.90];
+for (const dm of H.cluster.domes) {
+if (dm.onTier === undefined) continue;
+const aft = (H.tierAftU && H.tierAftU[dm.onTier] !== undefined)
+? H.tierAftU[dm.onTier] : hB3;
+if (dm.u < hA3 - 0.01 || dm.u > aft + 0.01)
+say(v.id, 'dome past its terrace',
+`dome u ${dm.u} on tier ${dm.onTier}, terrace ends ${aft}`);
+}
+}
 let g = null;
 try { g = SHIPS_HULL.buildShip(H, { fine: true }); }
 catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }
@@ -174,8 +197,12 @@ const cl = part.cluster;
 if (!cl) say(v.id, 'cluster declared but not drawn', 'cluster record with no geometry');
 else {
 const dh2 = H.deckM || H.beam * 0.105;
-const roofY = H.freeboard + (H.decks || 0) * dh2;
-const tierRoofY = ti => H.freeboard + (ti + 1) * dh2;
+const roofY = H.houseTopM !== undefined ? H.houseTopM
+: H.freeboard + (H.decks || 0) * dh2;
+const tierRoofY = ti => (H.tierFloorsM && H.tierFloorsM[ti] !== undefined)
+? H.tierFloorsM[ti]
+: (ti + 1 >= (H.decks || 0) && H.houseTopM !== undefined) ? H.houseTopM
+: H.freeboard + (ti + 1) * dh2;
 let floorY = roofY;
 for (const d of H.cluster.domes || [])
 if (!d.upper && d.onTier !== undefined) floorY = Math.min(floorY, tierRoofY(d.onTier));
