@@ -306,8 +306,28 @@ function buildStemGeometry(S, aft) {
     const p = surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
     const t = 0.05 * S.draught;
     const x0 = p[0] + (inset - 1) * t, x1 = p[0] + (inset + 1) * t;
-    pos.push(x0, p[1], -sided, x0, p[1], sided,
-             x1, p[1], sided,  x1, p[1], -sided);
+    /* ⚠ THE BAR MUST FIT INSIDE THE ENTRY IT STRENGTHENS. A fixed siding of 5.5% of beam
+       is wider than a fine bow's own half-breadth over most of the stem's run, so on Azzam
+       (stemFineness 0.03) the dark bar broke through the white shell and read as an arc of
+       z-fighting speckle down her stem in the first true broadside. And clamping to the
+       breadth AT THE PROFILE POINT is not enough: the bar stands aft of the leading edge,
+       where an acute entry is still only centimetres wide, so each FACE of the section is
+       sized from the shell at its own x — half the local breadth, never the full siding —
+       and the bar becomes the wedge the plating actually closes over. A timber stem stands
+       proud by design and keeps its constant siding. */
+    let sF = sided, sA = sided;
+    if (STEEL) {
+      const vv = Math.max(0, Math.min(1, v));
+      /* the x-offsets are already signed (aft insets run forward), so u follows x directly */
+      const bF = Math.abs(surfacePoint(S, H,
+        Math.max(0, Math.min(1, u + (x0 - p[0]) / S.lwl)), vv)[2]);
+      const bA = Math.abs(surfacePoint(S, H,
+        Math.max(0, Math.min(1, u + (x1 - p[0]) / S.lwl)), vv)[2]);
+      sF = Math.min(sided, Math.max(0.015, bF * 0.5));
+      sA = Math.min(sided, Math.max(0.015, bA * 0.5));
+    }
+    pos.push(x0, p[1], -sF, x0, p[1], sF,
+             x1, p[1], sA,  x1, p[1], -sA);
   }
   for (let i = 0; i < N; i++) {
     const a = i * 4, b = a + 4;
@@ -413,7 +433,18 @@ function buildRudderGeometry(S) {
    cannot float below it — they agree by construction rather than by tuning. */
 function surfacePoint(S, H, u, v) {
   const L = S.lwl;
-  const b = H.halfB * H.wl(u);
+  /* ── A STEM IS ROLLED PLATE OR SIDED TIMBER, NOT A MATHEMATICAL EDGE ────────────────
+     wl(u) runs to zero at the bow, so a fine entry collapses the two sides of the shell to
+     within millimetres of each other over the last several metres: they z-fight as speckle
+     from any broadside bearing, and the leading edge falls visibly short of the profile,
+     leaving the dark post to fill the wedge — Azzam's stem arc, found by hiding parts one
+     at a time. A real bow CLOSES: the shell lands on the stem's own siding — the rabbet —
+     so the surface carries a minimum half-breadth there, decaying inboard, sized from the
+     same 5.5%-of-beam siding the posts and keel already use. Timber posts stand proud of
+     this and cover the landing exactly as before; the steel post now hides inside a shell
+     that finally has room for it. */
+  const b = Math.max(H.halfB * H.wl(u),
+                     0.4 * 0.055 * S.beam / 2 * Math.max(0, 1 - u / 0.05));
   const t = S.draught * H.keel(u);
   const deckHalf = b * (1 - H.tumble(u));
   const fb = H.sheer(u);
@@ -3655,7 +3686,19 @@ function linerHouse(S) {
       return Math.max(B * 0.06, Math.min(wid / 2,
         Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
     };
-    tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
+    /* ── ⚠ A MOTOR YACHT'S FRONT IS ONE SURFACE, NOT A STAIRCASE ─────────────────────
+       With vertical fronts pinned at foreAt(i), the house climbs off the foredeck in steps —
+       right for the liner the pins were built for, wrong for a hull like Azzam whose broadside
+       shows every tier's front RAKED so its head lands on the next front's foot: the composite
+       line from foredeck to crest is one continuous sculpted ramp. uAHead is where a tier's
+       front arrives at its own ceiling; the crest carries the slope of the tier below it, held
+       inside its own span. Record-gated (houseRamp) — a record without it is vertex-identical. */
+    const uAHead = S.houseRamp
+      ? (i < n - 1 ? foreAt(i + 1)
+                   : Math.min(uA + (n > 1 ? uA - foreAt(n - 2) : 0.02),
+                              uA + (uB - uA) * 0.45))
+      : undefined;
+    tiers.push({ uA, uB, uAHead, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
                  recess: i === recessTier });
   }
   /* `recorded` marks a house the RECORD located (houseAt) as opposed to the default span.
@@ -3698,7 +3741,11 @@ function buildSuperstructure(S, group) {
      dark at the sill, lightening toward the head, because a long run of tinted glazing
      reflects more sky the higher the eye's line strikes it. Without it the colours are
      byte-identical to the old path — the band style is a record's choice, never a default. */
-  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec) => {
+  /* `shear`, when given, displaces a station in x as a function of the row fraction — how a
+     raked front is wound without breaking the loop: the front-leg stations lean back with
+     height while the side stations stand, and the one quad at each corner carries the twist.
+     Shared topology means the wall can never open a seam against itself. */
+  const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec, shear) => {
     const tp = [], tc = [], ti = [];
     const R = rows.length;
     const fc = faceCol || face;
@@ -3715,7 +3762,8 @@ function buildSuperstructure(S, group) {
                   (rf - band[0]) / Math.max(0.001, band[1] - band[0]))
               : glass)
           : fc;
-        tp.push(path[k].x, y0 + rf * (y1 - y0), path[k].z);
+        tp.push(path[k].x + (shear ? shear(path[k], rf) : 0),
+                y0 + rf * (y1 - y0), path[k].z);
         tc.push(c.r, c.g, c.b);
       }
     }
@@ -3881,6 +3929,17 @@ function buildSuperstructure(S, group) {
        it existed while the rails alone stood correctly. Nothing here waits to be positioned. */
     const bandRec = (TB && !t.recess && i >= TB.from && i <= TB.to) ? TB
                   : ((SB && t.shell && !t.recess) ? SB : null);
+    /* the ramped front: front-leg stations (exactly on the front plane — snapBand's
+       interpolated insertions between two such stations stay on it to the bit) lean back
+       from the tier's floor front to its ceiling front */
+    const xF = (t.uA - 0.5) * L;
+    const rampShear = t.uAHead !== undefined
+      ? (pt, rf) => (Math.abs(pt.x - xF) < 1e-6 ? rf * (t.uAHead - t.uA) * L : 0)
+      : null;
+    /* the roof and the crest rail stand on the plan the tier ARRIVES at, so a ramped
+       tier's roof is a brim over its own raked front rather than a shelf ahead of it */
+    const tCeil = t.uAHead !== undefined
+      ? { uA: t.uAHead, uB: t.uB, half: t.half } : t;
     if (bandRec) {
       const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
       const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
@@ -3892,14 +3951,14 @@ function buildSuperstructure(S, group) {
       const bStep = Math.max(0.6, pitch * 0.5);
       g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
                      [bandRec.bot, bandRec.top], pitch, pf,
-                     t.shell ? shellCol : null, { lo, hi }));
+                     t.shell ? shellCol : null, { lo, hi }, rampShear));
     } else {
       g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
-                     t.recess ? recessCol : (t.shell ? shellCol : null)));
+                     t.recess ? recessCol : (t.shell ? shellCol : null), null, rampShear));
     }
-    g.add(roofPlate(t, t.y1));
+    g.add(roofPlate(tCeil, t.y1));
     if (i === T.n - 1) {
-      railRun(perim(t), t.y1);                        // the boat deck is railed all round
+      railRun(perim(tCeil), t.y1);                    // the boat deck is railed all round
     } else {
       /* the exposed roof aft of the tier above is the promenade of this deck — railed along
          its sides and across its aft end, like the real thing */
@@ -3927,7 +3986,10 @@ function buildSuperstructure(S, group) {
         railRun(pr, t.y1);
       };
       if (t.uB > tAbove.uB + 0.012) promenade(tAbove.uB, t.uB, t.uB);
-      if (t.uA < tAbove.uA - 0.012) promenade(tAbove.uA, t.uA, t.uA);
+      /* a ramped tier's roof begins where its raked front ARRIVES — on the next tier's own
+         foot — so the bare forward plates (and their rails) cease to exist with the steps */
+      const fFront = t.uAHead !== undefined ? t.uAHead : t.uA;
+      if (fFront < tAbove.uA - 0.012) promenade(tAbove.uA, fFront, fFront);
     }
   }
 
@@ -7561,6 +7623,9 @@ function buildShip(S, opts) {
       uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
       uIron: { value: S.iron ? 1 : 0 },
       uWeld: { value: WELDED ? 1 : 0 },
+      /* a yacht's shell is FAIRED — filled, long-boarded and gloss-coated until no plate
+         shows. That finish is the record's own fact about the builder, not a default. */
+      uFaired: { value: S.faired ? 1 : 0 },
       uBottom: { value: bottom },
       uCove: { value: S.cove ? 1 : 0 },
       uBoot: { value: new THREE.Color(S.boot || '#ffffff') },

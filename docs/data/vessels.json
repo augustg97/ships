@@ -4550,6 +4550,10 @@
     },
     "houseTaper": 0.03,
     "housePlateProvenance": "MEASURED off the same broadside: houseAt 0.275-0.929, houseCrest 0.522-0.744, the two intermediate tier edges, and houseTaper 0.03 because a motor yacht's topsides are one flush surface, not a stack of stepped ledges.",
+    "houseRamp": true,
+    "faired": true,
+    "bowFlare": 0.14,
+    "formProvenance": "READ off the same broadside at 8.33 px/m (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0). houseRamp: every tier front is raked so its head lands on the next front's foot, one continuous sweep from the foredeck to the crest, where the model had four vertical steps. faired: the topside between the waterline and the sheer is an unbroken gloss surface with no visible plate lands, tone patchwork or streaking anywhere along her 180.6 m. bowFlare 0.14: the topsides lean out over the fine entry; the plate cannot give a number at this bearing, so this is set to the smallest value that reads as flare in the bow capture and is marked DERIVED, not measured.",
     "deckSteel": true
    },
    "rows": [

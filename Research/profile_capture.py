@@ -107,9 +107,26 @@ def main():
         page.evaluate("(fov) => { SW.cam.fov = fov; SW.cam.updateProjectionMatrix(); }",
                       args.fov)
         for name, deg, lat in shots:
-            page.evaluate("([deg, lat]) => { SW.shipSpin = deg * Math.PI / 180; SW.lat = lat; }",
+            # ⚠ Drive SW.viewFromDeg (the app's own `#b=` grammar), never SW.shipSpin.
+            # swFrame fixes the camera at SW.lon and derives spin = lon + π/2 − bearing
+            # every frame; writing shipSpin directly bakes in whatever lon the code uses
+            # today, and when lon became 0.42 every "broadside" here silently stood 66°
+            # off the beam — measured off the frame itself: 16.1 px/m vertical against a
+            # u0→u1 span of 67.6 m on a 172 m hull, cos θ = 0.39. Two rounds of plates
+            # were foreshortened by a factor the reader had no way to see.
+            page.evaluate("([deg, lat]) => { SW.viewFromDeg = deg; SW.lat = lat; }",
                           [deg, lat])
             page.wait_for_timeout(500)
+            # ⚠ A LONG LENS NEEDS A FAR NEAR-PLANE. At 3° the camera stands ~20 ship-lengths
+            # off; with the app's own sub-metre near plane, 24-bit depth resolves only about
+            # a metre AT THE SHIP, so any two surfaces within that — a stem bar just inside
+            # the shell, the two skins of a fine bow — z-fight into arcs and speckle that do
+            # not exist at the app's working distance. The near plane rides at a third of the
+            # camera distance, which puts depth resolution at millimetres where the hull is.
+            page.evaluate("""() => { const d = SW.fit * SW.dist;
+              SW.cam.near = Math.max(SW.cam.near, d * 0.3);
+              SW.cam.updateProjectionMatrix(); }""")
+            page.wait_for_timeout(150)
             if not args.no_ruler and name in ("port", "starboard"):
                 print("   ruler:", page.evaluate(RULER, [deg]))
             else:

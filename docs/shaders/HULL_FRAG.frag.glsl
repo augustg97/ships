@@ -17,6 +17,12 @@ uniform float uCove;         // gilt cove line at the sheer — a documented per
 uniform vec3  uBoot;         // boot-topping band at the waterline — per-ship livery, from the data
 uniform float uBootOn;       // 0 = no band; the record declares it ('boot'), the shader only paints it
 uniform float uPortholes;    // porthole count along the hull, 0 = none
+/* ── FAIRED: the shell shows NO PLATE WORK AT ALL. A yacht's hull is filled, long-boarded
+   and gloss-coated until the plating underneath is invisible — the finish is the builder's
+   own selling point, and drawing working-steel plate lands, tone patchwork, rust streaks
+   and hungry-horse dishing on one turns a mirror topside into a tramp's. The record
+   declares it (faired); everything below the boot-top and at the waterline stays. */
+uniform float uFaired;       // 0 = working steel shows its plates, 1 = faired and coated
 uniform float uTime;
 
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
@@ -158,7 +164,7 @@ void main(){
        dry-dock photograph. */
     vec2 cell = floor(vec2(ph, pv));
     float plateTone = 0.97 + toneAmp * (hash(cell * 7.31) - 0.5);
-    paint *= plateTone;
+    paint *= mix(plateTone, 1.0, uFaired);
 
     /* ── AND STEEL STREAKS. ────────────────────────────────────────────────────────────
        The most recognisable thing about a working steel hull is not its rivets, it is the
@@ -172,7 +178,7 @@ void main(){
     float runDown = smoothstep(uWaterline, 1.0, v);
     float streak = smoothstep(0.58, 0.92, streakN) * runDown * (1.0 - below);
     /* streaks lighten as well as darken on a dark hull — salt dries white on black paint */
-    paint = mix(paint, paint * vec3(1.55, 1.34, 1.14), streak * 0.42);
+    paint = mix(paint, paint * vec3(1.55, 1.34, 1.14), streak * 0.42 * (1.0 - uFaired));
 
     /* ── PORTHOLES, IN ROWS, AT A REAL SPACING ─────────────────────────────────────
        A porthole is about 400 mm whatever the ship, so the number of them between bow and
@@ -202,8 +208,8 @@ void main(){
     /* a riveted lap stands proud, so it shades on one side and catches light on the other —
        that highlight is what makes a plate seam visible on a dark hull at all. A welded butt
        is flush: the same expression at a fraction of the depth, a sheen line, not a step. */
-    col *= mix(landShade, uWeld < 0.5 ? 1.06 : 1.01, land);
-    col *= mix(buttShade, uWeld < 0.5 ? 1.02 : 1.005, butt);
+    col *= mix(mix(landShade, uWeld < 0.5 ? 1.06 : 1.01, land), 1.0, uFaired);
+    col *= mix(mix(buttShade, uWeld < 0.5 ? 1.02 : 1.005, butt), 1.0, uFaired);
     /* rivets at a third of their old strength. They are 20 mm domes on a 200 m ship: at any
        honest viewing distance they are a texture, not a feature. */
     col += rivet * 0.011;
@@ -215,7 +221,7 @@ void main(){
       float bay = fract(u * uFrames * 0.26);
       float dish = 0.5 - 0.5 * cos(bay * 6.2831853);
       float vary = 0.6 + 0.4 * noise(vec2(floor(u * uFrames * 0.26) * 3.7, v * 2.0));
-      col *= 1.0 - 0.045 * dish * vary * (1.0 - below);
+      col *= 1.0 - 0.045 * dish * vary * (1.0 - below) * (1.0 - uFaired);
     }
     col *= taper * 0.25 + 0.75;
   } else {

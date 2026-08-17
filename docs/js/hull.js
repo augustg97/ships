@@ -165,8 +165,18 @@ const v = aft ? f : 1 - f;
 const p = surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
 const t = 0.05 * S.draught;
 const x0 = p[0] + (inset - 1) * t, x1 = p[0] + (inset + 1) * t;
-pos.push(x0, p[1], -sided, x0, p[1], sided,
-x1, p[1], sided,  x1, p[1], -sided);
+let sF = sided, sA = sided;
+if (STEEL) {
+const vv = Math.max(0, Math.min(1, v));
+const bF = Math.abs(surfacePoint(S, H,
+Math.max(0, Math.min(1, u + (x0 - p[0]) / S.lwl)), vv)[2]);
+const bA = Math.abs(surfacePoint(S, H,
+Math.max(0, Math.min(1, u + (x1 - p[0]) / S.lwl)), vv)[2]);
+sF = Math.min(sided, Math.max(0.015, bF * 0.5));
+sA = Math.min(sided, Math.max(0.015, bA * 0.5));
+}
+pos.push(x0, p[1], -sF, x0, p[1], sF,
+x1, p[1], sA,  x1, p[1], -sA);
 }
 for (let i = 0; i < N; i++) {
 const a = i * 4, b = a + 4;
@@ -240,7 +250,8 @@ return g;
 }
 function surfacePoint(S, H, u, v) {
 const L = S.lwl;
-const b = H.halfB * H.wl(u);
+const b = Math.max(H.halfB * H.wl(u),
+0.4 * 0.055 * S.beam / 2 * Math.max(0, 1 - u / 0.05));
 const t = S.draught * H.keel(u);
 const deckHalf = b * (1 - H.tumble(u));
 const fb = H.sheer(u);
@@ -2203,7 +2214,12 @@ const uu = Math.max(0.001, Math.min(0.999, u));
 return Math.max(B * 0.06, Math.min(wid / 2,
 Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
 };
-tiers.push({ uA, uB, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
+const uAHead = S.houseRamp
+? (i < n - 1 ? foreAt(i + 1)
+: Math.min(uA + (n > 1 ? uA - foreAt(n - 2) : 0.02),
+uA + (uB - uA) * 0.45))
+: undefined;
+tiers.push({ uA, uB, uAHead, y0: base + dh * i, y1: base + dh * (i + 1), half, shell,
 recess: i === recessTier });
 }
 return { n, base, dh, top: base + dh * n, tiers,
@@ -2224,7 +2240,7 @@ const wallMat = new THREE.MeshStandardMaterial({
 vertexColors: true, roughness: 0.60, side: THREE.DoubleSide });
 const plateMat = new THREE.MeshStandardMaterial({
 color: 0xe4e2dc, roughness: 0.60, side: THREE.DoubleSide });
-const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec) => {
+const wallLoft = (path, y0, y1, rows, band, pw, mulFrac, faceCol, glassSpec, shear) => {
 const tp = [], tc = [], ti = [];
 const R = rows.length;
 const fc = faceCol || face;
@@ -2241,7 +2257,8 @@ const c = (inBand && !isMul)
 (rf - band[0]) / Math.max(0.001, band[1] - band[0]))
 : glass)
 : fc;
-tp.push(path[k].x, y0 + rf * (y1 - y0), path[k].z);
+tp.push(path[k].x + (shear ? shear(path[k], rf) : 0),
+y0 + rf * (y1 - y0), path[k].z);
 tc.push(c.r, c.g, c.b);
 }
 }
@@ -2351,6 +2368,12 @@ for (let i = 0; i < T.n; i++) {
 const t = T.tiers[i];
 const bandRec = (TB && !t.recess && i >= TB.from && i <= TB.to) ? TB
 : ((SB && t.shell && !t.recess) ? SB : null);
+const xF = (t.uA - 0.5) * L;
+const rampShear = t.uAHead !== undefined
+? (pt, rf) => (Math.abs(pt.x - xF) < 1e-6 ? rf * (t.uAHead - t.uA) * L : 0)
+: null;
+const tCeil = t.uAHead !== undefined
+? { uA: t.uAHead, uB: t.uB, half: t.half } : t;
 if (bandRec) {
 const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
 const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
@@ -2360,14 +2383,14 @@ const pitch = bandRec.pitchM || paneW;
 const bStep = Math.max(0.6, pitch * 0.5);
 g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
 [bandRec.bot, bandRec.top], pitch, pf,
-t.shell ? shellCol : null, { lo, hi }));
+t.shell ? shellCol : null, { lo, hi }, rampShear));
 } else {
 g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
-t.recess ? recessCol : (t.shell ? shellCol : null)));
+t.recess ? recessCol : (t.shell ? shellCol : null), null, rampShear));
 }
-g.add(roofPlate(t, t.y1));
+g.add(roofPlate(tCeil, t.y1));
 if (i === T.n - 1) {
-railRun(perim(t), t.y1);
+railRun(perim(tCeil), t.y1);
 } else {
 const tAbove = T.tiers[i + 1];
 const promenade = (uEnd, uStart, capAt) => {
@@ -2386,7 +2409,8 @@ pr.push({ x: (u - 0.5) * L, z: -t.half(u) });
 railRun(pr, t.y1);
 };
 if (t.uB > tAbove.uB + 0.012) promenade(tAbove.uB, t.uB, t.uB);
-if (t.uA < tAbove.uA - 0.012) promenade(tAbove.uA, t.uA, t.uA);
+const fFront = t.uAHead !== undefined ? t.uAHead : t.uA;
+if (fFront < tAbove.uA - 0.012) promenade(tAbove.uA, fFront, fFront);
 }
 }
 const top = T.tiers[T.n - 1];
@@ -4838,6 +4862,7 @@ uGunDecks: { value: S.gunDecks || 0 },
 uTopside: { value: new THREE.Color(S.topside || '#5b4a33') },
 uIron: { value: S.iron ? 1 : 0 },
 uWeld: { value: WELDED ? 1 : 0 },
+uFaired: { value: S.faired ? 1 : 0 },
 uBottom: { value: bottom },
 uCove: { value: S.cove ? 1 : 0 },
 uBoot: { value: new THREE.Color(S.boot || '#ffffff') },

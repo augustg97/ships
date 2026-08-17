@@ -5783,3 +5783,67 @@ Tabs now read Shipwright / Sea / Action, because the Shipwright opens by default
 **STILL WRONG, and stated rather than left to be found:** Azzam's topside is a flat slab with
 visible plate seams and no flare, and her forward superstructure is stepped where the real ship is
 one continuous sculpted ramp. Both need a fresh measurement off the broadside, not a parameter.
+
+## Round 95 — the instrument was 66° off the beam, and the yacht stopped being a working steamer
+
+The task was round 94's last line: Azzam's flat slab of a topside and her stepped forward
+superstructure, both to be fixed off a fresh broadside measurement. The first finding was that
+the measuring instrument itself was broken.
+
+**THE PROFILE HARNESS HAS NEVER TAKEN A TRUE BROADSIDE.** `profile_capture.py` wrote
+`SW.shipSpin = bearing` directly; `swFrame` fixes the camera at `SW.lon = 0.42` and expects
+`spin = lon + π/2 − bearing`. The difference is 65.9°, and it was measured OFF THE FRAME before
+it was found in the code: the Azzam "starboard" plate carries 16.1 px/m vertically but only
+67.6 m of hull across its u0→u1 ticks — cos θ = 0.39, θ = 67°. Every r93/r94 profile was
+foreshortened by a factor the reader had no way to see; heights read true, u-spans survived via
+the per-point ruler, but SHAPE judgements — the very thing the plates exist for — were made on
+a hull viewed 24° forward of the quarter. The harness now drives `SW.viewFromDeg`, the app's
+own `#b=` grammar, so the bearing is resolved by the same line the app resolves it with.
+
+**AND A LONG LENS NEEDS A FAR NEAR-PLANE.** At 3° the camera stands ~3.3 km off; with the
+app's sub-metre near plane, 24-bit depth resolves about A METRE at the ship. The "black arc
+with speckle" down Azzam's stem — carried into this round as a geometry fault — was two things
+at once: a real fault (the steel stem bar's fixed 5.5%-of-beam siding genuinely broke through a
+bow whose entry is narrower than that; proven again by injection, Yamato's post stood 0.15 m
+proud) and an instrument artifact (everything within ~1 m of the shell z-fought at that
+distance). The bar now tapers per-face to half the shell's own local breadth — the wedge the
+plating actually closes over — the surface carries a rabbet floor at the stem (binds only below
+stemFineness 0.022, a guard, not the fix), and the capture rides its near plane at a third of
+the camera distance, which puts depth resolution at millimetres. The clean plate shows a clean
+stem. New audit rule 'post proud of a welded shell' walks the post's own stations against the
+surface; fires 1-for-1 under injection, silent on all 33 today.
+
+**THE YACHT HERSELF.** Off the re-fetched Fricke broadside (kept this time:
+`Research/references/azzam-broadside-fricke-2014.jpg`, 8.33 px/m):
+- `houseRamp` — every tier front rakes so its head lands on the next front's foot; the
+  composite line from foredeck to crest is ONE sculpted sweep, where the model had four
+  vertical steps. Implemented as a per-row shear inside `wallLoft` (front-leg stations lean,
+  the wound loop keeps closure, one corner quad carries the twist), roofs and crest rail move
+  to the plan the tier arrives at, and the bare forward roofs — round 94's paving stones —
+  cease to exist along with their rails. Record-gated; every other hull vertex-identical.
+- `faired` — a Lürssen shell is filled, long-boarded and gloss-coated: no plate lands, no
+  per-plate tone patchwork, no rust streaks, no hungry horse. The welded-steel working
+  finish was painting a tramp's hull on a mirror. Uniform `uFaired`, waterline/boot/bottom
+  kept, record-gated.
+- `bowFlare` 0.14 — the field already existed (the counter's mirror, above v 0.62 only);
+  round 95's only new data is the value, marked DERIVED in formProvenance because a broadside
+  cannot measure flare.
+
+Gates: audit 33/0 (with the new rule). measure_ship: extent 181.45 m against LOA 180.6,
+beam 20.84 against 20.8, masthead 37.50 against 37.5, signal mast 36.21 against the
+broadside's 36.2, house and crest on their recorded u-spans. Ratchet: 55 frames, ONE moved —
+ship-azzam, 0.398% / 0.349, diff read: the change is confined to the yacht (ramped front,
+faired side, stem), sea and sky black — accepted with the class reason. All 54 others 0.000%.
+
+**Left deliberately un-run: the post-accept confirming ratchet pass.** The 80-minute watchdog
+left no room for a second 10-minute run after the accept; the accept consumed the check that
+was just read, nothing else changed after it, and the next round's opening check confirms it
+for free. If round 96 opens with ship-azzam green, this is closed.
+
+**Still wrong on Azzam, stated for round 96:** the tier window bands run as one continuous
+ribbon the full length of every tier; the broadside shows GROUPED punched windows with long
+blank wall runs, different per tier. The hull sides carry two rows of hull windows and a line
+of forward portholes in the photograph; the model's freeboard is bare. Both are record-driven
+window-geometry work (the tierBands mechanism already carries pitch/pier — it needs u-span
+GROUPS). And the r94 leftover stands: the foredeck's dark cap strip reads thicker than the
+photograph's.

@@ -998,6 +998,30 @@ if (z > allow) { over++; worst = Math.max(worst, z - allow); }
 if (over) say(v.id, 'cargo off the deck edge',
 `${over} meshes reach up to ${worst.toFixed(1)} m past the hull side at their own station`);
 }
+if (H.build === 'steel' || H.build === 'iron') {
+const HS4 = SHIPS_HULL.hullSurface(H);
+let poke = 0, worstP = 0;
+g.traverse(o => {
+if (!o.isMesh) return;
+const p = tagOf(o);
+if (!p || p.key !== 'stempost') return;
+const pa = o.geometry.getAttribute('position');
+for (let s = 0; s + 3 < pa.count; s += 4) {
+const x = pa.getX(s), y = pa.getY(s);
+const zHalf = Math.max(Math.abs(pa.getZ(s)), Math.abs(pa.getZ(s + 1)));
+if (y < 0.3) continue;
+let u = Math.max(0.001, Math.min(0.999, 0.5 + x / H.lwl));
+const fb = HS4.sheer(u) || 1;
+const k = Math.max(0, Math.min(1, y / fb));
+u = Math.max(0.001, Math.min(0.999, 0.5 + (x - HS4.rake(u) * k) / H.lwl));
+const shell = Math.abs(
+SHIPS_HULL.surfacePoint(H, HS4, u, 0.62 + 0.38 * k)[2]);
+if (zHalf > shell + 0.05) { poke++; worstP = Math.max(worstP, zHalf - shell); }
+}
+});
+if (poke) say(v.id, 'post proud of a welded shell',
+`${poke} stations stand up to ${worstP.toFixed(2)} m outside the plating`);
+}
 if (H.containers && part.container && part.bridge &&
 part.container.y[1] > part.bridge.y[1] - 2.0)
 say(v.id, 'the bridge cannot see over the stow',
