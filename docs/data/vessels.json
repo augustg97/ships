@@ -4426,7 +4426,7 @@
     "sheerBow": 0.25,
     "sheerStern": 0.0,
     "tumblehome": 0.0,
-    "stemRake": 0.015,
+    "stemRake": 0.052,
     "sternRake": 0.0,
     "strakes": 10,
     "copper": false,
@@ -4549,7 +4549,8 @@
      "2": 0.47
     },
     "houseTaper": 0.03,
-    "housePlateProvenance": "MEASURED off the same broadside: houseAt 0.275-0.929, houseCrest 0.522-0.744, the two intermediate tier edges, and houseTaper 0.03 because a motor yacht's topsides are one flush surface, not a stack of stepped ledges."
+    "housePlateProvenance": "MEASURED off the same broadside: houseAt 0.275-0.929, houseCrest 0.522-0.744, the two intermediate tier edges, and houseTaper 0.03 because a motor yacht's topsides are one flush surface, not a stack of stepped ledges.",
+    "deckSteel": true
    },
    "rows": [
     [
@@ -4807,7 +4808,7 @@
     "masts": [
      {
       "at": 0.19,
-      "heightM": 45.0,
+      "heightM": 15.5,
       "rig": "pole",
       "rake": 5.0,
       "shrouds": 0
@@ -4893,7 +4894,61 @@
     "bridgeM": 12.0,
     "bridgeHalf": 0.4,
     "housePlateProvenance": "MEASURED off the scale profile (Wikimedia Commons, File:En mary titanic.svg, Yzmo, CC BY-SA 3.0) by segmenting her silhouette and reading, at every metre of height above the load waterline, the most-forward and most-aft column still standing at that height. houseAt, houseCrest, tierForeU, tierAftU, the funnel station and its 24.3 m fore-and-aft length, and the mast at u 0.19 are all that measurement. Three earlier attempts were judged by eye off a 34-degree lens that magnifies the near half of a 345 m ship by a third.",
-    "bridgeBeamM": 45.0
+    "bridgeBeamM": 45.0,
+    "deckSteel": true,
+    "topWorks": [
+     {
+      "u0": 0.218,
+      "u1": 0.238,
+      "hM": 3.2,
+      "half": 0.62,
+      "kind": "house"
+     },
+     {
+      "u0": 0.284,
+      "u1": 0.303,
+      "hM": 3.9,
+      "half": 0.3,
+      "kind": "dome"
+     },
+     {
+      "u0": 0.428,
+      "u1": 0.447,
+      "hM": 3.9,
+      "half": 0.3,
+      "kind": "dome"
+     },
+     {
+      "u0": 0.492,
+      "u1": 0.66,
+      "hM": 4.6,
+      "half": 0.66,
+      "kind": "casing"
+     },
+     {
+      "u0": 0.676,
+      "u1": 0.752,
+      "hM": 3.0,
+      "half": 0.7,
+      "kind": "house"
+     },
+     {
+      "u0": 0.762,
+      "u1": 0.784,
+      "hM": 12.8,
+      "half": 0.22,
+      "kind": "uptake"
+     },
+     {
+      "u0": 0.786,
+      "u1": 0.8,
+      "hM": 3.0,
+      "half": 0.55,
+      "kind": "house"
+     }
+    ],
+    "topWorksProvenance": "MEASURED from the same scale profile as houseAt/houseCrest (Commons, File:En mary titanic.svg, Yzmo, CC BY-SA 3.0): the runs of her silhouette standing above the 46.5 m top-deck line, each with its u-span and its peak height over the water. Heights here are above the crest roof.",
+    "mastStep": "house"
    },
    "rows": [
     [

@@ -136,17 +136,38 @@ function swInit() {
      gives the eye a distance to measure the ship against and says "this is somewhere",
      without pretending to be anywhere in particular: it carries no place name and appears
      in no card. Nondescript on purpose — a coast, not a coastline. */
+  /* ── ⚠ AND LAND MUST END WHERE IT GOES UNDER, NOT WHERE THE MESH RUNS OUT ────────────
+     The first version was a 63° ARC at a constant 120 m minimum, so both ends were vertical
+     walls standing 200 m out of the sea in mid-air: a grey slab that simply stopped, which is
+     what August saw at the end of the ship line. Widening the arc only moves the wall.
+     A coast ends for one reason — the ground drops below the horizon — so that is what
+     decides it here. The strip is a CLOSED RING (no ends exist to be cut), and its height is
+     a large-scale landness envelope that spends most of its circumference BELOW zero. Clamped
+     at zero, those stretches collapse to zero-area triangles and are open sea; the crossings
+     are headlands receding under the curve, which is the shape a real coast makes at fifteen
+     kilometres. Every harmonic is an INTEGER multiple of the bearing, so the ring closes on
+     itself exactly and there is no seam either. */
   {
-    const R0 = 15000, seg = 220, pos = [], idx = [];
+    const R0 = 15000, seg = 720, pos = [], idx = [];
+    const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - R0 * R0)) - 6371000;
     for (let j = 0; j <= seg; j++) {
-      const a = (-0.55 + 1.10 * j / seg);                 // a 63-degree arc of shore
+      const a = j / seg * Math.PI * 2;
       const x = Math.sin(a) * R0, z = -Math.cos(a) * R0;
-      /* a ridge line from three incommensurate waves, so it never repeats visibly */
-      const t = j / seg * 9.0;
-      const h = 120 + 190 * (0.5 + 0.5 * Math.sin(t * 1.7))
-                    *  (0.6 + 0.4 * Math.sin(t * 0.61 + 1.3))
-                    +  70 * Math.sin(t * 3.1 + 0.7);
-      const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - R0 * R0)) - 6371000;
+      /* Where there is land at all. The phases are not free-hand: they were searched against
+         the sector this camera actually sees (the eye looks along a = −SW.lon, and the fleet
+         line spreads the view roughly −80°…+32° about it) for a profile that puts open water
+         across one end of the frame, brings the coast up out of the sea INSIDE the picture,
+         and runs it out the other side — so the break the viewer sees is a headland going
+         under the curve and not the edge of a mesh. Land over 48% of the ring. */
+      const envelope = 0.62 * Math.sin(a + 0.524)
+                     + 0.30 * Math.sin(a * 2 + 1.571)
+                     + 0.26 * Math.sin(a * 3 + 2.618)
+                     + 0.14 * Math.sin(a * 5 + 5.236) - 0.06;
+      /* and its relief where it stands, finer and never quite repeating */
+      const ridge = 0.55 + 0.45 * Math.sin(a * 11 + 1.10)
+                                * (0.60 + 0.40 * Math.sin(a * 17 - 0.30))
+                         + 0.18 * Math.sin(a * 29 + 2.20);
+      const h = Math.max(0, 760 * envelope * ridge);
       pos.push(x, drop, z, x, drop + h, z);
     }
     for (let j = 0; j < seg; j++) {

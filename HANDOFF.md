@@ -5726,3 +5726,60 @@ pass, it is a broken capture.** It looked like coverage for a whole round.
 Ratchet: 55 frames, all scored individually, three classes with three written reasons —
 2 rebuilt hulls, 27 round-92 sea, 26 sub-visual dither (0.07–0.15% at mean |Δ| ≤ 0.06 against a
 0.15 limit). Re-run after accepting: **55/55 at 0.000%.**
+
+## Round 94 — the flicker, the lattice, the empty deck, and a coast that ends under the horizon
+
+August: "assess Queen Mary 2 (especially) and Azzam again — they still look off, have strange
+shapes/angles, flicker, and disproportionate pieces… the land cuts off unnaturally at the end of
+the ship line… and by making Shipwright show first, it should also be first in line at the top."
+
+**THE FLICKER WAS THE HULL'S OWN CAPPING RAIL.** Found by experiment: hide the fittings one at a
+time under a fixed camera and the rail is the only one whose removal takes the tear away; hide the
+hull's deck fittings altogether and the strake is clean. It ran the whole length on every hull, so
+on a ship whose house carries out to the shell it sat **16 cm outboard of the white wall** — two
+near-parallel surfaces on a 345 m ship, which is z-fighting by construction. *A rail caps a deck
+EDGE, and there is no edge where the superstructure IS the ship's side.* It is emitted only over
+spans where the deck is genuinely open. A hull with no house is vertex-identical; on Titanic it
+removes a sub-pixel shimmer along B deck, where the plating really did carry up flush.
+
+**A COLOUR THAT LIVES ON A VERTEX CANNOT HAVE AN EDGE.** Her balcony pier is 12% of a 2.6 m cabin
+pitch — 31 cm of white between balconies — drawn by stationing the wall every 31 cm and painting
+one station white. The strip interpolates, so one white station bleeds a full quad each way and
+the pier arrives 93 cm wide; white then wins a third of the run and she read as **a spreadsheet**.
+Widening, narrowing or stationing finer all trade one blur for another, because the quantity has
+no edge to sharpen. `snapBand` gives it one: a PAIR of stations a millimetre apart at every pier
+boundary. Measured on the render: **87% dark / 10% light against the recorded 88/12.**
+
+**THE TOP OF A LINER IS NOT A TABLE.** 220 m of blank plate carrying one funnel and a wire. The
+plate already said what stands there — segmenting the silhouette above the top-deck line returns
+each structure's u-span and height, and every one of those numbers had been measured and thrown
+away. `topWorks` is that list (funnel casing, two radomes, the aft gas-turbine uptake, three
+deckhouses). And **a mast is stepped on the deck it stands on**: hers ran from the 17.6 m sheer up
+through ten decks of accommodation, so 29 m of its 45 m was inside the ship. `mastStep: 'house'` —
+gated on the record, because which datum a recorded height uses is a fact about the RECORD, the
+same trap `funnelH` hit.
+
+**THE AUDIT WAS RIGHT AND THE PLATE READING WAS NOT.** It flagged the masthead at 63.8 m against
+the recorded 62. That 63.8 is my own silhouette segmentation, with a metre of reading error on top
+of the drawing's own; 62 m is Cunard's attested air draught. **The record wins over a derivation
+from it.** 33 hulls, 0 problems.
+
+**LAND ENDS WHERE IT GOES UNDER.** The shore was a 63° arc at a constant 120 m minimum, so both
+ends were vertical walls standing 200 m out of the sea in mid-air. Widening the arc only moves the
+wall. It is a **closed ring** now — no ends exist to be cut — whose height is a landness envelope
+spending most of its circumference below zero; clamped at zero those stretches are open sea and
+the crossings are headlands receding under the curve. The phases were searched against the sector
+this camera actually sees, so the coast rises out of the water inside the frame.
+
+Azzam: a steel deck instead of a teak beach (`deckIsSteel` gives a timber deck to every steel hull
+without containers or a flight deck — right for Titanic and Yamato, wrong for a 2013 motor yacht);
+a stem that reaches (she measured 174.8 m against her recorded 180.6); and **railed promenades on
+her forward tier roofs** — the rail rule knew only about liners, which cascade aft and crest
+forward, so her three forward roofs were bare plates 14 m long. A roof you can stand on carries a
+rail whichever end of the ship it faces.
+
+Tabs now read Shipwright / Sea / Action, because the Shipwright opens by default.
+
+**STILL WRONG, and stated rather than left to be found:** Azzam's topside is a flat slab with
+visible plate seams and no flare, and her forward superstructure is stepped where the real ship is
+one continuous sculpted ramp. Both need a fresh measurement off the broadside, not a parameter.

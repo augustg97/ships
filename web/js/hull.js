@@ -720,7 +720,25 @@ function buildRig(S, group, mats, FINE, FURLED) {
     });
     const gapAft = (obstruct - u) * L;
     const x = (u - 0.5) * L + H.rake(u);
-    const base = deckAt(u);
+    /* ── ⚠ A MAST IS STEPPED ON THE DECK IT STANDS ON ───────────────────────────────────
+       Every mast started at the SHEER, which is right for a ship whose weather deck is her
+       top deck and wrong for anything with a house over it: Queen Mary 2's signal mast ran
+       from 17.6 m — the main-deck sheer — straight up THROUGH ten decks of accommodation and
+       out of the roof, so 29 m of its 45 m length was inside the ship and the 16 m that
+       showed read as a wire. The same reasoning the funnel already uses: the uptake exits
+       through the highest tier covering its station, from the house's own derivation, so the
+       two cannot disagree.
+       ⚠ AND WHICH DATUM A RECORDED HEIGHT USES IS A FACT ABOUT THE RECORD, not about the
+       ship — the same trap the funnel hit, where `funnelH` means "above the boat deck" on
+       Titanic and "above the sheer" on Great Eastern. Every existing heightM in this data was
+       read against the SHEER, so flipping the datum fleet-wide would silently shorten masts
+       that are currently right. `mastStep: 'house'` says the recorded height is measured from
+       the house roof; without it nothing moves. */
+    let base = deckAt(u);
+    if (S.mastStep === 'house' && S.decks) {
+      const HT = linerHouse(S);
+      for (const t of HT.tiers) if (u >= t.uA && u <= t.uB) base = Math.max(base, t.y1);
+    }
     const rakeRad = (mk.rake || 0) * Math.PI / 180;
 
     /* ── STEEL'S RULE, 1794 ────────────────────────────────────────────
@@ -3060,27 +3078,56 @@ function buildFittings(S, group, mats) {
   const halfAtU = u => (H.halfB * H.wl(u)) * (1 - H.tumble(u));
   const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 
-  /* ── the RAIL round the deck edge: a capping timber following the sheer ───────────── */
+  /* ── the RAIL round the deck edge: a capping timber following the sheer ─────────────
+     ── ⚠ AND A RAIL CAPS A DECK EDGE, SO WHERE THE HOUSE IS THE SHIP'S SIDE THERE IS NONE.
+     This ran the whole length on every hull. On a ship whose superstructure carries out to
+     the shell — Queen Mary 2 — the capping section landed 16 cm outboard of the white wall,
+     two near-parallel surfaces on a 345 m ship, which is z-fighting by construction: a torn,
+     crawling dark line along the strake for the whole length of the ship. That is the
+     flicker. Proved by hiding parts one at a time under a fixed camera — the rail is the
+     only one whose removal takes it away, and hiding the hull's deck fittings altogether
+     leaves the strake clean.
+     There is no such rail on the real ship either: her Deck 7 promenade is INSIDE the shell.
+     So the rail is emitted only over the spans where the deck is genuinely open — the
+     forecastle, the poop, and any stretch where the house stands far enough inboard to leave
+     a walkway. A hull with no house has no closed span and comes out vertex-identical. */
   {
     const pos = [], idx = [];
     const NU = 90; let base = 0;
+    const T = S.decks ? linerHouse(S) : null;
+    const t0 = T && T.tiers.length ? T.tiers[0] : null;
+    const open = (u) => {
+      if (!t0 || u < t0.uA || u > t0.uB) return true;
+      /* the house is here: is there deck left outboard of it to stand on? */
+      return halfAtU(u) - t0.half(u) > B * 0.045;
+    };
     for (const sgn of [-1, 1]) {
+      /* walk the same 91 stations as before and cut the strip into open RUNS */
+      let run = [];
+      const flush = () => {
+        if (run.length < 2) { run = []; return; }
+        const start = base;
+        for (const q of run) {
+          const r = B * 0.016;
+          pos.push(q.x, q.y, sgn * (q.hb - r), q.x, q.y + r * 1.6, sgn * (q.hb - r),
+                   q.x, q.y + r * 1.6, sgn * (q.hb + r * 0.3), q.x, q.y, sgn * (q.hb + r * 0.3));
+        }
+        for (let i = 0; i < run.length - 1; i++) {
+          const a = start + i * 4, b = a + 4;
+          for (let f = 0; f < 4; f++) {
+            const c = (f + 1) % 4;
+            idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+          }
+        }
+        base += run.length * 4;
+        run = [];
+      };
       for (let i = 0; i <= NU; i++) {
         const u = 0.035 + (i / NU) * 0.93;
-        const y = deckAtU(u), hb = halfAtU(u);
-        const x = (u - 0.5) * L + H.rake(u);
-        const r = B * 0.016;
-        pos.push(x, y, sgn * (hb - r), x, y + r * 1.6, sgn * (hb - r),
-                 x, y + r * 1.6, sgn * (hb + r * 0.3), x, y, sgn * (hb + r * 0.3));
+        if (!open(u)) { flush(); continue; }
+        run.push({ x: (u - 0.5) * L + H.rake(u), y: deckAtU(u), hb: halfAtU(u) });
       }
-      for (let i = 0; i < NU; i++) {
-        const a = base + i * 4, b = a + 4;
-        for (let f = 0; f < 4; f++) {
-          const c = (f + 1) % 4;
-          idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
-        }
-      }
-      base += (NU + 1) * 4;
+      flush();
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -3715,6 +3762,46 @@ function buildSuperstructure(S, group) {
     return pts;
   };
 
+  /* ── ⚠ A COLOUR THAT LIVES ON A VERTEX CANNOT HAVE AN EDGE ──────────────────────────
+     The band's pier is 12% of a 2.6 m cabin pitch — 31 cm of white between balconies. It was
+     drawn by stationing the wall every 31 cm and painting one station white, which sounds
+     right and is not: the strip interpolates between vertices, so ONE white station bleeds a
+     full quad each way and the pier arrives 93 cm wide. White then wins a third of the run
+     and Queen Mary 2 read as a spreadsheet — a lattice of pale boxes rather than a dark
+     balcony wall with thin dividers. Widening the mullion, narrowing it, or stationing finer
+     all trade one blur for another, because the quantity has no edge to sharpen.
+     Give it one: insert a PAIR of stations a millimetre apart at every pier boundary. The
+     quad between them is 2 mm wide, so the gradient has nowhere to spread and the pier lands
+     at its recorded width, on any pitch, at any beam. Called only for banded walls, so no
+     unbanded hull moves. */
+  const snapBand = (pts, pitch, pierFrac) => {
+    if (!pitch || pitch <= 0) return pts;
+    const eps = 0.001;
+    const out = [pts[0]];
+    let s = 0;
+    for (let k = 1; k < pts.length; k++) {
+      const a = pts[k - 1], b = pts[k];
+      const seg = Math.hypot(b.x - a.x, b.z - a.z);
+      if (seg > 1e-9) {
+        /* every boundary of the form (n + 0)·pitch and (n + pierFrac)·pitch inside this leg */
+        const n0 = Math.floor(s / pitch);
+        for (let n = n0; n <= Math.floor((s + seg) / pitch) + 1; n++) {
+          for (const f of [0, pierFrac]) {
+            const sb = (n + f) * pitch;
+            if (sb <= s + eps || sb >= s + seg - eps) continue;
+            for (const d of [-eps, +eps]) {
+              const t2 = (sb + d - s) / seg;
+              out.push({ x: a.x + (b.x - a.x) * t2, z: a.z + (b.z - a.z) * t2 });
+            }
+          }
+        }
+        s += seg;
+      }
+      out.push(b);
+    }
+    return out;
+  };
+
   /* the roof is a plate over the tier's own plan — ShapeGeometry from the same perimeter,
      so the two cannot disagree. rotateX(+90°) maps shape-y onto world z unmirrored. */
   const roofPlate = (t, y) => {
@@ -3799,9 +3886,12 @@ function buildSuperstructure(S, group) {
       const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
       const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec.top, 1.0];
       const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
-      const bStep = Math.max(0.25, (bandRec.pitchM || paneW) * Math.min(0.5, pf || 0.5));
-      g.add(wallLoft(perim(t, bStep), t.y0, t.y1, bRows, [bandRec.bot, bandRec.top],
-                     bandRec.pitchM || paneW, pf,
+      const pitch = bandRec.pitchM || paneW;
+      /* the wall's own stations only have to follow the SHAPE now — snapBand puts the
+         colour edges in, so the step is a geometry choice rather than a rhythm one */
+      const bStep = Math.max(0.6, pitch * 0.5);
+      g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
+                     [bandRec.bot, bandRec.top], pitch, pf,
                      t.shell ? shellCol : null, { lo, hi }));
     } else {
       g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
@@ -3813,22 +3903,31 @@ function buildSuperstructure(S, group) {
     } else {
       /* the exposed roof aft of the tier above is the promenade of this deck — railed along
          its sides and across its aft end, like the real thing */
+      /* ── ⚠ AND THE ROOF FORWARD OF THE TIER ABOVE IS A DECK TOO ──────────────────────
+         This railed only the AFT exposed roof, because the liner the rule was written for
+         cascades aft and crests forward, so forward roofs did not exist. A motor yacht is
+         built the other way about: Azzam's tiers step back going FORWARD, and each of those
+         three roofs came out as a bare white plate 14 m long — a stack of paving stones, and
+         the loudest thing wrong with her from above. A roof you can stand on carries a rail
+         whichever end of the ship it faces. */
       const tAbove = T.tiers[i + 1];
-      if (t.uB > tAbove.uB + 0.012) {
+      const promenade = (uEnd, uStart, capAt) => {
         const pr = [];
-        const NP = Math.max(4, Math.round((t.uB - tAbove.uB) * L / (paneW * 0.5)));
+        const NP = Math.max(4, Math.round(Math.abs(uStart - uEnd) * L / (paneW * 0.5)));
         for (let k = 0; k <= NP; k++) {
-          const u = tAbove.uB + (t.uB - tAbove.uB) * k / NP;
+          const u = uEnd + (uStart - uEnd) * k / NP;
           pr.push({ x: (u - 0.5) * L, z: t.half(u) });
         }
-        const hb = t.half(t.uB);
-        pr.push({ x: (t.uB - 0.5) * L, z: -hb });
+        const hb = t.half(capAt);
+        pr.push({ x: (capAt - 0.5) * L, z: -hb });
         for (let k = NP; k >= 0; k--) {
-          const u = tAbove.uB + (t.uB - tAbove.uB) * k / NP;
+          const u = uEnd + (uStart - uEnd) * k / NP;
           pr.push({ x: (u - 0.5) * L, z: -t.half(u) });
         }
         railRun(pr, t.y1);
-      }
+      };
+      if (t.uB > tAbove.uB + 0.012) promenade(tAbove.uB, t.uB, t.uB);
+      if (t.uA < tAbove.uA - 0.012) promenade(tAbove.uA, t.uA, t.uA);
     }
   }
 
@@ -3906,6 +4005,61 @@ function buildSuperstructure(S, group) {
     + 'because a beam this wide is brought alongside a pier by an officer standing at its '
     + 'very edge, watching the plating go home.';
   g.add(bTag);
+
+  /* ── ⚠ THE TOP OF A LINER IS NOT A TABLE ────────────────────────────────────────────
+     With the tiers flush-sided and the terraces measured, Queen Mary 2's crest came out as
+     220 m of blank white plate carrying one funnel and a wire, which is the loudest thing
+     wrong with her from any angle above the beam: a real sun deck is the most crowded deck
+     on the ship. And the plate SAYS what stands there — segmenting her silhouette above the
+     top-deck line returns each structure's u-span and its height over the water, and every
+     one of those numbers was already measured and then thrown away.
+     topWorks is that list: {u0, u1, hM, half, kind} per structure, hM above the crest roof,
+     half as a fraction of the tier's own half-breadth. 'house' is a white deckhouse with a
+     window band, 'dome' a radome, 'uptake' a dark stack, 'casing' a low white machinery
+     housing. Nothing is drawn for a hull whose record has no list, so no other ship moves. */
+  const works = S.topWorks || [];
+  if (works.length) {
+    const wg = new THREE.Group();
+    const dark = new THREE.MeshStandardMaterial({ color: 0x24272b, roughness: 0.62, metalness: 0.30 });
+    for (const w of works) {
+      const uM = (w.u0 + w.u1) / 2;
+      const len = Math.max(1, (w.u1 - w.u0) * L);
+      const half = Math.max(B * 0.05, top.half(uM) * (w.half !== undefined ? w.half : 0.55));
+      const x = (uM - 0.5) * L, h = w.hM;
+      if (w.kind === 'dome') {
+        const d = new THREE.Mesh(
+          new THREE.SphereGeometry(Math.min(h, len / 2), 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+          plateMat);
+        d.position.set(x, T.top, 0);
+        wg.add(tag(d, 'bridge', 'Radome',
+          'A radar scanner under a weatherproof shell. She carries more than one because a '
+          + 'single set blind astern of her own funnel is no use in the Western Approaches.'));
+      } else if (w.kind === 'uptake') {
+        const c = new THREE.Mesh(
+          new THREE.CylinderGeometry(len * 0.34, len * 0.40, h, 14), dark);
+        c.position.set(x, T.top + h / 2, 0);
+        wg.add(tag(c, 'funnel', 'Gas turbine uptake',
+          'The gas turbines do not sit in the machinery spaces at all — they are in a housing '
+          + 'abaft the funnel, because their intake and exhaust are too big to trunk that far '
+          + 'down through a passenger ship.'));
+      } else {
+        /* a house or a casing: one banded wall and a plate, from the same loft the tiers use */
+        const wt = { uA: w.u0, uB: w.u1, half: () => half };
+        const band = w.kind === 'casing' ? null : [0.34, 0.80];
+        wg.add(wallLoft(perim(wt, Math.max(0.6, paneW * 0.5)), T.top, T.top + h,
+                        band ? [0.0, band[0], band[0] + 0.03, band[1] - 0.03, band[1], 1.0]
+                             : [0.0, 0.5, 1.0],
+                        band || [2, 3], paneW * 1.3, 0.42));
+        wg.add(roofPlate(wt, T.top + h));
+      }
+    }
+    const wTag = tag(wg, 'superstructure', 'Deck works');
+    wTag.userData.part.what =
+      'What stands on the open top deck: machinery casings, the funnel housing, radar, and '
+      + 'the deckhouses over the public rooms. Their positions and heights are read off a '
+      + 'scale profile of the ship, one structure at a time.';
+    g.add(wTag);
+  }
 
   /* ── COWL VENTILATORS, ON THE BOAT DECK ─────────────────────────────────────────────
      The most recognisable fitting on a Victorian steamer, and for as long as the tiers have

@@ -64,15 +64,19 @@ gm.rotation.x = -Math.PI / 2;
 gm.frustumCulled = false;
 SW.ground = gm; SW.scene.add(gm);
 {
-const R0 = 15000, seg = 220, pos = [], idx = [];
-for (let j = 0; j <= seg; j++) {
-const a = (-0.55 + 1.10 * j / seg);
-const x = Math.sin(a) * R0, z = -Math.cos(a) * R0;
-const t = j / seg * 9.0;
-const h = 120 + 190 * (0.5 + 0.5 * Math.sin(t * 1.7))
-*  (0.6 + 0.4 * Math.sin(t * 0.61 + 1.3))
-+  70 * Math.sin(t * 3.1 + 0.7);
+const R0 = 15000, seg = 720, pos = [], idx = [];
 const drop = Math.sqrt(Math.max(0, 6371000 * 6371000 - R0 * R0)) - 6371000;
+for (let j = 0; j <= seg; j++) {
+const a = j / seg * Math.PI * 2;
+const x = Math.sin(a) * R0, z = -Math.cos(a) * R0;
+const envelope = 0.62 * Math.sin(a + 0.524)
++ 0.30 * Math.sin(a * 2 + 1.571)
++ 0.26 * Math.sin(a * 3 + 2.618)
++ 0.14 * Math.sin(a * 5 + 5.236) - 0.06;
+const ridge = 0.55 + 0.45 * Math.sin(a * 11 + 1.10)
+* (0.60 + 0.40 * Math.sin(a * 17 - 0.30))
++ 0.18 * Math.sin(a * 29 + 2.20);
+const h = Math.max(0, 760 * envelope * ridge);
 pos.push(x, drop, z, x, drop + h, z);
 }
 for (let j = 0; j < seg; j++) {

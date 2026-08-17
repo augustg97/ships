@@ -409,7 +409,11 @@ if (fu > u + 1e-4 && fu < obstruct) obstruct = fu;
 });
 const gapAft = (obstruct - u) * L;
 const x = (u - 0.5) * L + H.rake(u);
-const base = deckAt(u);
+let base = deckAt(u);
+if (S.mastStep === 'house' && S.decks) {
+const HT = linerHouse(S);
+for (const t of HT.tiers) if (u >= t.uA && u <= t.uB) base = Math.max(base, t.y1);
+}
 const rakeRad = (mk.rake || 0) * Math.PI / 180;
 const steelMain = (S.lwl + S.beam) / 2;
 const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
@@ -1865,23 +1869,38 @@ const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 {
 const pos = [], idx = [];
 const NU = 90; let base = 0;
+const T = S.decks ? linerHouse(S) : null;
+const t0 = T && T.tiers.length ? T.tiers[0] : null;
+const open = (u) => {
+if (!t0 || u < t0.uA || u > t0.uB) return true;
+return halfAtU(u) - t0.half(u) > B * 0.045;
+};
 for (const sgn of [-1, 1]) {
-for (let i = 0; i <= NU; i++) {
-const u = 0.035 + (i / NU) * 0.93;
-const y = deckAtU(u), hb = halfAtU(u);
-const x = (u - 0.5) * L + H.rake(u);
+let run = [];
+const flush = () => {
+if (run.length < 2) { run = []; return; }
+const start = base;
+for (const q of run) {
 const r = B * 0.016;
-pos.push(x, y, sgn * (hb - r), x, y + r * 1.6, sgn * (hb - r),
-x, y + r * 1.6, sgn * (hb + r * 0.3), x, y, sgn * (hb + r * 0.3));
+pos.push(q.x, q.y, sgn * (q.hb - r), q.x, q.y + r * 1.6, sgn * (q.hb - r),
+q.x, q.y + r * 1.6, sgn * (q.hb + r * 0.3), q.x, q.y, sgn * (q.hb + r * 0.3));
 }
-for (let i = 0; i < NU; i++) {
-const a = base + i * 4, b = a + 4;
+for (let i = 0; i < run.length - 1; i++) {
+const a = start + i * 4, b = a + 4;
 for (let f = 0; f < 4; f++) {
 const c = (f + 1) % 4;
 idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
 }
 }
-base += (NU + 1) * 4;
+base += run.length * 4;
+run = [];
+};
+for (let i = 0; i <= NU; i++) {
+const u = 0.035 + (i / NU) * 0.93;
+if (!open(u)) { flush(); continue; }
+run.push({ x: (u - 0.5) * L + H.rake(u), y: deckAtU(u), hb: halfAtU(u) });
+}
+flush();
 }
 const g = new THREE.BufferGeometry();
 g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -2257,6 +2276,32 @@ for (let k = 1; k <= NF; k++)
 pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
 return pts;
 };
+const snapBand = (pts, pitch, pierFrac) => {
+if (!pitch || pitch <= 0) return pts;
+const eps = 0.001;
+const out = [pts[0]];
+let s = 0;
+for (let k = 1; k < pts.length; k++) {
+const a = pts[k - 1], b = pts[k];
+const seg = Math.hypot(b.x - a.x, b.z - a.z);
+if (seg > 1e-9) {
+const n0 = Math.floor(s / pitch);
+for (let n = n0; n <= Math.floor((s + seg) / pitch) + 1; n++) {
+for (const f of [0, pierFrac]) {
+const sb = (n + f) * pitch;
+if (sb <= s + eps || sb >= s + seg - eps) continue;
+for (const d of [-eps, +eps]) {
+const t2 = (sb + d - s) / seg;
+out.push({ x: a.x + (b.x - a.x) * t2, z: a.z + (b.z - a.z) * t2 });
+}
+}
+}
+s += seg;
+}
+out.push(b);
+}
+return out;
+};
 const roofPlate = (t, y) => {
 const pts = perim(t);
 const sh = new THREE.Shape();
@@ -2311,9 +2356,10 @@ const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
 const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
 const bRows = [0.0, bandRec.bot, bandRec.bot + 0.02, bandRec.top - 0.02, bandRec.top, 1.0];
 const pf = bandRec.pierFrac !== undefined ? bandRec.pierFrac : 0.16;
-const bStep = Math.max(0.25, (bandRec.pitchM || paneW) * Math.min(0.5, pf || 0.5));
-g.add(wallLoft(perim(t, bStep), t.y0, t.y1, bRows, [bandRec.bot, bandRec.top],
-bandRec.pitchM || paneW, pf,
+const pitch = bandRec.pitchM || paneW;
+const bStep = Math.max(0.6, pitch * 0.5);
+g.add(wallLoft(snapBand(perim(t, bStep), pitch, pf), t.y0, t.y1, bRows,
+[bandRec.bot, bandRec.top], pitch, pf,
 t.shell ? shellCol : null, { lo, hi }));
 } else {
 g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
@@ -2324,21 +2370,23 @@ if (i === T.n - 1) {
 railRun(perim(t), t.y1);
 } else {
 const tAbove = T.tiers[i + 1];
-if (t.uB > tAbove.uB + 0.012) {
+const promenade = (uEnd, uStart, capAt) => {
 const pr = [];
-const NP = Math.max(4, Math.round((t.uB - tAbove.uB) * L / (paneW * 0.5)));
+const NP = Math.max(4, Math.round(Math.abs(uStart - uEnd) * L / (paneW * 0.5)));
 for (let k = 0; k <= NP; k++) {
-const u = tAbove.uB + (t.uB - tAbove.uB) * k / NP;
+const u = uEnd + (uStart - uEnd) * k / NP;
 pr.push({ x: (u - 0.5) * L, z: t.half(u) });
 }
-const hb = t.half(t.uB);
-pr.push({ x: (t.uB - 0.5) * L, z: -hb });
+const hb = t.half(capAt);
+pr.push({ x: (capAt - 0.5) * L, z: -hb });
 for (let k = NP; k >= 0; k--) {
-const u = tAbove.uB + (t.uB - tAbove.uB) * k / NP;
+const u = uEnd + (uStart - uEnd) * k / NP;
 pr.push({ x: (u - 0.5) * L, z: -t.half(u) });
 }
 railRun(pr, t.y1);
-}
+};
+if (t.uB > tAbove.uB + 0.012) promenade(tAbove.uB, t.uB, t.uB);
+if (t.uA < tAbove.uA - 0.012) promenade(tAbove.uA, t.uA, t.uA);
 }
 }
 const top = T.tiers[T.n - 1];
@@ -2388,6 +2436,48 @@ bTag.userData.part.what =
 + 'because a beam this wide is brought alongside a pier by an officer standing at its '
 + 'very edge, watching the plating go home.';
 g.add(bTag);
+const works = S.topWorks || [];
+if (works.length) {
+const wg = new THREE.Group();
+const dark = new THREE.MeshStandardMaterial({ color: 0x24272b, roughness: 0.62, metalness: 0.30 });
+for (const w of works) {
+const uM = (w.u0 + w.u1) / 2;
+const len = Math.max(1, (w.u1 - w.u0) * L);
+const half = Math.max(B * 0.05, top.half(uM) * (w.half !== undefined ? w.half : 0.55));
+const x = (uM - 0.5) * L, h = w.hM;
+if (w.kind === 'dome') {
+const d = new THREE.Mesh(
+new THREE.SphereGeometry(Math.min(h, len / 2), 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+plateMat);
+d.position.set(x, T.top, 0);
+wg.add(tag(d, 'bridge', 'Radome',
+'A radar scanner under a weatherproof shell. She carries more than one because a '
++ 'single set blind astern of her own funnel is no use in the Western Approaches.'));
+} else if (w.kind === 'uptake') {
+const c = new THREE.Mesh(
+new THREE.CylinderGeometry(len * 0.34, len * 0.40, h, 14), dark);
+c.position.set(x, T.top + h / 2, 0);
+wg.add(tag(c, 'funnel', 'Gas turbine uptake',
+'The gas turbines do not sit in the machinery spaces at all — they are in a housing '
++ 'abaft the funnel, because their intake and exhaust are too big to trunk that far '
++ 'down through a passenger ship.'));
+} else {
+const wt = { uA: w.u0, uB: w.u1, half: () => half };
+const band = w.kind === 'casing' ? null : [0.34, 0.80];
+wg.add(wallLoft(perim(wt, Math.max(0.6, paneW * 0.5)), T.top, T.top + h,
+band ? [0.0, band[0], band[0] + 0.03, band[1] - 0.03, band[1], 1.0]
+: [0.0, 0.5, 1.0],
+band || [2, 3], paneW * 1.3, 0.42));
+wg.add(roofPlate(wt, T.top + h));
+}
+}
+const wTag = tag(wg, 'superstructure', 'Deck works');
+wTag.userData.part.what =
+'What stands on the open top deck: machinery casings, the funnel housing, radar, and '
++ 'the deckhouses over the public rooms. Their positions and heights are read off a '
++ 'scale profile of the ship, one structure at a time.';
+g.add(wTag);
+}
 if (S.funnels && !(S.year >= 1950)) {
 const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
 const fst = funnelStations(S);
