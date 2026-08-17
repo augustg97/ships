@@ -49,6 +49,29 @@ say(v.id, 'dome past its terrace',
 `dome u ${dm.u} on tier ${dm.onTier}, terrace ends ${aft}`);
 }
 }
+if (H.sternSteps) {
+const ss = H.sternSteps.steps || [];
+for (let i = 0; i < ss.length; i++) {
+const st = ss[i];
+if (!(st.u[0] < st.u[1]) || st.u[0] < 0 || st.u[1] > 1)
+say(v.id, 'stern step span inverted', `step ${i} u [${st.u[0]}, ${st.u[1]}]`);
+if (i && Math.abs(ss[i - 1].u[1] - st.u[0]) > 0.001)
+say(v.id, 'stern steps not contiguous',
+`step ${i - 1} ends ${ss[i - 1].u[1]}, step ${i} starts ${st.u[0]}`);
+if (i && st.topM[0] > ss[i - 1].topM[1] + 0.05)
+say(v.id, 'stern cap line ascends aft',
+`step ${i} fwd top ${st.topM[0]} m over step ${i - 1} aft top ${ss[i - 1].topM[1]} m`);
+if (st.deckM !== undefined) {
+const para = Math.min(st.topM[0], st.topM[1]) - st.deckM;
+if (para < 0.4 || para > 2.0)
+say(v.id, 'stern parapet off human height',
+`step ${i} deck ${st.deckM} m under cap ${st.topM} m — parapet ${para.toFixed(2)} m`);
+if (st.deckM > (H.freeboard || 6))
+say(v.id, 'stern step deck above the freeboard',
+`step ${i} deck ${st.deckM} m on ${H.freeboard} m freeboard`);
+}
+}
+}
 let g = null;
 try { g = SHIPS_HULL.buildShip(H, { fine: true }); }
 catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }
@@ -87,6 +110,31 @@ e.z[0] = Math.min(e.z[0], bb.min.z); e.z[1] = Math.max(e.z[1], bb.max.z);
 const deckY = part.deck ? part.deck.y[1] : 0;
 const bb = new THREE.Box3().setFromObject(g);
 const airM = bb.max.y - deckY;
+if (H.sternSteps) {
+const ss = H.sternSteps.steps || [];
+const spanDev = ss.map(() => -1e9);
+g.traverse(o => {
+if (!o.isMesh || !o.geometry) return;
+const p = tagOf(o);
+if (!p || p.key !== 'terrace') return;
+const a = o.geometry.attributes.position.array;
+for (let i = 0; i < a.length; i += 3) {
+const uu = a[i] / H.lwl + 0.5;
+for (let s2 = 0; s2 < ss.length; s2++)
+if (uu > ss[s2].u[0] + 0.002 && uu < ss[s2].u[1] - 0.002) {
+const t = (uu - ss[s2].u[0]) / (ss[s2].u[1] - ss[s2].u[0]);
+const want = ss[s2].topM[0] + (ss[s2].topM[1] - ss[s2].topM[0]) * t;
+spanDev[s2] = Math.max(spanDev[s2], a[i + 1] - want);
+}
+}
+});
+for (let s2 = 0; s2 < ss.length; s2++) {
+if (spanDev[s2] < -1e8) continue;
+if (spanDev[s2] < -0.2 || spanDev[s2] > 0.3)
+say(v.id, 'stern cap off its record',
+`step ${s2} built cap sits ${spanDev[s2].toFixed(2)} m off the recorded line`);
+}
+}
 const carriesSail = !!H.wingSail ||
 (H.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole');
 const airLimit = carriesSail ? H.loa * 1.15 : H.loa * 0.35;
@@ -101,7 +149,8 @@ for (const [flag, key, label] of [['funnels', 'funnel', 'funnels'],
 ['aaLight', 'aaLight', 'the light AA battery'],
 ['searchlights', 'searchlight', 'searchlights'],
 ['floatplanes', 'floatplane', 'floatplanes'],
-['deckHatches', 'hatch', 'stowage hatches']])
+['deckHatches', 'hatch', 'stowage hatches'],
+['sternSteps', 'terrace', 'the stern terraces']])
 if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key]
 && !(flag === 'boats' && H.boatsInboard))
 say(v.id, 'declared but not drawn', label);

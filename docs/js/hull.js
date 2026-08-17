@@ -83,7 +83,21 @@ return Math.max(0.06, Math.min(fore, aft));
 const sheer = u => {
 const s = Math.abs(2 * u - 1);
 const rise = u < 0.5 ? S.sheerBow : S.sheerStern;
-return S.freeboard + rise * Math.pow(s, 2.8);
+const base = S.freeboard + rise * Math.pow(s, 2.8);
+if (S.sternSteps)
+for (const st of S.sternSteps.steps)
+if (u >= st.u[0] && u <= st.u[1] && st.deckM !== undefined)
+return Math.min(base, st.deckM);
+return base;
+};
+const stepTop = u => {
+if (!S.sternSteps) return null;
+for (const st of S.sternSteps.steps)
+if (u >= st.u[0] && u <= st.u[1]) {
+const t = (u - st.u[0]) / (st.u[1] - st.u[0]);
+return st.topM[0] + (st.topM[1] - st.topM[0]) * t;
+}
+return null;
 };
 const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
 const rake = u => {
@@ -97,7 +111,20 @@ return S.sternRake * k * k * S.loa;
 }
 return 0;
 };
-return { nExp, halfB, wl, keel, sheer, tumble, rake };
+return { nExp, halfB, wl, keel, sheer, tumble, rake, stepTop };
+}
+function hullStations(S, NU) {
+const us = [];
+for (let i = 0; i <= NU; i++) us.push(i / NU);
+if (S.sternSteps) {
+const E = 1e-5;
+for (const st of S.sternSteps.steps) {
+const b = st.u[0];
+if (b > 0 && b < 1) us.push(b - E, b + E);
+}
+us.sort((a, b) => a - b);
+}
+return us;
 }
 function buildKeelGeometry(S) {
 const H = hullSurface(S);
@@ -294,15 +321,21 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
 const H = hullSurface(S);
 const pos = [], nor = [], uvs = [], idx = [];
 const pointAt = (u, v) => surfacePoint(S, H, u, v);
-for (let i = 0; i <= NU; i++) {
-const u = i / NU;
+const US = hullStations(S, NU);
+const brks = S.sternSteps ? S.sternSteps.steps.map(st => st.u[0]).filter(b => b > 0 && b < 1) : [];
+const nearBrk = u => { for (const b of brks) if (Math.abs(u - b) < 1e-4) return b; return null; };
+for (let i = 0; i < US.length; i++) {
+const u = US[i];
 for (let j = 0; j <= NV; j++) {
 const v = j / NV;
 const [x, z, y] = pointAt(u, v);
 pos.push(x, z, y);
 uvs.push(u, v);
 const e = 1 / (NU * 2), f = 1 / (NV * 2);
-const a  = pointAt(Math.min(1, u + e), v), a2 = pointAt(Math.max(0, u - e), v);
+let uF = Math.min(1, u + e), uB = Math.max(0, u - e);
+const bk = nearBrk(u);
+if (bk !== null) { if (u <= bk) uF = u; else uB = u; }
+const a  = pointAt(uF, v), a2 = pointAt(uB, v);
 const c  = pointAt(u, Math.min(1, v + f)), c2 = pointAt(u, Math.max(0, v - f));
 const du = [a[0] - a2[0], a[1] - a2[1], a[2] - a2[2]];
 const dv = [c[0] - c2[0], c[1] - c2[1], c[2] - c2[2]];
@@ -314,7 +347,7 @@ nor.push(nx / ln, ny / ln, nz / ln);
 }
 }
 const row = NV + 1;
-for (let i = 0; i < NU; i++) {
+for (let i = 0; i < US.length - 1; i++) {
 for (let j = 0; j < NV; j++) {
 const a = i * row + j, b = a + row, c = a + 1, d = b + 1;
 idx.push(a, b, c, c, b, d);
@@ -358,8 +391,9 @@ return (S.build === 'steel' || S.build === 'iron')
 function buildDeckGeometry(S, NU = 120) {
 const H = hullSurface(S);
 const pos = [], nor = [], uvs = [], idx = [];
-for (let i = 0; i <= NU; i++) {
-const u = i / NU;
+const US = hullStations(S, NU);
+for (let i = 0; i < US.length; i++) {
+const u = US[i];
 const edge = surfacePoint(S, H, u, 1);
 const b = edge[2], fb = edge[1], x = edge[0];
 for (let j = 0; j <= 8; j++) {
@@ -371,7 +405,8 @@ nor.push(0, 1, 0);
 uvs.push(u, k);
 }
 }
-for (let i = 0; i < NU; i++) {
+for (let i = 0; i < US.length - 1; i++) {
+if (US[i + 1] - US[i] < 1e-4) continue;
 for (let j = 0; j < 8; j++) {
 const a = i * 9 + j, b = a + 9, c = a + 1, d = b + 1;
 idx.push(a, b, c, c, b, d);
@@ -383,6 +418,91 @@ g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
 g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx);
 return g;
+}
+function buildSternTerraces(S, group) {
+if (!S.sternSteps) return;
+const H = hullSurface(S);
+const g = new THREE.Group();
+const E = 1e-5, TH = 0.15;
+const capH = S.capM || 0.2;
+const white = new THREE.MeshStandardMaterial({
+color: new THREE.Color(S.topside || '#e4e2dc'), roughness: 0.42, metalness: 0.08,
+side: THREE.DoubleSide });
+const capMat = new THREE.MeshStandardMaterial({
+color: 0x4a5057, roughness: 0.58, metalness: 0.42, side: THREE.DoubleSide });
+const loft = (secs, mat, wrap, ends) => {
+const pos = [], idx = [];
+const P = secs[0].length;
+for (const sec of secs) for (const p of sec) pos.push(p[0], p[1], p[2]);
+for (let i = 0; i < secs.length - 1; i++)
+for (let f = 0; f < (wrap ? P : P - 1); f++) {
+const c = (f + 1) % P;
+idx.push(i * P + f, (i + 1) * P + f, i * P + c,
+i * P + c, (i + 1) * P + f, (i + 1) * P + c);
+}
+if (ends) {
+const l = (secs.length - 1) * P;
+idx.push(0, 1, 2, 0, 2, 3, l, l + 2, l + 1, l, l + 3, l + 2);
+}
+const gg = new THREE.BufferGeometry();
+gg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+gg.setIndex(idx); gg.computeVertexNormals();
+return new THREE.Mesh(gg, mat);
+};
+const edgeAt = u => surfacePoint(S, H, u, 1);
+for (let si = 0; si < S.sternSteps.steps.length; si++) {
+const st = S.sternSteps.steps[si];
+const u0 = st.u[0] + E, u1 = st.u[1] - E;
+const N = Math.max(2, Math.ceil((u1 - u0) * S.lwl / 2));
+for (const sgn of [-1, 1]) {
+const wall = [], cap = [];
+for (let i = 0; i <= N; i++) {
+const u = u0 + (i / N) * (u1 - u0);
+const p = edgeAt(u);
+const x = p[0], fb = p[1], ye = Math.abs(p[2]);
+const top = H.stepTop(u);
+wall.push([[x, fb - 0.3, sgn * (ye - TH)], [x, top - capH, sgn * (ye - TH)],
+[x, top - capH, sgn * ye],      [x, fb - 0.3, sgn * ye]]);
+cap.push([[x, top - capH, sgn * (ye - TH - 0.02)], [x, top, sgn * (ye - TH - 0.02)],
+[x, top, sgn * (ye + 0.03)],             [x, top - capH, sgn * (ye + 0.03)]]);
+}
+g.add(tag(loft(wall, white, true, true), 'terrace'));
+g.add(tag(loft(cap, capMat, true, true), 'terrace'));
+}
+const b = st.u[0];
+const dF = H.sheer(b - E), dA = H.sheer(b + E);
+if (dF - dA > 0.02) {
+const eF = edgeAt(b - E), eA = edgeAt(b + E);
+const rows = [[], []];
+for (let k = 0; k <= 8; k++) {
+const kk = k / 8;
+rows[0].push([eF[0], eF[1] + Math.cos((kk - 0.5) * Math.PI) * eF[2] * 0.035,
+eF[2] * (1 - 2 * kk)]);
+rows[1].push([eA[0], eA[1] + Math.cos((kk - 0.5) * Math.PI) * eA[2] * 0.035,
+eA[2] * (1 - 2 * kk)]);
+}
+g.add(tag(loft(rows, white, false, false), 'terrace'));
+}
+}
+const pT = edgeAt(1 - E);
+const xT = pT[0], fbT = pT[1], bT = Math.abs(pT[2]), topT = H.stepTop(1);
+if (topT !== null && topT > fbT + 0.1) {
+const secs = [];
+for (let k = 0; k <= 8; k++) {
+const y = bT * (1 - 2 * k / 8);
+secs.push([[xT - TH, fbT - 0.3, y], [xT - TH, topT - capH, y],
+[xT, topT - capH, y],    [xT, fbT - 0.3, y]]);
+}
+g.add(tag(loft(secs, white, true, true), 'terrace'));
+const capS = [];
+for (let k = 0; k <= 8; k++) {
+const y = bT * (1 - 2 * k / 8);
+capS.push([[xT - TH - 0.02, topT - capH, y], [xT - TH - 0.02, topT, y],
+[xT + 0.03, topT, y],             [xT + 0.03, topT - capH, y]]);
+}
+g.add(tag(loft(capS, capMat, true, true), 'terrace'));
+}
+group.add(g);
 }
 const HULL_VERT = SHADERS['HULL_VERT.vert'];
 const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
@@ -1732,6 +1852,11 @@ what: 'Running rigging from each yard ARM, leading aft. Hauling one brace and '
 rail:     { stage: 3, name: 'Rail',
 what: 'The capping timber round the deck edge, following the sheer. It finishes '
 + 'the tops of the frames and is what everyone aboard actually holds on to.' },
+terrace:  { stage: 3, name: 'Stern terraces',
+what: 'The stepped after decks and their solid bulwarks, descending from the main '
++ 'deck to a low platform at the transom. Each step is a deck you can stand '
++ 'on, walled by a faired steel parapet whose cap line is what the broadside '
++ 'photograph actually shows.' },
 waterway: { stage: 3, name: 'Waterway',
 what: 'The margin plank at the deck edge, thicker than the deck it borders and '
 + 'standing a little proud of it. The gutter its inboard edge makes against '
@@ -1883,6 +2008,7 @@ const NU = 90; let base = 0;
 const T = S.decks ? linerHouse(S) : null;
 const t0 = T && T.tiers.length ? T.tiers[0] : null;
 const open = (u) => {
+if (H.stepTop(u) !== null) return false;
 if (!t0 || u < t0.uA || u > t0.uB) return true;
 return halfAtU(u) - t0.half(u) > B * 0.045;
 };
@@ -5028,6 +5154,7 @@ if (FINE) buildFunnel(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
 if (FINE && S.cluster) buildCluster(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
+if (FINE && S.sternSteps) buildSternTerraces(S, group);
 if (FINE) buildJunkCastle(S, group);
 if (FINE && S.turrets) buildCitadel(S, group, mats);
 if (FINE) buildSternAviation(S, group);

@@ -5974,3 +5974,67 @@ this round. The aft deck aft of u 0.82 is also still bare.
 **Left un-run, same as r95/r96: the post-accept confirming ratchet pass.** The accept consumed
 the check just read and nothing changed after it; round 98's opening check confirms it for
 free. If round 98 opens with ship-azzam green, this is closed.
+
+## Round 98 — 2026-08-17 — the stern comes down to the water the way the photograph says it does
+
+**Round 97's deferred confirming pass is closed**: the opening ratchet ran 54/55 at 0.000%.
+ship-azzam read 0.734% for the same reason r97's opening did — this round's edits were landing
+in web/ while the check was still rendering, and the diff (read) is confined to the yacht's stern.
+
+**The task was round 97's last paragraph: THE STERN TERRACES. Done, and measured finer than the
+r97 read.** A 0.0025-u envelope scan of the broadside (same anchors, 8.96 px/m) resolves what
+r97's 0.005 sampling could not: the main-deck bulwark ends at u 0.884, not 0.90 — the 9.93 read
+at exactly 0.900 is an occluder standing on the terrace (r97's own text already called 0.888 the
+bulwark run-out) — and the cap tops RAKE within every terrace rather than sitting level: 9.9→9.6
+to the break, 6.9→7.0 to 0.931, 6.6→6.1 to 0.946, 5.7→4.9 to 0.9625, 4.9→4.2 to 0.975, 3.5→3.0
+at the transom. New record field `sternSteps`: steps as [u-span, topM [fwd, aft]] — the measured
+silhouette line — plus DERIVED `deckM` per terrace (low cap minus a 0.9–1.0 m parapet; the plate
+cannot see decks behind their own bulwarks). The first span keeps the hull's recorded 9.0 m sheer.
+
+**The model change is hull-sheer surgery, record-gated end to end.** `hullSurface.sheer()` steps
+the deck line span by span; `hullStations()` inserts 4 mm snap-pair stations at every break (the
+snapBand lesson in its third guise — a height on a vertex cannot have an edge), and the shell,
+deck cap and frames all follow because they all ask surfacePoint. The deck loft leaves the slot
+between a snap pair open — its declared up normals would light a vertical face as floor — and new
+`buildSternTerraces()` closes each break with a cambered riser panel, walks solid white parapets
+along both deck edges of every span (flush with the shell, asked of surfacePoint, counter flare
+included), rides a dark capM cap strip along every parapet top, and walls the transom. The old
+deck-edge rail is suppressed over the terrace spans — the bulwark owns that edge now, and the rail
+would have hung in the air over the lowered decks. Every hull without sternSteps: vertex-identical,
+confirmed by the final ratchet's 54 zeros.
+
+**Verified three ways.** (1) Profile harness, per-column waterline datum (the 3° lens's projection
+tilt is ~0.6 m across 180 m — the tick centres carry it, so the datum must be local): model
+envelope tracks the recorded cap line with mean −0.28 m, of which −0.2 m is the classifier
+excluding the dark cap by construction; worst column 0.37 m; foredeck sanity anchor 8.94 vs 9.0.
+(2) measure_ship: extent 181.45 / beam 20.84 / masthead 37.50 unmoved; the new part spans
+u 0.820–1.000, top 9.93 m, half-breadth 10.23 on a 10.42 half-beam. (3) Astern and quarter
+captures read clean — no holes, no z-fighting, risers closed, caps descending like a staircase.
+
+**Audit: three new record rules + one build rule, all injection-proven.** 'stern step span
+inverted'/'not contiguous'/'cap line ascends aft'/'parapet off human height' on the record, and
+'stern cap off its record' walks every terrace-tagged VERTEX against the record's cap line at
+that vertex's own u — the first version compared spans against their forward cap value and
+convicted every raked cap of being its own rake short (rule 8: the audit was the fault; fixed
+before anything else moved). sternSteps also joins the declared-but-not-drawn table. Injection:
+ascending-cap record fires, a 1 m y-shift build fires 6-for-6. Clean sweep 33/0.
+
+⚠ Playwright's `page.evaluate` CALLS a snippet whose completion value is a function — a build-
+injection snippet ending on `SHIPS_HULL.buildShip = function(){...}` gets its wrapper invoked
+with no arguments and dies on `S.year`. End injection snippets with a bare `"wrapped";`.
+
+**Known residuals, stated:** the terrace parapets are a plain MeshStandardMaterial and read a
+touch brighter than the shader-lit shell in close-up — tone, not structure. The boot-topping band
+is painted in v, so it thins where the freeboard drops to 2.1 m aft (sub-pixel at frame scale).
+The aft-facing riser walls are bare white where the photograph shows glazing and doors, and the
+terrace decks themselves are unfurnished (no pool, no stairs between levels) — the aft deck aft
+of 0.82 remains bare. Also found and deliberately not touched: the deck-edge RAIL loft still
+computes its half-breadth as halfB·wl·(1−tumble), which predates the counter/bow flare — on every
+flared hull the forward rail sits inboard of the true deck edge (up to ~1.4 m near Azzam's stem).
+That is the same stale-parallel-formula class the deck builder comment already names; fixing it
+moves the rail on every transom-sterned hull in the fleet, so it needs its own round with its own
+before/after — not a side effect of this one.
+
+**Next:** the Azzam thread is at diminishing returns for silhouette work; per round 51's list the
+next-crudest unfinished vessel in the standing survey is **ship-of-the-line**. If a future round
+returns to Azzam: riser glazing, terrace furniture, and the parapet/shell tone match.

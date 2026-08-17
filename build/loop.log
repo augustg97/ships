@@ -5470,3 +5470,22 @@ The queue itself is long closed, so this round worked round 95's stated leftover
   by itself at the next firing. Nothing else is needed.
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 12:46:14  round starting
+Live stamp **1786998793** confirmed — the deploy is real, the round is complete.
+
+## Round 97 summary
+
+The queue is long closed, so this round worked round 96's two named leftovers on Azzam. The first is done; the second is measured and deliberately deferred.
+
+**The tier heights are the record's now.** A new envelope segmentation (`Research/segment-azzam-envelope.py`) reads the broadside's upper silhouette with a ship-white classifier — the Bremen yard backdrop defeats any sky-difference scan — and takes each tier's roof where that roof is exposed. Fore and aft reads agree within 0.4 m: floors at **13.5 / 17.4 / 20.0 m** under a 22.5 m top, tiers of 4.5/3.9/2.6/2.5 m where `deckM` had stacked four at 3.05. `linerHouse` gained record-gated `tierFloorsM`/`houseTopM`, and `tierBands` gained `bandsM` — glazing sills and heads in metres over the waterline, straight off the plate. The profile harness closes the loop: segmented model rooflines 13.59/17.40/19.94 against the plate's 13.5/17.4/20.0.
+
+**The aft staircase was misattributed by two decks.** With every tier drawn ~3 m, r95 had matched silhouette edges to the wrong tiers: the "tier 2 edge" at 0.821 is tier 0's roof end, 0.888 is the main-deck bulwark run-out, and r96's aft glazing groups were dark background over the stepped-down stern read as glass (their provenance had already flagged the extension as derived). Corrected: `houseAt` aft 0.82, `tierAftU` 0.795/0.744, `houseCrest` aft 0.708, groups trimmed. The delivery photo's "roof tip u 0.87" turned out to be the UAE ensign, which occludes 0.83–0.87.
+
+**The aft domes weren't where the record put them.** A strip scan at 17.8–23 m finds nothing at the recorded 0.763/0.803 — which after the edge correction would have floated past their own terrace — and white mass only at the measured 0.710 (pair) and 0.737 (single). Moved; their pedestals now stand at 19.74 m, the height the cluster provenance itself reads.
+
+**Gates, all green:** audit 33/33 with two new injection-verified record rules ('tier band outside its tier', 'dome past its terrace') plus a rule-8 fix — the cluster-float rule was still deriving footings from `freeboard + deckM` and disagreed only because the audit ran the old arithmetic. Ratchet 54/55 at 0.000% (closing r96's deferred confirmation), ship-azzam's diff read and confined to the yacht, accepted with reason. Commit `615100c` pushed, live stamp verified.
+
+**Left for round 98, measured and recorded in the provenance:** the stern terraces — the plate reads bulwark tops descending 9.7 → 6.9 → 6.3 → 5.4 → 4.5 → 3.1 m aft of u 0.90 where the model runs plain 8.9 m sheer. That is hull-sheer surgery, not house work. Also noted: the mast u 0.638 could not be re-verified (the yard crane crosses its strip); if the cluster grid is ever re-anchored, start there.
+2026-08-17 13:51:05  round finished; HEAD is 615100c Round 97: the tiers stand at the plate's floors, and the aft staircase was mislabelled by two decks
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 70714 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 14:01:05  round starting

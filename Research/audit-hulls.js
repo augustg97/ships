@@ -103,6 +103,36 @@
       }
     }
 
+    /* ── A TERRACED STERN DESCENDS, CONTIGUOUSLY (round 98) ─────────────────────────────
+       sternSteps records the bulwark cap line the broadside reads, span by span, and the
+       derived deck behind each parapet. A gap between spans leaves a slice of hull on the
+       OLD sheer; an ascending cap line puts a terrace above the one forward of it; a deck
+       above its own cap is a parapet of negative height. All record errors the picture
+       cannot see, because the build would draw each of them faithfully. */
+    if (H.sternSteps) {
+      const ss = H.sternSteps.steps || [];
+      for (let i = 0; i < ss.length; i++) {
+        const st = ss[i];
+        if (!(st.u[0] < st.u[1]) || st.u[0] < 0 || st.u[1] > 1)
+          say(v.id, 'stern step span inverted', `step ${i} u [${st.u[0]}, ${st.u[1]}]`);
+        if (i && Math.abs(ss[i - 1].u[1] - st.u[0]) > 0.001)
+          say(v.id, 'stern steps not contiguous',
+              `step ${i - 1} ends ${ss[i - 1].u[1]}, step ${i} starts ${st.u[0]}`);
+        if (i && st.topM[0] > ss[i - 1].topM[1] + 0.05)
+          say(v.id, 'stern cap line ascends aft',
+              `step ${i} fwd top ${st.topM[0]} m over step ${i - 1} aft top ${ss[i - 1].topM[1]} m`);
+        if (st.deckM !== undefined) {
+          const para = Math.min(st.topM[0], st.topM[1]) - st.deckM;
+          if (para < 0.4 || para > 2.0)
+            say(v.id, 'stern parapet off human height',
+                `step ${i} deck ${st.deckM} m under cap ${st.topM} m — parapet ${para.toFixed(2)} m`);
+          if (st.deckM > (H.freeboard || 6))
+            say(v.id, 'stern step deck above the freeboard',
+                `step ${i} deck ${st.deckM} m on ${H.freeboard} m freeboard`);
+        }
+      }
+    }
+
     let g = null;
     try { g = SHIPS_HULL.buildShip(H, { fine: true }); }
     catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }
@@ -159,6 +189,45 @@
     const bb = new THREE.Box3().setFromObject(g);
     const airM = bb.max.y - deckY;
 
+    /* ── THE BUILT CAP LINE STANDS WHERE THE RECORD READS IT (round 98) ─────────────────
+       The record can be right and the build still wrong — a dropped gate, a stale copy of
+       the sheer, a loft fed the deck instead of the cap. So ask the MESHES: inside each
+       span (margins exclude the riser and end stations; u from x assumes the terrace region
+       carries no stern rake, which a terraced stern does not), the tallest terrace-tagged
+       vertex must reach the span's own cap line and nothing tagged terrace may stand past
+       it. Fires 1-for-1 under a y-shift injection; silent when the build honours the read. */
+    if (H.sternSteps) {
+      const ss = H.sternSteps.steps || [];
+      /* the cap is RAKED, so a span has no single height: every vertex is judged against
+         the record's own line AT ITS OWN u. The tallest deviation should be ~0 — the cap
+         tops sit on the line — so a build shifted low reads a large negative maxDev and
+         anything standing proud reads positive. (The first version compared the span's
+         interior max against the span's FORWARD cap value and convicted every raked cap
+         of being its own rake short — the audit was the fault, rule 8.) */
+      const spanDev = ss.map(() => -1e9);
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return;
+        const p = tagOf(o);
+        if (!p || p.key !== 'terrace') return;
+        const a = o.geometry.attributes.position.array;
+        for (let i = 0; i < a.length; i += 3) {
+          const uu = a[i] / H.lwl + 0.5;
+          for (let s2 = 0; s2 < ss.length; s2++)
+            if (uu > ss[s2].u[0] + 0.002 && uu < ss[s2].u[1] - 0.002) {
+              const t = (uu - ss[s2].u[0]) / (ss[s2].u[1] - ss[s2].u[0]);
+              const want = ss[s2].topM[0] + (ss[s2].topM[1] - ss[s2].topM[0]) * t;
+              spanDev[s2] = Math.max(spanDev[s2], a[i + 1] - want);
+            }
+        }
+      });
+      for (let s2 = 0; s2 < ss.length; s2++) {
+        if (spanDev[s2] < -1e8) continue;   // a span too short to hold an interior station
+        if (spanDev[s2] < -0.2 || spanDev[s2] > 0.3)
+          say(v.id, 'stern cap off its record',
+              `step ${s2} built cap sits ${spanDev[s2].toFixed(2)} m off the recorded line`);
+      }
+    }
+
     /* ── the rules ─────────────────────────────────────────────────────────────────── */
     /* ⚠ AND A SQUARE-RIGGER'S MAST TRUCK GENUINELY APPROACHES HER OWN LENGTH — a 57 m ship of
        the line carries 58 m of rig, which is correct and which this rule called a fault on its
@@ -180,7 +249,8 @@
                                       ['aaLight', 'aaLight', 'the light AA battery'],
                                       ['searchlights', 'searchlight', 'searchlights'],
                                       ['floatplanes', 'floatplane', 'floatplanes'],
-                                      ['deckHatches', 'hatch', 'stowage hatches']])
+                                      ['deckHatches', 'hatch', 'stowage hatches'],
+                                      ['sternSteps', 'terrace', 'the stern terraces']])
       if (H[flag] && (!Array.isArray(H[flag]) || H[flag].length) && !part[key]
           /* a boatsInboard record EXPLAINS the absence: the tenders live in a garage
              inside the shell, so a declared count rightly draws nothing topside */
