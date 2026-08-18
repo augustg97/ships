@@ -720,17 +720,41 @@ function buildDeckGeometry(S, NU = 120) {
  * raked cap line is the height the broadside actually measures, and the parapet across the
  * transom. Everything is asked of surfacePoint, so the walls stand flush with the shell —
  * counter flare included — and cannot drift from it. */
-function buildSternTerraces(S, group) {
+function buildSternTerraces(S, group, hullMat) {
   if (!S.sternSteps) return;
   const H = hullSurface(S);
   const g = new THREE.Group();
   const E = 1e-5, TH = 0.15;                       // parapet plate thickness, inboard
   const capH = S.capM || 0.2;                      // cap face height — the measured strip
-  const white = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(S.topside || '#e4e2dc'), roughness: 0.42, metalness: 0.08,
+  /* ── THE PARAPET IS THE SHELL, CONTINUED — SO IT TAKES THE SHELL'S LIGHT ─────────────
+     Measured round 102 (build/terrace-tone-before.json): the same white paint on the same
+     near-vertical orientation read 216 sRGB on the parapet and 89 on the shell an arm's
+     length below it, because MeshStandardMaterial is lit by the scene through ACES while
+     the shell is lit by HULL_FRAG's own sun. STEEL_FRAG is that recipe on a plain colour,
+     and the uniforms are the hull material's OWN uSun/uCam objects, so the wall cannot
+     drift from the shell it stands on. */
+  const steel = hex => new THREE.ShaderMaterial({
+    vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
+    side: THREE.DoubleSide,
+    uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                uCol: { value: new THREE.Color(hex) } } });
+  const white = steel(S.topside || '#e4e2dc');
+  const capMat = steel('#4a5057');
+  /* the glass follows the HOUSE's glazing system — the wallLoft recipe and the tierBands
+     'glass' lo/hi — because a terrace door matches the windows above it, not the paint */
+  const glassMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.60,
     side: THREE.DoubleSide });
-  const capMat = new THREE.MeshStandardMaterial({
-    color: 0x4a5057, roughness: 0.58, metalness: 0.42, side: THREE.DoubleSide });
+  const gLo = new THREE.Color(0x272e35), gHi = new THREE.Color(0x4a545d);
+  const glassQuad = (x, z0, z1, y0, y1) => {
+    const gg = new THREE.BufferGeometry();
+    gg.setAttribute('position', new THREE.Float32BufferAttribute(
+      [x, y0, z0, x, y0, z1, x, y1, z1, x, y1, z0], 3));
+    gg.setAttribute('color', new THREE.Float32BufferAttribute(
+      [gLo.r, gLo.g, gLo.b, gLo.r, gLo.g, gLo.b,
+       gHi.r, gHi.g, gHi.b, gHi.r, gHi.g, gHi.b], 3));
+    gg.setIndex([0, 1, 2, 0, 2, 3]); gg.computeVertexNormals();
+    return new THREE.Mesh(gg, glassMat);
+  };
 
   /* a quad strip through equal-length section loops; wrap closes the profile into a box
      strip, ends caps the first and last sections */
@@ -792,6 +816,59 @@ function buildSternTerraces(S, group) {
                       eA[2] * (1 - 2 * kk)]);
       }
       g.add(tag(loft(rows, white, false, false), 'terrace'));
+
+      /* deck camber crowns 0.035·half on the centreline; local height at any z needs it */
+      const zwA = Math.abs(eA[2]), zwF = Math.abs(eF[2]);
+      const crownAt = (z, edgeY, zw) => edgeY + 0.035 * zw * Math.cos(z * Math.PI / (2 * zw));
+
+      if (dF - dA > 2.0) {
+        /* ── A FULL-HEIGHT RISER IS A WALL YOU LIVE BEHIND, NOT A PLATE ────────────────
+           The delivery photograph reads the house's aft face dark with glazing over the
+           terraces; its 6.6 px/m cannot place individual lights, so the ARRANGEMENT is
+           inferred: a tinted band between white piers, and a pair of doors to the deck on
+           the centreline — the saloon opens onto the first terrace. Panels stand 25 mm
+           proud of the steel face so no two surfaces share a plane. */
+        const xg = eA[0] + 0.025;
+        const head = dF - 0.45;
+        const sill = crownAt(0, dA, zwA) + 1.0;
+        const zBand = zwA * 0.72;
+        const doorTag = (m, nm, what) => tag(m, 'terrace', nm, what);
+        g.add(doorTag(glassQuad(xg, -zBand, -1.55, sill, head), 'Terrace glazing',
+          'The tinted band across the house’s aft face, looking down the terraces. '
+          + 'The delivery photograph reads this wall dark against the white; the pane '
+          + 'arrangement is inferred — the plate’s scale cannot place it.'));
+        g.add(doorTag(glassQuad(xg, 1.55, zBand, sill, head), 'Terrace glazing',
+          'The tinted band across the house’s aft face, looking down the terraces. '
+          + 'The delivery photograph reads this wall dark against the white; the pane '
+          + 'arrangement is inferred — the plate’s scale cannot place it.'));
+        for (const sgn of [-1, 1])
+          g.add(doorTag(glassQuad(xg, sgn * 0.10, sgn * 1.45,
+                                  crownAt(sgn * 0.8, dA, zwA) + 0.02, head),
+            'Terrace doors',
+            'Glazed doors from the saloon onto the highest terrace, glass to the sill. '
+            + 'Attested by the dark aft face in the delivery photograph; their exact '
+            + 'width is inferred.'));
+      } else if (dF - dA > 0.25) {
+        /* ── A BREAK YOU CAN STAND AT IS A BREAK YOU CAN WALK DOWN ─────────────────────
+           Twin flights against the riser, one each side, closed risers in the yacht
+           manner. Their tops land flush with the upper deck and they hide behind the
+           next span's bulwark, which is why the round-98 broadside envelope never saw
+           them — consistent with, not contradicted by, the plate. */
+        for (const sgn of [-1, 1]) {
+          const zs = sgn * (zwA - 1.75);
+          const yb = crownAt(zs, dA, zwA), yt = crownAt(zs, dF, zwF);
+          const dl = yt - yb;
+          const n = Math.max(2, Math.round(dl / 0.19)), rise = dl / n, treadD = 0.28;
+          const flight = new THREE.Group();
+          for (let j = 0; j < n; j++) {          // j = 0 the top tread, at the riser
+            const hgt = (yt - j * rise) - yb;
+            const step = new THREE.Mesh(new THREE.BoxGeometry(treadD, hgt, 1.3), white);
+            step.position.set(eA[0] + 0.02 + (j + 0.5) * treadD, yb + hgt / 2, zs);
+            flight.add(step);
+          }
+          g.add(tag(flight, 'stair'));
+        }
+      }
     }
   }
 
@@ -3156,6 +3233,10 @@ const PARTS = {
                   + 'deck to a low platform at the transom. Each step is a deck you can stand '
                   + 'on, walled by a faired steel parapet whose cap line is what the broadside '
                   + 'photograph actually shows.' },
+  stair:    { stage: 3, name: 'Terrace stair',
+              what: 'Twin flights against the riser at each break, closed risers in the yacht '
+                  + 'manner, tops flush with the deck above. They stand behind the next '
+                  + 'bulwark aft, which is why a broadside cannot see them.' },
   waterway: { stage: 3, name: 'Waterway',
               what: 'The margin plank at the deck edge, thicker than the deck it borders and '
                   + 'standing a little proud of it. The gutter its inboard edge makes against '
@@ -8150,7 +8231,7 @@ function buildShip(S, opts) {
   if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
   if (FINE && S.cluster) buildCluster(S, group);
   if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
-  if (FINE && S.sternSteps) buildSternTerraces(S, group);
+  if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
   if (FINE) buildJunkCastle(S, group);
   if (FINE && S.turrets) buildCitadel(S, group, mats);
   if (FINE) buildSternAviation(S, group);

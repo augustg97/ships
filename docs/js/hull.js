@@ -419,17 +419,32 @@ g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx);
 return g;
 }
-function buildSternTerraces(S, group) {
+function buildSternTerraces(S, group, hullMat) {
 if (!S.sternSteps) return;
 const H = hullSurface(S);
 const g = new THREE.Group();
 const E = 1e-5, TH = 0.15;
 const capH = S.capM || 0.2;
-const white = new THREE.MeshStandardMaterial({
-color: new THREE.Color(S.topside || '#e4e2dc'), roughness: 0.42, metalness: 0.08,
+const steel = hex => new THREE.ShaderMaterial({
+vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
+side: THREE.DoubleSide,
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+uCol: { value: new THREE.Color(hex) } } });
+const white = steel(S.topside || '#e4e2dc');
+const capMat = steel('#4a5057');
+const glassMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.60,
 side: THREE.DoubleSide });
-const capMat = new THREE.MeshStandardMaterial({
-color: 0x4a5057, roughness: 0.58, metalness: 0.42, side: THREE.DoubleSide });
+const gLo = new THREE.Color(0x272e35), gHi = new THREE.Color(0x4a545d);
+const glassQuad = (x, z0, z1, y0, y1) => {
+const gg = new THREE.BufferGeometry();
+gg.setAttribute('position', new THREE.Float32BufferAttribute(
+[x, y0, z0, x, y0, z1, x, y1, z1, x, y1, z0], 3));
+gg.setAttribute('color', new THREE.Float32BufferAttribute(
+[gLo.r, gLo.g, gLo.b, gLo.r, gLo.g, gLo.b,
+gHi.r, gHi.g, gHi.b, gHi.r, gHi.g, gHi.b], 3));
+gg.setIndex([0, 1, 2, 0, 2, 3]); gg.computeVertexNormals();
+return new THREE.Mesh(gg, glassMat);
+};
 const loft = (secs, mat, wrap, ends) => {
 const pos = [], idx = [];
 const P = secs[0].length;
@@ -482,6 +497,45 @@ rows[1].push([eA[0], eA[1] + Math.cos((kk - 0.5) * Math.PI) * eA[2] * 0.035,
 eA[2] * (1 - 2 * kk)]);
 }
 g.add(tag(loft(rows, white, false, false), 'terrace'));
+const zwA = Math.abs(eA[2]), zwF = Math.abs(eF[2]);
+const crownAt = (z, edgeY, zw) => edgeY + 0.035 * zw * Math.cos(z * Math.PI / (2 * zw));
+if (dF - dA > 2.0) {
+const xg = eA[0] + 0.025;
+const head = dF - 0.45;
+const sill = crownAt(0, dA, zwA) + 1.0;
+const zBand = zwA * 0.72;
+const doorTag = (m, nm, what) => tag(m, 'terrace', nm, what);
+g.add(doorTag(glassQuad(xg, -zBand, -1.55, sill, head), 'Terrace glazing',
+'The tinted band across the house’s aft face, looking down the terraces. '
++ 'The delivery photograph reads this wall dark against the white; the pane '
++ 'arrangement is inferred — the plate’s scale cannot place it.'));
+g.add(doorTag(glassQuad(xg, 1.55, zBand, sill, head), 'Terrace glazing',
+'The tinted band across the house’s aft face, looking down the terraces. '
++ 'The delivery photograph reads this wall dark against the white; the pane '
++ 'arrangement is inferred — the plate’s scale cannot place it.'));
+for (const sgn of [-1, 1])
+g.add(doorTag(glassQuad(xg, sgn * 0.10, sgn * 1.45,
+crownAt(sgn * 0.8, dA, zwA) + 0.02, head),
+'Terrace doors',
+'Glazed doors from the saloon onto the highest terrace, glass to the sill. '
++ 'Attested by the dark aft face in the delivery photograph; their exact '
++ 'width is inferred.'));
+} else if (dF - dA > 0.25) {
+for (const sgn of [-1, 1]) {
+const zs = sgn * (zwA - 1.75);
+const yb = crownAt(zs, dA, zwA), yt = crownAt(zs, dF, zwF);
+const dl = yt - yb;
+const n = Math.max(2, Math.round(dl / 0.19)), rise = dl / n, treadD = 0.28;
+const flight = new THREE.Group();
+for (let j = 0; j < n; j++) {
+const hgt = (yt - j * rise) - yb;
+const step = new THREE.Mesh(new THREE.BoxGeometry(treadD, hgt, 1.3), white);
+step.position.set(eA[0] + 0.02 + (j + 0.5) * treadD, yb + hgt / 2, zs);
+flight.add(step);
+}
+g.add(tag(flight, 'stair'));
+}
+}
 }
 }
 const pT = edgeAt(1 - E);
@@ -1868,6 +1922,10 @@ what: 'The stepped after decks and their solid bulwarks, descending from the mai
 + 'deck to a low platform at the transom. Each step is a deck you can stand '
 + 'on, walled by a faired steel parapet whose cap line is what the broadside '
 + 'photograph actually shows.' },
+stair:    { stage: 3, name: 'Terrace stair',
+what: 'Twin flights against the riser at each break, closed risers in the yacht '
++ 'manner, tops flush with the deck above. They stand behind the next '
++ 'bulwark aft, which is why a broadside cannot see them.' },
 waterway: { stage: 3, name: 'Waterway',
 what: 'The margin plank at the deck edge, thicker than the deck it borders and '
 + 'standing a little proud of it. The gutter its inboard edge makes against '
@@ -5181,7 +5239,7 @@ if (FINE) buildFunnel(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
 if (FINE && S.cluster) buildCluster(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
-if (FINE && S.sternSteps) buildSternTerraces(S, group);
+if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
 if (FINE) buildJunkCastle(S, group);
 if (FINE && S.turrets) buildCitadel(S, group, mats);
 if (FINE) buildSternAviation(S, group);

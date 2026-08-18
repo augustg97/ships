@@ -5538,3 +5538,22 @@ Live stamp reads **1787010448** — the deploy is verified end to end. Round 100
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 84734 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 17:23:40  round starting
+Round 101 is complete and live. The summary:
+
+**The task was round 99's deferred class fix — the aftermost boom clamp — and the phantom had two heads.** `gapAft * 0.78` discounted swing clearance, a collision term, against a stern that is not an obstruction, so the open boom scaled with hull length abaft the mast instead of with the sail plan. And on the steamer the clamp wasn't even the stern: `funnelStations()` lists candidate *slots*, `buildFunnel` draws only the first `S.funnels` of them, and both the boom clamp and the cowl-ventilator dodge consulted all slots — her spanker was held at 5.4 m by a phantom stack at 0.92 that her one real funnel (at 0.26) never occupied. A new `drawnFunnelStations()` is now the single source of what actually stands, consumed by all three sites.
+
+**The open boom now draws the sail plan's own terms**: the 0.62 share of the lower mast, bounded by `gapAft * 1.6` — how far a driver boom can overhang the taffrail with its sheet still anchored there — calibrated on the one attested spar in reach, Steel's 74 driver boom (13–17 m). Measured before/after per hull with a new instrument (`Research/probe-booms.py`, tables committed): the 74's driver 7.56 → 15.50 m (mid-Steel), clipper 8.74 → 13.83, steamer 5.38 → 11.99, Endurance 6.02 → 12.36 (the overhang bound binding — the bare share would have drawn 15.8 m on her 39.6 m hull), Wyoming 15.44 → 20.77, her spanker now the longest boom aboard as the photographs show. Preussen and Great Eastern were already at their share and did not move; the junk-family booms are untouched.
+
+**Found while verifying: the Shipwright deep-link to Endurance was dead.** She shipped `build: 'wood'` — no such tradition — and the undefined lookup threw during boot, before `__FRAME_READY`. The one hull with no baseline frame was also the one that crashed when opened; those are the same fact. Record corrected to `frame` (Framnæs built her carvel), the view now degrades to the default tradition on an unknown key, and she renders correctly.
+
+**Held for the future:** three injection-proven audit rules — 'open boom off its sail plan' firing both directions (7/7 shortened, 7/7 stretched), and 'build tradition unknown' (33/33). Clean sweep 33/0. Ratchet 55 frames, 9 moved, none BLANK, each read and accepted with its reason. Committed as fc0c8e1, pushed, and the live stamp 1787014769 verified end to end.
+
+**Handed to round 102:** the Azzam residuals (riser glazing, terrace furniture, parapet tone), a `ship-endurance` baseline frame, and the opening check confirms this round's nine accepts for free.
+2026-08-17 18:25:32  round finished; HEAD is fc0c8e1 Round 101: the boom stops measuring the hull and starts measuring the sail
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 89107 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 18:35:32  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 18:45:37  round starting

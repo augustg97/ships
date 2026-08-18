@@ -172,6 +172,40 @@ if (spanDev[s2] < -0.2 || spanDev[s2] > 0.3)
 say(v.id, 'stern cap off its record',
 `step ${s2} built cap sits ${spanDev[s2].toFixed(2)} m off the recorded line`);
 }
+const HSs = SHIPS_HULL.hullSurface(H);
+const wv = new THREE.Vector3();
+g.updateMatrixWorld(true);
+g.traverse(o => {
+if (!o.userData.part || o.userData.part.key !== 'stair' || !o.children.length) return;
+let minY = 1e9, maxY = -1e9, maxZ = 0, mx = 0, nch = 0;
+for (const c of o.children) {
+if (!c.isMesh || !c.geometry.parameters) continue;
+const p = c.geometry.parameters;
+c.getWorldPosition(wv);
+minY = Math.min(minY, wv.y - p.height / 2);
+maxY = Math.max(maxY, wv.y + p.height / 2);
+maxZ = Math.max(maxZ, Math.abs(wv.z) + p.depth / 2);
+mx += wv.x; nch++;
+}
+if (!nch) return;
+const u = (mx / nch) / H.lwl + 0.5;
+let bu = null;
+for (const st of ss) if (st.u[0] > 0.5 && Math.abs(st.u[0] - u) < 0.05 &&
+(bu === null || Math.abs(st.u[0] - u) < Math.abs(bu - u)))
+bu = st.u[0];
+if (bu === null) { say(v.id, 'stair off its decks', `flight at u ${u.toFixed(3)} near no break`); return; }
+const dUp = HSs.sheer(bu - 1e-5), dLo = HSs.sheer(bu + 1e-5);
+const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSs, bu + 1e-5, 1)[2]);
+if (maxY < dUp - 0.05 || maxY > dUp + 0.45)
+say(v.id, 'stair off its decks',
+`top tread ${maxY.toFixed(2)} m vs upper deck ${dUp.toFixed(2)} at break ${bu}`);
+if (minY < dLo - 0.05 || minY > dLo + 0.45)
+say(v.id, 'stair off its decks',
+`foot ${minY.toFixed(2)} m vs lower deck ${dLo.toFixed(2)} at break ${bu}`);
+if (maxZ > half + 0.05)
+say(v.id, 'stair off its decks',
+`tread reaches ${maxZ.toFixed(2)} m off centre on a ${half.toFixed(2)} m half-breadth`);
+});
 }
 const carriesSail = !!H.wingSail ||
 (H.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole');

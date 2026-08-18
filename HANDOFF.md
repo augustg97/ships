@@ -6233,3 +6233,74 @@ check confirms these nine for free.
 **Next:** Azzam residuals (riser glazing, terrace furniture, parapet tone — r98). And a
 `ship-endurance` baseline frame is worth adding: she was the only hull without one, and this
 round showed what lives in unphotographed corners.
+
+## Round 102 — 2026-08-17 — the terraces stop being a different ship from the hull they stand on
+
+**The opening ratchet confirmed round 101's nine accepts** — all 55 frames green, nothing
+carried. The task was r98's three named Azzam residuals, deferred through three rounds of
+class fixes: parapet/shell tone, riser glazing, terrace furniture. All three closed, plus
+the ship-endurance baseline r101 asked for.
+
+**THE TONE SEAM WAS TWO LIGHTING MODELS ON ONE SURFACE.** A terrace parapet rises flush
+from the shell — it IS the shell, continued — but it was drawn in MeshStandardMaterial,
+lit by the scene through ACES, while the shell below it is lit by HULL_FRAG's own one-sun
+recipe. Measured on the same near-vertical faces in the same frame (rule 4;
+build/terrace-tone-before.json): parapet 216 sRGB, shell 89 — the same white paint, 2.4×
+apart, a hard seam along the whole terrace run. The fix is the furl-material lesson taken
+structurally: new STEEL_VERT/STEEL_FRAG is the hull's closing light recipe (sun, sky,
+water bounce, paint spec, the same gamma, the same view-space-normal quirk, kept
+deliberately) on a plain colour, and the terrace materials share the hull material's OWN
+uSun/uCam uniform objects, so the wall cannot drift from the shell at any bearing. After
+(terrace-tone-after.json): the parapet outer faces read the shell's exact tone and the
+seam is gone; the riser face reads 160 vs the shell's 89, which is its aft-facing normal
+in the same recipe, not a residual — the shell's own counter reads pale the same way.
+
+**THE 0.884 RISER GETS THE GLAZING AND DOORS THE PLATE ATTESTS.** The only full-height
+drop (3.1 m, the house's aft face over the first terrace) now carries a tinted band
+between white piers and a pair of centreline doors, glass to the sill, panels 25 mm proud
+of the steel face so no two surfaces share a plane. The glass is the HOUSE system's
+recipe — wallLoft's vertexColors material and the tierBands 'glass' lo/hi — because a
+terrace door matches the windows above it, not the paint. The arrangement is INFERRED and
+says so on the record and the part card: the delivery plate reads the face dark against
+the white but its ~6.6 px/m cannot place a pane. The four lesser risers (0.7–1.2 m) stay
+bare steel — they are below-waist walls, not rooms.
+
+**THE BREAKS GET THEIR STAIRS, AND THE ENVELOPE STAYS TRUE.** Twin flights at each of the
+four lesser breaks, closed risers in the yacht manner, 0.19 m rise from the deck camber's
+own local height, tops flush with the deck above (measure_ship: flight top 6.00 vs upper
+deck 5.9 + 0.095 crown at its z). Every flight hides behind the next span's bulwark —
+checked on a bare beam capture — which is why round 98's broadside envelope never saw
+one; the model now agrees with the plate about what a broadside CANNOT see. The 0.884
+break gets no external stair: a flight to 9.0 m would stand 2 m proud of span 2's cap
+over 3.5 m of run and the envelope read no such mass — you leave that deck through the
+glazed doors. No pool is drawn anywhere: charter-site copy claims one but nothing places
+it at a measurable position, and the record now says so (rule 10).
+
+**Audit: one new rule, injection-proven both ways, clean sweep 33/0.** 'stair off its
+decks' reads each flight's WORLD extents (a shifted group must still convict) against the
+record's own break: top tread flush with the deck above, feet on the deck below, no tread
+past the surface's half-breadth at its own u — the r100 rail fault, asserted against
+stairs before it could happen. +0.5 m y-shift fires 16/16 (both ends of all eight
+flights); 1.2 m outboard fires 8/8 (inject-stair-shift.js / inject-stair-outboard.js).
+
+**New instrument: Research/url_capture.py** — one frame at any `b=`/`z=`/`l=` address,
+`--bare` hides the UI chrome (the terraces sit exactly behind the Loaded card from
+astern). The tone measurement and the beam check above are its first work.
+
+**Ratchet: 56 frames, one moved, one new, everything else 0.000%.** ship-azzam carries
+the vessel work (the right-edge ghost in the diff is the same stern seen through the
+frosted fleet panel — read before accepting); ship-endurance is the NEW baseline r101
+asked for, read before committing: barquentine canvas, carvel tradition card, mizzen boom
+over the counter. Both accepted with reasons in FRAME-LOG. Deployed at stamp 1787022251;
+live verify below. The vessels.json provenance edit landed after the closing check —
+bytes only, no rendered pixel reads it — so the next round's opening check is the
+confirming pass, per the r95–r101 pattern.
+
+**Next:** the survey queue stands exhausted (r51 ordering, closed r99) and August's
+second list stands WORKED IN FULL (r57). Known candidate work, none of it urgent: the
+terrace DECKS read the fleet's gray steel where a yacht's guest decks are laid teak — a
+material question for the whole deck loft, its own round if taken; Endurance now has a
+frame and her survey (hull detail, deckhouse fidelity against Hurley's plates) has never
+been done; and the Sea-view voyage cards item 4 follow-ons from the second list are all
+closed, so a fresh look at the Sea close-up wake (item 10 was closed r44) against the
+current fleet would be due diligence rather than a known fault.
