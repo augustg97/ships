@@ -1,0 +1,200 @@
+[
+ {
+  "id": "dugout",
+  "kind": "bare",
+  "mode": 0,
+  "recorded": false
+ },
+ {
+  "id": "voyaging-canoe",
+  "kind": "bare",
+  "mode": 0,
+  "recorded": false
+ },
+ {
+  "id": "trireme",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "corbita",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "dhow",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "junk",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "treasure-ship",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "cog",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "caravel",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "carrack",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "galley",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "galleass",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "panokseon",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "sekibune",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "fluyt",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "east-indiaman",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "ship-of-the-line",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "slave-ship",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "wyoming",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "preussen",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "great-eastern",
+  "kind": "teak",
+  "mode": 1,
+  "recorded": true
+ },
+ {
+  "id": "titanic",
+  "kind": "pine",
+  "mode": 1,
+  "recorded": true
+ },
+ {
+  "id": "usv",
+  "kind": "steel",
+  "mode": 2,
+  "recorded": false
+ },
+ {
+  "id": "clipper",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "steamer",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "dreadnought",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "yamato",
+  "kind": "hinoki",
+  "mode": 1,
+  "recorded": true
+ },
+ {
+  "id": "carrier",
+  "kind": "steel",
+  "mode": 2,
+  "recorded": false
+ },
+ {
+  "id": "container",
+  "kind": "steel",
+  "mode": 2,
+  "recorded": false
+ },
+ {
+  "id": "ever-given",
+  "kind": "steel",
+  "mode": 2,
+  "recorded": false
+ },
+ {
+  "id": "azzam",
+  "kind": "teak",
+  "mode": 1,
+  "recorded": true
+ },
+ {
+  "id": "endurance",
+  "kind": "wood",
+  "mode": 1,
+  "recorded": false
+ },
+ {
+  "id": "queen-mary-2",
+  "kind": "teak",
+  "mode": 1,
+  "recorded": true
+ }
+]

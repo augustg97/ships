@@ -1,0 +1,150 @@
+{
+ "frame": "ship-great-eastern",
+ "note": "Broadside bearing: the weather deck is edge-on, so its wood->teak darkening is below box resolution (fore deck line moved ~1 count). The resolvable movers are the house tier roofs, white plate -> DECK_FRAG teak through the r108 gate. Controls pixel-identical.",
+ "boxes": {
+  "mid house roof": {
+   "px": [
+    1180,
+    905,
+    1320,
+    918
+   ],
+   "before": [
+    187,
+    188,
+    185
+   ],
+   "after": [
+    164,
+    158,
+    147
+   ]
+  },
+  "aft house roof": {
+   "px": [
+    1990,
+    980,
+    2158,
+    1000
+   ],
+   "before": [
+    207,
+    208,
+    207
+   ],
+   "after": [
+    191,
+    189,
+    183
+   ]
+  },
+  "stern house roof": {
+   "px": [
+    2270,
+    1010,
+    2380,
+    1030
+   ],
+   "before": [
+    190,
+    192,
+    191
+   ],
+   "after": [
+    148,
+    140,
+    126
+   ]
+  },
+  "fore deck line (glancing)": {
+   "px": [
+    680,
+    910,
+    745,
+    921
+   ],
+   "before": [
+    185,
+    185,
+    182
+   ],
+   "after": [
+    184,
+    184,
+    181
+   ]
+  },
+  "CTRL funnel white": {
+   "px": [
+    1460,
+    770,
+    1478,
+    800
+   ],
+   "before": [
+    212,
+    208,
+    197
+   ],
+   "after": [
+    212,
+    208,
+    197
+   ]
+  },
+  "CTRL hull side black": {
+   "px": [
+    1570,
+    1045,
+    1600,
+    1060
+   ],
+   "before": [
+    25,
+    25,
+    26
+   ],
+   "after": [
+    25,
+    25,
+    26
+   ]
+  },
+  "CTRL sea": {
+   "px": [
+    420,
+    1290,
+    460,
+    1310
+   ],
+   "before": [
+    82,
+    111,
+    124
+   ],
+   "after": [
+    82,
+    111,
+    124
+   ]
+  },
+  "CTRL sail": {
+   "px": [
+    1290,
+    610,
+    1310,
+    640
+   ],
+   "before": [
+    162,
+    158,
+    146
+   ],
+   "after": [
+    162,
+    158,
+    146
+   ]
+  }
+ }
+}

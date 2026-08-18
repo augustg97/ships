@@ -2936,6 +2936,10 @@
     }
    },
    "hull": {
+    "deck": {
+     "covering": "teak",
+     "provenance": "RECORDED: the contemporary descriptions carry it twice over - Description and History of the Great Eastern (1861): 'the massive wrought-iron deck is covered with teak planking', and of the cellular structure, 'the deck, which is of teak planking placed over the top plates, forms the upper surface of the tube'. The deck beneath is Brunel's double cellular iron top on the Britannia-bridge principle, two half-inch plates top and bottom on longitudinal webs (Descriptive Particulars of the Great Eastern Steam Ship, 1857) - so the teak is a covering laid over iron, which is what this model draws. No plank dimensions are attested; the drawn planks are class defaults."
+    },
     "wlPower": 3.6,
     "stemFineness": 0.1,
     "sternFineness": 0.22,

@@ -4161,9 +4161,9 @@ function buildSuperstructure(S, group, hullMat) {
      recorded covering: Azzam read white paving stones over teak terraces, and her builder's
      2,200 m² of laid teak is far more area than her weather deck alone can carry. So the
      roofs ask deckCovering()'s one judgement too. STAGED like r106: only a RECORDED laid
-     covering flips (azzam alone qualifies today) — the 32 fallback ships keep the byte-
-     identical plateMat, because a fleet-wide house relight is its own round's ratchet
-     budget, and a liner's boat deck being planked is a fact to RECORD first, not infer. */
+     covering flips — ships on the INFERRED fallback keep the byte-identical plateMat,
+     because a liner's boat deck being planked is a fact to RECORD per ship first, not
+     infer (azzam r108; titanic, queen-mary-2 r109; great-eastern r110). */
   const cover = deckCovering(S);
   const roofDeckMat = (hullMat && cover.recorded && cover.mode === 1)
     ? new THREE.ShaderMaterial({

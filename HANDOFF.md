@@ -6761,3 +6761,75 @@ fallback. (2) The Sea close-up wake due-diligence pass (r102), still queued. (3)
 Endurance forecastle break still waits on the RMG original of J9266. (4) Azzam crest
 residual (r108): radome pedestals and cluster base plates sit on teak; check the real
 mast deck covering if a better plate arrives.
+
+## Round 110 — 2026-08-18 — the Leviathan's teak was on the record all along, and the type-ship keeps its label
+
+**The opening ratchet confirmed round 109 — 56/56 within tolerance** (45+ at 0.000%, nothing
+above 0.045%), captured clean before any edit landed.
+
+**THE TASK WAS r109'S FIRST QUEUE ITEM: the remaining unrecorded superstructure ships —
+research Great Eastern's deck covering, and settle the generic steamer.** Like r109, no code
+path changed for the flip — the round is one `hull.deck` record, one stale comment corrected,
+and a rule-10 decision written down.
+
+**Great Eastern: TEAK, attested twice over in the contemporary descriptions.** Found and read
+this round, full OCR texts fetched from the Internet Archive (identifiers cihm_44208 and
+cihm_45461, the 1861 *Description and History of the Great Eastern* and its sister edition;
+b22459480, the 1857 *Descriptive Particulars of the Great Eastern Steam Ship*):
+
+- 1861: "The massive wrought-iron deck is covered with teak planking" — and again, of the
+  cellular structure: "the deck, which is of teak planking placed over the top plates, forms
+  the upper surface of the tube."
+- 1857: the deck's iron basis is double and cellular on the Britannia-bridge principle,
+  half-inch plates top and bottom on longitudinal webs — so the teak is a covering laid over
+  iron, which is exactly what this model draws. A promenade once round the deck was sold as a
+  quarter-mile walk.
+- No plank dimensions are attested in any of the three texts; the drawn planks are class
+  defaults and the provenance says so.
+
+**The steamer: NO RECORD EXISTS TO FIND, and that is the answer, not a gap.** She is "Ocean
+steamer", a composite type (1838–1910, her card's own rows cite Great Britain and Great
+Western) — a type-ship has no builder's specification, so there is nothing to record without
+inventing it. Rule 10: she stays on the INFERRED fallback, which deckCovering() already
+labels on the part card ("INFERRED — no recorded covering: a planked ship's weather deck is
+laid fore-and-aft"). Her weather deck draws generic laid planking as before; her house roofs
+stay white plate DELIBERATELY, because the r108 gate asks for a record and a composite can
+never have one. Decided and closed, not carried.
+
+**One comment corrected (the comment-vs-code class, in its mildest form):** the r108 gate
+comment in buildSuperstructure still read "azzam alone qualifies today — the 32 fallback
+ships", stale since r109 flipped Titanic and QM2 through it. It now states the gate and
+lists the flips by round instead of counting a fleet that changes under it.
+
+**Enumerated before and after (build/deck-flip-r110-{before,after}.json): exactly ONE hull
+changed** — great-eastern wood/inferred → teak/recorded; thirty-two others byte-identical.
+
+**Measured (rule 4, build/deck-tone-r110.json), same boxes both sides:** mid house roof
+(187,188,185)→(164,158,147), aft house roof (207,208,207)→(191,189,183), stern house roof
+(190,192,191)→(148,140,126) — warm, red over blue, the white-plate-to-teak flip. The weather
+deck itself is edge-on at the shipwright broadside, so its wood→teak darkening is below box
+resolution (~1 count at the fore deck line) — the resolvable movers ARE the roofs, which is
+what the diff shows. Controls (funnel white, hull side, sea, sail) pixel-identical.
+
+**Verified (rule 1, frames read):** ship-great-eastern — the house tier roofs and deck line
+read laid teak the length of her, boats sitting white on the planking, hull/rig/sails/sea
+untouched; aboard-cable — the cable-layer's decks take the same covering at sea level, wake
+and panels untouched. Rule 0 on aboard-cable: reads as a rendered vessel on open water; three
+facts a viewer can name — the Great Eastern lays the cable (1866) at 51°45'N 27°30'W with no
+land within 486 nm; six masts, five funnels and the paddle box amidships; her decks are laid
+timber under white deckhouses.
+
+**Ratchet: the closing check moved exactly TWO frames of 56 — ship-great-eastern 0.593% /
+mean 0.563 and aboard-cable 0.214% / 0.183, the two frames that watch her — both diffs
+copied out and read before accepting (deck line and roofs only; one faint patch is her stern
+deck showing through the translucent fleet panel), both accepted with the class reason in
+FRAME-LOG.** Audit 33/0 clean, no new vocabulary needed (teak has been registered since
+r106). Built at stamp 1787057481. Confirming pass is next round's opening check.
+
+**Next:** (1) The Sea close-up wake due-diligence pass (r102), still queued and now the
+oldest carried item. (2) Endurance forecastle break still waits on the RMG original of
+J9266. (3) Azzam crest residual (r108): radome pedestals and cluster base plates sit on
+teak; check the real mast deck covering if a better plate arrives. (4) The deck-covering
+programme is COMPLETE — all five superstructure ships resolved (azzam r106-108, titanic and
+yamato and queen-mary-2 r109, great-eastern r110, steamer closed as a labelled fallback
+r110); the survey continues from the round-23 queue when the carried items are done.
