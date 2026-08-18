@@ -8,7 +8,7 @@
  "ready": {
   "expr": "window.__FRAME_READY === true && (!document.fonts || document.fonts.status === 'loaded')",
   "timeout_ms": 60000,
-  "note": "set in app.js armNext() after the first painted frame. The fonts clause is load-bearing: each frame opens a cold page, and a capture taken before the serif arrives rasterises every label in the fallback font \u2014 globe-default moved 1.016% on 2026-08-06 and the diff was nothing but label halos and reflowed voyage lists."
+  "note": "set in app.js armNext() after the first painted frame. The fonts clause is load-bearing: each frame opens a cold page, and a capture taken before the serif arrives rasterises every label in the fallback font — globe-default moved 1.016% on 2026-08-06 and the diff was nothing but label halos and reflowed voyage lists."
  },
  "settle_ms": 600,
  "thresholds": {
@@ -25,27 +25,27 @@
   {
    "name": "globe-crossing",
    "path": "/?frozen=1#e=0&t=40000",
-   "note": "era 0 \u2014 the first crossings, low sea level and exposed shelves"
+   "note": "era 0 — the first crossings, low sea level and exposed shelves"
   },
   {
    "name": "globe-steam",
    "path": "/?frozen=1#e=5&t=1870",
-   "note": "era 5 \u2014 iron and steam"
+   "note": "era 5 — iron and steam"
   },
   {
    "name": "globe-modern",
    "path": "/?frozen=1#e=7&t=2000",
-   "note": "era 7 \u2014 the box; the network at its densest"
+   "note": "era 7 — the box; the network at its densest"
   },
   {
    "name": "globe-era-card",
    "path": "/?frozen=1#e=1&card=era",
-   "note": "the era card, openable by URL since r66 \u2014 Reed & plank over the Khufu-ship plate. Closes the r43 gap: era cards showed only on click, so no frame watched their plates."
+   "note": "the era card, openable by URL since r66 — Reed & plank over the Khufu-ship plate. Closes the r43 gap: era cards showed only on click, so no frame watched their plates."
   },
   {
    "name": "shipwright",
    "path": "/?frozen=1#v=ship",
-   "note": "hull.js shaders \u2014 HULL_VERT/FRAG, SAIL_VERT/FRAG"
+   "note": "hull.js shaders — HULL_VERT/FRAG, SAIL_VERT/FRAG"
   },
   {
    "name": "action",
@@ -55,17 +55,17 @@
   {
    "name": "ship-dhow",
    "path": "/?frozen=1#v=ship&s=dhow",
-   "note": "the settee rig \u2014 a quadrilateral, not the lateen triangle the code built until 2026-08-02"
+   "note": "the settee rig — a quadrilateral, not the lateen triangle the code built until 2026-08-02"
   },
   {
    "name": "ship-junk",
    "path": "/?frozen=1#v=ship&s=junk",
-   "note": "the battened lug \u2014 battens must stay inside the canvas when the sail is sheeted out"
+   "note": "the battened lug — battens must stay inside the canvas when the sail is sheeted out"
   },
   {
    "name": "ship-canoe",
    "path": "/?frozen=1#v=ship&s=voyaging-canoe",
-   "note": "crab claw \u2014 the triangular sail treatment"
+   "note": "crab claw — the triangular sail treatment"
   },
   {
    "name": "ship-great-eastern",
@@ -85,12 +85,12 @@
   {
    "name": "ship-trireme",
    "path": "/?frozen=1.4#v=ship&s=trireme",
-   "note": "170 oars \u2014 they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"
+   "note": "170 oars — they must reach OUTBOARD, not lie along the hull (fixed 2026-08-03)"
   },
   {
    "name": "ship-galley",
    "path": "/?frozen=1#v=ship&s=galley",
-   "note": "the spur, the apostis and the forward battery \u2014 the rowing frame stands wider than the hull, and every gun faces the bow"
+   "note": "the spur, the apostis and the forward battery — the rowing frame stands wider than the hull, and every gun faces the bow"
   },
   {
    "name": "ship-galleass",
@@ -120,7 +120,7 @@
   {
    "name": "ship-yamato",
    "path": "/?frozen=1#v=ship&s=yamato",
-   "note": "the warship citadel \u2014 turrets clear of the deckhouse, guns toward the bow; round 27"
+   "note": "the warship citadel — turrets clear of the deckhouse, guns toward the bow; round 27"
   },
   {
    "name": "ship-container",
@@ -130,27 +130,27 @@
   {
    "name": "ship-queen-mary-2",
    "path": "/?frozen=1#v=ship&s=queen-mary-2",
-   "note": "the 2003 liner rebuilt from her record (r70); the 12\u00b0 uptake and its casing are the r72 shear \u2014 base rim on the casing floor, head at the record height"
+   "note": "the 2003 liner rebuilt from her record (r70); the 12° uptake and its casing are the r72 shear — base rim on the casing floor, head at the record height"
   },
   {
    "name": "descent",
-   "note": "The near field at 700 m: displaced water, the near/far seam and the horizon, off the Bristol Channel. \u26a0 ITS NOTE USED TO CLAIM \"the Great Western at true scale\" AND NO HULL HAS EVER BEEN IN IT \u2014 checked pixelwise against the 2026-08-03 baseline on 2026-08-04: zero hull-dark pixels in either. The descent path does call psgFleet, so a hull within 182 km should draw; it does not, and that is an open bug rather than a framing accident. Until it is fixed this frame watches WATER, and nothing here defends the near-field fleet.",
+   "note": "The near field at 700 m: displaced water, the near/far seam and the horizon, off the Bristol Channel. ⚠ ITS NOTE USED TO CLAIM \"the Great Western at true scale\" AND NO HULL HAS EVER BEEN IN IT — checked pixelwise against the 2026-08-03 baseline on 2026-08-04: zero hull-dark pixels in either. The descent path does call psgFleet, so a hull within 182 km should draw; it does not, and that is an open bug rather than a framing accident. Until it is fixed this frame watches WATER, and nothing here defends the near-field fleet.",
    "path": "/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700"
   },
   {
    "name": "descent-high",
-   "note": "Nine kilometres: just ABOVE the handover, so the token side of the seam is watched too. A frame on only one side of a boundary cannot see the boundary move. \u26a0 Do not re-point this one northward \u2014 51.1N 3.87W is over Exmoor and the frame comes back a near-black picture of unlit ground.",
+   "note": "Nine kilometres: just ABOVE the handover, so the token side of the seam is watched too. A frame on only one side of a boundary cannot see the boundary move. ⚠ Do not re-point this one northward — 51.1N 3.87W is over Exmoor and the frame comes back a near-black picture of unlit ground.",
    "path": "/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000"
   },
   {
    "name": "descent-coast",
    "path": "/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260",
-   "note": "The near-field GROUND: the Strait of Gibraltar at 260 m, looking south at the Moroccan coast. The globe sphere is 192x128 \u2014 a 209 km facet \u2014 so at this eye height the backdrop is a flat plate with a polygon edge for a horizon and can never show a coast. This frame watches the displaced land patch that can."
+   "note": "The near-field GROUND: the Strait of Gibraltar at 260 m, looking south at the Moroccan coast. The globe sphere is 192x128 — a 209 km facet — so at this eye height the backdrop is a flat plate with a polygon edge for a horizon and can never show a coast. This frame watches the displaced land patch that can."
   },
   {
    "name": "aboard",
    "path": "/?frozen=1#e=5&f=greatwestern",
-   "note": "ABOARD: the close-up, entered the way a viewer enters it \u2014 by naming a ship. This view is what the project is most often asked about and it had no baseline at all, for the plain reason that no URL could ask for it. Watches the true-scale hull, the near-field water it floats in, her wake, and the join between that water and the globe behind it."
+   "note": "ABOARD: the close-up, entered the way a viewer enters it — by naming a ship. This view is what the project is most often asked about and it had no baseline at all, for the plain reason that no URL could ask for it. Watches the true-scale hull, the near-field water it floats in, her wake, and the join between that water and the globe behind it."
   },
   {
    "name": "aboard-off",
@@ -160,87 +160,87 @@
   {
    "name": "map-floor",
    "path": "/?frozen=1#e=4&t=1590&c=-45.3,-24.1&z=300000",
-   "note": "THE MAP AT ITS LOWEST \u2014 300 km over the Serra do Mar, with Sousa's fleet closing the Brazilian coast for S\u00e3o Vicente. 300 km is where the token exaggeration peaks and therefore where the wheel now stops: below it the ramp unwinds the token toward true scale and the ship SHRANK, from 65 km long at 35.6% of the frame to 100 m at 2%. Watches the ship-to-coast proportion, which is the thing being asserted, and the water at that height. \u26a0 Re-pointed r54: it framed the treasure fleet off Cape St Vincent until phases became identity-keyed (a hash of the voyage name, so data insertions stop moving unrelated ships) and the flota's own phase left her mid-Atlantic. Chosen the aboard-coast way \u2014 every era-4 ship's frozen position computed, the one against a coast taken."
+   "note": "THE MAP AT ITS LOWEST — 300 km over the Serra do Mar, with Sousa's fleet closing the Brazilian coast for São Vicente. 300 km is where the token exaggeration peaks and therefore where the wheel now stops: below it the ramp unwinds the token toward true scale and the ship SHRANK, from 65 km long at 35.6% of the frame to 100 m at 2%. Watches the ship-to-coast proportion, which is the thing being asserted, and the water at that height. ⚠ Re-pointed r54: it framed the treasure fleet off Cape St Vincent until phases became identity-keyed (a hash of the voyage name, so data insertions stop moving unrelated ships) and the flota's own phase left her mid-Atlantic. Chosen the aboard-coast way — every era-4 ship's frozen position computed, the one against a coast taken."
   },
   {
    "name": "aboard-coast",
    "path": "/?frozen=1#e=2&f=syracuse",
-   "note": "ABOARD, CLOSE INSHORE \u2014 the Athenian armada five kilometres off the Peloponnese, with land 121 m high and the sun 65 degrees up. August reported seeing NO LAND from the close-up while the map showed the ship hugging a coast, and no frame watched it: `aboard` and `aboard-off` both happen to sit in open water, and the first attempt at this frame put the guano clipper a thousand kilometres off Chile. Chosen by sweeping every ship in every era at the frozen instant for the one nearest to lit land, rather than by guessing."
+   "note": "ABOARD, CLOSE INSHORE — the Athenian armada five kilometres off the Peloponnese, with land 121 m high and the sun 65 degrees up. August reported seeing NO LAND from the close-up while the map showed the ship hugging a coast, and no frame watched it: `aboard` and `aboard-off` both happen to sit in open water, and the first attempt at this frame put the guano clipper a thousand kilometres off Chile. Chosen by sweeping every ship in every era at the frozen instant for the one nearest to lit land, rather than by guessing."
   },
   {
    "name": "sea-magnified",
    "path": "/?frozen=1#e=7&t=2000&c=-30,35&z=10000",
-   "note": "OPEN WATER AT 10 km \u2014 magnified far past the scale the sea shader was tuned for, which is the band between the near-field handover at 8 km and the old 12 km map floor. August photographed a regular lattice of pale dashes here and no frame watched it: every other water frame is either at globe zoom or in the near field. The cause was foam laid along the crests of a FOUR-component Gerstner sum \u2014 four sinusoids are visibly periodic once resolved, and white on their crests draws that periodicity. Measured by FFT: one component at 33 px, peak-to-mean 395, now 139."
+   "note": "OPEN WATER AT 10 km — magnified far past the scale the sea shader was tuned for, which is the band between the near-field handover at 8 km and the old 12 km map floor. August photographed a regular lattice of pale dashes here and no frame watched it: every other water frame is either at globe zoom or in the near field. The cause was foam laid along the crests of a FOUR-component Gerstner sum — four sinusoids are visibly periodic once resolved, and white on their crests draws that periodicity. Measured by FFT: one component at 33 px, peak-to-mean 395, now 139."
   },
   {
    "name": "ship-preussen",
    "path": "/?frozen=1#v=ship&s=preussen",
-   "note": "riveted 1902 steel windjammer \u2014 era-keyed dress: red-brown bottom, no cove line"
+   "note": "riveted 1902 steel windjammer — era-keyed dress: red-brown bottom, no cove line"
   },
   {
    "name": "ship-steamer",
    "path": "/?frozen=1#v=ship&s=steamer",
-   "note": "1870 riveted iron \u2014 Victorian dress: salmon bottom, gilt cove; the era-key A/B control"
+   "note": "1870 riveted iron — Victorian dress: salmon bottom, gilt cove; the era-key A/B control"
   },
   {
    "name": "ship-dreadnought",
    "path": "/?frozen=1#v=ship&s=dreadnought",
-   "note": "1906 riveted warship \u2014 red-brown bottom, no cove line"
+   "note": "1906 riveted warship — red-brown bottom, no cove line"
   },
   {
    "name": "aboard-carrier",
    "path": "/?frozen=1#e=7&f=csg",
-   "note": "ABOARD, THE CARRIER \u2014 the strike group on deployment. Added round 35 with the paint rebuild: she read as a black cutout in both views (deck 0x23272b, island 0x2b3036, topside #4e545b \u2014 soot albedos tuned to rigs). Watches the measured scheme \u2014 FS 26270 haze-grey verticals, weathered non-skid deck \u2014 and the deck markings, deck park and island against the reference relative pattern: island brightest, deck ~0.9\u00d7, shell 0.2\u20130.6\u00d7."
+   "note": "ABOARD, THE CARRIER — the strike group on deployment. Added round 35 with the paint rebuild: she read as a black cutout in both views (deck 0x23272b, island 0x2b3036, topside #4e545b — soot albedos tuned to rigs). Watches the measured scheme — FS 26270 haze-grey verticals, weathered non-skid deck — and the deck markings, deck park and island against the reference relative pattern: island brightest, deck ~0.9×, shell 0.2–0.6×."
   },
   {
    "name": "aboard-cable",
    "path": "/?frozen=1#e=5&f=cable",
-   "note": "ABOARD, THE LEVIATHAN \u2014 Great Eastern laying the Atlantic cable. Added round 40 with the paddle-box rebuild: from sea level the box must read as a closed drum standing on its sponson, fan face outboard, the open lower wheel entering the water beneath it."
+   "note": "ABOARD, THE LEVIATHAN — Great Eastern laying the Atlantic cable. Added round 40 with the paddle-box rebuild: from sea level the box must read as a closed drum standing on its sponson, fan face outboard, the open lower wheel entering the water beneath it."
   },
   {
    "name": "aboard-titanic",
    "path": "/?frozen=1#e=6&f=titanicvoy",
-   "note": "ABOARD, THE LINER \u2014 Titanic on her maiden-voyage track. Added round 34 with the era profile rebuild: black shell to B deck with the white house above, forecastle/poop breaks, 9.46\u00b0 raked buff funnels and masts whose trucks stand 62.5 m over the load line. The Sea view is where the r32 era-dress and this structure meet; no baseline watched a liner here before."
+   "note": "ABOARD, THE LINER — Titanic on her maiden-voyage track. Added round 34 with the era profile rebuild: black shell to B deck with the white house above, forecastle/poop breaks, 9.46° raked buff funnels and masts whose trucks stand 62.5 m over the load line. The Sea view is where the r32 era-dress and this structure meet; no baseline watched a liner here before."
   },
   {
    "name": "aboard-yamato",
-   "note": "ABOARD, THE BATTLESHIP \u2014 Yamato on the Ten-ichi-go sortie. Added round 36 with her second detail pass: the 1941 close-in fit (eight shielded 25 mm triples on bandstands), searchlight platforms winged off the pagoda, stowage hatches on the quarterdeck and two floatplanes aft \u2014 one riding the port catapult. Watches the crowded amidships silhouette the record describes.",
+   "note": "ABOARD, THE BATTLESHIP — Yamato on the Ten-ichi-go sortie. Added round 36 with her second detail pass: the 1941 close-in fit (eight shielded 25 mm triples on bandstands), searchlight platforms winged off the pagoda, stowage hatches on the quarterdeck and two floatplanes aft — one riding the port catapult. Watches the crowded amidships silhouette the record describes.",
    "path": "/?frozen=1#e=6&f=tenichigo"
   },
   {
    "name": "aboard-preussen",
    "path": "/?frozen=1#e=6&f=preussenvoy",
-   "note": "the doubled rig from on deck \u2014 30 square sails, staysails, jibs and the spanker, round 44"
+   "note": "the doubled rig from on deck — 30 square sails, staysails, jibs and the spanker, round 44"
   },
   {
    "name": "ship-wyoming",
    "path": "/?frozen=1#v=ship&s=wyoming",
-   "note": "the six-masted schooner \u2014 gaff quads, topsails, five headsails on the spike bowsprit, deckhouses (round 42)"
+   "note": "the six-masted schooner — gaff quads, topsails, five headsails on the spike bowsprit, deckhouses (round 42)"
   },
   {
    "name": "aboard-wyoming",
    "path": "/?frozen=1#e=6&f=wyomingvoy",
-   "note": "Wyoming at sea in the coal trade, close-up \u2014 the rig from the water (round 42)"
+   "note": "Wyoming at sea in the coal trade, close-up — the rig from the water (round 42)"
   },
   {
    "name": "ship-treasure",
    "path": "/?frozen=1#v=ship&s=treasure-ship",
-   "note": "the junk grammar complete (round 46) \u2014 fanned battened lugs to steep yards, sheet crowfeet, bulkhead transoms both ends, the slung median rudder below the bottom, the tiered aft castle"
+   "note": "the junk grammar complete (round 46) — fanned battened lugs to steep yards, sheet crowfeet, bulkhead transoms both ends, the slung median rudder below the bottom, the tiered aft castle"
   },
   {
    "name": "aboard-treasure",
    "path": "/?frozen=1#e=4&f=zhenghe",
-   "note": "ABOARD, THE TREASURE FLEET \u2014 Zheng He outbound, round 46. Watches the five fans drawing at sea, the castle and the blunt ends from the water. \u26a0 e must be 4: the voyage lives in Ocean Crossing 1400\u20131800, and asking for it in era 3 leaves the app waiting forever and __FRAME_READY never fires."
+   "note": "ABOARD, THE TREASURE FLEET — Zheng He outbound, round 46. Watches the five fans drawing at sea, the castle and the blunt ends from the water. ⚠ e must be 4: the voyage lives in Ocean Crossing 1400–1800, and asking for it in era 3 leaves the app waiting forever and __FRAME_READY never fires."
   },
   {
    "name": "ship-clipper",
    "path": "/?frozen=1#v=ship&s=clipper",
-   "note": "the record's full-rigger (round 51) \u2014 five yards to a mast with royals atop, four jibs on taut stays, six staysails, the spanker, two white deckhouses and the open wheel aft; rig scale anchored to RMG's 47 m main truck"
+   "note": "the record's full-rigger (round 51) — five yards to a mast with royals atop, four jibs on taut stays, six staysails, the spanker, two white deckhouses and the open wheel aft; rig scale anchored to RMG's 47 m main truck"
   },
   {
    "name": "aboard-clipper",
    "path": "/?frozen=1#e=5&f=woolrun",
-   "note": "ABOARD, THE WOOL RUN \u2014 the clipper running home, round 51. \u26a0 e must be 5: woolrun is 1887 and lives in 1800\u20131900; a wrong era hangs the app before first paint (the treasure-fleet lesson)."
+   "note": "ABOARD, THE WOOL RUN — the clipper running home, round 51. ⚠ e must be 5: woolrun is 1887 and lives in 1800–1900; a wrong era hangs the app before first paint (the treasure-fleet lesson)."
   },
   {
    "name": "shipwright-ahead",
@@ -250,62 +250,67 @@
   {
    "name": "shipwright-astern",
    "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7",
-   "note": "the standing stern guard: the 74 dead astern, close, aimed at the hull (#z/#l/#y, the r58 camera grammar). Every timber transom ship shares buildStern, so this one bearing watches the class: two tiers of lights, quarter galleries, taffrail. The r58 fault \u2014 furniture keyed to a stale u=0.985 plate, buried inside the u=1.0 skin \u2014 was invisible from every baseline bearing that existed before this frame."
+   "note": "the standing stern guard: the 74 dead astern, close, aimed at the hull (#z/#l/#y, the r58 camera grammar). Every timber transom ship shares buildStern, so this one bearing watches the class: two tiers of lights, quarter galleries, taffrail. The r58 fault — furniture keyed to a stale u=0.985 plate, buried inside the u=1.0 skin — was invisible from every baseline bearing that existed before this frame."
   },
   {
    "name": "shipwright-furled",
    "path": "/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25",
-   "note": "the canvas STATE guard: the 74 from the port quarter, furled \u2014 every square roll, its gaskets and bunt, the hauled clews, and the whole yard built in the furled state behind her. One bearing watches the class; every rig type shares makeFurl."
+   "note": "the canvas STATE guard: the 74 from the port quarter, furled — every square roll, its gaskets and bunt, the hauled clews, and the whole yard built in the furled state behind her. One bearing watches the class; every rig type shares makeFurl."
   },
   {
    "name": "shipwright-hounds",
    "path": "/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34",
-   "note": "r64 standing guard on the masthead class: the 74's main lower masthead from the port quarter \u2014 cheeks under the trestletree pair, the doubling between them, wooldings with their wooden hoops down the made mast. Guards item 9's whole class (wooldings/iron hoops by S.year, cheeks per doubled masthead)."
+   "note": "r64 standing guard on the masthead class: the 74's main lower masthead from the port quarter — cheeks under the trestletree pair, the doubling between them, wooldings with their wooden hoops down the made mast. Guards item 9's whole class (wooldings/iron hoops by S.year, cheeks per doubled masthead)."
   },
   {
    "name": "shipwright-corbis",
    "path": "/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15",
-   "note": "r67 standing guard: masthead furniture per the evidence \u2014 the corbita's bare head (no top before 1100) with the corbis, the basket that named her (Festus). Watches the dated-top class and the corbis class."
+   "note": "r67 standing guard: masthead furniture per the evidence — the corbita's bare head (no top before 1100) with the corbis, the basket that named her (Festus). Watches the dated-top class and the corbis class."
   },
   {
    "name": "ship-azzam",
    "path": "/?frozen=1#v=ship&s=azzam",
-   "note": "the 2013 L\u00fcrssen yacht with her plate-derived mast/stack/radome cluster (r73) \u2014 every height derived from the delivery photograph, labelled so"
+   "note": "the 2013 Lürssen yacht with her plate-derived mast/stack/radome cluster (r73) — every height derived from the delivery photograph, labelled so"
   },
   {
    "name": "ship-endurance",
    "path": "/?frozen=1#v=ship&s=endurance",
-   "note": "the one hull that had no frame was the one that crashed when opened (round 101) \u2014 unphotographed corners hide faults by construction"
+   "note": "the one hull that had no frame was the one that crashed when opened (round 101) — unphotographed corners hide faults by construction"
   },
   {
    "name": "action-salamis",
    "path": "/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16",
-   "note": "the galley action: Salamis at the crush, 130 m, both fleets triremes under bare spars \u2014 guards the data-driven campaign class (fleets/formation/powder/year from the record)"
+   "note": "the galley action: Salamis at the crush, 130 m, both fleets triremes under bare spars — guards the data-driven campaign class (fleets/formation/powder/year from the record)"
   },
   {
    "name": "board-salamis",
    "path": "/?frozen=1#e=2&battle=salamis",
-   "note": "the globe CAMPAIGN BOARD, addressable at last (r82) \u2014 Salamis day 0 at the record's own cam (450 km over the Saronic Gulf), one token per fleet per the fits-test, tracks, wind streaks and the campaign bar. The board was dead for nine days (c66c703) because no frame could name it; this one guards the class the audit's step-every-campaign rule only smoke-tests."
+   "note": "the globe CAMPAIGN BOARD, addressable at last (r82) — Salamis day 0 at the record's own cam (450 km over the Saronic Gulf), one token per fleet per the fits-test, tracks, wind streaks and the campaign bar. The board was dead for nine days (c66c703) because no frame could name it; this one guards the class the audit's step-every-campaign rule only smoke-tests."
   },
   {
    "name": "action-gravelines",
    "path": "/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11",
-   "note": "GRAVELINES from the water, day 9 at 110 m \u2014 the only close action of the Armada campaign, with the r84 DEM coast wearing the r85 data-keyed polder palette (pasture green, dune-sand waterline, Dunkirk dunes as fogged headlands E). Guards the shore-palette class: a coast wearing another climate's colours moves this frame."
+   "note": "GRAVELINES from the water, day 9 at 110 m — the only close action of the Armada campaign, with the r84 DEM coast wearing the r85 data-keyed polder palette (pasture green, dune-sand waterline, Dunkirk dunes as fogged headlands E). Guards the shore-palette class: a coast wearing another climate's colours moves this frame."
   },
   {
    "name": "action-lepanto",
    "path": "/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9",
-   "note": "Lepanto, early afternoon 7 October 1571 \u2014 the north flank: Barbarigo's wing and Scirocco's locked at 200 m under the Scropha rise, the delta spit at the waterline. Watches the lepanto.png shore render, the grounding rule, the third-fleet (side:0) staging and the authored day heading (hd)."
+   "note": "Lepanto, early afternoon 7 October 1571 — the north flank: Barbarigo's wing and Scirocco's locked at 200 m under the Scropha rise, the delta spit at the waterline. Watches the lepanto.png shore render, the grounding rule, the third-fleet (side:0) staging and the authored day heading (hd)."
   },
   {
    "name": "wake-plan",
    "path": "/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600",
-   "note": "THE WAKE FROM ABOVE \u2014 the container ship at 20 kn, near-plan through the r111 follow-camera grammar (fb/fd/fz). The wake shipped wrong twice (r44 steps, r111 ladder-and-blob) because every addressable camera was deck-level and nearly edge-on: no frame could see the Kelvin pattern at all. Watches the wedge springing from the stem, the curved transverse crests (phase from the dispersion relation, 1.00 on the track to 1.53 at the cusp), the feathered arms, the bow horseshoe with dark water ahead of her, and the turbulent band from the stern."
+   "note": "THE WAKE FROM ABOVE — the container ship at 20 kn, near-plan through the r111 follow-camera grammar (fb/fd/fz). The wake shipped wrong twice (r44 steps, r111 ladder-and-blob) because every addressable camera was deck-level and nearly edge-on: no frame could see the Kelvin pattern at all. Watches the wedge springing from the stem, the curved transverse crests (phase from the dispersion relation, 1.00 on the track to 1.53 at the cusp), the feathered arms, the bow horseshoe with dark water ahead of her, and the turbulent band from the stern."
   },
   {
    "name": "ship-ever-given",
    "path": "/?frozen=1#v=ship&s=ever-given",
-   "note": "THE TWIN-ISLAND SHIP \u2014 added round 113 with her rebuild from the PMA casualty report. No frame watched her before, which is how a bridge drawn 190 m from its recorded station survived 66 rounds. Watches: the accommodation tower in the fore third (mast at u 0.366, the loading computer's own figure), the dark-green engine casing and stack at u 0.845, EVERGREEN on the shell, EVER GIVEN / PANAMA on the transom, the 17.2 m freeboard wall under a ten-tier stow."
+   "note": "THE TWIN-ISLAND SHIP — added round 113 with her rebuild from the PMA casualty report. No frame watched her before, which is how a bridge drawn 190 m from its recorded station survived 66 rounds. Watches: the accommodation tower in the fore third (mast at u 0.366, the loading computer's own figure), the dark-green engine casing and stack at u 0.845, EVERGREEN on the shell, EVER GIVEN / PANAMA on the transom, the 17.2 m freeboard wall under a ten-tier stow."
+  },
+  {
+   "name": "sea-ever-given",
+   "path": "/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800",
+   "note": "THE TWIN-ISLAND SHIP AT SEA — round 113 rebuilt her from the PMA casualty report but only the Shipwright watched her; this frame stands 800 m off her port beam at sea level on the westbound Arabian Sea leg (course 283°, 22.8 kn). Watches: the accommodation tower a third from the bow and the dark-green casing aft among the stacks (the twin-island layout), EVERGREEN on the shell reading correctly on the port side, the 17.2 m freeboard wall with the boot-top at the water, the bow wave and the near arm of her wake."
   }
  ]
 }

@@ -7078,3 +7078,73 @@ break still waits on the RMG original of J9266. (4) Azzam crest residual (r108) 
 (5) The survey continues: next never-surveyed by the fresh ranking is the galleass block
 (3105 tris/m, r87-built) — but she was built to her own round's record; prefer the r113
 survey json's floating/boxy columns when choosing.
+
+## Round 114 — 2026-08-18 — the type ship's deck comes down to where the class record puts it, and the fleet's newest hull gets her sea-level frame
+
+**The opening ratchet was the confirming pass r113 owed: all 58 frames within tolerance**
+(globe-steam 0.008%, board-salamis 0.009%, ship-container 0.012% — the sub-tolerance accU
+drift r113 already named — everything else 0.000–0.006%). Round 113 is confirmed fleet-wide.
+Procedural: the run went to a FILE (build/ratchet-open-r114.log) per the r112 lesson, and no
+edit landed until it finished, per the r112 contamination lesson.
+
+**THE TASK WAS r113's FIRST TWO CARRIED ITEMS.** August's second list stands worked in full
+(r57), so the round fell through to the carried queue.
+
+**(1) The generic container type-ship's freeboard 30.0 had no source, and the record's
+number is 17.2.** The type ship is drawn at the 24,000-TEU generation its own card rows
+name (MSC Gülsün / MSC Irina classes, 399.9 × 61.3 m). Fetched this round: depth moulded
+33.2 m to main deck (RINA, *Significant Ships of 2019*, MSC Gülsün; the Irina class repeats
+the figure). 33.2 less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck
+freeboard; the old 30.0 stood the deck at nearly the whole moulded depth over the water — a
+hull floating near her light line drawn as loaded. Decided as rule 10 requires for a TYPE
+ship: the drawn value is DERIVED and the card says so — a new "Freeboard, as drawn" row
+labels the derivation **derived** in the UI, and hull.freeboardProvenance carries the full
+trail. Fleet class check (rule 2): all 33 freeboards tabulated against draught — container
+at fbd/drt 1.88 was the one unattested outlier (azzam 2.09 and queen-mary-2 1.65 are
+attested high-siders); no numeric audit rule shipped because the legitimate spread (0.45–
+2.09) brackets the fault — the class close is the provenance requirement, not a threshold.
+
+**Measured (rule 4, build/measure-container-r114-{before,after}.txt):** weather deck
+30.00 → 17.20 m over water exactly (= 33.2 − 16.0); every part rides the deck down 12.8 m —
+stow top 51.3 → 38.5, bridge top 56.5 → 43.7, mast 64.9 → 52.1; nothing floats, nothing
+clips (audit 33/0 clean). The card's air-draught row now reads 34.9 m above deck.
+
+**(2) Ever Given has her Sea-view frame.** New baseline `sea-ever-given`
+(#e=7&f=evergiven&fb=347&fd=7&fz=800, the r111 follow grammar): 800 m off her port beam at
+sea level on the westbound Arabian Sea leg. Until now only the Shipwright watched her — the
+same one-view blindness that hid her bridge for 66 rounds. Rule 0 on the frame: reads as a
+rendered ship on real water; a viewer can name — she is an Evergreen ship, the name on the
+shell; bridge a third from the bow, funnel casing standing separately aft, the twin-island
+layout; under way loaded, bow wave at the stem, off Calicut per her own card.
+
+**Verified (rule 1, frames read):** ship-container (wall-to-stow proportion now matches the
+class, boot-top at the water), aboard-off (a loaded box ship), wake-plan diff (the hull
+footprint ALONE — wake field, sea and panels byte-black; r111 physics untouched),
+sea-ever-given, plus two trial views of Ever Given at 800 m. Frames accepted with reasons
+in FRAME-LOG: aboard-off 1.459%, ship-container 23.375% (the hull is most of that frame),
+wake-plan 0.292%, sea-ever-given NEW. Checked and unmoved: aboard-carrier, sea-magnified,
+globe-modern, globe-default. ⚠ The r57 accept-order trap was nearly repaid — two solo
+checks ran before the first accept, and _current holds only the LAST check; recovered by
+accepting in reverse order. Check, THEN accept, one frame at a time.
+
+**Instrument residual, recorded not hidden:** probe-wake.py's `hdgFromDirDeg` reads
+mirrored against the voyage card's course (76.7 vs 283 for evergiven — they sum to ~360).
+The card is right: stood north of her (fb 347) her bow points west, which is course 283.
+The probe's heading derivation flips east/west somewhere in the dir→compass step; its
+uniform and position reads are unaffected (r111/r112 used those, and their frames verify).
+Fix the probe before trusting its heading for a frame choice.
+
+**Ratchet: NOT run fleet-wide at close — the affected frames were checked solo (all six
+listed above) and the opening pass this round already confirmed the rest on identical
+code.** ⚠ Next round's opening check is the confirming pass for the other 52 frames;
+expected 0.000% everywhere (nothing but the container record and frames.json changed after
+the opening run), but expectation is not verification.
+
+**Deployed: stamp 1787078297.** Live verify below.
+
+**Next:** (1) The survey continues — by the r113 survey's boxy column the next
+never-surveyed vessel is **sekibune (73% box meshes, 5506 tris/m)**; galleass/galley/
+panokseon (68/68/67%) follow. The 98% pair (ever-given, container) are box ships whose
+boxes are the cargo — correct, not crude. (2) probe-wake.py heading mirror, above. (3)
+Endurance forecastle break still waits on the RMG original of J9266. (4) Azzam crest
+residual (r108) unchanged.

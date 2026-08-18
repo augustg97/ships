@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-carrier               http://localhost:8149/?frozen=1#e=7&f=csg
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-carrier                  0.000%     0.000  ok
+
+  all frames within tolerance.
+

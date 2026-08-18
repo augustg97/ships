@@ -1,0 +1,12 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  sea-ever-given                                    NEW — no baseline
+
+  1 frame(s) have no baseline: sea-ever-given
+  → run capture, look at the images, then commit them.
+
+  all frames within tolerance.
+

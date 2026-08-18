@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · globe-default                http://localhost:8149/?frozen=1#v=sea
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  globe-default                   0.000%     0.000  ok
+
+  all frames within tolerance.
+

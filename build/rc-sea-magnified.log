@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · sea-magnified                http://localhost:8149/?frozen=1#e=7&t=2000&c=-30,35&z=10000
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  sea-magnified                   0.000%     0.000  ok
+
+  all frames within tolerance.
+

@@ -5752,3 +5752,16 @@ API Error: 500 Internal server error. This is a server-side issue, usually tempo
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 13727 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 09:45:49  round starting
+Round 113 is done and live — stamp 1787075239 verified on the deployed site.
+
+**What this round did:** the queue and the r51 survey ordering both stand exhausted, so the survey re-ran on all 33 hulls. Ever Given came up: second-crudest, never surveyed, and watched by no baseline frame — the same blindness that hid Endurance's funnel for forty rounds.
+
+**The finding:** her own casualty report (PMA R-026-2021-DIAM, fetched and read this round) contradicted the model three ways. The builder hard-codes the classic single-island container layout, but the Imabari 20000 design is twin-island — the report's loading-computer page puts her bridge mast 245.35 m forward of the aft perpendicular, which is a third from the bow, not right aft where the model drew it for 66 rounds. Her depth moulded is 32.90 m, so the deck stands 17.2 m over the water — the model drew a 30 m green wall, near double. And the hull carried no lettering at all, on the ship most people know only by the word EVERGREEN on her side.
+
+**The fix, at class level:** the builder now reads island stations from the record (`bridgeU`, `funnelU`, plus house decks, stow tiers and stow beam), with defaults that reproduce the single-island ship exactly — proven by targeted ratchet checks (ship-container 0.012%, aboard-off and wake-plan 0.000%). A new `buildLivery` draws operator and stern lettering for any hull that records it. A new audit rule convicts any hull whose built islands stand more than 3% of length off a recorded station.
+
+**Verified:** twelve spin bearings read; the drawn mast lands at u 0.366 — the record's own figure, exact; mast top 60.8 m over water against the record's 60.3; audit 33/0. New baseline `ship-ever-given` accepted with its reason in FRAME-LOG. The fleet-wide confirming pass is next round's opening check — the 80-minute watchdog left no room for a full 27-minute run after the targeted ones, and HANDOFF says so explicitly, with next steps queued (the generic container's freeboard is the same class of error, to be decided as a type-ship fallback question).
+2026-08-18 10:50:14  round finished; HEAD is 95ec1b6 Round 113: the islands stand where the record stands them — Ever Given rebuilt twin-island from her own casualty report
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 14504 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 11:00:15  round starting

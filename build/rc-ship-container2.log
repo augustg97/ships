@@ -1,0 +1,15 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-container               http://localhost:8149/?frozen=1#v=ship&s=container
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-container                 23.375%     7.845  CHANGED
+
+  1 frame(s) moved. Every one must be classified before this ships (§7 — never on an average):
+
+    ship-container
+      23.375% of pixels moved (limit 0.050%), mean |Δ| 7.845 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-container.png
+
+  If a change is an improvement, accept it deliberately:
+    frame_baseline.py accept --project /Users/augustgweon/Ships --frame <name> --reason "..."
+
