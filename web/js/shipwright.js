@@ -780,11 +780,16 @@ function swFillCard(v) {
     [(P.beatHard !== undefined ? P.beatHard + '°' : '—'),
      P.floor ? 'closest made good under sail, blowing hard' : 'closest made good, blowing hard'],
   ]).concat(P.floor ? (() => {
-    /* A muscled hull has a second engine that is not the wind's, so the beat angles above
-       are the SAIL's limits only: under oar she goes straight upwind, paying the measured
-       windage. The router holds the same two numbers — the floor unscaled by wind, less
-       lossKnPerMs per m/s of head component. */
-    const word = /oar/.test(P.rig || '') ? 'oar' : 'paddle';
+    /* A hull with a floor has a second engine that is not the wind's — oars, paddles or
+       an auxiliary boiler — so the beat angles above are the SAIL's limits only: on the
+       floor she goes straight upwind, paying the measured windage. The router holds the
+       same two numbers — the floor unscaled by wind, less lossKnPerMs per m/s of head
+       component.
+       ⚠ The word is the RECORD's (`floor.by`), never guessed off the rig string. The old
+       /oar/-else-'paddle' guess printed "4.0 kn UNDER PADDLE" on Endurance's card for a
+       350 ihp screw auxiliary, because a barquentine rig string says nothing about her
+       engine. The audit convicts any floor with no `by` before this line can print one. */
+    const word = P.floor.by;
     return [
       [P.floor.kn.toFixed(1) + ' kn', 'under ' + word + ', any heading — a calm does not slow her'],
       [Math.max(0, P.floor.kn - P.floor.lossKnPerMs * 8).toFixed(1) + ' kn',

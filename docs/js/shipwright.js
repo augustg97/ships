@@ -439,7 +439,7 @@ P.floor ? 'closest made good under sail, light airs' : 'closest made good, light
 [(P.beatHard !== undefined ? P.beatHard + '°' : '—'),
 P.floor ? 'closest made good under sail, blowing hard' : 'closest made good, blowing hard'],
 ]).concat(P.floor ? (() => {
-const word = /oar/.test(P.rig || '') ? 'oar' : 'paddle';
+const word = P.floor.by;
 return [
 [P.floor.kn.toFixed(1) + ' kn', 'under ' + word + ', any heading — a calm does not slow her'],
 [Math.max(0, P.floor.kn - P.floor.lossKnPerMs * 8).toFixed(1) + ' kn',

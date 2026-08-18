@@ -38,6 +38,24 @@
   const say = (id, rule, detail) => problems.push({ id, rule, detail });
 
   for (const v of list) {
+    /* ── A SPEED FLOOR MUST NAME WHAT DRIVES IT (round 104) ─────────────────────────────
+       The Shipwright's cap prints "under <word>" for any polar floor, and the word was
+       guessed off the RIG string — /oar/ or else 'paddle'. Endurance's barquentine rig
+       string says nothing about her 350 ihp auxiliary, so her steam floor printed
+       "4.0 kn UNDER PADDLE" on a screw steamer, for as long as she has had a card. The
+       floor now carries its means as data (`polar.floor.by`), the card prints the
+       record's own word, and this convicts any floor that does not say — plus the exact
+       fault that happened: a floor whose own provenance attests steam while its label
+       claims muscle. Sits before the hull gate because it is a fact about the record,
+       not the geometry. */
+    if (v.polar && v.polar.floor) {
+      const fb = v.polar.floor;
+      if (!/^(oar|paddle|steam|motor)$/.test(fb.by || ''))
+        say(v.id, 'speed floor with no means', `floor.by = ${JSON.stringify(fb.by)}`);
+      else if (/steam|\bihp\b|\bbhp\b/i.test(fb.source || '') && !/^(steam|motor)$/.test(fb.by))
+        say(v.id, 'floor attests steam but claims muscle',
+            `floor.by = ${fb.by}; the floor's own source says steam`);
+    }
     if (!v.hull) continue;
     const H = v.hull;
 

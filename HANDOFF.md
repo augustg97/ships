@@ -6378,3 +6378,47 @@ the forecastle break is not modelled as a raised deck; the funnel row in measure
 reads 1.83 m wide against a 1.26 m stack (unexplained 0.6 m — possibly a fitting merged
 into the tag). Then the r102 candidates still open: the terrace-deck teak question on
 Azzam (whole deck-loft material decision), and the Sea close-up wake due-diligence pass.
+
+## Round 104 — 2026-08-17 — the floor names what drives it
+
+**The opening ratchet confirmed round 103's two accepts — all 56 frames green, nothing
+carried.** The task was round 103's named opener: Endurance's card read "4.0 kn UNDER
+PADDLE" for her steam floor — a screw steamer labelled as a paddled hull.
+
+**THE WORD WAS GUESSED OFF THE RIG STRING, AND THE RIG STRING DOES NOT KNOW ABOUT THE
+ENGINE.** `swFillCard` chose the floor's label by `/oar/.test(P.rig) ? 'oar' : 'paddle'`
+— right on all six muscled hulls only because their rig prose happens to carry the word
+("oars, with a square sail…" matches; "paddles, with a mat sail…" falls through to
+'paddle', which is what a dugout wants), and wrong the moment a floor arrived whose
+second engine is not muscle: Endurance's rig string is "barquentine — square on the
+fore…", no 'oar' anywhere in it, so her 350 ihp coal auxiliary printed as a paddle.
+The class fix is rule 9 applied to the label: the record states the means. Every
+`polar.floor` in vessels.json now carries `by` — 'paddle' (dugout), 'oar' (trireme,
+galley, galleass, panokseon, sekibune), 'steam' (endurance) — and the card prints the
+record's own word (`shipwright.js` swFillCard). The regex guess is gone.
+
+**Audit: two new rules, both injection-proven, clean sweep 33/0.** 'speed floor with no
+means' — any `polar.floor` must name its drive, one of oar/paddle/steam/motor; stripping
+`by` fleet-wide fires 7/7 (inject-floor-no-means.js). 'floor attests steam but claims
+muscle' — a floor whose own source text attests steam (steam/ihp/bhp, the r103 funnel
+rule's corroborators) may not label itself oar or paddle; setting Endurance's `by` to
+'paddle' reproduces the round-103 card fault at the data level and fires 1/1
+(inject-floor-muscle-claim.js). Both rules sit before the audit's hull gate because they
+are facts about the record, not the geometry.
+
+**Ratchet: 56 frames, EXIT 0, nothing beyond tolerance, no baseline moved.**
+ship-endurance moved 0.018% against 0.000% in the opening pass — the changed words on
+her card, read on the frame: "UNDER STEAM, ANY HEADING — A CALM DOES NOT SLOW HER". The
+six muscled cards' floor lines are unchanged by construction (old regex word = new
+recorded word for all six, checked before the run) and the frames agree: ship-trireme,
+ship-dugout, ship-panokseon, ship-sekibune 0.000%; ship-galley 0.031% and ship-galleass
+0.036% sit in the standing sub-threshold jitter band (aboard-cable read 0.047% on
+identical code in the same run). Built at stamp 1787029064; live verify in the round
+log.
+
+**Next:** the Endurance geometry residuals from round 103, none blocking: she carried
+three boats (two more in stern davits — the night plate shows the port-quarter boat)
+against the one drawn amidships; the forecastle break is not modelled as a raised deck;
+the funnel row in measure_ship reads 1.83 m wide against a 1.26 m stack. Then the r102
+candidates: the terrace-deck teak question on Azzam (a whole deck-loft material
+decision), and the Sea close-up wake due-diligence pass against the current fleet.

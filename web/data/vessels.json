@@ -58,6 +58,7 @@
      "source": "Kaifu's Sugime crossing 2019: 225 km in 45 h \u2248 3 kn; Haddon & Hornell, Canoes of Oceania, for the fair-wind sail"
     },
     "floor": {
+     "by": "paddle",
      "kn": 3.0,
      "lossKnPerMs": 0.17,
      "source": "Kaifu's Sugime crossing for the floor. No measured logboat headwind figure exists; the loss is Olympias's fractional windage (46% of floor at 8 m/s) carried over \u2014 an inference, stated as one"
@@ -319,6 +320,7 @@
      "source": "Olympias Final Report: 8.3 kn \"achieved only momentarily\", cruise 5.4 under oar"
     },
     "floor": {
+     "by": "oar",
      "kn": 5.4,
      "lossKnPerMs": 0.31,
      "source": "Olympias sea trials: 5.4 kn oar cruise; ~2.9 kn into a head sea at force 4\u20135, taken at the polar's 8 m/s reference \u2014 (5.4 \u2212 2.9)/8"
@@ -1398,6 +1400,7 @@
      "source": "Guilmartin, Gunpowder and Galleys: a dash of just over 7 kn, sustainable for about twenty minutes; cruise 3\u20134 kn under oars"
     },
     "floor": {
+     "by": "oar",
      "kn": 3.5,
      "lossKnPerMs": 0.2,
      "source": "cruise per Guilmartin; headwind loss inferred from Olympias's measured (5.4\u22122.9)/8, scaled to a 3.5 kn cruise \u2014 no instrumented galley trial exists"
@@ -1555,6 +1558,7 @@
      "source": "day's-run averages of the Venetian merchant great galleys, 3\u20135 kn on passage (Pryor, in Morrison ed., The Age of the Galley); the Lepanto conversions kept the merchant hull and its three-masted lateen rig"
     },
     "floor": {
+     "by": "oar",
      "kn": 2.5,
      "lossKnPerMs": 0.18,
      "source": "derived: set below the war galley's 3.5 kn cruise for three times her displacement on 8% more oars; the attestation is the towing at Lepanto (Guilmartin). Headwind loss carried from Olympias's measured ratio, the galley's own method"
@@ -1725,6 +1729,7 @@
      "source": "derived: the junk's battened-lug coastal passage figure (Worcester, 5 kn) scaled down for a flat-bottomed, high-sided hull of war burden; no measured Joseon passage exists"
     },
     "floor": {
+     "by": "oar",
      "kn": 2.5,
      "lossKnPerMs": 0.18,
      "source": "derived: set below the Mediterranean galley's 3.5 kn cruise \u2014 50\u201360 rowers on ~500 t against her 150 on 200 t; the attestation is relative, both sides' Imjin accounts calling the Japanese ships faster. Headwind loss carried from Olympias's measured ratio, the galley's own method"
@@ -1884,6 +1889,7 @@
      "source": "derived: no measured sekibune passage exists; set half a knot above the panokseon's derived 4.5 \u2014 the one attested speed comparison of the Imjin sea war is relative, both fleets calling the Japanese ships faster"
     },
     "floor": {
+     "by": "oar",
      "kn": 3.5,
      "lossKnPerMs": 0.2,
      "source": "derived: a knot above the panokseon's 2.5 for the attested relative difference, level with the Mediterranean galley's cruise on a hull of similar slenderness; headwind loss carried from Olympias's measured ratio, the galley's own method"
@@ -5020,6 +5026,7 @@
      "source": "Framn\u00e6s builder's figure under steam, 1912; under sail alone she was slower"
     },
     "floor": {
+     "by": "steam",
      "kn": 4.0,
      "lossKnPerMs": 0.14,
      "source": "auxiliary steam floor; no measured headwind figure survives, so the loss follows the clipper's fractional windage \u2014 an inference"
