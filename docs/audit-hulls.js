@@ -601,6 +601,34 @@ if (!touches) adrift.push(i);
 if (adrift.length) say(v.id, 'part attached to nothing',
 `${adrift.length} of ${parts.length} meshes touch no other part`);
 }
+{
+const HSr = SHIPS_HULL.hullSurface(H);
+const spr = u => SHIPS_HULL.surfacePoint(H, HSr, u, 1);
+const NSr = 2000, rxs = [], rus = [];
+for (let i = 0; i <= NSr; i++) { const u = i / NSr; rus.push(u); rxs.push(spr(u)[0]); }
+const uOfX = x => { let bi = 0, bd = Infinity;
+for (let i = 0; i <= NSr; i++) { const d = Math.abs(rxs[i] - x); if (d < bd) { bd = d; bi = i; } }
+return rus[bi]; };
+const rr = H.capM ? H.capM / 1.6 : H.beam * 0.016;
+const tol = Math.max(0.25, rr * 1.2);
+let off = 0, worst = 0, wu = null, walked = 0;
+g.traverse(o => { const p = tagOf(o);
+if (!o.isMesh || !p || p.key !== 'rail') return;
+const pos = o.geometry.attributes.position;
+for (let k = 0; k + 3 < pos.count; k += 4) {
+let maxZ = 0;
+for (let j = 0; j < 4; j++) maxZ = Math.max(maxZ, Math.abs(pos.getZ(k + j)));
+const u = uOfX(pos.getX(k));
+const err = maxZ - (Math.abs(spr(u)[2]) + rr * 0.3);
+walked++;
+if (Math.abs(err) > tol) { off++;
+if (Math.abs(err) > Math.abs(worst)) { worst = err; wu = u; } }
+}
+});
+if (off) say(v.id, 'rail off its deck edge',
+`${off} of ${walked} rail stations off the surface edge, worst ` +
+`${worst.toFixed(2)} m (${worst < 0 ? 'inboard' : 'outboard'}) at u ${wu}`);
+}
 if (H.turrets && part.turret && (part.superstructure || part.island)) {
 const houseBoxes = [], lofts = [];
 g.updateMatrixWorld(true);

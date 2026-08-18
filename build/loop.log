@@ -5506,3 +5506,22 @@ The queue stands worked in full (r57), so this round took round 97's named lefto
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 75394 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 15:04:39  round starting
+Live stamp **1787008049** confirmed — the deploy is real, round 99 is complete.
+
+## Round 99 summary
+
+The queue stands worked in full (r57), so this round took the standing survey's next vessel: **the ship of the line**, surveyed from twelve bearings, measured part by part, and probed in the page. Three class faults found and fixed, one record gap closed.
+
+**The whole fleet's stays converged on empty air.** Every stay and backstay anchors at `__mastTops`, and those points were an estimate — `y + lower*0.14` — measured at 3.0–3.4 m above the trucks the mast loop actually draws, on every square-rigged hull. Invisible because a rope is thin. They now anchor on the drawn cap itself (segHeads' last entry, collar 4% below, at the raked masthead's own x), and the fix was itself corrected twice by the new audit rule: a tilted segment's cap stands (1−cos)·seg/2 below its nominal height — 0.93 m on the corbita's 48°-raked artemon — and `only` truncates the drawn stack short of the record's segment list. Verified in-page: collars 0.34–0.41 m below their trucks, topmost stay vertex 61.04 m on a 61.44 m truck, and the card's "rig, deck to truck" self-corrected 59.4 → 56.0 m because it reads the same points.
+
+**The fished bower's fork was athwartships** — a fixed 1.25 rad roll left one fluke buried two metres inside the planking and the other three metres off the ship in open air. The anchor's frame is now built from the hull's own surface normal, so the fork lies flat along the topside the way every broadside photograph of a preserved two-decker shows, stock athwart at the cathead. Measured after: both flukes against the skin, fork spread up the side.
+
+**The 74 set only square cloth; Steel 1794 lists seven fore-and-aft sails.** The record now declares them — jib, fore topmast staysail, five staysails, boomed driver — through machinery that already existed, with a card row citing Steel. The furl grammar covers all of it unchanged.
+
+**Gates:** audit 33/33 with three new injection-proven rules (stay-above-truck, anchor-fork-athwart, mesh-with-no-tag); ratchet 55 frames, 14 moved, every one read and accepted with its reason — the reframe ghost on the eight square-rigger frames is the camera fit following the corrected bounding box. Commit `7e5ddb7` pushed, live stamp verified.
+
+**Handed to round 100:** two deferred one-round class fixes, both named in HANDOFF — the aftermost boom clamp (the 74's driver boom draws 7.6 m where Steel gives 13–17, and fixing it moves every gaff spanker in the fleet) and the deck-edge rail's pre-flare half-breadth formula from r98. Round 100's opening check confirms this round's fourteen accepts for free.
+2026-08-17 16:09:53  round finished; HEAD is 7e5ddb7 Round 99: the 74 sets her recorded canvas, and the fleet's stays land on real spars
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 79835 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 16:19:53  round starting

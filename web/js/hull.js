@@ -1580,7 +1580,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* the deck attachment: the bulwark at station uu, on side sgn */
       const rail = (uu, sgn) => {
         const uc = Math.max(0.03, Math.min(0.965, uu));
-        const hz = H.halfB * H.wl(uc) * (1 - H.tumble(uc)) * 0.96;
+        /* the true deck edge, asked of the surface (r100) — 0.96 keeps the pin rail
+           deliberately just inboard of it */
+        const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
         return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
       };
       const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
@@ -2126,7 +2128,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
        the Anatomy of Nelson's Ships gives 13 for Victory. The 14–16 in commonly used by
        modellers is looser practice, not a documented rule. */
     if (mk.shrouds) {
-      const half = H.halfB * H.wl(u) * (1 - H.tumble(u));
+      /* the channels stand off the TRUE deck edge (r100) — the old parallel formula put
+         them inboard of a flared topside */
+      const half = Math.abs(surfacePoint(S, H, u, 1)[2]);
       const topY = base + lower * 0.97;
       const shroudPts = [[], []];
       const shroudSegs = [], ratSegs = [];
@@ -3296,7 +3300,14 @@ function buildFittings(S, group, mats) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckAtU = u => H.sheer(u);
-  const halfAtU = u => (H.halfB * H.wl(u)) * (1 - H.tumble(u));
+  /* ⚠ the deck edge is WHERE THE SKIN ENDS, asked of surfacePoint — the deck builder's own
+     lesson, and this line was the rail's stale copy of it: no counter flare, no bow flare,
+     no rounded stern, no stem rabbet. Measured before the fix (r100): 20 of 33 hulls had
+     the rail over half a metre inboard of the true edge — the carrier 4.9 m at the counter
+     — and Queen Mary 2's hung 4.1 m OUTBOARD of her rounded stern, in open air. Everything
+     in this function that means "the deck edge" asks the surface now: the rail, the
+     open-walkway test, the gratings, the deckhouse widths. */
+  const halfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
   const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 
   /* ── the RAIL round the deck edge: a capping timber following the sheer ─────────────
@@ -3724,7 +3735,8 @@ function buildRigging(S, group, mats, spars, mastTops) {
     /* backstays to the ship's side, one each way */
     const bu = Math.min(0.96, m.u + 0.20);
     const bx = (bu - 0.5) * L, by = deckAt(bu);
-    const hb = (H.halfB * H.wl(bu)) * (1 - H.tumble(bu));
+    /* backstays set up at the ship's side — the true edge, asked of the surface (r100) */
+    const hb = Math.abs(surfacePoint(S, H, bu, 1)[2]);
     for (const sgn of [-1, 1]) staySegs.push(line([m.x, m.y, 0], [bx, by, sgn * hb]));
   });
 

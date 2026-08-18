@@ -6119,3 +6119,56 @@ closed.
 deferred class fixes above (rail half-breadth, boom clamp) are the highest-value known work,
 each a one-round job with fleet-wide before/after. Azzam residuals (riser glazing, terrace
 furniture, parapet tone) remain from r98.
+
+## Round 100 — 2026-08-17 — the rail finds the edge of the ship, and so do the shrouds
+
+**Rounds 95–99's deferred confirming pass is closed for good**: the opening ratchet ran all 55
+frames at green — round 99's fourteen accepts confirmed, nothing carried.
+
+**The task was the r98 deferral: THE DECK-EDGE HALF-BREADTH WAS STILL COMPUTED BY A STALE
+PARALLEL FORMULA IN FOUR PLACES.** `halfB·wl·(1−tumble)` predates the counter flare, the bow
+flare, the rounded stern and the stem rabbet — every term surfacePoint has grown since. The
+four copies: the fittings' `halfAtU` (the rail loft, the open-walkway test, the gratings, the
+deckhouse widths), the braces' pin-rail attachment, the shroud channels, and the backstay
+feet. All four now ask `surfacePoint(S, H, u, 1)[2]` — the same call the deck loft and the
+waterway already make, the "second private copy of the surface" failure closed at its source
+for the third and, in hull.js, last time (grep: no `tumble` outside surfacePoint's own family).
+
+**Measured before, per hull (rule 7), with a new instrument** — `Research/probe-rail-edge.py`
+walks every drawn rail station, recovers its u by nearest-x against the true edge, and scores
+the outer face against trueHalf + 0.3·r. Before: 20 of 33 hulls more than half a metre off
+somewhere — carrier −4.93 m and yamato −3.41 m at the counter, ship-of-the-line −2.35 m,
+great-eastern −2.46 m, and Queen Mary 2 both ways at once: −4.98 m at her flared bow and
+**+4.12 m OUTBOARD at her rounded stern — a rail standing in open air off the quarter**.
+After: every hull within 0.10 m, and that residual is the probe's own u-quantisation at the
+steep stem, not the model's. Both tables kept: `build/rail-before.json`, `rail-after.json`.
+
+**The walkway test moving to the true edge fixed emission spans too, in both directions.**
+Great Eastern, Dreadnought, Yamato and the carrier extend their rails to the full open span
+(166–170 → 182 stations): the true flared edge leaves a genuine walkway their stale test
+denied. Queen Mary 2 drops from 46 to 14 stations: her house IS the ship's side and the
+rounded stern's true edge leaves no walkway — the round-51 flicker lesson (no rail where the
+house is the shell) now falls out of the geometry instead of being a special case. Her 14
+remaining stations are the open forecastle, which is right.
+
+**Audit: one new rule, injection-proven both ways.** 'rail off its deck edge' walks every
+drawn rail station against the surface at that station's own u (NS 2000, tol max(0.25, 1.2r)).
+Injected ±1.2 m shifts each fire 33/33 (`inject-rail-inboard.js` / `-outboard.js`; the dugout
+reports the inboard shift as outboard because 1.2 m crosses her sub-metre centreline — the
+rule still fires, noted so the next reader does not chase it). Clean sweep 33/0.
+
+**Ratchet: 55 frames, 14 moved, every one read and accepted with its reason.** The largest
+(shipwright-furled 3.04%, -astern 1.79%) are pure rigging: shroud gangs and ratlines
+re-led from channels at the true edge. The steel hulls are the rail band on the counter.
+ship-carrier read 0.000% despite its −4.93 m before-error — its counter rail hides under the
+flight-deck overhang from the baseline bearing, which is why the before-table, not the frame,
+is the record of what moved. Deployed at stamp 1787010448; live verify at end of round.
+
+**Left un-run: the post-accept confirming pass** (the r95–r99 pattern). Round 101's opening
+check confirms these fourteen accepts for free.
+
+**Next:** the second deferred class fix from r99 — **the aftermost boom clamp**: `gapAft *
+0.78` discounts swing clearance against a stern that is not an obstruction, so the 74's driver
+boom draws 7.6 m where Steel gives 13–17. Moves every gaff spanker (Wyoming, Great Eastern,
+Preussen) — one round, before/after per ship. Then Azzam's residuals (riser glazing, terrace
+furniture, parapet tone, r98).

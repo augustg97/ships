@@ -867,7 +867,7 @@ const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
 const V3 = (px, py, pz) => new THREE.Vector3(px, py, pz);
 const rail = (uu, sgn) => {
 const uc = Math.max(0.03, Math.min(0.965, uu));
-const hz = H.halfB * H.wl(uc) * (1 - H.tumble(uc)) * 0.96;
+const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
 return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
 };
 const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
@@ -1148,7 +1148,7 @@ B * 0.03)]],
 if (hal) lug.add(tag(hal, 'halyard'));
 }
 if (mk.shrouds) {
-const half = H.halfB * H.wl(u) * (1 - H.tumble(u));
+const half = Math.abs(surfacePoint(S, H, u, 1)[2]);
 const topY = base + lower * 0.97;
 const shroudPts = [[], []];
 const shroudSegs = [], ratSegs = [];
@@ -2008,7 +2008,7 @@ const timberShip = !(S.build === 'iron' || S.build === 'steel');
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const deckAtU = u => H.sheer(u);
-const halfAtU = u => (H.halfB * H.wl(u)) * (1 - H.tumble(u));
+const halfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
 const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 {
 const pos = [], idx = [];
@@ -2293,7 +2293,7 @@ const ay = i === 0 ? deckAt(0.06) + (S.bowsprit ? S.beam * 0.20 : 0) : deckAt(ah
 staySegs.push(line([m.x, m.y], [ax, ay]));
 const bu = Math.min(0.96, m.u + 0.20);
 const bx = (bu - 0.5) * L, by = deckAt(bu);
-const hb = (H.halfB * H.wl(bu)) * (1 - H.tumble(bu));
+const hb = Math.abs(surfacePoint(S, H, bu, 1)[2]);
 for (const sgn of [-1, 1]) staySegs.push(line([m.x, m.y, 0], [bx, by, sgn * hb]));
 });
 spars.forEach(sp => {

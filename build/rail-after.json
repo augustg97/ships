@@ -1,0 +1,299 @@
+[
+ {
+  "id": "dugout",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.0,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.16875
+ },
+ {
+  "id": "voyaging-canoe",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.0,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.08625
+ },
+ {
+  "id": "trireme",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.0,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.08625
+ },
+ {
+  "id": "corbita",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.1275
+ },
+ {
+  "id": "dhow",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.1275
+ },
+ {
+  "id": "junk",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.16875
+ },
+ {
+  "id": "treasure-ship",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.16875
+ },
+ {
+  "id": "cog",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.16875
+ },
+ {
+  "id": "caravel",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.1275
+ },
+ {
+  "id": "carrack",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.1275
+ },
+ {
+  "id": "galley",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.08625
+ },
+ {
+  "id": "galleass",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "panokseon",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.16875
+ },
+ {
+  "id": "sekibune",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.08625
+ },
+ {
+  "id": "fluyt",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0,
+  "uOut": 0.045
+ },
+ {
+  "id": "east-indiaman",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "ship-of-the-line",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "slave-ship",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "wyoming",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.02,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "preussen",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.02,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.045
+ },
+ {
+  "id": "great-eastern",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.03,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.02,
+  "uOut": 0.045
+ },
+ {
+  "id": "titanic",
+  "railMeshes": 1,
+  "stations": 58,
+  "worstInboardM": -0.04,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.02,
+  "uOut": 0.045
+ },
+ {
+  "id": "usv",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.045
+ },
+ {
+  "id": "clipper",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "steamer",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.02,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.045
+ },
+ {
+  "id": "dreadnought",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.04,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.02,
+  "uOut": 0.045
+ },
+ {
+  "id": "yamato",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.06,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.04,
+  "uOut": 0.045
+ },
+ {
+  "id": "carrier",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.07,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.04,
+  "uOut": 0.045
+ },
+ {
+  "id": "container",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.1,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.06,
+  "uOut": 0.045
+ },
+ {
+  "id": "ever-given",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.1,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.06,
+  "uOut": 0.045
+ },
+ {
+  "id": "azzam",
+  "railMeshes": 1,
+  "stations": 48,
+  "worstInboardM": -0.02,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.045
+ },
+ {
+  "id": "endurance",
+  "railMeshes": 1,
+  "stations": 182,
+  "worstInboardM": -0.01,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.01,
+  "uOut": 0.08625
+ },
+ {
+  "id": "queen-mary-2",
+  "railMeshes": 1,
+  "stations": 14,
+  "worstInboardM": -0.04,
+  "uIn": 0.05625,
+  "worstOutboardM": 0.03,
+  "uOut": 0.045
+ }
+]

@@ -923,6 +923,45 @@
                              `${adrift.length} of ${parts.length} meshes touch no other part`);
     }
 
+    /* ── THE RAIL SITS ON THE DECK EDGE, ASKED OF THE SURFACE (round 100) ───────────────
+       The rail loft computed its half-breadth as halfB·wl·(1−tumble) — a stale parallel
+       copy of surfacePoint that predates the counter flare, the bow flare, the rounded
+       stern and the stem rabbet. Measured before the fix: 20 of 33 hulls carried the rail
+       more than half a metre inboard of the true edge somewhere (carrier −4.9 m at the
+       counter), and Queen Mary 2's rail hung 4.1 m OUTBOARD of her rounded stern, in open
+       air. Same class the deck builder's own comment names; the deck and the waterway ask
+       surfacePoint, so anything capping their edge must land where they end. The rule
+       walks every drawn rail station: recover its u by nearest-x against the true edge,
+       and its outer face must sit at trueHalf + 0.3·r within tolerance, both directions. */
+    {
+      const HSr = SHIPS_HULL.hullSurface(H);
+      const spr = u => SHIPS_HULL.surfacePoint(H, HSr, u, 1);
+      const NSr = 2000, rxs = [], rus = [];
+      for (let i = 0; i <= NSr; i++) { const u = i / NSr; rus.push(u); rxs.push(spr(u)[0]); }
+      const uOfX = x => { let bi = 0, bd = Infinity;
+        for (let i = 0; i <= NSr; i++) { const d = Math.abs(rxs[i] - x); if (d < bd) { bd = d; bi = i; } }
+        return rus[bi]; };
+      const rr = H.capM ? H.capM / 1.6 : H.beam * 0.016;
+      const tol = Math.max(0.25, rr * 1.2);
+      let off = 0, worst = 0, wu = null, walked = 0;
+      g.traverse(o => { const p = tagOf(o);
+        if (!o.isMesh || !p || p.key !== 'rail') return;
+        const pos = o.geometry.attributes.position;
+        for (let k = 0; k + 3 < pos.count; k += 4) {
+          let maxZ = 0;
+          for (let j = 0; j < 4; j++) maxZ = Math.max(maxZ, Math.abs(pos.getZ(k + j)));
+          const u = uOfX(pos.getX(k));
+          const err = maxZ - (Math.abs(spr(u)[2]) + rr * 0.3);
+          walked++;
+          if (Math.abs(err) > tol) { off++;
+            if (Math.abs(err) > Math.abs(worst)) { worst = err; wu = u; } }
+        }
+      });
+      if (off) say(v.id, 'rail off its deck edge',
+                   `${off} of ${walked} rail stations off the surface edge, worst ` +
+                   `${worst.toFixed(2)} m (${worst < 0 ? 'inboard' : 'outboard'}) at u ${wu}`);
+    }
+
     /* ⚠ A BATTLESHIP'S TURRETS ARE HER SILHOUETTE, AND FOR FOUR ROUNDS THEY WERE INSIDE THE
        DECKHOUSE. The liner superstructure ran 80% of Yamato's length and the three main
        turrets stood buried in it — declared, drawn, tagged, and invisible from all twelve

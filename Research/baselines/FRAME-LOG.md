@@ -978,3 +978,17 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-17 16:06** · `ship-galley` — r99 class fix: stays and backstays anchor on the drawn trucks (was 0.14*lower above them), the true bounding box shrank and the camera fit reframes; catted anchors stow with the fork along the side
 - **2026-08-17 16:06** · `ship-galleass` — r99 class fix: stays and backstays anchor on the drawn trucks (was 0.14*lower above them), the true bounding box shrank and the camera fit reframes; catted anchors stow with the fork along the side
 - **2026-08-17 16:06** · `aboard-preussen` — r99 class fix: stays and backstays anchor on the drawn trucks (was 0.14*lower above them), the true bounding box shrank and the camera fit reframes; catted anchors stow with the fork along the side
+- **2026-08-17 17:11** · `shipwright` — r100 rail/channels to the true deck edge: the default vessel's shroud channels, backstay feet and rail cap follow surfacePoint instead of the stale halfB*wl*(1-tumble) copy; diff is rigging feet and the deck-edge line only
+- **2026-08-17 17:11** · `shipwright-ahead` — r100 class fix on the 74 from ahead: channels moved out to the true flared edge, shroud gangs and their ratlines follow; before-measure had her rail 2.35 m inboard at the counter
+- **2026-08-17 17:11** · `shipwright-astern` — r100 class fix on the 74 dead astern: shroud gangs spread to the true topside edge, backstay feet out, rail cap on the counter's actual edge; read in-frame, canvas and stern galleries untouched
+- **2026-08-17 17:11** · `shipwright-furled` — r100 class fix, furled state: same channels/ratline/backstay displacement as the set state, largest diff because this close bearing fills the frame with rigging
+- **2026-08-17 17:11** · `shipwright-hounds` — r100 class fix at the hounds: shroud upper ends unchanged, the ghosting is the gangs' new lead from channels at the true edge
+- **2026-08-17 17:11** · `ship-great-eastern` — r100: rail extends to the full open span (166 to 182 stations) - the true flared bow/counter edge leaves a genuine walkway her house's stale test denied - and the rail line sits on the surface edge
+- **2026-08-17 17:11** · `ship-usv` — r100: rail to the true edge on the flared USV bow; before-measure 0.71 m inboard at the counter
+- **2026-08-17 17:11** · `ship-yamato` — r100: rail runs the counter's true edge (168 to 182 stations); before-measure had it 3.41 m inboard at u 0.965; diff confined to the stern deck-edge band
+- **2026-08-17 17:11** · `ship-queen-mary-2` — r100: stern rails REMOVED - her house is the ship's side and the rounded stern's true edge leaves no walkway, the round-51 flicker lesson made structural; 14 forecastle stations remain, on the true flared bow edge
+- **2026-08-17 17:11** · `ship-preussen` — r100: channels and ratline gangs to the true edge, rail extended aft along the counter; before-measure 1.88 m inboard at u 0.965
+- **2026-08-17 17:11** · `ship-dreadnought` — r100: rail to the full open span on the true edge (166 to 182 stations); before-measure 2.06 m inboard at the counter
+- **2026-08-17 17:11** · `aboard-preussen` — r100 class fix seen from aboard: shroud feet and rail line at the true edge, sea and sky untouched
+- **2026-08-17 17:11** · `ship-wyoming` — r100: the six-master's channels and rail to the true edge; before-measure 1.95 m inboard at u 0.965
+- **2026-08-17 17:11** · `ship-clipper` — r100: channels, backstay feet and rail to the true edge; before-measure 1.34 m inboard at the counter
