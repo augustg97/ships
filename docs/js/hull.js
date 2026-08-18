@@ -1829,6 +1829,12 @@ what: 'The heavy plank belt between the hull\'s gunwale and the fighting deck '
 + 'boarding party that has climbed the two metres of hull side finds another '
 + 'storey of timber standing over the rail. The old drawings paint a dragon '
 + 'along this belt and cut a row of small ports just under the deck line.' },
+maku:     { stage: 5, name: 'Maku',
+what: 'The cloth band hung from the fighting deck\'s overhung edge over the '
++ 'oar band — white under a dark scalloped hem in the Busan scroll, which '
++ 'dresses hull after hull of the anchored fleet in it and hangs the '
++ 'atakebune\'s in the same cut, inverted, under sail. Dress and '
++ 'concealment both: an arquebusier behind it cannot be counted.' },
 sama:     { stage: 5, name: 'Sama',
 what: 'A loophole cut in the shield wall, one of a row down each side — the '
 + 'arquebus and the bow fire from behind the planking. On a hull too light '
@@ -5069,6 +5075,41 @@ return foot + (head - foot) * f;
 const a = new THREE.Vector3(p1[0], yP, sgn * zAt(p1));
 const b = new THREE.Vector3(p2[0], yP, sgn * zAt(p2));
 group.add(tag(beamAB(a, b, 0.5, B * 0.028, portMat), 'sangjang', 'Oar-deck port'));
+}
+}
+if (GD.maku) {
+const clothMat = new THREE.MeshStandardMaterial({ color: 0xe9e2d0, roughness: 0.94,
+side: THREE.DoubleSide });
+const hemMat = new THREE.MeshStandardMaterial({ color: 0x252a38, roughness: 0.94,
+side: THREE.DoubleSide });
+const lipIn = B * 0.010;
+const tuck = 0.10;
+const clear = 0.15;
+const headYc = gdY - B * 0.016;
+for (const sgn of [-1, 1]) {
+const cpos = [], cidx = [];
+for (let i = 0; i <= N; i++) {
+cpos.push(sx[i], headYc,           sgn * (halfW[i] - lipIn),
+sx[i], railY[i] + clear, sgn * (halfW[i] - lipIn - tuck));
+if (i) { const a = (i - 1) * 2; cidx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+}
+const cg = new THREE.BufferGeometry();
+cg.setAttribute('position', new THREE.Float32BufferAttribute(cpos, 3));
+cg.setIndex(cidx); cg.computeVertexNormals();
+group.add(tag(new THREE.Mesh(cg, clothMat), 'maku', 'Maku',
+'The cloth band the Busan scroll hangs along the yagura band on hull after '
++ 'hull of the anchored fleet — white, under a dark scalloped hem. Dress and '
++ 'concealment both: an arquebusier behind it cannot be counted.'));
+const bays = Math.max(4, Math.round((GD.to - GD.from) * L / 0.7));
+for (let j = 0; j < bays; j++) {
+const u = GD.from + (GD.to - GD.from) * ((j + 0.5) / bays);
+const p = surfacePoint(S, H, u, 1.0);
+const hw = Math.abs(p[2]) + over;
+const sc = new THREE.Mesh(new THREE.CircleGeometry(0.24, 10, Math.PI, Math.PI),
+hemMat);
+sc.position.set(p[0], p[1] + clear, sgn * (hw - lipIn - tuck + 0.01));
+group.add(tag(sc, 'maku', 'Maku hem'));
+}
 }
 }
 const nL = Math.max(0, GD.loops | 0);

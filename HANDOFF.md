@@ -7483,3 +7483,81 @@ the band before declaring gunDeck.walls for her, the rule is already waiting. (2
 gundeck both-ways normals class, if a sweep is wanted. (3) The opening check next round
 confirms the 54 frames not re-checked at this close — expected 0.000%; if anything moved,
 this round owns it.
+
+## Round 119 — 2026-08-18 — the plate was read before the rule was declared, and it refuted the rule
+
+**The opening ratchet was the confirming pass r118 owed: all 59 frames within tolerance,
+exit 0** (build/ratchet-open-r119.log). Round 118 is confirmed fleet-wide.
+
+**THE TASK: r118's pointer — read the Busan scroll at the sekibune's band below the
+fighting deck BEFORE declaring gunDeck.walls for her. The reading refuted walls.** Seven
+crops of the plate (~16 px/m — a ~25 m hull drawn ~400 px long) were read at the band,
+and on hull after hull of the anchored fleet the space between rail and yagura deck is
+hung with CLOTH: a white band under a dark scalloped hem, lapping the sheer; the
+atakebune amidships wears the same dress inverted — dark with white scallops — and wears
+it UNDER SAIL. The timber the plate shows at the band is rail posts and frames; no plank
+belt anywhere. The card's "walled with tate-ita … pierced by sama" is the screen ABOVE
+the deck, drawn since r90. So the panokseon's sangjang belt is NOT this class's answer,
+and the honest record field is the cloth itself.
+
+**The class fix: `gunDeck.maku`, one record-driven branch in the gunDeck builder.** A
+lofted cloth strip per side — head hung one lip-inset under the deck clamp, hem riding
+0.15 m clear of the rail cap so the ro work out from under it (the sangjang's own law),
+0.10 m inward tuck at the foot — and the scalloped valance drawn as GEOMETRY, a row of
+dark half-discs (r 0.24, ~0.7 m bays) flat-edge on the hem line, because a colour that
+lives on a vertex cannot have an edge. Sides only: the plate shows the band in broadside
+alone, and the open end bays are recorded, not hidden. Single winding on DoubleSide (the
+r118 normals lesson, applied not relearned). PARTS gains `maku` with its own card text;
+the record gains `makuProvenance` carrying attested vs derived, the plate's px/m, and
+the anchored-fleet bound; the card gains "Maku, as drawn", labelled derived.
+
+**Measured (rule 4, build/measure-sekibune-r119-{before,after}.txt):** Maku u
+0.039–0.945 = the yagura's own span, y 1.55–2.52 amidships (hem at rail 1.40 + 0.15,
+head at the clamp), half-breadth 2.80 under the 2.85 deck lip; hem discs to 0.24 below
+the hem line. Global extents byte-identical; every prior row of the part table unchanged.
+
+**Verified (rule 1): all twelve furled spin bearings read, plus the set-sails spin
+spot-read.** From every bearing the band reads as hung cloth — white, dark scalloped
+hem, ro emerging beneath, tate-ita screen with sama above, ends closing with the yagura —
+nothing floats, nothing clips the oars or the backstays. Rule 0 on ship-sekibune: reads
+as a rendered vessel on water; three facts a viewer can name — a white cloth band with a
+dark scalloped hem hangs along her side below the fighting deck and her sculls work out
+from under it; a loopholed timber box runs nearly her whole length above it; the
+commander's roofed plank cabin stands abaft her single mast.
+
+**The audit learned the class (round-119 rule): 'maku declared but not drawn' plus
+perpendicular rays at the band, 24 stations × 2 heights × 2 sides, expectation from
+record + surfacePoint (never the drawn meshes), intersecting the maku part alone, first
+strike inside the band's depth window — a bare near side convicts because its first maku
+strike is the FAR side's cloth, sign flipped, outside the window. Ray heights stay
+between hem and head because the valance hangs BELOW the hem line. Proven by injection
+against the final geometry (build/staging/inj-maku-{strip,hole}.js): strip convicts
+'maku declared but not drawn'; hole — the port strip removed, the valance deliberately
+LEFT — convicts 48/96, first at u 0.12 port, proving the scallops cannot satisfy the
+rays. Clean run 33/0, twice.**
+
+**Ratchet: check-then-accept, ship-sekibune 1.519% / mean 1.366 — diff read before
+accepting: the maku band alone, strip and scallop row, hull/sails/oars/panels
+byte-black; accepted, re-checked 0.000%. Neighbours checked clean after: ship-panokseon
+0.000%, ship-galleass 0.037% sub-tolerance, ship-galley 0.000%, shipwright 0.000%,
+shipwright-furled 0.000% — the r115/r118 berth-ghost class did not fire this round.**
+
+**Deployed: stamp 1787095894.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The maku's end bays stand open — the plate
+shows the cloth only in broadside; makuProvenance says so. (2) The yakata wall-opening
+curtain (r117) is still not drawn. (3) The gundeck both-ways normals class (r118) stands
+fleet-wide, unconvicted. (4) Sekibune drawn LOA 31.1 vs record 25 — the stem/stern loft
+overhang class (r113/r115), untouched. (5) The r115 hayao and sekibune swivels (r90)
+stand. (6) probe-wake.py heading mirror (r114) untouched. (7) Endurance forecastle break
+still waits on the RMG original of J9266. (8) Azzam crest residual (r108) unchanged.
+
+**Next:** (1) The survey continues — the r113 survey's boxy column, past the container
+ships whose boxes are honest cargo, now points at the DUGOUT (boxPct 64, gratingx76):
+`timberShip` in hull.js is defined as "not iron and not steel", so the 8.6 m hollowed
+log of 68,000 BP is given three hatch gratings and a bar-capstan written for planked
+ships with holds. Fix the CLASS: gate deck furniture on what it actually requires — a
+laid deck with hatches — not on hull material; check the voyaging canoe (build 'shell')
+for the same fault while there. (2) The gundeck both-ways normals sweep, if wanted.
+(3) The opening check next round confirms the 53 frames not re-checked at this close —
+expected 0.000%; if anything moved, this round owns it.

@@ -577,6 +577,56 @@
           }
         }
       }
+      /* ── THE BAND WEARS CLOTH, NOT PLANK (round 119).
+         The panokseon's plate closes the oar band with a plank belt (gunDeck.walls,
+         r118); the sekibune's plate — the Busan scroll — draws no plank there and
+         hangs cloth instead: gunDeck.maku, the white band under a dark scalloped
+         hem. Same discipline as the sangjang rule above: PERPENDICULAR rays at the
+         band, station by station, the expectation derived from the record and
+         surfacePoint, never from the drawn meshes, intersecting the MAKU part
+         alone. A bare near side still convicts: its first maku strike is the far
+         side's cloth, sign flipped, far outside the depth window. Ray heights stay
+         BETWEEN hem and head — the valance hangs BELOW the hem line, so a rule
+         aimed too low would take the scallops for the cloth; the hole injection
+         removes the strip and leaves the valance to refute exactly that. */
+      if (H.gunDeck.maku) {
+        const mk = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'maku') mk.push(o); });
+        if (!mk.length)
+          say(v.id, 'maku declared but not drawn', 'gunDeck.maku with no cloth geometry');
+        else {
+          const HSm = SHIPS_HULL.hullSurface(H);
+          const GDm = H.gunDeck;
+          const overM = GDm.over !== undefined ? GDm.over : H.beam * 0.045;
+          const headYm = H.freeboard + GDm.height - H.beam * 0.016;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let open = 0, shot = 0, first = '';
+          for (const sgn of [-1, 1]) for (let i = 0; i < 24; i++) {
+            const u = GDm.from + (GDm.to - GDm.from) * ((i + 0.5) / 24);
+            const pd = SHIPS_HULL.surfacePoint(H, HSm, u, 1.0);
+            const railZ = Math.abs(pd[2]);
+            const hemY = pd[1] + 0.15;
+            if (headYm - hemY < 0.25) continue;   // the sheer squeezes the band out
+            for (const f of [0.35, 0.75]) {
+              const y = hemY + (headYm - hemY) * f;
+              rc.set(new THREE.Vector3(pd[0], y, sgn * (railZ + overM + 4)),
+                     new THREE.Vector3(0, 0, -sgn));
+              shot++;
+              const hit = rc.intersectObjects(mk, true)[0];
+              if (!hit || hit.point.z * sgn < railZ - 0.05
+                       || hit.point.z * sgn > railZ + overM + 0.3) {
+                open++;
+                if (!first) first = `first at u ${u.toFixed(2)} ` +
+                                    `${sgn > 0 ? 'stbd' : 'port'}, y ${y.toFixed(1)} m`;
+              }
+            }
+          }
+          if (open) say(v.id, 'yagura band bare where its cloth should hang',
+                        `${open} of ${shot} rays at the maku band miss the cloth — ${first}`);
+        }
+      }
       if (H.tower) {
         const tw = part.tower;
         if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');
