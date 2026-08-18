@@ -1520,6 +1520,14 @@
      "about 30: a five-piece bow battery, eight or nine lighter pieces a side firing over the oars, chasers aft"
     ],
     [
+     "Bow fortress, as drawn",
+     "a rounded fighting deck over the stem carrying the five-piece battery, its parapet sweeping rail to rail — the round form is attested; its plan is derived, no drawing of one survives"
+    ],
+    [
+     "Chasers, as drawn",
+     "two, at the after end of the gun deck, laid astern — the record says only 'chasers aft'; two is the least the plural supports (derived)"
+    ],
+    [
      "Crew",
      "250\u2013300 at the oars, about 70 sailors and gunners; up to 250 soldiers embarked"
     ],
@@ -1630,6 +1638,14 @@
     },
     "spur": 4.5,
     "bowGuns": 5,
+    "bowFortress": {
+     "from": 0.02,
+     "to": 0.16,
+     "parapetH": 1.1
+    },
+    "bowFortressProvenance": "The ROUND form is attested — Guilmartin's account of the 1570–71 Arsenal conversions and the rounded bow structure the contemporary Lepanto depictions draw — but no plan of one survives, so the half-ellipse drawn here (6.2 m long, closing round the stem at the rowing frame's own width, parapet 1.1 m) is DERIVED: a form choice, not a measurement. Round 87 drew the flat galley arrumbada instead and recorded the simplification; round 116 is that record cashed.",
+    "sternGuns": 2,
+    "sternGunsProvenance": "The card's Guns row says 'chasers aft' — plural, unnumbered (Guilmartin; Morrison ed.). TWO are drawn, one either side of the centreline at the gun deck's aft edge, laid astern over the poop tent: the minimum the plural supports (rule 10). No gun-by-gun inventory of a 1571 galleass's stern battery was found this round; if one surfaces, the count follows it.",
     "gunDeck": {
      "from": 0.16,
      "to": 0.86,

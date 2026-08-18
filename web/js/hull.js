@@ -3166,6 +3166,12 @@ const PARTS = {
                   + 'frame. The guns stand on it and the boarding party masses on it, over the '
                   + 'heel of the spur. All of a galley\'s violence is concentrated on these few '
                   + 'square metres of deck; everything abaft it is propulsion.' },
+  fortress: { stage: 3, name: 'Bow fortress',
+              what: 'The round fighting deck the Arsenal built over the bow in the 1570–71 '
+                  + 'conversions, its parapet sweeping from one rail around the stem to the '
+                  + 'other. The heavy battery stands on it and fires ahead and on both bows '
+                  + 'through ports in the curve — an arc of fire, not a single axis, which is '
+                  + 'why an Ottoman line could not row past without losing its dressing.' },
   canopy:   { stage: 7, name: 'Stern awning',
               what: 'Canvas arched over the poop, where the captain and the officers live — '
                   + 'the only cover aboard a ship whose entire deck is benches. Struck before '
@@ -8091,7 +8097,7 @@ function buildGalleyWorks(S, group, mats) {
   /* ── THE ARRUMBADA, AND THE GUNS THAT FACE FORWARD ─────────────────────────────────
      The platform spans the rowing frame's full width over the spur's heel. The courser
      sits on the centreline; the flankers beside it. Aimed by aiming the ship. */
-  if (S.bowGuns) {
+  if (S.bowGuns && !S.bowFortress) {
     const u0 = 0.030, u1 = AP ? AP.from : 0.17;
     const pA0 = surfacePoint(S, H, u0, 1.0), pA1 = surfacePoint(S, H, u1, 1.0);
     /* Where a gun deck runs over the rowers, the bow platform is its forward
@@ -8153,6 +8159,127 @@ function buildGalleyWorks(S, group, mats) {
       const side = j % 2 ? -1 : 1, rank = Math.floor(j / 2);
       const z = side * (B * 0.115 + rank * B * 0.105);
       group.add(tag(mkGun(B * 0.42, B * 0.017, z, side * 0.05), 'gun', 'Flanking piece'));
+    }
+  }
+
+  /* ── THE BOW FORTRESS, AND THE BATTERY THAT FIRES ALL ROUND THE BOW ────────────────
+     The Lepanto conversions carried no flat arrumbada: the Arsenal built a ROUND
+     fortress over the bow — a fighting deck whose parapet sweeps from one apostis rail
+     around the stem to the other, the heavy pieces firing ahead and on both bows
+     through ports in the curve. Record-driven: bowFortress {from, to, parapetH}; the
+     plan is a half-ellipse closing round the stem, the deck in one plane with the gun
+     deck (the two meet in one line at `to`). The rim's overhang past the fine bow
+     rides on raked posts standing on the hull's own deck edge — the head-timbers' law.
+     Sources: Guilmartin, Gunpowder and Galleys; the rounded bow structure the
+     contemporary Lepanto depictions draw. Form derived, and the record's
+     bowFortressProvenance says so. The galley keeps her flat arrumbada; this branch
+     never runs for her. */
+  if (S.bowGuns && S.bowFortress) {
+    const F = S.bowFortress;
+    const topY = (S.gunDeck ? deckY + S.gunDeck.height
+                            : surfacePoint(S, H, F.to, 1.0)[1]) + B * 0.023;
+    const wF = apZ + B * 0.025;                        // meets the gun deck at its own width
+    const K = 22;
+    const arcU = k => F.to - (F.to - F.from) * Math.cos(-Math.PI / 2 + Math.PI * k / K);
+    const arc = [];
+    for (let k = 0; k <= K; k++)
+      arc.push(new THREE.Vector3((arcU(k) - 0.5) * L, topY,
+                                 wF * Math.sin(-Math.PI / 2 + Math.PI * k / K)));
+    const cen = new THREE.Vector3((F.to - 0.5) * L, topY, 0);
+    /* the deck: a fan from the aft edge's centre out to the curve, faced both ways */
+    const pos = [cen.x, cen.y, cen.z], idx = [];
+    for (const p of arc) pos.push(p.x, p.y, p.z);
+    for (let k = 1; k < K + 1; k++) idx.push(0, k, k + 1, 0, k + 1, k);
+    const fg = new THREE.BufferGeometry();
+    fg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    fg.setIndex(idx); fg.computeVertexNormals();
+    group.add(tag(new THREE.Mesh(fg, pale), 'fortress'));
+    const pH = F.parapetH || B * 0.14;
+    const fsY = topY + B * 0.007;
+    for (let k = 0; k < K; k++) {
+      const a = new THREE.Vector3(arc[k].x, fsY + pH / 2, arc[k].z);
+      const b = new THREE.Vector3(arc[k + 1].x, fsY + pH / 2, arc[k + 1].z);
+      group.add(tag(beamAB(a, b, pH, B * 0.014, timber), 'fortress', 'Parapet'));
+    }
+    /* raked posts: head at the rim, foot on the hull's own deck edge at that station */
+    for (let k = 0; k <= K; k += 2) {
+      const pd = surfacePoint(S, H, Math.min(Math.max(arcU(k), 0.004), 1), 1.0);
+      const zMax = Math.max(Math.abs(pd[2]) - B * 0.02, B * 0.02);
+      const zF = Math.sign(arc[k].z || 1) * Math.min(Math.abs(arc[k].z), zMax);
+      const a = new THREE.Vector3(pd[0], pd[1], zF);
+      const b = new THREE.Vector3(arc[k].x, topY - B * 0.008, arc[k].z);
+      group.add(tag(beamAB(a, b, B * 0.022, B * 0.022, timber), 'fortress', 'Fortress post'));
+    }
+    /* the battery, radial: courser dead ahead at the nose, flanker pairs trained out
+       on the bows — each piece laid along the local radius, its muzzle in a port */
+    const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
+    const nB = Math.max(1, S.bowGuns | 0);
+    const nRank = Math.max(1, (nB - 1) / 2);
+    const angs = [0];
+    for (let rk = 1; rk <= (nB - 1) / 2; rk++) { const a0 = rk * 0.84 / nRank; angs.push(a0, -a0); }
+    const rimAt = a0 => new THREE.Vector3(
+      (F.to - (F.to - F.from) * Math.cos(a0) - 0.5) * L, topY, wF * Math.sin(a0));
+    let big = true;
+    for (const a0 of angs) {
+      const rim = rimAt(a0);
+      const dir = rim.clone().sub(cen).setY(0).normalize();
+      const len = big ? B * 0.65 : B * 0.42, r = big ? B * 0.028 : B * 0.017;
+      const g = new THREE.Group();
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 14), mats.iron);
+      bar.rotation.z = Math.PI / 2;                    // +Y to −X: muzzle toward the rim
+      g.add(bar);
+      const carr = new THREE.Mesh(new THREE.BoxGeometry(len * 0.48, r * 2.4, r * 3.2), timber);
+      carr.position.set(len * 0.18, -r * 2.0, 0);
+      g.add(carr);
+      g.position.copy(cen).addScaledVector(dir, cen.distanceTo(rim) - len * 0.45)
+        .setY(fsY + r * 3.0);
+      g.rotation.y = Math.atan2(dir.z, -dir.x);
+      g.userData.gun = { style: 'fortress', tip: [-len * 0.5, 0, 0] };
+      group.add(tag(g, 'gun', big ? 'Courser' : 'Flanking piece', big
+        ? 'The centreline heavy gun of the bow battery, firing dead ahead through the '
+          + 'fortress parapet. At Lepanto this fire, opened as the Ottoman centre rowed '
+          + 'down on the anchored galleasses, was the first sustained heavy bombardment '
+          + 'a galley fleet had ever taken from shipboard.'
+        : 'A flanker on the round fortress, trained out on the bow. The curve is the '
+          + 'point: a galley cannot row past on either side without crossing its fire.'));
+      /* the port: a dark plate straddling the parapet where the muzzle crosses it */
+      const d1 = 0.07;
+      const pa = rimAt(a0 - d1).setY(fsY + pH * 0.42);
+      const pb = rimAt(a0 + d1).setY(fsY + pH * 0.42);
+      group.add(tag(beamAB(pa, pb, pH * 0.52, B * 0.024, portMat), 'gun', 'Gun port',
+        'The opening in the parapet the piece fires through.'));
+      big = false;
+    }
+  }
+
+  /* ── THE CHASERS AFT ───────────────────────────────────────────────────────────────
+     The record's own Guns row carries them: pieces at the after end of the fighting
+     deck, firing astern — the answer to being overtaken by anything her oars cannot
+     outrun. They stand either side of the centreline at the gun deck's aft edge,
+     muzzles over the poop and its tent (the ridge tops out below the fighting deck's
+     plane, measured before this was built). Record-driven: sternGuns, a COUNT — the
+     record's sternGunsProvenance carries the bound the unnumbered plural supports. */
+  if (S.sternGuns && S.gunDeck) {
+    const GD = S.gunDeck;
+    const chY = deckY + GD.height + B * 0.007;
+    const len = B * 0.42, r = B * 0.017;
+    const n = Math.max(1, S.sternGuns | 0);
+    for (let j = 0; j < n; j++) {
+      const side = j % 2 ? -1 : 1, rank = Math.floor(j / 2);
+      const z = side * (B * 0.12 + rank * B * 0.11);
+      const g = new THREE.Group();
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.72, r, len, 12), mats.iron);
+      bar.rotation.z = -Math.PI / 2;                   // +Y to +X: muzzle astern
+      g.add(bar);
+      const carr = new THREE.Mesh(new THREE.BoxGeometry(len * 0.48, r * 2.4, r * 3.2), timber);
+      carr.position.set(-len * 0.18, -r * 2.0, 0);
+      g.add(carr);
+      g.position.set((GD.to - 0.5) * L - len * 0.20, chY + r * 3.0, z);
+      g.userData.gun = { style: 'chaser', tip: [len * 0.5, 0, 0] };
+      group.add(tag(g, 'gun', 'Stern chaser',
+        'A chaser at the after end of the fighting deck, laid astern over the poop '
+        + 'tent. The card says "chasers aft" and gives no number; two are drawn, the '
+        + 'least the plural supports.'));
     }
   }
 

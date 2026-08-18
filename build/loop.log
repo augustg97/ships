@@ -5782,3 +5782,18 @@ Live verify passed — the first grep's pattern was wrong, not the deploy (rule 
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 21404 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 11:54:00  round starting
+Live stamp verified: **1787081639**. Round 115 is complete and deployed.
+
+**What this round did:** The queue stands worked in full (r57), so the survey continued at r114's ranking — the sekibune, whose one recorded gap since round 90 was that her forty ro were drawn as Western pulling sweeps, splayed perpendicular, while her own card said "the sculling oar of Japan and Korea both." The record beat the drawing.
+
+- **Opening ratchet was the confirming pass r114 owed:** 58 of 59 clean; the one mover was ship-queen-mary-2 at 0.075% — r114's container-ship deck drop showing at QM2's berth edges, a frame r114 never solo-checked. Diff read, accepted with that reason.
+- **The class fix is record-declared:** `oarStyle: "ro"` on sekibune and panokseon. The builder grew the scull — two limbs scarfed at the pivot pin on the rail, loom rising to a standing man's hands, flat blade limb trailing aft-down with its tip buried — posed by one quaternion, with the plan rake growing toward the narrow end stations under a geometric cap so no loom can cross the centreline (the first spin capture showed exactly that thicket at the bow, and it was fixed by looking again). The animator grew the matching stroke: the blade never leaves the water, yaw with a quarter-phase roll, each oar on its own time.
+- **Measured:** sekibune's fan pulled in from 6.94 m to 5.46 m half-breadth, tips buried to −0.68 m above her −1.29 m keel, aft blades trailing past the transom; panokseon 10.28 → 8.25 m.
+- **Audit:** new round-115 rule — a declared ro must put every blade abaft its pin and in the water — proven by injection on both arms (40/40 and 18/18 convictions), then 33/0 clean.
+- **Ratchet:** the two moved frames accepted with diffs read (oar fans alone, everything else byte-black); controls ship-trireme, ship-galley, action-lepanto at 0.000% prove the sweep class untouched.
+
+**Carried forward:** the yakata should become the solid roofed house the Busan scroll draws (a `tower.walls` field, one round); the hayao rope is undrawn; the fleet-wide loft overhang class shows here too (31.1 m drawn vs 25 recorded); next by the boxy ranking are galleass, galley, panokseon.
+2026-08-18 12:38:21  round finished; HEAD is 2658260 Round 115: the forty ro become the sculls their own card always said they were — oarStyle 'ro' record class, sekibune and panokseon, audit rule proven both arms
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 26583 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 12:48:21  round starting

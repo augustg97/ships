@@ -7224,3 +7224,83 @@ pre-existing. (4) No swivel pieces or bow gun (r90 carried). (5) probe-wake.py h
 galleass carries her own carried gaps (r88: stern chasers, bow fortress). (2) The yakata walls,
 above, with the scroll open. (3) Endurance forecastle break still waits on the RMG original of
 J9266. (4) Azzam crest residual (r108) unchanged.
+
+## Round 116 — 2026-08-18 — the fortress the record always described, round, and the chasers her own card carries
+
+**The opening ratchet was the confirming pass r115 owed: all 59 frames within tolerance,
+exit 0** (build/ratchet-open-r116.log). Round 115 is confirmed fleet-wide.
+
+**THE TASK: the queue stands worked in full (r57), so the survey continued at r115's ranking
+— the galleass, whose two recorded gaps had stood since round 88: no stern chasers ("chasers
+aft" in her own Guns row) and the Lepanto conversions' ROUND bow fortress flattened to a
+galley arrumbada.** Both closed as record fields, r113's discipline: a field the builder
+ignores must convict.
+
+**The class fix, two new record-driven builders in buildGalleyWorks:** (1) `bowFortress
+{from, to, parapetH}` — a rounded fighting deck whose plan is a half-ellipse closing round
+the stem at the rowing frame's own width, deck lofted as a fan, parapet swept segment by
+segment along the curve, and the five-piece battery laid RADIALLY: courser dead ahead at the
+nose, flanker pairs trained out at ±24°/±48°, each muzzle through a dark port straddling the
+parapet — an arc of fire, which is the type's whole argument. The rim's overhang past the
+fine bow rides on raked posts standing on the hull's own deck edge (the head-timbers' law).
+The galley keeps her flat arrumbada — her branch is untouched (`bowGuns && !bowFortress`)
+and proven byte-identical (ship-galley 0.000%). (2) `sternGuns` (count) — chasers at the gun
+deck's aft end either side of the centreline, laid astern over the poop tent; the ridge tops
+out at 5.34 m, the chaser axis rides at 5.5, measured BEFORE building. Form/count bounds
+live in the record: bowFortressProvenance (round form attested — Guilmartin, the Lepanto
+depictions — plan derived, no drawing survives) and sternGunsProvenance (the card's plural
+is unnumbered; TWO drawn, the least the plural supports, rule 10). The card gains "Bow
+fortress, as drawn" and "Chasers, as drawn" rows, both labelled derived.
+
+**Measured (rule 4, build/measure-galleass-r116-{before,after}.txt):** fortress u
+0.020–0.160 exactly the record's from/to, 6.16 m long, half-breadth 4.58 meeting the gun
+deck's own 4.58 (the old rectangle held a constant 4.23 with its corners over open water at
+the stem); fortress posts' feet down at y 2.94 (the deck edge), deck plane 5.18; courser
+muzzle to u 0.014 through the nose parapet; flankers out to z 3.62. Chasers u 0.807–0.883 —
+muzzles 1.0 m past the deck's aft edge at 0.86, tent starting 0.899, clear; axis y to 5.60
+over the ridge's 5.34. Global extents byte-identical to before (54.40 × 37.22 × 27.94) — the
+fortress lives inside the old platform's footprint. LOA residual +7.4 m is the fleet-wide
+stem/stern loft class (r113/r115), untouched.
+
+**Verified (rule 1, twelve spin bearings read post-change + bow/stern crops):** the fortress
+reads as a built round structure — deck on raked posts, curved parapet, muzzles in ports —
+from bow, quarter and low bearings; chasers lie fore-and-aft at the fighting deck's aft end,
+muzzles astern; nothing floats, nothing clips the tent. Rule 0 on ship-galleass: reads as a
+rendered vessel on water; three facts a viewer can name — a round gun fortress stands over
+her stem; her broadside fires over the oar fan from a deck above the rowers; three lateens,
+with the officers' tent under the mizzen.
+
+**The audit learned the class (round-116 rules): a hull declaring sternGuns must draw
+exactly that many chaser groups, each abaft 0.8·LWL and firing ASTERN (tip abaft breech); a
+hull declaring bowFortress must DRAW fortress meshes and lay every bow piece forward-OUT
+through the curve (tip forward of breech, no closer to the centreline). Proven by injection,
+all four arms (build/staging/inj-guns-{flip,strip}.js): flip convicts 'chasers mis-laid'
+2/2 + 'bow battery mis-laid' 5/5; strip convicts 'stern chasers off the record' (2 drawn 0)
++ 'bow fortress declared but not drawn'. Clean run 33/0, twice.**
+
+**Ratchet: opening full pass as above; after the change, check-then-accept: ship-galleass
+0.324% / mean 0.224 — diff read: the bow patch (fortress for platform), the aft-deck patch
+(chasers), and one raked spar at the frame's right edge which is the PANOKSEON'S r115 ro
+oar at the next berth — the ship-galleass baseline predated r115, and r115's close measured
+exactly this as 0.019% sub-tolerance ghosting and left it unaccepted; this accept absorbs
+it, and the reason in FRAME-LOG says so. Checked clean after: action-lepanto,
+ship-panokseon, ship-galley, shipwright-furled, ship-sekibune — all within tolerance, none
+accepted.**
+
+**Deployed: stamp 1787084915.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The fortress underside is open truss — the
+posts are the honest minimum; a planked soffit is a form guess the depictions do not settle.
+(2) Galleass drawn LOA 54.4 vs record 47 — the stem/stern loft overhang class, fleet-wide,
+pre-existing (r113/r115). (3) The Action's Lepanto galleasses did not move at fleet scale
+(within tolerance) — if the Action ever draws them nearer, the fortress arrives free. (4)
+probe-wake.py heading mirror (r114) untouched. (5) Endurance forecastle break still waits on
+the RMG original of J9266. (6) Azzam crest residual (r108) unchanged.
+
+**Next:** (1) The survey continues — by the r113 boxy ranking the galley (68%) and panokseon
+(67%) follow; both have ring coverage (r91) and the galley's arrumbada is now the last flat
+bow platform, correct for her type. Consider instead the sekibune's yakata walls (r115
+carried 2) with the Busan scroll open. (2) The r115 hayao (ro lanyard) and sekibune swivel
+pieces (r90) stand. (3) The opening check next round confirms the 53 frames not re-checked
+at this close — expected 0.000% everywhere except possibly ship-slave-ship-class neighbours
+of the galleass berth; if anything moved, this round owns it.

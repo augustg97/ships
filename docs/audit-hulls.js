@@ -342,6 +342,50 @@ bad++; if (!first) first = `tip at ${tip.y.toFixed(2)} m over water (draught ${H
 if (!nRo) say(v.id, 'ro declared but no oars drawn', 'oarStyle ro with no oar groups');
 else if (bad) say(v.id, 'ro drawn as sweeps', `${bad} of ${nRo} oars fail the scull test — ${first}`);
 }
+if (H.sternGuns) {
+let nCh = 0, bad = 0, first = '';
+const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+g.updateMatrixWorld(true);
+g.traverse(o => {
+const d = o.userData && o.userData.gun;
+if (!d || d.style !== 'chaser') return;
+nCh++;
+tip.set(d.tip[0], d.tip[1], d.tip[2]).applyMatrix4(o.matrixWorld);
+o.getWorldPosition(pin);
+if (pin.x < (0.80 - 0.5) * H.lwl) {
+bad++; if (!first) first = `chaser amidships (x ${pin.x.toFixed(1)} m)`;
+} else if (tip.x < pin.x + 0.5) {
+bad++; if (!first) first = `chaser fires forward (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+}
+});
+if (nCh !== H.sternGuns)
+say(v.id, 'stern chasers off the record', `record says ${H.sternGuns}, drawn ${nCh}`);
+else if (bad) say(v.id, 'chasers mis-laid', `${bad} of ${nCh} — ${first}`);
+}
+if (H.bowFortress) {
+let fortDrawn = false, nBow = 0, bad = 0, first = '';
+const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+g.updateMatrixWorld(true);
+g.traverse(o => {
+const p = tagOf(o);
+if (o.isMesh && p && p.key === 'fortress') fortDrawn = true;
+const d = o.userData && o.userData.gun;
+if (!d || d.style !== 'fortress') return;
+nBow++;
+tip.set(d.tip[0], d.tip[1], d.tip[2]).applyMatrix4(o.matrixWorld);
+o.getWorldPosition(pin);
+if (tip.x > pin.x - 0.3) {
+bad++; if (!first) first = `bow piece not firing ahead (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+} else if (Math.abs(tip.z) < Math.abs(pin.z) - 0.15) {
+bad++; if (!first) first = 'bow piece crossing inboard of its breech';
+}
+});
+if (!fortDrawn)
+say(v.id, 'bow fortress declared but not drawn', 'bowFortress with no fortress meshes');
+else if (H.bowGuns && nBow !== H.bowGuns)
+say(v.id, 'bow battery off the record', `record says ${H.bowGuns}, drawn on the fortress ${nBow}`);
+else if (bad) say(v.id, 'bow battery mis-laid', `${bad} of ${nBow} — ${first}`);
+}
 if (H.iron && !H.year)
 say(v.id, 'no dress era', 'iron hull without year — shader falls back to Victorian dress');
 if (H.iron && H.year >= 1950 && H.cove)
