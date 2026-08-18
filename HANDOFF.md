@@ -6605,3 +6605,8 @@ sources are proper: Titanic (pine weather decks, teak where attested), Yamato (h
 QM2 (her deckSteel guess should become data or stay a labelled fallback). (3) The Sea
 close-up wake due-diligence pass (r102), still queued. (4) Endurance forecastle break
 still waits on the RMG original of J9266.
+
+**Post-commit correction, same round:** the 176 MB build/r107-before-frames snapshot was
+committed by an over-broad `git add -A` and untracked again one commit later, with the class
+rule in .gitignore (`build/*-frames/`). The blobs remain in history — the cost of the mistake;
+the rule prevents the recurrence.
