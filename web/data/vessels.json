@@ -3177,7 +3177,11 @@
     "mastTopM": 62.5,
     "buff": "#c9a267",
     "funnelRake": 9.46,
-    "deckM": 2.96
+    "deckM": 2.96,
+    "deck": {
+     "covering": "pine",
+     "provenance": "RECORDED: the Olympic-class record as the archive compilations carry it (GG Archives; Titanic Connections; both citing The Shipbuilder's 1911 Olympic and Titanic special number) - yellow pine laid on the exposed decks, including the boat deck; pitch pine on the forecastle, poop and well decks; teak only as margin and trim around houses and fittings. Planks 5 in wide by 3 in thick - 127 x 76 mm. The pitch-pine ends and the teak margins are finer distinctions than this one-covering model draws."
+    }
    }
   },
   {
@@ -4052,7 +4056,11 @@
     ],
     "year": 1941,
     "bottom": "#5c2019",
-    "deckM": 4.08
+    "deckM": 4.08,
+    "deck": {
+     "covering": "hinoki",
+     "provenance": "RECORDED, species CONTESTED: Skulski (Anatomy of the Ship - The Battleship Yamato) gives hinoki, Japanese cypress, planks 127 x 76 mm; the Yamato Museum, Kure, states the ship's deck timber was Taiwanese cypress. Neighbouring cypresses of the same pale colour class, so the drawn tone stands either way. Plank width 127 mm from Skulski; butt length is a class default."
+    }
    }
   },
   {
@@ -5308,7 +5316,6 @@
     "bridgeHalf": 0.4,
     "housePlateProvenance": "MEASURED off the scale profile (Wikimedia Commons, File:En mary titanic.svg, Yzmo, CC BY-SA 3.0) by segmenting her silhouette and reading, at every metre of height above the load waterline, the most-forward and most-aft column still standing at that height. houseAt, houseCrest, tierForeU, tierAftU, the funnel station and its 24.3 m fore-and-aft length, and the mast at u 0.19 are all that measurement. Three earlier attempts were judged by eye off a 34-degree lens that magnifies the near half of a 345 m ship by a third.",
     "bridgeBeamM": 45.0,
-    "deckSteel": true,
     "topWorks": [
      {
       "u0": 0.218,
@@ -5361,7 +5368,11 @@
      }
     ],
     "topWorksProvenance": "MEASURED from the same scale profile as houseAt/houseCrest (Commons, File:En mary titanic.svg, Yzmo, CC BY-SA 3.0): the runs of her silhouette standing above the 46.5 m top-deck line, each with its u-span and its peak height over the water. Heights here are above the crest roof.",
-    "mastStep": "house"
+    "mastStep": "house",
+    "deck": {
+     "covering": "teak",
+     "provenance": "RECORDED for the promenade, EXTENDED above: Cunard's own copy and the Cunard historian Chris Frame carry the wrap-around Promenade Deck, deck 7, as laid teak, nearly 600 m to the lap - and deck 7 is this hull's sheer, so the model's weather deck IS the attested surface. The house tier decks above draw the same covering; photographs of her terraced stern show laid decking there, but no builder's figure attests it. The working foredeck's painted steel is a distinction this one-covering model does not draw. Replaces the deckSteel guess."
+    }
    },
    "rows": [
     [

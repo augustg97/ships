@@ -6688,3 +6688,76 @@ still waits on the RMG original of J9266. (4) Azzam residual worth one look: the
 front and tier walls are correct white, but the crest's radome pedestals and cluster base
 plates sit on teak now — check the real ship's mast deck covering if a better plate ever
 arrives.
+
+## Round 109 — 2026-08-18 — the record says what the decks are made of, and three ships stop guessing
+
+**The opening ratchet confirmed round 108 — 56/56 within tolerance** (45+ at 0.000%,
+board-salamis 0.009%, nothing near a limit), captured clean BEFORE any edit landed this
+time.
+
+**THE TASK WAS r108'S FIRST QUEUE ITEM: record the attested deck coverings for Titanic,
+Yamato and Queen Mary 2, and let their house decks relight through the r108 gate.** No
+code path changed — the round is three `hull.deck` records, one registry entry, and the
+audit's vocabulary catching up. The sources, found and read this round:
+
+- **Titanic: PINE, not the teak the hull.js comment claimed.** The Olympic-class record
+  (GG Archives and Titanic Connections, both citing The Shipbuilder's 1911 special
+  number): yellow pine laid on the exposed decks including the boat deck; pitch pine on
+  the forecastle, poop and well decks; teak only as margin and trim around houses and
+  fittings; planks 5 in by 3 in — 127 × 76 mm. The comment at the deckMat ("Titanic's
+  teak") was the familiar class of plausible-and-wrong; corrected.
+- **Yamato: HINOKI, and the species is CONTESTED, so the record says so.** Skulski
+  (Anatomy of the Ship) gives hinoki at 127 × 76 mm; the Yamato Museum in Kure states
+  the actual deck timber was Taiwanese cypress. Neighbouring cypresses, same pale
+  colour class — the drawn tone stands either way, and the provenance carries the
+  disagreement per rule 9.
+- **QM2: TEAK, recorded for the promenade and extended above.** Cunard's own copy and
+  Chris Frame carry the wrap-around Promenade Deck (deck 7) as laid teak — and deck 7
+  is this hull's sheer, so the model's weather deck IS the attested surface. Her
+  terraced stern shows laid decking in photographs but no builder's figure attests it;
+  the provenance says which is which. The foredeck's painted steel is a distinction the
+  one-covering model does not draw, and the record admits that too. `deckSteel: true`
+  deleted — a dead flag contradicting a record is the comment-vs-arithmetic fault in
+  data form.
+
+**Registry: `pine` added (0xc0ad84, 127 mm), `hinoki` width corrected 0.20 → 0.127 m
+(Skulski).** The registry comment no longer claims all plank dimensions are class
+defaults, because two now are not. The audit mirrored the same vocabulary in two rules
+(the unknown-covering guard and the r108 treads/roofs rule) — both got `pine`; first
+audit run rightly convicted titanic's record as a word the model could not draw, which
+is that guard doing its job.
+
+**Enumerated before and after (build/deck-flip-r109-{before,after}.json): exactly three
+hulls changed** — titanic wood/inferred → pine/recorded, yamato wood/inferred →
+hinoki/recorded, queen-mary-2 steel/inferred → teak/recorded; thirty others
+byte-identical.
+
+**Measured (rule 4, build/deck-tone-r109.json):** Yamato foredeck (148,128,96) →
+(165,149,115) — lighter and warmer, the pale scrubbed cypress of the photographs.
+Titanic forecastle (137,123,96) → (146,130,97). QM2 house tier roof (209,212,214) →
+(153,143,127) and upper tier (225,226,225) → (170,158,140) — the r102
+two-lighting-models fault leaves her last plate roofs. Controls (turret top, funnel
+buff, funnel red, hull sides) pixel-identical.
+
+**Verified (rule 1, frames read):** ship-titanic (pine at forecastle, well decks, poop
+and along the boat deck, boats sitting on planking), ship-yamato (the full-length
+weather deck in hinoki straw), ship-queen-mary-2 (every terrace and sun-deck top teak —
+against her own card photograph of the terraced stern), both aboard diffs deck-only.
+Rule 0 held on all three: each reads as a rendered vessel on water; a viewer can name
+the coverings, the funnels, the hull liveries off the frames.
+
+**Ratchet: the closing check moved exactly FIVE frames of 56 — the three ships'
+shipwright frames (0.61–0.73%) and their two sea views (0.22%, 0.24%) — every diff read
+before accepting (deck surfaces only; hulls, sea, panels black), all five accepted with
+the class reason in FRAME-LOG.** The gate held everywhere else: globe-*, map-floor,
+shipwright-*, ship-azzam all 0.000–0.045%. Audit 33/0 clean. Built at stamp 1787053787.
+Confirming pass is next round's opening check, per the standing pattern.
+
+**Next:** (1) The remaining unrecorded superstructure ships: great-eastern and steamer
+keep white plate roofs — Great Eastern's deck covering is researchable (Brunel's
+records; her deck was planked) and would flip her roofs through the same gate; the
+generic steamer may have no record to find, which rule 10 accepts as a labelled
+fallback. (2) The Sea close-up wake due-diligence pass (r102), still queued. (3)
+Endurance forecastle break still waits on the RMG original of J9266. (4) Azzam crest
+residual (r108): radome pedestals and cluster base plates sit on teak; check the real
+mast deck covering if a better plate arrives.

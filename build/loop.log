@@ -5650,3 +5650,24 @@ Round 107 is complete and live. Summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 74905 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 03:08:34  round starting
+Round 108 is complete and live at stamp 1787049517, HEAD `1e9c1c4`, tree clean.
+
+**August's second list is closed (since round 57), so this round took round 107's first residual — the three Azzam covering leftovers — and one of the three turned out not to be a fault.**
+
+**What happened:**
+
+1. **The "dark lowest terrace" is not a fault.** Rays cast down at six stations from u 0.90 to u 0.994 strike the deck loft in recorded teak (uCol 8a7250) first, every time — the transom-most floor has been teak since round 106. What read dark in the far capture is the parapet band and the counter top at glancing angle, both correct surfaces. Closed by measurement, nothing changed.
+
+2. **The terrace stair treads take the recorded covering.** White steel flights between two teak floors disagreed with both floors they join; the 40 tread meshes now draw the covering's timber in the shell's own light, gated to a recorded laid covering so unrecorded ships stay byte-identical.
+
+3. **The walkable house tier roofs are decks now.** The white paving-stone cascade over teak terraces — railed as promenades, yet plain MeshStandard plates — takes DECK_FRAG with the covering's uniforms. Two traps closed on the way: ShapeGeometry's rotateX leaves down-facing normals that a one-sun shader lights as sea-floor (winding flipped, up declared), and the roofs are tagged `superstructure`, not `deck` — the waterway audit rule measures against `part.deck`'s crown and convicted the first attempt at 22.5 m.
+
+**The proof chain:** the gate enumerated over 33 hulls passes exactly one vessel (azzam); measured tone flip cascade-roof (224,224,222)→(203,197,188) with the terrace-floor control pixel-identical; audit gained two clauses, each injection-proven 1/1, clean sweep 33/0; the closing ratchet moved exactly one frame of 56 (ship-azzam, 0.219%), diff read before accepting — roofs, crest plates, stair triangles only — re-check 0.000%.
+
+**One mistake, recorded in the handoff:** my first edit landed while the opening confirming pass was still rendering, so ship-azzam's opening diff photographed the new code — the round-106 contamination repeated. The closing check owned that frame properly; the other 55 opening frames were clean and confirm round 107's accepts.
+
+**Next round's queue, left in HANDOFF.md:** record the attested coverings (Titanic pine/teak, Yamato hinoki, QM2's deckSteel guess) and relight their house roofs through the same gate — the fleet flip done as records, not inference; then the r102 wake pass; Endurance still waits on the RMG plate.
+2026-08-18 04:11:44  round finished; HEAD is 1e9c1c4 Round 108: the surfaces you stand on take the covering
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 81375 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 04:21:44  round starting

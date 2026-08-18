@@ -1,0 +1,170 @@
+{
+ "ship-yamato: foredeck (wood fallback -> hinoki)": {
+  "before": [
+   148,
+   128,
+   96
+  ],
+  "after": [
+   165,
+   149,
+   115
+  ]
+ },
+ "ship-yamato: amidships deck (wood -> hinoki)": {
+  "before": [
+   66,
+   70,
+   74
+  ],
+  "after": [
+   67,
+   72,
+   75
+  ]
+ },
+ "ship-yamato: aft deck (wood -> hinoki)": {
+  "before": [
+   152,
+   135,
+   106
+  ],
+  "after": [
+   169,
+   155,
+   124
+  ]
+ },
+ "ship-yamato: turret top (control)": {
+  "before": [
+   124,
+   128,
+   131
+  ],
+  "after": [
+   124,
+   128,
+   131
+  ]
+ },
+ "ship-yamato: hull side (control)": {
+  "before": [
+   47,
+   50,
+   54
+  ],
+  "after": [
+   47,
+   50,
+   54
+  ]
+ },
+ "ship-titanic: boat deck / house roof (white -> pine)": {
+  "before": [
+   207,
+   208,
+   207
+  ],
+  "after": [
+   202,
+   202,
+   197
+  ]
+ },
+ "ship-titanic: forecastle deck (wood -> pine)": {
+  "before": [
+   137,
+   123,
+   96
+  ],
+  "after": [
+   146,
+   130,
+   97
+  ]
+ },
+ "ship-titanic: poop deck (wood -> pine)": {
+  "before": [
+   43,
+   44,
+   44
+  ],
+  "after": [
+   45,
+   46,
+   46
+  ]
+ },
+ "ship-titanic: funnel buff (control)": {
+  "before": [
+   201,
+   173,
+   116
+  ],
+  "after": [
+   201,
+   173,
+   116
+  ]
+ },
+ "ship-titanic: hull side (control)": {
+  "before": [
+   16,
+   16,
+   17
+  ],
+  "after": [
+   16,
+   16,
+   17
+  ]
+ },
+ "ship-queen-mary-2: house tier roof (white plate -> teak)": {
+  "before": [
+   209,
+   212,
+   214
+  ],
+  "after": [
+   153,
+   143,
+   127
+  ]
+ },
+ "ship-queen-mary-2: upper tier roof aft (white -> teak)": {
+  "before": [
+   225,
+   226,
+   225
+  ],
+  "after": [
+   170,
+   158,
+   140
+  ]
+ },
+ "ship-queen-mary-2: hull side (control)": {
+  "before": [
+   100,
+   102,
+   103
+  ],
+  "after": [
+   99,
+   101,
+   102
+  ]
+ },
+ "ship-queen-mary-2: funnel red (control)": {
+  "before": [
+   139,
+   5,
+   30
+  ],
+  "after": [
+   139,
+   5,
+   30
+  ]
+ }
+}

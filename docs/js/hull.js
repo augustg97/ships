@@ -387,8 +387,10 @@ return g;
 const DECK_COVERINGS = {
 teak:   { mode: 1, col: 0x8a7250, plankW: 0.09, buttL: 2.4,
 name: 'Weather deck — laid teak' },
-hinoki: { mode: 1, col: 0xb3a17c, plankW: 0.20, buttL: 7.0,
+hinoki: { mode: 1, col: 0xb3a17c, plankW: 0.127, buttL: 7.0,
 name: 'Weather deck — laid hinoki' },
+pine:   { mode: 1, col: 0xc0ad84, plankW: 0.127, buttL: 6.5,
+name: 'Weather deck — laid pine' },
 wood:   { mode: 1, col: 0xa08a66, plankW: 0.15, buttL: 6.5,
 name: 'Weather deck — laid planking' },
 steel:  { mode: 2, col: 0x494e54, plankW: 0, buttL: 1,

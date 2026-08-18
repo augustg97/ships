@@ -666,13 +666,18 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
    carries it, says 2,200 m² of laid teak. So the record may now state the covering itself:
    `hull.deck = { covering, provenance }`, drawn from this registry. The old deckSteel /
    deckLaid heuristic remains ONLY as the fallback, and the part card names which one
-   answered (rule 10: a fallback is labelled as one). Plank dimensions are CLASS defaults —
-   no plate of any ship here can resolve a 90 mm strake — and the card says that too. */
+   answered (rule 10: a fallback is labelled as one). Plank dimensions are CLASS defaults
+   except where the record attests one — hinoki and pine carry 127 mm because their one
+   ship each has that width on record (Skulski's Yamato: 127 × 76 mm; the Olympic-class
+   record: 5 in × 3 in) — and either way a plank sits below what any plate here can
+   resolve; the card says which kind of number it got. */
 const DECK_COVERINGS = {
   teak:   { mode: 1, col: 0x8a7250, plankW: 0.09, buttL: 2.4,
             name: 'Weather deck — laid teak' },
-  hinoki: { mode: 1, col: 0xb3a17c, plankW: 0.20, buttL: 7.0,
+  hinoki: { mode: 1, col: 0xb3a17c, plankW: 0.127, buttL: 7.0,
             name: 'Weather deck — laid hinoki' },
+  pine:   { mode: 1, col: 0xc0ad84, plankW: 0.127, buttL: 6.5,
+            name: 'Weather deck — laid pine' },
   wood:   { mode: 1, col: 0xa08a66, plankW: 0.15, buttL: 6.5,
             name: 'Weather deck — laid planking' },
   steel:  { mode: 2, col: 0x494e54, plankW: 0, buttL: 1,
@@ -8329,7 +8334,7 @@ function buildShip(S, opts) {
   group.add(tag(hull, 'planking'));
 
   /* the weather deck keys off what the DECK was, not what the hull was: liners and
-     battleships stayed planked to the end — Titanic's teak, Yamato's hinoki — but a flight
+     battleships stayed planked to the end — Titanic's pine, Yamato's hinoki — but a flight
      deck and a container ship's weather deck are bare steel. ⚠ And the covering is a fact
      of the SHIP, not of two cargo types: the round-35 winding fix lit the decks properly
      for the first time and exposed a planked timber deck on the 2026 composite USV, which

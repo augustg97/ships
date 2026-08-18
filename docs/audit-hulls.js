@@ -15,10 +15,10 @@ say(v.id, 'floor attests steam but claims muscle',
 if (!v.hull) continue;
 const H = v.hull;
 if (H.deck) {
-if (!/^(teak|hinoki|wood|steel|bare)$/.test(H.deck.covering || ''))
+if (!/^(teak|hinoki|pine|wood|steel|bare)$/.test(H.deck.covering || ''))
 say(v.id, 'deck covering unknown to the model',
 `hull.deck.covering = ${JSON.stringify(H.deck.covering)}; the registry `
-+ 'draws teak/hinoki/wood/steel/bare, and an unknown word falls back to '
++ 'draws teak/hinoki/pine/wood/steel/bare, and an unknown word falls back to '
 + 'the heuristic silently');
 else if (!(H.deck.provenance && H.deck.provenance.length > 20))
 say(v.id, 'deck covering with no provenance',
@@ -1339,8 +1339,9 @@ say(v.id, 'winding contradicts declared normals',
 keys.map(k => `${bad[k]} ${k} mesh(es)`).join(', ') +
 ' — double-sided lighting flips these the wrong way');
 }
-if (H.deck && /^(teak|hinoki|wood)$/.test(H.deck.covering || '')) {
-const covCol = { teak: '8a7250', hinoki: 'b3a17c', wood: 'a08a66' }[H.deck.covering];
+if (H.deck && /^(teak|hinoki|pine|wood)$/.test(H.deck.covering || '')) {
+const covCol = { teak: '8a7250', hinoki: 'b3a17c', pine: 'c0ad84',
+wood: 'a08a66' }[H.deck.covering];
 let badTreads = 0, coveredRoof = false;
 g.traverse(o => {
 if (!o.isMesh || !o.material) return;
