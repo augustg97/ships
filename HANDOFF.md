@@ -6610,3 +6610,81 @@ still waits on the RMG original of J9266.
 committed by an over-broad `git add -A` and untracked again one commit later, with the class
 rule in .gitignore (`build/*-frames/`). The blobs remain in history — the cost of the mistake;
 the rule prevents the recurrence.
+
+## Round 108 — 2026-08-18 — the surfaces you stand on take the covering
+
+**The opening ratchet confirmed round 107 for 55 of 56 frames** (45 at 0.000%, the rest
+within limits). The 56th, ship-azzam, moved 0.219% — but that number is contaminated:
+this round's first edit landed while the opening check was still rendering, so the frame
+photographed the new code. The r106 mistake repeated; the closing check owned the frame
+properly. Every other frame was captured clean and confirms r107's 39 accepts.
+
+**THE TASK WAS r107'S FIRST RESIDUAL — the three Azzam covering leftovers — and one of
+the three turned out not to be a fault.**
+
+**1. The "dark lowest terrace" is the deck loft in teak, proven by ray, not by eye.** Rays
+down at u 0.90/0.94/0.955/0.97/0.985/0.994 (z 0 and 5) strike a 'deck'-tagged
+ShaderMaterial with uCol 8a7250 first, every station — the transom-most floor IS the
+weather-deck loft and has been teak since r106. What read dark in the far capture is the
+parapet band and the counter top at glancing angle, both correct surfaces. Classified NOT
+A FAULT; nothing changed.
+
+**2. The terrace stair treads take deckCovering()'s one judgement.** White steel flights
+between two teak floors disagreed with both floors they join; the treads now draw the
+covering's timber in STEEL_FRAG (plank seams on a 28 cm tread are below anything a plate
+resolves, and DECK_FRAG's own LOD would fade them to the mean tone anyway). Gated to a
+RECORDED laid covering — unrecorded ships keep the byte-identical topside white.
+
+**3. The walkable house tier roofs are decks, and now draw as decks.** Every exposed tier
+roof is railed as a promenade yet stayed a 0xe4e2dc MeshStandard plate beside a teak
+weather deck — the white paving-stone cascade over teak terraces, and the last
+scene-lit-through-ACES surfaces in her envelope (the r102 two-lighting-models fault).
+roofPlate now takes DECK_FRAG (shared uSun/uCam, the covering's own uniforms) when the
+covering is recorded and laid. Two traps closed on the way: (a) ShapeGeometry+rotateX(+90°)
+declares DOWN normals and DECK_FRAG lights by the declared normal (the round-34 lesson) —
+the covering path flips the winding and declares up; (b) the roofs are tagged
+'superstructure', NOT 'deck' — part.deck is the WEATHER deck to every audit rule that
+measures against it, and the first injection run convicted 'a waterway adrift of its deck'
+at a 22.5 m crown before the retag. Their card reads "House deck — laid teak".
+
+**STAGED exactly as r106:** the gate (recorded AND laid) enumerated over all 33 hulls —
+exactly one vessel passes (azzam). The other four superstructure ships (great-eastern,
+titanic, steamer, queen-mary-2) keep the identical plateMat path. The fleet flip is NOT
+queued as a mechanical follow-on this time: a liner's boat deck being planked is a fact to
+RECORD per ship first — it belongs to r107-next item 2 (Titanic pine/teak, Yamato hinoki,
+QM2's teak promenades vs her deckSteel guess), record and relight together.
+
+**Measured (rule 4, build/house-roof-tone-r108.json), same boxes both sides:** cascade
+roof (224,224,222)→(203,197,188), crest deck (165,178,184)→(117,119,108) — warm, red over
+blue, the flip the round was for. Controls: terrace floor pixel-identical, tier aft wall
+within 2 counts (edge AA).
+
+**Audit: one new rule, two clauses, both injection-proven, clean sweep 33/0.** 'stair
+treads ignore the recorded covering' (inject-tread-white.js: fires 1/1) and 'house roofs
+ignore the recorded covering' (inject-roof-plate.js: fires 1/1). Checked on the built
+graph because the fault is a material assignment the record cannot show.
+
+**Verified (rule 1):** astern low (terraces, glazing band, flights now in the field),
+stern quarter wide (the whole cascade teak, white walls, one coherent yacht), cascade
+close-crop (teak roofs, white risers, rails standing against the field), astern-above
+crest (teak around the cluster). Rule 0 on the quarter frame: reads as a rendered vessel
+on real water; three facts a viewer can name — her decks, roofs and terraces are laid
+teak; the house is white with continuous tinted glazing bands; the stern descends in
+railed terraces with twin stairs closing each break, over an oxide-red bottom.
+
+**Ratchet: closing check moved exactly ONE frame of 56 — ship-azzam 0.219% / mean |Δ|
+0.227 — diff read before accepting (tier roofs, crest plates, stair-flight triangles;
+hull, terraces, sea black), accepted with the class reason in FRAME-LOG, re-check
+0.000%.** The staged gate held fleet-wide: shipwright-furled, map-floor, globe-* all
+0.000% this time because this round's builders are FINE-gated and no other vessel passes
+the gate. Built at stamp 1787049517.
+
+**Next:** (1) r107 item 2, now upgraded: RECORD the attested coverings — Titanic (pine
+weather decks, teak where attested), Yamato (hinoki), QM2 (deckSteel:true should become
+data or stay a labelled fallback) — and their house roofs relight with the same records
+through the r108 gate; that is the round-sized fleet flip done the honest way. (2) The Sea
+close-up wake due-diligence pass (r102), still queued. (3) Endurance forecastle break
+still waits on the RMG original of J9266. (4) Azzam residual worth one look: the ramp
+front and tier walls are correct white, but the crest's radome pedestals and cluster base
+plates sit on teak now — check the real ship's mast deck covering if a better plate ever
+arrives.

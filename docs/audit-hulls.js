@@ -1339,6 +1339,30 @@ say(v.id, 'winding contradicts declared normals',
 keys.map(k => `${bad[k]} ${k} mesh(es)`).join(', ') +
 ' — double-sided lighting flips these the wrong way');
 }
+if (H.deck && /^(teak|hinoki|wood)$/.test(H.deck.covering || '')) {
+const covCol = { teak: '8a7250', hinoki: 'b3a17c', wood: 'a08a66' }[H.deck.covering];
+let badTreads = 0, coveredRoof = false;
+g.traverse(o => {
+if (!o.isMesh || !o.material) return;
+const p = tagOf(o);
+if (p && p.key === 'stair') {
+const c = o.material.uniforms && o.material.uniforms.uCol
+? o.material.uniforms.uCol.value.getHexString()
+: (o.material.color ? o.material.color.getHexString() : '');
+if (c !== covCol) badTreads++;
+}
+if (p && p.key === 'superstructure' && o.material.isShaderMaterial
+&& o.material.uniforms && o.material.uniforms.uPlankW
+&& o.geometry && o.geometry.type === 'ShapeGeometry') coveredRoof = true;
+});
+if (badTreads)
+say(v.id, 'stair treads ignore the recorded covering',
+`${badTreads} tread mesh(es) not in ${H.deck.covering} on a ship whose record lays it`);
+if (H.decks && !H.flightDeck && !H.turrets && H.houseAt && !coveredRoof)
+say(v.id, 'house roofs ignore the recorded covering',
+'a recorded laid covering, a walkable tier roof cascade, and no roof plate '
++ 'draws in the deck shader');
+}
 {
 const P = v.polar || {};
 const anch = P.anchor;

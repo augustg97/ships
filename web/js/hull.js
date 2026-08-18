@@ -772,6 +772,14 @@ function buildSternTerraces(S, group, hullMat) {
                 uCol: { value: new THREE.Color(hex) } } });
   const white = steel(S.topside || '#e4e2dc');
   const capMat = steel('#4a5057');
+  /* the stair flights are deck furniture between two floors of the SAME covering, so they
+     take deckCovering()'s one judgement: a yacht treads her flights in the deck's own laid
+     timber, and white steel steps between two teak terraces disagree with both floors they
+     join. Gated to a RECORDED laid covering — an inferred one keeps the topside white the
+     fleet has always drawn, byte-identical. Plank seams on a 28 cm tread are below anything
+     a plate can resolve, so the tread is the covering's plain timber in the shell's light. */
+  const cover = deckCovering(S);
+  const tread = cover.recorded && cover.mode === 1 ? steel(cover.col) : white;
   /* the glass follows the HOUSE's glazing system — the wallLoft recipe and the tierBands
      'glass' lo/hi — because a terrace door matches the windows above it, not the paint */
   const glassMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.60,
@@ -894,11 +902,16 @@ function buildSternTerraces(S, group, hullMat) {
           const flight = new THREE.Group();
           for (let j = 0; j < n; j++) {          // j = 0 the top tread, at the riser
             const hgt = (yt - j * rise) - yb;
-            const step = new THREE.Mesh(new THREE.BoxGeometry(treadD, hgt, 1.3), white);
+            const step = new THREE.Mesh(new THREE.BoxGeometry(treadD, hgt, 1.3), tread);
             step.position.set(eA[0] + 0.02 + (j + 0.5) * treadD, yb + hgt / 2, zs);
             flight.add(step);
           }
-          g.add(tag(flight, 'stair'));
+          g.add(tag(flight, 'stair', 'Terrace stair',
+            cover.recorded && cover.mode === 1
+              ? 'Twin flights closing each terrace break, trodden in the deck’s own '
+                + 'recorded covering — a yacht’s flights match the floors they join. '
+                + 'Tread and rise are the builder’s convention; no plate resolves them.'
+              : undefined));
         }
       }
     }
@@ -4129,7 +4142,7 @@ function linerHouse(S) {
            recorded: !!(S.houseAt && S.houseAt.length === 2) };
 }
 
-function buildSuperstructure(S, group) {
+function buildSuperstructure(S, group, hullMat) {
   const n = S.decks || 0;
   if (!n) return;
   const H = hullSurface(S);
@@ -4137,6 +4150,25 @@ function buildSuperstructure(S, group) {
   const white = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
   const g = new THREE.Group();
   const T = linerHouse(S);
+  /* ── A TIER ROOF YOU CAN STAND ON IS A DECK, AND A DECK HAS A COVERING (round 108) ────
+     Every exposed tier roof here is a walkable deck — the promenades are railed as such —
+     yet they stayed 0xe4e2dc MeshStandard plates while the weather deck below took the
+     recorded covering: Azzam read white paving stones over teak terraces, and her builder's
+     2,200 m² of laid teak is far more area than her weather deck alone can carry. So the
+     roofs ask deckCovering()'s one judgement too. STAGED like r106: only a RECORDED laid
+     covering flips (azzam alone qualifies today) — the 32 fallback ships keep the byte-
+     identical plateMat, because a fleet-wide house relight is its own round's ratchet
+     budget, and a liner's boat deck being planked is a fact to RECORD first, not infer. */
+  const cover = deckCovering(S);
+  const roofDeckMat = (hullMat && cover.recorded && cover.mode === 1)
+    ? new THREE.ShaderMaterial({
+        vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+        uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                    uCol:    { value: new THREE.Color(cover.col) },
+                    uMode:   { value: cover.mode },
+                    uPlankW: { value: cover.plankW || 1 },
+                    uButtL:  { value: cover.buttL || 1 } } })
+    : null;
   const paneW = B * 0.075;                            // a light is about this wide, always
   const face = new THREE.Color(0xe4e2dc);
   /* ⚠ A liner's windows are not black. They are a strake of small lights in a white wall,
@@ -4348,6 +4380,21 @@ function buildSuperstructure(S, group) {
     const gg = new THREE.ShapeGeometry(sh);
     gg.rotateX(Math.PI / 2);
     gg.translate(0, y, 0);
+    if (roofDeckMat) {
+      /* DECK_FRAG lights by the DECLARED normal (the round-34 lesson), and rotateX(+90°)
+         leaves ShapeGeometry's normals facing DOWN — plateMat's DoubleSide flip forgave
+         that, a one-sun shader does not. Wind the top as the front face and declare up. */
+      const ix = gg.getIndex().array;
+      for (let k = 0; k + 2 < ix.length; k += 3) {
+        const t2 = ix[k + 1]; ix[k + 1] = ix[k + 2]; ix[k + 2] = t2;
+      }
+      const na = gg.getAttribute('normal');
+      for (let k = 0; k < na.count; k++) na.setXYZ(k, 0, 1, 0);
+      /* tagged superstructure, NOT 'deck': part.deck is the WEATHER deck to every audit
+         rule that measures against it (the waterway rides ITS crown, not the boat deck's) */
+      return tag(new THREE.Mesh(gg, roofDeckMat), 'superstructure',
+                 cover.name.replace('Weather deck', 'House deck'), cover.what);
+    }
     return new THREE.Mesh(gg, plateMat);
   };
 
@@ -8346,7 +8393,7 @@ function buildShip(S, opts) {
   /* ⚠ AND A BATTLESHIP HAS NO DECKHOUSE EITHER — the same class of fault as the carrier's:
      the liner builder gave Yamato four white window-banded passenger tiers over 80% of her
      length, and the main battery was buried inside them. A turreted ship gets the citadel. */
-  if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
+  if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
   if (FINE && S.cluster) buildCluster(S, group);
   if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
   if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);

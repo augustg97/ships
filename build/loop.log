@@ -5634,3 +5634,19 @@ Round 106 is complete and live. Summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 68692 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 01:49:15  round starting
+Round 107 is complete and live. Summary:
+
+**The task was r106's declared remainder: the fleet flip onto DECK_FRAG.** The staged gate in `buildShip`'s deckMat is deleted — every weather deck in the fleet now draws in the shell's own one-sun recipe, so no deck is lit by a different sun than the hull it caps. The 32 fallback ships resolve exactly as before (proven by node enumeration before and after: 25 wood, 5 steel, 2 bare, byte-identical).
+
+**What shipped:**
+- **The two never-rendered modes got the moiré rule before the fleet took them.** Steel's 3 cm grit and bare timber's 17 cm tool-mark noise were sub-pixel at fleet range with no LOD fade — the exact class r106 caught on the plank seams. The metres-per-pixel term is hoisted in DECK_FRAG and both terms fade to their means as their footprint collapses.
+- **The seam closed, measured:** the USV's steel deck went (87,97,107) → (63,70,76) — before, it floated ~25 points brighter than the shell beside it, the two-lighting-models fault r102 first measured; now it sits with the hull. The 74's planking stays warm at (214,207,192).
+- **Verified at every range:** planks resolve fore-and-aft close-in on the 74; flush welded plate on the USV; the dugout's rim in the hull's light; battle fleets from above show uniform warm fields with no moiré; the globe diff is ship-shaped specks only; a plan-on ship in map-floor shows planks parallel to the centreline. Controls behaved — ship-azzam moved 0.000%, descent frames 0.000%, the carrier 0.001% (deck hidden under the flight deck).
+
+**Finish:** opening ratchet 56/56 green confirming r106; audit 33/0; 39 moved frames each classified and accepted with a written reason in FRAME-LOG; built, committed (9ac513a), pushed, and the live stamp **1787044502 confirmed serving**. One correction commit followed (f2b0468): `git add -A` had swept the 176 MB before-frames snapshot into the round commit — it's untracked again with a class rule in .gitignore; the blobs stay in history as the cost of the mistake.
+
+**Next round:** the r106 residuals — Azzam's lowest terrace floor, the white stair treads, the house-tier roofs' own covering question — then recording attested coverings (Titanic, Yamato, QM2) when properly sourced, and the Sea wake pass still queued.
+2026-08-18 02:58:34  round finished; HEAD is f2b0468 Round 107 correction: untrack the before-frames snapshot, ignore the class
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 74905 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 03:08:34  round starting

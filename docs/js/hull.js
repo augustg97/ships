@@ -456,6 +456,8 @@ uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
 uCol: { value: new THREE.Color(hex) } } });
 const white = steel(S.topside || '#e4e2dc');
 const capMat = steel('#4a5057');
+const cover = deckCovering(S);
+const tread = cover.recorded && cover.mode === 1 ? steel(cover.col) : white;
 const glassMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.60,
 side: THREE.DoubleSide });
 const gLo = new THREE.Color(0x272e35), gHi = new THREE.Color(0x4a545d);
@@ -553,11 +555,16 @@ const n = Math.max(2, Math.round(dl / 0.19)), rise = dl / n, treadD = 0.28;
 const flight = new THREE.Group();
 for (let j = 0; j < n; j++) {
 const hgt = (yt - j * rise) - yb;
-const step = new THREE.Mesh(new THREE.BoxGeometry(treadD, hgt, 1.3), white);
+const step = new THREE.Mesh(new THREE.BoxGeometry(treadD, hgt, 1.3), tread);
 step.position.set(eA[0] + 0.02 + (j + 0.5) * treadD, yb + hgt / 2, zs);
 flight.add(step);
 }
-g.add(tag(flight, 'stair'));
+g.add(tag(flight, 'stair', 'Terrace stair',
+cover.recorded && cover.mode === 1
+? 'Twin flights closing each terrace break, trodden in the deck’s own '
++ 'recorded covering — a yacht’s flights match the floors they join. '
++ 'Tread and rise are the builder’s convention; no plate resolves them.'
+: undefined));
 }
 }
 }
@@ -2496,7 +2503,7 @@ recess: i === recessTier });
 return { n, base, dh, top: floorY(n), tiers,
 recorded: !!(S.houseAt && S.houseAt.length === 2) };
 }
-function buildSuperstructure(S, group) {
+function buildSuperstructure(S, group, hullMat) {
 const n = S.decks || 0;
 if (!n) return;
 const H = hullSurface(S);
@@ -2504,6 +2511,16 @@ const L = S.lwl, B = S.beam;
 const white = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
 const g = new THREE.Group();
 const T = linerHouse(S);
+const cover = deckCovering(S);
+const roofDeckMat = (hullMat && cover.recorded && cover.mode === 1)
+? new THREE.ShaderMaterial({
+vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+uCol:    { value: new THREE.Color(cover.col) },
+uMode:   { value: cover.mode },
+uPlankW: { value: cover.plankW || 1 },
+uButtL:  { value: cover.buttL || 1 } } })
+: null;
 const paneW = B * 0.075;
 const face = new THREE.Color(0xe4e2dc);
 const glass = new THREE.Color(0x6d7a86);
@@ -2648,6 +2665,16 @@ for (let k = 1; k < pts.length; k++) sh.lineTo(pts[k].x, pts[k].z);
 const gg = new THREE.ShapeGeometry(sh);
 gg.rotateX(Math.PI / 2);
 gg.translate(0, y, 0);
+if (roofDeckMat) {
+const ix = gg.getIndex().array;
+for (let k = 0; k + 2 < ix.length; k += 3) {
+const t2 = ix[k + 1]; ix[k + 1] = ix[k + 2]; ix[k + 2] = t2;
+}
+const na = gg.getAttribute('normal');
+for (let k = 0; k < na.count; k++) na.setXYZ(k, 0, 1, 0);
+return tag(new THREE.Mesh(gg, roofDeckMat), 'superstructure',
+cover.name.replace('Weather deck', 'House deck'), cover.what);
+}
 return new THREE.Mesh(gg, plateMat);
 };
 const up = new THREE.Vector3(0, 1, 0);
@@ -5313,7 +5340,7 @@ buildRigging(S, group, mats, S.__spars, S.__mastTops || []);
 }
 if (FINE) buildFittings(S, group, mats);
 if (FINE) buildFunnel(S, group);
-if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group);
+if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
 if (FINE && S.cluster) buildCluster(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
 if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);

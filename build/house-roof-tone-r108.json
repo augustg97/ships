@@ -1,0 +1,62 @@
+{
+ "cascade roof (tier 2 aft promenade)": {
+  "before": [
+   224,
+   224,
+   222
+  ],
+  "after": [
+   203,
+   197,
+   188
+  ]
+ },
+ "crest deck beside cluster": {
+  "before": [
+   165,
+   178,
+   184
+  ],
+  "after": [
+   117,
+   119,
+   108
+  ]
+ },
+ "terrace floor (control)": {
+  "before": [
+   133,
+   118,
+   96
+  ],
+  "after": [
+   133,
+   118,
+   96
+  ]
+ },
+ "tier aft wall (control)": {
+  "before": [
+   226,
+   226,
+   224
+  ],
+  "after": [
+   194,
+   185,
+   173
+  ]
+ },
+ "tier aft wall (control, re-placed)": {
+  "before": [
+   222,
+   221,
+   219
+  ],
+  "after": [
+   221,
+   219,
+   217
+  ]
+ }
+}

@@ -1990,6 +1990,39 @@
             ' — double-sided lighting flips these the wrong way');
     }
 
+    /* ── A SURFACE YOU STAND ON TAKES THE RECORDED COVERING (round 108). ──────────────
+       Azzam's record states 2,200 m² of laid teak and after r106 the weather deck drew
+       it — while the terrace stairs stayed topside white and every walkable tier roof
+       stayed a MeshStandard plate: surfaces you stand on, ignoring the record they stand
+       in the middle of. The class: stair treads and exposed house roofs are DECKS, and
+       must ask deckCovering()'s one judgement. Gated exactly as the builder gates —
+       recorded AND laid — so the 32 fallback ships convict nothing. Checked on the built
+       graph because the fault is an assignment, invisible in the record itself. */
+    if (H.deck && /^(teak|hinoki|wood)$/.test(H.deck.covering || '')) {
+      const covCol = { teak: '8a7250', hinoki: 'b3a17c', wood: 'a08a66' }[H.deck.covering];
+      let badTreads = 0, coveredRoof = false;
+      g.traverse(o => {
+        if (!o.isMesh || !o.material) return;
+        const p = tagOf(o);
+        if (p && p.key === 'stair') {
+          const c = o.material.uniforms && o.material.uniforms.uCol
+            ? o.material.uniforms.uCol.value.getHexString()
+            : (o.material.color ? o.material.color.getHexString() : '');
+          if (c !== covCol) badTreads++;
+        }
+        if (p && p.key === 'superstructure' && o.material.isShaderMaterial
+            && o.material.uniforms && o.material.uniforms.uPlankW
+            && o.geometry && o.geometry.type === 'ShapeGeometry') coveredRoof = true;
+      });
+      if (badTreads)
+        say(v.id, 'stair treads ignore the recorded covering',
+            `${badTreads} tread mesh(es) not in ${H.deck.covering} on a ship whose record lays it`);
+      if (H.decks && !H.flightDeck && !H.turrets && H.houseAt && !coveredRoof)
+        say(v.id, 'house roofs ignore the recorded covering',
+            'a recorded laid covering, a walkable tier roof cascade, and no roof plate '
+            + 'draws in the deck shader');
+    }
+
     /* ── THE POLAR IS THE VESSEL'S OWN (round 47). ─────────────────────────────────────
        25 vessels shared 8 curves: the card printed Preussen's 20.5 kn over the corbita's
        5.8-kn curve, Yamato's 27 over a shared 9.6, and the audit could not see it because
