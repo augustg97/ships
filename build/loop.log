@@ -5812,3 +5812,20 @@ Round 116 is complete and deployed — live stamp **1787084915** verified.
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 31125 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 13:45:36  round starting
+Round 117 is done, deployed, and live-verified — stamp **1787088250** on https://augustg97.github.io/ships/, commit `e369261` pushed.
+
+**What the round did.** The queue stands worked in full (r57), so the survey took r116's pointer: the sekibune's yakata. The model drew an open four-post pavilion with a railed platform and tent top; the Busan boat-barrier scroll of 1593 — the card's own plate, re-read before building — draws a closed plank house under a ridged plank roof on hull after hull. The record already called it "the roofed cabin."
+
+**The class fix** is a `tower.walls` record field and one new branch in the tower builder: plank walls to the eaves, proud corner posts, a doorway plate, roof planes with overhanging eaves, closed gable boards, ridge cap. One geometry decision mattered: the eave tip drops below the wall-top line at the roof's own pitch, which keeps the gable hypotenuse and the roof soffit on one line — a first draft left a constant open wedge under each roof end, caught on paper. The panokseon's janggundae stays the default branch, proven byte-identical (her frame moved 0.000%).
+
+**Measured:** yakata top 6.97 → 5.32 m over water, ridge 1.2 m proud of the yagura screen, sole on the fighting-deck plane, footprint 4.5 × 2.8 m per the provenance note — form attested by the scroll, plan derived and labelled so on a new card row.
+
+**Audit:** a new rule — a walls-declared tower must answer a 216-ray ring from its own skin, first strike at the entered face, so a ray through a hole that hits the far wall from inside still convicts. Proven by injection both arms (strip 204/216, hole 33/216 first at dead astern). Rule 8 got exercised on the way: the rule's first clean run convicted the correct house by 1 cm at diagonal bearings — the entry datum was the roof-inflated part box, and the fix (entry against the wall-band box) went in before the proofs. Clean run 33/0, twice.
+
+**Frames:** opening ratchet 59/59 within tolerance (r116 confirmed fleet-wide); after the change, ship-sekibune moved 1.049% — the diff is the cabin patch alone, everything else byte-black — accepted with the reason logged; four control frames all 0.000%.
+
+**Next round:** the panokseon by the boxy ranking, whose own card names structure worth checking against the drawing; residuals recorded — the maku curtain cloth, the hayao lanyard, the swivel pieces, and the fleet-wide stem-loft LOA overhang.
+2026-08-18 14:33:10  round finished; HEAD is e369261 Round 117: the yakata closes up to its own plate — tower.walls plank house per the Busan scroll, audit ray ring with the depth test, proven strip and hole arms
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 44798 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 14:43:11  round starting

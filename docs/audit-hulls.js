@@ -308,6 +308,66 @@ if (through) say(v.id, 'you can see through the gun-deck wall',
 `${through} of ${shot} bearings at the wall band strike nothing — ${first}`);
 }
 }
+if (H.gunDeck.walls) {
+const sj = [];
+g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.key === 'sangjang') sj.push(o); });
+if (!sj.length)
+say(v.id, 'sangjang walls declared but not drawn',
+'gunDeck.walls with no sangjang geometry');
+else {
+const HSw = SHIPS_HULL.hullSurface(H);
+const GDw = H.gunDeck;
+const overW = GDw.over !== undefined ? GDw.over : H.beam * 0.045;
+const rc = new THREE.Raycaster(); rc.far = 60;
+let open = 0, shot = 0, first = '';
+const miss = (where, y) => {
+open++;
+if (!first) first = `first ${where}, y ${y.toFixed(1)} m`;
+};
+for (const sgn of [-1, 1]) for (let i = 0; i < 24; i++) {
+const u = GDw.from + (GDw.to - GDw.from) * ((i + 0.5) / 24);
+const pd = SHIPS_HULL.surfacePoint(H, HSw, u, 1.0);
+const railZ = Math.abs(pd[2]);
+for (const f of [0.30, 0.55, 0.85]) {
+const y = pd[1] + (planeY - 0.15 - pd[1]) * f;
+rc.set(new THREE.Vector3(pd[0], y, sgn * (railZ + overW + 4)),
+new THREE.Vector3(0, 0, -sgn));
+shot++;
+const hit = rc.intersectObjects(sj, true)[0];
+if (!hit || hit.point.z * sgn < railZ - 0.35
+|| hit.point.z * sgn > railZ + overW + 0.6)
+miss(`at u ${u.toFixed(2)} ${sgn > 0 ? 'stbd' : 'port'}`, y);
+}
+}
+for (const uE of [GDw.from, GDw.to]) {
+const pd = SHIPS_HULL.surfacePoint(H, HSw, uE, 1.0);
+const railZ = Math.abs(pd[2]);
+const dir = uE === GDw.from ? 1 : -1;
+const uO = uE - dir * (1.2 / H.loa);
+const pO = SHIPS_HULL.surfacePoint(H, HSw, Math.max(0.01, Math.min(0.99, uO)), 1.0);
+const yLo = Math.max(pd[1], pO[1]) + 0.2;
+for (const zf of [-0.5, 0, 0.5]) for (const f of [0.30, 0.55, 0.85]) {
+const y = yLo + (planeY - 0.15 - yLo) * f;
+rc.set(new THREE.Vector3(pd[0] - dir * 1.2, y, zf * railZ),
+new THREE.Vector3(dir, 0, 0));
+shot++;
+const hit = rc.intersectObjects(sj, true)[0];
+if (!hit || Math.abs(hit.point.x - pd[0]) > 0.5)
+miss(`at the ${uE === GDw.from ? 'forward' : 'aft'} end`, y);
+}
+}
+if (open) say(v.id, 'oar deck open where its wall should stand',
+`${open} of ${shot} rays at the sangjang band miss it — ${first}`);
+if (H.gunDeck.wallPorts) {
+const np = sj.filter(m => tagOf(m).name === 'Oar-deck port').length;
+if (np !== 2 * H.gunDeck.wallPorts)
+say(v.id, 'oar-deck ports off their record',
+`${np} drawn, record declares ${H.gunDeck.wallPorts} a side`);
+}
+}
+}
 if (H.tower) {
 const tw = part.tower;
 if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');

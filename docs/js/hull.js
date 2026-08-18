@@ -1823,6 +1823,12 @@ what: 'The deck built across the rowing frame, over the rowers\' heads — the '
 + 'sides at gun height are full of oars. At Lepanto the fire from six of '
 + 'these decks broke up the Ottoman line\'s order before the fleets '
 + 'touched, which is why the galleasses were stationed ahead of the line.' },
+sangjang: { stage: 5, name: 'Sangjang wall',
+what: 'The heavy plank belt between the hull\'s gunwale and the fighting deck '
++ 'above it. The rowers on the oar deck work behind it, under cover; a '
++ 'boarding party that has climbed the two metres of hull side finds another '
++ 'storey of timber standing over the rail. The old drawings paint a dragon '
++ 'along this belt and cut a row of small ports just under the deck line.' },
 sama:     { stage: 5, name: 'Sama',
 what: 'A loophole cut in the shield wall, one of a row down each side — the '
 + 'arquebus and the bow fire from behind the planking. On a hull too light '
@@ -5021,6 +5027,50 @@ panel.position.set(pd[0], surfY + shH / 2, 0);
 group.add(tag(panel, 'gundeck', 'End bulwark'));
 }
 const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
+if (GD.walls) {
+const wIn = B * 0.006;
+const headY = gdY - B * 0.016;
+const timberDS = timber.clone(); timberDS.side = THREE.DoubleSide;
+for (const sgn of [-1, 1]) {
+const wpos = [], widx = [];
+for (let i = 0; i <= N; i++) {
+wpos.push(sx[i], railY[i] - B * 0.010, sgn * (halfW[i] - over - wIn),
+sx[i], headY,                sgn * (halfW[i] - B * 0.020 - wIn));
+if (i) { const a = (i - 1) * 2; widx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+}
+const wg = new THREE.BufferGeometry();
+wg.setAttribute('position', new THREE.Float32BufferAttribute(wpos, 3));
+wg.setIndex(widx); wg.computeVertexNormals();
+group.add(tag(new THREE.Mesh(wg, timberDS), 'sangjang'));
+}
+for (const uE of [GD.from, GD.to]) {
+const pd = surfacePoint(S, H, uE, 1.0);
+const zf = Math.abs(pd[2]) - wIn, zh = Math.abs(pd[2]) + over - B * 0.020 - wIn;
+const ep = [pd[0], pd[1] - B * 0.010, -zf,  pd[0], pd[1] - B * 0.010, zf,
+pd[0], headY, zh,               pd[0], headY, -zh];
+const eg = new THREE.BufferGeometry();
+eg.setAttribute('position', new THREE.Float32BufferAttribute(ep, 3));
+eg.setIndex([0, 1, 2, 0, 2, 3]);
+eg.computeVertexNormals();
+group.add(tag(new THREE.Mesh(eg, timberDS), 'sangjang',
+uE === GD.from ? 'Oar-deck end wall, forward' : 'Oar-deck end wall, aft'));
+}
+const nP = Math.max(0, GD.wallPorts | 0);
+for (const sgn of [-1, 1]) for (let j = 0; j < nP; j++) {
+const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nP;
+const duP = 0.26 / L;
+const p1 = surfacePoint(S, H, u - duP, 1.0), p2 = surfacePoint(S, H, u + duP, 1.0);
+const yP = headY - 0.42;
+const zAt = p => {
+const foot = Math.abs(p[2]) - wIn, head = Math.abs(p[2]) + over - B * 0.020 - wIn;
+const f = (yP - (p[1] - B * 0.010)) / (headY - (p[1] - B * 0.010));
+return foot + (head - foot) * f;
+};
+const a = new THREE.Vector3(p1[0], yP, sgn * zAt(p1));
+const b = new THREE.Vector3(p2[0], yP, sgn * zAt(p2));
+group.add(tag(beamAB(a, b, 0.5, B * 0.028, portMat), 'sangjang', 'Oar-deck port'));
+}
+}
 const nL = Math.max(0, GD.loops | 0);
 if (nL) {
 const du = 0.05 / L;

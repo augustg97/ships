@@ -1521,11 +1521,11 @@
     ],
     [
      "Bow fortress, as drawn",
-     "a rounded fighting deck over the stem carrying the five-piece battery, its parapet sweeping rail to rail — the round form is attested; its plan is derived, no drawing of one survives"
+     "a rounded fighting deck over the stem carrying the five-piece battery, its parapet sweeping rail to rail \u2014 the round form is attested; its plan is derived, no drawing of one survives"
     ],
     [
      "Chasers, as drawn",
-     "two, at the after end of the gun deck, laid astern — the record says only 'chasers aft'; two is the least the plural supports (derived)"
+     "two, at the after end of the gun deck, laid astern \u2014 the record says only 'chasers aft'; two is the least the plural supports (derived)"
     ],
     [
      "Crew",
@@ -1643,9 +1643,9 @@
      "to": 0.16,
      "parapetH": 1.1
     },
-    "bowFortressProvenance": "The ROUND form is attested — Guilmartin's account of the 1570–71 Arsenal conversions and the rounded bow structure the contemporary Lepanto depictions draw — but no plan of one survives, so the half-ellipse drawn here (6.2 m long, closing round the stem at the rowing frame's own width, parapet 1.1 m) is DERIVED: a form choice, not a measurement. Round 87 drew the flat galley arrumbada instead and recorded the simplification; round 116 is that record cashed.",
+    "bowFortressProvenance": "The ROUND form is attested \u2014 Guilmartin's account of the 1570\u201371 Arsenal conversions and the rounded bow structure the contemporary Lepanto depictions draw \u2014 but no plan of one survives, so the half-ellipse drawn here (6.2 m long, closing round the stem at the rowing frame's own width, parapet 1.1 m) is DERIVED: a form choice, not a measurement. Round 87 drew the flat galley arrumbada instead and recorded the simplification; round 116 is that record cashed.",
     "sternGuns": 2,
-    "sternGunsProvenance": "The card's Guns row says 'chasers aft' — plural, unnumbered (Guilmartin; Morrison ed.). TWO are drawn, one either side of the centreline at the gun deck's aft edge, laid astern over the poop tent: the minimum the plural supports (rule 10). No gun-by-gun inventory of a 1571 galleass's stern battery was found this round; if one surfaces, the count follows it.",
+    "sternGunsProvenance": "The card's Guns row says 'chasers aft' \u2014 plural, unnumbered (Guilmartin; Morrison ed.). TWO are drawn, one either side of the centreline at the gun deck's aft edge, laid astern over the poop tent: the minimum the plural supports (rule 10). No gun-by-gun inventory of a 1571 galleass's stern battery was found this round; if one surfaces, the count follows it.",
     "gunDeck": {
      "from": 0.16,
      "to": 0.86,
@@ -1690,6 +1690,10 @@
     [
      "Decks",
      "three levels: the hold; a protected oar deck; and the raised fighting deck the ship is named for"
+    ],
+    [
+     "Sangjang wall, as drawn",
+     "closed plank from the gunwale up to the fighting deck, sixteen small ports a side under the deck line \u2014 the closed band is her own plate's; the port count is read off that drawing at about 12 px/m, good to \u00b12 (derived)"
     ],
     [
      "Oars",
@@ -1810,13 +1814,18 @@
      "height": 1.6,
      "gunsPerSide": 6,
      "screenH": 1.2,
-     "over": 0.5
+     "over": 0.5,
+     "walls": true,
+     "wallPorts": 16,
+     "name": "Sangjang",
+     "what": "The raised fighting deck the ship is named for \u2014 the \"board roof\" laid over the oar deck on stanchions rising from the gunwale, walled with heavy plank all round. The marines and gunners fight from it a full storey above the water; the rowers work beneath it, under cover. Before 1555 a Korean warship had one deck and could be boarded; this second one is the answer."
     },
     "tower": {
      "at": 0.62,
      "w": 3.2,
      "h": 2.6
-    }
+    },
+    "sangjangProvenance": "The CLOSED wall band between the gunwale and the fighting deck is attested: her own plate \u2014 the late-Joseon jeonseon drawing on this card, in the Gakseon dobon manner \u2014 closes the band with a painted plank belt on both sides she shows, and Hong Sun-jae (2025) reconstructs the same pangpae planking; the card's own Decks row calls the oar deck protected. The PORT ROW is read off that plate: a line of small square ports under the deck line, about sixteen a side at the plate's roughly 12 px/m \u2014 good to plus or minus two, no finer, and that bound is the drawing's, not the ship's. The dragon painted along the belt and the row of shields along the bulwark top in the same drawing are not drawn here; that simplification is recorded."
    }
   },
   {
@@ -1981,9 +1990,9 @@
      "h": 2.0,
      "walls": true,
      "name": "Yakata",
-     "what": "The commander's cabin standing on the yagura abaft the mast — a closed plank house under a ridged plank roof, which is the form the Busan scroll of 1593 draws on hull after hull of the anchored fleet. The ship is commanded from it; in the Edo peace it grew into the lacquered state cabin of the gozabune."
+     "what": "The commander's cabin standing on the yagura abaft the mast \u2014 a closed plank house under a ridged plank roof, which is the form the Busan scroll of 1593 draws on hull after hull of the anchored fleet. The ship is commanded from it; in the Edo peace it grew into the lacquered state cabin of the gozabune."
     },
-    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull — the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale — good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; the curtain is not drawn, and that simplification is recorded here."
+    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull \u2014 the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale \u2014 good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; the curtain is not drawn, and that simplification is recorded here."
    }
   },
   {
@@ -4328,7 +4337,7 @@
     "freeboard": 17.2,
     "cm": 0.98,
     "year": 1991,
-    "freeboardProvenance": "TYPE SHIP — the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC Gülsün / MSC Irina classes, 399.9 m × 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC Gülsün; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water — a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts — the same distinction ever-given's stationProvenance records from her casualty report."
+    "freeboardProvenance": "TYPE SHIP \u2014 the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC G\u00fcls\u00fcn / MSC Irina classes, 399.9 m \u00d7 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC G\u00fcls\u00fcn; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water \u2014 a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts \u2014 the same distinction ever-given's stationProvenance records from her casualty report."
    }
   },
   {

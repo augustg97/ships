@@ -7389,3 +7389,97 @@ unchanged.
 honest next hull, and her own card names structure the model may not fully draw (three
 levels, the sangjang walls). (2) The opening check next round confirms the 54 frames not
 re-checked at this close — expected 0.000%; if anything moved, this round owns it.
+
+## Round 118 — 2026-08-18 — the oar deck gets the protection its own card always claimed
+
+**The opening ratchet was the confirming pass r117 owed: all 59 frames within tolerance,
+exit 0** (build/ratchet-open-r118.log). Round 117 is confirmed fleet-wide.
+
+**THE TASK: the queue stands worked in full (r57), so the survey took r117's pointer — the
+panokseon, whose card names three levels and calls the oar deck PROTECTED ("a boarder must
+climb two storeys") while the model drew the band between her gunwale and fighting deck as
+open stanchions: a pavilion, not protection.** Her own plate — the late-Joseon jeonseon
+drawing on her card, read again and upscaled before building — closes that band on both
+sides it shows with a painted plank belt, posts dividing it into bays, and a row of small
+square ports just under the deck line. Hong Sun-jae (2025) reconstructs the same pangpae
+planking.
+
+**The class fix: `gunDeck.walls` + `gunDeck.wallPorts`, one new record-driven branch in the
+sangjang builder.** The wall is lofted station by station between rail and deck clamp
+exactly as the stanchions rake, set one post-face inboard so the posts stand proud (the
+yakata's law); the ends close with lofted trapezoid panels because the band's foot follows
+the hull's rail and its head follows the overhung deck edge — a box would hang its foot
+corners over open water (the galleass fortress lesson). Sixteen ports a side straddle the
+raked wall under the deck line, the count read off the plate at its ~12 px/m and bounded
+±2 in sangjangProvenance, which also records what is NOT drawn: the dragon painted along
+the belt and the shield row on the bulwark top. The deck part also stops borrowing the
+galleass's Lepanto card text — GD.name/what now carry the sangjang's own. The card gains
+"Sangjang wall, as drawn", labelled derived. The sekibune declares no walls and is proven
+untouched (shipwright-furled, ship-galley, action-lepanto 0.000%).
+
+**⚠ A class fault found and recorded: the both-ways index trick cancels normals.** The
+first wall build copied the gundeck plank's double-face pattern — duplicated triangles of
+opposite winding SHARING vertices — and computeVertexNormals sums each vertex to zero
+length: half the band rendered washed near-white, and reading the render could not say
+whether the plank was missing or the light was broken. A red-paint diagnosis capture
+settled it (the plank was there), and the fix is a single winding on a DoubleSide clone.
+The gundeck plank itself shares the pattern fleet-wide — mostly viewed from above and
+sky-lit, so it has never convicted itself — a future round may want to sweep the class.
+
+**Measured (rule 4, build/measure-panokseon-r118-{before,after}.txt):** wall band u
+0.140–0.883 = the deck's own span, foot 1.91 m (tucked under the 2.00 rail), head 3.45 =
+the clamp line, half-breadth 4.96 raked out under the 5.20 deck lip; port row y 2.76–3.30,
+u 0.156–0.866; end walls at both u ends, y 2.2–3.45. Global extents byte-identical to
+before; every other row of the part table identical except the deck row renamed Sangjang.
+
+**Verified (rule 1, twelve spin bearings re-captured and read after the normals fix, plus
+band close-crops):** the belt reads as a closed dark plank wall in the deck's shadow from
+bow, broadside, quarter and astern; posts divide it, ports run under the deck line, the ro
+work out from under its foot seam, and with the bulwark above it the side now reads as the
+two-storey timber climb the card describes. Rule 0 on ship-panokseon: reads as a rendered
+vessel on water; three facts a viewer can name — her rowers work behind a closed plank
+belt pierced by a row of small ports; her marines fight a storey higher behind a bulwark
+whose gun muzzles pierce dark ports; the commander's open pavilion stands amidships
+between her two battened lugs.
+
+**The audit learned the class (round-118 rule), and its first draft was refuted by its own
+injection — twice.** Draft 1: a single-origin escape ring from the band's centre; the hole
+injection could not convict because a ship's boat and the capstan stand between the centre
+and the stern — a shared origin is blind along any shadowed bearing. Draft 2 aimed
+outside-in at the whole group; the foresail honestly hanging across the forward approach
+convicted an honest build 3/162. What stands: perpendicular rays at the wall's own
+expected surface, station by station, expectation derived from record + surfacePoint
+(never the drawn meshes), intersecting the sangjang part alone — sides 24 stations × 3
+heights × 2, first strike in the band's depth window; ends 3 × 3 × 2, first strike within
+0.5 m of the panel plane, approach heights clearing the local sheer. Proven by injection,
+all three arms, against the FINAL geometry (build/staging/inj-sangjang-{strip,hole,port}.js):
+strip convicts 'sangjang walls declared but not drawn'; hole (aft end wall removed)
+convicts 9/162 first at the aft end; port (one plate removed) convicts '31 drawn, record
+declares 16 a side'. Clean run 33/0, twice.
+
+**Ratchet: opening full pass as above; after the change, check-then-accept: ship-panokseon
+1.487% / mean 1.382 — diff read before accepting: the belt band alone, bays between posts
+and the end wrap, hull/sails/oars/panels byte-black. ship-sekibune 0.115% / mean 0.043 —
+diff read: the sekibune herself byte-black, two edge patches at hull height behind the
+translucent panels = the panokseon's new belt at the neighbouring berth, the r115/r116
+neighbour-berth ghost class, above tolerance this time because a wall band is bigger than
+a ro spar; accepted with that reason. Checked clean after: both 0.000%; ship-galleass
+0.037% sub-tolerance, shipwright-furled 0.000%, ship-galley 0.000%.**
+
+**Deployed: stamp 1787091977.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The dragon painted along the belt and the
+shield row along the bulwark top in her plate are not drawn; sangjangProvenance says so.
+(2) The gundeck plank's both-ways normal cancellation stands fleet-wide, unconvicted —
+see the class note above. (3) Panokseon drawn LOA 36.4 vs record 32 — the stem/stern loft
+overhang class (r113/r115), untouched. (4) The r115 hayao and sekibune swivels (r90)
+stand. (5) probe-wake.py heading mirror (r114) untouched. (6) Endurance forecastle break
+still waits on the RMG original of J9266. (7) Azzam crest residual (r108) unchanged.
+
+**Next:** (1) The survey continues — the SEKIBUNE's Sō-yagura shares the same open band
+below her fighting deck, and her own card text says "walled with tate-ita … the rowers
+work beneath it"; the Busan scroll is her plate — read what the scroll actually shows at
+the band before declaring gunDeck.walls for her, the rule is already waiting. (2) The
+gundeck both-ways normals class, if a sweep is wanted. (3) The opening check next round
+confirms the 54 frames not re-checked at this close — expected 0.000%; if anything moved,
+this round owns it.

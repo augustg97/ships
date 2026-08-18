@@ -3151,6 +3151,12 @@ const PARTS = {
                   + 'sides at gun height are full of oars. At Lepanto the fire from six of '
                   + 'these decks broke up the Ottoman line\'s order before the fleets '
                   + 'touched, which is why the galleasses were stationed ahead of the line.' },
+  sangjang: { stage: 5, name: 'Sangjang wall',
+              what: 'The heavy plank belt between the hull\'s gunwale and the fighting deck '
+                  + 'above it. The rowers on the oar deck work behind it, under cover; a '
+                  + 'boarding party that has climbed the two metres of hull side finds another '
+                  + 'storey of timber standing over the rail. The old drawings paint a dragon '
+                  + 'along this belt and cut a row of small ports just under the deck line.' },
   sama:     { stage: 5, name: 'Sama',
               what: 'A loophole cut in the shield wall, one of a row down each side — the '
                   + 'arquebus and the bow fire from behind the planking. On a hull too light '
@@ -7938,6 +7944,75 @@ function buildGalleyWorks(S, group, mats) {
       group.add(tag(panel, 'gundeck', 'End bulwark'));
     }
     const portMat = new THREE.MeshStandardMaterial({ color: 0x17120c, roughness: 0.95 });
+    /* ── THE SANGJANG WALL: THE OAR DECK'S OWN PROTECTION (round 118) ─────────────────
+       Between the hull's rail and the fighting deck the class default is open
+       stanchions, which is a pavilion, not protection — and the panokseon's own plate
+       (the late-Joseon jeonseon drawing on her card) closes this band on both sides it
+       shows with a painted plank belt pierced by a row of small ports under the deck
+       line; her card's Decks row calls the oar deck protected. Record-driven:
+       GD.walls closes the band, GD.wallPorts counts the port row a side, and
+       sangjangProvenance in the record carries what the plate attests and at what
+       scale. The wall is lofted station by station between rail and deck clamp
+       exactly as the stanchions rake, set one post-face inboard so the posts stand
+       proud of the planking (the yakata's law); the ends close with lofted trapezoid
+       panels, because the band's foot follows the hull's rail and its head follows
+       the overhung deck edge — a box here would hang its foot corners over open
+       water, the galleass fortress lesson (r116). The ro pivot at the rail, so the
+       oars work under the wall's own foot seam. */
+    if (GD.walls) {
+      const wIn = B * 0.006;                     // one post-face: walls inboard, posts proud
+      const headY = gdY - B * 0.016;             // the clamp line the wall head tucks into
+      /* ⚠ single winding on a DoubleSide material, NOT the deck's both-ways index
+         trick: duplicated opposite-winding triangles SHARE vertices, so
+         computeVertexNormals sums each vertex's normals to zero length, and the
+         first render of this wall came out washed near-white along half its run —
+         the red-paint diagnosis capture proved the plank was there and the light
+         was broken. DoubleSide flips clean normals in the shader instead. */
+      const timberDS = timber.clone(); timberDS.side = THREE.DoubleSide;
+      for (const sgn of [-1, 1]) {
+        const wpos = [], widx = [];
+        for (let i = 0; i <= N; i++) {
+          wpos.push(sx[i], railY[i] - B * 0.010, sgn * (halfW[i] - over - wIn),
+                    sx[i], headY,                sgn * (halfW[i] - B * 0.020 - wIn));
+          if (i) { const a = (i - 1) * 2; widx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+        }
+        const wg = new THREE.BufferGeometry();
+        wg.setAttribute('position', new THREE.Float32BufferAttribute(wpos, 3));
+        wg.setIndex(widx); wg.computeVertexNormals();
+        group.add(tag(new THREE.Mesh(wg, timberDS), 'sangjang'));
+      }
+      /* the end closures, lofted foot-to-head like the sides */
+      for (const uE of [GD.from, GD.to]) {
+        const pd = surfacePoint(S, H, uE, 1.0);
+        const zf = Math.abs(pd[2]) - wIn, zh = Math.abs(pd[2]) + over - B * 0.020 - wIn;
+        const ep = [pd[0], pd[1] - B * 0.010, -zf,  pd[0], pd[1] - B * 0.010, zf,
+                    pd[0], headY, zh,               pd[0], headY, -zh];
+        const eg = new THREE.BufferGeometry();
+        eg.setAttribute('position', new THREE.Float32BufferAttribute(ep, 3));
+        eg.setIndex([0, 1, 2, 0, 2, 3]);
+        eg.computeVertexNormals();
+        group.add(tag(new THREE.Mesh(eg, timberDS), 'sangjang',
+                      uE === GD.from ? 'Oar-deck end wall, forward' : 'Oar-deck end wall, aft'));
+      }
+      /* the port row the plate draws, tucked under the deck line */
+      const nP = Math.max(0, GD.wallPorts | 0);
+      for (const sgn of [-1, 1]) for (let j = 0; j < nP; j++) {
+        const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nP;
+        const duP = 0.26 / L;
+        const p1 = surfacePoint(S, H, u - duP, 1.0), p2 = surfacePoint(S, H, u + duP, 1.0);
+        const yP = headY - 0.42;
+        /* the wall rakes outboard as it rises: its half-breadth at the port's own
+           height, interpolated along the rake at this station */
+        const zAt = p => {
+          const foot = Math.abs(p[2]) - wIn, head = Math.abs(p[2]) + over - B * 0.020 - wIn;
+          const f = (yP - (p[1] - B * 0.010)) / (headY - (p[1] - B * 0.010));
+          return foot + (head - foot) * f;
+        };
+        const a = new THREE.Vector3(p1[0], yP, sgn * zAt(p1));
+        const b = new THREE.Vector3(p2[0], yP, sgn * zAt(p2));
+        group.add(tag(beamAB(a, b, 0.5, B * 0.028, portMat), 'sangjang', 'Oar-deck port'));
+      }
+    }
     /* the sama: loopholes for bows and arquebuses in a row along the bulwark — what the
        wall is FOR on a hull that mounts no broadside. Record-driven: GD.loops a side.
        Each is a dark plate straddling the plank, laid to the wall's own run at its

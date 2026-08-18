@@ -493,6 +493,90 @@
                            `${through} of ${shot} bearings at the wall band strike nothing — ${first}`);
         }
       }
+      /* ── THE OAR DECK IS PROTECTED, AND ITS OWN RECORD SAYS SO (round 118).
+         gunDeck.walls declares the sangjang belt — the closed plank band between the
+         hull's rail and the fighting deck that the panokseon's own plate paints a
+         dragon on. The class default is open stanchions, and the r91 ring above
+         guards only the bulwark ABOVE the deck, so a missing belt BELOW it convicts
+         nothing. ⚠ The first draft of this rule was a single-origin escape ring from
+         the band's centre, and its own hole injection refuted it: a ship's boat and
+         the capstan stand on the oar deck between the centre and the stern, so the
+         missing aft end wall hid behind honest furniture. A shared origin is blind
+         along any shadowed bearing. So instead: PERPENDICULAR rays at the wall's own
+         expected surface, station by station, the expectation derived from the
+         record and the hull surface (surfacePoint), never from the drawn meshes —
+         the r113 discipline. Sides: 24 stations x 3 heights x 2 sides, straight in
+         athwartships; the first strike ON THE SANGJANG MESHES must land in the
+         band's own depth window [rail − 0.35, rail + over + 0.6] — the rays
+         intersect the sangjang part alone, because the question is whether the
+         record's wall stands where the record puts it, and the foresail honestly
+         hanging across the forward approach convicted the first draft of THIS
+         version too. A ray through a gap still convicts: its first sangjang strike
+         is the far side's wall, outside the window. Ends: 3 heights x 3 offsets x
+         2 ends, straight in fore-and-aft from just outside the panel (an approach
+         from far out would start inside the bow loft), first sangjang strike
+         within 0.5 m of the end plane; approach heights clear the LOCAL sheer. And
+         the port row is counted like the sama: exactly 2 x wallPorts. */
+      if (H.gunDeck.walls) {
+        const sj = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'sangjang') sj.push(o); });
+        if (!sj.length)
+          say(v.id, 'sangjang walls declared but not drawn',
+              'gunDeck.walls with no sangjang geometry');
+        else {
+          const HSw = SHIPS_HULL.hullSurface(H);
+          const GDw = H.gunDeck;
+          const overW = GDw.over !== undefined ? GDw.over : H.beam * 0.045;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let open = 0, shot = 0, first = '';
+          const miss = (where, y) => {
+            open++;
+            if (!first) first = `first ${where}, y ${y.toFixed(1)} m`;
+          };
+          for (const sgn of [-1, 1]) for (let i = 0; i < 24; i++) {
+            const u = GDw.from + (GDw.to - GDw.from) * ((i + 0.5) / 24);
+            const pd = SHIPS_HULL.surfacePoint(H, HSw, u, 1.0);
+            const railZ = Math.abs(pd[2]);
+            for (const f of [0.30, 0.55, 0.85]) {
+              const y = pd[1] + (planeY - 0.15 - pd[1]) * f;
+              rc.set(new THREE.Vector3(pd[0], y, sgn * (railZ + overW + 4)),
+                     new THREE.Vector3(0, 0, -sgn));
+              shot++;
+              const hit = rc.intersectObjects(sj, true)[0];
+              if (!hit || hit.point.z * sgn < railZ - 0.35
+                       || hit.point.z * sgn > railZ + overW + 0.6)
+                miss(`at u ${u.toFixed(2)} ${sgn > 0 ? 'stbd' : 'port'}`, y);
+            }
+          }
+          for (const uE of [GDw.from, GDw.to]) {
+            const pd = SHIPS_HULL.surfacePoint(H, HSw, uE, 1.0);
+            const railZ = Math.abs(pd[2]);
+            const dir = uE === GDw.from ? 1 : -1;      // +x is aft: approach the near end
+            const uO = uE - dir * (1.2 / H.loa);
+            const pO = SHIPS_HULL.surfacePoint(H, HSw, Math.max(0.01, Math.min(0.99, uO)), 1.0);
+            const yLo = Math.max(pd[1], pO[1]) + 0.2;
+            for (const zf of [-0.5, 0, 0.5]) for (const f of [0.30, 0.55, 0.85]) {
+              const y = yLo + (planeY - 0.15 - yLo) * f;
+              rc.set(new THREE.Vector3(pd[0] - dir * 1.2, y, zf * railZ),
+                     new THREE.Vector3(dir, 0, 0));
+              shot++;
+              const hit = rc.intersectObjects(sj, true)[0];
+              if (!hit || Math.abs(hit.point.x - pd[0]) > 0.5)
+                miss(`at the ${uE === GDw.from ? 'forward' : 'aft'} end`, y);
+            }
+          }
+          if (open) say(v.id, 'oar deck open where its wall should stand',
+                        `${open} of ${shot} rays at the sangjang band miss it — ${first}`);
+          if (H.gunDeck.wallPorts) {
+            const np = sj.filter(m => tagOf(m).name === 'Oar-deck port').length;
+            if (np !== 2 * H.gunDeck.wallPorts)
+              say(v.id, 'oar-deck ports off their record',
+                  `${np} drawn, record declares ${H.gunDeck.wallPorts} a side`);
+          }
+        }
+      }
       if (H.tower) {
         const tw = part.tower;
         if (!tw) say(v.id, 'tower declared but not drawn', 'tower record with no geometry');
