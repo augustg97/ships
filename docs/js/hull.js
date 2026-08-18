@@ -4830,8 +4830,9 @@ const AP = S.apostis;
 const pdMid = AP && surfacePoint(S, H, 0.5, 1.0);
 const apZ = AP && Math.abs(pdMid[2]) + AP.out;
 const apY = AP && pdMid[1] + B * 0.115;
+const RO = S.oarStyle === 'ro';
 for (let bank = 0; bank < n; bank++) {
-const v = 0.70 + bank * 0.11;
+const v = RO ? 0.96 : 0.70 + bank * 0.11;
 const out = 1.0 + bank * 0.22;
 const perBank = perBankOf(bank);
 const spread = 0.62 + bank * 0.05;
@@ -4842,6 +4843,35 @@ const u = uc - span / 2 + (i / (perBank - 1)) * span + bank * 0.006;
 const p = surfacePoint(S, H, u, Math.min(0.99, v));
 for (const sgn of [-1, 1]) {
 const o = new THREE.Group();
+if (RO) {
+const inb = oarLen * 0.38, outb = oarLen * 0.62;
+const DOG = 0.35;
+const limb = new THREE.Mesh(
+new THREE.BoxGeometry(B * 0.010, B * 0.036, outb), mat);
+limb.position.z = outb / 2;
+o.add(limb);
+const face = new THREE.Mesh(
+new THREE.BoxGeometry(B * 0.008, B * 0.052, outb * 0.45), mat);
+face.position.set(0, -B * 0.004, outb * 0.76);
+o.add(face);
+const loom = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.011, B * 0.014, inb, 6), mat);
+loom.rotation.x = Math.PI / 2 + DOG;
+loom.position.set(0, inb * 0.5 * Math.sin(DOG), -inb * 0.5 * Math.cos(DOG));
+o.add(loom);
+o.position.set(p[0], p[1], sgn * p[2]);
+let psi = 0.62 + 0.55 * Math.pow(2 * Math.abs(u - 0.5), 2);
+const spanIn = inb * Math.cos(DOG), lim = Math.abs(p[2]) * 0.85;
+if (spanIn * Math.cos(psi) > lim) psi = Math.acos(lim / spanIn);
+const hyp = Math.hypot(outb, p[1] + 0.5), c = outb / hyp;
+const dir = new THREE.Vector3(Math.sin(psi) * c, -(p[1] + 0.5) / hyp,
+sgn * Math.cos(psi) * c);
+o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+o.userData.oar = { sgn, bank, style: 'ro', qRest: o.quaternion.clone(),
+ph: (i * 0.618 + (sgn > 0 ? 0 : 0.31)) % 1, outb };
+g.add(o);
+continue;
+}
 const inb = oarLen * 0.26, outb = oarLen * 0.74;
 const shaft = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.010, B * 0.014, oarLen, 6), mat);

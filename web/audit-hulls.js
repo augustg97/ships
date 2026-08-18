@@ -508,6 +508,34 @@
     } else if (H.tower)
       say(v.id, 'tower without a deck', 'tower record on a hull with no gunDeck to stand on');
 
+    /* ── A RO SCULLS, A SWEEP PULLS (round 115). A hull whose record declares oarStyle
+       'ro' rows the Japanese/Korean way: each blade trails AFT of its pin and stays IN
+       the water — that is what sculling is. Round 90 drew the sekibune's forty ro as
+       perpendicular western sweeps and recorded the simplification; this rule is that
+       record cashed, and it guards the panokseon's ro too. The audit sees the BUILT rest
+       pose (its own buildShip instances never animate), so the tolerances are the rest
+       pose's own. */
+    if (H.oarStyle === 'ro') {
+      let nRo = 0, bad = 0, first = '';
+      const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const d = o.userData && o.userData.oar;
+        if (!d) return;
+        nRo++;
+        if (d.style !== 'ro') { bad++; if (!first) first = 'drawn as a sweep'; return; }
+        tip.set(0, 0, d.outb).applyMatrix4(o.matrixWorld);
+        o.getWorldPosition(pin);
+        if (tip.x < pin.x + 0.3) {
+          bad++; if (!first) first = `tip not abaft its pin (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+        } else if (tip.y > 0.15 || tip.y < -(H.draught + 0.6)) {
+          bad++; if (!first) first = `tip at ${tip.y.toFixed(2)} m over water (draught ${H.draught})`;
+        }
+      });
+      if (!nRo) say(v.id, 'ro declared but no oars drawn', 'oarStyle ro with no oar groups');
+      else if (bad) say(v.id, 'ro drawn as sweeps', `${bad} of ${nRo} oars fail the scull test — ${first}`);
+    }
+
     /* ── THE DRESS IS A DATE (round 32). The plating shader keys fastening and bottom colour
        off the year the hull is depicted at; a steel hull with no year silently falls back to
        the Victorian scheme, which is exactly the fleet-wide anachronism the era key was built

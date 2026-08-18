@@ -7148,3 +7148,79 @@ panokseon (68/68/67%) follow. The 98% pair (ever-given, container) are box ships
 boxes are the cargo — correct, not crude. (2) probe-wake.py heading mirror, above. (3)
 Endurance forecastle break still waits on the RMG original of J9266. (4) Azzam crest
 residual (r108) unchanged.
+
+## Round 115 — 2026-08-18 — the forty ro become the sculls their own card always said they were
+
+**The opening ratchet was the confirming pass r114 owed: 58 of 59 within tolerance, and the
+one mover was r114's own change in a frame it never checked.** ship-queen-mary-2 moved 0.075%
+/ mean 0.044: the diff (read before accepting) is two white patches at the frame's left and
+right edges — the container type-ship at the next berth poking past both ends of QM2, her stow
+and bridge 12.8 m lower after r114's freeboard fix. QM2 herself and every panel byte-black.
+Accepted with that reason; the lesson is r113's sharpened: a solo-check list must include the
+BERTH NEIGHBOURS' frames, because a hull is visible from more frames than her own.
+
+**THE TASK: the queue stands worked in full (r57), so the survey continued at r114's ranking —
+sekibune, and her one recorded gap (r90, carried item 2): "the ro are still drawn as pulling
+sweeps ... the stated class simplification."** The card always said the true thing — "40 ro —
+the sculling oar of Japan and Korea both — one man each, worked standing"; the drawing said a
+Western sweep, splayed perpendicular, resting awash. The record beat the drawing.
+
+**The class fix: `oarStyle: "ro"` — record-declared, two hulls, one branch.** buildOars grew
+the scull: two limbs scarfed at 0.35 rad — the loom rising up-inboard to a standing man's
+hands, the long flat blade limb (with a wider face piece toward the tip) trailing aft-down,
+pivot pin at the RAIL (v 0.96, not the sweep banks' hull-side v 0.70) — and the whole working
+pose set as ONE quaternion from a direction vector, because an Euler pitch about the ship's X
+on an aft-raked oar is part roll. The plan rake grows from 0.62 rad amidships toward the
+narrow end stations, with a geometric cap: no loom can reach past the hull's own half-breadth
+at its station (acos of the limit — the head-timbers' law applied to oars). The first spin
+capture is why: at fixed rake the bow stations' looms crossed the centreline and stood over
+the foredeck as a thicket of bare sticks. animateOars grew the matching branch: the ro never
+leaves the water — a yaw stroke about the oar's own near-vertical axis with a roll about the
+loom a quarter-phase ahead, no catch, no recovery, no feather, and each oar carries its OWN
+phase (i-hashed), so the fan reads as forty men, not one machine. The panokseon declares the
+same field — her card's "great sculling oars" (8–10 a side, 9 modelled, r89's own record) had
+the same Western stroke — and the sweep hulls' code path is untouched, byte-for-byte.
+
+**Measured (rule 4, build/measure-{sekibune,panokseon}-r115-{before,after}.txt):** sekibune
+oar fan half-breadth 6.94 → 5.46 m (breadth over all 13.88 → 11.44 on a 5 m beam); loom tops
+1.00 → 3.84 m over water (a standing sculler's hands); tips −0.26 → −0.68 m, buried, above
+the −1.29 keel; aft blades now trail to u 1.148 — past the transom, where a stern ro lives.
+Panokseon: half-breadth 10.28 → 8.25 m, tips −0.71 m, loom tops 4.25 m.
+
+**Verified (rule 1, twelve sekibune bearings + four panokseon read, twice — the fixed-rake
+fault found and refixed between captures):** the fan trails aft-down the whole side at varied
+phases, blades at the water, no crossing at bow or stern, nothing floats, panels clean. Rule 0
+on ship-sekibune: reads as a rendered vessel on water; three facts a viewer can name — she
+rows with sculls trailing aft like a fish's tail, not reaching sweeps; the fighting box with
+its loopholes runs nearly her whole length; one mast, sail bent on, stands amidships with the
+commander's pavilion abaft it.
+
+**The audit learned the class (round-115 rule): a hull declaring oarStyle 'ro' must draw every
+blade tip ABAFT its pin and IN the water (below +0.15, above −draught−0.6), in the built rest
+pose. Proven by injection (build/staging/inj-ro-sweep.js), BOTH arms: sekibune style-stripped
+convicts 'drawn as a sweep' 40/40; panokseon squared to perpendicular convicts 'tip not abaft
+its pin' 18/18. Clean run 33/0, twice (once per geometry).**
+
+**Ratchet: opening full pass as above; after the change, check-then-accept PAIRS: ship-sekibune
+1.983% / mean 1.099 (diff read: the two oar fans alone, hull/yagura/sail/panels byte-black),
+ship-panokseon 1.278% / 0.857 (her fan alone). Controls proven byte-identical: ship-trireme,
+ship-galley, action-lepanto all 0.000% — the sweep class untouched; ship-galleass 0.019%
+sub-tolerance (neighbour ghosting), not accepted, within limit.**
+
+**Deployed: stamp 1787081639.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The hayao — the rope from the loom end to the
+deck that holds a working ro down on its pin — is not drawn; it wants a deck anchor point the
+oar-local frame cannot know cheaply. (2) The yakata is still the open four-post pavilion; the
+Busan scroll (the model's own plate) draws a SOLID roofed plank house on hull after hull — a
+`tower.walls` record field, one round, would close it for her and leave the panokseon's open
+janggundae as the default. Read the plate before building it. (3) Sekibune drawn LOA 31.1 m vs
+record 25 — the stem/stern loft overhang class (r113 noted the same on ever-given), fleet-wide,
+pre-existing. (4) No swivel pieces or bow gun (r90 carried). (5) probe-wake.py heading mirror
+(r114) untouched.
+
+**Next:** (1) The survey continues — after sekibune the r113 boxy ranking gives galleass
+(68%), galley (68%), panokseon (67%); all three now have ring-survey coverage (r91) and the
+galleass carries her own carried gaps (r88: stern chasers, bow fortress). (2) The yakata walls,
+above, with the scroll open. (3) Endurance forecastle break still waits on the RMG original of
+J9266. (4) Azzam crest residual (r108) unchanged.

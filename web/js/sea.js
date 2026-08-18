@@ -247,12 +247,29 @@ function floatShip(obj, x, z, heading, lengthM, t, wind, beamM, draughtM) {
  */
 const STROKES_PER_MIN = 31;
 
+/* scratch for the ro branch — allocated once, never per frame */
+const RO_Q = new THREE.Quaternion(), RO_R = new THREE.Quaternion();
+const RO_Y = new THREE.Vector3(0, 1, 0), RO_Z = new THREE.Vector3(0, 0, 1);
+
 function animateOars(root, t) {
   if (!root) return;
   const period = 60 / STROKES_PER_MIN;
   root.traverse(o => {
     const d = o.userData && o.userData.oar;
     if (!d) return;
+    /* ── THE RO NEVER LEAVES THE WATER (round 115) ───────────────────────────────────
+       Sculling is the other answer to the oar. The blade stays buried and works like a
+       fish's tail: a yaw stroke athwartships with a roll about the loom a quarter-phase
+       ahead of it, so the flat of the blade always meets the water at an angle that
+       drives — a screw, not a lever. No catch, no recovery, no feather; and each man
+       keeps his own time, so the fan reads as forty men, not one machine. */
+    if (d.style === 'ro') {
+      const w = 2 * Math.PI * ((t / period) + d.ph);
+      RO_Q.setFromAxisAngle(RO_Y, Math.sin(w) * 0.10);
+      RO_R.setFromAxisAngle(RO_Z, Math.cos(w) * 0.30);
+      o.quaternion.copy(d.qRest).multiply(RO_Q).multiply(RO_R);
+      return;
+    }
     const ph = ((t / period) + d.bank * 0.075) % 1.0;
     const DRIVE = 0.36;
 

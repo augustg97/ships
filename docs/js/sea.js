@@ -90,12 +90,21 @@ obj.position.y = y;
 return { pitch: Math.atan(pitch), roll: Math.atan(roll), y };
 }
 const STROKES_PER_MIN = 31;
+const RO_Q = new THREE.Quaternion(), RO_R = new THREE.Quaternion();
+const RO_Y = new THREE.Vector3(0, 1, 0), RO_Z = new THREE.Vector3(0, 0, 1);
 function animateOars(root, t) {
 if (!root) return;
 const period = 60 / STROKES_PER_MIN;
 root.traverse(o => {
 const d = o.userData && o.userData.oar;
 if (!d) return;
+if (d.style === 'ro') {
+const w = 2 * Math.PI * ((t / period) + d.ph);
+RO_Q.setFromAxisAngle(RO_Y, Math.sin(w) * 0.10);
+RO_R.setFromAxisAngle(RO_Z, Math.cos(w) * 0.30);
+o.quaternion.copy(d.qRest).multiply(RO_Q).multiply(RO_R);
+return;
+}
 const ph = ((t / period) + d.bank * 0.075) % 1.0;
 const DRIVE = 0.36;
 const DOWN_IN = 0.30;

@@ -1787,6 +1787,7 @@
     ],
     "oarLen": 7.5,
     "interscalmium": 2.4,
+    "oarStyle": "ro",
     "gunDeck": {
      "from": 0.16,
      "to": 0.86,
@@ -1941,6 +1942,7 @@
     ],
     "oarLen": 6.0,
     "interscalmium": 1.05,
+    "oarStyle": "ro",
     "gunDeck": {
      "from": 0.1,
      "to": 0.9,

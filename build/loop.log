@@ -5765,3 +5765,20 @@ Round 113 is done and live — stamp 1787075239 verified on the deployed site.
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 14504 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 11:00:15  round starting
+Live verify passed — the first grep's pattern was wrong, not the deploy (rule 8): the stamp is a `<meta>` tag, and the live page serves **1787078297**, this round's build. Round 114 is complete.
+
+**What this round did:**
+
+1. **Opening ratchet — the confirming pass round 113 owed: all 58 frames within tolerance**, run to a file before any edit landed. Round 113 stands confirmed fleet-wide.
+
+2. **The container type-ship's freeboard came down from an unattested 30.0 to a derived 17.2 m** (r113's first carried item). The type ship is drawn at the 24,000-TEU class its own card rows name; I fetched the class record this round — depth moulded 33.2 m to main deck (RINA *Significant Ships of 2019*, MSC Gülsün) less the 16.0 m draught. Decided per rule 10 as a type-ship question: a new card row labels the value **derived** in the UI, and `hull.freeboardProvenance` carries the full trail. Measured before/after: deck 30.00 → 17.20 m over water exactly, every part riding it down 12.8 m, audit 33/0 clean. A fleet-wide freeboard/draught table confirmed container was the one unattested outlier.
+
+3. **Ever Given got her Sea-view frame** (r113's second item): new baseline `sea-ever-given`, 800 m off her port beam at sea level — twin islands, EVERGREEN on the shell, bow wave, wake. Only the Shipwright watched her before, the same one-view blindness that hid her bridge for 66 rounds.
+
+4. Four moved frames accepted with written reasons (the wake-plan diff was the hull footprint alone — r111's wake physics untouched); four more checked and unmoved. One instrument fault found and recorded: probe-wake's heading read is mirrored against the voyage card's course (76.7° vs 283°, summing to ~360) — the card is right, the probe needs fixing before its heading is trusted again.
+
+**Next round:** the survey resumes at **sekibune** (73% box meshes), and the opening check confirms the 52 frames not re-checked at close.
+2026-08-18 11:44:00  round finished; HEAD is 1d21a58 Round 114: the type ship's deck comes down to the class record — container freeboard 30→17.2 derived and labelled, Ever Given gets her sea-level frame
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 21404 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 11:54:00  round starting

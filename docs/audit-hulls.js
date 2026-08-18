@@ -322,6 +322,26 @@ say(v.id, 'tower short of its record',
 }
 } else if (H.tower)
 say(v.id, 'tower without a deck', 'tower record on a hull with no gunDeck to stand on');
+if (H.oarStyle === 'ro') {
+let nRo = 0, bad = 0, first = '';
+const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+g.updateMatrixWorld(true);
+g.traverse(o => {
+const d = o.userData && o.userData.oar;
+if (!d) return;
+nRo++;
+if (d.style !== 'ro') { bad++; if (!first) first = 'drawn as a sweep'; return; }
+tip.set(0, 0, d.outb).applyMatrix4(o.matrixWorld);
+o.getWorldPosition(pin);
+if (tip.x < pin.x + 0.3) {
+bad++; if (!first) first = `tip not abaft its pin (dx ${(tip.x - pin.x).toFixed(1)} m)`;
+} else if (tip.y > 0.15 || tip.y < -(H.draught + 0.6)) {
+bad++; if (!first) first = `tip at ${tip.y.toFixed(2)} m over water (draught ${H.draught})`;
+}
+});
+if (!nRo) say(v.id, 'ro declared but no oars drawn', 'oarStyle ro with no oar groups');
+else if (bad) say(v.id, 'ro drawn as sweeps', `${bad} of ${nRo} oars fail the scull test — ${first}`);
+}
 if (H.iron && !H.year)
 say(v.id, 'no dress era', 'iron hull without year — shader falls back to Victorian dress');
 if (H.iron && H.year >= 1950 && H.cove)
