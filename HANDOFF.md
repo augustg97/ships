@@ -7304,3 +7304,88 @@ carried 2) with the Busan scroll open. (2) The r115 hayao (ro lanyard) and sekib
 pieces (r90) stand. (3) The opening check next round confirms the 53 frames not re-checked
 at this close — expected 0.000% everywhere except possibly ship-slave-ship-class neighbours
 of the galleass berth; if anything moved, this round owns it.
+
+## Round 117 — 2026-08-18 — the yakata closes up to its own plate
+
+**The opening ratchet was the confirming pass r116 owed: all 59 frames within tolerance,
+exit 0** (build/ratchet-open-r117.log). Round 116 is confirmed fleet-wide, including the
+53 frames its close never re-checked.
+
+**THE TASK: the queue stands worked in full (r57), so the survey took r116's pointer — the
+sekibune's yakata (r115 carried 2), drawn as an open four-post pavilion with a railed
+platform and a tent top while the Busan boat-barrier scroll of 1593, the model's OWN plate,
+draws a CLOSED plank house under a ridged plank roof on hull after hull of the anchored
+fleet.** The record already said the true thing — "the roofed cabin standing on the yagura"
+— and the drawing said janggundae. The plate was read again before building (rule: read the
+plate first): plank walls, ridge fore-and-aft, overhanging eaves, roofline standing modestly
+above the bulwark; several cabins hang cloth in their wall openings.
+
+**The class fix: `tower.walls` — record-declared, one new branch in the tower builder.**
+The walls branch draws plank side and end walls to the eaves, corner posts proud of the
+planking, a waist batten, a dark doorway plate straddling the forward wall, two roof planes
+at one pitch with the eaves overhanging all round, gable boards closing the triangle under
+each end at the SAME pitch, and a ridge cap. The one geometric decision worth recording:
+the ridge stands over the wall-top line and the eave TIP drops below it at the roof's own
+pitch — that is what puts the gable hypotenuse and the roof soffit on one line; a first
+draft that raised the ridge by the full half-width-plus-overhang left a constant open wedge
+under each end of the roof, caught on paper before it was built. The open pavilion stays
+the class default and the panokseon's branch is untouched — proven byte-identical below.
+Record: tower {at 0.66, w 2.8, len 4.5, h 2.0 (eaves), walls}; towerProvenance carries what
+the plate attests (the FORM) and what is derived (the PLAN — no Sengoku sekibune survives;
+footprint and eaves read off the scroll at ship scale, good to the nearest half metre, no
+finer; the curtain cloth in the scroll's wall openings is NOT drawn, recorded there). The
+card gains "Yakata, as drawn", labelled derived.
+
+**Measured (rule 4, build/measure-sekibune-r117-{before,after}.txt):** Yakata u 0.510–0.810
+→ 0.542–0.778 (5.30 m over the 4.5 m walls — eaves and cap), top 6.97 → 5.32 m over water
+(ridge 1.2 m proud of the yagura screen's 4.14, the scroll's proportion), half-breadth 3.37
+→ 1.76 (the before figure was the pavilion's rotated-cone AABB, an artefact worth knowing:
+Box3 inflates a 45°-rotated cone by √2). Sole at 2.63 = the fighting-deck plane. Global
+extents unchanged.
+
+**Verified (rule 1, twelve bearings read across two spin sets — set sails and furled — plus
+two close crops):** under sail the house hides behind the canvas from most bearings, so the
+verification set is the FURLED one; from bow, quarter, broadside and astern the house reads
+as a built thing — dark plank walls above the wall line, pale ridged roof, closed gables,
+eaves overhang — and nothing floats, nothing clips the mast or the backstays. Rule 0 on
+ship-sekibune: reads as a rendered vessel on water; three facts a viewer can name — she
+rows with sculls trailing aft like a fish's tail; a loopholed fighting box runs nearly her
+whole length; the commander's roofed plank cabin stands abaft the single mast, above the
+wall.
+
+**The audit learned the class (round-117 rule): a hull declaring tower.walls must answer a
+72-bearing × 3-height ray ring at the wall band FROM ITS OWN SKIN — first strike within
+0.6 m of the wall-box face the ray enters, so a ray through a hole that hits the far wall
+from inside still convicts (the depth test r91's ring could not do). Proven by injection,
+both arms (build/staging/inj-yakata-{strip,hole}.js): strip (builder ignores the field,
+draws the pavilion) convicts 204/216; hole (aft end wall alone removed) convicts 33/216,
+first at bearing 0° — dead astern, where the hole is. Clean run 33/0, twice. ⚠ And rule 8
+was exercised on the way: the rule's FIRST clean run convicted its own house 12/216 at the
+diagonal bearings, by 1 cm — the entry datum was the part box, which the roof overhang
+inflates in both axes, and the corner run to the wall is longer than any honest margin. The
+audit was wrong, the fix (entry against the wall-band box, the meshes whose feet stand on
+the cabin sole) is in the rule, and the injections were proven against the FIXED rule.**
+
+**Ratchet: opening full pass as above; after the change, check-then-accept: ship-sekibune
+1.049% / mean 0.612 — diff read before accepting: the cabin patch ALONE, old pavilion ghost
+over new roof, hull/sail/oars/panels byte-black. Checked clean after: ship-panokseon
+0.000% (the janggundae branch untouched, byte-identical), ship-galleass 0.000%,
+shipwright-furled 0.000%, action-lepanto 0.000%. The berth neighbour (r115's lesson) is
+covered: panokseon clean; the fluyt has no frame and the sekibune SHRANK, so nothing new
+can poke into a neighbour's crop.**
+
+**Deployed: stamp 1787088250.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The maku — the cloth the scroll hangs in the
+cabin wall openings, white with a scalloped dark hem — is not drawn; towerProvenance says
+so. (2) The r115 hayao (ro lanyard) and the sekibune swivel pieces (r90) stand. (3)
+Sekibune drawn LOA 31.1 vs record 25 — the fleet-wide stem/stern loft overhang class
+(r113/r115), untouched. (4) probe-wake.py heading mirror (r114) untouched. (5) Endurance
+forecastle break still waits on the RMG original of J9266. (6) Azzam crest residual (r108)
+unchanged.
+
+**Next:** (1) The survey continues — the r113 boxy ranking gives galley (68%) and panokseon
+(67%); the galley's flat arrumbada is correct for her type (r116), so the panokseon is the
+honest next hull, and her own card names structure the model may not fully draw (three
+levels, the sangjang walls). (2) The opening check next round confirms the 54 frames not
+re-checked at this close — expected 0.000%; if anything moved, this round owns it.

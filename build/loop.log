@@ -5797,3 +5797,18 @@ Live stamp verified: **1787081639**. Round 115 is complete and deployed.
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 26583 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 12:48:21  round starting
+Round 116 is complete and deployed — live stamp **1787084915** verified.
+
+**What this round did:** The queue stands worked in full, so the survey continued at the galleass, closing both gaps recorded since round 88: her card's "chasers aft" were never drawn, and the Lepanto conversions' round bow fortress was flattened to a galley's rectangular platform — a slab whose corners the before-measurement showed hanging over open water at the stem.
+
+- **Opening ratchet was the confirming pass r115 owed:** all 59 frames within tolerance, exit 0. Round 115 confirmed fleet-wide.
+- **Two new record-driven builders in `buildGalleyWorks`:** `bowFortress {from, to, parapetH}` — a rounded fighting deck, half-ellipse plan closing round the stem at the rowing frame's own width, curved parapet, and the five-piece battery laid radially (courser ahead, flanker pairs at ±24°/±48°, muzzles through dark ports), the rim's overhang on raked posts standing on the hull's deck edge. And `sternGuns` — two chasers at the gun deck's aft end laid astern, their axis at y 5.5 clearing the tent ridge's measured 5.34. The round form is attested (Guilmartin, the Lepanto depictions), the plan derived, and the card says so in two new "as drawn" rows; the chaser count is the least the record's unnumbered plural supports, with the bound in `sternGunsProvenance`.
+- **Measured:** fortress at u 0.020–0.160 exactly, meeting the gun deck at half-breadth 4.58; chaser muzzles 1.0 m past the deck's aft edge, tent clear at 0.899; global extents byte-identical to before.
+- **The audit learned the class**, proven by injection all four arms: flipped guns convict "chasers mis-laid" 2/2 and "bow battery mis-laid" 5/5; stripped builders convict both ignored-field arms. Clean run 33/0.
+- **Frames:** ship-galleass 0.324% accepted — the diff is the fortress, the chasers, and one raked spar at the frame edge that is the panokseon's r115 ro oar (her baseline ghosting, 0.019% sub-tolerance last round, now absorbed with the reason logged). The galley's arrumbada branch proved byte-identical, and action-lepanto, ship-panokseon, ship-galley, ship-sekibune and shipwright-furled all checked clean.
+
+**Next round:** the survey's boxy ranking gives the galley and panokseon, but the sekibune's yakata walls (r115 carried, with the Busan scroll open) are the better structural target; the opening ratchet confirms the 53 frames not re-checked at this close.
+2026-08-18 13:35:36  round finished; HEAD is 2863734 Round 116: the fortress the record always described — bowFortress round fighting deck with radial battery, sternGuns chasers drawn, audit rule proven all four arms
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 31125 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 13:45:36  round starting

@@ -8052,6 +8052,78 @@ function buildGalleyWorks(S, group, mats) {
     const platY = baseY + T.h;
     const hw = T.w / 2;
     const tg = new THREE.Group();
+    if (T.walls) {
+    /* ── THE WALLED YAKATA (round 117) ──────────────────────────────────────────────
+       The Busan boat-barrier scroll of 1593 — this hull's own plate — draws the
+       commander's cabin as a CLOSED plank house under a ridged plank roof on hull
+       after hull of the anchored fleet; the open pavilion this branch replaces was
+       the class default (the panokseon's janggundae, which keeps it below). Record-
+       driven: tower {len, w, h: eaves over the fighting deck, walls}; towerProvenance
+       carries what the plate attests (the form) and what is derived (the plan — no
+       Sengoku sekibune survives). Eaves overhang the walls all round, so the roof
+       tip drops below the wall-top line at the roof's own pitch — the wall plate is
+       where soffit and wall meet, which is what keeps the planes and the gable
+       boards on ONE line instead of an open wedge under each end of the roof. */
+      const hl = (T.len || T.w) / 2;
+      const eaveY = baseY + T.h;
+      const wt = 0.06;
+      for (const sgn of [-1, 1]) {                       // side walls, plank to the eaves
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(hl * 2, T.h, wt), timber);
+        wall.position.set(xC, baseY + T.h / 2, sgn * (hw - wt / 2));
+        tg.add(wall);
+      }
+      for (const sgn of [-1, 1]) {                       // end walls, closing the house
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(wt, T.h, hw * 2 - wt * 2), timber);
+        wall.position.set(xC + sgn * (hl - wt / 2), baseY + T.h / 2, 0);
+        tg.add(wall);
+      }
+      /* corner posts proud of the planking — the frame the walls land on */
+      for (const dx of [-1, 1]) for (const dz of [-1, 1]) {
+        const px = xC + dx * (hl - B * 0.011), pz = dz * (hw - B * 0.011);
+        tg.add(beamAB(new THREE.Vector3(px, baseY, pz),
+                      new THREE.Vector3(px, eaveY, pz), B * 0.026, B * 0.026, timber));
+      }
+      /* a waist batten each side — the scroll draws the wall planking in bands */
+      for (const sgn of [-1, 1]) {
+        const bat = new THREE.Mesh(new THREE.BoxGeometry(hl * 2, B * 0.012, B * 0.010), pale);
+        bat.position.set(xC, baseY + T.h * 0.55, sgn * hw);
+        tg.add(bat);
+      }
+      /* the doorway, a dark plate straddling the forward wall — the way in from the deck */
+      const doorMat = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+        { color: 0x17120c, roughness: 0.95 }));
+      const doorH = Math.min(T.h * 0.72, 1.5);
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.04, doorH, 0.72), doorMat);
+      door.position.set(xC - hl, baseY + doorH / 2 + 0.06, 0);
+      tg.add(door);
+      /* the ridged plank roof */
+      const ovh = Math.min(0.35, hw * 0.25);             // eaves overhang
+      const pitch = 0.42;
+      const ridgeY = eaveY + pitch * hw;                 // ridge over the wall-top line
+      const tipY = eaveY - pitch * ovh;                  // eave tip, below it at the same pitch
+      const slope = Math.hypot(hw + ovh, ridgeY - tipY);
+      for (const sgn of [-1, 1]) {
+        const plane = new THREE.Mesh(
+          new THREE.BoxGeometry(hl * 2 + ovh * 2, 0.045, slope), pale);
+        plane.rotation.x = sgn * Math.atan(pitch);
+        plane.position.set(xC, (ridgeY + tipY) / 2 + 0.03, sgn * (hw + ovh) / 2);
+        tg.add(plane);
+      }
+      /* gable boards close the triangle under each end of the roof, at the roof's pitch */
+      for (const sgn of [-1, 1]) {
+        const shp = new THREE.Shape();
+        shp.moveTo(-hw, 0); shp.lineTo(hw, 0); shp.lineTo(0, pitch * hw); shp.closePath();
+        const gable = new THREE.Mesh(
+          new THREE.ExtrudeGeometry(shp, { depth: wt, bevelEnabled: false }), timber);
+        gable.rotation.y = Math.PI / 2;
+        gable.position.set(xC + sgn * hl - (sgn > 0 ? wt : 0), eaveY, 0);
+        tg.add(gable);
+      }
+      const cap = new THREE.Mesh(                        // the ridge cap
+        new THREE.BoxGeometry(hl * 2 + ovh * 2 + 0.10, 0.07, 0.16), timber);
+      cap.position.set(xC, ridgeY + 0.06, 0);
+      tg.add(cap);
+    } else {
     for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
       const a = new THREE.Vector3(xC + dx, baseY, dz);
       const b = new THREE.Vector3(xC + dx, platY, dz);
@@ -8085,6 +8157,7 @@ function buildGalleyWorks(S, group, mats) {
     roof.rotation.y = Math.PI / 4;                     // flats fore-and-aft, hips at the corners
     roof.position.set(xC, roofY + roofH / 2, 0);
     tg.add(roof);
+    }
     /* the record may name its own tower — the sekibune's yakata is not a janggundae —
        and the Joseon text stays as the default the class was built from */
     group.add(tag(tg, 'tower', T.name, T.what

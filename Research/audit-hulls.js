@@ -505,6 +505,57 @@
                 `tower top ${tw.y[1].toFixed(1)} m, record claims ${(planeY + H.tower.h).toFixed(1)}+`);
         }
       }
+      /* ── THE WALLED CABIN ANSWERS FROM EVERY BEARING, FROM ITS OWN SKIN (round 117).
+         tower.walls declares the yakata the Busan scroll draws: a CLOSED plank house,
+         not the open janggundae pavilion the class default draws. An open pavilion at
+         the wall band is four posts and a rail — most bearings pass straight through —
+         and a single missing wall panel hides from the one berth bearing a baseline
+         shows. So: 72 bearings x 3 heights in the wall band, aimed at the tower's own
+         centre, intersecting the TOWER part alone — and the first strike must land at
+         the face the ray ENTERS, because a ray through a hole still hits the far wall
+         from inside. That depth test is what the r91 ring could not do. */
+      if (H.tower && H.tower.walls) {
+        const tm = []; g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && p.key === 'tower') tm.push(o); });
+        if (tm.length) {
+          const tb = new THREE.Box3();
+          for (const m of tm) tb.expandByObject(m);
+          /* the entry datum is the WALL box, not the part box: the part box is inflated
+             by the roof overhang in both axes, and at a diagonal bearing the run from
+             that corner to the wall is longer than any honest margin — the first clean
+             run convicted its own house by 1 cm exactly there. Wall-band meshes are the
+             ones whose feet stand on the cabin sole. */
+          const wb = new THREE.Box3(); let nw = 0;
+          for (const m of tm) {
+            const b = new THREE.Box3().setFromObject(m);
+            if (b.min.y < tb.min.y + 0.3) { wb.union(b); nw++; }
+          }
+          const eb = nw ? wb : tb;
+          const cx = (eb.min.x + eb.max.x) / 2, cz = (eb.min.z + eb.max.z) / 2;
+          const rc = new THREE.Raycaster(); rc.far = 900;
+          const entry = new THREE.Vector3();
+          let open = 0, shot = 0, first = '';
+          for (const f of [0.25, 0.5, 0.8]) {
+            const y = tb.min.y + (H.tower.h || (tb.max.y - tb.min.y)) * f;
+            for (let b = 0; b < 72; b++) {
+              const th = b * Math.PI / 36;
+              rc.set(new THREE.Vector3(cx + Math.cos(th) * 400, y, cz + Math.sin(th) * 400),
+                     new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)));
+              shot++;
+              const hit = rc.intersectObjects(tm, true)[0];
+              const ent = rc.ray.intersectBox(eb, entry);
+              if (!hit || !ent || hit.point.distanceTo(ent) > 0.6) {
+                open++;
+                if (!first) first = `first at bearing ${Math.round(th * 180 / Math.PI)}°, ` +
+                                    `y ${y.toFixed(1)} m`;
+              }
+            }
+          }
+          if (open) say(v.id, 'walled cabin open to a bearing',
+                        `${open} of ${shot} rays into the wall band miss plank — ${first}`);
+        }
+      }
     } else if (H.tower)
       say(v.id, 'tower without a deck', 'tower record on a hull with no gunDeck to stand on');
 

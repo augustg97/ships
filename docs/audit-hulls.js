@@ -320,6 +320,43 @@ say(v.id, 'tower short of its record',
 `tower top ${tw.y[1].toFixed(1)} m, record claims ${(planeY + H.tower.h).toFixed(1)}+`);
 }
 }
+if (H.tower && H.tower.walls) {
+const tm = []; g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.key === 'tower') tm.push(o); });
+if (tm.length) {
+const tb = new THREE.Box3();
+for (const m of tm) tb.expandByObject(m);
+const wb = new THREE.Box3(); let nw = 0;
+for (const m of tm) {
+const b = new THREE.Box3().setFromObject(m);
+if (b.min.y < tb.min.y + 0.3) { wb.union(b); nw++; }
+}
+const eb = nw ? wb : tb;
+const cx = (eb.min.x + eb.max.x) / 2, cz = (eb.min.z + eb.max.z) / 2;
+const rc = new THREE.Raycaster(); rc.far = 900;
+const entry = new THREE.Vector3();
+let open = 0, shot = 0, first = '';
+for (const f of [0.25, 0.5, 0.8]) {
+const y = tb.min.y + (H.tower.h || (tb.max.y - tb.min.y)) * f;
+for (let b = 0; b < 72; b++) {
+const th = b * Math.PI / 36;
+rc.set(new THREE.Vector3(cx + Math.cos(th) * 400, y, cz + Math.sin(th) * 400),
+new THREE.Vector3(-Math.cos(th), 0, -Math.sin(th)));
+shot++;
+const hit = rc.intersectObjects(tm, true)[0];
+const ent = rc.ray.intersectBox(eb, entry);
+if (!hit || !ent || hit.point.distanceTo(ent) > 0.6) {
+open++;
+if (!first) first = `first at bearing ${Math.round(th * 180 / Math.PI)}°, ` +
+`y ${y.toFixed(1)} m`;
+}
+}
+}
+if (open) say(v.id, 'walled cabin open to a bearing',
+`${open} of ${shot} rays into the wall band miss plank — ${first}`);
+}
+}
 } else if (H.tower)
 say(v.id, 'tower without a deck', 'tower record on a hull with no gunDeck to stand on');
 if (H.oarStyle === 'ro') {

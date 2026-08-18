@@ -5114,6 +5114,62 @@ const baseY = S.gunDeck ? deckY + S.gunDeck.height + B * 0.007 : deckY;
 const platY = baseY + T.h;
 const hw = T.w / 2;
 const tg = new THREE.Group();
+if (T.walls) {
+const hl = (T.len || T.w) / 2;
+const eaveY = baseY + T.h;
+const wt = 0.06;
+for (const sgn of [-1, 1]) {
+const wall = new THREE.Mesh(new THREE.BoxGeometry(hl * 2, T.h, wt), timber);
+wall.position.set(xC, baseY + T.h / 2, sgn * (hw - wt / 2));
+tg.add(wall);
+}
+for (const sgn of [-1, 1]) {
+const wall = new THREE.Mesh(new THREE.BoxGeometry(wt, T.h, hw * 2 - wt * 2), timber);
+wall.position.set(xC + sgn * (hl - wt / 2), baseY + T.h / 2, 0);
+tg.add(wall);
+}
+for (const dx of [-1, 1]) for (const dz of [-1, 1]) {
+const px = xC + dx * (hl - B * 0.011), pz = dz * (hw - B * 0.011);
+tg.add(beamAB(new THREE.Vector3(px, baseY, pz),
+new THREE.Vector3(px, eaveY, pz), B * 0.026, B * 0.026, timber));
+}
+for (const sgn of [-1, 1]) {
+const bat = new THREE.Mesh(new THREE.BoxGeometry(hl * 2, B * 0.012, B * 0.010), pale);
+bat.position.set(xC, baseY + T.h * 0.55, sgn * hw);
+tg.add(bat);
+}
+const doorMat = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
+{ color: 0x17120c, roughness: 0.95 }));
+const doorH = Math.min(T.h * 0.72, 1.5);
+const door = new THREE.Mesh(new THREE.BoxGeometry(0.04, doorH, 0.72), doorMat);
+door.position.set(xC - hl, baseY + doorH / 2 + 0.06, 0);
+tg.add(door);
+const ovh = Math.min(0.35, hw * 0.25);
+const pitch = 0.42;
+const ridgeY = eaveY + pitch * hw;
+const tipY = eaveY - pitch * ovh;
+const slope = Math.hypot(hw + ovh, ridgeY - tipY);
+for (const sgn of [-1, 1]) {
+const plane = new THREE.Mesh(
+new THREE.BoxGeometry(hl * 2 + ovh * 2, 0.045, slope), pale);
+plane.rotation.x = sgn * Math.atan(pitch);
+plane.position.set(xC, (ridgeY + tipY) / 2 + 0.03, sgn * (hw + ovh) / 2);
+tg.add(plane);
+}
+for (const sgn of [-1, 1]) {
+const shp = new THREE.Shape();
+shp.moveTo(-hw, 0); shp.lineTo(hw, 0); shp.lineTo(0, pitch * hw); shp.closePath();
+const gable = new THREE.Mesh(
+new THREE.ExtrudeGeometry(shp, { depth: wt, bevelEnabled: false }), timber);
+gable.rotation.y = Math.PI / 2;
+gable.position.set(xC + sgn * hl - (sgn > 0 ? wt : 0), eaveY, 0);
+tg.add(gable);
+}
+const cap = new THREE.Mesh(
+new THREE.BoxGeometry(hl * 2 + ovh * 2 + 0.10, 0.07, 0.16), timber);
+cap.position.set(xC, ridgeY + 0.06, 0);
+tg.add(cap);
+} else {
 for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
 const a = new THREE.Vector3(xC + dx, baseY, dz);
 const b = new THREE.Vector3(xC + dx, platY, dz);
@@ -5145,6 +5201,7 @@ new THREE.ConeGeometry(T.w * 0.85, roofH, 4), timber);
 roof.rotation.y = Math.PI / 4;
 roof.position.set(xC, roofY + roofH / 2, 0);
 tg.add(roof);
+}
 group.add(tag(tg, 'tower', T.name, T.what
 || 'The janggundae, the roofed pavilion amidships the commander fights the ship from. '
 + 'At Myeongnyang Yi Sun-sin stood on one of these, in the first ship in the line, '

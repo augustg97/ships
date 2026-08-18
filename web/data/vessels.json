@@ -1853,6 +1853,10 @@
      "the s\u014d-yagura, a deck laid over nearly the whole hull, walled with tate-ita shield planks \u2014 thinner than an atakebune's \u2014 pierced by sama loopholes"
     ],
     [
+     "Yakata, as drawn",
+     "the commander's cabin abaft the mast \u2014 a closed plank house, 4.5 \u00d7 2.8 m to 2.0 m eaves under a ridged plank roof. The form is the Busan scroll's; the dimensions are derived"
+    ],
+    [
      "Oars",
      "40 ro \u2014 the sculling oar of Japan and Korea both \u2014 one man each, worked standing, stem to stern"
     ],
@@ -1973,10 +1977,13 @@
     "tower": {
      "at": 0.66,
      "w": 2.8,
-     "h": 1.6,
+     "len": 4.5,
+     "h": 2.0,
+     "walls": true,
      "name": "Yakata",
-     "what": "The roofed cabin standing on the yagura abaft the mast, where the ship is commanded from. The Busan scroll of 1593 draws one on hull after hull of the anchored fleet; in the Edo peace it grew into the lacquered state cabin of the gozabune."
-    }
+     "what": "The commander's cabin standing on the yagura abaft the mast — a closed plank house under a ridged plank roof, which is the form the Busan scroll of 1593 draws on hull after hull of the anchored fleet. The ship is commanded from it; in the Edo peace it grew into the lacquered state cabin of the gozabune."
+    },
+    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull — the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale — good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; the curtain is not drawn, and that simplification is recorded here."
    }
   },
   {
