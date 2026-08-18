@@ -29,6 +29,11 @@ void main(){
   vec3 L = normalize(uSun);
   vec3 col = uCol;
 
+  /* metres per pixel ≈ dist · 2·tan(17°)/1500 px for the 34° lens — the screen footprint
+     every covering-scale term fades against (the r106 moiré rule: a sub-pixel feature is
+     not a feature, it aliases; fade it to its mean and the far field holds its tone) */
+  float mpp = length(uCam - vP) * 4.1e-4;
+
   if (uMode > 0.5 && uMode < 1.5) {
     /* laid planking */
     float sp = abs(vO.z) / uPlankW;              // seams at half-integers: king plank at 0
@@ -51,9 +56,8 @@ void main(){
        as a near-uniform warm field — so every plank-scale term fades out as the plank's
        screen footprint collapses, which is the surface's own LOD, not a cheat.
        fwidth needs an ES-1.00 extension pragma the checker (rightly) refuses, so the
-       footprint comes from camera distance: metres per pixel ≈ dist · 2·tan(17°)/1500 px
-       for the 34° lens on the app's canvases — a soft fade does not need it exact. */
-    float mpp = length(uCam - vP) * 4.1e-4;
+       footprint comes from the camera distance above — a soft fade does not need it
+       exact. */
     float plankPx = uPlankW / max(mpp, 1e-5);
     float res = clamp(plankPx * 0.5 - 1.0, 0.0, 1.0);   // 0 below 2 px, full from 4 px
     seam = mix(1.0, seam, res);
@@ -64,13 +68,18 @@ void main(){
     col = mix(vec3(0.050, 0.045, 0.040), col, min(seam, butt));   // payed seams
   } else if (uMode > 1.5) {
     /* painted working steel: flush-welded, so no drawn seams — what shows is the plate
-       patchwork, each repainted on its own docking, and a quiet non-slip grit */
+       patchwork, each repainted on its own docking, and a quiet non-slip grit. The
+       plates are metres wide and hold at any range this app views a ship from; the
+       3 cm grit is sub-pixel long before that and takes the fade. */
     vec2 cell = floor(vec2(vO.x / 6.0, vO.z / 2.2));
     col *= 0.96 + 0.10 * (hash(cell * 2.7) - 0.5);
-    col *= 0.965 + 0.035 * noise(vec2(vO.x * 30.0, vO.z * 30.0));
+    float gritRes = clamp((0.033 / max(mpp, 1e-5)) * 0.5 - 1.0, 0.0, 1.0);
+    col *= 0.965 + 0.035 * mix(0.5, noise(vec2(vO.x * 30.0, vO.z * 30.0)), gritRes);
   } else {
-    /* bare timber — the hollowed log, the lashed platform: no laid deck to draw */
-    col *= 0.90 + 0.20 * noise(vec2(vO.x * 6.0, vO.z * 6.0));
+    /* bare timber — the hollowed log, the lashed platform: no laid deck to draw.
+       The tool-mark noise is ~17 cm and fades the same way. */
+    float barRes = clamp((0.17 / max(mpp, 1e-5)) * 0.5 - 1.0, 0.0, 1.0);
+    col *= 0.90 + 0.20 * mix(0.5, noise(vec2(vO.x * 6.0, vO.z * 6.0)), barRes);
   }
 
   float lam = max(dot(N, L), 0.0);

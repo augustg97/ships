@@ -5287,20 +5287,14 @@ const hull = new THREE.Mesh(
 FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
 group.add(tag(hull, 'planking'));
 const cover = deckCovering(S);
-const deckMat = cover.recorded
-? new THREE.ShaderMaterial({
+const deckMat = new THREE.ShaderMaterial({
 vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
 side: THREE.DoubleSide,
 uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
 uCol:    { value: new THREE.Color(cover.col) },
 uMode:   { value: cover.mode },
 uPlankW: { value: cover.plankW || 1 },
-uButtL:  { value: cover.buttL || 1 } } })
-: cover.kind === 'steel'
-? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
-side: THREE.DoubleSide })
-: new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
-side: THREE.DoubleSide });
+uButtL:  { value: cover.buttL || 1 } } });
 group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
 const mats = {
 spar: new THREE.MeshStandardMaterial({ color: 0x6a4d2c, roughness: 0.72, metalness: 0.02 }),

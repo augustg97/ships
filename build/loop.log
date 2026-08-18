@@ -5616,3 +5616,21 @@ Round 105 is complete and live. Summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 62379 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 00:49:59  round starting
+Round 106 is complete and live. Summary:
+
+**The task was the r102 candidate: Azzam's guest terraces read the fleet's gray steel where a yacht's decks are laid teak.** Measured first: terrace floors at (84,94,102) sRGB — blue over red, cold working steel. Two faults stacked, one data and one light.
+
+**What shipped:**
+- **The deck covering is data now.** `hull.deck = {covering, provenance}` with a registry (teak/hinoki/wood/steel/bare); the old `deckSteel`/`deckLaid` heuristic survives only as a labelled fallback the part card names. Azzam records teak from the builder's spec as the BOAT International directory carries it — 2,200 m² of laid teak — and her wrong `deckSteel: true` is gone.
+- **The deck takes the shell's light.** The deck loft was the last MeshStandardMaterial surface in the hull's envelope — the exact two-lighting-models fault r102 measured on the parapet. New DECK_VERT/DECK_FRAG carries the hull's closing recipe on metric planking in hull space: 90 mm strakes, king plank astride the centreline, staggered butts, payed caulk, and the waterway margin a laid deck was owed.
+- **A sub-pixel seam is moiré, and looking caught it:** the first capture drew swirling arcs across the foredeck; plank-scale terms now fade with screen footprint, so the far view is a clean warm field and planks resolve close-in. After-tones: terraces (111,100,83) — the cool-to-warm flip is the number the round was for.
+- **Staged rollout, proven:** only recorded coverings take the new shader this round; both judgements enumerated over the fleet in node show exactly one vessel changes. The fleet-wide flip of the 32 fallback ships is next round's task with a full ratchet budget for its ~40 accepts.
+- **Audit:** new 'deck covering' rule, two clauses, both injection-proven 1/1; clean sweep 33/0.
+
+**Finish:** opening ratchet re-run clean after discarding a self-contaminated pass (56/56 green), ship-azzam moved 0.388%, diff read and accepted with the reason in FRAME-LOG, re-check green, committed as 348b2ae, pushed, and the live stamp **1787042042 confirmed serving**.
+
+**Next round:** the fleet flip onto DECK_FRAG, then the residuals recorded in HANDOFF — the dark lowest terrace span, white stair treads, the house tier roofs' own covering question, QM2's flag, and the Sea wake pass still queued.
+2026-08-18 01:39:15  round finished; HEAD is 348b2ae Round 106: the deck covering becomes a fact of the record, and Azzam's terraces get their teak
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 68692 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 01:49:15  round starting

@@ -8293,28 +8293,22 @@ function buildShip(S, opts) {
      by HULL_FRAG's own sun, the same two-lighting-models fault round 102 measured at
      216 vs 89 sRGB on Azzam's parapet. DECK_FRAG is the shell's closing recipe on a
      metric covering term, sharing the hull material's OWN uSun/uCam uniform objects. */
-  /* ⚠ STAGED ROLLOUT (round 106): only a RECORDED covering takes the DECK shader this
-     round. The 32 unrecorded ships keep the exact material they had — byte-equivalent
-     parameters, proven per ship before shipping — because relighting every weather deck
-     in the fleet moves ~40 baselines, and classifying forty diffs deserves a round's
-     whole ratchet budget, not its tail end. Flipping the fallback onto DECK_FRAG is the
-     next round's opening task; the registry, the record field and the audit rules are
-     all already load-bearing. */
+  /* ⚠ THE r106 STAGED GATE IS GONE (round 107): every weather deck draws in DECK_FRAG,
+     recorded or fallback. Round 106 lit only the recorded covering (azzam) and held the
+     other 32 ships byte-identical, because the fleet-wide relight moves ~40 baselines
+     and classifying forty diffs deserves a round's whole ratchet budget — round 107
+     spent it. The covering is still deckCovering()'s one judgement; the steel grit and
+     bare-timber noise took the plank terms' sub-pixel LOD fade before the fleet took
+     them (r106's moiré rule — those two modes had never rendered). */
   const cover = deckCovering(S);
-  const deckMat = cover.recorded
-    ? new THREE.ShaderMaterial({
-        vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
-        side: THREE.DoubleSide,
-        uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
-                    uCol:    { value: new THREE.Color(cover.col) },
-                    uMode:   { value: cover.mode },
-                    uPlankW: { value: cover.plankW || 1 },
-                    uButtL:  { value: cover.buttL || 1 } } })
-    : cover.kind === 'steel'
-      ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
-                                         side: THREE.DoubleSide })
-      : new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
-                                         side: THREE.DoubleSide });
+  const deckMat = new THREE.ShaderMaterial({
+    vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+    side: THREE.DoubleSide,
+    uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                uCol:    { value: new THREE.Color(cover.col) },
+                uMode:   { value: cover.mode },
+                uPlankW: { value: cover.plankW || 1 },
+                uButtL:  { value: cover.buttL || 1 } } });
   group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
 
   /* ⚠ Lambert has no specular term at all, so every timber came out matte and the whole ship

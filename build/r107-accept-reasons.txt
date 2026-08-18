@@ -1,0 +1,44 @@
+# Round 107 accept reasons — finalized after reading pass-2 diffs.
+# Class: the r106 staged gate is deleted; every weather deck draws in DECK_FRAG,
+# the shell's own one-sun recipe, so the deck can no longer disagree with the
+# shell about the light. Wood fallbacks: class-default planking (150 mm strakes,
+# 6.5 m butts, king plank on the centreline, LOD-faded seams). Steel: flush
+# welded plate with docking patchwork, 3 cm grit LOD-faded. Bare: tool-mark
+# tone, LOD-faded. Controls: ship-azzam must NOT move (already DECK_FRAG);
+# descent/map-floor must NOT move (no ships in frame).
+#
+# frame<TAB>expected group
+shipwright	wood (74's weather deck close, planks should resolve)
+shipwright-ahead	wood
+shipwright-astern	wood
+shipwright-furled	wood
+shipwright-hounds	wood
+shipwright-corbis	wood (corbita)
+ship-dhow	wood
+ship-junk	wood
+ship-canoe	bare (voyaging canoe — first render of mode 0)
+ship-dugout	bare (first render of mode 0)
+ship-trireme	wood
+ship-galley	wood
+ship-galleass	wood
+ship-panokseon	wood
+ship-sekibune	wood
+ship-treasure	wood
+ship-great-eastern	wood
+ship-titanic	wood
+ship-yamato	wood
+ship-preussen	wood
+ship-steamer	wood
+ship-dreadnought	wood
+ship-wyoming	wood
+ship-clipper	wood
+ship-endurance	wood
+ship-usv	steel (first render of mode 2)
+ship-carrier	steel
+ship-container	steel
+ship-ever-given	(no own frame)
+ship-queen-mary-2	steel
+aboard-*	distant fleet decks relit
+action-*	decks seen from above at battle range — moiré check here
+sea-magnified	fleet decks at sea range
+globe-*	should be small or nil (token ships)

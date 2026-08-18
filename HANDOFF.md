@@ -6557,3 +6557,51 @@ record treatment (her visible sheer-level decks are working steel at the bow —
 coverings (pine/teak; hinoki) when sourced properly. (4) The Sea close-up wake
 due-diligence pass (r102), still queued. (5) Endurance forecastle break still waits on
 the RMG original of J9266.
+
+## Round 107 — 2026-08-18 — the whole fleet's decks take the shell's light
+
+**The opening ratchet confirmed round 106 — 56/56 within tolerance** (shipwright-hounds
+0.044%, action-gravelines 0.022%, both under the limit; everything else 0.000%).
+
+**THE TASK WAS r106'S DECLARED REMAINDER: the fleet flip onto DECK_FRAG.** The staged
+gate in buildShip's deckMat is deleted — every weather deck now draws in the shell's
+one-sun recipe, recorded or fallback, so no deck in the fleet is lit by a different sun
+than the hull it caps. The 32 fallback ships resolve exactly as before (enumerated in
+node before and after, build/deck-flip-r107-{before,after}.json, byte-identical): 25
+wood, 5 steel (usv, carrier, container, ever-given, queen-mary-2), 2 bare (dugout,
+voyaging-canoe).
+
+**Before the fleet took them, the two never-rendered modes got the r106 moiré rule.**
+Steel's 3 cm non-slip grit and bare timber's 17 cm tool-mark noise were both sub-pixel
+at fleet range with no LOD fade — the same class as the plank seams r106 caught. The
+metres-per-pixel term is hoisted to the top of DECK_FRAG and both terms now fade to
+their means as their screen footprint collapses; the 6×2.2 m plate patchwork holds at
+any range this app views a ship from and keeps its edge.
+
+**Measured (rule 4, build/deck-tone-r107.json):** the USV's steel deck (87,97,107) →
+(63,70,76) — before, it floated ~25 points brighter than the shell beside it, the exact
+two-lighting-models seam r102 measured on Azzam's parapet; now it sits with the hull.
+The 74's planking (219,213,198) → (214,207,192), still warm, red over blue.
+
+**Verified (rule 1) across every distance regime:** shipwright-furled close-in (planks
+resolve fore-and-aft, gratings and coamings stand against the field), ship-usv (flush
+welded plate, quiet patchwork), ship-dugout (bare rim in the hull's light), ship-qm2
+(steel sliver at the sheer), action-salamis from above at battle range (uniform warm
+fields, NO moiré — the fade holds), globe-default (diff is ship-shaped specks only),
+map-floor (a sea-view ship crosses plan-on: planks parallel the centreline, the king
+plank rule visible in plan). Controls behaved: **ship-azzam 0.000%** (already on
+DECK_FRAG — the flip touched nothing she had), descent*/sea-magnified 0.000%,
+ship-carrier 0.001% (her weather deck hides under the flight deck).
+
+**Ratchet: 39 frames moved, every one classified and accepted with its reason in
+FRAME-LOG** (largest shipwright-furled 2.282% — the bearing that fills the frame with
+deck; map-floor 1.914% — the plan-on ship). Audit 33/0 clean. Built at stamp
+1787044502. Per the r95–r101 pattern the confirming pass is next round's opening check.
+
+**Next:** (1) The r106 residuals: the lowest terrace span's dark floor on Azzam; the
+white stair treads; the HOUSE tier roofs' own covering (a separate surface system —
+the superstructure builder's question). (2) Record the attested coverings where the
+sources are proper: Titanic (pine weather decks, teak where attested), Yamato (hinoki),
+QM2 (her deckSteel guess should become data or stay a labelled fallback). (3) The Sea
+close-up wake due-diligence pass (r102), still queued. (4) Endurance forecastle break
+still waits on the RMG original of J9266.
