@@ -301,6 +301,11 @@
    "name": "wake-plan",
    "path": "/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600",
    "note": "THE WAKE FROM ABOVE \u2014 the container ship at 20 kn, near-plan through the r111 follow-camera grammar (fb/fd/fz). The wake shipped wrong twice (r44 steps, r111 ladder-and-blob) because every addressable camera was deck-level and nearly edge-on: no frame could see the Kelvin pattern at all. Watches the wedge springing from the stem, the curved transverse crests (phase from the dispersion relation, 1.00 on the track to 1.53 at the cusp), the feathered arms, the bow horseshoe with dark water ahead of her, and the turbulent band from the stern."
+  },
+  {
+   "name": "ship-ever-given",
+   "path": "/?frozen=1#v=ship&s=ever-given",
+   "note": "THE TWIN-ISLAND SHIP \u2014 added round 113 with her rebuild from the PMA casualty report. No frame watched her before, which is how a bridge drawn 190 m from its recorded station survived 66 rounds. Watches: the accommodation tower in the fore third (mast at u 0.366, the loading computer's own figure), the dark-green engine casing and stack at u 0.845, EVERGREEN on the shell, EVER GIVEN / PANAMA on the transom, the 17.2 m freeboard wall under a ten-tier stow."
   }
  ]
 }

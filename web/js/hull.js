@@ -3101,6 +3101,11 @@ const PARTS = {
               what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
                   + 'over a stack that may be twelve boxes high, which is why it stands where it '
                   + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
+  livery:   { stage: 7, name: 'Livery',
+              what: 'The operator’s name painted on the shell and the ship’s own name and port '
+                  + 'on the stern. On a ship whose hull is a fifteen-metre wall of plate, the '
+                  + 'lettering is the largest single mark on her — sized to be read from another '
+                  + 'ship, not from a quay.' },
   paddle:   { stage: 4, name: 'Paddle wheels',
               what: 'Great Eastern\'s are 17 m across — taller than a house. She carried a 7.3 m '
                   + 'SCREW as well, and that is why she is such an odd ship: paddles are '
@@ -6637,16 +6642,27 @@ function buildContainers(S, group, coarse) {
   };
   const deckY = H.sheer(0.5);
 
-  /* ── THE LAYOUT IS SET BY THE HOUSE ──────────────────────────────────────────────────
-     The accommodation stands over the engine, right aft, so nothing blocks the crane runs;
-     the stow fills every bay of deck around it. Its stations are fixed here, first, and the
-     bays are laid around them — the reverse order is how a 30 m gap of bare deck opened
-     between the last bay and the house. */
+  /* ── THE LAYOUT IS SET BY THE ISLANDS ────────────────────────────────────────────────
+     The stow fills every bay of deck the islands leave free, so their stations are fixed
+     here, first, and the bays are laid around them — the reverse order is how a 30 m gap
+     of bare deck opened between the last bay and the house. */
   const DK = 2.9;                                       // one deck of the house, in metres
-  const N_DECKS = 8;                                    // cabin decks under the wheelhouse
-  const accX = L * 0.345, accL = L * 0.050, accW = B * 0.70;
+  const N_DECKS = S.deckHouseDecks || 8;                // cabin decks under the wheelhouse
+  /* ── THE ISLAND STATIONS ARE THE RECORD'S, WHERE THE RECORD HAS THEM (round 113) ─────
+     The default is the classic box boat: one island right aft, the engine casing abutting
+     it, because everything forward of the engine room is cargo. But the largest ships
+     built since ~2015 are TWIN-ISLAND — the Imabari 20000 design stands the navigation
+     bridge in the fore third (Ever Given's own loading computer puts her highest point
+     245.35 m forward of the aft perpendicular) and the funnel on its own engine casing
+     semi-aft, so the sightline no longer caps the stow between them. hull.bridgeU and
+     hull.funnelU carry the stations as u from the stem; absent, the defaults reproduce
+     the single-island ship exactly. */
+  const accU = (S.bridgeU !== undefined) ? S.bridgeU : 0.845;
+  const accX = L * (accU - 0.5), accL = L * 0.050, accW = B * 0.70;
   const casL = L * 0.042, casW = B * 0.34;
-  const casX = accX + accL / 2 + casL / 2;              // the engine casing abuts the house
+  const casX = (S.funnelU !== undefined) ? L * (S.funnelU - 0.5)
+             : accX + accL / 2 + casL / 2;              // default: the casing abuts the house
+  const twin = casX - accX > accL;                      // the funnel stands as its own island
 
   const hatch = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.85, metalness: 0.2 });
   const lash = new THREE.MeshStandardMaterial({ color: 0x6d7176, roughness: 0.7, metalness: 0.45 });
@@ -6655,10 +6671,15 @@ function buildContainers(S, group, coarse) {
   /* a bay exists wherever six columns fit and the house does not stand */
   const bays = [];
   for (let x = -L * 0.44 + pitch / 2; x + pitch / 2 < L * 0.48; x += pitch) {
-    const half = Math.min(B * 0.43, deckHalfAt(x - pitch / 2), deckHalfAt(x + pitch / 2)) - lashM;
+    const half = Math.min(B * (S.stowBeamF || 0.43),
+                          deckHalfAt(x - pitch / 2), deckHalfAt(x + pitch / 2)) - lashM;
     const nc = Math.floor((half * 2) / (TEU_W * 1.02));
     if (nc < 6) continue;                               // forward of this is forecastle deck
-    if (x + pitch / 2 > accX - accL / 2 - 3 && x - pitch / 2 < casX + casL / 2 + 3) continue;
+    /* a bay stands nowhere an island stands — one gap for the single-island ship, two
+       when the record separates the bridge from the funnel */
+    const aftGapX = twin ? accX + accL / 2 + 3 : casX + casL / 2 + 3;
+    if (x + pitch / 2 > accX - accL / 2 - 3 && x - pitch / 2 < aftGapX) continue;
+    if (twin && x + pitch / 2 > casX - casL / 2 - 3 && x - pitch / 2 < casX + casL / 2 + 3) continue;
     bays.push([x, nc]);
   }
   const foreBays = bays.filter(b => b[0] < accX).length;
@@ -6667,9 +6688,24 @@ function buildContainers(S, group, coarse) {
        house; the bays abaft the funnel sit lower. ⚠ The peak is CAPPED BY THE BRIDGE — the
        wheelhouse floor is above the tallest stack forward of it, because a bridge that cannot
        see over its own cargo is not a bridge. That is the constraint the audit now asserts. */
-    const t = i / Math.max(1, foreBays - 1);
-    const centreHigh = x > accX ? 5
-                     : Math.max(3, Math.round(4 + 4 * Math.sin(Math.min(1, t * 1.3) * Math.PI * 0.68)));
+    const peak = S.stowTiers || 8;
+    let centreHigh;
+    if (twin) {
+      /* the twin-island profile: moving the bridge forward is what BUYS the tall stow abaft
+         it, so that is where the height goes. The weather still steps the bow-most bays
+         down, the bays beside the funnel island keep a tier of clearance for its uptakes,
+         and the last bay over the mooring deck drops two. */
+      if (x < accX) centreHigh = Math.max(4, peak - 1 - Math.max(0, 2 - i));
+      else {
+        centreHigh = peak;
+        if (Math.abs(x - casX) < casL / 2 + pitch) centreHigh = peak - 1;
+        if (i === bays.length - 1) centreHigh = peak - 2;
+      }
+    } else {
+      const t = i / Math.max(1, foreBays - 1);
+      centreHigh = x > accX ? 5
+                 : Math.max(3, Math.round((peak - 4) + 4 * Math.sin(Math.min(1, t * 1.3) * Math.PI * 0.68)));
+    }
     const stowHalf = nc * TEU_W * 1.02 / 2;
     /* the bay stands on the deck AT ITS OWN STATION — the bow sheer lifts the foredeck
        1.4 m above amidships, and a stow based on the amidships height was buried in it */
@@ -6681,9 +6717,11 @@ function buildContainers(S, group, coarse) {
     hc.position.set(x, bayY + TEU_H * 0.11, 0);
     stack.add(hc);
     const highAt = c => {
-      /* the wings come down: full height on the centreline, two tiers less at the rail */
+      /* the wings come down: full height on the centreline, two tiers less at the rail —
+         except on the twin-island ship, whose forward bridge buys back the SOLAS sightline
+         the wing cut used to pay for, so her top runs nearly flat to a slight shoulder */
       const wing = Math.abs(c - (nc - 1) / 2) / ((nc - 1) / 2 || 1);
-      return Math.max(2, Math.round(centreHigh - wing * wing * 2.6));
+      return Math.max(2, Math.round(centreHigh - wing * wing * (twin ? 1.2 : 2.6)));
     };
     if (coarse) {
       /* ── ⚠ THE MAP HAD NO CONTAINERS AT ALL, AND A CONTAINER SHIP IS HER CARGO ────────
@@ -6884,12 +6922,23 @@ function buildContainers(S, group, coarse) {
      an UPTAKE: it rises out of the engine casing, which is the after part of the accommodation
      block, and the whole column is continuous from the engine room to the sky. Build the casing
      and the funnel has something to stand on — which is also why a real one sits where it does. */
-  const casH = DK * 4;
-  const casing = new THREE.Mesh(new THREE.BoxGeometry(casL, casH, casW), white);
+  /* on the twin-island ship the casing is the funnel's WHOLE island: the uptake column
+     rises from the engine room through the stow's own height, in the operator's hull
+     colour, and only a short stack stands above it. On the single-island ship it stays
+     the low white block abaft the house it always was. */
+  const casH = twin ? TEU_H * ((S.stowTiers || 8) + 0.9) : DK * 4;
+  const casMat = twin
+    ? new THREE.MeshStandardMaterial({ color: S.topside || '#2a4038', roughness: 0.62, metalness: 0.22 })
+    : white;
+  const casing = new THREE.Mesh(new THREE.BoxGeometry(casL, casH, casW), casMat);
   casing.position.set(casX, hs + casH / 2, 0);
-  group.add(tag(casing, 'bridge'));
+  if (twin) group.add(tag(casing, 'funnel', 'Engine casing',
+    'The funnel’s own island: the uptake from the semi-aft engine room, carried '
+    + 'through the height of the stow it stands among. On a twin-island ship the bridge '
+    + 'no longer marks where the engine is — this does.'));
+  else group.add(tag(casing, 'bridge'));
   const fnG = new THREE.Group();
-  const fnH = 13;
+  const fnH = twin ? 6 : 13;
   const fn = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.6, fnH, 20), dark);
   fn.scale.x = 1.6;
   fn.position.set(casX, hs + casH + fnH / 2 - 1, 0);
@@ -6907,6 +6956,77 @@ function buildContainers(S, group, coarse) {
   }
   group.add(tag(fnG, 'funnel', 'Funnel',
     'The uptake from the main engine, carried high enough to keep exhaust clear of the bridge and the deck. On a box boat it stands abaft the accommodation because everything forward of that is cargo.'));
+}
+
+
+/* ── THE LIVERY IS PART OF THE SHIP ────────────────────────────────────────────────────
+ * A modern merchant hull carries her operator's name in letters the height of a house —
+ * on Ever Given the word EVERGREEN spans over a hundred metres of shell and is, to most
+ * viewers, the single most recognisable thing about her. A hull record opts in with
+ * hull.livery = { side, stern: [name, port], … }; the letters are drawn into a canvas one
+ * character at a time (so the tracking can fill the run the photographs show) and stand a
+ * hand's breadth off the shell on the parallel midbody, where the side is a vertical wall.
+ * A plane turned about Y still shows its FRONT face, so neither side mirrors: like the
+ * real ship, the name starts at the bow on one side and at the stern on the other, and
+ * reads left-to-right from both. */
+function buildLivery(S, group) {
+  const H = hullSurface(S);
+  const L = S.lwl, lv = S.livery;
+  if (!lv) return;
+  const paint = '#eef0ec';
+  const makeTex = (lines) => {
+    const cv = document.createElement('canvas');
+    cv.width = 2048;
+    cv.height = lines.length > 1 ? 512 : 256;
+    const cx = cv.getContext('2d');
+    cx.fillStyle = paint;
+    cx.textBaseline = 'alphabetic';
+    const rowH = cv.height / lines.length;
+    lines.forEach((text, r) => {
+      const fs = Math.round(rowH * (lines.length > 1 ? 0.62 : 0.86));
+      cx.font = '700 ' + fs + 'px "Helvetica Neue", Helvetica, Arial, sans-serif';
+      const ws = Array.from(text, ch => cx.measureText(ch).width);
+      const tot = ws.reduce((a, b) => a + b, 0);
+      const run = cv.width * (lines.length > 1 ? 0.42 + 0.4 * (tot / cv.width) : 0.98);
+      const gap = (Math.min(run, cv.width * 0.98) - tot) / Math.max(1, text.length - 1);
+      let x = (cv.width - Math.min(run, cv.width * 0.98)) / 2;
+      const y = rowH * r + rowH * 0.82;
+      Array.from(text).forEach((ch, i) => { cx.fillText(ch, x, y); x += ws[i] + Math.max(0, gap); });
+    });
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    return tex;
+  };
+  const mkMat = tex => new THREE.MeshStandardMaterial({
+    map: tex, transparent: true, roughness: 0.55, metalness: 0.05,
+    polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const deckY = H.sheer(0.5);
+  /* the operator's name amidships, both sides, on the parallel midbody */
+  if (lv.side) {
+    const wM = L * (lv.sideRun || 0.30);
+    const hM = lv.sideH || Math.max(4, S.freeboard * 0.45);
+    const uC = (lv.sideU !== undefined) ? lv.sideU : 0.48;
+    const xC = L * (uC - 0.5);
+    const half = Math.abs(surfacePoint(S, H, uC, 1.0)[2]);
+    const yC = deckY - hM * 0.5 - (lv.sideDrop !== undefined ? lv.sideDrop : 1.6);
+    for (const side of [1, -1]) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM),
+                               mkMat(makeTex([lv.side])));
+      m.position.set(xC, yC, side * (half + 0.15));
+      if (side < 0) m.rotation.y = Math.PI;
+      group.add(tag(m, 'livery'));
+    }
+  }
+  /* the ship's own name and port of registry on the stern */
+  if (lv.stern && lv.stern.length) {
+    const wM = S.beam * 0.42, hM = wM * 0.25;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM), mkMat(makeTex(lv.stern)));
+    m.position.set(L * 0.5 + 0.15, deckY - S.freeboard * 0.42, 0);
+    m.rotation.y = Math.PI / 2;
+    group.add(tag(m, 'livery', 'Stern name',
+      'Name and port of registry, white on the transom — the address every ship carries.'));
+  }
 }
 
 
@@ -8426,6 +8546,7 @@ function buildShip(S, opts) {
   if (FINE && S.transom && S.build !== 'steel' && S.build !== 'iron')
     buildStern(S, group, mats);
   if (S.containers) buildContainers(S, group, !FINE);   /* the map needs her cargo too */
+  if (S.livery) buildLivery(S, group);                  /* and her name reads at map scale */
   if (S.wingSail) buildWingSail(S, group, mats);
   if (FINE && S.boats) buildBoats(S, group, mats);
   if (S.flightDeck) buildFlightDeck(S, group, mats);

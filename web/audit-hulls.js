@@ -1944,6 +1944,23 @@
           `stack top ${(part.container.y[1] - deckY).toFixed(1)} m above deck, ` +
           `house top ${(part.bridge.y[1] - deckY).toFixed(1)} m`);
 
+    /* ⚠ THE ISLANDS STAND WHERE THE RECORD STANDS THEM (round 113). Ever Given's bridge
+       was drawn right aft for 66 rounds because the builder hard-coded the classic
+       single-island layout, while her own loading computer puts her highest point — the
+       bridge mast — 245.35 m forward of the aft perpendicular. A hull whose record
+       carries bridgeU or funnelU must build that island within 3% of length of the
+       recorded station; a record field the builder silently ignores is the class this
+       round found. */
+    for (const [fld, key] of [['bridgeU', 'bridge'], ['funnelU', 'funnel']]) {
+      if (H[fld] === undefined || !part[key]) continue;
+      const want = (H[fld] - 0.5) * H.lwl;
+      const got = (part[key].x[0] + part[key].x[1]) / 2;
+      if (Math.abs(got - want) > H.lwl * 0.03)
+        say(v.id, `${key} island off its recorded station`,
+            `record ${fld} = ${H[fld]} puts it at x ${want.toFixed(1)} m; ` +
+            `built centroid x ${got.toFixed(1)} m`);
+    }
+
     /* ── THE WINDING MUST AGREE WITH THE DECLARED NORMALS (round 35). ─────────────────
        buildDeckGeometry declared every deck normal (0,1,0) and wound its triangles the other
        way, so three.js's double-sided lighting flip — which trusts the winding — inverted

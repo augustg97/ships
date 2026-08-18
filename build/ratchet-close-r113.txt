@@ -1,0 +1,53 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-container               http://localhost:8149/?frozen=1#v=ship&s=container
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-container                  0.012%     0.003  ok
+
+  all frames within tolerance.
+
+── ship-container exit 0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-off                   http://localhost:8149/?frozen=1#e=7&f=boxroute
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-off                      0.000%     0.000  ok
+
+  all frames within tolerance.
+
+── aboard-off exit 0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  wake-plan                       0.000%     0.000  ok
+
+  all frames within tolerance.
+
+── wake-plan exit 0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · globe-modern                 http://localhost:8149/?frozen=1#e=7&t=2000
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  globe-modern                    0.006%     0.001  ok
+
+  all frames within tolerance.
+
+── globe-modern exit 0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-ever-given                                   NEW — no baseline
+
+  1 frame(s) have no baseline: ship-ever-given
+  → run capture, look at the images, then commit them.
+
+  all frames within tolerance.
+
+  ship-ever-given promoted to baseline, reason logged in /Users/augustgweon/Ships/Research/baselines/FRAME-LOG.md

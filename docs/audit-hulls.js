@@ -1303,6 +1303,15 @@ part.container.y[1] > part.bridge.y[1] - 2.0)
 say(v.id, 'the bridge cannot see over the stow',
 `stack top ${(part.container.y[1] - deckY).toFixed(1)} m above deck, ` +
 `house top ${(part.bridge.y[1] - deckY).toFixed(1)} m`);
+for (const [fld, key] of [['bridgeU', 'bridge'], ['funnelU', 'funnel']]) {
+if (H[fld] === undefined || !part[key]) continue;
+const want = (H[fld] - 0.5) * H.lwl;
+const got = (part[key].x[0] + part[key].x[1]) / 2;
+if (Math.abs(got - want) > H.lwl * 0.03)
+say(v.id, `${key} island off its recorded station`,
+`record ${fld} = ${H[fld]} puts it at x ${want.toFixed(1)} m; ` +
+`built centroid x ${got.toFixed(1)} m`);
+}
 {
 const bad = {};
 g.traverse(o => {

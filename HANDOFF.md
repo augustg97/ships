@@ -6993,3 +6993,88 @@ programme (r106–110) and the wake programme (r102, r111–112) are both comple
 Endurance forecastle break still waits on the RMG original of J9266. (3) Azzam crest
 residual (r108): radome pedestals and cluster base plates sit on teak; check the real
 mast deck covering if a better plate arrives.
+
+## Round 113 — 2026-08-18 — the ship that stopped the canal gets her bridge back, a third from the bow, where her own papers put it
+
+**The opening ratchet confirmed round 112 — all 57 frames within tolerance** (45+ at 0.000%,
+board-salamis 0.009%, nothing else near a limit), captured clean before any edit landed.
+
+**THE TASK: the queue and the r51 survey ordering both stand exhausted, so the survey re-ran
+on the current 33 hulls (build/survey-r113.json). The next-crudest vessel never given a
+dedicated round is ever-given (#2, 408 tris/m) — and she had NO baseline frame, the same
+structural blindness that hid Endurance's funnel (r103).** Surveyed from twelve bearings and
+measured part by part, against the record fetched this round.
+
+**THE RECORD IS HER OWN CASUALTY REPORT, AND IT CONTRADICTED THE MODEL THREE WAYS.** The
+Panama Maritime Authority report R-026-2021-DIAM (fetched, read, figures extracted):
+
+- **The bridge was 190 m off its recorded station.** The builder hard-codes the classic
+  single-island layout (accX = L·0.345, casing abutting), so she wore her tower right aft
+  with the funnel inside it. The Imabari 20000 design is TWIN-ISLAND, and the report's
+  voyage-plan page carries the ship's loading computer stating the highest point — the
+  bridge mast — 245.35 m forward of the aft perpendicular on LBP 387.00: u 0.366. The GA
+  plan (Fig. 2, ~1.04 px/m, ±4 m) reads the tower centre 0.367 and the funnel casing 0.82,
+  and the Rotterdam photographs show the dark-green casing standing alone among the stacks.
+- **The freeboard was drawn near double.** hull.freeboard carried 30.0; depth moulded is
+  32.90 m (Table 1, vessel certificates), so the deck stands 17.2 m over the water at her
+  15.7 m draught. (The statutory 10.226 m summer freeboard is to a lower freeboard deck —
+  the provenance says why neither 30 nor 10 is the drawn number.)
+- **The hull was bare of the one thing everyone knows her by.** EVERGREEN spans over a
+  hundred metres of shell in the photographs; the model had no lettering at all.
+
+**The class fix (rule 2): the builder now reads island stations from the record.**
+hull.bridgeU / funnelU / deckHouseDecks / stowTiers / stowBeamF; absent, the defaults
+reproduce the single-island ship exactly — proven by the ratchet: ship-container 0.012%,
+aboard-off 0.000%, wake-plan 0.000%, globe-modern 0.006%, all within tolerance (the 0.012%
+is sub-tolerance silhouette drift from accU's float representation, not a flagged move).
+The twin-island stow profile carries its height ABAFT the bridge — moving the bridge
+forward is what buys the tall stow, so that is where the height goes — with the weather
+stepping the bow bays down, a tier of clearance beside the funnel island, two off over the
+mooring deck, and a near-flat top (the forward bridge buys back the sightline the wing cut
+paid for). New buildLivery(): hull.livery draws operator name amidships both sides and
+name/port on the transom, letters tracked per character into a CanvasTexture standing a
+hand's breadth off the parallel midbody. A plane turned about Y shows its FRONT face, so
+neither side mirrors — like the real ship, the name starts at the bow on one side and the
+stern on the other.
+
+**Measured (rule 4, build/measure-ever-given-r113{,-after}.txt):** radar mast u 0.363–0.369
+— centre 0.366, the record's own figure, exact; mast top 60.78 m over water against the
+loading computer's 60.26 at ~15.4 m draught (0.5 m over at her deeper drawn draught);
+deck 17.20 = 32.90 − 15.70; engine casing centre u 0.845; stack top 43.6 m (ten tiers),
+stow 55.8 m across (22 rows drawn; the real ship stows 23 — one row under, below any
+frame's resolution, bound stated in provenance); EVERGREEN u 0.330–0.630, letter top 1.6 m
+below the deck edge; stern name on the transom y 6.9–13.1. Breadth 62.06 m is the bridge
+WINGS at B·1.05 — deliberate, the berthing sightline. Residual: drawn LOA 402.12 vs record
+399.98 (+0.5%, the loft's stem/stern rake class, pre-existing; she was −1.9 m before).
+
+**Verified (rule 1, twelve spin bearings read + the new baseline):** tower forward with
+wings and orange boat, green casing with black stack aft among the stacks, letters read
+correctly from both sides and astern, no float, no z-fight at any bearing. Rule 0 on
+ship-ever-given: reads as a rendered vessel on water; three facts a viewer can name — she
+is an Evergreen ship, the name is on the shell; her bridge stands a third from the bow
+with the funnel three-quarters aft, the twin-island layout of the newest box boats; she is
+loaded ten high on a dark-green hull with the boot-top just showing.
+
+**Audit 33/0 clean, one new rule (round-113 class): a hull whose record carries bridgeU or
+funnelU must build that island within 3% of length of the recorded station — a record
+field the builder silently ignores is exactly the class this round found.**
+
+**Ratchet: NOT run fleet-wide this round — the 80-minute watchdog left no room for a
+27-minute full check after the targeted ones.** The five frames that share the changed
+code were checked solo (listed above, all within tolerance) and the NEW ship-ever-given
+baseline was accepted with its reason in FRAME-LOG. ⚠ **Next round's opening check is the
+confirming pass for the other 52 frames** — expected 0.000% everywhere (no other hull
+reads the new fields), but expectation is not verification; if anything moved, this round
+owns it.
+
+**Deployed: stamp 1787075239.** Live verify below.
+
+**Next:** (1) The generic `container` type-ship carries the same unattested freeboard 30.0
+— a real ship of her dims (400 m, 61 m beam) has depth ~30–33 m → freeboard ~15–17; same
+class as this round's fix but a TYPE ship, so decide it as a labelled-fallback question
+(rule 10), not a copy-paste. (2) A Sea-view frame for the evergiven voyage (era 7) would
+watch her at sea level; only the Shipwright watches her today. (3) Endurance forecastle
+break still waits on the RMG original of J9266. (4) Azzam crest residual (r108) unchanged.
+(5) The survey continues: next never-surveyed by the fresh ranking is the galleass block
+(3105 tris/m, r87-built) — but she was built to her own round's record; prefer the r113
+survey json's floating/boxy columns when choosing.

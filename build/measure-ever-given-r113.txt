@@ -1,0 +1,21 @@
+Ever Given   record: LOA 399.94 m  LWL 383 m  beam 59 m  draught 15.7 m
+  model extent   x  -206.55 ..  +191.50   =  398.05 m   (record LOA 399.94)   Δ -1.89 m
+  model height   y   -16.58 ..   +64.88   =   81.46 m   above water 64.88 m
+  model breadth  z         ..   +31.14   =   62.28 m   (record beam 59)   Δ +3.28 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Bulbous bow                 -0.039   0.049   33.93  -15.70   -2.13   6.68
+  Planking                    -0.031   1.000  395.00  -15.70   32.20  29.50
+  Weather deck — painted ste  -0.031   1.000  395.00   30.00   32.26  29.50
+  Stem                        -0.031   0.104   51.87  -15.08   32.20   1.62
+  Keel                         0.000   1.000  383.00  -16.58  -12.55   1.62
+  Rail                         0.015   0.965  363.98   30.00   33.31  29.78
+  Forecastle                   0.018   0.062   16.86   31.74   34.59   5.37
+  Foremast                     0.039   0.041    0.90   34.59   46.59   0.45
+  Containers                   0.061   0.970  348.14   30.00   51.28  24.24
+  Accommodation and bridge     0.820   0.912   35.41   30.00   56.54  31.14
+  Lifeboat                     0.836   0.860    8.90   35.10   39.71  23.35
+  Radar mast                   0.847   0.853    2.32   56.54   64.88   3.50
+  Funnel                       0.879   0.904    9.42   40.40   55.30   2.70
+  Sternpost                    0.896   1.000   39.87  -15.05   30.00   1.62
+  Rudder                       0.944   0.979   13.41  -14.91   -1.26   0.80

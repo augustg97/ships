@@ -1773,6 +1773,11 @@ bridge:   { stage: 3, name: 'Accommodation and bridge',
 what: 'Pushed to one end so nothing blocks the crane runs. The bridge has to see '
 + 'over a stack that may be twelve boxes high, which is why it stands where it '
 + 'does — and why the newest ships have moved it FORWARD of the boxes instead.' },
+livery:   { stage: 7, name: 'Livery',
+what: 'The operator’s name painted on the shell and the ship’s own name and port '
++ 'on the stern. On a ship whose hull is a fifteen-metre wall of plate, the '
++ 'lettering is the largest single mark on her — sized to be read from another '
++ 'ship, not from a quay.' },
 paddle:   { stage: 4, name: 'Paddle wheels',
 what: 'Great Eastern\'s are 17 m across — taller than a house. She carried a 7.3 m '
 + 'SCREW as well, and that is why she is such an odd ship: paddles are '
@@ -4148,27 +4153,44 @@ return Math.abs(surfacePoint(S, H, u, 1.0)[2]);
 };
 const deckY = H.sheer(0.5);
 const DK = 2.9;
-const N_DECKS = 8;
-const accX = L * 0.345, accL = L * 0.050, accW = B * 0.70;
+const N_DECKS = S.deckHouseDecks || 8;
+const accU = (S.bridgeU !== undefined) ? S.bridgeU : 0.845;
+const accX = L * (accU - 0.5), accL = L * 0.050, accW = B * 0.70;
 const casL = L * 0.042, casW = B * 0.34;
-const casX = accX + accL / 2 + casL / 2;
+const casX = (S.funnelU !== undefined) ? L * (S.funnelU - 0.5)
+: accX + accL / 2 + casL / 2;
+const twin = casX - accX > accL;
 const hatch = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.85, metalness: 0.2 });
 const lash = new THREE.MeshStandardMaterial({ color: 0x6d7176, roughness: 0.7, metalness: 0.45 });
 const pitch = TEU_L * 1.06;
 const lashM = B * 0.02;
 const bays = [];
 for (let x = -L * 0.44 + pitch / 2; x + pitch / 2 < L * 0.48; x += pitch) {
-const half = Math.min(B * 0.43, deckHalfAt(x - pitch / 2), deckHalfAt(x + pitch / 2)) - lashM;
+const half = Math.min(B * (S.stowBeamF || 0.43),
+deckHalfAt(x - pitch / 2), deckHalfAt(x + pitch / 2)) - lashM;
 const nc = Math.floor((half * 2) / (TEU_W * 1.02));
 if (nc < 6) continue;
-if (x + pitch / 2 > accX - accL / 2 - 3 && x - pitch / 2 < casX + casL / 2 + 3) continue;
+const aftGapX = twin ? accX + accL / 2 + 3 : casX + casL / 2 + 3;
+if (x + pitch / 2 > accX - accL / 2 - 3 && x - pitch / 2 < aftGapX) continue;
+if (twin && x + pitch / 2 > casX - casL / 2 - 3 && x - pitch / 2 < casX + casL / 2 + 3) continue;
 bays.push([x, nc]);
 }
 const foreBays = bays.filter(b => b[0] < accX).length;
 bays.forEach(([x, nc], i) => {
+const peak = S.stowTiers || 8;
+let centreHigh;
+if (twin) {
+if (x < accX) centreHigh = Math.max(4, peak - 1 - Math.max(0, 2 - i));
+else {
+centreHigh = peak;
+if (Math.abs(x - casX) < casL / 2 + pitch) centreHigh = peak - 1;
+if (i === bays.length - 1) centreHigh = peak - 2;
+}
+} else {
 const t = i / Math.max(1, foreBays - 1);
-const centreHigh = x > accX ? 5
-: Math.max(3, Math.round(4 + 4 * Math.sin(Math.min(1, t * 1.3) * Math.PI * 0.68)));
+centreHigh = x > accX ? 5
+: Math.max(3, Math.round((peak - 4) + 4 * Math.sin(Math.min(1, t * 1.3) * Math.PI * 0.68)));
+}
 const stowHalf = nc * TEU_W * 1.02 / 2;
 const bayY = Math.max(H.sheer(Math.max(0.001, 0.5 + (x - pitch / 2) / L)),
 H.sheer(Math.min(0.999, 0.5 + (x + pitch / 2) / L)));
@@ -4178,7 +4200,7 @@ hc.position.set(x, bayY + TEU_H * 0.11, 0);
 stack.add(hc);
 const highAt = c => {
 const wing = Math.abs(c - (nc - 1) / 2) / ((nc - 1) / 2 || 1);
-return Math.max(2, Math.round(centreHigh - wing * wing * 2.6));
+return Math.max(2, Math.round(centreHigh - wing * wing * (twin ? 1.2 : 2.6)));
 };
 if (coarse) {
 for (let hI = 0; hI < centreHigh; hI++) {
@@ -4317,12 +4339,19 @@ bG.add(dav);
 }
 group.add(tag(bG, 'boat', 'Lifeboat'));
 }
-const casH = DK * 4;
-const casing = new THREE.Mesh(new THREE.BoxGeometry(casL, casH, casW), white);
+const casH = twin ? TEU_H * ((S.stowTiers || 8) + 0.9) : DK * 4;
+const casMat = twin
+? new THREE.MeshStandardMaterial({ color: S.topside || '#2a4038', roughness: 0.62, metalness: 0.22 })
+: white;
+const casing = new THREE.Mesh(new THREE.BoxGeometry(casL, casH, casW), casMat);
 casing.position.set(casX, hs + casH / 2, 0);
-group.add(tag(casing, 'bridge'));
+if (twin) group.add(tag(casing, 'funnel', 'Engine casing',
+'The funnel’s own island: the uptake from the semi-aft engine room, carried '
++ 'through the height of the stow it stands among. On a twin-island ship the bridge '
++ 'no longer marks where the engine is — this does.'));
+else group.add(tag(casing, 'bridge'));
 const fnG = new THREE.Group();
-const fnH = 13;
+const fnH = twin ? 6 : 13;
 const fn = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.6, fnH, 20), dark);
 fn.scale.x = 1.6;
 fn.position.set(casX, hs + casH + fnH / 2 - 1, 0);
@@ -4340,6 +4369,63 @@ fnG.add(pipe);
 }
 group.add(tag(fnG, 'funnel', 'Funnel',
 'The uptake from the main engine, carried high enough to keep exhaust clear of the bridge and the deck. On a box boat it stands abaft the accommodation because everything forward of that is cargo.'));
+}
+function buildLivery(S, group) {
+const H = hullSurface(S);
+const L = S.lwl, lv = S.livery;
+if (!lv) return;
+const paint = '#eef0ec';
+const makeTex = (lines) => {
+const cv = document.createElement('canvas');
+cv.width = 2048;
+cv.height = lines.length > 1 ? 512 : 256;
+const cx = cv.getContext('2d');
+cx.fillStyle = paint;
+cx.textBaseline = 'alphabetic';
+const rowH = cv.height / lines.length;
+lines.forEach((text, r) => {
+const fs = Math.round(rowH * (lines.length > 1 ? 0.62 : 0.86));
+cx.font = '700 ' + fs + 'px "Helvetica Neue", Helvetica, Arial, sans-serif';
+const ws = Array.from(text, ch => cx.measureText(ch).width);
+const tot = ws.reduce((a, b) => a + b, 0);
+const run = cv.width * (lines.length > 1 ? 0.42 + 0.4 * (tot / cv.width) : 0.98);
+const gap = (Math.min(run, cv.width * 0.98) - tot) / Math.max(1, text.length - 1);
+let x = (cv.width - Math.min(run, cv.width * 0.98)) / 2;
+const y = rowH * r + rowH * 0.82;
+Array.from(text).forEach((ch, i) => { cx.fillText(ch, x, y); x += ws[i] + Math.max(0, gap); });
+});
+const tex = new THREE.CanvasTexture(cv);
+tex.colorSpace = THREE.SRGBColorSpace;
+tex.anisotropy = 4;
+return tex;
+};
+const mkMat = tex => new THREE.MeshStandardMaterial({
+map: tex, transparent: true, roughness: 0.55, metalness: 0.05,
+polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+const deckY = H.sheer(0.5);
+if (lv.side) {
+const wM = L * (lv.sideRun || 0.30);
+const hM = lv.sideH || Math.max(4, S.freeboard * 0.45);
+const uC = (lv.sideU !== undefined) ? lv.sideU : 0.48;
+const xC = L * (uC - 0.5);
+const half = Math.abs(surfacePoint(S, H, uC, 1.0)[2]);
+const yC = deckY - hM * 0.5 - (lv.sideDrop !== undefined ? lv.sideDrop : 1.6);
+for (const side of [1, -1]) {
+const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM),
+mkMat(makeTex([lv.side])));
+m.position.set(xC, yC, side * (half + 0.15));
+if (side < 0) m.rotation.y = Math.PI;
+group.add(tag(m, 'livery'));
+}
+}
+if (lv.stern && lv.stern.length) {
+const wM = S.beam * 0.42, hM = wM * 0.25;
+const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM), mkMat(makeTex(lv.stern)));
+m.position.set(L * 0.5 + 0.15, deckY - S.freeboard * 0.42, 0);
+m.rotation.y = Math.PI / 2;
+group.add(tag(m, 'livery', 'Stern name',
+'Name and port of registry, white on the transom — the address every ship carries.'));
+}
 }
 function buildHead(S, group, mats) {
 S.__catheads = null;
@@ -5360,6 +5446,7 @@ if (FINE) buildScrews(S, group);
 if (FINE && S.transom && S.build !== 'steel' && S.build !== 'iron')
 buildStern(S, group, mats);
 if (S.containers) buildContainers(S, group, !FINE);
+if (S.livery) buildLivery(S, group);
 if (S.wingSail) buildWingSail(S, group, mats);
 if (FINE && S.boats) buildBoats(S, group, mats);
 if (S.flightDeck) buildFlightDeck(S, group, mats);

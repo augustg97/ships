@@ -5727,3 +5727,28 @@ The task was the oldest carried item — the Sea close-up wake due-diligence pas
 /Users/augustgweon/Ships/build/loop-round.sh: line 85:   106 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 08:09:27  round starting
+Round 112 is done, deployed, and verified live at stamp 1787069027.
+
+**What the round did.** The queue item was r111's consort wakes: `uWake*` carried one hero, so the treasure fleet's companions and every mate glided on unmarked water. The wake block in SEA_FRAG is now a per-ship function looped over a small uniform array — `uWakePose[6]`, `uWakeBody[6]`, `uWakeN` — filled from every hull the fleet loop places, subject first, then nearest. Three conservative early-outs make an out-of-reach source cost a few dot products, and `uWakeN` defaults to 0 in the Shipwright, Action and yard, so water without ships costs what it always cost.
+
+**The probe found a 66-round-old fault.** Listing zhenghe's three sources showed two at the same position: the r46 station formula gave the mates stations {0, +1}, and station 0 is the subject's own — a duplicate treasure ship had stood inside her since round 46, invisible because two identical hulls in one place draw as one. The mates now take the map's station set minus hers; the duplicate became the port consort, and the fleet is finally the three-hull formation r46 claimed. `probe-wake` now exits non-zero when any two sources sit within 0.1 loa, so the class stays closed.
+
+**Evidence.** Before/after captured from an r111 worktree served on :8151 (`wake_capture.py` gained `--port`; `web/fields/` is gitignored and must be symlinked into a worktree or the app never reaches FRAME_READY). Consort churn moved (81,109,117)→(106,126,131), the canoe consort's fan +11 R counts, the subject's own wake and all controls byte-identical — which also proves the shader refactor pixel-exact for a single ship, as does `wake-plan` at 0.000%. The closing ratchet moved exactly one frame of 57: `aboard-treasure` 2.530% / 0.704, diff read (the port consort, her wake, panel bleed-through; everything else black), accepted with the class reason. Audit 33/0.
+
+One procedural lesson went into HANDOFF: piping a ratchet check through `head` ate the closing report, and the verdicts had to be recomputed from `_current` with the tool's own metric. Checks go to a file now.
+
+**Next round:** the vessel survey resumes from the round-23 queue — the deck-covering and wake programmes are both complete. Endurance still waits on the RMG plate; the Azzam crest residual stands.
+2026-08-18 09:11:03  round finished; HEAD is 7431aab Round 112: every hull under way makes a wake, and the duplicate inside the subject comes out
+/Users/augustgweon/Ships/build/loop-round.sh: line 85:  6456 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 09:21:03  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 09:33:03  round starting
+API Error: 500 Internal server error. This is a server-side issue, usually temporary — try again in a moment. If it persists, check https://status.claude.com.
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-18 09:35:49  round finished; HEAD is 7431aab Round 112: every hull under way makes a wake, and the duplicate inside the subject comes out
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 13727 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 09:45:49  round starting

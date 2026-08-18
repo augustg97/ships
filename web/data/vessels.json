@@ -4367,13 +4367,28 @@
     "masts": [],
     "build": "steel",
     "containers": true,
-    "loa": 399.94,
-    "lwl": 383.0,
-    "beam": 59.0,
+    "loa": 399.98,
+    "lwl": 387.0,
+    "beam": 58.8,
     "draught": 15.7,
-    "freeboard": 30.0,
+    "freeboard": 17.2,
     "cm": 0.98,
-    "year": 2018
+    "year": 2018,
+    "bridgeU": 0.361,
+    "funnelU": 0.845,
+    "deckHouseDecks": 11,
+    "stowTiers": 10,
+    "stowBeamF": 0.5,
+    "livery": {
+     "side": "EVERGREEN",
+     "stern": [
+      "EVER GIVEN",
+      "PANAMA"
+     ],
+     "sideRun": 0.3,
+     "sideU": 0.48
+    },
+    "stationProvenance": "Twin-island stations from the ship's OWN papers, not a photograph: the PMA casualty report R-026-2021-DIAM carries her voyage-plan particulars (Fig. 6, loading computer) \u2014 keel to highest point 75.71 m, air draft 60.26 m at ~15.4 m draught, and the highest point (the bridge mast) 245.35 m forward of the aft perpendicular on LBP 387.00 m, which is u 0.366 from the FP; bridgeU 0.361 lands the drawn mast there. Depth moulded 32.90 m and breadth 58.80 m from the same report's Table 1 (vessel certificates); freeboard 17.2 = depth less the 15.7 m draught (the statutory 10.226 m summer freeboard is to a lower freeboard deck, not the weather deck the model draws). Funnel casing at funnelU 0.845 READ off the GA plan reproduced in the report (Fig. 2, 711x315 px, ~1.04 px/m \u2014 good to +/-4 m, no finer), cross-checked against Commons broadsides (kees torn 51343xxx series: dark-green casing amid the stacks, short black stack above). Stow: 23 rows on the real ship; the drawn TEU grid fits 22 across the 58.8 m beam (one row under, below any frame's resolution), 10 tiers on deck midships-aft per the Rotterdam photographs. EVERGREEN side lettering span and stern name from the same photographs; bow name NOT drawn \u2014 the flare there is curved and a flat decal would lie about it."
    },
    "rows": [
     [
