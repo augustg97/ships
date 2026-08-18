@@ -14,6 +14,16 @@ say(v.id, 'floor attests steam but claims muscle',
 }
 if (!v.hull) continue;
 const H = v.hull;
+if (H.deck) {
+if (!/^(teak|hinoki|wood|steel|bare)$/.test(H.deck.covering || ''))
+say(v.id, 'deck covering unknown to the model',
+`hull.deck.covering = ${JSON.stringify(H.deck.covering)}; the registry `
++ 'draws teak/hinoki/wood/steel/bare, and an unknown word falls back to '
++ 'the heuristic silently');
+else if (!(H.deck.provenance && H.deck.provenance.length > 20))
+say(v.id, 'deck covering with no provenance',
+`hull.deck.covering = ${H.deck.covering} but no source is recorded`);
+}
 if ((H.year || 0) < 1950) {
 const recordText = JSON.stringify([v.rows || [], (v.polar || {}).anchor || {},
 (v.polar || {}).floor || {}, v.sub || '']);

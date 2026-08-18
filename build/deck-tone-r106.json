@@ -1,0 +1,33 @@
+{
+ "before_terrace_lowest": [
+  84,
+  94,
+  102
+ ],
+ "before_terrace_span2": [
+  113,
+  122,
+  130
+ ],
+ "before_foredeck": [
+  143,
+  155,
+  159
+ ],
+ "after_terrace_lowest": [
+  111,
+  100,
+  83
+ ],
+ "after_terrace_span2": [
+  150,
+  131,
+  105
+ ],
+ "after_foredeck": [
+  143,
+  154,
+  157
+ ],
+ "note": "mean sRGB in fixed boxes of the b=195/z=1.1/l=30 bare capture, before and after round 106. Before: cold blue-gray steel on guest decks (deckSteel:true). After: laid teak in the shell light recipe, seams distance-faded (sub-pixel seams alias)."
+}

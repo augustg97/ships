@@ -5599,3 +5599,20 @@ Round 104 is complete and live. The lock was my own wrapper's; the round ran cle
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 12736 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 00:05:32  round starting
+Round 105 is complete and live. Summary:
+
+**The situation at start:** the 22:35 firing did a full round of work — Endurance's quarter boats — and the 80-minute watchdog killed it during its closing ratchet, leaving the tree uncommitted. This round verified everything it left, from the tree, and finished the protocol. All of it held up.
+
+**What the work was, now verified and shipped:**
+- **Quarter boats in radial davits**, from the record: `davitBoats` on Endurance hangs one 6.7 m cutter per side at u 0.80, outboard of the shell, keel above the rail — the boats in every Hurley plate. The station is recorded as bounded (±0.04), not measured, because both plates showing the boats are foreshortened. I read the regenerated port, quarter, stern and plan captures: boats outboard, davit arcs over each, clear of the water, symmetric.
+- **The 1.83 m funnel-row mystery resolved** — it was the instrument, twice over: `measure_ship` applied two chained `Box3` transforms, which re-boxes corners and inflates tall parts under the pose's ~3° heel (the 1.26 m funnel read 1.70 m); and the waste-steam pipe was an untagged mesh folding into the funnel's row. One composed matrix and a `'Steam pipe'` tag later, the funnel measures exactly its 1.26 m.
+- **Audit:** new three-clause davit-boat rule, proven by the three injection scripts the dead round left (stripped 1/1, buried 2/2, in-the-water 2/2), then a clean sweep — 33 hulls, 0 problems.
+- **The forecastle break stays unmodelled**, with the reason now in `stationProvenance`: the web plan at 16.9 px/m can't carry a clean break station; it needs the RMG original.
+
+**Finish:** ratchet 56/56 green (ship-endurance 0.000% against the baseline accepted at 23:40, ship-yamato 0.001% neighbour view, no baseline moved this round), site rebuilt, HANDOFF round-105 entry appended, committed as 232e4b4, pushed, and the live stamp **1787037185 confirmed serving** on the third poll.
+
+**Next round:** the r102 candidates — the Azzam terrace-teak material decision (a decision before code), then the Sea close-up wake pass.
+2026-08-18 00:39:59  round finished; HEAD is 232e4b4 Round 105: the sea boats swing outboard, and the funnel's extra half-metre was the ruler's
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 62379 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 00:49:59  round starting

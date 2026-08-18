@@ -6471,3 +6471,89 @@ Built at stamp 1787037185; live verify in the round log.
 whole deck-loft material decision — decide the material model before writing code), then
 the Sea close-up wake due-diligence pass against the current fleet. After those, the
 Endurance forecastle break waits on the RMG original of J9266.
+
+## Round 106 — 2026-08-18 — the deck covering becomes a fact of the record, and Azzam's terraces get their teak
+
+**The opening ratchet confirmed round 105 — all 56 frames within tolerance, nothing
+carried.** (Procedural note: the first opening pass was discarded and re-run clean — this
+round's own edits had landed in web/ while it rendered, which contaminates the later
+frames. The re-run held the working tree stashed until the pass finished.)
+
+**THE TASK WAS THE r102 CANDIDATE: the terrace decks read the fleet's gray steel where a
+yacht's guest decks are laid teak.** Measured before touching anything (rule 4,
+build/deck-tone-r106.json): terrace floors (84,94,102) and (113,122,130) sRGB — blue over
+red, cold working steel, on the guest decks of a Lürssen yacht. Two faults stacked, one
+data and one light:
+
+**1. The record had no vocabulary for a deck covering.** `deckSteel: true` was all Azzam
+could say, and it said the wrong thing: the builder's spec, as the BOAT International
+Superyacht Directory carries it, is a TEAK deck on a steel hull under an aluminium
+superstructure — press copy repeats 2,200 m² of laid teak. The covering is now data:
+`hull.deck = { covering, provenance }`, drawn from a registry in hull.js
+(teak / hinoki / wood / steel / bare, each with mode, colour and CLASS-default plank
+dimensions — no plate of any ship here can resolve a 90 mm strake, and the provenance
+says so). The old deckSteel/deckLaid heuristic survives ONLY as the fallback, and the
+part card names which one answered (rule 10). Azzam records teak; her deckSteel flag is
+gone.
+
+**2. The deck loft was the last MeshStandardMaterial surface in the hull's envelope** —
+scene-lit through ACES beside a shell and terrace walls lit by HULL_FRAG's own sun, the
+exact two-lighting-models fault round 102 measured at 216 vs 89 on the parapet. New
+DECK_VERT/DECK_FRAG is the shell's closing recipe (shared uSun/uCam uniform objects, the
+r102 pattern) on a metric covering term in HULL space: planks parallel to the centreline
+at the class's width, seams at (n+½)·width so a king plank straddles the centreline,
+staggered butts, payed ~10 mm caulk, per-plank tone. The waterway mesh remains the
+margin plank, and a laid covering now gets one (Azzam had none under deckSteel).
+
+**⚠ A SUB-PIXEL SEAM IS NOT A SEAM, IT IS MOIRÉ — caught by looking, fixed by LOD.** The
+first capture drew broad swirling arcs across the foredeck: a 90 mm plank at fleet
+viewing distance is under a pixel and the seam field aliases. Every plank-scale term now
+fades with the plank's screen footprint (camera-distance metres-per-pixel; fwidth needs
+an ES-1.00 extension pragma the GLSL checker rightly refuses), zero below 2 px, full
+from 4 px. Second capture: clean warm field far, planking resolving close.
+
+**⚠ STAGED ROLLOUT — only a RECORDED covering takes the new shader this round.** The 32
+unrecorded ships keep byte-identical material parameters, PROVEN by enumerating both
+judgements over the whole fleet in node: exactly one vessel changes (azzam). Reason: the
+fleet-wide relight moves ~40 baselines and classifying forty diffs deserves a round's
+whole ratchet budget, not the tail end of one that spent 25 minutes on a contaminated
+opening pass. **Flipping the fallback coverings onto DECK_FRAG is the NEXT ROUND'S
+task** — the registry, record field, shader and audit rules are already load-bearing;
+the flip is deleting the `cover.recorded` gate in buildShip's deckMat and accepting the
+fleet's frames with the class reason. Check the steel-mode noise terms for the same
+sub-pixel aliasing before accepting.
+
+**Audit: one new rule with two clauses, both injection-proven, clean sweep 33/0.** 'deck
+covering unknown to the model' (misspell azzam's to 'marble': fires 1/1 — hull.js falls
+back silently, so the record would be ignored without a word) and 'deck covering with no
+provenance' (strip it: fires 1/1 — a stated material with nothing bounding the claim is
+the Azzam-cluster fault in a new field). inject-deck-unknown.js /
+inject-deck-no-provenance.js.
+
+**Verified (rule 1):** four bare captures read this round — stern quarter far (terraces
+and foredeck a clean warm teak field, stair flights white against it), astern close (the
+far foredeck clean after the LOD fix), bow close (teak deck edge and margin along the
+sheer). Measured after (same boxes): terraces (111,100,83) and (150,131,105) — red over
+blue now, the cool→warm flip is the number the round was for. The 'foredeck' box turned
+out to sit on surfaces that did not change (it reads ~(143,154,157) both sides) — the
+terrace boxes carry the measurement.
+
+**Ratchet:** ship-azzam 0.388% / mean |Δ| 0.111, diff read before accepting (foredeck
+sliver, the waterway hairline along the sheer, terrace floors, the stern's ghost through
+the frosted fleet panel — the r102 class), accepted with the reason in FRAME-LOG,
+re-check green. All other frames proven untouched by the staged gate + the clean opening
+pass; next round's opening check is the confirming pass, per the r95–r101 pattern.
+Built at stamp 1787042042.
+
+**Next:** (1) THE FLEET FLIP, above — the round-sized remainder of this class fix.
+(2) Then the residuals: the lowest terrace span read dark in the far capture — check
+whether the transom-most step's floor is deck loft or another surface before judging;
+the stair flights stay white steel (defensible, but a yacht would tread them in teak);
+the HOUSE tier roofs are still MeshStandard white and on the real Azzam the upper guest
+decks are teak too — that is the superstructure builder's own covering question, a
+separate surface system from the deck loft. (3) QM2's deckSteel:true deserves the same
+record treatment (her visible sheer-level decks are working steel at the bow — plausible
+— but it is a guess wearing a flag). Titanic and Yamato can record their attested
+coverings (pine/teak; hinoki) when sourced properly. (4) The Sea close-up wake
+due-diligence pass (r102), still queued. (5) Endurance forecastle break still waits on
+the RMG original of J9266.

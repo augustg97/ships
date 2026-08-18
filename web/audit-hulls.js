@@ -59,6 +59,25 @@
     if (!v.hull) continue;
     const H = v.hull;
 
+    /* ── A RECORDED DECK COVERING MUST BE DRAWABLE, AND MUST SAY WHERE IT CAME FROM
+       (round 106). The covering became data (`hull.deck`) when Azzam's teak arrived;
+       hull.js falls back silently to the old heuristic for any covering it does not
+       know, so a typo'd covering would print an "INFERRED" card against a record that
+       states the fact — the record ignored without a word. And a stated material with
+       no source is the Azzam-cluster fault in a new field: nothing bounds what the
+       claim can support. Sits before the geometry rules because it is a fact about
+       the record. */
+    if (H.deck) {
+      if (!/^(teak|hinoki|wood|steel|bare)$/.test(H.deck.covering || ''))
+        say(v.id, 'deck covering unknown to the model',
+            `hull.deck.covering = ${JSON.stringify(H.deck.covering)}; the registry `
+            + 'draws teak/hinoki/wood/steel/bare, and an unknown word falls back to '
+            + 'the heuristic silently');
+      else if (!(H.deck.provenance && H.deck.provenance.length > 20))
+        say(v.id, 'deck covering with no provenance',
+            `hull.deck.covering = ${H.deck.covering} but no source is recorded`);
+    }
+
     /* ── A RECORDED STEAM PLANT MUST SHOW ITS UPTAKE (round 103) ────────────────────────
        Endurance carried a 350 ihp coal-fired auxiliary — her card says so, her polar's
        steam floor says so — and for 40 rounds she drew no funnel at all, because funnels

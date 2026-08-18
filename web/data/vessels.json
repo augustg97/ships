@@ -4872,7 +4872,6 @@
     "faired": true,
     "bowFlare": 0.14,
     "formProvenance": "READ off the same broadside at 8.33 px/m (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0). houseRamp: every tier front is raked so its head lands on the next front's foot, one continuous sweep from the foredeck to the crest, where the model had four vertical steps. faired: the topside between the waterline and the sheer is an unbroken gloss surface with no visible plate lands, tone patchwork or streaking anywhere along her 180.6 m. bowFlare 0.14: the topsides lean out over the fine entry; the plate cannot give a number at this bearing, so this is set to the smallest value that reads as flare in the bow capture and is marked DERIVED, not measured. capM 0.2: the dark strip at the deck edge measures 0.11-0.33 m on the broadside (median 0.2) where the model's beam-derived capping drew 0.53 m.",
-    "deckSteel": true,
     "sternSteps": {
      "provenance": "MEASURED 2026-08-17 (round 98) off the kept broadside at 8.96 px/m, anchors x332/x1950/y941, silhouette envelope sampled every 0.0025 u (Research/segment-azzam-envelope.py). Aft of the house the stern descends in terraces, and the tops RAKE within each terrace - the silhouette is the outer bulwark cap, sweeping down toward each break: 9.9-9.6 m to the break at u 0.884 (the main-deck bulwark; round 97's coarser sampling read its run-out as 0.888), then 6.9-7.0 to 0.931, 6.6-6.1 to 0.946, 5.7-4.9 to 0.9625, 4.9-4.2 to 0.975, and 3.5-3.0 at the transom (flat 3.0 aft of u 0.9825). Occluders excluded from the read: the ensign u 0.83-0.87, davits or staff at 0.900, 0.9225, 0.930-0.9325 and 0.945-0.9475. topM [fwd, aft] is the measured cap line; deckM is DERIVED as the span's low cap minus a 0.9-1.0 m parapet, because the plate cannot see the decks behind their own bulwarks. The first span's deck is the hull's recorded 9.0 m sheer (deckM absent); its parapet is the 0.6-0.9 m the plate reads above it. ROUND 102: the 0.884 riser (the only full-height drop) now carries a tinted band and centreline doors - the delivery plate reads that face dark against the white, but its ~6.6 px/m cannot place panes, so the ARRANGEMENT is inferred. Twin flights close each lesser break, tops flush with the deck above; they stand behind the next bulwark aft, which is why the broadside envelope never saw them. No pool is drawn: none is attested at any measurable position.",
      "steps": [
@@ -4942,6 +4941,10 @@
        "deckM": 2.1
       }
      ]
+    },
+    "deck": {
+     "covering": "teak",
+     "provenance": "RECORDED: the builder's specification as carried by the BOAT International Superyacht Directory entry for Azzam (Lurssen, 2013) - teak deck, steel hull, aluminium superstructure; press copy repeats 2,200 m2 of laid teak. Plank width and butt pattern are CLASS defaults for a yacht's laid teak (90 mm strakes), below what any plate of her can resolve."
     }
    },
    "rows": [

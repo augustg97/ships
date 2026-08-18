@@ -384,9 +384,33 @@ g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx);
 return g;
 }
-function deckIsSteel(S) {
-return (S.build === 'steel' || S.build === 'iron')
+const DECK_COVERINGS = {
+teak:   { mode: 1, col: 0x8a7250, plankW: 0.09, buttL: 2.4,
+name: 'Weather deck — laid teak' },
+hinoki: { mode: 1, col: 0xb3a17c, plankW: 0.20, buttL: 7.0,
+name: 'Weather deck — laid hinoki' },
+wood:   { mode: 1, col: 0xa08a66, plankW: 0.15, buttL: 6.5,
+name: 'Weather deck — laid planking' },
+steel:  { mode: 2, col: 0x494e54, plankW: 0, buttL: 1,
+name: 'Weather deck — painted steel' },
+bare:   { mode: 0, col: 0xa08a66, plankW: 0, buttL: 1,
+name: 'Deck — bare timber' },
+};
+function deckCovering(S) {
+const rec = S.deck && S.deck.covering;
+if (rec && DECK_COVERINGS[rec])
+return Object.assign({ kind: rec, recorded: true,
+what: DECK_COVERINGS[rec].name.replace('Weather deck — ', 'The covering is ')
++ ', from the record. ' + (S.deck.provenance || '') }, DECK_COVERINGS[rec]);
+const heurSteel = (S.build === 'steel' || S.build === 'iron')
 && (S.deckSteel !== undefined ? S.deckSteel : !!(S.flightDeck || S.containers));
+const kind = heurSteel ? 'steel' : S.deckLaid === false ? 'bare' : 'wood';
+return Object.assign({ kind, recorded: false,
+what: 'INFERRED — no recorded covering: ' + (heurSteel
+? 'a working steel motor ship’s weather deck is bare painted plate.'
+: kind === 'bare' ? 'this hull carries no laid deck at all.'
+: 'a planked ship’s weather deck is laid fore-and-aft. Plank dimensions are '
++ 'class defaults, below what the sources can resolve.') }, DECK_COVERINGS[kind]);
 }
 function buildDeckGeometry(S, NU = 120) {
 const H = hullSurface(S);
@@ -2116,7 +2140,7 @@ const railMat = (S.build === 'steel' || S.build === 'iron')
 : pale;
 group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
 }
-if (!deckIsSteel(S) && S.deckLaid !== false) {
+if (deckCovering(S).mode === 1) {
 const pos = [], idx = [];
 const NU = 90; let vbase = 0;
 const w = Math.min(Math.max(B * 0.02, 0.15), 0.45);
@@ -5262,13 +5286,22 @@ group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
 const hull = new THREE.Mesh(
 FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
 group.add(tag(hull, 'planking'));
-const steelDeck = deckIsSteel(S);
-const deckMat = steelDeck
+const cover = deckCovering(S);
+const deckMat = cover.recorded
+? new THREE.ShaderMaterial({
+vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+side: THREE.DoubleSide,
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+uCol:    { value: new THREE.Color(cover.col) },
+uMode:   { value: cover.mode },
+uPlankW: { value: cover.plankW || 1 },
+uButtL:  { value: cover.buttL || 1 } } })
+: cover.kind === 'steel'
 ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
 side: THREE.DoubleSide })
 : new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
 side: THREE.DoubleSide });
-group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck'));
+group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
 const mats = {
 spar: new THREE.MeshStandardMaterial({ color: 0x6a4d2c, roughness: 0.72, metalness: 0.02 }),
 woodDark: new THREE.MeshStandardMaterial({ color: 0x54402a, roughness: 0.78 }),

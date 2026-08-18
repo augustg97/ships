@@ -660,11 +660,43 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
 }
 
 /* The deck: a cap across the sheer line, slightly cambered as a real deck is. */
+/* ── THE DECK COVERING IS A FACT OF THE RECORD, NOT A GUESS OFF THE HULL (round 106) ────
+   Azzam's guest terraces read the fleet's gray steel because `deckSteel: true` was the only
+   vocabulary the model had — and the builder's spec, as the BOAT International directory
+   carries it, says 2,200 m² of laid teak. So the record may now state the covering itself:
+   `hull.deck = { covering, provenance }`, drawn from this registry. The old deckSteel /
+   deckLaid heuristic remains ONLY as the fallback, and the part card names which one
+   answered (rule 10: a fallback is labelled as one). Plank dimensions are CLASS defaults —
+   no plate of any ship here can resolve a 90 mm strake — and the card says that too. */
+const DECK_COVERINGS = {
+  teak:   { mode: 1, col: 0x8a7250, plankW: 0.09, buttL: 2.4,
+            name: 'Weather deck — laid teak' },
+  hinoki: { mode: 1, col: 0xb3a17c, plankW: 0.20, buttL: 7.0,
+            name: 'Weather deck — laid hinoki' },
+  wood:   { mode: 1, col: 0xa08a66, plankW: 0.15, buttL: 6.5,
+            name: 'Weather deck — laid planking' },
+  steel:  { mode: 2, col: 0x494e54, plankW: 0, buttL: 1,
+            name: 'Weather deck — painted steel' },
+  bare:   { mode: 0, col: 0xa08a66, plankW: 0, buttL: 1,
+            name: 'Deck — bare timber' },
+};
 /* the weather deck keys off what the DECK was, not what the hull was — one judgement,
    asked in one place, so the deck material and the deck furniture cannot disagree */
-function deckIsSteel(S) {
-  return (S.build === 'steel' || S.build === 'iron')
+function deckCovering(S) {
+  const rec = S.deck && S.deck.covering;
+  if (rec && DECK_COVERINGS[rec])
+    return Object.assign({ kind: rec, recorded: true,
+      what: DECK_COVERINGS[rec].name.replace('Weather deck — ', 'The covering is ')
+            + ', from the record. ' + (S.deck.provenance || '') }, DECK_COVERINGS[rec]);
+  const heurSteel = (S.build === 'steel' || S.build === 'iron')
       && (S.deckSteel !== undefined ? S.deckSteel : !!(S.flightDeck || S.containers));
+  const kind = heurSteel ? 'steel' : S.deckLaid === false ? 'bare' : 'wood';
+  return Object.assign({ kind, recorded: false,
+    what: 'INFERRED — no recorded covering: ' + (heurSteel
+      ? 'a working steel motor ship’s weather deck is bare painted plate.'
+      : kind === 'bare' ? 'this hull carries no laid deck at all.'
+      : 'a planked ship’s weather deck is laid fore-and-aft. Plank dimensions are '
+        + 'class defaults, below what the sources can resolve.') }, DECK_COVERINGS[kind]);
 }
 
 function buildDeckGeometry(S, NU = 120) {
@@ -3489,7 +3521,7 @@ function buildFittings(S, group, mats) {
      steel deck does not, and a hull with no laid deck at all — the record's
      deckLaid: false, the dugout and the voyaging canoe — has no margin to plank.
      It hugs the deck's own edge, asked of surfacePoint like the deck itself. */
-  if (!deckIsSteel(S) && S.deckLaid !== false) {
+  if (deckCovering(S).mode === 1) {
     const pos = [], idx = [];
     const NU = 90; let vbase = 0;
     const w = Math.min(Math.max(B * 0.02, 0.15), 0.45);   // a plank's width, from the beam
@@ -8254,15 +8286,36 @@ function buildShip(S, opts) {
      deck and a container ship's weather deck are bare steel. ⚠ And the covering is a fact
      of the SHIP, not of two cargo types: the round-35 winding fix lit the decks properly
      for the first time and exposed a planked timber deck on the 2026 composite USV, which
-     the heuristic below had been guessing at invisibly. `deckSteel` in the record overrides
-     the guess. */
-  const steelDeck = deckIsSteel(S);
-  const deckMat = steelDeck
-    ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
-                                       side: THREE.DoubleSide })
-    : new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
-                                       side: THREE.DoubleSide });
-  group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck'));
+     the heuristic below had been guessing at invisibly. The record states the covering
+     itself now (`hull.deck`, round 106); `deckSteel`/`deckLaid` are the labelled fallback.
+     ── AND THE DECK TAKES THE SHELL'S LIGHT. It was the last MeshStandardMaterial surface
+     in the hull's envelope — scene-lit through ACES beside a shell and terrace walls lit
+     by HULL_FRAG's own sun, the same two-lighting-models fault round 102 measured at
+     216 vs 89 sRGB on Azzam's parapet. DECK_FRAG is the shell's closing recipe on a
+     metric covering term, sharing the hull material's OWN uSun/uCam uniform objects. */
+  /* ⚠ STAGED ROLLOUT (round 106): only a RECORDED covering takes the DECK shader this
+     round. The 32 unrecorded ships keep the exact material they had — byte-equivalent
+     parameters, proven per ship before shipping — because relighting every weather deck
+     in the fleet moves ~40 baselines, and classifying forty diffs deserves a round's
+     whole ratchet budget, not its tail end. Flipping the fallback onto DECK_FRAG is the
+     next round's opening task; the registry, the record field and the audit rules are
+     all already load-bearing. */
+  const cover = deckCovering(S);
+  const deckMat = cover.recorded
+    ? new THREE.ShaderMaterial({
+        vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+        side: THREE.DoubleSide,
+        uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                    uCol:    { value: new THREE.Color(cover.col) },
+                    uMode:   { value: cover.mode },
+                    uPlankW: { value: cover.plankW || 1 },
+                    uButtL:  { value: cover.buttL || 1 } } })
+    : cover.kind === 'steel'
+      ? new THREE.MeshStandardMaterial({ color: 0x494e54, roughness: 0.85, metalness: 0.25,
+                                         side: THREE.DoubleSide })
+      : new THREE.MeshStandardMaterial({ color: 0xa08a66, roughness: 0.80,
+                                         side: THREE.DoubleSide });
+  group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
 
   /* ⚠ Lambert has no specular term at all, so every timber came out matte and the whole ship
      read as cardboard under any lighting. Standard gives wood a low, broad sheen — which is
