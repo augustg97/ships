@@ -5119,7 +5119,13 @@
     ],
     "funnelRake": 0,
     "buff": "#26241f",
-    "stationProvenance": "Masts, funnel, deckhouses and overhangs READ off the Framnaes longitudinal-section plan (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m along the hull \u2014 stations good to \u00b10.5 m, no finer), anchored at the stem and counter LWL crossings; mast-gap ratio and funnel station cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m: fore-main/main-mizzen 1.12, funnel 45% of main\u2192mizzen). Trucks from the same broadside at 12.6 px/m: fore 34.3 m, main 35.2 m, mizzen 29.3 m over the water, main the tallest \u2014 the old record drew the fore at 49 m (27.5 m lower through the square-stack rule) and the main at 31.7. Funnel at 0.677: the plan reads 0.670 +/- 0.015 and the boiler casing must seat inside the house whose forward end it rises from. Funnel black: it reads as dark as the black hull in every plate where masts read pale; height 5.7 m over the rail at the broadside\u2019s scale. No forward deckhouse: the plan shows a boat on skids between fore and main, and no photograph shows a house there."
+    "davitBoats": [
+     {
+      "u": 0.8,
+      "lM": 6.7
+     }
+    ],
+    "stationProvenance": "Masts, funnel, deckhouses and overhangs READ off the Framnaes longitudinal-section plan (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m along the hull \u2014 stations good to \u00b10.5 m, no finer), anchored at the stem and counter LWL crossings; mast-gap ratio and funnel station cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m: fore-main/main-mizzen 1.12, funnel 45% of main\u2192mizzen). Trucks from the same broadside at 12.6 px/m: fore 34.3 m, main 35.2 m, mizzen 29.3 m over the water, main the tallest \u2014 the old record drew the fore at 49 m (27.5 m lower through the square-stack rule) and the main at 31.7. Funnel at 0.677: the plan reads 0.670 +/- 0.015 and the boiler casing must seat inside the house whose forward end it rises from. Funnel black: it reads as dark as the black hull in every plate where masts read pale; height 5.7 m over the rail at the broadside\u2019s scale. No forward deckhouse: the plan shows a boat on skids between fore and main, and no photograph shows a house there. Quarter boats (davitBoats): a canvas-covered boat hangs outboard in radial davits on the port quarter in the Hurley night plate and two stand on the starboard side in the full-sail plate; both plates are bow-on and foreshortened, so the station is bounded, not measured \u2014 abaft the aft house (plan, 0.781) and clear of the counter, u 0.80 \u00b1 0.04. Length 6.7 m: the expedition's cutters (Dudley Docker, Stancomb Wills) as recorded; the James Caird measured 6.9. Kept: the forecastle break \u2014 the web plan at 16.9 px/m cannot carry a clean break station or height (the deck lines there are one to two px apart); needs the RMG original before it is modelled."
    },
    "rows": [
     [

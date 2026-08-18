@@ -2275,6 +2275,54 @@ sk.position.set((u - 0.5) * L + d * bl, deckAtU(u) + bl * 0.012, 0);
 group.add(tag(sk, 'boat', 'Boat skids'));
 }
 }
+if (S.davitBoats && S.davitBoats.length) {
+const iron = new THREE.MeshStandardMaterial(
+{ color: 0x2a2723, roughness: 0.55, metalness: 0.45 });
+for (const db of S.davitBoats) {
+const bl = db.lM;
+const bb = bl / 3.4;
+const qSpec = {
+loa: bl, lwl: bl * 0.94, beam: bb, draught: bl * 0.075, freeboard: bl * 0.105,
+cm: 0.62, wlPower: 2.6, stemFineness: 0.06, sternFineness: 0.42, transom: 0.20,
+forefoot: 0.26, run: 0.30, riseF: 0.55, riseA: 0.30, sheerBow: 0.9, sheerStern: 0.6,
+tumblehome: 0.0, stemRake: 0.06, sternRake: 0.02, strakes: 9, masts: [],
+};
+const qGeo = buildHullGeometry(qSpec, 40, 14);
+for (const sgn of [-1, 1]) {
+const [bx, railY, railZ] = surfacePoint(S, H, db.u, 1);
+const bz = sgn * (railZ + bb * 0.55);
+const keelY = railY + 0.25;
+const bm = new THREE.Mesh(qGeo, pale);
+bm.position.set(bx, keelY + bl * 0.075, bz);
+group.add(tag(bm, 'boat', 'Quarter boat',
+'The sea boat, swung outboard in radial davits and kept there at sea: a boat '
++ 'stowed inboard takes minutes of tackle work to launch, and a man overboard '
++ 'has seconds. Canvas-covered against spray and, down here, against ice.'));
+const headY = keelY + bl * 0.075 + bl * 0.105 + 0.55;
+const reach = Math.abs(bz) - (railZ - 0.12);
+for (const e of [-1, 1]) {
+const dx = bx + e * bl * 0.46;
+const postZ = sgn * (railZ - 0.12);
+const hp = headY - (railY - 0.5);
+const post = new THREE.Mesh(
+new THREE.CylinderGeometry(0.055, 0.068, hp, 10), iron);
+post.position.set(dx, railY - 0.5 + hp / 2, postZ);
+group.add(tag(post, 'boat', 'Davit'));
+const arc = new THREE.Mesh(
+new THREE.TorusGeometry(reach, 0.052, 8, 14, Math.PI / 2), iron);
+arc.rotation.y = sgn * Math.PI / 2;
+arc.position.set(dx, headY, postZ + sgn * reach);
+group.add(tag(arc, 'boat', 'Davit'));
+const tipY = headY + reach;
+const endY = keelY + bl * 0.075 + bl * 0.105;
+const fall = new THREE.Mesh(
+new THREE.CylinderGeometry(0.018, 0.018, tipY - endY, 6), iron);
+fall.position.set(dx, (tipY + endY) / 2, bz);
+group.add(tag(fall, 'boat', 'Davit fall'));
+}
+}
+}
+}
 }
 function buildTop(r, mat, mastR) {
 const g = new THREE.Group();
@@ -2940,7 +2988,9 @@ pgeo.applyMatrix4(new THREE.Matrix4().set(
 0, 0,     0, 1));
 const pipe = new THREE.Mesh(pgeo, black);
 pipe.position.set(-ri * 1.25, rootY + Lp / 2, 0);
-g.add(pipe);
+g.add(tag(pipe, 'funnel', 'Steam pipe',
+'The waste-steam pipe alongside the uptake — what actually roars when the safety '
++ 'valves lift.'));
 g.position.set((u - 0.5) * S.lwl, y, 0);
 group.add(tag(g, 'funnel'));
 }

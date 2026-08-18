@@ -27,7 +27,12 @@ MEASURE = """() => {
     const g = o.geometry;
     if (!g.boundingBox) g.computeBoundingBox();
     const b = new THREE.Box3().copy(g.boundingBox);
-    b.applyMatrix4(o.matrixWorld).applyMatrix4(inv);
+    /* ⚠ ONE COMPOSED MATRIX, NOT TWO BOX TRANSFORMS. Box3.applyMatrix4 re-boxes the eight
+       corners, so chaining world-then-inverse inflates every tall part by height x tilt
+       wherever the pose carries a heel: Endurance's 1.26 m funnel measured 1.70 m athwart
+       and her 0.16 m steam pipe 0.58 m, off a ~3 degree list. Compose first — for a
+       root-level pose the rotation cancels EXACTLY and the box is the geometry's own. */
+    b.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld));
     bbAll.union(b);
     // walk up for the nearest tagged ancestor
     let name = null;

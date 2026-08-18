@@ -3691,6 +3691,71 @@ function buildFittings(S, group, mats) {
       group.add(tag(sk, 'boat', 'Boat skids'));
     }
   }
+
+  /* ── QUARTER BOATS IN RADIAL DAVITS, FROM THE RECORD: `davitBoats: [{u, lM}]` ────────
+     A working ship keeps her sea boats swung OUTBOARD, because a boat on skids takes minutes
+     of tackle work to launch and a man overboard has seconds. Each entry hangs a boat on
+     each side at station u, length lM in metres — Endurance's pair at the quarters is in
+     every Hurley plate, canvas-covered, keel above the rail. The boat comes from the same
+     hull generator as the ship carrying it (the skid boat's own rule), and every position
+     is sampled off surfacePoint at the boat's own station, so a fuller or finer hull moves
+     its boats with its side. */
+  if (S.davitBoats && S.davitBoats.length) {
+    const iron = new THREE.MeshStandardMaterial(
+      { color: 0x2a2723, roughness: 0.55, metalness: 0.45 });
+    for (const db of S.davitBoats) {
+      const bl = db.lM;
+      const bb = bl / 3.4;                              // the launch proportions, as amidships
+      const qSpec = {
+        loa: bl, lwl: bl * 0.94, beam: bb, draught: bl * 0.075, freeboard: bl * 0.105,
+        cm: 0.62, wlPower: 2.6, stemFineness: 0.06, sternFineness: 0.42, transom: 0.20,
+        forefoot: 0.26, run: 0.30, riseF: 0.55, riseA: 0.30, sheerBow: 0.9, sheerStern: 0.6,
+        tumblehome: 0.0, stemRake: 0.06, sternRake: 0.02, strakes: 9, masts: [],
+      };
+      const qGeo = buildHullGeometry(qSpec, 40, 14);
+      for (const sgn of [-1, 1]) {
+        const [bx, railY, railZ] = surfacePoint(S, H, db.u, 1);
+        const bz = sgn * (railZ + bb * 0.55);           // centreline clear of the shell
+        const keelY = railY + 0.25;                     // hung high — keel above the rail
+        const bm = new THREE.Mesh(qGeo, pale);
+        bm.position.set(bx, keelY + bl * 0.075, bz);
+        group.add(tag(bm, 'boat', 'Quarter boat',
+          'The sea boat, swung outboard in radial davits and kept there at sea: a boat '
+          + 'stowed inboard takes minutes of tackle work to launch, and a man overboard '
+          + 'has seconds. Canvas-covered against spray and, down here, against ice.'));
+        /* the davits: a round iron bar rising through the rail and curving outboard in a
+           quarter circle, one at each end of the boat, with a fall from the arc's tip to
+           the boat's hoisting ring. Radial pattern, 1912's own. */
+        const headY = keelY + bl * 0.075 + bl * 0.105 + 0.55;  // above the gunwale
+        const reach = Math.abs(bz) - (railZ - 0.12);    // post inside the rail to over the boat
+        for (const e of [-1, 1]) {
+          const dx = bx + e * bl * 0.46;
+          const postZ = sgn * (railZ - 0.12);
+          const hp = headY - (railY - 0.5);             // socketed below the rail
+          const post = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.055, 0.068, hp, 10), iron);
+          post.position.set(dx, railY - 0.5 + hp / 2, postZ);
+          group.add(tag(post, 'boat', 'Davit'));
+          /* the arc: quarter torus in the athwartships plane, from the post head (tangent
+             vertical) over to the fall point above the boat's centreline (tangent horizontal) */
+          const arc = new THREE.Mesh(
+            new THREE.TorusGeometry(reach, 0.052, 8, 14, Math.PI / 2), iron);
+          arc.rotation.y = sgn * Math.PI / 2;           // into the YZ plane, bending outboard:
+          /* arc angle 0 lands on the post head (tangent vertical), π/2 over the boat's
+             centreline (tangent horizontal) — checked against both signs of sgn */
+          arc.position.set(dx, headY, postZ + sgn * reach);
+          group.add(tag(arc, 'boat', 'Davit'));
+          /* the fall, from the arc tip down to the boat's end */
+          const tipY = headY + reach;
+          const endY = keelY + bl * 0.075 + bl * 0.105;
+          const fall = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.018, 0.018, tipY - endY, 6), iron);
+          fall.position.set(dx, (tipY + endY) / 2, bz);
+          group.add(tag(fall, 'boat', 'Davit fall'));
+        }
+      }
+    }
+  }
 }
 
 /* ── the TOP: the platform at the head of a lower mast ─────────────────────────────────
@@ -4849,7 +4914,13 @@ function buildFunnel(S, group) {
       0, 0,     0, 1));
     const pipe = new THREE.Mesh(pgeo, black);
     pipe.position.set(-ri * 1.25, rootY + Lp / 2, 0);
-    g.add(pipe);
+    /* tagged, because an untagged mesh folds into its parent's row and fattens it: the r103
+       audit read Endurance's funnel 1.83 m fore-and-aft because this pipe, nameless, merged
+       into the stack's own bounding box (and the r99 rule already says the picker must be
+       able to name every part) */
+    g.add(tag(pipe, 'funnel', 'Steam pipe',
+      'The waste-steam pipe alongside the uptake — what actually roars when the safety '
+      + 'valves lift.'));
     g.position.set((u - 0.5) * S.lwl, y, 0);
     group.add(tag(g, 'funnel'));
   }

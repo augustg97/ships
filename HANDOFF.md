@@ -6422,3 +6422,52 @@ against the one drawn amidships; the forecastle break is not modelled as a raise
 the funnel row in measure_ship reads 1.83 m wide against a 1.26 m stack. Then the r102
 candidates: the terrace-deck teak question on Azzam (a whole deck-loft material
 decision), and the Sea close-up wake due-diligence pass against the current fleet.
+
+## Round 105 — 2026-08-18 — the sea boats swing outboard, and the funnel's extra half-metre was the ruler's
+
+**The 22:35 firing did this round's work and the 80-minute watchdog killed it during its
+closing ratchet — the tree arrived uncommitted.** This firing verified everything it left,
+found all of it sound, and finished the protocol. Nothing below was taken on trust: every
+check was rerun from the working tree.
+
+**The quarter boats hang in radial davits now, from the record.** `davitBoats: [{u, lM}]`
+on Endurance — one boat per side at u 0.80 ± 0.04 (bounded, not measured: both plates
+that show the boats are bow-on and foreshortened; abaft the aft house at the plan's
+0.781, clear of the counter), length 6.7 m as the expedition's cutters are recorded.
+The boat reuses the ship's own hull generator; every position samples surfacePoint at
+the boat's own station, so a fuller hull moves its boats with its side. Davits are the
+1912 radial pattern: a round iron bar socketed below the rail, quarter-torus arc bending
+outboard, a fall from the arc tip to the gunwale. Verified on the regenerated profile
+captures (port, quarter, stern, plan read this round): one boat per side, keel above the
+rail, davit arcs over each boat, clear of the water.
+
+**The 1.83 m funnel row was two instruments' faults stacked, not the model's.**
+measure_ship chained `Box3.applyMatrix4(world)` then `.applyMatrix4(inv)` — each call
+re-boxes the eight corners, so a ~3° heel inflated every tall part by height × tilt:
+the 1.26 m funnel read 1.70 m athwart and the 0.16 m steam pipe 0.58 m. The fix composes
+one matrix (`inv × world`), where a root-level pose cancels exactly. And the waste-steam
+pipe alongside the uptake was an untagged mesh, so it folded into the funnel's row and
+fattened it fore-and-aft; it is tagged 'Steam pipe' now, its own row, and the picker can
+name it (the r99 rule). Funnel row after: 1.26 m against a 1.26 m stack.
+
+**Audit: one new rule with three clauses, all injection-proven, clean sweep 33/0.**
+'davit boat declared but not drawn' (strip the meshes: fires 1/1), 'davit boat buried in
+the shell' (shift 1.8 m inboard: fires 2/2, the r58 burial direction — the inboard edge
+must stand outboard of surfacePoint's own half-breadth at the boat's station), 'davit
+boat in the water' (drop 2.8 m: fires 2/2). The generic declared-but-not-drawn rule
+cannot see this class because the skid boat already populates part.boat.
+
+**The forecastle break stays unmodelled, and the record now says why:** the web plan at
+16.9 px/m draws the deck lines one to two px apart there — no clean break station or
+height survives that scale. It needs the RMG original before it is modelled. Recorded in
+`hull.stationProvenance`, not just here.
+
+**Ratchet: 56 frames, exit 0, all within tolerance.** ship-endurance 0.000% against the
+baseline accepted at 23:40 (FRAME-LOG carries the reason); ship-yamato 0.001% — the
+neighbour view took the boats without a visible move. No baseline moved this round.
+Built at stamp 1787037185; live verify in the round log.
+
+**Next:** the r102 candidates, in order: the terrace-deck teak question on Azzam (a
+whole deck-loft material decision — decide the material model before writing code), then
+the Sea close-up wake due-diligence pass against the current fleet. After those, the
+Endurance forecastle break waits on the RMG original of J9266.

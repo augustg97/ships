@@ -5580,3 +5580,22 @@ Round 103 is complete and live. Summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85:  1696 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 21:29:29  round starting
+Round 104 is complete and live. The lock was my own wrapper's; the round ran clean end to end.
+
+**What was done:** Round 103's named opener — Endurance's card printed "4.0 kn UNDER PADDLE" for her steam floor. The label was guessed from the rig string (`/oar/` or else 'paddle'), and her barquentine rig string says nothing about the 350 ihp screw auxiliary. The class fix moves the fact into the record: every `polar.floor` in vessels.json now carries a `by` field ('oar' ×5, 'paddle' for the dugout, 'steam' for Endurance), and `swFillCard` prints the record's word — the regex is gone. Her card now reads "UNDER STEAM, ANY HEADING — A CALM DOES NOT SLOW HER", confirmed by reading the rendered frame.
+
+**Guarding the class:** two new audit rules, both injection-proven — 'speed floor with no means' fires 7/7 when `by` is stripped fleet-wide, and 'floor attests steam but claims muscle' fires when Endurance's floor is relabelled 'paddle', convicting the exact fault off the floor's own provenance text. Clean sweep 33/0 on the real data.
+
+**Verification:** opening ratchet 56/56 green (round 103's accepts confirmed); closing ratchet 56/56 within tolerance, ship-endurance moved 0.018% — the changed card words — and the six muscled hulls' cards were proven unchanged both by construction (old regex word equals new recorded word on all six) and on the frames. No baseline moved. Committed as b2b17f2, pushed, and the live stamp **1787029064 confirmed serving** on the third poll.
+
+**Left for next round, recorded in HANDOFF:** the Endurance geometry residuals — three boats where one is drawn (two belong in stern davits), the unmodelled forecastle break, the 1.83 m funnel-row width against a 1.26 m stack — then the Azzam terrace-teak material decision and the Sea close-up wake due-diligence pass.
+2026-08-17 22:25:26  round finished; HEAD is b2b17f2 Round 104: the floor names what drives it
+/Users/augustgweon/Ships/build/loop-round.sh: line 85:  6365 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 22:35:26  round starting
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-17 23:55:31  round finished; HEAD is b2b17f2 Round 104: the floor names what drives it
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 12736 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 00:05:32  round starting

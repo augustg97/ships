@@ -671,6 +671,37 @@
       say(v.id, 'boats drawn against an inboard record',
           `${part.boat.n} boat meshes topside; the record stows the tenders inside the shell`);
 
+    /* ── A DECLARED DAVIT BOAT HANGS OUTBOARD OF THE SHELL, ONE PER SIDE, CLEAR OF THE
+       SEA (round 105). davitBoats is the record saying the sea boats hang in davits at
+       the quarters — Endurance's pair, in every Hurley plate. The r58 stern taught that
+       drawn-but-buried is invisible from every bearing, and the generic
+       declared-but-not-drawn rule cannot see this class because the skid boat already
+       populates part.boat. So ask the MESHES: each entry must hang one 'Quarter boat'
+       per side; each drawn boat's inboard edge must stand outboard of the shell's own
+       half-breadth at its station (surfacePoint, the geometry's source), and its keel
+       must stand above the load waterline. */
+    if (H.davitBoats && H.davitBoats.length) {
+      const qb = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Quarter boat')
+        qb.push(new THREE.Box3().setFromObject(o)); });
+      if (qb.length !== H.davitBoats.length * 2)
+        say(v.id, 'davit boat declared but not drawn',
+            `${H.davitBoats.length * 2} quarter boats declared, ${qb.length} drawn`);
+      const HSq = SHIPS_HULL.hullSurface(H);
+      for (const b of qb) {
+        const u = Math.max(0.001, Math.min(0.999, 0.5 + ((b.min.x + b.max.x) / 2) / H.lwl));
+        const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSq, u, 1)[2]);
+        const zin = Math.min(Math.abs(b.min.z), Math.abs(b.max.z));
+        if (Math.sign(b.min.z) !== Math.sign(b.max.z) || zin < half - 0.15)
+          say(v.id, 'davit boat buried in the shell',
+              `inboard edge ${zin.toFixed(2)} m off centre, hull side there ${half.toFixed(2)} m`);
+        if (b.min.y < 0.5)
+          say(v.id, 'davit boat in the water',
+              `keel at ${b.min.y.toFixed(2)} m over the load waterline`);
+      }
+    }
+
     /* ── A RECORDED RAKE IS A LEAN (round 70). stemRake·loa is the overhang of the stem
        head PAST the waterline ending — Queen Mary 2 declared 0.085 and drew a blunt
        vertical bow for three rounds, because the offset was applied uniformly at every
