@@ -6910,3 +6910,86 @@ patch. That is its own round.
 still waits on the RMG original of J9266. (3) Azzam crest residual (r108): radome
 pedestals and cluster base plates sit on teak; check the real mast deck covering if a
 better plate arrives. (4) The survey continues from the round-23 queue.
+
+## Round 112 — 2026-08-18 — every hull under way makes a wake, and the duplicate hidden inside the subject since round 46 comes out
+
+**The opening ratchet ran 57 frames and 56 were within tolerance** — 45+ at 0.000%,
+board-salamis 0.009%, nothing else near a limit. The 57th was aboard-treasure, and its
+number was already an AFTER number: this round's shader bundle landed five minutes into
+the opening run, so the frames captured later ran the new code. The confirmation of r111
+therefore rests on the 56 — which the closing check reproduced to the third decimal —
+and on wake-plan at 0.000% under both codes, which is also the proof that this round's
+refactor is pixel-exact for a single ship. Procedural lesson, recorded for the next
+round: do not pipe a ratchet check through `head` — it ate the closing report (the run
+survived only because its output fit the pipe buffer), and the verdicts had to be
+recomputed from `_current` with the tool's own metric (PIXEL_EPS 8, max-channel per
+pixel; same numbers the tool prints). Run checks to a FILE, then read the file.
+
+**THE TASK WAS r111'S FIRST QUEUE ITEM: consort wakes.** `uWake*` carried one hero, so
+the treasure fleet's companions and every mate glided on unmarked water. The class fix
+is the one r111 predicted: the wake block of SEA_FRAG is now a function, `shipWake(rel,
+dir, loa, beam, kn, dist, drift)` — r111's physics untouched, both wave families still
+drawn from the stationary-phase solution of the deep-water dispersion — and main() loops
+it over a small uniform array: `uWakePose[6]` (x, z, dir), `uWakeBody[6]` (loa, beam,
+kn), `uWakeN` live slots. JS registers every hull the fleet loop places — subject,
+neighbours, consorts, each with the same pose that placed it, the mates with their
+WOBBLED heading because a wake laid on the unwobbled course would shear off the stern —
+sorts subject-first-then-nearest, and fills at most six slots. Three early returns in
+the function are conservative bounds outside which every term is analytically zero, so a
+source whose wake cannot reach a fragment costs a few dot products; `uWakeN` is 0 in the
+Shipwright, Action and yard (they set no wake uniforms, GL zeros the int), so water
+without ships costs what it always cost. Overlapping wakes ADD before the one clamp —
+two ships' aerated water in one patch of sea is brighter than one's, to the same ceiling.
+
+**AND THE PROBE FOUND A HULL THAT HAD BEEN HIDDEN INSIDE THE SUBJECT FOR 66 ROUNDS.**
+probe-wake.py, updated for the array, listed zhenghe's three sources — and two of them
+sat at the SAME position. The r46 consort code reused the map's station formula over
+n = 1..together-1, which for a fleet of three yields stations 0 and +1 — and station 0
+is the subject's own. A duplicate treasure ship had stood inside her since round 46,
+invisible because two identical hulls in one place draw as one; the wake array made it
+matter, drawing the same wake twice from one spot (the subject's wake box read +5.5
+counts before the fix and byte-identical after). The map never had the fault — its loop
+includes the lead, so its stations come out -1, 0, +1. The mates now take the map's
+station set MINUS the one nearest the subject's own: the duplicate became the PORT
+consort, and the treasure fleet is finally the three-hull formation r46 claimed. The
+instrument keeps the class closed: probe-wake now flags any two sources within 0.1 loa
+as DUPLICATE-STATION FAULT and exits non-zero — no formation stations two hulls in one
+place.
+
+**Measured (rule 4, build/wake-r112/measure.json, matched follow-camera addresses, the
+before frames captured from an r111 git worktree served on :8151 — note web/fields/ is
+gitignored and must be symlinked in, or __FRAME_READY never fires):** zhenghe consort
+churn (81.4,109.2,116.6) → (106.0,125.7,131.1), consort fan +6.1 R; madagascar canoe
+consort fan (38.8,63.3,70.9) → (49.5,70.0,76.8); subject's own wake byte-identical
+(66.5,99.4,110.9) both sides; controls byte-identical both frames. wake_capture.py
+gained --port for exactly this before/after use.
+
+**Verified (rule 1, frames read):** zhenghe near-plan — THREE hulls in staggered
+formation, each trailing her own fan of close-set arcs (lambda 3.1 m at 4.3 kn), dark
+water ahead of every stem; madagascar — both canoes under way with their own fans;
+aboard-treasure deck-level — the consort ahead trails arcs and a churn road. Rule 0 on
+the zhenghe plan frame: reads as a rendered fleet on real water; three facts a viewer
+can name — three treasure ships sail in company on parallel course 253°; each leaves
+her own wake, close-ringed because she is slow; the sea ahead of each bow is
+undisturbed.
+
+**Ratchet: the closing check moved exactly ONE frame of 57 — aboard-treasure 2.530% /
+mean 0.704 — the diff read before accepting: the port consort standing where the
+duplicate used to hide, her sails, her churn, the second fan interfering with the
+subject's own, faint bleed-through behind the translucent panels; sky, cards and far
+sea black. Accepted with the class reason in FRAME-LOG.** All 56 others 0.000–0.045%,
+wake-plan 0.000%. Audit 33/0 clean. Built at stamp 1787069027. Confirming pass is next
+round's opening check, per the standing pattern.
+
+**Known residuals, recorded not hidden:** (1) a consort's kn is her track's — mates in
+company show no station-keeping speed variance, so their wakes are as steady as the
+subject's; the surge wobble is in their positions already, and threading it into kn is
+a refinement, not a fault. (2) The wake array holds six sources nearest-first; a patch
+with more hulls under way drops the farthest, which at that range are below the wake's
+own pixel reach.
+
+**Next:** (1) The survey continues from the round-23 queue — the deck-covering
+programme (r106–110) and the wake programme (r102, r111–112) are both complete. (2)
+Endurance forecastle break still waits on the RMG original of J9266. (3) Azzam crest
+residual (r108): radome pedestals and cluster base plates sit on teak; check the real
+mast deck covering if a better plate arrives.

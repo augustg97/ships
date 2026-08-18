@@ -1,0 +1,70 @@
+{
+ "zhenghe-before": {
+  "consort-wake": [
+   60.5,
+   95.4,
+   107.9
+  ],
+  "consort-churn": [
+   81.4,
+   109.2,
+   116.6
+  ],
+  "hero-wake": [
+   66.5,
+   99.4,
+   110.9
+  ],
+  "control-sea": [
+   63.3,
+   97.8,
+   109.3
+  ]
+ },
+ "zhenghe-after": {
+  "consort-wake": [
+   66.6,
+   99.3,
+   111.0
+  ],
+  "consort-churn": [
+   106.0,
+   125.7,
+   131.1
+  ],
+  "hero-wake": [
+   66.5,
+   99.4,
+   110.9
+  ],
+  "control-sea": [
+   63.3,
+   97.8,
+   109.3
+  ]
+ },
+ "madagascar-before": {
+  "consort-wake": [
+   38.8,
+   63.3,
+   70.9
+  ],
+  "control-sea": [
+   39.9,
+   65.2,
+   72.1
+  ]
+ },
+ "madagascar-after": {
+  "consort-wake": [
+   49.5,
+   70.0,
+   76.8
+  ],
+  "control-sea": [
+   39.9,
+   65.2,
+   72.1
+  ]
+ }
+}

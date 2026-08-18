@@ -16,13 +16,34 @@ async () => {
   const P = window.SHIPS_PSG.PSG;
   const u = P.sea && P.sea.material.uniforms;
   const out = { psgOn: P.on };
-  if (!u || !u.uWakeKn) return out;
+  /* r112: the wake is an ARRAY of sources — slot 0 is the subject, the rest are
+     consorts and neighbours nearest-first. The derived block below reads slot 0;
+     every live slot is listed under sources. */
+  if (!u || !u.uWakeN) return out;
+  out.wakeN = u.uWakeN.value;
+  if (!out.wakeN) return out;
+  out.sources = [];
+  for (let i = 0; i < out.wakeN; i++) {
+    const a = u.uWakePose.value[i], b = u.uWakeBody.value[i];
+    out.sources.push({ x: +a.x.toFixed(1), z: +a.y.toFixed(1),
+                       hdgDeg: +((Math.atan2(a.z, a.w) * 180 / Math.PI + 360) % 360).toFixed(1),
+                       loa: b.x, beam: +b.y.toFixed(1), kn: b.z });
+  }
+  /* two sources within a tenth of a length are one ship drawn twice — the r112
+     station fault, a duplicate hull standing inside the subject. Never legitimate:
+     no formation stations two hulls in one place. */
+  out.duplicateSources = [];
+  for (let i = 0; i < out.wakeN; i++) for (let j = i + 1; j < out.wakeN; j++) {
+    const a = u.uWakePose.value[i], b = u.uWakePose.value[j];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (d < u.uWakeBody.value[i].x * 0.1) out.duplicateSources.push([i, j, +d.toFixed(1)]);
+  }
   out.wake = {
-    kn: u.uWakeKn.value,
-    len: u.uWakeLen.value,
-    beam: u.uWakeBeam.value,
-    p: { x: u.uWakeP.value.x, z: u.uWakeP.value.y },
-    dir: { x: u.uWakeDir.value.x, z: u.uWakeDir.value.y },
+    kn: u.uWakeBody.value[0].z,
+    len: u.uWakeBody.value[0].x,
+    beam: u.uWakeBody.value[0].y,
+    p: { x: u.uWakePose.value[0].x, z: u.uWakePose.value[0].y },
+    dir: { x: u.uWakePose.value[0].z, z: u.uWakePose.value[0].w },
   };
   const V = out.wake.kn * 0.5144;
   out.derived = {
@@ -67,6 +88,9 @@ def main():
         out = page.evaluate(JS)
         browser.close()
     print(json.dumps(out, indent=1))
+    if out.get('duplicateSources'):
+        print('DUPLICATE-STATION FAULT: two wake sources within 0.1 loa', file=sys.stderr)
+        sys.exit(2)
 
 if __name__ == "__main__":
     main()

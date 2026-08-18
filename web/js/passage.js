@@ -138,10 +138,12 @@ function psgInit(R, globeCamera) {
       /* how far the anchor has moved over the ground since the passage opened, so the wave
          field belongs to the sea rather than to the ship — see SEA_VERT */
       uDrift: { value: new THREE.Vector2() },
-      /* her wake: position on the patch, heading, length, beam and speed */
-      uWakeP: { value: new THREE.Vector2() },
-      uWakeDir: { value: new THREE.Vector2(1, 0) },
-      uWakeLen: { value: 0 }, uWakeBeam: { value: 0 }, uWakeKn: { value: 0 },
+      /* their wakes — up to six sources, because r111 carried ONE and the consorts glided
+         on unmarked water. Pose is (x, z, dir.x, dir.z), Body is (loa, beam, knots, 0);
+         uWakeN says how many slots are live. Packing mirrored in SEA_FRAG. */
+      uWakePose: { value: Array.from({ length: 6 }, () => new THREE.Vector4()) },
+      uWakeBody: { value: Array.from({ length: 6 }, () => new THREE.Vector4()) },
+      uWakeN: { value: 0 },
       uWave: { value: SHIPS_SEA.seaWaveUniform() },
       /* the globe's own elevation field, so the water can end where the land begins */
       uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
@@ -558,7 +560,9 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
     if (PSG.sea && PSG.sea.material.uniforms.uDrift)
       PSG.sea.material.uniforms.uDrift.value.set(-dE, dN);
   }
-  let hero = null, heroR2 = Infinity;
+  /* every hull placed below — subjects, neighbours, consorts — registers here, and the
+     nearest six become the sea's wake sources; see the uWake* block after the loop */
+  const wakes = [];
   for (const tr of tracks || []) {
     if (!tr.at || !tr.vesselId) continue;
     const ves = list.find(x => x.id === tr.vesselId);
@@ -610,7 +614,22 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
                      : /container|steamer/.test(ves.id) ? 1
                      : /canoe|dugout/.test(ves.id) ? 2 : 1;
       e.mates = [];
-      for (let n = 1; n < together; n++) {
+      /* ⚠ THE SUBJECT STANDS THE MIDDLE STATION, SO HER MATES TAKE THE OTHERS. The first
+         cut reused the map's station formula over n = 1..together-1, which for a fleet
+         of three yields stations 0 and +1 — and station 0 is the subject's own. A
+         duplicate hull stood INSIDE her from r46 to r112, invisible because two identical
+         hulls in one place draw as one, found the day the wake array drew the same wake
+         twice from one spot (probe-wake listed two sources at one position). The map
+         never had the fault: its loop includes the lead, so its stations come out
+         -1, 0, +1. Here the lead is the track's own holder, so the mate list is the
+         map's station set MINUS the station nearest her own. */
+      const stations = [];
+      for (let n = 0; n < together; n++) stations.push(n - (together - 1) / 2);
+      stations.sort((a, b) => Math.abs(a) - Math.abs(b));
+      stations.shift();                    /* hers — she is already drawn */
+      let n = 0;
+      for (const tt of stations) {
+        n++;
         let co = null;
         try { co = window.SHIPS_HULL.buildShip(ves.hull); } catch (x) { break; }
         co.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
@@ -618,7 +637,6 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
         co.position.y = -(co.userData.waterlineY || 0);
         const mh = new THREE.Group();
         mh.add(co); mh.rotation.order = 'YXZ';
-        const tt = n - (together - 1) / 2;
         mh.userData.st = { x: tt * e.loa * 1.9, z: -Math.abs(tt) * e.loa * 1.5 };
         mh.userData.ph = n * 2.399963 + e.loa * 0.017;
         e.mates.push(mh);
@@ -635,10 +653,16 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
       /* the station is in her own frame; rotate it onto the patch by her heading */
       const cs = Math.cos(yaw), sn = Math.sin(yaw);
       const mx = -east + sx * cs + sz * sn, mz = north - sx * sn + sz * cs;
-      mh.rotation.set(0, yaw + wob(53.0, 79.0, ph * 0.77) * 0.045, 0);
+      const myaw = yaw + wob(53.0, 79.0, ph * 0.77) * 0.045;
+      mh.rotation.set(0, myaw, 0);
       const mfl = SHIPS_SEA.floatShip(mh, mx, mz, yaw, e.loa, t, wind, e.beam, e.draught);
       mh.position.set(mx, drop + mfl.y, mz);
       mh.rotation.z = mfl.pitch; mh.rotation.x = mfl.roll;
+      /* her wake, from the same pose that placed her — the wobbled heading, because a
+         wake laid on the unwobbled course would shear visibly off her own stern */
+      wakes.push({ x: mx, z: mz, yaw: myaw, loa: e.loa,
+                   beam: ves.hull.beam || ves.hull.loa * 0.18,
+                   kn: tr.kn || 0, r2: mx * mx + mz * mz });
     }
     const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind,
                                    e.beam, e.draught);
@@ -647,26 +671,29 @@ function psgFleet(tracks, R, t, wind, list, heroName) {
     e.holder.rotation.x = fl.roll;
     if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(e.holder, t, e.loa);
     if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
-    /* whichever hull is nearest the middle of the patch is the one being looked at, and hers
-       is the wake worth drawing — no plumbing needed to say which ship is the subject */
-    /* the named subject wins outright; otherwise whichever hull is nearest the middle */
-    const rank = (heroName && tr.name === heroName) ? -1 : r2;
-    if (rank < heroR2) { heroR2 = rank; hero = { x: -east, z: north, yaw, tr, ves }; }
+    /* the named subject sorts ahead of everything; the rest rank by distance from the
+       middle of the patch, which is where the camera lives */
+    wakes.push({ x: -east, z: north, yaw, loa: ves.hull.loa,
+                 beam: ves.hull.beam || ves.hull.loa * 0.18, kn: tr.kn || 0,
+                 r2: (heroName && tr.name === heroName) ? -1 : r2 });
   }
   for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
 
-  if (PSG.sea && PSG.sea.material.uniforms.uWakeKn) {
+  if (PSG.sea && PSG.sea.material.uniforms.uWakeN) {
     const u = PSG.sea.material.uniforms;
-    if (hero) {
-      /* the hull is built with its bow to -X and then turned +90 degrees onto +Z, so at yaw 0
-         she heads along +Z; yaw rotates about +Y. Taken from the same yaw that placed her,
-         because a wake that disagrees with the ship it comes from is worse than no wake. */
-      u.uWakeP.value.set(hero.x, hero.z);
-      u.uWakeDir.value.set(Math.sin(hero.yaw), Math.cos(hero.yaw));
-      u.uWakeLen.value = hero.ves.hull.loa;
-      u.uWakeBeam.value = hero.ves.hull.beam || hero.ves.hull.loa * 0.18;
-      u.uWakeKn.value = hero.tr.kn || 0;
-    } else u.uWakeKn.value = 0;
+    /* the hull is built with its bow to -X and then turned +90 degrees onto +Z, so at yaw 0
+       she heads along +Z; yaw rotates about +Y. Each pose is taken from the same yaw that
+       placed its hull, because a wake that disagrees with the ship it comes from is worse
+       than no wake. Six slots; a patch with more hulls under way drops the farthest, which
+       at that range are below the wake's own pixel reach anyway. */
+    wakes.sort((p, q) => p.r2 - q.r2);
+    const n = Math.min(wakes.length, u.uWakePose.value.length);
+    for (let i = 0; i < n; i++) {
+      const s = wakes[i];
+      u.uWakePose.value[i].set(s.x, s.z, Math.sin(s.yaw), Math.cos(s.yaw));
+      u.uWakeBody.value[i].set(s.loa, s.beam, s.kn, 0);
+    }
+    u.uWakeN.value = n;
   }
 }
 

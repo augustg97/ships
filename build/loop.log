@@ -5710,3 +5710,20 @@ Sources: [Description and History of the Great Eastern, 1861 (archive.org cihm_4
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 92660 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 06:54:24  round starting
+Live stamp verified: 1787064784, matching the build. The round is complete.
+
+## What this round did
+
+The task was the oldest carried item — the Sea close-up wake due-diligence pass, queued since round 102. Due diligence found four class faults, all in `SEA_FRAG`'s wake block, and all invisible from every camera a URL could name, which was the fifth finding.
+
+**The instrument came first.** The follow camera (`S.followAz/Dep/Dist`) had no URL grammar, so every addressable view of a wake was deck-level and nearly edge-on to the water. `Research/wake_capture.py` boards a voyage and sets that camera directly; `Research/probe-wake.py` reports the wake uniforms, the derived physics and the hero's lon/lat at the frozen instant. The first near-plan frame of the container ship at 20 knots showed at once what four rounds of sea-level frames could not: the bow wave was a white disc half a ship-length in radius sitting ahead of the stem (a 220 m searchlight blob; a halo around the whole fore half of the 4.3 kn treasure ship); the transverse crests were a ladder of straight rungs; the Kelvin arms were two solid ropes three kilometres long; and the distance fade used eye height, so from dead astern at deck level the whole wake vanished 900 m out while the ship stayed crisp at 1400 m — the same eye-height fallacy the ripple paid for at the top of the same file.
+
+**The fix is one piece of physics drawn honestly.** Stationary phase on deep-water dispersion gives the wave direction at every point in the wedge: `tan θ = (1 ∓ √(1−8m²))/4m`, transverse and divergent families from the two roots, the 19.47° wedge from the discriminant's zero — the same number from the same dispersion, not a second model. The phase factor runs 1.00 on the track to 1.53 at the cusp, which is exactly the backward curl in aerial photographs, so the crests now curve; the arms draw the divergent family as feathers instead of a rope; the wedge springs from the stem; the bow wave is an annulus hugging the stem, gated to a horseshoe so the water ahead of her stays undisturbed; and every feature fades by the pixel law `uRip` already encodes, with the far field left to the shared haze.
+
+**Measured and verified:** ahead-of-bow boxes dropped from ~100 counts over control sea to near control on all three test ships, wedge brightness held, controls byte-identical. The follow camera is now URL grammar (`fb=/fd=/fz=`) and a new `wake-plan` baseline watches the pattern from above. The closing ratchet moved exactly the 11 aboard frames — the frames that watch near-field water — every diff read (wake water only) and accepted; descent, globe, shipwright and action frames all held at 0.000%. Audit 33/0. Opening ratchet confirmed round 110 at 56/56. Committed as 726b694, pushed, live stamp verified at 1787064784.
+
+**Recorded residual, not hidden:** consorts leave no wake — `uWake*` carries one hero, so the treasure fleet's companions glide on unmarked water. That is next round's first queue item in HANDOFF, ahead of the Endurance forecastle (still waiting on the RMG plate) and the Azzam crest residual.
+2026-08-18 07:59:27  round finished; HEAD is 726b694 Round 111: the wake becomes the dispersion relation's own picture
+/Users/augustgweon/Ships/build/loop-round.sh: line 85:   106 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 08:09:27  round starting

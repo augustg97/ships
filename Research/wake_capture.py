@@ -37,13 +37,14 @@ def main():
     ap.add_argument('--out', required=True)
     ap.add_argument('--bare', action='store_true')
     ap.add_argument('--settle-ms', type=int, default=1200)
+    ap.add_argument('--port', type=int, default=8149)   # r112: a before-tree on another port
     a = ap.parse_args()
 
     from playwright.sync_api import sync_playwright
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto("http://localhost:8149/?frozen=1" + a.frag, wait_until="load", timeout=60000)
+        page.goto(f"http://localhost:{a.port}/?frozen=1" + a.frag, wait_until="load", timeout=60000)
         page.wait_for_function("window.__FRAME_READY === true", timeout=90000)
         r = page.evaluate(JS, [a.az, a.dep, a.dist])
         if r != 'ok':

@@ -40,9 +40,9 @@ uSun: { value: new THREE.Vector3(0.4, 0.7, 0.5) },
 uCam: { value: new THREE.Vector3() }, uTime: { value: 0 },
 uWind: { value: 7.0 }, uScale: { value: 60 }, uRip: { value: 3000 },
 uDrift: { value: new THREE.Vector2() },
-uWakeP: { value: new THREE.Vector2() },
-uWakeDir: { value: new THREE.Vector2(1, 0) },
-uWakeLen: { value: 0 }, uWakeBeam: { value: 0 }, uWakeKn: { value: 0 },
+uWakePose: { value: Array.from({ length: 6 }, () => new THREE.Vector4()) },
+uWakeBody: { value: Array.from({ length: 6 }, () => new THREE.Vector4()) },
+uWakeN: { value: 0 },
 uWave: { value: SHIPS_SEA.seaWaveUniform() },
 uDepth: { value: null }, uAnchor: { value: new THREE.Vector2() },
 uSeaLevel: { value: 0 }, uHasDepth: { value: 0 },
@@ -270,7 +270,7 @@ const dN = (alat - PSG.ref.lat) * Math.PI / 180 * 6371000;
 if (PSG.sea && PSG.sea.material.uniforms.uDrift)
 PSG.sea.material.uniforms.uDrift.value.set(-dE, dN);
 }
-let hero = null, heroR2 = Infinity;
+const wakes = [];
 for (const tr of tracks || []) {
 if (!tr.at || !tr.vesselId) continue;
 const ves = list.find(x => x.id === tr.vesselId);
@@ -312,7 +312,13 @@ const together = /treasure|carrack|indiaman/.test(ves.id) ? 3
 : /container|steamer/.test(ves.id) ? 1
 : /canoe|dugout/.test(ves.id) ? 2 : 1;
 e.mates = [];
-for (let n = 1; n < together; n++) {
+const stations = [];
+for (let n = 0; n < together; n++) stations.push(n - (together - 1) / 2);
+stations.sort((a, b) => Math.abs(a) - Math.abs(b));
+stations.shift();
+let n = 0;
+for (const tt of stations) {
+n++;
 let co = null;
 try { co = window.SHIPS_HULL.buildShip(ves.hull); } catch (x) { break; }
 co.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
@@ -320,7 +326,6 @@ co.rotation.y = Math.PI / 2;
 co.position.y = -(co.userData.waterlineY || 0);
 const mh = new THREE.Group();
 mh.add(co); mh.rotation.order = 'YXZ';
-const tt = n - (together - 1) / 2;
 mh.userData.st = { x: tt * e.loa * 1.9, z: -Math.abs(tt) * e.loa * 1.5 };
 mh.userData.ph = n * 2.399963 + e.loa * 0.017;
 e.mates.push(mh);
@@ -336,10 +341,14 @@ const sx = st.x + wob(37.0, 61.0, ph) * amp;
 const sz = st.z + wob(43.0, 71.0, ph * 1.31) * amp;
 const cs = Math.cos(yaw), sn = Math.sin(yaw);
 const mx = -east + sx * cs + sz * sn, mz = north - sx * sn + sz * cs;
-mh.rotation.set(0, yaw + wob(53.0, 79.0, ph * 0.77) * 0.045, 0);
+const myaw = yaw + wob(53.0, 79.0, ph * 0.77) * 0.045;
+mh.rotation.set(0, myaw, 0);
 const mfl = SHIPS_SEA.floatShip(mh, mx, mz, yaw, e.loa, t, wind, e.beam, e.draught);
 mh.position.set(mx, drop + mfl.y, mz);
 mh.rotation.z = mfl.pitch; mh.rotation.x = mfl.roll;
+wakes.push({ x: mx, z: mz, yaw: myaw, loa: e.loa,
+beam: ves.hull.beam || ves.hull.loa * 0.18,
+kn: tr.kn || 0, r2: mx * mx + mz * mz });
 }
 const fl = SHIPS_SEA.floatShip(e.holder, -east, north, yaw, e.loa, t, wind,
 e.beam, e.draught);
@@ -348,19 +357,21 @@ e.holder.rotation.z = fl.pitch;
 e.holder.rotation.x = fl.roll;
 if (SHIPS_SEA.animateOars) SHIPS_SEA.animateOars(e.holder, t, e.loa);
 if (SHIPS_SEA.animateWheels) SHIPS_SEA.animateWheels(e.holder, t, 4.5);
-const rank = (heroName && tr.name === heroName) ? -1 : r2;
-if (rank < heroR2) { heroR2 = rank; hero = { x: -east, z: north, yaw, tr, ves }; }
+wakes.push({ x: -east, z: north, yaw, loa: ves.hull.loa,
+beam: ves.hull.beam || ves.hull.loa * 0.18, kn: tr.kn || 0,
+r2: (heroName && tr.name === heroName) ? -1 : r2 });
 }
 for (const [k, e] of PSG.fleetPool) if (!seen.has(k)) e.holder.visible = false;
-if (PSG.sea && PSG.sea.material.uniforms.uWakeKn) {
+if (PSG.sea && PSG.sea.material.uniforms.uWakeN) {
 const u = PSG.sea.material.uniforms;
-if (hero) {
-u.uWakeP.value.set(hero.x, hero.z);
-u.uWakeDir.value.set(Math.sin(hero.yaw), Math.cos(hero.yaw));
-u.uWakeLen.value = hero.ves.hull.loa;
-u.uWakeBeam.value = hero.ves.hull.beam || hero.ves.hull.loa * 0.18;
-u.uWakeKn.value = hero.tr.kn || 0;
-} else u.uWakeKn.value = 0;
+wakes.sort((p, q) => p.r2 - q.r2);
+const n = Math.min(wakes.length, u.uWakePose.value.length);
+for (let i = 0; i < n; i++) {
+const s = wakes[i];
+u.uWakePose.value[i].set(s.x, s.z, Math.sin(s.yaw), Math.cos(s.yaw));
+u.uWakeBody.value[i].set(s.loa, s.beam, s.kn, 0);
+}
+u.uWakeN.value = n;
 }
 }
 function psgPrebuild(tr, ves) {
