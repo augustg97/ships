@@ -664,7 +664,25 @@ function applyHashView() {
            different depending on whether it was captured alone or after eighteen others. */
         const pool = window.SHIPS_PSG && window.SHIPS_PSG.PSG.fleetPool;
         const e = pool && pool.get(tr.name);
-        if (e && e.holder && e.holder.visible) { shipSelectPending = false; return; }
+        if (e && e.holder && e.holder.visible) {
+          /* `&fb=<deg>&fd=<deg>&fz=<m>` — the follow camera: the compass bearing you
+             stand ON from her, the depression, the stand-off in metres. The wake shipped
+             wrong twice (r44's steps, r111's ladder-and-blob) because the only camera a
+             URL could name was deck-level and nearly edge-on to the water — what a frame
+             cannot name it cannot watch, and no frame could name a view from above.
+             Read-only grammar like `b=`/`z=`: writeHash never emits any of them. Applied
+             HERE, after the board settles, because followShip seeds all three as it runs —
+             a value written earlier is destroyed by the very board it is aimed at.
+             placeCamera puts the ground point on bearing (followAz + PI) from her as a
+             true compass bearing, so standing on B means followAz = B - 180 degrees. */
+          const fb = /[#&]fb=(-?[\d.]+)/.exec(location.hash);
+          const fd = /[#&]fd=([\d.]+)/.exec(location.hash);
+          const fz = /[#&]fz=([\d.]+)/.exec(location.hash);
+          if (fb) S.followAz = (parseFloat(fb[1]) - 180) * Math.PI / 180;
+          if (fd) S.followDep = Math.max(4, Math.min(84, parseFloat(fd[1])));
+          if (fz) S.followDist = Math.max(25, Math.min(FOLLOW_MAX_M, parseFloat(fz[1])));
+          shipSelectPending = false; return;
+        }
       }
       if (++tries > 900) { shipSelectPending = false; console.warn('voyage never sailed', wantId); return; }
       requestAnimationFrame(board);

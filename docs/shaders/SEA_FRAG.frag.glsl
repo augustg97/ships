@@ -170,61 +170,124 @@ void main(){
     float fade   = clamp(1.0 - along / len, 0.0, 1.0);
     float w = 0.0;
 
-    /* ⚠ THE STRAIGHT LINES WERE step(). Three of them: step(0.0, along) began the turbulent
-       band with a razor edge running dead across her heading, step(uWakeLen*0.25, along) did
-       the same for the arms, and step(fwd, uWakeLen*0.60) chopped the bow wave off with a
-       hard line ahead of the stem. A step() is a discontinuity — the eye reads a perfectly
-       straight bright edge on water as a drawing error, correctly, because nothing in a wake
-       is straight except the arms and those are not edges. Every one is a smoothstep now,
-       over a width taken from the ship rather than from a constant.
+    /* ⚠ THE STRAIGHT LINES WERE step(), AND THEN THEY WERE THE PATTERN ITSELF. The r44
+       rewrite replaced every step() with a smoothstep and the razor EDGES went; r111 looked
+       at the result from above (wake_capture.py, a bearing the URL cannot address) and found
+       the next class down: the transverse crests were drawn as cos(2*pi*along/lambda) — a
+       ladder of perfectly straight rungs — and the arms as two solid ropes, constant along
+       three kilometres. Nothing in a real wake is straight-and-solid: the crests CURVE,
+       because the phase of a Kelvin wake is not linear in along, and the arms are FEATHERS —
+       short oblique divergent-wave crests strung along the cusp line — not lines.
 
-       AND THE GEOMETRY WAS WRONG AT BOTH ENDS. The turbulent band began at along = 0, which
-       is the ship's CENTRE — a wake starts at the stern. The bow wave was a rectangle ahead
-       of her instead of a crescent springing from the stem. */
+       Both come out of one piece of physics, so both are drawn from it. At a point m =
+       across/aStem inside the wedge, stationary phase picks the wave direction theta that
+       contributes: tan(theta) = (1 -/+ sqrt(1 - 8 m^2)) / (4 m) — the '-' root is the
+       transverse family, the '+' root the divergent — and the phase there is
+       k0 * aStem * (cos t + m sin t) / cos^2 t, k0 = g/V^2. The factor runs from 1.00 on
+       the track to 1.53 at the cusp, which is exactly the backward curl every aerial
+       photograph shows, and the discriminant hitting zero at m = 1/(2*sqrt(2)) IS the
+       19.47-degree wedge — the same number, from the same dispersion, not a second model.
+
+       AND THE WEDGE SPRINGS FROM THE STEM. The arms used to start a quarter-length abaft
+       amidships; the wave pattern of a moving hull starts where the hull starts. aStem is
+       distance abaft the STEM; the turbulent band alone keeps the stern for its origin.
+
+       AND THE BOW WAVE WAS A DISC. smoothstep(len*0.55, 0, dStem) is a radial glow half a
+       ship-length in radius centred on the stem — on the container ship a 220 m white blob
+       ahead of her, read from any height as a searchlight pointed at the water. A bow wave
+       is a CREST: it hugs the stem at about half a beam and is gone within one. Drawn now
+       as an annulus at that radius, gated so it cannot spill more than a fraction of a
+       beam ahead of the hull. */
     float halfL  = uWakeLen * 0.5;
     float soft   = uWakeBeam * 0.45;                  /* the softening width, her own beam */
 
+    /* ── HOW FAR EACH FEATURE IS STILL WORTH DRAWING ──────────────────────────────────
+       The old fade was 1 - smoothstep(uScale*2, uScale*9, dist), and uScale is the EYE
+       HEIGHT: from a deck the whole wake of a 400 m ship vanished nine hundred metres out
+       while the ship herself stayed crisp at fourteen hundred — the same eye-height fallacy
+       the ripple paid for at the top of this file, in the same shader. Visibility is a
+       question about PIXELS: a feature s metres across holds until its size falls under a
+       pixel, and uRip already encodes that law for a 2 m wavelength, so the reach of s is
+       uRip * s / 2. Each feature fades by its own size; the broad band needs no fade at
+       all, because a sixty-metre white road really is visible for tens of kilometres and
+       the shared haze at the bottom of main() already owns the far field. */
+
     /* ── 1. THE TURBULENT BAND, from the stern aft ────────────────────────────────────
        White water that the hull has actually broken: aerated, chaotic, and the brightest
-       thing in a wake close to. It begins at the stern, widens astern, and decays. */
+       thing in a wake close to. It begins at the stern, widens astern, and decays. Its
+       churn texture is ~16 m grain, so beyond that grain's pixel reach the band keeps its
+       MEAN rather than sparkling sub-pixel noise. */
     float aft    = along - halfL;                     /* positive ABAFT the stern */
     float halfW  = uWakeBeam * (0.5 + 1.1 * clamp(aft / len, 0.0, 1.0));
     float churn  = fbm(vec2(aft * 0.06 - drift * 1.7, across * 0.10));
+    float churnReach = uRip * 8.0;
+    float churnTex = mix(0.775, 0.55 + 0.45 * churn,
+                         1.0 - smoothstep(churnReach * 0.5, churnReach, dist));
     w += smoothstep(-soft, soft, aft) * fade * fade * churnSpd *
-         smoothstep(halfW, halfW * 0.30, across) * (0.55 + 0.45 * churn);
+         smoothstep(halfW, halfW * 0.30, across) * churnTex;
 
-    /* ── 2. THE KELVIN ARMS ───────────────────────────────────────────────────────────
-       The half-angle is 19.47 degrees for every displacement hull at every speed — it falls
-       out of deep-water dispersion and is not a free parameter. tan(19.47) = 0.3536. */
-    float arm    = abs(across - along * 0.3536);
-    float armW   = uWakeBeam * (0.35 + 0.9 * clamp(along / len, 0.0, 1.0));
-    w += smoothstep(-soft * 2.0, soft * 2.0, along - uWakeLen * 0.25) * fade * fade * 0.30 *
-         smoothstep(armW, 0.0, arm);
-
-    /* ── 3. THE TRANSVERSE WAVES, which were missing entirely ─────────────────────────
-       Inside the arms a real wake carries crests running ACROSS the track, and their spacing
-       is not free either: a displacement hull makes waves whose phase speed equals her own,
-       so the deep-water dispersion relation fixes the wavelength at lambda = 2*pi*V^2/g.
-       That is why a slow boat leaves close-set ripples and a fast ship leaves long swells,
-       and it is the single most recognisable part of a wake seen from above. */
+    /* ── 2-3. THE KELVIN PATTERN, from its own dispersion ─────────────────────────────
+       lambda = 2*pi*V^2/g — a slow boat leaves close-set ripples, a fast ship long swells,
+       and it is not a free parameter. Both wave families below share it through k0. */
     float V      = uWakeKn * 0.5144;                  /* knots to metres per second */
     float lambda = max(2.0, 6.2831853 * V * V / 9.81);
-    float inArm  = smoothstep(0.0, armW * 2.0, along * 0.3536 - across);
-    w += smoothstep(-soft, soft, aft) * fade * fade * inArm * 0.22 *
-         (0.5 + 0.5 * cos(6.2831853 * along / lambda));
+    float k0     = 6.2831853 / lambda;
+    float aStem  = along + halfL;                     /* positive abaft the STEM */
+    float m      = across / max(aStem, 1.0);
+    float mc     = min(m, 0.3530);                    /* just inside the cusp, disc >= 0 */
+    float disc   = sqrt(max(0.0, 1.0 - 8.0 * mc * mc));
+    /* the transverse root: theta -> 0 on the track, 35.26 deg at the cusp */
+    float tT = (mc > 1e-3) ? (1.0 - disc) / (4.0 * mc) : mc;
+    float cT = inversesqrt(1.0 + tT * tT);
+    float phT = k0 * aStem * (cT + mc * tT * cT) / (cT * cT);
+    /* the divergent root: steep short waves near the track, meeting the transverse family
+       at the cusp. Only evaluated where the arm envelope is non-zero, so the floor on mc
+       never shows. */
+    float tD = (1.0 + disc) / (4.0 * max(mc, 0.02));
+    float cD = inversesqrt(1.0 + tD * tD);
+    float phD = k0 * aStem * (cD + mc * tD * cD) / (cD * cD);
 
-    /* ── 4. THE BOW WAVE, a crescent off the stem ─────────────────────────────────────
-       Thrown out and forward as the stem parts the water, strongest right at the bow and
-       dying within a length. No hard cut anywhere: it falls off with distance from the stem
-       in both directions. */
+    /* ── 2. THE ARMS: divergent-wave feathers along the cusp line ─────────────────────
+       The envelope holds the 19.47-degree line; the feathers are the divergent crests
+       themselves, cos(phD), each a short oblique wavelet — which is why a real arm
+       sparkles instead of reading as a rope. Feather grain is about half a lambda, and
+       fades by the pixel law like everything else. */
+    float arm    = abs(across - aStem * 0.3536);
+    float armW   = uWakeBeam * (0.35 + 0.9 * clamp(aStem / len, 0.0, 1.0));
+    float feaReach = uRip * lambda * 0.25;
+    float feather = mix(0.5, 0.5 + 0.5 * cos(phD),
+                        1.0 - smoothstep(feaReach * 0.5, feaReach, dist));
+    w += smoothstep(-soft * 0.5, soft * 1.5, aStem - uWakeBeam * 0.5) * fade * fade * 0.42 *
+         smoothstep(armW, armW * 0.10, arm) * feather;
+
+    /* ── 3. THE TRANSVERSE WAVES, curved by the same phase ────────────────────────────
+       cos(phT) instead of cos(k0*along): the crests now curl backward toward the cusps,
+       where they merge with the divergent family, because the phase factor grows from 1.0
+       to 1.53 across the wedge. The gate dies AT the wedge edge in m, the wedge's own
+       coordinate. */
+    float inArm  = smoothstep(0.354, 0.30, m);
+    float barReach = uRip * lambda * 0.5;
+    w += smoothstep(-soft, soft, aft) * fade * fade * inArm * 0.22 *
+         (0.5 + 0.5 * cos(phT)) *
+         (1.0 - smoothstep(barReach * 0.5, barReach, dist));
+
+    /* ── 4. THE BOW WAVE, a crest hugging the stem ────────────────────────────────────
+       An annulus at about half a beam off the stem, softened over its own width, and
+       gated so it cannot reach more than a fraction of a beam ahead of her: the water
+       ahead of a ship is undisturbed, which is most of what makes a bow wave read as a
+       bow wave. */
     vec2  stem   = uWakeDir * halfL;                  /* her stem, in patch metres */
     float dStem  = length(rel - stem);
-    w += smoothstep(uWakeLen * 0.55, 0.0, dStem) *
-         smoothstep(uWakeBeam * 2.2, uWakeBeam * 0.4, across) * 0.85 * churnSpd;
+    float bowR   = uWakeBeam * 0.55;
+    float ring   = smoothstep(bowR * 1.9, bowR * 0.9, dStem) *
+                   smoothstep(bowR * 0.15, bowR * 0.7, dStem);
+    /* ⚠ the first gate left 40% of the annulus's dead-ahead arc alive, and from above the
+       bow wore a complete RING — a coin under her stem. The window now closes just ahead
+       of the stem, so what survives is a horseshoe opening astern: two shoulder crests
+       and nothing in the water she has not yet reached. */
+    w += ring * smoothstep(-halfL - uWakeBeam * 0.35, -halfL + uWakeBeam * 0.45, along) *
+         0.60 * churnSpd;
 
-    /* and it dies into the distance with the same haze the water does, so it cannot read as a
-       hard mark lying on top of the sea */
-    w *= 1.0 - smoothstep(uScale * 2.0, uScale * 9.0, dist);
     /* ⚠ and NOT another * spd here — that was applying the speed twice to terms that had
        already taken it, which is how a slow ship ended up with 7% of a wake. */
     w = clamp(w, 0.0, 0.85);

@@ -5671,3 +5671,42 @@ Round 108 is complete and live at stamp 1787049517, HEAD `1e9c1c4`, tree clean.
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 81375 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 04:21:44  round starting
+Live stamp confirmed — round 109 is deployed. The wrapper clears the lock when this process exits.
+
+## Round 109 summary
+
+**The task was r108's first queue item: record the attested deck coverings for Titanic, Yamato and Queen Mary 2.** The round turned out to be pure data — no code path changed; the r107 deck relight and r108 roof/tread gate consumed the records exactly as designed.
+
+**What the sources said, and what got recorded:**
+- **Titanic — pine, not teak.** The Olympic-class record (GG Archives and Titanic Connections, both citing *The Shipbuilder*'s 1911 special): yellow pine on the exposed decks including the boat deck, pitch pine on the forecastle, poop and well decks, teak as trim around houses and fittings only — planks 5 in × 3 in (127×76 mm). A comment in `hull.js` claimed "Titanic's teak"; it was plausible and wrong, and is corrected.
+- **Yamato — hinoki, species contested, recorded as such.** Skulski's *Anatomy of the Ship* gives hinoki at 127×76 mm; the Yamato Museum in Kure says Taiwanese cypress. Both cypresses share the pale colour class, so the drawn tone stands either way; the provenance carries the disagreement (rule 9).
+- **QM2 — teak.** Cunard's attested wrap-around teak Promenade Deck sits at deck 7, which is exactly the model's sheer, so the weather deck is the attested surface; the provenance says the terraced-stern extension is from photographs and that the steel foredeck is a distinction the one-covering model doesn't draw. Her `deckSteel: true` guess is deleted.
+
+**Verification:** enumeration shows exactly three hulls re-resolved, thirty byte-identical. Tone boxes (`build/deck-tone-r109.json`): Yamato's deck lightened to cypress straw (148,128,96 → 165,149,115), QM2's white plate roofs went warm teak (209,212,214 → 153,143,127) — her last scene-lit roof surfaces gone. All frames looked at: the three shipwright frames read correctly against their card photographs. The closing ratchet moved exactly the five frames of those three ships (0.22–0.73%), every diff deck-surfaces-only, all accepted with the class reason. Audit 33/0 after teaching its covering vocabulary `pine`. Opening check had confirmed r108 at 56/56 before any edit landed.
+
+**Next round's queue** (in HANDOFF): Great Eastern's researchable deck record (the same gate would flip her roofs), the r102 wake due-diligence pass, and the two waiting-on-plates residuals.
+2026-08-18 05:15:28  round finished; HEAD is 6f14485 Round 109: the record says what the decks are made of
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 87362 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 05:25:28  round starting
+Round 110 is complete and deployed — the live stamp is confirmed at 1787057481.
+
+## What this round did
+
+Round 109's queue pointed at the last two superstructure ships without deck-covering records. Both are now resolved, which closes the deck-covering programme that started with Azzam in round 106.
+
+**Great Eastern: teak, attested twice over.** I fetched the full OCR texts of three contemporary descriptions from the Internet Archive. The 1861 *Description and History of the Great Eastern* says it directly — "the massive wrought-iron deck is covered with teak planking" — and again of the cellular structure: "the deck, which is of teak planking placed over the top plates, forms the upper surface of the tube." The 1857 *Descriptive Particulars* gives the deck's iron basis: double and cellular on the Britannia-bridge principle, half-inch plates on longitudinal webs. So the teak is a covering laid over iron, which is exactly what the model draws. No plank dimensions are attested anywhere, so the drawn planks are class defaults and the provenance says so. The whole change is one `hull.deck` record in vessels.json — the r108 gate then flips her weather deck and house tier roofs by itself.
+
+**The steamer: closed as a labelled fallback, deliberately.** She is "Ocean steamer," a composite type of 1838–1910 — a type-ship has no builder's specification, so there is nothing to record without inventing it. Rule 10 answers this: she stays on the INFERRED fallback, which the part card already labels, and her house roofs stay white plate because the gate asks for a record a composite can never have. Decided and written down, not carried.
+
+**Verification, all of it:** the opening ratchet confirmed round 109 at 56/56 before any edit landed. Enumeration shows exactly one hull changed, thirty-two byte-identical. Tone boxes: her house roofs went (190,192,191)→(148,140,126) at the stern — the white-plate-to-teak flip — with all four controls pixel-identical. The closing check moved exactly the two frames that watch her (ship-great-eastern 0.593%, aboard-cable 0.214%); both diffs read as deck-surfaces-only before accepting, and the re-check came back 0.000%. Audit 33/0. Committed as c57e775, pushed, live stamp verified.
+
+I also corrected the r108 gate comment in hull.js, which still claimed "azzam alone qualifies today" — stale since round 109. It now states the gate and lists the flips by round.
+
+**Next round's queue** (in HANDOFF): the Sea close-up wake due-diligence pass from round 102 is now the oldest carried item; the Endurance forecastle break still waits on the RMG plate; then the standing survey resumes.
+
+Sources: [Description and History of the Great Eastern, 1861 (archive.org cihm_44208)](https://archive.org/details/cihm_44208), [sister edition cihm_45461](https://archive.org/details/cihm_45461), [Descriptive Particulars of the Great Eastern Steam Ship, 1857 (b22459480)](https://archive.org/details/b22459480), [Grace's Guide, SS Great Eastern](https://www.gracesguide.co.uk/SS_Great_Eastern), [Scientific American, 28 Jun 1856](https://todayinsci.com/B/Brunel_Isambard/GreatEastern-SciAmJun1856.htm).
+2026-08-18 06:44:23  round finished; HEAD is c57e775 Round 110: the Leviathan's teak was on the record all along
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 92660 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 06:54:24  round starting

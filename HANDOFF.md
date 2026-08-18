@@ -6833,3 +6833,80 @@ teak; check the real mast deck covering if a better plate arrives. (4) The deck-
 programme is COMPLETE — all five superstructure ships resolved (azzam r106-108, titanic and
 yamato and queen-mary-2 r109, great-eastern r110, steamer closed as a labelled fallback
 r110); the survey continues from the round-23 queue when the carried items are done.
+## Round 111 — 2026-08-18 — the wake stops being a drawing of lines and becomes the dispersion relation's own picture
+
+**The opening ratchet confirmed round 110 — 56/56 within tolerance** (board-salamis 0.009%,
+everything else at or near 0.000%), captured clean before any edit landed.
+
+**THE TASK WAS THE OLDEST CARRIED ITEM: the Sea close-up wake due-diligence pass, queued
+since round 102.** Due diligence found four class faults, all in SEA_FRAG's wake block, all
+invisible from every camera a URL could name — which is itself the fifth finding.
+
+**First, the instrument, because the faults could not be seen without it.** The close-up's
+follow camera (S.followAz/Dep/Dist) had no URL grammar, so every addressable view of a wake
+was deck-level and nearly edge-on to the water. Research/wake_capture.py boards a voyage and
+sets the follow camera directly; Research/probe-wake.py reports the uWake* uniforms, the
+derived physics (lambda = 2*pi*V^2/g, Froude, drawn length) and the hero's own lon/lat at
+the frozen instant. The first near-plan frame of the container ship at 20 kn showed, at
+once, what four rounds of sea-level frames could not:
+
+- **The bow wave was a DISC** — smoothstep(len*0.55, 0, dStem), a radial glow half a
+  ship-length in radius centred on the stem: a 220 m white blob AHEAD of the container
+  ship, and a halo around the whole fore half of the 4.3 kn treasure ship. Measured
+  (rule 4, matched follow-camera addresses, build/wake-r111/): ahead-of-bow box
+  (142,147,150) against control sea (41,64,72).
+- **The transverse crests were a LADDER** — cos(2*pi*along/lambda) is straight rungs at
+  even spacing, and August's item 10 said "no straight edges anywhere". Real Kelvin crests
+  curve backward toward the cusps.
+- **The arms were two solid ROPES** — constant-brightness lines three kilometres long, the
+  very "searchlights" the r44 comment warned about, still there because a solid
+  smoothstep(armW, 0, arm) has no along-arm structure at all.
+- **The distance fade used the EYE HEIGHT** — w *= 1-smoothstep(uScale*2, uScale*9, dist),
+  the same eye-height fallacy the ripple paid for at the top of the same file: from dead
+  astern at deck level the whole wake of a 20 kn ship vanished ~900 m out while the ship
+  stayed crisp at 1400 m.
+
+**The fix is one piece of physics drawn honestly (rule 3).** At a point m = across/aStem
+inside the wedge, stationary phase picks the contributing wave direction: tan(theta) =
+(1 -/+ sqrt(1 - 8m^2))/(4m) — '-' the transverse family, '+' the divergent — and the phase
+there is k0*aStem*(cos t + m sin t)/cos^2 t with k0 = g/V^2. The phase factor runs 1.00 on
+the track to 1.53 at the cusp, which is exactly the backward curl in every aerial
+photograph, and the discriminant's zero at m = 1/(2*sqrt(2)) IS the 19.47° wedge — the same
+number from the same dispersion, not a second model. The transverse crests now draw
+cos(phase_transverse) (curved, merging into the cusps); the arms draw the divergent family
+as FEATHERS — cos(phase_divergent) under the cusp-line envelope — instead of a rope; the
+wedge springs from the STEM (aStem = along + halfL; the turbulent band alone keeps the
+stern); the bow wave is an annulus at 0.55 beam hugging the stem, gated so nothing spills
+more than a fraction of a beam ahead — the first gate left 40% of the dead-ahead arc alive
+and the bow wore a complete ring; the window now closes just ahead of the stem and what
+survives is a horseshoe opening astern. Every feature fades by the PIXEL law (uRip encodes
+the reach of a 2 m wavelength; a feature s metres across holds to uRip*s/2): churn texture
+collapses to its mean, bars and feathers to nothing, and the broad band keeps no distance
+fade at all because a sixty-metre white road really is visible for tens of kilometres —
+the shared haze owns the far field.
+
+**Measured (rule 4, build/wake-r111/, controls byte-identical):** container plan view
+ahead-of-bow (142,147,150) → (51,72,79) against control (41,64,72); wedge-centre
+byte-stable at (96,107,112) — the energy stayed, the geometry changed; treasure-ship
+bow-halo (149,158,159) → (82,106,111). Verified (rule 1, frames read): the container plan
+and low-astern views, the steamer oblique, the treasure ship — the wake is now the most
+visible thing behind a 20 kn hull from deck level, the slow junk carries a modest crest
+and fine close-set arcs (lambda = 3.1 m at 4.3 kn), and no straight line remains anywhere.
+
+**And the system fix (rule 2): the follow camera is now URL grammar, and the wake has a
+baseline.** `&fb=<compass deg stood on>&fd=<depression>&fz=<stand-off m>`, read-only like
+b=/z=, applied after the board settles because followShip seeds all three as it runs. New
+frame `wake-plan` (#e=7&f=boxroute&fb=305&fd=60&fz=2600) watches the wedge, the curved
+crests, the feathered arms, the bow horseshoe and the undisturbed water ahead of her. The
+wake shipped wrong twice because no frame could see it; now one does.
+
+**Known residual, recorded not hidden:** consorts leave no wake — uWake* carries ONE
+hero, so the treasure fleet's two companions and every mate glide on unmarked water,
+legible in build/wake-r111/zhenghe-after.png. The fix is a small uniform array of wake
+sources filled from psgFleet's mates loop; its cost gates to zero when no mate is in the
+patch. That is its own round.
+
+**Next:** (1) Consort wakes — the uWake* array, above. (2) Endurance forecastle break
+still waits on the RMG original of J9266. (3) Azzam crest residual (r108): radome
+pedestals and cluster base plates sit on teak; check the real mast deck covering if a
+better plate arrives. (4) The survey continues from the round-23 queue.
