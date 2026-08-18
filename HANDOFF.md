@@ -6172,3 +6172,64 @@ check confirms these fourteen accepts for free.
 boom draws 7.6 m where Steel gives 13–17. Moves every gaff spanker (Wyoming, Great Eastern,
 Preussen) — one round, before/after per ship. Then Azzam's residuals (riser glazing, terrace
 furniture, parapet tone, r98).
+
+## Round 101 — 2026-08-17 — the boom stops measuring the hull and starts measuring the sail
+
+**The opening ratchet confirmed round 100's fourteen accepts** — 47/55 at green, and every
+one of the eight CHANGED frames was this round's own edit landing while the check was still
+rendering (the r97–r99 situation; the closing run reproduced all eight at identical numbers,
+which is the frozen determinism doing its job).
+
+**The task was r99's deferred class fix: the aftermost boom clamp — and the phantom turned
+out to have two heads.** `gapAft * 0.78` discounts swing clearance, which is a collision
+term, against a virtual stern station where there is nothing to collide with — so the open
+boom scaled with hull length abaft the mast instead of with the sail plan: roomy on
+Wyoming's 110 m, strangling on the 74's 51 m. And on the steamer the clamp was not even the
+stern: `funnelStations()` lists candidate SLOTS (mast gaps plus a virtual after-slot at
+0.92), buildFunnel draws only the first `S.funnels` of them, and the boom clamp and the
+cowl-ventilator dodge both consulted ALL slots — her spanker was clamped to 5.4 m by a
+phantom stack her one real funnel (at 0.26) never occupied. New `drawnFunnelStations()` is
+the single source of what actually stands; buildFunnel, the boom clamp and the cowl dodge
+all consume it.
+
+**The open boom's model: the sail plan's own terms.** The 0.62 share of the lower mast,
+bounded by `gapAft * 1.6` — how far a driver boom can stand past the taffrail with its
+sheet still anchored there; the constant is calibrated on the one attested spar in reach,
+Steel's 74 driver boom (13–17 m), which the bound puts at the middle of the table.
+
+**Measured before/after, per hull (rule 7)** — `Research/probe-booms.py`, tables in
+`build/booms-before.json` / `booms-after.json`: ship-of-the-line 7.56 → 15.50 m (Steel's
+range, mid), clipper 8.74 → 13.83, steamer 5.38 → 11.99 (still inboard of her stern, which
+is right for an auxiliary), endurance 6.02 → 12.36 (the overhang bound binding — the share
+alone would have drawn 15.8 m on a 39.6 m hull), wyoming 15.44 → 20.77 (her spanker now the
+longest boom aboard, 2.1 m past the stern, which is what the six-master photographs show).
+Preussen and Great Eastern did not move — both already sat at their sail-plan share — and
+the junk-family booms are untouched, which is the fix staying inside its class.
+
+**Found while verifying, and fixed: the Shipwright deep-link to Endurance was dead.** She
+shipped with `build: 'wood'` — no such TRADITION — and the undefined lookup threw inside
+swAdoptShip, aborting boot before `__FRAME_READY`: the one hull with no baseline frame was
+also the one that crashed when opened, and the two facts are the same fact. The record now
+says `frame` (Framnæs built her carvel, frame-first), the view degrades to the default
+tradition on an unknown key instead of dying, and she renders — mizzen boom over the
+counter, tradition card reading frame-first.
+
+**Audit: three new injection-proven rules, clean sweep 33/0.** 'open boom off its sail
+plan' fires BOTH directions (7/7 shortened to 60%, 7/7 stretched to 130% — the long side is
+the Endurance fault in reverse, an uncapped share on a pole mast); 'build tradition
+unknown' (33/33 under a bogus key, reading TRADITION from the page's own scope so the list
+cannot drift). Injection snippets: `inject-boom-short.js`, `inject-boom-long.js`,
+`inject-build-unknown.js`.
+
+**Ratchet: 55 frames, 9 moved, none BLANK, every one read and accepted with its reason** —
+the driver/spanker growth on the five moved hulls, the furled bundle following its boom,
+Wyoming's whole-ship ghost (camera refit to the longer bounding box), and two frames
+(ship-titanic, aboard) that moved only because neighbouring ships' grown canvas stands in
+their view. Deployed at stamp 1787014769; live verify below.
+
+**Left un-run, same as r95–r100: the post-accept confirming pass.** Round 102's opening
+check confirms these nine for free.
+
+**Next:** Azzam residuals (riser glazing, terrace furniture, parapet tone — r98). And a
+`ship-endurance` baseline frame is worth adding: she was the only hull without one, and this
+round showed what lives in unphotographed corners.

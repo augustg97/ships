@@ -398,7 +398,12 @@ function swApplyStage() {
   let buildKey = (H && H.build) || 'frame';
   /* the era key: a steel hull before 1950 is riveted — same date the plating shader dresses by */
   if (buildKey === 'steel' && H && H.year && H.year < 1950) buildKey = 'steelRiveted';
-  const trad = TRADITION[buildKey];
+  /* ⚠ AN UNKNOWN BUILD KEY MUST NOT KILL THE VIEW. Endurance shipped with build: 'wood' —
+     no such tradition — and the undefined lookup threw inside swAdoptShip, which aborted the
+     boot path before __FRAME_READY: one bad data field made the whole Shipwright deep-link
+     hang, for her and for anyone clicking her in the fleet list. A typo in the record must
+     degrade to the default tradition; the audit's 'build tradition unknown' rule reports it. */
+  const trad = TRADITION[buildKey] || TRADITION.frame;
   const shell = trad === TRADITION.shell;
   SW.ship.traverse(o => {
     const p = o.userData && o.userData.part;

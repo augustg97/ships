@@ -5525,3 +5525,16 @@ The queue stands worked in full (r57), so this round took the standing survey's 
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 79835 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 16:19:53  round starting
+Live stamp reads **1787010448** — the deploy is verified end to end. Round 100 is complete.
+
+**What this round did.** The opening ratchet ran all 55 frames green, closing the confirming pass rounds 95–99 kept deferring. Then the round took the r98 deferral: the deck-edge half-breadth was still computed by the stale `halfB·wl·(1−tumble)` formula in four places — the rail loft, the open-walkway test, the shroud channels, and the backstay feet — a parallel copy of the surface that predates the counter flare, bow flare, rounded stern and stem rabbet. All four now ask `surfacePoint`, the same call the deck loft and waterway already make.
+
+**Measured, per hull.** A new instrument (`Research/probe-rail-edge.py`) walks every drawn rail station against the true surface edge. Before: 20 of 33 hulls were over half a metre off somewhere — the carrier's rail 4.93 m inboard of her counter, Yamato's 3.41 m, and Queen Mary 2 wrong both ways at once: 4.98 m inboard at her flared bow and 4.12 m *outboard* at her rounded stern, a rail standing in open air. After: all 33 within 0.10 m, which is the probe's own quantisation. The walkway test moving to the true edge also corrected rail emission: four big steel hulls extend rails to their genuinely open spans, and QM2 loses her stern rails entirely — her house is the shell, so the round-51 "no rail where the house is the ship's side" lesson now falls out of the geometry.
+
+**Held for the future.** A new audit rule, 'rail off its deck edge', injection-proven 33/33 in both directions; audit clean 33/0. Fourteen moved frames read and accepted with individual reasons — the big ones are shroud gangs re-led from channels at the true edge on the 74 and the square-riggers.
+
+**Handed to round 101:** the aftermost boom clamp (`gapAft * 0.78` gives the 74 a 7.6 m driver boom where Steel lists 13–17; fixing it moves every gaff spanker in the fleet), then Azzam's riser glazing and terrace furniture.
+2026-08-17 17:13:40  round finished; HEAD is 7f23ff7 Round 100: the rail finds the edge of the ship, and so do the shrouds
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 84734 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 17:23:40  round starting

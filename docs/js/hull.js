@@ -534,11 +534,12 @@ const sails = [], spars = [], mastTops = [], stayMasts = [];
 S.masts.forEach((mk, mi) => {
 const u = mk.at;
 const nextAt = (S.masts[mi + 1] || {}).at;
-let obstruct = nextAt !== undefined ? nextAt : 1.04;
-(S.funnels ? funnelStations(S) : []).forEach(fu => {
+let obstruct = nextAt !== undefined ? nextAt : Infinity;
+drawnFunnelStations(S).forEach(fu => {
 if (fu > u + 1e-4 && fu < obstruct) obstruct = fu;
 });
-const gapAft = (obstruct - u) * L;
+const openAft = obstruct === Infinity;
+const gapAft = (Math.min(obstruct, 1.04) - u) * L;
 const x = (u - 0.5) * L + H.rake(u);
 let base = deckAt(u);
 if (S.mastStep === 'house' && S.decks) {
@@ -1033,7 +1034,9 @@ sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
 }
 }
 if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
-const boomL = Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
+const boomL = openAft
+? Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 1.6))
+: Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
 const gaffL = Math.min(lower * 0.42, boomL * 0.72);
 const peak = 0.62;
 const footY = base + lower * 0.11;
@@ -2704,7 +2707,7 @@ g.add(wTag);
 }
 if (S.funnels && !(S.year >= 1950)) {
 const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
-const fst = funnelStations(S);
+const fst = drawnFunnelStations(S);
 const caseR = S.beam * 0.115 * 1.34;
 for (const f of [0.16, 0.30, 0.44, 0.58, 0.72, 0.86]) {
 const u = top.uA + f * (top.uB - top.uA);
@@ -2810,6 +2813,15 @@ for (let i = 0; i < mu.length - 1; i++) slots.push((mu[i] + mu[i + 1]) / 2);
 slots.push(Math.min(0.92, mu[mu.length - 1] + 0.14));
 return slots;
 }
+function drawnFunnelStations(S) {
+const n = S.funnels || 0;
+if (!n) return [];
+const slots = funnelStations(S), out = [];
+for (let i = 0; i < n; i++)
+out.push(slots.length ? (slots[i % slots.length] || 0.50)
+: (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1))));
+return out;
+}
 function buildFunnel(S, group) {
 const n = S.funnels || 0;
 if (!n) return;
@@ -2818,13 +2830,12 @@ const h = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
 const r = S.beam * 0.115;
 const black = new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: 0.62, metalness: 0.30 });
 const band = new THREE.MeshStandardMaterial({ color: 0x8a3820, roughness: 0.55, metalness: 0.18 });
-const slots = funnelStations(S);
+const stations = drawnFunnelStations(S);
 const T = (S.decks && !S.turrets && !S.flightDeck) ? linerHouse(S) : null;
 const rakeDeg = S.funnelRake !== undefined ? S.funnelRake : 4.87;
 const th = rakeDeg * Math.PI / 180;
 for (let i = 0; i < n; i++) {
-const u = slots.length ? (slots[i % slots.length] || 0.50)
-: (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
+const u = stations[i];
 let y = H.sheer(u);
 if (T && T.recorded)
 for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);

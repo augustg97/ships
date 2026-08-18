@@ -1257,6 +1257,15 @@
         say(v.id, 'screws out of the water', `top at ${part.screw.y[1].toFixed(1)} m`);
     }
 
+    /* (r101) A BUILD KEY NAMES A TRADITION THE TABLE KNOWS. Endurance shipped with
+       build: 'wood' — no such entry — and the undefined lookup threw inside swAdoptShip,
+       killing __FRAME_READY for the whole Shipwright deep-link. The view now degrades to
+       the default tradition, so only this rule reports the bad field. TRADITION is read
+       from the page's own global scope so this list cannot drift from the real table. */
+    if (H.build && typeof TRADITION !== 'undefined' && !TRADITION[H.build])
+      say(v.id, 'build tradition unknown',
+          `build: '${H.build}' names no entry in the tradition table`);
+
     /* ── THE SCHOONER'S RIG IS THE RECORD'S RIG (round 42, Wyoming). Four rules from one
        survey. (1) THE SPANKER IS NOT THE SHORTEST SPAR ON THE SHIP: the aftermost boom's
        obstruction fallback was a station just abaft midships, so gapAft went negative and
@@ -1283,6 +1292,47 @@
               'forward of it — the one boom with nothing abaft it to hit');
       }
     }
+
+    /* (r101) THE OPEN AFTERMOST BOOM DRAWS ITS SAIL PLAN, NOT THE HULL'S LEFTOVERS.
+       Twice now a spanker boom was clamped by something that is not there: a virtual stern
+       station discounted for swing clearance (the 74's driver at 7.6 m against Steel's
+       13–17), and a phantom funnel slot no funnel occupies (the steamer's at 5.4 m). The
+       rule pins the agreed entitlement — the 0.62 share of the lower mast, bounded by
+       gapAft * 1.6, the calibrated taffrail-overhang limit — and fires BOTH ways, because
+       an unclamped boom running to 0.62 of a pole mast is the Endurance fault in reverse.
+       Obstruction is decided by GEOMETRY: a drawn funnel mesh abaft the mast station makes
+       the clamp legitimate and the rule stands down, whatever the spec declares. */
+    (() => {
+      const masts = H.masts || [];
+      const mk = masts[masts.length - 1];
+      if (!mk || !(mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker))) return;
+      const L = H.lwl, mastX = (mk.at - 0.5) * L;
+      let funnelAbaft = false;
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.key === 'funnel') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        if ((bbx.min.x + bbx.max.x) / 2 > mastX) funnelAbaft = true;
+      } });
+      if (funnelAbaft) return;
+      const steelMain = (H.lwl + H.beam) / 2;
+      const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+      const want = Math.max(lower * 0.16,
+                            Math.min(lower * 0.62, (1.04 - mk.at) * L * 1.6));
+      const booms = [];
+      g.traverse(o => { if (o.isMesh && o.userData.part &&
+                            o.userData.part.name === 'Boom') {
+        const bbx = new THREE.Box3().setFromObject(o);
+        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: bbx.max.x - bbx.min.x });
+      } });
+      if (!booms.length) return;
+      booms.sort((a, b) => a.cx - b.cx);
+      const aft = booms[booms.length - 1];
+      if (aft.cx < mastX - L * 0.02) return;   // no boom on the aftermost mast itself
+      if (aft.len < want * 0.93 || aft.len > want * 1.15)
+        say(v.id, 'open boom off its sail plan',
+            `aftermost boom ${aft.len.toFixed(1)} m against an entitlement of ` +
+            `${want.toFixed(1)} m with nothing drawn abaft the mast`);
+    })();
 
     /* (2) DECLARED HEADSAILS ARE DRAWN, FORWARD OF THE FOREMAST. `headsails: n` is the
        record's suit on the bowsprit stays; a jib that silently stops being built leaves a

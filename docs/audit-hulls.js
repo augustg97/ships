@@ -851,6 +851,9 @@ if (!part.screw) say(v.id, 'declared but not drawn', 'screws');
 else if (part.screw.y[1] > 0)
 say(v.id, 'screws out of the water', `top at ${part.screw.y[1].toFixed(1)} m`);
 }
+if (H.build && typeof TRADITION !== 'undefined' && !TRADITION[H.build])
+say(v.id, 'build tradition unknown',
+`build: '${H.build}' names no entry in the tradition table`);
 const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff');
 if (!H.funnels && gaffMasts.length >= 2 &&
 gaffMasts.length === (H.masts || []).length) {
@@ -870,6 +873,37 @@ say(v.id, 'spanker boom collapsed',
 'forward of it — the one boom with nothing abaft it to hit');
 }
 }
+(() => {
+const masts = H.masts || [];
+const mk = masts[masts.length - 1];
+if (!mk || !(mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker))) return;
+const L = H.lwl, mastX = (mk.at - 0.5) * L;
+let funnelAbaft = false;
+g.traverse(o => { if (o.isMesh && o.userData.part &&
+o.userData.part.key === 'funnel') {
+const bbx = new THREE.Box3().setFromObject(o);
+if ((bbx.min.x + bbx.max.x) / 2 > mastX) funnelAbaft = true;
+} });
+if (funnelAbaft) return;
+const steelMain = (H.lwl + H.beam) / 2;
+const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+const want = Math.max(lower * 0.16,
+Math.min(lower * 0.62, (1.04 - mk.at) * L * 1.6));
+const booms = [];
+g.traverse(o => { if (o.isMesh && o.userData.part &&
+o.userData.part.name === 'Boom') {
+const bbx = new THREE.Box3().setFromObject(o);
+booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: bbx.max.x - bbx.min.x });
+} });
+if (!booms.length) return;
+booms.sort((a, b) => a.cx - b.cx);
+const aft = booms[booms.length - 1];
+if (aft.cx < mastX - L * 0.02) return;
+if (aft.len < want * 0.93 || aft.len > want * 1.15)
+say(v.id, 'open boom off its sail plan',
+`aftermost boom ${aft.len.toFixed(1)} m against an entitlement of ` +
+`${want.toFixed(1)} m with nothing drawn abaft the mast`);
+})();
 if (H.headsails && (H.masts || []).length) {
 const fmx = (H.masts[0].at - 0.5) * H.lwl;
 let jibs = 0;

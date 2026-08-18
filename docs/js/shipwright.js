@@ -229,7 +229,7 @@ if (!SW.ship) return;
 const H = SW.spec && SW.spec.hull;
 let buildKey = (H && H.build) || 'frame';
 if (buildKey === 'steel' && H && H.year && H.year < 1950) buildKey = 'steelRiveted';
-const trad = TRADITION[buildKey];
+const trad = TRADITION[buildKey] || TRADITION.frame;
 const shell = trad === TRADITION.shell;
 SW.ship.traverse(o => {
 const p = o.userData && o.userData.part;

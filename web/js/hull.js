@@ -908,12 +908,18 @@ function buildRig(S, group, mats, FINE, FURLED) {
        below says may overhang the stern, was the shortest spar on the ship, at exactly
        lower * 0.16. The photographs show the opposite: the six-masters' spanker booms were
        their LONGEST, standing well out over the counter, because aft of the taffrail there
-       is nothing to hit. */
-    let obstruct = nextAt !== undefined ? nextAt : 1.04;
-    (S.funnels ? funnelStations(S) : []).forEach(fu => {
+       is nothing to hit.
+       ⚠ AND ONLY A DRAWN FUNNEL OBSTRUCTS — see drawnFunnelStations. The slot list's
+       virtual after-station clamped the steamer's spanker against a stack that is not
+       there. openAft says nothing at all stands abaft this mast; gapAft keeps the virtual
+       1.04 stern station in that case, because the junk sheet lead below still needs the
+       room the SHIP has, not the room the sail plan takes. */
+    let obstruct = nextAt !== undefined ? nextAt : Infinity;
+    drawnFunnelStations(S).forEach(fu => {
       if (fu > u + 1e-4 && fu < obstruct) obstruct = fu;
     });
-    const gapAft = (obstruct - u) * L;
+    const openAft = obstruct === Infinity;
+    const gapAft = (Math.min(obstruct, 1.04) - u) * L;
     const x = (u - 0.5) * L + H.rake(u);
     /* ── ⚠ A MAST IS STEPPED ON THE DECK IT STANDS ON ───────────────────────────────────
        Every mast started at the SHEER, which is right for a ship whose weather deck is her
@@ -1933,8 +1939,21 @@ function buildRig(S, group, mats, FINE, FURLED) {
          precisely why schooner booms get shorter as you add masts. Only the aftermost boom
          may overhang, and it overhangs the STERN, where there is nothing to hit. */
       /* 0.78 rather than 0.86: a boom needs room to swing, and the clearance it needs is to
-         the FACE of the obstruction, not to its centreline. */
-      const boomL = Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
+         the FACE of the obstruction, not to its centreline.
+         ── ⚠ THE STERN IS NOT AN OBSTRUCTION (r99, taken r101) ─────────────────────────
+         Swing clearance is a collision term, and aft of the taffrail there is nothing to
+         collide with — discounting the open aftermost boom by 0.78 of the room to a virtual
+         stern station made the boom scale with HULL LENGTH abaft the mast instead of with
+         the sail plan: roomy on Wyoming's 110 m, strangling on the 74's 51 m, where the
+         driver drew 7.6 m against Steel's listed 13–17. Open water gets the sail plan's own
+         terms instead: the 0.62 share of the lower mast, bounded by how far a driver boom
+         can stand past the taffrail and still be worked — its sheet lands on the taffrail
+         or a buffer on it, and no plan hangs much more than a third of the boom outboard of
+         that anchorage. gapAft * 1.6 is that bound, calibrated on the one attested spar in
+         reach: it puts the 74's boom at 15.5 m, the middle of Steel's table. */
+      const boomL = openAft
+        ? Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 1.6))
+        : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
       const gaffL = Math.min(lower * 0.42, boomL * 0.72);
       const peak = 0.62;                                 // the gaff's angle above horizontal
       const footY = base + lower * 0.11;
@@ -4445,7 +4464,7 @@ function buildSuperstructure(S, group) {
      year-1950 dress gate, applied to fittings. */
   if (S.funnels && !(S.year >= 1950)) {
     const cowl = new THREE.MeshStandardMaterial({ color: 0xb8483a, roughness: 0.55, metalness: 0.15 });
-    const fst = funnelStations(S);
+    const fst = drawnFunnelStations(S);   // a cowl dodges a real casing, not an empty slot
     const caseR = S.beam * 0.115 * 1.34;
     for (const f of [0.16, 0.30, 0.44, 0.58, 0.72, 0.86]) {
       const u = top.uA + f * (top.uB - top.uA);
@@ -4588,6 +4607,23 @@ function funnelStations(S) {
   return slots;
 }
 
+/* ⚠ A SLOT IS NOT A FUNNEL. funnelStations() lists every station a funnel COULD occupy —
+   the gaps between masts plus a virtual after-slot at 0.92 — and buildFunnel draws only the
+   first S.funnels of them. Anything that asks "does a stack stand here" must ask about the
+   DRAWN stations: the steamer's spanker boom was clamped to 5.4 m by a phantom funnel at
+   0.92 that her one real funnel (at 0.26) never occupied, and cowl ventilators were skipped
+   around the same empty air. One funnel, one entry, in drawing order — duplicates kept,
+   because the modulo cycling is buildFunnel's own behaviour for records without funnelAt. */
+function drawnFunnelStations(S) {
+  const n = S.funnels || 0;
+  if (!n) return [];
+  const slots = funnelStations(S), out = [];
+  for (let i = 0; i < n; i++)
+    out.push(slots.length ? (slots[i % slots.length] || 0.50)
+                          : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1))));
+  return out;
+}
+
 function buildFunnel(S, group) {
   const n = S.funnels || 0;
   if (!n) return;
@@ -4608,7 +4644,7 @@ function buildFunnel(S, group) {
      each other. On a real auxiliary steamer the uptakes are threaded into the GAPS between the
      masts, because a boiler casing and a mast step cannot occupy the same frame. Take the mast
      positions and sit in the widest holes between them. */
-  const slots = funnelStations(S);
+  const stations = drawnFunnelStations(S);
   /* ⚠ THE STACK STANDS ON ITS OWN DECK, NOT ON THE SHEER. funnelH is the record's number,
      and the record measures a funnel above the deck it stands on — for Titanic the BOAT
      deck. Rising from the sheer, her 19 m stacks spent 12 m hidden inside the house and
@@ -4640,8 +4676,7 @@ function buildFunnel(S, group) {
   const rakeDeg = S.funnelRake !== undefined ? S.funnelRake : 4.87;
   const th = rakeDeg * Math.PI / 180;
   for (let i = 0; i < n; i++) {
-    const u = slots.length ? (slots[i % slots.length] || 0.50)
-                           : (n === 1 ? 0.50 : 0.42 + i * (0.20 / (n - 1)));
+    const u = stations[i];
     let y = H.sheer(u);
     if (T && T.recorded)
       for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);

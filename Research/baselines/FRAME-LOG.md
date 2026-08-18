@@ -992,3 +992,12 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-17 17:11** · `aboard-preussen` — r100 class fix seen from aboard: shroud feet and rail line at the true edge, sea and sky untouched
 - **2026-08-17 17:11** · `ship-wyoming` — r100: the six-master's channels and rail to the true edge; before-measure 1.95 m inboard at u 0.965
 - **2026-08-17 17:11** · `ship-clipper` — r100: channels, backstay feet and rail to the true edge; before-measure 1.34 m inboard at the counter
+- **2026-08-17 18:23** · `shipwright` — r101 boom clamp: the 74's driver at Steel's length — boom 7.6 to 15.5 m, sail and sheet standing over the counter
+- **2026-08-17 18:23** · `shipwright-astern` — r101 boom clamp: the driver and its boom over the counter, seen from astern
+- **2026-08-17 18:23** · `shipwright-furled` — r101 boom clamp: the furled driver bundle follows its longer boom over the counter
+- **2026-08-17 18:23** · `ship-wyoming` — r101 boom clamp: spanker 15.4 to 20.8 m, now her longest boom; the whole-ship ghost is the camera refit to the longer bounding box
+- **2026-08-17 18:23** · `aboard-wyoming` — r101 boom clamp: the grown spanker read at distance
+- **2026-08-17 18:23** · `ship-clipper` — r101 boom clamp: spanker 8.7 to 13.8 m over the counter
+- **2026-08-17 18:23** · `ship-steamer` — r101 boom clamp: spanker 5.4 to 12.0 m — the phantom funnel-slot clamp removed; her one funnel is at 0.26
+- **2026-08-17 18:23** · `ship-titanic` — r101 boom clamp: neighbouring ships' grown spankers intrude at the frame edges of the fleet line
+- **2026-08-17 18:23** · `aboard` — r101 boom clamp: a distant schooner's regrown gaff canvas

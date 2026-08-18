@@ -125,11 +125,10 @@ Ordered by how much each closes the gap per unit of work.
 11. ~~The fore-and-aft canvas~~ — **done, r99.** The 74 set only square cloth; Steel 1794
     lists her jib, fore topmast staysail, staysails and driver. All record-driven through
     machinery that already existed (`headsails: 2`, `staysails: 3/2`, `spanker: true` on
-    the mizzen) — the record had simply never declared them. Residual, deliberately not
-    taken: the aftermost boom clamp discounts swing clearance (`gapAft * 0.78`) against a
-    stern that is not an obstruction, so the driver boom draws 7.6 m where Steel gives a
-    74 boom of 13–17 m. Fixing the clamp moves every gaff spanker in the fleet (Wyoming,
-    Great Eastern, Preussen) — its own round, with its own before/after.
+    the mizzen) — the record had simply never declared them. Residual — the aftermost
+    boom clamp — **taken r101**: open water abaft the mast no longer clamps the boom; the
+    driver draws 15.5 m against Steel's 13–17 (before/after per hull in
+    `build/booms-before.json` / `booms-after.json`, HANDOFF r101).
 
 ## Rules this view is held to
 
