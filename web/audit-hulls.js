@@ -41,6 +41,23 @@
     if (!v.hull) continue;
     const H = v.hull;
 
+    /* ── A RECORDED STEAM PLANT MUST SHOW ITS UPTAKE (round 103) ────────────────────────
+       Endurance carried a 350 ihp coal-fired auxiliary — her card says so, her polar's
+       steam floor says so — and for 40 rounds she drew no funnel at all, because funnels
+       are opt-in (`hull.funnels`) and nothing cross-examined the record against the
+       silhouette. The ratchet was structurally blind: a funnel that never existed never
+       CHANGED. So: any vessel whose own record attests steam (the word in her rows or in
+       her polar's provenance, with ihp/bhp as corroborators) and whose hull predates 1950
+       must declare at least one funnel. Post-1950 plants breathe through casings and
+       nuclear ships have no stack worth the name, so the gate closes there. */
+    if ((H.year || 0) < 1950) {
+      const recordText = JSON.stringify([v.rows || [], (v.polar || {}).anchor || {},
+                                         (v.polar || {}).floor || {}, v.sub || '']);
+      if (/steam|\bihp\b|\bbhp\b/i.test(recordText) && !(H.funnels >= 1))
+        say(v.id, 'steam attested, no funnel drawn',
+            `year ${H.year}; record says steam; hull.funnels = ${H.funnels}`);
+    }
+
     /* ── A RECORDED WINDOW GROUP MUST LIE WHERE ITS SURFACE IS (round 96) ───────────────
        tierBands.groups and hullRows put glazing at recorded u-spans and heights. A group
        outside its wall, or a hull row above the freeboard, maps past the surface's own

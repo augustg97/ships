@@ -6304,3 +6304,77 @@ frame and her survey (hull detail, deckhouse fidelity against Hurley's plates) h
 been done; and the Sea-view voyage cards item 4 follow-ons from the second list are all
 closed, so a fresh look at the Sea close-up wake (item 10 was closed r44) against the
 current fleet would be due diligence rather than a known fault.
+
+## Round 103 — 2026-08-17 — the ship that had never been surveyed gets her funnel back
+
+**The opening ratchet confirmed round 102's two accepts — all 56 frames green, nothing
+carried.** The task was the Endurance survey r102 named: hull detail and deckhouse fidelity,
+never done for the one hull that joined the fleet after the survey queue was ordered.
+
+**THE RECORD ATTESTED A 350 IHP COAL AUXILIARY AND THE MODEL DREW NO FUNNEL AT ALL.**
+Funnels are opt-in (`hull.funnels`) and nothing cross-examined the record against the
+silhouette, so the most recognisable fitting on every Hurley plate simply did not exist —
+for the forty rounds she has been aboard. The ratchet was structurally blind to it: a
+funnel that never existed never CHANGED.
+
+**The stations came off the builder's own drawing.** The Framnaes longitudinal section (as
+*Polaris*, RMG J9266 — the web copy is 1024x322, ~16.9 px/m, so stations carry ±0.5 m and
+the provenance says so) was segmented against the stem and counter LWL crossings, and
+cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m): mast-gap ratio
+fore-main/main-mizzen reads 1.12 in the photograph and 1.09 off the plan; the funnel
+stands at 45% of the main→mizzen gap in both, independently. Masts moved: fore 0.15 →
+0.209 (2.3 m aft — the record had her foremast in the forecastle), main 0.52 → 0.537,
+mizzen 0.845 → 0.839. Funnel at 0.677 (plan reads 0.670 ± 0.015; the extra 0.007 seats
+the boiler casing inside the house whose forward end it rises from, where the plan puts
+it). Black, per every plate where the funnel reads as dark as the black hull while the
+masts read pale; 6.5 m over the sheer, which the render then shows as 5.8 m over the
+rail against the photograph's 5.7.
+
+**The trucks were 15 m wrong, in the direction the square-stack rule always errs.** The
+broadside gives fore 34.3, main 35.2, mizzen 29.3 m over the water, main the tallest;
+the model drew the fore at 49.3 (27.5 m of recorded 'lower' through the 1.72× fidded
+stack) over a main at 31.7 — the tallest mast aboard the wrong mast by 17 m. heightM now
+carries the lower-mast lengths that land the photograph's trucks: 18.8 / 33.5 / 26.8.
+measure_ship after: tallest point 35.52 m ✓, and the fleet's boom clamp took the new
+funnel as the real obstruction it is — her main boom now stops short of the stack.
+
+**The deckhouses now match the plan instead of contradicting it.** The forward house
+(0.16–0.27) is GONE — the plan shows a ship's boat on skids there (which the model
+already draws) and no photograph shows a house; the aft house is 0.654–0.781 with the
+engine skylight block at 0.56–0.62 before it. Overhangs: the drawn shell ran 47.0 m
+against a recorded 43.9 LOA; stemRake 0.1 → 0.077 and sternRake 0.06 → 0.03 per the
+plan's own overhangs (bow 3.4 m, stern 1.3 m), and the planking now measures 44.67 m.
+All derivations and their px/m bounds are in `hull.stationProvenance`.
+
+**Audit: one new rule, injection-proven, clean sweep 33/0.** 'steam attested, no funnel
+drawn' — any pre-1950 record whose own words attest steam (rows, polar anchor/floor
+provenance) must declare a funnel. Stripping `hull.funnels` fleet-wide fires it on all
+four pre-1950 steam records (great-eastern, steamer, dreadnought, endurance —
+`inject-funnel-stripped.js`). Titanic and Yamato stay outside it because their record
+text never says "steam"; the rule convicts on the record's own words, noted so the next
+reader does not chase it.
+
+**Ratchet: 56 frames, two moved, both read and accepted with reasons.** ship-endurance
+(28.6%) carries the vessel work — read against Rule 0: a viewer can name the barquentine
+rig, the steam auxiliary's black funnel and the black polar hull off the frame without a
+legend. ship-yamato (0.071%) is three faint Endurance-shaped ghosts at distance down the
+fleet line — the r101 neighbour class, no Yamato pixel moved. Deployed at stamp
+1787025043; live verify below.
+
+**Found on the accepted frame and deliberately deferred: her card reads "4.0 kn UNDER
+PADDLE" for the steam floor.** She is a screw steamer; the floor label is a card-template
+string, a class issue for every steam-floor vessel. Fixing it is an app-JS change plus a
+full ratchet rerun — more than the round's remaining window held. Next round's opener.
+
+**Reference material kept in build/:** endurance-plan.png (+ gridded/zoom crops, RMG
+J9266), hurley-deck.jpg, endurance-heeled.png, z-broadside.png (the gridded crop the
+truck heights were read from), endurance-measure-before.txt. The multi-MB originals are
+not committed — re-fetch by name: RMG P00018 tiff and a090012h / night-1915 via Commons
+Special:FilePath, URLs in this entry and in hull.stationProvenance.
+
+**Next:** Endurance residuals, none blocking: her boats are one hull amidships where she
+carried three (two more in stern davits — the night plate shows the port-quarter boat);
+the forecastle break is not modelled as a raised deck; the funnel row in measure_ship
+reads 1.83 m wide against a 1.26 m stack (unexplained 0.6 m — possibly a fitting merged
+into the tag). Then the r102 candidates still open: the terrace-deck teak question on
+Azzam (whole deck-loft material decision), and the Sea close-up wake due-diligence pass.

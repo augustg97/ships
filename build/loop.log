@@ -5557,3 +5557,9 @@ Round 101 is complete and live. The summary:
   by itself at the next firing. Nothing else is needed.
 ───────────────────────────────────────────────────────────────────────────
 2026-08-17 18:45:37  round starting
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-17 20:05:42  round finished; HEAD is af29299 Round 102: the terraces stop being a different ship from the hull they stand on
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 95333 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-17 20:15:42  round starting
