@@ -40,3 +40,8 @@ scratchpad/
 
 # per-round frame snapshots for before/after measures — read locally, never committed
 build/*-frames/
+
+# the improvement-round mutex: a DIRECTORY, because mkdir is atomic. Committing it makes
+# every fresh checkout look permanently locked — `git add -A` while holding it did exactly
+# that in r125.
+build/.loop.lock/
