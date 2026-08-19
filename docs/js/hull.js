@@ -2122,6 +2122,7 @@ return o;
 }
 function buildFittings(S, group, mats) {
 const timberShip = !(S.build === 'iron' || S.build === 'steel');
+const laidDeck = deckCovering(S).mode === 1;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const deckAtU = u => H.sheer(u);
@@ -2227,11 +2228,11 @@ gg.add(c);
 }
 return tag(gg, 'grating');
 };
-if (timberShip) [0.30, 0.50, 0.70].forEach(u => {
+if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {
 const w = halfAtU(u) * 0.85;
 group.add(gratingAt(u, w, L * 0.055));
 });
-if (timberShip) {
+if (timberShip && laidDeck) {
 const u = 0.62, y = deckAtU(u), R = B * 0.062;
 const cg = new THREE.Group();
 const barrel = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.80, R, B * 0.115, 16), wood);
@@ -2313,7 +2314,7 @@ wg.add(sp);
 hg.add(wg);
 group.add(tag(hg, 'helm'));
 }
-if (timberShip && S.lwl > 25) {
+if (timberShip && laidDeck && S.lwl > 25) {
 const bl = L * 0.17, u = 0.46;
 const boatSpec = {
 loa: bl, lwl: bl * 0.94, beam: bl / 3.4, draught: bl * 0.075, freeboard: bl * 0.105,

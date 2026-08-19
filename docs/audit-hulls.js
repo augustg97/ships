@@ -135,6 +135,21 @@ e.z[0] = Math.min(e.z[0], bb.min.z); e.z[1] = Math.max(e.z[1], bb.max.z);
 const deckY = part.deck ? part.deck.y[1] : 0;
 const bb = new THREE.Box3().setFromObject(g);
 const airM = bb.max.y - deckY;
+{
+const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+const timber = !(H.build === 'iron' || H.build === 'steel');
+const steelDeck = H.deck && H.deck.covering === 'steel';
+for (const k of ['grating', 'capstan']) {
+if (undecked && part[k])
+say(v.id, 'hold furniture on an undecked hull',
+`${part[k].n} ${k} mesh(es) drawn, but the record declares deckLaid: false — `
++ 'no laid deck, no hatch to cover, nothing for a capstan to stand on');
+else if (!undecked && timber && !steelDeck && !part[k])
+say(v.id, `a decked timber ship lost her ${k}`,
+'the hull is timber and the record does not refuse a laid deck, so hatch '
++ 'gratings and a capstan belong aboard and none is drawn');
+}
+}
 if (H.__mastTops && H.__mastTops.length) {
 const mastBoxes = [];
 g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast')

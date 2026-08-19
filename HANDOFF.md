@@ -7561,3 +7561,90 @@ laid deck with hatches — not on hull material; check the voyaging canoe (build
 for the same fault while there. (2) The gundeck both-ways normals sweep, if wanted.
 (3) The opening check next round confirms the 53 frames not re-checked at this close —
 expected 0.000%; if anything moved, this round owns it.
+
+## Round 120 — 2026-08-18 — the log that was given a hold
+
+**The opening ratchet was the confirming pass r119 owed: 58 of 59 frames within tolerance.**
+The one mover was this round's own edit landing mid-pass — the harness captures frames in
+sequence, hull.js changed at 16:51, and ship-dugout's page loaded after that while every
+other frame (including ship-canoe, whose page had already loaded the old code) rendered the
+pre-edit tree. The diff was read and is exactly this round's change, so round 119 is
+confirmed fleet-wide and the mover is classified below (build/ratchet-open-r120.log).
+
+**THE TASK: r119's pointer, verified in the code before starting — `timberShip` in
+buildFittings means "not iron and not steel", so the 8.6 m hollowed log of 68,000 BP and
+the voyaging canoe (both `deckLaid: false` in the record) were given three hatch gratings
+and a bar-capstan written for planked ships with holds.** The dugout's was in plain sight:
+a grating spanning u 0.27–0.73 — 3.66 m of an 8 m log — and a capstan whose bars swept to
+half-breadth 0.29 on a 0.43 half-beam, overhanging both sides. The canoe's was the r58
+family in a new place: her furniture stood at the centreline BETWEEN her two hulls, y-capped
+under the crew platform (grating head 0.81 m, platform foot 0.90 m), so it was buried where
+no bearing could see it and only the part table could convict it.
+
+**The class fix is one gate: deck furniture keys off the DECK, not the hull material.**
+`deckCovering()` — the round-106 "one judgement, asked in one place, so the deck material
+and the deck furniture cannot disagree" — already classifies these two hulls `bare`; the
+furniture just never asked it. `const laidDeck = deckCovering(S).mode === 1` now gates the
+gratings, the capstan and the skid boat (the boat's `lwl > 25` already excluded both these
+hulls, but a boat stows on a deck, so it takes the gate for the class). A grating covers a
+hatch — an opening through a laid deck into a hold — and a capstan stands ON a deck; a hull
+with neither gets neither. Exactly two hulls change; the 19 decked timber ships keep every
+part.
+
+**Measured (rule 4, build/measure-{dugout,canoe}-r120-{before,after}.txt):** the diff of
+the part tables is exactly two rows removed per ship — dugout Grating u 0.271–0.729 and
+Capstan u 0.584–0.656 gone, canoe Grating u 0.272–0.728 and Capstan u 0.600–0.640 gone —
+and every other row plus the global extents byte-identical.
+
+**Verified (rule 1): twelve spin bearings each, read.** The dugout now reads as what her
+card argues she is — an open hollowed log with a clean sheer, nothing standing on her but
+her own rim. The canoe's platform stands clear with nothing poking beneath it. The fluyt
+was re-measured as the control: Grating, Capstan, Ship's boat and Boat skids all still
+aboard. Rule 0 on ship-dugout: reads as a rendered vessel on water; three facts a viewer
+can read off it — a single-piece hull with no deck and nothing aboard, her sheer rising to
+a fine stem; the 5-metre scale bar putting 8.6 m against the fleet list's 383 m container
+ship; the stage slider reading "One piece: a tree with the inside taken out."
+
+**The audit learned the class (round-120 rule): 'hold furniture requires a hold', two
+arms, expectation read off the RECORD independently of deckCovering so a bug in that one
+judgement cannot hide from the rule.** Arm one: a hull whose record declares
+`deckLaid: false` draws no grating and no capstan. Arm two: a decked timber hull STILL
+draws hers, so the gate cannot silently widen and strip the fleet. Proven by injection
+against the final geometry (build/staging/inj-hold-{undecked,strip}.js): deleting
+`deckLaid` for the build reproduces the original fault and convicts 4/33 on exactly the
+two ships (76 grating meshes on the dugout — the r113 survey's own count — plus 18 capstan
+meshes each), with the pre-existing waterway rule firing alongside as it should; stripping
+every drawn grating and capstan convicts 38 problems on exactly the 19 decked timber
+ships, silent on the undecked two and the steel fleet. Clean run 33/0, twice.
+
+**Ratchet: full post-edit pass — one mover, ship-dugout 0.102% / mean 0.038, diff read
+before accepting: the three grating rectangles and the capstan's crossed bars alone,
+hull/sea/panels byte-black. Accepted, re-checked 0.000%. ship-canoe 0.004% sub-tolerance —
+the buried furniture's few visible pixels at the platform edge — with everything else
+0.000–0.037%.** Frames stay at 59.
+
+**Deployed: stamp 1787098519.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) **The dugout still carries a RUDDER — and
+so does everything, unconditionally** (hull.js buildShip adds `buildRudderGeometry` to
+every hull with no gate at all), while her card attests paddling and the canoe's card
+says in terms "a long paddle, not a rudder". (2) Same family: WALES gate on "not
+iron/steel", so the one-piece log wears hogging girders, and separate stem/sternposts
+stand on a hull the stage card calls "one piece". (3) The dugout's deck part is a capped
+"bare timber" surface, not an open hollow — a monoxylon is open. (4) The gundeck
+both-ways normals class (r118) stands fleet-wide, unconvicted. (5) Sekibune/panokseon
+LOA overhang class (r113/r115) untouched. (6) The r115 hayao and sekibune swivels (r90)
+stand. (7) probe-wake.py heading mirror (r114) untouched. (8) Endurance forecastle break
+still waits on the RMG original of J9266. (9) Azzam crest residual (r108) unchanged.
+(10) The yakata wall-opening curtain (r117) is still not drawn.
+
+**Next:** (1) The survey continues at residuals 1–3, which are one class: PARTS OF AN
+ASSEMBLED SHIP drawn on a hull the record calls one piece. Steering is a fact of the
+record — rudder vs steering paddle vs quarter rudder — so it wants a record field, not a
+guess off the build string; and the `dugout` build type should suppress wales and the
+separate posts the way `deckLaid: false` now suppresses hold furniture. Read the cards
+first: the dugout's own rows attest "single trunk, fire and adze", the canoe's attest
+"Steering: a long paddle, not a rudder" — the fields are already half-written. (2) The
+gundeck both-ways normals sweep, if wanted. (3) The opening check next round confirms
+the 58 frames not re-checked at this close — expected 0.000%; if anything moved, this
+round owns it.

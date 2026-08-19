@@ -1,0 +1,14 @@
+Dugout canoe   record: LOA 8.6 m  LWL 8 m  beam 0.86 m  draught 0.26 m
+  model extent   x    -4.87 ..    +4.70   =    9.57 m   (record LOA 8.6)   Δ +0.97 m
+  model height   y    -0.29 ..    +0.62   =    0.91 m   above water 0.62 m
+  model breadth  z         ..    +0.44   =    0.88 m   (record beam 0.86)   Δ +0.02 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Stem                        -0.109   0.101    1.68   -0.21    0.62   0.02
+  Planking                    -0.108   1.086    9.55   -0.26    0.62   0.43
+  Deck — bare timber          -0.108   1.086    9.55    0.34    0.62   0.43
+  Rail                        -0.055   1.038    8.74    0.34    0.59   0.43
+  Wales                       -0.029   1.021    8.40    0.02    0.24   0.44
+  Keel                         0.000   1.000    8.00   -0.29   -0.17   0.02
+  Sternpost                    0.899   1.087    1.51   -0.21    0.58   0.02
+  Rudder                       1.000   1.060    0.48   -0.24    0.20   0.03

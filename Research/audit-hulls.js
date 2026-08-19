@@ -243,6 +243,33 @@
     const bb = new THREE.Box3().setFromObject(g);
     const airM = bb.max.y - deckY;
 
+    /* ── HOLD FURNITURE REQUIRES A HOLD (round 120) ─────────────────────────────────────
+       A grating covers a hatch — an opening through a laid deck into a hold — and a
+       capstan stands ON a deck, heaving cable. Both were gated on "timber" for as long as
+       buildFittings has existed, so the 8.6 m dugout and the voyaging canoe (the record's
+       deckLaid: false — an open log, and a lashed platform between two open hulls) carried
+       three hatch gratings and a bar-capstan whose bars overhung the sides. The
+       expectation here is read off the RECORD, independently of the builder's own
+       deckCovering() judgement, so a bug in that one judgement cannot hide from this rule.
+       Two arms: an undecked hull draws NO hold furniture, and a decked timber hull STILL
+       draws hers — so the gate that fixed the class cannot silently widen and strip the
+       fleet's working ships of their hatches. */
+    {
+      const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+      const timber = !(H.build === 'iron' || H.build === 'steel');
+      const steelDeck = H.deck && H.deck.covering === 'steel';
+      for (const k of ['grating', 'capstan']) {
+        if (undecked && part[k])
+          say(v.id, 'hold furniture on an undecked hull',
+              `${part[k].n} ${k} mesh(es) drawn, but the record declares deckLaid: false — `
+              + 'no laid deck, no hatch to cover, nothing for a capstan to stand on');
+        else if (!undecked && timber && !steelDeck && !part[k])
+          say(v.id, `a decked timber ship lost her ${k}`,
+              'the hull is timber and the record does not refuse a laid deck, so hatch '
+              + 'gratings and a capstan belong aboard and none is drawn');
+      }
+    }
+
     /* ── A STAY ENDS ON A SPAR, NOT ON AN ESTIMATE OF ONE (round 99) ────────────────────
        buildRigging anchors every stay and backstay at __mastTops; for rounds those points
        were `y + lower*0.14` — 3.0 to 3.4 m ABOVE the trucks the mast loop actually drew, so

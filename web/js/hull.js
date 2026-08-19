@@ -3470,6 +3470,14 @@ function buildFittings(S, group, mats) {
      that is right for most of the fleet, applied to all of it. Steel and iron hulls get their
      own fittings below. */
   const timberShip = !(S.build === 'iron' || S.build === 'steel');
+  /* ⚠ AND THE SAME FAILURE ONE SIZE DOWN (r120): "timber" put HOLD furniture on hulls with no
+     hold. A grating covers a hatch — an opening through a laid deck — and a capstan stands ON
+     a deck and heaves cable a crew this size hauls by hand; the 8.6 m dugout and the voyaging
+     canoe (the record's deckLaid: false, an open log and a lashed platform between two open
+     hulls) carried three gratings and a bar-capstan for as long as buildFittings has existed.
+     deckCovering() already promises "the deck material and the deck furniture cannot
+     disagree" — the furniture just never asked it. Now it does. */
+  const laidDeck = deckCovering(S).mode === 1;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckAtU = u => H.sheer(u);
@@ -3626,7 +3634,7 @@ function buildFittings(S, group, mats) {
     }
     return tag(gg, 'grating');
   };
-  if (timberShip) [0.30, 0.50, 0.70].forEach(u => {
+  if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {
     const w = halfAtU(u) * 0.85;
     group.add(gratingAt(u, w, L * 0.055));
   });
@@ -3636,7 +3644,7 @@ function buildFittings(S, group, mats) {
      to bite on, because a polished cylinder would simply let it slip. Above them sits the
      drumhead, pierced square for the bars, and the spindle runs down through the deck to a
      second capstan below, so two decks of men heave on the same anchor at once. */
-  if (timberShip) {
+  if (timberShip && laidDeck) {
     const u = 0.62, y = deckAtU(u), R = B * 0.062;
     const cg = new THREE.Group();
     const barrel = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.80, R, B * 0.115, 16), wood);
@@ -3743,7 +3751,7 @@ function buildFittings(S, group, mats) {
      it. Not a new model — the same generator at a different size, which is exactly the rule
      this project holds everything else to.
      Her proportions are a launch's: L/B about 3.4, fine forward, transom-sterned and open. */
-  if (timberShip && S.lwl > 25) {
+  if (timberShip && laidDeck && S.lwl > 25) {
     const bl = L * 0.17, u = 0.46;
     const boatSpec = {
       loa: bl, lwl: bl * 0.94, beam: bl / 3.4, draught: bl * 0.075, freeboard: bl * 0.105,
