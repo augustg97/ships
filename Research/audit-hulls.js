@@ -3466,5 +3466,81 @@
       }
     }
   }
+
+  /* ══ THE ROUTER'S SHORELINE IS THE RENDERER'S (round 123) ═══════════════════════════════
+     buildEraFleet used to take its routing datum from mat.uniforms.uSeaLevel — which onTime
+     writes AFTER buildEraFleet runs, so the router was always one state behind the picture.
+     At a frozen #e=0 boot the uniform still held 0: the first sea crossings were routed on
+     the MODERN coastline while the shader drew the shore 68 m lower, and the crossing to
+     Sahul — the voyage this project exists for — was drawn paddling 200 km of exposed shelf,
+     a near-black field of moonlit dry land in the close-up. route.js's own comment declared
+     this class fixed; the fix read the wrong clock, and nothing was watching the agreement.
+
+     Two arms, driven per era through the app's own selectEra and fleet queue:
+       1. FINE.datum must equal the era's own seaLevelAt(S.year), quantised the way the
+          router quantises it. Anything else means every track in the era was planned on a
+          coastline the viewer is not being shown.
+       2. Every assembled track must lie in water on the fine array — sampled at the points
+          the fleet actually slerps between, plus midpoints. This also convicts the router's
+          stated give-up path (an unroutable leg falls back to its raw waypoints and draws
+          the shortcut across whatever is in the way). The conviction line is the raster's
+          own resolution: samples run ~2 km apart, a texel is 4.9 km, so TWO consecutive
+          ashore samples mean the ship crosses a full texel of land — a fact the field can
+          state. One isolated ashore sample is a corner clip below the texel, which the
+          field cannot resolve into a coastline; those are counted and reported in the
+          detail of any conviction but do not convict alone (measured r123: 23 tracks carry
+          exactly one, at Cape Horn, the Hanish Islands, Mindoro and the like, every one at
+          a strait or headland the 4.9 km raster pinches shut). */
+  if (typeof selectEra === 'function' && typeof seaLevelAt === 'function'
+      && window.SHIPS_ROUTE && typeof S !== 'undefined' && typeof eraTracks !== 'undefined'
+      && APP.chapters && APP.voyages) {
+    const RT = window.SHIPS_ROUTE;
+    const eraHome = S.era;
+    const chs = APP.chapters.chapters || [];
+    const drain = async () => {
+      for (let w = 0; w < 2000 && typeof fleetQueueBusy === 'function' && fleetQueueBusy(); w++) {
+        try { if (typeof pumpFleetQueue === 'function') pumpFleetQueue(24); } catch (e) { break; }
+        await new Promise(r => setTimeout(r, 0));
+      }
+    };
+    for (let e = 0; e < chs.length; e++) {
+      try { selectEra(e); } catch (err) {
+        say('era-' + e, 'an era that cannot build its fleet', 'selectEra threw: ' + err.message);
+        continue;
+      }
+      await drain();
+      const want = Math.round((seaLevelAt(S.year) || 0) / 5) * 5;
+      if (RT.FINE.ready && RT.FINE.datum !== want)
+        say('era-' + e, 'the router and the renderer hold two shorelines',
+            `FINE.datum ${RT.FINE.datum} m against seaLevelAt(${S.year}) = ${want} m — `
+            + 'every track in this era was planned on a coastline the viewer is not shown');
+      for (const tr of eraTracks) {
+        const legs = tr.legs || [];
+        let ashore = 0, total = 0, run = 0, maxRun = 0, at = null;
+        const test = (lon, lat) => {
+          total++;
+          if (!RT.fineIsWater(lon, lat)) {
+            ashore++; run++; if (run > maxRun) maxRun = run;
+            if (!at) at = [lon, lat];
+          } else run = 0;
+        };
+        for (let i = 0; i < legs.length; i++) {
+          test(legs[i].lon, legs[i].lat);
+          if (i < legs.length - 1) {
+            /* midpoint, with the antimeridian unwrapped — a Pacific track's midpoint is
+               not in Africa */
+            const b = legs[i + 1], dl = ((b.lon - legs[i].lon + 540) % 360) - 180;
+            test(legs[i].lon + dl / 2, (legs[i].lat + b.lat) / 2);
+          }
+        }
+        if (maxRun >= 2)
+          say(tr.name || tr.vesselId, 'a voyage drawn on the model\'s own land',
+              `era ${e}: ${ashore} of ${total} track samples ashore at the era's own sea `
+              + `level, longest run ${maxRun}`
+              + (at ? `, first at (${at[0].toFixed(2)}, ${at[1].toFixed(2)})` : ''));
+      }
+    }
+    try { selectEra(eraHome); await drain(); } catch (e) { /* state restore only */ }
+  }
   return { problems, checked: rows.length, rows };
 })()

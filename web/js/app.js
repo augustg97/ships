@@ -1742,6 +1742,17 @@ function onTime() {
   /* Sea level from the Spratt & Lisiecki stack, for deep time. Interpolated linearly in
      thousands of years; zero at the present. The defensibility ladder is stated in About. */
   mat.uniforms.uSeaLevel.value = seaLevelAt(S.year);
+  /* the router follows the same law (r123): the year slider moves the sea WITHIN era 0 —
+     -70 m at the seek, -22 m by 8,000 BP — and tracks planned at one datum were left drawn
+     against another's coastline. setSeaLevel quantises to 5 m, so eras 1-7 never rebuild. */
+  {
+    const RTs = window.SHIPS_ROUTE;
+    if (RTs && RTs.setSeaLevel && eraFleet
+        && RTs.setSeaLevel(seaLevelAt(S.year), S.year)) {
+      RTs.buildMask(true);
+      buildEraFleet();
+    }
+  }
   updateReadout();
   markersVisible();
 }
@@ -2491,8 +2502,17 @@ function buildEraFleet() {
      rebuilt from the fine array whenever the datum moves — a second and a half, once per era. */
   {
     const RTs = window.SHIPS_ROUTE;
-    if (RTs && RTs.setSeaLevel && mat && mat.uniforms && mat.uniforms.uSeaLevel) {
-      if (RTs.setSeaLevel(mat.uniforms.uSeaLevel.value, S.year)) RTs.buildMask(true);
+    /* ⚠ FROM THE YEAR, NOT FROM THE UNIFORM. This read mat.uniforms.uSeaLevel for its datum,
+       and onTime WRITES that uniform — after this function has run, because selectEra sets
+       S.year, builds the fleet, and only then calls onTime. So the router was always one
+       state behind the picture: at a frozen #e=0 boot it routed the first crossings on the
+       MODERN coastline while the shader drew the shore 68 m lower, and the crossing to Sahul
+       was planned across 200 km of shelf the picture shows as dry land (measured r123:
+       FINE.datum 0 under a -68 m frame, and the audit's before-run caught the next era
+       planned at -70 in turn). One law, one source: seaLevelAt(S.year), here and in the
+       uniform, so the two cannot disagree again. */
+    if (RTs && RTs.setSeaLevel) {
+      if (RTs.setSeaLevel(seaLevelAt(S.year), S.year)) RTs.buildMask(true);
     }
   }
   const ch = (APP.chapters && APP.chapters.chapters) ? APP.chapters.chapters[S.era] : null;

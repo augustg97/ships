@@ -5881,3 +5881,9 @@ Round 120 is complete and live — stamp 1787098519 verified on the deployed pag
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 65391 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 19:21:29  round starting
+  round overran 80 min — killing its process group
+Execution error  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-18 20:41:35  round finished; HEAD is 40d2112 Round 122: the log is finally open — deckLaid: false now buys a carved hollow, not a cap: gunwale rim (dressed), cavity (charred, floor below the waterline) and a depth-only waterplane mask so the three Gerstner seas (renderOrder 2) cannot render inside; build 'dugout' sheds keel and frames per her own card, open hulls shed the capping rail (which also removes the canoe's never-cloned centreline rails floating over open water); the Shipwright tells the subtractive story (logtop exists only at 'Log felled', tradition-owned stage cards end the paddled log's ENGINE_STAGES diesel); audit rules proven all arms by injection, clean 33/0 twice
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 71965 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-18 20:51:35  round starting

@@ -7841,3 +7841,85 @@ bailers, paddles stowed; her card says no crew is drawn, but stowed GEAR is not 
 expected 0.000%; if anything moved, this round owns it. (2) The survey's boxy column
 continues, or residual 1 (the dark Sahul close-up) — it is the first crossing in the whole
 story and it deserves a picture. (3) The gundeck both-ways normals sweep, if wanted.
+
+## Round 123 — 2026-08-18 — the router and the renderer finally hold one shoreline
+
+**The opening ratchet confirmed r122 fleet-wide: all 59 frames within tolerance, exit 0
+(build/ratchet-open-r123.log).** ⚠ Two earlier attempts at that pass died of my own making:
+the first crashed scoring `map-floor` because my diagnosis captures ran CONCURRENTLY with it
+and starved the capture (never run url_capture while a pass is live), and the waiters on both
+runs hung because `pgrep -f frame_baseline` matched each other's own command lines — the
+standing pgrep trap, paid again. Wait on a PID, and give the pass the machine.
+
+**THE TASK: r122's residual 1 — the era-0 Sahul close-up was a near-black field.** Diagnosis
+by probe, not by eye (build/staging/probe-sahul-*.py): the frame is a descent at 190 m whose
+whole field is the MOONLIT DRY SHELF — `uSeaLevel -68` in the shader, but the ROUTER'S datum
+was 0. The track was planned on the modern coastline, where the Sahul Shelf is sea; the era
+draws it 68 m lower, where it is land; the ship was left paddling 200 km of exposed shelf and
+the near sea discarded itself over every pixel of it. The corridor map from the model's own
+elevation field (probe-sahul-track-r123.py) put 46 of 101 raw-track samples ashore, landfall
+200 km inland of the era's own paleo-coast.
+
+**The mechanism, measured: selectEra sets S.year, calls buildEraFleet — which read its datum
+from `mat.uniforms.uSeaLevel` — and only THEN calls onTime, which writes that uniform. The
+router was always one state behind the picture.** The audit's before-run caught both halves
+in the act: era 0 planned at datum 0 under a −70 m picture, then era 1 planned at **−70**
+under a 0 m picture (the uniform still holding era 0's level) — Hatshepsut's Punt fleet 34
+samples ashore in a Red Sea drawn 70 m too low, Dilmun's Gulf run dry entirely.
+
+**The class fix, one law one source: the datum is `seaLevelAt(S.year)` wherever it is
+needed.** buildEraFleet derives it from the year (never the uniform); onTime syncs the router
+after writing the uniform and rebuilds the fleet when the quantised datum moves — which also
+closes the WITHIN-era case (era 0's slider runs −70 m to −22 m and nothing was re-routing).
+And the sahul record's own waypoints now mean what they say at the era's own sea level,
+derived from the model's own field: "open water" at (126.4, −10.1) — the Timor Trough,
+−1,159 m — and "Sahul landfall" at (128.5, −10.9), the paleo-shoreline, in place of a
+landfall 200 km inland of it. Track row recomputes to 382 nm.
+
+**The audit learned the class (round-123 rules), and the proof is the before-run on the live
+fault, not an injection: build/staging/audit-before-r123.json holds 29 convictions of the
+shipping code — 'the router and the renderer hold two shorelines' (era 0 at 0 under −70,
+era 1 at −70 under 0) and 27 tracks ashore.** The rules drive the app's own selectEra and
+fleet queue through all eight eras. Arm 2's conviction line is the raster's own resolution:
+samples ~2 km apart, texel 4.9 km, so two consecutive ashore samples (a full texel of land
+under the keel) convict; one isolated sample is a corner clip below what the field can state
+— measured, 23 tracks carry exactly one, at Cape Horn, the Hanish Islands, Mindoro, the
+Great Belt, Rapa Nui and the like, every one at a strait or headland the raster pinches.
+After the fix: **33 hulls, 0 problems** (audit-after-r123.json). Injection files staged for
+the next round's confirming pass: inj-datum-stale.js (re-forces the original fault),
+inj-track-ashore.js (the give-up fallback via an unsnappable steppe voyage).
+
+**Verified (rule 1): the close-up re-captured and read (build/staging/r123-sahul-after-
+night.png).** The first crossing is a picture now: two dugout canoes under way with wakes on
+open water at 10°08'S 126°44'E — in the trough, in the water — a dim coast on the horizon,
+solid hollows, course 095°. Rule 0 on it: reads as a rendered sea; three facts a viewer can
+name — the consorts' wakes trail at their sterns, the era card says the sea stands 68 m
+lower, the voyage card's track ends at a landfall that only exists at that stand.
+
+**Ratchet close, targeted (the watchdog left no time for a full pass): globe-crossing — the
+only baseline in era 0, the only era whose tracks changed — 0.004%, within tolerance, no
+accept. Eras 1–7 booted at datum 0 before the fix and route at datum 0 after it, so their
+frames cannot move; the next round's opening pass is the fleet-wide confirmation and this
+round owns anything it finds.**
+
+**Deployed: stamp 1787115858.**
+
+**Known residuals, recorded not hidden:** (1) The confirming second audit run and both
+injection proofs are owed — the after-run was clean once; next round opens with both.
+(2) A `passage-sahul` baseline frame should exist now that the frame is worth watching;
+frozen t ≈ 374 s puts local noon on the Timor Sea (sun model: subsolar lon = 0.006·t rad).
+(3) 23 tracks carry one isolated sub-texel corner clip each (list in audit-before-r123.json);
+the class fix is a stand-off margin in refineAgainstFine/clearSegments, and FINE.detourFail
+gives up silently — rule 10 wants that labelled. (4) The close-up readout's "Nearest land:
+Ujung Pandang · 2 nm SE" at 10°S 126°E is doubly wrong — a modern port as land in 60,000 BC,
+and a distance off by three orders; the nearest-land derivation needs a round. (5) The
+sekibune 'stern' wasen kaji (r121) stands. (6) The gundeck both-ways normals class (r118)
+stands. (7) Sekibune/panokseon LOA overhang (r113/r115) untouched. (8) probe-wake.py heading
+mirror (r114) untouched. (9) Endurance forecastle break waits on the RMG original of J9266.
+(10) Azzam crest (r108) unchanged. (11) The yakata wall-opening curtain (r117) not drawn.
+(12) The dugout's hollow floor is still bare of stowed gear (r122).
+
+**Next:** (1) Open with the full ratchet AND the audit twice AND the two injections — this
+round's fix is only half-proven until they run. (2) Add the passage-sahul baseline at a
+daylight frozen t, looked at first. (3) Residual 3 (the corner-clip stand-off) or residual 4
+(nearest land), whichever the survey wants first.

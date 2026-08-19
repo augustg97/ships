@@ -918,6 +918,14 @@ document.getElementById('roStats').innerHTML = rows.join('<br>');
 function onTime() {
 document.getElementById('yrLab').textContent = yearLabel(S.year);
 mat.uniforms.uSeaLevel.value = seaLevelAt(S.year);
+{
+const RTs = window.SHIPS_ROUTE;
+if (RTs && RTs.setSeaLevel && eraFleet
+&& RTs.setSeaLevel(seaLevelAt(S.year), S.year)) {
+RTs.buildMask(true);
+buildEraFleet();
+}
+}
 updateReadout();
 markersVisible();
 }
@@ -1327,8 +1335,8 @@ clearEraFleet();
 paceClamped = [];
 {
 const RTs = window.SHIPS_ROUTE;
-if (RTs && RTs.setSeaLevel && mat && mat.uniforms && mat.uniforms.uSeaLevel) {
-if (RTs.setSeaLevel(mat.uniforms.uSeaLevel.value, S.year)) RTs.buildMask(true);
+if (RTs && RTs.setSeaLevel) {
+if (RTs.setSeaLevel(seaLevelAt(S.year), S.year)) RTs.buildMask(true);
 }
 }
 const ch = (APP.chapters && APP.chapters.chapters) ? APP.chapters.chapters[S.era] : null;

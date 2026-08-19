@@ -2390,5 +2390,54 @@ try { clearCampaign(); } catch (e) {  }
 }
 }
 }
+if (typeof selectEra === 'function' && typeof seaLevelAt === 'function'
+&& window.SHIPS_ROUTE && typeof S !== 'undefined' && typeof eraTracks !== 'undefined'
+&& APP.chapters && APP.voyages) {
+const RT = window.SHIPS_ROUTE;
+const eraHome = S.era;
+const chs = APP.chapters.chapters || [];
+const drain = async () => {
+for (let w = 0; w < 2000 && typeof fleetQueueBusy === 'function' && fleetQueueBusy(); w++) {
+try { if (typeof pumpFleetQueue === 'function') pumpFleetQueue(24); } catch (e) { break; }
+await new Promise(r => setTimeout(r, 0));
+}
+};
+for (let e = 0; e < chs.length; e++) {
+try { selectEra(e); } catch (err) {
+say('era-' + e, 'an era that cannot build its fleet', 'selectEra threw: ' + err.message);
+continue;
+}
+await drain();
+const want = Math.round((seaLevelAt(S.year) || 0) / 5) * 5;
+if (RT.FINE.ready && RT.FINE.datum !== want)
+say('era-' + e, 'the router and the renderer hold two shorelines',
+`FINE.datum ${RT.FINE.datum} m against seaLevelAt(${S.year}) = ${want} m — `
++ 'every track in this era was planned on a coastline the viewer is not shown');
+for (const tr of eraTracks) {
+const legs = tr.legs || [];
+let ashore = 0, total = 0, run = 0, maxRun = 0, at = null;
+const test = (lon, lat) => {
+total++;
+if (!RT.fineIsWater(lon, lat)) {
+ashore++; run++; if (run > maxRun) maxRun = run;
+if (!at) at = [lon, lat];
+} else run = 0;
+};
+for (let i = 0; i < legs.length; i++) {
+test(legs[i].lon, legs[i].lat);
+if (i < legs.length - 1) {
+const b = legs[i + 1], dl = ((b.lon - legs[i].lon + 540) % 360) - 180;
+test(legs[i].lon + dl / 2, (legs[i].lat + b.lat) / 2);
+}
+}
+if (maxRun >= 2)
+say(tr.name || tr.vesselId, 'a voyage drawn on the model\'s own land',
+`era ${e}: ${ashore} of ${total} track samples ashore at the era's own sea `
++ `level, longest run ${maxRun}`
++ (at ? `, first at (${at[0].toFixed(2)}, ${at[1].toFixed(2)})` : ''));
+}
+}
+try { selectEra(eraHome); await drain(); } catch (e) {  }
+}
 return { problems, checked: rows.length, rows };
 })()
