@@ -7923,3 +7923,86 @@ mirror (r114) untouched. (9) Endurance forecastle break waits on the RMG origina
 round's fix is only half-proven until they run. (2) Add the passage-sahul baseline at a
 daylight frozen t, looked at first. (3) Residual 3 (the corner-clip stand-off) or residual 4
 (nearest land), whichever the survey wants first.
+
+## Round 124 — 2026-08-18 — the readout's gazetteer learns what year it is
+
+**The opening ratchet ran in full: 59 frames, and the two that moved were this round's own
+doing, not r123's (build/ratchet-open-r124.log).** Every frame that r123's routing fix could
+have touched — all four globe eras, the era card, the map floor — read ≤0.013%, which is the
+fleet-wide confirmation r123 was owed. ⚠ A trap paid for and recorded: this round edited
+web/js/app.js while the pass was live, so frames 0–25 ran the old code and 26–59 the new — the
+pass renders the live tree, and a mid-pass edit splits it into two codebases. It survived only
+because the land row cannot render in frames 0–25 (no passage card there). Do not edit web/
+while a pass runs; next round's opening pass is the one-codebase confirmation.
+
+**The owed proofs ran and hold. Audit clean twice: 33 hulls / 0 problems, both runs
+(build/staging/audit-r124-run{1,2}.json). inj-datum-stale convicts arm 1 — era 0 planned at
+0 m under a −70 m picture ('the router and the renderer hold two shorelines'). ⚠ Its file
+comment over-promised arm 2: with the datum pinned, the planner and the mask AGREE — the audit
+samples the router's own fine array, so a track planned on the pinned mask is water on the
+pinned mask by construction. Arm 2's live conviction is the give-up path, and inj-track-ashore
+proves exactly that: the unsnappable steppe voyage falls back to its raw waypoints and convicts
+3/3 samples ashore while the datum arm stays quiet.**
+
+**THE TASK was r123 residual 4: "Nearest land: Ujung Pandang · 2 nm SE" at 10°S 126°E in
+60,000 BC.** The row stitched two derivations into one false statement: the NUMBER was the
+landward scan's answer about the shelf, the NAME was the port nearest THE SHIP — Ujung Pandang,
+978 km away, on a coast the scan never looked at, and a port of the modern record besides. The
+class fix, one law one source (app.js): (a) `portExistsAt(p, year)` extracted as the single
+existence gate — the label layer already knew this rule (modern from 1900, historic from their
+own founding) and the readout did not; both now ask the same function. (b) `landward()` returns
+the hit point it found. (c) The name is the nearest EXISTING port to the FOUND land, accepted
+only within 150 km of it — a coast with no honest name goes unnamed, which rule 10 says is an
+answer. (d) The printed range never states sub-texel precision: at or under one texel the row
+says "under N nm" — the r123 conviction line, now honoured by the card itself. The row's cache
+key also carries the count of ports open at the year, so a founding date inside an era's own
+slider (Roskilde, 800, era 3) re-asks the row.
+
+**Measured before judging (rule 4, build/staging/probe-landrow-r124.json):** at the sahul
+open-water waypoint, era 0, datum −70: land 36 km on bearing 127.5° at (126.66, −10.30) — the
+shelf edge at the era's own stand, texel 4.8 km — and the row reads **"19 nm SE"**, unnamed.
+At Yamato's 1945 position the name SURVIVES the gates: **"Kagoshima Ko · 52 nm ENE"** (hit on
+the Kyushu coast, port within reach, year open) — the fix strips lies, not names.
+
+**The audit learned the class (round-124 rule): 'a gazetteer that names a place out of its own
+time'** — drives the real fillLandRow at the sahul waypoint in era 0 and convicts if ANY of the
+423 gazetteer names appears (at 60,000 BP none existed — a fact of the record needing no
+predicate), or if the range claims sub-texel precision without "under". Proven by injection:
+inj-gazetteer-anachronism.js re-forces the r123 fillLandRow verbatim and convicts —
+"Ujung Pandang · 19 nm SE" at year −60000. Clean run stays 33/0.
+
+**Frames, each classified (rule 7):** aboard-carrier 1.829% — "Tazerka Oil Terminal · 32 nm
+WSW" → "La Goulette · 32 nm WSW", the port of the coast the scan found (Cape Bon), one-line row
+reflows the card; aboard-clipper 1.036% — "Nouadhibou · 154 nm SSE" → "154 nm SSE", a modern
+port dropped at 1885; aboard-coast 0.026%, UNDER threshold but real and promoted deliberately —
+"Soudha · 2 nm N" in 415 BC → "under 3 nm N", both arms of the fix in one cell the ratchet's
+tolerance could not see (which is why the audit rule exists). All three accepted with reasons
+(FRAME-LOG.md), all re-checked 0.000%.
+
+**The owed passage-sahul baseline exists (60 frames now).** `/?frozen=374#e=0&f=sahul&fb=160&
+fd=10&fz=70` — t=374 puts local noon on the Timor Sea; the camera is PINNED because the free
+follow camera at this instant stands off for a coast 26 nm over the horizon and shrinks the
+canoes to a speck. Looked at first, then accepted: two open dugouts in company, wakes astern,
+hollows dark, no land in sight — which is the record's own row ("70–90 km, out of sight of
+land"). Rule 0 on it: reads as a rendered sea; three facts a viewer can name — two carved log
+hulls travelling together, their open hollows with no deck, the wakes that say they are under
+way. Re-checked 0.000%.
+
+**Deployed: stamp 1787118924.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) 23 tracks carry one isolated sub-texel corner
+clip each (r123 res 3); the class fix is a stand-off margin in refineAgainstFine/clearSegments,
+and FINE.detourFail still gives up silently — rule 10 wants that labelled in the voyage card.
+(2) The WPI gate is a class date (1900), not per-port founding years — honest as a gazetteer
+statement, coarse as history; only per-port `from` fields would refine it, and inventing them
+is worse. (3) The sekibune 'stern' wasen kaji (r121) stands. (4) The gundeck both-ways normals
+class (r118) stands. (5) Sekibune/panokseon LOA overhang (r113/r115) untouched. (6)
+probe-wake.py heading mirror (r114) untouched — visible in passage-sahul as wakes that bear
+slightly off the sterns. (7) Endurance forecastle break waits on the RMG original of J9266.
+(8) Azzam crest (r108) unchanged. (9) The yakata wall-opening curtain (r117) not drawn.
+(10) The dugout's hollow floor is still bare of stowed gear (r122).
+
+**Next:** (1) Open with the full ratchet — the one-codebase confirmation this round's mid-pass
+edit owes; expected: only-noise. (2) Residual 1: the corner-clip stand-off margin and a
+rule-10 label on detourFail's give-up. (3) The survey's boxy column continues, or the dugout's
+stowed gear (res 10) — the smallest honest improvement to the oldest hull.

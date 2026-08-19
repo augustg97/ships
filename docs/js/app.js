@@ -555,6 +555,12 @@ let lblCamKey = '';
 let voyT = 0;
 let labelsHidden = false;
 let labelsSettled = false;
+function portExistsAt(p, year) {
+if (p.kind === 'modern') return year >= 1900;
+if (p.from !== undefined && year < p.from) return false;
+if (p.to !== undefined && year > p.to) return false;
+return true;
+}
 function updateLabels(now) {
 if (!APP.markers) return;
 if (PSGV.on || S.follow) {
@@ -588,10 +594,7 @@ const order = APP._lblSorted;
 for (const m of order) {
 let show = true;
 if (m.kind !== 'sea' && !S.layers.ports) show = false;
-if (show && m.kind === 'port') {
-if (m.item.kind === 'modern' && S.year < 1900) show = false;
-else if (m.item.from !== undefined && S.year < m.item.from) show = false;
-}
+if (show && m.kind === 'port' && !portExistsAt(m.item, S.year)) show = false;
 if (show && m.kind === 'battle' && era && (m.item.year < era.from || m.item.year > era.to))
 show = false;
 {
@@ -1484,7 +1487,7 @@ h = (landward._img[i] * 256 + landward._img[i + 1]) / 65535 * 20000 - 11000;
 }
 }
 const drawKm = km <= NEAR ? km : NEAR * (0.72 + 0.28 * Math.min(1, NEAR / km));
-return { az: th, km: drawKm, trueKm: km, h: Math.max(0, h) };
+return { az: th, km: drawKm, trueKm: km, h: Math.max(0, h), lon: lo, lat: la };
 }
 }
 }
@@ -1601,28 +1604,41 @@ function fillLandRow(c, tr, lw) {
 const cell = c && c.querySelector('.pc-land');
 if (!cell || !tr || !tr.at) return;
 const RT = window.SHIPS_ROUTE;
+const portsOpen = ((APP.ports && APP.ports.ports) || [])
+.reduce((n, p) => n + (portExistsAt(p, S.year) ? 1 : 0), 0);
 const key = (RT && RT.FINE
 ? (RT.FINE.ready ? 'r' : 'w') + RT.FINE.level + '|' + RT.FINE.sig : '')
-+ '|' + Math.round(tr.at.lon * 4) + ',' + Math.round(tr.at.lat * 4);
++ '|' + Math.round(tr.at.lon * 4) + ',' + Math.round(tr.at.lat * 4)
++ '|p' + portsOpen;
 if (lw === undefined) {
 if (PSGV.landKey === key) return;
 lw = landward(tr.at);
 }
 PSGV.landKey = key;
 if (lw) {
+const NAME_REACH_KM = 150;
 const ports = (APP.ports && APP.ports.ports) || [];
 let best = null, bestD = 1e9;
-const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
+if (lw.lon !== undefined) {
+const clat = Math.max(0.05, Math.cos(lw.lat * Math.PI / 180));
 for (const pt of ports) {
-const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
-const d = dx * dx + dy * dy;
+if (!portExistsAt(pt, S.year)) continue;
+const dl = ((pt.lon - lw.lon + 540) % 360 - 180) * clat, dy = pt.lat - lw.lat;
+const d = dl * dl + dy * dy;
 if (d < bestD) { bestD = d; best = pt; }
+}
+if (best && Math.sqrt(bestD) * 111.32 > NAME_REACH_KM) best = null;
 }
 const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
 'S','SSW','SW','WSW','W','WNW','NW','NNW'];
 const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
-cell.textContent = (best ? best.name + ' · ' : '') +
-Math.round((lw.trueKm || lw.km) / 1.852) + ' nm ' + pt8;
+const texKm = 40075 / ((RT && RT.FINE && RT.FINE.w) || 8192)
+* Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
+const kmOut = lw.trueKm || lw.km;
+const range = kmOut <= texKm
+? 'under ' + Math.max(1, Math.ceil(texKm / 1.852)) + ' nm'
+: Math.round(kmOut / 1.852) + ' nm';
+cell.textContent = (best ? best.name + ' · ' : '') + range + ' ' + pt8;
 } else if (RT && RT.FINE && RT.FINE.ready) {
 cell.textContent = 'none within ' + Math.round(LAND_REACH_KM / 1.852) + ' nm';
 } else cell.textContent = '—';

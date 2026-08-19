@@ -1,0 +1,8 @@
+checked 33 hulls, 1 problems
+[
+ {
+  "id": "passage-readout",
+  "rule": "a gazetteer that names a place out of its own time",
+  "detail": "era 0, year -60000: the land row reads \"Ujung Pandang \u00b7 19 nm SE\" \u2014 \"Ujung Pandang\" is a port of the modern record naming a coast sixty millennia before any port existed"
+ }
+]

@@ -1,0 +1,8 @@
+checked 33 hulls, 1 problems
+[
+ {
+  "id": "era-0",
+  "rule": "the router and the renderer hold two shorelines",
+  "detail": "FINE.datum 0 m against seaLevelAt(-60000) = -70 m \u2014 every track in this era was planned on a coastline the viewer is not shown"
+ }
+]

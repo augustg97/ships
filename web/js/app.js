@@ -1114,6 +1114,22 @@ let labelsHidden = false;
 /* true once the label layer has completed a pass with the camera at rest (or hidden them
    deliberately, which is also a settled state) — the condition markReady() waits on */
 let labelsSettled = false;
+/* ── AN ERA SHOWS ITS OWN WORLD ──────────────────────────────────────────────────────────
+   The World Port Index is a MODERN gazetteer: it lists the port network as it is today, so
+   its entries are only honest from the era in which that network exists. Showing them across
+   the whole timeline put oil terminals on a chart of 1590 — which is exactly the failure the
+   era system was built to end. Historical ports carry their own founding date and appear from
+   it. ⚠ ONE PREDICATE, EVERY CALLER. The label layer knew this rule and the passage readout
+   did not, which is how the close-up of the Sahul crossing named its coast "Ujung Pandang"
+   in 60,000 BC (r123 residual 4). Any code that turns a port into a statement about a year
+   asks here. */
+function portExistsAt(p, year) {
+  if (p.kind === 'modern') return year >= 1900;
+  if (p.from !== undefined && year < p.from) return false;
+  if (p.to !== undefined && year > p.to) return false;
+  return true;
+}
+
 function updateLabels(now) {
   if (!APP.markers) return;
   /* ── ⚠ THE OCEANS WERE WRITTEN ACROSS THE SKY ────────────────────────────────────────
@@ -1181,16 +1197,7 @@ function updateLabels(now) {
   for (const m of order) {
     let show = true;
     if (m.kind !== 'sea' && !S.layers.ports) show = false;
-    /* ── AN ERA SHOWS ITS OWN WORLD ──────────────────────────────────
-       The World Port Index is a MODERN gazetteer: it lists the port network as it is today,
-       so its entries are only honest from the era in which that network exists. Showing them
-       across the whole timeline put oil terminals on a chart of 1590 — which is exactly the
-       failure the era system was built to end. Historical ports carry their own founding date
-       and appear from it. */
-    if (show && m.kind === 'port') {
-      if (m.item.kind === 'modern' && S.year < 1900) show = false;
-      else if (m.item.from !== undefined && S.year < m.item.from) show = false;
-    }
+    if (show && m.kind === 'port' && !portExistsAt(m.item, S.year)) show = false;
     if (show && m.kind === 'battle' && era && (m.item.year < era.from || m.item.year > era.to))
       show = false;
     /* the far side of the planet */
@@ -2797,9 +2804,11 @@ function landward(at) {
             h = (landward._img[i] * 256 + landward._img[i + 1]) / 65535 * 20000 - 11000;
           }
         }
-        /* compress anything beyond the near field into it, and keep the honest range */
+        /* compress anything beyond the near field into it, and keep the honest range —
+           and keep WHERE the land was found, so a caller naming it can name THIS coast
+           rather than whatever happens to be nearest the ship (r123 residual 4) */
         const drawKm = km <= NEAR ? km : NEAR * (0.72 + 0.28 * Math.min(1, NEAR / km));
-        return { az: th, km: drawKm, trueKm: km, h: Math.max(0, h) };
+        return { az: th, km: drawKm, trueKm: km, h: Math.max(0, h), lon: lo, lat: la };
       }
     }
   }
@@ -3018,30 +3027,54 @@ function fillLandRow(c, tr, lw) {
   if (!cell || !tr || !tr.at) return;
   const RT = window.SHIPS_ROUTE;
   /* the key carries her position at quarter-degree grain, so a ship under way re-asks
-     about every 25 km of passage rather than keeping her departure's answer all voyage */
+     about every 25 km of passage rather than keeping her departure's answer all voyage —
+     and the count of ports open at this year, because the honest name can change at a
+     founding date (Roskilde, 800, inside era 3's own slider) with the router's key still */
+  const portsOpen = ((APP.ports && APP.ports.ports) || [])
+    .reduce((n, p) => n + (portExistsAt(p, S.year) ? 1 : 0), 0);
   const key = (RT && RT.FINE
     ? (RT.FINE.ready ? 'r' : 'w') + RT.FINE.level + '|' + RT.FINE.sig : '')
-    + '|' + Math.round(tr.at.lon * 4) + ',' + Math.round(tr.at.lat * 4);
+    + '|' + Math.round(tr.at.lon * 4) + ',' + Math.round(tr.at.lat * 4)
+    + '|p' + portsOpen;
   if (lw === undefined) {
     if (PSGV.landKey === key) return;
     lw = landward(tr.at);
   }
   PSGV.landKey = key;
   if (lw) {
-    /* name the coast from the gazetteer, and say how far it really is */
+    /* ── ⚠ THE NAME AND THE NUMBER MUST BE ONE STATEMENT ABOUT ONE PLACE ────────────────
+       r123 shipped "Ujung Pandang · 2 nm SE" on the Sahul crossing: the number was the
+       scan's answer about the shelf two miles off, the name was the port nearest THE SHIP —
+       528 nm away, on a coast the scan never looked at, forty millennia before the city.
+       The name now comes from the port nearest THE FOUND LAND, only if that port exists at
+       this year (portExistsAt — the label layer's own gate), and only if it stands on the
+       coast that was found; a coast with no honest name goes unnamed, which rule 10 says
+       is an answer. */
+    const NAME_REACH_KM = 150;   // beyond this the port is on some other stretch of coast
     const ports = (APP.ports && APP.ports.ports) || [];
     let best = null, bestD = 1e9;
-    const clat = Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
-    for (const pt of ports) {
-      const dx = (pt.lon - tr.at.lon) * clat, dy = pt.lat - tr.at.lat;
-      const d = dx * dx + dy * dy;
-      if (d < bestD) { bestD = d; best = pt; }
+    if (lw.lon !== undefined) {
+      const clat = Math.max(0.05, Math.cos(lw.lat * Math.PI / 180));
+      for (const pt of ports) {
+        if (!portExistsAt(pt, S.year)) continue;
+        const dl = ((pt.lon - lw.lon + 540) % 360 - 180) * clat, dy = pt.lat - lw.lat;
+        const d = dl * dl + dy * dy;
+        if (d < bestD) { bestD = d; best = pt; }
+      }
+      if (best && Math.sqrt(bestD) * 111.32 > NAME_REACH_KM) best = null;
     }
     const COMPASS = ['N','NNE','NE','ENE','E','ESE','SE','SSE',
                      'S','SSW','SW','WSW','W','WNW','NW','NNW'];
     const pt8 = COMPASS[Math.round(((lw.az * 180 / Math.PI) % 360) / 22.5) % 16];
-    cell.textContent = (best ? best.name + ' · ' : '') +
-                       Math.round((lw.trueKm || lw.km) / 1.852) + ' nm ' + pt8;
+    /* the raster cannot state a distance finer than its own texel (the r123 conviction
+       line), so neither may the card */
+    const texKm = 40075 / ((RT && RT.FINE && RT.FINE.w) || 8192)
+                * Math.max(0.05, Math.cos(tr.at.lat * Math.PI / 180));
+    const kmOut = lw.trueKm || lw.km;
+    const range = kmOut <= texKm
+      ? 'under ' + Math.max(1, Math.ceil(texKm / 1.852)) + ' nm'
+      : Math.round(kmOut / 1.852) + ' nm';
+    cell.textContent = (best ? best.name + ' · ' : '') + range + ' ' + pt8;
   } else if (RT && RT.FINE && RT.FINE.ready) {
     /* the scan ran and found nothing: that is an answer with a number, not a missing value */
     cell.textContent = 'none within ' + Math.round(LAND_REACH_KM / 1.852) + ' nm';

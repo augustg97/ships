@@ -2439,5 +2439,40 @@ say(tr.name || tr.vesselId, 'a voyage drawn on the model\'s own land',
 }
 try { selectEra(eraHome); await drain(); } catch (e) {  }
 }
+if (typeof fillLandRow === 'function' && typeof selectEra === 'function'
+&& window.SHIPS_ROUTE && APP.ports && APP.chapters) {
+const RT = window.SHIPS_ROUTE;
+const eraHome2 = S.era;
+const drain2 = async () => {
+for (let w = 0; w < 2000 && typeof fleetQueueBusy === 'function' && fleetQueueBusy(); w++) {
+try { if (typeof pumpFleetQueue === 'function') pumpFleetQueue(24); } catch (e) { break; }
+await new Promise(r => setTimeout(r, 0));
+}
+};
+try {
+selectEra(0); await drain2();
+const cell = document.createElement('div');
+cell.innerHTML = '<table><tr><td class="pc-land">—</td></tr></table>';
+if (typeof PSGV !== 'undefined') PSGV.landKey = undefined;
+fillLandRow(cell, { at: { lon: 126.4, lat: -10.1 } });
+const txt = cell.querySelector('.pc-land').textContent;
+for (const p of (APP.ports.ports || []))
+if (p.name && txt.includes(p.name))
+say('passage-readout', 'a gazetteer that names a place out of its own time',
+`era 0, year ${S.year}: the land row reads "${txt}" — "${p.name}" is a port `
++ 'of the modern record naming a coast sixty millennia before any port existed');
+const m = txt.match(/^(\d+) nm/);
+if (m && RT.FINE && RT.FINE.ready) {
+const texNm = 40075 / RT.FINE.w * Math.cos(-10.1 * Math.PI / 180) / 1.852;
+if (+m[1] < texNm)
+say('passage-readout', 'a distance the field cannot state',
+`the land row reads "${txt}" but the fine raster's texel here is `
++ `${texNm.toFixed(1)} nm — sub-texel ranges must say "under"`);
+}
+} catch (e) {
+say('passage-readout', 'a land row that cannot be asked', 'fillLandRow threw: ' + e.message);
+}
+try { selectEra(eraHome2); await drain2(); } catch (e) {  }
+}
 return { problems, checked: rows.length, rows };
 })()
