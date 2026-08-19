@@ -2550,8 +2550,8 @@
     "sheerBow": 1.2,
     "sheerStern": 0.6,
     "tumblehome": 0.13,
-    "stemRake": 0.03,
-    "sternRake": 0.02,
+     "stemRake": 0.081,
+     "sternRake": 0.054,
     "strakes": 22,
     "copper": true,
     "copperAge": 0.6,
@@ -2597,6 +2597,7 @@
     "draught": 3.6,
     "freeboard": 3.0,
     "cm": 0.8,
+     "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 30.0 \u2212 lwl 26.0 leaves 4.0 m of overhang and the drawn planking carried only 1.5 m of it (rakes 0.03/0.02, r129 fleet sweep). The recorded 30 m (98 ft) is the ship's hull length (en.wikipedia.org/wiki/Brooks_(1781_ship)), and the Brookes plan (Regulated Slave Trade Act plates, 1788\u201389) draws a raked stem carrying the head forward and a counter stern \u2014 the bow's share of the overhang larger than the stern's. The authored 3:2 stem:stern split is kept and normalized up to the allowance: 0.081/0.054, which the r129 loft clamp trims to 2.4 m bow / 1.6 m stern, 30.00 m drawn exactly. The plate is a stowage engraving, not a lines plan \u2014 it supports the split qualitatively, not to the centimetre.",
     "steering": "stern"
    }
   },
@@ -4379,7 +4380,7 @@
     "sheerBow": 2.2,
     "sheerStern": 0.0,
     "tumblehome": 0.0,
-    "stemRake": 0.03,
+     "stemRake": 0.0423,
     "sternRake": 0.0,
     "strakes": 16,
     "copper": false,
@@ -4401,6 +4402,7 @@
     "cm": 0.98,
     "year": 1991,
     "freeboardProvenance": "TYPE SHIP — the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC Gülsün / MSC Irina classes, 399.9 m × 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC Gülsün; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water — a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts — the same distinction ever-given's stationProvenance records from her casualty report.",
+     "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 399.9 \u2212 lwl 383.0 = 16.9 m, and the old 0.03/0.0 drew only 12.0 m of it (r129 fleet sweep, \u22124.9). 383.0 is the class's length between perpendiculars (RINA, Significant Ships of 2019, MSC G\u00fcls\u00fcn \u2014 the same plate as the depth moulded above); on this generation the transom stands nearly plumb at the aft perpendicular and virtually the whole LOA\u2212LPP difference is the flared bow above the bulb \u2014 ever-given, the fleet's attested hull of the same 400 m generation, carried the identical 383 LBP against 399.94 LOA before r113 moved her lwl to her casualty report's 387 waterline. The stern keeps its authored 0.0 and the stem takes the allowance: 0.0423, which the r129 loft clamp trims to 16.90 m of bow overhang, 399.90 m drawn exactly. NOTE the semantics this leaves: this type ship's lwl is the class LBP; the loaded waterline of the real hull runs \u007e4 m further over the bulb (the ever-given precedent) and is not published for this class, so the record keeps the figure a plate attests.",
     "steering": "steel"
    }
   },

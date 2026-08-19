@@ -1,0 +1,21 @@
+Container ship   record: LOA 399.9 m  LWL 383 m  beam 61.3 m  draught 16 m
+  model extent   x  -208.40 ..  +191.50   =  399.90 m   (record LOA 399.9)   Δ +0.00 m
+  model height   y   -16.90 ..   +52.08   =   68.98 m   above water 52.08 m
+  model breadth  z         ..   +32.35   =   64.70 m   (record beam 61.3)   Δ +3.40 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Planking                    -0.044   1.000  399.90  -16.00   19.40  30.65
+  Weather deck — painted ste  -0.044   1.000  399.90   17.20   19.46  30.65
+  Stem                        -0.044   0.104   56.80  -15.37   19.40   1.69
+  Bulbous bow                 -0.041   0.051   35.25  -16.00   -1.90   6.94
+  Keel                         0.000   1.000  383.00  -16.90  -12.79   1.69
+  Rail                         0.006   0.965  367.16   17.20   20.56  30.94
+  Forecastle                   0.018   0.062   16.86   18.94   21.79   5.57
+  Foremast                     0.039   0.041    0.90   21.79   33.79   0.45
+  Containers                   0.061   0.970  348.14   17.20   38.48  25.49
+  Accommodation and bridge     0.820   0.912   35.41   17.20   43.74  32.35
+  Lifeboat                     0.836   0.860    8.90   22.30   26.91  24.16
+  Radar mast                   0.847   0.853    2.32   43.73   52.08   3.50
+  Funnel                       0.879   0.904    9.42   27.60   42.50   2.70
+  Sternpost                    0.896   1.000   39.90  -15.33   17.20   1.69
+  Rudder                       0.944   0.979   13.41  -15.20   -1.28   0.83

@@ -1,0 +1,334 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-steamer                 http://localhost:8149/?frozen=1#v=ship&s=steamer
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-steamer                    0.015%     0.006  ok
+
+  all frames within tolerance.
+
+FRAME:ship-steamer EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-dreadnought             http://localhost:8149/?frozen=1#v=ship&s=dreadnought
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-dreadnought                0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:ship-dreadnought EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-carrier               http://localhost:8149/?frozen=1#e=7&f=csg
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-carrier                  0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-carrier EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-cable                 http://localhost:8149/?frozen=1#e=5&f=cable
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-cable                    0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-cable EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-titanic               http://localhost:8149/?frozen=1#e=6&f=titanicvoy
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-titanic                  0.018%     0.006  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-titanic EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-yamato                http://localhost:8149/?frozen=1#e=6&f=tenichigo
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-yamato                   0.031%     0.016  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-yamato EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-preussen              http://localhost:8149/?frozen=1#e=6&f=preussenvoy
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-preussen                 0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-preussen EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-wyoming                 http://localhost:8149/?frozen=1#v=ship&s=wyoming
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-wyoming                    0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:ship-wyoming EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-wyoming               http://localhost:8149/?frozen=1#e=6&f=wyomingvoy
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-wyoming                  0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-wyoming EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-treasure                   0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:ship-treasure EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-treasure              http://localhost:8149/?frozen=1#e=4&f=zhenghe
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-treasure                 0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-treasure EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-clipper                 http://localhost:8149/?frozen=1#v=ship&s=clipper
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-clipper                    0.015%     0.006  ok
+
+  all frames within tolerance.
+
+FRAME:ship-clipper EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · aboard-clipper               http://localhost:8149/?frozen=1#e=5&f=woolrun
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  aboard-clipper                  0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:aboard-clipper EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-ahead                0.015%     0.007  ok
+
+  all frames within tolerance.
+
+FRAME:shipwright-ahead EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-astern               0.015%     0.007  ok
+
+  all frames within tolerance.
+
+FRAME:shipwright-astern EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-furled               0.015%     0.007  ok
+
+  all frames within tolerance.
+
+FRAME:shipwright-furled EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-hounds               0.015%     0.007  ok
+
+  all frames within tolerance.
+
+FRAME:shipwright-hounds EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · shipwright-corbis            http://localhost:8149/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  shipwright-corbis               0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:shipwright-corbis EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-azzam                   http://localhost:8149/?frozen=1#v=ship&s=azzam
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-azzam                      0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:ship-azzam EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-endurance                  0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:ship-endurance EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+Traceback (most recent call last):
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 169, in capture_frames
+    page.wait_for_function(expr, timeout=ready.get("timeout_ms", 45000))
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/sync_api/_generated.py", line 12761, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_page.py", line 1151, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_frame.py", line 940, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/augustgweon/Modeling Studio/.venv/lib/python3.13/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 60000ms exceeded.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 375, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 370, in main
+    return {"init": cmd_init, "capture": cmd_capture,
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            "check": cmd_check, "accept": cmd_accept}[args.cmd](args)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 276, in cmd_check
+    names = capture_frames(p, m, p.current_dir, only=args.frame)
+  File "/Users/augustgweon/Modeling Studio/tools/frame_baseline.py", line 171, in capture_frames
+    raise RuntimeError(
+    ...<3 lines>...
+    ) from exc
+RuntimeError: frame 'action-salamis': readiness expression never became true ("window.__FRAME_READY === true && (!document.fonts || document.fonts.status === 'loaded')"). The app must set it after its first real render, or the manifest must drop it. Original error: Page.wait_for_function: Timeout 60000ms exceeded.
+FRAME:action-salamis EXIT:1
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  board-salamis                   0.011%     0.005  ok
+
+  all frames within tolerance.
+
+FRAME:board-salamis EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  action-gravelines               0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:action-gravelines EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  action-lepanto                  0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:action-lepanto EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  wake-plan                       0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:wake-plan EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-ever-given                 0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:ship-ever-given EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  sea-ever-given                  0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:sea-ever-given EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  passage-sahul                   0.034%     0.012  ok
+
+  all frames within tolerance.
+
+FRAME:passage-sahul EXIT:0
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  sea-dugout-floor                0.000%     0.000  ok
+
+  all frames within tolerance.
+
+FRAME:sea-dugout-floor EXIT:0
+OPENPASS-DONE FAIL:1

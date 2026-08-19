@@ -321,6 +321,11 @@
    "name": "sea-dugout-floor",
    "path": "/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30",
    "note": "THE OPEN HULL'S FLOOR, WATCHED - added r127. 55 deg down at 30 m over the followed Sahul dugout: the one angle that sees past the rim to the hollowed floor and the stowed gear (spare paddles, bailer) the record attests. Every other committed frame takes the floor on faith - the r114 one-view-blindness class. Same frozen noon as passage-sahul."
+  },
+  {
+   "name": "ship-slave-ship",
+   "path": "/?frozen=1#v=ship&s=slave-ship",
+   "note": "Added r131 with the rake authoring: until this frame she appeared in no committed view at all - the r114/r128 one-view-blindness class, on the hull that carries the Middle Passage. Berth 17, between ship-of-the-line and wyoming."
   }
  ]
 }

@@ -6008,3 +6008,16 @@ Round 129 is complete, deployed, and live-verified (stamp 1787152001 confirmed o
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 37063 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-19 08:19:25  round starting
+Round 130 is complete and pushed. Summary:
+
+**The work — r129's first queue item, the Wyoming/Preussen loa recut.** Both ships' records carried sparred length in the hull's row. Wyoming's `loa: 140` was Wikipedia's 450 ft, which the article itself defines as jib-boom tip to spanker boom tip; her hull is 350 ft on deck (106.7 m — the article's "110 m" is a two-significant-figure rounding of the same feet) and 329.5 ft (100.4 m) between perpendiculars. She's now `loa 106.7 / lwl 100.4`, rakes untouched because the r129 clamp already makes the record own the overhang. Preussen's `147` included the jibboom; her hull is 134.0 m, and the record attests a 124 m waterline, so `lwl` moved 122 → 124 and her rakes were normalized up to the record's own 10 m overhang allowance (4:3 stem:stern kept) — the clamp only shrinks, so under-fill is a data cut. Both cards recut: hull figures in the Length row, a new "Sparred length" row saying what each figure spans, and Wyoming's prose "110 m on deck" corrected.
+
+**Measured and looked at.** Fleet sweep 0/33 over; wyoming planking 106.70 m exact, preussen 134.00 exact, keels on their waterlines. Both port profiles read — each ship keeps her form and now ends where her card says. Audit 33/0.
+
+**Frames.** 14 of 61 moved, all classified and accepted with reasons: four direct (ship/aboard of each recut hull — wyoming draws 12% shorter, her Kelvin wake re-laid), and ten neighbours — every hull berthed after Preussen slid down the quay as the two slips gave back 46 m, and at the new world position the frozen swell phase differs, so unchanged ships float at a new heave. Everything berthed before Preussen stayed green, which confirms the cumulative-layout explanation.
+
+**Closed.** Committed (a900cfe), pushed, live stamp verified at 1787153533. The closing confirmation ratchet ran to 32/61 with zero diffs and was killed deliberately and leak-free at the watchdog boundary; the addendum recording that is committed and pushed (e54b30d). Next round opens with the remaining pass, then container/slave-ship under-rake authoring, then the survey at panokseon.
+2026-08-19 09:32:22  round finished; HEAD is e54b30d r130 addendum: closing confirmation taken deliberately at 32/61, all green, zero diffs — kill leak-free; the remainder is next round's opening pass on this identical committed tree
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 41119 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 09:42:22  round starting

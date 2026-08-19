@@ -8527,3 +8527,72 @@ deliberately at the watchdog boundary (the r128 pattern: the kill verified leak-
 chromium left behind). The remaining 29 frames are next round's opening pass, on this
 identical tree; the round's work was committed and live-verified before the pass started
 (a900cfe, stamp 1787153533), so the kill costs nothing.
+
+## Round 131 — 2026-08-19 — the last two honest records get their overhang, and the Middle Passage hull gets a committed view
+
+**The owed pass first: r130's closing confirmation is complete — 61/61 green.** The 29
+frames the watchdog took (frames.json order 33–61, identified from the killed run's
+_current mtimes: the closing run had walked frames 1–32 in order, ship-preussen at
+09:30:58) were re-checked one by one on the identical committed tree
+(build/staging/ratchet-r131-open.txt): 28 green first pass, action-salamis alone failed
+on a 60-second readiness TIMEOUT — not a pixel diff — while two background profile
+captures of mine were grinding the same CPU. Re-run with the machine quiet: 0.000%,
+0.000. ⚠ Procedural lesson: a readiness timeout during a solo check is a load symptom
+before it is an app symptom; check what else was running before touching anything.
+
+**The work — r130's first queue item: container and slave-ship under-rake authoring.**
+These two were the OTHER kind of under-length hull (r129): their loa rows are honest
+hull LOA, and the authored rakes simply failed to draw the overhang the record grants.
+Both now fill their allowance exactly (build/staging/sweep-r131-after.txt):
+
+- **container**: stem 0.03 → 0.0423, stern stays 0.0 — drawn 395.00 → **399.90 exactly**.
+  The 16.9 m allowance is loa 399.9 − lwl 383.0, and 383.0 is the class's length between
+  perpendiculars (RINA, *Significant Ships of 2019*, MSC Gülsün — the same plate as the
+  depth moulded); on this generation the transom stands nearly plumb at the aft
+  perpendicular and the whole LOA−LPP difference is the flared bow above the bulb.
+  Ever-given, the fleet's attested hull of the same 400 m generation, carried the
+  identical 383 LBP against 399.94 LOA before r113 moved her lwl to her casualty
+  report's 387 waterline. That semantics note is now IN the record (rakeProvenance):
+  this type ship's lwl is the class LBP; the real loaded waterline runs ~4 m further
+  over the bulb and is not published for the class, so the record keeps the figure a
+  plate attests.
+- **slave-ship**: rakes 0.03/0.02 → 0.081/0.054 — drawn 27.50 → **30.00 exactly**. The
+  recorded 30 m (98 ft) is the Brooks's own hull length (en.wikipedia.org/wiki/
+  Brooks_(1781_ship), re-read this round); the Brookes plate draws a raked stem carrying
+  the head forward and a counter stern, bow share larger than stern, so the authored 3:2
+  split was kept and normalized up — the r129 clamp trims it to 2.4 m bow / 1.6 m stern.
+  The plate is a stowage engraving, not a lines plan; rakeProvenance says it supports
+  the split qualitatively, not to the centimetre.
+
+**Measured and looked at (rule 1).** Fleet sweep 0/33 over, both hulls at ±0.00 to the
+cm; per-part measures in build/measure-{slave-ship,container}-r131-after.txt. BEFORE
+profiles captured and preserved (build/staging/r131-before/), AFTER profiles read
+against them: the slave ship's stem now rakes past her u 0.00 mark with the counter past
+u 1.00, form retained; the container's bow flare reaches full length, transom plumb.
+Audit 33/0 (build/staging/audit-r131-run1.txt).
+
+**Frames: one mover, one addition, both accepted with reasons; the set is 62.**
+ship-container 9.905% — the whole-hull redraw ghost of the r129/r130 mover class (yard
+camera reframes the longer hull), diff and current frame both read. **ship-slave-ship
+is NEW**: until this round the hull that carries the Middle Passage appeared in no
+committed view at all — the r114/r128 one-view-blindness class; frame added, captured,
+read (card, Brookes plate, fleet row legible), accepted as baseline 62. Verified still:
+aboard-off 0.018% and wake-plan 0.007% (the boxroute frames — at sea-camera scale the
+longer bow is sub-tolerance), ship-wyoming / ship-carrier / ship-ever-given 0.000%
+(berth layout untouched — loa never moved, so no quay slide this time), shipwright and
+shipwright-ahead 0.015%.
+
+**Rule 0, written on ship-slave-ship read in full this round:** it reads as a rendered
+ship at a yard on open water — hull, rig, sea and panels composed per pixel, no chart
+anywhere. Three facts a viewer can read off it: she is a three-masted square-rigger of
+30.0 m carrying 300 people with a crew of 35; the Brookes stowage plate sits on her own
+card; the fleet list berths her at 1501 between the war galley and the galleass.
+
+**Next, in order:** (1) The survey continues: panokseon boxPct 71 (towerx18), galleass
+70 (apostisx55, benchx52), galley 68. (2) The remaining under-fills are now carrier
+−3.15, ever-given −0.98, east-indiaman −0.50, fluyt −0.66, usv −0.62 — each needs its
+own record-semantics answer before any clamp-style rule; r129's refusal to prejudge
+stands. (3) Standing residuals: sekibune wasen kaji (r121), gundeck normals (r118),
+Endurance forecastle (RMG J9266), Azzam crest (r108), yakata curtain (r117), canoe
+floor frame; myeongnyang needs an Action baseline (one-view blindness, r128); Preussen
+mast trucks ~51.3 m drawn vs 58.0 attested deck-to-truck.
