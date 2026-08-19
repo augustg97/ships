@@ -8281,3 +8281,12 @@ dugout. (2) The probe-wake heading mirror (r114): fix the probe, verify against 
 course the record attests (evergiven 283°), then decide whether the passage-sahul wake
 bearing is the probe's fault or the renderer's. (3) The canoe floor frame, if the class
 deserves a second watcher.
+
+**Procedural addendum, r127 (the lock-check class again, in a smaller coat):** the live
+verify polled for `data-version="N"` for ten minutes and got thirty empty reads — while
+the deploy had in fact landed on the first poll. The stamp is a META tag
+(`data-version" content="N"`), so the grep could never match, and a verification loop
+that can never succeed is indistinguishable from a slow deploy. Same failure family as
+the r71 lock check: a check whose output looks the same whether the thing it checks is
+true or false. The working pattern is
+`curl -s .../index.html | grep -o 'data-version" content="[0-9]*"'`.
