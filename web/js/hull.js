@@ -858,6 +858,120 @@ function buildDeckGeometry(S, NU = 120) {
   return g;
 }
 
+/* ── THE OPEN HULL: an undecked hull is a CAVITY, not a cap (round 122) ────────────────
+   The dugout's record refuses a deck (deckLaid: false) and her stage card says in terms
+   what she is — "a tree with the inside taken out" — yet the model capped her sheer with
+   a "bare timber" surface, which is a DECK by any other name. A monoxylon is open: what
+   the viewer should see over the rail is the carved inner surface running down past the
+   waterline to a floor. Three pieces, one geometry: the RIM (the top of the log's own
+   wall, outer sheer edge to inner edge — over the solid ends it widens to the whole
+   half-breadth, which is what an uncarved end looks like from above), the inner WALLS
+   (the outer skin offset inboard by the wall siding, so the rim shows the real
+   thickness), and the FLOOR (the bottom siding above the outer bottom — BELOW the load
+   waterline, as a floating hull's floor is; the depth-mask plug in buildShip keeps the
+   drawn sea from rendering inside). The cavity closes toward the ends by lerping the
+   open section back to the flat top wherever the bottom gets too thin to carve, so the
+   ends stay solid and there is no seam to leak. Wall and bottom sidings are DERIVED
+   class defaults — the part card names them and says so (rule 10). */
+function buildOpenHullGeometry(S, NU = 96, which) {
+  const H = hullSurface(S);
+  /* a carver leaves more bottom than side; a planked open hull's wall is its plank */
+  const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
+                                  : Math.max(0.02, S.beam * 0.020);
+  const tb = S.build === 'dugout' ? tw * 1.8
+                                  : Math.max(0.04, S.draught * 0.06);
+  const NV = 7;                       // wall samples, rim to floor
+  const K = NV + 3;                   // + floor samples in to the centreline
+  const pos = [], idx = [];
+  const US = hullStations(S, NU);
+  /* `which` picks a piece so the two can wear their own materials: the RIM is dressed
+     timber — the fire never touches the gunwale, the adze does — while the CAVITY is
+     what the hollowing left. Omitted, both build into one geometry (the fallback). */
+  const wantRim = which !== 'cavity', wantCav = which !== 'rim';
+
+  /* where can the cavity exist? enough bottom under the floor, enough breadth for walls */
+  const eligible = u => u > 0.05 && u < 0.95
+    && S.draught * H.keel(u) > tb * 1.4
+    && surfacePoint(S, H, u, 1)[2] - tw > 0.01;
+  let i0 = -1, i1 = -1;
+  for (let i = 0; i < US.length; i++)
+    if (eligible(US[i])) { if (i0 < 0) i0 = i; i1 = i; }
+  if (i0 < 0 || i1 - i0 < 4)          // nothing to carve
+    return wantRim ? buildDeckGeometry(S, NU) : new THREE.BufferGeometry();
+
+  /* the interior half-section at station index i: K points, rim inner edge to centreline.
+     a = 0 collapses it onto the flat top, which is how the ends stay solid. */
+  const section = i => {
+    const u = US[i];
+    const s = (i - i0) / (i1 - i0);
+    const ss = t => { const c = Math.min(1, Math.max(0, t / 0.12)); return c * c * (3 - 2 * c); };
+    const a = ss(s) * ss(1 - s);
+    const t = S.draught * H.keel(u);
+    const vF = 0.62 * tb / t;                       // v where the floor cuts the section
+    const edge = surfacePoint(S, H, u, 1);
+    const yiTop = Math.max(0, edge[2] - tw);
+    const open = [];
+    for (let j = 0; j <= NV; j++) {
+      const p = surfacePoint(S, H, u, 1 - (1 - vF) * j / NV);
+      open.push([p[0], p[1], Math.max(0, p[2] - tw)]);
+    }
+    const fl = open[NV];                            // sits exactly at -t + tb
+    open.push([fl[0], fl[1], fl[2] * 0.5], [fl[0], fl[1], 0]);
+    const out = [];
+    for (let k = 0; k < K; k++) {
+      const cz = yiTop * (1 - k / (K - 1));         // the closed (flat-top) profile
+      out.push([edge[0] + (open[k][0] - edge[0]) * a,
+                edge[1] + (open[k][1] - edge[1]) * a,
+                cz + (open[k][2] - cz) * a]);
+    }
+    out.rimInner = yiTop; out.edge = edge;
+    return out;
+  };
+
+  /* winding: seen from above the visible faces are the cavity's — swap per side so the
+     computed normals face up and inboard on both (the r34 winding-vs-normals class) */
+  const quad = (sgn, a, b, c, d) => {
+    if (sgn > 0) idx.push(a, b, c, c, b, d); else idx.push(a, c, b, b, c, d);
+  };
+
+  for (const sgn of [1, -1]) {
+    if (wantRim) {
+      /* the rim, full length: solid top over the uncarved ends, wall-top in the run */
+      const base = pos.length / 3;
+      for (let i = 0; i < US.length; i++) {
+        const e = surfacePoint(S, H, US[i], 1);
+        const inner = (i >= i0 && i <= i1) ? Math.max(0, e[2] - tw) : 0;
+        pos.push(e[0], e[1], sgn * e[2], e[0], e[1], sgn * inner);
+      }
+      for (let i = 0; i < US.length - 1; i++) {
+        if (US[i + 1] - US[i] < 1e-4) continue;
+        const a = base + i * 2;
+        quad(sgn, a, a + 2, a + 1, a + 3);
+      }
+    }
+    if (wantCav) {
+      /* the cavity: walls and floor, one strip grid over the run */
+      const cav = pos.length / 3;
+      for (let i = i0; i <= i1; i++) {
+        const row = section(i);
+        for (const p of row) pos.push(p[0], p[1], sgn * p[2]);
+      }
+      for (let i = 0; i < i1 - i0; i++) {
+        if (US[i0 + i + 1] - US[i0 + i] < 1e-4) continue;
+        for (let k = 0; k < K - 1; k++) {
+          const a = cav + i * K + k;
+          quad(sgn, a, a + K, a + 1, a + K + 1);
+        }
+      }
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
 /* ── THE TERRACED STERN: risers, bulwarks and the transom parapet (sternSteps) ─────────
  * hullSurface.sheer() already lowers the after decks span by span, and the shell, the deck
  * cap and the frames follow because they all ask surfacePoint. This builds what the drop
@@ -3479,6 +3593,10 @@ const PARTS = {
               what: 'Not just a floor: the deck ties the two sides of the hull together against '
                   + 'the sea trying to squeeze them in, and it is the platform the guns stand on. '
                   + 'Its camber sheds water to the sides.' },
+  logtop:   { stage: 1, name: 'The log, before hollowing',
+              what: 'The felled trunk\'s upper face. The hollowing stage removes it — burning '
+                  + 'and adze work take everything inside the rim, and what remains of this '
+                  + 'surface afterwards is the rim itself.' },
   quarterRudder: { stage: 3, name: 'Quarter rudders',
               what: 'A steering oar grown into a fitting: one over each quarter, its loom '
                   + 'working against a through-beam at the rail, its blade standing down '
@@ -3596,6 +3714,12 @@ function buildFittings(S, group, mats) {
      deckCovering() already promises "the deck material and the deck furniture cannot
      disagree" — the furniture just never asked it. Now it does. */
   const laidDeck = deckCovering(S).mode === 1;
+  /* an OPEN hull (mode 0) has no deck at all, so it has no deck EDGE: the rim of the
+     hull wall is the gunwale (round 122), and a fitted capping rail is assembly timber
+     the record refuses. Found twice in one frame: the dugout's rail z-fighting her new
+     rim, and the canoe's rail — never in the twin-hull clone list — running the full
+     length at the CENTRELINE, floating over open water fore and aft of the platform. */
+  const openHull = deckCovering(S).mode === 0;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckAtU = u => H.sheer(u);
@@ -3621,8 +3745,9 @@ function buildFittings(S, group, mats) {
      There is no such rail on the real ship either: her Deck 7 promenade is INSIDE the shell.
      So the rail is emitted only over the spans where the deck is genuinely open — the
      forecastle, the poop, and any stretch where the house stands far enough inboard to leave
-     a walkway. A hull with no house has no closed span and comes out vertex-identical. */
-  {
+     a walkway. A hull with no house has no closed span and comes out vertex-identical.
+     And a hull with no DECK has no deck edge anywhere: the open hulls skip the whole rail. */
+  if (!openHull) {
     const pos = [], idx = [];
     const NU = 90; let base = 0;
     const T = S.decks ? linerHouse(S) : null;
@@ -8908,12 +9033,20 @@ function buildShip(S, opts) {
   const timber = STEEL
     ? new THREE.MeshStandardMaterial({ color: 0x3d4147, roughness: 0.52, metalness: 0.55 })
     : new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
-  group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
+  /* ⚠ A ONE-PIECE HULL HAS NO KEEL AND NO FRAMES (round 122). Her own tradition card has
+     said it all along — "there is no keel, no frame, no plank and no seam, because there
+     is no JOINT" — and while the hull was capped the contradiction hid: a keel timber
+     under the log, thirty ribs inside it, none visible. Opening the hull (below) would
+     have put the ribs of a ship that has none in plain sight. Same gate class as the
+     posts and wales (r121). */
+  const ONE_PIECE = S.build === 'dugout';
+  if (!ONE_PIECE) group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
   if (FINE) {
     /* every frame its own object, so one rib can be picked out of the skeleton */
-    for (let f = 0; f < 30; f++)
-      group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
-                    'frames', 'Frame ' + (f + 1) + ' of 30'));
+    if (!ONE_PIECE)
+      for (let f = 0; f < 30; f++)
+        group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
+                      'frames', 'Frame ' + (f + 1) + ' of 30'));
     /* ⚠ A BULKHEAD-BUILT HULL HAS NO STEM AND NO STERNPOST — the outermost bulkheads are
        the ends, planked across. Giving a junk the European backbone contradicted the stage
        card standing right under her: "bulkheads, then planking". */
@@ -8967,7 +9100,7 @@ function buildShip(S, opts) {
         group.add(de);
       }
     });
-  } else {
+  } else if (!ONE_PIECE) {
     group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
   }
 
@@ -8995,15 +9128,69 @@ function buildShip(S, opts) {
      bare-timber noise took the plank terms' sub-pixel LOD fade before the fleet took
      them (r106's moiré rule — those two modes had never rendered). */
   const cover = deckCovering(S);
-  const deckMat = new THREE.ShaderMaterial({
+  const deckShader = col => new THREE.ShaderMaterial({
     vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
     side: THREE.DoubleSide,
     uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
-                uCol:    { value: new THREE.Color(cover.col) },
+                uCol:    { value: new THREE.Color(col) },
                 uMode:   { value: cover.mode },
                 uPlankW: { value: cover.plankW || 1 },
                 uButtL:  { value: cover.buttL || 1 } } });
-  group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
+  const deckMat = deckShader(cover.col);
+  if (cover.mode === 0) {
+    /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────
+       deckLaid: false used to buy a "bare timber" CAP across the sheer — a deck by any
+       other name, on the two hulls whose records refuse one. The cap is replaced by the
+       carved interior: rim, inner walls, floor (buildOpenHullGeometry). The floor sits
+       below the load waterline, as a floating hull's floor does, so a depth-only PLUG
+       spans the old cap surface: it draws no colour, writes depth after the interior
+       (renderOrder 1) and before the sea (renderOrder 2 in each view), and that is the
+       whole reason the drawn sea cannot render inside the boat. */
+    const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
+                                    : Math.max(0.02, S.beam * 0.020);
+    const tb = S.build === 'dugout' ? tw * 1.8 : Math.max(0.04, S.draught * 0.06);
+    const nm = S.build === 'dugout' ? 'Open hull — the carved hollow'
+                                    : 'Open hull — no deck laid';
+    const what = 'The record lays no deck (deckLaid: false), so there is no cap: this is '
+      + 'the inner surface of the hull itself, open to the sky, running down past the '
+      + 'waterline to the floor. '
+      + (S.build === 'dugout'
+         ? 'Burned and adzed out of the one trunk, so the surface is charred and '
+           + 'tool-marked. '
+         : 'The inside of the planked shell, unpainted and unbleached. ')
+      + `Wall ${Math.round(tw * 100)} cm and bottom ${Math.round(tb * 100)} cm are `
+      + 'DERIVED class defaults — no source attests the sidings, and the rim shows the '
+      + 'wall figure as its visible thickness.';
+    /* two pieces, two surfaces of the real thing: the fire chars the bowl, the adze
+       dresses the gunwale — and the rim doubles as the pale line the hull has always
+       read by. No capping RAIL goes on an open hull (buildFittings): the rim IS the
+       gunwale, and a fitted capping is assembly timber this record refuses. */
+    group.add(tag(new THREE.Mesh(buildOpenHullGeometry(S, 96, 'cavity'),
+      deckShader(S.build === 'dugout' ? 0x54422d : 0x77664a)), 'deck', nm, what));
+    group.add(tag(new THREE.Mesh(buildOpenHullGeometry(S, 96, 'rim'),
+      deckShader(S.build === 'dugout' ? 0x97835d : 0x9c8a63)), 'deck',
+      S.build === 'dugout' ? 'Gunwale rim — dressed timber' : 'Gunwale — top strake edge',
+      'The top face of the hull wall itself, ' + Math.round(tw * 100) + ' cm across — '
+      + 'the wall siding, seen end-on. Dressed, not charred: hollowing burns the bowl, '
+      + 'the adze finishes the edge. There is no fitted capping rail; on an open hull '
+      + 'the rim is the gunwale.'));
+    const plug = new THREE.Mesh(buildDeckGeometry(S),
+      new THREE.MeshBasicMaterial({ colorWrite: false, side: THREE.DoubleSide }));
+    plug.renderOrder = 1;
+    group.add(tag(plug, 'deck', 'Waterplane mask',
+      'Draws nothing. It writes only depth across the open top so the sea surface cannot '
+      + 'render inside the open hull; the interior below the waterline shows because it '
+      + 'is drawn first.'));
+    /* the log's top face, shown only by the Shipwright's pre-hollowing stage — the
+       hollowing REMOVES it, which is the one subtractive step in the whole fleet */
+    if (S.build === 'dugout') {
+      const top = new THREE.Mesh(buildDeckGeometry(S), deckShader(0x8a7a5c));
+      top.visible = false;
+      group.add(tag(top, 'logtop'));
+    }
+  } else {
+    group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
+  }
 
   /* ⚠ Lambert has no specular term at all, so every timber came out matte and the whole ship
      read as cardboard under any lighting. Standard gives wood a low, broad sheen — which is

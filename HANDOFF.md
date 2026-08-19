@@ -7741,3 +7741,103 @@ close — expected 0.000%; if anything moved, this round owns it. (2) The survey
 residual 1: hollow the dugout — replace her capped deck with the carved inner surface, which
 is the last thing standing between her and her own stage card. (3) The gundeck both-ways
 normals sweep, if wanted.
+
+## Round 122 — 2026-08-18 — the log is finally open
+
+**The opening ratchet was the confirming pass r121 owed: all 59 frames within tolerance,
+exit 0** (build/ratchet-open-r122.log). Round 121 is confirmed fleet-wide. ⚠ This round's
+first hull.js edit landed mid-pass (the r120 pollution pattern again); it did no harm only
+because every frame captured after the edit was a decked ship the change provably does not
+touch — the discipline stays: OPEN THE RATCHET BEFORE OPENING THE EDITOR.
+
+**THE TASK: r121's pointer — hollow the dugout.** Her record refuses a deck (deckLaid:
+false), her stage card says "a tree with the inside taken out", and the model capped her
+sheer with a "bare timber" surface — a deck by any other name. And the cap was load-bearing:
+under it hid a keel timber and thirty ribs on a hull whose own tradition card reads "there
+is no keel, no frame, no plank and no seam" — invisible only while the hull stayed shut.
+
+**The class fix, three gates keyed on what the record says:** (1) `deckCovering mode 0` —
+the two undecked hulls — replaces the cap with `buildOpenHullGeometry`: the GUNWALE RIM
+(the wall siding seen end-on, dressed pale — the adze finishes the edge), the CAVITY
+(walls offset inboard by the wall siding, charred dark on the fire-hollowed log), and the
+FLOOR (bottom siding above the outer bottom, BELOW the load waterline as a floating hull's
+floor is). Sidings are DERIVED class defaults, named with figures on the part card (rule
+10): dugout wall 4 cm/bottom 7 cm, canoe wall 2 cm/bottom 4.5 cm. The cavity closes toward
+the ends by lerping the open section back to the flat top where the bottom gets too thin
+to carve, so the ends stay solid with no seam. (2) `build: 'dugout'` now suppresses keel
+and frames the way r121 suppressed posts and wales — the one-piece gate, finished.
+(3) An open hull takes NO capping rail: the rim IS the gunwale. That gate found a second
+fault it then fixed: the canoe's rail was never in the twin-hull clone list, so it ran the
+full length at the CENTRELINE — floating over open water fore and aft of the platform,
+poking through it amidships, for as long as the rail has existed.
+
+**The sea is masked out of the bowl by depth, not by lying about the floor.** A depth-only
+PLUG (colorWrite false) spans the old cap surface at renderOrder 1; the three Gerstner seas
+(Shipwright ground, passage sea, action sea) moved to renderOrder 2, so sea fragments
+inside the hull fail the depth test while the interior — drawn at order 0 — keeps its
+paint. The plug is tagged as a part and its card says exactly what it is.
+
+**The Shipwright now tells the subtractive story.** For the dugout: planking is stage 1
+('Log felled', with a `logtop` face that exists ONLY at that stage — the one subtractive
+step in the fleet), the hollow is stage 2 ('Hollowed'), and the tradition owns its other
+cards outright — s0 'Nothing to lay', s3 'Rim finished', s7 'Afloat' — because a paddled
+log was being told about three-storey diesels ('Machinery in', ENGINE_STAGES) at stage 4
+and "Canvas. She can now be driven by the wind" at stage 7. Any tradition may now own any
+stage's card (`trad['s'+stage]`); stages 4–6 fall back to s3 where defined.
+
+**Measured (rule 4, build/measure-{dugout,voyaging-canoe,fluyt}-r122-after.txt against the
+r121-after tables):** dugout — cap row replaced by Gunwale rim (0.34..0.62) + carved hollow
+(floor −0.19 = −draught + 7 cm bottom, exact), Keel row gone, model bottom rises −0.29 →
+−0.26 = the skin's own draught; canoe — the same swap per hull (floor −0.70), the floating
+centreline Rail row GONE; fluyt — byte-identical, twice. The ratchet corroborates
+fleet-wide: every post-edit decked-ship frame moved 0.000–0.016%.
+
+**Verified (rule 1): twelve spin bearings each, read; close look-down captures of both
+hollows; Shipwright stages 0/1/2 driven and read; passage close-up #e=0&f=kozushima.**
+The dugout reads as an open hollowed log: pale dressed rim in one continuous line, charred
+walls, warm floor, solid ends, no sea in the bowl, in the Shipwright afloat and in the
+passage close-up (two consorts, wakes, hollows dark). Rule 0 on the hollow capture: reads
+as a rendered vessel on water; three facts a viewer can name — the wall thickness as the
+rim's own width; the floor standing below the line the sea stops at; the ends left solid
+where a carver cannot thin the bottom.
+
+**The audit learned the class (round-122 rules), proven all arms by injection against the
+final geometry (build/staging/inj-open-{capped,decked}.js, inj-onepiece{,-members}.js):**
+'an undecked hull is capped' — the VIEWER'S question, rays down each hull's own centreline
+must reach below the load waterline; the waterplane mask is exempt by name and INVISIBLE
+meshes are exempt as a class (the Raycaster respects neither on its own — found when the
+rule convicted the hidden logtop). Capped injection: convicts dugout + both canoe lanes,
+with the r120 furniture rules honestly alongside (11 total). 'A decked hull opened up' —
+bounding-box arm, fluyt forced open convicts at −2.91 m. 'A capping rail on a hull with no
+deck edge' / 'a decked hull lost her rail' — both arms proven in the same two injections.
+One-piece extended to keel + frames: the shell-built dugout convicts 4/4, the stripped
+fluyt 2/2. Clean run 33/0 twice (second run after the close ratchet, below).
+
+**Ratchet close: full pass, EXACTLY the two changed ships moved and nothing else
+(build/ratchet-close-r122.log; 57 frames ok including globe-crossing 0.000% — the exaggerated
+era-0 tokens carry the change sub-pixel). Movers read before accepting (diffs copied out
+first, the r58/r121 lesson): ship-dugout 6.047% — the rim and hull profile, the stage card
+'Loaded'→'Afloat', and a faint whole-field sub-pixel sea shift, which is the camera refit
+after the keel's removal raised the bounding-box floor 3 cm; ship-canoe 0.780% — confined
+to the hull top edges: rails out, rims in. Both accepted with reasons (FRAME-LOG.md),
+both re-checked 0.000%.**
+
+**Deployed: stamp 1787110672.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The era-0 passage close-up of THE SAHUL
+CROSSING is a near-black field — panels fine, view opens, but the water/floor at that
+frozen position renders dark (Kozushima daylight is fine); pre-existing, no baseline
+watches it, wants a round. (2) The sekibune 'stern' wasen kaji (r121 residual) stands.
+(3) The gundeck both-ways normals class (r118) stands fleet-wide, unconvicted.
+(4) Sekibune/panokseon LOA overhang class (r113/r115) untouched — the dugout's own
+Δ +0.95 m is this class. (5) The r115 hayao and sekibune swivels (r90) stand.
+(6) probe-wake.py heading mirror (r114) untouched. (7) Endurance forecastle break waits
+on the RMG original of J9266. (8) Azzam crest residual (r108) unchanged. (9) The yakata
+wall-opening curtain (r117) still not drawn. (10) The corbita has no baseline frame.
+(11) The dugout's hollow floor is bare — a real dugout this size would carry dunnage,
+bailers, paddles stowed; her card says no crew is drawn, but stowed GEAR is not crew.
+
+**Next:** (1) The opening check next round confirms whatever this close did not re-check —
+expected 0.000%; if anything moved, this round owns it. (2) The survey's boxy column
+continues, or residual 1 (the dark Sahul close-up) — it is the first crossing in the whole
+story and it deserves a picture. (3) The gundeck both-ways normals sweep, if wanted.

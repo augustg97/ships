@@ -341,17 +341,80 @@
     {
       const onePiece = H.build === 'dugout';
       const metal = H.build === 'iron' || H.build === 'steel';
-      for (const k of ['stempost', 'wale']) {
-        const belongs = k === 'stempost'
-          ? !onePiece && H.build !== 'bulkhead'
-          : !onePiece && !metal;
+      /* keel and frames joined the list in round 122, when opening the hull would have
+         put thirty ribs inside a log whose own card says "no keel, no frame" — while
+         the cap stood, the contradiction was invisible and only the part table knew */
+      for (const k of ['stempost', 'wale', 'keel', 'frames']) {
+        const belongs = k === 'stempost' ? !onePiece && H.build !== 'bulkhead'
+                      : k === 'wale' ? !onePiece && !metal
+                      : !onePiece;
         if (onePiece && part[k])
           say(v.id, 'assembly timber on a one-piece hull',
               `${part[k].n} ${k} mesh(es) drawn on a hull the record calls one piece`);
         else if (belongs && !part[k])
           say(v.id, `an assembled ship lost her ${k}`,
-              `build ${H.build} raises posts and wears wales, and none is drawn`);
+              `build ${H.build} is assembled from members, and no ${k} is drawn`);
       }
+    }
+
+    /* ── AN UNDECKED HULL IS OPEN (round 122) ───────────────────────────────────────────
+       deckLaid: false bought a "bare timber" CAP across the sheer for as long as the deck
+       loft has existed — a deck by any other name, on the two hulls whose records refuse
+       one. The question is the viewer's own: can you see INTO her? Rays straight down at
+       the hull's midbody centreline must reach geometry BELOW the load waterline — the
+       floor of the hollow — at at least one probed station. The waterplane mask is
+       exempted by name: it draws nothing, so sight passes through it, and a rule that
+       counted it would convict the very build it guards. Capped, every ray lands at
+       sheer height and the rule convicts. The decked arm is bounding-box: a real deck
+       has no business below the load line, so a decked hull whose deck-tagged geometry
+       dips under it has been wrongly opened. Twin hulls are probed on each hull's own
+       centreline, at stations chosen clear of the record's crossbeams. */
+    {
+      const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+      if (undecked && part.deck) {
+        g.updateMatrixWorld(true);
+        const rc = new THREE.Raycaster();
+        const lanes = H.doubleHull ? [-(H.hullSep || 0) / 2, (H.hullSep || 0) / 2] : [0];
+        for (const lane of lanes) {
+          let deepest = 1e9;
+          for (const u of [0.35, 0.45, 0.55, 0.65, 0.75]) {
+            const x = (u - 0.5) * H.lwl;
+            rc.set(new THREE.Vector3(x, 50, lane), new THREE.Vector3(0, -1, 0));
+            /* the question is what the VIEWER meets: an invisible mesh draws nothing
+               (the log's pre-hollowing top face ships visible: false), and the
+               waterplane mask draws nothing by construction — sight passes through
+               both, and the Raycaster alone passes through neither */
+            const hit = rc.intersectObject(g, true)
+              .find(h => { for (let e = h.object; e; e = e.parent)
+                             if (e.visible === false) return false;
+                           const p = tagOf(h.object);
+                           return !p || p.name !== 'Waterplane mask'; });
+            if (hit) deepest = Math.min(deepest, hit.point.y);
+          }
+          if (deepest > -0.02)
+            say(v.id, 'an undecked hull is capped',
+                `rays down the ${lane ? (lane < 0 ? 'port' : 'starboard') + ' hull ' : ''}`
+                + `centreline bottom out at ${deepest === 1e9 ? 'nothing' : deepest.toFixed(2) + ' m'}`
+                + ' — the record lays no deck, so the view should reach the floor of the '
+                + 'hollow, below the load waterline');
+        }
+      } else if (!undecked && part.deck && part.deck.y[0] < -0.02)
+        say(v.id, 'a decked hull opened up',
+            `deck geometry reaches down to ${part.deck.y[0].toFixed(2)} m — below the load `
+            + 'waterline, where no laid deck belongs; the open-hull gate has widened');
+      /* and the rail follows the deck it caps: an open hull has no deck edge, so the
+         rim of the hull wall is the gunwale and a fitted capping is assembly timber.
+         Found both ways in round 122: the dugout's rail z-fighting her rim, and the
+         canoe's rail — never in the twin-hull clone list — floating at the CENTRELINE
+         over open water. The decked arm keeps the fleet's rails aboard. */
+      if (undecked && part.rail)
+        say(v.id, 'a capping rail on a hull with no deck edge',
+            `${part.rail.n} rail mesh(es) drawn, but the record lays no deck — the rim `
+            + 'of the hull wall is the gunwale');
+      else if (!undecked && !part.rail)
+        say(v.id, 'a decked hull lost her rail',
+            'every decked hull carries her capping (empty spans come out '
+            + 'vertex-identical, but the mesh exists), and none is drawn');
     }
 
     /* ── A STAY ENDS ON A SPAR, NOT ON AN ESTIMATE OF ONE (round 99) ────────────────────

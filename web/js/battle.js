@@ -106,6 +106,9 @@ function btInit() {
                 uWave: { value: SHIPS_SEA.seaWaveUniform() } },
   }));
   BT.sea.rotation.x = -Math.PI / 2;
+  /* after the open-hull depth plug (renderOrder 1), so the sea cannot render inside an
+     undecked hull whose floor is below the waterline — see buildShip, round 122 */
+  BT.sea.renderOrder = 2;
   BT.scene.add(BT.sea);
 
   /* powder smoke: quads that bloom and drift down the wind */

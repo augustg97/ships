@@ -152,6 +152,9 @@ function psgInit(R, globeCamera) {
   }));
   PSG.sea.rotation.x = -Math.PI / 2;
   PSG.sea.receiveShadow = true;
+  /* after the open-hull depth plug (renderOrder 1), so the sea cannot render inside an
+     undecked hull whose floor is below the waterline — see buildShip, round 122 */
+  PSG.sea.renderOrder = 2;
   PSG.scene.add(PSG.sea);
 
   /* ── THE GROUND, ON THE SAME TERMS AS THE WATER ────────────────────────────────────────

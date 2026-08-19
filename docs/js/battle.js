@@ -41,6 +41,7 @@ uWind: { value: 9 }, uScale: { value: 240 }, uRip: { value: 3000 },
 uWave: { value: SHIPS_SEA.seaWaveUniform() } },
 }));
 BT.sea.rotation.x = -Math.PI / 2;
+BT.sea.renderOrder = 2;
 BT.scene.add(BT.sea);
 const NS = 460;
 const sg = new THREE.BufferGeometry();

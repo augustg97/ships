@@ -50,6 +50,7 @@ uSeaLevel: { value: 0 }, uHasDepth: { value: 0 },
 }));
 PSG.sea.rotation.x = -Math.PI / 2;
 PSG.sea.receiveShadow = true;
+PSG.sea.renderOrder = 2;
 PSG.scene.add(PSG.sea);
 const lg = radialDisc(2.0, SEA_R, 340, 256, 6371000.0);
 PSG.land = new THREE.Mesh(lg, new THREE.ShaderMaterial({

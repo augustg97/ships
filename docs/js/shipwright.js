@@ -62,6 +62,7 @@ uWave: { value: SHIPS_SEA.seaWaveUniform(6.5) } },
 }));
 gm.rotation.x = -Math.PI / 2;
 gm.frustumCulled = false;
+gm.renderOrder = 2;
 SW.ground = gm; SW.scene.add(gm);
 {
 const R0 = 15000, seg = 720, pos = [], idx = [];
@@ -160,12 +161,22 @@ obj.material.emissive.setHex(0x3a2c10);
 }
 const TRADITION = {
 dugout: { label: 'One piece: a tree with the inside taken out',
+s0: ['Nothing to lay', 'A dugout is not assembled, so there is no keel and '
++ 'nothing is measured from one. The work starts with a '
++ 'standing tree, not a timber on blocks.'],
 s1: ['Log felled', 'The hull is chosen, not designed. Its beam is the trunk\'s '
 + 'beam and cannot exceed it, which fixes what the boat can '
 + 'ever be before a tool touches it.'],
 s2: ['Hollowed', 'Burned and adzed out from above. There is no seam anywhere in '
 + 'the hull, so nothing can leak — and nothing can be replaced '
-+ 'either, because there are no parts.'] },
++ 'either, because there are no parts.'],
+s3: ['Rim finished', 'The gunwale is dressed to a fair curve and left thick, '
++ 'because the rim takes the paddle strokes and every '
++ 'landing. Below it the hull is already complete: there is '
++ 'nothing left to add.'],
+s7: ['Afloat', 'She floats with about a third of a metre of freeboard. '
++ 'Paddlers, food and water all sit on the hollowed floor, below '
++ 'the line of the rim.'] },
 frame: { label: 'Frame-first (carvel): frames, then planking',
 s1: ['Frames raised', 'The ribs go up on the keel. The shape is decided now, on the '
 + 'drawing floor, before a single plank is cut — which is what '
@@ -231,14 +242,18 @@ let buildKey = (H && H.build) || 'frame';
 if (buildKey === 'steel' && H && H.year && H.year < 1950) buildKey = 'steelRiveted';
 const trad = TRADITION[buildKey] || TRADITION.frame;
 const shell = trad === TRADITION.shell;
+const dug = trad === TRADITION.dugout;
 SW.ship.traverse(o => {
 const p = o.userData && o.userData.part;
 if (!p) return;
 let st = p.stage;
 if (shell && p.key === 'frames') st = 2;
 if (shell && p.key === 'planking') st = 1;
+if (dug && p.key === 'planking') st = 1;
+if (dug && p.key === 'deck') st = 2;
 o.visible = st <= SW.stage;
 if (p.key === 'frames' && SW.stage >= (shell ? 1 : 2)) o.visible = false;
+if (p.key === 'logtop') o.visible = dug && SW.stage === 1;
 });
 const bb = new THREE.Box3();
 SW.ship.traverse(o => { if (o.visible && o.userData.part) bb.expandByObject(o); });
@@ -251,6 +266,8 @@ const engine = !(SW.spec.hull.masts || []).length;
 let nm = SW.stage === 1 ? trad.s1
 : SW.stage === 2 ? trad.s2
 : (engine && ENGINE_STAGES[SW.stage]) || STAGE_NAMES[SW.stage];
+if (trad['s' + SW.stage]) nm = trad['s' + SW.stage];
+else if (trad.s3 && SW.stage > 3 && SW.stage < 7) nm = trad.s3;
 if (SW.stage === 7 && SW.spec.hull.containers)
 nm = ['Loaded', 'The boxes. Eight feet by eight foot six by twenty or forty, corner castings '
 + 'identical everywhere on earth — and the standard, not the ship, is the '

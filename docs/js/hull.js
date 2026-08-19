@@ -524,6 +524,89 @@ g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx);
 return g;
 }
+function buildOpenHullGeometry(S, NU = 96, which) {
+const H = hullSurface(S);
+const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
+: Math.max(0.02, S.beam * 0.020);
+const tb = S.build === 'dugout' ? tw * 1.8
+: Math.max(0.04, S.draught * 0.06);
+const NV = 7;
+const K = NV + 3;
+const pos = [], idx = [];
+const US = hullStations(S, NU);
+const wantRim = which !== 'cavity', wantCav = which !== 'rim';
+const eligible = u => u > 0.05 && u < 0.95
+&& S.draught * H.keel(u) > tb * 1.4
+&& surfacePoint(S, H, u, 1)[2] - tw > 0.01;
+let i0 = -1, i1 = -1;
+for (let i = 0; i < US.length; i++)
+if (eligible(US[i])) { if (i0 < 0) i0 = i; i1 = i; }
+if (i0 < 0 || i1 - i0 < 4)
+return wantRim ? buildDeckGeometry(S, NU) : new THREE.BufferGeometry();
+const section = i => {
+const u = US[i];
+const s = (i - i0) / (i1 - i0);
+const ss = t => { const c = Math.min(1, Math.max(0, t / 0.12)); return c * c * (3 - 2 * c); };
+const a = ss(s) * ss(1 - s);
+const t = S.draught * H.keel(u);
+const vF = 0.62 * tb / t;
+const edge = surfacePoint(S, H, u, 1);
+const yiTop = Math.max(0, edge[2] - tw);
+const open = [];
+for (let j = 0; j <= NV; j++) {
+const p = surfacePoint(S, H, u, 1 - (1 - vF) * j / NV);
+open.push([p[0], p[1], Math.max(0, p[2] - tw)]);
+}
+const fl = open[NV];
+open.push([fl[0], fl[1], fl[2] * 0.5], [fl[0], fl[1], 0]);
+const out = [];
+for (let k = 0; k < K; k++) {
+const cz = yiTop * (1 - k / (K - 1));
+out.push([edge[0] + (open[k][0] - edge[0]) * a,
+edge[1] + (open[k][1] - edge[1]) * a,
+cz + (open[k][2] - cz) * a]);
+}
+out.rimInner = yiTop; out.edge = edge;
+return out;
+};
+const quad = (sgn, a, b, c, d) => {
+if (sgn > 0) idx.push(a, b, c, c, b, d); else idx.push(a, c, b, b, c, d);
+};
+for (const sgn of [1, -1]) {
+if (wantRim) {
+const base = pos.length / 3;
+for (let i = 0; i < US.length; i++) {
+const e = surfacePoint(S, H, US[i], 1);
+const inner = (i >= i0 && i <= i1) ? Math.max(0, e[2] - tw) : 0;
+pos.push(e[0], e[1], sgn * e[2], e[0], e[1], sgn * inner);
+}
+for (let i = 0; i < US.length - 1; i++) {
+if (US[i + 1] - US[i] < 1e-4) continue;
+const a = base + i * 2;
+quad(sgn, a, a + 2, a + 1, a + 3);
+}
+}
+if (wantCav) {
+const cav = pos.length / 3;
+for (let i = i0; i <= i1; i++) {
+const row = section(i);
+for (const p of row) pos.push(p[0], p[1], sgn * p[2]);
+}
+for (let i = 0; i < i1 - i0; i++) {
+if (US[i0 + i + 1] - US[i0 + i] < 1e-4) continue;
+for (let k = 0; k < K - 1; k++) {
+const a = cav + i * K + k;
+quad(sgn, a, a + K, a + 1, a + K + 1);
+}
+}
+}
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+g.setIndex(idx);
+g.computeVertexNormals();
+return g;
+}
 function buildSternTerraces(S, group, hullMat) {
 if (!S.sternSteps) return;
 const H = hullSurface(S);
@@ -2121,6 +2204,10 @@ deck:     { stage: 3, name: 'Deck',
 what: 'Not just a floor: the deck ties the two sides of the hull together against '
 + 'the sea trying to squeeze them in, and it is the platform the guns stand on. '
 + 'Its camber sheds water to the sides.' },
+logtop:   { stage: 1, name: 'The log, before hollowing',
+what: 'The felled trunk\'s upper face. The hollowing stage removes it — burning '
++ 'and adze work take everything inside the rim, and what remains of this '
++ 'surface afterwards is the rim itself.' },
 quarterRudder: { stage: 3, name: 'Quarter rudders',
 what: 'A steering oar grown into a fitting: one over each quarter, its loom '
 + 'working against a through-beam at the rail, its blade standing down '
@@ -2211,12 +2298,13 @@ return o;
 function buildFittings(S, group, mats) {
 const timberShip = !(S.build === 'iron' || S.build === 'steel');
 const laidDeck = deckCovering(S).mode === 1;
+const openHull = deckCovering(S).mode === 0;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const deckAtU = u => H.sheer(u);
 const halfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
 const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
-{
+if (!openHull) {
 const pos = [], idx = [];
 const NU = 90; let base = 0;
 const T = S.decks ? linerHouse(S) : null;
@@ -5731,8 +5819,10 @@ const STEEL = S.build === 'steel' || S.build === 'iron';
 const timber = STEEL
 ? new THREE.MeshStandardMaterial({ color: 0x3d4147, roughness: 0.52, metalness: 0.55 })
 : new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
-group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
+const ONE_PIECE = S.build === 'dugout';
+if (!ONE_PIECE) group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
 if (FINE) {
+if (!ONE_PIECE)
 for (let f = 0; f < 30; f++)
 group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
 'frames', 'Frame ' + (f + 1) + ' of 30'));
@@ -5771,22 +5861,62 @@ de.position.set(p[0], p[1] * 0.97 + S.beam * 0.016, sgn * (p[2] + S.beam * 0.046
 group.add(de);
 }
 });
-} else {
+} else if (!ONE_PIECE) {
 group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
 }
 const hull = new THREE.Mesh(
 FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);
 group.add(tag(hull, 'planking'));
 const cover = deckCovering(S);
-const deckMat = new THREE.ShaderMaterial({
+const deckShader = col => new THREE.ShaderMaterial({
 vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
 side: THREE.DoubleSide,
 uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
-uCol:    { value: new THREE.Color(cover.col) },
+uCol:    { value: new THREE.Color(col) },
 uMode:   { value: cover.mode },
 uPlankW: { value: cover.plankW || 1 },
 uButtL:  { value: cover.buttL || 1 } } });
+const deckMat = deckShader(cover.col);
+if (cover.mode === 0) {
+const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
+: Math.max(0.02, S.beam * 0.020);
+const tb = S.build === 'dugout' ? tw * 1.8 : Math.max(0.04, S.draught * 0.06);
+const nm = S.build === 'dugout' ? 'Open hull — the carved hollow'
+: 'Open hull — no deck laid';
+const what = 'The record lays no deck (deckLaid: false), so there is no cap: this is '
++ 'the inner surface of the hull itself, open to the sky, running down past the '
++ 'waterline to the floor. '
++ (S.build === 'dugout'
+? 'Burned and adzed out of the one trunk, so the surface is charred and '
++ 'tool-marked. '
+: 'The inside of the planked shell, unpainted and unbleached. ')
++ `Wall ${Math.round(tw * 100)} cm and bottom ${Math.round(tb * 100)} cm are `
++ 'DERIVED class defaults — no source attests the sidings, and the rim shows the '
++ 'wall figure as its visible thickness.';
+group.add(tag(new THREE.Mesh(buildOpenHullGeometry(S, 96, 'cavity'),
+deckShader(S.build === 'dugout' ? 0x54422d : 0x77664a)), 'deck', nm, what));
+group.add(tag(new THREE.Mesh(buildOpenHullGeometry(S, 96, 'rim'),
+deckShader(S.build === 'dugout' ? 0x97835d : 0x9c8a63)), 'deck',
+S.build === 'dugout' ? 'Gunwale rim — dressed timber' : 'Gunwale — top strake edge',
+'The top face of the hull wall itself, ' + Math.round(tw * 100) + ' cm across — '
++ 'the wall siding, seen end-on. Dressed, not charred: hollowing burns the bowl, '
++ 'the adze finishes the edge. There is no fitted capping rail; on an open hull '
++ 'the rim is the gunwale.'));
+const plug = new THREE.Mesh(buildDeckGeometry(S),
+new THREE.MeshBasicMaterial({ colorWrite: false, side: THREE.DoubleSide }));
+plug.renderOrder = 1;
+group.add(tag(plug, 'deck', 'Waterplane mask',
+'Draws nothing. It writes only depth across the open top so the sea surface cannot '
++ 'render inside the open hull; the interior below the waterline shows because it '
++ 'is drawn first.'));
+if (S.build === 'dugout') {
+const top = new THREE.Mesh(buildDeckGeometry(S), deckShader(0x8a7a5c));
+top.visible = false;
+group.add(tag(top, 'logtop'));
+}
+} else {
 group.add(tag(new THREE.Mesh(buildDeckGeometry(S), deckMat), 'deck', cover.name, cover.what));
+}
 const mats = {
 spar: new THREE.MeshStandardMaterial({ color: 0x6a4d2c, roughness: 0.72, metalness: 0.02 }),
 woodDark: new THREE.MeshStandardMaterial({ color: 0x54402a, roughness: 0.78 }),

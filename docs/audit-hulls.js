@@ -202,17 +202,55 @@ say(v.id, 'steel rudder above the waterline',
 {
 const onePiece = H.build === 'dugout';
 const metal = H.build === 'iron' || H.build === 'steel';
-for (const k of ['stempost', 'wale']) {
-const belongs = k === 'stempost'
-? !onePiece && H.build !== 'bulkhead'
-: !onePiece && !metal;
+for (const k of ['stempost', 'wale', 'keel', 'frames']) {
+const belongs = k === 'stempost' ? !onePiece && H.build !== 'bulkhead'
+: k === 'wale' ? !onePiece && !metal
+: !onePiece;
 if (onePiece && part[k])
 say(v.id, 'assembly timber on a one-piece hull',
 `${part[k].n} ${k} mesh(es) drawn on a hull the record calls one piece`);
 else if (belongs && !part[k])
 say(v.id, `an assembled ship lost her ${k}`,
-`build ${H.build} raises posts and wears wales, and none is drawn`);
+`build ${H.build} is assembled from members, and no ${k} is drawn`);
 }
+}
+{
+const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+if (undecked && part.deck) {
+g.updateMatrixWorld(true);
+const rc = new THREE.Raycaster();
+const lanes = H.doubleHull ? [-(H.hullSep || 0) / 2, (H.hullSep || 0) / 2] : [0];
+for (const lane of lanes) {
+let deepest = 1e9;
+for (const u of [0.35, 0.45, 0.55, 0.65, 0.75]) {
+const x = (u - 0.5) * H.lwl;
+rc.set(new THREE.Vector3(x, 50, lane), new THREE.Vector3(0, -1, 0));
+const hit = rc.intersectObject(g, true)
+.find(h => { for (let e = h.object; e; e = e.parent)
+if (e.visible === false) return false;
+const p = tagOf(h.object);
+return !p || p.name !== 'Waterplane mask'; });
+if (hit) deepest = Math.min(deepest, hit.point.y);
+}
+if (deepest > -0.02)
+say(v.id, 'an undecked hull is capped',
+`rays down the ${lane ? (lane < 0 ? 'port' : 'starboard') + ' hull ' : ''}`
++ `centreline bottom out at ${deepest === 1e9 ? 'nothing' : deepest.toFixed(2) + ' m'}`
++ ' — the record lays no deck, so the view should reach the floor of the '
++ 'hollow, below the load waterline');
+}
+} else if (!undecked && part.deck && part.deck.y[0] < -0.02)
+say(v.id, 'a decked hull opened up',
+`deck geometry reaches down to ${part.deck.y[0].toFixed(2)} m — below the load `
++ 'waterline, where no laid deck belongs; the open-hull gate has widened');
+if (undecked && part.rail)
+say(v.id, 'a capping rail on a hull with no deck edge',
+`${part.rail.n} rail mesh(es) drawn, but the record lays no deck — the rim `
++ 'of the hull wall is the gunwale');
+else if (!undecked && !part.rail)
+say(v.id, 'a decked hull lost her rail',
+'every decked hull carries her capping (empty spans come out '
++ 'vertex-identical, but the mesh exists), and none is drawn');
 }
 if (H.__mastTops && H.__mastTops.length) {
 const mastBoxes = [];
