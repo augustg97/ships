@@ -1313,6 +1313,7 @@ tags: p.tags,
 });
 }
 let eraFleet = null, eraTracks = [];
+let followWanted = null;
 let seaRouteMisses = 0;
 let paceClamped = [];
 const trackCache = new Map();
@@ -1369,6 +1370,8 @@ return legs;
 }
 function clearEraFleet() {
 setHover(null);
+if (S.follow) followWanted = { name: S.follow.name, az: S.followAz, dep: S.followDep,
+dist: S.followDist, aimM: S.follow.aimM };
 if (eraFleet) { scene.remove(eraFleet); }
 eraFleet = null; eraTracks = [];
 fleetQueue = [];
@@ -1424,8 +1427,32 @@ trackCache.set(item.ck, item.legsR);
 fleetQueue.shift();
 try { addVoyageToFleet(item.v, list, item.legsR); }
 catch (e) { console.warn('fleet', item.v && item.v.name, e); }
+if (followWanted) {
+const back = eraTracks.find(t => t.name === followWanted.name);
+if (back) {
+back.aimM = followWanted.aimM;
+S.follow = back;
+S.followAz = followWanted.az; S.followDep = followWanted.dep;
+S.followDist = followWanted.dist;
+followWanted = null;
 }
-if (!fleetQueue.length) buildVoyageList();
+}
+}
+if (!fleetQueue.length) {
+if (followWanted) {
+const back = eraTracks.find(t => t.name === followWanted.name);
+if (back) {
+back.aimM = followWanted.aimM; S.follow = back;
+S.followAz = followWanted.az; S.followDep = followWanted.dep;
+S.followDist = followWanted.dist;
+} else if (typeof releaseShip === 'function') {
+console.warn('aboard', followWanted.name, '— no such track in this era; released');
+releaseShip();
+}
+followWanted = null;
+}
+buildVoyageList();
+}
 }
 function addVoyageToFleet(v, list, legsR) {
 {

@@ -281,3 +281,27 @@ segmentation — a metre of reading error on top of the drawing's own; 62 m is C
 draught. Rule 8 says check the audit first, and the audit was right. **Where a measurement and the
 record disagree, and the measurement was taken FROM a source the record already summarises, the
 record wins.**
+
+### A boot profile taken in the harness is a profile of the harness
+
+The first CPU profile of the slow boot put **4,486 of 5,097 sampled ms in `(program)` under
+`(root)`** — host work with no JS on the stack, which reads as "shader compile and texture
+upload" and would have sent the fix toward material sharing. It was headless Chromium rendering
+through **SwiftShader**. Re-run headed with `--use-angle=metal` on the real GPU, the same boot is
+a different shape entirely and the true cost is legible.
+
+**Profile the machine the user has.** `chromium.launch(headless=False, args=["--use-angle=metal"])`,
+and check what you actually got with `WEBGL_debug_renderer_info` before believing any number.
+
+`APP.boot` is a permanent phase log for this reason — `console.table(APP.boot)` in any browser
+says where the time went on the real machine instead of on the harness.
+
+### A background refinement must not outrank the view the visitor is waiting for
+
+Levels 1 and 2 of the terrain are a refinement of the GLOBE, and the globe has not been the
+opening view since r92. Started right behind the first frame they took 1,517 ms and 1,681 ms with
+the main thread to themselves — and the eight small JSON files the Shipwright actually needs,
+fetched a line later, did not land until 4.9 s because they were queued behind that.
+
+**Ask what the work refines, and whether it is on screen.** Same work, started after the opening
+view is up: nothing about the result changes and the app opens in a third of the time.

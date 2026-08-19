@@ -5921,3 +5921,14 @@ Execution error  round exited non-zero — the next firing picks up from HANDOFF
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 88234 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-18 23:12:28  round starting
+Live stamp verified: **1787123230** — this round's build is deployed. The round is complete and recorded, seconds inside the watchdog.
+
+## Round 125, done
+
+**The task** was round 124's residual 1: the corner-clip stand-off and a rule-10 label on the router's silent give-up. Measuring first changed the shape of the work — at 0.25 km sampling the fleet's tracks touch drawn land far beyond what the audit's 2 km sampling sees: **65 tracks, 281 grazes, 181.6 km of drawn keel on drawn land**, including two ~13 km crossings of the Bahia peninsula on Sousa's own track. The sharper finding: the router *knew* — its final `clearSegments` counted those crossings — but the count died in a lifetime global, incremented at boot and unreadable ever after.
+
+**Shipped: the give-up now rides with the track.** `finishTrackSteps` keeps a per-run ledger, `seaRouteSteps` attaches it to the finished track, the cache and era fleet carry it, and the voyage card confesses it as a **"Route fallback" row** naming the counts and the raster's own resolution. Five era-4 voyages confess live — Columbus, Sousa (×2), Drake (×2), the Manila galleon, the Brouwer route — every one a real raster-closed pinch (the Bahia entrance, the Verde Island Passage, Sunda, Magellan). The audit learned the class, in both directions: a give-up without the row convicts, and so does a caveat on a clean track. **Audit: 33 hulls, 0 problems**, with the new rule exercised on five real cards.
+
+**Written but parked: `standOffLand`**, the berth against corner grazes. Proven on the fleet — 281 grazes → 103, 181.6 km ashore → 96.3, twenty tracks fully clean, zero worse — but left unwired at its call site under a ⚠ comment, because boot timings read 70–80 s while it was wired. Those timings turned out to be poisoned: my own timed-out audit run leaked a headless-chromium GPU process at 650% CPU, which I found and killed in the final minutes; the audit then ran clean at once. Its true cost is unknown and is the first thing round 126 measures.
+
+**Owed to next round, recorded in HANDOFF:** the second audit run and the injection proof, the stand-off re-timing on the now-quiet machine (and wiring it if honest), a try/finally around the audit runner's browser, and the closing ratchet confirmation — tracks didn't change with the stand-off unwired, so the expectation is only-noise. The opening ratchet this round was 60/60 green, closing out what round 124 owed.

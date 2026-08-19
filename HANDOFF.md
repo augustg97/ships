@@ -8069,3 +8069,62 @@ need-without-row arm exercised on five real tracks), and no clean track carries 
 machine is fast again after the chromium kill — the audit that timed out at 60 s finished
 comfortably at once, which also says the 70–80 s boot readings were the leak, not the code.
 Owed now: the second audit run, the injection proof, and the stand-off re-timing.**
+
+## Round 125 — the boot showed the wrong view for five seconds, and the timings say why
+
+August: "when opening the project, the Sea view / globe still shows for a while (frozen) while
+the project loads, after our loading screen — let's fix this, and the load time/freeze itself."
+
+**THE SPLASH WAS LIFTING ON THE GLOBE'S FIRST FRAME**, which is before `loadData()` has even
+fetched `vessels.json` — so the Shipwright, the default view since r92, could not possibly be
+open yet. `applyHashView()` ran from `boot().then(...)`, seconds later. The sequence a visitor
+actually got was: splash → globe (never asked for, motionless because the thread was busy) →
+jump to a different view. **The stillness was not the globe's fault; it was the wrong picture,
+shown during someone else's load.** The opening view is chosen inside boot now, under the splash,
+and the splash lifts after it. Still in a try/catch, and on that path the splash still lifts —
+onto the globe, which is the honest fallback rather than a permanent splash.
+
+**MEASURE ON THE MACHINE THAT MATTERS.** The first profile put 4,486 of 5,097 sampled ms in
+`(program)` under `(root)` — host work with no JS on the stack. That is headless Chromium
+rendering through **SwiftShader**, and optimising against it would have been optimising a
+software rasteriser. Re-run headed with `--use-angle=metal` (ANGLE Metal, Apple M1) the picture
+is completely different and the real costs are legible. **A boot profile taken in the harness is
+a profile of the harness.**
+
+**WHAT THE 5 SECONDS ACTUALLY WERE** (`APP.boot`, now a permanent phase log — `console.table(APP.boot)`):
+
+| phase | before | after |
+|---|---|---|
+| level 0 terrain | 661 ms | 661 ms |
+| the 8 JSON files the Shipwright needs | landed at **4,927 ms** | **1,423 ms** |
+| levels 1+2 terrain | **1,517 + 1,681 ms, before the view** | after the view is up |
+| opening view | ~7,500 ms | **1,762 ms** |
+
+The dominant cost was a **background refinement of a view that was not on screen**: levels 1 and
+2 of the terrain took the main thread and the small JSON files queued behind them. Same work,
+moved after the opening view. Nothing about the result changes — the mask still rebuilds from the
+finer coastline and the era still re-routes, which is the r123 two-shorelines guarantee.
+
+**AND THE LAYOUT IS NOT THE GEOMETRY.** `swBuildYard` called `buildShip` for all 33 hulls in one
+synchronous pass: 5,040 meshes, 2.35 M triangles before a frame could draw. Where each ship
+stands, what she is called and how long she is are known from the record without building
+anything, so the layout is laid out at once and the hulls are built on demand, nearest the camera
+first, one per frame. Opening the view costs **123 ms**. Under `?frozen` the pump still completes
+the whole line before anything is drawn.
+
+**THE RATCHET CAUGHT A LATENT BUG UNDER THE ONE I MADE.** Four `aboard-*` frames moved, one at
+76% with mean |Δ| 57.7 — **blank pale canvas with every panel fully populated**, the pale twin of
+black-canvas-with-working-panels. `S.follow` holds a TRACK OBJECT out of `eraTracks`, and
+`clearEraFleet()` empties that array without a word to it, so after any rebuild `frame()` still
+takes the near-field branch over a ship that no longer exists. Latent until now, because the only
+rebuild happened before anyone could be aboard — the terrain upgrade now rebuilds the era at ~4 s,
+which any viewer clicking a hull before then would have hit. Fixed the way `swRebuild` does it:
+remember WHICH ship by name, re-point at the new track when it exists, and release cleanly to the
+globe if she is not in this era. Wrong-but-legible beats right-looking-and-empty.
+
+Audit 33/0. Ratchet 60/60 within tolerance; the five that moved at all are 0.05–0.14% at mean |Δ|
+under 0.023 against a 0.15 limit — antialias dither on masts and oars.
+
+**NOT DONE, and why:** level 0 still costs 661 ms before the Shipwright can open, because
+`loadData()` → `buildChapters` → `selectEra` → `buildEraFleet` → `buildMask` needs the elevation
+raster. Reordering around that is the two-shorelines class again and wants its own measured round.

@@ -2463,6 +2463,8 @@ function openPort(p) {
  * ROUTE, the speed and the ship itself are all true.
  */
 let eraFleet = null, eraTracks = [];
+/* the ship a viewer was aboard when the era was rebuilt, so the close-up can re-acquire her */
+let followWanted = null;
 
 /* ── PUTTING A TRACK ON THE WATER ────────────────────────────────────────────────────────
  * A voyage's legs are five to twenty waypoints for a whole circumnavigation, so the straight
@@ -2572,6 +2574,19 @@ function* seaRouteSteps(legs) {
 
 function clearEraFleet() {
   setHover(null);
+  /* ── ⚠ A REBUILD DESTROYS THE TRACK THE VIEWER IS STANDING ON ───────────────────────
+     S.follow holds a TRACK OBJECT out of eraTracks, and this function empties eraTracks
+     without a word to it — so after any rebuild the close-up was aiming at a track that no
+     longer belongs to the scene: frame() still takes the near-field branch (`if (PSGV.on ||
+     S.follow)`), the ship it wants is gone, and what renders is bare paper with every panel
+     fully populated. The pale twin of the black-canvas-with-working-panels failure.
+     It is the round-90 shape one level up — state wired to an object that has been replaced —
+     and the answer is the same one swRebuild uses: remember WHICH ship by name, and re-point
+     at the new object once it exists. Latent until now because the only rebuild happened
+     before anyone could be aboard; the terrain upgrade rebuilds the era at about four
+     seconds, which any viewer who clicks a hull before then would have hit. */
+  if (S.follow) followWanted = { name: S.follow.name, az: S.followAz, dep: S.followDep,
+                                 dist: S.followDist, aimM: S.follow.aimM };
   if (eraFleet) { scene.remove(eraFleet); }
   eraFleet = null; eraTracks = [];
   fleetQueue = [];              /* an era abandoned mid-build must not finish into the next one */
@@ -2668,8 +2683,37 @@ function pumpFleetQueue(budgetMs) {
     fleetQueue.shift();
     try { addVoyageToFleet(item.v, list, item.legsR); }
     catch (e) { console.warn('fleet', item.v && item.v.name, e); }
+    /* re-acquire the ship the viewer was aboard as soon as her track exists again */
+    if (followWanted) {
+      const back = eraTracks.find(t => t.name === followWanted.name);
+      if (back) {
+        back.aimM = followWanted.aimM;
+        S.follow = back;
+        S.followAz = followWanted.az; S.followDep = followWanted.dep;
+        S.followDist = followWanted.dist;
+        followWanted = null;
+      }
+    }
   }
-  if (!fleetQueue.length) buildVoyageList();
+  /* ⚠ AND IF SHE NEVER COMES BACK, LET GO — a follow pointing at a track this era does not
+     have keeps frame() in the near-field branch over an empty scene, which renders as blank
+     paper. Releasing puts the viewer back on the globe, which is wrong-but-legible rather
+     than right-looking-and-empty. */
+  if (!fleetQueue.length) {
+    if (followWanted) {
+      const back = eraTracks.find(t => t.name === followWanted.name);
+      if (back) {
+        back.aimM = followWanted.aimM; S.follow = back;
+        S.followAz = followWanted.az; S.followDep = followWanted.dep;
+        S.followDist = followWanted.dist;
+      } else if (typeof releaseShip === 'function') {
+        console.warn('aboard', followWanted.name, '— no such track in this era; released');
+        releaseShip();
+      }
+      followWanted = null;
+    }
+    buildVoyageList();
+  }
 }
 
 function addVoyageToFleet(v, list, legsR) {
