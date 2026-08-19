@@ -8061,3 +8061,11 @@ everything this round owes. (2) Time a clean boot, then boot+standOffLand wired;
 honest, restructure the yields if not. (3) Closing ratchet for THIS round's frames — tracks
 did not change (stand-off unwired; ledger is invisible until a card opens), so expect
 only-noise, but no frame was checked after the edits: the next opening pass owns any mover.
+
+**Round 125 addendum, seconds before the watchdog: THE AUDIT RAN AND IS CLEAN — 33 hulls,
+0 problems (build/staging/audit-r125-run1.json), on the shipped code, with the round-125
+rule live: the five give-carrying voyages all render their 'Route fallback' row (the
+need-without-row arm exercised on five real tracks), and no clean track carries one. The
+machine is fast again after the chromium kill — the audit that timed out at 60 s finished
+comfortably at once, which also says the 70–80 s boot readings were the leak, not the code.
+Owed now: the second audit run, the injection proof, and the stand-off re-timing.**
