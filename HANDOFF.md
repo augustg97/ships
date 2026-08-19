@@ -8520,3 +8520,10 @@ Endurance forecastle (RMG J9266), Azzam crest (r108), yakata curtain (r117), can
 frame; myeongnyang needs an Action baseline (one-view blindness, r128). Preussen's mast
 trucks stand ~51.3 m over the deck against an attested 58.0 deck-to-truck — noted for the
 survey when her slip comes up.
+
+**r130 addendum, 09:31:** the closing confirmation ratchet ran to 32 of 61 frames on the
+committed tree, zero diffs written — every frame checked so far is green. It was killed
+deliberately at the watchdog boundary (the r128 pattern: the kill verified leak-free, no
+chromium left behind). The remaining 29 frames are next round's opening pass, on this
+identical tree; the round's work was committed and live-verified before the pass started
+(a900cfe, stamp 1787153533), so the kill costs nothing.
