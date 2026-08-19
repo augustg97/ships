@@ -2614,7 +2614,11 @@
    "rows": [
     [
      "Length",
-     "110 m on deck, 140 m overall — beam 15.3 m, depth of hold 10 m"
+     "350 ft (106.7 m) on deck, 329.5 ft (100.4 m) between perpendiculars — beam 15.3 m, depth of hold 10 m"
+    ],
+    [
+     "Sparred length",
+     "450 ft (137 m), jibboom tip to spanker boom tip"
     ],
     [
      "Tonnage",
@@ -2636,7 +2640,7 @@
    "crew": 13,
    "attestation": "generated",
    "confidence": "good",
-   "text": "Wyoming was at or past the practical limit for a wooden hull: she worked in a seaway badly enough to need steam pumps continuously, and she was lost with all hands in 1924.\n\nAt 110 m on deck she was too long to hold herself straight. A wooden hull resists bending only through the friction and fastenings between thousands of separate timbers, and past a certain length the sea simply works them: her planks twisted and opened, and **she ran her pumps continuously to stay afloat**. Not in heavy weather — always.\n\nShe foundered in a gale off Cape Cod in 1924 with everyone aboard. Iron and steel did not replace wood because they were cheaper; they replaced it because a metal hull is one continuous member and a wooden one is a negotiation.\n\nAnd the rig is the other half of the story. Six masts of gaff sail are worked entirely from the deck — nobody goes aloft to reef — so she carried 3,730 tons with **thirteen people**. A square-rigged ship of that tonnage wanted thirty.",
+   "text": "Wyoming was at or past the practical limit for a wooden hull: she worked in a seaway badly enough to need steam pumps continuously, and she was lost with all hands in 1924.\n\nAt 350 ft on deck — 106.7 m of wooden hull — she was too long to hold herself straight. A wooden hull resists bending only through the friction and fastenings between thousands of separate timbers, and past a certain length the sea simply works them: her planks twisted and opened, and **she ran her pumps continuously to stay afloat**. Not in heavy weather — always.\n\nShe foundered in a gale off Cape Cod in 1924 with everyone aboard. Iron and steel did not replace wood because they were cheaper; they replaced it because a metal hull is one continuous member and a wooden one is a negotiation.\n\nAnd the rig is the other half of the story. Six masts of gaff sail are worked entirely from the deck — nobody goes aloft to reef — so she carried 3,730 tons with **thirteen people**. A square-rigged ship of that tonnage wanted thirty.",
    "cite": "Wikipedia, *Wyoming (schooner)*, citing the Percy & Small yard records.",
    "from": 1909,
    "polar": {
@@ -2736,8 +2740,8 @@
      }
     ],
     "build": "frame",
-    "loa": 140.0,
-    "lwl": 110.0,
+    "loa": 106.7,
+    "lwl": 100.4,
     "beam": 15.3,
     "draught": 9.3,
     "freeboard": 4.2,
@@ -2777,7 +2781,11 @@
    "rows": [
     [
      "Length",
-     "147 m overall, 122 m between perpendiculars — beam 16.4 m"
+     "134.0 m hull (439.6 ft), 124 m waterline, 122 m between perpendiculars — beam 16.4 m"
+    ],
+    [
+     "Sparred length",
+     "147 m (482 ft) over all, including the jibboom"
     ],
     [
      "Tonnage",
@@ -2837,8 +2845,8 @@
     "sheerBow": 1.1,
     "sheerStern": 0.7,
     "tumblehome": 0.02,
-    "stemRake": 0.04,
-    "sternRake": 0.03,
+    "stemRake": 0.0426,
+    "sternRake": 0.032,
     "strakes": 34,
     "copper": false,
     "copperAge": 0.55,
@@ -2928,8 +2936,8 @@
      }
     ],
     "build": "steel",
-    "loa": 147.0,
-    "lwl": 122.0,
+    "loa": 134.0,
+    "lwl": 124.0,
     "beam": 16.4,
     "draught": 8.26,
     "freeboard": 5.0,

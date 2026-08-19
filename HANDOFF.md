@@ -8466,3 +8466,57 @@ galleass 70 (apostisx55, benchx52), galley 68. (4) Standing residuals: sekibune 
 kaji (r121), gundeck normals (r118), Endurance forecastle (RMG J9266), Azzam crest
 (r108), yakata curtain (r117), canoe floor frame; myeongnyang needs an Action baseline
 (one-view blindness, r128).
+
+## Round 130 — 2026-08-19 — sparred length stops wearing the hull's label
+
+**r129's first queue item is done: Wyoming and Preussen carry their hulls' lengths in loa,
+and sparred length is its own labelled card row.** Wyoming's loa was 140 — Wikipedia's 450 ft,
+which the article itself says is jib-boom tip to spanker boom tip; the hull is 350 ft on deck
+(106.7 m — the article's "110 m" is a two-significant-figure rounding of the same feet) and
+329.5 ft (100.4 m) between perpendiculars. Now loa 106.7, lwl 100.4, rakes untouched: the r129
+clamp already makes the record own the overhang, so the authored 0.05/0.03 is scaled to fit.
+Preussen's loa was 147 — overall including the jibboom; her hull is 134.0 m (439.6 ft), and the
+article attests a 124 m WATERLINE, so lwl moves 122 → 124 (122 is between perpendiculars and
+now lives only in the card row). The clamp only ever shrinks, so her 1.7 m under-fill was a
+data cut: rakes normalized UP to the record's own allowance (134 − 124 = 10 m of overhang),
+authored 4:3 stem:stern ratio kept — 0.0426/0.032. Both cards recut: the Length row carries
+the hull figures in the feet the yards measured in, a new "Sparred length" row carries
+450 ft (137 m) / 147 m (482 ft) with what each figure measures written beside it, and
+Wyoming's prose "At 110 m on deck" is recut to the honest conversion. Sources:
+en.wikipedia.org/wiki/Wyoming_(schooner), en.wikipedia.org/wiki/Preussen_(ship), both
+re-read this round.
+
+**Measured** (build/measure-fleet-loa-r130-after.txt, build/measure-{wyoming,preussen}-r130-
+after.txt): fleet sweep 0 of 33 over; wyoming planking 106.70 exact, keel 100.40 on the
+waterline; preussen planking 134.00 exact, keel 124.00. Past the planking only bowsprit,
+jibboom and spanker boom — the sparred figure, which LOA rightly excludes. Looked at (rule 1):
+both port profiles read — six even gaff masts and five headsails over the 100.4 m u-ruler;
+five square-rigged masts of six yards, staysails and white boot-topping over the 124.0 m
+u-ruler. Audit 33/0 (build/staging/audit-r130-run1.txt). Site rebuilt, stamp 1787153533.
+
+**Frames: 14 of 61 moved, every one classified, all accepted with per-frame reasons**
+(build/staging/ratchet-r130-post.txt). Four direct: ship/aboard of each recut hull
+(ship-wyoming 23.3% — the hull draws 12% shorter; aboard-wyoming's whole Kelvin wake re-laid
+to the shorter hull). Ten are the r129 neighbour class at full size: every hull berthed after
+Preussen in the yard row slides down the quay (wyoming gave back 33.3 m of slip, preussen
+13.0), and at the new world x the frozen swell phase differs, so an unchanged ship floats at
+a new heave — whole-ship ghost-shift, no part missing, no BLANK, fleet strip and list reflow
+with the recut numbers. Diffs read: ship-wyoming, ship-endurance (largest, 26.8%),
+aboard-wyoming; ship-endurance's current frame read in full. Everything berthed before
+Preussen stayed green, which is the cumulative slip layout confirming itself.
+
+**Rule 0, written on ship-endurance read in full this round:** it reads as a rendered yard on
+open water — hull, rig and sea composed per pixel, panels legible, no chart anywhere. Three
+facts a viewer can read off it: Endurance is a barquentine with a steam funnel between her
+masts; her card gives 44.0 m length overall and 10.2 kn service speed; the fleet strip puts
+Wyoming at 107 m and Preussen at 134 m — hull figures, not sparred ones.
+
+**Next, in order:** (1) Container and slave-ship under-rake authoring (r129 item 2): their
+loa rows are honest hull LOA and the authored rakes under-fill by 4.9 / 2.5 m; needs sources
+(the container class's LOA−LPP is ~17 m at the bow; the Brookes plan's raked stem and head).
+(2) The survey continues: panokseon boxPct 71 (towerx18), galleass 70 (apostisx55, benchx52),
+galley 68. (3) Standing residuals: sekibune wasen kaji (r121), gundeck normals (r118),
+Endurance forecastle (RMG J9266), Azzam crest (r108), yakata curtain (r117), canoe floor
+frame; myeongnyang needs an Action baseline (one-view blindness, r128). Preussen's mast
+trucks stand ~51.3 m over the deck against an attested 58.0 deck-to-truck — noted for the
+survey when her slip comes up.
