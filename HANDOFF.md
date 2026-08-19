@@ -8290,3 +8290,75 @@ that can never succeed is indistinguishable from a slow deploy. Same failure fam
 the r71 lock check: a check whose output looks the same whether the thing it checks is
 true or false. The working pattern is
 `curl -s .../index.html | grep -o 'data-version" content="[0-9]*"'`.
+
+## Round 128 — 2026-08-19 — the probe stops lying about the compass, and two ships shrink to their own cards
+
+**The opening ratchet was the fleet-wide confirming pass r127 owed: 61/61 green on the
+unchanged tree** (build/staging/ratchet-r128-open.txt, EXIT:0; largest mover action-salamis
+0.043% antialias dither). r127's expectation is now verification.
+
+**The probe-wake heading mirror (r114, carried 14 rounds) is closed, and the verdict is:
+the probe lied, the renderer never did.** probe-wake.py read heading as atan2(dir.x, dir.z)
+in a frame whose +X is WEST (passage.js:383, yaw = −hdg; pose .zw = (−sin H, cos H)), so
+every course came back 360−H. Fixed with the negation at both read sites, and the probe now
+carries a frozen-second argument, because a probe read is only comparable with a card when
+both stand at the same instant — at frozen=1 the sahul track legitimately bears 84°, at the
+baseline's frozen=374 it bears 195°, and both are true on a curving 382-nm track. Verified
+against two attested card courses: evergiven 283.3 v 283, sahul 195.2 v 195 (mate 193.6 =
+hero −1.6° of the ±2.6° wobble). The "wakes bear slightly off the sterns" claim (r124) was
+then decomposed by measurement (build/measure-wake-bearing-r128.txt): wake pose and hull
+rotation take the SAME yaw (passage.js:666/679/696) and floatShip displaces only y, so the
+wake axis IS the hull's waterline axis — projected screen angles equal to 0.00°. What the
+eye sees is honest seakeeping: at frozen=374 the hero dugout stands at pitch −2.3°, roll
+12.7°, heave +0.50 m (force 4, 0.9 m beam), and pitch+heave project ~3° of screen kink at
+the 10°-elevation camera. A hull working in a seaway points off her flat wake line moment
+to moment. No renderer change; the item leaves the residual list.
+
+**THE SURVEY: sekibune (boxPct 78, the column's head) and panokseon drew 24% and 14%
+longer than their own cards, and now draw them exactly.** The class (r113/r115): the loft
+grants stemRake·loa + sternRake·loa of overhang ON TOP of the lwl (hull.js:194–204), and
+nothing checks the sum against the record's loa. Sekibune: lwl 22.5 + (0.22+0.12)·25 =
+31.0 m drawn against the card's "~25 m for a 40-oar ship (derived from the oar stations)".
+Panokseon: 30 + 0.2·32 = 36.4 against "Length on deck ~32 m". The record wins: rakes
+normalized to each record's own allowance, preserving the authored stem:stern ratio —
+sekibune 0.065/0.035, panokseon 0.031/0.031. Measured before/after
+(build/measure-{sekibune,panokseon}-r128-{before,after}.txt): planking 31.00 → 25.00 and
+36.40 → 31.98; the surviving extent past LOA is oars and rudder, which LOA rightly
+excludes. Looked at (rule 1): profile_capture both, before and after
+(build/staging/r128-*), and both Shipwright frames — the sekibune keeps her raking stem,
+the panokseon her blunt bow; each card's LENGTH OVERALL row and its drawn hull finally
+agree. Audit 33/0 clean (build/staging/audit-r128-run1.json).
+
+**Frames: ship-sekibune 2.606%, ship-panokseon 3.352%, accepted with reasons after
+looking; `action` re-checked 0.003% (its default battle draws neither vessel); the other
+58 frames were confirmed by this round's own opening pass on identical pre-change code,
+and vessels.json geometry reaches nothing else — no voyage sails either hull, and
+myeongnyang (the one battle that does) has no committed frame, which is one-view
+blindness worth a baseline when the Action next gets attention.**
+
+**THE CLASS IS 23 HULLS WIDE AND IS NOT FIXED — deliberately.** The fleet sweep (this
+round, from vessels.json): 23 of 33 hulls draw longer than their record loa by the same
+mechanism — yamato +6.1 m, clipper +4.6, great-eastern +4.4, steamer +3.8, treasure-ship
++2.6, dreadnought +2.4, galleass +2.2, trireme +1.8, galley +1.7, cog +1.6, junk +1.1,
+dugout +0.9, voyaging-canoe +0.9, dhow +0.9, ship-of-the-line +0.8, azzam +0.8, titanic
++0.7, QM2 +0.6, carrack +0.6, endurance +0.3, caravel +0.2. The designed fix is a CLAMP
+in hull.js rake(): scale = min(1, (loa−lwl) / ((stemRake+sternRake)·loa)) applied to both
+branches — rakes become the SHAPE of the overhang, the record's loa owns its size; at
+scale 1 (ten hulls, and the two fixed today) nothing moves. It was NOT applied this round
+because it moves ~30 baselines and their individual verification (rule 7 — every frame
+looked at, every hull re-measured) does not fit the watchdog minutes that remained after
+the owed 61-frame opening pass; a kill mid-accept loses the round (r126). Next round:
+open with the clamp, verify hull-by-hull with measure_ship, then ONE fleet-wide ratchet
+with per-frame accepts, and add the audit arm — "drawn length beyond record loa" — which
+must come WITH the clamp, not before it, or 21 hulls convict at the gate. ⚠ Four hulls
+draw SHORTER than their record (wyoming −18.8 m!, preussen −14.7, container −4.9,
+slave-ship −2.5): that is the OTHER arm of the class and it is a RESEARCH question, not a
+clamp — wyoming's 140 m may be sparred length, not hull; the record's own semantics need
+establishing per ship before any code touches them.
+
+**Next, in order:** (1) The rake clamp in hull.js, as above — the whole class, with the
+full budget. (2) The under-length arm: establish what wyoming/preussen/container/
+slave-ship's loa rows actually measure. (3) The survey continues past sekibune:
+panokseon boxPct 71 (towerx18), galleass 70 (apostisx55, benchx52), galley 68. (4)
+Standing residuals: sekibune wasen kaji (r121), gundeck normals (r118), Endurance
+forecastle (RMG J9266), Azzam crest (r108), yakata curtain (r117), canoe floor frame.

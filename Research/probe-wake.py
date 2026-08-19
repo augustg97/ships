@@ -5,11 +5,16 @@ Kelvin arm half-angle (fixed), transverse wavelength lambda = 2*pi*V^2/g, wake l
 Prints the ship's lon/lat in DEGREES so a descent frame can be addressed straight over
 her with #c=<lon>,<lat>&z=<m>. Round 111, the wake due-diligence pass.
 
-  "$STUDIO/.venv/bin/python" Research/probe-wake.py '#e=7&f=boxroute'
+  "$STUDIO/.venv/bin/python" Research/probe-wake.py '#e=7&f=boxroute' [frozenS]
+
+The optional second argument is the frozen-clock second; a probe read is only comparable
+with a baseline's card when both stand at the same instant (the r128 sahul lesson: the
+track curves, so course 84 at t=1 and course 195 at t=374 are both true).
 """
 import json, sys
 
 FRAG = sys.argv[1] if len(sys.argv) > 1 else '#e=7&f=boxroute'
+FROZEN = sys.argv[2] if len(sys.argv) > 2 else '1'
 
 JS = """
 async () => {
@@ -25,8 +30,11 @@ async () => {
   out.sources = [];
   for (let i = 0; i < out.wakeN; i++) {
     const a = u.uWakePose.value[i], b = u.uWakeBody.value[i];
+    /* pose .zw is (sin yaw, cos yaw) with yaw = -hdg in a +X-WEST frame (passage.js:383),
+       so dir = (-sin H, cos H): compass heading is atan2(-dir.x, dir.z). The unnegated
+       read mirrored every course east-west for three rounds (r114..r127). */
     out.sources.push({ x: +a.x.toFixed(1), z: +a.y.toFixed(1),
-                       hdgDeg: +((Math.atan2(a.z, a.w) * 180 / Math.PI + 360) % 360).toFixed(1),
+                       hdgDeg: +((Math.atan2(-a.z, a.w) * 180 / Math.PI + 360) % 360).toFixed(1),
                        loa: b.x, beam: +b.y.toFixed(1), kn: b.z });
   }
   /* two sources within a tenth of a length are one ship drawn twice — the r112
@@ -67,7 +75,7 @@ async () => {
     out.shipDeg = { lon: +(sLon * 180 / Math.PI).toFixed(5),
                     lat: +(sLat * 180 / Math.PI).toFixed(5) };
   }
-  out.hdgFromDirDeg = +((Math.atan2(out.wake.dir.x, out.wake.dir.z) * 180 / Math.PI + 360) % 360).toFixed(1);
+  out.hdgFromDirDeg = +((Math.atan2(-out.wake.dir.x, out.wake.dir.z) * 180 / Math.PI + 360) % 360).toFixed(1);
   out.cam = P.cam ? { x: +P.cam.position.x.toFixed(1), y: +P.cam.position.y.toFixed(1),
                       z: +P.cam.position.z.toFixed(1) } : null;
   out.descentActive = window.SHIPS_PSG.psgDescentActive
@@ -83,7 +91,7 @@ def main():
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto("http://localhost:8149/?frozen=1" + FRAG, wait_until="load", timeout=60000)
+        page.goto("http://localhost:8149/?frozen=" + FROZEN + FRAG, wait_until="load", timeout=60000)
         page.wait_for_function("window.__FRAME_READY === true", timeout=90000)
         out = page.evaluate(JS)
         browser.close()

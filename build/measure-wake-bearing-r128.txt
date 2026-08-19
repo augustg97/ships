@@ -1,0 +1,27 @@
+r128 — the passage-sahul wake-bearing decision (r114 residual, carried 14 rounds)
+
+PROBE (the fault): probe-wake.py read heading as atan2(dir.x, dir.z) in a frame whose
++X is WEST (passage.js:383 yaw=-hdgRad; pose .zw = (sin yaw, cos yaw) = (-sin H, cos H)).
+That returns 360-H: every course mirrored east-west. Fixed: atan2(-dir.x, dir.z), both
+at the per-source read and hdgFromDirDeg. Probe also taught a frozen-second argument —
+a probe read is only comparable with a card when both stand at the same instant.
+
+VERIFIED against attested card courses:
+  evergiven  (frozen=1):    probe 283.3   card 283    (was 76.7 mirrored, r114)
+  sahul      (frozen=374):  probe 195.2   card 195    (was 164.8-ish mirrored)
+  sahul mate (frozen=374):  probe 193.6 = hero 195.2 - 1.6 of the ±2.6 deg wobble
+
+RENDERER (exonerated): wake pose and hull rotation take the SAME yaw variable
+(passage.js 666/679/696); floatShip displaces only position.y, so the wake axis passes
+through the hull's waterline axis identically — projected screen angles of the two lines
+are equal to 0.00 deg by direct computation with the frame camera (fb=160 fd=10 fz=70).
+
+THE VISIBLE KINK at the sterns in passage-sahul, decomposed:
+  hull state at frozen=374: pitch -2.27 deg, roll 12.68 deg, heave +0.50 m (force 4,
+  0.9 m beam dugout — floatShip's own IMO-form roll)
+  pitch+heave projected at the 10-deg camera:  3.08 deg of screen divergence (computed)
+  rail-vs-waterline parallel-line shear:       0.59 deg
+  pixel-fit of hull axis vs trail axis (PCA of masked baseline pixels): ~6-8 deg, the
+  fit polluted by the mate's overlapping trail in the same band.
+DECISION: honest physics — a hull working in a seaway points off her flat wake line
+moment to moment; the wake itself lies exactly on the course. No renderer change.
