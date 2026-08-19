@@ -413,16 +413,125 @@ function buildWaleGeometry(S, v0, thick) {
   return g;
 }
 
+/* ── STEERING IS A FACT OF THE RECORD (round 121) ─────────────────────────────────────
+   The rudder went aboard every hull unconditionally, so the 68,000 BP dugout hung a
+   pintled stern rudder her card refuses ("Paddled"), the voyaging canoe carried one on
+   EACH hull against her own row — "a long paddle, not a rudder" — and the sewn dhow's
+   hung on pintles, which are iron hinges, under a construction row reading "no iron".
+   The record now declares the kind — paddle | quarter | median | stern | steel — and
+   the build-string guess survives only as the fallback for a record that has not
+   declared, which the audit convicts. */
+function steeringOf(S) {
+  if (S.steering) return S.steering;
+  return (S.build === 'steel' || S.build === 'iron') ? 'steel'
+       : S.build === 'bulkhead' ? 'median' : 'stern';
+}
+
+/* ── A QUARTER RUDDER IS AN OAR GROWN INTO A FITTING ──────────────────────────────────
+   One over each quarter, pivoting against the rail, blade standing down beside the run —
+   the steering of the whole ancient Mediterranean (the trireme's pair of pēdalia; the
+   great quarter rudders the Sidon and Portus reliefs carve on Roman merchantmen) and of
+   the sewn Indian Ocean ships, which have no iron to hang a pintle with. No ancient
+   steering oar survives to measure, so everything is sized off the hull's own record:
+   blade breadth from the draught, the loom from the blade. The loom rakes aft rising, as
+   the reliefs draw it, which walks the blade FORWARD along the run as it descends — and
+   the run is a widening surface there, so the blade's whole footprint is sampled against
+   the skin and the fitting stands just proud of the widest point it spans; a through-beam
+   bracket closes the gap back to the rail, which is also what the reliefs show the loom
+   working against. One geometry per side: loom, tiller, bracket, blade. */
+function buildQuarterRudderGeometry(S, sgn) {
+  const H = hullSurface(S);
+  const uM = 0.945;                                 // abaft the aftmost tholes, on the quarter
+  const pm = surfacePoint(S, H, uM, 1.0);
+  const chord = Math.max(0.35, S.draught * 0.38);
+  const r = chord * 0.16;
+  const rake = 0.22;
+  const yHead = pm[1] + Math.max(0.8, pm[1] * 0.55);
+  const yHeel = -S.draught * 0.92;
+  const yT = 0.12 * pm[1];                          // blade shoulders just above the water
+  const xAt = y => pm[0] + rake * (y - pm[1]);
+  /* the blade's own u-footprint, sampled against the skin at every height it spans */
+  const uOf = x => Math.min(1, Math.max(0.8, x / S.lwl + 0.5));
+  const uLo = uOf(xAt(yHeel) - chord * 0.55), uHi = uOf(xAt(yT) + chord * 0.55);
+  let zClear = 0;
+  for (let i = 0; i <= 12; i++) for (let j = 0; j <= 8; j++)
+    zClear = Math.max(zClear, Math.abs(
+      surfacePoint(S, H, uLo + (uHi - uLo) * i / 12, j / 8)[2]));
+  const w = chord * 0.05;
+  const zP = sgn * Math.max(pm[2] + r * 0.55, zClear + w + r * 0.6);
+  const pos = [], idx = [];
+  const N = 8;
+  /* octagonal rings in the x-z plane (looms) and the x-y plane (the tiller) */
+  const ringY = (y, rr) => { const b = pos.length / 3;
+    for (let i = 0; i < N; i++) { const a = i / N * Math.PI * 2;
+      pos.push(xAt(y) + Math.cos(a) * rr, y, zP + Math.sin(a) * rr); }
+    return b; };
+  const ringZ = (z, rr) => { const b = pos.length / 3;
+    for (let i = 0; i < N; i++) { const a = i / N * Math.PI * 2;
+      pos.push(xAt(yHead) + Math.cos(a) * rr, yHead + Math.sin(a) * rr, z); }
+    return b; };
+  const tube = (a, b2, flip) => { for (let i = 0; i < N; i++) { const j = (i + 1) % N;
+    if (flip) idx.push(a + i, b2 + i, a + j, a + j, b2 + i, b2 + j);
+    else      idx.push(a + i, a + j, b2 + i, a + j, b2 + j, b2 + i); } };
+  /* the loom, head down to heel; a fan cap each end, single winding (the r118 lesson) */
+  const rHead = ringY(yHead, r * 0.85), rHeel = ringY(yHeel + chord * 0.25, r * 0.8);
+  tube(rHead, rHeel, false);
+  for (let i = 1; i + 1 < N; i++) idx.push(rHead, rHead + i + 1, rHead + i);
+  for (let i = 1; i + 1 < N; i++) idx.push(rHeel, rHeel + i, rHeel + i + 1);
+  /* the tiller: a bar from the head, inboard, for the helmsman — stopping short of the
+     centreline, or the pair meet in the middle and fight through each other */
+  const tLen = Math.min(Math.max(0.8, S.beam * 0.22), Math.abs(zP) * 0.8);
+  const t0 = ringZ(zP, r * 0.5);
+  const t1 = ringZ(zP - sgn * tLen, r * 0.45);
+  tube(t0, t1, sgn > 0);
+  for (let i = 1; i + 1 < N; i++)
+    if (sgn > 0) idx.push(t1, t1 + i + 1, t1 + i);
+    else         idx.push(t1, t1 + i, t1 + i + 1);
+  /* prisms — the rudder plate's own side-quads-plus-fan-caps pattern, offset by base */
+  const prism = (pts, zA, zB) => {
+    const b0 = pos.length / 3;
+    const lo = Math.min(zA, zB), hi = Math.max(zA, zB);
+    pts.forEach(q => pos.push(q[0], q[1], lo, q[0], q[1], hi));
+    const n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const a = b0 + i * 2, b2 = b0 + ((i + 1) % n) * 2;
+      idx.push(a, a + 1, b2, b2, a + 1, b2 + 1);
+    }
+    for (let i = 1; i + 1 < n; i++)
+      idx.push(b0, b0 + i * 2, b0 + (i + 1) * 2, b0 + 1, b0 + (i + 1) * 2 + 1, b0 + i * 2 + 1);
+  };
+  /* the blade: a flat plate carried on the loom's own line, shoulders to heel */
+  prism([[xAt(yT), yT],
+         [xAt(yT) + chord * 0.50, yT - chord * 0.35],
+         [xAt(yHeel) + chord * 0.55, yHeel + chord * 0.30],
+         [xAt(yHeel), yHeel],
+         [xAt(yHeel) - chord * 0.45, yHeel + chord * 0.30],
+         [xAt(yT) - chord * 0.40, yT - chord * 0.35]],
+        zP - w, zP + w);
+  /* the bracket: a through-beam under the rail cap, hull side out to the loom */
+  const yB = pm[1] - 0.10;
+  prism([[xAt(yB) - chord * 0.15, yB + chord * 0.11],
+         [xAt(yB) + chord * 0.15, yB + chord * 0.11],
+         [xAt(yB) + chord * 0.15, yB - chord * 0.11],
+         [xAt(yB) - chord * 0.15, yB - chord * 0.11]],
+        sgn * (pm[2] - 0.10), zP);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
 function buildRudderGeometry(S) {
   const H = hullSurface(S);
   const p = surfacePoint(S, H, 1.0, 0);
-  const STEEL = S.build === 'steel' || S.build === 'iron';
+  const kind = steeringOf(S);
+  const STEEL = kind === 'steel';
   /* ⚠ A MOTOR SHIP'S RUDDER IS UNDER THE COUNTER, NOT HUNG PAST THE STERNPOST. The
      stern-hung plate below is a timber shape — pintles down the post, a barn door standing
      proud of the stern. On the carrier it stood 17 m past the transom and 4 m out of the
      water, in timber brown, and no baseline bearing could see it. A steel ship gets a
      balanced plate tucked wholly below the waterline and inside her own length. */
-  const BULK = S.build === 'bulkhead';
+  const BULK = kind === 'median';
   /* ── AND A JUNK'S RUDDER IS A MEDIAN RUDDER, AND IT IS ENORMOUS ──────────────────────
      Slung on the centreline abaft the stern transom, worked on tackles in a trunk rather
      than hung on pintles, so it can be raised in shoal water — and lowered it stands well
@@ -3370,6 +3479,15 @@ const PARTS = {
               what: 'Not just a floor: the deck ties the two sides of the hull together against '
                   + 'the sea trying to squeeze them in, and it is the platform the guns stand on. '
                   + 'Its camber sheds water to the sides.' },
+  quarterRudder: { stage: 3, name: 'Quarter rudders',
+              what: 'A steering oar grown into a fitting: one over each quarter, its loom '
+                  + 'working against a through-beam at the rail, its blade standing down '
+                  + 'beside the run. The whole ancient Mediterranean steered this way — a '
+                  + 'pair, handled together by one helmsman — and the sewn ships of the '
+                  + 'Indian Ocean lashed theirs on, having no iron to hang a pintle with. '
+                  + 'It is not a lesser rudder: it balances about its own shaft, so it turns '
+                  + 'light in the hand, and it lifts clear in shoal water. What replaced it '
+                  + 'was cheaper to build heavy — a sternpost hinge grows with the ship.' },
   rudder:   { stage: 3, name: 'Rudder',
               what: 'Hung on pintles down the sternpost. The stern-hung rudder reached northern '
                   + 'Europe about 1200 and replaced the steering oar; it is what let ships grow '
@@ -8801,19 +8919,32 @@ function buildShip(S, opts) {
        card standing right under her: "bulkheads, then planking". */
     if (S.build === 'bulkhead') {
       buildJunkEnds(S, group);
-    } else {
+    } else if (S.build !== 'dugout') {
+      /* ⚠ A ONE-PIECE HULL RAISES NO POSTS (round 121). "Single trunk, fire and adze" —
+         there is nothing to scarf a stem to; the log's own ends are the ends. The same
+         gate class as deckLaid and the hold furniture. */
       group.add(tag(new THREE.Mesh(buildStemGeometry(S, false), timber), 'stempost', 'Stem'));
       group.add(tag(new THREE.Mesh(buildStemGeometry(S, true), timber), 'stempost', 'Sternpost'));
     }
     /* wales are a TIMBER remedy for hogging — thickened strakes acting as girders. A steel
        hull's own plating is the girder, and putting wales on one is like bracing a bridge with
-       rope. */
-    if (S.build !== 'iron' && S.build !== 'steel') {
+       rope. And a one-piece hull has no strake to thicken: the trunk is its own girder. */
+    if (S.build !== 'iron' && S.build !== 'steel' && S.build !== 'dugout') {
       const waleMat = new THREE.MeshStandardMaterial({ color: 0x3d2f1f, roughness: 0.9 });
       group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.655, 0.030), waleMat), 'wale'));
       group.add(tag(new THREE.Mesh(buildWaleGeometry(S, 0.760, 0.026), waleMat), 'wale'));
     }
-    group.add(tag(new THREE.Mesh(buildRudderGeometry(S), timber), 'rudder'));
+    /* steering per the record (round 121): a paddled hull mounts nothing, a quarter-
+       steered hull ships a pair, everything else keeps the axial rudder its kind draws */
+    const steer = steeringOf(S);
+    if (steer === 'quarter') {
+      for (const sgn of [-1, 1])
+        group.add(tag(new THREE.Mesh(buildQuarterRudderGeometry(S, sgn), timber),
+                      'quarterRudder',
+                      sgn < 0 ? 'Port quarter rudder' : 'Starboard quarter rudder'));
+    } else if (steer !== 'paddle') {
+      group.add(tag(new THREE.Mesh(buildRudderGeometry(S), timber), 'rudder'));
+    }
     /* channels: a shelf outboard of each mast, on both sides, which is what the shrouds set
        up to. Positioned from the mast stations, so they cannot land in the wrong place. */
     const HS = hullSurface(S);

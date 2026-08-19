@@ -150,6 +150,70 @@ say(v.id, `a decked timber ship lost her ${k}`,
 + 'gratings and a capstan belong aboard and none is drawn');
 }
 }
+{
+const st = H.steering;
+if (!/^(paddle|quarter|median|stern|steel)$/.test(st || ''))
+say(v.id, 'record declares no steering',
+`hull.steering = ${JSON.stringify(st)}; the model draws paddle | quarter | `
++ 'median | stern | steel, and an undeclared record leaves the builder '
++ 'guessing off the build string — the round-121 fault standing again');
+else if (st === 'paddle') {
+for (const k of ['rudder', 'quarterRudder'])
+if (part[k])
+say(v.id, 'a paddled hull mounts steering',
+`${part[k].n} ${k} mesh(es) drawn, but the record steers with a hand-held `
++ 'paddle — nothing is hung on the hull');
+} else {
+const want = st === 'quarter' ? 'quarterRudder' : 'rudder';
+const other = st === 'quarter' ? 'rudder' : 'quarterRudder';
+if (!part[want])
+say(v.id, 'declared steering not drawn',
+`hull.steering = ${st} and no ${want} mesh exists`);
+if (part[other])
+say(v.id, 'steering of the wrong kind drawn',
+`hull.steering = ${st} but ${part[other].n} ${other} mesh(es) drawn`);
+if (st === 'quarter' && part.quarterRudder) {
+const q = part.quarterRudder;
+if (q.n !== 2)
+say(v.id, 'a quarter-rudder pair is a pair',
+`${q.n} quarter-rudder mesh(es); one steers over each quarter`);
+else if (!(q.z[0] < -0.1 && q.z[1] > 0.1))
+say(v.id, 'both quarter rudders on one side',
+`z extent ${q.z[0].toFixed(2)}..${q.z[1].toFixed(2)} m does not straddle `
++ 'the centreline');
+if (q.y[0] > -0.15 * (H.draught || 1))
+say(v.id, 'quarter rudder not immersed',
+`blade bottoms at ${q.y[0].toFixed(2)} m on a ${H.draught} m draught — `
++ 'a steering blade out of the water steers nothing');
+if (q.y[1] < 0.3)
+say(v.id, 'quarter rudder with no loom above the rail',
+`head tops out at ${q.y[1].toFixed(2)} m — nothing for a helmsman to hold`);
+if (q.xs && !q.xs.every(x => x > 0.15 * (H.lwl || 1)))
+say(v.id, 'quarter rudder off the quarter',
+`mesh centres at x ${q.xs.map(x => x.toFixed(1)).join(', ')} m — the `
++ 'quarter is the after end of the run, well abaft amidships');
+}
+if (st === 'steel' && part.rudder && part.rudder.y[1] > 0.05)
+say(v.id, 'steel rudder above the waterline',
+`rudder tops at ${part.rudder.y[1].toFixed(2)} m; a motor ship's plate lives `
++ 'wholly below the counter — the carrier fault of round 27');
+}
+}
+{
+const onePiece = H.build === 'dugout';
+const metal = H.build === 'iron' || H.build === 'steel';
+for (const k of ['stempost', 'wale']) {
+const belongs = k === 'stempost'
+? !onePiece && H.build !== 'bulkhead'
+: !onePiece && !metal;
+if (onePiece && part[k])
+say(v.id, 'assembly timber on a one-piece hull',
+`${part[k].n} ${k} mesh(es) drawn on a hull the record calls one piece`);
+else if (belongs && !part[k])
+say(v.id, `an assembled ship lost her ${k}`,
+`build ${H.build} raises posts and wears wales, and none is drawn`);
+}
+}
 if (H.__mastTops && H.__mastTops.length) {
 const mastBoxes = [];
 g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast')

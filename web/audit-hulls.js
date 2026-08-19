@@ -270,6 +270,90 @@
       }
     }
 
+    /* ── STEERING IS A FACT OF THE RECORD (round 121) ───────────────────────────────────
+       The rudder was added to every hull UNCONDITIONALLY, so the 68,000 BP dugout hung a
+       pintled stern rudder her card refuses ("Paddled"), the voyaging canoe carried one
+       per hull against her own row — "a long paddle, not a rudder" — and the sewn dhow
+       hung hers on an iron hinge under a construction row reading "no iron". The record
+       now declares the kind — paddle | quarter | median | stern | steel — and this rule
+       cross-examines the drawn parts against the declaration, both directions: what the
+       record refuses must not be drawn, what it declares must be drawn, and drawn the
+       right KIND in the right place. A record that declares nothing convicts too, because
+       the builder's fallback is exactly the guess-off-the-build-string this round retired. */
+    {
+      const st = H.steering;
+      if (!/^(paddle|quarter|median|stern|steel)$/.test(st || ''))
+        say(v.id, 'record declares no steering',
+            `hull.steering = ${JSON.stringify(st)}; the model draws paddle | quarter | `
+            + 'median | stern | steel, and an undeclared record leaves the builder '
+            + 'guessing off the build string — the round-121 fault standing again');
+      else if (st === 'paddle') {
+        for (const k of ['rudder', 'quarterRudder'])
+          if (part[k])
+            say(v.id, 'a paddled hull mounts steering',
+                `${part[k].n} ${k} mesh(es) drawn, but the record steers with a hand-held `
+                + 'paddle — nothing is hung on the hull');
+      } else {
+        const want = st === 'quarter' ? 'quarterRudder' : 'rudder';
+        const other = st === 'quarter' ? 'rudder' : 'quarterRudder';
+        if (!part[want])
+          say(v.id, 'declared steering not drawn',
+              `hull.steering = ${st} and no ${want} mesh exists`);
+        if (part[other])
+          say(v.id, 'steering of the wrong kind drawn',
+              `hull.steering = ${st} but ${part[other].n} ${other} mesh(es) drawn`);
+        if (st === 'quarter' && part.quarterRudder) {
+          const q = part.quarterRudder;
+          if (q.n !== 2)
+            say(v.id, 'a quarter-rudder pair is a pair',
+                `${q.n} quarter-rudder mesh(es); one steers over each quarter`);
+          else if (!(q.z[0] < -0.1 && q.z[1] > 0.1))
+            say(v.id, 'both quarter rudders on one side',
+                `z extent ${q.z[0].toFixed(2)}..${q.z[1].toFixed(2)} m does not straddle `
+                + 'the centreline');
+          if (q.y[0] > -0.15 * (H.draught || 1))
+            say(v.id, 'quarter rudder not immersed',
+                `blade bottoms at ${q.y[0].toFixed(2)} m on a ${H.draught} m draught — `
+                + 'a steering blade out of the water steers nothing');
+          if (q.y[1] < 0.3)
+            say(v.id, 'quarter rudder with no loom above the rail',
+                `head tops out at ${q.y[1].toFixed(2)} m — nothing for a helmsman to hold`);
+          if (q.xs && !q.xs.every(x => x > 0.15 * (H.lwl || 1)))
+            say(v.id, 'quarter rudder off the quarter',
+                `mesh centres at x ${q.xs.map(x => x.toFixed(1)).join(', ')} m — the `
+                + 'quarter is the after end of the run, well abaft amidships');
+        }
+        if (st === 'steel' && part.rudder && part.rudder.y[1] > 0.05)
+          say(v.id, 'steel rudder above the waterline',
+              `rudder tops at ${part.rudder.y[1].toFixed(2)} m; a motor ship's plate lives `
+              + 'wholly below the counter — the carrier fault of round 27');
+      }
+    }
+
+    /* ── A ONE-PIECE HULL RAISES NO POSTS AND WEARS NO WALES (round 121) ────────────────
+       "Construction: single trunk, fire and adze" — there is nothing to scarf a stem to
+       and no strake to thicken into a wale, yet the dugout wore separate posts and two
+       hogging girders because both were gated on "not iron and not steel". Two arms, the
+       r120 pattern: a one-piece hull draws neither, and an assembled hull STILL draws
+       hers, so the gate cannot silently widen and strip the fleet. Posts: every build
+       except bulkhead (whose ends are transoms, tagged as such) and dugout. Wales: every
+       timber build except dugout. */
+    {
+      const onePiece = H.build === 'dugout';
+      const metal = H.build === 'iron' || H.build === 'steel';
+      for (const k of ['stempost', 'wale']) {
+        const belongs = k === 'stempost'
+          ? !onePiece && H.build !== 'bulkhead'
+          : !onePiece && !metal;
+        if (onePiece && part[k])
+          say(v.id, 'assembly timber on a one-piece hull',
+              `${part[k].n} ${k} mesh(es) drawn on a hull the record calls one piece`);
+        else if (belongs && !part[k])
+          say(v.id, `an assembled ship lost her ${k}`,
+              `build ${H.build} raises posts and wears wales, and none is drawn`);
+      }
+    }
+
     /* ── A STAY ENDS ON A SPAR, NOT ON AN ESTIMATE OF ONE (round 99) ────────────────────
        buildRigging anchors every stay and backstay at __mastTops; for rounds those points
        were `y + lower*0.14` — 3.0 to 3.4 m ABOVE the trucks the mast loop actually drew, so

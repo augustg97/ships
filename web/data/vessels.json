@@ -14,25 +14,29 @@
    "rows": [
     [
      "Oldest surviving",
-     "Pesse canoe, 8040\u20137510 BC, 2.98 \u00d7 0.44 m"
+     "Pesse canoe, 8040–7510 BC, 2.98 × 0.44 m"
     ],
     [
-     "Sunda\u2192Sahul crossing",
-     "~65,000 BP; minimum open-water leg 70\u201390 km"
+     "Sunda→Sahul crossing",
+     "~65,000 BP; minimum open-water leg 70–90 km"
     ],
     [
      "Measured performance",
-     "Sugime, 7.6 m cedar: Taiwan\u2192Yonaguni, 225 km in 45 h \u2248 2.5\u20133 kn"
+     "Sugime, 7.6 m cedar: Taiwan→Yonaguni, 225 km in 45 h ≈ 2.5–3 kn"
     ],
     [
      "Construction",
      "single trunk, fire and adze"
+    ],
+    [
+     "Steering",
+     "the paddle itself — nothing is hung on the hull"
     ]
    ],
    "attestation": "inferred",
    "confidence": "contested",
-   "text": "No watercraft survives from the crossing to Sahul. That people arrived is certain; what they arrived in is not, and this model does not draw the vessel.\n\nWhat the record does support is a negative: **bamboo rafts do not work.** Kaifu's experimental crossings (National Museum of Nature and Science, Tokyo, 2016\u201319) found rafts made under a knot against the 1\u20132 knot Kuroshio and failed outright, while a 7.6 m cedar dugout crossed 225 km of open water in 45 hours. If the Pleistocene sea craft was anything, it was more like a dugout than a raft.\n\nThe date is itself contested: Madjedbebe's optically stimulated luminescence gives 65 \u00b1 6 ka (Clarkson et al., *Nature*, 2017); Allen and O'Connell argue for ~50 ka.",
-   "cite": "Clarkson et al. 2017; Kealy, Louys & O'Connor 2018; Kaifu experimental crossings 2016\u201319.",
+   "text": "No watercraft survives from the crossing to Sahul. That people arrived is certain; what they arrived in is not, and this model does not draw the vessel.\n\nWhat the record does support is a negative: **bamboo rafts do not work.** Kaifu's experimental crossings (National Museum of Nature and Science, Tokyo, 2016–19) found rafts made under a knot against the 1–2 knot Kuroshio and failed outright, while a 7.6 m cedar dugout crossed 225 km of open water in 45 hours. If the Pleistocene sea craft was anything, it was more like a dugout than a raft.\n\nThe date is itself contested: Madjedbebe's optically stimulated luminescence gives 65 ± 6 ka (Clarkson et al., *Nature*, 2017); Allen and O'Connell argue for ~50 ka.",
+   "cite": "Clarkson et al. 2017; Kealy, Louys & O'Connor 2018; Kaifu experimental crossings 2016–19.",
    "from": -68000,
    "polar": {
     "beatLight": 90,
@@ -50,18 +54,18 @@
      "150": 3.9,
      "180": 3.8
     },
-    "rigNote": "Paddled. The one measured figure is a crossing, not a sprint: a 7.6 m cedar dugout took 225 km of the Kuroshio, Taiwan to Yonaguni, in 45 hours \u2014 very close to 3 kn held for two days, and that is the paddling floor the router holds in any wind, including a calm. The rise off the wind is the fair-wind mat sail of the Pacific logboats (Haddon & Hornell), set only when the wind serves; no mast is drawn, and none is attested this early.",
+    "rigNote": "Paddled. The one measured figure is a crossing, not a sprint: a 7.6 m cedar dugout took 225 km of the Kuroshio, Taiwan to Yonaguni, in 45 hours — very close to 3 kn held for two days, and that is the paddling floor the router holds in any wind, including a calm. The rise off the wind is the fair-wind mat sail of the Pacific logboats (Haddon & Hornell), set only when the wind serves; no mast is drawn, and none is attested this early.",
     "rig": "paddles, with a mat sail for fair winds",
     "anchor": {
      "kn": 3.0,
      "kind": "passage",
-     "source": "Kaifu's Sugime crossing 2019: 225 km in 45 h \u2248 3 kn; Haddon & Hornell, Canoes of Oceania, for the fair-wind sail"
+     "source": "Kaifu's Sugime crossing 2019: 225 km in 45 h ≈ 3 kn; Haddon & Hornell, Canoes of Oceania, for the fair-wind sail"
     },
     "floor": {
      "by": "paddle",
      "kn": 3.0,
      "lossKnPerMs": 0.17,
-     "source": "Kaifu's Sugime crossing for the floor. No measured logboat headwind figure exists; the loss is Olympias's fractional windage (46% of floor at 8 m/s) carried over \u2014 an inference, stated as one"
+     "source": "Kaifu's Sugime crossing for the floor. No measured logboat headwind figure exists; the loss is Olympias's fractional windage (46% of floor at 8 m/s) carried over — an inference, stated as one"
     }
    },
    "hull": {
@@ -95,7 +99,9 @@
     "freeboard": 0.34,
     "cm": 0.88,
     "paddleDia": 0,
-    "deckLaid": false
+    "deckLaid": false,
+    "steering": "paddle",
+    "steeringProvenance": "Steering is ATTESTED as a negative: the one measured performance row is a paddled crossing (Kaifu’s Sugime, Taiwan→Yonaguni, 2019), the polar’s own note reads “Paddled”, and nothing hung on the hull is attested anywhere this early. The paddle is crew gear, no crew is drawn, so the hull mounts nothing."
    }
   },
   {
@@ -111,8 +117,8 @@
    "region": "Pacific and Indian Oceans",
    "rows": [
     [
-     "H\u014dk\u016ble\u02bba",
-     "18.7 m LOA \u00b7 4.72 m beam \u00b7 0.76 m draught"
+     "Hōkūleʻa",
+     "18.7 m LOA · 4.72 m beam · 0.76 m draught"
     ],
     [
      "Displacement",
@@ -120,15 +126,15 @@
     ],
     [
      "Rig",
-     "**two masts**, crab claw \u2014 a triangular sail on two spars along its long sides"
+     "**two masts**, crab claw — a triangular sail on two spars along its long sides"
     ],
     [
      "Sail area",
-     "50.2 m\u00b2 for the pair"
+     "50.2 m² for the pair"
     ],
     [
      "Crew",
-     "12\u201316"
+     "12–16"
     ],
     [
      "Steering",
@@ -136,14 +142,14 @@
     ],
     [
      "Speed",
-     "4\u20136 kn under full sail"
+     "4–6 kn under full sail"
     ],
     [
      "Measured passage",
-     "Hawai\u02bbi\u2192Tahiti 1976, ~2,400 nm in 30 days at sea \u2248 3.3 kn"
+     "Hawaiʻi→Tahiti 1976, ~2,400 nm in 30 days at sea ≈ 3.3 kn"
     ],
     [
-     "M\u0101lama Honua, 2014\u201317",
+     "Mālama Honua, 2014–17",
      "47,000 nm, 85 ports, 26 countries"
     ],
     [
@@ -154,7 +160,7 @@
    "crew": 14,
    "attestation": "attested",
    "confidence": "good",
-   "text": "A double-hulled sailing canoe: two hulls of equal length lashed side by side, carrying two masts and steered by a long paddle rather than a rudder. Austronesian voyagers using vessels of this kind settled the Pacific islands, reaching the Lapita range by about 900 BC and Hawai\u02bbi, Rapa Nui and Aotearoa later.\n\nThe crab claw is approximately an isosceles triangle carried on two light spars along its long sides. It generates lift rather than merely catching wind, and it **widens upwards**, putting sail area high where the wind is stronger \u2014 which also raises the heeling moment, and is why the rig is carried on a multihull. A double hull carries enough sail to use it, and the combination makes good about 75\u00b0 to the true wind, against roughly 90\u00b0 for a square rig in ordinary conditions.\n\nLashed-lug construction uses planks carved with integral internal lugs and lashed to ribs with fibre \u2014 no nails, no iron, nothing that corrodes.",
+   "text": "A double-hulled sailing canoe: two hulls of equal length lashed side by side, carrying two masts and steered by a long paddle rather than a rudder. Austronesian voyagers using vessels of this kind settled the Pacific islands, reaching the Lapita range by about 900 BC and Hawaiʻi, Rapa Nui and Aotearoa later.\n\nThe crab claw is approximately an isosceles triangle carried on two light spars along its long sides. It generates lift rather than merely catching wind, and it **widens upwards**, putting sail area high where the wind is stronger — which also raises the heeling moment, and is why the rig is carried on a multihull. A double hull carries enough sail to use it, and the combination makes good about 75° to the true wind, against roughly 90° for a square rig in ordinary conditions.\n\nLashed-lug construction uses planks carved with integral internal lugs and lashed to ribs with fibre — no nails, no iron, nothing that corrodes.",
    "cite": "Irwin, *Archaeology in Oceania* 58 (2023); Finney, *Science* (1977); Polynesian Voyaging Society logs.",
    "from": -3000,
    "polar": {
@@ -173,12 +179,12 @@
      "150": 4.9,
      "180": 3.9
     },
-    "rigNote": "Poor by modern standards, positive by ancient ones \u2014 and positive is the whole argument, because it is what lets a canoe beat back the way she came. Fastest on a broad reach, not before the wind.",
+    "rigNote": "Poor by modern standards, positive by ancient ones — and positive is the whole argument, because it is what lets a canoe beat back the way she came. Fastest on a broad reach, not before the wind.",
     "rig": "crab claw on a double hull",
     "anchor": {
      "kn": 4.2,
      "kind": "passage",
-     "source": "Finney, H\u014dk\u016ble\u02bba Hawai\u02bbi\u2192Tahiti 1976: ~100 nm/day, best days near 7 kn"
+     "source": "Finney, Hōkūleʻa Hawaiʻi→Tahiti 1976: ~100 nm/day, best days near 7 kn"
     }
    },
    "hull": {
@@ -222,13 +228,15 @@
     "doubleHull": true,
     "hullSep": 5.4,
     "sailAreaEach": 25.0,
-    "deckLaid": false
+    "deckLaid": false,
+    "steering": "paddle",
+    "steeringProvenance": "ATTESTED by her own card row — “Steering: a long paddle, not a rudder” (Hōkūleʻa; Finney 1977, Polynesian Voyaging Society logs). The steering sweep is handled by the steersman over the quarter, not hung on the hull; no crew is drawn, so nothing is mounted. Before round 121 the model hung a pintled stern rudder on EACH hull."
    }
   },
   {
    "id": "trireme",
    "name": "Trireme",
-   "sub": "\u03c4\u03c1\u03b9\u03ae\u03c1\u03b7\u03c2",
+   "sub": "τριήρης",
    "rig": "oar",
    "era": [
     -700,
@@ -243,15 +251,15 @@
     ],
     [
      "Beam of the HULL, at the waterline",
-     "3.8 \u00b1 0.1 m"
+     "3.8 ± 0.1 m"
     ],
     [
      "Beam over the outriggers",
-     "5.4\u20135.5 m"
+     "5.4–5.5 m"
     ],
     [
      "Length : beam",
-     "9.7 \u2014 as slender as a modern frigate"
+     "9.7 — as slender as a modern frigate"
     ],
     [
      "Draught",
@@ -263,7 +271,7 @@
     ],
     [
      "Oars",
-     "170 \u2014 62 thranite, 54 zygian, 54 thalamite"
+     "170 — 62 thranite, 54 zygian, 54 thalamite"
     ],
     [
      "Sprint, measured",
@@ -275,25 +283,29 @@
     ],
     [
      "Turning circle",
-     "1.9 ship-lengths; 360\u00b0 in 128 s"
+     "1.9 ship-lengths; 360° in 128 s"
     ],
     [
      "Crew",
-     "about 200 \u2014 170 rowers (62 thranitai, 54 zygitai, 54 thalamitai), ~14 deck crew, 10\u201320 marines"
+     "about 200 — 170 rowers (62 thranitai, 54 zygitai, 54 thalamitai), ~14 deck crew, 10–20 marines"
     ],
     [
      "Turning",
-     "180\u00b0 in one minute, inside 2.5 ship-lengths \u2014 measured on Olympias"
+     "180° in one minute, inside 2.5 ship-lengths — measured on Olympias"
     ],
     [
      "Rig",
      "two masts, both square: the main and a small foremast, struck before battle"
+    ],
+    [
+     "Steering, as drawn",
+     "two pēdalia, one over each quarter — the pair Olympias steers with"
     ]
    ],
    "crew": 200,
    "attestation": "generated",
    "confidence": "contested",
-   "text": "A hull built to carry a bronze ram at speed and to turn inside its own length. It is also the best-measured ancient ship in existence, because one was built.\n\n*Olympias* (1987) **fell short of what the ancient sources imply**, and the shortfall is the interesting part. Xenophon implies 7\u20138 knots sustained for sixteen hours; the reconstruction managed 8.3 knots for a sprint and about 5.4 sustained. Coates concluded the hull is roughly 10% overweight and too short \u2014 Vitruvius's two-cubit oar spacing at the longer Ionic cubit gives a hull over 40 m, and a Mark II on those lines was calculated to reach 9.7 kn sprint and 7.5 sustained. It has never been built.\n\nThe widely repeated 8.9 knots was a single momentary GPS reading; the Final Report says 8.3 kn is the honest figure, 'achieved only momentarily (if at all)'.",
+   "text": "A hull built to carry a bronze ram at speed and to turn inside its own length. It is also the best-measured ancient ship in existence, because one was built.\n\n*Olympias* (1987) **fell short of what the ancient sources imply**, and the shortfall is the interesting part. Xenophon implies 7–8 knots sustained for sixteen hours; the reconstruction managed 8.3 knots for a sprint and about 5.4 sustained. Coates concluded the hull is roughly 10% overweight and too short — Vitruvius's two-cubit oar spacing at the longer Ionic cubit gives a hull over 40 m, and a Mark II on those lines was calculated to reach 9.7 kn sprint and 7.5 sustained. It has never been built.\n\nThe widely repeated 8.9 knots was a single momentary GPS reading; the Final Report says 8.3 kn is the honest figure, 'achieved only momentarily (if at all)'.",
    "cite": "Rankov (ed.), *Trireme Olympias: The Final Report* (Oxbow, 2012); Morrison, Coates & Rankov, *The Athenian Trireme*.",
    "from": -700,
    "polar": {
@@ -312,7 +324,7 @@
      "150": 5.1,
      "180": 4.8
     },
-    "rigNote": "A galley goes where it likes and not far, and the figure above is her SAILING speed \u2014 the sail is for fair winds only. Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre of sea \u2014 measured on the reconstruction Olympias, which fell short of what the ancient sources imply and is thought to be ~10% too short in the hull. The router holds the 5.4 as her oar floor in any wind, falling to the measured 2.9 dead upwind in a fresh breeze.",
+    "rigNote": "A galley goes where it likes and not far, and the figure above is her SAILING speed — the sail is for fair winds only. Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre of sea — measured on the reconstruction Olympias, which fell short of what the ancient sources imply and is thought to be ~10% too short in the hull. The router holds the 5.4 as her oar floor in any wind, falling to the measured 2.9 dead upwind in a fresh breeze.",
     "rig": "oars, with a square sail for fair winds",
     "anchor": {
      "kn": 8.3,
@@ -323,7 +335,7 @@
      "by": "oar",
      "kn": 5.4,
      "lossKnPerMs": 0.31,
-     "source": "Olympias sea trials: 5.4 kn oar cruise; ~2.9 kn into a head sea at force 4\u20135, taken at the polar's 8 m/s reference \u2014 (5.4 \u2212 2.9)/8"
+     "source": "Olympias sea trials: 5.4 kn oar cruise; ~2.9 kn into a head sea at force 4–5, taken at the polar's 8 m/s reference — (5.4 − 2.9)/8"
     }
    },
    "hull": {
@@ -379,7 +391,9 @@
      27,
      27,
      31
-    ]
+    ],
+    "steering": "quarter",
+    "steeringProvenance": "A pair of pēdalia, one over each quarter, is the attested steering of the type: Morrison, Coates & Rankov, The Athenian Trireme, and the reconstruction Olympias, whose helmsman works both looms from one seat. DERIVED here in size: blade and loom are scaled off the hull’s own draught and beam, no ancient steering oar surviving to measure."
    }
   },
   {
@@ -396,19 +410,19 @@
    "rows": [
     [
      "Typical length",
-     "20\u201330 m; Madrague de Giens 40 \u00d7 9 m"
+     "20–30 m; Madrague de Giens 40 × 9 m"
     ],
     [
      "Burden",
-     "150\u2013350 tons typical; the largest ~400 t"
+     "150–350 tons typical; the largest ~400 t"
     ],
     [
      "Standard grain capacity",
-     "50,000 *modii* \u2248 350 t"
+     "50,000 *modii* ≈ 350 t"
     ],
     [
      "Rig",
-     "one mainmast with a broad square mainsail; larger ships carried more than one mast and more than one sail per mast \u2014 the raked *artemon* forward and a triangular *supparum* above the main (Casson)"
+     "one mainmast with a broad square mainsail; larger ships carried more than one mast and more than one sail per mast — the raked *artemon* forward and a triangular *supparum* above the main (Casson)"
     ],
     [
      "Handed by brailing",
@@ -416,7 +430,7 @@
     ],
     [
      "The grain ship *Isis*",
-     "55 m; beam over a quarter of that; hold 13 m deep; 1,200\u20131,300 t of grain (Lucian) \u2014 contested, some read 1,900 t"
+     "55 m; beam over a quarter of that; hold 13 m deep; 1,200–1,300 t of grain (Lucian) — contested, some read 1,900 t"
     ],
     [
      "Construction",
@@ -424,21 +438,25 @@
     ],
     [
      "Passage, downwind",
-     "Rome\u2192Alexandria in ballast 10\u201314 days"
+     "Rome→Alexandria in ballast 10–14 days"
     ],
     [
      "Passage, upwind",
-     "Alexandria\u2192Rome laden a month, sometimes two or more"
+     "Alexandria→Rome laden a month, sometimes two or more"
     ],
     [
      "Round trip",
-     "about 70 days; 2,000\u20133,000 voyages a year fed the city"
+     "about 70 days; 2,000–3,000 voyages a year fed the city"
+    ],
+    [
+     "Steering, as drawn",
+     "a pair of great quarter rudders — the Sidon and Portus reliefs draw them; no Roman ship shows a sternpost rudder"
     ]
    ],
    "crew": 20,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "The bulk carrier of the Roman Mediterranean, built shell-first with pegged mortise-and-tenon joints and double planking. Typical hulls ran 20\u201330 m and carried 150\u2013350 tons; the standard grain capacity was 50,000 *modii*, about 350 tonnes.\n\nThe rig is a single broad square mainsail on one mast, with a small raked *artemon* over the bows on larger ships and sometimes a triangular *supparum* above the main. It was handled by **brailing**: there are no reef points, and the yard does not come down. Lines ran up the face of the sail through rings of lead or bone sewn to the cloth, and hauling on them gathered the sail up to the yard like a curtain.\n\nThe same ship on the same route took ten days to a fortnight in one direction and a month or more in the other. The difference is the wind: the Etesian northerlies of the eastern Mediterranean blow steadily down toward Egypt in summer. The grain fleet ran downwind to Alexandria in ballast and beat its way home laden, a round trip of about seventy days, and the sailing season closed in winter when the *mare clausum* held from November to March.",
+   "text": "The bulk carrier of the Roman Mediterranean, built shell-first with pegged mortise-and-tenon joints and double planking. Typical hulls ran 20–30 m and carried 150–350 tons; the standard grain capacity was 50,000 *modii*, about 350 tonnes.\n\nThe rig is a single broad square mainsail on one mast, with a small raked *artemon* over the bows on larger ships and sometimes a triangular *supparum* above the main. It was handled by **brailing**: there are no reef points, and the yard does not come down. Lines ran up the face of the sail through rings of lead or bone sewn to the cloth, and hauling on them gathered the sail up to the yard like a curtain.\n\nThe same ship on the same route took ten days to a fortnight in one direction and a month or more in the other. The difference is the wind: the Etesian northerlies of the eastern Mediterranean blow steadily down toward Egypt in summer. The grain fleet ran downwind to Alexandria in ballast and beat its way home laden, a round trip of about seventy days, and the sailing season closed in winter when the *mare clausum* held from November to March.",
    "cite": "Casson, *Ships and Seamanship in the Ancient World* (1971); Lucian, *The Ship*; Wikipedia, *Grain supply to the city of Rome* and *Square rig* (accessed 2026-08-02).",
    "from": -300,
    "polar": {
@@ -457,12 +475,12 @@
      "150": 4.8,
      "180": 4.1
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 6.2,
      "kind": "passage",
-     "source": "Casson, Ships and Seamanship: Puteoli\u2192Alexandria ~9 d fair; favorable runs 4.5\u20136 kn"
+     "source": "Casson, Ships and Seamanship: Puteoli→Alexandria ~9 d fair; favorable runs 4.5–6 kn"
     }
    },
    "hull": {
@@ -513,7 +531,9 @@
     "beam": 9.0,
     "draught": 3.4,
     "freeboard": 2.4,
-    "cm": 0.62
+    "cm": 0.62,
+    "steering": "quarter",
+    "steeringProvenance": "Roman seagoing ships steer with a pair of great quarter rudders — the Sidon and Portus reliefs and the Ostia mosaics draw them, and no Roman wreck or image shows a sternpost rudder (Casson, Ships and Seamanship in the Ancient World). DERIVED in size from the hull; the reliefs are profile carvings with no usable scale."
    }
   },
   {
@@ -530,19 +550,19 @@
    "rows": [
     [
      "Rig",
-     "one to three masts carrying **settee** sails \u2014 a quadrilateral, a lateen with its forward point cut off \u2014 sometimes a true lateen"
+     "one to three masts carrying **settee** sails — a quadrilateral, a lateen with its forward point cut off — sometimes a true lateen"
     ],
     [
      "Belitung wreck (c. AD 830)",
-     "~18 \u00d7 6.4 m; ~60,000 Changsha wares"
+     "~18 × 6.4 m; ~60,000 Changsha wares"
     ],
     [
      "Baghlah / ghanjah",
-     "30\u201340 m, 150\u2013400 t, crew 40\u2013150"
+     "30–40 m, 150–400 t, crew 40–150"
     ],
     [
      "The types",
-     "*baghlah* the heavy deep-sea trader \u00b7 *boum* large, tapering stern \u00b7 *sambuk* the largest still sailing in the Gulf \u00b7 *jalibut* small to medium"
+     "*baghlah* the heavy deep-sea trader · *boum* large, tapering stern · *sambuk* the largest still sailing in the Gulf · *jalibut* small to medium"
     ],
     [
      "Crew",
@@ -554,14 +574,18 @@
     ],
     [
      "Sailing season",
-     "out on the SW monsoon Apr\u2013Sep, home on the NE Nov\u2013Mar"
+     "out on the SW monsoon Apr–Sep, home on the NE Nov–Mar"
+    ],
+    [
+     "Steering, as drawn",
+     "twin lashed quarter rudders, as the Belitung hull is reconstructed — a sewn ship has no iron to hang a pintle on"
     ]
    ],
    "crew": 20,
    "attestation": "attested",
    "confidence": "good",
-   "text": "A sewn-plank trader of one to three masts. The sail is usually a **settee** rather than a true lateen: a quadrilateral, in effect a lateen with its forward point cut off, so the luff is short and the yard still rakes steeply.\n\nIn the Indian Ocean the departure **date** is not a free variable. The monsoon reverses twice a year, and it is the only wind system on Earth that does, so the calendar of the whole ocean is fixed by it: Egypt to India leaving in July on the south-west monsoon, home from November on the north-east.\n\nThe *Periplus of the Erythraean Sea* states the month outright \u2014 'about the month of July, that is Epiphi' \u2014 four separate times, for four separate routes.\n\nSewn construction with no iron at all was not primitive. It flexed on a reef instead of splitting, and it could be repaired anywhere there was coir.",
-   "cite": "*Periplus Maris Erythraei* \u00a7\u00a714, 24, 39, 49, 56; Flecker on the Belitung wreck.",
+   "text": "A sewn-plank trader of one to three masts. The sail is usually a **settee** rather than a true lateen: a quadrilateral, in effect a lateen with its forward point cut off, so the luff is short and the yard still rakes steeply.\n\nIn the Indian Ocean the departure **date** is not a free variable. The monsoon reverses twice a year, and it is the only wind system on Earth that does, so the calendar of the whole ocean is fixed by it: Egypt to India leaving in July on the south-west monsoon, home from November on the north-east.\n\nThe *Periplus of the Erythraean Sea* states the month outright — 'about the month of July, that is Epiphi' — four separate times, for four separate routes.\n\nSewn construction with no iron at all was not primitive. It flexed on a reef instead of splitting, and it could be repaired anywhere there was coir.",
+   "cite": "*Periplus Maris Erythraei* §§14, 24, 39, 49, 56; Flecker on the Belitung wreck.",
    "from": 300,
    "polar": {
     "beatLight": 72,
@@ -579,7 +603,7 @@
      "150": 4.0,
      "180": 3.2
     },
-    "rigNote": "Better than a square rig, and by less than the textbooks claim \u2014 their 55\u201365\u00b0 is a heading. The cost is manpower: tacking means walking the whole yard round the mast.",
+    "rigNote": "Better than a square rig, and by less than the textbooks claim — their 55–65° is a heading. The cost is manpower: tacking means walking the whole yard round the mast.",
     "rig": "lateen / settee",
     "anchor": {
      "kn": 5.5,
@@ -632,13 +656,15 @@
     "beam": 6.4,
     "draught": 2.4,
     "freeboard": 2.0,
-    "cm": 0.68
+    "cm": 0.68,
+    "steering": "quarter",
+    "steeringProvenance": "Her own construction row — coir stitching, no iron — refuses the pintle-and-gudgeon fitting the model hung before round 121: a pintle is an iron hinge. The Belitung hull (this card’s own row, c. AD 830) is reconstructed with twin lashed quarter rudders (Jewel of Muscat, 2010). The stern-hung rudder belongs to the ocean’s later big types — baghlah, ghanjah — whose rows here are burden figures, not fittings; the drawn ship is the sewn early type."
    }
   },
   {
    "id": "junk",
    "name": "Chinese junk",
-   "sub": "\u6d77\u8239",
+   "sub": "海船",
    "rig": "junk",
    "era": [
     800,
@@ -649,7 +675,7 @@
    "rows": [
     [
      "Rig",
-     "\u26a0 **the battened lug is not original.** Junks carried SQUARE sails before the 12th century, then adopted the tanja sail and the fully battened rig from the southern seas"
+     "⚠ **the battened lug is not original.** Junks carried SQUARE sails before the 12th century, then adopted the tanja sail and the fully battened rig from the southern seas"
     ],
     [
      "What the battens cost",
@@ -657,11 +683,11 @@
     ],
     [
      "Typical trading junk, pre-1500",
-     "20\u201330 m"
+     "20–30 m"
     ],
     [
      "Quanzhou ship (sank c. 1272)",
-     "surviving hull 24.2 \u00d7 9.15 m; reconstructed ~34 m"
+     "surviving hull 24.2 × 9.15 m; reconstructed ~34 m"
     ],
     [
      "Nanhai One (sank c. 1160)",
@@ -669,7 +695,7 @@
     ],
     [
      "Song claims of 71 m",
-     "discounted \u2014 such descriptions 'tend to greatly exaggerate dimensions, usually to twice or more of the actual lengths'"
+     "discounted — such descriptions 'tend to greatly exaggerate dimensions, usually to twice or more of the actual lengths'"
     ],
     [
      "Compartments",
@@ -677,11 +703,11 @@
     ],
     [
      "Cargo",
-     "200\u2013250 t"
+     "200–250 t"
     ],
     [
      "Sternpost rudder",
-     "a pottery model from before the 1st c. AD carries the oldest known depiction \u2014 about a millennium before Europe. On a large junk it took up to 20 hands to work in a blow"
+     "a pottery model from before the 1st c. AD carries the oldest known depiction — about a millennium before Europe. On a large junk it took up to 20 hands to work in a blow"
     ],
     [
      "Compass at sea",
@@ -689,17 +715,17 @@
     ],
     [
      "Ibn Battuta on the largest",
-     "1,000 men \u2014 600 sailors and 400 men-at-arms; 'from twelve down to three sails'"
+     "1,000 men — 600 sailors and 400 men-at-arms; 'from twelve down to three sails'"
     ],
     [
      "*Keying*",
-     "sailed from China round the Cape of Good Hope to the United States and England, 1846\u201348"
+     "sailed from China round the Cape of Good Hope to the United States and England, 1846–48"
     ]
    ],
    "crew": 30,
    "attestation": "attested",
    "confidence": "good",
-   "text": "A seagoing hull with watertight transverse bulkheads, an axial sternpost rudder and the magnetic compass used at sea, each attested in China well before it appeared in Europe. The hull descends from tapering rafts rather than from the dugout.\n\n\u26a0 The battened lug is the exception and is often miscounted among them. Junks carried square sails until about the 12th century and then adopted the tanja sail and the fully battened rig from the southern seas. The battens make the sail self-reefing and allow it to set flat. A junk therefore works to windward considerably better than a square rig, and with a smaller crew: reefing is done by lowering battens onto the boom from the deck. Instrumented comparisons put a junk at 75\u201380% of a Bermudan rig's windward performance.",
+   "text": "A seagoing hull with watertight transverse bulkheads, an axial sternpost rudder and the magnetic compass used at sea, each attested in China well before it appeared in Europe. The hull descends from tapering rafts rather than from the dugout.\n\n⚠ The battened lug is the exception and is often miscounted among them. Junks carried square sails until about the 12th century and then adopted the tanja sail and the fully battened rig from the southern seas. The battens make the sail self-reefing and allow it to set flat. A junk therefore works to windward considerably better than a square rig, and with a smaller crew: reefing is done by lowering battens onto the boom from the deck. Instrumented comparisons put a junk at 75–80% of a Bermudan rig's windward performance.",
    "cite": "Needham, *Science and Civilisation in China* IV.3; Quanzhou ship excavation 1974; Junk Rig Association instrumented polars.",
    "from": 200,
    "polar": {
@@ -718,7 +744,7 @@
      "150": 3.9,
      "180": 3.2
     },
-    "rigNote": "The battens do it: they make the sail self-reefing and let it set flat, so it beats a square rig to windward on a fraction of the crew \u2014 about 75\u201380% of Bermudan performance.",
+    "rigNote": "The battens do it: they make the sail self-reefing and let it set flat, so it beats a square rig to windward on a fraction of the crew — about 75–80% of Bermudan performance.",
     "rig": "battened lug (junk)",
     "anchor": {
      "kn": 5.0,
@@ -776,13 +802,14 @@
     "beam": 9.8,
     "draught": 3.3,
     "freeboard": 3.0,
-    "cm": 0.7
+    "cm": 0.7,
+    "steering": "median"
    }
   },
   {
    "id": "treasure-ship",
    "name": "Treasure ship",
-   "sub": "\u5bf6\u8239 \u2014 and how big it really was",
+   "sub": "寶船 — and how big it really was",
    "rig": "junk",
    "era": [
     1405,
@@ -793,11 +820,11 @@
    "rows": [
     [
      "Claimed length",
-     "44 zhang 4 chi \u2248 138 m"
+     "44 zhang 4 chi ≈ 138 m"
     ],
     [
      "Scholarly range",
-     "50\u201376 m"
+     "50–76 m"
     ],
     [
      "Fleet, first voyage",
@@ -805,7 +832,7 @@
     ],
     [
      "Voyages",
-     "seven, 1405\u20131433"
+     "seven, 1405–1433"
     ],
     [
      "By scholar",
@@ -831,8 +858,8 @@
    "crew": 250,
    "attestation": "generated",
    "confidence": "contested",
-   "text": "**The famous dimensions come from a novel.** The 44-zhang figure appears first in Luo Maodeng's *Xiyang Ji* of 1597 \u2014 a work of fiction written 164 years after the last voyage, in which ships are built with divine assistance \u2014 and was carried into the *Ming Shi* when that was compiled in 1739.\n\nTwo physical arguments cut against it. A length-to-beam ratio of 2.5 is a barge, not a seagoing hull; and unreinforced wooden hulls hog beyond about 90 m, which is why the longest wooden ship ever built needed iron strapping and still leaked continuously. Then the decisive one: the Longjiang shipyard was excavated in 2003\u201304 and its largest building basin is **421 m long and 41 m wide** \u2014 narrower than the 52 m beam the ships are supposed to have had.\n\nThe hull drawn here is at the defensible length. The claimed length is shown as an outline beside it, because the claim is part of the history even though it is almost certainly wrong.",
-   "cite": "Church, *Monumenta Serica* 53 (2005); Sleeswyk, *Nautical Research Journal* (1996); Xin Yuan'ou; Longjiang shipyard excavation 2003\u201304.",
+   "text": "**The famous dimensions come from a novel.** The 44-zhang figure appears first in Luo Maodeng's *Xiyang Ji* of 1597 — a work of fiction written 164 years after the last voyage, in which ships are built with divine assistance — and was carried into the *Ming Shi* when that was compiled in 1739.\n\nTwo physical arguments cut against it. A length-to-beam ratio of 2.5 is a barge, not a seagoing hull; and unreinforced wooden hulls hog beyond about 90 m, which is why the longest wooden ship ever built needed iron strapping and still leaked continuously. Then the decisive one: the Longjiang shipyard was excavated in 2003–04 and its largest building basin is **421 m long and 41 m wide** — narrower than the 52 m beam the ships are supposed to have had.\n\nThe hull drawn here is at the defensible length. The claimed length is shown as an outline beside it, because the claim is part of the history even though it is almost certainly wrong.",
+   "cite": "Church, *Monumenta Serica* 53 (2005); Sleeswyk, *Nautical Research Journal* (1996); Xin Yuan'ou; Longjiang shipyard excavation 2003–04.",
    "from": 1405,
    "polar": {
     "beatLight": 62,
@@ -850,12 +877,12 @@
      "150": 3.4,
      "180": 2.8
     },
-    "rigNote": "The battens do it: they make the sail self-reefing and let it set flat, so it beats a square rig to windward on a fraction of the crew \u2014 about 75\u201380% of Bermudan performance.",
+    "rigNote": "The battens do it: they make the sail self-reefing and let it set flat, so it beats a square rig to windward on a fraction of the crew — about 75–80% of Bermudan performance.",
     "rig": "battened lug (junk)",
     "anchor": {
      "kn": 2.5,
      "kind": "passage",
-     "source": "Dreyer, Zheng He: fleet legs made good ~2\u20133 kn in company",
+     "source": "Dreyer, Zheng He: fleet legs made good ~2–3 kn in company",
      "note": "sail area per displacement far below the coaster; capability above the fleet figure"
     }
    },
@@ -930,7 +957,8 @@
     "beam": 18.0,
     "draught": 5.2,
     "freeboard": 5.4,
-    "cm": 0.8
+    "cm": 0.8,
+    "steering": "median"
    }
   },
   {
@@ -947,7 +975,7 @@
    "rows": [
     [
      "Bremen cog, 1380",
-     "23.3 \u00d7 7.6 m, draught 2.25 m"
+     "23.3 × 7.6 m, draught 2.25 m"
     ],
     [
      "Displacement",
@@ -955,19 +983,19 @@
     ],
     [
      "Crew",
-     "15\u201320"
+     "15–20"
     ],
     [
      "Sail",
-     "one square sail, ~200 m\u00b2"
+     "one square sail, ~200 m²"
     ],
     [
      "Windward, measured",
-     "74\u201376\u00b0 made good in a gentle breeze; LOSES ground in 20 kn"
+     "74–76° made good in a gentle breeze; LOSES ground in 20 kn"
     ],
     [
      "Fastenings",
-     "double-clenched iron nails \u2014 not treenails; the nail is what let a\n              clinker shell be built without a frame to fasten to"
+     "double-clenched iron nails — not treenails; the nail is what let a\n              clinker shell be built without a frame to fasten to"
     ],
     [
      "Construction",
@@ -977,7 +1005,7 @@
    "crew": 20,
    "attestation": "attested",
    "confidence": "good",
-   "text": "Flat-bottomed so it could take the ground on a tidal flat and be unloaded at low water, which is what the Hanse ports needed. It also carries the **pintle-and-gudgeon stern rudder**, first depicted on the Winchester font about 1180 \u2014 the single most important European ship fitting of the Middle Ages.\n\nA replica was instrumented and the result is sobering: in a gentle breeze it made good 74\u201376\u00b0 to the true wind with a velocity made good of 0.15 knots. In twenty knots of wind it lost ground.",
+   "text": "Flat-bottomed so it could take the ground on a tidal flat and be unloaded at low water, which is what the Hanse ports needed. It also carries the **pintle-and-gudgeon stern rudder**, first depicted on the Winchester font about 1180 — the single most important European ship fitting of the Middle Ages.\n\nA replica was instrumented and the result is sobering: in a gentle breeze it made good 74–76° to the true wind with a velocity made good of 0.15 knots. In twenty knots of wind it lost ground.",
    "cite": "Bremen cog, Deutsches Schiffahrtsmuseum; Brandt & Hochkirch 1995 replica trials.",
    "from": 1100,
    "polar": {
@@ -996,7 +1024,7 @@
      "150": 4.4,
      "180": 3.8
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 8.0,
@@ -1044,7 +1072,8 @@
     "beam": 7.6,
     "draught": 2.25,
     "freeboard": 2.01,
-    "cm": 0.8
+    "cm": 0.8,
+    "steering": "stern"
    }
   },
   {
@@ -1061,7 +1090,7 @@
    "rows": [
     [
      "Length",
-     "20\u201325 m"
+     "20–25 m"
     ],
     [
      "Beam",
@@ -1069,11 +1098,11 @@
     ],
     [
      "Burden",
-     "50\u201360 tons"
+     "50–60 tons"
     ],
     [
      "Crew",
-     "20\u201325"
+     "20–25"
     ],
     [
      "Draught",
@@ -1081,7 +1110,7 @@
     ],
     [
      "Rig",
-     "2\u20133 lateen masts"
+     "2–3 lateen masts"
     ],
     [
      "Length to beam",
@@ -1103,8 +1132,8 @@
    "crew": 25,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "A small, shallow, weatherly hull carrying two or three lateen sails. Its significance is its ability to sail to windward: a square-rigged cog could run down to Guinea on the north-east trades but could not return against them, whereas a caravel could work back.\n\nWhat it made possible has a name: the ***volta do mar***, the turn of the sea. To come home from West Africa you do not beat up the coast against the trades. You stand out **west** into the middle of the Atlantic, as far as the Azores, pick up the westerlies at 35\u201340\u00b0N and run home on them. Sailing away from your destination in order to reach it is the first great piece of applied knowledge about the wind field, and in 1500 Cabral's southern version of it swung so far west that it reached Brazil.",
-   "cite": "Portuguese *Regimento* c. 1509; Barros, *D\u00e9cadas da \u00c1sia*.",
+   "text": "A small, shallow, weatherly hull carrying two or three lateen sails. Its significance is its ability to sail to windward: a square-rigged cog could run down to Guinea on the north-east trades but could not return against them, whereas a caravel could work back.\n\nWhat it made possible has a name: the ***volta do mar***, the turn of the sea. To come home from West Africa you do not beat up the coast against the trades. You stand out **west** into the middle of the Atlantic, as far as the Azores, pick up the westerlies at 35–40°N and run home on them. Sailing away from your destination in order to reach it is the first great piece of applied knowledge about the wind field, and in 1500 Cabral's southern version of it swung so far west that it reached Brazil.",
+   "cite": "Portuguese *Regimento* c. 1509; Barros, *Décadas da Ásia*.",
    "from": 1430,
    "polar": {
     "beatLight": 72,
@@ -1122,7 +1151,7 @@
      "150": 4.8,
      "180": 3.9
     },
-    "rigNote": "Better than a square rig, and by less than the textbooks claim \u2014 their 55\u201365\u00b0 is a heading. The cost is manpower: tacking means walking the whole yard round the mast.",
+    "rigNote": "Better than a square rig, and by less than the textbooks claim — their 55–65° is a heading. The cost is manpower: tacking means walking the whole yard round the mast.",
     "rig": "lateen / settee",
     "anchor": {
      "kn": 7.6,
@@ -1181,7 +1210,8 @@
     "beam": 5.8,
     "draught": 2.0,
     "freeboard": 2.1,
-    "cm": 0.7
+    "cm": 0.7,
+    "steering": "stern"
    }
   },
   {
@@ -1198,7 +1228,7 @@
    "rows": [
     [
      "Portuguese India naus",
-     "~400 t (1500) \u2192 1,000\u20132,000 t (1600)"
+     "~400 t (1500) → 1,000–2,000 t (1600)"
     ],
     [
      "*Madre de Deus*, 1592",
@@ -1210,7 +1240,7 @@
     ],
     [
      "A three-master's sails",
-     "six \u2014 spritsail, foresail, mainsail, mizzen, two topsails"
+     "six — spritsail, foresail, mainsail, mizzen, two topsails"
     ],
     [
      "Hull",
@@ -1218,14 +1248,14 @@
     ],
     [
      "Tonnage system",
-     "tons burden \u2014 not comparable with register or displacement tons"
+     "tons burden — not comparable with register or displacement tons"
     ]
    ],
    "crew": 80,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "A three- or four-masted ocean-going ship developed in Portugal and Spain during the fourteenth and fifteenth centuries, carvel-built, with a forecastle forward and a high rounded stern carrying an aftcastle. It carried cargo and guns on the same voyage and was large enough to remain stable in heavy seas.\n\nThe rig is mixed: square sails on the fore and main for driving power, a lateen mizzen aft to help the ship steer and lie closer to the wind. A typical three-master set six sails \u2014 spritsail, foresail, mainsail, mizzen and two topsails.\n\nPortuguese carracks on the India run were often over 1,000 tons. Galleons gradually superseded the type from the late sixteenth century, though carracks remained in use into the middle of the seventeenth.",
-   "cite": "Rodrigues & Loureiro on the *carreira da \u00cdndia*; Wikipedia, *Carrack* (accessed 2026-08-02).",
+   "text": "A three- or four-masted ocean-going ship developed in Portugal and Spain during the fourteenth and fifteenth centuries, carvel-built, with a forecastle forward and a high rounded stern carrying an aftcastle. It carried cargo and guns on the same voyage and was large enough to remain stable in heavy seas.\n\nThe rig is mixed: square sails on the fore and main for driving power, a lateen mizzen aft to help the ship steer and lie closer to the wind. A typical three-master set six sails — spritsail, foresail, mainsail, mizzen and two topsails.\n\nPortuguese carracks on the India run were often over 1,000 tons. Galleons gradually superseded the type from the late sixteenth century, though carracks remained in use into the middle of the seventeenth.",
+   "cite": "Rodrigues & Loureiro on the *carreira da Índia*; Wikipedia, *Carrack* (accessed 2026-08-02).",
    "from": 1440,
    "polar": {
     "beatLight": 80,
@@ -1243,12 +1273,12 @@
      "150": 4.7,
      "180": 4.1
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 4.5,
      "kind": "passage",
-     "source": "Carreira da \u00cdndia passage studies: typical fair-wind day's runs"
+     "source": "Carreira da Índia passage studies: typical fair-wind day's runs"
     }
    },
    "hull": {
@@ -1306,7 +1336,8 @@
     "beam": 11.0,
     "draught": 4.6,
     "freeboard": 4.4,
-    "cm": 0.76
+    "cm": 0.76,
+    "steering": "stern"
    }
   },
   {
@@ -1327,7 +1358,7 @@
     ],
     [
      "Beam of the HULL",
-     "5.2 m \u2014 but the rowing frame stands wider, about 6.9 m overall"
+     "5.2 m — but the rowing frame stands wider, about 6.9 m overall"
     ],
     [
      "Length : beam",
@@ -1343,11 +1374,11 @@
     ],
     [
      "Freeboard amidships",
-     "about 1.1 m \u2014 the sea is at the rower's elbow"
+     "about 1.1 m — the sea is at the rower's elbow"
     ],
     [
      "Oars",
-     "24 benches a side, one great oar to a bench (a scaloccio), each ~11.5 m and pulled by 3\u20134 men"
+     "24 benches a side, one great oar to a bench (a scaloccio), each ~11.5 m and pulled by 3–4 men"
     ],
     [
      "Dash",
@@ -1355,7 +1386,7 @@
     ],
     [
      "Cruise under oars",
-     "3\u20134 kn; the fleet's day is set by the rowers' drinking water"
+     "3–4 kn; the fleet's day is set by the rowers' drinking water"
     ],
     [
      "Guns",
@@ -1363,7 +1394,7 @@
     ],
     [
      "Crew",
-     "~150 at the oars, 20\u201330 sailors; up to 100 soldiers embarked for battle"
+     "~150 at the oars, 20–30 sailors; up to 100 soldiers embarked for battle"
     ],
     [
      "Rig",
@@ -1373,7 +1404,7 @@
    "crew": 280,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "The standard Mediterranean warship for four hundred years after gunpowder, and the ship that fought Lepanto \u2014 about 400 of them on one afternoon in October 1571, the largest galley action ever fought.\n\nHer armament faces FORWARD. The heavy gun sits on the centreline at the bow, aimed by aiming the ship, and it fired once \u2014 at fifty metres or less, immediately before boarding. The broadside that was re-organising Atlantic warfare in the same century has no place here: the sides are full of oars.\n\nThe dimensions of a fighting fact: 42 m of hull carries only 1.1 m of freeboard, so the rowing frame \u2014 the *apostis*, the rectangular outrigger the oars actually pivot on \u2014 stands wider than the hull itself, and the spur at the bow is a boarding bridge, not a ram. At Lepanto the two systems of rowing met: Venice still rowed *alla sensile*, three separate oars to a bench; Spain and Genoa had gone *a scaloccio*, one great oar pulled by three to five men. Everyone converted after the battle, because a scaloccio can be rowed by chained men and sensile cannot.\n\nGuilmartin's central measurement is logistical: a galley dashes at 7 knots for twenty minutes, cruises at 3\u20134, and carries water for a few days at most \u2014 150 rowers working in a Mediterranean summer drink tons of it. Galley war is therefore amphibious war, fought port to port along coasts, and it ended not when sailing ships got better guns but when the round ship could finally keep the sea in winter.",
+   "text": "The standard Mediterranean warship for four hundred years after gunpowder, and the ship that fought Lepanto — about 400 of them on one afternoon in October 1571, the largest galley action ever fought.\n\nHer armament faces FORWARD. The heavy gun sits on the centreline at the bow, aimed by aiming the ship, and it fired once — at fifty metres or less, immediately before boarding. The broadside that was re-organising Atlantic warfare in the same century has no place here: the sides are full of oars.\n\nThe dimensions of a fighting fact: 42 m of hull carries only 1.1 m of freeboard, so the rowing frame — the *apostis*, the rectangular outrigger the oars actually pivot on — stands wider than the hull itself, and the spur at the bow is a boarding bridge, not a ram. At Lepanto the two systems of rowing met: Venice still rowed *alla sensile*, three separate oars to a bench; Spain and Genoa had gone *a scaloccio*, one great oar pulled by three to five men. Everyone converted after the battle, because a scaloccio can be rowed by chained men and sensile cannot.\n\nGuilmartin's central measurement is logistical: a galley dashes at 7 knots for twenty minutes, cruises at 3–4, and carries water for a few days at most — 150 rowers working in a Mediterranean summer drink tons of it. Galley war is therefore amphibious war, fought port to port along coasts, and it ended not when sailing ships got better guns but when the round ship could finally keep the sea in winter.",
    "cite": "Guilmartin, *Gunpowder and Galleys* (rev. ed., Naval Institute Press, 2003); Morrison (ed.), *The Age of the Galley* (Conway, 1995).",
    "from": 1500,
    "polar": {
@@ -1392,18 +1423,18 @@
      "150": 4.3,
      "180": 3.7
     },
-    "rigNote": "The figures above are her SAILING speed in a moderate breeze, lateen canvas on both masts \u2014 passage-making rig, struck and sent ashore before battle, and a poor sailer even so: the hull is built for oars, shallow and leeway-prone. In strong fair winds the router lets the curve saturate at her recorded 7.2 kn. Under oars: a dash of just over 7 kn held for perhaps twenty minutes, cruise 3\u20134 kn (Guilmartin). The router holds 3.5 kn as her oar floor in any wind. No instrumented galley trial exists; the headwind loss is carried over from Olympias's measured ratio, scaled to this cruise.",
+    "rigNote": "The figures above are her SAILING speed in a moderate breeze, lateen canvas on both masts — passage-making rig, struck and sent ashore before battle, and a poor sailer even so: the hull is built for oars, shallow and leeway-prone. In strong fair winds the router lets the curve saturate at her recorded 7.2 kn. Under oars: a dash of just over 7 kn held for perhaps twenty minutes, cruise 3–4 kn (Guilmartin). The router holds 3.5 kn as her oar floor in any wind. No instrumented galley trial exists; the headwind loss is carried over from Olympias's measured ratio, scaled to this cruise.",
     "rig": "oars, with two lateen masts for passage",
     "anchor": {
      "kn": 7.2,
      "kind": "burst",
-     "source": "Guilmartin, Gunpowder and Galleys: a dash of just over 7 kn, sustainable for about twenty minutes; cruise 3\u20134 kn under oars"
+     "source": "Guilmartin, Gunpowder and Galleys: a dash of just over 7 kn, sustainable for about twenty minutes; cruise 3–4 kn under oars"
     },
     "floor": {
      "by": "oar",
      "kn": 3.5,
      "lossKnPerMs": 0.2,
-     "source": "cruise per Guilmartin; headwind loss inferred from Olympias's measured (5.4\u22122.9)/8, scaled to a 3.5 kn cruise \u2014 no instrumented galley trial exists"
+     "source": "cruise per Guilmartin; headwind loss inferred from Olympias's measured (5.4−2.9)/8, scaled to a 3.5 kn cruise — no instrumented galley trial exists"
     }
    },
    "hull": {
@@ -1468,7 +1499,8 @@
     "sternCanopy": {
      "from": 0.87,
      "to": 0.985
-    }
+    },
+    "steering": "stern"
    }
   },
   {
@@ -1493,7 +1525,7 @@
     ],
     [
      "Length : beam",
-     "5.9 \u2014 a merchant hull's proportions, against the war galley's 8.1"
+     "5.9 — a merchant hull's proportions, against the war galley's 8.1"
     ],
     [
      "Draught",
@@ -1501,11 +1533,11 @@
     ],
     [
      "Displacement",
-     "perhaps 600 t loaded \u2014 three times a war galley"
+     "perhaps 600 t loaded — three times a war galley"
     ],
     [
      "Freeboard",
-     "about 2.8 m to the gun deck, against a galley's 1.1 \u2014 her deck must be climbed, not stepped onto"
+     "about 2.8 m to the gun deck, against a galley's 1.1 — her deck must be climbed, not stepped onto"
     ],
     [
      "Oars",
@@ -1521,25 +1553,25 @@
     ],
     [
      "Bow fortress, as drawn",
-     "a rounded fighting deck over the stem carrying the five-piece battery, its parapet sweeping rail to rail \u2014 the round form is attested; its plan is derived, no drawing of one survives"
+     "a rounded fighting deck over the stem carrying the five-piece battery, its parapet sweeping rail to rail — the round form is attested; its plan is derived, no drawing of one survives"
     ],
     [
      "Chasers, as drawn",
-     "two, at the after end of the gun deck, laid astern \u2014 the record says only 'chasers aft'; two is the least the plural supports (derived)"
+     "two, at the after end of the gun deck, laid astern — the record says only 'chasers aft'; two is the least the plural supports (derived)"
     ],
     [
      "Crew",
-     "250\u2013300 at the oars, about 70 sailors and gunners; up to 250 soldiers embarked"
+     "250–300 at the oars, about 70 sailors and gunners; up to 250 soldiers embarked"
     ],
     [
      "Rig",
-     "three lateen masts \u2014 the merchant great galley's sail plan, kept in the conversion"
+     "three lateen masts — the merchant great galley's sail plan, kept in the conversion"
     ]
    ],
    "crew": 500,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "A merchant great galley's hull converted into a floating battery \u2014 the heaviest thing under oars in the sixteenth-century Mediterranean, and the type that opened Lepanto. Venice built her out of the reserve of galee grosse, the three-masted merchant galleys that had carried the Flanders and Levant trades, and the six that the Arsenal finished converting in 1570\u201371 fought at the front of the Christian line on 7 October 1571.\n\nStructurally she inverts the war galley's one hard constraint. A galia sottile carries her whole battery at the bow because her sides at gun height are full of oars. The great galley's hull is deep enough to carry a second deck clear over the rowers' heads, spanning the full width of the rowing frame, and the guns stand on that deck and fire outboard over the oars \u2014 eight or nine pieces a side, with the five-piece heavy battery at the bow and chasers aft, about thirty guns in all. Her freeboard, about 2.8 m to the gun deck against a galley's 1.1, means a galley alongside cannot board her without climbing.\n\nAt Lepanto the six galleasses were towed into position in pairs ahead of the Christian line, and the Ottoman fleet had to row past them to come to grips. Their fire \u2014 the first sustained heavy-gun bombardment an Ottoman galley fleet had ever taken from shipboard \u2014 sank or damaged a number of galleys and, what mattered more, broke up the dressing of the Ottoman line before contact. Guilmartin's judgment is that the galleasses did not win the battle by gunfire; they disordered the attack that the Christian galleys then destroyed at close quarters.\n\nShe was too heavy to row effectively \u2014 about three knots in a burst, towed whenever the fleet manoeuvred \u2014 and depended on her lateen rig for passage. Spain sent four galleasses of the Naples squadron with the 1588 Armada, where one, Girona, was wrecked on the Antrim coast with some 1,300 men lost. Venice kept galleasses in commission into the early eighteenth century, but the broadside's future belonged to the pure sailing ship, which carried more guns further on a fraction of the crew.",
+   "text": "A merchant great galley's hull converted into a floating battery — the heaviest thing under oars in the sixteenth-century Mediterranean, and the type that opened Lepanto. Venice built her out of the reserve of galee grosse, the three-masted merchant galleys that had carried the Flanders and Levant trades, and the six that the Arsenal finished converting in 1570–71 fought at the front of the Christian line on 7 October 1571.\n\nStructurally she inverts the war galley's one hard constraint. A galia sottile carries her whole battery at the bow because her sides at gun height are full of oars. The great galley's hull is deep enough to carry a second deck clear over the rowers' heads, spanning the full width of the rowing frame, and the guns stand on that deck and fire outboard over the oars — eight or nine pieces a side, with the five-piece heavy battery at the bow and chasers aft, about thirty guns in all. Her freeboard, about 2.8 m to the gun deck against a galley's 1.1, means a galley alongside cannot board her without climbing.\n\nAt Lepanto the six galleasses were towed into position in pairs ahead of the Christian line, and the Ottoman fleet had to row past them to come to grips. Their fire — the first sustained heavy-gun bombardment an Ottoman galley fleet had ever taken from shipboard — sank or damaged a number of galleys and, what mattered more, broke up the dressing of the Ottoman line before contact. Guilmartin's judgment is that the galleasses did not win the battle by gunfire; they disordered the attack that the Christian galleys then destroyed at close quarters.\n\nShe was too heavy to row effectively — about three knots in a burst, towed whenever the fleet manoeuvred — and depended on her lateen rig for passage. Spain sent four galleasses of the Naples squadron with the 1588 Armada, where one, Girona, was wrecked on the Antrim coast with some 1,300 men lost. Venice kept galleasses in commission into the early eighteenth century, but the broadside's future belonged to the pure sailing ship, which carried more guns further on a fraction of the crew.",
    "cite": "Guilmartin, *Gunpowder and Galleys* (rev. ed., Naval Institute Press, 2003); Morrison (ed.), *The Age of the Galley* (Conway, 1995).",
    "from": 1540,
    "polar": {
@@ -1558,12 +1590,12 @@
      "150": 3.9,
      "180": 3.4
     },
-    "rigNote": "The figures are her SAILING speed in a moderate breeze, three lateens standing \u2014 the war galley's own lateen curve shape, scaled down for a hull of three times the displacement on barely more canvas per ton. Under oars she is the slowest fighting ship of her century: about 3 kn in a burst, and at Lepanto each galleass was towed into position by two galleys so the rowers would arrive fresh. No instrumented galleass trial exists; every oar figure here is inference and labelled so.",
+    "rigNote": "The figures are her SAILING speed in a moderate breeze, three lateens standing — the war galley's own lateen curve shape, scaled down for a hull of three times the displacement on barely more canvas per ton. Under oars she is the slowest fighting ship of her century: about 3 kn in a burst, and at Lepanto each galleass was towed into position by two galleys so the rowers would arrive fresh. No instrumented galleass trial exists; every oar figure here is inference and labelled so.",
     "rig": "oars, with three lateen masts",
     "anchor": {
      "kn": 4.0,
      "kind": "passage",
-     "source": "day's-run averages of the Venetian merchant great galleys, 3\u20135 kn on passage (Pryor, in Morrison ed., The Age of the Galley); the Lepanto conversions kept the merchant hull and its three-masted lateen rig"
+     "source": "day's-run averages of the Venetian merchant great galleys, 3–5 kn on passage (Pryor, in Morrison ed., The Age of the Galley); the Lepanto conversions kept the merchant hull and its three-masted lateen rig"
     },
     "floor": {
      "by": "oar",
@@ -1643,9 +1675,9 @@
      "to": 0.16,
      "parapetH": 1.1
     },
-    "bowFortressProvenance": "The ROUND form is attested \u2014 Guilmartin's account of the 1570\u201371 Arsenal conversions and the rounded bow structure the contemporary Lepanto depictions draw \u2014 but no plan of one survives, so the half-ellipse drawn here (6.2 m long, closing round the stem at the rowing frame's own width, parapet 1.1 m) is DERIVED: a form choice, not a measurement. Round 87 drew the flat galley arrumbada instead and recorded the simplification; round 116 is that record cashed.",
+    "bowFortressProvenance": "The ROUND form is attested — Guilmartin's account of the 1570–71 Arsenal conversions and the rounded bow structure the contemporary Lepanto depictions draw — but no plan of one survives, so the half-ellipse drawn here (6.2 m long, closing round the stem at the rowing frame's own width, parapet 1.1 m) is DERIVED: a form choice, not a measurement. Round 87 drew the flat galley arrumbada instead and recorded the simplification; round 116 is that record cashed.",
     "sternGuns": 2,
-    "sternGunsProvenance": "The card's Guns row says 'chasers aft' \u2014 plural, unnumbered (Guilmartin; Morrison ed.). TWO are drawn, one either side of the centreline at the gun deck's aft edge, laid astern over the poop tent: the minimum the plural supports (rule 10). No gun-by-gun inventory of a 1571 galleass's stern battery was found this round; if one surfaces, the count follows it.",
+    "sternGunsProvenance": "The card's Guns row says 'chasers aft' — plural, unnumbered (Guilmartin; Morrison ed.). TWO are drawn, one either side of the centreline at the gun deck's aft edge, laid astern over the poop tent: the minimum the plural supports (rule 10). No gun-by-gun inventory of a 1571 galleass's stern battery was found this round; if one surfaces, the count follows it.",
     "gunDeck": {
      "from": 0.16,
      "to": 0.86,
@@ -1655,7 +1687,8 @@
     "sternCanopy": {
      "from": 0.88,
      "to": 0.985
-    }
+    },
+    "steering": "stern"
    }
   },
   {
@@ -1677,7 +1710,7 @@
     ],
     [
      "Beam",
-     "~9.4 m \u2014 length to beam about 3.4, against a Mediterranean galley's 8.1"
+     "~9.4 m — length to beam about 3.4, against a Mediterranean galley's 8.1"
     ],
     [
      "Draught",
@@ -1685,7 +1718,7 @@
     ],
     [
      "Freeboard",
-     "about 2 m to the gunwale, 3.6 m to the fighting deck \u2014 a boarder must climb two storeys"
+     "about 2 m to the gunwale, 3.6 m to the fighting deck — a boarder must climb two storeys"
     ],
     [
      "Decks",
@@ -1693,23 +1726,23 @@
     ],
     [
      "Sangjang wall, as drawn",
-     "closed plank from the gunwale up to the fighting deck, sixteen small ports a side under the deck line \u2014 the closed band is her own plate's; the port count is read off that drawing at about 12 px/m, good to \u00b12 (derived)"
+     "closed plank from the gunwale up to the fighting deck, sixteen small ports a side under the deck line — the closed band is her own plate's; the port count is read off that drawing at about 12 px/m, good to ±2 (derived)"
     ],
     [
      "Oars",
-     "8\u201310 a side, each a long sculling ro worked standing by 3\u20134 men"
+     "8–10 a side, each a long sculling ro worked standing by 3–4 men"
     ],
     [
      "Under oars",
-     "about 3 kn (derived) \u2014 slow, but she pivots on her flat bottom nearly in her own length"
+     "about 3 kn (derived) — slow, but she pivots on her flat bottom nearly in her own length"
     ],
     [
      "Guns",
-     "a dozen and more bronze pieces in four calibres \u2014 cheonja, jija, hyeonja, hwangja ('heaven, earth, black, yellow') \u2014 firing iron shot and the daejanggunjeon heavy arrow"
+     "a dozen and more bronze pieces in four calibres — cheonja, jija, hyeonja, hwangja ('heaven, earth, black, yellow') — firing iron shot and the daejanggunjeon heavy arrow"
     ],
     [
      "Crew",
-     "50\u201360 at the oars and about 125 marines and gunners"
+     "50–60 at the oars and about 125 marines and gunners"
     ],
     [
      "Rig",
@@ -1723,7 +1756,7 @@
    "crew": 180,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "The standard warship of the Joseon navy from 1555 until the nineteenth century, and the ship Yi Sun-sin fought every battle of the Imjin War with. The name means \"board-roofed ship\": above the oar deck the shipwrights built a second, higher deck on stanchions \u2014 the sangjang \u2014 walled with heavy plank, so that the whole fighting crew stands a full storey above the water behind timber, with the commander's roofed tower rising amidships. The first was launched in 1555, after the Eulmyo wako raid of that year showed the old single-decked ships could be boarded and taken.\n\nHer construction is the Korean coastal tradition scaled up to war burden. The bottom is dead flat, built of thick pine planks edge-fastened with oak pegs and locked by massive crossbeams whose ends pierce the hull sides \u2014 no iron nails, and no keel. A flat bottom suits a coast with some of the world's largest tides: she takes the ground upright when the water leaves, and she turns nearly in her own length, pivoting on it. The price is speed. Fifty to sixty rowers working eight to ten great sculling oars drove perhaps three knots, and both fleets' accounts agree the Japanese ships were faster through the water.\n\nThe two navies of the Imjin War (1592\u20131598) disagreed about what a warship is for. The Japanese fleet \u2014 atakebune and the lighter sekibune \u2014 carried arquebusiers and swordsmen, and fought by coming alongside and boarding; its lightly framed hulls mounted few heavy guns, because they could not bear the recoil. The panokseon is the opposite argument built in timber: heavy cannon \u2014 the cheonja, jija, hyeonja and hwangja chongtong, throwing iron shot and the great fletched daejanggunjeon to several hundred metres \u2014 worked from behind a high plank bulwark that boarders would have to climb. Joseon squadrons stood off, fired, and dismasted or holed the boarders before they could close. The geobukseon, the famous turtle ship, is this same hull with the fighting deck roofed over completely.\n\nHer hardest test came after her navy was nearly destroyed. At Chilcheollyang in August 1597 a Joseon fleet under Won Gyun was annihilated \u2014 and thirteen panokseon survived. With those thirteen, reinstated to command, Yi Sun-sin met the Japanese advance fleet of 133 warships in the Myeongnyang strait on 26 October 1597, where a tidal race runs to ten knots and reverses. Anchored across the narrows against the flood, his line fought until the tide turned, then drove the disordered Japanese van back through the strait onto their own supports. About thirty Japanese ships were destroyed; no panokseon was lost. The type, continued as the jeonseon of the late Joseon fleet, remained the kingdom's standard warship until the navy itself was reorganised out of existence in the 1890s.",
+   "text": "The standard warship of the Joseon navy from 1555 until the nineteenth century, and the ship Yi Sun-sin fought every battle of the Imjin War with. The name means \"board-roofed ship\": above the oar deck the shipwrights built a second, higher deck on stanchions — the sangjang — walled with heavy plank, so that the whole fighting crew stands a full storey above the water behind timber, with the commander's roofed tower rising amidships. The first was launched in 1555, after the Eulmyo wako raid of that year showed the old single-decked ships could be boarded and taken.\n\nHer construction is the Korean coastal tradition scaled up to war burden. The bottom is dead flat, built of thick pine planks edge-fastened with oak pegs and locked by massive crossbeams whose ends pierce the hull sides — no iron nails, and no keel. A flat bottom suits a coast with some of the world's largest tides: she takes the ground upright when the water leaves, and she turns nearly in her own length, pivoting on it. The price is speed. Fifty to sixty rowers working eight to ten great sculling oars drove perhaps three knots, and both fleets' accounts agree the Japanese ships were faster through the water.\n\nThe two navies of the Imjin War (1592–1598) disagreed about what a warship is for. The Japanese fleet — atakebune and the lighter sekibune — carried arquebusiers and swordsmen, and fought by coming alongside and boarding; its lightly framed hulls mounted few heavy guns, because they could not bear the recoil. The panokseon is the opposite argument built in timber: heavy cannon — the cheonja, jija, hyeonja and hwangja chongtong, throwing iron shot and the great fletched daejanggunjeon to several hundred metres — worked from behind a high plank bulwark that boarders would have to climb. Joseon squadrons stood off, fired, and dismasted or holed the boarders before they could close. The geobukseon, the famous turtle ship, is this same hull with the fighting deck roofed over completely.\n\nHer hardest test came after her navy was nearly destroyed. At Chilcheollyang in August 1597 a Joseon fleet under Won Gyun was annihilated — and thirteen panokseon survived. With those thirteen, reinstated to command, Yi Sun-sin met the Japanese advance fleet of 133 warships in the Myeongnyang strait on 26 October 1597, where a tidal race runs to ten knots and reverses. Anchored across the narrows against the flood, his line fought until the tide turned, then drove the disordered Japanese van back through the strait onto their own supports. About thirty Japanese ships were destroyed; no panokseon was lost. The type, continued as the jeonseon of the late Joseon fleet, remained the kingdom's standard warship until the navy itself was reorganised out of existence in the 1890s.",
    "cite": "Hong Sun-jae, 'Understanding the Structure of the Panokseon' (*Military History* 135, 2025); Hawley, *The Imjin War* (RAS Korea, 2005); Underwood, *Korean Boats and Ships* (1934). No panokseon survives; every dimension here is a reconstruction from the documentary record and is labelled derived where it is inference.",
    "polar": {
     "beatLight": 62,
@@ -1741,7 +1774,7 @@
      "150": 3.7,
      "180": 3.0
     },
-    "rigNote": "The figures are her SAILING speed in a moderate breeze, both battened lugs standing \u2014 the junk-family curve shape (the Korean sail is the same engineering: a balanced lug held flat by full-length battens), scaled down for a flat-bottomed hull of war burden that makes leeway freely. No Joseon log records a measured passage speed; the anchor is derived and labelled so. Under oars: about 3 kn, 50\u201360 rowers on eight to ten sculls \u2014 both fleets' battle accounts agree the Japanese ships were faster, which is the only speed attestation that exists. The router holds 2.5 kn as her oar floor.",
+    "rigNote": "The figures are her SAILING speed in a moderate breeze, both battened lugs standing — the junk-family curve shape (the Korean sail is the same engineering: a balanced lug held flat by full-length battens), scaled down for a flat-bottomed hull of war burden that makes leeway freely. No Joseon log records a measured passage speed; the anchor is derived and labelled so. Under oars: about 3 kn, 50–60 rowers on eight to ten sculls — both fleets' battle accounts agree the Japanese ships were faster, which is the only speed attestation that exists. The router holds 2.5 kn as her oar floor.",
     "rig": "oars, with two battened lug masts",
     "anchor": {
      "kn": 4.5,
@@ -1752,7 +1785,7 @@
      "by": "oar",
      "kn": 2.5,
      "lossKnPerMs": 0.18,
-     "source": "derived: set below the Mediterranean galley's 3.5 kn cruise \u2014 50\u201360 rowers on ~500 t against her 150 on 200 t; the attestation is relative, both sides' Imjin accounts calling the Japanese ships faster. Headwind loss carried from Olympias's measured ratio, the galley's own method"
+     "source": "derived: set below the Mediterranean galley's 3.5 kn cruise — 50–60 rowers on ~500 t against her 150 on 200 t; the attestation is relative, both sides' Imjin accounts calling the Japanese ships faster. Headwind loss carried from Olympias's measured ratio, the galley's own method"
     }
    },
    "hull": {
@@ -1818,14 +1851,15 @@
      "walls": true,
      "wallPorts": 16,
      "name": "Sangjang",
-     "what": "The raised fighting deck the ship is named for \u2014 the \"board roof\" laid over the oar deck on stanchions rising from the gunwale, walled with heavy plank all round. The marines and gunners fight from it a full storey above the water; the rowers work beneath it, under cover. Before 1555 a Korean warship had one deck and could be boarded; this second one is the answer."
+     "what": "The raised fighting deck the ship is named for — the \"board roof\" laid over the oar deck on stanchions rising from the gunwale, walled with heavy plank all round. The marines and gunners fight from it a full storey above the water; the rowers work beneath it, under cover. Before 1555 a Korean warship had one deck and could be boarded; this second one is the answer."
     },
     "tower": {
      "at": 0.62,
      "w": 3.2,
      "h": 2.6
     },
-    "sangjangProvenance": "The CLOSED wall band between the gunwale and the fighting deck is attested: her own plate \u2014 the late-Joseon jeonseon drawing on this card, in the Gakseon dobon manner \u2014 closes the band with a painted plank belt on both sides she shows, and Hong Sun-jae (2025) reconstructs the same pangpae planking; the card's own Decks row calls the oar deck protected. The PORT ROW is read off that plate: a line of small square ports under the deck line, about sixteen a side at the plate's roughly 12 px/m \u2014 good to plus or minus two, no finer, and that bound is the drawing's, not the ship's. The dragon painted along the belt and the row of shields along the bulwark top in the same drawing are not drawn here; that simplification is recorded."
+    "sangjangProvenance": "The CLOSED wall band between the gunwale and the fighting deck is attested: her own plate — the late-Joseon jeonseon drawing on this card, in the Gakseon dobon manner — closes the band with a painted plank belt on both sides she shows, and Hong Sun-jae (2025) reconstructs the same pangpae planking; the card's own Decks row calls the oar deck protected. The PORT ROW is read off that plate: a line of small square ports under the deck line, about sixteen a side at the plate's roughly 12 px/m — good to plus or minus two, no finer, and that bound is the drawing's, not the ship's. The dragon painted along the belt and the row of shields along the bulwark top in the same drawing are not drawn here; that simplification is recorded.",
+    "steering": "median"
    }
   },
   {
@@ -1843,39 +1877,39 @@
    "rows": [
     [
      "Class",
-     "the middle of the Sengoku navy's three \u2014 kobaya below 40 oars, sekibune 40\u201380, atakebune above \u2014 the classes are counted in oars, not tons"
+     "the middle of the Sengoku navy's three — kobaya below 40 oars, sekibune 40–80, atakebune above — the classes are counted in oars, not tons"
     ],
     [
      "Length",
-     "~25 m for a 40-oar ship (derived from the oar stations; no Sengoku example survives); the class ran roughly 20\u201330 m"
+     "~25 m for a 40-oar ship (derived from the oar stations; no Sengoku example survives); the class ran roughly 20–30 m"
     ],
     [
      "Beam",
-     "~5 m \u2014 length to beam about 5, against the panokseon's 3.4: a hull drawn out for speed"
+     "~5 m — length to beam about 5, against the panokseon's 3.4: a hull drawn out for speed"
     ],
     [
      "Draught",
-     "~1.2 m (derived) \u2014 lightly framed and shallow; she works the anchorages the tide leaves"
+     "~1.2 m (derived) — lightly framed and shallow; she works the anchorages the tide leaves"
     ],
     [
      "Fighting deck",
-     "the s\u014d-yagura, a deck laid over nearly the whole hull, walled with tate-ita shield planks \u2014 thinner than an atakebune's \u2014 pierced by sama loopholes"
+     "the sō-yagura, a deck laid over nearly the whole hull, walled with tate-ita shield planks — thinner than an atakebune's — pierced by sama loopholes"
     ],
     [
      "Yakata, as drawn",
-     "the commander's cabin abaft the mast \u2014 a closed plank house, 4.5 \u00d7 2.8 m to 2.0 m eaves under a ridged plank roof. The form is the Busan scroll's; the dimensions are derived"
+     "the commander's cabin abaft the mast — a closed plank house, 4.5 × 2.8 m to 2.0 m eaves under a ridged plank roof. The form is the Busan scroll's; the dimensions are derived"
     ],
     [
      "Maku, as drawn",
-     "white cloth hung from the yagura's deck edge over the oar band, under a dark scalloped hem \u2014 the dress the Busan scroll draws on hull after hull, with no plank belt anywhere at this band. The ro work out from under it. Depth follows the band itself; the scallop is read off the scroll at ~16 px/m (derived)"
+     "white cloth hung from the yagura's deck edge over the oar band, under a dark scalloped hem — the dress the Busan scroll draws on hull after hull, with no plank belt anywhere at this band. The ro work out from under it. Depth follows the band itself; the scallop is read off the scroll at ~16 px/m (derived)"
     ],
     [
      "Oars",
-     "40 ro \u2014 the sculling oar of Japan and Korea both \u2014 one man each, worked standing, stem to stern"
+     "40 ro — the sculling oar of Japan and Korea both — one man each, worked standing, stem to stern"
     ],
     [
      "Under oars",
-     "~4 kn (derived) \u2014 the one attested speed fact of the Imjin sea war is relative: both fleets' accounts call the Japanese ships the faster"
+     "~4 kn (derived) — the one attested speed fact of the Imjin sea war is relative: both fleets' accounts call the Japanese ships the faster"
     ],
     [
      "Rig",
@@ -1883,22 +1917,22 @@
     ],
     [
      "Weapons",
-     "arquebuses and bows through the sama, and a few light pieces at most \u2014 a lightly framed hull cannot bear big-gun recoil. The ship herself closes and boards"
+     "arquebuses and bows through the sama, and a few light pieces at most — a lightly framed hull cannot bear big-gun recoil. The ship herself closes and boards"
     ],
     [
      "Crew",
-     "about 40 at the oars and 30\u201340 fighting men"
+     "about 40 at the oars and 30–40 fighting men"
     ],
     [
      "At Myeongnyang",
-     "the fleet that entered the strait \u2014 133 warships, mostly this class; the deep-draughted atakebune stayed out of the race"
+     "the fleet that entered the strait — 133 warships, mostly this class; the deep-draughted atakebune stayed out of the race"
     ]
    ],
    "crew": 75,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "The standard warship of Japan from the Sengoku wars to the end of the Edo bakufu. The name means \"barrier ship\": the ships that enforced the toll barriers (seki) the lords of the Inland Sea \u2014 above all the Murakami houses \u2014 maintained across their straits, stopping, taxing and if need be taking every hull that passed. A navy's ships were counted by their oars: under forty a kobaya, a scout and messenger; forty to eighty a sekibune; above that, with beam to carry a castle, an atakebune. The sekibune is the cruiser of the three \u2014 a long, narrow hull on a single sharp stem, lightly framed, shallow, and by every account of the Imjin War faster through the water than anything Korea sent against her.\n\nHer construction is the Japanese coastal tradition put to war. A wasen carries no keel: a heavy flat bottom plank, broad side strakes edge-fastened with iron staples and nails, crossbeams whose ends pierce the planking, a square stern with a great hanging median rudder that can be raised in shoal water, and the sharp raked stem \u2014 a single plank, the mizu-oshi \u2014 that parts the water. Over nearly the whole length of the hull the shipwrights laid the s\u014d-yagura, a full fighting deck, and walled it with tate-ita, shield planks pierced by sama \u2014 loopholes for bows and arquebuses. The single mast is unstepped before action and laid down the yagura roof, and the ship fights under her forty sculling ro alone, one man standing at each.\n\nHer doctrine was the opposite of the panokseon's, and the two argued it out across the Imjin War (1592\u20131598). A sekibune's light frame cannot bear the recoil of heavy cannon, so she carried almost none: her weapons were the arquebus through the loophole and the grappling iron over the rail, and her speed existed to close the range and put swordsmen on the enemy's deck. Against Chinese and Korean coasters, and in the fleet actions of the Inland Sea, it worked. Against a Joseon line that stood off behind high timber and fired cannon, it mostly did not. At Myeongnyang on 26 October 1597 the tidal race barred the deep atakebune, so the 133 warships that entered the strait were led by sekibune \u2014 and thirteen panokseon anchored across the narrows destroyed about thirty of them, killing the fleet's van commander Kurushima Michifusa, without losing a ship.\n\nThe type outlived the war by two and a half centuries, because the Tokugawa peace was built partly on its back. In 1609 the shogunate confiscated every atakebune in Japan and capped the daimyo at ships of 500 koku, which made the sekibune the largest warship a lord could own; the great houses built them to the limit, lacquered and gilded them into gozabune, and rowed their lords to Edo in them on the alternate-attendance processions. The shogun's own, the red-lacquered Tenchi-maru of 1630 \u2014 500 koku, 76 oars \u2014 served for 230 years and was broken up only in the 1860s, when the navy that replaced her class ran on steam.",
-   "cite": "Turnbull, Fighting Ships of the Far East (2): Japan and Korea AD 612\u20131639 (Osprey, 2003); Hawley, The Imjin War (RAS Korea, 2005); Museum of Maritime Science, Tokyo (Tenchi-maru); the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), the card's own plate. No Sengoku sekibune survives; the classification by oar count is recorded, and every dimension here is a reconstruction from it, labelled derived where it is inference.",
+   "text": "The standard warship of Japan from the Sengoku wars to the end of the Edo bakufu. The name means \"barrier ship\": the ships that enforced the toll barriers (seki) the lords of the Inland Sea — above all the Murakami houses — maintained across their straits, stopping, taxing and if need be taking every hull that passed. A navy's ships were counted by their oars: under forty a kobaya, a scout and messenger; forty to eighty a sekibune; above that, with beam to carry a castle, an atakebune. The sekibune is the cruiser of the three — a long, narrow hull on a single sharp stem, lightly framed, shallow, and by every account of the Imjin War faster through the water than anything Korea sent against her.\n\nHer construction is the Japanese coastal tradition put to war. A wasen carries no keel: a heavy flat bottom plank, broad side strakes edge-fastened with iron staples and nails, crossbeams whose ends pierce the planking, a square stern with a great hanging median rudder that can be raised in shoal water, and the sharp raked stem — a single plank, the mizu-oshi — that parts the water. Over nearly the whole length of the hull the shipwrights laid the sō-yagura, a full fighting deck, and walled it with tate-ita, shield planks pierced by sama — loopholes for bows and arquebuses. The single mast is unstepped before action and laid down the yagura roof, and the ship fights under her forty sculling ro alone, one man standing at each.\n\nHer doctrine was the opposite of the panokseon's, and the two argued it out across the Imjin War (1592–1598). A sekibune's light frame cannot bear the recoil of heavy cannon, so she carried almost none: her weapons were the arquebus through the loophole and the grappling iron over the rail, and her speed existed to close the range and put swordsmen on the enemy's deck. Against Chinese and Korean coasters, and in the fleet actions of the Inland Sea, it worked. Against a Joseon line that stood off behind high timber and fired cannon, it mostly did not. At Myeongnyang on 26 October 1597 the tidal race barred the deep atakebune, so the 133 warships that entered the strait were led by sekibune — and thirteen panokseon anchored across the narrows destroyed about thirty of them, killing the fleet's van commander Kurushima Michifusa, without losing a ship.\n\nThe type outlived the war by two and a half centuries, because the Tokugawa peace was built partly on its back. In 1609 the shogunate confiscated every atakebune in Japan and capped the daimyo at ships of 500 koku, which made the sekibune the largest warship a lord could own; the great houses built them to the limit, lacquered and gilded them into gozabune, and rowed their lords to Edo in them on the alternate-attendance processions. The shogun's own, the red-lacquered Tenchi-maru of 1630 — 500 koku, 76 oars — served for 230 years and was broken up only in the 1860s, when the navy that replaced her class ran on steam.",
+   "cite": "Turnbull, Fighting Ships of the Far East (2): Japan and Korea AD 612–1639 (Osprey, 2003); Hawley, The Imjin War (RAS Korea, 2005); Museum of Maritime Science, Tokyo (Tenchi-maru); the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), the card's own plate. No Sengoku sekibune survives; the classification by oar count is recorded, and every dimension here is a reconstruction from it, labelled derived where it is inference.",
    "polar": {
     "beatLight": 80,
     "beatHard": 95,
@@ -1915,12 +1949,12 @@
      "150": 4.8,
      "180": 4.2
     },
-    "rigNote": "The figures are her SAILING speed in a moderate breeze, the single square sail set for passage \u2014 a fair-wind rig on a shallow, leeway-prone hull, struck and laid down the yagura before action. Under oars: about 4 kn (derived), 40 sculling ro with one man standing at each. No measured sekibune passage exists; the only speed attestation of the Imjin sea war is relative \u2014 both fleets' accounts agree the Japanese ships were faster \u2014 so her figures are set above the panokseon's, which are themselves derived and labelled so. The router holds 3.5 kn as her oar floor.",
+    "rigNote": "The figures are her SAILING speed in a moderate breeze, the single square sail set for passage — a fair-wind rig on a shallow, leeway-prone hull, struck and laid down the yagura before action. Under oars: about 4 kn (derived), 40 sculling ro with one man standing at each. No measured sekibune passage exists; the only speed attestation of the Imjin sea war is relative — both fleets' accounts agree the Japanese ships were faster — so her figures are set above the panokseon's, which are themselves derived and labelled so. The router holds 3.5 kn as her oar floor.",
     "rig": "oars, with one square-rigged mast for passage",
     "anchor": {
      "kn": 5.0,
      "kind": "passage",
-     "source": "derived: no measured sekibune passage exists; set half a knot above the panokseon's derived 4.5 \u2014 the one attested speed comparison of the Imjin sea war is relative, both fleets calling the Japanese ships faster"
+     "source": "derived: no measured sekibune passage exists; set half a knot above the panokseon's derived 4.5 — the one attested speed comparison of the Imjin sea war is relative, both fleets calling the Japanese ships faster"
     },
     "floor": {
      "by": "oar",
@@ -1985,8 +2019,8 @@
      "over": 0.35,
      "loops": 13,
      "maku": true,
-     "name": "S\u014d-yagura",
-     "what": "The full-length fighting deck the class is built around, laid over the hull on stanchions and walled with tate-ita \u2014 shield planks pierced by sama loopholes for bows and arquebuses. The rowers work beneath it; the fighting men stand on it; the mast lies down it before action."
+     "name": "Sō-yagura",
+     "what": "The full-length fighting deck the class is built around, laid over the hull on stanchions and walled with tate-ita — shield planks pierced by sama loopholes for bows and arquebuses. The rowers work beneath it; the fighting men stand on it; the mast lies down it before action."
     },
     "tower": {
      "at": 0.66,
@@ -1995,10 +2029,11 @@
      "h": 2.0,
      "walls": true,
      "name": "Yakata",
-     "what": "The commander's cabin standing on the yagura abaft the mast \u2014 a closed plank house under a ridged plank roof, which is the form the Busan scroll of 1593 draws on hull after hull of the anchored fleet. The ship is commanded from it; in the Edo peace it grew into the lacquered state cabin of the gozabune."
+     "what": "The commander's cabin standing on the yagura abaft the mast — a closed plank house under a ridged plank roof, which is the form the Busan scroll of 1593 draws on hull after hull of the anchored fleet. The ship is commanded from it; in the Edo peace it grew into the lacquered state cabin of the gozabune."
     },
-    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull \u2014 the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale \u2014 good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; the curtain is not drawn, and that simplification is recorded here.",
-   "makuProvenance": "The CLOTH is attested: the Busan boat-barrier scroll of 1593, this card's own plate, hangs a white band under a dark scalloped hem along the yagura band on hull after hull of the anchored fleet, and the atakebune amidships wears the same dress inverted \u2014 dark with white scallops \u2014 under sail. The scroll draws NO plank belt at this band, so gunDeck.walls (the panokseon's sangjang belt, round 118) is refuted for this class by its own plate. The DIMENSIONS are derived: the scroll stretches the upperworks, so the band's depth in metres cannot be read off it \u2014 the drawn cloth fills the band the model's own rail and deck bound, and the ~0.7 m scallop bay is read off the scroll at its ~16 px/m (a ~25 m hull drawn ~400 px long), good to the nearest half metre, no finer. Whether a sekibune cruised with the maku hung is not attested \u2014 the scroll's fleet is anchored, the atakebune wears hers under sail \u2014 and the ends of the band are left open: the plate shows the cloth only in broadside."
+    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull — the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale — good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; the curtain is not drawn, and that simplification is recorded here.",
+    "makuProvenance": "The CLOTH is attested: the Busan boat-barrier scroll of 1593, this card's own plate, hangs a white band under a dark scalloped hem along the yagura band on hull after hull of the anchored fleet, and the atakebune amidships wears the same dress inverted — dark with white scallops — under sail. The scroll draws NO plank belt at this band, so gunDeck.walls (the panokseon's sangjang belt, round 118) is refuted for this class by its own plate. The DIMENSIONS are derived: the scroll stretches the upperworks, so the band's depth in metres cannot be read off it — the drawn cloth fills the band the model's own rail and deck bound, and the ~0.7 m scallop bay is read off the scroll at its ~16 px/m (a ~25 m hull drawn ~400 px long), good to the nearest half metre, no finer. Whether a sekibune cruised with the maku hung is not attested — the scroll's fleet is anchored, the atakebune wears hers under sail — and the ends of the band are left open: the plate shows the cloth only in broadside.",
+    "steering": "stern"
    }
   },
   {
@@ -2015,7 +2050,7 @@
    "rows": [
     [
      "Length",
-     "24\u201340 m"
+     "24–40 m"
     ],
     [
      "Length : beam",
@@ -2023,11 +2058,11 @@
     ],
     [
      "Burden",
-     "200\u2013500 t"
+     "200–500 t"
     ],
     [
      "Crew",
-     "12\u201315 \u2014 against ~30 for the English equivalent"
+     "12–15 — against ~30 for the English equivalent"
     ],
     [
      "Rig",
@@ -2035,7 +2070,7 @@
     ],
     [
      "Section",
-     "pear-shaped \u2014 broad in the hold, narrow at the deck"
+     "pear-shaped — broad in the hold, narrow at the deck"
     ],
     [
      "Armament",
@@ -2049,7 +2084,7 @@
    "crew": 12,
    "attestation": "generated",
    "confidence": "good",
-   "text": "A cargo vessel designed by shipwrights of Hoorn in the Dutch Republic in the 1590s and built to no other purpose. The hull is pear-shaped in section, broad in the hold and narrow at the deck, with a shallow draught that let it reach ports and rivers closed to deeper ships. Armament was minimised or omitted to leave the hold clear, which restricted it to waters where it did not expect to fight.\n\nIt was built of softwood cut by wind-powered sawmills and rigged so that twelve to fifteen men could work it where an English ship of the same burden needed about thirty. It carried roughly twice the cargo of its rivals at about half the freight cost.\n\n\u26a0 The narrow deck is often explained as evasion of the Danish Sound Toll, which is said to have been charged on deck area. **The Sound Toll Registers do not support it**: officers assessed dues from the bills of lading a master presented, not from any measurement of the ship. The shape follows from what the hull is for \u2014 hold volume below, and as little weight and rigging as possible above.",
+   "text": "A cargo vessel designed by shipwrights of Hoorn in the Dutch Republic in the 1590s and built to no other purpose. The hull is pear-shaped in section, broad in the hold and narrow at the deck, with a shallow draught that let it reach ports and rivers closed to deeper ships. Armament was minimised or omitted to leave the hold clear, which restricted it to waters where it did not expect to fight.\n\nIt was built of softwood cut by wind-powered sawmills and rigged so that twelve to fifteen men could work it where an English ship of the same burden needed about thirty. It carried roughly twice the cargo of its rivals at about half the freight cost.\n\n⚠ The narrow deck is often explained as evasion of the Danish Sound Toll, which is said to have been charged on deck area. **The Sound Toll Registers do not support it**: officers assessed dues from the bills of lading a master presented, not from any measurement of the ship. The shape follows from what the hull is for — hold volume below, and as little weight and rigging as possible above.",
    "cite": "Unger, *Dutch Shipbuilding before 1800*; Sound Toll Registers Online; Wikipedia, *Fluyt* (accessed 2026-08-02).",
    "from": 1595,
    "polar": {
@@ -2068,7 +2103,7 @@
      "150": 4.6,
      "180": 4.0
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 4.5,
@@ -2133,7 +2168,8 @@
     "draught": 3.1,
     "freeboard": 3.0,
     "cm": 0.82,
-    "sternLights": 1
+    "sternLights": 1,
+    "steering": "stern"
    }
   },
   {
@@ -2154,23 +2190,23 @@
     ],
     [
      "VOC retourschip",
-     "45\u201355 m, 700\u20131,150 t, crew 200\u2013350"
+     "45–55 m, 700–1,150 t, crew 200–350"
     ],
     [
      "British EIC",
-     "1,100\u20131,400 tons burden"
+     "1,100–1,400 tons burden"
     ],
     [
      "*Earl of Mansfield*, 1795",
-     "1,426 t bm \u00b7 175 ft overall \u00b7 43 ft beam \u00b7 17 ft draught"
+     "1,426 t bm · 175 ft overall · 43 ft beam · 17 ft draught"
     ],
     [
      "*Amsterdam* (VOC), 1749",
-     "1,100 t bm \u00b7 42.5 m"
+     "1,100 t bm · 42.5 m"
     ],
     [
-     "Passage Netherlands\u2192Batavia",
-     "mean 253 days (1770\u201375), 238 days (1783\u201392)"
+     "Passage Netherlands→Batavia",
+     "mean 253 days (1770–75), 238 days (1783–92)"
     ],
     [
      "English EIC to Batavia",
@@ -2178,14 +2214,14 @@
     ],
     [
      "Mortality",
-     "VOC-wide ~9\u201310% per voyage across the whole record"
+     "VOC-wide ~9–10% per voyage across the whole record"
     ]
    ],
    "crew": 120,
    "attestation": "generated",
    "confidence": "good",
-   "text": "A three-masted armed merchantman chartered by the European East India companies for the Asia trade: the British EIC from 1600 to 1834, the Dutch VOC through the seventeenth and eighteenth centuries, with French, Danish, Swedish, Austrian and Portuguese equivalents. British ships ran 1,100\u20131,400 tons burden. They carried substantial armament against pirates and privateers, which is why a merchant hull of the period is built to the proportions of a warship.\n\nSolar and de Zwart worked the Dutch-Asiatic Shipping database, which records every VOC voyage made. **VOC ships were slow, and they did not get faster.** Mean passage to Batavia was 253 days in 1770\u201375 and 238 in 1783\u201392, and there is 'no significant trend' across the seventeenth and eighteenth centuries at all.\n\nEnglish East Indiamen did the same passage in 173 days. The gap is 60\u201380 days between two fleets sailing the same ocean in the same years, and it is a fact about the hulls and the standing orders, not about the wind: Dutch hull form was constrained by shallow inland waterways, copper sheathing was adopted late, and the sailing instructions were conservative.",
-   "cite": "Solar & de Zwart, *International Journal of Maritime History* 29(4) (2017); Bruijn, Gaastra & Sch\u00f6ffer, *Dutch-Asiatic Shipping*.",
+   "text": "A three-masted armed merchantman chartered by the European East India companies for the Asia trade: the British EIC from 1600 to 1834, the Dutch VOC through the seventeenth and eighteenth centuries, with French, Danish, Swedish, Austrian and Portuguese equivalents. British ships ran 1,100–1,400 tons burden. They carried substantial armament against pirates and privateers, which is why a merchant hull of the period is built to the proportions of a warship.\n\nSolar and de Zwart worked the Dutch-Asiatic Shipping database, which records every VOC voyage made. **VOC ships were slow, and they did not get faster.** Mean passage to Batavia was 253 days in 1770–75 and 238 in 1783–92, and there is 'no significant trend' across the seventeenth and eighteenth centuries at all.\n\nEnglish East Indiamen did the same passage in 173 days. The gap is 60–80 days between two fleets sailing the same ocean in the same years, and it is a fact about the hulls and the standing orders, not about the wind: Dutch hull form was constrained by shallow inland waterways, copper sheathing was adopted late, and the sailing instructions were conservative.",
+   "cite": "Solar & de Zwart, *International Journal of Maritime History* 29(4) (2017); Bruijn, Gaastra & Schöffer, *Dutch-Asiatic Shipping*.",
    "from": 1595,
    "polar": {
     "beatLight": 80,
@@ -2203,13 +2239,13 @@
      "150": 4.9,
      "180": 4.2
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 4.6,
      "kind": "passage",
      "source": "DAS-era accounts; Solar & de Zwart: mean day's run ~110 nm",
-     "note": "pinned: the front page's 119-day Lisbon\u2192Batavia test is computed on this curve"
+     "note": "pinned: the front page's 119-day Lisbon→Batavia test is computed on this curve"
     }
    },
    "hull": {
@@ -2270,7 +2306,8 @@
     "draught": 5.6,
     "freeboard": 4.6,
     "cm": 0.8,
-    "sternLights": 2
+    "sternLights": 2,
+    "steering": "stern"
    }
   },
   {
@@ -2287,7 +2324,7 @@
    "rows": [
     [
      "The rates",
-     "first 100+ guns \u00b7 second 90\u201398 \u00b7 third 64\u201390 \u00b7 fourth 50"
+     "first 100+ guns · second 90–98 · third 64–90 · fourth 50"
     ],
     [
      "The 74",
@@ -2295,31 +2332,31 @@
     ],
     [
      "Gundeck length",
-     "168\u2013176 ft (51\u201354 m); Slade's British 74s 167\u2013171 ft"
+     "168–176 ft (51–54 m); Slade's British 74s 167–171 ft"
     ],
     [
      "Beam",
-     "47\u201348 ft (14.3\u201314.6 m)"
+     "47–48 ft (14.3–14.6 m)"
     ],
     [
      "Tonnage",
-     "1,600\u20131,750 tons builder's old measurement"
+     "1,600–1,750 tons builder's old measurement"
     ],
     [
      "Crew",
-     "600\u2013650"
+     "600–650"
     ],
     [
      "Speed",
-     "8\u20139 kn maximum; fleet speed ~5 kn"
+     "8–9 kn maximum; fleet speed ~5 kn"
     ],
     [
      "Timber",
-     "~2,000 mature oaks \u2014 a 19th-c. estimate, not a dockyard account"
+     "~2,000 mature oaks — a 19th-c. estimate, not a dockyard account"
     ],
     [
      "*Victory*, 1765",
-     "2,142 tons BOM, 104 guns, 821 men \u2014 1 man per 2.6 tons"
+     "2,142 tons BOM, 104 guns, 821 men — 1 man per 2.6 tons"
     ],
     [
      "Fore-and-aft canvas",
@@ -2329,7 +2366,7 @@
    "crew": 640,
    "attestation": "generated",
    "confidence": "moderate",
-   "text": "Roughly half of all line-of-battle ships by 1800 were 74s: the point on the curve where enough guns met enough speed.\n\nThe manning ratio distinguishes a warship from any other vessel of the period. A merchantman carried one man per 20\u201330 tons; *Victory* carried one per 2.6. Guns need hands, and the Royal Navy went from 16,000 men in 1739 to 145,000 in 1813, roughly half the wartime lower deck pressed. Of about 103,000 deaths between 1793 and 1815, **81% were disease and accident, 13% shipwreck and fire, and 6% enemy action.**",
+   "text": "Roughly half of all line-of-battle ships by 1800 were 74s: the point on the curve where enough guns met enough speed.\n\nThe manning ratio distinguishes a warship from any other vessel of the period. A merchantman carried one man per 20–30 tons; *Victory* carried one per 2.6. Guns need hands, and the Royal Navy went from 16,000 men in 1739 to 145,000 in 1813, roughly half the wartime lower deck pressed. Of about 103,000 deaths between 1793 and 1815, **81% were disease and accident, 13% shipwreck and fire, and 6% enemy action.**",
    "cite": "Lavery, *The Ship of the Line*; Rodger, *The Command of the Ocean*; Albion, *Forests and Sea Power* (1926).",
    "from": 1640,
    "polar": {
@@ -2348,12 +2385,12 @@
      "150": 6.1,
      "180": 5.2
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 11.2,
      "kind": "burst",
-     "source": "Boudriot, The Seventy-Four Gun Ship; RN sailing-quality reports: a good 74 logged 11\u201312 kn"
+     "source": "Boudriot, The Seventy-Four Gun Ship; RN sailing-quality reports: a good 74 logged 11–12 kn"
     }
    },
    "hull": {
@@ -2418,7 +2455,8 @@
     "freeboard": 5.4,
     "cm": 0.8,
     "sternLights": 2,
-    "headsails": 2
+    "headsails": 2,
+    "steering": "stern"
    }
   },
   {
@@ -2434,7 +2472,7 @@
    "region": "the Atlantic",
    "rows": [
     [
-     "Embarked, 1501\u20131866",
+     "Embarked, 1501–1866",
      "~12.5 million people"
     ],
     [
@@ -2443,15 +2481,15 @@
     ],
     [
      "Died at sea",
-     "~1.8 million \u2014 about 14.5%"
+     "~1.8 million — about 14.5%"
     ],
     [
      "Passage length",
-     "~60 days (17th c.) \u2192 ~40 days (19th c.)"
+     "~60 days (17th c.) → ~40 days (19th c.)"
     ],
     [
      "Mortality by era",
-     "22\u201330% (16th c.) \u2192 ~5% (final decade)"
+     "22–30% (16th c.) → ~5% (final decade)"
     ],
     [
      "Crew mortality",
@@ -2463,7 +2501,7 @@
     ],
     [
      "Which is",
-     "2.3 people per ton \u2014 the ratio the Act was written to reduce"
+     "2.3 people per ton — the ratio the Act was written to reduce"
     ],
     [
      "*Henrietta Marie*",
@@ -2474,8 +2512,8 @@
    "pax": 300,
    "attestation": "attested",
    "confidence": "good",
-   "text": "For three centuries the principal cargo carried across the Atlantic was people. An estimated 12.5 million were embarked and 10.7 million landed.\n\nThe between-decks of a slave ship was a designed space, drawn by naval architects and optimised for a quantity of human beings per ton, and the optimisation is legible in the numbers: mortality fell across three centuries not because conditions became humane but because passages got shorter and the loss of cargo was expensive.\n\nThe crew figure is the one that moved Parliament. Thomas Clarkson's evidence was drawn from muster rolls showing that about a fifth of the **crews** died too \u2014 a trade that killed the people who ran it at a rate comparable to the people it carried.\n\n*The voyage database that records all of this is licensed for non-commercial use only, so this model cites it and does not republish it. The figures here are the published aggregates.*",
-   "cite": "Eltis & Richardson, *Atlas of the Transatlantic Slave Trade*; SlaveVoyages.org (cited, not redistributed \u2014 CC BY-NC).",
+   "text": "For three centuries the principal cargo carried across the Atlantic was people. An estimated 12.5 million were embarked and 10.7 million landed.\n\nThe between-decks of a slave ship was a designed space, drawn by naval architects and optimised for a quantity of human beings per ton, and the optimisation is legible in the numbers: mortality fell across three centuries not because conditions became humane but because passages got shorter and the loss of cargo was expensive.\n\nThe crew figure is the one that moved Parliament. Thomas Clarkson's evidence was drawn from muster rolls showing that about a fifth of the **crews** died too — a trade that killed the people who ran it at a rate comparable to the people it carried.\n\n*The voyage database that records all of this is licensed for non-commercial use only, so this model cites it and does not republish it. The figures here are the published aggregates.*",
+   "cite": "Eltis & Richardson, *Atlas of the Transatlantic Slave Trade*; SlaveVoyages.org (cited, not redistributed — CC BY-NC).",
    "from": 1501,
    "polar": {
     "beatLight": 80,
@@ -2493,12 +2531,12 @@
      "150": 5.2,
      "180": 4.5
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 9.6,
      "kind": "burst",
-     "source": "chase accounts of the suppression era: sharp-built brigs at 9\u201310 kn"
+     "source": "chase accounts of the suppression era: sharp-built brigs at 9–10 kn"
     }
    },
    "hull": {
@@ -2558,7 +2596,8 @@
     "beam": 8.0,
     "draught": 3.6,
     "freeboard": 3.0,
-    "cm": 0.8
+    "cm": 0.8,
+    "steering": "stern"
    }
   },
   {
@@ -2575,7 +2614,7 @@
    "rows": [
     [
      "Length",
-     "110 m on deck, 140 m overall \u2014 beam 15.3 m, depth of hold 10 m"
+     "110 m on deck, 140 m overall — beam 15.3 m, depth of hold 10 m"
     ],
     [
      "Tonnage",
@@ -2597,7 +2636,7 @@
    "crew": 13,
    "attestation": "generated",
    "confidence": "good",
-   "text": "Wyoming was at or past the practical limit for a wooden hull: she worked in a seaway badly enough to need steam pumps continuously, and she was lost with all hands in 1924.\n\nAt 110 m on deck she was too long to hold herself straight. A wooden hull resists bending only through the friction and fastenings between thousands of separate timbers, and past a certain length the sea simply works them: her planks twisted and opened, and **she ran her pumps continuously to stay afloat**. Not in heavy weather \u2014 always.\n\nShe foundered in a gale off Cape Cod in 1924 with everyone aboard. Iron and steel did not replace wood because they were cheaper; they replaced it because a metal hull is one continuous member and a wooden one is a negotiation.\n\nAnd the rig is the other half of the story. Six masts of gaff sail are worked entirely from the deck \u2014 nobody goes aloft to reef \u2014 so she carried 3,730 tons with **thirteen people**. A square-rigged ship of that tonnage wanted thirty.",
+   "text": "Wyoming was at or past the practical limit for a wooden hull: she worked in a seaway badly enough to need steam pumps continuously, and she was lost with all hands in 1924.\n\nAt 110 m on deck she was too long to hold herself straight. A wooden hull resists bending only through the friction and fastenings between thousands of separate timbers, and past a certain length the sea simply works them: her planks twisted and opened, and **she ran her pumps continuously to stay afloat**. Not in heavy weather — always.\n\nShe foundered in a gale off Cape Cod in 1924 with everyone aboard. Iron and steel did not replace wood because they were cheaper; they replaced it because a metal hull is one continuous member and a wooden one is a negotiation.\n\nAnd the rig is the other half of the story. Six masts of gaff sail are worked entirely from the deck — nobody goes aloft to reef — so she carried 3,730 tons with **thirteen people**. A square-rigged ship of that tonnage wanted thirty.",
    "cite": "Wikipedia, *Wyoming (schooner)*, citing the Percy & Small yard records.",
    "from": 1909,
    "polar": {
@@ -2616,7 +2655,7 @@
      "150": 6.6,
      "180": 5.3
     },
-    "rigNote": "Points high and is worked entirely from the deck \u2014 nobody goes aloft to reef a gaff sail. That is the whole economic argument for the rig: the crew, not the speed.",
+    "rigNote": "Points high and is worked entirely from the deck — nobody goes aloft to reef a gaff sail. That is the whole economic argument for the rig: the crew, not the speed.",
     "rig": "gaff schooner",
     "anchor": {
      "kn": 13.5,
@@ -2720,7 +2759,8 @@
       "wF": 0.72
      }
     ],
-    "helmAt": 0.962
+    "helmAt": 0.962,
+    "steering": "stern"
    }
   },
   {
@@ -2737,7 +2777,7 @@
    "rows": [
     [
      "Length",
-     "147 m overall, 122 m between perpendiculars \u2014 beam 16.4 m"
+     "147 m overall, 122 m between perpendiculars — beam 16.4 m"
     ],
     [
      "Tonnage",
@@ -2745,11 +2785,11 @@
     ],
     [
      "Rig",
-     "five-masted full-rigger \u2014 the only one ever built"
+     "five-masted full-rigger — the only one ever built"
     ],
     [
      "Canvas",
-     "47 sails, 6,806 m\u00b2"
+     "47 sails, 6,806 m²"
     ],
     [
      "Best day's run",
@@ -2759,7 +2799,7 @@
    "crew": 48,
    "attestation": "generated",
    "confidence": "good",
-   "text": "She was the largest sailing ship ever built and among the last commercially viable ones. She was lost in 1910 after a collision with a cross-Channel steamer that misjudged her speed.\n\nFive masts, all square-rigged \u2014 the only ship ever built that way. 6,806 m\u00b2 of canvas driving 5,081 tons round Cape Horn with nitrate, on a route where steam still could not compete because there was nowhere to coal.\n\nIn November 1910 the cross-Channel steamer *Brighton* misjudged her speed and tried to cross her bows. Preussen was making 16 knots. She broke her keel going ashore near Dover and was never salvaged.\n\nThat is the ending sail actually got: not obsolescence, but a steamer in a hurry.",
+   "text": "She was the largest sailing ship ever built and among the last commercially viable ones. She was lost in 1910 after a collision with a cross-Channel steamer that misjudged her speed.\n\nFive masts, all square-rigged — the only ship ever built that way. 6,806 m² of canvas driving 5,081 tons round Cape Horn with nitrate, on a route where steam still could not compete because there was nowhere to coal.\n\nIn November 1910 the cross-Channel steamer *Brighton* misjudged her speed and tried to cross her bows. Preussen was making 16 knots. She broke her keel going ashore near Dover and was never salvaged.\n\nThat is the ending sail actually got: not obsolescence, but a steamer in a hurry.",
    "cite": "Wikipedia, *Preussen (ship)*; Laeisz Flying-P line records.",
    "from": 1902,
    "polar": {
@@ -2778,7 +2818,7 @@
      "150": 11.2,
      "180": 9.6
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 20.5,
@@ -2896,7 +2936,8 @@
     "cm": 0.9,
     "transom": 0.3,
     "mastLivery": true,
-    "year": 1902
+    "year": 1902,
+    "steering": "steel"
    }
   },
   {
@@ -2913,7 +2954,7 @@
    "rows": [
     [
      "Length",
-     "211 m \u2014 beam 25.3 m, 18,915 gross register tons"
+     "211 m — beam 25.3 m, 18,915 gross register tons"
     ],
     [
      "Scale",
@@ -2925,7 +2966,7 @@
     ],
     [
      "Rig",
-     "topsail schooner \u2014 a gaff sail on each of six masts"
+     "topsail schooner — a gaff sail on each of six masts"
     ],
     [
      "The masts",
@@ -2968,11 +3009,11 @@
      "180": 11.2
     },
     "rigNote": "Paddle and screw together, six masts of sail above them as insurance. The wind decides little; coal and the size of her bunkers decide everything, which was the design argument.",
-    "rig": "steam \u2014 paddle, screw and six masts",
+    "rig": "steam — paddle, screw and six masts",
     "anchor": {
      "kn": 12.0,
      "kind": "sea service",
-     "source": "trials 1859\u201360 ~14 kn full speed; Atlantic crossings averaged ~11"
+     "source": "trials 1859–60 ~14 kn full speed; Atlantic crossings averaged ~11"
     }
    },
    "hull": {
@@ -3077,7 +3118,8 @@
     ],
     "year": 1858,
     "cove": 1,
-    "deckM": 2.66
+    "deckM": 2.66,
+    "steering": "steel"
    },
    "speedKn": 14.0
   },
@@ -3095,7 +3137,7 @@
    "rows": [
     [
      "Length",
-     "269.1 m \u2014 beam 28.2 m, draught 10.5 m"
+     "269.1 m — beam 28.2 m, draught 10.5 m"
     ],
     [
      "Tonnage",
@@ -3103,11 +3145,11 @@
     ],
     [
      "Watertight compartments",
-     "16, with 15 bulkheads \u2014 which stopped at D deck"
+     "16, with 15 bulkheads — which stopped at D deck"
     ],
     [
      "Speed",
-     "21 kn service, 23 kn maximum \u2014 deliberately not a record-breaker"
+     "21 kn service, 23 kn maximum — deliberately not a record-breaker"
     ],
     [
      "Funnels",
@@ -3123,7 +3165,7 @@
    "speedKn": 21.0,
    "attestation": "generated",
    "confidence": "good",
-   "text": "She was not built to be fast. Cunard had the speed record and White Star chose not to compete for it \u2014 Titanic was built for **size and comfort**, on the theory that passengers would rather cross well than quickly.\n\nHer sixteen watertight compartments were real, and they were not enough for a reason of geometry rather than engineering: **the bulkheads stopped at D deck**. Water filling one compartment past that level simply flowed over the top into the next. She could float with four flooded. The iceberg opened five.\n\nThe lifeboat number was legal. The regulation scaled boats to a ship's TONNAGE and had last been written when the largest ship afloat was 10,000 tons.",
+   "text": "She was not built to be fast. Cunard had the speed record and White Star chose not to compete for it — Titanic was built for **size and comfort**, on the theory that passengers would rather cross well than quickly.\n\nHer sixteen watertight compartments were real, and they were not enough for a reason of geometry rather than engineering: **the bulkheads stopped at D deck**. Water filling one compartment past that level simply flowed over the top into the next. She could float with four flooded. The iceberg opened five.\n\nThe lifeboat number was legal. The regulation scaled boats to a ship's TONNAGE and had last been written when the largest ship afloat was 10,000 tons.",
    "cite": "Wikipedia, *RMS Titanic*; British Wreck Commissioner's Inquiry, 1912.",
    "from": 1912,
    "polar": {
@@ -3147,7 +3189,7 @@
     "anchor": {
      "kn": 21.0,
      "kind": "sea service",
-     "source": "British Wreck Commissioner's Inquiry; Olympic-class service records: 21\u201322 kn at sea"
+     "source": "British Wreck Commissioner's Inquiry; Olympic-class service records: 21–22 kn at sea"
     }
    },
    "hull": {
@@ -3225,13 +3267,14 @@
     "deck": {
      "covering": "pine",
      "provenance": "RECORDED: the Olympic-class record as the archive compilations carry it (GG Archives; Titanic Connections; both citing The Shipbuilder's 1911 Olympic and Titanic special number) - yellow pine laid on the exposed decks, including the boat deck; pitch pine on the forecastle, poop and well decks; teak only as margin and trim around houses and fittings. Planks 5 in wide by 3 in thick - 127 x 76 mm. The pitch-pine ends and the teak margins are finer distinctions than this one-covering model draws."
-    }
+    },
+    "steering": "steel"
    }
   },
   {
    "id": "usv",
    "name": "Unmanned surface vessel",
-   "sub": "nobody aboard \u2014 a rigid wing, and no canvas",
+   "sub": "nobody aboard — a rigid wing, and no canvas",
    "rig": "motor",
    "era": [
     2010,
@@ -3242,7 +3285,7 @@
    "rows": [
     [
      "Length",
-     "~22 m \u2014 beam 6.1 m, draught 2.4 m"
+     "~22 m — beam 6.1 m, draught 2.4 m"
     ],
     [
      "Propulsion",
@@ -3270,7 +3313,7 @@
     ],
     [
      "*Soleil*",
-     "first fully autonomous sea voyage \u2014 240 km in 7 hours, 17 Jan 2022"
+     "first fully autonomous sea voyage — 240 km in 7 hours, 17 Jan 2022"
     ],
     [
      "MV *Yara Birkeland*",
@@ -3286,7 +3329,7 @@
     ],
     [
      "Speed",
-     "3\u20135 kn under wind and solar \u2014 **contested** as a 'service' figure for a hull that harvests its own drive; burst speeds are higher on diesel-electric types"
+     "3–5 kn under wind and solar — **contested** as a 'service' figure for a hull that harvests its own drive; burst speeds are higher on diesel-electric types"
     ]
    ],
    "crew": 0,
@@ -3294,7 +3337,7 @@
    "speedKn": 4.0,
    "attestation": "generated",
    "confidence": "fair",
-   "text": "A vessel that operates on the surface without a crew aboard, across a range from remote control to full autonomy. Propulsion may be wind, wave or solar: a wave glider takes its drive from the motion of the sea itself, and a Saildrone from wind and sunlight.\n\nRemoving the crew changes the constraint. A crewed ship's endurance is set by food, water and human tolerance; take the crew off and the limits become fouling, machinery and power. A wind-and-solar hull can stay out for **months**, and the sea state that would be dangerous for a manned vessel is merely slow for one that cannot drown.\n\nIt is a strange place for this story to arrive. The whole history above is people solving the problem of getting themselves across an ocean \u2014 and the current answer, for a growing share of the work, is not to go.",
+   "text": "A vessel that operates on the surface without a crew aboard, across a range from remote control to full autonomy. Propulsion may be wind, wave or solar: a wave glider takes its drive from the motion of the sea itself, and a Saildrone from wind and sunlight.\n\nRemoving the crew changes the constraint. A crewed ship's endurance is set by food, water and human tolerance; take the crew off and the limits become fouling, machinery and power. A wind-and-solar hull can stay out for **months**, and the sea state that would be dangerous for a manned vessel is merely slow for one that cannot drown.\n\nIt is a strange place for this story to arrive. The whole history above is people solving the problem of getting themselves across an ocean — and the current answer, for a growing share of the work, is not to go.",
    "cite": "Wikipedia, *Unmanned surface vehicle*; Saildrone and NOAA survey programmes.",
    "from": 2015,
    "polar": {
@@ -3313,13 +3356,13 @@
      "150": 3.9,
      "180": 3.8
     },
-    "rigNote": "Harvests its drive from wind, wave and sun \u2014 slow everywhere rather than fast somewhere. The design axis is endurance: months at sea, no one to feed.",
+    "rigNote": "Harvests its drive from wind, wave and sun — slow everywhere rather than fast somewhere. The design axis is endurance: months at sea, no one to feed.",
     "rig": "wind, wave and solar",
     "anchor": {
      "kn": 4.0,
      "kind": "sea service",
-     "source": "Saildrone / wave-glider published figures: 3\u20135 kn under wind and solar",
-     "note": "contested as a service figure \u2014 her own card row says so"
+     "source": "Saildrone / wave-glider published figures: 3–5 kn under wind and solar",
+     "note": "contested as a service figure — her own card row says so"
     }
    },
    "hull": {
@@ -3356,7 +3399,8 @@
     "wingSail": 0.62,
     "wingAt": 0.46,
     "year": 2015,
-    "deckSteel": true
+    "deckSteel": true,
+    "steering": "steel"
    }
   },
   {
@@ -3373,7 +3417,7 @@
    "rows": [
     [
      "Rig",
-     "\u26a0 **not a sailplan.** A clipper is a hull \u2014 fine lines built for speed. Clippers were schooners, brigs and brigantines as well as full-rigged ships"
+     "⚠ **not a sailplan.** A clipper is a hull — fine lines built for speed. Clippers were schooners, brigs and brigantines as well as full-rigged ships"
     ],
     [
      "*Cutty Sark*, 1869",
@@ -3381,27 +3425,27 @@
     ],
     [
      "Sail area",
-     "~2,970 m\u00b2; crew 28\u201335"
+     "~2,970 m²; crew 28–35"
     ],
     [
      "*Cutty Sark*'s best day",
-     "363 nm \u2014 a 15.1 kn average sustained for 24 hours"
+     "363 nm — a 15.1 kn average sustained for 24 hours"
     ],
     [
      "The era's best day",
-     "*Champion of the Seas*, 465 nm in 1854 \u2014 unbeaten until 1984"
+     "*Champion of the Seas*, 465 nm in 1854 — unbeaten until 1984"
     ],
     [
      "Highest speed reported",
      "*Sovereign of the Seas*, 22 kn (1854)"
     ],
     [
-     "NY\u2192San Francisco record",
-     "*Flying Cloud*, 89 days 8 hours (1854) \u2014 held until 1989"
+     "NY→San Francisco record",
+     "*Flying Cloud*, 89 days 8 hours (1854) — held until 1989"
     ],
     [
      "Construction",
-     "composite after 1863 \u2014 iron framework, wooden planking"
+     "composite after 1863 — iron framework, wooden planking"
     ],
     [
      "The era",
@@ -3411,7 +3455,7 @@
    "crew": 30,
    "attestation": "generated",
    "confidence": "good",
-   "text": "The fastest commercial sailing ships ever built, and they were obsolete almost immediately.\n\nThe Suez Canal opened in 1869, the year *Cutty Sark* was launched. It cut London\u2013Bombay from about 10,600 nautical miles to 6,200 \u2014 and **sail could not use it**, because there is no wind in a cut and towage was charged. So the clippers were driven onto the routes the canal did not help: Australian wool, and Chilean nitrate round the Horn. They were the best answer to a question that had just stopped being asked.\n\nThe rival record is worth the argument it causes. *Andrew Jackson*'s 89 days 4 hours in 1860 was measured pilot-to-pilot at the Farallones, after which she lay all night waiting for a pilot; Cutler put her anchor-to-anchor time at possibly 89 days 20 hours. The two figures are not commensurable.",
+   "text": "The fastest commercial sailing ships ever built, and they were obsolete almost immediately.\n\nThe Suez Canal opened in 1869, the year *Cutty Sark* was launched. It cut London–Bombay from about 10,600 nautical miles to 6,200 — and **sail could not use it**, because there is no wind in a cut and towage was charged. So the clippers were driven onto the routes the canal did not help: Australian wool, and Chilean nitrate round the Horn. They were the best answer to a question that had just stopped being asked.\n\nThe rival record is worth the argument it causes. *Andrew Jackson*'s 89 days 4 hours in 1860 was measured pilot-to-pilot at the Farallones, after which she lay all night waiting for a pilot; Cutler put her anchor-to-anchor time at possibly 89 days 20 hours. The two figures are not commensurable.",
    "cite": "Cutler, *Greyhounds of the Sea*; Royal Museums Greenwich.",
    "from": 1843,
    "polar": {
@@ -3430,7 +3474,7 @@
      "150": 9.5,
      "180": 8.2
     },
-    "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+    "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
     "rig": "square rig",
     "anchor": {
      "kn": 17.5,
@@ -3532,7 +3576,8 @@
       "wF": 0.48
      }
     ],
-    "helmAt": 0.94
+    "helmAt": 0.94,
+    "steering": "stern"
    }
   },
   {
@@ -3549,19 +3594,19 @@
    "rows": [
     [
      "*Great Britain*, 1843",
-     "98 \u00d7 15.4 m, 1,930 GRT, 1,000 ihp, 12.25 kn"
+     "98 × 15.4 m, 1,930 GRT, 1,000 ihp, 12.25 kn"
     ],
     [
      "*Great Western*, 1838",
-     "Bristol\u2192New York 15 d 5 h \u2248 8.2 kn"
+     "Bristol→New York 15 d 5 h ≈ 8.2 kn"
     ],
     [
      "Coal, simple engine 1850s",
-     "4.0\u20135.0 lb per indicated horsepower-hour"
+     "4.0–5.0 lb per indicated horsepower-hour"
     ],
     [
      "Compound, 1870s",
-     "~2.0\u20132.5 lb/ihp-hr"
+     "~2.0–2.5 lb/ihp-hr"
     ],
     [
      "Triple expansion, 1890",
@@ -3569,15 +3614,15 @@
     ],
     [
      "Propulsion, in order",
-     "paddle wheels \u2014 impractical in a seaway and abandoned for the screw; turbines from *Lusitania* and *Mauretania*; diesel and oil firing from the early 1930s"
+     "paddle wheels — impractical in a seaway and abandoned for the screw; turbines from *Lusitania* and *Mauretania*; diesel and oil firing from the early 1930s"
     ],
     [
      "Atlantic crossing, early 1840s",
-     "under 10 kn \u2014 twelve days and more"
+     "under 10 kn — twelve days and more"
     ],
     [
      "By the 1870s",
-     "about 15 kn \u2014 seven days"
+     "about 15 kn — seven days"
     ],
     [
      "*Lusitania* and *Mauretania*",
@@ -3585,7 +3630,7 @@
     ],
     [
      "SS *United States*, 1952",
-     "34.5 kn \u2014 3 days 12 hours, and the record still stands"
+     "34.5 kn — 3 days 12 hours, and the record still stands"
     ]
    ],
    "crew": 90,
@@ -3593,7 +3638,7 @@
    "speedKn": 12.25,
    "attestation": "generated",
    "confidence": "good",
-   "text": "An iron-hulled, screw-driven steamship on a scheduled ocean route. The figure that governs its range is not horsepower but **pounds of coal per horsepower-hour**, which fell about threefold between 1855 and 1890.\n\nThat is what made steam viable on long routes. At 1850s efficiency a ship crossing an ocean had to give up roughly half its deadweight to its own fuel; by 1890 it was 15\u201320%. Nothing about the engine's power mattered as much as how little coal it burned to make it.\n\nCompound expansion (1854), triple expansion (A. C. Kirk, 1881), then the turbine and oil firing. Steam overtook sail on the British register around 1883.",
+   "text": "An iron-hulled, screw-driven steamship on a scheduled ocean route. The figure that governs its range is not horsepower but **pounds of coal per horsepower-hour**, which fell about threefold between 1855 and 1890.\n\nThat is what made steam viable on long routes. At 1850s efficiency a ship crossing an ocean had to give up roughly half its deadweight to its own fuel; by 1890 it was 15–20%. Nothing about the engine's power mattered as much as how little coal it burned to make it.\n\nCompound expansion (1854), triple expansion (A. C. Kirk, 1881), then the turbine and oil firing. Steam overtook sail on the British register around 1883.",
    "cite": "Griffiths, *Steam at Sea*; Kirk on triple expansion, 1881.",
    "from": 1838,
    "polar": {
@@ -3714,7 +3759,8 @@
     "funnelH": 11.0,
     "year": 1870,
     "cove": 1,
-    "deckM": 1.62
+    "deckM": 1.62,
+    "steering": "steel"
    }
   },
   {
@@ -3731,7 +3777,7 @@
    "rows": [
     [
      "Dimensions",
-     "160.6 m \u00d7 25.0 m \u00d7 8.1 m draught"
+     "160.6 m × 25.0 m × 8.1 m draught"
     ],
     [
      "Displacement",
@@ -3739,7 +3785,7 @@
     ],
     [
      "Speed",
-     "21 kn \u2014 turbines, the first capital ship to have them"
+     "21 kn — turbines, the first capital ship to have them"
     ],
     [
      "Main battery",
@@ -3751,7 +3797,7 @@
     ],
     [
      "Built in",
-     "one year and one day, Portsmouth, 1905\u201306"
+     "one year and one day, Portsmouth, 1905–06"
     ],
     [
      "Net defence",
@@ -3762,7 +3808,7 @@
    "speedKn": 21.0,
    "attestation": "attested",
    "confidence": "good",
-   "text": "A battleship carrying a uniform main battery of ten 12-inch guns and driven by steam turbines, completed at Portsmouth in a year and a day. Both features were already understood separately; putting them in one hull made every existing battleship in every navy second-rate at a stroke, and the type took her name.\n\nThe all-big-gun battery follows from gunnery rather than from ambition. Fire control works by observing the fall of shot and correcting, and that is only possible if every splash comes from a gun of the same calibre \u2014 a mixed battery gives you two sets of splashes and no way to tell which is which at the ranges the guns could already reach.",
+   "text": "A battleship carrying a uniform main battery of ten 12-inch guns and driven by steam turbines, completed at Portsmouth in a year and a day. Both features were already understood separately; putting them in one hull made every existing battleship in every navy second-rate at a stroke, and the type took her name.\n\nThe all-big-gun battery follows from gunnery rather than from ambition. Fire control works by observing the fall of shot and correcting, and that is only possible if every splash comes from a gun of the same calibre — a mixed battery gives you two sets of splashes and no way to tell which is which at the ranges the guns could already reach.",
    "cite": "Wikipedia, *HMS Dreadnought (1906)*; Wikipedia, *Gerald R. Ford-class* (accessed 2026-08-03).",
    "from": 1906,
    "polar": {
@@ -3786,7 +3832,7 @@
     "anchor": {
      "kn": 19.0,
      "kind": "sea service",
-     "source": "trials 21.05 kn (1907); Jutland battle-line steaming 17\u201320"
+     "source": "trials 21.05 kn (1907); Jutland battle-line steaming 17–20"
     }
    },
    "hull": {
@@ -3882,13 +3928,14 @@
      "from": 0.28,
      "to": 0.92
     },
-    "deckM": 2.62
+    "deckM": 2.62,
+    "steering": "steel"
    }
   },
   {
    "id": "yamato",
    "name": "Yamato",
-   "sub": "\u5927\u548c \u2014 the largest guns ever put to sea",
+   "sub": "大和 — the largest guns ever put to sea",
    "rig": "steam",
    "era": [
     1941,
@@ -3899,7 +3946,7 @@
    "rows": [
     [
      "Dimensions",
-     "263.0 m \u00d7 38.9 m \u00d7 11.0 m draught"
+     "263.0 m × 38.9 m × 11.0 m draught"
     ],
     [
      "Displacement",
@@ -3907,11 +3954,11 @@
     ],
     [
      "Main battery",
-     "nine 46 cm (18.1 in) guns \u2014 three triple turrets"
+     "nine 46 cm (18.1 in) guns — three triple turrets"
     ],
     [
      "Armour",
-     "belt 410 mm \u00b7 deck 200\u2013226 mm \u00b7 turret face **650 mm**"
+     "belt 410 mm · deck 200–226 mm · turret face **650 mm**"
     ],
     [
      "Machinery",
@@ -3919,11 +3966,11 @@
     ],
     [
      "Anti-aircraft, as completed",
-     "twelve 12.7 cm in six twin mounts; twenty-four 25 mm in eight triple mounts \u2014 by 1945 the 25 mm barrels numbered about 150"
+     "twelve 12.7 cm in six twin mounts; twenty-four 25 mm in eight triple mounts — by 1945 the 25 mm barrels numbered about 150"
     ],
     [
      "Aircraft",
-     "up to seven floatplanes; two stern catapults and a crane. Boats and aircraft stowed BELOW decks \u2014 46 cm muzzle blast would wreck anything left in the open"
+     "up to seven floatplanes; two stern catapults and a crane. Boats and aircraft stowed BELOW decks — 46 cm muzzle blast would wreck anything left in the open"
     ],
     [
      "Crew",
@@ -4104,13 +4151,14 @@
     "deck": {
      "covering": "hinoki",
      "provenance": "RECORDED, species CONTESTED: Skulski (Anatomy of the Ship - The Battleship Yamato) gives hinoki, Japanese cypress, planks 127 x 76 mm; the Yamato Museum, Kure, states the ship's deck timber was Taiwanese cypress. Neighbouring cypresses of the same pale colour class, so the drawn tone stands either way. Plank width 127 mm from Skulski; butt length is a class default."
-    }
+    },
+    "steering": "steel"
    }
   },
   {
    "id": "carrier",
    "name": "Supercarrier",
-   "sub": "Gerald R. Ford class \u00b7 the deck is the weapon",
+   "sub": "Gerald R. Ford class · the deck is the weapon",
    "rig": "motor",
    "era": [
     2017,
@@ -4121,11 +4169,11 @@
    "rows": [
     [
      "Length overall",
-     "333\u2013337 m"
+     "333–337 m"
     ],
     [
      "Beam",
-     "41 m at the waterline \u2014 but **78 m across the flight deck**"
+     "41 m at the waterline — but **78 m across the flight deck**"
     ],
     [
      "Draught",
@@ -4156,7 +4204,7 @@
    "speedKn": 30.0,
    "attestation": "attested",
    "confidence": "good",
-   "text": "A nuclear-powered aircraft carrier of about 100,000 tons. Its waterline beam is 41 m and its flight deck is 78 m across, because the deck overhangs the hull on both sides \u2014 the two numbers describe different things and neither alone describes the ship.\n\nThe angled deck is the feature everything else depends on. A landing strip set a few degrees to port means a pilot who misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward behind a crash barrier. The island is small and to starboard so the deck stays clear, and to starboard specifically because an aircraft going around swings to port.\n\nTwo reactors remove the constraint that shaped every warship before: a hull that no longer carries its own fuel can spend that volume and that range on aircraft instead.",
+   "text": "A nuclear-powered aircraft carrier of about 100,000 tons. Its waterline beam is 41 m and its flight deck is 78 m across, because the deck overhangs the hull on both sides — the two numbers describe different things and neither alone describes the ship.\n\nThe angled deck is the feature everything else depends on. A landing strip set a few degrees to port means a pilot who misses the arrestor wires flies off the bow and goes round again, instead of into the aircraft parked forward behind a crash barrier. The island is small and to starboard so the deck stays clear, and to starboard specifically because an aircraft going around swings to port.\n\nTwo reactors remove the constraint that shaped every warship before: a hull that no longer carries its own fuel can spend that volume and that range on aircraft instead.",
    "cite": "Wikipedia, *Gerald R. Ford-class aircraft carrier* (accessed 2026-08-03).",
    "from": 2017,
    "polar": {
@@ -4219,7 +4267,8 @@
     "decks": 2,
     "deckPark": 12,
     "year": 2017,
-    "deckM": 4.3
+    "deckM": 4.3,
+    "steering": "steel"
    }
   },
   {
@@ -4236,7 +4285,7 @@
    "rows": [
     [
      "*Autocarrier*, February 1931",
-     "21 container slots \u2014 the first container ship, a quarter-century before the intermodal box"
+     "21 container slots — the first container ship, a quarter-century before the intermodal box"
     ],
     [
      "*Ideal X*, 26 April 1956",
@@ -4252,19 +4301,19 @@
     ],
     [
      "Speed",
-     "16\u201325 kn; slow steaming cut this to about 21 kn in the 2010s"
+     "16–25 kn; slow steaming cut this to about 21 kn in the 2010s"
     ],
     [
-     "*Emma M\u00e6rsk*, 2006",
-     "397 \u00d7 56 m, 15,550 TEU"
+     "*Emma Mærsk*, 2006",
+     "397 × 56 m, 15,550 TEU"
     ],
     [
      "MSC Irina class, 2023",
-     "399.9 \u00d7 61.3 m, 24,346 TEU"
+     "399.9 × 61.3 m, 24,346 TEU"
     ],
     [
      "Freeboard, as drawn",
-     "**derived** \u2014 33.2 m depth moulded (MSC G\u00fcls\u00fcn class, *Significant Ships of 2019*) less the 16 m loaded draught = 17.2 m to the weather deck; this is a type ship, a composite of the class, not one hull"
+     "**derived** — 33.2 m depth moulded (MSC Gülsün class, *Significant Ships of 2019*) less the 16 m loaded draught = 17.2 m to the weather deck; this is a type ship, a composite of the class, not one hull"
     ],
     [
      "Panamax (1914 locks)",
@@ -4272,11 +4321,11 @@
     ],
     [
      "Neo-Panamax (2016)",
-     "LOA 366 m, draught 15.2 m; beam **contested** \u2014 49 m as built, raised to 51.25 m by the Canal Authority in 2018"
+     "LOA 366 m, draught 15.2 m; beam **contested** — 49 m as built, raised to 51.25 m by the Canal Authority in 2018"
     ],
     [
      "Malaccamax",
-     "draught **contested** \u2014 commonly given as 25 m, though the strait is also cited at about 21 m. No container ship is bound by it"
+     "draught **contested** — commonly given as 25 m, though the strait is also cited at about 21 m. No container ship is bound by it"
     ]
    ],
    "crew": 22,
@@ -4284,7 +4333,7 @@
    "speedKn": 21.0,
    "attestation": "generated",
    "confidence": "good",
-   "text": "The last chapter of this story is not about the sea at all. A modern container ship's route is set by **lock chambers and dredged channels** \u2014 numbers written down by engineers \u2014 rather than by anything the ocean does.\n\nPanamax is not a ship. It is the inside dimension of a lock built in 1914, and for a century the world's fleet was designed around it: 294.13 m long, 32.31 m in the beam, because that is what fits. The 2016 expansion moved the number and the fleet moved with it.\n\nGrowth has now stopped, and it stopped on port depth and canal width rather than on anything to do with naval architecture.",
+   "text": "The last chapter of this story is not about the sea at all. A modern container ship's route is set by **lock chambers and dredged channels** — numbers written down by engineers — rather than by anything the ocean does.\n\nPanamax is not a ship. It is the inside dimension of a lock built in 1914, and for a century the world's fleet was designed around it: 294.13 m long, 32.31 m in the beam, because that is what fits. The 2016 expansion moved the number and the fleet moved with it.\n\nGrowth has now stopped, and it stopped on port depth and canal width rather than on anything to do with naval architecture.",
    "cite": "Levinson, *The Box* (2006); Panama Canal Authority vessel requirements; Suez Canal Authority.",
    "from": 1956,
    "polar": {
@@ -4308,7 +4357,7 @@
     "anchor": {
      "kn": 20.0,
      "kind": "sea service",
-     "source": "class design service 21\u201325 kn; slow-steamed 16\u201318 since 2008 (Notteboom & Cariou)"
+     "source": "class design service 21–25 kn; slow-steamed 16–18 since 2008 (Notteboom & Cariou)"
     }
    },
    "hull": {
@@ -4343,7 +4392,8 @@
     "freeboard": 17.2,
     "cm": 0.98,
     "year": 1991,
-    "freeboardProvenance": "TYPE SHIP \u2014 the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC G\u00fcls\u00fcn / MSC Irina classes, 399.9 m \u00d7 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC G\u00fcls\u00fcn; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water \u2014 a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts \u2014 the same distinction ever-given's stationProvenance records from her casualty report."
+    "freeboardProvenance": "TYPE SHIP — the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC Gülsün / MSC Irina classes, 399.9 m × 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC Gülsün; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water — a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts — the same distinction ever-given's stationProvenance records from her casualty report.",
+    "steering": "steel"
    }
   },
   {
@@ -4380,11 +4430,11 @@
      "180": 22.8
     },
     "rig": "two-stroke diesel, single screw",
-    "rigNote": "A 2018 ultra-large container ship: one low-speed two-stroke on a single fixed-pitch screw, about 59,000 kW. Service speed is set by fuel price as much as by the hull \u2014 ships of this class slow-steam near 16 knots when bunkers are dear, which is why the routing figure and a schedule figure can honestly differ.",
+    "rigNote": "A 2018 ultra-large container ship: one low-speed two-stroke on a single fixed-pitch screw, about 59,000 kW. Service speed is set by fuel price as much as by the hull — ships of this class slow-steam near 16 knots when bunkers are dear, which is why the routing figure and a schedule figure can honestly differ.",
     "anchor": {
      "kn": 22.8,
      "kind": "trial",
-     "source": "Imabari/Evergreen published service data; AIS tracks give 16\u201319 kn slow-steaming in service"
+     "source": "Imabari/Evergreen published service data; AIS tracks give 16–19 kn slow-steaming in service"
     }
    },
    "hull": {
@@ -4433,7 +4483,8 @@
      "sideRun": 0.3,
      "sideU": 0.48
     },
-    "stationProvenance": "Twin-island stations from the ship's OWN papers, not a photograph: the PMA casualty report R-026-2021-DIAM carries her voyage-plan particulars (Fig. 6, loading computer) \u2014 keel to highest point 75.71 m, air draft 60.26 m at ~15.4 m draught, and the highest point (the bridge mast) 245.35 m forward of the aft perpendicular on LBP 387.00 m, which is u 0.366 from the FP; bridgeU 0.361 lands the drawn mast there. Depth moulded 32.90 m and breadth 58.80 m from the same report's Table 1 (vessel certificates); freeboard 17.2 = depth less the 15.7 m draught (the statutory 10.226 m summer freeboard is to a lower freeboard deck, not the weather deck the model draws). Funnel casing at funnelU 0.845 READ off the GA plan reproduced in the report (Fig. 2, 711x315 px, ~1.04 px/m \u2014 good to +/-4 m, no finer), cross-checked against Commons broadsides (kees torn 51343xxx series: dark-green casing amid the stacks, short black stack above). Stow: 23 rows on the real ship; the drawn TEU grid fits 22 across the 58.8 m beam (one row under, below any frame's resolution), 10 tiers on deck midships-aft per the Rotterdam photographs. EVERGREEN side lettering span and stern name from the same photographs; bow name NOT drawn \u2014 the flare there is curved and a flat decal would lie about it."
+    "stationProvenance": "Twin-island stations from the ship's OWN papers, not a photograph: the PMA casualty report R-026-2021-DIAM carries her voyage-plan particulars (Fig. 6, loading computer) — keel to highest point 75.71 m, air draft 60.26 m at ~15.4 m draught, and the highest point (the bridge mast) 245.35 m forward of the aft perpendicular on LBP 387.00 m, which is u 0.366 from the FP; bridgeU 0.361 lands the drawn mast there. Depth moulded 32.90 m and breadth 58.80 m from the same report's Table 1 (vessel certificates); freeboard 17.2 = depth less the 15.7 m draught (the statutory 10.226 m summer freeboard is to a lower freeboard deck, not the weather deck the model draws). Funnel casing at funnelU 0.845 READ off the GA plan reproduced in the report (Fig. 2, 711x315 px, ~1.04 px/m — good to +/-4 m, no finer), cross-checked against Commons broadsides (kees torn 51343xxx series: dark-green casing amid the stacks, short black stack above). Stow: 23 rows on the real ship; the drawn TEU grid fits 22 across the 58.8 m beam (one row under, below any frame's resolution), 10 tiers on deck midships-aft per the Rotterdam photographs. EVERGREEN side lettering span and stern name from the same photographs; bow name NOT drawn — the flare there is curved and a flat decal would lie about it.",
+    "steering": "steel"
    },
    "rows": [
     [
@@ -4442,7 +4493,7 @@
     ],
     [
      "Capacity",
-     "20,124 TEU on 399.94 m \u2014 among the largest afloat"
+     "20,124 TEU on 399.94 m — among the largest afloat"
     ],
     [
      "Aground",
@@ -4450,14 +4501,14 @@
     ],
     [
      "Refloated",
-     "29 March 2021 \u2014 163 hours, about 30,000 m\u00b3 dredged"
+     "29 March 2021 — 163 hours, about 30,000 m³ dredged"
     ],
     [
      "Queue",
      "369 ships waiting; roughly 12% of world trade passes the canal"
     ]
    ],
-   "text": "Ever Given is a 20,124 TEU container ship built by Imabari Shipbuilding in 2018 and operated by Evergreen Marine. At 399.94 m she is a metre short of the 400 m at which some port and canal rules change, which is not a coincidence: the largest ships are built to the dimensions of the infrastructure that must accept them.\n\nOn the morning of 23 March 2021 she entered the Suez Canal southbound at about 13 knots in a sandstorm with gusts above 40 knots, sheered, and grounded diagonally across the channel at kilometre 151, wedging her bulbous bow into the eastern bank. The canal is single-lane along that stretch and there is no way past. She was refloated on 29 March after 163 hours, by dredging roughly 30,000 cubic metres from around the bow, fourteen tugs, and a spring tide.\n\nBy the time she moved, 369 ships were waiting at both ends. Around 12 per cent of world trade passes through the canal, and the alternative \u2014 round the Cape \u2014 adds about 9,000 km and ten days. The blockage is the clearest demonstration this model has of its own last chapter's argument: a modern route is set by the dimensions of dredged channels and lock chambers, and one hull athwart one of them stops a system that has no slack in it.",
+   "text": "Ever Given is a 20,124 TEU container ship built by Imabari Shipbuilding in 2018 and operated by Evergreen Marine. At 399.94 m she is a metre short of the 400 m at which some port and canal rules change, which is not a coincidence: the largest ships are built to the dimensions of the infrastructure that must accept them.\n\nOn the morning of 23 March 2021 she entered the Suez Canal southbound at about 13 knots in a sandstorm with gusts above 40 knots, sheered, and grounded diagonally across the channel at kilometre 151, wedging her bulbous bow into the eastern bank. The canal is single-lane along that stretch and there is no way past. She was refloated on 29 March after 163 hours, by dredging roughly 30,000 cubic metres from around the bow, fourteen tugs, and a spring tide.\n\nBy the time she moved, 369 ships were waiting at both ends. Around 12 per cent of world trade passes through the canal, and the alternative — round the Cape — adds about 9,000 km and ten days. The blockage is the clearest demonstration this model has of its own last chapter's argument: a modern route is set by the dimensions of dredged channels and lock chambers, and one hull athwart one of them stops a system that has no slack in it.",
    "cite": "Suez Canal Authority; Marine Accident Investigation Branch interim report, 2021."
   },
   {
@@ -4498,7 +4549,7 @@
     "anchor": {
      "kn": 31.5,
      "kind": "trial",
-     "source": "L\u00fcrssen delivery trials, 2013 \u2014 reported above 30 kn"
+     "source": "Lürssen delivery trials, 2013 — reported above 30 kn"
     }
    },
    "hull": {
@@ -4555,12 +4606,12 @@
     "houseProvenance": "DERIVED from the delivery photograph: the lowest tier's windows run forward to 0.157 m/px pixel 1010 (u 0.18) and its roof tip lands at u 0.87; the crest's forward face is the block's glass foot (u 0.437) and its full-height wall ends at u 0.66, the continuous-bright edge read at 20.9 m. SUPERSEDED for the house spans and tier edges by housePlateProvenance (round 97, the 8.96 px/m broadside): the 0.87 roof tip this small plate gave is the ensign flying just aft of the real 0.82 roof end, a misread its resolution could not avoid.",
     "shellTiers": 1,
     "boatsInboard": true,
-    "boatsProvenance": "INBOARD: her tenders stow in a garage within the hull, not on deck. The design accounts record the concept grew from 145 m to 180.6 m partly to make room for tenders, fuel and machinery inside (Nauta design history via Boat International and YachtBuyer, which lists her tender garage), and the delivery photograph on this card shows a bare topside \u2014 no boat stands on any deck. Her tender complement is not published, so no count is claimed.",
+    "boatsProvenance": "INBOARD: her tenders stow in a garage within the hull, not on deck. The design accounts record the concept grew from 145 m to 180.6 m partly to make room for tenders, fuel and machinery inside (Nauta design history via Boat International and YachtBuyer, which lists her tender garage), and the delivery photograph on this card shows a bare topside — no boat stands on any deck. Her tender complement is not published, so no count is claimed.",
     "transom": 0.3,
     "deckM": 3.05,
     "mastTopM": 37.5,
     "cluster": {
-     "provenance": "RE-MEASURED 2026-08-16 off a clean broadside (Wikimedia Commons, File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) with the stem, transom and waterline as the three anchors and her recorded 180.6 m as the scale \u2014 8.33 px per metre. The earlier derivation, off the smaller delivery photograph, put her mast at u 0.542 and 47.2 m over the water; the broadside reads u 0.638 and 36.2 m, which is a sixth of her length and a quarter of her air draught, and drew her with a radio tower amidships. Her house is FOUR decks, not five: the crest reads 21 m over the water against the five-deck stack's 24.25. AFT DOMES CORRECTED 2026-08-17 (round 97): a strip scan at 17.8-23.0 m over the water, anchors x332/x1950/y941 at 8.96 px/m, finds white mass aft of the block only at u 0.700-0.721 (the 3.4 m pair) and 0.731-0.744 (the 2.2 m single) \u2014 nothing stands at the earlier 0.763/0.803, which would float past the fairing foot now that tier 2's wall is measured to end there. Their bases stay on the tier-2 roof terrace, which the tierFloorsM correction raises to the 19.5-19.8 m this provenance already reads. The mast u could NOT be re-verified the same way: the yard crane's lattice crosses the 29.5-33 m strip behind her, so 0.638 stands on the r95 read.",
+     "provenance": "RE-MEASURED 2026-08-16 off a clean broadside (Wikimedia Commons, File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) with the stem, transom and waterline as the three anchors and her recorded 180.6 m as the scale — 8.33 px per metre. The earlier derivation, off the smaller delivery photograph, put her mast at u 0.542 and 47.2 m over the water; the broadside reads u 0.638 and 36.2 m, which is a sixth of her length and a quarter of her air draught, and drew her with a radio tower amidships. Her house is FOUR decks, not five: the crest reads 21 m over the water against the five-deck stack's 24.25. AFT DOMES CORRECTED 2026-08-17 (round 97): a strip scan at 17.8-23.0 m over the water, anchors x332/x1950/y941 at 8.96 px/m, finds white mass aft of the block only at u 0.700-0.721 (the 3.4 m pair) and 0.731-0.744 (the 2.2 m single) — nothing stands at the earlier 0.763/0.803, which would float past the fairing foot now that tier 2's wall is measured to end there. Their bases stay on the tier-2 roof terrace, which the tierFloorsM correction raises to the 19.5-19.8 m this provenance already reads. The mast u could NOT be re-verified the same way: the yard crane's lattice crosses the 29.5-33 m strip behind her, so 0.638 stands on the r95 read.",
      "blockU": [
       0.553,
       0.708
@@ -4627,7 +4678,7 @@
      }
     },
     "tierBands": {
-     "provenance": "RE-MEASURED 2026-08-17 off the kept broadside (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) at 8.96 px/m with stem x332 / transom x1950 / waterline y941 as anchors. The glazing is not a continuous ribbon: each tier carries GROUPS of punched lights with long blank wall runs between, different per tier. groups[tier] = [uStart, uEnd, pitchM, pierFrac]; pitchM 0 is one continuous run. Tier 0: six 4.1 m lights at 6.1 m pitch forward, small lights amidships, a 23 m run aft. Tier 1: four 3.2 m lights forward, small lights, a long aft run. Tier 2: a 10 m forward run and a short aft group under the fairing. Crest: the raked front glass and one aft run. AFT EXTENTS CORRECTED round 97: the r96 row scan read dark BACKGROUND over the stepped-down stern as glazing, because with every tier drawn ~3 m the walls were assumed to reach the old aft edges \u2014 the silhouette envelope shows tier 0's wall ends at u 0.82, tier 1's at 0.795, tier 2's at the fairing foot 0.744 and the crest's at the block face 0.708, so the groups that ran past those edges (t0 to 0.93, t1 to 0.889, t2 to 0.822, crest to 0.745) are trimmed or dropped. What stands aft of each wall is open terrace, and glazing there is UNKNOWN, not asserted. bandsM[tier] = [sill, head] in metres over the waterline, straight from the plate: 10.9-12.6 / 14.8-16.7 / 18.1-19.5 / 21.2-22.4 \u2014 the crest head read 22.8 exceeds the 22.5 roof by less than the read noise and is clipped under it.",
+     "provenance": "RE-MEASURED 2026-08-17 off the kept broadside (File:Azzam IMO 9693367 S Bremen 09-05-2014.jpg, Wolfgang Fricke, CC BY 3.0) at 8.96 px/m with stem x332 / transom x1950 / waterline y941 as anchors. The glazing is not a continuous ribbon: each tier carries GROUPS of punched lights with long blank wall runs between, different per tier. groups[tier] = [uStart, uEnd, pitchM, pierFrac]; pitchM 0 is one continuous run. Tier 0: six 4.1 m lights at 6.1 m pitch forward, small lights amidships, a 23 m run aft. Tier 1: four 3.2 m lights forward, small lights, a long aft run. Tier 2: a 10 m forward run and a short aft group under the fairing. Crest: the raked front glass and one aft run. AFT EXTENTS CORRECTED round 97: the r96 row scan read dark BACKGROUND over the stepped-down stern as glazing, because with every tier drawn ~3 m the walls were assumed to reach the old aft edges — the silhouette envelope shows tier 0's wall ends at u 0.82, tier 1's at 0.795, tier 2's at the fairing foot 0.744 and the crest's at the block face 0.708, so the groups that ran past those edges (t0 to 0.93, t1 to 0.889, t2 to 0.822, crest to 0.745) are trimmed or dropped. What stands aft of each wall is open terrace, and glazing there is UNKNOWN, not asserted. bandsM[tier] = [sill, head] in metres over the waterline, straight from the plate: 10.9-12.6 / 14.8-16.7 / 18.1-19.5 / 21.2-22.4 — the crest head read 22.8 exceeds the 22.5 roof by less than the read noise and is clipped under it.",
      "bandsM": {
       "0": [
        10.9,
@@ -4939,7 +4990,7 @@
      "2": 0.47
     },
     "houseTaper": 0.03,
-    "housePlateProvenance": "RE-MEASURED 2026-08-17 (round 97) off the kept broadside at 8.96 px/m, by reading the upper silhouette envelope column by column with a ship-white classifier rather than matching window rows. The aft staircase was previously misattributed by two tiers because every tier was drawn ~3 m and the real tiers are 4.5/3.9/2.6/2.5 m: the 0.821 edge is TIER 0's roof end (roof 13.5 m, visible terminating at u 0.819), 0.888 is the main-deck bulwark run-out, and tier 2's wall in fact ends at the fairing foot 0.744. tierFloorsM 13.5/17.4/20.0 and houseTopM 22.5 are the envelope's roof reads, each confirmed at two or more exposed spans fore and aft (tier 0: 13.3-13.7 fore, 13.5-13.8 aft; tier 1: 17.3-17.9 fore, 17.3-17.4 aft; tier 2: white to ~20 under the crest's raked glass; top = blockTopM). The UAE ensign occludes u 0.83-0.87 at 10-15 m; the tier-0 aft edge 0.82 is the roofline's visible termination just forward of it. houseTaper 0.03 stands. Aft of the house the stern terraces down \u2014 bulwark tops 9.7 m to u 0.90, then 6.9 (0.905-0.93), 6.3, 5.4, 4.5, 3.1 m at the transom \u2014 which the model does not yet build; the read is recorded here for when it does.",
+    "housePlateProvenance": "RE-MEASURED 2026-08-17 (round 97) off the kept broadside at 8.96 px/m, by reading the upper silhouette envelope column by column with a ship-white classifier rather than matching window rows. The aft staircase was previously misattributed by two tiers because every tier was drawn ~3 m and the real tiers are 4.5/3.9/2.6/2.5 m: the 0.821 edge is TIER 0's roof end (roof 13.5 m, visible terminating at u 0.819), 0.888 is the main-deck bulwark run-out, and tier 2's wall in fact ends at the fairing foot 0.744. tierFloorsM 13.5/17.4/20.0 and houseTopM 22.5 are the envelope's roof reads, each confirmed at two or more exposed spans fore and aft (tier 0: 13.3-13.7 fore, 13.5-13.8 aft; tier 1: 17.3-17.9 fore, 17.3-17.4 aft; tier 2: white to ~20 under the crest's raked glass; top = blockTopM). The UAE ensign occludes u 0.83-0.87 at 10-15 m; the tier-0 aft edge 0.82 is the roofline's visible termination just forward of it. houseTaper 0.03 stands. Aft of the house the stern terraces down — bulwark tops 9.7 m to u 0.90, then 6.9 (0.905-0.93), 6.3, 5.4, 4.5, 3.1 m at the transom — which the model does not yet build; the read is recorded here for when it does.",
     "houseRamp": true,
     "faired": true,
     "bowFlare": 0.14,
@@ -5017,16 +5068,17 @@
     "deck": {
      "covering": "teak",
      "provenance": "RECORDED: the builder's specification as carried by the BOAT International Superyacht Directory entry for Azzam (Lurssen, 2013) - teak deck, steel hull, aluminium superstructure; press copy repeats 2,200 m2 of laid teak. Plank width and butt pattern are CLASS defaults for a yacht's laid teak (90 mm strakes), below what any plate of her can resolve."
-    }
+    },
+    "steering": "steel"
    },
    "rows": [
     [
      "Built",
-     "L\u00fcrssen, Bremen, 2013 \u2014 three years from keel to delivery"
+     "Lürssen, Bremen, 2013 — three years from keel to delivery"
     ],
     [
      "Length",
-     "180.6 m \u2014 longer than any private vessel then afloat"
+     "180.6 m — longer than any private vessel then afloat"
     ],
     [
      "Draught",
@@ -5038,27 +5090,27 @@
     ],
     [
      "Speed",
-     "above 30 knots \u2014 faster than most warships of her displacement"
+     "above 30 knots — faster than most warships of her displacement"
     ],
     [
      "Cluster",
-     "mast to 37.5 m over water, uptakes to 25.5 m raked forward \u2014 measured from the 2014 broadside; no drawing of her is published"
+     "mast to 37.5 m over water, uptakes to 25.5 m raked forward — measured from the 2014 broadside; no drawing of her is published"
     ],
     [
      "House",
-     "four tiers ramping aft from a long foredeck to a 22.5 m crest abaft midships, then terracing down to the stern \u2014 measured from the 2014 broadside"
+     "four tiers ramping aft from a long foredeck to a 22.5 m crest abaft midships, then terracing down to the stern — measured from the 2014 broadside"
     ],
     [
      "Glazing",
-     "grouped runs of dark tinted glass at mid-tier, different on every deck, with two window rows and a porthole line in the hull side \u2014 measured from the 2014 broadside"
+     "grouped runs of dark tinted glass at mid-tier, different on every deck, with two window rows and a porthole line in the hull side — measured from the 2014 broadside"
     ],
     [
      "Tenders",
-     "stowed in a garage inside the hull, not on deck \u2014 the design grew 35 m partly to fit tenders, fuel and machinery within the shell, and her delivery photograph shows a bare topside. The complement is not published."
+     "stowed in a garage inside the hull, not on deck — the design grew 35 m partly to fit tenders, fuel and machinery within the shell, and her delivery photograph shows a bare topside. The complement is not published."
     ]
    ],
-   "text": "Azzam was delivered by L\u00fcrssen in 2013 for Sheikh Khalifa bin Zayed Al Nahyan and at 180.6 m remains the longest private motor yacht built. She is included here as the end point of a line the rest of this model traces: for most of history the largest and most advanced hulls afloat were built to carry cargo, fight, or explore, and their size was justified by what they returned.\n\nHer engineering is not decorative. A combined diesel and gas turbine plant of roughly 94,000 shaft horsepower drives four waterjets to over 30 knots \u2014 faster than most warships of comparable displacement \u2014 and she draws only 4.3 m on that length, a deliberately shallow hull for Gulf and Red Sea waters that forced a very fine, wide, low-block form.\n\nThe type is a real category rather than a curiosity: yachts above 100 m are now built in numbers, and they sustain specialist yards, naval-architecture practices and a supply chain that overlaps with naval work.",
-   "cite": "L\u00fcrssen; Boat International Global Order Book."
+   "text": "Azzam was delivered by Lürssen in 2013 for Sheikh Khalifa bin Zayed Al Nahyan and at 180.6 m remains the longest private motor yacht built. She is included here as the end point of a line the rest of this model traces: for most of history the largest and most advanced hulls afloat were built to carry cargo, fight, or explore, and their size was justified by what they returned.\n\nHer engineering is not decorative. A combined diesel and gas turbine plant of roughly 94,000 shaft horsepower drives four waterjets to over 30 knots — faster than most warships of comparable displacement — and she draws only 4.3 m on that length, a deliberately shallow hull for Gulf and Red Sea waters that forced a very fine, wide, low-block form.\n\nThe type is a real category rather than a curiosity: yachts above 100 m are now built in numbers, and they sustain specialist yards, naval-architecture practices and a supply chain that overlaps with naval work.",
+   "cite": "Lürssen; Boat International Global Order Book."
   },
   {
    "id": "endurance",
@@ -5093,18 +5145,18 @@
      "150": 6.1,
      "180": 4.6
     },
-    "rig": "barquentine \u2014 square on the fore, fore-and-aft on main and mizzen",
+    "rig": "barquentine — square on the fore, fore-and-aft on main and mizzen",
     "rigNote": "Square canvas on the foremast only, with fore-and-aft main and mizzen, plus a 350 ihp coal-fired auxiliary. The rig is a compromise for ice work: enough square sail to run before the westerlies, few enough yards that a small crew can handle her among floes, and an engine for calms and leads.",
     "anchor": {
      "kn": 10.2,
      "kind": "trial",
-     "source": "Framn\u00e6s builder's figure under steam, 1912; under sail alone she was slower"
+     "source": "Framnæs builder's figure under steam, 1912; under sail alone she was slower"
     },
     "floor": {
      "by": "steam",
      "kn": 4.0,
      "lossKnPerMs": 0.14,
-     "source": "auxiliary steam floor; no measured headwind figure survives, so the loss follows the clipper's fractional windage \u2014 an inference"
+     "source": "auxiliary steam floor; no measured headwind figure survives, so the loss follows the clipper's fractional windage — an inference"
     }
    },
    "hull": {
@@ -5200,12 +5252,13 @@
       "lM": 6.7
      }
     ],
-    "stationProvenance": "Masts, funnel, deckhouses and overhangs READ off the Framnaes longitudinal-section plan (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m along the hull \u2014 stations good to \u00b10.5 m, no finer), anchored at the stem and counter LWL crossings; mast-gap ratio and funnel station cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m: fore-main/main-mizzen 1.12, funnel 45% of main\u2192mizzen). Trucks from the same broadside at 12.6 px/m: fore 34.3 m, main 35.2 m, mizzen 29.3 m over the water, main the tallest \u2014 the old record drew the fore at 49 m (27.5 m lower through the square-stack rule) and the main at 31.7. Funnel at 0.677: the plan reads 0.670 +/- 0.015 and the boiler casing must seat inside the house whose forward end it rises from. Funnel black: it reads as dark as the black hull in every plate where masts read pale; height 5.7 m over the rail at the broadside\u2019s scale. No forward deckhouse: the plan shows a boat on skids between fore and main, and no photograph shows a house there. Quarter boats (davitBoats): a canvas-covered boat hangs outboard in radial davits on the port quarter in the Hurley night plate and two stand on the starboard side in the full-sail plate; both plates are bow-on and foreshortened, so the station is bounded, not measured \u2014 abaft the aft house (plan, 0.781) and clear of the counter, u 0.80 \u00b1 0.04. Length 6.7 m: the expedition's cutters (Dudley Docker, Stancomb Wills) as recorded; the James Caird measured 6.9. Kept: the forecastle break \u2014 the web plan at 16.9 px/m cannot carry a clean break station or height (the deck lines there are one to two px apart); needs the RMG original before it is modelled."
+    "stationProvenance": "Masts, funnel, deckhouses and overhangs READ off the Framnaes longitudinal-section plan (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m along the hull — stations good to ±0.5 m, no finer), anchored at the stem and counter LWL crossings; mast-gap ratio and funnel station cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m: fore-main/main-mizzen 1.12, funnel 45% of main→mizzen). Trucks from the same broadside at 12.6 px/m: fore 34.3 m, main 35.2 m, mizzen 29.3 m over the water, main the tallest — the old record drew the fore at 49 m (27.5 m lower through the square-stack rule) and the main at 31.7. Funnel at 0.677: the plan reads 0.670 +/- 0.015 and the boiler casing must seat inside the house whose forward end it rises from. Funnel black: it reads as dark as the black hull in every plate where masts read pale; height 5.7 m over the rail at the broadside’s scale. No forward deckhouse: the plan shows a boat on skids between fore and main, and no photograph shows a house there. Quarter boats (davitBoats): a canvas-covered boat hangs outboard in radial davits on the port quarter in the Hurley night plate and two stand on the starboard side in the full-sail plate; both plates are bow-on and foreshortened, so the station is bounded, not measured — abaft the aft house (plan, 0.781) and clear of the counter, u 0.80 ± 0.04. Length 6.7 m: the expedition's cutters (Dudley Docker, Stancomb Wills) as recorded; the James Caird measured 6.9. Kept: the forecastle break — the web plan at 16.9 px/m cannot carry a clean break station or height (the deck lines there are one to two px apart); needs the RMG original before it is modelled.",
+    "steering": "stern"
    },
    "rows": [
     [
      "Built",
-     "Framn\u00e6s, Sandefjord, 1912, as *Polaris* \u2014 for Arctic tourist cruising"
+     "Framnæs, Sandefjord, 1912, as *Polaris* — for Arctic tourist cruising"
     ],
     [
      "Construction",
@@ -5224,7 +5277,7 @@
      "5 March 2022, 3,008 m down, four miles from Worsley's fix"
     ]
    ],
-   "text": "Endurance was built at Framn\u00e6s in Sandefjord in 1912 as *Polaris*, for Arctic tourist cruising, and was designed for ice rather than merely strengthened against it: oak and Norwegian fir with greenheart sheathing, and a stem formed from a single baulk about 1.3 m thick. Shackleton bought her for the Imperial Trans-Antarctic Expedition of 1914.\n\nShe was beset in the Weddell Sea pack on 19 January 1915, one day's sail from her intended landing, and drifted with the ice for ten months. A ship built for ice can survive pressure from the sides; what destroyed her was being lifted and racked as floes converged. She was abandoned on 27 October and sank on 21 November 1915. All twenty-eight men survived, by boat to Elephant Island and then by an 800-nautical-mile passage in the 6.9 m *James Caird* to South Georgia.\n\nThe wreck was located on 5 March 2022 at 3,008 m, about four nautical miles from the position Frank Worsley recorded by sextant as she went down \u2014 a navigational fix taken from an ice floe with no land in sight, and vindicated after a century.",
+   "text": "Endurance was built at Framnæs in Sandefjord in 1912 as *Polaris*, for Arctic tourist cruising, and was designed for ice rather than merely strengthened against it: oak and Norwegian fir with greenheart sheathing, and a stem formed from a single baulk about 1.3 m thick. Shackleton bought her for the Imperial Trans-Antarctic Expedition of 1914.\n\nShe was beset in the Weddell Sea pack on 19 January 1915, one day's sail from her intended landing, and drifted with the ice for ten months. A ship built for ice can survive pressure from the sides; what destroyed her was being lifted and racked as floes converged. She was abandoned on 27 October and sank on 21 November 1915. All twenty-eight men survived, by boat to Elephant Island and then by an 800-nautical-mile passage in the 6.9 m *James Caird* to South Georgia.\n\nThe wreck was located on 5 March 2022 at 3,008 m, about four nautical miles from the position Frank Worsley recorded by sextant as she went down — a navigational fix taken from an ice floe with no land in sight, and vindicated after a century.",
    "cite": "Endurance22 expedition; Worsley's navigational log; Alexander, *The Endurance* (1998)."
   },
   {
@@ -5261,7 +5314,7 @@
      "180": 29.6
     },
     "rig": "diesel-electric and gas turbine, four azimuthing pods",
-    "rigNote": "Four azimuthing pods, two fixed and two steerable, fed by diesel-electric plant with gas turbines for the top end \u2014 about 117 MW. Pods rather than shafts because a liner hull fine enough to hold 26 knots in a North Atlantic winter has no room for four shaft lines.",
+    "rigNote": "Four azimuthing pods, two fixed and two steerable, fed by diesel-electric plant with gas turbines for the top end — about 117 MW. Pods rather than shafts because a liner hull fine enough to hold 26 knots in a North Atlantic winter has no room for four shaft lines.",
     "anchor": {
      "kn": 29.6,
      "kind": "trial",
@@ -5345,7 +5398,7 @@
      "pierFrac": 0.12,
      "kind": "balcony"
     },
-    "houseProvenance": "DERIVED from the same photograph: the black tops out at the recorded 17 m sheer; above it the shell plating carries up two further decks in a WHITE sheer strake with a continuous square-window row on each (shellTiers 2, painted shellTopside), so the boat gallery floor lands at 17 + 2\u00b73.2 = 23.4 m over water \u2014 the photograph reads it at about 24 m with the deck module as the scale. The black hull below the strake carries only sparse broken window groups and is drawn plain.",
+    "houseProvenance": "DERIVED from the same photograph: the black tops out at the recorded 17 m sheer; above it the shell plating carries up two further decks in a WHITE sheer strake with a continuous square-window row on each (shellTiers 2, painted shellTopside), so the boat gallery floor lands at 17 + 2·3.2 = 23.4 m over water — the photograph reads it at about 24 m with the deck module as the scale. The black hull below the strake carries only sparse broken window groups and is drawn plain.",
     "shellBands": {
      "provenance": "DERIVED from the same broadside photograph: the white strake windows are about 1.4 m square at roughly 2.5 m pitch, a bold colonnade, not the 0.7 m C-deck lights the Edwardian default draws.",
      "bot": 0.28,
@@ -5436,7 +5489,8 @@
     "deck": {
      "covering": "teak",
      "provenance": "RECORDED for the promenade, EXTENDED above: Cunard's own copy and the Cunard historian Chris Frame carry the wrap-around Promenade Deck, deck 7, as laid teak, nearly 600 m to the lap - and deck 7 is this hull's sheer, so the model's weather deck IS the attested surface. The house tier decks above draw the same covering; photographs of her terraced stern show laid decking there, but no builder's figure attests it. The working foredeck's painted steel is a distinction this one-covering model does not draw. Replaces the deckSteel guess."
-    }
+    },
+    "steering": "steel"
    },
    "rows": [
     [
@@ -5445,7 +5499,7 @@
     ],
     [
      "Service speed",
-     "26 knots, with over 29 available \u2014 a cruise ship makes 22"
+     "26 knots, with over 29 available — a cruise ship makes 22"
     ],
     [
      "Hull",
@@ -5461,10 +5515,10 @@
     ],
     [
      "House",
-     "black to 17 m, then a two-deck white strake with a square-window row on each deck, the boat gallery on top of it, balcony bands above \u2014 derived from a broadside photograph"
+     "black to 17 m, then a two-deck white strake with a square-window row on each deck, the boat gallery on top of it, balcony bands above — derived from a broadside photograph"
     ]
    ],
-   "text": "Queen Mary 2 entered service in 2004 and is the only ocean liner still in scheduled service. The distinction from a cruise ship is structural rather than commercial. A liner is built to hold a schedule across the North Atlantic in winter, which requires speed in a seaway and a hull that can take it: she has a long, fine, flared bow with a real forecastle, shell plating up to about twice the thickness of a comparable cruise ship's, and a service speed of 26 knots against the 22 a cruise ship makes.\n\nHer propulsion is four azimuthing pods, two fixed and two steerable, fed by diesel-electric and gas-turbine plant \u2014 an arrangement that gives her the power for the crossing without the shaft lines a hull of that fineness has no room for.\n\nShe is the last of the type. The transatlantic liner was killed by the jet within a decade of 1958, and everything built since for that water has been built to cruise. That one ship is still constructed to cross it is why she belongs at the end of this fleet.",
+   "text": "Queen Mary 2 entered service in 2004 and is the only ocean liner still in scheduled service. The distinction from a cruise ship is structural rather than commercial. A liner is built to hold a schedule across the North Atlantic in winter, which requires speed in a seaway and a hull that can take it: she has a long, fine, flared bow with a real forecastle, shell plating up to about twice the thickness of a comparable cruise ship's, and a service speed of 26 knots against the 22 a cruise ship makes.\n\nHer propulsion is four azimuthing pods, two fixed and two steerable, fed by diesel-electric and gas-turbine plant — an arrangement that gives her the power for the crossing without the shaft lines a hull of that fineness has no room for.\n\nShe is the last of the type. The transatlantic liner was killed by the jet within a decade of 1958, and everything built since for that water has been built to cruise. That one ship is still constructed to cross it is why she belongs at the end of this fleet.",
    "cite": "Cunard; Payne, *From Track to Trestle* and Chantiers de l'Atlantique specifications."
   }
  ],
@@ -5485,7 +5539,7 @@
     "150": 4.0,
     "180": 3.2
    },
-   "rigNote": "Poor by modern standards, positive by ancient ones \u2014 and positive is the whole argument, because it is what lets a canoe beat back the way she came. Fastest on a broad reach, not before the wind.",
+   "rigNote": "Poor by modern standards, positive by ancient ones — and positive is the whole argument, because it is what lets a canoe beat back the way she came. Fastest on a broad reach, not before the wind.",
    "rig": "crab claw on a double hull"
   },
   "square": {
@@ -5504,7 +5558,7 @@
     "150": 4.9,
     "180": 4.2
    },
-   "rigNote": "The famous \"six points\" is 67.5\u00b0 \u2014 and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
+   "rigNote": "The famous \"six points\" is 67.5° — and it is a HEADING. What she makes good is the figure above, and above force 4 she loses ground to leeward faster than she gains it.",
    "rig": "square rig"
   },
   "lateen": {
@@ -5523,7 +5577,7 @@
     "150": 3.6,
     "180": 2.9
    },
-   "rigNote": "Better than a square rig, and by less than the textbooks claim \u2014 their 55\u201365\u00b0 is a heading. The cost is manpower: tacking means walking the whole yard round the mast.",
+   "rigNote": "Better than a square rig, and by less than the textbooks claim — their 55–65° is a heading. The cost is manpower: tacking means walking the whole yard round the mast.",
    "rig": "lateen / settee"
   },
   "gaff": {
@@ -5542,7 +5596,7 @@
     "150": 6.2,
     "180": 5.0
    },
-   "rigNote": "Points high and is worked entirely from the deck \u2014 nobody goes aloft to reef a gaff sail. That is the whole economic argument for the rig: the crew, not the speed.",
+   "rigNote": "Points high and is worked entirely from the deck — nobody goes aloft to reef a gaff sail. That is the whole economic argument for the rig: the crew, not the speed.",
    "rig": "gaff schooner"
   },
   "junk": {
@@ -5561,7 +5615,7 @@
     "150": 3.9,
     "180": 3.2
    },
-   "rigNote": "The battens do it: they make the sail self-reefing and let it set flat, so it beats a square rig to windward on a fraction of the crew \u2014 about 75\u201380% of Bermudan performance.",
+   "rigNote": "The battens do it: they make the sail self-reefing and let it set flat, so it beats a square rig to windward on a fraction of the crew — about 75–80% of Bermudan performance.",
    "rig": "battened lug (junk)"
   },
   "oar": {
@@ -5580,7 +5634,7 @@
     "150": 4.6,
     "180": 4.4
    },
-   "rigNote": "A galley goes where it likes and not far, and the figure above is her SAILING speed \u2014 the sail is for fair winds only. Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre of sea \u2014 measured on the reconstruction Olympias, which fell short of what the ancient sources imply and is thought to be ~10% too short in the hull.",
+   "rigNote": "A galley goes where it likes and not far, and the figure above is her SAILING speed — the sail is for fair winds only. Under oar: 8.3 kn sprint, 5.4 kn cruise, and about 2.9 kn into a headwind with a metre of sea — measured on the reconstruction Olympias, which fell short of what the ancient sources imply and is thought to be ~10% too short in the hull.",
    "rig": "oars, with a square sail for fair winds"
   },
   "steam": {

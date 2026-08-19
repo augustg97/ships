@@ -7648,3 +7648,96 @@ first: the dugout's own rows attest "single trunk, fire and adze", the canoe's a
 gundeck both-ways normals sweep, if wanted. (3) The opening check next round confirms
 the 58 frames not re-checked at this close — expected 0.000%; if anything moved, this
 round owns it.
+
+## Round 121 — 2026-08-18 — steering becomes a fact of the record, and the log stops being an assembled ship
+
+**The opening ratchet was the confirming pass r120 owed: all 59 frames within tolerance,
+exit 0** (build/ratchet-open-r121.log). Round 120 is confirmed fleet-wide.
+
+**THE TASK: r120's pointer — residuals 1–3, parts of an assembled ship on a hull the record
+calls one piece.** The rudder went aboard every hull UNCONDITIONALLY, so the 68,000 BP dugout
+hung a pintled stern rudder her card refuses ("Paddled"), the voyaging canoe carried one on
+EACH hull against her own attested row — "a long paddle, not a rudder" — and reading the
+other ancient cards before coding found the same class three more times: the sewn dhow's
+rudder hung on pintles, which are iron hinges, under a construction row reading "no iron";
+the trireme and the corbita wore the medieval sternpost rudder fifteen centuries early, when
+their types steered with pairs of quarter rudders (Morrison/Coates/Rankov and Olympias for
+the pēdalia; Casson, the Sidon and Portus reliefs for the Roman pair; the Belitung
+reconstruction Jewel of Muscat for the lashed dhow pair).
+
+**The class fix: `hull.steering` on all 33 records — paddle | quarter | median | stern |
+steel — with `steeringOf()` in hull.js consuming the record and keeping the old build-string
+guess only as the labelled fallback, which the audit convicts.** Paddle-steered hulls mount
+nothing (the paddle is crew gear and no crew is drawn — steeringProvenance says so). Quarter-
+steered hulls ship a pair from new `buildQuarterRudderGeometry`: loom, tiller, through-beam
+bracket and blade in ONE single-winding geometry per side (the r118 normals lesson applied,
+not relearned), everything sized off the hull's own record, the blade's u-footprint sampled
+against the skin at every height it spans so the fitting stands just proud of the widest
+point — the loom rakes aft rising, so the blade walks forward along a WIDENING run, and an
+unsampled placement interpenetrates (found by measure: the first build's tillers also crossed
+the centreline and met in the middle; clamped to 0.8·|zP|). Median/stern/steel keep their
+exact prior geometry — the fluyt control's part table is byte-identical. And the one-piece
+gate: `build: 'dugout'` now suppresses stem/sternposts and wales the way `deckLaid: false`
+suppresses hold furniture — a single trunk has nothing to scarf a post to and no strake to
+thicken. Cards: trireme/corbita/dhow gain "Steering, as drawn" rows, the dugout a "Steering"
+row; the five changed ships carry `steeringProvenance` naming attested vs derived and the
+sources.
+
+**Measured (rule 4, build/measure-{dugout,voyaging-canoe,trireme,corbita,dhow,fluyt}-r121-
+{before,after}.txt):** dugout sheds Stem/Wales/Sternpost/Rudder and her drawn beam falls
+0.88 → 0.86 m = the record exactly (the wale band WAS the overshoot); canoe sheds the doubled
+Rudder row alone; trireme/corbita/dhow swap Rudder for Port/Starboard quarter rudder rows,
+mirrored to the centimetre (trireme u 0.955–0.987, blades −1.15 m, heads +2.84 m; corbita
+u 0.948–1.016, −3.13/+4.38; dhow u 0.912–0.994, −2.21/+3.79); fluyt byte-identical.
+
+**Verified (rule 1): twelve spin bearings for each of the five, read, plus close diagnosis
+captures of the trireme and corbita sterns.** The dugout finally reads as her stage card's
+argument — one smooth dark timber with only her carved rim, no band, no posts, nothing at
+either end. The canoe's twin sterns run out clean. The dhow's stern hangs nothing; her lashed
+pair stands at the quarters. The corbita's two looms rise to their tiller bars at the
+quarters with blades standing down the run. Rule 0 on ship-dhow: reads as a rendered vessel
+on water; three facts a viewer can name — twin quarter rudders stand over her quarters where
+her sewn hull has no iron to hang a hinge; her two settee sails rake forward of their masts;
+hatch gratings pierce her laid deck amidships.
+
+**The audit learned the class (round-121 rules), proven all five arms by injection against
+the final geometry (build/staging/inj-{steer-undeclared,steer-mount,steer-strip,steer-hole,
+onepiece}.js):** 'record declares no steering' (fluyt, 1); 'a paddled hull mounts steering'
+(the original fault re-forced: dugout + canoe, the canoe's TWO meshes); strip convicts
+'declared steering not drawn' + 'an assembled ship lost her stempost/wale' (fluyt, 3);
+hole — the starboard quarter rudder removed — convicts 'a quarter-rudder pair is a pair'
+(trireme, 1); and building the dugout as 'shell' convicts 'assembly timber on a one-piece
+hull' (dugout, 2). The quarter arm also asserts straddle, immersion, a loom above the rail
+and the mount abaft amidships. Clean run 33/0, twice.
+
+**Ratchet: targeted close (the r118–120 protocol), movers read then accepted then re-checked:
+ship-dugout 0.468% — diff read: her flank band and rim lines plus the removed sternpost
+behind the frosted fleet panel (the r119 translucent-panel class); ship-canoe 0.225% — diff
+read: exactly the two removed blades; ship-dhow 0.078% — diff read: the stern fitting alone.
+All three re-checked 0.000%. Checked clean, no accept needed: ship-trireme 0.040% (bow-view
+baseline, the stern change is small there), ship-junk 0.003%, action-salamis 0.000%,
+board-salamis 0.009%, shipwright 0.000%, shipwright-furled 0.000%.** A mid-round full pass
+was started and killed for time; its log is void (build/ratchet-r121-post.log).
+
+**⚠ The r58 diff-wipe lesson struck again and cost three re-renders: solo checks of later
+frames wiped the earlier movers' diffs before I read them. Copy the diff out THE MOMENT the
+check prints it.**
+
+**Deployed: stamp 1787104457.** Live verify below.
+
+**Known residuals, recorded not hidden:** (1) The dugout's deck part is still a capped "bare
+timber" surface, not an open hollow — a monoxylon is open; the one r120 residual this round
+did not take. (2) The sekibune is declared 'stern': her wasen kaji is slung on ropes and
+raisable, not pintled — the drawn pintled form stands as the class default. (3) The gundeck
+both-ways normals class (r118) stands fleet-wide, unconvicted. (4) Sekibune/panokseon LOA
+overhang class (r113/r115) untouched. (5) The r115 hayao and sekibune swivels (r90) stand.
+(6) probe-wake.py heading mirror (r114) untouched. (7) Endurance forecastle break waits on
+the RMG original of J9266. (8) Azzam crest residual (r108) unchanged. (9) The yakata
+wall-opening curtain (r117) still not drawn. (10) The corbita has no baseline frame; her
+quarter rudders are watched only by the audit.
+
+**Next:** (1) The opening check next round confirms the 50 frames not re-checked at this
+close — expected 0.000%; if anything moved, this round owns it. (2) The survey continues at
+residual 1: hollow the dugout — replace her capped deck with the carved inner surface, which
+is the last thing standing between her and her own stage card. (3) The gundeck both-ways
+normals sweep, if wanted.
