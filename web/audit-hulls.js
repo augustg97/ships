@@ -270,6 +270,50 @@
       }
     }
 
+    /* ── AN OPEN HULL SHOWS HER GEAR, AND THE GEAR LIES IN THE HOLLOW (round 127) ───────
+       deckLaid: false bought an empty hollow for 122 rounds. Both undecked hulls attest
+       their gear in their own rows — the dugout steers with "the paddle itself" and her
+       one measured figure is a paddled crossing; the canoe's rows say "a long paddle,
+       not a rudder" and "lashed-lug planking" — and neither drew any of it. Three arms,
+       read off the record as always: an undecked hull DRAWS stowage; a decked hull draws
+       NONE (below her own deck it would be invisible, so a stowage part there means the
+       gate widened wrongly); and every piece lies INSIDE the hollow — under the rim
+       line, above the floor, inside the hull's own extents. The containment arm is what
+       no picture can promise: a paddle floating over the rail still reads as "gear" in
+       a frame, and only the bounds say it is adrift. A NEW open hull convicting on the
+       bare-floor arm is the rule working: its gear must be decided from its own record,
+       not inherited from another ship's stores. */
+    {
+      const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+      const st = part.stowage;
+      if (undecked && !st)
+        say(v.id, 'an open hull with a bare floor',
+            'the record lays no deck, so the floor is in plain sight — and the gear the '
+            + 'record itself attests (paddles, a bailer) is not drawn');
+      else if (!undecked && st)
+        say(v.id, 'stowage drawn on a decked hull',
+            `${st.n} stowage mesh(es) on a hull whose deck would hide them — the open-`
+            + 'hull gate widened wrongly');
+      if (undecked && st && part.deck) {
+        const eps = 0.03;
+        if (st.y[1] > part.deck.y[1] + eps)
+          say(v.id, 'stowed gear above the rim',
+              `gear tops at ${st.y[1].toFixed(2)} m against a rim line of `
+              + `${part.deck.y[1].toFixed(2)} m — adrift, not stowed`);
+        if (st.y[0] < part.deck.y[0] - eps)
+          say(v.id, 'stowed gear below the floor',
+              `gear bottoms at ${st.y[0].toFixed(2)} m against a floor of `
+              + `${part.deck.y[0].toFixed(2)} m — sunk through the hull`);
+        if (st.x[0] < part.deck.x[0] - eps || st.x[1] > part.deck.x[1] + eps
+            || st.z[0] < part.deck.z[0] - eps || st.z[1] > part.deck.z[1] + eps)
+          say(v.id, 'stowed gear outside the hull',
+              `gear spans x ${st.x[0].toFixed(2)}..${st.x[1].toFixed(2)}, `
+              + `z ${st.z[0].toFixed(2)}..${st.z[1].toFixed(2)} against the open hull's `
+              + `x ${part.deck.x[0].toFixed(2)}..${part.deck.x[1].toFixed(2)}, `
+              + `z ${part.deck.z[0].toFixed(2)}..${part.deck.z[1].toFixed(2)}`);
+      }
+    }
+
     /* ── STEERING IS A FACT OF THE RECORD (round 121) ───────────────────────────────────
        The rudder was added to every hull UNCONDITIONALLY, so the 68,000 BP dugout hung a
        pintled stern rudder her card refuses ("Paddled"), the voyaging canoe carried one

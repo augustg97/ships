@@ -1801,6 +1801,9 @@ what: 'Stowed under curved davits on the boat deck. The davits curve because the
 + 'NUMBER of them was set by Board of Trade rules scaling boats to tonnage '
 + 'rather than to people, unrevised as ships grew — which is how Titanic '
 + 'sailed legally with 20 boats for 2,224 aboard.' },
+stowage:  { stage: 7, name: 'Stowed gear',
+what: 'Gear lying on the floor of an open hull. A hull with no deck hides '
++ 'nothing: what she carries sits in the bottom, in sight over the rail.' },
 vent:     { stage: 4, name: 'Cowl ventilator',
 what: 'Turned into the wind to drive air below decks. Before mechanical '
 + 'ventilation, a coal-fired boiler room, a galley and several hundred people '
@@ -5659,6 +5662,124 @@ group.add(tag(beamAB(foot, ridge[k], B * 0.014, B * 0.014, timber),
 }
 }
 }
+function buildFloorStowage(S, group, mats) {
+const H = hullSurface(S);
+const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
+: Math.max(0.02, S.beam * 0.020);
+const tb = S.build === 'dugout' ? tw * 1.8 : Math.max(0.04, S.draught * 0.06);
+const eligible = u => u > 0.05 && u < 0.95
+&& S.draught * H.keel(u) > tb * 1.4
+&& surfacePoint(S, H, u, 1)[2] - tw > 0.01;
+let uLo = -1, uHi = -1;
+for (let u = 0.05; u <= 0.951; u += 0.005)
+if (eligible(u)) { if (uLo < 0) uLo = u; uHi = u; }
+if (uLo < 0 || uHi - uLo < 0.2) return;
+const vF = u => 0.62 * tb / (S.draught * H.keel(u));
+const floorY = u => surfacePoint(S, H, u, vF(u))[1];
+const floorHalf = u => Math.max(0, surfacePoint(S, H, u, vF(u))[2] - tw);
+const over = (u0, u1, f, pick) => {
+let r = pick > 0 ? -1e9 : 1e9;
+for (let i = 0; i <= 8; i++) {
+const val = f(Math.min(uHi, Math.max(uLo, u0 + (u1 - u0) * i / 8)));
+r = pick > 0 ? Math.max(r, val) : Math.min(r, val);
+}
+return r;
+};
+const xAt = u => (u - 0.5) * S.lwl;
+const pale = mats.woodPale;
+const scoopMat = new THREE.MeshStandardMaterial({ color: 0x9c8259, roughness: 0.8,
+side: THREE.DoubleSide });
+const fibre = new THREE.MeshStandardMaterial({ color: 0x8f7442, roughness: 0.95 });
+const paddle = (len, bladeL, bladeW, name, what) => {
+const g = new THREE.Group();
+const shaftR = Math.max(0.016, len * 0.012);
+const shaftL = len - bladeL * 0.7;
+const shaft = new THREE.Mesh(
+new THREE.CylinderGeometry(shaftR, shaftR * 0.85, shaftL, 8), pale);
+shaft.rotation.z = Math.PI / 2;
+shaft.position.x = -len / 2 + shaftL / 2;
+g.add(shaft);
+const blade = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10), pale);
+blade.scale.set(bladeL / 2, shaftR * 0.85, bladeW / 2);
+blade.position.x = len / 2 - bladeL / 2;
+g.add(blade);
+g.userData.restR = shaftR;
+return tag(g, 'stowage', name, what);
+};
+const bailer = (r, name, what) => {
+const g = new THREE.Group();
+const bowl = new THREE.Mesh(
+new THREE.SphereGeometry(r, 14, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
+scoopMat);
+bowl.scale.set(1.5, 0.55, 1);
+g.add(bowl);
+const grip = new THREE.Mesh(
+new THREE.CylinderGeometry(r * 0.16, r * 0.16, r * 1.1, 8), pale);
+grip.rotation.z = Math.PI / 2;
+grip.position.set(r * 1.85, -r * 0.08, 0);
+g.add(grip);
+g.userData.restR = r * 0.55;
+return tag(g, 'stowage', name, what);
+};
+const coil = (R, rt, name, what) => {
+const g = new THREE.Group();
+for (const [rr, tt, dy] of [[R, rt, 0], [R * 0.82, rt * 0.9, rt * 0.9]]) {
+const t = new THREE.Mesh(new THREE.TorusGeometry(rr, tt, 8, 24), fibre);
+t.rotation.x = Math.PI / 2;
+t.position.y = dy;
+g.add(t);
+}
+g.userData.restR = rt;
+return tag(g, 'stowage', name, what);
+};
+const place = (item, uC, halfLenM, halfWidM, zWant, rotY) => {
+const u0 = uC - halfLenM / S.lwl, u1 = uC + halfLenM / S.lwl;
+const y = over(u0, u1, floorY, +1) + item.userData.restR + 0.004;
+const zRoom = over(u0, u1, floorHalf, -1) - halfWidM - 0.01;
+const z = Math.sign(zWant || 1) * Math.min(Math.abs(zWant), Math.max(0, zRoom));
+item.position.set(xAt(uC), y, z);
+if (rotY) item.rotation.y = rotY;
+group.add(item);
+};
+if (S.build === 'dugout') {
+const paddleWhat = 'Paddling is the record’s own steering row — "the paddle '
++ 'itself — nothing is hung on the hull" — and her one measured figure is a '
++ 'paddled crossing (Kaifu’s Sugime, Taiwan→Yonaguni, 2019). The paddle in '
++ 'use is crew gear and no crew is drawn; this is the spare, stowed on the floor. No '
++ 'Pleistocene paddle survives: the one-piece shaft and narrow leaf blade are DERIVED '
++ 'from the oldest recovered paddles (Star Carr, ~9000 BC; Tybrind Vig, ~4400 BC).';
+place(paddle(1.5, 0.5, 0.15, 'Spare paddle — stowed', paddleWhat),
+0.42, 0.75, 0.085, S.beam * 0.14, Math.PI);
+place(paddle(1.5, 0.5, 0.15, 'Spare paddle — stowed', paddleWhat),
+0.58, 0.75, 0.085, -S.beam * 0.14, 0);
+place(bailer(0.09, 'Bailer — carved scoop',
+'An open hull in a seaway ships water, and a 70–90 km open-water leg has '
++ 'nowhere to empty her: bailing is as old as the open boat. No Pleistocene bailer '
++ 'survives; the one-piece scoop is DERIVED from the form recorded across the '
++ 'Pacific in Haddon & Hornell, Canoes of Oceania (1936–38).'),
+0.34, 0.14, 0.10, -S.beam * 0.06, 0);
+} else if (S.doubleHull) {
+place(paddle(3.4, 1.0, 0.28, 'Steering paddle — stowed',
+'Her own card row: steering is "a long paddle, not a rudder" (Finney 1977; '
++ 'Polynesian Voyaging Society logs). In use the sweep is handled over the quarter '
++ 'by the steersman — nothing is mounted on the hull, and no crew is drawn. The '
++ 'spare stows in the bottom of the hull.'),
+0.50, 1.7, 0.15, S.beam * 0.10, 0);
+place(bailer(0.11, 'Bailer — carved scoop',
+'Both hulls are open and are bailed by hand under way — Polynesian Voyaging '
++ 'Society crews still stand bailing watches. The one-piece scoop with its spade '
++ 'grip is the recorded Oceanic form (Haddon & Hornell, Canoes of Oceania, '
++ '1936–38).'),
+0.66, 0.17, 0.12, -S.beam * 0.08, 0);
+const cR = Math.min(0.16, Math.max(0.06, floorHalf(0.74) * 0.7));
+place(coil(cR, Math.min(0.03, cR * 0.35), 'Lashing line — coiled spare',
+'Her construction row: "lashed-lug planking, no metal at all". A lashed ship is '
++ 'held together by cordage and carries it as stores; the traditional line is '
++ 'sennit — braided coconut fibre (Haddon & Hornell, Canoes of Oceania). The '
++ 'coil is the spare.'),
+0.74, cR + 0.03, cR + 0.03, S.beam * 0.05, 0);
+}
+}
 function buildPaddles(S, group, mats) {
 const D = S.paddleDia || 0;
 if (!D) return;
@@ -5948,6 +6069,7 @@ if (FINE && S.netDefence) buildNetDefence(S, group);
 if (FINE) buildOars(S, group, mats.woodPale);
 if (FINE) buildGalleyWorks(S, group, mats);
 if (FINE) buildPaddles(S, group, mats);
+if (FINE && cover.mode === 0) buildFloorStowage(S, group, mats);
 if (FINE) buildScrews(S, group);
 if (FINE && S.transom && S.build !== 'steel' && S.build !== 'iron')
 buildStern(S, group, mats);
@@ -5959,7 +6081,8 @@ if (S.flightDeck) buildFlightDeck(S, group, mats);
 if (S.turrets) buildTurrets(S, group, mats);
 if (S.doubleHull) {
 const sep = S.hullSep || S.loa * 0.26;
-const hullKeys = ['keel', 'frames', 'planking', 'deck', 'stempost', 'wale', 'rudder'];
+const hullKeys = ['keel', 'frames', 'planking', 'deck', 'stempost', 'wale', 'rudder',
+'stowage'];
 const body = group.children.filter(o => o.userData.part && hullKeys.includes(o.userData.part.key));
 body.forEach(o => {
 const twin = o.clone();

@@ -316,6 +316,11 @@
    "name": "passage-sahul",
    "path": "/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70",
    "note": "THE FIRST CROSSING, IN ITS OWN DAYLIGHT - added r124. Era 0 at the era's own datum (the r123 fix this frame stands guard over); frozen t=374 puts local noon on the Timor Sea (subsolar lon = 0.006t rad). Camera pinned by fb/fd/fz so the frame watches the two open dugouts and their wakes, not standOffFor's land-height guess. No land in sight is CORRECT - the voyage card's own row says 70-90 km out of sight of land. The land row must stay unnamed at 60,000 BC (r124 gazetteer existence gate)."
+  },
+  {
+   "name": "sea-dugout-floor",
+   "path": "/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30",
+   "note": "THE OPEN HULL'S FLOOR, WATCHED - added r127. 55 deg down at 30 m over the followed Sahul dugout: the one angle that sees past the rim to the hollowed floor and the stowed gear (spare paddles, bailer) the record attests. Every other committed frame takes the floor on faith - the r114 one-view-blindness class. Same frozen noon as passage-sahul."
   }
  ]
 }

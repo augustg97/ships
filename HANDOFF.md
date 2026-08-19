@@ -8197,3 +8197,87 @@ crest (r108), yakata curtain (r117), dugout floor gear (r122).
 gear (r122), the smallest honest improvement to the oldest hull. (2) The probe-wake heading
 mirror (r114) is now visible in a committed baseline (passage-sahul's wakes bear slightly
 off the sterns) — it finally has a frame that would prove its fix.
+
+## Round 127 — 2026-08-19 — the open hulls get the gear their own records attest, and a frame that can actually see it
+
+**The opening ratchet was started and then stopped, on purpose, at 15/60 frames.** r126's
+closing pass ran 60/60 green on this exact tree (commit eae03c9; nothing changed since but
+the loop log), so the opening pass was a re-check of identical code — and at ~45 s a frame
+it would have spent 45 of the round's 80 watchdog minutes re-proving what is already
+proved. The r126 procedural lesson cuts the other way too: the most expensive thing a
+watchdog can destroy is finished work that never got committed. The kill was verified
+clean — exit 143, no leaked browser (the r125 check), the ms-playwright processes on the
+box belong to the desktop app's own session, hours older than this round.
+
+**THE TASK was r126's queue head: the dugout's bare hollow floor (r122 residual), and it
+became the class fix for both open hulls.** `buildFloorStowage` in hull.js draws stowed
+gear on any FINE open hull (`deckCovering().mode === 0` — the same gate that opened the
+hulls in r122), and every piece is what the vessel's own record attests. The dugout: two
+spare paddles — her steering row is "the paddle itself — nothing is hung on the hull" and
+her one measured figure is a paddled crossing (Kaifu's Sugime, 2019); forms DERIVED from
+the oldest recovered paddles (Star Carr ~9000 BC, Tybrind Vig ~4400 BC), and the part card
+says so — plus a bailer (an open hull on a 70–90 km leg bails or founders; the one-piece
+scoop of Haddon & Hornell). The canoe, per hull via the r115 twin-clone list ('stowage'
+added to hullKeys): a stowed steering paddle ("a long paddle, not a rudder" — Finney 1977),
+a bailer, and a coil of lashing line ("lashed-lug planking, no metal at all" — sennit, per
+Haddon & Hornell). The paddle IN USE is crew gear and no crew is drawn (r121); what is
+drawn is the spare, stowed. A NEW open hull inherits nothing: the canoe branch is gated on
+her own doubleHull record, so a future undecked hull draws no gear until someone decides
+its gear from its own record — and the audit demands exactly that.
+
+**Placement is asked of the carved floor's own geometry** — the same tw/tb sidings as
+buildOpenHullGeometry; every piece rests on the HIGHEST floor its length crosses and is
+clamped inside the floor half-breadth over its whole span, so nothing can stand outside
+the walls or sink through the rising floor on any open hull at any proportion.
+
+**Measured (rule 4, build/measure-{dugout,voyaging-canoe}-r127-{before,after}.txt):**
+dugout — paddles at y −0.18..−0.15 on a −0.19 floor, span union u 0.326..0.674, |z| ≤ 0.20
+inside a 0.39 cavity half; bailer u 0.323..0.367. Canoe — steering paddle 3.40 m at
+y −0.70..−0.62 on a −0.70 floor in BOTH hulls (|z| 2.84 about the ±2.7 clones), bailer and
+coil likewise. Envelopes unchanged before/after to the centimetre — the gear adds nothing
+outside the hulls.
+
+**Audit: 33/0 clean (build/staging/audit-r127-run1.json), and the new rule's three arms
+each convict on injection:** inject-stowage-stripped → 2× "an open hull with a bare floor"
+(both open hulls); inject-stowage-adrift (freeboard-scaled hoist) → 2× "stowed gear above
+the rim"; inject-stowage-on-deck → 31× "stowage drawn on a decked hull" (33 − 2 — the
+gate-widening direction is held too).
+
+**Frames: the change is invisible from every pre-existing baseline, and that is correct —
+and it is also the r114 one-view-blindness class.** ship-dugout, passage-sahul, ship-canoe,
+globe-crossing all re-checked 0.000%: the Shipwright camera rides at sea level and a
+0.34 m rim hides a floor 0.53 m below it beyond ~2 m of sightline; stowed gear below the
+rim line SHOULD vanish from a sea-level camera. So the round added the one angle that can
+see it: **NEW baseline sea-dugout-floor** (55° down at 30 m over the followed Sahul
+dugout, same frozen noon as passage-sahul) — read before accepting: pale dressed rim in
+one continuous line, charred bowl, the leaf-bladed spare paddle and bailer lying on the
+floor below the rim, wake astern, the coarse consort honestly bare. The canoe's floors
+were verified by a temporary near-vertical diagnosis frame (read: steering paddle and
+bailer visible in the open lower hull, upper hull under the sail), then deleted — 61
+committed baselines, one of them new.
+
+**Rule 0, written on sea-dugout-floor:** it reads as a rendered sea seen from above — a
+hollowed log under way on blue-green water, not a chart. Three facts a viewer can read
+off it: the boat is one piece, a tree with the inside taken out (pale rim, charred bowl,
+no seam); she carries stowed spare paddles and a bailer on her floor, gear rather than
+crew; she is mid-crossing at 60,000 BC — wake astern, nearest land 16 nm NW on her slip
+card, sea level 68 m lower on the era card (derived, Spratt & Lisiecki 2016).
+
+**Known residuals:** (1) The canoe's floor gear has no committed watching frame — the
+sea-dugout-floor precedent extends if wanted (`#e=4&f=aotearoa&fb=160&fd=80&fz=25` was
+the diagnosis view). (2) Dunnage — r122's third named item — is NOT drawn: no attested
+Pleistocene form exists, and a smooth pale slab under the gear would read as exactly the
+flat-untextured-surface fault the survey hunts; drawn nothing rather than drawn a guess.
+(3) The next opening ratchet is the fleet-wide confirming pass for the 57 frames this
+round did not re-check; expected 0.000% everywhere (hull.js changed only inside the
+FINE open-hull gate), but expectation is not verification. (4) Earlier residuals stand:
+sekibune wasen kaji (r121), gundeck normals (r118), sekibune/panokseon LOA (r113/r115),
+probe-wake heading mirror (r114 — the one-line suspect is `hdgFromDirDeg`'s
+atan2(x,z) at probe-wake.py:70, unverified), Endurance forecastle (RMG J9266), Azzam
+crest (r108), yakata curtain (r117).
+
+**Next, in order:** (1) The survey's standing task resumes — the boxy column past the
+dugout. (2) The probe-wake heading mirror (r114): fix the probe, verify against a card
+course the record attests (evergiven 283°), then decide whether the passage-sahul wake
+bearing is the probe's fault or the renderer's. (3) The canoe floor frame, if the class
+deserves a second watcher.

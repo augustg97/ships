@@ -1,0 +1,24 @@
+Voyaging canoe   record: LOA 19 m  LWL 18 m  beam 1.05 m  draught 0.75 m
+  model extent   x    -9.99 ..    +9.99   =   19.98 m   (record LOA 19)   Δ +0.98 m
+  model height   y    -0.81 ..   +10.80   =   11.61 m   above water 10.80 m
+  model breadth  z         ..    +3.54   =    7.08 m   (record beam 1.05)   Δ +6.03 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Stem                        -0.055   0.102    2.83   -0.58    1.25   2.73
+  Planking                    -0.053   1.053   19.90   -0.75    1.25   3.22
+  Gunwale — top strake edge   -0.053   1.053   19.90    0.75    1.25   3.21
+  Waterplane mask             -0.053   1.053   19.90    0.75    1.25   3.21
+  Wales                       -0.007   1.008   18.27    0.04    0.49   3.23
+  Keel                         0.000   1.000   18.00   -0.81   -0.33   2.73
+  Open hull — no deck laid     0.017   0.984   17.40   -0.70    1.12   3.20
+  Yard                         0.239   0.464    4.05    0.75   10.80   0.01
+  Boom                         0.239   0.779    9.71    0.74    5.57   0.01
+  Sail                         0.240   0.779    9.70    0.75   10.80   0.86
+  Crossbeams                   0.282   0.718    7.86    0.75    0.96   3.54
+  Platform                     0.321   0.679    6.46    0.90    0.95   2.32
+  Steering paddle — stowed     0.406   0.594    3.40   -0.70   -0.62   2.84
+  Shrouds                      0.450   0.513    1.14    0.75    9.53   0.56
+  Mast                         0.458   0.514    1.01    0.77    9.78   0.03
+  Bailer — carved scoop        0.651   0.674    0.42   -0.70   -0.63   2.81
+  Lashing line — coiled spar   0.736   0.744    0.16   -0.69   -0.63   2.78
+  Sternpost                    0.898   1.055    2.83   -0.58    1.25   2.73

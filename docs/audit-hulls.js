@@ -151,6 +151,36 @@ say(v.id, `a decked timber ship lost her ${k}`,
 }
 }
 {
+const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
+const st = part.stowage;
+if (undecked && !st)
+say(v.id, 'an open hull with a bare floor',
+'the record lays no deck, so the floor is in plain sight — and the gear the '
++ 'record itself attests (paddles, a bailer) is not drawn');
+else if (!undecked && st)
+say(v.id, 'stowage drawn on a decked hull',
+`${st.n} stowage mesh(es) on a hull whose deck would hide them — the open-`
++ 'hull gate widened wrongly');
+if (undecked && st && part.deck) {
+const eps = 0.03;
+if (st.y[1] > part.deck.y[1] + eps)
+say(v.id, 'stowed gear above the rim',
+`gear tops at ${st.y[1].toFixed(2)} m against a rim line of `
++ `${part.deck.y[1].toFixed(2)} m — adrift, not stowed`);
+if (st.y[0] < part.deck.y[0] - eps)
+say(v.id, 'stowed gear below the floor',
+`gear bottoms at ${st.y[0].toFixed(2)} m against a floor of `
++ `${part.deck.y[0].toFixed(2)} m — sunk through the hull`);
+if (st.x[0] < part.deck.x[0] - eps || st.x[1] > part.deck.x[1] + eps
+|| st.z[0] < part.deck.z[0] - eps || st.z[1] > part.deck.z[1] + eps)
+say(v.id, 'stowed gear outside the hull',
+`gear spans x ${st.x[0].toFixed(2)}..${st.x[1].toFixed(2)}, `
++ `z ${st.z[0].toFixed(2)}..${st.z[1].toFixed(2)} against the open hull's `
++ `x ${part.deck.x[0].toFixed(2)}..${part.deck.x[1].toFixed(2)}, `
++ `z ${part.deck.z[0].toFixed(2)}..${part.deck.z[1].toFixed(2)}`);
+}
+}
+{
 const st = H.steering;
 if (!/^(paddle|quarter|median|stern|steel)$/.test(st || ''))
 say(v.id, 'record declares no steering',
