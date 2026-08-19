@@ -814,13 +814,25 @@ if (Math.abs(y) < wlBand) { foreWL = Math.min(foreWL, x); aftWL = Math.max(aftWL
 if (x < 0 && y > topB - 1.2) foreDk = Math.min(foreDk, x);
 if (x > 0 && y > topS - 1.2) aftDk = Math.max(aftDk, x);
 }
+const rakeAllow = ((H.stemRake || 0) + (H.sternRake || 0)) * H.loa;
+const rakeScale = rakeAllow > 0
+? Math.min(1, Math.max(0, H.loa - H.lwl) / rakeAllow) : 1;
 for (const [name, want, got] of [
-['stem', H.stemRake * H.loa, foreWL - foreDk],
-['sternpost', H.sternRake * H.loa, aftDk - aftWL]]) {
+['stem', H.stemRake * rakeScale * H.loa, foreWL - foreDk],
+['sternpost', H.sternRake * rakeScale * H.loa, aftDk - aftWL]]) {
 if (want > 1.5 && Math.abs(got - want) > Math.max(1.2, want * 0.4))
 say(v.id, 'a recorded rake drawn vertical',
 `${name}: record asks a ${want.toFixed(1)} m lean, drawn ${got.toFixed(1)} m`);
 }
+let px0 = 1e9, px1 = -1e9;
+for (let i = 0; i < P.count; i++) {
+const x = P.getX(i);
+if (x < px0) px0 = x; if (x > px1) px1 = x;
+}
+const drawnL = px1 - px0;
+if (drawnL > H.loa + Math.max(0.25, H.loa * 0.002))
+say(v.id, 'drawn length beyond record loa',
+`planking spans ${drawnL.toFixed(2)} m against loa ${H.loa} m`);
 }
 }
 const house = part.superstructure || part.island;

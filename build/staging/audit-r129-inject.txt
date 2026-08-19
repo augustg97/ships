@@ -1,0 +1,178 @@
+checked 33 hulls, 35 problems
+[
+ {
+  "id": "dugout",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 9.12 m against loa 8.6 m"
+ },
+ {
+  "id": "voyaging-canoe",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 21.35 m against loa 19 m"
+ },
+ {
+  "id": "trireme",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 39.11 m against loa 36.9 m"
+ },
+ {
+  "id": "corbita",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 42.19 m against loa 40 m"
+ },
+ {
+  "id": "dhow",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 27.56 m against loa 26 m"
+ },
+ {
+  "id": "junk",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 36.04 m against loa 34 m"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 74.20 m against loa 70 m"
+ },
+ {
+  "id": "cog",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 24.70 m against loa 23.3 m"
+ },
+ {
+  "id": "caravel",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 21.20 m against loa 20 m"
+ },
+ {
+  "id": "carrack",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 44.52 m against loa 42 m"
+ },
+ {
+  "id": "galley",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 44.52 m against loa 42 m"
+ },
+ {
+  "id": "galleass",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 49.82 m against loa 47 m"
+ },
+ {
+  "id": "panokseon",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 33.90 m against loa 32 m"
+ },
+ {
+  "id": "sekibune",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 26.50 m against loa 25 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 33.22 m against loa 32 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "stern furniture buried in the hull",
+  "detail": "lights end 0.83 m inboard of the aft face"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 52.47 m against loa 50 m"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture buried in the hull",
+  "detail": "lights end 1.27 m inboard of the aft face"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "stern furniture buried in the hull",
+  "detail": "galleries end 0.71 m inboard of the aft face"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 60.42 m against loa 57 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture buried in the hull",
+  "detail": "lights end 1.45 m inboard of the aft face"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "stern furniture buried in the hull",
+  "detail": "galleries end 0.79 m inboard of the aft face"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 223.66 m against loa 211 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 285.25 m against loa 269.1 m"
+ },
+ {
+  "id": "usv",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 22.66 m against loa 22 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 68.69 m against loa 64.8 m"
+ },
+ {
+  "id": "steamer",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 103.88 m against loa 98 m"
+ },
+ {
+  "id": "dreadnought",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 170.24 m against loa 160.6 m"
+ },
+ {
+  "id": "yamato",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 278.78 m against loa 263 m"
+ },
+ {
+  "id": "carrier",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 353.88 m against loa 337 m"
+ },
+ {
+  "id": "container",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 418.70 m against loa 399.9 m"
+ },
+ {
+  "id": "ever-given",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 422.94 m against loa 399.98 m"
+ },
+ {
+  "id": "azzam",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 191.44 m against loa 180.6 m"
+ },
+ {
+  "id": "endurance",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 46.64 m against loa 44 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "drawn length beyond record loa",
+  "detail": "planking spans 365.70 m against loa 345 m"
+ }
+]

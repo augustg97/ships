@@ -1,0 +1,235 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · globe-default                http://localhost:8149/?frozen=1#v=sea
+    · globe-crossing               http://localhost:8149/?frozen=1#e=0&t=40000
+    · globe-steam                  http://localhost:8149/?frozen=1#e=5&t=1870
+    · globe-modern                 http://localhost:8149/?frozen=1#e=7&t=2000
+    · globe-era-card               http://localhost:8149/?frozen=1#e=1&card=era
+    · shipwright                   http://localhost:8149/?frozen=1#v=ship
+    · action                       http://localhost:8149/?frozen=1#v=action
+    · ship-dhow                    http://localhost:8149/?frozen=1#v=ship&s=dhow
+    · ship-junk                    http://localhost:8149/?frozen=1#v=ship&s=junk
+    · ship-canoe                   http://localhost:8149/?frozen=1#v=ship&s=voyaging-canoe
+    · ship-great-eastern           http://localhost:8149/?frozen=1#v=ship&s=great-eastern
+    · ship-usv                     http://localhost:8149/?frozen=1#v=ship&s=usv
+    · ship-dugout                  http://localhost:8149/?frozen=1#v=ship&s=dugout
+    · ship-trireme                 http://localhost:8149/?frozen=1.4#v=ship&s=trireme
+    · ship-galley                  http://localhost:8149/?frozen=1#v=ship&s=galley
+    · ship-galleass                http://localhost:8149/?frozen=1#v=ship&s=galleass
+    · ship-panokseon               http://localhost:8149/?frozen=1#v=ship&s=panokseon
+    · ship-sekibune                http://localhost:8149/?frozen=1#v=ship&s=sekibune
+    · ship-carrier                 http://localhost:8149/?frozen=1#v=ship&s=carrier
+    · ship-titanic                 http://localhost:8149/?frozen=1#v=ship&s=titanic
+    · ship-yamato                  http://localhost:8149/?frozen=1#v=ship&s=yamato
+    · ship-container               http://localhost:8149/?frozen=1#v=ship&s=container
+    · ship-queen-mary-2            http://localhost:8149/?frozen=1#v=ship&s=queen-mary-2
+    · descent                      http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700
+    · descent-high                 http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000
+    · descent-coast                http://localhost:8149/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260
+    · aboard                       http://localhost:8149/?frozen=1#e=5&f=greatwestern
+    · aboard-off                   http://localhost:8149/?frozen=1#e=7&f=boxroute
+    · map-floor                    http://localhost:8149/?frozen=1#e=4&t=1590&c=-45.3,-24.1&z=300000
+    · aboard-coast                 http://localhost:8149/?frozen=1#e=2&f=syracuse
+    · sea-magnified                http://localhost:8149/?frozen=1#e=7&t=2000&c=-30,35&z=10000
+    · ship-preussen                http://localhost:8149/?frozen=1#v=ship&s=preussen
+    · ship-steamer                 http://localhost:8149/?frozen=1#v=ship&s=steamer
+    · ship-dreadnought             http://localhost:8149/?frozen=1#v=ship&s=dreadnought
+    · aboard-carrier               http://localhost:8149/?frozen=1#e=7&f=csg
+    · aboard-cable                 http://localhost:8149/?frozen=1#e=5&f=cable
+    · aboard-titanic               http://localhost:8149/?frozen=1#e=6&f=titanicvoy
+    · aboard-yamato                http://localhost:8149/?frozen=1#e=6&f=tenichigo
+    · aboard-preussen              http://localhost:8149/?frozen=1#e=6&f=preussenvoy
+    · ship-wyoming                 http://localhost:8149/?frozen=1#v=ship&s=wyoming
+    · aboard-wyoming               http://localhost:8149/?frozen=1#e=6&f=wyomingvoy
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+    · aboard-treasure              http://localhost:8149/?frozen=1#e=4&f=zhenghe
+    · ship-clipper                 http://localhost:8149/?frozen=1#v=ship&s=clipper
+    · aboard-clipper               http://localhost:8149/?frozen=1#e=5&f=woolrun
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+    · shipwright-corbis            http://localhost:8149/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15
+    · ship-azzam                   http://localhost:8149/?frozen=1#v=ship&s=azzam
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  globe-default                   0.020%     0.005  ok
+  globe-crossing                  0.004%     0.003  ok
+  globe-steam                     0.017%     0.005  ok
+  globe-modern                    0.013%     0.004  ok
+  globe-era-card                  0.004%     0.001  ok
+  shipwright                      2.245%     0.932  CHANGED
+  action                          0.245%     0.062  CHANGED
+  ship-dhow                       1.522%     0.751  CHANGED
+  ship-junk                       1.956%     0.763  CHANGED
+  ship-canoe                      0.383%     0.190  CHANGED
+  ship-great-eastern             17.268%     5.622  CHANGED
+  ship-usv                        0.003%     0.000  ok
+  ship-dugout                    12.582%     3.709  CHANGED
+  ship-trireme                   18.435%     6.353  CHANGED
+  ship-galley                     0.532%     0.291  CHANGED
+  ship-galleass                   0.924%     0.500  CHANGED
+  ship-panokseon                  0.101%     0.037  CHANGED
+  ship-sekibune                   0.000%     0.000  ok
+  ship-carrier                    0.027%     0.006  ok
+  ship-titanic                    7.425%     2.098  CHANGED
+  ship-yamato                    16.266%     3.800  CHANGED
+  ship-container                  0.036%     0.010  ok
+  ship-queen-mary-2               6.179%     2.268  CHANGED
+  descent                         0.000%     0.000  ok
+  descent-high                    0.000%     0.000  ok
+  descent-coast                   0.003%     0.000  ok
+  aboard                          0.187%     0.062  CHANGED
+  aboard-off                      0.000%     0.000  ok
+  map-floor                       0.409%     0.222  CHANGED
+  aboard-coast                    0.249%     0.086  CHANGED
+  sea-magnified                   0.000%     0.000  ok
+  ship-preussen                   0.033%     0.017  ok
+  ship-steamer                    2.870%     1.294  CHANGED
+  ship-dreadnought               13.273%     3.184  CHANGED
+  aboard-carrier                  0.000%     0.000  ok
+  aboard-cable                    0.147%     0.053  CHANGED
+  aboard-titanic                  0.018%     0.006  ok
+  aboard-yamato                   0.031%     0.016  ok
+  aboard-preussen                 0.000%     0.000  ok
+  ship-wyoming                    0.038%     0.010  ok
+  aboard-wyoming                  0.000%     0.000  ok
+  ship-treasure                   2.528%     0.871  CHANGED
+  aboard-treasure                 0.185%     0.084  CHANGED
+  ship-clipper                    4.701%     1.874  CHANGED
+  aboard-clipper                  0.187%     0.059  CHANGED
+  shipwright-ahead                0.741%     0.318  CHANGED
+  shipwright-astern               1.946%     0.683  CHANGED
+  shipwright-furled               8.161%     3.485  CHANGED
+  shipwright-hounds               5.236%     2.261  CHANGED
+  shipwright-corbis               0.000%     0.000  ok
+  ship-azzam                      8.335%     2.210  CHANGED
+  ship-endurance                  1.409%     0.522  CHANGED
+  action-salamis                  0.101%     0.018  CHANGED
+  board-salamis                   0.011%     0.005  ok
+  action-gravelines               0.133%     0.026  CHANGED
+  action-lepanto                  0.090%     0.017  CHANGED
+  wake-plan                       0.000%     0.000  ok
+  ship-ever-given                 0.032%     0.008  ok
+  sea-ever-given                  0.000%     0.000  ok
+  passage-sahul                   0.034%     0.012  ok
+  sea-dugout-floor                0.265%     0.114  CHANGED
+
+  34 frame(s) moved. Every one must be classified before this ships (§7 — never on an average):
+
+    shipwright
+      2.245% of pixels moved (limit 0.050%), mean |Δ| 0.932 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/shipwright.png
+
+    action
+      0.245% of pixels moved (limit 0.050%), mean |Δ| 0.062 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/action.png
+
+    ship-dhow
+      1.522% of pixels moved (limit 0.050%), mean |Δ| 0.751 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-dhow.png
+
+    ship-junk
+      1.956% of pixels moved (limit 0.050%), mean |Δ| 0.763 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-junk.png
+
+    ship-canoe
+      0.383% of pixels moved (limit 0.050%), mean |Δ| 0.190 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-canoe.png
+
+    ship-great-eastern
+      17.268% of pixels moved (limit 0.050%), mean |Δ| 5.622 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-great-eastern.png
+
+    ship-dugout
+      12.582% of pixels moved (limit 0.050%), mean |Δ| 3.709 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-dugout.png
+
+    ship-trireme
+      18.435% of pixels moved (limit 0.050%), mean |Δ| 6.353 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-trireme.png
+
+    ship-galley
+      0.532% of pixels moved (limit 0.050%), mean |Δ| 0.291 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-galley.png
+
+    ship-galleass
+      0.924% of pixels moved (limit 0.050%), mean |Δ| 0.500 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-galleass.png
+
+    ship-panokseon
+      0.101% of pixels moved (limit 0.050%), mean |Δ| 0.037 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-panokseon.png
+
+    ship-titanic
+      7.425% of pixels moved (limit 0.050%), mean |Δ| 2.098 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-titanic.png
+
+    ship-yamato
+      16.266% of pixels moved (limit 0.050%), mean |Δ| 3.800 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-yamato.png
+
+    ship-queen-mary-2
+      6.179% of pixels moved (limit 0.050%), mean |Δ| 2.268 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-queen-mary-2.png
+
+    aboard
+      0.187% of pixels moved (limit 0.050%), mean |Δ| 0.062 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/aboard.png
+
+    map-floor
+      0.409% of pixels moved (limit 0.050%), mean |Δ| 0.222 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/map-floor.png
+
+    aboard-coast
+      0.249% of pixels moved (limit 0.050%), mean |Δ| 0.086 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/aboard-coast.png
+
+    ship-steamer
+      2.870% of pixels moved (limit 0.050%), mean |Δ| 1.294 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-steamer.png
+
+    ship-dreadnought
+      13.273% of pixels moved (limit 0.050%), mean |Δ| 3.184 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-dreadnought.png
+
+    aboard-cable
+      0.147% of pixels moved (limit 0.050%), mean |Δ| 0.053 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/aboard-cable.png
+
+    ship-treasure
+      2.528% of pixels moved (limit 0.050%), mean |Δ| 0.871 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-treasure.png
+
+    aboard-treasure
+      0.185% of pixels moved (limit 0.050%), mean |Δ| 0.084 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/aboard-treasure.png
+
+    ship-clipper
+      4.701% of pixels moved (limit 0.050%), mean |Δ| 1.874 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-clipper.png
+
+    aboard-clipper
+      0.187% of pixels moved (limit 0.050%), mean |Δ| 0.059 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/aboard-clipper.png
+
+    shipwright-ahead
+      0.741% of pixels moved (limit 0.050%), mean |Δ| 0.318 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/shipwright-ahead.png
+
+    shipwright-astern
+      1.946% of pixels moved (limit 0.050%), mean |Δ| 0.683 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/shipwright-astern.png
+
+    shipwright-furled
+      8.161% of pixels moved (limit 0.050%), mean |Δ| 3.485 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/shipwright-furled.png
+
+    shipwright-hounds
+      5.236% of pixels moved (limit 0.050%), mean |Δ| 2.261 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/shipwright-hounds.png
+
+    ship-azzam
+      8.335% of pixels moved (limit 0.050%), mean |Δ| 2.210 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-azzam.png
+
+    ship-endurance
+      1.409% of pixels moved (limit 0.050%), mean |Δ| 0.522 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-endurance.png
+
+    action-salamis
+      0.101% of pixels moved (limit 0.050%), mean |Δ| 0.018 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/action-salamis.png
+
+    action-gravelines
+      0.133% of pixels moved (limit 0.050%), mean |Δ| 0.026 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/action-gravelines.png
+
+    action-lepanto
+      0.090% of pixels moved (limit 0.050%), mean |Δ| 0.017 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/action-lepanto.png
+
+    sea-dugout-floor
+      0.265% of pixels moved (limit 0.050%), mean |Δ| 0.114 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/sea-dugout-floor.png
+
+  If a change is an improvement, accept it deliberately:
+    frame_baseline.py accept --project /Users/augustgweon/Ships --frame <name> --reason "..."
+
+EXIT:1

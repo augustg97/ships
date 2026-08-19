@@ -100,14 +100,17 @@ return st.topM[0] + (st.topM[1] - st.topM[0]) * t;
 return null;
 };
 const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
+const rakeAllow = ((S.stemRake || 0) + (S.sternRake || 0)) * S.loa;
+const rakeScale = rakeAllow > 0
+? Math.min(1, Math.max(0, S.loa - S.lwl) / rakeAllow) : 1;
 const rake = u => {
 if (u < S.forefoot) {
 const k = (S.forefoot - u) / S.forefoot;
-return -S.stemRake * k * k * S.loa;
+return -S.stemRake * rakeScale * k * k * S.loa;
 }
 if (u > 1 - S.run) {
 const k = (u - (1 - S.run)) / S.run;
-return S.sternRake * k * k * S.loa;
+return S.sternRake * rakeScale * k * k * S.loa;
 }
 return 0;
 };
@@ -340,7 +343,7 @@ const pts = STEEL
 [p[0] + chord * 0.02, depth]]
 : [[p[0], top], [p[0] + chord * 0.55, top],
 [p[0] + chord, depth], [p[0], depth]];
-const postLean = q => q[1] > 0 ? S.sternRake * S.loa * Math.min(1, q[1] / H.sheer(1.0)) : 0;
+const postLean = q => q[1] > 0 ? H.rake(1.0) * Math.min(1, q[1] / H.sheer(1.0)) : 0;
 pts.forEach(q => pos.push(q[0] + postLean(q), q[1], -w, q[0] + postLean(q), q[1], w));
 const n = pts.length;
 for (let i = 0; i < n; i++) {

@@ -1106,3 +1106,37 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-19 04:19** · `sea-dugout-floor` — NEW - r127 floor stowage: the one committed angle that sees past the dugout's rim to the hollowed floor (55 deg down, 30 m). Gear the record attests now lies there - two spare paddles (steering row: 'the paddle itself'; forms from Star Carr/Tybrind Vig) and a bailer (Haddon & Hornell). Every other frame takes the floor on faith; this one watches it - the r114 one-view-blindness class.
 - **2026-08-19 05:30** · `ship-sekibune` — r128: drawn LOA now equals her own card - rakes normalized to the record allowance (stemRake .22->.065, sternRake .12->.035); planking measures 25.00 m exactly (was 31.0 against a 25 m card, the r113/r115 overhang class); profile and Shipwright looked at, the raking stem retained
 - **2026-08-19 05:30** · `ship-panokseon` — r128: drawn LOA now equals her own card - rakes normalized to the record allowance (0.1/0.1 -> 0.031/0.031); planking measures 31.98 m against the 32 m card (was 36.4, the r113/r115 overhang class); profile and Shipwright looked at, the blunt Korean bow retained
+- **2026-08-19 06:40** · `ship-yamato` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — yamato was +6.15 m over her card; 263.00 m exact now; profile+measure verified, form retained
+- **2026-08-19 06:40** · `ship-clipper` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — clipper was +4.57 m; 64.80 m exact; profile verified, raked stem and counter retained
+- **2026-08-19 06:40** · `ship-great-eastern` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — great-eastern was +4.44 m; 211.00 m exact, extent Δ 0.00
+- **2026-08-19 06:40** · `ship-steamer` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — steamer was +3.80 m; 98.00 m exact, bowsprit rightly past LOA
+- **2026-08-19 06:40** · `ship-treasure` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — treasure-ship was +2.60 m; 70.00 m exact
+- **2026-08-19 06:40** · `ship-dreadnought` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — dreadnought was +2.43 m; 160.60 m exact
+- **2026-08-19 06:40** · `ship-galleass` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — galleass was +2.17 m; 47.00 m exact
+- **2026-08-19 06:40** · `ship-trireme` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — trireme was +1.79 m; 36.90 m exact; card and drawn hull agree on screen, oars and ram intact
+- **2026-08-19 06:40** · `ship-galley` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — galley was +1.70 m; 42.00 m exact
+- **2026-08-19 06:40** · `ship-junk` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — junk was +1.12 m; 34.00 m exact
+- **2026-08-19 06:40** · `ship-dugout` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — dugout was +0.95 m; 8.60 m exact; carved floor and r127 gear ride with the shell
+- **2026-08-19 06:40** · `ship-dhow` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — dhow was +0.92 m; 26.00 m exact
+- **2026-08-19 06:40** · `ship-canoe` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — voyaging-canoe was +0.90 m; 19.00 m exact
+- **2026-08-19 06:40** · `ship-azzam` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — azzam was +0.79 m; 180.60 m exact; superstructure reframes with the hull
+- **2026-08-19 06:40** · `ship-titanic` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — titanic was +0.66 m; 269.10 m exact
+- **2026-08-19 06:40** · `ship-queen-mary-2` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — QM2 was +0.60 m; 345.00 m exact
+- **2026-08-19 06:40** · `ship-endurance` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — endurance was +0.31 m; 44.00 m exact
+- **2026-08-19 06:40** · `ship-panokseon` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — panokseon herself unchanged (r128 data fix holds at 31.98 m); the movement is the neighbouring slip's clamped hull in frame
+- **2026-08-19 06:40** · `shipwright` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — the yard's default slip and visible neighbours redraw at their record lengths
+- **2026-08-19 06:40** · `shipwright-ahead` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — ship-of-the-line was +0.84 m; 57.00 m exact; bow-on guard reframes
+- **2026-08-19 06:40** · `shipwright-astern` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — ship-of-the-line 57.00 m exact; stern guard reframes
+- **2026-08-19 06:40** · `shipwright-furled` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — ship-of-the-line 57.00 m exact; furled spars and mast feet shift with the deck strake
+- **2026-08-19 06:40** · `shipwright-hounds` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — ship-of-the-line 57.00 m exact; masthead closeup shifts with the mast feet
+- **2026-08-19 06:40** · `aboard` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — Great Western (steamer) 3.80 m shorter under the aboard camera
+- **2026-08-19 06:40** · `aboard-coast` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — the Athenian triremes 1.79 m shorter, whole armada ghost-shifts
+- **2026-08-19 06:40** · `aboard-cable` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — Great Eastern 4.44 m shorter on the cable run
+- **2026-08-19 06:40** · `aboard-treasure` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — treasure ship 2.60 m shorter at anchor
+- **2026-08-19 06:40** · `aboard-clipper` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — clipper 4.57 m shorter on her tea run
+- **2026-08-19 06:40** · `action` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — the default battle's staged fleets (galley-class hulls) redraw shorter
+- **2026-08-19 06:40** · `action-salamis` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — trireme and galley fleets redraw at record loa
+- **2026-08-19 06:40** · `action-gravelines` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — the era hulls staged at Gravelines redraw at record loa
+- **2026-08-19 06:40** · `action-lepanto` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — galleass and galley fleets redraw at record loa
+- **2026-08-19 06:40** · `map-floor` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — the 1590 fleet tokens draw the real (now record-length) models at token scale
+- **2026-08-19 06:40** · `sea-dugout-floor` — r129 rake clamp (hull.js): drawn planking length now equals the record loa — the hero and consort dugouts 0.95 m shorter; floor gear rides with the shell

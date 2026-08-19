@@ -1,0 +1,5 @@
+Ocean steamer   record: LOA 98 m  LWL 92 m  beam 15.4 m  draught 4.9 m
+  model extent   x   -59.89 ..   +48.40   =  108.29 m   (record LOA 98)   Δ +10.29 m
+  model height   y    -5.19 ..   +48.22   =   53.41 m   above water 48.22 m
+  model breadth  z         ..   +10.87   =   21.74 m   (record beam 15.4)   Δ +6.34 m
+

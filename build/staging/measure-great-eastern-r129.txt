@@ -1,0 +1,5 @@
+Great Eastern   record: LOA 211 m  LWL 207 m  beam 25.3 m  draught 9.1 m
+  model extent   x  -105.50 ..  +105.50   =  211.00 m   (record LOA 211)   Δ +0.00 m
+  model height   y    -9.62 ..   +64.51   =   74.13 m   above water 64.51 m
+  model breadth  z         ..   +22.62   =   45.24 m   (record beam 25.3)   Δ +19.94 m
+

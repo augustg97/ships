@@ -1,0 +1,35 @@
+
+33 hulls, 21 drawn longer than their record loa
+yamato               loa  263.00  lwl  256.00  rakes 0.030/0.020  drawn  269.15  over   +6.15
+clipper              loa   64.80  lwl   59.00  rakes 0.100/0.060  drawn   69.37  over   +4.57
+great-eastern        loa  211.00  lwl  207.00  rakes 0.020/0.020  drawn  215.44  over   +4.44
+steamer              loa   98.00  lwl   92.00  rakes 0.060/0.040  drawn  101.80  over   +3.80
+treasure-ship        loa   70.00  lwl   60.00  rakes 0.080/0.100  drawn   72.60  over   +2.60
+dreadnought          loa  160.60  lwl  155.00  rakes 0.030/0.020  drawn  163.03  over   +2.43
+galleass             loa   47.00  lwl   44.00  rakes 0.040/0.070  drawn   49.17  over   +2.17
+trireme              loa   36.90  lwl   35.00  rakes 0.045/0.055  drawn   38.69  over   +1.79
+galley               loa   42.00  lwl   39.50  rakes 0.030/0.070  drawn   43.70  over   +1.70
+cog                  loa   23.30  lwl   20.50  rakes 0.100/0.090  drawn   24.93  over   +1.63
+junk                 loa   34.00  lwl   29.00  rakes 0.080/0.100  drawn   35.12  over   +1.12
+dugout               loa    8.60  lwl    8.00  rakes 0.100/0.080  drawn    9.55  over   +0.95
+dhow                 loa   26.00  lwl   22.50  rakes 0.130/0.040  drawn   26.92  over   +0.92
+voyaging-canoe       loa   19.00  lwl   18.00  rakes 0.050/0.050  drawn   19.90  over   +0.90
+ship-of-the-line     loa   57.00  lwl   51.00  rakes 0.080/0.040  drawn   57.84  over   +0.84
+azzam                loa  180.60  lwl  172.00  rakes 0.052/0.000  drawn  181.39  over   +0.79
+titanic              loa  269.10  lwl  259.00  rakes 0.020/0.020  drawn  269.76  over   +0.66
+queen-mary-2         loa  345.00  lwl  328.00  rakes 0.041/0.010  drawn  345.60  over   +0.60
+carrack              loa   42.00  lwl   35.00  rakes 0.110/0.070  drawn   42.56  over   +0.56
+endurance            loa   44.00  lwl   39.60  rakes 0.077/0.030  drawn   44.31  over   +0.31
+caravel              loa   20.00  lwl   17.20  rakes 0.090/0.060  drawn   20.20  over   +0.20
+panokseon            loa   32.00  lwl   30.00  rakes 0.031/0.031  drawn   31.98  over   -0.02
+corbita              loa   40.00  lwl   35.00  rakes 0.050/0.070  drawn   39.80  over   -0.20
+east-indiaman        loa   50.00  lwl   43.00  rakes 0.080/0.050  drawn   49.50  over   -0.50
+usv                  loa   22.00  lwl   20.50  rakes 0.030/0.010  drawn   21.38  over   -0.62
+fluyt                loa   32.00  lwl   27.50  rakes 0.070/0.050  drawn   31.34  over   -0.66
+ever-given           loa  399.98  lwl  387.00  rakes 0.030/0.000  drawn  399.00  over   -0.98
+slave-ship           loa   30.00  lwl   26.00  rakes 0.030/0.020  drawn   27.50  over   -2.50
+carrier              loa  337.00  lwl  317.00  rakes 0.030/0.020  drawn  333.85  over   -3.15
+container            loa  399.90  lwl  383.00  rakes 0.030/0.000  drawn  395.00  over   -4.90
+preussen             loa  147.00  lwl  122.00  rakes 0.040/0.030  drawn  132.29  over  -14.71
+wyoming              loa  140.00  lwl  110.00  rakes 0.050/0.030  drawn  121.20  over  -18.80
+sekibune             loa   25.00  lwl   22.50  rakes 0.065/0.035  drawn   25.00  over   +0.00

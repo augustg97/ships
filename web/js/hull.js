@@ -190,15 +190,28 @@ function hullSurface(S) {
   /* tumblehome grows above the waterline; quoted as the fraction of half-beam lost at deck */
   const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
 
+  /* ── THE RECORD'S LOA OWNS THE OVERHANG (round 129) ─────────────────────────────────
+     The loft granted stemRake·loa + sternRake·loa of overhang ON TOP of the lwl, and
+     nothing checked the sum against the record's LENGTH OVERALL: 21 of 33 hulls drew
+     past their own cards — Yamato +6.1 m, the clipper +4.6 (the r113/r115/r128 class;
+     fleet table in build/measure-fleet-loa-r129-before.txt). The rakes are the SHAPE of
+     the overhang; loa − lwl is its SIZE, and the record owns it. One scale on both ends
+     preserves the authored stem:stern ratio; at 1 nothing moves, and a record whose loa
+     stands beyond lwl + rakes (wyoming, preussen) is untouched — under-length is a
+     record-semantics question, not a clamp. */
+  const rakeAllow = ((S.stemRake || 0) + (S.sternRake || 0)) * S.loa;
+  const rakeScale = rakeAllow > 0
+    ? Math.min(1, Math.max(0, S.loa - S.lwl) / rakeAllow) : 1;
+
   /* the profile of the stem and the sternpost, as an x-offset that rakes the ends */
   const rake = u => {
     if (u < S.forefoot) {
       const k = (S.forefoot - u) / S.forefoot;
-      return -S.stemRake * k * k * S.loa;
+      return -S.stemRake * rakeScale * k * k * S.loa;
     }
     if (u > 1 - S.run) {
       const k = (u - (1 - S.run)) / S.run;
-      return S.sternRake * k * k * S.loa;
+      return S.sternRake * rakeScale * k * k * S.loa;
     }
     return 0;
   };
@@ -563,7 +576,10 @@ function buildRudderGeometry(S) {
      transom notch the same way. Without this shear the wooden rudders' vertical leading
      edges would open a wedge of daylight against the post they hang on. The steel plate
      lives wholly below the waterline, where the offset is zero by construction. */
-  const postLean = q => q[1] > 0 ? S.sternRake * S.loa * Math.min(1, q[1] / H.sheer(1.0)) : 0;
+  /* H.rake(1.0), not sternRake·loa re-derived: since round 129 the loft clamps the rakes
+     to the record's loa, and a post re-deriving the raw product would lean past the hull
+     it hangs on. One source of truth. */
+  const postLean = q => q[1] > 0 ? H.rake(1.0) * Math.min(1, q[1] / H.sheer(1.0)) : 0;
   pts.forEach(q => pos.push(q[0] + postLean(q), q[1], -w, q[0] + postLean(q), q[1], w));
   const n = pts.length;
   for (let i = 0; i < n; i++) {
