@@ -1,0 +1,37 @@
+[
+ {
+  "id": "INJECTED: the steppe passage",
+  "rule": "a voyage drawn on the model's own land",
+  "detail": "era 0: 3 of 3 track samples ashore at the era's own sea level, longest run 3, first at (88.00, 47.00)"
+ },
+ {
+  "id": "INJECTED: the steppe passage",
+  "rule": "a give-up the card does not confess",
+  "detail": "era 0: the track carries give {\"legs\":1,\"unfixed\":0,\"ashore\":0} and the voyage card shows no Route fallback row"
+ },
+ {
+  "id": "Columbus's first crossing",
+  "rule": "a give-up the card does not confess",
+  "detail": "era 4: the track carries give {\"legs\":0,\"unfixed\":1,\"ashore\":0} and the voyage card shows no Route fallback row"
+ },
+ {
+  "id": "Sousa's fleet to Brazil",
+  "rule": "a give-up the card does not confess",
+  "detail": "era 4: the track carries give {\"legs\":0,\"unfixed\":2,\"ashore\":0} and the voyage card shows no Route fallback row"
+ },
+ {
+  "id": "Drake's circumnavigation",
+  "rule": "a give-up the card does not confess",
+  "detail": "era 4: the track carries give {\"legs\":0,\"unfixed\":2,\"ashore\":0} and the voyage card shows no Route fallback row"
+ },
+ {
+  "id": "The Manila galleon's return",
+  "rule": "a give-up the card does not confess",
+  "detail": "era 4: the track carries give {\"legs\":0,\"unfixed\":1,\"ashore\":0} and the voyage card shows no Route fallback row"
+ },
+ {
+  "id": "The Brouwer Route to Batavia",
+  "rule": "a give-up the card does not confess",
+  "detail": "era 4: the track carries give {\"legs\":0,\"unfixed\":1,\"ashore\":0} and the voyage card shows no Route fallback row"
+ }
+]

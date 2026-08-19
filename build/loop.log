@@ -5932,3 +5932,11 @@ Live stamp verified: **1787123230** — this round's build is deployed. The roun
 **Written but parked: `standOffLand`**, the berth against corner grazes. Proven on the fleet — 281 grazes → 103, 181.6 km ashore → 96.3, twenty tracks fully clean, zero worse — but left unwired at its call site under a ⚠ comment, because boot timings read 70–80 s while it was wired. Those timings turned out to be poisoned: my own timed-out audit run leaked a headless-chromium GPU process at 650% CPU, which I found and killed in the final minutes; the audit then ran clean at once. Its true cost is unknown and is the first thing round 126 measures.
 
 **Owed to next round, recorded in HANDOFF:** the second audit run and the injection proof, the stand-off re-timing on the now-quiet machine (and wiring it if honest), a try/finally around the audit runner's browser, and the closing ratchet confirmation — tracks didn't change with the stand-off unwired, so the expectation is only-noise. The opening ratchet this round was 60/60 green, closing out what round 124 owed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 01:22:12  round starting
+  round overran 80 min — killing its process group
+Execution error  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-19 02:42:20  round finished; HEAD is 3986dad Do not commit the loop lock
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 10166 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 02:52:20  round starting

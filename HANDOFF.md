@@ -8128,3 +8128,72 @@ under 0.023 against a 0.15 limit — antialias dither on masts and oars.
 **NOT DONE, and why:** level 0 still costs 661 ms before the Shipwright can open, because
 `loadData()` → `buildChapters` → `selectEra` → `buildEraFleet` → `buildMask` needs the elevation
 raster. Reordering around that is the two-shorelines class again and wants its own measured round.
+
+## Round 126 — 2026-08-19 — the berth is paid for (it costs nothing), and a killed round is finished by its next firing
+
+**Procedurally this round ran twice.** The 01:22 firing did the work — wired the berth, ran
+every proof, accepted 13 baselines with reasons at 02:09 — and was killed by the 80-minute
+watchdog with the tree uncommitted and no HANDOFF entry. The 02:52 firing found the
+uncommitted tree, verified every artifact against the code it described, re-measured the one
+number the kill had destroyed (the boot A/B lived only in the dead round's transcript), and
+finished: audit, ratchet, HANDOFF, build, deploy. Nothing below is taken on trust from the
+dead round — the audits, injections and probe JSONs are on disk and were re-read; the timing
+was re-run from scratch.
+
+**Everything r125 was owed, ran.** Audit clean twice — 33 hulls / 0 problems
+(build/staging/audit-r126-run1.json, audit-r126-run2-wired.json — the second with the berth
+live), plus a final run on the committed tree (audit-r126-final.json).
+inj-giveup-r126 convicts at 7: re-forcing the r124 showVoyageCard verbatim strips the
+'Route fallback' row from the five real give-carrying voyages and each convicts
+need-without-row, plus the injected steppe passage's own ashore and unconfessed-give arms.
+inj-track-ashore-r126 re-convicts the give-up path (3/3 samples ashore). And run_audit.py /
+run_audit_inject.py carry the try/finally r125 residual 3 demanded — a timeout can no longer
+leak the browser that poisoned r125's every timing.
+
+**THE TASK was r125 residual 2: pay for standOffLand or restructure it. It costs nothing.**
+A/B on the quiet machine, three fresh browsers per arm, frozen boot to FRAME_READY:
+**wired 25.0 / 25.0 / 25.1 s; unwired 22.8 / 25.0 / 25.1 s — median 25.0 s both arms.** The
+berth's cost is below run-to-run noise (the unwired arm's own spread exceeds any
+wired–unwired difference). r125's 70–80 s readings were the leaked chromium GPU process in
+their entirety. **Wired**, in finishTrackSteps after the last smoothing, inside the
+generator's own yield structure — no restructuring needed.
+
+**Measured live with the berth wired (build/staging/probe-clips-r126-wired.json), against
+r125's predictions (281→103 grazes, 181.6→96.3 km, zero worse): exactly as predicted.**
+103 grazes, 96.3 km of drawn keel on drawn land, **zero track points ashore**, FINE unfixed
+0 in every era, and the five give-carrying voyages still confess their 'Route fallback'
+rows — the berth removed grazes, not confessions.
+
+**Frames: 13 baselines moved and were accepted at 02:09 with reasons (FRAME-LOG.md).** The
+class: a berthed coastal track moves the followed ship along its re-shaped course, so every
+aboard-* frame re-samples camera, water and readout; each was read — vessel intact and
+afloat, readout rows recomputed honestly (passage-sahul's nearest-land 19→16 nm NW, still
+unnamed at 60,000 BC; aboard-coast's trireme still under 3 nm N off the rendered headland).
+map-floor moved 0.126% — the drawn track lines themselves; wake-plan 0.013%. **Closing
+ratchet on the finished tree: 60/60 within tolerance, exit 0** — the aboard set,
+passage-sahul, sea-ever-given and wake-plan re-check 0.000%; the largest mover anywhere is
+action-salamis at 0.043% / mean |Δ| 0.006, antialias dither. Rule 0, written on
+passage-sahul re-read this round: it reads as a rendered sea; a viewer can name the two
+carved log hulls travelling in company with wakes astern, the sea standing 68 m lower on
+the era card (derived, Spratt & Lisiecki 2016), and the voyage row's 70–90 km
+out-of-sight-of-land leg matching the empty horizon.
+
+**One probe bug found and fixed in passing:** time-boot-r126.py read `window.APP`, which is
+undefined — `APP` is a top-level `const` in a classic script, a global lexical binding, not
+a window property. `console.table(APP.boot)` works in a console; the harness guard did not.
+Fixed to `typeof APP !== 'undefined'`.
+
+**Known residuals:** (1) The 103 surviving grazes: sub-km corner clips plus the five
+labelled pinches; landfall approaches intrinsically end within a texel of drawn land — a
+class fix below the raster's own resolution does not exist. (2) The watchdog kill left this
+round's work uncommitted for 70 minutes; the loop survived because HANDOFF chaining and the
+staged artifacts made the dead round legible. Commit earlier: proofs first, then frames —
+an accepted baseline with no commit is the most expensive thing to lose. (3) Earlier
+residuals stand: sekibune wasen kaji (r121), gundeck normals (r118), sekibune/panokseon LOA
+(r113/r115), probe-wake heading mirror (r114), Endurance forecastle (RMG J9266), Azzam
+crest (r108), yakata curtain (r117), dugout floor gear (r122).
+
+**Next, in order:** (1) The survey's standing task resumes — or residual 3's dugout floor
+gear (r122), the smallest honest improvement to the oldest hull. (2) The probe-wake heading
+mirror (r114) is now visible in a committed baseline (passage-sahul's wakes bear slightly
+off the sterns) — it finally has a frame that would prove its fix.

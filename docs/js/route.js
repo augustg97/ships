@@ -1099,7 +1099,8 @@ fin.push(fix || p);
 }
 yield;
 const sm = smoothTrack(fin); yield;
-return clearSegments(sm, 1);
+const so = standOffLand(sm); yield;
+return clearSegments(so, 1);
 }
 window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable,
 buildMask, seaPath, isOcean, MASK, CARVED, maskCell, cellLonLat, windAt,

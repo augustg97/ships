@@ -1678,13 +1678,15 @@ function* finishTrackSteps(pts, opt) {
   }
   yield;
   const sm = smoothTrack(fin); yield;
-  /* ⚠ standOffLand belongs HERE — after the last smoothing, because the Laplacian pulls a
+  /* standOffLand goes here — after the last smoothing, because the Laplacian pulls a
      rounded course toward its own chord, which at a headland is toward the land it just
-     cleared. It is NOT WIRED: measured r125, running it at fleet scale took a frozen boot
-     from under 60 s to 70–80 s, which is every capture and every era switch. Its effect is
-     proven (281 grazes → 103, 181.6 km of drawn keel on drawn land → 96.3, zero tracks
-     worse) — the cost, not the correctness, is the open problem. See HANDOFF round 125. */
-  return clearSegments(sm, 1);
+     cleared. r125 parked it on 70–80 s frozen boots, but those numbers were the leaked
+     chromium GPU process, not the code: A/B'd r126 on a quiet machine (3 fresh browsers
+     each arm), frozen boot to FRAME_READY is 25.0 s median wired AND unwired — the
+     berth's cost is below run-to-run noise. Effect at 0.25 km sampling: 281 grazes →
+     103, 181.6 km of drawn keel on drawn land → 96.3, zero tracks worse. */
+  const so = standOffLand(sm); yield;
+  return clearSegments(so, 1);
 }
 
 window.SHIPS_ROUTE = { computeReachFrom, solveReach, passageHours, NAV, seaDepthAt, isNavigable,
