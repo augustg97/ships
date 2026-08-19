@@ -929,13 +929,25 @@ async function boot() {
   const bar = document.querySelector('#splash .bar i');
   const note = document.getElementById('loadnote');
   const setP = p => { bar.style.width = Math.round(p * 100) + '%'; };
+  /* ── boot phases, kept ─────────────────────────────────────────────────────────────
+     A load that feels slow is a load nobody has timed. APP.boot is the wall clock at each
+     phase boundary, in ms from navigation; `console.table(APP.boot)` in any browser says
+     where the time went, on the real machine rather than on a harness. */
+  APP.boot = [];
+  /* ⚠ ONE SPELLING. A second `APP.boot.push(...)` written out longhand elsewhere is two
+     models of one mechanism, and this project has paid for that shape more than once. */
+  APP.phase = n => APP.boot.push([n, Math.round(performance.now())]);
+  const phase = APP.phase;
+  phase('boot in');
 
+  phase('renderer+scene');
   const manifest = await (await fetch('fields/tiles.json')).json();
   APP.manifest = manifest;
 
   note.textContent = 'reading the sea floor…';
   const z0 = await loadLevel(0, manifest, p => setP(p * 0.55));
 
+  phase('level 0');
   note.textContent = 'reading the surface fields…';
   const mi = Math.floor(S.month) % 12;
   const seaA = await loadTex(`fields/sea_${String(mi + 1).padStart(2, '0')}.png`);
@@ -972,34 +984,41 @@ async function boot() {
   });
   APP.texA = { seaA, seaB, winA, winB };
 
+  phase('surface fields');
   sphere = new THREE.SphereGeometry(R, 192, 128);
   globe = new THREE.Mesh(sphere, mat);
   scene.add(globe);
 
   resize();
   placeCamera();
-  setP(1);
+  setP(0.90);
   nextFrame(frame);
 
-  /* The splash fades on a timer and then a CSS transition. A capture that lands mid-fade
-     differs from one that lands after it, so in capture mode it goes immediately. */
-  if (FROZEN) {
+  const liftSplash = () => {
+    /* The splash fades on a timer and then a CSS transition. A capture that lands mid-fade
+       differs from one that lands after it, so in capture mode it goes immediately. */
     const sp = document.getElementById('splash');
-    sp.classList.add('gone');
-    sp.style.transition = 'none';
-    sp.style.display = 'none';
-  } else {
-    setTimeout(() => {
-      document.getElementById('splash').classList.add('gone');
-    }, 260);
-  }
+    if (FROZEN) { sp.classList.add('gone'); sp.style.transition = 'none'; sp.style.display = 'none'; }
+    else setTimeout(() => sp.classList.add('gone'), 260);
+  };
 
-  /* upgrade the detail behind the first frame: level 1, then level 2. Binding tolerates
-     absence, so nothing waits on these. */
-  (async () => {
+  /* ── ⚠ A BACKGROUND REFINEMENT MUST NOT OUTRANK THE VIEW THE VISITOR IS WAITING FOR ──
+     Levels 1 and 2 of the terrain are a refinement of the GLOBE, and the globe is not even
+     the opening view any more. Started here, right behind the first frame, they measured
+     1,517 ms and 1,681 ms of decode and upload with the main thread to themselves — and the
+     eight small JSON files the Shipwright actually needs, fetched a line later, did not land
+     until 4.9 s because they were queued behind that. So the app spent five seconds loading
+     something it was not about to show.
+     Same work, later: the upgrade is a function now, and boot calls it AFTER the opening view
+     is up and the splash has lifted. Nothing about the result changes — the mask still
+     rebuilds from the finer coastline and the era still re-routes against it, which is the
+     r123 'two shorelines' guarantee — it simply stops holding the door. */
+  const upgradeTerrain = async () => {
     for (const lv of [1, 2]) {
       try {
+        APP.phase && APP.phase('  lv' + lv + ' fetch in');
         const z = await loadLevel(lv, manifest, null);
+        APP.phase && APP.phase('  lv' + lv + ' loaded');
         mat.uniforms.uDepth.value = z.tex;
         mat.uniforms.uTexel.value = 1.0 / z.w;
         APP.level = lv;
@@ -1013,18 +1032,41 @@ async function boot() {
         if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.maskUpgradeAvailable()) {
           const t0 = performance.now();
           window.SHIPS_ROUTE.buildMask(true);
+          APP.phase && APP.phase('  lv' + lv + ' mask');
           APP.maskBuildMs = Math.round(performance.now() - t0);
           APP.maskFineLevel = window.SHIPS_ROUTE.FINE.level;
           buildEraFleet();
+          APP.phase && APP.phase('  lv' + lv + ' fleet');
         }
       } catch (e) { console.warn('level', lv, 'failed', e); break; }
     }
     upgradesDone = true;      // capture mode has been waiting on this
-  })();
+  };
 
+  phase('globe built');
   await loadData();
+  phase('data');
+  note.textContent = 'laying off the fleet…';
+  setP(0.97);
   wireUI();
   wirePanelInsets();
+
+  /* ── ⚠ THE SPLASH MUST LIFT ON THE VIEW THE VISITOR ASKED FOR ───────────────────────
+     It lifted right after the globe's first frame, which is BEFORE the vessel data has even
+     been fetched — so the Shipwright, which is the default view, could not possibly be open
+     yet. What a visitor actually saw was: splash, then the globe, held motionless for several
+     seconds while the fleet was built, then a jump to a different view. The globe was never
+     asked for and the stillness was not the globe's fault; it was the wrong picture, shown
+     during someone else's load.
+     The opening view is chosen here, under the splash, and the splash lifts after it. Kept in
+     a try/catch for the reason it was originally moved out of boot() — a failure resolving the
+     hash must not take the app down — and on that path the splash still lifts, onto the globe,
+     which is the honest fallback rather than a permanent splash. */
+  try { applyHashView(); } catch (e) { console.warn('hash view', e); }
+  phase('opening view');
+  liftSplash();
+  /* and only now the globe's own refinement, behind whatever is on screen */
+  upgradeTerrain();
 }
 
 /* ── data ───────────────────────────────────────────────────────────────── */
@@ -1058,8 +1100,11 @@ async function loadData() {
   APP.about    = await get('data/about.json')    || null;
   /* running metrics for the readout — every row sourced or derived, per Research/METRICS.md */
   APP.metrics  = await get('data/metrics.json')  || { series: [], hideStat: [] };
+  APP.phase && APP.phase('  json fetched');
   buildChapters();
+  APP.phase && APP.phase('  chapters');
   buildMarkers();
+  APP.phase && APP.phase('  markers');
   updateReadout();
 }
 
@@ -1536,6 +1581,28 @@ function showVoyageCard(v) {
     }
     legRows.push(['Track in this model',
                   `${Math.round(nm).toLocaleString()} nm over ${v.legs.length} waypoints`]);
+  }
+  /* ── AND THE ROUTER'S GIVE-UP IS THE CARD'S TO CONFESS (rule 10) ───────────────────────
+     seaPath's unroutable legs and clearSegments' uncleared stretches ride on the routed
+     track as tr.give, and until r125 both died in a global counter — the line was drawn
+     across land with nothing on screen saying so. A voyage whose track is not built yet has
+     no row, the same standing as her route line: no second guess, a row when the fact
+     exists. */
+  const trk = ((typeof eraTracks !== 'undefined' && eraTracks) || []).find(t => t.name === v.name);
+  if (trk && trk.give) {
+    const g = trk.give, RTg = window.SHIPS_ROUTE;
+    const texKm = (RTg && RTg.FINE && RTg.FINE.w)
+      ? Math.round(40075 / RTg.FINE.w * 10) / 10 : 5;
+    const parts = [];
+    if (g.legs) parts.push(g.legs === 1
+      ? '1 leg could not be routed at sea and is drawn straight between its waypoints'
+      : g.legs + ' legs could not be routed at sea and are drawn straight between their waypoints');
+    if (g.unfixed) parts.push((g.unfixed === 1 ? '1 stretch crosses' : g.unfixed + ' stretches cross')
+      + ' land as the ' + texKm + ' km elevation raster draws it — no clear water route was '
+      + 'found at that resolution');
+    if (g.ashore) parts.push(g.ashore === 1
+      ? '1 waypoint stands on drawn land' : g.ashore + ' waypoints stand on drawn land');
+    if (parts.length) legRows.push(['Route fallback', parts.join('; ')]);
   }
   showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: legRows,
              prose: v.text, span: v.dates, cite: v.cite, tags: v.tags,
@@ -2467,6 +2534,7 @@ function seaRoute(legs) {
 function* seaRouteSteps(legs) {
   const RT = window.SHIPS_ROUTE;
   const out = [];
+  let missed = 0;
   const push = (lon, lat) => {
     const last = out[out.length - 1];
     if (!last || Math.abs(last.lon - lon) > 0.02 || Math.abs(last.lat - lat) > 0.02)
@@ -2476,7 +2544,7 @@ function* seaRouteSteps(legs) {
     const a = legs[i], b = legs[i + 1];
     const path = (RT && RT.seaPath) ? RT.seaPath(a.lon, a.lat, b.lon, b.lat) : null;
     if (path) { for (const p of path) push(p.lon, p.lat); }
-    else { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); }
+    else { seaRouteMisses++; missed++; push(a.lon, a.lat); push(b.lon, b.lat); }
     yield;
   }
   /* ⚠ The finishing runs HERE, on the assembled voyage, not inside the passage search. Each
@@ -2485,9 +2553,21 @@ function* seaRouteSteps(legs) {
     const it = RT.finishTrackSteps(out);
     let r = it.next();
     while (!r.done) { yield; r = it.next(); }
-    return r.value;
+    /* ── THE GIVE-UP RIDES WITH THE TRACK (rule 10) ─────────────────────────────────────
+       FINE.run is this track's own ledger — one generator finishes at a time, so it cannot
+       be another voyage's. It is attached to the array the cache stores and the card reads,
+       because a give-up kept in a global counter names no voyage: measured r125, Sousa's
+       two uncleared Bahia crossings were counted at boot and unreadable ever after. */
+    const t = r.value, run = RT.FINE && RT.FINE.run;
+    const unfixed = (run && run.unfixed) || 0, ashore = (run && run.ashorePts) || 0;
+    if (t && (missed || unfixed || ashore)) t.give = { legs: missed, unfixed, ashore };
+    return t;
   }
-  return out.length > 1 ? out : legs;
+  if (out.length > 1) {
+    if (missed) out.give = { legs: missed, unfixed: 0, ashore: 0 };
+    return out;
+  }
+  return legs;
 }
 
 function clearEraFleet() {
@@ -2697,7 +2777,7 @@ function addVoyageToFleet(v, list, legsR) {
        voyage's own: a hash of her name, stable whatever the data around her does. */
     let ph = 0;
     for (let i = 0; i < v.name.length; i++) ph = (ph * 31 + v.name.charCodeAt(i)) >>> 0;
-    eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
+    eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel, give: legsR.give || null,
                      phase: (ph % 1000) / 1000, name: v.name });
   }
 }
@@ -3755,8 +3835,9 @@ function openAbout() {
 
 /* Everything the URL asks for that needs a fully-booted app. Kept out of boot() itself so
    that a failure here cannot take the globe down with it. */
-boot().then(() => { try { applyHashView(); } catch (e) { console.warn('hash view', e); } })
-      .catch(e => {
+/* ⚠ applyHashView used to run HERE, after boot resolved and after the splash had already
+   lifted on the globe. It now runs inside boot, under the splash — see the note there. */
+boot().catch(e => {
   console.error(e);
   document.getElementById('loadnote').textContent = 'failed: ' + e.message;
 });

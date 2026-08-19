@@ -8006,3 +8006,58 @@ slightly off the sterns. (7) Endurance forecastle break waits on the RMG origina
 edit owes; expected: only-noise. (2) Residual 1: the corner-clip stand-off margin and a
 rule-10 label on detourFail's give-up. (3) The survey's boxy column continues, or the dugout's
 stowed gear (res 10) — the smallest honest improvement to the oldest hull.
+
+## Round 125 — 2026-08-19 — the router's give-up gets a name, and a berth is written but not yet paid for
+
+**The opening ratchet ran in full and green: 60 frames, all within tolerance, exit 0
+(build/ratchet-open-r125.log) — the one-codebase confirmation r124 owed.**
+
+**THE TASK was r124's residual 1: the corner-clip stand-off and a rule-10 label on the
+router's silent give-up.** Measured first (probe-clips-r125.py, before): at 0.25 km sampling
+the fleet's tracks touch drawn land far more than the audit's 2 km sampling can see — **65
+tracks, 281 grazes, 181.6 km of drawn keel on drawn land**, including 13.6 km crossings of
+the Bahia peninsula on Sousa's own track. And the contradiction that mattered: the router
+KNEW — its final clearSegments counted those crossings — but the count died in a lifetime
+global (FINE.unfixed), incremented at boot and unreadable ever after, because era 4 is the
+boot era and the trackCache serves that routing forever.
+
+**Shipped: the give-up rides with the track (rule 10).** finishTrackSteps keeps a per-run
+ledger (FINE.run — one track finishes at a time, so it is unambiguous); seaRouteSteps
+attaches it to the finished track as `.give` {legs unrouted, stretches unfixed, points
+ashore}; the cache stores it, eraTracks carries it, and **showVoyageCard confesses it as a
+'Route fallback' row** naming the counts and the raster's own resolution. Measured live:
+five era-4 voyages confess — Columbus (1), Sousa (2), Drake (2), the Manila galleon (1),
+the Brouwer route (1) — every one a real raster-closed pinch (the Bahia entrance, the Verde
+Island Passage, Sunda, Magellan). The audit learned the class **'a give-up the card does not
+confess'**, checked BOTH directions (a clean track must not carry the row) inside the r123
+era sweep, with inj-giveup-unlabelled.js staged (steppe voyage + r124 showVoyageCard
+verbatim) to prove it.
+
+**Written but NOT wired: standOffLand — the berth against corner clips.** Distance-based
+(landDist2 in texel units), 0.15-texel steps over 8 passes, accepted only wet + strictly
+more berth + both segments wet + no course fold. Proven on the fleet: **281 grazes → 103,
+181.6 km ashore → 96.3, twenty tracks fully clean, zero tracks worse** (probe-clips-r125-
+after2.json). It is parked at its call site under a ⚠ comment because frozen boots read
+70–80 s while it was wired — but ⚠ **that measurement is poisoned**: the first audit run
+timed out (60 s harness limit), the exception skipped browser.close(), and the leaked
+chrome-headless-shell GPU process sat at 650% CPU (load average 12) through every timing
+taken after it, including the 67.5 s reading with the stand-off UNWIRED. Killed (PID 1451,
+verified gone). The stand-off's true cost is UNKNOWN and is the first thing to measure.
+
+**Known residuals:** (1) ⚠ **The audit did not run this round** — the one run attempted hit
+the 60 s FRAME_READY timeout under the poisoned load and was killed by the clock; the new
+rule is UNPROVEN live and by injection. Rule 1/audit-every-round broken, recorded not
+hidden. (2) The stand-off re-wire: re-time boot on a quiet machine (baseline first, then
+wired); if the cost is real, the berth must move into the queue's own yield structure
+(one pass per yield) rather than one lump. (3) run_audit.py leaks its browser on timeout —
+wrap in try/finally before trusting another timing. (4) The 103 surviving grazes: mostly
+sub-km corner clips plus the labelled pinches; landfall approaches intrinsically end within
+a texel. (5) Earlier residuals stand: sekibune wasen kaji (r121), gundeck normals (r118),
+sekibune/panokseon LOA (r113/r115), probe-wake heading mirror (r114), Endurance forecastle
+(RMG J9266), Azzam crest (r108), yakata curtain (r117), dugout floor gear (r122).
+
+**Next, in order:** (1) Audit twice + inj-giveup-unlabelled + re-run inj-track-ashore —
+everything this round owes. (2) Time a clean boot, then boot+standOffLand wired; wire it if
+honest, restructure the yields if not. (3) Closing ratchet for THIS round's frames — tracks
+did not change (stand-off unwired; ledger is invisible until a card opens), so expect
+only-noise, but no frame was checked after the edits: the next opening pass owns any mover.

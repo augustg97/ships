@@ -428,10 +428,16 @@ raycaster = new THREE.Raycaster();
 const bar = document.querySelector('#splash .bar i');
 const note = document.getElementById('loadnote');
 const setP = p => { bar.style.width = Math.round(p * 100) + '%'; };
+APP.boot = [];
+APP.phase = n => APP.boot.push([n, Math.round(performance.now())]);
+const phase = APP.phase;
+phase('boot in');
+phase('renderer+scene');
 const manifest = await (await fetch('fields/tiles.json')).json();
 APP.manifest = manifest;
 note.textContent = 'reading the sea floor…';
 const z0 = await loadLevel(0, manifest, p => setP(p * 0.55));
+phase('level 0');
 note.textContent = 'reading the surface fields…';
 const mi = Math.floor(S.month) % 12;
 const seaA = await loadTex(`fields/sea_${String(mi + 1).padStart(2, '0')}.png`);
@@ -463,44 +469,52 @@ uWind: { value: 7.0 },
 },
 });
 APP.texA = { seaA, seaB, winA, winB };
+phase('surface fields');
 sphere = new THREE.SphereGeometry(R, 192, 128);
 globe = new THREE.Mesh(sphere, mat);
 scene.add(globe);
 resize();
 placeCamera();
-setP(1);
+setP(0.90);
 nextFrame(frame);
-if (FROZEN) {
+const liftSplash = () => {
 const sp = document.getElementById('splash');
-sp.classList.add('gone');
-sp.style.transition = 'none';
-sp.style.display = 'none';
-} else {
-setTimeout(() => {
-document.getElementById('splash').classList.add('gone');
-}, 260);
-}
-(async () => {
+if (FROZEN) { sp.classList.add('gone'); sp.style.transition = 'none'; sp.style.display = 'none'; }
+else setTimeout(() => sp.classList.add('gone'), 260);
+};
+const upgradeTerrain = async () => {
 for (const lv of [1, 2]) {
 try {
+APP.phase && APP.phase('  lv' + lv + ' fetch in');
 const z = await loadLevel(lv, manifest, null);
+APP.phase && APP.phase('  lv' + lv + ' loaded');
 mat.uniforms.uDepth.value = z.tex;
 mat.uniforms.uTexel.value = 1.0 / z.w;
 APP.level = lv;
 if (window.SHIPS_ROUTE && window.SHIPS_ROUTE.maskUpgradeAvailable()) {
 const t0 = performance.now();
 window.SHIPS_ROUTE.buildMask(true);
+APP.phase && APP.phase('  lv' + lv + ' mask');
 APP.maskBuildMs = Math.round(performance.now() - t0);
 APP.maskFineLevel = window.SHIPS_ROUTE.FINE.level;
 buildEraFleet();
+APP.phase && APP.phase('  lv' + lv + ' fleet');
 }
 } catch (e) { console.warn('level', lv, 'failed', e); break; }
 }
 upgradesDone = true;
-})();
+};
+phase('globe built');
 await loadData();
+phase('data');
+note.textContent = 'laying off the fleet…';
+setP(0.97);
 wireUI();
 wirePanelInsets();
+try { applyHashView(); } catch (e) { console.warn('hash view', e); }
+phase('opening view');
+liftSplash();
+upgradeTerrain();
 }
 async function loadData() {
 const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
@@ -515,8 +529,11 @@ APP.voyages  = await get('data/voyages.json')  || { voyages: [] };
 APP.plates   = await get('data/plates.json')   || {};
 APP.about    = await get('data/about.json')    || null;
 APP.metrics  = await get('data/metrics.json')  || { series: [], hideStat: [] };
+APP.phase && APP.phase('  json fetched');
 buildChapters();
+APP.phase && APP.phase('  chapters');
 buildMarkers();
+APP.phase && APP.phase('  markers');
 updateReadout();
 }
 const SEAS = [
@@ -796,6 +813,22 @@ nm += 2 * 3440.065 * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 legRows.push(['Track in this model',
 `${Math.round(nm).toLocaleString()} nm over ${v.legs.length} waypoints`]);
+}
+const trk = ((typeof eraTracks !== 'undefined' && eraTracks) || []).find(t => t.name === v.name);
+if (trk && trk.give) {
+const g = trk.give, RTg = window.SHIPS_ROUTE;
+const texKm = (RTg && RTg.FINE && RTg.FINE.w)
+? Math.round(40075 / RTg.FINE.w * 10) / 10 : 5;
+const parts = [];
+if (g.legs) parts.push(g.legs === 1
+? '1 leg could not be routed at sea and is drawn straight between its waypoints'
+: g.legs + ' legs could not be routed at sea and are drawn straight between their waypoints');
+if (g.unfixed) parts.push((g.unfixed === 1 ? '1 stretch crosses' : g.unfixed + ' stretches cross')
++ ' land as the ' + texKm + ' km elevation raster draws it — no clear water route was '
++ 'found at that resolution');
+if (g.ashore) parts.push(g.ashore === 1
+? '1 waypoint stands on drawn land' : g.ashore + ' waypoints stand on drawn land');
+if (parts.length) legRows.push(['Route fallback', parts.join('; ')]);
 }
 showCard({ eyebrow: 'Voyage', title: v.name, sub: v.dates, rows: legRows,
 prose: v.text, span: v.dates, cite: v.cite, tags: v.tags,
@@ -1306,6 +1339,7 @@ return r.value;
 function* seaRouteSteps(legs) {
 const RT = window.SHIPS_ROUTE;
 const out = [];
+let missed = 0;
 const push = (lon, lat) => {
 const last = out[out.length - 1];
 if (!last || Math.abs(last.lon - lon) > 0.02 || Math.abs(last.lat - lat) > 0.02)
@@ -1315,16 +1349,23 @@ for (let i = 0; i < legs.length - 1; i++) {
 const a = legs[i], b = legs[i + 1];
 const path = (RT && RT.seaPath) ? RT.seaPath(a.lon, a.lat, b.lon, b.lat) : null;
 if (path) { for (const p of path) push(p.lon, p.lat); }
-else { seaRouteMisses++; push(a.lon, a.lat); push(b.lon, b.lat); }
+else { seaRouteMisses++; missed++; push(a.lon, a.lat); push(b.lon, b.lat); }
 yield;
 }
 if (out.length > 2 && RT && RT.finishTrackSteps) {
 const it = RT.finishTrackSteps(out);
 let r = it.next();
 while (!r.done) { yield; r = it.next(); }
-return r.value;
+const t = r.value, run = RT.FINE && RT.FINE.run;
+const unfixed = (run && run.unfixed) || 0, ashore = (run && run.ashorePts) || 0;
+if (t && (missed || unfixed || ashore)) t.give = { legs: missed, unfixed, ashore };
+return t;
 }
-return out.length > 1 ? out : legs;
+if (out.length > 1) {
+if (missed) out.give = { legs: missed, unfixed: 0, ashore: 0 };
+return out;
+}
+return legs;
 }
 function clearEraFleet() {
 setHover(null);
@@ -1424,7 +1465,7 @@ const period = Math.max(45, want);
 if (want < 45) paceClamped.push(v.name);
 let ph = 0;
 for (let i = 0; i < v.name.length; i++) ph = (ph * 31 + v.name.charCodeAt(i)) >>> 0;
-eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel,
+eraTracks.push({ grp, legs: legsR, kn, period, km, vesselId: v.vessel, give: legsR.give || null,
 phase: (ph % 1000) / 1000, name: v.name });
 }
 }
@@ -2036,8 +2077,7 @@ document.getElementById('aboutBody').innerHTML = APP.about ? APP.about.html :
 '<h2>About</h2><p>Loading…</p>';
 el.classList.remove('hidden');
 }
-boot().then(() => { try { applyHashView(); } catch (e) { console.warn('hash view', e); } })
-.catch(e => {
+boot().catch(e => {
 console.error(e);
 document.getElementById('loadnote').textContent = 'failed: ' + e.message;
 });

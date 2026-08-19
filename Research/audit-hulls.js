@@ -3538,6 +3538,36 @@
               `era ${e}: ${ashore} of ${total} track samples ashore at the era's own sea `
               + `level, longest run ${maxRun}`
               + (at ? `, first at (${at[0].toFixed(2)}, ${at[1].toFixed(2)})` : ''));
+
+        /* ══ THE CARD CONFESSES THE ROUTER'S GIVE-UP (round 125) ═══════════════════════
+           seaPath's unroutable legs and clearSegments' uncleared stretches ride on the
+           track as tr.give, and rule 10 says a fallback the UI does not label is not a
+           legitimate return. Checked in both directions against the card the viewer
+           actually opens: a track carrying a give-up must show the 'Route fallback' row,
+           and a clean track must not — a caveat printed on every card indicts nothing. */
+        if (typeof showVoyageCard === 'function' && document.getElementById('cRows')) {
+          const vv = ((APP.voyages.voyages || APP.voyages) || [])
+            .find(x => x.name === tr.name);
+          if (vv) {
+            try {
+              showVoyageCard(vv);
+              const rowsTxt = document.getElementById('cRows').textContent || '';
+              const has = rowsTxt.indexOf('Route fallback') >= 0;
+              const need = !!(tr.give && (tr.give.legs || tr.give.unfixed || tr.give.ashore));
+              if (need && !has)
+                say(tr.name, 'a give-up the card does not confess',
+                    `era ${e}: the track carries give ${JSON.stringify(tr.give)} and the `
+                    + 'voyage card shows no Route fallback row');
+              if (!need && has)
+                say(tr.name, 'a caveat on a clean track',
+                    `era ${e}: the card shows a Route fallback row but the track's own `
+                    + 'ledger is clean');
+            } catch (err) {
+              say(tr.name, 'a voyage card that cannot open',
+                  'showVoyageCard threw: ' + err.message);
+            }
+          }
+        }
       }
     }
     try { selectEra(eraHome); await drain(); } catch (e) { /* state restore only */ }

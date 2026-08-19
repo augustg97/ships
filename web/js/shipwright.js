@@ -522,10 +522,20 @@ function swBuildYard() {
     const gap = i === 0 ? 0 : Math.max(9, 0.30 * Math.max(prevL, L));
     const x = cursor + (i === 0 ? L / 2 : prevL / 2 + gap + L / 2);
     cursor = x; prevL = L;
-    const obj = window.SHIPS_HULL.buildShip(v.hull, { furled: !!SW.furled });
-    obj.position.x = x;
-    SW.yard.add(obj);
-    SW.layout.push({ id: v.id, v, x, loa: L, obj, fine: false, furlBuilt: !!SW.furled });
+    /* ── ⚠ THE LAYOUT IS NOT THE GEOMETRY, AND BUILDING BOTH AT ONCE IS THE FREEZE ─────
+       This called buildShip for all 33 hulls in one synchronous pass: 5,040 meshes and
+       2.35 million triangles into the scene before a frame could be drawn. Profiled, the
+       cost is barely JavaScript at all — 9.0 of 11.3 sampled seconds land in `(program)`,
+       the host side, which for a WebGL boot is buffer upload and program setup. So the
+       measurement says the fix is not a faster builder; it is FEWER MESHES AT ONCE.
+       Where each ship stands, what she is called and how long she is are all known from
+       the record without building anything, so the layout is laid out here and the hulls
+       are built on demand — nearest the camera first — by swPumpDetail, one per frame.
+       ⚠ Except under ?frozen, where the pump completes the whole line before anything is
+       drawn: frozen must mean frozen, and a capture of a half-built yard would differ from
+       one taken a second later. */
+    SW.layout.push({ id: v.id, v, x, loa: L, obj: null, fine: false, built: false,
+                     furlBuilt: !!SW.furled });
   });
   /* ── A NAME UNDER EVERY HULL ────────────────────────────────────────────────────────
      Without them the line is twenty-one anonymous silhouettes and the comparison has nothing
@@ -582,8 +592,9 @@ function swFineWanted() {
 
 /* Rebuild ONE entry at the given detail, preserving its place in the yard. */
 function swRebuild(e, fine) {
-  SW.yard.remove(e.obj);
+  if (e.obj) SW.yard.remove(e.obj);
   e.obj = window.SHIPS_HULL.buildShip(e.v.hull, { fine: !!fine, furled: !!SW.furled });
+  e.built = true;
   e.obj.position.x = e.x;
   SW.yard.add(e.obj);
   e.fine = !!fine;
@@ -619,8 +630,21 @@ function swPumpDetail() {
   /* a hull built in the other canvas state is stale at either detail level */
   const stale = e => e.furlBuilt !== !!SW.furled;
   if (typeof FROZEN !== 'undefined' && FROZEN) {
-    SW.layout.forEach(e => { const f = want.has(e.id); if (e.fine !== f || stale(e)) swRebuild(e, f); });
+    SW.layout.forEach(e => {
+      const f = want.has(e.id);
+      if (!e.built || e.fine !== f || stale(e)) swRebuild(e, f);
+    });
     return;
+  }
+  /* an EMPTY berth is a worse fault than an under-detailed hull, so the line is filled
+     before any detail is polished — nearest the camera first, which is the order
+     swFineWanted already sorts by */
+  if (SW.layout.some(e => !e.built)) {
+    const centre = SW.panTo !== undefined ? SW.panTo
+                 : (SW.panX !== undefined ? SW.panX : SW.shipX || 0);
+    const next = SW.layout.filter(e => !e.built)
+      .sort((a, b) => Math.abs(a.x - centre) - Math.abs(b.x - centre))[0];
+    if (next) { swRebuild(next, want.has(next.id)); return; }
   }
   const up = SW.layout.find(e => want.has(e.id) && (!e.fine || stale(e)));
   if (up) { swRebuild(up, true); return; }
@@ -647,7 +671,7 @@ function swSetFurled(on) {
 }
 
 function swPromote(entry) {
-  if (entry.fine) return entry.obj;
+  if (entry.built && entry.fine) return entry.obj;
   return swRebuild(entry, true);            /* the window is maintained by swPumpDetail */
 }
 
@@ -967,7 +991,7 @@ function swFrame(now) {
   if (SW.viewFromDeg !== undefined)
     SW.shipSpin = SW.lon + Math.PI / 2 - SW.viewFromDeg * Math.PI / 180;
   /* the line stays put and the selected hull turns under the drag */
-  SW.layout && SW.layout.forEach(e => { e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
+  SW.layout && SW.layout.forEach(e => { if (e.obj) e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
   /* ── AND ONCE AFLOAT, SHE MOVES WITH THE WATER ────────────────────────────────────
      Every hull in the line samples the SAME wave field the shader draws — one table, in
      sea.js — so a ship is never at a height the sea disagrees with.
@@ -981,6 +1005,7 @@ function swFrame(now) {
     SHIPS_SEA.animateOars(SW.ship, t);
     SHIPS_SEA.animateWheels(SW.ship, t, (SW.spec && SW.spec.speedKn) || 8);
     SW.layout.forEach(e => {
+      if (!e.obj) return;                       // a berth still waiting on its hull
       const h = (e.v && e.v.hull) || {};
       const len = h.loa || 30;
       const r = SHIPS_SEA.floatShip(e.obj, e.obj.position.x, 0, 0, len, t, 6.5,
@@ -990,7 +1015,7 @@ function swFrame(now) {
       e.obj.rotation.x = r.roll;
     });
   } else if (SW.layout) {
-    SW.layout.forEach(e => { e.obj.position.y = 0; e.obj.rotation.z = 0; e.obj.rotation.x = 0; });
+    SW.layout.forEach(e => { if (!e.obj) return; e.obj.position.y = 0; e.obj.rotation.z = 0; e.obj.rotation.x = 0; });
   }
   /* ── THE CAMERA TRAVELS, AND SO DOES THE ZOOM ─────────────────────────────────────
      The pan already eased; the ZOOM did not. `fit` was recomputed from the new ship's bounding

@@ -963,7 +963,7 @@ if (fix) { out.push(fix); fixed++; }
 else {
 const way = fineDetour(A, B);
 if (way) { for (const q of way) out.push(q); fixed++; }
-else FINE.detourFail++;
+else { FINE.detourFail++; if (FINE.run) FINE.run.detourFail++; }
 }
 break;
 }
@@ -1000,8 +1000,72 @@ if (!any) break;
 for (let j = last; j < cur.length; j++) rebuilt.push(cur[j]);
 cur = rebuilt;
 }
-for (let i = 1; i < cur.length; i++) if (blocked(i)) FINE.unfixed++;
+let unf = 0;
+for (let i = 1; i < cur.length; i++) if (blocked(i)) unf++;
+FINE.unfixed += unf;
+if (FINE.run) FINE.run.unfixed = unf;
 return cur;
+}
+function landDist2(lon, lat) {
+const W = FINE.w, H = FINE.h, lim = FINE.datum + SHOAL_M;
+const fx = (((lon + 180) % 360) + 360) % 360 / 360 * W;
+const fy = (90 - lat) / 180 * H;
+const x = Math.floor(fx), y = Math.max(0, Math.min(H - 1, Math.floor(fy)));
+let best = 9;
+for (let dy = -2; dy <= 2; dy++) {
+const yy = y + dy; if (yy < 0 || yy >= H) continue;
+for (let dx = -2; dx <= 2; dx++) {
+const xx = ((x + dx) % W + W) % W;
+if (FINE.elev[yy * W + xx] >= lim) {
+const ex = x + dx + 0.5 - fx, ey = yy + 0.5 - fy;
+const d2 = ex * ex + ey * ey;
+if (d2 < best) best = d2;
+}
+}
+}
+return best;
+}
+function standOffLand(pts) {
+if (!FINE.ready || pts.length < 3) return pts;
+const out = pts.map(p => ({ lon: p.lon, lat: p.lat }));
+const texDeg = 360 / FINE.w, step = 0.15 * texDeg;
+const near = [];
+for (let i = 1; i < out.length - 1; i++)
+if (fineIsWater(out[i].lon, out[i].lat) && landDist2(out[i].lon, out[i].lat) < 1)
+near.push(i);
+if (!near.length) return out;
+const stuck = new Uint8Array(out.length);
+for (let pass = 0; pass < 8; pass++) {
+let moved = 0;
+for (const i of near) {
+if (stuck[i]) continue;
+const p = out[i];
+const d0 = landDist2(p.lon, p.lat);
+if (d0 >= 1) continue;
+const a = out[i - 1], c = out[i + 1];
+const cl = Math.max(0.08, Math.cos(p.lat * D2R));
+const ex = (((c.lon - a.lon + 540) % 360) - 180) * cl, ey = c.lat - a.lat;
+const L = Math.hypot(ex, ey) || 1;
+const px = -ey / L, py = ex / L;
+const turn0 = turnDeg(a, p, c);
+let best = null, bestD = d0;
+for (const s of [1, -1]) {
+const X = { lon: p.lon + s * px * step / cl, lat: p.lat + s * py * step };
+if (!fineIsWater(X.lon, X.lat)) continue;
+const dd = landDist2(X.lon, X.lat);
+if (dd <= bestD + 1e-6) continue;
+if (turnDeg(a, X, c) > Math.max(turn0, 8) + 20) continue;
+if (!gcWet(a, X) || !gcWet(X, c)) continue;
+best = X; bestD = dd;
+}
+if (best) {
+out[i] = best; moved++;
+stuck[i - 1] = 0; stuck[i + 1] = 0;
+} else stuck[i] = 1;
+}
+if (!moved) break;
+}
+return out;
 }
 function finishTrack(pts, opt) {
 const it = finishTrackSteps(pts, opt);
@@ -1011,6 +1075,7 @@ return r.value;
 }
 function* finishTrackSteps(pts, opt) {
 if (!FINE.ready || !pts || pts.length < 3) return pts;
+FINE.run = { detourFail: 0, unfixed: 0, ashorePts: 0 };
 const o = opt || {};
 const step = o.stepKm || 4;
 let t = pts.map(p => ({ lon: p.lon, lat: p.lat }));
@@ -1029,6 +1094,7 @@ if (fineIsWater(p.lon, p.lat)) { fin.push(p); continue; }
 const prev = fin[fin.length - 1], next = t[i + 1];
 if (prev && next && gcWet(prev, next)) continue;
 const fix = nearestWater(p, 60);
+if (!fix && FINE.run) FINE.run.ashorePts++;
 fin.push(fix || p);
 }
 yield;

@@ -298,10 +298,8 @@ const L = v.hull.loa;
 const gap = i === 0 ? 0 : Math.max(9, 0.30 * Math.max(prevL, L));
 const x = cursor + (i === 0 ? L / 2 : prevL / 2 + gap + L / 2);
 cursor = x; prevL = L;
-const obj = window.SHIPS_HULL.buildShip(v.hull, { furled: !!SW.furled });
-obj.position.x = x;
-SW.yard.add(obj);
-SW.layout.push({ id: v.id, v, x, loa: L, obj, fine: false, furlBuilt: !!SW.furled });
+SW.layout.push({ id: v.id, v, x, loa: L, obj: null, fine: false, built: false,
+furlBuilt: !!SW.furled });
 });
 const lay = document.getElementById('swLabels');
 lay.innerHTML = '';
@@ -329,8 +327,9 @@ if (SW.spec && SW.spec.id) want.add(SW.spec.id);
 return want;
 }
 function swRebuild(e, fine) {
-SW.yard.remove(e.obj);
+if (e.obj) SW.yard.remove(e.obj);
 e.obj = window.SHIPS_HULL.buildShip(e.v.hull, { fine: !!fine, furled: !!SW.furled });
+e.built = true;
 e.obj.position.x = e.x;
 SW.yard.add(e.obj);
 e.fine = !!fine;
@@ -351,8 +350,18 @@ if (!SW.layout || !SW.layout.length) return;
 const want = swFineWanted();
 const stale = e => e.furlBuilt !== !!SW.furled;
 if (typeof FROZEN !== 'undefined' && FROZEN) {
-SW.layout.forEach(e => { const f = want.has(e.id); if (e.fine !== f || stale(e)) swRebuild(e, f); });
+SW.layout.forEach(e => {
+const f = want.has(e.id);
+if (!e.built || e.fine !== f || stale(e)) swRebuild(e, f);
+});
 return;
+}
+if (SW.layout.some(e => !e.built)) {
+const centre = SW.panTo !== undefined ? SW.panTo
+: (SW.panX !== undefined ? SW.panX : SW.shipX || 0);
+const next = SW.layout.filter(e => !e.built)
+.sort((a, b) => Math.abs(a.x - centre) - Math.abs(b.x - centre))[0];
+if (next) { swRebuild(next, want.has(next.id)); return; }
 }
 const up = SW.layout.find(e => want.has(e.id) && (!e.fine || stale(e)));
 if (up) { swRebuild(up, true); return; }
@@ -372,7 +381,7 @@ if (e) swRebuild(e, true);
 if (SW.on) swApplyStage();
 }
 function swPromote(entry) {
-if (entry.fine) return entry.obj;
+if (entry.built && entry.fine) return entry.obj;
 return swRebuild(entry, true);
 }
 function swOpen(vessel) {
@@ -562,12 +571,13 @@ const L = SW.spec.hull.loa;
 SW.lon = 0.42;
 if (SW.viewFromDeg !== undefined)
 SW.shipSpin = SW.lon + Math.PI / 2 - SW.viewFromDeg * Math.PI / 180;
-SW.layout && SW.layout.forEach(e => { e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
+SW.layout && SW.layout.forEach(e => { if (e.obj) e.obj.rotation.y = e.id === SW.spec.id ? (SW.shipSpin || 0) : 0; });
 if (SW.stage >= 7 && SW.layout) {
 const t = clockS();
 SHIPS_SEA.animateOars(SW.ship, t);
 SHIPS_SEA.animateWheels(SW.ship, t, (SW.spec && SW.spec.speedKn) || 8);
 SW.layout.forEach(e => {
+if (!e.obj) return;
 const h = (e.v && e.v.hull) || {};
 const len = h.loa || 30;
 const r = SHIPS_SEA.floatShip(e.obj, e.obj.position.x, 0, 0, len, t, 6.5,
@@ -577,7 +587,7 @@ e.obj.rotation.z = r.pitch;
 e.obj.rotation.x = r.roll;
 });
 } else if (SW.layout) {
-SW.layout.forEach(e => { e.obj.position.y = 0; e.obj.rotation.z = 0; e.obj.rotation.x = 0; });
+SW.layout.forEach(e => { if (!e.obj) return; e.obj.position.y = 0; e.obj.rotation.z = 0; e.obj.rotation.x = 0; });
 }
 const top = SW.viewTop, bot = SW.viewBot;
 const lookT = SW.lookAtY !== undefined

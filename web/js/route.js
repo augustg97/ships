@@ -1468,7 +1468,7 @@ function clearSegments(pts, sampleKm) {
           else {
             const way = fineDetour(A, B);
             if (way) { for (const q of way) out.push(q); fixed++; }
-            else FINE.detourFail++;
+            else { FINE.detourFail++; if (FINE.run) FINE.run.detourFail++; }
           }
           break;
         }
@@ -1513,9 +1513,106 @@ function clearSegments(pts, sampleKm) {
     cur = rebuilt;
   }
 
-  /* what is still blocked after everything — the number that has to reach zero */
-  for (let i = 1; i < cur.length; i++) if (blocked(i)) FINE.unfixed++;
+  /* what is still blocked after everything — the number that has to reach zero. The run
+     ledger takes this call's count as an OVERWRITE, not a sum: finishTrackSteps clears
+     segments three times and the same blocked stretch would otherwise be confessed three
+     times over; the last call's answer is the truth of the track that ships. */
+  let unf = 0;
+  for (let i = 1; i < cur.length; i++) if (blocked(i)) unf++;
+  FINE.unfixed += unf;
+  if (FINE.run) FINE.run.unfixed = unf;
   return cur;
+}
+
+/* ── A NAVIGATOR GIVES A HEADLAND A BERTH ─────────────────────────────────────────────────
+ * Everything above verifies the track by SAMPLING — gcWet and clearSegments walk the curve at
+ * a kilometre — so a corner clip shorter than the sampling step passes every test and still
+ * puts the drawn keel on a drawn texel of land. Measured r125, before this pass: 281 grazes
+ * on 65 tracks, 181.6 km of drawn keel on drawn land fleet-wide, most of them under a
+ * kilometre long, at Cape Horn, the Skagerrak, Mindoro — always where the course shaved the
+ * corner cell of a headland. Sampling finer only shrinks the class; it cannot close it,
+ * because the repairs that answer a dry sample stop at the first wet point, which is the
+ * waterline again.
+ *
+ * So the finished track stands off instead: any point whose one-texel neighbourhood holds
+ * land is offered a berth of up to one texel, perpendicular to the course, both hands, and
+ * the move is accepted only when it strictly reduces the land in reach, keeps both adjoining
+ * great-circle segments wet, and does not fold the course (the detour sawtooth lesson).
+ * Track points sit about 4 km apart and a texel is 4.9 km, so a mid-segment sample is always
+ * inside the neighbourhood of its nearer endpoint: clearing both endpoints' neighbourhoods
+ * clears the whole segment between them, which is the geometric fact that makes this a fix
+ * for the CLASS rather than for whichever samples anyone happened to take. Where no berth
+ * exists — a carved strait, a one-texel channel — no candidate improves on the point and the
+ * track stands, so this can never close a passage the router found. */
+/* squared distance, in texel units, from the point to the nearest land-cell centre within
+   two cells — 9 (i.e. "far") when none is in reach. Continuous where a cell COUNT is a
+   staircase: a fifth-of-a-texel step strictly increases this, which is what lets the berth
+   be taken in steps gentle enough to steer. */
+function landDist2(lon, lat) {
+  const W = FINE.w, H = FINE.h, lim = FINE.datum + SHOAL_M;
+  const fx = (((lon + 180) % 360) + 360) % 360 / 360 * W;
+  const fy = (90 - lat) / 180 * H;
+  const x = Math.floor(fx), y = Math.max(0, Math.min(H - 1, Math.floor(fy)));
+  let best = 9;
+  for (let dy = -2; dy <= 2; dy++) {
+    const yy = y + dy; if (yy < 0 || yy >= H) continue;
+    for (let dx = -2; dx <= 2; dx++) {
+      const xx = ((x + dx) % W + W) % W;
+      if (FINE.elev[yy * W + xx] >= lim) {
+        const ex = x + dx + 0.5 - fx, ey = yy + 0.5 - fy;
+        const d2 = ex * ex + ey * ey;
+        if (d2 < best) best = d2;
+      }
+    }
+  }
+  return best;
+}
+function standOffLand(pts) {
+  if (!FINE.ready || pts.length < 3) return pts;
+  const out = pts.map(p => ({ lon: p.lon, lat: p.lat }));
+  const texDeg = 360 / FINE.w, step = 0.15 * texDeg;
+  /* the coastal set is found ONCE — steps are 0.15 texel, so a point that starts with a
+     texel of berth can never need one before the passes run out — and a point whose move
+     was refused is STUCK until a neighbour moves and changes its situation. Without both,
+     every pass re-walked every point of every track and boot went from 30 to 70 seconds:
+     the pump's budget is checked between yields, and this whole function is one yield. */
+  const near = [];
+  for (let i = 1; i < out.length - 1; i++)
+    if (fineIsWater(out[i].lon, out[i].lat) && landDist2(out[i].lon, out[i].lat) < 1)
+      near.push(i);
+  if (!near.length) return out;
+  const stuck = new Uint8Array(out.length);
+  for (let pass = 0; pass < 8; pass++) {
+    let moved = 0;
+    for (const i of near) {
+      if (stuck[i]) continue;
+      const p = out[i];
+      const d0 = landDist2(p.lon, p.lat);
+      if (d0 >= 1) continue;                      /* a texel of berth already */
+      const a = out[i - 1], c = out[i + 1];
+      const cl = Math.max(0.08, Math.cos(p.lat * D2R));
+      const ex = (((c.lon - a.lon + 540) % 360) - 180) * cl, ey = c.lat - a.lat;
+      const L = Math.hypot(ex, ey) || 1;
+      const px = -ey / L, py = ex / L;
+      const turn0 = turnDeg(a, p, c);
+      let best = null, bestD = d0;
+      for (const s of [1, -1]) {
+        const X = { lon: p.lon + s * px * step / cl, lat: p.lat + s * py * step };
+        if (!fineIsWater(X.lon, X.lat)) continue;
+        const dd = landDist2(X.lon, X.lat);
+        if (dd <= bestD + 1e-6) continue;
+        if (turnDeg(a, X, c) > Math.max(turn0, 8) + 20) continue;
+        if (!gcWet(a, X) || !gcWet(X, c)) continue;
+        best = X; bestD = dd;
+      }
+      if (best) {
+        out[i] = best; moved++;
+        stuck[i - 1] = 0; stuck[i + 1] = 0;   /* a moved neighbour can unjam a refused one */
+      } else stuck[i] = 1;
+    }
+    if (!moved) break;
+  }
+  return out;
 }
 
 /* ── ⚠ AND IT ALL HAPPENED IN ONE GO ─────────────────────────────────────────────────────
@@ -1533,6 +1630,14 @@ function finishTrack(pts, opt) {
 }
 function* finishTrackSteps(pts, opt) {
   if (!FINE.ready || !pts || pts.length < 3) return pts;
+  /* ── THE RUN'S OWN LEDGER ────────────────────────────────────────────────────────────
+     detourFail and unfixed are lifetime totals across every track ever finished, so no
+     caller could say WHICH voyage the router gave up on — measured r125, Sousa's fleet
+     shipped two uncleared crossings of the Bahia peninsula and the only trace was a
+     counter nobody reads, incremented at boot and buried by the next era. One track
+     finishes at a time (the fleet queue pumps one generator to completion), so a per-run
+     ledger reset here is unambiguous; seaRouteSteps attaches it to the finished track. */
+  FINE.run = { detourFail: 0, unfixed: 0, ashorePts: 0 };
   const o = opt || {};
   const step = o.stepKm || 4;
   let t = pts.map(p => ({ lon: p.lon, lat: p.lat }));
@@ -1568,10 +1673,17 @@ function* finishTrackSteps(pts, opt) {
     const prev = fin[fin.length - 1], next = t[i + 1];
     if (prev && next && gcWet(prev, next)) continue;
     const fix = nearestWater(p, 60);
+    if (!fix && FINE.run) FINE.run.ashorePts++;
     fin.push(fix || p);
   }
   yield;
   const sm = smoothTrack(fin); yield;
+  /* ⚠ standOffLand belongs HERE — after the last smoothing, because the Laplacian pulls a
+     rounded course toward its own chord, which at a headland is toward the land it just
+     cleared. It is NOT WIRED: measured r125, running it at fleet scale took a frozen boot
+     from under 60 s to 70–80 s, which is every capture and every era switch. Its effect is
+     proven (281 grazes → 103, 181.6 km of drawn keel on drawn land → 96.3, zero tracks
+     worse) — the cost, not the correctness, is the open problem. See HANDOFF round 125. */
   return clearSegments(sm, 1);
 }
 
