@@ -305,3 +305,26 @@ fetched a line later, did not land until 4.9 s because they were queued behind t
 
 **Ask what the work refines, and whether it is on screen.** Same work, started after the opening
 view is up: nothing about the result changes and the app opens in a third of the time.
+
+### A record covers the deck it names, not every deck above it
+
+r108 gave every tier roof a ship's recorded deck covering. On Titanic's three decks that is right —
+her boat deck is in the same specification. On Queen Mary 2's ten it painted the sun deck, the
+funnel casing and every aft terrace one khaki field, which no photograph supports. The record's own
+provenance said so: *"RECORDED for the promenade, EXTENDED above."*
+
+**An inference that inherits a record's provenance is the hardest kind to see**, because every
+check downstream reads "recorded" and stops. The extension is a record field now (`deck.roofs`),
+and the audit convicts **silence** — a laid covering with no answer either way — rather than
+convicting the answer.
+
+### When a frame moves that your change cannot reach, stash and re-run
+
+`ship-galley` and `ship-galleass` moved 1.4% in r132. Neither hull carries `deck`, `decks` or
+`houseAt`, so none of the round's three code paths could touch them, and they reproduced solo at
+identical numbers — so not the documented capture flap either. The decisive test took two minutes:
+**stash every change, rebuild at a clean HEAD, re-check.** Identical numbers a third time, so the
+baselines were already stale from the previous round.
+
+Without that test the reason written into FRAME-LOG.md would have been a confident fiction, and the
+drift would have been laundered into "accepted, r132".

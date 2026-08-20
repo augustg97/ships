@@ -8596,3 +8596,61 @@ stands. (3) Standing residuals: sekibune wasen kaji (r121), gundeck normals (r11
 Endurance forecastle (RMG J9266), Azzam crest (r108), yakata curtain (r117), canoe
 floor frame; myeongnyang needs an Action baseline (one-view blindness, r128); Preussen
 mast trucks ~51.3 m drawn vs 58.0 attested deck-to-truck.
+
+## Round 132 — a record covers the deck it names, and a stem that stood too upright
+
+August: "the Queen Mary is still quite poor, and the Azzam also needs improvement", with a
+high-quarter screenshot of a ship whose every deck, terrace and casing was khaki.
+
+**A RECORD COVERS THE DECK IT NAMES, NOT EVERY DECK ABOVE IT.** r108 gave every tier roof the
+recorded covering. On a three-deck Edwardian liner that is defensible — Titanic's boat deck IS in
+the same specification as her weather deck. On a TEN-deck hull it is not: Queen Mary 2's source
+attests the wrap-around Promenade, deck 7, and deck 7 is this model's own weather deck, so the
+teak was already drawn where it is attested. Extending it upward painted her sun deck, funnel
+casing and every aft terrace one khaki field — the loudest thing about her from any angle above
+the beam, and not what the photographs show. **Her own provenance admitted it in as many words:
+"RECORDED for the promenade, EXTENDED above."** An inference wearing a record's clothes. The
+extension is a RECORD now (`deck.roofs`), not a rule: Azzam keeps it and states why (2,200 m² of
+laid teak is more area than her weather deck alone can carry), Titanic, Great Eastern and Yamato
+keep it because their sources name the exposed decks *including* the boat deck, Queen Mary 2
+declines it with a reason.
+
+**AND THE AUDIT CAUGHT MY OWN CHANGE.** Rule 8 says check the audit first, and it was enforcing
+r108's rule faithfully. The resolution was not to silence it: it now convicts a ship whose record
+is **silent** on the question while carrying a laid covering — silence is the ambiguity worth
+flagging — and passes one that has decided either way with a reason.
+
+**THE BOW, IN ONE NUMBER.** Her stem overhung the forward perpendicular by 13.67 m; the Sydney
+bow plate (Commons, `Queen Mary 2 bow.jpg`, Conollyb, CC BY 2.5, scaled by her name letters on the
+flare at ~1.5 m) measures **23.5 m**. That is why she read blunt from ahead however fine the
+waterline under her — and it is not something `wlPower` or `stemFineness` could have fixed, because
+the entry was already fine and the stem above it was standing upright. LOA 345 is fixed and drawn
+exactly, so the overhang comes out of the perpendiculars: `lwl` is the length between them
+(318.2 m), the transom keeps its 3.3 m counter — **the same lwl-is-LBP semantics r131 established
+on the container ship and the slave ship**. Every u-keyed feature re-derived through the new frame
+*from its own original plate reading*, not rescaled off the old u. Drawn: 23.6 m at 345.00 LOA
+exactly, air draught unchanged.
+
+**AZZAM, off two independent broadsides** (Cádiz and Casablanca, opposite hands, different ports,
+agreeing): white to the waterline with no boot-top and a near-black antifouling, against a class
+default of oxide red for anything built after 1955; and a deck edge rising **3.0 m** from amidships
+to the stem against the 0.25 m recorded, which is the single number that made her a slab. The RISE
+was taken deliberately rather than the freeboard — a rise is a difference between two points on one
+line, so it survives the one thing these plates cannot resolve: where her hull ends and her first
+tier begins.
+
+**AND A FINDING THAT WAS NOT THIS ROUND'S.** `ship-galley` and `ship-galleass` moved 1.4%. Neither
+hull carries `deck`, `decks` or `houseAt`, so none of this round's three code paths can reach them;
+they reproduced SOLO at identical numbers, so not the documented flap. Then the decisive test:
+**every change stashed, rebuilt at a clean HEAD, re-checked — identical numbers a third time.**
+r131 committed baselines that do not match its own code for those two, and the next run would have
+blamed whoever held the tree. **When a frame moves that your change cannot reach, stash and re-run
+before writing a reason.**
+
+Audit 33/0. Ratchet 62 frames, 4 movers, each classified.
+
+**STILL WRONG, and stated:** her aft terraces are six near-identical full-width steps where the
+real ship has fewer and more varied ones. Those u-spans came off the Commons scale DRAWING, and
+the drawing is now the weak link — that wants a photographic aft-quarter plate, not another pass
+at the same source. Azzam's forward superstructure is still stepped where she is one swept form,
+and her freeboard/deck-count pair needs a plate resolving the hull-to-tier boundary.

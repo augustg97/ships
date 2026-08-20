@@ -4457,8 +4457,22 @@ function buildSuperstructure(S, group, hullMat) {
      covering flips — ships on the INFERRED fallback keep the byte-identical plateMat,
      because a liner's boat deck being planked is a fact to RECORD per ship first, not
      infer (azzam r108; titanic, queen-mary-2 r109; great-eastern r110). */
+  /* ── ⚠ AND A RECORD COVERS THE DECK IT NAMES, NOT EVERY DECK ABOVE IT ───────────────
+     r108 gave every tier roof the recorded covering. On a three-deck Edwardian liner that is
+     defensible — Titanic's boat deck IS in the same specification as her weather deck. On a
+     TEN-deck hull it is not: Queen Mary 2's source attests the wrap-around Promenade, deck 7,
+     nearly 600 m of laid teak — and deck 7 is this model's weather deck, so the record is
+     already honoured there. Extending it upward painted her sun deck, her funnel casing and
+     every aft terrace one khaki field, which is the loudest thing about her from any angle
+     above the beam and is not what the photographs show: her upper decks are pale coated
+     plate with teak in places. The record's own provenance says so in as many words —
+     "RECORDED for the promenade, EXTENDED above". An inference wearing a record's clothes.
+     So the extension is a RECORD now (deck.roofs), not a rule. Azzam keeps it and states why:
+     2,200 m² of laid teak is far more area than her weather deck alone can carry, so her
+     terraces are the rest of it. Nothing else claims it, and nothing without decks can care. */
   const cover = deckCovering(S);
-  const roofDeckMat = (hullMat && cover.recorded && cover.mode === 1)
+  const roofsLaid = !!(S.deck && S.deck.roofs);
+  const roofDeckMat = (hullMat && roofsLaid && cover.recorded && cover.mode === 1)
     ? new THREE.ShaderMaterial({
         vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
         uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,

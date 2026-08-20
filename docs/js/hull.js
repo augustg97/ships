@@ -2720,7 +2720,8 @@ const white = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 
 const g = new THREE.Group();
 const T = linerHouse(S);
 const cover = deckCovering(S);
-const roofDeckMat = (hullMat && cover.recorded && cover.mode === 1)
+const roofsLaid = !!(S.deck && S.deck.roofs);
+const roofDeckMat = (hullMat && roofsLaid && cover.recorded && cover.mode === 1)
 ? new THREE.ShaderMaterial({
 vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
 uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,

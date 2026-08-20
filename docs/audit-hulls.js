@@ -1726,8 +1726,9 @@ if (p && p.key === 'superstructure' && o.material.isShaderMaterial
 if (badTreads)
 say(v.id, 'stair treads ignore the recorded covering',
 `${badTreads} tread mesh(es) not in ${H.deck.covering} on a ship whose record lays it`);
-if (H.decks && !H.flightDeck && !H.turrets && H.houseAt && !coveredRoof)
-say(v.id, 'house roofs ignore the recorded covering',
+if (H.decks && !H.flightDeck && !H.turrets && H.houseAt
+&& (H.deck || {}).roofs === undefined && !coveredRoof)
+say(v.id, 'record is silent on whether the covering reaches the tier roofs',
 'a recorded laid covering, a walkable tier roof cascade, and no roof plate '
 + 'draws in the deck shader');
 }

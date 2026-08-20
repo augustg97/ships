@@ -2541,8 +2541,19 @@
       if (badTreads)
         say(v.id, 'stair treads ignore the recorded covering',
             `${badTreads} tread mesh(es) not in ${H.deck.covering} on a ship whose record lays it`);
-      if (H.decks && !H.flightDeck && !H.turrets && H.houseAt && !coveredRoof)
-        say(v.id, 'house roofs ignore the recorded covering',
+      /* ⚠ AND SILENCE IS THE FAULT, NOT A DECISION. This convicted any ship with a laid
+         covering whose tier roofs were not in it — which is r108's inference, and r132 found
+         it too strong: a record covers the DECK IT NAMES. Queen Mary 2's source attests the
+         wrap-around Promenade, deck 7, and deck 7 is that hull's own weather deck, so the
+         teak is already drawn where it is attested; extending it upward painted her sun deck
+         and every aft terrace one khaki field, which no photograph of her supports and which
+         her own provenance admitted in the words "EXTENDED above".
+         So what this rule now asks is whether the record has ANSWERED the question. A ship
+         that says deck.roofs (either way, with a reason) has decided; a ship that is silent
+         while carrying a laid covering has not, and that is the ambiguity worth convicting. */
+      if (H.decks && !H.flightDeck && !H.turrets && H.houseAt
+          && (H.deck || {}).roofs === undefined && !coveredRoof)
+        say(v.id, 'record is silent on whether the covering reaches the tier roofs',
             'a recorded laid covering, a walkable tier roof cascade, and no roof plate '
             + 'draws in the deck shader');
     }

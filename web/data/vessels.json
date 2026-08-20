@@ -2550,8 +2550,8 @@
     "sheerBow": 1.2,
     "sheerStern": 0.6,
     "tumblehome": 0.13,
-     "stemRake": 0.081,
-     "sternRake": 0.054,
+    "stemRake": 0.081,
+    "sternRake": 0.054,
     "strakes": 22,
     "copper": true,
     "copperAge": 0.6,
@@ -2597,7 +2597,7 @@
     "draught": 3.6,
     "freeboard": 3.0,
     "cm": 0.8,
-     "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 30.0 \u2212 lwl 26.0 leaves 4.0 m of overhang and the drawn planking carried only 1.5 m of it (rakes 0.03/0.02, r129 fleet sweep). The recorded 30 m (98 ft) is the ship's hull length (en.wikipedia.org/wiki/Brooks_(1781_ship)), and the Brookes plan (Regulated Slave Trade Act plates, 1788\u201389) draws a raked stem carrying the head forward and a counter stern \u2014 the bow's share of the overhang larger than the stern's. The authored 3:2 stem:stern split is kept and normalized up to the allowance: 0.081/0.054, which the r129 loft clamp trims to 2.4 m bow / 1.6 m stern, 30.00 m drawn exactly. The plate is a stowage engraving, not a lines plan \u2014 it supports the split qualitatively, not to the centimetre.",
+    "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 30.0 − lwl 26.0 leaves 4.0 m of overhang and the drawn planking carried only 1.5 m of it (rakes 0.03/0.02, r129 fleet sweep). The recorded 30 m (98 ft) is the ship's hull length (en.wikipedia.org/wiki/Brooks_(1781_ship)), and the Brookes plan (Regulated Slave Trade Act plates, 1788–89) draws a raked stem carrying the head forward and a counter stern — the bow's share of the overhang larger than the stern's. The authored 3:2 stem:stern split is kept and normalized up to the allowance: 0.081/0.054, which the r129 loft clamp trims to 2.4 m bow / 1.6 m stern, 30.00 m drawn exactly. The plate is a stowage engraving, not a lines plan — it supports the split qualitatively, not to the centimetre.",
     "steering": "stern"
    }
   },
@@ -3028,7 +3028,9 @@
    "hull": {
     "deck": {
      "covering": "teak",
-     "provenance": "RECORDED: the contemporary descriptions carry it twice over - Description and History of the Great Eastern (1861): 'the massive wrought-iron deck is covered with teak planking', and of the cellular structure, 'the deck, which is of teak planking placed over the top plates, forms the upper surface of the tube'. The deck beneath is Brunel's double cellular iron top on the Britannia-bridge principle, two half-inch plates top and bottom on longitudinal webs (Descriptive Particulars of the Great Eastern Steam Ship, 1857) - so the teak is a covering laid over iron, which is what this model draws. No plank dimensions are attested; the drawn planks are class defaults."
+     "provenance": "RECORDED: the contemporary descriptions carry it twice over - Description and History of the Great Eastern (1861): 'the massive wrought-iron deck is covered with teak planking', and of the cellular structure, 'the deck, which is of teak planking placed over the top plates, forms the upper surface of the tube'. The deck beneath is Brunel's double cellular iron top on the Britannia-bridge principle, two half-inch plates top and bottom on longitudinal webs (Descriptive Particulars of the Great Eastern Steam Ship, 1857) - so the teak is a covering laid over iron, which is what this model draws. No plank dimensions are attested; the drawn planks are class defaults.",
+     "roofs": true,
+     "roofsProvenance": "Her two tiers are the same weather deck stepped, within the same laid-deck specification."
     },
     "wlPower": 3.6,
     "stemFineness": 0.1,
@@ -3275,7 +3277,9 @@
     "deckM": 2.96,
     "deck": {
      "covering": "pine",
-     "provenance": "RECORDED: the Olympic-class record as the archive compilations carry it (GG Archives; Titanic Connections; both citing The Shipbuilder's 1911 Olympic and Titanic special number) - yellow pine laid on the exposed decks, including the boat deck; pitch pine on the forecastle, poop and well decks; teak only as margin and trim around houses and fittings. Planks 5 in wide by 3 in thick - 127 x 76 mm. The pitch-pine ends and the teak margins are finer distinctions than this one-covering model draws."
+     "provenance": "RECORDED: the Olympic-class record as the archive compilations carry it (GG Archives; Titanic Connections; both citing The Shipbuilder's 1911 Olympic and Titanic special number) - yellow pine laid on the exposed decks, including the boat deck; pitch pine on the forecastle, poop and well decks; teak only as margin and trim around houses and fittings. Planks 5 in wide by 3 in thick - 127 x 76 mm. The pitch-pine ends and the teak margins are finer distinctions than this one-covering model draws.",
+     "roofs": true,
+     "roofsProvenance": "The Shipbuilder 1911 names the exposed decks INCLUDING the boat deck, so the tier roofs are inside the same specification as the weather deck."
     },
     "steering": "steel"
    }
@@ -4159,7 +4163,9 @@
     "deckM": 4.08,
     "deck": {
      "covering": "hinoki",
-     "provenance": "RECORDED, species CONTESTED: Skulski (Anatomy of the Ship - The Battleship Yamato) gives hinoki, Japanese cypress, planks 127 x 76 mm; the Yamato Museum, Kure, states the ship's deck timber was Taiwanese cypress. Neighbouring cypresses of the same pale colour class, so the drawn tone stands either way. Plank width 127 mm from Skulski; butt length is a class default."
+     "provenance": "RECORDED, species CONTESTED: Skulski (Anatomy of the Ship - The Battleship Yamato) gives hinoki, Japanese cypress, planks 127 x 76 mm; the Yamato Museum, Kure, states the ship's deck timber was Taiwanese cypress. Neighbouring cypresses of the same pale colour class, so the drawn tone stands either way. Plank width 127 mm from Skulski; butt length is a class default.",
+     "roofs": true,
+     "roofsProvenance": "Her hinoki planking is recorded for the exposed decks, which on a battleship includes the shelter deck the tiers stand on."
     },
     "steering": "steel"
    }
@@ -4380,7 +4386,7 @@
     "sheerBow": 2.2,
     "sheerStern": 0.0,
     "tumblehome": 0.0,
-     "stemRake": 0.0423,
+    "stemRake": 0.0423,
     "sternRake": 0.0,
     "strakes": 16,
     "copper": false,
@@ -4402,7 +4408,7 @@
     "cm": 0.98,
     "year": 1991,
     "freeboardProvenance": "TYPE SHIP — the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC Gülsün / MSC Irina classes, 399.9 m × 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC Gülsün; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water — a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts — the same distinction ever-given's stationProvenance records from her casualty report.",
-     "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 399.9 \u2212 lwl 383.0 = 16.9 m, and the old 0.03/0.0 drew only 12.0 m of it (r129 fleet sweep, \u22124.9). 383.0 is the class's length between perpendiculars (RINA, Significant Ships of 2019, MSC G\u00fcls\u00fcn \u2014 the same plate as the depth moulded above); on this generation the transom stands nearly plumb at the aft perpendicular and virtually the whole LOA\u2212LPP difference is the flared bow above the bulb \u2014 ever-given, the fleet's attested hull of the same 400 m generation, carried the identical 383 LBP against 399.94 LOA before r113 moved her lwl to her casualty report's 387 waterline. The stern keeps its authored 0.0 and the stem takes the allowance: 0.0423, which the r129 loft clamp trims to 16.90 m of bow overhang, 399.90 m drawn exactly. NOTE the semantics this leaves: this type ship's lwl is the class LBP; the loaded waterline of the real hull runs \u007e4 m further over the bulb (the ever-given precedent) and is not published for this class, so the record keeps the figure a plate attests.",
+    "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 399.9 − lwl 383.0 = 16.9 m, and the old 0.03/0.0 drew only 12.0 m of it (r129 fleet sweep, −4.9). 383.0 is the class's length between perpendiculars (RINA, Significant Ships of 2019, MSC Gülsün — the same plate as the depth moulded above); on this generation the transom stands nearly plumb at the aft perpendicular and virtually the whole LOA−LPP difference is the flared bow above the bulb — ever-given, the fleet's attested hull of the same 400 m generation, carried the identical 383 LBP against 399.94 LOA before r113 moved her lwl to her casualty report's 387 waterline. The stern keeps its authored 0.0 and the stem takes the allowance: 0.0423, which the r129 loft clamp trims to 16.90 m of bow overhang, 399.90 m drawn exactly. NOTE the semantics this leaves: this type ship's lwl is the class LBP; the loaded waterline of the real hull runs ~4 m further over the bulb (the ever-given precedent) and is not published for this class, so the record keeps the figure a plate attests.",
     "steering": "steel"
    }
   },
@@ -4570,7 +4576,7 @@
     "run": 0.36,
     "riseF": 0.2,
     "riseA": 0.14,
-    "sheerBow": 0.25,
+    "sheerBow": 3.0,
     "sheerStern": 0.0,
     "tumblehome": 0.0,
     "stemRake": 0.052,
@@ -5077,9 +5083,13 @@
     },
     "deck": {
      "covering": "teak",
-     "provenance": "RECORDED: the builder's specification as carried by the BOAT International Superyacht Directory entry for Azzam (Lurssen, 2013) - teak deck, steel hull, aluminium superstructure; press copy repeats 2,200 m2 of laid teak. Plank width and butt pattern are CLASS defaults for a yacht's laid teak (90 mm strakes), below what any plate of her can resolve."
+     "provenance": "RECORDED: the builder's specification as carried by the BOAT International Superyacht Directory entry for Azzam (Lurssen, 2013) - teak deck, steel hull, aluminium superstructure; press copy repeats 2,200 m2 of laid teak. Plank width and butt pattern are CLASS defaults for a yacht's laid teak (90 mm strakes), below what any plate of her can resolve.",
+     "roofs": true,
+     "roofsProvenance": "The 2,200 m2 of laid teak in the builder-sourced copy is far more area than her weather deck alone can carry on a 180.6 x 20.8 m hull, so her tier terraces carry the rest — which is also what her photographs show."
     },
-    "steering": "steel"
+    "steering": "steel",
+    "bottom": "#2f353b",
+    "paintProvenance": "MEASURED off two independent broadsides — Wikimedia Commons File:AzzamCadiz.jpg (Javier Virues Ortega, CC BY-SA 4.0, port side, bow left) and File:Yacht Azzam - UAE.jpg (Farid mernissi, CC BY-SA 4.0, starboard, bow right). Both show her WHITE to the waterline with no boot-top and a near-black antifouling, where the class default for a hull built after 1955 is oxide red. And both show the deck edge rising about 3.0 m from amidships to the stem, against the 0.25 m the record carried — which is why she read as a flat slab. The RISE is a difference between two points on one line, so it is immune to where the hull ends and the first tier begins, which is the one thing these plates cannot resolve."
    },
    "rows": [
     [
@@ -5342,7 +5352,7 @@
     "sheerBow": 2.0,
     "sheerStern": 0.0,
     "tumblehome": 0.01,
-    "stemRake": 0.041,
+    "stemRake": 0.0739,
     "sternRake": 0.01,
     "strakes": 44,
     "copper": false,
@@ -5355,7 +5365,7 @@
     "steeve": 22,
     "masts": [
      {
-      "at": 0.19,
+      "at": 0.166,
       "heightM": 15.5,
       "rig": "pole",
       "rake": 5.0,
@@ -5364,7 +5374,7 @@
     ],
     "build": "steel",
     "loa": 345.0,
-    "lwl": 328.0,
+    "lwl": 318.2,
     "beam": 41.0,
     "draught": 10.3,
     "freeboard": 17.0,
@@ -5375,12 +5385,12 @@
     "portholes": false,
     "mastLivery": "#26282b",
     "houseAt": [
-     0.105,
-     0.995
+     0.079,
+     0.994
     ],
     "funnelH": 15.7,
     "funnelAt": [
-     0.57
+     0.557
     ],
     "year": 2003,
     "shellTiers": 2,
@@ -5418,24 +5428,24 @@
      "kind": "glass"
     },
     "houseCrest": [
-     0.139,
-     0.8
+     0.114,
+     0.794
     ],
     "tierForeU": {
-     "5": 0.123,
-     "6": 0.128,
-     "7": 0.134,
-     "8": 0.134
+     "5": 0.097,
+     "6": 0.102,
+     "7": 0.109,
+     "8": 0.109
     },
     "tierAftU": {
-     "1": 0.993,
-     "2": 0.985,
-     "3": 0.961,
-     "4": 0.925,
-     "5": 0.865,
-     "6": 0.844,
-     "7": 0.822,
-     "8": 0.807
+     "1": 0.992,
+     "2": 0.984,
+     "3": 0.959,
+     "4": 0.922,
+     "5": 0.861,
+     "6": 0.839,
+     "7": 0.816,
+     "8": 0.801
     },
     "houseTaper": 0.02,
     "funnelOval": 1.98,
@@ -5445,50 +5455,50 @@
     "bridgeBeamM": 45.0,
     "topWorks": [
      {
-      "u0": 0.218,
-      "u1": 0.238,
+      "u0": 0.195,
+      "u1": 0.216,
       "hM": 3.2,
       "half": 0.62,
       "kind": "house"
      },
      {
-      "u0": 0.284,
-      "u1": 0.303,
+      "u0": 0.263,
+      "u1": 0.282,
       "hM": 3.9,
       "half": 0.3,
       "kind": "dome"
      },
      {
-      "u0": 0.428,
-      "u1": 0.447,
+      "u0": 0.411,
+      "u1": 0.431,
       "hM": 3.9,
       "half": 0.3,
       "kind": "dome"
      },
      {
-      "u0": 0.492,
-      "u1": 0.66,
+      "u0": 0.477,
+      "u1": 0.65,
       "hM": 4.6,
       "half": 0.66,
       "kind": "casing"
      },
      {
-      "u0": 0.676,
-      "u1": 0.752,
+      "u0": 0.666,
+      "u1": 0.744,
       "hM": 3.0,
       "half": 0.7,
       "kind": "house"
      },
      {
-      "u0": 0.762,
-      "u1": 0.784,
+      "u0": 0.755,
+      "u1": 0.777,
       "hM": 12.8,
       "half": 0.22,
       "kind": "uptake"
      },
      {
-      "u0": 0.786,
-      "u1": 0.8,
+      "u0": 0.779,
+      "u1": 0.794,
       "hM": 3.0,
       "half": 0.55,
       "kind": "house"
@@ -5498,9 +5508,12 @@
     "mastStep": "house",
     "deck": {
      "covering": "teak",
-     "provenance": "RECORDED for the promenade, EXTENDED above: Cunard's own copy and the Cunard historian Chris Frame carry the wrap-around Promenade Deck, deck 7, as laid teak, nearly 600 m to the lap - and deck 7 is this hull's sheer, so the model's weather deck IS the attested surface. The house tier decks above draw the same covering; photographs of her terraced stern show laid decking there, but no builder's figure attests it. The working foredeck's painted steel is a distinction this one-covering model does not draw. Replaces the deckSteel guess."
+     "provenance": "RECORDED for the promenade, EXTENDED above: Cunard's own copy and the Cunard historian Chris Frame carry the wrap-around Promenade Deck, deck 7, as laid teak, nearly 600 m to the lap - and deck 7 is this hull's sheer, so the model's weather deck IS the attested surface. The house tier decks above draw the same covering; photographs of her terraced stern show laid decking there, but no builder's figure attests it. The working foredeck's painted steel is a distinction this one-covering model does not draw. Replaces the deckSteel guess.",
+     "roofs": false,
+     "roofsProvenance": "NOT extended above the promenade. The source attests deck 7, the wrap-around Promenade, and deck 7 is this hull sheer — so the recorded teak is already drawn where it is attested. Her sun deck, funnel casing and aft terraces are pale coated plate in every photograph, and painting them teak was an inference carrying a record provenance."
     },
-    "steering": "steel"
+    "steering": "steel",
+    "rakeProvenance": "MEASURED off a bow plate — Wikimedia Commons File:Queen Mary 2 bow.jpg (Conollyb, CC BY 2.5, Sydney) — scaled by her name letters on the flare at about 1.5 m. Her stem overhangs the forward perpendicular by about 23.5 m; the model had 13.67 m, which is why she read blunt from ahead however fine the waterline under her. LOA 345 is fixed and already drawn exactly, so the overhang comes out of the perpendiculars: lwl is the length between them (318.2 m) and the transom keeps its 3.3 m counter — the same lwl-is-LBP semantics r131 established on the container ship and the slave ship. Every u-keyed feature is re-derived through the new frame from its own original plate reading, not rescaled from the old u."
    },
    "rows": [
     [

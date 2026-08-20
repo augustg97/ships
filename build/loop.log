@@ -6021,3 +6021,319 @@ Round 130 is complete and pushed. Summary:
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 41119 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-19 09:42:22  round starting
+You're out of usage credits. Run /usage-credits to keep using Fable 5 or /model to switch models.
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-19 10:45:14  round finished; HEAD is cb4c768 Round 131: the last two honest records get their overhang, and the Middle Passage hull gets a committed view — r130's owed closing confirmation completed first (the 29 frames the watchdog took, identified from _current mtimes, re-checked solo on the identical tree: 28 green + action-salamis green on re-run after a load-induced readiness timeout; with r130's 32 the confirmation stands 61/61). Then r129 item 2: container stem 0.03→0.0423 (the 16.9 m allowance is the class LOA−LPP, Significant Ships 2019 LBP 383.0; the transom stands plumb at the AP, the whole difference is the flared bow — the ever-given 383-LBP precedent, and the lwl-is-LBP semantics is now IN the record as rakeProvenance), drawn 395.00→399.90 exactly; slave-ship 0.03/0.02→0.081/0.054 (the recorded 30 m is the Brooks's own hull length; the Brookes plate's raked stem carrying the head and counter stern support the kept 3:2 split qualitatively), drawn 27.50→30.00 exactly, clamp-trimmed to 2.4/1.6 m. Measured: sweep 0/33 over, both ±0.00; before/after profiles preserved and read; audit 33/0. Frames: ship-container 9.905% whole-hull-redraw accepted; ship-slave-ship added as baseline 62 — the hull that carries the Middle Passage appeared in no committed view (r114/r128 one-view blindness); aboard-off/wake-plan sub-tolerance, neighbours 0.000% (loa never moved, no quay slide). Stamp 1787159253. Next: survey at panokseon boxPct 71; remaining under-fills (carrier −3.15 …) each need record-semantics answers first.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 47789 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 10:55:15  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 11:05:19  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 11:15:25  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 11:25:28  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 11:35:33  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 11:45:39  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 11:55:44  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 12:05:50  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 12:15:55  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 12:25:58  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 12:36:02  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 12:46:05  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 12:56:08  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 13:06:11  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 13:16:14  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 13:26:17  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 13:36:22  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 13:46:27  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 13:56:33  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 14:06:38  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 14:16:43  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 14:26:48  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 14:36:53  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 14:46:56  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 14:57:01  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 15:07:06  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 15:17:09  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 15:27:12  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 15:37:17  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 15:47:22  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 15:57:26  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 16:07:31  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 16:17:36  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 16:27:41  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 16:37:43  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 16:47:48  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 16:57:50  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 17:07:55  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 17:18:00  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 17:28:05  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 17:38:10  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 17:48:15  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 17:58:19  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 18:08:23  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 18:18:27  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 18:28:31  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 18:38:36  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 18:48:40  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 18:58:45  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 19:08:48  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 19:18:55  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 19:29:00  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 19:39:05  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 19:49:09  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 19:59:13  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 20:09:18  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 20:19:22  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 20:29:24  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 20:39:27  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 20:49:31  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 20:59:36  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 21:09:39  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 21:19:44  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 21:29:49  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 21:39:53  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 21:49:58  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 22:00:03  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 22:10:07  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 22:20:13  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 22:30:18  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 22:40:23  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 22:50:28  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 23:00:33  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 23:10:38  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 23:20:43  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 23:30:48  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 23:40:54  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-08-19 23:50:59  round starting
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
