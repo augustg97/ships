@@ -3631,8 +3631,10 @@ const grey = new THREE.MeshStandardMaterial({ color: 0x4e5357, roughness: 0.99, 
 const dark = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.70, metalness: 0.15 });
 const line = new THREE.MeshStandardMaterial({ color: 0xd6d2c4, roughness: 0.85, metalness: 0.0 });
 const y = H.sheer(0.5) + B * 0.10;
-const fd = new THREE.Mesh(new THREE.BoxGeometry(L * 1.02, B * 0.045, deckW), grey);
-fd.position.set(0, y, 0);
+const dkL = S.flightDeckLen || L * 1.02;
+const dkCx = S.flightDeckLen ? (-L / 2 + H.rake(0) + S.loa - dkL / 2) : 0;
+const fd = new THREE.Mesh(new THREE.BoxGeometry(dkL, B * 0.045, deckW), grey);
+fd.position.set(dkCx, y, 0);
 group.add(tag(fd, 'flightdeck', 'Flight deck',
 'It overhangs the hull on both sides — which is why a carrier\'s waterline beam and its flight-deck beam are entirely different numbers.'));
 const caseMat = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.62,

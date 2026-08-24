@@ -1,0 +1,237 @@
+{
+ "problems": [],
+ "checked": 33,
+ "rows": [
+  {
+   "id": "dugout",
+   "loa": 8.6,
+   "airAboveDeck": 0,
+   "parts": 4,
+   "funnelH": null
+  },
+  {
+   "id": "voyaging-canoe",
+   "loa": 19,
+   "airAboveDeck": 9.6,
+   "parts": 13,
+   "funnelH": null
+  },
+  {
+   "id": "trireme",
+   "loa": 36.9,
+   "airAboveDeck": 10,
+   "parts": 27,
+   "funnelH": null
+  },
+  {
+   "id": "corbita",
+   "loa": 40,
+   "airAboveDeck": 12.8,
+   "parts": 29,
+   "funnelH": null
+  },
+  {
+   "id": "dhow",
+   "loa": 26,
+   "airAboveDeck": 16.2,
+   "parts": 15,
+   "funnelH": null
+  },
+  {
+   "id": "junk",
+   "loa": 34,
+   "airAboveDeck": 15.8,
+   "parts": 21,
+   "funnelH": null
+  },
+  {
+   "id": "treasure-ship",
+   "loa": 70,
+   "airAboveDeck": 37.3,
+   "parts": 21,
+   "funnelH": null
+  },
+  {
+   "id": "cog",
+   "loa": 23.3,
+   "airAboveDeck": 8.9,
+   "parts": 25,
+   "funnelH": null
+  },
+  {
+   "id": "caravel",
+   "loa": 20,
+   "airAboveDeck": 12.5,
+   "parts": 18,
+   "funnelH": null
+  },
+  {
+   "id": "carrack",
+   "loa": 42,
+   "airAboveDeck": 30,
+   "parts": 32,
+   "funnelH": null
+  },
+  {
+   "id": "galley",
+   "loa": 42,
+   "airAboveDeck": 27.4,
+   "parts": 23,
+   "funnelH": null
+  },
+  {
+   "id": "galleass",
+   "loa": 47,
+   "airAboveDeck": 30.7,
+   "parts": 24,
+   "funnelH": null
+  },
+  {
+   "id": "panokseon",
+   "loa": 32,
+   "airAboveDeck": 14,
+   "parts": 25,
+   "funnelH": null
+  },
+  {
+   "id": "sekibune",
+   "loa": 25,
+   "airAboveDeck": 11.9,
+   "parts": 26,
+   "funnelH": null
+  },
+  {
+   "id": "fluyt",
+   "loa": 32,
+   "airAboveDeck": 28.5,
+   "parts": 35,
+   "funnelH": null
+  },
+  {
+   "id": "east-indiaman",
+   "loa": 50,
+   "airAboveDeck": 43.8,
+   "parts": 38,
+   "funnelH": null
+  },
+  {
+   "id": "ship-of-the-line",
+   "loa": 57,
+   "airAboveDeck": 54.2,
+   "parts": 38,
+   "funnelH": null
+  },
+  {
+   "id": "slave-ship",
+   "loa": 30,
+   "airAboveDeck": 27.3,
+   "parts": 32,
+   "funnelH": null
+  },
+  {
+   "id": "wyoming",
+   "loa": 106.7,
+   "airAboveDeck": 46,
+   "parts": 22,
+   "funnelH": null
+  },
+  {
+   "id": "preussen",
+   "loa": 134,
+   "airAboveDeck": 50.2,
+   "parts": 25,
+   "funnelH": null
+  },
+  {
+   "id": "great-eastern",
+   "loa": 211,
+   "airAboveDeck": 55.2,
+   "parts": 19,
+   "funnelH": 30.8
+  },
+  {
+   "id": "titanic",
+   "loa": 269.1,
+   "airAboveDeck": 51.4,
+   "parts": 15,
+   "funnelH": 28
+  },
+  {
+   "id": "usv",
+   "loa": 22,
+   "airAboveDeck": 13,
+   "parts": 10,
+   "funnelH": null
+  },
+  {
+   "id": "clipper",
+   "loa": 64.8,
+   "airAboveDeck": 43.3,
+   "parts": 34,
+   "funnelH": null
+  },
+  {
+   "id": "steamer",
+   "loa": 98,
+   "airAboveDeck": 40.8,
+   "parts": 30,
+   "funnelH": 10.3
+  },
+  {
+   "id": "dreadnought",
+   "loa": 160.6,
+   "airAboveDeck": 32.6,
+   "parts": 13,
+   "funnelH": 21.6
+  },
+  {
+   "id": "yamato",
+   "loa": 263,
+   "airAboveDeck": 38.4,
+   "parts": 18,
+   "funnelH": 25.6
+  },
+  {
+   "id": "carrier",
+   "loa": 337,
+   "airAboveDeck": 28.7,
+   "parts": 12,
+   "funnelH": null
+  },
+  {
+   "id": "container",
+   "loa": 399.9,
+   "airAboveDeck": 32.6,
+   "parts": 14,
+   "funnelH": 23
+  },
+  {
+   "id": "ever-given",
+   "loa": 399.98,
+   "airAboveDeck": 41.3,
+   "parts": 15,
+   "funnelH": 32.7
+  },
+  {
+   "id": "azzam",
+   "loa": 180.6,
+   "airAboveDeck": 25.4,
+   "parts": 13,
+   "funnelH": null
+  },
+  {
+   "id": "endurance",
+   "loa": 44,
+   "airAboveDeck": 32.5,
+   "parts": 34,
+   "funnelH": 5.9
+  },
+  {
+   "id": "queen-mary-2",
+   "loa": 345,
+   "airAboveDeck": 43.7,
+   "parts": 13,
+   "funnelH": 43.7
+  }
+ ]
+}

@@ -8924,3 +8924,82 @@ three items (impavesata, galleass screen height, and new this round: whether the
 open deck carried hatch gratings at these stations at all — her footprint was kept, but the
 record has never been asked). (3) The survey's next crudest: sekibune 74, panokseon 58 —
 both already have their own residual entries.
+
+## Round 137 — 2026-08-24 — first the owed commit, then the length a carrier actually measures to
+
+**First, round 136 was recovered and committed.** The 13:37 firing did all of r136's work —
+handoff appended, seven frames accepted, audit 33/0 — and the 80-minute watchdog killed it
+between its handoff and its commit; its closing confirmation file was EMPTY (the watchdog
+pkills frame_baseline checks). This round verified the tree against the r136 handoff (run1's
+seven movers = the seven FRAME-LOG accepts; audit output present and clean), re-ran the full
+62-frame confirmation on the identical tree — **62/62 green, EXIT:0**
+(build/staging/ratchet-r136-confirm2.txt) — and committed and pushed r136 as its own commit
+(39cb37b) before touching anything. Live stamp 1787604876 verified on the deployed page.
+
+**The task: r136's queue head, the under-fill record semantics.** Five hulls drew shorter than
+their records' loa, and r129's rule stands: under-length is a record-semantics question, not a
+clamp. Three answered and applied; two answered and queued with their numbers.
+
+- **carrier: the record was right and the DECK was wrong.** Her loa 337.0 is the ship's
+  extreme — 1,106 ft, the Commander, Naval Air Force Atlantic figure on USS Gerald R. Ford —
+  and the flight deck is its own attested plate: 1,092 × 256 ft (333 × 78 m). No source
+  publishes the shell's length between extremities; the drawn 333.85 shell (rakes 0.03/0.02)
+  is reconstruction standing honestly INSIDE the loa. The defect was the drawn deck:
+  lwl·1.02 = 323.3 m — 10.5 m shorter than the shell under it, with the fantail standing
+  3.6 m proud of the deck's aft edge, which no photograph of a Ford supports: on the ship the
+  round-down overhangs the fantail. New record field flightDeckLen 333.0; buildFlightDeck now
+  draws the deck at its own length, anchored so bow tip → round-down = 337.00 = loa exactly.
+  rakeProvenance states all of it, including that a planking-only sweep reads −3.15 on this
+  hull BY CONSTRUCTION.
+- **ever-given: the container-class answer, applied to the attested hull.** Her lwl 387.00 is
+  the LBP her own casualty report states (PMA R-026-2021-DIAM, the plate stationProvenance
+  already reads); the transom stands near-plumb at the AP on this 400 m generation (the class
+  geometry r131 sourced from the MSC Gülsün plate), so the whole 12.98 m allowance is the
+  flared bow. stemRake 0.03 → 0.0325, clamp trims to exact: drawn 399.00 → 399.98.
+- **usv: type-coherence fill.** Generated record, its own "~22 m"; the 1.5 m allowance filled
+  at the authored 3:1 bow:stern character (0.0511/0.017), stated as authored in
+  rakeProvenance. Saildrone's current sheet gives Surveyor 20 m — inside the card's "~".
+  Drawn 21.38 → 22.00.
+- **east-indiaman, QUEUED with its answer:** fill (50−43)/50 = 0.14 total at the kept 8:5
+  authored split → 0.0862/0.0538; the retourschip profile (curved raked stem carrying the
+  head, near-vertical sternpost with the counter above — the Amsterdam/Batavia forms)
+  supports bow > stern qualitatively. Not applied: no committed frame carries her close, so
+  the change needs its profile capture read before it ships (rule 1), and the clock — most of
+  this round went to r136's recovery — did not allow it.
+- **fluyt, QUEUED with its answer:** fill (32−27.5)/32 = 0.140625 at the kept 7:5 split →
+  0.0820/0.0586; the fluyt profile (rounded stem falling forward, narrow tuck with the poop
+  overhanging aft — Witsen via Hoving) supports the split qualitatively. Same rule-1 reason.
+
+**Measured (rule 4).** Deck-aware sweep (build/staging/sweep_loa_r137.py — extreme span over
+planking+flightdeck for flightDeckLen hulls, planking for everyone else; sweep-r137.txt):
+usv 22.00 +0.00, ever-given 399.98 +0.00, carrier planking 333.85 / deck-extreme 337.00
++0.00; only east-indiaman −0.50 and fluyt −0.66 remain, queued above. measure_ship carrier
+chain exact: planking 333.85; flight deck 333.00, starting 4.1 m abaft the shell's bow tip
+and ending 3.2 m beyond the shell's stern — bow tip → round-down 337.00
+(build/staging/measure-carrier-r137.txt). Audit [] — 33/0 (build/staging/audit-r137-run1.json).
+
+**Frames: 10 solo-checked (paired check-then-accept, diffs copied out before any further
+check), 2 movers, both the change, both read and accepted, both re-checked to 0.000.**
+ship-carrier 13.155% — the r129/r130 whole-hull-redraw class (yard camera reframes the longer
+extreme span: ship ghost-shift, sea speckle, label recut) plus the deck's own ends; the
+current frame read in full — the deck now carries aft over the stern where bare hull top
+stood. ship-usv 0.155% — diff confined to her own lengthened ends. Green: aboard-carrier
+0.048, shipwright 0.044, shipwright-ahead 0.034, aboard-off 0.018, sea-ever-given 0.011,
+ship-ever-given 0.009 (a 0.98 m bow on a 400 m hull is sub-tolerance at yard scale),
+wake-plan 0.007, ship-azzam 0.000. The full 62-frame pass at this round's head doubles as the
+opening state check; the next round's opening pass guards the world against this tree.
+
+**Rule 0, written on the accepted ship-carrier frame:** it reads as a rendered ship on open
+water — hull, flight deck, island, deck park and sea composed per pixel, panels legible, no
+chart anywhere. Three facts a viewer can read off it: her flight deck is the longest thing on
+her, overhanging the fantail aft with the deck park's folded-wing fighters ranged along the
+starboard side; her card gives 337.0 m length overall against a 41.00 m beam because the two
+measure different things; the fleet list berths her at 2017 between the unmanned surface
+vessel and Ever Given.
+
+**Next, in order:** (1) east-indiaman and fluyt: apply the queued fills above, profile
+captures read, and the under-fill class is CLOSED. (2) Standing residuals unchanged from r136
+(sekibune wasen kaji, gundeck normals, Endurance forecastle, Azzam crest + boundary plate,
+QM2 aft terraces, yakata curtain, canoe floor frame, myeongnyang Action baseline, Preussen
+trucks), plus the battle-rig record question holding three items (impavesata, galleass screen
+height, trireme gratings). (3) The survey's next crudest: sekibune 74, panokseon 58.

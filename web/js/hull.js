@@ -5919,9 +5919,16 @@ function buildFlightDeck(S, group, mats) {
   const y = H.sheer(0.5) + B * 0.10;
 
   /* the deck itself: it OVERHANGS the hull on both sides, which is why a carrier's waterline
-     beam and its flight-deck beam are two very different numbers */
-  const fd = new THREE.Mesh(new THREE.BoxGeometry(L * 1.02, B * 0.045, deckW), grey);
-  fd.position.set(0, y, 0);
+     beam and its flight-deck beam are two very different numbers. Its LENGTH is its own
+     attested figure too (flightDeckLen — 1,092 ft on a 1,106 ft ship), not the hull's:
+     drawn from lwl it stood 10.5 m SHORTER than the shell, with the fantail proud of the
+     round-down, which no photograph of a Ford supports. Anchored so the round-down
+     overhangs the fantail and bow tip → round-down spans the record's loa exactly — the
+     deck, not the shell, is what a carrier's length overall measures to (r137). */
+  const dkL = S.flightDeckLen || L * 1.02;
+  const dkCx = S.flightDeckLen ? (-L / 2 + H.rake(0) + S.loa - dkL / 2) : 0;
+  const fd = new THREE.Mesh(new THREE.BoxGeometry(dkL, B * 0.045, deckW), grey);
+  fd.position.set(dkCx, y, 0);
   group.add(tag(fd, 'flightdeck', 'Flight deck',
     'It overhangs the hull on both sides — which is why a carrier\'s waterline beam and its flight-deck beam are entirely different numbers.'));
 
