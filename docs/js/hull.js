@@ -2384,30 +2384,95 @@ g.setIndex(idx); g.computeVertexNormals();
 const wwMat = new THREE.MeshStandardMaterial({ color: 0x3a2c1c, roughness: 0.88 });
 group.add(tag(new THREE.Mesh(g, wwMat), 'waterway'));
 }
+const hatchVoid = new THREE.MeshStandardMaterial({ color: 0x0b0906, roughness: 1.0 });
+const quadInto = (acc, p1, p2, p3, p4) => {
+const b = acc.pos.length / 3;
+acc.pos.push(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2],
+p3[0], p3[1], p3[2], p4[0], p4[1], p4[2]);
+const ux = p2[0] - p1[0], uy = p2[1] - p1[1], uz = p2[2] - p1[2];
+const vx = p4[0] - p1[0], vy = p4[1] - p1[1], vz = p4[2] - p1[2];
+const n = [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx];
+const m = Math.hypot(n[0], n[1], n[2]) || 1;
+for (let k = 0; k < 4; k++) acc.nrm.push(n[0] / m, n[1] / m, n[2] / m);
+acc.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+};
+const accMesh = (acc, mat) => {
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(acc.pos, 3));
+g.setAttribute('normal', new THREE.Float32BufferAttribute(acc.nrm, 3));
+g.setIndex(acc.idx);
+return new THREE.Mesh(g, mat);
+};
 const gratingAt = (u, w, l) => {
 const gg = new THREE.Group();
 const y = deckAtU(u) + B * 0.004;
 const x = (u - 0.5) * L;
 const t = B * 0.013;
-const pitch = B * 0.042;
-const nz = Math.max(3, Math.round(w / pitch));
-const nx = Math.max(3, Math.round(l / pitch));
-for (let i = 0; i < nz; i++) {
-const bar = new THREE.Mesh(new THREE.BoxGeometry(l, t, t * 0.62), wood);
-bar.position.set(x, y + t / 2, -w / 2 + (i + 0.5) * (w / nz));
-gg.add(bar);
+const BAR = 0.06, PITCH = 0.135;
+const depth = Math.min(0.075, t + B * 0.004);
+const yT = y + t, yB = yT - depth;
+const nx = Math.max(2, Math.round((l - BAR) / PITCH));
+const nz = Math.max(2, Math.round((w - BAR) / PITCH));
+const px = (l - BAR) / nx, pz = (w - BAR) / nz;
+const X0 = x - l / 2, Z0 = -w / 2;
+const A = { pos: [], nrm: [], idx: [] };
+const topQ = (x0, x1, z0, z1, yy) =>
+quadInto(A, [x0, yy, z0], [x0, yy, z1], [x1, yy, z1], [x1, yy, z0]);
+for (let j = 0; j <= nz; j++) {
+const za = Z0 + j * pz;
+topQ(X0, X0 + l, za, za + BAR, yT);
 }
-for (let i = 0; i < nx; i++) {
-const bar = new THREE.Mesh(new THREE.BoxGeometry(t * 0.62, t, w), wood);
-bar.position.set(x - l / 2 + (i + 0.5) * (l / nx), y + t / 2, 0);
-gg.add(bar);
+for (let j = 0; j < nz; j++) {
+const za = Z0 + j * pz + BAR, zb = Z0 + (j + 1) * pz;
+for (let k = 0; k <= nx; k++) {
+const xa = X0 + k * px;
+topQ(xa, xa + BAR, za, zb, yT);
 }
-for (const [dx, dz, sx, sz] of [[l / 2, 0, t * 0.9, w + t], [-l / 2, 0, t * 0.9, w + t],
-[0, w / 2, l + t, t * 0.9], [0, -w / 2, l + t, t * 0.9]]) {
-const c = new THREE.Mesh(new THREE.BoxGeometry(sx, t * 1.9, sz), pale);
-c.position.set(x + dx, y + t * 0.55, dz);
-gg.add(c);
 }
+for (let j = 0; j < nz; j++) {
+const za = Z0 + j * pz + BAR, zb = Z0 + (j + 1) * pz;
+for (let k = 0; k < nx; k++) {
+const xa = X0 + k * px + BAR, xb = X0 + (k + 1) * px;
+quadInto(A, [xa, yB, za], [xa, yT, za], [xa, yT, zb], [xa, yB, zb]);
+quadInto(A, [xb, yB, zb], [xb, yT, zb], [xb, yT, za], [xb, yB, za]);
+quadInto(A, [xb, yB, za], [xb, yT, za], [xa, yT, za], [xa, yB, za]);
+quadInto(A, [xa, yB, zb], [xa, yT, zb], [xb, yT, zb], [xb, yB, zb]);
+}
+}
+gg.add(accMesh(A, wood));
+const C = { pos: [], nrm: [], idx: [] };
+const sect = [[0.45 * t, y - 0.4 * t],
+[0.45 * t, y + 1.2 * t],
+[0.15 * t, y + 1.5 * t],
+[-0.45 * t, y + 1.5 * t],
+[-0.45 * t, y + 0.7 * t]];
+const hx = l / 2, hz = w / 2;
+for (let s = 0; s < sect.length - 1; s++) {
+const [d1, h1] = sect[s], [d2, h2] = sect[s + 1];
+for (const sg of [1, -1]) {
+{
+const A1 = [x + sg * (hx + d1), h1, -(hz + d1)],
+B1 = [x + sg * (hx + d1), h1, +(hz + d1)],
+A2 = [x + sg * (hx + d2), h2, -(hz + d2)],
+B2 = [x + sg * (hx + d2), h2, +(hz + d2)];
+if (sg > 0) quadInto(C, B1, A1, A2, B2);
+else        quadInto(C, A1, B1, B2, A2);
+}
+{
+const A1 = [x - (hx + d1), h1, sg * (hz + d1)],
+B1 = [x + (hx + d1), h1, sg * (hz + d1)],
+A2 = [x - (hx + d2), h2, sg * (hz + d2)],
+B2 = [x + (hx + d2), h2, sg * (hz + d2)];
+if (sg > 0) quadInto(C, A1, B1, B2, A2);
+else        quadInto(C, B1, A1, A2, B2);
+}
+}
+}
+gg.add(accMesh(C, pale));
+const V = { pos: [], nrm: [], idx: [] };
+quadInto(V, [X0, yB + 0.004, Z0], [X0, yB + 0.004, Z0 + w],
+[X0 + l, yB + 0.004, Z0 + w], [X0 + l, yB + 0.004, Z0]);
+gg.add(accMesh(V, hatchVoid));
 return tag(gg, 'grating');
 };
 if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {

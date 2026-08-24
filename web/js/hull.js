@@ -3867,33 +3867,113 @@ function buildFittings(S, group, mats) {
      The battens were two crossed layers sitting on top of each other, which is a trellis. A
      real grating is made of ledges notched HALF THROUGH so the two sets interlock flush into
      one board — that is what makes it strong enough to walk on and to take a sea aboard, and
-     it is why the holes are square-edged and the surface is flat rather than corrugated. Both
-     sets now sit at the same height and the openings are the square holes between them. */
+     it is why the holes are square-edged and the surface is flat rather than corrugated.
+     Drawn as that board now: one lofted geometry whose top is the flush surface of both sets
+     and whose openings are square holes with walls going down through it, replacing the ~20
+     loose boxes per hatch (≈1,100 fleet-wide) the old build stacked. The mesh is sized to the
+     human body, so it is in METRES, not fractions of beam — openings about three inches
+     square, small enough that a heel cannot go through, battens about two and a half inches
+     sided, the board three inches deep (established English practice; Steel tables gratings
+     at these scantlings for every rate). What shows through the openings is the unlit
+     hatchway, so a dark plate lies under the holes: the deck planking does not. */
+  const hatchVoid = new THREE.MeshStandardMaterial({ color: 0x0b0906, roughness: 1.0 });
+  const quadInto = (acc, p1, p2, p3, p4) => {
+    const b = acc.pos.length / 3;
+    acc.pos.push(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2],
+                 p3[0], p3[1], p3[2], p4[0], p4[1], p4[2]);
+    const ux = p2[0] - p1[0], uy = p2[1] - p1[1], uz = p2[2] - p1[2];
+    const vx = p4[0] - p1[0], vy = p4[1] - p1[1], vz = p4[2] - p1[2];
+    const n = [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx];
+    const m = Math.hypot(n[0], n[1], n[2]) || 1;
+    for (let k = 0; k < 4; k++) acc.nrm.push(n[0] / m, n[1] / m, n[2] / m);
+    acc.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+  };
+  const accMesh = (acc, mat) => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(acc.pos, 3));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(acc.nrm, 3));
+    g.setIndex(acc.idx);
+    return new THREE.Mesh(g, mat);
+  };
   const gratingAt = (u, w, l) => {
     const gg = new THREE.Group();
     const y = deckAtU(u) + B * 0.004;
     const x = (u - 0.5) * L;
-    const t = B * 0.013;                                // the ledge, and the notch is half of it
-    const pitch = B * 0.042;
-    const nz = Math.max(3, Math.round(w / pitch));
-    const nx = Math.max(3, Math.round(l / pitch));
-    for (let i = 0; i < nz; i++) {
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(l, t, t * 0.62), wood);
-      bar.position.set(x, y + t / 2, -w / 2 + (i + 0.5) * (w / nz));
-      gg.add(bar);
+    const t = B * 0.013;                                // the coaming module, from the beam
+    const BAR = 0.06, PITCH = 0.135;                    // batten sided and hole pitch, metres
+    const depth = Math.min(0.075, t + B * 0.004);       // board depth; heel never below the deck
+    const yT = y + t, yB = yT - depth;                  // flush top at the old bars' own line
+    const nx = Math.max(2, Math.round((l - BAR) / PITCH));
+    const nz = Math.max(2, Math.round((w - BAR) / PITCH));
+    const px = (l - BAR) / nx, pz = (w - BAR) / nz;     // true pitch, so the frame closes
+    const X0 = x - l / 2, Z0 = -w / 2;
+    const A = { pos: [], nrm: [], idx: [] };
+    const topQ = (x0, x1, z0, z1, yy) =>
+      quadInto(A, [x0, yy, z0], [x0, yy, z1], [x1, yy, z1], [x1, yy, z0]);
+    /* the top: full-length batten strips, and between them the ledges' tops between holes */
+    for (let j = 0; j <= nz; j++) {
+      const za = Z0 + j * pz;
+      topQ(X0, X0 + l, za, za + BAR, yT);
     }
-    for (let i = 0; i < nx; i++) {
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(t * 0.62, t, w), wood);
-      bar.position.set(x - l / 2 + (i + 0.5) * (l / nx), y + t / 2, 0);
-      gg.add(bar);
+    for (let j = 0; j < nz; j++) {
+      const za = Z0 + j * pz + BAR, zb = Z0 + (j + 1) * pz;
+      for (let k = 0; k <= nx; k++) {
+        const xa = X0 + k * px;
+        topQ(xa, xa + BAR, za, zb, yT);
+      }
     }
-    /* the coaming: the raised rim the grating drops into, which keeps water off the hatch */
-    for (const [dx, dz, sx, sz] of [[l / 2, 0, t * 0.9, w + t], [-l / 2, 0, t * 0.9, w + t],
-                                    [0, w / 2, l + t, t * 0.9], [0, -w / 2, l + t, t * 0.9]]) {
-      const c = new THREE.Mesh(new THREE.BoxGeometry(sx, t * 1.9, sz), pale);
-      c.position.set(x + dx, y + t * 0.55, dz);
-      gg.add(c);
+    /* the holes: four walls each, from the top down through the board, facing inward */
+    for (let j = 0; j < nz; j++) {
+      const za = Z0 + j * pz + BAR, zb = Z0 + (j + 1) * pz;
+      for (let k = 0; k < nx; k++) {
+        const xa = X0 + k * px + BAR, xb = X0 + (k + 1) * px;
+        quadInto(A, [xa, yB, za], [xa, yT, za], [xa, yT, zb], [xa, yB, zb]);
+        quadInto(A, [xb, yB, zb], [xb, yT, zb], [xb, yT, za], [xb, yB, za]);
+        quadInto(A, [xb, yB, za], [xb, yT, za], [xa, yT, za], [xa, yB, za]);
+        quadInto(A, [xa, yB, zb], [xa, yT, zb], [xb, yT, zb], [xb, yB, zb]);
+      }
     }
+    gg.add(accMesh(A, wood));
+    /* the coaming: the raised rim the grating drops into, which keeps water off the hatch —
+       a mitred ring lofted round the hatch in one piece: outer face with its heel buried in
+       the deck, a chamfer easing the top outer edge, and an inner face running down past the
+       board's own edge, which is the rabbet land the grating rests on */
+    const C = { pos: [], nrm: [], idx: [] };
+    const sect = [[0.45 * t, y - 0.4 * t],              // outer face foot, in the deck
+                  [0.45 * t, y + 1.2 * t],              // chamfer springs here
+                  [0.15 * t, y + 1.5 * t],              // top, outboard edge
+                  [-0.45 * t, y + 1.5 * t],             // top, inboard edge
+                  [-0.45 * t, y + 0.7 * t]];            // inner face, down past the board
+    const hx = l / 2, hz = w / 2;
+    for (let s = 0; s < sect.length - 1; s++) {
+      const [d1, h1] = sect[s], [d2, h2] = sect[s + 1];
+      for (const sg of [1, -1]) {
+        /* the head-ledge sides of the rim, running athwart at x = ±(hx+d) */
+        {
+          const A1 = [x + sg * (hx + d1), h1, -(hz + d1)],
+                B1 = [x + sg * (hx + d1), h1, +(hz + d1)],
+                A2 = [x + sg * (hx + d2), h2, -(hz + d2)],
+                B2 = [x + sg * (hx + d2), h2, +(hz + d2)];
+          if (sg > 0) quadInto(C, B1, A1, A2, B2);
+          else        quadInto(C, A1, B1, B2, A2);
+        }
+        /* the coamings proper, running fore and aft at z = ±(hz+d) */
+        {
+          const A1 = [x - (hx + d1), h1, sg * (hz + d1)],
+                B1 = [x + (hx + d1), h1, sg * (hz + d1)],
+                A2 = [x - (hx + d2), h2, sg * (hz + d2)],
+                B2 = [x + (hx + d2), h2, sg * (hz + d2)];
+          if (sg > 0) quadInto(C, A1, B1, B2, A2);
+          else        quadInto(C, B1, A1, A2, B2);
+        }
+      }
+    }
+    gg.add(accMesh(C, pale));
+    /* the hatchway under the board: dark, because it opens on the unlit space below */
+    const V = { pos: [], nrm: [], idx: [] };
+    quadInto(V, [X0, yB + 0.004, Z0], [X0, yB + 0.004, Z0 + w],
+                [X0 + l, yB + 0.004, Z0 + w], [X0 + l, yB + 0.004, Z0]);
+    gg.add(accMesh(V, hatchVoid));
     return tag(gg, 'grating');
   };
   if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {

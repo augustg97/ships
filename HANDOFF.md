@@ -8861,3 +8861,66 @@ galleass screen's own comment calls it "waist-high" while the drawn band is 0.34
 (B·0.042); whether the Lepanto conversions carried a taller screen, and whether it was
 pierced, is the same battle-rig record question as the impavesata and should be answered
 with it.
+
+## Round 136 — 2026-08-24 — the grating becomes the board its own comment described
+
+**The task was r135's queue head: the fleet-wide grating class — the last boxy class in the
+galley family and the widest-spread one anywhere, 48–75 loose boxes per hull on 19 of the 33.**
+The old `gratingAt` comment already knew what a grating is — "ledges notched HALF THROUGH so
+the two sets interlock flush into one board" — and then drew a stack of sticks anyway: nz+nx
+separate box bars at a pitch of B·0.042, plus four overlapping coaming boxes, ~20 meshes per
+hatch, ≈1,100 fleet-wide.
+
+**The rebuild draws the board the comment describes.** One lofted geometry per grating: a flat
+flush top (full-length batten strips, ledge tops between them) pierced by square holes whose
+four walls run down through the board, so the openings are square-edged geometry with real
+depth — the snapBand law again. The coaming is a second loft: a mitred ring swept round the
+hatch in one piece, chamfer on the top outer edge, heel buried in the deck, inner face running
+down past the board's edge (the rabbet land). Under the holes lies a near-black plate, because
+what a real grating shows through its openings is the unlit hatchway, not pale deck planking.
+Scantlings are METRES, the r134/r135 law, because a grating's mesh is sized to the human body,
+not to the ship: openings ~3 in square (small enough that a heel cannot pass), battens ~2.4 in
+sided, pitch 0.135 m, board 3 in deep (English practice, Steel's tables) — where the old
+B-fraction pitch dealt Wyoming 0.59 m holes. Board depth capped at t+B·0.004 so the heel never
+pierces the deck on the small hulls (galley bottom lands on her deck exactly). Positions,
+hatch footprints and the coaming's silhouette envelope all kept.
+
+**Measured (rule 4).** ship-of-the-line chain: grating group heel 5.38 = deck+B·0.004−0.4t
+exactly; half-extent 2.76 = w/2+0.45t exactly; the aft hatch rides the sheer to 5.88
+(build/staging/measure-sotl-r136.txt). Looked at (rule 1) from three deck close-ups —
+ship-of-the-line b=120 l=45, dhow, wyoming (build/staging/r136-*-deck.png): the dhow's
+openings are countable, wyoming's mesh reads as the fine woven field of a photograph.
+
+**Survey and audit.** All 19 carriers improved, none regressed: dhow boxPct 52→14, cog 49→19,
+junk 44→17, caravel 51→24, wyoming 52→32, galley 31→19, galleass 33→26 (grating gone from
+boxyParts everywhere; galley-family boxyParts now EMPTY). Fleet: +249k tris (+4.5%) for −898
+meshes (≈900 fewer draw calls). Floating [] everywhere. Audit 33/0
+(build/staging/audit-r136-run1.txt). No new audit rule: the fault class (a many-box part that
+should be one lofted board) is exactly what the survey's boxyParts metric already convicts,
+and this round closes its largest instance.
+
+**Frames: 62 checked, 7 movers, all the change, all read and accepted.** ship-dhow 0.093%,
+ship-trireme 0.078%, ship-wyoming 0.074%, shipwright-astern 0.069%, ship-galley 0.057%,
+ship-clipper 0.055%, shipwright-furled 0.172% (the furled deck is the class's clearest
+picture). Every diff confined to the three hatch rectangles, plus the documented side classes:
+neighbour-berth slivers at frame edges (dhow, galley — the r131/r135 class) and the r57
+scale-numeral sprite ghosts (clipper, astern, furled). ship-galleass 0.004% — her gratings
+hide under the r135 gun deck, which is itself the proof the gun deck covers them.
+Confirmation run green (see build/staging/ratchet-r136-confirm.txt).
+
+**Rule 0, written on the accepted shipwright-furled frame:** it reads as a rendered ship —
+furled canvas on her yards, laid deck with seamed planking, three dark-meshed gratings in pale
+coaming rims, guns at her ports, sea beyond. Three facts a viewer can read off it: her hatches
+are covered by wooden gratings a crew could walk on, dropped inside raised rims that keep water
+off the holds; the gratings are dark because they open on unlit space below; the deck between
+them is laid fore-and-aft planking with a capstan standing amidships.
+
+**Next, in order:** (1) the under-fills (carrier −3.15, ever-given −0.98, east-indiaman −0.50,
+fluyt −0.66, usv −0.62), each needing its record-semantics answer before any clamp-style rule.
+(2) Standing residuals unchanged from r135 (sekibune wasen kaji, gundeck normals, Endurance
+forecastle, Azzam crest + boundary plate, QM2 aft terraces, yakata curtain, canoe floor frame,
+myeongnyang Action baseline, Preussen trucks), plus the battle-rig record question now holding
+three items (impavesata, galleass screen height, and new this round: whether the trireme's
+open deck carried hatch gratings at these stations at all — her footprint was kept, but the
+record has never been asked). (3) The survey's next crudest: sekibune 74, panokseon 58 —
+both already have their own residual entries.
