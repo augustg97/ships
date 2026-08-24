@@ -5141,24 +5141,69 @@ if (AP) {
 const xF = (AP.from - 0.5) * L, xT = (AP.to - 0.5) * L;
 const inter = S.interscalmium || 0.98;
 const perBank = Array.isArray(S.oarsPerBank) ? S.oarsPerBank[0] : (S.oarsPerBank || 24);
-for (const sgn of [-1, 1]) {
-const rail = new THREE.Mesh(
-new THREE.BoxGeometry(xT - xF, B * 0.040, B * 0.034), timber);
-rail.position.set((xF + xT) / 2, apY, sgn * apZ);
-group.add(tag(rail, 'apostis'));
+const sparAB = (a, b, rFoot, rTip, mat) => {
+const d = b.clone().sub(a), len = d.length();
+const m = new THREE.Mesh(new THREE.CylinderGeometry(rTip, rFoot, len, 4, 1), mat);
+m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+m.rotateY(Math.PI / 4);
+m.position.copy(a).addScaledVector(d, len / 2);
+return m;
+};
+const plankGeo = (w, h, len) => {
+const c = Math.min(w, h) * 0.28, hw = w / 2, hh = h / 2;
+const s = new THREE.Shape();
+s.moveTo(-hw + c, -hh); s.lineTo(hw - c, -hh); s.lineTo(hw, -hh + c);
+s.lineTo(hw, hh - c); s.lineTo(hw - c, hh); s.lineTo(-hw + c, hh);
+s.lineTo(-hw, hh - c); s.lineTo(-hw, -hh + c); s.closePath();
+const g = new THREE.ExtrudeGeometry(s, { depth: len, bevelEnabled: false });
+g.translate(0, 0, -len / 2);
+return g;
+};
+const railH = B * 0.040;
+const benchT = B * 0.014;
+const benchY = deckY + B * 0.073;
+const bUnder = benchY - benchT / 2;
+const footZ0 = Math.abs(pdMid[2]) - B * 0.020;
+const headY = apY - B * 0.026, headZ = apZ + B * 0.020;
+const beamHalf = B * 0.019;
+const bandaD = B * 0.016, bandaW = B * 0.050;
+const tB = (bUnder - bandaD - (deckY + beamHalf)) / (headY - deckY);
+const bandaZ = footZ0 + Math.max(0.15, Math.min(0.92, tB)) * (headZ - footZ0);
 const span = (perBank - 1) * inter / L;
 const uc = (AP.from + AP.to) / 2;
+for (const sgn of [-1, 1]) {
+const rail = new THREE.Mesh(
+new THREE.BoxGeometry(xT - xF, railH, B * 0.034), timber);
+rail.position.set((xF + xT) / 2, apY, sgn * apZ);
+group.add(tag(rail, 'apostis'));
+const banda = new THREE.Mesh(
+new THREE.BoxGeometry(xT - xF, bandaD, bandaW), timber);
+banda.position.set((xF + xT) / 2, bUnder - bandaD / 2, sgn * bandaZ);
+group.add(tag(banda, 'apostis', 'Banda',
+'The stringer along the beams that the benches’ outboard ends rest on.'));
 for (let i = 0; i < perBank; i++) {
 const u = uc - span / 2 + (i / (perBank - 1)) * span;
 const pd = surfacePoint(S, H, u, 1.0);
-const a = new THREE.Vector3(pd[0], apY - B * 0.012, sgn * (Math.abs(pd[2]) - B * 0.05));
-const b = new THREE.Vector3(pd[0], apY - B * 0.012, sgn * (apZ + B * 0.017));
-group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'apostis', 'Crossbeam'));
-const bLen = apZ - B * 0.088;
-const bench = new THREE.Mesh(new THREE.BoxGeometry(B * 0.055, B * 0.014, bLen), pale);
-bench.position.set(pd[0], deckY + B * 0.073, sgn * (B * 0.088 + bLen / 2));
-bench.rotation.y = sgn * -0.17;
+const a = new THREE.Vector3(pd[0], pd[1], sgn * (Math.abs(pd[2]) - B * 0.020));
+const b = new THREE.Vector3(pd[0], headY, sgn * headZ);
+group.add(tag(sparAB(a, b, B * 0.017, B * 0.011, timber), 'apostis', 'Baccalaro',
+'The cantilever from the gunwale that carries the rowing frame.'));
+const pin = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.008, B * 0.008, B * 0.055, 6), timber);
+pin.position.set(pd[0] - 0.06, apY + railH / 2 + B * 0.018, sgn * apZ);
+group.add(tag(pin, 'apostis', 'Thole'));
+const bLen = apZ - B * 0.010 - B * 0.088;
+const bench = new THREE.Mesh(plankGeo(B * 0.055, benchT, bLen), pale);
+bench.position.set(pd[0], benchY, sgn * (B * 0.088 + bLen / 2));
+bench.rotation.y = sgn * 0.17;
 group.add(tag(bench, 'bench'));
+const pLen = bLen * 0.62;
+const ped = new THREE.Mesh(plankGeo(B * 0.032, B * 0.010, pLen), pale);
+ped.position.set(pd[0] + inter * 0.5, deckY + B * 0.008,
+sgn * (B * 0.080 + pLen / 2));
+ped.rotation.set(0, sgn * 0.17, 0.6);
+group.add(tag(ped, 'bench', 'Pedagna',
+'The footboard. A scaloccio stroke is climb-and-fall: step up, drop back.'));
 }
 }
 const corsia = new THREE.Mesh(

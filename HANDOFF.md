@@ -8717,3 +8717,75 @@ forecastle (RMG J9266), Azzam crest (r108) and her hull-to-tier boundary plate, 
 terraces want a photographic aft-quarter plate, yakata curtain (r117), canoe floor frame,
 myeongnyang Action baseline (one-view blindness, r128), Preussen mast trucks 51.3 drawn v
 58.0 attested.
+
+---
+
+## Round 134 — 2026-08-24: the rowing frame becomes the telaro the cross-sections draw
+
+**The task was r133's queue head: the galleass (boxPct 70, apostisx55, benchx52) and the
+galley (68, apostisx51, benchx48) — one shared code path in buildGalleyWorks, so one fix is
+the class fix for both.** What the committed frames showed: a comb. Crossbeams drawn as
+identical straight sticks floating at rail height — their inboard ends hung 0.6 m above the
+gunwale with nothing beneath — benches as unsupported slabs, no way for a rower's foot or a
+bench's end to reach structure, and every one of those 200-odd meshes a plain box.
+
+**The rebuild follows the telaro cross-sections in Burlet's chapter (Morrison ed., The Age
+of the Galley) and Guilmartin, each member carried by the one below it.** The BACCALARI now
+cantilever from the hull's own rail — foot on the sheer at each oar station, taken from
+surfacePoint — up to the apostis, whose rail rides on their heads; they are tapered square
+spars (the spur's own CylinderGeometry trick), deeper at the hull. The BANDA, the stringer
+the benches' outboard ends rest on, is placed where the midships beam's top face passes
+bench-underside height — computed from the beam's own run, and since the sheer only rises
+from amidships, every other station's beam notches deeper into it: nothing can float, by
+construction. Inboard the bench end sits on the corsia's ledge as before. Ahead of every
+bench stands the PEDAGNA, the sloped footboard, lower edge sunk in the deck — a scaloccio
+stroke is climb-and-fall, so a bench without a footboard is not a rowing bench. A THOLE pin
+stands on the rail at each station, bow side of its oar, the side the stroke bears on.
+Benches and pedagne are chamfered-edge planks (ExtrudeGeometry — rowing eases an arris).
+
+**And the documented trap class appeared again: a comment right while its arithmetic is the
+other sign.** The bench comment said "outer end trailing aft — the rower faces the stern";
+`rotation.y = sgn * -0.17` sent the outer end toward the BOW (u 0 = stem, so aft is +x).
+The mechanics agree with the comment — at the finish the loom lies over the bench angled
+inboard-bow-ward, so the bench parallels it — and the sign is now +, with the pedagna a
+half-interscalmium abaft each bench.
+
+**Measured (rule 4), in metres, both hulls.** Galley: banda top 1.44 = bench underside
+1.44 exactly; beam heads reach y 1.69, inside the rail band 1.59–1.80; tholes 1.75–2.04
+embedded 5 cm in the rail top; pedagne 1.07–1.21 against deck 1.10. Galleass: banda 3.33 =
+bench underside 3.33; beams 2.64–3.70 into the rail band 3.56–3.88; and the gun-deck chain
+above is untouched — stanchions 3.72–4.82 standing on the apostis rail, clamp at 4.69,
+deck at 4.94–5.06. Files: build/staging/measure-{galley,galleass}-r134.txt, before/after
+profile crops in build/staging/r134-*.png.
+
+**Survey and audit.** Galleass boxPct 70 → 39, apostis and bench GONE from boxyParts;
+galley 68 → 33, same. floating [] on both. Remaining boxy classes are each single-owner:
+gratingx60/70 (the fleet-wide grating class), gundeckx31 (galleass), arrumbadax4 (galley).
+Audit 33/0 (build/staging/audit-r134-run1.txt). Survey: build/staging/survey-r134.json.
+
+**Frames: 62 checked, two movers, both the change.** ship-galley 0.194%, ship-galleass
+0.227%, each diff confined to the rowing-frame band — sails, masts, hull, sea, panels all
+still; action-lepanto 0.000% (the galleys there are too distant for the frame to resolve).
+Both read and accepted with reasons; solo re-check after the accepts: 0.000%, EXIT:0.
+Every other frame green, largest passage-sahul 0.034%.
+
+**Rule 0, written on the accepted frames:** both read as rendered ships on open water, no
+chart anywhere. Three facts a viewer can read off the galley frame: her oars pivot on an
+outrigger frame standing wider than the hull, carried on brackets cantilevered from the
+gunwale; every gun she has points forward over the bow platform; the crew rows sitting on
+angled benches, each with a footboard, either side of a raised central gangway. Off the
+galleass frame: her guns stand on a full-length deck carried OVER the rowers on stanchions;
+the rowing frame beneath is the galley's own machinery at greater scale; boarding her
+means climbing, not stepping.
+
+**Next, in order:** (1) the survey continues — remaining single-owner boxy classes:
+galleass gundeckx31, galley arrumbadax4, and the fleet-wide grating class (52–70 boxes on
+nearly every hull — one lofted grating would pay off across the whole fleet). (2) The
+under-fills (carrier −3.15, ever-given −0.98, east-indiaman −0.50, fluyt −0.66, usv −0.62)
+still each need their record-semantics answer before any clamp-style rule. (3) Standing
+residuals unchanged from r133: sekibune wasen kaji (r121), gundeck normals (r118),
+Endurance forecastle (RMG J9266), Azzam crest + hull-to-tier boundary plate (r108), QM2
+aft terraces photographic plate, yakata curtain (r117), canoe floor frame, myeongnyang
+Action baseline, Preussen mast trucks 51.3 v 58.0. A candidate for the galley/galleass
+later: the impavesata — the rowers' screen along the apostis — is attested for battle rig;
+whether to draw it depends on which rig state the model shows, a record-semantics question.
