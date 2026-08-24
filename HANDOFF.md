@@ -8654,3 +8654,66 @@ real ship has fewer and more varied ones. Those u-spans came off the Commons sca
 the drawing is now the weak link — that wants a photographic aft-quarter plate, not another pass
 at the same source. Azzam's forward superstructure is still stepped where she is one swept form,
 and her freeboard/deck-count pair needs a plate resolving the hull-to-tier boundary.
+
+## Round 133 — 2026-08-24 — the janggundae stops being staging
+
+**The survey item at the queue's head: panokseon boxPct 71, towerx18.** The open-pavilion
+branch of the commander's tower (hull.js buildGalleyWorks, the `else` of `S.tower.walls`)
+runs for exactly one hull in the fleet, so the branch is the class. What it drew, read off
+the committed ship-panokseon frame and fresh profile captures (build/staging/r133-before/):
+four thin box posts, two rail lines running at the PLATFORM edge (1.84 m off centre) while
+the posts stood at 1.60 m — the rails touched nothing at all — a platform with no way up
+from the deck it serves, and a four-sided cone roof at pitch 0.30 that reads as a pale flat
+smudge from every bearing. The class comment cites the Gakseon dobon, and the Gakseon dobon
+draws a pavilion: railed platform, hipped roof standing clear above the bulwarks.
+
+**Rebuilt as structure, each piece carrying the next:** four round tapered columns run in
+one timber from the fighting deck to the eaves; an edge-beam frame at platform height
+carries the floor; rails span column to column with turned balusters at a hand's span; the
+forward rail is gated between two stanchions and a raked ladder lands there from the
+fighting deck (foot at u 0.528, inside the sangjang's own span); the hip roof stands at
+pitch 0.55 with 0.55 m of eave overhang, hip rafters on the arrises, a pale fascia closing
+each eave, and a finial at the apex. Plan and heights are still the record's {at, w, h}.
+⚠ One near-miss caught by arithmetic before rendering: rails cut to span T.w − 2·colR butt
+the column FACE and leave a 14 mm float — the fault class this round exists to kill,
+rebuilt in miniature. Rails now run centre-to-centre and bury their ends in the columns.
+
+**The record says what is attested and what is not.** towerProvenance added to the
+panokseon (vessels.json): the FORM — open pavilion, railed platform, hipped roof clear of
+the bulwarks — is the plate's; the 3.2 m square and 2.6 m height are read off it at ship
+scale, good to the nearest half metre; the ladder, baluster spacing and every scantling are
+reconstruction at the joinery any standing structure needs, and the provenance says the
+plate attests none of that piece by piece.
+
+**Measured (rule 4), and a tool artefact identified before believing it (rule 8).**
+measure_ship after (build/measure-panokseon-r133-after.txt) reports the tower at half 4.30
+and length 8.60 — twice the built geometry. The 2× is the measure tool's: Box3.setFromObject
+transforms the cone's LOCAL axis-aligned box (half 3.04) through the roof's 45° yaw, which
+inflates it by √2 → 4.30. The r128 files show the identical inflation on the old cone
+(2.72·√2 = 3.85 exactly), so the artefact predates this round and convicts neither build.
+The real eave corner stands 2.15 m off centre against a 4.70 m half-beam — inside the hull.
+Survey re-run (this round, in-page): panokseon boxPct 71 → 63, towerx18 GONE from
+boxyParts (gratingx52 remains, the fleet-wide grating class), floating []. Audit 33/0
+(build/staging/audit-r133-run1.txt).
+
+**Frames: 62 checked, one mover, and it is the change.** ship-panokseon 0.229%, diff
+confined to the pavilion's own silhouette — roof, balustrade, columns — nothing else in
+the frame moved; largest green frame passage-sahul 0.034%. Accepted with reason after
+reading diff and current; solo re-check after the accept: 0.000%, EXIT:0.
+
+**Rule 0, written on the accepted frame:** it reads as a rendered ship on open water —
+hull, rig, oars, sea and panels composed per pixel, no chart anywhere. Three facts a viewer
+can read off it: she is a two-masted oar-and-lug warship whose fighting deck is walled and
+pierced for guns; the commander's post is a railed pavilion under a hipped roof, reached by
+a ladder from the fighting deck; the fleet list berths her 14th of 33 at 32 m, between the
+galleass and the sekibune.
+
+**Next, in order:** (1) The survey continues: galleass boxPct 70 (apostisx55, benchx52),
+galley 68 — the apostis and bench classes are shared between them, one fix covers both.
+(2) The under-fills (carrier −3.15, ever-given −0.98, east-indiaman −0.50, fluyt −0.66,
+usv −0.62) each need their record-semantics answer before any clamp-style rule. (3)
+Standing residuals: sekibune wasen kaji (r121), gundeck normals (r118), Endurance
+forecastle (RMG J9266), Azzam crest (r108) and her hull-to-tier boundary plate, QM2 aft
+terraces want a photographic aft-quarter plate, yakata curtain (r117), canoe floor frame,
+myeongnyang Action baseline (one-view blindness, r128), Preussen mast trucks 51.3 drawn v
+58.0 attested.

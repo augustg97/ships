@@ -8539,39 +8539,120 @@ function buildGalleyWorks(S, group, mats) {
       cap.position.set(xC, ridgeY + 0.06, 0);
       tg.add(cap);
     } else {
-    for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
-      const a = new THREE.Vector3(xC + dx, baseY, dz);
-      const b = new THREE.Vector3(xC + dx, platY, dz);
-      tg.add(beamAB(a, b, B * 0.022, B * 0.022, timber));
+    /* ── THE OPEN JANGGUNDAE, AS THE PLATE DRAWS IT (round 133) ─────────────────────
+       The Gakseon dobon draws a pavilion, and what stood here was staging: two rail
+       lines held only at their corners, a platform with no way up from the deck it
+       serves, and a roof too flat to read from any committed view. Structure now,
+       each piece carrying the next: four round columns run in one timber from the
+       fighting deck to the eaves; an edge-beam frame at platform height carries the
+       floor; the rails span column to column with turned balusters under them, the
+       forward side left open at the middle where the ladder lands; and the hip roof
+       stands at the drawing's own prominence — hip rafters on the arrises, a fascia
+       closing each eave, a finial at the apex. Plan and heights stay the record's
+       {at, w, h}; the form is the plate's, the scantlings derived. */
+    const colR = B * 0.014, eaveY = platY + 1.9, railH = 0.95;
+    for (const dx of [-1, 1]) for (const dz of [-1, 1]) {          // columns, deck to eaves
+      const col = new THREE.Mesh(
+        new THREE.CylinderGeometry(colR * 0.85, colR, eaveY - baseY, 10), timber);
+      col.position.set(xC + dx * hw, (baseY + eaveY) / 2, dz * hw);
+      tg.add(col);
     }
-    const plat = new THREE.Mesh(
-      new THREE.BoxGeometry(T.w * 1.15, B * 0.012, T.w * 1.15), pale);
+    const pw = T.w + 4 * colR;                                     // floor lips past the columns
+    for (const sgn of [-1, 1]) {                                   // the edge-beam frame
+      const bx = new THREE.Mesh(new THREE.BoxGeometry(pw, B * 0.020, B * 0.024), timber);
+      bx.position.set(xC, platY - B * 0.014, sgn * hw);
+      tg.add(bx);
+      const bz = new THREE.Mesh(new THREE.BoxGeometry(B * 0.024, B * 0.020, pw), timber);
+      bz.position.set(xC + sgn * hw, platY - B * 0.014, 0);
+      tg.add(bz);
+    }
+    const plat = new THREE.Mesh(new THREE.BoxGeometry(pw, B * 0.006, pw), pale);
     plat.position.set(xC, platY, 0);
     tg.add(plat);
-    /* the railing round the platform — the commander stands, he does not hide */
-    const railH = 0.95, rw = T.w * 1.15;
-    for (const [px, pz, rx, rz] of [[0, rw / 2, rw, B * 0.010], [0, -rw / 2, rw, B * 0.010],
-                                    [rw / 2, 0, B * 0.010, rw], [-rw / 2, 0, B * 0.010, rw]]) {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(rx, B * 0.008, rz), timber);
-      rail.position.set(xC + px, platY + railH, pz);
-      tg.add(rail);
-      const mid = new THREE.Mesh(new THREE.BoxGeometry(rx, B * 0.006, rz), timber);
-      mid.position.set(xC + px, platY + railH * 0.5, pz);
-      tg.add(mid);
+    /* the balustrade — rails from column to column, balusters at a hand's span;
+       the commander stands at the rail, he does not hide behind a wall */
+    /* rails run centre-to-centre and bury their ends in the columns — a tenon,
+       not a butt joint hanging a gap off the column face */
+    const balR = B * 0.0045, span = T.w - colR, gate = 0.62;
+    const railSec = [B * 0.014, B * 0.011];
+    for (const side of ['aft', 'port', 'stbd', 'fwd']) {
+      const fwd = side === 'fwd';
+      const mkRail = (len, cx, cz, alongX) => {
+        const r = new THREE.Mesh(new THREE.BoxGeometry(
+          alongX ? len : railSec[0], railSec[1], alongX ? railSec[0] : len), timber);
+        r.position.set(cx, platY + railH, cz);
+        tg.add(r);
+      };
+      const alongX = side === 'port' || side === 'stbd';
+      const off = side === 'aft' ? [hw, 0] : side === 'fwd' ? [-hw, 0]
+                : side === 'port' ? [0, -hw] : [0, hw];
+      if (fwd) {                                                   // gate amidships for the ladder
+        const seg = (span - gate) / 2;
+        mkRail(seg, xC + off[0], -(gate + seg) / 2, false);
+        mkRail(seg, xC + off[0], (gate + seg) / 2, false);
+        for (const sgn of [-1, 1]) {                               // gate stanchions carry the rail ends
+          const gp = new THREE.Mesh(
+            new THREE.CylinderGeometry(balR * 1.8, balR * 1.8, railH, 6), timber);
+          gp.position.set(xC + off[0], platY + railH / 2, sgn * gate / 2);
+          tg.add(gp);
+        }
+      } else {
+        mkRail(span, xC + off[0], off[1], alongX);
+      }
+      const n = Math.max(4, Math.round(span / 0.33));
+      for (let j = 0; j <= n; j++) {
+        const t = -span / 2 + span * j / n;
+        if (fwd && Math.abs(t) < gate / 2) continue;
+        const bal = new THREE.Mesh(
+          new THREE.CylinderGeometry(balR, balR, railH - 0.06, 6), timber);
+        const bx = alongX ? xC + t : xC + off[0];
+        const bz = alongX ? off[1] : t;
+        bal.position.set(bx, platY + railH / 2, bz);
+        tg.add(bal);
+      }
     }
-    /* roof posts at the platform corners, and the hipped roof over them */
-    const roofY = platY + 1.9;
-    for (const dx of [-hw, hw]) for (const dz of [-hw, hw]) {
-      const a = new THREE.Vector3(xC + dx, platY, dz);
-      const b = new THREE.Vector3(xC + dx, roofY, dz);
-      tg.add(beamAB(a, b, B * 0.016, B * 0.016, timber));
+    /* the ladder — the way up exists, raked from the fighting deck to the gate */
+    const run = 1.15, footX = xC - hw - run;
+    for (const sgn of [-1, 1]) {
+      tg.add(beamAB(new THREE.Vector3(footX, baseY, sgn * 0.26),
+                    new THREE.Vector3(xC - hw + 0.04, platY, sgn * 0.26),
+                    0.05, 0.10, timber));
     }
-    const roofH = T.w * 0.30;
-    const roof = new THREE.Mesh(
-      new THREE.ConeGeometry(T.w * 0.85, roofH, 4), timber);
+    const rungs = 7;
+    for (let j = 1; j < rungs; j++) {
+      const t = j / rungs;
+      const rung = new THREE.Mesh(
+        new THREE.CylinderGeometry(B * 0.0028, B * 0.0028, 0.52, 6), pale);
+      rung.rotation.x = Math.PI / 2;
+      rung.position.set(footX + (xC - hw + 0.04 - footX) * t,
+                        baseY + (platY - baseY) * t, 0);
+      tg.add(rung);
+    }
+    /* the hip roof — a moim roof over a square plan, hips on the diagonals */
+    const ovh = 0.55, eaveR = (hw + ovh) * Math.SQRT2, pitch = 0.55;
+    const roofH = pitch * (hw + ovh);
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(eaveR, roofH, 4), timber);
     roof.rotation.y = Math.PI / 4;                     // flats fore-and-aft, hips at the corners
-    roof.position.set(xC, roofY + roofH / 2, 0);
+    roof.position.set(xC, eaveY + roofH / 2, 0);
     tg.add(roof);
+    const apex = new THREE.Vector3(xC, eaveY + roofH, 0);
+    for (const dx of [-1, 1]) for (const dz of [-1, 1]) {          // hip rafters on the arrises
+      const corner = new THREE.Vector3(xC + dx * (hw + ovh), eaveY + 0.02, dz * (hw + ovh));
+      tg.add(beamAB(apex.clone().setY(apex.y + 0.03), corner, 0.07, 0.07, timber));
+    }
+    for (const [fx, fz, alongX] of [[hw + ovh, 0, false], [-(hw + ovh), 0, false],
+                                    [0, hw + ovh, true], [0, -(hw + ovh), true]]) {
+      const fas = new THREE.Mesh(new THREE.BoxGeometry(                // fascia closing each eave
+        alongX ? 2 * (hw + ovh) : 0.05, 0.13, alongX ? 0.05 : 2 * (hw + ovh)), pale);
+      fas.position.set(xC + fx, eaveY, fz);
+      tg.add(fas);
+    }
+    const fin = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 0.5, 8), timber);
+    fin.position.set(xC, eaveY + roofH + 0.22, 0);
+    tg.add(fin);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 6), timber);
+    knob.position.set(xC, eaveY + roofH + 0.50, 0);
+    tg.add(knob);
     }
     /* the record may name its own tower — the sekibune's yakata is not a janggundae —
        and the Joseon text stays as the default the class was built from */
