@@ -8789,3 +8789,75 @@ aft terraces photographic plate, yakata curtain (r117), canoe floor frame, myeon
 Action baseline, Preussen mast trucks 51.3 v 58.0. A candidate for the galley/galleass
 later: the impavesata — the rowers' screen along the apostis — is attested for battle rig;
 whether to draw it depends on which rig state the model shows, a record-semantics question.
+
+---
+
+## Round 135 — 2026-08-24 — the gun deck grows its beams, and the arrumbada stands on its posts
+
+**The task was r134's queue head: the two remaining single-owner boxy classes in
+buildGalleyWorks — the galleass's gun deck (gundeckx31) and the galley's arrumbada
+(arrumbadax4).** What the committed frames drew: the gun deck was a slab floating between
+two clamp sticks — no athwartships beams at all, so a 31 m deck spanned 9 m of width with
+nothing under it but its own edges — 26 box stanchions and a box screen; the arrumbada was
+a slab with a box breastwork, and its platform posts were gated on `S.gunDeck`, a field no
+arrumbada hull carries — dead code since the branch was written, so the galley's platform
+stood on nothing forward of the apostis.
+
+**The rebuild continues r134's law one storey up, each member carried by the one below.**
+The stanchions (tapered square spars now) stand on the apostis rails; the fore-and-aft
+clamps ride on their heads; the deck beams span clamp to clamp, one at every stanchion,
+ends showing at the deck edge; the planking lies on the beams. The planking is `deckGeo`,
+a new shared helper beside `beamAB`/`sparAB`/`plankGeo` (the latter two hoisted out of the
+apostis block to the function head): one extrusion whose athwartships section carries a
+V-seam at every plank edge, so the seams are geometry with real edges, not paint — the
+snapBand law — and the pitch is in METRES (0.30 gun deck, 0.28 platform), because a deck
+plank is a real-world width, not a fraction of beam. The screen keeps its exact top line
+but is now planking under an eased cap standing proud. The arrumbada: same planking
+helper, three athwartships beams under the platform, the posts un-gated and re-headed
+into their beams, breastwork planking under a proud cap at the old top line exactly, and
+the edge beams now tapered spars, heavier where they land on the apostis rail.
+
+**Measured (rule 4), both hulls, chains exact.** Galleass: stanchion head 4.51 buried in
+the clamp (4.48–4.74); clamp top 4.74 = beam underside 4.74; beam top 4.94 = planking
+underside 4.94; deck band 4.94–5.06 identical to r134; screen+cap top 5.39 v the old
+5.40. Galley: post foot on the bow deck at 1.29, head 1.53 buried in its beam (1.51–1.63);
+beam top 1.63 = platform underside 1.63; breastwork cap top 2.14 = the old breastwork top
+exactly; courser unchanged 1.65–2.26. Files: build/staging/measure-{galleass,galley}-r135.txt.
+
+**Survey and audit.** Galleass boxPct 39 → 33, gundeck GONE from boxyParts; galley 33 → 31,
+arrumbada GONE; floating [] both; the only boxy class left on either hull is the fleet-wide
+grating (x60 / x70). Audit 33/0 (build/staging/audit-r135-run1.txt). Survey:
+build/staging/survey-r135.json. No new audit rule this round: the round's one new fault
+class — geometry gated on a record field no owner of the branch carries — leaves nothing
+in-page to convict, because the gated geometry never builds; the check that catches it is
+reading the gate against the records, which is how it was caught.
+
+**Frames: 62 checked, two movers, both the change.** ship-galleass 0.412%, diff confined
+to the gun-deck band — sails, masts, hull, sea, panels all still. ship-slave-ship 0.060%:
+she berths between the war galley and the galleass, both visible at her frame edges behind
+the fleet panel, and the diff sits exactly at the neighbours' rebuilt bands — the same
+neighbour-in-view class r131 checked for the quay. ship-galley herself 0.048%,
+sub-tolerance green (her platform is small in frame and every silhouette line was kept);
+action-lepanto 0.000%. Both movers read, accepted with reasons, solo re-check 0.000%,
+EXIT:0.
+
+**Rule 0, written on the accepted galleass frame:** it reads as a rendered ship on open
+water — hull, rig, oars, rowing frame, gun deck, sea and panels composed per pixel, no
+chart anywhere. Three facts a viewer can read off it: she is a three-masted lateen-rigged
+warship rowed through an outrigger frame standing wider than her hull; her broadside guns
+stand on a full-length planked deck carried over the rowers on rows of posts, edged with a
+low capped screen; the fleet list berths her at 47 m, 1540, between the slave ship and the
+panokseon.
+
+**Next, in order:** (1) the fleet-wide grating class (52–70 plain boxes on nearly every
+hull; one lofted grating pays off fleet-wide) — after it, the galley family's boxyParts
+are empty. (2) The under-fills (carrier −3.15, ever-given −0.98, east-indiaman −0.50,
+fluyt −0.66, usv −0.62) still each need their record-semantics answer before any
+clamp-style rule. (3) Standing residuals unchanged from r134 (sekibune wasen kaji, gundeck
+normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, yakata
+curtain, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus the
+impavesata record-semantics question — and one new residual from this round's reading: the
+galleass screen's own comment calls it "waist-high" while the drawn band is 0.34 m
+(B·0.042); whether the Lepanto conversions carried a taller screen, and whether it was
+pierced, is the same battle-rig record question as the impavesata and should be answered
+with it.

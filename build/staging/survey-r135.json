@@ -1,0 +1,491 @@
+{
+ "crudestFirst": [
+  {
+   "id": "carrier",
+   "loa": 337,
+   "tris": 134296,
+   "trisPerM": 399,
+   "meshes": 289,
+   "boxMeshes": 169,
+   "boxPct": 58,
+   "materials": 20,
+   "floating": [],
+   "boxyParts": []
+  },
+  {
+   "id": "container",
+   "loa": 399.9,
+   "tris": 164788,
+   "trisPerM": 412,
+   "meshes": 2918,
+   "boxMeshes": 2870,
+   "boxPct": 98,
+   "materials": 18,
+   "floating": [],
+   "boxyParts": [
+    "containerx2577"
+   ]
+  },
+  {
+   "id": "ever-given",
+   "loa": 399.98,
+   "tris": 182362,
+   "trisPerM": 456,
+   "meshes": 4385,
+   "boxMeshes": 4337,
+   "boxPct": 99,
+   "materials": 22,
+   "floating": [],
+   "boxyParts": [
+    "containerx3954",
+    "liveryx3"
+   ]
+  },
+  {
+   "id": "yamato",
+   "loa": 263,
+   "tris": 141284,
+   "trisPerM": 537,
+   "meshes": 294,
+   "boxMeshes": 62,
+   "boxPct": 21,
+   "materials": 21,
+   "floating": [],
+   "boxyParts": [
+    "hatchx12"
+   ]
+  },
+  {
+   "id": "titanic",
+   "loa": 269.1,
+   "tris": 161820,
+   "trisPerM": 601,
+   "meshes": 486,
+   "boxMeshes": 3,
+   "boxPct": 1,
+   "materials": 22,
+   "floating": [],
+   "boxyParts": []
+  },
+  {
+   "id": "queen-mary-2",
+   "loa": 345,
+   "tris": 271874,
+   "trisPerM": 788,
+   "meshes": 398,
+   "boxMeshes": 7,
+   "boxPct": 2,
+   "materials": 13,
+   "floating": [],
+   "boxyParts": []
+  },
+  {
+   "id": "great-eastern",
+   "loa": 211,
+   "tris": 175006,
+   "trisPerM": 829,
+   "meshes": 591,
+   "boxMeshes": 135,
+   "boxPct": 23,
+   "materials": 31,
+   "floating": [],
+   "boxyParts": []
+  },
+  {
+   "id": "dreadnought",
+   "loa": 160.6,
+   "tris": 139008,
+   "trisPerM": 866,
+   "meshes": 172,
+   "boxMeshes": 67,
+   "boxPct": 39,
+   "materials": 17,
+   "floating": [],
+   "boxyParts": []
+  },
+  {
+   "id": "azzam",
+   "loa": 180.6,
+   "tris": 156799,
+   "trisPerM": 868,
+   "meshes": 270,
+   "boxMeshes": 51,
+   "boxPct": 19,
+   "materials": 20,
+   "floating": [],
+   "boxyParts": [
+    "stairx40"
+   ]
+  },
+  {
+   "id": "wyoming",
+   "loa": 106.7,
+   "tris": 168540,
+   "trisPerM": 1580,
+   "meshes": 233,
+   "boxMeshes": 120,
+   "boxPct": 52,
+   "materials": 31,
+   "floating": [],
+   "boxyParts": [
+    "gratingx67",
+    "deckhousex24",
+    "catheadx4"
+   ]
+  },
+  {
+   "id": "preussen",
+   "loa": 134,
+   "tris": 252106,
+   "trisPerM": 1881,
+   "meshes": 343,
+   "boxMeshes": 73,
+   "boxPct": 21,
+   "materials": 58,
+   "floating": [],
+   "boxyParts": [
+    "channelx10",
+    "cheekx10"
+   ]
+  },
+  {
+   "id": "steamer",
+   "loa": 98,
+   "tris": 190208,
+   "trisPerM": 1941,
+   "meshes": 384,
+   "boxMeshes": 46,
+   "boxPct": 12,
+   "materials": 40,
+   "floating": [],
+   "boxyParts": [
+    "channelx6",
+    "cheekx6"
+   ]
+  },
+  {
+   "id": "treasure-ship",
+   "loa": 70,
+   "tris": 192886,
+   "trisPerM": 2756,
+   "meshes": 235,
+   "boxMeshes": 90,
+   "boxPct": 38,
+   "materials": 45,
+   "floating": [],
+   "boxyParts": [
+    "gratingx52"
+   ]
+  },
+  {
+   "id": "galleass",
+   "loa": 47,
+   "tris": 151204,
+   "trisPerM": 3217,
+   "meshes": 590,
+   "boxMeshes": 196,
+   "boxPct": 33,
+   "materials": 15,
+   "floating": [],
+   "boxyParts": [
+    "gratingx60"
+   ]
+  },
+  {
+   "id": "clipper",
+   "loa": 64.8,
+   "tris": 208966,
+   "trisPerM": 3225,
+   "meshes": 346,
+   "boxMeshes": 137,
+   "boxPct": 40,
+   "materials": 39,
+   "floating": [],
+   "boxyParts": [
+    "channelx6",
+    "cheekx6",
+    "gratingx61",
+    "deckhousex12",
+    "catheadx4"
+   ]
+  },
+  {
+   "id": "galley",
+   "loa": 42,
+   "tris": 146388,
+   "trisPerM": 3485,
+   "meshes": 462,
+   "boxMeshes": 145,
+   "boxPct": 31,
+   "materials": 13,
+   "floating": [],
+   "boxyParts": [
+    "gratingx70"
+   ]
+  },
+  {
+   "id": "corbita",
+   "loa": 40,
+   "tris": 140752,
+   "trisPerM": 3519,
+   "meshes": 169,
+   "boxMeshes": 77,
+   "boxPct": 46,
+   "materials": 14,
+   "floating": [],
+   "boxyParts": [
+    "channelx2",
+    "gratingx52"
+   ]
+  },
+  {
+   "id": "east-indiaman",
+   "loa": 50,
+   "tris": 180162,
+   "trisPerM": 3603,
+   "meshes": 364,
+   "boxMeshes": 137,
+   "boxPct": 38,
+   "materials": 22,
+   "floating": [],
+   "boxyParts": [
+    "channelx6",
+    "cheekx6",
+    "gratingx52",
+    "catheadx4",
+    "sternlightx24"
+   ]
+  },
+  {
+   "id": "ship-of-the-line",
+   "loa": 57,
+   "tris": 206626,
+   "trisPerM": 3625,
+   "meshes": 415,
+   "boxMeshes": 141,
+   "boxPct": 34,
+   "materials": 30,
+   "floating": [],
+   "boxyParts": [
+    "channelx6",
+    "cheekx6",
+    "gratingx52",
+    "catheadx4",
+    "sternlightx21"
+   ]
+  },
+  {
+   "id": "carrack",
+   "loa": 42,
+   "tris": 155204,
+   "trisPerM": 3695,
+   "meshes": 214,
+   "boxMeshes": 87,
+   "boxPct": 41,
+   "materials": 15,
+   "floating": [],
+   "boxyParts": [
+    "channelx4",
+    "cheekx4",
+    "gratingx48",
+    "catheadx4"
+   ]
+  },
+  {
+   "id": "endurance",
+   "loa": 44,
+   "tris": 168518,
+   "trisPerM": 3830,
+   "meshes": 250,
+   "boxMeshes": 111,
+   "boxPct": 44,
+   "materials": 25,
+   "floating": [],
+   "boxyParts": [
+    "channelx2",
+    "cheekx2",
+    "gratingx61",
+    "deckhousex12",
+    "catheadx4"
+   ]
+  },
+  {
+   "id": "trireme",
+   "loa": 36.9,
+   "tris": 146004,
+   "trisPerM": 3957,
+   "meshes": 513,
+   "boxMeshes": 263,
+   "boxPct": 51,
+   "materials": 12,
+   "floating": [],
+   "boxyParts": [
+    "channelx2",
+    "gratingx75"
+   ]
+  },
+  {
+   "id": "junk",
+   "loa": 34,
+   "tris": 157676,
+   "trisPerM": 4638,
+   "meshes": 156,
+   "boxMeshes": 68,
+   "boxPct": 44,
+   "materials": 27,
+   "floating": [],
+   "boxyParts": [
+    "gratingx52"
+   ]
+  },
+  {
+   "id": "fluyt",
+   "loa": 32,
+   "tris": 156236,
+   "trisPerM": 4882,
+   "meshes": 244,
+   "boxMeshes": 103,
+   "boxPct": 42,
+   "materials": 18,
+   "floating": [],
+   "boxyParts": [
+    "channelx4",
+    "cheekx4",
+    "gratingx48",
+    "catheadx4",
+    "sternlightx12"
+   ]
+  },
+  {
+   "id": "panokseon",
+   "loa": 32,
+   "tris": 162860,
+   "trisPerM": 5089,
+   "meshes": 466,
+   "boxMeshes": 295,
+   "boxPct": 63,
+   "materials": 27,
+   "floating": [],
+   "boxyParts": [
+    "gratingx52"
+   ]
+  },
+  {
+   "id": "dhow",
+   "loa": 26,
+   "tris": 136616,
+   "trisPerM": 5254,
+   "meshes": 122,
+   "boxMeshes": 63,
+   "boxPct": 52,
+   "materials": 11,
+   "floating": [],
+   "boxyParts": [
+    "gratingx55"
+   ]
+  },
+  {
+   "id": "slave-ship",
+   "loa": 30,
+   "tris": 163466,
+   "trisPerM": 5449,
+   "meshes": 265,
+   "boxMeshes": 102,
+   "boxPct": 38,
+   "materials": 19,
+   "floating": [],
+   "boxyParts": [
+    "channelx6",
+    "cheekx6",
+    "gratingx49",
+    "catheadx4"
+   ]
+  },
+  {
+   "id": "sekibune",
+   "loa": 25,
+   "tris": 138702,
+   "trisPerM": 5548,
+   "meshes": 463,
+   "boxMeshes": 361,
+   "boxPct": 78,
+   "materials": 14,
+   "floating": [],
+   "boxyParts": [
+    "gratingx60",
+    "samax26",
+    "towerx16"
+   ]
+  },
+  {
+   "id": "cog",
+   "loa": 23.3,
+   "tris": 136054,
+   "trisPerM": 5839,
+   "meshes": 138,
+   "boxMeshes": 67,
+   "boxPct": 49,
+   "materials": 10,
+   "floating": [],
+   "boxyParts": [
+    "channelx2",
+    "gratingx52"
+   ]
+  },
+  {
+   "id": "usv",
+   "loa": 22,
+   "tris": 129852,
+   "trisPerM": 5902,
+   "meshes": 47,
+   "boxMeshes": 7,
+   "boxPct": 15,
+   "materials": 7,
+   "floating": [],
+   "boxyParts": [
+    "solarx5"
+   ]
+  },
+  {
+   "id": "caravel",
+   "loa": 20,
+   "tris": 139128,
+   "trisPerM": 6956,
+   "meshes": 142,
+   "boxMeshes": 72,
+   "boxPct": 51,
+   "materials": 13,
+   "floating": [],
+   "boxyParts": [
+    "gratingx51",
+    "catheadx4"
+   ]
+  },
+  {
+   "id": "voyaging-canoe",
+   "loa": 19,
+   "tris": 268494,
+   "trisPerM": 14131,
+   "meshes": 99,
+   "boxMeshes": 4,
+   "boxPct": 4,
+   "materials": 13,
+   "floating": [],
+   "boxyParts": [
+    "crossbeamx3"
+   ]
+  },
+  {
+   "id": "dugout",
+   "loa": 8.6,
+   "tris": 129450,
+   "trisPerM": 15052,
+   "meshes": 11,
+   "boxMeshes": 0,
+   "boxPct": 0,
+   "materials": 7,
+   "floating": [],
+   "boxyParts": []
+  }
+ ]
+}

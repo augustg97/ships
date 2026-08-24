@@ -5110,6 +5110,41 @@ m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
 m.position.copy(a).addScaledVector(d, len / 2);
 return m;
 };
+const sparAB = (a, b, rFoot, rTip, mat) => {
+const d = b.clone().sub(a), len = d.length();
+const m = new THREE.Mesh(new THREE.CylinderGeometry(rTip, rFoot, len, 4, 1), mat);
+m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+m.rotateY(Math.PI / 4);
+m.position.copy(a).addScaledVector(d, len / 2);
+return m;
+};
+const plankGeo = (w, h, len) => {
+const c = Math.min(w, h) * 0.28, hw = w / 2, hh = h / 2;
+const s = new THREE.Shape();
+s.moveTo(-hw + c, -hh); s.lineTo(hw - c, -hh); s.lineTo(hw, -hh + c);
+s.lineTo(hw, hh - c); s.lineTo(hw - c, hh); s.lineTo(-hw + c, hh);
+s.lineTo(-hw, hh - c); s.lineTo(-hw, -hh + c); s.closePath();
+const g = new THREE.ExtrudeGeometry(s, { depth: len, bevelEnabled: false });
+g.translate(0, 0, -len / 2);
+return g;
+};
+const deckGeo = (width, t, len, pitch) => {
+const hw = width / 2, hh = t / 2, c = t * 0.35;
+const g = 0.007, d = t * 0.40;
+const s = new THREE.Shape();
+s.moveTo(-hw + c, -hh); s.lineTo(hw - c, -hh); s.lineTo(hw, -hh + c);
+s.lineTo(hw, hh - c); s.lineTo(hw - c, hh);
+const n = Math.max(1, Math.round(width / pitch));
+for (let k = n - 1; k >= 1; k--) {
+const z = -hw + (k / n) * width;
+s.lineTo(z + g, hh); s.lineTo(z, hh - d); s.lineTo(z - g, hh);
+}
+s.lineTo(-hw + c, hh); s.lineTo(-hw, hh - c); s.lineTo(-hw, -hh + c);
+s.closePath();
+const geo = new THREE.ExtrudeGeometry(s, { depth: len, bevelEnabled: false });
+geo.translate(0, 0, -len / 2);
+return geo;
+};
 const pdMid = surfacePoint(S, H, 0.5, 1.0);
 const deckY = pdMid[1];
 const apZ = AP ? Math.abs(pdMid[2]) + AP.out : Math.abs(pdMid[2]);
@@ -5141,24 +5176,6 @@ if (AP) {
 const xF = (AP.from - 0.5) * L, xT = (AP.to - 0.5) * L;
 const inter = S.interscalmium || 0.98;
 const perBank = Array.isArray(S.oarsPerBank) ? S.oarsPerBank[0] : (S.oarsPerBank || 24);
-const sparAB = (a, b, rFoot, rTip, mat) => {
-const d = b.clone().sub(a), len = d.length();
-const m = new THREE.Mesh(new THREE.CylinderGeometry(rTip, rFoot, len, 4, 1), mat);
-m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
-m.rotateY(Math.PI / 4);
-m.position.copy(a).addScaledVector(d, len / 2);
-return m;
-};
-const plankGeo = (w, h, len) => {
-const c = Math.min(w, h) * 0.28, hw = w / 2, hh = h / 2;
-const s = new THREE.Shape();
-s.moveTo(-hw + c, -hh); s.lineTo(hw - c, -hh); s.lineTo(hw, -hh + c);
-s.lineTo(hw, hh - c); s.lineTo(hw - c, hh); s.lineTo(-hw + c, hh);
-s.lineTo(-hw, hh - c); s.lineTo(-hw, -hh + c); s.closePath();
-const g = new THREE.ExtrudeGeometry(s, { depth: len, bevelEnabled: false });
-g.translate(0, 0, -len / 2);
-return g;
-};
 const railH = B * 0.040;
 const benchT = B * 0.014;
 const benchY = deckY + B * 0.073;
@@ -5385,27 +5402,46 @@ const GD = S.gunDeck;
 const xF = (GD.from - 0.5) * L, xT = (GD.to - 0.5) * L;
 const gdY = deckY + GD.height;
 const width = 2 * apZ + B * 0.05;
-const plank = new THREE.Mesh(
-new THREE.BoxGeometry(xT - xF, B * 0.014, width), pale);
-plank.position.set((xF + xT) / 2, gdY, 0);
-group.add(tag(plank, 'gundeck'));
+const deckT = B * 0.014;
+const deck = new THREE.Mesh(deckGeo(width, deckT, xT - xF, 0.30), pale);
+deck.rotation.y = Math.PI / 2;
+deck.position.set((xF + xT) / 2, gdY, 0);
+group.add(tag(deck, 'gundeck'));
 const surfY = gdY + B * 0.007;
-for (const sgn of [-1, 1]) {
-const clamp = new THREE.Mesh(
-new THREE.BoxGeometry(xT - xF, B * 0.032, B * 0.030), timber);
-clamp.position.set((xF + xT) / 2, gdY - B * 0.023, sgn * (width / 2 - B * 0.025));
-group.add(tag(clamp, 'gundeck', 'Deck clamp'));
+const bmD = B * 0.026, bmW = B * 0.030;
+const clH = B * 0.032, clW = B * 0.030;
+const bmTop = gdY - deckT / 2;
+const clTop = bmTop - bmD;
 const nPost = 12;
 for (let i = 0; i <= nPost; i++) {
 const x = xF + (xT - xF) * i / nPost;
-const a = new THREE.Vector3(x, apY, sgn * apZ);
-const b = new THREE.Vector3(x, gdY - B * 0.023, sgn * (width / 2 - B * 0.025));
-group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'gundeck', 'Stanchion'));
+const beam = new THREE.Mesh(plankGeo(bmW, bmD, width - B * 0.004), timber);
+beam.position.set(x, bmTop - bmD / 2, 0);
+group.add(tag(beam, 'gundeck', 'Deck beam',
+'Athwartships from clamp to clamp, one at every stanchion — the rowers pull '
++ 'under these, and the guns recoil over them.'));
 }
-const screen = new THREE.Mesh(
-new THREE.BoxGeometry(xT - xF, B * 0.042, B * 0.012), timber);
-screen.position.set((xF + xT) / 2, surfY + B * 0.021, sgn * (width / 2 - B * 0.006));
-group.add(tag(screen, 'gundeck', 'Screen'));
+for (const sgn of [-1, 1]) {
+const clZ = sgn * (width / 2 - B * 0.025);
+const clamp = new THREE.Mesh(plankGeo(clW, clH, xT - xF), timber);
+clamp.rotation.y = Math.PI / 2;
+clamp.position.set((xF + xT) / 2, clTop - clH / 2, clZ);
+group.add(tag(clamp, 'gundeck', 'Deck clamp'));
+for (let i = 0; i <= nPost; i++) {
+const x = xF + (xT - xF) * i / nPost;
+const a = new THREE.Vector3(x, apY, sgn * apZ);
+const b = new THREE.Vector3(x, clTop - clH + B * 0.004, clZ);
+group.add(tag(sparAB(a, b, B * 0.013, B * 0.010, timber), 'gundeck', 'Stanchion'));
+}
+const shH = B * 0.042, capH = B * 0.010;
+const scr = new THREE.Mesh(plankGeo(B * 0.012, shH - capH, xT - xF), timber);
+scr.rotation.y = Math.PI / 2;
+scr.position.set((xF + xT) / 2, surfY + (shH - capH) / 2, sgn * (width / 2 - B * 0.006));
+group.add(tag(scr, 'gundeck', 'Screen'));
+const cap = new THREE.Mesh(plankGeo(B * 0.020, capH, xT - xF), timber);
+cap.rotation.y = Math.PI / 2;
+cap.position.set((xF + xT) / 2, surfY + shH - capH / 2, sgn * (width / 2 - B * 0.006));
+group.add(tag(cap, 'gundeck', 'Screen cap'));
 }
 const nG = Math.max(0, GD.gunsPerSide | 0);
 for (const sgn of [-1, 1]) for (let j = 0; j < nG; j++) {
@@ -5600,30 +5636,40 @@ const pA0 = surfacePoint(S, H, u0, 1.0), pA1 = surfacePoint(S, H, u1, 1.0);
 const topY = (S.gunDeck ? deckY + S.gunDeck.height
 : Math.max(pA0[1], pA1[1])) + B * 0.023;
 const width = 2 * apZ - B * 0.038;
-const plat = new THREE.Mesh(
-new THREE.BoxGeometry(pA1[0] - pA0[0], B * 0.019, width), timber);
+const platT = B * 0.019;
+const plat = new THREE.Mesh(deckGeo(width, platT, pA1[0] - pA0[0], 0.28), timber);
+plat.rotation.y = Math.PI / 2;
 plat.position.set((pA0[0] + pA1[0]) / 2, topY, 0);
 group.add(tag(plat, 'arrumbada'));
-const breast = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.016, B * 0.082, width), timber);
-breast.position.set(pA0[0] + B * 0.008, topY + B * 0.048, 0);
-group.add(tag(breast, 'arrumbada', 'Breastwork'));
-if (S.gunDeck) {
+const bmD = B * 0.024;
+const bmTop = topY - platT / 2;
+for (const u of [u0 + 0.012, (u0 + u1) / 2, u1 - 0.012]) {
+const pd = surfacePoint(S, H, u, 1.0);
+const beam = new THREE.Mesh(plankGeo(B * 0.026, bmD, width - B * 0.008), timber);
+beam.position.set(pd[0], bmTop - bmD / 2, 0);
+group.add(tag(beam, 'arrumbada', 'Platform beam'));
+}
 for (const u of [u0 + 0.012, u1 - 0.012]) for (const sgn of [-1, 1]) {
 const pd = surfacePoint(S, H, u, 1.0);
 const zP = sgn * Math.max(B * 0.06, Math.abs(pd[2]) - B * 0.03);
 const a = new THREE.Vector3(pd[0], pd[1], zP);
-const b = new THREE.Vector3(pd[0], topY - B * 0.010, zP);
-group.add(tag(beamAB(a, b, B * 0.024, B * 0.024, timber),
+const b = new THREE.Vector3(pd[0], bmTop - bmD + B * 0.004, zP);
+group.add(tag(sparAB(a, b, B * 0.014, B * 0.011, timber),
 'arrumbada', 'Platform post'));
 }
-}
+const bwH = B * 0.082, bcH = B * 0.012;
+const breast = new THREE.Mesh(plankGeo(B * 0.016, bwH - bcH, width), timber);
+breast.position.set(pA0[0] + B * 0.008, topY + B * 0.007 + (bwH - bcH) / 2, 0);
+group.add(tag(breast, 'arrumbada', 'Breastwork'));
+const bcap = new THREE.Mesh(plankGeo(B * 0.026, bcH, width), timber);
+bcap.position.set(pA0[0] + B * 0.008, topY + B * 0.007 + bwH - bcH / 2, 0);
+group.add(tag(bcap, 'arrumbada', 'Breastwork cap'));
 if (AP) {
 const xF = (AP.from - 0.5) * L;
 for (const sgn of [-1, 1]) {
 const a = new THREE.Vector3(pA0[0] + B * 0.06, topY - B * 0.012, sgn * (width / 2 - B * 0.02));
 const b = new THREE.Vector3(xF + B * 0.02, apY, sgn * apZ);
-group.add(tag(beamAB(a, b, B * 0.022, B * 0.022, timber), 'arrumbada', 'Edge beam'));
+group.add(tag(sparAB(a, b, B * 0.011, B * 0.013, timber), 'arrumbada', 'Edge beam'));
 }
 }
 const gmat = mats.iron;
