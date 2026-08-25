@@ -491,6 +491,49 @@ if (bad) say(v.id, 'gun ports are not openings through the wall',
 `${bad} of ${shot} passage rays wrong — ${first}`);
 }
 }
+if (H.gunDeck.walls && H.gunDeck.wallPorts) {
+const beltSet = [];
+g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.key === 'sangjang') beltSet.push(o); });
+if (!beltSet.length)
+say(v.id, 'a port row with no belt to pierce',
+'GD.wallPorts declared with no sangjang geometry');
+else {
+const HSw = SHIPS_HULL.hullSurface(H);
+const GDw = H.gunDeck, B2 = H.beam;
+const overW = GDw.over !== undefined ? GDw.over : B2 * 0.045;
+const nW = GDw.wallPorts;
+const headYw = planeY - B2 * 0.016;
+const yRow = headYw - 0.42;
+const pdM = SHIPS_HULL.surfacePoint(H, HSw, 0.5, 1.0);
+const yOff = H.freeboard - pdM[1];
+const rc = new THREE.Raycaster(); rc.far = 60;
+let bad = 0, shot = 0, first = '';
+for (const sgn of [-1, 1]) for (let j = 0; j < 2 * nW - 1; j++) {
+const u = GDw.from + (GDw.to - GDw.from) * (j / 2 + 0.5) / nW;
+const pd = SHIPS_HULL.surfacePoint(H, HSw, u, 1.0);
+const footY = pd[1] + yOff - B2 * 0.010;
+const footZ = Math.abs(pd[2]) - B2 * 0.006;
+const headZ = Math.abs(pd[2]) + overW - B2 * 0.020 - B2 * 0.006;
+const faceZ = footZ + (headZ - footZ) * (yRow - footY) / (headYw - footY);
+rc.set(new THREE.Vector3(pd[0], yRow, sgn * (faceZ + 4)),
+new THREE.Vector3(0, 0, -sgn));
+shot++;
+const hit = rc.intersectObjects(beltSet, true)[0];
+const depth = hit ? faceZ - hit.point.z * sgn : 99;
+const isPort = j % 2 === 0;
+if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
+bad++;
+if (!first) first = `${isPort ? 'port' : 'belt'} at u ${u.toFixed(2)} `
++ `${sgn > 0 ? 'stbd' : 'port side'}: first strike `
++ `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
+}
+}
+if (bad) say(v.id, 'oar-deck ports are not openings through the belt',
+`${bad} of ${shot} passage rays wrong — ${first}`);
+}
+}
 {
 const WALL = ['Bulwark', 'End bulwark', 'Screen', 'Tate-ita'];
 const wallB = new THREE.Box3(); wallB.makeEmpty(); let nWall = 0;
@@ -575,9 +618,9 @@ if (open) say(v.id, 'oar deck open where its wall should stand',
 `${open} of ${shot} rays at the sangjang band miss it — ${first}`);
 if (H.gunDeck.wallPorts) {
 const np = sj.filter(m => tagOf(m).name === 'Oar-deck port').length;
-if (np !== 2 * H.gunDeck.wallPorts)
-say(v.id, 'oar-deck ports off their record',
-`${np} drawn, record declares ${H.gunDeck.wallPorts} a side`);
+if (!np)
+say(v.id, 'oar-deck ports declared but not drawn',
+`record declares ${H.gunDeck.wallPorts} a side, no Oar-deck port mesh`);
 }
 }
 }

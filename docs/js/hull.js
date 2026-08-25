@@ -5354,17 +5354,104 @@ if (GD.walls) {
 const wIn = B * 0.006;
 const headY = gdY - B * 0.016;
 const timberDS = timber.clone(); timberDS.side = THREE.DoubleSide;
-for (const sgn of [-1, 1]) {
-const wpos = [], widx = [];
-for (let i = 0; i <= N; i++) {
-wpos.push(sx[i], railY[i] - B * 0.010, sgn * (halfW[i] - over - wIn),
-sx[i], headY,                sgn * (halfW[i] - B * 0.020 - wIn));
-if (i) { const a = (i - 1) * 2; widx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+const tS = B * 0.012;
+const nP = Math.max(0, GD.wallPorts | 0);
+const duP = 0.26 / L;
+const yPc = headY - 0.42, ypS = yPc - 0.25, ypH = yPc + 0.25;
+const portDSS = portMat.clone(); portDSS.side = THREE.DoubleSide;
+const usS = [], portsS = [];
+for (let i = 0; i <= N; i++) usS.push(GD.from + (GD.to - GD.from) * i / N);
+for (let j = 0; j < nP; j++) {
+const uj = GD.from + (GD.to - GD.from) * (j + 0.5) / nP;
+portsS.push([uj - duP, uj + duP]); usS.push(uj - duP, uj + duP);
 }
-const wg = new THREE.BufferGeometry();
-wg.setAttribute('position', new THREE.Float32BufferAttribute(wpos, 3));
-wg.setIndex(widx); wg.computeVertexNormals();
-group.add(tag(new THREE.Mesh(wg, timberDS), 'sangjang'));
+usS.sort((a, b) => a - b);
+const inPort = u => portsS.some(s => u > s[0] + 1e-9 && u < s[1] - 1e-9);
+const stS = u => {
+const p = surfacePoint(S, H, u, 1.0);
+const footY = p[1] - B * 0.010;
+const footZ = Math.abs(p[2]) - wIn;
+const headZ = Math.abs(p[2]) + over - B * 0.020 - wIn;
+return { x: p[0], footY,
+z: y => footZ + (headZ - footZ) * (y - footY) / (headY - footY) };
+};
+for (const sgn of [-1, 1]) {
+const wallS = { pos: [], idx: [] }, revS = { pos: [], idx: [] };
+const quadS = (gq, a, b, c, d) => {
+const k = gq.pos.length / 3;
+gq.pos.push(...a, ...b, ...c, ...d);
+gq.idx.push(k, k + 1, k + 2, k, k + 2, k + 3);
+};
+for (let i = 0; i < usS.length - 1; i++) {
+if (usS[i + 1] - usS[i] < 1e-7) continue;
+const a = stS(usS[i]), b = stS(usS[i + 1]);
+const oA = y => sgn * a.z(y), oB = y => sgn * b.z(y);
+const iA = y => sgn * (a.z(y) - tS), iB = y => sgn * (b.z(y) - tS);
+quadS(wallS, [a.x, a.footY, oA(a.footY)], [b.x, b.footY, oB(b.footY)],
+[b.x, ypS, oB(ypS)], [a.x, ypS, oA(ypS)]);
+quadS(wallS, [a.x, a.footY, iA(a.footY)], [b.x, b.footY, iB(b.footY)],
+[b.x, ypS, iB(ypS)], [a.x, ypS, iA(ypS)]);
+quadS(wallS, [a.x, ypH, oA(ypH)], [b.x, ypH, oB(ypH)],
+[b.x, headY, oB(headY)], [a.x, headY, oA(headY)]);
+quadS(wallS, [a.x, ypH, iA(ypH)], [b.x, ypH, iB(ypH)],
+[b.x, headY, iB(headY)], [a.x, headY, iA(headY)]);
+quadS(wallS, [a.x, headY, iA(headY)], [b.x, headY, iB(headY)],
+[b.x, headY, oB(headY)], [a.x, headY, oA(headY)]);
+quadS(wallS, [a.x, a.footY, oA(a.footY)], [b.x, b.footY, oB(b.footY)],
+[b.x, b.footY, iB(b.footY)], [a.x, a.footY, iA(a.footY)]);
+if (!inPort((usS[i] + usS[i + 1]) / 2)) {
+quadS(wallS, [a.x, ypS, oA(ypS)], [b.x, ypS, oB(ypS)],
+[b.x, ypH, oB(ypH)], [a.x, ypH, oA(ypH)]);
+quadS(wallS, [a.x, ypS, iA(ypS)], [b.x, ypS, iB(ypS)],
+[b.x, ypH, iB(ypH)], [a.x, ypH, iA(ypH)]);
+}
+}
+for (const uE of [usS[0], usS[usS.length - 1]]) {
+const e = stS(uE);
+quadS(wallS, [e.x, e.footY, sgn * (e.z(e.footY) - tS)],
+[e.x, e.footY, sgn * e.z(e.footY)],
+[e.x, headY, sgn * e.z(headY)],
+[e.x, headY, sgn * (e.z(headY) - tS)]);
+}
+for (const [uL2, uR2] of portsS) {
+const l = stS(uL2), r = stS(uR2);
+const oL = y => sgn * l.z(y), iL = y => sgn * (l.z(y) - tS);
+const oR = y => sgn * r.z(y), iR = y => sgn * (r.z(y) - tS);
+quadS(revS, [l.x, ypS, oL(ypS)], [l.x, ypS, iL(ypS)],
+[l.x, ypH, iL(ypH)], [l.x, ypH, oL(ypH)]);
+quadS(revS, [r.x, ypS, oR(ypS)], [r.x, ypS, iR(ypS)],
+[r.x, ypH, iR(ypH)], [r.x, ypH, oR(ypH)]);
+quadS(revS, [l.x, ypS, oL(ypS)], [r.x, ypS, oR(ypS)],
+[r.x, ypS, iR(ypS)], [l.x, ypS, iL(ypS)]);
+quadS(revS, [l.x, ypH, oL(ypH)], [r.x, ypH, oR(ypH)],
+[r.x, ypH, iR(ypH)], [l.x, ypH, iL(ypH)]);
+}
+const mkS = (gq, mat, name, what) => {
+const bg = new THREE.BufferGeometry();
+bg.setAttribute('position', new THREE.Float32BufferAttribute(gq.pos, 3));
+bg.setIndex(gq.idx); bg.computeVertexNormals();
+group.add(tag(new THREE.Mesh(bg, mat), 'sangjang', name, what));
+};
+mkS(wallS, timberDS, 'Sangjang belt',
+'The closed plank belt between the gunwale and the fighting deck — the '
++ 'oar deck\'s own protection. The rowers work behind it, and the ro '
++ 'reach out under its foot seam.');
+mkS(revS, timberDS, 'Oar-deck port',
+'The row of small square ports her plate draws under the deck line, cut '
++ 'through the belt — from outside each is a dark square in the plank, '
++ 'reading into the oar deck\'s own shadow.');
+const brdS = { pos: [], idx: [] };
+const mrgS = 0.06;
+for (const [uL2, uR2] of portsS) {
+const l = stS(uL2), r = stS(uR2);
+const zb = sgn * (Math.min(l.z(ypS - mrgS), r.z(ypS - mrgS)) - tS - 0.08);
+const x0 = Math.min(l.x, r.x) - mrgS, x1 = Math.max(l.x, r.x) + mrgS;
+const k = brdS.pos.length / 3;
+brdS.pos.push(x0, ypS - mrgS, zb, x1, ypS - mrgS, zb,
+x1, ypH + mrgS, zb, x0, ypH + mrgS, zb);
+brdS.idx.push(k, k + 1, k + 2, k, k + 2, k + 3);
+}
+mkS(brdS, portDSS, 'Oar-deck port');
 }
 for (const uE of [GD.from, GD.to]) {
 const pd = surfacePoint(S, H, uE, 1.0);
@@ -5377,21 +5464,6 @@ eg.setIndex([0, 1, 2, 0, 2, 3]);
 eg.computeVertexNormals();
 group.add(tag(new THREE.Mesh(eg, timberDS), 'sangjang',
 uE === GD.from ? 'Oar-deck end wall, forward' : 'Oar-deck end wall, aft'));
-}
-const nP = Math.max(0, GD.wallPorts | 0);
-for (const sgn of [-1, 1]) for (let j = 0; j < nP; j++) {
-const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nP;
-const duP = 0.26 / L;
-const p1 = surfacePoint(S, H, u - duP, 1.0), p2 = surfacePoint(S, H, u + duP, 1.0);
-const yP = headY - 0.42;
-const zAt = p => {
-const foot = Math.abs(p[2]) - wIn, head = Math.abs(p[2]) + over - B * 0.020 - wIn;
-const f = (yP - (p[1] - B * 0.010)) / (headY - (p[1] - B * 0.010));
-return foot + (head - foot) * f;
-};
-const a = new THREE.Vector3(p1[0], yP, sgn * zAt(p1));
-const b = new THREE.Vector3(p2[0], yP, sgn * zAt(p2));
-group.add(tag(beamAB(a, b, 0.5, B * 0.028, portMat), 'sangjang', 'Oar-deck port'));
 }
 }
 if (GD.maku) {

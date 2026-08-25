@@ -9314,3 +9314,82 @@ QM2 aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen truck
 the battle-rig record question holding three items. (5) The under-gate residue class:
 ship-junk and ship-endurance baselines still predate r136 — stash-test before blaming your
 own change if either berth's neighbourhood moves.
+
+## Round 142 — 2026-08-24 — the oar deck breathes: the sangjang belt's ports go through the plank
+
+**First, the opening full 62-frame check r141 owed, taken BEFORE any edit** — 62/62 within
+tolerance, 0 BLANK, checker's own exit 0 (build/staging/ratchet-r142-opening.txt).
+ship-panokseon herself 0.000, so r141's wide-frame reasoning is CONFIRMED fleet-wide: the
+gun-port rebuild reached nothing beyond its own frame. The tree was untouched until the check
+returned; the only writes while it captured were drafts in build/staging/, which no frame reads.
+
+**Then r141's queue head: sangjang wallPorts — the same pierced-opening class one storey
+down.** Since r118 the oar deck's plank belt was one single-surface loft per side with 16
+beamAB plates a side straddling it — paint standing 0.13 m PROUD of the wall, while the
+record's own provenance has always read "a line of small square ports under the deck line"
+and the card row said "pierced". Now the belt itself is built pierced, the r141 builder's law
+driven from GD.wallPorts: stations of the loft plus both edges of every port, each port a
+real OPENING through the plank with jamb, sill and head reveal faces, and a near-black board
+a hand inboard so the port reads into the oar deck's shadow. Positions and sizes are the
+drawn row's exactly (16 a side, 0.52 m of daylight, 0.50 m tall, centre 0.42 m under the
+clamp line). Two decisions the class forced: the belt RAKES between rail and clamp, so every
+z is interpolated at its own height along the rake (the old zAt, now the whole wall's law);
+and the plank takes the bulwark's own gauge (B*0.012) but thickens INBOARD, so the outer
+face — the face the plate attests and the posts stand proud of — does not move. Gated on
+GD.walls: panokseon only; sekibune (maku) and galleass (apostis) never enter the path.
+
+**Record (record-r142.py, both asserts hit):** sangjangProvenance gains the openings
+sentence; the card row "Sangjang wall, as drawn" now says the ports are cut through the
+plank, not marks on it. **Audit rule r142** (the r140 conviction, one storey down): for any
+hull with GD.walls and GD.wallPorts, passage rays at the drawn port centres must strike the
+belt set DEEPER than the outer face, midway between ports STOPPED at it — the expected face
+interpolated along the rake from the record and surfacePoint (r113), the rail's world height
+anchored to the fleet convention (rail amidships IS the freeboard). Injection test: hull.js
+alone stashed, audit re-run — old form convicted, 32 of 62 rays wrong, "first strike
+-0.14 m in" (the plate's own proudness); popped, 33/0. The r118 plate-count rule superseded
+the same way r140 superseded r90: two meshes a side now carry all sixteen ports, so the
+count clause keeps bare existence and passage owns the record.
+
+**Measured (rule 4, build/staging/measure-panokseon-r142-{before,after}.txt):** the diff is
+the change's signature and nothing else — two lines. 'Sangjang wall'→'Sangjang belt' with
+u-run, band and half IDENTICAL (0.154–0.867, 1.91–3.45, 4.96 — the outer face did not move);
+'Oar-deck port' half 5.00→4.92 (the plates' 0.13 proudness gone; 4.92 is the reveal's own
+outer edge at the port head, computed and measured to the centimetre), band 2.76–3.30 →
+2.72–3.34 and len 20.60→20.64 (the boards' 0.06 margin exactly). Envelope identical.
+**Survey:** meshes 373→345 (−28 = 32 plates out, 4 lofted meshes in), boxMeshes 192→160
+(−32 exact), boxPct 51→46; sekibune and galleass rows byte-identical (the gate's null-test).
+**Audit 33/0** with the new rule live (build/staging/audit-r142.json).
+
+**Looked at (rule 1, build/staging/belt-r142/):** broadside b090 — the belt carries a row of
+small dark square openings under the deck line, unbroken plank above and below, the ro
+working out from under its foot; oblique b065 — a lit jamb and dark interior at every port,
+the reveal depth reads, muzzles standing in their own openings one storey up; elevated
+quarter b155 — guns on their beds, pavilion clean, nothing floating. One capture slip caught:
+zsh does not word-split an unquoted variable, so a `set -- $spec` loop wrote three captures
+to one nameless file; re-run explicitly.
+
+**Frames:** opening 62/62 green (above). Closing: ship-sekibune and ship-galleass solo both
+within tolerance (null-tests), then ship-panokseon check 1.259%/0.284 — diff read, confined
+to the belt band alone (the port row plus the loft's continuous shading where the single
+surface gained thickness), accepted with the full reason, re-check 0.000% EXIT:0, no
+intervening check between the pair. Wide frames: the panokseon's berth sits beyond their
+edge (r139–r141 reasoning, confirmed by this round's own opening check); **next round's
+opening full check confirms — if anything beyond ship-panokseon moved, this round owns it.**
+
+**Rule 0, written on the belt-b090 capture:** it reads as a rendered ship under sail — hull
+timber, matting sails, sea and panels composed per pixel. Three facts a viewer can read off
+it: the oar deck is closed by a plank belt pierced by a row of small square ports under the
+deck line; the fighting deck above it mounts guns firing through square ports with the
+muzzles standing out of the wall; the sculling oars pivot at the hull's rail and work out
+from under the belt.
+
+**Deployed: stamp 1787633821**, live verify in the commit below.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) The panokseon's remaining named
+classes if the survey still ranks them: oar 36 and the 44 clamp segments; else junk 51 or
+whatever survey-r142 ranks crudest (she now sits at boxPct 46). (3) Standing residuals
+unchanged from r141 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate,
+QM2 aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus the
+battle-rig record question holding three items. (4) The under-gate residue class: ship-junk
+and ship-endurance baselines still predate r136 — stash-test before blaming your own change
+if either berth's neighbourhood moves.
