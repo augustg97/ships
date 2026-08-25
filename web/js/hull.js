@@ -6606,7 +6606,18 @@ function buildCitadel(S, group, mats) {
   });
   /* ── THE BRIDGE TOWER ─────────────────────────────────────────────────────────────────
      Stacked and narrowing — the pagoda. Height from the record (`towerH`, metres above the
-     weather deck); the pole mast the rig builder steps at the same station rises out of it. */
+     weather deck); the pole mast the rig builder steps at the same station rises out of it.
+     Until r151 the tower was K stacked boxes with a proud glass box wrapped round each of
+     the top two levels — the r144 step class again, and a crate stack is not a welded
+     structure. One loft now, on the same level stations (the r146 island law): the section
+     is rounded forward — big chamfers at the front corners, small at the back — walls
+     vertical within a level, every step earning a real shelf on its own duplicated rings,
+     and the glazing bands ROWS OF WINDOWS LET INTO THE FACE, glass set back behind
+     structural piers with a jamb, sill and head to every opening, on the front face and
+     both sides (the aft face carries trunking and ladders on the real ship, not glass).
+     One geometry, two material groups (structure, glass); paired stations and paired
+     perimeter points keep every arris, shelf and jamb sharp; crown closed, heel buried
+     0.30 in the citadel roof. Proven offline first in build/staging-r151-pagoda.mjs. */
   const towerH = S.towerH !== undefined ? S.towerH : B * 0.55;
   const K = Math.max(2, Math.min(6, Math.round(towerH / (B * 0.11))));
   const tx = (towerU - 0.5) * L;
@@ -6617,17 +6628,107 @@ function buildCitadel(S, group, mats) {
     const w = B * (0.34 - 0.20 * f), d = B * (0.40 - 0.22 * f);
     const lh = (base + towerH - tierTop[0]) / K;
     levels.push({ y0: y, lh, w, d });
-    const lvl = new THREE.Mesh(new THREE.BoxGeometry(d, lh, w), k % 2 ? dark : wall);
-    lvl.position.set(tx, y + lh / 2, 0);
-    g.add(tag(lvl, 'superstructure', k === K - 1 ? 'Bridge' : 'Tower level ' + (k + 1),
-      k === K - 1 ? 'The compass platform at the head of the tower. Everything below it is fire control, flag space and searchlight platforms, stacked because the centreline is the only real estate there is.' : undefined));
-    /* the top two levels carry the glazing band — proud of the face, so nothing is coplanar */
-    if (k >= K - 2) {
-      const band = new THREE.Mesh(new THREE.BoxGeometry(d * 1.03, lh * 0.30, w * 1.03), glaze);
-      band.position.set(tx, y + lh * 0.62, 0);
-      g.add(tag(band, 'superstructure', 'Bridge glazing'));
-    }
     y += lh;
+  }
+  {
+    const PIER = 0.15, REV = 0.28, HEEL = 0.30;
+    const sec = levels.map((lv, k) => {
+      const a = lv.d / 2, b = lv.w / 2;
+      const cf = b * 0.42, cb = b * 0.22;
+      return {
+        y0: lv.y0, y1: lv.y0 + lv.lh, a, b, cf, cb,
+        xr: Math.min(a * 0.45, a - cf - PIER - 0.10, a - cb - PIER - 0.10),
+        zr: Math.max(0.30, b - cf - PIER - 0.10),
+        win: k >= K - 2
+      };
+    });
+    /* window count from the head level's own runs, one count for the whole loft */
+    const NS = Math.max(2, Math.round(sec[K - 1].xr / 0.55));
+    const NF = Math.max(2, Math.round(sec[K - 1].zr / 0.55));
+    const sta = [];
+    sec.forEach((v, k) => {
+      sta.push({ v, y: k ? v.y0 : v.y0 - HEEL, d: 0 });
+      if (v.win) {
+        const lo = v.y0 + (v.y1 - v.y0) * 0.47, hi = v.y0 + (v.y1 - v.y0) * 0.77;
+        sta.push({ v, y: lo, d: 0 }, { v, y: lo + 0.02, d: REV },
+                 { v, y: hi - 0.02, d: REV }, { v, y: hi, d: 0 });
+      }
+      sta.push({ v, y: v.y1, d: 0 });
+    });
+    /* one station's perimeter, walked CCW from above so every winding faces OUT (the
+       r145 rule); points flagged w are pane edges, moved in by the reveal on inset
+       stations while the paired unflagged point stays on the face — the quad between
+       them is the jamb (the island's own walker, with a windowed FRONT face added) */
+    const ring = (st) => {
+      const v = st.v, a = v.a, b = v.b, cf = v.cf, cb = v.cb, d = st.d;
+      const pts = [];
+      const P = (x, z, w) => pts.push([x, z, !!w]);
+      const runE = (r, n) => {
+        const e = [];
+        for (let j = 0; j <= n; j++) {
+          const t = r - (j / n) * 2 * r;
+          e.push([t + PIER, j > 0], [t + PIER, false],
+                 [t - PIER, false], [t - PIER, j < n]);
+        }
+        return e;
+      };
+      const sE = runE(v.xr, NS), fE = runE(v.zr, NF);
+      P(a, -(b - cb)); P(a, -(b - cb));
+      P(a, b - cb);    P(a, b - cb);
+      P(a - cb, b);    P(a - cb, b);
+      sE.forEach(([x, w]) => P(x, b - (w ? d : 0), w));
+      P(-a + cf, b);   P(-a + cf, b);
+      P(-a, b - cf);   P(-a, b - cf);
+      fE.forEach(([z, w]) => P(-a + (w ? d : 0), z, w));
+      P(-a, -(b - cf)); P(-a, -(b - cf));
+      P(-a + cf, -b);   P(-a + cf, -b);
+      sE.slice().reverse().forEach(([x, w]) => P(x, -(b - (w ? d : 0)), w));
+      P(a - cb, -b);   P(a - cb, -b);
+      return pts;
+    };
+    const pos = [], flag = [];
+    const rings = sta.map(st => ring(st));
+    const KP = rings[0].length;
+    const addRing = (r, ya) => {
+      const b0 = pos.length / 3;
+      r.forEach(([x, z, w]) => { pos.push(x, ya, z); flag.push(w); });
+      return b0;
+    };
+    const bases = sta.map((st, i) => addRing(rings[i], st.y));
+    const iWall = [], iGlass = [];
+    const row = (A, Bq, glassRow) => {
+      for (let k = 0; k < KP; k++) {
+        const a2 = A + k, b2 = A + (k + 1) % KP;
+        const pane = glassRow && flag[a2] && flag[b2];
+        (pane ? iGlass : iWall).push(a2, Bq + k, b2, b2, Bq + k, Bq + (k + 1) % KP);
+      }
+    };
+    /* wall rows run within a level only; each shelf, sill and head gets its OWN
+       duplicated rings, so horizontal grain cannot tilt the wall's vertex normals
+       (the r146 striping mechanism, impossible by construction) */
+    const shared = s => sta[s].v === sta[s + 1].v && sta[s].d === sta[s + 1].d;
+    for (let s = 0; s < sta.length - 1; s++)
+      if (shared(s)) row(bases[s], bases[s + 1], sta[s].d > 0);
+    for (let s = 0; s < sta.length - 1; s++)
+      if (!shared(s))
+        row(addRing(rings[s], sta[s].y), addRing(rings[s + 1], sta[s + 1].y), false);
+    /* end grain closed both ends — fan caps, wound outward, on their own rims */
+    const R0 = addRing(rings[0], sta[0].y);
+    const c0 = pos.length / 3; pos.push(0, sta[0].y, 0); flag.push(false);
+    for (let k = 0; k < KP; k++) iWall.push(c0, R0 + k, R0 + (k + 1) % KP);
+    const RT = addRing(rings[sta.length - 1], sta[sta.length - 1].y);
+    const cT = pos.length / 3; pos.push(0, sta[sta.length - 1].y, 0); flag.push(false);
+    for (let k = 0; k < KP; k++) iWall.push(cT, RT + (k + 1) % KP, RT + k);
+    const tg = new THREE.BufferGeometry();
+    tg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    tg.setIndex(iWall.concat(iGlass));
+    tg.addGroup(0, iWall.length, 0);
+    tg.addGroup(iWall.length, iGlass.length, 1);
+    tg.computeVertexNormals();
+    const tw = new THREE.Mesh(tg, [wall, glaze]);
+    tw.position.set(tx, 0, 0);
+    g.add(tag(tw, 'superstructure', 'Bridge tower',
+      'The tower foremast, one welded structure: the compass platform at its head behind rows of glazing let into the face, and beneath it fire control, flag space and the searchlight platforms, stacked because the centreline is the only real estate there is.'));
   }
   /* the main rangefinder across the tower head — on Yamato a 15 m pair of ears */
   const rf = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.016, B * 0.016, B * 0.40, 10), dark);

@@ -9995,3 +9995,90 @@ r146 island law could reach the pagoda mast; run probe_parts to name the rest.
 Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang Action
 baseline, Preussen trucks), plus the battle-rig record question. (4) The residue class
 above.
+
+## Round 151 — 2026-08-25 — the pagoda becomes one tower
+
+**The queue check first: August's second list stands WORKED IN FULL (r57), so the survey
+carried the round — r150's queue head, the tower levels and bridge, on both hulls that
+have them.**
+
+**One honesty note on the opening check.** The full 62-frame run launched at 08:56 before
+any edit ABORTED at its 23rd capture (ship-queen-mary-2, readiness timeout at 60 s) —
+the machine was also running two spin captures and a probe at that moment, the r125
+contention class, not an app fault: the same frame captured clean twenty minutes later.
+Nothing was scored, so this round has no 62/62 opening verdict. What stands instead:
+r150's closing state was verified live; the 22 frames the aborted run did capture were
+all taken pre-edit at HEAD; ship-yamato among them re-scored at its r149/r150 residue in
+the closing run. The closing full check (below) is the round's one complete verdict.
+
+**The tower class closed — the r146 island law reaching the pagoda, and it reached
+dreadnought too, because the fix is in buildCitadel and the CLASS is every turreted
+hull.** Yamato's six stacked boxes (5 tower levels + bridge, alternating grey/dark) with
+a proud glass box wrapped round each of the top two, and dreadnought's four-box stack
+with the same bands, are now ONE loft per ship on the same level stations: the section
+rounded forward (front chamfers 0.42 of the level's own half-breadth, back 0.22), walls
+vertical within a level, every step earning a real shelf on its OWN duplicated rings,
+and the glazing bands ROWS OF WINDOWS LET INTO THE FACE — glass 0.28 behind structural
+piers with a jamb, sill and head to every opening, on the front face and both sides (the
+real aft face carries trunking and ladders, not glass). One BufferGeometry, two material
+groups (structure, glass); paired stations and paired perimeter points keep every arris
+sharp (r146 striping impossible by construction); crown closed, heel buried 0.30 in the
+citadel roof; the section its own z-mirror so port = starboard on the centreline. Window
+counts derived from the head level's own runs (NS/NF at ~0.55 m pitch), so yamato gets
+3-a-side and dreadnought 2 without a tuned constant. The `levels` array the searchlight
+platforms hang from is untouched — the r149 brackets still bury their roots 0.20 in the
+tower face, proven in the sim.
+
+**Verified offline before touching the app** (build/staging-r151-pagoda.mjs, node,
+39/39): ring-count constancy, z-mirror, envelope containment in each level's OWN old box
+(heel the one allowed downward run), pane widths >0.30 m on both ships, every glass vert
+behind its face, shell winding proven by positional edge-pairing (every shared edge
+traversed once each way — a jamb faces tangentially, so a radial dot cannot judge it)
+with the sense anchored on 776/576 clearly-radial tris, caps up/down, real shelves at
+every step, bracket-web fits, and the r151 audit property with the old form convicted at
+0.14 (yamato) / 0.19 (dreadnought) of height.
+
+**Audit rule r151: a pagoda is one tower, not a stack of crates.** For turreted hulls
+the superstructure's principal mesh — longest y-run through its own matrix — must span
+≥0.6 of the assembly and be >40 tris. Injection with hull.js stashed convicted BOTH
+ships at exactly the sim's predicted numbers ("principal mesh runs 4.48 of 31.80 m at 12
+triangles" / "2.50 of 13.30 m"), no other rule fired; popped, 33/0 clean.
+
+**Measured, the deltas are the tower's own and nothing else's.** Probe yamato:
+superstructure 11→4 meshes, boxy 8→0, tris 624→2928 (+2400 = the loft exactly, minus
+the 96 the boxes were); ship 291→284 meshes, boxy 14→6 (4%→2%; the six left are 5
+catapult + 1 rudder). Probe dreadnought: superstructure 9→4, boxy 6→0, tris 600→2192
+(+1664 exactly); ship 172→167, boxy 67→61 (her older build is later queue).
+measure_ship: on each ship the tower rows merge to ONE 'Bridge tower' row — footprint
+and half-breadth identical to old level 1, top identical to the old bridge crown, base
+exactly 0.30 lower (the heel); every other row byte-identical on both ships.
+
+**Looked at (rule 1, before/after 12-bearing spins both ships, before-captures proven
+pre-edit by mtime).** All 24 diffs confine every changed pixel to one compact tower box
+(yamato x 1339–1523 of 2880 at every bearing; dreadnought's box walks with the
+parallax). At the crops: the striped crate stack with proud black bands becomes one grey
+tower — lit front chamfers, sharp shelf lines, rows of individual dark openings with
+piers between, searchlight platforms riding unchanged. Dreadnought's reads as a 1906
+conning structure with chart-house glazing. Rule 0 on the promoted ship-yamato frame:
+a rendered world, not a chart — three facts in the round summary.
+
+**Frames: closing full check 62 frames, 59 within tolerance (all documented residues at
+their values: treasure 0.049, junk 0.048, galleass 0.047), 0 BLANK, exactly the three
+frames this change can reach moved: ship-yamato 0.306%/0.127 (diff = the pagoda alone),
+ship-dreadnought 0.186%/0.086 (the tower alone), aboard-yamato 0.084%/0.027 (the tower
+at sea scale on its documented 0.045 residue). Each accepted with reason, each
+re-checked 0.000% clean.**
+
+**Deployed: stamp 1787674801**, live verify in the commit.
+
+**Next, in order:** (1) The opening full check — and note the contention lesson: do not
+run spins/probes while the ratchet captures, it killed this round's opening run at
+QM2's readiness gate. (2) Yamato's last boxy meshes by the probe: catapult x5 (2
+catapult, 2 launch rail, 1 crane) + rudder x1 — a catapult is a truss in life, a
+launch rail is a girder, neither is a crate. (3) Dreadnought's 61 boxy meshes (36%) —
+her funnels, casings and boats never had the later rounds' laws applied; survey her
+next as a hull, not a part. (4) Standing residuals unchanged from r143 (gundeck
+normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe
+floor frame, myeongnyang Action baseline, Preussen trucks), plus the battle-rig record
+question. (5) The residue class: treasure 0.049, junk 0.048, galleass 0.047,
+aboard-yamato re-baselined this round.

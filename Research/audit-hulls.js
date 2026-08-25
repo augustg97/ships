@@ -2776,6 +2776,38 @@
             'shield is');
     }
 
+    /* ⚠ A PAGODA IS ONE TOWER, NOT A STACK OF CRATES (round 151) — the r146 island
+       law reaching the battleship's bridge structure. The superstructure's principal
+       mesh — the one with the longest run up the group's own y axis — must BE the
+       tower: spanning at least 0.6 of the assembly's full height, rangefinder
+       included, and lofted rather than boxed. The convicted form was K stacked boxes
+       with a proud glass box wrapped round each of the top two levels; its tallest
+       single mesh was one level at 14% of the assembly on yamato, 19% on
+       dreadnought. Measured through each mesh's own matrix — every superstructure
+       mesh is a direct child of the citadel group, so one level of matrix is the
+       whole local frame (the r144 lesson). */
+    if (H.turrets) {
+      let ssLo = Infinity, ssHi = -Infinity, pRun = 0, pTris = 0, ssN = 0;
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry || !o.userData.part ||
+            o.userData.part.key !== 'superstructure') return;
+        ssN++;
+        o.geometry.computeBoundingBox();
+        const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+        ssLo = Math.min(ssLo, bb.min.y); ssHi = Math.max(ssHi, bb.max.y);
+        const r = bb.max.y - bb.min.y;
+        if (r > pRun) {
+          pRun = r;
+          pTris = o.geometry.index ? o.geometry.index.count / 3
+                : o.geometry.attributes.position.count / 3;
+        }
+      });
+      if (ssN && (pRun < (ssHi - ssLo) * 0.6 || pTris <= 40))
+        say(v.id, 'pagoda is a stack of crates',
+            `principal mesh runs ${pRun.toFixed(2)} of ${(ssHi - ssLo).toFixed(2)} m ` +
+            `at ${pTris} triangles — stacked boxes, not one lofted tower`);
+    }
+
     /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
        boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
        the deck the boats are named for, and the row of white hulls read as blisters riveted

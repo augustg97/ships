@@ -1917,6 +1917,27 @@ say(v.id, 'gun shield is a crate',
 `${shBad} of ${shN} — ${shNote} — plumb on every side, which no gun ` +
 'shield is');
 }
+if (H.turrets) {
+let ssLo = Infinity, ssHi = -Infinity, pRun = 0, pTris = 0, ssN = 0;
+g.traverse(o => {
+if (!o.isMesh || !o.geometry || !o.userData.part ||
+o.userData.part.key !== 'superstructure') return;
+ssN++;
+o.geometry.computeBoundingBox();
+const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+ssLo = Math.min(ssLo, bb.min.y); ssHi = Math.max(ssHi, bb.max.y);
+const r = bb.max.y - bb.min.y;
+if (r > pRun) {
+pRun = r;
+pTris = o.geometry.index ? o.geometry.index.count / 3
+: o.geometry.attributes.position.count / 3;
+}
+});
+if (ssN && (pRun < (ssHi - ssLo) * 0.6 || pTris <= 40))
+say(v.id, 'pagoda is a stack of crates',
+`principal mesh runs ${pRun.toFixed(2)} of ${(ssHi - ssLo).toFixed(2)} m ` +
+`at ${pTris} triangles — stacked boxes, not one lofted tower`);
+}
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
 const rec = T.tiers.find(t => t.recess);
