@@ -9003,3 +9003,79 @@ captures read, and the under-fill class is CLOSED. (2) Standing residuals unchan
 QM2 aft terraces, yakata curtain, canoe floor frame, myeongnyang Action baseline, Preussen
 trucks), plus the battle-rig record question holding three items (impavesata, galleass screen
 height, trireme gratings). (3) The survey's next crudest: sekibune 74, panokseon 58.
+
+## Round 138 — 2026-08-24 — the under-fill class closes, and a stale baseline surfaces from under the gate
+
+**The task was r137's queue head: apply the queued east-indiaman and fluyt fills, profile
+captures read, closing the under-fill class.** Both applied exactly as queued, both with
+rakeProvenance stating the AUTHORED class-figure semantics (both are generated type records,
+so loa and lwl are class figures, not one ship's):
+
+- **east-indiaman:** 0.08/0.05 → 0.0862/0.0538 — the (50−43)/50 = 0.14 allowance at the kept
+  8:5 authored split; drawn 4.31 m bow / 2.69 m stern, planking 50.00 exactly (was 49.50).
+  The retourschip profile — curved raked stem carrying the head forward, near-vertical
+  sternpost with the counter above (the Amsterdam and Batavia forms) — supports bow > stern
+  qualitatively, not to the centimetre.
+- **fluyt:** 0.07/0.05 → 0.0820/0.0586 — the (32−27.5)/32 = 0.140625 allowance at the kept
+  7:5 split; drawn 2.62 m bow / 1.88 m stern, planking 32.00 to the centimetre (0.8 mm
+  inside exact, from the 4-decimal rakes). The fluyt profile — rounded stem falling forward,
+  narrow tuck with the poop overhanging aft (Witsen via Hoving) — supports the split
+  qualitatively.
+
+**Measured (rule 4).** Deck-aware sweep (sweep-r138.txt): both hulls +0.00; the whole fleet
+at +0.00 except the sub-cut tail the class never covered — panokseon −0.02 and corbita −0.20,
+both present in r137's sweep at identical numbers. measure_ship: east-indiaman planking
+50.00, fluyt planking 32.00, both exact (build/staging/measure-{east-indiaman,fluyt}-r138.txt).
+Looked at (rule 1): profile captures of both hulls read — the east-indiaman's stem carries
+her head forward of u 0.00 and her counter overhangs past u 1.00 with the bow share visibly
+larger; the fluyt's rounded stem falls forward and her narrow poop overhangs aft. Audit 33/0
+(build/staging/audit-r138-run1.json).
+
+**Frames: 62 checked, 6 movers, every one classified with its clusters located numerically
+before its reason was written.** shipwright 0.459%, shipwright-ahead 0.449%, shipwright-furled
+0.351%, shipwright-hounds 0.148%, shipwright-astern 0.103%, action-gravelines 0.052%. Four
+classes among them: (a) the change itself — the two refilled hulls at their berths, at the
+frame edges (the r131/r135 neighbour-berth class), and dead astern of the bow-on sotl;
+(b) **a stale-baseline residue surfacing from under the gate** — see below; (c) the r57
+scale-numeral ghosts; (d) Gravelines: the English fleet there is drawn with 18 fluyt-class
+hulls (battles.json fleets), so the 0.052% band is the English line redrawn at 32.00.
+
+**The finding worth keeping: a fleet-wide change can leave a baseline stale by LESS than the
+per-frame gate, and the staleness surfaces later attached to an unrelated mover.** The
+shipwright and shipwright-ahead diffs contained re-speckled gratings on the SOTL — a hull
+this round's data change cannot reach. The r132 stash test proved both directions: solo
+re-runs reproduced the numbers exactly (deterministic, not flap), and at a stashed clean HEAD
+the frames read 0.044% — the residue alone, no movers. The mechanism, pinned by FRAME-LOG
+dates: these two baselines were last accepted at r129; r136's grating loft moved their sotl
+grating pixels only ~0.044% — under the 0.050% gate — so no round was ever obliged to
+re-accept them, and the divergence sat invisible until this round's neighbour redraw carried
+the frames over the gate and exposed it in the same diff. Both diffs' clusters were located
+numerically (grid-cell census of changed pixels) and each cluster attributed before
+accepting. **Method note for future movers: when a diff contains pixels your change cannot
+reach, run the stash test AND check the baseline's last-accept date against the last
+fleet-wide change — the residue of an under-gate move is the quietest kind of stale.**
+
+**Rule 0, written on the accepted shipwright frame:** it reads as a rendered yard on open
+water — hull, rig, sea, quay neighbours and panels composed per pixel, no chart anywhere.
+Three facts a viewer can read off it: the ship of the line carries her 74 guns on two full
+decks with a third row of ports along the waist; her three masts are square-rigged with
+courses, topsails and topgallants set and the canvas bellies forward; the fleet list berths
+her at 57 m, between the East Indiaman at 50 m and the ocean steamer at 98 m, and the East
+Indiaman two berths up-quay now stands the full 50 m her own card gives.
+
+**The under-fill class is CLOSED:** carrier (r137, record semantics — the deck), ever-given
+(r137), usv (r137), east-indiaman and fluyt (this round). The sweep's remaining tail
+(panokseon −0.02, corbita −0.20) sat below the class's cut from the start; if either is ever
+worked it is a fresh record-semantics question, not a reopening of this class.
+
+**Next, in order:** (1) the survey's next crudest: sekibune 74, panokseon 58 — both already
+have their own residual entries (sekibune wasen kaji r121). (2) Standing residuals unchanged
+from r137 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft
+terraces, yakata curtain, canoe floor frame, myeongnyang Action baseline, Preussen trucks),
+plus the battle-rig record question holding three items (impavesata, galleass screen height,
+trireme gratings). (3) The under-gate residue class is NOT closed: ship-junk,
+ship-sekibune and ship-endurance baselines also predate r136 (last committed 2026-08-19),
+were green in r136's check, and so may carry the same sub-gate grating residue — it will
+surface whenever an unrelated mover carries one of those frames over the gate, and the
+stash test + last-accept-date method above is written for exactly that day.
+shipwright and shipwright-ahead are current as of this round.

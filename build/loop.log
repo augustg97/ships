@@ -8844,3 +8844,25 @@ Round 135 is complete and live — stamp 1787600699 confirmed at 13:26:50. (The 
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 70311 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-24 15:07:42  round starting
+Round complete and live. Summary of what this round did:
+
+**Recovered round 136 first.** The previous firing did all of round 136's work — the fleet-wide grating rebuild, seven frame accepts, audit clean — but the 80-minute watchdog killed it between writing its handoff and committing, and its closing confirmation file was empty because the watchdog kills frame-baseline checks. I verified the tree matched the handoff's claims (run1's seven movers equal the seven FRAME-LOG accepts), re-ran the full 62-frame confirmation on the identical tree — **62/62 green** — then committed and pushed round 136 as its own commit (39cb37b) and verified its stamp 1787604876 live.
+
+**Then round 137's own work: the under-fill record semantics, three of five answered and applied.**
+
+- **Carrier — the record was right and the deck was wrong.** Her 337.0 m LOA is the ship's extreme (the 1,106 ft Commander, Naval Air Force Atlantic figure), while the flight deck is its own attested plate at 1,092 × 256 ft. The drawn deck was derived from lwl and came out 323.3 m — 10.5 m *shorter* than the hull, with the fantail standing proud of the round-down, backwards from every photograph. New record field `flightDeckLen: 333.0`; the deck is now anchored so bow tip → round-down spans 337.00 exactly, and `rakeProvenance` records that a planking-only sweep reads −3.15 on this hull by construction.
+- **Ever Given** — her lwl 387 is her casualty report's LBP and her transom is plumb, so the whole 12.98 m allowance is the flared bow: stemRake 0.0325, drawn 399.98 exactly.
+- **USV** — the generated record's own 1.5 m allowance filled at the authored 3:1 character, drawn 22.00 exactly.
+- **East-indiaman and fluyt** — answers computed and written into the handoff (0.0862/0.0538 and 0.0820/0.0586, with the plan-profile reasoning), deliberately queued: neither has a committed close view, so rule 1 wants their profile captures read before those fills ship, and the r136 recovery had consumed that time.
+
+Verification: deck-aware sweep shows all three applied hulls at ±0.00; measure_ship confirms the carrier chain exact; audit 33/0; ten frames solo-checked in paired check-then-accept order, two movers (ship-carrier 13.2% — the documented whole-hull-redraw class plus the deck's real ends; ship-usv 0.155% — her own lengthened ends) read, accepted, and re-checked to 0.000. Live stamp **1787611640** verified on the deployed page; tree clean.
+2026-08-24 16:02:10  round finished; HEAD is 0f23716 Round 137 stamp sync: web/index.html carries the 1787611640 stamp its docs copy already shipped with.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 77262 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-24 16:12:11  round starting
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-08-24 17:32:18  round finished; HEAD is 0f23716 Round 137 stamp sync: web/index.html carries the 1787611640 stamp its docs copy already shipped with.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 82249 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-24 17:42:18  round starting
