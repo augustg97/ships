@@ -3694,27 +3694,80 @@ const islW = deckW * 0.105;
 const tiers = [[L * 0.115, islW,        B * 0.155, 0.0],
 [L * 0.090, islW * 0.90, B * 0.105, -L * 0.006],
 [L * 0.052, islW * 0.78, B * 0.080, -L * 0.014]];
-let yy = 0;
-tiers.forEach((t, ti) => {
-const blk = new THREE.Mesh(new THREE.BoxGeometry(t[0], t[2], t[1]), dark);
-blk.position.set(t[3], yy + t[2] / 2, 0);
-isl.add(blk);
-if (ti >= 1) {
-const winH = t[2] * 0.30, winY = yy + t[2] * 0.64;
-const win = new THREE.Mesh(
-new THREE.BoxGeometry(t[0] * 0.94, winH, t[1] * 1.01), glassI);
-win.position.set(t[3], winY, 0);
-isl.add(win);
-const nM = Math.max(3, Math.round(t[0] / 2.2));
-for (let m = 0; m <= nM; m++) {
-const mull = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.006, winH * 1.06, t[1] * 1.015), dark);
-mull.position.set(t[3] - t[0] * 0.47 + (m / nM) * t[0] * 0.94, winY, 0);
-isl.add(mull);
-}
-}
-yy += t[2];
+const CANT = 0.10, CHAM = 1.1, NP = 11, PIER = 0.15, REV = 0.28;
+let yB = 0;
+const lv = tiers.map(t => {
+const o = { y0: yB, h: t[2], a: t[0] / 2, b: t[1] / 2, cx: t[3] };
+o.run = Math.min(t[0] * 0.47, o.a - o.h * CANT - CHAM - PIER);
+yB += t[2];
+return o;
 });
+const sta = [];
+lv.forEach((v, ti) => {
+sta.push({ v, y: v.y0, d: 0 });
+if (ti >= 1) {
+const lo = v.y0 + v.h * 0.49, hi = v.y0 + v.h * 0.79;
+sta.push({ v, y: lo, d: 0 }, { v, y: lo + 0.02, d: REV },
+{ v, y: hi - 0.02, d: REV }, { v, y: hi, d: 0 });
+}
+sta.push({ v, y: v.y0 + v.h, d: 0 });
+});
+const ring = (st) => {
+const v = st.v, sh = v.h * CANT * ((st.y - v.y0) / v.h);
+const a = v.a - sh, b = v.b - sh, c = v.cx, d = st.d;
+const pts = [];
+const P = (x, z, w) => pts.push([x, z, !!w]);
+const edges = [];
+for (let j = 0; j <= NP; j++) {
+const xj = v.run - (j / NP) * 2 * v.run;
+edges.push([xj + PIER, j > 0], [xj + PIER, false],
+[xj - PIER, false], [xj - PIER, j < NP]);
+}
+P(c + a, -(b - CHAM)); P(c + a, -(b - CHAM));
+P(c + a, b - CHAM);    P(c + a, b - CHAM);
+P(c + a - CHAM, b);    P(c + a - CHAM, b);
+edges.forEach(([x, w]) => P(c + x, b - (w ? d : 0), w));
+P(c - a + CHAM, b);    P(c - a + CHAM, b);
+P(c - a, b - CHAM);    P(c - a, b - CHAM);
+P(c - a, -(b - CHAM)); P(c - a, -(b - CHAM));
+P(c - a + CHAM, -b);   P(c - a + CHAM, -b);
+edges.slice().reverse().forEach(([x, w]) => P(c + x, -(b - (w ? d : 0)), w));
+P(c + a - CHAM, -b);   P(c + a - CHAM, -b);
+return pts;
+};
+const K = 16 + 8 * (NP + 1), pos = [], flag = [];
+const rings = sta.map(st => ring(st));
+const addRing = (r, ya) => { const base = pos.length / 3;
+r.forEach(([x, z, w]) => { pos.push(x, ya, z); flag.push(w); }); return base; };
+const bases = sta.map((st, i) => addRing(rings[i], st.y));
+const iDark = [], iGlass = [];
+const row = (A, Bq, glassRow) => {
+for (let k = 0; k < K; k++) {
+const a2 = A + k, b2 = A + (k + 1) % K;
+const pane = glassRow && flag[a2] && flag[b2];
+(pane ? iGlass : iDark).push(a2, Bq + k, b2, b2, Bq + k, Bq + (k + 1) % K);
+}
+};
+const shared = s => sta[s].v === sta[s + 1].v && sta[s].d === sta[s + 1].d;
+for (let s = 0; s < sta.length - 1; s++)
+if (shared(s))
+row(bases[s], bases[s + 1], sta[s].d > 0);
+for (let s = 0; s < sta.length - 1; s++)
+if (!shared(s))
+row(addRing(rings[s], sta[s].y), addRing(rings[s + 1], sta[s + 1].y), false);
+const R0 = addRing(rings[0], 0);
+const c0 = pos.length / 3; pos.push(lv[0].cx, 0, 0); flag.push(false);
+for (let k = 0; k < K; k++) iDark.push(c0, R0 + k, R0 + (k + 1) % K);
+const RT = addRing(rings[sta.length - 1], yB);
+const cT = pos.length / 3; pos.push(lv[2].cx, yB, 0); flag.push(false);
+for (let k = 0; k < K; k++) iDark.push(cT, RT + (k + 1) % K, RT + k);
+const tg = new THREE.BufferGeometry();
+tg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+tg.setIndex(iDark.concat(iGlass));
+tg.addGroup(0, iDark.length, 0);
+tg.addGroup(iDark.length, iGlass.length, 1);
+tg.computeVertexNormals();
+isl.add(new THREE.Mesh(tg, [dark, glassI]));
 for (const zz of [-islW * 0.22, islW * 0.22]) {
 const up = new THREE.Mesh(
 new THREE.BoxGeometry(L * 0.020, B * 0.115, islW * 0.34), dark);
@@ -3725,9 +3778,15 @@ for (const f of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
 const pan = new THREE.Mesh(
 new THREE.BoxGeometry(f[0] ? L * 0.008 : L * 0.016, B * 0.058,
 f[0] ? islW * 0.55 : islW * 0.06), radarM);
-pan.position.set(-L * 0.006 + f[0] * L * 0.046, tiers[0][2] + B * 0.052,
-f[1] * islW * 0.47);
-pan.rotation.z = f[0] * 0.10;
+const py = tiers[0][2] + B * 0.052;
+const vv = lv[1], sh2 = vv.h * CANT * ((py - vv.y0) / vv.h);
+if (f[0]) {
+pan.position.set(vv.cx + f[0] * (vv.a - sh2 - L * 0.004 + 0.19), py, 0);
+pan.rotation.z = f[0] * CANT;
+} else {
+pan.position.set(vv.cx, py, f[1] * (vv.b - sh2 + islW * 0.006));
+pan.rotation.x = -f[1] * CANT;
+}
 isl.add(pan);
 }
 const mastTop = tiers.reduce((a, t) => a + t[2], 0);

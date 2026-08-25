@@ -9597,3 +9597,86 @@ forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, m
 Action baseline, Preussen trucks), plus the battle-rig record question holding three items.
 (4) The under-gate residue class: ship-junk and ship-endurance (pre-r136 baselines) still
 carry sub-gate traces — ship-junk read 0.048% in this round's opening, unchanged.
+
+## Round 146 — 2026-08-25 — the island becomes one tower
+
+**Opening full 62-frame check at HEAD c412b8c, before any edit: 62/62 within tolerance, 0
+BLANK, EXIT:0** (build/ratchet-open-r146.log, local) — the fleet-wide net r145 deferred to
+this round. Top mover ship-treasure 0.049% under gate, the documented under-gate residue,
+unchanged. The queue check preceded it: August's second list stands WORKED IN FULL (r57),
+so the survey carried the task — r145's queue head, the carrier's island x33.
+
+**The island's box class closed.** The r145 probe had named her 33: 3 tier slabs, 2 glass
+boxes laid proud over the upper tiers, 22 mullion pickets over the glass (the r141
+paint-plate class stood on end), 2 uptakes, 4 radar panels. The 27-box tower is ONE loft
+now, on the same tier stations: faces cant inward 0.10 rad as they rise (the Ford's
+flat-panel RCS shaping), corners chamfered 1.1 m with sharp arrises (paired perimeter
+points), each level stepping across a real shelf — the bridge level oversails the lower
+tier's canted top by 0.23 m at the sides, which is what a real island's upper works do —
+and both window bands are ROWS OF WINDOWS LET INTO THE FACE: glass 0.28 m behind
+structural piers, jamb/sill/head reveals falling out of paired stations, the r141/r142
+pierced-wall law wrapped round a loft. One BufferGeometry, two material groups (structure,
+glass) — a material boundary has a hard edge by construction, so no snapBand is needed to
+keep the panes from bleeding. End grain closed both ends. Uptakes stay boxes (a trunked
+casing IS a box), radar arrays stay flat panels (a SPY face IS a slab) but now sit ON the
+canted faces and lean with them — at the old fixed offsets the side panels floated 0.13 m
+clear of the leaning wall and the aft panel stood 1.8 m out of it at its top. Mast and
+yards stay cylinders (the loom rule). Verified OFFLINE before touching the app: a node
+simulation of the arrays checked K=112, 14 stations, 0 verts outside the old tier boxes'
+own envelope, 0 NaN, glass quads exactly 2 bands x 22 panes, and every winding on real
+triangles — caps −y/+y, shelf soffit −y where the bridge oversails and +y where the ends
+step in, jambs ±x, sill +y.
+
+**⚠ NEW MECHANISM, caught by rule 1 and fixed in the same hour: a fan cap shares its rim
+with the wall, and its uneven triangles tilt the wall's normals.** The first loft striped
+tier0's whole face at the window rhythm — computeVertexNormals is area-weighted, the
+bottom cap's fan triangles vary hugely in size around a perimeter whose points sit at pane
+pitch, and the shelf rings' in-plane shear (tier0's window stations against tier1's) did
+the same at each step. Nothing was wrong in any bounding box, measure or audit — only the
+LOOKED-AT close-up showed it. The fix is the snapBand law applied to rows: wall quad rows
+run only between stations of the same tier AND the same inset; every shelf, sill and head
+row — anywhere the section jumps — gets its OWN duplicated rings, so horizontal grain
+cannot reach a wall vertex, and every one of those edges goes sharp as a bonus. Re-capture
+clean: one uniform gradient per face. If a later loft ever stripes at a regular rhythm,
+look at what shares its rim before touching a light.
+
+**Audit rule r146: the island's principal mesh must BE the tower.** In the group's local
+frame, the mesh with the longest y-run must span ≥0.5 of the island's full height (mast
+included) and carry >40 triangles. Injection with hull.js stashed convicted the old form —
+"principal mesh runs 10.66 of 24.60 m at 32 triangles — slabs under a stick, not a lofted
+tower": the tallest single mesh in the old island was the MAST, at 43% of the assembly,
+and no slab rose past a quarter. Carrier only, no other rule fired; popped, 33/0.
+
+**Measured, the deltas are the island's own and nothing else's.** Probe: island meshes
+36→10, boxy 33→6, tris 476→3288. Survey: carrier meshes 277→251 (−26 = 27 boxes out, 1
+loft in), boxes 49→22 (−27 exact), boxPct 18→9, tris 136984→139796 (+2812 = the loft's
+3136 minus the 27 boxes' 324), floating [], boxyParts EMPTY; the other 32 rows
+BYTE-identical (null test). measure_ship: ONE row moved, The island, 35.30→35.29 — a
+centimetre off the outboard reach, the proud mullion boxes leaving; every other row
+identical.
+
+**Looked at (rule 1, before/after at b100 and b145, staging renders deleted after
+reading).** Before b100: three stacked slabs, window strips proud of the wall with mullion
+pickets, a radar plate floating over the band. After b100 close-up: one canted tower,
+sharp chamfers and shelf arrises, two rows of individually recessed dark panes with lit
+sill ledges, the bridge deck oversailing, the array flush amid the band. After b145
+quarter: the canted aft face, the two uptake trunks standing on the tier0 shelf, folded
+wings on deck beyond — nothing floating, nothing interpenetrating. Rule 0 on the b100
+close-up: reads as a rendered warship island, and a viewer can name the bridge and flyco
+window rows, the canted chamfered faces, the SPY panel, the mast with its yards.
+
+**Frames: closing pair, no intervening check between check and accept.** ship-carrier
+0.390%/0.076 — diff read: the island silhouette and bands ALONE, nothing else in frame —
+accepted, re-check ok. aboard-carrier 0.013% under gate untouched: at sea scale the
+island's envelope is near-identical, which is what "inside the old boxes' own envelope"
+buys.
+
+**Deployed: stamp 1787656562**, live verify in the commit.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) Yamato hatch x12 — the queue
+head now; the carrier's remaining 22 boxes are boxes in life (uptake trunks, array faces,
+container-stack class). (3) Standing residuals unchanged from r143 (gundeck normals,
+Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame,
+myeongnyang Action baseline, Preussen trucks), plus the battle-rig record question. (4)
+The under-gate residue class: ship-junk 0.048 and ship-treasure 0.049 in this round's
+opening, both pre-r136 baselines, unchanged.

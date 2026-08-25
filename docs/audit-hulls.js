@@ -1764,6 +1764,33 @@ say(v.id, 'airframe is not one body',
 'not a lofted body');
 }
 }
+if (H.flightDeck) {
+let islG = null;
+g.traverse(o => {
+if (!islG && o.isGroup && o.userData.part && o.userData.part.key === 'island')
+islG = o;
+});
+if (islG) {
+islG.updateMatrixWorld(true);
+let lo2 = Infinity, hi2 = -Infinity, pRun = 0, pTris = 0;
+islG.traverse(o => {
+if (!o.isMesh || !o.geometry) return;
+o.geometry.computeBoundingBox();
+const bb2 = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+lo2 = Math.min(lo2, bb2.min.y); hi2 = Math.max(hi2, bb2.max.y);
+const r = bb2.max.y - bb2.min.y;
+if (r > pRun) {
+pRun = r;
+pTris = o.geometry.index ? o.geometry.index.count / 3
+: o.geometry.attributes.position.count / 3;
+}
+});
+if (pRun < (hi2 - lo2) * 0.5 || pTris <= 40)
+say(v.id, 'island is not one tower',
+`principal mesh runs ${pRun.toFixed(2)} of ${(hi2 - lo2).toFixed(2)} m ` +
+`at ${pTris} triangles — slabs under a stick, not a lofted tower`);
+}
+}
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
 const rec = T.tiers.find(t => t.recess);

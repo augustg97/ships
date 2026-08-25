@@ -1,0 +1,24 @@
+Supercarrier   record: LOA 337 m  LWL 317 m  beam 41 m  draught 12 m
+  model extent   x  -168.61 ..  +168.39   =  337.00 m   (record LOA 337)   Δ +0.00 m
+  model height   y   -12.68 ..   +41.10   =   53.78 m   above water 41.10 m
+  model breadth  z         ..   +39.39   =   78.78 m   (record beam 41)   Δ +37.78 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Planking                    -0.032   1.021  333.85  -12.00   12.30  20.50
+  Weather deck — painted ste  -0.032   1.021  333.85   11.50   12.39  20.50
+  Stem                        -0.032   0.104   43.01  -11.66   12.30   1.13
+  Flight deck                 -0.019   1.031  333.00   14.68   16.52  39.00
+  Keel                         0.000   1.000  317.00  -12.68   -9.59   1.13
+  Rail                         0.016   0.980  305.75   11.50   13.20  20.70
+  Hangar and gallery decks     0.033   0.965  295.37   11.01   14.78  20.58
+  Deck park                    0.046   0.990  299.06   16.52   21.37  36.58
+  Catapult track               0.060   0.579  164.42   16.52   16.65   8.58
+  Deck-edge lift               0.272   0.648  118.88   16.36   16.69  39.39
+  Angled landing area          0.334   0.946  194.24   16.54   16.71  10.13
+  Landing centreline           0.368   0.912  172.36   16.52   16.65   0.29
+  Foul line                    0.373   0.887  162.92   16.52   16.65  11.87
+  The island                   0.502   0.618   36.46   16.50   41.10  35.29
+  Arrestor wire                0.822   0.902   25.27   16.55   16.76   8.69
+  Screw                        0.880   0.943   20.06  -11.02   -3.91  13.17
+  Sternpost                    0.896   1.021   39.64  -11.57   11.50   1.13
+  Rudder                       0.944   0.979   11.09  -11.40   -0.96   0.55

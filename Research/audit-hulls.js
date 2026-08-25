@@ -2577,6 +2577,42 @@
       }
     }
 
+    /* ⚠ AN ISLAND IS ONE TOWER, NOT A STACK OF SLABS UNDER A STICK (round 146). The
+       island's principal mesh — the one with the longest run up the group's own y axis —
+       must BE the tower: spanning at least half the island's full height, mast included,
+       and lofted rather than boxed. The convicted form was three stacked tier boxes with
+       a glass box laid over each upper tier and a picket of 22 mullion boxes over the
+       glass; its tallest single mesh was the MAST, an eight-sided stick at 43% of the
+       assembly, and no slab rose past a quarter of it. Measured in the group's LOCAL
+       frame, the r144 lesson. */
+    if (H.flightDeck) {
+      let islG = null;
+      g.traverse(o => {
+        if (!islG && o.isGroup && o.userData.part && o.userData.part.key === 'island')
+          islG = o;
+      });
+      if (islG) {
+        islG.updateMatrixWorld(true);
+        let lo2 = Infinity, hi2 = -Infinity, pRun = 0, pTris = 0;
+        islG.traverse(o => {
+          if (!o.isMesh || !o.geometry) return;
+          o.geometry.computeBoundingBox();
+          const bb2 = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+          lo2 = Math.min(lo2, bb2.min.y); hi2 = Math.max(hi2, bb2.max.y);
+          const r = bb2.max.y - bb2.min.y;
+          if (r > pRun) {
+            pRun = r;
+            pTris = o.geometry.index ? o.geometry.index.count / 3
+                  : o.geometry.attributes.position.count / 3;
+          }
+        });
+        if (pRun < (hi2 - lo2) * 0.5 || pTris <= 40)
+          say(v.id, 'island is not one tower',
+              `principal mesh runs ${pRun.toFixed(2)} of ${(hi2 - lo2).toFixed(2)} m ` +
+              `at ${pTris} triangles — slabs under a stick, not a lofted tower`);
+      }
+    }
+
     /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
        boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
        the deck the boats are named for, and the row of white hulls read as blisters riveted

@@ -1,0 +1,75 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "stempost": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 416
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 1,
+   "tris": 12
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "screw": {
+   "n": 28,
+   "boxy": 0,
+   "tris": 1824
+  },
+  "flightdeck": {
+   "n": 13,
+   "boxy": 10,
+   "tris": 180
+  },
+  "hangar": {
+   "n": 7,
+   "boxy": 5,
+   "tris": 204
+  },
+  "island": {
+   "n": 10,
+   "boxy": 6,
+   "tris": 3288
+  },
+  "aircraft": {
+   "n": 156,
+   "boxy": 0,
+   "tris": 5376
+  }
+ },
+ "byName": {
+  "rudder/Rudder": 1,
+  "flightdeck/Flight deck": 1,
+  "hangar/Hangar and gallery decks": 5,
+  "flightdeck/Angled landing area": 2,
+  "island/The island": 6,
+  "flightdeck/Deck-edge lift": 2,
+  "flightdeck/Landing centreline": 1,
+  "flightdeck/Foul line": 1,
+  "flightdeck/Catapult track": 3
+ }
+}
