@@ -10255,3 +10255,80 @@ from r143 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, 
 aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus
 the battle-rig record question. (3) The residue class: treasure 0.049, junk 0.048,
 galleass 0.047.
+
+## Round 154 — 2026-08-25 — the net defence becomes shipwork, and Dreadnought runs out of crates
+
+**The queue check first: August's second list stands WORKED IN FULL (r57), so the survey
+carried the round — r153's queue head, Dreadnought as a hull.**
+
+**Opening full 62-frame check at HEAD before any edit: 62/62 within tolerance, 0 BLANK,
+EXIT:0** (build/ratchet-open-r154.log, local), nothing else rendering. ship-dreadnought's
+opening residue 0.000.
+
+**What "61 boxy" actually was.** The r151-after probe named it exactly: 36 shelf plates,
+24 boom hinges, 1 rudder — and r153's foil had already closed the rudder, so the round
+opened at 60, all of them the torpedo-net defence. The funnels, casings and boats the
+r153 handoff guessed at are clean (funnel 6/0 boxy, superstructure 4/0, turret 25/0):
+the probe beats the guess, and the class was `buildNetDefence` all along.
+
+**The class closed: a net shelf is one ledge on goosenecks, not a chain of crates.**
+The shelf was 18 loose plumb boxes per side riding the hull on 6% overlap; it is now ONE
+BufferGeometry both sides — a fair lofted ledge on 41 stations following the plating
+(inner edge buried 0.055 in the shell, plate 0.55 × 0.09 as before), carried on 13 gusset
+webs per side (4-point tapering profile, seat buried in the plate r149-style, toe at
+shelfY − 0.5, stationed at the heel-pitch MIDPOINTS so no web can land on a gooseneck).
+Every boom heel's crate is now a gooseneck — backing pad on the shell, two cheek lugs
+tapering 2.1:1 root-to-tip, a vertical octagonal pin proud of the lug tips that passes
+through the 40 ft spar's own heel — ONE geometry shared by all 24 (r144), rotated to the
+local plating tangent, the port turn the r118 mirror (π − θ, geometry x-symmetric).
+Verts unshared throughout (r146/r147). Roll and booms byte-untouched.
+
+**The r152 camera-fit law, designed in.** The loft's outer extreme is CLAMPED to what
+the old chain gave Box3 — centre + hx·|sin rot| + hz·|cos rot| per rotated plate,
+formula proven in the sim against brute-forced corners — set exactly onto the widest
+station. Proof it held: measure_ship half-breadth 12.84 unchanged, and the 12-bearing
+spin diff is a narrow amidships band at EVERY bearing (348–908 px of 2880×1800), no
+whole-silhouette ghost anywhere.
+
+**Proven offline first, then by injection.** build/staging-r154-netdefence.mjs: 30/30 —
+windings per face class, closed-manifold edge pairing on strip, gusset and gooseneck,
+byte-exact clamp, hinge fill 0.40 with the old crate convicted at 1.00, both r154
+predicates against both forms. One sim trap for the file: toFixed(6) writes −5.9e-18 as
+"-0.000000", so a signed-zero key breaks a mirror check that the geometry passes.
+Audit rule r154 (`net defence is dry goods`): principal 'Net shelf' mesh ≥ 0.8 of the
+gear's own span past the boxy line, no 'Boom hinge' over 0.6 fill (r152's divergence
+read) or at the line. Against the OLD form in the page it convicted EXACTLY dreadnought:
+"25 of 60 — principal shelf plate runs 6.56 of 106.49 m at 12 triangles" — 24 hinges +
+the shelf, nothing else fired. With the new form: 33 hulls, 0 problems.
+
+**Measured: the delta is the class's own and nothing else's.** Probe: net 86 → 51 meshes
+(36 plates → 1 ledge, hinges keep 24, one shared geometry), tris 3600 → 5760 (+2160,
+the sim's number), ship 167 → 132 meshes, boxy 60 → 0 — **Dreadnought 0% boxy, her last
+boxy mesh closed.** measure_ship: TWO rows moved and both are the change itself — Net
+shelf y-floor 4.25 → 3.79 (= shelfY − 0.5, the gusset toes, exact), run 106.49 → 106.06
+(the 6% chord overhang gone); Boom hinge reach 12.75 → 12.64 (a gooseneck stops at its
+pin, a crate ran to its corner), y 3.82–4.27 → 3.83–4.25 (pin ± 0.21). Every other row
+byte-identical, before/after files in build/staging/r154-before|after/.
+
+**Looked at (rule 1).** 12-bearing before/after spins: at b045/b090 close crops the heel
+crates are gone and the stowed diagonals spring from small tapered fittings; at low270
+(port, the mirror) the ledge runs fair along the sheer with the gusset teeth beneath and
+the down-aft boom row exactly as photograph H61017 carries it. Rule 0 on that frame: a
+rendered world — grey shell with visible strakes, tan deck, red antifouling, open sea.
+Three facts a viewer can read: the net shelf runs over two-thirds of her length; the
+40 ft booms stow in a down-aft diagonal row both sides; the boot is antifouling red.
+
+**Closing frame: ship-dreadnought 0.013% / 0.003 — UNDER the gate, no acceptance,
+FRAME-LOG untouched.** The only reachable frame: netDefence builds under FINE only, so
+no sea/passage frame carries it, and the opening 62 were all green at this HEAD. Like
+r153's foil, the change is real, class-wide and audit-guarded, and the app's own bearing
+barely sees it — the spins are where it lives.
+
+**Deployed: stamp 1787689866**, live verify in the commit.
+
+**Next, in order:** (1) The r143 standing residuals (gundeck normals, Endurance
+forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame,
+myeongnyang Action baseline, Preussen trucks), plus the battle-rig record question.
+(2) The residue class: treasure 0.049, junk 0.048, galleass 0.047. (3) The fleet is at
+0 boxy on yamato AND dreadnought — the next probe sweep should rank the remaining hulls
+by boxy count and name the next class.

@@ -2923,6 +2923,71 @@
             `${rdNote} — a balanced rudder is a foil, closed at its trailing edge`);
     }
 
+    /* ⚠ A NET SHELF IS ONE LEDGE ON GOOSENECKS, NOT A CHAIN OF CRATES (round 154).
+       The torpedo-net outfit rides a continuous shelf plate following the plating —
+       one fair ledge spanning the gear's own run, carried on gusset webs — and every
+       boom heel swings in a gooseneck: backing pad, tapering cheek lugs, a pin. The
+       convicted form was 18 loose plumb boxes per side chained on 6% overlap, and a
+       solid crate at every heel. Two reads, both on the part's own meshes: the
+       principal 'Net shelf' mesh must run at least 0.8 of the gear's fore-aft span
+       past the boxy line (the r148 principal-body read), and no 'Boom hinge' may
+       enclose more than 0.6 of its own bounding box (the divergence sum over its
+       triangles, the r152 read) or sit at the boxy line. Extents via o.matrix — the
+       net gear hangs directly on the ship group. */
+    if (H.netDefence) {
+      let ndBad = 0, ndN = 0, ndNote = '';
+      let nsLo = Infinity, nsHi = -Infinity, nsRun = 0, nsTris = 0;
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        const nm = o.userData.part.name;
+        if (nm !== 'Net shelf' && nm !== 'Boom hinge') return;
+        const geo = o.geometry;
+        geo.computeBoundingBox();
+        const tris = geo.index ? geo.index.count / 3
+                   : geo.attributes.position.count / 3;
+        if (nm === 'Net shelf') {
+          ndN++;
+          const bb = geo.boundingBox.clone().applyMatrix4(o.matrix);
+          nsLo = Math.min(nsLo, bb.min.x); nsHi = Math.max(nsHi, bb.max.x);
+          const r = bb.max.x - bb.min.x;
+          if (r > nsRun) { nsRun = r; nsTris = tris; }
+          return;
+        }
+        ndN++;
+        const bb = geo.boundingBox;
+        const bbV = Math.max(1e-9, (bb.max.x - bb.min.x) *
+                    (bb.max.y - bb.min.y) * (bb.max.z - bb.min.z));
+        const pos = geo.attributes.position, ix = geo.index;
+        const n = ix ? ix.count : pos.count;
+        let vol = 0;
+        const t = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        for (let i = 0; i + 2 < n; i += 3) {
+          for (let k = 0; k < 3; k++) {
+            const vi = ix ? ix.getX(i + k) : i + k;
+            t[k][0] = pos.getX(vi); t[k][1] = pos.getY(vi); t[k][2] = pos.getZ(vi);
+          }
+          vol += (t[0][0] * (t[1][1] * t[2][2] - t[1][2] * t[2][1])
+                - t[0][1] * (t[1][0] * t[2][2] - t[1][2] * t[2][0])
+                + t[0][2] * (t[1][0] * t[2][1] - t[1][1] * t[2][0])) / 6;
+        }
+        const fill = Math.abs(vol) / bbV;
+        if (tris <= 12 || fill > 0.6) {
+          ndBad++;
+          ndNote = `a heel fitting of ${tris} triangles filling ${fill.toFixed(2)} ` +
+                   'of its own box';
+        }
+      });
+      if (nsHi > nsLo && (nsTris <= 12 || nsRun < (nsHi - nsLo) * 0.8)) {
+        ndBad++;
+        ndNote = `principal shelf plate runs ${nsRun.toFixed(2)} of ` +
+                 `${(nsHi - nsLo).toFixed(2)} m at ${nsTris} triangles`;
+      }
+      if (ndBad)
+        say(v.id, 'net defence is dry goods',
+            `${ndBad} of ${ndN} — ${ndNote} — a net shelf is one ledge riding the ` +
+            'plating, and a boom heel swings in a gooseneck, not a crate');
+    }
+
     /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
        boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
        the deck the boats are named for, and the row of white hulls read as blisters riveted
