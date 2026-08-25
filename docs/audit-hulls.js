@@ -1368,11 +1368,11 @@ const HSh = SHIPS_HULL.hullSurface(H);
 const hs = [];
 g.updateMatrixWorld(true);
 g.traverse(o => { if (o.isGroup && o.userData.part && o.userData.part.key === 'hatch')
-hs.push(new THREE.Box3().setFromObject(o)); });
+hs.push({ grp: o, box: new THREE.Box3().setFromObject(o) }); });
 if (hs.length !== H.deckHatches.length)
 say(v.id, 'stowage hatches miscounted',
 `${H.deckHatches.length} in the record, ${hs.length} drawn`);
-for (const hb of hs) {
+for (const { box: hb } of hs) {
 const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hb.min.x + hb.max.x) / 2) / H.lwl));
 const zc = (hb.min.z + hb.max.z) / 2;
 const bB = Math.abs(SHIPS_HULL.surfacePoint(H, HSh, uu, 1.0)[2]);
@@ -1381,6 +1381,33 @@ const d = hb.min.y - (HSh.sheer(uu) + camber);
 if (d < -0.6 || d > 0.6)
 say(v.id, 'hatch off the deck',
 `coaming bottom ${d.toFixed(2)} m from the cambered deck at its station`);
+}
+for (const hc of H.deckHatches) {
+const rx = (hc.at - 0.5) * H.lwl;
+const rz = (hc.z || 0) * Math.abs(SHIPS_HULL.surfacePoint(H, HSh, hc.at, 1.0)[2]);
+let best = null, bd = Infinity;
+for (const h of hs) {
+const c = h.box.getCenter(new THREE.Vector3());
+const d2 = (c.x - rx) ** 2 + (c.z - rz) ** 2;
+if (d2 < bd) { bd = d2; best = h; }
+}
+if (!best) continue;
+const rc = new THREE.Raycaster(); rc.far = 60;
+const down = new THREE.Vector3(0, -1, 0);
+const top = best.box.max.y + 5;
+const hitY = (dx, dz) => {
+rc.set(new THREE.Vector3(rx + dx, top, rz + dz), down);
+const h2 = rc.intersectObject(best.grp, true);
+return h2.length ? h2[0].point.y : -Infinity;
+};
+const hC = Math.max(hitY(0, 0), hitY(-hc.lenM * 0.16, 0), hitY(hc.lenM * 0.16, 0));
+const hR = Math.max(hitY(0, hc.widM / 2 - 0.07), hitY(0, -(hc.widM / 2 - 0.07)));
+if (hR === -Infinity)
+say(v.id, 'hatch has no coaming', 'no surface under the rim line');
+else if (hC >= hR - 0.02)
+say(v.id, 'hatch cover stands proud of its own coaming',
+`cover line ${hC.toFixed(2)} m, rim line ${hR.toFixed(2)} m — ` +
+'a lid stacked on a box, not a cover dropped into a ring');
 }
 }
 if (H.catapults) {

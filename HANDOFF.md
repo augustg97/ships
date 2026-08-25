@@ -9680,3 +9680,73 @@ Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floo
 myeongnyang Action baseline, Preussen trucks), plus the battle-rig record question. (4)
 The under-gate residue class: ship-junk 0.048 and ship-treasure 0.049 in this round's
 opening, both pre-r136 baselines, unchanged.
+
+## Round 147 — 2026-08-25 — the hatch becomes a cover dropped into its coaming
+
+**Opening full 62-frame check at HEAD e11cdc9, before any edit: 62/62 within tolerance, 0
+BLANK, EXIT:0** (build/ratchet-open-r147.log, local). Top movers ship-treasure 0.049 /
+ship-junk 0.048 — the documented pre-r136 residue, unchanged. The queue check preceded it:
+August's second list stands WORKED IN FULL (r57), so the survey carried the task — r146's
+queue head, the Yamato hatch class x12.
+
+**The stowage hatch class closed.** buildDeckHatches drew each hatch as four boxes: a
+coaming box, a lid box stacked ON it (the r144 step class, two meshes pretending to be one
+fitting), and two seam strips proud of the lid (the r141 paint-plate class). The part's own
+card says these hatches are FLUSH — the model contradicted its own record. Three hatches
+× four boxes = the probe's hatch x12. Now each hatch is ONE loft: a mitred coaming ring —
+outer face, chamfered top edge, rim flat, inner reveal — with the armoured cover set 0.10 m
+below the rim on its land, and the section seams recessed grooves (0.08 × 0.04) with sealed
+ends. Every vertex is seated on the deck's own sheer and camber sampled at its OWN station,
+so the 12 m coaming rides the crown and the 9.5 m side coamings ride the camber slope
+instead of a flat box floating one side and burying the other. Flat per-quad normals: each
+quad owns its four verts, every arris is sharp, and no cap shares a rim with a wall — the
+r146 stripe mechanism cannot occur here by construction. Heel buried 0.25 m.
+
+**Verified offline before touching the app** (build/staging-r147-hatch.mjs, node): 18/18
+checks across the three recorded hatches — 0 NaN, 0 verts outside the record footprint,
+0 degenerate triangles, 0 windings against their face class, and the r147 passage property
+(every cover-top vertex below the rim at its own station) with worst margin 0.045 m, on
+the side hatch where the camber slope eats most of the reveal.
+
+**Audit rule r147: a cover sits IN a coaming, not on it.** Rays straight down the cover's
+centreline (and down the old seam strips' own stations) must stop below rays down the rim
+line. Injection with hull.js stashed convicted all three — "cover line 10.77 m, rim line
+10.57 m — a lid stacked on a box, not a cover dropped into a ring" (10.91/10.71 for the
+centre hatch, the strips) — yamato only, no other rule fired; popped, 33/0 clean.
+
+**Measured, the deltas are the hatches' own and nothing else's.** Probe: hatch 12→3
+meshes, boxy 12→0, tris 144→470; whole ship 294→285 meshes, boxy 62→50 (21%→17%).
+measure_ship: the three hatch rows collapse to one, top 10.91→10.60 m (the proud lid and
+strips leaving — 0.31 m off the profile), heel 10.02→9.87 (buried through the camber),
+u-run 0.776–0.848 and half-breadth 8.84 identical; every non-hatch row byte-identical.
+The fleet survey was not re-run this round — the probe covers the class and the 33/0
+audit covers the fleet; the watchdog window does not hold it.
+
+**Looked at (rule 1, before/after crops at two bearings, staging renders deleted after
+reading).** Before: three grey mats lying proud on the tan planking, seams drawn as strips
+ON them — they read as painted rectangles. After: each hatch a steel rim frame with a lit
+chamfer round a darker recessed three-section cover, the seams fine shadow lines, the
+fitting let INTO the deck. At sea scale (aboard frame) they read as low flush covers on
+the quarterdeck. Rule 0 on the b045 crop: reads as a rendered quarterdeck, and a viewer
+can name the floatplane with hinomaru roundels beside its catapult, the two armoured
+stowage hatches let into the planking, and the aft turret with its rangefinder wings.
+
+**Frames: both closing checks UNDER the gate, no acceptance needed.** ship-yamato 0.048%
+/ 0.024, aboard-yamato 0.036% / 0.019 — the citadel framing barely sees the quarterdeck,
+and at sea scale the change is a 0.31 m lower profile inside the old envelope; the r146
+aboard-carrier precedent. ⚠ Both baselines now carry sub-gate traces and join the residue
+class: expect ship-yamato and aboard-yamato among top movers in later openings, alongside
+ship-junk 0.048 and ship-treasure 0.049.
+
+**Deployed: stamp 1787660926**, live verify in the commit.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) The Yamato floatplane — this
+round's probe names her remaining boxy classes and the floatplane leads: 6 boxy meshes
+named 'Floatplane' across the two aircraft plus boxy canopy/wings/fins — the r145 airframe
+law (one lofted body, real planforms) reaching the catapult aircraft. Searchlight platform
+brackets x8 and the 25 mm / high-angle mounts one row down, noting a shielded gunhouse IS
+near-boxy in life. (3) Standing residuals unchanged from r143 (gundeck normals, Endurance
+forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang
+Action baseline, Preussen trucks), plus the battle-rig record question. (4) The under-gate
+residue class, now four frames: ship-junk 0.048, ship-treasure 0.049, ship-yamato 0.048,
+aboard-yamato 0.036.

@@ -4361,23 +4361,88 @@ const H = hullSurface(S);
 const L = S.lwl;
 const dark = new THREE.MeshStandardMaterial({ color: 0x3f444a, roughness: 0.66, metalness: 0.25 });
 const cover = new THREE.MeshStandardMaterial({ color: 0x565c61, roughness: 0.72, metalness: 0.22 });
+const deckAt = (u, z) => {
+const b = Math.abs(surfacePoint(S, H, u, 1.0)[2]) || 1e-6;
+return H.sheer(u) + Math.cos(Math.min(1, Math.abs(z) / b) * Math.PI / 2) * b * 0.035;
+};
 S.deckHatches.forEach(hc => {
-const u = hc.at, b = Math.abs(surfacePoint(S, H, u, 1.0)[2]);
-const zP = (hc.z || 0) * b;
-const camber = Math.cos((zP / b) * Math.PI / 2) * b * 0.035;
-const g = new THREE.Group();
-const coam = new THREE.Mesh(new THREE.BoxGeometry(hc.lenM, 0.55, hc.widM), dark);
-coam.position.y = 0.12;
-g.add(tag(coam, 'hatch', 'Hatch coaming'));
-const lid = new THREE.Mesh(new THREE.BoxGeometry(hc.lenM * 0.96, 0.16, hc.widM * 0.92), cover);
-lid.position.y = 0.47;
-g.add(tag(lid, 'hatch', 'Hatch cover'));
-for (let s = 1; s <= 2; s++) {
-const strip = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, hc.widM * 0.92), dark);
-strip.position.set((s / 3 - 0.5) * hc.lenM * 0.96, 0.57, 0);
-g.add(strip);
+const u0 = hc.at, zP = (hc.z || 0) * Math.abs(surfacePoint(S, H, u0, 1.0)[2]);
+const y0 = deckAt(u0, zP);
+const dY = (dx, dz) => deckAt(u0 + dx / L, zP + dz) - y0;
+const hx = hc.lenM / 2, hz = hc.widM / 2;
+const T = 0.14, RIM = 0.28, CH = 0.04, HEEL = 0.25, DROP = 0.10;
+const GW = 0.08, GD = 0.04;
+const acc = { pos: [], nrm: [], idx: [] };
+const quad = (p1, p2, p3, p4) => {
+const b = acc.pos.length / 3;
+acc.pos.push(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2],
+p3[0], p3[1], p3[2], p4[0], p4[1], p4[2]);
+const ux = p2[0] - p1[0], uy = p2[1] - p1[1], uz = p2[2] - p1[2];
+const vx = p4[0] - p1[0], vy = p4[1] - p1[1], vz = p4[2] - p1[2];
+const n = [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx];
+const m = Math.hypot(n[0], n[1], n[2]) || 1;
+for (let k = 0; k < 4; k++) acc.nrm.push(n[0] / m, n[1] / m, n[2] / m);
+acc.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+};
+const sect = [[0, -HEEL], [0, RIM - CH], [CH, RIM], [T, RIM], [T, RIM - DROP]];
+const NX = Math.max(2, Math.round(hc.lenM / 2.5));
+const NZ = Math.max(2, Math.round(hc.widM / 1.5));
+const P = (x, h, z) => [x, h + dY(x, z), z];
+for (let s = 0; s < sect.length - 1; s++) {
+const [i1, h1] = sect[s], [i2, h2] = sect[s + 1];
+for (const sg of [1, -1]) {
+for (let k = 0; k < NX; k++) {
+const xa1 = (k / NX * 2 - 1) * (hx - i1), xb1 = ((k + 1) / NX * 2 - 1) * (hx - i1);
+const xa2 = (k / NX * 2 - 1) * (hx - i2), xb2 = ((k + 1) / NX * 2 - 1) * (hx - i2);
+const A1 = P(xa1, h1, sg * (hz - i1)), B1 = P(xb1, h1, sg * (hz - i1));
+const A2 = P(xa2, h2, sg * (hz - i2)), B2 = P(xb2, h2, sg * (hz - i2));
+if (sg > 0) quad(A1, B1, B2, A2); else quad(B1, A1, A2, B2);
 }
-g.position.set((u - 0.5) * L, H.sheer(u) + camber, zP);
+for (let k = 0; k < NZ; k++) {
+const za1 = (k / NZ * 2 - 1) * (hz - i1), zb1 = ((k + 1) / NZ * 2 - 1) * (hz - i1);
+const za2 = (k / NZ * 2 - 1) * (hz - i2), zb2 = ((k + 1) / NZ * 2 - 1) * (hz - i2);
+const A1 = P(sg * (hx - i1), h1, za1), B1 = P(sg * (hx - i1), h1, zb1);
+const A2 = P(sg * (hx - i2), h2, za2), B2 = P(sg * (hx - i2), h2, zb2);
+if (sg > 0) quad(B1, A1, A2, B2); else quad(A1, B1, B2, A2);
+}
+}
+}
+const coamIdx = acc.idx.length;
+const cx = hx - T, cz = hz - T, yc = RIM - DROP;
+const seams = [-cx / 1.5, cx / 1.5];
+const edges = [-cx];
+for (const sc of seams) edges.push(sc - GW / 2, sc + GW / 2);
+edges.push(cx);
+const zrow = (x0, x1, yy) => {
+for (let k = 0; k < NZ; k++) {
+const z0 = (k / NZ * 2 - 1) * cz, z1 = ((k + 1) / NZ * 2 - 1) * cz;
+quad(P(x0, yy, z0), P(x0, yy, z1), P(x1, yy, z1), P(x1, yy, z0));
+}
+};
+for (let i = 0; i < edges.length; i += 2) zrow(edges[i], edges[i + 1], yc);
+for (const sc of seams) {
+const x0 = sc - GW / 2, x1 = sc + GW / 2;
+zrow(x0, x1, yc - GD);
+for (let k = 0; k < NZ; k++) {
+const z0 = (k / NZ * 2 - 1) * cz, z1 = ((k + 1) / NZ * 2 - 1) * cz;
+quad(P(x0, yc - GD, z0), P(x0, yc - GD, z1), P(x0, yc, z1), P(x0, yc, z0));
+quad(P(x1, yc - GD, z1), P(x1, yc - GD, z0), P(x1, yc, z0), P(x1, yc, z1));
+}
+for (const sg of [1, -1]) {
+const q = [P(x0, yc - GD, sg * cz), P(x1, yc - GD, sg * cz),
+P(x1, yc, sg * cz), P(x0, yc, sg * cz)];
+if (sg > 0) quad(q[1], q[0], q[3], q[2]); else quad(q[0], q[1], q[2], q[3]);
+}
+}
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(acc.pos, 3));
+geo.setAttribute('normal', new THREE.Float32BufferAttribute(acc.nrm, 3));
+geo.setIndex(acc.idx);
+geo.addGroup(0, coamIdx, 0);
+geo.addGroup(coamIdx, acc.idx.length - coamIdx, 1);
+const g = new THREE.Group();
+g.add(tag(new THREE.Mesh(geo, [dark, cover]), 'hatch', 'Stowage hatch'));
+g.position.set((u0 - 0.5) * L, y0, zP);
 group.add(tag(g, 'hatch'));
 });
 }

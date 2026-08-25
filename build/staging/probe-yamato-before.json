@@ -1,0 +1,118 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "stempost": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 416
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 1,
+   "tris": 12
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "mast": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 36
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "waterway": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "funnel": {
+   "n": 3,
+   "boxy": 0,
+   "tris": 1344
+  },
+  "superstructure": {
+   "n": 11,
+   "boxy": 8,
+   "tris": 624
+  },
+  "searchlight": {
+   "n": 40,
+   "boxy": 8,
+   "tris": 1696
+  },
+  "turret": {
+   "n": 38,
+   "boxy": 0,
+   "tris": 2248
+  },
+  "aa": {
+   "n": 30,
+   "boxy": 6,
+   "tris": 1128
+  },
+  "aaLight": {
+   "n": 56,
+   "boxy": 8,
+   "tris": 1888
+  },
+  "catapult": {
+   "n": 8,
+   "boxy": 5,
+   "tris": 220
+  },
+  "floatplane": {
+   "n": 56,
+   "boxy": 14,
+   "tris": 1592
+  },
+  "hatch": {
+   "n": 12,
+   "boxy": 12,
+   "tris": 144
+  }
+ },
+ "byName": {
+  "rudder/Rudder": 1,
+  "superstructure/Tower level 1": 1,
+  "superstructure/Tower level 2": 1,
+  "superstructure/Tower level 3": 1,
+  "superstructure/Tower level 4": 1,
+  "superstructure/Tower level 5": 1,
+  "superstructure/Bridge glazing": 2,
+  "superstructure/Bridge": 1,
+  "searchlight/Platform bracket": 8,
+  "aa/High-angle mount": 6,
+  "aaLight/Triple 25 mm mount": 8,
+  "catapult/Aircraft catapult": 2,
+  "catapult/Launch rail": 2,
+  "floatplane/Floatplane": 6,
+  "floatplane/Canopy": 2,
+  "floatplane/Lower wing": 2,
+  "floatplane/Upper wing": 2,
+  "floatplane/Fin": 2,
+  "catapult/Aircraft crane": 1,
+  "hatch/Hatch coaming": 3,
+  "hatch/Hatch cover": 3,
+  "hatch/Stowage hatch": 6
+ }
+}
