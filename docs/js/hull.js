@@ -5541,32 +5541,120 @@ if (T.walls) {
 const hl = (T.len || T.w) / 2;
 const eaveY = baseY + T.h;
 const wt = 0.06;
+const sillH = 0.07, plateH = 0.08;
+const bandLo = baseY + sillH, bandHi = eaveY - plateH;
 for (const sgn of [-1, 1]) {
-const wall = new THREE.Mesh(new THREE.BoxGeometry(hl * 2, T.h, wt), timber);
-wall.position.set(xC, baseY + T.h / 2, sgn * (hw - wt / 2));
-tg.add(wall);
+const sill = new THREE.Mesh(plankGeo(0.10, sillH, hl * 2), timber);
+sill.rotation.y = Math.PI / 2;
+sill.position.set(xC, baseY + sillH / 2, sgn * (hw - wt / 2));
+tg.add(sill);
+const plate = new THREE.Mesh(plankGeo(0.10, plateH, hl * 2 + 0.06), timber);
+plate.rotation.y = Math.PI / 2;
+plate.position.set(xC, eaveY - plateH / 2, sgn * (hw - wt / 2));
+tg.add(plate);
 }
 for (const sgn of [-1, 1]) {
-const wall = new THREE.Mesh(new THREE.BoxGeometry(wt, T.h, hw * 2 - wt * 2), timber);
-wall.position.set(xC + sgn * (hl - wt / 2), baseY + T.h / 2, 0);
-tg.add(wall);
+const sill = new THREE.Mesh(plankGeo(0.10, sillH, hw * 2 - wt * 2), timber);
+sill.position.set(xC + sgn * (hl - wt / 2), baseY + sillH / 2, 0);
+tg.add(sill);
+const plate = new THREE.Mesh(plankGeo(0.10, plateH, hw * 2 - wt * 2), timber);
+plate.position.set(xC + sgn * (hl - wt / 2), eaveY - plateH / 2, 0);
+tg.add(plate);
 }
 for (const dx of [-1, 1]) for (const dz of [-1, 1]) {
 const px = xC + dx * (hl - B * 0.011), pz = dz * (hw - B * 0.011);
-tg.add(beamAB(new THREE.Vector3(px, baseY, pz),
-new THREE.Vector3(px, eaveY, pz), B * 0.026, B * 0.026, timber));
+tg.add(sparAB(new THREE.Vector3(px, baseY, pz),
+new THREE.Vector3(px, eaveY, pz), B * 0.0190, B * 0.0165, timber));
 }
+const wallBand = (h, len, rotY) => {
+const g = deckGeo(h, wt, len, 0.30);
+g.rotateZ(Math.PI / 2);
+if (rotY) g.rotateY(rotY);
+return new THREE.Mesh(g, timber);
+};
+const wo = 1.10, ho = 0.55;
+const headYo = eaveY - 0.28, sillYo = headYo - ho;
+const clothMatT = new THREE.MeshStandardMaterial({ color: 0xe9e2d0, roughness: 0.94,
+side: THREE.DoubleSide });
 for (const sgn of [-1, 1]) {
-const bat = new THREE.Mesh(new THREE.BoxGeometry(hl * 2, B * 0.012, B * 0.010), pale);
-bat.position.set(xC, baseY + T.h * 0.55, sgn * hw);
-tg.add(bat);
+const zW = sgn * (hw - wt / 2);
+const rotY = sgn > 0 ? Math.PI / 2 : -Math.PI / 2;
+const lo = wallBand(sillYo - bandLo, hl * 2, rotY);
+lo.position.set(xC, (bandLo + sillYo) / 2, zW);
+tg.add(lo);
+const hi = wallBand(bandHi - headYo, hl * 2, rotY);
+hi.position.set(xC, (headYo + bandHi) / 2, zW);
+tg.add(hi);
+const segL = (hl * 2 - wo) / 2;
+for (const dx of [-1, 1]) {
+const mid = wallBand(ho, segL, rotY);
+mid.position.set(xC + dx * (wo / 2 + segL / 2), (sillYo + headYo) / 2, zW);
+tg.add(mid);
+}
+const zP = sgn * (hw - wt / 2 + 0.020);
+for (const dx of [-1, 1]) {
+const jamb = new THREE.Mesh(plankGeo(0.05, 0.05, ho + 0.16), timber);
+jamb.rotation.x = Math.PI / 2;
+jamb.position.set(xC + dx * (wo / 2 + 0.025), (sillYo + headYo) / 2, zP);
+tg.add(jamb);
+}
+for (const [yF, dy] of [[headYo, 0.025], [sillYo, -0.025]]) {
+const strip = new THREE.Mesh(plankGeo(0.05, 0.05, wo + 0.26), timber);
+strip.rotation.y = Math.PI / 2;
+strip.position.set(xC, yF + dy, zP);
+tg.add(strip);
+}
+const nC = 10, cpos = [], cidx = [];
+for (let i = 0; i <= nC; i++) {
+const t = i / nC, x = xC - wo / 2 + wo * t;
+const sag = 0.05 * Math.sin(Math.PI * t) + 0.02 * Math.sin(3 * Math.PI * t + 1.0);
+const zTop = sgn * (hw - wt - 0.015);
+const zHem = sgn * (hw - wt - 0.055 - 0.03 * Math.sin(2 * Math.PI * t));
+cpos.push(x, headYo - 0.01, zTop, x, sillYo - 0.06 + sag, zHem);
+if (i) { const a = (i - 1) * 2; cidx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+}
+const cg = new THREE.BufferGeometry();
+cg.setAttribute('position', new THREE.Float32BufferAttribute(cpos, 3));
+cg.setIndex(cidx); cg.computeVertexNormals();
+tg.add(new THREE.Mesh(cg, clothMatT));
 }
 const doorMat = mats.slotDark || (mats.slotDark = new THREE.MeshStandardMaterial(
 { color: 0x17120c, roughness: 0.95 }));
-const doorH = Math.min(T.h * 0.72, 1.5);
-const door = new THREE.Mesh(new THREE.BoxGeometry(0.04, doorH, 0.72), doorMat);
-door.position.set(xC - hl, baseY + doorH / 2 + 0.06, 0);
+const doorW = 0.72, doorH = Math.min(T.h * 0.72, 1.5);
+const doorTop = bandLo + doorH;
+const endLen = hw * 2 - wt * 2, xF = xC - (hl - wt / 2);
+for (const dz of [-1, 1]) {
+const seg = wallBand(bandHi - bandLo, (endLen - doorW) / 2, 0);
+seg.position.set(xF, (bandLo + bandHi) / 2, dz * (doorW / 2 + (endLen - doorW) / 4));
+tg.add(seg);
+}
+const hdr = wallBand(bandHi - doorTop, doorW, 0);
+hdr.position.set(xF, (doorTop + bandHi) / 2, 0);
+tg.add(hdr);
+const xP = xC - hl - 0.012;
+for (const dz of [-1, 1]) {
+const jamb = new THREE.Mesh(plankGeo(0.05, 0.05, doorH + 0.10), timber);
+jamb.rotation.x = Math.PI / 2;
+jamb.position.set(xP, bandLo + doorH / 2, dz * (doorW / 2 + 0.025));
+tg.add(jamb);
+}
+const lintel = new THREE.Mesh(plankGeo(0.05, 0.05, doorW + 0.26), timber);
+lintel.position.set(xP, doorTop + 0.025, 0);
+tg.add(lintel);
+const doorG = plankGeo(doorW - 0.04, 0.035, doorH - 0.04);
+doorG.rotateX(Math.PI / 2); doorG.rotateY(Math.PI / 2);
+const door = new THREE.Mesh(doorG, doorMat);
+door.position.set(xC - hl + 0.048, bandLo + doorH / 2, 0);
 tg.add(door);
+const aft = wallBand(bandHi - bandLo, endLen, Math.PI);
+aft.position.set(xC + (hl - wt / 2), (bandLo + bandHi) / 2, 0);
+tg.add(aft);
+for (const sgn of [-1, 1]) {
+const bat = new THREE.Mesh(plankGeo(B * 0.012, B * 0.010, hl * 2), pale);
+bat.rotation.y = Math.PI / 2;
+bat.position.set(xC, baseY + T.h * 0.55, sgn * hw);
+tg.add(bat);
+}
 const ovh = Math.min(0.35, hw * 0.25);
 const pitch = 0.42;
 const ridgeY = eaveY + pitch * hw;
@@ -5574,24 +5662,30 @@ const tipY = eaveY - pitch * ovh;
 const slope = Math.hypot(hw + ovh, ridgeY - tipY);
 for (const sgn of [-1, 1]) {
 const plane = new THREE.Mesh(
-new THREE.BoxGeometry(hl * 2 + ovh * 2, 0.045, slope), pale);
+deckGeo(hl * 2 + ovh * 2, 0.045, slope, 0.30), pale);
 plane.rotation.x = sgn * Math.atan(pitch);
 plane.position.set(xC, (ridgeY + tipY) / 2 + 0.03, sgn * (hw + ovh) / 2);
 tg.add(plane);
 }
 for (const sgn of [-1, 1]) {
+const c = 0.04, apX = pitch * hw;
 const shp = new THREE.Shape();
-shp.moveTo(-hw, 0); shp.lineTo(hw, 0); shp.lineTo(0, pitch * hw); shp.closePath();
+shp.moveTo(-hw + c, 0); shp.lineTo(hw - c, 0);
+shp.lineTo(hw - c, pitch * c);
+shp.lineTo(c * 0.5, apX - pitch * c * 0.5);
+shp.lineTo(-c * 0.5, apX - pitch * c * 0.5);
+shp.lineTo(-hw + c, pitch * c); shp.closePath();
 const gable = new THREE.Mesh(
 new THREE.ExtrudeGeometry(shp, { depth: wt, bevelEnabled: false }), timber);
 gable.rotation.y = Math.PI / 2;
 gable.position.set(xC + sgn * hl - (sgn > 0 ? wt : 0), eaveY, 0);
 tg.add(gable);
 }
-const cap = new THREE.Mesh(
-new THREE.BoxGeometry(hl * 2 + ovh * 2 + 0.10, 0.07, 0.16), timber);
-cap.position.set(xC, ridgeY + 0.06, 0);
-tg.add(cap);
+const capR = new THREE.Mesh(
+plankGeo(0.16, 0.07, hl * 2 + ovh * 2 + 0.10), timber);
+capR.rotation.y = Math.PI / 2;
+capR.position.set(xC, ridgeY + 0.06, 0);
+tg.add(capR);
 } else {
 const colR = B * 0.014, eaveY = platY + 1.9, railH = 0.95;
 for (const dx of [-1, 1]) for (const dz of [-1, 1]) {

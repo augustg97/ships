@@ -1,0 +1,4 @@
+
+  FATAL  no frame named 'ship-fluyt' in the manifest
+
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current

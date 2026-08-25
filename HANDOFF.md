@@ -9079,3 +9079,78 @@ were green in r136's check, and so may carry the same sub-gate grating residue �
 surface whenever an unrelated mover carries one of those frames over the gate, and the
 stash test + last-accept-date method above is written for exactly that day.
 shipwright and shipwright-ahead are current as of this round.
+
+## Round 139 — 2026-08-24 — first the owed commit, then the yakata becomes a house a carpenter framed
+
+**First, r138 recovered:** the 80-min watchdog took it between its accepts and its closing
+confirmation (the confirm file it left was empty). The confirmation was re-run on the identical
+tree — 62/62 within tolerance, 0 BLANK (build/staging/ratchet-r139-confirm138.txt) — and r138
+was committed as 10cab05 with the recovery noted in its message. Its live stamp 1787613643 was
+verified during this round's work.
+
+**Then r138's queue head: the sekibune's walled yakata (survey class towerx16, boxPct 74 — the
+fleet's crudest) rebuilt from box slabs into carried structure, and the r117 curtain residual
+closed.** The r117 form is kept exactly — footprint 4.5 × 2.8 m, 2.0 m eaves, the ridge law
+(ridge pitch·hw over the wall-top line, eave tip pitch·ovh below it, gable hypotenuse on the
+soffit line) — and inside that envelope the house is now framed the way a wasen carpenter
+frames one: groundsills on the yagura, corner posts in one timber sill to plate (sparAB, a
+working taper), wall plates at the eave line, and every wall a seam-planked surface (deckGeo
+stood on edge — the snapBand law, board edges as geometry). One opening a side under the
+eaves, framed with jambs, head and sill timbers, and the CLOTH the Busan scroll hangs in the
+wall openings of several cabins now hangs in ours — lofted with a deterministic sag, single
+winding on DoubleSide (r118). The doorway is framed and the dark door recessed INTO the
+opening, not a plate proud of the wall. Roof boards run ridge to eave with real seams; the
+gable corners are truncated INSIDE the triangle (vertical cuts at the feet under the posts, a
+flat under the apex beneath the ridge cap) so the hypotenuse never leaves the soffit line —
+the first draft eased them outward and would have re-opened the r117 wedge, caught on paper.
+towerProvenance and the card's "Yakata, as drawn" row now say the curtain is drawn and what
+about the opening is derived (record-r139.py, both asserts hit).
+
+**Measured (rule 4, build/staging/measure-sekibune-r139.txt):** yakata envelope IDENTICAL to
+r117's chain — u 0.542–0.778, span 5.30, sole 2.63 = the fighting-deck plane, ridge 5.32 over
+water, half-breadth 1.76. The rebuild changed the inside of the envelope, not the envelope.
+**Looked at (rule 1), six angles:** port/starboard/bow/stern/quarter/plan profile set
+(Research/baselines/_profile/sekibune/) plus two furled close-ups through the r55/r58 grammar
+(&sail=furled&b=335 and b=150&l=40, build/staging/r139-yakata-{door,deck}.png): the doorway
+reads with reveal depth under the fore gable, the curtain's white cloth stands in the side
+opening, roof seams read from above, no open wedge at either gable, nothing floating.
+
+**Survey and audit:** sekibune boxPct 74 → 65, boxMeshes 304 → 288 (−16, exactly the tower
+class), tower GONE from boxyParts, floating [] — samax26 is now her only named class. Audit
+33/0 (build/staging/audit-r139.json).
+
+**Frames: solo pairs, and two traps relived.** ship-sekibune moved 0.210%: cluster census put
+one cluster exactly on the house and one at the right frame edge + corner — pixels this change
+cannot reach. The stash test at clean HEAD read 0.040%, under the gate: the r138 fluyt 32.00
+redraw at the next berth surfacing from under the gate, the SECOND occurrence of the
+r138-documented mechanism (this baseline was last accepted 2026-08-19), plus r57 corner
+ghosts. ⚠ Then both old traps in new coats, both caught: (1) `check | tail -3; echo EXIT:$?`
+reports TAIL's status — the r71 agreeing-status-line class; re-run to a FILE and test the
+checker's own exit. (2) The stash-test check ran between the first check and its accept, so
+the accept promoted the STASH-TEST capture (clean HEAD) — the r57 accept-consumes-last-check
+trap; FRAME-LOG carries the correction entry and the second accept promoted the true
+post-edit frame. Final state: ship-sekibune solo 0.000% EXIT:0; ship-panokseon solo 0.000%
+EXIT:0 (the near neighbour that could see the yakata). There is no ship-fluyt frame; the wide
+shipwright frames hold the fluyt at their LEFT EDGE (r138 accepts), so the sekibune one berth
+further is out of frame — reasoned, not looked: **the opening full check next round confirms
+fleet-wide, the r121 pattern. If anything beyond ship-sekibune moved, this round owns it.**
+
+**Rule 0, written on the r139-yakata-door capture:** it reads as a rendered ship at anchor —
+hull, furled rig, sea and panels composed per pixel. Three facts a viewer can read off it: the
+commander's cabin is a plank house with a framed doorway facing forward and its door set back
+into the reveal; the fighting deck is walled with tate-ita pierced by sama loopholes; the
+fleet list berths her at 25 m between the panokseon at 32 and the fluyt at 32.
+
+**Deployed: stamp 1787622276.** Live verify below in the commit; r138's 1787613643 was
+confirmed live before this round's build.
+
+**Next, in order:** (1) The opening full 62-frame check — this round's solo-pair closing is
+partial by the watchdog, and the wide-frame reasoning above is unverified. (2) sekibune
+samax26 — the last named class on the fleet's crudest hull: the sama as real slots with depth
+in the tate-ita rather than dark plates proud of the wall (the r136 grating-hole law applies).
+(3) panokseon 58 next in the survey. (4) Standing residuals unchanged from r138 (gundeck
+normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor
+frame, myeongnyang Action baseline, Preussen trucks — the yakata curtain LEAVES the list,
+closed this round), plus the battle-rig record question holding three items. (5) The
+under-gate residue class: ship-junk and ship-endurance baselines still predate r136; ship-
+sekibune is current as of this round and its fluyt residue is absorbed.

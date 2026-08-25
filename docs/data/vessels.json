@@ -1898,7 +1898,7 @@
     ],
     [
      "Yakata, as drawn",
-     "the commander's cabin abaft the mast — a closed plank house, 4.5 × 2.8 m to 2.0 m eaves under a ridged plank roof. The form is the Busan scroll's; the dimensions are derived"
+     "the commander's cabin abaft the mast — a closed plank house, 4.5 × 2.8 m to 2.0 m eaves under a ridged plank roof, cloth hung in a wall opening each side as the scroll hangs it on several cabins. The form and the cloth are the Busan scroll's; the dimensions and the opening's place are derived"
     ],
     [
      "Maku, as drawn",
@@ -2032,7 +2032,7 @@
      "name": "Yakata",
      "what": "The commander's cabin standing on the yagura abaft the mast — a closed plank house under a ridged plank roof, which is the form the Busan scroll of 1593 draws on hull after hull of the anchored fleet. The ship is commanded from it; in the Edo peace it grew into the lacquered state cabin of the gozabune."
     },
-    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull — the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale — good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; the curtain is not drawn, and that simplification is recorded here.",
+    "towerProvenance": "The WALLED form is attested: the Busan boat-barrier scroll of 1593 (Univ. of Tokyo), this card's own plate, draws the yakata as a closed plank house with a ridged roof on hull after hull — the open pavilion drawn before round 117 was the class default (the panokseon's janggundae), not this plate. The PLAN is derived: no Sengoku sekibune survives, so the 4.5 x 2.8 m footprint, the 2.0 m eaves and the roof pitch are read off the scroll's hulls at ship scale — good to the nearest half metre, no finer. The scroll also hangs cloth in the wall openings of several cabins; since round 139 one opening a side is drawn with the cloth hung in it. The OPENING's size and place are derived — no cabin interior is attested, and the scroll resolves the openings only to ship scale — the cloth itself is the scroll's.",
     "makuProvenance": "The CLOTH is attested: the Busan boat-barrier scroll of 1593, this card's own plate, hangs a white band under a dark scalloped hem along the yagura band on hull after hull of the anchored fleet, and the atakebune amidships wears the same dress inverted — dark with white scallops — under sail. The scroll draws NO plank belt at this band, so gunDeck.walls (the panokseon's sangjang belt, round 118) is refuted for this class by its own plate. The DIMENSIONS are derived: the scroll stretches the upperworks, so the band's depth in metres cannot be read off it — the drawn cloth fills the band the model's own rail and deck bound, and the ~0.7 m scallop bay is read off the scroll at its ~16 px/m (a ~25 m hull drawn ~400 px long), good to the nearest half metre, no finer. Whether a sekibune cruised with the maku hung is not attested — the scroll's fleet is anchored, the atakebune wears hers under sail — and the ends of the band are left open: the plate shows the cloth only in broadside.",
     "steering": "stern"
    }
