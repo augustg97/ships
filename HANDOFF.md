@@ -9458,3 +9458,68 @@ aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), 
 battle-rig record question holding three items. (5) The under-gate residue class now includes
 ship-galleass/ship-fluyt neighbour-berth traces (this round) alongside ship-junk and
 ship-endurance (pre-r136 baselines).
+
+## Round 144 — 2026-08-25 — the ro blade becomes the one timber a sculler actually swings
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey carried
+the task.** The opening full 62-frame check ran at HEAD: 62/62 within tolerance, 0 BLANK,
+ship-panokseon 0.000 / ship-sekibune 0.000, ship-galleass 0.044% under gate and no fluyt frame
+exists — r143's neighbour-berth caution is CLEARED by the full check, top mover fleet-wide
+0.049%. ⚠ One discipline catch, the r140 class relived and this time caught in the act:
+hull.js was edited while the first opening run was still rendering. The run was killed before
+it scored anything, the edit stashed, the check re-run clean at HEAD, and the edit re-applied
+only after 62/62 — the numbers above are the clean run's. Check first, then edit, and if the
+order breaks, the check is void: kill it, do not read it.
+
+**The class closed: the fleet's largest named box class, 116 boxes across both ro hulls.**
+Each ro blade was a limb box with a wider face box overlaid near the tip — a stepped widening
+at 0.54·outb that no sculling blade has, two meshes pretending to be one timber. Now ONE
+lofted blade per hull (all a hull's ro are the same timber, so 18 and 40 meshes share one
+geometry): six stations along the old boxes' own envelope, section deepening continuously
+from B*0.033 at the pin to B*0.052 at 0.82·outb then easing to the tip, the face's B*0.004
+drop carried outboard, end grain closed both ends, single winding on a DoubleSide clone (the
+r118 lesson). The loom stays a cylinder because a loom IS a round spar; the animator is
+untouched because it swings the GROUP and userData.oar is byte-identical.
+
+**Audit rule r144: overlap convicts the step, in the group's own frame.** Extending the r115
+scull rule: with +z the blade run (so the rake cannot alias in), exactly TWO timbers hang on
+one pin — blade and loom — no two may share more than 15% of the blade run (an overlaid face
+plate is how a step is drawn), and the blade must reach 0.95·outb. Injection with hull.js
+stashed convicted the old form on both hulls — "18 of 18 — two timbers overlap 2.09 m of a
+4.65 m blade run" and "40 of 40 — 1.67 m of 3.72 m", which is the face box's 0.45·outb
+exactly — no other rule fired; popped, 33/0.
+
+**Measured: the deltas are the blades' own and nothing else's.** Survey panokseon meshes
+303→285 (−18, one per oar), boxes 116→80 (−36 exact), boxPct 38→28, tris +360 = 18 oars ×
+(44 loft − 24 box) exactly; sekibune 335→295, 174→94 (−80 exact), 52→32, +800 = 40 × 20.
+31 of 33 survey rows BYTE-identical, including galleass/galley/trireme — the sweep branch's
+null test. boxyParts empty on both hulls. measure_ship: oar-row u-extent and half-breadth
+identical to 0.01 m; the low point drops 5 cm (panokseon −0.71→−0.76) because the eased tip
+section now reaches the tip itself, where the old face box stopped 1.5% short.
+
+**Looked at (rule 1, build/staging/oar-r144/, three bearings per hull before/after):** the
+before blades carry a visible shoulder where the face slab began and end in a square-cut
+slab; the after blades are one continuous timber, edges tapering smoothly to an eased tip —
+clearest at panokseon b135 lower-left fan and sekibune b100 starboard fan. Rule 0 on the
+panokseon after-b135: reads as a rendered ship, and a viewer can name the ro fan trailing
+aft into the water each blade one tapered timber, the black chongtong muzzles standing in
+their own ports, the lookout tower and ladder above the board roof.
+
+**Frames: closing pairs one at a time, no intervening check between check and accept.**
+ship-panokseon 0.176%/0.065 — diff read: nine blade outlines in the oar band, nothing else —
+accepted, re-check 0.000 EXIT:0. ship-sekibune 0.276%/0.089 — her whole fan PLUS the
+panokseon's sternmost ro in the neighbour berth (the r143 mechanism, same class change) —
+accepted, re-check 0.000 EXIT:0.
+
+**Deployed: stamp 1787642862**, live verify in the commit below.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) The gunwale-deck hulls' named
+classes are DONE (clamp r143, oar r144, walls r140–142); the survey's crudest-first now heads
+with the carrier (169 boxes, 58 boxPct, boxyParts unnamed) — run the per-part probe on her
+and take the crudest named class. Yamato's hatchx12 is a named candidate one row down. The
+container stacks on container/ever-given are boxes in life, not faults. The sekibune maku hem
+no longer ranks. (3) Standing residuals unchanged from r143 (gundeck normals, Endurance
+forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang
+Action baseline, Preussen trucks), plus the battle-rig record question holding three items.
+(4) The under-gate residue class: ship-junk and ship-endurance (pre-r136 baselines) still
+carry sub-gate traces.

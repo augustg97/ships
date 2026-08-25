@@ -5100,6 +5100,36 @@ const pdMid = AP && surfacePoint(S, H, 0.5, 1.0);
 const apZ = AP && Math.abs(pdMid[2]) + AP.out;
 const apY = AP && pdMid[1] + B * 0.115;
 const RO = S.oarStyle === 'ro';
+const roInb = oarLen * 0.38, roOutb = oarLen * 0.62;
+let bladeRo = null, matRo = null;
+if (RO) {
+matRo = mat.clone(); matRo.side = THREE.DoubleSide;
+const prof = [
+[0.00, 0.0050, 0.0165,  0.0000],
+[0.20, 0.0049, 0.0180, -0.0010],
+[0.42, 0.0046, 0.0215, -0.0025],
+[0.62, 0.0043, 0.0250, -0.0038],
+[0.82, 0.0039, 0.0260, -0.0040],
+[1.00, 0.0033, 0.0205, -0.0040]];
+const bp = { pos: [], idx: [] };
+const quadB = (a2, b2, c2, d2) => { const k = bp.pos.length / 3;
+bp.pos.push(...a2, ...b2, ...c2, ...d2);
+bp.idx.push(k, k + 1, k + 2, k, k + 2, k + 3); };
+const rings = prof.map(([f, w, d2, y]) => { const z = f * roOutb,
+xw = w * B, yd = d2 * B, yc = y * B;
+return [[-xw, yc - yd, z], [xw, yc - yd, z],
+[xw, yc + yd, z], [-xw, yc + yd, z]]; });
+for (let s = 0; s < rings.length - 1; s++)
+for (let e = 0; e < 4; e++) {
+const e2 = (e + 1) % 4;
+quadB(rings[s][e], rings[s + 1][e], rings[s + 1][e2], rings[s][e2]);
+}
+quadB(...rings[0]);
+quadB(...[...rings[rings.length - 1]].reverse());
+bladeRo = new THREE.BufferGeometry();
+bladeRo.setAttribute('position', new THREE.Float32BufferAttribute(bp.pos, 3));
+bladeRo.setIndex(bp.idx); bladeRo.computeVertexNormals();
+}
 for (let bank = 0; bank < n; bank++) {
 const v = RO ? 0.96 : 0.70 + bank * 0.11;
 const out = 1.0 + bank * 0.22;
@@ -5113,16 +5143,9 @@ const p = surfacePoint(S, H, u, Math.min(0.99, v));
 for (const sgn of [-1, 1]) {
 const o = new THREE.Group();
 if (RO) {
-const inb = oarLen * 0.38, outb = oarLen * 0.62;
+const inb = roInb, outb = roOutb;
 const DOG = 0.35;
-const limb = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.010, B * 0.036, outb), mat);
-limb.position.z = outb / 2;
-o.add(limb);
-const face = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.008, B * 0.052, outb * 0.45), mat);
-face.position.set(0, -B * 0.004, outb * 0.76);
-o.add(face);
+o.add(new THREE.Mesh(bladeRo, matRo));
 const loom = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.011, B * 0.014, inb, 6), mat);
 loom.rotation.x = Math.PI / 2 + DOG;

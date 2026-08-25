@@ -8046,6 +8046,45 @@ function buildOars(S, group, mat) {
      record cashed, for her and for the panokseon whose card says the same word.
      Turnbull FSFE2; both cards' own texts carry the scull. */
   const RO = S.oarStyle === 'ro';
+  /* ── AND THE BLADE IS ONE SCARFED TIMBER, NOT A STEP (round 144) ─────────────────────
+     Until r144 each ro blade was a limb box with a wider face box overlaid near the tip —
+     a stepped widening at 0.54·outb that no sculling blade has. A ro's blade is hewn and
+     scarfed from one timber: the face deepens CONTINUOUSLY from the loom scarf to its
+     widest just short of the tip, then eases to the tip itself. One loft, shared by every
+     blade in the hull because they are the same timber, stations inside the old boxes'
+     own envelope — depth B*0.033 at the pin to B*0.052 at 0.82·outb, the face's B*0.004
+     drop carried out with it — end grain closed both ends, single winding on DoubleSide
+     (the r118 normals lesson). The loom stays a cylinder because a loom IS a round spar. */
+  const roInb = oarLen * 0.38, roOutb = oarLen * 0.62;
+  let bladeRo = null, matRo = null;
+  if (RO) {
+    matRo = mat.clone(); matRo.side = THREE.DoubleSide;
+    const prof = [                     /* [z/outb, halfW/B, halfD/B, yOff/B] */
+      [0.00, 0.0050, 0.0165,  0.0000],
+      [0.20, 0.0049, 0.0180, -0.0010],
+      [0.42, 0.0046, 0.0215, -0.0025],
+      [0.62, 0.0043, 0.0250, -0.0038],
+      [0.82, 0.0039, 0.0260, -0.0040],
+      [1.00, 0.0033, 0.0205, -0.0040]];
+    const bp = { pos: [], idx: [] };
+    const quadB = (a2, b2, c2, d2) => { const k = bp.pos.length / 3;
+      bp.pos.push(...a2, ...b2, ...c2, ...d2);
+      bp.idx.push(k, k + 1, k + 2, k, k + 2, k + 3); };
+    const rings = prof.map(([f, w, d2, y]) => { const z = f * roOutb,
+        xw = w * B, yd = d2 * B, yc = y * B;
+      return [[-xw, yc - yd, z], [xw, yc - yd, z],
+              [xw, yc + yd, z], [-xw, yc + yd, z]]; });
+    for (let s = 0; s < rings.length - 1; s++)
+      for (let e = 0; e < 4; e++) {
+        const e2 = (e + 1) % 4;
+        quadB(rings[s][e], rings[s + 1][e], rings[s + 1][e2], rings[s][e2]);
+      }
+    quadB(...rings[0]);                                    /* pin end grain */
+    quadB(...[...rings[rings.length - 1]].reverse());      /* tip end grain */
+    bladeRo = new THREE.BufferGeometry();
+    bladeRo.setAttribute('position', new THREE.Float32BufferAttribute(bp.pos, 3));
+    bladeRo.setIndex(bp.idx); bladeRo.computeVertexNormals();
+  }
   for (let bank = 0; bank < n; bank++) {
     const v = RO ? 0.96 : 0.70 + bank * 0.11;         // a ro pivots ON the rail; sweep banks ride the side
     const out = 1.0 + bank * 0.22;                    // and further outboard
@@ -8061,18 +8100,11 @@ function buildOars(S, group, mat) {
       for (const sgn of [-1, 1]) {
         const o = new THREE.Group();
         if (RO) {
-          const inb = oarLen * 0.38, outb = oarLen * 0.62;
+          const inb = roInb, outb = roOutb;
           const DOG = 0.35;                           // the scarf angle between the limbs
-          /* the blade limb: one long flat timber, face near-vertical, widening a little
-             toward the tip — built along +Z with the pivot pin at the origin */
-          const limb = new THREE.Mesh(
-            new THREE.BoxGeometry(B * 0.010, B * 0.036, outb), mat);
-          limb.position.z = outb / 2;
-          o.add(limb);
-          const face = new THREE.Mesh(
-            new THREE.BoxGeometry(B * 0.008, B * 0.052, outb * 0.45), mat);
-          face.position.set(0, -B * 0.004, outb * 0.76);
-          o.add(face);
+          /* the blade: the shared loft above — one flat timber, face near-vertical,
+             widening continuously toward the tip, pivot pin at the origin */
+          o.add(new THREE.Mesh(bladeRo, matRo));
           /* the loom, scarfed up-inboard from the pin to the sculler's hands */
           const loom = new THREE.Mesh(
             new THREE.CylinderGeometry(B * 0.011, B * 0.014, inb, 6), mat);

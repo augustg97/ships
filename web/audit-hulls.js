@@ -1115,8 +1115,8 @@
        pose (its own buildShip instances never animate), so the tolerances are the rest
        pose's own. */
     if (H.oarStyle === 'ro') {
-      let nRo = 0, bad = 0, first = '';
-      const tip = new THREE.Vector3(), pin = new THREE.Vector3();
+      let nRo = 0, bad = 0, first = '', badF = 0, firstF = '';
+      const tip = new THREE.Vector3(), pin = new THREE.Vector3(), cnr = new THREE.Vector3();
       g.updateMatrixWorld(true);
       g.traverse(o => {
         const d = o.userData && o.userData.oar;
@@ -1130,9 +1130,50 @@
         } else if (tip.y > 0.15 || tip.y < -(H.draught + 0.6)) {
           bad++; if (!first) first = `tip at ${tip.y.toFixed(2)} m over water (draught ${H.draught})`;
         }
+        /* ── AND THE BLADE IS ONE SCARFED TIMBER (round 144). A ro's blade widens
+           CONTINUOUSLY from the loom scarf to the tip — a step is not a scarf, and
+           the way a step gets drawn is a wider face plate OVERLAID on the limb.
+           Conviction is by OVERLAP, in the group's own frame where +z is the blade
+           run (so the rake cannot alias into the measure): exactly two timbers hang
+           on the pin — blade and loom — no two of them may share more than 15% of
+           the blade run, and the blade must REACH its own recorded tip. The r144
+           pre-form convicts itself twice over: three meshes on the pin, the face
+           plate sharing 0.45·outb of the run with the limb inside it. */
+        const kids = [];
+        o.traverse(m => { if (m.isMesh) kids.push(m); });
+        const ext = kids.map(m => {
+          m.updateMatrix();
+          const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox; let z0 = Infinity, z1 = -Infinity;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+                z0 = Math.min(z0, cnr.z); z1 = Math.max(z1, cnr.z);
+              }
+          return [z0, z1];
+        });
+        let ovl = 0;
+        for (let a2 = 0; a2 < ext.length; a2++)
+          for (let b2 = a2 + 1; b2 < ext.length; b2++)
+            ovl = Math.max(ovl,
+              Math.min(ext[a2][1], ext[b2][1]) - Math.max(ext[a2][0], ext[b2][0]));
+        const reach = Math.max(...ext.map(e => e[1]));
+        if (ovl > 0.15 * d.outb) {
+          badF++; if (!firstF) firstF = `two timbers overlap ${ovl.toFixed(2)} m of a `
+            + `${d.outb.toFixed(2)} m blade run`;
+        } else if (kids.length !== 2) {
+          badF++; if (!firstF) firstF = `${kids.length} meshes on one pin for a blade and a loom`;
+        } else if (reach < 0.95 * d.outb) {
+          badF++; if (!firstF) firstF = `blade reaches ${reach.toFixed(2)} m of its `
+            + `${d.outb.toFixed(2)} m run`;
+        }
       });
       if (!nRo) say(v.id, 'ro declared but no oars drawn', 'oarStyle ro with no oar groups');
       else if (bad) say(v.id, 'ro drawn as sweeps', `${bad} of ${nRo} oars fail the scull test — ${first}`);
+      if (nRo && badF)
+        say(v.id, 'the ro blade is a stepped overlay, not one scarfed timber',
+            `${badF} of ${nRo} — ${firstF}`);
     }
 
     /* ── THE RECORD'S GUNS FIRE THE WAY THE RECORD SAYS (round 116). Round 88 recorded
