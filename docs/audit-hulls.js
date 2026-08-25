@@ -534,6 +534,37 @@ if (bad) say(v.id, 'oar-deck ports are not openings through the belt',
 `${bad} of ${shot} passage rays wrong — ${first}`);
 }
 }
+if (!H.apostis) {
+const clamps = [];
+g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.name === 'Deck clamp') clamps.push(o); });
+if (!clamps.length)
+say(v.id, 'a fighting deck with no clamp under its edge',
+'gunDeck on a frameless hull with no Deck clamp mesh');
+else {
+const HSc = SHIPS_HULL.hullSurface(H);
+const GDc = H.gunDeck;
+const xFc = SHIPS_HULL.surfacePoint(H, HSc, GDc.from, 1.0)[0];
+const xTc = SHIPS_HULL.surfacePoint(H, HSc, GDc.to, 1.0)[0];
+const run = Math.abs(xTc - xFc), stW = run / 22;
+let badC = 0, firstC = '';
+for (const m of clamps) {
+const bb = new THREE.Box3().setFromObject(m);
+const span = bb.max.x - bb.min.x;
+if (span < run - stW) {
+badC++;
+if (!firstC) firstC = `a clamp mesh spans ${span.toFixed(2)} m of a `
++ `${run.toFixed(2)} m run`;
+}
+}
+if (clamps.length !== 2 && !firstC)
+firstC = `${clamps.length} clamp meshes for two sides`;
+if (badC || clamps.length !== 2)
+say(v.id, 'the deck clamp is a chain, not a bent timber',
+`${badC} of ${clamps.length} clamp meshes short of the run — ${firstC}`);
+}
+}
 {
 const WALL = ['Bulwark', 'End bulwark', 'Screen', 'Tate-ita'];
 const wallB = new THREE.Box3(); wallB.makeEmpty(); let nWall = 0;

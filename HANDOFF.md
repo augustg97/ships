@@ -9393,3 +9393,68 @@ QM2 aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen truck
 battle-rig record question holding three items. (4) The under-gate residue class: ship-junk
 and ship-endurance baselines still predate r136 — stash-test before blaming your own change
 if either berth's neighbourhood moves.
+
+## Round 143 — 2026-08-24 — the clamp becomes the bent timber the walls always tucked into
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey carried
+the task.** The opening full 62-frame check ran BEFORE any edit: 62/62 within tolerance,
+0 BLANK, ship-panokseon 0.000 — r142's closing confirmed fleet-wide, the r140 discipline held.
+
+**The class named by probe, then closed.** A per-part probe over both gunwale-deck hulls named
+their boxy classes exactly: panokseon 160 boxes led by Deck clamp x44 (her largest), sekibune
+218 led by oar x80 with Deck clamp x44 second. The clamp — the fore-and-aft timber under the
+fighting-deck lip that the r140 sama wall, r141 gun-port bulwark and r142 sangjang belt all
+tuck their heads into — was still N=22 chord boxes a side from the shared `gunDeck && !apostis`
+branch: a kink, a wedge gap and its own facet shading at every joint. It is now ONE lofted bent
+timber per side, stations the loft's own, section where every chord's section was (B*0.030
+deep, B*0.028 athwart, axis at gdY−B*0.016 / halfW−B*0.014), end grain closed, single winding
+on DoubleSide (the r118 normals lesson). Stanchions stay discrete boxes because stanchions ARE
+discrete posts; the class-default segment bulwark branch (no sama, no guns) is untouched in
+form.
+
+**Audit rule r143: span convicts the chain, because passage cannot tell two solid forms
+apart.** Inside the gunDeck rules, `!apostis` scope: every mesh tagged 'Deck clamp' must span
+the GD.from..GD.to run (x-extent within one station's width, expectation from record +
+surfacePoint, r113), and there must be exactly two. Injection test with hull.js alone stashed:
+the old form convicted itself on BOTH hulls — "44 of 44 clamp meshes short of the run — a
+clamp mesh spans 1.12 m of a 21.39 m run" — and no one else fired; popped, 33/0.
+
+**Measured: one diff line per hull, the clamp row itself.** Panokseon Deck clamp y-band
+3.28–3.62 → 3.31–3.59 (= B*0.030 exactly; the old band was fatter by the chords' tilt-AABB),
+len 21.47→21.39 (the chords' end-overshoot leaving), half-breadth 5.20→5.20 IDENTICAL.
+Sekibune the same signature: band 2.44–2.60 = B*0.030 on B 5.0, half 2.85 identical. Envelope
+unmoved on both. **Survey:** panokseon meshes 345→303 / boxes 160→116 (−42/−44 exact,
+boxPct 46→38), sekibune 377→335 / 218→174 (−42/−44 exact, 58→52), tris −168 each — precisely
+44 chords x 12 tris out, 2 lofts x 180 tris in. Galleass row byte-identical (the apostis
+branch's null-test), her solo frame 0.044% ok.
+
+**Looked at (rule 1, build/staging/clamp-r143/):** before-b065 showed the fault plainly — the
+band under the deck lip a chain of bricks, each chord catching the light at its own angle;
+after-b065 one continuous timber with an unbroken highlight along its top arris, the stanchion
+heads standing in front of it no longer drowned among joints; after-b090 the timber sweeps the
+deck-edge curve round the bow in one piece; sekibune obliques clean. Rule 0 on the after-b090:
+reads as a rendered ship, and a viewer can name the bent timber carrying the deck edge round
+the bow, the muzzles standing in their own ports, the ro pivoting under the belt's port row.
+
+**Frames:** opening 62/62 green (above). Closing pairs, one frame at a time, no intervening
+check between check and accept: ship-panokseon 0.233%/0.048 — diff read, one thin line along
+the clamp band alone — accepted, re-check 0.000 EXIT:0; ship-sekibune 0.131%/0.036 — her
+clamp line PLUS a faint patch at the frame's left edge, which is the PANOKSEON'S STERN in the
+neighbour berth carrying the same class change — accepted, re-check 0.000 EXIT:0.
+⚠ The neighbour-berth mechanism cuts the other way too: ship-galleass passed at 0.044% and
+ship-fluyt was not solo-checked, so either baseline may now hold a sub-gate trace of a
+neighbour's clamp (the r138 under-gate class). Next round's opening full check owns
+confirming; stash-test before blaming your own change if those berths' neighbourhoods move.
+
+**Deployed: stamp 1787637638**, live verify in the commit below.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) The oar class — the fleet's
+largest remaining named box class: the ro's blade is a limb box with a face box overlaid (a
+stepped widening no scarfed sculling blade has), 36 boxes on the panokseon + 80 on the
+sekibune; one tapered blade loft closes both (the animator swings the GROUP, so userData.oar
+is untouched). (3) Sekibune maku hem x52 if the probe still ranks it. (4) Standing residuals
+unchanged from r142 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, QM2
+aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus the
+battle-rig record question holding three items. (5) The under-gate residue class now includes
+ship-galleass/ship-fluyt neighbour-berth traces (this round) alongside ship-junk and
+ship-endurance (pre-r136 baselines).

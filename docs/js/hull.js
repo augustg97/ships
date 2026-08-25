@@ -5322,23 +5322,47 @@ const surfY = gdY + B * 0.007;
 const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
 const nSama = Math.max(0, GD.loops | 0);
 const nG = Math.max(0, GD.gunsPerSide | 0);
+const timberC = timber.clone(); timberC.side = THREE.DoubleSide;
 for (const sgn of [-1, 1]) {
 for (let i = 0; i <= N; i += 2) {
 const a = new THREE.Vector3(sx[i], railY[i], sgn * (halfW[i] - over));
 const b = new THREE.Vector3(sx[i], gdY, sgn * (halfW[i] - B * 0.020));
 group.add(tag(beamAB(a, b, B * 0.020, B * 0.020, timber), 'gundeck', 'Stanchion'));
 }
+{
+const cvh = B * 0.015, cah = B * 0.014, cyC = gdY - B * 0.016;
+const zCl = i => halfW[i] - B * 0.014;
+const cp = { pos: [], idx: [] };
+const quadCl = (a2, b2, c2, d2) => { const k = cp.pos.length / 3;
+cp.pos.push(...a2, ...b2, ...c2, ...d2);
+cp.idx.push(k, k + 1, k + 2, k, k + 2, k + 3); };
 for (let i = 0; i < N; i++) {
-const ca = new THREE.Vector3(sx[i], gdY - B * 0.016, sgn * (halfW[i] - B * 0.014));
-const cb = new THREE.Vector3(sx[i + 1], gdY - B * 0.016, sgn * (halfW[i + 1] - B * 0.014));
-group.add(tag(beamAB(ca, cb, B * 0.030, B * 0.028, timber), 'gundeck', 'Deck clamp'));
-if (!nSama && !nG) {
+const xA = sx[i], xB = sx[i + 1], zA = zCl(i), zB = zCl(i + 1);
+quadCl([xA, cyC + cvh, sgn * (zA - cah)], [xB, cyC + cvh, sgn * (zB - cah)],
+[xB, cyC + cvh, sgn * (zB + cah)], [xA, cyC + cvh, sgn * (zA + cah)]);
+quadCl([xA, cyC - cvh, sgn * (zA - cah)], [xB, cyC - cvh, sgn * (zB - cah)],
+[xB, cyC - cvh, sgn * (zB + cah)], [xA, cyC - cvh, sgn * (zA + cah)]);
+quadCl([xA, cyC - cvh, sgn * (zA + cah)], [xB, cyC - cvh, sgn * (zB + cah)],
+[xB, cyC + cvh, sgn * (zB + cah)], [xA, cyC + cvh, sgn * (zA + cah)]);
+quadCl([xA, cyC - cvh, sgn * (zA - cah)], [xB, cyC - cvh, sgn * (zB - cah)],
+[xB, cyC + cvh, sgn * (zB - cah)], [xA, cyC + cvh, sgn * (zA - cah)]);
+}
+for (const iE of [0, N])
+quadCl([sx[iE], cyC - cvh, sgn * (zCl(iE) - cah)],
+[sx[iE], cyC - cvh, sgn * (zCl(iE) + cah)],
+[sx[iE], cyC + cvh, sgn * (zCl(iE) + cah)],
+[sx[iE], cyC + cvh, sgn * (zCl(iE) - cah)]);
+const cg2 = new THREE.BufferGeometry();
+cg2.setAttribute('position', new THREE.Float32BufferAttribute(cp.pos, 3));
+cg2.setIndex(cp.idx); cg2.computeVertexNormals();
+group.add(tag(new THREE.Mesh(cg2, timberC), 'gundeck', 'Deck clamp'));
+}
+if (!nSama && !nG) for (let i = 0; i < N; i++) {
 const ba = new THREE.Vector3(sx[i], surfY + shH / 2, sgn * (halfW[i] - B * 0.006));
 const bb = new THREE.Vector3(sx[i + 1], surfY + shH / 2, sgn * (halfW[i + 1] - B * 0.006));
 group.add(tag(beamAB(ba, bb, shH, B * 0.012, timber), 'gundeck', 'Bulwark',
 'Heavy plank, chest-high, around the whole fighting deck — the rowers below it, '
 + 'the marines behind it, and the reason boarding a panokseon means climbing.'));
-}
 }
 }
 for (const uE of [GD.from, GD.to]) {

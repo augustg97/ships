@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-galleass                http://localhost:8149/?frozen=1#v=ship&s=galleass
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-galleass                   0.044%     0.010  ok
+
+  all frames within tolerance.
+

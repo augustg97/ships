@@ -1,0 +1,144 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "stempost": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 416
+  },
+  "wale": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 960
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 1,
+   "tris": 12
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "mast": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 18
+  },
+  "top": {
+   "n": 5,
+   "boxy": 4,
+   "tris": 104
+  },
+  "yard": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 288
+  },
+  "sail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1120
+  },
+  "lift": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 16
+  },
+  "sheet": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 16
+  },
+  "tack": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 16
+  },
+  "halyard": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 16
+  },
+  "stay": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 24
+  },
+  "brace": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 16
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "waterway": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "grating": {
+   "n": 9,
+   "boxy": 3,
+   "tris": 4244
+  },
+  "capstan": {
+   "n": 18,
+   "boxy": 8,
+   "tris": 544
+  },
+  "oar": {
+   "n": 120,
+   "boxy": 80,
+   "tris": 1920
+  },
+  "gundeck": {
+   "n": 31,
+   "boxy": 26,
+   "tris": 2000
+  },
+  "maku": {
+   "n": 54,
+   "boxy": 52,
+   "tris": 608
+  },
+  "sama": {
+   "n": 4,
+   "boxy": 0,
+   "tris": 260
+  },
+  "tower": {
+   "n": 45,
+   "boxy": 0,
+   "tris": 1864
+  }
+ },
+ "byName": {
+  "rudder/Rudder": 1,
+  "top/Top": 4,
+  "grating/Grating": 3,
+  "capstan/Capstan": 8,
+  "oar/Oars": 80,
+  "gundeck/Stanchion": 24,
+  "gundeck/End bulwark": 2,
+  "maku/Maku hem": 52
+ }
+}

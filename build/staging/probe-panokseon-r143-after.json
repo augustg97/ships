@@ -1,0 +1,143 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "bowtransom": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 256
+  },
+  "sterntransom": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 256
+  },
+  "wale": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 960
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 16
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "mast": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 36
+  },
+  "mastband": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 112
+  },
+  "sheave": {
+   "n": 6,
+   "boxy": 4,
+   "tris": 112
+  },
+  "yard": {
+   "n": 14,
+   "boxy": 0,
+   "tris": 672
+  },
+  "sail": {
+   "n": 12,
+   "boxy": 0,
+   "tris": 21600
+  },
+  "sheet": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 96
+  },
+  "halyard": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 32
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "waterway": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "grating": {
+   "n": 9,
+   "boxy": 3,
+   "tris": 10400
+  },
+  "capstan": {
+   "n": 18,
+   "boxy": 8,
+   "tris": 544
+  },
+  "boat": {
+   "n": 3,
+   "boxy": 2,
+   "tris": 2320
+  },
+  "oar": {
+   "n": 54,
+   "boxy": 36,
+   "tris": 864
+  },
+  "gundeck": {
+   "n": 31,
+   "boxy": 26,
+   "tris": 1640
+  },
+  "sangjang": {
+   "n": 8,
+   "boxy": 2,
+   "tris": 1868
+  },
+  "gun": {
+   "n": 28,
+   "boxy": 14,
+   "tris": 840
+  },
+  "tower": {
+   "n": 73,
+   "boxy": 21,
+   "tris": 1628
+  }
+ },
+ "byName": {
+  "sheave/Masthead sheave": 4,
+  "grating/Grating": 3,
+  "capstan/Capstan": 8,
+  "boat/Boat skids": 2,
+  "oar/Oars": 36,
+  "gundeck/Stanchion": 24,
+  "gundeck/End bulwark": 2,
+  "sangjang/Oar-deck end wall, forward": 1,
+  "sangjang/Oar-deck end wall, aft": 1,
+  "gun/Gun port": 2,
+  "gun/Deck piece": 12,
+  "tower/Commander's tower": 21
+ }
+}
