@@ -2688,6 +2688,51 @@
             'abutting, not a lofted body');
     }
 
+    /* ⚠ A WING PLATFORM STANDS ON A TAPERING WEB, NOT ON A SLAB (round 149). Each
+       searchlight platform hangs off the pagoda on a bracket, and a cantilever bracket
+       is deep at the tower face and thins to a toe under the platform rim — a web whose
+       depth at the root is at least twice its depth at the free end, plated rather than
+       boxed. The convicted form was one 1.1 × 0.9 × 2.6 box, the same depth at the
+       tower as at its free end, which no cantilever web is. Measured on the bracket's
+       own geometry in mesh-local coordinates — the port meshes share the starboard
+       geometry under a PI turn about y (r118), which only swaps the two ends, so the
+       root/toe read is taken as max/min of the ends and holds on both sides. */
+    if (H.searchlights) {
+      let bkBad = 0, bkN = 0, bkNote = '';
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Platform bracket')
+          return;
+        bkN++;
+        const pos = o.geometry.attributes.position;
+        const bkTris = o.geometry.index ? o.geometry.index.count / 3 : pos.count / 3;
+        let zLo = Infinity, zHi = -Infinity;
+        for (let i = 0; i < pos.count; i++) {
+          zLo = Math.min(zLo, pos.getZ(i)); zHi = Math.max(zHi, pos.getZ(i));
+        }
+        const span = zHi - zLo;
+        const depth = band => {
+          let yLo = Infinity, yHi = -Infinity;
+          for (let i = 0; i < pos.count; i++)
+            if (band(pos.getZ(i))) {
+              yLo = Math.min(yLo, pos.getY(i)); yHi = Math.max(yHi, pos.getY(i));
+            }
+          return yHi > yLo ? yHi - yLo : 0;
+        };
+        const dA = depth(z => z < zLo + span * 0.15);
+        const dB = depth(z => z > zHi - span * 0.15);
+        const dRoot = Math.max(dA, dB), dToe = Math.min(dA, dB);
+        if (bkTris <= 12 || dRoot < 2 * dToe) {
+          bkBad++;
+          bkNote = `depth ${dRoot.toFixed(2)} at the tower, ${dToe.toFixed(2)} at the ` +
+                   `toe, ${bkTris} triangles`;
+        }
+      });
+      if (bkBad)
+        say(v.id, 'platform bracket is a slab',
+            `${bkBad} of ${bkN} — ${bkNote} — the same depth at its free end as at ` +
+            'the tower face, which no cantilever web is');
+    }
+
     /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
        boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
        the deck the boats are named for, and the row of white hulls read as blisters riveted

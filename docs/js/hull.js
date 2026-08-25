@@ -4103,13 +4103,28 @@ g.add(tag(rf, 'superstructure', 'Main rangefinder',
 'The primary optical rangefinder for the main battery, at the highest point that will hold one: range accuracy is baseline times height.'));
 if (S.searchlights) {
 const nPairs = Math.min(Math.ceil(S.searchlights / 2), Math.max(1, K - 2));
+const webShape = new THREE.Shape(
+[[-1.45, -0.10], [0.90, -0.10], [0.90, -0.30],
+[0.31, -0.34], [-0.28, -0.47], [-0.86, -0.68], [-1.45, -0.98]]
+.map(p => new THREE.Vector2(p[0], p[1])));
+const web = new THREE.ExtrudeGeometry(webShape, { depth: 0.08, bevelEnabled: false });
+web.translate(0, 0, -0.04);
+web.rotateY(-Math.PI / 2);
+const wp = (web.index ? web.toNonIndexed() : web).attributes.position;
+const bkPos = [];
+for (const wx of [-0.51, 0, 0.51])
+for (let i = 0; i < wp.count; i++)
+bkPos.push(wp.getX(i) + wx, wp.getY(i), wp.getZ(i));
+const bkGeo = new THREE.BufferGeometry();
+bkGeo.setAttribute('position', new THREE.Float32BufferAttribute(bkPos, 3));
+bkGeo.computeVertexNormals();
 for (let p = 0; p < nPairs; p++) {
 const lv = levels[Math.min(1 + p, K - 1)];
 for (const sgn of [1, -1]) {
 const zc = sgn * (lv.w / 2 + 1.25);
 const sl = new THREE.Group();
-const bk = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 2.6), dark);
-bk.position.set(0, -0.55, -sgn * 0.7);
+const bk = new THREE.Mesh(bkGeo, dark);
+if (sgn < 0) bk.rotation.y = Math.PI;
 sl.add(tag(bk, 'searchlight', 'Platform bracket'));
 const plat = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.35, 0.28, 12), dark);
 sl.add(tag(plat, 'searchlight', 'Searchlight platform'));

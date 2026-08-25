@@ -9829,3 +9829,82 @@ crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang Action 
 Preussen trucks), plus the battle-rig record question. (4) The under-gate residue class:
 ship-junk 0.048, ship-treasure 0.049, aboard-yamato 0.041 (r147+r148 traces); ship-yamato
 re-baselined this round, so its residue is cleared.
+
+## Round 149 — 2026-08-25 — the platform bracket becomes the gusset a cantilever stands on
+
+**Opening full 62-frame check at HEAD 52dd3f6, before any edit: 62/62 within tolerance, 0
+BLANK, EXIT:0** (build/ratchet-open-r149.log, local). Top movers ship-treasure 0.049 /
+ship-junk 0.048 / ship-galleass 0.047 — the documented sub-gate residue, unchanged. The
+queue check preceded it: August's second list stands WORKED IN FULL (r57), so the survey
+carried the task — r148's queue head, Yamato's searchlight platform brackets x8.
+
+**The bracket class closed.** Each of the eight winged searchlight platforms on the pagoda
+hung on one 1.1 × 0.9 × 2.6 box — a slab of the same depth at the tower face as at its
+free end, which no cantilever bracket is. Now each platform stands on three tapering web
+plates: a seven-point gusset planform 0.98 deep at the tower face, raking in a hollow
+curve to a 0.20 toe under the platform rim, extruded 0.08 thick at fore-aft stations
+±0.51 and 0 — inside the old box's own 1.10 fore-aft envelope. One BufferGeometry built
+ONCE and shared by all eight meshes (r144 one-timber rule); port is the starboard
+geometry under a PI turn about y (r118, proper rotation — the webs' x-offsets are their
+own mirror). Verts unshared, so every face is flat and every arris sharp (the r146/r147
+striping mechanism impossible by construction). The root buries 0.20 into the tower
+face, the top edge 0.04 up into the platform underside, and the root's run below its own
+level's floor is buried inside the wider level below at every one of the four platform
+levels (constant 0.05 margin — the tower's own 0.78 half-width step per level covers the
+0.53 reach, so the fit is the derivation's, not luck).
+
+**A real misfit found by drawing the planform: the old box stopped 0.75 short of the rim
+it pretends to carry.** The box reached 0.60 outboard of platform centre under a rim at
+1.35; the toe now reaches 0.90, under the platform's own 12-gon bottom rim (toe corner
+radius 1.055 against apothem 1.304, checked). That is the one deliberate excursion past
+the old envelope, and it is UNDER the platform, where nothing else lives — the drum sits
+1.35 above.
+
+**Verified offline before touching the app** (build/staging-r149-bracket.mjs, node):
+22/22 — planform simple and finite, real plate area 1.16 m², 72 tris per bracket, taper
+ratio 4.4 with the old box convicted at 1.0 by the same test, root/top/toe fits, buried
+root inside the level below at all four levels, mirror symmetry for the PI turn.
+
+**Audit rule r149: a wing platform stands on a tapering web, not on a slab.** Each
+'Platform bracket' mesh must be plated (>12 tris) and taper ≥2x — depth at the tower
+root at least twice the depth at the toe, measured mesh-local as max/min of the two ends
+so the port PI turn reads the same. Injection with hull.js stashed convicted the old
+form — "8 of 8 — depth 0.90 at the tower, 0.90 at the toe, 12 triangles" — yamato only,
+no other rule fired; popped, 33/0 clean.
+
+**Measured, the deltas are the brackets' own and nothing else's.** Probe: searchlight
+class boxy 8→0, tris 1696→2176 (+480 = 8 × 60 exactly), mesh count unchanged at 40;
+whole ship 291 meshes unchanged, boxy 36→28 (12%→9%). measure_ship: ONE row moved —
+Platform bracket, y0 16.74→16.76 (the root 2 cm shallower than the box), half-breadth
+reach 7.68→7.98 (the toe reaching the rim), fore-aft 1.10 identical; every other row
+byte-identical.
+
+**Looked at (rule 1, before/after at b0 and b25 with the old form stashed for the
+before).** The pixel diff between the two b0 captures is confined to x 952–1047,
+y 520–606 of a 2000 × 1300 frame — the platform band on the tower flanks alone, 253 px
+at b0, 125 at b25, nothing else in either frame moved. At max zoom the before shows a
+solid dark block under each platform tray; the after shows the tray carried on a raking
+web with open air outboard of it. Rule 0 on the closing aboard frame: reads as a
+rendered world — Yamato under way off Kagoshima with her wake astern on a wind-streaked
+July sea. Three facts a viewer can read: her last sortie lost 3,055 of 3,332 crew under
+386 attacking aircraft (voyage card); she stands at 32°21′N 132°00′E, course 201°,
+16 nm WNW of Kagoshima Ko; 1943's seaborne trade ran 137 M tonnes a year (Stopford,
+Tbl 1.2) with ~14.7 M tons sunk by U-boats.
+
+**Frames: closing pair BOTH under the gate, no acceptance.** ship-yamato 0.004%/0.001 —
+re-baselined r148, so its residue was already cleared, and the bracket is a metre-scale
+fitting mostly hidden behind its own drum at the baseline bearing. aboard-yamato
+0.041%/0.021 — byte-for-byte its documented opening residue, untouched by this change.
+The under-gate residue class is now ship-junk 0.048, ship-treasure 0.049, ship-galleass
+0.047, aboard-yamato 0.041.
+
+**Deployed: stamp 1787668733**, live verify in the commit.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) Yamato's remaining boxy
+classes by the probe: the triple 25 mm mounts x8 and high-angle mounts x6 — noting a
+shielded gunhouse IS near-boxy in life, so the fix there is chamfer and shield form,
+not a loft for its own sake; superstructure tower levels x5 + bridge x3 one row down
+(the r146 island law could reach the pagoda mast). (3) Standing residuals unchanged
+from r143 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, QM2
+aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus
+the battle-rig record question. (4) The residue class above.

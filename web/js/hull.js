@@ -6642,15 +6642,39 @@ function buildCitadel(S, group, mats) {
      tower's own levels, so a taller or shorter pagoda carries them at its own heights. */
   if (S.searchlights) {
     const nPairs = Math.min(Math.ceil(S.searchlights / 2), Math.max(1, K - 2));
+    /* the bracket, built once and shared by every platform (r144): a cantilevered wing
+       platform stands on tapering web plates — deep at the tower face, raking in a
+       hollow curve to a thin toe under the platform rim — not on a slab of one depth.
+       Three webs, one BufferGeometry, verts unshared so every arris is flat-shaded
+       sharp. The local frame is the same at every level because the platform stands a
+       fixed 1.25 out from its own tower face; port is the starboard geometry under a
+       PI turn about y (r118, proper rotation). Fits proven offline first in
+       build/staging-r149-bracket.mjs. */
+    const webShape = new THREE.Shape(
+      [[-1.45, -0.10], [0.90, -0.10], [0.90, -0.30],
+       [0.31, -0.34], [-0.28, -0.47], [-0.86, -0.68], [-1.45, -0.98]]
+      .map(p => new THREE.Vector2(p[0], p[1])));
+    const web = new THREE.ExtrudeGeometry(webShape, { depth: 0.08, bevelEnabled: false });
+    web.translate(0, 0, -0.04);
+    web.rotateY(-Math.PI / 2);       // shape plane to (z outboard, y up), thickness fore-aft
+    const wp = (web.index ? web.toNonIndexed() : web).attributes.position;
+    const bkPos = [];
+    for (const wx of [-0.51, 0, 0.51])
+      for (let i = 0; i < wp.count; i++)
+        bkPos.push(wp.getX(i) + wx, wp.getY(i), wp.getZ(i));
+    const bkGeo = new THREE.BufferGeometry();
+    bkGeo.setAttribute('position', new THREE.Float32BufferAttribute(bkPos, 3));
+    bkGeo.computeVertexNormals();
     for (let p = 0; p < nPairs; p++) {
       const lv = levels[Math.min(1 + p, K - 1)];
       for (const sgn of [1, -1]) {
         const zc = sgn * (lv.w / 2 + 1.25);
         const sl = new THREE.Group();
-        /* the bracket spans from the tower face under the platform, so the wing hangs on
-           structure rather than on air */
-        const bk = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 2.6), dark);
-        bk.position.set(0, -0.55, -sgn * 0.7);
+        /* the webs span from the tower face to under the platform rim, so the wing
+           hangs on structure rather than on air; the root below this level's own floor
+           is buried inside the wider level below */
+        const bk = new THREE.Mesh(bkGeo, dark);
+        if (sgn < 0) bk.rotation.y = Math.PI;
         sl.add(tag(bk, 'searchlight', 'Platform bracket'));
         const plat = new THREE.Mesh(new THREE.CylinderGeometry(1.55, 1.35, 0.28, 12), dark);
         sl.add(tag(plat, 'searchlight', 'Searchlight platform'));

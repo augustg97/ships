@@ -1850,6 +1850,41 @@ say(v.id, 'floatplane is not one body',
 `${fpBad} of ${acs.length} — ${fpNote} — a cowl, a barrel and a tail cone ` +
 'abutting, not a lofted body');
 }
+if (H.searchlights) {
+let bkBad = 0, bkN = 0, bkNote = '';
+g.traverse(o => {
+if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Platform bracket')
+return;
+bkN++;
+const pos = o.geometry.attributes.position;
+const bkTris = o.geometry.index ? o.geometry.index.count / 3 : pos.count / 3;
+let zLo = Infinity, zHi = -Infinity;
+for (let i = 0; i < pos.count; i++) {
+zLo = Math.min(zLo, pos.getZ(i)); zHi = Math.max(zHi, pos.getZ(i));
+}
+const span = zHi - zLo;
+const depth = band => {
+let yLo = Infinity, yHi = -Infinity;
+for (let i = 0; i < pos.count; i++)
+if (band(pos.getZ(i))) {
+yLo = Math.min(yLo, pos.getY(i)); yHi = Math.max(yHi, pos.getY(i));
+}
+return yHi > yLo ? yHi - yLo : 0;
+};
+const dA = depth(z => z < zLo + span * 0.15);
+const dB = depth(z => z > zHi - span * 0.15);
+const dRoot = Math.max(dA, dB), dToe = Math.min(dA, dB);
+if (bkTris <= 12 || dRoot < 2 * dToe) {
+bkBad++;
+bkNote = `depth ${dRoot.toFixed(2)} at the tower, ${dToe.toFixed(2)} at the ` +
+`toe, ${bkTris} triangles`;
+}
+});
+if (bkBad)
+say(v.id, 'platform bracket is a slab',
+`${bkBad} of ${bkN} — ${bkNote} — the same depth at its free end as at ` +
+'the tower face, which no cantilever web is');
+}
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
 const rec = T.tiers.find(t => t.recess);
