@@ -1,0 +1,10 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-sekibune                http://localhost:8149/?frozen=1#v=ship&s=sekibune
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-sekibune                   0.001%     0.001  ok
+
+  all frames within tolerance.
+
+CHECKER_EXIT:0

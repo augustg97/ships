@@ -1,0 +1,16 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-panokseon               http://localhost:8149/?frozen=1#v=ship&s=panokseon
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-panokseon                  1.203%     0.197  CHANGED
+
+  1 frame(s) moved. Every one must be classified before this ships (§7 — never on an average):
+
+    ship-panokseon
+      1.203% of pixels moved (limit 0.050%), mean |Δ| 0.197 (limit 0.15). Diff: /Users/augustgweon/Ships/Research/baselines/_diff/ship-panokseon.png
+
+  If a change is an improvement, accept it deliberately:
+    frame_baseline.py accept --project /Users/augustgweon/Ships --frame <name> --reason "..."
+
+CHECKER_EXIT:1

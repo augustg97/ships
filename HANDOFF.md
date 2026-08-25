@@ -9229,3 +9229,88 @@ terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus
 battle-rig record question holding three items. (3) The under-gate residue class: ship-junk
 and ship-endurance baselines still predate r136 — the next round that touches either berth's
 neighbourhood should stash-test before blaming its own change.
+
+## Round 141 — 2026-08-24 — the broadside stops being paint: the panokseon's ports go through the wall
+
+**First, the opening full 62-frame check, taken BEFORE any edit this time** — 62/62 within
+tolerance, 0 BLANK, checker's own exit 0 (build/staging/ratchet-r141-opening.txt). r140's
+closing was a solo pair, so this also confirms fleet-wide that the sama refactor reached
+nothing beyond its own frame. The discipline slip r140 documented did not repeat: the tree
+was untouched until the check returned.
+
+**Then the survey queue head: the panokseon (boxPct 58, 246 box meshes, no named class).**
+The first job was NAMING, and the probe (build/staging/probe_panokseon_r141.py) named her
+boxes: gundeck 114 of 115 meshes boxy (24 stanchions + 44 clamp segments + 44 bulwark
+segments + 2 end panels), oar 36, sangjang 34 (the oar-deck port plates), gun 24 (12
+carriage beds + 12 dark port plates). The crudest NAMED class: the fighting-deck bulwark —
+44 beamAB segments a side pretending to be one curved wall — carrying 12 paint-plate gun
+ports while the battery's own comment says each piece fires THROUGH a port cut low in the
+bulwark. The barrels pierced solid plank. This is the r140 sekibune class exactly, one hull
+over: the record says pierced, the drawing says paint.
+
+**The fix is the r140 law driven from the battery instead of the loops.** The pierced-wall
+builder is now parameterized by what the record cuts through it: GD.loops gives sama (band
+0.48–0.72 of screenH, 0.10 m slots — the sekibune, unchanged), gunsPerSide with no apostis
+gives gun ports (B·0.055 square, centred on the drawn battery's own axis height
+surfY + B·0.042, so each muzzle stands in its own opening). One lofted plank wall per side
+following the deck edge's curve, each port a real OPENING with jamb/sill/head reveals the
+plank's thickness deep and a near-black board a hand inboard; the 12 plates and 44 segments
+deleted; the galleass (apostis path) untouched. No hull in the fleet records both loops and
+a frameless battery, and the builder's comment says so. Record: hull.portProvenance
+(attested: the chongtong fired through the fighting-deck wall; derived: count at the wall
+6 a side from the recorded dozen-plus pieces, size, sill height — no example survives, her
+jeonseon plate resolves the sangjang port row but not this one) and a card row "Gun ports,
+as drawn" after the Guns row (record-r141.py, both asserts hit). Audit rule r141, the r140
+conviction on the battery: for any frameless hull with gunsPerSide, passage rays at the
+drawn port centres must strike the wall set DEEPER than the outer face and midway between
+ports must be STOPPED at it. Injection test run: hull.js alone stashed, audit re-run with
+the new rule against the old form — panokseon convicted, 8 of 22 rays wrong, "first strike
+0.00 m in"; popped, 33/0 clean (the rule fires and the old form convicts itself).
+
+**Measured (rule 4, before/after in build/staging/measure-panokseon-r141-{before,after}.txt):**
+deltas are the change's signature and nothing else. Bulwark y 3.66→3.67 (loft starts at the
+deck surface where the segment boxes overshot), u-run 0.152–0.869 → 0.154–0.867 and half
+5.21→5.20 (box-corner overhang gone — the r140 delta in her size); NEW part Gun port y
+3.74–4.38 = the port band 3.80–4.32 plus the boards' 0.06 margin exactly; Deck piece y1
+4.32→4.19 (the plates' top leaving; 4.19 is the barrel's own top) with half 5.60 unchanged
+(muzzles still standing proud of the wall). Envelope identical. **Survey:** meshes 423→373
+(−50 = 56 deleted, 6 lofted meshes added), boxMeshes 246→192 (−54 = 56 boxes out, 2
+twelve-tri shadow boards in), boxPct 58→51; sekibune (218/58) and galleass (139/26) rows
+byte-identical — the parameterization's null-test. **Audit 33/0** with the new rule live
+(build/staging/audit-r141.json).
+
+**Looked at (rule 1, build/staging/ports-r141/):** broadside b090 — six real openings, dark
+interiors, muzzles standing out, unbroken wall top; oblique b065 — lit jamb and dark
+interior at every port, the reveal depth reads; quarter b155 from above — guns on their
+beds inboard, tower clean, nothing floating; the inboard dark rectangles are the shadow
+boards, the same read r140 accepted on the sekibune.
+
+**Frames:** opening 62/62 green; closing ship-galleass 0.030% ok and ship-sekibune 0.001%
+ok (null-tests), ship-panokseon 1.203%/0.197 — diff read, confined to the wall band alone
+(the port row plus the loft's continuous shading where 22 abutting boxes each shaded
+alone), accepted with the full reason, re-check 0.000% EXIT:0, no intervening check
+between the pair. Wide frames: reasoned out of reach as in r139/r140 (the panokseon's
+berth sits beyond the wide frames' edge) — **next round's opening full check confirms; if
+anything beyond ship-panokseon moved, this round owns it.**
+
+**Rule 0, written on the wall-b090 capture:** it reads as a rendered ship under sail —
+hull, matting sails, sea and timber composed per pixel. Three facts a viewer can read off
+it: the ship mounts six guns a side firing through square ports cut low in her
+fighting-deck wall, with the muzzles standing out of the plank; the oar deck below is
+closed by its own plank belt with a row of small dark ports under the deck line; the
+sculling oars pivot at the hull's rail and work out from under that belt.
+
+**Deployed: stamp 1787629627**, live verify in the commit below.
+
+**Next, in order:** (1) The opening full 62-frame check — this round's closing is the solo
+pair + two neighbour null-tests, and the wide-frame reasoning above is unverified. (2)
+panokseon, the remaining named classes: sangjang wallPorts x32 — the SAME pierced-opening
+class one storey down (the record says "pierced by a row of small ports", drawn as beamAB
+plates proud of the lofted belt; the r141 builder is sitting right there to drive from
+them), then oar 36 and the 44 clamp segments if the survey still ranks them. (3) After the
+panokseon: junk 51 or whatever the survey then ranks crudest. (4) Standing residuals
+unchanged from r140 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate,
+QM2 aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus
+the battle-rig record question holding three items. (5) The under-gate residue class:
+ship-junk and ship-endurance baselines still predate r136 — stash-test before blaming your
+own change if either berth's neighbourhood moves.

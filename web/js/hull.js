@@ -8374,9 +8374,11 @@ function buildGalleyWorks(S, group, mats) {
     group.add(tag(new THREE.Mesh(dg, pale), 'gundeck', GD.name, GD.what));
     const surfY = gdY + B * 0.007;
     const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
-    /* a record that carries sama gets its wall built pierced, below — the segment
-       bulwark here would only be torn open again */
+    /* a record that carries sama, or a battery firing through the wall, gets that
+       wall built pierced, below — the segment bulwark here would only be torn
+       open again */
     const nSama = Math.max(0, GD.loops | 0);
+    const nG = Math.max(0, GD.gunsPerSide | 0);
     for (const sgn of [-1, 1]) {
       for (let i = 0; i <= N; i += 2) {
         /* stanchions stand ON the rail — foot at the gunwale the surface owns */
@@ -8390,7 +8392,7 @@ function buildGalleyWorks(S, group, mats) {
         const ca = new THREE.Vector3(sx[i], gdY - B * 0.016, sgn * (halfW[i] - B * 0.014));
         const cb = new THREE.Vector3(sx[i + 1], gdY - B * 0.016, sgn * (halfW[i + 1] - B * 0.014));
         group.add(tag(beamAB(ca, cb, B * 0.030, B * 0.028, timber), 'gundeck', 'Deck clamp'));
-        if (!nSama) {
+        if (!nSama && !nG) {
           const ba = new THREE.Vector3(sx[i], surfY + shH / 2, sgn * (halfW[i] - B * 0.006));
           const bb = new THREE.Vector3(sx[i + 1], surfY + shH / 2, sgn * (halfW[i + 1] - B * 0.006));
           group.add(tag(beamAB(ba, bb, shH, B * 0.012, timber), 'gundeck', 'Bulwark',
@@ -8544,19 +8546,30 @@ function buildGalleyWorks(S, group, mats) {
        hatchway plate gives the gratings. Positions, sizes and the row line are the
        plate row's exactly: centre 0.60·shH over the deck, 0.24·shH tall, 0.10 m wide.
        Source: ja "sekibune": the tate-ita carry sama (狭間), slots for bow and arquebus.
+       Round 141 drives the same law from the battery: on a hull with no rowing frame
+       the guns fire through this wall — the panokseon's broadside — so where the
+       record carries gunsPerSide instead of loops, the openings are her gun ports,
+       square and cut low so each muzzle clears its own timber bed. No hull in the
+       fleet records both.
        Single winding on DoubleSide throughout — the r118 normals lesson. */
-    if (nSama) {
+    if (nSama || nG) {
       const t = B * 0.012;                     // the plank the segments drew, kept
-      const du = 0.05 / L;                     // slot half-width in u — 0.10 m drawn
+      const nOp = nSama || nG;
+      /* slot half-width: a sama is 0.10 m of daylight; a gun port is the plate row's
+         own square, B·0.055 a side, centred on the battery's axis height */
+      const opHalf = nSama ? 0.05 : B * 0.0275;
+      const du = opHalf / L;                   // and the same half-width in u
       const yB2 = surfY, yT2 = surfY + shH;
-      const yS = surfY + shH * 0.48, yH2 = surfY + shH * 0.72;
+      const yAx = surfY + B * 0.042;           // the drawn battery's own axis height
+      const yS = nSama ? surfY + shH * 0.48 : yAx - opHalf;
+      const yH2 = nSama ? surfY + shH * 0.72 : yAx + opHalf;
       const timberDS2 = timber.clone(); timberDS2.side = THREE.DoubleSide;
       const portDS = portMat.clone(); portDS.side = THREE.DoubleSide;
       /* stations: the loft's own N plus both edges of every slot, sorted */
       const us = [], slots = [];
       for (let i = 0; i <= N; i++) us.push(GD.from + (GD.to - GD.from) * i / N);
-      for (let j = 0; j < nSama; j++) {
-        const uj = GD.from + (GD.to - GD.from) * (j + 0.5) / nSama;
+      for (let j = 0; j < nOp; j++) {
+        const uj = GD.from + (GD.to - GD.from) * (j + 0.5) / nOp;
         slots.push([uj - du, uj + du]); us.push(uj - du, uj + du);
       }
       us.sort((a, b) => a - b);
@@ -8609,15 +8622,28 @@ function buildGalleyWorks(S, group, mats) {
           const bg = new THREE.BufferGeometry();
           bg.setAttribute('position', new THREE.Float32BufferAttribute(g.pos, 3));
           bg.setIndex(g.idx); bg.computeVertexNormals();
-          group.add(tag(new THREE.Mesh(bg, mat), name === 'Tate-ita' ? 'gundeck' : 'sama',
+          group.add(tag(new THREE.Mesh(bg, mat),
+                        name === 'Tate-ita' || name === 'Bulwark' ? 'gundeck'
+                                                                  : nSama ? 'sama' : 'gun',
                         name, what));
         };
-        mk(wall, timberDS2, 'Tate-ita',
-           'The shield planking around the fighting deck, pierced by the sama — thinner '
-           + 'than an atakebune\'s, and the storey a boarding party has to climb.');
-        mk(rev, timberDS2, 'Sama',
-           'Firing slots for bow and arquebus, cut through the tate-ita — the wall\'s '
-           + 'whole purpose on a hull that mounts no broadside.');
+        if (nSama) {
+          mk(wall, timberDS2, 'Tate-ita',
+             'The shield planking around the fighting deck, pierced by the sama — thinner '
+             + 'than an atakebune\'s, and the storey a boarding party has to climb.');
+          mk(rev, timberDS2, 'Sama',
+             'Firing slots for bow and arquebus, cut through the tate-ita — the wall\'s '
+             + 'whole purpose on a hull that mounts no broadside.');
+        } else {
+          mk(wall, timberDS2, 'Bulwark',
+             'Heavy plank, chest-high, around the whole fighting deck — the rowers below it, '
+             + 'the marines behind it, and the reason boarding a panokseon means climbing.');
+          mk(rev, timberDS2, 'Gun port',
+             'A square port for each chongtong, cut low through the bulwark so the muzzle '
+             + 'clears its own bed and stands out of the plank. The gunners reload behind '
+             + 'the wall; from outside the broadside is a row of dark squares under an '
+             + 'unbroken wall top.');
+        }
         /* the shadow boards: one dark plane behind each slot, a hand inboard, so the
            opening reads into the deck's own shadow rather than through to the far wall */
         const brd = { pos: [], idx: [] };
@@ -8634,14 +8660,12 @@ function buildGalleyWorks(S, group, mats) {
           quadB([x0, yS - mrg, zb], [x1, yS - mrg, zb],
                 [x1, yH2 + mrg, zb], [x0, yH2 + mrg, zb]);
         }
-        mk(brd, portDS, 'Sama', undefined);
+        mk(brd, portDS, nSama ? 'Sama' : 'Gun port', undefined);
       }
     }
-    /* the battery: gunsPerSide pieces a side, each firing THROUGH a port cut low in the
-       bulwark — the muzzle pierces the plank and a dark port frames it on the outer face,
-       which is what a panokseon's broadside looks like from outside: a row of square
-       ports with muzzles standing out of them, under an unbroken bulwark top */
-    const nG = Math.max(0, GD.gunsPerSide | 0);
+    /* the battery: gunsPerSide pieces a side, each firing THROUGH its own port in the
+       pierced wall above — barrel and timber bed only; the port is an opening now,
+       framed by its reveals with the dark board behind it, not a plate on the face */
     for (const sgn of [-1, 1]) for (let j = 0; j < nG; j++) {
       const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nG;
       const pd = surfacePoint(S, H, u, 1.0);
@@ -8656,10 +8680,6 @@ function buildGalleyWorks(S, group, mats) {
         new THREE.BoxGeometry(r * 3.2, r * 2.4, len * 0.48), timber);
       carr.position.set(0, -r * 2.0, -sgn * len * 0.18);
       g.add(carr);
-      const port = new THREE.Mesh(
-        new THREE.BoxGeometry(B * 0.055, B * 0.055, B * 0.020), portMat);
-      port.position.set(0, 0, sgn * (len * 0.30 - B * 0.004));
-      g.add(port);
       g.position.set((u - 0.5) * L, surfY + r * 3.0, sgn * (hw - len * 0.30));
       group.add(tag(g, 'gun', 'Deck piece',
         'A bronze chongtong — cheonja, jija, hyeonja or hwangja, "heaven, earth, black, '

@@ -709,6 +709,57 @@
                        `${bad} of ${shot} passage rays wrong — ${first}`);
         }
       }
+      /* ── AND THE GUN PORTS ARE OPENINGS TOO (round 141, the r140 law on the battery).
+         On a hull with no rowing frame the guns fire through the fighting-deck wall
+         itself — gunsPerSide with no apostis is the panokseon's broadside — and since
+         r141 that wall is built pierced: one square port at each gun's station, cut
+         low on the battery's axis line, the muzzle through it. Same conviction as the
+         sama: PASSAGE. At each port centre a perpendicular ray from outside must
+         strike the wall-band meshes DEEPER than the outer face (the dark board
+         inboard); midway between ports it must be STOPPED at the face. Expectation
+         from the record and surfacePoint, never the drawn meshes (r113). The old form
+         — a dark plate proud of the wall, the barrel through solid plank — convicts
+         itself both ways. Rays intersect the wall set alone: the muzzle standing in
+         its own port must not answer for the wall. */
+      if (!H.apostis && H.gunDeck.gunsPerSide) {
+        const wallSet = [];
+        g.updateMatrixWorld(true);
+        g.traverse(o => { const p = tagOf(o);
+          if (o.isMesh && p && (p.name === 'Bulwark' || p.name === 'Gun port'))
+            wallSet.push(o); });
+        if (!wallSet.length)
+          say(v.id, 'a battery with no wall to fire through',
+              'gunsPerSide on a frameless hull with no Bulwark or Gun port mesh');
+        else {
+          const HSp = SHIPS_HULL.hullSurface(H);
+          const GDp = H.gunDeck;
+          const overP = GDp.over !== undefined ? GDp.over : H.beam * 0.045;
+          const nP2 = GDp.gunsPerSide;
+          const rc = new THREE.Raycaster(); rc.far = 60;
+          let bad = 0, shot = 0, first = '';
+          const yRay = planeY + H.beam * 0.007 + H.beam * 0.042;  // the battery's axis
+          for (const sgn of [-1, 1]) for (let j = 0; j < 2 * nP2 - 1; j++) {
+            /* even j: port centre (must pass); odd j: midway between ports (must stop) */
+            const u = GDp.from + (GDp.to - GDp.from) * (j / 2 + 0.5) / nP2;
+            const pd = SHIPS_HULL.surfacePoint(H, HSp, u, 1.0);
+            const faceZ = Math.abs(pd[2]) + overP;
+            rc.set(new THREE.Vector3(pd[0], yRay, sgn * (faceZ + 4)),
+                   new THREE.Vector3(0, 0, -sgn));
+            shot++;
+            const hit = rc.intersectObjects(wallSet, true)[0];
+            const depth = hit ? faceZ - hit.point.z * sgn : 99;
+            const isPort = j % 2 === 0;
+            if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
+              bad++;
+              if (!first) first = `${isPort ? 'port' : 'wall'} at u ${u.toFixed(2)} `
+                + `${sgn > 0 ? 'stbd' : 'port side'}: first strike `
+                + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
+            }
+          }
+          if (bad) say(v.id, 'gun ports are not openings through the wall',
+                       `${bad} of ${shot} passage rays wrong — ${first}`);
+        }
+      }
       /* ── AND THE WALL ANSWERS FROM EVERY BEARING (round 91). The fighting deck's wall
          is hand-placed segment by segment along a curved rail — one side, one end panel
          or one run of segments can silently not be there, and the berth baseline shows
