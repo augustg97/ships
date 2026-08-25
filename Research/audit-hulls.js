@@ -2646,6 +2646,48 @@
       }
     }
 
+    /* ⚠ A FLOATPLANE IS ONE BODY TOO (round 148) — the r145 airframe law reaching the
+       catapult aircraft. Each floatplane group's principal mesh — the longest run down
+       the group's own x axis — must BE the airframe: spanning at least 0.8 of the
+       aircraft's length and lofted rather than boxed. The convicted form was three
+       abutting cylinders — cowl, barrel, tail cone, the r144 step class — whose
+       principal mesh was the 6.6 m barrel of a 9.3 m aircraft. Measured in the group's
+       LOCAL frame (the r144 lesson): one aircraft rides the catapult nose-astern, the
+       parked ones stand at hand-pushed headings, and a world-frame box aliases all of
+       that in. */
+    if (H.floatplanes) {
+      const acs = [];
+      g.traverse(o => {
+        if (o.isGroup && o.userData.part && o.userData.part.key === 'floatplane')
+          acs.push(o);
+      });
+      let fpBad = 0, fpNote = '';
+      for (const ac of acs) {
+        let lo = Infinity, hi = -Infinity, pRun = 0, pTris = 0;
+        ac.traverse(o => {
+          if (!o.isMesh || !o.geometry) return;
+          o.geometry.computeBoundingBox();
+          const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+          lo = Math.min(lo, bb.min.x); hi = Math.max(hi, bb.max.x);
+          const r = bb.max.x - bb.min.x;
+          if (r > pRun) {
+            pRun = r;
+            pTris = o.geometry.index ? o.geometry.index.count / 3
+                  : o.geometry.attributes.position.count / 3;
+          }
+        });
+        if (pRun < (hi - lo) * 0.8 || pTris <= 12) {
+          fpBad++;
+          fpNote = `principal mesh runs ${pRun.toFixed(2)} of ${(hi - lo).toFixed(2)} m ` +
+                   `at ${pTris} triangles`;
+        }
+      }
+      if (fpBad)
+        say(v.id, 'floatplane is not one body',
+            `${fpBad} of ${acs.length} — ${fpNote} — a cowl, a barrel and a tail cone ` +
+            'abutting, not a lofted body');
+    }
+
     /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
        boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
        the deck the boats are named for, and the row of white hulls read as blisters riveted

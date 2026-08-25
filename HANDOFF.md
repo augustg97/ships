@@ -9750,3 +9750,82 @@ forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, m
 Action baseline, Preussen trucks), plus the battle-rig record question. (4) The under-gate
 residue class, now four frames: ship-junk 0.048, ship-treasure 0.049, ship-yamato 0.048,
 aboard-yamato 0.036.
+
+## Round 148 — 2026-08-25 — the floatplane becomes one body
+
+**Opening full 62-frame check at HEAD b987c7f, before any edit: 62/62 within tolerance, 0
+BLANK, EXIT:0** (build/ratchet-open-r148.log, local). Top movers ship-treasure 0.049 /
+ship-yamato 0.048 / ship-junk 0.048 — the documented sub-gate residue; ship-yamato joined
+it in r147 exactly as predicted. The queue check preceded it: August's second list stands
+WORKED IN FULL (r57), so the survey carried the task — r147's queue head, the Yamato
+floatplane, the r145 airframe law reaching the catapult aircraft.
+
+**The floatplane's box class closed.** The probe named her 14: per aircraft a boxy canopy,
+two slab wings, a boxy fin, a box stab and two prop-blade boxes — and the fuselage was
+three abutting cylinders (cowl, barrel, tail cone: the r144 step class, three meshes
+pretending to be one body). Now the fuselage is ONE superelliptic loft (10 stations, exp
+2.5, K=12) from cowl lip to tail post, inside the old cylinders' own envelope, end grain
+closed both ends; the cowl is a second material group, so the radial engine's dark ring is
+a material boundary with a hard edge by construction (the r146 island precedent). Wings,
+fin, stab and the three propeller blades are real planforms (the r145 plate law): rounded
+tips, near-constant chord — the observation biplane's own wing — the fin and rudder one
+rounded outline with its root buried 0.25 under the fuselage top, and a stopped
+three-blade prop on a spinner where two crossed boxes had been. The canopy is the r145
+glasshouse (scaled sphere) embedded in the fuselage top. Struts and floats stay cylinders
+(the loom rule). Geometries built ONCE, shared by both aircraft (r144 one-timber rule);
+port surfaces are the starboard geometry under ±PI/2 proper rotations (r118).
+
+**A real misfit found by the planform, fixed in the round: the old interplane struts stood
+outside the wings they pretend to brace.** At the rectangles' stations the forward pair
+stood 7.5 cm FORWARD of the lower wing's leading edge and the aft pair 2.5 cm AFT of the
+upper wing's trailing edge — invisible between two rectangles, unmissable against a
+tapered chord. The struts now stand in the overlap of the two chords at their own span
+(−1.22 and −0.68 at z ±4.55), the cabane reaches the upper wing's underside, and the
+wingtip floats hang at mid-chord instead of aft of the new trailing edge.
+
+**Verified offline before touching the app** (build/staging-r148-floatplane.mjs, node):
+33/33 — stations monotone and finite, every station inside the old cylinders' own
+envelope, 0 NaN, 0 degenerate triangles, every winding on its face class, all five
+planforms simple polygons inside their old boxes' chord/span, strut-under-chord and
+root-burial fits, and the r148 passage property with the old form convicted (0.711 < 0.8).
+
+**Audit rule r148: a floatplane is one body too.** Each floatplane group's principal
+mesh — longest local x-run, the r144 lesson — must span ≥0.8 of the airframe and be
+lofted (>12 tris). Injection with hull.js stashed convicted both aircraft — "2 of 2 —
+principal mesh runs 6.60 of 9.29 m at 40 triangles — a cowl, a barrel and a tail cone
+abutting, not a lofted body" — yamato only, no other rule fired; popped, 33/0 clean.
+
+**Measured, the deltas are the floatplanes' own and nothing else's.** Probe: floatplane
+56→62 meshes, boxy 14→0, tris 1592→2616; whole ship 285→291 meshes, boxy 50→36
+(17%→12%). measure_ship: the Engine cowling row is GONE (merged into the loft), the
+Floatplane row's envelope tightens (len 19.63→19.20 aggregate, half 16.51→16.26), Canopy
+and Fin y0 13.00→12.75 (the roots burying 0.25 into the loft), Wingtip float rows move
+with the mid-chord shift; every non-floatplane row byte-identical.
+
+**Looked at (rule 1, before/after b178 astern + full-res crops of both aircraft).**
+Before: hard rectangular wing slabs, a black box-cross for a propeller on a fat tube, the
+tail cone visibly a separate mesh, the canopy a black brick. After: rounded wingtips with
+the hinomaru seated in the wing, a three-blade prop on its spinner ahead of the dark cowl
+ring, one continuous tapering body to a rounded fin, the glasshouse a smooth dark bubble
+on the catapult aircraft. No striping on the loft (the r146 mechanism absent). Rule 0 on
+the after-crop: reads as a rendered quarterdeck, and a viewer can name the three-blade
+propeller on its round cowling, the biplane's rounded wings with roundels, the central
+float between the catapult beams, and the recessed stowage hatches in the planking.
+
+**Frames: closing pair, one at a time.** ship-yamato 0.084%/0.038 — diff read: the two
+aircraft outlines on the quarterdeck ALONE — accepted with reason, re-check ok.
+aboard-yamato 0.041%/0.021 under the gate, untouched — at sea scale the airframes stay
+inside their old envelope; it keeps its place in the sub-gate residue class.
+
+**Deployed: stamp 1787665036**, live verify in the commit.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) Yamato's remaining boxy
+classes by the probe: searchlight platform brackets x8, then the triple 25 mm mounts x8
+and high-angle mounts x6 — noting a shielded gunhouse IS near-boxy in life, so the fix
+there is chamfer and shield form, not a loft for its own sake; superstructure tower
+levels x5 + bridge x3 one row down (the r146 island law could reach the pagoda mast).
+(3) Standing residuals unchanged from r143 (gundeck normals, Endurance forecastle, Azzam
+crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang Action baseline,
+Preussen trucks), plus the battle-rig record question. (4) The under-gate residue class:
+ship-junk 0.048, ship-treasure 0.049, aboard-yamato 0.041 (r147+r148 traces); ship-yamato
+re-baselined this round, so its residue is cleared.

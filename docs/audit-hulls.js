@@ -1818,6 +1818,38 @@ say(v.id, 'island is not one tower',
 `at ${pTris} triangles — slabs under a stick, not a lofted tower`);
 }
 }
+if (H.floatplanes) {
+const acs = [];
+g.traverse(o => {
+if (o.isGroup && o.userData.part && o.userData.part.key === 'floatplane')
+acs.push(o);
+});
+let fpBad = 0, fpNote = '';
+for (const ac of acs) {
+let lo = Infinity, hi = -Infinity, pRun = 0, pTris = 0;
+ac.traverse(o => {
+if (!o.isMesh || !o.geometry) return;
+o.geometry.computeBoundingBox();
+const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+lo = Math.min(lo, bb.min.x); hi = Math.max(hi, bb.max.x);
+const r = bb.max.x - bb.min.x;
+if (r > pRun) {
+pRun = r;
+pTris = o.geometry.index ? o.geometry.index.count / 3
+: o.geometry.attributes.position.count / 3;
+}
+});
+if (pRun < (hi - lo) * 0.8 || pTris <= 12) {
+fpBad++;
+fpNote = `principal mesh runs ${pRun.toFixed(2)} of ${(hi - lo).toFixed(2)} m ` +
+`at ${pTris} triangles`;
+}
+}
+if (fpBad)
+say(v.id, 'floatplane is not one body',
+`${fpBad} of ${acs.length} — ${fpNote} — a cowl, a barrel and a tail cone ` +
+'abutting, not a lofted body');
+}
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
 const rec = T.tiers.find(t => t.recess);

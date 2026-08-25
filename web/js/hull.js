@@ -6793,11 +6793,93 @@ function buildAALight(S, g, T, mats) {
 
 /* ── THE FLOATPLANE ─────────────────────────────────────────────────────────────────────
  * A catapult observation biplane in real metres — main float bottom on y = 0, nose toward
- * -x, about nine and a half metres of aircraft. Built the way buildAircraft builds the
- * strike fighter: the most legible single facts first. For a floatplane those are the one
- * big CENTRAL FLOAT under a two-bay BIPLANE, the round engine ahead of an open glazed
- * canopy, and the red discs — so all four are geometry. */
-function buildFloatplane(fm) {
+ * -x, about nine and a half metres of aircraft. The most legible single facts are
+ * geometry: the one big CENTRAL FLOAT under a two-bay BIPLANE, the round engine ahead of
+ * a glazed canopy, and the red discs.
+ * ⚠ AN AIRFRAME IS ONE BODY here too (round 148, the r145 law reaching the catapult
+ * aircraft). The fuselage was three abutting cylinders — cowl, barrel, tail cone, the
+ * r144 step class — and every flying surface a rectangular slab. Now the fuselage is ONE
+ * superelliptic loft cowl-lip to tail post, the cowl a second material group (a material
+ * boundary has a hard edge by construction, the r146 lesson), and wings, fin, stab and
+ * the three propeller blades are real planforms (the r145 plate law). Struts and floats
+ * stay cylinders — a strut IS a round leg, the loom rule. Geometries are built ONCE and
+ * shared by every aircraft aboard (the r144 one-timber rule); port surfaces are the
+ * starboard geometry under a proper rotation (r118, windings outward). */
+function floatplaneGeometries() {
+  /* the fuselage loft: stations [x, halfW, halfH, yCentre], sections superelliptic
+     (exponent 2.5), inside the old three cylinders' own envelope: cowl x −3.8..−2.8
+     r 0.58, barrel r 0.52 about y 2.35, tail cone closing to r 0.16 at x 5.2 */
+  const stations = [
+    [-3.80, 0.55, 0.55, 2.35],
+    [-3.45, 0.58, 0.58, 2.35],
+    [-2.85, 0.56, 0.56, 2.35],
+    [-2.20, 0.50, 0.52, 2.35],
+    [-0.60, 0.46, 0.52, 2.35],
+    [ 1.00, 0.40, 0.48, 2.37],
+    [ 2.40, 0.30, 0.38, 2.40],
+    [ 3.70, 0.19, 0.26, 2.42],
+    [ 4.50, 0.10, 0.16, 2.42],
+    [ 5.20, 0.03, 0.075, 2.42]];
+  const K = 12, pos = [], idx = [];
+  const se = (v, m) => m * Math.sign(v) * Math.pow(Math.abs(v), 2 / 2.5);
+  stations.forEach(([x, w, h, yc]) => {
+    for (let k = 0; k < K; k++) { const th = (k / K) * 2 * Math.PI;
+      pos.push(x, yc + se(Math.sin(th), h), se(Math.cos(th), w)); }
+  });
+  const row = s => { for (let k = 0; k < K; k++) {
+    const a = s * K + k, b = s * K + (k + 1) % K;
+    idx.push(a, a + K, b, b, a + K, b + K); } };
+  /* the cowl is the first two bays plus the nose cap — material group 0, the radial
+     engine's dark ring; the rest of the tube and the tail cap are group 1, the skin */
+  row(0); row(1);
+  const c0 = pos.length / 3; pos.push(-3.80, 2.35, 0);
+  for (let k = 0; k < K; k++) idx.push(c0, k, (k + 1) % K);
+  const cowlEnd = idx.length;
+  for (let s = 2; s < stations.length - 1; s++) row(s);
+  const c1 = pos.length / 3; pos.push(5.20, 2.42, 0);
+  const last = (stations.length - 1) * K;
+  for (let k = 0; k < K; k++) idx.push(c1, last + (k + 1) % K, last + k);
+  const fus = new THREE.BufferGeometry();
+  fus.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  fus.setIndex(idx);
+  fus.addGroup(0, cowlEnd, 0);
+  fus.addGroup(cowlEnd, idx.length - cowlEnd, 1);
+  fus.computeVertexNormals();
+
+  /* a flying surface is a planform, not a rectangle — the r145 plate law */
+  const plate = (pts, t) => {
+    const sh = new THREE.Shape(pts.map(p => new THREE.Vector2(p[0], p[1])));
+    const g = new THREE.ExtrudeGeometry(sh, { depth: t, bevelEnabled: false });
+    g.translate(0, 0, -t / 2);
+    return g;
+  };
+  const blade = plate([[-0.05, 0.14], [-0.10, 0.50], [-0.135, 0.85], [-0.11, 1.10],
+                       [-0.02, 1.235], [0.09, 1.13], [0.125, 0.88], [0.10, 0.50],
+                       [0.05, 0.14]], 0.055);
+  blade.rotateY(Math.PI / 2);            // chord across the disc, thickness fore-aft
+  return {
+    fus,
+    canopy: new THREE.SphereGeometry(1, 8, 6),
+    /* per-side planforms (x chord, span outboard): near-constant chord with rounded
+       tips, the observation biplane's own wing. +PI/2 about x sends the span to
+       starboard, -PI/2 to port — one geometry, both sides, windings outward */
+    wingHi: plate([[-2.075, 0.0], [-2.05, 2.0], [-1.98, 3.8], [-1.86, 4.9],
+                   [-1.62, 5.45], [-1.28, 5.60], [-0.95, 5.52], [-0.70, 5.18],
+                   [-0.55, 4.60], [-0.44, 3.40], [-0.35, 1.4], [-0.325, 0.0]], 0.12),
+    wingLo: plate([[-1.525, 0.0], [-1.505, 2.0], [-1.45, 3.6], [-1.34, 4.6],
+                   [-1.12, 5.15], [-0.80, 5.40], [-0.46, 5.32], [-0.22, 4.95],
+                   [-0.06, 4.40], [0.05, 3.2], [0.115, 1.2], [0.125, 0.0]], 0.12),
+    /* the fin and rudder in one rounded planform (x, y up), root buried in the loft */
+    fin: plate([[3.95, 2.42], [4.02, 3.00], [4.18, 3.55], [4.45, 3.90], [4.80, 4.02],
+                [5.12, 3.92], [5.30, 3.60], [5.34, 3.15], [5.30, 2.70], [5.28, 2.42]],
+               0.10),
+    stab: plate([[3.80, 0.0], [3.83, 0.9], [3.93, 1.35], [4.12, 1.60], [4.42, 1.70],
+                 [4.72, 1.60], [4.92, 1.30], [5.00, 0.8], [5.04, 0.0]], 0.10),
+    blade,
+  };
+}
+
+function buildFloatplane(fm, G) {
   const ac = new THREE.Group();
   /* the main float: what makes it a seaplane. Fatter forward, tapering aft */
   const flt = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.30, 6.2, 10), fm.skin);
@@ -6810,48 +6892,55 @@ function buildFloatplane(fm) {
       st.position.set(sx, 1.45, sz);
       ac.add(st);
     }
-  const fus = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 6.6, 10), fm.skin);
-  fus.rotation.z = Math.PI / 2;
-  fus.position.set(0.4, 2.35, 0);
+  const fus = new THREE.Mesh(G.fus, [fm.dark, fm.skin]);
   ac.add(tag(fus, 'floatplane', 'Floatplane'));
-  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.16, 1.5, 10), fm.skin);
-  tail.rotation.z = Math.PI / 2;
-  tail.position.set(4.45, 2.35, 0);
-  ac.add(tail);
-  const cowl = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 1.0, 12), fm.dark);
-  cowl.rotation.z = Math.PI / 2;
-  cowl.position.set(-3.3, 2.35, 0);
-  ac.add(tag(cowl, 'floatplane', 'Engine cowling'));
-  for (const r of [0, Math.PI / 2]) {               // the propeller, stopped on the cross
-    const bl = new THREE.Mesh(new THREE.BoxGeometry(0.07, 2.5, 0.28), fm.dark);
-    bl.rotation.x = r;
-    bl.position.set(-3.9, 2.35, 0);
+  /* three blades and a spinner, stopped where the last swing left them */
+  for (let b = 0; b < 3; b++) {
+    const bl = new THREE.Mesh(G.blade, fm.dark);
+    bl.rotation.x = b * 2 * Math.PI / 3 + 0.5;
+    bl.position.set(-3.90, 2.35, 0);
     ac.add(bl);
   }
-  const can = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.55, 0.75), fm.glass);
-  can.position.set(0.3, 2.95, 0);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.10, 0.30, 8), fm.dark);
+  hub.rotation.z = Math.PI / 2;
+  hub.position.set(-3.98, 2.35, 0);
+  ac.add(hub);
+  const can = new THREE.Mesh(G.canopy, fm.glass);
+  can.scale.set(1.15, 0.40, 0.36);
+  can.position.set(0.30, 2.82, 0);
   ac.add(tag(can, 'floatplane', 'Canopy'));
-  const wingLo = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.12, 10.8), fm.skin);
-  wingLo.position.set(-0.7, 1.95, 0);
-  ac.add(tag(wingLo, 'floatplane', 'Lower wing'));
-  const wingHi = new THREE.Mesh(new THREE.BoxGeometry(1.75, 0.12, 11.2), fm.skin);
-  wingHi.position.set(-1.2, 3.65, 0);
-  ac.add(tag(wingHi, 'floatplane', 'Upper wing'));
+  const fin = new THREE.Mesh(G.fin, fm.skin);
+  ac.add(tag(fin, 'floatplane', 'Fin'));
   for (const s of [-1, 1]) {
-    for (const sx of [-1.6, -0.3]) {                // interplane struts, the two-bay pair
+    const wHi = new THREE.Mesh(G.wingHi, fm.skin);
+    wHi.rotation.x = s * Math.PI / 2;
+    wHi.position.y = 3.65;
+    ac.add(tag(wHi, 'floatplane', 'Upper wing'));
+    const wLo = new THREE.Mesh(G.wingLo, fm.skin);
+    wLo.rotation.x = s * Math.PI / 2;
+    wLo.position.y = 1.95;
+    ac.add(tag(wLo, 'floatplane', 'Lower wing'));
+    const stab = new THREE.Mesh(G.stab, fm.skin);
+    stab.rotation.x = s * Math.PI / 2;
+    stab.position.y = 2.60;
+    ac.add(stab);
+    /* interplane struts stand in the overlap of the two tapered chords at their own
+       span — the old pair sat at the rectangles' stations, one of them forward of
+       the lower wing's leading edge and one aft of the upper's trailing edge */
+    for (const sx of [-1.22, -0.68]) {
       const st = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.72, 6), fm.dark);
-      st.position.set(sx, 2.8, s * 4.6);
+      st.position.set(sx, 2.8, s * 4.55);
       ac.add(st);
     }
-    const cb = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.75, 6), fm.dark);
-    cb.position.set(-1.0, 3.2, s * 0.6);            // cabane struts at the fuselage
+    const cb = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.85, 6), fm.dark);
+    cb.position.set(-1.0, 3.22, s * 0.6);           // cabane struts at the fuselage
     ac.add(cb);
     const tf = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.13, 1.5, 8), fm.skin);
     tf.rotation.z = Math.PI / 2;
-    tf.position.set(0.1, 1.05, s * 4.7);            // wingtip stabilising floats
+    tf.position.set(-0.70, 1.05, s * 4.7);          // wingtip floats, at mid-chord
     ac.add(tag(tf, 'floatplane', 'Wingtip float'));
     const ts = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 6), fm.dark);
-    ts.position.set(0.1, 1.6, s * 4.7);
+    ts.position.set(-0.70, 1.6, s * 4.7);
     ac.add(ts);
     /* the hinomaru: a red disc through the fuselage and one on each upper wing panel —
        the single most identifying mark on the aircraft, so it is geometry, not paint */
@@ -6859,16 +6948,10 @@ function buildFloatplane(fm) {
     wd.position.set(-1.2, 3.65, s * 3.4);
     ac.add(wd);
   }
-  const fd = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.10, 16), fm.red);
+  const fd = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.10, 16), fm.red);
   fd.rotation.x = Math.PI / 2;
-  fd.position.set(1.6, 2.4, 0);
+  fd.position.set(1.6, 2.38, 0);
   ac.add(fd);
-  const fin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.35, 0.10), fm.skin);
-  fin.position.set(4.6, 3.35, 0);
-  ac.add(tag(fin, 'floatplane', 'Fin'));
-  const stab = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.10, 3.4), fm.skin);
-  stab.position.set(4.4, 2.6, 0);
-  ac.add(stab);
   return ac;
 }
 
@@ -6933,14 +7016,15 @@ function buildSternAviation(S, group) {
       glass: new THREE.MeshStandardMaterial({ color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 }),
       red:   new THREE.MeshStandardMaterial({ color: 0x9c2f28, roughness: 0.60, metalness: 0.05 }),
     };
+    const G = floatplaneGeometries();             // one airframe, every aircraft aboard
     if (portCat) {
-      const p0 = buildFloatplane(fm);
+      const p0 = buildFloatplane(fm, G);
       p0.position.y = 2.08;                       // float on the launch rail
       p0.rotation.y = Math.PI;                    // nose at the outboard-aft launch end
       portCat.add(tag(p0, 'floatplane'));
     }
     for (let i = portCat ? 1 : 0; i < S.floatplanes; i++) {
-      const p = buildFloatplane(fm);
+      const p = buildFloatplane(fm, G);
       const uP = u - 0.045 - 0.042 * (i - 1);
       const bC = Math.abs(surfacePoint(S, H, uP, 1.0)[2]);
       p.position.set((uP - 0.5) * L, H.sheer(uP) + bC * 0.035, 0);
