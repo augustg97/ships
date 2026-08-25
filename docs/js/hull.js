@@ -333,11 +333,43 @@ const top = STEEL ? -S.draught * 0.08 : H.sheer(1.0) * (BULK ? 0.60 : 0.35);
 const depth = -S.draught * (STEEL ? 0.95 : BULK ? 1.25 : 0.92);
 const w = 0.030 * S.beam * (STEEL ? 0.45 : 1.0);
 const chord = S.lwl * (STEEL ? 0.035 : BULK ? 0.095 : 0.055);
+if (STEEL) {
+const FS = [0.00, 0.03, 0.10, 0.25, 0.45, 0.65, 0.82, 1.00];
+const FF = [0.00, 0.55, 0.85, 1.00, 0.92, 0.72, 0.45, 0.06];
+const rows = [
+{ y: top,   xLE: p[0] - chord * 1.6,  xTE: p[0] - chord * 0.6 },
+{ y: depth, xLE: p[0] - chord * 1.45, xTE: p[0] - chord * 0.75 },
+];
+const ring = r => {
+const q = [];
+for (let i = FS.length - 1; i >= 0; i--)
+q.push([r.xLE + FS[i] * (r.xTE - r.xLE), r.y, -FF[i] * w]);
+for (let i = 1; i < FS.length; i++)
+q.push([r.xLE + FS[i] * (r.xTE - r.xLE), r.y,  FF[i] * w]);
+return q;
+};
+const rT = ring(rows[0]), rB = ring(rows[1]), n = rT.length, tri = [];
+for (let i = 0; i < n; i++) {
+const j = (i + 1) % n;
+tri.push(rT[i], rB[i], rB[j], rT[i], rB[j], rT[j]);
+}
+const cen = r => r.reduce((a, q2) => [a[0] + q2[0] / n, a[1] + q2[1] / n,
+a[2] + q2[2] / n], [0, 0, 0]);
+const cT = cen(rT), cB = cen(rB);
+for (let i = 0; i < n; i++) {
+const j = (i + 1) % n;
+tri.push(cT, rT[i], rT[j]);
+tri.push(cB, rB[j], rB[i]);
+}
+const flat = [];
+for (const q of tri) flat.push(q[0], q[1], q[2]);
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+geo.computeVertexNormals();
+return geo;
+}
 const pos = [], idx = [];
-const pts = STEEL
-? [[p[0] - chord * 1.6, top], [p[0] - chord * 0.6, top],
-[p[0] - chord * 0.75, depth], [p[0] - chord * 1.45, depth]]
-: BULK
+const pts = BULK
 ? [[p[0] + chord * 0.02, top], [p[0] + chord * 0.42, top],
 [p[0] + chord * 0.92, -S.draught * 0.10], [p[0] + chord * 0.92, depth],
 [p[0] + chord * 0.02, depth]]
@@ -6996,7 +7028,10 @@ group.add(tag(new THREE.Mesh(buildQuarterRudderGeometry(S, sgn), timber),
 'quarterRudder',
 sgn < 0 ? 'Port quarter rudder' : 'Starboard quarter rudder'));
 } else if (steer !== 'paddle') {
-group.add(tag(new THREE.Mesh(buildRudderGeometry(S), timber), 'rudder'));
+const rudderMat = steer === 'steel'
+? new THREE.MeshStandardMaterial({ color: bottom, roughness: 0.78, metalness: 0.12 })
+: timber;
+group.add(tag(new THREE.Mesh(buildRudderGeometry(S), rudderMat), 'rudder'));
 }
 const HS = hullSurface(S);
 (S.masts || []).forEach(mk => {

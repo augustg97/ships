@@ -10187,3 +10187,71 @@ had the later rounds' laws). (4) Standing residuals unchanged from r143 (gundeck
 normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe
 floor frame, myeongnyang Action baseline, Preussen trucks), plus the battle-rig record
 question. (5) The residue class: treasure 0.049, junk 0.048, galleass 0.047.
+
+## Round 153 — 2026-08-25 — the rudder becomes a foil, and the sea keeps the secret
+
+**The queue check first: August's second list stands WORKED IN FULL (r57), so the survey
+carried the round — r152's queue head, the steel rudder, staged there and landed here.**
+
+**Opening full 62-frame check at HEAD before any edit: 62/62 within tolerance, 0 BLANK,
+EXIT:0** (build/ratchet-open-r153.log, local), nothing else rendering.
+
+**The class closed: a balanced rudder is a foil, on every steel-steered hull at once.**
+buildRudderGeometry's STEEL branch now lofts the plate's own trapezoid planform as a
+closed streamlined body — eight chord stations, half-thickness peaking at 25% of chord,
+closing to 0.06 of max at the trailing edge, round nose; two rows on the plate's own
+LE/TE lines, one closed 15-point ring each, wall quads plus cap fans, 60 unindexed
+triangles (r146/r147, every arris its own vertices). The bounding box is the old
+plate's EXACTLY — the r152 camera-fit law, asserted in the sim — so measure_ship is
+byte-identical by construction. Sections run 8–23% t/c fleet-wide from each hull's own
+beam and lwl (titanic 8.4, yamato 11.7, usv 23.0 on a 0.72 m chord). And the foil
+changed CLOTHES as prescribed: a steel ship's rudder is part of the underwater body and
+wears her own `bottom` antifouling — yamato's IJN hull-red record, great-eastern's
+Victorian salmon derivation — where it drew in the fittings' topside steel grey.
+Timber and median rudders are genuinely plates and keep their timber, out of scope by
+the record's own steering kind.
+
+**Proven offline first, then by injection.** The r152 sim re-run 49/49 before the app
+was touched. The staged rule (build/staging-r153-rudder-rule.js, now DELETED — it lives
+in Research/audit-hulls.js as rule r153) ran against the OLD form in the page: convicted
+EXACTLY the twelve steel-steered hulls — "1.00 of full thickness at the trailing edge,
+12 triangles" on every one, the sim's predicted note — and nothing else fired. With the
+foil in: 33 hulls, 0 problems.
+
+**Measured: the delta is the rudder's own and nothing else's.** Probe yamato vs
+r152-after: ONE row moved — rudder 12 → 60 tris (+48, the sim's number), boxy 1 → 0;
+the ship 284 meshes, 0 boxy, 0% — her LAST boxy mesh closed. ⚠ The loose
+build/staging/probe-yamato.json is STALE (pre-r151); the current before is
+build/staging/r152-after/probe-yamato.json. measure_ship yamato byte-identical to
+r152-after including the Rudder row; queen-mary-2 before/after byte-identical.
+
+**The round's own finding: the sea keeps the secret.** r152 predicted the antifouling
+colour "is what will move the twelve frames." It moved NONE of them. Twelve-bearing
+after-spin vs r152's after-captures at this HEAD: ZERO changed pixels at every bearing
+including the lows — the Shipwright's water is opaque past about a metre, and the
+deepest-topped foil (container, −1.28 m) to the shallowest (usv, −0.19 m) all live
+below what any exterior bearing can read. The closing twelve ship-* frames scored one
+at a time: seven at 0.000%, five at 0.003–0.017% (the documented shimmer class), ALL
+under the gate, no acceptance, FRAME-LOG untouched. A change can be real, class-wide
+and audit-guarded, and still be invisible from every view the app owns.
+
+**Rule 1, honestly.** The foil itself is barely LOOKABLE in-app: the counter overhang
+hides it from above the horizon, and the app's own rAF camera re-fit overwrites a
+scripted camera. What was seen: with SW.ground hidden and SW.lat set negative
+(bypassing the drag clamp — build/staging/r153-look-rudder2.py, reusable), the blade
+shows below the usv's counter in the shell's own red (r153-look4-usv.png + crops),
+where the old plate read grey. The form beyond that is proven by sim, audit, probe and
+measure, not by eye. Rule 0 on the b090 spin frame: a rendered world — Yamato at her
+berth on open water, hazed shore on the horizon, red boot, tan deck, pagoda amidships.
+Three facts a viewer can read: 263.0 m length overall; 27.0 kn service speed with a
+crew of 3233; hull 27 of 33 in the fleet rail, laid down 1940.
+
+**Deployed: stamp 1787685606**, live verify in the commit.
+
+**Next, in order:** (1) Dreadnought as a hull — 61 boxy meshes, 36%: funnels, casings,
+boats never had the later rounds' laws; the r144–r152 catalogue (shared geometry, loft
+laws, plate laws, camera-fit clamp) is the toolkit. (2) Standing residuals unchanged
+from r143 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, QM2
+aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus
+the battle-rig record question. (3) The residue class: treasure 0.049, junk 0.048,
+galleass 0.047.

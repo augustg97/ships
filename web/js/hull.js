@@ -543,7 +543,7 @@ function buildRudderGeometry(S) {
      stern-hung plate below is a timber shape — pintles down the post, a barn door standing
      proud of the stern. On the carrier it stood 17 m past the transom and 4 m out of the
      water, in timber brown, and no baseline bearing could see it. A steel ship gets a
-     balanced plate tucked wholly below the waterline and inside her own length. */
+     balanced foil tucked wholly below the waterline and inside her own length. */
   const BULK = kind === 'median';
   /* ── AND A JUNK'S RUDDER IS A MEDIAN RUDDER, AND IT IS ENORMOUS ──────────────────────
      Slung on the centreline abaft the stern transom, worked on tackles in a trunk rather
@@ -558,12 +558,53 @@ function buildRudderGeometry(S) {
   const depth = -S.draught * (STEEL ? 0.95 : BULK ? 1.25 : 0.92);
   const w = 0.030 * S.beam * (STEEL ? 0.45 : 1.0);
   const chord = S.lwl * (STEEL ? 0.035 : BULK ? 0.095 : 0.055);
+  /* ── ⚠ A BALANCED RUDDER IS A FOIL (round 153) ──────────────────────────────────────
+     A steel ship's rudder is a streamlined body working as a wing in water: round nose,
+     thickness peaking near a quarter of the chord, closing to a near-sharp trailing
+     edge. The slab it replaces ran full thickness to its trailing edge on every
+     steel-steered hull — twelve of them. The loft keeps the plate's own LE/TE lines top
+     and bottom, so the bounding box — which the Shipwright's camera fit reads (r152) —
+     cannot move by construction. Wholly below the waterline, where postLean is zero by
+     construction, so the rows carry no lean term. Emitted as unindexed triangles:
+     every arris its own vertices (r146/r147). */
+  if (STEEL) {
+    const FS = [0.00, 0.03, 0.10, 0.25, 0.45, 0.65, 0.82, 1.00];  // chord stations
+    const FF = [0.00, 0.55, 0.85, 1.00, 0.92, 0.72, 0.45, 0.06];  // half-thickness / w
+    const rows = [
+      { y: top,   xLE: p[0] - chord * 1.6,  xTE: p[0] - chord * 0.6 },
+      { y: depth, xLE: p[0] - chord * 1.45, xTE: p[0] - chord * 0.75 },
+    ];
+    const ring = r => {
+      const q = [];
+      for (let i = FS.length - 1; i >= 0; i--)                    // TE → nose, −z side
+        q.push([r.xLE + FS[i] * (r.xTE - r.xLE), r.y, -FF[i] * w]);
+      for (let i = 1; i < FS.length; i++)                         // nose → TE, +z side
+        q.push([r.xLE + FS[i] * (r.xTE - r.xLE), r.y,  FF[i] * w]);
+      return q;                                                   // closed loop of 15
+    };
+    const rT = ring(rows[0]), rB = ring(rows[1]), n = rT.length, tri = [];
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      tri.push(rT[i], rB[i], rB[j], rT[i], rB[j], rT[j]);         // wall, outward
+    }
+    const cen = r => r.reduce((a, q2) => [a[0] + q2[0] / n, a[1] + q2[1] / n,
+                                          a[2] + q2[2] / n], [0, 0, 0]);
+    const cT = cen(rT), cB = cen(rB);
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      tri.push(cT, rT[i], rT[j]);                                 // top cap, +y out
+      tri.push(cB, rB[j], rB[i]);                                 // bottom cap, −y out
+    }
+    const flat = [];
+    for (const q of tri) flat.push(q[0], q[1], q[2]);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+    geo.computeVertexNormals();
+    return geo;
+  }
   const pos = [], idx = [];
   /* a plate on the sternpost: wider at the foot, raked with the post */
-  const pts = STEEL
-    ? [[p[0] - chord * 1.6, top], [p[0] - chord * 0.6, top],
-       [p[0] - chord * 0.75, depth], [p[0] - chord * 1.45, depth]]
-    : BULK
+  const pts = BULK
     ? [[p[0] + chord * 0.02, top], [p[0] + chord * 0.42, top],
        [p[0] + chord * 0.92, -S.draught * 0.10], [p[0] + chord * 0.92, depth],
        [p[0] + chord * 0.02, depth]]
@@ -574,8 +615,8 @@ function buildRudderGeometry(S) {
      runs aft with height. A stern-hung rudder's stock is pintled DOWN THAT POST — its
      leading edge is the post's own line — and the junk's median rudder stands up the raked
      transom notch the same way. Without this shear the wooden rudders' vertical leading
-     edges would open a wedge of daylight against the post they hang on. The steel plate
-     lives wholly below the waterline, where the offset is zero by construction. */
+     edges would open a wedge of daylight against the post they hang on. (The steel foil
+     returned above this: wholly below the waterline, its lean is zero by construction.) */
   /* H.rake(1.0), not sternRake·loa re-derived: since round 129 the loft clamps the rakes
      to the record's loa, and a post re-deriving the raw product would lean past the hull
      it hangs on. One source of truth. */
@@ -10611,7 +10652,14 @@ function buildShip(S, opts) {
                       'quarterRudder',
                       sgn < 0 ? 'Port quarter rudder' : 'Starboard quarter rudder'));
     } else if (steer !== 'paddle') {
-      group.add(tag(new THREE.Mesh(buildRudderGeometry(S), timber), 'rudder'));
+      /* ⚠ THE RUDDER IS PART OF THE UNDERWATER BODY (round 153). A steel ship's foil
+         works below her load line and is docked and painted with the shell: it wears
+         the ship's own antifouling — the same `bottom` the hull shader lays on — not
+         the fittings' topside steel grey. Timber rudders stay in the build's timber. */
+      const rudderMat = steer === 'steel'
+        ? new THREE.MeshStandardMaterial({ color: bottom, roughness: 0.78, metalness: 0.12 })
+        : timber;
+      group.add(tag(new THREE.Mesh(buildRudderGeometry(S), rudderMat), 'rudder'));
     }
     /* channels: a shelf outboard of each mast, on both sides, which is what the shrouds set
        up to. Positioned from the mast stations, so they cannot land in the wrong place. */
