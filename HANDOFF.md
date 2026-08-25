@@ -10082,3 +10082,108 @@ normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, c
 floor frame, myeongnyang Action baseline, Preussen trucks), plus the battle-rig record
 question. (5) The residue class: treasure 0.049, junk 0.048, galleass 0.047,
 aboard-yamato re-baselined this round.
+
+## Round 152 — 2026-08-25 — the aviation deck's steelwork becomes steelwork
+
+**The queue check first: August's second list stands WORKED IN FULL (r57), so the survey
+carried the round — r151's queue head, Yamato's catapults and crane.**
+
+**Opening full 62-frame check at HEAD before any edit: 62/62 within tolerance, 0 BLANK,
+EXIT:0** (build/ratchet-open-r152.log, local), run with NOTHING else rendering — r151's
+contention lesson applied, and the run completed clean where r151's aborted. aboard-yamato
+0.000 (re-baselined r151); residue class at its documented values (treasure 0.049,
+junk 0.048; galleass under 0.047).
+
+**The catapult class closed — a catapult is a truss, a launch rail is a slotted girder,
+a crane jib is a tapering lattice; none of them is a crate.** Each launch beam
+(BoxGeometry 19.4 × 0.9 × 1.4) is now ONE Warren-with-verticals truss: four chords,
+verticals at ~1.62 m panel points derived from the record's own lenM, alternating
+diagonals, top cross-beams under the rail, bottom cross-struts — 73 members, 876 tris,
+open air between them (fill 0.094 of the old box, the box itself 1.000). Each launch
+rail (Box 18.6 × 0.18 × 0.5) is now a girder with foot flange, narrow web and the head
+split into TWO rail strips either side of a real shuttle slot — the rail's own working
+feature — with the strip tops at the same 2.08 m the floatplane's float seats on. The
+crane jib (Box 12.6 × 0.6 × 0.6) is now a lattice tapering 0.60 → 0.24: four raking
+chords with mitred ends, zig-zag lacing on the side faces, transverse rungs top and
+bottom (a single zig-zag across z cannot be its own z-mirror), end frames, sheave
+housing at the head — 47 members, fill 0.107. One geometry per class built ONCE and
+shared by both mounts (r144); verts unshared so every arris is sharp (r146/r147);
+truss and rail bboxes are the old boxes EXACTLY; materials, positions, tags unchanged.
+
+**The round's own lesson: the mesh's extreme points are camera state.** The jib chords
+first took a 2 mm envelope inset (guarding a 4 µm cap-tilt graze) — and every spin
+bearing then showed a one-pixel ghost of the WHOLE ship silhouette, full frame width.
+After-vs-after recapture diffed 0 px >8, so it was real; the Shipwright fits its camera
+from the ship's own extents, the jib tip over the stern IS the extreme, and 2 mm of tip
+moved the fit sub-pixel. Fixed by clamping member corners to the old box's own faces —
+extremes exactly the old box's — and the sim now asserts the jib bbox byte-exact
+"because the camera fit reads these extremes". A near-invisible envelope change is a
+whole-frame change on any hull whose fitting is the extent.
+
+**Verified offline before touching the app** (build/staging-r152-aviation.mjs, node,
+49/49): member counts and tri counts exact, no NaN, no degenerates, positional
+edge-pairing on every closed member, signed volumes positive, z-mirror symmetry,
+envelope containment with truss/rail/jib bboxes exact, the r152 audit properties with
+the old forms convicted by the same tests (old beam fill 1.000 at 12 tris; old rail's
+one-piece top face crossing the slot line), float seat arithmetic 1.99 + 0.09 = 2.08.
+
+**Audit rule r152: open steelwork is OPEN — and a rail is slotted.** For hulls with
+catapults: 'Aircraft catapult' and 'Aircraft crane' meshes must be plated past 60 tris
+with enclosed volume ≤ 0.25 of their own bounding box (divergence sum, mesh-local);
+'Launch rail' must have no triangle in its head band (top 5 cm) crossing the
+centreline — asked of TRIANGLES because a vertex-band width read on an 8-vertex box
+sees nothing at all. Injection with hull.js stashed convicted the old form — "5 of 5 —
+Aircraft crane: 12 triangles filling 1.00 of its own box" — yamato only, no other rule
+fired; popped, 33/0 clean.
+
+**Measured, the deltas are the steelwork's own and nothing else's.** Probe: catapult
+class 8 meshes unchanged, tris 220 → 2572 (delta 2352 = truss 876×2 + rail 48×2 +
+jib 564 minus the five 12-tri boxes, exactly the sim's number), boxy 5 → 0; rudder and
+floatplane rows byte-identical; ship 284 meshes, boxy 6 → 1 (the deferred rudder).
+measure_ship: EVERY row byte-identical — truss and rail keep the old bboxes exactly,
+the jib's clamped extremes likewise.
+
+**Looked at (rule 1, before/after 12-bearing spins, before = r151's own after-captures
+at this HEAD).** With the clamp in, every pixel >8 is confined to one compact stern box
+at every bearing (b090: x 1637–1860 of 2880; b270: x 696–1060; b225: ZERO — the band
+hides behind the pagoda there); the ≤2-LSB sea shimmer is the documented flap class. At
+the b270 crop the solid slab under the floatplane becomes an open truss you can see the
+deck through, the box jib becomes a lattice narrowing to its sheave, the rail rides the
+chords with its slot line reading; at b090 the quarterdeck reads through the open webs.
+Rule 0 on the closing aboard frame: a rendered world — Yamato under way off Kagoshima,
+wake astern, on a wind-streaked July sea. Three facts a viewer can read: her last
+sortie lost 3,055 of 3,332 crew under 386 attacking aircraft (voyage card); she stands
+at 32°21′N 132°00′E, course 201°, 16 nm WNW of Kagoshima Ko in a force 2; 1943's
+seaborne trade ran 137 M tonnes a year (Stopford, Tbl 1.2) with ~14.7 M tons sunk by
+U-boats.
+
+**Frames: closing pair BOTH under the gate, no acceptance.** ship-yamato 0.017%/0.009,
+aboard-yamato 0.006%/0.002 — at the baseline bearings the stern band is small and the
+trusses hold the old envelope. The spins above are where the form change is proven.
+
+**One trap written down: `open(f, 'w')` truncates BEFORE the argument expression
+evaluates.** A python patch whose write-argument raised emptied Research/audit-hulls.js
+to zero bytes — and `node --check` PASSES an empty file, so the syntax check cannot
+catch it. Caught by grepping for the rule header; restored from git. Check a patched
+file's line count, not just its syntax.
+
+**The rudder is STAGED, deliberately.** The queue head named catapult ×5 + rudder ×1;
+the rudder fix is class-level (buildRudderGeometry's STEEL branch reaches TWELVE
+steel-steered hulls and twelve ship-* frames), and those twelve individual closing
+checks did not fit this round's window beside the catapult work. Everything is ready:
+the foil loft is sim-proven in build/staging-r152-aviation.mjs (closed edge-paired
+surface, bbox identical to the old plate's on yamato/QM2/dreadnought, TE ratio 0.060
+vs the plate's 1.000), and the audit rule sits in build/staging-r153-rudder-rule.js
+with application notes. Give the foil the ship's own `bottom` antifouling colour
+(buildShip already derives it; the rudder currently draws in TIMBER on steel hulls) —
+that colour change, not the silhouette, is what will move the twelve frames.
+
+**Deployed: stamp 1787681643**, live verify in the commit.
+
+**Next, in order:** (1) The opening full check, alone on the machine. (2) The steel
+rudder foil + material + staged rule — twelve hulls, score every frame individually
+(§7). (3) Dreadnought as a hull (61 boxy meshes, 36% — funnels, casings, boats never
+had the later rounds' laws). (4) Standing residuals unchanged from r143 (gundeck
+normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe
+floor frame, myeongnyang Action baseline, Preussen trucks), plus the battle-rig record
+question. (5) The residue class: treasure 0.049, junk 0.048, galleass 0.047.

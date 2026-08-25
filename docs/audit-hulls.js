@@ -1938,6 +1938,71 @@ say(v.id, 'pagoda is a stack of crates',
 `principal mesh runs ${pRun.toFixed(2)} of ${(ssHi - ssLo).toFixed(2)} m ` +
 `at ${pTris} triangles — stacked boxes, not one lofted tower`);
 }
+if (H.catapults) {
+let avBad = 0, avN = 0, avNote = '';
+const avTri = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+const eachTri = (geo, fn) => {
+const pos = geo.attributes.position, ix = geo.index;
+const n = ix ? ix.count : pos.count;
+for (let i = 0; i + 2 < n; i += 3) {
+for (let k = 0; k < 3; k++) {
+const vi = ix ? ix.getX(i + k) : i + k;
+avTri[k][0] = pos.getX(vi); avTri[k][1] = pos.getY(vi);
+avTri[k][2] = pos.getZ(vi);
+}
+fn(avTri);
+}
+};
+g.traverse(o => {
+if (!o.isMesh || !o.userData.part) return;
+const nm = o.userData.part.name;
+if (nm !== 'Aircraft catapult' && nm !== 'Aircraft crane' &&
+nm !== 'Launch rail') return;
+avN++;
+const geo = o.geometry;
+const tris = geo.index ? geo.index.count / 3
+: geo.attributes.position.count / 3;
+if (nm === 'Launch rail') {
+let yHi = -Infinity, cross = false;
+eachTri(geo, t => {
+for (const p of t) yHi = Math.max(yHi, p[1]);
+});
+eachTri(geo, t => {
+if (t[0][1] >= yHi - 0.05 && t[1][1] >= yHi - 0.05 &&
+t[2][1] >= yHi - 0.05 &&
+Math.min(t[0][2], t[1][2], t[2][2]) < -0.02 &&
+Math.max(t[0][2], t[1][2], t[2][2]) > 0.02) cross = true;
+});
+if (tris <= 12 || cross) {
+avBad++;
+avNote = `${nm}: ${tris} triangles, head face in one piece across ` +
+'the slot line';
+}
+} else {
+geo.computeBoundingBox();
+const bb = geo.boundingBox;
+const bbV = Math.max(1e-9, (bb.max.x - bb.min.x) *
+(bb.max.y - bb.min.y) * (bb.max.z - bb.min.z));
+let vol = 0;
+eachTri(geo, t => {
+const a = t[0], b = t[1], c = t[2];
+vol += (a[0] * (b[1] * c[2] - b[2] * c[1])
+- a[1] * (b[0] * c[2] - b[2] * c[0])
++ a[2] * (b[0] * c[1] - b[1] * c[0])) / 6;
+});
+const fill = Math.abs(vol) / bbV;
+if (tris <= 60 || fill > 0.25) {
+avBad++;
+avNote = `${nm}: ${tris} triangles filling ${fill.toFixed(2)} of its ` +
+'own box';
+}
+}
+});
+if (avBad)
+say(v.id, 'aviation steelwork is a crate',
+`${avBad} of ${avN} — ${avNote} — a catapult is a truss, a rail is a ` +
+'slotted girder, a jib is a lattice');
+}
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
 const rec = T.tiers.find(t => t.recess);

@@ -4510,6 +4510,113 @@ fd.position.set(1.6, 2.38, 0);
 ac.add(fd);
 return ac;
 }
+function emitBar(out, A, B, w, h, endX) {
+const ax = [B[0] - A[0], B[1] - A[1], B[2] - A[2]];
+const len = Math.hypot(ax[0], ax[1], ax[2]);
+const u = [ax[0] / len, ax[1] / len, ax[2] / len];
+let nW = [u[2], 0, -u[0]];
+let m = Math.hypot(nW[0], nW[1], nW[2]);
+if (m < 1e-6) { nW = [1, 0, 0]; m = 1; }
+nW = [nW[0] / m, nW[1] / m, nW[2] / m];
+const nH = [u[1] * nW[2] - u[2] * nW[1], u[2] * nW[0] - u[0] * nW[2],
+u[0] * nW[1] - u[1] * nW[0]];
+const c = (P, sw, sh) => {
+const p = [P[0] + nW[0] * sw * w / 2 + nH[0] * sh * h / 2,
+P[1] + nW[1] * sw * w / 2 + nH[1] * sh * h / 2,
+P[2] + nW[2] * sw * w / 2 + nH[2] * sh * h / 2];
+if (endX && Math.abs(u[0]) > 1e-6) {
+const t = (P[0] - p[0]) / u[0];
+p[0] = P[0]; p[1] += u[1] * t; p[2] += u[2] * t;
+}
+return p;
+};
+const v = [c(A, -1, -1), c(A, 1, -1), c(A, 1, 1), c(A, -1, 1),
+c(B, -1, -1), c(B, 1, -1), c(B, 1, 1), c(B, -1, 1)];
+const quad = (a, b, cc, d) => out.push(v[a], v[b], v[cc], v[a], v[cc], v[d]);
+quad(0, 3, 2, 1); quad(4, 5, 6, 7);
+quad(0, 1, 5, 4); quad(2, 3, 7, 6);
+quad(1, 2, 6, 5); quad(3, 0, 4, 7);
+}
+function trisGeometry(tris) {
+const pos = new Float32Array(tris.length * 3);
+for (let i = 0; i < tris.length; i++) {
+pos[i * 3] = tris[i][0]; pos[i * 3 + 1] = tris[i][1]; pos[i * 3 + 2] = tris[i][2];
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+g.computeVertexNormals();
+return g;
+}
+const TR_D = 0.90, TR_W = 1.40, TR_C = 0.14, TR_V = 0.10, TR_G = 0.09, TR_X = 0.10;
+function catapultTrussTris(len) {
+const out = [];
+const yB = -TR_D / 2 + TR_C / 2, yT = TR_D / 2 - TR_C / 2;
+const zS = TR_W / 2 - TR_C / 2;
+const x0 = -len / 2, x1 = len / 2;
+for (const sz of [-1, 1]) {
+emitBar(out, [x0, yB, sz * zS], [x1, yB, sz * zS], TR_C, TR_C);
+emitBar(out, [x0, yT, sz * zS], [x1, yT, sz * zS], TR_C, TR_C);
+}
+const N = Math.max(6, Math.round(len / 1.62));
+const px = i => (x0 + TR_C / 2) + (i / N) * (len - TR_C);
+for (let i = 0; i <= N; i++) {
+for (const sz of [-1, 1])
+emitBar(out, [px(i), yB, sz * zS], [px(i), yT, sz * zS], TR_V, TR_V);
+emitBar(out, [px(i), yT, -zS], [px(i), yT, zS], TR_X, TR_X);
+if (i % 2 === 0 && i < N)
+emitBar(out, [px(i), yB, -zS], [px(i), yB, zS], TR_G, TR_G);
+}
+for (let i = 0; i < N; i++)
+for (const sz of [-1, 1]) {
+const a = i % 2 ? [px(i), yT, sz * zS] : [px(i), yB, sz * zS];
+const b = i % 2 ? [px(i + 1), yB, sz * zS] : [px(i + 1), yT, sz * zS];
+emitBar(out, a, b, TR_G, TR_G);
+}
+return out;
+}
+const RL_HH = 0.09, RL_HW = 0.25, RL_FT = 0.045, RL_WEB = 0.05, RL_HD = 0.06, RL_SLOT = 0.055;
+function railGirderTris(len) {
+const out = [], L = len * 0.96, x0 = -L / 2, x1 = L / 2;
+const slab = (yLo, yHi, zLo, zHi) =>
+emitBar(out, [x0, (yLo + yHi) / 2, (zLo + zHi) / 2],
+[x1, (yLo + yHi) / 2, (zLo + zHi) / 2], zHi - zLo, yHi - yLo);
+slab(-RL_HH, -RL_HH + RL_FT, -RL_HW, RL_HW);
+slab(-RL_HH + RL_FT, RL_HH - RL_HD, -RL_WEB, RL_WEB);
+slab(RL_HH - RL_HD, RL_HH, RL_SLOT, RL_HW);
+slab(RL_HH - RL_HD, RL_HH, -RL_HW, -RL_SLOT);
+return out;
+}
+const JB_H0 = 0.60, JB_H1 = 0.24, JB_C = 0.085, JB_L = 0.055;
+function craneJibTris(jibL) {
+const out = [];
+const x0 = -jibL / 2, x1 = jibL / 2;
+const half = x => (JB_H0 + (JB_H1 - JB_H0) * (x - x0) / jibL) / 2 - JB_C / 2;
+const chord = (sy, sz, x) => [x, sy * half(x), sz * half(x)];
+for (const sy of [-1, 1]) for (const sz of [-1, 1])
+emitBar(out, chord(sy, sz, x0), chord(sy, sz, x1), JB_C, JB_C, true);
+const M = Math.max(5, Math.round(jibL / 1.4));
+const px = i => x0 + (i / M) * jibL;
+for (let i = 0; i < M; i++) {
+const a = i % 2 ? 1 : -1, b = -a;
+for (const s of [-1, 1])
+emitBar(out, chord(a, s, px(i)), chord(b, s, px(i + 1)), JB_L, JB_L, true);
+}
+for (let i = 1; i < M; i++)
+for (const sy of [-1, 1])
+emitBar(out, chord(sy, -1, px(i)), chord(sy, 1, px(i)), JB_L, JB_L);
+for (const x of [x0 + JB_C / 2, x1 - JB_C / 2]) {
+for (const sy of [-1, 1])
+emitBar(out, chord(sy, -1, x), chord(sy, 1, x), JB_L, JB_L);
+for (const sz of [-1, 1])
+emitBar(out, chord(-1, sz, x), chord(1, sz, x), JB_L, JB_L);
+}
+emitBar(out, [x1 - 0.30, 0, 0], [x1, 0, 0], 0.34, 0.18);
+for (const p of out) {
+p[1] = Math.max(-JB_H0 / 2, Math.min(JB_H0 / 2, p[1]));
+p[2] = Math.max(-JB_H0 / 2, Math.min(JB_H0 / 2, p[2]));
+}
+return out;
+}
 function buildSternAviation(S, group) {
 if (!S.catapults) return;
 const H = hullSurface(S);
@@ -4520,16 +4627,18 @@ const u = S.catapults.at || 0.92;
 const len = S.catapults.lenM || B * 0.5;
 const deckY = H.sheer(u);
 const half = Math.abs(surfacePoint(S, H, u, 1.0)[2]);
+const trussGeo = trisGeometry(catapultTrussTris(len));
+const railGeo = trisGeometry(railGirderTris(len));
 let portCat = null;
 for (const sgn of [1, -1]) {
 const g = new THREE.Group();
 const ped = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.7, 1.0, 14), dark);
 ped.position.y = 0.5;
 g.add(tag(ped, 'catapult', 'Catapult turntable'));
-const beam = new THREE.Mesh(new THREE.BoxGeometry(len, 0.9, 1.4), steel);
+const beam = new THREE.Mesh(trussGeo, steel);
 beam.position.y = 1.45;
 g.add(tag(beam, 'catapult'));
-const rail = new THREE.Mesh(new THREE.BoxGeometry(len * 0.96, 0.18, 0.5), dark);
+const rail = new THREE.Mesh(railGeo, dark);
 rail.position.y = 1.99;
 g.add(tag(rail, 'catapult', 'Launch rail'));
 g.position.set((u - 0.5) * L, deckY, sgn * (half - 2.6));
@@ -4544,7 +4653,7 @@ const post = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.65, 9.0, 12), dark
 post.position.y = 4.5;
 g.add(tag(post, 'catapult', 'Crane post'));
 const jibL = len * 0.65;
-const jib = new THREE.Mesh(new THREE.BoxGeometry(jibL, 0.6, 0.6), steel);
+const jib = new THREE.Mesh(trisGeometry(craneJibTris(jibL)), steel);
 jib.position.set(Math.cos(0.6) * jibL / 2, 9.0 + Math.sin(0.6) * jibL / 2, 0);
 jib.rotation.z = 0.6;
 g.add(tag(jib, 'catapult', 'Aircraft crane'));
