@@ -1885,6 +1885,38 @@ say(v.id, 'platform bracket is a slab',
 `${bkBad} of ${bkN} — ${bkNote} — the same depth at its free end as at ` +
 'the tower face, which no cantilever web is');
 }
+if (H.aa || H.aaLight) {
+let shBad = 0, shN = 0, shNote = '';
+g.traverse(o => {
+if (!o.isMesh || !o.userData.part) return;
+const nm = o.userData.part.name;
+if (nm !== 'High-angle mount' && nm !== 'Triple 25 mm mount') return;
+shN++;
+const pos = o.geometry.attributes.position;
+const shTris = o.geometry.index ? o.geometry.index.count / 3 : pos.count / 3;
+let yLo = Infinity, yHi = -Infinity;
+for (let i = 0; i < pos.count; i++) {
+yLo = Math.min(yLo, pos.getY(i)); yHi = Math.max(yHi, pos.getY(i));
+}
+const h = yHi - yLo;
+const maxZ = band => {
+let m = -Infinity;
+for (let i = 0; i < pos.count; i++)
+if (band(pos.getY(i))) m = Math.max(m, pos.getZ(i));
+return m;
+};
+const zTop = maxZ(y => y > yHi - h * 0.25), zBot = maxZ(y => y < yLo + h * 0.25);
+if (shTris <= 12 || zTop > 0.9 * zBot) {
+shBad++;
+shNote = `${nm}: face ${zBot.toFixed(2)} at the base, ${zTop.toFixed(2)} at ` +
+`the crown, ${shTris} triangles`;
+}
+});
+if (shBad)
+say(v.id, 'gun shield is a crate',
+`${shBad} of ${shN} — ${shNote} — plumb on every side, which no gun ` +
+'shield is');
+}
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {
 const T = SHIPS_HULL.linerHouse(H);
 const rec = T.tiers.find(t => t.recess);

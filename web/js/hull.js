@@ -6723,6 +6723,78 @@ function buildCitadel(S, group, mats) {
   group.add(tag(g, 'superstructure'));
 }
 
+/* ── THE READY BATTERY'S SHIELDS (round 150) ────────────────────────────────────────────
+ * A shielded gun mount IS near-boxy in life, so the fix is the shield's own form — chamfer
+ * and rake, not a loft for its own sake. Two shells, each built ONCE per hull and shared by
+ * every mount of its class (r144): the high-angle gunhouse an eight-sided chamfered house,
+ * walls vertical to a knuckle then raking to a flat crown, floor and crown closed; the
+ * 25 mm shield an open-backed faceted wrap raking inward, 5 cm plate with its top, bottom
+ * and end grain closed. Both live strictly inside the box they replace, so every recorded
+ * fit holds. Face outboard at +z in the mesh's own frame; the port mount turns the same
+ * geometry PI about y (r118) — both planforms are their own x-mirror, so the turn is exact.
+ * Verts unshared, every face flat, so every arris is sharp (the r146/r147 striping
+ * mechanism impossible by construction). Sim: build/staging-r150-mounts.mjs, 31/31. */
+function aaHouseGeometry() {
+  const R0 = [[-0.78, 1.00], [0.78, 1.00], [1.20, 0.58], [1.20, -0.70],
+              [0.90, -1.00], [-0.90, -1.00], [-1.20, -0.70], [-1.20, 0.58]];
+  const R2 = [[-0.72, 0.62], [0.72, 0.62], [1.04, 0.34], [1.04, -0.62],
+              [0.78, -0.86], [-0.78, -0.86], [-1.04, -0.62], [-1.04, 0.34]];
+  const rings = [{ y: 0, p: R0 }, { y: 0.95, p: R0 }, { y: 1.70, p: R2 }];
+  const v = [];
+  const tri = (a, b, c) => v.push(...a, ...b, ...c);
+  const quad = (a, b, c, d) => { tri(a, b, c); tri(a, c, d); };
+  const n = R0.length;
+  for (let r = 0; r + 1 < rings.length; r++)
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n, lo = rings[r], hi = rings[r + 1];
+      quad([lo.p[i][0], lo.y, lo.p[i][1]], [lo.p[j][0], lo.y, lo.p[j][1]],
+           [hi.p[j][0], hi.y, hi.p[j][1]], [hi.p[i][0], hi.y, hi.p[i][1]]);
+    }
+  const cen = ring => {
+    let x = 0, z = 0;
+    for (const p of ring.p) { x += p[0]; z += p[1]; }
+    return [x / n, ring.y, z / n];
+  };
+  const top = rings[2], bot = rings[0], cT = cen(top), cB = cen(bot);
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    tri(cT, [top.p[i][0], top.y, top.p[i][1]], [top.p[j][0], top.y, top.p[j][1]]);
+    tri(cB, [bot.p[j][0], bot.y, bot.p[j][1]], [bot.p[i][0], bot.y, bot.p[i][1]]);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function aaLightShieldGeometry() {
+  const RX = 0.92, RZ = 0.78, T = 0.05, H = 1.25, TOP = 0.65, N = 7;
+  const th0 = -Math.PI * 7 / 12, th1 = Math.PI * 7 / 12;      // ±105°, open inboard
+  const sta = [];
+  for (let k = 0; k <= N; k++) {
+    const th = th0 + (th1 - th0) * k / N;
+    sta.push([Math.sin(th), Math.cos(th)]);
+  }
+  const pt = (k, s, rx, rz, y) => [sta[k][0] * rx * s, y, sta[k][1] * rz * s];
+  const oB = k => pt(k, 1, RX, RZ, 0),       oT = k => pt(k, TOP, RX, RZ, H);
+  const iB = k => pt(k, 1, RX - T, RZ - T, 0), iT = k => pt(k, TOP, RX - T, RZ - T, H);
+  const v = [];
+  const tri = (a, b, c) => v.push(...a, ...b, ...c);
+  const quad = (a, b, c, d) => { tri(a, b, c); tri(a, c, d); };
+  for (let k = 0; k < N; k++) {
+    quad(oB(k), oB(k + 1), oT(k + 1), oT(k));            // outer face
+    quad(iB(k + 1), iB(k), iT(k), iT(k + 1));            // inner face
+    quad(oT(k), oT(k + 1), iT(k + 1), iT(k));            // top grain
+    quad(oB(k + 1), oB(k), iB(k), iB(k + 1));            // bottom grain
+  }
+  quad(oB(0), oT(0), iT(0), iB(0));                      // θ0 end grain
+  quad(oT(N), oB(N), iB(N), iT(N));                      // θ1 end grain
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
 /* ── THE HIGH-ANGLE BATTERY ─────────────────────────────────────────────────────────────
  * Twin heavy AA mounts along the upper citadel edge, mirrored port and starboard, from the
  * record: `aa: [{at: …}, …]`, one entry per side-pair. Open mounts — a platform, a pedestal,
@@ -6735,6 +6807,7 @@ function buildAA(S, g, T, mats) {
     new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
   const dark = mats.turretDark || (mats.turretDark =
     new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+  const houseGeo = aaHouseGeometry();               // ONE shell, shared by all six (r144)
   S.aa.forEach(m => {
     const cal = m.cal || 0.127;
     const barrelL = cal * (m.calLen || 40);
@@ -6748,9 +6821,13 @@ function buildAA(S, g, T, mats) {
       const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.85, 1.1, 12), dark);
       ped.position.y = 0.9;
       mount.add(ped);
-      /* the shield: an open-backed box, face outboard */
-      const shield = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.7, 2.0), steel);
-      shield.position.y = 2.1;
+      /* the gunhouse: chamfered walls to a knuckle, raked crown, face outboard; the
+         pedestal top (1.45) runs 0.20 up through its floor (1.25), so it stands on
+         structure. The barrels elevate through the raked upper face as the real
+         mount's did. */
+      const shield = new THREE.Mesh(houseGeo, steel);
+      shield.position.y = 1.25;
+      if (sgn < 0) shield.rotation.y = Math.PI;
       mount.add(tag(shield, 'aa', 'High-angle mount'));
       /* twin barrels, elevated — trained outboard like the rest of the ready battery */
       for (const off of [-0.55, 0.55]) {
@@ -6782,6 +6859,7 @@ function buildAALight(S, g, T, mats) {
     new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
   const dark = mats.turretDark || (mats.turretDark =
     new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+  const wrapGeo = aaLightShieldGeometry();          // ONE shell, shared by all eight (r144)
   S.aaLight.forEach(m => {
     for (const sgn of [1, -1]) {
       const mount = new THREE.Group();
@@ -6795,9 +6873,12 @@ function buildAALight(S, g, T, mats) {
       const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 0.8, 10), dark);
       ped.position.y = 3.0;
       mount.add(ped);
-      /* the shield: open-backed, face outboard with the guns */
-      const shield = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.25, 1.6), steel);
-      shield.position.y = 3.9;
+      /* the shield: an open-backed faceted wrap raking inward, face outboard with the
+         guns; the pedestal stands inside its open base ring, on the carriage the wrap
+         actually hung from. */
+      const shield = new THREE.Mesh(wrapGeo, steel);
+      shield.position.y = 3.275;
+      if (sgn < 0) shield.rotation.y = Math.PI;
       mount.add(tag(shield, 'aaLight', 'Triple 25 mm mount'));
       /* three barrels close abreast, elevated — the automatic-battery signature */
       for (const off of [-0.34, 0, 0.34]) {

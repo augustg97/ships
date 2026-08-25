@@ -4164,6 +4164,65 @@ buildAA(S, g, { tierTop, tierHalf, dh }, mats);
 buildAALight(S, g, { tierTop, tierHalf, dh }, mats);
 group.add(tag(g, 'superstructure'));
 }
+function aaHouseGeometry() {
+const R0 = [[-0.78, 1.00], [0.78, 1.00], [1.20, 0.58], [1.20, -0.70],
+[0.90, -1.00], [-0.90, -1.00], [-1.20, -0.70], [-1.20, 0.58]];
+const R2 = [[-0.72, 0.62], [0.72, 0.62], [1.04, 0.34], [1.04, -0.62],
+[0.78, -0.86], [-0.78, -0.86], [-1.04, -0.62], [-1.04, 0.34]];
+const rings = [{ y: 0, p: R0 }, { y: 0.95, p: R0 }, { y: 1.70, p: R2 }];
+const v = [];
+const tri = (a, b, c) => v.push(...a, ...b, ...c);
+const quad = (a, b, c, d) => { tri(a, b, c); tri(a, c, d); };
+const n = R0.length;
+for (let r = 0; r + 1 < rings.length; r++)
+for (let i = 0; i < n; i++) {
+const j = (i + 1) % n, lo = rings[r], hi = rings[r + 1];
+quad([lo.p[i][0], lo.y, lo.p[i][1]], [lo.p[j][0], lo.y, lo.p[j][1]],
+[hi.p[j][0], hi.y, hi.p[j][1]], [hi.p[i][0], hi.y, hi.p[i][1]]);
+}
+const cen = ring => {
+let x = 0, z = 0;
+for (const p of ring.p) { x += p[0]; z += p[1]; }
+return [x / n, ring.y, z / n];
+};
+const top = rings[2], bot = rings[0], cT = cen(top), cB = cen(bot);
+for (let i = 0; i < n; i++) {
+const j = (i + 1) % n;
+tri(cT, [top.p[i][0], top.y, top.p[i][1]], [top.p[j][0], top.y, top.p[j][1]]);
+tri(cB, [bot.p[j][0], bot.y, bot.p[j][1]], [bot.p[i][0], bot.y, bot.p[i][1]]);
+}
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+geo.computeVertexNormals();
+return geo;
+}
+function aaLightShieldGeometry() {
+const RX = 0.92, RZ = 0.78, T = 0.05, H = 1.25, TOP = 0.65, N = 7;
+const th0 = -Math.PI * 7 / 12, th1 = Math.PI * 7 / 12;
+const sta = [];
+for (let k = 0; k <= N; k++) {
+const th = th0 + (th1 - th0) * k / N;
+sta.push([Math.sin(th), Math.cos(th)]);
+}
+const pt = (k, s, rx, rz, y) => [sta[k][0] * rx * s, y, sta[k][1] * rz * s];
+const oB = k => pt(k, 1, RX, RZ, 0),       oT = k => pt(k, TOP, RX, RZ, H);
+const iB = k => pt(k, 1, RX - T, RZ - T, 0), iT = k => pt(k, TOP, RX - T, RZ - T, H);
+const v = [];
+const tri = (a, b, c) => v.push(...a, ...b, ...c);
+const quad = (a, b, c, d) => { tri(a, b, c); tri(a, c, d); };
+for (let k = 0; k < N; k++) {
+quad(oB(k), oB(k + 1), oT(k + 1), oT(k));
+quad(iB(k + 1), iB(k), iT(k), iT(k + 1));
+quad(oT(k), oT(k + 1), iT(k + 1), iT(k));
+quad(oB(k + 1), oB(k), iB(k), iB(k + 1));
+}
+quad(oB(0), oT(0), iT(0), iB(0));
+quad(oT(N), oB(N), iB(N), iT(N));
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+geo.computeVertexNormals();
+return geo;
+}
 function buildAA(S, g, T, mats) {
 if (!S.aa || !S.aa.length) return;
 const B = S.beam, L = S.lwl;
@@ -4171,6 +4230,7 @@ const steel = mats.turretSteel || (mats.turretSteel =
 new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
 const dark = mats.turretDark || (mats.turretDark =
 new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+const houseGeo = aaHouseGeometry();
 S.aa.forEach(m => {
 const cal = m.cal || 0.127;
 const barrelL = cal * (m.calLen || 40);
@@ -4183,8 +4243,9 @@ mount.add(tag(plat, 'aa', 'Gun platform'));
 const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.85, 1.1, 12), dark);
 ped.position.y = 0.9;
 mount.add(ped);
-const shield = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.7, 2.0), steel);
-shield.position.y = 2.1;
+const shield = new THREE.Mesh(houseGeo, steel);
+shield.position.y = 1.25;
+if (sgn < 0) shield.rotation.y = Math.PI;
 mount.add(tag(shield, 'aa', 'High-angle mount'));
 for (const off of [-0.55, 0.55]) {
 const gun = new THREE.Mesh(
@@ -4206,6 +4267,7 @@ const steel = mats.turretSteel || (mats.turretSteel =
 new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 }));
 const dark = mats.turretDark || (mats.turretDark =
 new THREE.MeshStandardMaterial({ color: 0x3a4046, roughness: 0.58, metalness: 0.40 }));
+const wrapGeo = aaLightShieldGeometry();
 S.aaLight.forEach(m => {
 for (const sgn of [1, -1]) {
 const mount = new THREE.Group();
@@ -4218,8 +4280,9 @@ mount.add(tag(tub, 'aaLight', 'Gun tub'));
 const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.5, 0.8, 10), dark);
 ped.position.y = 3.0;
 mount.add(ped);
-const shield = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.25, 1.6), steel);
-shield.position.y = 3.9;
+const shield = new THREE.Mesh(wrapGeo, steel);
+shield.position.y = 3.275;
+if (sgn < 0) shield.rotation.y = Math.PI;
 mount.add(tag(shield, 'aaLight', 'Triple 25 mm mount'));
 for (const off of [-0.34, 0, 0.34]) {
 const gun = new THREE.Mesh(

@@ -9908,3 +9908,90 @@ not a loft for its own sake; superstructure tower levels x5 + bridge x3 one row 
 from r143 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, QM2
 aft terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus
 the battle-rig record question. (4) The residue class above.
+
+## Round 150 — 2026-08-25 — the ready battery's shields get their own form
+
+**Opening full 62-frame check, launched at 07:58 before any edit: 62/62 within
+tolerance, 0 BLANK, EXIT:0** (build/ratchet-open-r150.log, local). One honesty note on
+what "at HEAD" means this round: the run overlapped the round's own edits. ship-yamato
+was captured at 08:10, before the hull edit landed — its 0.004%/0.001 is byte-for-byte
+the r149 closing residue, so HEAD was clean there. aboard-yamato was captured ~08:20
+with the new shields already in web/ and still read 0.045%/0.022, under the gate —
+its documented 0.041 residue plus the mount band's trace at sea scale. Every other
+frame is untouched by this round's code by construction (no other hull carries
+`aa`/`aaLight`). Top movers ship-treasure 0.049 / ship-junk 0.048 — the documented
+residue, unchanged.
+
+**The queue check preceded it: August's second list stands WORKED IN FULL (r57), so the
+survey carried the task — r149's queue head, the triple 25 mm mounts x8 and high-angle
+mounts x6.**
+
+**The shield class closed, the way HANDOFF said it had to be: chamfer and shield form,
+not a loft for its own sake.** A shielded gun mount IS near-boxy in life — that is why
+these fourteen boxes survived 149 rounds — but both shields rake back from their own
+base, and a rectangular crate rakes nowhere. The six high-angle shields
+(BoxGeometry 2.4 × 1.7 × 2.0) are now ONE eight-sided chamfered gunhouse: walls
+vertical to a knuckle at 0.95, then raking to a flat crown — face 1.00 → 0.62, sides
+1.20 → 1.04 — floor and crown closed, the pedestal top (1.45) running 0.20 up through
+the floor (1.25) so the house stands on structure. The eight 25 mm shields
+(BoxGeometry 1.9 × 1.25 × 1.6) are now ONE open-backed faceted wrap: 7 facets on an
+elliptical arc ±105° (rx 0.92, rz 0.78), raking inward to 0.65 scale at the crown,
+5 cm plate with top, bottom and both end grains closed, the pedestal standing inside
+the open base ring on the carriage the wrap actually hung from. Each shell is built
+ONCE per hull and shared by every mount of its class (r144); verts unshared so every
+arris is flat-shaded sharp (r146/r147 mechanism impossible); both planforms are their
+own x-mirror, so the port mount is the same geometry under a PI turn about y (r118).
+Both shells live strictly inside the box they replace — no excursion at all this time.
+
+**Verified offline before touching the app** (build/staging-r150-mounts.mjs, node):
+31/31 — tri counts (house 48, wrap 60), no degenerates, simple planforms, x-mirror
+symmetry, envelope containment, the r150 rake property with the old boxes convicted
+at 1.0 by the same test, all windings (closed-convex outwardness for the house;
+per-plate-class radial/vertical/tangent senses for the wrap), pedestal and barrel fits,
+open back proven (no vert further inboard than the arc's own ends).
+
+**Audit rule r150: a gun shield rakes; only a crate is plumb on every side.** Each
+'High-angle mount' / 'Triple 25 mm mount' mesh must be plated (>12 tris) and rake —
+mesh-local max z in the top quarter ≤ 0.9 × max z in the bottom quarter (the port PI
+turn leaves local attributes untouched, so one read holds both sides). Injection with
+hull.js stashed convicted the old form — "14 of 14 — Triple 25 mm mount: face 0.80 at
+the base, 0.80 at the crown, 12 triangles" — yamato only, no other rule fired;
+popped, 33/0 clean.
+
+**Measured, the deltas are the shields' own and nothing else's.** Probe: aa boxy 6→0,
+tris 1128→1344 (+216 = 6 × 36 exactly); aaLight boxy 8→0, tris 1888→2272
+(+384 = 8 × 48 exactly); ship 291 meshes unchanged, boxy 28→14 (9%→4%). measure_ship:
+ONE row moved — Triple 25 mm mount, fore-aft 47.21→47.09 (2 × (0.95 − 0.92 sin 75°),
+the wrap's ends inside the box corners) and half-breadth 13.89→13.84
+(0.8 − 0.78 cos 15°, the faceted front's chord against the old box face); every other
+row byte-identical, the High-angle row unmoved because the house keeps the box's base
+planform at its own base.
+
+**Looked at (rule 1, before/after 12-bearing spins with the old form stashed for the
+before).** The pixel diff is confined to the amidships mount band at every one of the
+ten compared bearings (y 773–902 of 1800; e.g. b045 3,242 px of 2880 × 1800). At the
+b270 close crop the before shows grey bricks plumb on their drums; the after shows
+each 25 mm wrap narrowing to its crown with lit chamfer facets, and the high-angle
+house showing its knuckle line and raked crown. Rule 0 on the closing aboard frame:
+reads as a rendered world — Yamato under way off Kagoshima, wake astern, on a
+wind-streaked July sea. Three facts a viewer can read: her last sortie lost 3,055 of
+3,332 crew under 386 attacking aircraft (voyage card); she stands at 32°21′N 132°00′E,
+course 201°, 16 nm WNW of Kagoshima Ko; 1943's seaborne trade ran 137 M tonnes a year
+(Stopford, Tbl 1.2) with ~14.7 M tons sunk by U-boats.
+
+**Frames: closing pair one at a time.** ship-yamato 0.060%/0.021 — the diff image is
+the fourteen shields alone, small blobs in the amidships band, nothing else in the
+frame — accepted with reason, re-check clean. aboard-yamato 0.045%/0.022 under the
+gate, untouched: its residue value is now 0.045 (was 0.041; the band's sea-scale
+trace rides on it). The under-gate residue class is now ship-junk 0.048,
+ship-treasure 0.049, ship-galleass 0.047, aboard-yamato 0.045.
+
+**Deployed: stamp 1787672381**, live verify in the commit.
+
+**Next, in order:** (1) The opening full check. (2) Yamato's remaining boxy classes by
+the probe (14 boxy meshes left, 4%): superstructure tower levels x5 + bridge x3 — the
+r146 island law could reach the pagoda mast; run probe_parts to name the rest.
+(3) Standing residuals unchanged from r143 (gundeck normals, Endurance forecastle,
+Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang Action
+baseline, Preussen trucks), plus the battle-rig record question. (4) The residue class
+above.

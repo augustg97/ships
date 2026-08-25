@@ -2733,6 +2733,49 @@
             'the tower face, which no cantilever web is');
     }
 
+    /* ⚠ A GUN SHIELD RAKES; ONLY A CRATE IS PLUMB ON EVERY SIDE (round 150). The
+       high-angle gunhouse and the shielded 25 mm mount are near-boxy in life — that is
+       why they survived 149 rounds — but both shields rake back from their own base:
+       the Type 89 house to a narrower crown, the Type 96 wrap inward toward the guns.
+       The convicted forms were rectangular boxes, 12 triangles, plumb on every side.
+       Measured on the shield's own geometry in mesh-local coordinates — the port
+       mount turns the starboard geometry PI about y (r118), which leaves the local
+       attributes untouched, so the read holds on both sides: max z in the top quarter
+       of the mesh's height must be ≤ 0.9 x max z in the bottom quarter, and the shell
+       must be plated past the boxy line (> 12 triangles). */
+    if (H.aa || H.aaLight) {
+      let shBad = 0, shN = 0, shNote = '';
+      g.traverse(o => {
+        if (!o.isMesh || !o.userData.part) return;
+        const nm = o.userData.part.name;
+        if (nm !== 'High-angle mount' && nm !== 'Triple 25 mm mount') return;
+        shN++;
+        const pos = o.geometry.attributes.position;
+        const shTris = o.geometry.index ? o.geometry.index.count / 3 : pos.count / 3;
+        let yLo = Infinity, yHi = -Infinity;
+        for (let i = 0; i < pos.count; i++) {
+          yLo = Math.min(yLo, pos.getY(i)); yHi = Math.max(yHi, pos.getY(i));
+        }
+        const h = yHi - yLo;
+        const maxZ = band => {
+          let m = -Infinity;
+          for (let i = 0; i < pos.count; i++)
+            if (band(pos.getY(i))) m = Math.max(m, pos.getZ(i));
+          return m;
+        };
+        const zTop = maxZ(y => y > yHi - h * 0.25), zBot = maxZ(y => y < yLo + h * 0.25);
+        if (shTris <= 12 || zTop > 0.9 * zBot) {
+          shBad++;
+          shNote = `${nm}: face ${zBot.toFixed(2)} at the base, ${zTop.toFixed(2)} at ` +
+                   `the crown, ${shTris} triangles`;
+        }
+      });
+      if (shBad)
+        say(v.id, 'gun shield is a crate',
+            `${shBad} of ${shN} — ${shNote} — plumb on every side, which no gun ` +
+            'shield is');
+    }
+
     /* ⚠ THE BOATS STOW ON THE BOAT DECK, WHICH IS THE TOP OF THE HOUSE. buildBoats put every
        boat at the hull SHEER — on a liner that is the well of the promenade, four decks below
        the deck the boats are named for, and the row of white hulls read as blisters riveted
