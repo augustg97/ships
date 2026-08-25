@@ -8374,6 +8374,9 @@ function buildGalleyWorks(S, group, mats) {
     group.add(tag(new THREE.Mesh(dg, pale), 'gundeck', GD.name, GD.what));
     const surfY = gdY + B * 0.007;
     const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
+    /* a record that carries sama gets its wall built pierced, below — the segment
+       bulwark here would only be torn open again */
+    const nSama = Math.max(0, GD.loops | 0);
     for (const sgn of [-1, 1]) {
       for (let i = 0; i <= N; i += 2) {
         /* stanchions stand ON the rail — foot at the gunwale the surface owns */
@@ -8387,11 +8390,13 @@ function buildGalleyWorks(S, group, mats) {
         const ca = new THREE.Vector3(sx[i], gdY - B * 0.016, sgn * (halfW[i] - B * 0.014));
         const cb = new THREE.Vector3(sx[i + 1], gdY - B * 0.016, sgn * (halfW[i + 1] - B * 0.014));
         group.add(tag(beamAB(ca, cb, B * 0.030, B * 0.028, timber), 'gundeck', 'Deck clamp'));
-        const ba = new THREE.Vector3(sx[i], surfY + shH / 2, sgn * (halfW[i] - B * 0.006));
-        const bb = new THREE.Vector3(sx[i + 1], surfY + shH / 2, sgn * (halfW[i + 1] - B * 0.006));
-        group.add(tag(beamAB(ba, bb, shH, B * 0.012, timber), 'gundeck', 'Bulwark',
-          'Heavy plank, chest-high, around the whole fighting deck — the rowers below it, '
-          + 'the marines behind it, and the reason boarding a panokseon means climbing.'));
+        if (!nSama) {
+          const ba = new THREE.Vector3(sx[i], surfY + shH / 2, sgn * (halfW[i] - B * 0.006));
+          const bb = new THREE.Vector3(sx[i + 1], surfY + shH / 2, sgn * (halfW[i + 1] - B * 0.006));
+          group.add(tag(beamAB(ba, bb, shH, B * 0.012, timber), 'gundeck', 'Bulwark',
+            'Heavy plank, chest-high, around the whole fighting deck — the rowers below it, '
+            + 'the marines behind it, and the reason boarding a panokseon means climbing.'));
+        }
       }
     }
     /* and the ends CLOSE: an athwartships panel at each end of the fighting deck. Every
@@ -8527,21 +8532,109 @@ function buildGalleyWorks(S, group, mats) {
         }
       }
     }
-    /* the sama: loopholes for bows and arquebuses in a row along the bulwark — what the
+    /* ── THE TATE-ITA, PIERCED (round 140) ────────────────────────────────────────────
+       The sama: firing slots for bow and arquebus in a row along the wall — what the
        wall is FOR on a hull that mounts no broadside. Record-driven: GD.loops a side.
-       Each is a dark plate straddling the plank, laid to the wall's own run at its
-       station, so the row follows the rail line the bulwark itself follows. Source:
-       ja "sekibune": the tate-ita carry sama (狭間), firing slots for bow and arquebus. */
-    const nL = Math.max(0, GD.loops | 0);
-    if (nL) {
-      const du = 0.05 / L;
-      for (const sgn of [-1, 1]) for (let j = 0; j < nL; j++) {
-        const u = GD.from + (GD.to - GD.from) * (j + 0.5) / nL;
-        const p1 = surfacePoint(S, H, u - du, 1.0), p2 = surfacePoint(S, H, u + du, 1.0);
-        const yL = surfY + shH * 0.60;
-        const a = new THREE.Vector3(p1[0], yL, sgn * (Math.abs(p1[2]) + over - B * 0.006));
-        const b = new THREE.Vector3(p2[0], yL, sgn * (Math.abs(p2[2]) + over - B * 0.006));
-        group.add(tag(beamAB(a, b, shH * 0.24, B * 0.026, portMat), 'sama'));
+       Until r140 each was a dark plate straddling the plank — paint, not a slot — and
+       the survey named the class (samax26). Now the wall itself is built pierced, the
+       r136 grating-hole law: one lofted plank wall per side following the deck edge's
+       own curve, each sama a real OPENING through it with reveal faces the plank's own
+       thickness deep, and a near-black board a hand inboard of each opening so the slot
+       reads into shadow from every outboard bearing — the same interior darkness the
+       hatchway plate gives the gratings. Positions, sizes and the row line are the
+       plate row's exactly: centre 0.60·shH over the deck, 0.24·shH tall, 0.10 m wide.
+       Source: ja "sekibune": the tate-ita carry sama (狭間), slots for bow and arquebus.
+       Single winding on DoubleSide throughout — the r118 normals lesson. */
+    if (nSama) {
+      const t = B * 0.012;                     // the plank the segments drew, kept
+      const du = 0.05 / L;                     // slot half-width in u — 0.10 m drawn
+      const yB2 = surfY, yT2 = surfY + shH;
+      const yS = surfY + shH * 0.48, yH2 = surfY + shH * 0.72;
+      const timberDS2 = timber.clone(); timberDS2.side = THREE.DoubleSide;
+      const portDS = portMat.clone(); portDS.side = THREE.DoubleSide;
+      /* stations: the loft's own N plus both edges of every slot, sorted */
+      const us = [], slots = [];
+      for (let i = 0; i <= N; i++) us.push(GD.from + (GD.to - GD.from) * i / N);
+      for (let j = 0; j < nSama; j++) {
+        const uj = GD.from + (GD.to - GD.from) * (j + 0.5) / nSama;
+        slots.push([uj - du, uj + du]); us.push(uj - du, uj + du);
+      }
+      us.sort((a, b) => a - b);
+      const inSlot = u => slots.some(s => u > s[0] + 1e-9 && u < s[1] - 1e-9);
+      const st = u => { const p = surfacePoint(S, H, u, 1.0);
+                        return { x: p[0], w: Math.abs(p[2]) + over - B * 0.006 }; };
+      for (const sgn of [-1, 1]) {
+        const wall = { pos: [], idx: [] }, rev = { pos: [], idx: [] };
+        const quad = (g, a, b, c, d) => {
+          const k = g.pos.length / 3;
+          g.pos.push(...a, ...b, ...c, ...d);
+          g.idx.push(k, k + 1, k + 2, k, k + 2, k + 3);
+        };
+        for (let i = 0; i < us.length - 1; i++) {
+          if (us[i + 1] - us[i] < 1e-7) continue;   // a slot edge on a loft station
+          const a = st(us[i]), b = st(us[i + 1]);
+          const zoA = sgn * (a.w + t / 2), zoB = sgn * (b.w + t / 2);
+          const ziA = sgn * (a.w - t / 2), ziB = sgn * (b.w - t / 2);
+          /* below the sill and above the head the wall runs unbroken */
+          quad(wall, [a.x, yB2, zoA], [b.x, yB2, zoB], [b.x, yS, zoB], [a.x, yS, zoA]);
+          quad(wall, [a.x, yB2, ziA], [b.x, yB2, ziB], [b.x, yS, ziB], [a.x, yS, ziA]);
+          quad(wall, [a.x, yH2, zoA], [b.x, yH2, zoB], [b.x, yT2, zoB], [a.x, yT2, zoA]);
+          quad(wall, [a.x, yH2, ziA], [b.x, yH2, ziB], [b.x, yT2, ziB], [a.x, yT2, ziA]);
+          quad(wall, [a.x, yT2, ziA], [b.x, yT2, ziB], [b.x, yT2, zoB], [a.x, yT2, zoA]);
+          /* the slot band: wall only between slots — a span inside a slot is the hole */
+          if (!inSlot((us[i] + us[i + 1]) / 2)) {
+            quad(wall, [a.x, yS, zoA], [b.x, yS, zoB], [b.x, yH2, zoB], [a.x, yH2, zoA]);
+            quad(wall, [a.x, yS, ziA], [b.x, yS, ziB], [b.x, yH2, ziB], [a.x, yH2, ziA]);
+          }
+        }
+        /* end grain at the wall's own ends, under the athwartships panels */
+        for (const uE of [us[0], us[us.length - 1]]) {
+          const e = st(uE);
+          quad(wall, [e.x, yB2, sgn * (e.w - t / 2)], [e.x, yB2, sgn * (e.w + t / 2)],
+                     [e.x, yT2, sgn * (e.w + t / 2)], [e.x, yT2, sgn * (e.w - t / 2)]);
+        }
+        /* each sama: jambs, sill and head through the plank, and the shadow board */
+        for (const [uL2, uR2] of slots) {
+          const l = st(uL2), r = st(uR2);
+          quad(rev, [l.x, yS, sgn * (l.w + t / 2)], [l.x, yS, sgn * (l.w - t / 2)],
+                    [l.x, yH2, sgn * (l.w - t / 2)], [l.x, yH2, sgn * (l.w + t / 2)]);
+          quad(rev, [r.x, yS, sgn * (r.w + t / 2)], [r.x, yS, sgn * (r.w - t / 2)],
+                    [r.x, yH2, sgn * (r.w - t / 2)], [r.x, yH2, sgn * (r.w + t / 2)]);
+          quad(rev, [l.x, yS, sgn * (l.w + t / 2)], [r.x, yS, sgn * (r.w + t / 2)],
+                    [r.x, yS, sgn * (r.w - t / 2)], [l.x, yS, sgn * (l.w - t / 2)]);
+          quad(rev, [l.x, yH2, sgn * (l.w + t / 2)], [r.x, yH2, sgn * (r.w + t / 2)],
+                    [r.x, yH2, sgn * (r.w - t / 2)], [l.x, yH2, sgn * (l.w - t / 2)]);
+        }
+        const mk = (g, mat, name, what) => {
+          const bg = new THREE.BufferGeometry();
+          bg.setAttribute('position', new THREE.Float32BufferAttribute(g.pos, 3));
+          bg.setIndex(g.idx); bg.computeVertexNormals();
+          group.add(tag(new THREE.Mesh(bg, mat), name === 'Tate-ita' ? 'gundeck' : 'sama',
+                        name, what));
+        };
+        mk(wall, timberDS2, 'Tate-ita',
+           'The shield planking around the fighting deck, pierced by the sama — thinner '
+           + 'than an atakebune\'s, and the storey a boarding party has to climb.');
+        mk(rev, timberDS2, 'Sama',
+           'Firing slots for bow and arquebus, cut through the tate-ita — the wall\'s '
+           + 'whole purpose on a hull that mounts no broadside.');
+        /* the shadow boards: one dark plane behind each slot, a hand inboard, so the
+           opening reads into the deck's own shadow rather than through to the far wall */
+        const brd = { pos: [], idx: [] };
+        const quadB = (a, b, c, d) => {
+          const k = brd.pos.length / 3;
+          brd.pos.push(...a, ...b, ...c, ...d);
+          brd.idx.push(k, k + 1, k + 2, k, k + 2, k + 3);
+        };
+        const mrg = 0.06;
+        for (const [uL2, uR2] of slots) {
+          const l = st(uL2), r = st(uR2);
+          const zb = sgn * ((l.w + r.w) / 2 - t / 2 - 0.08);
+          const x0 = Math.min(l.x, r.x) - mrg, x1 = Math.max(l.x, r.x) + mrg;
+          quadB([x0, yS - mrg, zb], [x1, yS - mrg, zb],
+                [x1, yH2 + mrg, zb], [x0, yH2 + mrg, zb]);
+        }
+        mk(brd, portDS, 'Sama', undefined);
       }
     }
     /* the battery: gunsPerSide pieces a side, each firing THROUGH a port cut low in the

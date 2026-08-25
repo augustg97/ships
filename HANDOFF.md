@@ -9154,3 +9154,78 @@ frame, myeongnyang Action baseline, Preussen trucks — the yakata curtain LEAVE
 closed this round), plus the battle-rig record question holding three items. (5) The
 under-gate residue class: ship-junk and ship-endurance baselines still predate r136; ship-
 sekibune is current as of this round and its fluyt residue is absorbed.
+
+## Round 140 — 2026-08-24 — first the owed check, then the wall earns its own adjective
+
+**First, r139's owed confirmation: the opening full 62-frame check, and it comes back clean.**
+61 of 62 within tolerance, 0 BLANK (build/staging/ratchet-r140-opening.txt, checker's own exit
+to the file — the r71 discipline). The one mover was ship-sekibune, this round's own change
+reading through, so r139's wide-frame reasoning is CONFIRMED: the yakata rebuild reached
+nothing beyond its own frame. ship-panokseon 0.000, ship-galleass 0.004 — which is also the
+null-test of this round's refactor, see below. ⚠ One discipline slip, documented: this round
+edited hull.js at 19:04 while the opening check was still capturing, and ship-sekibune's
+capture (19:08) already carried the pierced wall. The other 61 frames stay a valid
+confirmation because the change is gated on GD.loops and only the sekibune records it — and
+her own clean-HEAD state was r139's closing solo 0.000. **Take the opening check BEFORE
+touching the tree; concurrency was luck here, not method.**
+
+**Then r139's queue head: samax26 closes — the sama become openings and the tate-ita becomes
+one pierced wall (survey class samax26, the sekibune's last named class).** Until now the
+fighting-deck wall was 22 beamAB segments a side and each sama a dark plate straddling the
+plank — paint, not a slot — while the record's own Fighting-deck row has always said "pierced
+by sama loopholes". Now the record is drawn: for any hull recording GD.loops the wall itself
+is built pierced, the r136 grating-hole law — one lofted plank wall per side following the
+deck edge's own curve (stations of the loft plus both edges of every slot), each sama a real
+OPENING through the plank with jamb/sill/head reveal faces its own thickness deep, and a
+near-black board a hand inboard of each opening so the slot reads into the deck's shadow from
+every outboard bearing — the same interior darkness the hatchway plate gives the gratings.
+Positions, sizes and the row line are the plate row's exactly: centre 0.60·shH over the deck,
+0.24·shH tall, 0.10 m wide, 13 a side. Hulls without loops (panokseon, galleass) keep the
+segment bulwark — code-path identical, and the opening check's 0.000/0.004 on their frames is
+the measured proof. Record: hull.samaProvenance (attested: the class carried sama; derived:
+count, size, height — no Sengoku example survives, the Busan scroll resolves the band, not
+slots) and a card row "Sama, as drawn" after the Fighting-deck row (record-r140.py, both
+asserts hit). The audit rule grew with the class (r140 supersedes the r90 plate count):
+PASSAGE convicts now — a perpendicular ray at each declared slot centre must strike DEEPER
+than the wall's outer face, and midway between slots it must be STOPPED at the face,
+expectation from the record and surfacePoint (the r113 discipline); the old plate form
+convicts itself, standing proud where the ray must pass. 'Tate-ita' joined the r91 wall-ring
+name list.
+
+**Measured (rule 4, build/staging/measure-sekibune-r140.txt against r139's):** wall band
+y 2.63–4.14 IDENTICAL, End bulwark identical, model envelope identical (26.40 × 15.70 ×
+11.44). The deltas are the change's own signature and nothing else: Tate-ita half 2.86 → 2.85
+(the plates' proudness removed — they stood B·0.013 off the face), sama band 3.34–3.73 →
+3.30–3.78 (the shadow boards' 0.06 m margin), wall u-run 18.81 → 18.71 (box corners
+overhanging the loft ends by half a segment, gone). **Looked at (rule 1):** five close-ups
+(build/staging/sama-r140/wall2-*.png) — broadside: dark vertical slots IN the wall; oblique
+both hands: each slot shows a lit jamb and a dark interior, the reveal depth reads; high over
+the deck: from inboard the slots read as dark rectangles, no stray geometry; plus the
+six-angle profile set refreshed (Research/baselines/_profile/sekibune/).
+
+**Survey and audit:** sekibune boxPct 65 → 58, boxMeshes 288 → 218 (−70: the 44 bulwark
+segments + 26 plates exactly), boxyParts EMPTY — no named class remains on her; floating [].
+Audit 33/0 with the new passage rule live (50 rays on the sekibune: slots pass, walls stop;
+build/staging/audit-r140.json).
+
+**Frames:** the closing pair on the final tree: check 1.380%/0.233, diff read — confined to
+the tate-ita band alone (the slot row plus the loft's continuous shading where 22 abutting
+boxes each shaded alone), no sea, no rig, no panels, no neighbour berths — accepted with the
+full reason, re-check 0.000% EXIT:0, no intervening check between the pair (the r57 trap
+stayed caught). FRAME-LOG carries the entry.
+
+**Rule 0, written on the wall2-b065 capture:** it reads as a rendered ship at anchor — hull,
+furled rig, sea, panels composed per pixel. Three facts a viewer can read off it: the
+fighting deck is walled with shield planks pierced by a row of narrow vertical firing slots
+with visible thickness; the commander's cabin is a ridge-roofed plank house standing on that
+deck; the sculling oars work out from under a white cloth band with a dark scalloped hem.
+
+**Deployed: stamp 1787625684**, live verify in the commit below.
+
+**Next, in order:** (1) panokseon 58 — next in the survey queue, 246 box meshes, no named
+class: find her crudest parts and name them before building. (2) Standing residuals unchanged
+from r139 (gundeck normals, Endurance forecastle, Azzam crest + boundary plate, QM2 aft
+terraces, canoe floor frame, myeongnyang Action baseline, Preussen trucks), plus the
+battle-rig record question holding three items. (3) The under-gate residue class: ship-junk
+and ship-endurance baselines still predate r136 — the next round that touches either berth's
+neighbourhood should stash-test before blaming its own change.

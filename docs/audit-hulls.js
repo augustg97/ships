@@ -415,18 +415,46 @@ if (H.gunDeck.loops) {
 const sm = part.sama;
 if (!sm) say(v.id, 'loopholes declared but not drawn', 'GD.loops with no sama geometry');
 else {
-if (sm.n !== 2 * H.gunDeck.loops)
-say(v.id, 'loophole count off its record',
-`${sm.n} sama drawn, record declares ${H.gunDeck.loops} a side`);
 const bandTop = planeY + (H.gunDeck.screenH || 0) + 0.3;
 if (sm.y[0] < planeY - 0.1 || sm.y[1] > bandTop)
 say(v.id, 'loopholes out of the bulwark band',
 `sama band ${sm.y[0].toFixed(1)}–${sm.y[1].toFixed(1)} m, bulwark ` +
 `${planeY.toFixed(1)}–${bandTop.toFixed(1)}`);
+const wallSet = [];
+g.updateMatrixWorld(true);
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && (p.key === 'sama' || p.name === 'Tate-ita')) wallSet.push(o); });
+const HSs = SHIPS_HULL.hullSurface(H);
+const GDs = H.gunDeck;
+const overS = GDs.over !== undefined ? GDs.over : H.beam * 0.045;
+const shHs = GDs.screenH !== undefined ? GDs.screenH : H.beam * 0.042;
+const nL = GDs.loops;
+const rc = new THREE.Raycaster(); rc.far = 60;
+let bad = 0, shot = 0, first = '';
+const yRay = planeY + H.beam * 0.007 + shHs * 0.60;
+for (const sgn of [-1, 1]) for (let j = 0; j < 2 * nL - 1; j++) {
+const u = GDs.from + (GDs.to - GDs.from) * (j / 2 + 0.5) / nL;
+const pd = SHIPS_HULL.surfacePoint(H, HSs, u, 1.0);
+const faceZ = Math.abs(pd[2]) + overS;
+rc.set(new THREE.Vector3(pd[0], yRay, sgn * (faceZ + 4)),
+new THREE.Vector3(0, 0, -sgn));
+shot++;
+const hit = rc.intersectObjects(wallSet, true)[0];
+const depth = hit ? faceZ - hit.point.z * sgn : 99;
+const isSlot = j % 2 === 0;
+if (isSlot ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
+bad++;
+if (!first) first = `${isSlot ? 'slot' : 'wall'} at u ${u.toFixed(2)} `
++ `${sgn > 0 ? 'stbd' : 'port'}: first strike ${hit ? depth.toFixed(2) + ' m in'
+: 'nothing'}`;
+}
+}
+if (bad) say(v.id, 'sama are not openings through the wall',
+`${bad} of ${shot} passage rays wrong — ${first}`);
 }
 }
 {
-const WALL = ['Bulwark', 'End bulwark', 'Screen'];
+const WALL = ['Bulwark', 'End bulwark', 'Screen', 'Tate-ita'];
 const wallB = new THREE.Box3(); wallB.makeEmpty(); let nWall = 0;
 g.updateMatrixWorld(true);
 g.traverse(o => { const p = tagOf(o);
