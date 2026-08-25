@@ -6162,31 +6162,109 @@ function buildFlightDeck(S, group, mats) {
  * along the starboard side aft of the island, and the fantail — never inside the angled
  * landing area and never across the foul line, which is what those lines are FOR.
  */
-function buildAircraft(mats) {
-  /* an 18 m strike fighter in real metres — wheels on y = 0, nose toward -x, wings FOLDED,
-     which is how a parked naval fighter actually stands and the most legible single fact
-     about a deck park. Fuselage, radome, canopy, folded outer panels standing up, twin
-     canted fins, stabs, and the gear it stands on. */
+/* ⚠ AN AIRFRAME IS ONE BODY, NOT A CONE ABUTTING A BRICK (round 145). Until r145 each
+ * parked fighter was ten boxes and a cone: a 13.2 m rectangular slab with a nose cone
+ * abutting it — the r144 step class again, two meshes pretending to be one body — slab
+ * wings swung about y to fake sweep, rectangular fins and stabs. 120 of the carrier's
+ * 169 box meshes, the fleet's largest named box class after the ro blades closed.
+ * Now the airframe is ONE lofted fuselage from radome tip to nozzles, a glass bubble
+ * canopy, and every flying surface a real planform. Six geometries built ONCE and shared
+ * by all twelve aircraft, because a deck park is twelve of the same airframe (the r144
+ * ro-blade rule). Port surfaces are the same geometry under a -PI/2 rotation where
+ * starboard takes +PI/2 — proper rotations, so every winding stays outward and no
+ * negative scale is needed (the r118 normals lesson). The gear stays cylinders because
+ * a strut IS a round leg (the loom rule). */
+function airframeGeometries() {
+  /* the fuselage loft: stations [x, halfW, halfH, yCentre], sections superelliptic
+     (exponent 2.5 — a jet body is rounder than a brick, squarer than a tube). The
+     y/z envelope is the old box's own: y 0.80–2.30, z ±0.95. */
+  const stations = [
+    [-11.0, 0.10, 0.10, 1.55],
+    [ -9.2, 0.52, 0.50, 1.55],
+    [ -6.0, 0.95, 0.72, 1.52],
+    [ -3.0, 0.95, 0.75, 1.55],
+    [  0.5, 0.95, 0.72, 1.52],
+    [  4.0, 0.85, 0.62, 1.47],
+    [  7.5, 0.48, 0.38, 1.42]];
+  const K = 12, pos = [], idx = [];
+  const se = (v, m) => m * Math.sign(v) * Math.pow(Math.abs(v), 2 / 2.5);
+  stations.forEach(([x, w, h, yc]) => {
+    for (let k = 0; k < K; k++) { const th = (k / K) * 2 * Math.PI;
+      pos.push(x, yc + se(Math.sin(th), h), se(Math.cos(th), w)); }
+  });
+  for (let s = 0; s < stations.length - 1; s++)
+    for (let k = 0; k < K; k++) {
+      const a = s * K + k, b = s * K + (k + 1) % K;
+      idx.push(a, a + K, b, b, a + K, b + K);
+    }
+  /* end grain closed both ends — fan caps, wound outward */
+  const c0 = pos.length / 3; pos.push(-11.0, 1.55, 0);
+  for (let k = 0; k < K; k++) idx.push(c0, k, (k + 1) % K);
+  const c1 = pos.length / 3; pos.push(7.5, 1.42, 0);
+  const last = (stations.length - 1) * K;
+  for (let k = 0; k < K; k++) idx.push(c1, last + (k + 1) % K, last + k);
+  const fus = new THREE.BufferGeometry();
+  fus.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  fus.setIndex(idx); fus.computeVertexNormals();
+
+  /* a flying surface is a planform, not a rectangle: a polygon in the shape plane,
+     extruded its own thickness, the thickness centred on the plane */
+  const plate = (pts, t) => {
+    const sh = new THREE.Shape(pts.map(p => new THREE.Vector2(p[0], p[1])));
+    const g = new THREE.ExtrudeGeometry(sh, { depth: t, bevelEnabled: false });
+    g.translate(0, 0, -t / 2);
+    return g;
+  };
+
+  return {
+    fus,
+    canopy: new THREE.SphereGeometry(1, 8, 6),
+    /* inner wing, planform (x chord, span): LERX strake at the root sweeping into a
+       37-degree leading edge, tip chord 2.0 at the fold line 4.3 out */
+    wing: plate([[-4.2, 1.0], [-2.4, 1.6], [-0.6, 4.3], [1.4, 4.3], [1.6, 1.0]], 0.15),
+    /* folded outer panel, planform (x chord, up when standing): root chord matching
+       the inner tip chord across the fold, missile-rail step at the tip */
+    tip: plate([[-0.6, 0.0], [1.4, 0.0], [1.05, 1.9], [0.5, 2.4], [-0.3, 2.4]], 0.13),
+    /* fin, planform (x chord, height): swept, tapered, notched trailing tip */
+    fin: plate([[3.6, 0.0], [5.2, 2.9], [6.5, 2.9], [6.7, 1.0], [6.3, 0.0]], 0.16),
+    /* stab, planform (x chord, span): swept and tapered like the wing, smaller */
+    stab: plate([[5.3, 0.5], [6.5, 2.3], [7.4, 2.3], [7.8, 1.2], [7.6, 0.5]], 0.12),
+  };
+}
+
+function buildAircraft(mats, G) {
+  /* an 18 m strike fighter in real metres — wheels on y = 0, nose toward -x, wings
+     FOLDED, which is how a parked naval fighter actually stands and the most legible
+     single fact about a deck park */
   const ac = new THREE.Group();
-  const fus = new THREE.Mesh(new THREE.BoxGeometry(13.2, 1.5, 1.9), mats.acSkin);
-  fus.position.set(0.6, 1.55, 0); ac.add(fus);
-  const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.18, 5.0, 8), mats.acSkin);
-  nose.rotation.z = -Math.PI / 2;
-  nose.position.set(-8.5, 1.55, 0); ac.add(nose);
-  const can = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.75, 1.1), mats.acGlass);
-  can.position.set(-4.6, 2.5, 0); ac.add(can);
+  ac.add(new THREE.Mesh(G.fus, mats.acSkin));
+  const can = new THREE.Mesh(G.canopy, mats.acGlass);
+  can.scale.set(1.5, 0.55, 0.62); can.position.set(-4.6, 2.30, 0);
+  ac.add(can);
   for (const s of [-1, 1]) {
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.15, 3.3), mats.acSkin);
-    wing.position.set(-0.4, 2.0, s * 2.6); wing.rotation.y = s * 0.3; ac.add(wing);
-    const tip = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.13, 2.5), mats.acSkin);
-    tip.position.set(0.4, 3.05, s * 4.5); tip.rotation.x = -s * 1.25; ac.add(tip);
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.0, 0.16), mats.acSkin);
-    fin.position.set(5.2, 3.35, s * 1.15); fin.rotation.x = s * 0.35; fin.rotation.z = -0.35;
+    /* the shape plane lies down: +PI/2 about x sends the span to starboard, -PI/2
+       to port — one geometry, two proper rotations, both windings outward */
+    const wing = new THREE.Mesh(G.wing, mats.acSkin);
+    wing.rotation.x = s * Math.PI / 2;
+    wing.position.y = 2.0;
+    ac.add(wing);
+    const tip = new THREE.Mesh(G.tip, mats.acSkin);
+    tip.rotation.x = s * 0.25;                     /* standing, leaning a little outboard */
+    tip.position.set(0, 2.0, s * 4.3);
+    ac.add(tip);
+    const fin = new THREE.Mesh(G.fin, mats.acSkin);
+    fin.rotation.x = s * 0.30;                     /* canted outward */
+    fin.position.set(0, 2.05, s * 0.78);
     ac.add(fin);
-    const stab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 2.1), mats.acSkin);
-    stab.position.set(6.6, 1.7, s * 1.9); stab.rotation.y = s * 0.45; ac.add(stab);
-    const mg = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.85, 6), mats.acDark);
-    mg.position.set(1.1, 0.43, s * 1.0); ac.add(mg);
+    const stab = new THREE.Mesh(G.stab, mats.acSkin);
+    stab.rotation.x = s * Math.PI / 2;
+    stab.position.y = 1.5;
+    ac.add(stab);
+    /* the strut runs UP to the belly flare it hangs from — the old box had a flat
+       bottom at 0.80 across the full width; the loft's belly curves away from its
+       side, so a strut parked at the old height would float in air under it */
+    const mg = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 1.25, 6), mats.acDark);
+    mg.position.set(1.1, 0.62, s * 0.92); ac.add(mg);
   }
   const ng = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 6), mats.acDark);
   ng.position.set(-6.3, 0.43, 0); ac.add(ng);
@@ -6212,8 +6290,9 @@ function buildDeckPark(S, group, yDeck) {
     [ 0.40, 0.23, 2.95], [ 0.455, 0.23, 3.05], [ 0.40, 0.32, 2.90], [ 0.455, 0.32, 3.10],
   ];
   const yTop = yDeck + S.beam * 0.0225;
+  const G = airframeGeometries();                  // one airframe, twelve aircraft
   for (let i = 0; i < Math.min(S.deckPark, spots.length); i++) {
-    const ac = buildAircraft(mats);
+    const ac = buildAircraft(mats, G);
     ac.position.set(spots[i][0] * L, yTop, spots[i][1] * deckW);
     ac.rotation.y = spots[i][2];
     group.add(tag(ac, 'aircraft'));

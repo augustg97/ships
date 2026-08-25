@@ -9523,3 +9523,77 @@ forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, m
 Action baseline, Preussen trucks), plus the battle-rig record question holding three items.
 (4) The under-gate residue class: ship-junk and ship-endurance (pre-r136 baselines) still
 carry sub-gate traces.
+
+## Round 145 — 2026-08-25 — the parked airframe becomes one body
+
+**This round ran twice, and this handoff covers both.** The first attempt (00:49) did the
+work — probe, draft, edit, measures, renders — and the 80-minute watchdog killed it at 02:09
+mid-verification, tree dirty, nothing committed, no handoff. This attempt (02:19) found the
+dirty tree, identified the dead round from loop.log, reconstructed its state from the staging
+artefacts and the diff, and finished the round with its own verification throughout: the dead
+round's opening check left no log, so it was not trusted — a fresh full 62-frame check ran at
+HEAD with every r145 change stashed. 62/62 within tolerance, 0 BLANK, top mover ship-treasure
+0.049% under gate; EXIT:0 (build/ratchet-open-r145.log). The queue check preceded it: August's
+second list stands WORKED IN FULL (r57), so the survey carried the task.
+
+**The per-part probe named the carrier's crudest class, and it closed.** The probe (now
+Research/probe_parts.py, generic over ships) split her 169 box meshes: aircraft/Deck park
+x120, island x33, flightdeck x10, hangar x5, rudder x1. The deck park was the head. Each
+parked fighter was ten boxes and a cone — a 13.2 m slab with a nose cone ABUTTING it, the
+r144 step class, two meshes pretending to be one body — slab wings rotated about y to fake
+sweep, rectangular fins and stabs. Now the airframe is ONE lofted fuselage from radome tip to
+nozzles: seven superelliptic stations (exponent 2.5 — a jet body is rounder than a brick,
+squarer than a tube) inside the old box's own y/z envelope, end grain closed both ends; a
+glass bubble canopy; every flying surface a real planform — LERX strake sweeping into a 37°
+leading edge, folded outer panels standing on the fold line with the chord continuous across
+it, swept canted fins, swept stabs. Six geometries built ONCE and shared by all twelve
+aircraft (the r144 one-timber rule: a deck park is twelve of the same airframe). Port
+surfaces are the starboard geometry under a −PI/2 rotation where starboard takes +PI/2 —
+proper rotations, windings outward, no negative scale (r118). Gear stays cylinders (the loom
+rule), main struts lengthened to 1.25 m to reach the loft's curving belly where the old box's
+flat bottom was.
+
+**Audit rule r145: the principal mesh must BE the airframe.** In each parked aircraft's own
+local frame (the r144 lesson — deck aircraft are rotated to their headings, a world-frame box
+aliases the rake in), the mesh with the longest x-run must span ≥0.8 of the group's length
+and be lofted (>12 triangles). Injection with hull.js stashed convicted the old form — "12 of
+12 — principal mesh runs 13.20 of 19.14 m at 12 triangles", the brick at 69% of the airframe —
+and no other rule fired; popped, 33/0.
+
+**Measured, the deltas are the aircraft's own and nothing else's.** Probe: aircraft meshes
+168→156 (14→13 per plane × 12 — the cone merged into the body), boxy 120→0, tris 2688→5376
+(224→448 per plane). Survey: carrier meshes 289→277 (−12 exact), boxes 169→49 (−120 = the
+aircraft class exactly), boxPct 58→18, boxyParts EMPTY. measure_ship: one row moved, Deck
+park, by centimetres (u-run 299.34→299.06, z 21.64→21.37) — the loft's tighter envelope
+inside the old boxes' own; every other row identical.
+
+**Looked at (rule 1, three bearings before/after, staging renders deleted after reading).**
+Before b045: white cones abutting grey bricks in a row. After b045: parked jets, noses
+flowing into one body, black canopy bubbles. After b160 close: lofted fuselages, canted fins,
+standing folded panels down the whole deck run. After b100 broadside: airframe silhouettes
+behind the island. The staging renders predated a final 01:35 hull.js edit; a difflib diff of
+the draft against the final proved that edit comment-wording only, so the renders show the
+shipping geometry — and the two closing-frame captures re-confirmed it at final code. Rule 0
+on after-b160: reads as a rendered ship, and a viewer can name the angled deck edge, the
+parked fighters wings-folded with black canopies, the island with its mast, the oxide-red
+boot at the waterline.
+
+**Frames: closing pairs one at a time, no intervening check between check and accept.**
+ship-carrier 0.189%/0.071 — diff read: the twelve aircraft outlines in both deck parks,
+nothing else — accepted, re-check 0.000 EXIT:0. aboard-carrier 0.097%/0.037 — diff read: the
+two park rows at sea scale, where the old slab wings drew a continuous streak along each
+park's deck edge and the planforms break it into airframes; wake, hull, island, panels
+untouched — accepted, re-check 0.000 EXIT:0. No full closing check — the watchdog window
+does not hold a second 35-minute run; the next round's opening full check is the fleet-wide
+net, the r143→r144 pattern.
+
+**Deployed: stamp 1787652214**, live verify in the commit.
+
+**Next, in order:** (1) The opening full 62-frame check. (2) The carrier's island x33 — named
+by this round's probe (Research/probe_parts.py), the next crudest class on the queue's head
+vessel; yamato hatchx12 one row down. The container stacks on container/ever-given are boxes
+in life, not faults. (3) Standing residuals unchanged from r143 (gundeck normals, Endurance
+forecastle, Azzam crest + boundary plate, QM2 aft terraces, canoe floor frame, myeongnyang
+Action baseline, Preussen trucks), plus the battle-rig record question holding three items.
+(4) The under-gate residue class: ship-junk and ship-endurance (pre-r136 baselines) still
+carry sub-gate traces — ship-junk read 0.048% in this round's opening, unchanged.

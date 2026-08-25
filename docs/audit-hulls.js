@@ -1737,6 +1737,31 @@ if (Math.abs(zl) < LS.halfW + 4 && Math.abs(xl) < LS.halfLen + 9)
 say(v.id, 'aircraft parked foul of the landing area',
 `${zl.toFixed(1)} m off the axis at x ${cxA.toFixed(0)}`);
 }
+let acBad = 0, acNote = '';
+for (const ac of acs) {
+let lo = Infinity, hi = -Infinity, pRun = 0, pTris = 0;
+ac.traverse(o => {
+if (!o.isMesh || !o.geometry) return;
+o.geometry.computeBoundingBox();
+const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+lo = Math.min(lo, bb.min.x); hi = Math.max(hi, bb.max.x);
+const r = bb.max.x - bb.min.x;
+if (r > pRun) {
+pRun = r;
+pTris = o.geometry.index ? o.geometry.index.count / 3
+: o.geometry.attributes.position.count / 3;
+}
+});
+if (pRun < (hi - lo) * 0.8 || pTris <= 12) {
+acBad++;
+acNote = `principal mesh runs ${pRun.toFixed(2)} of ${(hi - lo).toFixed(2)} m ` +
+`at ${pTris} triangles`;
+}
+}
+if (acBad)
+say(v.id, 'airframe is not one body',
+`${acBad} of ${acs.length} — ${acNote} — a cone abutting a brick, ` +
+'not a lofted body');
 }
 }
 if (H.boats && H.decks && !H.turrets && !H.flightDeck && part.boat) {

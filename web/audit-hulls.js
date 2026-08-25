@@ -2540,6 +2540,40 @@
             say(v.id, 'aircraft parked foul of the landing area',
                 `${zl.toFixed(1)} m off the axis at x ${cxA.toFixed(0)}`);
         }
+        /* ⚠ AN AIRFRAME IS ONE BODY (round 145). Each parked aircraft's principal
+           mesh — the one with the longest run down the group's own x axis — must BE
+           the airframe: spanning at least 0.8 of the group's length and lofted
+           rather than a twelve-triangle box. The convicted form was a nose cone
+           abutting a 13.2 m brick — the r144 step class, two meshes pretending to
+           be one body, and the brick was 70% of the airframe. Measured in the
+           group's LOCAL frame (the r144 lesson), because every aircraft on the
+           deck is rotated to its own heading and a world-frame box aliases the
+           rake in. */
+        let acBad = 0, acNote = '';
+        for (const ac of acs) {
+          let lo = Infinity, hi = -Infinity, pRun = 0, pTris = 0;
+          ac.traverse(o => {
+            if (!o.isMesh || !o.geometry) return;
+            o.geometry.computeBoundingBox();
+            const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrix);
+            lo = Math.min(lo, bb.min.x); hi = Math.max(hi, bb.max.x);
+            const r = bb.max.x - bb.min.x;
+            if (r > pRun) {
+              pRun = r;
+              pTris = o.geometry.index ? o.geometry.index.count / 3
+                    : o.geometry.attributes.position.count / 3;
+            }
+          });
+          if (pRun < (hi - lo) * 0.8 || pTris <= 12) {
+            acBad++;
+            acNote = `principal mesh runs ${pRun.toFixed(2)} of ${(hi - lo).toFixed(2)} m ` +
+                     `at ${pTris} triangles`;
+          }
+        }
+        if (acBad)
+          say(v.id, 'airframe is not one body',
+              `${acBad} of ${acs.length} — ${acNote} — a cone abutting a brick, ` +
+              'not a lofted body');
       }
     }
 
