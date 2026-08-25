@@ -103,6 +103,15 @@ catch (e) { say(v.id, 'BUILD THREW', e.message); continue; }
 const tagOf = o => { for (let e = o; e; e = e.parent)
 if (e.userData && e.userData.part) return e.userData.part;
 return null; };
+const lowerOf = mk => {
+if (mk.truckM !== undefined && mk.rig === 'square') {
+const K = mk.only === 1 ? 1.0 : mk.only === 2 ? 0.88 + 0.60
+: 0.88 * (1 + 0.60) + 0.30;
+return mk.truckM / K;
+}
+return mk.heightM !== undefined ? mk.heightM
+: (mk.height || 0) * (H.lwl + H.beam) / 2;
+};
 {
 const bad = {};
 g.traverse(o => {
@@ -296,6 +305,28 @@ say(v.id, 'stay anchored above its own truck',
 `mast ${i} stay collar at ${mt.y.toFixed(1)} m vs drawn truck ${my.toFixed(1)} m`);
 });
 }
+(H.masts || []).forEach((mk, i) => {
+if (mk.truckM === undefined || mk.rig !== 'square') return;
+const mt = (H.__mastTops || []).find(t => Math.abs(t.u - mk.at) < 0.02);
+if (!mt) {
+say(v.id, 'recorded truck with no drawn masthead',
+`mast ${i} attests truckM ${mk.truckM} m and no masthead stands near u ${mk.at}`);
+return;
+}
+const win = (H.beam || 10) * 0.25;
+let lo = 1e9, hi = -1e9;
+g.traverse(o => {
+if (!o.isMesh || !tagOf(o) || tagOf(o).key !== 'mast') return;
+const b2 = new THREE.Box3().setFromObject(o);
+if (Math.abs((b2.min.x + b2.max.x) / 2 - mt.x) < win) {
+lo = Math.min(lo, b2.min.y); hi = Math.max(hi, b2.max.y);
+}
+});
+if (hi > lo && Math.abs((hi - lo) - mk.truckM) > 0.75)
+say(v.id, 'mast short of its recorded flag-button',
+`mast ${i} spans ${(hi - lo).toFixed(2)} m deck-to-truck against the record's `
++ `${mk.truckM} m`);
+});
 g.traverse(o => {
 if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
 const flukes = [];
@@ -1522,8 +1553,7 @@ const bbx = new THREE.Box3().setFromObject(o);
 if ((bbx.min.x + bbx.max.x) / 2 > mastX) funnelAbaft = true;
 } });
 if (funnelAbaft) return;
-const steelMain = (H.lwl + H.beam) / 2;
-const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+const lower = lowerOf(mk);
 const want = Math.max(lower * 0.16,
 Math.min(lower * 0.62, (1.04 - mk.at) * L * 1.6));
 const booms = [];
@@ -1557,8 +1587,7 @@ for (const mk of (H.masts || [])) {
 if (mk.rig !== 'gaff' || !mk.topsail) continue;
 const mx = (mk.at - 0.5) * H.lwl;
 const HSt = SHIPS_HULL.hullSurface(H);
-const lower = mk.heightM !== undefined ? mk.heightM
-: mk.height * (H.lwl + H.beam) / 2;
+const lower = lowerOf(mk);
 const floorY = HSt.sheer(mk.at) + lower * 0.75;
 let found = 0;
 g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
@@ -2402,9 +2431,7 @@ say(v.id, "a junk's furled sail left hoisted",
 {
 const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
 const jk = (H.masts || []).filter(mm => mm.rig === 'junk').length;
-const steelMainA = (H.lwl + H.beam) / 2;
-const lowersA = (H.masts || []).map(mm =>
-mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainA);
+const lowersA = (H.masts || []).map(mm => lowerOf(mm));
 const mainLowerA = Math.max(...lowersA, 0) || 1;
 const aftAt = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
 const mixedSqA = (H.masts || []).some(mm => mm.rig === 'square');
@@ -2483,7 +2510,7 @@ say(v.id, 'a corbis adrift down the mast',
 {
 const anc = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only === 1);
 const depYear = H.year || v.from || 0;
-const headM = mm => mm.heightM || (H.lwl + H.beam) / 2 * (mm.height || 0);
+const headM = mm => lowerOf(mm);
 let nK = 0;
 g.traverse(o => { const p = o.userData && o.userData.part;
 if (p && p.key === 'karchesion' && !o.isMesh) nK++; });
@@ -2564,8 +2591,7 @@ say(v.id, 'a hoisting yard without its tie',
 `head to the rail), ${got} drawn — a count below the mark is a fall that ` +
 `misses its masthead, above it is a fall on a fixed yard`);
 }
-const vv = m => m.heightM !== undefined ? m.heightM
-: (H.lwl + H.beam) / 2 * (m.height || 0);
+const vv = m => lowerOf(m);
 const seg3 = sq.filter(m => !m.yards && (m.only ? Math.min(m.only, 3) : 3) >= 2);
 let wantJ = 0;
 if (seg3.length && !H.iron) {
@@ -2637,9 +2663,7 @@ say(v.id, 'a cheek carrying nothing',
 }
 }
 {
-const steelMainB = (H.lwl + H.beam) / 2;
-const lowersB = (H.masts || []).map(mm =>
-mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainB);
+const lowersB = (H.masts || []).map(mm => lowerOf(mm));
 const mainLowerB = Math.max(...lowersB, 0) || 1;
 const aftAtB = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
 const mixedSqB = (H.masts || []).some(mm => mm.rig === 'square');
@@ -2685,7 +2709,6 @@ say(v.id, 'every mast from one tree',
 }
 {
 if (H.iron && (H.masts || []).length) {
-const steelMainC = (H.lwl + H.beam) / 2;
 const colsC = [];
 g.traverse(o => {
 if (!o.isMesh || !o.userData.part) return;
@@ -2696,8 +2719,7 @@ if (bb.max.y - bb.min.y < Math.min(3, H.beam * 0.35)) return;
 colsC.push({ x: (bb.min.x + bb.max.x) / 2, d: bb.max.z - bb.min.z });
 });
 (H.masts || []).forEach((mm, i) => {
-const lo = mm.heightM !== undefined ? mm.heightM
-: (mm.height || 0) * steelMainC;
+const lo = lowerOf(mm);
 const pole = mm.rig === 'square' ? lo * 1.9
 : mm.rig === 'gaff' ? (mm.topmast ? lo * 1.52 : lo)
 : lo;

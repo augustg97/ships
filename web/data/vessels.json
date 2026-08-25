@@ -2810,6 +2810,10 @@
      "five-masted full-rigger — the only one ever built"
     ],
     [
+     "Masts",
+     "58 m deck to truck (68 m from the keel), one figure for all five — the standard rig cut interchangeable spars. Main course yard 32 m, royal 16 m."
+    ],
+    [
      "Canvas",
      "47 sails, 6,806 m²"
     ],
@@ -2875,7 +2879,6 @@
     "masts": [
      {
       "at": 0.16,
-      "heightM": 27.0,
       "rig": "square",
       "shrouds": 6,
       "yards": [
@@ -2885,11 +2888,12 @@
        "ltg",
        "utg",
        "royal"
-      ]
+      ],
+      "truckM": 58.0,
+      "courseYardM": 32.0
      },
      {
       "at": 0.34,
-      "heightM": 30.0,
       "rig": "square",
       "shrouds": 7,
       "yards": [
@@ -2900,11 +2904,12 @@
        "utg",
        "royal"
       ],
-      "staysails": 3
+      "staysails": 3,
+      "truckM": 58.0,
+      "courseYardM": 32.0
      },
      {
       "at": 0.52,
-      "heightM": 30.0,
       "rig": "square",
       "shrouds": 7,
       "yards": [
@@ -2915,11 +2920,12 @@
        "utg",
        "royal"
       ],
-      "staysails": 3
+      "staysails": 3,
+      "truckM": 58.0,
+      "courseYardM": 32.0
      },
      {
       "at": 0.7,
-      "heightM": 29.0,
       "rig": "square",
       "shrouds": 6,
       "yards": [
@@ -2930,11 +2936,12 @@
        "utg",
        "royal"
       ],
-      "staysails": 3
+      "staysails": 3,
+      "truckM": 58.0,
+      "courseYardM": 32.0
      },
      {
       "at": 0.86,
-      "heightM": 25.0,
       "rig": "square",
       "shrouds": 5,
       "yards": [
@@ -2946,7 +2953,9 @@
        "royal"
       ],
       "staysails": 3,
-      "spanker": true
+      "spanker": true,
+      "truckM": 58.0,
+      "courseYardM": 32.0
      }
     ],
     "build": "steel",
@@ -2959,7 +2968,8 @@
     "transom": 0.3,
     "mastLivery": true,
     "year": 1902,
-    "steering": "steel"
+    "steering": "steel",
+    "mastProvenance": "Deck-to-truck 58 m and keel-to-truck 68 m are ATTESTED (de.wikipedia Preußen (Schiff, 1902) infobox: \"Masthöhe: 68 m (Kiel-Flaggenknopf), 58 m (Deck-Flaggenknopf)\") — one figure for all five masts, because the Laeisz Standardrigg cut interchangeable spars; lower masts and topmasts were one steel tube, only the topgallant stenge fids above. Course yard 32 m and royal 16 m attested in the same source (\"Länge Großrah: 32 m; Royalrah: 16 m\") — the royal's 0.50 share of the course is the drawn plan's own fraction, an independent cross-check. The lower-mast lengths behind the drawn stack are DERIVED from truckM in hull.js; no lower-mast length is attested in reach. A per-mast spar table (Hamecher 1993) would beat the single figure if it surfaces."
    }
   },
   {

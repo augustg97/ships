@@ -1,0 +1,24 @@
+Queen Mary 2   record: LOA 345 m  LWL 318.2 m  beam 41 m  draught 10.3 m
+  model extent   x  -182.71 ..  +162.29   =  345.00 m   (record LOA 345)   Δ +0.00 m
+  model height   y   -10.89 ..   +62.93   =   73.82 m   above water 62.93 m
+  model breadth  z         ..   +22.75   =   45.50 m   (record beam 41)   Δ +4.50 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Planking                    -0.074   1.010  345.00  -10.30   19.00  20.50
+  Weather deck — laid teak    -0.074   1.010  345.00   17.00   19.25  20.30
+  Stem                        -0.074   0.103   56.46   -9.48   19.00   1.13
+  Rail                        -0.023   0.035   18.45   18.26   19.68  13.93
+  Waterway                    -0.023   0.973  316.84   16.99   18.67  20.30
+  Keel                         0.000   1.000  318.20  -10.89   -8.44   1.13
+  Superstructure               0.079   0.994  291.15   17.00   47.58  19.85
+  Navigating bridge            0.117   0.156   12.25   46.50   49.21  22.75
+  Steel mast                   0.151   0.156    1.63   46.52   61.98   0.14
+  Deck works                   0.195   0.794  190.60   46.50   51.10  13.45
+  Radome                       0.263   0.431   53.45   46.50   49.68   3.18
+  Ship's boat                  0.268   0.822  176.42   23.15   25.65  20.22
+  Boiler casing                0.506   0.608   32.53   46.03   47.37   8.21
+  Funnel                       0.519   0.604   27.00   46.10   62.93   6.13
+  Steam pipe                   0.530   0.546    4.90   46.10   61.68   0.80
+  Gas turbine uptake           0.757   0.775    5.46   46.50   59.30   2.80
+  Sternpost                    0.897   1.010   36.05   -9.61   17.00   1.13
+  Rudder                       0.944   0.979   11.14   -9.78   -0.82   0.55

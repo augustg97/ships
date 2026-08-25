@@ -1,0 +1,87 @@
+[
+ {
+  "id": "preussen",
+  "rule": "geometry with non-finite vertices",
+  "detail": "NaN positions in: Steel mast, Cheeks, Yard, Sail, Lifts, Sheets, Tacks, Halyard, Shrouds, Futtock shrouds, Topmast shrouds, Topgallant shrouds, Boom, Gaff, Stays and backstays, Braces \u2014 the black-canvas class"
+ },
+ {
+  "id": "preussen",
+  "rule": "headsail suit miscounted",
+  "detail": "4 in the record, 0 drawn forward of the foremast"
+ },
+ {
+  "id": "preussen",
+  "rule": "square tiers miscounted",
+  "detail": "6 yards in the record at u=0.16, 0 sails crossed"
+ },
+ {
+  "id": "preussen",
+  "rule": "square tiers miscounted",
+  "detail": "6 yards in the record at u=0.34, 0 sails crossed"
+ },
+ {
+  "id": "preussen",
+  "rule": "square tiers miscounted",
+  "detail": "6 yards in the record at u=0.52, 0 sails crossed"
+ },
+ {
+  "id": "preussen",
+  "rule": "square tiers miscounted",
+  "detail": "6 yards in the record at u=0.7, 0 sails crossed"
+ },
+ {
+  "id": "preussen",
+  "rule": "square tiers miscounted",
+  "detail": "6 yards in the record at u=0.86, 0 sails crossed"
+ },
+ {
+  "id": "preussen",
+  "rule": "staysails miscounted",
+  "detail": "3 in the record between u=0.16 and u=0.34, 0 drawn"
+ },
+ {
+  "id": "preussen",
+  "rule": "staysails miscounted",
+  "detail": "3 in the record between u=0.34 and u=0.52, 0 drawn"
+ },
+ {
+  "id": "preussen",
+  "rule": "staysails miscounted",
+  "detail": "3 in the record between u=0.52 and u=0.7, 0 drawn"
+ },
+ {
+  "id": "preussen",
+  "rule": "staysails miscounted",
+  "detail": "3 in the record between u=0.7 and u=0.86, 0 drawn"
+ },
+ {
+  "id": "preussen",
+  "rule": "spanker not set",
+  "detail": "mast at u=0.86 declares a spanker and no quad cloth runs aft of its station"
+ },
+ {
+  "id": "preussen",
+  "rule": "a recorded mast not drawn",
+  "detail": "mast 0 at u=0.16 declares 0.00 m through and no iron mast stands at its station"
+ },
+ {
+  "id": "preussen",
+  "rule": "a recorded mast not drawn",
+  "detail": "mast 1 at u=0.34 declares 0.00 m through and no iron mast stands at its station"
+ },
+ {
+  "id": "preussen",
+  "rule": "a recorded mast not drawn",
+  "detail": "mast 2 at u=0.52 declares 0.00 m through and no iron mast stands at its station"
+ },
+ {
+  "id": "preussen",
+  "rule": "a recorded mast not drawn",
+  "detail": "mast 3 at u=0.7 declares 0.00 m through and no iron mast stands at its station"
+ },
+ {
+  "id": "preussen",
+  "rule": "a recorded mast not drawn",
+  "detail": "mast 4 at u=0.86 declares 0.00 m through and no iron mast stands at its station"
+ }
+]

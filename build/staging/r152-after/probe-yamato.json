@@ -1,0 +1,97 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "stempost": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 416
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 1,
+   "tris": 12
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "mast": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 36
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "waterway": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "funnel": {
+   "n": 3,
+   "boxy": 0,
+   "tris": 1344
+  },
+  "superstructure": {
+   "n": 4,
+   "boxy": 0,
+   "tris": 2928
+  },
+  "searchlight": {
+   "n": 40,
+   "boxy": 0,
+   "tris": 2176
+  },
+  "turret": {
+   "n": 38,
+   "boxy": 0,
+   "tris": 2248
+  },
+  "aa": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 1344
+  },
+  "aaLight": {
+   "n": 56,
+   "boxy": 0,
+   "tris": 2272
+  },
+  "catapult": {
+   "n": 8,
+   "boxy": 0,
+   "tris": 2572
+  },
+  "floatplane": {
+   "n": 62,
+   "boxy": 0,
+   "tris": 2616
+  },
+  "hatch": {
+   "n": 3,
+   "boxy": 0,
+   "tris": 470
+  }
+ },
+ "byName": {
+  "rudder/Rudder": 1
+ }
+}

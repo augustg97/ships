@@ -1,0 +1,62 @@
+[
+ {
+  "id": "preussen",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "titanic",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "usv",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "steamer",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "dreadnought",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "yamato",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "carrier",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "container",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "ever-given",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "azzam",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "rudder is a slab",
+  "detail": "1.00 of full thickness at the trailing edge, 12 triangles \u2014 a balanced rudder is a foil, closed at its trailing edge"
+ }
+]

@@ -1246,6 +1246,26 @@ const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
  * lengths as fractions of the mast — rather than by eye. Where a rule is not attested for a
  * type, the value is marked inferred on the card.
  */
+/* ── A RECORD MAY ATTEST THE FLAG-BUTTON, NOT THE SPAR ────────────────────────────────
+   Preussen's record carries one mast figure and its datum is the TRUCK: "Masthöhe: 68 m
+   (Kiel-Flaggenknopf), 58 m (Deck-Flaggenknopf)" — one number for all five masts, because
+   the Laeisz Standardrigg cut interchangeable spars. No lower-mast length is attested
+   anywhere in reach. So `truckM` on a square mast record states deck-to-truck, the figure
+   the source names, and the stack is SOLVED for it here, beside the constants the solution
+   depends on: the drawn truck stands at 0.88·(lower + top) + tg above the step — the 0.88
+   doubling advance, Steel's 0.60 topmast and 0.30 topgallant — so lower = truckM / 1.708
+   for the full stack, 1.48 truncated at two segments by `only`, 1.00 at one. Encoding the
+   solved lower in the DATA instead would bake these constants into the record and drift
+   silently the day they change. */
+function mastLowerOf(mk, steelMain) {
+  if (mk.truckM !== undefined && mk.rig === 'square') {
+    const K = mk.only === 1 ? 1.0
+            : mk.only === 2 ? 0.88 + 0.60
+            : 0.88 * (1 + 0.60) + 0.30;
+    return mk.truckM / K;
+  }
+  return mk.heightM !== undefined ? mk.heightM : (mk.height || 0) * steelMain;
+}
 function buildRig(S, group, mats, FINE, FURLED) {
   const L = S.lwl, B = S.beam;
   const H = hullSurface(S);
@@ -1363,7 +1383,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        a trireme at L/B 9.7 comes out with a 20 m mast against Olympias's measured 11 m. Where a
        vessel has an attested mast, that measurement wins and the rule is not used at all —
        `heightM` is metres, `height` is a share of Steel's main. */
-    const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+    const lower = mastLowerOf(mk, steelMain);
     /* ── A MAST IS AS THICK AS ITS OWN LENGTH ASKS, NOT AS ITS SHIP'S BEAM ─────────────
        Every mast on a ship drew the same diameter — beam x 0.06 — so the treasure ship's
        0.6-share mizzen stood as fat as her main, and the corbita's little artemon as fat
@@ -1380,7 +1400,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        mizzen) is inference, like the height shares themselves. Junk and crabclaw masts
        take the length scaling only — China is not rigged by Steel's tables. */
     const mainLower = S.masts.reduce((mx, m2) =>
-      Math.max(mx, m2.heightM !== undefined ? m2.heightM : (m2.height || 0) * steelMain), 0)
+      Math.max(mx, mastLowerOf(m2, steelMain)), 0)
       || lower || 1;
     /* the mizzen is the AFTERMOST STATION, not the last list entry — the corbita and the
        trireme list their mains first and their bow masts second */
@@ -1886,9 +1906,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
            one answer.
            ⚠ And the fractions hold for two-deckers and above ONLY. Below 74 guns Steel's own
            tables run .89-.91, so a frigate wants the tabulated ratio, not the rule. */
-        const yardLen = si === 0 ? lower * 0.875
-                      : si === 1 ? lower * 0.875 * 0.714
-                      : lower * 0.875 * 0.714 * 0.667;
+        /* the record may attest the course yard itself (Preussen: "Länge Großrah:
+           32 m") — an attested spar beats Steel's share of a derived mast */
+        const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
+        const yardLen = si === 0 ? courseL
+                      : si === 1 ? courseL * 0.714
+                      : courseL * 0.714 * 0.667;
         /* ⚠ 0.94 SLUNG EVERY YARD AT THE HEAD OF ITS OWN SEGMENT, which put the main course
            30 m up a 33 m lower mast and left a two-storey hole between the deck and the lowest
            sail. A course yard is slung a little over halfway up the lower mast; the mast carries
@@ -1967,10 +1990,15 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const HOIST = { course: 'fixed', ltop: 'fixed', ltg: 'fixed',
                       top: { tie: 1 }, utop: { tie: 1 },
                       tg: { tie: 2 }, utg: { tie: 2 }, royal: { tie: 2 } };
+      /* the record may attest the course yard itself (Preussen: "Länge Großrah: 32 m;
+         Royalrah: 16 m" — and 16/32 is EXACTLY the royal's 0.50 share below, the record
+         confirming the plan's own fractions). An attested spar beats Steel's 7/8 of a
+         derived mast. */
+      const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
       mk.yards.filter(nm => PLAN[nm])
         .sort((a, b) => PLAN[a][0] - PLAN[b][0])
         .forEach(nm => { const [f, r, kind] = PLAN[nm];
-          crossYard(base + T * f, lower * 0.875 * r,
+          crossYard(base + T * f, courseL * r,
                     kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm]); });
     }
 
@@ -2771,7 +2799,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
     if (S.headsails && S.masts && S.masts.length) {
       const fm = S.masts[0];
       const steelMain = (S.lwl + S.beam) / 2;
-      const flower = fm.heightM !== undefined ? fm.heightM : fm.height * steelMain;
+      const flower = mastLowerOf(fm, steelMain);
       const fx = (fm.at - 0.5) * L + H.rake(fm.at);
       const fbase = deckAt(fm.at);
       const hounds = fbase + flower * 0.78;

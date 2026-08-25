@@ -201,6 +201,20 @@
                            if (e.userData && e.userData.part) return e.userData.part;
                          return null; };
 
+    /* r155: the record may attest the FLAG-BUTTON (`truckM`, deck-to-truck) instead of a
+       lower-mast length — every expectation below that derives from the lower must mirror
+       hull.js's own solution (lower = truckM / 1.708 for the full square stack), or a
+       truckM record reads as a mast of height zero and every mast rule fires on it. */
+    const lowerOf = mk => {
+      if (mk.truckM !== undefined && mk.rig === 'square') {
+        const K = mk.only === 1 ? 1.0 : mk.only === 2 ? 0.88 + 0.60
+                : 0.88 * (1 + 0.60) + 0.30;
+        return mk.truckM / K;
+      }
+      return mk.heightM !== undefined ? mk.heightM
+                                      : (mk.height || 0) * (H.lwl + H.beam) / 2;
+    };
+
     /* ── NOTHING ABOARD IS NaN ──────────────────────────────────────────────────────────
        Round 86: the first lateen mast with an ATTESTED height (`heightM`, the galley) hit
        a yard-share formula that assumed the Steel-share form of the record; both masts,
@@ -481,6 +495,38 @@
               `mast ${i} stay collar at ${mt.y.toFixed(1)} m vs drawn truck ${my.toFixed(1)} m`);
       });
     }
+
+    /* ── r155: A RECORDED FLAG-BUTTON IS WHERE THE MAST STOPS ───────────────────────────
+       Preussen's record attests ONE mast height and its datum is the truck: 58 m deck to
+       flag-button, all five masts — the Laeisz Standardrigg cut interchangeable spars, so
+       one figure covers the rig. `truckM` on a square mast record states it. The drawn
+       stack must LAND it, and the mast's own meshes are the witnesses: every segment is
+       stepped at the deck and the stack tops out at the truck, so the y-span of the
+       mast-tagged meshes at that station IS deck-to-truck. Before r155 the builder drew
+       heightM (a lower-mast guess) through the fidded fractions and Preussen's trucks
+       stood 51.2 m — 6.8 m short of her record, on all five masts. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.truckM === undefined || mk.rig !== 'square') return;
+      const mt = (H.__mastTops || []).find(t => Math.abs(t.u - mk.at) < 0.02);
+      if (!mt) {
+        say(v.id, 'recorded truck with no drawn masthead',
+            `mast ${i} attests truckM ${mk.truckM} m and no masthead stands near u ${mk.at}`);
+        return;
+      }
+      const win = (H.beam || 10) * 0.25;
+      let lo = 1e9, hi = -1e9;
+      g.traverse(o => {
+        if (!o.isMesh || !tagOf(o) || tagOf(o).key !== 'mast') return;
+        const b2 = new THREE.Box3().setFromObject(o);
+        if (Math.abs((b2.min.x + b2.max.x) / 2 - mt.x) < win) {
+          lo = Math.min(lo, b2.min.y); hi = Math.max(hi, b2.max.y);
+        }
+      });
+      if (hi > lo && Math.abs((hi - lo) - mk.truckM) > 0.75)
+        say(v.id, 'mast short of its recorded flag-button',
+            `mast ${i} spans ${(hi - lo).toFixed(2)} m deck-to-truck against the record's `
+            + `${mk.truckM} m`);
+    });
 
     /* ── A STOWED BOWER LIES FLAT ALONG THE SIDE (round 99) ─────────────────────────────
        The fished anchor's fork plane is parallel to the planking — that is why broadside
@@ -2217,8 +2263,7 @@
         if ((bbx.min.x + bbx.max.x) / 2 > mastX) funnelAbaft = true;
       } });
       if (funnelAbaft) return;
-      const steelMain = (H.lwl + H.beam) / 2;
-      const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+      const lower = lowerOf(mk);
       const want = Math.max(lower * 0.16,
                             Math.min(lower * 0.62, (1.04 - mk.at) * L * 1.6));
       const booms = [];
@@ -2270,8 +2315,7 @@
       if (mk.rig !== 'gaff' || !mk.topsail) continue;
       const mx = (mk.at - 0.5) * H.lwl;
       const HSt = SHIPS_HULL.hullSurface(H);
-      const lower = mk.heightM !== undefined ? mk.heightM
-                  : mk.height * (H.lwl + H.beam) / 2;
+      const lower = lowerOf(mk);
       const floorY = HSt.sheer(mk.at) + lower * 0.75;
       let found = 0;
       g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
@@ -3482,9 +3526,7 @@
          The audit recomputes the same rule; only masts past one tree (0.55 m) are bound. */
       const sq = (H.masts || []).filter(mm => mm.rig === 'square').length;
       const jk = (H.masts || []).filter(mm => mm.rig === 'junk').length;
-      const steelMainA = (H.lwl + H.beam) / 2;
-      const lowersA = (H.masts || []).map(mm =>
-        mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainA);
+      const lowersA = (H.masts || []).map(mm => lowerOf(mm));
       const mainLowerA = Math.max(...lowersA, 0) || 1;
       const aftAt = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
       const mixedSqA = (H.masts || []).some(mm => mm.rig === 'square');
@@ -3594,7 +3636,7 @@
     {
       const anc = (H.masts || []).filter(mm => mm.rig === 'square' && mm.only === 1);
       const depYear = H.year || v.from || 0;
-      const headM = mm => mm.heightM || (H.lwl + H.beam) / 2 * (mm.height || 0);
+      const headM = mm => lowerOf(mm);
       /* one karchesion is one tagged GROUP of several meshes — count groups, not meshes,
          or one drawn masthead would satisfy a two-masted hull's rule by mesh count */
       let nK = 0;
@@ -3706,8 +3748,7 @@
          ⚠ the mizzen test replicates the builder's isMizzen (aftermost station, 3+
          masts, shorter than the main) — if this rule fires when the app looks right,
          check this test against hull.js's isMizzen FIRST, rule 8. */
-      const vv = m => m.heightM !== undefined ? m.heightM
-                                              : (H.lwl + H.beam) / 2 * (m.height || 0);
+      const vv = m => lowerOf(m);
       const seg3 = sq.filter(m => !m.yards && (m.only ? Math.min(m.only, 3) : 3) >= 2);
       let wantJ = 0;
       if (seg3.length && !H.iron) {
@@ -3798,9 +3839,7 @@
        diameters spread by more than a quarter and the drawn ones sit within 8% of each
        other, every mast came from the same tree. */
     {
-      const steelMainB = (H.lwl + H.beam) / 2;
-      const lowersB = (H.masts || []).map(mm =>
-        mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainB);
+      const lowersB = (H.masts || []).map(mm => lowerOf(mm));
       const mainLowerB = Math.max(...lowersB, 0) || 1;
       const aftAtB = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
       const mixedSqB = (H.masts || []).some(mm => mm.rig === 'square');
@@ -3867,7 +3906,6 @@
        is stronger: absolute diameters, not ratios.) */
     {
       if (H.iron && (H.masts || []).length) {
-        const steelMainC = (H.lwl + H.beam) / 2;
         const colsC = [];
         g.traverse(o => {
           if (!o.isMesh || !o.userData.part) return;
@@ -3878,8 +3916,7 @@
           colsC.push({ x: (bb.min.x + bb.max.x) / 2, d: bb.max.z - bb.min.z });
         });
         (H.masts || []).forEach((mm, i) => {
-          const lo = mm.heightM !== undefined ? mm.heightM
-                                              : (mm.height || 0) * steelMainC;
+          const lo = lowerOf(mm);
           /* the same segment stack hull.js builds: square rig adds top and topgallant,
              a gaff mast its topmast; a pole is its own whole height */
           const pole = mm.rig === 'square' ? lo * 1.9

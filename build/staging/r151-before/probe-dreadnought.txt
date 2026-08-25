@@ -1,0 +1,24 @@
+== dreadnought: boxy meshes by part/name ==
+  36x  net/Net shelf
+  24x  net/Boom hinge
+   2x  superstructure/Bridge glazing
+   1x  rudder/Rudder
+   1x  superstructure/Tower level 1
+   1x  superstructure/Tower level 2
+   1x  superstructure/Tower level 3
+   1x  superstructure/Bridge
+-- all part kinds --
+net            n=  86 boxy=  60 tris=  3600
+superstructure n=   9 boxy=   6 tris=   600
+rudder         n=   1 boxy=   1 tris=    12
+keel           n=   1 boxy=   0 tris=   768
+frames         n=  30 boxy=   0 tris=  3120
+stempost       n=   2 boxy=   0 tris=   416
+planking       n=   1 boxy=   0 tris=121248
+deck           n=   1 boxy=   0 tris=  1920
+mast           n=   8 boxy=   0 tris=   276
+rail           n=   1 boxy=   0 tris=  1440
+waterway       n=   1 boxy=   0 tris=  1440
+funnel         n=   6 boxy=   0 tris=  2688
+turret         n=  25 boxy=   0 tris=  1480
+total 172 meshes, 67 boxy (38%)

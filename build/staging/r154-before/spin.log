@@ -1,0 +1,13 @@
+  b000.png  bearing 0°
+  b045.png  bearing 45°
+  b090.png  bearing 90°
+  b135.png  bearing 135°
+  b180.png  bearing 180°
+  b225.png  bearing 225°
+  b270.png  bearing 270°
+  b315.png  bearing 315°
+  low000.png  bearing 0°  lat 0.02
+  low090.png  bearing 90°  lat 0.02
+  low180.png  bearing 180°  lat 0.02
+  low270.png  bearing 270°  lat 0.02
+→ build/staging/r154-before/spin-dreadnought

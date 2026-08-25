@@ -10332,3 +10332,86 @@ myeongnyang Action baseline, Preussen trucks), plus the battle-rig record questi
 (2) The residue class: treasure 0.049, junk 0.048, galleass 0.047. (3) The fleet is at
 0 boxy on yamato AND dreadnought — the next probe sweep should rank the remaining hulls
 by boxy count and name the next class.
+
+## Round 155 — 2026-08-25 — the record's own flag-button, landed
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey's
+queue carried — r154's head, the r143 standing residuals, and the first of them closed
+this round is the Preussen trucks (51.3 drawn v 58.0 attested).**
+
+**Opening full 62-frame check at HEAD before any edit: 62/62 within tolerance, 0 BLANK
+(build/ratchet-open-r155.log), both Preussen frames at 0.000.** One process trap re-hit
+and killed: a waiter on `pgrep -f "frame_baseline.py check"` matches ITSELF (the
+documented class) — the check had finished; the four "live" PIDs were my own waiters.
+
+**The fault, and why it was structural.** Her five masts carried heightM 27/30/30/29/25 —
+the model's own taper, no source — and the fidded stack (top 0.60, tg 0.30, 0.88 doubling
+advance) lands a truck at exactly 1.708 × lower, so the trucks stood 42.7–51.2 m over the
+deck against the record's one attested figure: "Masthöhe: 68 m (Kiel-Flaggenknopf), 58 m
+(Deck-Flaggenknopf)" (de.wikipedia, Preußen (Schiff, 1902)) — one number for all five
+masts, because the Laeisz Standardrigg cut interchangeable spars. The same infobox
+attests the course yard: "Länge Großrah: 32 m (!); Royalrah: 16 m" — and 16/32 is EXACTLY
+the royal's 0.50 share in the drawn plan, the record confirming the model's own fractions.
+
+**The fix lets the record state what the source states.** `truckM` (deck-to-truck) and
+`courseYardM` on the mast record; hull.js solves the stack for them (mastLowerOf, beside
+the constants the solution depends on — lower = truckM/1.708 full stack, /1.48 at
+`only: 2`, /1.00 at 1) and cuts every yard from the attested course length. Encoding the
+solved lower in the DATA instead would bake the stack constants into the record and
+drift silently when they change — that is why the conversion lives in code. Preussen's
+record now carries truckM 58.0 + courseYardM 32.0 on all five masts, mastProvenance
+naming what is attested and what derived, and a card row with the figures. heightM
+records everywhere else are byte-untouched (sim-proven precedence).
+
+**Offline first: build/staging-r155-trucks.mjs 23/23** — stack factor at five lowers,
+only-truncation factors, truckM lands 58.000000 exact, precedence (truckM beats heightM,
+non-square rigs ignore it), royal = the record's own 16, audit predicate against both
+forms with the injection number 6.76 predicted.
+
+**Audit rule r155 'mast short of its recorded flag-button'** (mast-tagged meshes at the
+station span deck-to-truck; every segment steps at the deck, the stack tops at the truck).
+Injection was TWO-STAGE because the first stage found something better: with heightM
+simply removed, the OLD hull.js drew `undefined * steelMain` = NaN and the whole rig
+convicted under the r86 NaN class — the old code cannot even draw the new record. The
+clean stage (truckM coexisting with heightM) convicted EXACTLY the five masts at the
+sim's numbers: 46.12/51.24/51.24/49.53/42.70 v 58. Rule-8 catch the fix required: SEVEN
+audit expectations derived `lower` from heightM and would read a truckM record as a mast
+of height zero — all seven now share one `lowerOf` mirroring the builder. With the fix:
+33 hulls, 0 problems, EXIT:0.
+
+**Measured (build/staging/r155/measure-before|after.txt):** every moved row is the rig's
+own — Steel mast merged row 5.00–56.29 → 5.00–63.37 over water (per-mast deck-to-truck
+58.00 exact, audit-verified; the merged row mixes five deck steps so its span reads
+58.37), Yard reach 12.46 → 15.19 half-breadth (the 32 m course), Lifts/Braces/Stays
+follow their spars, spanker gaff/boom scale with their mast (DERIVED — no besan record
+in reach). Hull rows byte-identical.
+
+**Looked at (rule 1, _spin/preussen-r155-before|after/):** before-b090 shows the taper
+plainly — fore and kreuz mastheads notched well below the mid three; after-b090/b270 the
+level six-storey wall of the P-liner sail plan, mastheads in one line on the sheer, the
+jib suit climbing to the fore topmast head, the card printing 58.4 (the 0.4 is the fore
+deck's sheer over the amidships freeboard datum the panel subtracts). Rule 0 on the
+aboard frame: a rendered sea, a black-hulled five-master heeling under full canvas with
+her wake astern; a viewer can read five masts all square-rigged, six tiers each, and the
+slip's position/course/wind.
+
+**Frames: the two reachable moved and were accepted with reasons, each re-checked 0.000.**
+ship-preussen 28.612%/10.761 — the rig grew and the Shipwright camera's fit target
+follows rigTop, so the whole frame reframes; diff read before accepting (ship + reframed
+sea, panels still). aboard-preussen 3.981%/1.847 — the ship's own rig ALONE, sea/sky/
+panels byte-black. FRAME-LOG carries both.
+
+**Deployed: stamp 1787694431**, live verify in the commit.
+
+**Next, in order:** (1) The remaining r143 standing residuals — gundeck both-ways
+normals sweep (r118, fleet-wide, unconvicted), canoe floor frame, myeongnyang Action
+baseline (NOT a baseline add: battle.js:189 needs `campaign` + `fleets` and she has
+neither — staging the strait is a full round: fleets, formation, the 293 m channel's DEM
+patch, the 11.5-kn reversing tide), Azzam crest + boundary plate (wants plates), QM2 aft
+terraces (wants an aft-quarter plate), Endurance forecastle (waits on RMG J9266), the
+battle-rig record question (impavesata, galleass screen height, third item). (2) The
+under-gate residue class: treasure 0.049, junk 0.048, galleass 0.047. (3) The fleet-wide
+probe sweep to rank remaining hulls by boxy count and name the next class. A candidate
+from this round's plates: Preussen's mast LIVERY — the model wears Great Eastern's
+white-lower/black-upper; photographs of the P-liners show pale masts with black doublings
+but her record row is `mastLivery: true`, worth its own source pass.

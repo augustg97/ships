@@ -790,6 +790,15 @@ group.add(g);
 }
 const HULL_VERT = SHADERS['HULL_VERT.vert'];
 const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
+function mastLowerOf(mk, steelMain) {
+if (mk.truckM !== undefined && mk.rig === 'square') {
+const K = mk.only === 1 ? 1.0
+: mk.only === 2 ? 0.88 + 0.60
+: 0.88 * (1 + 0.60) + 0.30;
+return mk.truckM / K;
+}
+return mk.heightM !== undefined ? mk.heightM : (mk.height || 0) * steelMain;
+}
 function buildRig(S, group, mats, FINE, FURLED) {
 const L = S.lwl, B = S.beam;
 const H = hullSurface(S);
@@ -832,9 +841,9 @@ for (const t of HT.tiers) if (u >= t.uA && u <= t.uB) base = Math.max(base, t.y1
 }
 const rakeRad = (mk.rake || 0) * Math.PI / 180;
 const steelMain = (S.lwl + S.beam) / 2;
-const lower = mk.heightM !== undefined ? mk.heightM : mk.height * steelMain;
+const lower = mastLowerOf(mk, steelMain);
 const mainLower = S.masts.reduce((mx, m2) =>
-Math.max(mx, m2.heightM !== undefined ? m2.heightM : (m2.height || 0) * steelMain), 0)
+Math.max(mx, mastLowerOf(m2, steelMain)), 0)
 || lower || 1;
 const isMizzen = mk.at === Math.max(...S.masts.map(m2 => m2.at)) && S.masts.length >= 3
 && !S.iron && S.masts.some(m2 => m2.rig === 'square') && lower < mainLower * 0.95
@@ -1110,9 +1119,10 @@ cb.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.94, hang);
 group.add(tag(cb, 'corbis'));
 }
 if (mk.rig === 'square' && !mk.yards) {
-const yardLen = si === 0 ? lower * 0.875
-: si === 1 ? lower * 0.875 * 0.714
-: lower * 0.875 * 0.714 * 0.667;
+const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
+const yardLen = si === 0 ? courseL
+: si === 1 ? courseL * 0.714
+: courseL * 0.714 * 0.667;
 const tiers = mk.only || 3;
 const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
 crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
@@ -1140,10 +1150,11 @@ royal:  [0.92, 0.50, 'royal'],
 const HOIST = { course: 'fixed', ltop: 'fixed', ltg: 'fixed',
 top: { tie: 1 }, utop: { tie: 1 },
 tg: { tie: 2 }, utg: { tie: 2 }, royal: { tie: 2 } };
+const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
 mk.yards.filter(nm => PLAN[nm])
 .sort((a, b) => PLAN[a][0] - PLAN[b][0])
 .forEach(nm => { const [f, r, kind] = PLAN[nm];
-crossYard(base + T * f, lower * 0.875 * r,
+crossYard(base + T * f, courseL * r,
 kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm]); });
 }
 if (FINE && mk.rig === 'square' && mastYards.length) {
@@ -1587,7 +1598,7 @@ if (bob) group.add(tag(bob, 'stay', 'Bobstay',
 if (S.headsails && S.masts && S.masts.length) {
 const fm = S.masts[0];
 const steelMain = (S.lwl + S.beam) / 2;
-const flower = fm.heightM !== undefined ? fm.heightM : fm.height * steelMain;
+const flower = mastLowerOf(fm, steelMain);
 const fx = (fm.at - 0.5) * L + H.rake(fm.at);
 const fbase = deckAt(fm.at);
 const hounds = fbase + flower * 0.78;

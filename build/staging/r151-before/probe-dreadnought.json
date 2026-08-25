@@ -1,0 +1,79 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "stempost": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 416
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 1,
+   "tris": 12
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "mast": {
+   "n": 8,
+   "boxy": 0,
+   "tris": 276
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "waterway": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "funnel": {
+   "n": 6,
+   "boxy": 0,
+   "tris": 2688
+  },
+  "superstructure": {
+   "n": 9,
+   "boxy": 6,
+   "tris": 600
+  },
+  "net": {
+   "n": 86,
+   "boxy": 60,
+   "tris": 3600
+  },
+  "turret": {
+   "n": 25,
+   "boxy": 0,
+   "tris": 1480
+  }
+ },
+ "byName": {
+  "rudder/Rudder": 1,
+  "superstructure/Tower level 1": 1,
+  "superstructure/Tower level 2": 1,
+  "superstructure/Tower level 3": 1,
+  "superstructure/Bridge glazing": 2,
+  "superstructure/Bridge": 1,
+  "net/Net shelf": 36,
+  "net/Boom hinge": 24
+ }
+}
