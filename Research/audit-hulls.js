@@ -241,6 +241,40 @@
             `NaN positions in: ${names.join(', ')} — the black-canvas class`);
     }
 
+    /* ── A TRIANGLE IS DRAWN ONCE (round 156) ───────────────────────────────────────────
+       The both-ways index trick — the same three vertices indexed AGAIN in opposite
+       winding so a strip reads from below — breaks computeVertexNormals: each cancelling
+       pair is an exact FP negation, but per-vertex accumulation is not associative, so
+       about half the sums come out exactly zero (normalize's `|| 1` guard keeps them —
+       unlit) and the rest come out ~1e-16 dust that normalize amplifies to a FULL UNIT
+       vector in an arbitrary direction (lit upside-down). The plank reads as alternating
+       washed and dark bands — r118 saw exactly this on the sangjang wall, fixed that one
+       instance (single winding on a DoubleSide clone) and named the class; this is the
+       class rule. A magnitude test cannot convict it — the garbage normals are unit
+       length — so the rule convicts the PATTERN: one unordered vertex triple drawn
+       twice in one indexed geometry. Opposite winding is the both-ways form; same
+       winding is a double draw, the z-fight form. Both convict. */
+    {
+      const bad = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry || !o.geometry.index) return;
+        const ia = o.geometry.index.array;
+        const seen = new Set(); let dup = 0;
+        for (let i = 0; i < ia.length; i += 3) {
+          const t = [ia[i], ia[i + 1], ia[i + 2]].sort((a, b) => a - b).join(',');
+          if (seen.has(t)) dup++; else seen.add(t);
+        }
+        if (dup) {
+          const p = tagOf(o);
+          bad.push(`${(p && (p.name || p.key)) || o.geometry.type}: ${dup} of ${ia.length / 3}`);
+        }
+      });
+      if (bad.length)
+        say(v.id, 'triangles drawn twice over the same vertices',
+            `${bad.join('; ')} — the both-ways class: computeVertexNormals cancels `
+            + 'shared windings to zeros and unit garbage');
+    }
+
     const part = {};
     g.traverse(o => {
       if (!o.isMesh) return;

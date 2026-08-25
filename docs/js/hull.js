@@ -5994,13 +5994,13 @@ sx.push(pd[0]); railY.push(pd[1]); halfW.push(Math.abs(pd[2]) + over);
 const pos = [], idx = [];
 for (let i = 0; i <= N; i++) {
 pos.push(sx[i], gdY, -halfW[i], sx[i], gdY, halfW[i]);
-if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2,
-a + 2, a + 1, a, a + 2, a + 3, a + 1); }
+if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
 }
 const dg = new THREE.BufferGeometry();
 dg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 dg.setIndex(idx); dg.computeVertexNormals();
-group.add(tag(new THREE.Mesh(dg, pale), 'gundeck', GD.name, GD.what));
+const paleDS = pale.clone(); paleDS.side = THREE.DoubleSide;
+group.add(tag(new THREE.Mesh(dg, paleDS), 'gundeck', GD.name, GD.what));
 const surfY = gdY + B * 0.007;
 const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
 const nSama = Math.max(0, GD.loops | 0);
@@ -6739,11 +6739,12 @@ wF * Math.sin(-Math.PI / 2 + Math.PI * k / K)));
 const cen = new THREE.Vector3((F.to - 0.5) * L, topY, 0);
 const pos = [cen.x, cen.y, cen.z], idx = [];
 for (const p of arc) pos.push(p.x, p.y, p.z);
-for (let k = 1; k < K + 1; k++) idx.push(0, k, k + 1, 0, k + 1, k);
+for (let k = 1; k < K + 1; k++) idx.push(0, k, k + 1);
 const fg = new THREE.BufferGeometry();
 fg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 fg.setIndex(idx); fg.computeVertexNormals();
-group.add(tag(new THREE.Mesh(fg, pale), 'fortress'));
+const paleDS = pale.clone(); paleDS.side = THREE.DoubleSide;
+group.add(tag(new THREE.Mesh(fg, paleDS), 'fortress'));
 const pH = F.parapetH || B * 0.14;
 const fsY = topY + B * 0.007;
 for (let k = 0; k < K; k++) {

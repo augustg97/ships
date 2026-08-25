@@ -1,0 +1,17 @@
+[
+ {
+  "id": "galleass",
+  "rule": "triangles drawn twice over the same vertices",
+  "detail": "Bow fortress: 22 of 44 \u2014 the both-ways class: computeVertexNormals cancels shared windings to zeros and unit garbage"
+ },
+ {
+  "id": "panokseon",
+  "rule": "triangles drawn twice over the same vertices",
+  "detail": "Sangjang: 44 of 88 \u2014 the both-ways class: computeVertexNormals cancels shared windings to zeros and unit garbage"
+ },
+ {
+  "id": "sekibune",
+  "rule": "triangles drawn twice over the same vertices",
+  "detail": "S\u014d-yagura: 44 of 88 \u2014 the both-ways class: computeVertexNormals cancels shared windings to zeros and unit garbage"
+ }
+]

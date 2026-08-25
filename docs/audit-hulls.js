@@ -129,6 +129,26 @@ if (names.length)
 say(v.id, 'geometry with non-finite vertices',
 `NaN positions in: ${names.join(', ')} — the black-canvas class`);
 }
+{
+const bad = [];
+g.traverse(o => {
+if (!o.isMesh || !o.geometry || !o.geometry.index) return;
+const ia = o.geometry.index.array;
+const seen = new Set(); let dup = 0;
+for (let i = 0; i < ia.length; i += 3) {
+const t = [ia[i], ia[i + 1], ia[i + 2]].sort((a, b) => a - b).join(',');
+if (seen.has(t)) dup++; else seen.add(t);
+}
+if (dup) {
+const p = tagOf(o);
+bad.push(`${(p && (p.name || p.key)) || o.geometry.type}: ${dup} of ${ia.length / 3}`);
+}
+});
+if (bad.length)
+say(v.id, 'triangles drawn twice over the same vertices',
+`${bad.join('; ')} — the both-ways class: computeVertexNormals cancels `
++ 'shared windings to zeros and unit garbage');
+}
 const part = {};
 g.traverse(o => {
 if (!o.isMesh) return;

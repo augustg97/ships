@@ -9272,18 +9272,24 @@ function buildGalleyWorks(S, group, mats) {
       const pd = surfacePoint(S, H, u, 1.0);
       sx.push(pd[0]); railY.push(pd[1]); halfW.push(Math.abs(pd[2]) + over);
     }
-    /* the deck: one lofted strip between the two edge curves, faced both ways so the
-       rowers' side of their own roof is not a hole */
+    /* the deck: one lofted strip between the two edge curves, single winding on a
+       DoubleSide clone so the rowers' side of their own roof is not a hole.
+       ⚠ r156: this was the both-ways index trick — the same triangles indexed again
+       in opposite winding, SHARING vertices — and computeVertexNormals cancels each
+       shared vertex to an exact zero or to ~1e-16 of FP dust that normalize()
+       amplifies to a full unit vector in an arbitrary direction: the plank lit as
+       alternating unlit / skyward / upside-down bands, the r118 sangjang symptom.
+       The audit's round-156 rule convicts the pattern itself. */
     const pos = [], idx = [];
     for (let i = 0; i <= N; i++) {
       pos.push(sx[i], gdY, -halfW[i], sx[i], gdY, halfW[i]);
-      if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2,
-                                               a + 2, a + 1, a, a + 2, a + 3, a + 1); }
+      if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
     }
     const dg = new THREE.BufferGeometry();
     dg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     dg.setIndex(idx); dg.computeVertexNormals();
-    group.add(tag(new THREE.Mesh(dg, pale), 'gundeck', GD.name, GD.what));
+    const paleDS = pale.clone(); paleDS.side = THREE.DoubleSide;
+    group.add(tag(new THREE.Mesh(dg, paleDS), 'gundeck', GD.name, GD.what));
     const surfY = gdY + B * 0.007;
     const shH = GD.screenH !== undefined ? GD.screenH : B * 0.042;
     /* a record that carries sama, or a battery firing through the wall, gets that
@@ -10238,14 +10244,16 @@ function buildGalleyWorks(S, group, mats) {
       arc.push(new THREE.Vector3((arcU(k) - 0.5) * L, topY,
                                  wF * Math.sin(-Math.PI / 2 + Math.PI * k / K)));
     const cen = new THREE.Vector3((F.to - 0.5) * L, topY, 0);
-    /* the deck: a fan from the aft edge's centre out to the curve, faced both ways */
+    /* the deck: a fan from the aft edge's centre out to the curve — single winding on
+       a DoubleSide clone; the both-ways index trick cancelled its normals (r156) */
     const pos = [cen.x, cen.y, cen.z], idx = [];
     for (const p of arc) pos.push(p.x, p.y, p.z);
-    for (let k = 1; k < K + 1; k++) idx.push(0, k, k + 1, 0, k + 1, k);
+    for (let k = 1; k < K + 1; k++) idx.push(0, k, k + 1);
     const fg = new THREE.BufferGeometry();
     fg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     fg.setIndex(idx); fg.computeVertexNormals();
-    group.add(tag(new THREE.Mesh(fg, pale), 'fortress'));
+    const paleDS = pale.clone(); paleDS.side = THREE.DoubleSide;
+    group.add(tag(new THREE.Mesh(fg, paleDS), 'fortress'));
     const pH = F.parapetH || B * 0.14;
     const fsY = topY + B * 0.007;
     for (let k = 0; k < K; k++) {

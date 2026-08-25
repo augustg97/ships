@@ -10415,3 +10415,88 @@ probe sweep to rank remaining hulls by boxy count and name the next class. A can
 from this round's plates: Preussen's mast LIVERY — the model wears Great Eastern's
 white-lower/black-upper; photographs of the P-liners show pale masts with black doublings
 but her record row is `mastLivery: true`, worth its own source pass.
+
+## Round 156 — 2026-08-25 — the r118 class convicted at last: a triangle is drawn once
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey's
+queue carried — r155's head, and the first item is the gundeck both-ways normals sweep
+(r118, fleet-wide, unconvicted since round 118). CLOSED this round, with its audit rule.**
+
+**The class, and what the offline sim refuted about it.** The both-ways index trick —
+the same triangles indexed AGAIN in opposite winding, SHARING vertices, so a strip reads
+from below — breaks computeVertexNormals. But not the way r118's note said: the sim
+(build/staging-r156-normals.mjs, 14/14) showed each cancelling pair is an EXACT FP
+negation, while the per-vertex accumulation is NOT associative — so some sums come out
+exactly zero (normalize's `|| 1` guard keeps them: unlit) and the rest come out ~1e-16
+dust that normalize amplifies to a FULL UNIT vector in whatever direction the dust
+points: neighbouring vertices lit skyward, unlit, and upside-down along one strip.
+r118's own words — "washed near-white along half its run". In the browser (Float32
+positions) the split is even worse: the r156 probe found NO exact zeros on the three
+planks at all — every broken normal is unit-length garbage, INVISIBLE to any magnitude
+test. So the audit rule convicts the PATTERN, not the symptom: one unordered vertex
+triple drawn twice in one indexed geometry (opposite winding = both-ways; same winding =
+double draw, the z-fight form; both convict).
+
+**The sweep is the rule, not a grep.** Comment-marked sites numbered two; the audit walks
+every triangle of every mesh of all 33 hulls, so the sweep is mechanical and closed.
+Injection (r156 edit stashed, clean HEAD): EXACTLY three convictions at the sim's own
+numbers — panokseon 'Sangjang: 44 of 88', sekibune 'Sō-yagura: 44 of 88', galleass 'Bow
+fortress: 22 of 44' — nothing else fired, so these were the ONLY instances in the fleet.
+The fix is r118's own law applied to both build sites (hull.js gundeck !AP plank,
+bowFortress fan): single winding on a DoubleSide clone of `pale`. With the fix: 33/0.
+
+**Measured.** measure_ship before/after for all three hulls: BYTE-IDENTICAL part tables —
+the change is lighting alone, positions untouched (sim-proven, app-confirmed). Probe
+before/after also identical on its residual entries: ten meshes fleet-wide carry isolated
+zero normals from DEGENERATE triangles (galleries 1/54, carrier island 28/3138, lifeboats
+11/198, Azzam fairing 6/294) — a separate minor class, vertices used only by zero-area
+triangles, invisible in render; the r156 rule correctly ignores it (recorded here, not
+hidden — a candidate rule if it ever shows).
+
+**Looked at (rule 1, build/staging/r156/*-crop.png).** Panokseon's sangjang strip:
+green-white garbage streaks become one evenly sky-lit surface. Sekibune: her deck hides
+behind the tate-ita walls from the app's bearing — the diff is the plank's seam sliver at
+the wall head. Galleass: the fan hides behind its parapet, few pixels. Rule 0 on
+ship-panokseon: reads as a rendered vessel on water; three facts a viewer can name — gun
+muzzles pierce her plank bulwark over a row of small square ports; the fighting deck lies
+a full storey above the oar deck; two battened lugs and the commander's tower stand
+amidships.
+
+**Frames — and one process fault owned.** The opening 62-frame run was STARTED before the
+edit but still capturing when the edit landed (15:16:13), so ship-galleass/panokseon/
+sekibune and action-lepanto were captured post-edit: the "opening" was contaminated for
+exactly the reachable frames. Handled by the r132 law: stash, solo re-check at clean
+HEAD — panokseon 0.000, sekibune 0.000 (baselines fresh; the run's diffs are the change
+alone), galleass 0.047 (the documented under-gate residue, now solo-verified). Every
+other frame's verdict stands for the final code because the class provably lives on
+three hulls only (audit sweep) and their one other frame, action-lepanto, scored 0.000
+post-edit. No second full pass was run — the watchdog window was spent on per-frame
+check→look→accept→recheck cycles instead, all four ending 0.000.
+
+**The unexpected mover was a STALE BASELINE, not this round.** ship-dreadnought 0.202%/
+0.064 — reproduced SOLO at clean HEAD at identical numbers with the edit stashed. The
+crops name it: Preussen's r155-grown rig at the neighbouring berth, showing through
+dreadnought's translucent panels and her net-boom gaps (the r115/r116 neighbour-berth
+ghost class). r155 re-checked only the two preussen frames; this one went stale.
+Accepted with that reason. **The r155 lesson generalises: when a RIG grows, the
+neighbour-berth frames are reachable frames.**
+
+**Two traps written down.** (1) A single-frame `check --frame X` WIPES _current and
+leaves only its own capture — the big run's after-captures were gone when the crops were
+wanted; re-capture per frame, accept from that. (2) The opening ratchet and the round's
+edit share the working tree: either wait out the opening before editing, or expect to
+stash-and-prove afterwards (this round did the latter deliberately once the overlap was
+seen; the solo re-checks made it sound).
+
+**Audit: 33 hulls, 0 problems, EXIT:0. Deployed: stamp 1787698902**, live verify in the
+commit.
+
+**Next, in order:** (1) The remaining r143 standing residuals — canoe floor frame,
+myeongnyang Action staging (a FULL round: battle.js:189 needs campaign+fleets, the 293 m
+strait's DEM patch, the 11.5-kn reversing tide), Azzam crest + boundary plate, QM2 aft
+terraces, Endurance forecastle (waits on RMG J9266), the battle-rig record question.
+(2) The under-gate residue class: treasure 0.049, junk 0.048, galleass 0.047 — galleass's
+is now solo-verified and characterised, worth naming the mechanism. (3) The fleet-wide
+probe sweep to rank remaining hulls by boxy count. (4) Preussen mast livery source pass
+(r155 candidate). (5) The degenerate-triangle zero-normal class recorded above, if it
+ever shows in a render.

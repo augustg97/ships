@@ -1,0 +1,92 @@
+[
+ {
+  "id": "east-indiaman",
+  "part": "Quarter galleries",
+  "key": "gallery",
+  "bad": 1,
+  "tot": 54,
+  "frac": 0.019,
+  "basic": false
+ },
+ {
+  "id": "east-indiaman",
+  "part": "Quarter galleries",
+  "key": "gallery",
+  "bad": 1,
+  "tot": 54,
+  "frac": 0.019,
+  "basic": false
+ },
+ {
+  "id": "ship-of-the-line",
+  "part": "Quarter galleries",
+  "key": "gallery",
+  "bad": 1,
+  "tot": 54,
+  "frac": 0.019,
+  "basic": false
+ },
+ {
+  "id": "ship-of-the-line",
+  "part": "Quarter galleries",
+  "key": "gallery",
+  "bad": 1,
+  "tot": 54,
+  "frac": 0.019,
+  "basic": false
+ },
+ {
+  "id": "carrier",
+  "part": "The island",
+  "key": "island",
+  "bad": 28,
+  "tot": 3138,
+  "frac": 0.009,
+  "basic": false
+ },
+ {
+  "id": "container",
+  "part": "Lifeboat",
+  "key": "boat",
+  "bad": 11,
+  "tot": 198,
+  "frac": 0.056,
+  "basic": false
+ },
+ {
+  "id": "container",
+  "part": "Lifeboat",
+  "key": "boat",
+  "bad": 11,
+  "tot": 198,
+  "frac": 0.056,
+  "basic": false
+ },
+ {
+  "id": "ever-given",
+  "part": "Lifeboat",
+  "key": "boat",
+  "bad": 11,
+  "tot": 198,
+  "frac": 0.056,
+  "basic": false
+ },
+ {
+  "id": "ever-given",
+  "part": "Lifeboat",
+  "key": "boat",
+  "bad": 11,
+  "tot": 198,
+  "frac": 0.056,
+  "basic": false
+ },
+ {
+  "id": "azzam",
+  "part": "Stack fairing",
+  "key": "cluster",
+  "bad": 6,
+  "tot": 294,
+  "frac": 0.02,
+  "basic": false
+ }
+]
