@@ -4603,7 +4603,7 @@
     "run": 0.36,
     "riseF": 0.2,
     "riseA": 0.14,
-    "sheerBow": 3.0,
+    "sheerBow": -0.8,
     "sheerStern": 0.0,
     "tumblehome": 0.0,
     "stemRake": 0.052,
@@ -5116,7 +5116,9 @@
     },
     "steering": "steel",
     "bottom": "#2f353b",
-    "paintProvenance": "MEASURED off two independent broadsides — Wikimedia Commons File:AzzamCadiz.jpg (Javier Virues Ortega, CC BY-SA 4.0, port side, bow left) and File:Yacht Azzam - UAE.jpg (Farid mernissi, CC BY-SA 4.0, starboard, bow right). Both show her WHITE to the waterline with no boot-top and a near-black antifouling, where the class default for a hull built after 1955 is oxide red. And both show the deck edge rising about 3.0 m from amidships to the stem, against the 0.25 m the record carried — which is why she read as a flat slab. The RISE is a difference between two points on one line, so it is immune to where the hull ends and the first tier begins, which is the one thing these plates cannot resolve."
+    "paintProvenance": "MEASURED off two independent broadsides — Wikimedia Commons File:AzzamCadiz.jpg (Javier Virues Ortega, CC BY-SA 4.0, port side, bow left) and File:Yacht Azzam - UAE.jpg (Farid mernissi, CC BY-SA 4.0, starboard, bow right). Both show her WHITE to the waterline with no boot-top and a near-black antifouling, where the class default for a hull built after 1955 is oxide red. And both show the deck edge rising about 3.0 m from amidships to the stem, against the 0.25 m the record carried — which is why she read as a flat slab. The RISE is a difference between two points on one line, so it is immune to where the hull ends and the first tier begins, which is the one thing these plates cannot resolve.",
+    "bowTopM": 8.2,
+    "sheerProvenance": "MEASURED 2026-08-25 (round 160) off two independent broadsides, each with its scale: the Cadiz in-service broadside (Commons AzzamCadiz.jpg, 17.27 px/m re-anchored, stem tip x351 y1709, waterline fit y=1847.8+0.00162x) reads the stem head at 8.05-8.13 m and the foredeck cap 8.19-8.38 m rising to 8.84 at the house front; the kept Bremen broadside (azzam-broadside-fricke-2014.jpg, 8.96 px/m, anchors x332/x1950/y941) reads the same stem head at 8.37 m. Both refute the former sheerBow 3.0 (a 12.0 m bow) by ~3.9 m: her sheer is INVERTED, the bow below the freeboard deck, one sweep rising aft into the house. bowTopM is the two-plate band's centre; sheerBow = bowTopM - freeboard. The 1343_Azzam.jpg fitting-out oblique was rejected as a witness: no local scale anchor at the bow (Research/AZZAM-PLATES.md, r160 section)."
    },
    "rows": [
     [

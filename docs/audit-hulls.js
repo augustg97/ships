@@ -325,6 +325,34 @@ say(v.id, 'stay anchored above its own truck',
 `mast ${i} stay collar at ${mt.y.toFixed(1)} m vs drawn truck ${my.toFixed(1)} m`);
 });
 }
+if (typeof H.bowTopM === 'number' && typeof H.freeboard === 'number') {
+const expect = H.freeboard + (H.sheerBow || 0);
+if (Math.abs(expect - H.bowTopM) > 0.4)
+say(v.id, 'a bow the record measured but the sheer ignores',
+`freeboard ${H.freeboard} + sheerBow ${H.sheerBow} draws the stem head at `
++ `${expect.toFixed(1)} m against the plates' bowTopM ${H.bowTopM} m`);
+else {
+g.updateMatrixWorld(true);
+const rc = new THREE.Raycaster();
+let worst = 0, at = null;
+for (const u of [0.01, 0.02, 0.03]) {
+const line = H.freeboard + (H.sheerBow || 0) * Math.pow(1 - 2 * u, 2.8);
+rc.set(new THREE.Vector3((u - 0.5) * H.lwl, 50, 0), new THREE.Vector3(0, -1, 0));
+const hit = rc.intersectObject(g, true)
+.find(ht => { for (let e = ht.object; e; e = e.parent)
+if (e.visible === false) return false;
+const p = tagOf(ht.object);
+return !p || p.name !== 'Waterplane mask'; });
+if (hit && Math.abs(hit.point.y - line) > worst) {
+worst = Math.abs(hit.point.y - line); at = { u, hit: hit.point.y, line };
+}
+}
+if (worst > 0.65)
+say(v.id, 'a drawn bow off its own recorded sheer line',
+`ray at u ${at.u} lands ${at.hit.toFixed(2)} m where the record's sheer `
++ `line runs ${at.line.toFixed(2)} m (bowTopM ${H.bowTopM})`);
+}
+}
 (H.masts || []).forEach((mk, i) => {
 if (mk.truckM === undefined || mk.rig !== 'square') return;
 const mt = (H.__mastTops || []).find(t => Math.abs(t.u - mk.at) < 0.02);

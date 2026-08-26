@@ -1,0 +1,12 @@
+Azzam   record: LOA 180.6 m  LWL 172 m  beam 20.8 m  draught 4.3 m
+  model extent   x   -94.60 ..   +86.03   =  180.63 m   (record LOA 180.6)   Δ +0.03 m
+  model height   y    -4.56 ..   +37.50   =   42.06 m   above water 37.50 m
+  model breadth  z         ..   +10.40   =   20.80 m   (record beam 20.8)   Δ +0.00 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Planking                    -0.050   1.000  180.60   -4.30    9.00  10.40
+  Weather deck — laid teak    -0.050   1.000  180.60    2.10    9.36  10.40
+  Stem                        -0.050   0.103   26.23   -4.30    8.20   0.57
+  Keel                         0.000   1.000  172.00   -4.56   -3.43   0.57
+  Rail                         0.031   0.273   41.65    8.35    9.11   9.80
+  Waterway                     0.031   0.965  160.73    3.29    9.03  10.40

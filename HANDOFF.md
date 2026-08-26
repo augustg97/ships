@@ -10746,3 +10746,74 @@ same hunt this round ran for Azzam works there). (3) The fleet-wide probe sweep 
 remaining hulls by boxy count and name the next class. (4) Preussen mast livery source pass
 (r155). (5) Endurance forecastle still waits on RMG J9266. (6) The degenerate-triangle
 zero-normal class (r156 residue), if it ever shows.
+
+## Round 160 — 2026-08-25 — the bow comes down 3.9 m to where two plates put it
+
+**Queue check first (August's second list worked in full r57, survey carries). Opening full
+64-frame check at HEAD 4a90349: 64/64 within tolerance, 0 BLANK, EXIT:0
+(build/r160-opening-check.txt) — r159's confining pass owned, ship-azzam 0.000, no web edit
+until it exited.**
+
+**THE QUEUE HEAD OPENED AND CLOSED: the Azzam boundary-plate derivation off the pinned Cádiz
+broadside (Research/AZZAM-PLATES.md, r160 section).** Anchors re-read as the r159 note
+demanded, not inherited: stem tip (351, 1709); counter tip (3470, ~1850), proven ship because
+it occludes the quay fence; waterline fitted on the boot-top's bottom edge; **scale 17.27
+px/m** — the note's own ≈17.0 was 1.6% off, which is why it said re-anchor. Region-growing
+segmentation traced the silhouette cleanly against sky, water and trees, and FAILED honestly
+against Cádiz's white city: every exclusion box produced rows pinned at the box's own edge —
+a level "22.5 m crest from u 0.40" that was exactly box C's bottom, a level "16.8 m" that was
+box B's. Those bands were thrown away and read by eye off magnified crops (the r76 method);
+only reads surviving both are claimed. **The law worth keeping: a level line in a derived
+profile that equals an exclusion boundary is the boundary, not the ship — check every
+suspiciously flat read against the mask's own edges before believing it.**
+
+**The finding: sheerBow 3.0 drew a 12.0 m liner's bow on a ship whose stem stands at
+8.05–8.37 m — below her own 9.0 m freeboard.** Cádiz reads the stem head 8.05–8.13, the
+foredeck 8.19–8.38 rising to 8.84 at the house front; the kept r97 Fricke broadside (8.96
+px/m) reads the same stem at 8.37 — two independent plates within 0.3 m. The 1343 fitting-out
+oblique was tried and REJECTED as a witness: with no bow-local scale anchor it reads the same
+stem at ~14 m, the caution its own r159 entry carried, now demonstrated. Her sheer is
+INVERTED: one sweep rising aft into the house — the r132 "one swept form" residual was this
+single number, since `houseRamp` + `tierForeU` (r97) already rake the tier fronts to the
+crest. **freeboard 9.0 and decks 4 CONFIRMED off the plate** (bulwark 8.84±0.2 where the
+house begins; four window bands under the crest) — the hull-to-tier boundary residual closed
+without change. Clean aft reads (cap 9.6–9.75, low stern 3.8–3.9) agree with r98 sternSteps
+to ~0.5 m; aft not re-derived; crest span city-pinned, r97 houseCrest stands.
+
+**The change: `sheerBow 3.0 → −0.8` and the plates' number became a record field, `bowTopM
+8.2`,** with both plates and scales in sheerProvenance (authored by assert-heavy
+build/staging/r160/author-azzam-sheer.py, byte-stable serializer, fleet asserted untouched).
+hull.js unchanged — sheer() already draws what the record says, and sheerBow's only consumer
+is sheer() (checked). Drawn result measured: stem 12.00 → **8.20 m** (bowTopM exactly),
+planking max 12.00 → 9.00, foredeck rail riding the sweep at 8.35–9.11 where the plates read
+the rail 8.5–8.8. Looked at (rule 1): profile_capture starboard — the low stem sweeping up
+into the raked tiers, the plates' own picture.
+
+**Audit: 33/0 with the r160 rule 'a bow the record measured but the sheer ignores' — the r84
+class, BOTH directions.** Arithmetic arm: freeboard + sheerBow must land bowTopM. Ray arm:
+down-rays at u 0.01/0.02/0.03 must meet the loft on the record's sheer line (±0.65 m).
+Injection one (data): sheerBow back to 3.0 → convicted EXACTLY azzam, "draws the stem head at
+12.0 m against the plates' bowTopM 8.2 m". Injection two (code): sheer() clamping negative
+rise to zero — the realistic future bug, someone sanitizing a negative sheer — convicted
+EXACTLY azzam, "ray at u 0.01 lands 9.11 m where the record's sheer line runs 8.24 m"; only
+azzam carries a negative sheerBow, so the conviction is exact by construction. Clean restores
+re-ran 0 both times.
+
+**Frames: ship-azzam 0.228%/0.090 — diff read before accepting: confined to the bow (x
+498–1385), the foredeck dropping to the low sweep, house/crest/stern byte-untouched —
+accepted, re-checked 0.000. Berth neighbours: container 0.003, ever-given 0.010 (their
+documented noise), endurance 0.000, queen-mary-2 0.000, shipwright overview 0.000.** No full
+closing run; the next round's opening full check owns the confirming pass (the standing
+pattern). ⚠ check --frame still WIPES _current — the r156 trap cost one re-capture again.
+
+**Deployed: stamp 1787716462, live verify in the commit.**
+
+**Next, in order:** (1) QM2 aft terraces — "six near-identical full-width steps where the
+real ship has fewer and more varied ones"; the r132 note says the Commons scale drawing is
+the weak link and it wants a photographic aft-quarter plate: run the same hunt that pinned
+Azzam's plates in r159. (2) The fleet-wide probe sweep to rank remaining hulls by boxy count
+and name the next class. (3) Preussen mast livery source pass (r155). (4) Endurance
+forecastle still waits on RMG J9266. (5) The degenerate-triangle zero-normal class (r156
+residue), if it ever shows. (6) Small and stated: Azzam's crest span was not independently
+re-derivable off the Cádiz plate (city-pinned columns) — a clean elevated bow-quarter plate
+would settle houseCrest[0] the same way the Klaus Jordan aerial settled the crest covering.
