@@ -3103,7 +3103,7 @@ uA: uW0, uB: uW1, half: () => whHalf,
 const whH = T.dh * 0.92;
 bg.add(wallLoft(perim(whT), T.top, T.top + whH,
 [0.0, 0.30, 0.33, 0.82, 0.85, 1.0], [0.30, 0.85], paneW * 1.5, 0.30));
-bg.add(roofPlate(whT, T.top + whH));
+bg.add(roofPlate(whT, T.top + whH, roofsBareTop));
 const wingBeam = S.bridgeBeamM || 0;
 for (const sgn of [-1, 1]) {
 const uMid = (uW0 + uW1) / 2;
@@ -3170,7 +3170,7 @@ wg.add(wallLoft(perim(wt, Math.max(0.6, paneW * 0.5)), T.top, T.top + h,
 band ? [0.0, band[0], band[0] + 0.03, band[1] - 0.03, band[1], 1.0]
 : [0.0, 0.5, 1.0],
 band || [2, 3], paneW * 1.3, 0.42));
-wg.add(roofPlate(wt, T.top + h));
+wg.add(roofPlate(wt, T.top + h, roofsBareTop));
 }
 }
 const wTag = tag(wg, 'superstructure', 'Deck works');

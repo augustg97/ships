@@ -10817,3 +10817,77 @@ forecastle still waits on RMG J9266. (5) The degenerate-triangle zero-normal cla
 residue), if it ever shows. (6) Small and stated: Azzam's crest span was not independently
 re-derivable off the Cádiz plate (city-pinned columns) — a clean elevated bow-quarter plate
 would settle houseCrest[0] the same way the Klaus Jordan aerial settled the crest covering.
+
+## Round 161 — 2026-08-25 — the terraces stop wearing plate the plates refute, and the QM2 stern gets its photographs
+
+**Queue check first (August's second list worked in full r57, survey carries). Opening full
+64-frame check at HEAD 84fa2b1: 64/64 within tolerance, 0 BLANK, EXIT:0
+(build/r161-opening-check.txt) — r160's confining pass owned, ship-azzam 0.000, no web edit
+until it exited.**
+
+**THE QUEUE HEAD OPENED: the r132 QM2 aft-terrace residual's plate hunt, run the way r159
+ran Azzam's (Research/QM2-PLATES.md, new; the four plates committed in build/staging/r161/).**
+Pinned with scales per the r96 rule: the 2016-10-01 Commons aerial pair (CC BY-SA 4.0,
+3888 px, ~3.4 px/m at the stern — the elevated aft-quarter the residual asked for), the
+2004-07-20 Hamburg arrival set (Arnold Schott, CC BY-SA 3.0 — elevated astern and quarter,
+AS BUILT), the 2011 Southampton astern plate (CC BY-SA 2.0, 3296 px — quay-level: it sees
+the counter and fantail rail only, every higher terrace hides behind its own set-back), the
+2015 Liverpool aft-quarter rejected as a measuring source for the same reason. The refit
+boundary stated: the June 2016 remastering changed only the top step (deck 13 splash pool
+and Regatta Bar became 30 cabins); every level below is refit-stable.
+
+**Read 1, SETTLED AND CARRIED INTO THE RECORD: every aft terrace is laid decking at both
+ends of the era — the fantail with its pool, the café step, the main-pool terrace, the two
+shallow steps above — and the crest and its works are white coated plate.** The r108
+`roofs: false` rested on "pale coated plate in every photograph"; the 2004 and 2016 plates
+both refute it, and the record's own `deck.provenance` already said "photographs of her
+terraced stern show laid decking there." The change: `deck.roofs false → 'terraces'` (the
+r159 word's second ship), authored by assert-heavy build/staging/r161/author-qm2-roofs.py
+(byte-stable serializer proven first, fleet asserted untouched).
+
+**AND THE AUDIT EARNED ITS KEEP: the first clean run CONVICTED queen-mary-2** — "deck.roofs
+is 'terraces' yet the topmost roof plate (y 51.10) draws in the deck shader". Rule 8, audit
+checked first: the audit was right. r159's change left the wheelhouse and deck-works
+roofPlate call sites passing no `bare` flag, latent until a 'terraces' ship with works
+ABOVE the crest arrived; QM2's above-crest works read white on both aerials. The class fix:
+both call sites (hull.js 5057, 5140) pass `roofsBareTop` — a work standing on the top
+tier's bare roof is as bare as the plate it stands on. `true` ships pass false there, bytes
+unchanged; Azzam returns at `cluster.blockU` before either site and cannot be reached —
+her frame re-checked 0.000, the proof.
+
+**Audit: 33/0. Both r159-rule directions injection-proven, now convicting the CLASS:**
+injection one (`!bare` removed, crest drawn covered) convicted exactly {azzam y 22.50,
+queen-mary-2 y 51.10}; injection two (the word read as `=== true`) convicted exactly
+{azzam "none of 4 roof plates", queen-mary-2 "none of 14"}. Clean restores re-ran 0 both
+times. ⚠ The first restore (`git checkout web/js/hull.js`) also wiped the round's own
+call-site fix — re-applied and re-verified before the closing audit; a restore restores
+everything, including your change.
+
+**Looked at (rule 1): the b=145&l=40&y=25 elevated stern grammar, before/after in
+build/staging/r161/ (look-stern-before.jpg, look-stern-after.png): the cascade flips to
+laid teak, the crest block and funnel casing stay white — the aerial's own colour split.
+Frames: ship-queen-mary-2 0.190%/0.153, diff read before accepting: the stern cascade
+steps and the edge-on tier roof slivers, all else byte-black — accepted, re-checked 0.000.
+Neighbours: ship-azzam 0.000, container 0.003, ever-given 0.010 (their documented noise),
+endurance 0.000, shipwright 0.000.** No full closing run; the next round's opening full
+check owns the confirming pass (the standing pattern).
+
+**Read 2, STRUCTURAL, NOT YET IN THE RECORD — r162's owed measuring round:** the cascade is
+FIVE terraces with the deep ones low and mid (the fantail deepest, the main-pool terrace
+second), not seven near-equal steps; the model's deepest drawn step sits near the top.
+Re-derive `tierAftU` off the 2016 aerial by counting 2.6 m balcony bays on the wing beside
+each terrace (integer counts, ±half a bay per edge); adjacent tiers sharing one real riser
+take the same u — five steps out of eight tiers. Map levels to tiers on the model's own
+tier floors (23.4 + 2.95·i against the 2004 astern stack), not Cunard deck names. Decide
+there whether the drawn form keeps the as-built open top step (the record's year is 2003)
+and say so in the provenance either way.
+
+**Deployed: stamp in the second commit, live verify there.**
+
+**Next, in order:** (1) The r162 measuring round above — tierAftU off the pinned plates.
+(2) Two QM2 geometry residuals the plates name: balcony wings running aft PAST the terrace
+floors (a terrace sits recessed between wings; the model ends the whole tier at one u), and
+curved terrace aft rails with the fantail's outward-leaning windscreen panels (the model
+cuts every tier square). (3) The fleet-wide probe sweep to rank remaining hulls by boxy
+count. (4) Preussen mast livery source pass (r155). (5) Endurance forecastle, waiting on
+RMG J9266. (6) Azzam crest span, waiting on a clean elevated bow-quarter plate.

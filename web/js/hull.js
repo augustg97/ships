@@ -5052,7 +5052,9 @@ function buildSuperstructure(S, group, hullMat) {
   const whH = T.dh * 0.92;
   bg.add(wallLoft(perim(whT), T.top, T.top + whH,
                   [0.0, 0.30, 0.33, 0.82, 0.85, 1.0], [0.30, 0.85], paneW * 1.5, 0.30));
-  bg.add(roofPlate(whT, T.top + whH));
+  /* the wheelhouse stands on the top tier's roof, so under 'terraces' it is as bare as
+     the plate it stands on (r161: QM2's above-crest works read white on both aerials) */
+  bg.add(roofPlate(whT, T.top + whH, roofsBareTop));
   const wingBeam = S.bridgeBeamM || 0;
   for (const sgn of [-1, 1]) {
     const uMid = (uW0 + uW1) / 2;
@@ -5134,7 +5136,8 @@ function buildSuperstructure(S, group, hullMat) {
                         band ? [0.0, band[0], band[0] + 0.03, band[1] - 0.03, band[1], 1.0]
                              : [0.0, 0.5, 1.0],
                         band || [2, 3], paneW * 1.3, 0.42));
-        wg.add(roofPlate(wt, T.top + h));
+        /* deck works stand on the crest too — bare under 'terraces', like the wheelhouse */
+        wg.add(roofPlate(wt, T.top + h, roofsBareTop));
       }
     }
     const wTag = tag(wg, 'superstructure', 'Deck works');
