@@ -4156,6 +4156,21 @@
         if (day.hd !== undefined && !(day.hd >= 0 && day.hd <= 360))
           say(bid, 'a day with an impossible facing',
               `day ${i} ("${day.d}") hd=${day.hd} — an authored fleet heading is a compass bearing`);
+        /* the tidal stream is a VECTOR of the record (round 158, Myeongnyang): a day that
+           states a rate must state a set and vice versa, or the Action would advect every
+           hull in a direction nobody wrote down */
+        if (day.ck !== undefined || day.cs !== undefined)
+          if (!(day.ck >= 0 && day.ck <= 15) || !(day.cs >= 0 && day.cs <= 360))
+            say(bid, 'a stream that is not a vector',
+                `day ${i} ("${day.d}") cs=${day.cs} ck=${day.ck} — a tidal stream is a set ` +
+                '(degrees toward, 0-360) and a rate (knots), both or neither');
+        /* the anchor is the record's own fact (the diary's "dropped anchor"), and it names
+           WHICH fleet lies to it by side — an anchor that names no fleet holds nothing */
+        if (day.anc !== undefined
+            && (!Array.isArray(day.anc) || !day.anc.length
+                || !day.anc.every(a => a === 0 || a === 1)))
+          say(bid, 'an anchor that names no fleet',
+              `day ${i} ("${day.d}") anc=${JSON.stringify(day.anc)} — anc lists the sides (0/1) lying to anchors`);
       });
 
       /* ── A SHORE IS A CHECKED FACT (round 83). ─────────────────────────────────────────
@@ -4271,6 +4286,18 @@
           || SHIPS_BT.btYear(1588) !== '1588')
         say('battle', 'a year that cannot go BC',
             'btYear(-480) must read "480 BC" — Salamis is dated like the vessels are');
+      /* the stream must be a FORCE, not a caption (round 158): if any staged day carries
+         a tidal rate, btFrame must advect through it, and if any day states the anchor
+         fact, btFrame must honour it — else Myeongnyang's tide is prose over still water */
+      const src158 = String(SHIPS_BT.btFrame);
+      if (BATS.some(b => (b.campaign || []).some(dd => dd.ck !== undefined))
+          && !/curMs/.test(src158))
+        say('battle', 'a helm that ignores the stream',
+            'a campaign day carries a tidal rate (ck) but btFrame never reads BT.curMs — the tide would be a caption, not a force');
+      if (BATS.some(b => (b.campaign || []).some(dd => dd.anc !== undefined))
+          && !/anchored|\.anc\b/.test(src158))
+        say('battle', 'an anchor the helm never feels',
+            'a campaign day states the anchor fact (anc) but btFrame never reads it — the anchored fleet would drift on the stream its cable holds');
     }
 
     /* the BOARD must survive a step of every campaign. No baseline frame can name the

@@ -26,6 +26,7 @@ const BT = {
   spec: null, wind: 225, force: 5, smoke: null, sp: [], mats: [],
   land: null, shoreReady: false, shoreFor: null, shoreGrid: null,
   shoreW: 0, shoreH: 0, shoreB: null, dayLonR: 0, dayLatR: 0,
+  curMs: 0, curTo: 0, anc: [],
 };
 
 /* ── ⚠ THE FRAME IS (x = WEST, z = NORTH), RIGHT-HANDED — AND IT USED TO BE A MIRROR ──────
@@ -257,11 +258,21 @@ function btSetDay() {
   /* Beaufort to m/s once per day — v = 0.836·B^1.5, the scale's defining relation — so the
      frame loop hands polarSpeed a true wind speed, not a force number. */
   BT.tws = 0.836 * Math.pow(d.f, 1.5);
+  /* ── THE STREAM IS A FACT OF THE DAY (round 158, Myeongnyang) ──────────────────────
+     A campaign day may carry the tidal stream as data — `cs` the set (degrees toward),
+     `ck` the rate in knots — and btFrame advects every hull that is not lying to an
+     anchor with it. `anc` lists the fleet sides the record says were anchored that day:
+     the diary's "dropped anchor" is what let thirteen hulls with a 2.5-kn oar floor
+     hold their water through a flood no oar could pull against. */
+  BT.curMs = isFinite(d.ck) ? d.ck * KN : 0;
+  BT.curTo = (isFinite(d.cs) ? d.cs : 0) * Math.PI / 180;
+  BT.anc = Array.isArray(d.anc) ? d.anc : [];
   BT.sea.material.uniforms.uWind.value = 2.5 + d.f * 1.9;
   const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   document.getElementById('btDate').textContent = d.d + ' ' + btYear(BT.spec.year);
   document.getElementById('btWind').innerHTML =
-    '<b>' + CARD[Math.round(d.w / 22.5) % 16] + '</b> force ' + d.f;
+    '<b>' + CARD[Math.round(d.w / 22.5) % 16] + '</b> force ' + d.f
+    + (isFinite(d.ck) ? ' · tide ' + d.ck + ' kn ' + CARD[Math.round(d.cs / 22.5) % 16] : '');
   document.getElementById('btText').textContent = d.t;
 
   /* ── WHERE THE OTHER FLEET IS ──────────────────────────────────────────────────────
@@ -280,8 +291,17 @@ function btSetDay() {
      shore mesh and the grounding rule both derive lon/lat from local metres through this. */
   BT.dayLonR = d.lon * Math.PI / 180; BT.dayLatR = d.lat * Math.PI / 180;
   if (BT.land) BT.land.material.uniforms.uDay.value.set(BT.dayLonR, BT.dayLatR);
-  const FL = BT.spec.fleets, gaugeFleet = engSep > 0 ? FL[1] : FL[0];
+  const FL = BT.spec.fleets;
+  let gaugeFleet = engSep > 0 ? FL[1] : FL[0];
   BT.gauge = gaugeFleet.name + ' holds the weather gauge';
+  /* in a tide race the gauge that matters is the STREAM's: it runs with whichever fleet
+     it carries toward its enemy. At Myeongnyang that exchange — flood against ebb — IS
+     the battle, so on a day that states a stream the card states the water, not the wind. */
+  if (BT.curMs > 0) {
+    const withF0 = (-Math.sin(BT.curTo)) * BT.sep.x + Math.cos(BT.curTo) * BT.sep.z > 0;
+    gaugeFleet = withF0 ? FL[0] : FL[1];
+    BT.gauge = 'the tide runs with the ' + gaugeFleet.name;
+  }
   /* the course is the track's own bearing, this day to the next — and on the LAST day the
      previous day to this one, the heading the fleet arrived on. The old fallback was a
      hardcoded 90, east up the Channel, which pointed the Armada at Norway on the one day
@@ -376,6 +396,12 @@ const SHORE_PALS = {
   polder:   { vegLo: [0.238, 0.318, 0.186], vegHi: [0.330, 0.402, 0.226],
               rock: [0.760, 0.755, 0.700], shoreC: [0.695, 0.655, 0.545],
               rockS: [0.18, 0.45], bare: [1e5, 2e5, 0.0], shoreHi: 9.0 },
+  /* the south-west Korean coast in late October: pine over autumn scrub on granite hills
+     wooded to their crests (Jindo's massif tops 480 m — no bare-summit band), grey rock
+     where the ground steepens, and the great tidal flats as a wide mud waterline */
+  mudflat:  { vegLo: [0.242, 0.286, 0.178], vegHi: [0.372, 0.352, 0.226],
+              rock: [0.560, 0.545, 0.500], shoreC: [0.470, 0.430, 0.360],
+              rockS: [0.14, 0.42], bare: [1e5, 2e5, 0.0], shoreHi: 5.0 },
 };
 
 /* ── the shore: a battle that carries a DEM patch gets its coast staged around the fleets ──
@@ -519,21 +545,29 @@ function btFrame(now, dt) {
   const action = !!BT.spec.campaign[BT.day].a && !!BT.spec.powder;
 
   BT.ships.forEach(s => {
+    /* the record can say a fleet lies to its anchors (`anc`, by side): the cable holds
+       her against a stream her own oar floor could not, her way comes off, and she lies
+       as she snapped — bow on the fleet heading, which on a stream day is head to the
+       tide, which at Myeongnyang is toward the enemy. She still fights: the gunfire
+       path below never asks the helm. */
+    const anchored = BT.anc.length > 0 && BT.anc.indexOf(s.side) >= 0;
     /* steer for the station — but the helm knows the gate. If the direct course would make
        no way (a square rig ordered dead upwind), she falls to the nearer beat limb and
        holds it, which is what a helmsman with a station to windward actually does. A hull
        with an oar floor or an engine always makes way, so her helm is never clamped. */
     const dx = s.tx - s.x, dz = s.tz - s.z;
-    let want = Math.atan2(-dx, dz);        // compass bearing of a local vector: x is WEST
-    let rw = (want - fromWind) * 180 / Math.PI;
-    while (rw > 180) rw -= 360;
-    while (rw < -180) rw += 360;
-    if (polarSpeed(s.P, BT.tws, rw) <= 0)
-      want = fromWind + (rw < 0 ? -1 : 1) * polarBeat(s.P, BT.tws) * Math.PI / 180;
-    let e = want - s.hd;
-    while (e > Math.PI) e -= 2 * Math.PI;
-    while (e < -Math.PI) e += 2 * Math.PI;
-    s.hd += Math.max(-0.30 * dt, Math.min(0.30 * dt, e));   // a ship does not turn on a pin
+    if (!anchored) {
+      let want = Math.atan2(-dx, dz);      // compass bearing of a local vector: x is WEST
+      let rw = (want - fromWind) * 180 / Math.PI;
+      while (rw > 180) rw -= 360;
+      while (rw < -180) rw += 360;
+      if (polarSpeed(s.P, BT.tws, rw) <= 0)
+        want = fromWind + (rw < 0 ? -1 : 1) * polarBeat(s.P, BT.tws) * Math.PI / 180;
+      let e = want - s.hd;
+      while (e > Math.PI) e -= 2 * Math.PI;
+      while (e < -Math.PI) e += 2 * Math.PI;
+      s.hd += Math.max(-0.30 * dt, Math.min(0.30 * dt, e)); // a ship does not turn on a pin
+    }
 
     /* ── SPEED FROM THE POLAR — THE ROUTER'S OWN ──────────────────────────────────
        The angle that matters is between the ship's HEAD and where the wind comes FROM.
@@ -541,16 +575,24 @@ function btFrame(now, dt) {
     let rel = (s.hd - fromWind) * 180 / Math.PI;
     while (rel > 180) rel -= 360;
     while (rel < -180) rel += 360;
-    const kn = polarSpeed(s.P, BT.tws, rel);
-    s.spd += (kn * KN - s.spd) * Math.min(1, dt * 0.4);
-    const dist = Math.hypot(dx, dz);
-    const drive = dist < 40 ? dist / 40 : 1;
-    const nx = s.x - Math.sin(s.hd) * s.spd * drive * dt;
-    const nz = s.z + Math.cos(s.hd) * s.spd * drive * dt;
-    /* a hull does not sail up a hillside: a step that would ground is refused, and she lies
-       at the water's edge with her way coming off — the shore is a fact the helm obeys */
-    if (!BT.shoreGrid || btElevLocal(nx, nz) <= -2.0) { s.x = nx; s.z = nz; }
-    else s.spd *= 0.85;
+    if (anchored) {
+      s.spd += (0 - s.spd) * Math.min(1, dt * 0.6);
+    } else {
+      const kn = polarSpeed(s.P, BT.tws, rel);
+      s.spd += (kn * KN - s.spd) * Math.min(1, dt * 0.4);
+      const dist = Math.hypot(dx, dz);
+      const drive = dist < 40 ? dist / 40 : 1;
+      /* ── OVER THE GROUND IS THROUGH THE WATER PLUS THE STREAM (round 158) ─────────
+         The day's tide advects every hull not holding to an anchor. At Myeongnyang the
+         staged ebb outruns the sekibune's own oar floor, so the record's stern-first
+         drift back through the strait is arithmetic here, not animation. */
+      const nx = s.x - Math.sin(s.hd) * s.spd * drive * dt - Math.sin(BT.curTo) * BT.curMs * dt;
+      const nz = s.z + Math.cos(s.hd) * s.spd * drive * dt + Math.cos(BT.curTo) * BT.curMs * dt;
+      /* a hull does not sail up a hillside: a step that would ground is refused, and she lies
+         at the water's edge with her way coming off — the shore is a fact the helm obeys */
+      if (!BT.shoreGrid || btElevLocal(nx, nz) <= -2.0) { s.x = nx; s.z = nz; }
+      else s.spd *= 0.85;
+    }
 
     const o = s.obj;
     o.position.set(s.x, 0, s.z);

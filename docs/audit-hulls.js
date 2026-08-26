@@ -2894,6 +2894,16 @@ say(bid, 'an action flag that is not a flag', `day ${i} ("${day.d}") a=${day.a}`
 if (day.hd !== undefined && !(day.hd >= 0 && day.hd <= 360))
 say(bid, 'a day with an impossible facing',
 `day ${i} ("${day.d}") hd=${day.hd} — an authored fleet heading is a compass bearing`);
+if (day.ck !== undefined || day.cs !== undefined)
+if (!(day.ck >= 0 && day.ck <= 15) || !(day.cs >= 0 && day.cs <= 360))
+say(bid, 'a stream that is not a vector',
+`day ${i} ("${day.d}") cs=${day.cs} ck=${day.ck} — a tidal stream is a set ` +
+'(degrees toward, 0-360) and a rate (knots), both or neither');
+if (day.anc !== undefined
+&& (!Array.isArray(day.anc) || !day.anc.length
+|| !day.anc.every(a => a === 0 || a === 1)))
+say(bid, 'an anchor that names no fleet',
+`day ${i} ("${day.d}") anc=${JSON.stringify(day.anc)} — anc lists the sides (0/1) lying to anchors`);
 });
 if (b.shore) {
 const sh = b.shore;
@@ -2976,6 +2986,15 @@ if (typeof SHIPS_BT.btYear !== 'function' || SHIPS_BT.btYear(-480) !== '480 BC'
 || SHIPS_BT.btYear(1588) !== '1588')
 say('battle', 'a year that cannot go BC',
 'btYear(-480) must read "480 BC" — Salamis is dated like the vessels are');
+const src158 = String(SHIPS_BT.btFrame);
+if (BATS.some(b => (b.campaign || []).some(dd => dd.ck !== undefined))
+&& !/curMs/.test(src158))
+say('battle', 'a helm that ignores the stream',
+'a campaign day carries a tidal rate (ck) but btFrame never reads BT.curMs — the tide would be a caption, not a force');
+if (BATS.some(b => (b.campaign || []).some(dd => dd.anc !== undefined))
+&& !/anchored|\.anc\b/.test(src158))
+say('battle', 'an anchor the helm never feels',
+'a campaign day states the anchor fact (anc) but btFrame never reads it — the anchored fleet would drift on the stream its cable holds');
 }
 if (typeof startCampaign === 'function' && typeof stepCampaign === 'function'
 && typeof clearCampaign === 'function') {

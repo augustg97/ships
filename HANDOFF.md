@@ -10569,3 +10569,110 @@ fleet-wide probe sweep to rank remaining hulls by boxy count and name the next c
 (3) Preussen mast livery source pass (r155 candidate). (4) The degenerate-triangle
 zero-normal class (r156 residue), if it ever shows in a render. The canoe floor frame
 and the under-gate residue class LEAVE the list, both closed this round.
+
+## Round 158 — 2026-08-25 — Myeongnyang is staged, and the tide becomes a force
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey
+carried — the queue head from r157, the myeongnyang Action staging as a FULL round, is
+CLOSED this round.** The Action's third campaign, the second galley action, and the
+first battle in the model decided by the water itself.
+
+**Opening full 63-frame check at HEAD: 63/63 within tolerance, 0 BLANK, EXIT:0
+(build/r158-opening-check.txt), nothing else rendering; no web/ edit landed until it
+exited (the r156 law, held deliberately — the DEM bake, the research note and the
+author script were written while it ran, none of them served).**
+
+**The record (Research/MYEONGNYANG.md, new).** Nanjung Ilgi for the 16th day of the 9th
+month, the Tōdō clan record and Hawley, read this round: 13 panokseon anchored across
+the basin north of the neck; the sekibune vanguard under Kurushima Michifusa (the
+atakebune could not work the strait — the Japanese record's own composition); the
+flagship alone with Kim Ŏkch'u one to two majang back; An Wi and Kim Ŭngham called up
+by flag; the tide turned about midday; 31 ships rammed open on the ebb; Kurushima's
+body recognised by the defector Junsa. The wind is staged as light NW and MYEONGNYANG.md
+says it is an inference — the diary attests only the evening head-wind on a north-west
+withdrawal; both fleets fought under oar and the polars are nearly wind-blind. Not
+staged, with reasons in the note: the iron chain (not in the record), the atakebune
+(kept out by the Tōdō record), the 32 scouting craft, and any clock-times for the tide
+(the reconstructions disagree; the phases carry the diary's sequence).
+
+**The DEM: web/data/terrain/myeongnyang.png (2292×1889, 20 m/px, terrarium z13),
+baked with Research/bake-shore.py — the tool's own docstring named this coast next.**
+The raster's strait is OPEN: a connected water channel from the sound south-east of
+the neck through Uldolmok to the Usuyeong basin, verified by flood-fill inside the
+neck box (N edge to S edge, one component). It pinches to ~120–260 m against the
+surveyed 293 — the south-west coast's tidal flats read as land — and the ASSETS.json
+entry and the shore cite both say so. Every campaign anchor and every probe was picked
+OFF THE RASTER (build/staging/r158/pick-anchors.py): nearest cell with a 3×3
+neighborhood entirely below −2 m (water) or above +15 m (land), re-read through
+btShoreElev's own bilinear formula before shipping. My first guessed coordinates put
+the fight's water on +6 m of Haenam — the raster corrected the map in my head, which
+is what it is for.
+
+**The mechanism: a campaign day may now carry the tidal stream as data — `cs` (set,
+degrees toward), `ck` (rate, knots) — and `anc`, the sides lying to anchors.** In
+battle.js btFrame, speed over the ground is speed through the water plus the stream:
+every unanchored hull advects with the day's tide; an anchored hull's way comes off
+and her cable holds her (the diary's "dropped anchor" is what let 13 hulls with a
+2.5-kn oar floor hold their water through a 3.5-kn flood). The sweep-back is
+ARITHMETIC, not animation: polarSpeed gives a sekibune pulling into the NW wind
+2.6 kn through the water against a 4-kn ebb — she loses 1.4 kn over the ground,
+stern-first, which is the record's own picture of the afternoon. The card states the
+water: the wind line gains "· tide 4 kn SE", and on a stream day the gauge line reads
+"the tide runs with the Korean fleet"/"…the Japanese vanguard" — computed from the
+same sep geometry the views share, flood against ebb, which IS this battle's weather
+gauge. Armada, Salamis and Lepanto carry no stream fields and are byte-untouched by
+every one of these paths (the default `action` frame — the Armada — scored 0.000 in
+the closing run's own capture, hand-diffed; the other three are classified below when
+the run lands).
+
+**The staging (Research/author-myeongnyang-r158.py, the r80 author-script pattern):**
+eight phases, 13 panokseon in a single 800 m line abreast (rows 1 — the record's own
+countable number, drawn at true scale) against 31 sekibune (the diary's rammed-open
+count; the 133 warships live in the prose) in a deep column, front 240, eight rows.
+Both fleets furled — each rigNote already said the canvas was struck for action.
+`hd: 140` on the fight phases: the anchored line lies head to the flood, which is
+head to the neck, which is head to the enemy — the anchor and the tide point the line
+without inventing a facing. Asserted before writing: gauge sign stable on every phase;
+every stream set on the channel's own axis (320 flood / 140 ebb ±25°); every flood
+that beats the panokseon floor carries the anchor fact; the peak ebb beats the
+sekibune floor; every probe correct through the app's own bilinear read; every day
+anchored in water; and EVERY STATION of both fleets afloat on every phase, laid by
+formStation and pulled back by btPlace's own shore rule, mirrored exactly. The
+station assert earned its keep immediately: rng 200 and 250 put the melee origin on a
+sub-2-m drying flat 50–250 m south-east of the line (the basin is laced with them);
+the staged ranges moved to 300+ where the water is, and the picture keeps the flats
+as what they are — ground the fight bent around.
+
+**Audit: 33 hulls, 0 problems, with three NEW rules — 'a stream that is not a
+vector', 'an anchor that names no fleet', 'a helm that ignores the stream/anchor'
+(source checks on btFrame, the r84 wired-to-nothing lesson applied in advance).
+Injection proof: probe flipped to land + cs deleted + anc=[7] convicted EXACTLY three
+problems with the right rules and details, nothing else fired, clean restore re-ran
+0 (build/staging/r158/battles-good.json was the restore source).**
+
+**Looked at (rule 1), five captures in build/staging/r158/look-*.png before any
+baseline was chosen: the strait winds SE between the banks and both fleets read as
+fleets; the card carries the tide; the low view puts sekibune at true scale against
+the Jindo hills with the mud waterline behind.** Rule 0, answered in writing: it
+reads as a rendered world; a viewer can name (1) the anchored line abreast facing a
+crowd of attackers at a drying bank's edge, (2) the channel narrowing to a neck
+between green hills, (3) the tide's rate, direction and which fleet it runs with,
+off the card. NEW baseline `action-myeongnyang` added to frames.json (64 frames now):
+day 3, mid-morning — the flood crush, the tide with the Japanese, the strait behind.
+The closing 64-frame run was still capturing at the round's first commit (the 80-min
+loop kill was closing in); the first 42 captures were hand-diffed against their
+baselines — every one ≤0.046% with `action` at 0.000 — and the acceptance of the new
+frame plus the classification of the remaining frames follows in the same round's
+second commit if the run outruns the kill, else at the next round's opening check.
+
+**Deployed: stamp 1787706759, live verify in the commit.**
+
+**Next, in order:** (1) The remaining r143 standing residuals — Azzam crest +
+boundary plate, QM2 aft terraces, Endurance forecastle (waits on RMG J9266), the
+battle-rig record question. (2) The fleet-wide probe sweep to rank remaining hulls by
+boxy count and name the next class. (3) Preussen mast livery source pass (r155).
+(4) The degenerate-triangle zero-normal class (r156 residue), if it ever shows.
+(5) Myeongnyang residue, small and stated: the race itself is not drawn on the sea
+surface (the shader has no stream term — the tide is a force on hulls and a fact on
+the card, not yet a texture), and the live slideshow's day transitions move anchored
+fleets between anchors by sailing them, the slideshow's own abstraction.

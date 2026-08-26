@@ -608,6 +608,14 @@
    "files": [
     "web/data/assets/ships/sekibune.jpg"
    ]
+  },
+  {
+   "path": "web/data/terrain/myeongnyang.png",
+   "what": "Elevation patch for the Myeongnyang Strait (Uldolmok) - Jindo, the Haenam peninsula, the Usuyeong basin, Byeokpajin and the sound toward Eoranjin (lon 126.10-126.60, lat 34.38-34.72, 2292x1889, 20 m/px), 16-bit metres in the app's own (elev+11000)/20000 R/G encoding",
+   "source": "Terrain Tiles on AWS (Mapzen 'terrarium' tiles, zoom 13, tiles x6965-6976 y3252-3261), an AWS Open Data set; land heights from SRTM, offshore from ETOPO1",
+   "license": "Public domain / open data per the Terrain Tiles on AWS usage terms; the underlying SRTM is US government public domain",
+   "fetched": "2026-08-25",
+   "treatment": "Mercator tiles mosaicked and resampled to an equirectangular grid; water cells (elev <= 0) floored to -8 m because the raster's nearshore bathymetry gap encodes harbour water as 0 m and a 0 m seabed breaks the rendered sea surface; 165,265 land cells in components never reaching 2 m despeckled to -8 m (the south-west coast's tidal-flat noise). The flats that survive read as land and pinch the drawn neck to ~120-260 m against the surveyed 293 m; the coastline - the 0-crossing - is the raster's own."
   }
  ]
 }

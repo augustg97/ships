@@ -5,6 +5,7 @@ ships: [], day: 0, t: 0, playing: true, lon: 0.6, lat: 0.10, dist: 900, eye: 26,
 spec: null, wind: 225, force: 5, smoke: null, sp: [], mats: [],
 land: null, shoreReady: false, shoreFor: null, shoreGrid: null,
 shoreW: 0, shoreH: 0, shoreB: null, dayLonR: 0, dayLatR: 0,
+curMs: 0, curTo: 0, anc: [],
 };
 function btInit() {
 if (BT.renderer) return;
@@ -142,19 +143,29 @@ function btSetDay() {
 const C = BT.spec.campaign, d = C[BT.day];
 BT.wind = d.w; BT.force = d.f;
 BT.tws = 0.836 * Math.pow(d.f, 1.5);
+BT.curMs = isFinite(d.ck) ? d.ck * KN : 0;
+BT.curTo = (isFinite(d.cs) ? d.cs : 0) * Math.PI / 180;
+BT.anc = Array.isArray(d.anc) ? d.anc : [];
 BT.sea.material.uniforms.uWind.value = 2.5 + d.f * 1.9;
 const CARD = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 document.getElementById('btDate').textContent = d.d + ' ' + btYear(BT.spec.year);
 document.getElementById('btWind').innerHTML =
-'<b>' + CARD[Math.round(d.w / 22.5) % 16] + '</b> force ' + d.f;
+'<b>' + CARD[Math.round(d.w / 22.5) % 16] + '</b> force ' + d.f
++ (isFinite(d.ck) ? ' · tide ' + d.ck + ' kn ' + CARD[Math.round(d.cs / 22.5) % 16] : '');
 document.getElementById('btText').textContent = d.t;
 const toWind = (d.w) * Math.PI / 180;
 const engSep = lonLatUpwind(d);
 BT.sep = { x: -Math.sin(toWind) * d.rng * engSep, z: Math.cos(toWind) * d.rng * engSep };
 BT.dayLonR = d.lon * Math.PI / 180; BT.dayLatR = d.lat * Math.PI / 180;
 if (BT.land) BT.land.material.uniforms.uDay.value.set(BT.dayLonR, BT.dayLatR);
-const FL = BT.spec.fleets, gaugeFleet = engSep > 0 ? FL[1] : FL[0];
+const FL = BT.spec.fleets;
+let gaugeFleet = engSep > 0 ? FL[1] : FL[0];
 BT.gauge = gaugeFleet.name + ' holds the weather gauge';
+if (BT.curMs > 0) {
+const withF0 = (-Math.sin(BT.curTo)) * BT.sep.x + Math.cos(BT.curTo) * BT.sep.z > 0;
+gaugeFleet = withF0 ? FL[0] : FL[1];
+BT.gauge = 'the tide runs with the ' + gaugeFleet.name;
+}
 BT.fleetHd = 90;
 if (isFinite(d.hd)) BT.fleetHd = d.hd;
 else if (C.length > 1) {
@@ -214,6 +225,9 @@ rockS: [0.10, 0.38], bare: [220, 420, 0.4], shoreHi: 4.0 },
 polder:   { vegLo: [0.238, 0.318, 0.186], vegHi: [0.330, 0.402, 0.226],
 rock: [0.760, 0.755, 0.700], shoreC: [0.695, 0.655, 0.545],
 rockS: [0.18, 0.45], bare: [1e5, 2e5, 0.0], shoreHi: 9.0 },
+mudflat:  { vegLo: [0.242, 0.286, 0.178], vegHi: [0.372, 0.352, 0.226],
+rock: [0.560, 0.545, 0.500], shoreC: [0.470, 0.430, 0.360],
+rockS: [0.14, 0.42], bare: [1e5, 2e5, 0.0], shoreHi: 5.0 },
 };
 function btShoreLoad(battle) {
 const sh = battle.shore;
@@ -312,7 +326,9 @@ const windTo = (BT.wind + 180) * Math.PI / 180;
 const fromWind = windTo + Math.PI;
 const action = !!BT.spec.campaign[BT.day].a && !!BT.spec.powder;
 BT.ships.forEach(s => {
+const anchored = BT.anc.length > 0 && BT.anc.indexOf(s.side) >= 0;
 const dx = s.tx - s.x, dz = s.tz - s.z;
+if (!anchored) {
 let want = Math.atan2(-dx, dz);
 let rw = (want - fromWind) * 180 / Math.PI;
 while (rw > 180) rw -= 360;
@@ -323,17 +339,22 @@ let e = want - s.hd;
 while (e > Math.PI) e -= 2 * Math.PI;
 while (e < -Math.PI) e += 2 * Math.PI;
 s.hd += Math.max(-0.30 * dt, Math.min(0.30 * dt, e));
+}
 let rel = (s.hd - fromWind) * 180 / Math.PI;
 while (rel > 180) rel -= 360;
 while (rel < -180) rel += 360;
+if (anchored) {
+s.spd += (0 - s.spd) * Math.min(1, dt * 0.6);
+} else {
 const kn = polarSpeed(s.P, BT.tws, rel);
 s.spd += (kn * KN - s.spd) * Math.min(1, dt * 0.4);
 const dist = Math.hypot(dx, dz);
 const drive = dist < 40 ? dist / 40 : 1;
-const nx = s.x - Math.sin(s.hd) * s.spd * drive * dt;
-const nz = s.z + Math.cos(s.hd) * s.spd * drive * dt;
+const nx = s.x - Math.sin(s.hd) * s.spd * drive * dt - Math.sin(BT.curTo) * BT.curMs * dt;
+const nz = s.z + Math.cos(s.hd) * s.spd * drive * dt + Math.cos(BT.curTo) * BT.curMs * dt;
 if (!BT.shoreGrid || btElevLocal(nx, nz) <= -2.0) { s.x = nx; s.z = nz; }
 else s.spd *= 0.85;
+}
 const o = s.obj;
 o.position.set(s.x, 0, s.z);
 o.rotation.set(0, -s.hd, 0);
