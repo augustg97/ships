@@ -2797,8 +2797,6 @@ const tiers = [];
 const ns = S.shellTiers || 0;
 const recessTier = (S.boatsRecessed && S.boats) ? ns : -1;
 const taper = S.houseTaper !== undefined ? S.houseTaper : 0.16;
-const overCounter = hB > 1.0
-|| Object.values(S.tierAftU || {}).some(p => p > 1.0);
 const qAtX = (x) => {
 if (x <= -0.5 * L + H.rake(0)) return 0;
 if (x >= 0.5 * L + H.rake(1)) return 1;
@@ -2816,8 +2814,7 @@ const ins = shell ? B * 0.015 : (taper < 0.06 ? B * 0.015 : inset);
 const f = n > 1 ? i / (n - 1) : 0;
 const uA = foreAt(i), uB = aftAt(i);
 const half = (u) => {
-const uu = overCounter ? qAtX((u - 0.5) * L)
-: Math.max(0.001, Math.min(0.999, u));
+const uu = qAtX((u - 0.5) * L);
 return Math.max(B * 0.06, Math.min(wid / 2,
 Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
 };

@@ -553,6 +553,82 @@ say(v.id, 'a bulge nobody attested',
 }
 }
 }
+if (H.decks && H.lwl && !H.turrets && !H.flightDeck && g) {
+const n7 = H.decks, B7 = H.beam || 10, L7 = H.lwl;
+const HS7 = SHIPS_HULL.hullSurface(H);
+const base7 = H.freeboard || 0,
+dh7 = H.deckM || Math.min(B7 * 0.105, 3.0);
+const fl7 = i => (i <= 0) ? base7
+: (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+: base7 + dh7 * i;
+const qAtX7 = (x) => {
+if (x <= -0.5 * L7 + HS7.rake(0)) return 0;
+if (x >= 0.5 * L7 + HS7.rake(1)) return 1;
+let lo = 0, hi = 1;
+for (let it = 0; it < 32; it++) {
+const q = (lo + hi) / 2;
+if ((q - 0.5) * L7 + HS7.rake(q) < x) lo = q; else hi = q;
+}
+return (lo + hi) / 2;
+};
+const shellTrue7 = x => Math.abs(SHIPS_HULL.surfacePoint(H, HS7, qAtX7(x), 1.0)[2]);
+const shellOld7 = u => Math.abs(SHIPS_HULL.surfacePoint(H, HS7,
+Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
+const ns7 = H.shellTiers || 0,
+taper7 = H.houseTaper !== undefined ? H.houseTaper : 0.16;
+const predHalf = (i, x) => {
+const sh = i < ns7;
+const wid = sh ? B7 : B7 * (1 - taper7 * (0.5 + i / n7));
+const ins = sh ? B7 * 0.015 : (taper7 < 0.06 ? B7 * 0.015 : B7 * 0.055);
+return Math.max(B7 * 0.06, Math.min(wid / 2, shellTrue7(x) - ins));
+};
+const T7 = SHIPS_HULL.linerHouse(H);
+let pick = null;
+for (let i = 0; i < T7.tiers.length; i++) {
+const t = T7.tiers[i];
+for (const [u7, dir7] of [[t.uA, 1], [t.uB, -1]]) {
+const x7 = (u7 - 0.5) * L7, q7 = qAtX7(x7);
+if (q7 > 0 && q7 < 1
+&& Math.abs((q7 - 0.5) * L7 + HS7.rake(q7) - x7) > 0.02)
+say(v.id, 'a station inversion the loft cannot trust',
+`tier ${i} edge u ${u7.toFixed(4)}: bisection returns q ${q7.toFixed(5)} `
++ `whose x misses the target by more than 2 cm`);
+const bias7 = shellTrue7(x7) - shellOld7(u7);
+if (!pick || Math.abs(bias7) > Math.abs(pick.bias))
+pick = { i, u: u7, dir: dir7, bias: bias7 };
+}
+}
+if (pick && Math.abs(pick.bias) > 0.5) {
+const rc7 = new THREE.Raycaster();
+const drop7 = (x, z) => {
+rc7.set(new THREE.Vector3(x, 90, z), new THREE.Vector3(0, -1, 0));
+const hit = rc7.intersectObject(g, true)
+.find(ht => { for (let e = ht.object; e; e = e.parent)
+if (e.visible === false) return false;
+const p = tagOf(ht.object);
+return !p || p.name !== 'Waterplane mask'; });
+return hit ? hit.point.y : -1;
+};
+const xP = (pick.u - 0.5) * L7 + pick.dir * 1.2;
+const wall7 = predHalf(pick.i, xP), roof7 = fl7(pick.i + 1);
+const inn = Math.min(drop7(xP, wall7 - 0.35), drop7(xP, -(wall7 - 0.35)));
+if (inn < roof7 - 0.5)
+say(v.id, 'a wall sized off a station it does not stand at',
+`tier ${pick.i} edge u ${pick.u.toFixed(3)} carries ${pick.bias.toFixed(2)} m `
++ `of rake bias, yet the ray one margin inside the true wall at x `
++ `${xP.toFixed(1)} lands ${inn.toFixed(2)} m where the tier roof runs `
++ `${roof7.toFixed(2)} m`);
+for (const sgn of [1, -1]) {
+const outs = Math.min(...[xP - 2, xP, xP + 2]
+.map(xx => drop7(xx, sgn * (predHalf(pick.i, xx) + 0.6))));
+if (outs > roof7 - 0.5)
+say(v.id, 'a wall standing outside the shell station that sizes it',
+`tier ${pick.i} edge u ${pick.u.toFixed(3)}: rays just outside the `
++ `predicted wall land ${outs.toFixed(2)} m, at the tier's own roof `
++ `height ${roof7.toFixed(2)} m`);
+}
+}
+}
 {
 const strips = [];
 g.traverse(o => { if (o.isMesh && o.name === 'sternLivery') strips.push(o); });

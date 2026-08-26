@@ -11304,3 +11304,88 @@ fantail gallery's wing walls draw in the boat-gallery tier's dark recess treatme
 the plates read white glazing — a colour class on tier 2's stern portion. (8) Small, new:
 the drawn screen's glass reads sun-bright pale over the dark hull where plate 3 reads it
 sky-translucent — a material nuance below the round's bar, named so it is not laundered.
+
+## Round 167 — 2026-08-26 — the fleet rides its own stations: the no-rake sampling residual closes
+
+**The queue head (r163's fleet-wide no-rake tier sampling) OPENED AND CLOSED, measured first.
+linerHouse half() sampled the shell at u as if x were (u−0.5)·lwl and clamped 0.999 — r163
+fixed it only where a pin crosses the perpendicular (queen-mary-2); every other decks hull
+kept the old sampling. A new instrument (build/staging/r167/measure-norake.py) measured the
+bias per ship, per tier, at 241 stations a tier plus the edge marks, BEFORE any edit
+(bias-before.json): nil where the house sits inboard of the rake spans (azzam 0.000, steamer
+0.000), sub-metre where a tier edge enters one — titanic +0.054 m at her aft corner u 0.849,
+great-eastern +0.081 m at u 0.900, the warship bow tiers +0.222/+0.230/+0.309 m
+(yamato/dreadnought/carrier, consumed only by fittings and boats since turret and
+flight-deck hulls draw no house walls), queen-mary-2 1.673 m at u 0.079 — the bias her r163
+gate already corrects. Exactly the r163 residual's own prediction: nil outside, sub-metre
+inside.**
+
+**The change (hull.js): half() now inverts the true deck-edge x by bisection on EVERY hull —
+the overCounter gate is deleted, the fleet rides one sampling. The instrument re-run on the
+new code (bias-after.json) confirms the applied deltas equal the predicted bias to the
+millimetre, and queen-mary-2, azzam and steamer read +0.000 — her gated path was already the
+unconditional one, so removing the gate moves nothing on her.**
+
+**Audit: 33/0 clean twice (build/staging/r167/audit-clean.json, audit-clean-final.json). The
+r167 rule — 'a wall sized off a station it does not stand at' — three arms, own block, gated
+on a drawn house (decks, no turrets, no flight deck). ARITHMETIC: the audit's re-derived
+bisection must return a q whose x matches the target within 2 cm at every tier edge — a rake
+term bisection cannot invert breaks every derivation downstream. RAYS (gated on predicted
+bias over 0.5 m at some tier edge, so a hull whose house never enters a rake span is never
+probed): a down-ray one margin inside the PREDICTED wall at the biased edge must meet the
+tier's roof. COUNTER: rays just outside the predicted wall at three x-stations (min per
+side, so a davit or boat cannot false-convict) must NOT land at roof height. Injections:
+(a) builder severed (the no-rake line restored verbatim) convicted EXACTLY queen-mary-2, 1
+problem — the ray inside her true wall falling to the foredeck; (b) titanic's houseAt[1]
+dragged 0.849→0.965 into her stern rake span under the HEALTHY builder: CLEAN — the rule
+follows the record wherever it goes, because the builder now draws it truly; the same drag
+under the severed builder convicted EXACTLY {titanic, queen-mary-2} — titanic '0.57 m of
+rake bias' at the dragged edge — the fleet arm live beyond the ship it was born on. Builder
+and record restored, record byte-compared (cmp) against the pre-drag copy, final audit
+33/0.**
+
+**Frames, with the timing stated so nothing is laundered. The opening 64-frame check
+(build/r167-opening-check.txt, started 04:22) overlapped the round: hull.js edited 04:29:05,
+builder severed for injection ~04:35:10–04:38:42, record dragged 04:37–04:38. Frames
+captured before 04:29:05 — the globes, action, shipwright, ship-great-eastern 04:28:14 —
+own r166's confirming pass in pure r166 state; 63 of 64 read within tolerance, 0 BLANK. The
+one mover, ship-queen-mary-2 0.995%/0.663 captured 04:33:36 UNDER THE ROUND'S OWN NEW CODE
+but concurrent with the audit-clean browser (04:33–04:34:54), showed the whole balcony
+lattice lit sub-pixel in the diff; the solo re-check on the identical final code with
+nothing else running reads 0.017%/0.015 — byte-for-byte r166's documented under-floor
+residual (the t7 arc + fantail screen). Same code, two captures, two numbers: a capture
+flap under GPU contention, not a change — the frozen-capture determinism holds only when
+the harness has the machine to itself, which joins the documented flap class. Every
+decks-carrying hull was then re-checked SOLO on the FINAL code after all restores:
+queen-mary-2 0.017 (documented, under floor), titanic ok (its opening capture 04:43:09
+already post-restore final code), steamer 0.018 and yamato 0.017 (under floor, the noise
+band), dreadnought 0.000, carrier 0.000 — and great-eastern 0.072%/0.025, the round's ONE
+real mover past the floor: her aft house corner widening the measured +0.081 m,
+re-stationing the house edge, rails and roof. Diff read (house-edge and fitting AA, all
+else black), accepted with the full reason, re-checked 0.000.**
+
+**Looked at (rule 1, rule 0 answered on the round's one visible mover): the
+ship-great-eastern frame reads as a rendered world, not a chart. Three facts a viewer can
+read off it: she carries a paddle wheel amidships AND canvas bent on six masts — the card's
+'paddle, screw and six masts'; the black iron hull carries its rows of oval ports under a
+white deckhouse; the fleet strip runs Sekibune 25 m to Container 400 m with Great Eastern
+lit at 211 m.**
+
+**Procedural, honestly named: the first inject-b attempt re-dumped vessels.json whole
+(json.dump, reformatting every line) and the audit page timed out under the concurrent
+frame harness; the record was restored byte-exact and the drag redone as a surgical
+byte-level replace, which ran clean. And the injection windows overlapped the opening
+check's tail — three ship frames photographed the severed builder (which IS the old
+sampling, so their pixels are r166 state, and all three were re-proven solo on final code
+above). A round that runs injections while its own opening check is still capturing should
+sever AFTER the check exits; the solo re-checks closed the gap this time.**
+
+**Deployed: data-version 1787746409; live verify follows the push.**
+
+**Named residuals, in order:** (1) The fleet-wide probe sweep to rank remaining hulls by
+boxy count. (2) Preussen mast livery source pass (r155). (3) Endurance forecastle, waiting
+on RMG J9266. (4) Azzam crest span, waiting on a clean elevated bow-quarter plate.
+(5) Small, from r164: the risen black is drawn unpierced where the plates show sparse small
+lights. (6) Small, from r165: the fantail gallery's wing walls draw in the boat-gallery
+tier's dark recess treatment where the plates read white glazing. (7) Small, from r166: the
+drawn screen's glass reads sun-bright pale where plate 3 reads it sky-translucent.

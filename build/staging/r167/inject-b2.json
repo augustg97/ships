@@ -1,0 +1,12 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a wall sized off a station it does not stand at",
+  "detail": "tier 0 edge u 0.965 carries 0.57 m of rake bias, yet the ray one margin inside the true wall at x 119.2 lands 10.44 m where the tier roof runs 13.06 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a wall sized off a station it does not stand at",
+  "detail": "tier 0 edge u 0.079 carries 1.67 m of rake bias, yet the ray one margin inside the true wall at x -132.8 lands 18.04 m where the tier roof runs 19.95 m"
+ }
+]
