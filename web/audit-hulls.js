@@ -3316,6 +3316,39 @@
         say(v.id, 'record is silent on whether the covering reaches the tier roofs',
             'a recorded laid covering, a walkable tier roof cascade, and no roof plate '
             + 'draws in the deck shader');
+
+      /* ── ⚠ A 'terraces' ANSWER THE DRAWING IGNORES (round 159). ────────────────────
+         deck.roofs learned a third value: 'terraces' — the covering reaches the exposed
+         tier terraces but NOT the top tier's roof, which stays coated plate (Azzam: the
+         delivery-trials aerial reads white around the radome pedestals and the mast
+         foot, the teak one level down on the ringing terraces; Research/AZZAM-PLATES.md
+         plate 2). A record field the builder ignores is the r84 class, so the graph is
+         checked in both directions: a covered crest is the word not honoured, and no
+         covered terrace at all is the word read as false. */
+      if ((H.deck || {}).roofs === 'terraces') {
+        const plates = [];
+        g.traverse(o => {
+          if (!o.isMesh || !o.material || !o.geometry) return;
+          const p = tagOf(o);
+          if (!p || p.key !== 'superstructure' || o.geometry.type !== 'ShapeGeometry') return;
+          if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+          plates.push({
+            covered: !!(o.material.isShaderMaterial && o.material.uniforms
+                        && o.material.uniforms.uPlankW),
+            y: o.geometry.boundingBox.max.y });
+        });
+        if (plates.length) {
+          const top = plates.reduce((a, b) => (b.y > a.y ? b : a));
+          if (top.covered)
+            say(v.id, 'the crest roof wears the covering the record keeps off it',
+                `deck.roofs is 'terraces' yet the topmost roof plate (y ${top.y.toFixed(2)}) `
+                + 'draws in the deck shader');
+          if (!plates.some(p2 => p2.covered))
+            say(v.id, "a 'terraces' answer with no terrace drawn in the covering",
+                `deck.roofs is 'terraces' yet none of ${plates.length} roof plates draws `
+                + 'in the deck shader');
+        }
+      }
     }
 
     /* ── THE POLAR IS THE VESSEL'S OWN (round 47). ─────────────────────────────────────

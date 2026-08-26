@@ -1,0 +1,31 @@
+Azzam   record: LOA 180.6 m  LWL 172 m  beam 20.8 m  draught 4.3 m
+  model extent   x   -94.60 ..   +86.03   =  180.63 m   (record LOA 180.6)   Δ +0.03 m
+  model height   y    -4.56 ..   +37.50   =   42.06 m   above water 37.50 m
+  model breadth  z         ..   +10.40   =   20.80 m   (record beam 20.8)   Δ +0.00 m
+
+  part                        u fore   u aft   len m      y0      y1   half
+  Planking                    -0.050   1.000  180.60   -4.30   12.00  10.40
+  Weather deck — laid teak    -0.050   1.000  180.60    2.10   12.06  10.40
+  Stem                        -0.050   0.103   26.23   -4.30   12.00   0.57
+  Keel                         0.000   1.000  172.00   -4.56   -3.43   0.57
+  Rail                         0.031   0.273   41.65    9.33   11.65   9.80
+  Waterway                     0.031   0.965  160.73    3.29   11.48  10.40
+  Superstructure               0.275   0.820   93.82    9.00   23.51  10.09
+  House deck — laid teak       0.349   0.820   81.01   13.50   20.00  10.09
+  Glass sweep                  0.552   0.613   10.56   22.44   23.66   4.08
+  Radome                       0.590   0.743   26.37   20.30   26.80   8.83
+  Radome pedestal              0.595   0.739   24.76   19.75   24.15   7.77
+  Mast block                   0.612   0.681   11.87   22.30   23.50   4.16
+  Signal mast                  0.630   0.651    3.60   23.10   36.20   1.35
+  Spreader platform            0.637   0.648    1.92   25.93   32.57   3.75
+  Aerial dome                  0.643   0.649    1.10   32.55   33.65   1.95
+  Masthead whip                0.649   0.651    0.31   35.90   37.50   0.05
+  Exhaust pipe                 0.687   0.735    8.34   19.54   25.50   0.70
+  Stack casing                 0.704   0.733    4.97   19.63   24.00   1.70
+  Stack fairing                0.708   0.744    6.19   19.75   22.50   5.42
+  Stern terraces               0.820   1.000   30.99    1.80    9.90  10.23
+  Terrace glazing              0.884   0.884    0.00    7.25    8.55   7.18
+  Terrace doors                0.884   0.884    0.00    6.27    8.55   1.45
+  Sternpost                    0.897   1.000   17.63   -3.99    2.10   0.57
+  Terrace stair                0.931   0.985    9.25    2.19    5.99   8.56
+  Rudder                       0.944   0.979    6.02   -4.09   -0.34   0.28

@@ -10676,3 +10676,73 @@ boxy count and name the next class. (3) Preussen mast livery source pass (r155).
 surface (the shader has no stream term — the tide is a force on hulls and a fact on
 the card, not yet a texture), and the live slideshow's day transitions move anchored
 fleets between anchors by sailing them, the slideshow's own abstraction.
+
+## Round 159 — 2026-08-25 — the crest stops wearing teak the plate refutes, and the plates the residual waits on are pinned
+
+**Queue check first (August's second list worked in full r57, survey carries). Two debts
+opened the round: r158's closing run died with its round at 18:40 — build/r158-closing-check.txt
+is the empty file it left — so `action-myeongnyang` sat in frames.json with no committed
+baseline, and the r143 queue head (Azzam crest + boundary plate) stood waiting on plates.**
+
+**Opening full 64-frame check at HEAD d6f4c64: 63/63 within tolerance, 0 BLANK, EXIT:0
+(build/r159-opening-check.txt), no web edit until it exited.** r158's first-42 hand-diff
+confirmed across the whole set. The NEW frame captured on that proven-clean tree, LOOKED AT
+(the anchored line at the neck, the vanguard 350 m off, the card stating tide 3.5 kn NW and
+'the tide runs with the Japanese vanguard'), accepted with the reason in FRAME-LOG,
+re-checked 0.000. First commit (3bb809b) pushed the acceptance immediately — the two-commit
+pattern, insurance against the 80-min kill.
+
+**The plates (Research/AZZAM-PLATES.md, new).** The residual's two halves each get their
+photograph, each with its scale stated per the r96 rule. (1) The boundary-plate half:
+Commons AzzamCadiz.jpg, 3777×2464, CC BY-SA 4.0, in-service starboard broadside at
+**17.0 px/m** — nearly twice the r97 plate every current house span is measured off;
+committed to build/staging/r159/ with the corroborating 1343_Azzam.jpg (16.7 px/m, Bremen
+fitting-out, scaffolding cautioned). **The derivation off it is deliberately NOT done** —
+segmenting both standing extremes at every metre of height is a measuring round of its own.
+(2) The crest half: the Klaus Jordan delivery-trials aerial (Lürssen press 2013, via
+CharterWorld wp-content, 960×640 copy via the Wayback im_ prefix; **press copyright, URL
+recorded, file not committed**), ~4.4 px/m locally at the crest — a colour-FIELD read only,
+and the field is metres wide, so the read holds: **the roof the radome cluster and mast
+stand on is white coated plate; the teak is one level down on the ringing terraces.** Also
+read off it: foredeck teak with the H painted directly on the planks (model already right),
+steel uptakes with no band (r97 re-confirmed).
+
+**The change: `deck.roofs` learned a third answer, 'terraces'** — the covering reaches
+every exposed tier roof EXCEPT the top tier's, which stays coated plate. `true` (titanic,
+yamato, great-eastern) and `false` (queen-mary-2) keep their exact meanings; the new word
+changes ONE mesh on ONE ship. hull.js: roofPlate takes a `bare` flag, passed as
+`roofsBareTop && i === T.n - 1` in the tier loop; the wheelhouse and deck-works call sites
+pass nothing and are byte-unchanged. Azzam's record: `roofs: 'terraces'` with the plate and
+its scale in roofsProvenance (authored by build/staging/r159/author-azzam-roofs.py,
+assert-heavy, byte-stable serializer proven before writing). Looked at both ways
+(build/staging/r159/look-crest-{before,after}.png, the `l=51&y=21` elevated grammar): the
+tan field around the equipment block and under the domes flips white; foredeck, side
+terraces and the aft terrace under the dome pair keep their teak — the aerial's own picture.
+
+**Audit: 33/0, with the r159 rule 'a terraces answer the drawing ignores' (the r84
+wired-to-nothing class, both directions).** Injection one — `!bare` removed, the crest drawn
+covered — convicted EXACTLY azzam: 'topmost roof plate (y 22.50) draws in the deck shader',
+the record's own houseTopM. Injection two — roofsLaid read as `=== true`, the word read as
+false — convicted EXACTLY azzam: 'none of 4 roof plates draws in the deck shader'. Clean
+restore re-ran 0. measure_ship rows sane (mast 36.20/37.50 over water, the record's own);
+a material-only change moves no geometry row by construction.
+
+**Frames: ship-azzam 0.060%/0.059 — the diff read before accepting: ONE edge-on sliver at
+the crest roof's own strip, all else byte-black — accepted, re-checked 0.000. Every other
+reachable frame checked clean: the four berth neighbours (container 0.003, ever-given
+0.010 — both their own documented capture noise — endurance 0.000, queen-mary-2 0.000) and
+the shipwright overview 0.000.** No full closing run: the round's one web change is proven
+confined to azzam's crest by the diff and the neighbour checks; the next round's opening
+full check owns the confirming pass (the standing pattern).
+
+**Deployed: stamp 1787711972, live verify in the commit.**
+
+**Next, in order:** (1) The Azzam BOUNDARY-PLATE derivation off the pinned 17.0 px/m Cádiz
+broadside (Research/AZZAM-PLATES.md plate 1): segment the most-forward and most-aft
+standing column at every metre of height, then re-derive freeboard/decks/houseAt/tierAftU
+where the plate disagrees — the r132 'six near-identical steps' and 'one swept form'
+residuals hang on it. (2) QM2 aft terraces (needs a photographic aft-quarter plate — the
+same hunt this round ran for Azzam works there). (3) The fleet-wide probe sweep to rank
+remaining hulls by boxy count and name the next class. (4) Preussen mast livery source pass
+(r155). (5) Endurance forecastle still waits on RMG J9266. (6) The degenerate-triangle
+zero-normal class (r156 residue), if it ever shows.

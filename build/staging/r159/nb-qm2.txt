@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-queen-mary-2            http://localhost:8149/?frozen=1#v=ship&s=queen-mary-2
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-queen-mary-2               0.000%     0.000  ok
+
+  all frames within tolerance.
+

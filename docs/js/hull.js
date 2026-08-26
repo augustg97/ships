@@ -2829,6 +2829,7 @@ const g = new THREE.Group();
 const T = linerHouse(S);
 const cover = deckCovering(S);
 const roofsLaid = !!(S.deck && S.deck.roofs);
+const roofsBareTop = !!(S.deck && S.deck.roofs === 'terraces');
 const roofDeckMat = (hullMat && roofsLaid && cover.recorded && cover.mode === 1)
 ? new THREE.ShaderMaterial({
 vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
@@ -2974,7 +2975,7 @@ out.push(b);
 }
 return out;
 };
-const roofPlate = (t, y) => {
+const roofPlate = (t, y, bare) => {
 const pts = perim(t);
 const sh = new THREE.Shape();
 sh.moveTo(pts[0].x, pts[0].z);
@@ -2982,7 +2983,7 @@ for (let k = 1; k < pts.length; k++) sh.lineTo(pts[k].x, pts[k].z);
 const gg = new THREE.ShapeGeometry(sh);
 gg.rotateX(Math.PI / 2);
 gg.translate(0, y, 0);
-if (roofDeckMat) {
+if (roofDeckMat && !bare) {
 const ix = gg.getIndex().array;
 for (let k = 0; k + 2 < ix.length; k += 3) {
 const t2 = ix[k + 1]; ix[k + 1] = ix[k + 2]; ix[k + 2] = t2;
@@ -3065,7 +3066,7 @@ t.shell ? shellCol : null, { lo, hi }, rampShear));
 g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
 t.recess ? recessCol : (t.shell ? shellCol : null), null, rampShear));
 }
-g.add(roofPlate(tCeil, t.y1));
+g.add(roofPlate(tCeil, t.y1, roofsBareTop && i === T.n - 1));
 if (i === T.n - 1) {
 railRun(perim(tCeil), t.y1);
 } else {

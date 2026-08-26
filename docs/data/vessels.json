@@ -5111,8 +5111,8 @@
     "deck": {
      "covering": "teak",
      "provenance": "RECORDED: the builder's specification as carried by the BOAT International Superyacht Directory entry for Azzam (Lurssen, 2013) - teak deck, steel hull, aluminium superstructure; press copy repeats 2,200 m2 of laid teak. Plank width and butt pattern are CLASS defaults for a yacht's laid teak (90 mm strakes), below what any plate of her can resolve.",
-     "roofs": true,
-     "roofsProvenance": "The 2,200 m2 of laid teak in the builder-sourced copy is far more area than her weather deck alone can carry on a 180.6 x 20.8 m hull, so her tier terraces carry the rest — which is also what her photographs show."
+     "roofs": "terraces",
+     "roofsProvenance": "TERRACES, NOT THE CREST: the 2,200 m2 of laid teak in the builder-sourced copy is far more area than her weather deck alone can carry on a 180.6 x 20.8 m hull, so her tier terraces carry the rest — which her photographs show. But the crest top is not among them: on the Klaus Jordan delivery-trials aerial (Lurssen press 2013, via CharterWorld wp-content, 960x640 copy, ~4.4 px/m locally at the crest — a colour-field read only, stated in Research/AZZAM-PLATES.md) the roof the radome cluster and mast stand on reads unbroken white coated plate, with the teak one level down on the ringing terraces. Pedestal base-plate detail is below that plate's resolution and is not claimed."
     },
     "steering": "steel",
     "bottom": "#2f353b",

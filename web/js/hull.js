@@ -4621,6 +4621,14 @@ function buildSuperstructure(S, group, hullMat) {
      terraces are the rest of it. Nothing else claims it, and nothing without decks can care. */
   const cover = deckCovering(S);
   const roofsLaid = !!(S.deck && S.deck.roofs);
+  /* ── ⚠ AND THE ROOF THE CLUSTER STANDS ON IS NOT A TERRACE (round 159) ──────────────
+     The r108 extension carried Azzam's teak to every tier roof, crest included, and the
+     delivery-trials aerial refutes exactly one of them: the crest top around the radome
+     pedestals and the mast foot is white coated plate, with the teak one level down on
+     the ringing terraces (Research/AZZAM-PLATES.md, plate 2). So deck.roofs can answer
+     'terraces': the covering reaches every exposed tier roof EXCEPT the top tier's,
+     which stays plate. true and false keep their exact meanings. */
+  const roofsBareTop = !!(S.deck && S.deck.roofs === 'terraces');
   const roofDeckMat = (hullMat && roofsLaid && cover.recorded && cover.mode === 1)
     ? new THREE.ShaderMaterial({
         vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
@@ -4833,7 +4841,7 @@ function buildSuperstructure(S, group, hullMat) {
 
   /* the roof is a plate over the tier's own plan — ShapeGeometry from the same perimeter,
      so the two cannot disagree. rotateX(+90°) maps shape-y onto world z unmirrored. */
-  const roofPlate = (t, y) => {
+  const roofPlate = (t, y, bare) => {
     const pts = perim(t);
     const sh = new THREE.Shape();
     sh.moveTo(pts[0].x, pts[0].z);
@@ -4841,7 +4849,7 @@ function buildSuperstructure(S, group, hullMat) {
     const gg = new THREE.ShapeGeometry(sh);
     gg.rotateX(Math.PI / 2);
     gg.translate(0, y, 0);
-    if (roofDeckMat) {
+    if (roofDeckMat && !bare) {
       /* DECK_FRAG lights by the DECLARED normal (the round-34 lesson), and rotateX(+90°)
          leaves ShapeGeometry's normals facing DOWN — plateMat's DoubleSide flip forgave
          that, a one-sun shader does not. Wind the top as the front face and declare up. */
@@ -4970,7 +4978,7 @@ function buildSuperstructure(S, group, hullMat) {
       g.add(wallLoft(perim(t), t.y0, t.y1, rows, t.recess ? [2, 3] : [0.46, 0.68], paneW, 0.52,
                      t.recess ? recessCol : (t.shell ? shellCol : null), null, rampShear));
     }
-    g.add(roofPlate(tCeil, t.y1));
+    g.add(roofPlate(tCeil, t.y1, roofsBareTop && i === T.n - 1));
     if (i === T.n - 1) {
       railRun(perim(tCeil), t.y1);                    // the boat deck is railed all round
     } else {
