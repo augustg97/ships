@@ -3104,6 +3104,58 @@ const fFront = t.uAHead !== undefined ? t.uAHead : t.uA;
 if (fFront < tAbove.uA - 0.012) promenade(tAbove.uA, fFront, fFront);
 }
 }
+const livery = S.sternLivery;
+const shellsN = T.tiers.filter(t => t.shell).length;
+if (livery && livery.strakes > 0 && shellsN > 0) {
+const kL = Math.min(livery.strakes, shellsN);
+const topY = T.tiers[kL - 1].y1;
+const t0 = T.tiers[0];
+const xTip = (t0.uB - 0.5) * L;
+const xKnee = Math.max((livery.fromU - 0.5) * L, (t0.uA - 0.5) * L + 1);
+const yAt = x => T.base + (topY - T.base) *
+Math.min(1, Math.max(0, (x - xKnee) / Math.max(1e-6, xTip - xKnee)));
+const liveryCol = new THREE.Color(S.topside || '#1d1d1f');
+for (let i = 0; i < kL; i++) {
+const t = T.tiers[i];
+const xA = xKnee + (t.y0 - T.base) / Math.max(1e-6, topY - T.base) * (xTip - xKnee);
+const uA = Math.max(t.uA, xA / L + 0.5), uB = t.uB;
+if (uB - uA < 1e-4) continue;
+const pts = [];
+const NU = Math.max(12, Math.round((uB - uA) * L));
+for (let q = 0; q <= NU; q++) {
+const u = uA + (uB - uA) * q / NU;
+pts.push({ x: (u - 0.5) * L, z: t.half(u) });
+}
+const hb = t.half(uB), NB = Math.max(8, Math.round(2 * hb));
+for (let q = 1; q <= NB; q++)
+pts.push({ x: (uB - 0.5) * L, z: hb - 2 * hb * q / NB });
+for (let q = 1; q <= NU; q++) {
+const u = uB - (uB - uA) * q / NU;
+pts.push({ x: (u - 0.5) * L, z: -t.half(u) });
+}
+const sp = [], sc = [], si = [];
+for (let q = 0; q < pts.length; q++) {
+const a = pts[Math.max(0, q - 1)], b = pts[Math.min(pts.length - 1, q + 1)];
+let nx = -(b.z - a.z), nz = b.x - a.x;
+const nl = Math.hypot(nx, nz) || 1;
+nx = nx / nl * 0.03; nz = nz / nl * 0.03;
+const yTop = Math.min(t.y1, yAt(pts[q].x));
+sp.push(pts[q].x + nx, t.y0, pts[q].z + nz,
+pts[q].x + nx, yTop, pts[q].z + nz);
+sc.push(liveryCol.r, liveryCol.g, liveryCol.b,
+liveryCol.r, liveryCol.g, liveryCol.b);
+}
+for (let q = 0; q + 1 < pts.length; q++)
+si.push(2 * q, 2 * q + 2, 2 * q + 1, 2 * q + 1, 2 * q + 2, 2 * q + 3);
+const sg = new THREE.BufferGeometry();
+sg.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+sg.setAttribute('color', new THREE.Float32BufferAttribute(sc, 3));
+sg.setIndex(si); sg.computeVertexNormals();
+const strip = new THREE.Mesh(sg, wallMat);
+strip.name = 'sternLivery';
+g.add(strip);
+}
+}
 const top = T.tiers[T.n - 1];
 if (S.cluster && S.cluster.blockU) { group.add(tag(g, 'superstructure')); return; }
 const bg = new THREE.Group();

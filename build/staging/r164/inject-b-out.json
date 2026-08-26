@@ -1,0 +1,18 @@
+checked 33 hulls, 3 problems
+[
+ {
+  "id": "queen-mary-2",
+  "rule": "a livery rise the ship cannot carry",
+  "detail": "sternLivery.strakes 3 against 2 shell strake(s)"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a livery knee outside the house it paints",
+  "detail": "sternLivery.fromU 1.02 against houseAt [0.079,1.008]"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded livery rise with no drawn paint",
+  "detail": "sternLivery attests 3 strake(s) risen and no sternLivery mesh stands in the scene"
+ }
+]

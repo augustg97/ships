@@ -11040,3 +11040,82 @@ somewhere to stand now). (3) The fleet-wide no-rake tier sampling, above. (4) Th
 fleet-wide probe sweep to rank remaining hulls by boxy count. (5) Preussen mast livery
 source pass (r155). (6) Endurance forecastle, waiting on RMG J9266. (7) Azzam crest span,
 waiting on a clean elevated bow-quarter plate.
+
+## Round 164 — 2026-08-26 — the black rises over the counter
+
+**The opening full 64-frame check at HEAD d47bca7 owned the standing confirmation: 64/64
+within tolerance, 0 BLANK, EXIT:0 (build/r164-opening-check.txt) — ship-queen-mary-2 read
+0.000, ship-azzam 0.000, the small movers all inside the documented noise band (ever-given
+0.010, slave-ship 0.044, sahul 0.034). Timing stated so nothing is laundered: the QM2 frame
+was captured 01:14, after this round's record write (sternLivery, a field nothing then read)
+and five minutes before its first hull.js edit at 01:19, so its pixels are pure r163 state;
+the fleet's bytes are untouched by this round's code (record-gated strip, proven by
+injection below).**
+
+**THE QUEUE HEAD OPENED: the r163 stern-face livery residual — the model painted both
+strake tiers shellTopside white around the sweep, where the 2011 Southampton astern plate
+reads the hull black rising over the counter with roughly ONE deck of white at the stern
+face, the name painted on black.** Re-read against all three plates (Research/QM2-PLATES.md):
+plate 3 (2011, 3296 px quay astern) gives the paint top at the foot of the oval-row strake —
+one deck of white below the fantail rail; plate 1 (2016 aerial) and plate 2 (2004 Hamburg,
+as built) read the same grammar at both ends of the era, so the rise is not a refit artefact.
+The knee where the line leaves the level 17 m sheer was measured off the 2016 aerial: the
+fantail's own recorded 15.6 m span scales the quarter at ~18.5 px/m along-axis, and the knee
+projects ~29 m forward of the drawn tip — u 0.93, a couple of bays forward of the fantail
+front 0.959, supported to ±2 bays (u ±0.016), the bound stated in the provenance.
+
+**The record change (build/staging/r164/author-qm2-sternlivery.py, assert-heavy, byte-stable
+serializer proven, fleet asserted untouched): sternLivery { strakes: 1, fromU: 0.93 }.** The
+field carries the SEMANTIC quantity the plates give — how many of the white shell strakes
+the risen black swallows at the stern face — not a metre height that could drift from the
+model's own floors; the builder lands the strip top on floorY(strakes) at any deckM.
+tierAftUProvenance's residual sentence replaced with the r164 pointer.
+
+**The drawing (hull.js buildSuperstructure, after the tier loop): paint drawn as paint.** A
+rising diagonal boundary cannot live on the wall's vertex colours — the rows are shared, so
+the edge would blur across a 1.4 m band quad, the exact class the snapBand lesson forbids —
+so the risen black is a STRIP riding the strake walls' own half() (the same loft that sweeps
+the counter since r163), its top edge the paint line, 3 cm proud and parallel so it never
+crosses the surface it covers. Straight in u from the sheer at fromU to the recorded strake
+boundary at the stern extremity; unpierced, as the provenance states the plates read it.
+Record-gated: a hull without sternLivery is vertex-identical, held live by the opening
+check's own post-edit frames. measure_ship: the strip stands u 0.930–1.008, y 17.00–19.95,
+half 8.23 inside the deck edge; Superstructure still ends u 1.008, extent 345.00 = LOA.
+
+**Audit: 33/0 clean (build/staging/r164/audit-clean.json). The r164 rule — 'the hull's paint
+does not stop at the hull' — two arms plus the counter-direction.** ARITHMETIC: strakes must
+fit the shell (≥1, ≤ shellTiers) and the knee must sit inside the house, forward of the aft
+extremity. SCENE: meshes named sternLivery must stand, reach the house's aft extremity in x,
+span house floor to the recorded strake boundary in y (±0.35), and wear the topside's own
+colour. OTHER DIRECTION: a strip on a hull with no sternLivery record convicts as paint
+nobody attested. Injections: (a) builder severed by stashing hull.js convicted EXACTLY
+queen-mary-2, 1 problem ('a recorded livery rise with no drawn paint'); (b) record dragged
+to strakes 3 / fromU 1.02 convicted EXACTLY queen-mary-2, 3 problems — both arithmetic arms
+AND the scene arm, because the builder refuses an impossible record (uA > uB draws nothing)
+and the missing strip is itself the third conviction. Clean restores 0 both times
+(audit-clean-final.json), record restore asserted field-by-field, hull.js re-checked.
+
+**Looked at (rule 1): the low quarter-astern capture (b=168&l=10&y=14&z=0.45,
+build/staging/r164/look-astern-low.png) reads the change directly: at the stern the black
+stands ABOVE the teak waterway line where forward of the knee the white strake carries its
+window band — the 2011 plate's own grammar. Three facts a viewer can read off the frame: the
+hull black rises toward the stern and swallows the lower strake; the white above it carries
+the window rows to the fantail; the boat gallery and balcony lattice are untouched forward.
+The baseline frame ship-queen-mary-2 re-checked after the edits: 0.009%/0.002 — UNDER the
+ratchet's own 0.05% floor (the default view barely sees the stern quarter side-on), so the
+ratchet stays green with no acceptance owed; the diff pixels are the stern strake region.
+The b=145 elevated look and a dead-astern z=0.4 framing were also captured
+(look-stern-after.png, look-dead-astern.png); the dead-astern crop framed the cascade above
+the counter, so the plate-grammar astern portrait at a wider z is a small residual look for
+r165's opening.**
+
+**Deployed: data-version 1787734059; live verify follows the push.**
+
+**Named residuals, in order:** (1) The two r161 read-3 geometry residuals: balcony wings
+running aft past the terrace floors; curved terrace aft rails with the fantail's
+outward-leaning glass windscreen panels. (2) The fleet-wide no-rake tier sampling round
+(r163). (3) The fleet-wide probe sweep to rank remaining hulls by boxy count. (4) Preussen
+mast livery source pass (r155). (5) Endurance forecastle, waiting on RMG J9266. (6) Azzam
+crest span, waiting on a clean elevated bow-quarter plate. (7) Small: the risen black is
+drawn unpierced where the plates show sparse small lights in it; a dead-astern portrait
+look at wider z for the r165 opening.

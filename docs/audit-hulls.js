@@ -429,6 +429,56 @@ say(v.id, 'a counter the record pins but the drawn sweep never reaches',
 }
 }
 }
+{
+const strips = [];
+g.traverse(o => { if (o.isMesh && o.name === 'sternLivery') strips.push(o); });
+const sl = H.sternLivery;
+if (sl) {
+const shellsA = H.shellTiers || 0;
+if (!(sl.strakes >= 1) || sl.strakes > shellsA)
+say(v.id, 'a livery rise the ship cannot carry',
+`sternLivery.strakes ${sl.strakes} against ${shellsA} shell strake(s)`);
+if (H.houseAt && H.houseAt.length === 2
+&& !(sl.fromU > H.houseAt[0] && sl.fromU < H.houseAt[1] - 0.01))
+say(v.id, 'a livery knee outside the house it paints',
+`sternLivery.fromU ${sl.fromU} against houseAt [${H.houseAt}]`);
+if (!strips.length) {
+say(v.id, 'a recorded livery rise with no drawn paint',
+`sternLivery attests ${sl.strakes} strake(s) risen and no sternLivery `
++ 'mesh stands in the scene');
+} else {
+const baseL = H.freeboard || 0,
+dhL = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+const flL = i => (i <= 0) ? baseL
+: (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+: baseL + dhL * i;
+const topL = flL(Math.min(sl.strakes, shellsA));
+const bb = new THREE.Box3();
+strips.forEach(s2 => bb.union(new THREE.Box3().setFromObject(s2)));
+if (H.houseAt && H.houseAt.length === 2
+&& bb.max.x < (H.houseAt[1] - 0.5) * H.lwl - 1.0)
+say(v.id, 'a livery rise that stops short of the stern it paints',
+`the strip ends at x ${bb.max.x.toFixed(1)} where the house aft `
++ `extremity runs to x ${((H.houseAt[1] - 0.5) * H.lwl).toFixed(1)}`);
+if (Math.abs(bb.max.y - topL) > 0.35 || Math.abs(bb.min.y - baseL) > 0.35)
+say(v.id, 'a paint line off its own recorded strake boundary',
+`the strip spans y ${bb.min.y.toFixed(2)}–${bb.max.y.toFixed(2)} m where `
++ `the record puts the rise ${baseL.toFixed(2)}–${topL.toFixed(2)} m`);
+const ca = strips[0].geometry.getAttribute('color');
+const want = new THREE.Color(H.topside || '#3a3a3c');
+if (ca && (Math.abs(ca.getX(0) - want.r) > 0.03
+|| Math.abs(ca.getY(0) - want.g) > 0.03
+|| Math.abs(ca.getZ(0) - want.b) > 0.03))
+say(v.id, 'risen paint that is not the topside\'s own',
+`strip colour (${ca.getX(0).toFixed(2)}, ${ca.getY(0).toFixed(2)}, `
++ `${ca.getZ(0).toFixed(2)}) against topside ${H.topside}`);
+}
+} else if (strips.length) {
+say(v.id, 'risen paint nobody attested',
+`${strips.length} sternLivery mesh(es) stand on a hull whose record `
++ 'carries no sternLivery');
+}
+}
 (H.masts || []).forEach((mk, i) => {
 if (mk.truckM === undefined || mk.rig !== 'square') return;
 const mt = (H.__mastTops || []).find(t => Math.abs(t.u - mk.at) < 0.02);

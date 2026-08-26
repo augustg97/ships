@@ -672,6 +672,71 @@
       }
     }
 
+    /* ── r164: THE HULL'S PAINT DOES NOT STOP AT THE HULL ───────────────────────────────
+       Queen Mary 2's black rises over the counter: every aft-quarter plate reads ONE deck
+       of white at the stern face — the name is painted on black — and r164 recorded it
+       (sternLivery: how many white shell strakes the black swallows at the face, and the
+       knee where the line leaves the level sheer) and drew it as a paint strip riding the
+       strake walls' own loft, its top edge the paint line. Two ways record and drawing
+       can drift, so two arms. ARITHMETIC: the rise must fit the ship that carries it —
+       at least one strake, no more than the shell has, the knee inside the house and
+       forward of the stern extremity. SCENE: the strip must STAND — meshes named
+       sternLivery must reach the house's aft extremity in x, run from the house floor to
+       the recorded strake boundary in y, and wear the topside's own colour, not the
+       strake white they cover. And the other direction: a strip on a hull whose record
+       says nothing is paint nobody attested. Record-gated both ways: no sternLivery and
+       no strip, no rule, no other hull touched. */
+    {
+      const strips = [];
+      g.traverse(o => { if (o.isMesh && o.name === 'sternLivery') strips.push(o); });
+      const sl = H.sternLivery;
+      if (sl) {
+        const shellsA = H.shellTiers || 0;
+        if (!(sl.strakes >= 1) || sl.strakes > shellsA)
+          say(v.id, 'a livery rise the ship cannot carry',
+              `sternLivery.strakes ${sl.strakes} against ${shellsA} shell strake(s)`);
+        if (H.houseAt && H.houseAt.length === 2
+            && !(sl.fromU > H.houseAt[0] && sl.fromU < H.houseAt[1] - 0.01))
+          say(v.id, 'a livery knee outside the house it paints',
+              `sternLivery.fromU ${sl.fromU} against houseAt [${H.houseAt}]`);
+        if (!strips.length) {
+          say(v.id, 'a recorded livery rise with no drawn paint',
+              `sternLivery attests ${sl.strakes} strake(s) risen and no sternLivery `
+              + 'mesh stands in the scene');
+        } else {
+          const baseL = H.freeboard || 0,
+                dhL = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+          const flL = i => (i <= 0) ? baseL
+            : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+            : baseL + dhL * i;
+          const topL = flL(Math.min(sl.strakes, shellsA));
+          const bb = new THREE.Box3();
+          strips.forEach(s2 => bb.union(new THREE.Box3().setFromObject(s2)));
+          if (H.houseAt && H.houseAt.length === 2
+              && bb.max.x < (H.houseAt[1] - 0.5) * H.lwl - 1.0)
+            say(v.id, 'a livery rise that stops short of the stern it paints',
+                `the strip ends at x ${bb.max.x.toFixed(1)} where the house aft `
+                + `extremity runs to x ${((H.houseAt[1] - 0.5) * H.lwl).toFixed(1)}`);
+          if (Math.abs(bb.max.y - topL) > 0.35 || Math.abs(bb.min.y - baseL) > 0.35)
+            say(v.id, 'a paint line off its own recorded strake boundary',
+                `the strip spans y ${bb.min.y.toFixed(2)}–${bb.max.y.toFixed(2)} m where `
+                + `the record puts the rise ${baseL.toFixed(2)}–${topL.toFixed(2)} m`);
+          const ca = strips[0].geometry.getAttribute('color');
+          const want = new THREE.Color(H.topside || '#3a3a3c');
+          if (ca && (Math.abs(ca.getX(0) - want.r) > 0.03
+                  || Math.abs(ca.getY(0) - want.g) > 0.03
+                  || Math.abs(ca.getZ(0) - want.b) > 0.03))
+            say(v.id, 'risen paint that is not the topside\'s own',
+                `strip colour (${ca.getX(0).toFixed(2)}, ${ca.getY(0).toFixed(2)}, `
+                + `${ca.getZ(0).toFixed(2)}) against topside ${H.topside}`);
+        }
+      } else if (strips.length) {
+        say(v.id, 'risen paint nobody attested',
+            `${strips.length} sternLivery mesh(es) stand on a hull whose record `
+            + 'carries no sternLivery');
+      }
+    }
+
     /* ── r155: A RECORDED FLAG-BUTTON IS WHERE THE MAST STOPS ───────────────────────────
        Preussen's record attests ONE mast height and its datum is the truck: 58 m deck to
        flag-button, all five masts — the Laeisz Standardrigg cut interchangeable spars, so
