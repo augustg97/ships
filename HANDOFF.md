@@ -11117,5 +11117,7 @@ outward-leaning glass windscreen panels. (2) The fleet-wide no-rake tier samplin
 (r163). (3) The fleet-wide probe sweep to rank remaining hulls by boxy count. (4) Preussen
 mast livery source pass (r155). (5) Endurance forecastle, waiting on RMG J9266. (6) Azzam
 crest span, waiting on a clean elevated bow-quarter plate. (7) Small: the risen black is
-drawn unpierced where the plates show sparse small lights in it; a dead-astern portrait
-look at wider z for the r165 opening.
+drawn unpierced where the plates show sparse small lights in it. The dead-astern portrait
+was captured before this round closed (b=180&l=8&y=18&z=0.8, look-astern-portrait.png):
+black over the counter, one banded white deck under the fantail rail, terraces above —
+the 2011 plate's grammar, looked at from the plate's own bearing; nothing owed to r165.
