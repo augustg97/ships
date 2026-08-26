@@ -2827,10 +2827,17 @@ const uAHead = S.houseRamp
 uA + (uB - uA) * 0.45))
 : undefined;
 const wr = S.tierWings ? S.tierWings[i] : undefined;
+const rr = S.tierRound ? S.tierRound[i] : undefined;
+const wingUi = (wr && wr.aftU > uB + 1e-6) ? wr.aftU : undefined;
+const pitchU = ((S.tierBands && S.tierBands.pitchM) || 2.6) / L;
+const rrOK = rr && rr.sagittaM > 0.01 &&
+uB + rr.sagittaM / L <
+(wingUi !== undefined ? wingUi : (i ? tiers[i - 1].uB : uB)) - pitchU;
 tiers.push({ uA, uB, uAHead, y0: floorY(i), y1: floorY(i + 1), half, shell,
 recess: i === recessTier,
-wingU: (wr && wr.aftU > uB + 1e-6) ? wr.aftU : undefined,
-wingDepth: wr ? wr.depthM : undefined });
+wingU: wingUi,
+wingDepth: wr ? wr.depthM : undefined,
+roundM: rrOK ? rr.sagittaM : undefined });
 }
 return { n, base, dh, top: floorY(n), tiers,
 recorded: !!(S.houseAt && S.houseAt.length === 2) };
@@ -2909,6 +2916,23 @@ gg.setAttribute('color', new THREE.Float32BufferAttribute(tc, 3));
 gg.setIndex(ti); gg.computeVertexNormals();
 return new THREE.Mesh(gg, wallMat);
 };
+const capPts = (t, h, st) => {
+const xF = (t.uB - 0.5) * L;
+const s = t.roundM || 0;
+const N = Math.max(6, Math.round(2 * h / st));
+const out = [];
+if (s > 0.01 && s < h * 0.9) {
+const R = (h * h + s * s) / (2 * s);
+const xc = xF + s - R;
+for (let k = 1; k <= N; k++) {
+const z = h - 2 * h * k / N;
+out.push({ x: xc + Math.sqrt(Math.max(0, R * R - z * z)), z });
+}
+} else {
+for (let k = 1; k <= N; k++) out.push({ x: xF, z: h - 2 * h * k / N });
+}
+return out;
+};
 const perim = (t, step) => {
 const st = step || paneW * 0.5;
 const pts = [];
@@ -2927,9 +2951,7 @@ pts.push({ x: (u - 0.5) * L, z: zf(u) });
 leg(t.uA, t.wingU, u => t.half(u));
 pts.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });
 leg(t.wingU - chU, t.uB, u => inz(u));
-const hn = inz(t.uB), NN = Math.max(6, Math.round(2 * hn / st));
-for (let k = 1; k <= NN; k++)
-pts.push({ x: (t.uB - 0.5) * L, z: hn - 2 * hn * k / NN });
+for (const q of capPts(t, inz(t.uB), st)) pts.push(q);
 leg(t.uB, t.wingU - chU, u => -inz(u));
 pts.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });
 leg(t.wingU, t.uA, u => -t.half(u));
@@ -2943,9 +2965,7 @@ for (let k = 0; k <= NU; k++) {
 const u = t.uA + (t.uB - t.uA) * k / NU;
 pts.push({ x: (u - 0.5) * L, z: t.half(u) });
 }
-const hb = t.half(t.uB), NB = Math.max(6, Math.round(2 * hb / st));
-for (let k = 1; k <= NB; k++)
-pts.push({ x: (t.uB - 0.5) * L, z: hb - 2 * hb * k / NB });
+for (const q of capPts(t, t.half(t.uB), st)) pts.push(q);
 for (let k = 1; k <= NU; k++) {
 const u = t.uB - (t.uB - t.uA) * k / NU;
 pts.push({ x: (u - 0.5) * L, z: -t.half(u) });
@@ -3067,6 +3087,61 @@ g.add(bar);
 }
 }
 };
+const screen = S.fantailScreen;
+const glassMat = screen ? new THREE.MeshStandardMaterial({
+color: 0xaebfca, roughness: 0.22, metalness: 0.08,
+transparent: true, opacity: 0.42, depthWrite: false,
+side: THREE.DoubleSide }) : null;
+const screenRailMat = screen ? new THREE.MeshStandardMaterial({
+color: 0x4a3826, roughness: 0.55 }) : null;
+const windscreen = (pts, y) => {
+const hM = screen.hM, lean = Math.tan(screen.leanDeg * Math.PI / 180) * hM;
+const off = pts.map((p, k) => {
+const a = pts[Math.max(0, k - 1)], b = pts[Math.min(pts.length - 1, k + 1)];
+let nx = -(b.z - a.z), nz = b.x - a.x;
+const nl = Math.hypot(nx, nz) || 1;
+return { x: nx / nl * lean, z: nz / nl * lean };
+});
+const sp = [], si = [];
+for (let k = 0; k < pts.length; k++)
+sp.push(pts[k].x, y, pts[k].z,
+pts[k].x + off[k].x, y + hM, pts[k].z + off[k].z);
+for (let k = 0; k + 1 < pts.length; k++)
+si.push(2 * k, 2 * k + 2, 2 * k + 1, 2 * k + 1, 2 * k + 2, 2 * k + 3);
+const sg = new THREE.BufferGeometry();
+sg.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+sg.setIndex(si); sg.computeVertexNormals();
+const strip = new THREE.Mesh(sg, glassMat);
+strip.name = 'fantailScreen';
+g.add(strip);
+const post = k => {
+const d = new THREE.Vector3(off[k].x, hM, off[k].z);
+const len = d.length();
+const st2 = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.003, B * 0.003, len, 5), white);
+st2.position.set(pts[k].x + off[k].x / 2, y + hM / 2, pts[k].z + off[k].z / 2);
+st2.quaternion.setFromUnitVectors(up, d.normalize());
+g.add(st2);
+};
+let acc = 0;
+post(0);
+for (let k = 1; k < pts.length; k++) {
+acc += Math.hypot(pts[k].x - pts[k - 1].x, pts[k].z - pts[k - 1].z);
+if (acc >= 2.0 || k === pts.length - 1) { post(k); acc = 0; }
+}
+for (let k = 0; k + 1 < pts.length; k++) {
+const ax = pts[k].x + off[k].x, az = pts[k].z + off[k].z;
+const bx = pts[k + 1].x + off[k + 1].x, bz = pts[k + 1].z + off[k + 1].z;
+const len = Math.hypot(bx - ax, bz - az);
+if (len < 0.01) continue;
+const dir = new THREE.Vector3(bx - ax, 0, bz - az).normalize();
+const bar = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.0045, B * 0.0045, len, 6), screenRailMat);
+bar.position.set((ax + bx) / 2, y + hM, (az + bz) / 2);
+bar.quaternion.setFromUnitVectors(up, dir);
+g.add(bar);
+}
+};
 const rows = [0.0, 0.46, 0.475, 0.665, 0.68, 1.0];
 const shellCol = new THREE.Color(S.shellTopside || S.topside || '#3a3a3c');
 const recessCol = new THREE.Color(0x24272b);
@@ -3082,7 +3157,7 @@ const rampShear = t.uAHead !== undefined
 : null;
 const tCeil = t.uAHead !== undefined
 ? { uA: t.uAHead, uB: t.uB, half: t.half,
-wingU: t.wingU, wingDepth: t.wingDepth } : t;
+wingU: t.wingU, wingDepth: t.wingDepth, roundM: t.roundM } : t;
 if (bandRec) {
 const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
 const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
@@ -3114,21 +3189,25 @@ if (i === T.n - 1) {
 railRun(perim(tCeil), t.y1);
 } else {
 const tAbove = T.tiers[i + 1];
-const promenade = (uEnd, uStart, capAt) => {
+const promPath = (uEnd, uStart, capAt) => {
 const pr = [];
 const NP = Math.max(4, Math.round(Math.abs(uStart - uEnd) * L / (paneW * 0.5)));
 for (let k = 0; k <= NP; k++) {
 const u = uEnd + (uStart - uEnd) * k / NP;
 pr.push({ x: (u - 0.5) * L, z: t.half(u) });
 }
-const hb = t.half(capAt);
-pr.push({ x: (capAt - 0.5) * L, z: -hb });
+if (t.roundM !== undefined && capAt === t.uB) {
+for (const q of capPts(t, t.half(capAt), paneW * 0.5)) pr.push(q);
+} else {
+pr.push({ x: (capAt - 0.5) * L, z: -t.half(capAt) });
+}
 for (let k = NP; k >= 0; k--) {
 const u = uEnd + (uStart - uEnd) * k / NP;
 pr.push({ x: (u - 0.5) * L, z: -t.half(u) });
 }
-railRun(pr, t.y1);
+return pr;
 };
+const promenade = (uEnd, uStart, capAt) => railRun(promPath(uEnd, uStart, capAt), t.y1);
 const aStart = tAbove.wingU !== undefined ? tAbove.wingU : tAbove.uB;
 if (t.wingU !== undefined) {
 if (t.wingU > aStart + 0.012) {
@@ -3147,14 +3226,21 @@ wp.push({ x: (u - 0.5) * L, z: zf(u) });
 wleg(aStart, t.wingU, u => t.half(u));
 wp.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });
 wleg(t.wingU - chU, Math.max(t.uB, aStart), u => inz(u));
-const hn = inz(Math.max(t.uB, aStart));
-wp.push({ x: (Math.max(t.uB, aStart) - 0.5) * L, z: -hn });
+const capAt = Math.max(t.uB, aStart), hn = inz(capAt);
+if (t.roundM !== undefined && capAt === t.uB) {
+for (const q of capPts(t, hn, paneW * 0.5)) wp.push(q);
+} else {
+wp.push({ x: (capAt - 0.5) * L, z: -hn });
+}
 wleg(Math.max(t.uB, aStart), t.wingU - chU, u => -inz(u));
 wp.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });
 wleg(t.wingU, aStart, u => -t.half(u));
 railRun(wp, t.y1);
 }
-} else if (t.uB > aStart + 0.012) promenade(aStart, t.uB, t.uB);
+} else if (t.uB > aStart + 0.012) {
+if (screen && screen.tier === i) windscreen(promPath(aStart, t.uB, t.uB), t.y1);
+else promenade(aStart, t.uB, t.uB);
+}
 const fFront = t.uAHead !== undefined ? t.uAHead : t.uA;
 if (fFront < tAbove.uA - 0.012) promenade(tAbove.uA, fFront, fFront);
 }

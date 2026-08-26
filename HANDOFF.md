@@ -11209,3 +11209,98 @@ clean elevated bow-quarter plate. (7) Small, from r164: the risen black is drawn
 where the plates show sparse small lights. (8) Small, new: the fantail gallery's wing walls
 draw in the boat-gallery tier's dark recess treatment where the plates read white glazing —
 a colour class on tier 2's stern portion, prior to this round and unchanged by it.
+
+## Round 166 — 2026-08-26 — the round the plates actually read, and the fantail takes its glass
+
+**The opening full 64-frame check at HEAD f929470 owned r165's standing confirmation:
+64/64 within tolerance, 0 BLANK, EXIT:0 (build/r166-opening-check.txt) — ship-queen-mary-2
+0.000, ship-azzam 0.000, ship-endurance 0.000, the small movers inside the documented noise
+band (ever-given 0.010, slave-ship 0.044, sahul 0.034). Timing stated: the QM2 frame was
+captured 03:28, BEFORE this round's record write at 03:35:46 and before every hull.js edit
+(03:37–03:45); the record-gate for the fleet was then proven on the FINAL code by solo
+re-checks after the round's edits — shipwright, titanic, azzam, endurance all 0.000,
+container at its documented 0.003.**
+
+**THE QUEUE HEAD OPENED AND CLOSED: the r161 read-3(b) residual — 'each terrace's aft rail
+is curved in plan, and the fantail rail carries outward-leaning glass windscreen panels.'
+The measuring round REFINED the first half before drawing anything: of the terrace rails,
+exactly ONE curves at the plate's own resolution.** A new instrument
+(build/staging/r166/measure-round.py; the r162 CL frame and pitch witnesses reused; every
+read overlaid and looked at, z-t2-marked.png / z-t7-marked.png) measured each candidate
+face's apex against the chord through its own corners, all three points on one edge so the
+parallax cancels inside the read: tier 7, the jacuzzi step between the r165 wing decks,
+sagitta 2.9 m ±1.0 (apex candidates spread 2.8–3.0; the image apex lands 60% along the
+chord, which is where a centreline-symmetric arc lands seen obliquely) — REAL. Tier 2
+measures −0.1 m and tier 3 −0.1 m: STRAIGHT within the plate's support — the r161
+impression of curvature at tier 2 was the arch's fan ROOF misread as plan, and the chord
+verdict overruled my own first re-read this round, which had also seen 'a projecting bay'
+until the drawn chord said otherwise. Tiers 4–6 bunch within 4 m along-axis, tier 6's rail
+hides under its awnings — unresolved, stated, not recorded. The windscreen is
+unconditional: plate 3 (2011, 3296 px) resolves the translucent band, its panel posts,
+five horizontal framing lines and a person leaning with elbows on the top rail (the height
+witness, 1.2 m ±0.2); plate 1 carries the same band around both quarters. Lean attested
+both plates, angle resolved by neither: 12° ±8, a direction with a stated bound.**
+
+**The record (build/staging/r166/author-qm2-round-screen.py, assert-heavy, byte-stable
+serializer proven, fleet asserted untouched): tierRound { 7: { sagittaM: 2.9 } } and
+fantailScreen { tier: 1, hM: 1.2, leanDeg: 12 }, provenances naming the instrument, the
+straight reads and the unresolved tiers; tierAftUProvenance's residual sentence replaced —
+the r161 read-3 loop is CLOSED.**
+
+**The drawing (hull.js): one cap emitter, and the screen replaces the rail.** capPts()
+emits a tier's stern-crossing leg — the old constant-x chord byte for byte, or, where the
+record rounds it, the circular arc through the same corners bulging aft by the sagitta —
+and the wall winding (perim, winged and plain), the wing-rail cap and the promenade cap
+all take their points from it, so band, roof, rails and wall inherit the arc from the one
+path (the r165 principle). The builder refuses an apex past the tier's own wing chamfer.
+The windscreen rides the SAME promenade path the open rail rode: glass strip base on the
+deck edge, top displaced outboard along each point's own horizontal normal (the
+sternLivery construction), white posts at 2 m, the dark handrail on the head; drawn in
+place of railRun only where the record names the tier. Record-gated everywhere.
+measure_ship: extent 345.00 = LOA, screen u 0.971–1.009, y 22.90–24.10 = fl(2)+hM.**
+
+**Audit: 33/0 clean twice (build/staging/r166/audit-clean.json, audit-clean-final.json).
+The r166 rule, two blocks: 'a round the record pins but the drawn face cuts square'
+(arithmetic: sagitta a measurable quantity, apex inside the notch; scene: a centreline ray
+inside the bulge lands on the tier's own roof; counter: at every unrounded pin a
+centreline ray 1.2 m aft must fall past the face — a roof there is a bulge nobody
+attested, the arm that closes the r162 aft arm's centre blind spot, since that arm takes
+the MIN over three z-stations exactly so furniture cannot convict) and 'the fantail rail
+is a screen the record names' (arithmetic: height and lean bounds, the tier exists; scene:
+the named mesh stands at the tier's own roof, spans the recorded height, reaches the aft
+extremity, and LEANS — each top vertex outboard of its base; counter: glass nobody
+attested). Two existing arms LEARNED THE ROUND so they cannot convict what the record
+attests: the r162 aft probe moves past a recorded apex, and the r165 notch-open probes
+stand aft of it — both byte-identical without tierRound. Injections: (a) hull.js stashed
+convicted EXACTLY queen-mary-2, 2 problems, one per feature ('a recorded round with no
+drawn bulge' — the ray landing on t6's roof at 37.65 where t7's runs 40.60 — and 'a
+recorded windscreen with no drawn glass'); (b) record dragged (sagitta 9, hM 3.0, lean
+40°) convicted EXACTLY queen-mary-2, 5 problems — apex-outruns-notch, the refused
+builder's missing bulge, both screen bounds, AND 'a bulge nobody attested' where the
+dragged 40° lean pushed the glass head past the ship's own stern — the counter arm
+catching real geometry standing where nothing is attested. Clean restores 0 both times,
+record restored byte-exact and field-checked.**
+
+**Looked at (rule 1): the dead-astern portrait (b=180&l=8&y=18&z=0.8, zoomed crop
+zoom-portrait-fantail.png) reads the screen directly — both quarters of the fantail sweep
+carry a continuous paneled band with posts at panel pitch where r164's frame had a thin
+three-bar open rail. The elevated quarter (b=145&l=40&y=25, zoom-elev-cascade.png) reads
+the arc — the jacuzzi step's aft rail sweeps convex-aft between the angled wing-deck tips,
+the banded face following the curve, the 2016 aerial's own grammar. Three facts a viewer
+can read off the frame: the jacuzzi step's rail is an arc between its wings; the fantail
+edge is a glass screen, not an open rail; the black still rises over the counter under the
+white oval-row strake. Frame: ship-queen-mary-2 0.017%/0.015 — UNDER the ratchet's 0.05%
+floor, no acceptance owed; the amplified diff read anyway (rule 7): two clusters, the t7
+arc and the fantail screen, all else byte-black.**
+
+**Deployed: data-version 1787742444; live verify follows the push.**
+
+**Named residuals, in order:** (1) The fleet-wide no-rake tier sampling round (r163).
+(2) The fleet-wide probe sweep to rank remaining hulls by boxy count. (3) Preussen mast
+livery source pass (r155). (4) Endurance forecastle, waiting on RMG J9266. (5) Azzam crest
+span, waiting on a clean elevated bow-quarter plate. (6) Small, from r164: the risen black
+is drawn unpierced where the plates show sparse small lights. (7) Small, from r165: the
+fantail gallery's wing walls draw in the boat-gallery tier's dark recess treatment where
+the plates read white glazing — a colour class on tier 2's stern portion. (8) Small, new:
+the drawn screen's glass reads sun-bright pale over the dark hull where plate 3 reads it
+sky-translucent — a material nuance below the round's bar, named so it is not laundered.

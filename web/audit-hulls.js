@@ -601,8 +601,12 @@
         const i = +k;
         if (!(i > 0 && i < nT - 1)) continue;          // mkPin's own key filter
         const wall = (H.tierAftU[k] - 0.5) * H.lwl, roof = fl(i + 1);
+        /* r166: a recorded plan round bulges the face AFT of its own chord by the
+           sagitta — the aft probe moves past the recorded apex, or it would convict
+           the arc the record attests. No tierRound, the old 0.6, byte for byte. */
+        const sagK = (H.tierRound && H.tierRound[k]) ? H.tierRound[k].sagittaM : 0;
         const fwd = Math.max(...zs.map(z => drop(wall - 0.6, z)));
-        const aft = Math.min(...zs.map(z => drop(wall + 0.6, z)));
+        const aft = Math.min(...zs.map(z => drop(wall + sagK + 0.6, z)));
         if (fwd < roof - 0.5)
           say(v.id, 'a terrace the record pins but the drawn tier ignores',
               `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just forward of the `
@@ -729,11 +733,18 @@
                   `tierWings[${k}] pins the tip at u ${w.aftU} yet the deck-edge ray `
                   + `at u ${uMid.toFixed(3)} lands ${stand.toFixed(2)} m where the `
                   + `wing roof runs ${wroof.toFixed(2)} m`);
+            /* r166: a recorded round is allowed to reach into the notch as far as
+               its own apex — the open-notch probes stand aft of it. No tierRound,
+               uOpen === uMid, byte for byte. */
+            const uOpen = Math.max(uMid, face
+              + ((H.tierRound && H.tierRound[k]) ? H.tierRound[k].sagittaM : 0)
+                / H.lwl + 0.002);
+            const xO = (uOpen - 0.5) * H.lwl;
             const open = Math.min(...[0, (H.beam || 10) * 0.1, -(H.beam || 10) * 0.1]
-                                  .map(z => drop(x, z)));
+                                  .map(z => drop(xO, z)));
             if (open > wroof - 0.5)
               say(v.id, 'a wing drawn as a full-width shelf',
-                  `tier ${k} centreline ray at u ${uMid.toFixed(3)} lands `
+                  `tier ${k} centreline ray at u ${uOpen.toFixed(3)} lands `
                   + `${open.toFixed(2)} m — the tier still crosses the notch the `
                   + `record recesses`);
           }
@@ -759,6 +770,76 @@
                 `tier ${k} ends at u ${pin} with no tierWings, yet the deck-edge ray `
                 + `just aft lands ${landE.toFixed(2)} m — a story above the terrace `
                 + `floor ${fl(i).toFixed(2)} m`);
+        }
+      }
+
+      /* ── r166: A ROUND THE RECORD PINS BUT THE DRAWN FACE CUTS SQUARE ────────────────
+         Queen Mary 2's jacuzzi step sweeps convex-aft between its r165 wing decks on
+         the 2016 aerial — the aft rail an arc, 2.9 m of sagitta at the centreline —
+         and r166 recorded it (tierRound: how far the face's centre stands aft of the
+         chord through its notch corners) and bent the perimeter's centre-face leg
+         into the arc. Two arms plus the counter. ARITHMETIC: a sagitta below any
+         plate's support is a number nobody measured, and an apex past the tier's own
+         wing chamfer (or, unwinged, past the terrace floor below) bulges into
+         structure the record contradicts. SCENE: a centreline down-ray just aft of
+         the chord, inside the recorded bulge, must land ON the tier's own roof — a
+         fall to the terrace below is the square cut the record exists to forbid.
+         COUNTER: at every pinned tier with NO round, a centreline ray 1.2 m aft of
+         the pin must fall past the face — a roof there is a bulge nobody attested.
+         Record-gated: no tierRound and the counter arm sees only pinned tiers. */
+      {
+        const rrec = H.tierRound || {};
+        const pitchR = ((H.tierBands && H.tierBands.pitchM) || 2.6) / H.lwl;
+        for (const k in rrec) {
+          const i = +k;
+          if (!Number.isFinite(i)) continue;             // the provenance key
+          const r = rrec[k];
+          const face = H.tierAftU[k];
+          if (face === undefined) {
+            say(v.id, 'a round on a tier whose face no record pins',
+                `tierRound[${k}] with no tierAftU[${k}]`);
+            continue;
+          }
+          if (!(r.sagittaM > 0.3 && r.sagittaM <= (H.beam || 10) * 0.45))
+            say(v.id, 'a round the plate cannot support',
+                `tierRound[${k}].sagittaM ${r.sagittaM} on beam ${H.beam}`);
+          const wR = (H.tierWings || {})[k];
+          const boundR = (wR ? wR.aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)]
+                          : (H.houseAt ? H.houseAt[1] : 1))) - pitchR;
+          const apexU = face + r.sagittaM / H.lwl;
+          if (apexU >= boundR)
+            say(v.id, 'a round whose apex outruns its own notch',
+                `tierRound[${k}] puts the apex at u ${apexU.toFixed(4)} against the `
+                + `${wR ? 'wing chamfer' : 'floor below'} at u ${boundR.toFixed(4)}`);
+          /* the scene: the bulge stands */
+          if (i > 0 && i < nT - 1) {
+            const xR = (face - 0.5) * H.lwl + r.sagittaM * 0.55;
+            const landR = drop(xR, 0), roofR = fl(i + 1);
+            if (landR < roofR - 0.5)
+              say(v.id, 'a recorded round with no drawn bulge',
+                  `tierRound[${k}] attests ${r.sagittaM} m of sweep yet the centreline `
+                  + `ray at x ${xR.toFixed(1)} lands ${landR.toFixed(2)} m where the `
+                  + `tier roof runs ${roofR.toFixed(2)} m`);
+          }
+        }
+        /* the counter direction: a centre bulge slips the r162 aft arm, which takes
+           the MIN over three z-stations exactly so deck furniture cannot convict —
+           so the centreline gets its own one-sided watch at every unrounded pin */
+        for (const k in H.tierAftU) {
+          const i = +k;
+          if (!(i > 0 && i < nT - 1) || rrec[k]) continue;
+          const pin = H.tierAftU[k];
+          const below = (H.tierWings && H.tierWings[k]) ? H.tierWings[k].aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)] : undefined);
+          const uC = pin + 1.2 / H.lwl;
+          if (below !== undefined && uC > below - pitchR) continue;  // no room to probe
+          const landC = drop((uC - 0.5) * H.lwl, 0);
+          if (landC > fl(i + 1) - 0.5)
+            say(v.id, 'a bulge nobody attested',
+                `tier ${k} ends square at u ${pin} with no tierRound, yet the `
+                + `centreline ray 1.2 m aft lands ${landC.toFixed(2)} m at the tier's `
+                + `own roof height ${fl(i + 1).toFixed(2)} m`);
         }
       }
     }
@@ -825,6 +906,79 @@
         say(v.id, 'risen paint nobody attested',
             `${strips.length} sternLivery mesh(es) stand on a hull whose record `
             + 'carries no sternLivery');
+      }
+    }
+
+    /* ── r166: THE FANTAIL RAIL IS A SCREEN THE RECORD NAMES ────────────────────────────
+       Both of Queen Mary 2's aft-quarter plate eras read the fantail's swept edge
+       carrying a continuous translucent windscreen band under a dark top rail — panel
+       posts and a person leaning on the rail resolved on the 2011 astern plate — and
+       r166 recorded it (fantailScreen: which tier's exposed aft roof edge, the height
+       over the deck, the outward lean) and drew it riding the promenade path the open
+       rail rode. Two arms. ARITHMETIC: the height and lean must be what a deck screen
+       can be, and the tier must exist. SCENE: a mesh named fantailScreen must stand —
+       base at the tier's own roof, head the recorded height above it, reaching the
+       house's aft extremity, and LEANING: the top vertex of each pair stands farther
+       from the path's own horizontal centroid than its base, or the record's one
+       attested direction is not drawn. And the other direction: a screen on a hull
+       whose record names none is glass nobody attested. Record-gated both ways. */
+    {
+      const scr = [];
+      g.traverse(o => { if (o.isMesh && o.name === 'fantailScreen') scr.push(o); });
+      const fs = H.fantailScreen;
+      if (fs) {
+        if (!(fs.hM >= 0.9 && fs.hM <= 2.0))
+          say(v.id, 'a screen no deck edge carries',
+              `fantailScreen.hM ${fs.hM} — outside 0.9–2.0 m`);
+        if (!(fs.leanDeg >= 0 && fs.leanDeg <= 25))
+          say(v.id, 'a screen leaning past its own plates',
+              `fantailScreen.leanDeg ${fs.leanDeg} — outside 0–25 deg`);
+        if (!(Number.isInteger(fs.tier) && fs.tier >= 0 && fs.tier < (H.decks || 0)))
+          say(v.id, 'a screen on a tier the ship does not have',
+              `fantailScreen.tier ${fs.tier} on ${H.decks || 0} decks`);
+        if (!scr.length) {
+          say(v.id, 'a recorded windscreen with no drawn glass',
+              `fantailScreen attests ${fs.hM} m of screen and no fantailScreen mesh `
+              + 'stands in the scene');
+        } else {
+          const baseF = H.freeboard || 0,
+                dhF = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+          const flF = i => (i <= 0) ? baseF
+            : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+            : baseF + dhF * i;
+          const yDeck = flF(fs.tier + 1);
+          const bbF = new THREE.Box3();
+          scr.forEach(s2 => bbF.union(new THREE.Box3().setFromObject(s2)));
+          if (Math.abs(bbF.min.y - yDeck) > 0.35
+              || Math.abs(bbF.max.y - (yDeck + fs.hM)) > 0.35)
+            say(v.id, 'a screen off its own recorded deck edge',
+                `the glass spans y ${bbF.min.y.toFixed(2)}–${bbF.max.y.toFixed(2)} m `
+                + `where the record puts it ${yDeck.toFixed(2)}–`
+                + `${(yDeck + fs.hM).toFixed(2)} m`);
+          if (H.houseAt && H.houseAt.length === 2
+              && bbF.max.x < (H.houseAt[1] - 0.5) * H.lwl - 1.5)
+            say(v.id, 'a screen that stops short of the sweep it rings',
+                `the glass ends at x ${bbF.max.x.toFixed(1)} where the house aft `
+                + `extremity runs to x ${((H.houseAt[1] - 0.5) * H.lwl).toFixed(1)}`);
+          /* the lean: base/top vertex pairs, the top outboard of the base */
+          const pa = scr[0].geometry.getAttribute('position');
+          let cx = 0, cz = 0, nB = 0;
+          for (let q2 = 0; q2 < pa.count; q2 += 2) { cx += pa.getX(q2); cz += pa.getZ(q2); nB++; }
+          cx /= nB; cz /= nB;
+          let leanOK = 0;
+          for (let q2 = 0; q2 + 1 < pa.count; q2 += 2) {
+            const dB = Math.hypot(pa.getX(q2) - cx, pa.getZ(q2) - cz);
+            const dT = Math.hypot(pa.getX(q2 + 1) - cx, pa.getZ(q2 + 1) - cz);
+            if (dT > dB + 0.02) leanOK++;
+          }
+          if (fs.leanDeg > 2 && leanOK < nB * 0.9)
+            say(v.id, 'a screen that does not lean the way the plates read',
+                `${leanOK} of ${nB} panel pairs stand outboard of their own base`);
+        }
+      } else if (scr.length) {
+        say(v.id, 'a windscreen nobody attested',
+            `${scr.length} fantailScreen mesh(es) stand on a hull whose record `
+            + 'carries no fantailScreen');
       }
     }
 

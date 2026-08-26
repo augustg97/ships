@@ -1,0 +1,12 @@
+[
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded round with no drawn bulge",
+  "detail": "tierRound[7] attests 2.9 m of sweep yet the centreline ray at x 102.1 lands 37.65 m where the tier roof runs 40.60 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded windscreen with no drawn glass",
+  "detail": "fantailScreen attests 1.2 m of screen and no fantailScreen mesh stands in the scene"
+ }
+]

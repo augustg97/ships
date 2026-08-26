@@ -1,0 +1,27 @@
+[
+ {
+  "id": "queen-mary-2",
+  "rule": "a round whose apex outruns its own notch",
+  "detail": "tierRound[7] puts the apex at u 0.8443 against the wing chamfer at u 0.8318"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded round with no drawn bulge",
+  "detail": "tierRound[7] attests 9 m of sweep yet the centreline ray at x 105.5 lands 37.65 m where the tier roof runs 40.60 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a bulge nobody attested",
+  "detail": "tier 1 ends square at u 1.008 with no tierRound, yet the centreline ray 1.2 m aft lands 24.38 m at the tier's own roof height 22.90 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a screen no deck edge carries",
+  "detail": "fantailScreen.hM 3 \u2014 outside 0.9\u20132.0 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a screen leaning past its own plates",
+  "detail": "fantailScreen.leanDeg 40 \u2014 outside 0\u201325 deg"
+ }
+]
