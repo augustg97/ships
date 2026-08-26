@@ -85,3 +85,67 @@ keep their exact meanings — the new word changes one mesh on one ship.
 - A **true overhead** of the crest would upgrade read #1 from a colour field to geometry;
   none exists in any archive searched. The claim stands on the field read at its stated
   scale.
+
+## The boundary-plate derivation (round 160) — the bow, measured, refutes the drawn sheer
+
+Done off plate 1 as this note demanded, anchors re-read, not inherited. **Anchors:** stem
+tip (351, 1709) — the top of the raked stem, where the bulwark cap meets the stem edge,
+scanned as the leftmost 8-px white run per row against the dark trees; aft counter tip
+(3470, ~1850) — the shadowed rounded transom, confirmed ship rather than quay because it
+occludes the quay fence behind it; waterline fitted on the boot-top's bottom edge over
+x 500–1900, y = 1847.8 + 0.00162x. **Scale: 3119 px over her 180.6 m LOA = 17.27 px/m**
+(the note's own preliminary ≈17.0 was off by 1.6%; this is why it said re-anchor).
+Telephoto near water level; near-orthographic assumed, bound stated at ±2% + ±2 px.
+
+**Method and an honest failure.** Region-growing segmentation (warm-white criterion, sky
+and water excluded by blue excess, erode–fill–dilate) traced the silhouette cleanly
+wherever it stands against sky, water or trees, and FAILED against Cádiz's white city:
+every exclusion box drawn over the background produced rows pinned at the box's own edge
+(a level "22.5 m crest from u 0.40" that was exactly box C's bottom, a level "16.8 m"
+that was box B's). Those bands were thrown away and read by eye off magnified crops
+instead — the r76 method. Only reads that survive both are claimed below.
+
+**What the plate reads (heights over the waterline, ±0.2 m):**
+
+| station | u | height |
+|---|---|---|
+| stem tip (bulwark cap at the stem) | 0.000 | 8.05–8.13 |
+| foredeck cap | 0.03–0.15 | 8.19–8.38 |
+| foredeck rail/gear over the mooring well | 0.15–0.22 | 8.5–8.8 (jitter) |
+| bulwark reaching the house front | 0.26–0.27 | 8.84 |
+| aft main-deck bulwark cap (r98 span [0.82, 0.884]) | 0.83–0.91 | 9.6–9.75 |
+| low stern bulwark | 0.94–0.98 | 3.8–3.9 |
+
+**Second witness:** the kept r97 broadside (Research/references/azzam-broadside-fricke-
+2014.jpg, 8.96 px/m, anchors x332/x1950/y941) reads the stem tip at (~302, 866) =
+**8.37 m**, the same fairleads at ~7.5 m, the same foredeck rail jitter at u 0.14–0.24.
+The 1343_Azzam.jpg fitting-out oblique was tried and REJECTED as a witness: its bow-local
+scale differs from the whole-ship average enough to read the same stem at ~14 m — the
+caution this note already carried, demonstrated.
+
+**The refutation.** The record draws `sheerBow 3.0` on `freeboard 9.0`: a stem at
+12.0 m, a liner's raised bow, falling aft. Two independent plates put the stem at
+8.05–8.37 m — BELOW her own freeboard — with the deck line SWEEPING UP into the house:
+the drawn bow is ~3.9 m too high and the sheer is inverted. This is the r132 "one swept
+form" residual in a single number: with the bow dropped, the foredeck rises 8.2 → 9.0
+into `houseAt` [0.275], and `houseRamp` + `tierForeU` already rake the tier fronts to
+the crest — the whole forward silhouette becomes the sweep the photographs show.
+
+**The change (round 160):** `sheerBow 3.0 → −0.8` (tip lands at 8.2, the two-plate
+band's centre; the s^2.8 profile then sits within 0.3 m of every clean foredeck read).
+The measured stem head becomes a record field, `bowTopM 8.2`, so the audit can convict
+both directions of the r84 class: a sheerBow that ignores the record's own measured bow,
+and a builder that ignores sheerBow.
+
+**Resolved without change:** `freeboard 9.0` and `decks 4` — the hull-to-tier boundary
+this note's residual named. The bulwark reads 8.84±0.2 where the house begins (the 9.0
+stands within the bound), tier-0 windows sit above it exactly as `tierBands` records,
+and four window bands under the crest confirm the four tiers. `tierForeU` {1: 0.349,
+2: 0.47} — the plate's own brow-tip reads land at 0.349 (exact) and ~0.41–0.47 (the
+tier-2 brow, read through the city-contaminated band, within its uncertainty).
+`sternSteps` (r98) — this plate's clean aft reads (9.6–9.75 cap, 3.8–3.9 low stern)
+agree with the recorded terraces to ~0.5 m; the aft third was not re-derived.
+
+**Still open after this round:** the crest span could not be independently re-read here
+(city-pinned columns); r97's houseCrest stands. A true aft-quarter plate would settle
+the 0.5 m aft-terrace differences; that is the QM2-class hunt, queued.

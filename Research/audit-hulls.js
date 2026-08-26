@@ -530,6 +530,45 @@
       });
     }
 
+    /* ── r160: A BOW THE RECORD MEASURED BUT THE SHEER IGNORES ──────────────────────────
+       Azzam's sheerBow survived at a liner's 3.0 — a 12.0 m bow — for 160 rounds while
+       two of her own broadsides read the stem head at 8.05–8.37 m, BELOW her 9.0 m
+       freeboard: an inverted sheer, one sweep rising aft into the house. The plates are
+       data now: bowTopM, the measured stem-head height over the waterline. Both
+       directions of the r84 class: (a) the RECORD must agree with itself — freeboard +
+       sheerBow is the bow the plates measured; (b) the DRAWING must obey the record —
+       rays down just aft of the stem meet the loft on the record's own sheer line, so a
+       builder that drops or double-applies the rise convicts here. Record-gated: no
+       bowTopM, no rule, no other hull touched. */
+    if (typeof H.bowTopM === 'number' && typeof H.freeboard === 'number') {
+      const expect = H.freeboard + (H.sheerBow || 0);
+      if (Math.abs(expect - H.bowTopM) > 0.4)
+        say(v.id, 'a bow the record measured but the sheer ignores',
+            `freeboard ${H.freeboard} + sheerBow ${H.sheerBow} draws the stem head at `
+            + `${expect.toFixed(1)} m against the plates' bowTopM ${H.bowTopM} m`);
+      else {
+        g.updateMatrixWorld(true);
+        const rc = new THREE.Raycaster();
+        let worst = 0, at = null;
+        for (const u of [0.01, 0.02, 0.03]) {
+          const line = H.freeboard + (H.sheerBow || 0) * Math.pow(1 - 2 * u, 2.8);
+          rc.set(new THREE.Vector3((u - 0.5) * H.lwl, 50, 0), new THREE.Vector3(0, -1, 0));
+          const hit = rc.intersectObject(g, true)
+            .find(ht => { for (let e = ht.object; e; e = e.parent)
+                            if (e.visible === false) return false;
+                          const p = tagOf(ht.object);
+                          return !p || p.name !== 'Waterplane mask'; });
+          if (hit && Math.abs(hit.point.y - line) > worst) {
+            worst = Math.abs(hit.point.y - line); at = { u, hit: hit.point.y, line };
+          }
+        }
+        if (worst > 0.65)
+          say(v.id, 'a drawn bow off its own recorded sheer line',
+              `ray at u ${at.u} lands ${at.hit.toFixed(2)} m where the record's sheer `
+              + `line runs ${at.line.toFixed(2)} m (bowTopM ${H.bowTopM})`);
+      }
+    }
+
     /* ── r155: A RECORDED FLAG-BUTTON IS WHERE THE MAST STOPS ───────────────────────────
        Preussen's record attests ONE mast height and its datum is the truck: 58 m deck to
        flag-button, all five masts — the Laeisz Standardrigg cut interchangeable spars, so
