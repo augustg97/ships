@@ -4607,8 +4607,20 @@ function linerHouse(S) {
                    : Math.min(uA + (n > 1 ? uA - foreAt(n - 2) : 0.02),
                               uA + (uB - uA) * 0.45))
       : undefined;
+    /* ── ⚠ A TIER'S SIDES CAN OUTRUN ITS OWN AFT FACE (round 165) ───────────────────
+       Queen Mary 2's terraces sit RECESSED between side balcony wings — the 2016
+       aerial reads enclosed structure running aft past each deep terrace's centre
+       face — so ending the whole tier at one u cut the wings off and left every
+       terrace a full-width shelf. tierWings records, per tier, the u the wing tip
+       reaches (aftU) and its inboard depth in metres (depthM); the perimeter winds
+       the notched plan, so the balcony band, the roof plate and the rails all
+       inherit the wings from the one path. Record-gated: no tierWings, no wing
+       fields, vertex-identical. */
+    const wr = S.tierWings ? S.tierWings[i] : undefined;
     tiers.push({ uA, uB, uAHead, y0: floorY(i), y1: floorY(i + 1), half, shell,
-                 recess: i === recessTier });
+                 recess: i === recessTier,
+                 wingU: (wr && wr.aftU > uB + 1e-6) ? wr.aftU : undefined,
+                 wingDepth: wr ? wr.depthM : undefined });
   }
   /* `recorded` marks a house the RECORD located (houseAt) as opposed to the default span.
      It decides which deck a funnel's recorded height is measured from — see buildFunnel. */
@@ -4765,6 +4777,41 @@ function buildSuperstructure(S, group, hullMat) {
   const perim = (t, step) => {
     const st = step || paneW * 0.5;
     const pts = [];
+    /* ── A WINGED TIER'S PLAN IS A NOTCH, NOT A CAP (round 165) ──────────────────────
+       The sides run aft to the wing tips, the centre face stays at the tier's own
+       recorded aft edge, and the terrace below sits recessed between the wings. One
+       winding still — the band rhythm marches around the wing walls by arc length,
+       exactly as it turns every other corner. The tip is cut with a one-bay chamfer
+       at the inboard corner (the angled ends the plates show; the exact cut is below
+       plate resolution), and the wing's inboard face rides half() at a constant
+       depth, so the wing sweeps with the shell like everything the loft carries.
+       A tier without wingU takes the old path, byte for byte. */
+    if (t.wingU !== undefined) {
+      const dep = t.wingDepth || B * 0.1;
+      const inz = (u) => Math.max(B * 0.04, t.half(u) - dep);
+      const chU = Math.min((S.tierBands && S.tierBands.pitchM) || paneW * 2,
+                           (t.wingU - t.uB) * L * 0.6) / L;
+      const leg = (u0, u1, zf) => {
+        const N = Math.max(8, Math.round(Math.abs(u1 - u0) * L / st));
+        for (let k = pts.length ? 1 : 0; k <= N; k++) {
+          const u = u0 + (u1 - u0) * k / N;
+          pts.push({ x: (u - 0.5) * L, z: zf(u) });
+        }
+      };
+      leg(t.uA, t.wingU, u => t.half(u));                          // stbd, out to the tip
+      pts.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });   // the chamfer
+      leg(t.wingU - chU, t.uB, u => inz(u));                       // wing inboard face
+      const hn = inz(t.uB), NN = Math.max(6, Math.round(2 * hn / st));
+      for (let k = 1; k <= NN; k++)
+        pts.push({ x: (t.uB - 0.5) * L, z: hn - 2 * hn * k / NN }); // the centre face
+      leg(t.uB, t.wingU - chU, u => -inz(u));                      // port inboard face
+      pts.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });   // port chamfer
+      leg(t.wingU, t.uA, u => -t.half(u));                         // port side forward
+      const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / st));
+      for (let k = 1; k <= NF; k++)
+        pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
+      return pts;
+    }
     const NU = Math.max(60, Math.round((t.uB - t.uA) * L / st));
     for (let k = 0; k <= NU; k++) {
       const u = t.uA + (t.uB - t.uA) * k / NU;
@@ -4970,7 +5017,8 @@ function buildSuperstructure(S, group, hullMat) {
     /* the roof and the crest rail stand on the plan the tier ARRIVES at, so a ramped
        tier's roof is a brim over its own raked front rather than a shelf ahead of it */
     const tCeil = t.uAHead !== undefined
-      ? { uA: t.uAHead, uB: t.uB, half: t.half } : t;
+      ? { uA: t.uAHead, uB: t.uB, half: t.half,
+          wingU: t.wingU, wingDepth: t.wingDepth } : t;
     if (bandRec) {
       const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
       const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
@@ -5034,7 +5082,39 @@ function buildSuperstructure(S, group, hullMat) {
         }
         railRun(pr, t.y1);
       };
-      if (t.uB > tAbove.uB + 0.012) promenade(tAbove.uB, t.uB, t.uB);
+      /* ── AND THE WING STRIPS ARE DECKS TOO (round 165) ───────────────────────────
+         A winged tier's roof runs aft along the sides past its own centre face; the
+         exposed strip on each wing carries a rail out to the tip, around the chamfer
+         and along the inboard edge, and the cap across the notch rails the terrace
+         edge at the tier's own face. The rail starts aft of the tier above's own
+         footprint — its wing tip where it has one. Without wings on this tier the
+         path is the old promenade exactly. */
+      const aStart = tAbove.wingU !== undefined ? tAbove.wingU : tAbove.uB;
+      if (t.wingU !== undefined) {
+        if (t.wingU > aStart + 0.012) {
+          const dep = t.wingDepth || B * 0.1;
+          const inz = (u) => Math.max(B * 0.04, t.half(u) - dep);
+          const chU = Math.min((S.tierBands && S.tierBands.pitchM) || paneW * 2,
+                               (t.wingU - t.uB) * L * 0.6) / L;
+          const wp = [];
+          const wleg = (u0, u1, zf) => {
+            const N = Math.max(4, Math.round(Math.abs(u1 - u0) * L / (paneW * 0.5)));
+            for (let k = wp.length ? 1 : 0; k <= N; k++) {
+              const u = u0 + (u1 - u0) * k / N;
+              wp.push({ x: (u - 0.5) * L, z: zf(u) });
+            }
+          };
+          wleg(aStart, t.wingU, u => t.half(u));
+          wp.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });
+          wleg(t.wingU - chU, Math.max(t.uB, aStart), u => inz(u));
+          const hn = inz(Math.max(t.uB, aStart));
+          wp.push({ x: (Math.max(t.uB, aStart) - 0.5) * L, z: -hn });
+          wleg(Math.max(t.uB, aStart), t.wingU - chU, u => -inz(u));
+          wp.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });
+          wleg(t.wingU, aStart, u => -t.half(u));
+          railRun(wp, t.y1);
+        }
+      } else if (t.uB > aStart + 0.012) promenade(aStart, t.uB, t.uB);
       /* a ramped tier's roof begins where its raked front ARRIVES — on the next tier's own
          foot — so the bare forward plates (and their rails) cease to exist with the steps */
       const fFront = t.uAHead !== undefined ? t.uAHead : t.uA;

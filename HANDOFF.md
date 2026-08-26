@@ -11121,3 +11121,91 @@ drawn unpierced where the plates show sparse small lights in it. The dead-astern
 was captured before this round closed (b=180&l=8&y=18&z=0.8, look-astern-portrait.png):
 black over the counter, one banded white deck under the fantail rail, terraces above —
 the 2011 plate's grammar, looked at from the plate's own bearing; nothing owed to r165.
+
+## Round 165 — 2026-08-26 — the terraces take their wings
+
+**The opening full 64-frame check at HEAD f85c752 owned r164's standing confirmation:
+64/64 within tolerance, 0 BLANK, EXIT:0 (build/r165-opening-check.txt) — ship-queen-mary-2
+0.009%/0.002 (the r164 under-floor residual diff, unchanged), ship-azzam 0.000, the small
+movers inside the documented noise band. Timing stated: the QM2 frame captured 02:20:56,
+BEFORE this round's record write at 02:23:24; ship-azzam (02:36:51) and ship-endurance
+(02:37:28) captured AFTER it read 0.000 — live proof the record write alone moves nothing,
+since no code then read the field.**
+
+**THE QUEUE HEAD OPENED: the r161 read-3(a) residual — the side balcony wings run aft PAST
+each terrace floor, so a terrace sits recessed between two wings; the model ended the whole
+tier at one u.** Measured off the 2016 aerial (plate 1) with a new instrument
+(build/staging/r165/measure-wings.py, overlay-wings.png; the r162 face lines and pitch
+witnesses reused): the r162 face lines only support centreline comparisons, so each wing
+tip was compared with its own tier's face along the image's athwartships direction, and the
+enclosed structures were separated from the deck-level balustrades — the long lattice runs
+aft of the blocks are balustrades, NOT wings, and are not recorded. The reads: the
+two-story cabin block on the main-pool terrace, one tip for both stories, 2.7 bays aft of
+the tier-5 face (port read; the starboard block corroborates), u 0.883; the wing decks
+flanking the top terrace, 3 bays (port and starboard disagree 2–5, split and capped by the
+tier-6 roof they stand on), u 0.840; the glazed gallery flanking the fantail, 1.5 bays aft
+of the pavilion face to its stair, u 0.971. Bounds stated per read (±1 bay, tier 7 ±2).
+
+**The record (build/staging/r165/author-qm2-wings.py, assert-heavy, byte-stable serializer
+proven, fleet asserted untouched): tierWings, keyed by tier, each { aftU, depthM } — tiers
+2 (0.971, 2.8 m), 4 and 5 (0.883, 6.0 m), 7 (0.840, 3.0 m).** depthM is the wing's inboard
+extent from the deck edge, the weakest number (±2 m, stated). tierAftUProvenance's residual
+sentence replaced with the r165 pointer; read 3(b) — curved rails and windscreens — stays
+named there.
+
+**The drawing (hull.js): a winged tier's plan is a NOTCH, not a cap.** linerHouse attaches
+wingU/wingDepth per tier from the record; perim() winds the notched plan in ONE winding —
+sides aft to the wing tips, a one-bay chamfer at each inboard corner (the angled ends the
+plates show), the inboard faces riding half() at constant depth so the wings sweep with the
+shell, the centre face at the tier's own recorded u — so the balcony band marches around
+the wing walls by arc length, the roof plate follows the same perimeter, and the notch can
+never disagree with the wall. Wing-aware rails: each exposed wing strip is railed out to
+the tip, around the chamfer, along the inboard edge, with the cap across the notch; the
+tier below's promenade rails start aft of the wing tip above. Record-gated everywhere: a
+hull without tierWings takes the old paths byte for byte — shipwright/azzam/titanic frames
+re-checked 0.000, container at its documented 0.003. This also closes an old loop: the r97
+scale drawing's silhouette always showed the wing tips, r162 moved the pins forward to the
+measured centre faces, and the profile now carries BOTH — faces recessed, wings standing.
+
+**Audit: 33/0 clean twice (build/staging/r165/audit-clean.json, audit-clean-final.json).
+The r165 rule — 'a wing the record pins but the drawn tier cuts off' — three arms plus the
+counter-direction, inside the tier-pin block so it shares the r162 helpers.** ARITHMETIC: a
+wing must outrun its own face, fit the half-beam, and stand on the roof below. WING STANDS:
+a deck-edge down-ray midway between face and tip must land no lower than the wing's roof
+(one-sided, so a rail stanchion cannot false-convict). NOTCH OPEN: centreline rays at the
+same station must not land at the tier's roof. COUNTER: at every pinned tier with NO wing
+record, a deck-edge ray just aft of the pin must land no higher than the terrace floor plus
+a rail — a story there is a wing nobody attested; safe against nested recorded wings
+because a lower tier's wing roof is never above the probed tier's own floor. Injections:
+(a) builder severed by stashing hull.js convicted EXACTLY queen-mary-2, 4 problems, one per
+recorded wing, each ray landing on the terrace floor the wing should stand over; (b) record
+dragged (tier 7 aftU 0.90, depthM 25) convicted EXACTLY queen-mary-2, 3 problems — both
+arithmetic arms AND the counter-direction, because the dragged wing drawn past tier 6's pin
+is itself a wing tier 6 never attested. Clean restores 0 both times, record restore
+asserted field-by-field.
+
+**Looked at (rule 1): the elevated quarter (b=145&l=40&y=25, look-quarter-elevated.png and
+the stern zoom) reads the aerial's own grammar: every deep terrace sits recessed between
+white wings with angled tips, the teak sweeps between them to the fantail, and the balcony
+band carries around the wing walls. The low quarter-astern (b=168&l=10&y=14&z=0.45) shows
+the wing strips railed above the terraces with the r164 black still rising over the
+counter. Three facts a viewer can read off the frame: the terraces are recessed between
+side wings; the wing tips are cut at an angle; the risen black, the white strake and the
+teak fantail stand as before. measure_ship: Superstructure still 0.079–1.008, extent
+345.00 = LOA. Frame: ship-queen-mary-2 0.309%/0.193, diff read before accepting — the
+stern-quarter wing structures plus sub-pixel AA speckle along the re-stationed tier-2
+gallery wall, all else byte-black — accepted, re-checked 0.000.** No full closing run; the
+next round's opening full check owns the confirming pass (the standing pattern).
+
+**Deployed: data-version 1787738461; live verify follows the push.**
+
+**Named residuals, in order:** (1) The r161 read-3(b) residual, now the queue head: curved
+terrace aft rails in plan and the fantail's outward-leaning glass windscreen panels (the
+model cuts every rail straight; the 2011 astern plate and the r165 fantail crop both show
+the panels). (2) The fleet-wide no-rake tier sampling round (r163). (3) The fleet-wide
+probe sweep to rank remaining hulls by boxy count. (4) Preussen mast livery source pass
+(r155). (5) Endurance forecastle, waiting on RMG J9266. (6) Azzam crest span, waiting on a
+clean elevated bow-quarter plate. (7) Small, from r164: the risen black is drawn unpierced
+where the plates show sparse small lights. (8) Small, new: the fantail gallery's wing walls
+draw in the boat-gallery tier's dark recess treatment where the plates read white glazing —
+a colour class on tier 2's stern portion, prior to this round and unchanged by it.

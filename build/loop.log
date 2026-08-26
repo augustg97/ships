@@ -9222,3 +9222,18 @@ Live stamp 1787730010 verified — the round is complete, inside the watchdog.
 /Users/augustgweon/Ships/build/loop-round.sh: line 85: 53955 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
 ───────────────────────────────────────────────────────────────────────────
 2026-08-26 01:00:12  round starting
+**Round 164 shipped: Queen Mary 2's black rises over the counter.**
+
+The opening 64-frame check owned r163's standing confirmation — 64/64 within tolerance, none blank, `ship-queen-mary-2` at 0.000, captured five minutes before this round's first code edit, so nothing was laundered into the pass.
+
+The queue head was r163's stern-face livery residual. All three aft-quarter plates — the 2011 Southampton astern shot, the 2016 aerial, and the 2004 Hamburg as-built pair — read the hull black rising over the counter so only one deck of white shows at the stern face, with the name painted on black; the model dressed both white shell strakes around the whole sweep. The record now carries `sternLivery {strakes: 1, fromU: 0.93}`: the number of white strakes the black swallows at the face (what the plates literally show, so the drawn boundary lands on the model's own strake floor at any deck height), and the knee where the paint line leaves the level 17 m sheer, measured off the 2016 aerial at ~29 m forward of the drawn tip with a stated ±2-bay bound.
+
+The drawing respects the snapBand lesson: a rising diagonal boundary can't live on wall vertex colours, so the risen black is a paint strip riding the strake walls' own counter-sweeping loft, its top edge the paint line itself — crisp by construction, 3 cm proud and parallel so it never crosses the surface it covers, and record-gated so the fleet is vertex-identical. `measure_ship` pins it at u 0.930–1.008, y 17.00–19.95, inside the deck edge.
+
+The audit runs 33/0 with the new r164 rule, both directions: injections convicted exactly queen-mary-2 with the builder severed (1 problem) and with the record dragged to impossible values (3 problems, including the scene arm — the builder refuses an impossible record and the missing strip itself convicts). Clean restores returned 0 both times. The baseline frame moved only 0.009%, under the ratchet's own floor, so no acceptance was owed; the change was looked at from the low quarter and from the 2011 plate's own dead-astern bearing, where the model now reads the plate's grammar: black over the counter, one banded white deck under the fantail rail, terraces above.
+
+Two commits pushed (1b8be37, f85c752), live stamp 1787734059 verified. Next in the queue: the QM2 balcony wings and curved terrace rails with windscreen panels, then the fleet-wide no-rake sampling round.
+2026-08-26 01:56:15  round finished; HEAD is f85c752 Round 164, closing look: the dead-astern portrait at z=0.8 reads the 2011 plate's grammar from the plate's own bearing — black over the counter, one banded white deck under the fantail rail, terraces above. HANDOFF residual (7) amended; nothing owed to r165 but the standing opening check.
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 58882 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-08-26 02:06:15  round starting

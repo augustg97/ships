@@ -2826,8 +2826,11 @@ const uAHead = S.houseRamp
 : Math.min(uA + (n > 1 ? uA - foreAt(n - 2) : 0.02),
 uA + (uB - uA) * 0.45))
 : undefined;
+const wr = S.tierWings ? S.tierWings[i] : undefined;
 tiers.push({ uA, uB, uAHead, y0: floorY(i), y1: floorY(i + 1), half, shell,
-recess: i === recessTier });
+recess: i === recessTier,
+wingU: (wr && wr.aftU > uB + 1e-6) ? wr.aftU : undefined,
+wingDepth: wr ? wr.depthM : undefined });
 }
 return { n, base, dh, top: floorY(n), tiers,
 recorded: !!(S.houseAt && S.houseAt.length === 2) };
@@ -2909,6 +2912,32 @@ return new THREE.Mesh(gg, wallMat);
 const perim = (t, step) => {
 const st = step || paneW * 0.5;
 const pts = [];
+if (t.wingU !== undefined) {
+const dep = t.wingDepth || B * 0.1;
+const inz = (u) => Math.max(B * 0.04, t.half(u) - dep);
+const chU = Math.min((S.tierBands && S.tierBands.pitchM) || paneW * 2,
+(t.wingU - t.uB) * L * 0.6) / L;
+const leg = (u0, u1, zf) => {
+const N = Math.max(8, Math.round(Math.abs(u1 - u0) * L / st));
+for (let k = pts.length ? 1 : 0; k <= N; k++) {
+const u = u0 + (u1 - u0) * k / N;
+pts.push({ x: (u - 0.5) * L, z: zf(u) });
+}
+};
+leg(t.uA, t.wingU, u => t.half(u));
+pts.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });
+leg(t.wingU - chU, t.uB, u => inz(u));
+const hn = inz(t.uB), NN = Math.max(6, Math.round(2 * hn / st));
+for (let k = 1; k <= NN; k++)
+pts.push({ x: (t.uB - 0.5) * L, z: hn - 2 * hn * k / NN });
+leg(t.uB, t.wingU - chU, u => -inz(u));
+pts.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });
+leg(t.wingU, t.uA, u => -t.half(u));
+const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / st));
+for (let k = 1; k <= NF; k++)
+pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
+return pts;
+}
 const NU = Math.max(60, Math.round((t.uB - t.uA) * L / st));
 for (let k = 0; k <= NU; k++) {
 const u = t.uA + (t.uB - t.uA) * k / NU;
@@ -3052,7 +3081,8 @@ const rampShear = t.uAHead !== undefined
 ? (pt, rf) => (Math.abs(pt.x - xF) < 1e-6 ? rf * (t.uAHead - t.uA) * L : 0)
 : null;
 const tCeil = t.uAHead !== undefined
-? { uA: t.uAHead, uB: t.uB, half: t.half } : t;
+? { uA: t.uAHead, uB: t.uB, half: t.half,
+wingU: t.wingU, wingDepth: t.wingDepth } : t;
 if (bandRec) {
 const lo = new THREE.Color(bandRec.kind === 'balcony' ? 0x20262b : 0x272e35);
 const hi = new THREE.Color(bandRec.kind === 'balcony' ? 0x424c54 : 0x4a545d);
@@ -3099,7 +3129,32 @@ pr.push({ x: (u - 0.5) * L, z: -t.half(u) });
 }
 railRun(pr, t.y1);
 };
-if (t.uB > tAbove.uB + 0.012) promenade(tAbove.uB, t.uB, t.uB);
+const aStart = tAbove.wingU !== undefined ? tAbove.wingU : tAbove.uB;
+if (t.wingU !== undefined) {
+if (t.wingU > aStart + 0.012) {
+const dep = t.wingDepth || B * 0.1;
+const inz = (u) => Math.max(B * 0.04, t.half(u) - dep);
+const chU = Math.min((S.tierBands && S.tierBands.pitchM) || paneW * 2,
+(t.wingU - t.uB) * L * 0.6) / L;
+const wp = [];
+const wleg = (u0, u1, zf) => {
+const N = Math.max(4, Math.round(Math.abs(u1 - u0) * L / (paneW * 0.5)));
+for (let k = wp.length ? 1 : 0; k <= N; k++) {
+const u = u0 + (u1 - u0) * k / N;
+wp.push({ x: (u - 0.5) * L, z: zf(u) });
+}
+};
+wleg(aStart, t.wingU, u => t.half(u));
+wp.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });
+wleg(t.wingU - chU, Math.max(t.uB, aStart), u => inz(u));
+const hn = inz(Math.max(t.uB, aStart));
+wp.push({ x: (Math.max(t.uB, aStart) - 0.5) * L, z: -hn });
+wleg(Math.max(t.uB, aStart), t.wingU - chU, u => -inz(u));
+wp.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });
+wleg(t.wingU, aStart, u => -t.half(u));
+railRun(wp, t.y1);
+}
+} else if (t.uB > aStart + 0.012) promenade(aStart, t.uB, t.uB);
 const fFront = t.uAHead !== undefined ? t.uAHead : t.uA;
 if (fFront < tAbove.uA - 0.012) promenade(tAbove.uA, fFront, fFront);
 }

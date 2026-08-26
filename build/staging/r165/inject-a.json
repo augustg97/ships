@@ -1,0 +1,22 @@
+[
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded wing with no drawn structure",
+  "detail": "tierWings[2] pins the tip at u 0.971 yet the deck-edge ray at u 0.965 lands 22.90 m where the wing roof runs 25.85 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded wing with no drawn structure",
+  "detail": "tierWings[4] pins the tip at u 0.883 yet the deck-edge ray at u 0.876 lands 28.80 m where the wing roof runs 31.75 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded wing with no drawn structure",
+  "detail": "tierWings[5] pins the tip at u 0.883 yet the deck-edge ray at u 0.872 lands 28.80 m where the wing roof runs 34.70 m"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a recorded wing with no drawn structure",
+  "detail": "tierWings[7] pins the tip at u 0.84 yet the deck-edge ray at u 0.828 lands 37.65 m where the wing roof runs 40.60 m"
+ }
+]

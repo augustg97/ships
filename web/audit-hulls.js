@@ -670,6 +670,97 @@
           }
         }
       }
+
+      /* ── r165: A WING THE RECORD PINS BUT THE DRAWN TIER CUTS OFF ────────────────────
+         Queen Mary 2's terraces sit recessed between side balcony wings — enclosed
+         structure running aft past each tier's own centre face (the 2016 aerial,
+         Research/QM2-PLATES.md read 3a) — and r165 recorded them (tierWings: the u
+         each wing tip reaches and its inboard depth) and wound the tier perimeter
+         around the notch. Three arms. ARITHMETIC: a wing must run AFT of its own
+         tier's face and STAND ON the roof below — a tip past the floor that carries
+         it hangs over the terrace or the sea. WING STANDS: a down-ray inside the wing
+         strip midway between face and tip must land no lower than the wing's own roof
+         less tolerance (one-sided, so a rail stanchion on the strip cannot
+         false-convict). NOTCH OPEN: down-rays at the centreline at that same station
+         must NOT land at the tier's roof — a full-width tier there is the wing drawn
+         as a shelf, the exact fault the record exists to forbid. And the counter
+         direction, closing r162's outboard blind spot: at every pinned tier WITHOUT a
+         wing record, a down-ray at the deck edge just aft of the pin must land no
+         higher than the terrace floor plus a rail — anything a story high there is a
+         wing nobody attested. Record-gated: no tierWings and the counter arm sees
+         only pinned tiers; a hull with neither is untouched. */
+      {
+        const HSw = SHIPS_HULL.hullSurface(H);
+        const edgeZ = (u) => Math.abs(SHIPS_HULL.surfacePoint(H, HSw, u, 1.0)[2])
+                             - (H.beam || 10) * 0.015 - 0.35;
+        const wrec = H.tierWings || {};
+        for (const k in wrec) {
+          const i = +k;
+          if (!Number.isFinite(i)) continue;               // the provenance key
+          const w = wrec[k];
+          const face = H.tierAftU[k];
+          if (face === undefined) {
+            say(v.id, 'a wing on a tier whose face no record pins',
+                `tierWings[${k}] with no tierAftU[${k}]`);
+            continue;
+          }
+          if (!(w.aftU > face + 0.004))
+            say(v.id, 'a wing that does not outrun its own face',
+                `tierWings[${k}].aftU ${w.aftU} against the tier face u ${face}`);
+          if (!(w.depthM > 0 && w.depthM < (H.beam || 10) / 2))
+            say(v.id, 'a wing deeper than the half-beam it stands in',
+                `tierWings[${k}].depthM ${w.depthM} on beam ${H.beam}`);
+          const bw = wrec[String(i - 1)];
+          const below = bw ? bw.aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)]
+                          : (H.houseAt ? H.houseAt[1] : undefined));
+          if (below !== undefined && w.aftU > below + 1e-6)
+            say(v.id, 'a wing tip past the floor that carries it',
+                `tierWings[${k}].aftU ${w.aftU} against the tier-below extent u ${below}`);
+          /* the scene: the wing stands, and the notch is open */
+          const uMid = (face + Math.min(w.aftU,
+                                        below !== undefined ? below : w.aftU)) / 2;
+          const zE = edgeZ(uMid);
+          if (zE > 0.8) {
+            const x = (uMid - 0.5) * H.lwl, wroof = fl(i + 1);
+            const stand = Math.max(drop(x, zE), drop(x, -zE));
+            if (stand < wroof - 0.5)
+              say(v.id, 'a recorded wing with no drawn structure',
+                  `tierWings[${k}] pins the tip at u ${w.aftU} yet the deck-edge ray `
+                  + `at u ${uMid.toFixed(3)} lands ${stand.toFixed(2)} m where the `
+                  + `wing roof runs ${wroof.toFixed(2)} m`);
+            const open = Math.min(...[0, (H.beam || 10) * 0.1, -(H.beam || 10) * 0.1]
+                                  .map(z => drop(x, z)));
+            if (open > wroof - 0.5)
+              say(v.id, 'a wing drawn as a full-width shelf',
+                  `tier ${k} centreline ray at u ${uMid.toFixed(3)} lands `
+                  + `${open.toFixed(2)} m — the tier still crosses the notch the `
+                  + `record recesses`);
+          }
+        }
+        /* the counter direction: r162's aft arm watches z ±beam·0.2, and a wing
+           lives outboard of that — so watch the deck edge at every pinned tier
+           that carries NO wing record */
+        for (const k in H.tierAftU) {
+          const i = +k;
+          if (!(i > 0 && i < nT - 1) || wrec[k]) continue;
+          const pin = H.tierAftU[k];
+          const bw2 = wrec[String(i - 1)];
+          const ext = bw2 ? bw2.aftU
+            : (i - 1 >= 1 ? H.tierAftU[String(i - 1)] : undefined);
+          const uProbe = pin + 0.012;
+          if (ext === undefined || uProbe > ext - 0.005) continue;  // no floor to probe
+          const zP = edgeZ(uProbe);
+          if (zP < 0.8) continue;
+          const xP = (uProbe - 0.5) * H.lwl;
+          const landE = Math.max(drop(xP, zP), drop(xP, -zP));
+          if (landE > fl(i) + 1.5)
+            say(v.id, 'a wing nobody attested',
+                `tier ${k} ends at u ${pin} with no tierWings, yet the deck-edge ray `
+                + `just aft lands ${landE.toFixed(2)} m — a story above the terrace `
+                + `floor ${fl(i).toFixed(2)} m`);
+        }
+      }
     }
 
     /* ── r164: THE HULL'S PAINT DOES NOT STOP AT THE HULL ───────────────────────────────

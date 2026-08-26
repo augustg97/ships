@@ -1,0 +1,17 @@
+[
+ {
+  "id": "queen-mary-2",
+  "rule": "a wing deeper than the half-beam it stands in",
+  "detail": "tierWings[7].depthM 25 on beam 41"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a wing tip past the floor that carries it",
+  "detail": "tierWings[7].aftU 0.9 against the tier-below extent u 0.857"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a wing nobody attested",
+  "detail": "tier 6 ends at u 0.857 with no tierWings, yet the deck-edge ray just aft lands 40.60 m \u2014 a story above the terrace floor 34.70 m"
+ }
+]

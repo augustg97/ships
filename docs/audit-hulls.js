@@ -428,6 +428,74 @@ say(v.id, 'a counter the record pins but the drawn sweep never reaches',
 }
 }
 }
+{
+const HSw = SHIPS_HULL.hullSurface(H);
+const edgeZ = (u) => Math.abs(SHIPS_HULL.surfacePoint(H, HSw, u, 1.0)[2])
+- (H.beam || 10) * 0.015 - 0.35;
+const wrec = H.tierWings || {};
+for (const k in wrec) {
+const i = +k;
+if (!Number.isFinite(i)) continue;
+const w = wrec[k];
+const face = H.tierAftU[k];
+if (face === undefined) {
+say(v.id, 'a wing on a tier whose face no record pins',
+`tierWings[${k}] with no tierAftU[${k}]`);
+continue;
+}
+if (!(w.aftU > face + 0.004))
+say(v.id, 'a wing that does not outrun its own face',
+`tierWings[${k}].aftU ${w.aftU} against the tier face u ${face}`);
+if (!(w.depthM > 0 && w.depthM < (H.beam || 10) / 2))
+say(v.id, 'a wing deeper than the half-beam it stands in',
+`tierWings[${k}].depthM ${w.depthM} on beam ${H.beam}`);
+const bw = wrec[String(i - 1)];
+const below = bw ? bw.aftU
+: (i - 1 >= 1 ? H.tierAftU[String(i - 1)]
+: (H.houseAt ? H.houseAt[1] : undefined));
+if (below !== undefined && w.aftU > below + 1e-6)
+say(v.id, 'a wing tip past the floor that carries it',
+`tierWings[${k}].aftU ${w.aftU} against the tier-below extent u ${below}`);
+const uMid = (face + Math.min(w.aftU,
+below !== undefined ? below : w.aftU)) / 2;
+const zE = edgeZ(uMid);
+if (zE > 0.8) {
+const x = (uMid - 0.5) * H.lwl, wroof = fl(i + 1);
+const stand = Math.max(drop(x, zE), drop(x, -zE));
+if (stand < wroof - 0.5)
+say(v.id, 'a recorded wing with no drawn structure',
+`tierWings[${k}] pins the tip at u ${w.aftU} yet the deck-edge ray `
++ `at u ${uMid.toFixed(3)} lands ${stand.toFixed(2)} m where the `
++ `wing roof runs ${wroof.toFixed(2)} m`);
+const open = Math.min(...[0, (H.beam || 10) * 0.1, -(H.beam || 10) * 0.1]
+.map(z => drop(x, z)));
+if (open > wroof - 0.5)
+say(v.id, 'a wing drawn as a full-width shelf',
+`tier ${k} centreline ray at u ${uMid.toFixed(3)} lands `
++ `${open.toFixed(2)} m — the tier still crosses the notch the `
++ `record recesses`);
+}
+}
+for (const k in H.tierAftU) {
+const i = +k;
+if (!(i > 0 && i < nT - 1) || wrec[k]) continue;
+const pin = H.tierAftU[k];
+const bw2 = wrec[String(i - 1)];
+const ext = bw2 ? bw2.aftU
+: (i - 1 >= 1 ? H.tierAftU[String(i - 1)] : undefined);
+const uProbe = pin + 0.012;
+if (ext === undefined || uProbe > ext - 0.005) continue;
+const zP = edgeZ(uProbe);
+if (zP < 0.8) continue;
+const xP = (uProbe - 0.5) * H.lwl;
+const landE = Math.max(drop(xP, zP), drop(xP, -zP));
+if (landE > fl(i) + 1.5)
+say(v.id, 'a wing nobody attested',
+`tier ${k} ends at u ${pin} with no tierWings, yet the deck-edge ray `
++ `just aft lands ${landE.toFixed(2)} m — a story above the terrace `
++ `floor ${fl(i).toFixed(2)} m`);
+}
+}
 }
 {
 const strips = [];
