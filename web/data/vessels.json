@@ -5468,11 +5468,11 @@
     },
     "tierAftU": {
      "1": 0.992,
-     "2": 0.984,
-     "3": 0.959,
-     "4": 0.922,
+     "2": 0.959,
+     "3": 0.934,
+     "4": 0.869,
      "5": 0.861,
-     "6": 0.839,
+     "6": 0.857,
      "7": 0.816,
      "8": 0.801
     },
@@ -5480,7 +5480,7 @@
     "funnelOval": 1.98,
     "bridgeM": 12.0,
     "bridgeHalf": 0.4,
-    "housePlateProvenance": "MEASURED off the scale profile (Wikimedia Commons, File:En mary titanic.svg, Yzmo, CC BY-SA 3.0) by segmenting her silhouette and reading, at every metre of height above the load waterline, the most-forward and most-aft column still standing at that height. houseAt, houseCrest, tierForeU, tierAftU, the funnel station and its 24.3 m fore-and-aft length, and the mast at u 0.19 are all that measurement. Three earlier attempts were judged by eye off a 34-degree lens that magnifies the near half of a 345 m ship by a third.",
+    "housePlateProvenance": "MEASURED off the scale profile (Wikimedia Commons, File:En mary titanic.svg, Yzmo, CC BY-SA 3.0) by segmenting her silhouette and reading, at every metre of height above the load waterline, the most-forward and most-aft column still standing at that height. houseAt, houseCrest, tierForeU, tierAftU 1 and 7-8, the funnel station and its 24.3 m fore-and-aft length, and the mast at u 0.19 are all that measurement. Three earlier attempts were judged by eye off a 34-degree lens that magnifies the near half of a 345 m ship by a third. r162: tierAftU 2-6 re-measured off the aft-quarter photographs; see tierAftUProvenance.",
     "bridgeBeamM": 45.0,
     "topWorks": [
      {
@@ -5542,7 +5542,8 @@
      "roofsProvenance": "TERRACES, NOT THE CREST: two plates at the era's two ends read laid decking on every aft terrace — the fantail and its pool, the cafe step, the main-pool terrace, the two shallow steps above — and white coated plate on the topmost roof where the dome and mast stand and on the large shell roof forward of the cascade. Plates: Commons 20161001 Queen Mary Aerial 2 (CC BY-SA 4.0, 3888 px, ~3.4 px/m at the stern) and the 2004-07-20 Hamburg arrival set (Arnold Schott, CC BY-SA 3.0, 1200 px, ~1.5 px/m) — colour-field reads, the fields metres wide, so both plates support them; scales and crops in Research/QM2-PLATES.md. Replaces the r108 'false', whose own sentence 'pale coated plate in every photograph' these photographs refute. The forward working deck's painted steel is still not drawn by this one-covering model."
     },
     "steering": "steel",
-    "rakeProvenance": "MEASURED off a bow plate — Wikimedia Commons File:Queen Mary 2 bow.jpg (Conollyb, CC BY 2.5, Sydney) — scaled by her name letters on the flare at about 1.5 m. Her stem overhangs the forward perpendicular by about 23.5 m; the model had 13.67 m, which is why she read blunt from ahead however fine the waterline under her. LOA 345 is fixed and already drawn exactly, so the overhang comes out of the perpendiculars: lwl is the length between them (318.2 m) and the transom keeps its 3.3 m counter — the same lwl-is-LBP semantics r131 established on the container ship and the slave ship. Every u-keyed feature is re-derived through the new frame from its own original plate reading, not rescaled from the old u."
+    "rakeProvenance": "MEASURED off a bow plate — Wikimedia Commons File:Queen Mary 2 bow.jpg (Conollyb, CC BY 2.5, Sydney) — scaled by her name letters on the flare at about 1.5 m. Her stem overhangs the forward perpendicular by about 23.5 m; the model had 13.67 m, which is why she read blunt from ahead however fine the waterline under her. LOA 345 is fixed and already drawn exactly, so the overhang comes out of the perpendiculars: lwl is the length between them (318.2 m) and the transom keeps its 3.3 m counter — the same lwl-is-LBP semantics r131 established on the container ship and the slave ship. Every u-keyed feature is re-derived through the new frame from its own original plate reading, not rescaled from the old u.",
+    "tierAftUProvenance": "TIERS 2-6 MEASURED off the aft-quarter plates (Research/QM2-PLATES.md), replacing the r97 scale-drawing spans the r132 residual convicted: the drawing dealt seven near-equal steps with the deepest near the top, the photographs read five terraces with the deep ones low and mid. Method: each terrace depth counted in 2.6 m tierBands balcony bays on the 2016-10-01 aerial (CC BY-SA 4.0, 3888 px; every gap measured between deck edges at the SAME height so the one-story parallax cancels), chained downward from the kept crest foot t7 0.816: fantail 6 bays, cafe step 3, main-pool terrace 8, awning step 1, inter-row strip half, top step 5 bays AS BUILT - the record year is 2003 and the 2004-07-20 Hamburg pair reads the open top step about a bay deeper than the 2016 frame, whose refit cabin front took that bay (only the top step changed in the 2016 remastering). Integer bay counts, error a half-bay per edge (1.3 m, u 0.004). Chain closure: the predicted fantail edge lands at u 1.008 against the drawn counter extremity u 1.010. Crest block t7-t9 kept from the r97 profile (not this residual). Named residuals: the drawn fantail stops at the t1 strake face 0.992, about 5 m short of the real edge over the counter (stern shell loft, its own round); balcony wings running aft past the terrace floors and curved terrace rails with fantail windscreen panels are still not drawn (r161 read 3)."
    },
    "rows": [
     [

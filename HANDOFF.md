@@ -10891,3 +10891,67 @@ curved terrace aft rails with the fantail's outward-leaning windscreen panels (t
 cuts every tier square). (3) The fleet-wide probe sweep to rank remaining hulls by boxy
 count. (4) Preussen mast livery source pass (r155). (5) Endurance forecastle, waiting on
 RMG J9266. (6) Azzam crest span, waiting on a clean elevated bow-quarter plate.
+
+## Round 162 — 2026-08-25 — the cascade takes its measured order: deep low and mid
+
+**Queue check first (August's second list worked in full r57, survey carries). Opening full
+64-frame check at HEAD 0da3e75: 64/64 within tolerance, 0 BLANK, EXIT:0
+(build/r162-opening-check.txt) — r161's confirming pass owned; no web edit until it exited.**
+
+**THE QUEUE HEAD OPENED: the r162 tierAftU measuring round off the pinned plates
+(Research/QM2-PLATES.md).** Method, per the plates file's own prescription: every terrace depth
+measured on the 2016-10-01 aerial between deck edges AT THE SAME HEIGHT — each terrace's aft
+rail against the next wall's foot — so the one-story parallax cancels inside every gap; gaps
+taken along the centerline (instrument: build/staging/r162/measure.py, every line drawn on the
+plate and looked at, overlay.png). Depths in 2.6 m tierBands bays, integer counts, ±half-bay
+per edge. Scale: the chain anchors at the kept crest foot t7 0.816 and closes at the counter —
+the predicted fantail edge lands u 1.008 against the drawn stern extremity u 1.010, inside a
+bay. THE MEASURED CASCADE: fantail 6 bays, café step 3, main-pool terrace 8, awning step 1,
+inter-row strip a half, top step 5 AS BUILT (record year 2003; the 2016 frame reads the top
+step 4.5 bays and the 2004 Hamburg pair reads it about a bay deeper — the refit cabin front
+took that bay, and only the top step changed in the remastering).
+
+**The record change: tierAftU {2: 0.984→0.959, 3: 0.959→0.934, 4: 0.922→0.869, 5: 0.861 kept
+by coincidence, 6: 0.839→0.857}; t1 and the crest t7–t9 kept.** Authored by assert-heavy
+build/staging/r162/author-qm2-tieraft.py (byte-stable serializer proven first, fleet asserted
+untouched); tierAftUProvenance added; housePlateProvenance amended so no reader takes the aft
+spans from the drawing any more. One tension stated rather than smoothed: read 2 ranked the
+fantail deepest by eye, the chain measures C 8 bays against A 6 — most of the difference is
+the fantail's rounded overhang the model does not draw, because the drawn stern stops at the
+t1 strake face 0.992 while the plates put the fantail edge at ≈1.008 over the counter. That
+5 m stern-loft shortfall is a NAMED RESIDUAL, its own round.
+
+**Audit: 33/0 clean (build/audit-r162-final.json). The r162 rule added — 'a terrace the record
+pins but the drawn tier ignores' — the r160 class, aft-cascade direction: down-rays just
+forward of every pinned tier wall must meet the tier's roof, just aft must fall past it; three
+z-stations so a deck work can block one ray but only a wall blocks all three.** Both directions
+injection-proven: (a) record pins dragged 0.02 forward convicted both tierAftU carriers —
+queen-mary-2 by the new rule's aft arm, azzam by her three existing cluster/terrace rules (the
+new rule's aft arm is lenient on her narrow tiers, min-of-three rays, stated); (b) mkPin's rec
+loop severed (the pre-r98 builder) convicted EXACTLY {azzam, queen-mary-2}, 9 problems, both
+arms firing (build/staging/r162/inject-*). hull.js untouched this round, so the git-checkout
+restore was safe; clean re-run 0 both times.
+
+**Looked at (rule 1): the b=145&l=40&y=25 elevated stern grammar, before (r161's
+look-stern-after.png) against after (build/staging/r162/look-stern-after.png): the near-equal
+staircase is gone; the render now reads deep top step, two shallow steps, the deep main-pool
+terrace at mid, the café step, the long fantail — the aerial's own order.**
+
+**⚠ FRAMES — THE CLOSING RUN DID NOT FINISH INSIDE THE WATCHDOG; DO NOT LAUNDER THE MOVE.**
+The opening check confirmed r161 at the old record; the closing full run was still capturing at
+the 80-minute kill and was stopped. r163's opening check WILL flag ship-queen-mary-2 as moved —
+that movement is THIS round's recorded cascade change (stern terraces re-pinned), and the
+accept reason should say so and cite this section. Any OTHER moved frame is not explained by
+this round: this round changed one vessel record, the audit file copies, and docs/ via the
+build — nothing else. Read the diff before accepting, per the standing rule.
+
+**Deployed: data-version 1787726449; live verify follows the push.**
+
+**Next, in order:** (1) The stern-loft residual named above — the drawn fantail stops 5 m short
+of the counter at ≈u 1.008; re-lofting the stern shell (t0/t1 aft faces and the counter sweep)
+is a geometry round with the 2011 Southampton astern plate as witness. (2) The two QM2 geometry
+residuals from r161 read 3: balcony wings running aft past the terrace floors, and curved
+terrace aft rails with the fantail's windscreen panels. (3) The fleet-wide probe sweep to rank
+remaining hulls by boxy count. (4) Preussen mast livery source pass (r155). (5) Endurance
+forecastle, waiting on RMG J9266. (6) Azzam crest span, waiting on a clean elevated bow-quarter
+plate.

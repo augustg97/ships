@@ -569,6 +569,51 @@
       }
     }
 
+    /* ── r162: A TERRACE THE RECORD PINS BUT THE DRAWN TIER IGNORES ─────────────────────
+       Queen Mary 2's aft cascade drew seven near-equal steps for 65 rounds because the
+       u-spans came off the Commons scale DRAWING; the 2016 aerial and the 2004 Hamburg
+       pair read five terraces with the deep ones low and mid, and r162 wrote the measured
+       pins into tierAftU (Research/QM2-PLATES.md). The pins are data now, and this rule
+       keeps drawing and record from drifting the way r161's roofPlate flags had: at every
+       pinned tier the aft wall must STAND at (u−0.5)·lwl — down-rays just forward of the
+       pin meet the tier's roof, down-rays just aft fall past it toward the terrace below.
+       Three z-stations each side, because a deck work standing on the lower terrace can
+       block one ray but only a wall blocks all three (fwd takes the max, aft the min).
+       Record-gated: no tierAftU, no rule, no other hull touched. */
+    if (H.tierAftU && H.decks && H.lwl) {
+      const nT = H.decks, baseT = H.freeboard || 0,
+            dhT = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+      const fl = i => (i <= 0) ? baseT
+        : (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+        : baseT + dhT * i;
+      const rcT = new THREE.Raycaster();
+      const zs = [0, (H.beam || 10) * 0.2, -(H.beam || 10) * 0.2];
+      const drop = (x, z) => {
+        rcT.set(new THREE.Vector3(x, 90, z), new THREE.Vector3(0, -1, 0));
+        const hit = rcT.intersectObject(g, true)
+          .find(ht => { for (let e = ht.object; e; e = e.parent)
+                          if (e.visible === false) return false;
+                        const p = tagOf(ht.object);
+                        return !p || p.name !== 'Waterplane mask'; });
+        return hit ? hit.point.y : -1;
+      };
+      for (const k in H.tierAftU) {
+        const i = +k;
+        if (!(i > 0 && i < nT - 1)) continue;          // mkPin's own key filter
+        const wall = (H.tierAftU[k] - 0.5) * H.lwl, roof = fl(i + 1);
+        const fwd = Math.max(...zs.map(z => drop(wall - 0.6, z)));
+        const aft = Math.min(...zs.map(z => drop(wall + 0.6, z)));
+        if (fwd < roof - 0.5)
+          say(v.id, 'a terrace the record pins but the drawn tier ignores',
+              `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just forward of the `
+              + `pin lands ${fwd.toFixed(2)} m where the tier roof runs ${roof.toFixed(2)} m`);
+        else if (aft > roof - 0.5)
+          say(v.id, 'a tier drawn past its recorded aft pin',
+              `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just aft of the pin `
+              + `still lands ${aft.toFixed(2)} m — the wall stands beyond its own record`);
+      }
+    }
+
     /* ── r155: A RECORDED FLAG-BUTTON IS WHERE THE MAST STOPS ───────────────────────────
        Preussen's record attests ONE mast height and its datum is the truck: 58 m deck to
        flag-button, all five masts — the Laeisz Standardrigg cut interchangeable spars, so

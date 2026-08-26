@@ -353,6 +353,39 @@ say(v.id, 'a drawn bow off its own recorded sheer line',
 + `line runs ${at.line.toFixed(2)} m (bowTopM ${H.bowTopM})`);
 }
 }
+if (H.tierAftU && H.decks && H.lwl) {
+const nT = H.decks, baseT = H.freeboard || 0,
+dhT = H.deckM || Math.min((H.beam || 0) * 0.105, 3.0);
+const fl = i => (i <= 0) ? baseT
+: (H.tierFloorsM && H.tierFloorsM[i - 1] !== undefined) ? H.tierFloorsM[i - 1]
+: baseT + dhT * i;
+const rcT = new THREE.Raycaster();
+const zs = [0, (H.beam || 10) * 0.2, -(H.beam || 10) * 0.2];
+const drop = (x, z) => {
+rcT.set(new THREE.Vector3(x, 90, z), new THREE.Vector3(0, -1, 0));
+const hit = rcT.intersectObject(g, true)
+.find(ht => { for (let e = ht.object; e; e = e.parent)
+if (e.visible === false) return false;
+const p = tagOf(ht.object);
+return !p || p.name !== 'Waterplane mask'; });
+return hit ? hit.point.y : -1;
+};
+for (const k in H.tierAftU) {
+const i = +k;
+if (!(i > 0 && i < nT - 1)) continue;
+const wall = (H.tierAftU[k] - 0.5) * H.lwl, roof = fl(i + 1);
+const fwd = Math.max(...zs.map(z => drop(wall - 0.6, z)));
+const aft = Math.min(...zs.map(z => drop(wall + 0.6, z)));
+if (fwd < roof - 0.5)
+say(v.id, 'a terrace the record pins but the drawn tier ignores',
+`tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just forward of the `
++ `pin lands ${fwd.toFixed(2)} m where the tier roof runs ${roof.toFixed(2)} m`);
+else if (aft > roof - 0.5)
+say(v.id, 'a tier drawn past its recorded aft pin',
+`tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just aft of the pin `
++ `still lands ${aft.toFixed(2)} m — the wall stands beyond its own record`);
+}
+}
 (H.masts || []).forEach((mk, i) => {
 if (mk.truckM === undefined || mk.rig !== 'square') return;
 const mt = (H.__mastTops || []).find(t => Math.abs(t.u - mk.at) < 0.02);
