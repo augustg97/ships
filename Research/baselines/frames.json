@@ -323,6 +323,11 @@
    "note": "THE OPEN HULL'S FLOOR, WATCHED - added r127. 55 deg down at 30 m over the followed Sahul dugout: the one angle that sees past the rim to the hollowed floor and the stowed gear (spare paddles, bailer) the record attests. Every other committed frame takes the floor on faith - the r114 one-view-blindness class. Same frozen noon as passage-sahul."
   },
   {
+   "name": "sea-canoe-floor",
+   "path": "/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25",
+   "note": "THE DOUBLE HULL'S FLOOR, WATCHED - added r157, closing the r127 residual (the canoe's floor gear had no committed frame). 80 deg down at 25 m over the followed Aotearoa canoe - the r127 diagnosis angle, steeper than the dugout's 55 because a 0.70 m deep hull at 1.05 m beam hides its floor from any shallower line: the open lower hull shows the 3.40 m steering paddle and bailer on the floor, the upper hull hides under the sail (correct, r127's own read). e=3 stated because the app derives the era from the voyage's year (1280) - the r127 diagnosis frag said e=4 and was silently overridden. frozen=553 puts local noon 3.6 deg off her longitude (subsolar lon = 0.006t rad), mid-leg Rarotonga-Kermadecs at 24 26 S 166 18 W, no land within 486 nm - probe table in build/staging/r157/."
+  },
+  {
    "name": "ship-slave-ship",
    "path": "/?frozen=1#v=ship&s=slave-ship",
    "note": "Added r131 with the rake authoring: until this frame she appeared in no committed view at all - the r114/r128 one-view-blindness class, on the hull that carries the Middle Passage. Berth 17, between ship-of-the-line and wyoming."

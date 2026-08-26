@@ -10500,3 +10500,72 @@ is now solo-verified and characterised, worth naming the mechanism. (3) The flee
 probe sweep to rank remaining hulls by boxy count. (4) Preussen mast livery source pass
 (r155 candidate). (5) The degenerate-triangle zero-normal class recorded above, if it
 ever shows in a render.
+
+## Round 157 — 2026-08-25 — the canoe's floor gets its watcher, and the residue class turns out to be one mechanism
+
+**Queue check first: August's second list stands WORKED IN FULL (r57), so the survey
+carried — r156's queue head (canoe floor frame) and its item (2) (the under-gate residue
+class) both CLOSED this round. No code changed: the round is a new committed frame, three
+re-captured baselines, and the analysis that justifies them.**
+
+**Opening full 62-frame check at HEAD: 62/62 within tolerance, 0 BLANK, EXIT:0
+(build/r157-opening-check.txt), nothing else rendering, no edit landed while it ran (the
+r156 trap avoided by doing only read-only prep until it exited).** The three residue
+frames scored exactly their documented numbers — ship-junk 0.048, ship-treasure 0.049,
+ship-endurance 0.021 — and ship-galleass, re-baselined by r156, scored 0.0000.
+
+**The under-gate residue class is ONE mechanism, now named: stale baselines predating
+r136's grating-hole law.** The diff of each frame against its baseline was read pixel by
+pixel (build/diff-r157-residue.py, crops in build/staging/r157/): ship-junk's whole
+0.048%/2512 px is its four deck hatches in a 36 px band at the deck line — dark slat
+plates in the r129-era baseline vs the r136 woven grating over a dark hold in today's
+render; ship-treasure the same on two hatches amidships (2261 of 2530 px) plus the
+documented r143 neighbour-berth slivers at the frame edges (94+175 px); ship-endurance
+one forward hatch in a single 274×50 px cluster. All three baselines were last committed
+r129 (08-19 07:32), seven rounds before r136 changed gratings fleet-wide by 0.02–0.05% —
+under the 0.05% gate, so no round was ever forced to accept them. Deterministic, not
+shimmer: galleass, whose baseline is one day old, reads 0.0000% in the same run, and
+r156 had already reproduced its 0.047 solo at clean HEAD twice. All three accepted with
+the mechanism in their FRAME-LOG reasons and re-checked 0.000. The 'treasure 0.049 /
+junk 0.048 / galleass 0.047' queue item is CLOSED — galleass absorbed r156, the other
+two plus endurance absorbed here, and the class rule generalises: **a fleet-wide change
+that moves a frame less than the gate leaves that baseline quietly stale forever; when a
+frame hovers just under the gate for many rounds, diff it against its baseline and read
+the pixels — it is probably carrying an old change, not shimmer.**
+
+**The canoe floor frame: NEW committed baseline sea-canoe-floor, 63 frames now.**
+`/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25` — the r127 diagnosis angle made a
+watcher. The frozen time was PICKED BY PROBE, not guessed (build/probe-r157-canoe-floor.py):
+candidates spaced 1047 s apart all hold local noon at 170°W (subsolar lon = 0.006t rad),
+and the probe read the slip card's own Position/Nearest-land rows off the DOM at each —
+t=553 puts her at 24°26′S 166°18′W, noon 3.6° off her longitude, mid-leg
+Rarotonga→Kermadecs, 'none within 486 nm' for land. Two corrections to the r127 frag
+written into the frame note: e=3 not e=4 (the app derives the era from the voyage's own
+year, 1280 — the e=4 in the r127 note was silently overridden, and a URL that says one
+thing and does another is the r71 class in miniature), and the 80° depression is the
+canoe's own requirement — a 0.70 m deep hull at 1.05 m beam hides its floor from the
+dugout's 55° line. Looked at (rule 1): the open lower hull carries the 3.40 m
+leaf-bladed steering paddle, the bailer and the coil on its floor, ribs visible inside;
+the upper hull hides under the crab-claw sail — r127's own read, still true. Rule 0:
+reads as a rendered sea from overhead; a viewer can name the double hull with its lashed
+platform and crossbeams, the stowed steering gear in the open hull, and where she is —
+position, course and nearest-land on her own slip card. Variance 5186.8 against a blank
+floor of 4.0. Re-checked 0.000 after capture.
+
+**Audit: 33 hulls, 0 problems, EXIT:0 (build/audit-r157.json). No code changed, and the
+audit says so.**
+
+**Measured, this round's own discipline:** every number above was read off a diff image
+or a DOM row, none judged from a squinted frame. The probe table (six candidate times,
+six positions, six land rows) is in the round's staging directory beside the hatch crops.
+
+**Deployed: stamp 1787702846**, live verify in the commit.
+
+**Next, in order:** (1) The remaining r143 standing residuals — myeongnyang Action
+staging as a FULL round (battle.js:189 needs campaign+fleets, the 293 m strait's DEM
+patch, the 11.5-kn reversing tide), Azzam crest + boundary plate, QM2 aft terraces,
+Endurance forecastle (waits on RMG J9266), the battle-rig record question. (2) The
+fleet-wide probe sweep to rank remaining hulls by boxy count and name the next class.
+(3) Preussen mast livery source pass (r155 candidate). (4) The degenerate-triangle
+zero-normal class (r156 residue), if it ever shows in a render. The canoe floor frame
+and the under-gate residue class LEAVE the list, both closed this round.
