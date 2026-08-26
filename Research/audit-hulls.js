@@ -612,6 +612,64 @@
               `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just aft of the pin `
               + `still lands ${aft.toFixed(2)} m — the wall stands beyond its own record`);
       }
+
+      /* ── AND A PIN PAST THE PERPENDICULAR MUST RIDE THE COUNTER (round 163) ──────────
+         Queen Mary 2's fantail edge is recorded at u 1.008 — past the after
+         perpendicular, over the counter (the r162 chain closure; the 2011 Southampton
+         astern plate reads one continuous rounded shell from counter to fantail rail).
+         Two ways that record can rot, so two arms. ARITHMETIC: the record's own
+         loa/lwl/rakes place the drawn stern extremity, and a pin past it stands on
+         water no loft can reach. RAYS: under the old u 0.999 clamp the walls freeze at
+         the clamp's half-breadth and the last five metres of stern are a tube inside
+         the counter — drawn, roofed, and wrong in plan only, which no elevation shows.
+         So at three stations across the swept quarter a down-ray one waterway plus a
+         margin inside the TRUE deck edge (surfacePoint at the bisection-inverted x, the
+         same loft the builder rides) must meet the pinned tier's roof, both sides.
+         Ray arm record-gated on a pin past u 1.0: no such pin, no rays, no other hull
+         touched. */
+      if (H.loa) {
+        const rakeAllow2 = ((H.stemRake || 0) + (H.sternRake || 0)) * H.loa;
+        const rakeScale2 = rakeAllow2 > 0
+          ? Math.min(1, Math.max(0, H.loa - H.lwl) / rakeAllow2) : 1;
+        const tipU = 0.5 + (0.5 * H.lwl + (H.sternRake || 0) * rakeScale2 * H.loa) / H.lwl;
+        const pins2 = Object.entries(H.tierAftU).map(([k2, p2]) => [+k2, p2]);
+        if (H.houseAt && H.houseAt.length === 2) pins2.push([0, H.houseAt[1]]);
+        for (const [i2, p2] of pins2)
+          if (p2 > tipU - 0.0005)
+            say(v.id, 'a terrace pinned past the ship\'s own counter',
+                `tier ${i2} aft pin u ${p2} vs the drawn stern extremity u ${tipU.toFixed(4)}`);
+        const swept = pins2.filter(([i2, p2]) =>
+          i2 > 0 && i2 < nT - 1 && p2 > 1.0 && p2 <= tipU - 0.0005);
+        if (swept.length) {
+          const HSs2 = SHIPS_HULL.hullSurface(H);
+          const qAtX2 = (x) => {
+            let lo = 0, hi = 1;
+            for (let it = 0; it < 32; it++) {
+              const q = (lo + hi) / 2;
+              if ((q - 0.5) * H.lwl + HSs2.rake(q) < x) lo = q; else hi = q;
+            }
+            return (lo + hi) / 2;
+          };
+          for (const [i2, p2] of swept) {
+            const xPin = (p2 - 0.5) * H.lwl;
+            const above = H.tierAftU[String(i2 + 1)];
+            const xAbove = ((above !== undefined ? above : p2 - 0.05) - 0.5) * H.lwl;
+            const roof2 = fl(i2 + 1);
+            for (const f of [0.45, 0.6, 0.75]) {
+              const x = xAbove + (xPin - xAbove) * f;
+              const zE = Math.abs(SHIPS_HULL.surfacePoint(H, HSs2, qAtX2(x), 1.0)[2])
+                         - (H.beam || 10) * 0.015 - 0.35;
+              if (zE < 0.8) continue;
+              const land = Math.min(drop(x, zE), drop(x, -zE));
+              if (land < roof2 - 0.5)
+                say(v.id, 'a counter the record pins but the drawn sweep never reaches',
+                    `tier ${i2} pinned at u ${p2} past the perpendicular, yet the ray one `
+                    + `waterway inside the true deck edge at x ${x.toFixed(1)} lands `
+                    + `${land.toFixed(2)} m where the tier roof runs ${roof2.toFixed(2)} m`);
+            }
+          }
+        }
+      }
     }
 
     /* ── r155: A RECORDED FLAG-BUTTON IS WHERE THE MAST STOPS ───────────────────────────

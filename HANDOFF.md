@@ -10955,3 +10955,88 @@ terrace aft rails with the fantail's windscreen panels. (3) The fleet-wide probe
 remaining hulls by boxy count. (4) Preussen mast livery source pass (r155). (5) Endurance
 forecastle, waiting on RMG J9266. (6) Azzam crest span, waiting on a clean elevated bow-quarter
 plate.
+
+## Round 163 — 2026-08-26 — the stern shell reaches the counter
+
+**Queue check first (August's second list worked in full r57, survey carries). Opening full
+64-frame check at HEAD 7aa0ba7: 63 ok, 0 BLANK, ONE moved — ship-queen-mary-2 0.490/0.370,
+exactly the move HANDOFF r162 predicted and owned (build/r163-opening-check.txt). Diff read
+before accepting: tier-2 boat-gallery scallops (the gallery span shortened 0.984→0.959 and
+the boats re-space across it) and the re-pinned terrace walls aft, else byte-black — r162's
+recorded cascade, accepted citing that section. Timing stated so nothing is laundered: the
+QM2 frame was captured 00:06:54 and this round's first edit landed 00:07:11, so that baseline
+is the pure r162 state; frames captured after 00:07:50 (ship-azzam, ship-endurance, the
+action set) already ran against r163's tree and read 0.000 — the ship gate held live.
+r162's commit was never pushed (the watchdog killed the round before push); this round's
+push carries both.**
+
+**THE QUEUE HEAD OPENED: the r162 stern-loft residual — the drawn stern stopped at the t1
+strake face u 0.992, 5 m short of the fantail edge the plates put over the counter.** The
+2011 Southampton astern plate (Research/QM2-PLATES.md plate 3, the counter-and-fantail
+witness, committed r161) reads the stern as ONE continuous rounded shell from the counter to
+the fantail rail — oval window row wrapping quarter to quarter, no square cut, no ledge. The
+r162 bay chain already predicted the edge at u 1.008 against the drawn counter extremity
+1.010. The strake face 0.992 was the scale DRAWING's stern column — the same weak link r162
+convicted for tiers 2-6.
+
+**The record change: houseAt [0.079, 0.994]→[0.079, 1.008]; tierAftU 1: 0.992→1.008** (both
+strakes land on the measured fantail edge because the plate reads one vertical face).
+Authored by assert-heavy build/staging/r163/author-qm2-sternloft.py (byte-stable serializer
+proven, fleet asserted untouched, the pin proven inside the record's own drawn tip 1.010
+before writing); tierAftUProvenance and housePlateProvenance amended.
+
+**The loft change (hull.js linerHouse): a tier the record carries past the after
+perpendicular rides the counter.** Tier pins are x/lwl, but half() sampled the shell at u AS
+IF x = (u−0.5)·lwl — no rake — then clamped at 0.999: inside the rake spans it read the
+shell up to a rake's length away from the wall it sizes (always narrower, so the error hid
+inboard), and nothing past u 1.0 could draw at all. A record with any pin past 1.0 now
+inverts the true deck-edge x (bisection, both rake terms monotone), so every wall stands one
+waterway inside the shell AT ITS OWN STATION and the plan sweeps home with the counter to
+the recorded edge — walls, roof, rails and promenade all ride the same half(), so the sweep
+propagates by construction, and the stern capping-rail collision class cannot arise (the
+tier now covers the counter top it used to expose). Ship-gated: no pin past 1.0,
+byte-identical — proven live by ship-azzam/ship-endurance 0.000 above. NAMED RESIDUAL (the
+gate's own honesty): the fleet keeps the no-rake sampling, whose inboard bias is nil outside
+rake spans and sub-metre inside them; re-lofting fleet-wide is its own measured round with
+per-ship diffs.
+
+**Audit: 33/0 clean. The r163 rule — 'a pin past the perpendicular must ride the counter' —
+two arms in the r162 rule's own block (one fl/drop derivation).** ARITHMETIC: every tierAftU
+pin and houseAt[1] must land inside the record's own drawn stern extremity (loa/lwl/rakes).
+RAYS (record-gated on a pin past 1.0): at three stations across the swept quarter, a
+down-ray one waterway + 0.35 m inside the TRUE deck edge (surfacePoint at the
+bisection-inverted x, the same loft the builder rides) must meet the pinned tier's roof both
+sides. Injections: (b) pin dragged past each carrier's own tip convicted EXACTLY
+{azzam, queen-mary-2} by the arithmetic arm (existing pin-order rules fired alongside, same
+two ships); (a) builder severed by stashing hull.js convicted EXACTLY queen-mary-2, 3
+problems, all three ray stations (build/staging/r163/inject-*); clean restores 0 both times.
+
+**Looked at (rule 1): b=145&l=40&y=25 before (r162's look-stern-after.png) against after
+(build/staging/r163/look-stern-after.png): the square-cut stern with its stacked white
+ledges becomes the teak fantail sweeping home over the counter — the 2011 plate's own
+grammar. Three facts a viewer can read: the cascade descends in teak terraces to a long
+fantail; the fantail's aft edge is rounded and carries over the counter; the balcony strakes
+run as one white plane into the stern round. measure_ship: Superstructure and House deck now
+end u 1.008 exactly, walls half 19.85 inside the 20.5 shell, extent 345.00 = LOA.**
+
+**Frames: ship-queen-mary-2 re-checked after the r162 acceptance — 0.990/0.650 for r163's
+own change, diff read (house-wide balcony lattice re-phase — the mullion rhythm rides
+perimeter arc length and the plan changed, phase never a recorded quantity; the stern sweep;
+the strake fronts taking the true flared bow shell), accepted with the full reason,
+re-checked 0.000. The closing full run is NOT owed by r164's opening check this time for the
+fleet — the opening run itself captured the neighbours against r163's tree at 0.000 — but
+r164's opening check still owns the standing confirmation.**
+
+**Deployed: data-version 1787730010; live verify follows the push (which also carries
+r162's stranded commit 7aa0ba7).**
+
+**Named residuals, in order:** (1) The QM2 stern-face livery: the 2011 plate reads the black
+paint rising over the counter so roughly one deck of white shows at the stern face; the
+model paints both strake tiers shellTopside white around the sweep (stated in
+tierAftUProvenance). (2) The two r161 read-3 geometry residuals: balcony wings running aft
+past the terrace floors; curved terrace aft rails with the fantail's outward-leaning glass
+windscreen panels (the 2011 plate shows them on the swept edge this round built — they have
+somewhere to stand now). (3) The fleet-wide no-rake tier sampling, above. (4) The
+fleet-wide probe sweep to rank remaining hulls by boxy count. (5) Preussen mast livery
+source pass (r155). (6) Endurance forecastle, waiting on RMG J9266. (7) Azzam crest span,
+waiting on a clean elevated bow-quarter plate.

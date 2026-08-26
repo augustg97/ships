@@ -1,0 +1,28 @@
+checked 33 hulls, 5 problems
+[
+ {
+  "id": "azzam",
+  "rule": "a tier drawn past its recorded aft pin",
+  "detail": "tier 1 pinned aft at u 0.795 yet the ray just aft of the pin still lands 20.00 m \u2014 the wall stands beyond its own record"
+ },
+ {
+  "id": "azzam",
+  "rule": "a terrace pinned past the ship's own counter",
+  "detail": "tier 2 aft pin u 1.01 vs the drawn stern extremity u 1.0000"
+ },
+ {
+  "id": "azzam",
+  "rule": "band declared but not worn",
+  "detail": "tier 2: 56 of 716 wall vertices carry band glass"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a tier drawn past its recorded aft pin",
+  "detail": "tier 4 pinned aft at u 0.869 yet the ray just aft of the pin still lands 34.70 m \u2014 the wall stands beyond its own record"
+ },
+ {
+  "id": "queen-mary-2",
+  "rule": "a terrace pinned past the ship's own counter",
+  "detail": "tier 5 aft pin u 1.02 vs the drawn stern extremity u 1.0100"
+ }
+]

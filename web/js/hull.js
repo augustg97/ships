@@ -4546,6 +4546,32 @@ function linerHouse(S) {
      steps fore and aft, never sideways. houseTaper is that set-in as a fraction of the
      beam over the whole house; 0.16 is the old value and every existing hull keeps it. */
   const taper = S.houseTaper !== undefined ? S.houseTaper : 0.16;
+  /* ── ⚠ A TIER THE RECORD CARRIES PAST THE AFTER PERPENDICULAR RIDES THE COUNTER ─────
+     Tier pins are x/lwl read off plates and profiles, but the loft sampled the shell AT
+     u AS IF x were (u − 0.5)·lwl — no rake — and clamped at 0.999. Inside the rake spans
+     that reads the shell up to a rake's length away from the wall it sizes (always the
+     narrower station, so the error hid inboard), and nothing past the perpendicular can
+     be drawn at all: Queen Mary 2's fantail edge is MEASURED at u 1.008, over the counter
+     (r162 chain closure; the 2011 Southampton astern plate), and her stern stopped 5 m
+     short at the strake face. A record that pins any edge past u 1.0 declares its house
+     rides the counter: every half-breadth then inverts the deck-edge x truly (bisection —
+     both rake terms are monotone in u), so each wall stands one waterway inside the shell
+     AT ITS OWN STATION and the plan sweeps home with the counter to the recorded edge.
+     Ship-gated: no pin past 1.0, byte-identical. The fleet keeps the old sampling, whose
+     inboard bias away from rake zones is nil — re-lofting it fleet-wide is its own
+     measured round. */
+  const overCounter = hB > 1.0
+    || Object.values(S.tierAftU || {}).some(p => p > 1.0);
+  const qAtX = (x) => {
+    if (x <= -0.5 * L + H.rake(0)) return 0;
+    if (x >= 0.5 * L + H.rake(1)) return 1;
+    let lo = 0, hi = 1;
+    for (let it = 0; it < 32; it++) {
+      const q = (lo + hi) / 2;
+      if ((q - 0.5) * L + H.rake(q) < x) lo = q; else hi = q;
+    }
+    return (lo + hi) / 2;
+  };
   for (let i = 0; i < n; i++) {
     const shell = i < ns;
     const wid = shell ? B : B * (1 - taper * (0.5 + i / n));   // ≡ 0.92 − i/n·0.16 at 0.16
@@ -4564,7 +4590,8 @@ function linerHouse(S) {
     /* the tier stops short of the deck edge by a WATERWAY, lofted from the hull's own
        half-breadth so it can never overhang, on any ship, at any beam (the round-4 fault) */
     const half = (u) => {
-      const uu = Math.max(0.001, Math.min(0.999, u));
+      const uu = overCounter ? qAtX((u - 0.5) * L)
+                             : Math.max(0.001, Math.min(0.999, u));
       return Math.max(B * 0.06, Math.min(wid / 2,
         Math.abs(surfacePoint(S, H, uu, 1.0)[2]) - ins));
     };

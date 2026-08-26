@@ -385,6 +385,49 @@ say(v.id, 'a tier drawn past its recorded aft pin',
 `tier ${i} pinned aft at u ${H.tierAftU[k]} yet the ray just aft of the pin `
 + `still lands ${aft.toFixed(2)} m — the wall stands beyond its own record`);
 }
+if (H.loa) {
+const rakeAllow2 = ((H.stemRake || 0) + (H.sternRake || 0)) * H.loa;
+const rakeScale2 = rakeAllow2 > 0
+? Math.min(1, Math.max(0, H.loa - H.lwl) / rakeAllow2) : 1;
+const tipU = 0.5 + (0.5 * H.lwl + (H.sternRake || 0) * rakeScale2 * H.loa) / H.lwl;
+const pins2 = Object.entries(H.tierAftU).map(([k2, p2]) => [+k2, p2]);
+if (H.houseAt && H.houseAt.length === 2) pins2.push([0, H.houseAt[1]]);
+for (const [i2, p2] of pins2)
+if (p2 > tipU - 0.0005)
+say(v.id, 'a terrace pinned past the ship\'s own counter',
+`tier ${i2} aft pin u ${p2} vs the drawn stern extremity u ${tipU.toFixed(4)}`);
+const swept = pins2.filter(([i2, p2]) =>
+i2 > 0 && i2 < nT - 1 && p2 > 1.0 && p2 <= tipU - 0.0005);
+if (swept.length) {
+const HSs2 = SHIPS_HULL.hullSurface(H);
+const qAtX2 = (x) => {
+let lo = 0, hi = 1;
+for (let it = 0; it < 32; it++) {
+const q = (lo + hi) / 2;
+if ((q - 0.5) * H.lwl + HSs2.rake(q) < x) lo = q; else hi = q;
+}
+return (lo + hi) / 2;
+};
+for (const [i2, p2] of swept) {
+const xPin = (p2 - 0.5) * H.lwl;
+const above = H.tierAftU[String(i2 + 1)];
+const xAbove = ((above !== undefined ? above : p2 - 0.05) - 0.5) * H.lwl;
+const roof2 = fl(i2 + 1);
+for (const f of [0.45, 0.6, 0.75]) {
+const x = xAbove + (xPin - xAbove) * f;
+const zE = Math.abs(SHIPS_HULL.surfacePoint(H, HSs2, qAtX2(x), 1.0)[2])
+- (H.beam || 10) * 0.015 - 0.35;
+if (zE < 0.8) continue;
+const land = Math.min(drop(x, zE), drop(x, -zE));
+if (land < roof2 - 0.5)
+say(v.id, 'a counter the record pins but the drawn sweep never reaches',
+`tier ${i2} pinned at u ${p2} past the perpendicular, yet the ray one `
++ `waterway inside the true deck edge at x ${x.toFixed(1)} lands `
++ `${land.toFixed(2)} m where the tier roof runs ${roof2.toFixed(2)} m`);
+}
+}
+}
+}
 }
 (H.masts || []).forEach((mk, i) => {
 if (mk.truckM === undefined || mk.rig !== 'square') return;
