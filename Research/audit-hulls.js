@@ -306,16 +306,24 @@
       const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
       const timber = !(H.build === 'iron' || H.build === 'steel');
       const steelDeck = H.deck && H.deck.covering === 'steel';
-      for (const k of ['grating', 'capstan']) {
+      /* r172: the capstan left this rule — its presence is the RECORD's (`capstan`
+         field, the round-172 rule below), not an inference from timber-and-decked;
+         that inference put a Georgian bar capstan on a trireme for 172 rounds. The
+         gratings arm stays: a hatch through a laid deck is what a laid deck IS. */
+      for (const k of ['grating']) {
         if (undecked && part[k])
           say(v.id, 'hold furniture on an undecked hull',
               `${part[k].n} ${k} mesh(es) drawn, but the record declares deckLaid: false — `
-              + 'no laid deck, no hatch to cover, nothing for a capstan to stand on');
+              + 'no laid deck, no hatch to cover');
         else if (!undecked && timber && !steelDeck && !part[k])
           say(v.id, `a decked timber ship lost her ${k}`,
               'the hull is timber and the record does not refuse a laid deck, so hatch '
-              + 'gratings and a capstan belong aboard and none is drawn');
+              + 'gratings belong aboard and none is drawn');
       }
+      if (undecked && part.capstan)
+        say(v.id, 'hold furniture on an undecked hull',
+            `${part.capstan.n} capstan mesh(es) drawn on a hull with no laid deck — `
+            + 'nothing for a capstan to stand on');
     }
 
     /* ── AN OPEN HULL SHOWS HER GEAR, AND THE GEAR LIES IN THE HOLLOW (round 127) ───────
@@ -3153,6 +3161,120 @@
               + `${sashOut.toFixed(3)} — panes sit in a rebate behind their bars`);
       } else if (sashes.length && !sheets.length)
         say(v.id, 'a sash with no glass behind it', 'no glazing sheet in any tier');
+    }
+
+    /* ── THE CAPSTAN IS THE RECORD'S MACHINE, SIZED TO THE MEN WHO HEAVE IT (round 172).
+       Until r172 `timberShip && laidDeck` drew a Georgian bar capstan on 19 hulls — a
+       trireme and a Song junk among them — with parallel-box whelps floating clear of
+       deck and drumhead both, no pawls, and the bar plane at 0.132·B: 1.93 m over the
+       74's deck, 2.02 m over Wyoming's, 0.69 m over the galley's. Falconer 1769
+       (CAPSTERN, and pl. II fig 11 measured by row): whelps reach drumhead-to-deck
+       like buttresses enlarging the sweep; two iron pawls stand on deck in the whelp
+       intervals; men heave with their breasts against the bars. Parts are identified
+       STRUCTURALLY (a disc cylinder is the head, tall vertical timbers are whelps,
+       small horizontal boxes at deck are pawls) so a builder that never heard of the
+       naming still gets read; every number is geometry vertices and sibling-local
+       positions in the capstan group's own frame — no Box3, the r169 lesson. Arms:
+       V-WARRANT (capstan drawn, record silent — the drawing convicts, not the record),
+       V-COUNT (record arm — whelp and bar counts are the record's), V-REACH (whelps
+       touch deck and drumhead underside within 0.02·dia), V-FLARE (base sweep ≥ 1.08×
+       neck sweep; fig 11 measures 1.15–1.22), V-PAWL (two on deck), V-STATURE
+       (record-blind counter — no drumhead over 1.8 m, and height ≥ 0.55× drumhead dia:
+       the arm that survives a dragged drumDiaM). */
+    {
+      const capm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'capstan') capm.push(o); });
+      if (capm.length && !H.capstan)
+        say(v.id, 'a machine the record does not carry',
+            `${capm.length} capstan meshes drawn with no capstan field — this hull's `
+            + 'tradition attests other gear, and silence draws nothing');
+      if (H.capstan && !capm.length)
+        say(v.id, 'declared but not drawn', 'capstan');
+      if (H.capstan && capm.length) {
+        const vrange = o => {          // vertex extents in the mesh's own frame
+          const a = o.geometry.attributes.position;
+          let y0 = 1e9, y1 = -1e9;
+          for (let i = 0; i < a.count; i++) {
+            const yy = a.getY(i); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy);
+          }
+          return [y0, y1];
+        };
+        const radAt = (o, yq, tol) => { // outer radial extent near height yq
+          const a = o.geometry.attributes.position;
+          const off = Math.hypot(o.position.x, o.position.z);
+          let r = 0;
+          for (let i = 0; i < a.count; i++)
+            if (Math.abs(a.getY(i) - yq) < tol)
+              r = Math.max(r, Math.hypot(a.getX(i), a.getZ(i)));
+          return off + r;
+        };
+        let head = null, headDia = 0;
+        for (const o of capm) {
+          if (o.geometry.type !== 'CylinderGeometry') continue;
+          const p = o.geometry.parameters;
+          const dia = 2 * Math.max(p.radiusTop, p.radiusBottom);
+          if (p.height < dia / 2 && dia > headDia &&
+              Math.abs(o.rotation.z) < 0.1) { head = o; headDia = dia; }
+        }
+        if (!head) say(v.id, 'a capstan with no drumhead', 'no disc atop the barrel');
+        else {
+          const headT = head.geometry.parameters.height;
+          const headUnder = head.position.y - headT / 2;
+          const headTop = head.position.y + headT / 2;
+          let deckRef = 1e9;
+          for (const o of capm) {
+            if (Math.abs(o.rotation.z) > 0.1) continue;    // bars lie on their sides
+            deckRef = Math.min(deckRef, o.position.y + vrange(o)[0]);
+          }
+          const whelps = [], pawls = [];
+          let bars = 0;
+          for (const o of capm) {
+            if (o === head) continue;
+            if (Math.abs(o.rotation.z) > 0.1) { bars++; continue; }
+            const [y0, y1] = vrange(o);
+            if (o.geometry.type === 'BoxGeometry' &&
+                o.geometry.parameters.height <= 0.1 * headDia &&
+                o.position.y + y0 < deckRef + 0.1 * headDia) { pawls.push(o); continue; }
+            if ((o.geometry.type === 'BoxGeometry' ||
+                 o.geometry.type === 'ExtrudeGeometry') &&
+                (y1 - y0) >= 0.25 * headDia) whelps.push(o);
+          }
+          if (H.capstan.whelps && whelps.length !== H.capstan.whelps)
+            say(v.id, "the capstan off the record's count",
+                `${whelps.length} whelps drawn, record says ${H.capstan.whelps}`);
+          if (H.capstan.bars && bars !== H.capstan.bars)
+            say(v.id, "the capstan off the record's count",
+                `${bars} bars shipped, record says ${H.capstan.bars}`);
+          if (whelps.length) {
+            const tol = 0.05 * headDia;
+            let baseGap = 1e9, headGap = 1e9, flare = 0;
+            for (const o of whelps) {
+              const [y0, y1] = vrange(o);
+              baseGap = Math.min(baseGap, (o.position.y + y0) - deckRef);
+              headGap = Math.min(headGap, headUnder - (o.position.y + y1));
+              const rT = radAt(o, y1, tol), rB = radAt(o, y0, tol);
+              if (rT > 0) flare = Math.max(flare, rB / rT);
+            }
+            if (baseGap > 0.02 * headDia || headGap > 0.02 * headDia)
+              say(v.id, 'whelps that touch neither deck nor drumhead',
+                  `gap to deck ${baseGap.toFixed(3)} m, to drumhead `
+                  + `${headGap.toFixed(3)} m — Falconer: drum-head to the deck, both`);
+            if (flare < 1.08)
+              say(v.id, 'whelps with no sweep to enlarge',
+                  `base/neck ${flare.toFixed(2)} — buttresses flare; fig 11 reads `
+                  + '1.15–1.22');
+          }
+          if (pawls.length < 2)
+            say(v.id, 'a capstan that would recoil through its crew',
+                `${pawls.length} pawl(s) on deck — Falconer bolts two`);
+          const Habove = headTop - deckRef;
+          if (headDia > 1.8 || Habove / headDia < 0.55)
+            say(v.id, 'a capstan nobody built',
+                `drumhead ${headDia.toFixed(2)} m dia, ${Habove.toFixed(2)} m tall — `
+                + 'over 1.8 m or squatter than 0.55 of its own drum');
+        }
+      }
     }
 
     /* declared screws must be drawn, and a screw lives under water */

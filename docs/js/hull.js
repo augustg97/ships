@@ -2212,9 +2212,12 @@ what: 'A lattice hatch cover. It has to be open, because the only ventilation fo
 + 'on and to take a sea aboard. In heavy weather they were battened down under '
 + 'tarpaulin, which is where the phrase comes from.' },
 capstan:  { stage: 3, name: 'Capstan',
-what: 'A vertical winch turned by bars. It is the machine that makes a big ship '
-+ 'workable by muscle: fourteen men on the bars can weigh an anchor no gang '
-+ 'could lift, and the same drum warps the ship, hoists yards and heaves guns.' },
+what: 'A vertical winch turned by bars, drawn from the record: whelp timbers run '
++ 'from drumhead to deck, flaring like buttresses to enlarge the sweep, with '
++ 'chocks wedged between and two iron pawls on deck to stop the recoil '
++ '(Falconer 1769). The bars ship through square holes at breast height — '
++ 'the whole machine is sized to the men who walk it round. Hulls whose '
++ 'traditions used other gear carry no capstan.' },
 boat:     { stage: 3, name: "Ship's boat",
 what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
 + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -2528,30 +2531,66 @@ if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {
 const w = halfAtU(u) * 0.85;
 group.add(gratingAt(u, w, L * 0.055));
 });
-if (timberShip && laidDeck) {
-const u = 0.62, y = deckAtU(u), R = B * 0.062;
+if (S.capstan) {
+const u = 0.62, y = deckAtU(u);
+const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
+const D = S.capstan.drumDiaM || clampN(B * 0.11, 0.95, 1.55);
+const H = clampN(0.86 * D, 1.15, 1.35);
+const headT = 0.30 * H, whelpH = H - headT;
+const nW = S.capstan.whelps || 6, nB = S.capstan.bars || 6;
+const body = S.capstan.paint === 'red'
+? (mats.capRed || (mats.capRed = new THREE.MeshStandardMaterial(
+{ color: 0x7a3226, roughness: 0.72 })))
+: wood;
+const iron = mats.capIron || (mats.capIron = new THREE.MeshStandardMaterial(
+{ color: 0x2a2d31, roughness: 0.52, metalness: 0.55 }));
 const cg = new THREE.Group();
-const barrel = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.80, R, B * 0.115, 16), wood);
-barrel.position.y = y + B * 0.058;
-cg.add(barrel);
-for (let i = 0; i < 8; i++) {
-const a = i / 8 * Math.PI * 2;
-const w = new THREE.Mesh(new THREE.BoxGeometry(B * 0.014, B * 0.100, B * 0.030), wood);
-w.position.set(Math.cos(a) * R * 0.92, y + B * 0.056, Math.sin(a) * R * 0.92);
-w.rotation.y = -a;
+const core = new THREE.Mesh(new THREE.CylinderGeometry(D * 0.16, D * 0.16, whelpH, 12), body);
+core.name = 'cap-core'; core.position.y = y + whelpH / 2; cg.add(core);
+const wp = new THREE.Shape();
+wp.moveTo(D * 0.13, 0); wp.lineTo(D * 0.50, 0);
+wp.lineTo(D * 0.455, whelpH * 0.38); wp.lineTo(D * 0.41, whelpH);
+wp.lineTo(D * 0.13, whelpH); wp.closePath();
+const wGeo = new THREE.ExtrudeGeometry(wp, { depth: D * 0.15, bevelEnabled: false });
+wGeo.translate(0, 0, -D * 0.075);
+for (let i = 0; i < nW; i++) {
+const w = new THREE.Mesh(wGeo, body);
+w.name = 'cap-whelp'; w.position.y = y; w.rotation.y = -(i / nW) * Math.PI * 2;
 cg.add(w);
 }
+const ch = new THREE.Shape();
+ch.moveTo(D * 0.16, 0); ch.lineTo(D * 0.40, 0);
+ch.lineTo(D * 0.37, whelpH * 0.14); ch.lineTo(D * 0.16, whelpH * 0.14); ch.closePath();
+const chGeo = new THREE.ExtrudeGeometry(ch, { depth: D * 0.13, bevelEnabled: false });
+chGeo.translate(0, 0, -D * 0.065);
+for (let i = 0; i < nW; i++) {
+const a = ((i + 0.5) / nW) * Math.PI * 2;
+for (const yy of [y + whelpH * 0.02, y + whelpH * 0.82]) {
+const c = new THREE.Mesh(chGeo, body);
+c.name = 'cap-chock'; c.position.y = yy; c.rotation.y = -a;
+cg.add(c);
+}
+}
 const head = new THREE.Mesh(
-new THREE.CylinderGeometry(R * 1.16, R * 1.02, B * 0.038, 16), pale);
-head.position.y = y + B * 0.132;
-cg.add(head);
-for (let i = 0; i < 8; i++) {
-const a = i / 8 * Math.PI * 2;
+new THREE.CylinderGeometry(D * 0.50, D * 0.46, headT, 20), body);
+head.name = 'cap-head'; head.position.y = y + whelpH + headT / 2; cg.add(head);
+const barY = y + H - headT / 2;
+for (let i = 0; i < nB; i++) {
+const a = (i / nB) * Math.PI * 2;
 const bar = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.009, B * 0.012, B * 0.34, 10), pale);
+new THREE.CylinderGeometry(D * 0.020, D * 0.026, D * 2.1, 8), pale);
+bar.name = 'cap-bar';
 bar.rotation.z = Math.PI / 2; bar.rotation.y = a;
-bar.position.set(Math.cos(a) * B * 0.17, y + B * 0.132, Math.sin(a) * B * 0.17);
+bar.position.set(Math.cos(a) * D * 1.35, barY, Math.sin(a) * D * 1.35);
 cg.add(bar);
+}
+for (const sgn of [1, -1]) {
+const p = new THREE.Mesh(new THREE.BoxGeometry(D * 0.22, D * 0.05, D * 0.06), iron);
+p.name = 'cap-pawl';
+const a = (0.5 / nW) * Math.PI * 2 + (sgn > 0 ? 0 : Math.PI);
+p.position.set(Math.cos(a) * D * 0.52, y + D * 0.025, Math.sin(a) * D * 0.52);
+p.rotation.y = -a;
+cg.add(p);
 }
 cg.position.x = (u - 0.5) * L;
 group.add(tag(cg, 'capstan'));

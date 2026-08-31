@@ -1211,7 +1211,12 @@
     "draught": 2.0,
     "freeboard": 2.1,
     "cm": 0.7,
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 6
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    }
   },
   {
@@ -1337,7 +1342,12 @@
     "draught": 4.6,
     "freeboard": 4.4,
     "cm": 0.76,
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 8
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    }
   },
   {
@@ -1500,7 +1510,12 @@
      "from": 0.87,
      "to": 0.985
     },
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 6
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars. Mediterranean argano; confidence lower than the sailing hulls'."
    }
   },
   {
@@ -1688,7 +1703,12 @@
      "from": 0.88,
      "to": 0.985
     },
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 8
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars. Mediterranean argano; confidence lower than the sailing hulls'."
    }
   },
   {
@@ -2182,11 +2202,19 @@
     "freeboard": 3.0,
     "cm": 0.82,
     "sternLights": 1,
-    "sternLightPanes": [3, 3],
+    "sternLightPanes": [
+     3,
+     3
+    ],
     "sternLightPierFrac": 0.26,
     "sternLightPitchM": 1.25,
     "sternLightProvenance": "CLASS DEFAULTS, not a read of this hull: the small-pane grid is the period's glazing technology — crown glass casts no metre pane — read on the one plate in hand, the English SLR0338 (see ship-of-the-line). The narrow Dutch tuck carried leaded lights with smaller panes if anything, so 3×3 is a floor; pier share and pitch are class figures from the same plate.",
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 8
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    }
   },
   {
@@ -2325,11 +2353,19 @@
     "freeboard": 4.6,
     "cm": 0.8,
     "sternLights": 2,
-    "sternLightPanes": [3, 3],
+    "sternLightPanes": [
+     3,
+     3
+    ],
     "sternLightPierFrac": 0.26,
     "sternLightPitchM": 1.25,
     "sternLightProvenance": "CLASS DEFAULTS, not a read of this hull: the small-pane grid is the period's glazing technology — crown glass casts no metre pane — and the one plate in hand is English (SLR0338, see ship-of-the-line). Dutch retourschip practice ran leaded lights with smaller panes if anything, so 3×3 is a floor, not a count of this stern; pier share and pitch are carried from the same plate as class figures.",
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 12
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    }
   },
   {
@@ -2477,12 +2513,22 @@
     "freeboard": 5.4,
     "cm": 0.8,
     "sternLights": 2,
-    "sternLightPanes": [3, 3],
+    "sternLightPanes": [
+     3,
+     3
+    ],
     "sternLightPierFrac": 0.26,
     "sternLightPitchM": 1.25,
     "sternLightProvenance": "The tier arrangement is a PLATE READ: SLR0338, the RMG contemporary full-hull model of Bellona (1760), a Slade 74 — the record's own sub-type. Astern photograph (RMG media c1099, 1041×1280) at ~55 px/m: five pilaster pitches span 335 px and the ~9.2 m stern flat ~510 px, so pane COUNTS are solid and widths good to ~±15%, no finer. Each light in BOTH tiers is a 3×3 pane grid — two vertical and two horizontal bars, the 2–4 px bright lines a column-brightness profile finds inside every light; glazing fills 74–80% of pitch (pier assembly 17 px of 66–71) at 1.20–1.29 m pitch. The colour quarter plate (RMG media d7827) resolves the mica panes recessed BEHIND the gilt bars. Until round 171 each drawn light was one uncastable 0.9 m sheet with a single stick, floating proud of its own frame, and 36% of the tier was blank wall.",
     "headsails": 2,
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 14,
+     "drumDiaM": 1.5,
+     "paint": "red"
+    },
+    "capstanProvenance": "PLATE READS off RMG SLR0338, the contemporary Bellona model, quarter plate l5785_003 (~16 px/m at the waist — counts solid ±1, widths ±15%): bars SHIPPED, 12-14 rays so bars=14 is a read ±1; drumhead ≈1.5 m (read at that px/m, ±10%); bar tips ≈2.7 drumhead-dias out, agreeing with the period's 12-14 ft bars; the machine painted red-ochre like the inner works (paint field). whelps 6 is a CLASS DEFAULT (Falconer pl. II resolves six; period range 6-8). Form per Falconer 1769 CAPSTERN: whelps drumhead-to-deck, chocks between, two iron pawls on deck, men heaving breast-high. A 74 carried main (double) and jeer capstans; the weather-deck machine drawn is the upper barrel of the main."
    }
   },
   {
@@ -2624,7 +2670,12 @@
     "freeboard": 3.0,
     "cm": 0.8,
     "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 30.0 − lwl 26.0 leaves 4.0 m of overhang and the drawn planking carried only 1.5 m of it (rakes 0.03/0.02, r129 fleet sweep). The recorded 30 m (98 ft) is the ship's hull length (en.wikipedia.org/wiki/Brooks_(1781_ship)), and the Brookes plan (Regulated Slave Trade Act plates, 1788–89) draws a raked stem carrying the head forward and a counter stern — the bow's share of the overhang larger than the stern's. The authored 3:2 stem:stern split is kept and normalized up to the allowance: 0.081/0.054, which the r129 loft clamp trims to 2.4 m bow / 1.6 m stern, 30.00 m drawn exactly. The plate is a stowage engraving, not a lines plan — it supports the split qualitatively, not to the centimetre.",
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 8
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    }
   },
   {
@@ -2791,7 +2842,12 @@
      }
     ],
     "helmAt": 0.962,
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 10
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars. By 1909 heaving was the donkey engine's; the bar capstan stands aft."
    }
   },
   {
@@ -3633,7 +3689,12 @@
      }
     ],
     "helmAt": 0.94,
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 10
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    }
   },
   {
@@ -5321,7 +5382,12 @@
      }
     ],
     "stationProvenance": "Masts, funnel, deckhouses and overhangs READ off the Framnaes longitudinal-section plan (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m along the hull — stations good to ±0.5 m, no finer), anchored at the stem and counter LWL crossings; mast-gap ratio and funnel station cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m: fore-main/main-mizzen 1.12, funnel 45% of main→mizzen). Trucks from the same broadside at 12.6 px/m: fore 34.3 m, main 35.2 m, mizzen 29.3 m over the water, main the tallest — the old record drew the fore at 49 m (27.5 m lower through the square-stack rule) and the main at 31.7. Funnel at 0.677: the plan reads 0.670 +/- 0.015 and the boiler casing must seat inside the house whose forward end it rises from. Funnel black: it reads as dark as the black hull in every plate where masts read pale; height 5.7 m over the rail at the broadside’s scale. No forward deckhouse: the plan shows a boat on skids between fore and main, and no photograph shows a house there. Quarter boats (davitBoats): a canvas-covered boat hangs outboard in radial davits on the port quarter in the Hurley night plate and two stand on the starboard side in the full-sail plate; both plates are bow-on and foreshortened, so the station is bounded, not measured — abaft the aft house (plan, 0.781) and clear of the counter, u 0.80 ± 0.04. Length 6.7 m: the expedition's cutters (Dudley Docker, Stancomb Wills) as recorded; the James Caird measured 6.9. Kept: the forecastle break — the web plan at 16.9 px/m cannot carry a clean break station or height (the deck lines there are one to two px apart); needs the RMG original before it is modelled.",
-    "steering": "stern"
+    "steering": "stern",
+    "capstan": {
+     "whelps": 6,
+     "bars": 8
+    },
+    "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
    },
    "rows": [
     [

@@ -11727,3 +11727,88 @@ stern tiers (the galleries are the same cabins carried round the corner); the dr
 loft draws bands, not sashes. (9) NEW, r171: the tier heights (0.42/0.30·fb) and light
 height (0.16·fb) remain authored fractions never read off a plate; c1099 could give
 both at its 55 px/m.**
+
+## Round 172 — 2026-08-31 — the capstan becomes the record's machine, and eight hulls stop carrying one
+
+**The r171 residual 1 queue head — the fleet's capstans, 152 boxy whelp meshes across 19
+hulls, the largest remaining class — OPENED AND CLOSED, judgment first
+(build/staging/r172/JUDGMENT.md). Two convictions. FORM: Falconer 1769 CAPSTERN, fetched
+this round in full text (falconer.txt, Gutenberg #57705): whelps "reach downwards from
+the lower part of the drum-head to the deck" "like buttresses, to enlarge the sweep" —
+the drawn whelps were parallel-sided boxes floating clear of deck AND drumhead; chocks
+(ENTREMISES, same book) and pawls ("might greatly endanger the men who heave") were
+absent entirely; and the bar plane at 0.132·B put the bars men heave "setting their
+breasts against them" at 1.93 m on the 74 and 2.02 m on Wyoming — over the heavers'
+heads — and 0.69 m on the galley. Falconer's own Plate II fig 11 measured by row-width
+profile (falconer-plate2.jpg: H≈0.86·D, neck 0.82·D flaring to 1.0·D at deck) and the
+Bellona model's capstan on the r171 quarter plate (~16 px/m: bars SHIPPED, 12–14 rays,
+red-ochre like the inner works) gave the proportions and counts. WARRANT: no vessel
+record mentioned a capstan anywhere — `timberShip && laidDeck` drew Falconer's Georgian
+machine on a 480 BC trireme, a Roman corbita, a Song junk, the treasure-ship, the
+Bremen-class cog (whose own wreck attests a WINDLASS), a dhow, a panokseon and a
+sekibune. Rule 10: silence draws nothing.**
+
+**The change: `capstan: {whelps, bars, drumDiaM?, paint?}` promoted to the record on 11
+hulls (caravel→endurance) with provenance naming PLATE READS (the 74: bars 14 ±1,
+drumDiaM 1.5 ±10%, paint red — SLR0338) vs CLASS DEFAULTS (whelps 6 — the figures
+resolve six, period range 6–8; every other hull's counts; galley/galleass flagged lower
+confidence). buildCapstan derives everything: D from the record or clamp(0.11·B, 0.95,
+1.55), H clamped to [1.15, 1.35] m — the machine is sized to the MEN, so it cannot
+scale past them — whelps are extruded tapered profiles reaching deck to drumhead
+underside with the surge's concavity, chocks wedge between in two bands, two iron pawls
+stand on deck in the whelp intervals, N bars ship at breast height (0.98–1.13 m across
+the fleet). The 8 record-less hulls draw NOTHING. Census (sweep-after.json): the 152
+unattested box-whelps are dead; 154 attested flats remain in the class (132 chock
+wedges at exactly the 12-tri threshold — Falconer's "small wedges", no finer form
+attested — plus 22 iron pawl bars); fleet boxy 8412→8414.**
+
+**The r172 audit rule, six arms, parts identified STRUCTURALLY (disc head, tall vertical
+timbers, small horizontal deck boxes) so a builder ignorant of the naming still gets
+read; geometry vertices and sibling-local positions, no Box3: V-WARRANT (drawn, record
+silent), V-COUNT (record arm), V-REACH, V-FLARE (≥1.08; fig 11 reads 1.15–1.22),
+V-PAWL, V-STATURE record-blind (dia ≤1.8 m, H/dia ≥0.55). The r120 rule's capstan
+presence arm (timber+decked ⇒ capstan owed) DELETED — it was the inference itself; its
+gratings arm stays. Proven in sim on the fleet's real beams BEFORE any web/ edit
+(sim.py: old builder fails REACH+FLARE+PAWL everywhere, BREAST both directions,
+STATURE on 74/wyoming exactly), then in-page: severed builder (inj-capstan-sever.js,
+old assembly restored fleet-wide) → 8 record-less hulls convict V-WARRANT alone, 11
+record hulls convict REACH+FLARE+PAWL+COUNT, STATURE exactly 74+wyoming (2.10/2.20 m),
+14 hulls silent; drumDiaM dragged 1.5→3.5 under the FAITHFUL builder
+(inj-capstan-drag.js) → only record-blind V-STATURE convicts, exactly the 74, "3.50 m
+dia, 1.35 m tall". Audit 33/0 clean twice, before and after injections.**
+
+**Frames, with timing stated: the opening 64-check ran 14:27–15:22 and CAUGHT THE ROUND
+MID-EDIT — frames 1–26 captured before the first web/ edit (14:54), the rest after (the
+r167 pattern, stated plainly). The pre-edit captures at 0.000 — ship-junk, ship-galley,
+ship-galleass, ship-trireme, ship-dhow, ship-panokseon, ship-sekibune, shipwright among
+them — own r170's and r171's owed passes for the frames they cover. 59/64 ok, 0 BLANK,
+5 movers, every one photographing FINAL code, every one the round's own capstan class,
+each diff read (one compact deck cluster per solo frame; the furled and astern views
+the machine alone), each accepted with the class reason. ⚠ OWED TO r173's OPENING: the
+pre-edit-captured frames of capstan hulls will move when next photographed — the eight
+removals (ship-junk, ship-galley, ship-galleass, ship-trireme, ship-dhow,
+ship-panokseon, ship-sekibune, and any cog/corbita/carrack/caravel/fluyt frame) plus
+shipwright (the 74's red machine amidships) and ship-preussen 0.000 stands (steel, no
+capstan). Expected reason on all: r172's capstan class.**
+
+**Looked at (rules 0 and 1): z-cap-74-crop.png — the red machine between the gratings.
+Three facts a viewer can read off it: a mill-stone drumhead overhangs a whelped body
+that flares toward the deck; pale bars radiate from the head at breast height, shipped
+for heaving; the body is not a smooth drum — vertical whelp timbers stand proud with
+chocks between. And z-junk-deck.png: the junk's deck carries her gratings and sampan
+and no Georgian machine.**
+
+**Deployed: data-version 1788214094. Live verify below.**
+
+**Named residuals, in order:** (1) NEW, r172: the windlass — the eight hulls that lost
+the capstan attest OTHER gear (Bremen cog's windlass physically recovered; Chinese
+windlass on junk/treasure-ship; Korean/Japanese gear on panokseon/sekibune) and draw
+nothing; each needs its judgment and its machine. (2) The remaining sweep-derived boxy
+classes: `top` (18 boxy), `channel`/`cheek`/`cathead`. (3) Preussen mast livery source
+pass (r155). (4) Endurance forecastle, waiting on RMG J9266. (5) Azzam crest span.
+(6) r164: the risen black drawn unpierced. (7) r165: the fantail gallery wing walls.
+(8) r166: the screen glass sun-bright. (9) r171: quarter-gallery sashes at the old
+spacing. (10) r171: tier heights are authored fractions c1099 could read. (11) NEW,
+r172: the 74's main capstan was a DOUBLE — the drawn machine is the upper barrel only;
+the lower-deck barrel is invisible until a deck section exists, noted here so the
+inference is on the record.
