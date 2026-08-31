@@ -11812,3 +11812,91 @@ spacing. (10) r171: tier heights are authored fractions c1099 could read. (11) N
 r172: the 74's main capstan was a DOUBLE — the drawn machine is the upper barrel only;
 the lower-deck barrel is invisible until a deck section exists, noted here so the
 inference is on the record.
+
+## Round 173 — 2026-08-31 — the cog gets her windlass: the wreck's own machine, in the wreck's own place
+
+**The r172 residual 1 queue head OPENED for ONE hull and CLOSED for that hull, judgment
+first (build/staging/r173/JUDGMENT.md). The cog's machine is the best-attested in the
+whole residual — the type ship herself carries it — so she went first; the other seven
+r172 hulls stay silent, each still owed its own judgment. Two sources fetched this
+round. Ellmers (the DSM's first director, Drassana article, saved whole): the
+reconstructed Bremen cog carries "a windlass in its middle and a capstan on its top" of
+the aftcastle, and the man at the tiller stood under the castle-deck "behind the heavy
+windlass" — athwartships, aft, forward of the helm. The Kiel replica's build record
+(Baykowski 1991, via de.wiki Bremer Kogge): built to the DSM's own Lahn plans, her
+Bratspill is 4.5 m long and 60 cm thick — the dimension pair promoted to the record.
+Falconer 1769 WINDLASS (r172's fetched text) supplies the class mechanism, named as
+defaults: two end frames, handspike holes bored through the body, lower part about a
+foot above the deck. And a correction to r172's story: the cog's tradition attests BOTH
+machines — the windlass under the castle deck AND a medieval capstan (Gangspill) on the
+castle top. r172's deletion of the Georgian amidships machine stands; the Gangspill in
+its real place is a new named residual.**
+
+**The change: `windlass: {atU 0.82, barrelLenM 4.5, barrelDiaM 0.6}` +
+windlassProvenance on the cog (web/data/vessels.json), provenance naming which numbers
+are build-record reads, which are text reads (station ±0.04 u), which are Falconer
+class defaults — and stating that whether the ORIGINAL barrel was among the >2,000
+recovered pieces is not established by the sources fetched. buildWindlass (hull.js,
+after the capstan): eight-square barrel (toNonIndexed, face normals), axis at
+0.30 + D/2 over the deck clamped [0.45, 0.90] — sized to the standing man who levers
+the handspike — two standards with journals, two spikes shipped in the bored holes.
+PARTS gets a windlass card. Measured (measure_ship): barrel u 0.805–0.835, dia 0.60,
+half-span 2.25, axis 0.60 m over the deck the standards stand on — every number the
+record's. Looked at (rules 0 and 1): z-cog-quarter-crop.png — three facts a viewer can
+read: an eight-square barrel athwartships on the afterdeck with a shipped handspike
+standing in it; three slatted gratings along the centreline; clinker strake lines under
+a single square sail.**
+
+**The r173 audit rule, proven in sim on the cog's real numbers BEFORE any web/ edit
+(sim.py), then in-page. Arms: V-WARRANT (drawn, record silent), V-AXIS (horizontal and
+athwartships or it is a capstan wearing the wrong name), V-SPAN (record length, and
+inside the planking at its own station — asked of the shell's vertices), V-DIA,
+V-STANDARD (both ends carried), and three record-blind counters (axis 0.45–0.90 m over
+the deck; barrel ≤ 0.9 m thick — no handspike reaches through a fatter one; ≥ 0.12 m
+clearance under the barrel for the cable). The rule identifies the barrel from LOCAL
+VERTEX EXTENTS, not geometry class — the first draft keyed on CylinderGeometry, and the
+faithful builder's own toNonIndexed barrel vanished from the candidate set, so the rule
+convicted a handspike as an undersized barrel (rule 8: the audit was checked first, and
+the audit had misread). Injections, no file touched: sever (inj-windlass-sever.js,
+vertical barrel on the cog + windlasses on junk/trireme/dhow) → cog convicts
+AXIS+SPAN+DIA+STANDARD both ends, the three convict V-WARRANT alone, 29 silent; drag
+(inj-windlass-drag.js, barrelDiaM 0.60→1.60 under the FAITHFUL builder, whose clamp
+caps the axis at 0.90 so the lever arm stays silent) → only the record-blind counters
+convict, exactly the cog: "barrel 1.60 m thick — no handspike reaches through it",
+"0.10 m under the barrel". Audit 33/0 clean before and after. ⚠ One mechanics trap for
+future rounds, hit twice now: run_audit_inject fetches /audit-hulls.js from web/ — a
+rule edited in Research/ convicts NOTHING until copied; the drag ran silent once for
+exactly this reason.**
+
+**Frames, with timing stated: the opening 64-check ran 15:29–16:03 and caught the round
+mid-edit again (first web/ edit ~15:56; stated, the r167/r172 pattern) — but all four
+movers were captured in the run's first eight minutes, before any r173 edit, and all
+four are r172's OWED movers, predicted by name in r172's handoff: shipwright (the 74's
+new red machine), ship-dhow, ship-junk, ship-trireme (removals). 60/64 ok, 0 BLANK,
+each diff read (one compact capstan-scale deck cluster plus berth-neighbour edge
+patches), each accepted with the class reason. Close on FINAL code, solo: shipwright,
+ship-dhow, ship-junk, ship-trireme all 0.000; the cog's berth neighbours ship-treasure
+0.000 and aboard-treasure 0.005 ok — the windlass reaches no baseline frame (the cog
+has no frame of her own; she moors between the dhow and the treasure-ship). r172's owed
+list also named ship-galley/galleass/panokseon/sekibune: they passed in this same
+64-check at 0.000–0.035 ok, so every r172 debt is settled. Census: probe-sweep NOT
+re-run this round (time); the class adds two boxy standards — attested flats,
+Falconer's "two frames of wood" — plus journals and spikes above the tri threshold.**
+
+**Deployed: data-version 1788218139. Live verify below.**
+
+**Named residuals, in order:** (1) r172 windlass judgments, seven hulls remaining —
+junk and treasure-ship (the Chinese windlass Needham/Worcester describe), panokseon,
+sekibune (rokuro gear), corbita, dhow, trireme (whose anchors may be hand-worked — a
+silent record may be the RIGHT answer; say so explicitly when judged). (2) NEW r173:
+the cog's Gangspill — the medieval capstan on the aftcastle top, attested by Ellmers
+and the Kiel build record; needs the medieval Spill form and a castle top to stand on.
+(3) NEW r173: the cog's castles — fore and aft, the type's defining silhouette (the
+Stralsund seal; the wreck's aftcastle preserved to its highest rail); until drawn, the
+windlass stands in its attested place on an open afterdeck. (4) NEW r173, seen not
+opened: the cog's rudder reads as a pale untextured slab below the sternpost in
+profile. (5) The sweep-derived boxy classes: top (18), channel/cheek/cathead.
+(6) Preussen mast livery (r155). (7) Endurance forecastle (RMG J9266). (8) Azzam crest
+span. (9) r164 risen black unpierced. (10) r165 fantail gallery wing walls. (11) r166
+screen glass sun-bright. (12) r171 quarter-gallery sashes. (13) r171 authored tier
+fractions. (14) r172 the 74's lower capstan barrel (needs a deck section).

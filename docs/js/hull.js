@@ -2218,6 +2218,13 @@ what: 'A vertical winch turned by bars, drawn from the record: whelp timbers run
 + '(Falconer 1769). The bars ship through square holes at breast height — '
 + 'the whole machine is sized to the men who walk it round. Hulls whose '
 + 'traditions used other gear carry no capstan.' },
+windlass: { stage: 3, name: 'Windlass',
+what: 'A horizontal winch: an eight-square oak barrel turned by handspikes '
++ 'thrust into holes bored through its body, the crew rising together on '
++ 'the bars to a song. On the cog it lies athwartships at the aftcastle, '
++ 'forward of the helm — the reconstructed Bremen ship carries it there, '
++ 'and the replicas built to her plans work it at sea. Drawn only where '
++ 'the record attests one.' },
 boat:     { stage: 3, name: "Ship's boat",
 what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
 + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -2594,6 +2601,42 @@ cg.add(p);
 }
 cg.position.x = (u - 0.5) * L;
 group.add(tag(cg, 'capstan'));
+}
+if (S.windlass) {
+const u = S.windlass.atU || 0.5, y = deckAtU(u);
+const clampW = (v, a, b) => Math.max(a, Math.min(b, v));
+const len = S.windlass.barrelLenM || B * 0.55;
+const D = S.windlass.barrelDiaM || 0.5;
+const axisY = y + clampW(0.30 + D / 2, 0.45, 0.90);
+const wg = new THREE.Group();
+const bGeo = new THREE.CylinderGeometry(D / 2, D / 2, len, 8, 1).toNonIndexed();
+bGeo.computeVertexNormals();
+const bar = new THREE.Mesh(bGeo, wood);
+bar.name = 'win-barrel'; bar.rotation.x = Math.PI / 2;
+bar.position.y = axisY; wg.add(bar);
+const stH = (axisY - y) + D * 0.42;
+for (const sg of [1, -1]) {
+const st = new THREE.Mesh(new THREE.BoxGeometry(0.30, stH, 0.26), wood);
+st.name = 'win-standard';
+st.position.set(0, y + stH / 2, sg * (len / 2 + 0.13));
+wg.add(st);
+const j = new THREE.Mesh(
+new THREE.CylinderGeometry(D * 0.18, D * 0.18, 0.32, 10), wood);
+j.name = 'win-journal'; j.rotation.x = Math.PI / 2;
+j.position.set(0, axisY, sg * (len / 2 + 0.10));
+wg.add(j);
+}
+for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
+const spL = 1.7, seat = 0.22;
+const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
+sp.name = 'win-spike';
+sp.rotation.z = ang;
+const dx = -Math.sin(ang), dy = Math.cos(ang);
+sp.position.set(dx * (spL / 2 - seat), axisY + dy * (spL / 2 - seat), zf * len);
+wg.add(sp);
+}
+wg.position.x = (u - 0.5) * L;
+group.add(tag(wg, 'windlass'));
 }
 if (S.deckhouses && S.deckhouses.length) {
 const white = mats.houseWhite || (mats.houseWhite = new THREE.MeshStandardMaterial(

@@ -2324,6 +2324,101 @@ say(v.id, 'a capstan nobody built',
 }
 }
 }
+{
+const wm = [];
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.key === 'windlass') wm.push(o); });
+if (wm.length && !H.windlass)
+say(v.id, 'a machine the record does not carry',
+`${wm.length} windlass meshes drawn with no windlass field — this hull's `
++ 'record is silent, and silence draws nothing');
+if (H.windlass && !wm.length)
+say(v.id, 'declared but not drawn', 'windlass');
+if (H.windlass && wm.length) {
+const R = H.windlass;
+const ext = o => {
+const a = o.geometry.attributes.position;
+const lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+for (let i = 0; i < a.count; i++) {
+const p = [a.getX(i), a.getY(i), a.getZ(i)];
+for (let k = 0; k < 3; k++) {
+lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]);
+}
+}
+return [hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]];
+};
+let bar = null, barLen = 0, barDia = 0, barK = 1;
+for (const o of wm) {
+if (o.geometry.type === 'BoxGeometry') continue;
+const e = ext(o);
+const k = e[0] > e[1] ? (e[0] > e[2] ? 0 : 2) : (e[1] > e[2] ? 1 : 2);
+const dia = (e[(k + 1) % 3] + e[(k + 2) % 3]) / 2;
+if (e[k] >= 2.5 * dia && e[k] > barLen) {
+bar = o; barLen = e[k]; barDia = dia; barK = k;
+}
+}
+if (!bar)
+say(v.id, 'a windlass with no barrel',
+'no round timber at least 2.5× its own cross dimension in the group');
+else {
+const ax = new THREE.Vector3(barK === 0 ? 1 : 0, barK === 1 ? 1 : 0,
+barK === 2 ? 1 : 0).applyEuler(bar.rotation);
+if (Math.abs(ax.y) >= 0.1 || Math.abs(ax.z) <= 0.95)
+say(v.id, 'a windlass stood on end',
+`barrel axis (${ax.x.toFixed(2)}, ${ax.y.toFixed(2)}, `
++ `${ax.z.toFixed(2)}) — the machine lies athwartships or it is `
++ 'a capstan wearing the wrong name');
+if (R.barrelLenM && Math.abs(barLen - R.barrelLenM) > 0.12 * R.barrelLenM)
+say(v.id, "the windlass off the record's length",
+`barrel ${barLen.toFixed(2)} m, record says ${R.barrelLenM}`);
+if (R.barrelDiaM && Math.abs(barDia - R.barrelDiaM) > 0.15 * R.barrelDiaM)
+say(v.id, "the windlass off the record's diameter",
+`barrel ${barDia.toFixed(2)} m, record says ${R.barrelDiaM}`);
+let wgrp = bar; while (wgrp.parent && wgrp.parent !== g) wgrp = wgrp.parent;
+const stationX = wgrp.position.x;
+let plank = null;
+g.traverse(o => { const p = tagOf(o);
+if (!plank && o.isMesh && p && p.key === 'planking') plank = o; });
+if (plank) {
+const a = plank.geometry.attributes.position;
+let zmax = 0;
+for (let i = 0; i < a.count; i++)
+if (Math.abs(a.getX(i) - stationX) < 0.6)
+zmax = Math.max(zmax, Math.abs(a.getZ(i)));
+if (zmax > 0 && barLen / 2 > 0.95 * zmax)
+say(v.id, 'a windlass through the planking',
+`barrel ${barLen.toFixed(2)} m across a deck `
++ `${(2 * zmax).toFixed(2)} m wide at its station`);
+}
+const stands = wm.filter(o => o.geometry.type === 'BoxGeometry' &&
+o.geometry.parameters.height > o.geometry.parameters.width);
+for (const sg of [1, -1]) {
+const zEnd = bar.position.z + sg * barLen / 2;
+if (!stands.some(s => Math.abs(s.position.z - zEnd) < 0.35))
+say(v.id, 'a windlass end carried by nothing',
+`barrel end at z ${zEnd.toFixed(2)} with no standard within 0.35 m — `
++ 'Falconer supports it at the two ends by two frames of wood');
+}
+if (stands.length) {
+let deckRef = 1e9;
+for (const s of stands)
+deckRef = Math.min(deckRef,
+s.position.y - s.geometry.parameters.height / 2);
+const over = bar.position.y - deckRef;
+if (!(over >= 0.45 && over <= 0.90))
+say(v.id, 'a windlass nobody could heave',
+`axis ${over.toFixed(2)} m over the deck — the handspike is levered `
++ 'by a standing man');
+if (barDia > 0.9)
+say(v.id, 'a windlass nobody bored',
+`barrel ${barDia.toFixed(2)} m thick — no handspike reaches through it`);
+if (over - barDia / 2 < 0.12)
+say(v.id, 'a windlass the cable cannot pass under',
+`${(over - barDia / 2).toFixed(2)} m under the barrel`);
+}
+}
+}
+}
 if (H.screws) {
 if (!part.screw) say(v.id, 'declared but not drawn', 'screws');
 else if (part.screw.y[1] > 0)

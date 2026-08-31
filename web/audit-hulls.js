@@ -3277,6 +3277,129 @@
       }
     }
 
+    /* ── THE WINDLASS IS THE RECORD'S MACHINE, LYING WHERE MEN CAN LEVER IT (round 173).
+       The Bremen cog's wreck-attested gear: a heavy windlass athwartships at the
+       aftcastle (Ellmers — the tillerman stood BEHIND it), barrel 4.5 × 0.60 m (the Kiel
+       replica's build record to the DSM plans, Baykowski 1991). Falconer's WINDLASS is
+       the class mechanism: a timber "supported at the two ends by two frames of wood",
+       handspikes thrust into holes bored through the body, lower part about a foot over
+       the deck. Parts identified STRUCTURALLY from LOCAL VERTEX EXTENTS — the barrel is
+       the longest round timber, ≥ 2.5× its own cross dimension — not from geometry
+       class or .parameters: the first draft keyed on CylinderGeometry and the faithful
+       builder's own toNonIndexed() barrel (flat-shaded eight-square) vanished from the
+       candidate set, so the rule convicted a handspike as an undersized barrel. Read
+       the vertices and a builder using raw buffers is still read. Sibling-local
+       positions, no Box3 (the r169 lesson). Arms: V-WARRANT (drawn,
+       record silent), V-AXIS (horizontal and athwartships — a vertical barrel is a
+       capstan wearing the wrong name), V-SPAN (record length, AND inside the planking
+       at its own station), V-DIA (record diameter), V-STANDARD (both ends carried),
+       V-BREAST (record-blind: axis 0.45–0.90 m over the deck the standards stand on —
+       the handspike is levered by a standing man, and no dragged record may move the
+       work out of his reach). */
+    {
+      const wm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'windlass') wm.push(o); });
+      if (wm.length && !H.windlass)
+        say(v.id, 'a machine the record does not carry',
+            `${wm.length} windlass meshes drawn with no windlass field — this hull's `
+            + 'record is silent, and silence draws nothing');
+      if (H.windlass && !wm.length)
+        say(v.id, 'declared but not drawn', 'windlass');
+      if (H.windlass && wm.length) {
+        const R = H.windlass;
+        const ext = o => {              // local AABB of the mesh's own vertices
+          const a = o.geometry.attributes.position;
+          const lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+          for (let i = 0; i < a.count; i++) {
+            const p = [a.getX(i), a.getY(i), a.getZ(i)];
+            for (let k = 0; k < 3; k++) {
+              lo[k] = Math.min(lo[k], p[k]); hi[k] = Math.max(hi[k], p[k]);
+            }
+          }
+          return [hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]];
+        };
+        let bar = null, barLen = 0, barDia = 0, barK = 1;
+        for (const o of wm) {
+          if (o.geometry.type === 'BoxGeometry') continue;   // standards are boxes
+          const e = ext(o);
+          const k = e[0] > e[1] ? (e[0] > e[2] ? 0 : 2) : (e[1] > e[2] ? 1 : 2);
+          const dia = (e[(k + 1) % 3] + e[(k + 2) % 3]) / 2;
+          if (e[k] >= 2.5 * dia && e[k] > barLen) {
+            bar = o; barLen = e[k]; barDia = dia; barK = k;
+          }
+        }
+        if (!bar)
+          say(v.id, 'a windlass with no barrel',
+              'no round timber at least 2.5× its own cross dimension in the group');
+        else {
+          const ax = new THREE.Vector3(barK === 0 ? 1 : 0, barK === 1 ? 1 : 0,
+                                       barK === 2 ? 1 : 0).applyEuler(bar.rotation);
+          if (Math.abs(ax.y) >= 0.1 || Math.abs(ax.z) <= 0.95)
+            say(v.id, 'a windlass stood on end',
+                `barrel axis (${ax.x.toFixed(2)}, ${ax.y.toFixed(2)}, `
+                + `${ax.z.toFixed(2)}) — the machine lies athwartships or it is `
+                + 'a capstan wearing the wrong name');
+          if (R.barrelLenM && Math.abs(barLen - R.barrelLenM) > 0.12 * R.barrelLenM)
+            say(v.id, "the windlass off the record's length",
+                `barrel ${barLen.toFixed(2)} m, record says ${R.barrelLenM}`);
+          if (R.barrelDiaM && Math.abs(barDia - R.barrelDiaM) > 0.15 * R.barrelDiaM)
+            say(v.id, "the windlass off the record's diameter",
+                `barrel ${barDia.toFixed(2)} m, record says ${R.barrelDiaM}`);
+          /* the barrel must fit inside the planking at its own station — asked of the
+             shell itself, in hull frame: the windlass group is a direct child of the
+             ship group, so its x IS the station */
+          let wgrp = bar; while (wgrp.parent && wgrp.parent !== g) wgrp = wgrp.parent;
+          const stationX = wgrp.position.x;
+          let plank = null;
+          g.traverse(o => { const p = tagOf(o);
+            if (!plank && o.isMesh && p && p.key === 'planking') plank = o; });
+          if (plank) {
+            const a = plank.geometry.attributes.position;
+            let zmax = 0;
+            for (let i = 0; i < a.count; i++)
+              if (Math.abs(a.getX(i) - stationX) < 0.6)
+                zmax = Math.max(zmax, Math.abs(a.getZ(i)));
+            if (zmax > 0 && barLen / 2 > 0.95 * zmax)
+              say(v.id, 'a windlass through the planking',
+                  `barrel ${barLen.toFixed(2)} m across a deck `
+                  + `${(2 * zmax).toFixed(2)} m wide at its station`);
+          }
+          const stands = wm.filter(o => o.geometry.type === 'BoxGeometry' &&
+            o.geometry.parameters.height > o.geometry.parameters.width);
+          for (const sg of [1, -1]) {
+            const zEnd = bar.position.z + sg * barLen / 2;
+            if (!stands.some(s => Math.abs(s.position.z - zEnd) < 0.35))
+              say(v.id, 'a windlass end carried by nothing',
+                  `barrel end at z ${zEnd.toFixed(2)} with no standard within 0.35 m — `
+                  + 'Falconer supports it at the two ends by two frames of wood');
+          }
+          if (stands.length) {
+            let deckRef = 1e9;
+            for (const s of stands)
+              deckRef = Math.min(deckRef,
+                                 s.position.y - s.geometry.parameters.height / 2);
+            const over = bar.position.y - deckRef;
+            /* record-blind, all three: the axis where a standing man levers, a barrel
+               a man can bore a handspike hole through, and room for the cable to pass
+               beneath. The builder's own clamp caps the axis at 0.90, so a dragged
+               diameter shows up in the barrel itself and in the vanished clearance —
+               the arms that survive a lying record. */
+            if (!(over >= 0.45 && over <= 0.90))
+              say(v.id, 'a windlass nobody could heave',
+                  `axis ${over.toFixed(2)} m over the deck — the handspike is levered `
+                  + 'by a standing man');
+            if (barDia > 0.9)
+              say(v.id, 'a windlass nobody bored',
+                  `barrel ${barDia.toFixed(2)} m thick — no handspike reaches through it`);
+            if (over - barDia / 2 < 0.12)
+              say(v.id, 'a windlass the cable cannot pass under',
+                  `${(over - barDia / 2).toFixed(2)} m under the barrel`);
+          }
+        }
+      }
+    }
+
     /* declared screws must be drawn, and a screw lives under water */
     if (H.screws) {
       if (!part.screw) say(v.id, 'declared but not drawn', 'screws');

@@ -3646,6 +3646,13 @@ const PARTS = {
                   + '(Falconer 1769). The bars ship through square holes at breast height — '
                   + 'the whole machine is sized to the men who walk it round. Hulls whose '
                   + 'traditions used other gear carry no capstan.' },
+  windlass: { stage: 3, name: 'Windlass',
+              what: 'A horizontal winch: an eight-square oak barrel turned by handspikes '
+                  + 'thrust into holes bored through its body, the crew rising together on '
+                  + 'the bars to a song. On the cog it lies athwartships at the aftcastle, '
+                  + 'forward of the helm — the reconstructed Bremen ship carries it there, '
+                  + 'and the replicas built to her plans work it at sea. Drawn only where '
+                  + 'the record attests one.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
                   + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -4139,6 +4146,59 @@ function buildFittings(S, group, mats) {
     }
     cg.position.x = (u - 0.5) * L;
     group.add(tag(cg, 'capstan'));
+  }
+
+  /* ── THE WINDLASS, FROM THE RECORD: `windlass: {atU, barrelLenM, barrelDiaM}` ───────
+     The Bremen cog's own machine (r173). Ellmers (DSM): the man at the tiller stood
+     under the castle-deck "behind the heavy windlass" — athwartships, at the aftcastle,
+     forward of the helm; the Kiel replica built to the DSM's plans gives the barrel,
+     4.5 m long and 60 cm thick (Baykowski 1991). Falconer's WINDLASS supplies the class
+     mechanism, named as defaults in the provenance: a timber "supported at the two ends
+     by two frames of wood", turned by handspikes "thrust into holes bored through the
+     body", its "lower part ... about a foot above the deck" — so the axis stands at
+     0.30 + D/2 over the deck, clamped to [0.45, 0.90] m: a standing man levers the
+     spike, and no record can move the work out of his reach. The barrel is eight-square:
+     a baulk is worked eight-square where the holes are bored. The aftcastle that should
+     roof the machine is a named residual — it stands in its attested place on the open
+     afterdeck. Silence draws nothing: only a windlass record draws one. */
+  if (S.windlass) {
+    const u = S.windlass.atU || 0.5, y = deckAtU(u);
+    const clampW = (v, a, b) => Math.max(a, Math.min(b, v));
+    const len = S.windlass.barrelLenM || B * 0.55;
+    const D = S.windlass.barrelDiaM || 0.5;
+    const axisY = y + clampW(0.30 + D / 2, 0.45, 0.90);
+    const wg = new THREE.Group();
+    /* the barrel: eight flats, non-indexed so the normals are the faces' own */
+    const bGeo = new THREE.CylinderGeometry(D / 2, D / 2, len, 8, 1).toNonIndexed();
+    bGeo.computeVertexNormals();
+    const bar = new THREE.Mesh(bGeo, wood);
+    bar.name = 'win-barrel'; bar.rotation.x = Math.PI / 2;
+    bar.position.y = axisY; wg.add(bar);
+    /* the standards — Falconer's "two frames of wood" — with the journal turning in each */
+    const stH = (axisY - y) + D * 0.42;
+    for (const sg of [1, -1]) {
+      const st = new THREE.Mesh(new THREE.BoxGeometry(0.30, stH, 0.26), wood);
+      st.name = 'win-standard';
+      st.position.set(0, y + stH / 2, sg * (len / 2 + 0.13));
+      wg.add(st);
+      const j = new THREE.Mesh(
+        new THREE.CylinderGeometry(D * 0.18, D * 0.18, 0.32, 10), wood);
+      j.name = 'win-journal'; j.rotation.x = Math.PI / 2;
+      j.position.set(0, axisY, sg * (len / 2 + 0.10));
+      wg.add(j);
+    }
+    /* two handspikes shipped in the bored through-holes, as the crew left them */
+    for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
+      const spL = 1.7, seat = 0.22;
+      const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
+      sp.name = 'win-spike';
+      sp.rotation.z = ang;
+      const dx = -Math.sin(ang), dy = Math.cos(ang);
+      sp.position.set(dx * (spL / 2 - seat), axisY + dy * (spL / 2 - seat), zf * len);
+      wg.add(sp);
+    }
+    wg.position.x = (u - 0.5) * L;
+    group.add(tag(wg, 'windlass'));
   }
 
   /* ── THE DECKHOUSE, FROM THE RECORD: `deckhouses: [{a, b, hM, wF}]` ─────────────────

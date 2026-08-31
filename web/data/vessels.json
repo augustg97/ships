@@ -1073,7 +1073,13 @@
     "draught": 2.25,
     "freeboard": 2.01,
     "cm": 0.8,
-    "steering": "stern"
+    "steering": "stern",
+    "windlass": {
+     "atU": 0.82,
+     "barrelLenM": 4.5,
+     "barrelDiaM": 0.6
+    },
+    "windlassProvenance": "The wreck's own machine. The reconstructed Bremen cog carries a windlass athwartships UNDER THE AFTCASTLE DECK, forward of the helmsman — Ellmers (DSM, Drassana): 'the man at the tiller had to stand ... behind the heavy windlass' — with a separate capstan (Gangspill) on the castle top, NOT drawn (residual r173). Dimensions are the Kiel replica's build record to the DSM's own Lahn plans: Bratspill 4.5 m long, 60 cm thick (Baykowski 1991, via de.wikipedia Bremer Kogge — TEXT reads, no plate scale applies). Station u 0.82 is a TEXT read of Ellmers (the middle of the castle's run, clear of the helm), precision ±0.04 u. Barrel underside 0.30 m over the deck, the eight-square barrel, two standards and two shipped handspikes are CLASS DEFAULTS from Falconer 1769 WINDLASS ('holes bored through the body', 'lower part ... about a foot above the deck'), named cross-tradition. The aftcastle above it is not yet drawn (residual r173), so the machine stands in its attested place on the open afterdeck. Whether the ORIGINAL barrel was among the >2,000 recovered pieces is not established by the sources fetched in r173; the claim is the reconstruction and the replicas, not the find inventory."
    }
   },
   {
