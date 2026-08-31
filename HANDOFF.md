@@ -11555,3 +11555,87 @@ black drawn unpierced where the plates show sparse small lights. (6) r165: the f
 gallery's wing walls draw the dark recess treatment where the plates read white glazing.
 (7) r166: the drawn screen's glass reads sun-bright pale where plate 3 reads it
 sky-translucent.
+
+## Round 170 — 2026-08-31 — the valance hangs from the head: the sekibune's 52 medallions become two strips of cloth
+
+**The r169 residual 1 queue head — sekibune's 52 'Maku hem' meshes, the next sweep-derived
+boxy class — OPENED AND CLOSED, judgment first, and the judgment differed from the float's
+exactly as the r168 residual predicted. A scallop IS flat cloth, so the flat form is
+attested and the sweep's boxy flag is not itself a conviction. What convicted the drawn row
+was the plate, read again this round from the r119 crops (build/staging/r119/): on every
+hull of the Busan scroll that resolves the border — the atakebune crop above all, the same
+dress at better scale — the dark scallops hang from the band's HEAD, tangent, cut from one
+strip, white cusps rising between them to the hanging line. The code hung spaced discs off
+the band's FOOT, floating +0.01 m proud in fixed ±z vertical planes, while the record's own
+sentence — "white cloth UNDER a dark scalloped hem" — already said the plate's arrangement:
+the documented class, a comment right while its arithmetic is the other sign, this time
+between a record and its builder.**
+
+**The change (hull.js, the GD.maku branch): the band keeps its loft byte-identical; the
+valance becomes ONE mesh per side, contiguous tangent semicircles (radius half the recorded
+bay) lofted ON the band's own parametric surface, flat edge on the head line under the deck
+clamp, lying 8 mm proud along the outboard normal — the second cloth a real valance is. Arc
+segments scale with the radius (SEG = max(12, ceil(π·r/0.07))) so vertex spacing stays
+under the audit's coverage reach at any recorded bay — that coupling was DESIGNED, not
+lucked into: the first draft's fixed SEG made the faithful builder fail its own coverage
+arm under a dragged record, found in standalone simulation before any web/ file was touched
+(build/staging/r170/JUDGMENT.md). The record gains gunDeck.makuBayM = 0.7 — the bay the
+r119 read already took off the scroll at ~16 px/m, promoted from a code constant to a
+record field — and makuProvenance and the card row now state the border's place (head) and
+cut (tangent, one strip), each with its plate and bound. The 52-mesh boxy class dies:
+sweep re-run on the final code (build/staging/r170/sweep-after.json), sekibune boxy 94 → 42,
+maku gone from the census; her boxy column now heads at gundeck/Stanchion 24 and
+capstan/Capstan 8, both already named residuals.**
+
+**The r170 audit rule, four arms in the hull's own frame, vertex positions via matrixWorld,
+no Box3 (the r169 lesson): V-HEAD (the border's top edge on the hanging line, judged
+amidships where the sheer cannot blur it), V-COVER (a strip, not medallions — ≥97% of
+head-line stations within 0.075 m of a border vertex), V-ONCLOTH (every border vertex on
+the record's own cloth surface, [−0.02, +0.06] outboard, the band parameter recovered by
+inverting the builder's own station table piecewise — a global linear inverse samples the
+wrong station at the curved ends and convicts the innocent), V-COUNTER record-blind (no
+border vertex deeper than 0.75 m below the head, none below the band's mid-height — a
+valance nobody hung). The r119 ray rule's comment corrected — it still described the
+foot-hung valance. All four arms proven in simulation BEFORE the round's first web/ edit,
+then by in-page injection, no file touched: severed builder (the r119 disc row restored,
+build/staging/r170/inj-valance-sever.js) → convicted EXACTLY sekibune on ALL FOUR arms
+(V-HEAD "top edge 1.58 amidships, hanging line 2.52", V-COVER 58/60, V-ONCLOTH 46/348,
+V-COUNTER 1.21 m), 8 problems, 32 hulls silent; record dragged makuBayM 0.7 → 2.4 under
+the FAITHFUL builder (inj-valance-drag.js) → only the record-blind V-COUNTER convicts
+("border reaches 0.97 m below the hanging line" — the s-clamp stops the dragged scallop at
+the hem, exactly as the simulation predicted), exactly sekibune. Audit 33/0 clean before
+injections and after; vessels.json diff is the round's own 3 lines.**
+
+**Frames, with timing stated: the opening 64-check ran 12:26–13:02, EXIT:1 — 63/64 within
+tolerance, 0 BLANK, and the one mover was NOT r170's (no edit had touched the tree):
+aboard-cable 0.081%/0.031 is r169's paddle rebuild reaching the aboard view its close
+missed — the frame's own note names the paddle box, the diff is the fan face, drum and
+float row alone. Diff read, accepted with the class reason, re-checked solo 0.000. So
+r169's "zero movers expected" was wrong by exactly one frame, and the opening sweep now
+owns r169's pass whole. Close, on the final code: ship-sekibune 0.532%/0.643 — diff read,
+the two scallop rows alone (old foot row removed, new head row added, both sides),
+hull/sails/oars/panels black — accepted, re-checked solo 0.000; ship-panokseon 0.000,
+ship-galleass 0.000, action-myeongnyang 0.000 (the strait's camera does not resolve a
+0.35 m scallop). No ship-fluyt frame exists to check. ⚠ r171's opening check owes the
+full 64; zero movers expected from this round.**
+
+**Looked at (rules 0 and 1): the Shipwright broadside reads as a rendered vessel on water.
+Three facts a viewer can read off it: a white cloth band with a dark tangent-scalloped
+border at its head hangs below her fighting deck, and her forty sculling ro work out from
+under it; a loopholed timber wall runs nearly her whole length above the band, the
+commander's roofed plank cabin abaft the single mast; she is a long narrow sharp-stemmed
+shell with a raked plank stem and a square stern, riding shallow. The border's arrangement
+now matches the left-column middle hull of the plate — scallops at the deck edge, white
+falling below.**
+
+**Deployed: data-version 1788207091. Live verify below.**
+
+**Named residuals, in order:** (1) The remaining sweep-derived boxy classes, judgment
+first — the ship-of-the-line/east-indiaman stern lights (21/24), the fleet's capstans
+(8 boxy meshes each; a capstan is a waisted drum with whelps — likely a real conviction).
+(2) Preussen mast livery source pass (r155). (3) Endurance forecastle, waiting on RMG
+J9266. (4) Azzam crest span, waiting on a clean elevated bow-quarter plate. (5) r164: the
+risen black drawn unpierced where the plates show sparse small lights. (6) r165: the
+fantail gallery's wing walls draw the dark recess treatment where the plates read white
+glazing. (7) r166: the drawn screen's glass reads sun-bright pale where plate 3 reads it
+sky-translucent.

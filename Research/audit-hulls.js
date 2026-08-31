@@ -1631,9 +1631,11 @@
          surfacePoint, never from the drawn meshes, intersecting the MAKU part
          alone. A bare near side still convicts: its first maku strike is the far
          side's cloth, sign flipped, far outside the depth window. Ray heights stay
-         BETWEEN hem and head — the valance hangs BELOW the hem line, so a rule
-         aimed too low would take the scallops for the cloth; the hole injection
-         removes the strip and leaves the valance to refute exactly that. */
+         BETWEEN hem and head. Until r170 the valance hung BELOW the hem line and a
+         rule aimed too low would have taken the scallops for the cloth; r170 moved
+         the valance to the band's HEAD, ON the cloth surface, where these rays may
+         honestly count it as cloth — the strip still owns the lower ray height, so
+         the r119 hole injection (strip removed, valance left) still convicts. */
       if (H.gunDeck.maku) {
         const mk = [];
         g.updateMatrixWorld(true);
@@ -1670,6 +1672,114 @@
           }
           if (open) say(v.id, 'yagura band bare where its cloth should hang',
                         `${open} of ${shot} rays at the maku band miss the cloth — ${first}`);
+        }
+      }
+      /* ── THE VALANCE HANGS FROM THE HEAD, IN ONE STRIP (round 170). The r168 sweep
+         flagged the 52 'Maku hem' half-discs; the plate overruled the drawing, not
+         the form — a scallop IS flat cloth, but on every hull of the scroll that
+         resolves the border it hangs from the band's HEAD, tangent semicircles cut
+         from one strip, white cusps rising between them to the hanging line. The
+         r119 code hung spaced medallions off the FOOT: the record's own sentence
+         ("white cloth UNDER a dark scalloped hem") drawn the other sign. Expectation
+         from the record, surfacePoint and the class constants (lip B·0.010, tuck
+         0.10, clear 0.15), never the drawn meshes; vertices read via matrixWorld in
+         the hull's own frame — the r169 lesson: geometry positions, no Box3, ever.
+         The band parameter is recovered from x by inverting the builder's own
+         station table piecewise — a global linear inverse samples the wrong station
+         where x(u) compresses at the curved ends, and a rule that measures against
+         the wrong station convicts the innocent. Arms: V-HEAD (the border's top
+         edge on the hanging line, judged amidships where the sheer cannot blur it),
+         V-COVER (a strip, not medallions — ≥97% of head-line stations within
+         0.075 m of a border vertex), V-ONCLOTH (every border vertex on the record's
+         own cloth surface, [−0.02, +0.06] outboard of it), and V-COUNTER
+         record-blind (no border vertex deeper than 0.75 m below the head, none
+         below the band's mid-height — a valance nobody hung; the one arm that
+         survives a dragged record). */
+      if (H.gunDeck.maku) {
+        const GDv = H.gunDeck;
+        const HSv = SHIPS_HULL.hullSurface(H);
+        const overV = GDv.over !== undefined ? GDv.over : H.beam * 0.045;
+        const headYv = H.freeboard + GDv.height - H.beam * 0.016;
+        const lipV = H.beam * 0.010, tuckV = 0.10, clearV = 0.15;
+        const NV = 22, sxV = [], ryV = [], hwV = [];
+        for (let i = 0; i <= NV; i++) {
+          const u = GDv.from + (GDv.to - GDv.from) * i / NV;
+          const pd = SHIPS_HULL.surfacePoint(H, HSv, u, 1.0);
+          sxV.push(pd[0]); ryV.push(pd[1]); hwV.push(Math.abs(pd[2]) + overV);
+        }
+        const dirV = Math.sign(sxV[NV] - sxV[0]) || 1;
+        const fInv = x => {           // invert the piecewise-linear station table
+          if ((x - sxV[0]) * dirV <= 0) return 0;
+          for (let i = 0; i < NV; i++)
+            if ((x - sxV[i + 1]) * dirV <= 0)
+              return (i + (x - sxV[i]) / (sxV[i + 1] - sxV[i])) / NV;
+          return 1;
+        };
+        const lerpV = (arr, f) => { const t = Math.min(1, Math.max(0, f)) * NV;
+          const i = Math.min(NV - 1, Math.floor(t)), w = t - i;
+          return arr[i] + (arr[i + 1] - arr[i]) * w; };
+        g.updateMatrixWorld(true);
+        const VW = new THREE.Vector3();
+        for (const sgn of [-1, 1]) {
+          const vtx = [];             // border vertices this side, hull frame
+          g.traverse(o => { const p = tagOf(o);
+            if (!(o.isMesh && p && p.key === 'maku' && p.name !== 'Maku')) return;
+            const pa = o.geometry.getAttribute('position');
+            for (let k = 0; k < pa.count; k++) {
+              VW.fromBufferAttribute(pa, k).applyMatrix4(o.matrixWorld);
+              if (VW.z * sgn > 0) vtx.push([VW.x, VW.y, VW.z]);
+            } });
+          if (!vtx.length) {
+            say(v.id, 'maku band drawn without its valance',
+                `no border geometry on the ${sgn > 0 ? 'starboard' : 'port'} side`);
+            continue;
+          }
+          /* V-HEAD, judged amidships: the border's top edge is the hanging line */
+          const xMidLo = lerpV(sxV, 1 / 3), xMidHi = lerpV(sxV, 2 / 3);
+          const mid = vtx.filter(p => (p[0] - xMidLo) * dirV >= 0
+                                   && (p[0] - xMidHi) * dirV <= 0);
+          const topMid = mid.length ? Math.max(...mid.map(p => p[1])) : -1e9;
+          if (Math.abs(topMid - headYv) > 0.06)
+            say(v.id, 'maku valance hung off the head',
+                `border top edge ${topMid.toFixed(2)} m amidships, `
+                + `the hanging line at ${headYv.toFixed(2)}`);
+          /* V-COVER: a strip, not medallions */
+          const x0c = lerpV(sxV, 0) + dirV * 0.7, x1c = lerpV(sxV, 1) - dirV * 0.7;
+          let cov = 0; const MC = 60;
+          for (let m = 0; m < MC; m++) {
+            const xs = x0c + (x1c - x0c) * (m + 0.5) / MC;
+            if (vtx.some(p => Math.abs(p[0] - xs) <= 0.075)) cov++;
+          }
+          if (cov / MC < 0.97)
+            say(v.id, 'maku border is medallions, not a strip',
+                `${cov} of ${MC} head-line stations have border cloth within 0.075 m `
+                + '— the scallops are cut from one strip and touch');
+          /* V-ONCLOTH: every border vertex on the record's own cloth surface */
+          let offC = 0, firstC = '';
+          for (const p of vtx) {
+            const f = fInv(p[0]);
+            const depF = Math.max(0.05, headYv - (lerpV(ryV, f) + clearV));
+            const s = Math.min(1, Math.max(0, (headYv - p[1]) / depF));
+            const dev = Math.abs(p[2]) - (lerpV(hwV, f) - lipV - tuckV * s);
+            if (dev < -0.02 || dev > 0.06) {
+              offC++;
+              if (!firstC) firstC = `first at x ${p[0].toFixed(1)}, y ${p[1].toFixed(2)}, `
+                                  + `${dev.toFixed(3)} m off the cloth`;
+            }
+          }
+          if (offC) say(v.id, 'maku border off its own cloth',
+                        `${offC} of ${vtx.length} border vertices off the surface — ${firstC}`);
+          /* V-COUNTER, record-blind: a valance nobody hung */
+          const botV = Math.min(...vtx.map(p => p[1]));
+          const hemMidV = lerpV(ryV, 0.5) + clearV;
+          if (headYv - botV > 0.75)
+            say(v.id, 'a scallop nobody hung',
+                `border reaches ${(headYv - botV).toFixed(2)} m below the hanging line `
+                + '— no plate reads a valance past 0.75 m');
+          else if (botV < (headYv + hemMidV) / 2)
+            say(v.id, 'a scallop nobody hung',
+                `border bottom ${botV.toFixed(2)} m, below the band's own mid-height `
+                + `${((headYv + hemMidV) / 2).toFixed(2)}`);
         }
       }
       if (H.tower) {

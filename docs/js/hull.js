@@ -6393,12 +6393,31 @@ uE === GD.from ? 'Oar-deck end wall, forward' : 'Oar-deck end wall, aft'));
 if (GD.maku) {
 const clothMat = new THREE.MeshStandardMaterial({ color: 0xe9e2d0, roughness: 0.94,
 side: THREE.DoubleSide });
-const hemMat = new THREE.MeshStandardMaterial({ color: 0x252a38, roughness: 0.94,
+const valMat = new THREE.MeshStandardMaterial({ color: 0x252a38, roughness: 0.94,
 side: THREE.DoubleSide });
 const lipIn = B * 0.010;
 const tuck = 0.10;
 const clear = 0.15;
 const headYc = gdY - B * 0.016;
+const atCloth = (f, s, sgn) => {
+const t = Math.min(1, Math.max(0, f)) * N;
+const i = Math.min(N - 1, Math.floor(t)), w = t - i;
+const xx = sx[i] + (sx[i + 1] - sx[i]) * w;
+const ry = railY[i] + (railY[i + 1] - railY[i]) * w;
+const hw = halfW[i] + (halfW[i + 1] - halfW[i]) * w;
+return [xx, headYc + (ry + clear - headYc) * s, sgn * (hw - lipIn - tuck * s)];
+};
+const depCloth = f => {
+const t = Math.min(1, Math.max(0, f)) * N;
+const i = Math.min(N - 1, Math.floor(t)), w = t - i;
+return headYc - (railY[i] + (railY[i + 1] - railY[i]) * w + clear);
+};
+const bayM = GD.makuBayM !== undefined ? GD.makuBayM : 0.7;
+const bandLen = Math.abs(sx[N] - sx[0]);
+const nSc = Math.max(4, Math.round(bandLen / bayM));
+const pitchF = 1 / nSc, rM = bandLen / nSc / 2;
+const SEG = Math.max(12, Math.ceil(Math.PI * rM / 0.07));
+const lay = 0.008;
 for (const sgn of [-1, 1]) {
 const cpos = [], cidx = [];
 for (let i = 0; i <= N; i++) {
@@ -6413,16 +6432,30 @@ group.add(tag(new THREE.Mesh(cg, clothMat), 'maku', 'Maku',
 'The cloth band the Busan scroll hangs along the yagura band on hull after '
 + 'hull of the anchored fleet — white, under a dark scalloped hem. Dress and '
 + 'concealment both: an arquebusier behind it cannot be counted.'));
-const bays = Math.max(4, Math.round((GD.to - GD.from) * L / 0.7));
-for (let j = 0; j < bays; j++) {
-const u = GD.from + (GD.to - GD.from) * ((j + 0.5) / bays);
-const p = surfacePoint(S, H, u, 1.0);
-const hw = Math.abs(p[2]) + over;
-const sc = new THREE.Mesh(new THREE.CircleGeometry(0.24, 10, Math.PI, Math.PI),
-hemMat);
-sc.position.set(p[0], p[1] + clear, sgn * (hw - lipIn - tuck + 0.01));
-group.add(tag(sc, 'maku', 'Maku hem'));
+const vpos = [], vidx = [];
+for (let j = 0; j < nSc; j++) {
+const fc = (j + 0.5) * pitchF;
+const base = vpos.length / 3;
+const ap = atCloth(fc, 0, sgn);
+vpos.push(ap[0], ap[1], ap[2] + sgn * lay);
+for (let k = 0; k <= SEG; k++) {
+const th = Math.PI + Math.PI * k / SEG;
+const f = fc + Math.cos(th) * pitchF / 2;
+const d = -Math.sin(th) * rM;
+const p = atCloth(f, Math.min(1, d / Math.max(depCloth(f), 1e-6)), sgn);
+vpos.push(p[0], p[1], p[2] + sgn * lay);
+if (k) vidx.push(base, base + k, base + k + 1);
 }
+}
+const vg = new THREE.BufferGeometry();
+vg.setAttribute('position', new THREE.Float32BufferAttribute(vpos, 3));
+vg.setIndex(vidx); vg.computeVertexNormals();
+group.add(tag(new THREE.Mesh(vg, valMat), 'maku', 'Maku valance',
+'The dark scalloped border at the cloth band\'s head — tangent semicircles '
++ 'cut from one strip, hanging from the line the cloth itself hangs from, as '
++ 'the scroll draws them on hull after hull. Until round 170 the scallops '
++ 'were drawn spaced apart and off the band\'s foot; the plate hangs them '
++ 'touching, at the head.'));
 }
 }
 if (nSama || nG) {

@@ -9865,7 +9865,8 @@ function buildGalleyWorks(S, group, mats) {
                       uE === GD.from ? 'Oar-deck end wall, forward' : 'Oar-deck end wall, aft'));
       }
     }
-    /* ── THE MAKU: THE CLOTH HER OWN PLATE HANGS AT THE BAND (round 119) ─────────────
+    /* ── THE MAKU: THE CLOTH HER OWN PLATE HANGS AT THE BAND (round 119; the valance
+       corrected round 170) ─────────────────────────────────────────────────────────
        The Busan boat-barrier scroll of 1593 — the sekibune's own plate — draws NO
        plank belt between rail and fighting deck: on hull after hull of the anchored
        fleet it hangs CLOTH there, a white band under a dark scalloped hem, falling
@@ -9874,20 +9875,50 @@ function buildGalleyWorks(S, group, mats) {
        it under sail. So GD.walls is refuted for this class by its own plate, and
        the record field is GD.maku: a lofted cloth strip per side, head hung under
        the deck clamp, hem riding clear of the rail cap so the ro work out from
-       under it — the sangjang's own law. The valance is GEOMETRY, a row of dark
-       half-discs on the hem line, because a colour that lives on a vertex cannot
-       have an edge. Sides only: the plate shows the band only in broadside, and
-       the ends keep the open stanchions the class default draws. Single winding
-       on DoubleSide, the r118 normals lesson. */
+       under it — the sangjang's own law. The valance is GEOMETRY, because a colour
+       that lives on a vertex cannot have an edge — and since r170 it is the plate's
+       own valance. r119 hung spaced half-discs off the band's FOOT while the record
+       said "white cloth UNDER a dark scalloped hem": the comment right, the
+       arithmetic the other sign. On every hull of the scroll that resolves the
+       border (the atakebune crop above all) the scallops hang from the HEAD,
+       tangent, cut from one strip, white cusps rising between them — so one mesh a
+       side: contiguous semicircles of half the recorded bay (GD.makuBayM), lofted
+       ON the band's own surface, flat edge on the head line, lying 8 mm proud
+       along the outboard normal, the second cloth a real valance is. Arc segments
+       scale with the radius so vertex spacing stays under the audit's coverage
+       reach at any recorded bay. Sides only: the plate shows the band only in
+       broadside, and the ends keep the open stanchions the class default draws.
+       Single winding on DoubleSide, the r118 normals lesson. */
     if (GD.maku) {
       const clothMat = new THREE.MeshStandardMaterial({ color: 0xe9e2d0, roughness: 0.94,
                                                         side: THREE.DoubleSide });
-      const hemMat = new THREE.MeshStandardMaterial({ color: 0x252a38, roughness: 0.94,
+      const valMat = new THREE.MeshStandardMaterial({ color: 0x252a38, roughness: 0.94,
                                                       side: THREE.DoubleSide });
       const lipIn = B * 0.010;      // hung just inside the deck lip
       const tuck = 0.10;            // the hem swings a hand's-breadth inboard
       const clear = 0.15;           // and rides clear of the rail cap, over the ro
       const headYc = gdY - B * 0.016;
+      /* the cloth is one parametric surface both pieces share: f along the band,
+         s down it — 0 the head under the clamp, 1 the hem over the rail */
+      const atCloth = (f, s, sgn) => {
+        const t = Math.min(1, Math.max(0, f)) * N;
+        const i = Math.min(N - 1, Math.floor(t)), w = t - i;
+        const xx = sx[i] + (sx[i + 1] - sx[i]) * w;
+        const ry = railY[i] + (railY[i + 1] - railY[i]) * w;
+        const hw = halfW[i] + (halfW[i + 1] - halfW[i]) * w;
+        return [xx, headYc + (ry + clear - headYc) * s, sgn * (hw - lipIn - tuck * s)];
+      };
+      const depCloth = f => {
+        const t = Math.min(1, Math.max(0, f)) * N;
+        const i = Math.min(N - 1, Math.floor(t)), w = t - i;
+        return headYc - (railY[i] + (railY[i + 1] - railY[i]) * w + clear);
+      };
+      const bayM = GD.makuBayM !== undefined ? GD.makuBayM : 0.7;
+      const bandLen = Math.abs(sx[N] - sx[0]);
+      const nSc = Math.max(4, Math.round(bandLen / bayM));
+      const pitchF = 1 / nSc, rM = bandLen / nSc / 2;
+      const SEG = Math.max(12, Math.ceil(Math.PI * rM / 0.07));
+      const lay = 0.008;
       for (const sgn of [-1, 1]) {
         const cpos = [], cidx = [];
         for (let i = 0; i <= N; i++) {
@@ -9902,17 +9933,32 @@ function buildGalleyWorks(S, group, mats) {
           'The cloth band the Busan scroll hangs along the yagura band on hull after '
           + 'hull of the anchored fleet — white, under a dark scalloped hem. Dress and '
           + 'concealment both: an arquebusier behind it cannot be counted.'));
-        /* the valance: dark half-discs, flat edge on the hem line, one bay ~0.7 m */
-        const bays = Math.max(4, Math.round((GD.to - GD.from) * L / 0.7));
-        for (let j = 0; j < bays; j++) {
-          const u = GD.from + (GD.to - GD.from) * ((j + 0.5) / bays);
-          const p = surfacePoint(S, H, u, 1.0);
-          const hw = Math.abs(p[2]) + over;
-          const sc = new THREE.Mesh(new THREE.CircleGeometry(0.24, 10, Math.PI, Math.PI),
-                                    hemMat);
-          sc.position.set(p[0], p[1] + clear, sgn * (hw - lipIn - tuck + 0.01));
-          group.add(tag(sc, 'maku', 'Maku hem'));
+        /* the valance: one strip of cloth a side — tangent semicircles hanging from
+           the head line, radius half the recorded bay, on the band's own surface */
+        const vpos = [], vidx = [];
+        for (let j = 0; j < nSc; j++) {
+          const fc = (j + 0.5) * pitchF;
+          const base = vpos.length / 3;
+          const ap = atCloth(fc, 0, sgn);
+          vpos.push(ap[0], ap[1], ap[2] + sgn * lay);
+          for (let k = 0; k <= SEG; k++) {
+            const th = Math.PI + Math.PI * k / SEG;
+            const f = fc + Math.cos(th) * pitchF / 2;
+            const d = -Math.sin(th) * rM;
+            const p = atCloth(f, Math.min(1, d / Math.max(depCloth(f), 1e-6)), sgn);
+            vpos.push(p[0], p[1], p[2] + sgn * lay);
+            if (k) vidx.push(base, base + k, base + k + 1);
+          }
         }
+        const vg = new THREE.BufferGeometry();
+        vg.setAttribute('position', new THREE.Float32BufferAttribute(vpos, 3));
+        vg.setIndex(vidx); vg.computeVertexNormals();
+        group.add(tag(new THREE.Mesh(vg, valMat), 'maku', 'Maku valance',
+          'The dark scalloped border at the cloth band\'s head — tangent semicircles '
+          + 'cut from one strip, hanging from the line the cloth itself hangs from, as '
+          + 'the scroll draws them on hull after hull. Until round 170 the scallops '
+          + 'were drawn spaced apart and off the band\'s foot; the plate hangs them '
+          + 'touching, at the head.'));
       }
     }
     /* ── THE TATE-ITA, PIERCED (round 140) ────────────────────────────────────────────
