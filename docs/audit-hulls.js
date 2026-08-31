@@ -1259,6 +1259,85 @@ if (nRo && badF)
 say(v.id, 'the ro blade is a stepped overlay, not one scarfed timber',
 `${badF} of ${nRo} — ${firstF}`);
 }
+if (H.oarBanks) {
+const isc = H.interscalmium || 0.98;
+const banks = Array.isArray(H.oarsPerBank) ? H.oarsPerBank
+: [H.oarsPerBank || 27];
+for (let b = 0; b < banks.length; b++) {
+const span = (banks[b] - 1) * isc;
+if (span > 0.9 * H.lwl)
+say(v.id, 'more rowers than the hull has stations',
+`bank ${b}: ${banks[b]} rowers at ${isc} m span ${span.toFixed(1)} m `
++ `on a ${H.lwl} m waterline`);
+}
+}
+if (H.oarBanks && H.oarStyle !== 'ro') {
+const outbR = 0.74 * (H.oarLen || 4.2);
+let nSw = 0, badR = 0, firstR = '', badF2 = 0, firstF2 = '', badC = 0, firstC = '';
+const cnr = new THREE.Vector3();
+g.updateMatrixWorld(true);
+g.traverse(o => {
+const d = o.userData && o.userData.oar;
+if (!d || d.style === 'ro') return;
+nSw++;
+const kids = [];
+o.traverse(m => { if (m.isMesh) kids.push(m); });
+if (kids.length !== 2) {
+badF2++; if (!firstF2) firstF2 = `${kids.length} meshes on one thole for a loom and a blade`;
+return;
+}
+const ext = kids.map(m => {
+m.updateMatrix();
+const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+const bb = gm.boundingBox; let z0 = Infinity, z1 = -Infinity;
+for (const cx of [bb.min.x, bb.max.x])
+for (const cy of [bb.min.y, bb.max.y])
+for (const cz of [bb.min.z, bb.max.z]) {
+cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+z0 = Math.min(z0, cnr.z); z1 = Math.max(z1, cnr.z);
+}
+return [z0, z1];
+});
+const reach = Math.max(ext[0][1], ext[1][1]);
+if (reach > 1.01 * outbR || reach < 0.97 * outbR) {
+badR++; if (!firstR) firstR = `tip at ${reach.toFixed(2)} m of a recorded `
++ `${outbR.toFixed(2)} m outboard run`;
+}
+const bi = ext[0][0] > ext[1][0] ? 0 : 1;
+const bm = kids[bi], bz0 = ext[bi][0], bz1 = ext[bi][1], run = bz1 - bz0;
+const pa = bm.geometry.attributes.position.array;
+const p3 = new THREE.Vector3();
+let neckLo = Infinity, neckHi = -Infinity, tipLo = Infinity, tipHi = -Infinity,
+allLo = Infinity, allHi = -Infinity;
+for (let i = 0; i < pa.length; i += 3) {
+p3.set(pa[i], pa[i + 1], pa[i + 2]).applyMatrix4(bm.matrix);
+allLo = Math.min(allLo, p3.y); allHi = Math.max(allHi, p3.y);
+if (p3.z < bz0 + 0.15 * run) { neckLo = Math.min(neckLo, p3.y);
+neckHi = Math.max(neckHi, p3.y); }
+if (p3.z > bz1 - 0.02 * run) { tipLo = Math.min(tipLo, p3.y);
+tipHi = Math.max(tipHi, p3.y); }
+}
+const neckD = (neckHi - neckLo) / 2, tipD = (tipHi - tipLo) / 2,
+maxD = (allHi - allLo) / 2;
+if (!(maxD > 1.15 * neckD && maxD > 1.05 * tipD)) {
+badF2++; if (!firstF2) firstF2 = `neck ${neckD.toFixed(3)}, widest `
++ `${maxD.toFixed(3)}, tip ${tipD.toFixed(3)} m half-depth — the same depth `
++ 'at the neck as at its widest is a crate, not a blade';
+}
+if (maxD > 0.045 * H.beam) {
+badC++; if (!firstC) firstC = `blade ${(2 * maxD).toFixed(2)} m deep on a `
++ `${H.beam} m beam — deeper than the class it replaced`;
+}
+});
+if (H.oarBanks && !nSw) say(v.id, 'oar banks declared but no sweeps drawn',
+'oarBanks with no oar groups');
+if (badR) say(v.id, 'an oar drawn past its own record',
+`${badR} of ${nSw} sweeps — ${firstR}`);
+if (badF2) say(v.id, 'the sweep blade is a crate, not a loft',
+`${badF2} of ${nSw} — ${firstF2}`);
+if (badC) say(v.id, 'a blade nobody attested',
+`${badC} of ${nSw} — ${firstC}`);
+}
 if (H.sternGuns) {
 let nCh = 0, bad = 0, first = '';
 const tip = new THREE.Vector3(), pin = new THREE.Vector3();

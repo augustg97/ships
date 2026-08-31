@@ -1,0 +1,7 @@
+[
+ {
+  "id": "trireme",
+  "rule": "more rowers than the hull has stations",
+  "detail": "bank 2: 45 rowers at 0.98 m span 43.1 m on a 35 m waterline"
+ }
+]

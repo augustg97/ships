@@ -9238,21 +9238,15 @@ function buildOars(S, group, mat) {
      drop carried out with it — end grain closed both ends, single winding on DoubleSide
      (the r118 normals lesson). The loom stays a cylinder because a loom IS a round spar. */
   const roInb = oarLen * 0.38, roOutb = oarLen * 0.62;
-  let bladeRo = null, matRo = null;
-  if (RO) {
-    matRo = mat.clone(); matRo.side = THREE.DoubleSide;
-    const prof = [                     /* [z/outb, halfW/B, halfD/B, yOff/B] */
-      [0.00, 0.0050, 0.0165,  0.0000],
-      [0.20, 0.0049, 0.0180, -0.0010],
-      [0.42, 0.0046, 0.0215, -0.0025],
-      [0.62, 0.0043, 0.0250, -0.0038],
-      [0.82, 0.0039, 0.0260, -0.0040],
-      [1.00, 0.0033, 0.0205, -0.0040]];
+  /* one closed quad-section loft, the shared construction for BOTH blade laws — stations
+     [zFrac, halfW/B, halfD/B, yOff/B], z = zFrac·runLen, end grain closed both ends,
+     single winding on DoubleSide (the r118/r156 normals law) */
+  const bladeLoft = (prof, runLen) => {
     const bp = { pos: [], idx: [] };
     const quadB = (a2, b2, c2, d2) => { const k = bp.pos.length / 3;
       bp.pos.push(...a2, ...b2, ...c2, ...d2);
       bp.idx.push(k, k + 1, k + 2, k, k + 2, k + 3); };
-    const rings = prof.map(([f, w, d2, y]) => { const z = f * roOutb,
+    const rings = prof.map(([f, w, d2, y]) => { const z = f * runLen,
         xw = w * B, yd = d2 * B, yc = y * B;
       return [[-xw, yc - yd, z], [xw, yc - yd, z],
               [xw, yc + yd, z], [-xw, yc + yd, z]]; });
@@ -9263,9 +9257,50 @@ function buildOars(S, group, mat) {
       }
     quadB(...rings[0]);                                    /* pin end grain */
     quadB(...[...rings[rings.length - 1]].reverse());      /* tip end grain */
-    bladeRo = new THREE.BufferGeometry();
-    bladeRo.setAttribute('position', new THREE.Float32BufferAttribute(bp.pos, 3));
-    bladeRo.setIndex(bp.idx); bladeRo.computeVertexNormals();
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(bp.pos, 3));
+    geo.setIndex(bp.idx); geo.computeVertexNormals();
+    return geo;
+  };
+  let bladeRo = null, matRo = null;
+  if (RO) {
+    matRo = mat.clone(); matRo.side = THREE.DoubleSide;
+    bladeRo = bladeLoft([              /* [z/outb, halfW/B, halfD/B, yOff/B] */
+      [0.00, 0.0050, 0.0165,  0.0000],
+      [0.20, 0.0049, 0.0180, -0.0010],
+      [0.42, 0.0046, 0.0215, -0.0025],
+      [0.62, 0.0043, 0.0250, -0.0038],
+      [0.82, 0.0039, 0.0260, -0.0040],
+      [1.00, 0.0033, 0.0205, -0.0040]], roOutb);
+  }
+  /* ── AND A SWEEP'S BLADE IS ALSO ONE TIMBER, NOT A CRATE (round 168) ─────────────────
+     The fleet probe ranked the oared fleet's 270 sweep blades the largest boxy class
+     left after the containers (which are boxes because a container IS a box): every
+     blade was a 12-triangle BoxGeometry — the same depth at the neck as at the tip,
+     which no blade hewn from a timber has — and the crate overran the oar itself:
+     centred at 0.90·outb with an 0.11·oarLen half-length, its corner stood at
+     1.049·outb, five per cent past the oar's own recorded length. The blade takes the
+     ro's one-timber law with the sweep's own SYMMETRIC section (a sweep feathers, so
+     its face carries no ro camber): shaft-round at the neck where the loom scarfs in,
+     deepening continuously to its widest just short of the tip, easing to the tip at
+     1.00·outb exactly — an oar stops at its own record. Stations sit inside the old
+     crate's own envelope (max half-depth the crate's 0.0375·B). One loft and one loom
+     spar shared by every sweep in the hull, because they are the same timber. */
+  let bladeSw = null, matSw = null, loomSwGeo = null;
+  const swInb = oarLen * 0.26, swOutb = oarLen * 0.74;
+  if (!RO && n) {
+    matSw = mat.clone(); matSw.side = THREE.DoubleSide;
+    bladeSw = bladeLoft([              /* [z/outb, halfW/B, halfD/B, yOff/B] */
+      [0.70, 0.0100, 0.0100, 0],
+      [0.78, 0.0070, 0.0200, 0],
+      [0.86, 0.0050, 0.0300, 0],
+      [0.93, 0.0042, 0.0365, 0],
+      [0.97, 0.0038, 0.0375, 0],
+      [1.00, 0.0028, 0.0260, 0]], swOutb);
+    /* the loom stops in the blade's neck instead of running to the tip inside it — the
+       old full-length spar poked its round head through the thin blade's faces for the
+       last quarter of the run, a 7.6 cm cylinder in a 3 cm slab on the trireme */
+    loomSwGeo = new THREE.CylinderGeometry(B * 0.010, B * 0.014, swInb + swOutb * 0.72, 6);
   }
   for (let bank = 0; bank < n; bank++) {
     const v = RO ? 0.96 : 0.70 + bank * 0.11;         // a ro pivots ON the rail; sweep banks ride the side
@@ -9320,16 +9355,12 @@ function buildOars(S, group, mat) {
            hands; the shaft runs OUTBOARD to the blade. The gearing is what the whole stroke
            depends on: about 1.1 m inboard against 3.1 m outboard, so the handle moves a
            metre and the blade moves nearly three. Built along +Z, which is outboard. */
-        const inb = oarLen * 0.26, outb = oarLen * 0.74;
-        const shaft = new THREE.Mesh(
-          new THREE.CylinderGeometry(B * 0.010, B * 0.014, oarLen, 6), mat);
+        const inb = swInb, outb = swOutb;
+        const shaft = new THREE.Mesh(loomSwGeo, mat);
         shaft.rotation.x = Math.PI / 2;                 // lie the loom along Z: OUTBOARD
-        shaft.position.z = outb / 2 - inb / 2;
+        shaft.position.z = (outb * 0.72 - inb) / 2;
         o.add(shaft);
-        const blade = new THREE.Mesh(
-          new THREE.BoxGeometry(B * 0.008, B * 0.075, oarLen * 0.22), mat);
-        blade.position.z = outb * 0.90;
-        o.add(blade);
+        o.add(new THREE.Mesh(bladeSw, matSw));
         if (AP) o.position.set(p[0], apY, sgn * apZ);
         else o.position.set(p[0], p[1], sgn * p[2] * out);
         o.rotation.y = sgn > 0 ? 0 : Math.PI;          // flips +Z outboard to the other side

@@ -1,0 +1,7 @@
+[
+ {
+  "id": "galley",
+  "rule": "more rowers than the hull has stations",
+  "detail": "bank 0: 40 rowers at 1.2 m span 46.8 m on a 39.5 m waterline"
+ }
+]

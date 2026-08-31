@@ -1,0 +1,134 @@
+{
+ "byKey": {
+  "keel": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 768
+  },
+  "frames": {
+   "n": 30,
+   "boxy": 0,
+   "tris": 3120
+  },
+  "stempost": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 416
+  },
+  "wale": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 960
+  },
+  "rudder": {
+   "n": 1,
+   "boxy": 1,
+   "tris": 12
+  },
+  "planking": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 121248
+  },
+  "deck": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1920
+  },
+  "mast": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 144
+  },
+  "yard": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 112
+  },
+  "sail": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 3600
+  },
+  "shroud": {
+   "n": 2,
+   "boxy": 0,
+   "tris": 112
+  },
+  "rail": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "waterway": {
+   "n": 1,
+   "boxy": 0,
+   "tris": 1440
+  },
+  "grating": {
+   "n": 9,
+   "boxy": 3,
+   "tris": 7160
+  },
+  "capstan": {
+   "n": 18,
+   "boxy": 8,
+   "tris": 544
+  },
+  "boat": {
+   "n": 3,
+   "boxy": 2,
+   "tris": 2320
+  },
+  "oar": {
+   "n": 96,
+   "boxy": 0,
+   "tris": 3264
+  },
+  "spur": {
+   "n": 4,
+   "boxy": 3,
+   "tris": 52
+  },
+  "apostis": {
+   "n": 101,
+   "boxy": 5,
+   "tris": 1980
+  },
+  "bench": {
+   "n": 96,
+   "boxy": 0,
+   "tris": 2688
+  },
+  "arrumbada": {
+   "n": 12,
+   "boxy": 0,
+   "tris": 528
+  },
+  "gun": {
+   "n": 10,
+   "boxy": 5,
+   "tris": 340
+  },
+  "canopy": {
+   "n": 4,
+   "boxy": 3,
+   "tris": 76
+  }
+ },
+ "byName": {
+  "rudder/Rudder": 1,
+  "grating/Grating": 3,
+  "capstan/Capstan": 8,
+  "boat/Boat skids": 2,
+  "spur/Spur shoe": 1,
+  "spur/Cheek knee": 2,
+  "apostis/Rowing frame": 2,
+  "apostis/Banda": 2,
+  "apostis/Corsia": 1,
+  "gun/Courser": 1,
+  "gun/Flanking piece": 4,
+  "canopy/Ridgepole": 1,
+  "canopy/Tent post": 2
+ }
+}

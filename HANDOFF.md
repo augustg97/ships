@@ -11389,3 +11389,93 @@ on RMG J9266. (4) Azzam crest span, waiting on a clean elevated bow-quarter plat
 lights. (6) Small, from r165: the fantail gallery's wing walls draw in the boat-gallery
 tier's dark recess treatment where the plates read white glazing. (7) Small, from r166: the
 drawn screen's glass reads sun-bright pale where plate 3 reads it sky-translucent.
+
+## Round 168 — 2026-08-26/31 — the fleet probe sweep runs, and a sweep's blade becomes one timber
+
+**This round ran in two sessions and the record says so. The work — probe sweep, blade loft,
+audit rules, galley frame acceptance — ran 2026-08-26 05:19–06:41 and died mid-round on
+exhausted usage credits, after accepting the galley baseline and before the injections, the
+docs build, this handoff and the commit. Five days of loop firings then exited unauthenticated
+(build/loop.log). The 2026-08-31 session verified every staged claim against the tree it
+found, ran what was missing on the identical code, and shipped. Where a proof was re-run
+rather than recovered, the date below names it.**
+
+**The queue head (r167 residual 1, the fleet-wide probe sweep) OPENED AND CLOSED. A new
+instrument (build/staging/r168/probe-sweep.py) builds all 33 hulls in one page and ranks
+every mesh by triangle count — boxy at ≤ 12 triangles, probe_parts.py's r145 criterion
+(sweep.json). The ranking's top is the two container ships (ever-given 4,336, container
+2,869), boxy because a container IS a box; the largest real class below them: the oared
+fleet's 270 sweep blades — trireme 170, galleass 52, galley 48 — every one a 12-triangle
+BoxGeometry, the same depth at the neck as at the tip, which no blade hewn from a timber
+has. And the crate overran the oar itself: centred at 0.90·outb with an 0.11·oarLen
+half-length, its corner stood at 1.049·outb — five per cent past the oar's own recorded
+length, on every sweep in the fleet.**
+
+**The change (hull.js buildOars): the ro's closed quad-section loft is hoisted into a shared
+bladeLoft(prof, runLen), and the sweep takes it with its own SYMMETRIC section — a sweep
+feathers, so its face carries no ro camber: shaft-round at the neck where the loom scarfs
+in, deepening continuously to its widest just short of the tip, easing to the tip at
+1.00·outb exactly. Stations sit inside the old crate's own envelope (max half-depth the
+crate's 0.0375·B). One loft and one loom spar shared per hull. And the loom stops in the
+blade's neck — the old full-length spar poked its round head through the thin blade's faces
+for the last quarter of the run, a 7.6 cm cylinder in a 3 cm slab on the trireme. Measured
+(measure-before/after-*.txt): trireme oar breadth half 5.78 → 5.63 m — the crate corner
+pulled back to the record; probe-after: oar boxy count 0 on all three.**
+
+**Audit: 33/0 clean — 08-26 twice (audit-clean.json 06:21, audit-clean-final.json 06:25) and
+08-31 twice again on the identical tree (audit-clean-r168b.json, audit-clean-final2.json).
+Two new r168 rules. THE RECORD AGREES WITH ITSELF: a bank's span (perBank−1)·interscalmium
+must fit inside nine tenths of the waterline it claims — only the record's own arithmetic
+can convict a dragged rower count, because the builder would draw it faithfully. THE SWEEP
+RULE, three arms in the oar group's own frame, outb derived from the RECORD (0.74·oarLen,
+mirroring hull.js): REACH — the drawn tip lands on [0.97, 1.01]·outb, so the crate's 1.049
+convicts and so does an oar cut short; FORM — the blade must deepen from its neck (widest
+over 1.15× neck) and ease at its tip (over 1.05× tip), which a constant-section crate fails
+twice; COUNTER — no blade deeper than 0.045·B, the blade nobody attested, the arm that
+watches the fix itself.**
+
+**Injections, run 08-31 on the staged final code, all in-page (no file touched; vessels.json
+cmp-identical to its pre-round copy). (a) Builder severed — every sweep blade swapped back
+to the crate at 0.90·outb in the page: convicted EXACTLY {trireme 170/170, galley 48/48,
+galleass 52/52}, REACH ('tip at 1.049 of the recorded run') and FORM both firing, ro hulls
+silent. (b) Record dragged, healthy builder — galley 24 → 40 rowers: exactly galley, 'bank
+0: 40 rowers at 1.2 m span 46.8 m on a 39.5 m waterline'. (b2) The same drag on the ship
+the rule was not born on — trireme bank 2, 31 → 45 at the Vitruvian 0.98 default: exactly
+trireme. Clean restores 33/0 both sessions.**
+
+**Frames. The opening 64-frame check (build/r168-opening-check.txt) finished 06:08, BEFORE
+the first edit at 06:19 — it owns r167's pass entirely: 64/64 within tolerance, 0 BLANK,
+and the procedural lesson from r167 (sever after the check exits) was kept by timing.
+ship-galley was accepted 06:41 on final code — diff read: the oar bank plus three aft tips,
+all else black. The 08-31 closing ratchet on the published code: 64 frames, 0 BLANK, 60
+within tolerance and four movers — every one the round's own blade class, each diff read,
+each accepted with its reason, each re-checked solo at 0.000 after. ship-trireme
+1.105%/0.428, the three oar banks only. ship-galleass 0.586%/0.314, the single sweep bank
+plus the pager button's translucent overlap. aboard-coast 0.127%/0.027 — the Syracuse
+frame, where a neighbouring trireme's bank crosses the view. ship-slave-ship 0.061%/0.014 —
+she carries no oars herself, but she moors between the war galley and the galleass and both
+neighbours' fans cross her frame; reproduced solo at identical numbers TWICE before
+classifying, and the class follows by elimination because the round's only code path is the
+blade. ship-galley itself read 0.000 against its 08-26 acceptance, which proves that
+acceptance photographed the final code.**
+
+**Looked at (rule 1, rule 0): the ship-trireme frame reads as a rendered world, not a chart.
+Three facts a viewer can read off it: she is rowed in three stacked banks whose oars now
+taper to blades; she sets two square sails for fair winds with the boat stowed amidships;
+her stern rises in the curved horn with quarter rudders shipped either side. The war galley
+low-quarter capture reads her two lateen sails set and a single bank of long sweeps held
+level both sides.**
+
+**Deployed: data-version 1788196623 — restamped 08-31 because the 08-26 stamp (1787751301)
+was never published. Live verify follows the push.**
+
+**Named residuals, in order:** (1) From the sweep, the next real boxy classes, each needing a
+judgment before a fix — great-eastern's 96 paddle-wheel floats (a float IS a flat board;
+decide whether the record supports curvature), sekibune's 52 maku hem pieces, the
+ship-of-the-line/east-indiaman stern lights (21/24), the fleet's capstans (8 boxy meshes
+each). (2) Preussen mast livery source pass (r155). (3) Endurance forecastle, waiting on
+RMG J9266. (4) Azzam crest span, waiting on a clean elevated bow-quarter plate. (5) Small,
+from r164: the risen black is drawn unpierced where the plates show sparse small lights.
+(6) Small, from r165: the fantail gallery's wing walls draw in the boat-gallery tier's dark
+recess treatment where the plates read white glazing. (7) Small, from r166: the drawn
+screen's glass reads sun-bright pale where plate 3 reads it sky-translucent.

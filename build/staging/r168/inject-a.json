@@ -1,0 +1,32 @@
+[
+ {
+  "id": "trireme",
+  "rule": "an oar drawn past its own record",
+  "detail": "170 of 170 sweeps \u2014 tip at 3.26 m of a recorded 3.11 m outboard run"
+ },
+ {
+  "id": "trireme",
+  "rule": "the sweep blade is a crate, not a loft",
+  "detail": "170 of 170 \u2014 neck 0.142, widest 0.142, tip 0.142 m half-depth \u2014 the same depth at the neck as at its widest is a crate, not a blade"
+ },
+ {
+  "id": "galley",
+  "rule": "an oar drawn past its own record",
+  "detail": "48 of 48 sweeps \u2014 tip at 8.92 m of a recorded 8.51 m outboard run"
+ },
+ {
+  "id": "galley",
+  "rule": "the sweep blade is a crate, not a loft",
+  "detail": "48 of 48 \u2014 neck 0.195, widest 0.195, tip 0.195 m half-depth \u2014 the same depth at the neck as at its widest is a crate, not a blade"
+ },
+ {
+  "id": "galleass",
+  "rule": "an oar drawn past its own record",
+  "detail": "52 of 52 sweeps \u2014 tip at 10.09 m of a recorded 9.62 m outboard run"
+ },
+ {
+  "id": "galleass",
+  "rule": "the sweep blade is a crate, not a loft",
+  "detail": "52 of 52 \u2014 neck 0.300, widest 0.300, tip 0.300 m half-depth \u2014 the same depth at the neck as at its widest is a crate, not a blade"
+ }
+]

@@ -5965,21 +5965,12 @@ const apZ = AP && Math.abs(pdMid[2]) + AP.out;
 const apY = AP && pdMid[1] + B * 0.115;
 const RO = S.oarStyle === 'ro';
 const roInb = oarLen * 0.38, roOutb = oarLen * 0.62;
-let bladeRo = null, matRo = null;
-if (RO) {
-matRo = mat.clone(); matRo.side = THREE.DoubleSide;
-const prof = [
-[0.00, 0.0050, 0.0165,  0.0000],
-[0.20, 0.0049, 0.0180, -0.0010],
-[0.42, 0.0046, 0.0215, -0.0025],
-[0.62, 0.0043, 0.0250, -0.0038],
-[0.82, 0.0039, 0.0260, -0.0040],
-[1.00, 0.0033, 0.0205, -0.0040]];
+const bladeLoft = (prof, runLen) => {
 const bp = { pos: [], idx: [] };
 const quadB = (a2, b2, c2, d2) => { const k = bp.pos.length / 3;
 bp.pos.push(...a2, ...b2, ...c2, ...d2);
 bp.idx.push(k, k + 1, k + 2, k, k + 2, k + 3); };
-const rings = prof.map(([f, w, d2, y]) => { const z = f * roOutb,
+const rings = prof.map(([f, w, d2, y]) => { const z = f * runLen,
 xw = w * B, yd = d2 * B, yc = y * B;
 return [[-xw, yc - yd, z], [xw, yc - yd, z],
 [xw, yc + yd, z], [-xw, yc + yd, z]]; });
@@ -5990,9 +5981,34 @@ quadB(rings[s][e], rings[s + 1][e], rings[s + 1][e2], rings[s][e2]);
 }
 quadB(...rings[0]);
 quadB(...[...rings[rings.length - 1]].reverse());
-bladeRo = new THREE.BufferGeometry();
-bladeRo.setAttribute('position', new THREE.Float32BufferAttribute(bp.pos, 3));
-bladeRo.setIndex(bp.idx); bladeRo.computeVertexNormals();
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.Float32BufferAttribute(bp.pos, 3));
+geo.setIndex(bp.idx); geo.computeVertexNormals();
+return geo;
+};
+let bladeRo = null, matRo = null;
+if (RO) {
+matRo = mat.clone(); matRo.side = THREE.DoubleSide;
+bladeRo = bladeLoft([
+[0.00, 0.0050, 0.0165,  0.0000],
+[0.20, 0.0049, 0.0180, -0.0010],
+[0.42, 0.0046, 0.0215, -0.0025],
+[0.62, 0.0043, 0.0250, -0.0038],
+[0.82, 0.0039, 0.0260, -0.0040],
+[1.00, 0.0033, 0.0205, -0.0040]], roOutb);
+}
+let bladeSw = null, matSw = null, loomSwGeo = null;
+const swInb = oarLen * 0.26, swOutb = oarLen * 0.74;
+if (!RO && n) {
+matSw = mat.clone(); matSw.side = THREE.DoubleSide;
+bladeSw = bladeLoft([
+[0.70, 0.0100, 0.0100, 0],
+[0.78, 0.0070, 0.0200, 0],
+[0.86, 0.0050, 0.0300, 0],
+[0.93, 0.0042, 0.0365, 0],
+[0.97, 0.0038, 0.0375, 0],
+[1.00, 0.0028, 0.0260, 0]], swOutb);
+loomSwGeo = new THREE.CylinderGeometry(B * 0.010, B * 0.014, swInb + swOutb * 0.72, 6);
 }
 for (let bank = 0; bank < n; bank++) {
 const v = RO ? 0.96 : 0.70 + bank * 0.11;
@@ -6028,16 +6044,12 @@ ph: (i * 0.618 + (sgn > 0 ? 0 : 0.31)) % 1, outb };
 g.add(o);
 continue;
 }
-const inb = oarLen * 0.26, outb = oarLen * 0.74;
-const shaft = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.010, B * 0.014, oarLen, 6), mat);
+const inb = swInb, outb = swOutb;
+const shaft = new THREE.Mesh(loomSwGeo, mat);
 shaft.rotation.x = Math.PI / 2;
-shaft.position.z = outb / 2 - inb / 2;
+shaft.position.z = (outb * 0.72 - inb) / 2;
 o.add(shaft);
-const blade = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.008, B * 0.075, oarLen * 0.22), mat);
-blade.position.z = outb * 0.90;
-o.add(blade);
+o.add(new THREE.Mesh(bladeSw, matSw));
 if (AP) o.position.set(p[0], apY, sgn * apZ);
 else o.position.set(p[0], p[1], sgn * p[2] * out);
 o.rotation.y = sgn > 0 ? 0 : Math.PI;

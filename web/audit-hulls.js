@@ -1807,6 +1807,110 @@
             `${badF} of ${nRo} — ${firstF}`);
     }
 
+    /* ── A BANK OF ROWERS FITS THE HULL THAT SEATS THEM (round 168) ─────────────────────
+       The record must agree with itself before the drawing is judged: a bank's extent is
+       (perBank − 1) · interscalmium, a REAL length, and it must fit inside nine tenths of
+       the waterline it claims to sit on. A record dragged to more rowers than the hull
+       has stations would seat men off both ends of the ship — the builder would draw it
+       faithfully, so only the record's own arithmetic can convict it. All oared hulls,
+       ro and sweep alike; the defaults mirror hull.js's own (Vitruvius 0.98, oarLen 4.2). */
+    if (H.oarBanks) {
+      const isc = H.interscalmium || 0.98;
+      const banks = Array.isArray(H.oarsPerBank) ? H.oarsPerBank
+                  : [H.oarsPerBank || 27];
+      for (let b = 0; b < banks.length; b++) {
+        const span = (banks[b] - 1) * isc;
+        if (span > 0.9 * H.lwl)
+          say(v.id, 'more rowers than the hull has stations',
+              `bank ${b}: ${banks[b]} rowers at ${isc} m span ${span.toFixed(1)} m `
+              + `on a ${H.lwl} m waterline`);
+      }
+    }
+
+    /* ── A SWEEP STOPS AT ITS OWN RECORD, AND ITS BLADE IS A LOFT (round 168) ───────────
+       The fleet probe ranked the oared fleet's 270 sweep blades the largest boxy class
+       left after the containers: every blade a 12-triangle crate, and the crate overran
+       the oar — centred at 0.90·outb with an 0.11·oarLen half-length, its corner stood
+       at 1.049·outb, five per cent past the oar's own recorded length. Three arms, in
+       the oar group's own frame (the ro rule's corner-transform, so the rest rake cannot
+       alias into the measure), outb derived from the RECORD (0.74 · (oarLen or the
+       builder's own 4.2 default), mirroring hull.js the way lowerOf mirrors the mast
+       stack). REACH: the oar's drawn tip lands on [0.97, 1.01]·outb — the crate's 1.049
+       convicts, and so does an oar cut short. FORM: the blade (the outboard mesh of the
+       pin's two) must deepen from its neck and ease at its tip — widest section over
+       1.15× the neck's and over 1.05× the tip's; a constant-section crate fails both.
+       COUNTER: no blade deeper than 0.045·B — a blade nobody attested, the arm that
+       watches the fix itself. */
+    if (H.oarBanks && H.oarStyle !== 'ro') {
+      const outbR = 0.74 * (H.oarLen || 4.2);
+      let nSw = 0, badR = 0, firstR = '', badF2 = 0, firstF2 = '', badC = 0, firstC = '';
+      const cnr = new THREE.Vector3();
+      g.updateMatrixWorld(true);
+      g.traverse(o => {
+        const d = o.userData && o.userData.oar;
+        if (!d || d.style === 'ro') return;
+        nSw++;
+        const kids = [];
+        o.traverse(m => { if (m.isMesh) kids.push(m); });
+        if (kids.length !== 2) {
+          badF2++; if (!firstF2) firstF2 = `${kids.length} meshes on one thole for a loom and a blade`;
+          return;
+        }
+        /* z-extents of each timber in the group's frame */
+        const ext = kids.map(m => {
+          m.updateMatrix();
+          const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox; let z0 = Infinity, z1 = -Infinity;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+                z0 = Math.min(z0, cnr.z); z1 = Math.max(z1, cnr.z);
+              }
+          return [z0, z1];
+        });
+        const reach = Math.max(ext[0][1], ext[1][1]);
+        if (reach > 1.01 * outbR || reach < 0.97 * outbR) {
+          badR++; if (!firstR) firstR = `tip at ${reach.toFixed(2)} m of a recorded `
+            + `${outbR.toFixed(2)} m outboard run`;
+        }
+        /* the blade is the mesh that STARTS further outboard */
+        const bi = ext[0][0] > ext[1][0] ? 0 : 1;
+        const bm = kids[bi], bz0 = ext[bi][0], bz1 = ext[bi][1], run = bz1 - bz0;
+        const pa = bm.geometry.attributes.position.array;
+        const p3 = new THREE.Vector3();
+        let neckLo = Infinity, neckHi = -Infinity, tipLo = Infinity, tipHi = -Infinity,
+            allLo = Infinity, allHi = -Infinity;
+        for (let i = 0; i < pa.length; i += 3) {
+          p3.set(pa[i], pa[i + 1], pa[i + 2]).applyMatrix4(bm.matrix);
+          allLo = Math.min(allLo, p3.y); allHi = Math.max(allHi, p3.y);
+          if (p3.z < bz0 + 0.15 * run) { neckLo = Math.min(neckLo, p3.y);
+                                         neckHi = Math.max(neckHi, p3.y); }
+          if (p3.z > bz1 - 0.02 * run) { tipLo = Math.min(tipLo, p3.y);
+                                         tipHi = Math.max(tipHi, p3.y); }
+        }
+        const neckD = (neckHi - neckLo) / 2, tipD = (tipHi - tipLo) / 2,
+              maxD = (allHi - allLo) / 2;
+        if (!(maxD > 1.15 * neckD && maxD > 1.05 * tipD)) {
+          badF2++; if (!firstF2) firstF2 = `neck ${neckD.toFixed(3)}, widest `
+            + `${maxD.toFixed(3)}, tip ${tipD.toFixed(3)} m half-depth — the same depth `
+            + 'at the neck as at its widest is a crate, not a blade';
+        }
+        if (maxD > 0.045 * H.beam) {
+          badC++; if (!firstC) firstC = `blade ${(2 * maxD).toFixed(2)} m deep on a `
+            + `${H.beam} m beam — deeper than the class it replaced`;
+        }
+      });
+      if (H.oarBanks && !nSw) say(v.id, 'oar banks declared but no sweeps drawn',
+                                  'oarBanks with no oar groups');
+      if (badR) say(v.id, 'an oar drawn past its own record',
+                    `${badR} of ${nSw} sweeps — ${firstR}`);
+      if (badF2) say(v.id, 'the sweep blade is a crate, not a loft',
+                     `${badF2} of ${nSw} — ${firstF2}`);
+      if (badC) say(v.id, 'a blade nobody attested',
+                    `${badC} of ${nSw} — ${firstC}`);
+    }
+
     /* ── THE RECORD'S GUNS FIRE THE WAY THE RECORD SAYS (round 116). Round 88 recorded
        two gaps on the galleass: 'chasers aft' claimed by her own Guns row and never
        drawn, and the Lepanto conversions' ROUND bow fortress flattened to a galley
