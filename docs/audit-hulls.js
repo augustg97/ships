@@ -1338,6 +1338,69 @@ if (badF2) say(v.id, 'the sweep blade is a crate, not a loft',
 if (badC) say(v.id, 'a blade nobody attested',
 `${badC} of ${nSw} — ${firstC}`);
 }
+if (H.paddleFloats) {
+const Rw = (H.paddleDia || 0) / 2;
+const fD = H.paddleFloatDeepM || 0, fL = H.paddleFloatLenM || 0;
+let wheels = 0, badN = 0, firstN = '', badB = 0, firstB = '',
+badC = 0, firstC = '';
+g.traverse(o => {
+if (!(o.userData && o.userData.wheel)) return;
+wheels++;
+let nF = 0;
+o.children.forEach(m => {
+if (!m.isMesh || m.name !== 'Float') return;
+nF++;
+const pp = m.geometry.parameters || {};
+const deep = pp.height || 0, len = pp.depth || 0, thick = pp.width || 0;
+const reach = Math.hypot(m.position.x, m.position.y) + deep / 2;
+const dimBad = (fD && Math.abs(deep - fD) > 0.15 * fD)
+|| (fL && Math.abs(len - fL) > 0.15 * fL);
+if (dimBad || reach > 1.01 * Rw || reach < 0.95 * Rw) {
+badB++; if (!firstB) firstB = `a ${len.toFixed(2)} × ${deep.toFixed(2)} m float `
++ `reaching ${reach.toFixed(2)} m against a recorded ${fL.toFixed(2)} × `
++ `${fD.toFixed(2)} m board on a ${Rw.toFixed(2)} m wheel`;
+}
+if (deep > 1.5 || thick > 0.30) {
+badC++; if (!firstC) firstC = `a float ${deep.toFixed(2)} m deep and `
++ `${thick.toFixed(2)} m thick`;
+}
+});
+if (nF !== H.paddleFloats) {
+badN++; if (!firstN) firstN =
+`${nF} floats drawn on a wheel recorded with ${H.paddleFloats}`;
+}
+});
+if (!wheels) say(v.id, 'paddle floats recorded but no wheel drawn',
+'paddleFloats with no wheel group');
+if (badN) say(v.id, 'the wheel does not carry its recorded floats', firstN);
+if (badB) say(v.id, 'a float drawn past its own record', `${badB} — ${firstB}`);
+if (badC) say(v.id, 'a board nobody attested', `${badC} — ${firstC}`);
+if (H.paddleOverBoxesM && wheels) {
+const obHalf = H.paddleOverBoxesM / 2;
+let zMax = 0;
+const cnr = new THREE.Vector3();
+g.updateMatrixWorld(true);
+g.traverse(o => {
+if (!o.isMesh) return;
+let part = null;
+for (let e = o; e; e = e.parent)
+if (e.userData && e.userData.part) { part = e.userData.part; break; }
+if (!part || part.key !== 'paddlebox') return;
+const gm = o.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+const bb = gm.boundingBox;
+for (const cx of [bb.min.x, bb.max.x])
+for (const cy of [bb.min.y, bb.max.y])
+for (const cz of [bb.min.z, bb.max.z]) {
+cnr.set(cx, cy, cz).applyMatrix4(o.matrixWorld);
+zMax = Math.max(zMax, Math.abs(cnr.z));
+}
+});
+if (zMax > 1.01 * obHalf || zMax < 0.93 * obHalf)
+say(v.id, 'the housing does not stop at its recorded breadth',
+`widest box structure at ${(2 * zMax).toFixed(2)} m over a recorded `
++ `${H.paddleOverBoxesM} m over the boxes`);
+}
+}
 if (H.sternGuns) {
 let nCh = 0, bad = 0, first = '';
 const tip = new THREE.Vector3(), pin = new THREE.Vector3();

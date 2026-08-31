@@ -1990,7 +1990,8 @@ what: 'The operator’s name painted on the shell and the ship’s own name and 
 + 'lettering is the largest single mark on her — sized to be read from another '
 + 'ship, not from a quay.' },
 paddle:   { stage: 4, name: 'Paddle wheels',
-what: 'Great Eastern\'s are 17 m across — taller than a house. She carried a 7.3 m '
+what: 'Great Eastern\'s are 17 m across — taller than a house — each wheel hanging '
++ 'thirty flat boards of 13 feet by 3 on its radial arms. She carried a 7.3 m '
 + 'SCREW as well, and that is why she is such an odd ship: paddles are '
 + 'efficient in smooth water and useless the moment a roll lifts one clear, a '
 + 'screw works in any sea but was unproven at that size, so Brunel fitted both '
@@ -7197,41 +7198,55 @@ const p = surfacePoint(S, H, u, 0.80);
 const waterY = H.sheer(u) - S.freeboard;
 const axleY = waterY + D * 0.35;
 const iron = mats.iron || mats.woodDark;
+const NF = S.paddleFloats || 24;
+const fLen = S.paddleFloatLenM || B * 0.30;
+const fDeep = S.paddleFloatDeepM || D * 0.115;
+const fThick = 0.10;
+const R = D / 2;
+const owHalf = S.paddleOverWheelsM ? S.paddleOverWheelsM / 2 : p[2] + B * 0.16 + fLen / 2;
+const obHalf = S.paddleOverBoxesM ? S.paddleOverBoxesM / 2 : owHalf + B * 0.02;
+const zc = owHalf - fLen / 2;
 for (const sgn of [-1, 1]) {
 const g = new THREE.Group();
-const R = D / 2;
-for (let i = 0; i < 24; i++) {
-const a = i / 24 * Math.PI * 2;
+for (let i = 0; i < NF / 2; i++) {
 const arm = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.020, R * 2, B * 0.020), iron);
-arm.rotation.z = a;
+new THREE.BoxGeometry(D * 0.018, R * 2, Math.max(0.14, D * 0.009)), iron);
+arm.rotation.z = i / NF * Math.PI * 2;
+arm.name = 'Wheel arm';
 g.add(arm);
+}
+for (let i = 0; i < NF; i++) {
+const a = i / NF * Math.PI * 2;
 const float = new THREE.Mesh(
-new THREE.BoxGeometry(D * 0.030, D * 0.115, B * 0.30), mats.woodDark || mats.woodPale);
-float.position.set(Math.cos(a + Math.PI / 2) * R * 0.90,
-Math.sin(a + Math.PI / 2) * R * 0.90, 0);
+new THREE.BoxGeometry(fThick, fDeep, fLen), mats.woodDark || mats.woodPale);
+const r0 = R - fDeep / 2;
+float.position.set(Math.cos(a + Math.PI / 2) * r0,
+Math.sin(a + Math.PI / 2) * r0, 0);
 float.rotation.z = a;
+float.name = 'Float';
 g.add(float);
 }
 for (const r of [R, R * 0.55]) {
 const rim = new THREE.Mesh(new THREE.TorusGeometry(r, B * 0.012, 6, 30), iron);
 g.add(rim);
 }
-g.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
+g.position.set(p[0], axleY, sgn * zc);
 g.userData.wheel = { sgn, R };
 group.add(tag(g, 'paddle'));
-const bw = B * 0.42;
+const zo = owHalf + 0.10, zi = p[2];
+const bw = zo - zi;
+const zbc = (zo + zi) / 2;
 const boxRx = D * 0.60, boxRy = D * 0.60 * 0.86;
 const h0 = Math.min(Math.max(H.sheer(u) - axleY, boxRy * 0.12), boxRy * 0.55);
 const th0 = Math.asin(h0 / boxRy);
 const xc = boxRx * Math.cos(th0);
 const spon = new THREE.Mesh(
 new THREE.BoxGeometry(xc * 2.16, B * 0.055, bw * 1.06), iron);
-spon.position.set(p[0], axleY + h0 - B * 0.0275, sgn * (p[2] + B * 0.16));
+spon.position.set(p[0], axleY + h0 - B * 0.0275, sgn * zbc);
 group.add(tag(spon, 'paddle', 'Sponson',
 'The platform bracketed out from the hull side at deck level that carries the wheel\'s shaft bearings and the box above. Everything over it is housing; everything under it is wheel.'));
 const bg = new THREE.Group();
-bg.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
+bg.position.set(p[0], axleY, sgn * zbc);
 if (sgn < 0) bg.rotation.y = Math.PI;
 const NB = 22, arc = [];
 for (let i = 0; i <= NB; i++) {
@@ -7266,9 +7281,10 @@ const A = Math.pow(Math.cos(b) / boxRx, 2) + Math.pow(Math.sin(b) / boxRy, 2);
 const B2 = 2 * h0 * Math.sin(b) / (boxRy * boxRy);
 const C = (h0 * h0) / (boxRy * boxRy) - 1;
 const t = (-B2 + Math.sqrt(B2 * B2 - 4 * A * C)) / (2 * A);
+const rT = Math.max(0.12, obHalf - zo);
 const rib = new THREE.Mesh(
-new THREE.BoxGeometry(D * 0.020, t * 0.92, B * 0.030), mats.woodPale || iron);
-rib.position.set(Math.cos(b) * t * 0.5, h0 + Math.sin(b) * t * 0.5, bw / 2 + B * 0.014);
+new THREE.BoxGeometry(D * 0.020, t * 0.92, rT), mats.woodPale || iron);
+rib.position.set(Math.cos(b) * t * 0.5, h0 + Math.sin(b) * t * 0.5, bw / 2 + rT / 2);
 rib.rotation.z = b - Math.PI / 2;
 bg.add(tag(rib, 'paddlebox', 'Paddle-box rib',
 'The face fans from its base because it must: a large thin panel taking the water a wheel throws at it is stiffened most cheaply by ribs running out from the centre. That it also looks well is why owners lettered and gilded it.'));

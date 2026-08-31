@@ -1911,6 +1911,88 @@
                     `${badC} of ${nSw} — ${firstC}`);
     }
 
+    /* ── A PADDLE FLOAT IS THE RECORDED BOARD (round 169) ───────────────────────────────
+       The r168 sweep ranked great-eastern's 96 paddle meshes the largest boxy class after
+       the containers, and the judgment came back from the record: a float IS a flat
+       board — 'the propelling boards fixed on the radiating arms' (Young's Nautical
+       Dictionary, 1863) — so the boxy FORM is attested and what convicts is ARITHMETIC.
+       Lindsay's specification table (1876) gives each wheel 30 floats of 13 ft × 3 ft;
+       the drawn wheel carried 24 floats of 7.6 × 2.0 m, every dimension roughly double
+       its record, and the housing rode out to 45.2 m against 120 ft attested over the
+       boxes. Four arms, all in the wheel group's own frame from geometry parameters and
+       local positions — Box3.setFromObject inflates a spinning wheel's rim AABB by √2
+       and convicted the rims falsely this same round. COUNT: floats drawn per wheel
+       equal the record's. BOARD: each float within 15% of the recorded depth and length,
+       its outer edge landing on [0.95, 1.01]·R. BREADTH: the face ornament lands on
+       [0.93, 1.01] of the recorded half-breadth over the boxes. COUNTER, record-blind:
+       no float deeper than 1.5 m or thicker than 0.30 m — a board nobody ever hung on a
+       wheel, the arm that convicts a dragged record under a faithful builder. */
+    if (H.paddleFloats) {
+      const Rw = (H.paddleDia || 0) / 2;
+      const fD = H.paddleFloatDeepM || 0, fL = H.paddleFloatLenM || 0;
+      let wheels = 0, badN = 0, firstN = '', badB = 0, firstB = '',
+          badC = 0, firstC = '';
+      g.traverse(o => {
+        if (!(o.userData && o.userData.wheel)) return;
+        wheels++;
+        let nF = 0;
+        o.children.forEach(m => {
+          if (!m.isMesh || m.name !== 'Float') return;
+          nF++;
+          const pp = m.geometry.parameters || {};
+          const deep = pp.height || 0, len = pp.depth || 0, thick = pp.width || 0;
+          const reach = Math.hypot(m.position.x, m.position.y) + deep / 2;
+          const dimBad = (fD && Math.abs(deep - fD) > 0.15 * fD)
+                      || (fL && Math.abs(len - fL) > 0.15 * fL);
+          if (dimBad || reach > 1.01 * Rw || reach < 0.95 * Rw) {
+            badB++; if (!firstB) firstB = `a ${len.toFixed(2)} × ${deep.toFixed(2)} m float `
+              + `reaching ${reach.toFixed(2)} m against a recorded ${fL.toFixed(2)} × `
+              + `${fD.toFixed(2)} m board on a ${Rw.toFixed(2)} m wheel`;
+          }
+          if (deep > 1.5 || thick > 0.30) {
+            badC++; if (!firstC) firstC = `a float ${deep.toFixed(2)} m deep and `
+              + `${thick.toFixed(2)} m thick`;
+          }
+        });
+        if (nF !== H.paddleFloats) {
+          badN++; if (!firstN) firstN =
+            `${nF} floats drawn on a wheel recorded with ${H.paddleFloats}`;
+        }
+      });
+      if (!wheels) say(v.id, 'paddle floats recorded but no wheel drawn',
+                       'paddleFloats with no wheel group');
+      if (badN) say(v.id, 'the wheel does not carry its recorded floats', firstN);
+      if (badB) say(v.id, 'a float drawn past its own record', `${badB} — ${firstB}`);
+      if (badC) say(v.id, 'a board nobody attested', `${badC} — ${firstC}`);
+      if (H.paddleOverBoxesM && wheels) {
+        /* the widest paddle-box structure, corner-transformed per mesh — exact for
+           boxes, and the box group only ever turns a half-turn about Y */
+        const obHalf = H.paddleOverBoxesM / 2;
+        let zMax = 0;
+        const cnr = new THREE.Vector3();
+        g.updateMatrixWorld(true);
+        g.traverse(o => {
+          if (!o.isMesh) return;
+          let part = null;
+          for (let e = o; e; e = e.parent)
+            if (e.userData && e.userData.part) { part = e.userData.part; break; }
+          if (!part || part.key !== 'paddlebox') return;
+          const gm = o.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+          const bb = gm.boundingBox;
+          for (const cx of [bb.min.x, bb.max.x])
+            for (const cy of [bb.min.y, bb.max.y])
+              for (const cz of [bb.min.z, bb.max.z]) {
+                cnr.set(cx, cy, cz).applyMatrix4(o.matrixWorld);
+                zMax = Math.max(zMax, Math.abs(cnr.z));
+              }
+        });
+        if (zMax > 1.01 * obHalf || zMax < 0.93 * obHalf)
+          say(v.id, 'the housing does not stop at its recorded breadth',
+              `widest box structure at ${(2 * zMax).toFixed(2)} m over a recorded `
+              + `${H.paddleOverBoxesM} m over the boxes`);
+      }
+    }
+
     /* ── THE RECORD'S GUNS FIRE THE WAY THE RECORD SAYS (round 116). Round 88 recorded
        two gaps on the galleass: 'chasers aft' claimed by her own Guns row and never
        drawn, and the Lepanto conversions' ROUND bow fortress flattened to a galley

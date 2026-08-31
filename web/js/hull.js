@@ -3418,7 +3418,8 @@ const PARTS = {
                   + 'lettering is the largest single mark on her — sized to be read from another '
                   + 'ship, not from a quay.' },
   paddle:   { stage: 4, name: 'Paddle wheels',
-              what: 'Great Eastern\'s are 17 m across — taller than a house. She carried a 7.3 m '
+              what: 'Great Eastern\'s are 17 m across — taller than a house — each wheel hanging '
+                  + 'thirty flat boards of 13 feet by 3 on its radial arms. She carried a 7.3 m '
                   + 'SCREW as well, and that is why she is such an odd ship: paddles are '
                   + 'efficient in smooth water and useless the moment a roll lifts one clear, a '
                   + 'screw works in any sea but was unproven at that size, so Brunel fitted both '
@@ -10887,20 +10888,49 @@ function buildPaddles(S, group, mats) {
   const waterY = H.sheer(u) - S.freeboard;
   const axleY = waterY + D * 0.35;
   const iron = mats.iron || mats.woodDark;
+  /* ── THE FLOAT IS THE RECORDED BOARD (round 169) ─────────────────────────────────────
+     The r168 probe sweep ranked these meshes the largest boxy class after the containers,
+     and the judgment came back from the record: a float IS a flat board — "the propelling
+     boards fixed on the radiating arms" (Young's Nautical Dictionary, 1863) — so the box
+     stays. What was wrong was every number on it: 24 floats of 7.6 × 2.0 m, both
+     dimensions roughly double their record, half a metre thick, on 0.5 m square arms of
+     which half exactly coincided (a full-diameter spoke at angle a IS the spoke at a+π).
+     Lindsay's specification table (History of Merchant Shipping IV, 1876) gives each
+     wheel 30 floats, 13 ft by 3 ft; the wheel is drawn from those numbers and the housing
+     from her recorded breadths — 118 ft over the wheels, 120 ft over the boxes — so the
+     appearance falls out of the record. Board thickness is unattested; 0.10 m is a class
+     default. */
+  const NF = S.paddleFloats || 24;
+  const fLen = S.paddleFloatLenM || B * 0.30;          // along the axle
+  const fDeep = S.paddleFloatDeepM || D * 0.115;       // radial — the board's width
+  const fThick = 0.10;
+  const R = D / 2;
+  /* floats tip out at half the recorded breadth over the wheels; the drum face clears
+     them by a hand's breadth; the face ornament stops at the breadth over the boxes */
+  const owHalf = S.paddleOverWheelsM ? S.paddleOverWheelsM / 2 : p[2] + B * 0.16 + fLen / 2;
+  const obHalf = S.paddleOverBoxesM ? S.paddleOverBoxesM / 2 : owHalf + B * 0.02;
+  const zc = owHalf - fLen / 2;                        // the wheel's own plane
   for (const sgn of [-1, 1]) {
     const g = new THREE.Group();
-    const R = D / 2;
-    for (let i = 0; i < 24; i++) {                     // the radial arms
-      const a = i / 24 * Math.PI * 2;
+    /* one full-diameter spoke serves the float at each end, so an even count wants NF/2
+       arms — the old 24 repeated themselves after twelve, and half the iron in the wheel
+       was drawn twice in the same place */
+    for (let i = 0; i < NF / 2; i++) {
       const arm = new THREE.Mesh(
-        new THREE.BoxGeometry(B * 0.020, R * 2, B * 0.020), iron);
-      arm.rotation.z = a;
+        new THREE.BoxGeometry(D * 0.018, R * 2, Math.max(0.14, D * 0.009)), iron);
+      arm.rotation.z = i / NF * Math.PI * 2;
+      arm.name = 'Wheel arm';
       g.add(arm);
-      const float = new THREE.Mesh(                     // and the floats that do the work
-        new THREE.BoxGeometry(D * 0.030, D * 0.115, B * 0.30), mats.woodDark || mats.woodPale);
-      float.position.set(Math.cos(a + Math.PI / 2) * R * 0.90,
-                         Math.sin(a + Math.PI / 2) * R * 0.90, 0);
+    }
+    for (let i = 0; i < NF; i++) {                     // the boards that do the work
+      const a = i / NF * Math.PI * 2;
+      const float = new THREE.Mesh(
+        new THREE.BoxGeometry(fThick, fDeep, fLen), mats.woodDark || mats.woodPale);
+      const r0 = R - fDeep / 2;                        // outer edge ON the rim circle
+      float.position.set(Math.cos(a + Math.PI / 2) * r0,
+                         Math.sin(a + Math.PI / 2) * r0, 0);
       float.rotation.z = a;
+      float.name = 'Float';
       g.add(float);
     }
     for (const r of [R, R * 0.55]) {                    // the rims
@@ -10917,7 +10947,7 @@ function buildPaddles(S, group, mats) {
        was edge-on from the side and would have been shovelling water sideways. The arms are
        already built in the XY plane, which is the fore-and-aft plane; they needed no rotation
        at all. */
-    g.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
+    g.position.set(p[0], axleY, sgn * zc);
     /* what the animator needs to turn this wheel: which side, and its radius, because the
        rate is not free — the float at the rim must move sternward at roughly the ship's own
        speed through the water, or the wheel is either slipping or being dragged. */
@@ -10938,14 +10968,19 @@ function buildPaddles(S, group, mats) {
        band's ends hung at axle height, two and a half metres below the deck with nothing
        under them. Built from the chord, the parts cannot come apart: the platform spans the
        chord because the chord is where the box stops. */
-    const bw = B * 0.42;                              // housing width athwartships
+    /* the housing derives from the record too: its inner face meets the ship's side, its
+       drum face stands a hand's breadth clear of the float tips, and its face ornament
+       stops at half the recorded breadth over the boxes */
+    const zo = owHalf + 0.10, zi = p[2];
+    const bw = zo - zi;                               // housing width athwartships
+    const zbc = (zo + zi) / 2;
     const boxRx = D * 0.60, boxRy = D * 0.60 * 0.86;  // the crown, slightly flattened
     const h0 = Math.min(Math.max(H.sheer(u) - axleY, boxRy * 0.12), boxRy * 0.55);
     const th0 = Math.asin(h0 / boxRy);                // where the arc springs from the deck
     const xc = boxRx * Math.cos(th0);                 // half the chord
     const spon = new THREE.Mesh(
       new THREE.BoxGeometry(xc * 2.16, B * 0.055, bw * 1.06), iron);
-    spon.position.set(p[0], axleY + h0 - B * 0.0275, sgn * (p[2] + B * 0.16));
+    spon.position.set(p[0], axleY + h0 - B * 0.0275, sgn * zbc);
     group.add(tag(spon, 'paddle', 'Sponson',
       'The platform bracketed out from the hull side at deck level that carries the wheel\'s shaft bearings and the box above. Everything over it is housing; everything under it is wheel.'));
 
@@ -10953,7 +10988,7 @@ function buildPaddles(S, group, mats) {
        negative scale re-hands every triangle it touches, and the port box would face inward
        again. A half-turn about Y moves the geometry without re-handing it. */
     const bg = new THREE.Group();
-    bg.position.set(p[0], axleY, sgn * (p[2] + B * 0.16));
+    bg.position.set(p[0], axleY, sgn * zbc);
     if (sgn < 0) bg.rotation.y = Math.PI;
     const NB = 22, arc = [];
     for (let i = 0; i <= NB; i++) {
@@ -10995,9 +11030,10 @@ function buildPaddles(S, group, mats) {
       const B2 = 2 * h0 * Math.sin(b) / (boxRy * boxRy);
       const C = (h0 * h0) / (boxRy * boxRy) - 1;
       const t = (-B2 + Math.sqrt(B2 * B2 - 4 * A * C)) / (2 * A);  // chord centre → arc
+      const rT = Math.max(0.12, obHalf - zo);         // the ornament stops AT the record
       const rib = new THREE.Mesh(
-        new THREE.BoxGeometry(D * 0.020, t * 0.92, B * 0.030), mats.woodPale || iron);
-      rib.position.set(Math.cos(b) * t * 0.5, h0 + Math.sin(b) * t * 0.5, bw / 2 + B * 0.014);
+        new THREE.BoxGeometry(D * 0.020, t * 0.92, rT), mats.woodPale || iron);
+      rib.position.set(Math.cos(b) * t * 0.5, h0 + Math.sin(b) * t * 0.5, bw / 2 + rT / 2);
       rib.rotation.z = b - Math.PI / 2;
       bg.add(tag(rib, 'paddlebox', 'Paddle-box rib',
         'The face fans from its base because it must: a large thin panel taking the water a wheel throws at it is stiffened most cheaply by ribs running out from the centre. That it also looks well is why owners lettered and gilded it.'));

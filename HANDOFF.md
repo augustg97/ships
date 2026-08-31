@@ -11479,3 +11479,79 @@ from r164: the risen black is drawn unpierced where the plates show sparse small
 (6) Small, from r165: the fantail gallery's wing walls draw in the boat-gallery tier's dark
 recess treatment where the plates read white glazing. (7) Small, from r166: the drawn
 screen's glass reads sun-bright pale where plate 3 reads it sky-translucent.
+
+## Round 169 — 2026-08-31 — the paddle wheel rides its own record: the first sweep-derived judgment lands
+
+**The r168 residual 1 queue head — great-eastern's 96 paddle meshes, the largest boxy class
+after the containers — OPENED AND CLOSED, and the judgment came first, as the residual
+demanded. The record answers: a float IS a flat board — "the propelling boards fixed on the
+radiating arms" (Young's Nautical Dictionary, 1863) — so the boxy FORM is attested, exactly
+as a container's is, and no curvature is drawn because none is recorded. What convicted the
+drawn wheel was arithmetic. Lindsay's specification table (History of Merchant Shipping and
+Ancient Commerce IV, 1876) gives each wheel 30 floats of 13 ft × 3 ft; a second 19th-century
+account ("56 feet in diameter, with 30 floats, each 13 feet broad and 3 feet deep") agrees;
+the NYT's 30 Jun 1860 detailed description and Shipping Wonders attest 120 ft over the paddle
+boxes and 118 ft over the wheels. The drawn wheel carried 24 floats of 7.59 × 1.96 m — both
+dimensions roughly double the record — half a metre thick, on 0.5 m square full-diameter
+spokes of which HALF EXACTLY COINCIDED (a centred symmetric spoke at angle a IS the spoke at
+a+π: twelve of the twenty-four were drawn twice in the same place), and the housing rode out
+to 45.24 m over the box ribs against the attested 36.58 m.**
+
+**The change (hull.js buildPaddles): the record fields paddleFloats / paddleFloatLenM /
+paddleFloatDeepM / paddleOverWheelsM / paddleOverBoxesM land in vessels.json with a
+provenance naming every source, and the wheel and housing DERIVE: 30 boards of 3.96 × 0.91 ×
+0.10 m (thickness unattested, class default, the provenance says so), outer edge on the rim
+circle, on 15 full-diameter spokes serving a float at each end; the wheel plane at half the
+over-wheels breadth less half a board; the drum's inner face at the ship's side, its outer
+face a hand's breadth past the float tips, the fan-face ornament stopping AT half the
+over-boxes breadth. Measured after: floats 0.92 × 3.96 m at reach 8.50 = R; widest box
+structure 36.60 m against the recorded 36.58; the assembly that measured 45.24 m over ribs
+now stops at the record.**
+
+**An instrument convicted falsely and the round says so (rule 8): measure_ship and my first
+per-mesh survey read the rim tori at 24.8 m on a 17 m wheel — Box3.setFromObject transforms
+the geometry AABB's corners, the wheel group sits frozen mid-turn, and a rotated square AABB
+gains √2. The rims were right all along; the r169 audit rule is written from geometry
+parameters and local positions for exactly this reason, and the lesson is in the rule's own
+comment.**
+
+**Audit: 33/0 clean before injections and after restore. The r169 rule, four arms in the
+wheel group's own frame, record-gated on paddleFloats: COUNT (floats drawn per wheel equal
+the record's), BOARD (each float within 15% of recorded depth and length, outer edge on
+[0.95, 1.01]·R), BREADTH (the face ornament lands on [0.93, 1.01] of the recorded
+half-breadth over the boxes), COUNTER record-blind (no float deeper than 1.5 m or thicker
+than 0.30 m — a board nobody ever hung on a wheel). Injections, in-page, no file touched:
+(a) builder severed back to the 24-crate wheel — convicted EXACTLY great-eastern on
+COUNT + BOARD + COUNTER, 32 hulls silent; (b) record dragged, paddleFloatDeepM 0.91 → 2.2
+under the FAITHFUL builder — COUNT and BOARD follow the drag and only the record-blind
+COUNTER convicts, exactly great-eastern, "a float 2.20 m deep". vessels.json diff shows only
+the round's own six added lines.**
+
+**Frames, with timing stated: the opening 64-frame check ran 11:16–11:54, EXIT:0, 64/64
+within tolerance, 0 BLANK — it owns r168's pass whole and finished BEFORE the first edit
+(11:57). The round ran inside an 80-minute loop window, so the close is solo checks on the
+reachable set, the r167→r168 pattern where the NEXT round's opening check owns the full
+sweep: ship-great-eastern 0.368%/0.276, diff read — the two paddle assemblies alone, fan
+face, drum and floats, all else black — accepted with the class reason, re-checked solo
+0.000; the five berth-neighbour frames all within tolerance untouched (ship-preussen 0.000,
+ship-clipper 0.000, ship-steamer 0.018, aboard-preussen 0.000, aboard-clipper 0.001).
+⚠ r170's opening check owes the full 64 and should expect ZERO movers from this round.**
+
+**Looked at (rules 0 and 1): the port-quarter close capture reads as a rendered world. Three
+facts a viewer can read off it: she is a black-hulled six-master with a vented paddle box
+amidships whose gilt fan face is her one piece of display; under the sponson her wheel turns
+thin flat boards, not slabs; a white house band runs her length with boats swung on davits.
+The before/after pair is in build/staging/r169/.**
+
+**Deployed: data-version 1788203344. Live verify follows the push.**
+
+**Named residuals, in order:** (1) The remaining sweep-derived boxy classes, each still
+needing its judgment first — sekibune's 52 maku hem pieces (cloth, not board: the judgment
+will differ), the ship-of-the-line/east-indiaman stern lights (21/24), the fleet's capstans
+(8 boxy meshes each — a capstan is a waisted drum with whelps, likely a real conviction).
+(2) Preussen mast livery source pass (r155). (3) Endurance forecastle, waiting on RMG J9266.
+(4) Azzam crest span, waiting on a clean elevated bow-quarter plate. (5) r164: the risen
+black drawn unpierced where the plates show sparse small lights. (6) r165: the fantail
+gallery's wing walls draw the dark recess treatment where the plates read white glazing.
+(7) r166: the drawn screen's glass reads sun-bright pale where plate 3 reads it
+sky-translucent.
