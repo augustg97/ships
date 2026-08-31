@@ -2143,7 +2143,12 @@ what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave 
 sternlight:{ stage: 3, name: 'Stern lights',
 what: 'The great windows across the transom, and the only real glazing in the ship. '
 + 'Everywhere else light comes through a gunport or a grating, so the captain\'s '
-+ 'cabin is the one place aboard you can read without a candle.' },
++ 'cabin is the one place aboard you can read without a candle. Each tier is a '
++ 'pierced sash wall: lights nearly shoulder to shoulder, each a grid of small '
++ 'panes set behind its glazing bars — crown glass cast no metre sheet. Grid, '
++ 'pier and pitch are record fields; on the 74 they are read off the RMG Bellona '
++ 'model (SLR0338) at ~55 px/m, and the record says which ships carry a class '
++ 'default instead.' },
 taffrail: { stage: 3, name: 'Taffrail',
 what: 'The rail crowning the stern, carried up over the sheer and rising toward the '
 + 'centre with the poop\'s own camber. It is the highest timber of the hull '
@@ -5698,24 +5703,37 @@ const rowZ = [];
 for (let r = 0; r < rows; r++)
 rowZ.push(fb * (rows === 1 ? 0.55 : 0.42 + 0.30 * r));
 const wh = fb * 0.16;
+const [plC, plR] = S.sternLightPanes || [3, 3];
+const pierF = S.sternLightPierFrac !== undefined ? S.sternLightPierFrac : 0.26;
+const pitchT = S.sternLightPitchM || 1.25;
+const barW = 0.045, sashT = B * 0.012;
 for (const zc of rowZ) {
 const hw = halfAt(zc) * 0.84;
-const N = Math.max(3, Math.min(7, Math.round((2 * hw) / (B * 0.095))));
-const pitch = (2 * hw) / N, ww = pitch * 0.64;
+const N = Math.max(3, Math.min(7, Math.round((2 * hw) / pitchT)));
+const pitch = (2 * hw) / N, lw = pitch * (1 - pierF), gh = wh * 0.80;
+const pw = (lw - (plC - 1) * barW) / plC, ph = (gh - (plR - 1) * barW) / plR;
+const sash = new THREE.Shape();
+sash.moveTo(-hw, zc - wh / 2); sash.lineTo(hw, zc - wh / 2);
+sash.lineTo(hw, zc + wh / 2); sash.lineTo(-hw, zc + wh / 2); sash.closePath();
 for (let i = 0; i < N; i++) {
 const zi = -hw + pitch * (i + 0.5);
-const fr = new THREE.Mesh(new THREE.BoxGeometry(B * 0.012, wh, ww), mats.woodPale);
-fr.position.set(xF + B * 0.006, zc, zi);
-g.add(tag(fr, 'sternlight'));
-const gl = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.012, wh - B * 0.016, ww - B * 0.014), glass);
-gl.position.set(xF + B * 0.007, zc, zi);
-g.add(tag(gl, 'sternlight'));
-const mu = new THREE.Mesh(
-new THREE.BoxGeometry(B * 0.013, wh - B * 0.016, B * 0.006), mats.woodPale);
-mu.position.set(xF + B * 0.0075, zc, zi);
-g.add(tag(mu, 'sternlight'));
+for (let cx = 0; cx < plC; cx++) for (let cy = 0; cy < plR; cy++) {
+const h0 = zi - lw / 2 + cx * (pw + barW), v0 = zc - gh / 2 + cy * (ph + barW);
+const hole = new THREE.Path();
+hole.moveTo(h0, v0); hole.lineTo(h0 + pw, v0);
+hole.lineTo(h0 + pw, v0 + ph); hole.lineTo(h0, v0 + ph); hole.closePath();
+sash.holes.push(hole);
 }
+}
+const fr = new THREE.Mesh(
+new THREE.ExtrudeGeometry(sash, { depth: sashT, bevelEnabled: false }),
+mats.woodPale);
+fr.rotation.y = Math.PI / 2;
+fr.position.set(xF + B * 0.002, 0, 0);
+g.add(tag(fr, 'sternlight'));
+const gl = new THREE.Mesh(new THREE.BoxGeometry(0.012, gh, 2 * hw), glass);
+gl.position.set(xF + B * 0.004, zc, 0);
+g.add(tag(gl, 'sternlight'));
 for (const zm of [zc - wh * 0.80, zc + wh * 0.80]) {
 const w2 = halfAt(zm) * 0.94;
 const rail = new THREE.Mesh(

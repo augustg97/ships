@@ -2182,6 +2182,10 @@
     "freeboard": 3.0,
     "cm": 0.82,
     "sternLights": 1,
+    "sternLightPanes": [3, 3],
+    "sternLightPierFrac": 0.26,
+    "sternLightPitchM": 1.25,
+    "sternLightProvenance": "CLASS DEFAULTS, not a read of this hull: the small-pane grid is the period's glazing technology — crown glass casts no metre pane — read on the one plate in hand, the English SLR0338 (see ship-of-the-line). The narrow Dutch tuck carried leaded lights with smaller panes if anything, so 3×3 is a floor; pier share and pitch are class figures from the same plate.",
     "steering": "stern"
    }
   },
@@ -2321,6 +2325,10 @@
     "freeboard": 4.6,
     "cm": 0.8,
     "sternLights": 2,
+    "sternLightPanes": [3, 3],
+    "sternLightPierFrac": 0.26,
+    "sternLightPitchM": 1.25,
+    "sternLightProvenance": "CLASS DEFAULTS, not a read of this hull: the small-pane grid is the period's glazing technology — crown glass casts no metre pane — and the one plate in hand is English (SLR0338, see ship-of-the-line). Dutch retourschip practice ran leaded lights with smaller panes if anything, so 3×3 is a floor, not a count of this stern; pier share and pitch are carried from the same plate as class figures.",
     "steering": "stern"
    }
   },
@@ -2469,6 +2477,10 @@
     "freeboard": 5.4,
     "cm": 0.8,
     "sternLights": 2,
+    "sternLightPanes": [3, 3],
+    "sternLightPierFrac": 0.26,
+    "sternLightPitchM": 1.25,
+    "sternLightProvenance": "The tier arrangement is a PLATE READ: SLR0338, the RMG contemporary full-hull model of Bellona (1760), a Slade 74 — the record's own sub-type. Astern photograph (RMG media c1099, 1041×1280) at ~55 px/m: five pilaster pitches span 335 px and the ~9.2 m stern flat ~510 px, so pane COUNTS are solid and widths good to ~±15%, no finer. Each light in BOTH tiers is a 3×3 pane grid — two vertical and two horizontal bars, the 2–4 px bright lines a column-brightness profile finds inside every light; glazing fills 74–80% of pitch (pier assembly 17 px of 66–71) at 1.20–1.29 m pitch. The colour quarter plate (RMG media d7827) resolves the mica panes recessed BEHIND the gilt bars. Until round 171 each drawn light was one uncastable 0.9 m sheet with a single stick, floating proud of its own frame, and 36% of the tier was blank wall.",
     "headsails": 2,
     "steering": "stern"
    }

@@ -11639,3 +11639,91 @@ risen black drawn unpierced where the plates show sparse small lights. (6) r165:
 fantail gallery's wing walls draw the dark recess treatment where the plates read white
 glazing. (7) r166: the drawn screen's glass reads sun-bright pale where plate 3 reads it
 sky-translucent.
+
+## Round 171 — 2026-08-31 — the stern becomes glass: 57 boxes become six pierced sash walls
+
+**The r170 residual 1 queue head — the ship-of-the-line/east-indiaman stern lights, plus
+the fluyt's 12 the census note under-counted (57 twelve-triangle boxes across the three
+sternLights hulls) — OPENED AND CLOSED, judgment first. The boxy flag alone convicted
+nothing: a sash light IS flat glazing in a flat frame. What convicted the drawn row was
+a plate fetched THIS round: SLR0338, the RMG contemporary Bellona model — a Slade 74,
+the record's own sub-type — astern photograph c1099 at ~55 px/m (five pilaster pitches
+335 px, the ~9.2 m stern flat ~510 px; counts solid, widths ±15%), quarter colour plate
+d7827, both in build/staging/r171/ with the marked crops. Three convictions: (1) the
+drawn glass slab floated 0.001·B PROUD of its own frame slab, the mullion prouder still
+— a sash holds panes in a rebate BEHIND its bars, and d7827 resolves the mica exactly
+there; (2) one uncastable 0.9 m sheet with a single stick — 2×1 panes — where the plate
+resolves a 3×3 grid in BOTH tiers (the 2–4 px bright lines a column-brightness profile
+finds inside every light); (3) 36% of the tier drawn as blank wall where glazing fills
+74–80% of pitch, pilaster to pilaster (pier assembly 17 px of 66–71). Full reads in
+build/staging/r171/JUDGMENT.md.**
+
+**The change (hull.js buildStern): each tier is ONE pierced sash-wall — a THREE.Shape
+with a rectangular hole per PANE, N lights of the record's grid at the record's pitch,
+extruded to the old frame depth; the timber left standing between hole groups IS the
+pilaster and between panes the glazing bar — plus ONE glass sheet per tier lying inside
+the frame depth behind the bars. Record fields promoted with provenance saying which
+numbers are a PLATE READ and which are CLASS DEFAULTS: sternLightPanes [3,3],
+sternLightPierFrac 0.26, sternLightPitchM 1.25 — the 74's a read of SLR0338, the
+indiaman's and fluyt's class defaults named as such (crown glass casts no metre pane;
+3×3 is a floor for Dutch leaded work, not a count of those hulls). The 57-box class
+dies: sweep re-run (build/staging/r171/sweep-after.json) sternlight 21/24/12 boxy →
+4/4/2 meshes of which 2/2/1 boxy — the glass sheets themselves, flat glass, attested.
+Boxy totals 92→73, 88→66, 58→47. The stage card now states the arrangement and its
+source.**
+
+**The r171 audit rule, four arms, geometry parameters and sibling-local positions, no
+Box3 (the r169 lesson): V-PIERCED (a glazed tier has real apertures — an extruded sash
+whose shape carries holes; a tier of solid slabs convicts), V-GRID (record arm —
+apertures = N·cols·rows of sternLightPanes for an integer 3–7 lights), V-BEHIND (glass
+sheet ≥ 5 mm inboard of the sash's outer face — a rebate, not an appliqué), V-COUNTER
+record-blind (no aperture over 0.45 m either way — a pane nobody could cast). All four
+proven in standalone simulation on the three hulls' REAL surface numbers BEFORE any
+web/ edit (build/staging/r171/sim.py on stern-dims.json, 0 failures), then in-page:
+severed builder (the old three-slab row restored, inj-lights-sever.js) → convicted
+EXACTLY the three sternLights hulls on V-PIERCED, 30 silent; record dragged
+sternLightPanes [3,3]→[1,1] on the 74 under the FAITHFUL builder (inj-lights-drag.js)
+→ only record-blind V-COUNTER convicts, exactly ship-of-the-line, both tiers, at the
+simulation's own numbers ("0.89 × 0.81 m — a pane nobody could cast"). Audit 33/0
+clean twice, before injections and after; vessels.json diff is the round's own 12
+lines.**
+
+**Frames, with timing stated, and one hard truth: the opening 64-check HUNG. Launched
+13:32, it captured 46 of 64 frames by 13:58 — all BEFORE the round's first web/ edit
+(14:25) — then a chromium at 607% CPU stalled it for 24 minutes and it was killed
+unscored at 14:23 (the r125 leaked-GPU class; the harness was killed by process group,
+_current left with the 46 pre-edit captures). So r170's "zero movers expected" stands
+UNVERIFIED for the full sweep and ⚠ r172's opening check owes the full 64 and owns
+BOTH r170's and r171's passes — the r167→r168 pattern, stated plainly. The close, on
+final code, solo checks on every frame that can see a sternLights stern:
+ship­wright-astern 0.455%/0.222 — the standing stern guard of the 74; diff read, the
+two light tiers alone plus the berth-neighbour sterns at the frame edges — accepted;
+shipwright-furled 0.111%/0.077 — one cluster, a berth neighbour's two tiers at the
+frame's left edge — diff read, accepted; shipwright within tolerance;
+action-gravelines within tolerance. Both acceptances photographed FINAL code, so the
+re-check-to-0.000 is owed to r172's opening sweep rather than re-run in the loop
+window's last minutes.**
+
+**Looked at (rules 0 and 1): the dead-astern capture reads as a rendered vessel on
+water. Three facts a viewer can read off it: two tiers of small-paned lights band her
+stern under the taffrail, each light a 3×3 grid of dark glass behind pale bars; the
+lights stand nearly shoulder to shoulder, narrow pilasters between them, glazing
+filling the band; the tiers sit between stern mouldings with the quarter davits either
+side. The zoomed crop is build/staging/r171/z-astern-crop.png.**
+
+**Deployed: data-version 1788210709. Live verify below.**
+
+**Named residuals, in order:** (1) The remaining sweep-derived boxy classes, judgment
+first — the fleet's capstans (8 boxy meshes each; a capstan is a waisted drum with
+whelps — likely a real conviction), then `top` (18 boxy), `channel`/`cheek`/`cathead`.
+(2) Preussen mast livery source pass (r155). (3) Endurance forecastle, waiting on RMG
+J9266. (4) Azzam crest span, waiting on a clean elevated bow-quarter plate. (5) r164:
+the risen black drawn unpierced where the plates show sparse small lights. (6) r165:
+the fantail gallery's wing walls draw the dark recess treatment where the plates read
+white glazing. (7) r166: the drawn screen's glass reads sun-bright pale where plate 3
+reads it sky-translucent. (8) NEW, r171: the quarter-gallery panes still sit at the
+old spacing — SLR0338 shows the gallery lights at the SAME heights and grid as the
+stern tiers (the galleries are the same cabins carried round the corner); the drum
+loft draws bands, not sashes. (9) NEW, r171: the tier heights (0.42/0.30·fb) and light
+height (0.16·fb) remain authored fractions never read off a plate; c1099 could give
+both at its 55 px/m.**

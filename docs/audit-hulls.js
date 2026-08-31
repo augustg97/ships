@@ -2171,6 +2171,60 @@ say(v.id, 'stern furniture buried in the hull',
 `galleries end ${(part.planking.x[1] - part.gallery.x[1]).toFixed(2)} m inboard ` +
 'of the aft face');
 }
+if (H.sternLights) {
+const sl = [];
+g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.key === 'sternlight') sl.push(o); });
+const sashes = sl.filter(o => o.geometry && o.geometry.type === 'ExtrudeGeometry');
+const sheets = sl.filter(o => o.geometry && o.geometry.type === 'BoxGeometry'
+&& o.material && o.material.metalness >= 0.3);
+if (sashes.length < H.sternLights)
+say(v.id, 'a glazed tier with no aperture',
+`${H.sternLights} tier(s) declared, ${sashes.length} pierced sash frame(s) `
++ 'drawn — a light laid ON a solid wall is a slab, not a window');
+const gridRec = H.sternLightPanes || [3, 3];
+const perLight = gridRec[0] * gridRec[1];
+for (const fr of sashes) {
+const shp = fr.geometry.parameters.shapes;
+const holes = (shp && shp.holes) || [];
+if (!holes.length) {
+say(v.id, 'a glazed tier with no aperture',
+'sash frame extruded without a single hole');
+continue;
+}
+const nL = holes.length / perLight;
+if (holes.length % perLight !== 0 || nL < 3 || nL > 7)
+say(v.id, "stern lights off the record's grid",
+`${holes.length} apertures cannot be an integer 3–7 lights of `
++ `${gridRec[0]}×${gridRec[1]} panes`);
+let big = 0, dims = '';
+for (const hp of holes) {
+let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9;
+for (const q of hp.getPoints(1)) {
+a0 = Math.min(a0, q.x); a1 = Math.max(a1, q.x);
+b0 = Math.min(b0, q.y); b1 = Math.max(b1, q.y);
+}
+if (a1 - a0 > 0.45 || b1 - b0 > 0.45) {
+big++;
+if (!dims) dims = `${(a1 - a0).toFixed(2)} × ${(b1 - b0).toFixed(2)} m`;
+}
+}
+if (big)
+say(v.id, 'a pane nobody could cast',
+`${big} aperture(s) over 0.45 m — the first ${dims}`);
+}
+if (sashes.length && sheets.length) {
+const sashOut = Math.min(...sashes.map(o =>
+o.position.x + (o.geometry.parameters.options.depth || 0)));
+const glassOut = Math.max(...sheets.map(o =>
+o.position.x + o.geometry.parameters.width / 2));
+if (glassOut > sashOut - 0.005)
+say(v.id, 'glazing proud of its own sash',
+`glass face at x ${glassOut.toFixed(3)}, sash face at `
++ `${sashOut.toFixed(3)} — panes sit in a rebate behind their bars`);
+} else if (sashes.length && !sheets.length)
+say(v.id, 'a sash with no glass behind it', 'no glazing sheet in any tier');
+}
 if (H.screws) {
 if (!part.screw) say(v.id, 'declared but not drawn', 'screws');
 else if (part.screw.y[1] > 0)

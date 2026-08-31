@@ -1,0 +1,4229 @@
+{
+ "dugout": {
+  "meshes": 11,
+  "boxy": 0,
+  "tris": 129450,
+  "lwl": 8,
+  "byKey": {
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 5400
+   },
+   "logtop": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "stowage": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 882
+   }
+  },
+  "byName": {}
+ },
+ "voyaging-canoe": {
+  "meshes": 99,
+  "boxy": 4,
+  "tris": 268494,
+  "lwl": 18,
+  "byKey": {
+   "keel": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 1536
+   },
+   "frames": {
+    "n": 60,
+    "boxy": 0,
+    "tris": 6240
+   },
+   "stempost": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 832
+   },
+   "wale": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "planking": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 242496
+   },
+   "deck": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 10800
+   },
+   "mast": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 18
+   },
+   "yard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 112
+   },
+   "sail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1800
+   },
+   "shroud": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 32
+   },
+   "stowage": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 2660
+   },
+   "crossbeam": {
+    "n": 3,
+    "boxy": 3,
+    "tris": 36
+   },
+   "platform": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   }
+  },
+  "byName": {
+   "crossbeam/Crossbeams": 3,
+   "platform/Platform": 1
+  }
+ },
+ "trireme": {
+  "meshes": 447,
+  "boxy": 21,
+  "tris": 154972,
+  "lwl": 35,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "quarterRudder": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 164
+   },
+   "channel": {
+    "n": 2,
+    "boxy": 2,
+    "tris": 24
+   },
+   "deadeye": {
+    "n": 8,
+    "boxy": 0,
+    "tris": 512
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 36
+   },
+   "karchesion": {
+    "n": 8,
+    "boxy": 6,
+    "tris": 136
+   },
+   "yard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 576
+   },
+   "sail": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 2240
+   },
+   "lift": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "sheet": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "tack": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "halyard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "shroud": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   },
+   "ratline": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 864
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 32
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 4428
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "oar": {
+    "n": 340,
+    "boxy": 0,
+    "tris": 11560
+   }
+  },
+  "byName": {
+   "channel/Channels": 2,
+   "karchesion/Karchesion": 6,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2
+  }
+ },
+ "corbita": {
+  "meshes": 126,
+  "boxy": 28,
+  "tris": 150604,
+  "lwl": 35,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "quarterRudder": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 164
+   },
+   "channel": {
+    "n": 2,
+    "boxy": 2,
+    "tris": 24
+   },
+   "deadeye": {
+    "n": 8,
+    "boxy": 0,
+    "tris": 512
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 36
+   },
+   "karchesion": {
+    "n": 8,
+    "boxy": 6,
+    "tris": 136
+   },
+   "corbis": {
+    "n": 4,
+    "boxy": 1,
+    "tris": 248
+   },
+   "yard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 576
+   },
+   "sail": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 2240
+   },
+   "lift": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "sheet": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "tack": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "halyard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "shroud": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   },
+   "ratline": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1088
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 32
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 10476
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "anchor": {
+    "n": 14,
+    "boxy": 6,
+    "tris": 608
+   }
+  },
+  "byName": {
+   "channel/Channels": 2,
+   "karchesion/Karchesion": 6,
+   "corbis/The corbis": 1,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "dhow": {
+  "meshes": 76,
+  "boxy": 11,
+  "tris": 141046,
+  "lwl": 22.5,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "quarterRudder": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 164
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 144
+   },
+   "yard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 112
+   },
+   "sail": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 3600
+   },
+   "shroud": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 80
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 5090
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   }
+  },
+  "byName": {
+   "grating/Grating": 3,
+   "capstan/Capstan": 8
+  }
+ },
+ "junk": {
+  "meshes": 113,
+  "boxy": 19,
+  "tris": 166622,
+  "lwl": 29,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "bowtransom": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 256
+   },
+   "sterntransom": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 256
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 36
+   },
+   "mastband": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 140
+   },
+   "sheave": {
+    "n": 6,
+    "boxy": 4,
+    "tris": 112
+   },
+   "yard": {
+    "n": 14,
+    "boxy": 0,
+    "tris": 672
+   },
+   "sail": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 21600
+   },
+   "sheet": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 96
+   },
+   "halyard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 9570
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "poop": {
+    "n": 4,
+    "boxy": 2,
+    "tris": 76
+   }
+  },
+  "byName": {
+   "sheave/Masthead sheave": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "poop/Aft castle": 2
+  }
+ },
+ "treasure-ship": {
+  "meshes": 192,
+  "boxy": 41,
+  "tris": 230434,
+  "lwl": 60,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "bowtransom": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 256
+   },
+   "sterntransom": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 256
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 90
+   },
+   "mastband": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 1260
+   },
+   "sheave": {
+    "n": 15,
+    "boxy": 10,
+    "tris": 280
+   },
+   "yard": {
+    "n": 35,
+    "boxy": 0,
+    "tris": 1680
+   },
+   "sail": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 54000
+   },
+   "sheet": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 240
+   },
+   "halyard": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 80
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 38172
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "poop": {
+    "n": 22,
+    "boxy": 18,
+    "tris": 344
+   }
+  },
+  "byName": {
+   "sheave/Masthead sheave": 10,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "poop/Aft castle": 18
+  }
+ },
+ "cog": {
+  "meshes": 95,
+  "boxy": 18,
+  "tris": 140830,
+  "lwl": 20.5,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 2,
+    "boxy": 2,
+    "tris": 24
+   },
+   "deadeye": {
+    "n": 10,
+    "boxy": 0,
+    "tris": 640
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 18
+   },
+   "top": {
+    "n": 5,
+    "boxy": 4,
+    "tris": 104
+   },
+   "yard": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 288
+   },
+   "sail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1120
+   },
+   "lift": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "sheet": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "tack": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "halyard": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "shroud": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "ratline": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1200
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 24
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 5400
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 2,
+   "top/Top": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8
+  }
+ },
+ "caravel": {
+  "meshes": 100,
+  "boxy": 24,
+  "tris": 142102,
+  "lwl": 17.2,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 216
+   },
+   "yard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 168
+   },
+   "sail": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 5400
+   },
+   "shroud": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 128
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 3586
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "carrack": {
+  "meshes": 175,
+  "boxy": 42,
+  "tris": 166112,
+  "lwl": 35,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "deadeye": {
+    "n": 24,
+    "boxy": 0,
+    "tris": 1536
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 144
+   },
+   "woolding": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 840
+   },
+   "top": {
+    "n": 10,
+    "boxy": 8,
+    "tris": 208
+   },
+   "cheek": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "yard": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 1208
+   },
+   "sail": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 6280
+   },
+   "lift": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "sheet": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "tack": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "halyard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "jeers": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "shroud": {
+    "n": 7,
+    "boxy": 0,
+    "tris": 464
+   },
+   "ratline": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 8560
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 11484
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 4,
+   "top/Top": 8,
+   "cheek/Cheeks": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "galley": {
+  "meshes": 401,
+  "boxy": 30,
+  "tris": 154244,
+  "lwl": 39.5,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 144
+   },
+   "yard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 112
+   },
+   "sail": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 3600
+   },
+   "shroud": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 112
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 7160
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "oar": {
+    "n": 96,
+    "boxy": 0,
+    "tris": 3264
+   },
+   "spur": {
+    "n": 4,
+    "boxy": 3,
+    "tris": 52
+   },
+   "apostis": {
+    "n": 101,
+    "boxy": 5,
+    "tris": 1980
+   },
+   "bench": {
+    "n": 96,
+    "boxy": 0,
+    "tris": 2688
+   },
+   "arrumbada": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 528
+   },
+   "gun": {
+    "n": 10,
+    "boxy": 5,
+    "tris": 340
+   },
+   "canopy": {
+    "n": 4,
+    "boxy": 3,
+    "tris": 76
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "spur/Spur shoe": 1,
+   "spur/Cheek knee": 2,
+   "apostis/Rowing frame": 2,
+   "apostis/Banda": 2,
+   "apostis/Corsia": 1,
+   "gun/Courser": 1,
+   "gun/Flanking piece": 4,
+   "canopy/Ridgepole": 1,
+   "canopy/Tent post": 2
+  }
+ },
+ "galleass": {
+  "meshes": 539,
+  "boxy": 87,
+  "tris": 163544,
+  "lwl": 44,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 216
+   },
+   "yard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 168
+   },
+   "sail": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 5400
+   },
+   "shroud": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 192
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 11418
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "oar": {
+    "n": 104,
+    "boxy": 0,
+    "tris": 3536
+   },
+   "spur": {
+    "n": 4,
+    "boxy": 3,
+    "tris": 52
+   },
+   "apostis": {
+    "n": 109,
+    "boxy": 5,
+    "tris": 2140
+   },
+   "bench": {
+    "n": 104,
+    "boxy": 0,
+    "tris": 2912
+   },
+   "gundeck": {
+    "n": 46,
+    "boxy": 0,
+    "tris": 1336
+   },
+   "gun": {
+    "n": 51,
+    "boxy": 28,
+    "tris": 1480
+   },
+   "fortress": {
+    "n": 35,
+    "boxy": 34,
+    "tris": 430
+   },
+   "canopy": {
+    "n": 4,
+    "boxy": 3,
+    "tris": 76
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "spur/Spur shoe": 1,
+   "spur/Cheek knee": 2,
+   "apostis/Rowing frame": 2,
+   "apostis/Banda": 2,
+   "apostis/Corsia": 1,
+   "gun/Broadside piece": 16,
+   "fortress/Parapet": 22,
+   "fortress/Fortress post": 12,
+   "gun/Courser": 1,
+   "gun/Gun port": 5,
+   "gun/Flanking piece": 4,
+   "gun/Stern chaser": 2,
+   "canopy/Ridgepole": 1,
+   "canopy/Tent post": 2
+  }
+ },
+ "panokseon": {
+  "meshes": 285,
+  "boxy": 80,
+  "tris": 174504,
+  "lwl": 30,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "bowtransom": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 256
+   },
+   "sterntransom": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 256
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 36
+   },
+   "mastband": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 112
+   },
+   "sheave": {
+    "n": 6,
+    "boxy": 4,
+    "tris": 112
+   },
+   "yard": {
+    "n": 14,
+    "boxy": 0,
+    "tris": 672
+   },
+   "sail": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 21600
+   },
+   "sheet": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 96
+   },
+   "halyard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 10400
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "oar": {
+    "n": 36,
+    "boxy": 0,
+    "tris": 1224
+   },
+   "gundeck": {
+    "n": 31,
+    "boxy": 26,
+    "tris": 1596
+   },
+   "sangjang": {
+    "n": 8,
+    "boxy": 2,
+    "tris": 1868
+   },
+   "gun": {
+    "n": 28,
+    "boxy": 14,
+    "tris": 840
+   },
+   "tower": {
+    "n": 73,
+    "boxy": 21,
+    "tris": 1628
+   }
+  },
+  "byName": {
+   "sheave/Masthead sheave": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "gundeck/Stanchion": 24,
+   "gundeck/End bulwark": 2,
+   "sangjang/Oar-deck end wall, forward": 1,
+   "sangjang/Oar-deck end wall, aft": 1,
+   "gun/Gun port": 2,
+   "gun/Deck piece": 12,
+   "tower/Commander's tower": 21
+  }
+ },
+ "sekibune": {
+  "meshes": 245,
+  "boxy": 42,
+  "tris": 145498,
+  "lwl": 22.5,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 18
+   },
+   "top": {
+    "n": 5,
+    "boxy": 4,
+    "tris": 104
+   },
+   "yard": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 288
+   },
+   "sail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1120
+   },
+   "lift": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "sheet": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "tack": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "halyard": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 24
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 4244
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "oar": {
+    "n": 80,
+    "boxy": 0,
+    "tris": 2720
+   },
+   "gundeck": {
+    "n": 31,
+    "boxy": 26,
+    "tris": 1956
+   },
+   "maku": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 952
+   },
+   "sama": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 260
+   },
+   "tower": {
+    "n": 45,
+    "boxy": 0,
+    "tris": 1864
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "top/Top": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "gundeck/Stanchion": 24,
+   "gundeck/End bulwark": 2
+  }
+ },
+ "fluyt": {
+  "meshes": 195,
+  "boxy": 47,
+  "tris": 160880,
+  "lwl": 27.5,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "deadeye": {
+    "n": 22,
+    "boxy": 0,
+    "tris": 1408
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 7,
+    "boxy": 0,
+    "tris": 180
+   },
+   "top": {
+    "n": 14,
+    "boxy": 12,
+    "tris": 256
+   },
+   "cheek": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "yard": {
+    "n": 7,
+    "boxy": 0,
+    "tris": 1784
+   },
+   "sail": {
+    "n": 7,
+    "boxy": 0,
+    "tris": 8520
+   },
+   "lift": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 96
+   },
+   "sheet": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 96
+   },
+   "tack": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 32
+   },
+   "halyard": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "jeers": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "shroud": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 480
+   },
+   "ratline": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 5776
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 96
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 4896
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "head": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1256
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   },
+   "sternlight": {
+    "n": 2,
+    "boxy": 1,
+    "tris": 468
+   },
+   "transom": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 48
+   },
+   "taffrail": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 292
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 4,
+   "top/Top": 8,
+   "cheek/Cheeks": 4,
+   "top/Crosstrees": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6,
+   "sternlight/Stern lights": 1
+  }
+ },
+ "east-indiaman": {
+  "meshes": 301,
+  "boxy": 66,
+  "tris": 196968,
+  "lwl": 43,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "deadeye": {
+    "n": 44,
+    "boxy": 0,
+    "tris": 2816
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 162
+   },
+   "woolding": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1008
+   },
+   "top": {
+    "n": 21,
+    "boxy": 18,
+    "tris": 384
+   },
+   "cheek": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "yard": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 2592
+   },
+   "sail": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 10080
+   },
+   "lift": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "sheet": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "tack": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 48
+   },
+   "halyard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 96
+   },
+   "jeers": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "shroud": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 912
+   },
+   "ratline": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 20992
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "gun": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 72
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 144
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 16638
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "head": {
+    "n": 16,
+    "boxy": 4,
+    "tris": 1928
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   },
+   "sternlight": {
+    "n": 4,
+    "boxy": 2,
+    "tris": 1080
+   },
+   "transom": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 96
+   },
+   "taffrail": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 292
+   },
+   "gallery": {
+    "n": 8,
+    "boxy": 4,
+    "tris": 288
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 6,
+   "top/Top": 12,
+   "cheek/Cheeks": 6,
+   "top/Crosstrees": 6,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "head/Head and beakhead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6,
+   "sternlight/Stern lights": 2,
+   "gallery/Quarter galleries": 4
+  }
+ },
+ "ship-of-the-line": {
+  "meshes": 355,
+  "boxy": 73,
+  "tris": 230278,
+  "lwl": 51,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "deadeye": {
+    "n": 50,
+    "boxy": 0,
+    "tris": 3200
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 162
+   },
+   "woolding": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1260
+   },
+   "top": {
+    "n": 21,
+    "boxy": 18,
+    "tris": 384
+   },
+   "cheek": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "yard": {
+    "n": 11,
+    "boxy": 0,
+    "tris": 2704
+   },
+   "sail": {
+    "n": 17,
+    "boxy": 0,
+    "tris": 24480
+   },
+   "lift": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "sheet": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "tack": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 48
+   },
+   "halyard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 96
+   },
+   "jeers": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "shroud": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 1024
+   },
+   "ratline": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 30240
+   },
+   "stay": {
+    "n": 9,
+    "boxy": 7,
+    "tris": 144
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "gun": {
+    "n": 60,
+    "boxy": 0,
+    "tris": 3840
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 144
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 23160
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "head": {
+    "n": 16,
+    "boxy": 4,
+    "tris": 1928
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   },
+   "sternlight": {
+    "n": 4,
+    "boxy": 2,
+    "tris": 1368
+   },
+   "transom": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 96
+   },
+   "taffrail": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 292
+   },
+   "gallery": {
+    "n": 8,
+    "boxy": 4,
+    "tris": 288
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 6,
+   "top/Top": 12,
+   "cheek/Cheeks": 6,
+   "top/Crosstrees": 6,
+   "stay/Stays and backstays": 7,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "head/Head and beakhead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6,
+   "sternlight/Stern lights": 2,
+   "gallery/Quarter galleries": 4
+  }
+ },
+ "slave-ship": {
+  "meshes": 225,
+  "boxy": 56,
+  "tris": 169330,
+  "lwl": 26,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "deadeye": {
+    "n": 36,
+    "boxy": 0,
+    "tris": 2304
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 162
+   },
+   "top": {
+    "n": 21,
+    "boxy": 18,
+    "tris": 384
+   },
+   "cheek": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "yard": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 2592
+   },
+   "sail": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 10080
+   },
+   "lift": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "sheet": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "tack": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 48
+   },
+   "halyard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 96
+   },
+   "jeers": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 64
+   },
+   "shroud": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 720
+   },
+   "ratline": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 9600
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "stay": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 72
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 144
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 6452
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "head": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1256
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 6,
+   "top/Top": 12,
+   "cheek/Cheeks": 6,
+   "top/Crosstrees": 6,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "wyoming": {
+  "meshes": 175,
+  "boxy": 56,
+  "tris": 221980,
+  "lwl": 100.4,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 216
+   },
+   "yard": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 672
+   },
+   "sail": {
+    "n": 17,
+    "boxy": 0,
+    "tris": 30600
+   },
+   "shroud": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 288
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "stay": {
+    "n": 6,
+    "boxy": 5,
+    "tris": 56
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 54244
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "deckhouse": {
+    "n": 24,
+    "boxy": 24,
+    "tris": 288
+   },
+   "helm": {
+    "n": 7,
+    "boxy": 1,
+    "tris": 692
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "stay/Stays and backstays": 5,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "deckhouse/Deckhouse": 24,
+   "helm/The wheel": 1,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "preussen": {
+  "meshes": 343,
+  "boxy": 72,
+  "tris": 259610,
+  "lwl": 124,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "channel": {
+    "n": 10,
+    "boxy": 10,
+    "tris": 120
+   },
+   "deadeye": {
+    "n": 72,
+    "boxy": 0,
+    "tris": 4608
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 15,
+    "boxy": 0,
+    "tris": 270
+   },
+   "top": {
+    "n": 35,
+    "boxy": 30,
+    "tris": 640
+   },
+   "cheek": {
+    "n": 10,
+    "boxy": 10,
+    "tris": 120
+   },
+   "yard": {
+    "n": 32,
+    "boxy": 0,
+    "tris": 8752
+   },
+   "sail": {
+    "n": 47,
+    "boxy": 0,
+    "tris": 64200
+   },
+   "lift": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 480
+   },
+   "sheet": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 480
+   },
+   "tack": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 80
+   },
+   "halyard": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 240
+   },
+   "shroud": {
+    "n": 20,
+    "boxy": 0,
+    "tris": 1456
+   },
+   "ratline": {
+    "n": 10,
+    "boxy": 0,
+    "tris": 46336
+   },
+   "stay": {
+    "n": 18,
+    "boxy": 16,
+    "tris": 264
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 480
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "anchor": {
+    "n": 14,
+    "boxy": 6,
+    "tris": 608
+   }
+  },
+  "byName": {
+   "channel/Channels": 10,
+   "top/Top": 20,
+   "cheek/Cheeks": 10,
+   "top/Crosstrees": 10,
+   "stay/Stays and backstays": 16,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "great-eastern": {
+  "meshes": 585,
+  "boxy": 128,
+  "tris": 174982,
+  "lwl": 207,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 216
+   },
+   "yard": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 672
+   },
+   "sail": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 10800
+   },
+   "shroud": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "funnel": {
+    "n": 15,
+    "boxy": 0,
+    "tris": 6720
+   },
+   "superstructure": {
+    "n": 281,
+    "boxy": 0,
+    "tris": 13670
+   },
+   "bridge": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 1504
+   },
+   "vent": {
+    "n": 20,
+    "boxy": 0,
+    "tris": 640
+   },
+   "paddle": {
+    "n": 96,
+    "boxy": 92,
+    "tris": 2544
+   },
+   "paddlebox": {
+    "n": 36,
+    "boxy": 34,
+    "tris": 588
+   },
+   "boat": {
+    "n": 60,
+    "boxy": 0,
+    "tris": 6800
+   }
+  },
+  "byName": {
+   "bridge/Navigating bridge": 2,
+   "paddle/Paddle wheels": 90,
+   "paddle/Sponson": 2,
+   "paddlebox/Paddle-box rib": 22,
+   "paddlebox/Paddle-box vent": 12
+  }
+ },
+ "titanic": {
+  "meshes": 486,
+  "boxy": 2,
+  "tris": 161869,
+  "lwl": 259,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 60
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 432
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "funnel": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 5376
+   },
+   "superstructure": {
+    "n": 268,
+    "boxy": 0,
+    "tris": 16339
+   },
+   "bridge": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 1504
+   },
+   "vent": {
+    "n": 16,
+    "boxy": 0,
+    "tris": 512
+   },
+   "forecast": {
+    "n": 86,
+    "boxy": 0,
+    "tris": 1874
+   },
+   "boat": {
+    "n": 60,
+    "boxy": 0,
+    "tris": 6800
+   }
+  },
+  "byName": {
+   "bridge/Navigating bridge": 2
+  }
+ },
+ "usv": {
+  "meshes": 47,
+  "boxy": 6,
+  "tris": 129900,
+  "lwl": 20.5,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "wing": {
+    "n": 4,
+    "boxy": 1,
+    "tris": 820
+   },
+   "solar": {
+    "n": 5,
+    "boxy": 5,
+    "tris": 60
+   },
+   "sensor": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 48
+   }
+  },
+  "byName": {
+   "wing/Tail vane": 1,
+   "solar/Solar array": 5
+  }
+ },
+ "clipper": {
+  "meshes": 294,
+  "boxy": 79,
+  "tris": 231766,
+  "lwl": 59,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "deadeye": {
+    "n": 50,
+    "boxy": 0,
+    "tris": 3200
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 9,
+    "boxy": 0,
+    "tris": 162
+   },
+   "mastband": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 336
+   },
+   "top": {
+    "n": 21,
+    "boxy": 18,
+    "tris": 384
+   },
+   "cheek": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "yard": {
+    "n": 17,
+    "boxy": 0,
+    "tris": 4432
+   },
+   "sail": {
+    "n": 26,
+    "boxy": 0,
+    "tris": 36600
+   },
+   "lift": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 240
+   },
+   "sheet": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 240
+   },
+   "tack": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 48
+   },
+   "halyard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 144
+   },
+   "shroud": {
+    "n": 12,
+    "boxy": 0,
+    "tris": 1024
+   },
+   "ratline": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 23856
+   },
+   "stay": {
+    "n": 12,
+    "boxy": 10,
+    "tris": 168
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 240
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 23532
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "deckhouse": {
+    "n": 12,
+    "boxy": 12,
+    "tris": 144
+   },
+   "helm": {
+    "n": 7,
+    "boxy": 1,
+    "tris": 692
+   },
+   "boat": {
+    "n": 3,
+    "boxy": 2,
+    "tris": 2320
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "head": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1256
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 6,
+   "top/Top": 12,
+   "cheek/Cheeks": 6,
+   "top/Crosstrees": 6,
+   "stay/Stays and backstays": 10,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "deckhouse/Deckhouse": 12,
+   "helm/The wheel": 1,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "steamer": {
+  "meshes": 384,
+  "boxy": 45,
+  "tris": 190256,
+  "lwl": 92,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "channel": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "deadeye": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 11,
+    "boxy": 0,
+    "tris": 198
+   },
+   "top": {
+    "n": 21,
+    "boxy": 18,
+    "tris": 384
+   },
+   "cheek": {
+    "n": 6,
+    "boxy": 6,
+    "tris": 72
+   },
+   "yard": {
+    "n": 14,
+    "boxy": 0,
+    "tris": 3568
+   },
+   "sail": {
+    "n": 21,
+    "boxy": 0,
+    "tris": 29640
+   },
+   "lift": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 192
+   },
+   "sheet": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 192
+   },
+   "tack": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 48
+   },
+   "halyard": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 96
+   },
+   "shroud": {
+    "n": 13,
+    "boxy": 0,
+    "tris": 624
+   },
+   "ratline": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 9856
+   },
+   "stay": {
+    "n": 9,
+    "boxy": 7,
+    "tris": 152
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 192
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "funnel": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 1344
+   },
+   "superstructure": {
+    "n": 132,
+    "boxy": 0,
+    "tris": 6164
+   },
+   "bridge": {
+    "n": 4,
+    "boxy": 2,
+    "tris": 1650
+   },
+   "vent": {
+    "n": 24,
+    "boxy": 0,
+    "tris": 768
+   },
+   "anchor": {
+    "n": 14,
+    "boxy": 6,
+    "tris": 608
+   },
+   "boat": {
+    "n": 18,
+    "boxy": 0,
+    "tris": 2040
+   }
+  },
+  "byName": {
+   "channel/Channels": 6,
+   "top/Top": 12,
+   "cheek/Cheeks": 6,
+   "top/Crosstrees": 6,
+   "stay/Stays and backstays": 7,
+   "bridge/Navigating bridge": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "dreadnought": {
+  "meshes": 132,
+  "boxy": 0,
+  "tris": 142808,
+  "lwl": 155,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 8,
+    "boxy": 0,
+    "tris": 276
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "funnel": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 2688
+   },
+   "superstructure": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 2192
+   },
+   "net": {
+    "n": 51,
+    "boxy": 0,
+    "tris": 5760
+   },
+   "turret": {
+    "n": 25,
+    "boxy": 0,
+    "tris": 1480
+   }
+  },
+  "byName": {}
+ },
+ "yamato": {
+  "meshes": 284,
+  "boxy": 0,
+  "tris": 148418,
+  "lwl": 256,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 36
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "funnel": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 1344
+   },
+   "superstructure": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 2928
+   },
+   "searchlight": {
+    "n": 40,
+    "boxy": 0,
+    "tris": 2176
+   },
+   "turret": {
+    "n": 38,
+    "boxy": 0,
+    "tris": 2248
+   },
+   "aa": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 1344
+   },
+   "aaLight": {
+    "n": 56,
+    "boxy": 0,
+    "tris": 2272
+   },
+   "catapult": {
+    "n": 8,
+    "boxy": 0,
+    "tris": 2572
+   },
+   "floatplane": {
+    "n": 62,
+    "boxy": 0,
+    "tris": 2616
+   },
+   "hatch": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 470
+   }
+  },
+  "byName": {}
+ },
+ "carrier": {
+  "meshes": 251,
+  "boxy": 21,
+  "tris": 139844,
+  "lwl": 317,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "screw": {
+    "n": 28,
+    "boxy": 0,
+    "tris": 1824
+   },
+   "flightdeck": {
+    "n": 13,
+    "boxy": 10,
+    "tris": 180
+   },
+   "hangar": {
+    "n": 7,
+    "boxy": 5,
+    "tris": 204
+   },
+   "island": {
+    "n": 10,
+    "boxy": 6,
+    "tris": 3288
+   },
+   "aircraft": {
+    "n": 156,
+    "boxy": 0,
+    "tris": 5376
+   }
+  },
+  "byName": {
+   "flightdeck/Flight deck": 1,
+   "hangar/Hangar and gallery decks": 5,
+   "flightdeck/Angled landing area": 2,
+   "island/The island": 6,
+   "flightdeck/Deck-edge lift": 2,
+   "flightdeck/Landing centreline": 1,
+   "flightdeck/Foul line": 1,
+   "flightdeck/Catapult track": 3
+  }
+ },
+ "container": {
+  "meshes": 2918,
+  "boxy": 2869,
+  "tris": 164836,
+  "lwl": 383,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "container": {
+    "n": 2577,
+    "boxy": 2577,
+    "tris": 30924
+   },
+   "bulb": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 396
+   },
+   "forecast": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "mast": {
+    "n": 5,
+    "boxy": 2,
+    "tris": 112
+   },
+   "bridge": {
+    "n": 287,
+    "boxy": 285,
+    "tris": 3468
+   },
+   "boat": {
+    "n": 6,
+    "boxy": 4,
+    "tris": 728
+   },
+   "funnel": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 224
+   }
+  },
+  "byName": {
+   "container/Containers": 2577,
+   "forecast/Forecastle": 1,
+   "bridge/Accommodation and bridge": 285,
+   "mast/Radar mast": 2,
+   "boat/Lifeboat": 4
+  }
+ },
+ "ever-given": {
+  "meshes": 4385,
+  "boxy": 4336,
+  "tris": 182410,
+  "lwl": 387,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "container": {
+    "n": 3954,
+    "boxy": 3954,
+    "tris": 47448
+   },
+   "bulb": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 396
+   },
+   "forecast": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "mast": {
+    "n": 5,
+    "boxy": 2,
+    "tris": 112
+   },
+   "bridge": {
+    "n": 373,
+    "boxy": 371,
+    "tris": 4500
+   },
+   "boat": {
+    "n": 6,
+    "boxy": 4,
+    "tris": 728
+   },
+   "funnel": {
+    "n": 5,
+    "boxy": 1,
+    "tris": 236
+   },
+   "livery": {
+    "n": 3,
+    "boxy": 3,
+    "tris": 6
+   }
+  },
+  "byName": {
+   "container/Containers": 3954,
+   "forecast/Forecastle": 1,
+   "bridge/Accommodation and bridge": 371,
+   "mast/Radar mast": 2,
+   "boat/Lifeboat": 4,
+   "funnel/Engine casing": 1,
+   "livery/Livery": 2,
+   "livery/Stern name": 1
+  }
+ },
+ "azzam": {
+  "meshes": 270,
+  "boxy": 50,
+  "tris": 156847,
+  "lwl": 172,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 124704
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 2000
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 368
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "superstructure": {
+    "n": 128,
+    "boxy": 0,
+    "tris": 11569
+   },
+   "cluster": {
+    "n": 22,
+    "boxy": 3,
+    "tris": 9510
+   },
+   "mast": {
+    "n": 7,
+    "boxy": 3,
+    "tris": 1452
+   },
+   "terrace": {
+    "n": 35,
+    "boxy": 4,
+    "tris": 960
+   },
+   "stair": {
+    "n": 40,
+    "boxy": 40,
+    "tris": 480
+   }
+  },
+  "byName": {
+   "cluster/Mast block": 1,
+   "cluster/Glass sweep": 1,
+   "cluster/Stack casing": 1,
+   "mast/Spreader platform": 3,
+   "terrace/Terrace glazing": 2,
+   "terrace/Terrace doors": 2,
+   "stair/Terrace stair": 40
+  }
+ },
+ "endurance": {
+  "meshes": 198,
+  "boxy": 53,
+  "tris": 178882,
+  "lwl": 39.6,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "wale": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 960
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 1,
+    "tris": 12
+   },
+   "channel": {
+    "n": 2,
+    "boxy": 2,
+    "tris": 24
+   },
+   "deadeye": {
+    "n": 14,
+    "boxy": 0,
+    "tris": 896
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 5,
+    "boxy": 0,
+    "tris": 90
+   },
+   "top": {
+    "n": 7,
+    "boxy": 6,
+    "tris": 128
+   },
+   "cheek": {
+    "n": 2,
+    "boxy": 2,
+    "tris": 24
+   },
+   "yard": {
+    "n": 8,
+    "boxy": 0,
+    "tris": 1376
+   },
+   "sail": {
+    "n": 10,
+    "boxy": 0,
+    "tris": 15280
+   },
+   "lift": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "sheet": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "tack": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 16
+   },
+   "halyard": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 32
+   },
+   "shroud": {
+    "n": 6,
+    "boxy": 0,
+    "tris": 480
+   },
+   "ratline": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 5056
+   },
+   "bowsprit": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "stay": {
+    "n": 6,
+    "boxy": 4,
+    "tris": 88
+   },
+   "brace": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "grating": {
+    "n": 9,
+    "boxy": 3,
+    "tris": 11096
+   },
+   "capstan": {
+    "n": 18,
+    "boxy": 8,
+    "tris": 544
+   },
+   "deckhouse": {
+    "n": 12,
+    "boxy": 12,
+    "tris": 144
+   },
+   "helm": {
+    "n": 7,
+    "boxy": 1,
+    "tris": 692
+   },
+   "boat": {
+    "n": 17,
+    "boxy": 2,
+    "tris": 8064
+   },
+   "funnel": {
+    "n": 3,
+    "boxy": 0,
+    "tris": 1344
+   },
+   "cathead": {
+    "n": 4,
+    "boxy": 4,
+    "tris": 48
+   },
+   "head": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1256
+   },
+   "anchor": {
+    "n": 16,
+    "boxy": 8,
+    "tris": 624
+   }
+  },
+  "byName": {
+   "rudder/Rudder": 1,
+   "channel/Channels": 2,
+   "top/Top": 4,
+   "cheek/Cheeks": 2,
+   "top/Crosstrees": 2,
+   "stay/Stays and backstays": 4,
+   "grating/Grating": 3,
+   "capstan/Capstan": 8,
+   "deckhouse/Deckhouse": 12,
+   "helm/The wheel": 1,
+   "boat/Boat skids": 2,
+   "cathead/Cathead": 4,
+   "anchor/Cat pendant": 2,
+   "anchor/Bower anchor": 6
+  }
+ },
+ "queen-mary-2": {
+  "meshes": 447,
+  "boxy": 6,
+  "tris": 275286,
+  "lwl": 318.2,
+  "byKey": {
+   "keel": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 768
+   },
+   "frames": {
+    "n": 30,
+    "boxy": 0,
+    "tris": 3120
+   },
+   "stempost": {
+    "n": 2,
+    "boxy": 0,
+    "tris": 416
+   },
+   "rudder": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 60
+   },
+   "planking": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 121248
+   },
+   "deck": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1920
+   },
+   "mast": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 18
+   },
+   "rail": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 64
+   },
+   "waterway": {
+    "n": 1,
+    "boxy": 0,
+    "tris": 1440
+   },
+   "funnel": {
+    "n": 4,
+    "boxy": 0,
+    "tris": 1400
+   },
+   "superstructure": {
+    "n": 372,
+    "boxy": 0,
+    "tris": 138412
+   },
+   "bridge": {
+    "n": 10,
+    "boxy": 6,
+    "tris": 2460
+   },
+   "boat": {
+    "n": 22,
+    "boxy": 0,
+    "tris": 3960
+   }
+  },
+  "byName": {
+   "bridge/Navigating bridge": 6
+  }
+ }
+}
