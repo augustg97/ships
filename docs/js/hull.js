@@ -2859,42 +2859,51 @@ const wl = S.windlass;
 const uW = wl ? (wl.atU || 0.10) : 0.10;
 const wLen = wl ? (wl.barrelLenM || B * 0.55) : B * 0.55;
 const wDia = wl ? (wl.barrelDiaM || 0.5) : 0.5;
-const makeAnchor = (fullL, clawL) => {
+const IA_P = {
+crownR: 0.0391,
+ringR: 0.0216, ringT: 0.0095,
+claw: [[0.000, 0.035, 0.0120],
+[0.140, 0.060, 0.0075],
+[0.260, 0.135, 0.0060],
+[0.315, 0.180, 0.0045]],
+tip: [0.339, 0.201]
+};
+const makeAnchor = (fullL) => {
 const shD = fullL * 0.046;
-const shankL = fullL - shD * 2.78;
 const g2 = new THREE.Group();
 g2.name = 'ia-grp';
-const crown = new THREE.Mesh(new THREE.SphereGeometry(shD * 0.85, 10, 8), ironG);
+const crown = new THREE.Mesh(
+new THREE.SphereGeometry(fullL * IA_P.crownR, 10, 8), ironG);
 crown.name = 'ia-crown'; g2.add(crown);
+const ringC = fullL * (1 - IA_P.crownR - IA_P.ringR - IA_P.ringT);
+const shankL = ringC - fullL * IA_P.ringR;
 const sh = new THREE.Mesh(
 new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), ironG);
 sh.name = 'ia-shank'; sh.position.y = shankL / 2; g2.add(sh);
 const ring = new THREE.Mesh(
-new THREE.TorusGeometry(shD * 1.4, shD * 0.28, 8, 18), ironG);
-ring.name = 'ia-ring'; ring.position.y = shankL + shD * 1.1; g2.add(ring);
-const clawD = shD * 0.80;
+new THREE.TorusGeometry(fullL * IA_P.ringR, fullL * IA_P.ringT, 8, 18), ironG);
+ring.name = 'ia-ring'; ring.position.y = ringC; g2.add(ring);
 for (let k = 0; k < 4; k++) {
 const cg2 = new THREE.Group();
 cg2.rotation.y = k * Math.PI / 2;
-const a1 = 1.19, l1 = clawL * 0.58;
-const s1 = new THREE.Mesh(
-new THREE.CylinderGeometry(clawD * 0.40, clawD * 0.52, l1, 8), ironG);
-s1.name = 'ia-claw'; s1.rotation.z = -a1;
-s1.position.set(Math.sin(a1) * l1 / 2, Math.cos(a1) * l1 / 2, 0);
-cg2.add(s1);
-const P1x = Math.sin(a1) * l1, P1y = Math.cos(a1) * l1;
-const a2 = 0.38, l2 = clawL * 0.32;
-const s2 = new THREE.Mesh(
-new THREE.CylinderGeometry(clawD * 0.30, clawD * 0.42, l2, 8), ironG);
-s2.name = 'ia-claw'; s2.rotation.z = -a2;
-s2.position.set(P1x + Math.sin(a2) * l2 / 2, P1y + Math.cos(a2) * l2 / 2, 0);
-cg2.add(s2);
-const ch = clawL * 0.18;
-const tip = new THREE.Mesh(
-new THREE.ConeGeometry(clawD * 0.34, ch, 8), ironG);
-tip.name = 'ia-tip'; tip.rotation.z = -a2;
-tip.position.set(P1x + Math.sin(a2) * (l2 + ch / 2 - 0.01),
-P1y + Math.cos(a2) * (l2 + ch / 2 - 0.01), 0);
+const P = IA_P.claw.map(p => [p[0] * fullL, p[1] * fullL, p[2] * fullL]);
+for (let s = 0; s + 1 < P.length; s++) {
+const [x0, y0, r0] = P[s], [x1, y1, r1] = P[s + 1];
+const dl = Math.hypot(x1 - x0, y1 - y0);
+const seg = new THREE.Mesh(
+new THREE.CylinderGeometry(r1, r0, dl, 8), ironG);
+seg.name = 'ia-claw';
+seg.rotation.z = -Math.atan2(x1 - x0, y1 - y0);
+seg.position.set((x0 + x1) / 2, (y0 + y1) / 2, 0);
+cg2.add(seg);
+}
+const [xb, yb, rb] = P[P.length - 1];
+const xt = IA_P.tip[0] * fullL, yt = IA_P.tip[1] * fullL;
+const ch = Math.hypot(xt - xb, yt - yb);
+const tip = new THREE.Mesh(new THREE.ConeGeometry(rb, ch, 8), ironG);
+tip.name = 'ia-tip';
+tip.rotation.z = -Math.atan2(xt - xb, yt - yb);
+tip.position.set((xb + xt) / 2, (yb + yt) / 2, 0);
 cg2.add(tip);
 g2.add(cg2);
 }
@@ -2918,7 +2927,8 @@ g2.updateMatrixWorld(true);
 const bb = new THREE.Box3().setFromObject(g2);
 g2.position.y += (yD - bb.min.y);
 g2.updateMatrixWorld(true);
-return new THREE.Vector3(0, fullL - fullL * 0.046 * 1.68, 0)
+return new THREE.Vector3(
+0, fullL * (1 - IA_P.crownR - IA_P.ringR - IA_P.ringT), 0)
 .applyMatrix4(g2.matrixWorld);
 };
 const cableTo = (from, to, r) => {
@@ -2928,8 +2938,8 @@ const c = ropeMesh([[from, mid], [mid, to]], r, mats.ropeSolid || wood);
 if (c) { c.name = 'ia-cable'; ag.add(c); }
 };
 if (ia.sheetLenM !== 0) {
-const fL = ia.sheetLenM || 1.86, clL = fL * (ia.clawFrac || 0.42);
-const g2 = makeAnchor(fL, clL);
+const fL = ia.sheetLenM || 1.86;
+const g2 = makeAnchor(fL);
 const ringP = stow(g2, fL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
 ag.add(g2);
 const barrelPt = new THREE.Vector3(
@@ -2937,9 +2947,9 @@ const barrelPt = new THREE.Vector3(
 cableTo(ringP, barrelPt, 0.035);
 }
 if (ia.bowerLenM !== 0) {
-const fL = ia.bowerLenM || 1.57, clL = fL * (ia.clawFrac || 0.42);
+const fL = ia.bowerLenM || 1.57;
 for (const sg of [1, -1]) {
-const g2 = makeAnchor(fL, clL);
+const g2 = makeAnchor(fL);
 const ringP = stow(g2, fL, ia.pairAtU != null ? ia.pairAtU : 0.060,
 sg * (ia.pairOffZ || 2.4));
 ag.add(g2);
@@ -2949,12 +2959,12 @@ cableTo(ringP, postPt, 0.030);
 }
 }
 if (ia.sternAtU != null && ia.sternLenM !== 0 && S.poop && S.poop.length === 3) {
-const fL = ia.sternLenM || 1.57, clL = fL * (ia.clawFrac || 0.42);
+const fL = ia.sternLenM || 1.57;
 const dhP = B * 0.115;
 const poopTop = u => deckAtU(u) + dhP * (S.poop[2] + 0.02);
 const ropeM = mats.ropeSolid || wood;
 for (const sg of [1, -1]) {
-const g2 = makeAnchor(fL, clL);
+const g2 = makeAnchor(fL);
 const zA = sg * (ia.sternOffZ || 2.4);
 const ringP = stow(g2, fL, ia.sternAtU, zA, poopTop);
 ag.add(g2);

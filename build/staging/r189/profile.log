@@ -1,0 +1,9 @@
+   ruler: ok
+  port.png  bearing 90deg  lat 0.01
+   ruler: ok
+  starboard.png  bearing 270deg  lat 0.01
+  bow.png  bearing 0deg  lat 0.01
+  stern.png  bearing 180deg  lat 0.01
+  quarter.png  bearing 300deg  lat 0.09
+  plan.png  bearing 90deg  lat 1.52
+-> build/staging/r189/profile

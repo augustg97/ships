@@ -3606,11 +3606,16 @@
        assemblies, found STRUCTURALLY as the group's ring tori, equal what the record
        draws (sheet + head pair + stern pair where the record stows one, r185).
        V-CLAWS: four cone points per anchor — the forging text's own count. V-LEN
-       (r188, replacing the r184 shank-box read): each anchor's full crown-to-ring
-       length, shank and head-ring extents projected on the shank's own world axis —
-       geometry through the world matrix, the r186 lesson — sorted against the
-       record's full lengths, which are CALIBRATED from the Penglai find (2.15 m,
-       456 kg; Matsui 2013 fig. 3). V-REST (r185): each assembly asked of the
+       (r188; r189 adds the crown): each anchor's 全長 — crown BOTTOM to ring top,
+       the span the find convention measures — crown, shank and head-ring extents
+       projected on the shank's own world axis, geometry through the world matrix
+       (the r186 lesson), sorted against the record's full lengths, which are
+       CALIBRATED from the Penglai find (2.15 m, 456 kg; Matsui 2013 fig. 3).
+       V-SWEEP (r189): each anchor's claw reach — tip-cone apexes' radial distance
+       from the shank's own world axis — against the proportion measured from the
+       same find's drawing, 0.339 of the record's 全長 (fig. 3a self-scaled,
+       322.8 px/m). An anchor with no tips is V-CLAWS's conviction, so V-SWEEP
+       passes over it. V-REST (r185): each assembly asked of the
        SURFACE ITSELF — a ray straight down from over the assembly, first non-anchor
        hit is the surface it must rest on. Sheer-only V-REST would convict any
        poop-stowed stern anchor as floating, and could never see a missing roof.
@@ -3643,17 +3648,23 @@
         g.traverse(o => { const p = tagOf(o);
           if (o.isGroup && o.name === 'ia-grp' && p && p.key === 'ironAnchors')
             grps.push(o); });
-        /* full length per anchor, crown to ring head: shank and head-ring extents
-           projected on the shank's own world axis — geometry through the world
-           matrix (the r186 lesson: a world AABB cannot read the 45° stow) */
-        const lens = grps.map(gr => {
-          let shk = null, rng = null;
+        /* full length per anchor — 全長, crown bottom to ring top: crown, shank
+           and head-ring extents projected on the shank's own world axis — geometry
+           through the world matrix (the r186 lesson: a world AABB cannot read the
+           45° stow). Sweep is measured on the SAME pass and the pair {len, sweep}
+           stays together, sorted by length — the first sever run proved that
+           sorting sweeps separately slides the survivors against the wrong record
+           slots and convicts an innocent anchor. */
+        const per = grps.map(gr => {
+          let shk = null, rng = null, crn = null; const tps = [];
           gr.traverse(o => { if (o.name === 'ia-shank') shk = o;
-            else if (o.name === 'ia-ring') rng = o; });
-          if (!shk || !rng) return 0;
+            else if (o.name === 'ia-ring') rng = o;
+            else if (o.name === 'ia-crown') crn = o;
+            else if (o.name === 'ia-tip') tps.push(o); });
+          if (!shk || !rng || !crn) return { len: 0, sweep: null };
           let lo = Infinity, hi = -Infinity;
           const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
-          for (const o of [shk, rng]) {
+          for (const o of [shk, rng, crn]) {
             o.geometry.computeBoundingBox();
             o.updateMatrixWorld(true);
             const lb2 = o.geometry.boundingBox;
@@ -3662,19 +3673,38 @@
               if (t < lo) lo = t; if (t > hi) hi = t;
             }
           }
-          return hi - lo;
-        }).sort((a, b2) => b2 - a);
+          /* V-SWEEP (r189): apex of each tip cone through its world matrix;
+             radial distance from the line through the shank along its own axis.
+             Null (no tips) is V-CLAWS's fault, not this rule's. */
+          let mx = null;
+          const p0 = new THREE.Vector3().setFromMatrixPosition(shk.matrixWorld);
+          for (const t of tps) {
+            t.updateMatrixWorld(true);
+            const apex = new THREE.Vector3(0, t.geometry.parameters.height / 2, 0)
+              .applyMatrix4(t.matrixWorld);
+            const d = apex.sub(p0);
+            const rad = d.sub(ax.clone().multiplyScalar(d.dot(ax))).length();
+            if (mx == null || rad > mx) mx = rad;
+          }
+          return { len: hi - lo, sweep: mx };
+        }).sort((a, b2) => b2.len - a.len);
         const wantLn = [];
         if (R.sheetLenM !== 0) wantLn.push(R.sheetLenM || 1.86);
         if (R.bowerLenM !== 0) wantLn.push(R.bowerLenM || 1.57, R.bowerLenM || 1.57);
         if (R.sternAtU != null && R.sternLenM !== 0)
           wantLn.push(R.sternLenM || 1.57, R.sternLenM || 1.57);
         wantLn.sort((a, b2) => b2 - a);
-        for (let i = 0; i < Math.min(lens.length, wantLn.length); i++)
-          if (Math.abs(lens[i] - wantLn[i]) > 0.12 * wantLn[i])
+        for (let i = 0; i < Math.min(per.length, wantLn.length); i++) {
+          if (Math.abs(per[i].len - wantLn[i]) > 0.12 * wantLn[i])
             say(v.id, "an anchor off the record's length",
-                `crown to ring head ${lens[i].toFixed(2)} m along the shank's own `
+                `crown to ring head ${per[i].len.toFixed(2)} m along the shank's own `
                 + `axis — the record's full length is ${wantLn[i]}`);
+          if (per[i].sweep != null
+              && Math.abs(per[i].sweep - 0.339 * wantLn[i]) > 0.12 * 0.339 * wantLn[i])
+            say(v.id, "a claw sweep off the find's proportion",
+                `claw reach ${per[i].sweep.toFixed(2)} m from the shank's own axis — `
+                + `the Penglai proportion gives ${(0.339 * wantLn[i]).toFixed(2)}`);
+        }
         const rayR = new THREE.Raycaster();
         for (const gr of grps) {
           const bb = new THREE.Box3().setFromObject(gr);

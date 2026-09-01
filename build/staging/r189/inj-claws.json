@@ -1,0 +1,12 @@
+[
+ {
+  "id": "treasure-ship",
+  "rule": "an iron anchor without its four claws",
+  "detail": "16 claw points drawn for 5 anchors \u2014 the forging text makes four claws first"
+ },
+ {
+  "id": "treasure-ship",
+  "rule": "a claw sweep off the find's proportion",
+  "detail": "claw reach 0.53 m from the shank's own axis \u2014 the Penglai proportion gives 0.63"
+ }
+]

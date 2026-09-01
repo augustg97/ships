@@ -13322,3 +13322,86 @@ channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle.
 wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes. (20) r171 authored
 tier fractions. (21) r172 the 74's lower capstan barrel. (22) r181 eraSm dead fallback
 branch (app.js:1353).
+
+## Round 189 — 2026-09-01 — the claws take the find's own drawing: the part-proportion pass paid, and the new rule convicted its own draft
+
+**The r188 queue head OPENED AND CLOSED (build/staging/r189/JUDGMENT.md): fig. 3a
+self-scales — 全長 2.15 m in its own caption — and the part-proportion pass it promised
+replaces the claw-sweep woodcut default. Plate and scale named per the Azzam rule:
+Matsui 2013 fig. 3a (王冠倬 2000's line drawing of the Penglai find, re-printed),
+rendered from PDF p. 14 at 300 DPI, crown-to-ring 659 px → 322.8 px/m, 3.1 mm per
+pixel — millimetric pixels, the drawing's own draughting the true bound.**
+
+**The measurement (measure_fig3a.py / trace_claws.py, verified on the annotated
+overlay): the drawing is an oblique of four claws at 90°; the pair drawn widest is
+read as in-plane and the two sides' spread is the named obliquity bound (reach
+0.325/0.354 of 全長, tip height 0.222/0.181). Means set the class: tips at 0.339 from
+the shank axis, 0.201 above the crown centre; the claw springs at the shank foot,
+runs near-flat to r 0.14 and rises to ~40° at the point — the woodcut default drew a
+bud (root 22°, tip 68° above horizontal) where the find is a flat spider. Arms taper
+0.024 → 0.009 of 全長, half the drawn. The head is a small forged eye 0.062 across —
+the drawn torus was 0.155, 2.6× the plate. Crown ball and shank taper measured
+CONSISTENT, left alone. The foreshortened pair's droop below the crown is read as
+projection, so 全長 ≈ crown-bottom-to-ring-top within 5% and the r188 field
+convention stands.**
+
+**Class not instance: makeAnchor draws the claw as the measured polyline (three
+sections between the plate's stations, cone to the measured point), the head eye at
+the measured size, and the ring top at 1 − crownR so crown-bottom-to-ring-top = the
+field EXACTLY. clawFrac retired from signature and record — proportions are class
+constants from the calibrator, not a knob. V-LEN adds the crown to the projection and
+now measures precisely what a find's 全長 measures. NEW RULE V-SWEEP: per anchor,
+tip-cone apexes' radial distance from the shank's own world axis against 0.339 of the
+record's length, 12% band; an anchor with no tips is V-CLAWS's fault and V-SWEEP
+passes over it.**
+
+**THE ROUND'S FIND: the sever proof convicted the round's own draft rule. V-SWEEP
+v1 sorted sweeps separately from lengths, so stripping the sheet's tips slid the four
+faithful bowers against the record's 1.86 slot and convicted an innocent anchor at
+0.53 vs 0.63. Rewritten: {len, sweep} measured in ONE pass per anchor, sorted
+together by length, each sweep compared in its own record slot. The general lesson
+for every sorted-pairing rule: a skipped member must keep its slot, or the
+comparison indicts its neighbours (inj-claws2.err preserves the conviction).**
+
+**Proofs on final code, each exactly ONE: drag 1.35× → V-LEN 2.28 vs 1.86 (the
+predicted 1.23×), V-SWEEP silent; sever → V-CLAWS 16/5, V-LEN and V-SWEEP silent;
+sweep (new inj, tips displaced radially 1.3×) → V-SWEEP 0.81 vs 0.63 (the predicted
+1.29×), all else silent. Audit 33/0 clean (run twice: post-land, post-rule-fix).
+measure_ship: stations unchanged, bow set u 0.029–0.058, coils u 0.939–0.951.**
+
+**Looked at (rules 0/1): the frame reads as a rendered world. Three facts a viewer
+can read off the quarter and plan crops: a four-clawed iron anchor lies recovered on
+the foredeck aft of the windlass bar, arms splayed nearly flat to the treenailed
+planking with tips turned up; its tan cable is bent to the head eye and led to the
+general's-post; from above the three bow anchors read as the same arrow glyph the
+Kawaguchi screen's painter draws (Matsui fig. 4), crown forward, barbs sweeping
+aft-outboard. Card row renders whole with the new sweep sentence, plain type,
+rawStar False.**
+
+**Frames: opening 64 PAID AND PURE — launched 10:29 on the unedited tree, edits
+staged in build/staging/r189 and landed atomically only after frames 42/43 captured
+(ship-treasure 0.000, aboard-treasure 0.002 pre-edit); 64/64, 0 movers, 0 BLANK,
+EXIT:0. Close solos on final code: ship-treasure 0.012% — read and located, 647
+amplified px in the deck-line band carrying the five anchors and their cables —
+ACCEPTED with FRAME-LOG reason (r132-in-advance), then 0.000; aboard-treasure 0.002%
+flap-level, within tolerance, not accepted (r184/r188 precedent); ship-junk 0.000
+proves the class edit inert.**
+
+**Deployed: data-version 1788286981. Live verify below.**
+
+**Named residuals, in order:** (1) NEW r189, small: the drawn arm taper follows the
+plate's line weights, and a mass balance at the caption's 456 kg would ask thicker
+members — a photograph of the Penglai find itself (not the line drawing) would settle
+the cross-sections; name its px/m when fetched. (2) r187: the 1433 Jingu Kogo engi
+emaki warship-anchor plate — fetch in resolution if it surfaces open. (3) r187: the
+two ray-free anchor rest rules (grapnel, stoneAnchor) still compare against the sheer
+FUNCTION, not the drawn plank — move to the surface-asked form. (4) r186: the
+panokseon stone-station inference (Taean reproduction photo). (5) r182 grapnel shank
+reconstruction. (6) r183 junk stone bar class default. (7) r177 Lucian's second
+machine. (8) r173 cog Gangspill. (9) r173 cog castles. (10) r173 cog rudder slab.
+(11) r176 sekibune class-size (kiwari read). (12) boxy classes: top (18),
+channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle.
+(15) Azzam crest span. (16) r164 risen black unpierced. (17) r165 fantail gallery
+wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes. (20) r171 authored
+tier fractions. (21) r172 the 74's lower capstan barrel. (22) r181 eraSm dead
+fallback branch (app.js:1353).

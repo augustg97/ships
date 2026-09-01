@@ -2593,14 +2593,16 @@ const grps = [];
 g.traverse(o => { const p = tagOf(o);
 if (o.isGroup && o.name === 'ia-grp' && p && p.key === 'ironAnchors')
 grps.push(o); });
-const lens = grps.map(gr => {
-let shk = null, rng = null;
+const per = grps.map(gr => {
+let shk = null, rng = null, crn = null; const tps = [];
 gr.traverse(o => { if (o.name === 'ia-shank') shk = o;
-else if (o.name === 'ia-ring') rng = o; });
-if (!shk || !rng) return 0;
+else if (o.name === 'ia-ring') rng = o;
+else if (o.name === 'ia-crown') crn = o;
+else if (o.name === 'ia-tip') tps.push(o); });
+if (!shk || !rng || !crn) return { len: 0, sweep: null };
 let lo = Infinity, hi = -Infinity;
 const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
-for (const o of [shk, rng]) {
+for (const o of [shk, rng, crn]) {
 o.geometry.computeBoundingBox();
 o.updateMatrixWorld(true);
 const lb2 = o.geometry.boundingBox;
@@ -2609,19 +2611,35 @@ const t = new THREE.Vector3(0, yy, 0).applyMatrix4(o.matrixWorld).dot(ax);
 if (t < lo) lo = t; if (t > hi) hi = t;
 }
 }
-return hi - lo;
-}).sort((a, b2) => b2 - a);
+let mx = null;
+const p0 = new THREE.Vector3().setFromMatrixPosition(shk.matrixWorld);
+for (const t of tps) {
+t.updateMatrixWorld(true);
+const apex = new THREE.Vector3(0, t.geometry.parameters.height / 2, 0)
+.applyMatrix4(t.matrixWorld);
+const d = apex.sub(p0);
+const rad = d.sub(ax.clone().multiplyScalar(d.dot(ax))).length();
+if (mx == null || rad > mx) mx = rad;
+}
+return { len: hi - lo, sweep: mx };
+}).sort((a, b2) => b2.len - a.len);
 const wantLn = [];
 if (R.sheetLenM !== 0) wantLn.push(R.sheetLenM || 1.86);
 if (R.bowerLenM !== 0) wantLn.push(R.bowerLenM || 1.57, R.bowerLenM || 1.57);
 if (R.sternAtU != null && R.sternLenM !== 0)
 wantLn.push(R.sternLenM || 1.57, R.sternLenM || 1.57);
 wantLn.sort((a, b2) => b2 - a);
-for (let i = 0; i < Math.min(lens.length, wantLn.length); i++)
-if (Math.abs(lens[i] - wantLn[i]) > 0.12 * wantLn[i])
+for (let i = 0; i < Math.min(per.length, wantLn.length); i++) {
+if (Math.abs(per[i].len - wantLn[i]) > 0.12 * wantLn[i])
 say(v.id, "an anchor off the record's length",
-`crown to ring head ${lens[i].toFixed(2)} m along the shank's own `
+`crown to ring head ${per[i].len.toFixed(2)} m along the shank's own `
 + `axis — the record's full length is ${wantLn[i]}`);
+if (per[i].sweep != null
+&& Math.abs(per[i].sweep - 0.339 * wantLn[i]) > 0.12 * 0.339 * wantLn[i])
+say(v.id, "a claw sweep off the find's proportion",
+`claw reach ${per[i].sweep.toFixed(2)} m from the shank's own axis — `
++ `the Penglai proportion gives ${(0.339 * wantLn[i]).toFixed(2)}`);
+}
 const rayR = new THREE.Raycaster();
 for (const gr of grps) {
 const bb = new THREE.Box3().setFromObject(gr);
