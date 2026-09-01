@@ -12810,3 +12810,109 @@ boxy classes: top (18), channel/cheek/cathead. (10) Preussen mast livery
 (15) r166 screen glass sun-bright. (16) r171 quarter-gallery sashes.
 (17) r171 authored tier fractions. (18) r172 the 74's lower capstan barrel.
 (19) r181, small: eraSm's dead fallback branch (app.js:1353).
+
+## Round 184 — 2026-09-01 — the treasure-ship's iron anchors: the owed fetch paid, and the four-claw form drawn at the inventory's own stations
+
+**The r183 queue head OPENED AND CLOSED, judgment first (build/staging/r184/
+JUDGMENT.md), and the OWED FETCH WAS PAID FIRST: the TGK 錘鍛 chapter's anchor
+section, fetched WHOLE (Project Gutenberg #25273, the full TGK, 197 KB, the 錨
+section at line 1124; Wikisource's 錘鍛第十 page carries only the chapter
+preface at Textquality 25% — fetched too, and its own preface line 重千鈞者，
+系巨艦於狂淵 already moors the great ship on the anchor; ctext auth-gated,
+named as not fetched). The section verbatim: 錘法：先成四爪，以次逐節接身 —
+the forging method FIRST MAKES THE FOUR CLAWS, then joins them section by
+section to the shank; within 300 catties on a foot-wide anvil, around a
+thousand on a timber stage with chain slings; the flux sifted aged wall-earth;
+the anchor the largest thing under furnace and hammer. The FORM is the primary
+text's: the four-claw iron anchor, no stock, no wood. The INVENTORY was local
+since r174 (舟車 line 10): five or six iron anchors to a grain ship, the
+看家錨 at ~500 catties RECORDED, head two, stern two, cables belayed to the
+將軍柱 and broken out by the 雲車 — and the cable MATERIAL is recorded in the
+same chapter: anchor cables are split green bamboo, boiled then twisted
+(破析青篾為之), not the sail-cordage hemp. Warrant: FLEET-CLASS EXTENSION,
+the same 器具皆同 zheyang join as her r174 windlass, the ~200-year gap named.**
+
+**Drawn: the bow-worked three — the sheet anchor on the centreline at u 0.030,
+the head pair flanking at u 0.060, z ±2.4 — recovered on the foredeck (the
+r182/r183 stow precedents: spun 45° so two claws splay to the planking and two
+stand up, pitched to the rising foredeck's own gradient, settled by measured
+box), each cable bent to its ring: the pair's to their own general's-posts
+(the r174 windlass standards, z ±3.13), the sheet's to the barrel. NOT drawn:
+the stern pair (梢用二枝) — station attested, stow surface NOT resolved (the
+two-tier poop runs u 0.66–0.985 and whether it carries a walkable deck at its
+own height is a measurement this round's budget could not pay for honestly);
+queued by name. Standings all named in the provenance: sheet dimensions
+DERIVED (2.4 m shank of wrought iron summing to the recorded ~300 kg), pair
+weight an INFERENCE at the forging text's own 300-catty anvil threshold
+(scale 0.84 → 2.0 m), claw sweep a woodcut-proportion default; a measured
+surviving 四爪錨 would replace all three and the field says so.**
+
+**The class, not the instance: generic datum-driven `ironAnchors` block in
+buildFittings (silence draws nothing), its own PARTS card (the bower is the
+Atlantic's stocked anchor, the grapnel the Belitung wreck's, the stone Xu
+Jing's — none may cover for this object), and a NEW audit rule generic over
+H.ironAnchors: V-WARRANT both ways, V-COUNT (assemblies found structurally as
+ring tori against what the record draws), V-CLAWS (four cone points per
+anchor — the forging text's own count), V-SHANK (each shank's longest drawn
+dimension through any stow transform, sorted against the record's lengths),
+V-REST (each assembly's lowest point ON the deck at its own station, asked of
+the surface), V-CABLE (a drawn anchor with no cable convicts — the 舟車
+sentence carries anchor, cable, posts and winch together). The rule PROVEN
+able to convict before trusted: sever injection → exactly one conviction,
+V-WARRANT, right member, right count (48 meshes); drag injection (one shank
+stretched 1.30× under an unchanged record) → exactly one conviction, V-SHANK
+reads 3.12 m through the stow transform. Audit 33/0 on the first live run
+with the anchors drawn, then twice more on final code.**
+
+**Looked at, not just measured: measure_ship put the three assemblies at
+u 0.028–0.098, crowns clear of the bow transom's aft face (u 0.002), cables
+ending at the post line (u 0.101, z 3.16); the camera-move probe failed (the
+app's own controller repositions SW.cam every frame — the b/z/l/y hash
+grammar is the addressable camera, r55's lesson re-learned) and the furled
+b=28/z=0.38/l=22/y=7 shot shows the starboard bower whole: dark iron on pale
+planking, two claws up, beside its own windlass post. Card row 'Ground
+tackle, as drawn' added after Masts, shot and read: renders whole as plain
+type, *Tiangong kaiwu* spent as italic, probe rawStar:False.**
+
+**Frames, with timing stated: the opening OWED THE FULL 64 (r183's debt) and
+PAID IT FIRST — launched 03:37:31 on the unedited tree (only build/loop.log
+off HEAD 9365cc4), PASSED WHOLE 04:13:58: all 64 within tolerance, 0 movers,
+0 BLANK, EXIT:0 — and every web/ edit of the round landed AFTER that exit, no
+chromium beside it. Close: solo checks on final code (the r174/r183 fallback
+— the 80-minute budget held one full run and the opening spent it):
+ship-treasure 0.034% under gate, diff READ (one white cluster at the bow, the
+stow and cables alone, claw shapes legible), baseline ACCEPTED with the
+reason logged in FRAME-LOG (r132 in advance), then 0.000 against the accepted
+baseline; ship-junk 0.000 and ship-dhow 0.000 — the hull.js class edit PROVEN
+inert on both other anchor-carrying hulls; aboard-treasure 0.009% within
+tolerance, no diff image written at that magnitude, NOT accepted (flap-level,
+unattributable — the r183 within-tolerance precedent, not the accept one).**
+
+**Rule 0, answered in writing on the furled bow capture: the frame reads as a
+rendered vessel on open water, not a chart. Three facts a viewer can read off
+it: a four-claw iron anchor lies stowed on the foredeck planking, two dark
+claws standing up and two splayed to the deck, beside the windlass post its
+bamboo cable leads to; the deck is planked in rings with woven hatch gratings
+let into it; the furled battened lugsails lie stacked on their yards between
+the pole masts.**
+
+**Deployed: data-version 1788262323. Live verify below.**
+
+**Named residuals, in order:** (1) r184 — the anchors line: the treasure
+ship's STERN PAIR (梢用二枝, station attested, stow surface unresolved — the
+poop-deck walkability measurement is the open question); then the panokseon's
+drawn-plate anchor, the wasen yotsume-ikari. (2) r182, small — the grapnel's
+1.8 m shank reconstruction (Jewel of Muscat record or Vosmer PSAS would
+replace it). (3) r183, small — the junk's stone bar is a class default; any
+fetched dimensioned 碇石 replaces it. (4) NEW r184, small — the four-claw
+dimensions are all derived/default; a measured surviving 四爪錨 (Quanzhou
+museum holdings, Penglai finds) replaces them. (5) r177: Lucian's second
+machine. (6) r173: the cog's Gangspill on the aftcastle top. (7) r173: the
+cog's castles, fore and aft. (8) r173: the cog's pale rudder slab. (9) r176:
+the sekibune's class-size question (kiwari read owed). (10) The sweep-derived
+boxy classes: top (18), channel/cheek/cathead. (11) Preussen mast livery
+(r155). (12) Endurance forecastle (RMG J9266). (13) Azzam crest span.
+(14) r164 risen black unpierced. (15) r165 fantail gallery wing walls.
+(16) r166 screen glass sun-bright. (17) r171 quarter-gallery sashes.
+(18) r171 authored tier fractions. (19) r172 the 74's lower capstan barrel.
+(20) r181, small: eraSm's dead fallback branch (app.js:1353).

@@ -2096,6 +2096,17 @@ what: 'The Chinese sea-ship\'s ground tackle in an eyewitness\'s one sentence '
 + 'point bites. In heavy weather two spare anchors of the same make go down '
 + 'beside it. Shaped anchor-stone bars are among the commonest ground-tackle '
 + 'finds of this ocean\'s wrecks; the wood rotted off them.' },
+ironAnchors: { stage: 3, name: 'Four-claw anchor',
+what: 'The Chinese sea anchor as the Tiangong kaiwu forges it: four claws '
++ 'made first, then joined section by section to a wrought-iron shank — '
++ 'the largest single thing under furnace and hammer, welded by crews '
++ 'on a timber stage with chain slings. No stock and no wood anywhere: '
++ 'whichever way it lands, a claw points down and bites. A state grain '
++ 'ship carried five or six; the mightiest, the "house-guarding anchor" '
++ 'of about 500 catties, went down only in the last extremity, and the '
++ 'crew\'s name for its cable — ben shen, the ship\'s own life — says '
++ 'what hung on it. The cables themselves are split green bamboo, '
++ 'boiled and twisted.' },
 cathead:  { stage: 3, name: 'Cathead',
 what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -2813,6 +2824,104 @@ const ag = new THREE.Group();
 ag.add(g);
 if (cable) { cable.name = 'st-cable'; ag.add(cable); }
 group.add(tag(ag, 'stoneAnchor'));
+}
+if (S.ironAnchors) {
+const ia = S.ironAnchors;
+const ironG = mats.capIron || (mats.capIron = new THREE.MeshStandardMaterial(
+{ color: 0x2a2622, roughness: 0.62, metalness: 0.45 }));
+const ag = new THREE.Group();
+const wl = S.windlass;
+const uW = wl ? (wl.atU || 0.10) : 0.10;
+const wLen = wl ? (wl.barrelLenM || B * 0.55) : B * 0.55;
+const wDia = wl ? (wl.barrelDiaM || 0.5) : 0.5;
+const makeAnchor = (shankL, clawL) => {
+const shD = shankL * 0.046;
+const g2 = new THREE.Group();
+g2.name = 'ia-grp';
+const crown = new THREE.Mesh(new THREE.SphereGeometry(shD * 0.85, 10, 8), ironG);
+crown.name = 'ia-crown'; g2.add(crown);
+const sh = new THREE.Mesh(
+new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), ironG);
+sh.name = 'ia-shank'; sh.position.y = shankL / 2; g2.add(sh);
+const ring = new THREE.Mesh(
+new THREE.TorusGeometry(shD * 1.4, shD * 0.28, 8, 18), ironG);
+ring.name = 'ia-ring'; ring.position.y = shankL + shD * 1.1; g2.add(ring);
+const clawD = shD * 0.80;
+for (let k = 0; k < 4; k++) {
+const cg2 = new THREE.Group();
+cg2.rotation.y = k * Math.PI / 2;
+const a1 = 1.19, l1 = clawL * 0.58;
+const s1 = new THREE.Mesh(
+new THREE.CylinderGeometry(clawD * 0.40, clawD * 0.52, l1, 8), ironG);
+s1.name = 'ia-claw'; s1.rotation.z = -a1;
+s1.position.set(Math.sin(a1) * l1 / 2, Math.cos(a1) * l1 / 2, 0);
+cg2.add(s1);
+const P1x = Math.sin(a1) * l1, P1y = Math.cos(a1) * l1;
+const a2 = 0.38, l2 = clawL * 0.32;
+const s2 = new THREE.Mesh(
+new THREE.CylinderGeometry(clawD * 0.30, clawD * 0.42, l2, 8), ironG);
+s2.name = 'ia-claw'; s2.rotation.z = -a2;
+s2.position.set(P1x + Math.sin(a2) * l2 / 2, P1y + Math.cos(a2) * l2 / 2, 0);
+cg2.add(s2);
+const ch = clawL * 0.18;
+const tip = new THREE.Mesh(
+new THREE.ConeGeometry(clawD * 0.34, ch, 8), ironG);
+tip.name = 'ia-tip'; tip.rotation.z = -a2;
+tip.position.set(P1x + Math.sin(a2) * (l2 + ch / 2 - 0.01),
+P1y + Math.cos(a2) * (l2 + ch / 2 - 0.01), 0);
+cg2.add(tip);
+g2.add(cg2);
+}
+return g2;
+};
+const stow = (g2, shankL, u, offZ) => {
+const uA = Math.min(1, u + shankL / L);
+const s = (uA - u) > 1e-6
+? (deckAtU(uA) - deckAtU(u)) / ((uA - u) * L) : 0;
+const q = new THREE.Quaternion()
+.setFromAxisAngle(new THREE.Vector3(0, 1, 0), ia.yaw || 0);
+q.multiply(new THREE.Quaternion().setFromAxisAngle(
+new THREE.Vector3(0, 0, 1), -Math.PI / 2 + Math.atan(s)));
+q.multiply(new THREE.Quaternion().setFromAxisAngle(
+new THREE.Vector3(0, 1, 0), Math.PI / 4));
+g2.quaternion.copy(q);
+const yD = deckAtU(u);
+g2.position.set((u - 0.5) * L, yD, offZ);
+g2.updateMatrixWorld(true);
+const bb = new THREE.Box3().setFromObject(g2);
+g2.position.y += (yD - bb.min.y);
+g2.updateMatrixWorld(true);
+return new THREE.Vector3(0, shankL + shankL * 0.046 * 1.1, 0)
+.applyMatrix4(g2.matrixWorld);
+};
+const cableTo = (from, to, r) => {
+const mid = from.clone().lerp(to, 0.5);
+mid.y = deckAtU(Math.max(0, Math.min(1, mid.x / L + 0.5))) + 0.07;
+const c = ropeMesh([[from, mid], [mid, to]], r, mats.ropeSolid || wood);
+if (c) { c.name = 'ia-cable'; ag.add(c); }
+};
+if (ia.sheetShankM !== 0) {
+const shL = ia.sheetShankM || 2.4, clL = shL * (ia.clawFrac || 0.42);
+const g2 = makeAnchor(shL, clL);
+const ringP = stow(g2, shL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
+ag.add(g2);
+const barrelPt = new THREE.Vector3(
+(uW - 0.5) * L - wLen * 0.18, deckAtU(uW) + 0.30 + wDia / 2, 0);
+cableTo(ringP, barrelPt, 0.035);
+}
+if (ia.bowerShankM !== 0) {
+const shL = ia.bowerShankM || 2.0, clL = shL * (ia.clawFrac || 0.42);
+for (const sg of [1, -1]) {
+const g2 = makeAnchor(shL, clL);
+const ringP = stow(g2, shL, ia.pairAtU != null ? ia.pairAtU : 0.060,
+sg * (ia.pairOffZ || 2.4));
+ag.add(g2);
+const postPt = new THREE.Vector3(
+(uW - 0.5) * L, deckAtU(uW) + 0.55, sg * (wLen / 2 + 0.13));
+cableTo(ringP, postPt, 0.030);
+}
+}
+group.add(tag(ag, 'ironAnchors'));
 }
 if (S.deckhouses && S.deckhouses.length) {
 const white = mats.houseWhite || (mats.houseWhite = new THREE.MeshStandardMaterial(
