@@ -12160,3 +12160,104 @@ classes: top (18), channel/cheek/cathead. (8) Preussen mast livery (r155).
 unpierced. (12) r165 fantail gallery wing walls. (13) r166 screen glass sun-bright.
 (14) r171 quarter-gallery sashes. (15) r171 authored tier fractions. (16) r172 the
 74's lower capstan barrel.
+
+## Round 177 — 2026-08-31 — the corbita's windlass: the Isis's own gear list, extended down her own trade
+
+**The r172 windlass residual's queue head (corbita, first of the three remaining after
+r176's sekibune silence) OPENED AND CLOSED, judgment first
+(build/staging/r177/JUDGMENT.md) — and the judgment is DRAW, warrant GEAR-LIST
+EXTENSION (same trade, same era), the r174 shape with ONE stated inference where r176
+counted three and rightly went silent. This round ran as TWO invocations: the first
+researched and staged everything (19:41–19:45) and died before touching web/; the
+second re-fetched every load-bearing source before applying — Torr 1894 downloaded
+WHOLE this time (staging/torr-ancient-ships.txt, 548 KB) and grepped, not
+fetched-and-summarised.**
+
+**The sources, verified verbatim: Lucian, Navigium 5 (c. AD 165), the Alexandrian
+grain freighter Isis at Piraeus — the ship this card's own rows already carry — 'αἱ
+ἄγκυραι καὶ στροφεῖα καὶ περιαγωγεῖς καὶ αἱ κατὰ τὴν πρύμναν οἰκήσεις, θαυμάσια πάντα
+μοι ἔδοξε' (Greek Wikisource section 5, and again letter-for-letter inside Torr's note
+205): the anchors and the two winding machines in one working inventory, all wonders
+to the visitor; the fetched translation (topostext work 349) renders them 'the
+capstans and windlasses'. Torr's note 205 whole: Plutarch's steersmen working ὀργάνοις
+ἑτέροις ('περιάγουσι καὶ στρέφουσι' — the machine nouns' own verb roots), and
+Lucretius 4.901–906 ('multaque per trocleas et tympana pondere magno / commovet atque
+levi sustollit machina nisu', thelatinlibrary, verbatim in the same breath as navem
+and gubernaclum), with Torr's own scholarly reading connecting the Latin to the Greek,
+named as such. Where the work is: Torr pp. 69–74 — the bow eyes 'turned to account as
+hawse-holes for the anchor-cables', the anchors 'suspended from the catheads a little
+way abaft of these hawse-holes', the Athenian lists' four cables 'to serve the two
+anchors at the bows'; and p. 95, 'the larger ropes were attached to various windlasses
+about the ship'. No ancient source PLACES the machine — the bow station is a PLACEMENT
+INFERENCE and the provenance says so. The standing negative, CONTESTED in the record:
+Laurons 2, the one wreck preserved to the rail (late 3rd c., ~15 m, ~30 t coaster;
+Hochschule Trier project page fetched — no windlass, no capstan, no winch anywhere in
+it), keeps bitts, belaying pins and a spare rudder; the class's small end may have
+worked its anchors by hand, and a corbita drawn at her size would reopen the judgment
+toward silence. Casson 1971 borrow-gated, named as not fetched (the r174
+Needham/Worcester shape). NOT drawn: the second machine — if περιαγωγεῖς is a distinct
+vertical winch its Roman FORM is unattested, and the Georgian capstan this hull
+carried until r172 was exactly that anachronism.**
+
+**The change: `windlass{atU 0.15, barrelLenM 3.6, barrelDiaM 0.5}` +
+windlassProvenance (web/data/vessels.json). Every status named: station u 0.15 a
+PLACEMENT INFERENCE ±0.05 — the open foredeck 2 m abaft the artemon's step at u 0.10,
+forward of the grated hold hatch; barrel a GEOMETRIC read off the drawn deck
+(probe-bow.py, read-only, run BEFORE any record was written: half-breadth 2.336 m at
+the loa-based station, so 3.6 = 0.77 of the 4.67 m breadth, inside the r174/r175 band
+0.66–0.82 — and conservative again: the audit's drawn-station measure is 5.76 m, the
+r174 lwl/loa divergence, stated); diameter, axis height and standards Falconer CLASS
+DEFAULTS cross-tradition (r173). NO builder edit — the plain record draws Falconer's
+class machine as-is; the PARTS windlass tag gains the fourth tradition (one sentence,
+hull.js). No audit edit owed: the r173 rule is generic over H.windlass, checked.**
+
+**sim.py on the probe's real numbers BEFORE any web/ edit — faithful ALL ARMS PASS,
+sever → V-WARRANT alone, drag 9.5 → V-SPAN(shell) alone. Audit 33/0 twice on final
+code. Injections in-page: sever (builder deletes the record under the drawn meshes) →
+1 conviction, corbita only, '7 windlass meshes drawn with no windlass field'; every
+faithful machine — cog's, junk's, treasure's, panokseon's — silent. Drag (barrelLenM
+3.6→9.5 under the faithful builder) → 1 conviction, corbita only, 'a windlass through
+the planking — barrel 9.50 m across a deck 5.76 m wide at its station'.**
+
+**Frames, with timing stated: the opening 64-check ran 19:57–20:44 and PASSED WHOLE —
+64/64 ok, 0 movers, 0 BLANK, EXIT:0 — the SECOND consecutive clean opening; the round
+ran NO chromium tool beside it (all research remote fetches and local reads until it
+exited, the r175 trap held). All web/ edits landed AFTER the run. Close by solo checks
+on final code: shipwright-corbis 0.000 (her own frame watches the masthead),
+ship-junk 0.000, ship-trireme 0.000, ship-galley 0.035%/0.019 ok — under gate, no
+acceptance owed, but diff read and LOCATED per rule 7: every changed pixel is the
+corbita's new machine in the galley frame's background, seen twice — directly across
+her oars, and faintly through the galley's own translucent stats panel. Trap
+re-confirmed: each solo frame_baseline run clears _current; diffs were read before
+the next check, always.**
+
+**Measured (measure_ship, final): win-barrel u 0.143–0.157 (centred 0.15), dia 0.50,
+half-span 1.80; win-standard base y = deck y (connected), outer faces 2.06 m out on a
+2.88 m drawn half-breadth — 0.8 m of deck outboard; axis 0.55 m over the deck
+(Falconer's clamp); barrel underside 0.30 m clear; spikes shipped, leaning, clear of
+the raked artemon. Every number the record's. Looked at (rules 0 and 1):
+z-corbita-plan-bow.png and z-corbita-port-bow.png (3×) read as a rendered vessel on
+water, not a chart. Three facts a viewer can read off the port frame: a black bower
+anchor hangs from the rail just abaft the stem; the artemon rakes forward over the
+stem with its small square sail set; the windlass stands on the open foredeck abaft
+it, barrel end and standard just proud of the low rail, handspikes shipped and
+leaning. The vessel card carries NO new row — hulls that gain the machine itself
+never did (r173–r175); only the sekibune's r176 silence is a row.**
+
+**Deployed: data-version 1788234787. Live verify below.**
+
+**Named residuals, in order:** (1) r172 windlass judgments, TWO hulls remaining —
+dhow, then trireme (whose record may rightly END silent; the r176 sekibune is the
+worked precedent — say so explicitly when judged). (2) NEW r177: Lucian's SECOND
+machine — the gear list names two winding-machine nouns and only the horizontal
+windlass is drawn; a Roman-form vertical winch, if ever attested in form, would add
+it. (3) r173: the cog's Gangspill on the aftcastle top. (4) r173: the cog's castles,
+fore and aft. (5) r173: the cog's pale rudder slab. (6) r174: the junk's and
+treasure-ship's attested anchors, the panokseon's drawn-plate anchor, the wasen
+yotsume-ikari — the corbita's bowers are already drawn and hung. (7) r176: the
+sekibune's class-size question (kiwari read owed). (8) The sweep-derived boxy
+classes: top (18), channel/cheek/cathead. (9) Preussen mast livery (r155).
+(10) Endurance forecastle (RMG J9266). (11) Azzam crest span. (12) r164 risen black
+unpierced. (13) r165 fantail gallery wing walls. (14) r166 screen glass sun-bright.
+(15) r171 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the
+74's lower capstan barrel.

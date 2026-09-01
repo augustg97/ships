@@ -3658,7 +3658,10 @@ const PARTS = {
                   + 'same machine at the bow with its own working: two long bars pass '
                   + 'clean through the drum, crossed, and four men heave at the four '
                   + 'ends — the album of the Joseon navy drew it around 1797, and the '
-                  + 'rebuilt grain ship of 2011 works it still. Drawn only where the '
+                  + 'rebuilt grain ship of 2011 works it still. On the Roman grain run '
+                  + 'the machines stand in a gear list: Lucian\'s visitor, walking the '
+                  + 'giant Isis at Piraeus around AD 165, counts the anchors and their '
+                  + 'winding machines among the ship\'s wonders. Drawn only where the '
                   + 'record attests one.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
