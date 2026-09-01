@@ -12083,3 +12083,80 @@ livery (r155). (8) Endurance forecastle (RMG J9266). (9) Azzam crest span. (10) 
 risen black unpierced. (11) r165 fantail gallery wing walls. (12) r166 screen glass
 sun-bright. (13) r171 quarter-gallery sashes. (14) r171 authored tier fractions.
 (15) r172 the 74's lower capstan barrel.
+
+## Round 176 — 2026-08-31 — the rokuro is a different machine, and the sekibune's record rightly ends silent
+
+**The r172 windlass residual's queue head (sekibune, with r175's finding attached)
+OPENED AND CLOSED, judgment first (build/staging/r176/JUDGMENT.md) — and the judgment
+is SILENCE, the first of the windlass line to end that way, the shape the residual
+itself anticipated for the trireme. Sources fetched this round (r175 pinned no URL, so
+the minamichita finding was re-found and pinned): the Minamichita wasen museum's own
+rokuro page — the surviving spindle and the Hōkyū-maru model photographed, downloaded
+and READ (build/staging/r176/rokuro01–05.png, form only, no scale on the pages): a
+VERTICAL tapered spindle standing between a lower deck and an overhead beam, two long
+bars through it crosswise at different heights, the rope winding at its foot. Not a
+windlass at all — the r173 V-AXIS arm's own words, a capstan wearing the wrong name —
+and not Falconer's capstan either (no whelps, no drumhead, no pawls). Both fetched
+descriptions rig it the same way: two sets INSIDE the aft yagura house of the Edo
+bezaisen, the line from the masthead semi block over the stern tobi-guruma block,
+winding yard, tender and anchor from within the ship (minamichita-museum.com/wasen/ship.html;
+Museum of Maritime Science monoshiri sheet 28, nippon.zaidan.info). The class
+definition: Wakan senyōshū 1761, 40+ oars with a yagura (kuregure). And the class's
+own record: the Murakami Suigun Museum's staff, verbatim, the sekibune and kobaya
+"barely appear in contemporary documents or drawings; much of their actual form is
+unknown" (suigun-staff.blogspot.com, leaning on Ishii Kenji 1983).**
+
+**The judgment: no fetched source puts a rokuro — or any winch — on a sekibune or any
+Sengoku warship. The drawn ship is the 1597 Myeongnyang instance (hull.year). Drawing
+the machine would stack THREE unsourced inferences: era (1597 against Edo-only
+attestations — the bezaisen type itself postdates her, and the museum's own sentence
+treats the machine's installation aboard as a development within that tradition),
+class (cargo to war with NO textual bridge — contrast r174's 器具皆同 and r175's navy
+album), and placement (the attested stand is inside an aft WORKING house between floor
+and beam; the sekibune's aft house is the commander's yakata, and her open yagura deck
+offers no head bearing). JUDGED SILENT, stated in the data per rules 9/10: a
+"Rokuro, judged" rows entry on the card and hull.windlassProvenance carrying the full
+judgment, sources and scope — the judgment is for the drawn 1597 instance; the class
+ran to 1868, an Edo sekibune shares the attested machine's own era, and a drawn Edo
+instance would reopen the question. No hull.windlass, no builder edit, no PARTS-card
+edit (she gains no part), and no audit edit owed: the r173 rule is generic — V-WARRANT
+convicts any future windlass meshes drawn on this hull without a record, and a
+provenance field alone triggers no arm (checked against the rule source; the audit
+never reads provenance fields). No sim or injection applies to a prose-only change.**
+
+**Frames: the opening 64-check RAN 18:37–19:12 and PASSED WHOLE — 64/64 ok, 0 movers,
+0 BLANK, EXIT:0 — the first completed opening check since r172, settling the debt
+r173/r174/r175 each carried. action-gravelines, r175's wedge, passed at 0.000. The
+round ran NO chromium tool beside the ratchet (the r175 trap): all research was remote
+fetches and local reads until the run exited. The vessels.json edit was applied
+MID-RUN at 18:45:52 (r172 precedent, stated); it reaches exactly one frame,
+ship-sekibune, whose capture wrote at 18:45:59 — and scored 0.000, so the page
+photographed the pre-edit record. The SOLO re-check on final code also scored 0.000:
+the new row lands below the fold of that frame's panel, so NO committed frame reaches
+this round's change and no acceptance is owed. The rendered row was looked at anyway
+(rule 1): a one-off panel screenshot scrolled to the row, chromium run AFTER the
+ratchet exited (build/staging/r176/z-sekibune-card-rokuro.png) — "Rokuro, judged"
+renders in full between Rig and Weapons. Rule 0, answered in writing: the frame reads
+as a rendered vessel on water, not a chart; three facts a viewer can read off it — the
+fighting deck is walled bow to stern and a white cloth band under a dark scalloped hem
+hangs along the oar band; the commander's plank-roofed yakata stands abaft the single
+mast; some forty sculling oars fan from under the cloth along both sides.**
+
+**Audit: 33/0 twice on final code. Deployed: data-version 1788228990. Live verify
+below.**
+
+**Named residuals, in order:** (1) r172 windlass judgments, THREE hulls remaining —
+corbita, dhow, trireme; the sekibune's r176 silence is the worked precedent for a
+judgment that rightly ends silent — say so explicitly when judged. (2) r173: the cog's
+Gangspill on the aftcastle top. (3) r173: the cog's castles, fore and aft. (4) r173:
+the cog's pale rudder slab. (5) r174: the junk's and treasure-ship's attested anchors,
+the panokseon's drawn-plate anchor — and now the wasen line's own yotsume-ikari
+(four-fluke iron anchor, minamichita) alongside, none examined yet. (6) NEW r176: the
+sekibune's derived "~25 m for a 40-oar ship" stands against the Murakami museum line's
+"30–40 oars, perhaps ~15 m, uncertain" — the class-size question, owed a proper read
+of the kiwari numbers (Ishii) before any hull change. (7) The sweep-derived boxy
+classes: top (18), channel/cheek/cathead. (8) Preussen mast livery (r155).
+(9) Endurance forecastle (RMG J9266). (10) Azzam crest span. (11) r164 risen black
+unpierced. (12) r165 fantail gallery wing walls. (13) r166 screen glass sun-bright.
+(14) r171 quarter-gallery sashes. (15) r171 authored tier fractions. (16) r172 the
+74's lower capstan barrel.
