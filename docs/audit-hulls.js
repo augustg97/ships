@@ -18,11 +18,32 @@ if (spend(it[f]).includes('*'))
 say(id, 'an asterisk the renderer cannot spend',
 `${f} = ${JSON.stringify(String(it[f]).slice(0, 60))}`);
 });
+const V = (APP.voyages && (APP.voyages.voyages || APP.voyages)) || [];
+const C = (APP.chapters && APP.chapters.chapters) || [];
+const B = (APP.battles && APP.battles.battles) || [];
+const P = (APP.ports && APP.ports.ports) || [];
 sweep('vessels', list);
-sweep('voyages', (APP.voyages && (APP.voyages.voyages || APP.voyages)) || []);
-sweep('chapters', (APP.chapters && APP.chapters.chapters) || []);
-sweep('battles', (APP.battles && APP.battles.battles) || []);
-sweep('ports', (APP.ports && APP.ports.ports) || []);
+sweep('voyages', V);
+sweep('chapters', C);
+sweep('battles', B);
+sweep('ports', P);
+const titles = (coll, items, fields) => (items || []).forEach(it => {
+const id = `data:${coll}/${it.id || it.name || it.title || '?'}`;
+for (const f of fields)
+if (String(it[f] == null ? '' : it[f]).includes('*'))
+say(id, 'an asterisk in a title slot',
+`${f} = ${JSON.stringify(String(it[f]).slice(0, 60))}`);
+(it.legs || []).forEach((l, i) => {
+if (String(l.name == null ? '' : l.name).includes('*'))
+say(id, 'an asterisk in a title slot',
+`legs[${i}].name = ${JSON.stringify(String(l.name).slice(0, 60))}`);
+});
+});
+titles('vessels', list, ['name', 'sub']);
+titles('voyages', V, ['name', 'dates']);
+titles('chapters', C, ['title', 'short', 'years', 'stat', 'lede']);
+titles('battles', B, ['name', 'date', 'campaign']);
+titles('ports', P, ['name', 'modern', 'eyebrow', 'kind']);
 }
 for (const v of list) {
 if (v.polar && v.polar.floor) {
