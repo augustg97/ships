@@ -2859,8 +2859,9 @@ const wl = S.windlass;
 const uW = wl ? (wl.atU || 0.10) : 0.10;
 const wLen = wl ? (wl.barrelLenM || B * 0.55) : B * 0.55;
 const wDia = wl ? (wl.barrelDiaM || 0.5) : 0.5;
-const makeAnchor = (shankL, clawL) => {
-const shD = shankL * 0.046;
+const makeAnchor = (fullL, clawL) => {
+const shD = fullL * 0.046;
+const shankL = fullL - shD * 2.78;
 const g2 = new THREE.Group();
 g2.name = 'ia-grp';
 const crown = new THREE.Mesh(new THREE.SphereGeometry(shD * 0.85, 10, 8), ironG);
@@ -2899,9 +2900,9 @@ g2.add(cg2);
 }
 return g2;
 };
-const stow = (g2, shankL, u, offZ, surf) => {
+const stow = (g2, fullL, u, offZ, surf) => {
 const sAt = surf || deckAtU;
-const uA = Math.min(1, u + shankL / L);
+const uA = Math.min(1, u + fullL / L);
 const s = (uA - u) > 1e-6
 ? (sAt(uA) - sAt(u)) / ((uA - u) * L) : 0;
 const q = new THREE.Quaternion()
@@ -2917,7 +2918,7 @@ g2.updateMatrixWorld(true);
 const bb = new THREE.Box3().setFromObject(g2);
 g2.position.y += (yD - bb.min.y);
 g2.updateMatrixWorld(true);
-return new THREE.Vector3(0, shankL + shankL * 0.046 * 1.1, 0)
+return new THREE.Vector3(0, fullL - fullL * 0.046 * 1.68, 0)
 .applyMatrix4(g2.matrixWorld);
 };
 const cableTo = (from, to, r) => {
@@ -2926,20 +2927,20 @@ mid.y = deckAtU(Math.max(0, Math.min(1, mid.x / L + 0.5))) + 0.07;
 const c = ropeMesh([[from, mid], [mid, to]], r, mats.ropeSolid || wood);
 if (c) { c.name = 'ia-cable'; ag.add(c); }
 };
-if (ia.sheetShankM !== 0) {
-const shL = ia.sheetShankM || 2.4, clL = shL * (ia.clawFrac || 0.42);
-const g2 = makeAnchor(shL, clL);
-const ringP = stow(g2, shL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
+if (ia.sheetLenM !== 0) {
+const fL = ia.sheetLenM || 1.86, clL = fL * (ia.clawFrac || 0.42);
+const g2 = makeAnchor(fL, clL);
+const ringP = stow(g2, fL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
 ag.add(g2);
 const barrelPt = new THREE.Vector3(
 (uW - 0.5) * L - wLen * 0.18, deckAtU(uW) + 0.30 + wDia / 2, 0);
 cableTo(ringP, barrelPt, 0.035);
 }
-if (ia.bowerShankM !== 0) {
-const shL = ia.bowerShankM || 2.0, clL = shL * (ia.clawFrac || 0.42);
+if (ia.bowerLenM !== 0) {
+const fL = ia.bowerLenM || 1.57, clL = fL * (ia.clawFrac || 0.42);
 for (const sg of [1, -1]) {
-const g2 = makeAnchor(shL, clL);
-const ringP = stow(g2, shL, ia.pairAtU != null ? ia.pairAtU : 0.060,
+const g2 = makeAnchor(fL, clL);
+const ringP = stow(g2, fL, ia.pairAtU != null ? ia.pairAtU : 0.060,
 sg * (ia.pairOffZ || 2.4));
 ag.add(g2);
 const postPt = new THREE.Vector3(
@@ -2947,17 +2948,17 @@ const postPt = new THREE.Vector3(
 cableTo(ringP, postPt, 0.030);
 }
 }
-if (ia.sternAtU != null && ia.sternShankM !== 0 && S.poop && S.poop.length === 3) {
-const shL = ia.sternShankM || 2.0, clL = shL * (ia.clawFrac || 0.42);
+if (ia.sternAtU != null && ia.sternLenM !== 0 && S.poop && S.poop.length === 3) {
+const fL = ia.sternLenM || 1.57, clL = fL * (ia.clawFrac || 0.42);
 const dhP = B * 0.115;
 const poopTop = u => deckAtU(u) + dhP * (S.poop[2] + 0.02);
 const ropeM = mats.ropeSolid || wood;
 for (const sg of [1, -1]) {
-const g2 = makeAnchor(shL, clL);
+const g2 = makeAnchor(fL, clL);
 const zA = sg * (ia.sternOffZ || 2.4);
-const ringP = stow(g2, shL, ia.sternAtU, zA, poopTop);
+const ringP = stow(g2, fL, ia.sternAtU, zA, poopTop);
 ag.add(g2);
-const cu = ia.sternAtU + (shL + 0.55) / L;
+const cu = ia.sternAtU + (fL + 0.55) / L;
 const coilC = new THREE.Vector3(
 (cu - 0.5) * L, poopTop(cu) + 0.055, sg * ((ia.sternOffZ || 2.4) - 0.55));
 const segs = [];

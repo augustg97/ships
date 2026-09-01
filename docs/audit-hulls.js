@@ -2578,8 +2578,8 @@ if (H.ironAnchors && !im.length)
 say(v.id, 'declared but not drawn', 'ironAnchors');
 if (H.ironAnchors && im.length) {
 const R = H.ironAnchors;
-const want = (R.sheetShankM !== 0 ? 1 : 0) + (R.bowerShankM !== 0 ? 2 : 0)
-+ (R.sternAtU != null && R.sternShankM !== 0 ? 2 : 0);
+const want = (R.sheetLenM !== 0 ? 1 : 0) + (R.bowerLenM !== 0 ? 2 : 0)
++ (R.sternAtU != null && R.sternLenM !== 0 ? 2 : 0);
 const rings = im.filter(o => o.geometry.type === 'TorusGeometry');
 if (rings.length !== want)
 say(v.id, "the anchors off the record's count",
@@ -2589,24 +2589,39 @@ if (tips.length !== want * 4)
 say(v.id, 'an iron anchor without its four claws',
 `${tips.length} claw points drawn for ${want} anchors — the forging text `
 + 'makes four claws first');
-const shanks = im.filter(o => o.name === 'ia-shank')
-.map(o => { const b = new THREE.Box3().setFromObject(o);
-return Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z); })
-.sort((a, b2) => b2 - a);
-const wantSh = [];
-if (R.sheetShankM !== 0) wantSh.push(R.sheetShankM || 2.4);
-if (R.bowerShankM !== 0) wantSh.push(R.bowerShankM || 2.0, R.bowerShankM || 2.0);
-if (R.sternAtU != null && R.sternShankM !== 0)
-wantSh.push(R.sternShankM || 2.0, R.sternShankM || 2.0);
-wantSh.sort((a, b2) => b2 - a);
-for (let i = 0; i < Math.min(shanks.length, wantSh.length); i++)
-if (Math.abs(shanks[i] - wantSh[i]) > 0.12 * wantSh[i])
-say(v.id, "a shank off the record's length",
-`shank ${shanks[i].toFixed(2)} m drawn, the record's is ${wantSh[i]}`);
 const grps = [];
 g.traverse(o => { const p = tagOf(o);
 if (o.isGroup && o.name === 'ia-grp' && p && p.key === 'ironAnchors')
 grps.push(o); });
+const lens = grps.map(gr => {
+let shk = null, rng = null;
+gr.traverse(o => { if (o.name === 'ia-shank') shk = o;
+else if (o.name === 'ia-ring') rng = o; });
+if (!shk || !rng) return 0;
+let lo = Infinity, hi = -Infinity;
+const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+for (const o of [shk, rng]) {
+o.geometry.computeBoundingBox();
+o.updateMatrixWorld(true);
+const lb2 = o.geometry.boundingBox;
+for (const yy of [lb2.min.y, lb2.max.y]) {
+const t = new THREE.Vector3(0, yy, 0).applyMatrix4(o.matrixWorld).dot(ax);
+if (t < lo) lo = t; if (t > hi) hi = t;
+}
+}
+return hi - lo;
+}).sort((a, b2) => b2 - a);
+const wantLn = [];
+if (R.sheetLenM !== 0) wantLn.push(R.sheetLenM || 1.86);
+if (R.bowerLenM !== 0) wantLn.push(R.bowerLenM || 1.57, R.bowerLenM || 1.57);
+if (R.sternAtU != null && R.sternLenM !== 0)
+wantLn.push(R.sternLenM || 1.57, R.sternLenM || 1.57);
+wantLn.sort((a, b2) => b2 - a);
+for (let i = 0; i < Math.min(lens.length, wantLn.length); i++)
+if (Math.abs(lens[i] - wantLn[i]) > 0.12 * wantLn[i])
+say(v.id, "an anchor off the record's length",
+`crown to ring head ${lens[i].toFixed(2)} m along the shank's own `
++ `axis — the record's full length is ${wantLn[i]}`);
 const rayR = new THREE.Raycaster();
 for (const gr of grps) {
 const bb = new THREE.Box3().setFromObject(gr);

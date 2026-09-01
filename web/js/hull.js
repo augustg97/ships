@@ -4496,8 +4496,8 @@ function buildFittings(S, group, mats) {
   }
 
   /* ── THE FOUR-CLAW IRON ANCHORS, FROM THE RECORD:
-     `ironAnchors: {sheetAtU?, pairAtU?, pairOffZ?, sheetShankM?, bowerShankM?,
-                    sternAtU?, sternOffZ?, sternShankM?, clawFrac?, yaw?}`
+     `ironAnchors: {sheetAtU?, pairAtU?, pairOffZ?, sheetLenM?, bowerLenM?,
+                    sternAtU?, sternOffZ?, sternLenM?, clawFrac?, yaw?}`
      The Tiangong Kaiwu carries this object in two chapters. 錘鍛 gives the FORM
      (fetched whole, r184): 錘法先成四爪，以次逐節接身 — the forging method first
      makes the four claws, then joins them section by section to the shank; war-ships
@@ -4506,10 +4506,13 @@ function buildFittings(S, group, mats) {
      iron anchors to a grain ship, the mightiest the 看家錨 at about 500 catties
      RECORDED, two worked at the head, two at the stern, the cable belayed to the two
      general's-posts and broken out by the yun-che windlass. No text gives a dimension:
-     the sheet anchor's shank is a DERIVED default (2.4 m of wrought iron summing to
-     the recorded ~300 kg), the pair's weight an inference at the 錘鍛 chapter's own
-     300-catty anvil threshold, claw length a woodcut-proportion default — all named in
-     the provenance. Drawn recovered, all five: the bow-worked three on the foredeck,
+     lengths are CALIBRATED from the excavated corpus (r188) — the Penglai naval-fortress
+     anchor of 1984, 全長 2.15 m at 456 kg (Matsui 2013 fig. 3, after 王冠倬 2000),
+     cube-scales the recorded 500-catty (~295 kg) sheet to 1.86 m full length and the
+     300-catty pair inference to 1.57 m; claw length stays a woodcut-proportion default —
+     all named in the provenance. The record fields carry the FULL crown-to-ring length
+     a find's 全長 measures (the r187 yotsume convention): the builder splits it so the
+     drawn ring top lands at the field's value. Drawn recovered, all five: the bow-worked three on the foredeck,
      the stern pair (梢用二枝, r185) on the poop's top tier roof — the surface the ray
      map measured continuous and clear, and the one the after-sheets are already
      worked from. Each lies as the fleet's stowed anchors lie (r182/r183), spun 45°
@@ -4528,9 +4531,11 @@ function buildFittings(S, group, mats) {
     const uW = wl ? (wl.atU || 0.10) : 0.10;
     const wLen = wl ? (wl.barrelLenM || B * 0.55) : B * 0.55;
     const wDia = wl ? (wl.barrelDiaM || 0.5) : 0.5;
-    /* one anchor: origin at the crown, shank along +Y to the head ring */
-    const makeAnchor = (shankL, clawL) => {
-      const shD = shankL * 0.046;
+    /* one anchor: origin at the crown, shank along +Y to the head ring; fullL is
+       the crown-to-ring-top length — the ring top lands at it exactly */
+    const makeAnchor = (fullL, clawL) => {
+      const shD = fullL * 0.046;
+      const shankL = fullL - shD * 2.78;
       const g2 = new THREE.Group();
       g2.name = 'ia-grp';
       const crown = new THREE.Mesh(new THREE.SphereGeometry(shD * 0.85, 10, 8), ironG);
@@ -4575,9 +4580,9 @@ function buildFittings(S, group, mats) {
        own shank, pitched to the surface's gradient over its own length, settled by
        measurement (the r182/r183 rules). The surface defaults to the weather deck;
        the stern pair passes the poop top's own function (r185). */
-    const stow = (g2, shankL, u, offZ, surf) => {
+    const stow = (g2, fullL, u, offZ, surf) => {
       const sAt = surf || deckAtU;
-      const uA = Math.min(1, u + shankL / L);
+      const uA = Math.min(1, u + fullL / L);
       const s = (uA - u) > 1e-6
         ? (sAt(uA) - sAt(u)) / ((uA - u) * L) : 0;
       const q = new THREE.Quaternion()
@@ -4594,7 +4599,7 @@ function buildFittings(S, group, mats) {
       g2.position.y += (yD - bb.min.y);
       g2.updateMatrixWorld(true);
       /* the ring's world point, for the cable */
-      return new THREE.Vector3(0, shankL + shankL * 0.046 * 1.1, 0)
+      return new THREE.Vector3(0, fullL - fullL * 0.046 * 1.68, 0)
         .applyMatrix4(g2.matrixWorld);
     };
     const cableTo = (from, to, r) => {
@@ -4604,10 +4609,10 @@ function buildFittings(S, group, mats) {
       if (c) { c.name = 'ia-cable'; ag.add(c); }
     };
     /* the sheet anchor, centreline, forward of the pair */
-    if (ia.sheetShankM !== 0) {
-      const shL = ia.sheetShankM || 2.4, clL = shL * (ia.clawFrac || 0.42);
-      const g2 = makeAnchor(shL, clL);
-      const ringP = stow(g2, shL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
+    if (ia.sheetLenM !== 0) {
+      const fL = ia.sheetLenM || 1.86, clL = fL * (ia.clawFrac || 0.42);
+      const g2 = makeAnchor(fL, clL);
+      const ringP = stow(g2, fL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
       ag.add(g2);
       /* its cable — the one the text names 本身 — led to the barrel that lifts it */
       const barrelPt = new THREE.Vector3(
@@ -4615,11 +4620,11 @@ function buildFittings(S, group, mats) {
       cableTo(ringP, barrelPt, 0.035);
     }
     /* the head pair, one to each side, cables to their own general's-posts */
-    if (ia.bowerShankM !== 0) {
-      const shL = ia.bowerShankM || 2.0, clL = shL * (ia.clawFrac || 0.42);
+    if (ia.bowerLenM !== 0) {
+      const fL = ia.bowerLenM || 1.57, clL = fL * (ia.clawFrac || 0.42);
       for (const sg of [1, -1]) {
-        const g2 = makeAnchor(shL, clL);
-        const ringP = stow(g2, shL, ia.pairAtU != null ? ia.pairAtU : 0.060,
+        const g2 = makeAnchor(fL, clL);
+        const ringP = stow(g2, fL, ia.pairAtU != null ? ia.pairAtU : 0.060,
                            sg * (ia.pairOffZ || 2.4));
         ag.add(g2);
         const postPt = new THREE.Vector3(
@@ -4635,18 +4640,18 @@ function buildFittings(S, group, mats) {
        to its ring and flaked in a coil beside it — a stow, not an invented lead
        (the r182 grapnel standing). Coil from rope segments, never a torus: the
        audit counts anchors by their ring tori. */
-    if (ia.sternAtU != null && ia.sternShankM !== 0 && S.poop && S.poop.length === 3) {
-      const shL = ia.sternShankM || 2.0, clL = shL * (ia.clawFrac || 0.42);
+    if (ia.sternAtU != null && ia.sternLenM !== 0 && S.poop && S.poop.length === 3) {
+      const fL = ia.sternLenM || 1.57, clL = fL * (ia.clawFrac || 0.42);
       const dhP = B * 0.115;
       const poopTop = u => deckAtU(u) + dhP * (S.poop[2] + 0.02);
       const ropeM = mats.ropeSolid || wood;
       for (const sg of [1, -1]) {
-        const g2 = makeAnchor(shL, clL);
+        const g2 = makeAnchor(fL, clL);
         const zA = sg * (ia.sternOffZ || 2.4);
-        const ringP = stow(g2, shL, ia.sternAtU, zA, poopTop);
+        const ringP = stow(g2, fL, ia.sternAtU, zA, poopTop);
         ag.add(g2);
         /* the coil: two flaked rings just aft of the ring, inboard, on the same roof */
-        const cu = ia.sternAtU + (shL + 0.55) / L;
+        const cu = ia.sternAtU + (fL + 0.55) / L;
         const coilC = new THREE.Vector3(
           (cu - 0.5) * L, poopTop(cu) + 0.055, sg * ((ia.sternOffZ || 2.4) - 0.55));
         const segs = [];
