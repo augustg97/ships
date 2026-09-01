@@ -11986,3 +11986,100 @@ channel/cheek/cathead. (7) Preussen mast livery (r155). (8) Endurance forecastle
 J9266). (9) Azzam crest span. (10) r164 risen black unpierced. (11) r165 fantail gallery
 wing walls. (12) r166 screen glass sun-bright. (13) r171 quarter-gallery sashes.
 (14) r171 authored tier fractions. (15) r172 the 74's lower capstan barrel.
+
+## Round 175 — 2026-08-31 — the horong: the Korean tradition's bow windlass, and the bars that pass clean through
+
+**The r172 residual's queue head (five windlass judgments) OPENED for the panokseon and
+CLOSED, judgment first (build/staging/r175/JUDGMENT.md). No prior research existed for
+any of the five hulls — "rokuro/호롱" appeared only in the residual lists. Sources
+fetched this round: the living tradition's own description of the horong (호롱, 揚錨機)
+— a drum with TWO LONG BARS PASSED THROUGH at different points, crossed as a +, four
+men at the ends, about one coil of cable wound on (옛 돛단배의 언어 3, opinionnews);
+the Joseon navy's own album, the Gakseondobon (c. 1797) — its 전선 warship plate draws
+mast, ANCHOR, oars, rudder (encykorea E0000455 names no horong on that plate, and the
+provenance says so), while the National Maritime Heritage Institute's 2011
+reconstruction of the album's 조선 grain-ship plate carries the horong at the BOW
+("호롱과 치가 선수와 선미에", seamuse info/112) and the launch record says it was
+recreated from the drawing ("호롱 등이 그대로 재현", christianwr 2011 — whose photo,
+~19 px/m, shows the machine on the open foredeck abaft the stem, bars resting LOW;
+form only, no dimension, the Azzam rule); the institute's component classification of
+the excavated Goryeo ships lists the horong among the anchoring gear (정박구: 닻,
+호롱, 닻돌, 엄말 — read in site excerpts, carrying page NOT pinned, stated; no claim
+any wreck preserved one). CONTESTED, in the record: encykorea's hanseon description
+fixes an anchor-winding 굴통 at the STERN board beside the rudder; the drawn machine
+follows the naval line's build record, at the bow.**
+
+**Warrant: NAVY-TRADITION EXTENSION, stated in the provenance itself (the r108/r174
+shape — her attestation is generated; the machine is the tradition's, attested in her
+own navy's album, on the Goryeo carriers' gear list, and in the living craft by name;
+no source puts one on a 16th-century warship directly).**
+
+**The change: `windlass{atU 0.10, barrelLenM 3.8, barrelDiaM 0.5, throughBars: true}`
++ windlassProvenance (web/data/vessels.json). Every status named: station a PHOTO/TEXT
+read ±0.05 (the open foredeck, forward of the sangjang's drawn leading edge at 0.16);
+barrel a GEOMETRIC class default (drawn deck 5.79 m wide at the loa-based probe
+station — probe-bow.py, read-only, run BEFORE any record was written; the audit's
+drawn-station measure is 6.27 m, the r174 lwl/loa divergence again, so the probe was
+conservative); diameter, underside and standards Falconer CLASS DEFAULTS
+cross-tradition as r173/r174; bars 2.0 m CLASS DEFAULT. buildWindlass grows ONE
+parameter: under throughBars the two Falconer thrust-in spikes become two long bars
+centred ON the axis, through the drum at different stations, crossed. ⚠ measure_ship
+caught the first draft: 2.4 m bars at near-vertical rest angles STABBED 0.5 m through
+the foredeck (bar tip y 1.99 under a 2.48 deck) — a 2.4 m bar centred on a 0.55 m axis
+cannot stand upright; the replica photo shows the crew leaves them low. Final: 2.0 m
+at ±1.15 rad, lowest tip 0.12 m clear of the deck, measured. The PARTS windlass card
+now carries the third tradition.**
+
+**Audit: rule r173 generic over H.windlass covered the horong unchanged; the NEW field
+got its own watcher — V-THROUGH (a record field no arm can see is a silent lie): under
+throughBars every long thin round timber in the group (≥1.2 m, cross ≤0.15 — keeps the
+0.32 m journals and the barrel out) must sit its centre within 0.25 m of the axis; a
+single-ended Falconer spike rides 0.63 m out and convicts. sim.py BEFORE any web/
+edit; 33/0 clean twice on final code. Injections in-page (audit synced to web/ first —
+the r173/r174 trap): sever (builder strips throughBars, ships Falconer spikes under
+the horong record) → 2 convictions, panokseon only, both V-THROUGH at 0.63 m, the
+sim's own number; drag (barrelLenM 3.8→7.0 under the faithful builder) → 1 conviction,
+panokseon only, 'a windlass through the planking — 7.00 m across a 6.27 m deck'.**
+
+**Frames, with timing stated: the opening 64-check ran 17:39–18:31 and DIED at 55/64 —
+frame action-gravelines' readiness never came true in 60 s (RuntimeError, EXIT:1,
+NOTHING scored; the same app booted to __FRAME_READY in every audit/injection/profile
+run before and after). ⚠ Likely cause, named as a trap: this round ran its OWN
+chromium tools (probe, audit, two injections, measure, profile) WHILE the ratchet was
+capturing — CPU contention starved the action frame's readiness. Do not run in-page
+tools during a ratchet run. r176's OPENING OWES THE FULL 64 — the third consecutive
+round owing it; if it wedges again, consider raising the tool's readiness timeout or
+splitting the check into two halves run back to back. Close on final code, solo:
+ship-panokseon 0.018%/0.016 ok — diff read and located: the changed pixels are UI
+panel text (the record gained a part), and the machine itself is OCCLUDED by the
+sangjang's forward wall from that frame's camera; looked at instead in the profile
+plan crop. ship-sekibune 0.000, ship-galleass 0.004% ok (berth neighbours),
+action-myeongnyang 0.000 — the machine reaches no baseline frame.**
+
+**Measured (measure_ship, final): win-barrel u 0.092–0.108, dia 0.50, half-span 1.90,
+underside 0.30 over the deck the standards stand on (base y = deck y, connected);
+win-bar tips 0.12 m clear of the deck; win-standard/journal at the barrel ends — every
+number the record's. Looked at (rules 0 and 1): z-panokseon-bow-crop.png (plan, 3×)
+reads as a rendered deck. Three facts a viewer can read off it: the horong lies
+athwartships across the open foredeck with its two through-bars crossing the drum at
+different stations, each projecting both sides; the furled foresail lies diagonally
+across the deck break behind it; the sangjang's plank roof spans wall to wall with the
+oar shafts fanned along both sides.**
+
+**Deployed: data-version 1788225612. Live verify below.**
+
+**Named residuals, in order:** (1) r172 windlass judgments, FOUR hulls remaining —
+sekibune FIRST, with this round's finding attached: the wasen rokuro is worked from
+the yagura AFT, serving halyards, tender and anchor through a mast-top block
+(minamichita wasen museum) — a different machine in a different place, not a bow
+windlass; then corbita, dhow, trireme (whose record may rightly END silent; say so
+explicitly when judged). (2) r173: the cog's Gangspill on the aftcastle top.
+(3) r173: the cog's castles, fore and aft. (4) r173: the cog's pale rudder slab.
+(5) r174: the junk's and treasure-ship's attested anchors (five or six iron anchors,
+the 500-catty 看家錨, Xu Jing's hooked stone) — and now the panokseon's 닻 too: the
+warship plate DRAWS her anchor and this round drew only the machine that lifts it.
+(6) The sweep-derived boxy classes: top (18), channel/cheek/cathead. (7) Preussen mast
+livery (r155). (8) Endurance forecastle (RMG J9266). (9) Azzam crest span. (10) r164
+risen black unpierced. (11) r165 fantail gallery wing walls. (12) r166 screen glass
+sun-bright. (13) r171 quarter-gallery sashes. (14) r171 authored tier fractions.
+(15) r172 the 74's lower capstan barrel.

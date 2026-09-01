@@ -2226,8 +2226,12 @@ what: 'A horizontal winch: an eight-square barrel turned by handspikes '
 + 'On the Chinese seagoing tradition it lies at the bow between the two '
 + 'mooring posts: Xu Jing watched one worked in 1124, winding a rattan '
 + 'cable as thick as a rafter, and the Tiangong Kaiwu of 1637 names the '
-+ 'machine that breaks out the iron anchors. Drawn only where the record '
-+ 'attests one.' },
++ 'machine that breaks out the iron anchors. The Korean horong is the '
++ 'same machine at the bow with its own working: two long bars pass '
++ 'clean through the drum, crossed, and four men heave at the four '
++ 'ends — the album of the Joseon navy drew it around 1797, and the '
++ 'rebuilt grain ship of 2011 works it still. Drawn only where the '
++ 'record attests one.' },
 boat:     { stage: 3, name: "Ship's boat",
 what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
 + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -2629,14 +2633,27 @@ j.name = 'win-journal'; j.rotation.x = Math.PI / 2;
 j.position.set(0, axisY, sg * (len / 2 + 0.10));
 wg.add(j);
 }
+if (S.windlass.throughBars) {
+for (const [zf, ang] of [[-0.20, 1.15], [0.28, -1.15]]) {
+const spL = 2.0;
+const sp = new THREE.Mesh(
+new THREE.CylinderGeometry(0.028, 0.028, spL, 8), pale);
+sp.name = 'win-bar';
+sp.rotation.z = ang;
+sp.position.set(0, axisY, zf * len);
+wg.add(sp);
+}
+} else {
 for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
 const spL = 1.7, seat = 0.22;
-const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
+const sp = new THREE.Mesh(
+new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
 sp.name = 'win-spike';
 sp.rotation.z = ang;
 const dx = -Math.sin(ang), dy = Math.cos(ang);
 sp.position.set(dx * (spL / 2 - seat), axisY + dy * (spL / 2 - seat), zf * len);
 wg.add(sp);
+}
 }
 wg.position.x = (u - 0.5) * L;
 group.add(tag(wg, 'windlass'));

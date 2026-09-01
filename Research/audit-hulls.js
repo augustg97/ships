@@ -3396,6 +3396,29 @@
               say(v.id, 'a windlass the cable cannot pass under',
                   `${(over - barDia / 2).toFixed(2)} m under the barrel`);
           }
+          /* V-THROUGH (r175): the Korean horong's record says its bars pass THROUGH
+             the drum — so every long thin round timber in the group must straddle the
+             axis: centre within 0.25 m of the barrel's axis in the plane the bars
+             swing in. A single-ended Falconer spike rides its centre 0.63 m out along
+             its own shaft and convicts. Bars found by the same local-vertex-extent
+             read as the barrel (length >= 1.2 m keeps the 0.32 m journals out; cross
+             <= 0.15 m keeps the barrel out). */
+          if (R.throughBars) {
+            for (const o of wm) {
+              if (o === bar || o.geometry.type === 'BoxGeometry') continue;
+              const e = ext(o);
+              const k2 = e[0] > e[1] ? (e[0] > e[2] ? 0 : 2)
+                                     : (e[1] > e[2] ? 1 : 2);
+              const d2 = (e[(k2 + 1) % 3] + e[(k2 + 2) % 3]) / 2;
+              if (e[k2] < 1.2 || d2 > 0.15 || e[k2] < 2.5 * d2) continue;
+              const off = Math.hypot(o.position.x - bar.position.x,
+                                     o.position.y - bar.position.y);
+              if (off > 0.25)
+                say(v.id, 'a bar the record says passes through the drum',
+                    `bar centre ${off.toFixed(2)} m off the axis — the horong's bars `
+                    + 'pass clean through, a man at each of the four ends');
+            }
+          }
         }
       }
     }

@@ -3654,8 +3654,12 @@ const PARTS = {
                   + 'On the Chinese seagoing tradition it lies at the bow between the two '
                   + 'mooring posts: Xu Jing watched one worked in 1124, winding a rattan '
                   + 'cable as thick as a rafter, and the Tiangong Kaiwu of 1637 names the '
-                  + 'machine that breaks out the iron anchors. Drawn only where the record '
-                  + 'attests one.' },
+                  + 'machine that breaks out the iron anchors. The Korean horong is the '
+                  + 'same machine at the bow with its own working: two long bars pass '
+                  + 'clean through the drum, crossed, and four men heave at the four '
+                  + 'ends — the album of the Joseon navy drew it around 1797, and the '
+                  + 'rebuilt grain ship of 2011 works it still. Drawn only where the '
+                  + 'record attests one.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
                   + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -4151,15 +4155,20 @@ function buildFittings(S, group, mats) {
     group.add(tag(cg, 'capstan'));
   }
 
-  /* ── THE WINDLASS, FROM THE RECORD: `windlass: {atU, barrelLenM, barrelDiaM, postHM?}`
-     Two traditions, each in its record's place. The Bremen cog's (r173): athwartships at
+  /* ── THE WINDLASS, FROM THE RECORD:
+     `windlass: {atU, barrelLenM, barrelDiaM, postHM?, throughBars?}`
+     Three traditions, each in its record's place. The Bremen cog's (r173): athwartships at
      the aftcastle, forward of the helm (Ellmers, DSM), barrel 4.5 × 0.60 m (the Kiel
      replica's build record, Baykowski 1991). The Chinese bow machine (r174): Xu Jing
      watched it worked in 1124 — 船首兩頰柱中，有車輪，上綰藤索 — a wheel between the two
      cheek-posts at the head, the cable wound on it; the Tiangong Kaiwu (1637) names the
      machine (雲車) and the two bow posts the cable belays to (將軍柱). When the record
      gives postHM, the standards are those mooring posts, rising past the barrel to take
-     the cable's turns. Falconer's WINDLASS supplies the class mechanism, named as
+     the cable's turns. The Korean horong (r175): the Joseon navy's own album (the
+     Gakseondobon, c. 1797) draws it at the bow of the grain ship, and the living
+     tradition gives its working — two long bars through the drum, crossed, four men;
+     the record says throughBars and the bars straddle the axis. Falconer's WINDLASS
+     supplies the class mechanism, named as
      defaults in the provenance: a timber "supported at the two ends by two frames of
      wood", turned by handspikes "thrust into holes bored through the body", its "lower
      part ... about a foot above the deck" — so the axis stands at 0.30 + D/2 over the
@@ -4195,15 +4204,36 @@ function buildFittings(S, group, mats) {
       j.position.set(0, axisY, sg * (len / 2 + 0.10));
       wg.add(j);
     }
-    /* two handspikes shipped in the bored through-holes, as the crew left them */
-    for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
-      const spL = 1.7, seat = 0.22;
-      const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
-      sp.name = 'win-spike';
-      sp.rotation.z = ang;
-      const dx = -Math.sin(ang), dy = Math.cos(ang);
-      sp.position.set(dx * (spL / 2 - seat), axisY + dy * (spL / 2 - seat), zf * len);
-      wg.add(sp);
+    /* the bars: Falconer's two handspikes shipped in the bored holes as the crew left
+       them — or, where the record says throughBars, the Korean horong's pair (r175):
+       two long bars PASSING THROUGH the drum at different stations, crossed, a man's
+       grip at each of the four ends — "긴 막대 2개를 다른 위치에서 관통하게 만들어야
+       튼튼하다", the living tradition's own structural sentence */
+    if (S.windlass.throughBars) {
+      /* at rest the bars lie LOW — a bar longer than twice the axis height cannot
+         stand near the vertical without stabbing the deck (measure_ship caught the
+         first draft doing exactly that), and the rebuilt grain ship's photo shows
+         them left near-horizontal */
+      for (const [zf, ang] of [[-0.20, 1.15], [0.28, -1.15]]) {
+        const spL = 2.0;
+        const sp = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.028, 0.028, spL, 8), pale);
+        sp.name = 'win-bar';
+        sp.rotation.z = ang;
+        sp.position.set(0, axisY, zf * len);
+        wg.add(sp);
+      }
+    } else {
+      for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
+        const spL = 1.7, seat = 0.22;
+        const sp = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
+        sp.name = 'win-spike';
+        sp.rotation.z = ang;
+        const dx = -Math.sin(ang), dy = Math.cos(ang);
+        sp.position.set(dx * (spL / 2 - seat), axisY + dy * (spL / 2 - seat), zf * len);
+        wg.add(sp);
+      }
     }
     wg.position.x = (u - 0.5) * L;
     group.add(tag(wg, 'windlass'));
