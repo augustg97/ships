@@ -257,6 +257,13 @@
     const tagOf = o => { for (let e = o; e; e = e.parent)
                            if (e.userData && e.userData.part) return e.userData.part;
                          return null; };
+    /* (r187) parts that cannot BEAR: a rest-ray asking what surface is under a
+       stow must not accept a rope or an oar shaft as the answer — the sekibune's
+       forestay crossed the anchor's rest-ray 0.44 m over the planking and the
+       first live run convicted a seated anchor as stabbed-through. Every deck is
+       a surface; a line crossing over one is not. */
+    const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
+                                'sheet', 'tack', 'ratline', 'oar']);
 
     /* r155: the record may attest the FLAG-BUTTON (`truckM`, deck-to-truck) instead of a
        lower-mast length — every expectation below that derives from the lower must mirror
@@ -3659,7 +3666,8 @@
                                      (bb.min.z + bb.max.z) / 2),
                    new THREE.Vector3(0, -1, 0));
           const under = rayR.intersectObject(g, true).filter(h => {
-            const p = tagOf(h.object); return !(p && p.key === 'ironAnchors'); });
+            const p = tagOf(h.object);
+            return !(p && (p.key === 'ironAnchors' || NONBEARING.has(p.key))); });
           if (!under.length) {
             say(v.id, 'an anchor resting on nothing',
                 `no surface under the assembly at u ${ui.toFixed(2)}`);
@@ -3771,7 +3779,8 @@
                                    (bbW.min.z + bbW.max.z) / 2),
                  new THREE.Vector3(0, -1, 0));
         const underW = rayW.intersectObject(g, true).filter(h => {
-          const p = tagOf(h.object); return !(p && p.key === 'woodAnchor'); });
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'woodAnchor' || NONBEARING.has(p.key))); });
         if (!underW.length)
           say(v.id, 'an anchor resting on nothing',
               `no surface under the assembly at u ${uw.toFixed(2)}`);
@@ -3787,6 +3796,101 @@
         if (!wm.some(o => o.name === 'wa-cable'))
           say(v.id, 'a wooden anchor with no cable',
               'the horong turns this anchor\'s cable — nothing drawn holds it to the ship');
+      }
+    }
+
+    /* (r187) THE JAPANESE FOUR-CLAW IRON ANCHOR. Her own plate draws the recurved-
+       claw anchor at the anchored barrier's cable-end (Busan 1593); the form is the
+       wasen tradition's 四爪碇 — square-bar shank split into four claws, elongated
+       head ring, free accessory ring the cable bends to. V-WARRANT both ways, as
+       every anchor rule. V-YARMS: four fluke tips, found STRUCTURALLY as cones.
+       V-YRING: exactly TWO ring tori — the head ring and the accessory ring through
+       it; one is a lost cable-bend, three is an invented fitting. V-YLEN: the
+       assembly's longest extent read from each mesh's own geometry through the world
+       matrix scale (the r186 lesson — a world AABB cannot read a 45° roll) against
+       the record's lenM. V-YREST: the recovered anchor lies on the foredeck, asked
+       of the surface itself (ray straight down, first non-anchor hit — the r185
+       form); floating and stabbed-through both convict. V-YCABLE: no machine and no
+       belay is attested — the cable is flaked in a coil beside the head, so a drawn
+       anchor with no cable or no coil convicts. */
+    {
+      const ym = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'yotsumeAnchor') ym.push(o); });
+      if (ym.length && !H.yotsumeAnchor)
+        say(v.id, 'an anchor the record does not carry',
+            `${ym.length} yotsume-anchor meshes drawn with no yotsumeAnchor field — `
+            + "this hull's record is silent, and silence draws nothing");
+      if (H.yotsumeAnchor && !ym.length)
+        say(v.id, 'declared but not drawn', 'yotsumeAnchor');
+      if (H.yotsumeAnchor && ym.length) {
+        const R = H.yotsumeAnchor;
+        const tips = ym.filter(o => o.geometry.type === 'ConeGeometry');
+        if (tips.length !== 4)
+          say(v.id, 'a four-claw anchor off its claw count',
+              `${tips.length} fluke tips drawn — the name itself says four`);
+        const tori = ym.filter(o => o.geometry.type === 'TorusGeometry');
+        if (tori.length !== 2)
+          say(v.id, 'a yotsume off its rings',
+              `${tori.length} ring tori drawn — the head ring carries the free ring `
+              + 'the cable bends to: exactly two');
+        /* the length through the stow transform: per-mesh geometry extents through
+           world scale, assembled — a rigid stow cannot shrink it, a scale cheat
+           cannot hide from it */
+        const lenR = R.lenM || 2.0;
+        let lo = Infinity, hi = -Infinity;
+        const shk = ym.find(o => o.name === 'ya-shank');
+        const rng = ym.find(o => o.name === 'ya-ring');
+        if (shk && rng) {
+          for (const o of [shk, rng]) {
+            o.geometry.computeBoundingBox();
+            o.updateMatrixWorld(true);
+            const lb2 = o.geometry.boundingBox;
+            for (const yy of [lb2.min.y, lb2.max.y]) {
+              const p2 = new THREE.Vector3(0, yy, 0).applyMatrix4(o.matrixWorld);
+              /* project onto the shank's own world axis */
+              const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+              const t = p2.dot(ax);
+              if (t < lo) lo = t; if (t > hi) hi = t;
+            }
+          }
+          const drawnLen = hi - lo;
+          if (Math.abs(drawnLen - lenR) > 0.12 * lenR)
+            say(v.id, "a yotsume off the record's length",
+                `crown to ring head ${drawnLen.toFixed(2)} m along the shank's own `
+                + `axis — the record says ${lenR}`);
+        }
+        const bbY = new THREE.Box3();
+        for (const o of ym) if (o.name !== 'ya-cable' && o.name !== 'ya-coil')
+          bbY.union(new THREE.Box3().setFromObject(o));
+        const uy = Math.max(0, Math.min(1,
+          ((bbY.min.x + bbY.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const rayY = new THREE.Raycaster();
+        rayY.set(new THREE.Vector3((bbY.min.x + bbY.max.x) / 2, bbY.max.y + 0.5,
+                                   (bbY.min.z + bbY.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underY = rayY.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'yotsumeAnchor' || NONBEARING.has(p.key))); });
+        if (!underY.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${uy.toFixed(2)}`);
+        else {
+          const gapY = bbY.min.y - underY[0].point.y;
+          if (gapY > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapY.toFixed(2)} m above the surface under it at u ${uy.toFixed(2)}`);
+          if (gapY < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapY).toFixed(2)} m into the surface under it at u ${uy.toFixed(2)}`);
+        }
+        if (!ym.some(o => o.name === 'ya-cable'))
+          say(v.id, 'a yotsume with no cable',
+              'nothing drawn holds this anchor to the ship');
+        else if (!ym.some(o => o.name === 'ya-coil'))
+          say(v.id, 'a cable with no coil',
+              'no machine and no belay is attested — the cable is flaked beside the '
+              + 'head, and a cable ending in air is a part attached to nothing');
       }
     }
 

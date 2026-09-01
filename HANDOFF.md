@@ -13124,3 +13124,111 @@ forecastle. (15) Azzam crest span. (16) r164 risen black unpierced. (17) r165
 fantail gallery wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes.
 (20) r171 authored tier fractions. (21) r172 the 74's lower capstan barrel.
 (22) r181 eraSm dead fallback branch (app.js:1353).
+
+## Round 187 — 2026-09-01 — the sekibune's yotsume-ikari: the anchor her own plate draws at the barrier's end
+
+**The r186 queue head — the anchors line's last member — OPENED AND CLOSED, judgment
+first (build/staging/r187/JUDGMENT.md). The shadow was r176: the same museum's rokuro
+was judged SILENT for this hull. The anchor closes the other way because the evidence
+points the other way, at her class and era and on her own plate. THE ROUND'S FIND: the
+card's own plate (the Busan boat-barrier scroll of 1593, local copy
+web/data/assets/ships/sekibune.jpg, 2095×2167) DRAWS the ground tackle — the barrier
+line rides to twisted cables and at its upper and lower ends the anchor itself hangs at
+the cable's end: stockless, short-shanked, four strongly recurved claws (crops read:
+build/staging/r187/plate-anchor-top.png; the lower one clipped at the sheet edge).
+Presence DIRECT-BY-PLATE, four years before her drawn year, in her own fleet, at
+anchor. Form ERA+CLASS: Matsui Hironobu's typological study (Kanazawa archaeology
+bulletin 34, 2013, PDF fetched WHOLE, saved in staging), carrying Ishii 1983 —
+the 1433 Jingu Kogo engi emaki depiction, the 1486 Boshi nyuminki iron-anchor record:
+warships and special ships carried the four-claw iron anchor ALONGSIDE wood-stone
+anchors from the first half of the 15th century, while wood-stone stayed the ordinary
+wasen's mainstay to the mid-17th (the Kawaguchi byobu counts one iron to eight
+wood-stone). The name and making are the wasen tradition's (Minamichita, verbatim: a
+square iron bar split in four, the quarters bent into claws; and the same page's
+uwakannuki — the bow-rail oak member the bezaisen rests its anchor on — supports the
+bow stow without being drawn: Edo cargo structure).**
+
+**Standings all named: length 2.0 m DRAWN CLASS DEFAULT (Matsui's corpus of 49
+survivors runs 1.05–3.03 m; ~120 kg by the Kozushima calibration — 2.8 m raised at
+330–340 kg — a direct-pull load for a crew whose rokuro is judged silent); ring/arm
+proportions corpus/figure defaults; count ONE, NOT RECORDED (Ishii's mixed tackle
+named, not drawn); stow PLACEMENT INFERENCE, the fleet rule (r182–r186), on the
+foredeck forward of the so-yagura, cable bent to the accessory ring and flaked in a
+coil beside the head.**
+
+**Class not instance: generic datum-driven `yotsumeAnchor` block in buildFittings
+(silence draws nothing), own PARTS card, record + anchorProvenance on the sekibune,
+and a "Ground tackle, as drawn" row (her card is array-form — the r186 panokseon
+card-schema residual does not recur). NEW audit rule: V-WARRANT both ways, V-YARMS
+(4 fluke cones), V-YRING (exactly TWO ring tori — head ring and accessory ring),
+V-YLEN (crown-to-ring-head read from geometry through the world matrix along the
+shank's own axis — the r186 lesson), V-YREST (surface-asked, r185 form), V-YCABLE
+(cable AND coil, else a part attached to nothing).**
+
+**Iterated by measurement, and TWO class fixes the measurement forced: (1) draft 1's
+coil, flaked aft of the head, SANK UNDER THE SO-YAGURA — probe_fore.py rayed the
+foredeck: walkable triangle ends at the yagura face u~0.095, deck jumping 2.49→3.01 —
+the class rule now flakes the coil BESIDE the head toward the centreline, seated by
+its own ray. (2) The first live V-YREST run convicted the seated anchor as
+stabbed-through: the FORESTAY crossed the rest-ray 0.44 m over the plank and "first
+non-anchor hit" took a rope for a surface — a latent bug in ALL THREE ray-based
+anchor rest rules (ironAnchors, woodAnchor, yotsume; every anchor hull has a
+forestay over its foredeck and passed by station luck). Fixed the class: a shared
+NONBEARING set (stay/shroud/halyard/brace/lift/sheet/tack/ratline/oar) in all three
+filters, and the BUILDER's settle now asks the surface itself too (ray at the
+assembly's centre, same skip-set) because deckAtU is the RAIL line and the drawn
+foredeck plank lies 0.33 m under it on this hull. Final measured: assembly u
+0.005–0.100 inside the triangle, ring end 0.093 clear of the yagura face, coil ON
+the plank at u 0.07–0.10, down-tips 2.65 on plank ~2.6.**
+
+**Audit 33/0 live and again on final code. Proofs on final code: sever (claws
+stripped under a faithful record) → exactly ONE conviction, V-YARMS "0 fluke tips
+drawn — the name itself says four"; drag (shank stretched 1.35×) → exactly ONE,
+V-YLEN "crown to ring head 2.30 m along the shank's own axis — the record says 2",
+read THROUGH the 45° roll and yaw.**
+
+**Looked at (rules 0 and 1): the profile tool's port broadside with its own u-ruler
+(z-ya-port-center.png; anchor crop z-ya-port-anchorcrop.png at 5×) — the frame reads
+as a rendered vessel. Three facts a viewer can read off it: a four-clawed dark iron
+anchor lies on the foredeck just abaft the raked stem, two recurved claws standing
+up, its head ring down by the deck; the fighting deck is walled bow to stern with a
+white cloth band under a dark scalloped hem along the oar band, the sculling ro
+fanned beneath it; the commander's plank-roofed yakata stands abaft the single mast.
+⚠ the profile tool frames the WHEEL — at 3° the flanking ships enter the ends of the
+frame; an end-crop is the NEIGHBOR, not the subject (this round misread the fluyt's
+bow for hers once; the centre crop is the subject). Card row shot
+(z-sek-card-anchor.png): renders whole, plain type, rawStar False.**
+
+**Frames: the opening OWED 64 PAID AND PURE — launched 08:08 on the unedited tree,
+web edits landed mid-run 08:20–08:29 BUT were STASHED at frame 32/64 (before any
+edit-bearing frame captured) and popped after EXIT:0 — 64/64 within tolerance, 0
+movers, 0 BLANK, action-myeongnyang 0.000. Close (the r186 fallback — a
+research-and-draw round inside one watchdog): solos on final code — ship-sekibune
+0.011% read and located (the anchor's own pixels at the bow), ACCEPTED with
+FRAME-LOG reason (r132-in-advance), then 0.000; action-myeongnyang 0.000 (the action
+tokens build no FINE fittings — no reach); ship-panokseon 0.000 and ship-junk 0.000
+(builder and audit edits proven inert on the neighbouring anchor hulls). **r188's
+opening OWES THE FULL 64.**
+
+**Deployed: data-version 1788279173. Live verify below.**
+
+**Named residuals, in order:** (1) NEW r187: the r184 four-claw dimension replacement
+is now CHEAPER than fetched-new — Matsui fig. 3 pins the finds the r184 residual
+named: Penglai 1984 全長 2.15 m / 456 kg, Quanzhou 1981 残高 2.68 m / 758.3 kg, the
+1372-inscribed anchor 1.36 m. The Penglai datum calibrates the treasure-ship's
+500-catty (~295 kg) sheet to ~1.86 m against the drawn derived 2.4 m — re-derive and
+re-measure; the PDF is in build/staging/r187/. (2) NEW r187, small: the 1433 Jingu
+Kogo engi emaki warship-anchor plate (Konda Hachimangu) — fetch in resolution if it
+surfaces open; it replaces the figure-proportion defaults with the era's own drawing.
+(3) NEW r187, small: the two ray-free anchor rest rules (grapnel, stoneAnchor) still
+compare against the sheer FUNCTION, not the drawn plank — the r187 rail-vs-plank
+lesson says they under-read; move them to the surface-asked form. (4) r186: the
+panokseon stone-station inference (Taean reproduction photo). (5) r182 grapnel shank
+reconstruction. (6) r183 junk stone bar class default. (7) r177 Lucian's second
+machine. (8) r173 cog Gangspill. (9) r173 cog castles. (10) r173 cog rudder slab.
+(11) r176 sekibune class-size (kiwari read). (12) boxy classes: top (18),
+channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle.
+(15) Azzam crest span. (16) r164 risen black unpierced. (17) r165 fantail gallery
+wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes. (20) r171 authored
+tier fractions. (21) r172 the 74's lower capstan barrel. (22) r181 eraSm dead
+fallback branch (app.js:1353).

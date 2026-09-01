@@ -3547,6 +3547,19 @@ const PARTS = {
                   + 'the wooden anchors found beside them carbon-dated from the second '
                   + 'century BC into this ship\'s own dynasty. Her navy\'s album draws the '
                   + 'anchor on the warship plate beside mast, oars and rudder.' },
+  yotsumeAnchor: { stage: 3, name: 'Yotsume-ikari',
+              what: 'The wasen tradition\'s ground tackle: the four-claw forged iron anchor, '
+                  + 'named for its making — a square iron bar split at the foot and the '
+                  + 'quarters bent outward into claws, an elongated ring at the head carrying '
+                  + 'the free ring the cable bends to. No stock and no wood: whichever way it '
+                  + 'lands, a claw points down and bites. Iron on a warship is the era\'s own '
+                  + 'pattern — from the early 15th century the warships and special ships '
+                  + 'carried the four-claw iron anchor alongside the wood-stone anchors that '
+                  + 'stayed the ordinary ships\' mainstay into the mid-1600s — and the Busan '
+                  + 'scroll of 1593 draws the anchored barrier fleet riding to its cables, '
+                  + 'the anchor itself at the line\'s end, claws recurved. Forty-nine survive '
+                  + 'in one measured corpus, 1.05 to 3.03 m; none of them a Sengoku '
+                  + 'warship\'s.' },
   cathead:  { stage: 3, name: 'Cathead',
               what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
                   + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -4778,6 +4791,185 @@ function buildFittings(S, group, mats) {
     ag.add(g);
     if (cable) { cable.name = 'wa-cable'; ag.add(cable); }
     group.add(tag(ag, 'woodAnchor'));
+  }
+
+  /* ── THE JAPANESE FOUR-CLAW IRON ANCHOR, FROM THE RECORD ────────────────────────────
+     `yotsumeAnchor: {atU?, offZ?, yaw?, lenM?, armFrac?, cableDiaM?}`
+     The 四爪碇 the wasen tradition names for its making — a square iron bar split at
+     the foot into four claws bent outward (Minamichita wasen museum, verbatim), the
+     head carrying an elongated anchor ring with a free accessory ring through it that
+     the cable bends to (Matsui 2013 fig. 1, the corpus's own part names). Era and
+     class: from the 1433 Jingu Kogo engi emaki and the 1486 Boshi nyuminki, warships
+     and special ships carried the four-claw iron anchor alongside wood-stone anchors
+     from the first half of the 15th century (Ishii 1983 via Matsui); her own card's
+     plate — the Busan barrier of 1593, at anchor — draws the recurved-claw anchor at
+     the cable's end. NO dimension is recorded for a sekibune: lenM defaults to 2.0 m,
+     a class default inside the measured corpus (1.05–3.03 m, Matsui table 1), about
+     120 kg by the Kozushima calibration (2.8 m ≈ 335 kg, cube-scaled) — a direct-pull
+     load for a crew with no winch (her rokuro is JUDGED SILENT, r176). Ring and arm
+     proportions are corpus/figure defaults, named in the provenance. Drawn recovered
+     on the open foredeck forward of the so-yagura (the fleet stow, r182–r186): rolled
+     45° so two claws splay to the planking and two stand up, pitched to the deck's
+     own gradient, settled by measured box; the cable bent to the accessory ring and
+     flaked in a coil beside it — no belay is attested and no machine exists to lead
+     it to (the r182/r185 standing). Coil from rope segments, never a torus: the
+     audit counts this anchor by its two ring tori. Silence draws nothing: only a
+     yotsumeAnchor record draws one. */
+  if (S.yotsumeAnchor) {
+    const ya = S.yotsumeAnchor;
+    const lenM = ya.lenM || 2.0;
+    const u = (ya.atU != null) ? ya.atU : 0.045;
+    const offZ = ya.offZ || 0;
+    const ironG = mats.capIron || (mats.capIron = new THREE.MeshStandardMaterial(
+      { color: 0x2a2622, roughness: 0.62, metalness: 0.45 }));
+    const ag = new THREE.Group();
+    /* local frame: origin at the crown, shank along +Y; the elongated head ring
+       takes the top of the length, the arms splay from the crown */
+    const ringHalf = lenM * 0.08;                  /* AR half-length: 0.16·len over 2 */
+    const shankL = lenM - ringHalf * 2;
+    const shS = lenM * 0.030;                      /* square-bar half-side at the crown */
+    const ai = new THREE.Group();
+    ai.name = 'ya-grp';
+    /* the shank: the smiths' square bar — a 4-segment cylinder IS a square bar */
+    const sh = new THREE.Mesh(
+      new THREE.CylinderGeometry(shS * 0.72, shS, shankL, 4), ironG);
+    sh.name = 'ya-shank';
+    sh.rotation.y = Math.PI / 4;
+    sh.position.y = shankL / 2;
+    ai.add(sh);
+    /* the anchor ring: elongated oval, ratio 1.5 — the corpus's oldest circular-
+       tendency type, of ~0.015·len bar (Onominato a: 44×19 cm ring, 3 cm bar,
+       on a 269 cm anchor) */
+    const arR = lenM * 0.052, arBar = lenM * 0.0135;
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(arR, arBar, 8, 20), ironG);
+    ring.name = 'ya-ring';
+    ring.scale.y = 1.5;
+    ring.position.y = shankL + arR * 1.5 - arBar;
+    ai.add(ring);
+    /* the accessory ring: round, free through the anchor ring's opening — its plane
+       athwart the AR's, threaded over the AR's top arc */
+    const acR = lenM * 0.045, acBar = lenM * 0.011;
+    const acr = new THREE.Mesh(
+      new THREE.TorusGeometry(acR, acBar, 8, 20), ironG);
+    acr.name = 'ya-acring';
+    acr.rotation.y = Math.PI / 2;
+    acr.position.y = shankL + arR * 1.5 * 2 - arBar * 2 - acR * 0.35;
+    ai.add(acr);
+    /* four claws at 90°: out from the crown near-flat, then the fluke recurves up —
+       the plate's own drawn sweep, proportions off Matsui fig. 1 */
+    const armL = lenM * (ya.armFrac || 0.30);
+    const clawD = shS * 1.5;
+    for (let k = 0; k < 4; k++) {
+      const cg2 = new THREE.Group();
+      cg2.rotation.y = k * Math.PI / 2 + Math.PI / 4;
+      const a1 = 1.62, l1 = armL * 0.62;           /* 93° from +Y: just below flat */
+      const s1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(clawD * 0.38, clawD * 0.52, l1, 8), ironG);
+      s1.name = 'ya-arm'; s1.rotation.z = -a1;
+      s1.position.set(Math.sin(a1) * l1 / 2, Math.cos(a1) * l1 / 2, 0);
+      cg2.add(s1);
+      const P1x = Math.sin(a1) * l1, P1y = Math.cos(a1) * l1;
+      const a2 = 0.90, l2 = armL * 0.26;           /* recurving up toward the head */
+      const s2 = new THREE.Mesh(
+        new THREE.CylinderGeometry(clawD * 0.28, clawD * 0.40, l2, 8), ironG);
+      s2.name = 'ya-arm'; s2.rotation.z = -a2;
+      s2.position.set(P1x + Math.sin(a2) * l2 / 2, P1y + Math.cos(a2) * l2 / 2, 0);
+      cg2.add(s2);
+      const ch = armL * 0.16;
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(clawD * 0.32, ch, 8), ironG);
+      tip.name = 'ya-tip'; tip.rotation.z = -a2;
+      tip.position.set(P1x + Math.sin(a2) * (l2 + ch / 2 - 0.01),
+                       P1y + Math.cos(a2) * (l2 + ch / 2 - 0.01), 0);
+      cg2.add(tip);
+      ai.add(cg2);
+    }
+    /* stow (the fleet rule): yaw, pitch to the deck's own gradient along the shank's
+       line, roll 45° on the shank so two claws splay to the planking; settle by box */
+    const g = new THREE.Group();
+    g.add(ai);
+    const cosYaw = Math.cos(ya.yaw || 0);
+    const uH2 = Math.min(1, u + lenM * cosYaw / L);
+    const slope = (uH2 - u) > 1e-6
+      ? (deckAtU(uH2) - deckAtU(u)) / ((uH2 - u) * L) : 0;
+    const q = new THREE.Quaternion()
+      .setFromAxisAngle(new THREE.Vector3(0, 1, 0), ya.yaw || 0);
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1), -Math.PI / 2 + Math.atan(slope * cosYaw)));
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0), Math.PI / 4));
+    g.quaternion.copy(q);
+    const yD = deckAtU(u);
+    g.position.set((u - 0.5) * L, yD, offZ);
+    g.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(g);
+    g.position.y += (yD - bb.min.y);
+    g.updateMatrixWorld(true);
+    /* the sheer function is the RAIL line, not always the drawn planking — on this
+       hull the foredeck plank lies 0.33 m under it (measured, r187). Ask the
+       surface itself (the r185 principle moved into the builder): ray straight
+       down at the assembly's own centre through what is already built, skip this
+       anchor and anything that cannot bear, and seat the box on the first hit.
+       If nothing answers, the deckAtU seat above stands. */
+    const NOBEAR = { stay: 1, shroud: 1, halyard: 1, brace: 1, lift: 1,
+                     sheet: 1, tack: 1, ratline: 1, oar: 1 };
+    group.updateMatrixWorld(true);
+    const bb2 = new THREE.Box3().setFromObject(g);
+    const bbc = bb2.getCenter(new THREE.Vector3());
+    const rc = new THREE.Raycaster();
+    rc.set(new THREE.Vector3(bbc.x, bb2.max.y + 2, bbc.z), new THREE.Vector3(0, -1, 0));
+    const seat = rc.intersectObject(group, true).filter(h => {
+      for (let e = h.object; e; e = e.parent) if (e === g) return false;
+      for (let e = h.object; e; e = e.parent)
+        if (e.userData && e.userData.part) return !NOBEAR[e.userData.part.key];
+      return true;
+    });
+    if (seat.length) {
+      g.position.y += (seat[0].point.y - bb2.min.y);
+      g.updateMatrixWorld(true);
+    }
+    /* the accessory ring's world point, for the cable */
+    const ringP = new THREE.Vector3(0, shankL + arR * 1.5 * 2 - arBar * 2 - acR * 0.35, 0)
+      .applyMatrix4(ai.matrixWorld);
+    /* the coil: the cable flaked BESIDE the head, moved toward the centreline — not
+       aft of it, where a foredeck stow would put it under the deck break (measured,
+       r187: the so-yagura face stands 0.5 m over the foredeck at u 0.10, and a coil
+       flaked aft of the head sank beneath it). No belay is attested, no machine
+       exists to lead it to; a stow, not an invented lead */
+    const cabR = (ya.cableDiaM || 0.06) / 2;
+    const ropeM = mats.ropeSolid || wood;
+    const cu = Math.max(0, Math.min(1, (ringP.x / L) + 0.5));
+    const coilZ = ringP.z - Math.sign(ringP.z || 1) * 0.75;
+    const coilC = new THREE.Vector3(
+      (cu - 0.5) * L, deckAtU(cu) + 0.05, coilZ);
+    /* the coil sits on the measured plank too, not the rail line */
+    rc.set(new THREE.Vector3(coilC.x, coilC.y + 3, coilC.z), new THREE.Vector3(0, -1, 0));
+    const cSeat = rc.intersectObject(group, true).filter(h => {
+      for (let e = h.object; e; e = e.parent) if (e === g) return false;
+      for (let e = h.object; e; e = e.parent)
+        if (e.userData && e.userData.part) return !NOBEAR[e.userData.part.key];
+      return true;
+    });
+    if (cSeat.length) coilC.y = cSeat[0].point.y + 0.05;
+    const segs = [];
+    for (let k = 0; k < 10; k++) {
+      const b1 = (k / 10) * 2 * Math.PI, b2 = ((k + 1) / 10) * 2 * Math.PI;
+      for (const [rr, dy] of [[0.30, 0], [0.22, 0.05]])
+        segs.push([new THREE.Vector3(coilC.x + Math.cos(b1) * rr, coilC.y + dy,
+                                     coilC.z + Math.sin(b1) * rr),
+                   new THREE.Vector3(coilC.x + Math.cos(b2) * rr, coilC.y + dy,
+                                     coilC.z + Math.sin(b2) * rr)]);
+    }
+    const coil = ropeMesh(segs, cabR, ropeM);
+    if (coil) { coil.name = 'ya-coil'; ag.add(coil); }
+    const cEnd = new THREE.Vector3(coilC.x, coilC.y + 0.08, coilC.z);
+    const cMid = ringP.clone().lerp(cEnd, 0.5);
+    cMid.y = Math.max(cEnd.y + 0.04, ringP.y - 0.15);
+    const cb = ropeMesh([[ringP, cMid], [cMid, cEnd]], cabR, ropeM);
+    if (cb) { cb.name = 'ya-cable'; ag.add(cb); }
+    ag.add(g);
+    group.add(tag(ag, 'yotsumeAnchor'));
   }
 
   /* ── THE DECKHOUSE, FROM THE RECORD: `deckhouses: [{a, b, hM, wF}]` ─────────────────
