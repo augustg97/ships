@@ -2576,11 +2576,12 @@ if (H.ironAnchors && !im.length)
 say(v.id, 'declared but not drawn', 'ironAnchors');
 if (H.ironAnchors && im.length) {
 const R = H.ironAnchors;
-const want = (R.sheetShankM !== 0 ? 1 : 0) + (R.bowerShankM !== 0 ? 2 : 0);
+const want = (R.sheetShankM !== 0 ? 1 : 0) + (R.bowerShankM !== 0 ? 2 : 0)
++ (R.sternAtU != null && R.sternShankM !== 0 ? 2 : 0);
 const rings = im.filter(o => o.geometry.type === 'TorusGeometry');
 if (rings.length !== want)
 say(v.id, "the anchors off the record's count",
-`${rings.length} head rings drawn — the record's bow-worked set is ${want}`);
+`${rings.length} head rings drawn — the record's drawn set is ${want}`);
 const tips = im.filter(o => o.geometry.type === 'ConeGeometry');
 if (tips.length !== want * 4)
 say(v.id, 'an iron anchor without its four claws',
@@ -2593,33 +2594,45 @@ return Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z); })
 const wantSh = [];
 if (R.sheetShankM !== 0) wantSh.push(R.sheetShankM || 2.4);
 if (R.bowerShankM !== 0) wantSh.push(R.bowerShankM || 2.0, R.bowerShankM || 2.0);
+if (R.sternAtU != null && R.sternShankM !== 0)
+wantSh.push(R.sternShankM || 2.0, R.sternShankM || 2.0);
 wantSh.sort((a, b2) => b2 - a);
 for (let i = 0; i < Math.min(shanks.length, wantSh.length); i++)
 if (Math.abs(shanks[i] - wantSh[i]) > 0.12 * wantSh[i])
 say(v.id, "a shank off the record's length",
 `shank ${shanks[i].toFixed(2)} m drawn, the record's is ${wantSh[i]}`);
-const HSi = SHIPS_HULL.hullSurface(H);
 const grps = [];
 g.traverse(o => { const p = tagOf(o);
 if (o.isGroup && o.name === 'ia-grp' && p && p.key === 'ironAnchors')
 grps.push(o); });
+const rayR = new THREE.Raycaster();
 for (const gr of grps) {
 const bb = new THREE.Box3().setFromObject(gr);
 const ui = Math.max(0, Math.min(1,
 ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
-const deckI = HSi.sheer(ui);
-if (bb.min.y > deckI + 0.25)
+rayR.set(new THREE.Vector3((bb.min.x + bb.max.x) / 2, bb.max.y + 0.5,
+(bb.min.z + bb.max.z) / 2),
+new THREE.Vector3(0, -1, 0));
+const under = rayR.intersectObject(g, true).filter(h => {
+const p = tagOf(h.object); return !(p && p.key === 'ironAnchors'); });
+if (!under.length) {
+say(v.id, 'an anchor resting on nothing',
+`no surface under the assembly at u ${ui.toFixed(2)}`);
+continue;
+}
+const gap = bb.min.y - under[0].point.y;
+if (gap > 0.25)
 say(v.id, 'an anchor floating over its own deck',
-`lowest point ${(bb.min.y - deckI).toFixed(2)} m above the deck at u ${ui.toFixed(2)}`);
-if (bb.min.y < deckI - 0.20)
+`lowest point ${gap.toFixed(2)} m above the surface under it at u ${ui.toFixed(2)}`);
+if (gap < -0.20)
 say(v.id, 'an anchor through the planking',
-`lowest point ${(deckI - bb.min.y).toFixed(2)} m below the deck at u ${ui.toFixed(2)}`);
+`lowest point ${(-gap).toFixed(2)} m into the surface under it at u ${ui.toFixed(2)}`);
 }
 const cables = im.filter(o => o.name === 'ia-cable');
 if (cables.length !== want)
 say(v.id, 'an iron anchor with no cable',
-`${cables.length} cables for ${want} anchors — the text belays every one `
-+ 'to the posts and the winch');
+`${cables.length} cables for ${want} anchors — the 舟車 sentence gives `
++ 'every anchor its cable');
 }
 }
 if (H.screws) {

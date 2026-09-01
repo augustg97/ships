@@ -12916,3 +12916,119 @@ boxy classes: top (18), channel/cheek/cathead. (11) Preussen mast livery
 (16) r166 screen glass sun-bright. (17) r171 quarter-gallery sashes.
 (18) r171 authored tier fractions. (19) r172 the 74's lower capstan barrel.
 (20) r181, small: eraSm's dead fallback branch (app.js:1353).
+
+## Round 185 — 2026-09-01 — the stern pair on the poop top: the surface asked first, and a killed round's work verified whole and shipped
+
+**The round that drew this was killed by its own watchdog, and the recovery
+cost one firing because everything was staged. The 04:45 round did the work —
+judgment, code, captures, baseline accepts, all on disk by 06:05 — and
+overran the 80-minute kill with the tree uncommitted: no HANDOFF, no commit,
+no deploy (loop.log 12525–12529; the kill also took the round's stdout, so
+its own narrative exists only as build/staging/r185/JUDGMENT.md). This firing
+(06:15) took the lock, read the staging dir, and RE-RAN every claim on the
+final code — audit, both injection proofs, the full 64 — then shipped. What
+made that cheap is the staging-dir discipline: the judgment was written
+before the code, so the work could be verified against its own stated
+intent.**
+
+**The judgment (JUDGMENT.md, verified): the r184 queue head — the stern pair,
+梢用二枝, stations RECORDED in the same 舟車 sentence as the bow-worked three
+— opened by paying the unresolved measurement first. poop_map.py rayed a grid
+straight down over u 0.64–1.00 × z −9..+9: the poop's TOP TIER ROOF is a
+continuous surface from u 0.70 to 1.00 at 9.70 → 10.52 m above WL, rising
+with the sheer — the drawn formula sheer(u) + B·0.115·(tiers + 0.02)
+confirmed by ray (spot-checked again this firing off poop_map.json) — with
+~11 m clear abeam at the stern stations and nothing between the roof and
+12 m over the stow; the tier-0 step reads as a ~1 m outboard gallery each
+side, too narrow for a 2 m anchor's splayed claws. And the poop top is
+already the drawn ship's aft working deck — the junk after-sheets land on it
+(the hull.js:2556 crowfoot rule: "worked from the poop deck, not led down
+through it"). DRAWN at u 0.91, z ±2.4: the fleet stow (r182/r183/r184 —
+spun 45° so two claws splay to the planking and two stand up, pitched to the
+surface's own measured gradient, 0.054 here, settled by measured box).
+PLACEMENT INFERENCE, named in the provenance: the record attests the
+station, the drawn ship's aft surface is the poop top.**
+
+**Standings, all named: the stern pair's weight is NOT RECORDED (其餘 — "the
+rest") — the head pair's 300-catty inference at the forging text's own anvil
+threshold carries over, scale 0.84 → shank 2.0 m; a measured surviving
+四爪錨 replaces it and the field says so. The stern BELAY is in no text (the
+將軍柱 sentence names the bow posts) — each cable is drawn bent to its ring
+and FLAKED IN A COIL beside it, the r182 grapnel standing: a stow, not an
+invented lead. The coil is built from ropeMesh segments, never a torus, so
+V-COUNT's ring-torus anchor signature stays unique.**
+
+**The class, not the instance: `stow()` gains a surface argument (default the
+weather deck; the stern block passes the poop top's own function), the stern
+pair is opt-in via `sternAtU` — silence draws nothing; and V-REST is
+REWRITTEN TO ASK THE SURFACE ITSELF: a ray straight down from over each
+assembly, first non-anchor hit is the surface it must rest on. A sheer-only
+V-REST would convict any poop-stowed anchor as floating, and could never see
+a missing roof. V-COUNT/V-CLAWS/V-SHANK/V-CABLE extend 3 → 5 when the
+record stows the stern pair.**
+
+**Proofs and audit, RE-RUN BY THIS FIRING on the final code: float injection
+(aftmost assembly +0.60 m under an unchanged record) → exactly ONE
+conviction, the surface-asked V-REST, "lowest point 0.69 m above the surface
+under it at u 0.93" — the ray found the roof, not the sheer line. Missing
+injection (one stern assembly removed, its cable and coil left behind) →
+exactly TWO: V-COUNT "4 head rings drawn — the record's drawn set is 5" and
+V-CLAWS "16 claw points drawn for 5 anchors"; V-CABLE and V-SHANK silent,
+as the injection's comment predicted. Audit 33/0 live on the final code.**
+
+**Looked at, on the final code's own captures (edits 05:26–05:27, captures
+05:32–05:58, accepts 06:00–06:03 — the order verified by mtime): the
+occluders were NAMED before a frame showed the stow (the r183 camera-raycast
+method): the mizzen's furled bundle crosses 2.3 m ABOVE the anchors from
+elevated abeam bearings, and from low bearings the roof's own near edge
+hides everything on it; the settled b=180 z=0.35 l=6 y=10 furled capture
+(z-stern-final-crop.png) shows the port member whole — the four-claw X on
+the ring-planked roof, two claws up catching the light, beside the mizzen.
+Card row "Ground tackle, as drawn" re-read with the new prose: renders whole
+as plain type, *Tiangong kaiwu* spent as italic, no raw asterisks, and the
+stern anchor stands visible on the poop roof in the same broadside.**
+
+**Frames, with timing stated and one claim refused: JUDGMENT.md records the
+drawing round's opening 64 PASSING on the unedited tree, but the kill took
+the stdout and every solo check wipes _current (r51), so that pass is
+UNVERIFIABLE from artifacts — named here, not laundered into the chain. What
+makes it moot: THIS FIRING RAN THE FULL 64 ON THE FINAL BUILT CODE as the
+close — launched 06:28, PASSED WHOLE 07:00: all 64 within tolerance, 0
+movers, 0 BLANK, EXIT:0. ship-treasure 0.000 and aboard-treasure 0.000
+against the accepted baselines — the drawing round's accepts verified
+honest; ship-junk 0.000 and ship-dhow 0.000 — the hull.js class edit proven
+inert on both other anchor-carrying hulls; worst mover globe-default 0.046%,
+the documented capture flap. A whole-tree pass against baselines last moved
+by the r184 close plus the two accepts also excludes staleness, which the
+unverifiable opening could not. The two moved baselines were accepted by the
+drawing round on final code with FRAME-LOG reasons (ship-treasure 06:00,
+0.012%; aboard-treasure 06:03, 0.010% — the r132-in-advance pattern,
+intentional change never left to read as drift).**
+
+**Rule 0, answered in writing on the stern capture: the frame reads as a
+rendered vessel, not a chart. Three facts a viewer can read off it: a
+four-claw iron anchor lies stowed on the poop's top roof beside the mizzen
+mast, two dark claws standing up; the roof is planked in the same ring
+pattern as the weather deck below; the furled battened lugsails lie stacked
+on their yards, and the after-sheet crowfeet lead down to the very roof the
+anchors rest on.**
+
+**Deployed: data-version 1788269015. Live verify below.**
+
+**Named residuals, in order:** (1) the anchors line, next members: the
+panokseon's drawn-plate anchor, then the wasen yotsume-ikari. (2) r182,
+small — the grapnel's 1.8 m shank reconstruction (Jewel of Muscat record or
+Vosmer PSAS would replace it). (3) r183, small — the junk's stone bar is a
+class default; any fetched dimensioned 碇石 replaces it. (4) r184, small —
+the four-claw dimensions are all derived/default; a measured surviving
+四爪錨 (Quanzhou museum holdings, Penglai finds) replaces them, now at five
+drawn instances. (5) r177: Lucian's second machine. (6) r173: the cog's
+Gangspill on the aftcastle top. (7) r173: the cog's castles, fore and aft.
+(8) r173: the cog's pale rudder slab. (9) r176: the sekibune's class-size
+question (kiwari read owed). (10) The sweep-derived boxy classes: top (18),
+channel/cheek/cathead. (11) Preussen mast livery (r155). (12) Endurance
+forecastle (RMG J9266). (13) Azzam crest span. (14) r164 risen black
+unpierced. (15) r165 fantail gallery wing walls. (16) r166 screen glass
+sun-bright. (17) r171 quarter-gallery sashes. (18) r171 authored tier
+fractions. (19) r172 the 74's lower capstan barrel. (20) r181, small:
+eraSm's dead fallback branch (app.js:1353).

@@ -2874,10 +2874,11 @@ g2.add(cg2);
 }
 return g2;
 };
-const stow = (g2, shankL, u, offZ) => {
+const stow = (g2, shankL, u, offZ, surf) => {
+const sAt = surf || deckAtU;
 const uA = Math.min(1, u + shankL / L);
 const s = (uA - u) > 1e-6
-? (deckAtU(uA) - deckAtU(u)) / ((uA - u) * L) : 0;
+? (sAt(uA) - sAt(u)) / ((uA - u) * L) : 0;
 const q = new THREE.Quaternion()
 .setFromAxisAngle(new THREE.Vector3(0, 1, 0), ia.yaw || 0);
 q.multiply(new THREE.Quaternion().setFromAxisAngle(
@@ -2885,7 +2886,7 @@ new THREE.Vector3(0, 0, 1), -Math.PI / 2 + Math.atan(s)));
 q.multiply(new THREE.Quaternion().setFromAxisAngle(
 new THREE.Vector3(0, 1, 0), Math.PI / 4));
 g2.quaternion.copy(q);
-const yD = deckAtU(u);
+const yD = sAt(u);
 g2.position.set((u - 0.5) * L, yD, offZ);
 g2.updateMatrixWorld(true);
 const bb = new THREE.Box3().setFromObject(g2);
@@ -2919,6 +2920,37 @@ ag.add(g2);
 const postPt = new THREE.Vector3(
 (uW - 0.5) * L, deckAtU(uW) + 0.55, sg * (wLen / 2 + 0.13));
 cableTo(ringP, postPt, 0.030);
+}
+}
+if (ia.sternAtU != null && ia.sternShankM !== 0 && S.poop && S.poop.length === 3) {
+const shL = ia.sternShankM || 2.0, clL = shL * (ia.clawFrac || 0.42);
+const dhP = B * 0.115;
+const poopTop = u => deckAtU(u) + dhP * (S.poop[2] + 0.02);
+const ropeM = mats.ropeSolid || wood;
+for (const sg of [1, -1]) {
+const g2 = makeAnchor(shL, clL);
+const zA = sg * (ia.sternOffZ || 2.4);
+const ringP = stow(g2, shL, ia.sternAtU, zA, poopTop);
+ag.add(g2);
+const cu = ia.sternAtU + (shL + 0.55) / L;
+const coilC = new THREE.Vector3(
+(cu - 0.5) * L, poopTop(cu) + 0.055, sg * ((ia.sternOffZ || 2.4) - 0.55));
+const segs = [];
+for (let k = 0; k < 10; k++) {
+const a1 = (k / 10) * 2 * Math.PI, a2 = ((k + 1) / 10) * 2 * Math.PI;
+for (const [rr, dy] of [[0.33, 0], [0.24, 0.055]])
+segs.push([new THREE.Vector3(coilC.x + Math.cos(a1) * rr, coilC.y + dy,
+coilC.z + Math.sin(a1) * rr),
+new THREE.Vector3(coilC.x + Math.cos(a2) * rr, coilC.y + dy,
+coilC.z + Math.sin(a2) * rr)]);
+}
+const coil = ropeMesh(segs, 0.030, ropeM);
+if (coil) { coil.name = 'ia-coil'; ag.add(coil); }
+const cEnd = new THREE.Vector3(coilC.x, coilC.y + 0.09, coilC.z + sg * 0.33);
+const cMid = ringP.clone().lerp(cEnd, 0.5);
+cMid.y = Math.max(cEnd.y + 0.05, ringP.y - 0.18);
+const cb = ropeMesh([[ringP, cMid], [cMid, cEnd]], 0.030, ropeM);
+if (cb) { cb.name = 'ia-cable'; ag.add(cb); }
 }
 }
 group.add(tag(ag, 'ironAnchors'));
