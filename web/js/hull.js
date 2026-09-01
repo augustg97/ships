@@ -3507,6 +3507,14 @@ const PARTS = {
                   + 'messenger line. The STOCK is set at right angles to the arms, and that 90° '
                   + 'is the whole invention: it rolls the anchor over until a fluke bites. '
                   + 'Without it the thing lies flat and drags.' },
+  grapnel:  { stage: 3, name: 'Grapnel anchor',
+              what: 'The Indian Ocean\'s own ground tackle, and the one anchor in this fleet '
+                  + 'lifted from its own ship\'s wreck: a wooden shank carrying four wrought-'
+                  + 'iron arms that cross at two levels, with a heavy cast-iron bell between '
+                  + 'them for weight — the Belitung ship\'s anchor, drawn to the excavation '
+                  + 'drawing\'s own scale. A grapnel needs no stock: whichever way it lands, '
+                  + 'an arm points down and bites. It lives loose on deck at the bow, a coir '
+                  + 'cable bent to the shank head, and the crew works it by direct pull.' },
   cathead:  { stage: 3, name: 'Cathead',
               what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
                   + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -4240,6 +4248,101 @@ function buildFittings(S, group, mats) {
     }
     wg.position.x = (u - 0.5) * L;
     group.add(tag(wg, 'windlass'));
+  }
+
+  /* ── THE COMPOSITE GRAPNEL, FROM THE RECORD:
+     `grapnel: {atU, spanM, bellDiaM, bellHM, shankM, armDiaM?, shankDiaM?}`
+     The Belitung wreck's own anchor (Flecker 2001; Flecker in Krahl et al. 2010, figs.
+     84–85): four wrought-iron arms protruding straight outward, crossing at two levels,
+     separated vertically by a heavy bell-shaped cast-iron disk with a hole through its
+     centre for the wooden shank; only the shank's lower end survived. Every dimension
+     here is read off fig. 84 against its own 100 cm scale bar except the shank's
+     length, which is a reconstruction the provenance names. The stow is the
+     tradition's documented one — loose on deck at the bow (Lockerbie; the Maqāmāt
+     images hang theirs at the prow) — so the anchor lies as a dumped grapnel lies:
+     spun 45° on its own shank so two arms splay to the deck and two stand up, crown
+     riding on the splayed pair, shank head down on the planking. The group is settled
+     onto the deck by its own measured bounding box, not by trigonometry, so the arm
+     tips land ON the deck at any span. Silence draws nothing: only a grapnel record
+     draws one. */
+  if (S.grapnel) {
+    const gp = S.grapnel;
+    const u = gp.atU || 0.10, yD = deckAtU(u);
+    const span = gp.spanM || 1.72;
+    const bellD = gp.bellDiaM || 0.55, bellH = gp.bellHM || 0.13;
+    const shankL = gp.shankM || 1.8;
+    const armD = gp.armDiaM || 0.10, shD = gp.shankDiaM || 0.16;
+    const ironG = mats.capIron || (mats.capIron = new THREE.MeshStandardMaterial(
+      { color: 0x2a2622, roughness: 0.62, metalness: 0.45 }));
+    const g = new THREE.Group();
+    /* upright local frame, origin at the bell's centre, shank along +Y.
+       One arm pair above the bell, the crossing pair below — fig. 84's own stack. */
+    for (const [lvl, dirZ] of [[1, false], [-1, true]]) {
+      const yA = lvl * (bellH / 2 + armD * 0.55);
+      for (const sg of [1, -1]) {
+        const arm = new THREE.Mesh(
+          new THREE.CylinderGeometry(armD * 0.40, armD * 0.50, span / 2, 10), ironG);
+        arm.name = 'grap-arm';
+        if (dirZ) { arm.rotation.x = Math.PI / 2; arm.position.set(0, yA, sg * span / 4); }
+        else      { arm.rotation.z = Math.PI / 2; arm.position.set(sg * span / 4, yA, 0); }
+        g.add(arm);
+        /* the drawn tips swell — the plate's own read, concretion and all */
+        const tip = new THREE.Mesh(new THREE.SphereGeometry(armD * 0.62, 10, 8), ironG);
+        tip.name = 'grap-tip';
+        tip.position.set(dirZ ? 0 : sg * span / 2, yA, dirZ ? sg * span / 2 : 0);
+        g.add(tip);
+      }
+    }
+    /* the bell: flaring downward, apex up, the shank through its centre hole */
+    const bell = new THREE.Mesh(
+      new THREE.CylinderGeometry(shD * 0.62, bellD / 2, bellH, 16), ironG);
+    bell.name = 'grap-bell';
+    g.add(bell);
+    /* the shank: hardwood, its foot protruding below the bell as the plate draws it */
+    const yLo = -(bellH / 2 + armD + 0.12);
+    const sh = new THREE.Mesh(
+      new THREE.CylinderGeometry(shD * 0.44, shD * 0.50, shankL, 12), wood);
+    sh.name = 'grap-shank';
+    sh.position.y = yLo + shankL / 2;
+    g.add(sh);
+    /* stow: lay the shank aft along the deck, dipping to put the head on the planking,
+       spun 45° so the arm cross rests as a tripod — two tips down, two up — and yawed
+       a little to port so the head and its cable land BESIDE the foremast's step, not
+       on it (measured: the axis-aligned first draft put the head at u 0.165 against a
+       mast foot at u 0.145) */
+    const hC = span / 2 * 0.707 + armD * 0.62;
+    const tilt = Math.asin(Math.max(0, Math.min(0.6, (hC - shD / 2) / shankL)));
+    const q = new THREE.Quaternion()
+      .setFromAxisAngle(new THREE.Vector3(0, 1, 0), gp.yaw != null ? gp.yaw : 0.30);
+    q.multiply(new THREE.Quaternion()
+      .setFromAxisAngle(new THREE.Vector3(0, 0, 1), -(Math.PI / 2 + tilt)));
+    q.multiply(new THREE.Quaternion()
+      .setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 4));
+    g.quaternion.copy(q);
+    g.position.set((u - 0.5) * L, yD, gp.offZ || 0);
+    /* settle onto the deck by measurement, not trigonometry */
+    g.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(g);
+    g.position.y += (yD - bb.min.y);
+    /* the coir cable: bent round the shank head, the rest flaked in a coil beside it —
+       coil and cable each rest on the deck at their OWN station (the sheer falls going
+       aft, so a coil set at the crown's deck height would float at its own) */
+    g.updateMatrixWorld(true);
+    const headW = new THREE.Vector3(0, yLo + shankL, 0).applyMatrix4(g.matrixWorld);
+    const coilC = new THREE.Vector3(headW.x + 0.10, 0, headW.z - 0.45);
+    coilC.y = deckAtU(coilC.x / L + 0.5) + 0.055;
+    const coil = new THREE.Mesh(
+      new THREE.TorusGeometry(0.26, 0.055, 8, 20), mats.ropeSolid || wood);
+    coil.name = 'grap-coil';
+    coil.rotation.x = Math.PI / 2;
+    coil.position.copy(coilC);
+    const mid = headW.clone().lerp(coilC, 0.5);
+    mid.y = deckAtU(mid.x / L + 0.5) + 0.06;
+    const cable = ropeMesh([[headW, mid], [mid, coilC.clone().add(new THREE.Vector3(0, 0.03, 0))]],
+                           0.028, mats.ropeSolid || wood);
+    const ag = new THREE.Group();
+    ag.add(g); ag.add(coil); if (cable) ag.add(cable);
+    group.add(tag(ag, 'grapnel'));
   }
 
   /* ── THE DECKHOUSE, FROM THE RECORD: `deckhouses: [{a, b, hM, wF}]` ─────────────────

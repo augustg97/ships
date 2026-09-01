@@ -52,3 +52,8 @@ build/staging/*/agius-*.txt
 build/staging/*/flecker-*.pdf
 build/staging/*/flecker-*.txt
 build/staging/*/catnaps-*.html
+build/staging/*/vosmer-*.pdf
+build/staging/*/vosmer-*.txt
+build/staging/*/ag-*.png
+build/staging/*/fig-*.png
+build/staging/*/hi-*.png

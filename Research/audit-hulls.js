@@ -3480,6 +3480,60 @@
       }
     }
 
+    /* ── THE GRAPNEL IS THE RECORD'S ANCHOR, RESTING ON THE DECK (round 182).
+       The Belitung wreck's own composite grapnel — the fleet's one ground tackle lifted
+       from its own ship's wreck (Flecker 2001; Flecker in Krahl et al. 2010, figs.
+       84–85). V-WARRANT both ways: meshes with no grapnel record convict (silence draws
+       nothing — the r172 lesson generalised), a record with no meshes convicts.
+       V-ARMS: the record's anchor carries four arms crossing at two levels, so four
+       swollen tips must be drawn — tips found STRUCTURALLY as the group's spheres, not
+       by name. V-SPAN: opposite tips of a pair sit one span apart in ANY stow attitude,
+       so the greatest pairwise tip distance reads the record's tip-to-tip span — a box
+       read cannot, because the stowed anchor lies spun 45° with two arms up.
+       V-REST: a dumped anchor neither floats nor stabs through the planking — the
+       group's lowest drawn point sits on the deck at its own station, asked of the
+       surface itself. */
+    {
+      const gm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'grapnel') gm.push(o); });
+      if (gm.length && !H.grapnel)
+        say(v.id, 'an anchor the record does not carry',
+            `${gm.length} grapnel meshes drawn with no grapnel field — this hull's `
+            + 'record is silent, and silence draws nothing');
+      if (H.grapnel && !gm.length)
+        say(v.id, 'declared but not drawn', 'grapnel');
+      if (H.grapnel && gm.length) {
+        const R = H.grapnel;
+        const tips = gm.filter(o => o.geometry.type === 'SphereGeometry');
+        if (tips.length !== 4)
+          say(v.id, 'a grapnel without its four arms',
+              `${tips.length} arm tips drawn — the record's anchor crosses two pairs`);
+        if (R.spanM && tips.length >= 2) {
+          const cs = tips.map(o => o.getWorldPosition(new THREE.Vector3()));
+          let span = 0;
+          for (let i = 0; i < cs.length; i++)
+            for (let j = i + 1; j < cs.length; j++)
+              span = Math.max(span, cs[i].distanceTo(cs[j]));
+          if (Math.abs(span - R.spanM) > 0.10 * R.spanM)
+            say(v.id, "the grapnel off the record's span",
+                `arms ${span.toFixed(2)} m tip to tip, record says ${R.spanM}`);
+        }
+        const bb = new THREE.Box3();
+        for (const o of gm) bb.union(new THREE.Box3().setFromObject(o));
+        const HSg = SHIPS_HULL.hullSurface(H);
+        const ug = Math.max(0, Math.min(1,
+          ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const deckY = HSg.sheer(ug);
+        if (bb.min.y > deckY + 0.25)
+          say(v.id, 'an anchor floating over its own deck',
+              `lowest point ${(bb.min.y - deckY).toFixed(2)} m above the deck at u ${ug.toFixed(2)}`);
+        if (bb.min.y < deckY - 0.20)
+          say(v.id, 'an anchor through the planking',
+              `lowest point ${(deckY - bb.min.y).toFixed(2)} m below the deck at u ${ug.toFixed(2)}`);
+      }
+    }
+
     /* declared screws must be drawn, and a screw lives under water */
     if (H.screws) {
       if (!part.screw) say(v.id, 'declared but not drawn', 'screws');

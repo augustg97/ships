@@ -12607,3 +12607,100 @@ authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) NEW
 r181, small: eraSm's fallback branch (app.js:1353) would render a first
 paragraph's markdown raw if a chapter ever lost its lede — dead code today
 (all 8 ledes set), one line to retire when touched.
+
+## Round 182 — 2026-09-01 — the wreck's own anchor: the anchors line opens and its head closes DRAWN, on a DIRECT warrant
+
+**The r181 queue head (residual 1, the Belitung composite grapnel heading the
+anchors line) OPENED AND CLOSED, judgment first (build/staging/r182/
+JUDGMENT.md) — and the judgment is DRAW, on the strongest warrant any ground
+tackle in this fleet carries: the drawn instance's OWN WRECK preserved the
+anchor. The windlass line's eight judgments extended, read traditions and
+borrowed gear lists; this object was excavated, photographed and published.
+Flecker 2001 (local from r178) names it with the author's own hedge, carried
+into the provenance; and the round's find is the excavation monograph fetched
+WHOLE and open — Flecker's chapter in Krahl et al., Shipwrecked: Tang
+Treasures and Monsoon Winds (Smithsonian 2010, archive.asia.si.edu, the copy
+r178 found 403-gated elsewhere; Vosmer's ch. 08 fetched too, zero anchor
+mentions, checked). The full form: four wrought-iron arms protruding straight
+outward, crossing at two levels, separated vertically by a heavy bell-shaped
+cast-iron disk with a hole through the centre for the wooden shank; only the
+shank's lower end survived; one arm broken; shank timber Afzelia or Amoora
+(CSIRO); the disk possibly Chinese-cast (cast iron was China's alone in the
+9th c.), and Ibn Majid's own lexicon carries al-hadid, 'the iron', for an
+iron grapnel. Fig. 84 carries its OWN 100 cm scale bar and was measured
+against it at 2.5 px/cm (the Azzam rule: the plate and its scale named):
+intact arm pair 1.72 m tip to tip — plan and both elevations agree within
+4 mm of drawing — crossing pair 1.44 as drawn with its broken arm, arm
+shafts ~0.12 m concreted (0.10 drawn), bell 0.55 across the base × 0.13
+high, shank stub 0.16–0.20 m thick, its foot protruding below the bell.**
+
+**Drawn at every stated standing: recorded dimensions off the plate; the
+broken pair completed at the intact pair's span (inference, named); shank
+length 1.8 m a RECONSTRUCTION (preserved nowhere, about the arm span over
+again, named — the Jewel of Muscat build record would replace it and
+jewelofmuscat.tv 404'd on every tried path, named as not fetched with
+Vosmer's pay-gated PSAS paper); stow a PLACEMENT INFERENCE, named — loose on
+the foredeck, the tradition's documented practice (Lockerbie r178; the
+Maqāmāt images hang theirs at the prow — Agius ill. 32 rendered and looked
+at, ~30 px, form only, no read taken). The class, not the instance: a
+generic datum-driven grapnel block in buildFittings (any future hull whose
+record attests one draws it from its own dimensions; silence draws nothing),
+a PARTS card of its own (the bower-anchor card no longer has to lie for the
+one anchor that is not a bower), and a NEW audit rule: V-WARRANT both ways,
+V-ARMS (four tips found structurally as spheres), V-SPAN (greatest pairwise
+tip distance — a box read cannot measure a stow spun 45°), V-REST (lowest
+point ON the deck at its own station, asked of the surface; neither floating
+nor through the planking). Audit 33/0 on first live run with the anchor
+drawn, then twice more on final code.**
+
+**Iterated with measurement, not squinting, each pass looked at: draft 1 put
+the shank head at u 0.165 against the foremast's foot at u 0.145
+(measure_ship found it) and the crown crowding the narrow bow deck; draft 2
+yawed 0.30 past the mast, crown still at the rail; final stow crown u 0.125
+on wider planking, offZ −0.15, yaw 0.38 — all datum fields, all named
+placement inference. Card row 'Ground tackle, as drawn' added between
+Steering and Windlass, shot and read: renders whole as plain type, no raw
+asterisks, and the grapnel is visible on the foredeck even at card scale.**
+
+**Frames, with timing stated: no opening 64-check; the attribution chain per
+r180's precedent — r181's close check PASSED WHOLE 00:21:28–00:58:11 on this
+HEAD's code (d9cc873), only build/loop.log changed between that exit and
+this round's edits. Solo ship-dhow re-shot after every draft (0.024%,
+0.024%, 0.026% — the anchor is a 1.7 m fitting on a 26 m hull, under the
+gate each time); baseline ACCEPTED anyway with the reason logged in
+FRAME-LOG so the intentional change does not stand as drift under a future
+round (the r132 lesson, applied in advance). Close 64-check on final code
+ran 01:45:11–02:22:02 and PASSED WHOLE — 64/64 ok, 0 movers, 0 BLANK,
+EXIT:0, ship-dhow 0.000 against the accepted baseline, worst frame
+globe-default 0.046% capture flap — all web/ edits landed before launch, no
+chromium beside it (card shot and pre-close audit before launch, both final
+audits after exit).**
+
+**Rule 0, answered in writing on the ship-dhow capture: the frame reads as a
+rendered vessel on open water, not a chart. Three facts a viewer can read
+off it: a composite grapnel anchor lies stowed on the foredeck, dark iron
+arms splayed two up and two to the planking, its wooden shank laid aft past
+the foremast's step with a coir coil beside it; the two raked masts carry
+settee sails, the quadrilateral cut with the short luff forward; the hull is
+planked in lengthwise strakes under a coir-matted deck pierced by woven
+hatch covers, twin lashed quarter rudders at the stern.**
+
+**Deployed: data-version 1788254676. Live verify below.**
+
+**Named residuals, in order:** (1) NEW r182 — the anchors line continues
+behind its closed head, next members from r174: the junk's and
+treasure-ship's attested anchors (Xu Jing's stone anchor with wooden flukes,
+the TGK's five or six iron anchors), the panokseon's drawn-plate anchor, the
+wasen yotsume-ikari. (2) NEW r182, small — the grapnel's 1.8 m shank stands
+as a stated reconstruction: the Jewel of Muscat build record (site down this
+round) or Vosmer's PSAS paper, fetched, would replace it. (3) r177: Lucian's
+second machine. (4) r173: the cog's Gangspill on the aftcastle top.
+(5) r173: the cog's castles, fore and aft. (6) r173: the cog's pale rudder
+slab. (7) r176: the sekibune's class-size question (kiwari read owed).
+(8) The sweep-derived boxy classes: top (18), channel/cheek/cathead.
+(9) Preussen mast livery (r155). (10) Endurance forecastle (RMG J9266).
+(11) Azzam crest span. (12) r164 risen black unpierced. (13) r165 fantail
+gallery wing walls. (14) r166 screen glass sun-bright. (15) r171
+quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the
+74's lower capstan barrel. (18) r181, small: eraSm's dead fallback branch
+(app.js:1353).
