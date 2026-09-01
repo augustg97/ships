@@ -12704,3 +12704,109 @@ gallery wing walls. (14) r166 screen glass sun-bright. (15) r171
 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the
 74's lower capstan barrel. (18) r181, small: eraSm's dead fallback branch
 (app.js:1353).
+
+## Round 183 — 2026-09-01 — the junk's stone anchor: the same sentence's other object, and the bow that pockets a hang
+
+**The r182 residual 1 head (the anchors line's next members from r174) OPENED,
+scoped and part-CLOSED, judgment first (build/staging/r183/JUDGMENT.md): the
+JUNK alone this round, drawn — her warrant is the line's strongest kind short
+of a wreck, the same eyewitness sentence that drew her r174 windlass (Xu Jing,
+Gaoli tujing 1124, 卷34, local since r174: 下垂矴石，石兩旁，夾以二木鈎 — the
+anchor-stone hangs below the winch, clamped on its two sides by two wooden
+hooks, on the rattan cable thick as a rafter). The form is the text's and
+nothing more: stone bar for weight, two hardwood hooks as flukes, rattan
+bands, no shank named, no iron anywhere. Corroboration already inside the
+fleet's own records: the Goryeo wrecks' anchoring-gear class lists anchor
+stones (닻돌, read r175). EVERY dimension a named CLASS DEFAULT (stone
+1.6 × 0.24 × 0.19 m ≈ 190 kg granite — a load the drawn four-man windlass can
+break out; hooks 2.1 m; cable dia an inference from 其大如椽, length 500 chi
+the record's); NOT FETCHED, named: the dimensioned 碇石 finds of Quanzhou bay
+and Hakata bay, the Shinan anchoring-gear report — any measured bar replaces
+the default. The 游矴 spares NOT drawn: attested in use only, no stow — 
+drawing one would invent place. The treasure-ship's iron anchors STAY AT THE
+QUEUE HEAD, owing a fetch the judgment names: the TGK 錘鍛 chapter's anchor
+section (four claws forged first, then joined to the shank — the form the
+舟車 chapter does not give), warrant FLEET-CLASS EXTENSION as her r174
+windlass, the ~200-year gap named.**
+
+**The round's find, and a lesson with a method: A HANG AT THE BOW WAS DRAWN
+FIRST AND WAS INVISIBLE IN EVERY BROADSIDE PIXEL. The frame moved 0.013% and
+the diff showed only the cable. Not reasoned out — measured out: an in-page
+probe projected every st-* mesh INSIDE the frustum and visible, and a RAYCAST
+FROM THE FRAME'S OWN CAMERA to the stone named the occluder — the hull shell
+itself, 1.8 m short of the anchor, at z ≈ 2.4 m off centreline. Two facts
+compose: u parameterizes the LWL and this stem overhangs it (loa 34 vs lwl
+~29), so 'forward of u 0' is still under the bow; and the junk's bluff bow
+carries ~2.4 m of half-breadth at the hang's height right to the stem — a
+centreline hang sits in a pocket no broadside view reaches, and an outboard
+hang clear of the shell would swing ~3.5 m off centreline and read detached.
+The stow followed the text instead: 收之, taken in — laid on the open
+foredeck, bar fore-and-aft, hook points forward, the r182 dhow's own stow
+precedent, the cable bent to the bar's head and led to the barrel where the
+text winds the rest (上綰藤索, so NO coil on deck — the winch holds it).
+Iterated by measurement and looked at each time: flat-settled it STABBED its
+forward points 0.2 m through the RISING foredeck (measure_ship; the sheer
+climbs to the stem) — fixed structurally, the bar pitches to the deck's own
+gradient between its ends; offZ 0.9 lay half-hidden along the rail cap;
+offZ 0.45 at u 0.085 hid behind the shipped handspike; final u 0.065, offZ
+0.45 — the bar on open planking forward of the posts, stone + hook + band
+legible, the machine right behind its load.**
+
+**The class, not the instance: generic datum-driven `stoneAnchor` block in
+buildFittings (silence draws nothing), its own PARTS card (the grapnel card
+is another ocean's; the bower is iron with a stock — neither may cover for
+this object), and a NEW audit rule generic over H.stoneAnchor: V-WARRANT both
+ways, V-STONE (one bar, longest drawn dimension the record's stoneLenM, read
+through any stow transform), V-HOOKS (two points found structurally as the
+group's cones), V-REST (lowest point ON the deck at its own station, asked of
+the surface — the grapnel's own check), V-CABLE (the text's one sentence
+carries wheel, cable and stone together; a stone with no cable convicts).
+Audit 33/0 first live run and twice more on final code. The rule PROVEN able
+to convict before trusted: sever injection (drawn faithfully, record deleted)
+→ exactly one conviction, V-WARRANT, right member, right count (10 meshes);
+drag injection (drawn stone stretched 1.35× under an unchanged record) →
+exactly one conviction, V-STONE reads 2.16 m through the stow transform.
+Card row 'Ground tackle, as drawn' added after Sternpost rudder, shot and
+read: renders whole as plain type, *youding* spent as italic, no raw
+asterisks (the r180 class holds).**
+
+**Frames, with timing stated: no opening 64-check — attribution chain per
+r180's precedent: r182's close 64 PASSED WHOLE 01:45–02:22 on this HEAD
+(9d894d7), and only build/loop.log moved between that exit and this round's
+edits. The close is SOLO CHECKS on final code (the r174/r169 fallback — the
+80-minute budget went to the placement iterations and cannot hold a 37-min
+64-run started at 03:40): ship-junk 0.011% under gate, diff read (the stow
+and cable alone), baseline ACCEPTED with the reason logged in FRAME-LOG so
+the intentional change cannot be laundered as drift (r132 in advance), then
+0.000 against the accepted baseline; ship-dhow 0.000 — the hull.js edit
+PROVEN inert on the grapnel's own hull; ship-treasure within tolerance.
+⚠ r184's OPENING OWES THE FULL 64 (the r175 pattern), zero movers expected
+beyond nothing — every edit is junk-record-guarded.**
+
+**Rule 0, answered in writing on the ship-junk capture: the frame reads as a
+rendered vessel on open water, not a chart. Three facts a viewer can read off
+it: a stone anchor — a grey shaped bar with a wooden hook lashed along it in
+rattan bands — lies stowed on the foredeck planking forward of the windlass;
+the windlass stands between its two mooring posts with a handspike shipped
+and leaning on the barrel; the deck is planked in rings with dark treenail
+stitching, pierced by a woven hatch grating, under the battened lug mainsail.**
+
+**Deployed: data-version 1788257952. Live verify below.**
+
+**Named residuals, in order:** (1) r183 — the anchors line: TREASURE-SHIP at
+the head (TGK five-or-six iron anchors, 看家錨 500 catties, head two + stern
+two; FETCH OWED: TGK 錘鍛 anchor-forging section for the four-claw form; then
+the panokseon's drawn-plate anchor, the wasen yotsume-ikari). (2) r182,
+small — the grapnel's 1.8 m shank reconstruction (Jewel of Muscat record or
+Vosmer PSAS would replace it). (3) NEW r183, small — the junk's stone bar is
+a class default; any fetched dimensioned 碇石 (Quanzhou bay, Hakata bay,
+Shinan) replaces it and its provenance says so. (4) r177: Lucian's second
+machine. (5) r173: the cog's Gangspill on the aftcastle top. (6) r173: the
+cog's castles, fore and aft. (7) r173: the cog's pale rudder slab. (8) r176:
+the sekibune's class-size question (kiwari read owed). (9) The sweep-derived
+boxy classes: top (18), channel/cheek/cathead. (10) Preussen mast livery
+(r155). (11) Endurance forecastle (RMG J9266). (12) Azzam crest span.
+(13) r164 risen black unpierced. (14) r165 fantail gallery wing walls.
+(15) r166 screen glass sun-bright. (16) r171 quarter-gallery sashes.
+(17) r171 authored tier fractions. (18) r172 the 74's lower capstan barrel.
+(19) r181, small: eraSm's dead fallback branch (app.js:1353).

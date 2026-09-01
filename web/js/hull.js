@@ -3515,6 +3515,15 @@ const PARTS = {
                   + 'drawing\'s own scale. A grapnel needs no stock: whichever way it lands, '
                   + 'an arm points down and bites. It lives loose on deck at the bow, a coir '
                   + 'cable bent to the shank head, and the crew works it by direct pull.' },
+  stoneAnchor: { stage: 3, name: 'Stone anchor',
+              what: 'The Chinese sea-ship\'s ground tackle in an eyewitness\'s one sentence '
+                  + '(Xu Jing, 1124): below the bow winch hangs the anchor-stone, clamped on '
+                  + 'its two sides by two wooden hooks, on a rattan cable thick as a rafter '
+                  + 'and five hundred feet long. The stone is the weight, the hooks are the '
+                  + 'flukes, and there is no iron in it anywhere — whichever way it lands, a '
+                  + 'point bites. In heavy weather two spare anchors of the same make go down '
+                  + 'beside it. Shaped anchor-stone bars are among the commonest ground-tackle '
+                  + 'finds of this ocean\'s wrecks; the wood rotted off them.' },
   cathead:  { stage: 3, name: 'Cathead',
               what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
                   + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -4343,6 +4352,111 @@ function buildFittings(S, group, mats) {
     const ag = new THREE.Group();
     ag.add(g); ag.add(coil); if (cable) ag.add(cable);
     group.add(tag(ag, 'grapnel'));
+  }
+
+  /* ── THE STONE ANCHOR, FROM THE RECORD:
+     `stoneAnchor: {atU?, hangM?, stoneLenM?, stoneSecM?, hookLenM?, hookDiaM?,
+                    cableDiaM?, offZ?}`
+     Xu Jing's own sentence (Gaoli tujing 1124, 卷34 — the same passage that drew the
+     r174 windlass): 下垂矴石，石兩旁，夾以二木鈎 — below the winch hangs the
+     anchor-stone, clamped on its two sides by two wooden hooks, on a rattan cable
+     thick as a rafter. The form is the text's and nothing more: a shaped stone bar
+     for weight, two hardwood hooks lashed one to each side with their points curving
+     outward past the stone's foot to bite whichever way it lands, rattan bands
+     clamping the bundle. No shank is named and no iron is in it anywhere. The drawn
+     ship is under way, so the anchor rides recovered (遇行則卷其輪而收之, taken in):
+     laid on the open foredeck between the stem and its own windlass, the bar
+     fore-and-aft with the hook points forward, the cable's short end bent to the
+     bar's head and led to the barrel, where the text winds the rest (上綰藤索). A
+     hang at the bow was drawn first and measured off: this hull's stem overhangs its
+     own forward waterline and the bow shell carries ~2.4 m of half-breadth at the
+     hang's height, so a hung anchor sits pocketed out of every view (raycast from
+     the frame's own camera: the shell occludes it 1.8 m short). Stow is placement
+     inference, named in the provenance. Dimensions are class defaults sized to the
+     hull, named as such. Silence draws nothing: only a stoneAnchor record draws
+     one. */
+  if (S.stoneAnchor) {
+    const sa = S.stoneAnchor;
+    const u = (sa.atU != null) ? sa.atU : -0.02;
+    const stoneL = sa.stoneLenM || 1.6, stoneS = sa.stoneSecM || 0.24;
+    const hookL = sa.hookLenM || 2.1, hookD = sa.hookDiaM || 0.12;
+    const cabR = (sa.cableDiaM || 0.10) / 2;
+    const offZ = sa.offZ || 0;
+    const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
+      { color: 0x7d7a70, roughness: 0.92, metalness: 0.02 }));
+    const g = new THREE.Group();
+    /* local frame: origin at the assembly head where the cable bends on, -Y down */
+    const stone = new THREE.Mesh(
+      new THREE.BoxGeometry(stoneS, stoneL, stoneS * 0.8), stoneM);
+    stone.name = 'st-stone';
+    stone.position.y = -stoneL / 2;
+    g.add(stone);
+    /* the two wooden hooks, one clamped to each side (石兩旁夾以二木鈎): a shaft the
+       stone's length along each ±z face, the point curving outward below the foot */
+    const shaftL = stoneL + 0.15, curveL = Math.max(0.25, hookL - shaftL);
+    for (const sg of [1, -1]) {
+      const zH = sg * (stoneS * 0.40 + hookD / 2);
+      const shaft = new THREE.Mesh(
+        new THREE.CylinderGeometry(hookD * 0.42, hookD * 0.50, shaftL, 10), wood);
+      shaft.name = 'st-hook';
+      shaft.position.set(0, -shaftL / 2 + 0.08, zH);
+      g.add(shaft);
+      const yFoot = -shaftL + 0.08;
+      const curve = new THREE.Mesh(
+        new THREE.CylinderGeometry(hookD * 0.46, hookD * 0.34, curveL, 10), wood);
+      curve.name = 'st-hook';
+      curve.rotation.x = -sg * 0.95;
+      curve.position.set(0, yFoot - curveL / 2 * Math.cos(0.95),
+                         zH + sg * curveL / 2 * Math.sin(0.95));
+      g.add(curve);
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(hookD * 0.34, hookD * 0.9, 10), wood);
+      tip.name = 'st-tip';
+      tip.rotation.x = sg * (Math.PI - 0.95);
+      tip.position.set(0, yFoot - (curveL + hookD * 0.45) * Math.cos(0.95),
+                       zH + sg * (curveL + hookD * 0.45) * Math.sin(0.95));
+      g.add(tip);
+    }
+    /* rattan lashings clamping hooks to stone, top of the bar and near its foot */
+    for (const yB of [-0.16, -(stoneL - 0.16)]) {
+      const band = new THREE.Mesh(
+        new THREE.TorusGeometry(1, 0.024, 8, 20), mats.ropeSolid || wood);
+      band.name = 'st-band';
+      band.rotation.x = Math.PI / 2;
+      band.scale.set(stoneS * 0.60, stoneS * 0.44 + hookD, 1);
+      band.position.y = yB;
+      g.add(band);
+    }
+    /* stow: lay the bar fore-and-aft on the foredeck, head aft toward the windlass,
+       hook points forward — rotZ(-90°) maps the hang's -Y down the bar to -X forward.
+       The foredeck SLOPES (the sheer rises to the stem), so the bar lies pitched to
+       the deck's own gradient between its two ends: settled flat it would stab its
+       forward points through the rising planking (measured, r183). */
+    const uH = Math.max(0, u), uT = Math.max(0, u - (stoneL + 0.6) / L);
+    const slope = (uH - uT) > 1e-6
+      ? (deckAtU(uH) - deckAtU(uT)) / ((uH - uT) * L) : 0;
+    g.rotation.z = -Math.PI / 2 + Math.atan(slope);
+    const yD = deckAtU(uH);
+    g.position.set((u - 0.5) * L, yD, offZ);
+    /* settle onto the deck by measurement, not trigonometry (the grapnel's own rule) */
+    g.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(g);
+    g.position.y += (yD - bb.min.y);
+    g.updateMatrixWorld(true);
+    /* the rattan cable: bent to the bar's head, led to the barrel where the text
+       winds the rest (上綰藤索) — no coil on deck, the winch holds it */
+    const head = new THREE.Vector3(0, 0, 0).applyMatrix4(g.matrixWorld)
+      .add(new THREE.Vector3(0.05, 0.06, 0));
+    const wl = S.windlass;
+    const uW = wl ? (wl.atU || 0.10) : 0.10;
+    const barrelPt = new THREE.Vector3(
+      (uW - 0.5) * L - (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2,
+      deckAtU(uW) + 0.30 + (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2, offZ * 0.4);
+    const cable = ropeMesh([[head, barrelPt]], cabR, mats.ropeSolid || wood);
+    const ag = new THREE.Group();
+    ag.add(g);
+    if (cable) { cable.name = 'st-cable'; ag.add(cable); }
+    group.add(tag(ag, 'stoneAnchor'));
   }
 
   /* ── THE DECKHOUSE, FROM THE RECORD: `deckhouses: [{a, b, hM, wF}]` ─────────────────

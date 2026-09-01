@@ -3534,6 +3534,64 @@
       }
     }
 
+    /* (r183) THE STONE ANCHOR THE EYEWITNESS DESCRIBES. Xu Jing 1124: the anchor-stone
+       hangs at the bow, two wooden hooks clamping its sides, on the windlass's own
+       rattan cable. V-WARRANT both ways, as the grapnel rule. V-STONE: one stone bar,
+       its longest drawn dimension the record's stoneLenM. V-HOOKS: two hook points,
+       found STRUCTURALLY as the group's cones, not by name. V-REST: the recovered
+       anchor is taken in (收之) and lies on the foredeck — the assembly's lowest
+       point sits ON the deck at its own station, asked of the surface itself, as the
+       grapnel rule asks; floating and stabbed-through both convict. V-CABLE: the
+       text's one sentence carries wheel, cable and stone together — a drawn stone
+       with no cable convicts. */
+    {
+      const am = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'stoneAnchor') am.push(o); });
+      if (am.length && !H.stoneAnchor)
+        say(v.id, 'an anchor the record does not carry',
+            `${am.length} stone-anchor meshes drawn with no stoneAnchor field — this `
+            + "hull's record is silent, and silence draws nothing");
+      if (H.stoneAnchor && !am.length)
+        say(v.id, 'declared but not drawn', 'stoneAnchor');
+      if (H.stoneAnchor && am.length) {
+        const R = H.stoneAnchor;
+        const stones = am.filter(o => o.name === 'st-stone');
+        if (stones.length !== 1)
+          say(v.id, 'a stone anchor without its stone',
+              `${stones.length} stone bars drawn — the record hangs one`);
+        else if (R.stoneLenM) {
+          const bs = new THREE.Box3().setFromObject(stones[0]);
+          const lg = Math.max(bs.max.x - bs.min.x, bs.max.y - bs.min.y,
+                              bs.max.z - bs.min.z);
+          if (Math.abs(lg - R.stoneLenM) > 0.10 * R.stoneLenM)
+            say(v.id, "the stone off the record's length",
+                `bar ${lg.toFixed(2)} m, record says ${R.stoneLenM}`);
+        }
+        const tips = am.filter(o => o.geometry.type === 'ConeGeometry');
+        if (tips.length !== 2)
+          say(v.id, 'a stone anchor without its two hooks',
+              `${tips.length} hook points drawn — the text clamps the stone with two`);
+        const bb = new THREE.Box3();
+        for (const o of am) if (o.name !== 'st-cable')
+          bb.union(new THREE.Box3().setFromObject(o));
+        const HSa = SHIPS_HULL.hullSurface(H);
+        const ua = Math.max(0, Math.min(1,
+          ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const deckA = HSa.sheer(ua);
+        if (bb.min.y > deckA + 0.25)
+          say(v.id, 'an anchor floating over its own deck',
+              `lowest point ${(bb.min.y - deckA).toFixed(2)} m above the deck at u ${ua.toFixed(2)}`);
+        if (bb.min.y < deckA - 0.20)
+          say(v.id, 'an anchor through the planking',
+              `lowest point ${(deckA - bb.min.y).toFixed(2)} m below the deck at u ${ua.toFixed(2)}`);
+        if (!am.some(o => o.name === 'st-cable'))
+          say(v.id, 'a stone anchor with no cable',
+              "the text's sentence carries wheel, cable and stone together — "
+              + 'nothing drawn holds this anchor to the ship');
+      }
+    }
+
     /* declared screws must be drawn, and a screw lives under water */
     if (H.screws) {
       if (!part.screw) say(v.id, 'declared but not drawn', 'screws');
