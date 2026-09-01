@@ -2131,7 +2131,12 @@ what: 'The wasen tradition\'s ground tackle: the four-claw forged iron anchor, '
 + 'scroll of 1593 draws the anchored barrier fleet riding to its cables, '
 + 'the anchor itself at the line\'s end, claws recurved. Forty-nine survive '
 + 'in one measured corpus, 1.05 to 3.03 m; none of them a Sengoku '
-+ 'warship\'s.' },
++ 'warship\'s. The corpus measures its members: the arms are flat forged '
++ 'bars, about a thirtieth of the length wide at the root and thinning to '
++ 'a blade at the point, and its one weighed anchor — 2.8 m, raised off '
++ 'Kozushima, 330-340 kg on a forklift — sets the class\'s weight. The '
++ 'drawn iron weighs that record: the shank, the one member the corpus '
++ 'table leaves unmeasured, is solved to carry the recorded mass.' },
 cathead:  { stage: 3, name: 'Cathead',
 what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -3109,52 +3114,85 @@ const offZ = ya.offZ || 0;
 const ironG = mats.capIron || (mats.capIron = new THREE.MeshStandardMaterial(
 { color: 0x2a2622, roughness: 0.62, metalness: 0.45 }));
 const ag = new THREE.Group();
-const ringHalf = lenM * 0.08;
-const shankL = lenM - ringHalf * 2;
-const shS = lenM * 0.030;
+const YA_P = {
+arW0: 0.0346, arT0: 0.0198,
+arW1: 0.0220, arT1: 0.0058,
+rSemiV: 0.0818, rSemiH: 0.0353, rBar: 0.0056,
+acR: 0.0590, acBar: 0.0079,
+shTaper: 0.72
+};
+const armF = ya.armFrac || 0.30;
+const yaW = (f) => YA_P.arW0 + (YA_P.arW1 - YA_P.arW0) * f;
+const yaT = (f) => YA_P.arT0 + (YA_P.arT1 - YA_P.arT0) * f;
+const F1 = 0.62 / 1.04, F2 = 0.88 / 1.04;
+const w0 = yaW(0), w1 = yaW(F1), w2 = yaW(F2);
+const zs1 = (yaT(0) / w0 + yaT(F1) / w1) / 2;
+const zs2 = (yaT(F1) / w1 + yaT(F2) / w2) / 2;
+const zsT = yaT(F2) / w2;
+const shankL = lenM * (1 - 2 * YA_P.rSemiV);
+const yaKg = ya.kg || Math.round(335 * Math.pow(lenM / 2.8, 3));
+const sqFrus = (wa, wb, h) => h / 3 * (wa * wa + wa * wb + wb * wb);
+let vOther = 4 * (zs1 * sqFrus(w0, w1, 0.62 * armF)
++ zs2 * sqFrus(w1, w2, 0.26 * armF)
++ zsT * w2 * w2 * 0.16 * armF / 3)
++ 2 * Math.PI * Math.PI * (YA_P.rSemiH - YA_P.rBar) * YA_P.rBar * YA_P.rBar
+* (YA_P.rSemiV / YA_P.rSemiH)
++ 2 * Math.PI * Math.PI * YA_P.acR * YA_P.acBar * YA_P.acBar;
+vOther *= lenM * lenM * lenM;
+const tp = YA_P.shTaper;
+const shS = Math.sqrt(Math.max(1e-9, (yaKg / 7850 - vOther)
+/ (shankL * (1 + tp + tp * tp) / 3)));
 const ai = new THREE.Group();
 ai.name = 'ya-grp';
-const sh = new THREE.Mesh(
-new THREE.CylinderGeometry(shS * 0.72, shS, shankL, 4), ironG);
+const shGeo = new THREE.CylinderGeometry(
+shS * tp / Math.SQRT2, shS / Math.SQRT2, shankL, 4);
+shGeo.rotateY(Math.PI / 4);
+const sh = new THREE.Mesh(shGeo, ironG);
 sh.name = 'ya-shank';
-sh.rotation.y = Math.PI / 4;
 sh.position.y = shankL / 2;
 ai.add(sh);
-const arR = lenM * 0.052, arBar = lenM * 0.0135;
+const arR = lenM * (YA_P.rSemiH - YA_P.rBar), arBar = lenM * YA_P.rBar;
 const ring = new THREE.Mesh(
 new THREE.TorusGeometry(arR, arBar, 8, 20), ironG);
 ring.name = 'ya-ring';
-ring.scale.y = 1.5;
-ring.position.y = shankL + arR * 1.5 - arBar;
+ring.scale.y = YA_P.rSemiV / YA_P.rSemiH;
+ring.position.y = lenM - lenM * YA_P.rSemiV - lenM * 0.01;
 ai.add(ring);
-const acR = lenM * 0.045, acBar = lenM * 0.011;
+const acR = lenM * YA_P.acR, acBar = lenM * YA_P.acBar;
 const acr = new THREE.Mesh(
 new THREE.TorusGeometry(acR, acBar, 8, 20), ironG);
 acr.name = 'ya-acring';
 acr.rotation.y = Math.PI / 2;
-acr.position.y = shankL + arR * 1.5 * 2 - arBar * 2 - acR * 0.35;
+acr.position.y = lenM - acR - 2 * acBar;
 ai.add(acr);
-const armL = lenM * (ya.armFrac || 0.30);
-const clawD = shS * 1.5;
+const armL = lenM * armF;
+const rectSeg = (wa, wb, h, zs) => {
+const geo = new THREE.CylinderGeometry(
+wb / Math.SQRT2, wa / Math.SQRT2, h, 4);
+geo.rotateY(Math.PI / 4);
+const m = new THREE.Mesh(geo, ironG);
+m.scale.x = zs;
+return m;
+};
 for (let k = 0; k < 4; k++) {
 const cg2 = new THREE.Group();
 cg2.rotation.y = k * Math.PI / 2 + Math.PI / 4;
 const a1 = 1.62, l1 = armL * 0.62;
-const s1 = new THREE.Mesh(
-new THREE.CylinderGeometry(clawD * 0.38, clawD * 0.52, l1, 8), ironG);
+const s1 = rectSeg(w0 * lenM, w1 * lenM, l1, zs1);
 s1.name = 'ya-arm'; s1.rotation.z = -a1;
 s1.position.set(Math.sin(a1) * l1 / 2, Math.cos(a1) * l1 / 2, 0);
 cg2.add(s1);
 const P1x = Math.sin(a1) * l1, P1y = Math.cos(a1) * l1;
 const a2 = 0.90, l2 = armL * 0.26;
-const s2 = new THREE.Mesh(
-new THREE.CylinderGeometry(clawD * 0.28, clawD * 0.40, l2, 8), ironG);
+const s2 = rectSeg(w1 * lenM, w2 * lenM, l2, zs2);
 s2.name = 'ya-arm'; s2.rotation.z = -a2;
 s2.position.set(P1x + Math.sin(a2) * l2 / 2, P1y + Math.cos(a2) * l2 / 2, 0);
 cg2.add(s2);
 const ch = armL * 0.16;
-const tip = new THREE.Mesh(
-new THREE.ConeGeometry(clawD * 0.32, ch, 8), ironG);
+const tipGeo = new THREE.ConeGeometry(w2 * lenM / Math.SQRT2, ch, 4);
+tipGeo.rotateY(Math.PI / 4);
+const tip = new THREE.Mesh(tipGeo, ironG);
+tip.scale.x = zsT;
 tip.name = 'ya-tip'; tip.rotation.z = -a2;
 tip.position.set(P1x + Math.sin(a2) * (l2 + ch / 2 - 0.01),
 P1y + Math.cos(a2) * (l2 + ch / 2 - 0.01), 0);
@@ -3197,7 +3235,7 @@ if (seat.length) {
 g.position.y += (seat[0].point.y - bb2.min.y);
 g.updateMatrixWorld(true);
 }
-const ringP = new THREE.Vector3(0, shankL + arR * 1.5 * 2 - arBar * 2 - acR * 0.35, 0)
+const ringP = new THREE.Vector3(0, lenM - acR - 2 * acBar, 0)
 .applyMatrix4(ai.matrixWorld);
 const cabR = (ya.cableDiaM || 0.06) / 2;
 const ropeM = mats.ropeSolid || wood;

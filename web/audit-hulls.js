@@ -3902,7 +3902,16 @@
        it; one is a lost cable-bend, three is an invented fitting. V-YLEN: the
        assembly's longest extent read from each mesh's own geometry through the world
        matrix scale (the r186 lesson — a world AABB cannot read a 45° roll) against
-       the record's lenM. V-YREST: the recovered anchor lies on the foredeck, asked
+       the record's lenM. V-YMASS (r191): the anchor's iron INTEGRATED from the
+       built scene — analytic member volumes through each world matrix's
+       DETERMINANT, with the 4-segment cylinders and cones read as the SQUARE bars
+       they are (area 2r², not πr²) — × 7850 kg/m³ against the record's kg, whose
+       default is the corpus's one weighed anchor cube-scaled (Kozushima, 2.8 m,
+       330–340 kg by forklift; Matsui 2013), 12% band. Arm and ring sections are
+       the corpus's own (表1); the shank is solved from the mass, so this rule
+       closes the loop the solve opens. Missing members are V-YARMS/V-YRING's
+       fault and this rule passes over them. V-YREST: the recovered anchor lies on
+       the foredeck, asked
        of the surface itself (ray straight down, first non-anchor hit — the r185
        form); floating and stabbed-through both convict. V-YCABLE: no machine and no
        belay is attested — the cable is flaked in a coil beside the head, so a drawn
@@ -3953,6 +3962,39 @@
             say(v.id, "a yotsume off the record's length",
                 `crown to ring head ${drawnLen.toFixed(2)} m along the shank's own `
                 + `axis — the record says ${lenR}`);
+          /* V-YMASS (r191): integrate the drawn iron. Every yotsume member is a
+             4-segment cylinder (square bar), a 4-segment cone (blade point) or a
+             torus; volumes analytic, × each world matrix's determinant — exact
+             under any linear map, so a stretched shank or thinned bar weighs as
+             drawn. The record's kg defaults by the weighed-anchor cube-law. */
+          const kgR = R.kg || Math.round(335 * Math.pow(lenR / 2.8, 3));
+          let vSum = 0;
+          for (const o of ym) {
+            if (o.name === 'ya-cable' || o.name === 'ya-coil') continue;
+            o.updateMatrixWorld(true);
+            const e = o.matrixWorld.elements;
+            const det = Math.abs(
+              e[0] * (e[5] * e[10] - e[6] * e[9])
+              - e[4] * (e[1] * e[10] - e[2] * e[9])
+              + e[8] * (e[1] * e[6] - e[2] * e[5]));
+            const pg = o.geometry.parameters;
+            if (o.geometry.type === 'CylinderGeometry') {
+              const f = (pg.radialSegments === 4) ? 2 : Math.PI;
+              vSum += det * f * pg.height / 3
+                * (pg.radiusTop * pg.radiusTop + pg.radiusTop * pg.radiusBottom
+                   + pg.radiusBottom * pg.radiusBottom);
+            } else if (o.geometry.type === 'ConeGeometry') {
+              const f = (pg.radialSegments === 4) ? 2 : Math.PI;
+              vSum += det * f * pg.radius * pg.radius * pg.height / 3;
+            } else if (o.geometry.type === 'TorusGeometry') {
+              vSum += det * 2 * Math.PI * Math.PI * pg.radius * pg.tube * pg.tube;
+            }
+          }
+          const kgD = 7850 * vSum;
+          if (Math.abs(kgD - kgR) > 0.12 * kgR)
+            say(v.id, "a yotsume off the record's weight",
+                `${kgD.toFixed(0)} kg of drawn iron integrated from the scene — `
+                + `the record's weight is ${kgR}`);
         }
         const bbY = new THREE.Box3();
         for (const o of ym) if (o.name !== 'ya-cable' && o.name !== 'ya-coil')
