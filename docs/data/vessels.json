@@ -753,6 +753,13 @@
     }
    },
    "hull": {
+    "windlass": {
+     "atU": 0.1,
+     "barrelLenM": 4.6,
+     "barrelDiaM": 0.5,
+     "postHM": 1.6
+    },
+    "windlassProvenance": "The bow machine of her own tradition, eyewitness-attested at her own size and century. Xu Jing, Gaoli tujing (1124), ch. 34, on the Song sea ships (kezhou, ten-odd zhang): 'between the two cheek-posts at the ship's head there is a winch wheel, on which is wound a rattan cable as thick as a rafter, five hundred feet long; below hangs the anchor stone, two wooden flukes clamped at its sides ... getting under way, they roll the wheel up and recover it.' The Tiangong Kaiwu (1637) confirms the arrangement as standing practice: the yun che windlass winds the cable to raise the iron anchors, belayed to the two 'general's posts' at the brow of the bow. Station u 0.10 is a TEXT read (at the head, between the posts), +/-0.04 u — no plate, no plate scale. NO barrel dimension survives in either text: length 4.6 m is a GEOMETRIC class default (the barrel spans the foredeck between the posts; the drawn deck is 6.63 m wide at the drawn station, the audit's own measure), diameter 0.5 m and the 0.30 m underside height are CLASS DEFAULTS (Falconer 1769 cross-tradition, as r173's cog), post height 1.6 m a CLASS DEFAULT (the posts belay the cable, so they rise past the barrel). Needham IV.3 and Worcester were NOT fetched (access-restricted scans); this record cites the primaries directly.",
     "wlPower": 2.2,
     "stemFineness": 0.36,
     "sternFineness": 0.46,
@@ -887,6 +894,13 @@
     }
    },
    "hull": {
+    "windlass": {
+     "atU": 0.1,
+     "barrelLenM": 6.0,
+     "barrelDiaM": 0.6,
+     "postHM": 1.8
+    },
+    "windlassProvenance": "A FLEET-CLASS EXTENSION, not a ship attestation — this hull's own record attests no fitting (her attestation is 'generated'). What is attested is the tradition: the Tiangong Kaiwu (1637) names the yun che windlass that 'winds the cable and raises the anchor' on the state grain ships (five or six iron anchors, two worked at the head, cable belayed to the two general's-posts at the brow of the bow), and says of the sea transports 'the gear is all the same' (qi ju jie tong) — and that sea transport, the zheyang ship, is the carrier of the Yuan and EARLY MING state fleets, the treasure fleet's own era and administration. Position at the bow between the posts follows Xu Jing (1124). Station u 0.10 TEXT read +/-0.05. NO dimension is a source read: barrel 6.0 m is a GEOMETRIC class default (a third of beam; the foredeck at the station is at least 10.48 m wide — a conservative probe of the drawn shell), diameter 0.6 m is the Kiel cog's measured barrel carried as a CLASS DEFAULT, post height 1.8 m a CLASS DEFAULT. The TGK is 200 years after the voyages and localizes the machine by naming the bow posts, not in one sentence — the join is stated in build/staging/r174/JUDGMENT.md.",
     "wlPower": 2.2,
     "stemFineness": 0.4,
     "sternFineness": 0.52,

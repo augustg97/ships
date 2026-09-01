@@ -3647,12 +3647,15 @@ const PARTS = {
                   + 'the whole machine is sized to the men who walk it round. Hulls whose '
                   + 'traditions used other gear carry no capstan.' },
   windlass: { stage: 3, name: 'Windlass',
-              what: 'A horizontal winch: an eight-square oak barrel turned by handspikes '
+              what: 'A horizontal winch: an eight-square barrel turned by handspikes '
                   + 'thrust into holes bored through its body, the crew rising together on '
                   + 'the bars to a song. On the cog it lies athwartships at the aftcastle, '
-                  + 'forward of the helm — the reconstructed Bremen ship carries it there, '
-                  + 'and the replicas built to her plans work it at sea. Drawn only where '
-                  + 'the record attests one.' },
+                  + 'forward of the helm — the reconstructed Bremen ship carries it there. '
+                  + 'On the Chinese seagoing tradition it lies at the bow between the two '
+                  + 'mooring posts: Xu Jing watched one worked in 1124, winding a rattan '
+                  + 'cable as thick as a rafter, and the Tiangong Kaiwu of 1637 names the '
+                  + 'machine that breaks out the iron anchors. Drawn only where the record '
+                  + 'attests one.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
                   + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -4148,19 +4151,22 @@ function buildFittings(S, group, mats) {
     group.add(tag(cg, 'capstan'));
   }
 
-  /* ── THE WINDLASS, FROM THE RECORD: `windlass: {atU, barrelLenM, barrelDiaM}` ───────
-     The Bremen cog's own machine (r173). Ellmers (DSM): the man at the tiller stood
-     under the castle-deck "behind the heavy windlass" — athwartships, at the aftcastle,
-     forward of the helm; the Kiel replica built to the DSM's plans gives the barrel,
-     4.5 m long and 60 cm thick (Baykowski 1991). Falconer's WINDLASS supplies the class
-     mechanism, named as defaults in the provenance: a timber "supported at the two ends
-     by two frames of wood", turned by handspikes "thrust into holes bored through the
-     body", its "lower part ... about a foot above the deck" — so the axis stands at
-     0.30 + D/2 over the deck, clamped to [0.45, 0.90] m: a standing man levers the
-     spike, and no record can move the work out of his reach. The barrel is eight-square:
-     a baulk is worked eight-square where the holes are bored. The aftcastle that should
-     roof the machine is a named residual — it stands in its attested place on the open
-     afterdeck. Silence draws nothing: only a windlass record draws one. */
+  /* ── THE WINDLASS, FROM THE RECORD: `windlass: {atU, barrelLenM, barrelDiaM, postHM?}`
+     Two traditions, each in its record's place. The Bremen cog's (r173): athwartships at
+     the aftcastle, forward of the helm (Ellmers, DSM), barrel 4.5 × 0.60 m (the Kiel
+     replica's build record, Baykowski 1991). The Chinese bow machine (r174): Xu Jing
+     watched it worked in 1124 — 船首兩頰柱中，有車輪，上綰藤索 — a wheel between the two
+     cheek-posts at the head, the cable wound on it; the Tiangong Kaiwu (1637) names the
+     machine (雲車) and the two bow posts the cable belays to (將軍柱). When the record
+     gives postHM, the standards are those mooring posts, rising past the barrel to take
+     the cable's turns. Falconer's WINDLASS supplies the class mechanism, named as
+     defaults in the provenance: a timber "supported at the two ends by two frames of
+     wood", turned by handspikes "thrust into holes bored through the body", its "lower
+     part ... about a foot above the deck" — so the axis stands at 0.30 + D/2 over the
+     deck, clamped to [0.45, 0.90] m: a standing man levers the spike, and no record can
+     move the work out of his reach. The barrel is eight-square: a baulk is worked
+     eight-square where the holes are bored. Silence draws nothing: only a windlass
+     record draws one. */
   if (S.windlass) {
     const u = S.windlass.atU || 0.5, y = deckAtU(u);
     const clampW = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -4174,8 +4180,10 @@ function buildFittings(S, group, mats) {
     const bar = new THREE.Mesh(bGeo, wood);
     bar.name = 'win-barrel'; bar.rotation.x = Math.PI / 2;
     bar.position.y = axisY; wg.add(bar);
-    /* the standards — Falconer's "two frames of wood" — with the journal turning in each */
-    const stH = (axisY - y) + D * 0.42;
+    /* the standards — Falconer's "two frames of wood", or, where the record gives
+       postHM, the Chinese tradition's mooring posts (頰柱/將軍柱) rising past the
+       barrel — with the journal turning in each */
+    const stH = S.windlass.postHM || (axisY - y) + D * 0.42;
     for (const sg of [1, -1]) {
       const st = new THREE.Mesh(new THREE.BoxGeometry(0.30, stH, 0.26), wood);
       st.name = 'win-standard';

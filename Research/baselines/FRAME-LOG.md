@@ -1234,3 +1234,4 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-08-31 16:11** · `ship-dhow` — r172 capstan class, owed: the dhow's record is silent so her unattested bar capstan is removed from the deck; berth-neighbour patches at left edge. Captured pre-r173-edit.
 - **2026-08-31 16:11** · `ship-junk` — r172 capstan class, owed: the junk's Georgian capstan removed (her tradition attests a windlass — named residual); neighbour patches at frame edges. Captured pre-r173-edit.
 - **2026-08-31 16:11** · `ship-trireme` — r172 capstan class, owed: the trireme loses the Georgian machine drawn on a 480 BC hull; compact deck cluster only. Captured pre-r173-edit.
+- **2026-08-31 17:02** · `ship-junk` — r174: the junk's bow windlass — Gaoli tujing 1124 (wheel between the bow cheek-posts, rattan cable) + Tiangong Kaiwu 1637 (yun che, general's-posts); diff read: the machine alone, two posts, barrel, two shipped spikes

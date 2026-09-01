@@ -11900,3 +11900,89 @@ profile. (5) The sweep-derived boxy classes: top (18), channel/cheek/cathead.
 span. (9) r164 risen black unpierced. (10) r165 fantail gallery wing walls. (11) r166
 screen glass sun-bright. (12) r171 quarter-gallery sashes. (13) r171 authored tier
 fractions. (14) r172 the 74's lower capstan barrel (needs a deck section).
+
+## Round 174 — 2026-08-31 — the Chinese windlass: the bow machine two primary texts describe, on the two hulls of its tradition
+
+**The r173 residual 1 queue head — "junk and treasure-ship (the Chinese windlass
+Needham/Worcester describe)" — OPENED AND CLOSED, judgment first
+(build/staging/r174/JUDGMENT.md). Two primaries fetched whole, in the original, replacing
+the residual's secondhand citation: Xu Jing's Gaoli tujing (1124, 卷34, an eyewitness who
+sailed in the Song sea ships) gives the machine in one sentence — 船首兩頰柱中，有車輪，
+上綰藤索，其大如椽，長五百尺 — a winch wheel BETWEEN THE TWO CHEEK-POSTS at the bow,
+winding a rattan cable thick as a rafter, the hooked anchor stone below; and the ship it
+stands on is 長十餘丈, our junk's own size, class and century. The Tiangong Kaiwu (1637,
+漕舫+海舟) names the machine (雲車絞纜提錨使上), the two bow posts the cable belays to
+(將軍柱), the five-or-six iron anchors two-worked-at-the-head, the boiled-bamboo-plait
+anchor cables — and carries it to sea: 遮洋運舡…器具皆同, the ocean transport's GEAR ALL
+THE SAME as the grain ship's, that transport being the Yuan/EARLY-MING state carrier, the
+treasure fleet's own era. Needham IV.3 and Worcester: NOT fetched (every scan
+access-restricted, fulltext API refused), named as such in the record.**
+
+**The change: `windlass{atU 0.10, barrelLenM 4.6, barrelDiaM 0.5, postHM 1.6}` on the
+junk — warrant DIRECT (eyewitness, her own class and era); `{atU 0.10, 6.0, 0.6, postHM
+1.8}` on the treasure-ship — warrant FLEET-CLASS EXTENSION, stated in the provenance
+itself (her attestation is 'generated'; the machine is the tradition's, not a find and
+not a plan — the r108 lesson). NO dimension is a source read and every one is named:
+stations TEXT reads ±0.04/±0.05, lengths GEOMETRIC class defaults (the barrel spans the
+foredeck between the posts; junk's drawn deck 6.63 m wide at the drawn station, the
+audit's own measure), diameters and the 0.30 m underside Falconer cross-tradition as
+r173, post heights CLASS DEFAULTS (a post that stops at the journal cannot belay).
+buildWindlass grows ONE parameter: `postHM` turns Falconer's standards into the
+頰柱/將軍柱 mooring posts rising past the barrel. PARTS windlass card covers both
+traditions. The five other r172 hulls stay silent, each owed its own judgment.**
+
+**Audit: rule r173 unchanged — generic over H.windlass, it covered both new records with
+no edit, so no rule sync was owed. sim.py on the real shell numbers (probe-bow.py,
+read-only, BEFORE any web/ edit): faithful passes every arm on both bow stations; the
+probe's junk span 5.60 m was measured at the loa-based station and the builder stations
+on its own length parameter — the audit's drawn-station measure is 6.63 m, so the probe
+was conservative and V-SPAN passes with more margin than planned (stated in
+JUDGMENT.md). Audit 33/0 on the final geometry and records; the only edit after that run
+was provenance PROSE (the span-number corrections above). In-page injections: sever
+(junk's faithful barrel stood ON END under a present record; treasure drawn faithfully
+then her record deleted) → junk convicts V-AXIS alone, treasure V-WARRANT alone, 31
+silent — exactly the sim. Drag (barrelLenM 4.6→9.0 junk, barrelDiaM 0.6→1.4 treasure
+under the FAITHFUL builder) → record-blind arms only, exactly the dragged hulls: junk
+'9.00 m across a deck 6.63 m wide', treasure 'nobody bored' PLUS 'nobody could heave' —
+the dragged diameter drives the axis clamp to its 0.90 boundary and the page's floats
+land a hair over, where the sim treated the boundary as inclusive. One arm more than
+predicted, record-blind like the rest; the drag's claim holds and the divergence is
+written in JUDGMENT.md.**
+
+**Frames, with timing stated: the opening 64-check ran 16:42–17:27 and WEDGED at 35/64
+(the r171 pattern — last capture 16:57, chromium 738% CPU, killed unscored, EXIT:143,
+nothing scored; all 35 captures predate the first web/ edit ~17:12 but no diffs were
+computed, so NOTHING is owned). ⚠ r175's OPENING OWES THE FULL 64, zero movers expected
+beyond its own work. Close by solo checks on final code (the r169/r171 fallback):
+ship-junk 0.084%/0.058 — diff read, the machine alone (two posts, barrel, two shipped
+spikes) — accepted, reason logged; ship-treasure 0.024% ok and aboard-treasure 0.008% ok
+(the barrel lies athwartships, end-on in profile below the rail — only the posts catch
+pixels); ship-dhow 0.000. Trap for future rounds, hit this round: each solo
+frame_baseline run CLEARS _current — read the diff and the capture BEFORE running the
+next frame's check, or the image you owe a look at is gone.**
+
+**Measured (measure_ship, both hulls): junk win-barrel u 0.091–0.109, dia 0.50,
+half-span 2.30, underside 0.30 m over the deck the posts stand on, posts 1.6 m;
+treasure win-barrel dia 0.60, half-span 3.00, underside 0.30, posts 1.8 m — every
+number the record's. Looked at (rules 0 and 1): z-junk-bow-crop.png reads as a rendered
+vessel on water. Three facts a viewer can read off it: two square mooring posts stand at
+the junk's head with the windlass barrel journalled between them and a handspike shipped
+and leaning; the foredeck's planking sweeps in rings with dark treenail stitching, broken
+by slatted gratings; the battened lug sail creases in parallel folds abaft the foremast.
+And z-treasure-bow-crop.png: the same machine at her head, sized to the men, not the
+ship — 6 m of barrel on a 70 m hull, dwarfed by her own foresail.**
+
+**Deployed: data-version 1788220678. Live verify below.**
+
+**Named residuals, in order:** (1) r172 windlass judgments, FIVE hulls remaining —
+panokseon, sekibune (rokuro gear), corbita, dhow, trireme (whose record may rightly END
+silent; say so explicitly when judged). (2) r173: the cog's Gangspill on the aftcastle
+top. (3) r173: the cog's castles, fore and aft. (4) r173: the cog's pale rudder slab.
+(5) NEW r174: the junk's and treasure-ship's ANCHORS — both texts attest them with
+numbers (five or six iron anchors, the 500-catty 看家錨, Xu Jing's hooked stone with two
+wooden flukes) and the drawn hulls' anchor gear was not examined this round; the
+windlass judgment stopped at the machine. (6) The sweep-derived boxy classes: top (18),
+channel/cheek/cathead. (7) Preussen mast livery (r155). (8) Endurance forecastle (RMG
+J9266). (9) Azzam crest span. (10) r164 risen black unpierced. (11) r165 fantail gallery
+wing walls. (12) r166 screen glass sun-bright. (13) r171 quarter-gallery sashes.
+(14) r171 authored tier fractions. (15) r172 the 74's lower capstan barrel.

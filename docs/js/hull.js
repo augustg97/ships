@@ -2219,12 +2219,15 @@ what: 'A vertical winch turned by bars, drawn from the record: whelp timbers run
 + 'the whole machine is sized to the men who walk it round. Hulls whose '
 + 'traditions used other gear carry no capstan.' },
 windlass: { stage: 3, name: 'Windlass',
-what: 'A horizontal winch: an eight-square oak barrel turned by handspikes '
+what: 'A horizontal winch: an eight-square barrel turned by handspikes '
 + 'thrust into holes bored through its body, the crew rising together on '
 + 'the bars to a song. On the cog it lies athwartships at the aftcastle, '
-+ 'forward of the helm — the reconstructed Bremen ship carries it there, '
-+ 'and the replicas built to her plans work it at sea. Drawn only where '
-+ 'the record attests one.' },
++ 'forward of the helm — the reconstructed Bremen ship carries it there. '
++ 'On the Chinese seagoing tradition it lies at the bow between the two '
++ 'mooring posts: Xu Jing watched one worked in 1124, winding a rattan '
++ 'cable as thick as a rafter, and the Tiangong Kaiwu of 1637 names the '
++ 'machine that breaks out the iron anchors. Drawn only where the record '
++ 'attests one.' },
 boat:     { stage: 3, name: "Ship's boat",
 what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
 + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -2614,7 +2617,7 @@ bGeo.computeVertexNormals();
 const bar = new THREE.Mesh(bGeo, wood);
 bar.name = 'win-barrel'; bar.rotation.x = Math.PI / 2;
 bar.position.y = axisY; wg.add(bar);
-const stH = (axisY - y) + D * 0.42;
+const stH = S.windlass.postHM || (axisY - y) + D * 0.42;
 for (const sg of [1, -1]) {
 const st = new THREE.Mesh(new THREE.BoxGeometry(0.30, stH, 0.26), wood);
 st.name = 'win-standard';
