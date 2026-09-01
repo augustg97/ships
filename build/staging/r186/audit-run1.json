@@ -1,0 +1,17 @@
+[
+ {
+  "id": "panokseon",
+  "rule": "part attached to nothing",
+  "detail": "1 of 288 meshes touch no other part"
+ },
+ {
+  "id": "panokseon",
+  "rule": "the stone off the record's length",
+  "detail": "stone 1.65 m through the stow transform, record says 2"
+ },
+ {
+  "id": "panokseon",
+  "rule": "an anchor resting on nothing",
+  "detail": "no surface under the assembly at u 0.00"
+ }
+]

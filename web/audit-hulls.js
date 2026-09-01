@@ -3681,6 +3681,115 @@
       }
     }
 
+    /* (r186) THE KOREAN WOODEN ANCHOR AND ITS STONE. The warship plate of her own
+       navy's album draws the anchor; the form is the West Sea composite — oak shank,
+       hook-arms both sides, crossbar at the head, a long grooved stone lashed on to
+       sink the frame. V-WARRANT both ways, as every anchor rule. V-ARMS: the
+       record's arm count of hook points, found STRUCTURALLY as the group's cones.
+       V-STONE: one stone, its longest dimension read THROUGH the stow transform
+       (sorted world extents — a box axis cannot read a 45° roll) against the
+       record's stoneLenM. V-CROSS: the 닻장 is a record field no bounding box can
+       see — a cross-member must sit near the shank head with its axis athwart the
+       shank's, or the cable has nothing to bend on. V-REST: the recovered anchor
+       lies on the foredeck, asked of the surface itself (ray straight down, first
+       non-anchor hit — the r185 form); floating and stabbed-through both convict.
+       V-CABLE: the horong turns this anchor's cable — a drawn anchor with nothing
+       led to the machine convicts. */
+    {
+      const wm = [];
+      g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'woodAnchor') wm.push(o); });
+      if (wm.length && !H.woodAnchor)
+        say(v.id, 'an anchor the record does not carry',
+            `${wm.length} wooden-anchor meshes drawn with no woodAnchor field — this `
+            + "hull's record is silent, and silence draws nothing");
+      if (H.woodAnchor && !wm.length)
+        say(v.id, 'declared but not drawn', 'woodAnchor');
+      if (H.woodAnchor && wm.length) {
+        const R = H.woodAnchor;
+        const tips = wm.filter(o => o.geometry.type === 'ConeGeometry');
+        const wantArms = R.arms || 4;
+        if (tips.length !== wantArms)
+          say(v.id, 'a wooden anchor off its arm count',
+              `${tips.length} hook points drawn — the record hangs ${wantArms}`);
+        const stones = wm.filter(o => o.name === 'wa-stone');
+        if (stones.length !== 1)
+          say(v.id, 'a wooden anchor without its stone',
+              `${stones.length} anchor-stones drawn — the record lashes one on, and `
+              + 'an oak frame without it will not sink');
+        else if (R.stoneLenM) {
+          /* a world AABB cannot read a box rolled 45° (the r182 span lesson) — read
+             the stone's own geometry extents through the world matrix's scale, which
+             a rigid stow cannot shrink and a scale cheat cannot hide from */
+          const sg2 = stones[0];
+          sg2.geometry.computeBoundingBox();
+          sg2.updateMatrixWorld(true);
+          const lb = sg2.geometry.boundingBox, me = sg2.matrixWorld.elements;
+          const scl = [Math.hypot(me[0], me[1], me[2]),
+                       Math.hypot(me[4], me[5], me[6]),
+                       Math.hypot(me[8], me[9], me[10])];
+          const ext = [(lb.max.x - lb.min.x) * scl[0],
+                       (lb.max.y - lb.min.y) * scl[1],
+                       (lb.max.z - lb.min.z) * scl[2]].sort((a, b2) => b2 - a);
+          if (Math.abs(ext[0] - R.stoneLenM) > 0.10 * R.stoneLenM)
+            say(v.id, "the stone off the record's length",
+                `stone ${ext[0].toFixed(2)} m through the stow transform, `
+                + `record says ${R.stoneLenM}`);
+        }
+        const shk = wm.find(o => o.name === 'wa-shank');
+        const crs = wm.find(o => o.name === 'wa-cross');
+        if (!crs)
+          say(v.id, 'a wooden anchor with no crossbar',
+              'the 닻장 the cable bends on is a record field — nothing drawn carries it');
+        else if (shk) {
+          shk.updateMatrixWorld(true); crs.updateMatrixWorld(true);
+          const axS = new THREE.Vector3(0, 1, 0)
+            .transformDirection(shk.matrixWorld);
+          const axC = new THREE.Vector3(0, 1, 0)
+            .transformDirection(crs.matrixWorld);
+          if (Math.abs(axS.dot(axC)) > 0.35)
+            say(v.id, 'a crossbar along its own shank',
+                `닻장 axis ${Math.abs(axS.dot(axC)).toFixed(2)} off athwart — the `
+                + 'bar is fixed across the shank, not along it');
+          const bS = new THREE.Box3().setFromObject(shk);
+          const bC = new THREE.Box3().setFromObject(crs);
+          const cS = bS.getCenter(new THREE.Vector3());
+          const cC = bC.getCenter(new THREE.Vector3());
+          const shankLen = R.shankM || 3.2;
+          if (cC.distanceTo(cS) < shankLen * 0.25)
+            say(v.id, 'a crossbar lost down the shank',
+                '닻장 drawn at the shank middle — the dictionary fixes it 닻채 위에, '
+                + 'at the head where the cable bends');
+        }
+        const bbW = new THREE.Box3();
+        for (const o of wm) if (o.name !== 'wa-cable')
+          bbW.union(new THREE.Box3().setFromObject(o));
+        const uw = Math.max(0, Math.min(1,
+          ((bbW.min.x + bbW.max.x) / 2) / (H.lwl || H.loa) + 0.5));
+        const rayW = new THREE.Raycaster();
+        rayW.set(new THREE.Vector3((bbW.min.x + bbW.max.x) / 2, bbW.max.y + 0.5,
+                                   (bbW.min.z + bbW.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underW = rayW.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object); return !(p && p.key === 'woodAnchor'); });
+        if (!underW.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${uw.toFixed(2)}`);
+        else {
+          const gapW = bbW.min.y - underW[0].point.y;
+          if (gapW > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapW.toFixed(2)} m above the surface under it at u ${uw.toFixed(2)}`);
+          if (gapW < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapW).toFixed(2)} m into the surface under it at u ${uw.toFixed(2)}`);
+        }
+        if (!wm.some(o => o.name === 'wa-cable'))
+          say(v.id, 'a wooden anchor with no cable',
+              'the horong turns this anchor\'s cable — nothing drawn holds it to the ship');
+      }
+    }
+
     /* declared screws must be drawn, and a screw lives under water */
     if (H.screws) {
       if (!part.screw) say(v.id, 'declared but not drawn', 'screws');

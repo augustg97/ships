@@ -2107,6 +2107,18 @@ what: 'The Chinese sea anchor as the Tiangong kaiwu forges it: four claws '
 + 'crew\'s name for its cable — ben shen, the ship\'s own life — says '
 + 'what hung on it. The cables themselves are split green bamboo, '
 + 'boiled and twisted.' },
+woodAnchor: { stage: 3, name: 'Wooden anchor and its stone',
+what: 'The Korean tradition\'s ground tackle: an oak shank — the 닻채 — with '
++ 'hook-arms spread from it like branches, usually four, two hung to a '
++ 'side; a crossbar fixed through the head where the cable bends on; and '
++ 'a long rectangular stone lashed across the frame, because oak alone '
++ 'will not sink — the stone carries the anchor down and drives the hooks '
++ 'into the tidal mud. The West Sea keeps the record of the type: 154 '
++ 'anchor stones lifted off Taean and Incheon since 2008, rope grooves '
++ 'still cut in them, the largest over two metres and 300 to 700 kg, and '
++ 'the wooden anchors found beside them carbon-dated from the second '
++ 'century BC into this ship\'s own dynasty. Her navy\'s album draws the '
++ 'anchor on the warship plate beside mast, oars and rudder.' },
 cathead:  { stage: 3, name: 'Cathead',
 what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
 + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -2954,6 +2966,92 @@ if (cb) { cb.name = 'ia-cable'; ag.add(cb); }
 }
 }
 group.add(tag(ag, 'ironAnchors'));
+}
+if (S.woodAnchor) {
+const wa = S.woodAnchor;
+const u = (wa.atU != null) ? wa.atU : 0.05;
+const shankL = wa.shankM || 3.2, shD = 0.20;
+const armL = wa.armM || 1.2, armD = 0.12;
+const nArms = wa.arms || 4;
+const crossL = wa.crossM || 1.6;
+const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
+const cabR = (wa.cableDiaM || 0.10) / 2;
+const offZ = wa.offZ || 0;
+const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
+{ color: 0x7d7a70, roughness: 0.92, metalness: 0.02 }));
+const ai = new THREE.Group();
+const shank = new THREE.Mesh(
+new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), wood);
+shank.name = 'wa-shank';
+shank.position.y = -shankL / 2;
+ai.add(shank);
+const cross = new THREE.Mesh(
+new THREE.CylinderGeometry(armD * 0.5, armD * 0.5, crossL, 10), wood);
+cross.name = 'wa-cross';
+cross.rotation.x = Math.PI / 2;
+cross.position.y = -0.28;
+ai.add(cross);
+const perSide = Math.max(1, Math.round(nArms / 2));
+for (const sg of [1, -1]) for (let k = 0; k < perSide; k++) {
+const ang = 0.72 + (perSide > 1 ? k * 0.26 : 0.13);
+const yRoot = -(shankL - 0.55 - k * 0.28);
+const arm = new THREE.Mesh(
+new THREE.CylinderGeometry(armD * 0.38, armD * 0.5, armL, 10), wood);
+arm.name = 'wa-arm';
+arm.rotation.z = -sg * ang;
+arm.position.set(sg * (armL / 2) * Math.sin(ang) + sg * shD * 0.4,
+yRoot - (armL / 2) * Math.cos(ang), 0);
+ai.add(arm);
+const tip = new THREE.Mesh(
+new THREE.ConeGeometry(armD * 0.38, armD * 1.0, 10), wood);
+tip.name = 'wa-tip';
+tip.rotation.z = -sg * ang + Math.PI;
+tip.position.set(sg * (armL + armD * 0.5) * Math.sin(ang) + sg * shD * 0.4,
+yRoot - (armL + armD * 0.5) * Math.cos(ang), 0);
+ai.add(tip);
+}
+const yStone = -(shankL - 0.9);
+const xStone = shD * 0.55 + stoneS / 2;
+const stone = new THREE.Mesh(
+new THREE.BoxGeometry(stoneS, stoneS * 0.83, stoneL), stoneM);
+stone.name = 'wa-stone';
+stone.position.set(xStone, yStone, 0);
+ai.add(stone);
+for (const zB of [-stoneL * 0.28, stoneL * 0.28]) {
+const band = new THREE.Mesh(
+new THREE.TorusGeometry(1, 0.024, 8, 20), mats.ropeSolid || wood);
+band.name = 'wa-band';
+band.scale.set(stoneS * 0.9 + shD * 0.55, stoneS * 0.62, 1);
+band.position.set(xStone / 2, yStone, zB);
+ai.add(band);
+}
+ai.rotation.y = Math.PI / 4;
+const g = new THREE.Group();
+g.add(ai);
+const cosYaw = Math.cos(wa.yaw || 0);
+const uH = Math.max(0, u), uT = Math.max(0, u - (shankL + 0.6) * cosYaw / L);
+const slope = (uH - uT) > 1e-6
+? (deckAtU(uH) - deckAtU(uT)) / ((uH - uT) * L) : 0;
+g.rotation.z = -Math.PI / 2 + Math.atan(slope * cosYaw);
+if (wa.yaw) g.rotation.y = wa.yaw;
+const yD = deckAtU(uH);
+g.position.set((u - 0.5) * L, yD, offZ);
+g.updateMatrixWorld(true);
+const bb = new THREE.Box3().setFromObject(g);
+g.position.y += (yD - bb.min.y);
+g.updateMatrixWorld(true);
+const head = new THREE.Vector3(0, 0, 0).applyMatrix4(g.matrixWorld)
+.add(new THREE.Vector3(0.05, 0.06, 0));
+const wl = S.windlass;
+const uW = wl ? (wl.atU || 0.10) : 0.10;
+const barrelPt = new THREE.Vector3(
+(uW - 0.5) * L - (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2 + 0.18,
+deckAtU(uW) + 0.30 + (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2, offZ * 0.4);
+const cable = ropeMesh([[head, barrelPt]], cabR, mats.ropeSolid || wood);
+const ag = new THREE.Group();
+ag.add(g);
+if (cable) { cable.name = 'wa-cable'; ag.add(cable); }
+group.add(tag(ag, 'woodAnchor'));
 }
 if (S.deckhouses && S.deckhouses.length) {
 const white = mats.houseWhite || (mats.houseWhite = new THREE.MeshStandardMaterial(

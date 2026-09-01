@@ -13032,3 +13032,95 @@ unpierced. (15) r165 fantail gallery wing walls. (16) r166 screen glass
 sun-bright. (17) r171 quarter-gallery sashes. (18) r171 authored tier
 fractions. (19) r172 the 74's lower capstan barrel. (20) r181, small:
 eraSm's dead fallback branch (app.js:1353).
+
+## Round 186 — 2026-09-01 — the panokseon's 닻: the anchor her own navy's album draws
+
+**The r174 residual at the head of the anchors line OPENED AND CLOSED, judgment
+first (build/staging/r186/JUDGMENT.md): the horong has turned at u 0.10 since r175
+with nothing on its cable, and the warship plate draws the anchor r175 could not.
+Warrant NAVY-TRADITION EXTENSION with the presence leg DIRECT-BY-ALBUM: encykorea
+E0000455's own sentence lists 돛대·닻[碇]·노·키 on the 전선 plate — the anchor is ON
+the warship plate itself, where the horong had to reach the grain-ship plate; and
+the encyclopedia's gloss is the STONE-anchor character 碇. No open image of the
+plate found (Kyujanggak holds it; 2018 conservation report named, not fetched) — so
+the drawn FORM is the tradition's, fetched this round at three depths: the Standard
+Korean Dictionary's part definitions (닻가지 "보통 네 갈고리이며 두 갈고리도 있다"
+— hook-arms usually FOUR; 닻장 "닻채 위에 닻줄을 매도록 가로 박은" — the crossbar
+at the shank head the cable bends on); the Korea Heritage Service's 닻돌 report
+(154 anchor stones, central West Sea 2008–2019, Mado 141, rope grooves cut 나무닻과
+묶을 수 있도록, radiocarbon ON THE WOODEN ANCHORS found with them 2nd c. BC through
+Joseon — her own dynasty inside the run; large class "over 2 m, 300–700 kg", Taean
+exhibition 2021); and the living boatwright (마광남, 배목수이야기 42: 石碇/木碇/鐵碇,
+oak chosen because it sinks, stones bound at the 닻장, his own figure naming the
+Chinese carve-the-stone-as-crossbar cognate). The institute's wood-and-stone
+reproduction EXISTS in that exhibition and was not fetchable — it replaces the
+stone-station inference the round it is fetched, and the provenance says so.**
+
+**The change, class not instance: a generic datum-driven `woodAnchor` block in
+buildFittings (silence draws nothing), its own PARTS card, and the record
+`woodAnchor{atU 0.08, offZ 1.55, yaw -0.74, shankM 3.2, armM 1.2, arms 4, crossM
+1.6, stoneLenM 2.0, stoneSecM 0.3}` + anchorProvenance on the panokseon. Statuses
+all named: arms 4 the dictionary's usual; stone at the recorded large-class
+threshold (~400 kg granite at these dims, a load the drawn four-man horong breaks
+out); shank/arms/crossbar DRAWN CLASS DEFAULTS (no fetched source dimensions a
+naval anchor — the Azzam rule); stone lashed across the shank above the crown, long
+axis with the crossbar's, a DRAWN INFERENCE from function + the boatwright's
+Chinese cognate; stow PLACEMENT INFERENCE, the fleet rule (r182–r185): recovered on
+the foredeck, rolled 45°, pitched to the deck gradient × cos(yaw), settled by box,
+cable bent at the head and led INTO the horong's drum face.**
+
+**Iterated by measurement, not by eye: draft 1 (atU 0.06, yaw +0.45) was convicted
+by my own new rule's first live run — V-REST "no surface under the assembly"
+(probe_fore.py ray grid: the walkable foredeck ENDS at u −0.02, and the drawn stow
+hung 1.3 m past the bow with its tail swung OUTBOARD past the narrowing deck edge);
+the same run caught the cable stopping 2 cm short of the barrel (the audit's
+part-attached-to-nothing rule) and V-STONE misreading 1.65 m — a world AABB cannot
+read a box rolled 45° (the r182 span lesson recurring), REWRITTEN to read the
+stone's own geometry extents through the world matrix's scale columns. Final: head
+at u 0.08 beside the barrel, tail yawed inboard across the foredeck triangle,
+measured (measure_ship): wa-shank u −0.002..0.083, wa-cross at the head u
+0.057..0.090, wa-cable u 0.080..0.099 reaching into the drum, tips at the stem
+board.**
+
+**Audit: 33/0 live after the placement fix and again on the final built tree. Rule
+proven able to convict on final code: sever (arms stripped under a faithful
+record) → exactly ONE conviction, V-ARMS "0 hook points drawn — the record hangs
+4"; drag (stone stretched 1.30× along its axis) → V-STONE reads 2.60 THROUGH the
+45° roll and yaw, plus an honest second conviction — the stretched stone really
+does stab 0.39 m through the planking (V-REST seeing a true consequence).**
+
+**Looked at (rules 0 and 1): the profile tool's plan view, bow crop at 3×
+(build/staging/r186/z-wa-plan-bowcrop.png) — the frame reads as a rendered deck,
+not a chart. Three facts a viewer can read off it: a wooden anchor lies diagonally
+across the foredeck with a grey stone lashed athwart its shank; its hook-arms reach
+toward the stem board while its head lies beside the windlass drum whose two long
+bars cross at different stations; the furled battened sail lies diagonally on the
+deck break abaft it with the oars fanned along both sides.**
+
+**Frames: no opening 64 (chain: r185's close ran the FULL 64 on this exact tree
+minus loop.log, 06:28–07:00, passed whole). Close solo on final code (the r174
+fallback — a research-and-draw round inside one 80-min watchdog): ship-panokseon
+0.078% read and located (the diff is the anchor's X at the bow and nothing else),
+ACCEPTED with logged reason (r132-in-advance), then 0.000; ship-sekibune,
+ship-galleass, action-myeongnyang all within tolerance untouched. **r187's opening
+OWES THE FULL 64.**
+
+**Deployed: data-version 1788273906. Live verify below.**
+
+**Named residuals, in order:** (1) the anchors line, last member: the wasen
+yotsume-ikari (four-fluke iron anchor, minamichita). (2) NEW r186, small: the
+panokseon's card `text` is the old prose schema — no "Ground tackle, as drawn" row
+could be appended (the dhow/junk/treasure rows live in array-form text); convert
+her text to the array schema and add the row, and shoot the PARTS card row, which
+this round could not reach in the panel DOM. (3) NEW r186, small: the stone's
+station on the frame is a DRAWN INFERENCE — the Taean exhibition reproduction photo
+replaces it when fetched (search: 나무닻 닻돌 재현품 사진). (4) r182 grapnel shank
+reconstruction. (5) r183 junk stone bar class default (any dimensioned 碇石).
+(6) r184 four-claw dimensions derived/default (Quanzhou/Penglai finds). (7) r177
+Lucian's second machine. (8) r173 cog Gangspill. (9) r173 cog castles. (10) r173
+cog rudder slab. (11) r176 sekibune class-size (kiwari read). (12) boxy classes:
+top (18), channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance
+forecastle. (15) Azzam crest span. (16) r164 risen black unpierced. (17) r165
+fantail gallery wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes.
+(20) r171 authored tier fractions. (21) r172 the 74's lower capstan barrel.
+(22) r181 eraSm dead fallback branch (app.js:1353).

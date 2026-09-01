@@ -3535,6 +3535,18 @@ const PARTS = {
                   + 'crew\'s name for its cable — ben shen, the ship\'s own life — says '
                   + 'what hung on it. The cables themselves are split green bamboo, '
                   + 'boiled and twisted.' },
+  woodAnchor: { stage: 3, name: 'Wooden anchor and its stone',
+              what: 'The Korean tradition\'s ground tackle: an oak shank — the 닻채 — with '
+                  + 'hook-arms spread from it like branches, usually four, two hung to a '
+                  + 'side; a crossbar fixed through the head where the cable bends on; and '
+                  + 'a long rectangular stone lashed across the frame, because oak alone '
+                  + 'will not sink — the stone carries the anchor down and drives the hooks '
+                  + 'into the tidal mud. The West Sea keeps the record of the type: 154 '
+                  + 'anchor stones lifted off Taean and Incheon since 2008, rope grooves '
+                  + 'still cut in them, the largest over two metres and 300 to 700 kg, and '
+                  + 'the wooden anchors found beside them carbon-dated from the second '
+                  + 'century BC into this ship\'s own dynasty. Her navy\'s album draws the '
+                  + 'anchor on the warship plate beside mast, oars and rudder.' },
   cathead:  { stage: 3, name: 'Cathead',
               what: 'The beam standing out over the bow that the anchor hangs from. Weighing '
                   + 'is a tackle problem: the ring must be caught, lifted clear of the water '
@@ -4644,6 +4656,128 @@ function buildFittings(S, group, mats) {
       }
     }
     group.add(tag(ag, 'ironAnchors'));
+  }
+
+  /* ── THE KOREAN WOODEN ANCHOR AND ITS STONE, FROM THE RECORD ────────────────────────
+     `woodAnchor: {atU?, offZ?, yaw?, shankM?, armM?, arms?, crossM?, stoneLenM?,
+                   stoneSecM?, cableDiaM?}`
+     The composite the West Sea record preserves: an oak shank (닻채), hook-arms hung
+     both sides of it (닻가지 — the dictionary's usual count is FOUR, two also occur),
+     a crossbar fixed through the upper shank where the cable bends (닻장), and a long
+     rectangular anchor-stone (닻돌) lashed across the frame to sink it — 154 such
+     stones lifted off Taean/Incheon 2008–2019, rope grooves cut for the lashing, the
+     wooden anchors beside them radiocarbon-dated 2nd c. BC through Joseon. The stone's
+     station on the frame is a DRAWN INFERENCE (the institute's reproduction exists and
+     replaces it when fetched); its long axis rides with the crossbar's, athwart the
+     arm plane, so weight and stock work together. The drawn ship is under way, so the
+     anchor lies recovered on the foredeck (the fleet stow, r182–r185): shank
+     fore-and-aft with the arms forward, rolled 45° so no member stands upright,
+     pitched to the deck's own gradient, settled by box; the cable bent at the shank
+     head and led to the horong's barrel, where the machine holds the rest — no coil
+     on deck. Silence draws nothing: only a woodAnchor record draws one. */
+  if (S.woodAnchor) {
+    const wa = S.woodAnchor;
+    const u = (wa.atU != null) ? wa.atU : 0.05;
+    const shankL = wa.shankM || 3.2, shD = 0.20;
+    const armL = wa.armM || 1.2, armD = 0.12;
+    const nArms = wa.arms || 4;
+    const crossL = wa.crossM || 1.6;
+    const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
+    const cabR = (wa.cableDiaM || 0.10) / 2;
+    const offZ = wa.offZ || 0;
+    const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
+      { color: 0x7d7a70, roughness: 0.92, metalness: 0.02 }));
+    /* local frame: origin at the shank head where the cable bends on, -Y down the
+       shank to the crown; arms spread in the XY plane, crossbar and stone along Z */
+    const ai = new THREE.Group();
+    const shank = new THREE.Mesh(
+      new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), wood);
+    shank.name = 'wa-shank';
+    shank.position.y = -shankL / 2;
+    ai.add(shank);
+    const cross = new THREE.Mesh(
+      new THREE.CylinderGeometry(armD * 0.5, armD * 0.5, crossL, 10), wood);
+    cross.name = 'wa-cross';
+    cross.rotation.x = Math.PI / 2;
+    cross.position.y = -0.28;
+    ai.add(cross);
+    /* the hook-arms: nArms total, half to each side, splayed within the XY plane,
+       sweeping outward-down from just above the crown so the points end past the
+       foot (the culturecontent line: hooks hung on BOTH SIDES of the post) */
+    const perSide = Math.max(1, Math.round(nArms / 2));
+    for (const sg of [1, -1]) for (let k = 0; k < perSide; k++) {
+      const ang = 0.72 + (perSide > 1 ? k * 0.26 : 0.13);   /* rad from -Y, outward */
+      const yRoot = -(shankL - 0.55 - k * 0.28);
+      const arm = new THREE.Mesh(
+        new THREE.CylinderGeometry(armD * 0.38, armD * 0.5, armL, 10), wood);
+      arm.name = 'wa-arm';
+      arm.rotation.z = -sg * ang;
+      arm.position.set(sg * (armL / 2) * Math.sin(ang) + sg * shD * 0.4,
+                       yRoot - (armL / 2) * Math.cos(ang), 0);
+      ai.add(arm);
+      const tip = new THREE.Mesh(
+        new THREE.ConeGeometry(armD * 0.38, armD * 1.0, 10), wood);
+      tip.name = 'wa-tip';
+      tip.rotation.z = -sg * ang + Math.PI;
+      tip.position.set(sg * (armL + armD * 0.5) * Math.sin(ang) + sg * shD * 0.4,
+                       yRoot - (armL + armD * 0.5) * Math.cos(ang), 0);
+      ai.add(tip);
+    }
+    /* the anchor-stone, lashed across the shank just above the arm roots, long axis
+       along the crossbar's — the grooved rectangular bar the West Sea record keeps */
+    const yStone = -(shankL - 0.9);
+    const xStone = shD * 0.55 + stoneS / 2;
+    const stone = new THREE.Mesh(
+      new THREE.BoxGeometry(stoneS, stoneS * 0.83, stoneL), stoneM);
+    stone.name = 'wa-stone';
+    stone.position.set(xStone, yStone, 0);
+    ai.add(stone);
+    /* lashings through the stone's own rope grooves, round stone and shank both */
+    for (const zB of [-stoneL * 0.28, stoneL * 0.28]) {
+      const band = new THREE.Mesh(
+        new THREE.TorusGeometry(1, 0.024, 8, 20), mats.ropeSolid || wood);
+      band.name = 'wa-band';
+      band.scale.set(stoneS * 0.9 + shD * 0.55, stoneS * 0.62, 1);
+      band.position.set(xStone / 2, yStone, zB);
+      ai.add(band);
+    }
+    /* stow: roll 45° about the shank's own axis, then lay the shank fore-and-aft,
+       arms forward, pitched to the deck's own gradient (the r183 rule — settled
+       flat it would stab its forward points through the rising planking) */
+    ai.rotation.y = Math.PI / 4;
+    const g = new THREE.Group();
+    g.add(ai);
+    /* the fore-aft footprint shortens with yaw, and the pitch follows the deck
+       along the shank's own line, not the centreline's (gradient × cos yaw) */
+    const cosYaw = Math.cos(wa.yaw || 0);
+    const uH = Math.max(0, u), uT = Math.max(0, u - (shankL + 0.6) * cosYaw / L);
+    const slope = (uH - uT) > 1e-6
+      ? (deckAtU(uH) - deckAtU(uT)) / ((uH - uT) * L) : 0;
+    g.rotation.z = -Math.PI / 2 + Math.atan(slope * cosYaw);
+    if (wa.yaw) g.rotation.y = wa.yaw;
+    const yD = deckAtU(uH);
+    g.position.set((u - 0.5) * L, yD, offZ);
+    /* settle onto the deck by measurement, not trigonometry (the grapnel's rule) */
+    g.updateMatrixWorld(true);
+    const bb = new THREE.Box3().setFromObject(g);
+    g.position.y += (yD - bb.min.y);
+    g.updateMatrixWorld(true);
+    /* the cable: bent at the shank head above the crossbar, led to the horong's
+       barrel, where the machine holds the rest — no coil on deck (r183) */
+    const head = new THREE.Vector3(0, 0, 0).applyMatrix4(g.matrixWorld)
+      .add(new THREE.Vector3(0.05, 0.06, 0));
+    const wl = S.windlass;
+    const uW = wl ? (wl.atU || 0.10) : 0.10;
+    /* the lead ends INSIDE the drum's forward face — the turns are wound on, and
+       a rope that stops a pixel short of the barrel is a part attached to nothing */
+    const barrelPt = new THREE.Vector3(
+      (uW - 0.5) * L - (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2 + 0.18,
+      deckAtU(uW) + 0.30 + (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2, offZ * 0.4);
+    const cable = ropeMesh([[head, barrelPt]], cabR, mats.ropeSolid || wood);
+    const ag = new THREE.Group();
+    ag.add(g);
+    if (cable) { cable.name = 'wa-cable'; ag.add(cable); }
+    group.add(tag(ag, 'woodAnchor'));
   }
 
   /* ── THE DECKHOUSE, FROM THE RECORD: `deckhouses: [{a, b, hM, wF}]` ─────────────────
