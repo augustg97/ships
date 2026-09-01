@@ -13405,3 +13405,81 @@ channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle.
 wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes. (20) r171 authored
 tier fractions. (21) r172 the 74's lower capstan barrel. (22) r181 eraSm dead
 fallback branch (app.js:1353).
+
+## Round 190 — 2026-09-01 — the anchors take their recorded weight: the mass residual paid by a record, not a photograph
+
+**The r189 queue head OPENED AND CLOSED (build/staging/r190/JUDGMENT.md): the
+residual asked for a photograph of the Penglai find to settle the arm
+cross-sections. The fetch found calipers instead — the same harbour's SECOND
+dredge (2005) raised a complete four-claw iron anchor, and the excavation brief
+(蓬莱3艘古船发掘简报 §7 船用文物, haijiaoshi.com/archives/425, saved to staging)
+measures it: 锚杆长177㎝，径8.5㎝ / 锚爪长73㎝，径7㎝ / 锚爪间距144㎝ / 缆口径
+4.5㎝, forge marks named on the surface. Under the standing rule that the record
+beats a derivation from the record, a published caliper measurement of the same
+class at the same site outranks both the museum photograph (not chased further)
+and the line weights of 王冠倬's illustration, which is what r189's sections
+were.**
+
+**The mass balance convicted the drawn model: integrating the r189 members gives
+156 kg of wrought iron at the calibrator's 2.15 m against the caption's 456 —
+15.7 kg/m³, below even the slender small-craft class, for the anchors of the
+stocky naval build (45.9). The method validates itself on the caliper record:
+the 2005 anchor's own members integrate to ~170 kg, which at its ~1.94 m is
+22.9 kg/m³ — landing on r188's slender class line derived independently from
+the Liangshan inscription; hand that mass and length back to the new solve and
+it returns claw ⌀7.1 cm against the calipered 7.0, shank 9.7 against 8.5. The
+plate and the caliper AGREE on the shank fraction (0.045/0.044); the arms alone
+were the line weights' lie (drawn ⌀0.024→0.009 of 全長 vs caliper ~0.036
+constant).**
+
+**Class not instance: makeAnchor(fullL, kg) — member sections are SOLVED per
+anchor so the drawn iron weighs the record's own mass at 7850 kg/m³, the one
+dimension the 舟車 text records (500 catties the sheet). Section RATIOS from the
+caliper record (shank ⌀ 1.21× claw ⌀; claw one diameter over its length,
+falling to 0.6 at the last station for the forged point); claw CENTRELINE,
+crown ball and head eye stay the plate's (r189). Nothing is a knob: a slender
+record draws slender members. Record fields sheetKg 295 (RECORDED), bowerKg /
+sternKg 177 (the standing inference); all three solve to t≈1.43 — one density
+class, geometric similarity, the r188 cube-law preserved. Solved sheet: shank
+⌀13.4→10.3 cm, claw ⌀9.8→5.9. NEW RULE V-MASS: each anchor's iron INTEGRATED
+from the built scene — every member's analytic volume through its own world
+matrix's DETERMINANT, exact under any linear map — against the record's weight
+slot, 12% band, {len, sweep, kg} in ONE pass sorted together (the r189 slot
+lesson); missing members are V-COUNT's fault.**
+
+**Proofs on final code: inj-ia-mass (NEW, members thinned ×0.8 in x/z) →
+exactly ONE, V-MASS 189/295; drag → V-LEN 2.28/1.86 plus the PREDICTED honest
+V-MASS second 346/295 (a stretched shank truly carries the extra iron — named,
+r185 precedent); sever → V-CLAWS 16/5 ALONE, V-MASS silent (tips are 0.6% of
+the iron); sweep → V-SWEEP 0.81/0.63 ALONE (positions carry no volume). Audit
+33/0 twice (post-land, final built tree).**
+
+**Frames: opening 64 PAID AND PURE — launched 11:52 unedited, edits landed
+12:13 atomically after frames 41/42 captured (ship-treasure 0.000 pre-edit);
+64/64, 0 movers, 0 BLANK, EXIT:0, frames 43–63 scored on the edited tree prove
+the class edit inert for every other hull. Close solos: ship-treasure 0.012% —
+the diff is the five anchors' own silhouettes, nothing else — ACCEPTED with
+FRAME-LOG reason, then 0.000; aboard-treasure 0.002% flap, not accepted. Looked
+at (rules 0/1, look-bow/look-stern crops): the members read as heavy forged bar
+now, not wire; the stern pair's cables bent to their eyes with coils beside
+them on the castle roof.**
+
+**Deployed: data-version 1788291130. Card row and provenance carry the solve,
+the brief and its URL.**
+
+**Named residuals, in order:** (1) NEW r190, small: the yotsume-ikari class
+(sekibune, r187) has no mass model — its ~120 kg corpus default is not yet an
+audited property; extend the mass solve and a V-YMASS when a member record for
+the Japanese four-claw form surfaces. (2) r187: the 1433 Jingu Kogo engi emaki
+warship-anchor plate — fetch in resolution if it surfaces open. (3) r187: the
+two ray-free anchor rest rules (grapnel, stoneAnchor) still compare against the
+sheer FUNCTION, not the drawn plank — move to the surface-asked form. (4) r186:
+the panokseon stone-station inference (Taean reproduction photo). (5) r182
+grapnel shank reconstruction. (6) r183 junk stone bar class default. (7) r177
+Lucian's second machine. (8) r173 cog Gangspill. (9) r173 cog castles. (10)
+r173 cog rudder slab. (11) r176 sekibune class-size (kiwari read). (12) boxy
+classes: top (18), channel/cheek/cathead. (13) Preussen mast livery. (14)
+Endurance forecastle. (15) Azzam crest span. (16) r164 risen black unpierced.
+(17) r165 fantail gallery wings. (18) r166 screen glass. (19) r171
+quarter-gallery sashes. (20) r171 authored tier fractions. (21) r172 the 74's
+lower capstan barrel. (22) r181 eraSm dead fallback branch (app.js:1353).

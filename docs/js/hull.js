@@ -2862,14 +2862,36 @@ const wDia = wl ? (wl.barrelDiaM || 0.5) : 0.5;
 const IA_P = {
 crownR: 0.0391,
 ringR: 0.0216, ringT: 0.0095,
-claw: [[0.000, 0.035, 0.0120],
-[0.140, 0.060, 0.0075],
-[0.260, 0.135, 0.0060],
-[0.315, 0.180, 0.0045]],
-tip: [0.339, 0.201]
+claw: [[0.000, 0.035], [0.140, 0.060],
+[0.260, 0.135], [0.315, 0.180]],
+tip: [0.339, 0.201],
+shTop: 0.01932, shBot: 0.0253,
+clawS: [0.01838, 0.01838, 0.01562, 0.01103]
 };
-const makeAnchor = (fullL) => {
-const shD = fullL * 0.046;
+const iaFrus = (r0, r1, h) => Math.PI * h / 3 * (r0 * r0 + r0 * r1 + r1 * r1);
+const iaVolF = (t) => {
+let v = 4 / 3 * Math.PI * Math.pow(IA_P.crownR, 3)
++ 2 * Math.PI * Math.PI * IA_P.ringR * IA_P.ringT * IA_P.ringT;
+const ringC = 1 - IA_P.crownR - IA_P.ringR - IA_P.ringT;
+v += iaFrus(IA_P.shBot * t, IA_P.shTop * t, ringC - IA_P.ringR);
+let c = 0;
+for (let s = 0; s + 1 < IA_P.claw.length; s++)
+c += iaFrus(IA_P.clawS[s] * t, IA_P.clawS[s + 1] * t,
+Math.hypot(IA_P.claw[s + 1][0] - IA_P.claw[s][0],
+IA_P.claw[s + 1][1] - IA_P.claw[s][1]));
+const last = IA_P.claw[IA_P.claw.length - 1];
+c += Math.PI * Math.pow(IA_P.clawS[3] * t, 2)
+* Math.hypot(IA_P.tip[0] - last[0], IA_P.tip[1] - last[1]) / 3;
+return v + 4 * c;
+};
+const makeAnchor = (fullL, kg) => {
+const need = kg / (7850 * fullL * fullL * fullL);
+let lo = 0.2, hi = 6;
+for (let i = 0; i < 48; i++) {
+const mid = (lo + hi) / 2;
+if (iaVolF(mid) < need) lo = mid; else hi = mid;
+}
+const t = (lo + hi) / 2;
 const g2 = new THREE.Group();
 g2.name = 'ia-grp';
 const crown = new THREE.Mesh(
@@ -2878,7 +2900,8 @@ crown.name = 'ia-crown'; g2.add(crown);
 const ringC = fullL * (1 - IA_P.crownR - IA_P.ringR - IA_P.ringT);
 const shankL = ringC - fullL * IA_P.ringR;
 const sh = new THREE.Mesh(
-new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), ironG);
+new THREE.CylinderGeometry(fullL * IA_P.shTop * t, fullL * IA_P.shBot * t,
+shankL, 10), ironG);
 sh.name = 'ia-shank'; sh.position.y = shankL / 2; g2.add(sh);
 const ring = new THREE.Mesh(
 new THREE.TorusGeometry(fullL * IA_P.ringR, fullL * IA_P.ringT, 8, 18), ironG);
@@ -2886,7 +2909,8 @@ ring.name = 'ia-ring'; ring.position.y = ringC; g2.add(ring);
 for (let k = 0; k < 4; k++) {
 const cg2 = new THREE.Group();
 cg2.rotation.y = k * Math.PI / 2;
-const P = IA_P.claw.map(p => [p[0] * fullL, p[1] * fullL, p[2] * fullL]);
+const P = IA_P.claw.map((p, pi) =>
+[p[0] * fullL, p[1] * fullL, IA_P.clawS[pi] * t * fullL]);
 for (let s = 0; s + 1 < P.length; s++) {
 const [x0, y0, r0] = P[s], [x1, y1, r1] = P[s + 1];
 const dl = Math.hypot(x1 - x0, y1 - y0);
@@ -2939,7 +2963,7 @@ if (c) { c.name = 'ia-cable'; ag.add(c); }
 };
 if (ia.sheetLenM !== 0) {
 const fL = ia.sheetLenM || 1.86;
-const g2 = makeAnchor(fL);
+const g2 = makeAnchor(fL, ia.sheetKg || 295);
 const ringP = stow(g2, fL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
 ag.add(g2);
 const barrelPt = new THREE.Vector3(
@@ -2949,7 +2973,7 @@ cableTo(ringP, barrelPt, 0.035);
 if (ia.bowerLenM !== 0) {
 const fL = ia.bowerLenM || 1.57;
 for (const sg of [1, -1]) {
-const g2 = makeAnchor(fL);
+const g2 = makeAnchor(fL, ia.bowerKg || 177);
 const ringP = stow(g2, fL, ia.pairAtU != null ? ia.pairAtU : 0.060,
 sg * (ia.pairOffZ || 2.4));
 ag.add(g2);
@@ -2964,7 +2988,7 @@ const dhP = B * 0.115;
 const poopTop = u => deckAtU(u) + dhP * (S.poop[2] + 0.02);
 const ropeM = mats.ropeSolid || wood;
 for (const sg of [1, -1]) {
-const g2 = makeAnchor(fL);
+const g2 = makeAnchor(fL, ia.sternKg || 177);
 const zA = sg * (ia.sternOffZ || 2.4);
 const ringP = stow(g2, fL, ia.sternAtU, zA, poopTop);
 ag.add(g2);

@@ -3615,7 +3615,14 @@
        from the shank's own world axis — against the proportion measured from the
        same find's drawing, 0.339 of the record's 全長 (fig. 3a self-scaled,
        322.8 px/m). An anchor with no tips is V-CLAWS's conviction, so V-SWEEP
-       passes over it. V-REST (r185): each assembly asked of the
+       passes over it. V-MASS (r190): each anchor's iron INTEGRATED from the
+       built scene — every member's analytic volume (frustum, cone, ball, torus
+       from its geometry parameters) through its own world matrix's DETERMINANT,
+       exact under any linear map — × 7850 kg/m³ against the record's weight
+       slot (sheetKg 295 RECORDED, the 舟車 text's own 500 catties; the pair's
+       300-catty inference), 12% band; {len, sweep, kg} measured in ONE pass and
+       sorted together (the r189 slot lesson). An anchor with missing members is
+       V-COUNT's fault and V-MASS passes over it. V-REST (r185): each assembly asked of the
        SURFACE ITSELF — a ray straight down from over the assembly, first non-anchor
        hit is the surface it must rest on. Sheer-only V-REST would convict any
        poop-stowed stern anchor as floating, and could never see a missing roof.
@@ -3655,13 +3662,38 @@
            stays together, sorted by length — the first sever run proved that
            sorting sweeps separately slides the survivors against the wrong record
            slots and convicts an innocent anchor. */
+        const volOf = (o) => {
+          /* analytic member volume through the world matrix's determinant —
+             exact under any linear map, so a stretched or thinned member
+             weighs as drawn (r190) */
+          o.updateMatrixWorld(true);
+          const e = o.matrixWorld.elements;
+          const det = Math.abs(
+            e[0] * (e[5] * e[10] - e[6] * e[9])
+            - e[4] * (e[1] * e[10] - e[2] * e[9])
+            + e[8] * (e[1] * e[6] - e[2] * e[5]));
+          const pg = o.geometry.parameters;
+          if (o.geometry.type === 'ConeGeometry')
+            return det * Math.PI * pg.radius * pg.radius * pg.height / 3;
+          if (o.geometry.type === 'CylinderGeometry')
+            return det * Math.PI * pg.height / 3
+              * (pg.radiusTop * pg.radiusTop + pg.radiusTop * pg.radiusBottom
+                 + pg.radiusBottom * pg.radiusBottom);
+          if (o.geometry.type === 'SphereGeometry')
+            return det * 4 / 3 * Math.PI * Math.pow(pg.radius, 3);
+          if (o.geometry.type === 'TorusGeometry')
+            return det * 2 * Math.PI * Math.PI * pg.radius * pg.tube * pg.tube;
+          return 0;
+        };
         const per = grps.map(gr => {
-          let shk = null, rng = null, crn = null; const tps = [];
-          gr.traverse(o => { if (o.name === 'ia-shank') shk = o;
+          let shk = null, rng = null, crn = null;
+          const tps = [], mem = [];
+          gr.traverse(o => { if (o.isMesh) mem.push(o);
+            if (o.name === 'ia-shank') shk = o;
             else if (o.name === 'ia-ring') rng = o;
             else if (o.name === 'ia-crown') crn = o;
             else if (o.name === 'ia-tip') tps.push(o); });
-          if (!shk || !rng || !crn) return { len: 0, sweep: null };
+          if (!shk || !rng || !crn) return { len: 0, sweep: null, kg: null };
           let lo = Infinity, hi = -Infinity;
           const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
           for (const o of [shk, rng, crn]) {
@@ -3686,24 +3718,35 @@
             const rad = d.sub(ax.clone().multiplyScalar(d.dot(ax))).length();
             if (mx == null || rad > mx) mx = rad;
           }
-          return { len: hi - lo, sweep: mx };
+          const kg = 7850 * mem.reduce((s2, o) => s2 + volOf(o), 0);
+          return { len: hi - lo, sweep: mx, kg };
         }).sort((a, b2) => b2.len - a.len);
         const wantLn = [];
-        if (R.sheetLenM !== 0) wantLn.push(R.sheetLenM || 1.86);
-        if (R.bowerLenM !== 0) wantLn.push(R.bowerLenM || 1.57, R.bowerLenM || 1.57);
+        if (R.sheetLenM !== 0)
+          wantLn.push({ ln: R.sheetLenM || 1.86, kg: R.sheetKg || 295 });
+        if (R.bowerLenM !== 0)
+          for (let k2 = 0; k2 < 2; k2++)
+            wantLn.push({ ln: R.bowerLenM || 1.57, kg: R.bowerKg || 177 });
         if (R.sternAtU != null && R.sternLenM !== 0)
-          wantLn.push(R.sternLenM || 1.57, R.sternLenM || 1.57);
-        wantLn.sort((a, b2) => b2 - a);
+          for (let k2 = 0; k2 < 2; k2++)
+            wantLn.push({ ln: R.sternLenM || 1.57, kg: R.sternKg || 177 });
+        wantLn.sort((a, b2) => b2.ln - a.ln);
         for (let i = 0; i < Math.min(per.length, wantLn.length); i++) {
-          if (Math.abs(per[i].len - wantLn[i]) > 0.12 * wantLn[i])
+          if (Math.abs(per[i].len - wantLn[i].ln) > 0.12 * wantLn[i].ln)
             say(v.id, "an anchor off the record's length",
                 `crown to ring head ${per[i].len.toFixed(2)} m along the shank's own `
-                + `axis — the record's full length is ${wantLn[i]}`);
+                + `axis — the record's full length is ${wantLn[i].ln}`);
           if (per[i].sweep != null
-              && Math.abs(per[i].sweep - 0.339 * wantLn[i]) > 0.12 * 0.339 * wantLn[i])
+              && Math.abs(per[i].sweep - 0.339 * wantLn[i].ln)
+                 > 0.12 * 0.339 * wantLn[i].ln)
             say(v.id, "a claw sweep off the find's proportion",
                 `claw reach ${per[i].sweep.toFixed(2)} m from the shank's own axis — `
-                + `the Penglai proportion gives ${(0.339 * wantLn[i]).toFixed(2)}`);
+                + `the Penglai proportion gives ${(0.339 * wantLn[i].ln).toFixed(2)}`);
+          if (per[i].kg != null
+              && Math.abs(per[i].kg - wantLn[i].kg) > 0.12 * wantLn[i].kg)
+            say(v.id, "an anchor off the record's weight",
+                `${per[i].kg.toFixed(0)} kg of drawn iron integrated from the scene — `
+                + `the record's weight is ${wantLn[i].kg}`);
         }
         const rayR = new THREE.Raycaster();
         for (const gr of grps) {

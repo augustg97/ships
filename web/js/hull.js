@@ -4510,7 +4510,9 @@ function buildFittings(S, group, mats) {
      anchor of 1984, 全長 2.15 m at 456 kg (Matsui 2013 fig. 3, after 王冠倬 2000),
      cube-scales the recorded 500-catty (~295 kg) sheet to 1.86 m full length and the
      300-catty pair inference to 1.57 m; part proportions are MEASURED from the same
-     find's own drawing (r189, fig. 3a self-scaled) — all named in the provenance. The record fields carry the FULL crown-to-ring length
+     find's own drawing (r189, fig. 3a self-scaled); member SECTIONS are SOLVED from
+     each anchor's recorded weight at 7850 kg/m³, their ratios from the same
+     harbour's 2005 caliper record (r190) — all named in the provenance. The record fields carry the FULL crown-to-ring length
      a find's 全長 measures (the r187 yotsume convention): the builder splits it so the
      drawn ring top lands at the field's value. Drawn recovered, all five: the bow-worked three on the foredeck,
      the stern pair (梢用二枝, r185) on the poop's top tier roof — the surface the ray
@@ -4537,19 +4539,54 @@ function buildFittings(S, group, mats) {
        the calibrator's own drawing (Matsui 2013 fig. 3a, the Penglai find, r189 —
        fig3a self-scales at 全長 2.15 m, read at 322.8 px/m; fractions of 全長): the
        claw springs at the shank foot, runs near-flat to r 0.14, rises through an
-       elbow to its point at (0.339, +0.201) — the in-plane pair's mean; arms taper
-       0.024 → 0.009 across; the head is a small forged eye 0.062 wide. */
+       elbow to its point at (0.339, +0.201) — the in-plane pair's mean; the head
+       is a small forged eye 0.062 wide. Sections are NOT the plate's: its line
+       weights starve the iron to a third of the recorded mass (r190). */
     const IA_P = {
       crownR: 0.0391,                    /* crown ball — bottom lands at −0.0391 */
       ringR: 0.0216, ringT: 0.0095,      /* the eye: centre radius, tube */
-      claw: [[0.000, 0.035, 0.0120],     /* [r, y, section radius] along the arm */
-             [0.140, 0.060, 0.0075],
-             [0.260, 0.135, 0.0060],
-             [0.315, 0.180, 0.0045]],
-      tip: [0.339, 0.201]                /* the measured point the cone lands on */
+      claw: [[0.000, 0.035], [0.140, 0.060],   /* [r, y] centreline stations —  */
+             [0.260, 0.135], [0.315, 0.180]],  /* the plate's own (r189)        */
+      tip: [0.339, 0.201],               /* the measured point the cone lands on */
+      /* SECTIONS (r190): the plate's line weights starved the iron — they summed
+         to 156 kg against the find's captioned 456. Section RATIOS are the same
+         harbour's caliper record (the 2005 dredge brief: shank ⌀8.5 to claw ⌀7,
+         one diameter over the claw's length, a fall to the point); the absolute
+         scale t is SOLVED per anchor below so the drawn iron weighs the record's
+         own mass. Fractions of 全長 at t = 1. */
+      shTop: 0.01932, shBot: 0.0253,
+      clawS: [0.01838, 0.01838, 0.01562, 0.01103]
     };
-    const makeAnchor = (fullL) => {
-      const shD = fullL * 0.046;
+    /* iron volume of one anchor as a fraction of 全長³ at section scale t —
+       crown ball and head eye are the plate's (r189) and stay fixed; shank and
+       claw sections scale. The audit integrates this same sum from the built
+       scene (V-MASS). */
+    const iaFrus = (r0, r1, h) => Math.PI * h / 3 * (r0 * r0 + r0 * r1 + r1 * r1);
+    const iaVolF = (t) => {
+      let v = 4 / 3 * Math.PI * Math.pow(IA_P.crownR, 3)
+            + 2 * Math.PI * Math.PI * IA_P.ringR * IA_P.ringT * IA_P.ringT;
+      const ringC = 1 - IA_P.crownR - IA_P.ringR - IA_P.ringT;
+      v += iaFrus(IA_P.shBot * t, IA_P.shTop * t, ringC - IA_P.ringR);
+      let c = 0;
+      for (let s = 0; s + 1 < IA_P.claw.length; s++)
+        c += iaFrus(IA_P.clawS[s] * t, IA_P.clawS[s + 1] * t,
+                    Math.hypot(IA_P.claw[s + 1][0] - IA_P.claw[s][0],
+                               IA_P.claw[s + 1][1] - IA_P.claw[s][1]));
+      const last = IA_P.claw[IA_P.claw.length - 1];
+      c += Math.PI * Math.pow(IA_P.clawS[3] * t, 2)
+         * Math.hypot(IA_P.tip[0] - last[0], IA_P.tip[1] - last[1]) / 3;
+      return v + 4 * c;
+    };
+    const makeAnchor = (fullL, kg) => {
+      /* the mass solve: the record's weight is the one dimension the 舟車 text
+         gives — wrought iron 7850 kg/m³, bisect t so drawn iron = the record */
+      const need = kg / (7850 * fullL * fullL * fullL);
+      let lo = 0.2, hi = 6;
+      for (let i = 0; i < 48; i++) {
+        const mid = (lo + hi) / 2;
+        if (iaVolF(mid) < need) lo = mid; else hi = mid;
+      }
+      const t = (lo + hi) / 2;
       const g2 = new THREE.Group();
       g2.name = 'ia-grp';
       const crown = new THREE.Mesh(
@@ -4558,7 +4595,8 @@ function buildFittings(S, group, mats) {
       const ringC = fullL * (1 - IA_P.crownR - IA_P.ringR - IA_P.ringT);
       const shankL = ringC - fullL * IA_P.ringR;
       const sh = new THREE.Mesh(
-        new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), ironG);
+        new THREE.CylinderGeometry(fullL * IA_P.shTop * t, fullL * IA_P.shBot * t,
+                                   shankL, 10), ironG);
       sh.name = 'ia-shank'; sh.position.y = shankL / 2; g2.add(sh);
       const ring = new THREE.Mesh(
         new THREE.TorusGeometry(fullL * IA_P.ringR, fullL * IA_P.ringT, 8, 18), ironG);
@@ -4568,7 +4606,8 @@ function buildFittings(S, group, mats) {
       for (let k = 0; k < 4; k++) {
         const cg2 = new THREE.Group();
         cg2.rotation.y = k * Math.PI / 2;
-        const P = IA_P.claw.map(p => [p[0] * fullL, p[1] * fullL, p[2] * fullL]);
+        const P = IA_P.claw.map((p, pi) =>
+          [p[0] * fullL, p[1] * fullL, IA_P.clawS[pi] * t * fullL]);
         for (let s = 0; s + 1 < P.length; s++) {
           const [x0, y0, r0] = P[s], [x1, y1, r1] = P[s + 1];
           const dl = Math.hypot(x1 - x0, y1 - y0);
@@ -4627,7 +4666,7 @@ function buildFittings(S, group, mats) {
     /* the sheet anchor, centreline, forward of the pair */
     if (ia.sheetLenM !== 0) {
       const fL = ia.sheetLenM || 1.86;
-      const g2 = makeAnchor(fL);
+      const g2 = makeAnchor(fL, ia.sheetKg || 295);
       const ringP = stow(g2, fL, ia.sheetAtU != null ? ia.sheetAtU : 0.030, 0);
       ag.add(g2);
       /* its cable — the one the text names 本身 — led to the barrel that lifts it */
@@ -4639,7 +4678,7 @@ function buildFittings(S, group, mats) {
     if (ia.bowerLenM !== 0) {
       const fL = ia.bowerLenM || 1.57;
       for (const sg of [1, -1]) {
-        const g2 = makeAnchor(fL);
+        const g2 = makeAnchor(fL, ia.bowerKg || 177);
         const ringP = stow(g2, fL, ia.pairAtU != null ? ia.pairAtU : 0.060,
                            sg * (ia.pairOffZ || 2.4));
         ag.add(g2);
@@ -4662,7 +4701,7 @@ function buildFittings(S, group, mats) {
       const poopTop = u => deckAtU(u) + dhP * (S.poop[2] + 0.02);
       const ropeM = mats.ropeSolid || wood;
       for (const sg of [1, -1]) {
-        const g2 = makeAnchor(fL);
+        const g2 = makeAnchor(fL, ia.sternKg || 177);
         const zA = sg * (ia.sternOffZ || 2.4);
         const ringP = stow(g2, fL, ia.sternAtU, zA, poopTop);
         ag.add(g2);
