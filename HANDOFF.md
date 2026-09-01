@@ -13663,3 +13663,83 @@ channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle. (15
 crest span. (16) r164 risen black unpierced. (17) r165 fantail gallery wings. (18) r166
 screen glass. (19) r171 quarter-gallery sashes. (20) r171 authored tier fractions. (21)
 r172 the 74's lower capstan barrel. (22) r181 eraSm dead fallback branch (app.js:1353).
+
+## Round 193 — 2026-09-01 — the two ray-free rest rules take the surface-asked form: the comment's claim finally honoured
+
+**The r187 residual (3) OPENED AND CLOSED (build/staging/r193/JUDGMENT.md). The grapnel
+rule (r182) and the stone-anchor rule (r183) both SAID "asked of the surface itself" in
+their headers and both READ `hullSurface(H).sheer(u)` in their code — the
+comment-right-arithmetic-wrong class CLAUDE.md warns on, caught by r187 when it built the
+true form for the iron anchors and queued these two stragglers. The sheer FUNCTION
+answers at every (u, z) even where no ship exists: blind to an anchor over the side,
+blind to a raised stow, never able to say "nothing is under it". Both rules now carry
+the r185 form verbatim — box over the assembly excluding cordage, ray straight down from
+over the box centre, first non-anchor non-NONBEARING hit is the bearing surface; no hit
+convicts 'resting on nothing'; +0.25/−0.20 floating/stabbed bands.**
+
+**The probe convicted the draft before any live run (the r189 V-SWEEP-draft precedent).
+probe_rest.py, run on the :8151 shadow against the staged rule: the dhow's raked
+FOREMAST crossed the grapnel's rest-ray at y 3.2504 — 0.85 m over the deck hit at
+2.4022 — and would have convicted a seated anchor as stabbed-through 0.76 m. Same class
+as r187's forestay: a member crossing over the ray is not a surface. NONBEARING gains
+'mast', named by this measurement in its comment. Probe-measured clean seats: dhow
+grapnel +0.089 m over the deck under its centre (rigid bar touching at its forward end
+on a falling deck — the band exists for this slope), junk stone anchor −0.038 m.**
+
+**hull.js: the grapnel's cable is now NAMED grap-cable — it was the only anchor cable in
+the fleet without a name (st-/wa-/ia- all have one) — and the rest box excludes
+grap-coil and grap-cable: cordage rests at its own stations by its own settle; the
+question is whether the IRON is seated. One mesh .name and two audit rule bodies; no
+drawn geometry touched.**
+
+**Proofs — predicted in the JUDGMENT before running, all landed to the digit, all on the
+:8151 shadow (staged files overlaid on web/, the r192 procedure): clean 33/0;
+inj-gr-float (+0.50) → exactly ONE, dhow 'floating over its own deck' 0.59 m at u 0.15
+(0.089 + 0.50); inj-st-stab (−0.50) → exactly ONE, junk 'through the planking' 0.54 m at
+u 0.03 (0.038 + 0.50); inj-gr-overside (z += 6, an offZ typo made flesh — the anchor in
+air outboard of a 3.2 m half-beam) → staged: exactly ONE, dhow 'resting on nothing' at
+u 0.15; the SAME injection against the r192 audit on :8149: ZERO problems. The pre-r193
+form is provably blind to the failure class; that blindness was the residual. Post-land
+audit on :8149: 33/0 twice.**
+
+**Frames — the opening 64 DIED THIS ROUND, by my own hand, and the honest account is:
+launched 15:37 on the unedited tree, it crashed at capture frame 'shipwright-ahead'
+(readiness timeout, 60 s) at ~16:12 while I ran two 1920×1300 look_shot captures against
+the same :8149 — the tool scores only after capturing all 64, so NOTHING was scored.
+⚠ NEW TRAP: do not run big-viewport captures against :8149 while the ratchet is
+capturing — the audit runs coexisted with it harmlessly all round, but two full-page
+Shipwright loads starved the frame's readiness wait. The clock (80-min launcher kill)
+did not admit a full re-run plus a deploy. What WAS scored, on the landed tree: solos
+shipwright-ahead (proving the timeout was contention, not the app), ship-dhow and
+ship-junk (the touched class), shipwright, globe-default — all within tolerance,
+EXIT:0, no accepts, no baseline moved. The change is pixel-inert by construction
+(audit-hulls.js is not loaded by the app; the hull.js edit sets one mesh .name). r194's
+own opening 64 re-verifies the full set as every round does.**
+
+**Looked at (rules 0/1, look-dhow-crop.png / look-junk-crop.png): the dhow's grapnel
+lies as a dumped grapnel lies — two arms down, two up, the dark bell at the crossing,
+wooden shank aft with the coir coil at its head — and the raked foremast leans directly
+over it, the very shaft the probe caught crossing the ray. Three facts a viewer can
+name: a four-armed iron grapnel loose on the foredeck; its cable coiled at the shank
+head beside the foremast foot; laid plank seams and two woven hatch gratings aft. The
+junk look framed the windlass with the stone bar and its rattan lashings at the frame
+corner — the camera needs a better bearing next time an edit touches her bow.**
+
+**The two conditional fetch residuals attempted, both unchanged: (1) Kozushima 1993 —
+nabunken sitereports search rate-limited (429) this round; the r192 conclusion stands
+(東京都教育委員会, print only). (2) the 1433 emaki plate — tobunken catalog entries
+(822656, 13626, 13627) are text-only bibliographic records, no images; stays shut until
+an open image surfaces.**
+
+**Deployed: data-version 1788304465.**
+
+**Named residuals, in order:** (1) Kozushima 1993 weighing (fetch if it surfaces open).
+(2) r187 emaki plate (fetch in resolution if it surfaces open). (3) r186 panokseon
+stone-station inference (Taean reproduction photo). (4) r182 grapnel shank
+reconstruction. (5) r183 junk stone bar class default. (6) r177 Lucian's second machine.
+(7) r173 cog Gangspill. (8) r173 cog castles. (9) r173 cog rudder slab. (10) r176
+sekibune class-size (kiwari read). (11) boxy classes: top (18), channel/cheek/cathead.
+(12) Preussen mast livery. (13) Endurance forecastle. (14) Azzam crest span. (15) r164
+risen black unpierced. (16) r165 fantail gallery wings. (17) r166 screen glass. (18)
+r171 quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172 the 74's lower
+capstan barrel. (21) r181 eraSm dead fallback branch (app.js:1353).

@@ -261,9 +261,12 @@
        stow must not accept a rope or an oar shaft as the answer — the sekibune's
        forestay crossed the anchor's rest-ray 0.44 m over the planking and the
        first live run convicted a seated anchor as stabbed-through. Every deck is
-       a surface; a line crossing over one is not. */
+       a surface; a line crossing over one is not. r193 adds the mast shaft by
+       the same measurement: the dhow's raked foremast crossed the grapnel's
+       rest-ray 0.85 m over the planking (probe, before any live run) — a stow
+       lies BESIDE a mast foot, never on the shaft leaning over it. */
     const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
-                                'sheet', 'tack', 'ratline', 'oar']);
+                                'sheet', 'tack', 'ratline', 'oar', 'mast']);
 
     /* r155: the record may attest the FLAG-BUTTON (`truckM`, deck-to-truck) instead of a
        lower-mast length — every expectation below that derives from the lower must mirror
@@ -3499,7 +3502,11 @@
        read cannot, because the stowed anchor lies spun 45° with two arms up.
        V-REST: a dumped anchor neither floats nor stabs through the planking — the
        group's lowest drawn point sits on the deck at its own station, asked of the
-       surface itself. */
+       surface itself (ray straight down, first non-anchor hit — the r185 form;
+       until r193 this comment claimed the ray while the code read the sheer
+       FUNCTION, which answers at every (u, z) even where no ship exists — blind
+       to an anchor over the side, blind to a raised stow, and never able to say
+       "nothing is under it"). */
     {
       const gm = [];
       g.traverse(o => { const p = tagOf(o);
@@ -3526,18 +3533,32 @@
             say(v.id, "the grapnel off the record's span",
                 `arms ${span.toFixed(2)} m tip to tip, record says ${R.spanM}`);
         }
+        /* the box excludes the coil and cable: cordage rests at its own stations
+           by its own settle, and the question here is whether the IRON is seated */
         const bb = new THREE.Box3();
-        for (const o of gm) bb.union(new THREE.Box3().setFromObject(o));
-        const HSg = SHIPS_HULL.hullSurface(H);
+        for (const o of gm) if (o.name !== 'grap-coil' && o.name !== 'grap-cable')
+          bb.union(new THREE.Box3().setFromObject(o));
         const ug = Math.max(0, Math.min(1,
           ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
-        const deckY = HSg.sheer(ug);
-        if (bb.min.y > deckY + 0.25)
-          say(v.id, 'an anchor floating over its own deck',
-              `lowest point ${(bb.min.y - deckY).toFixed(2)} m above the deck at u ${ug.toFixed(2)}`);
-        if (bb.min.y < deckY - 0.20)
-          say(v.id, 'an anchor through the planking',
-              `lowest point ${(deckY - bb.min.y).toFixed(2)} m below the deck at u ${ug.toFixed(2)}`);
+        const rayG = new THREE.Raycaster();
+        rayG.set(new THREE.Vector3((bb.min.x + bb.max.x) / 2, bb.max.y + 0.5,
+                                   (bb.min.z + bb.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underG = rayG.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'grapnel' || NONBEARING.has(p.key))); });
+        if (!underG.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${ug.toFixed(2)}`);
+        else {
+          const gapG = bb.min.y - underG[0].point.y;
+          if (gapG > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapG.toFixed(2)} m above the surface under it at u ${ug.toFixed(2)}`);
+          if (gapG < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapG).toFixed(2)} m into the surface under it at u ${ug.toFixed(2)}`);
+        }
       }
     }
 
@@ -3548,7 +3569,9 @@
        found STRUCTURALLY as the group's cones, not by name. V-REST: the recovered
        anchor is taken in (收之) and lies on the foredeck — the assembly's lowest
        point sits ON the deck at its own station, asked of the surface itself, as the
-       grapnel rule asks; floating and stabbed-through both convict. V-CABLE: the
+       grapnel rule asks (ray straight down, first non-anchor hit — the r185 form;
+       until r193 the code here read the sheer FUNCTION instead, the same claim
+       unhonoured as the grapnel rule's); floating and stabbed-through both convict. V-CABLE: the
        text's one sentence carries wheel, cable and stone together — a drawn stone
        with no cable convicts. */
     {
@@ -3582,16 +3605,27 @@
         const bb = new THREE.Box3();
         for (const o of am) if (o.name !== 'st-cable')
           bb.union(new THREE.Box3().setFromObject(o));
-        const HSa = SHIPS_HULL.hullSurface(H);
         const ua = Math.max(0, Math.min(1,
           ((bb.min.x + bb.max.x) / 2) / (H.lwl || H.loa) + 0.5));
-        const deckA = HSa.sheer(ua);
-        if (bb.min.y > deckA + 0.25)
-          say(v.id, 'an anchor floating over its own deck',
-              `lowest point ${(bb.min.y - deckA).toFixed(2)} m above the deck at u ${ua.toFixed(2)}`);
-        if (bb.min.y < deckA - 0.20)
-          say(v.id, 'an anchor through the planking',
-              `lowest point ${(deckA - bb.min.y).toFixed(2)} m below the deck at u ${ua.toFixed(2)}`);
+        const rayS = new THREE.Raycaster();
+        rayS.set(new THREE.Vector3((bb.min.x + bb.max.x) / 2, bb.max.y + 0.5,
+                                   (bb.min.z + bb.max.z) / 2),
+                 new THREE.Vector3(0, -1, 0));
+        const underS = rayS.intersectObject(g, true).filter(h => {
+          const p = tagOf(h.object);
+          return !(p && (p.key === 'stoneAnchor' || NONBEARING.has(p.key))); });
+        if (!underS.length)
+          say(v.id, 'an anchor resting on nothing',
+              `no surface under the assembly at u ${ua.toFixed(2)}`);
+        else {
+          const gapS = bb.min.y - underS[0].point.y;
+          if (gapS > 0.25)
+            say(v.id, 'an anchor floating over its own deck',
+                `lowest point ${gapS.toFixed(2)} m above the surface under it at u ${ua.toFixed(2)}`);
+          if (gapS < -0.20)
+            say(v.id, 'an anchor through the planking',
+                `lowest point ${(-gapS).toFixed(2)} m into the surface under it at u ${ua.toFixed(2)}`);
+        }
         if (!am.some(o => o.name === 'st-cable'))
           say(v.id, 'a stone anchor with no cable',
               "the text's sentence carries wheel, cable and stone together — "

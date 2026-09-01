@@ -2781,7 +2781,8 @@ mid.y = deckAtU(mid.x / L + 0.5) + 0.06;
 const cable = ropeMesh([[headW, mid], [mid, coilC.clone().add(new THREE.Vector3(0, 0.03, 0))]],
 0.028, mats.ropeSolid || wood);
 const ag = new THREE.Group();
-ag.add(g); ag.add(coil); if (cable) ag.add(cable);
+ag.add(g); ag.add(coil);
+if (cable) { cable.name = 'grap-cable'; ag.add(cable); }
 group.add(tag(ag, 'grapnel'));
 }
 if (S.stoneAnchor) {
