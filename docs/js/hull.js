@@ -3119,7 +3119,8 @@ arW0: 0.0346, arT0: 0.0198,
 arW1: 0.0220, arT1: 0.0058,
 rSemiV: 0.0818, rSemiH: 0.0353, rBar: 0.0056,
 acR: 0.0590, acBar: 0.0079,
-shTaper: 0.72
+shRw: 0.0491, shRt: 0.0764,
+shMw: 0.0214, shMt: 0.0303
 };
 const armF = ya.armFrac || 0.30;
 const yaW = (f) => YA_P.arW0 + (YA_P.arW1 - YA_P.arW0) * f;
@@ -3139,18 +3140,33 @@ let vOther = 4 * (zs1 * sqFrus(w0, w1, 0.62 * armF)
 * (YA_P.rSemiV / YA_P.rSemiH)
 + 2 * Math.PI * Math.PI * YA_P.acR * YA_P.acBar * YA_P.acBar;
 vOther *= lenM * lenM * lenM;
-const tp = YA_P.shTaper;
-const shS = Math.sqrt(Math.max(1e-9, (yaKg / 7850 - vOther)
-/ (shankL * (1 + tp + tp * tp) / 3)));
+const shWr = YA_P.shRw * lenM, shTr = YA_P.shRt * lenM;
+const shWm = YA_P.shMw * lenM, shTm = YA_P.shMt * lenM;
+const shRr = shTr / shWr, shRm = shTm / shWm;
+const shWmid = (shWr + shWm) / 2, shRmid = (shRr + shRm) / 2;
+const zsA = (shRr + shRmid) / 2, zsB = (shRmid + shRm) / 2;
+const vPrism = shRm * shWm * shWm * shankL;
+const vTaper = zsA * sqFrus(shWr, shWmid, shankL / 2)
++ zsB * sqFrus(shWmid, shWm, shankL / 2);
+const shH = shankL * Math.max(0.05, Math.min(1,
+(yaKg / 7850 - vOther - vPrism) / (vTaper - vPrism)));
 const ai = new THREE.Group();
 ai.name = 'ya-grp';
-const shGeo = new THREE.CylinderGeometry(
-shS * tp / Math.SQRT2, shS / Math.SQRT2, shankL, 4);
-shGeo.rotateY(Math.PI / 4);
-const sh = new THREE.Mesh(shGeo, ironG);
-sh.name = 'ya-shank';
-sh.position.y = shankL / 2;
-ai.add(sh);
+const shBar = (wa, wb, h, zs) => {
+const geo = new THREE.CylinderGeometry(wb / Math.SQRT2, wa / Math.SQRT2, h, 4);
+geo.rotateY(Math.PI / 4);
+const m = new THREE.Mesh(geo, ironG);
+m.scale.x = zs;
+m.name = 'ya-shank';
+return m;
+};
+const shA = shBar(shWr, shWmid, shH / 2, zsA);
+shA.position.y = shH / 4;
+const shB = shBar(shWmid, shWm, shH / 2, zsB);
+shB.position.y = shH * 0.75;
+const shC = shBar(shWm, shWm, shankL - shH, shRm);
+shC.position.y = shH + (shankL - shH) / 2;
+ai.add(shA); ai.add(shB); ai.add(shC);
 const arR = lenM * (YA_P.rSemiH - YA_P.rBar), arBar = lenM * YA_P.rBar;
 const ring = new THREE.Mesh(
 new THREE.TorusGeometry(arR, arBar, 8, 20), ironG);

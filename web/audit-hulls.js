@@ -3942,17 +3942,19 @@
            cannot hide from it */
         const lenR = R.lenM || 2.0;
         let lo = Infinity, hi = -Infinity;
-        const shk = ym.find(o => o.name === 'ya-shank');
+        /* the shank is pieces since r192 (two boss frustums and the upper-bar
+           prism, all named ya-shank) — collect them all */
+        const shks = ym.filter(o => o.name === 'ya-shank');
         const rng = ym.find(o => o.name === 'ya-ring');
-        if (shk && rng) {
-          for (const o of [shk, rng]) {
+        if (shks.length && rng) {
+          const ax = new THREE.Vector3(0, 1, 0).transformDirection(shks[0].matrixWorld);
+          for (const o of [...shks, rng]) {
             o.geometry.computeBoundingBox();
             o.updateMatrixWorld(true);
             const lb2 = o.geometry.boundingBox;
             for (const yy of [lb2.min.y, lb2.max.y]) {
               const p2 = new THREE.Vector3(0, yy, 0).applyMatrix4(o.matrixWorld);
               /* project onto the shank's own world axis */
-              const ax = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
               const t = p2.dot(ax);
               if (t < lo) lo = t; if (t > hi) hi = t;
             }
@@ -3995,6 +3997,48 @@
             say(v.id, "a yotsume off the record's weight",
                 `${kgD.toFixed(0)} kg of drawn iron integrated from the scene — `
                 + `the record's weight is ${kgR}`);
+          /* V-YSHANK (r192): the drawn shank's END SECTIONS against the
+             calipered stations — 表3 of the Pacific survey (二宮 2014,
+             東京海洋大学) records the shank at the root boss and the clean
+             upper bar; the class draws those stations and solves only the
+             knee between them. Read each piece's two geometry ends through
+             its world matrix (width = radius·√2 × world z-scale, thickness
+             = × world x-scale), take the section at the globally lowest end
+             (the crown) and highest (the head), compare SORTED against the
+             same named corpus means the builder draws by — the V-YMASS
+             shared-constants precedent, never vacuous. One conviction per
+             anchor, both stations in the message. 12% band. */
+          const YS = { rw: 0.0491, rt: 0.0764, mw: 0.0214, mt: 0.0303 };
+          let loE = null, hiE = null;
+          for (const o of shks) {
+            if (o.geometry.type !== 'CylinderGeometry') continue;
+            const pg2 = o.geometry.parameters;
+            const eW = o.matrixWorld.elements;
+            const sx = Math.hypot(eW[0], eW[1], eW[2]);
+            const sz = Math.hypot(eW[8], eW[9], eW[10]);
+            for (const [sgn, rad] of [[-1, pg2.radiusBottom], [1, pg2.radiusTop]]) {
+              const p3 = new THREE.Vector3(0, sgn * pg2.height / 2, 0)
+                .applyMatrix4(o.matrixWorld);
+              const end = { t: p3.dot(ax),
+                            sec: [rad * Math.SQRT2 * sz, rad * Math.SQRT2 * sx] };
+              if (!loE || end.t < loE.t) loE = end;
+              if (!hiE || end.t > hiE.t) hiE = end;
+            }
+          }
+          if (loE && hiE) {
+            const badS = [];
+            const chkS = (sec, fw, ft, where) => {
+              const a = Math.min(sec[0], sec[1]), b = Math.max(sec[0], sec[1]);
+              const ra = fw * lenR, rb = ft * lenR;
+              if (Math.abs(a - ra) > 0.12 * ra || Math.abs(b - rb) > 0.12 * rb)
+                badS.push(`${where} ${(a * 100).toFixed(1)}×${(b * 100).toFixed(1)} cm `
+                  + `drawn against the station's ${(ra * 100).toFixed(1)}×${(rb * 100).toFixed(1)}`);
+            };
+            chkS(loE.sec, YS.rw, YS.rt, 'crown');
+            chkS(hiE.sec, YS.mw, YS.mt, 'head');
+            if (badS.length)
+              say(v.id, 'a shank off its calipered stations', badS.join('; '));
+          }
         }
         const bbY = new THREE.Box3();
         for (const o of ym) if (o.name !== 'ya-cable' && o.name !== 'ya-coil')

@@ -13571,3 +13571,95 @@ channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle.
 gallery wings. (18) r166 screen glass. (19) r171 quarter-gallery sashes. (20)
 r171 authored tier fractions. (21) r172 the 74's lower capstan barrel. (22)
 r181 eraSm dead fallback branch (app.js:1353).
+
+## Round 192 — 2026-09-01 — the shank takes its own caliper record: the r191 contest resolves as a taper
+
+**The r191 queue head OPENED AND CLOSED (build/staging/r192/JUDGMENT.md). The residual
+asked for the 國學院大學 1993 Kozushima site report to settle the contested shank; the
+report did not surface open (it is 東京都教育委員会's, per the nabunken bibliography,
+print only) — but the fetch surfaced something better for the question: the Pacific-coast
+companion to the class's own corpus paper. 二宮俊洋「太平洋沿岸部にみられる四爪錨について」
+修士学位論文, 東京海洋大学 2014, oacis record 1018 (kam1846.pdf, 64 pp., saved to
+build/staging/r192/) — 144 four-claw anchors surveyed Ibaraki to Wakayama, built
+explicitly on Matsui 2013. Its 表3 調査錨法量 (rendered 300 DPI, transcribed, every used
+row strip-verified) records the member Matsui's 表1 omits: the SHANK, at two stations —
+the clean upper bar (軸正面×軸側面) and the root boss where the four arms are forged on
+(軸根本正面×軸根本側面). Kozushima itself is outside the thesis's scope (islands
+excluded), so the 1993 report remains a residual for the WEIGHING's precision only.**
+
+**The record read (fractions of 全長, per-anchor pairs sorted (min,max) because the
+shrine's mounting sets which face is 正面): upper bar 0.0214±0.0046 × 0.0303±0.0058
+(n=17), root boss 0.0491±0.0072 × 0.0764±0.0099 (n=16). Excluded by name: №1
+(sea-concreted, every member ~2× corpus), №74 (exfoliated to 0.012 of 全長), №93
+(printed-inconsistent, a 0.36·全長 root — the r191 rows-41/42 precedent); №82's shaft
+pair flagged (側面/正面 = 2.8, twice anyone else) and dropped. THE r191 CONTEST
+RESOLVES, both sides right at their own stations: the monument photographs' 0.023–0.034
+was the upper bar; the r191 solve's 0.047 was the root boss (0.0491). The real shank
+tapers hard from an oblong boss to a slender near-square bar — the class was missing the
+taper, and the old solve had smeared the boss's iron up the whole shank. Cross-corpus
+check: №71 (銚子, 300 cm) calipers claw root 0.0350×0.0233 and claw length 0.320 of 全長
+vs Matsui's 0.0346×0.0198 and the drawn 0.30 — two independent coasts agree on the arms.**
+
+**Class change: the shank's stations are class constants now, not knobs — drawn as two
+4-segment frustums (piecewise mean thickness ratios cut the scaled-frustum artifact at
+the crown to −2.2%) and a prism at the upper station, all named ya-shank. The KNEE where
+the taper meets the bar is the one dimension no table records: it takes the mass budget,
+SOLVED so the drawn iron weighs the record's kg at 7850 (the r190/r191 pattern) — at
+(2.0 m, 122 kg) it lands at 77% of the shank, inside the drawn form's own solvable band
+(69–138 kg); a kg outside the band clamps the knee and V-YMASS convicts honestly, a
+contest and not a knob. shTaper (0.72, "drawn class default — unrecorded") dies — one
+fewer default in the class. NEW RULE V-YSHANK: the drawn shank's END SECTIONS read from
+the built scene per piece through its world matrix (width = radius·√2 × world z-scale,
+thickness = × world x-scale), section at the globally lowest end vs the root station and
+at the highest vs the upper station, sorted, 12%, ONE conviction per anchor with both
+stations in the message; constants are the same named corpus means the builder draws by
+(the V-YMASS shared-constants precedent — never vacuous). V-YLEN now collects ALL
+ya-shank pieces (was find — one). This rule convicts the r191 uniform-solve form itself.**
+
+**Proofs — every number predicted in the JUDGMENT before running, and every run landed on
+the prediction to the digit, ON THE STAGED CLASS BEFORE LANDING (new procedure: a shadow
+server on :8151 overlaid the three staged files on web/, so the audit and all four
+injections were proven while the :8149 ratchet was still capturing the unedited tree):
+inj-ya-mass (members ×0.8 x/z) → TWO, both named — V-YMASS 78/122 + V-YSHANK crown
+7.9×11.9/9.8×15.3, head 3.4×4.8/4.3×6.1 (the r191 file's "exactly ONE" predates station
+auditing and is superseded — the r191-on-r187 precedent verbatim); inj-ya-drag (shank
+×1.35 crown-anchored) → V-YLEN 2.26/2.0 + honest V-YMASS 152/122, V-YSHANK SILENT (the
+stretch touches no section — the discrimination the new rule exists to show);
+inj-ya-tipsever → V-YARMS alone, V-YMASS and V-YSHANK silent (tips 0.63%);
+inj-ya-shankprism (NEW, the boss taper removed — the pre-r192 failure class made flesh)
+→ V-YSHANK crown 4.3×6.1/9.8×15.3 + honest V-YMASS 69/122, the all-prism floor to the
+kilogram. Clean audit returns the solved 122 exactly. Audit 33/0 twice (post-land, final
+built tree).**
+
+**Frames: opening 64 PAID AND PURE — launched 14:12 unedited, edits landed 14:48:19
+atomically after frame 56 (action-myeongnyang) captured; 64/64, 0 movers, 0 BLANK,
+EXIT:0; frames 57–63 scored on the edited tree prove the class edit inert elsewhere.
+Close solos: ship-sekibune 0.007% and action-myeongnyang 0.000 — both WITHIN tolerance,
+nothing accepted, no baseline moved.**
+
+**Looked at (rules 0/1, look-zoom-crop.png / look-zoom2-crop.png, camera by projecting
+the anchor's world box, panels hidden): the shank now visibly carries its iron at the
+claws — stout at the crown where the four claws spring, thinning along its run to the
+teardrop head ring, the cable bent to it and the coil flaked beside it on the planking.
+Three facts a viewer can name: a four-clawed iron anchor lying rolled on the foredeck,
+heavier at the claws than at its ring; the cable's coil beside the deckhouse face; laid
+plank seams with butts under the whole stow. Card row re-shot: rawStar False.**
+
+**Deployed: data-version 1788300699. Provenance carries the thesis, the stations, the
+exclusions, the resolution and the remaining Kozushima residual; card row carries the
+boss-to-bar taper in plain words.**
+
+**Named residuals, in order:** (1) r192, demoted from r191's head: the Kozushima weighing
+(約90貫 by forklift) still carries the mass calibration alone — the 1993 site report
+(東京都教育委員会) would firm the kg, no longer the shank; fetch if it surfaces open.
+(2) r187: the 1433 Jingu Kogo engi emaki warship-anchor plate — fetch in resolution if it
+surfaces open. (3) r187: the two ray-free anchor rest rules (grapnel, stoneAnchor) still
+compare against the sheer FUNCTION, not the drawn plank — move to the surface-asked form.
+(4) r186: the panokseon stone-station inference (Taean reproduction photo). (5) r182
+grapnel shank reconstruction. (6) r183 junk stone bar class default. (7) r177 Lucian's
+second machine. (8) r173 cog Gangspill. (9) r173 cog castles. (10) r173 cog rudder slab.
+(11) r176 sekibune class-size (kiwari read). (12) boxy classes: top (18),
+channel/cheek/cathead. (13) Preussen mast livery. (14) Endurance forecastle. (15) Azzam
+crest span. (16) r164 risen black unpierced. (17) r165 fantail gallery wings. (18) r166
+screen glass. (19) r171 quarter-gallery sashes. (20) r171 authored tier fractions. (21)
+r172 the 74's lower capstan barrel. (22) r181 eraSm dead fallback branch (app.js:1353).
