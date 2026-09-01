@@ -12261,3 +12261,99 @@ classes: top (18), channel/cheek/cathead. (9) Preussen mast livery (r155).
 unpierced. (13) r165 fantail gallery wing walls. (14) r166 screen glass sun-bright.
 (15) r171 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the
 74's lower capstan barrel.
+
+## Round 178 — 2026-08-31 — the dhow has no machine to extend, and her record says so at every era
+
+**The r172 windlass residual's queue head (dhow, first of the two remaining after
+r177's corbita) OPENED AND CLOSED, judgment first (build/staging/r178/JUDGMENT.md) —
+and the judgment is SILENCE, the second of the line to end that way, on a warrant
+STRONGER than the r176 precedent: the sekibune stacked three inferences over a
+machine its tradition at least possessed in a later era; the dhow's tradition
+attests NO windlass, winch or capstan at ANY documented point, so there is nothing
+to extend, and drawing one would invent existence, form and place at once — the
+removed r172 Georgian capstan's own class of error.**
+
+**The sources, and the round's find: Agius's Classic Ships of Islam (Brill 2008,
+HdO 92) — the scholarly survey of this ocean's ships, 7th–16th c. — surfaced OPEN
+mid-round (a repository copy; the book had been assumed gated) and was downloaded
+WHOLE (staging/agius-classic-ships.pdf, 1.14 MB of text extracted) and grepped:
+windlass|winch|capstan 0 matches, anchor 117. The anchors are there in every
+period — Omani stone anchors of 10–12 manns with sharp-ended timbers fitted
+through, Indo-Arabian stone shanks at Siraf (8th–11th c., the drawn ship's own
+era), Ibn Sida's wood-and-lead anchor recipe (d. 1066) quoted whole in Arabic and
+English, Correia's iron-and-stone and Varthema's marble anchors (16th c.) — each
+topped by a hawser hole and a rope, and no machine word appears in gear, crew
+roles or terminology anywhere in the book. Flecker 2001 (World Archaeology 32:3,
+335–354, the drawn instance's own wreck, downloaded whole and grepped): 0 machine
+words; the ship's nautical equipment 'may be represented by a composite
+grapnel-type anchor, the shank of wood and the arms of iron' — stated as WEAK
+silence, the wreck preserves the lower hull only, not the Laurons 2 shape.
+Lockerbie's Gulf field documentation (catnaps.org, both pages fetched whole): the
+tradition's best-documented end stows the anchor 'loose on deck or hung on the
+kalba built into the frame near the prow', takes lines to bitts and the rumaana
+bollard, names its anchors sinn, bawara, 'angar — and acquires a winch only 'with
+the advent of power'. The machine belongs to the engine era. Named as NOT fetched
+(the r174/r177 shape): Villiers' Sons of Sinbad (borrow-gated, search-inside
+blocked too), Vosmer's reconstruction chapter (403), the PSAS Jewel of Muscat
+paper (pay-gated), Agius's two other dhow books — any of them, fetched and
+attesting a sail-era machine, reopens the question.**
+
+**JUDGED SILENT, stated in the data per rules 9/10: a "Windlass, judged" row after
+"Steering, as drawn" and hull.windlassProvenance carrying the full judgment,
+sources and scope — the judgment is for the drawn sewn early type (the record's
+own steering provenance fixes that reading) and holds for the sail tradition as
+documented; a powered conversion's winch is a different ship. That her crew of
+twelve to thirty worked the grapnel by direct pull is the read backward from the
+documented late practice, marked as an inference on the card. No hull.windlass, no
+builder edit, no PARTS edit, and no audit edit owed: the r173 rule is generic —
+V-WARRANT convicts any future windlass meshes drawn on this hull without a record
+(audit-hulls.js:3303), and the audit never reads provenance fields (grepped, 0
+matches). Prose-only change; no sim or injection applies.**
+
+**Frames, with timing stated: the opening 64-check ran 21:08–21:44 and PASSED
+WHOLE — 64/64 ok, 0 movers, 0 BLANK, EXIT:0 — the THIRD consecutive clean opening;
+the round ran NO chromium tool beside it (all research remote fetches and local
+reads until it exited, the r175 trap held), and ALL web/ edits landed after the
+exit. Close solo on final code: ship-dhow 0.000 twice, once after each edit — the
+new row lands below that frame's panel fold, so no committed frame reaches the
+change and no acceptance is owed. The rendered row looked at anyway (rule 1):
+one-off scrolled panel shot after the ratchet and audits
+(build/staging/r178/z-dhow-card-windlass.png) — and the FIRST shot caught the row
+printing its own asterisks around kalba. The instance was fixed (plain text in the
+row, re-built, re-shot clean) and the CLASS was found and is named below: the
+Shipwright rows renderer never got the inlineMD fix the Sea card's rows got. Rule
+0, answered in writing: the frame reads as a rendered vessel on water, not a
+chart. Three facts a viewer can read off it: two masts, the main forward and a
+smaller mizzen aft, each set a pale quadrilateral settee sail on a steeply raked
+yard; the hull is planked in visible strakes with open cargo hatches down the
+waist; a quarter-rudder post stands at her starboard quarter and no rudder hangs
+on her stern.**
+
+**Audit: 33/0 twice on final code (and twice more mid-close before the asterisk
+edit). Deployed: data-version 1788238159. Live verify below.**
+
+**Named residuals, in order:** (1) r172 windlass judgments, ONE hull remaining —
+the trireme, whose record may rightly END silent; two worked precedents now
+(r176's three-inference stack, r178's no-machine-to-extend) — say explicitly which
+shape it is when judged. (2) NEW r178: the Shipwright rows print raw markdown —
+shipwright.js:879 renders r[0]/r[1] unprocessed while app.js cRows runs inlineMD
+(its own comment names this exact failure: 'ROWS CARRY MARKDOWN TOO... a citation
+inside a row printed its own asterisks'); every asterisked row on the Shipwright
+panel shows literal asterisks today (the dhow's Rig and The-types rows among
+them). The fix is one line, but it reaches every ship-*/shipwright-* committed
+frame whose visible rows carry markdown — owed its OWN round with the frame
+budget, per rule 7. (3) NEW r178: the dhow's own attested anchor — the Belitung
+composite grapnel, wooden shank (Afzelia/Amoora sp.), iron arms, photographed
+upright on the seabed (Flecker Plate 11), paralleled by the 13th-c. Maqamat
+painting's anchor (Flecker's own comparison; the same manuscript whose river boat
+is on Agius's cover) — heads the anchors line with a DIRECT warrant when opened.
+(4) r177: Lucian's second machine. (5) r173: the cog's Gangspill on the aftcastle
+top. (6) r173: the cog's castles, fore and aft. (7) r173: the cog's pale rudder
+slab. (8) r174: the junk's and treasure-ship's attested anchors, the panokseon's
+drawn-plate anchor, the wasen yotsume-ikari — behind item 3's grapnel. (9) r176:
+the sekibune's class-size question (kiwari read owed). (10) The sweep-derived boxy
+classes: top (18), channel/cheek/cathead. (11) Preussen mast livery (r155).
+(12) Endurance forecastle (RMG J9266). (13) Azzam crest span. (14) r164 risen
+black unpierced. (15) r165 fantail gallery wing walls. (16) r166 screen glass
+sun-bright. (17) r171 quarter-gallery sashes. (18) r171 authored tier fractions.
+(19) r172 the 74's lower capstan barrel.

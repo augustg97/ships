@@ -45,3 +45,10 @@ build/*-frames/
 # every fresh checkout look permanently locked — `git add -A` while holding it did exactly
 # that in r125.
 build/.loop.lock/
+
+# in-copyright sources fetched whole for judgment reads (r178): kept local, never committed
+build/staging/*/agius-*.pdf
+build/staging/*/agius-*.txt
+build/staging/*/flecker-*.pdf
+build/staging/*/flecker-*.txt
+build/staging/*/catnaps-*.html
