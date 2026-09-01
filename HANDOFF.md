@@ -12441,3 +12441,86 @@ grapnel. (9) r176: the sekibune's class-size question (kiwari read owed).
 gallery wing walls. (16) r166 screen glass sun-bright. (17) r171 quarter-gallery
 sashes. (18) r171 authored tier fractions. (19) r172 the 74's lower capstan
 barrel.
+
+## Round 180 — 2026-08-31/09-01 — the panels spend their own markdown: the r178 raw-asterisk class closes
+
+**Residual 2 (r178) taken as the queue head and closed at the CLASS level, per
+rule 2: the Shipwright's rows and cite printed their markdown as punctuation —
+*Nature* as five characters — because shipwright.js concatenated r[0]/r[1] raw
+and set the cite with textContent, while app.js cRows already spent r[1]
+through inlineMD. Five render sites fixed, the whole class, not the named
+line: swRows runs inlineMD on BOTH cells (they were raw AND unescaped, so the
+fix also closes an escaping hole); swCite renders inlineMD as innerHTML
+(inlineMD escapes before emphasising, so innerHTML carries no more trust than
+textContent did); app.js cRows spends the KEY as well (ten vessels title their
+keys — "The grain ship *Isis*"); cCite the same; metricRow's provenance cite
+through inlineMD (metric cites carry no star today, measured before wiring —
+the guard for the copy written next). Checked and NOT members: pc-rows (the
+passage slip builds from generated literals) and btText (the action day
+narratives are starless — measured per battle field).**
+
+**Measured before the fix: cite carries markdown on 28 of 33 vessels, rows on
+17, row KEYS on 10; voyages 61 cites, battles 8, chapters 6, ports 5. One
+member staged, SEEN and REVERTED, named per rule 5: the Santa Cruz voyage's
+NAME carries markdown ("the *Santiago* wrecked") and name is a title slot
+(textContent in the hover and slip, raw innerHTML in the voyage list), so the
+fix is the datum — but the route phase is a hash of v.name (app.js:2825, the
+r54 identity-keying), so the rename moves her frozen position along her own
+track. Owed its own round with a frame check on the era-4 committed frames.**
+
+**NEW audit rule: 'an asterisk the renderer cannot spend' — sweeps rows/cite/
+text of all five card collections (vessels, voyages, chapters, battles, ports)
+for stars the bold-then-italic pass cannot consume; a surviving star prints as
+itself, which is the r178 kalba fault as data rather than as a render path.
+0 convictions on today's data (python first, then live). Audit 33/0 twice on
+final code (23:19 and 23:53).**
+
+**Frames, with timing stated and the round's one departure NAMED: no opening
+64-check ran. The 80-minute budget holds ONE full check, and this round's
+change could reach many frames, so the full check had to be the CLOSE — the
+attribution chain stands written instead: r179's opening 64-check passed whole
+at 22:46:45 on this HEAD's code minus one commit, that commit (11094f9) was a
+prose row below the trireme frame's fold verified solo at 0.000, and only
+build/loop.log changed since. Close check on final code ran 23:14:49–23:52:14,
+PASSED WHOLE — 64/64 ok, 0 movers, 0 BLANK — no chromium beside it (a solo
+ship-junk pre-check ran BEFORE launch; the panel shot and both audits ran
+AFTER exit; the one web/-touching step in between was nothing — all web/ edits
+landed before launch, which is the inverse of the opening-check discipline and
+correct for a close). Zero movers because every changed pixel sits below a
+panel fold or in a panel no committed frame opens: the ship frames crop the
+panel above "Measurements and sources" (ship-junk solo 0.000 proved it before
+the run), the era card's cite is below its fold, and the action day panel is
+narrative prose, not showCard. The r179 note "as it has in every committed
+frame" overstated visibility — the raw asterisks were visible in scrolled
+SHOTS, not in committed frames.**
+
+**Rule 1, the changed pixels looked at: scrolled corbita panel shot after the
+ratchet and audits (build/staging/r180/z-corbita-card-rows.png) — the row key
+sets "The grain ship Isis" with Isis in italic type, "50,000 modii" carries
+its em, and the cite line sets Casson's, Lucian's and both Wikipedia titles as
+type with no asterisk anywhere; the DOM probe returns stars:False for the
+whole rows+cite text. Rule 0, answered in writing: the frame reads as a
+rendered vessel on open water, not a chart. Three facts a viewer can read off
+it: the merchantman's steeply raked foremast stands over the stem with the
+mainmast amidships bare-poled above a brailed cloth; a great quarter rudder
+hangs at her starboard quarter; her deck is planked lengthwise with two open
+hatch gratings amidships and an anchor stowed at the bow.**
+
+**Deployed: data-version 1788243202. Live verify below.**
+
+**Named residuals, in order:** (1) NEW r180 — the Santa Cruz voyage NAME
+("the *Santiago* wrecked"): a title slot carrying markdown, fix is the datum,
+but the rename moves her phase hash — needs its own round with era-4 frame
+checks. (2) r179: the windlass line's precedent set stands ready for the
+anchors line — the Belitung composite grapnel heads it with a DIRECT warrant
+(r178). (3) r177: Lucian's second machine. (4) r173: the cog's Gangspill on
+the aftcastle top. (5) r173: the cog's castles, fore and aft. (6) r173: the
+cog's pale rudder slab. (7) r174: the junk's and treasure-ship's attested
+anchors, the panokseon's drawn-plate anchor, the wasen yotsume-ikari — behind
+item 2's grapnel. (8) r176: the sekibune's class-size question (kiwari read
+owed). (9) The sweep-derived boxy classes: top (18), channel/cheek/cathead.
+(10) Preussen mast livery (r155). (11) Endurance forecastle (RMG J9266).
+(12) Azzam crest span. (13) r164 risen black unpierced. (14) r165 fantail
+gallery wing walls. (15) r166 screen glass sun-bright. (16) r171
+quarter-gallery sashes. (17) r171 authored tier fractions. (18) r172 the 74's
+lower capstan barrel.

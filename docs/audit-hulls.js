@@ -3,6 +3,27 @@ const list = (typeof APP !== 'undefined' && (APP.vessels.vessels || APP.vessels)
 const problems = [];
 const rows = [];
 const say = (id, rule, detail) => problems.push({ id, rule, detail });
+{
+const spend = s => String(s == null ? '' : s)
+.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+const sweep = (coll, items) => (items || []).forEach(it => {
+const id = `data:${coll}/${it.id || it.name || '?'}`;
+(it.rows || []).forEach((r, i) => [0, 1].forEach(j => {
+if (spend(r[j]).includes('*'))
+say(id, 'an asterisk the renderer cannot spend',
+`rows[${i}][${j}] = ${JSON.stringify(String(r[j]).slice(0, 60))}`);
+}));
+for (const f of ['cite', 'text'])
+if (spend(it[f]).includes('*'))
+say(id, 'an asterisk the renderer cannot spend',
+`${f} = ${JSON.stringify(String(it[f]).slice(0, 60))}`);
+});
+sweep('vessels', list);
+sweep('voyages', (APP.voyages && (APP.voyages.voyages || APP.voyages)) || []);
+sweep('chapters', (APP.chapters && APP.chapters.chapters) || []);
+sweep('battles', (APP.battles && APP.battles.battles) || []);
+sweep('ports', (APP.ports && APP.ports.ports) || []);
+}
 for (const v of list) {
 if (v.polar && v.polar.floor) {
 const fb = v.polar.floor;

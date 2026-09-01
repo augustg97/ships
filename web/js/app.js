@@ -1736,8 +1736,9 @@ function showCard(c) {
     const d = document.createElement('div');
     /* ⚠ ROWS CARRY MARKDOWN TOO. proseHTML was wired to the prose and the rows were left
        raw, so a citation inside a row printed its own asterisks — "62 treasure ships, 27,800
-       men (*Ming Shi*)". Same helper, minus the paragraph wrapper. */
-    d.innerHTML = `<span class="k">${r[0]}</span><span class="v">${inlineMD(r[1])}</span>`;
+       men (*Ming Shi*)". Same helper, minus the paragraph wrapper — and on the KEY as well,
+       because ten vessels title their keys ("The grain ship *Isis*"). */
+    d.innerHTML = `<span class="k">${inlineMD(r[0])}</span><span class="v">${inlineMD(r[1])}</span>`;
     rows.appendChild(d);
   });
   rows.style.display = (c.rows && c.rows.length) ? '' : 'none';
@@ -1761,7 +1762,7 @@ function showCard(c) {
       '</figcaption></figure>');
   }
   document.getElementById('cSpan').textContent = c.span || '';
-  document.getElementById('cCite').textContent = c.cite || '';
+  document.getElementById('cCite').innerHTML = inlineMD(c.cite || '');
   document.getElementById('card').classList.remove('hidden');
 }
 
@@ -1772,7 +1773,7 @@ function showCard(c) {
    Stopford's 1840 figure, and before that the honest return is the standing line, not a guess. */
 function metricRow(label, pt) {
   return `${label} ${pt.v}${pt.yr ? ` <span class="py">(${pt.yr})</span>` : ''}` +
-         `<br><span class="prov">${pt.kind} — ${pt.cite}</span>`;
+         `<br><span class="prov">${pt.kind} — ${inlineMD(pt.cite)}</span>`;
 }
 
 function updateReadout() {

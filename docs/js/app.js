@@ -897,7 +897,7 @@ const rows = document.getElementById('cRows');
 rows.innerHTML = '';
 (c.rows || []).forEach(r => {
 const d = document.createElement('div');
-d.innerHTML = `<span class="k">${r[0]}</span><span class="v">${inlineMD(r[1])}</span>`;
+d.innerHTML = `<span class="k">${inlineMD(r[0])}</span><span class="v">${inlineMD(r[1])}</span>`;
 rows.appendChild(d);
 });
 rows.style.display = (c.rows && c.rows.length) ? '' : 'none';
@@ -919,12 +919,12 @@ prose.insertAdjacentHTML('afterbegin',
 '</figcaption></figure>');
 }
 document.getElementById('cSpan').textContent = c.span || '';
-document.getElementById('cCite').textContent = c.cite || '';
+document.getElementById('cCite').innerHTML = inlineMD(c.cite || '');
 document.getElementById('card').classList.remove('hidden');
 }
 function metricRow(label, pt) {
 return `${label} ${pt.v}${pt.yr ? ` <span class="py">(${pt.yr})</span>` : ''}` +
-`<br><span class="prov">${pt.kind} — ${pt.cite}</span>`;
+`<br><span class="prov">${pt.kind} — ${inlineMD(pt.cite)}</span>`;
 }
 function updateReadout() {
 const ch = currentEra();

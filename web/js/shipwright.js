@@ -874,11 +874,14 @@ function swFillCard(v) {
             '</figcaption></figure>'
         : '') +
     '<h4>History and service</h4>' + proseHTML(v.text);   /* app.js — markdown, not asterisks */
+  /* ⚠ ROWS AND THE CITE CARRY MARKDOWN, same contract as the card's rows in app.js — a row
+     value or a citation prints journal titles as *Nature* unless the emphasis is spent here.
+     inlineMD escapes before emphasising, so innerHTML carries no more trust than textContent. */
   document.getElementById('swRows').innerHTML = (v.rows || []).length
     ? '<h4>Measurements and sources</h4>' + v.rows.map(r =>
-        '<div class="rw"><i>' + r[0] + '</i><b>' + r[1] + '</b></div>').join('')
+        '<div class="rw"><i>' + inlineMD(r[0]) + '</i><b>' + inlineMD(r[1]) + '</b></div>').join('')
     : '';
-  document.getElementById('swCite').textContent = v.cite || '';
+  document.getElementById('swCite').innerHTML = inlineMD(v.cite || '');
 }
 
 /* ── the scale strip: every hull in the model, one baseline, one scale ─────────────── */

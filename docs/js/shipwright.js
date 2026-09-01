@@ -490,9 +490,9 @@ document.getElementById('swStory').innerHTML =
 '<h4>History and service</h4>' + proseHTML(v.text);
 document.getElementById('swRows').innerHTML = (v.rows || []).length
 ? '<h4>Measurements and sources</h4>' + v.rows.map(r =>
-'<div class="rw"><i>' + r[0] + '</i><b>' + r[1] + '</b></div>').join('')
+'<div class="rw"><i>' + inlineMD(r[0]) + '</i><b>' + inlineMD(r[1]) + '</b></div>').join('')
 : '';
-document.getElementById('swCite').textContent = v.cite || '';
+document.getElementById('swCite').innerHTML = inlineMD(v.cite || '');
 }
 function swBuildFleetStrip() {
 const strip = document.getElementById('swFleet');

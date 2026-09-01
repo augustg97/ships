@@ -1,0 +1,135 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · globe-default                http://localhost:8149/?frozen=1#v=sea
+    · globe-crossing               http://localhost:8149/?frozen=1#e=0&t=40000
+    · globe-steam                  http://localhost:8149/?frozen=1#e=5&t=1870
+    · globe-modern                 http://localhost:8149/?frozen=1#e=7&t=2000
+    · globe-era-card               http://localhost:8149/?frozen=1#e=1&card=era
+    · shipwright                   http://localhost:8149/?frozen=1#v=ship
+    · action                       http://localhost:8149/?frozen=1#v=action
+    · ship-dhow                    http://localhost:8149/?frozen=1#v=ship&s=dhow
+    · ship-junk                    http://localhost:8149/?frozen=1#v=ship&s=junk
+    · ship-canoe                   http://localhost:8149/?frozen=1#v=ship&s=voyaging-canoe
+    · ship-great-eastern           http://localhost:8149/?frozen=1#v=ship&s=great-eastern
+    · ship-usv                     http://localhost:8149/?frozen=1#v=ship&s=usv
+    · ship-dugout                  http://localhost:8149/?frozen=1#v=ship&s=dugout
+    · ship-trireme                 http://localhost:8149/?frozen=1.4#v=ship&s=trireme
+    · ship-galley                  http://localhost:8149/?frozen=1#v=ship&s=galley
+    · ship-galleass                http://localhost:8149/?frozen=1#v=ship&s=galleass
+    · ship-panokseon               http://localhost:8149/?frozen=1#v=ship&s=panokseon
+    · ship-sekibune                http://localhost:8149/?frozen=1#v=ship&s=sekibune
+    · ship-carrier                 http://localhost:8149/?frozen=1#v=ship&s=carrier
+    · ship-titanic                 http://localhost:8149/?frozen=1#v=ship&s=titanic
+    · ship-yamato                  http://localhost:8149/?frozen=1#v=ship&s=yamato
+    · ship-container               http://localhost:8149/?frozen=1#v=ship&s=container
+    · ship-queen-mary-2            http://localhost:8149/?frozen=1#v=ship&s=queen-mary-2
+    · descent                      http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700
+    · descent-high                 http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000
+    · descent-coast                http://localhost:8149/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260
+    · aboard                       http://localhost:8149/?frozen=1#e=5&f=greatwestern
+    · aboard-off                   http://localhost:8149/?frozen=1#e=7&f=boxroute
+    · map-floor                    http://localhost:8149/?frozen=1#e=4&t=1590&c=-45.3,-24.1&z=300000
+    · aboard-coast                 http://localhost:8149/?frozen=1#e=2&f=syracuse
+    · sea-magnified                http://localhost:8149/?frozen=1#e=7&t=2000&c=-30,35&z=10000
+    · ship-preussen                http://localhost:8149/?frozen=1#v=ship&s=preussen
+    · ship-steamer                 http://localhost:8149/?frozen=1#v=ship&s=steamer
+    · ship-dreadnought             http://localhost:8149/?frozen=1#v=ship&s=dreadnought
+    · aboard-carrier               http://localhost:8149/?frozen=1#e=7&f=csg
+    · aboard-cable                 http://localhost:8149/?frozen=1#e=5&f=cable
+    · aboard-titanic               http://localhost:8149/?frozen=1#e=6&f=titanicvoy
+    · aboard-yamato                http://localhost:8149/?frozen=1#e=6&f=tenichigo
+    · aboard-preussen              http://localhost:8149/?frozen=1#e=6&f=preussenvoy
+    · ship-wyoming                 http://localhost:8149/?frozen=1#v=ship&s=wyoming
+    · aboard-wyoming               http://localhost:8149/?frozen=1#e=6&f=wyomingvoy
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+    · aboard-treasure              http://localhost:8149/?frozen=1#e=4&f=zhenghe
+    · ship-clipper                 http://localhost:8149/?frozen=1#v=ship&s=clipper
+    · aboard-clipper               http://localhost:8149/?frozen=1#e=5&f=woolrun
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+    · shipwright-corbis            http://localhost:8149/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15
+    · ship-azzam                   http://localhost:8149/?frozen=1#v=ship&s=azzam
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+    · action-myeongnyang           http://localhost:8149/?frozen=1#v=action&bt=myeongnyang&day=3&cb=45&cd=1100&ch=13
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+    · sea-canoe-floor              http://localhost:8149/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25
+    · ship-slave-ship              http://localhost:8149/?frozen=1#v=ship&s=slave-ship
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  globe-default                   0.046%     0.011  ok
+  globe-crossing                  0.004%     0.003  ok
+  globe-steam                     0.017%     0.005  ok
+  globe-modern                    0.015%     0.004  ok
+  globe-era-card                  0.004%     0.001  ok
+  shipwright                      0.000%     0.000  ok
+  action                          0.000%     0.000  ok
+  ship-dhow                       0.000%     0.000  ok
+  ship-junk                       0.000%     0.000  ok
+  ship-canoe                      0.000%     0.000  ok
+  ship-great-eastern              0.000%     0.000  ok
+  ship-usv                        0.000%     0.000  ok
+  ship-dugout                     0.000%     0.000  ok
+  ship-trireme                    0.000%     0.000  ok
+  ship-galley                     0.035%     0.019  ok
+  ship-galleass                   0.004%     0.003  ok
+  ship-panokseon                  0.018%     0.016  ok
+  ship-sekibune                   0.000%     0.000  ok
+  ship-carrier                    0.000%     0.000  ok
+  ship-titanic                    0.015%     0.004  ok
+  ship-yamato                     0.017%     0.009  ok
+  ship-container                  0.003%     0.001  ok
+  ship-queen-mary-2               0.017%     0.015  ok
+  descent                         0.000%     0.000  ok
+  descent-high                    0.000%     0.000  ok
+  descent-coast                   0.003%     0.000  ok
+  aboard                          0.000%     0.000  ok
+  aboard-off                      0.018%     0.007  ok
+  map-floor                       0.000%     0.000  ok
+  aboard-coast                    0.004%     0.002  ok
+  sea-magnified                   0.000%     0.000  ok
+  ship-preussen                   0.000%     0.000  ok
+  ship-steamer                    0.037%     0.016  ok
+  ship-dreadnought                0.000%     0.000  ok
+  aboard-carrier                  0.013%     0.005  ok
+  aboard-cable                    0.000%     0.000  ok
+  aboard-titanic                  0.028%     0.008  ok
+  aboard-yamato                   0.006%     0.002  ok
+  aboard-preussen                 0.000%     0.000  ok
+  ship-wyoming                    0.000%     0.000  ok
+  aboard-wyoming                  0.013%     0.004  ok
+  ship-treasure                   0.024%     0.016  ok
+  aboard-treasure                 0.008%     0.004  ok
+  ship-clipper                    0.008%     0.004  ok
+  aboard-clipper                  0.002%     0.000  ok
+  shipwright-ahead                0.017%     0.009  ok
+  shipwright-astern               0.000%     0.000  ok
+  shipwright-furled               0.000%     0.000  ok
+  shipwright-hounds               0.027%     0.020  ok
+  shipwright-corbis               0.000%     0.000  ok
+  ship-azzam                      0.002%     0.001  ok
+  ship-endurance                  0.014%     0.008  ok
+  action-salamis                  0.000%     0.000  ok
+  board-salamis                   0.011%     0.005  ok
+  action-gravelines               0.000%     0.000  ok
+  action-lepanto                  0.000%     0.000  ok
+  action-myeongnyang              0.000%     0.000  ok
+  wake-plan                       0.007%     0.002  ok
+  ship-ever-given                 0.010%     0.005  ok
+  sea-ever-given                  0.011%     0.005  ok
+  passage-sahul                   0.034%     0.012  ok
+  sea-dugout-floor                0.000%     0.000  ok
+  sea-canoe-floor                 0.000%     0.000  ok
+  ship-slave-ship                 0.000%     0.000  ok
+
+  all frames within tolerance.
+

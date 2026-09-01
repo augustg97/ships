@@ -37,6 +37,34 @@
   const rows = [];
   const say = (id, rule, detail) => problems.push({ id, rule, detail });
 
+  /* ── AN ASTERISK THE RENDERER CANNOT SPEND (round 180) ────────────────────────────────
+     rows, cite and text are markdown-bearing fields, and every path that renders them now
+     spends the emphasis through inlineMD/proseHTML (bold first, then italic). A star that
+     survives that pass has no meaning to the renderer: it prints as itself in the panel —
+     the r178 kalba fault, as data rather than as a render path. A fact about the record,
+     not the geometry, so it sweeps every card collection, not only hulls. */
+  {
+    const spend = s => String(s == null ? '' : s)
+      .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+    const sweep = (coll, items) => (items || []).forEach(it => {
+      const id = `data:${coll}/${it.id || it.name || '?'}`;
+      (it.rows || []).forEach((r, i) => [0, 1].forEach(j => {
+        if (spend(r[j]).includes('*'))
+          say(id, 'an asterisk the renderer cannot spend',
+              `rows[${i}][${j}] = ${JSON.stringify(String(r[j]).slice(0, 60))}`);
+      }));
+      for (const f of ['cite', 'text'])
+        if (spend(it[f]).includes('*'))
+          say(id, 'an asterisk the renderer cannot spend',
+              `${f} = ${JSON.stringify(String(it[f]).slice(0, 60))}`);
+    });
+    sweep('vessels', list);
+    sweep('voyages', (APP.voyages && (APP.voyages.voyages || APP.voyages)) || []);
+    sweep('chapters', (APP.chapters && APP.chapters.chapters) || []);
+    sweep('battles', (APP.battles && APP.battles.battles) || []);
+    sweep('ports', (APP.ports && APP.ports.ports) || []);
+  }
+
   for (const v of list) {
     /* ── A SPEED FLOOR MUST NAME WHAT DRIVES IT (round 104) ─────────────────────────────
        The Shipwright's cap prints "under <word>" for any polar floor, and the word was
