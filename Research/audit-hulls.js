@@ -3831,7 +3831,11 @@
        angle tests the frame and not the stow — the plates splay 0.38 rad (six
        limb chords, 17–27°, 그림 16 A/C and the institute figure); builder and
        rule share the constant, never vacuous, and the pre-r196 drawn 0.78 — twice
-       any plate — convicts. V-STONE: one stone, its
+       any plate — convicts. V-WARM (r197): each arm timber's drawn run and
+       section against the record's own arm — 진도-641, 190 × 19.6 cm, the one
+       recovered arm published with dimensions (Myeongnyang Ⅰ 2015, p. 467);
+       the pre-r197 drawn defaults (hook limb 1.2, section 0.12) convict on
+       both forms. V-STONE: one stone, its
        longest dimension read THROUGH the stow transform (sorted world extents — a
        box axis cannot read a 45° roll) against the record's stoneLenM.
        V-WSHANK (r195): the shank's drawn length vs the record's shankM, or — no
@@ -3945,6 +3949,53 @@
                 `an arm timber at ${worstA.toFixed(2)} rad off the shank — the form `
                 + "study's plates splay 0.38±0.12 (six limb chords, 그림 16/17 "
                 + "and the institute's own figure)");
+        }
+        /* V-WARM (r197): each arm timber against the record's own arm —
+           진도-641, the one recovered arm published with dimensions
+           (『진도 명량대첩로 해역 수중발굴조사 보고서 Ⅰ』 2015, p. 467:
+           190 × 19.6 cm, oak; the catalogue drawing reproduces those numbers
+           against its own 1 m bar, r197). LENGTH: the timber's drawn run vs
+           the record less the tip cone's reach (1.1·armD, as the builder
+           places the point) — skipped when a record armM overrides the hook
+           limb, since the blunt limb is a derivation this rule does not
+           re-derive. SECTION: the widest drawn diameter vs 1.1 × the record
+           section (the builder tapers 0.45/0.55 radii). Both ±12%, constants
+           shared with the builder, never vacuous; the pre-r197 section (0.12
+           drawn against the 0.196 record) convicts, and the pre-r197 hook
+           limb (1.2, pushing the run to 1.99) convicts the length. Worst
+           timber speaks once per form. */
+        {
+          const ARM_LEN = 1.90, ARM_SEC = 0.196;
+          const secW = 1.1 * (R.armSecM || ARM_SEC);
+          const lenW = R.armM ? null : ARM_LEN - secW;
+          let worstL = null, worstD = null;
+          for (const o of wm) {
+            if (o.name !== 'wa-arm') continue;
+            o.updateMatrixWorld(true);
+            o.geometry.computeBoundingBox();
+            const gbA = o.geometry.boundingBox, meA = o.matrixWorld.elements;
+            const sA = [Math.hypot(meA[0], meA[1], meA[2]),
+                        Math.hypot(meA[4], meA[5], meA[6]),
+                        Math.hypot(meA[8], meA[9], meA[10])];
+            const lenA = (gbA.max.y - gbA.min.y) * sA[1];
+            const diaA = Math.max((gbA.max.x - gbA.min.x) * sA[0],
+                                  (gbA.max.z - gbA.min.z) * sA[2]);
+            if (lenW && (worstL === null
+                || Math.abs(lenA - lenW) > Math.abs(worstL - lenW))) worstL = lenA;
+            if (worstD === null
+                || Math.abs(diaA - secW) > Math.abs(worstD - secW)) worstD = diaA;
+          }
+          if (lenW && worstL !== null && Math.abs(worstL - lenW) > 0.12 * lenW)
+            say(v.id, "an arm timber off its record's length",
+                `an arm timber runs ${worstL.toFixed(2)} m — 진도-641, the one `
+                + 'arm published with dimensions, is 1.90 m root to point '
+                + `(Myeongnyang Ⅰ 2015, p. 467), ${lenW.toFixed(2)} m of it the `
+                + 'timber once the point\'s cone takes its reach');
+          if (worstD !== null && Math.abs(worstD - secW) > 0.12 * secW)
+            say(v.id, "an arm timber off its record's section",
+                `an arm timber ${worstD.toFixed(2)} m through — 진도-641's `
+                + `section is 19.6 cm, ${secW.toFixed(2)} m at the builder's `
+                + 'own taper');
         }
         /* V-WSTATION (r194, re-anchored r195): the stone's station on the shank,
            read through the stow transforms — foot told from head by the hook

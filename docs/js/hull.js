@@ -3027,7 +3027,8 @@ const u = (wa.atU != null) ? wa.atU : 0.05;
 const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
 const ST_RATIO = 0.51;
 const shankL = wa.shankM || stoneL / ST_RATIO, shD = 0.20;
-const armL = wa.armM || 1.2, armD = 0.12;
+const ARM_LEN = 1.90, ARM_SEC = 0.196;
+const armD = wa.armSecM || ARM_SEC;
 const nArms = wa.arms || 2;
 const cabR = (wa.cableDiaM || 0.10) / 2;
 const offZ = wa.offZ || 0;
@@ -3060,7 +3061,7 @@ const TH = 0.38;
 const XA_FRAC = 0.35;
 const yX = -shankL * (1 - XA_FRAC);
 const BL = (yStone - stoneS * 0.83 / 2 - yX) / Math.cos(TH) + armD * 0.4;
-const HL = armL;
+const HL = wa.armM || Math.max(ARM_LEN - BL - 1.1 * armD, armD * 2);
 const SEP = shankL * 0.058;
 const pairs = (nArms >= 4)
 ? [[0, SEP, [1, -1]], [Math.PI / 2, -SEP, [1, -1]]]

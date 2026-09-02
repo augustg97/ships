@@ -2799,6 +2799,39 @@ say(v.id, "arms off the plates' splay",
 + "study's plates splay 0.38±0.12 (six limb chords, 그림 16/17 "
 + "and the institute's own figure)");
 }
+{
+const ARM_LEN = 1.90, ARM_SEC = 0.196;
+const secW = 1.1 * (R.armSecM || ARM_SEC);
+const lenW = R.armM ? null : ARM_LEN - secW;
+let worstL = null, worstD = null;
+for (const o of wm) {
+if (o.name !== 'wa-arm') continue;
+o.updateMatrixWorld(true);
+o.geometry.computeBoundingBox();
+const gbA = o.geometry.boundingBox, meA = o.matrixWorld.elements;
+const sA = [Math.hypot(meA[0], meA[1], meA[2]),
+Math.hypot(meA[4], meA[5], meA[6]),
+Math.hypot(meA[8], meA[9], meA[10])];
+const lenA = (gbA.max.y - gbA.min.y) * sA[1];
+const diaA = Math.max((gbA.max.x - gbA.min.x) * sA[0],
+(gbA.max.z - gbA.min.z) * sA[2]);
+if (lenW && (worstL === null
+|| Math.abs(lenA - lenW) > Math.abs(worstL - lenW))) worstL = lenA;
+if (worstD === null
+|| Math.abs(diaA - secW) > Math.abs(worstD - secW)) worstD = diaA;
+}
+if (lenW && worstL !== null && Math.abs(worstL - lenW) > 0.12 * lenW)
+say(v.id, "an arm timber off its record's length",
+`an arm timber runs ${worstL.toFixed(2)} m — 진도-641, the one `
++ 'arm published with dimensions, is 1.90 m root to point '
++ `(Myeongnyang Ⅰ 2015, p. 467), ${lenW.toFixed(2)} m of it the `
++ 'timber once the point\'s cone takes its reach');
+if (worstD !== null && Math.abs(worstD - secW) > 0.12 * secW)
+say(v.id, "an arm timber off its record's section",
+`an arm timber ${worstD.toFixed(2)} m through — 진도-641's `
++ `section is 19.6 cm, ${secW.toFixed(2)} m at the builder's `
++ 'own taper');
+}
 if (shk && stones.length === 1 && tips.length) {
 shk.updateMatrixWorld(true);
 shk.geometry.computeBoundingBox();

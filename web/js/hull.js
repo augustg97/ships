@@ -4769,7 +4769,14 @@ function buildFittings(S, group, mats) {
      they brace it at any shank length; a spreader board across the splay; two
      treenails pinned through each crossing (표민대화 draws two 나무못 at the
      joint, and both separately-made arms recovered carry two peg holes — Hong
-     2013 artifacts ④⑥); the cable seized to the shank head with whipped turns,
+     2013 artifacts ④⑥). The ARM TIMBER itself is RECORDED since r197:
+     진도-641, the Jindo arm (= artifact ④), catalogued at 190 × 19.6 cm in
+     the Myeongnyang report Ⅰ (2015, p. 467) — ARM_LEN/ARM_SEC below, the
+     whole drawn run root to point held to the record. CONTESTED, the joint:
+     that artifact's own peg stations sit 0.35–0.55 m from its lap-notched
+     root, the economy of Hong's foot-rooted variant, not the drawn crossed
+     frame's longer blunt limb — the institute's frame stays the drawn one,
+     the artifact's stations named. The cable seized to the shank head with whipped turns,
      the figure's own detail. Lashing: end turns in the stone's grooves, crossed
      frapping over the midbody (the 2021 reproduction). No stone has been found
      still lashed on — the report says so, and the provenance carries it. The
@@ -4787,7 +4794,18 @@ function buildFittings(S, group, mats) {
        study's long-shank rule (oak's buoyancy); a record shankM still outranks */
     const ST_RATIO = 0.51;
     const shankL = wa.shankM || stoneL / ST_RATIO, shD = 0.20;
-    const armL = wa.armM || 1.2, armD = 0.12;
+    /* the arm timber from its own record — 진도-641, the one recovered arm
+       published with dimensions (『진도 명량대첩로 해역 수중발굴조사 보고서 Ⅰ』
+       2015, p. 467): oak, 190 × 19.6 cm root to carved point, lap-notched at
+       the root for the shank, two peg stations 0.35–0.55 m from that end; the
+       catalogue drawing reproduces its printed numbers against its own 1 m bar
+       (r197, 8.79 px/cm — plans 188.7/189.0 cm, section circle 16–18 cm).
+       ARM_LEN is the WHOLE timber including the point; the hook limb below the
+       crossing is what remains after the derived blunt limb and the tip cone's
+       reach (1.1·armD, the cone as placed below) take theirs. A record armM
+       (hook limb) or armSecM outranks. */
+    const ARM_LEN = 1.90, ARM_SEC = 0.196;
+    const armD = wa.armSecM || ARM_SEC;
     const nArms = wa.arms || 2;
     const cabR = (wa.cableDiaM || 0.10) / 2;
     const offZ = wa.offZ || 0;
@@ -4828,7 +4846,9 @@ function buildFittings(S, group, mats) {
        whipped where it crosses. Two hooks — the study's stock-anchor count — are
        two single timbers in the stone's own plane, splayed opposite, each at its
        own whipped station; a four-hook record draws two pairs in perpendicular
-       planes. The hook limb (crossing to point) is the record's armM. */
+       planes. The timber's whole run, root to carved point, is the record's —
+       진도-641's 1.90 m — so the hook limb is ARM_LEN less the derived blunt
+       limb and the tip's reach; a record armM overrides the hook limb. */
     /* splay from the shank, rad — MEASURED r196: six limb chords, tip to root,
        across 그림 16 (A) 22°/27°, (C) 19°/26° and the institute figure ~19°/17°,
        mean 21.6°; the pre-r196 0.78 (45°) was a drawn default, twice the plates */
@@ -4838,7 +4858,7 @@ function buildFittings(S, group, mats) {
     /* the blunt limb is DERIVED, crossing to the stone's underside, so the arms
        brace the stone at any shank length — the figure's structure, not a knob */
     const BL = (yStone - stoneS * 0.83 / 2 - yX) / Math.cos(TH) + armD * 0.4;
-    const HL = armL;
+    const HL = wa.armM || Math.max(ARM_LEN - BL - 1.1 * armD, armD * 2);
     /* the figure whips the crossings at STAGGERED stations, ~0.12 of the shank
        apart — crossed at one point they read as a wheel's spokes, not a frame.
        Each entry is [plane angle, station, splay signs]: the two-hook form is one
