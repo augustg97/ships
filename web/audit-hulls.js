@@ -3822,7 +3822,16 @@
        hook-arms both sides, a long grooved stone lashed on to sink the frame, the
        stone serving as the stock (석제 닻장, the 2023 report's own term). V-WARRANT
        both ways, as every anchor rule. V-ARMS: the record's arm count of hook
-       points, found STRUCTURALLY as the group's cones. V-STONE: one stone, its
+       points, found STRUCTURALLY as the group's cones; class default TWO since
+       r196 — every stock-anchor the form study draws carries two (그림 16 A–D,
+       그림 17, all six artifact reconstructions), and the dictionary's four-hook
+       gloss belongs to the STOCKLESS form (the study's E; its 그림 18 analogue is
+       a modern grapnel). The pre-r196 drawn four convicts. V-WSPLAY (r196): each
+       arm timber's axis against the shank's, both read in world space so the
+       angle tests the frame and not the stow — the plates splay 0.38 rad (six
+       limb chords, 17–27°, 그림 16 A/C and the institute figure); builder and
+       rule share the constant, never vacuous, and the pre-r196 drawn 0.78 — twice
+       any plate — convicts. V-STONE: one stone, its
        longest dimension read THROUGH the stow transform (sorted world extents — a
        box axis cannot read a 45° roll) against the record's stoneLenM.
        V-WSHANK (r195): the shank's drawn length vs the record's shankM, or — no
@@ -3862,10 +3871,12 @@
       if (H.woodAnchor && wm.length) {
         const R = H.woodAnchor;
         const tips = wm.filter(o => o.geometry.type === 'ConeGeometry');
-        const wantArms = R.arms || 4;
+        const wantArms = R.arms || 2;
         if (tips.length !== wantArms)
           say(v.id, 'a wooden anchor off its arm count',
-              `${tips.length} hook points drawn — the record hangs ${wantArms}`);
+              `${tips.length} hook points drawn — ` + (R.arms
+                ? `the record hangs ${R.arms}`
+                : "the form study's stock anchor carries 2 (그림 16/17)"));
         const stones = wm.filter(o => o.name === 'wa-stone');
         if (stones.length !== 1)
           say(v.id, 'a wooden anchor without its stone',
@@ -3907,6 +3918,33 @@
                 `shank ${lenS.toFixed(2)} m drawn — the figure's stone/shank 0.51 `
                 + `puts ${wantS.toFixed(2)} m on this stone, the long shank the `
                 + "form study explains by oak's buoyancy");
+        }
+        /* V-WSPLAY (r196): each arm timber's axis against the shank's, both read
+           through their own world matrices — the two axes ride the same stow
+           transforms, so the angle tests the frame itself, not the stow (the
+           r195 lesson: a rule that borrows a movable feature tests the feature,
+           not the claim; an axis pair moves together). The plates splay 0.38 rad
+           — six limb chords, tip to root, 그림 16 (A) 22°/27°, (C) 19°/26°, the
+           institute figure ~19°/17° — and the band ±0.12 carries their 17–27°
+           spread. Shared with the builder's TH, never vacuous; the pre-r196
+           drawn 0.78, twice any plate, convicts. */
+        if (shk) {
+          const WSPLAY = 0.38, WSPLAY_TOL = 0.12;
+          const axSh = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+          let worstA = null;
+          for (const o of wm) {
+            if (o.name !== 'wa-arm') continue;
+            o.updateMatrixWorld(true);
+            const axA = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+            const angA = Math.acos(Math.min(1, Math.abs(axA.dot(axSh))));
+            if (worstA === null
+                || Math.abs(angA - WSPLAY) > Math.abs(worstA - WSPLAY)) worstA = angA;
+          }
+          if (worstA !== null && Math.abs(worstA - WSPLAY) > WSPLAY_TOL)
+            say(v.id, "arms off the plates' splay",
+                `an arm timber at ${worstA.toFixed(2)} rad off the shank — the form `
+                + "study's plates splay 0.38±0.12 (six limb chords, 그림 16/17 "
+                + "and the institute's own figure)");
         }
         /* V-WSTATION (r194, re-anchored r195): the stone's station on the shank,
            read through the stow transforms — foot told from head by the hook

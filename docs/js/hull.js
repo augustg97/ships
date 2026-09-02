@@ -3028,7 +3028,7 @@ const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
 const ST_RATIO = 0.51;
 const shankL = wa.shankM || stoneL / ST_RATIO, shD = 0.20;
 const armL = wa.armM || 1.2, armD = 0.12;
-const nArms = wa.arms || 4;
+const nArms = wa.arms || 2;
 const cabR = (wa.cableDiaM || 0.10) / 2;
 const offZ = wa.offZ || 0;
 const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
@@ -3056,14 +3056,16 @@ new THREE.BoxGeometry(stoneL, stoneS * 0.83, stoneS), stoneM);
 stone.name = 'wa-stone';
 stone.position.set(0, yStone, zStone);
 ai.add(stone);
-const TH = 0.78;
+const TH = 0.38;
 const XA_FRAC = 0.35;
 const yX = -shankL * (1 - XA_FRAC);
 const BL = (yStone - stoneS * 0.83 / 2 - yX) / Math.cos(TH) + armD * 0.4;
 const HL = armL;
 const SEP = shankL * 0.058;
-const pairs = (nArms >= 4) ? [[0, SEP], [Math.PI / 2, -SEP]] : [[0, 0]];
-for (const [ph, st] of pairs) for (const sg of [1, -1]) {
+const pairs = (nArms >= 4)
+? [[0, SEP, [1, -1]], [Math.PI / 2, -SEP, [1, -1]]]
+: [[0, SEP, [1]], [0, -SEP, [-1]]];
+for (const [ph, st, sgs] of pairs) for (const sg of sgs) {
 const yXp = yX + st;
 const dir = new THREE.Vector3(
 sg * Math.sin(TH) * Math.cos(ph), Math.cos(TH),

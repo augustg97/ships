@@ -13920,3 +13920,97 @@ forecastle. (14) Azzam crest span. (15) r164 risen black unpierced. (16) r165
 fantail gallery wings. (17) r166 screen glass. (18) r171 quarter-gallery sashes.
 (19) r171 authored tier fractions. (20) r172 the 74's lower capstan barrel.
 (21) r181 eraSm dead fallback branch (app.js:1353).
+
+## Round 196 — 2026-09-01 — the frame takes the plates' own proportions: two arms, half the splay
+
+**The r195 residual 1 OPENED AND CLOSED (build/staging/r196/JUDGMENT.md). The proportion
+pass on Hong 2013's own plates, plus the thesis's experiment tables, both already on
+disk since r195 — no fetch this round, the sources were mined.**
+
+**Measured, not judged (300 DPI renders, gridded, chords tip-to-root): every
+stock-anchor the study draws carries TWO arms — 그림 16 forms A–D (the captions count
+them), the stone-stock schematic 그림 17, all six artifact reconstructions on p.135,
+and the institute's r194 figure re-read at grid (two limbs, one whipped crossing each,
+staggered). FOUR arms appear only in the STOCKLESS form E, whose modern analogue the
+study names in 그림 18 — a four-claw grapnel. The pre-r196 drawn four came from the
+Standard Korean Dictionary's '보통 네 갈고리' — the same source class whose station
+gloss r195 killed V-CROSS over. Splay: six limb chords — 그림 16 (A) 22.0°/27.0°,
+(C) 18.9°/26.2°, institute figure ~18.9°/16.6° — mean 21.6° = 0.38 rad; the drawn
+TH 0.78 (45°) was a drawn default at TWICE any plate.**
+
+**The thesis tables mined (표 8 정박실험, 표 11 묶기): off Taean, 5–20 m of water,
+30 m of cable, three runs per rig — the stone athwart the shank's middle anchored ALL
+THREE runs (33/62/78 m of drift); the bare wooden anchor, the stone at the head and
+the stone on the cable failed all nine between them. The head rig floats the anchor so
+the arms cannot reach bottom (표 11's own reading); the cable rig is the thesis's
+AUXILIARY for strong current, named in provenance, not drawn. And the trial's own
+sentence: the wooden stock did little beside the stone — r195's crossbar removal
+confirmed in the water. The card's Ground-tackle row now carries the sea-trial
+sentence.**
+
+**Class change (hull.js woodAnchor): nArms class default 2 (was 4); the record's
+`arms: 4` DROPPED — a drawn default by its own provenance's words, a real fetched
+count would outrank. TH 0.38 measured. The two-hook form is one timber per whipped
+station (±SEP, the institute figure's stagger), splayed opposite in the stone's
+plane; a four-hook record still draws two perpendicular pairs. Whippings, pegs,
+spreader, BL derivation unchanged — BL adapts through cos(TH). Provenance rewritten:
+the arms' count and splay now MEASURED with the dictionary gloss CONTESTED to the
+stockless form; Hong's foot-rooted arm variant NAMED against the institute's crossed
+frame, which stays the drawn one (the class's declared frame source, r194).**
+
+**Audit: V-ARMS default 2, shared with the builder — the pre-r196 four convicts. NEW
+V-WSPLAY: each wa-arm axis against the shank's, BOTH through their own world matrices
+— the pair rides the same stow transforms, so the angle tests the frame, not the stow
+(the r195 movable-span lesson respected by construction). 0.38 ± 0.12, the band
+carrying the plates' 17–27° spread; convicts the pre-r196 0.78.**
+
+**Proofs on the :8151 shadow, predictions written first, all to the digit: clean
+33/0 ✓; inj-wa-arms (perpendicular pair added at the NEW splay) → exactly ONE V-ARMS
+✓, V-WSPLAY/V-WSTATION/V-REST silent as predicted; inj-wa-splay (timbers re-aimed to
+0.78 about their crossings) → exactly ONE V-WSPLAY 0.78 ✓, all else silent. No honest
+seconds — the stone's rolled corner owning the rest floor at −1.04 m was computed
+before the runs, not discovered by them. Post-land audit on :8149: 33/0 twice by the
+original round (mtimes prove it: edits 20:14, runs 20:16/20:17), and 33/0 twice AGAIN
+by the finishing round on the final tree.**
+
+**THE ROUND DIED AT THE FINISH AND WAS FINISHED BY ITS SUCCESSOR. The 80-minute
+overrun killer terminated the r196 process at 20:30 — after the gates had all passed
+and web/index.html was stamped (20:23), before docs/ regen, the closing ratchet,
+HANDOFF and commit. The 20:40 firing verified the landed state instead of redoing it:
+mtimes ordered (edits BEFORE the post-land audit runs), web/docs diffs compared
+(docs was STALE — the build had not rerun), audits re-run twice, then the checklist.
+The trap, named: a killed round that already passed its gates leaves a FINISHABLE
+tree — verify the evidence ordering, re-run the gates, finish the checklist; redoing
+the work would have doubled the round for nothing, and committing without re-running
+the gates would have trusted a dead process's word.**
+
+**Frames: opening 64 PAID AND PURE by the original round (EXIT:0 20:11, edits landed
+20:14 — every edit staged until then). Close 64 EXIT:0 all within tolerance; solo
+mover ship-panokseon 0.021% UNDER gate, diff image read — one cluster, the arm
+timbers' own pixels at the bow, nothing else in frame — accepted with FRAME-LOG
+reason per the r185 precedent (an intentional change accepted under gate cannot read
+as drift), re-checked solo 0.000%. ship-junk 0.000 / ship-sekibune 0.007% /
+shipwright / action / globes all inert.**
+
+**Looked at (rules 0/1, build/staging/r196/look-a..e + crops/zooms, re-read at
+finish): the anchor lies rolled on the planked bow platform, TWO arm timbers crossing
+the shank at staggered whipped stations, the grooved stone lashed at the middle,
+cable aft to the horong. The full frame reads as a rendered world: oar bank standing
+out to starboard, black gun muzzles through the bulwark ports, the roofed lookout
+tower with its ladder — three facts, no legend.**
+
+**Deployed: data-version 1788320733.**
+
+**Named residuals, in order:** (1) NEW r196: the study's artifact catalogue —
+recovered arms ④ (Jindo) and ⑥ (Gwangyang) were read for their peg holes only;
+whether the study or the thesis dimensions them was not checked, and a measured arm
+would replace the 1.2 m drawn class default the provenance still names. (2) Kozushima
+1993 weighing (print-only stands). (3) r187 emaki plate. (4) r182 grapnel shank
+reconstruction. (5) r183 junk stone bar class default. (6) r177 Lucian's second
+machine. (7) r173 cog Gangspill. (8) r173 cog castles. (9) r173 cog rudder slab.
+(10) r176 sekibune class-size (kiwari read). (11) boxy classes: top (18),
+channel/cheek/cathead. (12) Preussen mast livery. (13) Endurance forecastle.
+(14) Azzam crest span. (15) r164 risen black unpierced. (16) r165 fantail gallery
+wings. (17) r166 screen glass. (18) r171 quarter-gallery sashes. (19) r171 authored
+tier fractions. (20) r172 the 74's lower capstan barrel. (21) r181 eraSm dead
+fallback branch (app.js:1353).

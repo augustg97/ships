@@ -2740,10 +2740,12 @@ say(v.id, 'declared but not drawn', 'woodAnchor');
 if (H.woodAnchor && wm.length) {
 const R = H.woodAnchor;
 const tips = wm.filter(o => o.geometry.type === 'ConeGeometry');
-const wantArms = R.arms || 4;
+const wantArms = R.arms || 2;
 if (tips.length !== wantArms)
 say(v.id, 'a wooden anchor off its arm count',
-`${tips.length} hook points drawn — the record hangs ${wantArms}`);
+`${tips.length} hook points drawn — ` + (R.arms
+? `the record hangs ${R.arms}`
+: "the form study's stock anchor carries 2 (그림 16/17)"));
 const stones = wm.filter(o => o.name === 'wa-stone');
 if (stones.length !== 1)
 say(v.id, 'a wooden anchor without its stone',
@@ -2778,6 +2780,24 @@ say(v.id, "a shank off its stone's proportion",
 `shank ${lenS.toFixed(2)} m drawn — the figure's stone/shank 0.51 `
 + `puts ${wantS.toFixed(2)} m on this stone, the long shank the `
 + "form study explains by oak's buoyancy");
+}
+if (shk) {
+const WSPLAY = 0.38, WSPLAY_TOL = 0.12;
+const axSh = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+let worstA = null;
+for (const o of wm) {
+if (o.name !== 'wa-arm') continue;
+o.updateMatrixWorld(true);
+const axA = new THREE.Vector3(0, 1, 0).transformDirection(o.matrixWorld);
+const angA = Math.acos(Math.min(1, Math.abs(axA.dot(axSh))));
+if (worstA === null
+|| Math.abs(angA - WSPLAY) > Math.abs(worstA - WSPLAY)) worstA = angA;
+}
+if (worstA !== null && Math.abs(worstA - WSPLAY) > WSPLAY_TOL)
+say(v.id, "arms off the plates' splay",
+`an arm timber at ${worstA.toFixed(2)} rad off the shank — the form `
++ "study's plates splay 0.38±0.12 (six limb chords, 그림 16/17 "
++ "and the institute's own figure)");
 }
 if (shk && stones.length === 1 && tips.length) {
 shk.updateMatrixWorld(true);
