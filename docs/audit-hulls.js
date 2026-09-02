@@ -2548,9 +2548,13 @@ if (stones.length !== 1)
 say(v.id, 'a stone anchor without its stone',
 `${stones.length} stone bars drawn — the record hangs one`);
 else if (R.stoneLenM) {
-const bs = new THREE.Box3().setFromObject(stones[0]);
-const lg = Math.max(bs.max.x - bs.min.x, bs.max.y - bs.min.y,
-bs.max.z - bs.min.z);
+const s = stones[0];
+s.updateWorldMatrix(true, false);
+const e = s.matrixWorld.elements, gp = s.geometry.parameters;
+const lg = Math.max(
+Math.hypot(e[0], e[1], e[2]) * (gp.width || 0),
+Math.hypot(e[4], e[5], e[6]) * (gp.height || 0),
+Math.hypot(e[8], e[9], e[10]) * (gp.depth || 0));
 if (Math.abs(lg - R.stoneLenM) > 0.10 * R.stoneLenM)
 say(v.id, "the stone off the record's length",
 `bar ${lg.toFixed(2)} m, record says ${R.stoneLenM}`);
@@ -2559,6 +2563,33 @@ const tips = am.filter(o => o.geometry.type === 'ConeGeometry');
 if (tips.length !== 2)
 say(v.id, 'a stone anchor without its two hooks',
 `${tips.length} hook points drawn — the text clamps the stone with two`);
+if (R.armLenM) {
+const cheeks = am.filter(o => o.name === 'st-cheek' || o.name === 'st-tip');
+if (cheeks.length) {
+const par = cheeks[0].parent;
+par.updateWorldMatrix(true, false);
+const ax = new THREE.Vector3(0, 1, 0).transformDirection(par.matrixWorld);
+let lo = Infinity, hi = -Infinity;
+const c = new THREE.Vector3();
+for (const o of cheeks) {
+o.updateWorldMatrix(true, false);
+if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+const b = o.geometry.boundingBox;
+for (const cx of [b.min.x, b.max.x])
+for (const cy of [b.min.y, b.max.y])
+for (const cz of [b.min.z, b.max.z]) {
+const d = c.set(cx, cy, cz).applyMatrix4(o.matrixWorld).dot(ax);
+if (d < lo) lo = d;
+if (d > hi) hi = d;
+}
+}
+const run = hi - lo;
+if (Math.abs(run - R.armLenM) > 0.10 * R.armLenM)
+say(v.id, "the cheek timbers off the record's run",
+`arm run ${run.toFixed(2)} m tip to butt — the articulated `
++ `마도해역-212 arm measures ${R.armLenM}`);
+}
+}
 const bb = new THREE.Box3();
 for (const o of am) if (o.name !== 'st-cable')
 bb.union(new THREE.Box3().setFromObject(o));

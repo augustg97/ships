@@ -2091,11 +2091,14 @@ stoneAnchor: { stage: 3, name: 'Stone anchor',
 what: 'The Chinese sea-ship\'s ground tackle in an eyewitness\'s one sentence '
 + '(Xu Jing, 1124): below the bow winch hangs the anchor-stone, clamped on '
 + 'its two sides by two wooden hooks, on a rattan cable thick as a rafter '
-+ 'and five hundred feet long. The stone is the weight, the hooks are the '
-+ 'flukes, and there is no iron in it anywhere — whichever way it lands, a '
-+ 'point bites. In heavy weather two spare anchors of the same make go down '
-+ 'beside it. Shaped anchor-stone bars are among the commonest ground-tackle '
-+ 'finds of this ocean\'s wrecks; the wood rotted off them.' },
++ 'and five hundred feet long. The form drawn here is that sentence\'s own '
++ 'object as excavation recovered it: two shank timbers pegged together '
++ 'with cross battens, each sweeping out to a curved fluke point, and the '
++ 'stone wedged crosswise through the gap between them — its ends standing '
++ 'out both sides as the stock, so a fluke always points down to bite. One '
++ 'such anchor came up off the Korean coast still jointed, stone and arm '
++ 'together, from the sea road Chinese traders sailed to Goryeo. There is '
++ 'no iron in it anywhere; the wood rotted off every other stone found.' },
 ironAnchors: { stage: 3, name: 'Four-claw anchor',
 what: 'The Chinese sea anchor as the Tiangong kaiwu forges it: four claws '
 + 'made first, then joined section by section to a wrought-iron shank — '
@@ -2788,69 +2791,86 @@ group.add(tag(ag, 'grapnel'));
 if (S.stoneAnchor) {
 const sa = S.stoneAnchor;
 const u = (sa.atU != null) ? sa.atU : -0.02;
-const stoneL = sa.stoneLenM || 1.6, stoneS = sa.stoneSecM || 0.24;
-const hookL = sa.hookLenM || 2.1, hookD = sa.hookDiaM || 0.12;
+const armL = sa.armLenM || 1.49, armW = sa.armWM || 0.16,
+armD = sa.armDM || 0.15;
+const hornM = sa.hornM || 0.81, hornOff = sa.hornOffM || 0.285;
+const seatM = sa.seatM || 1.15;
+const batt = sa.battenM || [0.58, 0.90, 1.37];
+const stoneL = sa.stoneLenM || 1.09, stoneW = sa.stoneWM || 0.29,
+stoneT = sa.stoneTM || 0.10;
 const cabR = (sa.cableDiaM || 0.10) / 2;
 const offZ = sa.offZ || 0;
 const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
 { color: 0x7d7a70, roughness: 0.92, metalness: 0.02 }));
 const g = new THREE.Group();
-const stone = new THREE.Mesh(
-new THREE.BoxGeometry(stoneS, stoneL, stoneS * 0.8), stoneM);
-stone.name = 'st-stone';
-stone.position.y = -stoneL / 2;
-g.add(stone);
-const shaftL = stoneL + 0.15, curveL = Math.max(0.25, hookL - shaftL);
+const bodyL = armL - hornM;
 for (const sg of [1, -1]) {
-const zH = sg * (stoneS * 0.40 + hookD / 2);
-const shaft = new THREE.Mesh(
-new THREE.CylinderGeometry(hookD * 0.42, hookD * 0.50, shaftL, 10), wood);
-shaft.name = 'st-hook';
-shaft.position.set(0, -shaftL / 2 + 0.08, zH);
-g.add(shaft);
-const yFoot = -shaftL + 0.08;
-const curve = new THREE.Mesh(
-new THREE.CylinderGeometry(hookD * 0.46, hookD * 0.34, curveL, 10), wood);
-curve.name = 'st-hook';
-curve.rotation.x = -sg * 0.95;
-curve.position.set(0, yFoot - curveL / 2 * Math.cos(0.95),
-zH + sg * curveL / 2 * Math.sin(0.95));
-g.add(curve);
+const zc = sg * (stoneT + armD) / 2;
+const body = new THREE.Mesh(new THREE.BoxGeometry(armW, bodyL, armD), wood);
+body.name = 'st-cheek';
+body.position.set(0, -(hornM + bodyL / 2), zc);
+g.add(body);
+const NSEG = 5, tipL = 0.12;
+const zAt = t => zc + sg * hornOff * t * t;
+const yAt = t => -hornM * (1 - t);
+const dAt = t => armD * (1 - t) + 0.07 * t;
+const tCap = 1 - tipL / hornM;
+for (let i = 0; i < NSEG; i++) {
+const t0 = tCap * i / NSEG, t1 = tCap * (i + 1) / NSEG;
+const dy = yAt(t1) - yAt(t0), dz = zAt(t1) - zAt(t0);
+const seg = new THREE.Mesh(
+new THREE.BoxGeometry(armW, Math.hypot(dy, dz) + 0.02,
+dAt((t0 + t1) / 2)), wood);
+seg.name = 'st-cheek';
+seg.rotation.x = Math.atan2(dz, dy);
+seg.position.set(0, (yAt(t0) + yAt(t1)) / 2, (zAt(t0) + zAt(t1)) / 2);
+g.add(seg);
+}
+const dyT = yAt(1) - yAt(tCap), dzT = zAt(1) - zAt(tCap);
 const tip = new THREE.Mesh(
-new THREE.ConeGeometry(hookD * 0.34, hookD * 0.9, 10), wood);
+new THREE.ConeGeometry(dAt(tCap) * 0.5, tipL, 10), wood);
 tip.name = 'st-tip';
-tip.rotation.x = sg * (Math.PI - 0.95);
-tip.position.set(0, yFoot - (curveL + hookD * 0.45) * Math.cos(0.95),
-zH + sg * (curveL + hookD * 0.45) * Math.sin(0.95));
+tip.rotation.x = Math.atan2(dzT, dyT);
+tip.position.set(0, (yAt(tCap) + yAt(1)) / 2, (zAt(tCap) + zAt(1)) / 2);
 g.add(tip);
 }
-for (const yB of [-0.16, -(stoneL - 0.16)]) {
-const band = new THREE.Mesh(
-new THREE.TorusGeometry(1, 0.024, 8, 20), mats.ropeSolid || wood);
-band.name = 'st-band';
-band.rotation.x = Math.PI / 2;
-band.scale.set(stoneS * 0.60, stoneS * 0.44 + hookD, 1);
-band.position.y = yB;
-g.add(band);
+const stone = new THREE.Mesh(
+new THREE.BoxGeometry(stoneL, stoneW, stoneT), stoneM);
+stone.name = 'st-stone';
+stone.position.set(0, -seatM, 0);
+g.add(stone);
+for (const by of batt) {
+const b = new THREE.Mesh(
+new THREE.BoxGeometry(0.06, 0.055, stoneT + 2 * armD + 0.04), wood);
+b.name = 'st-batten';
+b.position.set(0, -by, 0);
+g.add(b);
 }
-const uH = Math.max(0, u), uT = Math.max(0, u - (stoneL + 0.6) / L);
+const uH = Math.max(0, u), uT = Math.max(0, u - (armL + 0.6) / L);
 const slope = (uH - uT) > 1e-6
 ? (deckAtU(uH) - deckAtU(uT)) / ((uH - uT) * L) : 0;
 g.rotation.z = -Math.PI / 2 + Math.atan(slope);
+g.rotation.x = 0.87;
 const yD = deckAtU(uH);
 g.position.set((u - 0.5) * L, yD, offZ);
 g.updateMatrixWorld(true);
 const bb = new THREE.Box3().setFromObject(g);
 g.position.y += (yD - bb.min.y);
 g.updateMatrixWorld(true);
-const head = new THREE.Vector3(0, 0, 0).applyMatrix4(g.matrixWorld)
-.add(new THREE.Vector3(0.05, 0.06, 0));
+const yBend = -(batt.length > 1 ? batt[1] : 0.90);
+const wrap = new THREE.Mesh(
+new THREE.TorusGeometry(0.055 + cabR, cabR, 8, 20), mats.ropeSolid || wood);
+wrap.name = 'st-cable';
+wrap.position.set(0, yBend, 0);
+g.add(wrap);
+g.updateMatrixWorld(true);
+const bend = new THREE.Vector3(0, yBend + 0.09, 0).applyMatrix4(g.matrixWorld);
 const wl = S.windlass;
 const uW = wl ? (wl.atU || 0.10) : 0.10;
 const barrelPt = new THREE.Vector3(
 (uW - 0.5) * L - (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2,
 deckAtU(uW) + 0.30 + (wl ? (wl.barrelDiaM || 0.5) : 0.5) / 2, offZ * 0.4);
-const cable = ropeMesh([[head, barrelPt]], cabR, mats.ropeSolid || wood);
+const cable = ropeMesh([[bend, barrelPt]], cabR, mats.ropeSolid || wood);
 const ag = new THREE.Group();
 ag.add(g);
 if (cable) { cable.name = 'st-cable'; ag.add(cable); }

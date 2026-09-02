@@ -12739,3 +12739,21 @@ Round 196 is complete and live — stamp **1788320733** verified at augustg97.gi
 ───────────────────────────────────────────────────────────────────────────
 2026-09-01 23:10:13  round starting
   starting the :8149 server
+Round 198 is done and live. The short version:
+
+**r197 had never actually shipped.** Its push died on GitHub's 100 MB limit — the committed Myeongnyang report Ⅰ PDF is 106.86 MB — and the 80-minute killer took the round before it could read its own push log. The live site was serving r196 while HANDOFF said r197 had landed. I untracked the PDF (it stays on disk; the mined record, drawing crops, and re-fetch coordinates are all still committed), added a named .gitignore rule for over-limit fetches, amended the never-pushed commit, and pushed. The trap is written into HANDOFF: read the push's exit status the same round it's issued — the live stamp is the only witness that shipped.
+
+**r197's pending checklist, finished per the killed-round protocol:**
+- Audit run 2 on the landed tree: 33 hulls, 0 problems.
+- The looks: three captures of the panokseon's bow. The keeper shows the shank diagonal on the planked foredeck, the grey grooved stone lashed at its middle, and the two arm timbers at staggered whipped stations now visibly near the shank's own girth — the 진도-641 record (armD 0.12 → 0.196) is on screen.
+- Close ratchet: all 64 frames within tolerance. ship-panokseon moved 0.005% — one 317-pixel cluster that the crop shows is the anchor assembly itself. Accepted under-gate with a written reason per the r185 precedent; solo re-check 0.000. Everything else inert, as r197 predicted.
+- Live stamp verified twice: 1788328583 (r197 going live, one round late) and 1788332236 (this round's own push).
+
+**Residual 1 opened and part-paid.** The 2017 Mado 시굴 report (42 MB) fetched and mined. Two stones came up with their arms: 마도해역-203 (2011 — stone 052 by date and circumstance, raised with one arm and a bamboo rope, which the report reads as Chinese practice) and 마도해역-212 (2014, raised still articulated with its arm). Both are the two-shank stone-insert form, and page 210 carries a measured drawing of the 212 arm at 1/10 scale with a 50 cm bar — Hong 2013's artifact ⑤, the Mado arm with three square holes, finally measurable. That record feeds the **junk's** stone-anchor class (residual 5), not the panokseon's, so HANDOFF tells the next round to take residual 5 first — the drawing is already on disk, no fetch needed.
+
+Commits 1dba2dd and 04400a1 are pushed; the tree is clean.
+2026-09-02 00:06:32  round finished; HEAD is 04400a1 r198 push log — the receipt the round rule now requires reading
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 18574 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 00:16:32  round starting
+  starting the :8149 server

@@ -3562,18 +3562,28 @@
       }
     }
 
-    /* (r183) THE STONE ANCHOR THE EYEWITNESS DESCRIBES. Xu Jing 1124: the anchor-stone
-       hangs at the bow, two wooden hooks clamping its sides, on the windlass's own
-       rattan cable. V-WARRANT both ways, as the grapnel rule. V-STONE: one stone bar,
-       its longest drawn dimension the record's stoneLenM. V-HOOKS: two hook points,
-       found STRUCTURALLY as the group's cones, not by name. V-REST: the recovered
-       anchor is taken in (收之) and lies on the foredeck — the assembly's lowest
-       point sits ON the deck at its own station, asked of the surface itself, as the
-       grapnel rule asks (ray straight down, first non-anchor hit — the r185 form;
-       until r193 the code here read the sheer FUNCTION instead, the same claim
-       unhonoured as the grapnel rule's); floating and stabbed-through both convict. V-CABLE: the
-       text's one sentence carries wheel, cable and stone together — a drawn stone
-       with no cable convicts. */
+    /* (r183; r199 the excavated form) THE STONE ANCHOR THE EYEWITNESS DESCRIBES.
+       Xu Jing 1124: the anchor-stone hangs at the bow, two wooden hooks clamping
+       its sides, on the windlass's own rattan cable — drawn since r199 as the
+       two-shank stone-insert form the 2017 마도해역 시굴조사 보고서 recovers, the
+       마도해역-212 pair raised still articulated. V-WARRANT both ways, as the
+       grapnel rule. V-STONE: one stone bar, its longest drawn dimension the
+       record's stoneLenM — read from the box's own PARAMETERS through its world
+       matrix's basis columns (r199: the repose stow rolls the stone off every
+       world axis, and an AABB shortens a diagonal — the r196 lesson applied
+       before it bit). V-WCHEEK (r199): the cheek run — every st-cheek/st-tip
+       corner projected on the assembly's own shank axis, asked of the built
+       group's world matrix (the r189 form) — against armLenM, the 마도해역-212
+       arm measured off its own 1/10 drawing; ±10%. V-HOOKS: two fluke points,
+       found STRUCTURALLY as the group's cones, not by name. V-REST: the
+       recovered anchor is taken in (收之) and lies on the foredeck — the
+       assembly's lowest point sits ON the deck at its own station, asked of the
+       surface itself, as the grapnel rule asks (ray straight down, first
+       non-anchor hit — the r185 form; until r193 the code here read the sheer
+       FUNCTION instead, the same claim unhonoured as the grapnel rule's);
+       floating and stabbed-through both convict. V-CABLE: the text's one
+       sentence carries wheel, cable and stone together — a drawn stone with no
+       cable convicts. */
     {
       const am = [];
       g.traverse(o => { const p = tagOf(o);
@@ -3591,9 +3601,13 @@
           say(v.id, 'a stone anchor without its stone',
               `${stones.length} stone bars drawn — the record hangs one`);
         else if (R.stoneLenM) {
-          const bs = new THREE.Box3().setFromObject(stones[0]);
-          const lg = Math.max(bs.max.x - bs.min.x, bs.max.y - bs.min.y,
-                              bs.max.z - bs.min.z);
+          const s = stones[0];
+          s.updateWorldMatrix(true, false);
+          const e = s.matrixWorld.elements, gp = s.geometry.parameters;
+          const lg = Math.max(
+            Math.hypot(e[0], e[1], e[2]) * (gp.width || 0),
+            Math.hypot(e[4], e[5], e[6]) * (gp.height || 0),
+            Math.hypot(e[8], e[9], e[10]) * (gp.depth || 0));
           if (Math.abs(lg - R.stoneLenM) > 0.10 * R.stoneLenM)
             say(v.id, "the stone off the record's length",
                 `bar ${lg.toFixed(2)} m, record says ${R.stoneLenM}`);
@@ -3602,6 +3616,34 @@
         if (tips.length !== 2)
           say(v.id, 'a stone anchor without its two hooks',
               `${tips.length} hook points drawn — the text clamps the stone with two`);
+        /* (r199) V-WCHEEK: the cheek run against the measured 마도해역-212 arm */
+        if (R.armLenM) {
+          const cheeks = am.filter(o => o.name === 'st-cheek' || o.name === 'st-tip');
+          if (cheeks.length) {
+            const par = cheeks[0].parent;
+            par.updateWorldMatrix(true, false);
+            const ax = new THREE.Vector3(0, 1, 0).transformDirection(par.matrixWorld);
+            let lo = Infinity, hi = -Infinity;
+            const c = new THREE.Vector3();
+            for (const o of cheeks) {
+              o.updateWorldMatrix(true, false);
+              if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+              const b = o.geometry.boundingBox;
+              for (const cx of [b.min.x, b.max.x])
+                for (const cy of [b.min.y, b.max.y])
+                  for (const cz of [b.min.z, b.max.z]) {
+                    const d = c.set(cx, cy, cz).applyMatrix4(o.matrixWorld).dot(ax);
+                    if (d < lo) lo = d;
+                    if (d > hi) hi = d;
+                  }
+            }
+            const run = hi - lo;
+            if (Math.abs(run - R.armLenM) > 0.10 * R.armLenM)
+              say(v.id, "the cheek timbers off the record's run",
+                  `arm run ${run.toFixed(2)} m tip to butt — the articulated `
+                  + `마도해역-212 arm measures ${R.armLenM}`);
+          }
+        }
         const bb = new THREE.Box3();
         for (const o of am) if (o.name !== 'st-cable')
           bb.union(new THREE.Box3().setFromObject(o));

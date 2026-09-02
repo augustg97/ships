@@ -14165,3 +14165,100 @@ drawing at 300 DPI against its printed bar, and read the junk's drawn stone
 anchor against the three measured insert-form stones (203, 206, 212) and the
 articulated arm. The next round should take (5) first; the record is already
 paid for.
+
+## Round 199 — 2026-09-02 — the junk's anchor takes the excavated pair: 마도해역-212, measured off its own drawing
+
+**Residual 5 OPENED AND CLOSED from disk, no fetch (build/staging/r199/
+JUDGMENT.md): r183's every-dimension-a-default stone anchor is replaced by the
+excavated two-shank stone-insert form the r198 mining surfaced — and the drawn
+object is 마도해역-212 at its own size, the one find in the tradition where arm
+and stone survive as ONE OBJECT, raised 2014-08-01 still articulated (결구된
+채) from the Mado anchorage on the Goryeo sea road Xu Jing's own fleet sailed.**
+
+**The measurements (p. 210 drawing, 300 DPI, 4.06 px/cm against its printed
+50 cm bar; the plate reproduces the stone's printed 29 cm width to 0.1 cm and
+the arm agrees across its three views to 0.3%): arm run 1.49 m tip to butt,
+section 0.16 × 0.15, the fluke sweeping 0.285 m off-axis over the outer 0.81
+and tapering to a ~0.07 point; the stone seat a 0.25 m waist cut 1.02–1.27
+from the tip AND the plan's stone crossing reading 1.02–1.29 — joinery and
+plan agree, seat centre 1.15; three square mortises at 0.58/0.90/1.37. The
+drawn stone-envelope reads 116 cm against the printed 길이 109 — the printed
+number wins (the record beats a derivation from the record); the arm is what
+the drawing alone dimensions. Stone: the printed record, 109 × 29 × 10 cm,
+84 kg. Assembly per the report's own complete-form schematic (p. 205): seat
+faces inward the stone's THICKNESS apart — the stone's two broad faces are
+what the two hook-timbers clamp, and Xu Jing's 石兩旁夾以二木鈎 lands on the
+artifact exactly — its ends projecting ~0.46 each side as the STOCK, forcing
+the fluke plane vertical on the bottom; battens through the mortises; cable
+bent round the mid batten. Hong 2013's artifact ⑤ ('the Mado arm with three
+square holes') now carries its own excavation record.**
+
+**SCALE CONTESTED, in the record: 84 kg reads as a coastal trader's anchor and
+the kezhou's great anchor likely swung heavier (corpus ceiling 마도해역-203,
+98×40×34, 255 kg, = 2023 report stone 052; 마도해역-206 between, 178×28×13,
+133 kg with a cut 결구부 seat) — but no larger pair survives measured and a
+scaled-up 212 would be a derivation with an invented factor. The smaller true
+object over the larger invented one, the gap stated.**
+
+**The class: hull.js stoneAnchor rebuilt — two cheek timbers with the measured
+sweep, stone through the gap, three battens, no lashing bands (this joint is
+pegged, not lashed; the r183 bands die with the form). Stow keeps r183's
+recovered-on-the-foredeck inference plus one addition the form forces: the
+assembly is cruciform in section, so flat-on-deck is impossible — drawn at
+repose, rolled ~50° onto one stone end and one horn, settled to the deck by
+measurement. The r183 pocket-hang finding stands and is restated in
+provenance. The panokseon's two 'no stone found still lashed' sentences (card
+row, anchorProvenance) now name the insert-form exception: 212 came up jointed
+but PEGGED — a different joint, the Korean lashed form's sentence stands.**
+
+**Audit: V-STONE re-read through the box's own PARAMETERS × its world basis
+columns (the repose stow rolls the stone off every world axis and an AABB
+shortens a diagonal — the r196 lesson applied before it bit); NEW V-WCHEEK,
+the cheek run — every st-cheek/st-tip corner projected on the assembly's own
+shank axis (the r189 form) — against armLenM ±10%. V-HOOKS/V-REST/V-CABLE/
+V-WARRANT retained. Proofs on :8149 (no ratchet was running), predictions
+written first in JUDGMENT.md, all to the digit: clean 33/0 ✓; inj-st-cheek
+(cheeks re-stationed to the old 2.1 hooks) → exactly ONE V-WCHEEK, 2.11 vs
+1.49 ✓; inj-st-stone (stone stretched to the old 1.6) → exactly ONE V-STONE,
+1.60 vs 1.09 ✓ — the retained rule proven to convict through the rolled stow.
+Post-land audit run 2: 33/0.**
+
+**Frames, with the timing stated: OPENING 64 BY ATTRIBUTION (the r180 chain):
+r198's close ratchet passed ALL 64 on 1dba2dd, and since that exit only
+build/staging/r198/push.log (04400a1) and build/loop.log moved — neither
+fetched by the app. CLOSE is SOLO CHECKS on final code (the r183/r174
+fallback; the 64-run does not fit what remained of the 80 minutes):
+ship-junk 0.019%/0.010 — ONE 990 px cluster at the foredeck, base and current
+crops READ side by side: the old long grey bar replaced by the compact
+articulated frame, stone end cocked in repose. Intended change ACCEPTED
+under-gate per r185 (FRAME-LOG carries the reason), solo re-check 0.000.
+Inertness proven where predicted: ship-dhow 0.000, ship-treasure 0.000,
+ship-panokseon 0.000, shipwright 0.000, action 0.000, globe-default 0.046%
+ok (its own documented noise). ⚠ r200's OPENING OWES THE FULL 64.**
+
+**Rule 0, answered in writing on look-d (staging/r199): the frame reads as a
+rendered vessel, not a chart. Three facts a viewer can read off it: a grey
+stone bar lies wedged through the anchor's twin timbers with one end resting
+on the bow planking; the two carved flukes stand splayed, one cocked up and
+one down by the deck, with the rattan cable leading aft to the windlass
+between its posts; the foredeck is planked with treenail stitching under the
+shipped handspike.**
+
+**Deployed: data-version 1788335811. Push log read THIS round (the r198 rule);
+live stamp verified below.**
+
+**Named residuals, in order (r197's list, amended):** (1) Myeongnyang Ⅱ–Ⅳ
+reports and the 2021 Mado 시굴 report (nttId 2894, 234 MB — start the download
+FIRST; it may catalogue a LARGER articulated pair, which would reopen the
+junk's scale contest on a record) — note the 2017 report is fully mined and
+residual 5 is CLOSED this round. (2) Kozushima 1993 weighing (print-only
+stands). (3) r187 emaki plate. (4) r182 grapnel shank reconstruction.
+(5) CLOSED r199 — the junk stone bar took 마도해역-212's own record.
+(6) r177 Lucian's second machine. (7) r173 cog Gangspill. (8) r173 cog
+castles. (9) r173 cog rudder slab. (10) r176 sekibune class-size (kiwari
+read). (11) boxy classes: top (18), channel/cheek/cathead. (12) Preussen mast
+livery. (13) Endurance forecastle. (14) Azzam crest span. (15) r164 risen
+black unpierced. (16) r165 fantail gallery wings. (17) r166 screen glass.
+(18) r171 quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172
+the 74's lower capstan barrel. (21) r181 eraSm dead fallback branch
+(app.js:1353).
