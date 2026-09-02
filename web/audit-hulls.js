@@ -3826,7 +3826,12 @@
        (sorted world extents — a box axis cannot read a 45° roll) against the
        record's stoneLenM. V-CROSS: the 닻장 is a record field no bounding box can
        see — a cross-member must sit near the shank head with its axis athwart the
-       shank's, or the cable has nothing to bend on. V-REST: the recovered anchor
+       shank's, or the cable has nothing to bend on. V-WSTATION (r194): the stone's
+       centre along the shank's own axis, as a fraction above the foot — the record's
+       reconstruction lashes the plank-form stone at the shank's MIDDLE (『한국의
+       닻돌』 2023 method ①; 표민대화 닻채 중앙부; the institute's figure reads 0.57);
+       builder and rule share the constant (0.55, ±0.12), never vacuous.
+       V-REST: the recovered anchor
        lies on the foredeck, asked of the surface itself (ray straight down, first
        non-anchor hit — the r185 form); floating and stabbed-through both convict.
        V-CABLE: the horong turns this anchor's cable — a drawn anchor with nothing
@@ -3896,6 +3901,31 @@
             say(v.id, 'a crossbar lost down the shank',
                 '닻장 drawn at the shank middle — the dictionary fixes it 닻채 위에, '
                 + 'at the head where the cable bends');
+        }
+        /* V-WSTATION (r194): the stone's station on the shank, read through the stow
+           transforms — foot told from head by which shank end lies farther from the
+           crossbar. The pre-r194 form (0.28, at the crown) convicts under this rule. */
+        if (shk && crs && stones.length === 1) {
+          shk.updateMatrixWorld(true);
+          shk.geometry.computeBoundingBox();
+          const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
+          const sclSY = Math.hypot(meS[4], meS[5], meS[6]);
+          const lenS = (gbS.max.y - gbS.min.y) * sclSY;
+          const axS2 = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
+          const cS2 = new THREE.Box3().setFromObject(shk).getCenter(new THREE.Vector3());
+          const cC2 = new THREE.Box3().setFromObject(crs).getCenter(new THREE.Vector3());
+          const eA = cS2.clone().addScaledVector(axS2, lenS / 2);
+          const eB = cS2.clone().addScaledVector(axS2, -lenS / 2);
+          const foot = (eA.distanceTo(cC2) > eB.distanceTo(cC2)) ? eA : eB;
+          const head2 = (foot === eA) ? eB : eA;
+          const cSt2 = new THREE.Box3().setFromObject(stones[0])
+            .getCenter(new THREE.Vector3());
+          const fracW = cSt2.clone().sub(foot)
+            .dot(head2.clone().sub(foot).normalize()) / lenS;
+          if (Math.abs(fracW - 0.55) > 0.12)
+            say(v.id, 'the stone off its shank station',
+                `stone centre at ${fracW.toFixed(2)} of the shank above the foot — `
+                + "the record's reconstruction lashes it at the middle, 0.55±0.12");
         }
         const bbW = new THREE.Box3();
         for (const o of wm) if (o.name !== 'wa-cable')

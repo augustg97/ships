@@ -13743,3 +13743,98 @@ sekibune class-size (kiwari read). (11) boxy classes: top (18), channel/cheek/ca
 risen black unpierced. (16) r165 fantail gallery wings. (17) r166 screen glass. (18)
 r171 quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172 the 74's lower
 capstan barrel. (21) r181 eraSm dead fallback branch (app.js:1353).
+
+## Round 194 — 2026-09-01 — the stone takes the record's own station: mid-shank, and the record itself came home
+
+**The r186 stone-station residual (queue position 3) OPENED AND CLOSED
+(build/staging/r194/JUDGMENT.md), and the fetch went three sources deep, each stronger
+than the one the residual asked for. The residual wanted the Taean reproduction photo;
+the round found (1) the institute's own reconstruction figure (닻돌 구성
+/국립해양문화재연구소, its Dec 2023 press release, via atlasnews 7487, 583×674 px —
+unscaled, proportions only): the full wooden anchor at a grain-ship's bow, stone lashed
+across the shank's face at its MIDDLE, arms as timbers CROSSING the shank with blunt
+upper ends bracing the stone's underside, whipped crossings at STAGGERED stations,
+carved points splayed below, a spreader board, end turns plus crossed frapping;
+(2) THE REPORT ITSELF, open on the CHA publications board (nttId 87406): 『한국의 닻돌
+— 서해중부해역 출수품 3 연구보고서』, 국립해양문화재연구소 2023, 195 pp., 127 MB,
+SAVED LOCALLY (build/staging/r194/dachdol-report-2023.pdf — 127 MB, over GitHub's 100 MB limit, gitignored; the extracted text and key page renders ARE committed) — its typology (p. 185) names
+lashing to the shank's OUTSIDE (닻채 외부에 묶는 방식) the leading use for the
+plank-form stones and carries the 19th-c. 『표민대화』 fixing the stone 닻채 중앙부 —
+the shank's middle, with a 방살 pin through the shank (named in provenance, not drawn);
+(3) the 2021 exhibition poster carrying the reproduction's own photograph (via
+ikoreanspirit 64135) — the lashing form. The report's honesty sentence is carried as
+CONTESTED: 닻돌이 닻채에 묶인 상태로 확인된 사례가 없어 추측만 — no stone has ever
+been found still lashed on. The report's 그림 2 재현품 is the small-stone-at-닻장 type
+(method ③); the record's one 2.0 m large-class stone takes method ①.**
+
+**Measured, not judged: grid overlay on the figure (drawing-grid-2x.png) — shank head
+(cable seizing) y≈265, foot y≈650, stone centre y≈427 → 0.57 of the shank above the
+foot (the beam head-call gives 0.48; the band carries it). The r186 inference had said
+0.28, above the crown — wrong by a quarter of the shank.**
+
+**Class change (hull.js woodAnchor, class not instance): stone centre at ST_FRAC 0.55
+of the shank above the foot — a class constant, not a knob; lower frame redrawn to the
+figure (timbers crossing the shank, blunt limb 0.70·armM, hook limb = record armM,
+splay 0.78 rad, whipped crossings staggered ±0.058·shank, spreader board); lashing
+redrawn (2 groove-turn pairs at the stone ends + 4 crossed frapping turns binding
+stone to shank). Record fields unchanged. NEW RULE V-WSTATION: stone centre projected
+on the shank's own axis through the stow transforms (foot told from head by distance
+from the crossbar), fraction above the foot vs the shared 0.55, ±0.12 — never vacuous
+(builder draws by the same constant), and it convicts the pre-r194 form itself (0.28).**
+
+**Proofs on the :8151 shadow, staged before landing, predictions written first: clean
+33/0 ✓; inj-wa-station (frac 0.28125, the r186 inference made flesh) → exactly ONE,
+V-WSTATION 0.28 ✓ to the digit; inj-wa-sever → exactly ONE, V-ARMS '0 hook points —
+the record hangs 4' ✓; inj-wa-drag (stone ×1.30) → TWO, V-STONE 2.60/2.0 ✓ PLUS 'an
+anchor through the planking' 0.38 m — THE PREDICTION OF ONE WAS WRONG and the code is
+right: the stow's 45° roll and lay rotation put the stone's long axis on a 45° DOWN
+diagonal, so a stretched stone digs; the r186 honest second SURVIVES at the new
+station (I had mapped the stowed stone axis to fore-aft; it is diagonal — the
+prediction corrected by the geometry, the r191→r192 supersession class). Post-land
+audit on :8149: 33/0 twice on final code.**
+
+**Rule 1 earned its keep twice: the first look showed all four timbers crossing at ONE
+station — a wheel's spokes, not a frame; the figure's whippings are STAGGERED (~0.12
+of the shank apart, measured), and the class now crosses the pairs at ±0.058·shank.
+And the caltrop rest is real: a two-plane four-hook frame lies on two hooks with two
+up (the r193 grapnel's own attitude), and the mid-shank stone rides diagonally in
+consequence — physical, not a defect. ⚠ look tool note: the wheel aims mid-rig; at
+z<0.5 the bow anchor is OUT OF FRUSTUM and the projected box goes negative — frame at
+z≈0.78 and crop by the box.**
+
+**Frames: opening 64 PAID AND PURE the clean way — launched 16:45 on the unedited
+tree, EVERY edit stayed in staging until EXIT:0 (17:20), 64/64, 0 movers, 0 BLANK.
+Close solos on the landed tree: ship-panokseon 0.098% — the diff ONE cluster at the
+foredeck, the anchor's own silhouette and nothing else — ACCEPTED with FRAME-LOG
+reason, re-checked within tolerance; ship-junk and ship-sekibune within tolerance
+(the class edit proven inert on the neighbouring anchor hulls).**
+
+**Looked at (rules 0/1, look-pan-a-zoom2x.png / look-pan-b-crop.png / look-plan-crop.png):
+the anchor lies dumped on the foredeck forward of the horong, resting caltrop-wise on
+two of its four splayed hook-arms, the two whipped crossings reading as a frame; the
+grey stone lashed across the shank's middle with crossed rope turns, riding diagonally
+as the frame lies; the cable led from the crossbar head into the windlass barrel.
+Three facts a viewer can name: a wooden anchor with four carved hook-arms lying at the
+bow; a long grey stone lashed to its shank's middle by crossed turns; the plank seams
+and fanned oars under and beside it.**
+
+**Deployed: data-version 1788309188. Provenance carries the report, the figure, the
+poster, the measured fraction, the band, and the report's own no-find sentence.**
+
+**Named residuals, in order:** (1) NEW r194, the head: 홍광희 2013 「전통 나무닻의
+생김새 연구」 (『해양문화재』 6, 국립해양문화재연구소, pp. 107–143) — the report's own
+cited study of the wooden anchor's FORM; would replace the drawn frame defaults with
+measured proportions (the figure's stone/shank 0.51 implies shank ≈3.9 m on the
+recorded 2.0 m stone against the drawn 3.2 default — re-derive when fetched).
+(2) Kozushima 1993 weighing (searched again r194, not surfaced; print-only stands).
+(3) r187 emaki plate (not attempted this round). (4) r182 grapnel shank
+reconstruction. (5) r183 junk stone bar class default. (6) r177 Lucian's second
+machine. (7) r173 cog Gangspill. (8) r173 cog castles. (9) r173 cog rudder slab.
+(10) r176 sekibune class-size (kiwari read). (11) boxy classes: top (18),
+channel/cheek/cathead. (12) Preussen mast livery. (13) Endurance forecastle.
+(14) Azzam crest span. (15) r164 risen black unpierced. (16) r165 fantail gallery
+wings. (17) r166 screen glass. (18) r171 quarter-gallery sashes. (19) r171 authored
+tier fractions. (20) r172 the 74's lower capstan barrel. (21) r181 eraSm dead
+fallback branch (app.js:1353). (22) REOPENED r186, small: the panokseon card text is
+still the prose schema (checked r194) — it silently left the list after r187; convert
+to array-form and add the "Ground tackle, as drawn" row.

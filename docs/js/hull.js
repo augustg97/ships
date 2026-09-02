@@ -3033,6 +3033,7 @@ const cabR = (wa.cableDiaM || 0.10) / 2;
 const offZ = wa.offZ || 0;
 const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
 { color: 0x7d7a70, roughness: 0.92, metalness: 0.02 }));
+const ropeM = mats.ropeSolid || wood;
 const ai = new THREE.Group();
 const shank = new THREE.Mesh(
 new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), wood);
@@ -3045,39 +3046,77 @@ cross.name = 'wa-cross';
 cross.rotation.x = Math.PI / 2;
 cross.position.y = -0.28;
 ai.add(cross);
-const perSide = Math.max(1, Math.round(nArms / 2));
-for (const sg of [1, -1]) for (let k = 0; k < perSide; k++) {
-const ang = 0.72 + (perSide > 1 ? k * 0.26 : 0.13);
-const yRoot = -(shankL - 0.55 - k * 0.28);
-const arm = new THREE.Mesh(
-new THREE.CylinderGeometry(armD * 0.38, armD * 0.5, armL, 10), wood);
-arm.name = 'wa-arm';
-arm.rotation.z = -sg * ang;
-arm.position.set(sg * (armL / 2) * Math.sin(ang) + sg * shD * 0.4,
-yRoot - (armL / 2) * Math.cos(ang), 0);
-ai.add(arm);
+const ST_FRAC = 0.55;
+const yStone = -shankL * (1 - ST_FRAC);
+const zStone = shD * 0.55 + stoneS / 2;
+const stone = new THREE.Mesh(
+new THREE.BoxGeometry(stoneL, stoneS * 0.83, stoneS), stoneM);
+stone.name = 'wa-stone';
+stone.position.set(0, yStone, zStone);
+ai.add(stone);
+const TH = 0.78;
+const yX = -shankL * 0.70;
+const BL = armL * 0.70, HL = armL;
+const SEP = shankL * 0.058;
+const pairs = (nArms >= 4) ? [[0, SEP], [Math.PI / 2, -SEP]] : [[0, 0]];
+for (const [ph, st] of pairs) for (const sg of [1, -1]) {
+const yXp = yX + st;
+const dir = new THREE.Vector3(
+sg * Math.sin(TH) * Math.cos(ph), Math.cos(TH),
+sg * Math.sin(TH) * Math.sin(ph));
+const timber = new THREE.Mesh(
+new THREE.CylinderGeometry(armD * 0.45, armD * 0.55, BL + HL, 10), wood);
+timber.name = 'wa-arm';
+timber.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+timber.position.set(0, yXp, 0);
+timber.position.addScaledVector(dir, (BL - HL) / 2);
+ai.add(timber);
 const tip = new THREE.Mesh(
-new THREE.ConeGeometry(armD * 0.38, armD * 1.0, 10), wood);
+new THREE.ConeGeometry(armD * 0.42, armD * 1.2, 10), wood);
 tip.name = 'wa-tip';
-tip.rotation.z = -sg * ang + Math.PI;
-tip.position.set(sg * (armL + armD * 0.5) * Math.sin(ang) + sg * shD * 0.4,
-yRoot - (armL + armD * 0.5) * Math.cos(ang), 0);
+tip.quaternion.setFromUnitVectors(
+new THREE.Vector3(0, 1, 0), dir.clone().negate());
+tip.position.set(0, yXp, 0);
+tip.position.addScaledVector(dir, -(HL + armD * 0.5));
 ai.add(tip);
 }
-const yStone = -(shankL - 0.9);
-const xStone = shD * 0.55 + stoneS / 2;
-const stone = new THREE.Mesh(
-new THREE.BoxGeometry(stoneS, stoneS * 0.83, stoneL), stoneM);
-stone.name = 'wa-stone';
-stone.position.set(xStone, yStone, 0);
-ai.add(stone);
-for (const zB of [-stoneL * 0.28, stoneL * 0.28]) {
-const band = new THREE.Mesh(
-new THREE.TorusGeometry(1, 0.024, 8, 20), mats.ropeSolid || wood);
-band.name = 'wa-band';
-band.scale.set(stoneS * 0.9 + shD * 0.55, stoneS * 0.62, 1);
-band.position.set(xStone / 2, yStone, zB);
-ai.add(band);
+for (const yW of [yX + SEP, yX - SEP]) {
+const whip = new THREE.Mesh(
+new THREE.TorusGeometry(shD * 0.8, 0.025, 8, 20), ropeM);
+whip.name = 'wa-whip';
+whip.rotation.x = Math.PI / 2;
+whip.position.set(0, yW, 0);
+ai.add(whip);
+}
+const spread = new THREE.Mesh(
+new THREE.BoxGeometry(Math.min(1.35, stoneL * 0.68), 0.05, 0.16), wood);
+spread.name = 'wa-spread';
+spread.rotation.z = 0.14; spread.rotation.y = 0.25;
+spread.position.set(0.05, yX - 0.28, 0.05);
+ai.add(spread);
+const zHalfAll = (zStone + stoneS / 2 + shD * 0.55) / 2;
+const addTurn = (x, tilt, wrapShank) => {
+const holder = new THREE.Group();
+const t = new THREE.Mesh(new THREE.TorusGeometry(1, 0.022, 8, 24), ropeM);
+t.name = 'wa-band';
+t.rotation.y = Math.PI / 2;
+if (wrapShank) {
+t.scale.set(zHalfAll + 0.03, stoneS * 0.52, 1);
+t.position.z = zHalfAll - shD * 0.55;
+} else {
+t.scale.set(stoneS * 0.62, stoneS * 0.52, 1);
+t.position.z = zStone;
+}
+holder.add(t);
+holder.rotation.z = tilt;
+holder.position.set(x, yStone, 0);
+ai.add(holder);
+};
+for (const sgx of [1, -1]) {
+addTurn(sgx * stoneL * 0.280, 0, false);
+addTurn(sgx * stoneL * 0.335, 0, false);
+addTurn(sgx * stoneL * 0.150, sgx * 0.42, true);
+addTurn(sgx * stoneL * 0.050, -sgx * 0.42, true);
 }
 ai.rotation.y = Math.PI / 4;
 const g = new THREE.Group();
