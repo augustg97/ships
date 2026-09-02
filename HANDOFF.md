@@ -14104,3 +14104,64 @@ mast livery. (13) Endurance forecastle. (14) Azzam crest span. (15) r164 risen
 black unpierced. (16) r165 fantail gallery wings. (17) r166 screen glass.
 (18) r171 quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172 the
 74's lower capstan barrel. (21) r181 eraSm dead fallback branch (app.js:1353).
+
+## Round 198 — 2026-09-01 — r197's close-out finished, and the push that had already failed
+
+**THE FINDING AT THE DOOR: r197 was never on the remote.** Its push died on
+GitHub's 100 MB limit — the committed 진도 명량 report Ⅰ PDF is 106.86 MB in
+git's accounting — and the 80-minute killer took the round before it could read
+its own push log (build/staging/r197/push.log holds the rejection). The live
+site was serving r196 while HANDOFF said r197 had landed, and loop.log's "round
+finished; HEAD is dbccb6c" was a statement about the LOCAL tree. **The trap,
+named:** a push's exit status must be read the same round it is issued, and the
+live stamp is the only witness that shipped — dbccb6c was locally true and
+remotely nothing. **The fix at the class level:** the PDF is untracked and
+gitignored by name (it stays on disk; the mined record, the drawing crops and
+the re-fetch coordinates are all committed in r197's staging), the rule written
+into .gitignore above the line — fetched reports over the push limit stay on
+disk only. dbccb6c amended to 78c2c76 — safe, it had never been pushed — pushed
+23:16, live stamp 1788328583 verified 23:31: r197 went live this round, one
+round late.
+
+**r197's pending checklist, worked in order (the r196 killed-round protocol —
+verify the evidence ordering, re-run the gates, finish the checklist):
+(1) audit run 2 on the landed tree: 33/0 (audit-run2.json). (2) The looks,
+rule 1: three captures on :8149 (look-a/b/c in r197 staging) — look-c is the
+keeper: the shank lies diagonal on the planked foredeck, the grey grooved
+stone lashed at its middle with visible turns, and the TWO arm timbers
+crossing at staggered whipped stations are now near the shank's own girth —
+the r197 record (armD 0.12 → 0.196) is on screen. Cable aft to the horong;
+nothing floats, nothing stabs. (3) The close ratchet: ALL 64 WITHIN TOLERANCE,
+EXIT:0. ship-panokseon moved 0.005%/0.001 — ONE cluster, 317 px, and the
+current-frame crop is the anchor assembly itself. Accepted under-gate per the
+r185 precedent so intent cannot read as drift; solo re-check 0.000. Everything
+else 0.000–0.046% ok — junk, sekibune, shipwright, action and the globes inert,
+as r197 predicted. (4) Live stamp: verified as above, and again after this
+round's own push.**
+
+**Residual 1 OPENED AND PART-PAID: the 2017 마도해역 시굴조사 보고서 fetched
+(42 MB, fileDown FILE_900000000007142/1) and mined — and the arm it records
+belongs to the JUNK, not the panokseon.** Two stones came up WITH their arms:
+마도해역-203 (2011-10-18, 98×40×34 cm 255 kg, no grooves, near-square section —
+the 2023 report's stone 052 by date and circumstance) raised with one 닻가지
+and a bamboo rope, which the report reads as Chinese practice, its analogue the
+Eastern-Han pottery ship from Dongjiao, Guangzhou; and 마도해역-212 (2014-08-01,
+109×29×10 cm 84 kg) raised STILL ARTICULATED with its arm. Both are the
+TWO-SHANK STONE-INSERT form — 두 개의 닻채 사이에 닻돌을 끼어 넣고 — and
+**p. 210 carries a measured drawing of the 212 arm at 1/10 with a 50 cm bar:
+plan with the stone crossing it, side elevation, underside with THREE SQUARE
+HOLES — Hong 2013's artifact ⑤ itself, measurable the r197 way.** No text
+dimension for either arm. Pages 205/210 rendered to r198 staging
+(p203-205.png, p212-210.png); the full mining is in
+build/staging/r198/JUDGMENT.md. **This record feeds residual 5 (the r183 junk
+stone-bar class default), not the panokseon's single-shank class.** The 2021
+report (FILE_000000000053762/0, 234 MB) needs a round that starts the download
+FIRST — an hour at the board's pace. Myeongnyang Ⅱ–Ⅳ nttIds still unlisted.
+
+**Named residuals: r197's list stands, amended so:** (1) narrows to the
+Myeongnyang Ⅱ–Ⅳ reports and the 2021 Mado 시굴 report (the 2017 report is
+mined); (5) the junk stone bar — NOW OPENABLE FROM DISK: measure the 212
+drawing at 300 DPI against its printed bar, and read the junk's drawn stone
+anchor against the three measured insert-form stones (203, 206, 212) and the
+articulated arm. The next round should take (5) first; the record is already
+paid for.
