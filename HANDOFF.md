@@ -14262,3 +14262,99 @@ black unpierced. (16) r165 fantail gallery wings. (17) r166 screen glass.
 (18) r171 quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172
 the 74's lower capstan barrel. (21) r181 eraSm dead fallback branch
 (app.js:1353).
+
+## Round 200 — 2026-09-02 — residual 1 paid across the whole board: four reports fetched, all mined, the arms question answered
+
+**A fetch-and-mine round in the r198 shape — no app change; the round's app
+obligations were the owed opening 64 and the audits, both paid. The opening
+64 ran IN FULL on the unedited tree (the r199 debt, discharged): ALL 64
+WITHIN TOLERANCE, ship-junk 0.000, ship-panokseon 0.000 — r199's
+close-by-solo-checks attribution proven right after the fact. Audit runs 1
+and 2 on :8149: 33/0 and 33/0. The round's work was the board: the 2021 Mado
+시굴 report (234 MB, download started FIRST per r199's instruction, 25 min at
+~160 KB/s) and ALL THREE Myeongnyang follow-on reports fetched whole, mined
+to verdicts the same round, every catalogue read against its printed numbers
+and the two load-bearing pages verified by eye on 150 DPI renders
+(build/staging/r200/, m4-p148/p149).**
+
+**THE ARMS QUESTION IS NOW ANSWERED BOARD-WIDE.** What r197 opened — do the
+later reports catalogue further anchor timbers — closes with a full census:
+report Ⅰ, ONE whole arm (진도-641, the class record since r197); report Ⅱ,
+ONE FRAGMENT — 진도Ⅱ-328, 닻가지, A63, 2017-06-05, 59.4 × 9.2 cm, the
+catalogue's own 목제닻을 구성하는 일부분, species-analysed 느티나무 (Zelkova)
+against 진도-641's oak, so the tradition built arms in at least two
+hardwoods; reports Ⅲ and Ⅳ, none; 2017 Mado, the articulated insert pair
+(the junk's record, r199); 2021 Mado, none. **진도-641 stays the only
+whole-run arm record. ARM_LEN 1.90 / ARM_SEC 0.196 stand unchallenged, now
+against the whole published board rather than one report.**
+
+**The 2021 Mado report answers NO for the junk.** Sixteen stones catalogued
+(마도18/19-xx), Korean grooved lashed-form throughout — no 결구부, no insert
+stones, no arms; largest 마도18-104, tuff, 148.4 × 62.8 × 21.0, 374.2 kg.
+The insert-form corpus stays the 2017 report's finds; 마도해역-212 remains
+the junk's record and the r199 scale contest stays closed. One structural
+gain, the report's own footnote 64: it classifies by 홍광희 2012's thesis
+bands — 대형군 304–590 kg / 146–263 cm — a corpus-grounded ladder better
+sourced than the exhibition's 'over 2 m, 300–700 kg' the panokseon provenance
+currently cites.**
+
+**And the round found the panokseon's stone.** 진도Ⅳ-58 / 명량21-17
+(D10, 2021-08-14): **166 × 53 × 29 cm, 458 kg**, grooves top 7 × 2.5 and
+bottom 11 × 3.5 cm, verified caption-against-photograph on the rendered page
+— the largest Korean lashed-form stone in anything fetched, inside Hong's
+대형군, raised from the Myeongnyang strait: the same water and anchorage that
+gave the class its arm. The panokseon's drawn stone is currently the
+exhibition THRESHOLD (2.0 m, ~400 kg at drawn dimensions); the r199 rule —
+the excavated object at its own size over the larger invented one — makes
+명량21-17 the change. Second witnesses: 명량21-56, 164 × 41 × 21, 237 kg,
+round clear grooves; Ⅲ's max 350 kg; Ⅱ's max 162 kg. ALSO READ FROM DISK:
+진도-621 (report Ⅰ p. 447, named by Ⅲ's synthesis as the strait's one
+Chinese stone): 175.6 × 22.8 × 13.2 cm, 108 kg, bar-form, a 13 cm seat
+groove on BOTH broad faces where the 닻채 timbers seat, 4 cm pin grooves —
+the two-shank insert joint with its seat recorded, a third measured insert
+stone seconding the junk's drawn grip (石兩旁夾以二木鈎).**
+
+**New coordinates recorded (JUDGMENT.md table, all verified via infoData):
+Ⅱ nttId 1401 / FILE_900000000007406/1; Ⅲ 3158 / FILE_000000000054335/0;
+Ⅳ 3759 / FILE_000000000055303/0 (저해상); 2021 Mado 2894 /
+FILE_000000000053762/0 (>100 MB, gitignored by name per the r198 rule, on
+disk); and a report no round had seen — 태안 마도해역 수중발굴조사 보고서
+(2025-01, the 2024 발굴), nttId 4033 / FILE_000000000055886/1,
+139,821,517 bytes, NOT fetched (>100 MB class), coordinates recorded.**
+
+**Frames: opening 64 IN FULL this round (open-ratchet.out, EXIT 0, all 64
+listed individually, every frame ok — worst mover globe-default 0.046%, its
+own documented noise). Close by the same run + attribution: after the run
+only staging files, .gitignore, HANDOFF.md and the stamp moved — none of
+them fetched by a frame (the stamp is a meta tag; the r180/r199 chain).
+Rule 0, answered on the run's own ship-junk capture: the frame reads as a
+rendered vessel on open water, not a chart. Three facts a viewer can read
+off it: the two masts carry battened lug sails with the battens ribbed
+across the canvas; the hull is planked with a dark deckhouse aft and the
+slab rudder hung at the transom; the foredeck carries the compact
+articulated anchor frame with the windlass behind it, and a grey headland
+stands across the water behind the bow.**
+
+**Deployed: data-version 1788339268. Push log to be read this round (the
+r198 rule); live stamp verified below.**
+
+**Named residuals, in order (r199's list, amended):** (1) NARROWED to one
+fetch: the 2024 Mado 발굴 report (nttId 4033, 140 MB — the class rule says
+disk-only; it may catalogue the Mado 시굴 stones' excavation successors) —
+Myeongnyang Ⅱ–Ⅳ and 2021 Mado are DONE this round. (1b) NEW, from disk,
+r201's opening move: **the panokseon's stone takes 명량21-17's record**
+(stoneLenM 2.0 → 1.66, section 0.3 sq → 0.53 × 0.29, 458 kg, groove
+stations; provenance cites Hong 2012's 대형군 band over the exhibition
+threshold; V-STONE-analog band + shadow-proof predictions written BEFORE the
+change, r19x protocol; page renders committed in r200 staging), plus the two
+provenance sentences — 진도-621's both-face seat grooves into the junk's
+record, 진도Ⅱ-328's zelkova beside 진도-641's oak. (2) Kozushima 1993
+weighing (print-only stands). (3) r187 emaki plate. (4) r182 grapnel shank
+reconstruction. (5) CLOSED r199. (6) r177 Lucian's second machine. (7) r173
+cog Gangspill. (8) r173 cog castles. (9) r173 cog rudder slab. (10) r176
+sekibune class-size (kiwari read). (11) boxy classes: top (18),
+channel/cheek/cathead. (12) Preussen mast livery. (13) Endurance forecastle.
+(14) Azzam crest span. (15) r164 risen black unpierced. (16) r165 fantail
+gallery wings. (17) r166 screen glass. (18) r171 quarter-gallery sashes.
+(19) r171 authored tier fractions. (20) r172 the 74's lower capstan barrel.
+(21) r181 eraSm dead fallback branch (app.js:1353).

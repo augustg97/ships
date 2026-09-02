@@ -12757,3 +12757,17 @@ Commits 1dba2dd and 04400a1 are pushed; the tree is clean.
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 00:16:32  round starting
   starting the :8149 server
+Round 199 is done and live. The short version:
+
+**The junk's stone anchor took its own excavation record.** August's second list stands worked in full (r57), so the round took the residual queue's head as r198 directed: residual 5, the junk's stone-bar class default. Everything came from disk — no fetch. The 2017 Mado report's page 210 carries a 1/10 measured drawing of the 마도해역-212 arm, the one find in the tradition where arm and stone were raised as one object, still jointed, from the Mado anchorage on the very Goryeo sea road Xu Jing sailed in 1123.
+
+**Measured off the drawing at 4.06 px/cm** (the plate reproduces the stone's printed 29 cm width to a millimetre): arm 1.49 m, section 0.16×0.15, the fluke sweeping 0.285 m off-axis to a tapered point, the stone seat at 1.02–1.27 m agreeing with the plan's stone crossing, three square mortises at 0.58/0.90/1.37. The stone stays the printed record: 109×29×10 cm, 84 kg. The assembled form — two cheek timbers clamping the stone's broad faces, its ends projecting both sides as the stock — is the report's own reconstruction schematic, and Xu Jing's 石兩旁夾以二木鈎 lands on the artifact word for word. Scale is contested in the record: 84 kg reads as a trader's anchor and the corpus ceiling (203, 255 kg) is named, but a scaled-up 212 would be a derivation with an invented factor, so the true object won.
+
+**Proofs, predicted first and landed to the digit:** clean audit 33/0 twice; the new V-WCHEEK rule convicted the injected old 2.1 m hooks at 2.11 vs 1.49, and the retained V-STONE convicted the injected old 1.6 m bar at 1.60 vs 1.09 — after being rewritten to read the box's parameters through its world basis, because the new repose stow rolls the stone off every world axis and an AABB would have shortened the diagonal. Frames: ship-junk moved 0.019% in exactly one cluster that the crops show is the anchor itself; accepted with a written reason per r185, re-checked 0.000; dhow, treasure, panokseon, shipwright, action all 0.000. The panokseon's "no stone found still lashed" sentences now name the insert-form exception.
+
+Commits 5857c4f and 6cf1265 are pushed, the push log was read this round per the r198 rule, and the live stamp verified at 1788335811. Round 200's opening owes the full 64-frame ratchet; HANDOFF says so.
+2026-09-02 01:00:50  round finished; HEAD is 6cf1265 r199 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 33243 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 01:10:50  round starting
+  starting the :8149 server

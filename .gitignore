@@ -62,3 +62,4 @@ build/staging/r194/dachdol-report-2023.pdf
 # fetched excavation reports over GitHub's 100 MB push limit stay on disk only —
 # the staging JUDGMENT.md carries the mined record and the board coordinates to re-fetch.
 /build/staging/r197/jindo-myeongnyang-I-2015.pdf
+/build/staging/r200/mado-sigul-2021.pdf
