@@ -678,7 +678,7 @@ yr.min = ch.from; yr.max = ch.to; yr.step = Math.max(1, Math.round((ch.to - ch.f
 yr.value = S.year;
 buildEraFleet();
 document.getElementById('eraHd').textContent = ch.title;
-document.getElementById('eraSm').innerHTML = ch.lede || (ch.text || '').split('\n\n')[0];
+document.getElementById('eraSm').textContent = ch.lede || '';
 onTime();
 buildVoyageList();
 if (fly && ch.view) flyTo(ch.view[0], ch.view[1], ch.view[2] || 330);

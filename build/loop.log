@@ -12795,3 +12795,17 @@ Round 200 is complete and live. The one matching process was this session itself
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 03:39:08  round starting
   starting the :8149 server
+Round 201 is complete and live. The tree is clean, everything committed and pushed, 35 minutes inside the kill window.
+
+**What this round inherited and how it finished.** The 02:08 firing did the r201 work — the panokseon's anchor stone replaced by 명량21-17's excavation record — but overran the 80-minute kill during its close ratchet, which died at frame 63 when the kill took the :8149 server down, leaving the tree edited and uncommitted. This firing verified the inherited work rather than redoing it: read the diffs against the pre-written PREDICTIONS.md, re-read both witness pages and all three look crops by eye, re-ran the audit on the final tree, re-ran the close ratchet in full, and shipped.
+
+**The change.** The panokseon's drawn stone stops standing at an exhibition threshold (2.0 m, ~400 kg) and takes the excavated object at its own size: 진도Ⅳ-58 / 명량21-17, raised from the Myeongnyang strait in 2021 — 166 × 53 × 29 cm, 458 kg, the largest Korean lashed-form stone in any fetched report, from the same water that gave the class its arm. The builder learned the record's two faces (`stoneWM`/`stoneTM`) with the old square field kept as an exact legacy fallback; the shank re-derived 3.92 → 3.25 m and the hook limbs lengthened 0.90 → 1.19 through the shared constants. Two witness sentences landed: 진도Ⅱ-328's zelkova beside 진도-641's oak (two hardwoods in the arm tradition), and 진도-621's both-face seat grooves into the junk's provenance, text only.
+
+**Gates.** Audit 33/0 three times across the two firings; injection proofs digit-exact, including one recorded prediction miss (a stone-stretch injection transplanted between stows whose local frames differ — the miss is written up in JUDGMENT.md). Close ratchet in full: exactly one frame of 64 moved — ship-panokseon at 0.051%, one bow cluster confirmed base-vs-current as the anchor assembly alone, accepted with reason; ship-junk and action-myeongnyang at 0.000, the inertness prediction holding frame for frame.
+
+**Shipped.** Commits 6b37826 + a5455aa pushed; live stamp verified serving 1788348061; both push receipts read this round. HANDOFF.md carries the two-firing story and the residual queue — next round's item (1) is the one remaining fetch, the 2024 Mado 발굴 report (140 MB, disk-only class).
+2026-09-02 04:24:55  round finished; HEAD is a5455aa r201 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 50709 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 04:34:55  round starting
+  starting the :8149 server

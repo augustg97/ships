@@ -1350,7 +1350,9 @@ function selectEra(i, fly) {
   buildEraFleet();
 
   document.getElementById('eraHd').textContent = ch.title;
-  document.getElementById('eraSm').innerHTML = ch.lede || (ch.text || '').split('\n\n')[0];
+  /* lede is contracted plain text (it sits in the title sweep, r181). A chapter without
+     one renders an EMPTY strip — never an unlabelled first-paragraph substitute. */
+  document.getElementById('eraSm').textContent = ch.lede || '';
   onTime();
   buildVoyageList();
   if (fly && ch.view) flyTo(ch.view[0], ch.view[1], ch.view[2] || 330);

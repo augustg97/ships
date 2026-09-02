@@ -14462,3 +14462,98 @@ black unpierced. (16) r165 fantail gallery wings. (17) r166 screen glass.
 (18) r171 quarter-gallery sashes. (19) r171 authored tier fractions.
 (20) r172 the 74's lower capstan barrel. (21) r181 eraSm dead fallback
 branch (app.js:1353).
+
+## Round 202 — 2026-09-02 — the board is fully fetched and answers NO one more time; the dead fallback retired; the board moves under the round
+
+**Residual 1 CLOSED — the whole published board is now fetched and mined.**
+The 2024 Mado 발굴 report (nttId 4033, the 10th excavation, 2023 season)
+came down whole — 139,821,517 bytes, byte-exact against infoData, plain GET
+with browser UA + info-page referer, download started FIRST at 04:38 per the
+r199 instruction, >100 MB class so gitignored by name, disk only — and was
+mined to a verdict the same round (staging/r202/JUDGMENT.md). **Verdict NO,
+for the third report running: nothing of ground tackle entered the
+catalogue.** 50건 51점 raised (the report's own 맺음말 says 51건 52점 — its
+two totals disagree by one, both counted): ceramics, a bronze spoon, a
+silver hairpin, a bird-shaped wooden object (마도23-51, 10.7 × 58.8 cm,
+2,040 g, use unknown by the report's own judgment) and ONE hull plank
+(마도23-52, remnant 110.3 × 34.6 × 9.0–16.0 cm, pine, A.D. 1060–1180, the
+마도 1–3호선 horizon). 석재류: 유물 0건 0점, 매몰 11건 20점 — eleven stone
+items seen and LEFT ON THE SEABED, no dimensions; the dive diary's one
+raised 닻돌 (23-A-3 line 1, 2023-05-08) appears in no catalogue entry.
+닻가지/닻채: zero text hits. **The arms census now closes over every report
+the board lists: 진도-641 stays the only whole-run arm record; ARM_LEN
+1.90 / ARM_SEC 0.196 stand board-wide; 마도해역-212 keeps the junk's
+record; 명량21-17's 458 kg stays the largest lashed-form stone fetched.**
+
+**And the board moved under the round: TWO reports posted 2025-11, after
+r200's sweep — 해남 송호리1호선 수중발굴조사보고서 (nttId 4300,
+FILE_000000000056217, posted 2025-11-06) and its 과학적 분석 보고서 (4297,
+FILE_000000000056213, 2025-11-04). Songho-ri No. 1 is the Haenam wreck — a
+NEW HULL for the Korean tradition, and an excavation report that may
+catalogue ground tackle. Sizes unknown: fileDown answers a range GET with
+the 1,240-byte egov error page for both files even with the UA + referer
+that served the 140 MB GET this same round — next fetch round, PLAIN GET,
+probe fileSn 0/1.**
+
+**Residual 4 ATTEMPTED, still standing, every path named (JUDGMENT.md):
+jewelofmuscat.tv is live again but is a 2015+ WordPress relaunch — full
+sitemap read (193 URLs), no construction diaries; the project's own book
+fetched whole (JoM2015_en.pdf, on disk) is voyage narrative, no dimensions;
+Archaeopress OJS PSAS 41 is a login wall (the open-archive assumption was
+wrong), academia.edu login-gated (not automated past), RINA 2009 on
+ResearchGate only; web.archive.org/archive.ph/memento all 429'd this IP the
+whole round — the ORIGINAL site's construction diaries stay the target,
+retry the Wayback another round. The dhow's 1.8 m shank stands as r182
+drew it: a stated reconstruction, named in the provenance.**
+
+**Residual 21 CLOSED — the round's app change, predictions first
+(staging/r202/PREDICTIONS.md, all landed). app.js:1353 stops being
+`innerHTML = ch.lede || first-paragraph-of-text` and becomes
+`textContent = ch.lede || ''` — the unlabelled substitute retired (a
+chapter without a lede renders an EMPTY strip, rule 10's honest unknown)
+and the raw-HTML surface retired with it (lede is contracted plain text
+under the title sweep, r181). Proven string-exact both ways in-page, no
+file touched: OLD renders the predicted 180-char first paragraph when a
+lede is deleted; NEW renders "" — and all 8 real chapters render
+byte-identical before/after (all8 true × 8, proof-old/new-behaviour.json).
+Audit 33/0 twice.**
+
+**Frames: no opening 64 — the attribution chain per r180/r181/r182: r201's
+close ratchet passed IN FULL on this HEAD (a5455aa) and only build/loop.log
+changed between that exit and this round's first edit (git status read at
+round start). Close: the one edit is verified inert three ways (byte-
+identical render in-page; the line's only consumer is the era readout; the
+five frames that fetch it checked SOLO — globe-default 0.046%/0.011 its
+documented flap, globe-crossing/steam/modern/era-card all within
+tolerance). No baseline moved, no accepts, FRAME-LOG untouched. **The
+full-64 debt is NAMED and owed to the next round's opening check — the
+r199 → r200 pattern, and this attribution is the prediction it tests.**
+Rule 1: the globe-era-card capture read by eye (z-globe-era-card-small.png),
+the lede strip rendering under the era tabs exactly as before. Rule 0,
+answered on the same capture: the frame reads as a rendered world, not a
+chart. Three facts a viewer can read off it: the Khufu ship beside the
+Great Pyramid is 43.6 m of cedar, no keel, no frames, planks sewn with
+rope; the Uluburun cargo was 354 copper ingots and about a tonne of tin,
+c. 1320 BC; the era strip runs Crossing 70,000–8,000 BP to Containers
+1950–2026 with Reed & Plank lit at 2,000 BC and Hatshepsut's fleet to Punt
+at 25°N 35°E in the era's voyage list.**
+
+**Deployed: data-version 1788350249. Push log to be read this round (the
+r198 rule); live stamp verified below.**
+
+**Named residuals, in order (r201's list, renumbered):** (1) NEW head, from
+this round's board sweep: the two Songho-ri reports — the excavation report
+first (nttId 4300; a new hull, possible ground tackle), the analysis report
+behind it (4297); plain GET, sizes unprobed. (1b) CLOSED r201.
+(2) Kozushima 1993 weighing (print-only stands). (3) r187 emaki plate.
+(4) r182 grapnel shank reconstruction — ATTEMPTED this round, paths named;
+Wayback retry owed. (5) — . (6) r177 Lucian's second machine. (7) r173 cog
+Gangspill. (8) r173 cog castles. (9) r173 cog rudder slab. (10) r176
+sekibune class-size (kiwari read). (11) boxy classes: top (18),
+channel/cheek/cathead. (12) Preussen mast livery. (13) Endurance
+forecastle. (14) Azzam crest span. (15) r164 risen black unpierced.
+(16) r165 fantail gallery wings. (17) r166 screen glass. (18) r171
+quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172 the
+74's lower capstan barrel. (21) CLOSED THIS ROUND (eraSm fallback retired).
+(22) NEW r202, owed: the opening 64 on this round's HEAD — the attribution
+test.

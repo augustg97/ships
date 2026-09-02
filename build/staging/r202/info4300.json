@@ -1,0 +1,39 @@
+
+
+
+
+<!-- 시스템 에러 -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>egovframe common component</title>
+<link href="/css/egovframework/com/com.css;jsessionid=A61177AFC2993CD9724C6D1A09281543" rel="stylesheet" type="text/css" />
+
+<script language="javascript">
+function fncGoAfterErrorPage(){
+    history.back(-2);
+}
+</script>
+</head>
+<body>
+<div style="width: 1000px; margin: 50px auto 50px;">
+	<p style="font-size: 18px; color: #000; margin-bottom: 10px; "><img src="/images/egovframework/com/cmm/er_logo.jpg;jsessionid=A61177AFC2993CD9724C6D1A09281543" width="379" height="57" /></p>
+	<div style="border: ppx solid #666; padding: 20px;">
+		<!-- Xss(Cross Site Scripting) Error -->
+		<p style="color:red; margin-bottom: 8px; ">시스템 에러<br /></p>
+
+		<div class="boxType1" style="width: 700px;">
+			<div class="box">
+				<div class="error">
+					<p class="title">알 수 없는 오류가 발생했습니다!</p><!-- 알 수 없는 오류가 발생했습니다! -->
+					<p class="cont mb20">시스템 에러<br /></p>
+					<span class="btn_style1 blue"><a href="javascript:fncGoAfterErrorPage();">이전 페이지<!-- 이전 페이지 --></a></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>
