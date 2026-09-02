@@ -4416,7 +4416,10 @@ function buildFittings(S, group, mats) {
      dimensions are the 마도해역-212 arm's, measured off the report's 1/10 drawing
      (4.06 px/cm against its 50 cm bar); the stone is the same find's printed
      record — the pair was raised still articulated (결구된 채), the one find in
-     the tradition where arm and stone are one object. The stone's two broad faces
+     the tradition where arm and stone are one object. A printed same-form
+     sibling exists since r203: the 송호리1호선 report (2025) catalogues a
+     one-piece oak half at 149.5 cm aboard a hull dated AD 1021–1158 — print
+     agreeing with the drawing-measured 1.49 m to half a centimetre. The stone's two broad faces
      are what the cheeks clamp: 石兩旁 lands on the artifact exactly. The drawn
      ship is under way, so the anchor rides recovered (遇行則卷其輪而收之): laid on
      the open foredeck between the stem and its own windlass, head aft, the cable

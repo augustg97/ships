@@ -12809,3 +12809,26 @@ Round 201 is complete and live. The tree is clean, everything committed and push
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 04:34:55  round starting
   starting the :8149 server
+Round 202 is complete and live, 53 minutes inside the kill window. Tree clean, both commits pushed, live stamp verified serving 1788350249 at 05:01.
+
+**Three residuals worked, two closed.**
+
+**Residual 1 closed — the whole published board is now fetched.** The 2024 Mado 발굴 report came down byte-exact (139,821,517 bytes, gitignored by name per the >100 MB rule) and was mined the same round. Verdict NO for the third report running: nothing of ground tackle entered its catalogue — eleven stone items were counted and left on the seabed undimensioned, the diary's one raised 닻돌 has no catalogue entry, and 닻가지 gets zero text hits. The arms census now closes over every report the board lists: 진도-641 stays the only whole-run arm record, the junk's and panokseon's records stand uncontested. And the board moved under the round: two Songho-ri reports posted November 2025 — the Haenam wreck, a new hull for the Korean tradition — have their coordinates recorded as the new residual head.
+
+**Residual 21 closed — the app change, predictions first.** eraSm's dead fallback (app.js:1353) is retired: `textContent = ch.lede || ''`. A chapter that loses its lede now renders an empty strip, never an unlabelled first-paragraph substitute, and the raw-HTML surface on a plain-text contract went with it. Proven string-exact in-page both ways, all 8 chapters byte-identical before/after, audits 33/0 twice, the five frames that fetch the line solo-checked within tolerance, the era-card capture read by eye.
+
+**Residual 4 attempted, stands.** The relaunched jewelofmuscat.tv has no construction diaries (full sitemap read), the project's book is narrative only, PSAS 41/RINA/academia are all gated, and every archive service 429'd this IP the whole round. The dhow's 1.8 m shank stays a stated reconstruction; the Wayback retry is owed.
+
+The full-64 opening check is named as next round's debt, testing this round's attribution chain.
+2026-09-02 05:01:32  round finished; HEAD is 192cc80 r202 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 55507 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 05:11:32  round starting
+  starting the :8149 server
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-09-02 06:31:41  round finished; HEAD is 192cc80 r202 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 58659 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 06:41:41  round starting
+  starting the :8149 server
