@@ -2766,31 +2766,20 @@ say(v.id, "the stone off the record's length",
 + `record says ${R.stoneLenM}`);
 }
 const shk = wm.find(o => o.name === 'wa-shank');
-const crs = wm.find(o => o.name === 'wa-cross');
-if (!crs)
-say(v.id, 'a wooden anchor with no crossbar',
-'the 닻장 the cable bends on is a record field — nothing drawn carries it');
-else if (shk) {
-shk.updateMatrixWorld(true); crs.updateMatrixWorld(true);
-const axS = new THREE.Vector3(0, 1, 0)
-.transformDirection(shk.matrixWorld);
-const axC = new THREE.Vector3(0, 1, 0)
-.transformDirection(crs.matrixWorld);
-if (Math.abs(axS.dot(axC)) > 0.35)
-say(v.id, 'a crossbar along its own shank',
-`닻장 axis ${Math.abs(axS.dot(axC)).toFixed(2)} off athwart — the `
-+ 'bar is fixed across the shank, not along it');
-const bS = new THREE.Box3().setFromObject(shk);
-const bC = new THREE.Box3().setFromObject(crs);
-const cS = bS.getCenter(new THREE.Vector3());
-const cC = bC.getCenter(new THREE.Vector3());
-const shankLen = R.shankM || 3.2;
-if (cC.distanceTo(cS) < shankLen * 0.25)
-say(v.id, 'a crossbar lost down the shank',
-'닻장 drawn at the shank middle — the dictionary fixes it 닻채 위에, '
-+ 'at the head where the cable bends');
+if (shk) {
+shk.updateMatrixWorld(true);
+shk.geometry.computeBoundingBox();
+const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
+const sclSY = Math.hypot(meS[4], meS[5], meS[6]);
+const lenS = (gbS.max.y - gbS.min.y) * sclSY;
+const wantS = R.shankM || (R.stoneLenM || 2.0) / 0.51;
+if (Math.abs(lenS - wantS) > 0.12 * wantS)
+say(v.id, "a shank off its stone's proportion",
+`shank ${lenS.toFixed(2)} m drawn — the figure's stone/shank 0.51 `
++ `puts ${wantS.toFixed(2)} m on this stone, the long shank the `
++ "form study explains by oak's buoyancy");
 }
-if (shk && crs && stones.length === 1) {
+if (shk && stones.length === 1 && tips.length) {
 shk.updateMatrixWorld(true);
 shk.geometry.computeBoundingBox();
 const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
@@ -2798,19 +2787,35 @@ const sclSY = Math.hypot(meS[4], meS[5], meS[6]);
 const lenS = (gbS.max.y - gbS.min.y) * sclSY;
 const axS2 = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
 const cS2 = new THREE.Box3().setFromObject(shk).getCenter(new THREE.Vector3());
-const cC2 = new THREE.Box3().setFromObject(crs).getCenter(new THREE.Vector3());
+const cT2 = new THREE.Vector3();
+for (const t of tips)
+cT2.add(new THREE.Box3().setFromObject(t).getCenter(new THREE.Vector3()));
+cT2.multiplyScalar(1 / tips.length);
 const eA = cS2.clone().addScaledVector(axS2, lenS / 2);
 const eB = cS2.clone().addScaledVector(axS2, -lenS / 2);
-const foot = (eA.distanceTo(cC2) > eB.distanceTo(cC2)) ? eA : eB;
+const foot = (eA.distanceTo(cT2) < eB.distanceTo(cT2)) ? eA : eB;
 const head2 = (foot === eA) ? eB : eA;
+const axUp = head2.clone().sub(foot).normalize();
 const cSt2 = new THREE.Box3().setFromObject(stones[0])
 .getCenter(new THREE.Vector3());
-const fracW = cSt2.clone().sub(foot)
-.dot(head2.clone().sub(foot).normalize()) / lenS;
+const fracW = cSt2.clone().sub(foot).dot(axUp) / lenS;
 if (Math.abs(fracW - 0.55) > 0.12)
 say(v.id, 'the stone off its shank station',
 `stone centre at ${fracW.toFixed(2)} of the shank above the foot — `
 + "the record's reconstruction lashes it at the middle, 0.55±0.12");
+const ROPE = new Set(['wa-seize', 'wa-band', 'wa-whip', 'wa-cable']);
+const HEAD_SPAN = 0.75;
+for (const o of wm) {
+if (o === shk || o === stones[0] || ROPE.has(o.name)) continue;
+const fo = new THREE.Box3().setFromObject(o)
+.getCenter(new THREE.Vector3()).sub(foot).dot(axUp) / lenS;
+if (fo > HEAD_SPAN)
+say(v.id, 'a stock at the cable end',
+`'${o.name}' crosses the shank at ${fo.toFixed(2)} above the `
++ 'foot — the stone is this anchor\'s 닻장, and the traditional '
++ "wooden stock sat at the arms' height, never at the cable end "
++ '(Hong 2013)');
+}
 }
 const bbW = new THREE.Box3();
 for (const o of wm) if (o.name !== 'wa-cable')

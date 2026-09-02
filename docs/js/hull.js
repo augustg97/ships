@@ -3024,11 +3024,11 @@ group.add(tag(ag, 'ironAnchors'));
 if (S.woodAnchor) {
 const wa = S.woodAnchor;
 const u = (wa.atU != null) ? wa.atU : 0.05;
-const shankL = wa.shankM || 3.2, shD = 0.20;
+const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
+const ST_RATIO = 0.51;
+const shankL = wa.shankM || stoneL / ST_RATIO, shD = 0.20;
 const armL = wa.armM || 1.2, armD = 0.12;
 const nArms = wa.arms || 4;
-const crossL = wa.crossM || 1.6;
-const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
 const cabR = (wa.cableDiaM || 0.10) / 2;
 const offZ = wa.offZ || 0;
 const stoneM = mats.anchStone || (mats.anchStone = new THREE.MeshStandardMaterial(
@@ -3040,12 +3040,14 @@ new THREE.CylinderGeometry(shD * 0.42, shD * 0.55, shankL, 10), wood);
 shank.name = 'wa-shank';
 shank.position.y = -shankL / 2;
 ai.add(shank);
-const cross = new THREE.Mesh(
-new THREE.CylinderGeometry(armD * 0.5, armD * 0.5, crossL, 10), wood);
-cross.name = 'wa-cross';
-cross.rotation.x = Math.PI / 2;
-cross.position.y = -0.28;
-ai.add(cross);
+for (const yS of [-0.05, -0.10, -0.15]) {
+const sz = new THREE.Mesh(
+new THREE.TorusGeometry(shD * 0.53, 0.022, 8, 20), ropeM);
+sz.name = 'wa-seize';
+sz.rotation.x = Math.PI / 2;
+sz.position.set(0, yS, 0);
+ai.add(sz);
+}
 const ST_FRAC = 0.55;
 const yStone = -shankL * (1 - ST_FRAC);
 const zStone = shD * 0.55 + stoneS / 2;
@@ -3055,8 +3057,10 @@ stone.name = 'wa-stone';
 stone.position.set(0, yStone, zStone);
 ai.add(stone);
 const TH = 0.78;
-const yX = -shankL * 0.70;
-const BL = armL * 0.70, HL = armL;
+const XA_FRAC = 0.35;
+const yX = -shankL * (1 - XA_FRAC);
+const BL = (yStone - stoneS * 0.83 / 2 - yX) / Math.cos(TH) + armD * 0.4;
+const HL = armL;
 const SEP = shankL * 0.058;
 const pairs = (nArms >= 4) ? [[0, SEP], [Math.PI / 2, -SEP]] : [[0, 0]];
 for (const [ph, st] of pairs) for (const sg of [1, -1]) {
@@ -3087,6 +3091,17 @@ whip.name = 'wa-whip';
 whip.rotation.x = Math.PI / 2;
 whip.position.set(0, yW, 0);
 ai.add(whip);
+}
+for (const [ph, st] of pairs) {
+const nrm = new THREE.Vector3(-Math.sin(ph), 0, Math.cos(ph));
+for (const dy of [0.07, -0.07]) {
+const peg = new THREE.Mesh(
+new THREE.CylinderGeometry(0.018, 0.018, shD + 0.16, 8), wood);
+peg.name = 'wa-peg';
+peg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), nrm);
+peg.position.set(0, yX + st + dy, 0);
+ai.add(peg);
+}
 }
 const spread = new THREE.Mesh(
 new THREE.BoxGeometry(Math.min(1.35, stoneL * 0.68), 0.05, 0.16), wood);

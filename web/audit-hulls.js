@@ -3819,23 +3819,36 @@
 
     /* (r186) THE KOREAN WOODEN ANCHOR AND ITS STONE. The warship plate of her own
        navy's album draws the anchor; the form is the West Sea composite — oak shank,
-       hook-arms both sides, crossbar at the head, a long grooved stone lashed on to
-       sink the frame. V-WARRANT both ways, as every anchor rule. V-ARMS: the
-       record's arm count of hook points, found STRUCTURALLY as the group's cones.
-       V-STONE: one stone, its longest dimension read THROUGH the stow transform
-       (sorted world extents — a box axis cannot read a 45° roll) against the
-       record's stoneLenM. V-CROSS: the 닻장 is a record field no bounding box can
-       see — a cross-member must sit near the shank head with its axis athwart the
-       shank's, or the cable has nothing to bend on. V-WSTATION (r194): the stone's
-       centre along the shank's own axis, as a fraction above the foot — the record's
-       reconstruction lashes the plank-form stone at the shank's MIDDLE (『한국의
-       닻돌』 2023 method ①; 표민대화 닻채 중앙부; the institute's figure reads 0.57);
-       builder and rule share the constant (0.55, ±0.12), never vacuous.
-       V-REST: the recovered anchor
-       lies on the foredeck, asked of the surface itself (ray straight down, first
-       non-anchor hit — the r185 form); floating and stabbed-through both convict.
-       V-CABLE: the horong turns this anchor's cable — a drawn anchor with nothing
-       led to the machine convicts. */
+       hook-arms both sides, a long grooved stone lashed on to sink the frame, the
+       stone serving as the stock (석제 닻장, the 2023 report's own term). V-WARRANT
+       both ways, as every anchor rule. V-ARMS: the record's arm count of hook
+       points, found STRUCTURALLY as the group's cones. V-STONE: one stone, its
+       longest dimension read THROUGH the stow transform (sorted world extents — a
+       box axis cannot read a 45° roll) against the record's stoneLenM.
+       V-WSHANK (r195): the shank's drawn length vs the record's shankM, or — no
+       shankM given — vs stoneLenM / 0.51, the institute figure's own stone/shank
+       ratio, the long shank the form study explains by oak's buoyancy (홍광희 2013,
+       해양문화재 6); builder and rule share ST_RATIO, never vacuous, and the
+       pre-r195 drawn default (3.2 m on the 2.0 m stone, ratio 0.625) convicts.
+       V-WSTOCK (r195): no timber member may cross the shank between the stone's
+       top and the head — Hong 2013's survey puts the traditional wooden stock at
+       the ARMS' top height and calls one redundant beside a stone stock; a bar at
+       the cable end is the MODERN station, and the pre-r195 form drew exactly
+       that. Rope is exempt by name (wa-seize is the cable's own whipped bend,
+       wa-band the frapping). CONTESTED, named in the record: the study's footnote
+       8 carries the counter-argument that stock and stone were sometimes fitted
+       together so the stone could not spin on a round shank — not drawn.
+       V-WSTATION (r194, re-anchored r195): the stone's centre along the shank's
+       own axis, as a fraction above the foot — the record's reconstruction lashes
+       the plank-form stone at the shank's MIDDLE (『한국의 닻돌』 2023 method ①;
+       표민대화 닻채 중앙부; the institute's figure reads 0.57); builder and rule
+       share the constant (0.55, ±0.12), never vacuous. The foot is told from the
+       head by the hook points' own centroid (the crossbar that used to tell it is
+       gone with the form). V-REST: the recovered anchor lies on the foredeck,
+       asked of the surface itself (ray straight down, first non-anchor hit — the
+       r185 form); floating and stabbed-through both convict. V-CABLE: the horong
+       turns this anchor's cable — a drawn anchor with nothing led to the machine
+       convicts. */
     {
       const wm = [];
       g.traverse(o => { const p = tagOf(o);
@@ -3878,34 +3891,33 @@
                 + `record says ${R.stoneLenM}`);
         }
         const shk = wm.find(o => o.name === 'wa-shank');
-        const crs = wm.find(o => o.name === 'wa-cross');
-        if (!crs)
-          say(v.id, 'a wooden anchor with no crossbar',
-              'the 닻장 the cable bends on is a record field — nothing drawn carries it');
-        else if (shk) {
-          shk.updateMatrixWorld(true); crs.updateMatrixWorld(true);
-          const axS = new THREE.Vector3(0, 1, 0)
-            .transformDirection(shk.matrixWorld);
-          const axC = new THREE.Vector3(0, 1, 0)
-            .transformDirection(crs.matrixWorld);
-          if (Math.abs(axS.dot(axC)) > 0.35)
-            say(v.id, 'a crossbar along its own shank',
-                `닻장 axis ${Math.abs(axS.dot(axC)).toFixed(2)} off athwart — the `
-                + 'bar is fixed across the shank, not along it');
-          const bS = new THREE.Box3().setFromObject(shk);
-          const bC = new THREE.Box3().setFromObject(crs);
-          const cS = bS.getCenter(new THREE.Vector3());
-          const cC = bC.getCenter(new THREE.Vector3());
-          const shankLen = R.shankM || 3.2;
-          if (cC.distanceTo(cS) < shankLen * 0.25)
-            say(v.id, 'a crossbar lost down the shank',
-                '닻장 drawn at the shank middle — the dictionary fixes it 닻채 위에, '
-                + 'at the head where the cable bends');
+        /* V-WSHANK (r195): the drawn shank vs the length its own stone implies —
+           the figure's stone/shank ST_RATIO 0.51, shared with the builder; a
+           record shankM outranks the derivation. The pre-r195 default (3.2 m on
+           the 2.0 m stone) is 18% short and convicts. */
+        if (shk) {
+          shk.updateMatrixWorld(true);
+          shk.geometry.computeBoundingBox();
+          const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
+          const sclSY = Math.hypot(meS[4], meS[5], meS[6]);
+          const lenS = (gbS.max.y - gbS.min.y) * sclSY;
+          const wantS = R.shankM || (R.stoneLenM || 2.0) / 0.51;
+          if (Math.abs(lenS - wantS) > 0.12 * wantS)
+            say(v.id, "a shank off its stone's proportion",
+                `shank ${lenS.toFixed(2)} m drawn — the figure's stone/shank 0.51 `
+                + `puts ${wantS.toFixed(2)} m on this stone, the long shank the `
+                + "form study explains by oak's buoyancy");
         }
-        /* V-WSTATION (r194): the stone's station on the shank, read through the stow
-           transforms — foot told from head by which shank end lies farther from the
-           crossbar. The pre-r194 form (0.28, at the crown) convicts under this rule. */
-        if (shk && crs && stones.length === 1) {
+        /* V-WSTATION (r194, re-anchored r195): the stone's station on the shank,
+           read through the stow transforms — foot told from head by the hook
+           points' own centroid (the tips cluster at the foot end; the crossbar
+           that used to tell it is gone with the form). The pre-r194 form (0.28,
+           at the crown) convicts under this rule.
+           V-WSTOCK (r195): no timber crosses the shank between the stone's top
+           and the head — a bar at the cable end is the modern station, not the
+           tradition's (Hong 2013 p.132); rope is exempt by name. The pre-r195
+           crossbar (frac 0.91) convicts. */
+        if (shk && stones.length === 1 && tips.length) {
           shk.updateMatrixWorld(true);
           shk.geometry.computeBoundingBox();
           const gbS = shk.geometry.boundingBox, meS = shk.matrixWorld.elements;
@@ -3913,19 +3925,41 @@
           const lenS = (gbS.max.y - gbS.min.y) * sclSY;
           const axS2 = new THREE.Vector3(0, 1, 0).transformDirection(shk.matrixWorld);
           const cS2 = new THREE.Box3().setFromObject(shk).getCenter(new THREE.Vector3());
-          const cC2 = new THREE.Box3().setFromObject(crs).getCenter(new THREE.Vector3());
+          const cT2 = new THREE.Vector3();
+          for (const t of tips)
+            cT2.add(new THREE.Box3().setFromObject(t).getCenter(new THREE.Vector3()));
+          cT2.multiplyScalar(1 / tips.length);
           const eA = cS2.clone().addScaledVector(axS2, lenS / 2);
           const eB = cS2.clone().addScaledVector(axS2, -lenS / 2);
-          const foot = (eA.distanceTo(cC2) > eB.distanceTo(cC2)) ? eA : eB;
+          const foot = (eA.distanceTo(cT2) < eB.distanceTo(cT2)) ? eA : eB;
           const head2 = (foot === eA) ? eB : eA;
+          const axUp = head2.clone().sub(foot).normalize();
           const cSt2 = new THREE.Box3().setFromObject(stones[0])
             .getCenter(new THREE.Vector3());
-          const fracW = cSt2.clone().sub(foot)
-            .dot(head2.clone().sub(foot).normalize()) / lenS;
+          const fracW = cSt2.clone().sub(foot).dot(axUp) / lenS;
           if (Math.abs(fracW - 0.55) > 0.12)
             say(v.id, 'the stone off its shank station',
                 `stone centre at ${fracW.toFixed(2)} of the shank above the foot — `
                 + "the record's reconstruction lashes it at the middle, 0.55±0.12");
+          /* the span the rule owns is the HEAD's — the modern stock station Hong
+             2013 distinguishes from the tradition's. HEAD_SPAN 0.75 sits clear
+             above the stone's own band (0.55+0.12) and the arm tops, so the rule
+             tests its claim, not the stone's drawn station (the first draft
+             hung the span off the stone and the station injection dragged it
+             onto the arms — r195's own miss, recorded). */
+          const ROPE = new Set(['wa-seize', 'wa-band', 'wa-whip', 'wa-cable']);
+          const HEAD_SPAN = 0.75;
+          for (const o of wm) {
+            if (o === shk || o === stones[0] || ROPE.has(o.name)) continue;
+            const fo = new THREE.Box3().setFromObject(o)
+              .getCenter(new THREE.Vector3()).sub(foot).dot(axUp) / lenS;
+            if (fo > HEAD_SPAN)
+              say(v.id, 'a stock at the cable end',
+                  `'${o.name}' crosses the shank at ${fo.toFixed(2)} above the `
+                  + 'foot — the stone is this anchor\'s 닻장, and the traditional '
+                  + "wooden stock sat at the arms' height, never at the cable end "
+                  + '(Hong 2013)');
+          }
         }
         const bbW = new THREE.Box3();
         for (const o of wm) if (o.name !== 'wa-cable')

@@ -13838,3 +13838,85 @@ tier fractions. (20) r172 the 74's lower capstan barrel. (21) r181 eraSm dead
 fallback branch (app.js:1353). (22) REOPENED r186, small: the panokseon card text is
 still the prose schema (checked r194) — it silently left the list after r187; convert
 to array-form and add the "Ground tackle, as drawn" row.
+
+## Round 195 — 2026-09-01 — the anchor takes its form study: the shank derived long, the modern crossbar dies
+
+**The r194 head residual OPENED AND CLOSED (build/staging/r195/JUDGMENT.md). The fetch
+landed BOTH sources: 홍광희 2013 「전통 나무닻의 생김새 연구」 (『해양문화재』 6,
+107–143, 36 pp. scanned, read visually page by page) from the institute's own journal
+board — the SPA hides its links; the listData JSON carries them (seamuse
+academiccultural infoData/2654 → board/fileDown/FILE_000000000053466/5, session cookie
++ referer needed) — AND the 2012 master's thesis behind it (조선대, via OAK with its
+js-challenge cookie, 91 pp. with the lashing experiments and island interviews).**
+
+**The study is a typology, no numeric table — its findings are structural, and two
+convict the drawn class: (1) the traditional shank was made LONG against oak's
+buoyancy, with the stock at the ARMS' top height — never at the cable end, which is
+the MODERN station (p. 132, 맺음말); the pre-r195 crossbar sat exactly there (frac
+0.91). (2) beside a stone stock a wooden crossbar is redundant — the study draws
+none, the institute's figure draws none (his footnote 8 carries the counter-argument,
+stock+stone together against spin on a round shank — CONTESTED in provenance, not
+drawn). Also fetched into the class: two treenails per separately-made arm joint
+(표민대화's two 나무못; artifacts ④ Jindo and ⑥ Gwangyang, two square peg holes
+each), V-crotch one-piece construction (3 of 9 recovered), crowns thick vs arms
+(already drawn, 1.8).**
+
+**Measured, not judged: r194's figure numbers REPRODUCE on the 3x crop (stone/shank
+0.51, centre 0.57 — my first grid read of ~1.0 was the crop's cut edge taken for the
+foot, corrected); crossing station measured 0.35 above the foot (r194's 0.30 was a
+choice, not a measurement). Class change (hull.js woodAnchor): ST_RATIO 0.51 —
+shankL = shankM || stoneLenM/0.51 → 3.92 m on the recorded 2.0 m stone (shankM 3.2
+was a DRAWN DEFAULT by the provenance's own words; dropped from the record so the
+derivation rules, a real fetched shankM would outrank). wa-cross and crossM DIE.
+Head seizing (wa-seize ×3, the figure's whipped bend). XA_FRAC 0.35. The blunt limb
+now DERIVES from crossing to the stone's underside so the arms brace the stone at
+ANY shank length (r194's fixed 0.70·armM breaks the bracing the moment the shank
+grows). Two treenails (wa-peg) per crossing. Card gains the "Ground tackle, as
+drawn" row — residual 22 CLOSED.**
+
+**Audit: V-CROSS dies (it ENFORCED the modern station off a dictionary gloss — the
+form study outranks the inference). NEW V-WSHANK: drawn shank vs shankM ||
+stoneLenM/0.51, ±12%, never vacuous, convicts the pre-r195 default (18% short). NEW
+V-WSTOCK: no timber crosses the shank above HEAD_SPAN 0.75, rope exempt by name —
+convicts the pre-r195 crossbar (0.93). V-WSTATION re-anchored: foot told from head
+by the hook points' centroid (the crossbar that used to tell it is gone).**
+
+**Proofs on the :8151 shadow, predictions first: clean 33/0 ✓; inj-shank → ONE
+V-WSHANK 3.20/3.92 to the digit ✓ (and the rope exemption proven — the seizing rises
+past the shortened head, silent); inj-cross → ONE V-WSTOCK 0.93 ✓; inj-station →
+V-WSTATION 0.28 to the digit ✓ BUT the first draft returned FIVE — V-WSTOCK's span
+hung off the stone's drawn station and the slid stone dragged it onto the arms. THE
+PREDICTION WAS RIGHT AND THE RULE WAS WRONG: it tested "above the stone" while its
+claim was "at the cable end". Fixed to fixed HEAD_SPAN 0.75; all three re-run clean.
+The r195 miss class, named: a rule whose span borrows a movable feature tests the
+feature, not the claim. Post-land audit on :8149: 33/0 twice.**
+
+**Frames: opening 64 PAID AND PURE (launched 17:53 unedited, EXIT:0 ~18:35, every
+edit staged until then). Close solo ship-panokseon 0.065% — ONE cluster, the
+anchor's own silhouette — accepted with FRAME-LOG reason, re-checked clean.
+ship-junk / ship-sekibune / shipwright / action / globe-default within tolerance.**
+
+**Looked at (rules 0/1, look-pan-e-zoom3x.png + probe_anchor.py): the anchor lies
+caltrop-wise on the planked bow platform, whipped crossings reading as a frame, the
+grey stone lashed diagonally at the shank's middle, cable aft to the horong; the
+blunt bow carries the longer frame (box probed against hull extents — the head-to-
+windlass relation is unchanged from the accepted r194 stow; the shank grew at the
+foot, forward).**
+
+**Deployed: data-version 1788313040. Provenance carries Hong 2013 by title, issue and
+pages, the derivation and its mechanism, the crossbar's removal argued, footnote 8
+CONTESTED, and the treenail evidence by artifact.**
+
+**Named residuals, in order:** (1) NEW r195: the 2013 study's 그림 17 (stone-stock
+anchor schematic) and 그림 16 typology plates were read but not measured against the
+drawn splay (TH 0.78) and arm count — a proportion pass on the study's own drawings
+would firm both; the thesis (r195, saved) also carries 정박실험 tables (표 8, 묶기
+결과) not yet mined. (2) Kozushima 1993 weighing (print-only stands). (3) r187 emaki
+plate. (4) r182 grapnel shank reconstruction. (5) r183 junk stone bar class default.
+(6) r177 Lucian's second machine. (7) r173 cog Gangspill. (8) r173 cog castles.
+(9) r173 cog rudder slab. (10) r176 sekibune class-size (kiwari read). (11) boxy
+classes: top (18), channel/cheek/cathead. (12) Preussen mast livery. (13) Endurance
+forecastle. (14) Azzam crest span. (15) r164 risen black unpierced. (16) r165
+fantail gallery wings. (17) r166 screen glass. (18) r171 quarter-gallery sashes.
+(19) r171 authored tier fractions. (20) r172 the 74's lower capstan barrel.
+(21) r181 eraSm dead fallback branch (app.js:1353).
