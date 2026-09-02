@@ -12832,3 +12832,17 @@ The full-64 opening check is named as next round's debt, testing this round's at
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 06:41:41  round starting
   starting the :8149 server
+Round 203 is complete and live, 26 minutes inside the kill window. Tree clean, both commits pushed, live stamp verified serving 1788359334 at 07:35.
+
+**How this round ran.** The 05:11 firing did the r203 work — fetched both Songho-ri reports, mined them, made the edits, ran every gate but the close — and overran the 80-minute kill with its close-ratchet output still empty. This firing verified the inherited tree: read all four diffs against the pre-written PREDICTIONS.md (exactly as written, insert-only provenance text), re-read every witness plate by eye, re-verified every printed number against the extracted report texts, re-ran the audit on the final tree, and ran the close ratchet in full. One procedural incident of its own, recorded in the handoff: the first close attempt died at the action frame's readiness timeout because two of this firing's own text-search processes (ugrep) hung and starved the renderer — killed, and the re-run went through whole.
+
+**The round's find.** Songho-ri 1 — a Goryeo coaster found at Haenam in 2023, hull plank dated AD 1021–1158 — carried one half of a two-shank stone-insert anchor, 마도해역-212's exact class, printed at 149.5 cm: half a centimetre from the 1.49 m the junk's arm was measured off 212's scale drawing in r199. The drawing-derived object now has a printed same-form sibling aboard a dated hull on Xu Jing's own sea road. The census holds everywhere: the three Songho-ri stones are all lashed-form and small, so 명량21-17's 458 kg stays the fetched ceiling and 진도-641 stays the lashed tradition's only dimensioned arm. Two contested readings are carried per rule 9 — the report's own chapters disagree about the anchor's mortises, and the site's two reports disagree about the big stone's rock type and dimensions.
+
+**Gates.** Audit 33/0 four times across the firings. Opening 64 on the untouched tree: all within tolerance — residual 22 paid, the r202 attribution chain confirmed as predicted. Close 64: all within tolerance, zero accepts — ship-junk, ship-panokseon and action-myeongnyang all 0.000, the inertness prediction holding frame for frame; no baseline moved, FRAME-LOG untouched.
+
+**Next round's head:** the 거북선 학술 복원 보고서 (nttId 4452) — the institute's scholarly turtle-ship reconstruction from the 1795 이충무공전서, two volumes at 128 MB and 785 MB, both over the 100 MB class, coordinates recorded in the handoff.
+2026-09-02 07:35:49  round finished; HEAD is 84d8b4b r203 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 67591 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 07:45:49  round starting
+  starting the :8149 server
