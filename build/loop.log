@@ -12771,3 +12771,27 @@ Commits 5857c4f and 6cf1265 are pushed, the push log was read this round per the
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 01:10:50  round starting
   starting the :8149 server
+Round 200 is complete and live. The one matching process was this session itself — nothing else is running, the tree is clean.
+
+**What the round did.** The queue at HANDOFF line 2589 stands WORKED IN FULL (r57), so the round fell through to the residual line. It paid the two debts r199 left and closed most of residual 1:
+
+- **The owed opening 64-frame ratchet ran in full**: all 64 within tolerance, ship-junk and ship-panokseon at 0.000 — which retroactively proves r199's close-by-attribution was sound. Audits ran twice: 33 hulls, 0 problems, both times.
+- **Four excavation reports fetched whole** from the institute's board (the 234 MB 2021 Mado 시굴 report started first, per r199's instruction), and all four mined to verdicts the same round.
+
+**The findings.** The arms question r197 opened is now answered across the whole published board: report Ⅰ holds the only whole-run arm (진도-641); report Ⅱ's second arm is a 59.4 × 9.2 cm *fragment* (진도Ⅱ-328, zelkova against 641's oak — two hardwoods in the tradition); Ⅲ, Ⅳ and the 2021 Mado report have none. The class constants ARM_LEN 1.90 / ARM_SEC 0.196 stand unchallenged. The 2021 Mado report answers NO for the junk — sixteen Korean grooved stones, no insert forms, so 마도해역-212 stays the junk's record and its scale contest stays closed.
+
+**The find for r201**: 명량21-17, a 458 kg, 166 × 53 × 29 cm lashed-form stone raised from the Myeongnyang strait itself — verified caption-against-photograph on the rendered page. The panokseon's stone is currently drawn at an exhibition threshold; the r199 rule (the excavated object at its own size) makes this the next change, and it's fully prepped in staging with page renders. Also read from disk: 진도-621, the strait's one Chinese stone, with the insert joint's 13 cm seat grooves recorded on both faces.
+
+**Shipped**: commits 68c1f8a + 055a37e pushed, push log read this round per the r198 rule, live stamp 1788339268 verified serving.
+2026-09-02 01:58:58  round finished; HEAD is 055a37e r200 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 37555 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 02:08:58  round starting
+  starting the :8149 server
+  round overran 80 min — killing its process group
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-09-02 03:29:08  round finished; HEAD is 055a37e r200 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 42849 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 03:39:08  round starting
+  starting the :8149 server

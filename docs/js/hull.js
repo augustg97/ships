@@ -3044,7 +3044,9 @@ group.add(tag(ag, 'ironAnchors'));
 if (S.woodAnchor) {
 const wa = S.woodAnchor;
 const u = (wa.atU != null) ? wa.atU : 0.05;
-const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
+const stoneL = wa.stoneLenM || 2.0;
+const stoneH = wa.stoneWM || (wa.stoneSecM || 0.30) * 0.83;
+const stoneT = wa.stoneTM || wa.stoneSecM || 0.30;
 const ST_RATIO = 0.51;
 const shankL = wa.shankM || stoneL / ST_RATIO, shD = 0.20;
 const ARM_LEN = 1.90, ARM_SEC = 0.196;
@@ -3071,16 +3073,16 @@ ai.add(sz);
 }
 const ST_FRAC = 0.55;
 const yStone = -shankL * (1 - ST_FRAC);
-const zStone = shD * 0.55 + stoneS / 2;
+const zStone = shD * 0.55 + stoneT / 2;
 const stone = new THREE.Mesh(
-new THREE.BoxGeometry(stoneL, stoneS * 0.83, stoneS), stoneM);
+new THREE.BoxGeometry(stoneL, stoneH, stoneT), stoneM);
 stone.name = 'wa-stone';
 stone.position.set(0, yStone, zStone);
 ai.add(stone);
 const TH = 0.38;
 const XA_FRAC = 0.35;
 const yX = -shankL * (1 - XA_FRAC);
-const BL = (yStone - stoneS * 0.83 / 2 - yX) / Math.cos(TH) + armD * 0.4;
+const BL = (yStone - stoneH / 2 - yX) / Math.cos(TH) + armD * 0.4;
 const HL = wa.armM || Math.max(ARM_LEN - BL - 1.1 * armD, armD * 2);
 const SEP = shankL * 0.058;
 const pairs = (nArms >= 4)
@@ -3132,17 +3134,17 @@ spread.name = 'wa-spread';
 spread.rotation.z = 0.14; spread.rotation.y = 0.25;
 spread.position.set(0.05, yX - 0.28, 0.05);
 ai.add(spread);
-const zHalfAll = (zStone + stoneS / 2 + shD * 0.55) / 2;
+const zHalfAll = (zStone + stoneT / 2 + shD * 0.55) / 2;
 const addTurn = (x, tilt, wrapShank) => {
 const holder = new THREE.Group();
 const t = new THREE.Mesh(new THREE.TorusGeometry(1, 0.022, 8, 24), ropeM);
 t.name = 'wa-band';
 t.rotation.y = Math.PI / 2;
 if (wrapShank) {
-t.scale.set(zHalfAll + 0.03, stoneS * 0.52, 1);
+t.scale.set(zHalfAll + 0.03, stoneH * 0.63, 1);
 t.position.z = zHalfAll - shD * 0.55;
 } else {
-t.scale.set(stoneS * 0.62, stoneS * 0.52, 1);
+t.scale.set(stoneT * 0.62, stoneH * 0.63, 1);
 t.position.z = zStone;
 }
 holder.add(t);

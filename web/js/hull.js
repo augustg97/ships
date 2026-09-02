@@ -4774,7 +4774,7 @@ function buildFittings(S, group, mats) {
 
   /* ── THE KOREAN WOODEN ANCHOR AND ITS STONE, FROM THE RECORD ────────────────────────
      `woodAnchor: {atU?, offZ?, yaw?, shankM?, armM?, arms?, stoneLenM?,
-                   stoneSecM?, cableDiaM?}`
+                   stoneWM?, stoneTM?, stoneKg?, stoneSecM?, cableDiaM?}`
      The composite the West Sea record preserves: an oak shank (닻채), hook-arms hung
      both sides of it (닻가지 — TWO on every stock-anchor the form study draws:
      그림 16 A–D, the stone-stock schematic 그림 17, and all six artifact
@@ -4822,7 +4822,14 @@ function buildFittings(S, group, mats) {
   if (S.woodAnchor) {
     const wa = S.woodAnchor;
     const u = (wa.atU != null) ? wa.atU : 0.05;
-    const stoneL = wa.stoneLenM || 2.0, stoneS = wa.stoneSecM || 0.30;
+    const stoneL = wa.stoneLenM || 2.0;
+    /* the stone's section is the record's own two faces since r201 — stoneWM
+       the 너비 laid along the shank's axis, stoneTM the 두께 standing off its
+       face (명량21-17: 166 × 53 × 29, 458 kg — the excavated stone at its own
+       size, r199 rule); a square stoneSecM record keeps the pre-r201
+       proportions as the legacy fallback */
+    const stoneH = wa.stoneWM || (wa.stoneSecM || 0.30) * 0.83;
+    const stoneT = wa.stoneTM || wa.stoneSecM || 0.30;
     /* the shank from its own stone — the figure's stone/shank ST_RATIO, the form
        study's long-shank rule (oak's buoyancy); a record shankM still outranks */
     const ST_RATIO = 0.51;
@@ -4868,9 +4875,9 @@ function buildFittings(S, group, mats) {
        class constant V-WSTATION audits by (figure 0.57, 표민대화 중앙부) */
     const ST_FRAC = 0.55;
     const yStone = -shankL * (1 - ST_FRAC);
-    const zStone = shD * 0.55 + stoneS / 2;
+    const zStone = shD * 0.55 + stoneT / 2;
     const stone = new THREE.Mesh(
-      new THREE.BoxGeometry(stoneL, stoneS * 0.83, stoneS), stoneM);
+      new THREE.BoxGeometry(stoneL, stoneH, stoneT), stoneM);
     stone.name = 'wa-stone';
     stone.position.set(0, yStone, zStone);
     ai.add(stone);
@@ -4890,7 +4897,7 @@ function buildFittings(S, group, mats) {
     const yX = -shankL * (1 - XA_FRAC);
     /* the blunt limb is DERIVED, crossing to the stone's underside, so the arms
        brace the stone at any shank length — the figure's structure, not a knob */
-    const BL = (yStone - stoneS * 0.83 / 2 - yX) / Math.cos(TH) + armD * 0.4;
+    const BL = (yStone - stoneH / 2 - yX) / Math.cos(TH) + armD * 0.4;
     const HL = wa.armM || Math.max(ARM_LEN - BL - 1.1 * armD, armD * 2);
     /* the figure whips the crossings at STAGGERED stations, ~0.12 of the shank
        apart — crossed at one point they read as a wheel's spokes, not a frame.
@@ -4954,17 +4961,17 @@ function buildFittings(S, group, mats) {
     ai.add(spread);
     /* the lashing the reproduction photographs: end turns seated in the stone's own
        rope grooves, crossed frapping over the midbody binding stone to shank */
-    const zHalfAll = (zStone + stoneS / 2 + shD * 0.55) / 2;
+    const zHalfAll = (zStone + stoneT / 2 + shD * 0.55) / 2;
     const addTurn = (x, tilt, wrapShank) => {
       const holder = new THREE.Group();
       const t = new THREE.Mesh(new THREE.TorusGeometry(1, 0.022, 8, 24), ropeM);
       t.name = 'wa-band';
       t.rotation.y = Math.PI / 2;
       if (wrapShank) {
-        t.scale.set(zHalfAll + 0.03, stoneS * 0.52, 1);
+        t.scale.set(zHalfAll + 0.03, stoneH * 0.63, 1);
         t.position.z = zHalfAll - shD * 0.55;
       } else {
-        t.scale.set(stoneS * 0.62, stoneS * 0.52, 1);
+        t.scale.set(stoneT * 0.62, stoneH * 0.63, 1);
         t.position.z = zStone;
       }
       holder.add(t);
