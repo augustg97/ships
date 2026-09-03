@@ -15298,3 +15298,7 @@ r172 the 74's lower capstan barrel. (21–23) CLOSED r202–r204. (24) CLOSED r2
 CLOSED r207. (26) NEW: the readiness transient has now cost three whole runs (r206 ×1,
 r208 ×2); if the 150 s timeout does not hold it, the next step is in the app — log what
 __FRAME_READY waits on in frozen mode and time each stage under load.
+
+**Live stamp VERIFIED: 1788455398 on https://augustg97.github.io/ships/index.html at
+10:13:07 PDT, 13 polls × 10 s after the push (build/staging/r208/push.log). Tree at close:
+git status shows only the r205 daemon's cookie file, deliberately left uncommitted.**
