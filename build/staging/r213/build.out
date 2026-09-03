@@ -1,0 +1,30 @@
+build_site.py — the gate
+
+1. research selftests
+   ok   passages.py
+   1 selftests passed
+2. fields present
+   170 tiles, 24 monthly fields
+3. registration, re-read from the shipped raster
+   ok   Challenger Deep         -9802 m (want -9800 ± 1400)
+   ok   Grand Banks               -58 m (want -58 ± 140)
+   ok   Mid-Atlantic Ridge      -3427 m (want -3430 ± 1500)
+   ok   Everest / High Himalaya     6228 m (want 6228 ± 1500)
+   ok   Sargasso (open ocean)    -5384 m (want -5300 ± 1400)
+   ok   Sahara (interior)         968 m (want 500 ± 700)
+   ok   mid-Pacific             -3577 m (want -4300 ± 1500)
+   ok   Bay of Bengal           -2832 m (want -2400 ± 1800)
+   land fraction 29.11% (true 29.2%)
+4. data layers
+   ports 423 · vessels 33 · chapters 8 · battles 8 · plates 35
+6. stamp, then copy
+   stamp 1788477099
+   minified docs/ 2.61 MB -> 1.63 MB (38% of script and style bytes)
+   compacted docs/data 0.68 MB -> 0.60 MB (11% of data bytes)
+   docs/ written, 155 files
+5. byte budget
+   first paint 8.55 MB (budget 8.6)
+   total       125.4 MB (budget 460.0)
+
+PUBLISHED. data-version 1788477099
+Verify the LIVE stamp after pushing — a successful push is not a successful deploy.

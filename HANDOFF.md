@@ -15798,3 +15798,15 @@ CLOSE STATE: if the paragraphs below this one are missing, the round was killed 
 gate — the next firing must (1) re-run the ratchet whole on this committed tree, read and
 accept every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push,
 verify the live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 16:10:35 (build/staging/r213/close-ratchet.out): 64 frames,
+5 movers, all five the predicted stern-hung timber hulls — shipwright-astern 0.134%/0.052,
+shipwright-furled 0.088%/0.030, ship-galley 0.076%/0.039, ship-clipper 0.062%/0.026,
+ship-slave-ship 0.050%/0.019 — every diff read: sterns (the subject's and the berth
+neighbours' rudders), the clipper's three mastheads at r211's documented flap, and TWO
+SMALL TEXT STRIPS not explained by the rudder (bottom-centre panel on shipwright-astern,
+~45 px; top-left card block on ship-galley). Accepted with those words in FRAME-LOG.md;
+the strips are NEW residual (0) for r214: stash-and-rerun those two frames at a clean HEAD
+before believing any reason. No BLANK. Build PUBLISHED after the run (the r207 order),
+data-version 1788477099. Push receipt and live stamp: appended below if the round survived to
+write them (the driver's kill was 16:15:37); otherwise r214 verifies the live stamp first.**
