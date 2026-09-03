@@ -15810,3 +15810,28 @@ the strips are NEW residual (0) for r214: stash-and-rerun those two frames at a 
 before believing any reason. No BLANK. Build PUBLISHED after the run (the r207 order),
 data-version 1788477099. Push receipt and live stamp: appended below if the round survived to
 write them (the driver's kill was 16:15:37); otherwise r214 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788477099 on https://augustg97.github.io/ships/index.html at 16:14:01
+PDT, 90 s after the push at 16:12:30 (build/staging/r213/push.log, the r209 poll pattern).
+Three commits close the round (04a3470 source, c247564 accepts, 2b947a8 docs + handoff);
+the empty-looking d95e4af is the accept call that ran nothing (a spaced interpreter path
+expanded as one word — the accepts were re-run and landed in c247564). Tree at close: only
+build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r213 staging
+images (plates, crops, witness frames) stay on disk uncommitted, the r211 convention.**
+
+**Named residuals, in order (r212's list, renumbered):** (0) NEW r213: two small text-strip
+movers not explained by the rudder — shipwright-astern's bottom-centre panel (~45 px) and
+ship-galley's top-left card block — stash-and-rerun both at a clean HEAD before any reason is
+written. (1) NEW r213, HEAD for r214: **the cog's castle takes its fetched plan** — Westphal
+1991 (r213/akhs-1991-4-kiel.txt): after trapezoid 4.75 m long, 7.20 m forward, 6.50 m aft, two
+side parts 3.45 × 1.65 m, the after posts on two stern beams; written into castleProvenance,
+not yet drawn. Also NEW: the cog's `transom: 0.3` draws a flat stern face above water; the
+Bremen cog's stern is sharp on a straight raked post (Lahn Blatt 9) — the castle's stern
+beams overhang it. (2) NEW r213: decked timber ships' rudder heads still stop at 0.35 of the
+sheer; a helm port and the head entering the counter are not drawn (the 74, the clipper, the
+Indiaman). (3) Kozushima 1993 weighing. (4) r187 emaki plate. (5) r182 grapnel shank. (6) r177
+Lucian's second machine. (7) r176 sekibune class-size, paired with r211's top question. (8)
+Preussen mast livery. (9) Endurance forecastle. (10) Azzam crest span. (11) r164 risen black
+unpierced. (12) r165 fantail gallery wings. (13) r166 screen glass. (14) r171 quarter-gallery
+sashes. (15) r171 authored tier fractions. (16) r172 the 74's lower capstan barrel. (17) the
+cathead's supporting knee is a block. (18) the readiness transient: keep the r208 rule.**
