@@ -1,0 +1,137 @@
+[
+ {
+  "id": "cog",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.01 m from the post's after face at 0.96 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "cog",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "cog",
+  "rule": "a castle with no tiller under it",
+  "detail": "record gives the castle; Ellmers puts the man at the tiller under its deck"
+ },
+ {
+  "id": "caravel",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.01 m from the post's after face at -0.21 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "caravel",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "carrack",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at -3.77 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "carrack",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "galley",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.01 m from the post's after face at 0.58 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "galley",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "galleass",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.01 m from the post's after face at 0.05 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "galleass",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.01 m from the post's after face at -1.02 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at -1.25 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at 1.98 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at -3.30 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at -0.28 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at -3.83 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "clipper",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.00 m from the post's after face at -3.96 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "clipper",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ },
+ {
+  "id": "endurance",
+  "rule": "a rudder hung off its post",
+  "detail": "stock's leading edge 1.01 m from the post's after face at -1.09 m \u2014 the irons clasp the post; the blade lies on it"
+ },
+ {
+  "id": "endurance",
+  "rule": "a rudder with no irons",
+  "detail": "0 straps drawn; the Bremen gudgeons say four were needed"
+ }
+]

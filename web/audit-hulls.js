@@ -497,6 +497,128 @@
       }
     }
 
+    /* ── THE TIMBER RUDDER HANGS ON THE POST (round 213) ─────────────────────────────
+       The stern-hung timber rudder was one vertical plate sampled at the waterline's after
+       end, while the sternpost it hangs on runs from u 0.90 at the keel to u 1.0 at the
+       sheer: on the cog the plate's leading edge stood two metres abaft the post's heel with
+       water between them, and above the sea it read as a pale slab (r173). The Bremen cog's
+       own irons survive — DSM I/10393/08, a gudgeon whose clamp plates gripped the post,
+       "four were needed", pintles down from the blade — and Lahn's Blatt 9 draws the blade
+       parallel to the post from heel to castle beam with the tiller level under the castle
+       deck. So a 'stern' rudder on a timber build is read from its vertices against the
+       post's: the STOCK's leading edge must lie on the post's after face at every height
+       they share (R-STOCK); the irons must be there, the record's count where the record
+       gives one, pintle and two clamp plates per hanging, each within the stock's height
+       (R-IRONS), and no two closer than a hand span (record-blind); where the record gives
+       a castle, a TILLER must exist, level, its head end at the stock's top, its hand end
+       under the castle deck at a standing man's height (R-TILLER, the stature arms
+       record-blind); and where the record gives the foot chord the blade must carry it
+       within 30% (R-CHORD). */
+    if (H.steering === 'stern' && !/^(steel|iron)$/.test(H.build || '')) {
+      const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
+      const post = (() => { let r = null; g.traverse(o => {
+        if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+      const stock = byName('rudder-stock'), planks = byName('rudder-plank'), bands = byName('rudder-band');
+      const pins = byName('rudder-pintle'), clamps = byName('rudder-gudgeon'), tillers = byName('rudder-tiller');
+      const world = o => {           // vertices in hull space (the hull group's frame)
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      if (!stock.length)
+        say(v.id, 'a rudder with no stock', 'no rudder-stock mesh on a stern-hung timber build');
+      else {
+        const sv = world(stock[0]);
+        let sy0 = 1e9, sy1 = -1e9; for (const q of sv) { sy0 = Math.min(sy0, q[1]); sy1 = Math.max(sy1, q[1]); }
+        /* R-STOCK: at every 0.3 m of shared height, the stock's leading edge against the
+           post's after face */
+        if (!post) say(v.id, 'a rudder with no post to hang on', 'no Sternpost mesh');
+        else {
+          /* the post's after face as a ridge (max x per centimetre of height), then the
+             stock's leading edge read at ITS OWN heights against the ridge interpolated
+             there — a height band compares two heights on a raked post and reads a gap
+             that is not there (the first draft convicted eleven faithful hulls) */
+          const pv = world(post), ridge = new Map();
+          for (const q of pv) { const k = Math.round(q[1] * 100); ridge.set(k, Math.max(ridge.get(k) ?? -1e9, q[0])); }
+          const rk = [...ridge.keys()].sort((a, b) => a - b);
+          const ridgeAt = y => {
+            const k = y * 100; if (k < rk[0] || k > rk[rk.length - 1]) return null;
+            let i = 0; while (i + 1 < rk.length && rk[i + 1] < k) i++;
+            const a = rk[i], b = rk[Math.min(i + 1, rk.length - 1)];
+            if (b === a) return ridge.get(a);
+            const t = (k - a) / (b - a); return ridge.get(a) + (ridge.get(b) - ridge.get(a)) * t;
+          };
+          const edge = new Map();
+          for (const q of sv) { const k = Math.round(q[1] * 100); edge.set(k, Math.min(edge.get(k) ?? 1e9, q[0])); }
+          let worst = 0, worstY = 0, seen = 0;
+          for (const [k, x] of edge) {
+            const px = ridgeAt(k / 100); if (px == null) continue;
+            seen++; const gap = x - px;
+            if (Math.abs(gap) > Math.abs(worst)) { worst = gap; worstY = k / 100; }
+          }
+          if (!seen) say(v.id, 'a rudder that shares no height with its post', `stock ${sy0.toFixed(2)}..${sy1.toFixed(2)} m`);
+          else if (worst > 0.30 || worst < -0.12)
+            say(v.id, 'a rudder hung off its post',
+                `stock's leading edge ${worst.toFixed(2)} m from the post's after face at ${worstY.toFixed(2)} m — `
+                + 'the irons clasp the post; the blade lies on it');
+        }
+        /* R-IRONS */
+        const want = H.rudder && H.rudder.hangings;
+        if (!bands.length) say(v.id, 'a rudder with no irons', '0 straps drawn; the Bremen gudgeons say four were needed');
+        else {
+          if (want && bands.length !== want)
+            say(v.id, "the irons off the record's count", `${bands.length} hangings drawn, record says ${want}`);
+          else if (!want && bands.length < 3)
+            say(v.id, 'too few irons for a stern-hung blade', `${bands.length} hangings`);
+          if (pins.length !== bands.length || clamps.length !== 2 * bands.length)
+            say(v.id, 'irons without their other half',
+                `${bands.length} straps, ${pins.length} pintles, ${clamps.length} clamp plates — one pintle and two plates per strap`);
+          const ys = bands.map(b => { const w = world(b); return w.reduce((a, q) => a + q[1], 0) / w.length; }).sort((a, b) => a - b);
+          for (const y of ys) if (y < sy0 - 0.05 || y > sy1 + 0.05)
+            say(v.id, 'an iron off the blade', `strap at ${y.toFixed(2)} m, stock ${sy0.toFixed(2)}..${sy1.toFixed(2)}`);
+          for (let i = 1; i < ys.length; i++) if (ys[i] - ys[i - 1] < 0.5)
+            say(v.id, 'irons closer than a hand span', `${(ys[i] - ys[i - 1]).toFixed(2)} m between hangings — record-blind`);
+        }
+        /* R-TILLER, record-gated on the castle */
+        if (H.castle && H.castle.fromU != null) {
+          if (!tillers.length) say(v.id, 'a castle with no tiller under it', 'record gives the castle; Ellmers puts the man at the tiller under its deck');
+          else {
+            const tv = world(tillers[0]);
+            let tx0 = 1e9, tx1 = -1e9, ty0 = 1e9, ty1 = -1e9;
+            for (const q of tv) { tx0 = Math.min(tx0, q[0]); tx1 = Math.max(tx1, q[0]); ty0 = Math.min(ty0, q[1]); ty1 = Math.max(ty1, q[1]); }
+            if (ty1 - ty0 > 0.3) say(v.id, 'a tiller that is not level', `${(ty1 - ty0).toFixed(2)} m of rise`);
+            if (sy1 < ty0 - 0.1) say(v.id, 'a tiller with no head to fit', `stock tops at ${sy1.toFixed(2)} m, tiller at ${ty0.toFixed(2)}`);
+            const uHand = 0.5 + tx0 / (H.lwl || 1);
+            if (uHand < H.castle.fromU || uHand > H.castle.toU)
+              say(v.id, 'a tiller whose hand end is not under the castle',
+                  `hand end at u ${uHand.toFixed(2)}, castle ${H.castle.fromU}–${H.castle.toU} — the man stood under the castle deck`);
+            if (H.rudder && H.rudder.tillerAtU != null && Math.abs(uHand - H.rudder.tillerAtU) > 0.12)
+              say(v.id, "the tiller off the record's station", `hand end u ${uHand.toFixed(2)}, record says ${H.rudder.tillerAtU}`);
+            /* stature, off the castle's own planks: the afterdeck is the castle deck less deckHM */
+            let deckY = -1e9, seen = 0;
+            g.traverse(o => { if (!o.isMesh || o.name !== 'castle-deck') return;
+              for (const q of world(o)) if (Math.abs(q[0] - tx0) < 0.6) { deckY = Math.max(deckY, q[1]); seen++; } });
+            if (seen) {
+              const hand = (ty0 + ty1) / 2 - (deckY - (H.castle.deckHM || 1.95));
+              if (hand < 0.8 || hand > 1.7) say(v.id, 'a tiller nobody could hold', `${hand.toFixed(2)} m over the afterdeck at the hand`);
+              if (deckY - ty1 < 0.2) say(v.id, 'a tiller through the castle deck', `${(deckY - ty1).toFixed(2)} m under the planks`);
+            }
+          }
+        }
+        /* R-CHORD */
+        if (H.rudder && H.rudder.chordFootM) {
+          const all = sv.concat(...planks.map(world));
+          let lo = 1e9; for (const q of all) lo = Math.min(lo, q[1]);
+          let x0 = 1e9, x1 = -1e9;
+          for (const q of all) if (q[1] < lo + 0.35) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); }
+          const c = x1 - x0;
+          if (Math.abs(c - H.rudder.chordFootM) > 0.30 * H.rudder.chordFootM)
+            say(v.id, "the blade off the record's chord", `${c.toFixed(2)} m at the foot, record says ${H.rudder.chordFootM}`);
+        }
+      }
+    }
+
     /* ── A ONE-PIECE HULL RAISES NO POSTS AND WEARS NO WALES (round 121) ────────────────
        "Construction: single trunk, fire and adze" — there is nothing to scarf a stem to
        and no strake to thicken into a wale, yet the dugout wore separate posts and two

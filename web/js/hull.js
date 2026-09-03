@@ -637,6 +637,186 @@ function buildRudderGeometry(S) {
   return g;
 }
 
+/* ── A TIMBER RUDDER HANGS ON THE POST, AND IT IS BUILT, NOT CUT (round 213) ───────────
+   The stern-hung plate above was sampled at u = 1, the after end of the WATERLINE, and stood
+   there as one vertical slab: the sternpost it is supposed to hang on runs from u = 0.90 at
+   the keel to u = 1.0 at the sheer (buildStemGeometry), so on the cog the plate's leading
+   edge stood two metres abaft the post's heel with open water between them, and above the
+   sea it read as a pale untextured rectangle (r173, seen from the starboard quarter). What
+   the record draws is the other thing entirely. The Bremen cog's own rudder irons survive:
+   DSM Inv. I/10393/08, one of two RUDERÖSEN found with the wreck — a short iron tube with a
+   clamp forged to it whose rectangular plates clasp the sternpost, the museum's text saying
+   four were needed and the blade carried downward pintles to drop into them; Ellmers adds
+   that the two upper ones were never nailed on, so she sank unfinished with the rudder not
+   yet hung. Lahn's Blatt 9 elevation (Tanner & Belasus 2021, fig. 1) draws it: a narrow blade
+   parallel to the raked post, four hangings ticked along it, the head rising past the top
+   strake to the castle's after beam, and the tiller running forward under the castle deck to
+   the helmsman Ellmers puts "underneath the castle-deck ... behind the heavy windlass".
+   So the rudder is lofted DOWN THE POST'S OWN LINE — the same surfacePoint samples the post
+   is built from, one thickness abaft its after face — as a stock plus back pieces with
+   seams, iron straps across the blade at each hanging with a pintle knuckle at the leading
+   edge, the gudgeon's clamp plates on the post beside it, and, where the record gives the
+   castle, the head and the tiller. Every number is either the record's (S.rudder, with its
+   provenance on the card) or a named class default. */
+function buildTimberRudder(S, group, timber, tag) {
+  const H = hullSurface(S);
+  const add = (m, nm) => { m.name = nm; group.add(tag(m, 'rudder', nm)); };
+  const R = S.rudder || {};
+  const t = 0.05 * S.draught;                       // the post's own half-moulding
+  const sided = 0.055 * S.beam / 2;                 // the post's half-siding (buildStemGeometry)
+  /* the post's after face, on the post's own parametrisation: f 0 at the heel, 1 at the
+     sheer; beyond 1 the head continues the line the post was leaning on */
+  const postPt = f => {
+    if (f <= 1) {
+      const p = surfacePoint(S, H, 1 - (1 - f) * 0.10, f);
+      return [p[0] + t, p[1]];
+    }
+    const a = surfacePoint(S, H, 0.998, 0.98), b = surfacePoint(S, H, 1.0, 1.0);
+    const dx = (b[0] - a[0]) / 0.02, dy = (b[1] - a[1]) / 0.02;
+    return [b[0] + t + dx * (f - 1), b[1] + dy * (f - 1)];
+  };
+  /* class defaults, named: chord at the foot 5.5% of lwl (the old plate's own number), head
+     chord 55% of it (the old plate's taper); hangings by century — four before 1500 (the
+     Bremen count), five to 1700, six after (Steel's 74 carries seven; the count is a class
+     read, not a record, unless S.rudder.hangings says so) */
+  const yr = S.year || 1500;
+  const chordF = R.chordFootM || 0.055 * S.lwl;
+  const chordH = R.chordHeadM || chordF * 0.55;
+  const nHang = R.hangings || (yr < 1500 ? 4 : yr < 1700 ? 5 : 6);
+  const yFoot = -S.draught * 0.92;
+  /* find the post parameter at the foot height: the blade begins where the post is that deep */
+  let fFoot = 0.02;
+  for (let f = 0.02; f < 1; f += 0.01) { if (postPt(f)[1] >= yFoot) { fFoot = f; break; } }
+  /* the head: with a castle the stock rises to the tiller under the castle deck; otherwise it
+     stops where the old plate stopped (the tiller of a decked ship works inside the hull —
+     a residual named in r213, not drawn here) */
+  const castle = S.castle && S.castle.fromU != null;
+  const yTiller = castle ? H.sheer(S.castle.toU) + (S.castle.deckHM || 1.95) - 0.55
+                         : H.sheer(1.0) * 0.35;
+  let fHead = 1.0;
+  if (postPt(1.0)[1] < yTiller) {
+    for (let f = 1.0; f < 2.5; f += 0.01) { if (postPt(f)[1] >= yTiller + 0.12) { fHead = f; break; } }
+  } else {
+    for (let f = fFoot; f <= 1.0; f += 0.01) { fHead = f; if (postPt(f)[1] >= yTiller) break; }
+  }
+  const NS = 22;
+  const fAt = k => fFoot + (fHead - fFoot) * k / NS;
+  /* local frame at f: tangent up the post; the chord runs LEVEL aft of it, so the after
+     edge is parallel to the post and the foot is cut square at the heel — Lahn's outline.
+     A chord perpendicular to a raked post drops its after corner below the keel (the
+     galley convicted the first draft: 1.3 m under her own bottom). */
+  const frame = f => {
+    const a = postPt(Math.max(fFoot, f - 0.01)), b = postPt(f + 0.01);
+    const tx = b[0] - a[0], ty = b[1] - a[1], m = Math.hypot(tx, ty) || 1;
+    return { p: postPt(f), tx: tx / m, ty: ty / m, nx: 1, ny: 0 };
+  };
+  const chordAt = f => {
+    const q = Math.max(0, Math.min(1, (f - fFoot) / (1 - fFoot)));
+    return chordF + (chordH - chordF) * q;
+  };
+  /* a lofted box between two chord rails, c0..c1 as fractions of the local chord, of
+     half-thickness hw, over f in [f0, f1]; unindexed, every arris its own vertices */
+  const loft = (f0, f1, c0, c1, hw, n) => {
+    const secs = [];
+    for (let k = 0; k <= n; k++) {
+      const f = f0 + (f1 - f0) * k / n, F = frame(f), c = chordAt(f);
+      const a0 = F.p[0] + F.nx * c * c0, a1 = F.p[1] + F.ny * c * c0;
+      const b0 = F.p[0] + F.nx * c * c1, b1 = F.p[1] + F.ny * c * c1;
+      secs.push([[a0, a1, -hw], [b0, b1, -hw], [b0, b1, hw], [a0, a1, hw]]);
+    }
+    const tri = [];
+    const quad = (A, B, C, D) => tri.push(A, B, C, A, C, D);
+    for (let k = 0; k < n; k++) {
+      const s0 = secs[k], s1 = secs[k + 1];
+      for (let e = 0; e < 4; e++) {
+        const g = (e + 1) % 4;
+        quad(s0[e], s1[e], s1[g], s0[g]);
+      }
+    }
+    const s0 = secs[0], s1 = secs[n];
+    quad(s0[0], s0[3], s0[2], s0[1]);                 // foot cap
+    quad(s1[0], s1[1], s1[2], s1[3]);                 // head cap
+    const flat = []; for (const q of tri) flat.push(q[0], q[1], q[2]);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(flat, 3));
+    g.computeVertexNormals();
+    return g;
+  };
+  const oak = tone => new THREE.MeshStandardMaterial({
+    color: timber.color.clone().multiplyScalar(tone), roughness: 0.88 });
+  const iron = new THREE.MeshStandardMaterial({ color: 0x2b2622, roughness: 0.62, metalness: 0.35 });
+  /* the stock: the first 0.30 m of chord (or the whole blade if narrower), the post's own
+     siding less a fifth; then the back pieces, each thinner than the last, a 12 mm seam
+     between — a strip that IS a mesh has an edge by construction */
+  const hwS = sided * 0.75;
+  const stockC = Math.min(0.30, chordF * 0.55);
+  const pieces = [];
+  let cAcc = stockC;
+  pieces.push({ c0: 0, c1: stockC / chordF, hw: hwS, tone: 0.92, nm: 'rudder-stock' });
+  const nBack = Math.max(1, Math.round((chordF - stockC) / 0.28));
+  for (let i = 0; i < nBack; i++) {
+    const cw = (chordF - stockC) / nBack;
+    pieces.push({ c0: (cAcc + 0.012) / chordF, c1: (cAcc + cw) / chordF,
+                  hw: hwS * (0.62 - 0.14 * i / Math.max(1, nBack - 1)),
+                  tone: 1.0 + 0.10 * ((i * 3) % 2), nm: 'rudder-plank' });
+    cAcc += cw;
+  }
+  for (const pc of pieces) {
+    const top = pc.nm === 'rudder-stock' ? fHead : Math.min(fHead, 1.0);
+    add(new THREE.Mesh(loft(fFoot, top, pc.c0, pc.c1, pc.hw, NS), oak(pc.tone)), pc.nm);
+  }
+  /* the hangings: straps across both faces of the blade (the full chord before 1500, two
+     thirds after), a pintle knuckle at the leading edge, and on the post the gudgeon's
+     clamp plates — the recovered iron is 35 cm long on the post */
+  const fTop = Math.min(fHead, 1.0);
+  const bandC = yr < 1500 ? 0.98 : 0.66;
+  /* the hangings are spaced by HEIGHT along the blade, never by the post's parameter —
+     f runs nearly level round the heel, so spacing in f bunched four irons into a metre
+     on the caravel (the audit's hand-span arm caught it). A short blade carries fewer:
+     one per 0.55 m of blade at most, never fewer than two. */
+  const yBot = postPt(fFoot)[1], yTop = postPt(fTop)[1];
+  const nH = R.hangings || Math.max(2, Math.min(nHang, Math.floor((yTop - yBot) / 0.55)));
+  const fAtY = yq => { let best = fFoot; for (let f = fFoot; f <= fTop; f += 0.005) { best = f; if (postPt(f)[1] >= yq) break; } return best; };
+  for (let i = 0; i < nH; i++) {
+    const yq = yBot + (yTop - yBot) * (0.10 + 0.80 * i / Math.max(1, nH - 1));
+    const f = fAtY(yq);
+    const df = 0.012;
+    add(new THREE.Mesh(loft(f - df, f + df, 0, bandC, hwS + 0.012, 2), iron), 'rudder-band');
+    const F = frame(f);
+    /* the knuckle: a short cylinder up the post's line at the leading edge */
+    const kn = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.22, 10), iron);
+    kn.position.set(F.p[0] - t * 0.15, F.p[1], 0);
+    kn.rotation.z = -Math.atan2(F.tx, F.ty);
+    add(kn, 'rudder-pintle');
+    /* the gudgeon's clamp on the post's two faces, forward from the knuckle */
+    for (const sg of [-1, 1]) {
+      const pl = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.07, 0.012), iron);
+      pl.position.set(F.p[0] - t - 0.16, F.p[1] - 0.14, sg * (sided + 0.006));
+      pl.rotation.z = -Math.atan2(F.tx, F.ty) * 0.15;
+      add(pl, 'rudder-gudgeon');
+    }
+  }
+  /* the tiller, where the record gives the helm a place: from the head forward, level, to
+     the station abaft the windlass — the man at the tiller behind the machine (Ellmers) */
+  if (castle) {
+    const Fh = frame(fHead - 0.02);
+    const xHead = Fh.p[0] + Fh.nx * chordH * 0.45, yHead = yTiller;
+    const uEnd = R.tillerAtU || ((S.windlass && S.windlass.atU) ? S.windlass.atU + 0.03 : 0.85);
+    const xEnd = (uEnd - 0.5) * S.lwl + H.rake(uEnd);
+    const len = xHead - xEnd;
+    const tg = new THREE.BoxGeometry(len, 0.13, 0.13);
+    const pa = tg.attributes.position;
+    for (let i = 0; i < pa.count; i++) {        // taper toward the hand
+      const q = (pa.getX(i) + len / 2) / len;   // 0 at the hand, 1 at the head
+      pa.setY(i, pa.getY(i) * (0.62 + 0.38 * q)); pa.setZ(i, pa.getZ(i) * (0.62 + 0.38 * q));
+    }
+    tg.computeVertexNormals();
+    const tl = new THREE.Mesh(tg, oak(1.06));
+    tl.position.set(xEnd + len / 2, yHead, 0);
+    add(tl, 'rudder-tiller');
+  }
+}
+
 /* Build the hull as an indexed triangle mesh. u runs stem→stern, v runs keel→sheer. */
 /* The one place a point on the hull surface is defined. Keel, frames and planking are all
    generated from THIS function, so the frames cannot sit proud of the planking and the keel
@@ -3798,7 +3978,15 @@ const PARTS = {
                   + 'light in the hand, and it lifts clear in shoal water. What replaced it '
                   + 'was cheaper to build heavy — a sternpost hinge grows with the ship.' },
   rudder:   { stage: 3, name: 'Rudder',
-              what: 'Hung on pintles down the sternpost. The stern-hung rudder reached northern '
+              what: 'Hung on pintles down the sternpost: a stock at the leading edge with back '
+                  + 'pieces fastened to it, iron straps across the blade at each hanging, and '
+                  + 'on the post the gudgeons the pintles drop into. Two of the Bremen cog\'s '
+                  + 'gudgeons survive (DSM I/10393/08): a tube with a clamp whose plates grip the '
+                  + 'post; four were needed, and the upper two were never nailed on, so she sank '
+                  + 'with her rudder not yet hung. Her head rose past the top strake to the '
+                  + 'castle\'s after beam and the tiller ran forward under the castle deck to a '
+                  + 'helmsman who could see neither the sea nor his own sail. '
+                  + 'The stern-hung rudder reached northern '
                   + 'Europe about 1200 and replaced the steering oar; it is what let ships grow '
                   + 'beyond the size one person could steer with an oar over the quarter. China '
                   + 'was there a millennium earlier: the Han pottery boat models of the first '
@@ -12735,7 +12923,10 @@ function buildShip(S, opts) {
       const rudderMat = steer === 'steel'
         ? new THREE.MeshStandardMaterial({ color: bottom, roughness: 0.78, metalness: 0.12 })
         : timber;
-      group.add(tag(new THREE.Mesh(buildRudderGeometry(S), rudderMat), 'rudder'));
+      /* a timber stern-hung rudder is BUILT down the post (r213); the steel foil and the
+         junk's median rudder keep their own geometries */
+      if (steer === 'stern') buildTimberRudder(S, group, timber, tag);
+      else group.add(tag(new THREE.Mesh(buildRudderGeometry(S), rudderMat), 'rudder'));
     }
     /* channels: a shelf outboard of each mast, on both sides, which is what the shrouds set
        up to. Positioned from the mast stations, so they cannot land in the wrong place. */
