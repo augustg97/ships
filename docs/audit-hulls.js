@@ -1402,6 +1402,59 @@ say(v.id, 'more rowers than the hull has stations',
 + `on a ${H.lwl} m waterline`);
 }
 }
+if ((H.year || 0) >= 1100 && (H.masts || []).some(m => m.rig === 'square')) {
+let nTop = 0, badF = 0, firstF = '', badW = 0, firstW = '';
+const cnr = new THREE.Vector3();
+const square = H.year >= 1710;
+g.updateMatrixWorld(true);
+g.traverse(o => {
+const part = o.userData && o.userData.part;
+if (!part || part.key !== 'top' || part.name === 'Crosstrees') return;
+const kids = [];
+o.traverse(m => { if (m.isMesh) kids.push(m); });
+if (!kids.length) return;
+nTop++;
+const ext = kids.map(m => {
+m.updateMatrix();
+const gm = m.geometry; if (!gm.boundingBox) gm.computeBoundingBox();
+const bb = gm.boundingBox;
+let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+for (const cx of [bb.min.x, bb.max.x])
+for (const cy of [bb.min.y, bb.max.y])
+for (const cz of [bb.min.z, bb.max.z]) {
+cnr.set(cx, cy, cz).applyMatrix4(m.matrix);
+x0 = Math.min(x0, cnr.x); x1 = Math.max(x1, cnr.x);
+y0 = Math.min(y0, cnr.y); y1 = Math.max(y1, cnr.y);
+}
+const idx = gm.index ? gm.index.count : gm.attributes.position.count;
+return { tris: idx / 3, fwd: -x0, aft: x1, h: y1 - y0 };
+});
+const plat = ext.reduce((a, b) => (b.tris > a.tris ? b : a));
+const r = plat.fwd, ratio = plat.aft / plat.fwd;
+const tallest = Math.max(...ext.map(e => e.h));
+if (square) {
+if (ratio < 0.55 || ratio > 0.85) {
+badF++; if (!firstF) firstF = `aft ${plat.aft.toFixed(2)} m of forward ${r.toFixed(2)} m, `
++ `${ratio.toFixed(2)} — a top depicted at ${H.year} is square-backed`;
+}
+if (tallest > 0.2 * r) {
+badW++; if (!firstW) firstW = `a ${tallest.toFixed(2)} m wall on a ${r.toFixed(2)} m top `
++ `depicted at ${H.year} — the bulwark is the fighting top's, before 1710`;
+}
+} else {
+if (Math.abs(ratio - 1) > 0.03) {
+badF++; if (!firstF) firstF = `aft ${plat.aft.toFixed(2)} m of forward ${r.toFixed(2)} m, `
++ `${ratio.toFixed(2)} — a top depicted at ${H.year} is round`;
+}
+if (tallest < 0.3 * r) {
+badW++; if (!firstW) firstW = `nothing over ${tallest.toFixed(2)} m on a ${r.toFixed(2)} m top `
++ `depicted at ${H.year} — a fighting top without its bulwark is a bare disc`;
+}
+}
+});
+if (badF) say(v.id, "a top of the wrong century's form", `${badF} of ${nTop} — ${firstF}`);
+if (badW) say(v.id, "a top walled for the wrong century", `${badW} of ${nTop} — ${firstW}`);
+}
 if (H.oarBanks && H.oarStyle !== 'ro') {
 const outbR = 0.74 * (H.oarLen || 4.2);
 let nSw = 0, badR = 0, firstR = '', badF2 = 0, firstF2 = '', badC = 0, firstC = '';

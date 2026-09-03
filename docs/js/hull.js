@@ -1029,7 +1029,7 @@ group.add(tag(nest, 'mast', "Crow's nest",
 }
 if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100) {
 const topR = B * 0.20, headR = radii[0] * 0.7;
-const tp = buildTop(topR, mats.woodPale, headR);
+const tp = buildTop(topR, mats.woodPale, headR, S.year);
 tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
 group.add(tp);
 if (mk.only !== 1) {
@@ -2315,7 +2315,10 @@ what: 'The platform at the head of the lower mast, carried on trestletrees and '
 + 'enough base to be stayed at all — and doubles as a fighting platform for '
 + 'musketeers. Nelson was shot by a man in one. It is a medieval invention: '
 + 'no classical ship carried one, and the earliest among these types are on '
-+ 'the 13th-century seals of the cog towns.' },
++ 'the 13th-century seals of the cog towns. Its form is dated: round and '
++ 'walled like a basket while it was a fighting position, and from about 1710 '
++ 'a planked platform, rounded forward and square aft, with the lubber\'s hole '
++ 'cut round the masthead.' },
 corbis:   { stage: 4, name: 'The corbis',
 what: 'The basket hung at the mainmast head — the thing that named the ship. '
 + 'Festus: cargo ships are called corbitae "because baskets used to be hung '
@@ -3604,11 +3607,42 @@ group.add(tag(fall, 'boat', 'Davit fall'));
 }
 }
 }
-function buildTop(r, mat, mastR) {
+function buildTop(r, mat, mastR, year) {
 const g = new THREE.Group();
-const plat = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.92, r * 0.09, 14), mat);
-g.add(plat);
 const zT = mastR ? mastR + r * 0.055 : r * 0.13;
+const thick = r * 0.09;
+if ((year || 0) >= 1710) {
+const aft = r * 0.70;
+const sh = new THREE.Shape();
+sh.moveTo(aft, -r);
+sh.lineTo(0, -r);
+sh.absarc(0, 0, r, Math.PI * 1.5, Math.PI * 0.5, true);
+sh.lineTo(aft, r);
+sh.lineTo(aft, -r);
+const hx = r * 0.32, hz = Math.max(r * 0.07, zT - r * 0.055);
+const hole = new THREE.Path();
+hole.moveTo(-hx, -hz); hole.lineTo(hx, -hz); hole.lineTo(hx, hz); hole.lineTo(-hx, hz);
+hole.lineTo(-hx, -hz);
+sh.holes.push(hole);
+const plat = new THREE.Mesh(
+new THREE.ExtrudeGeometry(sh, { depth: thick, bevelEnabled: false, curveSegments: 14 }), mat);
+plat.rotation.x = Math.PI / 2;
+plat.position.y = thick / 2;
+g.add(plat);
+} else {
+const plat = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.92, thick, 14), mat);
+g.add(plat);
+const ring = new THREE.Shape();
+ring.absarc(0, 0, r, 0, Math.PI * 2, false);
+const inner = new THREE.Path();
+inner.absarc(0, 0, r * 0.94, 0, Math.PI * 2, true);
+ring.holes.push(inner);
+const wall = new THREE.Mesh(
+new THREE.ExtrudeGeometry(ring, { depth: r * 0.5, bevelEnabled: false, curveSegments: 14 }), mat);
+wall.rotation.x = -Math.PI / 2;
+wall.position.y = thick / 2;
+g.add(wall);
+}
 for (const sz of [-1, 1]) {
 const t = new THREE.Mesh(new THREE.BoxGeometry(r * 1.5, r * 0.13, r * 0.11), mat);
 t.position.set(0, -r * 0.155, sz * zT);

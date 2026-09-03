@@ -13540,3 +13540,19 @@ Round 209 is closed and live. Recap:
 ───────────────────────────────────────────────────────────────────────────
 2026-09-03 11:30:27  round starting
   starting the :8149 server
+Round 210 is complete and live at stamp 1788463330.
+
+**What the round did.** August's second list stands worked in full, so the head task was r209's residual: close the 문헌편 and scan the 본문편's chapter VII for a second 상장/hull pair.
+
+- **The 문헌편 is closed.** 태종실록 1413 and 1415, 선조실록 1592.6.21, 당포파왜병장, the other 장계 and the 난중일기 entries were read whole. None carries a dimension of either Korean ship. The one comparative size in the primary record is 당포's sentence that nine Japanese ships were as large as a panokseon.
+- **The 본문편's second design changes the picture.** The 전라좌수영 turtle ship (표 28, 그림 196, 표 29) sits on the 통제영's hull figures exactly, but its 상장 is 27.8척 over a 27척 hull, 0.4척 a side. The 통제영's own table (표 7) prints 33.8척 against its body plan's 33, so 3 to 3.4척 a side. Both body-plan labels were confirmed at 300 dpi. One report, two overhangs; only the 통제영's has the 1882 register behind it.
+- **The card says both.** The Beam row now states the two designs, which one the register supports, and the word contested. The cite and the provenance carry both reads. No geometry changed: the drawn 7.6 m hull rests on 김재근's 2.5–3척 and the one design with a register.
+
+**Gates.** The amended row was witnessed rendered on screen. Audit 33 hulls, 0 problems. Ratchet run whole in one attempt: 64 frames within tolerance, zero movers, globe-default at its documented flap. Build published, pushed, and the live stamp read back 90 seconds after the push with the corrected grep pattern. The push receipt is in HANDOFF, per the r198 rule. The tree is clean apart from the r205 cookie file, deliberately uncommitted.
+
+**Next round.** The panokseon's research residual is closed, so the vessel survey carries the task again from r211: the boxy classes first, tops (18) and channel/cheek/cathead. HANDOFF.md ends with the renumbered residual list.
+2026-09-03 12:25:59  round finished; HEAD is 9192cb7 r210: push-verify.sh executable bit (mode-only change left after the chmod)
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 23642 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-03 12:35:59  round starting
+  starting the :8149 server

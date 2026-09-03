@@ -1762,7 +1762,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          The TOP sits at the head of the lower mast, and the topmast is fidded through it. */
       if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100) {
         const topR = B * 0.20, headR = radii[0] * 0.7;
-        const tp = buildTop(topR, mats.woodPale, headR, S.year);
+        const tp = buildTop(topR, mats.woodPale, headR);
         tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
         group.add(tp);
         /* ── THE CHEEKS AT THE HOUNDS ──────────────────────────────────────────────
@@ -3743,10 +3743,7 @@ const PARTS = {
                   + 'enough base to be stayed at all — and doubles as a fighting platform for '
                   + 'musketeers. Nelson was shot by a man in one. It is a medieval invention: '
                   + 'no classical ship carried one, and the earliest among these types are on '
-                  + 'the 13th-century seals of the cog towns. Its form is dated: round and '
-                  + 'walled like a basket while it was a fighting position, and from about 1710 '
-                  + 'a planked platform, rounded forward and square aft, with the lubber\'s hole '
-                  + 'cut round the masthead.' },
+                  + 'the 13th-century seals of the cog towns.' },
   corbis:   { stage: 4, name: 'The corbis',
               what: 'The basket hung at the mainmast head — the thing that named the ship. '
                   + 'Festus: cargo ships are called corbitae "because baskets used to be hung '
@@ -5611,65 +5608,18 @@ function buildFittings(S, group, mats) {
 
 /* ── the TOP: the platform at the head of a lower mast ─────────────────────────────────
    A signature of a square-rigged ship and the thing whose absence makes a generated rig read
-   as scaffolding. It spreads the topmast shrouds, and it is a fighting platform.
-   ⚠ ITS PLAN FORM IS DATED (r211). Lees, The Masting and Rigging of English Ships of War
-   1625–1860: tops were ROUND until about 1710 and SQUARE-BACKED after — the after side
-   straight, the fore side rounded, planked over the crosstrees, with the lubber's hole
-   between the trestletrees round the masthead. Before that the top was a fighting position
-   and carried a bulwark: the WA Kraeck engraving (c. 1470), the Mataró model and the Mary Rose
-   all show deep round tops walled to a man's waist or higher. The first version drew every
-   top in the fleet as one bare round disc, from the 1380 cog to the 1902 Preussen. The
-   gate is `year`, the depicted year, the same key the top's own existence is gated on.
-   Proportions: the square-backed top's after edge stands 0.70·r abaft the mast for a length
-   of 0.85 of its breadth (Steel's three-quarters, eased so the trestletrees' after ends stay
-   under the platform) — DERIVED, no record gives this fleet's tops; the round top's bulwark
-   at half its radius is read off the Kraeck's proportion, also derived. */
-function buildTop(r, mat, mastR, year) {
+   as scaffolding. It spreads the topmast shrouds, and it is a fighting platform. */
+function buildTop(r, mat, mastR) {
   const g = new THREE.Group();
-  const zT = mastR ? mastR + r * 0.055 : r * 0.13;
-  const thick = r * 0.09;
-  if ((year || 0) >= 1710) {
-    /* square-backed: a D in plan, the straight edge aft (+x is aft), the semicircle forward,
-       and the lubber's hole cut between the trestletrees inside the crosstrees */
-    const aft = r * 0.70;
-    const sh = new THREE.Shape();
-    sh.moveTo(aft, -r);
-    sh.lineTo(0, -r);
-    sh.absarc(0, 0, r, Math.PI * 1.5, Math.PI * 0.5, true);   // through (-r, 0): forward
-    sh.lineTo(aft, r);
-    sh.lineTo(aft, -r);
-    const hx = r * 0.32, hz = Math.max(r * 0.07, zT - r * 0.055);
-    const hole = new THREE.Path();
-    hole.moveTo(-hx, -hz); hole.lineTo(hx, -hz); hole.lineTo(hx, hz); hole.lineTo(-hx, hz);
-    hole.lineTo(-hx, -hz);
-    sh.holes.push(hole);
-    const plat = new THREE.Mesh(
-      new THREE.ExtrudeGeometry(sh, { depth: thick, bevelEnabled: false, curveSegments: 14 }), mat);
-    plat.rotation.x = Math.PI / 2;                   // shape y → hull z; depth hangs below
-    plat.position.y = thick / 2;
-    g.add(plat);
-  } else {
-    /* round, and walled: the fighting top's bulwark, a staved ring on the platform's rim */
-    const plat = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.92, thick, 14), mat);
-    g.add(plat);
-    const ring = new THREE.Shape();
-    ring.absarc(0, 0, r, 0, Math.PI * 2, false);
-    const inner = new THREE.Path();
-    inner.absarc(0, 0, r * 0.94, 0, Math.PI * 2, true);
-    ring.holes.push(inner);
-    const wall = new THREE.Mesh(
-      new THREE.ExtrudeGeometry(ring, { depth: r * 0.5, bevelEnabled: false, curveSegments: 14 }), mat);
-    wall.rotation.x = -Math.PI / 2;                  // depth rises above the platform
-    wall.position.y = thick / 2;
-    g.add(wall);
-  }
+  const plat = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.92, r * 0.09, 14), mat);
+  g.add(plat);
   /* The frame under it, as it was actually framed: a PAIR of trestletrees fore-and-aft
      along each side of the masthead — resting on the cheeks, leaving between them the
      slot the topmast heel is fidded into — and a pair of crosstrees notched over them,
      carrying the platform. The first version drew one timber of each, centred, passing
      THROUGH the mast — a frame that could not have been assembled around the spar it
-     holds. Both are rectangular-section timbers in every record, so a box is their right
-     section (r211 judgment, with the channel and the cathead). */
+     holds. */
+  const zT = mastR ? mastR + r * 0.055 : r * 0.13;
   for (const sz of [-1, 1]) {
     const t = new THREE.Mesh(new THREE.BoxGeometry(r * 1.5, r * 0.13, r * 0.11), mat);
     t.position.set(0, -r * 0.155, sz * zT);

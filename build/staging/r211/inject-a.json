@@ -1,0 +1,57 @@
+[
+ {
+  "id": "cog",
+  "rule": "a top walled for the wrong century",
+  "detail": "1 of 1 \u2014 nothing over 0.20 m on a 1.48 m top depicted at 1380 \u2014 a fighting top without its bulwark is a bare disc"
+ },
+ {
+  "id": "carrack",
+  "rule": "a top walled for the wrong century",
+  "detail": "2 of 2 \u2014 nothing over 0.29 m on a 2.14 m top depicted at 1500 \u2014 a fighting top without its bulwark is a bare disc"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a top walled for the wrong century",
+  "detail": "1 of 1 \u2014 nothing over 0.13 m on a 0.97 m top depicted at 1597 \u2014 a fighting top without its bulwark is a bare disc"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a top walled for the wrong century",
+  "detail": "2 of 2 \u2014 nothing over 0.17 m on a 1.29 m top depicted at 1620 \u2014 a fighting top without its bulwark is a bare disc"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a top walled for the wrong century",
+  "detail": "3 of 3 \u2014 nothing over 0.32 m on a 2.42 m top depicted at 1620 \u2014 a fighting top without its bulwark is a bare disc"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a top of the wrong century's form",
+  "detail": "3 of 3 \u2014 aft 2.85 m of forward 2.85 m, 1.00 \u2014 a top depicted at 1780 is square-backed"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a top walled for the wrong century",
+  "detail": "3 of 3 \u2014 nothing over 0.21 m on a 1.56 m top depicted at 1590 \u2014 a fighting top without its bulwark is a bare disc"
+ },
+ {
+  "id": "preussen",
+  "rule": "a top of the wrong century's form",
+  "detail": "5 of 5 \u2014 aft 3.20 m of forward 3.20 m, 1.00 \u2014 a top depicted at 1902 is square-backed"
+ },
+ {
+  "id": "clipper",
+  "rule": "a top of the wrong century's form",
+  "detail": "3 of 3 \u2014 aft 2.14 m of forward 2.14 m, 1.00 \u2014 a top depicted at 1869 is square-backed"
+ },
+ {
+  "id": "steamer",
+  "rule": "a top of the wrong century's form",
+  "detail": "3 of 3 \u2014 aft 3.00 m of forward 3.00 m, 1.00 \u2014 a top depicted at 1870 is square-backed"
+ },
+ {
+  "id": "endurance",
+  "rule": "a top of the wrong century's form",
+  "detail": "1 of 1 \u2014 aft 1.48 m of forward 1.48 m, 1.00 \u2014 a top depicted at 1912 is square-backed"
+ }
+]
