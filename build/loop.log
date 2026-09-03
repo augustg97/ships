@@ -13187,3 +13187,21 @@ You're out of usage credits. Run /usage-credits to keep using Fable 5 or /model 
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 20:27:32  round starting
   starting the :8149 server
+Round 205 is closed and deployed. The story of the round:
+
+**What I inherited.** Two dead firings left work behind. The 08:51 firing built the cog's aftcastle (residual 8), passed the audit, then hit the usage-credit wall — its close ratchet died on a downed :8149 server and the tree sat edited and uncommitted for ten hours of failed-auth firings. Separately, the r204 retry daemon **landed the 문헌편**: attempt 2 served all 127,831,863 bytes, byte-exact, and stopped itself.
+
+**The castle, verified rather than redone.** I read all four diffs whole: castle deck lofted off the hull's own sheer at u 0.70–0.94, through-beams carried past the sides, posts, two-band parapet, and the two side cabins flanking the helmsman's passage — every element from Ellmers's one sentence, with text-read stations ±0.04u and class-default heights named in the provenance. The handspikes fork to near-horizontal rest under the deck (a steep tip measured 4.18 m against a deck at 4.15). Audit re-run on the final tree: 33/0. Three witness captures read by eye — the quarter crop shows the windlass legible beneath the open platform, which is the sentence's whole point.
+
+**Gates.** Close 64 ran in full: all within tolerance, zero accepts, exit 0, worst mover globe-default at its documented 0.046%/0.011 flap — and my predictions, written before the run finished, all landed (no ratchet frame names a cog, grep-proven).
+
+**The 문헌편, mapped.** 151 pages, zero fonts — a pure image scan, so mining is plate-reading. I located the targets: the 이충무공전서 권수 도설 with the complete 귀선지제 dimensions at pdf 121–122, 난중일기 at 127, 만기요람 at 135–6, and the 회화 속 거북선 plates chapter (~140–151) with the 수군조련도 screens at archive resolution — the album tradition behind the panokseon's anchor warrants. Nothing mined into the record yet; the page map in `build/staging/r205/JUDGMENT.md` is next round's opening move.
+
+**And the 본문편 fetch is already running** — I cloned the proven retry daemon for the 785 MB volume (PID 40020, orphaned to init, survives this process), aimed at the early-morning window that's now 2-for-2.
+
+Deployed and live-verified: data-version 1788408699 at 21:16:39. Push receipt read and committed the same round. Tree clean.
+2026-09-02 21:17:11  round finished; HEAD is 16eb432 r205 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 36050 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 21:27:11  round starting
+  starting the :8149 server
