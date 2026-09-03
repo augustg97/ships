@@ -13205,3 +13205,19 @@ Deployed and live-verified: data-version 1788408699 at 21:16:39. Push receipt re
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 21:27:11  round starting
   starting the :8149 server
+Round 206 is closed and deployed. The story of the round:
+
+**The 문헌편's first plates are mined into the record.** The 이충무공전서 도설's 귀선지제 — read whole at 300 dpi, hanmun against translation — went into the panokseon card as a new "Hull record, 1795" row, a full `jeonseoProvenance`, and an Oars clause tying the card's 8–10 band to the 도설's own pair (통제영 10, 좌수영 8 a side). The numbers carry the record's own bounds, all three: the 전서's editor says no earlier source recorded dimensions; says the 1795 ship differs from 충무공's original by 치수의 가감; and the 도설 never names the panokseon — the numbers reach the card only through the roofing argument. Both foot conversions are printed as contested (영조척 31.2 cm → top strake 35.3 m; 주척 20.8 → 23.5). The 도설 names no ground tackle, and the provenance says so; the one addition to the anchor warrant is the 귀선도 (pdf 143) — both drawings hang a two-armed crossed anchor, the two-masted one unambiguously at the bow beside the dragon head, recorded with its ~50 px/m scale bound.
+
+**The next round's head found itself:** pdf 136 is the 1882 통제영계록 척량 — a measured survey of a real 일전선 (본판 90척, 상장 105척×39척) and 귀선 (본판 67척, within ~3% of the 도설's 64자8치) — the only measured dimension set for the class in anything fetched. It arrived after the gate started, so it is staged at 300 dpi and named r207's first task, with the datum question (상장 39척 = 12.2 m vs the card's 9.4 beam — deck overhang, not contradiction) stated in advance.
+
+**Gates, told straight.** Audit 33/0. Rule 1 witnessed: the row renders whole on the card (scrolled capture — the frame's default fold shows stats only). The opening 64 was attributed under residual 24's verified condition. The close 64 aborted at frame 53 on a readiness transient (action-salamis; solo re-run 0.000%), and a full re-run couldn't fit the 80-minute kill — so the close ran as eleven solo-scored frames: the entire diff-reachable set plus a cross-category sample, all within tolerance, zero accepts. The whole-set debt is residual 25, explicitly not attributable, and a trap is recorded: `cmd_check` wipes `_current` on every invocation, so an aborted run's captures cannot be scored afterward.
+
+**The 본문편 fetch measured its wall:** attempt 1 cut at exactly 3,601 s with 566 of 785 MB — the cap is connection time, one hour, so only a window sustaining ≥220 KB/s can land it. The daemon retries hourly into the early-morning window, 19 attempts left.
+
+Deployed and live-verified: data-version 1788410276 at 22:30. Push receipt read and committed the same round. Tree clean.
+2026-09-02 22:31:16  round finished; HEAD is f2bd318 r206 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 41802 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 22:41:16  round starting
+  starting the :8149 server

@@ -15053,3 +15053,108 @@ run whole, whatever moved — this round's close was eleven solo-scored
 frames, not the set, so there is no whole-set pass on this tree to
 attribute to. Run it first, before any edit, so it doubles as the
 opening baseline for whatever r207 changes.
+
+## Round 207 — 2026-09-02 — the datum and the foot answered from the card's own cite: the 9.4 is the fighting deck's, and the register keeps the 도설's foot
+
+**The round's shape, decided at open: residual 25 demanded the full 64 run
+whole before any edit, and the wrapper's 80-minute kill does not hold two
+full runs (~40 min each, measured again this round). So the r204 shape:
+the full 64 RUN IN FULL on the untouched tree at open — residual 25 PAID,
+the whole-set pass r206 could not produce, ALL 64 WITHIN TOLERANCE, ZERO
+accepts, FRAME-LOG untouched (build/staging/r207/open-ratchet.out; worst
+mover globe-default 0.046%/0.011, its documented flap at the same figure
+a seventh round) — the head task's two questions answered by research,
+the card edit DRAFTED and staged, no rendered change, and the close
+attributed to the opening run: git status at close shows only
+build/loop.log, the daemon's own cookie file, and build/staging/r207/*
+— nothing in web/, docs/ or the baselines between the run and the build.**
+
+**The datum question ANSWERED, and it is not what the Beam row implies
+(build/staging/r207/JUDGMENT.md, the full chain).** The card's ~32 m and
+9.4 m were traced to their source: Hong Sun-jae 2025 (군사 135) — r89
+took them from the paper, and the paper itself is now FETCHED
+(hong2025.pdf, KCI's own PDF route with browser headers; the bare curl
+gets a block page). Hong's 표 5 (p. 100, read whole by eye) estimates the
+Imjin-era 통제사 대선 off the 비변사등록's 14把 bottom: 본판장 70척,
+상갑판장 103척, 상장요광 30척. At the 영조척, 103척 ≈ 32.1 m and 30척 ≈
+9.2–9.4 m: **the card's ~32 m is the upper deck's length and its 9.4 m is
+the 상장요광 — the FIGHTING DECK's waist breadth, not the hull shell's.**
+No hull-at-sheer breadth appears in the paper's table at all. The
+deck-over-hull structure is the record's own: 김재근 (1984, p. 95, quoted
+by Hong) — the 가목 ends stand 2.5–3척 proud of the planking a side and
+the 상장 runs 5–6척 wider than the hull's sides, "판옥선만이 가지는
+특징"; 신경준's 병선론 (여암전서 권18) is the 3척 projection's own
+proposal text. MODEL CONSEQUENCE, staged for r208: `hull.beam: 9.4` draws
+the SHELL at the deck's breadth and `gunDeck.over: 0.5` rides the deck
+out to ~10.4 m; under the card's own cite the shell is ~24–25척 (~7.5 m)
+and the deck 30척 (~9.4 m), over ≈ 0.8–0.9. The shell is ~1.9 m too
+beamy and the drawn overhang half the record's. The Beam row amendment
+and the geometry fix must land TOGETHER — the row's new datum alone would
+contradict the drawn hull on screen — with measure_ship before/after and
+the oars re-checked (they work through the beam-end gap).**
+
+**The foot question ANSWERED as far as the record answers it, three legs
+(JUDGMENT.md):** (1) the register shares the 도설's foot — 1882 귀선 본판
+67척 vs 1795 저판 64자8치, same yard, within 3.4% in any one foot, and
+the 1882 일전선 IS the 각선도본 전선 within 촌s (90/18/15/12/105/39 vs
+90/18.4/15/12.7/105/39.7 — Hong 표 3 read whole, matching the plate
+column for column on 우별선 and 귀선): the yard held its dimensions
+across a century of records, one foot throughout. (2) The card's cite
+converts at the 영조척 family: Hong's own text works at 척 ≈ 30 cm
+(7.5자 = "약 225㎝"; 김재근's 흘수 3척 = 90㎝), and the institute's 2021
+재현선 headline 32.16 m is exactly the 각선도본's 상장장 105척 at
+30.63 cm. (3) The contest carries formally — the register names no foot,
+so the drafted row prints both conversions as the 1795 row does. One
+tension named, not resolved: the 재현선's 너비 8.74 m is 28.5척, no
+single record breadth, and its implied per-side overhang is double
+김재근's — its datum lives in the unfetched 판옥선 학술연구 보고서
+(2021), now a named fetch candidate on the same academic-report route.**
+
+**Also read this round: the 만기요람 귀선 entry (군정편-주사-총례, pdf
+135) is narrative only — the 징비록 tradition's description, 銃穴
+前後左右各六, no dimensions — MINED as far as it goes: nothing for the
+card the 도설 does not already give, and its six-a-side gunhole count is
+a different tradition from the 도설's 22, noted for any future geobukseon
+model. The 1882 계록's own Korean translation continues onto pdf 137
+(mangi300-137.png, rendered this round) and confirms every column.**
+
+**App change: NONE. Audit 33/0 (audit.out). Build/deploy stamped and
+verified below. Rule 0 answered on ship-panokseon read whole from
+_current mid-run (frames are final as written): the frame reads as a
+rendered world — a timber warship afloat on open water, hills on the
+horizon, nine sculling oars a side shipped at an angle, battened lug
+sails drawing, the commander's railed pavilion under its hipped roof on
+the fighting deck. Three facts a viewer can read off it: the fighting
+deck overhangs the hull on crossbeam ends with dark gunports cut through
+its bulwark; the stat block prints 32.0 m length and 9.40 m beam — the
+very number whose datum this round re-attributed; the fleet list runs
+the dugout canoe of 68000 BC to the panokseon of 1555 at 14 of 33.**
+
+**Named residuals, in order (r206's list, renumbered):** (1) HEAD, r208:
+WRITE the 1882 척량 row into the panokseon card (drafted verbatim in
+build/staging/r207/JUDGMENT.md) WITH the Beam row's datum amendment and
+the geometry fix (beam → ~7.5, gunDeck.over → ~0.9, measure_ship
+before/after, oars re-checked) — one round, one close, run whole. Then
+the rest of the 문헌편 run: 태종실록/탁신 (pdf 7 ff.), 당포파왜병장
+(pdf 123); 만기요람 CLOSED this round (read, nothing minable). The
+수군조련도 anchor read stays a museum fetch (증8190 e-museum). NEW
+sub-item: the 판옥선 학술연구 보고서 (2021) — the reconstruction's own
+report; resolves the 재현선 너비 datum tension. (1b) IN FLIGHT: the
+본문편 daemon (PID 40020) — attempt 1 cut at exactly 3,601 s with 566 MB
+of 785 (the hour cap), attempt 2 launched ~23:12 into the same evening
+window; the three states of the r204 instruction apply at round open.
+(2) Kozushima 1993 weighing (print-only stands). (3) r187 emaki plate.
+(4) r182 grapnel shank — retry from a cooler week. (5) — . (6) r177
+Lucian's second machine. (7) r173 cog Gangspill. (8) CLOSED r205.
+(9) r173 cog rudder slab. (10) r176 sekibune class-size (kiwari read).
+(11) boxy classes: top (18), channel/cheek/cathead. (12) Preussen mast
+livery. (13) Endurance forecastle. (14) Azzam crest span. (15) r164
+risen black unpierced. (16) r165 fantail gallery wings. (17) r166 screen
+glass. (18) r171 quarter-gallery sashes. (19) r171 authored tier
+fractions. (20) r172 the 74's lower capstan barrel. (21–23) CLOSED
+r202–r204. (24) CLOSED r206. (25) CLOSED THIS ROUND — the full 64 ran
+whole on the untouched tree at open, all within tolerance; it stands as
+r208's opening baseline (attribute ONLY if nothing rendered moves before
+r208's own edit — this round's build touched web/index.html's stamp and
+docs/ only after the run, and the next round should re-verify with git
+status at its open).
