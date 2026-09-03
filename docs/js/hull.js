@@ -2296,6 +2296,15 @@ what: 'A horizontal winch: an eight-square barrel turned by handspikes '
 + 'giant Isis at Piraeus around AD 165, counts the anchors and their '
 + 'winding machines among the ship\'s wonders. Drawn only where the '
 + 'record attests one.' },
+castle:   { stage: 4, name: 'Aftcastle',
+what: 'The raised fighting and command deck over the stern — an open platform '
++ 'on posts, not a walled house. The Bremen cog\'s is preserved to its '
++ 'highest rail: a castle deck with a windlass in its middle and a capstan '
++ 'on its top, and beneath it the helmsman stood between the two long side '
++ 'cabins, behind the windlass, unable to see his own sail — which is why '
++ 'the skipper moved up to the castle deck and command separated from '
++ 'steering. Drawn only where the record attests one; this hull has no '
++ 'forecastle because the wreck has none.' },
 boat:     { stage: 3, name: "Ship's boat",
 what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
 + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -2708,7 +2717,10 @@ sp.position.set(0, axisY, zf * len);
 wg.add(sp);
 }
 } else {
-for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
+const underCastle = S.castle && u > S.castle.fromU && u < S.castle.toU;
+const restAngs = underCastle ? [[-0.22, 1.18], [0.30, -1.18]]
+: [[-0.22, 0.55], [0.30, -0.35]];
+for (const [zf, ang] of restAngs) {
 const spL = 1.7, seat = 0.22;
 const sp = new THREE.Mesh(
 new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
@@ -2721,6 +2733,111 @@ wg.add(sp);
 }
 wg.position.x = (u - 0.5) * L;
 group.add(tag(wg, 'windlass'));
+}
+if (S.castle && S.castle.fromU != null && S.castle.toU != null) {
+const cF = S.castle.fromU, cT = S.castle.toU;
+const dH = S.castle.deckHM || 1.95, rH = S.castle.railHM || 1.0;
+const cg = new THREE.Group();
+const xAt = u => (u - 0.5) * L + H.rake(u);
+const wAt = u => halfAtU(u) - 0.06;
+const dY = u => deckAtU(u) + dH;
+const NS = Math.max(6, Math.round((cT - cF) * L / 0.8));
+const base = new THREE.Color(deckCovering(S).col).multiplyScalar(0.88);
+const wMax = wAt(cF), plankW = 0.30;
+let pi = 0;
+for (let zc = -wMax + plankW / 2; zc < wMax; zc += plankW, pi++) {
+const dp = [], di = []; let n = 0;
+for (let k = 0; k <= NS; k++) {
+const u = cF + (cT - cF) * k / NS, w = wAt(u);
+const z0 = Math.max(-w, Math.min(w, zc - plankW / 2));
+const z1 = Math.max(-w, Math.min(w, zc + plankW / 2 - 0.012));
+dp.push(xAt(u), dY(u), z0, xAt(u), dY(u), z1); n++;
+}
+for (let k = 0; k + 1 < n; k++) { const a = k * 2, b = a + 2; di.push(a, b, a + 1, a + 1, b, b + 1); }
+const dg = new THREE.BufferGeometry();
+dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
+dg.setIndex(di); dg.computeVertexNormals();
+const tone = base.clone().multiplyScalar(0.90 + 0.18 * ((pi * 7) % 5) / 4);
+const pm = new THREE.Mesh(dg, new THREE.MeshStandardMaterial({
+color: tone, roughness: 0.86, side: THREE.DoubleSide }));
+pm.name = 'castle-deck'; cg.add(pm);
+}
+const NB = Math.max(4, Math.round((cT - cF) * L / 1.2));
+for (let k = 0; k <= NB; k++) {
+const u = cF + (cT - cF) * k / NB;
+const bm = new THREE.Mesh(
+new THREE.BoxGeometry(0.20, 0.20, 2 * (halfAtU(u) + 0.18)), wood);
+bm.name = 'castle-beam';
+bm.position.set(xAt(u), dY(u) - 0.11, 0); cg.add(bm);
+for (const sg of [1, -1]) {
+const pH = dY(u) - 0.20 - deckAtU(u);
+const post = new THREE.Mesh(new THREE.BoxGeometry(0.18, pH, 0.18), wood);
+post.name = 'castle-post';
+post.position.set(xAt(u), deckAtU(u) + pH / 2, sg * (wAt(u) - 0.16)); cg.add(post);
+}
+}
+for (const sg of [1, -1]) {
+for (const frac of [0.5, 1.0]) {
+const rp = [], ri = [];
+for (let k = 0; k <= NS; k++) {
+const u = cF + (cT - cF) * k / NS, z = sg * (wAt(u) - 0.08);
+rp.push(xAt(u), dY(u) + rH * frac - 0.045, z, xAt(u), dY(u) + rH * frac + 0.045, z);
+}
+for (let k = 0; k < NS; k++) { const a = k * 2, b = a + 2; ri.push(a, b, a + 1, a + 1, b, b + 1); }
+const rg = new THREE.BufferGeometry();
+rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3));
+rg.setIndex(ri); rg.computeVertexNormals();
+const rm = new THREE.Mesh(rg, wood); rm.material = wood.clone();
+rm.material.side = THREE.DoubleSide; rm.name = 'castle-rail'; cg.add(rm);
+}
+const NR = Math.max(6, Math.round((cT - cF) * L / 0.7));
+for (let k = 0; k <= NR; k++) {
+const u = cF + (cT - cF) * k / NR;
+const st = new THREE.Mesh(new THREE.BoxGeometry(0.07, rH, 0.07), wood);
+st.name = 'castle-stanchion';
+st.position.set(xAt(u), dY(u) + rH / 2, sg * (wAt(u) - 0.08)); cg.add(st);
+}
+}
+for (const [u, nm] of [[cF + 0.004, 'castle-breastrail'], [cT - 0.004, 'castle-taffrail']]) {
+const rl = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 2 * (wAt(u) - 0.08)), wood);
+rl.name = nm; rl.position.set(xAt(u), dY(u) + rH, 0); cg.add(rl);
+const NC = Math.max(3, Math.round(2 * wAt(u) / 0.7));
+for (let k = 0; k <= NC; k++) {
+const z = -(wAt(u) - 0.08) + k * (2 * (wAt(u) - 0.08)) / NC;
+const st = new THREE.Mesh(new THREE.BoxGeometry(0.07, rH, 0.07), wood);
+st.name = 'castle-stanchion';
+st.position.set(xAt(u), dY(u) + rH / 2, z); cg.add(st);
+}
+}
+const winU = S.windlass ? (S.windlass.atU || 0.5) : cF;
+const cbF = Math.min(cT - 0.03, Math.max(cF + 0.02, winU + 0.025));
+const cbT = cT - 0.01, zIn = 0.75;
+for (const sg of [1, -1]) {
+const cp = [], ci = []; const NW = Math.max(3, Math.round((cbT - cbF) * L / 0.8));
+for (let k = 0; k <= NW; k++) {
+const u = cbF + (cbT - cbF) * k / NW;
+cp.push(xAt(u), deckAtU(u) - 0.02, sg * zIn, xAt(u), dY(u) - 0.02, sg * zIn);
+}
+for (let k = 0; k < NW; k++) { const a = k * 2, b = a + 2; ci.push(a, b, a + 1, a + 1, b, b + 1); }
+const cw = new THREE.BufferGeometry();
+cw.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3));
+cw.setIndex(ci); cw.computeVertexNormals();
+const cm = new THREE.Mesh(cw, wood); cm.material = wood.clone();
+cm.material.side = THREE.DoubleSide; cm.name = 'castle-cabin'; cg.add(cm);
+for (const [u, nm] of [[cbF, 'castle-cabin-fwd'], [cbT, 'castle-cabin-aft']]) {
+const wOut = wAt(u) - 0.02, hW = dY(u) - deckAtU(u);
+const ew = new THREE.Mesh(new THREE.BoxGeometry(0.05, hW - 0.04, wOut - zIn), wood);
+ew.name = nm;
+ew.position.set(xAt(u), deckAtU(u) + hW / 2 - 0.02, sg * (zIn + (wOut - zIn) / 2));
+cg.add(ew);
+}
+const door = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.35, 0.04),
+new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 0.95 }));
+door.name = 'castle-door';
+door.position.set(xAt(cbF + 0.012), deckAtU(cbF + 0.012) + 0.7, sg * (zIn - 0.005));
+cg.add(door);
+}
+group.add(tag(cg, 'castle'));
 }
 if (S.grapnel) {
 const gp = S.grapnel;

@@ -1,0 +1,3 @@
+2026-09-02 08:36:47 attempt 1: HTTP 200 size 17440104 time 936.467916s
+2026-09-02 09:52:26 attempt 2: HTTP 200 size 127831863 time 1780.505173s
+2026-09-02 10:22:07 attempt 2: COMPLETE byte-exact

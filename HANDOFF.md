@@ -14781,3 +14781,135 @@ attribute ONLY if this round's close passed whole and nothing but
 build/loop.log and build/staging/r204/* (no frame fetches either) moved;
 else run it in full.
 
+## Round 205 — 2026-09-02 — the cog gets its castle back, and the 문헌편 lands: Ellmers's one sentence drawn whole; the retry daemon hands over 151 pages
+
+**HOW THIS ROUND RAN, stated first: two firings, ten hours apart. The
+08:51 firing built the work, ran the audit (33/0, its audit.out at
+09:11), rebuilt docs/, and hit the usage-credit wall; its close ratchet
+died at 09:40 on ERR_CONNECTION_REFUSED — the :8149 server was down —
+and the 80-minute kill took the round with the tree edited, gated by
+audit only, uncommitted, no FRAME-LOG entry, no staging judgment. Every
+firing from 09:50 to 20:17 exited NOT AUTHENTICATED. The 20:27 firing
+(this one) verified the inherited work rather than redoing it: read all
+four diffs whole, re-ran the audit on the final tree (33/0, audit2.out),
+read the three witness captures by eye, wrote the close predictions
+before the ratchet finished (PREDICTIONS-close.md), and ran the close 64
+IN FULL. Evidence in build/staging/r205/JUDGMENT.md.**
+
+**Residual 8 CLOSED — the cog's aftcastle, drawn from the record it
+already carried.** Ellmers (Drassana, fetched whole r173) fixes the
+whole arrangement in one sentence: the aftcastle has 'a windlass in its
+middle and a capstan on its top', and the man at the tiller stood
+'underneath the castle-deck in between the long cabins at both sides and
+behind the heavy windlass'. Every drawn element is that sentence's: the
+castle deck lofted off the hull's own sheer and half-breadth (u
+0.70–0.94, the windlass's recorded u 0.82 at its middle — Ellmers's own
+word), through-beams with their ends carried past the sides (the seal
+silhouette), posts to the afterdeck, a two-band stanchion parapet with
+breastrail and taffrail, and the two side cabins beneath flanking the
+helmsman's passage, each with a door. The deck is LAID PLANKING — each
+plank its own lofted ribbon with its own tone, because a 6 mm seam
+offset drowned at render distance and the top read as one pale slab
+(looked at, then rebuilt; a plank that IS a mesh has edges by
+construction — the snapBand lesson applied fore-and-aft). The forward
+face stays open so the windlass reads beneath the deck, which is where
+it is. STATIONS ARE TEXT READS ±0.04 u; HEIGHTS ARE CLASS DEFAULTS,
+named (1.95 m to the castle deck — ~1.74 m clear under the beams, a
+stoop, which is the sentence's own point: the helmsman down there could
+see nothing); Lahn 1992's 36 plan-drawings are named in the provenance
+as the unfetched source that would supersede every default. The
+handspikes under the deck fork to near-horizontal rest — measured before
+the change, a steep spike's tip stood at 4.18 m against a deck at ~4.15
+at its own station — the r175 rest-position rule applied to this
+tradition. NO FORECASTLE: the wreck has none, and silence draws nothing.
+The Gangspill on the castle top now has a deck to stand on — residual 7
+is next in that class. Audit 33/0 twice (both firings). The three
+witness captures read by eye this firing: castle-quarter-crop.png (open
+platform on posts, per-plank deck tones, windlass and near-horizontal
+spikes legible beneath, cabin wall and door behind), the regenerated
+port and stern profiles (the castle on the sheer; the helmsman's passage
+the open bay between the cabin end walls).**
+
+**Residual 1's FETCH CLOSED — the r204 retry daemon landed the 문헌편.**
+retry-munheon.log tells it whole: attempt 1 cut by the server at
+17,440,104 bytes (the measured per-connection cap again); attempt 2 at
+09:52 served all 127,831,863 bytes in 1,780.5 s — COMPLETE byte-exact,
+%PDF-1.6, on disk, gitignored by name, the daemon stopped itself as
+designed. The r204 pattern (hourly whole-GET retries handed to the fast
+window) is now 2-for-2 against this server's connection cap.**
+
+**The volume, mapped this firing (pdf page = printed page + 1): 151
+pages, NO text layer — pdffonts lists zero fonts, a pure image scan;
+mining is pdftoppm plates read by eye, the r203 method. The map: pdf 7
+ff. chronological documents hanmun+translation, opening with 태종실록
+1413 — the first 거북선 in the record, the crown prince watching a
+mock-fight at the Imjin ferry — and 1415 탁신's 龜船之法 memorial. pdf
+120: 「이충무공전서」 opens. pdf 121–122: 권수 도설 <거북선> WHOLE — the
+귀선지제, hanmun and translation: 저판 10쪽, 64자 8치 long, 12자 head /
+14자 5치 waist / 10자 6치 tail; 현판 7쪽 a side, 7자 5치 high, 68자
+lowest plank to 113자 topmost, all 4치 thick; 축판 7쪽 with the 1자 2치
+rudder hole through the 6th plank; 신방·가룡·방패·언방 by name; 개판 11
+planks a side with the 1자 5치 mast gap; turtle head 4자 3치 × 3자; 10
+oars and 22 gunports a side; and the 통제영/전라좌수영 differences
+printed AS differences. pdf 127: 난중일기 (1592.2.27 방포 시험,
+1592.4.12 현자포 trial). pdf 130: 권14 부록 기실 하, 지봉유설. pdf
+135–136: 만기요람 군정편 — its own 귀선 description. ~pdf 140–151: 회화
+속 거북선 — 전함도 and 수군조련도 십곡병 (국립중앙박물관) at archive
+resolution with colour bars: the album tradition r203 named behind the
+panokseon's anchor and windlass warrants, and the pages the mining round
+renders at 300+ dpi. NOTHING MINED INTO THE RECORD THIS ROUND — the 도설
+read above is a locator, not a claim; writing 전서 numbers into
+vessels.json happens against the panokseon card's existing warrants,
+plate by plate.**
+
+**And the 본문편's round opened early: retry-bonmun.sh launched this
+firing (the r204 script verbatim, /2, byte target 784,858,884, -m
+raised to 14400 for the size), double-forked, orphaned to init — PID
+40020 verified surviving its launching call. Log:
+build/staging/r205/retry-bonmun.log; target name already gitignored.**
+
+**App change: the inherited castle work only (vessels.json castle record
++ two provenance texts, hull.js castle block + handspike fork + PARTS
+card). This firing added staging evidence and the daemon. Gates: audit
+33/0 on the final tree; close 64 IN FULL — ALL WITHIN TOLERANCE, ZERO
+accepts, exit 0 (close-ratchet2.out); predictions written before the run
+finished, all landed: no frame names a cog (grep-proven), ship-panokseon
+0.000, worst mover globe-default 0.046%/0.011 — its documented flap at
+the same figure four rounds running; FRAME-LOG untouched. Rule 0,
+answered on descent-high read mid-ratchet: the frame reads as open water
+from altitude — wind-streaked sea, not a chart. Three facts a viewer can
+read off it: Bristol→New York fell to 15 days under steam with the Great
+Western's maiden crossing of April 1838; Suez in 1869 cut London→Bombay
+from 10,600 to 6,200 nm; the Great Eastern laid the Atlantic cable near
+52°N 27°W, in the era card's own voyage list.**
+
+**Residual 24 taken on its own terms and NOT met: the attribution
+condition required an untouched tree, and this firing inherited the tree
+already edited by the dead 08:51 firing — no untouched-tree opening
+existed to run. The close 64 ran whole instead and every moved frame is
+either sub-tolerance flap or reachable by no path in the diff (no cog
+frame exists). The condition rolls forward as residual 24 unchanged.**
+
+**Deployed: data-version 1788408699. Push log to be read this round (the
+r198 rule); live stamp verified below.**
+
+**Named residuals, in order (r204's list, renumbered):** (1) HEAD: MINE
+the 문헌편 — the page map is in staging/r205/JUDGMENT.md; the 도설 pp.
+121–122 against the panokseon card first, then the 수군조련도 plates at
+300 dpi for the anchor/horong album warrants. (1b) IN FLIGHT: the
+본문편 daemon (PID 40020, log retry-bonmun.log) — read the log at round
+open, the three states of the r204 instruction apply. (2) Kozushima 1993
+weighing (print-only stands). (3) r187 emaki plate. (4) r182 grapnel
+shank — three walls 429/dead twice; retry from a cooler week. (5) — .
+(6) r177 Lucian's second machine. (7) r173 cog Gangspill — the castle
+top it stands on EXISTS as of this round. (8) CLOSED THIS ROUND (the
+aftcastle, Ellmers's sentence whole). (9) r173 cog rudder slab. (10)
+r176 sekibune class-size (kiwari read). (11) boxy classes: top (18),
+channel/cheek/cathead. (12) Preussen mast livery. (13) Endurance
+forecastle. (14) Azzam crest span. (15) r164 risen black unpierced. (16)
+r165 fantail gallery wings. (17) r166 screen glass. (18) r171
+quarter-gallery sashes. (19) r171 authored tier fractions. (20) r172 the
+74's lower capstan barrel. (21–23) CLOSED r202–r204. (24) ROLLED
+FORWARD: next round's opening 64 — attribute ONLY if this round's close
+passed whole and nothing but build/loop.log, build/staging/r205/* and
+the two daemon-touched r204 paths moved; else run it in full.

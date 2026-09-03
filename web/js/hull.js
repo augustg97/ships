@@ -3724,6 +3724,15 @@ const PARTS = {
                   + 'giant Isis at Piraeus around AD 165, counts the anchors and their '
                   + 'winding machines among the ship\'s wonders. Drawn only where the '
                   + 'record attests one.' },
+  castle:   { stage: 4, name: 'Aftcastle',
+              what: 'The raised fighting and command deck over the stern — an open platform '
+                  + 'on posts, not a walled house. The Bremen cog\'s is preserved to its '
+                  + 'highest rail: a castle deck with a windlass in its middle and a capstan '
+                  + 'on its top, and beneath it the helmsman stood between the two long side '
+                  + 'cabins, behind the windlass, unable to see his own sail — which is why '
+                  + 'the skipper moved up to the castle deck and command separated from '
+                  + 'steering. Drawn only where the record attests one; this hull has no '
+                  + 'forecastle because the wreck has none.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
                   + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -4288,7 +4297,14 @@ function buildFittings(S, group, mats) {
         wg.add(sp);
       }
     } else {
-      for (const [zf, ang] of [[-0.22, 0.55], [0.30, -0.35]]) {
+      /* where a castle deck stands over the machine (r205), a spike left steep would
+         stand through it — measured: tip 4.18 m against a deck at ~4.15 at its own
+         station. The crew could not leave them standing under a deck either: the bars
+         rest near horizontal, the r175 rest-position rule applied to this tradition */
+      const underCastle = S.castle && u > S.castle.fromU && u < S.castle.toU;
+      const restAngs = underCastle ? [[-0.22, 1.18], [0.30, -1.18]]
+                                   : [[-0.22, 0.55], [0.30, -0.35]];
+      for (const [zf, ang] of restAngs) {
         const spL = 1.7, seat = 0.22;
         const sp = new THREE.Mesh(
           new THREE.CylinderGeometry(0.022, 0.030, spL, 8), pale);
@@ -4301,6 +4317,141 @@ function buildFittings(S, group, mats) {
     }
     wg.position.x = (u - 0.5) * L;
     group.add(tag(wg, 'windlass'));
+  }
+
+  /* ── THE MEDIEVAL AFTCASTLE, FROM THE RECORD:
+     `castle: {fromU, toU, deckHM, railHM}`
+     The northern tradition's castle — the Bremen cog's own, preserved to its highest rail
+     and standing whole on the reconstructed ship (Ellmers, Drassana, r173/r205): an OPEN
+     PLATFORM on posts over the afterdeck, not a walled house — the junk's tiered quarters
+     are a different tradition and a different builder. Ellmers's one sentence fixes the
+     whole arrangement: the aftcastle carries 'a windlass in its middle and a capstan on
+     its top', and the man at the tiller stood 'underneath the castle-deck in between the
+     long cabins at both sides and behind the heavy windlass'. So: the castle deck lofted
+     off the hull's own sheer and half-breadth (a platform lofted off the real surface
+     cannot overhang — the buildRaisedEnds idiom), athwartship beams under it with their
+     ends carried through past the sides (the through-beam look of every cog seal), posts
+     down to the afterdeck, an open stanchion-and-rail parapet round the top, and the two
+     side cabins beneath, flanking the helmsman's passage abaft the machine. The forward
+     face stays open: the windlass must read beneath the deck, because that is where it is.
+     Silence draws nothing — only a castle record draws one, and the wreck has NO
+     forecastle, so none exists to draw. */
+  if (S.castle && S.castle.fromU != null && S.castle.toU != null) {
+    const cF = S.castle.fromU, cT = S.castle.toU;
+    const dH = S.castle.deckHM || 1.95, rH = S.castle.railHM || 1.0;
+    const cg = new THREE.Group();
+    const xAt = u => (u - 0.5) * L + H.rake(u);
+    const wAt = u => halfAtU(u) - 0.06;          // deck edge inset, off the real skin
+    const dY = u => deckAtU(u) + dH;             // castle deck follows the sheer
+    const NS = Math.max(6, Math.round((cT - cF) * L / 0.8));
+    /* the deck is LAID PLANKING, and each plank is its own lofted ribbon with its own
+       tone — a 6 mm seam offset drowns at render distance and the top read as one pale
+       slab (looked at, r205); a plank that IS a mesh has edges by construction, the
+       snapBand lesson applied fore-and-aft. Tones vary around the weather deck's own
+       covering colour, pulled down: a raw castle deck weathers darker than it washes. */
+    const base = new THREE.Color(deckCovering(S).col).multiplyScalar(0.88);
+    const wMax = wAt(cF), plankW = 0.30;
+    let pi = 0;
+    for (let zc = -wMax + plankW / 2; zc < wMax; zc += plankW, pi++) {
+      const dp = [], di = []; let n = 0;
+      for (let k = 0; k <= NS; k++) {
+        const u = cF + (cT - cF) * k / NS, w = wAt(u);
+        const z0 = Math.max(-w, Math.min(w, zc - plankW / 2));
+        const z1 = Math.max(-w, Math.min(w, zc + plankW / 2 - 0.012));
+        dp.push(xAt(u), dY(u), z0, xAt(u), dY(u), z1); n++;
+      }
+      for (let k = 0; k + 1 < n; k++) { const a = k * 2, b = a + 2; di.push(a, b, a + 1, a + 1, b, b + 1); }
+      const dg = new THREE.BufferGeometry();
+      dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
+      dg.setIndex(di); dg.computeVertexNormals();
+      const tone = base.clone().multiplyScalar(0.90 + 0.18 * ((pi * 7) % 5) / 4);
+      const pm = new THREE.Mesh(dg, new THREE.MeshStandardMaterial({
+        color: tone, roughness: 0.86, side: THREE.DoubleSide }));
+      pm.name = 'castle-deck'; cg.add(pm);
+    }
+    /* beams and posts: one bay per ~1.2 m, the beam ends carried past the hull side */
+    const NB = Math.max(4, Math.round((cT - cF) * L / 1.2));
+    for (let k = 0; k <= NB; k++) {
+      const u = cF + (cT - cF) * k / NB;
+      const bm = new THREE.Mesh(
+        new THREE.BoxGeometry(0.20, 0.20, 2 * (halfAtU(u) + 0.18)), wood);
+      bm.name = 'castle-beam';
+      bm.position.set(xAt(u), dY(u) - 0.11, 0); cg.add(bm);
+      for (const sg of [1, -1]) {
+        const pH = dY(u) - 0.20 - deckAtU(u);
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.18, pH, 0.18), wood);
+        post.name = 'castle-post';
+        post.position.set(xAt(u), deckAtU(u) + pH / 2, sg * (wAt(u) - 0.16)); cg.add(post);
+      }
+    }
+    /* the parapet: stanchions and two lofted rail bands each side, straight rails across
+       the forward and after ends — open framework, the reconstruction's own look */
+    for (const sg of [1, -1]) {
+      for (const frac of [0.5, 1.0]) {
+        const rp = [], ri = [];
+        for (let k = 0; k <= NS; k++) {
+          const u = cF + (cT - cF) * k / NS, z = sg * (wAt(u) - 0.08);
+          rp.push(xAt(u), dY(u) + rH * frac - 0.045, z, xAt(u), dY(u) + rH * frac + 0.045, z);
+        }
+        for (let k = 0; k < NS; k++) { const a = k * 2, b = a + 2; ri.push(a, b, a + 1, a + 1, b, b + 1); }
+        const rg = new THREE.BufferGeometry();
+        rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3));
+        rg.setIndex(ri); rg.computeVertexNormals();
+        const rm = new THREE.Mesh(rg, wood); rm.material = wood.clone();
+        rm.material.side = THREE.DoubleSide; rm.name = 'castle-rail'; cg.add(rm);
+      }
+      const NR = Math.max(6, Math.round((cT - cF) * L / 0.7));
+      for (let k = 0; k <= NR; k++) {
+        const u = cF + (cT - cF) * k / NR;
+        const st = new THREE.Mesh(new THREE.BoxGeometry(0.07, rH, 0.07), wood);
+        st.name = 'castle-stanchion';
+        st.position.set(xAt(u), dY(u) + rH / 2, sg * (wAt(u) - 0.08)); cg.add(st);
+      }
+    }
+    for (const [u, nm] of [[cF + 0.004, 'castle-breastrail'], [cT - 0.004, 'castle-taffrail']]) {
+      const rl = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 2 * (wAt(u) - 0.08)), wood);
+      rl.name = nm; rl.position.set(xAt(u), dY(u) + rH, 0); cg.add(rl);
+      const NC = Math.max(3, Math.round(2 * wAt(u) / 0.7));
+      for (let k = 0; k <= NC; k++) {
+        const z = -(wAt(u) - 0.08) + k * (2 * (wAt(u) - 0.08)) / NC;
+        const st = new THREE.Mesh(new THREE.BoxGeometry(0.07, rH, 0.07), wood);
+        st.name = 'castle-stanchion';
+        st.position.set(xAt(u), dY(u) + rH / 2, z); cg.add(st);
+      }
+    }
+    /* the long cabins at both sides, abaft the windlass's swing: inboard walls lofted
+       between the two decks (the castle deck IS their roof, the afterdeck their sole),
+       closed at each end, a door at the forward end of each passage wall */
+    const winU = S.windlass ? (S.windlass.atU || 0.5) : cF;
+    const cbF = Math.min(cT - 0.03, Math.max(cF + 0.02, winU + 0.025));
+    const cbT = cT - 0.01, zIn = 0.75;
+    for (const sg of [1, -1]) {
+      const cp = [], ci = []; const NW = Math.max(3, Math.round((cbT - cbF) * L / 0.8));
+      for (let k = 0; k <= NW; k++) {
+        const u = cbF + (cbT - cbF) * k / NW;
+        cp.push(xAt(u), deckAtU(u) - 0.02, sg * zIn, xAt(u), dY(u) - 0.02, sg * zIn);
+      }
+      for (let k = 0; k < NW; k++) { const a = k * 2, b = a + 2; ci.push(a, b, a + 1, a + 1, b, b + 1); }
+      const cw = new THREE.BufferGeometry();
+      cw.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3));
+      cw.setIndex(ci); cw.computeVertexNormals();
+      const cm = new THREE.Mesh(cw, wood); cm.material = wood.clone();
+      cm.material.side = THREE.DoubleSide; cm.name = 'castle-cabin'; cg.add(cm);
+      /* the end walls: inboard face out to the hull side, fore and aft */
+      for (const [u, nm] of [[cbF, 'castle-cabin-fwd'], [cbT, 'castle-cabin-aft']]) {
+        const wOut = wAt(u) - 0.02, hW = dY(u) - deckAtU(u);
+        const ew = new THREE.Mesh(new THREE.BoxGeometry(0.05, hW - 0.04, wOut - zIn), wood);
+        ew.name = nm;
+        ew.position.set(xAt(u), deckAtU(u) + hW / 2 - 0.02, sg * (zIn + (wOut - zIn) / 2));
+        cg.add(ew);
+      }
+      const door = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.35, 0.04),
+        new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 0.95 }));
+      door.name = 'castle-door';
+      door.position.set(xAt(cbF + 0.012), deckAtU(cbF + 0.012) + 0.7, sg * (zIn - 0.005));
+      cg.add(door);
+    }
+    group.add(tag(cg, 'castle'));
   }
 
   /* ── THE COMPOSITE GRAPNEL, FROM THE RECORD:

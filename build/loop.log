@@ -12846,3 +12846,344 @@ Round 203 is complete and live, 26 minutes inside the kill window. Tree clean, b
 ───────────────────────────────────────────────────────────────────────────
 2026-09-02 07:45:49  round starting
   starting the :8149 server
+The round is closed. Summary:
+
+**Round 204 shipped — stamp 1788361098 live, both commits pushed (702013e, 30bdb4f), tree clean.**
+
+The residual head — fetching the 128 MB 거북선 학술 복원 보고서 문헌편 — turned out to be blocked by the server twice over, and the round's product is those blockers measured and a machine left running against them:
+
+- **The route is confirmed right.** Fresh infoData re-verified all three files (the data API moved under `/resources/`); only the bare `/board/fileDown/...` path serves the file — the two prefixed variants answer HTTP 200 with the 25 KB SPA shell, so a 200 alone proves nothing. The plain GET answered `Content-Length: 127831863`, byte-exact against the board's record, body `%PDF-1.6`.
+- **Blocker one: daytime throughput of 11–37 KB/s.** At best that is ~58 minutes for the file, beside a close gate measured at ~46 minutes off r203 — they don't fit an 80-minute round.
+- **Blocker two: the server closes connections at ~11 minutes.** My first detached curl survived the round machinery as designed but the server cut it at 645.9 s with 16.2 MB served. Range GETs hang, so there is no resume — the whole file must land in one fast connection, and the only whole-file fetches on record ran in the early-morning window.
+- **The hand-forward:** a double-forked retry daemon (`retry-munheon.sh`, PID 78416, own session — verified alive after my push) attempts the whole plain GET hourly with a fresh session cookie, overwrites partials, and stops on byte-exact completion. The next round's first instruction is to read its log. Both volumes' filenames are gitignored in advance (>100 MB class).
+
+Residual 4 (the dhow's grapnel shank) was attempted a third round: Wayback CDX 429'd instantly, archive.ph 429'd, the Memento aggregator was dead outright — and r202's supposed PSAS PDF re-read as 10 KB of login-wall HTML, so that path was never open. It stands, with all walls named.
+
+Gates: audit 33/0; opening 64 attributed under residual 23's own stated condition (r203's close exited 0 on this exact HEAD, only loop.log moved — verified at round start); close 64 run in full — **all within tolerance, zero accepts**, worst mover globe-default at 0.046 %, its documented capture flap. Rule 0 answered on globe-default read by eye: the frame is a rendered world — the Mid-Atlantic Ridge legible as a raised spine in the bathymetry, the 1590 era card carrying the sourced Middle Passage figures beside "no aggregate record survives," carracks as models on the routes.
+2026-09-02 08:41:11  round finished; HEAD is 30bdb4f r204 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 74004 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 08:51:11  round starting
+  starting the :8149 server
+You're out of usage credits. Run /usage-credits to keep using Fable 5 or /model to switch models.
+  round exited non-zero — the next firing picks up from HANDOFF.md
+2026-09-02 09:40:37  round finished; HEAD is 30bdb4f r204 push log — the receipt read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 79876 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 09:50:37  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 10:00:42  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 10:10:49  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 10:20:55  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 10:31:01  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 10:41:06  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 10:51:14  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 11:01:19  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 11:11:24  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 11:21:31  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 11:31:38  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 11:41:45  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 11:51:51  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 12:01:58  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 12:12:05  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 12:22:11  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 12:32:18  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 12:42:25  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 12:52:32  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 13:02:39  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 13:12:45  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 13:22:52  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 13:32:58  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 13:43:06  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 13:53:11  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 14:03:18  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 14:13:23  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 14:23:29  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 14:33:36  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 14:43:42  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 14:53:49  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 15:03:56  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 15:14:04  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 15:24:11  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 15:34:18  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 15:44:25  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 15:54:31  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 16:04:38  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 16:14:45  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 16:24:51  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 16:34:58  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 16:45:05  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 16:55:12  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 17:05:17  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 17:15:25  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 17:25:32  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 17:35:37  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 17:45:44  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 17:55:51  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 18:05:58  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 18:16:04  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 18:26:11  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 18:36:18  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 18:46:25  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 18:56:32  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 19:06:39  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 19:16:46  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 19:26:53  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 19:37:00  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 19:47:07  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 19:57:14  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 20:07:21  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 20:17:26  round starting
+  starting the :8149 server
+  NOT AUTHENTICATED — run 'claude' once in a terminal and sign in, then this loop starts
+  by itself at the next firing. Nothing else is needed.
+───────────────────────────────────────────────────────────────────────────
+2026-09-02 20:27:32  round starting
+  starting the :8149 server
