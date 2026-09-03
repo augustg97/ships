@@ -276,6 +276,26 @@ def stamp_and_copy():
             mb += len(raw.encode()); ma += len(out.encode())
     log(f"   minified docs/ {mb/1e6:.2f} MB -> {ma/1e6:.2f} MB "
         f"({100*(mb-ma)/max(1,mb):.0f}% of script and style bytes)")
+    # ── COMPACT THE PUBLISHED DATA ────────────────────────────────────────────────────
+    # r208: the first-paint budget refused at 8.60 against 8.6 with one card row added, and
+    # the fat was indentation — web/data/*.json is written pretty-printed so diffs read, and
+    # was copied to docs/ as-is. The app only ever JSON.parses it. Same rule as the scripts:
+    # web/ keeps the readable form, docs/ ships the compact one. json.load → json.dump is a
+    # parse and a re-serialise, so the published value is the source value exactly; the
+    # keys, the order and every string are untouched, and ensure_ascii=False keeps the
+    # Korean and the diacritics as UTF-8 rather than six-byte escapes.
+    jb = ja = 0
+    for root, _, fs in os.walk(os.path.join(DOCS, "data")):
+        for f in fs:
+            if not f.endswith(".json"):
+                continue
+            fp = os.path.join(root, f)
+            raw = open(fp, encoding="utf-8").read()
+            out = json.dumps(json.loads(raw), separators=(",", ":"), ensure_ascii=False)
+            open(fp, "w", encoding="utf-8").write(out)
+            jb += len(raw.encode()); ja += len(out.encode())
+    log(f"   compacted docs/data {jb/1e6:.2f} MB -> {ja/1e6:.2f} MB "
+        f"({100*(jb-ja)/max(1,jb):.0f}% of data bytes)")
     n = sum(len(fs) for _, _, fs in os.walk(DOCS))
     log(f"   docs/ written, {n} files")
     return stamp

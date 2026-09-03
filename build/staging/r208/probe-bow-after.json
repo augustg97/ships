@@ -1,0 +1,49 @@
+{
+ "panokseon": {
+  "loa": 32,
+  "beam": 7.6,
+  "rows": [
+   {
+    "u": 0.04,
+    "zmax": 1.832,
+    "ytop": 2.807
+   },
+   {
+    "u": 0.06,
+    "zmax": 2.018,
+    "ytop": 2.721
+   },
+   {
+    "u": 0.08,
+    "zmax": 2.173,
+    "ytop": 2.65
+   },
+   {
+    "u": 0.1,
+    "zmax": 2.34,
+    "ytop": 2.575
+   },
+   {
+    "u": 0.12,
+    "zmax": 2.496,
+    "ytop": 2.515
+   },
+   {
+    "u": 0.14,
+    "zmax": 2.643,
+    "ytop": 2.45
+   },
+   {
+    "u": 0.16,
+    "zmax": 2.78,
+    "ytop": 2.392
+   }
+  ],
+  "deckKeys": [
+   "gunDecks",
+   "gunDeck",
+   "windlass",
+   "windlassProvenance"
+  ]
+ }
+}
