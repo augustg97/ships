@@ -15394,6 +15394,10 @@ no abort this round at timeout_ms 150000 under a load
 of 25–56, so the harness tolerance held once; keep the r208 rule (read uptime, no browser
 work while a run is up) and leave the in-app readiness log as the next step if it aborts again.
 
-**Build PUBLISHED, data-version 1788459189, first paint 8.53 MB of 8.6. Live stamp: read in
-the push-log commit that follows, per the r198 rule (the receipt and the live stamp read
-the same round).**
+**Build PUBLISHED, data-version 1788459189, first paint 8.53 MB of 8.6. Live stamp VERIFIED:
+1788459189 on https://augustg97.github.io/ships/index.html at 11:19:32 PDT, 5 min 27 s after
+the push at 11:14:05 (build/staging/r209/push.log). The poll loop's grep read nothing for
+thirty polls because it looked for data-version="…" and the page carries the value in the
+meta's content= attribute — the pattern was wrong, the page was right; the next round's poll
+should grep 'name="data-version" content="'. Tree at close: git status shows only the r205
+daemon's cookie file, deliberately left uncommitted.**

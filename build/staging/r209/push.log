@@ -1,0 +1,2 @@
+2026-09-03 11:14:05 PDT  git push origin main → fb770d6..038b760  main -> main  (receipt read the same round)
+2026-09-03 11:19:32 PDT  live https://augustg97.github.io/ships/index.html data-version 1788459189 — matches docs/index.html (meta name="data-version" content="1788459189"; css and shaders.js ?v= the same); the 30-poll loop read nothing because its grep looked for data-version="…" and the meta carries the value in content=; re-read by hand 5 min 27 s after the push
