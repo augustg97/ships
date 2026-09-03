@@ -15489,3 +15489,9 @@ it aborts again.
 **Build PUBLISHED, data-version 1788463330, first paint 8.53 MB of 8.6, docs/ 155 files;
 web/index.html carries the same stamp and is in this commit's path list (the r209 rule). Push
 receipt and live stamp: appended below after the push, per the r198 rule.**
+
+**Live stamp VERIFIED: 1788463330 on https://augustg97.github.io/ships/index.html at 12:25:13
+PDT, 90 s after the push at 12:23:42 (build/staging/r210/push.log; re-read by hand at the
+push-log commit). The poll used the corrected pattern, name="data-version" content=, and read
+the stamp on its third poll — the r209 note stands paid. Tree at close: git status shows only
+the r205 daemon's cookie file, deliberately left uncommitted.**
