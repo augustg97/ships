@@ -13524,3 +13524,19 @@ Left uncommitted on purpose: the r205 daemon's cookie file.
 ───────────────────────────────────────────────────────────────────────────
 2026-09-03 10:23:42  round starting
   starting the :8149 server
+Round 209 is closed and live. Recap:
+
+**What this round did.** The head task from r208 was the 본문편's panokseon-relevant plates, and all of it was read: the hull-form section on pages 110 to 112, the 이순신 종가 귀선도 on pages 41 to 42, and the 2004 New York painting on pages 44 to 45. The page 128 foot line was already confirmed last round, so nothing more was needed there.
+
+**What the plates say.** The institute builds its 통제영 turtle ship on the panokseon line's flat-bottom construction, and its body plan draws the 상장 33척 wide over an upper hull 27척 wide at the waist, 3척 a side. Its 일러두기 states that the design is a reference model and the drawings are inferred, not measured. The two paintings are ranked by the report as later iconography, one about 1800 in the 도설's manner, the other with a 19th-century inscription, 19th-century firearms and overpainting. Neither changes a number on the card.
+
+**The edit.** The panokseon's Beam row gains two sentences carrying the institute's 3척 as a class witness for the derived hull breadth, with the reference-model bound stated. The provenance field and the cite name the 본문편, which shares series number 91 with the 문헌편. No geometry changed, and the row was witnessed rendered whole on screen.
+
+**Gates.** Audit 33 hulls, 0 problems. The ratchet ran whole in one attempt under a load of 25 to 56, all 64 frames within tolerance, zero movers. Build published and the live stamp verified at 11:19 PDT. Three commits pushed: the round, the push log, and the web index stamp the round commit's path list had missed.
+
+**Next round.** Close the 문헌편 with the 태종실록 and 당포파왜병장 reads, scan the 본문편's 전라좌수영 dimension table, then the vessel survey carries the task again, starting with the boxy classes. The next poll loop should grep the meta tag's content attribute, since this round's loop looked for the wrong form and read nothing for thirty polls.
+2026-09-03 11:20:27  round finished; HEAD is c784ea9 r209: web/index.html stamp 1788459189 — the build stamps web/ as well as docs/, and the round commit's path list missed it
+/Users/augustgweon/Ships/build/loop-round.sh: line 85: 16796 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-03 11:30:27  round starting
+  starting the :8149 server
