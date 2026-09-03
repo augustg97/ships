@@ -15596,3 +15596,10 @@ abort this round at timeout 150 s under load 6–21; keep the r208 rule.
 
 **Build PUBLISHED, data-version 1788467565, docs/ 10 entries; web/index.html
 carries 1788467565. Push receipt and live stamp: appended below after the push, per the r198 rule.**
+
+**Live stamp VERIFIED: 1788467565 on https://augustg97.github.io/ships/index.html at 13:34:41
+PDT, 90 s after the push at 13:33:10 (build/staging/r211/push.log; the poll read the meta's
+content= attribute, the r209 pattern). The published copies strip comments — docs/js/hull.js
+and docs/audit-hulls.js carry the 1710 gate, the ExtrudeGeometry tops and both rule strings,
+grepped after the push; the live hull.js read back the gate too. Tree at close: git status
+shows only the r205 daemon's cookie file, deliberately left uncommitted.**
