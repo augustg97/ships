@@ -13508,3 +13508,19 @@ You've hit your monthly spend limit. Run /usage-credits to manage your limit and
 ───────────────────────────────────────────────────────────────────────────
 2026-09-03 09:18:33  round starting
   starting the :8149 server
+Round 208 is closed and live.
+
+**What landed.** The panokseon edit the previous firing staged is now committed and deployed: the 1882 통제영계록 survey row on the card, the Beam row re-attributed to the fighting deck's 상장요광, and the hull redrawn to match it. The hull shell went from 9.4 m to 7.6 m beam, the deck overhang from 0.5 m to 0.9 m a side, and the windlass barrel from 3.8 m to 2.7 m on its own geometric warrant. Measured half-breadths before and after are in the staging folder. The stat block now prints 7.60 m, and the oars still reach the water from the hull's own rail.
+
+**How the close went.** The first two ratchet attempts died on the readiness transient with the machine at a load average near twelve. I raised the manifest's readiness timeout from 60 s to 150 s, a harness tolerance that changes nothing about what is captured, and the third attempt ran all 64 frames. Three frames moved and all three are accepted with written reasons: the panokseon herself, and the galleass and sekibune, where 95 to 98 percent of the moved pixels are the panokseon standing at the frame edge as the next ship in the row.
+
+**The build refused once.** First paint hit exactly the 8.6 MB budget. The published JSON was being served pretty-printed, so the build script now compacts the data files in docs only, with every file re-parsed equal to its source. First paint is 8.53 MB. Audit 33 of 33. Live stamp 1788455398 verified on the site.
+
+**The 본문편 arrived overnight**, byte-exact at 785 MB, 404 image-only pages. Its 표 6 and body plan put the institute's own 통제영 turtle ship at a 33척 deck over a 27척 upper hull, a 3척 overhang a side, which is the structure this round drew before I read the page. Its design drawings fix 1척 = 31.22 cm, confirmed at 300 dpi. Both are written into the handoff as the next round's head task, along with the report's two 귀선도 plates.
+
+Left uncommitted on purpose: the r205 daemon's cookie file.
+2026-09-03 10:13:42  round finished; HEAD is fb770d6 r208 push log — the receipt and the live stamp read the same round, per the r198 rule
+/Users/augustgweon/Ships/build/loop-round.sh: line 85:  1721 Terminated: 15          ( sleep 4800; kill -0 "$ROUND" 2> /dev/null && { echo "  round overran 80 min — killing its process group"; kill -- -"$ROUND" 2> /dev/null; sleep 2; pkill -f "frame_baseline.py check" 2> /dev/null; } )
+───────────────────────────────────────────────────────────────────────────
+2026-09-03 10:23:42  round starting
+  starting the :8149 server
