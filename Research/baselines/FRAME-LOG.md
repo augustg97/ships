@@ -1261,3 +1261,8 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-09-03 13:29** · `shipwright-furled` — r211: the top's plan form is dated (Lees) — the default hull's three tops with sails furled; diff read — the three tops and the rigging passing them, 0.293%/0.128
 - **2026-09-03 13:29** · `shipwright-hounds` — r211: the top's plan form is dated (Lees) — the 74's main lower masthead close: the square-backed top, straight edge aft toward the camera, semicircle forward, lubber's hole open round the masthead; diff read — the three tops only, 0.326%/0.187
 - **2026-09-03 13:29** · `ship-slave-ship` — r211: the top's plan form is dated (Lees) — three walled round tops at 1590; diff read — the three tops and nothing else, 0.126%/0.063
+- **2026-09-03 16:12** · `shipwright-astern` — r213 built timber rudder: the 74's stern fittings from astern and the berth neighbours' rudder heads at both frame edges; also a ~45 px text strip in the bottom-centre panel, NOT explained by the rudder — carried as a residual to stash-test next round
+- **2026-09-03 16:12** · `ship-galley` — r213 built timber rudder: the galley's own stern and three neighbours' sterns; plus a small text block top-left in the card and a dot in the fleet list, not explained — residual to stash-test
+- **2026-09-03 16:12** · `ship-clipper` — r213 built timber rudder: the clipper's stern and a neighbour's; the three mastheads are r211's tops at their documented sub-tolerance flap
+- **2026-09-03 16:12** · `shipwright-furled` — r213 built timber rudder: the two berth neighbours' sterns at the bottom corners, nothing else
+- **2026-09-03 16:12** · `ship-slave-ship` — r213 built timber rudder: the slave ship's stern and a neighbour's, nothing else
