@@ -3705,11 +3705,7 @@ const PARTS = {
                   + 'from drumhead to deck, flaring like buttresses to enlarge the sweep, with '
                   + 'chocks wedged between and two iron pawls on deck to stop the recoil '
                   + '(Falconer 1769). The bars ship through square holes at breast height — '
-                  + 'the whole machine is sized to the men who walk it round. The medieval '
-                  + 'form is the other way up: the Bremen cog\'s own Gangspill, recovered with '
-                  + 'the wreck (DSM, oak, 56 cm by 176 cm), is a single spindle whose rope ran '
-                  + 'round a cone at the foot while the handspikes shipped through rectangular '
-                  + 'holes in the head above it; it stood on the aftcastle deck. Hulls whose '
+                  + 'the whole machine is sized to the men who walk it round. Hulls whose '
                   + 'traditions used other gear carry no capstan.' },
   windlass: { stage: 3, name: 'Windlass',
               what: 'A horizontal winch: an eight-square barrel turned by handspikes '
@@ -4153,61 +4149,6 @@ function buildFittings(S, group, mats) {
     group.add(gratingAt(u, w, L * 0.055));
   });
 
-  /* ── THE MEDIEVAL SPILL, FROM THE RECORD (r212):
-     `capstan: {form: 'spill', diaM, heightM, atU?, onCastle?, bars?}`
-     The Bremen cog's own Gangspill came up WITH the wreck in the 1960s and stands in the
-     DSM (Inv. I/11066/14; museum-digital:bremen object 3): one oak spindle, D 56 cm,
-     H 176 cm. The museum's description fixes the form — the rope ran round the LOWER
-     wooden cone ("Das Windentau lief um den unteren Holzkegel") and the handspikes shipped
-     into RECTANGULAR HOLES through the body above it. That is the Georgian machine the
-     other way up: the drum is a cone at the foot, the bars pass through the head, and
-     there are no whelps, no drumhead disc and no pawls to draw. The DSM plate
-     (build/staging/r212/gangspill-dsm.jpg — an oblique museum photograph, no scale) gives
-     the proportions as READS off the record's two numbers: the head a squared eight-sided
-     block a little over half the height, wider than the cone's top so it stands on a
-     shoulder; the cone tapering from the record's 56 cm at the foot to about 40 cm under
-     the shoulder. Ellmers puts the machine "on the top" of the aftcastle, so it stands on
-     the castle deck at the castle's own station, its foot in a step let into the planking.
-     The number of holes is not in the record: two handspikes are drawn shipped THROUGH the
-     head at right angles, one above the other, lying horizontal because a horizontal hole
-     lets them lie no other way — a class default, named. Sized to the men who work it: the
-     bars come at chest height off the record's own 1.76 m. */
-  if (S.capstan && S.capstan.form === 'spill') {
-    const R = S.capstan;
-    const onCastle = !!(R.onCastle && S.castle && S.castle.fromU != null);
-    const u = R.atU != null ? R.atU
-            : onCastle ? (S.castle.fromU + S.castle.toU) / 2 : 0.62;
-    const deckY = onCastle ? deckAtU(u) + (S.castle.deckHM || 1.95) : deckAtU(u);
-    const Db = R.diaM || 0.56, Ht = R.heightM || 1.76;
-    const coneH = 0.46 * Ht, headH = Ht - coneH;
-    const rFoot = Db / 2, rNeck = 0.36 * Db, rHead = 0.48 * Db;
-    const cg = new THREE.Group();
-    /* the step: a squared oak chock on the planking, the foot's bearing */
-    const step = new THREE.Mesh(new THREE.BoxGeometry(Db * 1.5, 0.10, Db * 1.5), wood);
-    step.name = 'spill-step'; step.position.y = deckY + 0.05; cg.add(step);
-    /* the cone the rope runs round — wide at the foot, the museum's "unterer Holzkegel" */
-    const cone = new THREE.Mesh(new THREE.CylinderGeometry(rNeck, rFoot, coneH, 16), wood);
-    cone.name = 'spill-cone'; cone.position.y = deckY + coneH / 2; cg.add(cone);
-    /* the head: eight flats, non-indexed so each flat is its own face, standing proud of
-       the neck on a shoulder */
-    const hGeo = new THREE.CylinderGeometry(rHead, rHead, headH, 8).toNonIndexed();
-    hGeo.computeVertexNormals();
-    const head = new THREE.Mesh(hGeo, wood);
-    head.name = 'spill-head'; head.position.y = deckY + coneH + headH / 2;
-    cg.add(head);
-    /* the handspikes, through the head — shipped, crossed, at rest */
-    const nB = R.bars || 2, spL = 2.0;
-    for (let i = 0; i < nB; i++) {
-      const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, spL, 8), pale);
-      sp.name = 'spill-bar';
-      sp.rotation.z = Math.PI / 2; sp.rotation.y = (i / nB) * Math.PI;
-      sp.position.y = deckY + coneH + headH * (0.42 + 0.26 * (i / Math.max(1, nB - 1)));
-      cg.add(sp);
-    }
-    cg.position.x = (u - 0.5) * L + (onCastle ? H.rake(u) : 0);
-    group.add(tag(cg, 'capstan'));
-  }
-
   /* ── THE CAPSTAN, FROM THE RECORD: `capstan: {whelps, bars, drumDiaM?, paint?}` ─────
      Falconer 1769, CAPSTERN: the whelps "rise out from the main body … like buttresses,
      to enlarge the sweep" and "reach downwards from the lower part of the drum-head to
@@ -4221,7 +4162,7 @@ function buildFittings(S, group, mats) {
      trireme, a Song junk and the Bremen-class cog, with parallel-box whelps floating
      clear of deck and drumhead both, no pawls, and bars at 1.9–2.0 m over the big
      hulls' decks. The record draws it now; silence draws nothing (rule 10). */
-  if (S.capstan && S.capstan.form !== 'spill') {
+  if (S.capstan) {
     const u = 0.62, y = deckAtU(u);
     const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
     const D = S.capstan.drumDiaM || clampN(B * 0.11, 0.95, 1.55);

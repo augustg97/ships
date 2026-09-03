@@ -2336,7 +2336,102 @@ say(v.id, 'a machine the record does not carry',
 + 'tradition attests other gear, and silence draws nothing');
 if (H.capstan && !capm.length)
 say(v.id, 'declared but not drawn', 'capstan');
-if (H.capstan && capm.length) {
+if (H.capstan && capm.length && H.capstan.form === 'spill') {
+const vr = o => {
+const a = o.geometry.attributes.position; let y0 = 1e9, y1 = -1e9;
+for (let i = 0; i < a.count; i++) { const yy = a.getY(i); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy); }
+return [y0, y1];
+};
+const cgrp = capm[0].parent;
+const isBar = o => Math.abs(o.rotation.z) > 0.1 || Math.abs(o.rotation.x) > 0.1;
+const verts = capm.filter(o => !isBar(o)), bars = capm.filter(isBar);
+const prof = o => {
+const a = o.geometry.attributes.position;
+const [y0, y1] = vr(o); let rB = 0, rT = 0, rMax = 0, rMin = 1e9;
+for (let i = 0; i < a.count; i++) {
+const r = Math.hypot(a.getX(i), a.getZ(i)), yy = a.getY(i);
+rMax = Math.max(rMax, r); rMin = Math.min(rMin, r);
+if (yy < y0 + 0.02) rB = Math.max(rB, r);
+if (yy > y1 - 0.02) rT = Math.max(rT, r);
+}
+return { y0: o.position.y + y0, y1: o.position.y + y1, rB, rT, rMax, rMin,
+off: Math.hypot(o.position.x, o.position.z) };
+};
+const P = new Map(verts.map(o => [o, prof(o)]));
+let cone = null, foot = 1e9, lowest = 1e9;
+for (const o of verts) {
+const q = P.get(o); lowest = Math.min(lowest, q.y0);
+if (q.off < 0.05 && q.rMin < 0.05 && q.rB >= 1.08 * q.rT && q.y0 < foot) {
+foot = q.y0; cone = o;
+}
+}
+if (!cone || foot > lowest + 0.02)
+say(v.id, 'a spill with no cone to take the rope',
+cone ? `the cone's foot ${(foot - lowest).toFixed(2)} m above the lowest part`
+: 'no body on the axis widens toward the deck — the museum: the rope ran round the lower cone');
+else {
+const cq = P.get(cone), coneTop = cq.y1;
+let head = null, hq = null;
+for (const o of verts) {
+if (o === cone) continue;
+const q = P.get(o);
+if (q.off < 0.05 && (!hq || q.y1 > hq.y1)) { head = o; hq = q; }
+}
+const headBot = hq ? hq.y0 : 0, headTop = hq ? hq.y1 : 0, headR = hq ? hq.rMax : 0;
+if (!head || headBot > coneTop + 0.05 || headR <= cq.rT)
+say(v.id, 'a spill with no head for the handspikes',
+head ? `head radius ${headR.toFixed(2)} m against a neck of ${cq.rT.toFixed(2)}, `
++ `standing ${(headBot - coneTop).toFixed(2)} m over the cone`
+: 'nothing stands above the cone');
+else {
+if (!bars.length)
+say(v.id, 'a spill nobody shipped a handspike in', '0 bars drawn');
+for (const b of bars) {
+const off = Math.hypot(b.position.x, b.position.z);
+if (off > 0.5 * headR || b.position.y < headBot || b.position.y > headTop)
+say(v.id, 'a handspike that does not pass through the head',
+`bar ${off.toFixed(2)} m off the spindle's axis at ${b.position.y.toFixed(2)} m, `
++ `head ${headBot.toFixed(2)}–${headTop.toFixed(2)}`);
+}
+if (H.capstan.bars && bars.length !== H.capstan.bars)
+say(v.id, "the spill off the record's count",
+`${bars.length} bars shipped, record says ${H.capstan.bars}`);
+const footDia = 2 * cq.rB, Ht = headTop - foot;
+if (H.capstan.diaM && Math.abs(footDia - H.capstan.diaM) > 0.15 * H.capstan.diaM)
+say(v.id, "the spill off the record's diameter",
+`foot ${footDia.toFixed(2)} m, record says ${H.capstan.diaM}`);
+if (H.capstan.heightM && Math.abs(Ht - H.capstan.heightM) > 0.12 * H.capstan.heightM)
+say(v.id, "the spill off the record's height",
+`${Ht.toFixed(2)} m foot to head, record says ${H.capstan.heightM}`);
+if (H.capstan.onCastle && H.castle) {
+const sx = cgrp.position.x; let deckY = -1e9, seen = 0;
+g.traverse(o => {
+if (!o.isMesh || o.name !== 'castle-deck') return;
+const a = o.geometry.attributes.position;
+for (let i = 0; i < a.count; i++)
+if (Math.abs(a.getX(i) - sx) < 0.5) { deckY = Math.max(deckY, a.getY(i)); seen++; }
+});
+const footY = cgrp.position.y + foot;
+if (!seen)
+say(v.id, 'a spill on a castle that is not there',
+`no castle-deck vertex within 0.5 m of x ${sx.toFixed(2)}`);
+else if (footY < deckY - 0.15 || footY > deckY + 0.05)
+say(v.id, 'a spill standing off its deck',
+`foot ${footY.toFixed(2)} m, castle deck ${deckY.toFixed(2)} at its station`);
+}
+for (const b of bars) {
+const hb = b.position.y - foot;
+if (hb < 0.9 || hb > 1.6)
+say(v.id, 'a spill nobody could work',
+`handspike ${hb.toFixed(2)} m over the foot — a man pushes at chest height`);
+}
+if (Ht > 2.2 || Ht < 1.2)
+say(v.id, 'a spill nobody built',
+`${Ht.toFixed(2)} m tall — the recovered timber is 1.76`);
+}
+}
+}
+if (H.capstan && capm.length && H.capstan.form !== 'spill') {
 const vrange = o => {
 const a = o.geometry.attributes.position;
 let y0 = 1e9, y1 = -1e9;

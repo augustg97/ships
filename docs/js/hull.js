@@ -2277,7 +2277,11 @@ what: 'A vertical winch turned by bars, drawn from the record: whelp timbers run
 + 'from drumhead to deck, flaring like buttresses to enlarge the sweep, with '
 + 'chocks wedged between and two iron pawls on deck to stop the recoil '
 + '(Falconer 1769). The bars ship through square holes at breast height — '
-+ 'the whole machine is sized to the men who walk it round. Hulls whose '
++ 'the whole machine is sized to the men who walk it round. The medieval '
++ 'form is the other way up: the Bremen cog\'s own Gangspill, recovered with '
++ 'the wreck (DSM, oak, 56 cm by 176 cm), is a single spindle whose rope ran '
++ 'round a cone at the foot while the handspikes shipped through rectangular '
++ 'holes in the head above it; it stood on the aftcastle deck. Hulls whose '
 + 'traditions used other gear carry no capstan.' },
 windlass: { stage: 3, name: 'Windlass',
 what: 'A horizontal winch: an eight-square barrel turned by handspikes '
@@ -2621,7 +2625,37 @@ if (timberShip && laidDeck) [0.30, 0.50, 0.70].forEach(u => {
 const w = halfAtU(u) * 0.85;
 group.add(gratingAt(u, w, L * 0.055));
 });
-if (S.capstan) {
+if (S.capstan && S.capstan.form === 'spill') {
+const R = S.capstan;
+const onCastle = !!(R.onCastle && S.castle && S.castle.fromU != null);
+const u = R.atU != null ? R.atU
+: onCastle ? (S.castle.fromU + S.castle.toU) / 2 : 0.62;
+const deckY = onCastle ? deckAtU(u) + (S.castle.deckHM || 1.95) : deckAtU(u);
+const Db = R.diaM || 0.56, Ht = R.heightM || 1.76;
+const coneH = 0.46 * Ht, headH = Ht - coneH;
+const rFoot = Db / 2, rNeck = 0.36 * Db, rHead = 0.48 * Db;
+const cg = new THREE.Group();
+const step = new THREE.Mesh(new THREE.BoxGeometry(Db * 1.5, 0.10, Db * 1.5), wood);
+step.name = 'spill-step'; step.position.y = deckY + 0.05; cg.add(step);
+const cone = new THREE.Mesh(new THREE.CylinderGeometry(rNeck, rFoot, coneH, 16), wood);
+cone.name = 'spill-cone'; cone.position.y = deckY + coneH / 2; cg.add(cone);
+const hGeo = new THREE.CylinderGeometry(rHead, rHead, headH, 8).toNonIndexed();
+hGeo.computeVertexNormals();
+const head = new THREE.Mesh(hGeo, wood);
+head.name = 'spill-head'; head.position.y = deckY + coneH + headH / 2;
+cg.add(head);
+const nB = R.bars || 2, spL = 2.0;
+for (let i = 0; i < nB; i++) {
+const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, spL, 8), pale);
+sp.name = 'spill-bar';
+sp.rotation.z = Math.PI / 2; sp.rotation.y = (i / nB) * Math.PI;
+sp.position.y = deckY + coneH + headH * (0.42 + 0.26 * (i / Math.max(1, nB - 1)));
+cg.add(sp);
+}
+cg.position.x = (u - 0.5) * L + (onCastle ? H.rake(u) : 0);
+group.add(tag(cg, 'capstan'));
+}
+if (S.capstan && S.capstan.form !== 'spill') {
 const u = 0.62, y = deckAtU(u);
 const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
 const D = S.capstan.drumDiaM || clampN(B * 0.11, 0.95, 1.55);
