@@ -658,6 +658,44 @@ function buildRudderGeometry(S) {
    edge, the gudgeon's clamp plates on the post beside it, and, where the record gives the
    castle, the head and the tiller. Every number is either the record's (S.rudder, with its
    provenance on the card) or a named class default. */
+/* ── THE CASTLE'S GEOMETRY, SHARED (r214) ──────────────────────────────────────────────
+ * One answer for the castle's extent and its deck height, asked by the castle builder, the
+ * Gangspill that stands on it and the tiller that runs under it — three builders reading
+ * three copies of the same numbers is how the rudder came to sample the waterline (r213).
+ * null unless the record carries a PLAN. The castle deck is LEVEL (Lahn Blatt 9 draws it
+ * so), set at the record's headroom over the afterdeck at the helmsman's own station —
+ * Ellmers's man at the tiller is the one who has to stand under it. The after edge is the
+ * sternpost's after face at deck height (the r213 postPt extrapolation, the post's own
+ * line continued) plus the recorded overhang. */
+function castleGeom(S, H) {
+  const C = S.castle; if (!C || !C.plan) return null;
+  const P = C.plan, L = S.lwl;
+  const dH = C.deckHM || 1.95, rH = C.railHM || 1.0;
+  const uHelm = (S.rudder && S.rudder.tillerAtU) ||
+                (S.windlass && S.windlass.atU ? S.windlass.atU + 0.03 : null) ||
+                ((C.fromU || 0.7) + (C.toU || 0.95)) / 2;
+  const yDeck = H.sheer(Math.min(1, uHelm)) + dH;
+  /* the post's after face where it meets the top strake — the stern beams lie there. The
+     overhang is measured from THIS point, not from the post's line continued up to the
+     castle deck: that line is the post's own rake, and a castle deck standing high over the
+     sheer (this model's does, see castleProvenance) would carry the whole castle aft with
+     it — 1.4 m on the cog in the first draft, the windlass left in the open between the wings. */
+  const t = 0.05 * S.draught;
+  const b = surfacePoint(S, H, 1.0, 1.0);
+  const xPost = b[0] + t;
+  const xA = xPost + (C.overhangAftM != null ? C.overhangAftM : 0.7);
+  const xT = xA - P.aftLenM, xF = xT - P.sideLenM;
+  const wF = P.aftBreadthFwdM / 2, wA = P.aftBreadthAftM / 2;
+  const wC = x => x >= xT ? wF + (wA - wF) * (x - xT) / P.aftLenM : wF;
+  const wIn = wF - P.sideBreadthM;
+  const uAtX = x => {
+    let lo = 0.3, hi = 1.4;
+    for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if ((m - 0.5) * L + H.rake(m) < x) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  };
+  return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17 };
+}
+
 function buildTimberRudder(S, group, timber, tag) {
   const H = hullSurface(S);
   const add = (m, nm) => { m.name = nm; group.add(tag(m, 'rudder', nm)); };
@@ -691,7 +729,9 @@ function buildTimberRudder(S, group, timber, tag) {
      stops where the old plate stopped (the tiller of a decked ship works inside the hull —
      a residual named in r213, not drawn here) */
   const castle = S.castle && S.castle.fromU != null;
-  const yTiller = castle ? H.sheer(S.castle.toU) + (S.castle.deckHM || 1.95) - 0.55
+  const CGr = castle ? castleGeom(S, H) : null;
+  const yTiller = CGr ? CGr.yDeck - 0.55
+                : castle ? H.sheer(S.castle.toU) + (S.castle.deckHM || 1.95) - 0.55
                          : H.sheer(1.0) * 0.35;
   let fHead = 1.0;
   if (postPt(1.0)[1] < yTiller) {
@@ -3909,14 +3949,17 @@ const PARTS = {
                   + 'winding machines among the ship\'s wonders. Drawn only where the '
                   + 'record attests one.' },
   castle:   { stage: 4, name: 'Aftcastle',
-              what: 'The raised fighting and command deck over the stern — an open platform '
-                  + 'on posts, not a walled house. The Bremen cog\'s is preserved to its '
-                  + 'highest rail: a castle deck with a windlass in its middle and a capstan '
-                  + 'on its top, and beneath it the helmsman stood between the two long side '
-                  + 'cabins, behind the windlass, unable to see his own sail — which is why '
-                  + 'the skipper moved up to the castle deck and command separated from '
-                  + 'steering. Drawn only where the record attests one; this hull has no '
-                  + 'forecastle because the wreck has none.' },
+              what: 'The raised fighting and command deck over the stern. The Bremen cog\'s '
+                  + 'came up with the wreck and was rebuilt from its own timbers: an after part '
+                  + 'trapezoidal in plan, 4.75 m long and 7.2 m broad at its forward edge, with '
+                  + 'two narrow decked wings running forward along the sides and the main deck '
+                  + 'open between them. It is wider than the hull under it, so it stands on '
+                  + 'beams whose ends reach out past the planking, the after posts on two stern '
+                  + 'beams, and it is walled with vertical boards — the starboard wall\'s 17 '
+                  + 'boards were counted from their nail holes. Beneath the deck a windlass in '
+                  + 'its middle and the helmsman behind it between two long side cabins, unable '
+                  + 'to see his own sail; on top a capstan. Drawn only where the record attests '
+                  + 'one; this hull has no forecastle because the wreck has none.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
                   + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -4365,7 +4408,8 @@ function buildFittings(S, group, mats) {
     const onCastle = !!(R.onCastle && S.castle && S.castle.fromU != null);
     const u = R.atU != null ? R.atU
             : onCastle ? (S.castle.fromU + S.castle.toU) / 2 : 0.62;
-    const deckY = onCastle ? deckAtU(u) + (S.castle.deckHM || 1.95) : deckAtU(u);
+    const CGs = onCastle ? castleGeom(S, H) : null;
+    const deckY = CGs ? CGs.yDeck : onCastle ? deckAtU(u) + (S.castle.deckHM || 1.95) : deckAtU(u);
     const Db = R.diaM || 0.56, Ht = R.heightM || 1.76;
     const coneH = 0.46 * Ht, headH = Ht - coneH;
     const rFoot = Db / 2, rNeck = 0.36 * Db, rHead = 0.48 * Db;
@@ -4569,7 +4613,153 @@ function buildFittings(S, group, mats) {
     group.add(tag(wg, 'windlass'));
   }
 
-  /* ── THE MEDIEVAL AFTCASTLE, FROM THE RECORD:
+  /* ── THE MEDIEVAL AFTCASTLE, FROM THE RECORD'S PLAN (r214):
+     `castle: {plan: {aftLenM, aftBreadthFwdM, aftBreadthAftM, sideLenM, sideBreadthM},
+               overhangAftM?, wallBoards?, deckHM, railHM, fromU, toU}`
+     The Bremen cog's own castle as the wreck gave it up in 1978 (Lahn 1979; Westphal, DAS
+     LOGBUCH 27/1991, the Kiel replica's build): an after part TRAPEZOIDAL in plan — 4.75 m
+     long, 7.20 m broad at its forward edge and 6.50 at its after — and two SIDE PARTS forward
+     of it, each 3.45 m long and 1.65 m broad, decked wings along the hull's sides with the
+     main deck open between them. It OVERHANGS the hull aft and at both sides, so it cannot
+     be lofted off the skin the way a poop is: the castle deck is cross-planked over
+     fore-and-aft beams, those over athwartship beams on posts, and the after posts stand on
+     two stern beams (Heckbalken) whose ends reach out past the hull. The starboard side wall
+     came up with the wreck — three stringer-like timbers and a plank below, 17 vertical
+     boards above (from nail traces; three found). The after edge stands abaft the sternpost
+     by a read of Lahn's Blatt 9. Everything here is placed in x (metres), because half the
+     castle is over water where u has no skin to sample; the hull is asked only where the
+     posts must stand on it. Ellmers's arrangement stands (r205): the windlass in its middle
+     beneath the deck, the man at the tiller behind it between the long cabins. */
+  const CG = castleGeom(S, H);
+  if (CG) {
+    const { xA, xT, xF, yDeck, wC, wIn, wF, wA, rH, xPost, uAtX, plan: P } = CG;
+    const cg = new THREE.Group();
+    const afterdeckAtX = x => deckAtU(Math.min(1, uAtX(x)));
+    const hullHalfAtX = x => { const u = uAtX(x); return u >= 1 ? 0 : halfAtU(u); };
+    const box = (len, h, w, x, y, z, nm, rotY, mat) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(len, h, w), mat || wood);
+      m.position.set(x, y, z); if (rotY) m.rotation.y = rotY; m.name = nm; cg.add(m); return m;
+    };
+    /* the deck: CROSS-PLANKED (Westphal: 'wie das Hauptdeck ... querbeplankt'), each plank
+       its own strip with its own tone (the r205 lesson: a plank that is a mesh has edges) */
+    const base = new THREE.Color(deckCovering(S).col).multiplyScalar(0.88);
+    const plankW = 0.30; let pi = 0;
+    const strip = (x0, x1, zLo, zHi, tone) => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute([
+        x0, yDeck, zLo(x0), x1, yDeck, zLo(x1), x1, yDeck, zHi(x1), x0, yDeck, zHi(x0)], 3));
+      g.setIndex([0, 2, 1, 0, 3, 2]); g.computeVertexNormals();
+      const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
+        color: tone, roughness: 0.86, side: THREE.DoubleSide }));
+      m.name = 'castle-deck'; cg.add(m);
+    };
+    for (let x0 = xF; x0 < xA - 0.02; x0 += plankW, pi++) {
+      const x1 = Math.min(xA, x0 + plankW - 0.012);
+      const tone = base.clone().multiplyScalar(0.90 + 0.18 * ((pi * 7) % 5) / 4);
+      if (x0 >= xT - 1e-6) strip(x0, x1, x => -wC(x), x => wC(x), tone);
+      else { strip(x0, x1, () => wIn, () => wF, tone); strip(x0, x1, () => -wF, () => -wIn, tone); }
+    }
+    /* fore-and-aft beams (Längsbalken) under the planks; the outer pair follow the taper */
+    const yL = yDeck - 0.12, taper = Math.atan2(wF - wA, P.aftLenM);
+    for (const sg of [1, -1]) {
+      box(xA - xF, 0.20, 0.16, (xA + xF) / 2, yL, sg * (wIn + 0.10), 'castle-longitudinal');
+      box(xT - xF, 0.20, 0.16, (xT + xF) / 2, yL, sg * (wF - 0.14), 'castle-longitudinal');
+      box(P.aftLenM / Math.cos(taper), 0.20, 0.16, (xA + xT) / 2, yL,
+          sg * ((wF + wA) / 2 - 0.14), 'castle-longitudinal', sg * taper);
+    }
+    box(P.aftLenM, 0.20, 0.16, (xA + xT) / 2, yL, 0, 'castle-longitudinal');
+    /* athwartship beams (Querbalken) under those, on posts. The two after rows are the
+       Heckbalken rows: a stern beam at the afterdeck reaching the castle's full breadth,
+       short posts on its ends. Forward rows: posts stand on the afterdeck INSIDE the hull
+       (the hull asked for its own half-breadth) and the beam cantilevers past them. */
+    const yQ = yDeck - 0.44;
+    const rows = [xPost - 0.35, xPost - 2.6, xT, xF + P.sideLenM / 2, xF + 0.15];
+    rows.forEach((xr, i) => {
+      const w = wC(xr), yDk = afterdeckAtX(xr);
+      box(0.22, 0.22, 2 * w, xr, yQ + 0.11, 0, 'castle-beam');
+      if (i < 2) {
+        box(0.26, 0.26, 2 * w - 0.1, xr, yDk + 0.13, 0, 'castle-heckbalken');
+        const pH = Math.max(0.2, yQ - (yDk + 0.26));
+        for (const sg of [1, -1]) box(0.18, pH, 0.18, xr, yDk + 0.26 + pH / 2, sg * (w - 0.2), 'castle-post');
+      } else {
+        const zP = Math.min(w - 0.2, hullHalfAtX(xr) - 0.28), pH = Math.max(0.2, yQ - yDk);
+        for (const sg of [1, -1]) box(0.18, pH, 0.18, xr, yDk + pH / 2, sg * zP, 'castle-post');
+      }
+    });
+    /* the walls. Upper part: vertical boards, the record's count along the trapezoid's
+       side, the same pitch elsewhere; lower part: three stringers and a plank, 0.6 m deep,
+       under the deck edge. Wing walls stand lower (the Kiel replica, read off a photograph). */
+    const boardT = 0.045, nB = CG.nBoards;
+    const boardMat = k => { const m = wood.clone(); m.color = wood.color.clone().multiplyScalar(0.90 + 0.16 * ((k * 5) % 7) / 6); return m; };
+    const runAng = (x0, z0, x1, z1) => Math.atan2(-(z1 - z0), x1 - x0);
+    const boardRun = (x0, z0, x1, z1, n, yLo, yHi, nm) => {
+      const len = Math.hypot(x1 - x0, z1 - z0), ang = runAng(x0, z0, x1, z1), bw = len / n;
+      for (let k = 0; k < n; k++) {
+        const q = (k + 0.5) / n;
+        box(bw - 0.012, yHi - yLo, boardT, x0 + (x1 - x0) * q, (yLo + yHi) / 2, z0 + (z1 - z0) * q, nm, ang, boardMat(k));
+      }
+      box(len, 0.06, 0.10, (x0 + x1) / 2, yHi + 0.03, (z0 + z1) / 2, 'castle-rail', ang);
+    };
+    const lowerRun = (x0, z0, x1, z1) => {
+      const len = Math.hypot(x1 - x0, z1 - z0), ang = runAng(x0, z0, x1, z1);
+      for (let c = 0; c < 4; c++)
+        box(len, 0.14, 0.05, (x0 + x1) / 2, yDeck - 0.02 - 0.075 - c * 0.15, (z0 + z1) / 2, 'castle-wall-lower', ang);
+    };
+    const pitch = Math.hypot(P.aftLenM, wF - wA) / nB;
+    for (const sg of [1, -1]) {
+      boardRun(xT, sg * wF, xA, sg * wA, nB, yDeck, yDeck + rH, 'castle-wall');
+      lowerRun(xT, sg * wF, xA, sg * wA);
+      boardRun(xF, sg * wF, xT, sg * wF, Math.max(3, Math.round(P.sideLenM / pitch)), yDeck, yDeck + rH * 0.6, 'castle-wall-wing');
+      lowerRun(xF, sg * wF, xT, sg * wF);
+    }
+    boardRun(xA, -wA, xA, wA, Math.max(3, Math.round(2 * wA / pitch)), yDeck, yDeck + rH, 'castle-wall-aft');
+    /* the after end's lower wall parts at the centreline: the tiller comes in through it
+       (a port 0.7 m wide; the top course runs through above the tiller) */
+    for (const c of [0, 1, 2, 3]) {
+      if (c === 0) { box(0.05, 0.14, 2 * wA, xA, yDeck - 0.02 - 0.075, 0, 'castle-wall-lower'); continue; }
+      for (const sg of [1, -1])
+        box(0.05, 0.14, wA - 0.35, xA, yDeck - 0.02 - 0.075 - c * 0.15, sg * (0.35 + (wA - 0.35) / 2), 'castle-wall-lower');
+    }
+    /* open rails where no wall is recorded: the wings' inner edges and forward ends, and
+       the breastrail across the trapezoid's forward edge over the open main deck */
+    const railRun = (x0, z0, x1, z1, nm) => {
+      const len = Math.hypot(x1 - x0, z1 - z0), ang = runAng(x0, z0, x1, z1), n = Math.max(2, Math.round(len / 0.7));
+      for (let k = 0; k <= n; k++) { const q = k / n; box(0.07, rH, 0.07, x0 + (x1 - x0) * q, yDeck + rH / 2, z0 + (z1 - z0) * q, 'castle-stanchion'); }
+      for (const fr of [0.5, 1.0]) box(len, 0.08, 0.08, (x0 + x1) / 2, yDeck + rH * fr, (z0 + z1) / 2, nm, ang);
+    };
+    for (const sg of [1, -1]) {
+      railRun(xF + 0.04, sg * (wIn + 0.04), xT - 0.04, sg * (wIn + 0.04), 'castle-rail');
+      railRun(xF + 0.04, sg * (wIn + 0.04), xF + 0.04, sg * (wF - 0.06), 'castle-rail');
+    }
+    railRun(xT + 0.04, -wIn, xT + 0.04, wIn, 'castle-breastrail');
+    /* the long cabins at both sides, abaft the windlass's swing: inboard walls from the
+       afterdeck to the castle deck, closed at each end out to the hull side, a door forward */
+    const winU = S.windlass ? (S.windlass.atU || 0.5) : uAtX(xT);
+    const xWind = (winU - 0.5) * L + H.rake(winU);
+    const cbF = Math.max(xT + 0.2, xWind + (S.windlass ? (S.windlass.barrelDiaM || 0.6) / 2 : 0) + 0.35);
+    const cbT = Math.min(xPost - 0.5, xA - 0.6), zIn = 0.75;
+    if (cbT - cbF > 1.0) for (const sg of [1, -1]) {
+      const cp = [], ci = []; const NW = Math.max(3, Math.round((cbT - cbF) / 0.8));
+      for (let k = 0; k <= NW; k++) {
+        const x = cbF + (cbT - cbF) * k / NW;
+        cp.push(x, afterdeckAtX(x) - 0.02, sg * zIn, x, yDeck - 0.02, sg * zIn);
+      }
+      for (let k = 0; k < NW; k++) { const a = k * 2, b = a + 2; ci.push(a, b, a + 1, a + 1, b, b + 1); }
+      const cw = new THREE.BufferGeometry();
+      cw.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3));
+      cw.setIndex(ci); cw.computeVertexNormals();
+      const cm = new THREE.Mesh(cw, wood); cm.material = wood.clone();
+      cm.material.side = THREE.DoubleSide; cm.name = 'castle-cabin'; cg.add(cm);
+      for (const [x, nm] of [[cbF, 'castle-cabin-fwd'], [cbT, 'castle-cabin-aft']]) {
+        const wOut = Math.max(zIn + 0.3, hullHalfAtX(x) - 0.02), hW = yDeck - afterdeckAtX(x);
+        box(0.05, hW - 0.04, wOut - zIn, x, afterdeckAtX(x) + hW / 2 - 0.02, sg * (zIn + (wOut - zIn) / 2), nm);
+      }
+      box(0.65, 1.35, 0.04, cbF + 0.4, afterdeckAtX(cbF + 0.4) + 0.7, sg * (zIn - 0.005), 'castle-door', 0,
+          new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 0.95 }));
+    }
+    group.add(tag(cg, 'castle'));
+  } else
+  /* ── THE MEDIEVAL AFTCASTLE WITHOUT A PLAN (the r205 lofted platform, kept for a record that names only fromU/toU):
      `castle: {fromU, toU, deckHM, railHM}`
      The northern tradition's castle — the Bremen cog's own, preserved to its highest rail
      and standing whole on the reconstructed ship (Ellmers, Drassana, r173/r205): an OPEN

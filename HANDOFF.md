@@ -15835,3 +15835,102 @@ Preussen mast livery. (9) Endurance forecastle. (10) Azzam crest span. (11) r164
 unpierced. (12) r165 fantail gallery wings. (13) r166 screen glass. (14) r171 quarter-gallery
 sashes. (15) r171 authored tier fractions. (16) r172 the 74's lower capstan barrel. (17) the
 cathead's supporting knee is a block. (18) the readiness transient: keep the r208 rule.**
+
+## Round 214 — 2026-09-03 — the cog's castle takes its fetched plan: Westphal's trapezoid and wings, on stern beams, walled with the wreck's own board count
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r213's residual 1 was
+the head task — the cog's castle takes its fetched plan — and it is DONE, with residual 0
+(the two text-strip movers) answered first (build/staging/r214/JUDGMENT.md).**
+
+**Residual 0 answered.** `shipwright-astern` and `ship-galley` were re-captured at the clean
+r213 HEAD (b08a9a5; nothing was uncommitted, so nothing needed stashing) with the ratchet's
+own `--frame` switch: 0.000% / 0.000 against the r213 baselines, both
+(build/staging/r214/r0-check.out). The strips accepted in r213 do not reproduce. They were a
+one-off capture flap; the accepts stand, and FRAME-LOG.md carries the finding.
+
+**The record.** Westphal (DAS LOGBUCH 27/1991 H.4 p.128, fetched r213, citing Lahn, Das
+Achterkastell der Hansekogge, 1979) gives the castle's plan in numbers: an after part
+trapezoidal in plan, 4.75 m long, 7.20 m broad at its forward edge and 6.50 m at its after
+edge, plus two side parts each 3.45 m long and 1.65 m broad; the deck cross-planked over
+fore-and-aft beams, those on athwartship beams on posts; the castle overhangs the main deck
+aft and at both sides, so the after posts stand on two stern beams (Heckbalken); the
+starboard side wall's lower part three stringer-like timbers and a plank, its upper part 17
+vertical boards counted from nail traces. Lahn's Blatt 9 elevation at 60 px/m (r213) reads
+the castle deck as level, 8.3 m long (Westphal's 8.2), its after edge about 0.5 m abaft the
+sternpost at deck height. The Roland von Bremen replica photographed from the quarter
+(r213/roland-ubena.jpg) shows the form whole: a walled box of vertical boards on beam ends
+overhanging stern and sides, two narrow decked wings forward along the sides, the main deck
+open between them. The DSM booklet: the ship is 7.02 m high to the winch on the castle deck;
+Lahn's elevation puts the castle deck about 5.4 m over the keel.**
+
+**The change (web/js/hull.js; before-copy r214/hull.before.js).** A shared `castleGeom(S, H)`
+answers the castle's extent and its level deck height for three builders at once — the
+castle, the Gangspill that stands on it and the tiller that runs under it. The castle is
+built IN METRES from the plan: cross-planked deck (each plank its own strip), five
+fore-and-aft beams, five athwartship beams on posts, the two after rows on Heckbalken laid
+at the afterdeck reaching the castle's full breadth with short posts on their ends, the
+forward rows on posts standing inside the hull with the beams cantilevered past them; 17
+vertical boards a side along the after part and a cap rail, the after end boarded, the
+wings' outer walls at 0.6 of the height, a four-course lower wall under every walled edge
+with a 0.7 m port at the centreline aft for the tiller; open rails on the wings' inner
+edges and forward ends and the breastrail over the open deck; the two long cabins under the
+after part. The after edge is anchored on the sternpost's after face AT THE TOP STRAKE plus
+the recorded overhang (0.7 m). A castle record without a plan keeps the r205 lofted
+platform. Record (web/data/vessels.json): `castle.plan` (five numbers), `overhangAftM 0.7`,
+`wallBoards 17`, `toU 1.03` (derived; `fromU 0.70` stands), `windlass.atU 0.875` and
+`capstan.atU 0.875` (Ellmers's 'in its middle' applied to the recorded run instead of a
+guessed one), `rudder.tillerAtU 0.90` (behind the windlass), `transom 0` with a
+sternProvenance (the Bremen cog is sharp-sterned on a straight raked post; the 0.3 drew a
+flat face above water no plate supports). castleProvenance rewritten naming every number's
+kind; the windlass, capstan and rudder provenances amended for the moved stations; the
+PARTS.castle card rewritten round the plan.**
+
+**Measured (measure_ship, r214/measure after the fixes): castle-deck x 4.18–12.38, 8.20 m,
+level at 4.28 m; castle-wall 4.74 m a side, 4.28–5.28; castle-heckbalken at x 8.96 and
+11.33, y 2.35–2.84 (the afterdeck); castle-post feet from 2.06; Sternpost u 0.895–1.070;
+rudder-tiller x 8.86–12.9 at 3.67–3.80, clear of the beams above by 0.04 m; model extent
++1.58 m over the record LOA (the rudder head and the overhang, both drawn by Lahn). Two
+drafts were caught by measurement before this one: the overhang anchored on the post's
+line continued up to the over-high castle deck (castle 1.4 m too far aft, the windlass in
+the open), and a rotated after-wall box 11.45 m long through the stern.**
+
+**The audit rule (Research/audit-hulls.js, THE CASTLE STANDS ON ITS PLAN, synced to web/ and
+docs/), record-gated on `castle.plan`, every part read from vertices in hull space:
+C-EXTENT (deck length = plan ±0.15), C-OVERHANG (after edge vs the Sternpost's own top
+vertices, ±0.25), C-PLAN (breadth at the after part's two ends ±0.2; the wings' inner
+clearance ±0.15), C-BEAMS (two Heckbalken, ≥ 1.0 m under the deck, reaching the castle's
+side), C-WALL (the record's board count a side; each board ≥ 0.6 m; ≥ 8 lower-wall
+courses), and record-blind: C-STATURE (wall 0.8–1.4 m over the deck), C-REACH (after edge ≤
+1.5 m abaft the post's head), C-TILLER-PORT (no castle box crosses the tiller's box — the
+first draft's after wall did). Clean tree 33/0 (r214/audit.out).**
+
+**Proven to fire (r214/inject-a.js, inject-b.js).** inject-a severs the builder — stern beams
+stripped, castle shoved 1.5 m aft, every other wall board removed: the cog alone, "a castle
+with no stern beams", "a castle off the record's overhang", "a castle hanging past its
+stern", "the castle wall off the record's board count (9 / 8, record 17)"; no other hull.
+inject-b drags the record (railHM 0.3, overhangAftM 3.0) under the faithful builder: the cog
+alone on the record-blind arms — "a castle wall nobody could stand behind (0.30 m)", "a
+castle board that is not a board", "a castle hanging past its stern" — the record-gated arms
+silent as they must be.**
+
+**Witnessed (rule 1): r214/castle-astern2.png — the walled after part standing wider than the
+stern under it, on its Heckbalken with the short posts, the lower courses, the rudder head
+rising to the tiller that enters through the port; r214/castle-pq2.png — the boarded side
+with its cap rail, the lower wing wall and rail forward, the Gangspill head above, the
+windlass barrel end under the castle's forward edge; r214/castle-sq-high.png (first draft,
+same wing) — the wing overhanging the hull side on its posts. Rule 0 answered on
+castle-astern2.png read whole: it reads as a rendered world — clinker planking closing on a
+raked post over a pale underbody, the castle's board shadows, open water to a low headland.
+Three facts a viewer can read off it without a legend: the castle is wider than the hull and
+stands out past the stern on beams; the rudder hangs on the post and its tiller goes in
+under the castle; the hull is double-ended, not square-sterned.**
+
+**The close ratchet, started 16:48:11 (build/staging/r214/run-ratchet.sh →
+close-ratchet.out), ~40 s a frame, ends about 17:31 against the driver's 80-minute kill at
+17:44:40. This paragraph is written at 17:00 with the run at frame 14 of 64 so that the tree
+is committed whatever the kill does. Predictions are in r214/PREDICTIONS-close.md (no mover
+beyond tolerance: the cog has no frame of her own and is a berth neighbour only). CLOSE
+STATE: if the paragraphs below this one are missing, the round was killed at the close gate
+— the next firing must (1) re-run the ratchet whole on this committed tree, read and accept
+every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the
+live stamp, the r198 rule.**

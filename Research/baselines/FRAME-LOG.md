@@ -1266,3 +1266,4 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-09-03 16:12** · `ship-clipper` — r213 built timber rudder: the clipper's stern and a neighbour's; the three mastheads are r211's tops at their documented sub-tolerance flap
 - **2026-09-03 16:12** · `shipwright-furled` — r213 built timber rudder: the two berth neighbours' sterns at the bottom corners, nothing else
 - **2026-09-03 16:12** · `ship-slave-ship` — r213 built timber rudder: the slave ship's stern and a neighbour's, nothing else
+- **2026-09-03 16:30** · `shipwright-astern`, `ship-galley` — r214 residual-0 check, no accept: both re-captured at the clean r213 HEAD (b08a9a5, nothing stashed because nothing was uncommitted) and read 0.000% / 0.000 against the r213 baselines (build/staging/r214/r0-check.out). The two text strips accepted in r213 do not reproduce: a one-off capture flap, not a code effect. The r213 accepts stand as written.
