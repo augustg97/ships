@@ -15701,3 +15701,11 @@ web/index.html carries the same stamp and is in this commit's path list (the r20
 published copies strip comments — docs/js/hull.js carries the `form === 'spill'` gate and
 docs/audit-hulls.js the spill branch, grepped after the build. Push receipt and live stamp:
 appended below after the push, per the r198 rule.**
+
+**Live stamp VERIFIED: 1788471763 on https://augustg97.github.io/ships/index.html at 14:44:42
+PDT, 60 s after the push at 14:43:42 (build/staging/r212/push.log; the poll read the meta's
+content= attribute, the r209 pattern). The live copies read back: js/hull.js carries the
+'spill' form gate (1 match), audit-hulls.js the S-CONE arm string (1 match), both
+grepped from the live host after the stamp matched. Tree at close: git status shows only the
+r205 daemon's cookie file and build/loop.log, both deliberately left uncommitted; the staging
+images (the DSM plate and four witness frames) stay on disk uncommitted, the r211 convention.**
