@@ -399,39 +399,79 @@ function buildFramesGeometry(S, NF = 26, onlyU) {
          the head (the bulwark is straight in v, so height is linear there), and the last
          station keeps a fifth of the head's width as a flat — a hewn end, not a point. */
       const frac = S.frames.headSidedFrac || 1, taper = S.frames.headTaperM || 0, round = !!S.frames.headRound;
-      const yTop = sec(vTop)[1], rr = frac * half;
-      const vs = Array.from({ length: NV + 1 }, (_, j) => j / NV * vTop);
-      if (round && rr > 0) {
-        const yLo = sec(0.62)[1], dvdy = (vTop - 0.62) / Math.max(1e-6, yTop - yLo);
-        for (const hb of [0.75, 0.5, 0.25, 0.08]) vs.push(vTop - hb * rr * dvdy);
+      const rr = frac * half;
+      /* a table of the section from the keel to the head, so a HEIGHT can be turned back
+         into v: y climbs with v up the side, so the table is monotonic, and a linear read
+         between its rows is exact where the skin is straight in v (the bulwark) */
+      const TAB = 96, tv = [], ty = [];
+      for (let j = 0; j <= TAB; j++) { const v = j / TAB * vTop; tv.push(v); ty.push(sec(v)[1]); }
+      const yTop = ty[TAB], yKeel = ty[0];
+      const vAtY = y => {
+        if (y <= yKeel) return 0; if (y >= yTop) return vTop;
+        let j = 1; while (j < TAB && ty[j] < y) j++;
+        const f = Math.max(0, Math.min(1, (y - ty[j - 1]) / Math.max(1e-6, ty[j] - ty[j - 1])));
+        return tv[j - 1] + f * (tv[j] - tv[j - 1]);
+      };
+      /* ── THE FRAME IS A CHAIN OF LAPPED TIMBERS, NOT ONE TIMBER (round 224) ──────────
+         A cog's frame is not one timber from the keel to the rail: the floor and the
+         futtocks over it are grown pieces laid SIDE BY SIDE, each lapped beside the next
+         over a length, the lower one's head standing against the upper one's body. The
+         DSM's plate from over the bow (r213/wreck-dsm-side.jpg) shows a second rounded head
+         beside every futtock that reaches the rail, about a strake and a half under it, the
+         lower timber standing forward of the upper and touching it; Doel 1, a cog of the
+         same century (Vermeersch & Haneca 2014), carried up to three futtocks a side over
+         the floor. The record says where each lower head stands (frames.laps[].headBelowM,
+         under the top head) and how far the upper timber's foot reaches below it (lapM);
+         the lower timber stands one siding forward of the upper, touching, and the offset
+         alternates down the chain. Every head in the chain is tapered and rounded as the
+         record says for the top one; an upper timber's foot, cut in the open, is capped
+         square. Without laps the chain is one timber, keel to head, the r223 build. */
+      const laps = (S.frames.laps || []).slice().sort((a, b) => a.headBelowM - b.headBelowM);
+      const timbers = [];
+      let yH = yTop;
+      laps.forEach((lp, i) => {
+        const yNext = yTop - lp.headBelowM;
+        timbers.push({ yHead: yH, yFoot: Math.max(yKeel, yNext - (lp.lapM || 0)), dx: (i % 2) ? -2 * half : 0 });
+        yH = yNext;
+      });
+      timbers.push({ yHead: yH, yFoot: yKeel, dx: (laps.length % 2) ? -2 * half : 0 });
+      for (const T of timbers) {
+        const vF = vAtY(T.yFoot), vH = vAtY(T.yHead);
+        const vs = [vF, vH];
+        for (let j = 0; j <= NV; j++) { const v = j / NV * vTop; if (v > vF + 1e-6 && v < vH - 1e-6) vs.push(v); }
+        if (round && rr > 0)
+          for (const hb of [0.75, 0.5, 0.25, 0.08]) { const v = vAtY(T.yHead - hb * rr); if (v > vF + 1e-6 && v < vH - 1e-6) vs.push(v); }
         vs.sort((a, b) => a - b);
-      }
-      const NS = vs.length - 1;
-      for (let j = 0; j <= NS; j++) {
-        const v = vs[j];
-        const p = sec(v), pa = sec(Math.max(0, v - 0.01)), pb = sec(Math.min(vTop, v + 0.01));
-        let tz = pb[2] - pa[2], ty = pb[1] - pa[1];
-        const tl = Math.hypot(tz, ty) || 1; tz /= tl; ty /= tl;
-        const nz = -ty, ny = tz;                       // inward: −z on a side, +y on the floor
-        const zo = Math.max(0, p[2] + gap * nz), yo = p[1] + gap * ny;
-        const zi = Math.max(0, zo + m * nz), yi = yo + m * ny;
-        const hBelow = Math.max(0, yTop - p[1]);       // height under the head
-        let hj = half;
-        if (taper > 0 && frac < 1) hj *= 1 - (1 - frac) * Math.max(0, 1 - hBelow / taper);
-        if (round && hBelow < rr) hj *= Math.max(0.2, Math.sqrt(Math.max(0, 1 - ((rr - hBelow) / rr) ** 2)));
-        pos.push(p[0] - hj, yo, sgn * zo,  p[0] + hj, yo, sgn * zo,
-                 p[0] + hj, yi, sgn * zi,  p[0] - hj, yi, sgn * zi);
-      }
-      for (let j = 0; j < NS; j++) {
-        const a = base + j * 4, b = a + 4;
-        for (let f = 0; f < 4; f++) {
-          const c = (f + 1) % 4;
-          idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+        const NS = vs.length - 1;
+        for (let j = 0; j <= NS; j++) {
+          const v = vs[j];
+          const p = sec(v), pa = sec(Math.max(0, v - 0.01)), pb = sec(Math.min(vTop, v + 0.01));
+          let tz = pb[2] - pa[2], tyy = pb[1] - pa[1];
+          const tl = Math.hypot(tz, tyy) || 1; tz /= tl; tyy /= tl;
+          const nz = -tyy, ny = tz;                      // inward: −z on a side, +y on the floor
+          const zo = Math.max(0, p[2] + gap * nz), yo = p[1] + gap * ny;
+          const zi = Math.max(0, zo + m * nz), yi = yo + m * ny;
+          const hBelow = Math.max(0, T.yHead - p[1]);   // height under THIS timber's head
+          let hj = half;
+          if (taper > 0 && frac < 1) hj *= 1 - (1 - frac) * Math.max(0, 1 - hBelow / taper);
+          if (round && hBelow < rr) hj *= Math.max(0.2, Math.sqrt(Math.max(0, 1 - ((rr - hBelow) / rr) ** 2)));
+          const x = p[0] + T.dx;
+          pos.push(x - hj, yo, sgn * zo,  x + hj, yo, sgn * zo,
+                   x + hj, yi, sgn * zi,  x - hj, yi, sgn * zi);
         }
+        for (let j = 0; j < NS; j++) {
+          const a = base + j * 4, b = a + 4;
+          for (let f = 0; f < 4; f++) {
+            const c = (f + 1) % 4;
+            idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+          }
+        }
+        const t = base + NS * 4;                        // the cap at the head
+        idx.push(t, t + 1, t + 2, t, t + 2, t + 3);
+        if (T.yFoot > yKeel + 1e-6)                     // an upper timber's foot, cut square in the open
+          idx.push(base, base + 2, base + 1, base, base + 3, base + 2);
+        base += (NS + 1) * 4;
       }
-      const t = base + NS * 4;                          // the cap at the head
-      idx.push(t, t + 1, t + 2, t, t + 2, t + 3);
-      base += (NS + 1) * 4;
     }
   }
   const g = new THREE.BufferGeometry();

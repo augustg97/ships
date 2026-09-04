@@ -844,26 +844,83 @@
                (Frame 1 spans 1.18 m in x) is not read wider for its lean. Body: the median
                siding within 0.3 m of the bulwark height; near-head: the widest station between
                0.12 and 0.35 m under the head, below the round; head: the topmost station. */
-            if (H.frames.headSidedFrac) {
-              const W = world(f), st = [];
-              for (let k = 0; k + 1 < W.length; k += 4) st.push({ y: W[k][1], s: Math.abs(W[k + 1][0] - W[k][0]) });
-              /* the body is read BELOW the taper: on the cog the taper's 1.2 m starts at the
-                 deck, so the bulwark band is already inside it (the rule's first run, r223,
-                 read 0.161 there against 0.180 below and called the head untapered) */
-              const tp = H.frames.headTaperM || 0;
-              let body = st.filter(q => q.y < b[4] - tp - 0.02).map(q => q.s);
-              if (!body.length) body = st.slice().sort((a, c) => a.y - c.y).slice(0, 4).map(q => q.s);
-              body.sort((a, c) => a - c);
-              const near = st.filter(q => q.y > b[4] - 0.35 && q.y < b[4] - 0.12).map(q => q.s);
-              const topS = st.reduce((m2, q) => (q.y > m2.y ? q : m2), { y: -1e9, s: 0 }).s;
-              if (body.length && near.length) {
-                const bs = body[body.length >> 1], ratio = Math.max(...near) / bs, want = H.frames.headSidedFrac;
-                if (ratio > want + 0.12)
-                  say(v.id, 'a futtock head that is not tapered', `siding ${Math.max(...near).toFixed(3)} m under the head, ${bs.toFixed(3)} at the deck (${ratio.toFixed(2)}), record ${want} at x ${xc.toFixed(1)}`);
-                if (ratio < want - 0.15)
-                  say(v.id, 'a futtock head tapered past the record', `${ratio.toFixed(2)} of the body's siding, record ${want} at x ${xc.toFixed(1)}`);
-                if (H.frames.headRound && topS > 0.5 * bs)
-                  say(v.id, 'a futtock head cut square', `top station ${topS.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)}`);
+            if (H.frames.headSidedFrac || H.frames.laps) {
+              const W = world(f);
+              /* D-FRAMES lap (round 224): a recorded frame is a CHAIN of timbers (frames.laps),
+                 each a run of stations climbing from its foot to its head, one chain a side.
+                 The runs are split where the height DROPS from one station to the next (the
+                 next timber begins at its foot); the head rules read the top run of each side
+                 and the lap rules read each neighbouring pair. */
+              const st = [];
+              for (let k = 0; k + 1 < W.length; k += 4)
+                st.push({ y: W[k][1], x: (W[k][0] + W[k + 1][0]) / 2, z: W[k][2], s: Math.abs(W[k + 1][0] - W[k][0]) });
+              const all = [[]];
+              for (let k = 0; k < st.length; k++) { if (k && st[k].y < st[k - 1].y - 0.01) all.push([]); all[all.length - 1].push(st[k]); }
+              /* a run belongs to the side its stations lie on, by their mean z — the keel
+                 station of either side has z exactly 0 (the rule's first run, r224, put one
+                 side's keel station at the head of the other side's list and read that
+                 side's top timber as reaching the keel) */
+              for (const sg of [-1, 1]) {
+                const runs = all.filter(run => Math.sign(run.reduce((a2, r) => a2 + r.z, 0)) === sg);
+                if (!runs.length) continue;
+                const headOf = run => Math.max(...run.map(r => r.y)), footOf = run => Math.min(...run.map(r => r.y));
+                runs.sort((p, q) => headOf(q) - headOf(p));
+                const top = runs[0], topY = headOf(top), side = sg < 0 ? 'starboard' : 'port';
+                const tp = H.frames.headTaperM || 0;
+                /* the body is read BELOW the taper: on the cog the taper's 1.2 m starts at the
+                   deck, so the bulwark band is already inside it (the rule's first run, r223,
+                   read 0.161 there against 0.180 below and called the head untapered) */
+                let body = top.filter(q => q.y < topY - tp - 0.02).map(q => q.s);
+                if (!body.length) body = top.slice().sort((a, c) => a.y - c.y).slice(0, 4).map(q => q.s);
+                body.sort((a, c) => a - c);
+                const bs = body.length ? body[body.length >> 1] : 0;
+                const near = top.filter(q => q.y > topY - 0.35 && q.y < topY - 0.12).map(q => q.s);
+                const topS = top.reduce((m2, q) => (q.y > m2.y ? q : m2), { y: -1e9, s: 0 }).s;
+                if (H.frames.headSidedFrac && bs && near.length) {
+                  const ratio = Math.max(...near) / bs, want = H.frames.headSidedFrac;
+                  if (ratio > want + 0.12)
+                    say(v.id, 'a futtock head that is not tapered', `siding ${Math.max(...near).toFixed(3)} m under the head, ${bs.toFixed(3)} at the deck (${ratio.toFixed(2)}), record ${want} at x ${xc.toFixed(1)} ${side}`);
+                  if (ratio < want - 0.15)
+                    say(v.id, 'a futtock head tapered past the record', `${ratio.toFixed(2)} of the body's siding, record ${want} at x ${xc.toFixed(1)} ${side}`);
+                  if (H.frames.headRound && topS > 0.5 * bs)
+                    say(v.id, 'a futtock head cut square', `top station ${topS.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)} ${side}`);
+                }
+                if (H.frames.laps) {
+                  const laps = H.frames.laps.slice().sort((a, c) => a.headBelowM - c.headBelowM);
+                  const sided = H.frames.sidedM || 0.18;
+                  if (runs.length < laps.length + 1)
+                    say(v.id, 'a frame built as fewer timbers than its laps', `${runs.length} timbers, record ${laps.length} lap(s) at x ${xc.toFixed(1)} ${side}`);
+                  laps.forEach((lp, i) => {
+                    const up = runs[i], lo = runs[i + 1]; if (!up || !lo) return;
+                    const wantHead = topY - lp.headBelowM, gotHead = headOf(lo);
+                    if (Math.abs(gotHead - wantHead) > 0.15)
+                      say(v.id, 'a lap head off the record', `lower timber's head ${gotHead.toFixed(2)} m, record ${wantHead.toFixed(2)} (${lp.headBelowM} under the top head) at x ${xc.toFixed(1)} ${side}`);
+                    const gotLap = gotHead - footOf(up);
+                    if (lp.lapM && Math.abs(gotLap - lp.lapM) > 0.15)
+                      say(v.id, 'a lap off its length', `upper timber's foot ${gotLap.toFixed(2)} m below the lower's head, record ${lp.lapM} at x ${xc.toFixed(1)} ${side}`);
+                    /* side by side: the two timbers' centres compared IN THE LAP ZONE and AT
+                       ONE HEIGHT — the lower timber's x read at each upper station's height by
+                       a linear walk up the lower run, because a leaning end frame's x moves
+                       0.27 m a metre and the two runs' stations do not share heights */
+                    const zLo = footOf(up), zHi = gotHead;
+                    const xAt = (run, y) => {
+                      const q = run.slice().sort((a2, c2) => a2.y - c2.y);
+                      if (y <= q[0].y) return q[0].x; if (y >= q[q.length - 1].y) return q[q.length - 1].x;
+                      let k = 1; while (k < q.length - 1 && q[k].y < y) k++;
+                      const t2 = (y - q[k - 1].y) / Math.max(1e-6, q[k].y - q[k - 1].y);
+                      return q[k - 1].x + t2 * (q[k].x - q[k - 1].x);
+                    };
+                    const xu = up.filter(r => r.y >= zLo + 0.02 && r.y <= zHi - 0.02);
+                    const dx = xu.length ? xu.reduce((s2, r) => s2 + Math.abs(r.x - xAt(lo, r.y)), 0) / xu.length : sided;
+                    if (dx < sided - 0.06)
+                      say(v.id, 'lapped timbers in one another', `${dx.toFixed(2)} m between their centres in the lap, a siding is ${sided} at x ${xc.toFixed(1)} ${side}`);
+                    if (dx > 1.5 * sided)
+                      say(v.id, 'lapped timbers standing apart', `${dx.toFixed(2)} m between their centres in the lap, a siding is ${sided} at x ${xc.toFixed(1)} ${side}`);
+                    const loTop = lo.reduce((m2, q) => (q.y > m2.y ? q : m2), { y: -1e9, s: 0 }).s;
+                    if (H.frames.headRound && bs && loTop > 0.5 * bs)
+                      say(v.id, 'a lap head cut square', `lower timber's top station ${loTop.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)} ${side}`);
+                  });
+                }
               }
             }
           }

@@ -17330,3 +17330,165 @@ push-verify.sh) stays on disk uncommitted, the r211 convention. One harness note
 ratchet was launched as the Bash tool's own background task and polled from the foreground
 in nine-minute waits; it survived the whole 43 minutes and its exit was read from
 close-ratchet.out, so the r198 foreground-wait rule is met by that pattern too.**
+
+## Round 224 — 2026-09-04 — the frame is a chain of lapped timbers: the plate's second head read for its height and its side, the futtock and the timber under it built side by side, and the audit reads the chain run by run
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r223 said r224 opens
+with residual (0b′), the lower timber's head lapped beside the futtock — or (0a) if a route
+to Lahn 1992's plates appeared. No route was hunted; the round hunted the framing SYSTEM
+instead and found it in print for a sister: the Bremen cog's own frame description is in
+Lahn 1992 (unfetched, as before) and nowhere on the open web (Wikipedia de, the
+Mittelalter-Lexikon, the DSM's pages, modellmarine's contents list, the Wettringer forum:
+each fetched, r224, none describes the frames), but Doel 1, a cog of the same century, is
+described timber by timber in Vermeersch & Haneca, IJNA 2014 (fetched, r224/doel1.txt), and
+that paper says what the plate shows. (0b′) is DONE for the top lap and the r223 phrase
+"the floors' arm heads at mid-side" was WRONG about which timber: the second head beside
+each futtock stands a strake and a half under the rail, far above mid-side, and is the head
+of the NEXT FUTTOCK DOWN, not the floor's arm — Doel 1 carried up to three futtocks a side
+over the floor, "a maximum of three futtocks on each side rise to the sheer-strake".**
+
+**What the plate can support (the r158 rule, scale first). r213/wreck-dsm-side.jpg, the
+port side forward, crops r224/crop-port-heads-2x-left.png (plate x 1104–1704, y 704–1354
+at 2×, 50 px grid) and crop-port-lap-3x.png (x 1350–1750, y 820–1120 at 3×, 25 px grid).
+(1) Beside every futtock that reaches the rail stands a second timber whose head is
+ROUNDED like the futtock's and stands under the futtock's head by 110–135 px in the plate's
+vertical. The plate looks DOWN the side, so its vertical is compressed and r223's 250 px/m
+does not apply to heights; the strakes give the vertical scale instead: their seams lie
+75–85 px apart in the same crop and the cog's strakes are 0.4–0.6 m wide, so the second
+head stands about a strake and a half under the futtock's, 0.75 m (±0.25). (2) In the three
+pairs the 3× crop resolves, the lower timber stands FORWARD of the futtock and touches it;
+its siding reads the same as the futtock's within the plate's resolution. (3) The feet of
+both timbers are hidden by the forward through-beam and the modern shoring
+(crop-port-lower-2x.png, plate y 1250–1750), so the LAP LENGTH is not read from this plate.
+(4) The starboard bilge (r223/crop-side-stbd-mid.png) shows the floors as single timbers
+over the bottom and a second timber beside each at the turn of the bilge: a lower lap, no
+number here. A column-brightness peak count along the band (r224 method note below) could
+not separate the two timbers of a pair from the two lit faces of one timber and was
+abandoned; every number above is a read off the gridded crops. Doel 1 (Vermeersch & Haneca
+2014) for the class bounds: futtocks 1.40–3.41 m long, c. 0.20 m sided and 0.14 m moulded,
+floors 0.22 sided and 0.14 moulded, the second set of futtocks ending between strakes GN and
+GP and the third running from GN or GP to the sheer-strake, a lap of nought to two strakes;
+its uppermost futtocks "cut horizontally at their top ends", which the Bremen plate does not
+bear out (nine rounded heads, r223). lapM 1.0 is a CLASS VALUE with bounds 0.5–2.0 from
+that paper, and the record says so.**
+
+**The change (before-copies r224/hull.before.js, audit-hulls.before.js, vessels.before.json;
+the edit script r224/apply-edits.py, every match asserted unique; hull.diff 106 lines,
+audit.diff 87 after the fix below). web/data/vessels.json: the cog's `hull.frames` gains
+`laps: [{ headBelowM: 0.75, lapM: 1.0 }]` and framesProvenance gains the paragraph above
+with the plate, its two scales, the bounds and Doel 1. web/js/hull.js, buildFramesGeometry's
+record path: the section is tabled keel to head (96 rows) so a HEIGHT can be turned back
+into v (y climbs with v up the side; the read is exact where the skin is straight in v);
+the frame is a CHAIN of timbers — the top one from lapM below the first lap's head to the
+rail, each lower one from lapM below the next head to its own, the last to the keel — each
+lower timber one siding forward of the one above (touching; the offset alternates down a
+longer chain), every head tapered and rounded by the r223 fields measured from ITS OWN head,
+an upper timber's foot capped square in the open. Without `laps` the chain is one timber,
+keel to head, the r223 build; the path itself runs only for a hull with frames.roomAndSpaceM,
+which is only the cog. Research/audit-hulls.js, D-FRAMES lap: the frame's stations are split
+into RUNS where the height drops between consecutive stations (the next timber begins at its
+foot), each run assigned to a side by its mean z, the runs of a side sorted by head; the r223
+head rules read the TOP run of each side; then for each recorded lap the pair (upper, lower):
+"a frame built as fewer timbers than its laps", "a lap head off the record" (the lower's head
+against the top head less headBelowM, ±0.15), "a lap off its length" (the upper's foot below
+the lower's head against lapM, ±0.15), "lapped timbers in one another" / "lapped timbers
+standing apart" (the lower timber's x read at EACH upper station's height by a linear walk
+up the lower run, the mean |dx| against the siding: under siding − 0.06, or over 1.5 sidings)
+and "a lap head cut square" where the record says rounded.**
+
+**Rule 8 fired on the rule's own first run (r224/audit-first.out): 47 problems, every one
+the cog — 33 × "a lap off its length" (the upper timber's foot 3.75 m below the lower's
+head, port), 10 × "in one another", 4 × "standing apart". The first draft assigned stations
+to a side by the sign of their own z and sent z = 0 to port; the keel station of EITHER
+side's lower timber has z exactly 0 (the section's tangent is flat there, so the inward
+normal is straight up), so the starboard chain's keel station stood at the head of the port
+list, no drop preceded the port futtock's foot, and the port "top run" ran from the keel to
+the rail. Runs are split on the whole list first now and each run takes the side of its mean
+z; and the side-by-side read compares x at matched heights, because the two runs' stations
+do not share heights and a leaning end frame's x moves 0.27 m a metre. Second run: 33 hulls,
+0 problems (r224/audit.out), synced to web/ (the build strips it into docs/).**
+
+**Proven to fire: the OLD builder against the NEW record (hull.before.js swapped in, the
+audit run, hull.after.js swapped back and cmp'd byte-identical; r224/inject-oldbuilder.out):
+66 × "a frame built as fewer timbers than its laps" ("1 timbers, record 1 lap(s)"), one per
+side per frame, every other hull silent. The r223 head rules stayed silent on both builders,
+as they should: the top timber's head is the r223 head.**
+
+**Measured (measure_ship, r224/measure-after.out, compared with r223's by script): 93 parts
+in both, nothing missing, nothing new; 32 moved, every one a frame and every move in the
+x-span alone, by one siding (0.18 m): +0.18 amidships (Frame 17: 0.18 → 0.36), the after
+frames +0.18 (Frame 33: 1.04 → 1.22), the forward frames −0.18 (Frame 1: 1.14 → 0.96) —
+at the bow a leaning frame's foot lies AFT of its head, so a lower timber moved forward
+narrows the union, and the crossover is Frame 5, unmoved to 5 mm; heads (1.91 under a rail
+at 2.01), feet (−2.20) and outer faces (3.74 against planking at 3.80) unchanged; the 61
+other parts identical to 5 mm.**
+
+**Witnessed (rule 1), both --bare, r217's own cameras: r224/inboard-after.png (b 300, z 0.42,
+l 16): both bulwarks are lined inside with PAIRS — a taller timber to a hand under the rail
+and, forward of it and touching, a shorter one whose rounded head stands about three
+quarters of a metre lower; r224/heads-close-after.png (b 300, z 0.2, l 10): the pairs
+closer, the lower head's round catching the light like the upper's, the two bodies side by
+side. Rule 0 answered on heads-close-after.png read whole: it reads as a rendered world —
+laid deck with staggered butts, gratings, cloth with light through it, textured water to a
+hazy coast, the timber inside the bulwark in shadow. Three facts a viewer can read off it
+without a legend: the bulwark's timbers stand in pairs, one taller than the other, both
+rounded at the head; the beam heads come through the ship's side and show end grain; the
+deck planks run across the ship and the hatches are grated.**
+
+**Named residuals, in order:** (0a) OPEN, pitch 1.8 ± 0.2 sidings (r223), Lahn 1992's
+Blatt 3 or 28–34 would settle it. (0b′) CLOSED for the top lap this round. NEW (0b″): the
+LOWER lap, the floor's arm against the first futtock at the turn of the bilge, shown on
+r223/crop-side-stbd-mid.png with no number — read it as a fraction of the side's height off
+that crop (the r158 rule) and add it as laps[1]; Doel 1 sets that scarf alternately below and
+above the bilge, which the model does not do. NEW (0b‴): lapM is a class value, 0.5–2.0;
+a plate of the wreck's side from INSIDE below the deck would show the top futtock's foot.
+The moulding at the head is still unread. (0c) the beams' stations and count. (0e)
+belowSheerM contested by 0.4 m. (0f) the beam-head wedge at 60+ px/m. (1) r214: the
+Gangspill's station. (2) r214: the wings' inner-edge and forward-end rails, no source.
+(3) r213: decked timber ships' rudder heads stop at 0.35 of the sheer; no helm port.
+(4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177
+Lucian's second machine. (8) r176 sekibune class-size, paired with r211's top question.
+(9) Preussen mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen
+black unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171
+quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan
+barrel. (18) the cathead's supporting knee is a block. (19) the readiness transient: keep
+the r208 rule.**
+
+**Two method notes. (1) A plate that looks DOWN a ship's side has two scales: r223's 250
+px/m was read along a siding, horizontally, and is right for widths; heights on the same
+plate are compressed by the look-down, and the strakes are the ruler for those. (2) A rule
+that sorts a mesh's stations by which side they are on must not classify a station by its
+own z alone: on the centreline z is exactly 0, and a station with z = 0 belongs to whichever
+timber it is part of, not to a default side. Split into runs first, then assign the run.**
+
+**The close ratchet, started 04:44:30 (r224/run-close.sh → close-ratchet.out) on a tree whose
+every change is described above. Predictions: r224/PREDICTIONS-close.md — ZERO movers beyond
+the documented sub-gate flaps, because the chain is record-gated on frames.laps, which only
+the cog carries, and she stands at berth-neighbour scale in ship-dhow and ship-treasure only.
+CLOSE STATE: if the paragraphs below this one are missing, the round was killed at the close
+gate (05:40:37) — the next firing must (1) re-run the ratchet whole on this committed tree,
+read and accept every mover with its reason, (2) `python3 build/build_site.py`, (3) commit,
+push, verify the live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 05:27:41 (r224/close-ratchet.out, started 04:44:27, ~39 s a
+frame): 64 frames, ZERO movers, exit 0, no BLANK — "all frames within tolerance", as
+predicted. Every frame was read while the run was going (r224/sweep.out, one line per frame
+as it landed, by the sweep's own >0 count) and compared with r223's sweep by script
+(r224/compare-sweeps.py) at 17, 31, 45, 58 and 64 frames landed: IDENTICAL to r223's line
+for 63 of 64 frames, digit for digit and box for box; the one DIFFERENT line is ship-dhow,
+0.246% → 0.317% by that >0 count (mean 0.012 → 0.018, the same x-range 41–2879), which is
+the cog at her right edge: at the harness's own >8 count she reads 0.0485% (r223: 0.038%),
+under the 0.05% gate, and the >8 pixels lie 95% in the frame's rightmost tenth —
+r224/dhow-edge-before-after-diff.png (baseline over current over the diff ×6) shows them
+to be the timbers inside the cog's bulwark seen through the vessel list, doubled. Nothing
+accepted; FRAME-LOG.md untouched. Build PUBLISHED after the run (the r207 order); the stamp,
+the push receipt and the live stamp are appended below if the round survived to write them
+(the driver's kill is 05:40:37); otherwise r225 verifies the live stamp first.**
+
+**r225 opens with residual (0b″), the lower lap at the turn of the bilge — read the floor's
+arm head as a fraction of the side's height off r223/crop-side-stbd-mid.png (the r158 rule:
+name the crop and what its scale rests on), add it as laps[1] with lapM stated as the same
+class value, and consider Doel 1's alternation (the scarf below the bilge on one side and
+above it on the other) — or (0a) if a route to Lahn 1992's plates appears; r218's hunt
+paragraph lists every route that walled, and r224 added five more pages that do not
+describe the frames (listed above).**
