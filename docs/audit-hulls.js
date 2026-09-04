@@ -532,28 +532,53 @@ if (H.section) {
 if (H.section.form !== 'flared')
 say(v.id, 'a section form the loft does not build', `hull.section.form ${JSON.stringify(H.section.form)}`);
 else {
-const xM = 0, mid = sv.filter(q => Math.abs(q[0] - xM) < 0.35);
-let yTop = -1e9, yKeel = 1e9, wAll = 0, wTop = 0;
-for (const q of mid) { yTop = Math.max(yTop, q[1]); yKeel = Math.min(yKeel, q[1]); }
-for (const q of mid) {
-const w = Math.abs(q[2]);
-wAll = Math.max(wAll, w);
-if (q[1] > yTop - 0.25) wTop = Math.max(wTop, w);
+const rs = H.frames && H.frames.roomAndSpaceM;
+const nFr = rs ? Math.max(2, Math.floor(0.89 * L / rs) + 1) : 0;
+const frameU = k => rs ? 0.055 + 0.89 * k / (nFr - 1) : 0.5;
+const F0 = H.section.floorHalfFrac || 0, n0 = H.section.power || 2.2;
+const rows = (H.section.stations || []).map(s => ({
+u: s.u !== undefined ? s.u : frameU(s.spant),
+F: s.floorHalfFrac !== undefined ? s.floorHalfFrac : F0,
+n: s.power !== undefined ? s.power : n0, spant: s.spant })).sort((a, b) => a.u - b.u);
+const formAt = u => {
+if (!rows.length) return { F: F0, n: n0 };
+if (u <= rows[0].u) return rows[0];
+const last = rows[rows.length - 1]; if (u >= last.u) return last;
+for (let i = 1; i < rows.length; i++) if (u <= rows[i].u) {
+const a = rows[i - 1], b = rows[i], f = (u - a.u) / Math.max(1e-9, b.u - a.u);
+return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
 }
+return last;
+};
+const uvA = skin.geometry.attributes.uv;
+if (rows.length && !uvA)
+say(v.id, 'a section record with stations and a skin that carries no u to read them at', `${rows.length} stations`);
+const stations = [{ u: 0.5, label: 'midships' }].concat(rows.map(r => ({ u: r.u, label: r.spant !== undefined ? `Spant ${r.spant} (u ${r.u.toFixed(3)})` : `u ${r.u.toFixed(3)}` })));
+for (const st of stations) {
+let sel;
+if (uvA) {
+let best = 1e9; for (let i = 0; i < uvA.count; i++) best = Math.min(best, Math.abs(uvA.getX(i) - st.u));
+sel = []; for (let i = 0; i < uvA.count; i++) if (Math.abs(uvA.getX(i) - st.u) <= best + 1e-6) sel.push(sv[i]);
+} else sel = sv.filter(q => Math.abs(q[0] - (st.u - 0.5) * L) < 0.35);
+if (sel.length < 8) { say(v.id, 'a section station with no skin to read', `${st.label}: ${sel.length} vertices`); continue; }
+let yTop = -1e9, yKeel = 1e9, wAll = 0, wTop = 0;
+for (const q of sel) { yTop = Math.max(yTop, q[1]); yKeel = Math.min(yKeel, q[1]); }
+for (const q of sel) { const w = Math.abs(q[2]); wAll = Math.max(wAll, w); if (q[1] > yTop - 0.25) wTop = Math.max(wTop, w); }
 if (wAll > wTop + 0.05)
-say(v.id, 'a flared section not widest at its rail', `${wAll.toFixed(2)} m half-breadth below the rail, ${wTop.toFixed(2)} at it, at midships`);
-if (Math.abs(wTop - H.beam / 2) > 0.1)
+say(v.id, 'a flared section not widest at its rail', `${wAll.toFixed(2)} m half-breadth below the rail, ${wTop.toFixed(2)} at it, at ${st.label}`);
+if (st.label === 'midships' && Math.abs(wTop - H.beam / 2) > 0.1)
 say(v.id, "a flared section's rail off the record's beam", `${(2 * wTop).toFixed(2)} m across the rail, the record ${H.beam}`);
-const F = H.section.floorHalfFrac || 0, n = H.section.power || 2.2, D = yTop - yKeel;
+const { F, n } = formAt(st.u), D = yTop - yKeel;
 const want = h => wTop * (F + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - Math.max(0, Math.min(1, h / D)), n)), 1 / n));
 let worst = 0, worstH = 0, worstW = 0, worstWant = 0;
-for (const q of mid) {
+for (const q of sel) {
 const h = q[1] - yKeel; if (h < 0.05 || h > D - 0.05) continue;
 const w = Math.abs(q[2]), e = Math.abs(w - want(h));
 if (e > worst) { worst = e; worstH = h; worstW = w; worstWant = want(h); }
 }
 if (worst > 0.2)
-say(v.id, "a flared section off its record's curve", `${worstW.toFixed(2)} m half-breadth at ${worstH.toFixed(2)} m over the keel, the record's curve ${worstWant.toFixed(2)} (F ${F}, n ${n}, D ${D.toFixed(2)}); worst of the midship vertices, ${mid.length} read`);
+say(v.id, "a flared section off its record's curve", `${worstW.toFixed(2)} m half-breadth at ${worstH.toFixed(2)} m over the keel, the record's curve ${worstWant.toFixed(2)} (F ${F.toFixed(3)}, n ${n.toFixed(2)}, D ${D.toFixed(2)}) at ${st.label}; worst of ${sel.length} vertices`);
+}
 }
 }
 if (H.frames && H.frames.roomAndSpaceM) {

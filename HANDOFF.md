@@ -17901,3 +17901,161 @@ started, none beside it.**
 `git add` list (inherited from r225, a round with no movers) names FRAME-LOG.md but not
 Research/baselines/frames/, so the log said accepted while the picture was uncommitted. It is
 in this third commit. Next round's close-out.sh must add Research/baselines/frames/ too.**
+
+## Round 227 — 2026-09-04 — the flat is a property of the station, not of the breadth: Blatt 2's other three sections read, and the cog's section form now changes along the ship from the record's own stations
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r226 said r227 opens
+with residual (0g′), how the flat's half-width changes along the ship: read Blatt 2's other
+three sections the way Spant 26 was read, fit F(u) against B(u)/B_max, and if the law is not
+proportional, give the record the law and the loft the reader. Done, at the class level. The
+law is not proportional and it is not a function of the breadth at all: the flat exists at
+Spant 26 and at none of the other three, while the rail there is 0.91–1.0 of Spant 26's.**
+
+**What the plate supports. r213/lahn-blatt2.jpg (640 × 459, about 30 px/m across the beam)
+carries Spant 5, 12, 26 and 33. r227/trace-sections.py seeds each section at its keel (the one
+feature no label sits on) and walks the outer planking line UPWARD row by row, the edge allowed
+9 px outward and 3 px inward per row; r226's tracer seeded at the widest row, walked both ways
+with a symmetric window and a strict threshold, and stopped at the first blank row. Overlays at
+4× (r227/trace-spant5-4x.png, -spant12-, -spant33-, -spant26-) read by eye: the trace holds the
+outer line to the rail on Spant 5, to about half the side's height on Spant 33 and Spant 12,
+and wanders onto the labels above that (Spant 33's left side from 0.5 D, Spant 26's above 0.4 D),
+so only the rows it holds are used and Spant 26 keeps r226's hand read. Spant 12's bottom rows
+sat on the Kielschwein label (a plateau of 0.47 B from 0.05 to 0.10 D, which is not a hull), so
+Spant 12 was read by eye off r227/grid-spant12-4x.png, a 4× crop with a 10 px plate grid drawn
+over it. Rail half-breadths in plate px: Spant 5 104, Spant 12 115, Spant 26 114 (r226), Spant 33
+113 (by hand at y 250). Half-breadth as a fraction of each section's OWN rail half-breadth:
+Spant 5 at h/D 0.05 / 0.10 / 0.20 / 0.40 → 0.11 / 0.21 / 0.39 / 0.70; Spant 12 at 0.03 / 0.11 /
+0.18 / 0.26 / 0.33 / 0.49 → 0.07 / 0.20 / 0.34 / 0.46 / 0.57 / 0.76; Spant 33 at 0.05 / 0.10 /
+0.20 / 0.40 → 0.15 / 0.20 / 0.47 / 0.80; Spant 26 at 0.06 / 0.15 / 0.28 / 0.42 → 0.52 / 0.65 /
+0.78 / 0.90. Two facts. The flat is at midships only: at both ends the section is a V to the
+keel plank with no flat, and the V's curve is nearer a straight line than the midship's. And the
+rail is nearly parallel from Spant 12 to Spant 33 (115, 114, 113 px) and 0.91 of that at Spant 5
+— the plan at the rail is a full one with a long middle body, which the model's plan is not
+(below). Fits to r226's family, half-breadth B·(F + (1 − F)·(1 − (1 − h/D)^n)^(1/n)): Spant 5
+F 0 n 1.5 (rms 0.05 B over 0.02–0.8 D); Spant 12 F 0 n 1.4 (rms 0.045 on the eye read); Spant 33
+F 0 n 1.6 (rms 0.07 over 0.02–0.42); Spant 26 F 0.15 n 2.2 unchanged. The family cannot draw a
+straight V that rounds off above, which is what the end sections are; the misfit is under
+0.08 B and is a named residual. Read precision ±2.5 plate px = ±0.02 B.**
+
+**The class change (before-copies r227/hull.before.js, audit-hulls.before.js,
+vessels.before.json; the edit script r227/apply-edits.py, every match asserted unique;
+hull.diff 48 lines, audit.diff 81). web/js/hull.js: frameU(S, k), the inverse of r225's
+frameNumber (0.055 + 0.89·k/(n − 1), n the record's frame count), so a record can name a
+station by frame number; sectionRows(S) reads hull.section.stations[] { spant | u,
+floorHalfFrac, power } into rows sorted by u, and hullSurface carries them as H.section;
+sectionAt(S, rows, u) interpolates F and n linearly in u between stations and holds the end
+values beyond the outermost; surfacePoint's flaredY takes (F, n) from sectionAt at ITS u. A
+record without stations reads the single form everywhere — byte-identical to r226 — and a hull
+without hull.section is untouched. web/data/vessels.json, the cog: stations Spant 5 (0, 1.5),
+Spant 12 (0, 1.4), Spant 26 (0.15, 2.2), Spant 33 (0, 1.6), placed at u 0.179, 0.352, 0.698,
+0.871 by frameU at the record's 0.5 m room and space; sectionProvenance carries the reads above
+and the assumption that the model's frame 0 is the wreck's Spant 0 (±1 frame, 0.025 u). The
+numbering runs from the bow, r226's reading (Spant 33 carries the castle deck above its beam).
+The frames, the floors' laps, the deck edge and the beam heads all read surfacePoint, so they
+followed without an edit: the audit's frame rules passed on the first run.**
+
+**Audit rule D-SECTION now reads EVERY recorded station (Research/audit-hulls.js, synced to
+web/): for midships and for each station, the drawn skin's vertices at that u — the planking
+carries (u, v) in its uv attribute (buildHullGeometry pushes them), so a station is the set of
+skin vertices at the nearest stored u, above and below the water alike, and the rake above the
+waterline cannot shift it out of an x window; a skin with no uv falls back to the x window, and
+a record with stations and no uv to read them at is convicted (rule 10). At each station: widest
+at the rail, and every vertex within 0.2 m of the record's own curve with F and n interpolated
+the same way, the arithmetic written a second time on purpose; the rail-against-beam test stays
+at midships only. Real build: 33 hulls, 0 problems (r227/audit.out). Proven to fire by two
+builder variants against the same record, hull.js cmp'd byte-identical after each: A, the
+stations ignored (hull.variantA-stationsIgnored.js): 4 problems, all cog — "1.41 m half-breadth
+at 0.42 m over the keel, the record's curve 0.68 at Spant 5", 2.10 against 0.96 at Spant 12,
+1.13 against 0.57 at Spant 33, and 1.93 against 1.30 at midships (the interpolated form, F 0.064
+n 1.74, differs from Spant 26's there); B, the flat held at 0.15 everywhere with the powers
+per station (hull.variantB-flatHeld.js): 4 problems, "0.60 m at 0.09 m over the keel, the
+curve 0.25 at Spant 5", 0.79 against 0.31 at Spant 12, 0.56 against 0.26 at Spant 33, 1.09
+against 0.81 at midships (inject-variantA.out, -B.out). Every other hull silent in both.**
+
+**Measured (measure_ship, r227/measure-after.out against r226/measure-after2.out by script):
+93 parts in both, nothing missing, nothing new; 41 moved, 52 identical to 5 mm. The planking's
+half 3.80 and the rail's 3.84 unchanged (the rail IS the record's beam at every station by
+construction). The five through-beam heads, which end at a fixed reach outside the skin at
+deck height: 2.37 → 2.12, 3.54 → 3.20, 3.96 → 3.81, 3.65 → 3.63, 2.63 → 2.50 (u 0.14, 0.315,
+0.49, 0.665, 0.84) — the V sections are narrower at deck height than the flat-floored one was.
+The weather deck and the waterway 3.71 → 3.59 and the wales 3.77 → 3.66, both at midships,
+where the form is now the interpolation between Spant 12's and Spant 26's (0.94 B at deck
+height against Spant 26's 0.99); channels and deadeyes in 0.01; the forward castle cabin's
+half 1.85 → 1.69; 27 frames' heads up 0.01–0.05 (a narrower section stands its head at the
+same v a little higher on the flared side). The model's stated breadth line (8.90 m) is r225's
+number and predates the round.**
+
+**Witnessed (rule 1): r227/section-ahead.png (b 0, z 1.3, l 6), bow-on: the entry is a V under
+the water and the side widens to the rail above it; entry-quarter.png (b 315, z 1.0, l 8),
+from the starboard bow: the forebody is a V running to a sharp forefoot, the beam heads and
+their shadows along the side, the castle on its posts astern; floors-bow-stage2.png and
+floors-stern-stage2.png (SW.stage 2, z 0.55, l 38, b 330 and 210): the frames at both ends are
+V's meeting on the keel plank, the midship frames flat across it — the change is in the
+timbers, not only in the skin. Rule 0 answered on entry-quarter.png read whole: it reads as a
+rendered world — the sea's texture, the sky, the planked side in light with the beam heads'
+shadows on it. Three facts a viewer can read off it without a legend: the bow's underwater
+body is a V that runs to a sharp forefoot; the side widens all the way to the rail; the stern
+castle stands on posts over the sternpost with a railed deck.**
+
+**Found on the way, and it is the next residual: the model's PLAN is far finer at the ends than
+the plate's rail. Using the beam heads as a proxy for the deck-height half-breadth, the model
+reads 2.12 at u 0.14, 3.81 at 0.49, 2.50 at 0.84 — 0.56 and 0.66 of the middle. The plate's
+rail half-breadths are 104 / 115 / 114 / 113 px at Spant 5 / 12 / 26 / 33 (u 0.18 / 0.35 /
+0.70 / 0.87): 0.91 / 1.0 / 1.0 / 0.99 of the widest. The record's own castle already says the
+stern is broad up high (aftBreadthAftM 6.5 m at the post, 0.86 of the beam), while the hull's
+rail at u 0.87 is about 5.0 m across. So the section forms are now the plate's, but the
+breadth they are scaled by is a class plan (wlPower 2, stemFineness 0.2, sternFineness 0.24)
+that the plate contradicts by a third of the beam at the stern. Changing the plan moves Cw,
+Cp and Cb, so it is a round of its own, measured first.**
+
+**Named residuals, in order:** (0g‴) NEW, above: the rail plan against the plate's four rail
+half-breadths — measure the model's rail half-breadth at the four Spants' u (the audit's uv
+read, or hullSurface in the page), and if the stern is finer than the plate's 0.99 by more
+than the read's ±0.02, give the record a rail plan by station and the loft a reader, with the
+waterline coefficients re-derived and stated. (0g⁗) NEW: the family cannot draw the end
+sections' straight-V-then-round form (under 0.08 B); a third parameter, or a per-station
+table of half-breadths, would. (0g⁵) NEW: the Spant → u mapping assumes frame 0 = Spant 0
+(±1 frame); and the through-beams stand at class stations (0.14 + 0.70·i/4) where the plate
+puts DB 1, 2, 4, 5 at Spant 5, 12, 26, 33 (u 0.18, 0.35, 0.70, 0.87 by frameU) — deck.beamsAtU
+exists and could take them, DB 3 unread (Spant 18–19 by spacing). (0g⁶) NEW: the form at the
+model's midships (u 0.5, Spant 18–19) is an interpolation, unread; Blatt 2 has no section
+there. (0g″) the loft's strakes 14 against Doel 1's twelve, unchanged. (0a) OPEN, pitch 1.8 ±
+0.2 sidings (r223). (0b″) the floor arm heights are on Lahn's frame sheets, none fetched; the
+floor's lap head (0.8 m, the midship bilge) is now a midship value applied at every station,
+including the V's, where there is no bilge. (0b‴) lapM 1.0 for the top lap is a class value.
+(0h) the futtock count per side. (0c) the beams' stations and count — see (0g⁵). (0e)
+belowSheerM contested by 0.4 m; r215's 0.31–0.33 against r226's crop reading DB 4 at 0.65 of
+the side under the top strake. (0f) the beam-head wedge at 60+ px/m. (1) r214: the Gangspill's
+station. (2) r214: the wings' rails. (3) r213: decked timber ships' rudder heads stop at 0.35
+of the sheer. (4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7)
+r177 Lucian's second machine. (8) r176 sekibune class-size. (9) Preussen mast livery. (10)
+Endurance forecastle. (11) Azzam crest span. (12) r164 risen black unpierced. (13) r165
+fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery sashes. (16) r171
+authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the cathead's supporting
+knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**Three method notes. (1) A tracer needs a seed on a feature no label touches and a walk in
+ONE direction with a window shaped like the line's own motion (outward more than inward on a
+flaring side); a symmetric window seeded at the widest row follows the first leader line it
+meets. (2) Look at every trace's overlay and use only the rows it holds: a fit on Spant 12's
+contaminated rows returned F 0.21 for a section that has no flat at all — a good rms on bad
+rows is a fit to the label. (3) A record value that holds at one station must say which:
+r226's "the bottom is a flat" was a Spant 26 fact written as a class fact, and the loft scaled
+it along the whole ship. The record's stations[] now says where each form was read.**
+
+**The close ratchet, started 09:38 (r227/run-close.sh → close-ratchet.out) on the tree
+described above, hull.js cmp'd against hull.after.js and the audit against web/ before the
+start. Predictions (r227/PREDICTIONS-close.md, written first): only the cog carries
+hull.section, so surfacePoint is byte-identical for every other hull, and the ONE expected
+mover is ship-dhow, where the cog stands at berth-neighbour scale in the frame's rightmost
+tenth — r226's only mover, for the same reason. FINISHED at 10:18:16 (~37 s a frame): 64 frames, exit 0, NO mover — ship-dhow, the predicted frame, moved 0.022% of pixels (limit 0.050%), mean |Δ| 0.010, the cog's V'd ends at the frame's edge being a smaller change at that scale than r226's whole section was (0.067%); every other frame within tolerance, no BLANK. Nothing accepted, FRAME-LOG.md untouched. The ratchet ran as the Bash tool's own background task, polled from the foreground in until-loops of up to nine minutes, its exit read from close-ratchet.out (the r198 foreground-wait rule met by the r223 pattern); the four witnesses were captured before it started, none beside it.**
+
+**r228 opens with residual (0g‴), the plan: measure the model's rail half-breadth at u 0.179,
+0.352, 0.698 and 0.871 on the drawn skin (the audit's uv read is the tool: the widest vertex
+within 0.25 m of the top at each station), against the plate's 104 / 115 / 114 / 113 px, and
+if the stern reads finer than 0.99 of the widest by more than the read's precision, give the
+record the plate's rail plan by station and the loft a reader, and re-derive the coefficients
+the plan moves (Cw, Cp, Cb) before and after, individually. Or (0g⁵): put the through-beams at
+the plate's stations with deck.beamsAtU.**
+
+**Live stamp: docs/index.html carries data-version 1788542335 at the build; the push and the live poll are in build/staging/r227/push.log, and the verified live value is recorded in the push-log commit that follows this one (the r198 rule: the receipt and the live stamp read the same round). Tree at close: only build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r227 staging (the three before-copies, hull.after.js, vessels.after.json, the two builder variants, apply-edits.py, the two diffs, trace-sections.py with its four overlays and four gridded crops, fit.json, the four witnesses, the audit and variant outputs, the measure, the predictions, run-close.sh, close-out.sh, push-verify.sh) stays on disk uncommitted, the r211 convention.**

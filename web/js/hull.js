@@ -231,7 +231,7 @@ function hullSurface(S) {
     if (S.deck.level) return S.freeboard - deckDrop;
     return sheer(u) - deckDrop;
   };
-  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop };
+  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S) };
 }
 
 /* the skin point at DECK height: where the deck's edge meets the planking. Above v 0.62
@@ -339,6 +339,43 @@ function frameNumber(S, u) {
   const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
   const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
   return Math.round((u - 0.055) / 0.89 * (n - 1));
+}
+/* the inverse: the station of frame k, the same arithmetic — a record that names a frame
+   (Lahn's 'Spant 26') can be placed along the ship without a list (round 227) */
+function frameU(S, k) {
+  const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0.5;
+  const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
+  return 0.055 + 0.89 * k / (n - 1);
+}
+
+/* ── THE SECTION FORM CHANGES ALONG THE SHIP (round 227) ─────────────────────────────
+   r226 gave the cog one section form, Spant 26's, and scaled its flat with the local
+   half-breadth. Blatt 2's other three sections say otherwise: at Spant 5 and 12 (the bow)
+   and Spant 33 (the run aft) the bottom is a V to the keel plank with NO flat, and its
+   curve is nearer a straight line (superellipse power about 1.5) than the midship's 2.2 —
+   while the rail is still 0.91–1.0 of the midship's. So the flat is a property of the
+   STATION, not of the breadth. The record carries the sheet's own sections
+   (hull.section.stations[] { spant | u, floorHalfFrac, power }); the loft interpolates F
+   and n linearly in u between them and holds the end values beyond the outermost. A
+   station named by frame number is placed by frameU. Without stations, the record's
+   single form everywhere, byte-identical to r226. */
+function sectionRows(S) {
+  const sec = S.section; if (!sec || !sec.stations || !sec.stations.length) return null;
+  const F0 = sec.floorHalfFrac || 0, n0 = sec.power || 2.2;
+  return sec.stations.map(s => ({
+    u: s.u !== undefined ? s.u : frameU(S, s.spant),
+    F: s.floorHalfFrac !== undefined ? s.floorHalfFrac : F0,
+    n: s.power !== undefined ? s.power : n0 })).sort((a, b) => a.u - b.u);
+}
+function sectionAt(S, rows, u) {
+  if (!rows) return { F: S.section.floorHalfFrac || 0, n: S.section.power || 2.2 };
+  if (u <= rows[0].u) return rows[0];
+  const last = rows[rows.length - 1]; if (u >= last.u) return last;
+  for (let i = 1; i < rows.length; i++) if (u <= rows[i].u) {
+    const a = rows[i - 1], b = rows[i], f = (u - a.u) / Math.max(1e-9, b.u - a.u);
+    return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
+  }
+  return last;
 }
 
 function buildFramesGeometry(S, NF = 26, onlyU) {
@@ -1087,8 +1124,9 @@ function surfacePoint(S, H, u, v) {
      untouched, and the waterline half-breadth falls out of the curve (0.92 B on the
      cog). Without the field, byte-identical. */
   const flared = S.section && S.section.form === 'flared';
+  const sec = flared ? sectionAt(S, H.section, u) : null;   // F and n at THIS station (round 227)
   const flaredY = (h, v) => {
-    const D = t + fb, F = S.section.floorHalfFrac || 0, n = S.section.power || 2.2;
+    const D = t + fb, F = sec.F, n = sec.n;
     const hf = Math.max(0, Math.min(1, h / D));
     const s = Math.min(1, v / 0.02);
     return b * (F * s + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - hf, n)), 1 / n));
