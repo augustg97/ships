@@ -114,7 +114,19 @@ return S.sternRake * rakeScale * k * k * S.loa;
 }
 return 0;
 };
-return { nExp, halfB, wl, keel, sheer, tumble, rake, stepTop };
+const deckDrop = (S.deck && S.deck.belowSheerM) || 0;
+const deck = u => {
+if (!deckDrop) return sheer(u);
+if (S.deck.level) return S.freeboard - deckDrop;
+return sheer(u) - deckDrop;
+};
+return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop };
+}
+function deckEdge(S, H, u) {
+const yD = H.deck(u), fb = H.sheer(u);
+if (yD >= fb - 1e-6 || fb <= 0) return surfacePoint(S, H, u, 1);
+const k = Math.max(0, yD / fb);
+return surfacePoint(S, H, u, 0.62 + 0.38 * k);
 }
 function hullStations(S, NU) {
 const us = [];
@@ -396,7 +408,7 @@ const dH = C.deckHM || 1.95, rH = C.railHM || 1.0;
 const uHelm = (S.rudder && S.rudder.tillerAtU) ||
 (S.windlass && S.windlass.atU ? S.windlass.atU + 0.03 : null) ||
 ((C.fromU || 0.7) + (C.toU || 0.95)) / 2;
-const yDeck = H.sheer(Math.min(1, uHelm)) + dH;
+const yDeck = H.deck(Math.min(1, uHelm)) + dH;
 const t = 0.05 * S.draught;
 const b = surfacePoint(S, H, 1.0, 1.0);
 const xPost = b[0] + t;
@@ -687,7 +699,7 @@ const pos = [], nor = [], uvs = [], idx = [];
 const US = hullStations(S, NU);
 for (let i = 0; i < US.length; i++) {
 const u = US[i];
-const edge = surfacePoint(S, H, u, 1);
+const edge = deckEdge(S, H, u);
 const b = edge[2], fb = edge[1], x = edge[0];
 for (let j = 0; j <= 8; j++) {
 const k = j / 8;
@@ -955,7 +967,7 @@ return mk.heightM !== undefined ? mk.heightM : (mk.height || 0) * steelMain;
 function buildRig(S, group, mats, FINE, FURLED) {
 const L = S.lwl, B = S.beam;
 const H = hullSurface(S);
-const deckAt = u => H.sheer(u);
+const deckAt = u => H.deck(u);
 const deckMax = (uA, uB) => {
 const a = Math.max(0, Math.min(uA, uB)), b = Math.min(1, Math.max(uA, uB));
 let m = -Infinity;
@@ -2617,8 +2629,9 @@ const laidDeck = deckCovering(S).mode === 1;
 const openHull = deckCovering(S).mode === 0;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
-const deckAtU = u => H.sheer(u);
-const halfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
+const deckAtU = u => H.deck(u);
+const halfAtU = u => Math.abs(deckEdge(S, H, u)[2]);
+const railAtU = u => H.sheer(u), railHalfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
 const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 if (!openHull) {
 const pos = [], idx = [];
@@ -2653,7 +2666,7 @@ run = [];
 for (let i = 0; i <= NU; i++) {
 const u = 0.035 + (i / NU) * 0.93;
 if (!open(u)) { flush(); continue; }
-run.push({ x: (u - 0.5) * L + H.rake(u), y: deckAtU(u), hb: halfAtU(u) });
+run.push({ x: (u - 0.5) * L + H.rake(u), y: railAtU(u), hb: railHalfAtU(u) });
 }
 flush();
 }
@@ -2665,6 +2678,23 @@ const railMat = (S.build === 'steel' || S.build === 'iron')
 : pale;
 group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
 }
+if (S.deck && S.deck.throughBeams) {
+const n = S.deck.throughBeams;
+const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
+const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+us.forEach((u, i) => {
+const e = deckEdge(S, H, u);
+const half = Math.abs(e[2]) + proud;
+const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2), wood);
+bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
+bm.name = 'deck-beam';
+group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken)',
+'An athwartship deck beam whose heads pass through the planking and stand '
++ Math.round(proud * 100) + ' cm proud of the hull side — the beam-ended profile '
++ 'every cog seal draws. Count from the record; its station' + (S.deck.beamsAtU ? '' : ' a CLASS DEFAULT, the beams spread evenly over the deck')
++ '; ' + Math.round(sq * 100) + ' cm square is a class default below what the plates resolve.'));
+});
+}
 if (deckCovering(S).mode === 1) {
 const pos = [], idx = [];
 const NU = 90; let vbase = 0;
@@ -2672,7 +2702,7 @@ const w = Math.min(Math.max(B * 0.02, 0.15), 0.45);
 for (const sgn of [-1, 1]) {
 for (let i = 0; i <= NU; i++) {
 const u = 0.035 + (i / NU) * 0.93;
-const e = surfacePoint(S, H, u, 1);
+const e = deckEdge(S, H, u);
 const x = e[0], fb = e[1], hb = e[2];
 const wu = Math.min(w, hb * 0.55);
 const yT = fb + 0.034, yB = fb - 0.012;
@@ -4009,7 +4039,7 @@ const ropeMat = mats.ropeSolid || mats.spar;
 const staySegs = [], braceSegs = [];
 const line = (a, b) => [new THREE.Vector3(a[0], a[1], a[2] || 0),
 new THREE.Vector3(b[0], b[1], b[2] || 0)];
-const deckAt = u => H.sheer(u);
+const deckAt = u => H.deck(u);
 mastTops.forEach((m, i) => {
 if (m.gaff) {
 const prev = mastTops[i - 1];
@@ -6218,7 +6248,7 @@ const dark = new THREE.MeshStandardMaterial({ color: 0x3f444a, roughness: 0.66, 
 const cover = new THREE.MeshStandardMaterial({ color: 0x565c61, roughness: 0.72, metalness: 0.22 });
 const deckAt = (u, z) => {
 const b = Math.abs(surfacePoint(S, H, u, 1.0)[2]) || 1e-6;
-return H.sheer(u) + Math.cos(Math.min(1, Math.abs(z) / b) * Math.PI / 2) * b * 0.035;
+return H.deck(u) + Math.cos(Math.min(1, Math.abs(z) / b) * Math.PI / 2) * b * 0.035;
 };
 S.deckHatches.forEach(hc => {
 const u0 = hc.at, zP = (hc.z || 0) * Math.abs(surfacePoint(S, H, u0, 1.0)[2]);

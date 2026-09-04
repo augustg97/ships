@@ -16127,3 +16127,25 @@ mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen b
 unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
 sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
 cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**The close ratchet FINISHED at 18:43:51 (r215/close-ratchet.out, started 17:57:40, ~43 s a
+frame with the audit and inject runs beside it): 64 frames, ONE mover, exit 1 — against a
+prediction of none. `ship-dhow` 0.150% / 0.044 (limit 0.050% / 0.15), reproduced solo at the
+same numbers (r215/recheck-dhow.out), so not a flap. The diff image (Research/baselines/_diff/
+ship-dhow.png) is confined to the frame's right edge — a sail foot, a yard and stays behind
+the fleet panel — and the fleet order there is dhow, then COG: the cog is the dhow's berth
+neighbour, and her whole rig dropped with her deck this round (mast heel 2.01 → 0.81 m; her
+x-extent is 0.6 m shorter with the tiller and rudder head lower). So the prediction was wrong
+in one particular: the cog IS in a frame, as the dhow's neighbour, and any change to her
+silhouette will move ship-dhow. Accepted with that reason (FRAME-LOG.md). NOT explained: a
+thin sliver at the frame's LEFT edge (the junk's side) is in the diff too; the junk carries no
+deck field and is byte-identical by construction — r216 must re-capture ship-dhow solo at the
+r214 HEAD (0ff1042, `git stash`-free: check out web/ from it into a scratch tree) and say
+whether the sliver is the berth's spacing reacting to the cog's shorter extent or something
+else. No BLANK; every other frame ≤ 0.05% (globe-default at its documented flap a fourteenth
+round). Build PUBLISHED after the run (the r207 order), data-version 1788486326, docs/ at
+125.4 MB; web/index.html carries the same stamp and is in this commit's path list (the r209
+rule). The published copies read back: docs/js/hull.js carries deckEdge (5 matches),
+docs/audit-hulls.js the "a deck at the waterline" arm (1), docs/data/vessels.json belowSheerM
+(1). Push receipt and live stamp: appended below if the round survived to write them (the
+driver's kill is 19:01:28); otherwise r216 verifies the live stamp first.**
