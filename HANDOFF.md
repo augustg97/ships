@@ -15971,3 +15971,13 @@ weighing. (4) r187 emaki plate. (5) r182 grapnel shank. (6) r177 Lucian's second
 fantail gallery wings. (13) r166 screen glass. (14) r171 quarter-gallery sashes. (15) r171
 authored tier fractions. (16) r172 the 74's lower capstan barrel. (17) the cathead's
 supporting knee is a block. (18) the readiness transient: keep the r208 rule.**
+
+**Live stamp VERIFIED: 1788481754 on https://augustg97.github.io/ships/index.html at 17:30:43
+PDT, 60 s after the push at 17:29:43 (build/staging/r214/push.log, the r209 poll pattern). The
+live copies read back from the host after the stamp matched: js/hull.js carries castleGeom
+(4 matches), audit-hulls.js the "a castle with no stern beams" arm (1), data/vessels.json
+the castle plan (1). Three commits close the round (540f50d source + handoff close state,
+2b6e8dd docs + close paragraphs, and this push-log commit). Tree at close: only
+build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r214 staging
+images (witness frames), the before-copies, the scratch castle-new.js / castle-rule.js and the
+audit/inject outputs stay on disk uncommitted, the r211 convention.**
