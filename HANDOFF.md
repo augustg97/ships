@@ -16856,3 +16856,22 @@ STATE: if the paragraphs below this one are missing, the round was killed at the
 (01:10:30) — the next firing must (1) re-run the ratchet whole on this committed tree, read
 and accept every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push,
 verify the live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 00:42:19 (r220/close-ratchet.out, started 00:02:02, 40.3 min,
+~38 s a frame): 64 frames, ZERO movers, exit 0, no BLANK — "all frames within tolerance", as
+predicted. Every frame was read while the run was going (r220/sweep.out, one line per frame
+as it landed, by my own >0 count with the mean and the bbox). Sixteen lines stood over the
+sweep's own 0.05% line by that >0 count — globe-default, ship-dhow, ship-galleass,
+ship-titanic, ship-yamato, aboard-off, aboard-titanic, ship-wyoming, ship-treasure,
+shipwright-ahead, ship-endurance, ship-ever-given, sea-ever-given, passage-sahul,
+sea-canoe-floor, and ship-azzam at 0.007% — and every one of them was compared with r219's
+sweep line for the same frame and read IDENTICAL, digit for digit and box for box (the
+comparisons are in this round's transcript; the two sweep files are on disk). They are the
+r218 sub-gate residue r219 named, unchanged by a round that touched no geometry. At the
+harness's own >8 count the largest is globe-default's 2,485 px (0.048%), under the 0.05%
+gate, exactly r218's number. Nothing accepted; FRAME-LOG.md untouched. Build PUBLISHED after
+the run (the r207 order), data-version 1788507783; web/index.html carries the same stamp and
+is in this commit's path list (the r209 rule). Published copies read back by code strings (the
+build strips comments): docs/js/app.js lookAtX (1), docs/js/shipwright.js lookAtX (1) and
+aimX (3). Push receipt and live stamp appended below if the round survived to write them (the
+driver's kill is 01:10:30); otherwise r221 verifies the live stamp first.**

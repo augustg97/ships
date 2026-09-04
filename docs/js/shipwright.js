@@ -608,10 +608,13 @@ const look = SW.look;
 const d = SW.fit * SW.dist;
 if (SW.panX === undefined) SW.panX = SW.shipX;
 if (SW.panTo !== undefined) SW.panX += (SW.panTo - SW.panX) * EASE;
-SW.cam.position.set(SW.panX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
+const spin = SW.shipSpin || 0;
+const ax = SW.lookAtX !== undefined ? SW.lookAtX : 0;
+const aimX = SW.panX + ax * Math.cos(spin), aimZ = -ax * Math.sin(spin);
+SW.cam.position.set(aimX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
 d * Math.sin(SW.lat) + look,
-d * Math.cos(SW.lat) * Math.cos(SW.lon));
-SW.cam.lookAt(SW.panX, look, 0);
+aimZ + d * Math.cos(SW.lat) * Math.cos(SW.lon));
+SW.cam.lookAt(aimX, look, aimZ);
 if (SW.ground && SW.ground.material.uniforms.uRip)
 SW.ground.material.uniforms.uRip.value =
 SHIPS_SEA.rippleRange(SW.cam, SW.renderer ? SW.renderer.domElement.height : 900);

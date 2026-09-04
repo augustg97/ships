@@ -190,6 +190,7 @@ const bm = /[#&]b=(-?[\d.]+)/.exec(location.hash);
 const zm = /[#&]z=([\d.]+)/.exec(location.hash);
 const lm = /[#&]l=([\d.]+)/.exec(location.hash);
 const ym = /[#&]y=(-?[\d.]+)/.exec(location.hash);
+const xm = /[#&]x=(-?[\d.]+)/.exec(location.hash);
 const fu = /[#&]sail=(furled|set)/.exec(location.hash);
 const tryPick = () => {
 const SWs = window.SHIPS_SW && window.SHIPS_SW.SW;
@@ -203,6 +204,7 @@ if (bm) SWs.viewFromDeg = parseFloat(bm[1]);
 if (zm) SWs.dist = Math.max(0.35, Math.min(8.0, parseFloat(zm[1])));
 if (lm) SWs.lat = Math.max(0.02, Math.min(0.90, parseFloat(lm[1]) * Math.PI / 180));
 if (ym) SWs.lookAtY = parseFloat(ym[1]);
+if (xm) SWs.lookAtX = parseFloat(xm[1]);
 shipSelectPending = false; return;
 }
 if (typeof swOpenById === 'function') swOpenById(sm[1]);
