@@ -695,8 +695,8 @@ pos.push(x, z, -y);  nor.push(nx, 0, 0); uvs.push(end, j / NV);
 }
 for (let j = 0; j < NV; j++) {
 const a = base + j * 2;
-if (end === 0) idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
-else           idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+if (end === 0) idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+else           idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
 }
 }
 const g = new THREE.BufferGeometry();

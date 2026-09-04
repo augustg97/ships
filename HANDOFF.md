@@ -16607,3 +16607,34 @@ mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen b
 unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
 sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
 cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**The close ratchet FINISHED at 22:23:30 (r218/close-ratchet.out, started 21:41:30, 42.0 min,
+~39 s a frame): 64 frames, EIGHT movers, exit 1, no BLANK — shipwright 0.062%/0.031, ship-junk
+0.085/0.033, ship-usv 0.051/0.030, ship-queen-mary-2 0.061/0.018, ship-preussen 0.058/0.013,
+aboard-treasure 0.059/0.014, shipwright-astern 1.012/0.434, shipwright-furled 0.156/0.069. All
+eight are on r216's list of ten; the other two, shipwright-ahead and action-myeongnyang, read
+under the gate this time (the panokseon row's transoms at 0.013% by my own >0 count). Every
+mover was read while the run was still going (r218/sweep.out, one line per frame as it landed;
+the crops and tile sheets r218/*-band.png, tiles-a.png, tiles-b.png) and every one is a cap:
+the 74's whole transom across the counter lighter by ~42 levels on the face (crop mean
+134.8 → 136.6), berth neighbours' sterns at frame edges, the junk's own stern, the USV's
+transom, the two treasure ships' transoms in the Sea as two clean parallelograms. Accepted,
+eight reasons in FRAME-LOG.md, each with its own diff read (r218/accept-8.sh). Under the
+harness gate but visible to a >0-level count and read anyway: ship-dhow (the cog's broad stern
+cap at the right edge and the junk's at the left, 1–8 levels), the steel ships' own stern caps
+(ship-titanic, ship-yamato, ship-wyoming, sea-ever-given), aboard-off (the container ship's flat
+stem face darker with the sun aft), globe-default (ship-shaped specks at every hull's ends,
+signed mean 0.0 as the fleet heads every way), ship-galleass (the galley's stern behind the
+translucent card), and thin-line antialiasing on Endurance's rig and the Sahul dugouts'
+outlines at one to three levels — none of these tripped and none was accepted. Rule 0 on
+r218/astern-band.png read whole: a ship of the line from astern, the transom's window rows and
+gallery bands lit as an aft-facing surface, the wheel and capstan on her deck over the
+taffrail, the mizzen and its rigging, textured water — a rendered world. Three facts a viewer
+can read off it without a legend: the stern is a flat face carrying rows of windows; the
+quarter galleries stand out from it on both sides; the deck is planked fore-and-aft with the
+wheel just forward of the taffrail. Build PUBLISHED after the run (the r207 order),
+data-version 1788499462; web/index.html carries the same stamp and is in this commit's path
+list (the r209 rule). Published copies read back by code strings: docs/js/hull.js the bow
+cap's new winding (present), docs/audit-hulls.js 'skin faces wound against their normals' (1).
+Push receipt and live stamp appended below if the round survived to write them (the driver's
+kill is 22:47:44); otherwise r219 verifies the live stamp first.**
