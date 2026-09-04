@@ -16875,3 +16875,18 @@ is in this commit's path list (the r209 rule). Published copies read back by cod
 build strips comments): docs/js/app.js lookAtX (1), docs/js/shipwright.js lookAtX (1) and
 aimX (3). Push receipt and live stamp appended below if the round survived to write them (the
 driver's kill is 01:10:30); otherwise r221 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788507783 on https://augustg97.github.io/ships/index.html at 00:45:06
+PDT, 90 s after the push (build/staging/r220/push.log, the r209 poll pattern). Three commits
+close the round (c2b333d source + handoff, 9bec3b2 docs + close paragraph, and this push-log
+commit). Tree at close: only build/loop.log and the r205 daemon's cookie file uncommitted,
+deliberately; the r220 staging (the three before-copies, the bearing probes, the two witnesses
+with their crop and diff, the width probe and its output, the audit outputs, the sweep, the
+predictions, run-close.sh, push-verify.sh) stays on disk uncommitted, the r211 convention.
+r221 opens with residual (0d) — the nine `H.sheer` deck-readers named in r215
+(buildRaisedEnds, buildFunnel, buildBoats, buildTurrets, buildSternAviation, buildNetDefence,
+buildWingSail, buildJunkCastle, buildPaddles) switched to `H.deck`, a change that is
+byte-identical on every hull without deck.belowSheerM and so should ratchet 64/0 — or (0a) if
+a route to Lahn 1992's plates appears; r218's hunt paragraph lists every route that walled.
+For any close witness from now on, name the point along the hull with x= (loft metres from
+amidships, aft positive) and take it before the ratchet is launched.**
