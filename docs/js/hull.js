@@ -165,11 +165,15 @@ g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return g;
 }
-function beamStations(S) {
+function beamRows(S) {
 if (!(S.deck && S.deck.throughBeams)) return [];
 const n = S.deck.throughBeams;
-return S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+if (S.deck.beamStations)
+return S.deck.beamStations.map(s => ({ u: s.u !== undefined ? s.u : frameU(S, s.spant), st: s })).sort((a, b) => a.u - b.u);
+const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+return us.map(u => ({ u, st: null }));
 }
+function beamStations(S) { return beamRows(S).map(r => r.u); }
 function frameStations(S, NF) {
 const rs = S.frames && S.frames.roomAndSpaceM;
 if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
@@ -2865,7 +2869,7 @@ group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
 if (S.deck && S.deck.throughBeams) {
 const n = S.deck.throughBeams;
 const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
-const us = beamStations(S);
+const rows = beamRows(S), us = rows.map(r => r.u);
 const endGrain = mats.endGrain || (mats.endGrain = (() => {
 const c = document.createElement('canvas'); c.width = c.height = 64;
 const ctx = c.getContext('2d');
@@ -2911,10 +2915,13 @@ group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn
 'A grown knee standing on the beam and against the inside of the planking, up to the '
 + 'top strake — Lahn, Blatt 2, draws one at every beam end. Sidings are class defaults.'));
 }
-group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken)',
+const st = rows[i].st;
+const where = st ? (st.spant !== undefined ? ' Spant ' + st.spant : ' u ' + st.u) + (st.derived ? ' — ' + st.derived : ", the record's")
+: S.deck.beamsAtU ? " the record's" : ' a CLASS DEFAULT, the beams spread evenly over the deck';
+group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken' + (st && st.name ? ', ' + st.name : '') + ')',
 'An athwartship deck beam whose heads pass through the planking and stand '
 + Math.round(proud * 100) + ' cm proud of the hull side — the beam-ended profile '
-+ 'every cog seal draws. Count from the record; its station' + (S.deck.beamsAtU ? '' : ' a CLASS DEFAULT, the beams spread evenly over the deck')
++ 'every cog seal draws. Count from the record; its station' + where
 + '; ' + Math.round(sq * 100) + ' cm square is a class default below what the plates resolve.'));
 });
 }

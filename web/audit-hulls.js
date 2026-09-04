@@ -779,6 +779,37 @@
             if (edge < 1e8 && (b[4] > edge + 0.02 || b[4] < edge - 0.15))
               say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
           }
+          /* D-BEAM-STATION (round 229): a record that names the beams' stations
+             (deck.beamStations, each { spant | u }, a frame number placed by the arithmetic
+             D-FRAMES counts with) stands a deck-beam at every one of them. The station's x
+             is read off the SKIN — the vertex at that u (the skin's uv, as D-SECTION reads
+             it) nearest the beam's own height — because a raked end carries its stations
+             forward of (u − 0.5)·L, and the beam is placed on the skin's edge. Before this
+             rule the sections and the rail were read at the sheet's frames while the beams
+             stood at class stations 0.65–0.87 m from them, and nothing compared the two. */
+          if (H.deck.beamStations) {
+            const rsB = H.frames && H.frames.roomAndSpaceM, nFB = rsB ? Math.floor(0.89 * L / rsB) + 1 : 0;
+            const uvB = skin.geometry.attributes.uv;
+            const bxs = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; });
+            if (H.deck.beamStations.length !== H.deck.throughBeams)
+              say(v.id, "beam stations off the record's count", `${H.deck.beamStations.length} stations, throughBeams ${H.deck.throughBeams}`);
+            H.deck.beamStations.forEach((st, i) => {
+              const label = st.name || ('beam ' + (i + 1));
+              let u;
+              if (st.u !== undefined) u = st.u;
+              else if (rsB) u = 0.055 + 0.89 * st.spant / (nFB - 1);
+              else { say(v.id, 'a beam station named by frame number on a record with no frame pitch', `${label}: Spant ${st.spant}, no frames.roomAndSpaceM`); return; }
+              const yRef = bxs.length ? bxs[0].y : deckEdgeNear(0);
+              let want = (u - 0.5) * L;
+              if (uvB) {
+                let best = 1e9; for (let k = 0; k < uvB.count; k++) best = Math.min(best, Math.abs(uvB.getX(k) - u));
+                let dy = 1e9; for (let k = 0; k < uvB.count; k++) if (Math.abs(uvB.getX(k) - u) <= best + 1e-6 && Math.abs(sv[k][1] - yRef) < dy) { dy = Math.abs(sv[k][1] - yRef); want = sv[k][0]; }
+              }
+              let near = 1e9; for (const q of bxs) near = Math.min(near, Math.abs(q.x - want));
+              if (near > 0.15)
+                say(v.id, "a through-beam off the record's station", `${label} wanted at x ${want.toFixed(2)} m (${st.spant !== undefined ? 'Spant ' + st.spant : 'u ' + u}${st.derived ? ', derived' : ''}), the nearest deck-beam ${near.toFixed(2)} m away`);
+            });
+          }
           /* D-KNEES (round 216): a standing knee at every beam end, both sides — its foot on
              the beam (at the deck's edge), its head up at the top strake, and the whole of it
              INSIDE the planking. A knee outboard of the skin is a knee drawn through the hull. */

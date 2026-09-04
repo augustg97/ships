@@ -319,11 +319,25 @@ function buildKeelGeometry(S) {
    hull's own length; and no frame within a timber's siding of a through-beam station,
    because the standing knee (r216) is the timber against the skin there, and two timbers in
    one place flicker. */
-function beamStations(S) {
+/* ── THE BEAMS STAND AT THE RECORD'S STATIONS (round 229) ────────────────────────────
+   Lahn's Blatt 2 titles its sections by the frame each beam sits on — 'Spant 5 mit
+   Querbalken DB 1', Spant 12 / DB 2, Spant 26 / DB 4, Spant 33 / DB 5 — and r226–r228 read
+   the section forms and the rail plan at those frames while the beams themselves stood at
+   class stations (0.14 + 0.70·i/4), 0.65–0.87 m from the frames the sheet names (r229's audit variant). A record
+   may carry deck.beamStations, one entry a beam, each { spant | u } like the section's
+   stations and placed by the same frameU, with a name (the sheet's 'DB 3') and, where the
+   station is not read but derived, the derivation, which the card prints. Sorted by u, so
+   beam i of n counts from the bow. Without the field: beamsAtU, then the class spread,
+   byte-identical. */
+function beamRows(S) {
   if (!(S.deck && S.deck.throughBeams)) return [];
   const n = S.deck.throughBeams;
-  return S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+  if (S.deck.beamStations)
+    return S.deck.beamStations.map(s => ({ u: s.u !== undefined ? s.u : frameU(S, s.spant), st: s })).sort((a, b) => a.u - b.u);
+  const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+  return us.map(u => ({ u, st: null }));
 }
+function beamStations(S) { return beamRows(S).map(r => r.u); }
 function frameStations(S, NF) {
   const rs = S.frames && S.frames.roomAndSpaceM;
   if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
@@ -4601,7 +4615,7 @@ function buildFittings(S, group, mats) {
   if (S.deck && S.deck.throughBeams) {
     const n = S.deck.throughBeams;
     const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
-    const us = beamStations(S);
+    const rows = beamRows(S), us = rows.map(r => r.u);
     /* ── THE HEADS ARE END GRAIN (round 216). A beam head outside the planking is a
        CROSS-CUT of the timber: paler than the weathered side grain, ringed, checked from
        the heart. A cube in the hull's tone read as a bump on the strakes (r215 witness);
@@ -4669,10 +4683,15 @@ function buildFittings(S, group, mats) {
       }
       /* keyed 'crossbeam', not 'deck': the audit reads part.deck's breadth as the deck's
          edge, and a beam head 25 cm proud of the skin is not the deck's edge */
-      group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken)',
+      /* the station on the card (round 229): the record's frame ('Spant 5, the record's'),
+         a derived one with its derivation, or the class default named as such */
+      const st = rows[i].st;
+      const where = st ? (st.spant !== undefined ? ' Spant ' + st.spant : ' u ' + st.u) + (st.derived ? ' — ' + st.derived : ", the record's")
+                  : S.deck.beamsAtU ? " the record's" : ' a CLASS DEFAULT, the beams spread evenly over the deck';
+      group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken' + (st && st.name ? ', ' + st.name : '') + ')',
         'An athwartship deck beam whose heads pass through the planking and stand '
         + Math.round(proud * 100) + ' cm proud of the hull side — the beam-ended profile '
-        + 'every cog seal draws. Count from the record; its station' + (S.deck.beamsAtU ? '' : ' a CLASS DEFAULT, the beams spread evenly over the deck')
+        + 'every cog seal draws. Count from the record; its station' + where
         + '; ' + Math.round(sq * 100) + ' cm square is a class default below what the plates resolve.'));
     });
   }

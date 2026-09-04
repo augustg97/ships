@@ -513,6 +513,29 @@ say(v.id, 'a through-beam that does not come through', `reaches ${Math.min(b[5],
 if (edge < 1e8 && (b[4] > edge + 0.02 || b[4] < edge - 0.15))
 say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
 }
+if (H.deck.beamStations) {
+const rsB = H.frames && H.frames.roomAndSpaceM, nFB = rsB ? Math.floor(0.89 * L / rsB) + 1 : 0;
+const uvB = skin.geometry.attributes.uv;
+const bxs = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; });
+if (H.deck.beamStations.length !== H.deck.throughBeams)
+say(v.id, "beam stations off the record's count", `${H.deck.beamStations.length} stations, throughBeams ${H.deck.throughBeams}`);
+H.deck.beamStations.forEach((st, i) => {
+const label = st.name || ('beam ' + (i + 1));
+let u;
+if (st.u !== undefined) u = st.u;
+else if (rsB) u = 0.055 + 0.89 * st.spant / (nFB - 1);
+else { say(v.id, 'a beam station named by frame number on a record with no frame pitch', `${label}: Spant ${st.spant}, no frames.roomAndSpaceM`); return; }
+const yRef = bxs.length ? bxs[0].y : deckEdgeNear(0);
+let want = (u - 0.5) * L;
+if (uvB) {
+let best = 1e9; for (let k = 0; k < uvB.count; k++) best = Math.min(best, Math.abs(uvB.getX(k) - u));
+let dy = 1e9; for (let k = 0; k < uvB.count; k++) if (Math.abs(uvB.getX(k) - u) <= best + 1e-6 && Math.abs(sv[k][1] - yRef) < dy) { dy = Math.abs(sv[k][1] - yRef); want = sv[k][0]; }
+}
+let near = 1e9; for (const q of bxs) near = Math.min(near, Math.abs(q.x - want));
+if (near > 0.15)
+say(v.id, "a through-beam off the record's station", `${label} wanted at x ${want.toFixed(2)} m (${st.spant !== undefined ? 'Spant ' + st.spant : 'u ' + u}${st.derived ? ', derived' : ''}), the nearest deck-beam ${near.toFixed(2)} m away`);
+});
+}
 const knees = byName('deck-knee');
 if (knees.length !== 2 * H.deck.throughBeams)
 say(v.id, 'through-beams without their knees', `${knees.length} deck-knee, ${2 * H.deck.throughBeams} wanted for ${H.deck.throughBeams} beams`);
