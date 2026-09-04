@@ -17164,3 +17164,12 @@ hunt paragraph lists every route that walled. One method note from this round's 
 aggregate box over a part name (Main gun, Turret) can move by a fraction of the injected
 number when the name covers two populations standing on two datums; sum the moves across the
 rounds that switched each population before reading a fraction as a fault.**
+
+**Live stamp VERIFIED: 1788515855 on https://augustg97.github.io/ships/index.html at 02:59:12
+PDT, 60 s after the push (build/staging/r222/push.log, the r209 poll pattern). Two commits
+close the round (79aa4a2 source + audit + docs + handoff, and this push-log commit). Tree at
+close: only build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the
+r222 staging (hull.before.js, audit-hulls.before.js, vessels.before.json, inject.py, the two
+edit scripts, the two diffs, the eight measures, the two witnesses, the audit outputs, the
+sweep and compare-sweeps.py, the predictions, run-close.sh, push-verify.sh) stays on disk
+uncommitted, the r211 convention.**
