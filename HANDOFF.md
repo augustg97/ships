@@ -16508,3 +16508,102 @@ script, the audit/inject/measure/ratchet outputs, the predictions) stays on disk
 uncommitted, the r211 convention. r218 opens with residual (0a) — the cog's frame pitch is a
 class default until Lahn 1992 Blatt 3 or 28–34 is fetched — or, if that fetch walls again,
 (0g) the transom-winding audit rule carried from r216's close gate, which needs no source.**
+
+## Round 218 — 2026-09-03 — the loft's end caps wind outward: r216's darker transom was the inside of the ship, and the audit now reads every skin face's winding against its normal
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r217 said r218 opens
+with residual (0a), the cog's frame pitch, or if that fetch walls again, (0g), the transom
+winding. The fetch walled; (0g) is DONE, and its rule found a second fault on Azzam, carried
+as (0h) below.**
+
+**The (0a) hunt, time-boxed and walled (every attempt listed so the next round does not
+repeat it). Three searches (German and English, Lahn / Spantabstand / room and space /
+Bodenwrangen / Auflanger) returned no frame sentence for the Bremen cog. Fetched and read:
+fairwoodworks.de's Kogge build (frames lettered A–I, no dimensions, no Lahn plate cited);
+the Wettringer Modellbauforum thread 73272 (no numbers); en.wikipedia Bremen cog ("The rib
+timber was built in after the hull had been made", nothing more); the warshipsresearch blog
+(dimensions only). Refused: digital.deutsches-museum.de object 1991-518 (HTTP 429),
+academia.edu 40454772 "Still a Cog but not as we knew it" (403), hansekogge.de's Der Bau page
+(the fetch failed, as in r217), ww3.dsm.museum (DNS failure). Fetched but unread: the ISPRS
+2025 geometric-monitoring paper on the cog (r218/isprs-2025-monitoring.pdf, 3.3 MB) — no PDF
+text library on this machine or in the Studio venv (pypdf and fitz both absent), and a
+monitoring paper is unlikely to inventory the framing. The DGAMN 35–40 cm figure came back
+a second time and is the scrapped wreck r217 identified, not this ship. The cog's frames
+stay a CLASS DEFAULT at 0.50 m; Lahn 1992 Blatt 3 or 28–34 remains the one fetch that would
+replace it.**
+
+**(0g): what the arithmetic says. buildHullGeometry closes the skin's two ends with their own
+vertices and stored normals (∓1, 0, 0): for each end, vertex a is starboard at v_j, a+1 port
+at v_j, a+2 starboard at v_{j+1}, a+3 port at v_{j+1}. The bow cap (u = 0, at −x) was wound
+(a, a+1, a+2): (a+1−a) × (a+2−a) = (0, 0, −2w) × (0, Δh, Δw) = (2wΔh, 0, 0), along +x — INTO
+the ship, against its stored (−1, 0, 0). The stern cap (u = 1, at +x) was wound (a, a+2, a+1),
+which is the same cross product negated, along −x — into the ship again. Both caps wound
+inward, on every hull, since the caps were added. It showed nothing while the shader lit every
+face by its stored normal; r216's gl_FrontFacing flip made it light: a cap seen from outside
+is a BACK face under that winding, so its normal was negated and the transom took the light of
+the inside of the ship (the ten frames r216 accepted as "a shade darker, physically right").
+The face was not turned from the sun; it was wound backwards.**
+
+**The change, fixed where the class lives (before-copies in build/staging/r218/).**
+(1) web/js/hull.js, buildHullGeometry's end caps: the bow cap winds (a, a+2, a+1) and the
+stern cap (a, a+1, a+2); the comment carries the derivation above. The position, normal and uv
+attributes are byte-identical to r217's — only the triangle order changed — so measure_ship
+would read r217's numbers to the millimetre and was not re-run; the change is not a
+measurement, it is a sign. (2) Research/audit-hulls.js, THE SKIN IS WOUND OUTWARD, synced to
+web/ (docs/ by the build): for the planking mesh, every indexed triangle's geometric normal
+(b−a)×(c−a) against the mean of its three stored vertex normals; a face standing more than
+120° from its own normal (cos < −0.5) convicts as 'skin faces wound against their normals',
+with the count, the total, and the x and y range of the faces; slivers under 1e-4 m² skipped.
+Record-blind, every hull.**
+
+**Proven on the old loft before the fix, no inject script needed (r218/audit-before.out): 33
+hulls, 33 convictions — 286 of 121,246 triangles on every fine hull, which is two caps × 72
+rows × 2 triangles less two slivers, with the x range the hull's own length; the dugout 157
+(a coarser loft), the double canoe 248, the trireme 252, the galley 284, Azzam 798. After the
+fix, first run at cos < 0 (r218/audit-after.out): 32 hulls clean, Azzam alone 512 faces at
+x 66.0–81.7, y 0.2–9.0 — her stern terraces. Rule 8: probed (r218/probe-azzam.py →
+probe-azzam.out) — all 512 lie in one bin, cos −0.03 to −0.05; a sample face at x 66.05,
+y 0.45, z 8.69 has both edges with Δx 0.003 (a face in an x = const plane), geometric normal
+(−1.00, −0.02, 0.05), stored normal (0.09, −0.36, 0.93). These are the risers of her stern
+terraces at the loft's snap pairs: the one-sided finite difference there deliberately takes
+the SIDE's tangent away from the break, so the riser's vertices carry the side's normal,
+which lies in the riser's own plane. That is not a reversed face; it is a face with no normal
+of its own, a different fault. The rule took the cos < −0.5 threshold with that reason written
+in it (a reversed cap reads −1.00 exactly), and the fault is carried as (0h) with the numbers.
+Final run (r218/audit-after2.out): 33 hulls, 0 problems.**
+
+**The close ratchet, started 21:41:30 (r218/run-ratchet.sh → close-ratchet.out) on a tree
+whose every change is described above. Predictions: r218/PREDICTIONS-close.md — the ten
+frames r216 accepted for the cap reason move BACK by about their r216 amounts (shipwright-
+astern ~1.0%, shipwright-furled, ship-preussen, shipwright, ship-queen-mary-2, ship-junk,
+action-myeongnyang, aboard-treasure, shipwright-ahead, ship-usv), the documented flaps ride
+along, nothing else. The witness for rule 1 is the run's own shipwright-astern frame (46th of
+64, due about 22:10), to be read against its r216 baseline and the r216 astern crop
+(r216/astern-before-after.png) when it lands; the rule 0 answer is written below it if the
+round survived that long. CLOSE STATE: if the paragraphs below this one are missing, the round
+was killed at the close gate (22:47:44) — the next firing must (1) re-run the ratchet whole on
+this committed tree, read and accept every mover with its reason, (2) `python3
+build/build_site.py`, (3) commit, push, verify the live stamp, the r198 rule.**
+
+**Named residuals, in order (r217's list, renumbered):** (0a) OPEN — the cog's frame pitch
+is a class default; the hunt above lists what walled. (0b) the futtock's bevel and rough head.
+(0c) the beams' stations and count (Lahn 1992 or Blatt 2 at a legible scale). (0d) the nine
+`H.sheer` deck-readers on other classes must switch to `H.deck` before any second hull takes
+deck.belowSheerM. (0e) belowSheerM contested by 0.4 m. (0f) the beam-head wedge at 60+ px/m.
+(0g) CLOSED this round — the caps wind outward and the audit reads the winding. NEW (0h):
+**Azzam's stern-terrace risers carry the side's normal** — 512 skin faces at x 66.0–81.7,
+y 0.2–9.0 lie in x = const planes with their geometric normal along −x and a stored normal
+along the side (cos −0.03 to −0.05). Two things to settle: a rule of their own ('a skin face
+whose stored normal lies in its own plane', |cos| < 0.3), and the loft fix — duplicate the
+vertex rows at a snap pair so the riser quads take their own ±x normal; and whether −x is the
+right facing for a riser at a terrace that steps DOWN going aft (its visible face is toward the
+stern, +x) is not resolved — the winding there may be reversed as well as the normal wrong.
+Queen Mary 2's terraces did not convict, so hers differ; find out why before fixing Azzam's.
+(1) r214: the Gangspill's station. (2) r214: the wings' inner-edge and forward-end rails, no
+source. (3) r213: decked timber ships' rudder heads stop at 0.35 of the sheer; no helm port.
+(4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177 Lucian's
+second machine. (8) r176 sekibune class-size, paired with r211's top question. (9) Preussen
+mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen black
+unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
+sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
+cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**

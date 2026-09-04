@@ -866,6 +866,45 @@
       }
     }
 
+    /* ── THE SKIN IS WOUND OUTWARD (round 218) ──────────────────────────────────────────
+       The hull shader lights a back face by its own facing since r216 (gl_FrontFacing), so
+       the winding of every skin triangle is now LIGHT: a face wound against the normal its
+       vertices carry is lit as the inside of the ship. r216's close ratchet found the loft's
+       end caps that way — the flat transom the loft closes across the counter, and the stem's
+       closure — on every hull, and accepted the darker transom with the reason written; the
+       fact stayed in the geometry. This rule makes it a conviction: every skin triangle's
+       geometric normal, (b−a)×(c−a), must not stand more than 120° from the mean of its three
+       vertex normals (a reversed face reads cos −1; the caps read −1.00 exactly). Record-blind.
+       Slivers under 1e-4 m² are skipped (a degenerate triangle has no winding to speak of).
+       Rule 8 on the first run (r218): the caps convicted every hull at −1, and Azzam alone kept
+       512 faces at cos −0.03 to −0.05 — the risers of her stern terraces, whose vertices carry
+       the neighbouring SIDE's normal by the loft's one-sided difference at a snap pair, so the
+       stored normal lies in the riser's own plane. That is not a reversed winding; it is a
+       face with no normal of its own, a different fault, named in HANDOFF r218 with its
+       numbers and left for its own rule and a loft fix (the snap-pair rows duplicated so the
+       riser takes ±x). The threshold is what keeps this rule to the fault it names. */
+    {
+      let skin = null; g.traverse(o => { const p = tagOf(o); if (!skin && o.isMesh && p && p.key === 'planking') skin = o; });
+      const geo = skin && skin.geometry;
+      if (geo && geo.index && geo.attributes.normal) {
+        const P = geo.attributes.position, Nn = geo.attributes.normal, I = geo.index;
+        let bad = 0, tot = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+        for (let t = 0; t < I.count; t += 3) {
+          const a = I.getX(t), b = I.getX(t + 1), c = I.getX(t + 2);
+          const ax = P.getX(a), ay = P.getY(a), az = P.getZ(a);
+          const e1x = P.getX(b) - ax, e1y = P.getY(b) - ay, e1z = P.getZ(b) - az;
+          const e2x = P.getX(c) - ax, e2y = P.getY(c) - ay, e2z = P.getZ(c) - az;
+          const nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
+          if (Math.hypot(nx, ny, nz) / 2 < 1e-4) continue;
+          tot++;
+          const sx = Nn.getX(a) + Nn.getX(b) + Nn.getX(c), sy = Nn.getY(a) + Nn.getY(b) + Nn.getY(c), sz = Nn.getZ(a) + Nn.getZ(b) + Nn.getZ(c);
+          const ln = Math.hypot(nx, ny, nz), ls = Math.hypot(sx, sy, sz) || 1;
+          if ((nx * sx + ny * sy + nz * sz) / (ln * ls) < -0.5) { bad++; x0 = Math.min(x0, ax); x1 = Math.max(x1, ax); y0 = Math.min(y0, ay); y1 = Math.max(y1, ay); }
+        }
+        if (bad) say(v.id, 'skin faces wound against their normals', `${bad} of ${tot} triangles, at x ${x0.toFixed(1)} to ${x1.toFixed(1)}, y ${y0.toFixed(1)} to ${y1.toFixed(1)}`);
+      }
+    }
+
     /* ── A ONE-PIECE HULL RAISES NO POSTS AND WEARS NO WALES (round 121) ────────────────
        "Construction: single trunk, fire and adze" — there is nothing to scarf a stem to
        and no strake to thicken into a wale, yet the dugout wore separate posts and two

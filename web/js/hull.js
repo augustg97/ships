@@ -1112,7 +1112,15 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
      and a sternpost with actual width. So the mesh was open at bow and stern and you could see
      straight through into the inside of the ship, which is most of what read as "gaps".
      They are closed with their own vertices and their own outward normals, because reusing the
-     hull's surface normals would light a flat end as if it were curved planking. */
+     hull's surface normals would light a flat end as if it were curved planking.
+     ⚠ AND THE CAPS WERE WOUND INWARD (found r216, fixed r218). Vertex a is starboard at v_j,
+     a+1 port at v_j, a+2 starboard at v_{j+1}: (a, a+1, a+2) has (a+1−a)×(a+2−a) along +x, so
+     wound that way the BOW cap's front faced aft, into the ship, and the stern cap's forward —
+     against the (±1, 0, 0) normals stored on the same vertices. Nothing showed while the shader
+     lit every face by its stored normal; once it lit a back face by its facing (gl_FrontFacing,
+     r216) the transom went a shade darker on ten frames, from the inside of the ship. The bow
+     cap winds (a, a+2, a+1) and the stern cap (a, a+1, a+2); the audit reads the winding
+     against the normal on every skin triangle. */
   for (const end of [0, 1]) {
     const nx = end === 0 ? -1 : 1;
     const base = pos.length / 3;
@@ -1123,8 +1131,8 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
     }
     for (let j = 0; j < NV; j++) {
       const a = base + j * 2;
-      if (end === 0) idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
-      else           idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+      if (end === 0) idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
+      else           idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
     }
   }
 
