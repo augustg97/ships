@@ -15981,3 +15981,149 @@ the castle plan (1). Three commits close the round (540f50d source + handoff clo
 build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r214 staging
 images (witness frames), the before-copies, the scratch castle-new.js / castle-rule.js and the
 audit/inject outputs stay on disk uncommitted, the r211 convention.**
+
+## Round 215 — 2026-09-03 — the cog's deck goes down to her beams: the loft learns that the deck is not the sheer, and five through-beams come out through the planking
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r214's head residual —
+the cog's main deck lies at the sheer where the wreck's lies about 1.2 m below the top
+strake on through-beams, with a bulwark above — is DONE, at the class level.**
+
+**The record.** Lahn, Blatt 2 (the cross-section sheet, photographed at about 30 px/m,
+r213/lahn-blatt2.jpg; gridded crops in r215/lahn-blatt2-sections.png) titles its four
+sections 'Spant .. mit Querbalken DB 1', 'DB 2', 'DB 4', 'DB 5' and draws each deck beam's
+top about a third of the side's height under the sheer: read 0.31 and 0.33 of sheer-to-keel
+at the two midship sections, which on a 4.26 m side (freeboard 2.01 + draught 2.25) is
+1.3–1.4 m, ±0.2 m at that scale. Lahn's Blatt 9 elevation (r213, 60 px/m) puts the castle
+deck about 5.4 m over the keel; through the castle's headroom (deckHM 1.95, a class default)
+that chain reads the main deck 0.8–1.1 m under the sheer. The two reads disagree by about
+0.4 m and the record says so as a field (deck.belowSheerContest); belowSheerM 1.2 sits
+between them. The deck is LEVEL — the beam heads in Blatt 9 lie in one line while the
+sheer rises aft, so the bulwark deepens toward the castle. throughBeams 5 is the sheet's own
+numbering, a floor not a census; the beams' stations are a class default (spread evenly from
+u 0.14 to 0.84) because the frame numbers in the section titles do not resolve at 640 px.
+The covering is recorded too — Westphal (DAS LOGBUCH 27/1991): 'Ebenso wie das Hauptdeck ist
+auch das Kasteldeck über Längsbalken querbeplankt' — a planked deck, ATHWARTSHIPS over
+fore-and-aft beams; the model lays its planks fore-and-aft, a class default the record
+contradicts (residual below). The DSM booklet's one height, 7.02 m to the winch on the castle
+deck, is the check: the Gangspill's top now stands about 6.7 m over the keel (was ~8.1).**
+
+**The change (web/js/hull.js; before-copy r215/hull.before.js) — fixed where the class lives.
+`hullSurface(S)` gains `deck(u)`: the sheer minus the record's `deck.belowSheerM`, constant
+(`S.freeboard − drop`) when the record says `deck.level`, and the sheer itself for every hull
+without the field — byte-identical geometry. A new `deckEdge(S, H, u)` gives the skin point
+AT deck height (the skin's height is linear in v above 0.62, so the v is direct, no
+bisection). Every builder that means "the deck" reads those two now: `buildDeckGeometry`'s
+edge, `buildFittings`' deckAtU and halfAtU (windlass, capstan, gratings, tiller, castle
+posts and cabins, coils), the waterway's edge (`deckEdge` — it had its own `surfacePoint(u,
+1)`), `castleGeom`'s yDeck (so the castle, the Gangspill on it and the tiller under it all
+dropped 1.5 m by construction), both `buildRig` deckAt copies (the mast heel and the sail
+clearances), and `buildDeckHatches`' camber seat. The RAIL alone keeps the sheer, on purpose
+and by name (`railAtU`, `railHalfAtU`): it caps the skin's top — on a hull whose deck lies
+below the sheer the rail caps the bulwark, not the deck. THROUGH-BEAMS, gated on
+`deck.throughBeams`: a 0.30 m square timber (class default) at each station spanning the
+skin's breadth at deck height plus 0.25 m proud a side, its top 2 cm under the deck, keyed
+'crossbeam' (the first draft keyed them 'deck' and the r-old waterway rule read the beam
+heads as the deck's edge — the audit was right about what it saw). The hull material is
+DoubleSide, so lowering the deck exposes the planking's inner face as the bulwark with no
+new geometry. Record (web/data/vessels.json, before-copy r215/vessels.before.json):
+`hull.deck {covering 'wood', belowSheerM 1.2, level true, throughBeams 5, provenance,
+belowSheerContest}`. Remaining `H.sheer` readers that mean a deck on OTHER classes
+(buildRaisedEnds, buildFunnel, buildBoats, buildTurrets, buildSternAviation,
+buildNetDefence, buildWingSail, buildJunkCastle, buildPaddles) were left as they are — none
+of those hulls carries the field, so they are identical either way; when a second hull
+takes `deck.belowSheerM` they must be switched first (residual).**
+
+**Measured (measure_ship, r215/measure2.out after the fixes; r214 values in brackets):
+Weather deck y 0.81–0.94 [2.01–3.1], 21.28 m long; Waterway 0.80–0.84 at ±3.73 [at the
+sheer, 2.00–3.02 — caught by measurement, fixed]; Rail 2.01–3.18 (the sheer, unchanged);
+five Through-beams at u 0.13/0.31/0.49/0.66/0.85, each 0.30 m, y 0.49–0.79, reaching
+±2.45 … ±3.98; Mast heel 0.81 [2.0], head 10.93; castle-deck level at 2.76 [4.28] — 5.01 m
+over the keel against Lahn's ~5.4; castle-heckbalken 0.81–1.07 [2.35–2.84]; castle-post
+feet 0.81; rudder-tiller 2.15–2.27 [3.67–3.80]; Sternpost head 2.61; model extent +0.98 m
+over the record LOA [+1.58]. The whole castle chain moved by construction — nothing in it
+was edited.**
+
+**The audit rule (Research/audit-hulls.js, THE DECK LIES WHERE THE RECORD PUTS IT, synced to
+web/ and docs/), record-gated on `deck.belowSheerM`, read off the built vertices in hull
+space: D-DEPTH (skin top over the deck's edge at midships = record ±0.15), D-LEVEL (edge
+height equal at u 0.2 and 0.8, ±0.1, when the record says level), D-BEAMS (deck-beam count =
+record; each reaches ≥ 0.1 m past the skin AT ITS OWN HEIGHT both sides; top within
+−0.15/+0.02 of the deck's edge), D-CASTLE (castle deck = main deck edge + deckHM ±0.15, so
+the chain holds); record-blind D-RAIL (the rail did not follow the deck down: rail min y ≥
+skin top − 0.3) and D-WELL (deck edge ≥ 0.2 m over the water — a deck at the waterline is a
+hull that floods). Rule 8 fired once on its own first draft: D-BEAMS read the cog's foremost
+beam as 'not through' (2.45 vs a skin 2.36 at x −7.5) because the skin's vertices near that
+x include a fuller station's WATERLINE further aft — the raked bow leans forward — while
+the witness shows the head standing proud; the skin read is banded on the beam's height
+now. Clean tree: checked 33 hulls, 0 problems (r215/audit.out, audit.err).**
+
+**Proven to fire (r215/inject-a.js, inject-b.js). inject-a severs the builder — one beam
+removed, the rest dropped 0.8 m and shortened to 0.8 of their span, the weather deck pushed
+0.4 m down: the cog alone, "a deck off the record's depth", "through-beams off the record's
+count" (4 / 5), "a through-beam that does not come through" ×4, "a through-beam off its deck"
+×4, "a castle deck off its headroom", plus the old "a waterway adrift of its deck" (the
+waterway stayed where the builder put it); no other hull (r215/inject-a.out). inject-b drags
+the record under the faithful builder. Its first form set belowSheerM 2.2, which puts a
+level deck 0.19 m UNDER the load waterline: the loft clamps a deck at the waterline
+(deckEdge's k ≥ 0), and the rule then convicted the DISAGREEMENT between the built deck
+and the record on every gated arm (depth 2.01 vs 2.2, headroom, five beams 'off their deck')
+as well as D-WELL — the right behaviour for an impossible record, recorded here so the next
+reader does not mistake it for a gating fault. The second form sets 1.9 (deck 0.11 m over
+the water, no clamp): the cog alone, "a deck at the waterline — edge 0.11 m over the water at
+midships", every record-gated arm silent, 33 hulls checked (r215/inject-b.out; two earlier
+attempts timed out at FRAME_READY under the ratchet's load — one browser at a time).**
+
+**Witnessed (rule 1): r215/deck-quarter.png (Shipwright, bearing 135, zoom 0.7, level 6) —
+the deck well below the pale rail, the planking's inner face standing as a bulwark forward,
+five beam heads pierced through the strakes in one level line under a rising sheer, the
+castle's walled after part, Gangspill and windlass end all lower against the sail; the
+Heckbalken ends and the short posts on them now outboard of the planking at deck height,
+which is what Westphal describes and the Roland replica shows. r215/deck-high-quarter.png
+(bearing 210, zoom 0.55, level 9) — looking down over the castle wall into the open deck
+with its grating, the wing walls and stanchions, the through-beam heads on the port side.
+Rule 0 answered on deck-quarter.png read whole: it reads as a rendered world — clinker
+strakes with their shadowed lands, a rope-coiled rail forward, the boarded castle, open
+water to a low coast. Three facts a viewer can read off it without a legend: the deck is
+sunk a man's height below the rail; beam ends stick out through the hull side in a row;
+the after castle stands wider than the hull, on posts. What it does NOT yet read right:
+the beam heads are plain cubes with the hull's tone and no end-grain; the bulwark's inner
+face is the outer planking's shader seen from behind, so it shows clinker lands the wrong
+way (residual).**
+
+**The close ratchet, started 17:57:40 (r215/run-ratchet.sh → close-ratchet.out), ~44 s a
+frame under the audit and inject runs beside it, ends about 18:45 against the driver's
+80-minute kill at 19:01:28. Predictions: r215/PREDICTIONS-close.md — no mover beyond
+tolerance; the cog has no frame of her own. This paragraph is written at 18:22 with the run
+at frame 28 of 64 so that the tree is committed whatever the kill does. Two edits landed
+AFTER the run started, both invisible to every frame: the through-beams' tag key ('deck' →
+'crossbeam', userData only; the cog is in no frame) and the cog record's `covering 'wood'`
+(the same DECK_COVERINGS entry the heuristic already chose — material identical). CLOSE
+STATE: if the paragraphs below this one are missing, the round was killed at the close gate
+— the next firing must (1) re-run the ratchet whole on this committed tree, read and accept
+every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the
+live stamp, the r198 rule.**
+
+**Named residuals, in order (r214's list, renumbered):** (0) CLOSED this round — the deck
+below the sheer, at the class level. NEW from it, HEAD for r216: **the through-beam heads
+and the bulwark's inner face** — the heads are bare cubes (give them end-grain and the
+wedge/treenail Lahn draws; Blatt 2 shows each beam let through the strake with a knee
+inside), and the bulwark's inner face is the outer hull shader seen from behind (clinker
+lands read the wrong way; it wants its own inner-planking material with the frames/knees
+Blatt 2 draws — the sections show standing knees at every beam). Also NEW: the deck planks
+run fore-and-aft where Westphal says athwartships (`querbeplankt`) — a covering-direction
+record field, and the castle deck already lays cross-planks (r214), so the builder exists.
+Also NEW: the beams' stations and count — Lahn 1992's hull sheets or the Blatt 2 frame
+numbers at a legible scale would give both in one fetch; and the nine `H.sheer` deck-readers
+on other classes (listed above) must switch to `H.deck` before any second hull takes the
+field. Also NEW: belowSheerM is contested by 0.4 m between two reads (the field says so);
+the castle headroom (deckHM 1.95, class default) is the weak link — Lahn's castle sheet
+(1979) would fix it. (1) r214: the Gangspill's station (Lahn's elevation draws it ~1 m abaft
+the castle's forward end; Lahn 1992's castle sheet). (2) r214: the wings' inner edges and
+forward ends carry class-default open rails; no source seen. (3) r213: decked timber ships'
+rudder heads stop at 0.35 of the sheer; no helm port (the 74, the clipper, the Indiaman).
+(4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177 Lucian's
+second machine. (8) r176 sekibune class-size, paired with r211's top question. (9) Preussen
+mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen black
+unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
+sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
+cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**

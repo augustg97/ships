@@ -717,6 +717,87 @@
       }
     }
 
+    /* ── THE DECK LIES WHERE THE RECORD PUTS IT (round 215) ─────────────────────────────
+       Every builder in hull.js read the sheer as the deck — deckAtU = H.sheer(u) — so the
+       cog's deck lay at her top strake and everything on her (castle, windlass, tiller,
+       mast heel) rode a metre high; the wreck's deck beams sit about a third of the side's
+       height under the sheer (Lahn, Blatt 2 sections). The loft's deck(u) is the one answer
+       now, record-gated on deck.belowSheerM. This rule reads the BUILT deck against the
+       record off its own vertices in hull space: the skin's top stands the recorded depth
+       over the deck's edge at midships (D-DEPTH); a deck the record calls level has one
+       edge height fore and aft (D-LEVEL); the through-beams are the record's count, each
+       reaching through the skin on both sides with its top under the deck (D-BEAMS); with a
+       castle plan, the castle deck stands its headroom over the main deck, so the chain the
+       castle reads holds (D-CASTLE). Record-blind: the capping rail stays on the SKIN and
+       does not follow the deck down (D-RAIL), and the deck lies above the waterline — a
+       deck below it is a hull that floods (D-WELL). Silent without the field. */
+    if (H.deck && H.deck.belowSheerM) {
+      const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const bbox = o => { const b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9];
+        for (const q of world(o)) { b[0] = Math.min(b[0], q[0]); b[1] = Math.min(b[1], q[1]); b[2] = Math.min(b[2], q[2]); b[3] = Math.max(b[3], q[0]); b[4] = Math.max(b[4], q[1]); b[5] = Math.max(b[5], q[2]); }
+        return b; };
+      let skin = null; g.traverse(o => { const p = tagOf(o); if (!skin && o.isMesh && p && p.key === 'planking') skin = o; });
+      const deckMeshes = []; g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckMeshes.push(o); });
+      if (!skin || !deckMeshes.length)
+        say(v.id, 'a deck record with no deck to measure', `${skin ? '' : 'no planking mesh; '}${deckMeshes.length} deck mesh(es)`);
+      else {
+        const sv = world(skin), dv = [].concat(...deckMeshes.map(world));
+        const L = H.lwl || H.loa;
+        const skinTopNear = x => { let t = -1e9; for (const q of sv) if (Math.abs(q[0] - x) < 0.5) t = Math.max(t, q[1]); return t; };
+        /* the skin's half-breadth at x AND at height y: a raked bow leans forward, so the
+           vertices near a beam head's x include a fuller station's waterline further aft —
+           the first draft read the cog's foremost beam as 'not through' against that (r215) */
+        const skinHalfNear = (x, y) => { let w = 0; for (const q of sv) if (Math.abs(q[0] - x) < 0.3 && Math.abs(q[1] - y) < 0.3) w = Math.max(w, Math.abs(q[2])); return w; };
+        const deckEdgeNear = x => { let e = 1e9; for (const q of dv) if (Math.abs(q[0] - x) < 0.5) e = Math.min(e, q[1]); return e; };
+        const top0 = skinTopNear(0), edge0 = deckEdgeNear(0);
+        /* D-DEPTH */
+        if (edge0 > 1e8) say(v.id, 'a deck with no midship edge', 'no deck vertex within 0.5 m of midships');
+        else if (Math.abs((top0 - edge0) - H.deck.belowSheerM) > 0.15)
+          say(v.id, "a deck off the record's depth", `${(top0 - edge0).toFixed(2)} m under the top strake at midships, record says ${H.deck.belowSheerM}`);
+        /* D-LEVEL */
+        if (H.deck.level) {
+          const eF = deckEdgeNear(-0.3 * L), eA = deckEdgeNear(0.3 * L);
+          if (eF < 1e8 && eA < 1e8 && Math.abs(eF - eA) > 0.1)
+            say(v.id, 'a level deck that is not level', `edge ${eF.toFixed(2)} m at u 0.2, ${eA.toFixed(2)} at u 0.8`);
+        }
+        /* D-BEAMS */
+        if (H.deck.throughBeams) {
+          const beams = byName('deck-beam');
+          if (beams.length !== H.deck.throughBeams)
+            say(v.id, "through-beams off the record's count", `${beams.length} deck-beam, record says ${H.deck.throughBeams}`);
+          for (const bm of beams) {
+            const b = bbox(bm), xc = (b[0] + b[3]) / 2, half = skinHalfNear(xc, (b[1] + b[4]) / 2), edge = deckEdgeNear(xc);
+            if (b[5] < half + 0.1 || -b[2] < half + 0.1) {
+              say(v.id, 'a through-beam that does not come through', `reaches ${Math.min(b[5], -b[2]).toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`); }
+            if (edge < 1e8 && (b[4] > edge + 0.02 || b[4] < edge - 0.15))
+              say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
+          }
+        }
+        /* D-CASTLE */
+        if (H.castle && H.castle.plan) {
+          const cd = byName('castle-deck'); let yC = -1e9, x0 = 1e9, x1 = -1e9;
+          for (const q of [].concat(...cd.map(world))) { yC = Math.max(yC, q[1]); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); }
+          let under = 1e9; for (const q of dv) if (q[0] >= x0 && q[0] <= x1) under = Math.min(under, q[1]);
+          const want = H.castle.deckHM || 1.95;
+          if (cd.length && under < 1e8 && Math.abs((yC - under) - want) > 0.15)
+            say(v.id, 'a castle deck off its headroom', `${(yC - under).toFixed(2)} m over the main deck's edge, record says ${want}`);
+        }
+        /* D-RAIL, record-blind */
+        if (part.rail && part.rail.y[0] < top0 - 0.3)
+          say(v.id, 'a rail that followed the deck down', `rail from ${part.rail.y[0].toFixed(2)} m, the skin's top at midships ${top0.toFixed(2)}`);
+        /* D-WELL, record-blind */
+        if (edge0 < 1e8 && edge0 < 0.2)
+          say(v.id, 'a deck at the waterline', `edge ${edge0.toFixed(2)} m over the water at midships — she floods`);
+      }
+    }
+
     /* ── A ONE-PIECE HULL RAISES NO POSTS AND WEARS NO WALES (round 121) ────────────────
        "Construction: single trunk, fire and adze" — there is nothing to scarf a stem to
        and no strake to thicken into a wale, yet the dugout wore separate posts and two

@@ -216,7 +216,32 @@ function hullSurface(S) {
     return 0;
   };
 
-  return { nExp, halfB, wl, keel, sheer, tumble, rake, stepTop };
+  /* ── THE DECK LIES BELOW THE SHEER WHERE THE RECORD PUTS IT (round 215) ─────────────
+     sheer(u) is where the SKIN ends; the deck is not always there. The Bremen cog's deck
+     beams (Durchbalken) sit about a third of the side's height under the top strake —
+     Lahn's Blatt 2 sections draw each beam with three or four strakes of bulwark standing
+     over it — and everything on her (castle, windlass, tiller, mast heel) rode a metre high
+     because every builder read the sheer as the deck. deck(u) is the one answer: the
+     record's depth below the sheer (deck.belowSheerM); LEVEL when the record says so (a
+     beam-decked hull lays its beams in one line, so the bulwark deepens where the sheer
+     rises); the sheer itself for every hull without the field, byte-identical. */
+  const deckDrop = (S.deck && S.deck.belowSheerM) || 0;
+  const deck = u => {
+    if (!deckDrop) return sheer(u);
+    if (S.deck.level) return S.freeboard - deckDrop;
+    return sheer(u) - deckDrop;
+  };
+  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop };
+}
+
+/* the skin point at DECK height: where the deck's edge meets the planking. Above v 0.62
+   the skin's height is linear in v (surfacePoint: z = sheer·k), so the v at deck height is
+   direct — no bisection. A deck at the sheer (no record field) is surfacePoint(u, 1). */
+function deckEdge(S, H, u) {
+  const yD = H.deck(u), fb = H.sheer(u);
+  if (yD >= fb - 1e-6 || fb <= 0) return surfacePoint(S, H, u, 1);
+  const k = Math.max(0, yD / fb);
+  return surfacePoint(S, H, u, 0.62 + 0.38 * k);
 }
 
 /* ── THE STATION LIST, WITH SNAP PAIRS AT EVERY TERRACE BREAK ─────────────────────────
@@ -674,7 +699,7 @@ function castleGeom(S, H) {
   const uHelm = (S.rudder && S.rudder.tillerAtU) ||
                 (S.windlass && S.windlass.atU ? S.windlass.atU + 0.03 : null) ||
                 ((C.fromU || 0.7) + (C.toU || 0.95)) / 2;
-  const yDeck = H.sheer(Math.min(1, uHelm)) + dH;
+  const yDeck = H.deck(Math.min(1, uHelm)) + dH;
   /* the post's after face where it meets the top strake — the stern beams lie there. The
      overhang is measured from THIS point, not from the post's line continued up to the
      castle deck: that line is the post's own rake, and a castle deck standing high over the
@@ -1099,7 +1124,7 @@ function buildDeckGeometry(S, NU = 120) {
     /* ⚠ the deck edge is WHERE THE SKIN ENDS, asked of surfacePoint — not a parallel formula.
        The old halfB·wl·(1−tumble) copy predated the counter flare, so on every transom stern
        the deck stopped short of the flared skin and left a ledge round the quarter. */
-    const edge = surfacePoint(S, H, u, 1);
+    const edge = deckEdge(S, H, u);
     const b = edge[2], fb = edge[1], x = edge[0];
     for (let j = 0; j <= 8; j++) {
       const k = j / 8;                    // 0 = starboard edge, 1 = port edge
@@ -1489,7 +1514,7 @@ function mastLowerOf(mk, steelMain) {
 function buildRig(S, group, mats, FINE, FURLED) {
   const L = S.lwl, B = S.beam;
   const H = hullSurface(S);
-  const deckAt = u => H.sheer(u);
+  const deckAt = u => H.deck(u);
   /* ── ⚠ THE DECK IS NOT LEVEL, AND CLEARANCE WAS BEING TAKEN AT THE MAST ────────────
      A sheer line RISES toward the bow and the stern — that is what sheer is — so the deck
      under a sail's clew stands higher than the deck at the mast the sail hangs on, sometimes
@@ -4144,7 +4169,7 @@ function buildFittings(S, group, mats) {
   const openHull = deckCovering(S).mode === 0;
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
-  const deckAtU = u => H.sheer(u);
+  const deckAtU = u => H.deck(u);
   /* ⚠ the deck edge is WHERE THE SKIN ENDS, asked of surfacePoint — the deck builder's own
      lesson, and this line was the rail's stale copy of it: no counter flare, no bow flare,
      no rounded stern, no stem rabbet. Measured before the fix (r100): 20 of 33 hulls had
@@ -4152,7 +4177,10 @@ function buildFittings(S, group, mats) {
      — and Queen Mary 2's hung 4.1 m OUTBOARD of her rounded stern, in open air. Everything
      in this function that means "the deck edge" asks the surface now: the rail, the
      open-walkway test, the gratings, the deckhouse widths. */
-  const halfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
+  const halfAtU = u => Math.abs(deckEdge(S, H, u)[2]);
+  /* the SKIN's top, where the capping rail sits: on a hull whose deck lies below the sheer
+     the rail caps the bulwark, not the deck (r215) */
+  const railAtU = u => H.sheer(u), railHalfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
   const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 
   /* ── the RAIL round the deck edge: a capping timber following the sheer ─────────────
@@ -4212,7 +4240,7 @@ function buildFittings(S, group, mats) {
       for (let i = 0; i <= NU; i++) {
         const u = 0.035 + (i / NU) * 0.93;
         if (!open(u)) { flush(); continue; }
-        run.push({ x: (u - 0.5) * L + H.rake(u), y: deckAtU(u), hb: halfAtU(u) });
+        run.push({ x: (u - 0.5) * L + H.rake(u), y: railAtU(u), hb: railHalfAtU(u) });
       }
       flush();
     }
@@ -4224,6 +4252,36 @@ function buildFittings(S, group, mats) {
       ? new THREE.MeshStandardMaterial({ color: 0x4a5057, roughness: 0.58, metalness: 0.42 })
       : pale;
     group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
+  }
+
+  /* ── THE THROUGH-BEAMS (Durchbalken), record-gated on deck.throughBeams (round 215) ──
+     A beam-decked clinker hull carries its deck on athwartship beams whose heads pass
+     THROUGH the planking and stand proud outside — the beam-ended look of every cog seal,
+     and on the Bremen wreck the beams Lahn's Blatt 2 sections are drawn at ('Spant .. mit
+     Querbalken DB 1 .. 5'). Each is a square timber spanning the whole breadth at deck
+     height, its top under the deck planks, its heads carried the recorded (or class-default)
+     distance past the skin. Stations: the record's own (deck.beamsAtU) or spread evenly over
+     the deck's run — a class default, named on the card. Siding and moulding are class
+     defaults too (0.30 m; the wreck's beams are of that order and no plate here resolves
+     them). Nothing without the field: byte-identical. */
+  if (S.deck && S.deck.throughBeams) {
+    const n = S.deck.throughBeams;
+    const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
+    const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+    us.forEach((u, i) => {
+      const e = deckEdge(S, H, u);
+      const half = Math.abs(e[2]) + proud;
+      const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2), wood);
+      bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
+      bm.name = 'deck-beam';
+      /* keyed 'crossbeam', not 'deck': the audit reads part.deck's breadth as the deck's
+         edge, and a beam head 25 cm proud of the skin is not the deck's edge */
+      group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken)',
+        'An athwartship deck beam whose heads pass through the planking and stand '
+        + Math.round(proud * 100) + ' cm proud of the hull side — the beam-ended profile '
+        + 'every cog seal draws. Count from the record; its station' + (S.deck.beamsAtU ? '' : ' a CLASS DEFAULT, the beams spread evenly over the deck')
+        + '; ' + Math.round(sq * 100) + ' cm square is a class default below what the plates resolve.'));
+    });
   }
 
   /* ── THE WATERWAY: the margin plank at the deck edge ──────────────────────────────
@@ -4242,7 +4300,7 @@ function buildFittings(S, group, mats) {
     for (const sgn of [-1, 1]) {
       for (let i = 0; i <= NU; i++) {
         const u = 0.035 + (i / NU) * 0.93;
-        const e = surfacePoint(S, H, u, 1);
+        const e = deckEdge(S, H, u);          // the DECK's edge, not the skin's top (r215)
         const x = e[0], fb = e[1], hb = e[2];
         const wu = Math.min(w, hb * 0.55);
         const yT = fb + 0.034, yB = fb - 0.012;           // proud of the deck, heel buried
@@ -6204,7 +6262,7 @@ function buildRigging(S, group, mats, spars, mastTops) {
   const staySegs = [], braceSegs = [];
   const line = (a, b) => [new THREE.Vector3(a[0], a[1], a[2] || 0),
                           new THREE.Vector3(b[0], b[1], b[2] || 0)];
-  const deckAt = u => H.sheer(u);
+  const deckAt = u => H.deck(u);
 
   mastTops.forEach((m, i) => {
     /* ── A SCHOONER'S WEB IS NOT A SQUARE-RIGGER'S ─────────────────────────────────────
@@ -9621,7 +9679,7 @@ function buildDeckHatches(S, group) {
   const cover = new THREE.MeshStandardMaterial({ color: 0x565c61, roughness: 0.72, metalness: 0.22 });
   const deckAt = (u, z) => {                       // the deck surface near the hatch
     const b = Math.abs(surfacePoint(S, H, u, 1.0)[2]) || 1e-6;
-    return H.sheer(u) + Math.cos(Math.min(1, Math.abs(z) / b) * Math.PI / 2) * b * 0.035;
+    return H.deck(u) + Math.cos(Math.min(1, Math.abs(z) / b) * Math.PI / 2) * b * 0.035;
   };
   S.deckHatches.forEach(hc => {
     const u0 = hc.at, zP = (hc.z || 0) * Math.abs(surfacePoint(S, H, u0, 1.0)[2]);
