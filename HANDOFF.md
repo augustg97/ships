@@ -16149,3 +16149,15 @@ rule). The published copies read back: docs/js/hull.js carries deckEdge (5 match
 docs/audit-hulls.js the "a deck at the waterline" arm (1), docs/data/vessels.json belowSheerM
 (1). Push receipt and live stamp: appended below if the round survived to write them (the
 driver's kill is 19:01:28); otherwise r216 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788486326 on https://augustg97.github.io/ships/index.html at 18:47:19
+PDT, 60 s after the push at 18:46:18 (build/staging/r215/push.log, the r209 poll pattern). The
+live copies read back from the host after the stamp matched: js/hull.js carries deckEdge (5
+matches), audit-hulls.js the "a deck at the waterline" arm (1), data/vessels.json belowSheerM
+(1). Three commits close the round (a6911d9 source + handoff close state, beff757 docs +
+baseline + close paragraph, and this push-log commit). Tree at close: only build/loop.log and
+the r205 daemon's cookie file uncommitted, deliberately; the r215 staging images (witness
+frames, the gridded Lahn sections), the before-copies, the inject scripts and the audit/inject/
+ratchet outputs stay on disk uncommitted, the r211 convention. r216 opens with the two checks
+named above — the ship-dhow left-edge sliver at the r214 HEAD, and the beam heads and bulwark
+inner face as the head residual.**
