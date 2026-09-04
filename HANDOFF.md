@@ -17492,3 +17492,18 @@ class value, and consider Doel 1's alternation (the scarf below the bilge on one
 above it on the other) — or (0a) if a route to Lahn 1992's plates appears; r218's hunt
 paragraph lists every route that walled, and r224 added five more pages that do not
 describe the frames (listed above).**
+
+**Live stamp VERIFIED: 1788524864 on https://augustg97.github.io/ships/index.html at 05:29:20
+PDT, 90 s after the push (build/staging/r224/push.log, the r209 poll pattern). Two commits
+close the round (a4d7316 source + audit + docs + handoff, and this push-log commit).
+Published copies read back by code strings (the build strips comments): docs/js/hull.js
+carries headBelowM, docs/data/vessels.json carries laps, docs/audit-hulls.js carries 'a lap
+off its length'. Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r224 staging (the three before-copies, hull.after.js,
+apply-edits.py, the two diffs, the six plate crops, the Doel 1 and Scholl texts, the
+measure, the two witnesses, the dhow edge triptych, the three audit outputs, the injection
+output, the sweep and compare-sweeps.py, the predictions, run-close.sh, close-out.sh,
+push-verify.sh) stays on disk uncommitted, the r211 convention. The close ratchet ran as
+the Bash tool's own background task, polled from the foreground in nine-minute waits, and
+its exit was read from close-ratchet.out — the r198 foreground-wait rule met by the r223
+pattern again.**
