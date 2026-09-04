@@ -539,7 +539,7 @@ const F0 = H.section.floorHalfFrac || 0, n0 = H.section.power || 2.2;
 const rows = (H.section.stations || []).map(s => ({
 u: s.u !== undefined ? s.u : frameU(s.spant),
 F: s.floorHalfFrac !== undefined ? s.floorHalfFrac : F0,
-n: s.power !== undefined ? s.power : n0, spant: s.spant })).sort((a, b) => a.u - b.u);
+n: s.power !== undefined ? s.power : n0, spant: s.spant, r: s.railHalfFrac })).sort((a, b) => a.u - b.u);
 const formAt = u => {
 if (!rows.length) return { F: F0, n: n0 };
 if (u <= rows[0].u) return rows[0];
@@ -553,7 +553,7 @@ return last;
 const uvA = skin.geometry.attributes.uv;
 if (rows.length && !uvA)
 say(v.id, 'a section record with stations and a skin that carries no u to read them at', `${rows.length} stations`);
-const stations = [{ u: 0.5, label: 'midships' }].concat(rows.map(r => ({ u: r.u, label: r.spant !== undefined ? `Spant ${r.spant} (u ${r.u.toFixed(3)})` : `u ${r.u.toFixed(3)}` })));
+const stations = [{ u: 0.5, label: 'midships' }].concat(rows.map(r => ({ u: r.u, r: r.r, label: r.spant !== undefined ? `Spant ${r.spant} (u ${r.u.toFixed(3)})` : `u ${r.u.toFixed(3)}` })));
 for (const st of stations) {
 let sel;
 if (uvA) {
@@ -568,6 +568,8 @@ if (wAll > wTop + 0.05)
 say(v.id, 'a flared section not widest at its rail', `${wAll.toFixed(2)} m half-breadth below the rail, ${wTop.toFixed(2)} at it, at ${st.label}`);
 if (st.label === 'midships' && Math.abs(wTop - H.beam / 2) > 0.1)
 say(v.id, "a flared section's rail off the record's beam", `${(2 * wTop).toFixed(2)} m across the rail, the record ${H.beam}`);
+if (st.r !== undefined && Math.abs(wTop - st.r * H.beam / 2) > 0.1)
+say(v.id, "a rail off the record's plan", `${wTop.toFixed(2)} m half-breadth at the rail, the record's ${(st.r * H.beam / 2).toFixed(2)} (${st.r} of the half-beam) at ${st.label}`);
 const { F, n } = formAt(st.u), D = yTop - yKeel;
 const want = h => wTop * (F + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - Math.max(0, Math.min(1, h / D)), n)), 1 / n));
 let worst = 0, worstH = 0, worstW = 0, worstWant = 0;

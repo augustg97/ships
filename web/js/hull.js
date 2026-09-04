@@ -143,8 +143,10 @@ function hullSurface(S) {
   const nExp = exponentForCm(S.cm);
   const halfB = S.beam / 2;
 
-  /* waterline half-breadth, normalised */
-  const wl = u => fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
+  /* waterline half-breadth, normalised — or, on a hull whose record carries rail
+     half-breadths by station, the RAIL plan through them (railPlan, round 228) */
+  const plan = railPlan(S);
+  const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
   /* depth of the keel below the waterline, normalised. The forefoot rises and the run sweeps
      up to the sternpost; a flat-floored cog barely does either. */
   const keel = u => {
@@ -376,6 +378,52 @@ function sectionAt(S, rows, u) {
     return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
   }
   return last;
+}
+
+/* ── THE RAIL PLAN COMES FROM THE RECORD'S STATIONS (round 228) ──────────────────────
+   The section forms are the plate's (r226–r227), but the breadth they scaled was a class
+   plan — fullness(u, wlPower, stemFineness, sternFineness), a parabola — that Blatt 2's
+   own rail half-breadths contradict by a third of the beam at the stern: the sheet reads
+   104 / 115 / 114 / 113 plate px at Spant 5 / 12 / 26 / 33 (0.90 / 1.0 / 0.99 / 0.98 of
+   the widest), a short entry into a long parallel middle body that runs nearly to the
+   sternpost, where the parabola read 0.67 / 0.93 / 0.88 / 0.58. A station may carry
+   railHalfFrac, its rail half-breadth as a fraction of the record's half-beam, and the
+   plan is then a monotone cubic (Fritsch–Carlson) through those stations, from
+   stemFineness at the stem to sternFineness at the sternpost — the class's own end
+   values, because the sheet has no section forward of Spant 5 or abaft Spant 33.
+   Monotone, so the rail cannot bulge past the beam between two full stations; C1, so it
+   carries no kink at a station. The plan is the RAIL's: on a flared hull the section
+   form turns it into the waterline's, and the coefficients fall out (r228/coeffs.py:
+   Cw 0.59 → 0.70, Cp 0.61 → 0.64, Cb 0.39 → 0.45 on the cog). Without railHalfFrac on
+   any station, the class plan, byte-identical. */
+function railRows(S) {
+  const sec = S.section; if (!sec || !sec.stations) return null;
+  const rows = sec.stations.filter(s => s.railHalfFrac !== undefined)
+    .map(s => ({ u: s.u !== undefined ? s.u : frameU(S, s.spant), r: s.railHalfFrac }))
+    .sort((a, b) => a.u - b.u);
+  return rows.length ? rows : null;
+}
+/* a monotone C1 cubic through (u, r) points sorted by u — Fritsch & Carlson 1980 */
+function pchip(pts) {
+  const n = pts.length, h = [], d = [], m = new Array(n);
+  for (let i = 0; i < n - 1; i++) { h.push(pts[i + 1].u - pts[i].u); d.push((pts[i + 1].r - pts[i].r) / h[i]); }
+  m[0] = d[0]; m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) {
+    if (d[i - 1] * d[i] <= 0) m[i] = 0;
+    else { const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1]; m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]); }
+  }
+  return u => {
+    if (u <= pts[0].u) return pts[0].r;
+    if (u >= pts[n - 1].u) return pts[n - 1].r;
+    let i = 0; while (i < n - 2 && u > pts[i + 1].u) i++;
+    const t = (u - pts[i].u) / h[i], t2 = t * t, t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * pts[i].r + (t3 - 2 * t2 + t) * h[i] * m[i]
+         + (-2 * t3 + 3 * t2) * pts[i + 1].r + (t3 - t2) * h[i] * m[i + 1];
+  };
+}
+function railPlan(S) {
+  const rows = railRows(S); if (!rows) return null;
+  return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: S.sternFineness }]));
 }
 
 function buildFramesGeometry(S, NF = 26, onlyU) {
@@ -4577,7 +4625,15 @@ function buildFittings(S, group, mats) {
     })());
     us.forEach((u, i) => {
       const e = deckEdge(S, H, u);
-      const half = Math.abs(e[2]) + proud;
+      /* ── THE HEAD STANDS PROUD OF WHERE THE BEAM EXITS THE PLANKING (round 228) ────
+         A beam is sided, and the skin is not parallel across its siding: under the plate's
+         plan the cog's forward beam exits 0.09 m further out at its aft face than at its
+         centre line, so a head carried `proud` past the centre-line skin stood 0.16 m past
+         the planking where it actually left it — and the audit read 0.07 through its
+         window. The reach is measured from the WIDEST skin across the beam's own faces. */
+      const du = sq / 2 / S.lwl;
+      const exit = Math.max(Math.abs(e[2]), Math.abs(deckEdge(S, H, u - du)[2]), Math.abs(deckEdge(S, H, u + du)[2]));
+      const half = exit + proud;
       /* BoxGeometry groups run +x −x +y −y +z −z: the long axis is z, so 4 and 5 are the heads */
       const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2),
                                 [wood, wood, wood, wood, endGrain, endGrain]);

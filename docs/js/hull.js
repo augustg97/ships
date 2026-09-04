@@ -74,7 +74,8 @@ return new THREE.Mesh(g, mat);
 function hullSurface(S) {
 const nExp = exponentForCm(S.cm);
 const halfB = S.beam / 2;
-const wl = u => fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
+const plan = railPlan(S);
+const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
 const keel = u => {
 const fore = 1 - Math.pow(Math.max(0, (S.forefoot - u) / S.forefoot), 2) * S.riseF;
 const aft = 1 - Math.pow(Math.max(0, (u - (1 - S.run)) / S.run), 2) * S.riseA;
@@ -205,6 +206,34 @@ const a = rows[i - 1], b = rows[i], f = (u - a.u) / Math.max(1e-9, b.u - a.u);
 return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
 }
 return last;
+}
+function railRows(S) {
+const sec = S.section; if (!sec || !sec.stations) return null;
+const rows = sec.stations.filter(s => s.railHalfFrac !== undefined)
+.map(s => ({ u: s.u !== undefined ? s.u : frameU(S, s.spant), r: s.railHalfFrac }))
+.sort((a, b) => a.u - b.u);
+return rows.length ? rows : null;
+}
+function pchip(pts) {
+const n = pts.length, h = [], d = [], m = new Array(n);
+for (let i = 0; i < n - 1; i++) { h.push(pts[i + 1].u - pts[i].u); d.push((pts[i + 1].r - pts[i].r) / h[i]); }
+m[0] = d[0]; m[n - 1] = d[n - 2];
+for (let i = 1; i < n - 1; i++) {
+if (d[i - 1] * d[i] <= 0) m[i] = 0;
+else { const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1]; m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]); }
+}
+return u => {
+if (u <= pts[0].u) return pts[0].r;
+if (u >= pts[n - 1].u) return pts[n - 1].r;
+let i = 0; while (i < n - 2 && u > pts[i + 1].u) i++;
+const t = (u - pts[i].u) / h[i], t2 = t * t, t3 = t2 * t;
+return (2 * t3 - 3 * t2 + 1) * pts[i].r + (t3 - 2 * t2 + t) * h[i] * m[i]
++ (-2 * t3 + 3 * t2) * pts[i + 1].r + (t3 - t2) * h[i] * m[i + 1];
+};
+}
+function railPlan(S) {
+const rows = railRows(S); if (!rows) return null;
+return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: S.sternFineness }]));
 }
 function buildFramesGeometry(S, NF = 26, onlyU) {
 const H = hullSurface(S);
@@ -2855,7 +2884,9 @@ return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.93 });
 })());
 us.forEach((u, i) => {
 const e = deckEdge(S, H, u);
-const half = Math.abs(e[2]) + proud;
+const du = sq / 2 / S.lwl;
+const exit = Math.max(Math.abs(e[2]), Math.abs(deckEdge(S, H, u - du)[2]), Math.abs(deckEdge(S, H, u + du)[2]));
+const half = exit + proud;
 const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2),
 [wood, wood, wood, wood, endGrain, endGrain]);
 bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);

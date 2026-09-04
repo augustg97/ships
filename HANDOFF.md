@@ -18068,3 +18068,197 @@ with no skin to read" (1) and "carries no u to read them at" (1). Two commits cl
 (b456142 source + audit + docs + handoff, and this push-log commit); no baseline moved, so
 close-out's add list (which now names Research/baselines/frames/, the r226 correction) had
 nothing to add there.**
+
+---
+
+## Round 228 — 2026-09-04 — the rail plan comes from the record's stations: Blatt 2's four rail half-breadths carried on the cog's section stations, the loft's plan a monotone cubic through them, and the coefficients re-derived and labelled
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r227 said r228 opens
+with residual (0g‴), the plan: measure the model's rail half-breadth at u 0.179, 0.352, 0.698
+and 0.871 against the plate's 104 / 115 / 114 / 113 px, and if the stern reads finer than
+0.99 of the widest by more than the read's ±0.02, give the record the plate's rail plan by
+station and the loft a reader, and re-derive Cw, Cp, Cb before and after. Done, at the class
+level. The stern read 0.58 of the beam where the plate reads 0.98 — twenty times the read's
+precision — so the plan is the record's now, and the class parabola survives only as the
+plan's end values at the two posts, where the sheet has nothing.**
+
+**The measurement (r228/coeffs.py, a replica of hullSurface's wl/keel/sheer, sectionAt and
+flaredY, checked against the audit's read of the drawn skin below). The class plan —
+fullness(u, wlPower 2, stemFineness 0.2, sternFineness 0.24), a parabola — puts the rail at
+0.669 / 0.930 / 0.881 / 0.582 of the beam at Spant 5 / 12 / 26 / 33 (u 0.179 / 0.352 / 0.698
+/ 0.871 by frameU), 2.54 / 3.53 / 3.35 / 2.21 m of half-breadth; the plate's rail half-
+breadths, 104 / 115 / 114 / 113 px, are 0.904 / 1.0 / 0.991 / 0.983 of the widest (±0.02),
+3.42 / 3.80 / 3.76 / 3.72 m. The parabola is a third of the beam too fine at Spant 33, a
+quarter at Spant 5, a tenth at Spant 26 — under section forms that had already been read
+from the same sheet (r226–r227): the form was the plate's, the breadth it scaled was not.
+The plate's rail is a short entry into a long parallel body (115, 114, 113 px from Spant 12
+to Spant 33, a third of the length) that runs nearly to the sternpost; a parabola cannot draw
+that at any power.**
+
+**The class change (before-copies r228/hull.before.js, audit-hulls.before.js,
+vessels.before.json; the edit scripts r228/apply-edits.py and apply-edits-2.py, every match
+asserted unique; hull.diff 68 lines, audit.diff 20). web/js/hull.js: railRows(S) reads the
+stations that carry railHalfFrac (a station's rail half-breadth as a fraction of the record's
+half-beam) into rows sorted by u; pchip(pts) is a monotone C1 cubic through (u, r) points
+(Fritsch & Carlson 1980: the tangent at an interior point is the weighted harmonic mean of
+its two secants, zero where they change sign, so the curve cannot overshoot a point or bulge
+past the beam between two full stations, and carries no kink at a station); railPlan(S)
+runs it from (0, stemFineness) through the rows to (1, sternFineness) — the class's own end
+values, because the sheet has no section forward of Spant 5 or abaft Spant 33. hullSurface's
+wl is the plan where the record has one and the class fullness where it has not, so a record
+without railHalfFrac on any station is byte-identical. The plan is the RAIL's: on a flared
+hull the section form at each station turns it into the waterline's, and the coefficients
+fall out. web/data/vessels.json, the cog: railHalfFrac 0.90 / 1.0 / 0.99 / 0.98 on Spant 5 /
+12 / 26 / 33; sectionProvenance carries the px reads, the parabola's reads, and the
+coefficients below, labelled. What the plan draws, every 0.05 u (coeffs.out): 0.20, 0.43,
+0.66, 0.85, 0.92, 0.96, 0.99, 1.00 (u 0.35) … 0.99 (u 0.70) … 0.98 (u 0.85), 0.91, 0.59,
+0.24 — the whole sweep from the parallel body into the sternpost lies in the last 0.13 u
+(2.6 m at the rail), which is what the plate's Spant 33 forces and what the record's own
+castle already said (aftBreadthAftM 6.5 m at the post, on beams past it).**
+
+**Rule 8 fired on the first audit run (r228/audit-first.out): one problem, "a through-beam
+that does not come through — reaches 2.87 m, the skin 2.80 at x −7.5", the forward beam
+DB 1. The audit was right and the builder was wrong: it carried each head `proud` (0.25 m)
+past the skin at the beam's CENTRE LINE, and under the plate's plan the skin at u 0.14 widens
+0.68 m per metre of length, so the beam's aft face — 0.15 m aft of its centre — left the
+planking 0.09 m further out than the centre did, and the head stood 0.16 m past the
+planking where it actually exited; the audit's ±0.3 m window read 0.07. Fixed in the
+builder for the class (apply-edits-2.py): the reach is measured from the widest skin across
+the beam's own faces (deckEdge at u ± sq/2L), so every head stands `proud` of the planking
+where the beam leaves it, on any plan. Second run 33 hulls, 0 problems (r228/audit.out).**
+
+**The coefficients, DERIVED before and after (r228/coeffs.py: the loft's underwater body
+integrated at the record's 2.25 m draught on the 20.5 m waterline, 800 stations × 400
+heights, the same sections the skin is built from), and UNVERIFIED — the record holds no
+published displacement to check them against; the DSM booklet (r213/dsm-kogge-1380-
+booklet.pdf) gives "Laderaumgröße etwa 160 m³", which is the HOLD, a cargo volume, not a
+displacement, and r213's other download (akhs-1991-4-kiel.pdf) carries no figure:**
+
+| | class plan (r227) | plate plan (r228) |
+|---|---|---|
+| Cw, waterplane | 0.592 | 0.695 |
+| Cp, prismatic | 0.605 | 0.641 |
+| Cm, midship (on the waterline beam at the fullest station) | 0.755 | 0.778 |
+| Cb, block (on 20.5 × 7.6 × 2.25) | 0.389 | 0.452 |
+| displacement at 2.25 m, t | 139.9 | 162.5 |
+| waterline beam, widest, m | 6.58 | 6.91 |
+| waterline half-breadth at Spant 5 / 12 / 26 / 33, m | 1.84 / 2.58 / 3.08 / 1.67 | 2.47 / 2.78 / 3.46 / 2.81 |
+
+**The record's cm 0.8 keeps its meaning as the old loft's section coefficient (r226) and is
+still read by hulls without a section. The 163 t is the model's number until a published
+displacement is fetched — Lahn's Band 1 or Hoffmann & Hoffmann 2009 (IJNA 38.2) would give
+one; a named residual below.**
+
+**Audit rule D-PLAN (Research/audit-hulls.js, synced to web/, in the D-SECTION station loop):
+at every station that carries railHalfFrac, the drawn rail's half-breadth (the widest skin
+vertex within 0.25 m of the top at that station, the r227 uv read) must stand within 0.1 m of
+railHalfFrac × the record's half-beam. The midship rail-against-beam test stays. Real build:
+33 hulls, 0 problems. Proven to fire by a builder variant against the same record, hull.js
+cmp'd byte-identical after (r228/hull.variantA-planIgnored.js, the plan forced null so the
+class parabola draws under the record): 4 problems, all cog — "2.54 m half-breadth at the
+rail, the record's 3.42 (0.9 of the half-beam) at Spant 5", 3.54 against 3.80 at Spant 12,
+3.35 against 3.76 at Spant 26, 2.21 against 3.72 at Spant 33 (inject-variantA.out) — the
+parabola's own numbers from coeffs.py to the centimetre, which is the replica's check. Every
+other hull silent.**
+
+**Measured (measure_ship, r228/measure-after.out against r227's by r228/compare-measure.py):
+93 parts in both, nothing missing, nothing new; 48 moved, 45 identical to 5 mm. The planking's
+half 3.80 and the rail's 3.84 unchanged (midships is between Spant 12 and 26, where the plan
+was already the beam). The five through-beam heads: 2.12 → 2.95 (u 0.12), 3.20 → 3.55
+(0.31), 3.81 unchanged (0.49), 3.63 → 3.91 (0.66), 2.50 → 3.68 (0.84) — the stern head out by
+1.2 m. The frames' heads follow the skin: Frame 4 2.29 → 3.20, Frame 30 2.16 → 3.67, Frame 31
+1.94 → 3.48, Frame 33 1.46 → 2.34; Frames 15–19 within 0.06. Wales 3.66 → 3.73 and the deck
+and waterway 3.59 → 3.66 (the plan is 0.99–1.0 over the whole middle body now, where the
+parabola fell to 0.93 at their widest); channels and deadeyes out 0.02; stays 3.54 → 3.80;
+the forward castle cabin 1.69 → 3.01 (it sits at u 0.93, where the hull is now twice as
+broad). The model's stated breadth line (8.90 m, Δ +1.30) is r225's number and predates the
+round.**
+
+**Witnessed (rule 1): r228/plan-above.png (b 90, z 1.4, l 80), the plan from above — the rail
+parallel from abaft the mast to the castle, the entry short and sharp, the stern sweeping into
+the post under the castle, the beam heads along both sides; plan-astern.png (b 180, z 1.1,
+l 12), dead astern — the castle over a hull now nearly as broad as itself, the V of the run
+under the water; plan-stern-quarter.png (b 225, z 1.0, l 10), from the port quarter — the
+parallel body carried to the quarter and the strakes turning hard into the sternpost in the
+last three metres; plan-bow-quarter.png (b 315, z 1.0, l 8, re-captured after the beam fix)
+— the broad-shouldered bow, DB 1 through the side at the turn. Rule 0 answered on
+plan-stern-quarter.png read whole: it reads as a rendered world — the sea's texture, the sky,
+the coast on the horizon, the planked castle wall in light with the posts' shadows under it.
+Three facts a viewer can read off it without a legend: the ship is as broad at the quarter
+as at midships and turns into her sternpost over a few metres; the stern castle stands on
+posts and overhangs the hull's sides; the through-beam heads stand out along the side.**
+
+**Named residuals, in order:** (0g⁷) NEW: the plan beyond the outermost stations is the loft's
+own — forward of Spant 5 and abaft Spant 33 it is the cubic's sweep to the class's stemFineness
+and sternFineness, unread; Lahn's Blatt 1 (the lines) would give the rail's own sweep into the
+posts and the half-breadth at the posts. (0g⁸) NEW: the derived displacement (163 t at 2.25 m)
+and the four coefficients are UNVERIFIED — fetch a published displacement (Lahn Band 1;
+Hoffmann & Hoffmann 2009) and compare; if it disagrees by more than the section read's ±0.02 B
+allows, the draught or the waterline length is the suspect, not the plan. (0g⁗) the family
+cannot draw the end sections' straight-V-then-round form (under 0.08 B). (0g⁵) the Spant → u
+mapping assumes frame 0 = Spant 0 (±1 frame); the through-beams stand at class stations
+(0.14 + 0.70·i/4) where the plate puts DB 1, 2, 4, 5 at Spant 5, 12, 26, 33 — deck.beamsAtU
+exists and could take them, DB 3 unread (Spant 18–19 by spacing). (0g⁶) the form at the
+model's midships (u 0.5) is an interpolation, unread. (0g″) the loft's strakes 14 against
+Doel 1's twelve. (0a) OPEN, pitch 1.8 ± 0.2 sidings (r223). (0b″) the floor arm heights are on
+Lahn's frame sheets, none fetched. (0b‴) lapM 1.0 for the top lap is a class value. (0h) the
+futtock count per side. (0c) the beams' stations and count — see (0g⁵). (0e) belowSheerM
+contested by 0.4 m; r215's 0.31–0.33 against r226's crop reading DB 4 at 0.65 of the side
+under the top strake. (0f) the beam-head wedge at 60+ px/m. (1) r214: the Gangspill's station.
+(2) r214: the wings' rails. (3) r213: decked timber ships' rudder heads stop at 0.35 of the
+sheer. (4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177
+Lucian's second machine. (8) r176 sekibune class-size. (9) Preussen mast livery. (10)
+Endurance forecastle. (11) Azzam crest span. (12) r164 risen black unpierced. (13) r165
+fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery sashes. (16) r171
+authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the cathead's supporting
+knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**Three method notes. (1) A shape read from a plate at named stations must be tested at those
+stations on the drawn skin; the class parameters that used to draw it are not evidence and
+cannot be tuned to the plate — a parabola has no setting that holds 1.0 over a third of the
+length and falls to 0.24 in the last eighth. (2) A fixed offset from a surface sampled at ONE
+point is wrong wherever the surface slopes across the feature's own width — the beam head
+was 0.25 m proud of the centre-line skin and 0.16 m proud of the planking it actually came
+through; sample the surface across the feature and offset from the extreme. The audit found
+it because it reads a window, not a point. (3) A derived coefficient goes into the record
+with the word DERIVED and a sentence naming what there is to check it against; when the
+answer is "nothing fetched", say that too (rule 10), or the next reader inherits a number
+with a record's authority and a model's provenance.**
+
+**The close ratchet, started 10:49:35 (r228/run-close.sh → close-ratchet.out) on the tree
+described above, hull.js cmp'd against hull.after.js and the audit against web/ before the
+start. Predictions (r228/PREDICTIONS-close.md, written first): only the cog carries
+railHalfFrac, so hullSurface's wl is the class fullness for every other hull, byte-identical,
+and the ONE expected mover is ship-dhow, where the cog stands at berth-neighbour scale in the
+frame's rightmost tenth (r226's and r227's only candidate, for the same reason), this time over
+the limit because the whole plan moved. FINISHED at 11:28:53 (~37 s a frame): 64 frames, exit
+1, ONE mover — ship-dhow at 0.101% of pixels (limit 0.050%), mean |Δ| 0.049, no BLANK; exactly
+the predicted frame and no other, and larger than r226's whole-section move (0.067%) as
+predicted. Read (Research/baselines/_diff/ship-dhow.png): the moved pixels are the cog's
+silhouette, castle and beam heads at the frame's right edge, and a handful of pixels at the
+frame's left edge; nothing on the dhow herself. ACCEPTED with that reason (FRAME-LOG.md; the
+PNG in Research/baselines/frames/ is in the commit — close-out's add list names the directory,
+the r226 correction). The 63 other frames were within tolerance, the sub-gate flaps included.
+The ratchet ran as the Bash tool's own background task, polled from the foreground in
+until-loops of up to nine minutes, its exit read from close-ratchet.out (the r198
+foreground-wait rule met by the r223 pattern); the five witnesses were captured before it
+started, none beside it.**
+
+**r229 opens with residual (0g⁵), the beams' stations: the plate puts DB 1, 2, 4, 5 at Spant
+5, 12, 26, 33 (u 0.179, 0.352, 0.698, 0.871 by frameU) where the model spreads five beams
+evenly (0.14 + 0.70·i/4); deck.beamsAtU already exists and the builder and the audit both
+read it. Give the record the four read stations and DB 3 by spacing (Spant 18–19, u ≈ 0.50,
+stated as unread), check the frames displaced at those stations against the record's count
+(D-FRAMES allows up to throughBeams fewer), and measure the heads before and after. Or (0g⁸):
+fetch a published displacement for the Bremen cog and test the derived 163 t.**
+
+**Live stamp: docs/index.html carries data-version 1788546571 at the build; the push and the live
+poll are in build/staging/r228/push.log, and the verified live value is recorded in the push-log
+commit that follows this one (the r198 rule: the receipt and the live stamp read the same
+round). Tree at close: only build/loop.log and the r205 daemon's cookie file uncommitted,
+deliberately; the r228 staging (the three before-copies, hull.after.js, vessels.after.json,
+the builder variant, apply-edits.py and apply-edits-2.py, the two diffs, coeffs.py and
+coeffs.out, compare-measure.py, the five witnesses, the two audit outputs, the variant output,
+the two measures, the predictions, run-browser.sh and run-browser-2.sh, run-close.sh,
+close-out.sh, push-verify.sh, push-log-commit.sh) stays on disk uncommitted, the r211
+convention.**
