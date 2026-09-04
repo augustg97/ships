@@ -16161,3 +16161,145 @@ frames, the gridded Lahn sections), the before-copies, the inject scripts and th
 ratchet outputs stay on disk uncommitted, the r211 convention. r216 opens with the two checks
 named above — the ship-dhow left-edge sliver at the r214 HEAD, and the beam heads and bulwark
 inner face as the head residual.**
+
+## Round 216 — 2026-09-03 — the beam heads are cut timber and the bulwark is lit from inside: end grain, ten standing knees, the deck planked across the ship, and the shell's back face takes its own normal
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r215 left two named
+items for r216 — the ship-dhow left-edge sliver check, and the head residual (the through-beam
+heads and the bulwark's inner face). Both DONE, and the deck's plank run (r215's third item)
+with them.**
+
+**The sliver check first, because it was a claim about the baselines.** r215 accepted the
+ship-dhow move with the reason written and a sentence saying a thin sliver at the frame's LEFT
+edge (the junk's side) was NOT explained. Re-captured this round at the r214 HEAD (0ff1042):
+web/ extracted with `git archive` into /tmp/r214web, served on :8150, with `web/fields`
+symlinked in — the gitignored fields are fetched at boot and without them FRAME_READY never
+fires under ?frozen (the first attempt timed out at 60 s on a 404 for /fields/tiles.json;
+that is the trap, written here so it is not paid twice). Results (r216/dhow-r214.png,
+dhow-r215.png, against the r214 baseline pulled from git as
+Research/baselines/frames/ship-dhow.png): the r214 capture reads 0.000% / 0.000 against the
+r214 baseline — no flap, no stale baseline; the r215 capture differs from it by 0.150% / 0.044
+in columns 2561–2879 ONLY (the cog's side), and the left 2,000 columns differ by NOT ONE LEVEL
+in any pixel. There is no left-edge sliver. It was a misread of the amplified diff image's
+edge (r215 read `_diff/ship-dhow.png` by eye; the numbers were never taken). The berth
+spacing could not have moved it anyway: swBuildYard places each hull off the RECORD's
+`hull.loa`, not the built extent, and the cog's loa did not change. Logged in FRAME-LOG.md as
+a no-accept check, the r214 pattern.**
+
+**The head residual — the record.** Lahn, Blatt 2 (r213/lahn-blatt2.jpg, ~30 px/m; the
+gridded crops r215/lahn-blatt2-sections.png) draws, at every 'Spant .. mit Querbalken DB n'
+section, a knee standing at each beam end: a vertical arm against the inside of the planking
+from the beam up to the top strake, and a lower arm along the beam — the joint that holds
+the side to the beam on a shell-first hull with no frames above the deck. The beam heads
+outside the planking are cross-cuts of the timber. The wedge or peg through the head that
+the residual named is NOT resolved at 30 px/m and is not drawn (rule 10: unknown is an
+answer; a sheet at 60+ px/m would settle it). Westphal (DAS LOGBUCH 27/1991) has the main
+deck 'querbeplankt' — planked ATHWARTSHIPS over fore-and-aft beams — which r215 recorded and
+did not build.**
+
+**The change, fixed where each class lives.** (1) web/shaders/HULL_FRAG.frag.glsl (before-copy
+r216/HULL_FRAG.before.glsl): `if (!gl_FrontFacing) N = -N;` after the normal is read. The
+hull material is DoubleSide and a custom ShaderMaterial gets no back-face normal flip from
+three.js, so the inner face of the planking was lit with the OUTER face's normal — a bulwark's
+inside read sunlit where it faced away from the sun, and its seams shaded the wrong way. Every
+closed hull shows no back face and is byte-identical. The 'clinker lands' r215 named are the
+strake seams (the planking branch draws seams and butts, no lap step), so with the light
+right the inside now reads as what it is: the strakes' inner faces. (2) web/js/hull.js
+(before-copy r216/hull.before.js), the through-beams block: the beam mesh takes a material
+ARRAY — BoxGeometry groups run +x −x +y −y +z −z, the long axis is z, so groups 4 and 5 (the
+heads) take `mats.endGrain`, a 64 px CanvasTexture of off-centre rings and three heart checks
+on a paler cut-face tone, cached once on mats; the four sides keep the side grain. Ten
+STANDING KNEES, one a side per beam, gated with the beams on deck.throughBeams: the standing
+arm a 0.20 × 0.22 m box whose length is the chord between the skin point at deck height
+(deckEdge) and at the sheer (surfacePoint v 1), rotated about x to lie along it, 5 cm inboard
+of the skin, foot at the beam's top (deck − 0.02), head at the sheer − 0.10 (under the rail
+cap); the lower arm 0.18 m high on the deck from the skin inboard, min(0.9 m, 0.35 × the
+half-breadth). Mesh names 'deck-knee' (the standing arm — what the audit measures) and
+'deck-knee-arm'; the pair tagged 'crossbeam' so the audit's deck-breadth read is untouched.
+Sidings are class defaults (deck.kneeSidedM overrides). (3) web/shaders/DECK_FRAG.frag.glsl
+(before-copy r216/DECK_FRAG.before.glsl): `uPlankRun` — 0 lays the planks fore-and-aft with
+the king plank on the centreline as before; 1 lays them athwartships (the across-plank
+coordinate is x, the along-plank one z, seams across the ship, butts and grain along the
+beams). mix(a, b, 0.0) is exactly a, so every hull at 0 is byte-identical. deckCovering()
+returns `run` from the record (deck.plankRun 'athwart'); the deck shader takes it as
+uPlankRun. Record (web/data/vessels.json, before-copy r216/vessels.before.json): the cog's
+`deck.plankRun: 'athwart'`, provenance rewritten to say the run is built and the plank width
+and butt length are class defaults. Shaders: `glsl.py check` all 18 compile, bundled to
+web/js/shaders.js.**
+
+**Measured (measure_ship, r216/measure.out; the knee arms measured as one part each): five
+through-beams unchanged (u 0.13/0.31/0.49/0.66/0.85, y 0.49–0.79, reaching ±2.45 … ±3.98);
+ten standing knees, feet 0.78–0.79 m against a deck edge of 0.81, heads 1.92–2.39 m under
+sheer heights 2.0–2.5 (the forward knees taller because the sheer rises forward while the
+deck is level — the bulwark deepens, and the knees say so), outer faces 5 cm inside the skin
+(port knee 1 reaches +2.15 against a skin of 2.20 at deck height), lower arms 0.77–0.90 m
+inboard. Nothing else on the cog moved: Weather deck 0.81–0.94, Rail 2.01–3.18, castle-deck
+2.76, Mast heel 0.81 / head 10.93, model extent +0.98 m over the record LOA — all r215's
+numbers.**
+
+**The audit rule (Research/audit-hulls.js, D-KNEES under THE DECK LIES WHERE THE RECORD PUTS
+IT, synced to web/ and docs/): count of 'deck-knee' meshes = 2 × deck.throughBeams; each
+knee's foot within −0.35/+0.05 of the deck's edge at its x; its head within 0.5 m of the
+skin's top there; its outermost reach ≤ the skin's half-breadth at its own heights (the
+r215 banded read, taken at foot + 0.15 and head − 0.15, the larger) + 0.02. Rule 8 fired
+ONCE on the rule's own first run: 0 deck-knee found, because the knee was a Group named
+'deck-knee' and byName() collects meshes — the audit was right about what it saw; the
+standing arm carries the name now (r216/audit.out, audit2.out). Clean tree: checked 33
+hulls, 0 problems. Proven to fire (r216/inject-knees.js → inject-knees.out): one knee
+removed, one lifted 0.5 m, one shrunk to a fifth of its height about its middle, one pushed
+0.4 m outboard — the cog alone: "through-beams without their knees" (9 / 10), "a knee off
+its beam" ×2 (the lifted one and the shrunk one, whose foot rose too), "a knee that does not
+reach the top strake" ×1 (head 1.51 vs a skin top of 2.11), "a knee outside the planking"
+×1 (3.68 vs 3.40); 33 hulls checked, every other hull silent — exactly the prediction
+written in the script's header.**
+
+**Witnessed (rule 1), all three at the cog in the Shipwright: r216/deck-quarter.png (bearing
+135, zoom 0.7, level 6; r215's deck-quarter camera) — the beam heads read as cut timber,
+paler, ringed and checked, standing out of the dark strakes; r216/knees-inboard-bare.png
+(bearing 300, zoom 0.42, level 16, look-at 2 m; --bare) — looking down over the port bow
+onto the deck: the planks run ACROSS the ship with staggered butts, the far (starboard)
+bulwark's inside stands in its own shadow with the standing knees against it and their lower
+arms on the deck, the near beam heads show their end grain, the castle aft on its posts;
+r216/deck-high-quarter-bare.png (bearing 210, zoom 0.55, level 9; --bare) — from the port
+quarter over the castle wing, the port beam heads' cut faces, the castle posts on the
+Heckbalken ends outboard. Rule 0 answered on knees-inboard-bare.png read whole: it reads as
+a rendered world — sun on a laid deck, the sail's cloth with light through it, water with
+its own texture, the far bulwark's inside in shadow. Three facts a viewer can read off it
+without a legend: the deck is planked across the ship, not along it; the beams come out
+through the side and their cut ends show; timber knees stand against the inside of the far
+bulwark, one at each beam. NOT yet right: the bulwark's inside between the knees is bare
+strakes — the Bremen cog carries FRAMES (Spanten) against the inside of the planking at
+about half-metre room-and-space, and above the deck they show as ribs; and the beam heads
+have no wedge (unresolved at the plate's scale, above).**
+
+**The close ratchet, started 19:13:37 (r216/run-ratchet.sh → close-ratchet.out), on a tree
+whose every change is described above. Predictions: r216/PREDICTIONS-close.md — ship-dhow
+moves (the cog at its right edge: heads paler, knees, planks athwart, bulwark relit; expected
+under 0.1%), ship-treasure MAY move (the cog at its left edge), nothing else. The berth order
+is junk, dhow, COG, treasure-ship, caravel. This paragraph is written at 19:16 with the run
+at its first frames so the tree is committed whatever the kill (20:17:58) does. CLOSE STATE:
+if the paragraphs below this one are missing, the round was killed at the close gate — the
+next firing must (1) re-run the ratchet whole on this committed tree, read and accept every
+mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the live
+stamp, the r198 rule.**
+
+**Named residuals, in order (r215's list, renumbered):** (0) CLOSED this round — the beam
+heads, the bulwark's lighting, the plank run. NEW from it, HEAD for r217: **the frames
+(Spanten) against the inside of the planking** — the Bremen cog's floors and futtocks stand
+at roughly half-metre room-and-space (Lahn's Blatt 2 titles each section by its Spant
+number; Lahn 1992's hull sheets give the spacing); above the deck they are the ribs of the
+bulwark's inside between the knees, below it they are what a viewer sees through the open
+hatches. Record field (frames.roomAndSpaceM), gated, built as boxes following the skin's
+section (the knee's chord idiom, extended to the whole side), audited by count against the
+record over the deck's run. Also carried from r215: the beams' stations and count (Lahn 1992
+or Blatt 2 at a legible scale); the nine `H.sheer` deck-readers on other classes must switch
+to `H.deck` before any second hull takes deck.belowSheerM; belowSheerM contested by 0.4 m
+(the castle headroom is the weak link); the beam-head wedge at 60+ px/m. (1) r214: the
+Gangspill's station. (2) r214: the wings' inner-edge and forward-end rails, no source. (3)
+r213: decked timber ships' rudder heads stop at 0.35 of the sheer; no helm port. (4)
+Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177 Lucian's
+second machine. (8) r176 sekibune class-size, paired with r211's top question. (9) Preussen
+mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen black
+unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
+sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
+cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**

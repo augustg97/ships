@@ -43,6 +43,15 @@ float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
 void main(){
   float u = vUv.x, v = vUv.y;
   vec3 N = normalize(vN);
+  /* ── THE INSIDE OF THE SHELL IS LIT BY ITS OWN FACING (round 216) ─────────────────
+     The material is DoubleSide, and a custom ShaderMaterial gets no back-face normal flip
+     from three.js: the inner face of the planking took the OUTER face's normal, so a
+     bulwark's inside read sunlit where it faced away from the sun and its seams shaded
+     the wrong way. Seen first on the cog, whose deck now lies 1.2 m under her top strake
+     and shows the strakes' inner faces as her bulwark. Flip on the back face and the
+     inside takes the light a real inner face takes; a closed hull shows no back face and
+     is byte-identical. */
+  if (!gl_FrontFacing) N = -N;
   vec3 V = normalize(uCam - vP);
   vec3 L = normalize(uSun);
 

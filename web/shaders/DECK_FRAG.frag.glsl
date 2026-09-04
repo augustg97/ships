@@ -18,6 +18,7 @@ uniform vec3 uSun, uCam, uCol;
 uniform float uMode;     // 0 = bare timber, 1 = laid planks, 2 = painted steel
 uniform float uPlankW;   // plank width, metres
 uniform float uButtL;    // plank length between butts, metres
+uniform float uPlankRun; // 0 = planks run fore-and-aft (the king plank on the centreline), 1 = athwartships
 
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
@@ -36,10 +37,16 @@ void main(){
 
   if (uMode > 0.5 && uMode < 1.5) {
     /* laid planking */
-    float sp = abs(vO.z) / uPlankW;              // seams at half-integers: king plank at 0
+    /* ── THE RUN IS THE RECORD'S (round 216): a deck laid ATHWARTSHIPS (the Bremen cog,
+       Westphal: 'querbeplankt' over fore-and-aft beams) has its seams across the ship and
+       its butts along the beams; the across-plank coordinate is x and the along-plank one
+       is z. Fore-and-aft (every other hull, uPlankRun 0) is byte-identical. */
+    float acrossC = mix(abs(vO.z), vO.x, uPlankRun);   // across the planks
+    float alongC  = mix(vO.x, vO.z, uPlankRun);        // along them
+    float sp = acrossC / uPlankW;                // seams at half-integers: king plank at 0
     float pi = floor(sp + 0.5);                  // plank index outward from the king plank
-    float side = sign(vO.z + 0.001);             // port and starboard stagger independently
-    float bu = vO.x / uButtL + hash(vec2(pi * 7.3, side * 13.7));
+    float side = sign(mix(vO.z, 1.0, uPlankRun) + 0.001);   // port and starboard stagger independently
+    float bu = alongC / uButtL + hash(vec2(pi * 7.3, side * 13.7));
     float seg = floor(bu + 0.5);
     /* seam and butt distances in METRES, so the caulk is ~10 mm on any ship */
     float dSeam = abs(fract(sp) - 0.5) * uPlankW;
@@ -48,8 +55,8 @@ void main(){
     float butt = smoothstep(0.005, 0.013, dButt);
     /* each plank is its own tree, sawn on its own day: tone per plank and per length */
     float tone = 0.90 + 0.20 * hash(vec2(pi * 3.1, seg * 5.7));
-    float grain = noise(vec2(vO.x * 7.0, pi * 31.7)) * 0.6
-                + noise(vec2(vO.x * 55.0, pi * 12.3)) * 0.4;
+    float grain = noise(vec2(alongC * 7.0, pi * 31.7)) * 0.6
+                + noise(vec2(alongC * 55.0, pi * 12.3)) * 0.4;
     /* ⚠ A SUB-PIXEL SEAM IS NOT A SEAM, IT IS MOIRÉ. At the fleet views a 90 mm plank
        covers well under a pixel and the seam field aliases into broad swirling arcs the
        first capture showed clearly. What a real laid deck does at that distance is read

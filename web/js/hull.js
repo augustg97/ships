@@ -1102,6 +1102,8 @@ function deckCovering(S) {
   const rec = S.deck && S.deck.covering;
   if (rec && DECK_COVERINGS[rec])
     return Object.assign({ kind: rec, recorded: true,
+      /* the RUN of the planks is the record's too (deck.plankRun 'athwart'), round 216 */
+      run: S.deck.plankRun === 'athwart' ? 1 : 0,
       what: DECK_COVERINGS[rec].name.replace('Weather deck — ', 'The covering is ')
             + ', from the record. ' + (S.deck.provenance || '') }, DECK_COVERINGS[rec]);
   const heurSteel = (S.build === 'steel' || S.build === 'iron')
@@ -4268,12 +4270,63 @@ function buildFittings(S, group, mats) {
     const n = S.deck.throughBeams;
     const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
     const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+    /* ── THE HEADS ARE END GRAIN (round 216). A beam head outside the planking is a
+       CROSS-CUT of the timber: paler than the weathered side grain, ringed, checked from
+       the heart. A cube in the hull's tone read as a bump on the strakes (r215 witness);
+       the two head faces take a ring texture, the four sides keep the side grain. One
+       material for the fleet, cached on mats. */
+    const endGrain = mats.endGrain || (mats.endGrain = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#846b4b'; ctx.fillRect(0, 0, 64, 64);
+      ctx.strokeStyle = 'rgba(52, 34, 18, 0.55)'; ctx.lineWidth = 1.1;
+      for (let r = 2.5; r < 74; r += 3.2 + 0.9 * ((r * 1.7) % 1)) {
+        ctx.beginPath(); ctx.ellipse(40, 44, r, r * 0.84, 0.25, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(30, 20, 10, 0.85)'; ctx.lineWidth = 1.5;
+      for (const a of [0.35, 2.05, 3.95]) {
+        ctx.beginPath(); ctx.moveTo(40, 44); ctx.lineTo(40 + 44 * Math.cos(a), 44 + 44 * Math.sin(a)); ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
+      return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.93 });
+    })());
     us.forEach((u, i) => {
       const e = deckEdge(S, H, u);
       const half = Math.abs(e[2]) + proud;
-      const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2), wood);
+      /* BoxGeometry groups run +x −x +y −y +z −z: the long axis is z, so 4 and 5 are the heads */
+      const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2),
+                                [wood, wood, wood, wood, endGrain, endGrain]);
       bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
       bm.name = 'deck-beam';
+      /* ── THE KNEES (round 216). Lahn's Blatt 2 draws a standing knee at every beam end:
+         the vertical arm rises against the inside of the planking from the beam to the top
+         strake, the lower arm lies along the beam. That is what holds the side to the beam
+         on a shell-first hull with no proper frames above the deck. One a side per beam,
+         sided like the beam, the vertical arm following the skin's own slope between deck
+         height and the sheer (the chord of two surfacePoints), a hand inboard of the skin. */
+      const kS = S.deck.kneeSidedM || 0.20, kM = 0.22, gap = 0.05;
+      const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - 0.02;
+      for (const sgn of [-1, 1]) {
+        const zD = Math.abs(e[2]) - gap - kM / 2;
+        const zT = railHalfAtU(u) - gap - kM / 2;
+        const len = Math.hypot(yTop - yFoot, zT - zD);
+        if (len < 0.25) continue;
+        const kg = new THREE.Group();
+        const vert = new THREE.Mesh(new THREE.BoxGeometry(kS, len, kM), wood);
+        vert.position.set(0, (yTop + yFoot) / 2, sgn * (zD + zT) / 2);
+        vert.rotation.x = -sgn * Math.atan2(zT - zD, yTop - yFoot);
+        const armL = Math.min(0.9, Math.abs(e[2]) * 0.35);
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
+        arm.position.set(0, deckAtU(u) + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
+        /* the standing arm carries the name the audit reads (D-KNEES measures a mesh: foot,
+           head, and how far out it reaches); the lower arm is named for the measurer */
+        vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
+        kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
+        group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
+          'A grown knee standing on the beam and against the inside of the planking, up to the '
+          + 'top strake — Lahn, Blatt 2, draws one at every beam end. Sidings are class defaults.'));
+      }
       /* keyed 'crossbeam', not 'deck': the audit reads part.deck's breadth as the deck's
          edge, and a beam head 25 cm proud of the skin is not the deck's edge */
       group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken)',
@@ -13233,7 +13286,8 @@ function buildShip(S, opts) {
                 uCol:    { value: new THREE.Color(col) },
                 uMode:   { value: cover.mode },
                 uPlankW: { value: cover.plankW || 1 },
-                uButtL:  { value: cover.buttL || 1 } } });
+                uButtL:  { value: cover.buttL || 1 },
+                uPlankRun: { value: cover.run || 0 } } });
   const deckMat = deckShader(cover.col);
   if (cover.mode === 0) {
     /* ── AN UNDECKED HULL IS OPEN (round 122) ─────────────────────────────────────────
