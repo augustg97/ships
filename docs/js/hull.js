@@ -669,10 +669,44 @@ nor.push(nx / ln, ny / ln, nz / ln);
 }
 }
 const row = NV + 1;
+const risers = [];
+for (let i = 0; i < US.length - 1; i++)
+if (US[i + 1] - US[i] < 1e-4)
+risers.push([i, H.sheer(US[i]) > H.sheer(US[i + 1]) ? 1 : -1]);
+const riserAt = new Set(risers.map(r => r[0]));
 for (let i = 0; i < US.length - 1; i++) {
+if (riserAt.has(i)) continue;
 for (let j = 0; j < NV; j++) {
 const a = i * row + j, b = a + row, c = a + 1, d = b + 1;
 idx.push(a, b, c, c, b, d);
+}
+}
+for (const [i, sgn] of risers) {
+const base = pos.length / 3;
+for (const k of [i, i + 1]) for (let j = 0; j <= NV; j++) {
+const p = k * row + j;
+pos.push(pos[p * 3], pos[p * 3 + 1], pos[p * 3 + 2]);
+nor.push(sgn, 0, 0);
+uvs.push(uvs[p * 2], uvs[p * 2 + 1]);
+}
+const P = k => [pos[k * 3], pos[k * 3 + 1], pos[k * 3 + 2]];
+const triNx = (a, b, c) => {
+const A = P(a), B = P(b), C = P(c);
+const e1 = [B[0] - A[0], B[1] - A[1], B[2] - A[2]], e2 = [C[0] - A[0], C[1] - A[1], C[2] - A[2]];
+const nx = e1[1] * e2[2] - e1[2] * e2[1], ny = e1[2] * e2[0] - e1[0] * e2[2], nz = e1[0] * e2[1] - e1[1] * e2[0];
+return Math.abs(nx) > Math.abs(ny) + Math.abs(nz) ? nx : 0;
+};
+const put = (a, b, c, ar, br, cr) => {
+const nx = triNx(a, b, c);
+if (nx === 0) idx.push(a, b, c);
+else if (nx * sgn > 0) idx.push(ar, br, cr);
+else idx.push(ar, cr, br);
+};
+for (let j = 0; j < NV; j++) {
+const aS = i * row + j, bS = aS + row, cS = aS + 1, dS = bS + 1;
+const aR = base + j,    bR = aR + row, cR = aR + 1, dR = bR + 1;
+put(aS, bS, cS, aR, bR, cR);
+put(cS, bS, dS, cR, bR, dR);
 }
 }
 const n0 = pos.length / 3;

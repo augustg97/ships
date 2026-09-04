@@ -16737,3 +16737,22 @@ the paragraphs below this one are missing, the round was killed at the close gat
 — the next firing must (1) re-run the ratchet whole on this committed tree, read and accept
 every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the
 live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 23:37:32 (r219/close-ratchet.out, started 22:57:22, 40.2 min,
+~38 s a frame): 64 frames, ZERO movers, exit 0, no BLANK — "all frames within tolerance".
+Every frame was read while the run was going (r219/sweep.out, one line per frame as it
+landed, by my own >0 count with the mean and the bbox). ship-azzam, the one frame whose
+geometry changed: 388 px over 0, 193 over 8 levels, 32 over 32, signed mean +14.5 (lighter
+after), 0.007% — the crop and ×8 diff (r219/ship-azzam-before-after.png, ship-azzam-diff.png)
+read as two vertical hairlines at the stern quarter, where the five risers stand edge-on from
+the broadside, plus thin-line antialiasing along the house's top edge and one stay at the bow,
+the r208 class. Everything else over 0 at my count is r218's sub-gate residue (ship-dhow,
+ship-titanic, ship-yamato, ship-wyoming, ship-treasure, aboard-off, aboard-titanic,
+globe-default, sea-ever-given, ship-galleass, sea-canoe-floor, passage-sahul, Endurance's
+rig) at means of 0.002 to 0.021 — the same list r218 named, none tripped, none accepted.
+Build PUBLISHED after the run (the r207 order), data-version 1788503870; web/index.html
+carries the same stamp and is in this commit's path list (the r209 rule). Published copies
+read back by code strings: docs/js/hull.js carries triNx and riserAt (the build strips
+comments), docs/audit-hulls.js 'skin faces with no normal of their own' (1). Push receipt and
+live stamp appended below if the round survived to write them (the driver's kill is 23:57:13);
+otherwise r220 verifies the live stamp first.**

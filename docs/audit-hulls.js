@@ -583,6 +583,7 @@ const geo = skin && skin.geometry;
 if (geo && geo.index && geo.attributes.normal) {
 const P = geo.attributes.position, Nn = geo.attributes.normal, I = geo.index;
 let bad = 0, tot = 0, x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+let flat = 0, fx0 = 1e9, fx1 = -1e9, fy0 = 1e9, fy1 = -1e9;
 for (let t = 0; t < I.count; t += 3) {
 const a = I.getX(t), b = I.getX(t + 1), c = I.getX(t + 2);
 const ax = P.getX(a), ay = P.getY(a), az = P.getZ(a);
@@ -593,9 +594,12 @@ if (Math.hypot(nx, ny, nz) / 2 < 1e-4) continue;
 tot++;
 const sx = Nn.getX(a) + Nn.getX(b) + Nn.getX(c), sy = Nn.getY(a) + Nn.getY(b) + Nn.getY(c), sz = Nn.getZ(a) + Nn.getZ(b) + Nn.getZ(c);
 const ln = Math.hypot(nx, ny, nz), ls = Math.hypot(sx, sy, sz) || 1;
-if ((nx * sx + ny * sy + nz * sz) / (ln * ls) < -0.5) { bad++; x0 = Math.min(x0, ax); x1 = Math.max(x1, ax); y0 = Math.min(y0, ay); y1 = Math.max(y1, ay); }
+const cos = (nx * sx + ny * sy + nz * sz) / (ln * ls);
+if (cos < -0.5) { bad++; x0 = Math.min(x0, ax); x1 = Math.max(x1, ax); y0 = Math.min(y0, ay); y1 = Math.max(y1, ay); }
+else if (Math.abs(cos) < 0.3) { flat++; fx0 = Math.min(fx0, ax); fx1 = Math.max(fx1, ax); fy0 = Math.min(fy0, ay); fy1 = Math.max(fy1, ay); }
 }
 if (bad) say(v.id, 'skin faces wound against their normals', `${bad} of ${tot} triangles, at x ${x0.toFixed(1)} to ${x1.toFixed(1)}, y ${y0.toFixed(1)} to ${y1.toFixed(1)}`);
+if (flat) say(v.id, 'skin faces with no normal of their own', `${flat} of ${tot} triangles carry a normal lying in their own plane, at x ${fx0.toFixed(1)} to ${fx1.toFixed(1)}, y ${fy0.toFixed(1)} to ${fy1.toFixed(1)}`);
 }
 }
 {
