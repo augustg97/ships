@@ -16326,6 +16326,19 @@ point aft, not forward) — carried as a residual, not fixed blind at the close 
 Build PUBLISHED after the run (the r207 order), data-version 1788490629; web/index.html
 carries the same stamp and is in this commit's path list (the r209 rule). The published
 copies read back: docs/js/shaders.js carries gl_FrontFacing (1), docs/js/hull.js deck-knee
-(2), docs/audit-hulls.js the knee arm (1), docs/data/vessels.json plankRun (1). Push receipt
+(1 line, both names), docs/audit-hulls.js the knee arm (1), docs/data/vessels.json plankRun (1). Push receipt
 and live stamp: appended below if the round survived to write them (the driver's kill is
 20:17:58); otherwise r217 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788490629 on https://augustg97.github.io/ships/index.html at 19:59:24
+PDT, 90 s after the push (build/staging/r216/push.log, the r209 poll pattern). Three commits
+close the round (3d80698 source + handoff close state, 5c704cd docs + baselines + close
+paragraph, and this push-log commit). Tree at close: only build/loop.log and the r205
+daemon's cookie file uncommitted, deliberately; the r216 staging (witness frames, the dhow
+captures and the r214 baseline pulled from git, the before-copies, the inject script and the
+audit/inject/ratchet outputs, the before/after crops and the diff sheet) stays on disk
+uncommitted, the r211 convention. The scratch :8150 server was stopped; /tmp/r214web can be
+deleted. r217 opens with the head residual — the frames (Spanten) against the inside of the
+planking — and the new small one from the close gate: an audit rule that the skin's transom
+closure is wound outward (or the loft fixed so it is), now that gl_FrontFacing makes the
+winding visible as light.**
