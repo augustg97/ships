@@ -17021,3 +17021,21 @@ carries H.deck(uC), H.deck(uP), H.deck(0.84), H.deck(q.u) (4 lines) and 25 H.she
 the same 25 as web/; docs/audit-hulls.js carries the five rules' .deck reads (7 lines).
 Push receipt and live stamp appended below if the round survived to write them (the driver's
 kill is 02:15:57); otherwise r222 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788511968 on https://augustg97.github.io/ships/index.html at 01:54:49
+PDT, 90 s after the push (build/staging/r221/push.log, the r209 poll pattern). Two commits
+close the round (77f9cf2 source + audit + docs + handoff, and this push-log commit). Tree at
+close: only build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the
+r221 staging (hull.before.js, audit-hulls.before.js, vessels.before.json, the two edit
+scripts, the two witnesses, the four injected-audit outputs, the two measures, the audit
+outputs, the sweep and compare-sweeps.py, the predictions, run-close.sh, push-verify.sh)
+stays on disk uncommitted, the r211 convention. One method note for the next witness that
+swaps a file: `git checkout web/js/hull.js` to restore the before-loft ALSO discarded this
+round's own uncommitted edits, and the edits came back only because the edit was a script
+(r221/apply-edits.py) — restore a swapped file from its saved copy, never from git, and keep
+every edit as a re-runnable script until it is committed. r222 opens with residual (0d′) —
+the six remaining deck-reads in buildCitadel, linerHouse, buildFlightDeck, buildContainers
+and buildLivery switched to `H.deck`, byte-identical on every hull today and so 64/0, with
+the same Yamato injection as the witness (the citadel must move 2.00 m this time, and the
+container ship's stacks want the same test on their own hull) — or (0a) if a route to Lahn
+1992's plates appears; r218's hunt paragraph lists every route that walled.**
