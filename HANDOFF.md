@@ -16303,3 +16303,29 @@ mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen b
 unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
 sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
 cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**The close ratchet FINISHED at 19:54:06 (r216/close-ratchet.out, started 19:13:37, ~38 s a
+frame): 64 frames, TEN movers, exit 1 — against a prediction of two, and NEITHER predicted
+frame moved (ship-dhow and ship-treasure held: the cog's heads, knees and plank run are below
+tolerance at a berth neighbour's scale). The ten are ONE class the prediction missed:
+shipwright-astern 1.013% / 0.435, shipwright-furled 0.135, ship-preussen 0.101, shipwright
+0.095, ship-queen-mary-2 0.078, ship-junk 0.067, action-myeongnyang 0.063, aboard-treasure
+0.062, shipwright-ahead 0.062, ship-usv 0.050. Read (r216/astern-before-after.png, the 74's
+stern crop; treasure-before-after.png; diff-sheet.png, the six small ones tiled): every diff
+is a STERN FACE — the flat transom the loft closes across the counter, on the 74 from astern
+(the whole face, mean 141 → 138 sRGB over the crop, a shade darker), on berth neighbours at
+frame edges, on the panokseon row's transoms in the Action, on the treasure ships in the
+Sea. So the prediction's "a closed hull shows no back face" was wrong in one particular:
+the loft's transom closure is WOUND INWARD (its normal points into the hull), and until now
+it was lit as if it faced the sun. With gl_FrontFacing it lights as a face turned from the
+sun, which is what a transom in that light does. Plus two documented flaps riding along:
+the five tops on ship-preussen (r211) and the stern-label text strip on shipwright-astern
+(r213/r214). All ten accepted with that reason (FRAME-LOG.md). NOTE for the audit: a transom
+wound inward is a geometry fact worth a rule (face normals of the skin at u > 0.95 should
+point aft, not forward) — carried as a residual, not fixed blind at the close gate. No BLANK.
+Build PUBLISHED after the run (the r207 order), data-version 1788490629; web/index.html
+carries the same stamp and is in this commit's path list (the r209 rule). The published
+copies read back: docs/js/shaders.js carries gl_FrontFacing (1), docs/js/hull.js deck-knee
+(2), docs/audit-hulls.js the knee arm (1), docs/data/vessels.json plankRun (1). Push receipt
+and live stamp: appended below if the round survived to write them (the driver's kill is
+20:17:58); otherwise r217 verifies the live stamp first.**

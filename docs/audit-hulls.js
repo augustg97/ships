@@ -513,6 +513,20 @@ say(v.id, 'a through-beam that does not come through', `reaches ${Math.min(b[5],
 if (edge < 1e8 && (b[4] > edge + 0.02 || b[4] < edge - 0.15))
 say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
 }
+const knees = byName('deck-knee');
+if (knees.length !== 2 * H.deck.throughBeams)
+say(v.id, 'through-beams without their knees', `${knees.length} deck-knee, ${2 * H.deck.throughBeams} wanted for ${H.deck.throughBeams} beams`);
+for (const kn of knees) {
+const b = bbox(kn), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
+const out = Math.max(b[5], -b[2]);
+const half = Math.max(skinHalfNear(xc, b[1] + 0.15), skinHalfNear(xc, b[4] - 0.15));
+if (edge < 1e8 && (b[1] > edge + 0.05 || b[1] < edge - 0.35))
+say(v.id, 'a knee off its beam', `foot ${b[1].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
+if (b[4] < top - 0.5)
+say(v.id, 'a knee that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
+if (half > 0 && out > half + 0.02)
+say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
+}
 }
 if (H.castle && H.castle.plan) {
 const cd = byName('castle-deck'); let yC = -1e9, x0 = 1e9, x1 = -1e9;

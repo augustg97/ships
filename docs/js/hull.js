@@ -681,6 +681,7 @@ function deckCovering(S) {
 const rec = S.deck && S.deck.covering;
 if (rec && DECK_COVERINGS[rec])
 return Object.assign({ kind: rec, recorded: true,
+run: S.deck.plankRun === 'athwart' ? 1 : 0,
 what: DECK_COVERINGS[rec].name.replace('Weather deck — ', 'The covering is ')
 + ', from the record. ' + (S.deck.provenance || '') }, DECK_COVERINGS[rec]);
 const heurSteel = (S.build === 'steel' || S.build === 'iron')
@@ -2682,12 +2683,49 @@ if (S.deck && S.deck.throughBeams) {
 const n = S.deck.throughBeams;
 const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
 const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+const endGrain = mats.endGrain || (mats.endGrain = (() => {
+const c = document.createElement('canvas'); c.width = c.height = 64;
+const ctx = c.getContext('2d');
+ctx.fillStyle = '#846b4b'; ctx.fillRect(0, 0, 64, 64);
+ctx.strokeStyle = 'rgba(52, 34, 18, 0.55)'; ctx.lineWidth = 1.1;
+for (let r = 2.5; r < 74; r += 3.2 + 0.9 * ((r * 1.7) % 1)) {
+ctx.beginPath(); ctx.ellipse(40, 44, r, r * 0.84, 0.25, 0, Math.PI * 2); ctx.stroke();
+}
+ctx.strokeStyle = 'rgba(30, 20, 10, 0.85)'; ctx.lineWidth = 1.5;
+for (const a of [0.35, 2.05, 3.95]) {
+ctx.beginPath(); ctx.moveTo(40, 44); ctx.lineTo(40 + 44 * Math.cos(a), 44 + 44 * Math.sin(a)); ctx.stroke();
+}
+const tex = new THREE.CanvasTexture(c);
+if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
+return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.93 });
+})());
 us.forEach((u, i) => {
 const e = deckEdge(S, H, u);
 const half = Math.abs(e[2]) + proud;
-const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2), wood);
+const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2),
+[wood, wood, wood, wood, endGrain, endGrain]);
 bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
 bm.name = 'deck-beam';
+const kS = S.deck.kneeSidedM || 0.20, kM = 0.22, gap = 0.05;
+const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - 0.02;
+for (const sgn of [-1, 1]) {
+const zD = Math.abs(e[2]) - gap - kM / 2;
+const zT = railHalfAtU(u) - gap - kM / 2;
+const len = Math.hypot(yTop - yFoot, zT - zD);
+if (len < 0.25) continue;
+const kg = new THREE.Group();
+const vert = new THREE.Mesh(new THREE.BoxGeometry(kS, len, kM), wood);
+vert.position.set(0, (yTop + yFoot) / 2, sgn * (zD + zT) / 2);
+vert.rotation.x = -sgn * Math.atan2(zT - zD, yTop - yFoot);
+const armL = Math.min(0.9, Math.abs(e[2]) * 0.35);
+const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
+arm.position.set(0, deckAtU(u) + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
+vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
+kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
+group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
+'A grown knee standing on the beam and against the inside of the planking, up to the '
++ 'top strake — Lahn, Blatt 2, draws one at every beam end. Sidings are class defaults.'));
+}
 group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durchbalken)',
 'An athwartship deck beam whose heads pass through the planking and stand '
 + Math.round(proud * 100) + ' cm proud of the hull side — the beam-ended profile '
@@ -8777,7 +8815,8 @@ uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
 uCol:    { value: new THREE.Color(col) },
 uMode:   { value: cover.mode },
 uPlankW: { value: cover.plankW || 1 },
-uButtL:  { value: cover.buttL || 1 } } });
+uButtL:  { value: cover.buttL || 1 },
+uPlankRun: { value: cover.run || 0 } } });
 const deckMat = deckShader(cover.col);
 if (cover.mode === 0) {
 const tw = S.build === 'dugout' ? Math.max(0.03, S.beam * 0.045)
