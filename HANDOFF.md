@@ -18582,3 +18582,140 @@ scripts) stays on disk uncommitted, the r211 convention.**
 back by code strings: docs/js/hull.js carries `function frameOrigin` (1), docs/data/vessels.json carries originU (5),
 docs/audit-hulls.js carries "a through-beam off the sheet's distance from the heel" (1).
 Two commits close the round (e6f6154 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 231 — 2026-09-04 — the deck's height is read, not built: the full ratchet run first at the clean HEAD, slowed to 63 minutes by the machine's load and clean at all 64, Blatt 1 read rail-to-keel at all five heads, the Blatt 3 sections re-read with the beam told from the carlings on it, the main deck 1.75 m under the rail where the model has 1.2 and a bow platform on DB 1, the move written for r232, and the coefficients re-derived on the moved stations
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r230 ordered r231's opening:
+the full frame ratchet at the pushed HEAD before anything else, then (0e), the deck's height, then
+(0g⁸), the coefficients. All three were taken in that order; the first was cut short by the machine,
+the second was read and not built, the third is closed; the first finished only because the machine's load fell.**
+
+**The ratchet (build/staging/r231/run-close.sh, launched 13:52 at the clean r230 HEAD 28f9c50, the
+tree carrying nothing but loop.log and the r205 cookie file). It finished, late. The machine was
+running at a load average of 184 from other work (ps: mediaanalysisd at 160 %, a Codex renderer at
+133 %, the ratchet's own headless GPU process at 177 %), and the frames landed at 65–78 s each
+against the usual 38, so 64 frames took 63 minutes of a round that had 78 left at launch; the load fell to the 30s
+by 14:30 and the run reached its last frame at 14:54 (RATCHET EXIT 0  END 14:54:12; the harness's own table is in
+r231/close-ratchet.out and agrees with the hand diff below). Every landed frame was diffed against its committed baseline with the harness's own
+arithmetic (r231/diff-landed.py: a pixel counts when any channel moves more than 8 levels, the
+harness's PIXEL_EPS; gate 0.05 % / mean 0.15) and every one passes. The largest: globe-default at
+0.0479 % / 0.012 — the Ocean Crossing fleet's ship marks along the Atlantic routes, each
+re-rasterised by a pixel, sea and land at zero (r231/globe-default-sbs.png, globe-default-diff.png),
+the sub-visual dither FRAME-LOG documents for this frame at r93 and r107. ship-dhow, the one frame
+r230 changed and accepted, reads 0.0000 % against its r230 baseline. Every one of the 64 is checked, so r230's prediction (only ship-dhow may move) is
+verified in full and r230's debt is cleared; r232 opens with a normal ratchet after checking the
+machine's load (uptime under about 20 before launching). No baseline was accepted this round.**
+
+**(0e), the deck's height — READ. Three plates and one thesis, in order of weight. (1) Lahn's
+Blatt 1, the starboard elevation fetched whole in r230 at 590.8 px/m (r230/lahn-blatt1-full.png),
+cropped rail-to-keel at each head with a metre ruler from the head's centre (r231/col-DB1..DB5.png)
+and the bow read whole with height lines from the keel (r231/bow-context.png, db1-head-fullres.png).
+The datum is the keel's underside amidships, plate y 4442, which Tanner's Table 6 closes on to the
+pixel: his 4273 mm at midships from the washboard's top at y 1918 lands at 4442. The five heads'
+centres (the cross-hatched squares, DB 1 re-boxed at full resolution to y 2422 where r230's
+detector had 2502): 3.42 / 2.23 / 2.01 / 2.04 / 2.31 m over the keel, and 1.10 / 2.23 / 2.26 /
+2.28 / 1.97 m under the washboard's top at the same x (the rail there 4.52 / 4.46 / 4.27 / 4.32 /
+4.28 m over the keel; Tanner's Table 6 washboard heights 4522 / 4354 / 4273 / 4216 / 4280 at Frames 6 / 10 / midships /
+23 / 30, so my rail reads run 0–0.1 m high, the caprail's top against his washboard).
+(2) Lahn's Blatt 3, the four sections, still only the 640 px photograph (r213/lahn-blatt2.jpg),
+cropped one section at a time at 3× (r231/sec-spant6-db1.png, sec-spant10-db2.png,
+sec-spant26-db4.png, sec-spant35-db5.png). Each section draws the through-beam as a horizontal
+BAND the depth of the beam with four small SQUARES standing on it — the carlings, the fore-and-aft
+timbers Westphal names, cut across — and the deck's line on those. At Spant 10 the band's centre
+reads 2.1 m under the rail (Blatt 1: 2.23) and at Spant 26 2.4 m (Blatt 1: 2.28); the carlings'
+tops, the deck's surface, stand 0.4–0.7 m over the band's centre. At Spant 35 the photograph's
+bands cannot be told apart (2.3 or 2.8 m over the keel); Blatt 1's 2.31 stands. (3) Tanner 2021,
+Appendix H: the castle deck (his 'Upper Deck') 5260 mm over the keel at Frame 26 and 5343 at Frame
+35, the main deck cambered 92 mm, the windlass on DB 5's bevel knees with a dowel hole 86 mm over
+the main deck's surface — the castle deck stands 3.0 m over DB 5's centre. (4) The replicas, not
+measured: the Ubena von Bremen abeam (r213/ubena-kiel2007-2.jpg, r231/ubena-bow-3x.png) shows a
+person at the stem from the waist up where the waist's crowd shows heads and shoulders; the Roland
+von Bremen from above (r231/roland-bow-2x.png) shows a decked platform with a cross-timber at the
+bow, a level above the waist's deck. Wikipedia's 'Deck 3,14 m über der Wasserlinie' for both is not
+the main deck (2.25 + 3.14 = 5.39, the castle deck; or the rail at the light draught) and is not
+used.**
+
+**What it means for the model. The deck's surface stands about 0.5 m over each beam's centre
+(the beam's half-depth 0.22, the carlings, the planking; the sections read 0.4–0.7): 2.5 / 2.6 /
+2.8 m over the keel at DB 3–4 / DB 2 / DB 5, which is 1.75 m under the rail at DB 2–4 and 1.47 m at
+DB 5. The model's deck lies 1.2 m under the sheer, level, 3.2 m over its keel's underside
+(measure_ship r230: the weather deck at y 0.81–0.94, the five beams' tops at 0.79, the keel at
+−2.39), so the beams sit 0.7–1.0 m too high from DB 2 aft. DB 1 is the other way: its head is
+1.2 m higher than DB 2's, 1.10 m under the rail, so the model's DB 1 sits 0.4 m too LOW and the
+deck on it is a platform at the bow about 0.6 m under the rail. The deck also has a sheer of its
+own — the heads rise 0.22 m at DB 2 and 0.30 m at DB 5 over DB 3–4 — so deck.level true is wrong
+as well, gently. r215's 'a third of the side under the sheer' (1.3–1.4 m) was the carlings' tops
+at Spant 10 read as the beam; the Blatt 9 chain (0.8–1.1 m) ran through a class-default castle
+headroom of 1.95 where the plate has 3.0 m from the beam's centre. Both reads were honest reads of
+what their plates could show; both are voided in the record.**
+
+**The record (web/data/vessels.json, the cog; before-copy r231/vessels.before.json, the edit
+script r231/apply-edits.py with every text match asserted unique, vessels.diff). Three fields:
+deck.beamHeightsFromKeelM [3.42, 2.23, 2.01, 2.04, 2.31], deck.railAboveBeamCentreM [1.10, 2.23,
+2.26, 2.28, 1.97], deck.deckAboveBeamCentreM 0.5. The DEPTH and LEVEL sentences of deck.provenance
+are rewritten with the plates, the scales and the crops, the voided reads named as voided (r229's
+method note 2). deck.belowSheerContest is rewritten: what the plate says, why it was not built,
+and THE MOVE for r232 in full — belowSheerM about 1.75 with level false and the deck's own sheer;
+the castle deck HELD at Tanner's 5.34 m over the keel while the deck under it drops, so
+castle.deckHM 1.95 (a class default) becomes about 2.5; a foredeck on DB 1 at 3.9 m over the keel,
+its after edge unread; everything standing on the deck following deckAtU (windlass, mast heel,
+knees, the frames' beam displacement, tiller); an audit rule D-BEAM-HEIGHT reading each beam's
+built centre against deck.beamHeightsFromKeelM (±0.15), proved by the r231 builder as the variant;
+and the freeboard to the DECK stated — at the record's 2.25 m draught the deck at DB 3 stands
+0.25 m over the water, which is what the numbers give and is not itself a fault, and the Sea
+view's waves will need looking at against it. belowSheerM 1.2 and level true are UNCHANGED this
+round: geometry byte-identical, hull.js and the audit untouched.**
+
+**Why it was not built. Rule 1: a deck moved a metre, with the castle re-hung and a new foredeck,
+is a change that has to be measured (measure_ship) and witnessed from two quarters and at stage 2,
+which is four browsers, and the round's one renderer was the ratchet from 13:52 until it was
+stopped, under a load that made every FRAME_READY wait a coin toss (r230 lost six url_capture calls
+to the 60 s wait on a quieter machine). A record-only round that says exactly what the plate shows
+and exactly what to build is the honest close; a deck moved blind and shipped is the class of
+failure r219 and r230 already paid for.**
+
+**(0g⁸) — CLOSED. r228's coefficient replica re-run with the section stations at the sheet's own u
+(r231/coeffs.py, coeffs.out: 6 / 10 / 26 / 35 at 0.146 / 0.234 / 0.657 / 0.847 replacing the
+frameU(5/12/26/33) rows). The plate plan's underwater body at 2.25 m on 20.5 m: volume 164.3 m³
+(r228: 158.6), displacement 168.4 t (162.5), Cw 0.709 (0.695), Cb 0.469 (0.452), Cm 0.778 (0.778),
+Cp 0.661 (0.641), the fullest section at u 0.657 (0.697), Bwl 6.93 (6.91); the class plan on the
+same stations 145.3 t / 0.602 / 0.404 / 0.764 / 0.603. The held end forms and the rail plan now
+reach 0.5–1.0 m further toward each end, so the body fills by 3–4 %. sectionProvenance's
+coefficient sentence carries the new numbers with the r228 ones beside them; all five stay
+DERIVED and UNVERIFIED (no published displacement on the record).**
+
+**Rule 0 and rule 1 this round: no frame changed, so the witness is the ratchet's own capture of
+the cog at berth scale in ship-dhow (0.0000 % against r230's accepted baseline) and r230's
+origin-broadside.png stands as the last witnessed state of the cog; nothing new was rendered
+because nothing rendered changed. The card's new text was not captured (the browser was the
+ratchet's); r232 reads the cog's card with the deck paragraph on it.**
+
+**Named residuals, in order:** (0e) READ, the move queued as belowSheerContest says — the head of
+r232 after the ratchet; it needs the Sea view checked at the new freeboard and a decision on the
+foredeck's after edge (Blatt 4/5 or the deck plan, neither on disk; fetch before building, or
+build it to DB 1's station and say so). (0g⁸) CLOSED. (0g⁵) remainder unchanged (Blatt 35).
+(0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists
+them. No new residual from the ratchet: all 64 checked.**
+
+**Three method notes. (1) Check the machine before launching a forty-minute run: uptime's load
+average was 184 at 13:52 and the first frames took twice their usual time; the run finished only
+because the load fell, and the close was planned from a stop time, not from the usual 40 min. The
+check costs one second and should precede the launch. (2) A section drawn AT a beam shows the beam as a band and the timbers
+on it as squares; the deck's line is above both. Two rounds read the squares as the beam because
+the photograph could not separate them, and the elevation at twenty times the scale could. When
+two plates disagree by half a metre, the coarser one is not wrong so much as unread — go back to
+it with the finer one's answer and see which line it was drawing. (3) A record-only round is a
+legitimate close when the renderer is unavailable; what makes it legitimate is that the record
+says what to build, to the number, and why it was not built.**
+
+**r232 opens by checking the load (uptime under ~20) and running the ratchet as usual, then builds the deck at its read
+height per belowSheerContest — the move, the castle held, the foredeck, D-BEAM-HEIGHT — and
+witnesses it broadside, from both quarters, at stage 2 and in the Sea view at the new freeboard.**
+
+**Live stamp: docs/index.html carries data-version 1788558902 at the build; the push and the live
+poll are in build/staging/r231/push.log, and the verified live value is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205
+daemon's cookie file uncommitted, deliberately; the r231 staging (the before-copy, the edit script,
+the diff, the column crops, the section crops, the bow crops, the replica crops, coeffs.py and its
+out, diff-landed.py and its outs, the ratchet's out, the close scripts) stays on disk
+uncommitted, the r211 convention.**
