@@ -3472,12 +3472,17 @@
             `${H.floatplanes} in the record, ${planes.length} drawn`);
       for (const pb of planes) {
         const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((pb.min.x + pb.max.x) / 2) / H.lwl));
-        const d = pb.min.y - HSf.sheer(uu);
+        /* r221: the DECK, not the sheer — deck(u) is the sheer on every hull without
+           deck.belowSheerM and the recorded depth under it otherwise (r215), and the
+           builders were switched to it this round; a rule that kept the sheer convicted
+           a plane standing exactly on the deck by the record's own drop (Yamato, 2 m
+           injected: -1.4 m "off the sheer") */
+        const d = pb.min.y - HSf.deck(uu);
         /* on the deck (plus its camber) or riding a catapult beam — never higher, never
            sunk through the planking */
         if (d < -0.6 || d > 3.6)
           say(v.id, 'floatplane stands on nothing',
-              `float bottom ${d.toFixed(1)} m off the sheer at its station`);
+              `float bottom ${d.toFixed(1)} m off the deck at its station`);
         if (Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)) > H.beam / 2 + 0.5)
           say(v.id, 'floatplane off the ship',
               `z reaches ${Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)).toFixed(1)} m`);
@@ -3497,7 +3502,7 @@
         const zc = (hb.min.z + hb.max.z) / 2;
         const bB = Math.abs(SHIPS_HULL.surfacePoint(H, HSh, uu, 1.0)[2]);
         const camber = Math.cos((zc / bB) * Math.PI / 2) * bB * 0.035;
-        const d = hb.min.y - (HSh.sheer(uu) + camber);
+        const d = hb.min.y - (HSh.deck(uu) + camber);   // the deck the coaming is seated on (r221)
         if (d < -0.6 || d > 0.6)
           say(v.id, 'hatch off the deck',
               `coaming bottom ${d.toFixed(2)} m from the cambered deck at its station`);
@@ -3538,8 +3543,9 @@
     }
 
     /* ⚠ THE QUARTERDECK AVIATION DECK STANDS ON THE DECK. Declared catapults are drawn as a
-       PAIR, mirrored, each turntable resting on the sheer at its station — the class of
-       fault the funnel-attached-to-nothing audit exists for, asserted before it happens. */
+       PAIR, mirrored, each turntable resting on the DECK at its station (r221: deck(u),
+       the sheer less the record's drop) — the class of fault the funnel-attached-to-nothing
+       audit exists for, asserted before it happens. */
     if (H.catapults) {
       const HS3 = SHIPS_HULL.hullSurface(H);
       const cats = [];
@@ -3552,17 +3558,18 @@
             `${wanted} structures in the record (2 catapults${H.sternCrane ? ' + crane' : ''}), ${cats.length} drawn`);
       for (const cb of cats) {
         const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((cb.min.x + cb.max.x) / 2) / H.lwl));
-        if (Math.abs(cb.min.y - HS3.sheer(uu)) > 1.5)
+        if (Math.abs(cb.min.y - HS3.deck(uu)) > 1.5)
           say(v.id, 'catapult stands on nothing',
-              `bottom at ${cb.min.y.toFixed(1)} m, sheer there ${HS3.sheer(uu).toFixed(1)} m`);
+              `bottom at ${cb.min.y.toFixed(1)} m, deck there ${HS3.deck(uu).toFixed(1)} m`);
       }
     }
 
     /* ⚠ A SUPERFIRING TURRET'S BARBETTE RUNS TO THE DECK. The raised mount was lifted by
        moving its group up, so the barbette bottom floated exactly the raise above the
        planking — and the contact audit could not see it, because the barbette touches the
-       gunhouse above it. Each turret group's bottom must rest on ITS OWN support: the sheer
-       at its station, or a superstructure surface directly beneath it. */
+       gunhouse above it. Each turret group's bottom must rest on ITS OWN support: the DECK
+       at its station (r221: deck(u), which is the sheer unless the record drops it), or a
+       superstructure surface directly beneath it. */
     if (H.turrets) {
       const HS2 = SHIPS_HULL.hullSurface(H);
       const houseBoxes2 = [];
@@ -3575,14 +3582,14 @@
       for (const tgp of turretGroups2) {
         const tb = new THREE.Box3().setFromObject(tgp);
         const u = Math.max(0.001, Math.min(0.999, 0.5 + ((tb.min.x + tb.max.x) / 2) / H.lwl));
-        const onSheer = Math.abs(tb.min.y - HS2.sheer(u)) < 1.4;
+        const onDeck = Math.abs(tb.min.y - HS2.deck(u)) < 1.4;
         const onHouse = houseBoxes2.some(hbx =>
           Math.abs(tb.min.y - hbx.max.y) < 1.4 &&
           tb.max.x > hbx.min.x && tb.min.x < hbx.max.x &&
           tb.max.z > hbx.min.z && tb.min.z < hbx.max.z);
-        if (!onSheer && !onHouse)
+        if (!onDeck && !onHouse)
           say(v.id, 'turret stands on nothing',
-              `bottom at ${tb.min.y.toFixed(1)} m, sheer there ${HS2.sheer(u).toFixed(1)} m, no deck beneath`);
+              `bottom at ${tb.min.y.toFixed(1)} m, deck there ${HS2.deck(u).toFixed(1)} m, no house beneath`);
       }
     }
 
@@ -5026,7 +5033,7 @@
       const mx = (mk.at - 0.5) * H.lwl;
       const HSt = SHIPS_HULL.hullSurface(H);
       const lower = lowerOf(mk);
-      const floorY = HSt.sheer(mk.at) + lower * 0.75;
+      const floorY = HSt.deck(mk.at) + lower * 0.75;   // the heel stands on the deck (r215/r221)
       let found = 0;
       g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
         const bbx = new THREE.Box3().setFromObject(o);

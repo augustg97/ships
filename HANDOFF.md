@@ -16890,3 +16890,134 @@ byte-identical on every hull without deck.belowSheerM and so should ratchet 64/0
 a route to Lahn 1992's plates appears; r218's hunt paragraph lists every route that walled.
 For any close witness from now on, name the point along the hull with x= (loft metres from
 amidships, aft positive) and take it before the ratchet is launched.**
+
+## Round 221 — 2026-09-04 — the deck-readers switch: eight builders and four audit rules stand their parts on the deck, and a two-metre drop injected into Yamato proves it on both lofts
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r220 said r221 opens
+with residual (0d), the nine `H.sheer` deck-readers named in r215 switched to `H.deck` —
+or (0a) if a route to Lahn 1992's plates appeared. No new route. (0d) is DONE, and doing it
+found the same fault in the audit: four of its rules judged those parts against the sheer,
+so on any hull that takes the record field they would have convicted a turret standing
+exactly on the deck.**
+
+**The change (before-copies r221/hull.before.js, audit-hulls.before.js; the edit scripts
+r221/apply-edits.py and apply-audit-edits.py, each asserting every match is unique).
+web/js/hull.js, 15 edits, 16 reads: buildRaisedEnds (the raised deck strip, its posts and
+rails, and the wall's HEAD stand at deck + dh; the wall's base stays on the sheer, since it is
+the shell carried up), buildFunnel (the casing's foot), buildBoats (open-deck stowage),
+buildTurrets (the barbette base), buildSternAviation (both turntables, the crane, the parked
+floatplanes), buildWingSail (the bearing, five solar panels, the instrument pod),
+buildJunkCastle (each tier's floor and head), buildPaddles (where the box's arc springs from
+the deck; the waterline derivation `sheer − freeboard` two lines above stays, it names the
+waterline, not a deck). The ninth on r215's list, buildNetDefence, keeps its one read: sideAt
+maps a height onto the skin between v 0.62 and 1 by the same formula deckEdge uses, and the
+skin's top IS the sheer. Research/audit-hulls.js, 8 edits: the floatplane, stowage-hatch,
+catapult and turret rules and the gaff-topsail floor read `.deck(u)`, and their messages say
+deck. hullSurface's deck(u) returns sheer(u) exactly on every hull without deck.belowSheerM
+(r215), so both files are byte-identical in effect on 32 of 33 hulls; the cog, the only
+carrier, uses none of the eight builders (no wellM/houseAt, funnels, boats, turrets,
+catapults, wingSail, poop or paddleDia — read off the record, r221 transcript).**
+
+**The witness, taken before the ratchet with the point named (the r220 rule): Yamato with
+`deck.belowSheerM 2.0, level false` injected into web/data/vessels.json (before-copy
+r221/vessels.before.json, restored; git status afterwards reads only hull.js and the two
+audit copies modified), at #v=ship&s=yamato&b=120&z=0.5&l=8&y=8&x=45 --bare, on the before
+loft (hull.before.js, diff-identical to 071f533's) and the after loft. witness-before.png:
+the deck two metres down inside a bulwark, the aft turret's barbette standing on nothing with
+a band of hull side under its rim, the catapult trusses and the three floatplanes up at the
+sheer over the bulwark's top. witness-after.png: the barbette down on the deck, the funnel's
+foot down behind the shelter deck, the floatplanes and catapults on the quarterdeck behind
+the bulwark strip. The citadel, the shelter deck and the bridge tower sit at the same height
+in both, which is the next paragraph's finding.**
+
+**Measured (measure_ship on the injected record, r221/measure-before.out → measure-after.out,
+part y0): Turret 13.33 → 11.33; Turret rangefinder 16.83 → 14.83; Funnel 8.94 → 6.94;
+Floatplane 11.10 → 9.10; Aircraft catapult 10.84 → 8.84; Catapult turntable 9.84 → 7.84;
+Crane post 9.94 → 7.94; Aircraft crane 18.69 → 16.69 — every switched part moves 2.00 m,
+the record's drop, and nothing else moves. Weather deck 7.60–9.23 both times (it has read
+H.deck since r215); Stowage hatch 7.87–8.60 both times (buildDeckHatches already reads
+H.deck through its own deckAt, so the OLD audit's -2.31 m "hatch off the deck" convictions
+were the audit's sheer, not the hatch). Citadel deck 9.20–12.71 BOTH times: buildCitadel,
+hull.js line 9011, `const base = H.sheer((uA + uB) / 2)`, is a TENTH deck-reader r215's list
+did not name. Found by the measure after the ratchet had started on this tree, so it is left
+as it is and stands first in the residuals; `grep -c "S\.freeboard" web/js/hull.js` reads 6
+and each of those wants the same question asked.**
+
+**The audit as the proof that the rules fire (run_audit on the injected record, r221/
+audit-inject-*.out). The OLD audit on the AFTER loft convicted 10 on Yamato — "floatplane
+stands on nothing: float bottom -1.4 m off the sheer", three catapults "bottom at 7.8 m,
+sheer there 9.8 m", three turrets, and three hatches — every one a part standing exactly on
+the deck, judged against the skin's edge: Rule 8, the audit was wrong first. The FIXED
+audit on the AFTER loft: 1 problem, "deck covering with no provenance", the injection's
+own (my provenance string replaced Yamato's covering source; the loft is clean). The FIXED
+audit on the BEFORE loft: 8 — three catapults, three turrets, one floatplane, and that
+same injection artefact; two of the three parked floatplanes pass on the before loft by
+design, because the rule's window (-0.6 to 3.6 m over the deck) admits a plane riding the
+catapult beam and a plane 2.6 m up reads as that. Clean audit, real record, this tree:
+33 hulls, 0 problems (r221/audit.out).**
+
+**Rule 0 on witness-after.png, read whole: a battleship seen from her starboard quarter,
+dark grey hull with the red boot-topping showing at the bow wave, a laid deck, the pagoda
+bridge tower and the raked funnel over the citadel, secondary mounts and their barrels in
+rows, textured sea to a hazy coast — a rendered world. Three facts a viewer can read off it
+without a legend: the main battery is three triple turrets, two forward and one aft; the
+funnel rakes aft; two floatplanes stand on the quarterdeck beside a pair of catapults
+trained outboard.**
+
+**Audit: 33 hulls, 0 problems on this tree (r221/audit.out, audit.err), with the switched
+rules in place and synced to web/ and docs/.**
+
+**Named residuals, in order (r220's list, renumbered):** (0a) OPEN — the cog's frame pitch is
+a class default; r218's hunt paragraph lists every route that walled. (0b) the futtock's bevel
+and rough head. (0c) the beams' stations and count. (0d) CLOSED this round for r215's nine
+and the audit's five. (0d′) NEW — the remaining `H.sheer` reads that mean a deck, found by
+walking every read left with its enclosing function (r221 transcript): buildCitadel 9011
+(the injected witness measured it unmoved, 9.20 both lofts), linerHouse 6550 (the ground
+tier's base), buildFlightDeck 8379, buildContainers 10303/10372–3/10453 (the stacks and the
+forecastle bay), buildLivery 10664 — six reads in five builders, all on steel hulls whose
+deck is their sheer today, so the switch is byte-identical and should ratchet 64/0; the
+reads that STAY are the skin's own (buildFittings railAtU 4317, buildHead 10761, buildStern
+10894, buildAnchor 11237, buildSternTerraces 1511, buildFramesGeometry 387, surfacePoint,
+deckEdge, buildHullGeometry's risers, buildNetDefence 10082, the rudders' scale reads 648/714/
+825–826, buildRig's clew scale 2640, buildPaddles' waterline 13044). (0e) belowSheerM
+contested by 0.4 m. (0f) the beam-head wedge at 60+ px/m. (1) r214: the Gangspill's station.
+(2) r214: the wings' inner-edge and forward-end rails, no source. (3) r213: decked timber
+ships' rudder heads stop at 0.35 of the sheer; no helm port. (4) Kozushima 1993 weighing.
+(5) r187 emaki plate. (6) r182 grapnel shank. (7) r177 Lucian's second machine. (8) r176
+sekibune class-size, paired with r211's top question. (9) Preussen mast livery. (10)
+Endurance forecastle. (11) Azzam crest span. (12) r164 risen black unpierced. (13) r165
+fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery sashes. (16) r171
+authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the cathead's
+supporting knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**The close ratchet, started 01:11:18 (r221/run-close.sh → close-ratchet.out) on a tree
+whose every change is described above. Predictions: r221/PREDICTIONS-close.md — ZERO movers
+beyond the documented sub-gate flaps, because deck(u) ≡ sheer(u) on every hull without the
+field and the one carrier uses none of the eight builders. CLOSE STATE: if the paragraphs
+below this one are missing, the round was killed at the close gate (02:15:57) — the next
+firing must (1) re-run the ratchet whole on this committed tree, read and accept every mover
+with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the live stamp,
+the r198 rule.**
+
+**The close ratchet FINISHED at 01:52:23 (r221/close-ratchet.out, started 01:11:18, 41.1 min,
+~38.5 s a frame): 64 frames, ZERO movers, exit 0, no BLANK — "all frames within tolerance",
+as predicted. Every frame was read while the run was going (r221/sweep.out, one line per
+frame as it landed, by my own >0 count with the mean and the bbox), and this time the
+comparison with the previous round's sweep was a script, not a reading: r221/compare-sweeps.py
+parses both files and reports every frame whose three numbers or box differ. Result at
+17, 33, 48, 62 and 64 frames landed: IDENTICAL to r220's line for every frame, digit for
+digit and box for box, DIFFERENT 0. Fifteen lines stand over the sweep's own 0.05% line by
+that >0 count (r220's fifteen: globe-default, ship-dhow, ship-galleass, ship-titanic,
+ship-yamato, aboard-off, aboard-titanic, ship-wyoming, ship-treasure, shipwright-ahead,
+ship-endurance, ship-ever-given, sea-ever-given, passage-sahul, sea-canoe-floor), the r218
+sub-gate residue, unchanged by a round whose only geometric effect is on a hull that does
+not exist yet. At the harness's own >8 count: globe-default 0.048%, ship-titanic 0.015%,
+ship-yamato 0.018%, all ok — the two hulls whose builders were switched read exactly what
+they read in r220, because deck(u) is sheer(u) on both. Nothing accepted; FRAME-LOG.md
+untouched. Build PUBLISHED after the run (the r207 order), data-version 1788511968;
+web/index.html carries the same stamp and is in this commit's path list (the r209 rule).
+Published copies read back by code strings (the build strips comments): docs/js/hull.js
+carries H.deck(uC), H.deck(uP), H.deck(0.84), H.deck(q.u) (4 lines) and 25 H.sheer lines,
+the same 25 as web/; docs/audit-hulls.js carries the five rules' .deck reads (7 lines).
+Push receipt and live stamp appended below if the round survived to write them (the driver's
+kill is 02:15:57); otherwise r222 verifies the live stamp first.**

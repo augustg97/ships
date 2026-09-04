@@ -2439,10 +2439,10 @@ say(v.id, 'floatplanes miscounted',
 `${H.floatplanes} in the record, ${planes.length} drawn`);
 for (const pb of planes) {
 const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((pb.min.x + pb.max.x) / 2) / H.lwl));
-const d = pb.min.y - HSf.sheer(uu);
+const d = pb.min.y - HSf.deck(uu);
 if (d < -0.6 || d > 3.6)
 say(v.id, 'floatplane stands on nothing',
-`float bottom ${d.toFixed(1)} m off the sheer at its station`);
+`float bottom ${d.toFixed(1)} m off the deck at its station`);
 if (Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)) > H.beam / 2 + 0.5)
 say(v.id, 'floatplane off the ship',
 `z reaches ${Math.max(Math.abs(pb.min.z), Math.abs(pb.max.z)).toFixed(1)} m`);
@@ -2462,7 +2462,7 @@ const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hb.min.x + hb.max.x) / 2) / H
 const zc = (hb.min.z + hb.max.z) / 2;
 const bB = Math.abs(SHIPS_HULL.surfacePoint(H, HSh, uu, 1.0)[2]);
 const camber = Math.cos((zc / bB) * Math.PI / 2) * bB * 0.035;
-const d = hb.min.y - (HSh.sheer(uu) + camber);
+const d = hb.min.y - (HSh.deck(uu) + camber);
 if (d < -0.6 || d > 0.6)
 say(v.id, 'hatch off the deck',
 `coaming bottom ${d.toFixed(2)} m from the cambered deck at its station`);
@@ -2507,9 +2507,9 @@ say(v.id, 'aviation deck miscounted',
 `${wanted} structures in the record (2 catapults${H.sternCrane ? ' + crane' : ''}), ${cats.length} drawn`);
 for (const cb of cats) {
 const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((cb.min.x + cb.max.x) / 2) / H.lwl));
-if (Math.abs(cb.min.y - HS3.sheer(uu)) > 1.5)
+if (Math.abs(cb.min.y - HS3.deck(uu)) > 1.5)
 say(v.id, 'catapult stands on nothing',
-`bottom at ${cb.min.y.toFixed(1)} m, sheer there ${HS3.sheer(uu).toFixed(1)} m`);
+`bottom at ${cb.min.y.toFixed(1)} m, deck there ${HS3.deck(uu).toFixed(1)} m`);
 }
 }
 if (H.turrets) {
@@ -2524,14 +2524,14 @@ turretGroups2.push(o); });
 for (const tgp of turretGroups2) {
 const tb = new THREE.Box3().setFromObject(tgp);
 const u = Math.max(0.001, Math.min(0.999, 0.5 + ((tb.min.x + tb.max.x) / 2) / H.lwl));
-const onSheer = Math.abs(tb.min.y - HS2.sheer(u)) < 1.4;
+const onDeck = Math.abs(tb.min.y - HS2.deck(u)) < 1.4;
 const onHouse = houseBoxes2.some(hbx =>
 Math.abs(tb.min.y - hbx.max.y) < 1.4 &&
 tb.max.x > hbx.min.x && tb.min.x < hbx.max.x &&
 tb.max.z > hbx.min.z && tb.min.z < hbx.max.z);
-if (!onSheer && !onHouse)
+if (!onDeck && !onHouse)
 say(v.id, 'turret stands on nothing',
-`bottom at ${tb.min.y.toFixed(1)} m, sheer there ${HS2.sheer(u).toFixed(1)} m, no deck beneath`);
+`bottom at ${tb.min.y.toFixed(1)} m, deck there ${HS2.deck(u).toFixed(1)} m, no house beneath`);
 }
 }
 if ((H.build === 'steel' || H.build === 'iron') && part.rudder) {
@@ -3583,7 +3583,7 @@ if (mk.rig !== 'gaff' || !mk.topsail) continue;
 const mx = (mk.at - 0.5) * H.lwl;
 const HSt = SHIPS_HULL.hullSurface(H);
 const lower = lowerOf(mk);
-const floorY = HSt.sheer(mk.at) + lower * 0.75;
+const floorY = HSt.deck(mk.at) + lower * 0.75;
 let found = 0;
 g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
 const bbx = new THREE.Box3().setFromObject(o);

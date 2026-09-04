@@ -7600,8 +7600,8 @@ function buildRaisedEnds(S, group) {
        fight), head one deck-height over the local sheer */
     const tp = [], ti = [];
     for (const p of path) {
-      const ys = H.sheer(p.u);
-      tp.push(p.x, ys - dh * 0.15, p.z, p.x, ys + dh, p.z);
+      const ys = H.sheer(p.u), yd = H.deck(p.u);
+      tp.push(p.x, ys - dh * 0.15, p.z, p.x, yd + dh, p.z);
     }
     for (let k = 0; k + 1 < path.length; k++) {
       const a = k * 2, b = a + 2;
@@ -7611,11 +7611,14 @@ function buildRaisedEnds(S, group) {
     wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
     wg.setIndex(ti); wg.computeVertexNormals();
     g.add(new THREE.Mesh(wg, wallMat));
-    /* the deck: a planked strip lofted station by station at sheer + dh, so it carries the
-       hull's own sheer out to the end rather than lying flat across it */
+    /* the deck: a planked strip lofted station by station at deck + dh, so it carries the
+       hull's own sheer out to the end rather than lying flat across it. H.deck (r221): the
+       raised end stands one deck-height over the WEATHER DECK, which is the sheer on every
+       hull without deck.belowSheerM and the recorded depth under it otherwise; the wall's
+       base above stays on the skin's own edge, since it is the shell carried up. */
     const dp = [], di = [];
     for (let k = 0; k <= N; k++) {
-      const u = u0 + (u1 - u0) * k / N, y = H.sheer(u) + dh, h = halfAt(u);
+      const u = u0 + (u1 - u0) * k / N, y = H.deck(u) + dh, h = halfAt(u);
       dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
     }
     for (let k = 0; k < N; k++) { const a = k * 2, b = a + 2; di.push(a, b, a + 1, a + 1, b, b + 1); }
@@ -7633,7 +7636,7 @@ function buildRaisedEnds(S, group) {
     }
     for (const q of Q) {
       const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), railMat);
-      st.position.set(q.x, H.sheer(q.u) + dh + dh * 0.15, q.z);
+      st.position.set(q.x, H.deck(q.u) + dh + dh * 0.15, q.z);
       g.add(st);
     }
     for (let k = 0; k + 1 < Q.length; k++) {
@@ -7641,7 +7644,7 @@ function buildRaisedEnds(S, group) {
       const len = Math.hypot(b.x - a.x, b.z - a.z);
       if (len < 0.01) continue;
       const dir = new THREE.Vector3(b.x - a.x, 0, b.z - a.z).normalize();
-      const ym = (H.sheer(a.u) + H.sheer(b.u)) / 2 + dh;
+      const ym = (H.deck(a.u) + H.deck(b.u)) / 2 + dh;
       for (const hf of [0.10, 0.20, 0.30]) {
         const bar = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), railMat);
         bar.position.set((a.x + b.x) / 2, ym + dh * hf, (a.z + b.z) / 2);
@@ -7751,7 +7754,7 @@ function buildFunnel(S, group) {
   const th = rakeDeg * Math.PI / 180;
   for (let i = 0; i < n; i++) {
     const u = stations[i];
-    let y = H.sheer(u);
+    let y = H.deck(u);                            // the casing stands on the DECK (r221)
     if (T && T.recorded)
       for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);
     const g = new THREE.Group();
@@ -8244,7 +8247,7 @@ function buildBoats(S, group, mats) {
     const u = uMid - span / 2 + (i / Math.max(1, ps - 1)) * span;
     /* in a recess the boat stands on the gallery SOLE (y0), under the decks above;
        on an open boat deck it stands on the roof (y1) */
-    const deckY = recT ? recT.y0 + 0.15 : (topT ? topT.y1 : H.sheer(u));
+    const deckY = recT ? recT.y0 + 0.15 : (topT ? topT.y1 : H.deck(u));
     const half = topT ? topT.half(u)
                       : Math.abs(surfacePoint(S, H, Math.max(0.01, Math.min(0.99, u)), 1.0)[2]);
     for (const sgn of [-1, 1]) {
@@ -8940,7 +8943,7 @@ function buildTurrets(S, group, mats) {
      rest like every other mount, and photograph H61017 shows P trained toward the bow. */
   const sides = S.turretSide || [];
   stations.forEach((u, i) => {
-    const base = H.sheer(u);
+    const base = H.deck(u);                        // the barbette stands on the deck (r221)
     const raised = raise[i] ? B * 0.085 : 0;       // the superfiring one stands higher
     const R = turretRadius(S);
     const side = sides[i] || 0;
@@ -9774,7 +9777,7 @@ function buildSternAviation(S, group) {
   const steel = new THREE.MeshStandardMaterial({ color: 0x5c6167, roughness: 0.62, metalness: 0.35 });
   const u = S.catapults.at || 0.92;
   const len = S.catapults.lenM || B * 0.5;
-  const deckY = H.sheer(u);
+  const deckY = H.deck(u);                         // the quarterdeck, not the skin's edge (r221)
   const half = Math.abs(surfacePoint(S, H, u, 1.0)[2]);
   /* one truss and one rail geometry, built once and shared by both mounts (r144);
      both live strictly inside the boxes they replace */
@@ -9811,7 +9814,7 @@ function buildSternAviation(S, group) {
     jib.position.set(Math.cos(0.6) * jibL / 2, 9.0 + Math.sin(0.6) * jibL / 2, 0);
     jib.rotation.z = 0.6;
     g.add(tag(jib, 'catapult', 'Aircraft crane'));
-    g.position.set((uC - 0.5) * L, H.sheer(uC), 0);
+    g.position.set((uC - 0.5) * L, H.deck(uC), 0);
     group.add(tag(g, 'catapult'));
   }
   /* ── THE AIRCRAFT THEMSELVES, from the record: `floatplanes: N` ──────────────────────
@@ -9836,7 +9839,7 @@ function buildSternAviation(S, group) {
       const p = buildFloatplane(fm, G);
       const uP = u - 0.045 - 0.042 * (i - 1);
       const bC = Math.abs(surfacePoint(S, H, uP, 1.0)[2]);
-      p.position.set((uP - 0.5) * L, H.sheer(uP) + bC * 0.035, 0);
+      p.position.set((uP - 0.5) * L, H.deck(uP) + bC * 0.035, 0);
       p.rotation.y = (i % 2 ? -1 : 1) * 0.28;     // pushed about by hand, not ruled lines
       group.add(tag(p, 'floatplane'));
     }
@@ -10179,7 +10182,7 @@ function buildWingSail(S, group, mats) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const u = S.wingAt || 0.46;
-  const base = H.sheer(u);
+  const base = H.deck(u);                          // the bearing stands on the deck (r221)
   const x = (u - 0.5) * L;
   const span = L * S.wingSail;                      // wing height
   const chord = span * 0.27;
@@ -10250,13 +10253,13 @@ function buildWingSail(S, group, mats) {
   const pv = new THREE.MeshStandardMaterial({ color: 0x141d2b, roughness: 0.22, metalness: 0.45 });
   for (const uu of [0.24, 0.32, 0.62, 0.70, 0.78]) {
     const p = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, B * 0.42), pv);
-    p.position.set((uu - 0.5) * L, H.sheer(uu) + B * 0.010, 0);
+    p.position.set((uu - 0.5) * L, H.deck(uu) + B * 0.010, 0);
     group.add(tag(p, 'solar', 'Solar array',
       'Power for the instruments, the computer and the satellite link. With wind for propulsion and sun for electricity, the endurance limit stops being fuel and becomes fouling.'));
   }
   /* the instrument pod: the reason the vessel is out there at all */
   const pod = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.05, B * 0.06, B * 0.20, 12), dark);
-  pod.position.set((0.84 - 0.5) * L, H.sheer(0.84) + B * 0.10, 0);
+  pod.position.set((0.84 - 0.5) * L, H.deck(0.84) + B * 0.10, 0);
   group.add(tag(pod, 'sensor', 'Instrument mast',
     'Anemometer, satellite antenna and cameras. Below the waterline the same vessel carries echo sounders and a CTD.'));
 }
@@ -11111,7 +11114,7 @@ function buildJunkCastle(S, group) {
     const inset = B * (0.030 + 0.055 * t);
     const half = u => Math.max(B * 0.10,
       Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - inset);
-    const y0 = u => H.sheer(u) + dh * t, y1 = u => H.sheer(u) + dh * (t + 1);
+    const y0 = u => H.deck(u) + dh * t, y1 = u => H.deck(u) + dh * (t + 1);   // tiers stand on the deck (r221)
     const N = Math.max(8, Math.round((u1 - u0) * L / 1.8));
     /* the perimeter, wound once round: starboard fwd→aft, port aft→fwd, closed */
     const path = [];
@@ -13128,7 +13131,7 @@ function buildPaddles(S, group, mats) {
     const bw = zo - zi;                               // housing width athwartships
     const zbc = (zo + zi) / 2;
     const boxRx = D * 0.60, boxRy = D * 0.60 * 0.86;  // the crown, slightly flattened
-    const h0 = Math.min(Math.max(H.sheer(u) - axleY, boxRy * 0.12), boxRy * 0.55);
+    const h0 = Math.min(Math.max(H.deck(u) - axleY, boxRy * 0.12), boxRy * 0.55);   // the deck, r221
     const th0 = Math.asin(h0 / boxRy);                // where the arc springs from the deck
     const xc = boxRx * Math.cos(th0);                 // half the chord
     const spon = new THREE.Mesh(
