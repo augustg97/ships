@@ -183,15 +183,16 @@ const keep = ((S.frames.sidedM || 0.18) + ((S.deck && S.deck.kneeSidedM) || 0.20
 const beams = beamStations(S);
 return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
 }
+function frameOrigin(S) { return S.frames && S.frames.originU !== undefined ? S.frames.originU : 0.055; }
 function frameNumber(S, u) {
 const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
 const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
-return Math.round((u - 0.055) / 0.89 * (n - 1));
+return Math.round((u - frameOrigin(S)) / 0.89 * (n - 1));
 }
 function frameU(S, k) {
 const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0.5;
 const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
-return 0.055 + 0.89 * k / (n - 1);
+return frameOrigin(S) + 0.89 * k / (n - 1);
 }
 function sectionRows(S) {
 const sec = S.section; if (!sec || !sec.stations || !sec.stations.length) return null;
@@ -2913,7 +2914,7 @@ vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
 kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
 group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
 'A grown knee standing on the beam and against the inside of the planking, up to the '
-+ 'top strake — Lahn, Blatt 2, draws one at every beam end. Sidings are class defaults.'));
++ 'top strake — Lahn, Blatt 3, draws one at every beam end. Sidings are class defaults.'));
 }
 const st = rows[i].st;
 const where = st ? (st.spant !== undefined ? ' Spant ' + st.spant : ' u ' + st.u) + (st.derived ? ' — ' + st.derived : ", the record's")

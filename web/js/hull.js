@@ -221,7 +221,7 @@ function hullSurface(S) {
   /* ── THE DECK LIES BELOW THE SHEER WHERE THE RECORD PUTS IT (round 215) ─────────────
      sheer(u) is where the SKIN ends; the deck is not always there. The Bremen cog's deck
      beams (Durchbalken) sit about a third of the side's height under the top strake —
-     Lahn's Blatt 2 sections draw each beam with three or four strakes of bulwark standing
+     Lahn's Blatt 3 sections draw each beam with three or four strakes of bulwark standing
      over it — and everything on her (castle, windlass, tiller, mast heel) rode a metre high
      because every builder read the sheer as the deck. deck(u) is the one answer: the
      record's depth below the sheer (deck.belowSheerM); LEVEL when the record says so (a
@@ -320,8 +320,8 @@ function buildKeelGeometry(S) {
    because the standing knee (r216) is the timber against the skin there, and two timbers in
    one place flicker. */
 /* ── THE BEAMS STAND AT THE RECORD'S STATIONS (round 229) ────────────────────────────
-   Lahn's Blatt 2 titles its sections by the frame each beam sits on — 'Spant 5 mit
-   Querbalken DB 1', Spant 12 / DB 2, Spant 26 / DB 4, Spant 33 / DB 5 — and r226–r228 read
+   Lahn's Blatt 3 titles its sections by the frame each beam sits on — 'Spant 6 mit
+   Querbalken DB 1', Spant 10 / DB 2, Spant 26 / DB 4, Spant 35 / DB 5 (the numbers as Tanner 2021 reads the sheet, r230) — and r226–r228 read
    the section forms and the rail plan at those frames while the beams themselves stood at
    class stations (0.14 + 0.70·i/4), 0.65–0.87 m from the frames the sheet names (r229's audit variant). A record
    may carry deck.beamStations, one entry a beam, each { spant | u } like the section's
@@ -351,23 +351,35 @@ function frameStations(S, NF) {
 /* the frame's number from its station (round 225): the floor's long arm changes side
    frame by frame, and a frame built as its own object (the Shipwright, onlyU) must know
    its number without the list — the same arithmetic frameStations uses for the list */
+/* ── THE NUMBERING HAS AN ORIGIN (round 230) ────────────────────────────────────────
+   A station named by frame number stands on the numbering's origin, and until r230 the
+   origin was an assumption: frame 0 of the built run (u 0.055) was taken for Lahn's
+   Spant 0, and four rounds of reads from the section sheet were placed on it. Blatt 1,
+   the plain starboard elevation, draws every beam head; with Tanner's frame numbers the
+   sheet's Spant 0 stands 0.4 m forward of the waterline's forward end, three frames
+   forward of the run's first — every numbered station had sat 1.5 m too far aft. A
+   record may carry frames.originU, the u of Spant 0, which frameNumber and frameU both
+   read; the built run itself (frameStations) does not move, and the record's value is
+   chosen so its frames still stand on the numbered stations. Without the field the
+   origin is the run's first frame, byte-identical. */
+function frameOrigin(S) { return S.frames && S.frames.originU !== undefined ? S.frames.originU : 0.055; }
 function frameNumber(S, u) {
   const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
   const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
-  return Math.round((u - 0.055) / 0.89 * (n - 1));
+  return Math.round((u - frameOrigin(S)) / 0.89 * (n - 1));
 }
 /* the inverse: the station of frame k, the same arithmetic — a record that names a frame
    (Lahn's 'Spant 26') can be placed along the ship without a list (round 227) */
 function frameU(S, k) {
   const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0.5;
   const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
-  return 0.055 + 0.89 * k / (n - 1);
+  return frameOrigin(S) + 0.89 * k / (n - 1);
 }
 
 /* ── THE SECTION FORM CHANGES ALONG THE SHIP (round 227) ─────────────────────────────
    r226 gave the cog one section form, Spant 26's, and scaled its flat with the local
-   half-breadth. Blatt 2's other three sections say otherwise: at Spant 5 and 12 (the bow)
-   and Spant 33 (the run aft) the bottom is a V to the keel plank with NO flat, and its
+   half-breadth. Blatt 3's other three sections say otherwise: at Spant 6 and 10 (the bow)
+   and Spant 35 (the run aft) the bottom is a V to the keel plank with NO flat, and its
    curve is nearer a straight line (superellipse power about 1.5) than the midship's 2.2 —
    while the rail is still 0.91–1.0 of the midship's. So the flat is a property of the
    STATION, not of the breadth. The record carries the sheet's own sections
@@ -396,15 +408,15 @@ function sectionAt(S, rows, u) {
 
 /* ── THE RAIL PLAN COMES FROM THE RECORD'S STATIONS (round 228) ──────────────────────
    The section forms are the plate's (r226–r227), but the breadth they scaled was a class
-   plan — fullness(u, wlPower, stemFineness, sternFineness), a parabola — that Blatt 2's
+   plan — fullness(u, wlPower, stemFineness, sternFineness), a parabola — that Blatt 3's
    own rail half-breadths contradict by a third of the beam at the stern: the sheet reads
-   104 / 115 / 114 / 113 plate px at Spant 5 / 12 / 26 / 33 (0.90 / 1.0 / 0.99 / 0.98 of
+   104 / 115 / 114 / 113 plate px at Spant 6 / 10 / 26 / 35 (0.90 / 1.0 / 0.99 / 0.98 of
    the widest), a short entry into a long parallel middle body that runs nearly to the
    sternpost, where the parabola read 0.67 / 0.93 / 0.88 / 0.58. A station may carry
    railHalfFrac, its rail half-breadth as a fraction of the record's half-beam, and the
    plan is then a monotone cubic (Fritsch–Carlson) through those stations, from
    stemFineness at the stem to sternFineness at the sternpost — the class's own end
-   values, because the sheet has no section forward of Spant 5 or abaft Spant 33.
+   values, because the sheet has no section forward of Spant 5 or abaft Spant 35.
    Monotone, so the rail cannot bulge past the beam between two full stations; C1, so it
    carries no kink at a station. The plan is the RAIL's: on a flared hull the section
    form turns it into the waterline's, and the coefficients fall out (r228/coeffs.py:
@@ -1169,7 +1181,7 @@ function surfacePoint(S, H, u, v) {
   /* ── A FLARED SECTION IS WIDEST AT THE RAIL, AND ITS BOTTOM IS A FLAT (round 226) ──
      The superellipse below stands its vertical tangent at the load waterline: the beam
      is there, and the topsides fall in (tumblehome) or stand plumb over it. The Bremen
-     cog's sections are not that shape. Lahn's Blatt 2, Spant 26 (r213/lahn-blatt2.jpg,
+     cog's sections are not that shape. Lahn's Blatt 3, Spant 26 (r213/lahn-blatt2.jpg,
      read at 4x in r226/trace-spant26-4x.png): the side widens ALL THE WAY from the keel
      plank to the top strake — half-breadth 0.78 of the rail's at 0.28 of the side's
      height, 0.90 at 0.42, 0.96 at 0.56 — so the beam is at the RAIL, and the bottom is
@@ -4605,7 +4617,7 @@ function buildFittings(S, group, mats) {
   /* ── THE THROUGH-BEAMS (Durchbalken), record-gated on deck.throughBeams (round 215) ──
      A beam-decked clinker hull carries its deck on athwartship beams whose heads pass
      THROUGH the planking and stand proud outside — the beam-ended look of every cog seal,
-     and on the Bremen wreck the beams Lahn's Blatt 2 sections are drawn at ('Spant .. mit
+     and on the Bremen wreck the beams Lahn's Blatt 3 sections are drawn at ('Spant .. mit
      Querbalken DB 1 .. 5'). Each is a square timber spanning the whole breadth at deck
      height, its top under the deck planks, its heads carried the recorded (or class-default)
      distance past the skin. Stations: the record's own (deck.beamsAtU) or spread evenly over
@@ -4653,7 +4665,7 @@ function buildFittings(S, group, mats) {
                                 [wood, wood, wood, wood, endGrain, endGrain]);
       bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
       bm.name = 'deck-beam';
-      /* ── THE KNEES (round 216). Lahn's Blatt 2 draws a standing knee at every beam end:
+      /* ── THE KNEES (round 216). Lahn's Blatt 3 draws a standing knee at every beam end:
          the vertical arm rises against the inside of the planking from the beam to the top
          strake, the lower arm lies along the beam. That is what holds the side to the beam
          on a shell-first hull with no proper frames above the deck. One a side per beam,
@@ -4679,11 +4691,11 @@ function buildFittings(S, group, mats) {
         kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
         group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
           'A grown knee standing on the beam and against the inside of the planking, up to the '
-          + 'top strake — Lahn, Blatt 2, draws one at every beam end. Sidings are class defaults.'));
+          + 'top strake — Lahn, Blatt 3, draws one at every beam end. Sidings are class defaults.'));
       }
       /* keyed 'crossbeam', not 'deck': the audit reads part.deck's breadth as the deck's
          edge, and a beam head 25 cm proud of the skin is not the deck's edge */
-      /* the station on the card (round 229): the record's frame ('Spant 5, the record's'),
+      /* the station on the card (round 229): the record's frame ('Spant 6, the record's'),
          a derived one with its derivation, or the class default named as such */
       const st = rows[i].st;
       const where = st ? (st.spant !== undefined ? ' Spant ' + st.spant : ' u ' + st.u) + (st.derived ? ' — ' + st.derived : ", the record's")

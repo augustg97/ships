@@ -18438,3 +18438,141 @@ uncommitted, the r211 convention.**
 back by code strings: docs/js/hull.js carries `function beamRows` (1), docs/data/vessels.json carries beamStations (4),
 docs/audit-hulls.js carries "a through-beam off the record's station" (1).
 Two commits close the round (f1c8f04 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 230 — 2026-09-04 — the numbering has an origin: Lahn's Blatt 1 fetched plain by tiles draws all five beam heads, Tanner's Appendix H reads the section sheet's frames as 6 / 10 / 26 / 35 rising aft from the bow, Spant 0 stands three frames forward of the run's first, and the beams, the sections and the rail plan move to the sheet's own metres
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r229 opened r230 with
+residual (0g⁵), decisive: fetch Lahn's elevation without Tanner & Belasus's overlay, read the
+five beam heads against the sternpost heel, and read where the frame numbering starts. Done,
+with two sources instead of one, and the answer moved four rounds of stations by about 1.5 m.**
+
+**The fetch. Google Arts & Culture holds the DSM's "Kogge-Seitenansicht, Zeichnung von Werner
+Lahn" (asset ngGyF3o9Vjp9CA, "Lahn 1992, Page 1"): Blatt 1, "Seitenansicht / STB, M 1:20,
+Rekonstruktion W. Lahn, Zeichnung C. Nord, Bremerhaven August 1989". Its og:image caps at
+1200 px; the tiles came down whole with dezoomify-rs (brew, r230/brew-dezoomify.log) at
+14338 × 4699 px, r230/lahn-blatt1-full.png, 590.8 px/m by the sheet's own 2500 mm bar
+(1477 px). The second source is Tanner 2021, the Southampton thesis, Volume 2 Appendix H
+"Bremen Cog reanalysis" (eprints.soton.ac.uk/447372, r230/tanner-vol2-appendices.pdf,
+tanner-vol2.txt), which works from the physical sheets: "frames 6, 10, 26 and 35 on
+Blatt 3", the title "Blatt 3: Spant 35 mit Querbalken DB 5", the castle wall "running from
+the aft channel wale to frame 36", the windlass "securely fastened to crossbeam DB5", and
+"the central area from frame 19 aft to frame 28". Also fetched: Blatt 12 (the castle
+construction, r230/lahn-kastell-1200.jpg, 1200 px only) — not read this round.**
+
+**What the sheet says (r230/head-A..E.png, the boxes drawn by the detector; full-overview-q.png).
+Five cross-hatched squares on the starboard side, each about 0.45 m on a side (0.36 at DB 2)
+with a wedge drawn beneath — end grain, the through-beams' heads — at full-plate x 11504 /
+10379 / 7290 / 5223 / 2843, which is 15.82 / 13.91 / 8.68 / 5.18 / 1.16 m forward of the
+sternpost's aft face at the keel (plate x 2160 ± 60, datum-sternheel.png). Nothing else at
+deck level is hatched (deckband-0..2.png). The heel-to-stemhead length reads 19.94 m against
+the model's 19.95. With Tanner's numbers DB 1 = Spant 6 … DB 5 = Spant 35, the four named
+heads fit ONE pitch, 0.02466 u a frame against the class's 0.02472 (0.507 m), to 0.1 m at
+three stations and 0.4 m at Spant 26 — the wreck's own uneven framing — and the origin
+falls at u −0.008 (median), between two and three frames forward of the run's first frame at
+u 0.055. r226's 5 / 12 / 33 were misreads of a 640 px photograph whose titles do not resolve
+(r230/sec-titles-stacked.png, 5×); the thesis's read of the sheet wins (the r166 rule: the
+record beats a derivation from the record). The sheet in that photograph is Blatt 3, not
+Blatt 2 as modellmarine.de's filename says.**
+
+**A trap found on the way: Blatt 1's own bottom scale is labelled "Rekonstruktionsspant-Nr."
+and runs 2−, 1−, 0, 1 … 18 from the STERN to the bow (strip-0..5.png; ticks detected at
+589–590 px = 1.0 m apart, 0.68 m for 0→1 at the heel and 0.50 m for 17→18 at the stem's
+foot). Those are metre stations for the lines, not the frames — Spant 35 cannot exist on an
+18-station scale — and a reader taking them for the frame numbers would put the origin at the
+stern and the pitch at a metre. The record's deck provenance names the two numberings apart.**
+
+**The record (web/data/vessels.json, the cog; before-copy r230/vessels.before.json, the edit
+scripts apply-edits.py and apply-edits-2.py with edits-3 noted at its foot, every match
+asserted unique; vessels.diff 42 lines). frames.originU −0.019, the u of Spant 0, with a
+provenance that gives the fit's four values (−0.002 / −0.013 / +0.014 / −0.018) and names the
+other candidate, +0.006 (two frames), and the fetch that would choose (Blatt 35, the body
+plan). section.stations relabelled 6 / 10 / 26 / 35 and each given the sheet's u;
+deck.beamStations likewise, DB 3 at u 0.486 READ off Blatt 1 (its head, 8.68 m; no section)
+with Spant 20 ± 1 by the origin, the card saying so. deck.beamHeadsFromHeelM [15.82, 13.91,
+8.68, 5.18, 1.16] — the sheet's metres, the primary read. The u's are DERIVED THROUGH THE
+BUILT HULL: the model's heel is the sternpost's aftmost foot vertex, x 8.39, and a beam at u
+lands on the raked skin 0.18 m forward of (u − 0.5)·L at DB 1 and 0.11 m aft at DB 5
+(r230/audit-first.out), so 0.146 / 0.234 / 0.486 / 0.657 / 0.847 are the u's that put the
+built heads at the sheet's distances; the provenance also gives the no-loft values. Every
+"Blatt 2" in the cog's record is now "Blatt 3" (10), the Spant numbers renamed (22), and
+beamStationsContest is replaced by beamStationsResolved with the numbers. The deck
+provenance's STATIONS sentence is rewritten (r229's is gone, per r229's method note 2), and
+the frames provenance carries ORIGIN and SHEET NUMBER paragraphs.**
+
+**The class change (web/js/hull.js; before r230/hull.before.js, hull.diff 69 lines).
+frameOrigin(S) returns frames.originU or 0.055; frameNumber and frameU read it. The built
+run (frameStations) does not move — the record's origin is chosen so the numbered stations
+coincide with the run's frames (frame f of the run is Spant f+3), so a beam still displaces
+the frame at its station and D-FRAMES' floor holds. The floor's long arm alternates by
+frame number (r225), so its parity on the cog moved with the origin; no source gives it. A
+record without the field is byte-identical. Comments and card strings say Blatt 3 and the
+new numbers.**
+
+**Audit (Research/audit-hulls.js, synced to web/; before r230/audit-hulls.before.js,
+audit.diff 37 lines). D-BEAM-STATION and D-SECTION read the origin from the record (two
+0.055 constants replaced). New rule D-BEAM-HEEL: with deck.beamHeadsFromHeelM on the record,
+every beam's built centre stands within 0.30 m of the sheet's distance from the built hull's
+own heel — the sternpost part's (key stempost, name Sternpost) aftmost vertex within 0.15 m
+of its foot. Rule 8 fired twice on this rule, both times on the audit: (1) its first datum
+was the skin's lowest aftmost vertex, which on this hull is the keel's flat end at x 6.64,
+1.6 m short of the post's heel, so all five beams read 1.3–1.6 m short (audit-first.out) —
+the datum is the sternpost now; (2) with the right datum it convicted DB 3 alone at 8.10 m
+against 8.68 (0.58 off), a sign slip in my own u for DB 3 (8.39 − 8.68 is −0.29, not
++0.29), fixed as edits-3. Proven to fire by a builder variant (r230/hull.variantA-
+originIgnored.js: the record's u and origin ignored, the r229 builder under the r230
+record; hull.js cmp'd byte-identical after): 10 problems, all cog — D-BEAM-STATION 0.46–1.68 m
+and D-BEAM-HEEL 14.56 / 12.45 / 7.38 / 4.33 / −0.49 m against 15.82 / 13.91 / 8.68 / 5.18 /
+1.16 (inject-variantA.out). Real build, final run (r230/audit.out, after edits-3): 33 hulls, 0 problems.**
+
+**Measured (measure_ship, r230/measure-after.out against r229's by r228/compare-measure.py): 92 parts before and after, 47 moved, 45 identical to 5 mm, none missing or new. The five beams' centres now stand at u 0.139 / 0.232 / 0.486 / 0.657 / 0.854 (their x-extents 0.131–0.146 … 0.847–0.861; the ends differ from the record's u by the skin's rake, as the provenance says), which is x −7.41 / −5.50 / −0.29 / 3.22 / 7.26 and 15.80 / 13.89 / 8.68 / 5.17 / 1.13 m forward of the sternpost's foot at 8.39 — the sheet's 15.82 / 13.91 / 8.68 / 5.18 / 1.16 to 3 cm. They moved forward 0.72 / 2.46 / 0.80 / 0.84 / 0.51 m from r229's stations (DB 2 the most: Spant 12 → 10 plus the origin); their heads' half-breadths 3.21 → 3.18, 3.58 → 3.51, 3.84 → 3.86, 3.92 → 3.92, 3.57 → 3.59, following the skin. The ten knees moved with their beams. The section stations moved with the sections (u 0.179 → 0.146, 0.352 → 0.234, 0.698 → 0.657, 0.871 → 0.847), so the loft's held end forms and the rail plan reach 0.5–1.0 m further toward each end: the bow frames broadened (Frame 1 of 32 half 1.66 → 1.86, Frame 5 3.20 → 3.56) and the stern frames narrowed (Frame 30 3.48 → 3.18, Frame 32 2.34 → 2.10, castle-cabin-fwd 3.01 → 2.74); the deck, the wales, the channels, the deadeyes and the shrouds moved 1 cm in half-breadth with the plan. Frames stay 32 of 37 (D-FRAMES' floor), the displaced ones now at the new stations (Frames 5, 7–11, 16–17, 22–23, 29 re-stationed by a pitch). Nothing else moved.**
+
+**Witnessed (rule 1): r230/origin-broadside.png (b 270, z 1.2, l 14) and origin-stern-quarter.png (b 225, z 1.0, l 10), taken by r230/witness.py (a plain Playwright page that waits on __FRAME_READY, because url_capture's 60 s wait timed out six times today while the same page reached FRAME_READY in 27–30 s with no console error, r230/console-probe.py — the harness's wait, not the app; r231 should lengthen url_capture's timeout). Broadside: five heads along the starboard side at the sheet's spacing — the forwardmost pair close under the bow's rise, then a long gap to the midship head, then two under and just forward of the castle — with the frames' heads along the inside of the bulwark above them. Stern quarter: every head attached to the planking it comes through, the aftmost under the castle's forward edge. Rule 0 answered on origin-stern-quarter.png read whole: it reads as a rendered world — the sea's texture and haze, the planked castle wall in light with its posts' shadows, the sail bellied forward of the mast. Three facts a viewer can read off it without a legend: the beam heads stand along the side and two of them sit close together at the bow; the castle stands on posts and overhangs the hull; the hull is as broad at the quarter as at midships and turns into her sternpost in a few metres.**
+
+**Not done, and why. The full 64-frame ratchet was NOT run this round: the tile fetch, the
+thesis, the sheet's reading and the two rule-8 events used the window, and at 13:23 the
+driver's 80-minute kill (14:08) left no 40 minutes. The one predicted mover was checked alone (frame_baseline.py check --frame ship-dhow, r230/ratchet-dhow.out): 0.050% of pixels moved, exactly the limit, mean |Δ| 0.022, the diff image the cog alone at the frame's right edge; accepted with the reason in FRAME-LOG.md (13:34), the accepted PNG committed with this round. The other 63 frames are predicted byte-identical (r230/PREDICTIONS-close.md, written before the check) and are UNCHECKED. r231 opens by running the
+full ratchet at a clean HEAD before touching anything, classifying any mover against
+r230/PREDICTIONS-close.md (only ship-dhow may move; anything else is a fault to explain).
+The five stage-2 and quarter witnesses were not re-captured after edits-3 (the first chain's
+four url_capture calls timed out at FRAME_READY, cap1..4.log, while nothing else held a
+browser — unexplained; the final broadside capture is the witness that counts).**
+
+**Named residuals, in order:** (0e) NOW DECISIVE and the head of r231's queue after the
+ratchet: the deck's height. Blatt 1 draws DB 2–5's heads 1.9–2.3 m over the keel's underside
+(plate y 3127 / 3249 / 3226 / 3075 against a keel at ≈ 4370–4440 and a midship sheer at
+≈ 1935, 4.1 m) and DB 1's 3.2 m (y 2502); the model's deck lies belowSheerM 1.2 under the
+sheer, about 3.0 m over the keel, so four of the five built beams may stand a metre too
+high, or the sheet's lower squares are a second tier of through-beams under a higher deck —
+r215's read of the sections put the beam tops a third of the side under the sheer. Read the
+Blatt 3 sections at Tanner's scale, or Blatt 1's deck line, before moving anything. (0g⁵)
+CLOSED (beamStationsResolved); its remainder is the two-versus-three-frame choice of origin,
+settled by Blatt 35. (0g⁹) unchanged. (0g⁷) the plan beyond the outermost stations, which
+now lie at u 0.146 and 0.847. (0g⁸) the coefficients are UNVERIFIED and now STALE — r228's
+replica was not re-run this round; re-derive with r228/coeffs.py against the moved stations.
+(0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f: the wedge under every head is DRAWN on
+Blatt 1 now, r230/head-C.png, two small feet under the square — a read waiting for the
+builder) — unchanged. (1)–(19) as r229 lists them. NEW (20): Blatt 12, the castle
+construction sheet, fetched at 1200 px (lahn-kastell-1200.jpg) and a tile fetch away from
+full size; r214's castle plan came from Westphal's text.**
+
+**Three method notes. (1) A tile viewer's 1200 px preview is not the plate. The og:image was
+enough to see that the sheet had the heads and a numbered scale, and not enough to read
+either; the tiles were one tool install away, and the difference was 590 px/m against 49.
+(2) A datum the rule computes for itself must be checked against the datum the record was
+read to. The heel rule's first datum was "the lowest aftmost skin vertex", a phrase that
+sounds like the heel and on a hull with a flat keel and a rising run is 1.6 m from it; the
+sheet was read to the sternpost's aft face, so the rule reads the sternpost. (3) Two
+numberings on one wreck: the sheet's own scale and the frames it is titled by can differ in
+origin, direction and pitch at once. Name which one a field means, in the field.**
+
+**r231 opens by running the full frame ratchet (~40 min) at the pushed HEAD and accepting or
+explaining every mover, then (0e), the deck's height, off Blatt 1 and the Blatt 3 sections
+at Tanner's scale; then (0g⁸), the coefficients re-derived on the moved stations.**
+
+**Live stamp: docs/index.html carries data-version 1788554257 at the build; the push and the live
+poll are in build/staging/r230/push.log, and the verified live value is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205
+daemon's cookie file uncommitted, deliberately; the r230 staging (the three before-copies,
+hull.after.js, the variant, the edit scripts, the three diffs, the full sheet and its crops,
+the thesis and its text, the audit outputs, the measure, the witness, the predictions, the
+scripts) stays on disk uncommitted, the r211 convention.**

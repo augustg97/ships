@@ -789,6 +789,7 @@
              stood at class stations 0.65–0.87 m from them, and nothing compared the two. */
           if (H.deck.beamStations) {
             const rsB = H.frames && H.frames.roomAndSpaceM, nFB = rsB ? Math.floor(0.89 * L / rsB) + 1 : 0;
+            const oUB = H.frames && H.frames.originU !== undefined ? H.frames.originU : 0.055;   // the numbering's origin (round 230)
             const uvB = skin.geometry.attributes.uv;
             const bxs = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; });
             if (H.deck.beamStations.length !== H.deck.throughBeams)
@@ -797,7 +798,7 @@
               const label = st.name || ('beam ' + (i + 1));
               let u;
               if (st.u !== undefined) u = st.u;
-              else if (rsB) u = 0.055 + 0.89 * st.spant / (nFB - 1);
+              else if (rsB) u = oUB + 0.89 * st.spant / (nFB - 1);
               else { say(v.id, 'a beam station named by frame number on a record with no frame pitch', `${label}: Spant ${st.spant}, no frames.roomAndSpaceM`); return; }
               const yRef = bxs.length ? bxs[0].y : deckEdgeNear(0);
               let want = (u - 0.5) * L;
@@ -808,6 +809,31 @@
               let near = 1e9; for (const q of bxs) near = Math.min(near, Math.abs(q.x - want));
               if (near > 0.15)
                 say(v.id, "a through-beam off the record's station", `${label} wanted at x ${want.toFixed(2)} m (${st.spant !== undefined ? 'Spant ' + st.spant : 'u ' + u}${st.derived ? ', derived' : ''}), the nearest deck-beam ${near.toFixed(2)} m away`);
+            });
+          }
+          /* D-BEAM-HEEL (round 230): a record that carries a plate's own distances from the
+             sternpost's heel to each beam head (deck.beamHeadsFromHeelM, bow first, read off
+             Lahn's Blatt 1 at 590 px/m) has a deck-beam within 0.30 m of each, measured from
+             the built hull's own heel — the sternpost's (the part keyed stempost and named
+             Sternpost) aftmost vertex within a hand of its foot, or the skin's where no post is built. This is the check r229's origin
+             question needed and had no field for: the numbered stations are placed by
+             frames.originU and the pitch, and nothing else compares a beam's built x with
+             a plate's metres. Before this round DB 1 stood 0.7–1.0 m abaft the sheet's head
+             and DB 5 1.4 m, and every station rule passed. */
+          if (H.deck.beamHeadsFromHeelM) {
+            const want = H.deck.beamHeadsFromHeelM;
+            if (want.length !== beams.length)
+              say(v.id, "beam heel distances off the beams' count", `${want.length} distances, ${beams.length} deck-beams`);
+            const posts = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'stempost' && p.name === 'Sternpost') posts.push(o); });
+            const pv = posts.length ? [].concat(...posts.map(world)) : sv;
+            let yMin = 1e9; for (const p of pv) yMin = Math.min(yMin, p[1]);
+            let heelX = -1e9; for (const p of pv) if (p[1] < yMin + 0.15) heelX = Math.max(heelX, p[0]);
+            const bx = beams.map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; }).sort((a, b) => a - b);
+            want.forEach((d, i) => {
+              if (i >= bx.length) return;
+              const got = heelX - bx[i];
+              if (Math.abs(got - d) > 0.30)
+                say(v.id, "a through-beam off the sheet's distance from the heel", `beam ${i + 1} of ${bx.length} stands ${got.toFixed(2)} m forward of the heel (heel x ${heelX.toFixed(2)}, ${posts.length ? 'the sternpost' : 'the skin'}), the sheet says ${d.toFixed(2)}`);
             });
           }
           /* D-KNEES (round 216): a standing knee at every beam end, both sides — its foot on
@@ -862,7 +888,8 @@
                stations and no uv to read them at is convicted (rule 10). */
             const rs = H.frames && H.frames.roomAndSpaceM;
             const nFr = rs ? Math.max(2, Math.floor(0.89 * L / rs) + 1) : 0;
-            const frameU = k => rs ? 0.055 + 0.89 * k / (nFr - 1) : 0.5;
+            const oU = H.frames && H.frames.originU !== undefined ? H.frames.originU : 0.055;   // the numbering's origin (round 230)
+            const frameU = k => rs ? oU + 0.89 * k / (nFr - 1) : 0.5;
             const F0 = H.section.floorHalfFrac || 0, n0 = H.section.power || 2.2;
             const rows = (H.section.stations || []).map(s => ({
               u: s.u !== undefined ? s.u : frameU(s.spant),

@@ -515,6 +515,7 @@ say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's e
 }
 if (H.deck.beamStations) {
 const rsB = H.frames && H.frames.roomAndSpaceM, nFB = rsB ? Math.floor(0.89 * L / rsB) + 1 : 0;
+const oUB = H.frames && H.frames.originU !== undefined ? H.frames.originU : 0.055;
 const uvB = skin.geometry.attributes.uv;
 const bxs = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; });
 if (H.deck.beamStations.length !== H.deck.throughBeams)
@@ -523,7 +524,7 @@ H.deck.beamStations.forEach((st, i) => {
 const label = st.name || ('beam ' + (i + 1));
 let u;
 if (st.u !== undefined) u = st.u;
-else if (rsB) u = 0.055 + 0.89 * st.spant / (nFB - 1);
+else if (rsB) u = oUB + 0.89 * st.spant / (nFB - 1);
 else { say(v.id, 'a beam station named by frame number on a record with no frame pitch', `${label}: Spant ${st.spant}, no frames.roomAndSpaceM`); return; }
 const yRef = bxs.length ? bxs[0].y : deckEdgeNear(0);
 let want = (u - 0.5) * L;
@@ -534,6 +535,22 @@ let dy = 1e9; for (let k = 0; k < uvB.count; k++) if (Math.abs(uvB.getX(k) - u) 
 let near = 1e9; for (const q of bxs) near = Math.min(near, Math.abs(q.x - want));
 if (near > 0.15)
 say(v.id, "a through-beam off the record's station", `${label} wanted at x ${want.toFixed(2)} m (${st.spant !== undefined ? 'Spant ' + st.spant : 'u ' + u}${st.derived ? ', derived' : ''}), the nearest deck-beam ${near.toFixed(2)} m away`);
+});
+}
+if (H.deck.beamHeadsFromHeelM) {
+const want = H.deck.beamHeadsFromHeelM;
+if (want.length !== beams.length)
+say(v.id, "beam heel distances off the beams' count", `${want.length} distances, ${beams.length} deck-beams`);
+const posts = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'stempost' && p.name === 'Sternpost') posts.push(o); });
+const pv = posts.length ? [].concat(...posts.map(world)) : sv;
+let yMin = 1e9; for (const p of pv) yMin = Math.min(yMin, p[1]);
+let heelX = -1e9; for (const p of pv) if (p[1] < yMin + 0.15) heelX = Math.max(heelX, p[0]);
+const bx = beams.map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; }).sort((a, b) => a - b);
+want.forEach((d, i) => {
+if (i >= bx.length) return;
+const got = heelX - bx[i];
+if (Math.abs(got - d) > 0.30)
+say(v.id, "a through-beam off the sheet's distance from the heel", `beam ${i + 1} of ${bx.length} stands ${got.toFixed(2)} m forward of the heel (heel x ${heelX.toFixed(2)}, ${posts.length ? 'the sternpost' : 'the skin'}), the sheet says ${d.toFixed(2)}`);
 });
 }
 const knees = byName('deck-knee');
@@ -557,7 +574,8 @@ say(v.id, 'a section form the loft does not build', `hull.section.form ${JSON.st
 else {
 const rs = H.frames && H.frames.roomAndSpaceM;
 const nFr = rs ? Math.max(2, Math.floor(0.89 * L / rs) + 1) : 0;
-const frameU = k => rs ? 0.055 + 0.89 * k / (nFr - 1) : 0.5;
+const oU = H.frames && H.frames.originU !== undefined ? H.frames.originU : 0.055;
+const frameU = k => rs ? oU + 0.89 * k / (nFr - 1) : 0.5;
 const F0 = H.section.floorHalfFrac || 0, n0 = H.section.power || 2.2;
 const rows = (H.section.stations || []).map(s => ({
 u: s.u !== undefined ? s.u : frameU(s.spant),
