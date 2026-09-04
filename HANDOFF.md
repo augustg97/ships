@@ -16342,3 +16342,144 @@ deleted. r217 opens with the head residual — the frames (Spanten) against the 
 planking — and the new small one from the close gate: an audit rule that the skin's transom
 closure is wound outward (or the loft fixed so it is), now that gl_FrontFacing makes the
 winding visible as light.**
+
+## Round 217 — 2026-09-03 — the cog's frames stand inside her bulwark: the record's room-and-space built as timbers against the planking, and the Shipwright shows them where the record puts them in the open
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r216 left the head
+residual named — the frames (Spanten) against the inside of the planking — and a small one
+from its close gate, an audit rule for the transom's winding. The head is DONE; the transom
+rule is carried (below).**
+
+**What was already there, and why the bulwark was bare.** hull.js has drawn frames on every
+assembled hull since the Shipwright's stage slider existed: `buildFramesGeometry` — 26 of
+them as one mesh in the token build, 30 as separate meshes in the fine one, each a flat
+ribbon 1.6% of the length wide, a proportional plank thickness inside the skin, spread over
+u 0.055–0.945. shipwright.js hides every one of them once the planking stage is reached
+(the "YOU CANNOT SEE THE FRAMES OF A PLANKED HULL" rule, written after three rounds of ribs
+poking through sterns where a 26-step and a 72-step tessellation of the same curve cross).
+That rule is right for a closed hull. It is wrong for a hull whose deck lies below the sheer:
+above the deck the inside of the planking is in the open, and on the Bremen cog what stands
+against it is the futtocks' upper ends, one every room-and-space, between the beam knees.
+r216's witness saw bare strakes there because the frames were hidden, not because they were
+absent.**
+
+**The record.** THAT the frames stand there is the wreck's own structure: the DSM's
+photograph of the hull from above (r213/wreck-in-bremerhaven.jpg, no scale) shows the
+futtocks against the starboard planking under and beside the deck, and Lahn's Blatt 2
+titles each section by its Spant number. The PITCH was hunted this round and not found:
+de.wikipedia Bremer Kogge has no frame sentence; the DSM booklet and the AKHS 1991 Kiel
+text (r213) have none; Tanner & Belasus 2021 (Archaeonautica 21, DOI
+10.4000/archaeonautica.2699, fetched whole) is a hydrostatics paper with no framing
+inventory; mass.cultureelerfgoed.nl's Bremen Cog page lists planking and fastenings and no
+frames; the modellmarine.de review of Lahn 1992 gives the book's contents — the frames are
+on Blätter 3, 7, 8, 24 and 28–34 — and none of those sheets is fetched; the geschichtsforum
+thread and hansekogge.de's build page gave nothing (the latter failed to fetch). One number
+a search returned, "Halbspanten ... Abstand 35–40 cm" (Mitteilungen der DGAMN, the article
+itself 404s), is NOT this ship: the same passage says the frames were removed when the
+vessel was scrapped, and the Bremen cog's are in place. One class witness: the Poel cog of
+1354 carried 50 frames (Mittelalter-Lexikon, 'Kogge'), about 0.4 m of pitch. So the record
+carries `hull.frames = { roomAndSpaceM 0.5, sidedM 0.18, mouldedM 0.20 }` with a provenance
+that says in its first sentence about the pitch that 0.50 m is a CLASS DEFAULT, ±0.15 m,
+with the bounds above (rule 10; the field is what gates the build, so the card can say
+what it rests on). Lahn 1992's Blatt 3 or 28–34 would replace it in one fetch.**
+
+**The change, fixed where each class lives (before-copies in build/staging/r217/).**
+(1) web/js/hull.js: `beamStations(S)` — the through-beam station arithmetic, which lived
+inline in the beams block, is one function the beams, the knees and now the frames all read;
+`frameStations(S, NF)` — without a record, the default list at the same arithmetic as before
+(`0.055 + f/(NF−1)·0.89`, so every other hull's frames are bit-identical); with
+frames.roomAndSpaceM, `floor(0.89·lwl / rs) + 1` stations over the same run, LESS any station
+within (frame siding + knee siding)/2 + 5 cm of a through-beam, because the standing knee
+(r216) is the timber against the skin there and two timbers in one place flicker.
+`buildFramesGeometry` keeps the ribbon for the default path and takes a record path: each
+frame a moulded box — sided and moulded from the record — whose outer face is 5 cm (the
+knee's own gap) inside the skin, offset along the SECTION'S INWARD NORMAL (taken from the
+tangent between v ± 0.01), so a floor lies flat on the bottom and a futtock stands against
+the side; sampled at 26 steps from the keel to a hand (10 cm) under the rail cap, with a cap
+at the head. Both surfaces are surfacePoint at the same u, and above v 0.62 the skin is a
+straight line in v, so in the bulwark the two cannot cross. The recorded frames take a
+DoubleSide copy of the timber material (they are seen from inside); the fine build's 'Frame i
+of N' names now count the list. (2) web/js/shipwright.js: the hide rule gains one exception —
+`openBulwark`, true only when the record carries BOTH deck.belowSheerM and
+frames.roomAndSpaceM; every other hull keeps the rule. (3) web/data/vessels.json: the cog's
+`hull.frames` and `framesProvenance` (above). (4) Research/audit-hulls.js, D-FRAMES under THE
+DECK LIES WHERE THE RECORD PUTS IT, synced to web/ (docs/ by the build): count within
+[nWant − beams, nWant] where nWant = floor(0.89·L/rs)+1; each frame's outermost vertex in the
+bulwark band (deck edge + 0.5 m ± 0.3) is INSIDE the skin at its own height (+0.02) and within
+0.15 m of the NEAREST planking vertex in its section plane; its head within 0.5 m of the skin's
+top; neighbours one pitch apart (±0.1), a wider gap allowed only where a deck-beam's x lies
+in it, and never over 2.3 pitches. No shader touched; `node --check` clean on all three files.**
+
+**Rule 8 fired on the rule's own first run (r217/audit.out): eight "a frame standing off
+the planking" at the ENDS (x −9.6…−7.3 and 6.7…9.6, 0.15–0.21 m), on frames the builder
+had put 5 cm from the skin. The first draft compared the frame's greatest half-breadth over
+a 0.6 m height band with the skin's greatest half-breadth over the same band and a ±0.3 m
+x-window: on a flared end section the skin's breadth grows through the band by gap/ty
+(≈0.17 m where the side leans 70° from vertical), and the ends narrow ~0.2 m within the
+x-window. The audit was measuring a difference of breadths and calling it a gap. Rewritten
+as a distance to the nearest planking vertex (r217/audit2.out): 33 hulls, 0 problems.
+Proven to fire (r217/inject-frames.js → inject-frames2.out): one frame removed, one pushed
+0.4 m to +z, one scaled 0.5 m inboard at the bulwark, one shrunk to a third about the
+waterline — the cog alone: "frames off their pitch" (1.11 m between x −7.3 and −6.2, no
+beam between), "a frame outside the planking" (3.48 vs 3.14), "a frame standing off the
+planking" ×2 (0.35 m — the pushed frame's OTHER side, carried inboard by the bodily shift —
+and 0.53 m), "a frame that does not reach the top strake" (0.63 vs 2.01); no count
+conviction (32 is inside the bound, as the script's header predicts); every other hull
+silent. Exactly the prediction written in the header.**
+
+**Measured (measure_ship, r217/measure.out): 33 frames — 37 stations at 0.507 m over
+18.2 m, less four at beams 1, 3, 4 and 5 (beam 2 at u 0.315 falls between two stations
+0.245 m and 0.262 m off it, so both stand, the knee between them with 5.5 cm to spare).
+Midship frames: sided 0.18 (u-span 0.0088 × 20.5), heads 1.91 m under a rail at 2.01,
+feet −2.20 over a keel at −2.25, outer faces at 3.74 against planking at 3.80. The end frames
+lean with the raked posts (Frame 1 spans 1.18 m in x, keel −1.73 to head 2.78 at the bow).
+Nothing else moved: Weather deck 0.81–0.94, Rail 2.01–3.18, castle-deck 2.76, deck-knee
+0.78–2.39 and 3.68 out, model extent +0.98 m over LOA — r216's numbers.**
+
+**Witnessed (rule 1), the cog in the Shipwright, all --bare but the second:
+r217/inboard-bare.png (bearing 300, zoom 0.42, level 16) — over the port bow onto the deck:
+the far bulwark's inside is a row of upright timbers from the deck to under the rail at about
+half-metre pitch, the knees among them, the frames continuing forward into the bow and aft
+under the castle wing; r217/deck-quarter.png (bearing 135, zoom 0.7, level 6, UI on) —
+from the port quarter, the ribs stand inside the bow bulwark above the sheer; r217/
+hatch-high-bare.png (bearing 250, zoom 0.5, level 30) — high over the port side: the far
+bulwark ribbed its whole length in the sun's shadow, the frames running on under the castle
+deck between the wing posts. Rule 0 answered on inboard-bare.png read whole: it reads as a
+rendered world — sunlit laid deck, cloth with light through it, textured water, the far
+bulwark's inside in shadow with timber standing against it. Three facts a viewer can read
+off it without a legend: the bulwark's inside is ribbed with upright timbers, one about every
+half metre, the beam knees thicker among them; the deck planks run across the ship with
+staggered butts; the beams come out through the side and show their cut ends. NOT right yet:
+the frames are boxes with sharp arrises (a hewn futtock has a bevel where it meets the
+planking, and its head is usually left rough); the hatches are grated, so nothing shows
+through them and the below-deck frames are unseen from any camera; and the pitch is a class
+default (above).**
+
+**The close ratchet, started 20:34:54 (r217/run-ratchet.sh → close-ratchet.out) on a tree
+whose every change is described above. Predictions: r217/PREDICTIONS-close.md — ship-dhow
+MAY move (the cog at its right edge, 33 frames in the bulwark), ship-treasure MAY move (her
+left edge), the documented flaps, nothing else. This paragraph is written at 20:40 with the
+run at its first frames so the tree is committed whatever the kill (21:30:12) does. CLOSE
+STATE: if the paragraphs below this one are missing, the round was killed at the close gate —
+the next firing must (1) re-run the ratchet whole on this committed tree, read and accept
+every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify
+the live stamp, the r198 rule.**
+
+**Named residuals, in order (r216's list, renumbered):** (0) CLOSED this round — the frames
+against the inside of the planking. NEW from it: (a) **the pitch is a class default** —
+Lahn 1992 Blatt 3 (main frame) or Blätter 28–34 (Meßspanten) would give the record its own
+room-and-space, siding and moulding in one fetch; (b) the futtock's bevel and rough head;
+(c) the beams' stations and count (Lahn 1992 or Blatt 2 at a legible scale), carried from
+r215; (d) the nine `H.sheer` deck-readers on other classes must switch to `H.deck` before any
+second hull takes deck.belowSheerM; (e) belowSheerM contested by 0.4 m; (f) the beam-head
+wedge at 60+ px/m; (g) from r216's close gate: an audit rule that the skin's transom closure
+is wound outward (face normals at u > 0.95 pointing aft), or the loft fixed so it is — not
+touched this round. (1) r214: the Gangspill's station. (2) r214: the wings' inner-edge and
+forward-end rails, no source. (3) r213: decked timber ships' rudder heads stop at 0.35 of the
+sheer; no helm port. (4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel
+shank. (7) r177 Lucian's second machine. (8) r176 sekibune class-size, paired with r211's
+top question. (9) Preussen mast livery. (10) Endurance forecastle. (11) Azzam crest span.
+(12) r164 risen black unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass.
+(15) r171 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower
+capstan barrel. (18) the cathead's supporting knee is a block. (19) the readiness transient:
+keep the r208 rule.**

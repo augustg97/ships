@@ -307,41 +307,107 @@ function buildKeelGeometry(S) {
   return g;
 }
 
+/* ── WHERE THE BEAMS AND THE FRAMES STAND ──────────────────────────────────────────────
+   Through-beam stations: the record's own (deck.beamsAtU) or spread evenly over the deck's
+   run — the one list the beams, the knees and the frames all read (round 217; before it the
+   beams block held this arithmetic alone). Frame stations, class default: NF frames spread
+   evenly over u 0.055–0.945 — 26 in the token build, 30 in the fine one, the counts every
+   hull has carried, byte-identical. Record-gated on frames.roomAndSpaceM: one frame every
+   room-and-space over the same run, the count falling out of the record's pitch and the
+   hull's own length; and no frame within a timber's siding of a through-beam station,
+   because the standing knee (r216) is the timber against the skin there, and two timbers in
+   one place flicker. */
+function beamStations(S) {
+  if (!(S.deck && S.deck.throughBeams)) return [];
+  const n = S.deck.throughBeams;
+  return S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+}
+function frameStations(S, NF) {
+  const rs = S.frames && S.frames.roomAndSpaceM;
+  if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
+  const L = S.lwl, n = Math.max(2, Math.floor(0.89 * L / rs) + 1);
+  const us = Array.from({ length: n }, (_, f) => 0.055 + (f / (n - 1)) * 0.89);
+  const keep = ((S.frames.sidedM || 0.18) + ((S.deck && S.deck.kneeSidedM) || 0.20)) / 2 + 0.05;
+  const beams = beamStations(S);
+  return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
+}
+
 function buildFramesGeometry(S, NF = 26, onlyU) {
   const H = hullSurface(S);
   const pos = [], idx = [];
-  const NV = 26, half = 0.016 * S.lwl / 2;
-  if (NF === 1 && onlyU === undefined) NF = 1;          // the room-and-space of one frame
+  const NV = 26;
+  const REC = !!(S.frames && S.frames.roomAndSpaceM);
+  const half = REC ? (S.frames.sidedM || 0.18) / 2 : 0.016 * S.lwl / 2;
+  const us = onlyU !== undefined ? [onlyU] : frameStations(S, NF);
   let base = 0;
-  for (let f = 0; f < NF; f++) {
-    const u = onlyU !== undefined ? onlyU : 0.055 + (f / (NF - 1)) * 0.89;
+  for (const u of us) {
     for (let sgn = -1; sgn <= 1; sgn += 2) {        // both sides of the ship
-      for (let j = 0; j <= NV; j++) {
-        const v = j / NV;
-        const p = surfacePoint(S, H, u, v);
-        /* ── ⚠ THE FRAMES WERE POKING THROUGH THE PLANKING ON EVERY SHIP ────────────────
-           A 3.5% inset is not a plank thickness, it is a PROPORTION — so at the ends, where
-           the half-breadth falls to a fraction of a metre, the gap shrank to millimetres and
-           the two surfaces interpenetrated. Worse, the frames are tessellated at 26 steps and
-           the fine planking at 72: two polygonal approximations of the same curve, sampled
-           differently, cross each other wherever the curvature is strongest. The ribs then
-           show as streaks down a finished hull — which is exactly what they were doing, on
-           every vessel in the fleet, and it read as a texture bug rather than as geometry.
+      if (!REC) {
+        for (let j = 0; j <= NV; j++) {
+          const v = j / NV;
+          const p = surfacePoint(S, H, u, v);
+          /* ── ⚠ THE FRAMES WERE POKING THROUGH THE PLANKING ON EVERY SHIP ──────────────
+             A 3.5% inset is not a plank thickness, it is a PROPORTION — so at the ends, where
+             the half-breadth falls to a fraction of a metre, the gap shrank to millimetres and
+             the two surfaces interpenetrated. Worse, the frames are tessellated at 26 steps
+             and the fine planking at 72: two polygonal approximations of the same curve,
+             sampled differently, cross each other wherever the curvature is strongest. The
+             ribs then show as streaks down a finished hull — which is exactly what they were
+             doing, on every vessel in the fleet, and it read as a texture bug rather than as
+             geometry.
 
-           An inset has to be a LENGTH, because a plank is a length. Frames sit one plank
-           thickness inboard — call it 4% of the half-beam — plus a small absolute clearance
-           that does not vanish when the section narrows. */
-        const plank = S.beam * 0.020;
-        const inset = plank + S.beam * 0.006;
-        const z = Math.max(0, Math.abs(p[2]) - inset);
-        for (let e = -1; e <= 1; e += 2)
-          pos.push(p[0] + e * half, p[1], sgn * z);
+             An inset has to be a LENGTH, because a plank is a length. Frames sit one plank
+             thickness inboard — call it 4% of the half-beam — plus a small absolute clearance
+             that does not vanish when the section narrows. */
+          const plank = S.beam * 0.020;
+          const inset = plank + S.beam * 0.006;
+          const z = Math.max(0, Math.abs(p[2]) - inset);
+          for (let e = -1; e <= 1; e += 2)
+            pos.push(p[0] + e * half, p[1], sgn * z);
+        }
+        for (let j = 0; j < NV; j++) {
+          const a = base + j * 2;
+          idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+        }
+        base += (NV + 1) * 2;
+        continue;
+      }
+      /* ── A RECORDED FRAME IS A MOULDED TIMBER AGAINST THE PLANKING (round 217) ─────────
+         The ribbon above is a proportion of the ship drawn inside her skin for the skeleton
+         stages, and the Shipwright hides it once the planking is on. A hull whose deck lies
+         below the sheer shows her futtocks' upper ends inside the bulwark, between the knees
+         (the Bremen cog: r216's witness found bare strakes there), so a recorded frame is
+         drawn as a timber: sided and moulded from the record or its class defaults, the outer
+         face a hand (5 cm, the knee's own gap) inside the skin, the section following the
+         skin's own — the inward normal taken from the section's tangent, so a floor lies on
+         the bottom and a futtock stands against the side — capped at the head a hand under
+         the rail. Both surfaces come from surfacePoint at the same u, and above v 0.62 the
+         skin is a straight line, so in the bulwark the two cannot cross. */
+      const gap = 0.05, m = S.frames.mouldedM || 0.20;
+      const fb = H.sheer(u);
+      const vTop = fb > 0.3 ? 0.62 + 0.38 * (1 - 0.10 / fb) : 1;
+      const sec = v => { const p = surfacePoint(S, H, u, v); return [p[0], p[1], Math.abs(p[2])]; };
+      for (let j = 0; j <= NV; j++) {
+        const v = j / NV * vTop;
+        const p = sec(v), pa = sec(Math.max(0, v - 0.01)), pb = sec(Math.min(vTop, v + 0.01));
+        let tz = pb[2] - pa[2], ty = pb[1] - pa[1];
+        const tl = Math.hypot(tz, ty) || 1; tz /= tl; ty /= tl;
+        const nz = -ty, ny = tz;                       // inward: −z on a side, +y on the floor
+        const zo = Math.max(0, p[2] + gap * nz), yo = p[1] + gap * ny;
+        const zi = Math.max(0, zo + m * nz), yi = yo + m * ny;
+        pos.push(p[0] - half, yo, sgn * zo,  p[0] + half, yo, sgn * zo,
+                 p[0] + half, yi, sgn * zi,  p[0] - half, yi, sgn * zi);
       }
       for (let j = 0; j < NV; j++) {
-        const a = base + j * 2;
-        idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+        const a = base + j * 4, b = a + 4;
+        for (let f = 0; f < 4; f++) {
+          const c = (f + 1) % 4;
+          idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+        }
       }
-      base += (NV + 1) * 2;
+      const t = base + NV * 4;                          // the cap at the head
+      idx.push(t, t + 1, t + 2, t, t + 2, t + 3);
+      base += (NV + 1) * 4;
     }
   }
   const g = new THREE.BufferGeometry();
@@ -4269,7 +4335,7 @@ function buildFittings(S, group, mats) {
   if (S.deck && S.deck.throughBeams) {
     const n = S.deck.throughBeams;
     const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
-    const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+    const us = beamStations(S);
     /* ── THE HEADS ARE END GRAIN (round 216). A beam head outside the planking is a
        CROSS-CUT of the timber: paler than the weathered side grain, ringed, checked from
        the heart. A cube in the hull's tone read as a bump on the strakes (r215 witness);
@@ -13182,12 +13248,19 @@ function buildShip(S, opts) {
      posts and wales (r121). */
   const ONE_PIECE = S.build === 'dugout';
   if (!ONE_PIECE) group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
+  /* a recorded frame (frames.roomAndSpaceM, r217) is a moulded timber seen from INSIDE the
+     bulwark, so its material shows both faces; the class-default ribbon keeps the skeleton's */
+  const frameMat = (S.frames && S.frames.roomAndSpaceM)
+    ? new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86, side: THREE.DoubleSide })
+    : timber;
   if (FINE) {
     /* every frame its own object, so one rib can be picked out of the skeleton */
-    if (!ONE_PIECE)
-      for (let f = 0; f < 30; f++)
-        group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
-                      'frames', 'Frame ' + (f + 1) + ' of 30'));
+    if (!ONE_PIECE) {
+      const fus = frameStations(S, 30);
+      fus.forEach((u, f) =>
+        group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, u), frameMat),
+                      'frames', 'Frame ' + (f + 1) + ' of ' + fus.length)));
+    }
     /* ⚠ A BULKHEAD-BUILT HULL HAS NO STEM AND NO STERNPOST — the outermost bulkheads are
        the ends, planked across. Giving a junk the European backbone contradicted the stage
        card standing right under her: "bulkheads, then planking". */
@@ -13252,7 +13325,7 @@ function buildShip(S, opts) {
       }
     });
   } else if (!ONE_PIECE) {
-    group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
+    group.add(tag(new THREE.Mesh(buildFramesGeometry(S), frameMat), 'frames'));
   }
 
   const hull = new THREE.Mesh(

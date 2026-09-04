@@ -1165,6 +1165,12 @@
     "cm": 0.8,
     "steering": "stern",
     "sternProvenance": "Sharp-sterned on a straight raked post: the Bremen cog is double-ended, her planking closing on stem and sternpost (Lahn Blatt 9 elevation; the DSM booklet: 'vorn und achtern gerade Steven auf einer flachen Kielplanke'). transom 0 from r214 — the 0.3 it replaced drew a flat stern face above water that no plate supports. The castle's stern beams overhang the post; the hull does not.",
+    "frames": {
+     "roomAndSpaceM": 0.5,
+     "sidedM": 0.18,
+     "mouldedM": 0.2
+    },
+    "framesProvenance": "THAT THEY STAND THERE: the wreck's own timbers. The Bremen cog is framed with floor timbers (Bodenwrangen) and futtocks (Auflanger) put in after the shell was planked, and the futtocks' upper ends stand against the inside of the planking above the deck, between the beam knees, up to the top strake: the DSM's photograph of the hull from above (r213/wreck-in-bremerhaven.jpg, no scale) shows them against the starboard planking under and beside the deck, and Lahn's Blatt 2 titles each section by its Spant number. PITCH, a CLASS DEFAULT: 0.50 m room-and-space is not a fetched number. Lahn 1992 draws the frames on Blaetter 3, 7, 8, 24 and 28-34 (the book's contents list via modellmarine.de, r217) and none of those sheets has been fetched; the Blatt 2 section titles do not resolve their Spant numbers at 640 px (r215). Bounds: the Poel cog of 1354 carried 50 frames (Mittelalter-Lexikon, 'Kogge'), about 0.4 m of pitch on a hull of that length; the DSM photograph reads roughly a futtock's siding of gap between futtocks. A 35-40 cm figure a search returned (Mitteilungen der DGAMN) describes a scrapped wreck whose frames had been taken out and is NOT this ship. Precision +-0.15 m. SIDING 0.18 m and MOULDING 0.20 m are class defaults below what any plate here resolves. Built (r217): one frame every room-and-space over the same run the class-default frames use, from the keel to a hand under the rail cap, the outer face 5 cm inside the skin; no frame within a timber's siding of a through-beam, where the standing knee is the timber against the skin. The Shipwright shows them in the planked stages on this hull because the record says the deck lies below the sheer (deck.belowSheerM); on every other hull the frames stay hidden once the planking is on.",
     "windlass": {
      "atU": 0.875,
      "barrelLenM": 4.5,

@@ -441,8 +441,15 @@ function swApplyStage() {
        The frames are interior structure. Once the planking is on, a real ship shows none of
        them, so drawing them and relying on the skin to occlude them was never right: it made
        correctness depend on two independently-sampled curves never crossing, which is a
-       promise no tessellation can keep. When the planking is visible, the frames are not. */
-    if (p.key === 'frames' && SW.stage >= (shell ? 1 : 2)) o.visible = false;
+       promise no tessellation can keep. When the planking is visible, the frames are not.
+       EXCEPT where the record puts them in the open (round 217): a hull whose deck lies
+       below the sheer (deck.belowSheerM) has a bulwark whose inside IS her frames' upper
+       ends — the Bremen cog's futtocks between her beam knees — and with frames.roomAndSpaceM
+       those frames are built as timbers a hand inside the skin along the skin's own section,
+       so the promise the rule above refuses to make is not asked for. Every other hull keeps
+       the rule. */
+    const openBulwark = !!(H && H.deck && H.deck.belowSheerM && H.frames && H.frames.roomAndSpaceM);
+    if (p.key === 'frames' && SW.stage >= (shell ? 1 : 2) && !openBulwark) o.visible = false;
     /* the one subtractive step in the fleet: hollowing REMOVES the log's top face. The
        part ships invisible (no other view may show it) and exists only at this stage. */
     if (p.key === 'logtop') o.visible = dug && SW.stage === 1;
