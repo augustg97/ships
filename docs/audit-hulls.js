@@ -574,6 +574,11 @@ if (Math.abs(got - h) > 0.15)
 say(v.id, "a through-beam off the plate's height over the keel", `beam ${i + 1} of ${by.length} centre ${got.toFixed(2)} m over the skin's bottom at midships (y ${datum.toFixed(2)}), the plate says ${h.toFixed(2)}`);
 });
 }
+{
+const wet = beams.filter(bm => { const b = bbox(bm); return (b[1] + b[4]) / 2 < 0; });
+if (wet.length && !H.draughtCondition)
+say(v.id, 'a through-beam under the waterline on a hull whose record does not name its load', `${wet.length} of ${beams.length} deck-beams have their centres under the water at hull.draught ${H.draught}; hull.draughtCondition is not on the record`);
+}
 const knees = byName('deck-knee');
 if (knees.length !== 2 * H.deck.throughBeams)
 say(v.id, 'through-beams without their knees', `${knees.length} deck-knee, ${2 * H.deck.throughBeams} wanted for ${H.deck.throughBeams} beams`);
@@ -588,6 +593,14 @@ say(v.id, 'a knee that does not reach the top strake', `head ${b[4].toFixed(2)} 
 if (half > 0 && out > half + 0.02)
 say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
 }
+}
+if (H.draughtCondition !== undefined) {
+const lc = H.loadConditions || [];
+const c = lc.find(q => q.name === H.draughtCondition);
+if (!c)
+say(v.id, 'a named load condition the record does not carry', `hull.draughtCondition ${JSON.stringify(H.draughtCondition)}, hull.loadConditions ${lc.map(q => q.name).join(', ') || 'absent'}`);
+else if (c.draughtM === undefined || Math.abs(c.draughtM - H.draught) > 0.05)
+say(v.id, "a draught off the named load condition's", `hull.draught ${H.draught}, the ${H.draughtCondition} condition's draughtM ${c.draughtM}`);
 }
 if (H.section) {
 if (H.section.form !== 'flared')

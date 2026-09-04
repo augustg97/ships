@@ -758,7 +758,8 @@ function swOpen(vessel) {
   document.getElementById('swDims').innerHTML = [
     ['Length overall', L.toFixed(1) + ' m'],
     ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
-    ['Draught', vessel.hull.draught.toFixed(2) + ' m'],
+    /* r233: the load she floats at, when the record names it (hull.draughtCondition) */
+    ['Draught' + (vessel.hull.draughtCondition ? ', ' + vessel.hull.draughtCondition : ''), vessel.hull.draught.toFixed(2) + ' m'],
     /* ⚠ "deck to truck" is a MAST measurement, and it was being printed on ships with no
        masts — Titanic's 62.3 m is her funnels and superstructure. Say what is being measured.
        ⚠ AND MEASURED FROM THE DECK, WHICH IS WHAT BOTH LABELS SAY. rigTop is the bounding

@@ -1656,7 +1656,7 @@ const H = ves.hull;
 const rows = [
 ['Length overall', H.loa.toFixed(1) + ' m'],
 ['Beam', H.beam.toFixed(1) + ' m'],
-['Draught', H.draught.toFixed(2) + ' m'],
+['Draught' + (H.draughtCondition ? ', ' + H.draughtCondition : ''), H.draught.toFixed(2) + ' m'],
 ves.speedKn !== undefined
 ? ['Service speed', ves.speedKn.toFixed(1) + ' kn']
 : ['Best speed, moderate breeze', shipKn(ves).toFixed(1) + ' kn'],

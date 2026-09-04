@@ -3111,7 +3111,9 @@ function passageCard(tr, ves, lw) {
   const rows = [
     ['Length overall', H.loa.toFixed(1) + ' m'],
     ['Beam', H.beam.toFixed(1) + ' m'],
-    ['Draught', H.draught.toFixed(2) + ' m'],
+    /* r233: a record that names the load she floats at (hull.draughtCondition, the cog's
+       'laden') says so beside the number; a draught with no condition is printed bare. */
+    ['Draught' + (H.draughtCondition ? ', ' + H.draughtCondition : ''), H.draught.toFixed(2) + ' m'],
     /* ⚠ ves.polar.best does not exist — the same non-field that made every hull sail at the
        literal fallback of six knots two rounds ago. The card was still printing "6.0 kn" for
        a 400 m container ship while the pacing beside it used 16. One reading of one number. */

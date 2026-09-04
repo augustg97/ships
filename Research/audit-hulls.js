@@ -878,6 +878,18 @@
                 say(v.id, "a through-beam off the plate's height over the keel", `beam ${i + 1} of ${by.length} centre ${got.toFixed(2)} m over the skin's bottom at midships (y ${datum.toFixed(2)}), the plate says ${h.toFixed(2)}`);
             });
           }
+          /* D-LOAD (round 233): a through-beam whose centre stands under the water — y < 0
+             in hull space, where y 0 is the waterline the loft floats her at (hull.draught) —
+             is a laden ship, and the record must SAY which load she carries
+             (hull.draughtCondition). Lahn's Blatt 1 draws no waterline (read r233); the Kiel
+             replicas' 2.25 m is their laden figure and floats the cog's midship heads 0.24 m
+             under; Tanner's beam-ends condition floats them dry 0.43 m lighter. Silence is
+             convicted (the r108 pattern): beams awash on a hull whose card cannot say why. */
+          {
+            const wet = beams.filter(bm => { const b = bbox(bm); return (b[1] + b[4]) / 2 < 0; });
+            if (wet.length && !H.draughtCondition)
+              say(v.id, 'a through-beam under the waterline on a hull whose record does not name its load', `${wet.length} of ${beams.length} deck-beams have their centres under the water at hull.draught ${H.draught}; hull.draughtCondition is not on the record`);
+          }
           /* D-KNEES (round 216): a standing knee at every beam end, both sides — its foot on
              the beam (at the deck's edge), its head up at the top strake, and the whole of it
              INSIDE the planking. A knee outboard of the skin is a knee drawn through the hull. */
@@ -895,6 +907,18 @@
             if (half > 0 && out > half + 0.02)
               say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
           }
+        }
+        /* D-LOAD-CONDITION (round 233): a record that names the load she floats at
+           (hull.draughtCondition) must carry that condition in hull.loadConditions with a
+           draughtM equal to hull.draught within 0.05, so the draught the loft floats her at
+           cannot drift from the condition the card names. */
+        if (H.draughtCondition !== undefined) {
+          const lc = H.loadConditions || [];
+          const c = lc.find(q => q.name === H.draughtCondition);
+          if (!c)
+            say(v.id, 'a named load condition the record does not carry', `hull.draughtCondition ${JSON.stringify(H.draughtCondition)}, hull.loadConditions ${lc.map(q => q.name).join(', ') || 'absent'}`);
+          else if (c.draughtM === undefined || Math.abs(c.draughtM - H.draught) > 0.05)
+            say(v.id, "a draught off the named load condition's", `hull.draught ${H.draught}, the ${H.draughtCondition} condition's draughtM ${c.draughtM}`);
         }
         /* D-SECTION (round 226): a hull whose record gives a FLARED section (hull.section.form
            'flared', the Bremen cog from Lahn's Blatt 2) is widest at her RAIL — the side widens

@@ -1065,11 +1065,11 @@
    "rows": [
     [
      "Bremen cog, 1380",
-     "23.3 × 7.6 m, draught 2.25 m"
+     "23.3 × 7.6 m; draught 2.25 m laden, the Kiel replicas' figure (about 1.25 m light)"
     ],
     [
      "Displacement",
-     "~84 t; cargo ~87 t"
+     "84 t at 2.25 m, the Hansekogge replica laden (Wikipedia); Tanner 2021: 62 t rigged, no cargo (1.49 m aft); 106 t with 43 t cargo, beam heads at the water (2.07 m); 170 t with 108 t at the Grågås load line (2.77 m)"
     ],
     [
      "Crew",
@@ -1162,6 +1162,9 @@
     "beam": 7.6,
     "draught": 2.25,
     "freeboard": 2.01,
+    "draughtCondition": "laden",
+    "loadConditions": [{"name": "light", "draughtM": 1.25, "source": "de.wikipedia Bremer Kogge: the Ubena empty, a metre less than laden (r233)"}, {"name": "laden", "draughtM": 2.25, "displacementT": 84, "source": "de.wikipedia Bremer Kogge: Ubena 'mit Ladung 2,25 m'; Hansekogge 'voll beladen' 84 t at 2.25 m (r233)"}, {"name": "lightship", "draughtAftM": 1.49, "draughtFwdM": 0.95, "freeboardMidM": 2.98, "displacementT": 62.3, "cargoT": 0, "ballastT": 15.1, "source": "Tanner 2021 App. I Fig. 11: rigged, 41 cm stone ballast, no cargo"}, {"name": "through-beams at the waterline", "draughtAftM": 2.07, "freeboardMidM": 2.45, "draughtMidM": 1.82, "displacementT": 105.6, "cargoT": 43.3, "ballastT": 15.1, "source": "Tanner 2021 App. I I.8, the beam ends kept dry; draughtMidM DERIVED, 4.27 (Table 6) less the freeboard"}, {"name": "Graagaas load line", "draughtAftM": 2.77, "freeboardMidM": 1.75, "draughtMidM": 2.52, "displacementT": 170.3, "cargoT": 108.0, "ballastT": 15.1, "source": "Tanner 2021 App. I I.9, the Icelandic 1.74 m minimum freeboard; draughtMidM DERIVED as above"}],
+    "draughtProvenance": "WHAT 2.25 IS (r233): the LADEN draught. Lahn's Blatt 1 draws NO waterline (read four ways; crops in r233/, HANDOFF r233), so the plate cannot settle where she floats. 2.25 is the Kiel replicas' laden figure; Tanner 2021 App. I gives the three hydrostatic conditions (loadConditions). At 2.25 m the midship heads DB 3-4 (2.01 / 2.04 m over the keel) stand 0.24 m UNDER the water, DB 2 and 5 at it, DB 1 1.2 m clear; Tanner's beam-ends condition floats them dry 0.43 m lighter. The model floats her laden (hull.draughtCondition), both cards say so, D-LOAD convicts a beam under the water on a hull that does not name its load. CONTESTED: the displacement, 84 t (replica) / 105.6 (Tanner, 2.07 m aft) / 168 (the loft on a 20.5 m waterline; Tanner reads 17.5-18.3). NOT DONE: the trim (Tanner floats her by the stern) and the lwl.",
     "cm": 0.8,
     "section": {
      "form": "flared",

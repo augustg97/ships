@@ -420,7 +420,7 @@ document.getElementById('swSub').textContent = rigLine(vessel);
 document.getElementById('swDims').innerHTML = [
 ['Length overall', L.toFixed(1) + ' m'],
 ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
-['Draught', vessel.hull.draught.toFixed(2) + ' m'],
+['Draught' + (vessel.hull.draughtCondition ? ', ' + vessel.hull.draughtCondition : ''), vessel.hull.draught.toFixed(2) + ' m'],
 [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
 (U.rigTop - vessel.hull.freeboard).toFixed(1) + ' m'],
 ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');

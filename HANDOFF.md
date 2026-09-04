@@ -18879,3 +18879,133 @@ docs/js/hull.js carries deckLineFromBeams (4) and docs/audit-hulls.js D-BEAM-HEI
 Two commits close the round (e9c65fa source + audit + docs + handoff, and this push-log commit with any accepted baseline).**
 
 **Correction to the receipt above: 'docs/audit-hulls.js D-BEAM-HEIGHT (0)' counted a COMMENT token, and the build strips comments from the published audit (docs/ 231,586 bytes against web/ 463,317). The rule's code string "a through-beam off the plate's height over the keel" reads 1 in docs/audit-hulls.js and mastDeckY reads 6, so the published audit carries the round's rules; the receipt script should count code strings, not rule names in comments (r233: fix push-log-commit.sh's pattern).**
+
+## Round 233 — 2026-09-04 — the draught is a load condition: Blatt 1 draws no waterline, the Kiel replicas' 2.25 m is their laden figure, Tanner's three hydrostatic conditions go on the record, both cards say "Draught, laden", and the audit convicts a through-beam under the water on a hull whose record does not name its load
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r232's receipt reported the ratchet clean
+at all 64 (movers 0), so nothing was carried in as a first item, and the round took (0e″) as r232 ordered.
+The r232 pattern held for the clock: the round's work committed and pushed first, the full ratchet after the
+push with its result in the receipt commit.**
+
+**THE READ (0e″), Blatt 1 has no waterline. Lahn's starboard elevation (r230/lahn-blatt1-full.png, 14338 × 4699
+px at 590.8 px/m, the keel's underside at y 4442) was read for a KWL four ways: the whole plate at a fifth
+(r233/overview-5x.png); the band from 1.5 to 3.0 m over the keel — a 2.25 m draught sits at y 3113 — across
+the full length at a quarter, in three parts (r233/strip-kwl-band-4x.png, strip-kwl-part0..2.png); both ends
+of the sheet outside the hull, where a waterline is carried past the stem and the post (r233/end-stem.png,
+end-stern.png); and the title block (r233/titleblock.png: KOGGE, Seitenansicht / STB, M 1:20, Rekonstruktion
+W. Lahn, Zeichnung C. Nord, Deutsches Schiffahrtsmuseum Bremerhaven, August 1989). There is no dashed or
+dash-dot line at any height, no KWL label, and no Tiefgang in the block; the sheet's only datum row is the
+Rekonstruktionsspant-Nr. line along the bottom. The long dark rows r232 found at 1.31 / 1.80 / 2.21 / 2.61 m
+are strake seams, as r232 said. So the plate cannot settle where she floats, and the record now says so.**
+
+**WHAT 2.25 IS: the laden draught. de.wikipedia's Bremer Kogge page (fetched raw, r233/wiki-Bremer_Kogge.txt)
+states it for both Kiel replicas: the Ubena von Bremen "hat mit Ladung einen Tiefgang von 2,25 Metern. Ohne
+Ladung verringert sich dieser um einen Meter"; the Hansekogge "voll beladen ... bei einer Verdrängung von 84
+Tonnen einen Tiefgang von 2,25 Metern". (The Roland von Bremen, a different hull at 23.98 × 7.18 m, floats
+at 1.85 m and 120 t.) Tanner 2021 vol. 2, Appendix I — the hypothetical reconstruction in Orca 3D
+(r230/tanner-vol2.txt, lines 13040–13480) — gives three conditions: LIGHTSHIP, fully rigged with 41 cm of
+stone ballast (15,090 kg) and no cargo, 62,294 kg, 1.49 m aft and 0.95 forward, 2.98 m freeboard amidships;
+THROUGH-BEAMS AT THE WATERLINE, his freeboard rule that keeps the through-hull beam ends dry (his Figure 13),
+105,639 kg with 43,345 kg of cargo, 2.07 m aft, 2.45 m freeboard; and the GRÅGÅS CODEX load line, the medieval
+Icelandic minimum freeboard of 1.74 m, 170,297 kg with 108,003 kg of cargo, 2.77 m aft, 1.75 m freeboard,
+which fails his modern stability criteria (flooding angle 24.5°). His freeboards are to the washboard at
+midships, 4.27 m over the keel (his Table 6), so the water at midships stands 1.82 m over the keel at the
+beam-ends condition and 2.52 at Grågås — DERIVED, and labelled so on the record. Against the plate's beam
+heights (r231): at 2.25 m DB 3 and DB 4 (2.01 / 2.04) stand 0.24 m UNDER the water, DB 2 and DB 5
+(2.23 / 2.31) at it, DB 1 (3.42) 1.2 m clear; at Tanner's beam-ends condition every head is dry by 0.2 m or
+more. 2.25 m lies 0.43 m deeper at midships than the condition that keeps the heads dry and 0.27 m shallower
+than the load line: a laden ship, by every source, and the one the Kiel photographs show (r213/ubena-kiel2007-2.jpg).
+The record's 1.25 m light figure (the Ubena's "um einen Meter") and Tanner's lightship (1.49 aft, 0.95 forward,
+mean 1.22) agree to 3 cm.**
+
+**THE DECISION: she floats laden, and says so. hull.draught 2.25 stands — the record's number, the replicas'
+own, and the state a cog on the Hanse run to Bergen is in (the voyage card's cargo north: salt, grain, cloth).
+The alternative, floating her at Tanner's beam-ends condition, was not taken: it is a rule he proposes for
+want of evidence, not a measured state of any ship, and the replicas' laden figure is a measured one. What
+the round changes is that the number is now a CONDITION, not a dimension.**
+
+**THE RECORD (web/data/vessels.json; before-copy r233/vessels.before.json, the script r233/apply-vessel-edits.py
+with every match asserted unique, the after-copy vessels.after.json). Three fields on the cog's hull:
+draughtCondition "laden"; loadConditions, five entries each with its source and note — light (1.25, the
+Ubena), laden (2.25, 84 t, both replicas), lightship, through-beams at the waterline and Grågås load line
+(Tanner's, with draughtAftM, freeboardMidM, the derived draughtMidM, displacementT, cargoT, ballastT); and
+draughtProvenance, the argument above with the crops named, the CONTESTED displacement named (the replica's
+84 t at 2.25, Tanner's 105.6 t at 2.07 aft, the loft's own 168 t at 2.25 from r231/coeffs.py on a 20.5 m
+waterline where Tanner reads 17.5–18.3), and what is NOT DONE (the trim, the lwl). Two card rows rewritten:
+"draught 2.25 m laden, the Kiel replicas' figure (about 1.25 m without cargo)" and the Displacement row, which
+carried "~84 t; cargo ~87 t" with no source, now the replica's 84 t at 2.25 (Wikipedia) and Tanner's three
+conditions with their draughts aft and cargo.**
+
+**THE CARDS (web/js/app.js and web/js/shipwright.js; before/after copies in r233/). The Sea close-up's row
+(app.js, the psgCard) and the Shipwright's stat tile (shipwright.js, swDims) both print "Draught, laden" when
+the record carries hull.draughtCondition and "Draught" bare when it does not — the class change, one line
+each, gated on the field: any hull that gains a condition gets the label. Witnessed: r233/witness-sea-card.png
+(#e=3&f=hanse) reads "Draught, laden 2.25 m" beside the cog under way; r233/witness-shipwright-card.png and the
+tile crop witness-shipwright-tile-crop.png read "2.25 m DRAUGHT, LADEN". Rule 0 answered on witness-sea-card.png
+read whole: it reads as a rendered world — the sea's swell and the coast's grey haze, the hull's planking and
+castle lit from the quarter, the wake's diverging arms. Three facts a viewer can read off it without a legend:
+the ship is deep in the water with her deck close to it; the castle stands high at the stern on posts; the
+card beside her says she is laden and what she carries.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; before-copy r233/audit-hulls.before.js, the script
+r233/apply-audit-and-app-edits.py). Two rules. D-LOAD, in the deck-beams block after D-BEAM-HEIGHT: a deck-beam
+whose centre stands under y 0 in hull space (the waterline the loft floats her at) on a hull whose record does
+not carry hull.draughtCondition is convicted — silence, the r108 pattern: beams awash and a card that cannot
+say why. D-LOAD-CONDITION, beside D-SECTION: a record that names its condition must carry it in
+hull.loadConditions with a draughtM equal to hull.draught within 0.05, so the loft's draught cannot drift from
+the condition the card names. PROOF (r233/run-audit-and-witness.sh): the r232 record (vessels.before.json)
+under the r233 audit, r233/audit-old-record.out — one problem, the cog, "3 of 5 deck-beams have their centres
+under the water at hull.draught 2.25; hull.draughtCondition is not on the record"; the record restored from
+the after-copy (cmp, not git) and the r233 record: r233/audit.out, checked 33 hulls, 0 problems.**
+
+**MEASURED: nothing moved. No geometry changed on any hull, so measure_ship was not re-run; r232's
+measure-after.out stands, and the audit read the same scene — DB 2, 3 and 4 with their centres under the
+water (Through-beam 3 of 5 at y −0.39 to −0.09 in r232's table), DB 5 and DB 1 over it.**
+
+**THE RECEIPT SCRIPT (r232's correction, done): r233/push-log-commit.sh counts CODE strings in the published
+copies — "loadConditions" and "draughtCondition" in docs/data/vessels.json, H.draughtCondition in docs/js/app.js,
+vessel.hull.draughtCondition in docs/js/shipwright.js, and the two rules' say() strings in docs/audit-hulls.js —
+never a rule name in a comment, because the build strips comments from the audit it publishes.**
+
+**THE BUDGET, and what it cost the record. The first build refused to publish: first paint 8,602,381 bytes against the
+8,600,000 gate (build/staging/r233/build.out), the r233 record 4,647 bytes larger compact than r232's, whose own margin was
+2,266 bytes. The gate's note (build_site.py, 2026-08-04) forbids moving the line a third time and prescribes compressing the
+level-0 tiles (4,858,081 bytes) instead — no PNG optimiser is on this machine (oxipng, optipng, pngcrush, zopflipng all
+absent) and a lossless re-encode with a manifest rebuild is not a fifteen-minute job with the ratchet still to run. So the new
+record text was cut to its numbers and sources (r233/apply-vessel-edits-2.py and -3.py, the third a string-level edit on the before-copy so the diff is the three anchors alone): every
+condition, draught, displacement, cargo and source is kept; the crop-by-crop account lives in this handoff. The published
+record is within the gate by under a kilobyte, which means r234 CANNOT add a sentence to any record before it compresses the
+tiles. That is r234's first item after the receipt, ahead of the mast.**
+
+**Named residuals, in order:** (0e″) RESOLVED: the plate has no waterline; 2.25 is laden; the record and both
+cards say so. NEW (0e⁵): the trim — every Tanner condition floats by the stern (lightship 0.54 m, aft over
+forward) and the loft floats her level, so the stern sits 0.2–0.3 m high and the bow low against his
+flotation; a loft trim field, read from his conditions, is the fix. NEW (0e⁶): the loft's lwl 20.5 m is a
+class number; Tanner reads 16.8 / 17.5 / 18.3 m at his three conditions, and the r231 coefficients (168 t at
+2.25) were integrated on the long waterline — re-derive on the record's. (0e‴), THE MAST, handed forward with
+its numbers read this round: the Ubena von Bremen's mast is 23.80 m long, 0.65 m at its greatest diameter
+(de.wikipedia, r233/wiki-Bremer_Kogge.txt), stepped on the keelson (Tanner's mast step 1860 mm long with a
+rectangular heel socket), so about 21.7 m from the deck at the mast to the truck (±0.5); the Hansekogge's sail
+is 100 m² with three bonnets of 33 m² (Tanner App. I; the record's "~200 m²" row is that total). The model's
+mast stands 10.1 m over the deck (r232 measure: y 0.26 to 10.38), its yard 8.4 m, its sail 8.9 × 7.5 m, about
+67 m² — half the height and a third of the canvas. The fix is masts[0].truckM on the record (mastLowerOf reads
+it, K 1.0 with only 1) and a read of the yard's length against the sail's 100 m²; and the Shipwright's "Rig,
+deck to truck" tile subtracts hull.freeboard (the RAIL over the water) from rigTop, so on a hull whose deck lies
+under the sheer it prints rail-to-truck (8.4 on the cog against 10.1 deck-to-truck) — give it the deck at the
+mast. (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230
+lists them.**
+
+**Three method notes. (1) A plate that does not draw a thing cannot settle it, and the record must say the
+plate was read for it and where — otherwise the next reader reads it again. (2) A draught is a load condition,
+not a dimension of the ship: the same hull floats a metre apart empty and full, and a number without its
+condition is a number without a meaning. The field now carries the condition and the audit refuses the number
+without it. (3) A receipt that counts a token must count one the published file keeps.**
+
+**r234 opens by reading the receipt paragraph below for the ratchet's result (any mover named there is r234's
+first item), then takes (0e‴) — the mast to the Ubena's 23.80 m via truckM, the yard against the 100 m² sail,
+and the Shipwright tile's datum — because the Sea view shows a cog with half a mast.**
+
+**Live stamp: docs/index.html carries data-version 1788565721 at the build; the push and the live poll are in
+build/staging/r233/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r233 staging stays on disk uncommitted, the r211 convention.**
