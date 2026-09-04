@@ -17318,3 +17318,15 @@ route to Lahn 1992's plates appears; r218's hunt paragraph lists every route tha
 One method note from this round's audit: a rule that compares a part's dimension at two
 heights must take its reference reading OUTSIDE the zone the record says is changing; the
 first draft read the body inside the taper and convicted every frame.**
+
+**Live stamp VERIFIED: 1788520077 on https://augustg97.github.io/ships/index.html at 04:09:51
+PDT, 90 s after the push (build/staging/r223/push.log, the r209 poll pattern). Two commits
+close the round (389aa4f source + audit + docs + handoff, and this push-log commit). Tree at
+close: only build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the
+r223 staging (the three before-copies, hull.after.js, apply-edits.py, the two diffs, the four
+plate crops, the measure, the two witnesses, the three audit outputs, the two injection
+outputs, the sweep and compare-sweeps.py, the predictions, run-close.sh, close-out.sh,
+push-verify.sh) stays on disk uncommitted, the r211 convention. One harness note: the close
+ratchet was launched as the Bash tool's own background task and polled from the foreground
+in nine-minute waits; it survived the whole 43 minutes and its exit was read from
+close-ratchet.out, so the r198 foreground-wait rule is met by that pattern too.**
