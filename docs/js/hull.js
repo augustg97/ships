@@ -4192,7 +4192,7 @@ function linerHouse(S) {
 const n = S.decks || 0;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
-const base = H.sheer(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B * 0.055;
+const base = H.deck(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B * 0.055;
 const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
 const crest = (S.houseCrest && S.houseCrest.length === 2) ? S.houseCrest
 : [hA + 0.024 * (n - 1) / n, hB - 0.14 * (n - 1) / n];
@@ -5301,7 +5301,7 @@ const HAZE = 0x848a8e;
 const grey = new THREE.MeshStandardMaterial({ color: 0x4e5357, roughness: 0.99, metalness: 0.0 });
 const dark = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.70, metalness: 0.15 });
 const line = new THREE.MeshStandardMaterial({ color: 0xd6d2c4, roughness: 0.85, metalness: 0.0 });
-const y = H.sheer(0.5) + B * 0.10;
+const y = H.deck(0.5) + B * 0.10;
 const dkL = S.flightDeckLen || L * 1.02;
 const dkCx = S.flightDeckLen ? (-L / 2 + H.rake(0) + S.loa - dkL / 2) : 0;
 const fd = new THREE.Mesh(new THREE.BoxGeometry(dkL, B * 0.045, deckW), grey);
@@ -5703,7 +5703,7 @@ uA = Math.min(uA, sec.at - rB);
 uB = Math.max(uB, sec.at + rB);
 });
 const g = new THREE.Group();
-const base = H.sheer((uA + uB) / 2);
+const base = H.deck((uA + uB) / 2);
 const dh = B * 0.080;
 const tierHalf = (u, t) => {
 const full = Math.max(B * 0.06,
@@ -6708,7 +6708,7 @@ const deckHalfAt = x => {
 const u = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
 return Math.abs(surfacePoint(S, H, u, 1.0)[2]);
 };
-const deckY = H.sheer(0.5);
+const deckY = H.deck(0.5);
 const DK = 2.9;
 const N_DECKS = S.deckHouseDecks || 8;
 const accU = (S.bridgeU !== undefined) ? S.bridgeU : 0.845;
@@ -6749,8 +6749,8 @@ centreHigh = x > accX ? 5
 : Math.max(3, Math.round((peak - 4) + 4 * Math.sin(Math.min(1, t * 1.3) * Math.PI * 0.68)));
 }
 const stowHalf = nc * TEU_W * 1.02 / 2;
-const bayY = Math.max(H.sheer(Math.max(0.001, 0.5 + (x - pitch / 2) / L)),
-H.sheer(Math.min(0.999, 0.5 + (x + pitch / 2) / L)));
+const bayY = Math.max(H.deck(Math.max(0.001, 0.5 + (x - pitch / 2) / L)),
+H.deck(Math.min(0.999, 0.5 + (x + pitch / 2) / L)));
 const hc = new THREE.Mesh(
 new THREE.BoxGeometry(TEU_L * 1.00, TEU_H * 0.22, stowHalf * 2 + 1.0), hatch);
 hc.position.set(x, bayY + TEU_H * 0.11, 0);
@@ -6798,7 +6798,7 @@ bulb.position.set(-L * 0.495, Math.max(-S.draught * 0.62, bulbR - S.draught), 0)
 group.add(tag(bulb, 'bulb'));
 const steelPale = new THREE.MeshStandardMaterial({ color: 0xc8c4bb, roughness: 0.62 });
 const fcX = -L * 0.46;
-const fcY = H.sheer(Math.max(0.001, 0.5 + fcX / L));
+const fcY = H.deck(Math.max(0.001, 0.5 + fcX / L));
 const fcHalf = Math.min(deckHalfAt(fcX - L * 0.022), deckHalfAt(fcX + L * 0.022)) - B * 0.012;
 const fc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.044, TEU_H * 1.1, fcHalf * 2), steelPale);
 fc.position.set(fcX, fcY + TEU_H * 0.55, 0);
@@ -6959,14 +6959,14 @@ return tex;
 const mkMat = tex => new THREE.MeshStandardMaterial({
 map: tex, transparent: true, roughness: 0.55, metalness: 0.05,
 polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
-const deckY = H.sheer(0.5);
+const edgeY = H.sheer(0.5);
 if (lv.side) {
 const wM = L * (lv.sideRun || 0.30);
 const hM = lv.sideH || Math.max(4, S.freeboard * 0.45);
 const uC = (lv.sideU !== undefined) ? lv.sideU : 0.48;
 const xC = L * (uC - 0.5);
 const half = Math.abs(surfacePoint(S, H, uC, 1.0)[2]);
-const yC = deckY - hM * 0.5 - (lv.sideDrop !== undefined ? lv.sideDrop : 1.6);
+const yC = edgeY - hM * 0.5 - (lv.sideDrop !== undefined ? lv.sideDrop : 1.6);
 for (const side of [1, -1]) {
 const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM),
 mkMat(makeTex([lv.side])));
@@ -6978,7 +6978,7 @@ group.add(tag(m, 'livery'));
 if (lv.stern && lv.stern.length) {
 const wM = S.beam * 0.42, hM = wM * 0.25;
 const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM), mkMat(makeTex(lv.stern)));
-m.position.set(L * 0.5 + 0.15, deckY - S.freeboard * 0.42, 0);
+m.position.set(L * 0.5 + 0.15, edgeY - S.freeboard * 0.42, 0);
 m.rotation.y = Math.PI / 2;
 group.add(tag(m, 'livery', 'Stern name',
 'Name and port of registry, white on the transom — the address every ship carries.'));

@@ -3606,10 +3606,10 @@ say(v.id, 'deckhouses miscounted',
 `${H.deckhouses.length} in the record, ${houses.length} drawn`);
 for (const hbx of houses) {
 const uu = Math.max(0.001, Math.min(0.999, 0.5 + ((hbx.min.x + hbx.max.x) / 2) / H.lwl));
-const d = HSd.sheer(uu);
+const d = HSd.deck(uu);
 if (hbx.min.y > d + 0.3 || hbx.max.y < d + 1.0)
 say(v.id, 'deckhouse off the deck',
-`house spans ${hbx.min.y.toFixed(1)}–${hbx.max.y.toFixed(1)} m, sheer there ${d.toFixed(1)} m`);
+`house spans ${hbx.min.y.toFixed(1)}–${hbx.max.y.toFixed(1)} m, deck there ${d.toFixed(1)} m`);
 const half = Math.abs(SHIPS_HULL.surfacePoint(H, HSd, uu, 1.0)[2]);
 if (Math.max(-hbx.min.z, hbx.max.z) > half + 0.4)
 say(v.id, 'deckhouse over the side',
@@ -3620,9 +3620,9 @@ if (H.helmAt !== undefined) {
 if (!part.helm) say(v.id, 'declared but not drawn', 'the wheel');
 else {
 const HSw = SHIPS_HULL.hullSurface(H);
-if (Math.abs(part.helm.y[0] - HSw.sheer(H.helmAt)) > 1.2)
+if (Math.abs(part.helm.y[0] - HSw.deck(H.helmAt)) > 1.2)
 say(v.id, 'wheel stands on nothing',
-`base at ${part.helm.y[0].toFixed(1)} m, sheer there ${HSw.sheer(H.helmAt).toFixed(1)} m`);
+`base at ${part.helm.y[0].toFixed(1)} m, deck there ${HSw.deck(H.helmAt).toFixed(1)} m`);
 }
 }
 {
@@ -4145,7 +4145,7 @@ g.traverse(o => {
 if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'funnel') return;
 const bb2 = new THREE.Box3().setFromObject(o);
 const u = Math.max(0.001, Math.min(0.999, 0.5 + ((bb2.min.x + bb2.max.x) / 2) / H.lwl));
-let deck = HS3.sheer(u);
+let deck = HS3.deck(u);
 if (T.recorded)
 for (const t of T.tiers) if (u >= t.uA && u <= t.uB) deck = Math.max(deck, t.y1);
 const d = bb2.min.y - deck;

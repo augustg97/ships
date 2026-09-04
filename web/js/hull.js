@@ -6547,7 +6547,7 @@ function linerHouse(S) {
      Every hull that already carried decks has been pinned to its current value in the data, so
      this change moves nothing that was right; the DEFAULT is now the human dimension, which is
      what any vessel added from here inherits. */
-  const base = H.sheer(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B * 0.055;
+  const base = H.deck(0.5), dh = S.deckM || Math.min(B * 0.105, 3.0), inset = B * 0.055;   // the house stands on the DECK (r222)
   const [hA, hB] = (S.houseAt && S.houseAt.length === 2) ? S.houseAt : [0.10, 0.90];
   /* ── ⚠ NOT EVERY HOUSE CRESTS FORWARD ────────────────────────────────────────────────
      The aligned-fronts/cascading-afts rule below is the LINER's logic — conned from the
@@ -8376,7 +8376,7 @@ function buildFlightDeck(S, group, mats) {
   const grey = new THREE.MeshStandardMaterial({ color: 0x4e5357, roughness: 0.99, metalness: 0.0 });
   const dark = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.70, metalness: 0.15 });
   const line = new THREE.MeshStandardMaterial({ color: 0xd6d2c4, roughness: 0.85, metalness: 0.0 });
-  const y = H.sheer(0.5) + B * 0.10;
+  const y = H.deck(0.5) + B * 0.10;                // a hangar's height over the DECK (r222)
 
   /* the deck itself: it OVERHANGS the hull on both sides, which is why a carrier's waterline
      beam and its flight-deck beam are two very different numbers. Its LENGTH is its own
@@ -9008,7 +9008,7 @@ function buildCitadel(S, group, mats) {
     uB = Math.max(uB, sec.at + rB);
   });
   const g = new THREE.Group();
-  const base = H.sheer((uA + uB) / 2);
+  const base = H.deck((uA + uB) / 2);              // the citadel stands on the DECK (r222)
   const dh = B * 0.080;
   /* one half-breadth derivation for the tier walls and everything that stands at them, so a
      mount placed "at the deck edge" is at the edge the loft actually drew.
@@ -10300,7 +10300,7 @@ function buildContainers(S, group, coarse) {
     const u = Math.max(0.001, Math.min(0.999, 0.5 + x / L));
     return Math.abs(surfacePoint(S, H, u, 1.0)[2]);
   };
-  const deckY = H.sheer(0.5);
+  const deckY = H.deck(0.5);                       // the DECK, not the skin's edge (r222)
 
   /* ── THE LAYOUT IS SET BY THE ISLANDS ────────────────────────────────────────────────
      The stow fills every bay of deck the islands leave free, so their stations are fixed
@@ -10369,8 +10369,8 @@ function buildContainers(S, group, coarse) {
     const stowHalf = nc * TEU_W * 1.02 / 2;
     /* the bay stands on the deck AT ITS OWN STATION — the bow sheer lifts the foredeck
        1.4 m above amidships, and a stow based on the amidships height was buried in it */
-    const bayY = Math.max(H.sheer(Math.max(0.001, 0.5 + (x - pitch / 2) / L)),
-                          H.sheer(Math.min(0.999, 0.5 + (x + pitch / 2) / L)));
+    const bayY = Math.max(H.deck(Math.max(0.001, 0.5 + (x - pitch / 2) / L)),
+                          H.deck(Math.min(0.999, 0.5 + (x + pitch / 2) / L)));
     /* the hatch cover under the bay, sized to the bay it serves */
     const hc = new THREE.Mesh(
       new THREE.BoxGeometry(TEU_L * 1.00, TEU_H * 0.22, stowHalf * 2 + 1.0), hatch);
@@ -10450,7 +10450,7 @@ function buildContainers(S, group, coarse) {
      and sunk in the deck at once. Width and height both come from its own station now. */
   const steelPale = new THREE.MeshStandardMaterial({ color: 0xc8c4bb, roughness: 0.62 });
   const fcX = -L * 0.46;
-  const fcY = H.sheer(Math.max(0.001, 0.5 + fcX / L));
+  const fcY = H.deck(Math.max(0.001, 0.5 + fcX / L));
   const fcHalf = Math.min(deckHalfAt(fcX - L * 0.022), deckHalfAt(fcX + L * 0.022)) - B * 0.012;
   const fc = new THREE.Mesh(new THREE.BoxGeometry(L * 0.044, TEU_H * 1.1, fcHalf * 2), steelPale);
   fc.position.set(fcX, fcY + TEU_H * 0.55, 0);
@@ -10661,7 +10661,11 @@ function buildLivery(S, group) {
   const mkMat = tex => new THREE.MeshStandardMaterial({
     map: tex, transparent: true, roughness: 0.55, metalness: 0.05,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
-  const deckY = H.sheer(0.5);
+  /* the shell's top edge, NOT a deck (r222): lettering is painted on the plating and is set
+     down from the plating's edge; the stern name sits at a fraction of S.freeboard, which is
+     the sheer's height over the water. On a bulwarked hull the deck is inside and lower, and
+     the paint does not follow it. */
+  const edgeY = H.sheer(0.5);
   /* the operator's name amidships, both sides, on the parallel midbody */
   if (lv.side) {
     const wM = L * (lv.sideRun || 0.30);
@@ -10669,7 +10673,7 @@ function buildLivery(S, group) {
     const uC = (lv.sideU !== undefined) ? lv.sideU : 0.48;
     const xC = L * (uC - 0.5);
     const half = Math.abs(surfacePoint(S, H, uC, 1.0)[2]);
-    const yC = deckY - hM * 0.5 - (lv.sideDrop !== undefined ? lv.sideDrop : 1.6);
+    const yC = edgeY - hM * 0.5 - (lv.sideDrop !== undefined ? lv.sideDrop : 1.6);
     for (const side of [1, -1]) {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM),
                                mkMat(makeTex([lv.side])));
@@ -10682,7 +10686,7 @@ function buildLivery(S, group) {
   if (lv.stern && lv.stern.length) {
     const wM = S.beam * 0.42, hM = wM * 0.25;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(wM, hM), mkMat(makeTex(lv.stern)));
-    m.position.set(L * 0.5 + 0.15, deckY - S.freeboard * 0.42, 0);
+    m.position.set(L * 0.5 + 0.15, edgeY - S.freeboard * 0.42, 0);
     m.rotation.y = Math.PI / 2;
     group.add(tag(m, 'livery', 'Stern name',
       'Name and port of registry, white on the transom — the address every ship carries.'));

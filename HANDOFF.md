@@ -17039,3 +17039,128 @@ and buildLivery switched to `H.deck`, byte-identical on every hull today and so 
 the same Yamato injection as the witness (the citadel must move 2.00 m this time, and the
 container ship's stacks want the same test on their own hull) — or (0a) if a route to Lahn
 1992's plates appears; r218's hunt paragraph lists every route that walled.**
+
+## Round 222 — 2026-09-04 — the last deck-readers switch: the citadel, the liner house, the flight deck and the container stow stand on the deck, the livery stays on the shell by its own arithmetic, and three audit rules follow
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r221 said r222 opens
+with residual (0d′), the six `H.sheer` reads in five builders that mean a deck — or (0a) if
+a route to Lahn 1992's plates appeared. No new route. (0d′) is DONE for five of the six
+reads; the sixth, buildLivery's, is NOT a deck read and stays on the sheer, with the
+arithmetic that says so written beside it. Doing it found three more audit rules judging a
+deck-standing part against the sheer, the same fault r221 found in four.**
+
+**The change (before-copies r222/hull.before.js, audit-hulls.before.js; the edit scripts
+r222/apply-edits.py and apply-audit-edits.py, each asserting every match is unique; the
+diffs r222/hull.diff, 42 lines, and audit.diff, 20 lines). web/js/hull.js, 9 edits:
+linerHouse 6550 (the ground tier's base), buildFlightDeck 8379 (the slab, a hangar's height
+over the deck; the hangar CASING keeps its own foot, because line 8401 says what it is —
+"the shell carried up" — the same reason buildRaisedEnds' wall base stayed on the sheer in
+r221), buildCitadel 9011 (the tenth reader r221's injection found unmoved), buildContainers
+10303 (deckY, which is `hs`, the accommodation block's foot at 10475), 10372–3 (each bay's
+own station) and 10453 (the forecastle). buildLivery 10664 is renamed, not switched: the
+variable was `deckY` and both its uses measure from the shell's top edge — the side name
+sits `sideDrop` under it, and the stern name sits at `deckY − S.freeboard × 0.42`, where
+S.freeboard is the sheer's height over the water by the loft's own definition (line 164, the
+sheer's base term). On a bulwarked hull the deck is inside and lower and the paint does not
+follow it, so the read is the skin's; it is `edgeY` now, with a comment saying why. `grep -c
+"H\.sheer"` reads 18 (r221: 25); every remaining read was walked in r221's list and is the
+skin's own. The six `S.freeboard` reads r221 asked about were walked too: 164 defines the
+sheer, 231 is deck(u)'s level branch, 10665/10672/10689 are the livery's (skin), 13048 is
+buildPaddles' waterline, 13256 is the hull-rows shader scale — none is a deck.
+Research/audit-hulls.js, 3 edits: the deckhouse rule (5064), the wheel rule (5078–80) and
+the funnel rule (5810) read `.deck(u)`; their builders have stood those parts on deckAtU =
+H.deck(u) (hull.js 4306) since r215, so on a bulwarked hull with a deckhouse, a wheel or a
+funnel the audit would have convicted a part standing exactly where the record puts it. The
+net-boom rule (3150) and the stem-post rule (5873) read the sheer and mean it: a boom stows
+against the hull's edge and the post's k is a fraction of the shell's height.**
+
+**The witness, taken before the ratchet (the r220 rule), one hull per switched builder:
+`deck.belowSheerM 2.0, level false` injected into Yamato, Ever Given, the carrier and Titanic
+at once (r222/inject.py; before-copy vessels.before.json, restored from the copy, and git
+status afterwards reads only hull.js and the two audit copies modified), measure_ship on
+each, before on hull.before.js and after on this tree (r222/measure-before-<id>.out,
+measure-after-<id>.out; every part's box compared by script). Yamato: Citadel deck y0 9.20 →
+7.20, and with it the shelter deck, the bridge tower, every bandstand, gun tub, high-angle and
+25 mm mount, searchlight platform and the main rangefinder, each exactly −2.00; 26 of 46
+parts unmoved. The three aggregate boxes that moved by less — Main gun −0.30/−1.17, Turret
+top −0.45, Barbette top −2.00 with its foot still — are boxes over TWO populations, the main
+turrets (switched r221, standing on the deck) and the 155 mm secondaries (standing on the
+citadel, switched now): summed over r221's measure and this one every one of them reads
+exactly −2.00 (Main gun 15.44 → 13.44; Turret top 20.99 → 18.99), which is the number the
+record put in. Ever Given: Containers 17.20 → 15.20, Accommodation and bridge 17.20 → 15.20,
+Forecastle 18.94 → 16.94, and the foremast, lifeboats, radar mast, engine casing and funnel
+with them, all −2.00; 10 of 18 parts unmoved. Carrier: Flight deck 14.68 → 12.68, the island,
+the deck park, the catapult track, the lifts, the wires and the markings all −2.00; the hangar
+casing's top follows the slab (14.78 → 12.78) and its foot does not (11.01 both), which is
+the shell-carried-up derivation above doing what its comment says. Titanic: Superstructure
+10.10 → 8.10, and the house deck, the bridge, every boat and davit, the ventilators, the steam
+pipes and the funnels −2.00; 12 of 21 unmoved. Two witnesses (r222/witness-yamato-after.png,
+#v=ship&s=yamato&b=120&z=0.5&l=8&y=8&x=45; witness-eg-after.png, s=ever-given, x=−60): the
+citadel and its secondaries down on the planked deck inside the 2 m bulwark strip, where
+r221/witness-after.png at the same camera has them standing a deck-height over it; the
+stacks and the white house down on the container ship's deck behind the same strip, the
+EVERGREEN lettering still hung from the shell's edge.**
+
+**Audit: 33 hulls, 0 problems on this tree, real record (r222/audit.out, audit.err), the
+three switched rules in place and synced to web/ (the build strips them into docs/).**
+
+**Rule 0 on witness-eg-after.png, read whole: a container ship seen from her port bow,
+dark green hull with the boot-topping showing at the bow wave, a foredeck rising to the
+forecastle, tiers of coloured boxes in bay after bay, the white accommodation block with its
+rows of cabin lights and the bridge wing run out to the ship's side, textured sea to a hazy
+coast — a rendered world. Three facts a viewer can read off it without a legend: the
+operator's name runs the length of the parallel midbody in white capitals; the house stands
+about a third of the way aft with cargo both sides of it; the stow is nine or ten boxes high
+over the hatches.**
+
+**Named residuals, in order (r221's list, renumbered):** (0a) OPEN — the cog's frame pitch is
+a class default; r218's hunt paragraph lists every route that walled. (0b) the futtock's bevel
+and rough head. (0c) the beams' stations and count. (0d′) CLOSED this round: no `H.sheer` read
+left in hull.js or the audit means a deck. (0e) belowSheerM contested by 0.4 m. (0f) the
+beam-head wedge at 60+ px/m. (1) r214: the Gangspill's station. (2) r214: the wings'
+inner-edge and forward-end rails, no source. (3) r213: decked timber ships' rudder heads stop
+at 0.35 of the sheer; no helm port. (4) Kozushima 1993 weighing. (5) r187 emaki plate. (6)
+r182 grapnel shank. (7) r177 Lucian's second machine. (8) r176 sekibune class-size, paired
+with r211's top question. (9) Preussen mast livery. (10) Endurance forecastle. (11) Azzam
+crest span. (12) r164 risen black unpierced. (13) r165 fantail gallery wings. (14) r166 screen
+glass. (15) r171 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the 74's
+lower capstan barrel. (18) the cathead's supporting knee is a block. (19) the readiness
+transient: keep the r208 rule.**
+
+**The close ratchet, started 02:15:55 (r222/run-close.sh → close-ratchet.out) on a tree
+whose every change is described above. Predictions: r222/PREDICTIONS-close.md — ZERO movers
+beyond the documented sub-gate flaps, because deck(u) ≡ sheer(u) on every hull without the
+field and the one carrier, the cog, has no house, flight deck, citadel, containers or livery.
+CLOSE STATE: if the paragraphs below this one are missing, the round was killed at the close
+gate (03:25:28) — the next firing must (1) re-run the ratchet whole on this committed tree,
+read and accept every mover with its reason, (2) `python3 build/build_site.py`, (3) commit,
+push, verify the live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 02:57:15 (r222/close-ratchet.out, started 02:15:52, 41.4 min,
+~38.8 s a frame): 64 frames, ZERO movers, exit 0, no BLANK — "all frames within tolerance",
+as predicted. Every frame was read while the run was going (r222/sweep.out, one line per
+frame as it landed, by the sweep's own >0 count with the mean and the bbox) and compared with
+r221's sweep by script (r222/compare-sweeps.py) at 17, 31, 46, 59 and 64 frames landed:
+IDENTICAL to r221's line for every frame, digit for digit and box for box, DIFFERENT 0.
+Fifteen lines stand over the sweep's own 0.05% line by that >0 count, r221's same fifteen,
+the r218 sub-gate residue. At the harness's own >8 count the hulls whose builders were
+switched read what they read in r221: ship-carrier 0.000%, ship-container 0.003%,
+ship-ever-given 0.010%, ship-titanic 0.015%, ship-yamato 0.018%, and globe-default 0.048%,
+all ok. Nothing accepted; FRAME-LOG.md untouched. Build PUBLISHED after the run (the r207
+order), data-version 1788515855; web/index.html carries the same stamp and is in this
+commit's path list (the r209 rule). Published copies read back by code strings (the build
+strips comments): docs/js/hull.js carries 28 H.deck lines and 18 H.sheer lines, the same 18
+as web/, and edgeY on 4 lines; docs/audit-hulls.js carries 11 `.deck(` reads (r221: 7, plus
+the deckhouse, wheel and funnel rules). Push receipt and live stamp appended below if the
+round survived to write them (the driver's kill is 03:25:28); otherwise r223 verifies the
+live stamp first.**
+
+**r223 opens with residual (0b), the futtock's bevel and rough head — the cog's frames (r217)
+are rectangular timbers of one siding and moulding from the keel to under the rail cap, and
+the DSM's overhead photograph (r213/wreck-in-bremerhaven.jpg) shows the futtocks' upper ends
+cut to the planking's angle; measure what that plate can support (its px/m first, the r158
+rule) before drawing anything — or (0a) if a route to Lahn 1992's plates appears; r218's
+hunt paragraph lists every route that walled. One method note from this round's measure: an
+aggregate box over a part name (Main gun, Turret) can move by a fraction of the injected
+number when the name covers two populations standing on two datums; sum the moves across the
+rounds that switched each population before reading a fraction as a fault.**
