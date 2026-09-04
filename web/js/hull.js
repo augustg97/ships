@@ -228,7 +228,9 @@ function hullSurface(S) {
      beam-decked hull lays its beams in one line, so the bulwark deepens where the sheer
      rises); the sheer itself for every hull without the field, byte-identical. */
   const deckDrop = (S.deck && S.deck.belowSheerM) || 0;
+  const deckLine = deckLineFromBeams(S);           // the deck on its beams (round 232)
   const deck = u => {
+    if (deckLine) return deckLine(u);
     if (!deckDrop) return sheer(u);
     if (S.deck.level) return S.freeboard - deckDrop;
     return sheer(u) - deckDrop;
@@ -261,6 +263,14 @@ function hullStations(S, NU) {
       const b = st.u[0];
       if (b > 0 && b < 1) us.push(b - E, b + E);
     }
+    us.sort((a, b) => a - b);
+  }
+  /* the foredeck's after edge is a deck break too (round 232): a pair of stations either
+     side of it, so the step down to the main deck lands vertical on any tessellation */
+  const dl = deckLineFromBeams(S);
+  if (dl && dl.breakU !== undefined && dl.breakU > 0 && dl.breakU < 1) {
+    const E = 1e-5;
+    us.push(dl.breakU - E, dl.breakU + E);
     us.sort((a, b) => a - b);
   }
   return us;
@@ -338,6 +348,47 @@ function beamRows(S) {
   return us.map(u => ({ u, st: null }));
 }
 function beamStations(S) { return beamRows(S).map(r => r.u); }
+/* ── THE DECK IS LAID ON ITS BEAMS AT THE PLATE'S HEIGHTS (round 232) ─────────────────
+   A beam-decked hull's deck is wherever its beams are, and Lahn's Blatt 1 (590.8 px/m) gives
+   each through-beam head's centre over the keel's underside (deck.beamHeightsFromKeelM, bow
+   first, one a beam station) and the sections give the deck's surface over the beam's centre
+   (deck.deckAboveBeamCentreM — the beam's half-depth, the carlings on it and the planking).
+   So the deck line is a monotone cubic through the beams' heights, held level beyond the end
+   beams, on the datum the plate uses: the keel's underside at midships, which the loft draws
+   at −draught (the planking's bottom; the keel timber under it is the model's own). A deck
+   fixed a constant under the sheer (belowSheerM) would carry the rail's sheer, and the plate
+   says the deck's own is gentler — 0.2–0.3 m over the ship where the rail rises 0.6–1.2.
+   deck.foredeck { beams: n } says the n bow-most beams carry a PLATFORM a level higher: it
+   is level at those beams' heights (a cubic through them if more than one) and ends at the
+   after face of its after beam, where the deck steps down to the main line — a break the
+   deck mesh gets a snap pair at (hullStations), so it lands vertical. The platform's after
+   edge is built to the beam because that is what the record can support; its provenance
+   says the edge is unread. Without the fields: belowSheerM as before, byte-identical. */
+function deckLineFromBeams(S) {
+  const D = S.deck; if (!(D && D.beamHeightsFromKeelM && D.beamStations)) return null;
+  const rows = beamRows(S), hs = D.beamHeightsFromKeelM;
+  if (rows.length !== hs.length) return null;
+  const datum = -S.draught, over = D.deckAboveBeamCentreM != null ? D.deckAboveBeamCentreM : 0.5;
+  const pts = rows.map(r => ({ u: r.u, r: datum + hs[D.beamStations.indexOf(r.st)] + over }));
+  const nFd = Math.min(pts.length - 2, (D.foredeck && D.foredeck.beams) || 0);
+  const main = pts.slice(nFd), fore = pts.slice(0, nFd);
+  const line = main.length >= 2 ? pchip(main) : (() => main[0].r);
+  if (!nFd) return line;
+  const sq = D.beamSidedM || 0.30;
+  const aft = fore[fore.length - 1];
+  const uBreak = aft.u + sq / 2 / S.lwl;
+  const foreLine = fore.length >= 2 ? pchip(fore) : (() => aft.r);
+  const fn = u => u <= uBreak ? foreLine(u) : line(u);
+  fn.breakU = uBreak; fn.foreY = aft.r;
+  return fn;
+}
+/* the deck's height over the top of the beam under it: the record's distance from the beam's
+   centre less the beam's half-siding, or the old two centimetres of planking */
+function deckOverBeamTop(S) {
+  const D = S.deck || {};
+  if (D.beamHeightsFromKeelM && D.deckAboveBeamCentreM != null) return D.deckAboveBeamCentreM - (D.beamSidedM || 0.30) / 2;
+  return 0.02;
+}
 function frameStations(S, NF) {
   const rs = S.frames && S.frames.roomAndSpaceM;
   if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
@@ -964,7 +1015,12 @@ function castleGeom(S, H) {
   const uHelm = (S.rudder && S.rudder.tillerAtU) ||
                 (S.windlass && S.windlass.atU ? S.windlass.atU + 0.03 : null) ||
                 ((C.fromU || 0.7) + (C.toU || 0.95)) / 2;
-  const yDeck = H.deck(Math.min(1, uHelm)) + dH;
+  /* the castle deck's height: the record's own over the keel's underside where it has one
+     (castle.deckAboveKeelM — Tanner 2021's 5.34 m on the Bremen cog, the same datum the
+     deck's beams stand on, round 232), else the class headroom over the afterdeck at the
+     helmsman's station. The headroom is DERIVED in the first case, and reported. */
+  const yAfter = H.deck(Math.min(1, uHelm));
+  const yDeck = C.deckAboveKeelM != null ? -S.draught + C.deckAboveKeelM : yAfter + dH;
   /* the post's after face where it meets the top strake — the stern beams lie there. The
      overhang is measured from THIS point, not from the post's line continued up to the
      castle deck: that line is the post's own rake, and a castle deck standing high over the
@@ -983,7 +1039,7 @@ function castleGeom(S, H) {
     for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if ((m - 0.5) * L + H.rake(m) < x) lo = m; else hi = m; }
     return (lo + hi) / 2;
   };
-  return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17 };
+  return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH: yDeck - yAfter, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17 };
 }
 
 function buildTimberRudder(S, group, timber, tag) {
@@ -1020,7 +1076,12 @@ function buildTimberRudder(S, group, timber, tag) {
      a residual named in r213, not drawn here) */
   const castle = S.castle && S.castle.fromU != null;
   const CGr = castle ? castleGeom(S, H) : null;
-  const yTiller = CGr ? CGr.yDeck - 0.55
+  /* the tiller runs at the helmsman's hand — 1.25 m over the afterdeck where he stands
+     (0.7 of the record's own 1.76 m stature, a class default) and never within 0.55 m of
+     the castle deck over him (round 232; before it the tiller hung a fixed 0.55 m under the
+     castle deck, which stood it 2 m over the afterdeck once the castle took its plate height) */
+  const uHand = R.tillerAtU || ((S.windlass && S.windlass.atU) ? S.windlass.atU + 0.03 : 0.85);
+  const yTiller = CGr ? Math.min(CGr.yDeck - 0.55, H.deck(Math.min(1, uHand)) + 1.25)
                 : castle ? H.sheer(S.castle.toU) + (S.castle.deckHM || 1.95) - 0.55
                          : H.sheer(1.0) * 0.35;
   let fHead = 1.0;
@@ -4663,7 +4724,10 @@ function buildFittings(S, group, mats) {
       /* BoxGeometry groups run +x −x +y −y +z −z: the long axis is z, so 4 and 5 are the heads */
       const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2),
                                 [wood, wood, wood, wood, endGrain, endGrain]);
-      bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
+      /* the beam's top stands the record's distance under the deck's surface (the carlings
+         and the planking between, deckOverBeamTop; round 232) — 2 cm of planking without it */
+      const gapT = deckOverBeamTop(S);
+      bm.position.set(e[0], deckAtU(u) - gapT - sq / 2, 0);
       bm.name = 'deck-beam';
       /* ── THE KNEES (round 216). Lahn's Blatt 3 draws a standing knee at every beam end:
          the vertical arm rises against the inside of the planking from the beam to the top
@@ -4672,7 +4736,7 @@ function buildFittings(S, group, mats) {
          sided like the beam, the vertical arm following the skin's own slope between deck
          height and the sheer (the chord of two surfacePoints), a hand inboard of the skin. */
       const kS = S.deck.kneeSidedM || 0.20, kM = 0.22, gap = 0.05;
-      const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - 0.02;
+      const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - gapT;     // the knee stands ON the beam
       for (const sgn of [-1, 1]) {
         const zD = Math.abs(e[2]) - gap - kM / 2;
         const zT = railHalfAtU(u) - gap - kM / 2;
@@ -4684,7 +4748,7 @@ function buildFittings(S, group, mats) {
         vert.rotation.x = -sgn * Math.atan2(zT - zD, yTop - yFoot);
         const armL = Math.min(0.9, Math.abs(e[2]) * 0.35);
         const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
-        arm.position.set(0, deckAtU(u) + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
+        arm.position.set(0, yFoot + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
         /* the standing arm carries the name the audit reads (D-KNEES measures a mesh: foot,
            head, and how far out it reaches); the lower arm is named for the measurer */
         vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
@@ -4706,6 +4770,40 @@ function buildFittings(S, group, mats) {
         + 'every cog seal draws. Count from the record; its station' + where
         + '; ' + Math.round(sq * 100) + ' cm square is a class default below what the plates resolve.'));
     });
+    /* ── THE CARLINGS (round 232). Lahn's Blatt 3 draws four small squares standing on each
+       through-beam's band — the fore-and-aft timbers the deck is planked across (Westphal:
+       'über Längsbalken querbeplankt'). They run from beam to beam under the planking, the
+       deck's surface on their tops, which is what puts the deck deckAboveBeamCentreM over the
+       beam. Drawn only where the record gives that distance (there is no room for them under
+       2 cm of planking): four runs, their athwartship positions a class default (the sheet's
+       count is read, their spacing is not), 0.20 m square, between consecutive beams on one
+       deck level — not across the foredeck's break. */
+    if (S.deck.beamHeightsFromKeelM && S.deck.deckAboveBeamCentreM != null) {
+      const cs = 0.20, yOff = 0.02 + cs / 2;
+      const dl = deckLineFromBeams(S);
+      for (let i = 0; i + 1 < us.length; i++) {
+        const uA = us[i], uB = us[i + 1];
+        if (dl && dl.breakU !== undefined && uA < dl.breakU && uB > dl.breakU) continue;
+        const xA = (uA - 0.5) * L + H.rake(uA) + sq / 2, xB = (uB - 0.5) * L + H.rake(uB) - sq / 2;
+        if (xB - xA < 0.3) continue;
+        const half = Math.min(Math.abs(deckEdge(S, H, uA)[2]), Math.abs(deckEdge(S, H, uB)[2])) - 0.6;
+        const NS = 12, pts = [];
+        for (let k = 0; k <= NS; k++) { const u = uA + (uB - uA) * k / NS; pts.push([(u - 0.5) * L + H.rake(u), deckAtU(u) - yOff]); }
+        for (const zc of [-half, -half / 3, half / 3, half]) {
+          const g = new THREE.BufferGeometry(); const pos = [], idx = [];
+          pts.forEach((p, k) => {
+            const x = Math.max(xA, Math.min(xB, p[0]));
+            pos.push(x, p[1] + cs / 2, zc - cs / 2, x, p[1] + cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc - cs / 2);
+            if (k) { const a = (k - 1) * 4, b = k * 4; for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, b + f, a + c, a + c, b + f, b + c); } }
+          });
+          g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+          const cm = new THREE.Mesh(g, wood); cm.name = 'deck-carling';
+          group.add(tag(cm, 'crossbeam', 'Carling between through-beams ' + (i + 1) + ' and ' + (i + 2),
+            'A fore-and-aft timber on the beams, under the deck planking — Lahn, Blatt 3, draws four '
+            + 'on each beam; the deck is planked across them. Their spacing and the 20 cm siding are class defaults.'));
+        }
+      }
+    }
   }
 
   /* ── THE WATERWAY: the margin plank at the deck edge ──────────────────────────────

@@ -18725,3 +18725,149 @@ uncommitted, the r211 convention.**
 back by code strings: docs/data/vessels.json carries beamHeightsFromKeelM (3) and "the carlings' tops" (2),
 docs/js/hull.js and docs/audit-hulls.js are byte-identical to r230's (git diff 28f9c50..HEAD on hull.js and audit-hulls.js in web/, docs/ and Research/: empty).
 Two commits close the round (ba18be2 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 232 — 2026-09-04 — the deck is laid on its beams: the loft's deck line runs through the five heads' read heights over the keel, a platform at DB 1's height at the bow, the beams 0.35 m under the deck with carlings on them, the castle held at Tanner's 5.34 m while the deck under it dropped, the tiller at the helmsman's hand, and an audit rule that reads each beam's built height against the plate
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r231 ordered r232's opening:
+the ratchet first, then the deck built per belowSheerContest. The order was changed: the deck was
+built, measured and witnessed first, the round was committed and pushed, and the full ratchet ran
+after the push, its result landing in the receipt commit. The reason is the clock. The driver's
+round is 80 minutes; a 64-frame ratchet is 40 of them at the load this round had (uptime 5.4 at
+15:08), and r231 had already run all 64 frames clean at a HEAD that renders byte-identically to
+this round's starting HEAD (r231 changed record text and the handoff, nothing the renderer reads).
+So the ratchet that matters is the one AFTER the change, and it is the one that ran.**
+
+**THE BUILD (web/js/hull.js; before-copy r232/hull.before.js, the edit script r232/apply-hull-edits.py
+with every match asserted unique, the after-copy hull.after.js). One new function, deckLineFromBeams(S),
+next to beamRows: when the record carries deck.beamHeightsFromKeelM and deck.beamStations, the deck
+line is a monotone cubic (the r228 pchip) through the beams' recorded centre heights plus
+deck.deckAboveBeamCentreM, on the datum the plate uses — the keel's underside at midships, which the
+loft draws at −draught (the planking's bottom; the model's keel timber hangs 0.14 m under it and is
+not the datum) — held level beyond the end beams. deck.foredeck { beams: 1 } says the bow-most
+beam carries a platform a level higher: level at that beam's height, from the stem to the beam's
+after face (u 0.154 + half the siding), where the deck steps down 1.2 m to the main line. The
+loft's deck(u) reads deckLineFromBeams first, then belowSheerM as before; hullStations puts a snap
+pair at the break so the deck mesh lands the step vertical (the sternSteps idiom). The slot between
+the pair is open — no riser panel is drawn under the platform's after edge, because nothing on the
+record says what closes it, and the beam is what shows there. The beams' tops stand
+deckOverBeamTop(S) under the deck — deckAboveBeamCentreM less the half-siding, 0.35 m on the cog,
+2 cm of planking on any hull without the field — the knees' feet on the beams, and four CARLINGS
+run beam to beam on one deck level (not across the break), 0.20 m square at class-default
+athwartship positions (Blatt 3's count of four is read, their spacing is not), tagged crossbeam and
+named deck-carling. castleGeom reads castle.deckAboveKeelM (5.34) and sets the castle deck at
+−draught + 5.34, the headroom over the afterdeck at the helm's station DERIVED (2.53 m) and
+returned as dH; without the field the class headroom as before. The tiller runs at the helmsman's
+hand — 1.25 m over the afterdeck at the hand's station (0.7 of the record's own 1.76 m stature, a
+class default), never within 0.55 m of the castle deck — where it hung a fixed 0.55 m under the
+castle deck before, which would have stood it 2 m over the afterdeck once the castle took its plate
+height. Every builder that stands on the deck (windlass, mast heel, grating, waterway, knees,
+cabins, posts, Gangspill on the castle) read deckAtU already and moved with it.**
+
+**THE RECORD (web/data/vessels.json; before-copy r232/vessels.before.json, scripts apply-vessel-edits.py
+and -2.py). deck.belowSheerM 1.2 → 1.75 (the plate's midship number, 4.27 − 2.51, the one D-DEPTH
+reads); deck.level true → false; deck.foredeck { beams: 1 } new; castle.deckHM 1.95 (a class
+default) REMOVED and castle.deckAboveKeelM 5.34 added (Tanner 2021 Appendix H, 5260 mm at Frame 26
+and 5343 at Frame 35); DB 1's beam station u 0.146 → 0.154, re-derived through the built hull at
+the platform's height, because the head exits the raked bow 0.16 m further forward there than at
+the old deck height (the first build put it 15.96 m from the heel against the sheet's 15.82). The
+DEPTH and HEIGHT sentences of deck.provenance say the deck is built; belowSheerContest is
+rewritten as RESOLVED and BUILT with the arithmetic and what stays contested; castleProvenance
+gains a HEIGHT sentence; the DB 1 derivation sentence carries both u's and why.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; before-copy r232/audit-hulls.before.js,
+script apply-audit-edits.py). Six changes. (1) deckEdgeNear reads the lowest vertex of the deck's
+NEAREST station, not the lowest within half a metre — with a break in the deck, the old read gave
+the main deck under the beam that carries the platform. (2) D-BEAMS wants each beam's top the
+record's distance under the deck's edge (gapBeam: deckAboveBeamCentreM less the half-siding; 2 cm
+without the field), with the old slack. (3) D-KNEES the same for the knee's foot. (4) D-BEAM-HEIGHT,
+NEW: with deck.beamHeightsFromKeelM on the record, each deck-beam's centre (bow first) must stand
+within 0.15 m of the plate's height over the skin's lowest vertex at midships. (5) D-CASTLE: with
+castle.deckAboveKeelM the castle deck is read against the same datum (±0.15) instead of the
+headroom over the main deck's edge. (6) The tiller's stature reads the weather deck's edge at the
+hand from the deck mesh, not the castle deck less deckHM. And one datum fix found by the audit
+itself: the rig rules took the deck's highest vertex as the deck at the mast, which is now the bow
+platform, and 'a halyard that reaches no masthead' fired on the cog with the halyard 1 cm under a
+masthead estimate 0.85 m too high. The first fix moved the shared datum to the mast's foot and
+broke the waterway rule (the platform's waterway against the mast-foot deck, r232/audit2.out), so
+the rig rules got their own datum, mastDeckY — the mast's foot on a hull with deck.foredeck, the
+deck's highest vertex otherwise — and every other rule keeps deckY (byte-identical elsewhere).
+PROOF: the r231 builder (hull.before.js) under this record and this audit, r232/audit-old-builder.out:
+22 problems, all cog — D-BEAM-HEIGHT on all five beams (centres 2.77 / 2.54 / 2.34 / 2.36 / 2.56 m
+over the skin's bottom against the plate's 3.42 / 2.23 / 2.01 / 2.04 / 2.31), D-CASTLE (the castle
+deck off 5.34), D-BEAMS on all five and D-KNEES on all ten (the beam 2 cm under the deck where the
+record says 0.35), the waterway rule once. The r232 build: r232/audit3.out, 33 hulls, 0 problems.**
+
+**MEASURED (r232/measure-after.out, measure_ship on the built scene; the r230 numbers in
+r230/measure-after.out). The five beams' centres over the planking's bottom: 3.42 / 2.23 / 2.01 /
+2.04 / 2.31 m, the plate's numbers to the centimetre; from the sternpost's heel 15.79 / 13.87 /
+8.68 / 5.17 / 1.18 m against the sheet's 15.82 / 13.91 / 8.68 / 5.18 / 1.16. The weather deck
+runs from y 0.26 (midships, 1.75 m under the rail) to 1.79 (the platform, with camber); the deck's
+own sheer 0.22 m at DB 2 and 0.30 at DB 5 over DB 3–4 falls out of the heights. The castle deck at
+3.09 over the water (5.34 over the keel, was 2.76); castle posts 0.33–2.65; the tiller 1.75–1.87
+(was 2.15–2.27); the windlass barrel 0.86–1.46; the mast from 0.26 to 10.38 (was 0.81 to 10.93 —
+the mast's height is a beam-multiple from the deck, so it followed the deck down 0.55 m; the
+record has no masthead height, and this is named below). Model height 12.79 m (was 13.33).**
+
+**WITNESSED (rule 1; r232/witness.py, a plain Playwright page waiting on __FRAME_READY, and
+r232/stage_capture.py). witness-broadside.png (b 270, z 1.2, l 14): the deck's edge now lies low
+in the hull with the bulwark 1.75 m over it, the knees standing the whole height of the bulwark
+inside, the five heads along the side with the midship three at the waterline and DB 1 high under
+the bow; the castle stands high on its posts. witness-stern-quarter.png (b 225, z 1.0, l 10): the
+castle's walls and wings, the tall posts to the afterdeck, the cabins between, the rudder on the
+post. witness-bow-quarter.png (b 315, z 1.0, l 10): the platform at the bow a level over the deck
+with the step down abaft it, the grating on the main deck, the knees in a row inside the bulwark.
+witness-stage2.png (stage 2, b 300, z 0.9, l 35): the futtocks inside the planking, unchanged by
+this round (the beams and carlings are laid at a later stage). witness-sea.png (#e=3&f=hanse) and
+witness-sea-low.png (fb 250, fd 6, fz 55): the cog under way in the Sea view at the record's
+draught, the deck's edge a hand over the water at midships, the beam heads at the waterline, the
+bulwark and castle standing over it; the waves do not board her in the frozen frame (force 1). Rule 0
+answered on witness-sea-low.png read whole: it reads as a rendered world — the sea's texture and
+the coast's haze, the hull's planking in light with the castle's shadow, the furled sail. Three
+facts a viewer can read off it without a legend: the ship floats deep, her deck close to the
+water and her side standing high over it; the castle at the stern stands on posts well over the
+deck; the beam heads come through the side in a row at the waterline.**
+
+**THE FREEBOARD TO THE DECK, and the plate's waterline. At the record's 2.25 m draught the deck at
+DB 3 stands 0.26 m over the water and the midship heads' centres 0.24 m UNDER it. That is what the
+plate's heights and the record's draught give together. Blatt 1 around DB 3 (r232/blatt1-db3-kwl.png,
+the plate cropped 3 m wide from 0.8 to 3.5 m over the keel) draws strake seams with their nails
+and the head on a seam, and NO waterline — the long dark rows at 1.31 / 1.80 / 2.21 / 2.61 m over
+the keel are seams, not a KWL — so the plate does not settle where the ship floats and the record's
+draught is unchecked against it. A cog whose lowest beam heads sit under the load waterline is
+possible (the heads were caulked) and is what the loaded replicas photographed at Kiel show near
+the water; but it is a contested reading, and it is NOT resolved this round: hull.draught 2.25
+stands, and the question — where Lahn draws the KWL, and whether 2.25 is a laden or a design
+draught — is named as a residual for a research round.**
+
+**Named residuals, in order:** (0e) BUILT. NEW (0e′): the foredeck's after edge, built to DB 1's
+after face; Lahn's Blatt 4/5 (deck plan, longitudinal section) would read it, neither on disk.
+NEW (0e″): the draught against the plate — locate the KWL on Blatt 1 (a dashed line, if drawn, is
+not what the dark-row scan finds) and say whether the midship heads stand over or under it; if
+under, the record's draught is the laden one and the Sea view should say so or float her lighter.
+NEW (0e‴): the mast's height followed the deck down 0.55 m because it is a beam-multiple from the
+deck; the record carries no masthead height for the Bremen cog (Tanner's reconstruction gives one)
+— read it and carry it as truckM. NEW (0e⁗): the carlings' athwartship spacing and the open slot
+under the platform's after edge, both class defaults said so on the card. (0g⁵) remainder unchanged
+(Blatt 35). (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as
+r230 lists them.**
+
+**Three method notes. (1) A deck that moves changes every derivation made THROUGH the built hull:
+DB 1's u was derived in r230 at the old deck height, and at the platform's height the raked bow
+put the head 0.16 m further forward — the measure caught it, the audit's ±0.30 did not. When a
+station is derived through the hull, re-derive it after any change to what it was derived through.
+(2) A rule's datum is a claim about the hull: 'the deck's highest vertex' was the deck at the mast
+on every hull until one hull had a platform higher than its deck. The datum now says which hull it
+holds for. (3) When the record's draught and a plate's heights together put a structural member
+under the water, do not move either to make it come right; say what each source gives and name the
+read that would settle it.**
+
+**r233 opens by reading the receipt paragraph below for the ratchet's result (any mover named
+there is r233's first item), then takes (0e″) — the KWL on Blatt 1 — before anything else on the
+cog, because the freeboard to the deck is what a viewer sees first in the Sea view.**
+
+**Live stamp: docs/index.html carries data-version 1788561185 at the build; the push and the live
+poll are in build/staging/r232/push.log, and the verified live value with the ratchet's result is
+recorded in the push-log commit that follows this one (the r198 rule). Tree at close: only
+build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r232 staging (the
+before- and after-copies, the edit scripts, the measure, the witnesses, the plate crop, the audit
+outs, the close scripts) stays on disk uncommitted, the r211 convention.**

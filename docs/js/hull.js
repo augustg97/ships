@@ -116,7 +116,9 @@ return S.sternRake * rakeScale * k * k * S.loa;
 return 0;
 };
 const deckDrop = (S.deck && S.deck.belowSheerM) || 0;
+const deckLine = deckLineFromBeams(S);
 const deck = u => {
+if (deckLine) return deckLine(u);
 if (!deckDrop) return sheer(u);
 if (S.deck.level) return S.freeboard - deckDrop;
 return sheer(u) - deckDrop;
@@ -138,6 +140,12 @@ for (const st of S.sternSteps.steps) {
 const b = st.u[0];
 if (b > 0 && b < 1) us.push(b - E, b + E);
 }
+us.sort((a, b) => a - b);
+}
+const dl = deckLineFromBeams(S);
+if (dl && dl.breakU !== undefined && dl.breakU > 0 && dl.breakU < 1) {
+const E = 1e-5;
+us.push(dl.breakU - E, dl.breakU + E);
 us.sort((a, b) => a - b);
 }
 return us;
@@ -174,6 +182,29 @@ const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 
 return us.map(u => ({ u, st: null }));
 }
 function beamStations(S) { return beamRows(S).map(r => r.u); }
+function deckLineFromBeams(S) {
+const D = S.deck; if (!(D && D.beamHeightsFromKeelM && D.beamStations)) return null;
+const rows = beamRows(S), hs = D.beamHeightsFromKeelM;
+if (rows.length !== hs.length) return null;
+const datum = -S.draught, over = D.deckAboveBeamCentreM != null ? D.deckAboveBeamCentreM : 0.5;
+const pts = rows.map(r => ({ u: r.u, r: datum + hs[D.beamStations.indexOf(r.st)] + over }));
+const nFd = Math.min(pts.length - 2, (D.foredeck && D.foredeck.beams) || 0);
+const main = pts.slice(nFd), fore = pts.slice(0, nFd);
+const line = main.length >= 2 ? pchip(main) : (() => main[0].r);
+if (!nFd) return line;
+const sq = D.beamSidedM || 0.30;
+const aft = fore[fore.length - 1];
+const uBreak = aft.u + sq / 2 / S.lwl;
+const foreLine = fore.length >= 2 ? pchip(fore) : (() => aft.r);
+const fn = u => u <= uBreak ? foreLine(u) : line(u);
+fn.breakU = uBreak; fn.foreY = aft.r;
+return fn;
+}
+function deckOverBeamTop(S) {
+const D = S.deck || {};
+if (D.beamHeightsFromKeelM && D.deckAboveBeamCentreM != null) return D.deckAboveBeamCentreM - (D.beamSidedM || 0.30) / 2;
+return 0.02;
+}
 function frameStations(S, NF) {
 const rs = S.frames && S.frames.roomAndSpaceM;
 if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
@@ -554,7 +585,8 @@ const dH = C.deckHM || 1.95, rH = C.railHM || 1.0;
 const uHelm = (S.rudder && S.rudder.tillerAtU) ||
 (S.windlass && S.windlass.atU ? S.windlass.atU + 0.03 : null) ||
 ((C.fromU || 0.7) + (C.toU || 0.95)) / 2;
-const yDeck = H.deck(Math.min(1, uHelm)) + dH;
+const yAfter = H.deck(Math.min(1, uHelm));
+const yDeck = C.deckAboveKeelM != null ? -S.draught + C.deckAboveKeelM : yAfter + dH;
 const t = 0.05 * S.draught;
 const b = surfacePoint(S, H, 1.0, 1.0);
 const xPost = b[0] + t;
@@ -568,7 +600,7 @@ let lo = 0.3, hi = 1.4;
 for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if ((m - 0.5) * L + H.rake(m) < x) lo = m; else hi = m; }
 return (lo + hi) / 2;
 };
-return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17 };
+return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH: yDeck - yAfter, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17 };
 }
 function buildTimberRudder(S, group, timber, tag) {
 const H = hullSurface(S);
@@ -594,7 +626,8 @@ let fFoot = 0.02;
 for (let f = 0.02; f < 1; f += 0.01) { if (postPt(f)[1] >= yFoot) { fFoot = f; break; } }
 const castle = S.castle && S.castle.fromU != null;
 const CGr = castle ? castleGeom(S, H) : null;
-const yTiller = CGr ? CGr.yDeck - 0.55
+const uHand = R.tillerAtU || ((S.windlass && S.windlass.atU) ? S.windlass.atU + 0.03 : 0.85);
+const yTiller = CGr ? Math.min(CGr.yDeck - 0.55, H.deck(Math.min(1, uHand)) + 1.25)
 : castle ? H.sheer(S.castle.toU) + (S.castle.deckHM || 1.95) - 0.55
 : H.sheer(1.0) * 0.35;
 let fHead = 1.0;
@@ -2894,10 +2927,11 @@ const exit = Math.max(Math.abs(e[2]), Math.abs(deckEdge(S, H, u - du)[2]), Math.
 const half = exit + proud;
 const bm = new THREE.Mesh(new THREE.BoxGeometry(sq, sq, half * 2),
 [wood, wood, wood, wood, endGrain, endGrain]);
-bm.position.set(e[0], deckAtU(u) - 0.02 - sq / 2, 0);
+const gapT = deckOverBeamTop(S);
+bm.position.set(e[0], deckAtU(u) - gapT - sq / 2, 0);
 bm.name = 'deck-beam';
 const kS = S.deck.kneeSidedM || 0.20, kM = 0.22, gap = 0.05;
-const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - 0.02;
+const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - gapT;
 for (const sgn of [-1, 1]) {
 const zD = Math.abs(e[2]) - gap - kM / 2;
 const zT = railHalfAtU(u) - gap - kM / 2;
@@ -2909,7 +2943,7 @@ vert.position.set(0, (yTop + yFoot) / 2, sgn * (zD + zT) / 2);
 vert.rotation.x = -sgn * Math.atan2(zT - zD, yTop - yFoot);
 const armL = Math.min(0.9, Math.abs(e[2]) * 0.35);
 const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
-arm.position.set(0, deckAtU(u) + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
+arm.position.set(0, yFoot + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
 vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
 kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
 group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
@@ -2925,6 +2959,32 @@ group.add(tag(bm, 'crossbeam', 'Through-beam ' + (i + 1) + ' of ' + n + ' (Durch
 + 'every cog seal draws. Count from the record; its station' + where
 + '; ' + Math.round(sq * 100) + ' cm square is a class default below what the plates resolve.'));
 });
+if (S.deck.beamHeightsFromKeelM && S.deck.deckAboveBeamCentreM != null) {
+const cs = 0.20, yOff = 0.02 + cs / 2;
+const dl = deckLineFromBeams(S);
+for (let i = 0; i + 1 < us.length; i++) {
+const uA = us[i], uB = us[i + 1];
+if (dl && dl.breakU !== undefined && uA < dl.breakU && uB > dl.breakU) continue;
+const xA = (uA - 0.5) * L + H.rake(uA) + sq / 2, xB = (uB - 0.5) * L + H.rake(uB) - sq / 2;
+if (xB - xA < 0.3) continue;
+const half = Math.min(Math.abs(deckEdge(S, H, uA)[2]), Math.abs(deckEdge(S, H, uB)[2])) - 0.6;
+const NS = 12, pts = [];
+for (let k = 0; k <= NS; k++) { const u = uA + (uB - uA) * k / NS; pts.push([(u - 0.5) * L + H.rake(u), deckAtU(u) - yOff]); }
+for (const zc of [-half, -half / 3, half / 3, half]) {
+const g = new THREE.BufferGeometry(); const pos = [], idx = [];
+pts.forEach((p, k) => {
+const x = Math.max(xA, Math.min(xB, p[0]));
+pos.push(x, p[1] + cs / 2, zc - cs / 2, x, p[1] + cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc + cs / 2, x, p[1] - cs / 2, zc - cs / 2);
+if (k) { const a = (k - 1) * 4, b = k * 4; for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, b + f, a + c, a + c, b + f, b + c); } }
+});
+g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+const cm = new THREE.Mesh(g, wood); cm.name = 'deck-carling';
+group.add(tag(cm, 'crossbeam', 'Carling between through-beams ' + (i + 1) + ' and ' + (i + 2),
+'A fore-and-aft timber on the beams, under the deck planking — Lahn, Blatt 3, draws four '
++ 'on each beam; the deck is planked across them. Their spacing and the 20 cm siding are class defaults.'));
+}
+}
+}
 }
 if (deckCovering(S).mode === 1) {
 const pos = [], idx = [];

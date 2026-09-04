@@ -355,6 +355,11 @@
       e.z[0] = Math.min(e.z[0], bb.min.z); e.z[1] = Math.max(e.z[1], bb.max.z);
     });
     const deckY = part.deck ? part.deck.y[1] : 0;
+    /* the deck at the MAST, for the rig rules: the deck's highest vertex — unless the record
+       gives the hull a FOREDECK (deck.foredeck, round 232), when that vertex is the bow platform
+       a level over the deck the mast is stepped on; then the mast's own foot, which is the deck
+       at its station by construction. Without the field, byte-identical. */
+    const mastDeckY = (part.deck && H.deck && H.deck.foredeck && part.mast) ? part.mast.y[0] : deckY;
     const bb = new THREE.Box3().setFromObject(g);
     const airM = bb.max.y - deckY;
 
@@ -595,12 +600,18 @@
                   `hand end at u ${uHand.toFixed(2)}, castle ${H.castle.fromU}–${H.castle.toU} — the man stood under the castle deck`);
             if (H.rudder && H.rudder.tillerAtU != null && Math.abs(uHand - H.rudder.tillerAtU) > 0.12)
               say(v.id, "the tiller off the record's station", `hand end u ${uHand.toFixed(2)}, record says ${H.rudder.tillerAtU}`);
-            /* stature, off the castle's own planks: the afterdeck is the castle deck less deckHM */
+            /* stature, off the deck the man stands on: the weather deck's edge at the hand
+               (round 232; the castle deck less deckHM before, and the deck under the castle
+               is no longer a fixed headroom below it) */
             let deckY = -1e9, seen = 0;
             g.traverse(o => { if (!o.isMesh || o.name !== 'castle-deck') return;
               for (const q of world(o)) if (Math.abs(q[0] - tx0) < 0.6) { deckY = Math.max(deckY, q[1]); seen++; } });
             if (seen) {
-              const hand = (ty0 + ty1) / 2 - (deckY - (H.castle.deckHM || 1.95));
+              let after = 1e9, bestD = 0.6;
+              g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || ''))) return;
+                for (const q of world(o)) { const d = Math.abs(q[0] - tx0); if (d < bestD - 1e-6) { bestD = d; after = q[1]; } else if (d <= bestD + 1e-6) after = Math.min(after, q[1]); } });
+              if (after > 1e8) after = deckY - (H.castle.deckHM || 1.95);
+              const hand = (ty0 + ty1) / 2 - after;
               if (hand < 0.8 || hand > 1.7) say(v.id, 'a tiller nobody could hold', `${hand.toFixed(2)} m over the afterdeck at the hand`);
               if (deckY - ty1 < 0.2) say(v.id, 'a tiller through the castle deck', `${(deckY - ty1).toFixed(2)} m under the planks`);
             }
@@ -755,7 +766,16 @@
            vertices near a beam head's x include a fuller station's waterline further aft —
            the first draft read the cog's foremost beam as 'not through' against that (r215) */
         const skinHalfNear = (x, y) => { let w = 0; for (const q of sv) if (Math.abs(q[0] - x) < 0.3 && Math.abs(q[1] - y) < 0.3) w = Math.max(w, Math.abs(q[2])); return w; };
-        const deckEdgeNear = x => { let e = 1e9; for (const q of dv) if (Math.abs(q[0] - x) < 0.5) e = Math.min(e, q[1]); return e; };
+        /* the deck's edge near x: the lowest vertex of the deck's NEAREST station (round 232 —
+           the lowest within half a metre read the main deck under a beam that carries the
+           foredeck, a level higher; a station's nine vertices share an x, and the edge is the
+           lowest of them because the camber lifts the middle) */
+        const deckEdgeNear = x => { let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - x);
+          if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); } return e; };
+        /* the deck's height over the top of the beam under it: the record's distance from the
+           beam's centre less the half-siding (deck.deckAboveBeamCentreM, round 232), else 2 cm */
+        const gapBeam = (H.deck.beamHeightsFromKeelM && H.deck.deckAboveBeamCentreM != null)
+          ? H.deck.deckAboveBeamCentreM - (H.deck.beamSidedM || 0.30) / 2 : 0.02;
         const top0 = skinTopNear(0), edge0 = deckEdgeNear(0);
         /* D-DEPTH */
         if (edge0 > 1e8) say(v.id, 'a deck with no midship edge', 'no deck vertex within 0.5 m of midships');
@@ -776,8 +796,8 @@
             const b = bbox(bm), xc = (b[0] + b[3]) / 2, half = skinHalfNear(xc, (b[1] + b[4]) / 2), edge = deckEdgeNear(xc);
             if (b[5] < half + 0.1 || -b[2] < half + 0.1) {
               say(v.id, 'a through-beam that does not come through', `reaches ${Math.min(b[5], -b[2]).toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`); }
-            if (edge < 1e8 && (b[4] > edge + 0.02 || b[4] < edge - 0.15))
-              say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
+            if (edge < 1e8 && (b[4] > edge - gapBeam + 0.04 || b[4] < edge - gapBeam - 0.15))
+              say(v.id, 'a through-beam off its deck', `top ${b[4].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}, wanted ${gapBeam.toFixed(2)} under it`);
           }
           /* D-BEAM-STATION (round 229): a record that names the beams' stations
              (deck.beamStations, each { spant | u }, a frame number placed by the arithmetic
@@ -836,6 +856,28 @@
                 say(v.id, "a through-beam off the sheet's distance from the heel", `beam ${i + 1} of ${bx.length} stands ${got.toFixed(2)} m forward of the heel (heel x ${heelX.toFixed(2)}, ${posts.length ? 'the sternpost' : 'the skin'}), the sheet says ${d.toFixed(2)}`);
             });
           }
+          /* D-BEAM-HEIGHT (round 232): a record that carries a plate's own height of each
+             beam head's centre over the keel's underside (deck.beamHeightsFromKeelM, bow
+             first, Lahn's Blatt 1 at 590 px/m) has a deck-beam whose centre stands within
+             0.15 m of it, measured from the built skin's lowest vertex at midships — the
+             planking's bottom, which is the loft's −draught and the plate's datum (the model's
+             keel timber hangs under it and is not the datum). This is the check r231 read
+             the plate for and had no rule for: the beams stood 0.7–1.0 m too high from DB 2
+             aft and 0.4 m too low at DB 1 with every deck rule passing, because every deck
+             rule read the deck against the sheer and the beams against the deck. */
+          if (H.deck.beamHeightsFromKeelM) {
+            const want = H.deck.beamHeightsFromKeelM;
+            if (want.length !== beams.length)
+              say(v.id, "beam heights off the beams' count", `${want.length} heights, ${beams.length} deck-beams`);
+            let datum = 1e9; for (const q of sv) if (Math.abs(q[0]) < 0.5) datum = Math.min(datum, q[1]);
+            const by = beams.map(bm => { const b = bbox(bm); return { x: (b[0] + b[3]) / 2, y: (b[1] + b[4]) / 2 }; }).sort((a, b) => a.x - b.x);
+            want.forEach((h, i) => {
+              if (i >= by.length) return;
+              const got = by[i].y - datum;
+              if (Math.abs(got - h) > 0.15)
+                say(v.id, "a through-beam off the plate's height over the keel", `beam ${i + 1} of ${by.length} centre ${got.toFixed(2)} m over the skin's bottom at midships (y ${datum.toFixed(2)}), the plate says ${h.toFixed(2)}`);
+            });
+          }
           /* D-KNEES (round 216): a standing knee at every beam end, both sides — its foot on
              the beam (at the deck's edge), its head up at the top strake, and the whole of it
              INSIDE the planking. A knee outboard of the skin is a knee drawn through the hull. */
@@ -846,8 +888,8 @@
             const b = bbox(kn), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
             const out = Math.max(b[5], -b[2]);
             const half = Math.max(skinHalfNear(xc, b[1] + 0.15), skinHalfNear(xc, b[4] - 0.15));
-            if (edge < 1e8 && (b[1] > edge + 0.05 || b[1] < edge - 0.35))
-              say(v.id, 'a knee off its beam', `foot ${b[1].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}`);
+            if (edge < 1e8 && (b[1] > edge - gapBeam + 0.07 || b[1] < edge - gapBeam - 0.35))
+              say(v.id, 'a knee off its beam', `foot ${b[1].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}, the beam ${gapBeam.toFixed(2)} under it`);
             if (b[4] < top - 0.5)
               say(v.id, 'a knee that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
             if (half > 0 && out > half + 0.02)
@@ -1130,9 +1172,18 @@
           const cd = byName('castle-deck'); let yC = -1e9, x0 = 1e9, x1 = -1e9;
           for (const q of [].concat(...cd.map(world))) { yC = Math.max(yC, q[1]); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); }
           let under = 1e9; for (const q of dv) if (q[0] >= x0 && q[0] <= x1) under = Math.min(under, q[1]);
-          const want = H.castle.deckHM || 1.95;
-          if (cd.length && under < 1e8 && Math.abs((yC - under) - want) > 0.15)
-            say(v.id, 'a castle deck off its headroom', `${(yC - under).toFixed(2)} m over the main deck's edge, record says ${want}`);
+          /* the record may fix the castle deck over the keel's underside instead of over the
+             afterdeck (castle.deckAboveKeelM, round 232): then the test is against the skin's
+             bottom at midships, the datum D-BEAM-HEIGHT uses, and the headroom is derived */
+          if (H.castle.deckAboveKeelM != null) {
+            let datumC = 1e9; for (const q of sv) if (Math.abs(q[0]) < 0.5) datumC = Math.min(datumC, q[1]);
+            if (cd.length && Math.abs((yC - datumC) - H.castle.deckAboveKeelM) > 0.15)
+              say(v.id, "a castle deck off the record's height over the keel", `${(yC - datumC).toFixed(2)} m over the skin's bottom at midships, record says ${H.castle.deckAboveKeelM}`);
+          } else {
+            const want = H.castle.deckHM || 1.95;
+            if (cd.length && under < 1e8 && Math.abs((yC - under) - want) > 0.15)
+              say(v.id, 'a castle deck off its headroom', `${(yC - under).toFixed(2)} m over the main deck's edge, record says ${want}`);
+          }
         }
         /* D-RAIL, record-blind */
         if (part.rail && part.rail.y[0] < top0 - 0.3)
@@ -6528,7 +6579,7 @@
                                   setKinds.includes(o.userData.kind))
               setTop = Math.max(setTop, new THREE.Box3().setFromObject(o).max.y); });
             furlBoxes.forEach(fb => { furlTop = Math.max(furlTop, fb.max.y); });
-            if (furlTop > deckY + (setTop - deckY) * 0.6)
+            if (furlTop > mastDeckY + (setTop - mastDeckY) * 0.6)
               say(v.id, "a junk's furled sail left hoisted",
                   `stowed cloth tops at ${furlTop.toFixed(1)} m against set canvas at ${setTop.toFixed(1)} m — the battens did not drop`);
           }
@@ -6643,7 +6694,7 @@
            the floating-fitting class. Expected head height from the mast rule itself. */
         const maxShare = Math.max(...(H.masts || []).map(mm => mm.height || 0), 0);
         const head = (H.lwl + H.beam) / 2 * maxShare;
-        if (part.corbis.y[1] < deckY + head * 0.7)
+        if (part.corbis.y[1] < mastDeckY + head * 0.7)
           say(v.id, 'a corbis adrift down the mast',
               `basket tops at ${part.corbis.y[1].toFixed(1)} m against a ~${head.toFixed(0)} m masthead`);
       }
@@ -6683,11 +6734,11 @@
            and none may sit below the shortest mast's hounds */
         const heads = anc.map(headM);
         const hi = Math.max(...heads), lo = Math.min(...heads);
-        if (part.karchesion.y[1] < deckY + hi * 0.80)
+        if (part.karchesion.y[1] < mastDeckY + hi * 0.80)
           say(v.id, 'a karchesion adrift down the mast',
               `karchesion tops at ${part.karchesion.y[1].toFixed(1)} m against a ` +
               `~${hi.toFixed(0)} m masthead`);
-        if (part.karchesion.y[0] < deckY + lo * 0.45)
+        if (part.karchesion.y[0] < mastDeckY + lo * 0.45)
           say(v.id, 'a karchesion below the hounds',
               `karchesion base at ${part.karchesion.y[0].toFixed(1)} m on masts of ` +
               `${lo.toFixed(0)}–${hi.toFixed(0)} m`);
@@ -6695,7 +6746,7 @@
       const sqAll = (H.masts || []).filter(mm => mm.rig === 'square');
       if (sqAll.length && sqAll.every(mm => mm.only === 1) && part.halyard) {
         const hi = Math.max(...sqAll.map(headM));
-        if (part.halyard.y[1] < deckY + hi * 0.85)
+        if (part.halyard.y[1] < mastDeckY + hi * 0.85)
           say(v.id, 'a halyard that reaches no masthead',
               `halyard tops at ${part.halyard.y[1].toFixed(1)} m against a ` +
               `~${hi.toFixed(0)} m masthead — the fall must lead over the head sheave`);
