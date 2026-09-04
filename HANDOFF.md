@@ -18723,5 +18723,5 @@ uncommitted, the r211 convention.**
 **Live stamp VERIFIED: 1788558902 on https://augustg97.github.io/ships/index.html at 14:56 PDT,
 90 s after the push (build/staging/r231/push.log, the r209 poll pattern). Published copies read
 back by code strings: docs/data/vessels.json carries beamHeightsFromKeelM (3) and "the carlings' tops" (2),
-docs/js/hull.js and docs/audit-hulls.js are byte-identical to r230's ().
+docs/js/hull.js and docs/audit-hulls.js are byte-identical to r230's (git diff 28f9c50..HEAD on hull.js and audit-hulls.js in web/, docs/ and Research/: empty).
 Two commits close the round (ba18be2 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
