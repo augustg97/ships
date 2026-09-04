@@ -17720,3 +17720,153 @@ The close ratchet ran as the Bash tool's own background task, polled from the fo
 until-loops of up to nine minutes, and its exit was read from close-ratchet.out — the r198
 foreground-wait rule met by the r223 pattern again; the two witnesses were captured after
 its exit because both tries beside it timed out at FRAME_READY.**
+
+
+## Round 226 — 2026-09-04 — the cog's section is the plate's: the side widens all the way to the rail and the bottom is a flat, read off Lahn's Spant 26 on both sides at eleven heights, and the class takes a record-gated section form
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r225 said r226 opens
+with residual (0g), the loft's cog section against the wreck's: read Lahn's Blatt 2 for the
+flat's half-width and the turn's height, compare the loft's section at u 0.47, and if the
+wreck's bottom is flat where the loft is round, fix the class's section, not the cog's
+numbers. Done, at the class level, with one correction to the residual's own framing: the
+plate is a photograph and not square, so the read is in per-axis fractions, not angles.**
+
+**What the plate supports. r213/lahn-blatt2.jpg (640 × 459, a photographed sheet, about
+30 px/m across the beam) carries four sections: Spant 5 mit Querbalken DB 1 and Spant 12
+mit DB 2 are V-sectioned (the bow), Spant 33 mit DB 5 is V-bottomed too (the rising run
+aft), and Spant 26 mit DB 4 is the fullest and the nearest to midships — so the numbering
+runs from the bow, and the read is Spant 26. At 4× (r226/trace-spant26-4x.png; the
+programmatic tracer in trace-sections.py failed on the sheet's margins and the interior
+lines, so the read is by eye off the 4× crop) the outer face of the planking on BOTH sides
+at eleven crop heights, averaged, as fractions of the rail's half-breadth (113.75 plate px)
+and of the side's height keel plank to top strake (182.75 px): h/D 0.005 → 0.19, 0.022 →
+0.35, 0.063 → 0.52, 0.145 → 0.65, 0.28 → 0.78, 0.42 → 0.90, 0.56 → 0.96, 0.69 → 0.99, 0.83
+→ 1.00, 1.0 → 1.00 (the two sides agree within 0.07 B; read precision ±2.5 plate px =
+±0.02 B, ±0.014 D). Two facts: the side widens ALL THE WAY to the top strake, so the beam
+is at the RAIL; and the bottom is a flat of flush-laid planks on the keel plank that the
+curve starts from. The sheet reads D/B 0.80 where the record says 4.26/7.6 = 0.56, so the
+photograph is stretched in one axis and a 45° tangent read off it would be wrong by the
+stretch; the fractions are each within one axis and survive it. The loft's section at
+u 0.47, replicated in r226/section-model.py from surfacePoint's own formula (superellipse
+n 2.10 for cm 0.8 to the waterline, tumblehome 0.04 above): 0.31 at 0.022, 0.50 at 0.063,
+0.71 at 0.145, 0.90 at 0.28, 0.98 at 0.42, 1.00 at 0.56, 0.96 at the rail — an eighth of the
+beam too full through the bilge, 4% too narrow at the rail, and its vertical tangent at
+the waterline where the wreck has none.**
+
+**The class change (before-copies r226/hull.before.js, audit-hulls.before.js,
+vessels.before.json; the edit script r226/apply-edits.py with every match asserted unique;
+hull.diff 35 lines, audit.diff 46). web/js/hull.js, surfacePoint: record-gated on
+hull.section.form 'flared', the half-breadth at height h over the keel on a side of height
+D keel to rail is B·(F + (1 − F)·(1 − (1 − h/D)^n)^(1/n)) — the flat's half-width F·B plus
+a superellipse spanning the WHOLE side, B the record's beam at the rail. The flat is swept
+over the first sliver of v (v < 0.02, under 8 cm of height) so the shell still closes on
+the keel at v 0 and the keel timber sits at the centreline; z stays linear in v on both
+branches, so deckEdge, the open-hull floor (buildOpenHullGeometry's vF) and the frames'
+section table are untouched. Without the field, byte-identical. web/data/vessels.json,
+the cog: `hull.section { form 'flared', floorHalfFrac 0.15, power 2.2 }` with
+sectionProvenance carrying the read above; tumblehome 0 (the 0.04 was a class default);
+frames.laps[1].headAboveKeelM 0.8 (the record says it is the model's own bilge, and the
+new section's 45° tangent stands at 0.82 m over the keel where the superellipse's stood
+at 1.05–1.09); frames.laps[1].lapM 0.6 (below). F and n are a FIT to the ten read points,
+within 0.03 B at every height over 0.02 D (section-model.py prints the table). What falls
+out: the load waterline's half-breadth 0.92 B (7.0 m on the 7.6 m beam), the underwater
+section coefficient 0.78 (the wreck's own by the same integration, 0.77; the record's
+cm 0.8 keeps its meaning as the old loft's coefficient and is still read by hulls without
+a section), and the turn of the bilge at 0.82 m.**
+
+**Rule 8 fired twice. (1) On the section's first audit run (r226/audit-first.out): 33 ×
+"a lap off its length" ("upper timber's foot 0.77 m below the lower's head, record 1"),
+every frame of the cog. The floor's short arm now ends 0.8 m over the keel, and a futtock
+lapped a metre down beside it would have its foot UNDER the keel; the builder clamps a
+foot at the keel (`Math.max(yKeel, …)`) and the audit read the clamped lap. The record was
+wrong, not the builder: a floor lap cannot be longer than the floor's head is high. Doel 1
+(Vermeersch & Haneca 2014) gives the floor-to-futtock scarf as nought to two strakes,
+0–0.6 m at its 0.3 m strakes; the record takes the upper bound, lapM 0.6, so the middle
+futtock's foot stands 0.2 m over the keel beside the short arm and 1.1 m beside the long
+one. Second run 33 hulls, 0 problems (r226/audit.out). (2) On the new rule's own first
+form: D-SECTION tested the rail's breadth against the section's widest vertex, the rail
+against the record's beam, and one vertex row over the keel against F·B — and NEITHER
+builder variant tripped it (0 problems each). The superellipse under a record with
+tumblehome 0 is plumb above the waterline, so its rail IS the beam; and at the first
+vertex row over the keel (0.11 m at NV 34) the two forms differ by 0.18 m. The forms
+differ by 0.45 m at a third of the side's height, and the flat by 0.42 m at the first row,
+so the rule now reads EVERY midship skin vertex (|x| < 0.35 m, 2,190 of them) against the
+record's own curve, the formula written a second time in the audit on purpose, and
+convicts the worst over 0.2 m: "a flared section off its record's curve". The rail tests
+stay. Research/audit-hulls.js, synced to web/ (the build strips it into docs/).**
+
+**Proven to fire, by two builder variants against the same record, hull.js copied back and
+cmp'd byte-identical after each. Variant A, the record's section ignored
+(hull.variantA-superellipse.js): 1 problem, "3.53 m half-breadth at 1.36 m over the keel,
+the record's curve 3.07" (inject-variantA.out). Variant B, the flat ignored, F forced to 0
+(hull.variantB-noflat.js): 1 problem, "0.72 m at 0.05 m over the keel, the curve 1.18"
+(inject-variantB.out). Every other hull silent in both.**
+
+**Measured (measure_ship, r226/measure-after2.out against r225's by script): 93 parts in
+both, nothing missing, nothing new; 28 moved, 65 identical to 5 mm. The rail's half-breadth
+3.68 → 3.84 (the flare reaches the rail; the record's 3.8 plus the cap's own siding); the
+wales 3.86 → 3.77 (they lie above the waterline where the flared side is narrower than the
+old plumb topsides); channels 4.04 → 4.19, deadeyes 4.12 → 4.27, shrouds 3.87 → 4.03,
+ratlines 3.75 → 3.90 (all hung off the rail); the five through-beam heads in by 0.02–0.08
+(they end at a fixed reach outside a skin that is narrower at deck height); ten frames'
+heads up 0.01; the forward castle cabin's half 1.91 → 1.85. The model's stated breadth
+line (8.90 m, Δ +1.30) is r225's own number and predates the round.**
+
+**Witnessed (rule 1): r226/section-ahead.png (b 0, z 1.3, l 6), the cog bow-on with the
+sea round her: the side widens from the water to the rail and the rail is the widest
+line; section-quarter.png (b 225, z 1.0, l 10), from the port quarter: the underwater
+body is a broad flat floor with a hard bilge, lit pale under the water, the castle on its
+beams over the post; section-abeam.png, the flared side with the beam heads through it;
+floors-above-stage2.png (SW.stage 2, b 150, z 0.5, l 40): the frames as chains across the
+flat and up both sides, the lower heads at two alternating heights. Rule 0 answered on
+section-quarter.png read whole: it reads as a rendered world — the sea's texture, the
+sky, the planked castle walls in light, the shrouds' shadows on the sail. Three facts a
+viewer can read off it without a legend: the hull is widest at the rail and its side
+leans outward from the water; the bottom is flat and broad and turns hard into the side;
+the stern castle stands on beams that reach past the sternpost. Three captures were
+wasted first at z 0.22–0.4, which put the camera on the deck and inside the castle — the
+distance range is in memory now.**
+
+**Named residuals, in order:** (0g′) NEW: how the flat's half-width changes along the ship
+is unread — the model scales it with the local half-breadth (F·B(u)); Spant 5 and 12 show
+the V narrowing to the keel plank faster than that, and Lahn's Blatt 1 (the lines) or the
+frame sheets would give the law. (0g″) the loft's `strakes` 14 against Doel 1's twelve for
+Bremen, unchanged. (0a) OPEN, pitch 1.8 ± 0.2 sidings (r223). (0b″) the floor arm heights
+are on Lahn's frame sheets, none fetched; the model's bilge is now the plate's section's.
+(0b‴) lapM 1.0 for the top lap is a class value, 0.5–2.0; the floor's 0.6 is Doel 1's upper
+bound. (0h) the futtock count per side. (0c) the beams' stations and count. (0e)
+belowSheerM contested by 0.4 m — and r215's "0.31–0.33 of the side under the sheer" for
+the beam does not match this round's crop, where the through-beam DB 4 lies at 0.65 of the
+side under the top strake and a second full-width line at 0.49; worth a re-read with the
+Spant 26 crop's own ruler. (0f) the beam-head wedge at 60+ px/m. (1) r214: the Gangspill's
+station. (2) r214: the wings' rails. (3) r213: decked timber ships' rudder heads stop at
+0.35 of the sheer. (4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel
+shank. (7) r177 Lucian's second machine. (8) r176 sekibune class-size. (9) Preussen mast
+livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen black
+unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171
+quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower
+capstan barrel. (18) the cathead's supporting knee is a block. (19) the readiness
+transient: keep the r208 rule.**
+
+**Three method notes. (1) A photographed plate is not square: read fractions within one
+axis (a half-width over a half-beam, a height over a height) and never an angle or a
+slope across both, unless the sheet's own scale bar has been read in both axes. (2) A
+record value derived from the model ("the loft's own bilge") must be re-derived when the
+model changes, and any second value tied to it (the lap beside that head) re-checked
+against the physical bound — here the audit found it, which is what the audit is for.
+(3) An audit rule proven only on the real build proves nothing: run it against a variant
+that should fail BEFORE trusting a clean pass — the first form of D-SECTION passed the
+real build and both variants alike.**
+
+**The close ratchet, started 08:22:49 (r226/run-close.sh → close-ratchet.out) on the tree
+described above, hull.js cmp'd against hull.after.js and the audit against web/ before the
+start. Predictions (r226/PREDICTIONS-close.md, written first): no baseline shows the cog
+alone (there is no ship-cog frame), so the ONE expected mover was ship-dhow, where the cog
+stands at berth-neighbour scale in the frame's rightmost tenth, and nothing else — every
+other hull carries no hull.section, so surfacePoint is byte-identical for it. FINISHED at
+09:04:58 (~40 s a frame): 64 frames, ONE mover, ship-dhow at 0.067% of pixels (limit
+0.050%), mean |Δ| 0.024, no BLANK — exactly the predicted frame and no other. Read (the
+amplified diff Research/baselines/_diff/ship-dhow.png): the moved pixels are the cog's
+silhouette at the frame's right edge, her rail and side, nothing on the dhow herself.
+ACCEPTED with that reason (FRAME-LOG.md). The 63 other frames were within tolerance,
+the sub-gate flaps included.**

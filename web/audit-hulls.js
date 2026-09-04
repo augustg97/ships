@@ -797,6 +797,51 @@
               say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
           }
         }
+        /* D-SECTION (round 226): a hull whose record gives a FLARED section (hull.section.form
+           'flared', the Bremen cog from Lahn's Blatt 2) is widest at her RAIL — the side widens
+           all the way from the keel plank to the top strake — and her bottom is a flat of the
+           recorded half-width (floorHalfFrac of the rail's half-breadth) that the curve starts
+           from. Read on the DRAWN skin at midships, never on surfacePoint: a section fuller
+           below the rail than at it is the superellipse's waterline beam back again, and a
+           keel with no flat beside it is a round bottom. A record whose form the loft does
+           not know is convicted too (rule 10: a silent fallback to the superellipse would
+           draw the old shape under a record that says otherwise). */
+        if (H.section) {
+          if (H.section.form !== 'flared')
+            say(v.id, 'a section form the loft does not build', `hull.section.form ${JSON.stringify(H.section.form)}`);
+          else {
+            /* Rule 8 fired on this rule's first form (r226/inject-variantA.out, -B.out): it
+               tested the rail's breadth and one vertex row over the keel, and neither variant
+               tripped it — the superellipse under a record with tumblehome 0 is plumb above
+               the waterline (its rail IS the beam), and at the first row over the keel
+               (0.11 m) the two forms differ by 0.18 m. The forms differ by 0.45 m at a third
+               of the side's height and the flat by 0.42 m at the first row, so the test is
+               EVERY midship vertex against the record's own curve, the formula written here
+               a second time on purpose. */
+            const xM = 0, mid = sv.filter(q => Math.abs(q[0] - xM) < 0.35);
+            let yTop = -1e9, yKeel = 1e9, wAll = 0, wTop = 0;
+            for (const q of mid) { yTop = Math.max(yTop, q[1]); yKeel = Math.min(yKeel, q[1]); }
+            for (const q of mid) {
+              const w = Math.abs(q[2]);
+              wAll = Math.max(wAll, w);
+              if (q[1] > yTop - 0.25) wTop = Math.max(wTop, w);
+            }
+            if (wAll > wTop + 0.05)
+              say(v.id, 'a flared section not widest at its rail', `${wAll.toFixed(2)} m half-breadth below the rail, ${wTop.toFixed(2)} at it, at midships`);
+            if (Math.abs(wTop - H.beam / 2) > 0.1)
+              say(v.id, "a flared section's rail off the record's beam", `${(2 * wTop).toFixed(2)} m across the rail, the record ${H.beam}`);
+            const F = H.section.floorHalfFrac || 0, n = H.section.power || 2.2, D = yTop - yKeel;
+            const want = h => wTop * (F + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - Math.max(0, Math.min(1, h / D)), n)), 1 / n));
+            let worst = 0, worstH = 0, worstW = 0, worstWant = 0;
+            for (const q of mid) {
+              const h = q[1] - yKeel; if (h < 0.05 || h > D - 0.05) continue;
+              const w = Math.abs(q[2]), e = Math.abs(w - want(h));
+              if (e > worst) { worst = e; worstH = h; worstW = w; worstWant = want(h); }
+            }
+            if (worst > 0.2)
+              say(v.id, "a flared section off its record's curve", `${worstW.toFixed(2)} m half-breadth at ${worstH.toFixed(2)} m over the keel, the record's curve ${worstWant.toFixed(2)} (F ${F}, n ${n}, D ${D.toFixed(2)}); worst of the midship vertices, ${mid.length} read`);
+          }
+        }
         /* D-FRAMES (round 217): a hull whose record gives a room-and-space stands her frames
            at that pitch over the run, each a timber against the inside of the planking. The
            count lies within the record's (the stations a through-beam's knee displaces

@@ -650,17 +650,24 @@ const b = Math.max(H.halfB * H.wl(u),
 const t = S.draught * H.keel(u);
 const deckHalf = b * (1 - H.tumble(u));
 const fb = H.sheer(u);
+const flared = S.section && S.section.form === 'flared';
+const flaredY = (h, v) => {
+const D = t + fb, F = S.section.floorHalfFrac || 0, n = S.section.power || 2.2;
+const hf = Math.max(0, Math.min(1, h / D));
+const s = Math.min(1, v / 0.02);
+return b * (F * s + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - hf, n)), 1 / n));
+};
 let y, z, rakeF = 0;
 if (v <= 0.62) {
 const k = v / 0.62;
 z = -t * (1 - k);
 const yy = Math.pow(Math.max(0, 1 - Math.pow(1 - k, H.nExp)), 1 / H.nExp);
-y = b * yy;
+y = flared ? flaredY(z + t, v) : b * yy;
 } else {
 const k = (v - 0.62) / 0.38;
 z = fb * k;
 rakeF = k;
-y = b + (deckHalf - b) * Math.pow(k, 0.9);
+y = flared ? flaredY(z + t, v) : b + (deckHalf - b) * Math.pow(k, 0.9);
 if (S.transom) {
 const runStart = 1 - S.run;
 if (u > runStart) {

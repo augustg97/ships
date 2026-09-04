@@ -1067,17 +1067,43 @@ function surfacePoint(S, H, u, v) {
      height to the record's full overhang at the deck. rakeF below is that height fraction.
      H.rake(u) itself still returns the full deck-level rake, so the six deck-level callers
      (mast feet, bowsprit root, head knee, rails, deck strake) stay correct unchanged. */
+  /* ── A FLARED SECTION IS WIDEST AT THE RAIL, AND ITS BOTTOM IS A FLAT (round 226) ──
+     The superellipse below stands its vertical tangent at the load waterline: the beam
+     is there, and the topsides fall in (tumblehome) or stand plumb over it. The Bremen
+     cog's sections are not that shape. Lahn's Blatt 2, Spant 26 (r213/lahn-blatt2.jpg,
+     read at 4x in r226/trace-spant26-4x.png): the side widens ALL THE WAY from the keel
+     plank to the top strake — half-breadth 0.78 of the rail's at 0.28 of the side's
+     height, 0.90 at 0.42, 0.96 at 0.56 — so the beam is at the RAIL, and the bottom is
+     a flat of flush-laid planks on the keel plank that the curve starts from (0.35 of
+     the half-beam at 2% of the height). The superellipse to the waterline read 0.90 at
+     0.28 of the height and 0.98 at 0.42: fuller in the bilge by an eighth of the beam,
+     and narrower at the rail by 4%. Record-gated (hull.section.form 'flared'): the
+     half-breadth at height h over the keel, on a side of height D keel to rail, is
+        B · ( F + (1 − F) · (1 − (1 − h/D)^n)^(1/n) )
+     — the flat's half-width F·B, plus a superellipse spanning the WHOLE side, B the
+     record's beam at the rail; the flat itself is swept over the first sliver of v so
+     the shell still closes on the keel at v 0. z stays linear in v on both branches,
+     so every reader of v (deckEdge, the open-hull floor, the frames' table) is
+     untouched, and the waterline half-breadth falls out of the curve (0.92 B on the
+     cog). Without the field, byte-identical. */
+  const flared = S.section && S.section.form === 'flared';
+  const flaredY = (h, v) => {
+    const D = t + fb, F = S.section.floorHalfFrac || 0, n = S.section.power || 2.2;
+    const hf = Math.max(0, Math.min(1, h / D));
+    const s = Math.min(1, v / 0.02);
+    return b * (F * s + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - hf, n)), 1 / n));
+  };
   let y, z, rakeF = 0;
   if (v <= 0.62) {
     const k = v / 0.62;
     z = -t * (1 - k);
     const yy = Math.pow(Math.max(0, 1 - Math.pow(1 - k, H.nExp)), 1 / H.nExp);
-    y = b * yy;
+    y = flared ? flaredY(z + t, v) : b * yy;
   } else {
     const k = (v - 0.62) / 0.38;
     z = fb * k;
     rakeF = k;
-    y = b + (deckHalf - b) * Math.pow(k, 0.9);
+    y = flared ? flaredY(z + t, v) : b + (deckHalf - b) * Math.pow(k, 0.9);
     /* ── THE COUNTER ────────────────────────────────────────────────────────────────
        A square-sterned ship is FINE AT THE WATERLINE AND BROAD AT THE TAFFRAIL. The run
        tapers away underwater — it has to, or she drags a wake like a barn door — while the

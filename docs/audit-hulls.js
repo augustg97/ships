@@ -528,6 +528,34 @@ if (half > 0 && out > half + 0.02)
 say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
 }
 }
+if (H.section) {
+if (H.section.form !== 'flared')
+say(v.id, 'a section form the loft does not build', `hull.section.form ${JSON.stringify(H.section.form)}`);
+else {
+const xM = 0, mid = sv.filter(q => Math.abs(q[0] - xM) < 0.35);
+let yTop = -1e9, yKeel = 1e9, wAll = 0, wTop = 0;
+for (const q of mid) { yTop = Math.max(yTop, q[1]); yKeel = Math.min(yKeel, q[1]); }
+for (const q of mid) {
+const w = Math.abs(q[2]);
+wAll = Math.max(wAll, w);
+if (q[1] > yTop - 0.25) wTop = Math.max(wTop, w);
+}
+if (wAll > wTop + 0.05)
+say(v.id, 'a flared section not widest at its rail', `${wAll.toFixed(2)} m half-breadth below the rail, ${wTop.toFixed(2)} at it, at midships`);
+if (Math.abs(wTop - H.beam / 2) > 0.1)
+say(v.id, "a flared section's rail off the record's beam", `${(2 * wTop).toFixed(2)} m across the rail, the record ${H.beam}`);
+const F = H.section.floorHalfFrac || 0, n = H.section.power || 2.2, D = yTop - yKeel;
+const want = h => wTop * (F + (1 - F) * Math.pow(Math.max(0, 1 - Math.pow(1 - Math.max(0, Math.min(1, h / D)), n)), 1 / n));
+let worst = 0, worstH = 0, worstW = 0, worstWant = 0;
+for (const q of mid) {
+const h = q[1] - yKeel; if (h < 0.05 || h > D - 0.05) continue;
+const w = Math.abs(q[2]), e = Math.abs(w - want(h));
+if (e > worst) { worst = e; worstH = h; worstW = w; worstWant = want(h); }
+}
+if (worst > 0.2)
+say(v.id, "a flared section off its record's curve", `${worstW.toFixed(2)} m half-breadth at ${worstH.toFixed(2)} m over the keel, the record's curve ${worstWant.toFixed(2)} (F ${F}, n ${n}, D ${D.toFixed(2)}); worst of the midship vertices, ${mid.length} read`);
+}
+}
 if (H.frames && H.frames.roomAndSpaceM) {
 const fr = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'frames') fr.push(o); });
 const rs = H.frames.roomAndSpaceM, nWant = Math.floor(0.89 * L / rs) + 1;
