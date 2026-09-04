@@ -18262,3 +18262,9 @@ coeffs.out, compare-measure.py, the five witnesses, the two audit outputs, the v
 the two measures, the predictions, run-browser.sh and run-browser-2.sh, run-close.sh,
 close-out.sh, push-verify.sh, push-log-commit.sh) stays on disk uncommitted, the r211
 convention.**
+
+**Live stamp VERIFIED: 1788546571 on https://augustg97.github.io/ships/index.html at 11:30 PDT,
+after 60 s after the push (build/staging/r228/push.log, the r209 poll pattern). Published copies read
+back by code strings: docs/js/hull.js carries `function railPlan` (1) and `function pchip` (1),
+docs/data/vessels.json carries railHalfFrac (5), docs/audit-hulls.js carries "a rail off the record's plan" (1).
+Two commits close the round (97b7907 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
