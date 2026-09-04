@@ -16483,3 +16483,18 @@ top question. (9) Preussen mast livery. (10) Endurance forecastle. (11) Azzam cr
 (15) r171 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower
 capstan barrel. (18) the cathead's supporting knee is a block. (19) the readiness transient:
 keep the r208 rule.**
+
+**The close ratchet FINISHED at 21:15:18 (r217/close-ratchet.out, started 20:34:54, 40.4 min,
+~38 s a frame): 64 frames, ZERO movers, exit 0 — against a prediction of "may move" for
+ship-dhow and ship-treasure. ship-dhow read 0.049% / 0.018 (the cog's 33 frames at a berth
+neighbour's scale, just under the 0.05% gate — the same class as r216's knees, which did not
+move it either), ship-treasure 0.009% / 0.004, every Shipwright frame of the 74 0.000%, no
+BLANK. Nothing to accept; FRAME-LOG.md unchanged. Build PUBLISHED after the run (the r207
+order), data-version 1788495341; web/index.html carries the same stamp and is in this
+commit's path list (the r209 rule). The published copies read back by their own code
+strings (docs/ is comment-stripped, so a rule's comment label like D-FRAMES is NOT a valid
+check there — the first grep for it read 0): docs/audit-hulls.js 'frames off their pitch'
+(1), docs/js/hull.js frameStations (3), docs/data/vessels.json roomAndSpaceM (1),
+docs/js/shipwright.js openBulwark (2). Push receipt and live stamp: appended below if the
+round survived to write them (the driver's kill is 21:30:12); otherwise r218 verifies the
+live stamp first.**

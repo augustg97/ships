@@ -164,15 +164,31 @@ g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return g;
 }
+function beamStations(S) {
+if (!(S.deck && S.deck.throughBeams)) return [];
+const n = S.deck.throughBeams;
+return S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+}
+function frameStations(S, NF) {
+const rs = S.frames && S.frames.roomAndSpaceM;
+if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
+const L = S.lwl, n = Math.max(2, Math.floor(0.89 * L / rs) + 1);
+const us = Array.from({ length: n }, (_, f) => 0.055 + (f / (n - 1)) * 0.89);
+const keep = ((S.frames.sidedM || 0.18) + ((S.deck && S.deck.kneeSidedM) || 0.20)) / 2 + 0.05;
+const beams = beamStations(S);
+return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
+}
 function buildFramesGeometry(S, NF = 26, onlyU) {
 const H = hullSurface(S);
 const pos = [], idx = [];
-const NV = 26, half = 0.016 * S.lwl / 2;
-if (NF === 1 && onlyU === undefined) NF = 1;
+const NV = 26;
+const REC = !!(S.frames && S.frames.roomAndSpaceM);
+const half = REC ? (S.frames.sidedM || 0.18) / 2 : 0.016 * S.lwl / 2;
+const us = onlyU !== undefined ? [onlyU] : frameStations(S, NF);
 let base = 0;
-for (let f = 0; f < NF; f++) {
-const u = onlyU !== undefined ? onlyU : 0.055 + (f / (NF - 1)) * 0.89;
+for (const u of us) {
 for (let sgn = -1; sgn <= 1; sgn += 2) {
+if (!REC) {
 for (let j = 0; j <= NV; j++) {
 const v = j / NV;
 const p = surfacePoint(S, H, u, v);
@@ -187,6 +203,33 @@ const a = base + j * 2;
 idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
 }
 base += (NV + 1) * 2;
+continue;
+}
+const gap = 0.05, m = S.frames.mouldedM || 0.20;
+const fb = H.sheer(u);
+const vTop = fb > 0.3 ? 0.62 + 0.38 * (1 - 0.10 / fb) : 1;
+const sec = v => { const p = surfacePoint(S, H, u, v); return [p[0], p[1], Math.abs(p[2])]; };
+for (let j = 0; j <= NV; j++) {
+const v = j / NV * vTop;
+const p = sec(v), pa = sec(Math.max(0, v - 0.01)), pb = sec(Math.min(vTop, v + 0.01));
+let tz = pb[2] - pa[2], ty = pb[1] - pa[1];
+const tl = Math.hypot(tz, ty) || 1; tz /= tl; ty /= tl;
+const nz = -ty, ny = tz;
+const zo = Math.max(0, p[2] + gap * nz), yo = p[1] + gap * ny;
+const zi = Math.max(0, zo + m * nz), yi = yo + m * ny;
+pos.push(p[0] - half, yo, sgn * zo,  p[0] + half, yo, sgn * zo,
+p[0] + half, yi, sgn * zi,  p[0] - half, yi, sgn * zi);
+}
+for (let j = 0; j < NV; j++) {
+const a = base + j * 4, b = a + 4;
+for (let f = 0; f < 4; f++) {
+const c = (f + 1) % 4;
+idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
+}
+}
+const t = base + NV * 4;
+idx.push(t, t + 1, t + 2, t, t + 2, t + 3);
+base += (NV + 1) * 4;
 }
 }
 const g = new THREE.BufferGeometry();
@@ -2682,7 +2725,7 @@ group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
 if (S.deck && S.deck.throughBeams) {
 const n = S.deck.throughBeams;
 const sq = S.deck.beamSidedM || 0.30, proud = S.deck.beamProudM || 0.25;
-const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
+const us = beamStations(S);
 const endGrain = mats.endGrain || (mats.endGrain = (() => {
 const c = document.createElement('canvas'); c.width = c.height = 64;
 const ctx = c.getContext('2d');
@@ -8757,11 +8800,16 @@ const timber = STEEL
 : new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86 });
 const ONE_PIECE = S.build === 'dugout';
 if (!ONE_PIECE) group.add(tag(new THREE.Mesh(buildKeelGeometry(S), timber), 'keel'));
+const frameMat = (S.frames && S.frames.roomAndSpaceM)
+? new THREE.MeshStandardMaterial({ color: 0x6b5334, roughness: 0.86, side: THREE.DoubleSide })
+: timber;
 if (FINE) {
-if (!ONE_PIECE)
-for (let f = 0; f < 30; f++)
-group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, 0.055 + f / 29 * 0.89), timber),
-'frames', 'Frame ' + (f + 1) + ' of 30'));
+if (!ONE_PIECE) {
+const fus = frameStations(S, 30);
+fus.forEach((u, f) =>
+group.add(tag(new THREE.Mesh(buildFramesGeometry(S, 1, u), frameMat),
+'frames', 'Frame ' + (f + 1) + ' of ' + fus.length)));
+}
 if (S.build === 'bulkhead') {
 buildJunkEnds(S, group);
 } else if (S.build !== 'dugout') {
@@ -8802,7 +8850,7 @@ group.add(de);
 }
 });
 } else if (!ONE_PIECE) {
-group.add(tag(new THREE.Mesh(buildFramesGeometry(S), timber), 'frames'));
+group.add(tag(new THREE.Mesh(buildFramesGeometry(S), frameMat), 'frames'));
 }
 const hull = new THREE.Mesh(
 FINE ? buildHullGeometry(S, 420, 72) : buildHullGeometry(S), hullMat);

@@ -528,6 +528,41 @@ if (half > 0 && out > half + 0.02)
 say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
 }
 }
+if (H.frames && H.frames.roomAndSpaceM) {
+const fr = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'frames') fr.push(o); });
+const rs = H.frames.roomAndSpaceM, nWant = Math.floor(0.89 * L / rs) + 1;
+const nBeams = H.deck.throughBeams || 0;
+if (fr.length > nWant || fr.length < nWant - nBeams)
+say(v.id, "frames off the record's count", `${fr.length} frames, ${nWant} at ${rs} m over the run (less up to ${nBeams} at the beams)`);
+const xs = [];
+for (const f of fr) {
+const b = bbox(f), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
+xs.push(xc);
+const yB = edge < 1e8 ? edge + 0.5 : top - 0.5;
+let oq = null; for (const q of world(f)) if (Math.abs(q[1] - yB) < 0.3 && (!oq || Math.abs(q[2]) > Math.abs(oq[2]))) oq = q;
+if (oq) {
+let dmin = 1e9, halfAt = 0;
+for (const s of sv) if (Math.abs(s[0] - oq[0]) < 0.15) {
+dmin = Math.min(dmin, Math.hypot(s[1] - oq[1], Math.abs(s[2]) - Math.abs(oq[2])));
+if (Math.abs(s[1] - oq[1]) < 0.08) halfAt = Math.max(halfAt, Math.abs(s[2]));
+}
+if (halfAt > 0 && Math.abs(oq[2]) > halfAt + 0.02)
+say(v.id, 'a frame outside the planking', `reaches ${Math.abs(oq[2]).toFixed(2)} m, the skin ${halfAt.toFixed(2)} at x ${xc.toFixed(1)}`);
+if (dmin > 0.15)
+say(v.id, 'a frame standing off the planking', `outer face ${dmin.toFixed(2)} m from the nearest planking at x ${xc.toFixed(1)}`);
+}
+if (b[4] < top - 0.5)
+say(v.id, 'a frame that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
+}
+const beamX = byName('deck-beam').map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; });
+xs.sort((a, b) => a - b);
+for (let i = 1; i < xs.length; i++) {
+const d = xs[i] - xs[i - 1];
+const beamIn = beamX.some(x => x > xs[i - 1] && x < xs[i]);
+if (d < rs - 0.1 || (d > rs + 0.1 && !beamIn) || d > 2.3 * rs + 0.05)
+say(v.id, 'frames off their pitch', `${d.toFixed(2)} m between frames at x ${xs[i - 1].toFixed(1)} and ${xs[i].toFixed(1)}, record ${rs}${beamIn ? ' (a beam stands between)' : ''}`);
+}
+}
 if (H.castle && H.castle.plan) {
 const cd = byName('castle-deck'); let yC = -1e9, x0 = 1e9, x1 = -1e9;
 for (const q of [].concat(...cd.map(world))) { yC = Math.max(yC, q[1]); x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); }
