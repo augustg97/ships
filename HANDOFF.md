@@ -18576,3 +18576,9 @@ daemon's cookie file uncommitted, deliberately; the r230 staging (the three befo
 hull.after.js, the variant, the edit scripts, the three diffs, the full sheet and its crops,
 the thesis and its text, the audit outputs, the measure, the witness, the predictions, the
 scripts) stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788554257 on https://augustg97.github.io/ships/index.html at 13:38 PDT,
+60 s after the push (build/staging/r230/push.log, the r209 poll pattern). Published copies read
+back by code strings: docs/js/hull.js carries `function frameOrigin` (1), docs/data/vessels.json carries originU (5),
+docs/audit-hulls.js carries "a through-beam off the sheet's distance from the heel" (1).
+Two commits close the round (e6f6154 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
