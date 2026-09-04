@@ -16769,3 +16769,90 @@ z 0.35, aimed at x 66–82, --bare; the before from a worktree at 450e400 or fro
 docs/), taken BEFORE any ratchet is launched, because the ratchet holds the browser for forty
 minutes — or (0a) if a route to Lahn 1992's plates appears; r218's hunt paragraph lists every
 route that walled.**
+
+## Round 220 — 2026-09-04 — the riser witness taken as a face: the camera learns to aim along the hull, and the shell riser measures 4–8 cm wide, so the hairline was the right picture
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r219 said r220 opens
+with residual (0i), the close witness that shows Azzam's shell riser as a FACE, before and
+after, taken before any ratchet is launched — or (0a) if a route to Lahn 1992's plates
+appeared. No new route; (0i) is DONE, and taking it needed a camera parameter the URL grammar
+did not have.**
+
+**Why the witness could not be taken as r219 wrote it. swFrame looks at (panX, look, 0): the
+selected hull's midpoint in x, at the y= height, and the camera stands SW.dist × fit from that
+point. Azzam's fit is about 210 m, so z 0.35 put the camera 73 m from amidships, and her risers
+are 66–82 m aft of amidships. From b=150 the stern then stood about 97° off the lens axis in a
+34° lens: the close zoom framed her side amidships and the stern was not in the picture. The
+r219 quarter witness (b=150, z 0.7, aimed at amidships) had the terraces at the right edge of
+the frame behind the fleet panel for the same reason. y= aimed a height and nothing else;
+nothing in the grammar aimed along the ship, and what a frame cannot name it cannot watch.**
+
+**The change (before-copies in build/staging/r220/app.before.js, shipwright.before.js).
+(1) web/js/app.js, applyHashView: `&x=<metres>` is parsed beside y= and recorded as
+SWs.lookAtX, the point along the hull the camera looks at, in the loft's own metres from
+amidships, aft positive (x = (u − 0.5)·L). (2) web/js/shipwright.js, swFrame: the look point
+leaves the midpoint by lookAtX turned through the ship's spin (three.js rotation.y takes a hull
+point (x, 0, 0) to (x·cos s, 0, −x·sin s)), and the camera keeps its bearing, height angle and
+distance from the new point. Absent, ax = 0 and the arithmetic is what it was, term for term;
+none of the 64 baseline frags carries x= (grep: 0). hull.js is unchanged from HEAD.
+Research/url_capture.py's docstring now names all five parameters with an example.**
+
+**The witness. riser-before.png on the r218 loft — build/staging/r219/hull.before.js, which
+diff -q reads identical to 450e400:web/js/hull.js, copied over web/js/hull.js for the one
+capture and restored with git checkout; git status read only app.js and shipwright.js
+modified afterwards — and riser-after.png on HEAD's loft, both at
+#v=ship&s=azzam&b=150&z=0.35&l=10&y=5&x=75 --bare (the bearing probes at b=30 and b=210 are
+r220/probe-b30.png and probe-b210.png; b=150 is the port stern quarter). The frame: the
+yacht's stern from the quarter, the five terraces stepping down to the transom with their twin
+flights, the tinted band and doors on the 0.884 riser, the shell curving under the counter.
+Full-frame diff: 1,144 px over 0 (0.022%), 535 over 8, 70 over 32, signed mean +7.9 (lighter
+after); in the 550×450 stern crop 541 px over 0, 203 over 8, none over 32. The crop
+(riser-crop-before-after.png) and the ×8 diff (riser-crop-diff.png) read as FIVE HAIRLINES
+along the break stations, each running from the deck edge down the shell to the waterline,
+one to two pixels wide at z 0.35 and thirty degrees off the riser's own normal. The riser is
+not a face at this camera either.**
+
+**Why, measured (r220/probe-riser-width.py → probe-riser-width.out). For every planking
+triangle that classifies as riser (|nx| > |ny| + |nz|, the r219 test) the width is
+2·area / longest edge, grouped by station. The five strips at x 66.0, 74.1, 76.7, 79.5 and
+81.7 m have median widths 3.8, 4.2, 5.5, 5.7 and 7.2 cm (maxima 4.5 to 8.2 cm), and each runs
+from the waterline (y −0.06) to its own deck edge (9.0, 5.9, 5.2, 4.0 and 3.3 m): 106–110
+triangles and 1.2–3.8 m² apiece. The strip is the gap between two sections at the same u
+stretched to two different sheers, so its width at any height is the difference in the
+topsides' flare between the two — centimetres on a hull whose sides are nearly plumb. The
+step's visible face, the full-beam wall between the two deck edges, is the sternSteps bulkhead
+the r102 code builds, and it never was part of the loft. So the shell riser is a hairline from
+every bearing; r219's normals fix was right and cannot show as more than a hairline; (0i)
+closes as verified. The same probe lists x ±86.0: the stem cap (89 triangles, 1.9 m²) and the
+transom (143 triangles, 67.8 m²), x-facing by the same test, as they should be.**
+
+**Rule 0 on riser-after.png, read whole: a motor yacht's stern from the quarter, terraces
+stepping down to the transom, planked decks, white bulwarks, a dark hull over textured water
+to a hazy coast on the horizon — a rendered world. Three facts a viewer can read off it
+without a legend: the stern descends in five terraces; twin flights of steps join each pair;
+the after face of the main deck carries a band of dark glass with doors at the centreline.**
+
+**Audit: 33 hulls, 0 problems (r220/audit.out, audit.err), on this tree, hull.js unchanged.**
+
+**Named residuals, in order (r219's list, renumbered):** (0a) OPEN — the cog's frame pitch is
+a class default; r218's hunt paragraph lists every route that walled. (0b) the futtock's bevel
+and rough head. (0c) the beams' stations and count. (0d) the nine `H.sheer` deck-readers on
+other classes must switch to `H.deck` before any second hull takes deck.belowSheerM. (0e)
+belowSheerM contested by 0.4 m. (0f) the beam-head wedge at 60+ px/m. (0g) CLOSED r218. (0h)
+CLOSED r219. (0i) CLOSED this round, with the x= aim as its tool. (1) r214: the Gangspill's
+station. (2) r214: the wings' inner-edge and forward-end rails, no source. (3) r213: decked
+timber ships' rudder heads stop at 0.35 of the sheer; no helm port. (4) Kozushima 1993
+weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177 Lucian's second machine.
+(8) r176 sekibune class-size, paired with r211's top question. (9) Preussen mast livery.
+(10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen black unpierced. (13) r165
+fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery sashes. (16) r171
+authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the cathead's
+supporting knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**The close ratchet, started 00:02:02 (r220/run-close.sh → close-ratchet.out) on a tree whose
+every change is described above. Predictions: r220/PREDICTIONS-close.md — ZERO movers beyond
+the documented flaps, because ax = 0 on every baseline frag and hull.js is HEAD's. CLOSE
+STATE: if the paragraphs below this one are missing, the round was killed at the close gate
+(01:10:30) — the next firing must (1) re-run the ratchet whole on this committed tree, read
+and accept every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push,
+verify the live stamp, the r198 rule.**

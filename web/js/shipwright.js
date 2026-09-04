@@ -1065,10 +1065,18 @@ function swFrame(now) {
   const d = SW.fit * SW.dist;
   if (SW.panX === undefined) SW.panX = SW.shipX;
   if (SW.panTo !== undefined) SW.panX += (SW.panTo - SW.panX) * EASE;
-  SW.cam.position.set(SW.panX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
+  /* `#x=<metres>` aims ALONG the hull: the look point leaves the midpoint by that many hull
+     metres, turned through the ship's own spin into world space (three.js rotation.y takes a
+     hull point (x, 0, 0) to (x·cos s, 0, −x·sin s)). The camera keeps its bearing, height
+     angle and distance and travels with the point, so a close zoom can stand off a stern
+     instead of amidships (r220). Absent, the arithmetic below is exactly what it was. */
+  const spin = SW.shipSpin || 0;
+  const ax = SW.lookAtX !== undefined ? SW.lookAtX : 0;
+  const aimX = SW.panX + ax * Math.cos(spin), aimZ = -ax * Math.sin(spin);
+  SW.cam.position.set(aimX + d * Math.cos(SW.lat) * Math.sin(SW.lon),
                       d * Math.sin(SW.lat) + look,
-                      d * Math.cos(SW.lat) * Math.cos(SW.lon));
-  SW.cam.lookAt(SW.panX, look, 0);
+                      aimZ + d * Math.cos(SW.lat) * Math.cos(SW.lon));
+  SW.cam.lookAt(aimX, look, aimZ);
   if (SW.ground && SW.ground.material.uniforms.uRip)
     SW.ground.material.uniforms.uRip.value =
       SHIPS_SEA.rippleRange(SW.cam, SW.renderer ? SW.renderer.domElement.height : 900);

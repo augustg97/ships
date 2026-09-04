@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Capture ONE frame of the app at an arbitrary URL fragment — the diagnosis companion to
 spin_capture (which owns the fixed 12-bearing survey) and the frame ratchet (which owns the
-committed baselines). Use for close-ups the `b=`/`z=`/`l=` grammar can name:
+committed baselines). Use for close-ups the Shipwright's camera grammar can name: `b=` the
+bearing she is seen from (0 ahead, 90 abeam, 150 the stern quarter, 180 astern), `z=` the
+distance as a multiple of the fit (0.35 closest), `l=` the height angle in degrees, `y=` the
+height looked at in metres over the waterline, and `x=` the point looked at ALONG the hull in
+the loft's own metres from amidships, aft positive (r220: without it a close zoom always
+framed amidships, and a 180 m yacht's stern stood outside the lens):
 
   "$STUDIO/.venv/bin/python" Research/url_capture.py \
-      --frag '#v=ship&s=azzam&b=150&z=0.5&l=8' --out /tmp/azzam-stern.png
+      --frag '#v=ship&s=azzam&b=150&z=0.35&l=10&y=5&x=75' --bare --out /tmp/azzam-stern.png
 
 Needs the :8149 server. Frozen time, same ready expr as the harness."""
 import argparse, sys

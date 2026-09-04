@@ -500,6 +500,12 @@ function applyHashView() {
        is mid-rig; a hull survey wants the hull. Resolved in swFrame against the extents it
        owns; only the request is recorded here. */
     const ym = /[#&]y=(-?[\d.]+)/.exec(location.hash);
+    /* `&x=<metres>` — the point ALONG the hull the camera looks at, in the loft's own metres
+       from amidships (aft positive, x = (u − 0.5)·L). y= aims a height and nothing else: the
+       look point rode at the hull's midpoint, so at z 0.35 a 180 m yacht's stern stood ~97°
+       outside a 34° lens and no close-up of a stern fitting was addressable from a URL
+       (r220, the Azzam riser witness). Resolved in swFrame against the spin the frame uses. */
+    const xm = /[#&]x=(-?[\d.]+)/.exec(location.hash);
     /* `&sail=furled|set` — the canvas state, the same hull shown stowed or under way. A
        view choice, so it rides in the hash with the camera grammar, never in the record.
        Applied inside this loop because the state triggers REBUILDS that drain through
@@ -518,6 +524,7 @@ function applyHashView() {
         if (zm) SWs.dist = Math.max(0.35, Math.min(8.0, parseFloat(zm[1])));
         if (lm) SWs.lat = Math.max(0.02, Math.min(0.90, parseFloat(lm[1]) * Math.PI / 180));
         if (ym) SWs.lookAtY = parseFloat(ym[1]);
+        if (xm) SWs.lookAtX = parseFloat(xm[1]);
         shipSelectPending = false; return;
       }
       if (typeof swOpenById === 'function') swOpenById(sm[1]);
