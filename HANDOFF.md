@@ -17703,3 +17703,20 @@ and compare the loft's section at u 0.47 (r225 probe: the 45° tangent at 1.09 m
 keel, the half-breadth 1.16 m at 9 cm over the keel); if the wreck's bottom is flat where
 the loft is round, the fix is the class's section, not the cog's numbers — and the floor's
 headAboveKeelM follows from it. Or (0a) if a route to Lahn 1992's plates appears.**
+
+**Live stamp VERIFIED: 1788529521 on https://augustg97.github.io/ships/index.html at
+06:47 PDT, 90 s after the push (build/staging/r225/push.log, the r209 poll pattern). Two
+commits close the round (dde3fbb source + audit + docs + handoff, and this push-log
+commit). Published copies read back by code strings (the build strips comments): docs/js/
+hull.js carries headAboveKeelM (1), docs/data/vessels.json carries altM (1), docs/audit-hulls.js
+carries 'neighbouring floors long on the same side' (1). Tree at close: only build/loop.log
+and the r205 daemon's cookie file uncommitted, deliberately; the r225 staging (the three
+before-copies, hull.after.js, the two builder variants, apply-edits.py, the two diffs, the
+plate overview and the two starboard crops, the four Blatt 2 crops, the booklet's images,
+the measure, the two stage-2 witnesses, stage_capture.py, the dhow edge triptych, the three
+audit outputs, the two variant outputs, the sweep and compare-sweeps.py, the predictions,
+run-close.sh, close-out.sh, push-verify.sh) stays on disk uncommitted, the r211 convention.
+The close ratchet ran as the Bash tool's own background task, polled from the foreground in
+until-loops of up to nine minutes, and its exit was read from close-ratchet.out — the r198
+foreground-wait rule met by the r223 pattern again; the two witnesses were captured after
+its exit because both tries beside it timed out at FRAME_READY.**
