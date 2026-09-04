@@ -209,27 +209,40 @@ const gap = 0.05, m = S.frames.mouldedM || 0.20;
 const fb = H.sheer(u);
 const vTop = fb > 0.3 ? 0.62 + 0.38 * (1 - 0.10 / fb) : 1;
 const sec = v => { const p = surfacePoint(S, H, u, v); return [p[0], p[1], Math.abs(p[2])]; };
-for (let j = 0; j <= NV; j++) {
-const v = j / NV * vTop;
+const frac = S.frames.headSidedFrac || 1, taper = S.frames.headTaperM || 0, round = !!S.frames.headRound;
+const yTop = sec(vTop)[1], rr = frac * half;
+const vs = Array.from({ length: NV + 1 }, (_, j) => j / NV * vTop);
+if (round && rr > 0) {
+const yLo = sec(0.62)[1], dvdy = (vTop - 0.62) / Math.max(1e-6, yTop - yLo);
+for (const hb of [0.75, 0.5, 0.25, 0.08]) vs.push(vTop - hb * rr * dvdy);
+vs.sort((a, b) => a - b);
+}
+const NS = vs.length - 1;
+for (let j = 0; j <= NS; j++) {
+const v = vs[j];
 const p = sec(v), pa = sec(Math.max(0, v - 0.01)), pb = sec(Math.min(vTop, v + 0.01));
 let tz = pb[2] - pa[2], ty = pb[1] - pa[1];
 const tl = Math.hypot(tz, ty) || 1; tz /= tl; ty /= tl;
 const nz = -ty, ny = tz;
 const zo = Math.max(0, p[2] + gap * nz), yo = p[1] + gap * ny;
 const zi = Math.max(0, zo + m * nz), yi = yo + m * ny;
-pos.push(p[0] - half, yo, sgn * zo,  p[0] + half, yo, sgn * zo,
-p[0] + half, yi, sgn * zi,  p[0] - half, yi, sgn * zi);
+const hBelow = Math.max(0, yTop - p[1]);
+let hj = half;
+if (taper > 0 && frac < 1) hj *= 1 - (1 - frac) * Math.max(0, 1 - hBelow / taper);
+if (round && hBelow < rr) hj *= Math.max(0.2, Math.sqrt(Math.max(0, 1 - ((rr - hBelow) / rr) ** 2)));
+pos.push(p[0] - hj, yo, sgn * zo,  p[0] + hj, yo, sgn * zo,
+p[0] + hj, yi, sgn * zi,  p[0] - hj, yi, sgn * zi);
 }
-for (let j = 0; j < NV; j++) {
+for (let j = 0; j < NS; j++) {
 const a = base + j * 4, b = a + 4;
 for (let f = 0; f < 4; f++) {
 const c = (f + 1) % 4;
 idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
 }
 }
-const t = base + NV * 4;
+const t = base + NS * 4;
 idx.push(t, t + 1, t + 2, t, t + 2, t + 3);
-base += (NV + 1) * 4;
+base += (NS + 1) * 4;
 }
 }
 const g = new THREE.BufferGeometry();

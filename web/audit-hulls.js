@@ -836,6 +836,36 @@
             }
             if (b[4] < top - 0.5)
               say(v.id, 'a frame that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
+            /* D-FRAMES head (round 223): a record that gives the head's siding as a fraction of
+               the body's (frames.headSidedFrac) is built as a tapered timber, and one that says
+               the head is rounded (frames.headRound) narrows again over its last half-siding.
+               The siding is read station by station — a frame's vertices come four to a
+               station, the first two a siding apart — so a frame leaning with a raked post
+               (Frame 1 spans 1.18 m in x) is not read wider for its lean. Body: the median
+               siding within 0.3 m of the bulwark height; near-head: the widest station between
+               0.12 and 0.35 m under the head, below the round; head: the topmost station. */
+            if (H.frames.headSidedFrac) {
+              const W = world(f), st = [];
+              for (let k = 0; k + 1 < W.length; k += 4) st.push({ y: W[k][1], s: Math.abs(W[k + 1][0] - W[k][0]) });
+              /* the body is read BELOW the taper: on the cog the taper's 1.2 m starts at the
+                 deck, so the bulwark band is already inside it (the rule's first run, r223,
+                 read 0.161 there against 0.180 below and called the head untapered) */
+              const tp = H.frames.headTaperM || 0;
+              let body = st.filter(q => q.y < b[4] - tp - 0.02).map(q => q.s);
+              if (!body.length) body = st.slice().sort((a, c) => a.y - c.y).slice(0, 4).map(q => q.s);
+              body.sort((a, c) => a - c);
+              const near = st.filter(q => q.y > b[4] - 0.35 && q.y < b[4] - 0.12).map(q => q.s);
+              const topS = st.reduce((m2, q) => (q.y > m2.y ? q : m2), { y: -1e9, s: 0 }).s;
+              if (body.length && near.length) {
+                const bs = body[body.length >> 1], ratio = Math.max(...near) / bs, want = H.frames.headSidedFrac;
+                if (ratio > want + 0.12)
+                  say(v.id, 'a futtock head that is not tapered', `siding ${Math.max(...near).toFixed(3)} m under the head, ${bs.toFixed(3)} at the deck (${ratio.toFixed(2)}), record ${want} at x ${xc.toFixed(1)}`);
+                if (ratio < want - 0.15)
+                  say(v.id, 'a futtock head tapered past the record', `${ratio.toFixed(2)} of the body's siding, record ${want} at x ${xc.toFixed(1)}`);
+                if (H.frames.headRound && topS > 0.5 * bs)
+                  say(v.id, 'a futtock head cut square', `top station ${topS.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)}`);
+              }
+            }
           }
           /* neighbours one pitch apart; a wider gap is allowed only where a through-beam
              stands in it (its knee took the station) */

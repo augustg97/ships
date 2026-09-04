@@ -17173,3 +17173,148 @@ r222 staging (hull.before.js, audit-hulls.before.js, vessels.before.json, inject
 edit scripts, the two diffs, the eight measures, the two witnesses, the audit outputs, the
 sweep and compare-sweeps.py, the predictions, run-close.sh, push-verify.sh) stays on disk
 uncommitted, the r211 convention.**
+
+## Round 223 — 2026-09-04 — the futtock's head is a hewn end: the port-side plate read for the taper, the round and the pitch, the timber built to it, and the audit reads the siding station by station
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r222 said r223 opens
+with residual (0b), the futtock's bevel and rough head, or (0a) if a route to Lahn 1992's
+plates appeared. No route was hunted this round; (0b) is DONE. The plate that answered it
+was not the one r222 named: the overhead plate (r213/wreck-in-bremerhaven.jpg, 1920 × 1272;
+crop r223/crop-over-heads.png) shows the frames beside the castle deck under modern shoring
+and resolves no head at all. The DSM's plate from over the bow (r213/wreck-dsm-side.jpg,
+3840 × 2543) does: its port side forward shows nine futtock heads against the inside of the
+planking (crop r223/crop-side-port-heads.png at 1:1; the head band doubled with a 50 px grid,
+crop-port-heads-grid.png).**
+
+**What the plate can support (the r158 rule, scale first). It has no scale bar, and nothing
+in it is recorded in metres, so its scale comes from the futtock siding itself: 40–55 px to
+a siding, which is about 250 px/m if the siding is the class default 0.18 m and about
+200 px/m if it is 0.22. Every read below is therefore a RATIO to the siding, and the record
+says so. The reads: (1) each head narrows toward its top, 40 px in the last 0.3 m against
+50–55 px at the deck, so the head's siding is 0.78 (±0.08) of the body's, and the narrowing
+is spread over about the top 1.2 m (±0.4) — the timber is a grown one dressed to the
+planking, not a sawn bar; (2) every one of the nine heads is rounded off; none is cut square
+and none is cut to the planking's angle, which is the phrase r222 carried and the plate
+does not bear out; (3) the heads stand at the top strake's upper edge or up to 16 cm under
+it (±5 cm), which is where r217 already put them, a hand under the rail cap; the two heads
+forward that stand proud of the planking do so because the strake there is broken away;
+(4) the pitch: heads stand 75–82 px apart centre to centre against a 40–50 px siding, a
+room-and-space of 1.8 (±0.2) sidings, 0.32–0.36 m at siding 0.18 and 0.40–0.44 m at 0.22.
+That number is scale-free and tightens (0a)'s class-default bound (0.35–0.65) to its lower
+half; the pitch is NOT changed, because it still rests on a siding no plate here resolves;
+(5) the floors' arm heads stand beside the futtocks at about mid-side, rounded like the
+heads above, the two timbers lying side by side and lapped, not scarfed end to end — the
+model's frame is one timber from the keel to the head, so this is a new residual. The
+moulding at the head is unread: this plate looks at the futtocks' inner faces.**
+
+**The change (before-copies r223/hull.before.js, audit-hulls.before.js, vessels.before.json;
+the edit script r223/apply-edits.py, every match asserted unique; hull.diff 48 lines,
+audit.diff 40). web/data/vessels.json: the cog's `hull.frames` gains headSidedFrac 0.78,
+headTaperM 1.2 and headRound true, and framesProvenance gains the paragraph above with the
+plate, its scale and its bounds. web/js/hull.js, buildFramesGeometry's record path: the
+station's half-siding is scaled by height under the head — linearly from the full siding at
+headTaperM under the head to headSidedFrac at it — and the head is a semicircle in the
+siding plane whose radius is the head's own half-siding; four extra stations at 0.75, 0.5,
+0.25 and 0.08 of that radius under the head carry the round (placed by v through the
+bulwark's linear dv/dy, since above v 0.62 the skin is straight in v), and the last station
+keeps a fifth of the head's width as a flat, a hewn end rather than a point. Without the
+three fields the path is byte-identical: frac 1 is no taper, round false adds no station.
+Research/audit-hulls.js, D-FRAMES head: for a hull whose record gives headSidedFrac, the
+siding is read STATION BY STATION — a frame's vertices come four to a station and the first
+two lie a siding apart — so a frame leaning with a raked post (Frame 1 spans 1.18 m in x) is
+not read wider for its lean; body = the median siding below the taper, near-head = the
+widest station 0.12–0.35 m under the head (below the round), top = the topmost station; it
+convicts "a futtock head that is not tapered" (near-head over frac + 0.12 of the body),
+"a futtock head tapered past the record" (under frac − 0.15) and, where the record says
+rounded, "a futtock head cut square" (the top station over half the body).**
+
+**Rule 8 fired on the rule's own first run (r223/audit-first.out): all 33 frames convicted
+"not tapered", 0.147 m under the head against 0.161 "at the deck" (0.91). The first draft
+read the body in the bulwark band (deck edge + 0.5 m, ±0.3), and on this hull that band
+lies INSIDE the taper: a 1.2 m taper under a 1.91 m head begins at 0.71 m, below the deck
+at 0.81–0.94, so the body was already narrowed where the rule read it. The body is read
+below the taper now (y under the head by more than headTaperM), the four lowest stations if
+nothing lies there. Second run: 33 hulls, 0 problems (r223/audit.out), the rule synced to
+web/ (the build strips it into docs/).**
+
+**Proven to fire, twice. (1) Record injection (r223/inject-heads.py: headTaperM 0.0001 and
+headRound false into the cog, vessels.json restored from a copy and checked): 33 × "a futtock
+head that is not tapered"; the square rule did not fire because it is gated on the record
+saying rounded, and the injected record said not — the gate doing what it says. (2) The OLD
+builder against the NEW record (hull.before.js swapped in, the audit run, hull.after.js
+swapped back and cmp'd byte-identical; r223/inject-oldbuilder.out): 33 × "not tapered" AND
+33 × "a futtock head cut square" ("top station 0.180 m across, body 0.180, record says
+rounded"). Every other hull silent in both.**
+
+**Measured (measure_ship, r223/measure-after.out, compared with r217/measure.out by script):
+93 parts in both, nothing missing, nothing new; 20 moved, every one a frame and every move in
+the x-span alone — Frame 1 1.18 → 1.14, Frame 33 1.08 → 1.04, Frames 2–10 and 24–32 by 1–4 cm
+— which is a leaning end frame's narrower head shortening its box along the ship; heads
+(Frame 17: 1.91 under a rail at 2.01), feet (−2.20) and outer faces (3.74 against planking at
+3.80) unchanged; the 73 other parts identical to 5 mm.**
+
+**Witnessed (rule 1), both --bare: r223/inboard-after.png (b 300, z 0.42, l 16, r217's own
+camera, where r217/inboard-bare.png has square-topped boxes): the far bulwark's inside is a
+row of timbers whose heads narrow and round off under the rail; r223/heads-close-after.png
+(b 300, z 0.2, l 10): the heads closer, each a tapered timber with a rounded top, the round
+catching the light on its inboard face. Rule 0 answered on heads-close-after.png read whole:
+it reads as a rendered world — sunlit laid deck with staggered butts, cloth with light
+through it, textured water to a hazy coast, the timber inside the bulwark in shadow. Three
+facts a viewer can read off it without a legend: the bulwark is lined inside with upright
+timbers whose heads are rounded and narrower than their bodies; the beams come out through
+the ship's side and show their end grain; the hatches are grated and the deck planks run
+across the ship.**
+
+**Named residuals, in order (r222's list, renumbered):** (0a) OPEN, its bound tightened — the
+pitch reads 1.8 ± 0.2 sidings on the port-side plate; Lahn 1992's Blatt 3 or 28–34 would
+give the siding in metres and settle it; r218's hunt paragraph lists every route that
+walled. (0b) CLOSED this round. NEW (0b′): the floors' arm heads lapped beside the futtocks
+at mid-side (read 5 above), and the moulding at the head, which needs a plate looking along
+the hull. (0c) the beams' stations and count. (0e) belowSheerM contested by 0.4 m. (0f) the
+beam-head wedge at 60+ px/m. (1) r214: the Gangspill's station. (2) r214: the wings'
+inner-edge and forward-end rails, no source. (3) r213: decked timber ships' rudder heads stop
+at 0.35 of the sheer; no helm port. (4) Kozushima 1993 weighing. (5) r187 emaki plate. (6)
+r182 grapnel shank. (7) r177 Lucian's second machine. (8) r176 sekibune class-size, paired
+with r211's top question. (9) Preussen mast livery. (10) Endurance forecastle. (11) Azzam
+crest span. (12) r164 risen black unpierced. (13) r165 fantail gallery wings. (14) r166
+screen glass. (15) r171 quarter-gallery sashes. (16) r171 authored tier fractions. (17) r172
+the 74's lower capstan barrel. (18) the cathead's supporting knee is a block. (19) the
+readiness transient: keep the r208 rule.**
+
+**The close ratchet, started 03:24:25 (r223/run-close.sh → close-ratchet.out) on a tree whose
+every change is described above. Predictions: r223/PREDICTIONS-close.md — ZERO movers beyond
+the documented sub-gate flaps, because only the cog carries the three fields, and she stands
+at berth-neighbour scale at ship-dhow's right edge and ship-treasure's left, where a head
+3–4 cm narrower is under a pixel. CLOSE STATE: if the paragraphs below this one are missing,
+the round was killed at the close gate (04:29:39) — the next firing must (1) re-run the
+ratchet whole on this committed tree, read and accept every mover with its reason, (2)
+`python3 build/build_site.py`, (3) commit, push, verify the live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 04:07:24 (r223/close-ratchet.out, started 03:24:25, 43.0 min,
+~40 s a frame): 64 frames, ZERO movers, exit 0, no BLANK — "all frames within tolerance", as
+predicted. Every frame was read while the run was going (r223/sweep.out, one line per frame
+as it landed, by the sweep's own >0 count with the mean and the bbox) and compared with
+r222's sweep by script (r223/compare-sweeps.py) at 5, 18, 32, 46, 59 and 64 frames landed:
+IDENTICAL to r222's line for 63 of 64 frames, digit for digit and box for box; the one
+DIFFERENT line is ship-dhow, 0.245% → 0.246% by that >0 count with the same bbox (x 41–2879,
+y 770–1410), which is the cog's 33 narrower heads at her right edge, the prediction's "few
+thousandths". At the harness's own >8 count ship-dhow reads 0.038% (r217: 0.049%),
+ship-treasure 0.022%, globe-default 0.048%, ship-container 0.003%, all ok. Nothing accepted;
+FRAME-LOG.md untouched. Build PUBLISHED after the run (the r207 order), data-version
+1788520077; web/index.html carries the same stamp and is in this commit's path list (the
+r209 rule). Published copies read back by code strings (the build strips comments):
+docs/js/hull.js carries headSidedFrac, docs/audit-hulls.js carries 'a futtock head cut
+square', docs/data/vessels.json carries headRound. Push receipt and live stamp appended
+below if the round survived to write them (the driver's kill is 04:29:39); otherwise r224
+verifies the live stamp first.**
+
+**r224 opens with residual (0b′), the floors' arm heads lapped beside the futtocks — the
+port-side plate (r223/crop-side-port-heads.png) shows a second rounded head at about
+mid-side beside every futtock that reaches the rail, the floor timber's arm ending there and
+the futtock standing against its side; build it as two timbers per station, the futtock's
+foot overlapping the floor's arm head by what the plate reads (measure the overlap in
+sidings first, the r158 rule), and keep the through-beam knee exception — or (0a) if a
+route to Lahn 1992's plates appears; r218's hunt paragraph lists every route that walled.
+One method note from this round's audit: a rule that compares a part's dimension at two
+heights must take its reference reading OUTSIDE the zone the record says is changing; the
+first draft read the body inside the taper and convicted every frame.**
