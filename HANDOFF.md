@@ -17896,3 +17896,8 @@ ratchet ran as the Bash tool's own background task, polled from the foreground i
 until-loops of up to nine minutes, its exit read from close-ratchet.out — the r198
 foreground-wait rule met by the r223 pattern; the witnesses were captured before it
 started, none beside it.**
+
+**Correction, 09:09: the accepted ship-dhow baseline PNG was NOT in b797a20 — close-out.sh's
+`git add` list (inherited from r225, a round with no movers) names FRAME-LOG.md but not
+Research/baselines/frames/, so the log said accepted while the picture was uncommitted. It is
+in this third commit. Next round's close-out.sh must add Research/baselines/frames/ too.**
