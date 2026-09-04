@@ -17870,3 +17870,29 @@ amplified diff Research/baselines/_diff/ship-dhow.png): the moved pixels are the
 silhouette at the frame's right edge, her rail and side, nothing on the dhow herself.
 ACCEPTED with that reason (FRAME-LOG.md). The 63 other frames were within tolerance,
 the sub-gate flaps included.**
+
+**r227 opens with residual (0g′), the flat's half-width along the ship: Blatt 2 gives four
+sections at four stations (Spant 5, 12, 26, 33), and each carries the flat's half-width
+against its own rail half-breadth — the model scales the flat with the local half-breadth
+(F·B(u)), and the bow sections show it narrowing to the keel plank faster than that. Read
+all four the way Spant 26 was read (4× crops, both sides, per-axis fractions; fix
+r226/trace-sections.py's seeding or read by eye), fit F(u) against B(u)/B_max, and if the
+law is not proportional, give the record the law and the loft the reader. Or (0e): re-read
+the beam's depth under the top strake off the Spant 26 crop with its own ruler, since this
+round's crop puts DB 4 at 0.65 of the side under the top strake against r215's 0.31–0.33.**
+
+**Live stamp VERIFIED: 1788537959 on https://augustg97.github.io/ships/index.html at
+09:07 PDT, 90 s after the push (build/staging/r226/push.log, the r209 poll pattern). Two
+commits close the round (b797a20 source + audit + docs + handoff + the dhow baseline, and
+this push-log commit). Published copies read back by code strings: docs/js/hull.js carries
+`form === 'flared'` (1), docs/data/vessels.json carries floorHalfFrac (1), docs/audit-hulls.js
+carries "off its record's curve" (1). Tree at close: only build/loop.log and the r205
+daemon's cookie file uncommitted, deliberately; the r226 staging (the three before-copies,
+hull.after.js, vessels.after.json, the two builder variants, apply-edits.py, the two diffs,
+trace-sections.py and its four overlays, section-model.py, the six witnesses, the four
+audit outputs, the two variant outputs, the two measures, the predictions, run-close.sh,
+close-out.sh, push-verify.sh) stays on disk uncommitted, the r211 convention. The close
+ratchet ran as the Bash tool's own background task, polled from the foreground in
+until-loops of up to nine minutes, its exit read from close-ratchet.out — the r198
+foreground-wait rule met by the r223 pattern; the witnesses were captured before it
+started, none beside it.**
