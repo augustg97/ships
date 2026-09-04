@@ -18871,3 +18871,9 @@ recorded in the push-log commit that follows this one (the r198 rule). Tree at c
 build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r232 staging (the
 before- and after-copies, the edit scripts, the measure, the witnesses, the plate crop, the audit
 outs, the close scripts) stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788561185 on https://augustg97.github.io/ships/index.html at 15:34 PDT,
+90 s after the push (build/staging/r232/push.log, the r209 poll pattern). Published copies read
+back by code strings: docs/data/vessels.json carries deckAboveKeelM (3) and "foredeck" (1),
+docs/js/hull.js carries deckLineFromBeams (4) and docs/audit-hulls.js D-BEAM-HEIGHT (0). THE RATCHET, run after the push: RATCHET EXIT 0  END 16:14:44; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, shipwright-ahead 0.045%/0.021, ship-endurance 0.043%/0.018. Prediction (r232/PREDICTIONS-close.md) held. The two predicted frames moved where predicted and under the gate: ship-dhow 0.013%/0.010 (the diff, r232/diff-ship-dhow.png, is the cog's castle at the frame's right edge and a few pixels of the junk's label at the left, nothing on the dhow) and ship-treasure 0.021%/0.008 (the cog behind the card at the left edge); no baseline was accepted. Launched 15:33:15 at load 7.6, 41 minutes for 64 frames.
+Two commits close the round (e9c65fa source + audit + docs + handoff, and this push-log commit with any accepted baseline).**
