@@ -1,0 +1,3 @@
+2026-09-03 21:16:14 PDT  docs/index.html data-version 1788495341
+2026-09-03 21:16:16 PDT  git push origin main rc=0 →    c13ac72..ee3c8f5  main -> main
+2026-09-03 21:17:17 PDT  live data-version 1788495341 — matches docs/ after 60 s

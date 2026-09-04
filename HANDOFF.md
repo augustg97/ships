@@ -16498,3 +16498,13 @@ check there — the first grep for it read 0): docs/audit-hulls.js 'frames off t
 docs/js/shipwright.js openBulwark (2). Push receipt and live stamp: appended below if the
 round survived to write them (the driver's kill is 21:30:12); otherwise r218 verifies the
 live stamp first.**
+
+**Live stamp VERIFIED: 1788495341 on https://augustg97.github.io/ships/index.html at 21:17:17
+PDT, 60 s after the push (build/staging/r217/push.log, the r209 poll pattern). Three commits
+close the round (bf465a2 source + handoff close state, ee3c8f5 docs + close paragraph, and
+this push-log commit). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r217 staging (witness frames, before-copies, the inject
+script, the audit/inject/measure/ratchet outputs, the predictions) stays on disk
+uncommitted, the r211 convention. r218 opens with residual (0a) — the cog's frame pitch is a
+class default until Lahn 1992 Blatt 3 or 28–34 is fetched — or, if that fetch walls again,
+(0g) the transom-winding audit rule carried from r216's close gate, which needs no source.**
