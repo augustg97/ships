@@ -16650,3 +16650,90 @@ the predictions) stays on disk uncommitted, the r211 convention. r219 opens with
 its own rule and a loft fix and a first look at why Queen Mary 2's terraces did not convict —
 or (0a) if a route to Lahn 1992's plates appears; the (0a) hunt paragraph lists every route
 that walled.**
+
+## Round 219 — 2026-09-03 — the terrace riser on the shell takes its own normal: the snap slot's rows are duplicated, classified triangle by triangle, and the audit convicts a face whose normal lies in its own plane
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r218 said r219 opens
+with residual (0h), Azzam's stern-terrace risers on the shell, or (0a) if a route to Lahn
+1992 appeared. No new route appeared; (0h) is DONE, and the question r218 asked about Queen
+Mary 2 is answered below.**
+
+**(0h): what the geometry is. At each of Azzam's five terrace breaks hullStations puts two
+stations 2·10⁻⁵ apart in u (3.6 mm of x). The slot between them is a column of quads joining
+row j of the forward station to row j of the aft one. Above the waterline (v > 0.62) the two
+sections differ — the forward one is a deck taller — so each quad is a trapezoid in the plane
+x = const between the two section curves, and the column is a clean strip from the waterline
+to the sheer: the riser as it shows on the shell. Below the waterline the two sections are the
+same section, the rung between them is the 3.6 mm of x and nothing else, and the quad is a
+3.6 mm strip of side. Two faults sat on the riser rows: (1) their vertices carried the SIDE's
+normal — the one-sided difference at a snap pair deliberately takes the side's tangent away
+from the break — so the stored normal lay in the riser's own plane (r218: 512 faces at cos
+−0.03 to −0.05); (2) the side winding (a, b, c) reads (b−a)×(c−a) ≈ (0, −drop, 0)×(0, Δy, Δz)
+= (−drop·Δz, 0, 0), a face looking forward at a step that descends going aft, whose exposed
+face looks aft. Both wrong, on every riser triangle of the one hull that has them.**
+
+**Queen Mary 2 did not convict because she has no sternSteps: grep of vessels.json finds the
+field on Azzam alone. Her terraces are house tiers, built by the deck/house code, and never
+enter the loft's snap-pair path. Nothing to fix on her.**
+
+**The change (before-copies in build/staging/r219/). (1) web/js/hull.js, buildHullGeometry:
+after the side index loop, every snap slot (US[i+1] − US[i] < 10⁻⁴) gets two duplicate vertex
+rows — positions and uvs copied from the side rows, normal (sgn, 0, 0) where sgn = +1 when
+H.sheer stands higher forward of the break. Each of the slot's 2·NV triangles is then
+classified by its OWN geometric normal: if |nₓ| > |n_y| + |n_z| it is a riser triangle, indexed
+on the duplicate rows and wound so nₓ carries sgn (measured, so tumblehome cannot fold it);
+otherwise it is side and keeps the side rows and the side winding. Hulls without a snap pair
+are byte-identical; Azzam's positions are byte-identical (copied), so measure_ship was not
+re-run — the change is normals and index order. (2) Research/audit-hulls.js, THE SKIN FACE OWNS
+ITS NORMAL, in the r218 winding loop, synced to web/ (docs/ by the build): a skin triangle
+whose stored normal stands at |cos| < 0.3 to its geometric normal convicts as 'skin faces with
+no normal of their own', with the count and the x and y range. Record-blind, every hull.**
+
+**Three drafts of the loft fix, each convicted by the new rule with a number that named the
+next fault (all outputs in r219/audit-*.out). Rule proven on the r218 loft first: Azzam 542
+of 124,702 (r218's 512 plus 30 at the lower |cos| bound), x 66.0–81.7, y 0.0–9.0. Draft A,
+whole slot as riser: 1466, x 55.0–81.7, y −4.1 to 9.0 — the range says it: the underwater
+rows, where the slot is side, now carried an x normal, and the drop-less pair at u 0.82 (the
+first span's forward edge, no step) too. Draft B, per quad by rung drop > 10× the x gap: 6, y
+−0.1 to 0.1 — the waterline quad, whose first triangle stands on a rung with no drop and is
+side while its second is riser. Draft C, per triangle by its own rung: 8, x 76.7–81.7, y
+0.0–0.1 — where the side is vertical the strip between the two sections has no width and the
+triangle's area is the pair's own 3.6 mm × the row height, with the side's normal. Draft D,
+per triangle by geometric normal (shipped): 33 hulls, 0 problems (r219/audit-after4.out).
+Every draft's count was read before the next was written; none was guessed.**
+
+**Witness (r219/azzam-*-before.png and -after.png, url_capture at b=150 z=0.7 l=10 y=5 and
+b=180 z=0.6 l=8 y=5; crops and ×8 diffs r219/pq-crop*.png, astern-crop*.png, from
+r219/crop-diff.py): 0.011% and 0.001% of pixels differ, every one on a hairline along the
+five break stations down the shell — from the quarter and from astern the riser strip is
+edge-on, one pixel wide. A close witness that shows the riser as a FACE (the stern quarter,
+z 0.35, aimed at x 66–82 on the port or starboard side, --bare) is the first capture of the
+next round: the close ratchet had the browser from 22:57 and the r-one-browser rule holds.
+Rule 0 on azzam-astern-before.png, read whole: the yacht from dead astern, the tender-deck
+terraces stepping down to the transom under a planked deck, radomes on the mast, textured
+water — a rendered world. Three facts a viewer can read without a legend: the stern descends
+in terraces, each with a white bulwark; the decks are planked; the mast carries four radomes.**
+
+**Named residuals, in order (r218's list, renumbered):** (0a) OPEN — the cog's frame pitch is
+a class default; r218's hunt paragraph lists every route that walled. (0b) the futtock's bevel
+and rough head. (0c) the beams' stations and count. (0d) the nine `H.sheer` deck-readers on
+other classes must switch to `H.deck` before any second hull takes deck.belowSheerM. (0e)
+belowSheerM contested by 0.4 m. (0f) the beam-head wedge at 60+ px/m. (0g) CLOSED r218. (0h)
+CLOSED this round. NEW (0i): the close witness above — the riser seen as a face, before (r218
+HEAD, checked out into a worktree or served from docs/ of commit 450e400) and after. (1)
+r214: the Gangspill's station. (2) r214: the wings' inner-edge and forward-end rails, no
+source. (3) r213: decked timber ships' rudder heads stop at 0.35 of the sheer; no helm port.
+(4) Kozushima 1993 weighing. (5) r187 emaki plate. (6) r182 grapnel shank. (7) r177 Lucian's
+second machine. (8) r176 sekibune class-size, paired with r211's top question. (9) Preussen
+mast livery. (10) Endurance forecastle. (11) Azzam crest span. (12) r164 risen black
+unpierced. (13) r165 fantail gallery wings. (14) r166 screen glass. (15) r171 quarter-gallery
+sashes. (16) r171 authored tier fractions. (17) r172 the 74's lower capstan barrel. (18) the
+cathead's supporting knee is a block. (19) the readiness transient: keep the r208 rule.**
+
+**The close ratchet, started 22:57:22 (r219/run-close.sh → close-ratchet.out) on a tree
+whose every change is described above. Predictions: r219/PREDICTIONS-close.md — ship-azzam
+may move by hairlines or not at all; nothing else but the documented flaps. CLOSE STATE: if
+the paragraphs below this one are missing, the round was killed at the close gate (23:57:13)
+— the next firing must (1) re-run the ratchet whole on this committed tree, read and accept
+every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the
+live stamp, the r198 rule.**

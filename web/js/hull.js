@@ -1086,10 +1086,68 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
     }
   }
   const row = NV + 1;
+  /* ── THE RISER BETWEEN A SNAP PAIR IS ITS OWN FACE (round 219) ─────────────────────
+     The slot between the two stations of a snap pair is the terrace RISER on the shell: the
+     strip between the taller forward section and the shorter aft one, in the plane x = const,
+     from the keel (where the two sections meet) to the sheer (where they stand a deck apart).
+     Wound as side quads its vertices carried the SIDE's normal — the one-sided difference
+     above deliberately takes the side's tangent away from the break — so every riser face had
+     a stored normal lying in its own plane (r218's audit: 512 faces on Azzam at cos −0.03 to
+     −0.05) and was lit as the side it is at right angles to. And the side winding (a, b, c)
+     reads (b−a)×(c−a) ≈ (0, −drop, 0)×(0, Δy, Δz) = (−drop·Δz, 0, 0): a face looking FORWARD
+     at a step that descends going aft, whose exposed face looks aft. The slot now gets its own
+     two vertex rows (positions and uvs copied, normal ±x by which side of the break stands
+     higher) and a winding whose geometric normal is that same ±x; the side rows keep their
+     side normals for the side quads. ROW BY ROW, because the two sections only part above
+     the waterline: below v = 0.62 they are the same section, the rung between them is the
+     pair's own 4 mm of x and nothing else, and that quad is a 4 mm strip of SIDE — an x
+     normal there is the fault this fixes, the other way round (first run: 1466 faces down
+     to the keel). A quad is a riser where either of its rungs drops more than ten times the
+     pair's x gap; otherwise it stays side. Hulls without a snap pair: byte-identical. */
+  const risers = [];
+  for (let i = 0; i < US.length - 1; i++)
+    if (US[i + 1] - US[i] < 1e-4)
+      risers.push([i, H.sheer(US[i]) > H.sheer(US[i + 1]) ? 1 : -1]);
+  const riserAt = new Set(risers.map(r => r[0]));
   for (let i = 0; i < US.length - 1; i++) {
+    if (riserAt.has(i)) continue;
     for (let j = 0; j < NV; j++) {
       const a = i * row + j, b = a + row, c = a + 1, d = b + 1;
       idx.push(a, b, c, c, b, d);
+    }
+  }
+  for (const [i, sgn] of risers) {
+    const base = pos.length / 3;
+    for (const k of [i, i + 1]) for (let j = 0; j <= NV; j++) {
+      const p = k * row + j;
+      pos.push(pos[p * 3], pos[p * 3 + 1], pos[p * 3 + 2]);
+      nor.push(sgn, 0, 0);
+      uvs.push(uvs[p * 2], uvs[p * 2 + 1]);
+    }
+    /* per TRIANGLE, by its own geometric normal: a riser triangle stands in the x plane;
+       one that does not (below the waterline; the waterline row's first triangle, which
+       stands on a rung with no drop; any row where the side is vertical, so the strip
+       between the two sections has no width and the triangle is the pair's own 4 mm of
+       side) is side, and keeps the side rows. A riser triangle is wound so its geometric
+       normal carries sgn — measured, not assumed, so tumblehome cannot fold it. */
+    const P = k => [pos[k * 3], pos[k * 3 + 1], pos[k * 3 + 2]];
+    const triNx = (a, b, c) => {
+      const A = P(a), B = P(b), C = P(c);
+      const e1 = [B[0] - A[0], B[1] - A[1], B[2] - A[2]], e2 = [C[0] - A[0], C[1] - A[1], C[2] - A[2]];
+      const nx = e1[1] * e2[2] - e1[2] * e2[1], ny = e1[2] * e2[0] - e1[0] * e2[2], nz = e1[0] * e2[1] - e1[1] * e2[0];
+      return Math.abs(nx) > Math.abs(ny) + Math.abs(nz) ? nx : 0;
+    };
+    const put = (a, b, c, ar, br, cr) => {
+      const nx = triNx(a, b, c);
+      if (nx === 0) idx.push(a, b, c);
+      else if (nx * sgn > 0) idx.push(ar, br, cr);
+      else idx.push(ar, cr, br);
+    };
+    for (let j = 0; j < NV; j++) {
+      const aS = i * row + j, bS = aS + row, cS = aS + 1, dS = bS + 1;   // side rows
+      const aR = base + j,    bR = aR + row, cR = aR + 1, dR = bR + 1;   // riser rows
+      put(aS, bS, cS, aR, bR, cR);
+      put(cS, bS, dS, cR, bR, dR);
     }
   }
 
