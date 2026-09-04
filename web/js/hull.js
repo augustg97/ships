@@ -332,6 +332,15 @@ function frameStations(S, NF) {
   return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
 }
 
+/* the frame's number from its station (round 225): the floor's long arm changes side
+   frame by frame, and a frame built as its own object (the Shipwright, onlyU) must know
+   its number without the list — the same arithmetic frameStations uses for the list */
+function frameNumber(S, u) {
+  const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
+  const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
+  return Math.round((u - 0.055) / 0.89 * (n - 1));
+}
+
 function buildFramesGeometry(S, NF = 26, onlyU) {
   const H = hullSurface(S);
   const pos = [], idx = [];
@@ -426,13 +435,28 @@ function buildFramesGeometry(S, NF = 26, onlyU) {
          alternates down the chain. Every head in the chain is tapered and rounded as the
          record says for the top one; an upper timber's foot, cut in the open, is capped
          square. Without laps the chain is one timber, keel to head, the r223 build. */
-      const laps = (S.frames.laps || []).slice().sort((a, b) => a.headBelowM - b.headBelowM);
+      /* ── THE FLOOR'S ARMS ARE UNEQUAL, AND THE LONG ONE CHANGES SIDE FRAME BY FRAME (r225)
+         A lap under the top head is given under it (headBelowM); the floor's own lap is a
+         bottom timber's and is given over the KEEL (headAboveKeelM), where the floor's arm
+         ends at the turn of the bilge. Doel 1 (Vermeersch & Haneca 2014): each floor has
+         one bilge scarf, alternating to port and starboard — its arms end on strake GC
+         (the bilge) on one side and GF (three strakes higher) on the other, and the long
+         arm changes side from one floor to the next. The record says how much higher the
+         long arm ends (altM); the long side is the frame number's parity, port on the even
+         frames, so a frame built as its own object stands its long arm where the chain
+         built whole does. Without headAboveKeelM and altM the chain is the r224 build. */
+      const fno = frameNumber(S, u);
+      const longSide = ((fno + (sgn > 0 ? 0 : 1)) % 2) === 0;
+      const laps = (S.frames.laps || []).map(lp => {
+        const lift = (lp.altM && longSide) ? lp.altM : 0;
+        const yNext = lp.headAboveKeelM != null ? yKeel + lp.headAboveKeelM + lift : yTop - lp.headBelowM + lift;
+        return { yNext, lapM: lp.lapM || 0 };
+      }).sort((a, b) => b.yNext - a.yNext);
       const timbers = [];
       let yH = yTop;
       laps.forEach((lp, i) => {
-        const yNext = yTop - lp.headBelowM;
-        timbers.push({ yHead: yH, yFoot: Math.max(yKeel, yNext - (lp.lapM || 0)), dx: (i % 2) ? -2 * half : 0 });
-        yH = yNext;
+        timbers.push({ yHead: yH, yFoot: Math.max(yKeel, lp.yNext - lp.lapM), dx: (i % 2) ? -2 * half : 0 });
+        yH = lp.yNext;
       });
       timbers.push({ yHead: yH, yFoot: yKeel, dx: (laps.length % 2) ? -2 * half : 0 });
       for (const T of timbers) {

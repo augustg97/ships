@@ -178,6 +178,11 @@ const keep = ((S.frames.sidedM || 0.18) + ((S.deck && S.deck.kneeSidedM) || 0.20
 const beams = beamStations(S);
 return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
 }
+function frameNumber(S, u) {
+const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
+const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
+return Math.round((u - 0.055) / 0.89 * (n - 1));
+}
 function buildFramesGeometry(S, NF = 26, onlyU) {
 const H = hullSurface(S);
 const pos = [], idx = [];
@@ -220,13 +225,18 @@ let j = 1; while (j < TAB && ty[j] < y) j++;
 const f = Math.max(0, Math.min(1, (y - ty[j - 1]) / Math.max(1e-6, ty[j] - ty[j - 1])));
 return tv[j - 1] + f * (tv[j] - tv[j - 1]);
 };
-const laps = (S.frames.laps || []).slice().sort((a, b) => a.headBelowM - b.headBelowM);
+const fno = frameNumber(S, u);
+const longSide = ((fno + (sgn > 0 ? 0 : 1)) % 2) === 0;
+const laps = (S.frames.laps || []).map(lp => {
+const lift = (lp.altM && longSide) ? lp.altM : 0;
+const yNext = lp.headAboveKeelM != null ? yKeel + lp.headAboveKeelM + lift : yTop - lp.headBelowM + lift;
+return { yNext, lapM: lp.lapM || 0 };
+}).sort((a, b) => b.yNext - a.yNext);
 const timbers = [];
 let yH = yTop;
 laps.forEach((lp, i) => {
-const yNext = yTop - lp.headBelowM;
-timbers.push({ yHead: yH, yFoot: Math.max(yKeel, yNext - (lp.lapM || 0)), dx: (i % 2) ? -2 * half : 0 });
-yH = yNext;
+timbers.push({ yHead: yH, yFoot: Math.max(yKeel, lp.yNext - lp.lapM), dx: (i % 2) ? -2 * half : 0 });
+yH = lp.yNext;
 });
 timbers.push({ yHead: yH, yFoot: yKeel, dx: (laps.length % 2) ? -2 * half : 0 });
 for (const T of timbers) {

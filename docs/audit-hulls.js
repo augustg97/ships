@@ -534,7 +534,7 @@ const rs = H.frames.roomAndSpaceM, nWant = Math.floor(0.89 * L / rs) + 1;
 const nBeams = H.deck.throughBeams || 0;
 if (fr.length > nWant || fr.length < nWant - nBeams)
 say(v.id, "frames off the record's count", `${fr.length} frames, ${nWant} at ${rs} m over the run (less up to ${nBeams} at the beams)`);
-const xs = [];
+const xs = [], floorArms = [];
 for (const f of fr) {
 const b = bbox(f), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
 xs.push(xc);
@@ -559,7 +559,10 @@ const st = [];
 for (let k = 0; k + 1 < W.length; k += 4)
 st.push({ y: W[k][1], x: (W[k][0] + W[k + 1][0]) / 2, z: W[k][2], s: Math.abs(W[k + 1][0] - W[k][0]) });
 const all = [[]];
-for (let k = 0; k < st.length; k++) { if (k && st[k].y < st[k - 1].y - 0.01) all.push([]); all[all.length - 1].push(st[k]); }
+for (let k = 0; k < st.length; k++) {
+if (k && (st[k].y < st[k - 1].y - 0.01 || Math.sign(st[k].z) * Math.sign(st[k - 1].z) < 0)) all.push([]);
+all[all.length - 1].push(st[k]);
+}
 for (const sg of [-1, 1]) {
 const runs = all.filter(run => Math.sign(run.reduce((a2, r) => a2 + r.z, 0)) === sg);
 if (!runs.length) continue;
@@ -583,15 +586,20 @@ if (H.frames.headRound && topS > 0.5 * bs)
 say(v.id, 'a futtock head cut square', `top station ${topS.toFixed(3)} m across, body ${bs.toFixed(3)}, record says rounded, at x ${xc.toFixed(1)} ${side}`);
 }
 if (H.frames.laps) {
-const laps = H.frames.laps.slice().sort((a, c) => a.headBelowM - c.headBelowM);
+const keelY = Math.min(...runs.map(footOf));
+const wantOf = lp => lp.headAboveKeelM != null ? keelY + lp.headAboveKeelM : topY - lp.headBelowM;
+const laps = H.frames.laps.slice().sort((a, c) => wantOf(c) - wantOf(a));
 const sided = H.frames.sidedM || 0.18;
 if (runs.length < laps.length + 1)
 say(v.id, 'a frame built as fewer timbers than its laps', `${runs.length} timbers, record ${laps.length} lap(s) at x ${xc.toFixed(1)} ${side}`);
 laps.forEach((lp, i) => {
 const up = runs[i], lo = runs[i + 1]; if (!up || !lo) return;
-const wantHead = topY - lp.headBelowM, gotHead = headOf(lo);
+const want0 = wantOf(lp), gotHead = headOf(lo);
+const alt = lp.altM || 0, isLong = alt > 0 && Math.abs(gotHead - (want0 + alt)) < Math.abs(gotHead - want0);
+const wantHead = want0 + (isLong ? alt : 0);
 if (Math.abs(gotHead - wantHead) > 0.15)
-say(v.id, 'a lap head off the record', `lower timber's head ${gotHead.toFixed(2)} m, record ${wantHead.toFixed(2)} (${lp.headBelowM} under the top head) at x ${xc.toFixed(1)} ${side}`);
+say(v.id, 'a lap head off the record', `lower timber's head ${gotHead.toFixed(2)} m, record ${wantHead.toFixed(2)} (${lp.headAboveKeelM != null ? lp.headAboveKeelM + ' over the keel' : lp.headBelowM + ' under the top head'}${alt ? (isLong ? ' + ' + alt + ' on the long side' : ', the short side') : ''}) at x ${xc.toFixed(1)} ${side}`);
+if (alt > 0) floorArms.push({ x: xc, side: sg, y: gotHead, long: isLong, alt });
 const gotLap = gotHead - footOf(up);
 if (lp.lapM && Math.abs(gotLap - lp.lapM) > 0.15)
 say(v.id, 'a lap off its length', `upper timber's foot ${gotLap.toFixed(2)} m below the lower's head, record ${lp.lapM} at x ${xc.toFixed(1)} ${side}`);
@@ -618,6 +626,25 @@ say(v.id, 'a lap head cut square', `lower timber's top station ${loTop.toFixed(3
 }
 }
 const beamX = byName('deck-beam').map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; });
+if (floorArms.length) {
+const byX = new Map();
+for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[fa.side < 0 ? 's' : 'p'] = fa; }
+const fl = [...byX.values()].filter(f => f.s && f.p).sort((a, c) => a.x - c.x);
+if (fl.length < fr.length - 1)
+say(v.id, 'floors whose arms the rule could not pair', `${fl.length} floors read on both sides of ${fr.length} frames`);
+for (const f of fl) {
+const d = Math.abs(f.p.y - f.s.y);
+if (Math.abs(d - f.p.alt) > 0.15)
+say(v.id, "a floor whose arms do not stand the record's height apart", `port arm ${f.p.y.toFixed(2)} m, starboard ${f.s.y.toFixed(2)}, ${d.toFixed(2)} apart, record ${f.p.alt} at x ${f.x.toFixed(1)}`);
+f.longSide = f.p.y > f.s.y ? 'port' : 'starboard';
+}
+for (let i = 1; i < fl.length; i++) {
+const skipped = (fl[i].x - fl[i - 1].x) > 1.5 * rs;
+const same = fl[i].longSide === fl[i - 1].longSide;
+if (same !== skipped)
+say(v.id, skipped ? 'floors across a skipped station long on different sides' : 'neighbouring floors long on the same side', `${fl[i - 1].longSide} at x ${fl[i - 1].x.toFixed(1)} and ${fl[i].longSide} at x ${fl[i].x.toFixed(1)}${skipped ? ' (a station skipped between)' : ''}`);
+}
+}
 xs.sort((a, b) => a - b);
 for (let i = 1; i < xs.length; i++) {
 const d = xs[i] - xs[i - 1];
