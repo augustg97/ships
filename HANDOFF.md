@@ -16638,3 +16638,15 @@ list (the r209 rule). Published copies read back by code strings: docs/js/hull.j
 cap's new winding (present), docs/audit-hulls.js 'skin faces wound against their normals' (1).
 Push receipt and live stamp appended below if the round survived to write them (the driver's
 kill is 22:47:44); otherwise r219 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788499462 on https://augustg97.github.io/ships/index.html at 22:26:40
+PDT, 90 s after the push (build/staging/r218/push.log, the r209 poll pattern). Three commits
+close the round (2cf162e source + handoff close state, 582f69f docs + baselines + close
+paragraph, and this push-log commit). Tree at close: only build/loop.log and the r205 daemon's
+cookie file uncommitted, deliberately; the r218 staging (the before-copies, the audit outputs
+before and after, the Azzam probe, the sweep, the crops and tile sheets, the accept scripts,
+the predictions) stays on disk uncommitted, the r211 convention. r219 opens with residual (0h)
+— Azzam's stern-terrace risers carry the side's normal (512 faces, numbers above), which needs
+its own rule and a loft fix and a first look at why Queen Mary 2's terraces did not convict —
+or (0a) if a route to Lahn 1992's plates appears; the (0a) hunt paragraph lists every route
+that walled.**
