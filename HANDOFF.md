@@ -18059,3 +18059,12 @@ the plan moves (Cw, Cp, Cb) before and after, individually. Or (0g⁵): put the 
 the plate's stations with deck.beamsAtU.**
 
 **Live stamp: docs/index.html carries data-version 1788542335 at the build; the push and the live poll are in build/staging/r227/push.log, and the verified live value is recorded in the push-log commit that follows this one (the r198 rule: the receipt and the live stamp read the same round). Tree at close: only build/loop.log and the r205 daemon's cookie file uncommitted, deliberately; the r227 staging (the three before-copies, hull.after.js, vessels.after.json, the two builder variants, apply-edits.py, the two diffs, trace-sections.py with its four overlays and four gridded crops, fit.json, the four witnesses, the audit and variant outputs, the measure, the predictions, run-close.sh, close-out.sh, push-verify.sh) stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788542335 on https://augustg97.github.io/ships/index.html at 10:20:31 PDT,
+90 s after the push (build/staging/r227/push.log, the r209 poll pattern). Published copies read
+back by code strings: docs/js/hull.js carries `function frameU` (1) and `sectionRows` (2),
+docs/data/vessels.json carries "stations" (1), docs/audit-hulls.js carries "a section station
+with no skin to read" (1) and "carries no u to read them at" (1). Two commits close the round
+(b456142 source + audit + docs + handoff, and this push-log commit); no baseline moved, so
+close-out's add list (which now names Research/baselines/frames/, the r226 correction) had
+nothing to add there.**
