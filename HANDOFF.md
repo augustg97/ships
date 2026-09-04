@@ -16756,3 +16756,16 @@ read back by code strings: docs/js/hull.js carries triNx and riserAt (the build 
 comments), docs/audit-hulls.js 'skin faces with no normal of their own' (1). Push receipt and
 live stamp appended below if the round survived to write them (the driver's kill is 23:57:13);
 otherwise r220 verifies the live stamp first.**
+
+**Live stamp VERIFIED: 1788503870 on https://augustg97.github.io/ships/index.html at 23:39:47
+PDT, 90 s after the push (build/staging/r219/push.log, the r209 poll pattern). Three commits
+close the round (abb1ab6 source + handoff, dc26c09 docs + close paragraph, and this push-log
+commit). Tree at close: only build/loop.log and the r205 daemon's cookie file uncommitted,
+deliberately; the r219 staging (the before-copies, hull.after.js, the five audit outputs, the
+witness captures with their crops and diffs, the sweep, the predictions, run-close.sh,
+push-verify.sh) stays on disk uncommitted, the r211 convention. r220 opens with residual (0i)
+— the close witness that shows Azzam's riser as a FACE, before and after (the stern quarter,
+z 0.35, aimed at x 66–82, --bare; the before from a worktree at 450e400 or from that commit's
+docs/), taken BEFORE any ratchet is launched, because the ratchet holds the browser for forty
+minutes — or (0a) if a route to Lahn 1992's plates appears; r218's hunt paragraph lists every
+route that walled.**
