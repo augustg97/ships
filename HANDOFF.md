@@ -18432,3 +18432,9 @@ the builder variant, apply-edits.py and apply-edits-2.py, the three diffs, the B
 the five witnesses, the two audit outputs, the variant output, the measure, the predictions,
 run-browser.sh, run-close.sh, close-out.sh, push-verify.sh, push-log-commit.sh) stays on disk
 uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788550593 on https://augustg97.github.io/ships/index.html at 12:37 PDT,
+60 s after the push (build/staging/r229/push.log, the r209 poll pattern). Published copies read
+back by code strings: docs/js/hull.js carries `function beamRows` (1), docs/data/vessels.json carries beamStations (4),
+docs/audit-hulls.js carries "a through-beam off the record's station" (1).
+Two commits close the round (f1c8f04 source + audit + docs + handoff + any accepted baseline, and this push-log commit).**
