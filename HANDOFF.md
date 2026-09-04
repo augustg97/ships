@@ -15934,3 +15934,40 @@ STATE: if the paragraphs below this one are missing, the round was killed at the
 — the next firing must (1) re-run the ratchet whole on this committed tree, read and accept
 every mover with its reason, (2) `python3 build/build_site.py`, (3) commit, push, verify the
 live stamp, the r198 rule.**
+
+**The close ratchet FINISHED at 17:28:49 (build/staging/r214/close-ratchet.out, started
+16:48:11, ~38 s a frame under a load average that reached 24 while the audits and the
+residual-0 checks ran beside it): 64 frames, ZERO movers, exit 0 — exactly
+r214/PREDICTIONS-close.md. The cog's berth neighbours read ship-treasure 0.000% / 0.001,
+aboard-treasure 0.002% / 0.000; shipwright 0.042% / 0.017 and globe-default 0.046% / 0.011,
+both inside tolerance and the latter at its documented flap a thirteenth round; about thirty
+frames read a non-zero sub-tolerance diff (0.01–0.05%) under that load, none accepted
+because none crossed the gate. No BLANK. Build PUBLISHED after the run (the r207 order),
+data-version 1788481754, docs/ at 125.4 MB; web/index.html carries the same stamp and is in
+this commit's path list (the r209 rule). The published copies read back: docs/js/hull.js
+carries castleGeom and castle-heckbalken, docs/audit-hulls.js the "a castle with no stern
+beams" arm, docs/data/vessels.json the plan. Push receipt and live stamp: appended below if
+the round survived to write them (the driver's kill is 17:44:40); otherwise r215 verifies the
+live stamp first.**
+
+**Named residuals, in order (r213's list, renumbered):** (0) CLOSED this round — the two
+text-strip movers do not reproduce. (1) CLOSED this round — the castle's plan. NEW from it,
+HEAD for r215: **the cog's main deck lies at the sheer; the wreck's deck lies about 1.2 m
+below the top strake, its through-beams at that level, and a bulwark above** — everything
+on her rides about a metre high as a result (the castle deck at 4.28 m over the water where
+Lahn's elevation reads ~3.2; the Gangspill top ~8.1 m over the keel where the DSM booklet's
+record says 7.02 m to the winch on the castle deck). That is a hull-loft question
+(deckAtU = sheer for every hull), so it must be fixed at the class level with a record
+field for the deck's depth below the sheer, and the castle, windlass, cabins and tiller
+follow by construction because they already read the deck. Also NEW: the Gangspill's
+station — Lahn's elevation draws it about 1 m abaft the castle's forward end where the text
+says 'on its top'; the plan cannot say which side of the centreline; Lahn 1992's castle
+sheet would settle it in one fetch. Also NEW: the wings' inner edges and forward ends carry
+class-default open rails; no source seen. (2) r213: decked timber ships' rudder heads stop at
+0.35 of the sheer; no helm port (the 74, the clipper, the Indiaman). (3) Kozushima 1993
+weighing. (4) r187 emaki plate. (5) r182 grapnel shank. (6) r177 Lucian's second machine.
+(7) r176 sekibune class-size, paired with r211's top question. (8) Preussen mast livery.
+(9) Endurance forecastle. (10) Azzam crest span. (11) r164 risen black unpierced. (12) r165
+fantail gallery wings. (13) r166 screen glass. (14) r171 quarter-gallery sashes. (15) r171
+authored tier fractions. (16) r172 the 74's lower capstan barrel. (17) the cathead's
+supporting knee is a block. (18) the readiness transient: keep the r208 rule.**

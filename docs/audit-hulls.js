@@ -400,6 +400,77 @@ say(v.id, "the blade off the record's chord", `${c.toFixed(2)} m at the foot, re
 }
 }
 }
+if (H.castle && H.castle.plan) {
+const P = H.castle.plan;
+const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
+const world = o => {
+const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+return out;
+};
+const bbox = o => { const b = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9];
+for (const q of world(o)) { b[0] = Math.min(b[0], q[0]); b[1] = Math.min(b[1], q[1]); b[2] = Math.min(b[2], q[2]); b[3] = Math.max(b[3], q[0]); b[4] = Math.max(b[4], q[1]); b[5] = Math.max(b[5], q[2]); }
+return b; };
+const decks = byName('castle-deck');
+if (!decks.length) say(v.id, 'a castle plan with no deck', 'record gives castle.plan; no castle-deck mesh');
+else {
+const dv = [].concat(...decks.map(world));
+let xF = 1e9, xA = -1e9, yD = -1e9;
+for (const q of dv) { xF = Math.min(xF, q[0]); xA = Math.max(xA, q[0]); yD = Math.max(yD, q[1]); }
+const len = xA - xF, wantL = P.aftLenM + P.sideLenM;
+if (Math.abs(len - wantL) > 0.15)
+say(v.id, "a castle off the record's length", `${len.toFixed(2)} m of deck, the plan says ${wantL.toFixed(2)}`);
+const post = (() => { let r = null; g.traverse(o => {
+if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+if (!post) say(v.id, 'a castle with no post to overhang', 'no Sternpost mesh');
+else {
+const pv = world(post); let top = -1e9; for (const q of pv) top = Math.max(top, q[1]);
+let xp = -1e9; for (const q of pv) if (q[1] > top - 0.3) xp = Math.max(xp, q[0]);
+const ovh = H.castle.overhangAftM != null ? H.castle.overhangAftM : 0.7;
+if (Math.abs((xA - xp) - ovh) > 0.25)
+say(v.id, "a castle off the record's overhang", `after edge ${(xA - xp).toFixed(2)} m abaft the post's head, record says ${ovh}`);
+if (xA - xp > 1.5)
+say(v.id, 'a castle hanging past its stern', `after edge ${(xA - xp).toFixed(2)} m abaft the post's head — the stern beams cannot carry that`);
+}
+const halfAt = (x0, x1) => { let w = 0; for (const q of dv) if (q[0] >= x0 && q[0] <= x1) w = Math.max(w, Math.abs(q[2])); return w; };
+const xT = xA - P.aftLenM;
+const wFwd = halfAt(xT - 0.35, xT + 0.35), wAft = halfAt(xA - 0.35, xA + 0.01);
+if (Math.abs(2 * wFwd - P.aftBreadthFwdM) > 0.2)
+say(v.id, "the castle off the plan's forward breadth", `${(2 * wFwd).toFixed(2)} m at the after part's forward edge, record says ${P.aftBreadthFwdM}`);
+if (Math.abs(2 * wAft - P.aftBreadthAftM) > 0.2)
+say(v.id, "the castle off the plan's after breadth", `${(2 * wAft).toFixed(2)} m at the after edge, record says ${P.aftBreadthAftM}`);
+let innermost = 1e9; for (const q of dv) if (q[0] < xT - 0.35) innermost = Math.min(innermost, Math.abs(q[2]));
+const wantIn = P.aftBreadthFwdM / 2 - P.sideBreadthM;
+if (Math.abs(innermost - wantIn) > 0.15)
+say(v.id, "the wings off the plan's breadth", `deck reaches to ${innermost.toFixed(2)} m of the centreline along the wings; ${P.sideBreadthM} m wings on a ${P.aftBreadthFwdM} m front leave ${wantIn.toFixed(2)}`);
+const heck = byName('castle-heckbalken');
+if (heck.length < 2) say(v.id, 'a castle with no stern beams', `${heck.length} castle-heckbalken; the after posts stand on two (Westphal)`);
+for (const hb of heck) {
+const b = bbox(hb);
+if (yD - b[4] < 1.0) say(v.id, 'a stern beam up in the castle', `top ${(yD - b[4]).toFixed(2)} m under the castle deck`);
+const w = Math.max(-b[2], b[5]), wc = halfAt(b[0] - 0.4, b[3] + 0.4);
+if (wc - w > 0.3) say(v.id, "a stern beam short of the castle's side", `reaches ${w.toFixed(2)} m, the deck ${wc.toFixed(2)}`);
+}
+const walls = byName('castle-wall'), wantB = H.castle.wallBoards || 17;
+const stbd = walls.filter(w => bbox(w)[5] > 0).length, portN = walls.length - stbd;
+if (stbd !== wantB || portN !== wantB)
+say(v.id, "the castle wall off the record's board count", `${stbd} / ${portN} boards a side, record says ${wantB}`);
+for (const w of walls) { const b = bbox(w); if (b[4] - b[1] < 0.6) { say(v.id, 'a castle board that is not a board', `${(b[4] - b[1]).toFixed(2)} m tall`); break; } }
+if (byName('castle-wall-lower').length < 8)
+say(v.id, 'a castle wall with no lower part', 'three stringers and a plank below the deck (Westphal); fewer than 8 castle-wall-lower');
+if (walls.length) { const b = bbox(walls[0]), h = b[4] - yD;
+if (h < 0.8 || h > 1.4) say(v.id, 'a castle wall nobody could stand behind', `${h.toFixed(2)} m over the deck`); }
+const tl = byName('rudder-tiller');
+if (tl.length) {
+const tb = bbox(tl[0]); let hit = null;
+g.traverse(o => { if (hit || !o.isMesh || !/^castle-(wall|wall-lower|wall-aft|wall-wing|heckbalken|beam|post|longitudinal|cabin.*|door)$/.test(o.name)) return;
+const b = bbox(o);
+if (b[0] < tb[3] && b[3] > tb[0] && b[1] < tb[4] && b[4] > tb[1] && b[2] < tb[5] && b[5] > tb[2]) hit = o.name; });
+if (hit) say(v.id, 'the castle across the tiller', `${hit} crosses the tiller's box`);
+}
+}
+}
 {
 const onePiece = H.build === 'dugout';
 const metal = H.build === 'iron' || H.build === 'steel';
