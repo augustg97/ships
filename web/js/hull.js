@@ -2262,7 +2262,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
                   : { a: r0 * 0.48, b: r0 * 0.14 });
     } else {
       segR = segs.map((s2, si2) => {
-        const rr = [B * 0.030 * dScale[0], B * 0.020 * dScale[1],
+        /* r234: an attested diameter at the partners (`diaM`) on a WOODEN mast is drawn
+           outright, as the iron branch has always done — the Bremen cog's is the wreck's own
+           (the keelson's mast step 73 cm wide, a mast partner of 73 cm; Tanner 2021 App. G),
+           and beam x 0.06 drew her 0.46. The segments above keep the rule. */
+        const rr = (mk.diaM !== undefined && si2 === 0) ? mk.diaM / 2
+                 : [B * 0.030 * dScale[0], B * 0.020 * dScale[1],
                     B * 0.013 * dScale[2]][si2];
         return { a: rr, b: rr * 0.7 };
       });
@@ -2342,7 +2347,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
          slaver and Endurance carry none. The count is a length turned into a count:
          one binding about every 2.6 m of the exposed lower mast, which puts eight on
          a 74's main — what the contemporary models show. */
-      if (FINE && si === 0 && mk.rig === 'square' && !S.iron && radii[0] * 2 > 0.55) {
+      /* r234: the record may attest a SINGLE STICK (`oneTree`) whatever its drawn diameter —
+         the Bremen cog's 0.73 m partner is the wreck's, and both replicas' masts are one
+         larch tree each (the Ubena's 23.80 m spar, the Hansekogge's 25 m); a made mast
+         is a great-ship technology of the fifteenth century onward. Unbound when attested. */
+      if (FINE && si === 0 && mk.rig === 'square' && !S.iron && radii[0] * 2 > 0.55 && !mk.oneTree) {
         const ironHoops = (S.year || 0) >= 1800;
         const rings = [], hoops = [];
         const lo = seg * 0.14, hi = seg * 0.76;      // partners to below the hounds
@@ -2588,7 +2597,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
            is nothing above it to leave room for, and leaving the top 40% of the pole bare is
            just a mast that is too tall. */
         const tiers = mk.only || 3;
-        const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
+        let courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
+        /* ── r234: A SINGLE YARD IS HOISTED UNTIL ITS SAIL IS SET, NOT TO THE MASTHEAD ──
+           The sail's depth was the distance from wherever the yard sat down to the foot's
+           clearance, so a mast built to its attested 23.5 m carried 313 m² of canvas on a
+           record that says 199. On a one-sail ship the halyard brings the yard up until the
+           sail stands taut with its sheets at the deck, and the yard's height is what that
+           gives: the foot clearance plus the sail's depth, and the depth is the ATTESTED area
+           (`sail.areaM2`, with its bonnets — drawn at full sail) over the cloth's width. The
+           Kiel 2007 photograph of the Hansekogge shows exactly this: the yard about two
+           thirds up the mast, the foot at the rail, the masthead bare above. Without the
+           field, byte-identical. */
+        if (tiers === 1 && si === 0 && mk.sail && mk.sail.areaM2) {
+          const areaM2 = mk.sail.areaM2 + (mk.sail.bonnetsM2 || []).reduce((a2, b2) => a2 + b2, 0);
+          const depth = areaM2 / (yardLen * 0.96);
+          courseAt = Math.min(0.90, (prevYard + depth - y) / seg);
+        }
         /* the mizzen's lowest yard is the CROSSJACK, and Steel sets its diameter at the
            fore-topsail-yard's rate — a 74 crossed no mizzen course, and the spar that
            spread her mizzen topsail's foot was a lighter stick than a course yard */
@@ -13937,8 +13961,19 @@ function buildShip(S, opts) {
      lateen stopped taking its height from its mast, and cut the peak off the top of the frame.
      The bounding box is the exact answer, for every rig, including ones not written yet. */
   const bb = new THREE.Box3().setFromObject(group);
+  /* r234: the deck the TALLEST mast stands on — the foot of the mast mesh that reaches
+     highest. The Shipwright's "deck to truck" tile subtracted hull.freeboard from rigTop,
+     which is the RAIL over the water, so on any hull whose deck lies under the sheer (the
+     cog's 1.75 m) it printed rail-to-truck. undefined on a hull with no mast. */
+  let rigDeckY;
+  { let top = -Infinity;
+    group.traverse(o => {
+      if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
+      const b2 = new THREE.Box3().setFromObject(o);
+      if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; }
+    }); }
   group.userData = { hullMat, sails, spec: S, furled: FURLED,
-                     rigTop: bb.max.y, keelBottom: bb.min.y,
+                     rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY,
                      extentX: bb.max.x - bb.min.x,     // a lateen yard overhangs the stem
                      /* ── THE FLOAT DATUM IS A CONSTRUCTION FACT, NOT A MEASUREMENT ──────
                         surfacePoint puts the load waterline at local y = 0 (v = 0.62 → z = 0)

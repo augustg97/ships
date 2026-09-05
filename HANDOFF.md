@@ -19017,3 +19017,129 @@ back by CODE strings (the r232 correction): docs/data/vessels.json carries "load
 vessel.hull.draughtCondition (2); docs/audit-hulls.js carries D-LOAD's rule string (1) and
 D-LOAD-CONDITION's (1). THE RATCHET, run after the push: RATCHET EXIT 0  END 17:33:38; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, shipwright-ahead 0.045%/0.021, ship-endurance 0.043%/0.018. Prediction (r233/PREDICTIONS-close.md) held.
 Two commits close the round (a934ad3 record + audit + app + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 234 — 2026-09-04 — the cog's rig is the record's: a 23.5 m mast on the wreck's own 73 cm partner, an 18 m yard hoisted to where its 199 m² sail's foot clears the deck, a wooden mast that reads its attested diameter, a "deck to truck" tile that measures from the deck, and 118 KB taken off first paint losslessly
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r233's receipt reported the ratchet clean
+at all 64 (movers 0), so nothing was carried in as a first item. r233 ordered two things for this round: the
+first-paint budget before any record text (the gate was within a kilobyte), then (0e‴), the mast. Both are done.
+The r232 pattern held for the clock: the round's work committed and pushed first, the full ratchet after the push
+with its result in the receipt commit.**
+
+**THE BUDGET (r233's first item). No PNG optimiser was on the machine; pyoxipng (oxipng's Python binding) was
+installed into the Studio venv this round ("$STUDIO/.venv/bin/python" -m pip install pyoxipng) — a tool-chain
+addition, not an app dependency. The six first-paint PNGs (the two level-0 tiles, sea_01/02, wind_01/02) were
+re-encoded on COPIES in r234/tiles-z/ at level 6 with zopfli (r234/optimize-pngs-zopfli.py, .out): 6,541,348 →
+6,423,258 bytes, 118,090 saved (1.8%). The tiles themselves gave only 0.5% — R and G are the high and low bytes
+of a 16-bit depth, and the low byte is noise to any encoder — the sea keyframes 3%, the wind fields 13.5%. EVERY
+PIXEL of all six decodes identically (numpy array_equal on the RGB before and after, in the script; it refuses
+otherwise), so nothing the app draws can change: globe-default re-checked on the swapped tiles at 0.048%/0.012
+(r234/ratchet-tiles-globe.out), the same dither r233 read on the old ones. web/fields/tiles.json's level-0 byte
+count is 4,832,355 (was 4,858,081; the gate reads it), the originals are in r234/tiles-orig/. The gate's own note
+said the tiles and keyframes were where the saving had to come from; that is where it came from, and the record
+can carry text again — r234's own record grew by about 2 KB.**
+
+**THE READ (0e‴), the sources for the rig. Tanner 2021 vol. 2, Appendix I Table 1 (r230/tanner-vol2.txt, lines
+12781–12790) gives the three replicas side by side: Height of Mast 23 / 24 / 22.5 m, Length of Yard 18 / 14.6 /
+18 m, Sail Area 150 + 3 × 50 / 100 + 3 × 33 / 90 + 2 × 30 m² for the Ubena von Bremen, the Hansekogge and the
+Roland von Bremen; "Hoffmann notes the mast standing 24 m above deck" for the Hansekogge, whose yard was "reduced
+in width" to 14.6 m on Roskilde's recommendation while the Ubena kept the 18 m the Timbotta proportions asked.
+His own hypothetical reconstruction on Lahn's plates (lines 13007–13010): "a mast of 23.5 m, with a yard length of
+18 m and a sail area of 199 m² comprising of a mainsail of 100 m² with three additional bonnets of 33 m² each",
+full sail for light-to-moderate wind and 100 m² reefed. Appendix G (line 7880): the wreck's own keelson mast step
+is 73 cm wide and a disarticulated mast partner shows the same 73 cm, so the mast's diameter at the partners is
+the find's, not a replica's (his hypothesis rounds it to 0.75). de.wikipedia (r233/wiki-Bremer_Kogge.txt line 20):
+the Ubena's mast is 23.80 m long and 0.65 m at its thickest, her main sail up to 200 m² with two bonnets of 50;
+line 28: the Hansekogge's mast is 25 m of larch. The Kiel 2007 photograph (r213/ubena-kiel2007-2.jpg, read whole):
+the yard rides about two thirds of the way up the mast, the sail's foot stands at the rail, and the masthead
+above the yard is bare but for a basket top and a cross at the truck.**
+
+**THE DECISION. truckM 23.5, Tanner's figure, deck to truck (the datum hull.js's truckM states; Hoffmann's 24 m
+is "above deck", the Ubena's 23.80 m overall spar with about 1.5 m of it under the deck puts her truck near 22.3;
+the three agree within a metre of 23.5). diaM 0.73, the wreck's. courseYardM 18, Tanner's and two of the three
+replicas'. The sail 100 m² with bonnets of 33, 33, 33 — the Hansekogge's and Tanner's — drawn at FULL SAIL, with
+the Ubena's larger suit named on the record as contested (sail.contested). The Steel share 0.72 that drew a 10.1 m
+mast is gone from the record.**
+
+**THE MODEL (web/js/hull.js; before/after copies and the script apply-hull-edits.py in r234/). Three class
+changes, each gated on a record field and byte-identical without it. (1) A WOODEN mast reads an attested
+diameter at the partners: segR's wooden branch takes diaM / 2 for the lower segment, as the iron branch has
+since Great Eastern; beam × 0.06 drew the cog's 0.46. (2) A SINGLE YARD IS HOISTED UNTIL ITS SAIL IS SET. The
+one yard of a single-tier mast was slung at 0.90 of the pole, and the sail's depth was whatever distance that
+left down to the foot's clearance — so the attested mast, on its own, carried 306 m² (proof A below). On a
+one-sail ship the halyard brings the yard up until the sail stands taut with its sheets at the deck, and the
+yard's height IS the foot clearance plus the sail's depth, the depth being the attested area (sail.areaM2 plus
+its bonnetsM2) over the cloth's width (0.96 of the yard). courseAt becomes min(0.90, (foot + depth − base) /
+lower) when the field is present. (3) THE DECK THE TALLEST MAST STANDS ON goes out on group.userData as
+rigDeckY — the foot of the mast mesh that reaches highest — and the Shipwright's tile (web/js/shipwright.js)
+subtracts that from rigTop; hull.freeboard, the RAIL over the water, stays as the datum only on a hull with no
+mast, where the label says "above deck". On the cog the tile read 8.4 m for a 10.1 m mast (rail-to-truck),
+and would have read 21.7 for 23.5. (4) A MAST THE RECORD ATTESTS AS ONE TREE IS NOT BOUND: the loft's made-mast
+rule (rope wooldings on any square lower mast drawn past 0.55 m through, iron hoops from 1800) fired on the 0.73 m
+partner and hung five wooldings on the cog's mast in the first pass (r234/measure-pass1.out has them), and the audit,
+still expecting beam × 0.06 = 0.46, convicted "binding on a single stick". Both replicas' masts are one larch tree
+each (the Ubena's 23.80 m spar, the Hansekogge's 25 m), a made mast is a great-ship technology of the fifteenth
+century onward, so the record says `oneTree: true` on the mast and the builder leaves an attested single stick bare
+whatever its diameter; the audit's drawnD reads diaM and its thick-mast count skips oneTree, so builder and audit
+read the same record.**
+
+**MEASURED (r234/measure-after.out, measure_ship on the built scene, hull space, water at y 0):
+Mast y 0.26 → 23.76: 23.50 m from the deck at u 0.46 to the truck (was 0.26 → 10.38, 10.1 m); 0.72 m through at
+the foot. Yard at y 14.74–15.09, 14.65 m over the deck = 0.62 of the mast (was 0.90); its plan half-breadth 8.54 m
+braced, 18 m along its own axis. Sail y 3.74 → 14.91: 11.2 m deep (0.97 × the 11.5 the area gives), its foot 3.5 m
+over the deck at the mast, its head at the yard; 17.3 m wide on the yard — 199 m² against the record's 199 (the
+audit reads 17.5 × 11.2 on the built spar, within its 10%). Top at y 21.08–22.24, the masthead bare between the
+yard and it, which is what the photograph shows. Shrouds 0.26 → 23.06. Model height above water 23.77 m (was
+10.40). No woolding row in the second pass (five wooldings and their hoops at y 4.6–17.1 in the first).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; scripts apply-audit-edits.py and apply-edits-2.py). R-MAST-TRUCK
+was written (the built mast's top less its foot against truckM, ±0.3) and WITHDRAWN in the second pass: proof B
+convicted on it and on the r155 rule "mast short of its recorded flag-button" together, which already reads the
+same span of the mast-tagged meshes at the station against truckM at ±0.75 — a second rule for one fault is a
+second model of it. R-SAIL-AREA: a single-tier square mast with sail.areaM2 must set the record's
+canvas (main plus bonnets) within 10%, the width read off the built YARD (its plan length less 4% at the arms)
+and the depth off the sail mesh — the sail's own bounding box is not used because a bellied cloth's plan extent
+overstates the width by a fifth. PROOFS (r234/run-audit-and-witness.sh): A, the r233 builder under the r234
+record and audit — one problem, the cog, "17.5 x 17.5 m = 306 m² built against 199 m² on the record"; B, the
+r234 builder with the single-tier K doctored to 1.1 (hull.doctored-K.js) — three problems, all the cog: the r155
+rule "mast 0 spans 21.36 m deck-to-truck against the record's 23.5 m", R-MAST-TRUCK's twin of it (built 21.36 from
+its foot at y 0.26 to its head at 21.63), and "binding on a single stick", the builder's doctored lower crossing
+the audit's undoctored one on the woolding count. The builder restored from the after-copy (cmp, not git). The
+first-pass final audit (audit.out) convicted the cog once, "binding on a single stick" — the diaM/oneTree
+mismatch above, fixed in the second pass; the second-pass final audit (audit-final.out): checked 33 hulls, 0 problems (r234/audit-final.err), the builder and the audit cmp-equal to their after-copies at the run.**
+
+**WITNESSED (r234/witness-sea.png, #e=3&f=hanse; r234/witness-shipwright.png, #v=ship&s=cog). The Sea close-up (#e=3&f=hanse, force 1 light air, 2 nm off the Norwegian coast): a single-masted ship with a
+high stern castle, her one square sail set on a yard about two thirds up a mast as tall as she is long, the sail's
+foot at the rail and the masthead bare above the yard but for its top; the card beside her reads "Draught, laden
+2.25 m". The Shipwright (#v=ship&s=cog): the tile reads "23.5 m RIG, DECK TO TRUCK" (was 8.4); the mast stands to
+the top with the yard at 0.62 and the braced sail edge-on from the broadside; the quarter view
+(witness-shipwright-quarter.png, b=125) shows the sail's breadth. Rule 0 answered on witness-sea.png read whole: it
+reads as a rendered world — the swell's texture, the wake's diverging arms, the far coast's grey haze, the hull
+lit from the quarter with the castle's planking legible. Three facts a viewer can read off it without a legend:
+the ship carries one mast and one square sail; the sail is set on a yard hoisted well short of the masthead; a
+coast stands off her bow under haze.**
+
+**Named residuals, in order:** (0e‴) RESOLVED: the mast, yard and sail are the record's; the tile measures from
+the deck. NEW (0e⁷): the masthead — the replicas carry a basket top (Mastkorb) at the head and a cross at the
+truck, and Lahn's Blatt 1 should be read for what it draws above the hounds; the model's masthead is bare.
+NEW (0e⁸): the sail's emblem and the bonnet seams — three bonnets are three lacings across the cloth, and the
+photograph shows them; the model draws one sheet. NEW (0e⁹): the shrouds — the record says 4 a side; the
+Hansekogge's stand at the rail abaft the mast, and their attachment (a chainwale or the rail itself) is unread.
+(0e⁵) the trim and (0e⁶) the lwl unchanged from r233. (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a)
+(0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**Three method notes. (1) A one-sail ship's yard is where the sail puts it. The masthead rule (0.90) was a
+rule for a spar with nothing above it, and it was right about the spar and wrong about the sail: the sail's
+depth is an attested quantity, and the yard's height follows from it. (2) A tile that subtracts a freeboard
+prints a rail, and the rail is not the deck on any hull with sheer; the loft knows where the mast stands and
+should say so. (3) Compress before you write: 118 KB of headroom came out of six files in two minutes once
+the tool was on the machine, and the gate's note had said so for a month.**
+
+**r235 opens by reading the receipt paragraph below for the ratchet's result (any mover not named in
+r234/PREDICTIONS-close.md is r235's first item), then takes (0e⁷), the masthead: read Blatt 1 above the hounds
+and the Kiel photographs for the top, and give the single-tier wooden mast a dated top from the record.**
+
+**Live stamp: docs/index.html carries data-version 1788570347 at the build; the push and the live poll are in
+build/staging/r234/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r234 staging stays on disk uncommitted, the r211 convention.**

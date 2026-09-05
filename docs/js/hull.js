@@ -1309,7 +1309,8 @@ si2 === 0 ? (segs.length > 1 ? { a: r0, b: r0 * 0.96 }
 : { a: r0 * 0.48, b: r0 * 0.14 });
 } else {
 segR = segs.map((s2, si2) => {
-const rr = [B * 0.030 * dScale[0], B * 0.020 * dScale[1],
+const rr = (mk.diaM !== undefined && si2 === 0) ? mk.diaM / 2
+: [B * 0.030 * dScale[0], B * 0.020 * dScale[1],
 B * 0.013 * dScale[2]][si2];
 return { a: rr, b: rr * 0.7 };
 });
@@ -1358,7 +1359,7 @@ what: mk.diaM !== undefined
 + 'its diameter was in reach of this model, so the drawn figure is DERIVED at '
 + 'pole length / 55, the proportion held by the one attested set of iron tubes '
 + '(Great Eastern\'s, 1858). A derived figure, labelled as one.' };
-if (FINE && si === 0 && mk.rig === 'square' && !S.iron && radii[0] * 2 > 0.55) {
+if (FINE && si === 0 && mk.rig === 'square' && !S.iron && radii[0] * 2 > 0.55 && !mk.oneTree) {
 const ironHoops = (S.year || 0) >= 1800;
 const rings = [], hoops = [];
 const lo = seg * 0.14, hi = seg * 0.76;
@@ -1511,7 +1512,12 @@ const yardLen = si === 0 ? courseL
 : si === 1 ? courseL * 0.714
 : courseL * 0.714 * 0.667;
 const tiers = mk.only || 3;
-const courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
+let courseAt = tiers === 1 ? 0.90 : tiers === 2 ? 0.72 : 0.60;
+if (tiers === 1 && si === 0 && mk.sail && mk.sail.areaM2) {
+const areaM2 = mk.sail.areaM2 + (mk.sail.bonnetsM2 || []).reduce((a2, b2) => a2 + b2, 0);
+const depth = areaM2 / (yardLen * 0.96);
+courseAt = Math.min(0.90, (prevYard + depth - y) / seg);
+}
 crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
 si === 0 ? (isMizzen ? 'topsail' : 'course')
 : si === 1 ? 'topsail' : 'topgallant',
@@ -9183,8 +9189,15 @@ plat.position.set(0, dk.sheer(0.5) + S.beam * 0.17, 0);
 group.add(tag(plat, 'platform'));
 }
 const bb = new THREE.Box3().setFromObject(group);
+let rigDeckY;
+{ let top = -Infinity;
+group.traverse(o => {
+if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
+const b2 = new THREE.Box3().setFromObject(o);
+if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; }
+}); }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,
-rigTop: bb.max.y, keelBottom: bb.min.y,
+rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY,
 extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;

@@ -5397,6 +5397,36 @@
             `${floorY.toFixed(0)} m at its station`);
     }
 
+    /* R-SAIL-AREA (round 234): a single-yard square mast whose record attests its sail
+       (`sail.areaM2`, plus `bonnetsM2` — the loft draws full sail) must set that canvas within
+       10%. The width is read off the built YARD (its length along its own axis, the plan
+       extent of a spar braced round by TRIM) less the 4% the cloth leaves at the arms; the
+       depth off the sail mesh's height. The sail's own plan extent is not used: a bellied
+       cloth's bounding box overstates the width by a fifth. */
+    for (const mk of (H.masts || [])) {
+      if (!(mk.sail && mk.sail.areaM2) || mk.rig !== 'square' || mk.only !== 1) continue;
+      const want = mk.sail.areaM2 + (mk.sail.bonnetsM2 || []).reduce((a, b) => a + b, 0);
+      const mx = (mk.at - 0.5) * H.lwl;
+      let yardLen = 0, sailH = 0;
+      g.traverse(o => { if (!o.isMesh || !o.userData.part) return;
+        const k = o.userData.part.key;
+        if (k !== 'yard' && k !== 'sail') return;
+        const bbx = new THREE.Box3().setFromObject(o);
+        if (Math.abs((bbx.min.x + bbx.max.x) / 2 - mx) > H.lwl * 0.12) return;
+        if (k === 'yard') yardLen = Math.max(yardLen, Math.hypot(bbx.max.x - bbx.min.x, bbx.max.z - bbx.min.z));
+        else sailH = Math.max(sailH, bbx.max.y - bbx.min.y);
+      });
+      if (!yardLen || !sailH)
+        say(v.id, 'attested sail not set', `yard ${yardLen.toFixed(1)} m, sail depth ${sailH.toFixed(1)} m at u=${mk.at}`);
+      else {
+        const built = yardLen * 0.96 * sailH;
+        if (Math.abs(built - want) > want * 0.10)
+          say(v.id, 'a sail off its attested area',
+              `${(yardLen * 0.96).toFixed(1)} x ${sailH.toFixed(1)} m = ${built.toFixed(0)} m² built ` +
+              `against ${want} m² on the record (${mk.sail.areaM2} + bonnets) at u=${mk.at}`);
+      }
+    }
+
     /* (4) DECLARED DECKHOUSES STAND ON THE DECK, INSIDE THE RAIL — and the wheel likewise.
        The class of every fitting rule since round 36: right count, on its support, inside
        the ship. A house is walls sunk into a SHEERED deck, so its bottom sits below the
@@ -6637,10 +6667,13 @@
         const mz = mm.at === aftAt && (H.masts || []).length >= 3 && !H.iron
           && mixedSqA && lo < mainLowerA * 0.95
           && (mm.rig === 'square' || mm.rig === 'gaff' || mm.rig === 'lateen');
+        /* r234: a wooden mast with an attested diameter at the partners (diaM) draws it */
+        if (mm.diaM !== undefined) return mm.diaM;
         return H.beam * 0.06 * (mz ? Math.min(lo / mainLowerA, 0.60) : lo / mainLowerA);
       };
+      /* r234: a mast the record attests as ONE TREE (oneTree) is a single stick, unbound */
       const sqThick = (H.masts || []).filter((mm, i) =>
-        mm.rig === 'square' && !H.iron && drawnD(i) > 0.55).length;
+        mm.rig === 'square' && !H.iron && !mm.oneTree && drawnD(i) > 0.55).length;
       const jkThick = (H.masts || []).filter((mm, i) =>
         mm.rig === 'junk' && !H.iron && drawnD(i) > 0.55).length;
       const nW = part.woolding ? part.woolding.n : 0;

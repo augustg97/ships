@@ -766,8 +766,12 @@ function swOpen(vessel) {
        box over the WATERLINE, so every ship's number silently carried her freeboard —
        Wyoming's "deck to truck" read 46.8 m over a 42 m mast, which happened to match the
        record and so looked confirmed while being wrong twice. */
+    /* r234: hull.freeboard is the RAIL over the water, so this printed rail-to-truck on any
+       hull whose deck lies under the sheer (the cog: 8.4 m rail-to-truck for a 10.1 m mast).
+       The loft now reports the deck the tallest mast stands on (U.rigDeckY); the freeboard
+       stays as the datum for a hull with no mast, where the label says "above deck". */
     [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
-     (U.rigTop - vessel.hull.freeboard).toFixed(1) + ' m'],
+     (U.rigTop - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'],
   ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
   /* fit the shadow frustum to this ship, in her own place on the line */

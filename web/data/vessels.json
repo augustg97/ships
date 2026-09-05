@@ -1077,7 +1077,7 @@
     ],
     [
      "Sail",
-     "one square sail, ~200 m²"
+     "one square sail, 100 m² with three bonnets of 33 m² (199 m² full; the Hansekogge, and Tanner's reconstruction); the Ubena carries 150 m² and bonnets of 50"
     ],
     [
      "Windward, measured",
@@ -1147,11 +1147,20 @@
     "masts": [
      {
       "at": 0.46,
-      "height": 0.72,
+      "truckM": 23.5,
+      "diaM": 0.73,
+      "courseYardM": 18.0,
+      "oneTree": true,
+      "sail": {
+       "areaM2": 100,
+       "bonnetsM2": [33, 33, 33],
+       "contested": "the Ubena von Bremen carries 150 m² with three bonnets of 50 (Tanner 2021 App. I Table 1; de.wikipedia: up to 200 m² and two bonnets of 50), the Roland von Bremen 90 with two of 30; the Hansekogge's 100 + 3 × 33 = 199 m² is Tanner's reconstruction and the record's"
+      },
       "rig": "square",
       "rake": 0,
       "shrouds": 4,
-      "only": 1
+      "only": 1,
+      "provenance": "truckM 23.5, deck to truck: Tanner 2021 vol. 2 App. I, the reconstruction on Lahn's plates (his Table 1: Ubena 23 m, Hansekogge 24 m, which Hoffmann gives as above the deck, Roland 22.5; the Ubena's spar is 23.80 m overall and 0.65 m at its thickest, de.wikipedia). diaM 0.73 at the partners: the wreck's own, the keelson's mast step 73 cm wide and a disarticulated mast partner of 73 cm (Tanner App. G; his hypothesis rounds it to 0.75). courseYardM 18: Tanner's, the Ubena's and the Roland's yard; the Hansekogge cut hers to 14.6 on Roskilde's advice. Drawn at full sail, main and bonnets, the light-to-moderate-wind state: the yard hoists to where the foot clears the deck (hull.js r234), which is what the Kiel 2007 photograph shows, the yard about two thirds up the mast and the foot at the rail (r213/ubena-kiel2007-2.jpg). oneTree: the mast is a single stick, unbound — the Ubena's 23.80 m spar and the Hansekogge's 25 m larch are each one tree, and 0.73 m at the partners is within what a tree gives; the loft's made-mast rule (wooldings past 0.55 m through) is for the great ships of the fifteenth century onward. NOT DONE: the masthead top (Mastkorb) the replicas carry, and the sail's emblem."
      }
     ],
     "build": "shell",
