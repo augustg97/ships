@@ -630,6 +630,84 @@
       }
     }
 
+    /* ── A STRAIGHT POST IS A LINE, AND THE PLANKING CLOSES ON IT (round 237) ─────────
+       The cog's sternpost ran buried inside the after body from u 0.90 at the keel to u 1.0
+       at the sheer, bent at the waterline (0.60 m/m under it, 0.51 over), while the skin
+       ended in a vertical cut 0.7 m abaft the post at the water; Lahn's Blatt 1 draws one
+       straight line at 110° from the keel's underside to a head under the stern beams, and
+       Tanner 2021 says why (the stern hook's upper scarf). Where the record carries
+       hull.sternpost.form 'straight' with angleToKeelDeg: the Sternpost mesh's after face
+       (max x per centimetre of height, the R-STOCK ridge) is fitted with a line over its
+       height less 0.2 m at each end — the slope within 0.05 m/m of tan(θ − 90°)
+       (R-POST-ANGLE), no point 0.08 m off the line (R-POST-STRAIGHT), the line's crossing of
+       the load waterline within 0.2 m of lwl/2 plus the post's moulding (R-POST-LWL, what
+       lwl means), the head within 0.2 m of headAboveKeelM where recorded (R-POST-HEAD), the
+       foot within 0.2 m of the keel (R-POST-FOOT); and the planking's aftmost vertex in
+       every 0.25 m of shared height neither abaft the post's after face by more than 0.05 m
+       nor more than 0.45 m short of it (R-POST-CLOSE — a skin standing abaft its post is
+       the vertical cut; daylight between them is a post the planks do not land on). A
+       record without the field is not read. */
+    if (H.sternpost && H.sternpost.form === 'straight' && H.sternpost.angleToKeelDeg != null) {
+      const SP = H.sternpost;
+      const post = (() => { let r = null; g.traverse(o => {
+        if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      if (!post) say(v.id, 'a straight sternpost with no post drawn', 'record gives sternpost.form straight; no Sternpost mesh');
+      else {
+        const pv = world(post), ridge = new Map();
+        for (const q of pv) { const k = Math.round(q[1] * 100); ridge.set(k, Math.max(ridge.get(k) ?? -1e9, q[0])); }
+        const ks = [...ridge.keys()].sort((a, b) => a - b);
+        const yLo = ks[0] / 100, yHi = ks[ks.length - 1] / 100;
+        const pts = ks.filter(k => k / 100 > yLo + 0.2 && k / 100 < yHi - 0.2).map(k => [k / 100, ridge.get(k)]);
+        const n = pts.length; let sy = 0, sx = 0, syy = 0, sxy = 0;
+        for (const [y, x] of pts) { sy += y; sx += x; syy += y * y; sxy += x * y; }
+        const slope = n > 2 ? (n * sxy - sx * sy) / (n * syy - sy * sy) : 0, icpt = n ? (sx - slope * sy) / n : 0;
+        const wantTan = Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180);
+        let worst = 0; for (const [y, x] of pts) worst = Math.max(worst, Math.abs(x - (icpt + slope * y)));
+        if (n < 3) say(v.id, 'a sternpost too short to read', `${n} centimetres of after face`);
+        else {
+          if (Math.abs(slope - wantTan) > 0.05)
+            say(v.id, 'the sternpost off its attested angle', `${(90 + Math.atan(slope) * 180 / Math.PI).toFixed(1)}° to the keel drawn, the record says ${SP.angleToKeelDeg}`);
+          if (worst > 0.08)
+            say(v.id, 'a straight sternpost drawn bent', `after face ${worst.toFixed(2)} m off its own line`);
+          const wantWL = H.lwl / 2 + 0.05 * H.draught;
+          if (Math.abs(icpt - wantWL) > 0.2)
+            say(v.id, "the sternpost off the waterline's after end", `after face ${icpt.toFixed(2)} m abaft midships at the water, lwl/2 and the moulding say ${wantWL.toFixed(2)}`);
+          if (SP.headAboveKeelM != null && Math.abs((yHi + H.draught) - SP.headAboveKeelM) > 0.2)
+            say(v.id, "the sternpost's head off its attested height", `${(yHi + H.draught).toFixed(2)} m over the keel, the record says ${SP.headAboveKeelM}`);
+          if (yLo > -H.draught + 0.2)
+            say(v.id, 'a sternpost whose foot stands above the keel', `foot ${(yLo + H.draught).toFixed(2)} m over the keel's rabbet`);
+        }
+        /* R-POST-CLOSE */
+        const skins = []; g.traverse(o => { const p = o.userData && o.userData.part; if (o.isMesh && p && p.key === 'planking') skins.push(o); });
+        if (!skins.length) say(v.id, 'a straight sternpost with no planking to close on it', 'no planking mesh');
+        else {
+          const sv = [].concat(...skins.map(world)); let skinTop = -1e9; for (const q of sv) skinTop = Math.max(skinTop, q[1]);
+          const ridgeAt = y => { const k = Math.round(y * 100); let best = null, bd = 1e9;
+            for (const kk of ks) { const d = Math.abs(kk - k); if (d < bd) { bd = d; best = kk; } } return bd <= 3 ? ridge.get(best) : null; };
+          let worstAft = 0, worstGap = 0, yAft = 0, yGap = 0, bands = 0;
+          for (let y = yLo + 0.35; y < Math.min(yHi - 0.2, skinTop - 0.2); y += 0.25) {
+            const pa = ridgeAt(y); if (pa == null) continue;
+            let sx = -1e9; for (const q of sv) if (Math.abs(q[1] - y) < 0.13) sx = Math.max(sx, q[0]);
+            if (sx < -1e8) continue;
+            bands++; const gap = pa - sx;
+            if (-gap > worstAft) { worstAft = -gap; yAft = y; }
+            if (gap > worstGap) { worstGap = gap; yGap = y; }
+          }
+          if (!bands) say(v.id, 'a sternpost that shares no height with the planking', `post ${yLo.toFixed(2)}..${yHi.toFixed(2)} m`);
+          if (worstAft > 0.05)
+            say(v.id, 'planking standing abaft its sternpost', `skin ${worstAft.toFixed(2)} m abaft the post's after face at ${yAft.toFixed(2)} m — the planks close on the post, not past it`);
+          if (worstGap > 0.45)
+            say(v.id, 'daylight between the planking and the sternpost', `skin ${worstGap.toFixed(2)} m short of the post's after face at ${yGap.toFixed(2)} m`);
+        }
+      }
+    }
+
     /* ── THE CASTLE STANDS ON ITS PLAN (round 214) ───────────────────────────────────
        The cog's aftcastle was an open platform lofted off the hull's own skin between two
        text-read stations (r205). The wreck's castle is not that: Westphal (DAS LOGBUCH
@@ -674,7 +752,8 @@
         const ST = H.castle.stationsFromHeelM || null;
         let heelX = -1e9;
         if (post) { const pv0 = world(post); let yMin = 1e9; for (const q of pv0) yMin = Math.min(yMin, q[1]);
-                    for (const q of pv0) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]); }
+                    for (const q of pv0) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+                    heelX -= ((v.hull.sternpost && v.hull.sternpost.form === 'straight' && v.hull.sternpost.footAbaftStationDatumM) || 0); }   // the datum, not the foot (round 237)
         const len = xA - xF;
         const wantL = ST && heelX > -1e8 ? xA - (heelX - ST.wingFwd) : P.aftLenM + P.sideLenM;
         /* C-EXTENT */
@@ -689,7 +768,13 @@
           const pv = world(post); let top = -1e9; for (const q of pv) top = Math.max(top, q[1]);
           let xp = -1e9; for (const q of pv) if (q[1] > top - 0.3) xp = Math.max(xp, q[0]);
           const ovh = H.castle.overhangAftM != null ? H.castle.overhangAftM : 0.7;
-          if (Math.abs((xA - xp) - ovh) > 0.25)
+          /* C-AFTEDGE (round 237): where the plate gives the after edge's station abaft the
+             datum (castle.stationsFromHeelM.aftEdge, negative), the edge stands there; the
+             recorded overhang is then a derived number and C-OVERHANG stands down */
+          if (ST && ST.aftEdge != null && heelX > -1e8) {
+            if (Math.abs((xA - heelX) + ST.aftEdge) > 0.3)
+              say(v.id, "the castle's after edge off the plate's station", `after edge ${(xA - heelX).toFixed(2)} m abaft the heel, the plate says ${-ST.aftEdge}`);
+          } else if (Math.abs((xA - xp) - ovh) > 0.25)
             say(v.id, "a castle off the record's overhang", `after edge ${(xA - xp).toFixed(2)} m abaft the post's head, record says ${ovh}`);
           if (xA - xp > 1.5)
             say(v.id, 'a castle hanging past its stern', `after edge ${(xA - xp).toFixed(2)} m abaft the post's head — the stern beams cannot carry that`);
@@ -858,6 +943,10 @@
             const pv = posts.length ? [].concat(...posts.map(world)) : sv;
             let yMin = 1e9; for (const p of pv) yMin = Math.min(yMin, p[1]);
             let heelX = -1e9; for (const p of pv) if (p[1] < yMin + 0.15) heelX = Math.max(heelX, p[0]);
+            /* the record's datum stands hull.sternpost.footAbaftStationDatumM forward of the built
+               post's foot where the post is a straight one (round 237: on the cog the plate's
+               datum is the keel plank's after end at the stern hook, 1.12 m forward of the post) */
+            heelX -= ((v.hull.sternpost && v.hull.sternpost.form === 'straight' && v.hull.sternpost.footAbaftStationDatumM) || 0);
             const bx = beams.map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; }).sort((a, b) => a - b);
             want.forEach((d, i) => {
               if (i >= bx.length) return;
@@ -5531,6 +5620,7 @@
       const pv = wv(post); let yMin = 1e9, heelX = -1e9;
       for (const q of pv) yMin = Math.min(yMin, q[1]);
       for (const q of pv) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+      heelX -= ((v.hull.sternpost && v.hull.sternpost.form === 'straight' && v.hull.sternpost.footAbaftStationDatumM) || 0);   // the datum, not the foot (round 237)
       const want = F.stationsFromHeelM.slice().sort((a, b) => a - b);
       for (const w of wales) {
         const st = []; w.traverse(o => { if (o.isMesh && o.name === 'channel-wale-stanchion') st.push(new THREE.Box3().setFromObject(o)); });

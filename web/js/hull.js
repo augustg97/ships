@@ -205,6 +205,21 @@ function hullSurface(S) {
   const rakeScale = rakeAllow > 0
     ? Math.min(1, Math.max(0, S.loa - S.lwl) / rakeAllow) : 1;
 
+  /* ── A STRAIGHT POST IS A LINE, AND THE STERN'S PROFILE IS THAT LINE (round 237) ──
+     The Bremen cog's sternpost is one straight timber at 110° to the keel (Tanner 2021;
+     Lahn's Blatt 1 reads 109.8° over 2800 px), from the keel's underside to a head under
+     the stern beams, and the planking closes on it at every height. The class post ran
+     buried inside the after body from u 0.90 at the keel to u 1.0 at the sheer while the
+     skin ended in a vertical cut at the waterline's after end, and the rake above water was
+     sternRake·loa clamped to the record's loa — a bent post 0.60 m/m under the water and
+     0.51 over it, against the plate's 0.36. Record-gated on hull.sternpost.form 'straight':
+     the stern's deck-level rake is the post's own lean over the sheer, sheer(1)·tan(θ−90°),
+     surfacePoint leans the run BELOW the waterline too (negative, to the foot), and the
+     post, the rudder's stock and the castle's datum all read the same line. Without the
+     field every number below is what it was. */
+  const SP = S.sternpost && S.sternpost.form === 'straight' && S.sternpost.angleToKeelDeg != null
+    ? S.sternpost : null;
+  const postTan = SP ? Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180) : 0;
   /* the profile of the stem and the sternpost, as an x-offset that rakes the ends */
   const rake = u => {
     if (u < S.forefoot) {
@@ -213,7 +228,7 @@ function hullSurface(S) {
     }
     if (u > 1 - S.run) {
       const k = (u - (1 - S.run)) / S.run;
-      return S.sternRake * rakeScale * k * k * S.loa;
+      return (SP ? sheer(1.0) * postTan : S.sternRake * rakeScale * S.loa) * k * k;
     }
     return 0;
   };
@@ -235,7 +250,8 @@ function hullSurface(S) {
     if (S.deck.level) return S.freeboard - deckDrop;
     return sheer(u) - deckDrop;
   };
-  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S) };
+  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S),
+           straightPost: SP, postTan };
 }
 
 /* the skin point at DECK height: where the deck's edge meets the planking. Above v 0.62
@@ -696,12 +712,17 @@ function buildStemGeometry(S, aft) {
      covers them — which is the build order the stage card already describes. */
   const STEEL = S.build === 'steel' || S.build === 'iron';
   const inset = STEEL ? (aft ? -1.05 : 1.05) : 0;
+  /* a straight sternpost (round 237) is drawn ON ITS LINE, from the keel's underside (the
+     hook's bottom, where the plate's after face meets the keel) to the record's head; the
+     class post follows the skin's profile from u 0.90 at the keel to u 1.0 at the sheer */
+  const SPL = aft ? straightPostLine(S, H) : null;
   /* the timber follows the ship's own profile at the very end of the hull */
   for (let i = 0; i <= N; i++) {
     const f = i / N;
     const u = aft ? 1 - (1 - f) * 0.10 : f * 0.10;
     const v = aft ? f : 1 - f;
-    const p = surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
+    const p = SPL ? SPL.at(SPL.yFoot + f * (SPL.yHead - SPL.yFoot))
+                  : surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
     const t = 0.05 * S.draught;
     const x0 = p[0] + (inset - 1) * t, x1 = p[0] + (inset + 1) * t;
     /* ⚠ THE BAR MUST FIT INSIDE THE ENTRY IT STRENGTHENS. A fixed siding of 5.5% of beam
@@ -1008,6 +1029,28 @@ function buildRudderGeometry(S) {
  * Ellmers's man at the tiller is the one who has to stand under it. The after edge is the
  * sternpost's after face at deck height (the r213 postPt extrapolation, the post's own
  * line continued) plus the recorded overhang. */
+/* ── THE STRAIGHT POST'S LINE, SHARED (round 237) ─────────────────────────────────────
+ * One answer for where a straight sternpost stands, read by the post builder, the timber
+ * rudder that hangs on it and the castle whose stations are measured from a datum near its
+ * foot. null unless the record carries hull.sternpost.form 'straight' with an angle. The
+ * line runs through the waterline's after end (x = lwl/2 at y 0 — that is what lwl means)
+ * at the record's angle to the keel; its foot is the keel timber's underside at the post,
+ * its head the record's height over the keel (else the sheer). datumX is the point the
+ * record's 'FromHeelM' stations are measured from: the post's after face at the foot less
+ * hull.sternpost.footAbaftStationDatumM (on the cog, the keel plank's after end at the
+ * stern hook's scarf, 1.12 m forward of the post's foot — r230 called it the heel). */
+function straightPostLine(S, H) {
+  const SP = S.sternpost;
+  if (!SP || SP.form !== 'straight' || !H.straightPost) return null;
+  const keelDepth = 0.055 * S.draught + 0.02;            // the keel timber under the rabbet (buildKeelGeometry)
+  const yFoot = -S.draught * H.keel(1.0) - keelDepth;
+  const yHead = SP.headAboveKeelM != null ? SP.headAboveKeelM - S.draught : H.sheer(1.0);
+  const at = y => [S.lwl / 2 + y * H.postTan, y, 0];
+  const t = 0.05 * S.draught;
+  const datumX = SP.footAbaftStationDatumM != null ? at(yFoot)[0] + t - SP.footAbaftStationDatumM : null;
+  return { tan: H.postTan, yFoot, yHead, at, datumX };
+}
+
 function castleGeom(S, H) {
   const C = S.castle; if (!C || !C.plan) return null;
   const P = C.plan, L = S.lwl;
@@ -1029,7 +1072,14 @@ function castleGeom(S, H) {
   const t = 0.05 * S.draught;
   const b = surfacePoint(S, H, 1.0, 1.0);
   const xPost = b[0] + t;
-  const xA = xPost + (C.overhangAftM != null ? C.overhangAftM : 0.7);
+  /* the after edge: the plate's own station abaft the datum where the record carries one
+     (castle.stationsFromHeelM.aftEdge, negative abaft, round 237 — read through the straight
+     post's datum), else the recorded overhang abaft the post's head as before */
+  const SPL = straightPostLine(S, H);
+  const STm = C.stationsFromHeelM || null;
+  const xA = STm && STm.aftEdge != null && SPL && SPL.datumX != null
+    ? SPL.datumX - STm.aftEdge
+    : xPost + (C.overhangAftM != null ? C.overhangAftM : 0.7);
   /* the step (after part to wing) and the wing's forward end: the plate's own stations
      where the record carries them (castle.stationsU, round 236 — Lahn's Blatt 1 puts the
      cog's wing 2.9 m further forward than the plan's lengths chained from the post), else
@@ -1058,7 +1108,11 @@ function buildTimberRudder(S, group, timber, tag) {
   const sided = 0.055 * S.beam / 2;                 // the post's half-siding (buildStemGeometry)
   /* the post's after face, on the post's own parametrisation: f 0 at the heel, 1 at the
      sheer; beyond 1 the head continues the line the post was leaning on */
+  const SPL = straightPostLine(S, H);
   const postPt = f => {
+    /* a straight post (round 237): f 0 at the keel's underside, 1 at the sheer, the same
+       line on past it — the head continues it by construction */
+    if (SPL) { const y = SPL.yFoot + f * (H.sheer(1.0) - SPL.yFoot); return [SPL.at(y)[0] + t, y]; }
     if (f <= 1) {
       const p = surfacePoint(S, H, 1 - (1 - f) * 0.10, f);
       return [p[0] + t, p[1]];
@@ -1329,6 +1383,11 @@ function surfacePoint(S, H, u, v) {
       }
     }
   }
+  /* a straight post leans the whole run: rakeF is the height over the waterline as a
+     fraction of the sheer, NEGATIVE under it, so the skin's end at every height lies on the
+     post's line through the waterline's after end (round 237; above water z/fb is k, the
+     same number as before) */
+  if (H.straightPost && u > 1 - S.run && fb > 0) rakeF = z / fb;
   return [(u - 0.5) * L + H.rake(u) * rakeF, z, y];
 }
 

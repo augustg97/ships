@@ -19441,3 +19441,139 @@ shroud-landing string (1) and C-STATIONS' string (1).
 THE RATCHET, run after the push: RATCHET EXIT 0  END 21:28:07; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. Prediction (r236/PREDICTIONS-close.md) held.
 The two PREDICTED movers changed under the gate: ship-dhow 0.037%/0.039 and ship-treasure 0.018%/0.005 (the harness's own rows), the treasure frame's change being exactly the cog's shrouds' new run at its left edge (r236/prediff-ship-treasure.png, the amplified diff read whole) — the prediction named the right frames and overstated the size. No baseline moved; nothing is carried to r237 from the ratchet.
 Two commits close the round (85ca91b record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 237 — 2026-09-04 — the sternpost is one straight line: 110° to the keel, through the waterline's after end, from the keel's underside to a head 5.05 m over it, read off Lahn's Blatt 1; the station datum r230 called the heel is the keel plank's after end, 1.12 m forward of the post's foot; the keel is flat to the hook; and the castle's after edge moves 0.9 m forward to the plate's station
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r236's receipt reported the ratchet clean
+(64 of 64, movers 0), so nothing was carried in as a first item. r236 named (0e¹²), the sternpost's rake: read Blatt 1's
+post line from the heel to the sheer and give the record a raked post the plate supports. Done, and it re-identified
+the datum every station on the record is measured from. The r235 clock pattern held: the full ratchet STARTED beside
+the close (22:07, load 7.0) as soon as the geometry was final, the round's work was built, committed and pushed while
+it ran, and its result is in the receipt commit.**
+
+**THE READ (r230/lahn-blatt1-full.png, 590.8 px/m, the keel's underside at plate y 4440; crops r237/blatt1-heel-full.png,
+blatt1-stern-post-half.png, blatt1-stern-upper-full.png, blatt1-notch-2x.png). A row scan every 100 px from y 4440 to
+y 1640 takes the leftmost dark run inside the plate's border: x 1499 at the keel's underside, 1464 at 0.17 m, 1428 at
+0.34 … 492 at 4.74 m — 1007 px aft over 2800 px of height, 0.3596 m per metre, no point more than 3 px off the line.
+That is 109.8° to the keel; Tanner 2021 vol. 2 App. G (r230/tanner-vol2.txt line 7805) built his model on "a stern
+post at the determined 110° angle (taken from archaeological and historical parallels)", and read the stern hook's
+upper scarf as showing "the missing sternpost extended in a straight line continuing from the top of the sternhook up
+to gunwale level" (lines 4760–4766). The line ends between rows 1480 (5.01 m over the keel) and 1420 (5.11), under
+the stern beams whose hatched ends stand 5.11–5.3 m: the head is at 5.05 ± 0.05. At 2.25 m over the keel — the
+record's laden draught — the after face stands at x 1021, 1.93 m abaft the datum, which is the model's lwl/2 (10.25 m
+abaft midships, plus the post's 0.11 m moulding) to 4 cm: the record's lwl and the plate's post agree, so the loft runs
+the line through the waterline's after end. THE DATUM: r230 named plate x 2160 "the sternpost's aft face at the keel"
+and every station on the record (deck.beamHeadsFromHeelM, castle.stationsFromHeelM, mast.shroudFixing.stationsFromHeelM)
+is measured from it. It is not the post's foot. The flat bottom of the stern hook runs at y 4440 from x 1500 to 2055
+and steps down 40 px (7 cm) to the keel plank's underside between x 2055 and 2180 (r237/blatt1-heel-full.png,
+r230/datum-sternheel.png): x 2160 is the keel plank's after end at the hook's lower scarf, 661 px = 1.12 m forward of
+the post's after face at the keel. The stations keep their read values; the record now says what the datum is.
+THE KEEL: flat. The keel's underside line lies at y 4441–4447 at x 2843 (DB 5), 3500, 5000 and 7290, and the hook's
+bottom at 4445–4452 at x 1700–2000 — no rise toward the post. THE CASTLE'S AFTER EDGE: the after wall's outer face is
+at x 331 at the castle deck (y 1300, 5.31 m) and x 278 at the rail (y 580, 6.53 m): 3.10 m abaft the datum at the deck,
+3.19 at the rail; the post's after face at its head (5.05 m) is at x 426, 2.93 m abaft the datum, so the wall overhangs
+the head by 0.17 m.**
+
+**THE MODEL BEFORE (r236/measure-after.out; r237/before-stern-4x.png). The post was drawn along the skin's profile from
+u 0.90 at the keel to u 1.0 at the sheer (buildStemGeometry), which put it INSIDE the after body: its after face ran
+from (8.31, −1.94) to (9.47, 0) at the water and on to (11.58, 2.61) at the sheer — 0.60 m aft per metre under the
+water and 0.51 over it, against the plate's 0.36 — while the skin's after end stood at x 10.25 at the water (u 1, no
+lean below the waterline) in a vertical cut 1.8 m wide, 0.67 m ABAFT the post's after face at that height, and the keel
+ran on to u 1.0 at x 10.25, 1.9 m past the post's foot, swept up 0.63 m by riseA 0.28. The rudder, lofted down that
+post's line, hung inside the hull. The castle's after edge, chained 0.7 m abaft a post head 0.7 m too far aft, stood
+4.0 m abaft the datum against the plate's 3.10. The model's extent read 24.28 m against a 23.3 m record.**
+
+**THE DECISION. `hull.sternpost { form 'straight', angleToKeelDeg 110, headAboveKeelM 5.05, footAbaftStationDatumM 1.12 }`
+with provenance naming the plate, its px/m, the row scans and Tanner's lines, and contested carrying that 110° is
+Tanner's "from archaeological and historical parallels" against the plate's 109.8, that the surviving post is 2.2 m of
+angled timber, and that the datum correction is a re-identification, not a re-measurement. `hull.riseA` 0.02 (was 0.28).
+`castle.stationsFromHeelM.aftEdge −3.10` (negative: abaft the datum), `castle.overhangAftM` 0.15 as a DERIVED number.
+`hull.sternRake` 0.09 stays on the record for the stem's clamp (rakeScale, r129) and is not read for a straight post.
+A "Sternpost" row on the card; sternProvenance, castle.stationsProvenance and deck.provenance carry the datum note.**
+
+**THE MODEL (web/js/hull.js; before/after copies and apply-hull-edits.py in r237/). Every branch is gated on
+hull.sternpost.form 'straight' and byte-identical without it. (1) hullSurface: the stern's deck-level rake in the run is
+sheer(1)·tan(θ − 90°) times the class's k² shape, not sternRake·rakeScale·loa; H carries straightPost and postTan.
+(2) surfacePoint: in the run, rakeF = z / sheer(u) at every height — the same number as before above the water, NEGATIVE
+below it — so the skin's end at every height lies on the post's line through the waterline's after end, and the keel
+(surfacePoint at v 0) ends at the post's foot. (3) straightPostLine(S, H), beside castleGeom: the one line — through
+(lwl/2, 0) at the record's angle, from the keel timber's underside to the record's head — read by the post builder,
+which now samples the line instead of the skin's profile; by buildTimberRudder's postPt, so the stock hangs on it and
+the head continues it; and by castleGeom, which computes datumX = the after face at the foot less
+footAbaftStationDatumM and places the after edge at datumX − aftEdge (else the recorded overhang abaft the post's head
+as before). The Heckbalken and the after wall follow the after edge.**
+
+**MEASURED (r237/measure-after.out, measure_ship on the built scene, hull space, water at y 0): model extent
+−11.84 … +11.54 = 23.38 m against the record's 23.3 (was 24.28). Sternpost u 0.953–1.055, x 9.29 → 11.38, y −2.35 →
+2.80 (was u 0.895–1.070, 3.60 m long, y −1.94 → 2.61): 2.10 m of after face over 5.15 m of height, 0.41 m/m along
+the axis-aligned box. Keel u 0–0.961, ending at x 9.45 at the post's foot (was u 1.0, x 10.25). Planking u −0.072–1.046
+(was 1.065). castle-deck u 0.564–1.060, 10.18 m (was 11.08); castle-wall (the after part) 6.37 m (was 7.25);
+castle-heckbalken u 0.919–1.041. rudder-stock u 0.969–1.049, y −2.05 → 1.82 (was u 0.907–1.049); rudder-plank
+0.984–1.061; rudder-gudgeon 0.954–1.026; rudder-tiller 0.923–1.046. The datum the audit reads: 8.37 from the built
+post (the r230 conversion's 8.39).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; apply-audit-edits.py). A new block before the castle rules: with
+hull.sternpost.form 'straight', the Sternpost mesh's after face is read as a ridge (max x per centimetre of height, the
+R-STOCK method) and fitted with a line over its height less 0.2 m at each end — R-POST-ANGLE (slope within 0.05 m/m of
+tan(θ − 90°)), R-POST-STRAIGHT (no point 0.08 m off the line), R-POST-LWL (the line's crossing of the waterline within
+0.2 m of lwl/2 plus the moulding), R-POST-HEAD (the top within 0.2 m of headAboveKeelM), R-POST-FOOT (the foot within
+0.2 m of the keel); and R-POST-CLOSE: in every 0.25 m of shared height the planking's aftmost vertex stands neither more
+than 0.05 m abaft the post's after face nor more than 0.45 m short of it. C-AFTEDGE: with stationsFromHeelM.aftEdge the
+after edge stands at its station ± 0.3 m and C-OVERHANG stands down (C-REACH still convicts a castle 1.5 m past its post).
+The three heel readers (D-BEAM-HEEL, C-STATIONS/C-PLAN, R-SHROUD-FIXING) subtract footAbaftStationDatumM, so "forward
+of the heel" in their messages now means forward of the datum. PROOFS (r237/run-audit-and-witness.sh, .out): A, the
+r236 builder under the r237 record and audit — 19 problems, all the cog: "the sternpost off its attested angle: 124.4°
+to the keel drawn, the record says 110", "a straight sternpost drawn bent: 0.15 m off its own line", "the sternpost off
+the waterline's after end: 9.70 m abaft midships at the water, lwl/2 and the moulding say 10.36", "planking standing
+abaft its sternpost: 1.46 m at −1.38 m", "the castle's after edge off the plate's station: 4.57 m abaft the heel, the
+plate says 3.1", the castle's length and forward end, all five beams and all six stanchions off the corrected datum
+(audit-proof-a.out); B, the r237 builder with the post's angle doctored +8° (hull.doctored-angle.js) — 14 problems,
+first "the sternpost off its attested angle: 118.0° to the keel drawn" and then the beams and stanchions off a datum
+that moved with the foot (audit-proof-b.out). The builder restored from the after-copy (cmp). The final audit: checked
+33 hulls, 0 problems (r237/audit.err).**
+
+**WITNESSED (r237/witness-shipwright.png, the broadside, the stern at 4x in witness-stern-4x.png against r236's in
+before-stern-4x.png; witness-shipwright-quarter-close.png, b=150; witness-shipwright-stern-close.png, b=200;
+witness-sea.png, #e=3&f=hanse). At the broadside the post now reads as one straight timber leaning aft from the keel to
+the castle's after wall, the rudder hung on it in the open water abaft the hull with its head under the castle, and the
+after wall ends close over the post's head where before it hung a metre past it. On the Sea the cog is seen from her
+port quarter: the rudder stands clear abaft the hull under the castle's overhang. ⚠ profile_capture.py --ship cog
+rendered the CHINESE JUNK for both the before and after runs (r237/profile-before.png/, profile-after.png/ — a
+two-masted lug rig, the bow at the left); those directories are not the cog and were not used. Rule 0 answered on
+witness-sea.png read whole: it reads as a rendered world — the swell's texture under a low sun, the wake's two arms
+spreading astern, the coast's grey band under haze, the planking lit from the quarter. Three facts a viewer can read
+off it without a legend: the ship has one mast and one square sail with a cross at the truck; her rudder hangs on a
+raked sternpost under an overhanging castle; a coast lies off her starboard bow.**
+
+**Named residuals, in order:** (0e¹²) RESOLVED: the post is the plate's line and the castle's after edge is at its
+station. NEW (0e¹⁵): the hull's end breadth at the post — sternFineness 0.24 closes the rail plan to 1.8 m at u 1 where
+the post is 0.42 m sided, so the strakes' hood ends land on a flat end cap 0.7 m wide each side of the post instead of
+in a rabbet; the plan's closing over the last 4 m from Spant 35 (0.98 of the beam) to the head is unread. NEW (0e¹⁶):
+the stern hook as a timber (Tanner App. G Fig. 8; "grown timbers for the stem and stern hook") and the post's own
+moulded and sided dimensions — the plate draws a second line 0.27–0.30 m forward of the after face at 1.76, 2.25 and
+2.78 m. NEW (0e¹⁷): the stem — its rake stays the class's 1.47 m at the sheer against the plate's 1.30, and Blatt 1
+draws it curved (Tanner Fig. 7); the same read as this round's, for the bow. NEW (0h′): Research/profile_capture.py
+selects the wrong hull for --ship cog (see WITNESSED); until it is fixed no profile from it may be trusted without
+looking at the frame. (0e¹³) the wale's forward run, (0e¹⁴) the ratlines, (0e¹⁰) the mast's taper, (0e⁸) the sail's
+emblem and bonnet seams, (0e⁵) the trim and (0e⁶) the lwl unchanged. (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″)
+(0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**Three method notes. (1) A datum is a physical point, and the round that names one must say which timber it is on:
+r230's "the sternpost's aft face at the keel" was the keel plank's end, 1.12 m from the post, and six rounds of
+stations were read against it without anyone checking, because the model's post had been built to that point. The
+correction is one record field; the stations did not move. (2) A profile harness that takes a ship id must be checked
+against the frame it returns: both profile captures this round were of another hull, and a measurement off them would
+have been of the junk. (3) When a plate and the loft agree at one height and disagree at another, the disagreement is
+the loft's shape function — here the waterline's after end matched to 4 cm and the post's foot was 1.1 m off, which
+said the rake below the water was the wrong rule, not the wrong number.**
+
+**r238 opens by reading the receipt paragraph below for the ratchet's result (any mover not named in
+r237/PREDICTIONS-close.md is r238's first item), then takes (0e¹⁵), the planking's closing on the post: read the rail
+plan aft of Spant 35 for the half-breadth over the last 4 m to the head (Lahn's plan sheet, or the Blatt 1 deck-line
+breadths where the plan is not fetched), give the record the end half-breadth at the post's rabbet, and let the skin
+land there; the audit's R-POST-CLOSE already convicts daylight, and a rule for the end cap's width follows.**
+
+**Live stamp: docs/index.html carries data-version 1788585051 at the build; the push and the live poll are in
+build/staging/r237/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r237 staging stays on disk uncommitted, the r211 convention.**

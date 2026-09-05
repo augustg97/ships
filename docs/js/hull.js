@@ -104,6 +104,9 @@ const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
 const rakeAllow = ((S.stemRake || 0) + (S.sternRake || 0)) * S.loa;
 const rakeScale = rakeAllow > 0
 ? Math.min(1, Math.max(0, S.loa - S.lwl) / rakeAllow) : 1;
+const SP = S.sternpost && S.sternpost.form === 'straight' && S.sternpost.angleToKeelDeg != null
+? S.sternpost : null;
+const postTan = SP ? Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180) : 0;
 const rake = u => {
 if (u < S.forefoot) {
 const k = (S.forefoot - u) / S.forefoot;
@@ -111,7 +114,7 @@ return -S.stemRake * rakeScale * k * k * S.loa;
 }
 if (u > 1 - S.run) {
 const k = (u - (1 - S.run)) / S.run;
-return S.sternRake * rakeScale * k * k * S.loa;
+return (SP ? sheer(1.0) * postTan : S.sternRake * rakeScale * S.loa) * k * k;
 }
 return 0;
 };
@@ -123,7 +126,8 @@ if (!deckDrop) return sheer(u);
 if (S.deck.level) return S.freeboard - deckDrop;
 return sheer(u) - deckDrop;
 };
-return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S) };
+return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S),
+straightPost: SP, postTan };
 }
 function deckEdge(S, H, u) {
 const yD = H.deck(u), fb = H.sheer(u);
@@ -377,11 +381,13 @@ const pos = [], idx = [];
 const N = 26, sided = 0.055 * S.beam / 2;
 const STEEL = S.build === 'steel' || S.build === 'iron';
 const inset = STEEL ? (aft ? -1.05 : 1.05) : 0;
+const SPL = aft ? straightPostLine(S, H) : null;
 for (let i = 0; i <= N; i++) {
 const f = i / N;
 const u = aft ? 1 - (1 - f) * 0.10 : f * 0.10;
 const v = aft ? f : 1 - f;
-const p = surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
+const p = SPL ? SPL.at(SPL.yFoot + f * (SPL.yHead - SPL.yFoot))
+: surfacePoint(S, H, u, Math.max(0, Math.min(1, v)));
 const t = 0.05 * S.draught;
 const x0 = p[0] + (inset - 1) * t, x1 = p[0] + (inset + 1) * t;
 let sF = sided, sA = sided;
@@ -578,6 +584,17 @@ g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return g;
 }
+function straightPostLine(S, H) {
+const SP = S.sternpost;
+if (!SP || SP.form !== 'straight' || !H.straightPost) return null;
+const keelDepth = 0.055 * S.draught + 0.02;
+const yFoot = -S.draught * H.keel(1.0) - keelDepth;
+const yHead = SP.headAboveKeelM != null ? SP.headAboveKeelM - S.draught : H.sheer(1.0);
+const at = y => [S.lwl / 2 + y * H.postTan, y, 0];
+const t = 0.05 * S.draught;
+const datumX = SP.footAbaftStationDatumM != null ? at(yFoot)[0] + t - SP.footAbaftStationDatumM : null;
+return { tan: H.postTan, yFoot, yHead, at, datumX };
+}
 function castleGeom(S, H) {
 const C = S.castle; if (!C || !C.plan) return null;
 const P = C.plan, L = S.lwl;
@@ -590,7 +607,11 @@ const yDeck = C.deckAboveKeelM != null ? -S.draught + C.deckAboveKeelM : yAfter 
 const t = 0.05 * S.draught;
 const b = surfacePoint(S, H, 1.0, 1.0);
 const xPost = b[0] + t;
-const xA = xPost + (C.overhangAftM != null ? C.overhangAftM : 0.7);
+const SPL = straightPostLine(S, H);
+const STm = C.stationsFromHeelM || null;
+const xA = STm && STm.aftEdge != null && SPL && SPL.datumX != null
+? SPL.datumX - STm.aftEdge
+: xPost + (C.overhangAftM != null ? C.overhangAftM : 0.7);
 const ST = C.stationsU || null;
 const xAt0 = u => (u - 0.5) * L + H.rake(u);
 const xT = ST && ST.aftPartFwd != null ? xAt0(ST.aftPartFwd) : xA - P.aftLenM;
@@ -612,7 +633,9 @@ const add = (m, nm) => { m.name = nm; group.add(tag(m, 'rudder', nm)); };
 const R = S.rudder || {};
 const t = 0.05 * S.draught;
 const sided = 0.055 * S.beam / 2;
+const SPL = straightPostLine(S, H);
 const postPt = f => {
+if (SPL) { const y = SPL.yFoot + f * (H.sheer(1.0) - SPL.yFoot); return [SPL.at(y)[0] + t, y]; }
 if (f <= 1) {
 const p = surfacePoint(S, H, 1 - (1 - f) * 0.10, f);
 return [p[0] + t, p[1]];
@@ -785,6 +808,7 @@ y *= 1 - S.sternRound * Math.pow(t, 2.0) * Math.pow(k, 1.5);
 }
 }
 }
+if (H.straightPost && u > 1 - S.run && fb > 0) rakeF = z / fb;
 return [(u - 0.5) * L + H.rake(u) * rakeF, z, y];
 }
 function buildHullGeometry(S, NU = 120, NV = 34) {
