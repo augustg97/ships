@@ -19988,3 +19988,11 @@ survey queue under "Round 23" names the next crudest.**
 build/staging/r240/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r240 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788599242 on https://augustg97.github.io/ships/index.html at 02:09 PDT,
+90 s after the push (build/staging/r240/push.log, the r209 poll pattern). Published copies read
+back by CODE strings, the record's in the MINIFIED form (the r237 correction): docs/data/vessels.json carries the dropped
+beam-station u note (1) and DB 1 with no u (1); docs/js/hull.js fixes each frame's x at the waterline (1) and inverts u per height (1);
+docs/audit-hulls.js carries D-FRAME-PLUMB's string (1).
+THE RATCHET, run after the push: PARTIAL after the push, the r239 pattern (r240/run-partial.out, partial-*.out): 3 named frames scored by check --frame, movers 0 — ship-dhow 0.043%/0.015 ok, ship-treasure 0.018%/0.005 ok, shipwright 0.021%/0.029 ok (r240/PREDICTIONS-close.md named these three as the only frames that could move, by well under 0.2%; they stayed under the gate). The other 61 frames are UNSCORED on the r240 builder; the prediction says every one is 0.000% (the class ribbon's change above the water is hidden by the planking in every Shipwright frame and by the deck in every Sea frame; the record edit moves no geometry), and r241's full run at the clean HEAD is the test. THE OPENING FULL RATCHET at the clean r239 HEAD b2468a3 (r240/open-ratchet.out): 64 of 64 scored, movers 0, exit 0, 46 minutes; logged in FRAME-LOG.md as a no-accept full run.
+Two commits close the round (1e52126 record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
