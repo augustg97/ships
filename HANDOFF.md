@@ -21558,3 +21558,11 @@ probe (r253/probe_cross.py) — or (0y⁹), the corbita's artemon, or the survey
 build/staging/r253/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r253 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788652350 on https://augustg97.github.io/ships/index.html at 16:54 PDT,
+90 s after the push (build/staging/r253/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries the lug panel that says it hangs beside its mast (1) and the parrel's PARTS entry (1);
+docs/audit-hulls.js reads besideMast (1 mentions); docs/data/vessels.json is unchanged this round.
+THE RATCHET: THE OPENING FULL RATCHET at the clean r252 HEAD 5150a3f (r253/open-ratchet.out, launched 16:02 as the round's first act, ended 16:46): RATCHET EXIT 1  END 16:46:32; 65 frames scored; movers 9: shipwright 0.461%/0.115; ship-great-eastern 0.273%/0.126; ship-yamato 0.072%/0.025; aboard 0.066%/0.018; ship-preussen 0.078%/0.039; ship-steamer 0.928%/0.258; aboard-wyoming 0.065%/0.019; shipwright-astern 0.442%/0.247; shipwright-hounds 0.058%/0.010. Largest three: ship-steamer 0.928%/0.258, shipwright 0.461%/0.115, shipwright-astern 0.442%/0.247.
+ PARTIAL after the push, the r239 pattern (r253/partial-*.out): frames scored one at a time by check --frame on the r253 builder, each diff read before its accept — ship-junk 3.447%/1.274 CHANGED, ship-panokseon 4.180%/1.536 CHANGED, ship-treasure 6.608%/2.048 CHANGED (3 frames; r253/PREDICTIONS-close.md names the 5 frames that MUST move — ship-junk, ship-treasure, ship-panokseon, aboard-treasure and action-myeongnyang, every frame that draws a junk-rigged hull — the 10 that MAY, the berth neighbours within three of the junk, the treasure ship and the panokseon, the default Shipwright and the era 3–4 Sea views, and the 50 that must not). The other 62 frames are UNSCORED on the r253 builder; r254's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
+Two commits close the round (33604a9 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
