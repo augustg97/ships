@@ -20477,3 +20477,16 @@ never-spun hull, Endurance (4,114 triangles per metre), by looking.**
 build/staging/r244/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r244 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788614803 on https://augustg97.github.io/ships/index.html at 06:28 PDT,
+90 s after the push (build/staging/r244/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries castleTopAt (1) and channelRun (1);
+docs/audit-hulls.js carries D-CASTLES (4)'s shroud conviction (1) and its channel conviction (1); docs/data/vessels.json carries
+the carrack's class-placement sentence (1).
+THE RATCHET: THE OPENING FULL RATCHET at the clean r243 HEAD 9af6cd8 (r244/open-ratchet.out, launched 05:41 as the round's first act, ended 06:25): RATCHET EXIT 0  END 06:25:17; 65 frames scored; movers 0. Largest three: shipwright-astern 0.046%/0.037, action 0.038%/0.009, passage-sahul 0.038%/0.013.
+ PARTIAL after the push, the r239 pattern (r244/partial-*.out): frames scored one at a time by check --frame, each diff read before its accept — ship-carrack 0.606%/0.268 CHANGED, ship-galley 0.073%/0.023 CHANGED, ship-treasure 0.000%/0.000 ok (3 frames; r244/PREDICTIONS-close.md names the frames that MUST move — the carrack's own and her berth neighbours' — and those that must not). The other 62 frames are UNSCORED on the r244 builder; r244's full run at the clean HEAD is the test, and any mover outside the MUST list is not explained by this round.
+A CORRECTION TO THE ROUND'S COMMIT MESSAGE (the r241 pattern): its '10 of 26' and its claim that the main's after two pairs ran through
+the quarterdeck's forward rail are my first probe's read, taken with a 0.6 m window that did not stop at a wall's end; the audit's
+x-extent rule and the re-run probe (r244/shrouds-before.json) give 6 of 26, and the main's after pair set up 15 cm forward of the
+wall and did not pass through it. The handoff's fault paragraph above carries the corrected numbers.
+Two commits close the round (63b64e3 audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
