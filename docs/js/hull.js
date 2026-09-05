@@ -1417,9 +1417,40 @@ group.add(tag(nest, 'mast', "Crow's nest",
 }
 if (FINE && mk.rig === 'square' && si === 0 && (S.year || 0) >= 1100) {
 const topR = B * 0.20, headR = radii[0] * 0.7;
+const bsk = mk.top && mk.top.form === 'basket' ? mk.top : null;
+if (bsk) {
+const pole = bsk.poleAboveRimM !== undefined ? bsk.poleAboveRimM : 0.55;
+const bY = y + seg - pole - bsk.heightM;
+const mastRAt = segR[si].a + (segR[si].b - segR[si].a) * ((bY - y) / seg);
+const bt = buildBasketTop(bsk, mastMat, mats, mastRAt);
+bt.position.set(x + Math.sin(rakeRad) * (bY - base), bY, 0);
+bt.rotation.z = -rakeRad;
+group.add(bt);
+if (bsk.cross) {
+const span = bsk.cross.spanM || 0.6, staff = bsk.cross.staffM || 0.5;
+const th = span * 0.12;
+const cm = mats.crossPale || (mats.crossPale = new THREE.MeshStandardMaterial(
+{ color: 0xe6e2da, roughness: 0.55 }));
+const cg = new THREE.Group();
+const st = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.045, staff, 8), mastMat);
+st.position.y = staff / 2;
+cg.add(st);
+const arm = new THREE.Mesh(new THREE.BoxGeometry(span, th, th * 0.45), cm);
+arm.position.y = staff + span / 2;
+cg.add(arm);
+const post = new THREE.Mesh(new THREE.BoxGeometry(th, span, th * 0.45), cm);
+post.position.y = staff + span / 2;
+cg.add(post);
+const tY = y + seg;
+cg.position.set(x + Math.sin(rakeRad) * (tY - base), tY, 0);
+cg.rotation.z = -rakeRad;
+group.add(tag(cg, 'cross'));
+}
+} else {
 const tp = buildTop(topR, mats.woodPale, headR, S.year);
 tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
 group.add(tp);
+}
 if (mk.only !== 1) {
 const chH = seg * 0.085, chD = radii[0] * 2.1, chW = radii[0] * 0.5;
 const topY = seg * 0.90 - topR * 0.22;
@@ -2719,6 +2750,12 @@ what: 'The platform at the head of the lower mast, carried on trestletrees and '
 + 'walled like a basket while it was a fighting position, and from about 1710 '
 + 'a planked platform, rounded forward and square aft, with the lubber\'s hole '
 + 'cut round the masthead.' },
+cross:    { stage: 4, name: 'Cross at the truck',
+what: 'A cross on a short staff at the masthead. The Elbing seal of 1350 draws '
++ 'one over the top, and both Bremen replicas carry one; the Arbeitskreis '
++ 'historischer Schiffbau reads it as the sign of a peaceful merchantman and '
++ 'says in the same sentence that the reading cannot be proved. The Ubena\'s is '
++ 'a white cross patt\u00e9e; this one is drawn pale at the record\'s span.' },
 corbis:   { stage: 4, name: 'The corbis',
 what: 'The basket hung at the mainmast head — the thing that named the ship. '
 + 'Festus: cargo ships are called corbitae "because baskets used to be hung '
@@ -4293,6 +4330,43 @@ t.position.set(sx * r * 0.40, -r * 0.075, 0);
 g.add(t);
 }
 return tag(g, 'top');
+}
+function buildBasketTop(spec, mat, mats, mastR) {
+const g = new THREE.Group();
+const rimR = spec.rimDiaM / 2, baseR = spec.baseDiaM / 2, h = spec.heightM;
+const n = spec.staves || 24;
+const wallMat = mats.basketWall || (mats.basketWall = (() => {
+const m2 = mat.clone(); m2.side = THREE.DoubleSide; return m2; })());
+const wall = new THREE.Mesh(new THREE.CylinderGeometry(rimR, baseR, h, n, 1, true), wallMat);
+wall.position.y = h / 2;
+g.add(wall);
+const floor = new THREE.Mesh(new THREE.RingGeometry(Math.min(mastR * 1.02, baseR * 0.8), baseR, n), wallMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = 0.03;
+g.add(floor);
+const mh = h * 0.12, sw = 2 * Math.PI * rimR / n * 0.9, flare = Math.atan2(rimR - baseR, h);
+for (let i = 0; i < n; i += 2) {
+const a = (i + 0.5) / n * Math.PI * 2;
+const rr = rimR + (mh / 2) * Math.tan(flare);
+const mer = new THREE.Mesh(new THREE.BoxGeometry(sw, mh, 0.05), mat);
+mer.position.set(Math.sin(a) * rr, h + mh / 2, Math.cos(a) * rr);
+mer.rotation.set(flare, a, 0, 'YXZ');
+g.add(mer);
+}
+for (const f of [0.08, 0.62]) {
+const hoop = new THREE.Mesh(
+new THREE.TorusGeometry(baseR + (rimR - baseR) * f + 0.01, 0.025, 6, n), mat);
+hoop.rotation.x = Math.PI / 2;
+hoop.position.y = h * f;
+g.add(hoop);
+}
+return tag(g, 'top', 'Basket top',
+'The lookout\'s basket at the masthead: a staved bucket flaring to a battlemented rim, '
++ 'the mast through its floor and the pole standing clear above it. The Elbing seal of '
++ '1350 draws it so, and the Ubena von Bremen carries one. The wreck gives nothing above '
++ 'the deck \u2014 Lahn\'s plate draws the mast as its broken stump \u2014 so the form is the '
++ 'seals\' and the size is the replica\'s, read off the Kiel 2007 photograph: about 1.8 m '
++ 'across the rim, 1.35 m deep, on a mast about half a metre through at the hounds.');
 }
 function buildDeadeyes(n, r, mat) {
 const g = new THREE.Group();
@@ -9189,15 +9263,16 @@ plat.position.set(0, dk.sheer(0.5) + S.beam * 0.17, 0);
 group.add(tag(plat, 'platform'));
 }
 const bb = new THREE.Box3().setFromObject(group);
-let rigDeckY;
+let rigDeckY, rigTruckY;
 { let top = -Infinity;
 group.traverse(o => {
 if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
 const b2 = new THREE.Box3().setFromObject(o);
 if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; }
-}); }
+});
+if (top > -Infinity) rigTruckY = top; }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,
-rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY,
+rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY,
 extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;

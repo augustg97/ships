@@ -19154,3 +19154,137 @@ THE RATCHET, run after the push: RATCHET EXIT 1  END 18:50:34; 64 of 64 frames s
 Two commits close the round (217121f record + audit + hull + shipwright + tiles + docs + handoff, and this push-log commit with any accepted baseline).**
 
 **Receipt note: the R-MAST-TRUCK count above is 0 because the rule was written and then WITHDRAWN in the round's second pass (see THE AUDIT paragraph: the r155 rule "mast short of its recorded flag-button" already reads the same span); the receipt script's line for it predates the withdrawal and the 0 is the correct reading of the published audit.**
+
+## Round 235 — 2026-09-04 — the cog's masthead is the seals': a battlemented basket top on the pole and a cross at the truck, from the Elbing seal of 1350 and the Ubena's masthead, sized on the Kiel photographs at the hull's own scale; Blatt 1 draws only the wreck's stump above the deck; and the "deck to truck" tile learns that the truck is the mast's head, not the model's highest point
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r234's receipt reported one mover,
+shipwright-ahead, accepted with its reason (the 74's tile digits under the r234 datum), so nothing was carried in
+as a first item. r234 named (0e⁷), the masthead, as this round's item: read Blatt 1 above the hounds and the Kiel
+photographs for the top, and give the single-tier wooden mast a dated top from the record. Done. The r232 clock
+pattern held again, in a tighter form: the full ratchet was STARTED beside the close (19:28, load 4.4) as soon as
+the geometry was final, and the round's work was built, committed and pushed while it ran; its result is in the
+receipt commit.**
+
+**THE READ. Lahn's Blatt 1 (r230/lahn-blatt1-full.png, 590.8 px/m), the region over the mast step: the mast is
+drawn as the wreck's BROKEN STUMP — a jagged top at plate y 1056, standing on the line at y 1918, plate x
+7408–7719 — 0.53 m wide and 1.46 m tall (r235/blatt1-mast-stump.png). Nothing stands above it. The plate draws no
+top, no masthead, no yard; what the find gives above the deck is that stump, and the record now says so. Tanner
+2021 vol. 2 (r230/tanner-vol2.txt) has no sentence on the replicas' tops (grepped for mastkorb, crow's nest,
+top-castle, masthead, basket, lookout: the masthead lines are the Steel-proportion headheights at 5888–5894 and a
+lookout at the bow at 14773); the DSM's 1380 booklet and the AKHS 1991 Kiel paper (r235/dsm-booklet.txt,
+akhs-1991.txt, pdftotext) have none either. The MEDIEVAL evidence is the seals: the Elbing seal of 1350
+(r235/siegel-elbing-1350.jpg, Wikimedia Commons, read whole) draws a round battlemented top at the masthead —
+the same crenellation as the ship's two castles — with a cross on a staff above it and a streamer; the Stralsund
+seal of 1329 (Landesmuseum MV, r235/stralsund-siegel.txt) is described as the cog under sail with a stern rudder
+and a helmsman before a castle, its masthead not described. The Arbeitskreis historischer Schiffbau's Elbing
+reconstruction page (r235/akhs-kogge-1350.txt): "Das Kreuz auf dem Masttop, das den friedlichen Kauffahrer
+signalisiert, wurde vergoldet, was historisch allerdings nicht nachweisbar ist." de.wikipedia Kogge: "Knapp
+unterhalb der Mastspitze war manchmal ein Krähennest genannter Ausguck angebracht." The REPLICAS (the photographs
+already on disk from r213, cropped at 4x in r235/): the Ubena von Bremen (ubena-kiel2007-2.jpg, -3.jpg) carries a
+staved bucket at the masthead, dark like her mast, flaring from its floor to a rim whose alternate staves stand
+higher, two hoops round it, the mast through its floor, a short pole with a cap block above the rim and a white
+cross pattée on a staff above that; the Roland von Bremen (roland-ubena.jpg) carries NO basket — a bare taper
+with a sheave block, a hound band and a small cross at the truck; the Hansekogge's masthead is above the frame of
+hansekogge-kiel.jpg. So the form is the seals' and one replica's, the other replica contests it, and the record
+carries both.**
+
+**THE MEASURE (r235/measure-masthead.txt, row scans at lum < 110). -2.jpg: the rim 94 px across at y 207, the
+base 68 px at y 273, the basket 70 px tall (y 205–275), the mast below it 24 px through, the pole 30 px from the
+rim to its head (y 174), the cross about 32 px across. -3.jpg: rim 69, base 53, height 50, mast 18, pole 26.
+The ratios agree between the two plates (rim : base : height : pole = 1 : 0.72 : 0.745 : 0.32 and
+1 : 0.77 : 0.72 : 0.38). THE SCALE IS THE QUESTION, and four reads were taken. On the hull: the Ubena's 23.23 m
+spans 995 px at the rail in the near-broadside -3.jpg, 44–47 px/m for a bearing 15–25° off the beam, so the rim is
+1.46–1.55 m; her freeboard in -2.jpg (rail y ~1000, waterline y ~1128, 128 px for about 2.0 m) gives 64 px/m and
+a 1.47 m rim. On the mast: her stated 23.80 m spar less about 2 m under the deck should stand 21.8 m over it, and
+the 826 px from the rail to the pole's head would then be 37–40 px/m and the rim 2.5 m — but that mast photographs
+at 17–19 m over her deck against her own hull in both plates, so the mast-length scale contradicts the ship it is
+taken from and is set aside. The hull reads are carried: rim 1.5 m, base 1.1, height 1.1, pole 0.55, cross 0.5 on
+a 0.45 m staff (the -2.jpg ratios at 1.5). The mast at the hounds photographs 0.38–0.41 m through, 0.55 of the
+0.73 m partner, where the loft's class taper draws 0.70 (0.51 m) — a residual, below.**
+
+**THE DECISION. `top` on the cog's mast record: form 'basket', rimDiaM 1.5, baseDiaM 1.1, heightM 1.1, staves 24,
+poleAboveRimM 0.55, cross { spanM 0.5, staffM 0.45 }, with `contested` carrying the scale question and the Roland's
+bare masthead, and `provenance` carrying the seal, the AKHS sentence, the stump on Blatt 1, and the plates with
+their px/m. The first pass of this round carried rim 1.8 from the mast-taper read alone (24 px on an assumed
+0.46 m); the hull reads came in at 1.5 and the record was moved to them before the close (rule 4: the three
+hull-based reads cluster at 1.46–1.55 and only the contradicted one gives 2.5).**
+
+**THE MODEL (web/js/hull.js and web/js/shipwright.js; before/after copies and the scripts apply-hull-edits.py,
+apply-hull-edits-2.py in r235/). Three class changes. (1) THE TOP'S FORM MAY BE THE RECORD'S. The dated-top block
+drew buildTop's round walled platform on every square lower mast after 1100 at B × 0.20 — on the cog a 3.0 m
+fighting top in pale timber, 0.76 m of wall, at 0.90 of the mast. With `top.form 'basket'` the mast takes
+buildBasketTop instead: an open frustum of `staves` facets from baseDiaM to rimDiaM, a floor ring from the mast
+to the wall, alternate staves standing 0.12 of the height past the rim and leaning out with the wall's flare,
+two hoops, all in the mast's own material (the Ubena's is stained with it), the wall double-sided because a
+bucket is seen into from above. Its floor is set at truck − poleAboveRimM − heightM, so the pole stands the
+record's distance over the rim. Without the field the else-branch is the r234 code unchanged, and the other
+five square-rigged mastheads are byte-identical. (2) THE CROSS AT THE TRUCK (`top.cross`): a 0.45 m staff on the
+truck in the mast's timber, a pale Greek cross of the record's span above it (mats.crossPale, 0xe6e2da), the
+arms spanning fore and aft because both Kiel photographs, from abeam and from the quarter, show it face on.
+Tagged 'cross' (a new PARTS entry with its card), NOT 'mast', so the r155 rule's mast span still lands truckM.
+(3) THE TILE READS THE TRUCK. The first witness of this round showed "24.6 m RIG, DECK TO TRUCK" on a 23.5 m
+mast: shipwright.js subtracted rigDeckY from rigTop, and rigTop is the bounding box of the whole model — the
+cross's tip. The loft now exports rigTruckY, the head of the mast mesh that reaches highest (the same traversal
+that finds rigDeckY), and the tile reads it; rigTop stays the camera's datum, which is what a model's highest
+point is for. On every other hull the two are equal unless something stands above the truck; the ratchet will
+say whether any Shipwright frame's digits moved (none were predicted; see the receipt).**
+
+**MEASURED (r235/measure-after.out, measure_ship on the built scene, hull space, water at y 0): Basket top,
+1.60 m across the rim with the battlements (the wall itself 1.50), floor at y 22.11 and battlements to 23.35;
+Mast y 0.26 → 23.76 (23.50 m deck to truck, unchanged from r234); Cross at the truck y 23.76 → 24.71, 0.50 m
+across; model height above water 24.71 m (was 23.77). The basket's floor stands 1.65 m under the truck
+(0.55 + 1.1), so the pole and its cap show above the rim as the photograph has them.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; script apply-audit-edits.py). R-TOP-BASKET: a square mast whose
+record carries top.form 'basket' must have ONE group keyed 'top' and named 'Basket top' at its station, as wide
+across as rimDiaM within 10%, with its floor at truck − pole − height ± 0.3 m (the truck read off the mast-tagged
+meshes as the r155 rule reads it); a record without the field must carry no basket; top.cross the same two ways,
+a 'cross' group whose foot stands on the truck. The dated-top count (r67) sees 'Basket top' as a masthead
+platform, so the cog is not "a masthead left bare". PROOFS (r235/run-audit-and-witness.sh, .out): A, the r234
+builder under the r235 record and audit — two problems, both the cog: "declared but not drawn: the basket top on
+mast 0" and "the cross at the truck of mast 0" (audit-proof-a.out); B, the r235 builder with the rim doctored
+× 1.3 (hull.doctored-rim.js) — one problem, "a basket top off its attested breadth: 2.52 m across against 1.8 m
+on the record" (the first-pass record; audit-proof-b.out). The builder restored from the after-copy (cmp). The
+final audit at the final record and builder: checked 33 hulls, 0 problems (r235/audit-final.err).**
+
+**WITNESSED (r235/witness-shipwright-quarter-high.png, #v=ship&s=cog&b=125&l=14&z=1.5, the masthead cropped at
+8x in witness-masthead-crop-8x.png; witness-sea.png, #e=3&f=hanse, the masthead at 10x in
+witness-sea-masthead-crop-10x.png; witness-shipwright-final.png, #v=ship&s=cog, the tile). At the masthead: a
+dark flaring bucket with its battlements against the sky, two hoops, the four shrouds a side converging under
+its floor, the pole and cap above the rim, the pale cross above that — the Kiel photograph's masthead. The tile
+reads "23.5 m RIG, DECK TO TRUCK" (24.6 before change 3). Rule 0 answered on witness-sea.png read whole: it
+reads as a rendered world — the swell's texture under a low sun, the wake's two arms, the coast's grey band under
+haze, the hull's planking and castle lit from the quarter. Three facts a viewer can read off it without a
+legend: the ship has one mast and one square sail; the masthead carries a basket with a cross above it; a coast
+lies off her starboard bow under haze.**
+
+**Named residuals, in order:** (0e⁷) RESOLVED: the masthead is the record's, form from the seals, size from the
+replica at the hull's scale, the find's silence on the record. NEW (0e¹⁰): the mast's taper — the Ubena's mast
+photographs 0.38–0.41 m through at the hounds, 0.55 of the partner, where the class rule draws 0.70; a
+record-gated head diameter (headDiaM) would be the r234 diaM pattern one storey up. NEW (0e¹¹): the shrouds meet
+the mast under the basket's floor, which is right, but they are 4 a side on the record and their lower ends
+(0e⁹, r234) are still unread. (0e⁸) the sail's emblem and bonnet seams, (0e⁹) the shrouds' attachment, (0e⁵) the
+trim and (0e⁶) the lwl unchanged. (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f)
+unchanged. (1)–(20) as r230 lists them.**
+
+**Three method notes. (1) A replica's photograph is a plate whose scale must be chosen, and the choice is a
+claim about the replica: four reads of one masthead gave a rim of 1.5 m or 2.5 m according to whether the hull
+or the stated mast set the scale, and the two could not both be right because the mast does not photograph as
+long as it is stated. The record carries the disagreement and the reason for the pick. (2) A quantity named
+for one use will be read for another: rigTop was written for the camera and the tile borrowed it as the truck,
+which was true until something stood above the truck. Two names for two quantities. (3) Read the find before
+the reconstruction: an hour on the Ubena's basket would have been mis-spent if Blatt 1 had drawn a masthead,
+and it took one crop to learn it draws a stump.**
+
+**r236 opens by reading the receipt paragraph below for the ratchet's result (any mover not named in
+r235/PREDICTIONS-close.md is r236's first item), then takes (0e⁹)+(0e¹¹), the shrouds: 4 a side on the record,
+their lower ends unread — the Hansekogge page (r235/hansekogge-an-bord.txt) says only that the holes in the
+Rüstbalken for the shrouds' lower ends survived ("Lediglich die Löcher im Rüstbalken, an denen die unteren Enden
+der Wanten befestigt sind, waren vorhanden"), so the wreck has a shroud beam; the AKHS Elbing page puts the
+Wanten on Juffern (deadeyes) at three Wantklampen on the outside of the hull. Read Tanner for the Rüstbalken and
+build the attachment the wreck attests.**
+
+**Live stamp: docs/index.html carries data-version 1788575898 at the build; the push and the live poll are in
+build/staging/r235/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r235 staging stays on disk uncommitted, the r211 convention.**

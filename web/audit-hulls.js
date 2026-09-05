@@ -5427,6 +5427,64 @@
       }
     }
 
+    /* R-TOP-BASKET (round 235): a mast whose record attests a basket top (`top.form
+       'basket'` — the cog's Mastkorb: the Elbing seal's battlemented masthead, the Ubena's
+       staved bucket) must carry ONE group keyed 'top' and named 'Basket top' at its station,
+       as wide across as the record's rim within 10% (the battlements lean out with the wall
+       and add a few centimetres), with its floor standing the record's height and pole under
+       the truck (+-0.3 m; the truck is the top of the mast-tagged meshes at the station, as
+       the r155 flag-button rule reads it). A record without the field must carry no basket —
+       the class platform stays what it was. The cross at the truck (`top.cross`) is read the
+       same two ways: a group keyed 'cross' whose foot stands on the truck, and none where
+       the record attests none. */
+    (H.masts || []).forEach((mk, i) => {
+      if (mk.rig !== 'square') return;
+      const spec = mk.top && mk.top.form === 'basket' ? mk.top : null;
+      const mx = (mk.at - 0.5) * H.lwl, win = H.lwl * 0.12;
+      const near = b => Math.abs((b.min.x + b.max.x) / 2 - mx) < win;
+      const baskets = [], crosses = [];
+      let truck = -1e9;
+      g.traverse(o => {
+        const p = o.userData && o.userData.part;
+        if (!p) return;
+        if (!o.isMesh && p.key === 'top' && p.name === 'Basket top') {
+          const b = new THREE.Box3().setFromObject(o); if (near(b)) baskets.push(b);
+        } else if (!o.isMesh && p.key === 'cross') {
+          const b = new THREE.Box3().setFromObject(o); if (near(b)) crosses.push(b);
+        } else if (o.isMesh && p.key === 'mast') {
+          const b = new THREE.Box3().setFromObject(o); if (near(b)) truck = Math.max(truck, b.max.y);
+        }
+      });
+      if (spec) {
+        if (!baskets.length)
+          say(v.id, 'declared but not drawn', `the basket top on mast ${i} (top.form 'basket' at u=${mk.at})`);
+        else {
+          const b = baskets[0], w = b.max.z - b.min.z;
+          if (Math.abs(w - spec.rimDiaM) > spec.rimDiaM * 0.10)
+            say(v.id, 'a basket top off its attested breadth',
+                `${w.toFixed(2)} m across against ${spec.rimDiaM} m on the record, mast ${i}`);
+          const pole = spec.poleAboveRimM !== undefined ? spec.poleAboveRimM : 0.55;
+          const wantFloor = truck - pole - spec.heightM;
+          if (truck > -1e8 && Math.abs(b.min.y - wantFloor) > 0.3)
+            say(v.id, 'a basket top adrift on the mast',
+                `floor at ${b.min.y.toFixed(2)} m against ${wantFloor.toFixed(2)} ` +
+                `(truck ${truck.toFixed(2)} less ${pole} m of pole less ${spec.heightM} m of basket), mast ${i}`);
+          if (baskets.length > 1)
+            say(v.id, 'two baskets on one masthead', `${baskets.length} basket tops at u=${mk.at}`);
+        }
+        if (spec.cross && !crosses.length)
+          say(v.id, 'declared but not drawn', `the cross at the truck of mast ${i}`);
+        if (spec.cross && crosses.length && truck > -1e8 && Math.abs(crosses[0].min.y - truck) > 0.3)
+          say(v.id, 'a cross adrift of the truck',
+              `cross foot at ${crosses[0].min.y.toFixed(2)} m, truck at ${truck.toFixed(2)} m, mast ${i}`);
+      } else if (baskets.length)
+        say(v.id, 'a basket top nobody attested',
+            `${baskets.length} basket top(s) at u=${mk.at} on a record without top.form 'basket'`);
+      if (!(spec && spec.cross) && crosses.length)
+        say(v.id, 'a cross nobody attested',
+            `${crosses.length} cross group(s) at u=${mk.at} on a record without top.cross`);
+    });
+
     /* (4) DECLARED DECKHOUSES STAND ON THE DECK, INSIDE THE RAIL — and the wheel likewise.
        The class of every fitting rule since round 36: right count, on its support, inside
        the ship. A house is walls sunk into a SHEERED deck, so its bottom sits below the
@@ -6731,7 +6789,8 @@
       let tops = 0;
       g.traverse(o => {
         const p = o.userData && o.userData.part;
-        if (p && p.key === 'top' && p.name === 'Top' && !o.isMesh) tops++;
+        /* r235: a record-attested basket top ('Basket top') is a masthead platform too */
+        if (p && p.key === 'top' && (p.name === 'Top' || p.name === 'Basket top') && !o.isMesh) tops++;
       });
       if (tops && depYear < 1100)
         say(v.id, 'a top before the evidence',

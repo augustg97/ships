@@ -770,8 +770,12 @@ function swOpen(vessel) {
        hull whose deck lies under the sheer (the cog: 8.4 m rail-to-truck for a 10.1 m mast).
        The loft now reports the deck the tallest mast stands on (U.rigDeckY); the freeboard
        stays as the datum for a hull with no mast, where the label says "above deck". */
+    /* r235: and TO THE TRUCK, which is the head of the tallest mast (U.rigTruckY), not the
+       model's highest point — the cog's cross at the truck put rigTop 1.1 m over her truck and
+       this printed 24.6 m for a 23.5 m mast. rigTop stays the datum where no mast stands. */
     [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
-     (U.rigTop - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'],
+     ((U.rigTruckY !== undefined ? U.rigTruckY : U.rigTop)
+      - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'],
   ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
   /* fit the shadow frustum to this ship, in her own place on the line */
