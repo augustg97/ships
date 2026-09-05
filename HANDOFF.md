@@ -19996,3 +19996,127 @@ beam-station u note (1) and DB 1 with no u (1); docs/js/hull.js fixes each frame
 docs/audit-hulls.js carries D-FRAME-PLUMB's string (1).
 THE RATCHET, run after the push: PARTIAL after the push, the r239 pattern (r240/run-partial.out, partial-*.out): 3 named frames scored by check --frame, movers 0 — ship-dhow 0.043%/0.015 ok, ship-treasure 0.018%/0.005 ok, shipwright 0.021%/0.029 ok (r240/PREDICTIONS-close.md named these three as the only frames that could move, by well under 0.2%; they stayed under the gate). The other 61 frames are UNSCORED on the r240 builder; the prediction says every one is 0.000% (the class ribbon's change above the water is hidden by the planking in every Shipwright frame and by the deck in every Sea frame; the record edit moves no geometry), and r241's full run at the clean HEAD is the test. THE OPENING FULL RATCHET at the clean r239 HEAD b2468a3 (r240/open-ratchet.out): 64 of 64 scored, movers 0, exit 0, 46 minutes; logged in FRAME-LOG.md as a no-accept full run.
 Two commits close the round (1e52126 record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 241 — 2026-09-05 — a knee leans with the skin: the standing knee at every through-beam end was rotated with the wrong sign, so on the cog's flared side eight of ten had their feet 0.19–0.76 m outside the planking and their heads 0.26–0.81 m inside the top strake, and the audit that was written for them read the widest breadth over the knee's height and could not see it; the knee now stands at the beam's own x and a hand inside the skin at both ends, the rule reads each end at its own height, and the full ratchet ran first at the clean r240 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r240 ordered r241's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0e²²) or the survey's next hull. The ratchet ran at HEAD dffa8b4 from 02:22
+while the round's work was developed on a COPY of web/ served on :8150 (build/staging/r241/web, every file a symlink
+to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240 pattern, because :8149 serves web/ live and an
+edit under a running ratchet contaminates its frames); the copy's files were moved into web/ only after the run ended
+(cmp-verified). THE OPENING RATCHET (r241/open-ratchet.out): 64 of 64 frames scored, 47 minutes (02:21–03:09) into a load of
+4 that rose to 27 while this round's probes, proofs and witnesses ran beside it; ONE mover, sea-canoe-floor 0.069%/0.010
+— r240's frames-as-planes change seen on the one OPEN hull a Sea frame looks into (the voyaging canoe has no deck;
+r240's prediction said 'hidden by the deck in every Sea frame'), the diff 1,086 px of rib heads at the double hull's
+raked ends, read and accepted with that reason in FRAME-LOG.md before any of this round's files touched web/; the next
+largest globe-default 0.048% and ship-dhow 0.043%, at their r240 levels. The survey was re-run first (r241/survey.json,
+Research/survey-hulls.js on :8150): crudest by triangles per metre are still the three box boats (container 412,
+carrier 415, ever-given 456 — their boxes are containers), then yamato 564 and titanic 602 at 0% box meshes; the
+cog's 313 box meshes are the castle's planks (castlex213) and the channel wale's (channelWalex46). No hull on the
+list carries a named boxy class that is not a plank or a container. So the round took r240's named residual (0e²¹) —
+the knees built at constant u — and MEASURED it before deciding, per rule 4; the measurement found a different and
+larger fault under it.**
+
+**THE FAULT, measured (r241/probe_knees.py on :8150 against the r240 builder; r241/knees-before.json). For each of
+the cog's ten standing knees ('deck-knee', r216): the outboard reach of its vertices within 0.3 m of its foot and of
+its head, against the planking's half-breadth within 0.25 m of the knee's x and 0.12 m of that height. Beam 1
+(x −7.58): head 2.85 m against a skin of 3.35 (0.50 inside), foot 3.02 against 3.02. Beam 2 (x −5.56): head 2.99
+against 3.79 (0.81 inside), foot 3.73 against 2.97 — 0.76 m OUTSIDE the planking. Beam 3 (x −0.29): head 0.41 inside,
+foot 0.37 outside. Beam 4 (x 3.21): head 0.26 inside, foot 0.19 outside. Beam 5 (x 7.30): head 0.57 inside, foot 0.49
+outside. Both sides alike. The knee leaned the wrong way: its head inboard and its foot out, on a side that widens
+all the way to the rail (r226). The cause is one sign: the vertical arm is a box rotated about x by
+−sgn·atan2(zT − zD, yTop − yFoot); a rotation of +θ about x carries the port arm's head (+z) to +z, outboard, so −sgn
+carried it INBOARD when the rail is wider than the deck edge (zT > zD) and outboard when it is narrower — wrong
+either way. r216 wrote it under the superellipse section, whose rail is its beam (plumb above the water, tumblehome
+0): zT equalled zD, the angle was zero, and the sign had nothing to act on. r226's flared section gave it 0.4–0.8 m
+to act on and nothing looked: the knee is inside the hull in every Shipwright frame, and D-KNEES read the knee's
+whole reach against the LARGER of the skin's half-breadths at its foot and its head — the rail's — so a foot 0.76 m
+outside the planking at the deck's height passed as long as it stayed inside the rail's breadth. The CLAUDE.md class
+'a comment can be right while its arithmetic is the other sign': the comment says 'following the skin's own slope'.
+(0e²¹) itself — the head read at the station's parameter u where the skin's top at that u stands forward of the
+beam's x — is real and small: at beam 1 the rail at u and at the u whose sheer point has the beam's x differ by
+under 0.1 m of half-breadth. Both are fixed together.**
+
+**THE MODEL (web/js/hull.js; r241/hull.before.js, hull.after.js, apply-hull-edits.py). uAtXV(S, H, x, v, u): the u
+whose skin stands at x at parameter v — r240's per-height inversion lifted out of buildFramesGeometry into a module
+function, the same arithmetic (the station's own u where the skin's x at that height is already x; else a bisection
+over [u − 0.3, u + 0.3] widened to [0, 1], 30 halvings; null where no skin stands there). r240's own copy inside the
+frames builder is untouched, so every frame is byte-identical. The knee: uT = uAtXV(e[0], 1, u) — the u whose sheer
+point has the beam head's x; yTop = railAtU(uT) − 0.10 and zT = railHalfAtU(uT) − gap − kM/2 (were at u); the foot's
+zD = |e[2]| − gap − kM/2 as before (e IS the skin at the beam's x at deck height); rotation.x = +sgn·atan2(zT − zD,
+yTop − yFoot). Nothing else in the block moves: the lower arm, the beam, the names the audit reads. Only the cog
+carries deck.throughBeams (grep), so no other hull's geometry changes.**
+
+**MEASURED AFTER (r241/knees-after.json, the same probe on :8150 against the r241 builder). Beam 2: head 3.74
+against a skin of 3.79 (0.05 inside — the build's hand), foot 2.98 against 2.97. Beam 3: head 0.05 inside, foot
+3.37 against 3.37. Beam 4: head 0.05 inside, foot 0.02 inside. Beam 5: head 0.05 inside, foot 0.02 inside. Beam 1:
+head 3.20 against 3.35 (0.15) and foot 2.84 against 3.02 (0.18) — the probe's 0.25 m x-window takes the WIDEST skin
+vertex near the knee, and at beam 1 the plan narrows toward the stem by about 0.1 m across that window; the audit's
+own read (0.3 m window, the same effect) passes it. Every knee's head is at the rail's half-breadth at the beam's x,
+every foot at the deck edge's.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r241/apply-audit-edits.py). D-KNEES reads each END at its own height:
+the foot's reach is the largest |z| of the knee's vertices in its lowest 0.3 m, read against the skin within 0.12 m
+of the top of that band (so the knee's own lean across the band cannot convict it); the head's likewise from the top
+down. 'a knee outside the planking' at +0.02 m as before, now per end and named ('foot reaches 3.73 m, the skin 2.97
+at x −5.6'); NEW 'a knee standing off the planking' when either end's reach is more than 0.30 m inside the skin — the
+build is a hand (0.05), and the r240 heads stood 0.26–0.81 off. PROOFS (r241/run-proofs.sh, on :8150). A, the r240
+builder under the r241 audit: checked 33 hulls, 16 problems, all on the cog — 8 'a knee outside the planking' (the
+feet of beams 2–5, both sides, 0.19–0.76 m) and 8 'a knee standing off the planking' (the heads of beams 1, 2, 3
+and 5, both sides — 0.51, 0.78, 0.40 and 0.55 m inside the skin; beam 4's head at 0.26 sits under the 0.30
+allowance) (audit-proof-a.out). B, the r241 builder with every head inset a further 0.35 m
+(hull.doctored-inset.js): 10 problems, 'a knee standing off the planking' at every head (audit-proof-b.out). The
+builder restored from the after-copy (cmp). Final audit on the r241 builder and audit: checked 33 hulls, 0 problems
+(r241/audit.out). Rule 8 on the way there: none fired — the probe and the audit agreed on every knee within their
+windows.**
+
+**THE RECORD: unchanged (web/data/vessels.json byte-identical, cmp).**
+
+**WITNESSED (r241/run-witness.sh; stage_capture with the 150 s ready-wait, before on :8149 at the r240 HEAD and
+after on :8150). Two cameras. (1) Stage 3 ('Decked') from over the port bow, b 300, l 52, z 0.75 — the deck laid, the
+frame heads and the knees standing inside the starboard bulwark (before-stage3-overhead.png against
+after-stage3-overhead.png; the far bulwark's forward half cropped at 1.6x in before-/after-stage3-knees.png). Before:
+the two knees in the crop — the square-edged timbers among the rounded frame heads at beams 1 and 2 — lean INBOARD,
+their heads standing a half-metre off the planking toward the deck's centre and their feet against it, a timber
+leaning away from the side it is meant to hold. After: both stand flat against the planking, parallel to the frame
+heads beside them, their heads at the top strake with no gap. The diff between the two frames is 42,552 px (0.82%),
+every band of it at the ten knees and the beam heads, the deck, gratings and sea at zero. (2) The full build from the
+port quarter above, b 270, l 18, z 0.8, sail furled (before-/after-abeam.png): 3,260 px moved (0.063%), all inside
+x 1030–1874, y 1022–1235 of 2880 × 1800 — the starboard bulwark's inside where the knees stand; at that camera the
+port side's knee feet, which stood outside the planking below the deck's edge, are under the stage card, and the r240
+broadside at l 4 (r240/after-stage2-broadside.png) shows only the shell at the waterline. The overhead pair is the
+witness.**
+
+**Rule 0 on the after overhead read whole: the frame reads as a rendered object in a place, not a chart — a planked
+deck with its seams and three gratings, lit from the upper left, a dark clinker bulwark with the timbers' rounded
+heads catching the light along it, the beam heads standing proud outside the near side, the sea around. Three facts a
+viewer can read off it without a legend: the deck is laid over beams whose heads pass out through the planking; the
+frames are separate timbers whose heads stand inside the bulwark up to the top strake, one pitch apart; and at every
+beam a squared knee stands against the inside of the planking where the rounded frame heads do not.**
+
+**Named residuals, in order:** (0e²¹) RESOLVED — measured, and the measurement found the sign fault under it.
+(0e²²) OPEN and unread: Frames 1 and 2 end on the stem 0.56 and 1.29 m under the water; Lahn's Blatt 1 draws the
+hook and not the frames' heels, and Tanner's Appendix H does not describe the forward floors' landing (grepped this
+round: 'hook' and 'floor' in App. H give only the sagged floor timbers). (0e¹⁷) OPEN as a read: the stem hook as a
+timber, its scarf and the bolted lap, the head's fitting and the bowline spar. (0e¹⁵) the closing's form from
+Spant 35 to the post and from Spant 6 to the stem, unread. (0e¹⁸) the posts' sidings (Lahn 1992 not on disk).
+(0e¹⁶) the stern hook. (0h′) profile_capture.py still selects the wrong hull for --ship cog. NEW (0e²³): the
+D-KNEES 'standing off' allowance is 0.30 m against a build of 0.05, because the rule's skin read takes the widest
+vertex in a 0.3 × 0.12 m window and the cog's plan narrows 0.1 m across it at the bow; a read at the knee's exact x
+(interpolating the skin's rows) would let the allowance drop to 0.12. (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′)
+(0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r242 opens by running the FULL ratchet at the clean HEAD first (this round scores three frames by check --frame
+after the push — ship-dhow, ship-treasure and shipwright, the cog's berth neighbours and the default — with the
+prediction in r241/PREDICTIONS-close.md: under 0.05% on the two neighbours, 0.000% everywhere else, because the knees
+are inside the hull and the cog has no frame of her own), accepting with reasons only what this round's change
+explains (r240's ribbon change has now been seen on the canoe; any other open hull's Sea frame — the dugout's floor, the
+trireme's — is the place to look first if one moves), then takes the survey's next hull or (0e²²) if a source for the forward floors' landing is found. The
+survey's ranking is in r241/survey.json; the fleet's box meshes are planks and containers, so the next survey pass
+should be by LOOKING — a Shipwright spin of the next hull from eight bearings (Research/spin_capture.py) — not by
+the survey's counts.**
+
+**Live stamp: docs/index.html carries data-version 1788603120 at the build; the push and the live poll are in
+build/staging/r241/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r241 staging stays on disk uncommitted, the r211 convention.**

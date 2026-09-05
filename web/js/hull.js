@@ -521,6 +521,25 @@ function frameU(S, k) {
   return u;
 }
 
+/* ── THE u WHOSE SKIN STANDS AT x AT A HEIGHT (round 241) ────────────────────────────
+   A timber set across the ship stands at ONE x (a frame is a plane at fixed x, r240), and
+   the skin's x at a station varies with height wherever the hull's end leans. r240 wrote
+   this inversion inside the frames builder; the knees need it too, so here it is as a
+   function, the same arithmetic: the station's own u where the skin's x at that height is
+   already x (an unraked hull, every height under the water on a class hull); else a
+   bisection over u in [u − 0.3, u + 0.3], widened to [0, 1] if the root is outside, 30
+   halvings, x(u) at a fixed v being monotone in u; null where no skin stands at that x at
+   that height (the plane misses the skin past a raked end). */
+function uAtXV(S, H, x, v, u) {
+  const x0 = surfacePoint(S, H, u, v)[0];
+  if (Math.abs(x0 - x) < 1e-6) return u;
+  let lo = Math.max(0, u - 0.3), hi = Math.min(1, u + 0.3);
+  if (surfacePoint(S, H, lo, v)[0] > x) { lo = 0; if (surfacePoint(S, H, 0, v)[0] > x) return null; }
+  if (surfacePoint(S, H, hi, v)[0] < x) { hi = 1; if (surfacePoint(S, H, 1, v)[0] < x) return null; }
+  for (let it = 0; it < 30; it++) { const m = (lo + hi) / 2; if (surfacePoint(S, H, m, v)[0] < x) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+
 /* ── THE SECTION FORM CHANGES ALONG THE SHIP (round 227) ─────────────────────────────
    r226 gave the cog one section form, Spant 26's, and scaled its flat with the local
    half-breadth. Blatt 3's other three sections say otherwise: at Spant 6 and 10 (the bow)
@@ -5056,16 +5075,30 @@ function buildFittings(S, group, mats) {
          sided like the beam, the vertical arm following the skin's own slope between deck
          height and the sheer (the chord of two surfacePoints), a hand inboard of the skin. */
       const kS = S.deck.kneeSidedM || 0.20, kM = 0.22, gap = 0.05;
-      const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - gapT;     // the knee stands ON the beam
+      /* ── THE KNEE STANDS AT THE BEAM'S x AND LEANS WITH THE SKIN (round 241) ─────────
+         A knee is a timber at one x, the beam's. Its head is read where the skin's top
+         stands at THAT x — the u whose sheer point has the beam's x (uAtXV) — not at the
+         station's parameter, which at the rail stands forward of the beam wherever the
+         end leans. And it leans with the side: head at the rail's half-breadth, foot at
+         the deck edge's. r216 wrote the rotation with the other sign; under a plumb side
+         (the superellipse's rail is its beam) the angle was zero and hid it, and under the
+         flared side (r226) every knee leaned the wrong way — foot 0.19–0.76 m OUTSIDE the
+         planking, head 0.26–0.81 m inside it, on eight of the cog's ten (measured,
+         r241/knees-before.json). D-KNEES read the reach against the skin's WIDEST breadth
+         over the knee's height and could not see it; it reads each end at its own height now. */
+      const uTop = uAtXV(S, H, e[0], 1, u), uT = uTop == null ? u : uTop;
+      const yTop = railAtU(uT) - 0.10, yFoot = deckAtU(u) - gapT;     // the knee stands ON the beam
       for (const sgn of [-1, 1]) {
         const zD = Math.abs(e[2]) - gap - kM / 2;
-        const zT = railHalfAtU(u) - gap - kM / 2;
+        const zT = railHalfAtU(uT) - gap - kM / 2;
         const len = Math.hypot(yTop - yFoot, zT - zD);
         if (len < 0.25) continue;
         const kg = new THREE.Group();
         const vert = new THREE.Mesh(new THREE.BoxGeometry(kS, len, kM), wood);
         vert.position.set(0, (yTop + yFoot) / 2, sgn * (zD + zT) / 2);
-        vert.rotation.x = -sgn * Math.atan2(zT - zD, yTop - yFoot);
+        /* +sgn: a rotation of +θ about x carries the port arm's head (+z) further to +z,
+           outboard, where a flared rail is; −sgn carried it inboard and the foot out */
+        vert.rotation.x = sgn * Math.atan2(zT - zD, yTop - yFoot);
         const armL = Math.min(0.9, Math.abs(e[2]) * 0.35);
         const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
         arm.position.set(0, yFoot + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));

@@ -767,14 +767,21 @@ if (knees.length !== 2 * H.deck.throughBeams)
 say(v.id, 'through-beams without their knees', `${knees.length} deck-knee, ${2 * H.deck.throughBeams} wanted for ${H.deck.throughBeams} beams`);
 for (const kn of knees) {
 const b = bbox(kn), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
-const out = Math.max(b[5], -b[2]);
-const half = Math.max(skinHalfNear(xc, b[1] + 0.15), skinHalfNear(xc, b[4] - 0.15));
+const reachIn = (yA, yB) => { let w = 0; const pos = kn.geometry.attributes.position, p = new THREE.Vector3();
+for (let i = 0; i < pos.count; i++) { p.fromBufferAttribute(pos, i); kn.localToWorld(p); if (p.y >= yA && p.y <= yB) w = Math.max(w, Math.abs(p.z)); } return w; };
+const skinAt = y => { let w = 0; for (const q of sv) if (Math.abs(q[0] - xc) < 0.3 && Math.abs(q[1] - y) < 0.12) w = Math.max(w, Math.abs(q[2])); return w; };
+const ends = [['foot', reachIn(b[1] - 0.01, b[1] + 0.3), skinAt(b[1] + 0.3)],
+['head', reachIn(b[4] - 0.3, b[4] + 0.01), skinAt(b[4] - 0.3)]];
 if (edge < 1e8 && (b[1] > edge - gapBeam + 0.07 || b[1] < edge - gapBeam - 0.35))
 say(v.id, 'a knee off its beam', `foot ${b[1].toFixed(2)} m, the deck's edge ${edge.toFixed(2)} at x ${xc.toFixed(1)}, the beam ${gapBeam.toFixed(2)} under it`);
 if (b[4] < top - 0.5)
 say(v.id, 'a knee that does not reach the top strake', `head ${b[4].toFixed(2)} m, the skin's top ${top.toFixed(2)} at x ${xc.toFixed(1)}`);
+for (const [end, out, half] of ends) {
 if (half > 0 && out > half + 0.02)
-say(v.id, 'a knee outside the planking', `reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
+say(v.id, 'a knee outside the planking', `${end} reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}`);
+if (half > 0 && out < half - 0.30)
+say(v.id, 'a knee standing off the planking', `${end} reaches ${out.toFixed(2)} m, the skin ${half.toFixed(2)} at x ${xc.toFixed(1)}; a hand's gap is the build`);
+}
 }
 }
 if (H.draughtCondition !== undefined) {

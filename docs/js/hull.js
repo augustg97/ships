@@ -277,6 +277,15 @@ const SL = stemLineOf(S);
 if (SL) { const ux = SL.uAtX((u - 0.5) * S.lwl, 0); if (ux != null) return ux; }
 return u;
 }
+function uAtXV(S, H, x, v, u) {
+const x0 = surfacePoint(S, H, u, v)[0];
+if (Math.abs(x0 - x) < 1e-6) return u;
+let lo = Math.max(0, u - 0.3), hi = Math.min(1, u + 0.3);
+if (surfacePoint(S, H, lo, v)[0] > x) { lo = 0; if (surfacePoint(S, H, 0, v)[0] > x) return null; }
+if (surfacePoint(S, H, hi, v)[0] < x) { hi = 1; if (surfacePoint(S, H, 1, v)[0] < x) return null; }
+for (let it = 0; it < 30; it++) { const m = (lo + hi) / 2; if (surfacePoint(S, H, m, v)[0] < x) lo = m; else hi = m; }
+return (lo + hi) / 2;
+}
 function sectionRows(S) {
 const sec = S.section; if (!sec || !sec.stations || !sec.stations.length) return null;
 const F0 = sec.floorHalfFrac || 0, n0 = sec.power || 2.2;
@@ -3100,16 +3109,17 @@ const gapT = deckOverBeamTop(S);
 bm.position.set(e[0], deckAtU(u) - gapT - sq / 2, 0);
 bm.name = 'deck-beam';
 const kS = S.deck.kneeSidedM || 0.20, kM = 0.22, gap = 0.05;
-const yTop = railAtU(u) - 0.10, yFoot = deckAtU(u) - gapT;
+const uTop = uAtXV(S, H, e[0], 1, u), uT = uTop == null ? u : uTop;
+const yTop = railAtU(uT) - 0.10, yFoot = deckAtU(u) - gapT;
 for (const sgn of [-1, 1]) {
 const zD = Math.abs(e[2]) - gap - kM / 2;
-const zT = railHalfAtU(u) - gap - kM / 2;
+const zT = railHalfAtU(uT) - gap - kM / 2;
 const len = Math.hypot(yTop - yFoot, zT - zD);
 if (len < 0.25) continue;
 const kg = new THREE.Group();
 const vert = new THREE.Mesh(new THREE.BoxGeometry(kS, len, kM), wood);
 vert.position.set(0, (yTop + yFoot) / 2, sgn * (zD + zT) / 2);
-vert.rotation.x = -sgn * Math.atan2(zT - zD, yTop - yFoot);
+vert.rotation.x = sgn * Math.atan2(zT - zD, yTop - yFoot);
 const armL = Math.min(0.9, Math.abs(e[2]) * 0.35);
 const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
 arm.position.set(0, yFoot + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
