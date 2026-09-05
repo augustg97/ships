@@ -4033,10 +4033,12 @@ const mx = (mk.at - 0.5) * H.lwl;
 const HSt = SHIPS_HULL.hullSurface(H);
 const lower = lowerOf(mk);
 const floorY = HSt.deck(mk.at) + lower * 0.75;
+const rakeR = (mk.rake || 0) * Math.PI / 180, deckY = HSt.deck(mk.at);
 let found = 0;
 g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.key === 'sail') {
 const bbx = new THREE.Box3().setFromObject(o);
-if (bbx.min.y > floorY && bbx.min.x < mx + 1.0 && bbx.max.x > mx - 1.0) found++;
+const ax = mx + Math.sin(rakeR) * (bbx.min.y - deckY);
+if (bbx.min.y > floorY && bbx.min.x < ax + 1.0 && bbx.max.x > ax - 1.0) found++;
 } });
 if (!found)
 say(v.id, 'topsail not set',
@@ -4580,7 +4582,9 @@ const onYard = o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
 const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
 const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
 : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
-if (isOwn && (!named || onYard)) continue;
+const luffOnMast = !!o.userData.luffOnMast
+|| (o.userData.kind === 'quad' && (o.userData.held || []).includes('luff'));
+if (isOwn && !luffOnMast && (!named || onYard)) continue;
 say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on the mast at x ' + own.toFixed(2) : ''} (x ${xMin.toFixed(1)}–${xMax.toFixed(1)}) crossed by the axis of ${m.name} at x ${m.foot.x.toFixed(2)}: hit at x ${best.at.x.toFixed(2)}, y ${best.at.y.toFixed(2)}, z ${best.at.z.toFixed(2)}, grid ${best.i},${best.j}`);
 }
 }

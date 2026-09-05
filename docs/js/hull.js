@@ -1919,39 +1919,58 @@ const boomL = openAft
 const gaffL = Math.min(lower * 0.42, boomL * 0.72);
 const peak = 0.62;
 const footY = base + lower * 0.11;
+const mastX = h => x + Math.sin(rakeRad) * (h - base);
+const mastR = h => {
+let y0 = base;
+for (let si = 0; si < segs.length; si++) {
+if (h <= y0 + segs[si] || si === segs.length - 1) {
+const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
+return segR[si].a + (segR[si].b - segR[si].a) * t;
+}
+y0 += segs[si] * 0.88;
+}
+return segR[0].a;
+};
 const bm2 = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
 bm2.rotation.z = Math.PI / 2;
-bm2.position.set(x + boomL / 2, footY, 0);
+bm2.position.set(mastX(footY) + boomL / 2, footY, 0);
 group.add(tag(bm2, 'yard', 'Boom'));
 const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
-const setThroat = [x, gy];
-const setPeak = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
-const tack = [x, footY], clew = [x + boomL, footY];
+const rT = mastR(gy), rF = mastR(footY);
+const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
+const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
+const tack = [mastX(footY) + rF, footY], clew = [mastX(footY) + boomL, footY];
 const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
 if (FURLED) {
 const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
-sails.push(makeFurl(new THREE.Vector3(x, footY + r * 1.1, 0),
-new THREE.Vector3(x + boomL, footY + r * 1.1, 0),
+sails.push(makeFurl(new THREE.Vector3(mastX(footY), footY + r * 1.1, 0),
+new THREE.Vector3(mastX(footY) + boomL, footY + r * 1.1, 0),
 quadArea, furlMat(mats), group, { radius: r }));
 const rest = 0.13;
 const gm = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
 gm.rotation.z = -(Math.PI / 2 - rest);
-gm.position.set(x + Math.cos(rest) * gaffL / 2,
+gm.position.set(mastX(footY + r * 2.2) + Math.cos(rest) * gaffL / 2,
 footY + r * 2.2 + Math.sin(rest) * gaffL / 2, 0);
 group.add(tag(gm, 'yard', 'Gaff'));
 } else {
 const gm = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
 gm.rotation.z = -(Math.PI / 2 - peak);
-gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
 group.add(tag(gm, 'yard', 'Gaff'));
-sails.push(makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075));
+const gq = makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075);
+gq.userData.mastX = x; gq.userData.luffOnMast = true;
+sails.push(gq);
 if (mk.topmast && mk.topsail) {
 const topSeg = lower * 0.52;
 const truckY = base + lower * 0.88 + topSeg * 0.96;
-sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], setPeak, group, 0.035, 0.92));
+const tA = gy + lower * 0.015;
+const gt = makeTriSail([mastX(tA) + mastR(tA), tA], [mastX(truckY) + mastR(truckY), truckY],
+setPeak, group, 0.035, 0.92);
+gt.userData.mastX = x; gt.userData.luffOnMast = true;
+sails.push(gt);
 }
 }
 }

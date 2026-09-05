@@ -21326,3 +21326,105 @@ docs/audit-hulls.js carries D-SAIL-THROUGH-MAST's conviction (1); docs/data/vess
 THE RATCHET: THE OPENING FULL RATCHET at the clean r250 HEAD 25198a8 (r251/open-ratchet.out, launched 13:36 as the round's first act, ended 14:37): RATCHET EXIT 0  END 14:37:27; 65 frames scored; movers 0. Largest three: ship-yamato 0.043%/0.015, passage-sahul 0.038%/0.013, aboard 0.037%/0.009.
  PARTIAL after the push, the r239 pattern (r251/partial-*.out): frames scored one at a time by check --frame on the r251 builder, each diff read before its accept — sea-canoe-floor 8.812%/7.088 CHANGED, ship-canoe 4.218%/1.147 CHANGED, ship-carrack 0.756%/0.376 CHANGED, ship-dhow 12.657%/3.825 CHANGED, ship-galleass 14.618%/5.086 CHANGED, ship-galley 14.696%/4.727 CHANGED (6 frames; r251/PREDICTIONS-close.md names the 6 frames that MUST move — the canoe's own and the Sea's floor view of her, the dhow, the galley, the galleass and the carrack — the 6 that MAY, their berth neighbours and the two Action views with lateen craft, and the 53 that must not). The other 59 frames are UNSCORED on the r251 builder; r252's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (2d17a35 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 252 — 2026-09-05 — the gaff luff rides its mast: every gaff sail, spanker and gaff topsail was drawn with a plumb luff at the mast's deck station while the mast raked, so the 74's and the clipper's 5° mizzens, the steamer's 3° gaff mast and Endurance's 2° and 4° masts walked out through their own cloth at the throat; the luff now lies along the mast's own line a hoop's radius abaft its axis and the jaws of the boom and the gaff stand on the axis, the audit convicts any own-mast crossing of a cloth whose luff is on the mast, the topsail gate learns that a raked mast is not at its deck station aloft, and the full ratchet ran first at the clean r251 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r251 ordered r252's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y⁸), the gaff luff on the raked mast, or (0y⁷), or (0y¹⁰), or Endurance by
+looking. The ratchet was launched at HEAD bd6291b at 14:58 as the round's first act, and — the r250 rule — no
+screenshot was taken beside it: the round's probes and audits ran on a COPY of web/ served on :8150
+(build/staging/r252/web, every file a symlink to web/ except hull.js and audit-hulls.js; vessels.json is copied
+and unchanged), one browser at a time, and the witness waited for RATCHET EXIT. (0y⁸) was taken, as a class.**
+
+**THE FAULT, measured on the built scene (r252/probe_gaff.py, gaff-before.json — every cloth whose held edges include
+'luff' gives its luff column, the row at su 0 from the tack to the throat, in hull space; each point is read against
+the axis of the mast segment standing at its height, foot ring to head ring, and the offset along x is reported at
+the foot, the middle and the head; the boom's and the gaff's forward ends the same way): on every gaff-rigged mast in
+the fleet the luff stood at the mast's DECK station whatever the mast's rake, so where the mast leaned aft the luff
+opened away from it going up — the 74's spanker 0.27 m forward of the axis at the tack, 0.81 at mid-hoist and 1.35 m
+at the throat (a 5° mizzen, 12.4 m of hoist); the clipper's 0.21, 0.64, 1.07 (5°, 9.8 m); the steamer's 0.11, 0.49,
+0.87 (a 3° iron gaff mast, 14.5 m); Endurance's main 0.13, 0.57, 1.01 (2°, 25.1 m) and her mizzen 0.20, 0.91, 1.61
+(4°, 20.1 m). The boom's jaws stood the same distance forward of the mast at the boom's height (0.11–0.27 m) and the
+gaff's jaws 1.0–1.7 m forward of the mast at the throat. That is what r251's probe saw as five crossings on four hulls
+(r251/cross-after.json, every one at sv 0.93–1.00): the axis enters the cloth at the throat because the cloth, held
+to z 0 along the gaff, is the only place it can. On the unraked gaff masts — Wyoming's six, Great Eastern's six,
+Preussen's spanker — the luff lay ON the axis (offset 0.000), a bolt-rope threaded through the middle of a 0.4–0.6 m
+mast; r251's probe registered no crossing there because the ray grazes the held edge.**
+
+**THE MODEL (web/js/hull.js; r252/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted). The
+real sail is bent to the mast: the luff rides it on hoops (a track on a steel spar), the boom's jaws and the gaff's
+jaws straddle it. So the luff LIES ALONG the mast's own line, a hoop's radius abaft its axis, and the throat is where
+the gaff's jaws end — on the gaff's own line, a mast's radius from the axis. The gaff block now reads two functions
+of height that the rest of the mast has always read: mastX(h) = x + sin(rake)·(h − base), the axis every yard and
+ring on the mast is placed by, and mastR(h), the radius of the segment standing at h (the doubling's 0.88 overlap
+walked the same way the segment loop walks it). The boom's mesh starts at mastX(footY); the tack is at mastX(footY) +
+mastR(footY); the gaff's mesh starts at mastX(gy); the throat sits a mast's radius along the gaff from the axis; the
+peak and the clew are the spars' far ends as before; the gaff topsail's luff is at mastX + mastR at its foot and at
+the truck; the furled bundle and the lowered gaff start at the axis. Each cloth names its mast (userData.mastX) and
+says its luff is on it (userData.luffOnMast). On an unraked mast nothing moves but the luff, which steps aft off the
+axis onto the mast's after face. Nothing in the cloth's own shape changes (makeQuadSail and makeTriSail read their
+points only relatively), and no record field changes: vessels.json is untouched.**
+
+**MEASURED AFTER (r252/gaff-after.json, the same probe on the r252 builder): every luff stands ABAFT its mast's axis
+by that mast's radius at each height — the 74's spanker +0.26 m at the tack, +0.21 mid-hoist, +0.17 at the throat
+(the throat is on the gaff's line, so its x-offset is the radius times cos 0.62); the clipper's +0.19, +0.16, +0.13;
+the steamer's +0.27, +0.23, +0.20 and her gaff topsail +0.10, +0.18, +0.26 (the topmast's radius growing down to the
+doubling); Endurance's main +0.22, +0.18, +0.13 and mizzen +0.13, +0.11, +0.08; Wyoming's six +0.44, +0.36, +0.28
+and her six topsails +0.22, +0.28, +0.34; Preussen's spanker +0.58, +0.53, +0.47 (a 1.16 m steel tube); Great
+Eastern's six +0.42–0.53 at the tack. Every boom's forward end is on the axis to 4 mm (fwdOff −0.000 to +0.004 on
+all 17 booms); every gaff's forward end reads 0.05–0.17 m forward of the axis, which is the spar's own radius at
+the jaws (its mesh's lowest-x vertex), the same figure it read before on the unraked masts. The luffs are 0.1–0.3 m
+longer (they run the raked line) and the cloths lose 2–4% of their built area to the strip the hoops take — the
+74's 211.1 → 204.5 m², the clipper's 150.0 → 145.7, Preussen's 347.8 → 338.9, Wyoming's 269.1 → 259.7 — within
+D-SAIL-AREA's 25% of every Sail area row. Crossings (r252/probe_cross.py, cross-after.json, r251's probe on the
+seven gaff hulls): 0 on all seven — the 74, the clipper, the steamer, Endurance, Wyoming, Preussen, Great Eastern —
+where r251's cross-after.json (copied as r252/cross-before.json, the same builder at the same HEAD) had 5.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r252/apply-audit-edits.py). D-SAIL-THROUGH-MAST (round 251) now reads
+a cloth whose luff rides its mast: userData.luffOnMast, or — so the rule bites on an older builder — a quad whose
+held edges include 'luff'. Such a cloth has no row slung at the mast to be exempt; its own mast's axis must pass
+clear of it at every height, and ANY own-mast crossing convicts. PROOF A (r252/audit-proof-a.out, the r251 builder
+under the r252 audit on :8150): 5 problems, every one 'a sail through a mast' and every one on r251's list — the 74's
+spanker at (19.63, 21.23), the clipper's at (22.47, 15.94), the steamer's at (33.16, 22.58), Endurance's two at
+(2.49, 31.28) and (15.36, 24.55) — and none on Wyoming, Great Eastern or Preussen, the lugs, the spankers of the
+other classes or the artemon. THE EIGHTH STRIKE OF THE STATION-GATE CLASS: the final audit on the r252 builder then
+convicted the steamer alone — 'topsail not set: mast at u=0.845 declares a topsail and no canvas stands above 21 m at
+its station'. Rule 8: the audit was wrong. Rule (3) gated the topsail ±1 m about the mast's DECK station, and a 3°
+mast stands 1.14 m abaft that at the topsail's foot once the luff rides it; the rule's own comment on its neighbour,
+rule (2), names seven earlier strikes of the same gate on raked masts. The gate now reads the mast's axis at the
+cloth's own bottom — deck station + sin(rake)·(height − deck) — and the final audit on the r252 builder is "checked
+33 hulls, 0 problems" on :8150 (audit-final-8150.out, run-audit-final-2.out). The :8149 run after the copy into web/
+was skipped for the clock; cmp shows web/js/hull.js, web/audit-hulls.js and Research/audit-hulls.js byte-identical
+to the audited copies (run-close-checks.sh).**
+
+**WITNESSED (r252/witness-endurance-b090.png, witness-clipper-b140.png, witness-clipper-b090.png — 2880 × 1800 off :8150 after RATCHET EXIT, the after builder; the befores are the committed baselines frames/ship-endurance.png and frames/ship-clipper.png, whose pairs the partial checks write as r252/partial-*-pair.png). Endurance broadside from starboard (b=90, l=6, z=1.0): her main and mizzen gaff sails hang ON their masts — each luff runs from the boom's jaws at the deck to the gaff's jaws at the throat along the mast's own line, leaning aft with it, the cloth against the mast's after side the whole hoist; no gap opens at the throat and the gaff's jaws sit on the mast where before the mast's axis walked out through the cloth 1.0 and 1.6 m abaft a plumb luff. The clipper from the starboard quarter (b=140, l=12, z=0.9): the spanker stands abaft the mizzen with its luff up the raked mast, the boom leaving the mast at the deck and the gaff at the throat, its belly to leeward under the square canvas. The partial checks' pairs show the befores: a luff that is a plumb line standing away from the leaning mast toward the head.**
+
+**Rule 0 on the Endurance witness read whole (r252/witness-endurance-b090.png): a rendered vessel on water, not a chart — a black-hulled barquentine seen broadside on a grey-blue sea with a low grey coast behind, square sails on the fore, two big four-cornered gaff sails on the main and the mizzen, a black funnel between deckhouses amidships, boats on the deck, the standing and running rigging as lines against the sky. Three facts a viewer can read off it without a legend: she is a steam-and-sail vessel, a funnel standing between the masts under set canvas; her forward mast is square-rigged and her two after masts carry fore-and-aft sails on gaffs and booms; those two sails hang on their masts, the luff along the leaning mast from the boom to the gaff's jaws.**
+
+**Named residuals, in order:** (0y⁸) CLOSED as a class — every gaff luff lies along its mast a hoop's radius abaft the
+axis, on the raked and the unraked alike; no gaff cloth in the fleet is crossed by a mast's axis. NEW (0y¹²) the
+hoops, the jaws and the halyards are not drawn: the luff is placed where the hoops would hold it, but no hoop, no
+boom jaw, no gaff jaw, no throat or peak halyard exists as a mesh, and on the steel-masted hulls the track that
+replaces the hoops is not drawn either. NEW (0y¹³) the gaff's angle and the throat's height are class figures (0.62
+rad; 0.86 of the lower on a schooner, 0.55 on a square mast) with no plate behind them on any of the seven hulls.
+(0y⁷) the lug in its mast's plane, (0y⁹) the corbita's artemon, (0y¹⁰) the lateen yard through its own mast, (0y¹¹)
+the sheeting angle as a class figure — as r251 names them. (0y′) the masts' heights by the plate on one datum, (0y⁗)
+the sail area's contest, (0y⁵) the shroud count the plate shows, (0z) (0v) (0t) (0u) as r245–r250 name them. (0l)
+(0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰)
+(0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged.
+(1)–(20) as r230 lists them.**
+
+**r253 opens by running the FULL ratchet at the clean HEAD first (r252/PREDICTIONS-close.md names 12 frames that
+MUST move — every frame that draws a gaff sail, a spanker or a gaff topsail: ship-clipper, aboard-clipper,
+ship-steamer, aboard, ship-endurance, ship-wyoming, aboard-wyoming, ship-great-eastern, aboard-cable, ship-preussen,
+aboard-preussen, shipwright-astern — 11 that MAY, the 74's other close frames and the default Shipwright, the gaff
+hulls' berth neighbours and the Bristol descent, and 42 that MUST NOT; only those scored by check --frame after the
+push are accepted here), with no screenshot beside it until RATCHET EXIT; then takes (0y⁷), the lug beside its mast,
+or (0y¹⁰), the lateen yard on the mast's lee side — both read by r251's probe (r252/probe_cross.py) — or the
+survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking: her two gaff sails are now on her
+masts and she has never been looked at from twelve bearings.**
+
+**Live stamp: docs/index.html carries data-version 1788648395 at the build; the push and the live poll are in
+build/staging/r252/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r252 staging stays on disk uncommitted, the r211 convention.**

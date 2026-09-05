@@ -3466,17 +3466,46 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const gaffL = Math.min(lower * 0.42, boomL * 0.72);
       const peak = 0.62;                                 // the gaff's angle above horizontal
       const footY = base + lower * 0.11;
+      /* ── THE LUFF RIDES THE MAST (round 252) ──────────────────────────────────────────
+         Every point of this sail that touches the mast was placed at the mast's DECK station
+         x, whatever the mast's rake: the boom's jaws, the tack, the throat and the gaff's jaws
+         all stood plumb over the partners while the mast leaned aft 2–5°, so on the 74's and
+         the clipper's 5° spankers, the steamer's 3° gaff mast and Endurance's 2° and 4° masts
+         the mast's axis walked out through the cloth at the throat — 1.35 m abaft the luff on
+         the 74 (r251/cross-after.json: five crossings on four hulls, every one at sv 0.93–1.00;
+         the mast's yards and rings read x + sin(rake)·(h − base) and the sail did not). The real
+         sail is bent to the mast: the luff rides it on hoops (a track on a steel spar), the
+         boom's jaws and the gaff's jaws straddle it, so the luff LIES ALONG the mast's own line,
+         a hoop's radius abaft its axis, and the throat is where the gaff's jaws end — on the
+         gaff's own line, a mast's radius from the axis. mastX(h) is the axis at height h (the
+         term every yard and ring on this mast reads) and mastR(h) the radius of the segment
+         standing there. On an unraked mast nothing moves but the luff, which steps aft off the
+         axis onto the mast's after face. The cloth names its mast for the audit (userData.mastX)
+         and says its luff is on it (userData.luffOnMast), so any own-mast crossing convicts. */
+      const mastX = h => x + Math.sin(rakeRad) * (h - base);
+      const mastR = h => {
+        let y0 = base;
+        for (let si = 0; si < segs.length; si++) {
+          if (h <= y0 + segs[si] || si === segs.length - 1) {
+            const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
+            return segR[si].a + (segR[si].b - segR[si].a) * t;
+          }
+          y0 += segs[si] * 0.88;
+        }
+        return segR[0].a;
+      };
       const bm2 = new THREE.Mesh(
         new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
       bm2.rotation.z = Math.PI / 2;
-      bm2.position.set(x + boomL / 2, footY, 0);
+      bm2.position.set(mastX(footY) + boomL / 2, footY, 0);
       group.add(tag(bm2, 'yard', 'Boom'));
       /* the SET geometry decides the cloth's area whichever state it is shown in — furling
          does not change how much canvas she owns */
       const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
-      const setThroat = [x, gy];
-      const setPeak = [x + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
-      const tack = [x, footY], clew = [x + boomL, footY];
+      const rT = mastR(gy), rF = mastR(footY);
+      const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
+      const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
+      const tack = [mastX(footY) + rF, footY], clew = [mastX(footY) + boomL, footY];
       const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
       if (FURLED) {
         /* a gaff sail is handled entirely from the deck, and it stows the same way: halyards
@@ -3484,14 +3513,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
            bundle is lashed along the top of the boom. The gaff rests on the stowed sail,
            just peaked above it. */
         const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
-        sails.push(makeFurl(new THREE.Vector3(x, footY + r * 1.1, 0),
-                            new THREE.Vector3(x + boomL, footY + r * 1.1, 0),
+        sails.push(makeFurl(new THREE.Vector3(mastX(footY), footY + r * 1.1, 0),
+                            new THREE.Vector3(mastX(footY) + boomL, footY + r * 1.1, 0),
                             quadArea, furlMat(mats), group, { radius: r }));
         const rest = 0.13;                       // the lowered gaff's slight peak
         const gm = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
         gm.rotation.z = -(Math.PI / 2 - rest);
-        gm.position.set(x + Math.cos(rest) * gaffL / 2,
+        gm.position.set(mastX(footY + r * 2.2) + Math.cos(rest) * gaffL / 2,
                         footY + r * 2.2 + Math.sin(rest) * gaffL / 2, 0);
         group.add(tag(gm, 'yard', 'Gaff'));
         /* the jib-headed topsail is set flying and comes DOWN to the deck when struck —
@@ -3500,7 +3529,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const gm = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
         gm.rotation.z = -(Math.PI / 2 - peak);
-        gm.position.set(x + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+        gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
         group.add(tag(gm, 'yard', 'Gaff'));
         /* the sail is the quadrilateral: throat, peak, clew, tack — built from the two spars'
            own endpoints so it cannot come adrift of either */
@@ -3510,7 +3539,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
            two triangles' luffs differ, so the shared edge disagreed with itself by up to half a
            metre of z and the cloth tore open below the peak. A sail is one piece of canvas;
            build it as one surface and there is no seam to disagree across. */
-        sails.push(makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075));
+        const gq = makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075);
+        gq.userData.mastX = x; gq.userData.luffOnMast = true;
+        sails.push(gq);
         /* ── THE GAFF TOPSAIL, FROM THE RECORD: `topsail` ON THE MAST ────────────────────
            The jib-headed topsail fills the triangle between the topmast, the gaff and the
            peak — the highest canvas on the ship, set where the wind is. It is the record's
@@ -3520,7 +3551,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
         if (mk.topmast && mk.topsail) {
           const topSeg = lower * 0.52;
           const truckY = base + lower * 0.88 + topSeg * 0.96;
-          sails.push(makeTriSail([x, gy + lower * 0.015], [x, truckY], setPeak, group, 0.035, 0.92));
+          const tA = gy + lower * 0.015;
+          const gt = makeTriSail([mastX(tA) + mastR(tA), tA], [mastX(truckY) + mastR(truckY), truckY],
+                                 setPeak, group, 0.035, 0.92);
+          gt.userData.mastX = x; gt.userData.luffOnMast = true;
+          sails.push(gt);
         }
       }
     }
