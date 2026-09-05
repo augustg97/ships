@@ -21216,3 +21216,15 @@ docs/audit-hulls.js carries D-CRABCLAW-SPARS' two convictions (1, 1) and D-SAIL-
 THE RATCHET: THE OPENING FULL RATCHET at the clean r249 HEAD 6f67ec5 (r250/open-ratchet.out, launched 12:27 as the round's first act at a load of 20–25): CRASHED at 12:59:54 on its 28th frame, aboard-off, with "Page.screenshot: Timeout 30000ms exceeded" (open-ratchet.err) while the round's witness spin ran beside it on :8150 at a load of 15–30 — and the harness scores every frame only after the last capture, so 27 captures and 0 frames scored; the 61 frames r249 left unscored stay unscored, and they are r251's opening run to test (ship-galley's capture at 12:39:44 fell in the minute web/ carried the r250 files; web/ took them for good at 13:01:58, after the crash). THE AUDIT: the final audit on the r250 builder is "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out) and "checked 33 hulls, 0 problems" on :8149 after the copy into web/ (audit-final-8149.out).
  PARTIAL after the push, the r239 pattern (r250/partial-*.out): frames scored one at a time by check --frame on the r250 builder, each diff read before its accept — aboard-off 0.017%/0.007 ok, sea-canoe-floor 9.972%/7.274 CHANGED, ship-canoe 26.450%/9.036 CHANGED, ship-dhow 0.000%/0.000 ok, ship-dugout 0.000%/0.000 ok, ship-galley 0.000%/0.000 ok, ship-trireme 0.017%/0.011 ok, shipwright 0.000%/0.000 ok (8 frames; r250/PREDICTIONS-close.md names the 2 frames that MUST move — the canoe's own and the Sea's floor view of her — the 2 that MAY, her berth neighbours, and the 61 that must not). The other 57 frames are UNSCORED on the r250 builder; r251's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (61f513b record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+**Spot checks, continued after the receipt (r250/partial-*.out, check --frame one at a time on the r250 builder,
+13:16–13:24 at a load of 6–9): globe-default 0.009%/0.002 ok, ship-clipper 0.000%/0.000 ok, ship-carrack 0.000%/0.001
+ok, aboard 0.037%/0.009 ok, action 0.000%/0.000 ok, ship-junk 0.001%/0.000 ok, sea-dugout-floor 0.010%/0.003 ok,
+ship-galleass 0.000%/0.000 ok. With the eight above that is 16 of 65 scored on the r250 builder: the 2 MUST movers
+accepted, the 2 MAY frames unmoved, 12 of the 61 MUST NOT frames unmoved (the clipper among them, whose sails the
+new D-SAIL-AREA rule reads and whose frame this round cannot touch). 49 frames are unscored on the r250 builder.
+For r251's opening run: launch the full ratchet only when nothing else will open a browser until RATCHET EXIT —
+the r250 run crashed on a 30 s screenshot timeout with the witness spin beside it at a load of 15–30, and the
+harness scores nothing until the last capture, so a run that dies at frame 28 leaves no table (the memory
+"ratchet-scores-only-after-the-last-capture"). Take the witness and the proofs before the launch, or after the
+exit.**
