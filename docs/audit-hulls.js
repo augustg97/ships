@@ -475,6 +475,81 @@ say(v.id, "the planking's hood ends standing off the post", `${worstW.toFixed(2)
 }
 }
 }
+if (H.stem && H.stem.form === 'straight' && H.stem.angleToKeelDeg != null) {
+const ST = H.stem;
+const stem = (() => { let r = null; g.traverse(o => {
+if (!r && o.isMesh && (o.name === 'Stem' || (o.userData.part && o.userData.part.name === 'Stem'))) r = o; }); return r; })();
+const world = o => {
+const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+return out;
+};
+if (!stem) say(v.id, 'a straight stem with no stem drawn', 'record gives stem.form straight; no Stem mesh');
+else {
+const pv = world(stem), ridge = new Map();
+for (const q of pv) { const k = Math.round(q[1] * 100); ridge.set(k, Math.min(ridge.get(k) ?? 1e9, q[0])); }
+const ks = [...ridge.keys()].sort((a, b) => a - b);
+const yLo = ks[0] / 100, yHi = ks[ks.length - 1] / 100;
+const pts = ks.filter(k => k / 100 > yLo + 0.2 && k / 100 < yHi - 0.2).map(k => [k / 100, ridge.get(k)]);
+const n = pts.length; let sy = 0, sx = 0, syy = 0, sxy = 0;
+for (const [y, x] of pts) { sy += y; sx += x; syy += y * y; sxy += x * y; }
+const slope = n > 2 ? (n * sxy - sx * sy) / (n * syy - sy * sy) : 0, icpt = n ? (sx - slope * sy) / n : 0;
+const wantTan = -Math.tan((ST.angleToKeelDeg - 90) * Math.PI / 180);
+let worst = 0; for (const [y, x] of pts) worst = Math.max(worst, Math.abs(x - (icpt + slope * y)));
+if (n < 3) say(v.id, 'a stem too short to read', `${n} centimetres of forward face`);
+else {
+if (Math.abs(slope - wantTan) > 0.05)
+say(v.id, 'the stem off its attested angle', `${(90 - Math.atan(slope) * 180 / Math.PI).toFixed(1)}° to the keel drawn, the record says ${ST.angleToKeelDeg}`);
+if (worst > 0.08)
+say(v.id, 'a straight stem drawn bent', `forward face ${worst.toFixed(2)} m off its own line`);
+if (ST.headAboveKeelM != null && Math.abs((yHi + H.draught) - ST.headAboveKeelM) > 0.2)
+say(v.id, "the stem's head off its attested height", `${(yHi + H.draught).toFixed(2)} m over the keel, the record says ${ST.headAboveKeelM}`);
+if (yLo > -H.draught + 0.2)
+say(v.id, 'a stem whose foot stands above the keel', `foot ${(yLo + H.draught).toFixed(2)} m over the keel's rabbet`);
+const SPd = H.sternpost && H.sternpost.form === 'straight' ? H.sternpost : null;
+if (SPd && SPd.footAbaftStationDatumM != null && ST.footForwardOfStationDatumM != null) {
+const posts = []; g.traverse(o => { if (o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) posts.push(o); });
+if (posts.length) {
+const qv = [].concat(...posts.map(world)); let yMin = 1e9; for (const q of qv) yMin = Math.min(yMin, q[1]);
+let heelX = -1e9; for (const q of qv) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+const datumX = heelX - SPd.footAbaftStationDatumM;
+let footX = 1e9; for (const q of pv) if (q[1] < yLo + 0.15) footX = Math.min(footX, q[0]);
+const got = datumX - footX;
+if (Math.abs(got - ST.footForwardOfStationDatumM) > 0.25)
+say(v.id, "the stem's foot off the plate's station", `${got.toFixed(2)} m forward of the datum (datum x ${datumX.toFixed(2)}, foot x ${footX.toFixed(2)}), the record says ${ST.footForwardOfStationDatumM}`);
+}
+}
+}
+const skins = []; g.traverse(o => { const p = o.userData && o.userData.part; if (o.isMesh && p && p.key === 'planking') skins.push(o); });
+if (!skins.length) say(v.id, 'a straight stem with no planking to close on it', 'no planking mesh');
+else {
+const sv = [].concat(...skins.map(world)); let skinTop = -1e9; for (const q of sv) skinTop = Math.max(skinTop, q[1]);
+const ridgeAt = y => { const k = Math.round(y * 100); let best = null, bd = 1e9;
+for (const kk of ks) { const d = Math.abs(kk - k); if (d < bd) { bd = d; best = kk; } } return bd <= 3 ? ridge.get(best) : null; };
+let worstFwd = 0, worstGap = 0, yFwd = 0, yGap = 0, bands = 0, worstW = 0, yW = 0;
+for (let y = yLo + 0.35; y < Math.min(yHi - 0.2, skinTop - 0.2); y += 0.25) {
+const pf = ridgeAt(y); if (pf == null) continue;
+let sx = 1e9; for (const q of sv) if (Math.abs(q[1] - y) < 0.13) sx = Math.min(sx, q[0]);
+if (sx > 1e8) continue;
+bands++; const gap = sx - pf;
+if (-gap > worstFwd) { worstFwd = -gap; yFwd = y; }
+if (gap > worstGap) { worstGap = gap; yGap = y; }
+if (ST.hoodEndHalfBreadthM != null) {
+let w = 0; for (const q of sv) if (Math.abs(q[1] - y) < 0.13 && q[0] < sx + 0.10) w = Math.max(w, Math.abs(q[2]));
+if (w > worstW) { worstW = w; yW = y; }
+}
+}
+if (!bands) say(v.id, 'a stem that shares no height with the planking', `stem ${yLo.toFixed(2)}..${yHi.toFixed(2)} m`);
+if (worstFwd > 0.05)
+say(v.id, 'planking standing forward of its stem', `skin ${worstFwd.toFixed(2)} m forward of the stem's face at ${yFwd.toFixed(2)} m — the planks close on the stem, not past it`);
+if (worstGap > 0.45)
+say(v.id, 'daylight between the planking and the stem', `skin ${worstGap.toFixed(2)} m short of the stem's face at ${yGap.toFixed(2)} m`);
+if (ST.hoodEndHalfBreadthM != null && worstW > ST.hoodEndHalfBreadthM + 0.12)
+say(v.id, "the planking's hood ends standing off the stem", `${worstW.toFixed(2)} m half-breadth at the skin's forward end at ${yW.toFixed(2)} m, the record's rabbet ${ST.hoodEndHalfBreadthM} — an end face, not a rabbet`);
+}
+}
+}
 if (H.castle && H.castle.plan) {
 const P = H.castle.plan;
 const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
@@ -612,6 +687,7 @@ if (H.deck.beamStations.length !== H.deck.throughBeams)
 say(v.id, "beam stations off the record's count", `${H.deck.beamStations.length} stations, throughBeams ${H.deck.throughBeams}`);
 H.deck.beamStations.forEach((st, i) => {
 const label = st.name || ('beam ' + (i + 1));
+if (H.stem && H.stem.form === 'straight' && H.deck.beamHeadsFromHeelM && H.deck.beamHeadsFromHeelM[i] != null) return;
 let u;
 if (st.u !== undefined) u = st.u;
 else if (rsB) u = oUB + 0.89 * st.spant / (nFB - 1);
@@ -743,7 +819,17 @@ say(v.id, "a flared section off its record's curve", `${worstW.toFixed(2)} m hal
 }
 if (H.frames && H.frames.roomAndSpaceM) {
 const fr = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'frames') fr.push(o); });
-const rs = H.frames.roomAndSpaceM, nWant = Math.floor(0.89 * L / rs) + 1;
+const rs = H.frames.roomAndSpaceM; let nWant = Math.floor(0.89 * L / rs) + 1;
+if (H.stem && H.stem.form === 'straight' && H.stem.angleToKeelDeg != null && H.sternpost && H.sternpost.form === 'straight'
+&& H.sternpost.footAbaftStationDatumM != null && H.stem.footForwardOfStationDatumM != null) {
+const kd = 0.055 * H.draught + 0.02, t = 0.05 * H.draught;
+const yPF = -H.draught * Math.max(0.06, 1 - (H.riseA || 0)) - kd, yF = -H.draught * Math.max(0.06, 1 - (H.riseF || 0)) - kd;
+const datumX = L / 2 + yPF * Math.tan((H.sternpost.angleToKeelDeg - 90) * Math.PI / 180) + t - H.sternpost.footAbaftStationDatumM;
+const xFoot = datumX - H.stem.footForwardOfStationDatumM + t;
+const xEnd = xFoot + yF * Math.tan((H.stem.angleToKeelDeg - 90) * Math.PI / 180);
+const n0 = nWant; nWant = 0;
+for (let f = 0; f < n0; f++) if ((0.055 + 0.89 * f / (n0 - 1) - 0.5) * L >= xEnd) nWant++;
+}
 const nBeams = H.deck.throughBeams || 0;
 if (fr.length > nWant || fr.length < nWant - nBeams)
 say(v.id, "frames off the record's count", `${fr.length} frames, ${nWant} at ${rs} m over the run (less up to ${nBeams} at the beams)`);

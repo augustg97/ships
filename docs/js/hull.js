@@ -75,7 +75,7 @@ function hullSurface(S) {
 const nExp = exponentForCm(S.cm);
 const halfB = S.beam / 2;
 const plan = railPlan(S);
-const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, sternPlanEnd(S));
+const wl = u => plan ? plan(u) : fullness(u, S.wlPower, stemPlanEnd(S), sternPlanEnd(S));
 const keel = u => {
 const fore = 1 - Math.pow(Math.max(0, (S.forefoot - u) / S.forefoot), 2) * S.riseF;
 const aft = 1 - Math.pow(Math.max(0, (u - (1 - S.run)) / S.run), 2) * S.riseA;
@@ -107,9 +107,11 @@ const rakeScale = rakeAllow > 0
 const SP = S.sternpost && S.sternpost.form === 'straight' && S.sternpost.angleToKeelDeg != null
 ? S.sternpost : null;
 const postTan = SP ? Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180) : 0;
+const stemLine = stemLineOf(S);
 const rake = u => {
 if (u < S.forefoot) {
 const k = (S.forefoot - u) / S.forefoot;
+if (stemLine) return (stemLine.at(sheer(0.0))[0] + S.lwl / 2) * k * k;
 return -S.stemRake * rakeScale * k * k * S.loa;
 }
 if (u > 1 - S.run) {
@@ -127,7 +129,7 @@ if (S.deck.level) return S.freeboard - deckDrop;
 return sheer(u) - deckDrop;
 };
 return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S),
-straightPost: SP, postTan };
+straightPost: SP, postTan, stemLine };
 }
 function deckEdge(S, H, u) {
 const yD = H.deck(u), fb = H.sheer(u);
@@ -180,8 +182,17 @@ return g;
 function beamRows(S) {
 if (!(S.deck && S.deck.throughBeams)) return [];
 const n = S.deck.throughBeams;
-if (S.deck.beamStations)
-return S.deck.beamStations.map(s => ({ u: s.u !== undefined ? s.u : frameU(S, s.spant), st: s })).sort((a, b) => a.u - b.u);
+if (S.deck.beamStations) {
+const SL = stemLineOf(S), heads = S.deck.beamHeadsFromHeelM, hts = S.deck.beamHeightsFromKeelM;
+return S.deck.beamStations.map((s, i) => {
+let u = s.u !== undefined ? s.u : frameU(S, s.spant);
+if (SL && SL.datumX != null && heads && heads[i] != null) {
+const z = (hts && hts[i] != null ? hts[i] : S.freeboard + S.draught) - S.draught;
+const ux = SL.uAtX(SL.datumX - heads[i], z); if (ux != null) u = ux;
+}
+return { u, st: s };
+}).sort((a, b) => a.u - b.u);
+}
 const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
 return us.map(u => ({ u, st: null }));
 }
@@ -209,11 +220,43 @@ const D = S.deck || {};
 if (D.beamHeightsFromKeelM && D.deckAboveBeamCentreM != null) return D.deckAboveBeamCentreM - (D.beamSidedM || 0.30) / 2;
 return 0.02;
 }
+function stemLineOf(S) {
+const ST = S.stem && S.stem.form === 'straight' && S.stem.angleToKeelDeg != null ? S.stem : null;
+if (!ST) return null;
+const SP = S.sternpost && S.sternpost.form === 'straight' && S.sternpost.angleToKeelDeg != null ? S.sternpost : null;
+const postTan = SP ? Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180) : 0;
+const keelF = Math.max(0.06, 1 - (S.riseF || 0)), keelA = Math.max(0.06, 1 - (S.riseA || 0));
+const sheer0 = S.freeboard + (S.sheerBow || 0);
+const tan = Math.tan((ST.angleToKeelDeg - 90) * Math.PI / 180);
+const keelDepth = 0.055 * S.draught + 0.02, t = 0.05 * S.draught;
+const yFoot = -S.draught * keelF - keelDepth;
+const yHead = ST.headAboveKeelM != null ? ST.headAboveKeelM - S.draught : sheer0;
+let xFoot, datumX = null;
+if (SP && SP.footAbaftStationDatumM != null && ST.footForwardOfStationDatumM != null) {
+const yPostFoot = -S.draught * keelA - keelDepth;
+datumX = S.lwl / 2 + yPostFoot * postTan + t - SP.footAbaftStationDatumM;
+xFoot = datumX - ST.footForwardOfStationDatumM + t;
+} else xFoot = -S.lwl / 2 + yFoot * tan;
+const at = y => [xFoot - (y - yFoot) * tan, y, 0];
+const offAt = z => at(z)[0] + S.lwl / 2;
+const kOf = u => Math.max(0, (S.forefoot - u) / S.forefoot);
+const xOf = (u, z) => (u - 0.5) * S.lwl + offAt(z) * kOf(u) * kOf(u);
+const uAtX = (x, z) => {
+if (x < xOf(0, z)) return null;
+if (x >= xOf(S.forefoot, z)) return x / S.lwl + 0.5;
+let lo = 0, hi = S.forefoot;
+for (let it = 0; it < 40; it++) { const m = (lo + hi) / 2; if (xOf(m, z) < x) lo = m; else hi = m; }
+return (lo + hi) / 2;
+};
+return { tan, yFoot, yHead, at, xFoot, datumX, offAt, kOf, uAtX };
+}
 function frameStations(S, NF) {
 const rs = S.frames && S.frames.roomAndSpaceM;
 if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
 const L = S.lwl, n = Math.max(2, Math.floor(0.89 * L / rs) + 1);
-const us = Array.from({ length: n }, (_, f) => 0.055 + (f / (n - 1)) * 0.89);
+const us0 = Array.from({ length: n }, (_, f) => 0.055 + (f / (n - 1)) * 0.89);
+const SL = stemLineOf(S);
+const us = SL ? us0.map(u => SL.uAtX((u - 0.5) * L, 0)).filter(u => u != null) : us0;
 const keep = ((S.frames.sidedM || 0.18) + ((S.deck && S.deck.kneeSidedM) || 0.20)) / 2 + 0.05;
 const beams = beamStations(S);
 return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
@@ -222,12 +265,17 @@ function frameOrigin(S) { return S.frames && S.frames.originU !== undefined ? S.
 function frameNumber(S, u) {
 const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
 const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
+const SL = stemLineOf(S);
+if (SL) u = u + SL.offAt(0) * SL.kOf(u) * SL.kOf(u) / S.lwl;
 return Math.round((u - frameOrigin(S)) / 0.89 * (n - 1));
 }
 function frameU(S, k) {
 const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0.5;
 const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
-return frameOrigin(S) + 0.89 * k / (n - 1);
+const u = frameOrigin(S) + 0.89 * k / (n - 1);
+const SL = stemLineOf(S);
+if (SL) { const ux = SL.uAtX((u - 0.5) * S.lwl, 0); if (ux != null) return ux; }
+return u;
 }
 function sectionRows(S) {
 const sec = S.section; if (!sec || !sec.stations || !sec.stations.length) return null;
@@ -246,6 +294,12 @@ const a = rows[i - 1], b = rows[i], f = (u - a.u) / Math.max(1e-9, b.u - a.u);
 return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
 }
 return last;
+}
+function stemPlanEnd(S) {
+const ST = S.stem;
+if (ST && ST.form === 'straight' && ST.hoodEndHalfBreadthM != null)
+return Math.min(S.stemFineness, ST.hoodEndHalfBreadthM / (S.beam / 2));
+return S.stemFineness;
 }
 function sternPlanEnd(S) {
 const SP = S.sternpost;
@@ -279,7 +333,7 @@ return (2 * t3 - 3 * t2 + 1) * pts[i].r + (t3 - 2 * t2 + t) * h[i] * m[i]
 }
 function railPlan(S) {
 const rows = railRows(S); if (!rows) return null;
-return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: sternPlanEnd(S) }]));
+return pchip([{ u: 0, r: stemPlanEnd(S) }].concat(rows, [{ u: 1, r: sternPlanEnd(S) }]));
 }
 function buildFramesGeometry(S, NF = 26, onlyU) {
 const H = hullSurface(S);
@@ -387,7 +441,7 @@ const pos = [], idx = [];
 const N = 26, sided = 0.055 * S.beam / 2;
 const STEEL = S.build === 'steel' || S.build === 'iron';
 const inset = STEEL ? (aft ? -1.05 : 1.05) : 0;
-const SPL = aft ? straightPostLine(S, H) : null;
+const SPL = aft ? straightPostLine(S, H) : (H.stemLine || null);
 for (let i = 0; i <= N; i++) {
 const f = i / N;
 const u = aft ? 1 - (1 - f) * 0.10 : f * 0.10;
@@ -815,6 +869,10 @@ y *= 1 - S.sternRound * Math.pow(t, 2.0) * Math.pow(k, 1.5);
 }
 }
 if (H.straightPost && u > 1 - S.run && fb > 0) rakeF = z / fb;
+if (H.stemLine && u < S.forefoot) {
+const k = (S.forefoot - u) / S.forefoot;
+return [(u - 0.5) * L + (H.stemLine.at(z)[0] + L / 2) * k * k, z, y];
+}
 return [(u - 0.5) * L + H.rake(u) * rakeF, z, y];
 }
 function buildHullGeometry(S, NU = 120, NV = 34) {

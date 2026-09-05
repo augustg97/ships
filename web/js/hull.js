@@ -146,7 +146,7 @@ function hullSurface(S) {
   /* waterline half-breadth, normalised — or, on a hull whose record carries rail
      half-breadths by station, the RAIL plan through them (railPlan, round 228) */
   const plan = railPlan(S);
-  const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, sternPlanEnd(S));
+  const wl = u => plan ? plan(u) : fullness(u, S.wlPower, stemPlanEnd(S), sternPlanEnd(S));
   /* depth of the keel below the waterline, normalised. The forefoot rises and the run sweeps
      up to the sternpost; a flat-floored cog barely does either. */
   const keel = u => {
@@ -220,10 +220,27 @@ function hullSurface(S) {
   const SP = S.sternpost && S.sternpost.form === 'straight' && S.sternpost.angleToKeelDeg != null
     ? S.sternpost : null;
   const postTan = SP ? Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180) : 0;
+  /* ── A STRAIGHT STEM IS A LINE TOO (round 239) ─────────────────────────────────────
+     Lahn's Blatt 1 draws the cog's stem as ONE straight timber from a flat keel plank to a
+     head 7.1 m over the keel's underside, 124° to the keel (0.68 m forward per metre of
+     height; straight to 3.5 cm over 7 m of drawn face), its foot 15.4 m forward of the
+     station datum. At the laden draught that line stands 1.65 m ABAFT the loft's waterline
+     end (−lwl/2) and at the keel 3.25 m abaft it; at the head it stands where the class's
+     clamped deck-level overhang already put the skin's end. The class bow leaned only
+     above the water (rakeF in surfacePoint) off a bluff underwater entry at −lwl/2, and
+     the class stem timber ran along that skin from the keel to the sheer. Record-gated on
+     hull.stem.form 'straight': the line is placed from the record's foot station through
+     the straight post's datum (or through the waterline's forward end where no datum
+     exists) at the record's angle; surfacePoint puts the skin's forward end on it at
+     every height; rake(u) reports the line's deck-level offset, so the deck-level readers
+     (mast feet, tack, head knee) land on the stem; buildStemGeometry draws the timber on
+     the line to the record's head. Without the field every number below is what it was. */
+  const stemLine = stemLineOf(S);
   /* the profile of the stem and the sternpost, as an x-offset that rakes the ends */
   const rake = u => {
     if (u < S.forefoot) {
       const k = (S.forefoot - u) / S.forefoot;
+      if (stemLine) return (stemLine.at(sheer(0.0))[0] + S.lwl / 2) * k * k;
       return -S.stemRake * rakeScale * k * k * S.loa;
     }
     if (u > 1 - S.run) {
@@ -251,7 +268,7 @@ function hullSurface(S) {
     return sheer(u) - deckDrop;
   };
   return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S),
-           straightPost: SP, postTan };
+           straightPost: SP, postTan, stemLine };
 }
 
 /* the skin point at DECK height: where the deck's edge meets the planking. Above v 0.62
@@ -358,8 +375,20 @@ function buildKeelGeometry(S) {
 function beamRows(S) {
   if (!(S.deck && S.deck.throughBeams)) return [];
   const n = S.deck.throughBeams;
-  if (S.deck.beamStations)
-    return S.deck.beamStations.map(s => ({ u: s.u !== undefined ? s.u : frameU(S, s.spant), st: s })).sort((a, b) => a.u - b.u);
+  if (S.deck.beamStations) {
+    /* under a straight stem (round 239) a beam whose head the plate places in metres from
+       the datum (deck.beamHeadsFromHeelM, bow first) stands at that x at its own recorded
+       height (deck.beamHeightsFromKeelM), the u found through the stem line's inverse */
+    const SL = stemLineOf(S), heads = S.deck.beamHeadsFromHeelM, hts = S.deck.beamHeightsFromKeelM;
+    return S.deck.beamStations.map((s, i) => {
+      let u = s.u !== undefined ? s.u : frameU(S, s.spant);
+      if (SL && SL.datumX != null && heads && heads[i] != null) {
+        const z = (hts && hts[i] != null ? hts[i] : S.freeboard + S.draught) - S.draught;
+        const ux = SL.uAtX(SL.datumX - heads[i], z); if (ux != null) u = ux;
+      }
+      return { u, st: s };
+    }).sort((a, b) => a.u - b.u);
+  }
   const us = S.deck.beamsAtU || Array.from({ length: n }, (_, i) => n === 1 ? 0.5 : 0.14 + 0.70 * i / (n - 1));
   return us.map(u => ({ u, st: null }));
 }
@@ -405,11 +434,52 @@ function deckOverBeamTop(S) {
   if (D.beamHeightsFromKeelM && D.deckAboveBeamCentreM != null) return D.deckAboveBeamCentreM - (D.beamSidedM || 0.30) / 2;
   return 0.02;
 }
+/* the straight stem's line as a standalone (round 239): hullSurface's keel(0), keel(1) and
+   sheer(0) in closed form, so the beams' and frames' stationing can read it without
+   building the surface (deckLineFromBeams runs INSIDE hullSurface, so a call back into it
+   would recurse). offAt(z): the skin's end offset from −lwl/2 at height z; uAtX(x, z): the
+   u whose skin stands at x at height z — the forefoot's x(u) is (u − 0.5)·lwl + offAt(z)·k²,
+   monotone because the offset is under lwl·forefoot/2 — null forward of the stem. */
+function stemLineOf(S) {
+  const ST = S.stem && S.stem.form === 'straight' && S.stem.angleToKeelDeg != null ? S.stem : null;
+  if (!ST) return null;
+  const SP = S.sternpost && S.sternpost.form === 'straight' && S.sternpost.angleToKeelDeg != null ? S.sternpost : null;
+  const postTan = SP ? Math.tan((SP.angleToKeelDeg - 90) * Math.PI / 180) : 0;
+  const keelF = Math.max(0.06, 1 - (S.riseF || 0)), keelA = Math.max(0.06, 1 - (S.riseA || 0));
+  const sheer0 = S.freeboard + (S.sheerBow || 0);
+  const tan = Math.tan((ST.angleToKeelDeg - 90) * Math.PI / 180);
+  const keelDepth = 0.055 * S.draught + 0.02, t = 0.05 * S.draught;   // buildKeelGeometry, buildStemGeometry
+  const yFoot = -S.draught * keelF - keelDepth;
+  const yHead = ST.headAboveKeelM != null ? ST.headAboveKeelM - S.draught : sheer0;
+  let xFoot, datumX = null;
+  if (SP && SP.footAbaftStationDatumM != null && ST.footForwardOfStationDatumM != null) {
+    const yPostFoot = -S.draught * keelA - keelDepth;
+    datumX = S.lwl / 2 + yPostFoot * postTan + t - SP.footAbaftStationDatumM;   // straightPostLine's datum
+    xFoot = datumX - ST.footForwardOfStationDatumM + t;    // the line runs t abaft the timber's forward face
+  } else xFoot = -S.lwl / 2 + yFoot * tan;                 // through the waterline's forward end
+  const at = y => [xFoot - (y - yFoot) * tan, y, 0];
+  const offAt = z => at(z)[0] + S.lwl / 2;
+  const kOf = u => Math.max(0, (S.forefoot - u) / S.forefoot);
+  const xOf = (u, z) => (u - 0.5) * S.lwl + offAt(z) * kOf(u) * kOf(u);
+  const uAtX = (x, z) => {
+    if (x < xOf(0, z)) return null;
+    if (x >= xOf(S.forefoot, z)) return x / S.lwl + 0.5;
+    let lo = 0, hi = S.forefoot;
+    for (let it = 0; it < 40; it++) { const m = (lo + hi) / 2; if (xOf(m, z) < x) lo = m; else hi = m; }
+    return (lo + hi) / 2;
+  };
+  return { tan, yFoot, yHead, at, xFoot, datumX, offAt, kOf, uAtX };
+}
 function frameStations(S, NF) {
   const rs = S.frames && S.frames.roomAndSpaceM;
   if (!rs) return Array.from({ length: NF }, (_, f) => 0.055 + (f / (NF - 1)) * 0.89);
   const L = S.lwl, n = Math.max(2, Math.floor(0.89 * L / rs) + 1);
-  const us = Array.from({ length: n }, (_, f) => 0.055 + (f / (n - 1)) * 0.89);
+  const us0 = Array.from({ length: n }, (_, f) => 0.055 + (f / (n - 1)) * 0.89);
+  /* a frame stands at a fixed x, one room-and-space from the next: under a straight stem
+     (round 239) the forefoot's u is compressed, so each frame's u is the one whose skin
+     stands at its nominal x at the waterline, and a station forward of the stem is no frame */
+  const SL = stemLineOf(S);
+  const us = SL ? us0.map(u => SL.uAtX((u - 0.5) * L, 0)).filter(u => u != null) : us0;
   const keep = ((S.frames.sidedM || 0.18) + ((S.deck && S.deck.kneeSidedM) || 0.20)) / 2 + 0.05;
   const beams = beamStations(S);
   return us.filter(u => !beams.some(b => Math.abs(u - b) * L < keep));
@@ -433,6 +503,8 @@ function frameOrigin(S) { return S.frames && S.frames.originU !== undefined ? S.
 function frameNumber(S, u) {
   const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0;
   const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
+  const SL = stemLineOf(S);                          // the nominal u of a station placed by x (round 239)
+  if (SL) u = u + SL.offAt(0) * SL.kOf(u) * SL.kOf(u) / S.lwl;
   return Math.round((u - frameOrigin(S)) / 0.89 * (n - 1));
 }
 /* the inverse: the station of frame k, the same arithmetic — a record that names a frame
@@ -440,7 +512,13 @@ function frameNumber(S, u) {
 function frameU(S, k) {
   const rs = S.frames && S.frames.roomAndSpaceM; if (!rs) return 0.5;
   const n = Math.max(2, Math.floor(0.89 * S.lwl / rs) + 1);
-  return frameOrigin(S) + 0.89 * k / (n - 1);
+  const u = frameOrigin(S) + 0.89 * k / (n - 1);
+  /* a numbered station is a station in x (round 239): under a straight stem its u is the one
+     whose skin stands at the nominal x at the waterline — the inverse of frameNumber's map —
+     so the sections and the beams named by Spant stand where the frames of that number do */
+  const SL = stemLineOf(S);
+  if (SL) { const ux = SL.uAtX((u - 0.5) * S.lwl, 0); if (ux != null) return ux; }
+  return u;
 }
 
 /* ── THE SECTION FORM CHANGES ALONG THE SHIP (round 227) ─────────────────────────────
@@ -498,6 +576,12 @@ function sectionAt(S, rows, u) {
    hull.sternpost.hoodEndHalfBreadthM (the half-siding less the rabbet's depth), the plan
    closes to it; the cubic's own end tangent draws the closing between the last station
    and the post, which the sheet does not carry. Without the field, sternFineness. */
+function stemPlanEnd(S) {
+  const ST = S.stem;
+  if (ST && ST.form === 'straight' && ST.hoodEndHalfBreadthM != null)
+    return Math.min(S.stemFineness, ST.hoodEndHalfBreadthM / (S.beam / 2));
+  return S.stemFineness;
+}
 function sternPlanEnd(S) {
   const SP = S.sternpost;
   if (SP && SP.form === 'straight' && SP.hoodEndHalfBreadthM != null)
@@ -531,7 +615,7 @@ function pchip(pts) {
 }
 function railPlan(S) {
   const rows = railRows(S); if (!rows) return null;
-  return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: sternPlanEnd(S) }]));
+  return pchip([{ u: 0, r: stemPlanEnd(S) }].concat(rows, [{ u: 1, r: sternPlanEnd(S) }]));
 }
 
 function buildFramesGeometry(S, NF = 26, onlyU) {
@@ -730,7 +814,7 @@ function buildStemGeometry(S, aft) {
   /* a straight sternpost (round 237) is drawn ON ITS LINE, from the keel's underside (the
      hook's bottom, where the plate's after face meets the keel) to the record's head; the
      class post follows the skin's profile from u 0.90 at the keel to u 1.0 at the sheer */
-  const SPL = aft ? straightPostLine(S, H) : null;
+  const SPL = aft ? straightPostLine(S, H) : (H.stemLine || null);   // a straight stem (round 239) likewise
   /* the timber follows the ship's own profile at the very end of the hull */
   for (let i = 0; i <= N; i++) {
     const f = i / N;
@@ -1403,6 +1487,14 @@ function surfacePoint(S, H, u, v) {
      post's line through the waterline's after end (round 237; above water z/fb is k, the
      same number as before) */
   if (H.straightPost && u > 1 - S.run && fb > 0) rakeF = z / fb;
+  /* a straight stem (round 239): the skin's forward end lies on the stem's line at every
+     height, under the water as well as over it — the offset from the waterline's end
+     (−lwl/2) is the line's own, positive (aft) at the water on the cog, and decays inboard
+     with the class's k² over the forefoot */
+  if (H.stemLine && u < S.forefoot) {
+    const k = (S.forefoot - u) / S.forefoot;
+    return [(u - 0.5) * L + (H.stemLine.at(z)[0] + L / 2) * k * k, z, y];
+  }
   return [(u - 0.5) * L + H.rake(u) * rakeF, z, y];
 }
 

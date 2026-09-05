@@ -19707,3 +19707,176 @@ half-breadth (1), the re-attributed Tanner citation (2) and the card row (1); do
 closes the rail plan to it (1) and the class plan to it (1); docs/audit-hulls.js carries R-HOOD-ENDS's string (1).
 THE RATCHET, run after the push: RATCHET EXIT 0  END 23:53:29; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. Prediction (r238/PREDICTIONS-close.md) held. The two frames PREDICTIONS-close.md expected to move stayed under the gate: ship-dhow 0.037%/0.039, ship-treasure 0.018%/0.005 — the cog's stern narrows by 0.7 m each side over her last 2 m, which at a berth neighbour's distance is under 0.05% of the frame; no baseline accepted.
 Two commits close the round (a4ac13d record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 239 — 2026-09-05 — the stem is one straight line too: 124.2° to the keel from a flat keel plank to a head 7.1 m over it, its foot 15.4 m forward of the station datum, read off Lahn's Blatt 1 — so the bow's underwater entry, drawn to −lwl/2 at every height, moves aft 1.65 m at the water and 3.25 m at the keel; and a third Tanner citation on the sternpost was another vessel's, the Graveney boat's, and the cog's post is in fact recovered to its head
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r238's receipt reported the ratchet clean
+(64 of 64, movers 0), so nothing was carried in as a first item. r238 ordered two things: grep every Tanner citation on
+the cog's record for the appendix header above its line number (its method note 1), then (0e¹⁷), the stem, read the
+way r237 read the post. Both done. The r235 clock pattern held: the full ratchet STARTED beside the close as soon as
+the audit passed, the round's work was built, committed and pushed while it ran, and its result is in the receipt
+commit.**
+
+**THE CITATION CHECK (r230/tanner-vol2.txt; the appendix headers stand at lines 446 A, 541 B, 1509 C, 3716 D, 4034 E,
+4206 F Drogheda, 6449 G Newport, 10045 H Bremen cog, 12282 I, 14965 J). Eight line citations on the cog's record.
+Five are Appendix H's and stand (11135–11160, 11540, 11942, 12862; and 7805 / 4760–4766 are the Newport ship's and
+the Drogheda boat's as r238 already says). Three were wrong. (1) 'grown timbers for the stem and stern hook', line
+6260, cited by r237 for the cog's stern hook: it stands under the Appendix F header at 4206 — the Drogheda boat. (2)
+'Tanner App. G Figure 8', cited beside it: the only Figure 8 that is a stern hook is at line 4770, 'Figure 8 The stern
+hook (J. Ryan)', Appendix F again. (3) 'the surviving post is 2.2 m of angled timber (McKee in Fenwick 1978, Tanner
+line 2810) and the rest is reconstruction', carried on the sternpost's contested field and the card's Sternpost row
+since r237: line 2810 is a footnote under the Appendix C header, and the figures around it (2-30 to 2-33) are
+McKee's GRAVENEY boat drawings after Fenwick 1978 — the Graveney boat, not the cog. The cog's own post is recovered to
+its head: Appendix H, lines 11462–11467, reads Lahn's Figure 53 as 'the 40mm diameter hole ... at the head of the
+sternpost' in 'the recovered sternpost', and the open question there is the stern framework's bolt 80 mm below it.
+All three re-attributed on the record (r239/apply-vessel-edits.py); the card row now says the post is recovered to
+its head.**
+
+**THE READ (r230/lahn-blatt1-full.png, 590.8 px/m, the keel's underside at plate y 4440; crops r239/blatt1-bow-quarter.png,
+blatt1-stem-lower-half.png, blatt1-stem-foot-full.png, blatt1-stem-head-full.png). The plate draws the stem as ONE
+straight timber from the keel plank to a head far over the rail, a broad hook at its foot. A row scan every 100 px
+from y 4420 to y 260 takes the rightmost dark run inside the border (the title block at the lower right excluded
+below y 3400): x 11246 at 0.03 m over the keel, 11314 at 0.17, 11932 at 1.69, 12645 at 3.45, 13320 at 5.15, 13853 at
+6.50, 14087 at 7.08 — 2841 px forward over 4160 px up. A least-squares line through 46 rows: 0.6794 m forward per
+metre of height, 124.19° to the keel, no row more than 20 px (3.5 cm) off it, rms 6 px; the slope runs 0.700 in the
+lowest metre and 0.670 in the top two, a convexity of 3 cm over 7 m, which the record carries as straight and the
+contested field names. THE FOOT: the forward face runs straight down to the flat bottom and meets it at x 11250–11256,
+y 4435, where the plate draws its own reference cross — 15.40 m forward of the station datum at x 2160. THE HEAD: the
+forward face ends at y 260 (7.08 m over the keel), the after face at y 180 (7.21 m), the top cut square to the timber;
+7.1 ± 0.1. The after face runs 230–240 px behind the forward face over the top three metres (0.39–0.41 m horizontal);
+a block 0.1 m proud of the forward face at 6.6–6.75 m (x 13932–13998) is a fitting at the head, and the hatched spar
+lying against the head above the rail is Lahn's bowline spar — neither is read. THE KEEL: flat to the hook. The
+underside lies at y 4437–4451 from x 10400 to 11250 (14.0–15.4 m forward of the datum) against y 4441–4447 amidships;
+the fine line 30 px under it that ends at x 11550 is a drawn baseline, not the keel. THE WATER: at 2.25 m over the
+keel the forward face stands at x 12156, 16.92 m forward of the datum; the post's after face stands 1.93 m abaft it
+(r237), so the plate's length on the laden waterline is 18.85 m. Tanner App. I reads 17.5–18.3 at his lighter
+conditions (already on hull.draughtProvenance). The record's lwl 20.5 is neither.**
+
+**THE MODEL BEFORE (r238/measure-after.out; r239/before-bow-quarter.png, before-ahead.png). The bow leaned only above
+the water: surfacePoint's rakeF was the height fraction over the sheer, zero under it, so the skin's forward end stood
+at −lwl/2 = −10.25 m at every height from the waterline to the keel, a bluff entry the class's riseF 0.3 swept up
+0.68 m at the forefoot, and above the water it leaned to −11.72 m at the sheer (stemRake 0.1 clamped by rakeScale
+0.632, r129). The plate's stem at the same heights: −6.98 at the keel (3.25 m abaft the model's), −8.56 at the water
+(1.65 m abaft), −10.65 at the sheer (1.07 m abaft), and its head at −11.87, 7.1 m over the keel, where the model's
+stem timber stopped at the sheer 5.46 m over the keel (buildStemGeometry ran along the skin from u 0 at the keel to
+u 0.10 at the sheer). And the plan's forward end was stemFineness 0.2, a half-breadth of 0.76 m at u 0 — the r238 end
+cap, at the bow.**
+
+**THE DECISION. `hull.stem { form 'straight', angleToKeelDeg 124.2, headAboveKeelM 7.1, footForwardOfStationDatumM
+15.40, hoodEndHalfBreadthM 0.17 }` with provenance naming the plate, its px/m, the row scans and the fit; contested
+carrying THE WATERLINE — hull.lwl 20.5 is the loft's parametric length that every station u on this record was
+converted through (r230), so it stays, labelled a scale; the plate's laden waterline is 18.85 m and the loft's is now
+the plate's at the bow because the stem's line places the skin's end — and the angle's own spread (125.0 in the
+lowest metre, 123.8 in the top two); hoodEndProvenance says the half-breadth is derived from the class siding, the
+strakes' landing on the stem the plate's. `hull.riseF` 0.02 (was 0.3). hull.stemRake 0.1 stays for the class clamp
+and is not read. A 'Stem' row on the card above the Sternpost row.**
+
+**THE MODEL (web/js/hull.js; r239/hull.before.js, hull.after.js, apply-hull-edits.py; 53 diff lines). Every branch is
+gated on hull.stem.form 'straight' and byte-identical without it. (1) hullSurface: stemLine — tan(θ − 90°), the foot
+at −draught·keel(0) less the keel timber's depth, x from the straight post's datum (the same arithmetic as
+straightPostLine: the post's foot plus the timber's half-thickness less footAbaftStationDatumM) less
+footForwardOfStationDatumM, plus the half-thickness so the BUILT forward face lands on the station; through the
+waterline's forward end where no datum exists; the head at headAboveKeelM − draught. rake(u) inside the forefoot
+returns the line's deck-level offset from −lwl/2 times the class's k², so the deck-level readers (mast feet, the
+tack, the head knee) land on the stem. (2) surfacePoint: inside the forefoot the skin's x is (u − 0.5)·lwl plus the
+line's offset AT THIS HEIGHT times k² — positive (aft) at the water on the cog, negative above the sheer's crossing —
+so the skin's forward end lies on the stem at every height, under the water as well as over it. (3) buildStemGeometry:
+the stem timber samples the line from the foot to the record's head, as the post has since r237; the box is the same
+0.05·draught each side of the line. (4) stemPlanEnd(S), the r238 field at the bow: railPlan's first row and the class
+plan's stem end close to hoodEndHalfBreadthM over the half-beam (0.0447 on the cog), else stemFineness.**
+
+**THE SECOND PASS — a frame and a beam stand at a fixed x. The first pass's audit convicted the cog six times, all
+consequences of the line: DB 1 stood 0.52 m aft of the sheet's distance from the heel and the bow frames 0.35 m apart
+against a 0.5 m room-and-space, because the offset that moves the skin's end aft — 1.65 m at the water — decays inboard
+with the class's k² over the forefoot, and every station placed by u (the frames at 0.0247 u a frame, the beams at
+their Spant's u) landed on a compressed x. The u-to-x map was never linear at a raked end above the water (Frame 1 of
+32 already spanned 1.14 m in x at r238, a leaning timber drawn at constant u); the straight stem extends that under
+the water and doubles it. So (5) stemLineOf(S) is standalone — hullSurface's keel(0), keel(1) and sheer(0) in closed
+form, so it can be read without building the surface (deckLineFromBeams runs INSIDE hullSurface and a call back into
+it recurses) — and carries offAt(z), the skin's end offset at a height, and uAtX(x, z), the u whose skin stands at x at
+that height, a bisection over the forefoot (x(u) is monotone: the offset is under lwl·forefoot/2), null forward of the
+stem. (6) frameStations maps each nominal station to the u whose skin stands at its nominal x AT THE WATERLINE, and a
+station forward of the stem is no frame (two are, on the cog: 35 stations, 30 frames after the beams' knees take
+five); frameNumber reads the nominal u back through offAt(0), so the floors' long arm still alternates by number.
+(7) beamRows stands a beam whose head the plate places in metres (deck.beamHeadsFromHeelM, bow first) at that x AT ITS
+OWN RECORDED HEIGHT (deck.beamHeightsFromKeelM), which is what D-BEAM-HEEL measures; the record's stale beamStations.u
+values are overridden where the metres exist. (8) frameU inverts a numbered station the same way, so a section named
+by Spant stands where the frames of that number do. Audit (second pass): D-BEAM-STATION stands down for a beam the
+plate places in metres under a straight stem — r230 derived the Spant numbers FROM those metres by one pitch fit, so
+they are not a second station — and D-FRAMES' count excludes the nominal stations forward of the stem's line at the
+water, the line replicated in the rule in closed form on purpose (the D-SECTION precedent). What this does NOT fix: the
+frames are still drawn at constant u, so a bow frame LEANS with the stem's line — Frame 1 of 32 spans 2.5 m in x over
+its height (was 1.14) — where the wreck's frames stand square to the keel. That is r240's first item: a frame is a
+plane at fixed x, and the frames builder should find u per height. Until then the frames near the bow are wrong in a
+way the Shipwright's frame stage shows and the planked stages hide.**
+
+**MEASURED (r239/measure-after.out against r238/measure-after.out, measure_ship on the built scene, hull space, water at
+y 0). Stem: u −0.080 … 0.169, x −11.90 → −6.79, y −2.35 → 4.85 — 5.11 m of x over 7.20 m of height, the timber's head
+7.10 m over the keel's underside (was u −0.078 … 0.105, y −1.91 → 3.21: 3.75 m of x, its head at the sheer 5.46 m over
+the keel and its foot 0.34 m short of the keel). Keel: u 0.159 → 0.961, 16.45 m, y −2.39 → −2.19, flat (was u 0.000 →
+0.961, 19.70 m, rising to −1.57 at the bow): the keel ends at the stem's foot 6.99 m forward of midships, where the
+plate's cross stands. Planking: u −0.021 → 1.046, 21.88 m (was −0.072 → 1.046, 22.92): the skin's forward end at the
+sheer moved 1.04 m aft. The replica of the loft's arithmetic (this round's shell log): the built forward face at −7.08
+at the keel's underside, −8.61 at the water, −10.79 at the sheer, −11.90 at the head; the plate's, through the datum
+at 8.39: −7.01, −8.53, −10.71, −11.80 — the loft's line stands 7–10 cm forward of the plate's at every height because
+its foot is placed at the keel TIMBER's underside, 0.14 m under the plate's datum (the r237 convention for the post),
+and the record's contested field does not yet say so (r240 may move the foot to the rabbet line). Model extent −11.90
+… +11.54 = 23.44 m against the record's 23.3 (was 23.38). Frames: 30 (was 32) — the two nominal stations forward of
+the stem's line at the water are no frames; Frame 1 of 30 spans u 0.026–0.167, 2.90 m of x, a leaning timber (the
+named residual). The five beams stand at the sheet's metres from the heel to within the rule's 0.30 (D-BEAM-HEEL
+passes; DB 1 read 15.30 after the first pass, 15.80 before it).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; apply-audit-edits.py and apply-audit-edits-2.py). A new block after the
+post's: with hull.stem.form 'straight', the Stem mesh's forward face is read as a ridge (min x per centimetre of height)
+and fitted with a line over its height less 0.2 m at each end — R-STEM-ANGLE (slope within 0.05 m/m of −tan(θ − 90°)),
+R-STEM-STRAIGHT (no point 0.08 m off the line), R-STEM-HEAD (the top within 0.2 m of headAboveKeelM), R-STEM-FOOT (the
+foot within 0.2 m of the keel, and within 0.25 m of footForwardOfStationDatumM forward of the datum read off the built
+Sternpost's heel, D-BEAM-HEEL's reading), R-STEM-CLOSE (the planking's foremost vertex in every 0.25 m of shared height
+neither forward of the face by more than 0.05 m nor more than 0.45 m short of it) and R-HOOD-ENDS at the bow (vertices
+within 0.10 m of the foremost x no wider than hoodEndHalfBreadthM + 0.12). PROOFS (r239/run-audit-and-witness.sh,
+.out): A, the r238 builder under the r239 record and audit — 5 problems, all the cog (audit-proof-a.out): 'a straight
+stem drawn bent' (0.09 m), "the stem's head off its attested height" (5.46 against 7.1), "the stem's foot off the
+plate's station" (16.78 m forward of the datum against 15.4 — the class timber's foot at u 0.10, buried in the entry),
+'planking standing forward of its stem' (1.46 m at −1.38 m) and "the planking's hood ends standing off the stem" (0.80 m
+against 0.17). B, the r239 builder with the stem's tangent doctored +8° (hull.doctored-angle.js) — 'the stem off its
+attested angle' (132.2 against 124.2; audit-proof-b.out; the first-pass builder, its frames' pitch conviction beside
+it). The builder restored from the after-copy (cmp). The final audit, third pass: checked 33 hulls, 0 problems
+(audit.err).**
+
+**WITNESSED (r239/witness-broadside-furled.png against before-broadside-furled.png, the Shipwright at b 270, l 4, z 0.9
+with the canvas furled — the set sail fills every bow camera, and the b 330 and b 0 close cameras land on the castle
+deck (before-bow-quarter.png, witness-bow-quarter-furled.png), so the broadside is the witness; the bow at 3x in
+witness-broadside-furled-bow-3x.png and before-broadside-furled-bow-3x.png; witness-sea.png, #e=3&f=hanse). Before:
+the bow ended in a flat cut at the sheer, a dark end face under the rail's forward end, and nothing stood over it.
+After: a raked stem timber rises 1.6 m over the rail as its own post, the rail and the top strake sweep into it, and
+the profile from the water to the rail leans with it. On the Sea, from the port quarter, the stem head now shows over
+the bow as a short raked post. Rule 0 answered on witness-sea.png read whole: it reads as a rendered world — a light
+swell under a low sun, the wake's two arms astern, the grey coast under haze, the sail lit from the left. Three facts a
+viewer can read off it without a legend: the ship has one mast and one square sail with a cross at the truck; her
+stem stands up over the bow as a post the planking runs into; her rudder hangs on a raked sternpost under an
+overhanging castle. ⚠ These frames were taken on the final builder; the first-pass frames differ only in the beam
+heads (DB 1 0.5 m aft in them).**
+
+**Named residuals, in order:** NEW (0e¹⁹): a frame is a plane at fixed x — the frames builder draws each frame at
+constant u, and under the stem's lean Frame 1 of 30 spans 2.9 m of x over its height (Frame 1 of 32 spanned 1.14 before
+this round, the same fault above the water on every raked hull); the fix is per-height inversion in the frames builder
+(stemLineOf's uAtX exists for it). NEW (0e²⁰): the record's deck.beamStations[].u values are stale under the new map
+(the loft overrides them by the metres); re-derive or drop them. (0e¹⁷) RESOLVED for the line; OPEN as a read: the
+stem hook as a timber, its scarf and the bolted lap, the head's fitting and the bowline spar. (0e¹⁵) the closing's form
+from Spant 35 to the post, and now its mirror at the bow from Spant 6 to the stem, unread. (0e¹⁸) the posts' sidings
+(Lahn 1992 not on disk). (0e¹⁶) the stern hook. (0h′) profile_capture.py still selects the wrong hull for --ship cog.
+(0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f)
+unchanged. (1)–(20) as r230 lists them.**
+
+**r240 opens by running the FULL ratchet at the clean HEAD first (this round ran four named frames beside the close
+— the receipt paragraph below has them — and the 64-frame run could not fit the driver's 80 minutes after a second
+loft pass; the r231 pattern), accepting with reasons only what this round's change explains (the cog's bow in
+ship-dhow, ship-treasure and any frame that shows her), then takes (0e¹⁹): a frame is a plane at fixed x — make the
+frames builder find u per height through stemLineOf's uAtX (and its stern mirror through the post's line), prove it on
+Frame 1's x-span (2.9 m → under 0.3), and look at the frame stage (SW.stage=2, r225/stage_capture.py) at the bow. Then
+(0e²⁰), the stale beamStations.u values on the record.**
+
+**Live stamp: docs/index.html carries data-version 1788594128 at the build; the push and the live poll are in
+build/staging/r239/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r239 staging stays on disk uncommitted, the r211 convention.**
