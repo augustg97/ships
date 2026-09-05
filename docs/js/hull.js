@@ -1839,7 +1839,7 @@ const throat = [tack[0] + (peakPt[0] - tack[0]) * S.settee,
 tack[1] + (peakPt[1] - tack[1]) * S.settee];
 const foreft = [tack[0] + (clew[0] - tack[0]) * S.settee * 0.55,
 tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
-sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075));
+sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075, ['head']));
 } else {
 sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
 }
@@ -1869,7 +1869,7 @@ sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
 new THREE.Vector3(mid[0], mid[1], 0),
 area, furlMat(mats), group, {}));
 } else {
-sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
+sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46, true));
 }
 }
 if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
@@ -1971,7 +1971,7 @@ new THREE.Vector3(xF + lenK, y0, 0),
 }
 } else {
 for (let k = 0; k <= nb; k++)
-sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030));
+sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030, ['head', 'foot']));
 }
 const shX = xF + Math.min(boom * 1.16, gapAft * 0.90);
 const sheetPt = new THREE.Vector3(shX, base + castleTop + B * 0.012, 0);
@@ -2240,7 +2240,16 @@ m.userData.kind = kind;
 group.add(tag(m, 'sail'));
 return m;
 }
-function makeTriSail(A, B, C, group, belly, leechPull) {
+function distToLine(P, A, B) {
+const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy);
+return L > 1e-9 ? Math.abs(dx * (P[1] - A[1]) - dy * (P[0] - A[0])) / L
+: Math.hypot(P[0] - A[0], P[1] - A[1]);
+}
+function heldBySpar(z, d) {
+const cap = d * 0.58;
+return cap > 1e-9 ? z / Math.pow(1 + Math.pow(Math.abs(z) / cap, 4), 0.25) : 0;
+}
+function makeTriSail(A, B, C, group, belly, leechPull, footSpar) {
 const N = 30, pos = [], uvs = [], idx = [];
 const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
 const head = Math.hypot(B[0] - A[0], B[1] - A[1]);
@@ -2268,6 +2277,9 @@ z += Math.sin((sA * 7.0 + t * 11.0) * Math.PI) * corner * head * 0.016 * slack;
 z += Math.sin(t * Math.PI * 9.0) * Math.exp(-sA * 14.0) * head * 0.011 * slack;
 z += Math.sin(t * Math.PI * 5.0) * Math.exp(-(1 - sA) * 10.0) * head * 0.009 * slack;
 z += Math.sin(sA * 9.0 + t * 6.0) * span * Math.pow(t, 1.5) * head * 0.011 * slack;
+let dSpar = distToLine(P, A, B);
+if (footSpar) dSpar = Math.min(dSpar, distToLine(P, A, C));
+z = heldBySpar(z, dSpar);
 pos.push(P[0], P[1], z);
 uvs.push(sA, t);
 }
@@ -2289,10 +2301,12 @@ uniforms: { uPanels: { value: Math.max(4, Math.round(head / 0.61)) },
 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
 }));
 m.userData.kind = 'tri';
+m.userData.held = footSpar ? ['head', 'foot'] : ['head'];
 group.add(tag(m, 'sail'));
 return m;
 }
-function makeQuadSail(A, B, C, D, group, belly) {
+function makeQuadSail(A, B, C, D, group, belly, held) {
+const HELD = held || ['luff', 'head'];
 const N = 30, pos = [], uvs = [], idx = [];
 const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
 const chord = Math.hypot(D[0] - A[0], D[1] - A[1]);
@@ -2317,6 +2331,11 @@ z += Math.sin(sv * Math.PI * 9.0) * Math.exp(-su * 14.0) * chord * 0.010;
 z += Math.sin(su * Math.PI * 7.0) * Math.exp(-(1 - sv) * 12.0) * chord * 0.008;
 z += Math.sin(su * Math.PI * 5.0) * Math.exp(-sv * 10.0) * chord * 0.008;
 z += Math.sin(su * 9.0 + sv * 6.0) * draft * vert * chord * 0.010;
+let dSpar = Infinity;
+if (HELD.includes('head')) dSpar = Math.min(dSpar, distToLine(P, B, C));
+if (HELD.includes('luff')) dSpar = Math.min(dSpar, distToLine(P, A, B));
+if (HELD.includes('foot')) dSpar = Math.min(dSpar, distToLine(P, A, D));
+z = heldBySpar(z, dSpar);
 pos.push(P[0], P[1], z);
 uvs.push(su, su);
 }
@@ -2338,6 +2357,7 @@ uniforms: { uPanels: { value: Math.max(4, Math.round(chord / 0.61)) },
 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
 }));
 m.userData.kind = 'quad';
+m.userData.held = HELD.slice();
 group.add(tag(m, 'sail'));
 return m;
 }

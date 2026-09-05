@@ -5954,6 +5954,40 @@
         say(v.id, 'spanker not set',
             `mast at u=${mk.at} declares a spanker and no quad cloth runs aft of its station`);
     }
+    /* ── D-SAIL-SPAR (round 242): THE CLOTH IS ON THE SPAR IT IS BENT TO. A lateen's head is
+       laced to its yard, a jib's luff is hanked to its stay, a gaff sail's luff rides the mast
+       on hoops and its head is laced to the gaff, a junk panel lies between two battens. The
+       builder records which edges (userData.held: 'head' | 'luff' | 'foot'), and this rule
+       reads each held edge's row of vertices in the sail's own space, where z is the cloth's
+       departure from the sail's plane and every spar lies in that plane: a held row with a
+       vertex more than 0.01 m off is a sail standing off its spar. On the r241 builder every
+       lateen's head row stood 0.0232 of its length off the yard (0.92 m on the galley's
+       39.5 m main yard, 1.02 m on the galleass's), every jib's luff 0.0085–0.0118 of its stay,
+       every gaff sail's luff 0.21–0.54 m off the mast and its head 0.05–0.12 m off the gaff
+       (build/staging/r242/sailhead-before.json, -before-quads.json). A sail that does not say
+       which edges are held is convicted for the silence (rule 10) and read as if its head
+       were held — the one edge every one of these sails has on a spar. */
+    g.traverse(o => {
+      if (!o.isMesh || !o.geometry || (o.userData.kind !== 'tri' && o.userData.kind !== 'quad')) return;
+      const pos = o.geometry.attributes.position, n = pos.count, row = Math.round(Math.sqrt(n));
+      if (row * row !== n) { say(v.id, 'a sail that is not a grid', `${o.userData.kind} cloth with ${n} vertices`); return; }
+      let held = o.userData.held;
+      if (!held) { say(v.id, 'a sail that does not name the edges its spars hold', `${o.userData.kind} cloth, userData.held absent`); held = ['head']; }
+      /* tri: i runs from the yard (0) to the foot (N), j from the tack (0) to the leech (N):
+         head = row 0, foot = row N. quad: i from the luff (0) to the leech (N), j from the
+         foot (0) to the head (N): luff = row 0, head = column N, foot = column 0. */
+      const at = o.userData.kind === 'tri'
+        ? { head: q => q, foot: q => (row - 1) * row + q }
+        : { luff: q => q, head: q => q * row + row - 1, foot: q => q * row };
+      for (const e of held) {
+        if (!at[e]) { say(v.id, 'a sail holding an edge it does not have', `${o.userData.kind} cloth names '${e}'`); continue; }
+        let m = 0; for (let q = 0; q < row; q++) m = Math.max(m, Math.abs(pos.getZ(at[e](q))));
+        const P0 = at[e](0), P1 = at[e](row - 1);
+        const len = Math.hypot(pos.getX(P1) - pos.getX(P0), pos.getY(P1) - pos.getY(P0));
+        if (m > 0.01)
+          say(v.id, 'a sail standing off the spar it is bent to', `${o.userData.kind} cloth's ${e} stands ${m.toFixed(2)} m off its ${len.toFixed(1)} m spar (${(m / len).toFixed(4)} of it)`);
+      }
+    });
     /* ── THE CROSSED YARD IS WORKED, AND THE UPPER MASTS ARE STAYED (round 59). Item 2's
        standing remainder: a yard without lifts is held up by nothing, a sail without sheets
        is trimmed by nothing, and every topmast in the fleet stood as an unstayed pole —

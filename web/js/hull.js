@@ -3270,7 +3270,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
                         tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
         /* one cloth, same as the gaff quad — the two-triangle build tore along the shared
            diagonal because the noise terms scale with each triangle's own edges */
-        sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075));
+        sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075, ['head']));
       } else {
         sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
       }
@@ -3324,7 +3324,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
            also why it works: the deeply raked tips shed tip vortices and it out-performs a
            triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
-        sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46));
+        sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46, true));
       }
     }
     if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
@@ -3519,7 +3519,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         /* the cloth, one panel between each pair of spars — a junk sail really is panels: the
            batten line is a hinge in the cloth, and each panel sets nearly flat */
         for (let k = 0; k <= nb; k++)
-          sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030));
+          sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030, ['head', 'foot']));
       }
       /* ── THE GEAR IS WHY THE RIG WORKS, SO IT IS DRAWN ──────────────────────────────
          A sheetlet to every batten end, gathered to one point on the deck aft — the
@@ -3990,7 +3990,32 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
    and cannot come adrift of it. That is the whole fix: not an offset, a shape.
 
    Draft is a bubble that vanishes on all three edges, because all three are bolt-roped. */
-function makeTriSail(A, B, C, group, belly, leechPull) {
+/* ── THE CLOTH IS HELD BY THE SPAR IT IS BENT TO (r242) ──────────────────────────────
+   Measured on the r241 builder (build/staging/r242/sailhead-before.json, 67 triangular sails on
+   15 hulls): the head row of every lateen — the row laced to the yard — stood up to 0.0232 of
+   the head's length off the straight spar (0.92 m on the galley's 39.5 m main yard, 1.02 m on
+   the galleass's), and every jib's luff 0.0085–0.0118 of its stay's length off the stay. The
+   corner-crease and lacing-scallop terms below are non-zero ON the attached edge, and the
+   belly's span term rises to a third of full depth one row in, so within a metre of the peak
+   the cloth bagged further than it was wide. A yard does not move with the cloth: a point of
+   the sail d metres from the spar can at most swing about it — the cap is d·tan 30° (0.58,
+   the twist a set sail's head reaches when eased; Marchaj's tunnel work reads 15–25° on a
+   well-set head) — and on the spar itself it cannot move at all. The bound is a p = 4 soft
+   minimum, so it makes no crease where it takes over, and where the free displacement is
+   under half the cap it changes the cloth by under 3% (the minimum's own arithmetic). Measured
+   after (r242/sailhead-after.json): every held row at 0.000 m; the galley's main lost 14% of
+   its greatest departure, at the leech near the peak, where the cloth is narrow. */
+function distToLine(P, A, B) {
+  const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy);
+  return L > 1e-9 ? Math.abs(dx * (P[1] - A[1]) - dy * (P[0] - A[0])) / L
+                  : Math.hypot(P[0] - A[0], P[1] - A[1]);
+}
+function heldBySpar(z, d) {
+  const cap = d * 0.58;
+  return cap > 1e-9 ? z / Math.pow(1 + Math.pow(Math.abs(z) / cap, 4), 0.25) : 0;
+}
+
+function makeTriSail(A, B, C, group, belly, leechPull, footSpar) {
   /* 18 could not resolve a corner crease or a scalloped luff — the detail existed in the
      function and died in the tessellation. 30 costs ~2.8x the triangles on sails that are a
      small fraction of a ship's geometry. */
@@ -4063,6 +4088,11 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
       z += Math.sin(t * Math.PI * 5.0) * Math.exp(-(1 - sA) * 10.0) * head * 0.009 * slack;
       /* and cloth is never taut everywhere at once */
       z += Math.sin(sA * 9.0 + t * 6.0) * span * Math.pow(t, 1.5) * head * 0.011 * slack;
+      /* the head A->B is on the yard (or hanked to the stay); a crab claw's foot A->C is on
+         its boom too */
+      let dSpar = distToLine(P, A, B);
+      if (footSpar) dSpar = Math.min(dSpar, distToLine(P, A, C));
+      z = heldBySpar(z, dSpar);
       pos.push(P[0], P[1], z);
       /* uv.x = sA so the panel seams run from the yard down to the foot, which is how a
          lateen is cut; uv.y = t puts the shader's weathering gradient on the LEECH, the
@@ -4087,6 +4117,7 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
                 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
   }));
   m.userData.kind = 'tri';
+  m.userData.held = footSpar ? ['head', 'foot'] : ['head'];
   group.add(tag(m, 'sail'));
   return m;
 }
@@ -4102,7 +4133,10 @@ function makeTriSail(A, B, C, group, belly, leechPull) {
  * is laced to), D clew (outer end of the foot). Luff A→B and head B→C are bent to spars and
  * lie hard; the LEECH C→D is held by nothing but the sheet, so it is the edge that sags and
  * twists — most aloft, where the wind is stronger and the peak is the only thing above it. */
-function makeQuadSail(A, B, C, D, group, belly) {
+function makeQuadSail(A, B, C, D, group, belly, held) {
+  /* the edges bent to spars: a gaff sail's luff rides the mast on hoops and its head is laced
+     to the gaff; a settee's head is its yard and its short luff is a free bolt-rope */
+  const HELD = held || ['luff', 'head'];
   const N = 30, pos = [], uvs = [], idx = [];
   const lerp = (P, Q, t) => [P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t];
   /* draft scales with the CHORD — the foot — as it does on the real sail; the panels are
@@ -4136,6 +4170,11 @@ function makeQuadSail(A, B, C, D, group, belly) {
       z += Math.sin(su * Math.PI * 5.0) * Math.exp(-sv * 10.0) * chord * 0.008;
       /* and cloth is never taut everywhere at once */
       z += Math.sin(su * 9.0 + sv * 6.0) * draft * vert * chord * 0.010;
+      let dSpar = Infinity;
+      if (HELD.includes('head')) dSpar = Math.min(dSpar, distToLine(P, B, C));
+      if (HELD.includes('luff')) dSpar = Math.min(dSpar, distToLine(P, A, B));
+      if (HELD.includes('foot')) dSpar = Math.min(dSpar, distToLine(P, A, D));
+      z = heldBySpar(z, dSpar);
       pos.push(P[0], P[1], z);
       /* seams parallel to the leech; the weathering gradient lands ON the leech, the edge
          that flogs and is handled at every reef */
@@ -4159,6 +4198,7 @@ function makeQuadSail(A, B, C, D, group, belly) {
                 uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
   }));
   m.userData.kind = 'quad';
+  m.userData.held = HELD.slice();
   group.add(tag(m, 'sail'));
   return m;
 }

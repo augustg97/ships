@@ -4225,6 +4225,24 @@ if (!found)
 say(v.id, 'spanker not set',
 `mast at u=${mk.at} declares a spanker and no quad cloth runs aft of its station`);
 }
+g.traverse(o => {
+if (!o.isMesh || !o.geometry || (o.userData.kind !== 'tri' && o.userData.kind !== 'quad')) return;
+const pos = o.geometry.attributes.position, n = pos.count, row = Math.round(Math.sqrt(n));
+if (row * row !== n) { say(v.id, 'a sail that is not a grid', `${o.userData.kind} cloth with ${n} vertices`); return; }
+let held = o.userData.held;
+if (!held) { say(v.id, 'a sail that does not name the edges its spars hold', `${o.userData.kind} cloth, userData.held absent`); held = ['head']; }
+const at = o.userData.kind === 'tri'
+? { head: q => q, foot: q => (row - 1) * row + q }
+: { luff: q => q, head: q => q * row + row - 1, foot: q => q * row };
+for (const e of held) {
+if (!at[e]) { say(v.id, 'a sail holding an edge it does not have', `${o.userData.kind} cloth names '${e}'`); continue; }
+let m = 0; for (let q = 0; q < row; q++) m = Math.max(m, Math.abs(pos.getZ(at[e](q))));
+const P0 = at[e](0), P1 = at[e](row - 1);
+const len = Math.hypot(pos.getX(P1) - pos.getX(P0), pos.getY(P1) - pos.getY(P0));
+if (m > 0.01)
+say(v.id, 'a sail standing off the spar it is bent to', `${o.userData.kind} cloth's ${e} stands ${m.toFixed(2)} m off its ${len.toFixed(1)} m spar (${(m / len).toFixed(4)} of it)`);
+}
+});
 {
 const sq = (H.masts || []).filter(mk => mk.rig === 'square');
 if (sq.length) {

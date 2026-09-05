@@ -20133,3 +20133,108 @@ Two commits close the round (ba8654b record + audit + hull + shipwright + docs +
 'foot reaches', a string the code builds by interpolation and never contains literally. The code string of the per-end
 read, reachIn(b[1] - 0.01, b[1] + 0.3), is in docs/audit-hulls.js (1); 'a knee outside the planking' (1). Nothing in
 the published copy is missing.**
+
+## Round 242 — 2026-09-05 — the cloth is held by the spar it is bent to: the galley spun from eight bearings showed her lateen heads snaking off their yards near the peak, a probe of every sail's head row found the same departure on 141 sails across 17 hulls (0.92 m on the galley's 39.5 m main yard, a quarter to half a metre on every jib's stay and every gaff sail's mast), the builder now bounds a point's departure by its distance from the spar and each sail names the edges its spars hold, the audit reads those rows, and the full ratchet ran first at the clean r241 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r241 ordered r242's opening: the FULL ratchet at
+the clean HEAD before any edit, then the survey's next hull BY LOOKING — a Shipwright spin from eight bearings — or
+(0e²²) if a source for the cog's forward floors' landing were found (none was sought this round). The ratchet ran at
+HEAD 2137eff from 03:27 while the round's work was developed on a COPY of web/ served on :8150 (build/staging/r242/web,
+every file a symlink to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240 pattern); the copy's files
+were moved into web/ only after the run ended (cmp-verified). THE OPENING RATCHET: its result is in the receipt
+paragraph below, per the r198 rule. The next hull: of the survey's ranking (r241/survey.json) the hulls never spun
+by name (Research/baselines/_spin/) are the galley, the carrack, Endurance, the slave ship and the caravel, and the
+galley is the crudest of them (3,713 triangles per metre); she was spun on :8150 from eight bearings and four low
+ones (r242/spin-galley/, r242/spin_capture.py — Research/spin_capture.py with the FRAME_READY wait raised from 60 s
+to 150 s, which the 60 s wait failed under this machine's load of 8).**
+
+**THE FAULT, seen and then measured. From the stern quarter (b315) and from abeam (b270) the galley's two lateen
+sails do not lie on their yards: within the upper third of each sail the cloth snakes from side to side of the spar's
+line by a metre or more, the peak curls, and where the yard is in front of the cloth a triangle of sky stands between
+the spar and the sail's head (r242/crop-b315-sails.png, before-b270-sails.png). The probe (r242/probe_sailhead.py on
+:8150 against the r241 builder; r242/sailhead-before.json for the triangular sails, sailhead-before-quads.json for the
+four-cornered ones, read on :8149): for every sail built by makeTriSail or makeQuadSail, the row of vertices on each
+edge that a spar holds, in the sail's own space — the cloth is built in its x-y plane with z its departure from that
+plane, and every spar lies in the plane, so a held row's |z| is its distance off the spar. Triangular sails, 67 on 15
+hulls: the head row's greatest departure is 0.0232 of the head's length on every lateen (galley main 0.92 m of 39.5,
+galley fore 0.51 of 21.95, galleass 1.02 of 44, carrack 0.50 of 21.3, caravel 0.22–0.33, fluyt 0.40, the canoe's crab
+claw 0.25 of 10.8), 0.0118 on every jib and staysail set with belly 0.028 (the 74's 0.26–0.28 m, the clipper's, the
+steamer's, Preussen's twelve at 0.24–0.25) and 0.0085 on those set at 0.020 (Wyoming's, Endurance's, the big
+flying jibs at 0.31–0.48 m), and in every case the greatest departure is one column in from the peak. Four-cornered
+sails, 74 on 11 hulls: the luff 0.21–0.54 m off the mast (0.010 of the chord, plus the corner crease), the head
+0.05–0.12 m off the gaff or yard, the foot 0.20–0.51 m off the boom or batten. The cause is in the two builders: the
+corner-crease term (0.016 × head) and the lacing-scallop term (0.011 × head, written 'the luff is laced to the yard at
+intervals, so it scallops between the lacings') are non-zero ON the attached edge — the scallop is largest there by
+construction — and the belly's span term, sin(π·sA^0.62), reaches 0.35 of full depth one row in from the yard, so
+within a metre of the peak the cloth bagged 1.2 m where it was a metre wide. Nothing looked: the sail is the largest
+thing in every Shipwright frame and the yard is a 5 cm line across it.**
+
+**THE MODEL (web/js/hull.js; r242/hull.before.js, hull.after.js, apply-hull-edits.py). Two module functions before
+makeTriSail: distToLine(P, A, B), the in-plane distance from a point to the spar's line; heldBySpar(z, d), the cloth's
+free displacement z reduced to z / (1 + (|z| / (0.58 d))⁴)^¼ — a p = 4 soft minimum against a cap of d·tan 30°, the
+twist a set sail's head reaches when eased (Marchaj's tunnel work reads 15–25° on a well-set head), so a strip of
+cloth d metres from the spar can at most swing about it, and on the spar (d = 0) it cannot move; where the free
+displacement is under half the cap the change is under 3%, and the minimum has no crease where it takes over.
+makeTriSail(A, B, C, group, belly, leechPull, footSpar): after every crease term, dSpar = the distance to A→B (the
+yard, or the stay a jib is hanked to), and to A→C too when footSpar (the crab claw's boom); z = heldBySpar(z, dSpar);
+the mesh records userData.held = ['head'] or ['head', 'foot']. makeQuadSail(A, B, C, D, group, belly, held): held
+defaults to ['luff', 'head'] (a gaff sail's mast hoops and gaff); the settee call passes ['head'] (its short luff is a
+free bolt-rope), the junk-panel call ['head', 'foot'] (a panel lies between two battens); the mesh records the list.
+Square sails (makeSail) and furled cloth (makeFurl) are untouched, and the record is unchanged (vessels.json
+byte-identical, cmp).**
+
+**MEASURED AFTER (r242/sailhead-after.json, the same probe on :8150 against the r242 builder): every held row on
+all 141 sails at 0.000 m. The body: the galley's main's greatest departure anywhere on the cloth went from 2.38 m to
+2.05 (−14%) and its leech's from 1.81 to 1.66 — the greatest is at the leech near the peak, inside the twist zone the
+bound acts on; the galleass's main 2.65 to 2.28. Unheld edges keep their scallops (the dhow's settee luff 0.25 m,
+a gaff sail's free foot 0.11–0.42 m, a junk panel's luff 0.08–0.12 m).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r242/apply-audit-edits.py). D-SAIL-SPAR, after the spanker rule: for
+every mesh of kind 'tri' or 'quad', each edge named in userData.held is read as its row of vertices (tri: head = row 0,
+foot = row N; quad: luff = row 0, head = column N, foot = column 0) and convicted 'a sail standing off the spar it is
+bent to' when any vertex stands more than 0.01 m off, named with the edge, the distance and the spar's length; a sail
+with no held list is convicted 'a sail that does not name the edges its spars hold' (rule 10) and read as if its head
+were held. PROOFS (r242/run-proofs.sh on :8150). A, the r241 builder under the r242 audit: checked 33 hulls, 282 problems on 17 hulls, all this rule's — 'a sail that does not name the edges its spars hold' on all 141 sails and 'a sail standing off the spar it is bent to' on all 141 (the head read by default: the galley main's 'head stands 0.92 m off its 39.5 m spar (0.0232 of it)', Preussen's flying jib 'luff'... read as head, 0.48 m of 57.3)
+(audit-proof-a.out). B, the r242 builder with heldBySpar made a no-op (hull.doctored-free.js — the tags present, the
+geometry free): checked 33 hulls, 214 problems, every one 'a sail standing off the spar it is bent to' — one per held edge (67 triangular sails, the canoe's crab claw holding two; 74 four-cornered, the dhow's settee holding one and the other 72 two), the silence rule silent because the tags are present (audit-proof-b.out). The builder restored from the after-copy (cmp). Final audit on the
+r242 builder and audit: checked 33 hulls, 0 problems (r242/audit.out; on :8149 after the copy, audit-final-8149.out). Rule 8 on the
+way there: none fired — the probe and the audit agree on every sail (both read the same rows), and no other rule moved on the r242 builder.**
+
+**WITNESSED (r242/spin-galley/ before on :8150 at the r241 builder, spin-galley-after/ after; the pairs
+pair-b315-sails.png and pair-b270-sails.png, 650 × 1000 and 750 × 1150 crops of the 2880 × 1800 frames). From the
+stern quarter: before, the main's upper third is a ribbon that bends twice across the yard's line and the peak curls
+back on itself, the foresail the same at smaller scale; after, both sails' heads run straight to their peaks along the
+spars, and the body of each still bellies to leeward with its leech falling off aloft. From abeam: before, a wedge of
+sky between the straight yard and the cloth from the peak a third of the way down, the cloth's head a wavy edge beside
+the spar; after, the cloth meets the yard along its length and the wedge is gone, the seams and the leech twist
+unchanged below.**
+
+**Rule 0 on the after abeam frame read whole (r242/spin-galley-after/b270.png): it reads as a rendered vessel on
+water, not a chart — two tall lateen sails with their cloth seams and a darker leech, lit from the upper left, a
+straight yard along each head, the oars in their comb along the apostis, the bow guns on the rambade, the sea around
+and land on the horizon. Three facts a viewer can read off it without a legend: the sails are laced to straight spars
+that rake down forward, longer than their masts; the ship is rowed, one long oar to a bench, the frame the oars work
+from standing outboard of the hull; and her guns are all at the bow.**
+
+**Named residuals, in order:** NEW (0i) the galley's stern tent (hull.js 'THE TENT OVER THE POOP', S.sternCanopy):
+a ridge of canvas from u 0.87 to 0.985 with two faces per side and no hoops, drawn in the plain canvas material —
+from the quarter it reads as a flat white card standing on the poop (r242/crop-b045-stern.png, crop-b225-stern.png);
+the galia sottile's poop carried a tendaletto on hoops with a carved carosse under it (Guilmartin), a form question
+for her record, not a parameter. NEW (0j) the free foot of a lateen and a gaff sail's free foot keep the 0.009 ×
+head scallop (0.77 m on the galley's main); a foot held by nothing but the tack and clew does sag, but 0.77 m is a
+guess — unread. NEW (0k) the cap's 30° is an assumption stated in the code; a measured head-twist for a lateen
+under way is not on disk. (0e²²) OPEN and unread: the cog's Frames 1 and 2 end on the stem under the water. (0e¹⁷)
+(0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶)
+(0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r243 opens by running the FULL ratchet at the clean HEAD first (this round scores only a few of the frames it moves
+by check --frame after the push; the prediction in r242/PREDICTIONS-close.md names the frames that MUST move — every
+frame with a set fore-and-aft sail on it, some two dozen — and those that must not), reading every mover's diff and
+accepting with reasons only what the sail change explains; then takes the survey's next hull by looking — the carrack,
+Endurance, the slave ship and the caravel have never been spun — or (0i), the galley's own stern tent, if her record
+can be read for its form.**
+
+**Live stamp: docs/index.html carries data-version 1788606787 at the build; the push and the live poll are in
+build/staging/r242/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r242 staging stays on disk uncommitted, the r211 convention.**
