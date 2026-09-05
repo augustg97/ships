@@ -20120,3 +20120,11 @@ the survey's counts.**
 build/staging/r241/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r241 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788603120 on https://augustg97.github.io/ships/index.html at 03:13 PDT,
+90 s after the push (build/staging/r241/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries uAtXV (1) and the knee's
+rotation with the skin's own sign (1); docs/audit-hulls.js carries D-KNEES' new conviction (1) and its per-end read (0).
+THE RATCHET, run after the push: THE OPENING FULL RATCHET at the clean r240 HEAD dffa8b4 (r241/open-ratchet.out, launched 02:21 as the round's first act, ended 03:09): RATCHET EXIT 1  END 03:09:17; 64 frames scored; movers 1: sea-canoe-floor 0.069%/0.010. Largest three: sea-canoe-floor 0.069%/0.010, globe-default 0.048%/0.012, ship-dhow 0.043%/0.015.
+ PARTIAL after the push, the r239 pattern (r241/run-partial.out, partial-*.out): 3 named frames scored by check --frame — ship-dhow 0.043%/0.015 ok, ship-treasure 0.018%/0.005 ok, shipwright 0.021%/0.029 ok (r241/PREDICTIONS-close.md named the two neighbours as the only frames that could move, by well under 0.05%). The other 61 frames are UNSCORED on the r241 builder; the prediction says 0.000% (the knees are inside the hull), and r242's full run at the clean HEAD is the test.
+Two commits close the round (ba8654b record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
