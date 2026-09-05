@@ -3591,18 +3591,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
          buildShip's channel and deadeyes read the same two functions. FINE only, and only
          on a hull with castles: the coarse build draws no castles, and a shroud set up to a
          wall that is not there would float. */
-      const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
-      const CT = CR ? CR.top : null;
+      /* ── AND A SHROUD ENDS ON ITS DEADEYE (round 245): the feet, the channel and the deadeyes
+         are one derivation, shroudFeet — buildShip reads the same one for the channel and the
+         row. A deadeye-class foot is the top of its deadeye; a tackle- or lashing-class foot
+         (the all-lateen hulls, the crab claw) keeps the old deck-edge landing, undrawn. */
+      const FT = shroudFeet(S, H, mk, FINE);
+      const CT = FT.castle;
+      const onDeadeyes = FT.kind === 'deadeyes';
       for (let s = 0; s < mk.shrouds; s++) {
-        const f = (s + 1) / (mk.shrouds + 1);
-        const chX = CR ? x + (CR.lo + (CR.hi - CR.lo) * f - u) * L : x + (f - 0.5) * L * 0.055;
+        const chX = FT.xs[s];
         const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
           const a = SF ? new THREE.Vector3(sfX, sfY, side * sfZ)
-                       : CT ? new THREE.Vector3(chX, CT.y - B * 0.012 + B * 0.016, side * (CT.half + B * 0.046))
-                            : new THREE.Vector3(chX, base, side * half * 1.06);
+                       : onDeadeyes ? new THREE.Vector3(chX, FT.y + FT.r, side * FT.z)
+                                    : new THREE.Vector3(chX, base, side * half * 1.06);
           const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
           shroudSegs.push([a, b]);
           shroudPts[si2].push([a, b]);
@@ -3615,6 +3619,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         shr.userData.segs = shroudSegs.map(([p, q]) => [[p.x, p.y, p.z], [q.x, q.y, q.z]]);
         shr.userData.mast = mi;
         shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
+        shr.userData.feetKind = FT.kind;
         group.add(tag(shr, 'shroud'));
       }
 
@@ -7267,13 +7272,16 @@ function buildChannelWale(S, H, F, group, timber) {
   }
 }
 
-/* ── DEADEYES: the blocks that set up the shrouds, in a row along each channel ───────── */
-function buildDeadeyes(n, r, mat) {
+/* ── DEADEYES: the blocks that set up the shrouds, in a row along each channel ─────────
+ * One under each shroud, at the foot's own hull x (round 245: the row was n + 1 blocks at
+ * 2.4 r pitch centred on the channel, and the group was quarter-turned so every disc faced
+ * fore-and-aft — edge-on from abeam). The disc's axis is athwartships: it faces outboard. */
+function buildDeadeyes(xs, r, mat) {
   const g = new THREE.Group();
-  for (let i = 0; i < n; i++) {
+  for (const x of xs) {
     const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.5, 16), mat);
     d.rotation.x = Math.PI / 2;
-    d.position.z = (i - (n - 1) / 2) * r * 2.4;
+    d.position.x = x;
     g.add(d);
   }
   return tag(g, 'deadeye');
@@ -12151,6 +12159,62 @@ function channelRun(S, H, u, halfU) {
   return { lo, hi, top };
 }
 
+/* ── WHERE A MAST'S SHROUDS SET UP (round 245): ONE DERIVATION FOR THE FEET, THE CHANNEL AND
+ * THE DEADEYES. buildRig landed each lower shroud at the deck, 6% outside the skin, spread over
+ * ±0.0275 L of the mast; buildShip drew a channel 0.075 L long at the sheer and a row of
+ * shrouds + 1 deadeyes at 2.4 r pitch centred on it, facing fore-and-aft — three placements from
+ * two builders. The probe (r245/feet-before.json, 19 hulls, 510 lower shrouds) found 410 feet
+ * standing more than 1.5 r from any deadeye (0.66 m on Preussen's jigger; the ship-of-the-line's
+ * ten main deadeyes spread 5.68 m under feet spread 2.24) and 198 over no channel at all: the
+ * channel block was gated on rig === 'square' while buildRig draws shrouds on every mast that
+ * declares them, so 28 lateen, gaff and crab-claw masts on 12 hulls set up on nothing drawn. A
+ * shroud ends on a deadeye and the deadeye stands on the channel, so the three are one list.
+ *   kind — HOW the shrouds set up, a CLASS default read from no plate (named in HANDOFF r245):
+ *     'fixing'   the record names the structure (mast.shroudFixing: the cog's channel wale);
+ *     'deadeyes' chainplates, a channel and deadeyes — every square and gaff mast, and any mast
+ *                on a hull that also carries a square one (the carrack's and fluyt's lateen
+ *                mizzens set up as their square masts do);
+ *     'tackle'   a lateen on an all-lateen hull (dhow, galley, galleass, caravel) sets up with a
+ *                tackle to the rail — no deadeye, no channel; NOT DRAWN yet (r245 residual);
+ *     'lashing'  a crab claw or a junk: stays lashed to the hull — not drawn either.
+ *   Returns null for a mast without shrouds, else {kind, xs, y, z, r, chan, castle, run}: xs the
+ *   hull x of each shroud's foot, y and z the deadeyes' row (a foot is the top of its deadeye, at
+ *   (xs[s], y + r, ±z)), r the deadeye's radius, chan the channel box {x, y, z, len, d, w} or null.
+ *   The feet keep the class spread (±0.0275 L, shrunk to the mast's own structure by channelRun on
+ *   a castled hull, r244); a deadeye is 0.018 B across, never more than 0.5 m, and never wider
+ *   than that pitch allows — on a 74 the class gives 0.32 m a shroud against a 0.53 m block. The castle placement is FINE
+ *   only, as r244: the coarse build draws no castles. */
+function shroudFeet(S, H, mk, FINE) {
+  if (!mk.shrouds) return null;
+  const L = S.lwl, B = S.beam, u = mk.at, n = mk.shrouds;
+  const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
+  const anySquare = (S.masts || []).some(m => m.rig === 'square');
+  const kind = SF ? 'fixing'
+    : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
+    : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+  const x = (u - 0.5) * L + H.rake(u);
+  const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
+  const CT = CR ? CR.top : null;
+  const xs = [];
+  for (let s = 0; s < n; s++) {
+    const f = (s + 1) / (n + 1);
+    xs.push(CR ? x + (CR.lo + (CR.hi - CR.lo) * f - u) * L : x + (f - 0.5) * L * 0.055);
+  }
+  const p = surfacePoint(S, H, u, 0.985);
+  const cy = CT ? CT.y - B * 0.012 : p[1] * 0.97;
+  const cz = CT ? CT.half : p[2];
+  const pitch = n > 1 ? (xs[n - 1] - xs[0]) / (n - 1) : Infinity;
+  /* a block is sized by the rope it takes, not by the ship's beam: 0.018 B is 0.91 m across on
+     Great Eastern's 25 m beam, and no deadeye was ever turned that big — the largest lower
+     deadeyes, on the three-deckers, were 18–20 in (0.5 m). Capped there. */
+  const r = Math.min(B * 0.018, 0.25, pitch * 0.42);
+  const chan = kind === 'deadeyes'
+    ? { x: (xs[0] + xs[n - 1]) / 2, y: cy, z: cz + B * 0.026,
+        len: CR ? (CR.hi - CR.lo) * L : L * 0.075, d: B * 0.012, w: B * 0.055 }
+    : null;
+  return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR };
+}
+
 function buildTieredCastles(S, group, mats, hullMat) {
   const C = S.castles; if (!C || !(C.fore || C.aft)) return;
   const H = hullSurface(S);
@@ -14450,36 +14514,38 @@ function buildShip(S, opts) {
     /* channels: a shelf outboard of each mast, on both sides, which is what the shrouds set
        up to. Positioned from the mast stations, so they cannot land in the wrong place. */
     const HS = hullSurface(S);
-    (S.masts || []).forEach(mk => {
+    (S.masts || []).forEach((mk, mi) => {
       /* a mast that declares NO shrouds carries no channels — the trireme's artemon, the
          corbita's, the wasen mast held by running stays: chainplates and deadeyes are
-         northern-European standing rigging, and a channel without shrouds is a bare shelf */
-      if (mk.rig !== 'square' || mk.shrouds === 0) return;
+         northern-European standing rigging, and a channel without shrouds is a bare shelf.
+         ── AND THE CHANNEL IS GATED ON THE SHROUDS, NOT ON THE RIG (round 245): the old
+         `rig !== 'square'` gate left 28 lateen, gaff and crab-claw masts drawing shrouds to
+         nothing. shroudFeet is the one derivation of where they set up — buildRig reads the
+         same one for the feet — and its kind says whether a channel and deadeyes are the
+         structure at all (the all-lateen hulls' tackles are not, and are not drawn yet). */
+      const FT = shroudFeet(S, HS, mk, true);
+      if (!FT) return;
       /* a record that names WHERE the shrouds set up (mast.shroudFixing, round 236) draws
          that structure and no class channel: the Bremen cog's channel wale abaft the mast */
-      if (mk.shroudFixing && mk.shroudFixing.stationsU) { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
+      if (FT.kind === 'fixing') { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
+      if (!FT.chan) return;
       /* a mast within a walled castle carries its channel on the castle's side, just under
-         the highest tier's deck edge, where its shrouds set up (round 244; buildRig reads the
-         same castleTopAt for the shrouds' feet). Without a castle over the station the
-         channel stands at the sheer, where it did. */
-      const CR = S.castles ? channelRun(S, HS, mk.at, 0.0375) : null;
-      const CT = CR ? CR.top : null;
+         the highest tier's deck edge, where its shrouds set up (round 244; the same
+         castleTopAt, through shroudFeet). Without a castle over the station the channel
+         stands at the sheer, where it did — but centred on the feet it carries. */
+      const C = FT.chan, CT = FT.castle;
       for (const sgn of [-1, 1]) {
-        const p = surfacePoint(S, HS, mk.at, 0.985);
-        const cy = CT ? CT.y - S.beam * 0.012 : p[1] * 0.97;
-        const cz = CT ? CT.half : p[2];
-        const cx = CR ? p[0] + ((CR.lo + CR.hi) / 2 - mk.at) * S.lwl : p[0];
-        const cl = CR ? (CR.hi - CR.lo) * S.lwl : S.lwl * 0.075;
-        const ch = new THREE.Mesh(
-          new THREE.BoxGeometry(cl, S.beam * 0.012, S.beam * 0.055), timber);
-        ch.position.set(cx, cy, sgn * (cz + S.beam * 0.026));
+        const ch = new THREE.Mesh(new THREE.BoxGeometry(C.len, C.d, C.w), timber);
+        ch.position.set(C.x, C.y, sgn * C.z);
         ch.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
+        ch.userData.mast = mi;
         group.add(tag(ch, 'channel'));
-        /* the deadeyes stand in a row along the channel's outer edge — this is where the
-           shrouds actually terminate, and a channel without them reads as a bare shelf */
-        const de = buildDeadeyes(Math.max(3, (mk.shrouds || 3) + 1), S.beam * 0.018, timber);
-        de.rotation.y = Math.PI / 2;
-        de.position.set(cx, cy + S.beam * 0.016, sgn * (cz + S.beam * 0.046));
+        /* the deadeyes stand in a row along the channel's outer edge, ONE UNDER EACH SHROUD
+           at the foot's own x, facing outboard — this is where the shrouds actually terminate,
+           and a channel without them reads as a bare shelf */
+        const de = buildDeadeyes(FT.xs, FT.r, timber);
+        de.position.set(0, FT.y, sgn * FT.z);
+        de.userData.mast = mi;
         group.add(de);
       }
     });

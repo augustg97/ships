@@ -6125,6 +6125,69 @@
         });
       }
     }
+    /* ── D-SHROUDS (round 245): A SHROUD ENDS ON A DEADEYE, AND THE DEADEYE STANDS ON A
+       CHANNEL. The builders placed the feet, the channel and the deadeyes from three
+       expressions (r245/feet-before.json: 410 of 510 lower shroud feet more than 1.5 r from
+       any deadeye, 198 over no channel — the channel block was gated on rig === 'square'
+       while buildRig draws shrouds on every mast that declares them). Now shroudFeet is the
+       one derivation, and this reads the BUILT scene against it: (1) on a deadeye-class mast
+       — square or gaff, or any mast on a hull that also carries a square one, with no
+       shroudFixing — each lower shroud's foot (from the 'Shrouds' mesh's own vertices, 8 a
+       segment, the lower end) lies within 1.5 r + 0.05 m of a deadeye's centre; (2) every
+       deadeye stands over a channel on its side — within the channel's x extent (+0.02) and
+       from 0.1 m under to 0.5 m over its centre; (3) a deadeye-class mast with shrouds has a
+       channel each side within 0.06 L of its station. A tackle-class mast (a lateen on an
+       all-lateen hull) or a lashing-class one (crab claw, junk) is not read: its structure is
+       not a deadeye and is not drawn yet, a named r245 residual. */
+    {
+      const worldS = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const cenOf = pts => { const c = [0, 0, 0]; for (const q of pts) for (let d = 0; d < 3; d++) c[d] += q[d] / pts.length; return c; };
+      const anySquare = (H.masts || []).some(m => m.rig === 'square');
+      const kindOf = mk => !mk.shrouds ? null
+        : (mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length) ? 'fixing'
+        : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
+        : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+      const dead = [], chans = [], shr = [];
+      g.traverse(o => {
+        const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'deadeye') dead.push({ c: cenOf(worldS(o)), r: o.geometry.parameters ? o.geometry.parameters.radiusTop : 0.1 });
+        else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs) }); }
+        else if (p.key === 'shroud' && p.name === 'Shrouds') shr.push(o);
+      });
+      let off = 0, feet = 0, first = null;
+      for (const o of shr) {
+        const mk = (H.masts || [])[o.userData.mast]; if (!mk || kindOf(mk) !== 'deadeyes') continue;
+        const pts = worldS(o);
+        for (let i = 0; i + 7 < pts.length; i += 8) {
+          const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
+          feet++;
+          let best = null;
+          for (const d of dead) { const dist = Math.hypot(foot[0] - d.c[0], foot[1] - d.c[1], foot[2] - d.c[2]); if (!best || dist < best.dist) best = { dist, r: d.r }; }
+          if (!best || best.dist > 1.5 * best.r + 0.05) { off++; if (!first) first = { foot, mast: o.userData.mast, dist: best ? best.dist : null }; }
+        }
+      }
+      if (off)
+        say(v.id, 'a shroud on no deadeye', `${off} of ${feet} lower shrouds on deadeye-class masts end more than 1.5 r from any deadeye (first: mast ${first.mast}, a foot at x ${first.foot[0].toFixed(2)}, y ${first.foot[1].toFixed(2)}, z ${first.foot[2].toFixed(2)}, ${first.dist === null ? 'no deadeye drawn' : 'the nearest deadeye ' + first.dist.toFixed(2) + ' m away'})`);
+      let offC = 0, firstC = null;
+      for (const d of dead) {
+        const on = chans.some(c => Math.sign(c.c[2]) === Math.sign(d.c[2]) && d.c[0] >= c.xMin - 0.02 && d.c[0] <= c.xMax + 0.02 && d.c[1] - c.c[1] > -0.1 && d.c[1] - c.c[1] < 0.5);
+        if (!on) { offC++; if (!firstC) firstC = d; }
+      }
+      if (offC)
+        say(v.id, 'a deadeye off its channel', `${offC} of ${dead.length} deadeyes stand over no channel (first at x ${firstC.c[0].toFixed(2)}, y ${firstC.c[1].toFixed(2)}, z ${firstC.c[2].toFixed(2)})`);
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'deadeyes') return;
+        const mx = (mk.at - 0.5) * H.lwl;
+        for (const sgn of [-1, 1])
+          if (!chans.some(c => Math.sign(c.c[2]) === sgn && Math.abs(c.c[0] - mx) < 0.06 * H.lwl))
+            say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sgn < 0 ? 'port' : 'starboard'} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
+      });
+    }
     /* ── THE CROSSED YARD IS WORKED, AND THE UPPER MASTS ARE STAYED (round 59). Item 2's
        standing remainder: a yard without lifts is held up by nothing, a sail without sheets
        is trimmed by nothing, and every topmast in the fleet stood as an unstayed pole —

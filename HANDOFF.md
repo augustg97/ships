@@ -20490,3 +20490,135 @@ the quarterdeck's forward rail are my first probe's read, taken with a 0.6 m win
 x-extent rule and the re-run probe (r244/shrouds-before.json) give 6 of 26, and the main's after pair set up 15 cm forward of the
 wall and did not pass through it. The handoff's fault paragraph above carries the corrected numbers.
 Two commits close the round (63b64e3 audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+
+## Round 245 — 2026-09-05 — a shroud ends on its deadeye: the feet, the channel and the deadeyes come from one derivation, a deadeye is built under each shroud at the foot's own station facing outboard, the channel is gated on the shrouds and not on the rig, and the full ratchet ran first at the clean r244 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r244 ordered r245's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0p), the lateen mizzen's channel, or Endurance by looking. The ratchet ran at
+HEAD 335b343 from 06:43 while the round's work was developed on a COPY of web/ served on :8150 (build/staging/r245/web,
+every file a symlink to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240 pattern); the copy's files
+were moved into web/ only after the run ended (cmp-verified). THE OPENING RATCHET: its result is in the receipt paragraph
+below, per the r198 rule. (0p) was taken, and it opened wider than one mast: (0q) is the same fault, and the probe
+written for it found the fault on every hull with shrouds.**
+
+**THE FAULT, measured (r245/probe_feet.py on :8150 against the r244 builder, r245/feet-before.json — the probe
+builds each hull FINE, derives every lower shroud's foot from the rope mesh's own vertices, 8 a segment, the lower
+end, and reads it against every deadeye cylinder's world centre and every channel box). 19 hulls carry shrouds on the
+fine build, 510 lower shrouds in all. 410 of them ended more than 1.5 r from any deadeye, and 198 stood over no
+channel at all. Three placements were doing the work of one: buildRig landed each foot at the deck (deckAt), 6% of
+the half-breadth outside the skin, spread ±0.0275 L about the mast; buildShip drew a channel 0.075 L long at the
+sheer and, along it, shrouds + 1 deadeyes at 2.4 r pitch centred on the channel — so the ship-of-the-line's ten main
+deadeyes spread 5.68 m under eighteen feet spread 2.24, the worst foot in the fleet stood 0.66 m from its nearest
+deadeye (Preussen's jigger), and on the carrack's main, whose channel r244 shortened to 2.13 m at the quarterdeck's
+break, seven deadeyes spanning 2.85 m overhung it at both ends (4 of 24 over no channel — r244's (0q)). And the
+channel block began `if (mk.rig !== 'square' || mk.shrouds === 0) return;` while buildRig draws shrouds for every
+mast that declares them, so 28 masts on 12 hulls set up on nothing drawn — the carrack's and fluyt's lateen mizzens
+(r244's (0p)), Wyoming's six gaff masts, Great Eastern's six, the steamer's gaff mizzen, Endurance's two gaff masts,
+and the all-lateen dhow, caravel, galley and galleass, plus the voyaging canoe's crab claw: 198 feet. The deadeye
+group was also quarter-turned (rotation.y = π/2 over a cylinder already turned onto its side), which laid every
+disc's axis along the hull, so from abeam a deadeye showed its edge.**
+
+**THE MODEL (web/js/hull.js; r245/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+shroudFeet(S, H, mk, FINE), after channelRun, is now the ONE derivation of where a mast's shrouds set up, and both
+builders read it. It returns null for a mast without shrouds; otherwise the KIND of fixing, the hull x of each
+shroud's foot (the class spread, ±0.0275 L, shrunk to the mast's own structure by channelRun on a castled hull as
+r244 left it — no foot moves fore or aft this round), the deadeyes' row (y, z), the deadeye's radius, the channel box
+and the castle top. The kind is a CLASS DEFAULT, read from no plate, and the code says so: 'fixing' where the record
+names the structure (mast.shroudFixing — the cog's channel wale, untouched); 'deadeyes' for every square and gaff
+mast and for any mast on a hull that also carries a square one (the carrack's and fluyt's lateen mizzens set up as
+their square masts do); 'tackle' for a lateen on an all-lateen hull (dhow, caravel, galley, galleass — a tackle to
+the rail, no deadeye, no channel); 'lashing' for a crab claw or a junk. In buildRig a deadeye-class foot is the top
+of its deadeye, (xs[s], y + r, ±z); a tackle- or lashing-class foot keeps the old deck-edge landing, and every
+shroud mesh records its kind (userData.feetKind) beside r244's segs. In buildShip the channel is centred on the feet
+it carries (its length unchanged: 0.075 L, or the shrunk run on a castled hull), and buildDeadeyes(xs, r, mat) now
+builds ONE deadeye under EACH shroud at the foot's own x, the disc's axis athwartships so it faces outboard; the
+group is no longer turned. The radius is min(0.018 B, 0.25 m, 0.42 × the feet's pitch): the pitch term because the
+class spread gives a 74 0.32 m a shroud against a 0.53 m block, and the 0.25 m cap because 0.018 B is 0.91 m across
+on Great Eastern's 25 m beam and no deadeye was ever turned that big — the largest lower deadeyes, on the
+three-deckers, were 18–20 in. Every channel mesh records its mast (userData.mast).**
+
+**MEASURED AFTER (r245/feet-after.json, the same probe against the r245 builder): 510 feet; the 434 on deadeye-class
+masts all end on a deadeye (the worst foot-to-centre distance is the deadeye's own radius plus a centimetre —
+carrack mizzen 0.21 at r 0.198, Wyoming 0.26 at r 0.25); the 76 that do not are the tackle class (dhow 10, caravel
+16, galley 14, galleass 24), the lashing class (the canoe's 4) and the cog's 8 on her channel wale — named (0r) below.
+Deadeye count now equals shroud count on every deadeye-class mast, and the deadeyes' x span equals the feet's on
+each (ship-of-the-line main: 9 at 2.24 m under 9 feet at 2.24). Radii run from 0.068 m (the trireme, pitch-bound)
+to the 0.25 m cap (Wyoming, Preussen, Great Eastern, the steamer). New channels: Wyoming 7.53 m a mast, Great
+Eastern 15.52, the steamer's mizzen 6.9, Endurance 2.97, the fluyt's mizzen 2.06, and the carrack's mizzen 1.92 m at
+y 8.46, the poop's deck edge, with three deadeyes a side at r 0.198 — (0p) closed. The carrack's castled channels are
+now the feet's own run (fore 1.92 m where r244 built 2.62, main 1.78 where it built 2.13), because the shared
+derivation uses the feet's half-run 0.0275 L where buildShip had used 0.0375: the outermost deadeye stands 0.25–0.38
+m inside each end. No other channel's length moved (L × 0.075 as before).**
+
+**THE RECORD (web/data/vessels.json): unchanged this round (r245/vessels.after.json is the before copy, cmp). The
+kind of fixing is a class default named in the code and here, not a record field; a record field
+(`mast.shroudSetup`) with provenance per hull is the right home for it once a plate has been read for any one of
+them, and is named (0s) below.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r245/apply-audit-edits.py). D-SHROUDS, after the D-CASTLES geometry
+block, reads the BUILT scene against the same class: (1) 'a shroud on no deadeye' — on a deadeye-class mast (the
+audit derives the kind from the record exactly as shroudFeet does) each lower shroud's foot, from the 'Shrouds'
+mesh's own vertices, must lie within 1.5 r + 0.05 m of a deadeye's centre; (2) 'a deadeye off its channel' — every
+deadeye stands over a channel on its side, within the channel's x extent (+0.02) and from 0.1 m under to 0.5 m over
+its centre; (3) 'shrouds and no channel' — a deadeye-class mast with shrouds has a channel each side within 0.06 L
+of its station. Tackle- and lashing-class masts are not read, and the rule's comment says why. PROOF A (r245/
+audit-proof-a.out, the r244 builder under the r245 audit, on :8150): checked 33 hulls, 50 problems on 12 hulls — 34
+'shrouds and no channel' (Wyoming 12, Great Eastern 12, Endurance 4, the carrack, the fluyt and the steamer 2 each),
+12 'a shroud on no deadeye' (the trireme, carrack, fluyt, east-indiaman, ship-of-the-line, slave-ship, Wyoming,
+Preussen, Great Eastern, clipper, steamer and Endurance — 'Wyoming: 36 of 36 … no deadeye drawn'; 'ship-of-the-line:
+24 of 44 … the nearest deadeye 0.53 m away'), and 4 'a deadeye off its channel' (the carrack '4 of 24', the
+east-indiaman, the ship-of-the-line '12 of 50', the slave-ship). The final audit on the r245 builder, record and
+audit: on :8150, checked 33 hulls, 0 problems (audit-final-8150.out); on :8149 after the copy into web/, see the
+receipt paragraph's audit line (audit-final-8149.out). Rule 8 on the way there: the audit's counts agree with the
+probe's on every hull it convicts; the audit's 1.5 r + 0.05 m tolerance is looser than the probe's 1.5 r by design,
+which is why the corbita's two feet at 0.27 m from a 0.198 m deadeye convict in the probe and not in the audit.**
+
+**WITNESSED (r244/spin-carrack-after/b180.png is the carrack's before — the r244 builder; r245/spin-carrack-after/,
+spin-endurance-before/ and -after/, spin-great-eastern-before/ and -after/ the rest, the befores captured off :8149
+while it still served the r244 builder; the pairs pair-b180-carrack-stern.png, pair-b180-carrack-main.png,
+pair-b180-endurance.png and pair-b180-great-eastern.png cropped from the 2880 × 1800 frames — b180 is the port
+broadside, bow to the right). The carrack's stern (pair-b180-carrack-stern): before, the mizzen's three shrouds run
+from the masthead down to the poop's deck edge and stop in the air at the wall's top; after, a short channel with
+three deadeyes stands on the poop's side at its deck edge and the three shrouds end on it. The same crop shows the
+main channel at the quarterdeck's break: before, seven deadeyes overhang it; after, six stand on it under the six
+shrouds. Endurance (pair-b180-endurance): before, the main's seven and the mizzen's five shrouds end on the bare
+side at the sheer; after, a row of deadeyes on a channel stands under each set. Great Eastern
+(pair-b180-great-eastern): before, every gaff mast's shrouds end on the black iron side; after, a pale timber
+channel with its deadeyes stands at the sheer under each of the six, 15.5 m long, which is what her photographs
+show along the side. Nothing floats: every deadeye-class foot ends on a deadeye on a channel on the hull or the
+castle, by the probe and by the pairs. The all-lateen hulls' feet are as they were, (0r).**
+
+**Rule 0 on the after broadside read whole (r245/spin-carrack-after/b180.png; sheet-carrack-b180.png stacks it under
+the before): it reads as a rendered ship on water, not a chart — a dark planked hull with its strakes, the
+forecastle and the two-step stern, two square sails with topsails, the lateen on the mizzen, the bowsprit and its
+spritsail yard, the anchor catted at the bow, a low coast under a pale sky, a fleet neighbour's masts at the frame's
+edge. Three facts a viewer can read off it without a legend: her mizzen's shrouds set up on the side of her poop, on
+blocks at its deck edge; her main's shrouds set up forward of the quarterdeck's break; and she carries a square rig
+forward and a lateen aft.**
+
+**Named residuals, in order:** (0p) CLOSED this round. (0q) CLOSED this round. NEW (0r) a tackle-class mast (a lateen
+on an all-lateen hull: dhow, caravel, galley, galleass) and a lashing-class one (the canoe's crab claw) still draw
+their shrouds to the deck edge on nothing drawn — 76 feet on 6 hulls; the structure is a tackle of two blocks to the
+rail, or a lashing, and the builder should draw it and the audit read it. NEW (0s) the kind of fixing is a class
+default with no record field; `mast.shroudSetup` with provenance is its home once one plate is read. NEW (0t) the
+class spread of the feet, ±0.0275 L, is narrow: a 74's main channel ran about 0.27 L, and the pitch term now sizes
+the deadeyes down to fit the spread rather than the spread out to fit the deadeyes. NEW (0u) Preussen's steel masts
+draw channels and deadeyes where she set up on turnbuckles at chainplates on the sheer strake; the class draws every
+square rig alike. (0l) Queen Mary 2's Hull row and her data, (0n) the carrack's castle stations as a class default,
+(0o) the bowsprit through the forecastle deck with no aperture, (0i) the galley's stern tent, (0j) the free foot's
+scallop, (0k) the cap's 30°, (0e²²) the cog's Frames 1 and 2 on the stem, unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸)
+(0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a)
+(0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r246 opens by running the FULL ratchet at the clean HEAD first (this round is class-wide: r245/PREDICTIONS-close.md
+names 21 frames that MUST move, 17 that MAY, and 27 that MUST NOT; only those scored by check --frame after the push
+are accepted here, and the movers in the opening run are to be read against that list — any mover in the MUST NOT
+list is not explained by this round); then takes (0r), the tackle-class feet — the class is a lateen mast on a hull
+with no square rig, and the structure is a tackle (two blocks and a fall) from the shroud's end to the rail — or the
+survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788618579 at the build; the push and the live poll are in
+build/staging/r245/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r245 staging stays on disk uncommitted, the r211 convention.**

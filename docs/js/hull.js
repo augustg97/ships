@@ -1998,17 +1998,17 @@ const SF = mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stati
 ? mk.shroudFixing : null;
 const sfLo = SF ? Math.min(...SF.stationsU) : 0, sfHi = SF ? Math.max(...SF.stationsU) : 0;
 const sfY = SF ? -S.draught + (SF.boardsAboveKeelM ? SF.boardsAboveKeelM[1] : SF.waleTopAboveKeelM + 0.6) : 0;
-const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
-const CT = CR ? CR.top : null;
+const FT = shroudFeet(S, H, mk, FINE);
+const CT = FT.castle;
+const onDeadeyes = FT.kind === 'deadeyes';
 for (let s = 0; s < mk.shrouds; s++) {
-const f = (s + 1) / (mk.shrouds + 1);
-const chX = CR ? x + (CR.lo + (CR.hi - CR.lo) * f - u) * L : x + (f - 0.5) * L * 0.055;
+const chX = FT.xs[s];
 const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
 const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
 const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
 [1, -1].forEach((side, si2) => {
 const a = SF ? new THREE.Vector3(sfX, sfY, side * sfZ)
-: CT ? new THREE.Vector3(chX, CT.y - B * 0.012 + B * 0.016, side * (CT.half + B * 0.046))
+: onDeadeyes ? new THREE.Vector3(chX, FT.y + FT.r, side * FT.z)
 : new THREE.Vector3(chX, base, side * half * 1.06);
 const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
 shroudSegs.push([a, b]);
@@ -2020,6 +2020,7 @@ if (shr) {
 shr.userData.segs = shroudSegs.map(([p, q]) => [[p.x, p.y, p.z], [q.x, q.y, q.z]]);
 shr.userData.mast = mi;
 shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
+shr.userData.feetKind = FT.kind;
 group.add(tag(shr, 'shroud'));
 }
 const RAT = 0.3302;
@@ -4612,12 +4613,12 @@ box(0.12, yC - yD, 0.12, xs[i], (yC + yD) / 2, sgn * zi, 'channel-wale-inner-sta
 group.add(tag(gr, 'channelWale', sgn < 0 ? 'Port channel wale' : 'Starboard channel wale'));
 }
 }
-function buildDeadeyes(n, r, mat) {
+function buildDeadeyes(xs, r, mat) {
 const g = new THREE.Group();
-for (let i = 0; i < n; i++) {
+for (const x of xs) {
 const d = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.5, 16), mat);
 d.rotation.x = Math.PI / 2;
-d.position.z = (i - (n - 1) / 2) * r * 2.4;
+d.position.x = x;
 g.add(d);
 }
 return tag(g, 'deadeye');
@@ -7862,6 +7863,33 @@ while (lo < u - step && !same(lo)) lo += step;
 while (hi > u + step && !same(hi)) hi -= step;
 return { lo, hi, top };
 }
+function shroudFeet(S, H, mk, FINE) {
+if (!mk.shrouds) return null;
+const L = S.lwl, B = S.beam, u = mk.at, n = mk.shrouds;
+const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
+const anySquare = (S.masts || []).some(m => m.rig === 'square');
+const kind = SF ? 'fixing'
+: (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
+: (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+const x = (u - 0.5) * L + H.rake(u);
+const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
+const CT = CR ? CR.top : null;
+const xs = [];
+for (let s = 0; s < n; s++) {
+const f = (s + 1) / (n + 1);
+xs.push(CR ? x + (CR.lo + (CR.hi - CR.lo) * f - u) * L : x + (f - 0.5) * L * 0.055);
+}
+const p = surfacePoint(S, H, u, 0.985);
+const cy = CT ? CT.y - B * 0.012 : p[1] * 0.97;
+const cz = CT ? CT.half : p[2];
+const pitch = n > 1 ? (xs[n - 1] - xs[0]) / (n - 1) : Infinity;
+const r = Math.min(B * 0.018, 0.25, pitch * 0.42);
+const chan = kind === 'deadeyes'
+? { x: (xs[0] + xs[n - 1]) / 2, y: cy, z: cz + B * 0.026,
+len: CR ? (CR.hi - CR.lo) * L : L * 0.075, d: B * 0.012, w: B * 0.055 }
+: null;
+return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR };
+}
 function buildTieredCastles(S, group, mats, hullMat) {
 const C = S.castles; if (!C || !(C.fore || C.aft)) return;
 const H = hullSurface(S);
@@ -9493,25 +9521,21 @@ if (steer === 'stern') buildTimberRudder(S, group, timber, tag);
 else group.add(tag(new THREE.Mesh(buildRudderGeometry(S), rudderMat), 'rudder'));
 }
 const HS = hullSurface(S);
-(S.masts || []).forEach(mk => {
-if (mk.rig !== 'square' || mk.shrouds === 0) return;
-if (mk.shroudFixing && mk.shroudFixing.stationsU) { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
-const CR = S.castles ? channelRun(S, HS, mk.at, 0.0375) : null;
-const CT = CR ? CR.top : null;
+(S.masts || []).forEach((mk, mi) => {
+const FT = shroudFeet(S, HS, mk, true);
+if (!FT) return;
+if (FT.kind === 'fixing') { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
+if (!FT.chan) return;
+const C = FT.chan, CT = FT.castle;
 for (const sgn of [-1, 1]) {
-const p = surfacePoint(S, HS, mk.at, 0.985);
-const cy = CT ? CT.y - S.beam * 0.012 : p[1] * 0.97;
-const cz = CT ? CT.half : p[2];
-const cx = CR ? p[0] + ((CR.lo + CR.hi) / 2 - mk.at) * S.lwl : p[0];
-const cl = CR ? (CR.hi - CR.lo) * S.lwl : S.lwl * 0.075;
-const ch = new THREE.Mesh(
-new THREE.BoxGeometry(cl, S.beam * 0.012, S.beam * 0.055), timber);
-ch.position.set(cx, cy, sgn * (cz + S.beam * 0.026));
+const ch = new THREE.Mesh(new THREE.BoxGeometry(C.len, C.d, C.w), timber);
+ch.position.set(C.x, C.y, sgn * C.z);
 ch.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
+ch.userData.mast = mi;
 group.add(tag(ch, 'channel'));
-const de = buildDeadeyes(Math.max(3, (mk.shrouds || 3) + 1), S.beam * 0.018, timber);
-de.rotation.y = Math.PI / 2;
-de.position.set(cx, cy + S.beam * 0.016, sgn * (cz + S.beam * 0.046));
+const de = buildDeadeyes(FT.xs, FT.r, timber);
+de.position.set(0, FT.y, sgn * FT.z);
+de.userData.mast = mi;
 group.add(de);
 }
 });
