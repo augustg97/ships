@@ -19009,3 +19009,11 @@ and the Shipwright tile's datum — because the Sea view shows a cog with half a
 build/staging/r233/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r233 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788565721 on https://augustg97.github.io/ships/index.html at 16:49 PDT,
+60 s after the push (build/staging/r233/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r232 correction): docs/data/vessels.json carries "loadConditions" (1) and
+"draughtCondition" (1); docs/js/app.js reads H.draughtCondition (2); docs/js/shipwright.js reads
+vessel.hull.draughtCondition (2); docs/audit-hulls.js carries D-LOAD's rule string (1) and
+D-LOAD-CONDITION's (1). THE RATCHET, run after the push: RATCHET EXIT 0  END 17:33:38; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, shipwright-ahead 0.045%/0.021, ship-endurance 0.043%/0.018. Prediction (r233/PREDICTIONS-close.md) held.
+Two commits close the round (a934ad3 record + audit + app + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
