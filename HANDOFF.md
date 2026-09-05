@@ -19143,3 +19143,12 @@ and the Kiel photographs for the top, and give the single-tier wooden mast a dat
 build/staging/r234/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r234 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788570347 on https://augustg97.github.io/ships/index.html at 18:08 PDT,
+120 s after the push (build/staging/r234/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r232 correction): docs/data/vessels.json carries "truckM":23.5 (1) and
+"bonnetsM2" (1); docs/js/hull.js reads mk.sail.areaM2 (2) and rigDeckY (3); docs/js/shipwright.js reads
+U.rigDeckY (2); docs/audit-hulls.js carries R-MAST-TRUCK's rule string (0) and R-SAIL-AREA's (1);
+docs/fields/tiles.json carries the level-0 byte count 4832355 (1) and docs/fields/z0/0_0.png is 2439629 bytes.
+THE RATCHET, run after the push: RATCHET EXIT 1  END 18:50:34; 64 of 64 frames scored; movers 1: shipwright-ahead 0.067%/0.051 — ACCEPTED with the reason in FRAME-LOG.md: the 74's card tile 'Rig, deck to truck' changed its digits (the r234 datum, rigDeckY for hull.freeboard), reproduced solo at the same numbers (r234/recheck-shipwright-ahead.out); two small specks in the diff not individually identified. The PREDICTED movers did not move: ship-dhow 0.021%/0.016, ship-treasure 0.049%/0.019 — the cog's rig lies outside both frames' crops; globe-default 0.048%/0.012 on the swapped tiles. Prediction (r234/PREDICTIONS-close.md) did NOT hold: it missed that the Shipwright tile's text is inside the capture and named two frames that did not move. Largest three: shipwright-ahead 0.067%/0.051, ship-treasure 0.049%/0.019, globe-default 0.048%/0.012.
+Two commits close the round (217121f record + audit + hull + shipwright + tiles + docs + handoff, and this push-log commit with any accepted baseline).**
