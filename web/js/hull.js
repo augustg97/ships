@@ -3597,17 +3597,37 @@ function buildRig(S, group, mats, FINE, FURLED) {
          (the all-lateen hulls, the crab claw) keeps the old deck-edge landing, undrawn. */
       const FT = shroudFeet(S, H, mk, FINE);
       const CT = FT.castle;
-      const onDeadeyes = FT.kind === 'deadeyes';
+      const onDeadeyes = FT.kind === 'deadeyes', onTackle = FT.kind === 'tackle';
+      /* ── A SHROUD ON AN ALL-LATEEN HULL SETS UP WITH A TACKLE (round 246). r245 left the
+         tackle class — a lateen mast on a hull with no square rig: dhow, caravel, galley,
+         galleass, 72 feet — landing at the deck edge on nothing drawn. The structure is a
+         tackle: the shroud ends in an upper block, a lower block hooks to a ringbolt on the
+         rail's cap, and a fall rove between them sets the shroud up. On a lateen rig the yard
+         is passed round the mast when she tacks and the shrouds that will be to leeward are
+         slacked or cast off and set up again on the other side, which a tackle allows and a
+         deadeye pair does not; a class default read from no plate, as the deadeye row is. The
+         seat comes from shroudFeet; the tackle lies on the line from the seat to the masthead,
+         so the shroud runs straight into it. */
+      const tackles = [];
       for (let s = 0; s < mk.shrouds; s++) {
         const chX = FT.xs[s];
         const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
-          const a = SF ? new THREE.Vector3(sfX, sfY, side * sfZ)
-                       : onDeadeyes ? new THREE.Vector3(chX, FT.y + FT.r, side * FT.z)
-                                    : new THREE.Vector3(chX, base, side * half * 1.06);
           const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+          let a;
+          if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
+          else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
+          else if (onTackle) {
+            const st = FT.seats[s];
+            const seat = new THREE.Vector3(st.x, st.y, side * st.z);
+            const dir = new THREE.Vector3().subVectors(b, seat).normalize();
+            const lo = seat.clone().addScaledVector(dir, FT.block * 0.5 + 0.04);   // the lower block, hooked to the cap
+            const hi = lo.clone().addScaledVector(dir, FT.drift + FT.block);       // the upper block's centre
+            a = hi.clone().addScaledVector(dir, FT.block * 0.5);                   // the shroud ends at its top
+            tackles.push({ lo, hi, dir, side, s });
+          } else a = new THREE.Vector3(chX, base, side * half * 1.06);
           shroudSegs.push([a, b]);
           shroudPts[si2].push([a, b]);
         });
@@ -3621,6 +3641,32 @@ function buildRig(S, group, mats, FINE, FURLED) {
         shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
         shr.userData.feetKind = FT.kind;
         group.add(tag(shr, 'shroud'));
+      }
+      /* the tackles themselves: a block at each end of the drift, the fall rove between them
+         in three parts (a double and a single block), every block recording its shroud, its
+         side and which end it is for the audit (userData.block) */
+      if (tackles.length) {
+        const tg = new THREE.Group(), falls = [];
+        const bl = FT.block, up = new THREE.Vector3(0, 1, 0);
+        for (const T of tackles) {
+          const across = new THREE.Vector3().crossVectors(T.dir, new THREE.Vector3(0, 0, T.side)).normalize();
+          for (const [c, upper] of [[T.lo, false], [T.hi, true]]) {
+            const bk = new THREE.Mesh(new THREE.BoxGeometry(bl * 0.55, bl, bl * 0.38), woodDark);
+            bk.quaternion.setFromUnitVectors(up, T.dir);
+            bk.position.copy(c);
+            bk.userData.block = { mast: mi, shroud: T.s, side: T.side, upper, len: bl };
+            tg.add(bk);
+          }
+          const a0 = T.lo.clone().addScaledVector(T.dir, bl * 0.5), b0 = T.hi.clone().addScaledVector(T.dir, -bl * 0.5);
+          for (const k of [-0.3, 0, 0.3]) {
+            const off = across.clone().multiplyScalar(k * bl);
+            falls.push([a0.clone().add(off), b0.clone().add(off)]);
+          }
+        }
+        const fm = ropeMesh(falls, 0.008 + B * 0.0006, ropeMat);
+        if (fm) tg.add(fm);
+        tg.userData.mast = mi;
+        group.add(tag(tg, 'tackle'));
       }
 
       /* ── ⚠ RATLINES ARE NOT A UNIVERSAL FITTING ────────────────────────────────────
@@ -4847,6 +4893,15 @@ const PARTS = {
               what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
                   + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '
                   + 'and a deadeye pair is a hand-powered turnbuckle you can adjust at sea.' },
+  tackle:   { stage: 5, name: 'Shroud tackles',
+              what: 'Two blocks and a fall at the foot of each shroud on a lateen-rigged hull: the '
+                  + 'shroud ends in the upper block, the lower hooks to a ringbolt on the rail, '
+                  + 'and the fall rove between them sets the shroud up. When a lateen-rigged ship '
+                  + 'tacks the yard is passed round the mast, and the shrouds that will be to '
+                  + 'leeward are slacked or cast off and set up again on the other side; a tackle '
+                  + 'can be let go and set up in a minute, and a deadeye pair cannot. Galleys, '
+                  + 'dhows and the lateen caravel set up this way. A class default here, read '
+                  + 'from no plate.' },
   channelWale: { stage: 5, name: 'Channel wale',
               what: 'The timber outside the planking that the shrouds set up to on a cog: a wale '
                   + 'at the castle\'s forward corner with stanchions standing on it up to the '
@@ -12175,11 +12230,15 @@ function channelRun(S, H, u, halfU) {
  *                on a hull that also carries a square one (the carrack's and fluyt's lateen
  *                mizzens set up as their square masts do);
  *     'tackle'   a lateen on an all-lateen hull (dhow, galley, galleass, caravel) sets up with a
- *                tackle to the rail — no deadeye, no channel; NOT DRAWN yet (r245 residual);
- *     'lashing'  a crab claw or a junk: stays lashed to the hull — not drawn either.
- *   Returns null for a mast without shrouds, else {kind, xs, y, z, r, chan, castle, run}: xs the
- *   hull x of each shroud's foot, y and z the deadeyes' row (a foot is the top of its deadeye, at
- *   (xs[s], y + r, ±z)), r the deadeye's radius, chan the channel box {x, y, z, len, d, w} or null.
+ *                tackle — two blocks and a fall — from the shroud's end to the rail: no deadeye,
+ *                no channel. buildRig draws it from this derivation's seats (round 246);
+ *     'lashing'  a crab claw or a junk: stays lashed to the hull — not drawn (r246 residual).
+ *   Returns null for a mast without shrouds, else {kind, xs, y, z, r, chan, castle, run, seats,
+ *   drift, block}: xs the hull x of each shroud's foot, y and z the deadeyes' row (a deadeye-class
+ *   foot is the top of its deadeye, at (xs[s], y + r, ±z)), r the deadeye's radius, chan the
+ *   channel box {x, y, z, len, d, w} or null; for the tackle class seats[s] = {x, y, z} is where
+ *   the lower block hooks to the rail's cap, drift the run of fall between the blocks and block
+ *   a block's length — the foot is the upper block's top, on the line from the seat to the head.
  *   The feet keep the class spread (±0.0275 L, shrunk to the mast's own structure by channelRun on
  *   a castled hull, r244); a deadeye is 0.018 B across, never more than 0.5 m, and never wider
  *   than that pitch allows — on a 74 the class gives 0.32 m a shroud against a 0.53 m block. The castle placement is FINE
@@ -12212,7 +12271,20 @@ function shroudFeet(S, H, mk, FINE) {
     ? { x: (xs[0] + xs[n - 1]) / 2, y: cy, z: cz + B * 0.026,
         len: CR ? (CR.hi - CR.lo) * L : L * 0.075, d: B * 0.012, w: B * 0.055 }
     : null;
-  return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR };
+  /* ── THE TACKLE CLASS (round 246): a seat on the rail's cap under each shroud, at the foot's own
+     station — the cap's top face over the sheer (buildFittings lays it B·0.016 × 1.6 high, capM
+     where a plate gave one) at the sheer's half-breadth. The drift of fall between the two
+     blocks is a fortieth of the length held to 0.5–1.4 m (a galley's 1.0, a caravel's 0.5); a
+     block is 0.03 B long held to 0.12–0.30 m. Both are class figures read from no plate, as the
+     deadeye's radius is. The r245 probe left these 72 feet at the deck edge on nothing drawn. */
+  const capH = S.capM ? S.capM : B * 0.016 * 1.6;
+  const seats = kind === 'tackle' ? xs.map(xf => {
+    const uf = Math.max(0.02, Math.min(0.98, u + (xf - x) / L));
+    return { x: xf, y: H.sheer(uf) + capH, z: Math.abs(surfacePoint(S, H, uf, 1)[2]) };
+  }) : null;
+  const drift = Math.max(0.5, Math.min(1.4, L * 0.025));
+  const block = Math.max(0.12, Math.min(0.30, B * 0.03));
+  return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR, seats, drift, block };
 }
 
 function buildTieredCastles(S, group, mats, hullMat) {
@@ -14522,7 +14594,7 @@ function buildShip(S, opts) {
          `rig !== 'square'` gate left 28 lateen, gaff and crab-claw masts drawing shrouds to
          nothing. shroudFeet is the one derivation of where they set up — buildRig reads the
          same one for the feet — and its kind says whether a channel and deadeyes are the
-         structure at all (the all-lateen hulls' tackles are not, and are not drawn yet). */
+         structure at all (the all-lateen hulls' tackles are not: buildRig draws them, round 246). */
       const FT = shroudFeet(S, HS, mk, true);
       if (!FT) return;
       /* a record that names WHERE the shrouds set up (mast.shroudFixing, round 236) draws

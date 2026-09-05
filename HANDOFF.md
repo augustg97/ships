@@ -20630,3 +20630,96 @@ docs/audit-hulls.js carries D-SHROUDS' three convictions (1, 1, 1); docs/data/ve
 THE RATCHET: THE OPENING FULL RATCHET at the clean r244 HEAD 335b343 (r245/open-ratchet.out, launched 06:43 as the round's first act, ended 07:28): RATCHET EXIT 0  END 07:28:11; 65 frames scored; movers 0. Largest three: shipwright-astern 0.046%/0.037, action 0.038%/0.009, passage-sahul 0.038%/0.013.
  PARTIAL after the push, the r239 pattern (r245/partial-*.out): frames scored one at a time by check --frame, each diff read before its accept — ship-carrack 0.461%/0.181 CHANGED, ship-clipper 0.736%/0.328 CHANGED, ship-endurance 0.947%/0.374 CHANGED, ship-galley 0.111%/0.041 CHANGED, ship-great-eastern 0.708%/0.330 CHANGED, ship-preussen 1.667%/0.771 CHANGED, ship-steamer 1.006%/0.523 CHANGED, ship-treasure 0.000%/0.000 ok, ship-wyoming 0.865%/0.370 CHANGED, shipwright 0.732%/0.288 CHANGED (10 frames; r245/PREDICTIONS-close.md names the frames that MUST move — 21 deadeye-class hulls' frames — the 17 that MAY, and the 27 that must not). The other 55 frames are UNSCORED on the r245 builder; r246's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (ac5e77a audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 246 — 2026-09-05 — a shroud on an all-lateen hull sets up with a tackle: two blocks and a fall from the shroud's end to the rail's cap, drawn on the dhow, caravel, galley and galleass from the same derivation the deadeye class reads, the audit reads the blocks against the feet and the cap, and the full ratchet ran first at the clean r245 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r245 ordered r246's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0r), the tackle-class feet, or Endurance by looking. The ratchet ran at
+HEAD 3cd3c33 from 07:54 while the round's work was developed on a COPY of web/ served on :8150 (build/staging/r246/web,
+every file a symlink to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240 pattern); the copy's files
+were moved into web/ only after the run ended (cmp-verified). THE OPENING RATCHET: its result is in the receipt paragraph
+below, per the r198 rule. (0r) was taken for the tackle class; the lashing class is named below.**
+
+**THE FAULT, measured (r246/probe_feet.py — r245's probe unchanged — on :8150 against the r245 builder, r246/
+feet-before.json): the four all-lateen hulls carry ten masts with shrouds, 36 shrouds a side, 72 lower feet. Every
+one ended at the deck edge on nothing drawn — the dhow's at y 2.32 and 2.02, the galley's at 1.10 and 1.34, the
+galleass's at 2.80–3.04, the caravel's at 2.10–2.58, each 6% of the half-breadth outside the skin at the deck's
+height — because buildRig's last branch, the one r245 left for the kinds it did not draw, was still the old deck
+landing. The voyaging canoe's four (the lashing class) the same. On the ship the structure is a tackle: the shroud
+ends in an upper block, a lower block hooks to a ringbolt on the rail's cap, and a fall rove between them sets the
+shroud up. A lateen yard is passed round the mast when she tacks, and the shrouds that will be to leeward are
+slacked or cast off and set up again on the other side, which a tackle allows and a deadeye pair does not. This is a
+class default read from no plate, as r245's deadeye row is, and the code and the PARTS card both say so.**
+
+**THE MODEL (web/js/hull.js; r246/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+shroudFeet(S, H, mk, FINE) returns three more things: seats, drift and block. For the tackle class seats[s] is
+{x, y, z} — the top of the rail's cap at the foot's own station, H.sheer(u) plus the cap's height as buildFittings
+lays it (B·0.016 × 1.6, or capM where a plate gave one), at the sheer's half-breadth; drift is L/40 held to 0.5–1.4 m
+and block is 0.03 B held to 0.12–0.30 m, both class figures. In buildRig a tackle-class shroud runs from the masthead
+to the top of its upper block. The lower block's centre lies half a block and 4 cm along the line from the seat to
+the masthead, the upper block's a drift and a block further along the same line, so the shroud runs straight into
+the tackle with no kink; the fall is rove between the blocks in three parts offset ±0.3 block fore and aft (a double
+and a single block). A block is a box 0.55 × 1 × 0.38 block long turned onto the line, in the spar timber; the fall
+is rope 8 mm + 0.6 mm per metre of beam. The tackles of a mast are one group tagged 'tackle' with a PARTS card of its
+own, and every block records its mast, shroud, side and end (userData.block) for the audit. The deadeye and fixing
+classes are untouched, and buildShip's channel block changes only its comment.**
+
+**MEASURED AFTER (r246/probe_tackle.py, r246/feet-after.json — feet from the rope mesh's own vertices, blocks from the
+tackle group, the cap from hullSurface's sheer plus the cap's height): 72 feet on the ten tackle-class masts. Every
+foot ends within half a block of an upper block's centre, and the worst distance on each hull is that half-length
+exactly (galley 0.078 at block 0.156, caravel 0.087 at 0.174, dhow 0.096 at 0.192, galleass 0.120 at 0.240). Every
+lower block's centre stands 0.095–0.161 m over the cap's top at its own x and within 0.06 m of the sheer's
+half-breadth. Upper blocks a side equal shrouds a side on all ten masts (36 and 36). Drifts: caravel 0.50, dhow 0.56,
+galley 0.99, galleass 1.10 m. The canoe's four feet are where they were.**
+
+**THE RECORD (web/data/vessels.json): unchanged (r246/vessels.after.json is the before copy, cmp). (0s) still names
+mast.shroudSetup, with provenance, as the record field's home once a plate has been read for any one hull.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r246/apply-audit-edits.py). D-SHROUDS gains the tackle class, reading the
+BUILT scene: (4) 'a shroud on no tackle' — each tackle-class lower shroud's foot lies within 0.75 block + 0.05 m of an
+upper block's centre; (5) 'a tackle off the rail' — each lower block's centre stands from 0.05 m under to 1.5 block +
+0.1 m over the cap's top at its x (hullSurface's sheer plus the cap's height, the same expression the builder uses)
+and within 0.35 m of the sheer's half-breadth there; (6) 'shrouds and no tackle' — one upper block a side per shroud
+on every tackle-class mast. The lashing class is not read, and the comment says why. PROOF A (r246/audit-proof-a.out,
+the r245 builder under the r246 audit, on :8150): checked 33 hulls, 24 problems on 4 hulls — 20 'shrouds and no
+tackle' (caravel 6, galleass 6, dhow 4, galley 4: two sides of every mast) and 4 'a shroud on no tackle' (one a hull,
+'no tackle drawn'). The final audit on the r246 builder: on :8150, checked 33 hulls, 0 problems (audit-final-8150.out);
+on :8149 after the copy into web/, see the receipt paragraph's audit line (audit-final-8149.out). Rule 8 on the way:
+the audit's counts agree with the probe's on every mast.**
+
+**WITNESSED (r246/spin-dhow-before/ and -after/, spin-galley-before/ and -after/ — b180 and b135 at 2880 × 1800 off
+:8150, the befores captured with the r245 builder swapped in; pair-b180-dhow.png stacks the dhow's port broadside
+before over after at 1.4×; crop-galley-low180-main-4x.png is the galley's after at the low port broadside, cropped
+4× about the mainmast's feet). The dhow: before, the main's three shrouds and the mizzen's two run to the deck edge
+and stop there; after, each ends in a tackle standing on the rail — two dark blocks with the fall between them and the
+shroud running straight into the upper one. The galley: the main's four shrouds come down in front of the ship's boat
+and each ends in a tackle at the rail, a metre of fall under its upper block. The b180 broadside at 1.6×
+(pair-b180-galley-main.png) does not show them, because the boat stands in front of the feet from that bearing and a
+0.16 m block is six pixels there; that is why the low bearing and the 4× crop were taken.**
+
+**Rule 0 on the dhow's after broadside read whole (r246/spin-dhow-after/b180.png): a rendered ship on water, not a
+chart — a sewn-plank hull with its strakes and the pale cap along the sheer, the raked mainmast with its settee sail
+drawing, the short mizzen aft, three hatches in the deck, the rudder and tiller at the stern, a fleet neighbour's yard
+at the frame's edge. Three facts a viewer can read off it without a legend: her shrouds set up on tackles at the rail;
+she carries two masts, the after one short; her deck is open, with hatches and no house.**
+
+**Named residuals, in order:** (0r) CLOSED for the tackle class. NEW (0r′) the lashing class — the voyaging canoe's
+crab-claw mast, four feet — still lands at the deck edge on nothing drawn; a lashing of rope turns to the hull or the
+crossbeam is the structure, and the audit does not read it. NEW (0v) a tackle's blocks are boxes with no strop, and
+the fall's three parts run block to block with no hauling part belayed; the fall's end goes to a cleat on the rail.
+(0s) (0t) (0u) as r245 names them. (0l) Queen Mary 2's Hull row and her data, (0n) the carrack's castle stations as a
+class default, (0o) the bowsprit through the forecastle deck with no aperture, (0i) the galley's stern tent, (0j) the
+free foot's scallop, (0k) the cap's 30°, (0e²²) the cog's Frames 1 and 2 on the stem, unchanged and unread. (0e¹⁷)
+(0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶)
+(0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r247 opens by running the FULL ratchet at the clean HEAD first (r246/PREDICTIONS-close.md names 3 frames that MUST
+move — the dhow's, the galley's and the galleass's own — 6 that MAY and 56 that MUST NOT; only those scored by check
+--frame after the push are accepted here, and the movers in the opening run are to be read against that list — any
+mover in the MUST NOT list is not explained by this round); then takes (0r′), the lashing class, or the survey's next
+never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788623185 at the build; the push and the live poll are in
+build/staging/r246/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r246 staging stays on disk uncommitted, the r211 convention.**

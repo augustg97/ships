@@ -4358,12 +4358,13 @@ const kindOf = mk => !mk.shrouds ? null
 : (mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length) ? 'fixing'
 : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
 : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
-const dead = [], chans = [], shr = [];
+const dead = [], chans = [], shr = [], tack = [];
 g.traverse(o => {
 const p = tagOf(o); if (!o.isMesh || !p) return;
 if (p.key === 'deadeye') dead.push({ c: cenOf(worldS(o)), r: o.geometry.parameters ? o.geometry.parameters.radiusTop : 0.1 });
 else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs) }); }
 else if (p.key === 'shroud' && p.name === 'Shrouds') shr.push(o);
+else if (p.key === 'tackle' && o.userData.block) tack.push({ c: cenOf(worldS(o)), ...o.userData.block });
 });
 let off = 0, feet = 0, first = null;
 for (const o of shr) {
@@ -4392,6 +4393,42 @@ const mx = (mk.at - 0.5) * H.lwl;
 for (const sgn of [-1, 1])
 if (!chans.some(c => Math.sign(c.c[2]) === sgn && Math.abs(c.c[0] - mx) < 0.06 * H.lwl))
 say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sgn < 0 ? 'port' : 'starboard'} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
+});
+let offT = 0, feetT = 0, firstT = null;
+for (const o of shr) {
+const mk = (H.masts || [])[o.userData.mast]; if (!mk || kindOf(mk) !== 'tackle') continue;
+const pts = worldS(o);
+for (let i = 0; i + 7 < pts.length; i += 8) {
+const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
+feetT++;
+let best = null;
+for (const t of tack) { if (!t.upper) continue; const dist = Math.hypot(foot[0] - t.c[0], foot[1] - t.c[1], foot[2] - t.c[2]); if (!best || dist < best.dist) best = { dist, len: t.len }; }
+if (!best || best.dist > best.len * 0.75 + 0.05) { offT++; if (!firstT) firstT = { foot, mast: o.userData.mast, dist: best ? best.dist : null }; }
+}
+}
+if (offT)
+say(v.id, 'a shroud on no tackle', `${offT} of ${feetT} lower shrouds on tackle-class masts end away from any tackle's upper block (first: mast ${firstT.mast}, a foot at x ${firstT.foot[0].toFixed(2)}, y ${firstT.foot[1].toFixed(2)}, z ${firstT.foot[2].toFixed(2)}, ${firstT.dist === null ? 'no tackle drawn' : 'the nearest upper block ' + firstT.dist.toFixed(2) + ' m away'})`);
+if (tack.length) {
+const HSt = SHIPS_HULL.hullSurface(H), capH = H.capM ? H.capM : H.beam * 0.016 * 1.6;
+let offR = 0, firstR = null;
+for (const t of tack) {
+if (t.upper) continue;
+let uf = 0.5 + t.c[0] / H.lwl;
+for (let k = 0; k < 2; k++) uf = Math.max(0.02, Math.min(0.98, 0.5 + (t.c[0] - HSt.rake(uf)) / H.lwl));
+const top = HSt.sheer(uf) + capH, hb = Math.abs(SHIPS_HULL.surfacePoint(H, HSt, uf, 1)[2]);
+const dy = t.c[1] - top, dz = Math.abs(t.c[2]) - hb;
+if (dy < -0.05 || dy > t.len * 1.5 + 0.1 || Math.abs(dz) > 0.35) { offR++; if (!firstR) firstR = { t, dy, dz }; }
+}
+if (offR)
+say(v.id, 'a tackle off the rail', `${offR} lower tackle blocks stand off the rail's cap (first: mast ${firstR.t.mast} shroud ${firstR.t.shroud} ${firstR.t.side < 0 ? 'port' : 'starboard'}, ${firstR.dy.toFixed(2)} m over the cap, ${firstR.dz.toFixed(2)} m outboard of the sheer's half-breadth)`);
+}
+(H.masts || []).forEach((mk, mi) => {
+if (kindOf(mk) !== 'tackle') return;
+for (const sgn of [-1, 1]) {
+const n = tack.filter(t => t.mast === mi && t.side === sgn && t.upper).length;
+if (n !== mk.shrouds)
+say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} tackle${n === 1 ? '' : 's'}`);
+}
 });
 }
 {
