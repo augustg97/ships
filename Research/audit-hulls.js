@@ -6392,6 +6392,66 @@
           say(v.id, 'a sail area the cloth contradicts', `${built.toFixed(1)} m² of cloth built against ${expect} m² (${src})`);
       }
     }
+    /* ── D-SAIL-THROUGH-MAST (round 251): A SAIL IS NOT IN THE PLANE OF A MAST. Every lateen,
+       settee and crab claw was drawn in the centreline plane, so the canoe's fore boom ran
+       through her mainmast 6.4 m over the deck, the caravel's fore cloth through her mainmast,
+       the galleass's two forward clews into the masts abaft them, and every lateen's foot
+       through its own mast at the deck (r251/cross-before.json: 71 crossings on 15 hulls, 15 of them
+       on the seven lateen and crab-claw hulls; the other 56 are the residual classes named below).
+       Read from the BUILT scene: each mesh tagged 'mast' gives an axis, foot to head (the
+       means of its lowest and highest rings, in hull space), and that axis is cast through
+       every set fore-and-aft cloth — 'tri' and 'quad'; a 'furl' bundle is not cloth, and the
+       square cloth is not read (its one crossing, the corbita's artemon through its own raked
+       spar, is (0y⁹), unread until it is fixed). A hit is placed on the cloth's own grid from
+       its vertex index: makeTriSail's row i runs from the head on the yard to the foot,
+       makeQuadSail's row i from the luff to the leech and its column j from the foot to the
+       head. A cloth that names its mast (userData.mastX — the lateen, settee and crab-claw
+       builders, round 251) is convicted for any hit but its own mast's on the row laced to the
+       yard (a tri's i ≤ 1, a settee's j ≥ N − 1): the yard is slung at the mast, and the cloth
+       swings about it. A cloth that does not name its mast (the lug, the gaff sail, the
+       spanker) is convicted for a hit by a mast that is not the one at its luff — its own mast
+       stands within the cloth's run and hits it within 15% of the chord from the luff or on
+       the head row: (0y⁷) a lug in its mast's plane and (0y⁸) a gaff luff that stays plumb
+       where its mast rakes are named residuals, not read here. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const masts = [], cloths = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o);
+        if (p && p.key === 'mast') {
+          const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+          const span = yMax - yMin; if (span < 0.5) return;
+          const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
+          for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+          masts.push({ name: p.name, foot: lo.divideScalar(nl), head: hi.divideScalar(nh) });
+        }
+        if (o.userData.kind === 'tri' || o.userData.kind === 'quad') cloths.push(o);
+      });
+      const T = new THREE.Vector3();
+      for (const o of cloths) {
+        const pts = hullPts(o), ix = o.geometry.index, n = ix ? ix.count : pts.length, row = Math.round(Math.sqrt(pts.length));
+        let xMin = 1e9, xMax = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
+        const own = o.userData.mastX, named = typeof own === 'number';
+        for (const m of masts) {
+          const dir = m.head.clone().sub(m.foot), len = dir.length(); dir.normalize();
+          const ray = new THREE.Ray(m.foot, dir); let best = null;
+          for (let k = 0; k + 2 < n; k += 3) {
+            const a = ix ? ix.getX(k) : k, b = ix ? ix.getX(k + 1) : k + 1, c = ix ? ix.getX(k + 2) : k + 2;
+            if (ray.intersectTriangle(pts[a], pts[b], pts[c], false, T)) { const d = T.distanceTo(m.foot);
+              if (d <= len && (!best || d < best.d)) best = { d, at: T.clone(), i: Math.floor(a / row), j: a % row }; }
+          }
+          if (!best) continue;
+          const onYard = o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
+          const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
+          const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
+                      : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
+          if (isOwn && (!named || onYard)) continue;
+          say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on the mast at x ' + own.toFixed(2) : ''} (x ${xMin.toFixed(1)}–${xMax.toFixed(1)}) crossed by the axis of ${m.name} at x ${m.foot.x.toFixed(2)}: hit at x ${best.at.x.toFixed(2)}, y ${best.at.y.toFixed(2)}, z ${best.at.z.toFixed(2)}, grid ${best.i},${best.j}`);
+        }
+      }
+    }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/
        feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig

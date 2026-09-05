@@ -1831,6 +1831,12 @@ const tack = [heel[0] + dir[0] * along, heel[1] + dir[1] * along];
 const clewX = tack[0] + yardLen * 0.62;
 const clewU = Math.max(0, Math.min(1, clewX / L + 0.5));
 const clew = [clewX, deckMax(u, clewU) + Math.max(H.sheer(0.5) * 0.10, B * 0.10)];
+const SHEET = FURLED ? 0 : TRIM * 1.5;
+const sheetG = new THREE.Group();
+sheetG.position.set(heel[0], heel[1], 0);
+sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(dir[0], dir[1], 0).normalize(), -SHEET);
+group.add(sheetG);
+const rel = P => [P[0] - heel[0], P[1] - heel[1]];
 if (FURLED) {
 const area = S.settee
 ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
@@ -1843,9 +1849,13 @@ const throat = [tack[0] + (peakPt[0] - tack[0]) * S.settee,
 tack[1] + (peakPt[1] - tack[1]) * S.settee];
 const foreft = [tack[0] + (clew[0] - tack[0]) * S.settee * 0.55,
 tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
-sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075, ['head']));
+const cl = makeQuadSail(rel(foreft), rel(throat), rel(peakPt), rel(clew), sheetG, 0.075, ['head']);
+cl.userData.mastX = +x.toFixed(3);
+sails.push(cl);
 } else {
-sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
+const cl = makeTriSail(rel(tack), rel(peakPt), rel(clew), sheetG, 0.055);
+cl.userData.mastX = +x.toFixed(3);
+sails.push(cl);
 }
 }
 if (mk.rig === 'crabclaw') {
@@ -1867,20 +1877,29 @@ const tipY = [tack[0] + Math.cos(aY) * sparLen, tack[1] + Math.sin(aY) * sparLen
 const tipB = [tack[0] + Math.cos(aB) * boomLen, tack[1] + Math.sin(aB) * boomLen];
 const peakC = [tack[0] + Math.cos(aY) * clothLuff, tack[1] + Math.sin(aY) * clothLuff];
 const clothArea = 0.5 * clothLuff * boomLen * Math.sin(spread) * LEECH;
+const SHEET = FURLED ? 0 : TRIM * 1.5;
+const sheetG = new THREE.Group();
+sheetG.position.set(tack[0], tack[1], 0);
+sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(Math.cos(aY), Math.sin(aY), 0).normalize(), -SHEET);
+group.add(sheetG);
+const rel = P => [P[0] - tack[0], P[1] - tack[1]];
 [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
 const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
 const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
 const m2 = new THREE.Mesh(g2, woodDark);
-m2.position.set((tack[0] + tip[0]) / 2, (tack[1] + tip[1]) / 2, 0);
-m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
+const inSheet = nm === 'Boom';
+const P0 = inSheet ? [0, 0] : tack, P1 = inSheet ? rel(tip) : tip;
+m2.position.set((P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2, 0);
+m2.rotation.z = -Math.atan2(P1[0] - P0[0], P1[1] - P0[1]);
 if (nm === 'Yard') m2.userData.crabclaw = {
 at: mk.at, mastX: +x.toFixed(3), fromRecord: !!SG,
 tack: [+tack[0].toFixed(3), +tack[1].toFixed(3)],
 yardTip: [+tipY[0].toFixed(3), +tipY[1].toFixed(3)], boomTip: [+tipB[0].toFixed(3), +tipB[1].toFixed(3)],
 peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
 yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
-yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2) };
-group.add(tag(m2, 'yard', nm));
+yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
+sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'starboard' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug' };
+(inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
 });
 if (FURLED) {
 const mid = [(peakC[0] + tipB[0]) / 2, (peakC[1] + tipB[1]) / 2];
@@ -1888,7 +1907,9 @@ sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
 new THREE.Vector3(mid[0], mid[1], 0),
 clothArea, furlMat(mats), group, {}));
 } else {
-sails.push(makeTriSail(tack, peakC, tipB, group, 0.075, pull, true));
+const cl = makeTriSail([0, 0], rel(peakC), rel(tipB), sheetG, 0.075, pull, true);
+cl.userData.mastX = +x.toFixed(3);
+sails.push(cl);
 }
 }
 if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {

@@ -3264,6 +3264,23 @@ function buildRig(S, group, mats, FINE, FURLED) {
          there is far less useless cloth down where the wind is slowest and the spar is
          hardest to control. Built as two triangles on the diagonal, the same way the gaff
          quadrilateral above is built, so it shares that geometry rather than inventing one. */
+      /* ── THE CLOTH IS SHEETED TO LEEWARD, ABOUT ITS YARD (round 251) ─────────────────
+         Every lateen and settee was drawn in the centreline plane, and a lateen's foot runs
+         along the deck from a tack forward of the mast to a clew abaft it — so every one of
+         them passed through its own mast low down, the caravel's fore cloth ran through her
+         mainmast, and the galleass's clews were sheeted into her mainmast and her mizzen
+         (r251/cross-before.json, the mast axes cast through the built cloth). A lateen lies
+         on ONE side of its mast: the yard is slung to leeward of it and the clew is sheeted
+         to leeward. The yard is the hinge; the cloth swings about the yard's own axis by the
+         fleet's one sheeting angle (the junk's 1.5·TRIM, to starboard), so the head row stays
+         on the yard and the tack stays at the stem. The yard itself is not moved here — it
+         still passes through the mast's axis at the sling, which is its own residual. */
+      const SHEET = FURLED ? 0 : TRIM * 1.5;
+      const sheetG = new THREE.Group();
+      sheetG.position.set(heel[0], heel[1], 0);
+      sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(dir[0], dir[1], 0).normalize(), -SHEET);
+      group.add(sheetG);
+      const rel = P => [P[0] - heel[0], P[1] - heel[1]];
       if (FURLED) {
         /* Mediterranean and Indian Ocean practice: the yard stays aloft and the cloth is
            brailed and rolled to it. The roll runs the canvas's own stretch of the spar —
@@ -3288,9 +3305,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
                         tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
         /* one cloth, same as the gaff quad — the two-triangle build tore along the shared
            diagonal because the noise terms scale with each triangle's own edges */
-        sails.push(makeQuadSail(foreft, throat, peakPt, clew, group, 0.075, ['head']));
+        const cl = makeQuadSail(rel(foreft), rel(throat), rel(peakPt), rel(clew), sheetG, 0.075, ['head']);
+        cl.userData.mastX = +x.toFixed(3);
+        sails.push(cl);
       } else {
-        sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
+        const cl = makeTriSail(rel(tack), rel(peakPt), rel(clew), sheetG, 0.055);
+        cl.userData.mastX = +x.toFixed(3);
+        sails.push(cl);
       }
     }
     if (mk.rig === 'crabclaw') {
@@ -3349,12 +3370,35 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const tipB = [tack[0] + Math.cos(aB) * boomLen, tack[1] + Math.sin(aB) * boomLen];
       const peakC = [tack[0] + Math.cos(aY) * clothLuff, tack[1] + Math.sin(aY) * clothLuff];
       const clothArea = 0.5 * clothLuff * boomLen * Math.sin(spread) * LEECH;
+      /* ── THE SAIL IS SHEETED TO LEEWARD, ABOUT ITS YARD (round 251) ──────────────────
+         The boom and the cloth were drawn in the centreline plane, so the fore sail's boom —
+         9.46 m at 48° from a tack 4.6 m forward of the mainmast — passed through the mainmast
+         6.4 m over the deck (r251/cross-before.json: the mast's axis through the cloth at
+         x 0.815, y 6.38, on the boom's side of the sail). No sail lies in the plane of a mast
+         abaft it. The yard is lashed along the mast and is the HINGE: the boom and the cloth
+         swing about the yard's own axis, and the sheet sets how far. The fleet sails one wind —
+         the port tack that braces the square yards TRIM off square and sheets the junk's lug
+         1.5·TRIM to starboard — so the claw takes the lug's angle and the lug's side, as a class
+         figure (no plate reads it: the 2009 broadside is square to the sail). The yard does not
+         move (it is the axis), so the tack, the record's spars and the audit's reads of them are
+         what they were; the cloth's area is a rotation's invariant. A furled claw closes onto
+         its yard and is not sheeted. */
+      const SHEET = FURLED ? 0 : TRIM * 1.5;
+      const sheetG = new THREE.Group();
+      sheetG.position.set(tack[0], tack[1], 0);
+      sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(Math.cos(aY), Math.sin(aY), 0).normalize(), -SHEET);
+      group.add(sheetG);
+      const rel = P => [P[0] - tack[0], P[1] - tack[1]];
       [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
         const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
         const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
         const m2 = new THREE.Mesh(g2, woodDark);
-        m2.position.set((tack[0] + tip[0]) / 2, (tack[1] + tip[1]) / 2, 0);
-        m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
+        /* the boom swings with the cloth, in the sheeted group about the tack; the yard is the
+           hinge and stays in the hull's frame where the record puts it */
+        const inSheet = nm === 'Boom';
+        const P0 = inSheet ? [0, 0] : tack, P1 = inSheet ? rel(tip) : tip;
+        m2.position.set((P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2, 0);
+        m2.rotation.z = -Math.atan2(P1[0] - P0[0], P1[1] - P0[1]);
         /* the yard records the sail it carries, for the audit: what was built, and whether
            it came from the record's read or from the class's solve */
         if (nm === 'Yard') m2.userData.crabclaw = {
@@ -3363,8 +3407,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
           yardTip: [+tipY[0].toFixed(3), +tipY[1].toFixed(3)], boomTip: [+tipB[0].toFixed(3), +tipB[1].toFixed(3)],
           peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
           yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
-          yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2) };
-        group.add(tag(m2, 'yard', nm));
+          yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
+          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'starboard' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug' };
+        (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
       });
       if (FURLED) {
         const mid = [(peakC[0] + tipB[0]) / 2, (peakC[1] + tipB[1]) / 2];
@@ -3375,7 +3420,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
         /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
            also why it works: the deeply raked tips shed tip vortices and it out-performs a
            triangle of the same area on a reach (Marchaj's tunnel tests on the Pacific rigs) */
-        sails.push(makeTriSail(tack, peakC, tipB, group, 0.075, pull, true));
+        const cl = makeTriSail([0, 0], rel(peakC), rel(tipB), sheetG, 0.075, pull, true);
+        cl.userData.mastX = +x.toFixed(3);            // the mast this cloth is set on, for the audit
+        sails.push(cl);
       }
     }
     if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {

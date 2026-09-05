@@ -4546,6 +4546,45 @@ if (expect > 0 && Math.abs(built - expect) / expect > 0.25)
 say(v.id, 'a sail area the cloth contradicts', `${built.toFixed(1)} m² of cloth built against ${expect} m² (${src})`);
 }
 }
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const masts = [], cloths = [];
+g.traverse(o => {
+if (!o.isMesh || !o.geometry) return; const p = tagOf(o);
+if (p && p.key === 'mast') {
+const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+const span = yMax - yMin; if (span < 0.5) return;
+const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
+for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+masts.push({ name: p.name, foot: lo.divideScalar(nl), head: hi.divideScalar(nh) });
+}
+if (o.userData.kind === 'tri' || o.userData.kind === 'quad') cloths.push(o);
+});
+const T = new THREE.Vector3();
+for (const o of cloths) {
+const pts = hullPts(o), ix = o.geometry.index, n = ix ? ix.count : pts.length, row = Math.round(Math.sqrt(pts.length));
+let xMin = 1e9, xMax = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
+const own = o.userData.mastX, named = typeof own === 'number';
+for (const m of masts) {
+const dir = m.head.clone().sub(m.foot), len = dir.length(); dir.normalize();
+const ray = new THREE.Ray(m.foot, dir); let best = null;
+for (let k = 0; k + 2 < n; k += 3) {
+const a = ix ? ix.getX(k) : k, b = ix ? ix.getX(k + 1) : k + 1, c = ix ? ix.getX(k + 2) : k + 2;
+if (ray.intersectTriangle(pts[a], pts[b], pts[c], false, T)) { const d = T.distanceTo(m.foot);
+if (d <= len && (!best || d < best.d)) best = { d, at: T.clone(), i: Math.floor(a / row), j: a % row }; }
+}
+if (!best) continue;
+const onYard = o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
+const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
+const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
+: inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
+if (isOwn && (!named || onYard)) continue;
+say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on the mast at x ' + own.toFixed(2) : ''} (x ${xMin.toFixed(1)}–${xMax.toFixed(1)}) crossed by the axis of ${m.name} at x ${m.foot.x.toFixed(2)}: hit at x ${best.at.x.toFixed(2)}, y ${best.at.y.toFixed(2)}, z ${best.at.z.toFixed(2)}, grid ${best.i},${best.j}`);
+}
+}
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

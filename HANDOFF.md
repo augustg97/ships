@@ -21228,3 +21228,93 @@ the r250 run crashed on a 30 s screenshot timeout with the witness spin beside i
 harness scores nothing until the last capture, so a run that dies at frame 28 leaves no table (the memory
 "ratchet-scores-only-after-the-last-capture"). Take the witness and the proofs before the launch, or after the
 exit.**
+
+## Round 251 — 2026-09-05 — a sail is not in the plane of a mast: every lateen, settee and crab claw was drawn on the centreline, so the canoe's fore boom ran through her mainmast, the caravel's fore cloth through hers, the galleass's clews into the masts abaft them and every lateen's foot through its own mast; the cloth now swings about its yard to leeward by the fleet's one sheeting angle, the audit casts every mast's axis through every set cloth, and the full ratchet ran first at the clean r250 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r250 ordered r251's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y‴), the sail through the next mast as a class, or (0y′), or Endurance by
+looking. The ratchet was launched at HEAD 25198a8 at 13:36 as the round's first act, and — the r250 rule — no
+screenshot was taken beside it: the round's probes and audits ran on a COPY of web/ served on :8150
+(build/staging/r251/web, every file a symlink to web/ except hull.js and audit-hulls.js; vessels.json is copied
+and unchanged), one browser at a time, and the witness waited for RATCHET EXIT. (0y‴) was taken, as a class.**
+
+**THE FAULT, measured on the built scene (r251/probe_cross.py, cross-before.json — every mesh tagged 'mast' gives an
+axis from the mean of its lowest ring to the mean of its highest, in hull space, and that axis is cast through every
+set cloth's triangles with THREE.Ray.intersectTriangle; a hit is placed on the cloth's own grid from the triangle's
+first vertex index): 71 crossings on 15 hulls. Fifteen of them are the class this round takes — a lateen, settee or
+crab-claw cloth in the centreline plane: the canoe's fore cloth crossed by the mainmast's axis at x 0.815, y 6.38
+(grid sA 0.97, t 0.73: on the boom's side, three quarters of the way out to the leech — the boom itself, 9.46 m at
+47.9° from a tack 4.6 m forward of the mainmast, passes the mast 6.4 m over the deck); the dhow's settee crossed by
+her own mainmast at (3.15, 2.56) on its foot; the caravel's fore lateen crossed by her mainmast at (0.96, 4.33), her
+main by her own mast at (0.96, 2.66) and by the mizzen at (6.34, 3.64), her mizzen by its own mast at (6.34, 2.84);
+the carrack's mizzen lateen by its own mast at (12.93, 6.49); the galley's main and fore each by their own masts at
+(−3.16, 1.83) and (−14.67, 4.20); the galleass's main by her own mast at (−2.64, 3.75) and by the mizzen at (13.25,
+5.31), her fore by the mainmast at (−2.64, 4.21) and by its own at (−15.94, 6.34), her mizzen by its own at (13.25,
+3.94); the fluyt's mizzen lateen by its own at (10.03, 4.34). Every own-mast crossing is the sail's FOOT: a lateen's
+foot runs along the deck from a tack forward of the mast to a clew abaft it, and on the centreline that line passes
+through the mast. The other 56 are three classes this round names and does not fix: the junk's, the treasure ship's
+and the panokseon's lugs (50 hits, every one at su 0.03–0.07 on its own mast — the lug group is rotated about the
+mast's own axis, so the cloth's plane always contains it); the clipper's, the ship-of-the-line's, the steamer's and
+Endurance's spankers (5 hits at sv 0.93–1.00 near the throat — the luff is drawn plumb and the mast rakes 2–4°, so
+the raked axis enters the cloth a metre abaft the luff at the head); and the corbita's artemon, a square cloth on a
+spar raked 45° forward whose axis passes through the cloth at (−19.7, 8.4).**
+
+**THE MODEL (web/js/hull.js; r251/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted). The
+real arrangement: a lateen lies on ONE side of its mast — the yard is slung to leeward of it and the clew is sheeted
+to leeward; a crab claw's yard is lashed along the mast and its boom is sheeted off. In both the YARD is the hinge.
+So the cloth (and on the crab claw the boom) is built in a group whose origin is on the yard's axis — the tack on the
+crab claw, the heel on the lateen — and whose quaternion is a rotation about the yard's own direction by −SHEET,
+where SHEET = 1.5·TRIM (0.51 rad, 29.2°): the fleet sails one wind, the port tack that braces the square yards TRIM
+off square and sheets the junk's lug 1.5·TRIM to starboard, and the lateen and the claw take the lug's angle and side
+as a class figure — no plate reads it; the canoe's 2009 broadside is square to the sail. The yard mesh is not moved
+(it is the axis), so the tack, the record's spars, D-CRABCLAW-SPARS' reads and the head row on the yard are what
+they were, and the cloth's area is a rotation's invariant. A furled sail is not sheeted (SHEET 0). Each cloth names
+its mast (userData.mastX) for the audit; the crab-claw yard's record carries sheetDeg, sheetSide and sheetFrom.
+The points passed to makeTriSail and makeQuadSail are relative to the group's origin; both read their points only
+relatively (the head's length, the distance to a spar), so nothing in the cloth's own shape changes.**
+
+**MEASURED AFTER (r251/cross-after.json, the same probe on the r251 builder): 0 crossings on the seven lateen and
+crab-claw hulls — the canoe, the dhow, the caravel, the carrack, the galley, the galleass and the fluyt — and the
+56 residual-class hits unchanged on the other eight. Spars and sides (r251/probe_sails.py, sails-after.json, the yard meshes' records and every spar and cloth mesh in hull space): the canoe's yard records carry sheetDeg 29.2, sheetSide starboard, sheetFrom the class figure; the fore boom's tip stands at (1.709, 8.251, +3.092) — 3.1 m to STARBOARD, the junk's side (her lug's cloth lies at z −0.5 to +5.1) — with its mesh 9.46 m long in three dimensions and 8.94 in the broadside's projection, the main boom's tip at (5.882, 7.124, +2.718), 8.16 m; both yards where r250 left them, the fore from (−3.823, 1.227) to (−3.823, 13.977), 12.75 m, the main 11.6; the fore cloth runs z 0 → 3.10 and the main 0 → 2.72; the built cloth is 39.43 + 27.52 = 66.95 m² over a flat 60.58, the ratio 1.105 — r250's figures to the centimetre, a rotation's invariant. The dhow's settee reaches z 5.95 at its clew and her mizzen 2.59; the galley's main 8.32 and her fore 6.53 (a 39.5 m yard's clew, 24.5 m abaft the tack, swings that far at 29°); the caravel's three 4.97, 2.87 and 1.84; every lateen yard's ends at |z| ≤ 0.016, unmoved.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r251/apply-audit-edits.py). NEW D-SAIL-THROUGH-MAST (round 251): each
+'mast' mesh's axis is cast through every set 'tri' and 'quad' cloth (a 'furl' is not cloth; the square cloth is
+unread until the artemon is fixed). A cloth that names its mast is convicted for any hit but its own mast's on the
+row laced to the yard (a tri's i ≤ 1, a settee's j ≥ N − 1). A cloth that does not name its mast — the lug, the gaff
+sail, the spanker — is convicted for a hit by a mast that is not the one at its luff, where its own mast stands
+within the cloth's run and hits it within 15% of the chord from the luff or on the head row; those own-mast hits are
+(0y⁷) and (0y⁸), named, not read. PROOF A (r251/audit-proof-a.out, the r250 builder under the r251 audit on
+:8150): 15 problems, every one 'a sail through a mast' and every one on the list above — the canoe's fore cloth by the mainmast at (0.81, 6.38), the dhow's settee at (3.15, 2.56), the caravel's four, the carrack's one, the galley's two, the galleass's five, the fluyt's one — and none on the lugs, the spankers or the artemon, so the exemptions read the residual classes as residuals and nothing else. The final audit on the r251 builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out); the :8149 run after the copy into web/ was skipped for the clock — cmp shows web/js/hull.js, web/audit-hulls.js and Research/audit-hulls.js byte-identical to the audited copies (run-close-checks.sh). The opening full ratchet at the clean r250 HEAD 25198a8 (open-ratchet.out): RATCHET EXIT 0, 65 of 65 scored, movers 0, largest ship-yamato 0.043%/0.015 — the 49 frames r250 left unscored are clean on the r250 builder, and r250's 61 MUST NOT frames did not move.**
+
+**WITNESSED (r251/witness-canoe-b135.png, witness-canoe-b045.png, witness-galleass-b135.png — 2880 × 1800 off :8150 after RATCHET EXIT, camera b=135, l=18 / 16, z=1.3 / 1.2, from the port bow and high, so the sails' sheeting is seen; the before is the committed baseline frames/ship-canoe.png and frames/ship-galleass.png, r250's and r243's). Before, on the canoe's baseline: the fore cloth's after part lies across the mainmast in the picture and its boom runs on past it in the one plane, and on the galleass's the fore's clew ends at the mainmast's foot and the main's at the mizzen, each cloth drawn through the mast abaft it. After, from the port bow: the canoe's two claws stand swung together to starboard, each cloth seen at an angle with its yard upright on its mast, the fore boom passing to the starboard side of the mainmast with clear water between the cloth and the mast; the galleass's three lateens swing the same way, their clews out over the starboard side, the fore's clew beside the mainmast and the main's cloth beside the mizzen, the yards where they were on the masts. No cloth crosses a mast in either frame.**
+
+**Rule 0 on the galleass witness read whole (r251/witness-galleass-b135.png): a rendered vessel on water, not a chart — a long low hull seen from ahead and above, a bank of oars out on each side, three masts with three triangular sails on long raked yards all filled to the same side, the bow's beak and the stern's awning, the sea and a hazy coast. Three facts a viewer can read off it without a legend: she is rowed and sailed, the oars out under set canvas; her three sails are triangles on yards longer than her masts, all sheeted to the same side; the forward sail's foot passes clear of the mast behind it.**
+
+**Named residuals, in order:** (0y‴) CLOSED as a class — the lateen, the settee and the crab claw swing about their
+yards; no set fore-and-aft cloth on the seven hulls is crossed by a mast's axis. NEW (0y⁷) the lug in its mast's
+plane: the junk's, the treasure ship's and the panokseon's cloth is rotated about the mast's own axis, so the mast
+passes through the cloth at 8% of the chord (50 hits, cross-before.json); the real sail hangs on one side of the mast
+on its parrels, a mast's radius off. NEW (0y⁸) a gaff luff plumb on a raked mast: the clipper's, the
+ship-of-the-line's, the steamer's and Endurance's spankers keep a vertical luff while their masts rake 2–4°, so the
+mast's axis enters the cloth near the throat; the luff rides the mast on hoops and should follow it. NEW (0y⁹) the
+corbita's artemon: the square cloth on the forward-raked spar is crossed by the spar's axis at (−19.7, 8.4); unread by
+the rule until fixed. NEW (0y¹⁰) the lateen yard through its own mast: the sling is on the centreline, so every lateen
+yard passes through its mast's axis; the real yard lies against the mast's lee side. NEW (0y¹¹) the sheeting angle is
+a class figure, 1.5·TRIM, the junk's; no record names a sheet angle and no plate in hand can read one. (0y′) the
+masts' heights by the plate on one datum, (0y⁗) the sail area's contest, (0y⁵) the shroud count the plate shows, (0z)
+(0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵)
+(0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″)
+(0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r252 opens by running the FULL ratchet at the clean HEAD first (r251/PREDICTIONS-close.md names 6 frames that MUST
+move — ship-canoe, sea-canoe-floor, ship-dhow, ship-galley, ship-galleass, ship-carrack — 6 that MAY, their berth
+neighbours and the two Action views with lateen craft, and 53 that MUST NOT; only those scored by check --frame after
+the push are accepted here), with no screenshot beside it until RATCHET EXIT; then takes (0y⁸), the gaff luff on the
+raked mast, or (0y⁷), the lug beside its mast, or (0y¹⁰), the lateen yard on the mast's lee side — all three read by
+the same probe (r251/probe_cross.py) — or the survey's next never-spun hull, Endurance (4,114 triangles per metre),
+by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788644442 at the build; the push and the live poll are in
+build/staging/r251/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r251 staging stays on disk uncommitted, the r211 convention.**
