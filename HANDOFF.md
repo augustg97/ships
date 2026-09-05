@@ -20854,3 +20854,95 @@ docs/data/vessels.json. Both are there — the published copy is minified by bui
 colon, and the receipt's two greps carried the source file's spacing. Read back with the spacing free:
 "crossbeams":8 (1) and "shroudSetup":"lashing" (1). The web/ record and the docs/ record carry the same 33 vessels;
 the receipt script's patterns are corrected in build/staging/r247/push-log-commit.sh for the round that copies it.**
+
+## Round 248 — 2026-09-05 — a mast on a double hull steps on the platform: the platform becomes one derivation read by the builder and by the rig, the canoe's mast, spars, sail and masthead rise 0.2 m out of the deck they were inside, the audit reads every heel against the platform's top, and the full ratchet ran first at the clean r247 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r247 ordered r248's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0x), the mast's step on the platform, or (0y), the canoe's second mast, or Endurance
+by looking. The ratchet ran at HEAD b1b8a09 from 10:07 while the round's work was developed on a COPY of web/ served on
+:8150 (build/staging/r248/web, every file a symlink to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240
+pattern); the copy's files were moved into web/ only after the run ended (cmp-verified). THE OPENING RATCHET: its result is
+in the receipt paragraph below, per the r198 rule. (0x) was taken.**
+
+**THE FAULT, measured (r248/probe_step.py on :8150 against the r247 builder, r248/feet-before.json): the voyaging canoe's
+one lower mast has its heel at x −0.689, y 0.772, and the platform between her hulls has its top at y 0.955 (x −3.23 to
++3.23), so the heel stands 0.183 m inside the platform. The crab-claw sail's lowest point is at y 0.75 — the single hull's
+deck line, deckAt(0.46) — 0.205 m under the platform's top, so the tack and the foot of both spars were inside the
+platform too; the masthead the four shrouds run to was at y 9.528. buildRig steps every mast at deckAt(u), which on a
+double hull is one hull's own deck line, and the platform was three literals in buildShip's double-hull block (loa·0.34,
+0.05 B, 0.86 of the separation, its centre 0.17 B over the midship sheer) that no other builder could read. On the ship the
+platform IS the deck: Hōkūleʻa's masts rise from the deck between her hulls (the 2009 broadside, Wikimedia Commons
+Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull), and the double-hull block's own comment says the rig
+steps on the platform.**
+
+**THE MODEL (web/js/hull.js; r248/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted). (1)
+platformOf(S, H) is the double hull's one derivation of its platform, beside crossbeamsOf: x0/x1 at ±loa·0.17, height
+0.05 B, centre 0.17 B over H.sheer(0.5), span 0.86 of the hull separation — the same figures as before, so the mesh is
+unchanged. It returns null on a single hull. (2) buildShip's double-hull block builds the platform mesh from it and the
+mesh records itself (userData.platform: x0, x1, yTop, yBot, halfZ) for the audit. (3) buildRig, after the liner-house
+step: on a double hull, a mast whose x lies between the platform's ends takes base = max(deckAt(u), platform top). Every
+height buildRig measures from base — the sail's foot, the yard's hoist, the masthead — moves with it. The shroud feet are
+shroudFeet's (r247) and stay on the beams. No other hull reaches the branch.**
+
+**MEASURED AFTER (r248/probe_step.py on :8150, r248/feet-after.json — the heel from the 'Mast' mesh's lowest vertex, the
+platform from its mesh's vertices and its record, the feet from the rope mesh's vertices): the heel at x −0.689, y 0.976,
+0.021 m OVER the platform's top at 0.955 (before: 0.183 m under). The 0.021 is the raked cylinder's own: the segment is
+rotated 6° about its centre, so the heel lifts (seg/2)(1 − cos 6°) = 2.5 cm less the cap's dip, named (0x′) below. The
+sail's lowest point is at y 0.955, the platform's top, where it was 0.75. The masthead the shrouds run to is at y 9.732
+(was 9.528), the mast's head at 9.981 (was 9.777). The four feet are at y 1.212–1.214, z ±3.166, each 0.000 m from its
+eye. The Shipwright's "rig, deck to truck" tile reads 9.0 m before and after (r248/pair-b180-canoe.png): rigDeckY is the
+mast mesh's own heel (r234), so the tile now measures from the platform.**
+
+**THE RECORD (web/data/vessels.json): unchanged (r248/vessels.after.json is the before copy, cmp). The platform's figures
+are class figures read from no plate; platformOf's comment says so.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r248/apply-audit-edits.py). NEW D-MAST-STEP (round 248), after D-SHROUDS,
+reading the BUILT scene in hull space: on a double hull, the 'platform' mesh's x extent and top, and every 'Mast' mesh's
+heel (its lowest vertex) that lies between the platform's ends — 'a mast stepped under its platform' where the heel is
+more than 0.02 m under the top, 'a mast floating over its platform' where it is more than 0.10 m over, and 'a double hull
+with no platform' where doubleHull is set and no platform mesh is built. A mast beyond the platform's ends is not read;
+a single hull is silent. PROOF A (r248/audit-proof-a.out, the r247 builder under the r248 audit, on :8150): checked 33
+hulls, 1 problem on 1 hull — "a mast's heel at x −0.69, y 0.772 stands 0.183 m under the platform's top at 0.955". The
+final audit on the r248 builder: on :8150, checked 33 hulls, 0 problems (audit-final-8150.out); on :8149 after the copy
+into web/, see the receipt paragraph's audit line (audit-final-8149.out). Rule 8 on the way: the audit's one conviction
+is the probe's own number.**
+
+**WITNESSED (r248/spin-canoe-before/ and -after/ — b180, b135, low180 and low090 at 2880 × 1800 off :8150, the before
+captured with the r247 builder; pair-b180-canoe.png stacks the starboard broadside before over after at 0.5×;
+crop-canoe-low090-foot-3x.png, -b180-foot-3x.png and -b135-foot-3x.png are 3× crops about the platform, before beside
+after). At low090, before: the sail's tack runs down into the platform and is cut off by its surface, a wedge with no
+point. After: the tack ends in a point standing on the platform's top, and the mast's foot lands on the surface. From
+b180 the whole rig stands 0.2 m higher over the same hulls, beams and lashings, and the sail's foot clears the platform
+where before it entered it.**
+
+**Rule 0 on the after broadside read whole (r248/spin-canoe-after/b180.png): a rendered vessel on water, not a chart —
+two dark lashed-plank hulls with their sheer rising to the ends, eight pale beams across them carrying a platform, the
+raked mast standing on the platform with the crab-claw sail's two spars opening from a tack on its surface, the shrouds
+spreading to the hulls' rails, a fleet neighbour's hull at the frame's edge. Three facts a viewer can read off it without
+a legend: she is two hulls joined by beams that carry a platform; her mast and sail stand on that platform, between the
+hulls; her shrouds set up to the hulls at the beams.**
+
+**Named residuals, in order:** (0x) CLOSED. NEW (0x′) a raked mast's segment is rotated about its centre, so the heel
+lifts (seg/2)(1 − cos rake) over base and the head drops the same — 2.1 cm on the canoe's 9 m lower at 6°, 8 cm on a
+30 m lower at the same rake; the rotation should be about the heel. The audit's 0.10 m tolerance on D-MAST-STEP covers
+it. NEW (0x″) the platform is a box whose underside (0.145 B over the midship sheer) lies 0.015 B under the beams' tops
+(0.16 B over the sheer at each beam) by the two derivations' own figures, deeper where the sheer rises under the platform's
+ends; it should bed on the beams' tops. Unmeasured. (0y) the plate's second mast and four or five shrouds a side, (0z)
+the lashing's frapping and the beam-to-hull lashings, (0v) the tackle's strop and belay, (0t) (0u) as r245 names them.
+(0l) Queen Mary 2's Hull row and her data, (0n) the carrack's castle stations as a class default, (0o) the bowsprit
+through the forecastle deck with no aperture, (0i) the galley's stern tent, (0j) the free foot's scallop, (0k) the cap's
+30°, (0e²²) the cog's Frames 1 and 2 on the stem, unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³)
+(0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f)
+unchanged. (1)–(20) as r230 lists them.**
+
+**r249 opens by running the FULL ratchet at the clean HEAD first (r248/PREDICTIONS-close.md names 2 frames that MUST
+move — ship-canoe and sea-canoe-floor — 2 that MAY, her berth neighbours ship-dugout and ship-trireme, and 61 that
+MUST NOT; only those scored by check --frame after the push are accepted here, and the movers in the opening run are to
+be read against that list — any mover in the MUST NOT list is not explained by this round); then takes (0y), the canoe's
+second mast from her own Rig row, or (0x′), the raked heel, or the survey's next never-spun hull, Endurance (4,114
+triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788630819 at the build; the push and the live poll are in
+build/staging/r248/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r248 staging stays on disk uncommitted, the r211 convention.**

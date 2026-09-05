@@ -6301,6 +6301,53 @@
         }
       });
     }
+    /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
+       mast stood with its heel 0.18 m inside the platform between her hulls (r247/
+       feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig
+       stepped every mast at the single hull's deck line and nothing could ask where the
+       platform was. Read from the BUILT scene: the 'platform' mesh (its box, and
+       userData.platform where the builder records it), read in hull space, and every lower-mast mesh named
+       'Mast' whose heel — the mesh's lowest vertex — lies between the platform's ends. The
+       heel must stand on the platform's top: from 0.02 m under it (a raked heel's cap) to
+       0.10 m over it. A mast beyond the platform's ends steps on the hull's deck and is not
+       read. A double hull with no platform mesh is convicted outright. Silent on a single
+       hull. */
+    if (H.doubleHull) {
+      /* every point in HULL space, the frame the platform's record and the feet are in */
+      const worldM = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const plats = [], heels = [];
+      g.traverse(o => {
+        const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'platform') {
+          const pts = worldM(o), e = { xMin: 1e9, xMax: -1e9, yMax: -1e9 };
+          for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMax = Math.max(e.yMax, q[1]); }
+          plats.push({ ...e, rec: o.userData.platform || null });
+        } else if (p.key === 'mast' && p.name === 'Mast') {
+          const pts = worldM(o); let lo = pts[0], hi = pts[0];
+          for (const q of pts) { if (q[1] < lo[1]) lo = q; if (q[1] > hi[1]) hi = q; }
+          if (hi[1] - lo[1] < Math.min(3, H.beam * 0.35)) return;
+          heels.push({ x: lo[0], y: lo[1], z: lo[2] });
+        }
+      });
+      if (!plats.length)
+        say(v.id, 'a double hull with no platform', 'doubleHull is set and no platform mesh is built between the hulls');
+      for (const m of heels) {
+        const pl = plats.find(p => m.x >= p.xMin - 0.01 && m.x <= p.xMax + 0.01);
+        if (!pl) continue;
+        const top = pl.yMax;
+        if (m.y < top - 0.02)
+          say(v.id, 'a mast stepped under its platform',
+              `a mast's heel at x ${m.x.toFixed(2)}, y ${m.y.toFixed(3)} stands ${(top - m.y).toFixed(3)} m under the platform's top at ${top.toFixed(3)}`);
+        else if (m.y > top + 0.10)
+          say(v.id, 'a mast floating over its platform',
+              `a mast's heel at x ${m.x.toFixed(2)}, y ${m.y.toFixed(3)} stands ${(m.y - top).toFixed(3)} m over the platform's top at ${top.toFixed(3)}`);
+      }
+    }
     /* ── THE CROSSED YARD IS WORKED, AND THE UPPER MASTS ARE STAYED (round 59). Item 2's
        standing remainder: a yard without lifts is held up by nothing, a sail without sheets
        is trimmed by nothing, and every topmast in the fleet stood as an unstayed pole —

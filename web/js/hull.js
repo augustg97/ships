@@ -2269,6 +2269,20 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const HT = linerHouse(S);
       for (const t of HT.tiers) if (u >= t.uA && u <= t.uB) base = Math.max(base, t.y1);
     }
+    /* ── AND A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM (round 248) ─────────────────
+       The double canoe's deck is the lashed platform between her hulls — the one flat place
+       aboard, where the mast lives (the double-hull block in buildShip says so, and
+       Hōkūleʻa's 2009 broadside shows her masts rising from it). deckAt(u) is the single
+       hull's own deck line, which on the canoe lies 0.18 m UNDER the platform's top
+       (r247/feet-after.json: the heel at 0.772, the top at 0.955), so the mast was stepped
+       inside the platform, and everything measured from `base` — the sail's foot, the
+       yard's hoist, the masthead the shrouds run to — stood that much low. The platform's
+       top is platformOf's, the same derivation the mesh is built from. A mast standing
+       beyond the platform's ends keeps the hull's deck. */
+    if (S.doubleHull) {
+      const PL = platformOf(S, H);
+      if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.yTop);
+    }
     const rakeRad = (mk.rake || 0) * Math.PI / 180;
 
     /* ── STEEL'S RULE, 1794 ────────────────────────────────────────────
@@ -12398,6 +12412,23 @@ function crossbeamsOf(S, H) {
   return out;
 }
 
+/* ── THE PLATFORM OF A DOUBLE HULL IS ONE DERIVATION TOO (round 248). buildShip drew it from
+ * literals — loa·0.34 long, 0.05 B deep, 0.86 of the hull separation wide, its centre 0.17 B
+ * over the midship sheer — and buildRig, which steps every mast at deckAt(u), could not ask
+ * where its top was: the canoe's mast stood with its heel at y 0.772 under a platform top at
+ * 0.955 (r247/feet-after.json), 0.18 m of it inside the deck it is said to stand on. The
+ * platform is the one flat structure between the hulls, and the rig steps on it (Hōkūleʻa's
+ * masts rise from the deck between her hulls in the 2009 broadside, Wikimedia Commons
+ * Hokule'aSailing2009.jpg). Read by buildShip for the mesh and by buildRig for the mast's
+ * step, so the two cannot disagree. The figures are class figures, read from no plate. */
+function platformOf(S, H) {
+  if (!S.doubleHull) return null;
+  const sep = S.hullSep || S.loa * 0.26, B = S.beam;
+  const yc = H.sheer(0.5) + B * 0.17, h = B * 0.05, lenX = S.loa * 0.34;
+  return { x0: -lenX / 2, x1: lenX / 2, lenX, h, yc, yBot: yc - h / 2, yTop: yc + h / 2,
+           span: sep * 0.86, halfZ: sep * 0.43 };
+}
+
 function buildTieredCastles(S, group, mats, hullMat) {
   const C = S.castles; if (!C || !(C.fore || C.aft)) return;
   const H = hullSurface(S);
@@ -14903,7 +14934,9 @@ function buildShip(S, opts) {
      that a single hull of that beam could never have (1.05 m on 19 m), and the deck between
      them is the only flat space aboard: it is where the crew, the water, the pigs, the seed
      stock and the mast all live. That platform is what made the Pacific settleable.
-     The rig steps on the platform, on the centreline, so it stays where it was built. */
+     The rig steps on the platform, on the centreline — and since round 248 buildRig reads
+     platformOf for the step, so the heel stands on the platform's top and not 0.18 m
+     inside it. */
   if (S.doubleHull) {
     const sep = S.hullSep || S.loa * 0.26;
     const hullKeys = ['keel', 'frames', 'planking', 'deck', 'stempost', 'wale', 'rudder',
@@ -14928,9 +14961,12 @@ function buildShip(S, opts) {
       cb.userData.crossbeam = { u: b.u, x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, halfSpan: b.span / 2 };
       group.add(tag(cb, 'crossbeam'));
     });
-    const plat = new THREE.Mesh(
-      new THREE.BoxGeometry(S.loa * 0.34, S.beam * 0.05, sep * 0.86), beamMat);
-    plat.position.set(0, dk.sheer(0.5) + S.beam * 0.17, 0);
+    /* the platform from platformOf (round 248) — the derivation buildRig steps the mast on;
+       it records itself for the audit (userData.platform) */
+    const PL = platformOf(S, dk);
+    const plat = new THREE.Mesh(new THREE.BoxGeometry(PL.lenX, PL.h, PL.span), beamMat);
+    plat.position.set((PL.x0 + PL.x1) / 2, PL.yc, 0);
+    plat.userData.platform = { x0: PL.x0, x1: PL.x1, yTop: PL.yTop, yBot: PL.yBot, halfZ: PL.halfZ };
     group.add(tag(plat, 'platform'));
   }
 

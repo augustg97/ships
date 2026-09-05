@@ -1346,6 +1346,10 @@ if (S.mastStep === 'house' && S.decks) {
 const HT = linerHouse(S);
 for (const t of HT.tiers) if (u >= t.uA && u <= t.uB) base = Math.max(base, t.y1);
 }
+if (S.doubleHull) {
+const PL = platformOf(S, H);
+if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.yTop);
+}
 const rakeRad = (mk.rake || 0) * Math.PI / 180;
 const steelMain = (S.lwl + S.beam) / 2;
 const lower = mastLowerOf(mk, steelMain);
@@ -8009,6 +8013,13 @@ yBot: H.sheer(u), yTop: H.sheer(u) + B * 0.16, span: sep + B * 1.6 });
 }
 return out;
 }
+function platformOf(S, H) {
+if (!S.doubleHull) return null;
+const sep = S.hullSep || S.loa * 0.26, B = S.beam;
+const yc = H.sheer(0.5) + B * 0.17, h = B * 0.05, lenX = S.loa * 0.34;
+return { x0: -lenX / 2, x1: lenX / 2, lenX, h, yc, yBot: yc - h / 2, yTop: yc + h / 2,
+span: sep * 0.86, halfZ: sep * 0.43 };
+}
 function buildTieredCastles(S, group, mats, hullMat) {
 const C = S.castles; if (!C || !(C.fore || C.aft)) return;
 const H = hullSurface(S);
@@ -9777,9 +9788,10 @@ cb.position.set(b.x, (b.yTop + b.yBot) / 2, 0);
 cb.userData.crossbeam = { u: b.u, x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, halfSpan: b.span / 2 };
 group.add(tag(cb, 'crossbeam'));
 });
-const plat = new THREE.Mesh(
-new THREE.BoxGeometry(S.loa * 0.34, S.beam * 0.05, sep * 0.86), beamMat);
-plat.position.set(0, dk.sheer(0.5) + S.beam * 0.17, 0);
+const PL = platformOf(S, dk);
+const plat = new THREE.Mesh(new THREE.BoxGeometry(PL.lenX, PL.h, PL.span), beamMat);
+plat.position.set((PL.x0 + PL.x1) / 2, PL.yc, 0);
+plat.userData.platform = { x0: PL.x0, x1: PL.x1, yTop: PL.yTop, yBot: PL.yBot, halfZ: PL.halfZ };
 group.add(tag(plat, 'platform'));
 }
 const bb = new THREE.Box3().setFromObject(group);
