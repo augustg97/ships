@@ -4482,6 +4482,24 @@ say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shroud
 }
 });
 }
+{
+const rigRow = (v.rows || []).find(r => Array.isArray(r) && String(r[0]).toLowerCase() === 'rig');
+const W = { one: 1, single: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7 };
+if (rigRow) {
+const txt = String(rigRow[1]).toLowerCase().replace(/\*/g, '');
+const n = (H.masts || []).length;
+const rng = /(?<!than )\b(one|single|two|three|four|five|six|seven) (?:to|or) (one|two|three|four|five|six|seven)[- ]mast/.exec(txt);
+const one = /(?<!than )\b(one|single|two|three|four|five|six|seven)[- ]mast/.exec(txt);
+if (rng) {
+const lo = W[rng[1]], hi = W[rng[2]];
+if (n < lo || n > hi)
+say(v.id, 'a rig row the masts contradict', `the Rig row says "${rng[0]}" and hull.masts steps ${n}`);
+} else if (one) {
+if (W[one[1]] !== n)
+say(v.id, 'a rig row the masts contradict', `the Rig row says "${one[0]}" and hull.masts steps ${n}`);
+}
+}
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
@@ -4490,12 +4508,28 @@ for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).appl
 return out;
 };
 const plats = [], heels = [];
+const sepH = (H.hullSep || H.loa * 0.26) / 2 - H.beam / 2;
 g.traverse(o => {
 const p = tagOf(o); if (!o.isMesh || !p) return;
 if (p.key === 'platform') {
-const pts = worldM(o), e = { xMin: 1e9, xMax: -1e9, yMax: -1e9 };
-for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMax = Math.max(e.yMax, q[1]); }
-plats.push({ ...e, rec: o.userData.platform || null });
+const pts = worldM(o), e = { xMin: 1e9, xMax: -1e9, yMax: -1e9, yMin: 1e9 };
+for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMax = Math.max(e.yMax, q[1]); e.yMin = Math.min(e.yMin, q[1]); }
+const rec = o.userData.platform || null, PR = rec && rec.profile && rec.profile.length ? rec.profile : null;
+if (PR) {
+const top = Math.max(...PR.map(q => q.yTop)), bot = Math.min(...PR.map(q => q.yBot));
+if (Math.abs(top - e.yMax) > 0.005 || Math.abs(bot - e.yMin) > 0.005)
+say(v.id, 'a platform whose mesh is not its profile',
+`the platform's profile runs y ${bot.toFixed(3)}–${top.toFixed(3)} and its mesh y ${e.yMin.toFixed(3)}–${e.yMax.toFixed(3)}`);
+}
+const topAt = x => {
+if (!PR) return e.yMax;
+if (x <= PR[0].x) return PR[0].yTop;
+if (x >= PR[PR.length - 1].x) return PR[PR.length - 1].yTop;
+for (let k = 0; k + 1 < PR.length; k++)
+if (x >= PR[k].x && x <= PR[k + 1].x) { const t = (x - PR[k].x) / (PR[k + 1].x - PR[k].x); return PR[k].yTop + (PR[k + 1].yTop - PR[k].yTop) * t; }
+return e.yMax;
+};
+plats.push({ ...e, rec, topAt });
 } else if (p.key === 'mast' && p.name === 'Mast') {
 const pts = worldM(o); let lo = pts[0], hi = pts[0];
 for (const q of pts) { if (q[1] < lo[1]) lo = q; if (q[1] > hi[1]) hi = q; }
@@ -4507,8 +4541,13 @@ if (!plats.length)
 say(v.id, 'a double hull with no platform', 'doubleHull is set and no platform mesh is built between the hulls');
 for (const m of heels) {
 const pl = plats.find(p => m.x >= p.xMin - 0.01 && m.x <= p.xMax + 0.01);
-if (!pl) continue;
-const top = pl.yMax;
+if (!pl) {
+if (plats.length && Math.abs(m.z) < sepH)
+say(v.id, 'a mast stepped on nothing between the hulls',
+`a mast's heel at x ${m.x.toFixed(2)}, z ${m.z.toFixed(2)} stands between the hulls beyond the platform's ends (x ${plats[0].xMin.toFixed(2)} to ${plats[0].xMax.toFixed(2)})`);
+continue;
+}
+const top = pl.topAt(m.x);
 if (m.y < top - 0.02)
 say(v.id, 'a mast stepped under its platform',
 `a mast's heel at x ${m.x.toFixed(2)}, y ${m.y.toFixed(3)} stands ${(top - m.y).toFixed(3)} m under the platform's top at ${top.toFixed(3)}`);

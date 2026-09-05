@@ -159,6 +159,10 @@
         [
           "Crossbeams",
           "eight ʻiako, lashed to the hulls; the shrouds set up to them at the rail"
+        ],
+        [
+          "Deck",
+          "lashed on the ʻiako between the hulls, from a tenth of the waterline abaft the stem to the after rail; both masts step on it"
         ]
       ],
       "crew": 14,
@@ -215,13 +219,24 @@
         "steeve": 22,
         "masts": [
           {
-            "at": 0.46,
+            "at": 0.26,
             "height": 0.95,
             "rig": "crabclaw",
             "rake": 6,
             "shrouds": 2,
             "shroudSetup": "lashing",
-            "shroudSetupProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): every shroud from each masthead lands on the hull's rail at a beam end, none on the platform, and the vessel carries no metal fastening (her own construction row), so the set-up is a lashing round the beam at the rail. The number of shrouds a side the plate shows exceeds the record's 2 (four or five to the near hull from the foremast); the count is not changed here. The eye's height over the beam is a class figure."
+            "shroudSetupProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): every shroud from each masthead lands on the hull's rail at a beam end, none on the platform, and the vessel carries no metal fastening (her own construction row), so the set-up is a lashing round the beam at the rail. The number of shrouds a side the plate shows exceeds the record's 2 (four or five to the near hull from the foremast); the count is not changed here. The eye's height over the beam is a class figure.",
+            "atProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the foremast's foot meets the deck at x 405, (405 − 155) / 970 = 0.26 of the waterline from the stem. A 10 px read is 0.01 of u. Before round 249 the record stepped ONE mast at 0.46, between the two the plate shows and the card's own Rig row names. The plate reads the foremast about 10.0 m and the mainmast about 11.7 m from deck to head against the model's 9.05 m for both (a 0.95 share of Steel's main); the heights are not changed here."
+          },
+          {
+            "at": 0.54,
+            "height": 0.95,
+            "rig": "crabclaw",
+            "rake": 6,
+            "shrouds": 2,
+            "shroudSetup": "lashing",
+            "shroudSetupProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): every shroud from each masthead lands on the hull's rail at a beam end, none on the platform, and the vessel carries no metal fastening (her own construction row), so the set-up is a lashing round the beam at the rail. The number of shrouds a side the plate shows exceeds the record's 2 (four or five to the near hull from the foremast); the count is not changed here. The eye's height over the beam is a class figure.",
+            "atProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the mainmast's foot meets the deck at x 683, (683 − 155) / 970 = 0.54 of the waterline from the stem. A 10 px read is 0.01 of u. Before round 249 the record stepped ONE mast at 0.46, between the two the plate shows and the card's own Rig row names. The plate reads the foremast about 10.0 m and the mainmast about 11.7 m from deck to head against the model's 9.05 m for both (a 0.95 share of Steel's main); the heights are not changed here."
           }
         ],
         "build": "shell",
@@ -238,7 +253,12 @@
         "steering": "paddle",
         "steeringProvenance": "ATTESTED by her own card row — “Steering: a long paddle, not a rudder” (Hōkūleʻa; Finney 1977, Polynesian Voyaging Society logs). The steering sweep is handled by the steersman over the quarter, not hung on the hull; no crew is drawn, so nothing is mounted. Before round 121 the model hung a pintled stern rudder on EACH hull.",
         "crossbeams": 8,
-        "crossbeamsProvenance": "RECORDED: Hōkūleʻa's two hulls are joined by eight crossbeams, the ʻiako (Polynesian Voyaging Society; Kamehameha Schools' Holomoana tour of Hōkūleʻa). Their spread along the hull is READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): eight beam ends stand proud of the hull's side from near the bow to near the stern, so the model spreads them over the middle seven tenths of the length — the stations are the plate's to about half a metre, not a plan's."
+        "crossbeamsProvenance": "RECORDED: Hōkūleʻa's two hulls are joined by eight crossbeams, the ʻiako (Polynesian Voyaging Society; Kamehameha Schools' Holomoana tour of Hōkūleʻa). Their spread along the hull is READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): eight beam ends stand proud of the hull's side from near the bow to near the stern, so the model spreads them over the middle seven tenths of the length — the stations are the plate's to about half a metre, not a plan's.",
+        "platform": {
+          "u0": 0.1,
+          "u1": 0.92
+        },
+        "platformProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the deck between the hulls runs from its forward edge at x 255, where the crew stand forward of the foremast, to the after rail's last post at x 1050, so (255 − 155) / 970 = 0.10 to (1050 − 155) / 970 = 0.92 of the waterline. It lies on the ʻiako; its depth and its width between the hulls are class figures read from no plate. Before round 249 the model drew it 0.34 of the length long about midships (u 0.32–0.68), which left the foremast's station with nothing under it."
       }
     },
     {

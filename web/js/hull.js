@@ -2278,10 +2278,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
        inside the platform, and everything measured from `base` — the sail's foot, the
        yard's hoist, the masthead the shrouds run to — stood that much low. The platform's
        top is platformOf's, the same derivation the mesh is built from. A mast standing
-       beyond the platform's ends keeps the hull's deck. */
+       beyond the platform's ends keeps the hull's deck — and since round 249 the audit
+       convicts it, because between the hulls there is nothing there.
+       Round 249: the top is read AT THE MAST'S STATION (topAt), because the deck lies on the
+       beams and rises with the sheer — the canoe's foremast at u 0.26 steps 0.07 m higher
+       than her main at 0.54. */
     if (S.doubleHull) {
       const PL = platformOf(S, H);
-      if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.yTop);
+      if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.topAt(x));
     }
     const rakeRad = (mk.rake || 0) * Math.PI / 180;
 
@@ -12420,12 +12424,45 @@ function crossbeamsOf(S, H) {
  * platform is the one flat structure between the hulls, and the rig steps on it (Hōkūleʻa's
  * masts rise from the deck between her hulls in the 2009 broadside, Wikimedia Commons
  * Hokule'aSailing2009.jpg). Read by buildShip for the mesh and by buildRig for the mast's
- * step, so the two cannot disagree. The figures are class figures, read from no plate. */
+ * step, so the two cannot disagree.
+ * ── AND THE DECK LIES ON THE BEAMS (round 249). The record names the deck's span where a
+ * plate gives it (platform.u0/u1 — Hōkūleʻa's runs 0.10 to 0.92 of the waterline in the 2009
+ * broadside, 54 px/m; the class keeps ±0.17 loa about midships without it), and over that
+ * span the sheer rises: on the canoe the end beams' tops stand 0.18 m over the midship
+ * beams' (sheer 0.5·|2u−1|^2.8), so one flat box at the r248 height would have had the end
+ * beams through it and the foremast, at u 0.26, standing on nothing. A deck laid on beams
+ * FOLLOWS them: the underside is each beam's top at the beam, a straight plank between
+ * beams, level beyond the end beams to the deck's ends, a centimetre into the beams so no
+ * two faces are coplanar. topAt(x) is what the rig steps on
+ * and what the mesh is lofted from; the profile is the stations the loft uses. Depth 0.05 B
+ * and width 0.86 of the separation stay class figures read from no plate. */
 function platformOf(S, H) {
   if (!S.doubleHull) return null;
-  const sep = S.hullSep || S.loa * 0.26, B = S.beam;
-  const yc = H.sheer(0.5) + B * 0.17, h = B * 0.05, lenX = S.loa * 0.34;
-  return { x0: -lenX / 2, x1: lenX / 2, lenX, h, yc, yBot: yc - h / 2, yTop: yc + h / 2,
+  const sep = S.hullSep || S.loa * 0.26, B = S.beam, L = S.lwl;
+  const h = B * 0.05;
+  const REC = !!(S.platform && S.platform.u0 !== undefined && S.platform.u1 !== undefined);
+  const x0 = REC ? (S.platform.u0 - 0.5) * L : -S.loa * 0.17;
+  const x1 = REC ? (S.platform.u1 - 0.5) * L : S.loa * 0.17;
+  const CB = crossbeamsOf(S, H).filter(b => b.x >= x0 - 0.01 && b.x <= x1 + 0.01);
+  /* the underside bears a centimetre INTO each beam's top — the castles' own rule against a
+     coplanar face to fight (buildTieredCastles sinks a wall a tenth of a deck) */
+  const SEAT = 0.01;
+  const botAt = x => {
+    if (!CB.length) return H.sheer(0.5) + B * 0.16 - SEAT;    // no beam under it: the beams' own height amidships
+    if (x <= CB[0].x) return CB[0].yTop - SEAT;
+    if (x >= CB[CB.length - 1].x) return CB[CB.length - 1].yTop - SEAT;
+    for (let k = 0; k + 1 < CB.length; k++)
+      if (x >= CB[k].x && x <= CB[k + 1].x) {
+        const t = (x - CB[k].x) / (CB[k + 1].x - CB[k].x);
+        return CB[k].yTop + (CB[k + 1].yTop - CB[k].yTop) * t - SEAT;
+      }
+    return CB[0].yTop - SEAT;
+  };
+  const topAt = x => botAt(x) + h;
+  const xs = [x0, ...CB.map(b => b.x).filter(x => x > x0 + 0.01 && x < x1 - 0.01), x1];
+  const profile = xs.map(x => ({ x, yBot: botAt(x), yTop: topAt(x) }));
+  const yTop = Math.max(...profile.map(p => p.yTop)), yBot = Math.min(...profile.map(p => p.yBot));
+  return { x0, x1, lenX: x1 - x0, h, rec: REC, profile, topAt, botAt, yTop, yBot, yc: (yTop + yBot) / 2,
            span: sep * 0.86, halfZ: sep * 0.43 };
 }
 
@@ -14962,12 +14999,34 @@ function buildShip(S, opts) {
       group.add(tag(cb, 'crossbeam'));
     });
     /* the platform from platformOf (round 248) — the derivation buildRig steps the mast on;
-       it records itself for the audit (userData.platform) */
+       it records itself for the audit (userData.platform). Since round 249 it is lofted
+       through the profile — a station at each end and at every beam under it — so the deck
+       lies on the beams and follows the sheer they carry; the four long edges are wound so
+       every face's normal is outward, and the loft is made flat-shaded (non-indexed) so the
+       deck's edge reads as an edge and not as a smoothed roll. */
     const PL = platformOf(S, dk);
-    const plat = new THREE.Mesh(new THREE.BoxGeometry(PL.lenX, PL.h, PL.span), beamMat);
-    plat.position.set((PL.x0 + PL.x1) / 2, PL.yc, 0);
-    plat.userData.platform = { x0: PL.x0, x1: PL.x1, yTop: PL.yTop, yBot: PL.yBot, halfZ: PL.halfZ };
-    group.add(tag(plat, 'platform'));
+    {
+      const PR = PL.profile, hz = PL.halfZ, pp = [], pi = [];
+      /* per station: 0 top port, 1 top starboard, 2 bottom starboard, 3 bottom port */
+      PR.forEach(p => pp.push(p.x, p.yTop, -hz,  p.x, p.yTop, hz,  p.x, p.yBot, hz,  p.x, p.yBot, -hz));
+      for (let k = 0; k + 1 < PR.length; k++) {
+        const a = k * 4, b = a + 4;
+        for (let e = 0; e < 4; e++) {
+          const e2 = (e + 1) % 4, A = a + e, Bq = b + e, C = b + e2, D = a + e2;
+          pi.push(A, C, Bq, A, D, C);
+        }
+      }
+      const last = (PR.length - 1) * 4;
+      pi.push(0, 2, 1, 0, 3, 2);                                      // forward end, facing −x
+      pi.push(last, last + 1, last + 2, last, last + 2, last + 3);    // after end, facing +x
+      const pg0 = new THREE.BufferGeometry();
+      pg0.setIndex(pi); pg0.setAttribute('position', new THREE.Float32BufferAttribute(pp, 3));
+      const pg = pg0.toNonIndexed(); pg.computeVertexNormals(); pg0.dispose();
+      const plat = new THREE.Mesh(pg, beamMat);
+      plat.userData.platform = { x0: PL.x0, x1: PL.x1, yTop: PL.yTop, yBot: PL.yBot, halfZ: PL.halfZ, rec: PL.rec,
+        profile: PR.map(p => ({ x: +p.x.toFixed(4), yTop: +p.yTop.toFixed(4), yBot: +p.yBot.toFixed(4) })) };
+      group.add(tag(plat, 'platform'));
+    }
   }
 
   /* ── HOW TALL IS THE RIG? MEASURE IT, DO NOT ESTIMATE IT ─────────────────────────────

@@ -1348,7 +1348,7 @@ for (const t of HT.tiers) if (u >= t.uA && u <= t.uB) base = Math.max(base, t.y1
 }
 if (S.doubleHull) {
 const PL = platformOf(S, H);
-if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.yTop);
+if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.topAt(x));
 }
 const rakeRad = (mk.rake || 0) * Math.PI / 180;
 const steelMain = (S.lwl + S.beam) / 2;
@@ -8015,9 +8015,29 @@ return out;
 }
 function platformOf(S, H) {
 if (!S.doubleHull) return null;
-const sep = S.hullSep || S.loa * 0.26, B = S.beam;
-const yc = H.sheer(0.5) + B * 0.17, h = B * 0.05, lenX = S.loa * 0.34;
-return { x0: -lenX / 2, x1: lenX / 2, lenX, h, yc, yBot: yc - h / 2, yTop: yc + h / 2,
+const sep = S.hullSep || S.loa * 0.26, B = S.beam, L = S.lwl;
+const h = B * 0.05;
+const REC = !!(S.platform && S.platform.u0 !== undefined && S.platform.u1 !== undefined);
+const x0 = REC ? (S.platform.u0 - 0.5) * L : -S.loa * 0.17;
+const x1 = REC ? (S.platform.u1 - 0.5) * L : S.loa * 0.17;
+const CB = crossbeamsOf(S, H).filter(b => b.x >= x0 - 0.01 && b.x <= x1 + 0.01);
+const SEAT = 0.01;
+const botAt = x => {
+if (!CB.length) return H.sheer(0.5) + B * 0.16 - SEAT;
+if (x <= CB[0].x) return CB[0].yTop - SEAT;
+if (x >= CB[CB.length - 1].x) return CB[CB.length - 1].yTop - SEAT;
+for (let k = 0; k + 1 < CB.length; k++)
+if (x >= CB[k].x && x <= CB[k + 1].x) {
+const t = (x - CB[k].x) / (CB[k + 1].x - CB[k].x);
+return CB[k].yTop + (CB[k + 1].yTop - CB[k].yTop) * t - SEAT;
+}
+return CB[0].yTop - SEAT;
+};
+const topAt = x => botAt(x) + h;
+const xs = [x0, ...CB.map(b => b.x).filter(x => x > x0 + 0.01 && x < x1 - 0.01), x1];
+const profile = xs.map(x => ({ x, yBot: botAt(x), yTop: topAt(x) }));
+const yTop = Math.max(...profile.map(p => p.yTop)), yBot = Math.min(...profile.map(p => p.yBot));
+return { x0, x1, lenX: x1 - x0, h, rec: REC, profile, topAt, botAt, yTop, yBot, yc: (yTop + yBot) / 2,
 span: sep * 0.86, halfZ: sep * 0.43 };
 }
 function buildTieredCastles(S, group, mats, hullMat) {
@@ -9789,10 +9809,27 @@ cb.userData.crossbeam = { u: b.u, x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.le
 group.add(tag(cb, 'crossbeam'));
 });
 const PL = platformOf(S, dk);
-const plat = new THREE.Mesh(new THREE.BoxGeometry(PL.lenX, PL.h, PL.span), beamMat);
-plat.position.set((PL.x0 + PL.x1) / 2, PL.yc, 0);
-plat.userData.platform = { x0: PL.x0, x1: PL.x1, yTop: PL.yTop, yBot: PL.yBot, halfZ: PL.halfZ };
+{
+const PR = PL.profile, hz = PL.halfZ, pp = [], pi = [];
+PR.forEach(p => pp.push(p.x, p.yTop, -hz,  p.x, p.yTop, hz,  p.x, p.yBot, hz,  p.x, p.yBot, -hz));
+for (let k = 0; k + 1 < PR.length; k++) {
+const a = k * 4, b = a + 4;
+for (let e = 0; e < 4; e++) {
+const e2 = (e + 1) % 4, A = a + e, Bq = b + e, C = b + e2, D = a + e2;
+pi.push(A, C, Bq, A, D, C);
+}
+}
+const last = (PR.length - 1) * 4;
+pi.push(0, 2, 1, 0, 3, 2);
+pi.push(last, last + 1, last + 2, last, last + 2, last + 3);
+const pg0 = new THREE.BufferGeometry();
+pg0.setIndex(pi); pg0.setAttribute('position', new THREE.Float32BufferAttribute(pp, 3));
+const pg = pg0.toNonIndexed(); pg.computeVertexNormals(); pg0.dispose();
+const plat = new THREE.Mesh(pg, beamMat);
+plat.userData.platform = { x0: PL.x0, x1: PL.x1, yTop: PL.yTop, yBot: PL.yBot, halfZ: PL.halfZ, rec: PL.rec,
+profile: PR.map(p => ({ x: +p.x.toFixed(4), yTop: +p.yTop.toFixed(4), yBot: +p.yBot.toFixed(4) })) };
 group.add(tag(plat, 'platform'));
+}
 }
 const bb = new THREE.Box3().setFromObject(group);
 let rigDeckY, rigTruckY;

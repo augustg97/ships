@@ -6301,6 +6301,33 @@
         }
       });
     }
+    /* ── D-MAST-COUNT (round 249): THE CARD'S RIG ROW AGAINST THE RECORD'S MASTS. The canoe's
+       Rig row said "two masts" and her text "carrying two masts" while hull.masts stepped one,
+       for 248 rounds, and nothing read the words against the data (r243 did the same for the
+       carrack's castles). The row keyed 'Rig' is read for a number word before 'mast',
+       'masts' or '-masted' — an exact count must equal hull.masts.length; a range ('one to
+       three', 'two or three', 'three or four') must contain it; a count after 'than' ('more
+       than one mast', the corbita's row, which the rule's first run convicted — rule 8, the
+       audit was wrong) is not read. The text is not read: it describes the type as often as the ship. Only
+       the record's own words convict. */
+    {
+      const rigRow = (v.rows || []).find(r => Array.isArray(r) && String(r[0]).toLowerCase() === 'rig');
+      const W = { one: 1, single: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7 };
+      if (rigRow) {
+        const txt = String(rigRow[1]).toLowerCase().replace(/\*/g, '');
+        const n = (H.masts || []).length;
+        const rng = /(?<!than )\b(one|single|two|three|four|five|six|seven) (?:to|or) (one|two|three|four|five|six|seven)[- ]mast/.exec(txt);
+        const one = /(?<!than )\b(one|single|two|three|four|five|six|seven)[- ]mast/.exec(txt);
+        if (rng) {
+          const lo = W[rng[1]], hi = W[rng[2]];
+          if (n < lo || n > hi)
+            say(v.id, 'a rig row the masts contradict', `the Rig row says "${rng[0]}" and hull.masts steps ${n}`);
+        } else if (one) {
+          if (W[one[1]] !== n)
+            say(v.id, 'a rig row the masts contradict', `the Rig row says "${one[0]}" and hull.masts steps ${n}`);
+        }
+      }
+    }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/
        feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig
@@ -6309,9 +6336,16 @@
        userData.platform where the builder records it), read in hull space, and every lower-mast mesh named
        'Mast' whose heel — the mesh's lowest vertex — lies between the platform's ends. The
        heel must stand on the platform's top: from 0.02 m under it (a raked heel's cap) to
-       0.10 m over it. A mast beyond the platform's ends steps on the hull's deck and is not
-       read. A double hull with no platform mesh is convicted outright. Silent on a single
-       hull. */
+       0.10 m over it. A double hull with no platform mesh is convicted outright. Silent on a
+       single hull.
+       Round 249: the platform lies on the beams and follows the sheer, so its top is read AT
+       THE HEEL'S STATION — from the profile the builder records (userData.platform.profile,
+       interpolated), which the mesh's own vertices must bracket to 5 mm or the record and
+       the mesh disagree; the mesh's highest vertex where there is no profile. And a lower
+       mast whose heel stands BETWEEN the hulls (|z| inside the hull separation less a beam)
+       beyond the platform's ends is convicted — 'a mast stepped on nothing between the
+       hulls' — because r248 left it unread and the deck was the only thing there to step
+       on; the canoe's foremast at u 0.26 stood 1.1 m forward of the r248 platform's end. */
     if (H.doubleHull) {
       /* every point in HULL space, the frame the platform's record and the feet are in */
       const worldM = o => {
@@ -6321,12 +6355,28 @@
         return out;
       };
       const plats = [], heels = [];
+      const sepH = (H.hullSep || H.loa * 0.26) / 2 - H.beam / 2;      // inboard of this |z| is between the hulls
       g.traverse(o => {
         const p = tagOf(o); if (!o.isMesh || !p) return;
         if (p.key === 'platform') {
-          const pts = worldM(o), e = { xMin: 1e9, xMax: -1e9, yMax: -1e9 };
-          for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMax = Math.max(e.yMax, q[1]); }
-          plats.push({ ...e, rec: o.userData.platform || null });
+          const pts = worldM(o), e = { xMin: 1e9, xMax: -1e9, yMax: -1e9, yMin: 1e9 };
+          for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMax = Math.max(e.yMax, q[1]); e.yMin = Math.min(e.yMin, q[1]); }
+          const rec = o.userData.platform || null, PR = rec && rec.profile && rec.profile.length ? rec.profile : null;
+          if (PR) {
+            const top = Math.max(...PR.map(q => q.yTop)), bot = Math.min(...PR.map(q => q.yBot));
+            if (Math.abs(top - e.yMax) > 0.005 || Math.abs(bot - e.yMin) > 0.005)
+              say(v.id, 'a platform whose mesh is not its profile',
+                  `the platform's profile runs y ${bot.toFixed(3)}–${top.toFixed(3)} and its mesh y ${e.yMin.toFixed(3)}–${e.yMax.toFixed(3)}`);
+          }
+          const topAt = x => {
+            if (!PR) return e.yMax;
+            if (x <= PR[0].x) return PR[0].yTop;
+            if (x >= PR[PR.length - 1].x) return PR[PR.length - 1].yTop;
+            for (let k = 0; k + 1 < PR.length; k++)
+              if (x >= PR[k].x && x <= PR[k + 1].x) { const t = (x - PR[k].x) / (PR[k + 1].x - PR[k].x); return PR[k].yTop + (PR[k + 1].yTop - PR[k].yTop) * t; }
+            return e.yMax;
+          };
+          plats.push({ ...e, rec, topAt });
         } else if (p.key === 'mast' && p.name === 'Mast') {
           const pts = worldM(o); let lo = pts[0], hi = pts[0];
           for (const q of pts) { if (q[1] < lo[1]) lo = q; if (q[1] > hi[1]) hi = q; }
@@ -6338,8 +6388,13 @@
         say(v.id, 'a double hull with no platform', 'doubleHull is set and no platform mesh is built between the hulls');
       for (const m of heels) {
         const pl = plats.find(p => m.x >= p.xMin - 0.01 && m.x <= p.xMax + 0.01);
-        if (!pl) continue;
-        const top = pl.yMax;
+        if (!pl) {
+          if (plats.length && Math.abs(m.z) < sepH)
+            say(v.id, 'a mast stepped on nothing between the hulls',
+                `a mast's heel at x ${m.x.toFixed(2)}, z ${m.z.toFixed(2)} stands between the hulls beyond the platform's ends (x ${plats[0].xMin.toFixed(2)} to ${plats[0].xMax.toFixed(2)})`);
+          continue;
+        }
+        const top = pl.topAt(m.x);
         if (m.y < top - 0.02)
           say(v.id, 'a mast stepped under its platform',
               `a mast's heel at x ${m.x.toFixed(2)}, y ${m.y.toFixed(3)} stands ${(top - m.y).toFixed(3)} m under the platform's top at ${top.toFixed(3)}`);
