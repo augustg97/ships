@@ -2224,7 +2224,18 @@ function buildRig(S, group, mats, FINE, FURLED) {
     const u = mk.at;
     /* How much clear water there is abaft this mast before the next one. A fore-and-aft sail
        has to live inside it — see the boom clamp in the gaff block below. */
-    const nextAt = (S.masts[mi + 1] || {}).at;
+    /* ── ⚠ THE NEXT MAST IS THE NEXT ONE AFT, NOT THE NEXT ONE IN THE RECORD (round 253).
+       S.masts[mi + 1] assumed the record lists its masts fore to aft. Five records do not
+       (the trireme's, the corbita's, the galley's, the galleass's and the panokseon's put the
+       main first), so on the panokseon's main the "next" mast was her foremast, 0.29 L
+       FORWARD: gapAft came out −8.7 m and the junk sheet lead below, xF + min(boom·1.16,
+       gapAft·0.9), ran 8.6 m forward to the foremast's foot — and, turned with the sail,
+       4.2 m to port on a 7.6 m beam, outboard of the ship (r253/lug-before.json). The room
+       abaft a mast is to the nearest mast standing ABAFT it by station, whatever the order. */
+    let nextAt;
+    S.masts.forEach((m2, j) => {
+      if (j !== mi && m2.at > u + 1e-4 && (nextAt === undefined || m2.at < nextAt)) nextAt = m2.at;
+    });
     /* ⚠ AND A FUNNEL STANDS IN THAT GAP. Clamping the boom to the next MAST was not enough
        on Great Eastern, because a fore-and-aft sail and a centreline funnel occupy the SAME
        PLANE — they cannot pass through one another, and the funnel sits at the middle of the
@@ -3598,10 +3609,41 @@ function buildRig(S, group, mats, FINE, FURLED) {
          The whole rig — boom, battens, yard, canvas, sheets — is one group hung on the
          mast, and sheeting it is a single rotation of that group. Nothing in it can
          disagree with anything else in it. */
+      /* ── THE SAIL HANGS BESIDE ITS MAST, ON PARRELS (round 253) ──────────────────────
+         For 240 rounds this group stood at the mast's DECK station and every spar and panel in
+         it lay at z 0, so the cloth's plane CONTAINED the mast: r251's probe found the axis
+         passing through every set panel at 8% of the chord on all three junk-rigged hulls
+         (50 crossings — the junk's 12, the treasure ship's 30, the panokseon's 8; r251/
+         cross-before.json), and on the panokseon's mizzen, raked 4° forward, the plumb rig
+         left its mast by 0.7 m at the yard. The real sail hangs on ONE SIDE of the mast: each
+         batten is held to it by a parrel, a rope loop round the mast made fast to the batten
+         either side, so the battens lie against the mast's side and the cloth stands off its
+         axis by the mast's radius and the batten's — Hasler & McLeod, Practical Junk Rig,
+         ch. 2 (the sail "always lies on one side of the mast"); every photograph of a junk
+         under sail shows the mast standing clear of the canvas. Which side the record does
+         not say (no field, no plate in hand shows it), so the class puts the sail to LEEWARD
+         under the fleet's one wind — the side on which the cloth blows clear of the mast and
+         its belly has room — and the boom's record says so (userData.lug.sideFrom). Two
+         things change: the group is the MAST's frame (its origin on the axis, its y the
+         axis's raked line, r252's lesson that a raked mast is not at its deck station aloft),
+         trimmed about that axis; and everything hung on the mast lives in `side`, a child
+         standing OFF the axis by mastR(footY) + the boom's radius. The sheets and the halyard
+         stay in the mast's frame: their deck ends are hull points brought into it. */
+      const mastRj = h => segR[0].a + (segR[0].b - segR[0].a)
+                          * Math.max(0, Math.min(1, (h - base) / lower));
+      const rBoomJ = B * 0.0050;
+      const OFF = mastRj(base + lower * 0.14) + rBoomJ;      // the boom's height, below
       const lug = new THREE.Group();
-      lug.position.set(x, 0, 0);
-      lug.rotation.y = -TRIM * 1.5;
+      lug.position.set(x - Math.sin(rakeRad) * base, 0, 0);  // the axis at y 0
+      lug.rotation.set(0, -TRIM * 1.5, -rakeRad, 'ZYX');    // trim about the axis, then rake
       group.add(lug);
+      const side = new THREE.Group();
+      side.position.set(0, 0, OFF);
+      lug.add(side);
+      /* a hull point into the mast's frame: the inverse of the group's own placement */
+      const toLug = P => P.clone().sub(lug.position)
+                          .applyAxisAngle(new THREE.Vector3(0, 0, 1), rakeRad)
+                          .applyAxisAngle(new THREE.Vector3(0, 1, 0), TRIM * 1.5);
       /* every spar as its two endpoints, boom (k=0) to yard (k=nb+1); the cloth is built
          from the SAME points, so spar and canvas cannot come adrift of each other */
       const fwd = [], aft = [];
@@ -3635,8 +3677,32 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const bm = new THREE.Mesh(bg, woodDark);
         bm.rotation.z = Math.PI / 2 + Math.atan2(dy, dx);
         bm.position.set((fwd[k][0] + aft[k][0]) / 2, (fwd[k][1] + aft[k][1]) / 2, 0);
-        lug.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
+        if (k === 0) bm.userData.lug = {
+          mastX: +x.toFixed(3), rakeDeg: mk.rake || 0, off: +OFF.toFixed(3),
+          mastR: +mastRj(footY).toFixed(3), sparR: +rBoomJ.toFixed(3),
+          side: 'starboard', sideFrom: 'class: to leeward of the fleet\'s wind; no record names the side',
+          sheetDeg: +(TRIM * 1.5 * 180 / Math.PI).toFixed(1) };
+        side.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
       }
+      /* ── THE PARRELS: one rope loop per spar, round the mast and made fast to the spar
+         either side of it (Hasler & McLeod's batten parrel). Read at the height where the
+         spar crosses the mast's station, at the mast's radius there; the bight goes round
+         the mast's far side and the two ends come straight to the spar's near face. */
+      const parrelSegs = [], rPar = 0.010 + B * 0.0004;
+      for (let k = 0; k < fwd.length; k++) {
+        const dx = aft[k][0] - fwd[k][0], dy = aft[k][1] - fwd[k][1];
+        const yk = fwd[k][1] + (dx > 1e-6 ? dy * (-fwd[k][0] / dx) : 0);   // at x 0, the mast
+        const rk = B * (k === 0 ? 0.0050 : k === nb + 1 ? 0.0042 : 0.0032);
+        const R = mastRj(yk) + rPar, zFace = OFF - rk;
+        const arc = [];
+        for (let a = 50; a <= 310; a += 20)
+          arc.push(new THREE.Vector3(R * Math.sin(a * Math.PI / 180), yk, R * Math.cos(a * Math.PI / 180)));
+        const pts = [new THREE.Vector3(arc[0].x, yk, zFace), ...arc,
+                     new THREE.Vector3(arc[arc.length - 1].x, yk, zFace)];
+        for (let i = 0; i + 1 < pts.length; i++) parrelSegs.push([pts[i], pts[i + 1]]);
+      }
+      const par = ropeMesh(parrelSegs, rPar, ropeMat);
+      if (par) lug.add(tag(par, 'parrel'));
       if (FURLED) {
         /* the folds: between each stacked pair the cloth pooches out both sides, one
            bulge per gap — the striped bundle every photograph of a moored junk shows */
@@ -3646,13 +3712,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
           const lenK = Math.min(aft[k][0], aft[k + 1][0]) - xF;
           sails.push(makeFurl(new THREE.Vector3(xF, y0, 0),
                               new THREE.Vector3(xF + lenK, y0, 0),
-                              0, furlMat(mats), lug, { radius: dyS * 0.85 }));
+                              0, furlMat(mats), side, { radius: dyS * 0.85 }));
         }
       } else {
         /* the cloth, one panel between each pair of spars — a junk sail really is panels: the
            batten line is a hinge in the cloth, and each panel sets nearly flat */
-        for (let k = 0; k <= nb; k++)
-          sails.push(makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], lug, 0.030, ['head', 'foot']));
+        for (let k = 0; k <= nb; k++) {
+          const pq = makeQuadSail(fwd[k], fwd[k + 1], aft[k + 1], aft[k], side, 0.030, ['head', 'foot']);
+          pq.userData.mastX = x; pq.userData.besideMast = true;   // the audit: no own-mast crossing
+          sails.push(pq);
+        }
       }
       /* ── THE GEAR IS WHY THE RIG WORKS, SO IT IS DRAWN ──────────────────────────────
          A sheetlet to every batten end, gathered to one point on the deck aft — the
@@ -3664,14 +3733,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const shX = xF + Math.min(boom * 1.16, gapAft * 0.90);
       /* the crowfoot lands on the castle roof where there is one — the after sheets of a
          junk really were worked from the poop deck, not led down through it */
-      const sheetPt = new THREE.Vector3(shX, base + castleTop + B * 0.012, 0);
+      const sheetPt = toLug(new THREE.Vector3(x + shX, base + castleTop + B * 0.012, 0));
       const shSegs = [];
       for (let k = 0; k <= nb; k++)
-        shSegs.push([new THREE.Vector3(aft[k][0], aft[k][1], 0), sheetPt]);
+        shSegs.push([new THREE.Vector3(aft[k][0], aft[k][1], OFF), sheetPt]);
       const sh = ropeMesh(shSegs, 0.012 + B * 0.0005, ropeMat);
       if (sh) lug.add(tag(sh, 'sheet'));
       const slings = new THREE.Vector3(
-        (fwd[nb + 1][0] + aft[nb + 1][0]) / 2, (fwd[nb + 1][1] + aft[nb + 1][1]) / 2, 0);
+        (fwd[nb + 1][0] + aft[nb + 1][0]) / 2, (fwd[nb + 1][1] + aft[nb + 1][1]) / 2, OFF);
       /* ⚠ the halyard leads OVER the sheave in the masthead — Needham's "sheave pins
          passing through both masts" — and its fall comes down to the deck abaft the
          mast, where the sail is worked. Drawn slings-to-masthead and stopped, it was a
@@ -3679,8 +3748,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
          lead implies is drawn on the pole itself, in the mast build above. */
       const shv = new THREE.Vector3(0, base + lower * 0.965, 0);
       const hal = ropeMesh([[slings, shv],
-                            [shv, new THREE.Vector3(B * 0.05, base + castleTop + B * 0.012,
-                                                    B * 0.03)]],
+                            [shv, toLug(new THREE.Vector3(x + B * 0.05, base + castleTop + B * 0.012,
+                                                          B * 0.03))]],
                            0.016 + B * 0.0005, ropeMat);
       if (hal) lug.add(tag(hal, 'halyard'));
     }
@@ -4885,6 +4954,13 @@ const PARTS = {
                   + 'the rail. A battened lug carries a sheetlet to every batten end, gathered '
                   + 'through blocks to a single fall — the whole sail worked by a few hands on '
                   + 'deck, which is why no junk ever needed men aloft.' },
+  parrel:   { stage: 6, name: 'Parrels',
+              what: 'The rope loop that holds a spar to its mast and lets it slide up and down '
+                  + 'it: round the mast and made fast to the spar either side. On a battened '
+                  + 'lug every batten has one, so the whole sail hangs on ONE side of the mast '
+                  + 'and is hoisted and dropped along it — the mast stands beside the canvas, '
+                  + 'never through it. Hasler and McLeod, Practical Junk Rig (1988), call the '
+                  + 'batten parrel the fitting that makes the rig work at all.' },
   halyard:  { stage: 6, name: 'Halyard',
               what: 'The line that hoists the yard, and it must go over a masthead to do it: '
                   + 'the tie leads up from the yard\'s slings, through the sheave in the head '

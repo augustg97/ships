@@ -295,7 +295,7 @@
        rest-ray 0.85 m over the planking (probe, before any live run) — a stow
        lies BESIDE a mast foot, never on the shaft leaning over it. */
     const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
-                                'sheet', 'tack', 'ratline', 'oar', 'mast']);
+                                'sheet', 'tack', 'ratline', 'oar', 'mast', 'parrel']);
 
     /* r155: the record may attest the FLAG-BUTTON (`truckM`, deck-to-truck) instead of a
        lower-mast length — every expectation below that derives from the lower must mirror
@@ -6417,7 +6417,13 @@
        swings about it. A cloth that does not name its mast (the lug, the gaff sail, the
        spanker) is convicted for a hit by a mast that is not the one at its luff — its own mast
        stands within the cloth's run and hits it within 15% of the chord from the luff or on
-       the head row: (0y⁷) a lug in its mast's plane is a named residual, not read here.
+       the head row.
+       Round 253: A CLOTH THAT HANGS BESIDE ITS MAST ON PARRELS — the battened lug of the junk, the
+       treasure ship and the panokseon (userData.besideMast, and on an older builder a quad held
+       at its head and its foot and not at its luff, which only the lug builder makes) — stands
+       off the axis by the mast's radius and the batten's, so the axis must pass clear of every
+       panel and ANY own-mast crossing convicts: the lug in its mast's plane that r251 named
+       (0y⁷), 50 crossings at 8% of the chord on the three hulls (r251/cross-before.json).
        Round 252: A CLOTH WHOSE LUFF RIDES ITS MAST has no row slung at the mast to be exempt —
        the gaff sail, the spanker and the gaff topsail (userData.luffOnMast, and on an older
        builder a quad whose held edges include 'luff') lie along the mast on hoops, a hoop's
@@ -6459,9 +6465,11 @@
           const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
           const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
                       : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
-          const luffOnMast = !!o.userData.luffOnMast
-            || (o.userData.kind === 'quad' && (o.userData.held || []).includes('luff'));
-          if (isOwn && !luffOnMast && (!named || onYard)) continue;
+          const held = o.userData.held || [], isQuad = o.userData.kind === 'quad';
+          const onMast = !!o.userData.luffOnMast || !!o.userData.besideMast
+            || (isQuad && held.includes('luff'))
+            || (isQuad && held.includes('head') && held.includes('foot') && !held.includes('luff'));
+          if (isOwn && !onMast && (!named || onYard)) continue;
           say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on the mast at x ' + own.toFixed(2) : ''} (x ${xMin.toFixed(1)}–${xMax.toFixed(1)}) crossed by the axis of ${m.name} at x ${m.foot.x.toFixed(2)}: hit at x ${best.at.x.toFixed(2)}, y ${best.at.y.toFixed(2)}, z ${best.at.z.toFixed(2)}, grid ${best.i},${best.j}`);
         }
       }

@@ -21436,3 +21436,125 @@ docs/audit-hulls.js reads luffOnMast (3 mentions); docs/data/vessels.json is unc
 THE RATCHET: THE OPENING FULL RATCHET at the clean r251 HEAD bd6291b (r252/open-ratchet.out, launched 14:58 as the round's first act, ended 15:42): RATCHET EXIT 1  END 15:42:47; 65 frames scored; movers 6: action 0.112%/0.033; ship-panokseon 0.153%/0.101; map-floor 0.252%/0.145; ship-treasure 0.054%/0.023; action-gravelines 0.085%/0.019; ship-slave-ship 0.094%/0.069. Largest three: map-floor 0.252%/0.145, ship-panokseon 0.153%/0.101, action 0.112%/0.033. All six movers are r251's lateen and settee sheeting reaching frames beyond its MUST list — the diffs of map-floor, ship-treasure, ship-slave-ship and action read as triangular fore-and-aft cloths only (lateen craft drawn in the Action and Sea views; a lateen hull two or three berths off in the Shipwright frames), and action-gravelines and ship-panokseon were r251's own MAY predictions — accepted with that reason before any check --frame (FRAME-LOG.md, 15:44); no r252 code was in any of them.
  PARTIAL after the push, the r239 pattern (r252/partial-*.out): frames scored one at a time by check --frame on the r252 builder, each diff read before its accept — ship-clipper 0.515%/0.135 CHANGED, ship-endurance 3.088%/0.809 CHANGED, ship-wyoming 1.146%/0.515 CHANGED (3 frames; r252/PREDICTIONS-close.md names the 12 frames that MUST move — every frame that draws a gaff sail, a spanker or a gaff topsail, set or furled: the clipper, the steamer, Endurance, Wyoming, Great Eastern and Preussen in the Shipwright, the five aboard views on those hulls, and the 74 dead astern — the 11 that MAY, the 74's other three close frames and the default Shipwright, the gaff hulls' berth neighbours and the Bristol descent, and the 42 that must not). The other 62 frames are UNSCORED on the r252 builder; r253's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (3742b0f record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+
+## Round 253 — 2026-09-05 — the battened lug hangs beside its mast on parrels: the junk's, the treasure ship's and the panokseon's rig was hung in a group at the mast's axis with every spar and panel at z 0, so the mast passed through every set panel at 8% of the chord and the sheet crowfoot turned with the sail to 5.4 m off the centreline on a 9.8 m beam; the rig now lives in the mast's own frame, raked as the record says, and stands off the axis to leeward by the mast's radius and the boom's, a parrel is drawn round the mast at every spar, the sheets and the halyard fall land on the deck points they were written to, the audit convicts any own-mast crossing of a panel that says it hangs beside its mast, the room abaft a mast reads the nearest mast abaft by station and not the record's next entry, and the full ratchet ran first at the clean r252 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r252 ordered r253's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y⁷), the lug beside its mast, or (0y¹⁰), or Endurance by looking. The ratchet
+was launched at HEAD 5150a3f at 16:02 as the round's first act, and — the r250 rule — no screenshot was taken beside
+it: the round's probes and audits ran on a COPY of web/ served on :8150 (build/staging/r253/web, every file a symlink
+to web/ except hull.js and audit-hulls.js; vessels.json is copied and unchanged), one browser at a time, and the
+witness waited for RATCHET EXIT. (0y⁷) was taken, as a class.**
+
+**THE FAULT, measured on the built scene (r253/probe_cross.py, r251's probe, cross-before.json on the r252 builder
+served on :8149; r253/probe_lug.py, lug-before.json — every panel's least distance from a mast's axis, every spar's
+crossing of the mast's station, the parrels, the sheets' and halyards' lowest points): the lug group stood at the
+mast's DECK station with the boom, the five battens, the yard and the six panels all at z 0 in it, so the cloth's
+plane CONTAINED the mast's axis — 50 own-mast crossings, every set panel on the three hulls but four: the junk's 12 of
+12, the treasure ship's 30 of 30, the panokseon's 8 of 12, each at 8% of the chord (the record's share of the sail
+forward of the mast). The four that escaped are the panokseon's foremast's upper panels: that mast rakes 4° forward
+and the rig hung plumb at its deck station, so the axis left the cloth's plane going up and the yard's line did not
+reach it at all (lug-before.json: the yard 0.295 m off the axis at its height, inRun false) — a rig 0.7 m from its own
+mast at the yard. And the sheet crowfoot, a deck point written as (shX, deck, 0) INSIDE the turning group, turned with
+the sail: the junk's main crowfoot stood at z 5.44 m on a 9.8 m beam, 0.54 m outboard of her side; her fore at 3.92;
+the treasure ship's five at 3.7–4.5 m; the panokseon's fore at 3.66. The panokseon's MAIN crowfoot stood at
+(−9.32, 2.08, −4.22): 7.5 m FORWARD of the mast and 4.2 m to PORT on a 7.6 m beam — because her record lists the main
+first and the foremast second, and gapAft read the record's NEXT mast as the one abaft: (0.15 − 0.44)·L = −8.7 m, so
+the sheet lead xF + min(boom·1.16, gapAft·0.9) ran 8.6 m forward to the foremast's foot. Five records list their masts
+aft-first (trireme, corbita, galley, galleass, panokseon); gapAft feeds only the gaff boom and the junk sheet, so the
+panokseon's main is the only sail it misplaced.**
+
+**THE MODEL (web/js/hull.js; r253/hull.before.js, hull.after.js, apply-hull-edits.py, apply-hull-edits-2.py, every
+replace asserted). The real sail hangs on ONE SIDE of the mast: each batten is held to it by a parrel, a rope loop
+round the mast made fast to the batten either side, so the battens lie against the mast's side and the cloth stands
+off its axis by the mast's radius and the batten's (Hasler & McLeod, Practical Junk Rig; every photograph of a junk
+under sail shows the mast standing clear of the canvas). Which side no record says and no plate in hand shows, so the
+class puts the sail to LEEWARD under the fleet's one wind — the side on which the cloth blows clear of the mast and
+its belly has room — and the boom's record says so (userData.lug: mastX, rakeDeg, off, mastR, sparR, side
+'starboard', sideFrom 'class: to leeward of the fleet's wind; no record names the side', sheetDeg 29.2). Two things
+change in the junk block. The group is the MAST's frame: its origin on the axis at y 0 (x − sin(rake)·base), its
+rotation Euler ZYX (0, −1.5·TRIM, −rake) — trimmed about the axis, then raked with it, r252's lesson that a raked
+mast is not at its deck station aloft. Everything hung on the mast lives in `side`, a child at z OFF = mastR(footY)
++ the boom's radius: the spars, the set panels, the furled stack. The sheets and the halyard stay in the mast's
+frame; their upper ends read OFF and their deck ends are HULL points brought into the frame by the inverse placement
+(toLug), so the crowfoot is at (x + shX, deck, 0) in hull space whatever the trim, and the halyard's fall at
+(x + 0.05B, deck, 0.03B). A parrel is drawn at every spar: a rope loop at the height where the spar crosses the
+mast's station, round the mast's far side at the mast's radius there plus the rope's, its two ends straight to the
+spar's near face — 'parrel' is a PARTS entry (stage 6) and a non-bearing key in the audit. Each panel names its
+mast (userData.mastX) and says it hangs beside it (userData.besideMast). Second edit: nextAt is the nearest mast
+standing ABAFT this one by station over the whole record, not S.masts[mi + 1]. No record field changes.**
+
+**MEASURED AFTER (r253/lug-after.json, lug-after-2.json, cross-after.json — the same probes on the r253 builder on
+:8150): every set panel stands off its mast's axis — least distance over every vertex 0.19–0.30 m on the junk (the
+plane at 0.331 and 0.239 from the axis, the masts' radii there 0.282 and 0.190; the least vertex is the luff's
+ripple term, under 4 cm of amplitude, 0.25 m forward of the mast), 0.32–0.58 on the treasure ship (planes 0.400–0.607,
+radii 0.291–0.517), 0.15–0.24 on the panokseon (planes 0.256 and 0.191, radii 0.218 and 0.153); every panel names its
+mast (12, 30, 12). Every boom's and batten's centreline crosses the mast's station OFF from the axis to a centimetre;
+the panokseon's foremast rig now follows its 4° rake — the boom tilts 3.5° with the mast (0° before), the yard's
+line crosses the axis 0.19 m off (inRun true) where before it missed it by 0.30. A parrel ring at every spar, 7 per
+mast, 14 + 35 + 14, each centred on the axis to the mast mesh's own ring eccentricity (0.05–0.09 m) with its rope
+0.01–0.02 m off the mast's surface. The crowfoots are on the centreline: the junk's at z 0.013 and 0.014, the
+treasure ship's five at −0.011…+0.010, the panokseon's fore at −0.002 and her main at (8.90, 2.08, 0.013), 10.7 m abaft her own mast on the centreline (the lead min(boom·1.16, gapAft·0.9) with gapAft now (1.04 − 0.44)·L), where before it stood 7.5 m forward of it and 4.2 m to port. Crossings (probe_cross.py, cross-after.json): 0 on all three hulls, where cross-before.json has 50.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r253/apply-audit-edits.py). D-SAIL-THROUGH-MAST (round 251) now reads a
+cloth that hangs beside its mast: userData.besideMast, or — so the rule bites on an older builder — a quad held at
+its head and its foot and not at its luff, which only the lug builder makes. Such a cloth has no row slung at the
+mast to be exempt; its own mast's axis must pass clear of every panel, and ANY own-mast crossing convicts. PROOF A
+(r253/audit-proof-a.out, the r252 builder under the r253 audit on :8150, hull.before.js swapped in and restored from
+hull.after.js): 50 problems, every one 'a sail through a mast', and none on any other hull or rule. The final audit
+on the r253 builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out, run after the second edit). The
+:8149 run after the copy into web/ was skipped for the clock; cmp shows web/js/hull.js, web/audit-hulls.js and
+Research/audit-hulls.js byte-identical to the audited copies (run-close-checks.sh).**
+
+**WITNESSED (r253/witness-junk-b000.png, witness-junk-b270.png, witness-panokseon-b300.png — 2880 × 1800 off :8150
+after RATCHET EXIT, the after builder; the befores are the committed baselines frames/ship-junk.png and
+frames/ship-panokseon.png). The junk from ahead (b=0, l=6, z=0.9): the fore lug's cloth stands wholly to one side of
+its mast — the mast a clear pole along the sail's forward edge from the deck to the truck, the six panels and their
+battens abaft and beside it, and the sheetlets gathering from the batten ends down to a crowfoot ON THE DECK abaft the
+mast, where the before frame had them turned out over the side with the sail. The junk from the beam (b=270, l=8,
+z=0.9): both lugs set, each mast standing at its sail's forward edge with the panels abaft it, dark parrel bands on
+each mast at every batten's height, the halyards from the yards' slings to the mastheads and down, the crowfoots on the
+deck. The panokseon from the bow quarter (b=300, l=10, z=0.9): the foremast leans forward and its lug leans with it —
+the sail's forward edge parallel to the raked mast the whole hoist, where the before frame hung a plumb sail beside a
+leaning pole; the main's lug beside its own mast with the parrel bands; both crowfoots on the board roof's deck.**
+
+**Rule 0 on the junk beam witness read whole (r253/witness-junk-b270.png): a rendered vessel on water, not a chart — a
+brown planked hull with a raised after end and a low deckhouse forward, seen from the beam on a grey-blue sea under a
+pale sky with a hazed coast behind; two tall pale sails stiffened by fanned battens, their sheets and halyards as
+lines against the sky. Three facts a viewer can read off it without a legend: she is a two-masted junk with battened
+lugsails; each mast stands at the forward edge of its sail, clear of the canvas, with the battens made fast to it;
+the sails are trimmed to one side and their sheets gather to a point on the deck abaft each sail.**
+
+**A NAME TO SETTLE, not settled here: +z is called 'starboard' by r251's sheetSide, by this round's userData.lug.side
+(kept for consistency with r251) and by the hull mirror's comments ('a starboard half mirrored to port'); but hull.js
+defines +x as AFT with +y up, and in a right-handed frame that puts +z to PORT — and the b=0 witness, taken from
+ahead ('bow-on via #b=0', frames.json), shows the lugs on the viewer's RIGHT of their masts, which from ahead is the
+port side. The geometry is one-sided and consistent whatever the word: the cloth stands to leeward, on the side the
+clews sheet to. The WORD may be the mirror, on every record that says it. Named (0y¹⁷) below.**
+
+**Named residuals, in order:** (0y⁷) CLOSED as a class — every battened lug hangs beside its mast on parrels; no
+panel on the three junk-rigged hulls is crossed by a mast's axis. NEW (0y¹⁴) the lug's side is a class figure: the
+sail is put to leeward of the fleet's wind, starboard of the mast, on all nine masts; a record field (`lugSide`)
+and a plate that shows which side a given ship carried hers would make it the record's. NEW (0y¹⁵) the crowfoot's
+lead is a class figure, min(boom·1.16, gapAft·0.9) abaft the luff; no plate is behind it. NEW (0y¹⁶) five records
+list their masts aft-first (trireme, corbita, galley, galleass, panokseon) — harmless now that gapAft reads by
+station, but every other reader of S.masts[mi + 1] would inherit the same fault; none exists today. NEW (0y¹⁷) the side's NAME: +z is 'starboard' in r251's sheetSide, this round's userData.lug.side and the mirror comments, and the right-handed frame with +x aft puts +z to port, as the b=0 witness reads; r254 settles it by probing the Shipwright camera's hull-space position against a known bearing before any record says a side again. (0y¹²) the gaff
+hoops, jaws and halyards undrawn, (0y¹³) the gaff's angle a class figure, (0y⁹) the corbita's artemon, (0y¹⁰) the
+lateen yard through its own mast, (0y¹¹) the sheeting angle as a class figure — as r252 names them. (0y′) (0y⁗)
+(0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷)
+(0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶)
+(0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r254 opens by running the FULL ratchet at the clean HEAD first (r253/PREDICTIONS-close.md names 5 frames that MUST
+move — ship-junk, ship-treasure, ship-panokseon, aboard-treasure, action-myeongnyang — 10 that MAY, the berth
+neighbours and the era 3–4 Sea views, and 50 that MUST NOT; only those scored by check --frame after the push are
+accepted here), with no screenshot beside it until RATCHET EXIT; then takes (0y¹⁰), the lateen yard on the mast's
+lee side — the sling is on the centreline, so every lateen yard passes through its own mast's axis, read by r251's
+probe (r253/probe_cross.py) — or (0y⁹), the corbita's artemon, or the survey's next never-spun hull, Endurance
+(4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788652350 at the build; the push and the live poll are in
+build/staging/r253/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r253 staging stays on disk uncommitted, the r211 convention.**

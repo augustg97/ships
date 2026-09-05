@@ -161,7 +161,7 @@ const tagOf = o => { for (let e = o; e; e = e.parent)
 if (e.userData && e.userData.part) return e.userData.part;
 return null; };
 const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
-'sheet', 'tack', 'ratline', 'oar', 'mast']);
+'sheet', 'tack', 'ratline', 'oar', 'mast', 'parrel']);
 const lowerOf = mk => {
 if (mk.truckM !== undefined && mk.rig === 'square') {
 const K = mk.only === 1 ? 1.0 : mk.only === 2 ? 0.88 + 0.60
@@ -4582,9 +4582,11 @@ const onYard = o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
 const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
 const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
 : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
-const luffOnMast = !!o.userData.luffOnMast
-|| (o.userData.kind === 'quad' && (o.userData.held || []).includes('luff'));
-if (isOwn && !luffOnMast && (!named || onYard)) continue;
+const held = o.userData.held || [], isQuad = o.userData.kind === 'quad';
+const onMast = !!o.userData.luffOnMast || !!o.userData.besideMast
+|| (isQuad && held.includes('luff'))
+|| (isQuad && held.includes('head') && held.includes('foot') && !held.includes('luff'));
+if (isOwn && !onMast && (!named || onYard)) continue;
 say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on the mast at x ' + own.toFixed(2) : ''} (x ${xMin.toFixed(1)}–${xMax.toFixed(1)}) crossed by the axis of ${m.name} at x ${m.foot.x.toFixed(2)}: hit at x ${best.at.x.toFixed(2)}, y ${best.at.y.toFixed(2)}, z ${best.at.z.toFixed(2)}, grid ${best.i},${best.j}`);
 }
 }
