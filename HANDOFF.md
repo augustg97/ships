@@ -20238,3 +20238,11 @@ can be read for its form.**
 build/staging/r242/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r242 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788606787 on https://augustg97.github.io/ships/index.html at 04:15 PDT,
+120 s after the push (build/staging/r242/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries heldBySpar (1) and its two call sites, one in
+each cloth builder (2); docs/audit-hulls.js carries D-SAIL-SPAR's conviction (1) and its silence conviction (1).
+THE RATCHET: THE OPENING FULL RATCHET at the clean r241 HEAD 2137eff (r242/open-ratchet.out, launched 03:27 as the round's first act, ended 04:11): RATCHET EXIT 0  END 04:11:30; 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-dhow 0.043%/0.015, ship-endurance 0.043%/0.018.
+ PARTIAL after the push, the r239 pattern (r242/partial-*.out): frames scored one at a time by check --frame, each diff read before its accept — ship-clipper 0.319%/0.106 CHANGED, ship-galleass 0.689%/0.242 CHANGED, ship-galley 0.620%/0.249 CHANGED, shipwright 0.130%/0.067 CHANGED (4 frames; r242/PREDICTIONS-close.md names some two dozen that MUST move — every frame with a set fore-and-aft sail — and those that must not). The other 60 frames are UNSCORED on the r242 builder; r243's full run at the clean HEAD is the test, and any mover outside the MUST list is not explained by this round.
+Two commits close the round (e35e5dc audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
