@@ -19431,3 +19431,13 @@ after edge to the plate's 3.1 m abaft the heel through the r214 overhang rule un
 build/staging/r236/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r236 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788580239 on https://augustg97.github.io/ships/index.html at 20:52 PDT,
+90 s after the push (build/staging/r236/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r232 correction): docs/data/vessels.json carries the stanchions' stations (1),
+"form":"channel-wale" (1) and the castle's "wingFwd":7.08 (1); docs/js/hull.js defines buildChannelWale (1), names the
+stanchion mesh (1) and reads castle stationsU (1); docs/audit-hulls.js carries R-SHROUD-FIXING's station string (1), its
+shroud-landing string (1) and C-STATIONS' string (1).
+THE RATCHET, run after the push: RATCHET EXIT 0  END 21:28:07; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. Prediction (r236/PREDICTIONS-close.md) held.
+The two PREDICTED movers changed under the gate: ship-dhow 0.037%/0.039 and ship-treasure 0.018%/0.005 (the harness's own rows), the treasure frame's change being exactly the cog's shrouds' new run at its left edge (r236/prediff-ship-treasure.png, the amplified diff read whole) — the prediction named the right frames and overstated the size. No baseline moved; nothing is carried to r237 from the ratchet.
+Two commits close the round (85ca91b record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
