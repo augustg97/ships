@@ -19894,3 +19894,97 @@ not in the first four, one check --frame each): 29 frames scored, movers 0. Larg
 because the loft's branches are gated on hull.stem, which only the cog carries. Any mover above is NOT accepted and is
 r240's first item; the 31 aboard/sea/descent/passage/wake/action/board/globe/map frames are unscored this round and
 r240's full run at the clean HEAD scores them.**
+
+## Round 240 — 2026-09-05 — a frame is a plane at a fixed x: the frames builder finds the station's u at every height, so a bow frame stands square to the keel where it leaned with the stem — Frame 1 of 30 on the cog spans 0.36 m of x (two sidings, the lap's offset) where it spanned 2.90; a frame whose plane passes forward of the stem under the water ends on the stem; the class ribbon is plumb above the water on every raked hull; the record's stale beam-station u values are dropped; and the full ratchet ran first at the clean r239 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r239 ordered r240's opening: the FULL ratchet
+at the clean HEAD before any edit (r239 scored 33 of 64 frames by check --frame and left 31 unscored), then (0e¹⁹),
+the frames as planes at fixed x, then (0e²⁰), the stale beamStations.u values. All three done. The ratchet ran at
+HEAD b2468a3 from 01:15 while the round's work was developed on a COPY of web/ served on :8150 (build/staging/r240/web,
+every file a symlink to web/ except hull.js, audit-hulls.js and data/vessels.json), because :8149 serves web/ live and
+an edit under a running ratchet contaminates its frames; the copy's files were moved into web/ only after the run
+ended (cmp-verified). THE OPENING RATCHET (r240/open-ratchet.out): 64 of 64 frames scored, movers 0, exit 0, 46 minutes (01:15–02:01) into a load of 2 that rose to 31 while this round's proofs ran beside it; largest globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. r239's prediction held: nothing outside the cog's berth neighbours moved, and ship-dhow's r239 acceptance stands. Logged in FRAME-LOG.md as a no-accept full run, the r231 precedent.**
+
+**THE FAULT (r239's named residual). buildFramesGeometry drew every frame at a constant u. surfacePoint's x at a
+station is (u − 0.5)·lwl plus a term that varies with HEIGHT wherever the hull's end leans: the class rake times the
+height fraction over the sheer on every raked hull; under a straight stem (r239) the stem line's offset at that
+height times k², over the whole height, under the water as well as over it; under a straight post (r237) the post's
+offset times z/fb. So a frame in the forefoot leaned with the stem. r239/measure-after.out: Frame 1 of 30 spanned u
+0.026–0.167, 2.90 m of x from its floor at −2.17 to its head at 2.89; Frame 2 2.10 m; Frame 3 1.12 m; Frames 29 and
+30 1.34 and 1.52 m under the post's lean. Before r239 the same frame spanned 1.14 m (the class rake above the water
+only). A frame is a timber set across the keel; its every point stands at one x. Lahn's plates draw the cog's frames
+square to the keel plank, and no frame in Blatt 1 leans.**
+
+**THE MODEL (web/js/hull.js, buildFramesGeometry; r240/hull.before.js, hull.after.js, apply-hull-edits.py, 69 diff
+lines). For each station u: xF is the skin's x at that station AT THE WATERLINE — surfacePoint(S, H, u, 0.62), where
+z is 0 and every rake term vanishes, the x frameStations placed the station by in r239. uAtV(v) returns the u whose
+skin stands at xF at parameter v: if surfacePoint(u, v)'s x is already xF (within a micron) the station's own u,
+untouched — so a hull with no rake, and every height under the water on a class hull, is byte-identical; else a
+bisection over u in [u − 0.3, u + 0.3] widened to [0, 1] if needed, 30 halvings, x(u) at a fixed height being
+monotone in u (the stem's offset is under lwl·forefoot/2, r239). Where the plane MISSES the skin — xF forward of the
+skin's end at that height (the cog's stem stands 3.25 m abaft the waterline's end at the keel, so Frame 1's plane
+passes forward of it below 0.56 m under the water) or abaft it — uAtV is null and the frame has no skin to sit
+against there. Class ribbon: the stations that exist are built and indexed (nSt), the frame ends where the plane
+leaves the skin. Recorded timber (the cog): the section table (96 rows) starts at the first v the plane meets the
+skin, vLow; the frame's foot is at that height (cut), the timbers are stationed from vLow to vTop, the bottom
+timber's foot is capped square because it is cut in the open — the floors nearest a raked stem land on the stem and
+the apron, not the keel. The floor lap's head (headAboveKeelM) is measured from the TRUE keel under the station
+(surfacePoint(u, 0)), not from the cut, and a timber whose head lies below the cut is not built. The head's height:
+the rail is read at the u whose skin stands at xF at the head, not at the station's nominal u, so the head stands a
+hand under the rail at the frame's own x. The lap offset (a lower timber one siding forward of the upper, dx) is
+unchanged, so a lapped chain spans exactly two sidings in x. frameStations, frameNumber, frameU, beamRows: unchanged
+(r239's waterline stationing stands).**
+
+**MEASURED (r240/measure-after.out against r239/measure-after.out; measure_ship on the built scene at :8150, hull
+space, water at y 0). Frame 1 of 30: u 0.091–0.109, 0.36 m of x, its foot at y −0.56 (the plane meets the stem
+0.56 m under the water), head 2.56, half-breadth 2.75 (was u 0.026–0.167, 2.90 m, foot −2.17). Frame 2: 0.36 m, foot
+−1.29, head 2.47 (was 2.10 m, foot −2.18). Frame 3: 0.36 m, foot −2.18, head 2.30 — the first frame that reaches the keel (was 1.12 m).
+Frames 4–30: 0.36 m every one (was up to 1.52 at the stern; Frames 29 and 30 now u 0.907–0.925 and 0.932–0.949, their
+feet at −2.17 on the keel, the post's line at the keel standing 0.8 m abaft Frame 30's plane). 0.36 = 2 × sidedM 0.18,
+the lap's offset. Stem, planking, keel, sternpost: identical to r239 (u −0.080…0.169 / −0.021…1.046 / 0.159…0.961 /
+0.953…1.055). Frame count 30, as r239.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r240/apply-audit-edits.py). D-FRAME-PLUMB, a standalone block before
+the deck rules, read on EVERY hull whose frames are their own meshes ('Frame k of n', the fine build): a frame's
+vertices span at most its siding in x — two sidings where the record carries frames.laps, 0.016·lwl for the class
+ribbon — plus 0.06 m; the widest offender is named with its span, its height and the count over. PROOFS
+(r240/run-proofs-and-witness.sh, .out; on :8150). A, the r239 builder under the r240 audit: checked 33 hulls, 31 problems, every one 'a frame drawn on a slant' — 31 hulls convicted, all but the dugout (no frames) and Azzam (her ribbon's lean under the allowance): the cog's Frame 1 of 30 spans 2.90 m of x over 5.06 m of height, 14 frames over; the dhow's Frame 1 2.24 m over 4.18; the 74's 3.30 m over 11.90; Queen Mary 2's Frame 1 20.83 m of x over 27.51 m of height, 15 frames over; the trireme's Frame 30 1.18 m over 2.60 (audit-proof-a.out; the class ribbon leaned with every raked end, above the water, on every ship in the fleet). B, the r240
+builder with the inversion's target slanted 0.4 m over the frame's height (hull.doctored-slant.js): 33 problems — 'a frame drawn on a slant' on all 32 hulls with frames (the cog's Frame 30 of 30 spans 0.71 m of x over 4.50 m of height, 0.42 allowed) and 'frames off their pitch' on the cog (0.98 m between frames at x −7.5 and −6.5: the slant moves the frame centres the pitch rule reads) — audit-proof-b.out. The
+builder restored from the after-copy (cmp). Final audit on the r240 builder and record: checked 33 hulls, 0 problems (r240/audit.err, on :8149 with the files in web/). RULE 8 ON THE WAY THERE: the first final pass (:8150, 01:49) convicted the cog five times on the lap rules at the cut frames — 'a lap head off the record' (lower timber's head −0.48 m, record 0.28) and 'a lap off its length' at x −8.2, 'a frame built as fewer timbers than its laps' at −8.2 and −7.7, 'floors whose arms the rule could not pair' (28 of 30). Two faults, one each side. The builder's: the inward normal was a difference taken ALONG THE FRAME'S PLANE, and at the cut the plane runs out through the stem, so the first station's normal pointed up and lifted it 0.05 m over the second — a drop the audit reads as a new timber; the normal is now the section's at the point's own u (secU), byte-identical where the frame's u does not vary. The audit's: the lap rules took the frame's own foot for the keel and expected every frame to carry every lap; a CUT frame (its foot above the skin's bottom) now measures a lap given over the keel from the skin's bottom, reads only the laps whose lower timber's head stands above its foot, and is left out of the floor alternation's count. Frames 1 and 2 are cut on the cog; the rule names how many.**
+
+**THE RECORD (0e²⁰; web/data/vessels.json; r240/apply-vessel-edits.py). deck.beamStations[].u dropped on the cog
+(DB 1 0.154, DB 2 0.234, DB 3 0.486, DB 4 0.657, DB 5 0.847): r230 derived them through that round's u-to-x map, and
+since r239 beamRows stands every beam at the plate's metres (beamHeadsFromHeelM at beamHeightsFromKeelM) through the
+stem line's inverse and never reads a u — the values were stale by up to 0.5 m at DB 1. Each station keeps its spant
+(the sheet's title for the section there) and its name; DB 3's derivation no longer cites a u; deck.beamStationsU
+says what was dropped and why. beamRows' fallback for a station with neither u nor metres is frameU(spant), as
+before. The card does not print the u values; nothing else read them (grep).**
+
+**WITNESSED (SW.stage 2, the frames with the deck off; r240/stage_capture.py, r225's with a 150 s ready-wait, on
+:8149 for before and :8150 for after). r240/before-stage2-overhead.png against after-stage2-overhead.png, the Shipwright at b 300, l 52, z 0.75: the open hull from over the port bow, the deck off, the floors crossing the flat bottom and the futtocks' rounded heads standing inside the bulwark. Before: the forward frames lean aft with the planking's run toward the stem, their floors reaching the keel plank under the stem's foot, and the frame heads at the bow crowd toward the stem head. After: every frame stands parallel to its neighbours from the bow to the stern; the two forward-most frames end against the stem's inner face above the bottom, with no floor under them; the heads along both sides stand one pitch apart to the stem. The broadside at stage 2 (before-/after-stage2-broadside.png, b 270, l 4) shows only the planked shell from outside and was not the witness. ⚠ The after frame on :8149 was taken on the final builder (the tangent fix); the first after frame, on :8150, was taken on the builder before it and is overwritten.**
+
+**Rule 0 on the after frame read whole: the frame reads as a rendered object in a place, not a chart — a wooden hull open to the sky, lit from the upper left, the planking's grain inside the shell, the pale flat floor, the timbers' rounded heads catching the light, the sea around it. Three facts a viewer can read off it without a legend: the hull was planked first and the frames set in afterwards against the finished skin; each frame is a chain of separate timbers with rounded heads, not one rib; the bottom is flat with the frames' floors lying across it, and the frames nearest the bow stop short of the bottom on the stem.**
+
+**Named residuals, in order:** (0e¹⁹) RESOLVED. (0e²⁰) RESOLVED. NEW (0e²¹): the beams' standing knees and the
+sections named by Spant are built at constant u too (the knee is short, the lean under 0.1 m; the section drawing is
+a plan-view cut); read them the same way if a measurement shows it. NEW (0e²²): Frames 1 and 2 end on the stem at
+0.56 and 1.29 m under the water; the wreck's forward frames land on the stem hook and the apron, and how the model
+should show that landing (a heel let into the stem's inner face, or a short floor on the hook) is unread — Lahn's
+Blatt 1 draws the hook, not the frames' heels. (0e¹⁷) OPEN as a read: the stem hook as a timber, its scarf and the
+bolted lap, the head's fitting and the bowline spar. (0e¹⁵) the closing's form from Spant 35 to the post and from
+Spant 6 to the stem, unread. (0e¹⁸) the posts' sidings (Lahn 1992 not on disk). (0e¹⁶) the stern hook. (0h′)
+profile_capture.py still selects the wrong hull for --ship cog. (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗)
+(0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r241 opens by running the FULL ratchet at the clean HEAD first (this round scored the named frames by check --frame
+after the push, three frames — ship-dhow, ship-treasure and shipwright — their scores in the receipt paragraph below; the class ribbon's change above the water on every raked hull is hidden by the planking
+in every Shipwright frame and by the deck in every Sea frame, so the prediction in r240/PREDICTIONS-close.md is
+0.000% everywhere but the cog's frames — the full run is the test), accepting with reasons only what this round's
+change explains, then takes (0e²²) or the vessel survey's next hull: with the cog's stem, post, frames, beams, deck,
+castle, rig and masthead read off Lahn and Tanner over r213–r240, the cog is the fleet's best-attested hull and the
+survey queue under "Round 23" names the next crudest.**
+
+**Live stamp: docs/index.html carries data-version 1788599242 at the build; the push and the live poll are in
+build/staging/r240/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r240 staging stays on disk uncommitted, the r211 convention.**

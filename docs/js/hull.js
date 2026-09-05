@@ -344,44 +344,61 @@ const half = REC ? (S.frames.sidedM || 0.18) / 2 : 0.016 * S.lwl / 2;
 const us = onlyU !== undefined ? [onlyU] : frameStations(S, NF);
 let base = 0;
 for (const u of us) {
+const xF = surfacePoint(S, H, u, 0.62)[0];
+const uAtV = v => {
+const x0 = surfacePoint(S, H, u, v)[0];
+if (Math.abs(x0 - xF) < 1e-6) return u;
+let lo = Math.max(0, u - 0.3), hi = Math.min(1, u + 0.3);
+if (surfacePoint(S, H, lo, v)[0] > xF) { lo = 0; if (surfacePoint(S, H, 0, v)[0] > xF) return null; }
+if (surfacePoint(S, H, hi, v)[0] < xF) { hi = 1; if (surfacePoint(S, H, 1, v)[0] < xF) return null; }
+for (let it = 0; it < 30; it++) { const m = (lo + hi) / 2; if (surfacePoint(S, H, m, v)[0] < xF) lo = m; else hi = m; }
+return (lo + hi) / 2;
+};
+const P = v => { const uu = uAtV(v); return uu == null ? null : surfacePoint(S, H, uu, v); };
 for (let sgn = -1; sgn <= 1; sgn += 2) {
 if (!REC) {
+let nSt = 0;
 for (let j = 0; j <= NV; j++) {
 const v = j / NV;
-const p = surfacePoint(S, H, u, v);
+const p = P(v); if (!p) continue;
 const plank = S.beam * 0.020;
 const inset = plank + S.beam * 0.006;
 const z = Math.max(0, Math.abs(p[2]) - inset);
 for (let e = -1; e <= 1; e += 2)
 pos.push(p[0] + e * half, p[1], sgn * z);
+nSt++;
 }
-for (let j = 0; j < NV; j++) {
+for (let j = 0; j + 1 < nSt; j++) {
 const a = base + j * 2;
 idx.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
 }
-base += (NV + 1) * 2;
+base += nSt * 2;
 continue;
 }
 const gap = 0.05, m = S.frames.mouldedM || 0.20;
-const fb = H.sheer(u);
+const fb0 = H.sheer(u), vTop0 = fb0 > 0.3 ? 0.62 + 0.38 * (1 - 0.10 / fb0) : 1;
+const uTop = uAtV(vTop0), fb = uTop == null ? fb0 : H.sheer(uTop);
 const vTop = fb > 0.3 ? 0.62 + 0.38 * (1 - 0.10 / fb) : 1;
-const sec = v => { const p = surfacePoint(S, H, u, v); return [p[0], p[1], Math.abs(p[2])]; };
+const sec = v => { const p = P(v); return p ? [p[0], p[1], Math.abs(p[2])] : null; };
 const frac = S.frames.headSidedFrac || 1, taper = S.frames.headTaperM || 0, round = !!S.frames.headRound;
 const rr = frac * half;
 const TAB = 96, tv = [], ty = [];
-for (let j = 0; j <= TAB; j++) { const v = j / TAB * vTop; tv.push(v); ty.push(sec(v)[1]); }
-const yTop = ty[TAB], yKeel = ty[0];
+for (let j = 0; j <= TAB; j++) { const v = j / TAB * vTop; const q = sec(v); if (!q) continue; tv.push(v); ty.push(q[1]); }
+if (ty.length < 2) continue;
+const NT = ty.length - 1, yTop = ty[NT], yKeel = ty[0], vLow = tv[0];
+const cut = vLow > 1e-9;
 const vAtY = y => {
-if (y <= yKeel) return 0; if (y >= yTop) return vTop;
-let j = 1; while (j < TAB && ty[j] < y) j++;
+if (y <= yKeel) return vLow; if (y >= yTop) return vTop;
+let j = 1; while (j < NT && ty[j] < y) j++;
 const f = Math.max(0, Math.min(1, (y - ty[j - 1]) / Math.max(1e-6, ty[j] - ty[j - 1])));
 return tv[j - 1] + f * (tv[j] - tv[j - 1]);
 };
 const fno = frameNumber(S, u);
 const longSide = ((fno + (sgn > 0 ? 0 : 1)) % 2) === 0;
+const yKeelTrue = surfacePoint(S, H, u, 0)[1];
 const laps = (S.frames.laps || []).map(lp => {
 const lift = (lp.altM && longSide) ? lp.altM : 0;
-const yNext = lp.headAboveKeelM != null ? yKeel + lp.headAboveKeelM + lift : yTop - lp.headBelowM + lift;
+const yNext = lp.headAboveKeelM != null ? yKeelTrue + lp.headAboveKeelM + lift : yTop - lp.headBelowM + lift;
 return { yNext, lapM: lp.lapM || 0 };
 }).sort((a, b) => b.yNext - a.yNext);
 const timbers = [];
@@ -392,16 +409,18 @@ yH = lp.yNext;
 });
 timbers.push({ yHead: yH, yFoot: yKeel, dx: (laps.length % 2) ? -2 * half : 0 });
 for (const T of timbers) {
+if (T.yHead <= yKeel + 0.02) continue;
 const vF = vAtY(T.yFoot), vH = vAtY(T.yHead);
 const vs = [vF, vH];
-for (let j = 0; j <= NV; j++) { const v = j / NV * vTop; if (v > vF + 1e-6 && v < vH - 1e-6) vs.push(v); }
+for (let j = 0; j <= NV; j++) { const v = vLow + j / NV * (vTop - vLow); if (v > vF + 1e-6 && v < vH - 1e-6) vs.push(v); }
 if (round && rr > 0)
 for (const hb of [0.75, 0.5, 0.25, 0.08]) { const v = vAtY(T.yHead - hb * rr); if (v > vF + 1e-6 && v < vH - 1e-6) vs.push(v); }
 vs.sort((a, b) => a - b);
 const NS = vs.length - 1;
 for (let j = 0; j <= NS; j++) {
 const v = vs[j];
-const p = sec(v), pa = sec(Math.max(0, v - 0.01)), pb = sec(Math.min(vTop, v + 0.01));
+const uu = uAtV(v), secU = (u2, v2) => { const q = surfacePoint(S, H, u2, v2); return [q[0], q[1], Math.abs(q[2])]; };
+const p = sec(v), pa = secU(uu == null ? u : uu, Math.max(0, v - 0.01)), pb = secU(uu == null ? u : uu, Math.min(vTop, v + 0.01));
 let tz = pb[2] - pa[2], tyy = pb[1] - pa[1];
 const tl = Math.hypot(tz, tyy) || 1; tz /= tl; tyy /= tl;
 const nz = -tyy, ny = tz;
@@ -424,7 +443,7 @@ idx.push(a + f, b + f, a + c, a + c, b + f, b + c);
 }
 const t = base + NS * 4;
 idx.push(t, t + 1, t + 2, t, t + 2, t + 3);
-if (T.yFoot > yKeel + 1e-6)
+if (T.yFoot > yKeel + 1e-6 || cut)
 idx.push(base, base + 2, base + 1, base, base + 3, base + 2);
 base += (NS + 1) * 4;
 }

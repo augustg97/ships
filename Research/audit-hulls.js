@@ -948,6 +948,41 @@
        castle reads holds (D-CASTLE). Record-blind: the capping rail stays on the SKIN and
        does not follow the deck down (D-RAIL), and the deck lies above the waterline — a
        deck below it is a hull that floods (D-WELL). Silent without the field. */
+    /* D-FRAME-PLUMB (round 240): a frame is a timber set square across the keel, so every
+       point of it stands at one x. The builder drew each frame at a constant u, and a
+       station's x is not constant over its height wherever the hull's end leans — the class
+       rake above the water on every raked hull, the whole height under a straight stem or
+       post — so the cog's Frame 1 of 30 spanned 2.90 m of x from its floor to its head
+       (r239/measure-after.out), a timber drawn on a slant. Read on the built frames, each
+       its own mesh in the fine build ('Frame k of n'): the x-span of a frame's vertices is
+       at most its siding — two sidings for a recorded chain of lapped timbers, whose lower
+       pieces stand one siding forward of the upper (frames.laps) — plus 0.06 m. The class
+       ribbon's siding is 0.016·lwl (buildFramesGeometry). A hull whose frames are one mesh
+       (the token build) is not read. */
+    {
+      const fr = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.key === 'frames' && /^Frame \d+ of \d+$/.test(p.name || '')) fr.push(o); });
+      if (fr.length > 1) {
+        const worldF = o => {
+          const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+          o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+          for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+          return out;
+        };
+        const REC = !!(H.frames && H.frames.roomAndSpaceM);
+        const siding = REC ? (H.frames.sidedM || 0.18) : 0.016 * (H.lwl || H.loa);
+        const allow = siding * (REC && H.frames.laps && H.frames.laps.length ? 2 : 1) + 0.06;
+        let worst = null;
+        for (const f of fr) {
+          let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+          for (const q of worldF(f)) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); }
+          const span = x1 - x0;
+          if (span > allow && (!worst || span > worst.span)) worst = { span, y0, y1, name: tagOf(f).name, n: 0 };
+          if (span > allow && worst) worst.n++;
+        }
+        if (worst)
+          say(v.id, 'a frame drawn on a slant', `${worst.name} spans ${worst.span.toFixed(2)} m of x over ${(worst.y1 - worst.y0).toFixed(2)} m of height, a timber ${allow.toFixed(2)} m fore and aft at most${worst.n > 1 ? ' (' + worst.n + ' frames over)' : ''}`);
+      }
+    }
     if (H.deck && H.deck.belowSheerM) {
       const byName = nm => { const r = []; g.traverse(o => { if (o.isMesh && o.name === nm) r.push(o); }); return r; };
       const world = o => {
@@ -1255,7 +1290,7 @@
           const nBeams = H.deck.throughBeams || 0;
           if (fr.length > nWant || fr.length < nWant - nBeams)
             say(v.id, "frames off the record's count", `${fr.length} frames, ${nWant} at ${rs} m over the run (less up to ${nBeams} at the beams)`);
-          const xs = [], floorArms = [];
+          const xs = [], floorArms = [], cutFrames = new Set();   // cutFrames: round 240
           for (const f of fr) {
             const b = bbox(f), xc = (b[0] + b[3]) / 2, edge = deckEdgeNear(xc), top = skinTopNear(xc);
             xs.push(xc);
@@ -1343,8 +1378,16 @@
                      on the frame's long side; the rule accepts EITHER height here, notes which
                      side is long, and reads the alternation across the frames below */
                   const keelY = Math.min(...runs.map(footOf));
-                  const wantOf = lp => lp.headAboveKeelM != null ? keelY + lp.headAboveKeelM : topY - lp.headBelowM;
-                  const laps = H.frames.laps.slice().sort((a, c) => wantOf(c) - wantOf(a));
+                  /* a frame whose plane passes forward of the stem (or abaft the post) under the
+                     water ENDS on it (round 240): its foot stands above the skin's bottom, a lap
+                     given over the keel is measured over the ship's keel, not over that foot, and
+                     a lap whose lower timber's head lies below the foot is a floor the frame does
+                     not have — the chain is read from the laps above the foot */
+                  const skinBottom = Math.min(...sv.map(q => q[1]));
+                  const cutF = keelY > skinBottom + 0.15, keelBase = cutF ? skinBottom : keelY;
+                  const wantOf = lp => lp.headAboveKeelM != null ? keelBase + lp.headAboveKeelM : topY - lp.headBelowM;
+                  const laps = H.frames.laps.slice().sort((a, c) => wantOf(c) - wantOf(a)).filter(lp => !cutF || wantOf(lp) > keelY + 0.02);
+                  if (cutF && sg < 0) cutFrames.add(xc.toFixed(2));
                   const sided = H.frames.sidedM || 0.18;
                   if (runs.length < laps.length + 1)
                     say(v.id, 'a frame built as fewer timbers than its laps', `${runs.length} timbers, record ${laps.length} lap(s) at x ${xc.toFixed(1)} ${side}`);
@@ -1397,8 +1440,8 @@
             const byX = new Map();
             for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[fa.side < 0 ? 's' : 'p'] = fa; }
             const fl = [...byX.values()].filter(f => f.s && f.p).sort((a, c) => a.x - c.x);
-            if (fl.length < fr.length - 1)
-              say(v.id, 'floors whose arms the rule could not pair', `${fl.length} floors read on both sides of ${fr.length} frames`);
+            if (fl.length < fr.length - 1 - cutFrames.size)
+              say(v.id, 'floors whose arms the rule could not pair', `${fl.length} floors read on both sides of ${fr.length} frames${cutFrames.size ? ' (' + cutFrames.size + ' end on the stem or the post and have none)' : ''}`);
             for (const f of fl) {
               const d = Math.abs(f.p.y - f.s.y);
               if (Math.abs(d - f.p.alt) > 0.15)
