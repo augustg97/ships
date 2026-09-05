@@ -4772,6 +4772,12 @@ const PARTS = {
                   + 'its middle and the helmsman behind it between two long side cabins, unable '
                   + 'to see his own sail; on top a capstan. Drawn only where the record attests '
                   + 'one; this hull has no forecastle because the wreck has none.' },
+  castles:  { stage: 4, name: 'Castles',
+              what: 'The walled decks over the bow and the stern that make a nau read as one: '
+                  + 'the hull\'s own side carried up a deck at the forecastle and in steps at '
+                  + 'the aftcastle, each tier planked over and railed round. They were '
+                  + 'fighting platforms first and quarters second, and the reason the type '
+                  + 'stood so tall at both ends.' },
   boat:     { stage: 3, name: "Ship's boat",
               what: 'Stowed on the beams amidships. It is the tender, the anchor-laying boat, '
                   + 'the water carrier — and the only thing between the crew and the sea if the '
@@ -12043,6 +12049,117 @@ function buildJunkCastle(S, group) {
 }
 
 
+/* ── THE WALLED CASTLES OF THE SOUTHERN TRADITION (r243) ─────────────────────────────
+ * `castles: { fore: [fromU, toU, tiers], aft: [fromU, toU, tiers], deckHM?, railHM? }`
+ * ⚠ Not `castle` (singular): that is the cog's northern OPEN PLATFORM on posts, drawn in
+ * buildFittings from the wreck's own plan. A nau's castles are the other tradition —
+ * WALLED houses carried up from the hull's side, the forecastle one deck over the bow, the
+ * aftcastle rising in steps to the poop — and they are most of what makes a carrack read
+ * as one: without them the Shipwright drew a flush-decked barque (r243, the carrack spun
+ * from twelve bearings). Each tier is a wall lofted off the hull's own half-breadth and
+ * sheer at its stations (the buildRaisedEnds idiom: a wall lofted off the real surface
+ * cannot overhang), inset a step from the tier below, with a planked deck across its head
+ * and an open rail round that. The walls wear the hull's own planking shader, continued
+ * above the sheer at the same strake pitch, because on the ship they WERE the planking
+ * carried up. Silence draws nothing: only a record that declares castles gets them. */
+function buildTieredCastles(S, group, mats, hullMat) {
+  const C = S.castles; if (!C || !(C.fore || C.aft)) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const dh = C.deckHM || B * 0.16;                 // one deck of headroom a tier
+  const rH = C.railHM || 0.9;
+  const cl = u => Math.max(0.001, Math.min(0.999, u));
+  const halfAt = u => Math.abs(surfacePoint(S, H, cl(u), 1.0)[2]);
+  const xAt = u => (u - 0.5) * L + H.rake(cl(u));
+  /* the shader's v: 0.62 at the load line, 1.0 at the sheer, continued above it */
+  const vOf = (u, y) => 0.62 + 0.38 * (y / Math.max(0.5, H.sheer(cl(u))));
+  const deckM = new THREE.MeshStandardMaterial({ color: 0xb09566, roughness: 0.80, side: THREE.DoubleSide });
+  const railM = mats.woodDark;
+  const up = new THREE.Vector3(0, 1, 0);
+
+  const one = (label, spec, aft, what) => {
+    const [u0, u1, tiers] = spec;
+    const g = new THREE.Group();
+    const span = u1 - u0;
+    for (let t = 0; t < tiers; t++) {
+      /* each tier is shorter than the one under it: the break steps toward the end */
+      const a = aft ? u0 + span * 0.40 * t : u0;
+      const b = aft ? u1 : u1 - span * 0.40 * t;
+      const inset = B * (0.02 + 0.035 * t);
+      const half = u => Math.max(halfAt(u) * 0.5, halfAt(u) - inset);
+      const yB = u => H.deck(cl(u)) + dh * t;          // this tier stands on the deck below
+      const yT = u => H.deck(cl(u)) + dh * (t + 1);
+      const N = Math.max(6, Math.round((b - a) * L / 0.9));
+      /* the perimeter, wound once round: starboard fwd→aft, port aft→fwd, closed */
+      const path = [];
+      for (let k = 0; k <= N; k++) { const u = a + (b - a) * k / N; path.push({ u, x: xAt(u), z: half(u) }); }
+      for (let k = N; k >= 0; k--) { const u = a + (b - a) * k / N; path.push({ u, x: xAt(u), z: -half(u) }); }
+      path.push(path[0]);
+      /* the wall: base sunk a tenth of a deck into what it stands on (no coplanar cap to
+         fight), head at the tier's deck; uv in the hull shader's own frame */
+      const tp = [], tuv = [], ti = [];
+      let run = 0;
+      for (let k = 0; k < path.length; k++) {
+        const p = path[k];
+        if (k) run += Math.hypot(p.x - path[k - 1].x, p.z - path[k - 1].z);
+        const y0 = yB(p.u) - dh * 0.10, y1 = yT(p.u);
+        const uu = 0.5 + (p.x / L);
+        tp.push(p.x, y0, p.z, p.x, y1, p.z);
+        tuv.push(uu, vOf(p.u, y0), uu, vOf(p.u, y1));
+      }
+      for (let k = 0; k + 1 < path.length; k++) { const q = k * 2, r = q + 2; ti.push(q, r, q + 1, q + 1, r, r + 1); }
+      const wg = new THREE.BufferGeometry();
+      wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
+      wg.setAttribute('uv', new THREE.Float32BufferAttribute(tuv, 2));
+      wg.setIndex(ti); wg.computeVertexNormals();
+      const wall = new THREE.Mesh(wg, hullMat);
+      wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh };
+      g.add(wall);
+      /* the deck: a lofted strip at the tier's head, carrying the sheer out to the end */
+      const dp = [], di = [];
+      for (let k = 0; k <= N; k++) {
+        const u = a + (b - a) * k / N, y = yT(u), h = half(u);
+        dp.push(xAt(u), y, -h, xAt(u), y, h);
+      }
+      for (let k = 0; k < N; k++) { const q = k * 2, r = q + 2; di.push(q, r, q + 1, q + 1, r, r + 1); }
+      const dg = new THREE.BufferGeometry();
+      dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
+      dg.setIndex(di); dg.computeVertexNormals();
+      const deck = new THREE.Mesh(dg, deckM);
+      deck.userData.castle = { kind: 'deck', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh };
+      g.add(deck);
+      /* the rail: posts resampled from the wall's own perimeter, one cap bar between them */
+      const step = B * 0.20, Q = [];
+      let acc = 0; Q.push(path[0]);
+      for (let k = 1; k < path.length; k++) {
+        acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
+        if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
+      }
+      for (const q of Q) {
+        const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.005, B * 0.005, rH, 5), railM);
+        st.position.set(q.x, yT(q.u) + rH / 2, q.z);
+        g.add(st);
+      }
+      for (let k = 0; k + 1 < Q.length; k++) {
+        const p = Q[k], q = Q[k + 1];
+        const len = Math.hypot(q.x - p.x, q.z - p.z);
+        if (len < 0.01) continue;
+        const dir = new THREE.Vector3(q.x - p.x, 0, q.z - p.z).normalize();
+        const bar = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.006, B * 0.006, len, 5), railM);
+        bar.position.set((p.x + q.x) / 2, (yT(p.u) + yT(q.u)) / 2 + rH, (p.z + q.z) / 2);
+        bar.quaternion.setFromUnitVectors(up, dir);
+        g.add(bar);
+      }
+    }
+    group.add(tag(g, 'castles', label, what));
+  };
+  if (C.fore) one('Forecastle', C.fore, false,
+    'The walled deck over the bow, one deck high, the hull\'s own side carried up: the fighting platform of the age before broadside guns, and why a nau\'s bow stood so tall. The foremast passes through it and the bowsprit runs out over its rail.');
+  if (C.aft) one('Aftcastle', C.aft, true,
+    'The high stern that names the type: the quarterdeck from abaft the mainmast to the stern, and the poop stepped up again over its after half, each walled and railed, the officers\' quarters beneath. On the India naus the stern rose three and four decks over the waist; here two, a class default.');
+}
+
+
 /* ── THE BOWER ANCHOR, CATTED ──────────────────────────────────────────────────────────
  * Hung at the cathead on the bow, which is where it lived at sea: too heavy to bring inboard
  * and too dangerous to tow. A 74's best bower is about 3.7 tonnes, and the whole apparatus of
@@ -14407,6 +14524,7 @@ function buildShip(S, opts) {
   if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
   if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
   if (FINE) buildJunkCastle(S, group);
+  if (FINE) buildTieredCastles(S, group, mats, hullMat);
   if (FINE && S.turrets) buildCitadel(S, group, mats);
   if (FINE) buildSternAviation(S, group);
   if (FINE) buildDeckHatches(S, group);

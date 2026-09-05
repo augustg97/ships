@@ -56,6 +56,21 @@ say(v.id, 'floor attests steam but claims muscle',
 }
 if (!v.hull) continue;
 const H = v.hull;
+{
+const hullRow = (v.rows || []).find(r => Array.isArray(r) && /^hull$/i.test(String(r[0]).trim()));
+const timber = !/^(steel|iron)$/.test(String(H.build || ''));
+const names = timber && hullRow && /castle|\bpoop\b/i.test(String(hullRow[1]));
+const declares = !!(H.castle || H.castles || H.poop || (H.wellM && H.houseAt));
+if (names && !declares)
+say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop or raised ends in the data`);
+if (H.castles && !H.castlesProvenance)
+say(v.id, 'castles with no provenance', 'hull.castles declared, hull.castlesProvenance absent');
+if (H.castles) for (const end of ['fore', 'aft']) {
+const c = H.castles[end]; if (!c) continue;
+if (!(Array.isArray(c) && c.length === 3 && c[0] >= 0 && c[1] <= 1 && c[1] > c[0] && c[2] >= 1))
+say(v.id, 'a castle declared out of shape', `castles.${end} = ${JSON.stringify(c)}; want [fromU, toU, tiers]`);
+}
+}
 if (H.deck) {
 if (!/^(teak|hinoki|pine|wood|steel|bare)$/.test(H.deck.covering || ''))
 say(v.id, 'deck covering unknown to the model',
@@ -4243,6 +4258,55 @@ if (m > 0.01)
 say(v.id, 'a sail standing off the spar it is bent to', `${o.userData.kind} cloth's ${e} stands ${m.toFixed(2)} m off its ${len.toFixed(1)} m spar (${(m / len).toFixed(4)} of it)`);
 }
 });
+if (H.castles) {
+const worldC = o => {
+const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+return out;
+};
+let skinC = null; g.traverse(o => { const p = tagOf(o); if (!skinC && o.isMesh && p && p.key === 'planking') skinC = o; });
+const walls = [], decks = [];
+g.traverse(o => { if (o.isMesh && o.userData.castle) (o.userData.castle.kind === 'wall' ? walls : decks).push(o); });
+for (const end of ['fore', 'aft']) {
+const c = H.castles[end]; if (!c) continue;
+const w = walls.filter(o => o.userData.castle.end === end).length, d = decks.filter(o => o.userData.castle.end === end).length;
+if (w !== c[2] || d !== c[2])
+say(v.id, 'castle tiers missing', `${end}: ${c[2]} tier(s) declared, ${w} wall(s) and ${d} deck(s) drawn`);
+}
+if (!skinC) say(v.id, 'castles with no planking to stand in', 'no planking mesh');
+else {
+const sv = worldC(skinC);
+const skinTopNear = x => { let t = -1e9; for (const q of sv) if (Math.abs(q[0] - x) < 0.5) t = Math.max(t, q[1]); return t; };
+const skinHalfNear = (x, y) => { let w = 0; for (const q of sv) if (Math.abs(q[0] - x) < 0.3 && Math.abs(q[1] - y) < 0.3) w = Math.max(w, Math.abs(q[2])); return w; };
+const deckYNear = (end, tier, x) => { let y = null;
+for (const o of decks) { const c = o.userData.castle; if (c.end !== end || c.tier !== tier) continue;
+for (const q of worldC(o)) if (Math.abs(q[0] - x) < 0.5 && (y === null || q[1] < y)) y = q[1]; }
+return y; };
+for (const o of walls) {
+const c = o.userData.castle, pts = worldC(o);
+let worst = 0, at = null;
+for (const q of pts) {
+const top = skinTopNear(q[0]); if (q[1] > top - 0.05) continue;
+const half = skinHalfNear(q[0], q[1]); if (!half) continue;
+const over = Math.abs(q[2]) - half;
+if (over > worst) { worst = over; at = q; }
+}
+if (worst > 0.02)
+say(v.id, 'a castle wall outside the planking', `${c.end} tier ${c.tier}: a base vertex ${worst.toFixed(2)} m outside the skin at x ${at[0].toFixed(1)}, y ${at[1].toFixed(2)}`);
+const xs = [...new Set(pts.map(q => Math.round(q[0] * 2) / 2))];
+let lift = 0, where = null;
+for (const x of xs) {
+let base = 1e9; for (const q of pts) if (Math.abs(q[0] - x) < 0.26) base = Math.min(base, q[1]);
+const under = c.tier === 0 ? skinTopNear(x) : deckYNear(c.end, c.tier - 1, x);
+if (under === null || under < -1e8) continue;
+const d = base - under; if (d > lift) { lift = d; where = x; }
+}
+if (lift > 0.30)
+say(v.id, 'a castle standing off the ship', `${c.end} tier ${c.tier}: base ${lift.toFixed(2)} m over ${c.tier === 0 ? 'the skin' : 'the tier beneath'} at x ${where.toFixed(1)}`);
+}
+}
+}
 {
 const sq = (H.masts || []).filter(mk => mk.rig === 'square');
 if (sq.length) {

@@ -20246,3 +20246,118 @@ each cloth builder (2); docs/audit-hulls.js carries D-SAIL-SPAR's conviction (1)
 THE RATCHET: THE OPENING FULL RATCHET at the clean r241 HEAD 2137eff (r242/open-ratchet.out, launched 03:27 as the round's first act, ended 04:11): RATCHET EXIT 0  END 04:11:30; 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-dhow 0.043%/0.015, ship-endurance 0.043%/0.018.
  PARTIAL after the push, the r239 pattern (r242/partial-*.out): frames scored one at a time by check --frame, each diff read before its accept — ship-clipper 0.319%/0.106 CHANGED, ship-galleass 0.689%/0.242 CHANGED, ship-galley 0.620%/0.249 CHANGED, shipwright 0.130%/0.067 CHANGED (4 frames; r242/PREDICTIONS-close.md names some two dozen that MUST move — every frame with a set fore-and-aft sail — and those that must not). The other 60 frames are UNSCORED on the r242 builder; r243's full run at the clean HEAD is the test, and any mover outside the MUST list is not explained by this round.
 Two commits close the round (e35e5dc audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 243 — 2026-09-05 — the carrack gets her castles: spun from twelve bearings she was a flush-decked square-rigger, while her own Hull row and her card photograph give her a forecastle and a high aftcastle; a new builder lofts walled castles off the hull's own skin from a record field, the audit reads the record's words against its data and the walls against the planking, and the full ratchet ran first at the clean r242 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r242 ordered r243's opening: the FULL ratchet at
+the clean HEAD before any edit, then the survey's next hull BY LOOKING — the carrack, Endurance, the slave ship and the
+caravel had never been spun — or (0i), the galley's stern tent, if her record could be read for its form (it was not
+read this round). The ratchet ran at HEAD 157ef56 from 04:34 while the round's work was developed on a COPY of web/
+served on :8150 (build/staging/r243/web, every file a symlink to web/ except hull.js, audit-hulls.js and
+data/vessels.json — the r240 pattern); the copy's files were moved into web/ only after the run ended (cmp-verified).
+THE OPENING RATCHET: its result is in the receipt paragraph below, per the r198 rule. The next hull: of the survey's
+ranking (r241/survey.json) the never-spun hulls are the carrack (4,008 triangles per metre), Endurance (4,114), the
+slave ship (5,715) and the caravel (7,150); the carrack is the crudest of them and was spun on :8150 from eight
+bearings and four low ones (r243/spin-carrack/, r243/spin_capture.py — the r242 copy with the 150 s wait).**
+
+**THE FAULT, seen from every bearing. The carrack's record (attestation 'generated', confidence 'moderate') carries a
+Hull row reading 'carvel-built; forecastle forward, high rounded stern with aftcastle', her text says the same twice
+over, and her card photograph is a replica nau with a tall forecastle and a stepped sterncastle. The model drew a
+flush-decked hull with a flat sheer from stem to stern — 2.0 m of sheer at the bow and 1.6 at the stern, and no
+structure on the deck taller than a hatch coaming (r243/spin-carrack/b045.png, b180.png, b270.png). From the
+stern quarter she read as a barque with a lateen mizzen; nothing in the frame said carrack. The cause: her hull
+record has no castle field of any kind. hull.js draws castles only from data — the cog's open platform from
+`castle` (r205, r214), a junk's tiered quarters from `poop`, a liner's raised ends from `wellM` + `houseAt` — and
+the carrack declared none, so silence drew nothing, which is the rule (r205) and was right; what was wrong was
+that the record's own words and the record's own data disagreed and no rule read them against each other.**
+
+**THE MODEL (web/js/hull.js; r243/hull.before.js, hull.after.js, apply-hull-edits.py). buildTieredCastles(S, group,
+mats, hullMat), called from buildShip after buildJunkCastle on the FINE build, reads
+`castles: {fore: [fromU, toU, tiers], aft: [fromU, toU, tiers], deckHM?, railHM?}`. Each tier is a wall wound once
+round its stations (starboard forward to aft, port aft to forward, closed), lofted off the hull's own half-breadth
+at the sheer, inset 0.02 of the beam plus 0.035 a tier, its base sunk a tenth of a deck into what it stands on and
+its head one deck-height (deckHM, default 0.16 of the beam) over that; the aftcastle's tiers step aft (tier t starts
+0.40 t of the span further aft), the forecastle's step forward; a planked deck is lofted across each tier's head,
+carrying the sheer, and a rail of posts every 0.20 of the beam with one cap bar stands round it. The walls wear the
+hull's own planking shader — uv in the shader's frame, v continued above the sheer at the same strake pitch — because
+on the ship they WERE the side carried up; the decks and rails are plain timber materials. Every wall and deck mesh
+records userData.castle = {kind, end, tier, u0, u1, dh}. The floor on a tier's half-breadth is half the skin's own,
+so at the stem the forecastle's forward end closes inside the stem and never overhangs it (the buildRaisedEnds idiom).
+`castle` (singular, the cog's platform) is untouched, and the new builder returns at once for a hull without
+`castles`, so no other hull's geometry changes. The Action builds coarse (battle.js passes no `fine`), so the
+Gravelines fleet is unchanged.**
+
+**THE RECORD (web/data/vessels.json; r243/vessels.before.json, vessels.after.json, apply-record-edits.py). The
+carrack's hull gains `castles: {fore: [0.01, 0.26, 1], aft: [0.58, 0.995, 2], deckHM: 1.8, railHM: 0.9}` and a
+`castlesProvenance` that says what is attested and what is not: the Hull row attests both castles; the stations and
+heights are a CLASS DEFAULT read from no plate — a forecastle of one deck over the forward quarter of the length, an
+aftcastle of two tiers from just abaft the mainmast (at u 0.556) to the stern with the poop over its after 60%, 1.8 m
+a tier, a 0.9 m rail — with the Mataró votive model (c. 1450) and the Santa María reconstructions named as the sources
+of the arrangement and no px/m claimed, and two things marked UNREAD: whether the forecastle projected past the stem
+(the Mataró model's does), and the tier count of the India naus. Nothing else in the record moved (diff: 19 lines,
+all inside the carrack's hull).**
+
+**MEASURED AFTER (r243/probe_castles.py on :8150 against the r243 builder, r243/castles-after.json — the same reads
+as the audit's, printed): fore tier 0 (u 0.01–0.26, 46 vertices): its base row, read against the skin at 23 vertices, stands 0.27 m inside the planking at the closest and 0.21–0.27 m BELOW the skin's top (sunk a tenth of a deck by construction); the wall runs from y 4.48 to 8.09 and the deck lies at 8.09 at the stem, 1.7 m over the sheer's highest vertex (6.40). Aft tier 0 (u 0.58–0.995, 70 vertices): 0.24 m inside at the closest, base 0.18–0.27 m below the skin's top, wall 4.23 to 7.76. Aft tier 1, the poop (u 0.746–0.995, 46 vertices): base 0.15–0.18 m below tier 0's deck, wall 6.24 to 9.56 — its base row lies above the skin's height band, so it has no planking to be read against, which is why proof B below convicts two walls and not three. Nothing outside the skin anywhere; nothing standing off what it rests on.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r243/apply-audit-edits.py). D-CASTLES in two parts. THE RECORD, before
+the deck-covering rule: a timber hull whose Hull row names a castle or a poop must declare one — `castle`, `castles`,
+`poop`, or a liner's `wellM` + `houseAt` — or be convicted 'a hull whose record names a castle it does not declare';
+`castles` without `castlesProvenance` is 'castles with no provenance'; an end declared outside [fromU, toU, tiers] is
+'a castle declared out of shape'. THE GEOMETRY, after D-SAIL-SPAR: every declared tier must have its wall and its deck
+('castle tiers missing'); a wall vertex within the skin's own height band must lie inside the skin's half-breadth at
+its x and height, +0.02 m ('a castle wall outside the planking'); tier 0's base may ride no more than 0.30 m over the
+skin's top near its x and tier t's no more than 0.30 m over tier t−1's deck ('a castle standing off the ship').
+The first run of the record rule read every build and convicted Queen Mary 2 — her Hull row says 'a true forecastle
+and flared bow', her house runs from u 0.079 to the stern with no well, so nothing in her data declares a raised
+forecastle (r243/audit.out, the first run, 1 problem). That is a true finding about her record and a liner's
+question, not a nau's, so the record rule is scoped to timber builds this round and the finding is residual (0l)
+below. PROOFS (r243/run-proofs.sh on :8150): A, the r242 builder AND record under the r243 audit: checked 33 hulls, 2 problems — the carrack, 'a hull whose record names a castle it does not declare' with her Hull row quoted, and Queen Mary 2 the same under the first-run rule before its scoping (audit-proof-a.out). A2, the r242 builder under the r243 record and audit: 2 problems, both 'castle tiers missing' — 'fore: 1 tier(s) declared, 0 wall(s) and 0 deck(s) drawn' and 'aft: 2 tier(s) declared, 0 wall(s) and 0 deck(s) drawn' (audit-proof-a2.out). B, the r243 builder with the walls' inset made −0.30 m (hull.doctored-out.js): 2 problems, 'a castle wall outside the planking' — 'fore tier 0: a base vertex 0.25 m outside the skin at x −19.7, y 5.85' and 'aft tier 0: a base vertex 0.28 m outside the skin at x 20.0, y 5.78'; the poop's wall is above the skin's band and unread, as the probe says (audit-proof-b.out). C, tier 0's base and head lifted 0.6 m (hull.doctored-lift.js): 2 problems, 'a castle standing off the ship' — 'fore tier 0: base 0.39 m over the skin at x −18.0' and 'aft tier 0: base 0.42 m over the skin at x 3.5' (the 0.6 m lift less the 0.18 m sink; the poop rides on the lifted deck and is rightly silent; audit-proof-c.out). Builder and record restored from the after copies (cmp). The final audit on the r243 builder, record and audit:
+on :8150 after the scoping, checked 33 hulls, 0 problems (r243/audit-final-8150.out; the unscoped first run, 1 problem, is audit.out); on :8149 after the copy into web/, see the receipt paragraph's audit line (r243/audit-final-8149.out). Rule 8 on the way there: the one disagreement was Queen Mary 2's, and the audit was right about her record and wrong only about whose business the fix is.**
+
+**WITNESSED (r243/spin-carrack/ before, spin-carrack-after/ after, the pairs pair-b180-castles.png,
+pair-b045-castles.png and pair-b135-stern.png cropped from the 2880 × 1800 frames). Broadside from port (b180):
+before, one flat sheer from stem to stern with the hatches and the boat on it; after, a walled forecastle from the
+stem to abaft the foremast, the waist open at the mainmast, the quarterdeck wall rising from abaft the mainmast to
+the stern and the poop stepped up again over its after part, each deck railed, the walls planked in the hull's own
+strakes and colour. From the port bow (b045): the forecastle stands over the bow with the bowsprit running out over
+its rail and the anchor catted under it; the stepped stern reads behind the mainsail. From the stern quarter (b135):
+the aftcastle's after wall closes the stern with the rail across it, and the mizzen stands through the poop. Nothing
+floats and nothing that was on the deck is outside the walls; the fore and mizzen shrouds pass into the castle
+walls at the sheer, named (0m) below.**
+
+**Rule 0 on the after broadside read whole (r243/spin-carrack-after/b180.png): it reads as a rendered ship on
+water, not a chart — a dark planked hull with its strakes and wales, a tall bow and a taller stepped stern, two
+square sails on the fore and main with their topsails, a lateen on the mizzen, the bowsprit and its spritsail yard,
+the catted anchor, the sea to a low coast under a pale sky. Three facts a viewer can read off it without a legend:
+her ends are built up higher than her waist, the stern in two steps; she sets square sails forward and a triangular
+sail aft; and she is a wooden ship, planked, with her anchor hung at the bow.**
+
+**Named residuals, in order:** NEW (0l) Queen Mary 2's Hull row names 'a true forecastle' that her data does not
+declare and the model does not draw as a raised deck; the r243 record rule convicted her on its first run and is
+scoped to timber builds until her plates answer whether the bow's mooring deck is a raised forecastle — then the
+scope goes. NEW (0m) the carrack's fore and mizzen shrouds set up at the sheer inside the castle walls and pass
+through them; on the ship they set up on the castle's side or at its rail — buildRigging's chainplate height does
+not know about castles. NEW (0n) the carrack's castle stations and heights are a class default (castlesProvenance
+says so); the Mataró model's forecastle projects past the stem and the model's does not. NEW (0o) the carrack's
+bowsprit passes through the forecastle deck's plane with no hole drawn; the arrangement is attested, the aperture is
+not drawn. (0i) the galley's stern tent, (0j) the free foot's scallop, (0k) the cap's 30°, (0e²²) the cog's Frames
+1 and 2 on the stem, unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵)
+(0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230
+lists them.**
+
+**A NEW BASELINE: ship-carrack (`/?frozen=1#v=ship&s=carrack`) is added to Research/baselines/frames.json this round,
+captured after the push by check --frame and accepted as its first baseline after being looked at (FRAME-LOG.md).
+Until now no frame watched the carrack, which is how a flush-decked nau stood for 243 rounds.**
+
+**r244 opens by running the FULL ratchet at the clean HEAD first (this round scores only ship-galley, ship-treasure
+and the new ship-carrack by check --frame after the push; r243/PREDICTIONS-close.md says no other frame may move,
+and any mover outside it is not explained by this round); then takes (0m), the shrouds through the castle walls — the
+class is any mast standing within a walled castle, and buildRigging can read `castles` for the height its
+chainplates should set up at — or the survey's next never-spun hull, Endurance (4,114 triangles per metre), by
+looking.**
+
+**Live stamp: docs/index.html carries data-version 1788611047 at the build; the push and the live poll are in
+build/staging/r243/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r243 staging stays on disk uncommitted, the r211 convention.**
