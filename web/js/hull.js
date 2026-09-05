@@ -1030,16 +1030,24 @@ function castleGeom(S, H) {
   const b = surfacePoint(S, H, 1.0, 1.0);
   const xPost = b[0] + t;
   const xA = xPost + (C.overhangAftM != null ? C.overhangAftM : 0.7);
-  const xT = xA - P.aftLenM, xF = xT - P.sideLenM;
+  /* the step (after part to wing) and the wing's forward end: the plate's own stations
+     where the record carries them (castle.stationsU, round 236 — Lahn's Blatt 1 puts the
+     cog's wing 2.9 m further forward than the plan's lengths chained from the post), else
+     the plan's lengths chained aft to fore from the after edge */
+  const ST = C.stationsU || null;
+  const xAt0 = u => (u - 0.5) * L + H.rake(u);
+  const xT = ST && ST.aftPartFwd != null ? xAt0(ST.aftPartFwd) : xA - P.aftLenM;
+  const xF = ST && ST.wingFwd != null ? xAt0(ST.wingFwd) : xT - P.sideLenM;
+  const aftLen = xA - xT, sideLen = xT - xF;
   const wF = P.aftBreadthFwdM / 2, wA = P.aftBreadthAftM / 2;
-  const wC = x => x >= xT ? wF + (wA - wF) * (x - xT) / P.aftLenM : wF;
+  const wC = x => x >= xT ? wF + (wA - wF) * (x - xT) / aftLen : wF;
   const wIn = wF - P.sideBreadthM;
   const uAtX = x => {
     let lo = 0.3, hi = 1.4;
     for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if ((m - 0.5) * L + H.rake(m) < x) lo = m; else hi = m; }
     return (lo + hi) / 2;
   };
-  return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH: yDeck - yAfter, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17 };
+  return { xA, xT, xF, yDeck, wC, wIn, wF, wA, dH: yDeck - yAfter, rH, xPost, uAtX, plan: P, nBoards: C.wallBoards || 17, aftLen, sideLen };
 }
 
 function buildTimberRudder(S, group, timber, tag) {
@@ -3328,11 +3336,27 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const topY = base + lower * 0.97;
       const shroudPts = [[], []];
       const shroudSegs = [], ratSegs = [];
+      /* ── THE SHROUDS SET UP WHERE THE RECORD SAYS (round 236). The class lands them at
+         the mast's own station, spread over a channel there. The Bremen cog's set up ABAFT
+         the mast, in the channel wale at the castle's forward corner (Lahn Blatt 1; Tanner
+         2021 App. H: the stanchions and the two boards over the shrouds' lower ends were
+         recovered), 2.2–3.9 m abaft the mast — which is why Tanner notes they "do not sit
+         naturally" run from the masthead. With mast.shroudFixing.stationsU the lower ends
+         are spread between the outermost stanchions, at the top of the boards that box the
+         deadeyes, just outside them; without it the class channel stands where it did. */
+      const SF = mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length
+        ? mk.shroudFixing : null;
+      const sfLo = SF ? Math.min(...SF.stationsU) : 0, sfHi = SF ? Math.max(...SF.stationsU) : 0;
+      const sfY = SF ? -S.draught + (SF.boardsAboveKeelM ? SF.boardsAboveKeelM[1] : SF.waleTopAboveKeelM + 0.6) : 0;
       for (let s = 0; s < mk.shrouds; s++) {
         const f = (s + 1) / (mk.shrouds + 1);
         const chX = x + (f - 0.5) * L * 0.055;
+        const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
+        const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
+        const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
-          const a = new THREE.Vector3(chX, base, side * half * 1.06);
+          const a = SF ? new THREE.Vector3(sfX, sfY, side * sfZ)
+                       : new THREE.Vector3(chX, base, side * half * 1.06);
           const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
           shroudSegs.push([a, b]);
           shroudPts[si2].push([a, b]);
@@ -4520,6 +4544,13 @@ const PARTS = {
               what: 'Blocks with three holes, in pairs, rove with lanyards. They are how a shroud '
                   + 'is SET UP: hemp stretches, so standing rigging needs constant re-tensioning, '
                   + 'and a deadeye pair is a hand-powered turnbuckle you can adjust at sea.' },
+  channelWale: { stage: 5, name: 'Channel wale',
+              what: 'The timber outside the planking that the shrouds set up to on a cog: a wale '
+                  + 'at the castle\'s forward corner with stanchions standing on it up to the '
+                  + 'castle rail, boards between them over the shrouds\' lower ends, and '
+                  + 'crosspieces above the sheer. On the Bremen cog the three outer stanchions, '
+                  + 'two inner ones, two crosspieces and both boards were recovered, so the '
+                  + 'shrouds\' fixing points are the find\'s own — well abaft the mast.' },
   channel:  { stage: 5, name: 'Channels',
               what: 'Shelves bolted to the outside of the hull at deck level. They exist to push '
                   + 'the shrouds OUTBOARD, widening the angle at which the standing rigging '
@@ -5320,20 +5351,20 @@ function buildFittings(S, group, mats) {
       else { strip(x0, x1, () => wIn, () => wF, tone); strip(x0, x1, () => -wF, () => -wIn, tone); }
     }
     /* fore-and-aft beams (Längsbalken) under the planks; the outer pair follow the taper */
-    const yL = yDeck - 0.12, taper = Math.atan2(wF - wA, P.aftLenM);
+    const yL = yDeck - 0.12, taper = Math.atan2(wF - wA, CG.aftLen);
     for (const sg of [1, -1]) {
       box(xA - xF, 0.20, 0.16, (xA + xF) / 2, yL, sg * (wIn + 0.10), 'castle-longitudinal');
       box(xT - xF, 0.20, 0.16, (xT + xF) / 2, yL, sg * (wF - 0.14), 'castle-longitudinal');
-      box(P.aftLenM / Math.cos(taper), 0.20, 0.16, (xA + xT) / 2, yL,
+      box(CG.aftLen / Math.cos(taper), 0.20, 0.16, (xA + xT) / 2, yL,
           sg * ((wF + wA) / 2 - 0.14), 'castle-longitudinal', sg * taper);
     }
-    box(P.aftLenM, 0.20, 0.16, (xA + xT) / 2, yL, 0, 'castle-longitudinal');
+    box(CG.aftLen, 0.20, 0.16, (xA + xT) / 2, yL, 0, 'castle-longitudinal');
     /* athwartship beams (Querbalken) under those, on posts. The two after rows are the
        Heckbalken rows: a stern beam at the afterdeck reaching the castle's full breadth,
        short posts on its ends. Forward rows: posts stand on the afterdeck INSIDE the hull
        (the hull asked for its own half-breadth) and the beam cantilevers past them. */
     const yQ = yDeck - 0.44;
-    const rows = [xPost - 0.35, xPost - 2.6, xT, xF + P.sideLenM / 2, xF + 0.15];
+    const rows = [xPost - 0.35, xPost - 2.6, xT, xF + CG.sideLen / 2, xF + 0.15];
     rows.forEach((xr, i) => {
       const w = wC(xr), yDk = afterdeckAtX(xr);
       box(0.22, 0.22, 2 * w, xr, yQ + 0.11, 0, 'castle-beam');
@@ -5365,11 +5396,11 @@ function buildFittings(S, group, mats) {
       for (let c = 0; c < 4; c++)
         box(len, 0.14, 0.05, (x0 + x1) / 2, yDeck - 0.02 - 0.075 - c * 0.15, (z0 + z1) / 2, 'castle-wall-lower', ang);
     };
-    const pitch = Math.hypot(P.aftLenM, wF - wA) / nB;
+    const pitch = Math.hypot(CG.aftLen, wF - wA) / nB;
     for (const sg of [1, -1]) {
       boardRun(xT, sg * wF, xA, sg * wA, nB, yDeck, yDeck + rH, 'castle-wall');
       lowerRun(xT, sg * wF, xA, sg * wA);
-      boardRun(xF, sg * wF, xT, sg * wF, Math.max(3, Math.round(P.sideLenM / pitch)), yDeck, yDeck + rH * 0.6, 'castle-wall-wing');
+      boardRun(xF, sg * wF, xT, sg * wF, Math.max(3, Math.round(CG.sideLen / pitch)), yDeck, yDeck + rH * 0.6, 'castle-wall-wing');
       lowerRun(xF, sg * wF, xT, sg * wF);
     }
     boardRun(xA, -wA, xA, wA, Math.max(3, Math.round(2 * wA / pitch)), yDeck, yDeck + rH, 'castle-wall-aft');
@@ -6827,6 +6858,101 @@ function buildBasketTop(spec, mat, mats, mastR) {
     + 'the deck \u2014 Lahn\'s plate draws the mast as its broken stump \u2014 so the form is the '
     + 'seals\' and the size is the replica\'s, read off the Kiel 2007 photograph: about 1.8 m '
     + 'across the rim, 1.35 m deep, on a mast about half a metre through at the hounds.');
+}
+
+/* ── THE HULL'S HALF-BREADTH AT A HEIGHT (round 236): a fitting that stands against the
+ * planking at a given height wants the skin there, not the rail's or the deck's. Bisects the
+ * surface's v for the height, on a skin that rises monotonically with v. */
+function halfAtHeight(S, H, u, y) {
+  let lo = 0.02, hi = 1.0;
+  for (let i = 0; i < 28; i++) {
+    const m = (lo + hi) / 2;
+    if (surfacePoint(S, H, u, m)[1] < y) lo = m; else hi = m;
+  }
+  return Math.abs(surfacePoint(S, H, u, (lo + hi) / 2)[2]);
+}
+
+/* ── THE CHANNEL WALE (Rüstbalken), record-gated on mast.shroudFixing (round 236) ──────
+ * The Bremen cog's shrouds do not set up at the mast: they run aft to a wale outside the
+ * planking at the castle's forward corner, where three stanchions stand on the wale and rise
+ * to the castle rail, two boards close the bay between them from the wale to the sheer over
+ * the shrouds' lower ends, three crosspieces tie the stanchions above the sheer with vertical
+ * boards between the lower two, and three inner stanchions stand inside the rail — Tanner
+ * 2021 App. H, Figures 41 and 68; Lahn Blatt 1 in elevation. The record carries the plate's
+ * stations forward of the heel (as u), the heights over the keel, and the counts; the class
+ * defaults are the timbers' unread dimensions. Both sides are drawn; the record says the
+ * port side is inferred. */
+function buildChannelWale(S, H, F, group, timber) {
+  const L = S.lwl, y0 = -S.draught;
+  const xAt = u => (u - 0.5) * L + H.rake(u);
+  const yTop = y0 + (F.stanchionTopAboveKeelM || 5.9);
+  const dW = F.waleDepthM || 0.17, sW = F.waleSidedM || 0.15;
+  const yWaleTop = y0 + F.waleTopAboveKeelM, yWaleBot = yWaleTop - dW;
+  const sided = F.stanchionSidedM || 0.09, moulded = F.stanchionMouldedM || 0.15;
+  const us = F.stationsU.slice().sort((a, b) => a - b);
+  const xs = us.map(xAt);
+  const xFwd = Math.min(...xs), xAft = Math.max(...xs), xMid = (xFwd + xAft) / 2;
+  const uMid = (us[0] + us[us.length - 1]) / 2;
+  const boards = F.boardsAboveKeelM || [F.waleTopAboveKeelM, F.waleTopAboveKeelM + 0.6];
+  const ySheer = y0 + boards[1];
+  const cross = F.crosspiecesAboveKeelM || [];
+  const uW = F.waleU || [us[us.length - 1], us[0]];
+  const uW0 = Math.max(...uW), uW1 = Math.min(...uW);
+  for (const sgn of [-1, 1]) {
+    const gr = new THREE.Group();
+    const box = (lx, ly, lz, x, y, z, nm, rotX, rotY) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(lx, ly, lz), timber);
+      m.position.set(x, y, z);
+      if (rotX) m.rotation.x = rotX;
+      if (rotY) m.rotation.y = rotY;
+      m.name = nm; gr.add(m); return m;
+    };
+    /* the wale follows the planking, in short lengths, its inner face on the skin */
+    const yc = yWaleTop - dW / 2, NW = 6;
+    for (let k = 0; k < NW; k++) {
+      const ua = uW0 + (uW1 - uW0) * k / NW, ub = uW0 + (uW1 - uW0) * (k + 1) / NW;
+      const xa = xAt(ua), xb = xAt(ub);
+      const za = halfAtHeight(S, H, ua, yc) + sW / 2, zb = halfAtHeight(S, H, ub, yc) + sW / 2;
+      const len = Math.hypot(xb - xa, zb - za) + 0.03, ang = Math.atan2(-sgn * (zb - za), xb - xa);
+      box(len, dW, sW, (xa + xb) / 2, yc, sgn * (za + zb) / 2, 'channel-wale', 0, ang);
+    }
+    /* the outer stanchions stand on the wale outside the skin and lean out with the flare */
+    const zLo = halfAtHeight(S, H, uMid, yWaleBot) + sW, zHi = halfAtHeight(S, H, uMid, ySheer) + sW;
+    const lean = Math.atan2(zHi - zLo, ySheer - yWaleBot);
+    const zOn = y => zLo + Math.tan(lean) * (y - yWaleBot);
+    const rot = sgn * lean;
+    const hS = (yTop - yWaleBot) / Math.cos(lean), yS = (yTop + yWaleBot) / 2;
+    for (const x of xs) box(sided, hS, moulded, x, yS, sgn * (zOn(yS) + moulded / 2), 'channel-wale-stanchion', rot);
+    /* the two boards over the shrouds' lower ends, wale to sheer, on the stanchions' faces */
+    const nB = F.boards || 2, bh = (boards[1] - boards[0]) / nB;
+    for (let k = 0; k < nB; k++) {
+      const yb = y0 + boards[0] + (k + 0.5) * bh;
+      box(xAft - xFwd, bh - 0.015, 0.03, xMid, yb, sgn * (zOn(yb) + moulded + 0.015), 'channel-wale-board', rot);
+    }
+    /* the crosspieces, flush between the stanchions */
+    for (const h of cross) {
+      const yq = y0 + h;
+      box(xAft - xFwd, 0.10, 0.10, xMid, yq, sgn * (zOn(yq) + moulded / 2), 'channel-wale-crosspiece', rot);
+    }
+    /* vertical boards between the lower two crosspieces, as the plate draws them */
+    if (cross.length >= 2) {
+      const yA = y0 + cross[0] + 0.05, yB = y0 + cross[1] - 0.05, n = Math.max(2, Math.round((xAft - xFwd) / 0.3));
+      const ym = (yA + yB) / 2;
+      for (let k = 0; k < n; k++) {
+        const xc = xFwd + (k + 0.5) * (xAft - xFwd) / n;
+        box((xAft - xFwd) / n - 0.012, yB - yA, 0.03, xc, ym, sgn * (zOn(ym) + moulded + 0.015), 'channel-wale-board', rot);
+      }
+    }
+    /* the inner stanchions, inside the rail, deck to castle deck, at the outer ones' stations */
+    const nIn = F.innerStanchions || 0;
+    const yC = S.castle && S.castle.deckAboveKeelM != null ? y0 + S.castle.deckAboveKeelM : yTop;
+    for (let i = 0; i < nIn && i < xs.length; i++) {
+      const yD = H.deck(us[i]);
+      const zi = Math.abs(surfacePoint(S, H, us[i], 1)[2]) - 0.25;
+      box(0.12, yC - yD, 0.12, xs[i], (yC + yD) / 2, sgn * zi, 'channel-wale-inner-stanchion');
+    }
+    group.add(tag(gr, 'channelWale', sgn < 0 ? 'Port channel wale' : 'Starboard channel wale'));
+  }
 }
 
 /* ── DEADEYES: the blocks that set up the shrouds, in a row along each channel ───────── */
@@ -13849,6 +13975,9 @@ function buildShip(S, opts) {
          corbita's, the wasen mast held by running stays: chainplates and deadeyes are
          northern-European standing rigging, and a channel without shrouds is a bare shelf */
       if (mk.rig !== 'square' || mk.shrouds === 0) return;
+      /* a record that names WHERE the shrouds set up (mast.shroudFixing, round 236) draws
+         that structure and no class channel: the Bremen cog's channel wale abaft the mast */
+      if (mk.shroudFixing && mk.shroudFixing.stationsU) { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
       for (const sgn of [-1, 1]) {
         const p = surfacePoint(S, HS, mk.at, 0.985);
         const ch = new THREE.Mesh(

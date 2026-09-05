@@ -423,11 +423,19 @@ else {
 const dv = [].concat(...decks.map(world));
 let xF = 1e9, xA = -1e9, yD = -1e9;
 for (const q of dv) { xF = Math.min(xF, q[0]); xA = Math.max(xA, q[0]); yD = Math.max(yD, q[1]); }
-const len = xA - xF, wantL = P.aftLenM + P.sideLenM;
-if (Math.abs(len - wantL) > 0.15)
-say(v.id, "a castle off the record's length", `${len.toFixed(2)} m of deck, the plan says ${wantL.toFixed(2)}`);
 const post = (() => { let r = null; g.traverse(o => {
 if (!r && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) r = o; }); return r; })();
+const ST = H.castle.stationsFromHeelM || null;
+let heelX = -1e9;
+if (post) { const pv0 = world(post); let yMin = 1e9; for (const q of pv0) yMin = Math.min(yMin, q[1]);
+for (const q of pv0) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]); }
+const len = xA - xF;
+const wantL = ST && heelX > -1e8 ? xA - (heelX - ST.wingFwd) : P.aftLenM + P.sideLenM;
+if (Math.abs(len - wantL) > 0.15)
+say(v.id, "a castle off the record's length", `${len.toFixed(2)} m of deck, the ${ST ? 'plate' : 'plan'} says ${wantL.toFixed(2)}`);
+if (ST && heelX > -1e8 && Math.abs((heelX - xF) - ST.wingFwd) > 0.3)
+say(v.id, "the castle's forward end off the plate's station",
+`wing ends ${(heelX - xF).toFixed(2)} m forward of the heel, the plate says ${ST.wingFwd}`);
 if (!post) say(v.id, 'a castle with no post to overhang', 'no Sternpost mesh');
 else {
 const pv = world(post); let top = -1e9; for (const q of pv) top = Math.max(top, q[1]);
@@ -439,7 +447,7 @@ if (xA - xp > 1.5)
 say(v.id, 'a castle hanging past its stern', `after edge ${(xA - xp).toFixed(2)} m abaft the post's head — the stern beams cannot carry that`);
 }
 const halfAt = (x0, x1) => { let w = 0; for (const q of dv) if (q[0] >= x0 && q[0] <= x1) w = Math.max(w, Math.abs(q[2])); return w; };
-const xT = xA - P.aftLenM;
+const xT = ST && heelX > -1e8 ? heelX - ST.aftPartFwd : xA - P.aftLenM;
 const wFwd = halfAt(xT - 0.35, xT + 0.35), wAft = halfAt(xA - 0.35, xA + 0.01);
 if (Math.abs(2 * wFwd - P.aftBreadthFwdM) > 0.2)
 say(v.id, "the castle off the plan's forward breadth", `${(2 * wFwd).toFixed(2)} m at the after part's forward edge, record says ${P.aftBreadthFwdM}`);
@@ -3889,6 +3897,56 @@ say(v.id, 'a basket top nobody attested',
 if (!(spec && spec.cross) && crosses.length)
 say(v.id, 'a cross nobody attested',
 `${crosses.length} cross group(s) at u=${mk.at} on a record without top.cross`);
+});
+(H.masts || []).forEach((mk, i) => {
+if (mk.rig !== 'square') return;
+const F = mk.shroudFixing && mk.shroudFixing.stationsFromHeelM ? mk.shroudFixing : null;
+const wales = [];
+g.traverse(o => { const p = o.userData && o.userData.part;
+if (p && !o.isMesh && p.key === 'channelWale') wales.push(o); });
+if (!F) {
+if (wales.length) say(v.id, 'a channel wale nobody attested',
+`${wales.length} channel-wale group(s) on a record without mast.shroudFixing`);
+return;
+}
+if (wales.length !== 2) {
+say(v.id, 'declared but not drawn', `the channel wale the shrouds of mast ${i} set up in (${wales.length} of 2 sides drawn)`);
+return;
+}
+const wv = o => {
+const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+for (let k = 0; k < a.count; k++) { vv.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+return out;
+};
+let post = null;
+g.traverse(o => { if (!post && o.isMesh && (o.name === 'Sternpost' || (o.userData.part && o.userData.part.name === 'Sternpost'))) post = o; });
+if (!post) { say(v.id, 'a channel wale with no heel to measure from', 'no Sternpost mesh'); return; }
+const pv = wv(post); let yMin = 1e9, heelX = -1e9;
+for (const q of pv) yMin = Math.min(yMin, q[1]);
+for (const q of pv) if (q[1] < yMin + 0.15) heelX = Math.max(heelX, q[0]);
+const want = F.stationsFromHeelM.slice().sort((a, b) => a - b);
+for (const w of wales) {
+const st = []; w.traverse(o => { if (o.isMesh && o.name === 'channel-wale-stanchion') st.push(new THREE.Box3().setFromObject(o)); });
+if (st.length !== want.length)
+say(v.id, 'shroud stanchions miscounted', `${st.length} drawn on the ${w.userData.part.name.toLowerCase()}, the plate draws ${want.length}`);
+const got = st.map(b => heelX - (b.min.x + b.max.x) / 2).sort((a, b) => a - b);
+for (let k = 0; k < Math.min(got.length, want.length); k++)
+if (Math.abs(got[k] - want[k]) > 0.3)
+say(v.id, "a shroud stanchion off the plate's station",
+`${got[k].toFixed(2)} m forward of the heel against ${want[k]} on the ${w.userData.part.name.toLowerCase()}, mast ${i}`);
+}
+const xLo = heelX - Math.max(...want) - 0.4, xHi = heelX - Math.min(...want) + 0.4;
+let feet = 0, astray = 0, firstX = 0;
+g.traverse(o => {
+const p = o.userData && o.userData.part;
+if (!(o.isMesh && p && p.key === 'shroud' && p.name === 'Shrouds')) return;
+const pts = wv(o); let lo = 1e9; for (const q of pts) lo = Math.min(lo, q[1]);
+for (const q of pts) if (q[1] < lo + 0.5) { feet++; if (q[0] < xLo || q[0] > xHi) { astray++; if (astray === 1) firstX = q[0]; } }
+});
+if (feet && astray)
+say(v.id, 'shrouds set up off their attested station',
+`${astray} of ${feet} lower-end vertices outside the channel wale's span x ${xLo.toFixed(2)}–${xHi.toFixed(2)} (first at x ${firstX.toFixed(2)}; the mast stands at x ${((mk.at - 0.5) * H.lwl).toFixed(2)}), mast ${i}`);
 });
 if (H.deckhouses && H.deckhouses.length) {
 const HSd = SHIPS_HULL.hullSurface(H);

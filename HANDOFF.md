@@ -19299,3 +19299,135 @@ THE RATCHET, run after the push: RATCHET EXIT 1  END 20:10:36; 64 of 64 frames s
 Two commits close the round (e49442d record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
 
 **Receipt note (r235, 20:13 PDT): the one mover, ship-treasure 0.054%/0.019, was CLASSIFIED after the receipt above was written and is ACCEPTED with its reason in FRAME-LOG.md. The diff image (Research/baselines/_diff/ship-treasure.png, read whole) shows the cog — a berth neighbour at the frame's left edge — with her new basket top and cross as the bright pixels at x 250–430, y 590–900 of 2880×1800, her sail and shrouds faint, and the rest of the frame's change the same rigging dither r234 read at 0.049%/0.019 on this frame (the mean_abs is identical, 0.019). r235/PREDICTIONS-close.md said the masthead lay outside both neighbour crops; it lies inside this one, by the height the r235 masthead adds (24.7 m over the water against 23.8). The prediction was wrong about the crop, not about the cause. r236 carries no ratchet item in.**
+
+## Round 236 — 2026-09-04 — the shrouds set up where the wreck says: in the channel wale at the castle's forward corner, 2.2–3.9 m abaft the mast, on three stanchions with two boards over their lower ends, read off Lahn's Blatt 1 and Tanner's Appendix H; and the castle's wing, which ends on those stanchions, moves 2.9 m forward to the plate's station
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r235's receipt reported one mover,
+ship-treasure, classified and accepted after the receipt (the cog's masthead inside that frame's left edge), so
+nothing was carried in as a first item. r235 named (0e⁹)+(0e¹¹), the shrouds: 4 a side on the record, their lower
+ends unread — read Tanner for the Rüstbalken and build the attachment the wreck attests. Done, and it moved the
+castle. The r235 clock pattern held: the full ratchet STARTED beside the close (20:48, load 7.7 with Apple's
+mediaanalysisd indexing the round's own images at 200% CPU) as soon as the geometry was final; the round's work was
+built, committed and pushed while it ran; its result is in the receipt commit.**
+
+**THE READ. Tanner 2021 vol. 2, Appendix H, "Channel wale and stanchions" (r230/tanner-vol2.txt lines 11135–11160;
+Figure 41 and Figure 68 rendered from the PDF, r236/tanner-fig41-319.png, tanner-fig68-344.png): "Of the six
+stanchions, the three outer stanchions and two inner stanchions were recovered, as well as two of the three
+crosspieces and the two lower boards installed to protect the shrouds"; the recovered channel wale stanchions
+position "the foremost starboard corner of the stern castle" (line 11942); Hoffmann's rig was "fixed from the
+archaeological evidence with the recovery of the mast step, as were the shroud fixing points in the channel wale and
+stem-head" (12862); and Tanner's own note that "the red coloured shrouds in the earlier reconstruction do not sit
+naturally when run from the mast head as positioned, to the fixing points in the outer channel wale" (11540) — because
+the fixing points are metres abaft the mast. App. G's checklist item 10: a deadeye was recovered, its iron strop not.
+The Kiel Hansekogge's page: only the holes in the Rüstbalken for the shrouds' lower ends survived. Westphal 1991's
+figure caption: "Steuerbordwand des Kastells, vorn das Pütting-Schanzkleid für die Wanten". LAHN'S BLATT 1
+(r230/lahn-blatt1-full.png, 590.8 px/m, the heel at plate x 2160, the keel's underside at y 4440; crops
+r236/blatt1-castle-fwd-third.png, blatt1-ruest-half.png, blatt1-wale-full.png, blatt1-wale-fwd-half.png) draws the
+structure in elevation at the forward end of the castle's wing wall: three stanchions at 5.39 / 6.17 / 7.08 m forward
+of the heel (DB 4's head stands at 5.18), rising from a wale outside the planking — its top 3.63 m over the keel,
+0.17 m deep, its hatched aft end 4.54 m forward of the heel, running forward past the stanchions as a thinner doubled
+line whose end was not read — to the castle rail at 5.92 m; two boards between the stanchions from the wale's top to
+the sheer (3.63–4.21 m); crosspieces at 4.28, 4.78 and 5.27 m with vertical boards between the lower two. Tanner's
+Figure 55 (the 2014 laser scan of the reconstructed vessel, r236/tanner-fig55-crop.png) draws the same group standing
+between Frames 26 and 23. The replicas (r236/ubena3-rail-band-2x.png, ubena2-rail-band-2x.png, roland-lower.png) set
+their shrouds up at the rail at the forward end of the castle's side wall, abaft the mast, as the plate has it.**
+
+**AND THE CASTLE IS NOT WHERE THE MODEL HAD IT. The same plate reads the castle's stations against the heel: the tall
+after wall (rail 6.55 m over the keel) from about 3.1 m abaft the heel to 3.34 m forward of it, where it steps down to
+the wing wall (rail 5.89), which runs forward to 7.08 m and ends on the forward stanchion (r236/blatt1-stern-half.png).
+The model's wing ended 4.21 m forward of the heel and its step stood 0.76 m forward — 2.6–2.9 m abaft the plate's —
+because the castle was chained from the after edge by the plan's lengths (Westphal 1991 after Lahn 1979: 4.75 + 3.45 =
+8.2 m), and the elevation reads 10.2 m. The plan numbers stay on the record as breadth stations and are named
+CONTESTED against the plate (castle.stationsProvenance). The after edge stays where the r214 rule puts it,
+overhangAftM abaft the built post's head: the model's post stands 3.3 m abaft the heel at the sheer where the plate's
+stands about 2.3, so the model's after part is 7.3 m long against the plate's 6.45 — the sternpost's rake residual,
+named below, not moved this round.**
+
+**THE DECISION. `shroudFixing` on the cog's mast record: form 'channel-wale'; stationsFromHeelM [5.39, 6.17, 7.08]
+and stationsU [0.646, 0.608, 0.564] (u = 0.5 + (8.39 − d) / 20.5, the r230 conversion, the loft reading u and the
+audit reading metres from the built heel, the r230 beam pattern); the wale 4.54 → 8.0 m from the heel (waleU), top
+3.63, 0.17 deep, 0.15 sided; stanchions to 5.92, sided 0.09 as drawn, moulded 0.15; boards 2 at 3.63–4.21;
+crosspieces [4.28, 4.78, 5.27]; innerStanchions 3; the deadeye as a sentence; provenance naming every plate with its
+px/m; contested carrying the port side's inference, the inner stanchions' unread form, the AKHS Elbing model's
+different attachment (deadeyes to three Wantklampen after the Kalmar find) and the ratlines the class draws on a rig
+no cog seal rattles down. `castle.stationsFromHeelM { aftPartFwd 3.34, wingFwd 7.08 }`, `castle.stationsU { 0.746,
+0.564 }`, castle.fromU 0.564 (was 0.70). A "Shrouds" row on the card.**
+
+**THE MODEL (web/js/hull.js; before/after copies and apply-hull-edits.py in r236/). Three class changes, each gated on
+a record field and byte-identical without it. (1) THE SHROUDS SET UP WHERE THE RECORD SAYS: with
+mast.shroudFixing.stationsU the standing-rigging block spreads the lower ends between the outermost stanchions (four a
+side, two a bay), at the top of the boards and just outside them, via a new halfAtHeight(S, H, u, y) that bisects the
+skin for its half-breadth at a height; without it the class lands them at the mast as before. (2) THE CHANNEL WALE
+(buildChannelWale): the channels block draws the record's structure and no class channel or deadeye row — per side, a
+wale in six lengths following the planking with its inner face on the skin, three outer stanchions standing on the wale
+and leaning out with the flare (the lean read off the skin between the wale and the sheer), two boards and the
+crosspieces on the stanchions' faces, vertical boards between the lower two crosspieces, three inner stanchions inside
+the rail from the deck to the castle deck; tagged 'channelWale' (a new PARTS entry with its card), the stanchion meshes
+named 'channel-wale-stanchion'. (3) THE CASTLE'S STATIONS: castleGeom takes the step and the wing's forward end from
+castle.stationsU when present, else the plan's lengths chained from the after edge as before; the builder reads the
+derived aftLen and sideLen (the taper, the longitudinals, the beam rows, the wall pitch), which equal the plan's
+without stations.**
+
+**MEASURED (r236/measure-after.out, measure_ship on the built scene, hull space, water at y 0): Shrouds u 0.459 →
+0.637, y 1.95 → 23.07 — from the masthead to the wale, 3.65 m of run in plan (was u 0.442–0.478, at the mast);
+channel-wale u 0.518–0.689 (3.51 m; 4.5 → 8.0 m forward of the heel), y 1.21–1.38 (3.46–3.63 over the keel), half
+3.88; stanchions u 0.562–0.648, y 1.21 → 3.67 (3.46 → 5.92 over the keel), half 4.18 at the top of the lean; boards
+y 1.39–2.48 (the two below the sheer and the vertical row above it); crosspieces y 1.98–3.07; inner stanchions y 0.27
+→ 3.09 (deck to castle deck). castle-wall-wing u 0.564–0.750, 3.80 m (was 0.704–0.872, 3.44); castle-deck 11.08 m
+(was 8.20); castle-wall (the after part) 7.25 m. No Channels or Deadeyes row on the cog (were at u 0.42–0.50).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; apply-audit-edits.py). R-SHROUD-FIXING: a square mast whose record
+carries shroudFixing.stationsFromHeelM must have two 'channelWale' groups, each with as many stanchion meshes as
+stations, every stanchion within 0.3 m of its station forward of the built heel (the Sternpost part's lowest-aftmost
+vertex, as D-BEAM-HEEL reads it), and the 'Shrouds' mesh's lower-end vertices (the lowest 0.5 m) inside the
+stanchions' span; a record without the field must carry no channel wale. C-EXTENT and C-PLAN read castle
+stationsFromHeelM when present (the wanted length is the after edge to the plate's wing end; the step is the plate's),
+and new C-STATIONS convicts a wing end off the plate's station by more than 0.3 m. PROOFS
+(r236/run-audit-and-witness.sh, .out): A, the r235 builder under the r236 record and audit — three problems, all the
+cog: "a castle off the record's length: 8.20 m of deck, the plate says 11.08", "the castle's forward end off the
+plate's station: wing ends 4.20 m forward of the heel, the plate says 7.08", "declared but not drawn: the channel wale
+the shrouds of mast 0 set up in" (audit-proof-a.out); B, the r236 builder with the stanchions doctored 1.0 m aft
+(hull.doctored-stations.js) — six problems, "a shroud stanchion off the plate's station" at each of three stations on
+each side (audit-proof-b.out). The builder restored from the after-copy (cmp). The final audit: checked 33 hulls,
+0 problems (r236/audit.err).**
+
+**WITNESSED (r236/witness-shipwright-quarter-close.png, #v=ship&s=cog&b=150&l=8&z=0.9; witness-shipwright.png, the
+broadside, the structure at 6x in witness-wale-broadside-6x.png; witness-shipwright-quarter.png, b=125; witness-sea.png,
+#e=3&f=hanse; before-quarter.png is the r235 state at b=125). At the broadside: the shrouds and their ratlines run
+aft-and-down from the masthead past the sail to a framed bay at the wing's forward end — two stanchions in view
+standing on a short wale under the sheer, boards between them, crosspieces above, the wing wall ending on the forward
+one; the Georgian channel and deadeye row at the mast are gone. From the quarter the wing runs visibly further forward
+than before and the shrouds converge on its corner. Rule 0 answered on witness-sea.png read whole: it reads as a
+rendered world — the swell's texture, the wake's two arms, the coast's grey band under haze, the hull's planking lit
+from the quarter. Three facts a viewer can read off it without a legend: the ship has one mast and one square sail;
+her shrouds run aft from the masthead to a frame at the castle's forward corner, not to the rail beside the mast; a
+coast lies off her starboard bow under haze.**
+
+**Named residuals, in order:** (0e⁹)+(0e¹¹) RESOLVED: the shrouds set up in the wreck's channel wale at the plate's
+stations. NEW (0e¹²): the sternpost's rake — the built post's head stands 3.3 m abaft the heel at the sheer where
+Blatt 1's stands about 2.3 (r236/blatt1-stern-half.png), so the castle's after edge, chained from it, sits 4.0 m abaft
+the heel against the plate's 3.1 and the after part reads 7.3 m against 6.45; sternRake 0.09 is the knob, and the
+plate should be read for the post's line. NEW (0e¹³): the wale's forward run — drawn to 8.0 m from the heel; the plate
+carries a thinner doubled line on at the same height, unread. NEW (0e¹⁴): the ratlines the class rattles down on the
+cog — no cog seal shows them (AKHS), and the record says so; a record field to withhold them is the r234 oneTree
+pattern. (0e¹⁰) the mast's taper, (0e⁸) the sail's emblem and bonnet seams, (0e⁵) the trim and (0e⁶) the lwl unchanged.
+(0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**Three method notes. (1) A fitting's station is a fact about the hull, and reading it moved the castle: the round
+set out to attach four ropes and found the structure they attach to standing 2.9 m forward of where the model's
+castle ended, because the castle had been chained from the stern by summary lengths while the plate draws its
+stations directly. Read the plate for the station, not the summary for the length. (2) A plan and an elevation can
+both be Lahn's and disagree by two metres; the record carries both and says which the loft reads. (3) Tanner's remark
+that the earlier reconstruction's shrouds "do not sit naturally" was the clue that the fixing points were far from the
+mast — an author's complaint about someone else's model is a measurement.**
+
+**r237 opens by reading the receipt paragraph below for the ratchet's result (any mover not named in
+r236/PREDICTIONS-close.md is r237's first item), then takes (0e¹²), the sternpost's rake: read Blatt 1's post line
+from the heel to the sheer at 590.8 px/m (r236/blatt1-stern-half.png has it at half scale: the rudder's gudgeon
+straps sit on the post's after face) and give the record a raked post the plate supports, which brings the castle's
+after edge to the plate's 3.1 m abaft the heel through the r214 overhang rule unchanged.**
+
+**Live stamp: docs/index.html carries data-version 1788580239 at the build; the push and the live poll are in
+build/staging/r236/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r236 staging stays on disk uncommitted, the r211 convention.**
