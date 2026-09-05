@@ -1625,16 +1625,23 @@
        sheer height and the rule convicts. The decked arm is bounding-box: a real deck
        has no business below the load line, so a decked hull whose deck-tagged geometry
        dips under it has been wrongly opened. Twin hulls are probed on each hull's own
-       centreline, at stations chosen clear of the record's crossbeams. */
+       centreline, at stations halfway between the BUILT crossbeams (userData.crossbeam,
+       round 247: the record's eight put a beam on every one of the five stations the rule
+       had picked clear of the class's three, and the rule convicted the beams). */
     {
       const undecked = H.deckLaid === false || (H.deck && H.deck.covering === 'bare');
       if (undecked && part.deck) {
         g.updateMatrixWorld(true);
         const rc = new THREE.Raycaster();
         const lanes = H.doubleHull ? [-(H.hullSep || 0) / 2, (H.hullSep || 0) / 2] : [0];
+        const bmU = []; g.traverse(o => { if (o.userData && o.userData.crossbeam) bmU.push(o.userData.crossbeam.u); });
+        bmU.sort((a, b) => a - b);
+        const stations = bmU.length >= 2
+          ? bmU.slice(0, -1).map((u, i) => (u + bmU[i + 1]) / 2).filter(u => u >= 0.3 && u <= 0.8)
+          : [0.35, 0.45, 0.55, 0.65, 0.75];
         for (const lane of lanes) {
           let deepest = 1e9;
-          for (const u of [0.35, 0.45, 0.55, 0.65, 0.75]) {
+          for (const u of stations) {
             const x = (u - 0.5) * H.lwl;
             rc.set(new THREE.Vector3(x, 50, lane), new THREE.Vector3(0, -1, 0));
             /* the question is what the VIEWER meets: an invisible mesh draws nothing
@@ -6145,9 +6152,17 @@
        centre (the foot is the block's top, len/2 away); (5) each LOWER block's centre stands
        from 0.05 m under to 1.5 len + 0.1 m over the rail's cap at the sheer at its own x
        (H.sheer + the cap's height, as buildFittings lays it) and within 0.35 m of the sheer's
-       half-breadth there; (6) a tackle-class mast has one upper block a side per shroud. A
-       lashing-class mast (crab claw, junk) is not read: its lashing is not drawn, r246's
-       residual. */
+       half-breadth there; (6) a tackle-class mast has one upper block a side per shroud.
+       ── AND THE LASHING CLASS (round 247): a crab-claw mast on a double hull sets up with a
+       lashing round the crossbeam at the hull's rail (the canoe's four feet stood on the
+       platform at z ±0.55 on hulls 2.7 m out, r246/feet-after.json). Read from the
+       'shroudLashing' group's eyes (userData.lash: mast, shroud, side, eye, seat, timber) and
+       the built crossbeams (userData.crossbeam): (7) each lashing-class lower shroud's foot
+       lies within 0.10 m of an eye's centre; (8) each lashing's seat lies on a built
+       crossbeam — within its x extent (+0.02), within 0.05 m of its top, inboard of its end
+       — or, where the timber is the cap, on the cap's top at the sheer as (5) reads it; (9)
+       a lashing-class mast has one eye a side per shroud. Where the record names the class
+       (mast.shroudSetup) kindOf reads it, as shroudFeet does. */
     {
       const worldS = o => {
         const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
@@ -6159,15 +6174,21 @@
       const anySquare = (H.masts || []).some(m => m.rig === 'square');
       const kindOf = mk => !mk.shrouds ? null
         : (mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length) ? 'fixing'
+        : ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup
         : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
         : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
-      const dead = [], chans = [], shr = [], tack = [];
+      const dead = [], chans = [], shr = [], tack = [], lash = [], beams = [];
+      const extent = pts => { const e = { xMin: Infinity, xMax: -Infinity, yMin: Infinity, yMax: -Infinity, zMax: 0 };
+        for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMin = Math.min(e.yMin, q[1]); e.yMax = Math.max(e.yMax, q[1]); e.zMax = Math.max(e.zMax, Math.abs(q[2])); }
+        return e; };
       g.traverse(o => {
         const p = tagOf(o); if (!o.isMesh || !p) return;
         if (p.key === 'deadeye') dead.push({ c: cenOf(worldS(o)), r: o.geometry.parameters ? o.geometry.parameters.radiusTop : 0.1 });
         else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs) }); }
         else if (p.key === 'shroud' && p.name === 'Shrouds') shr.push(o);
         else if (p.key === 'tackle' && o.userData.block) tack.push({ c: cenOf(worldS(o)), ...o.userData.block });
+        else if (p.key === 'shroudLashing' && o.userData.lash) lash.push({ c: cenOf(worldS(o)), ...o.userData.lash });
+        else if (p.key === 'crossbeam' && o.userData.crossbeam) beams.push({ ...extent(worldS(o)), ...o.userData.crossbeam });
       });
       let off = 0, feet = 0, first = null;
       for (const o of shr) {
@@ -6234,6 +6255,49 @@
           const n = tack.filter(t => t.mast === mi && t.side === sgn && t.upper).length;
           if (n !== mk.shrouds)
             say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} tackle${n === 1 ? '' : 's'}`);
+        }
+      });
+      /* (7) a lashing-class shroud ends in its eye (round 247) */
+      let offL = 0, feetL = 0, firstL = null;
+      for (const o of shr) {
+        const mk = (H.masts || [])[o.userData.mast]; if (!mk || kindOf(mk) !== 'lashing') continue;
+        const pts = worldS(o);
+        for (let i = 0; i + 7 < pts.length; i += 8) {
+          const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
+          feetL++;
+          let best = null;
+          for (const e of lash) { const dist = Math.hypot(foot[0] - e.eye[0], foot[1] - e.eye[1], foot[2] - e.eye[2]); if (best === null || dist < best) best = dist; }
+          if (best === null || best > 0.10) { offL++; if (!firstL) firstL = { foot, mast: o.userData.mast, dist: best }; }
+        }
+      }
+      if (offL)
+        say(v.id, 'a shroud on no lashing', `${offL} of ${feetL} lower shrouds on lashing-class masts end away from any lashing's eye (first: mast ${firstL.mast}, a foot at x ${firstL.foot[0].toFixed(2)}, y ${firstL.foot[1].toFixed(2)}, z ${firstL.foot[2].toFixed(2)}, ${firstL.dist === null ? 'no lashing drawn' : 'the nearest eye ' + firstL.dist.toFixed(2) + ' m away'})`);
+      /* (8) the lashing's seat is on a built crossbeam — or on the cap where the hull has none */
+      if (lash.length) {
+        const HSl = SHIPS_HULL.hullSurface(H), capHl = H.capM ? H.capM : H.beam * 0.016 * 1.6;
+        let offB = 0, firstB = null;
+        for (const e of lash) {
+          const st = e.seat; let on;
+          if (e.timber && e.timber.what === 'crossbeam')
+            on = beams.some(bm => st[0] >= bm.xMin - 0.02 && st[0] <= bm.xMax + 0.02 && Math.abs(st[1] - bm.yMax) <= 0.05 && Math.abs(st[2]) <= bm.zMax + 0.02);
+          else {
+            let uf = 0.5 + st[0] / H.lwl;
+            for (let k = 0; k < 2; k++) uf = Math.max(0.02, Math.min(0.98, 0.5 + (st[0] - HSl.rake(uf)) / H.lwl));
+            const top = HSl.sheer(uf) + capHl, hb = Math.abs(SHIPS_HULL.surfacePoint(H, HSl, uf, 1)[2]);
+            on = Math.abs(st[1] - top) <= 0.05 && Math.abs(Math.abs(st[2]) - hb) <= 0.35;
+          }
+          if (!on) { offB++; if (!firstB) firstB = e; }
+        }
+        if (offB)
+          say(v.id, 'a lashing off its beam', `${offB} of ${lash.length} shroud lashings seat on no built ${firstB.timber && firstB.timber.what === 'crossbeam' ? 'crossbeam' : 'cap'} (first: mast ${firstB.mast} shroud ${firstB.shroud} ${firstB.side < 0 ? 'port' : 'starboard'}, seat at x ${firstB.seat[0].toFixed(2)}, y ${firstB.seat[1].toFixed(2)}, z ${firstB.seat[2].toFixed(2)}; ${beams.length} crossbeams built)`);
+      }
+      /* (9) every lashing-class shroud has its lashing */
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'lashing') return;
+        for (const sgn of [-1, 1]) {
+          const n = lash.filter(e => e.mast === mi && e.side === sgn).length;
+          if (n !== mk.shrouds)
+            say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} lashing${n === 1 ? '' : 's'}`);
         }
       });
     }

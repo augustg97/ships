@@ -3597,7 +3597,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          (the all-lateen hulls, the crab claw) keeps the old deck-edge landing, undrawn. */
       const FT = shroudFeet(S, H, mk, FINE);
       const CT = FT.castle;
-      const onDeadeyes = FT.kind === 'deadeyes', onTackle = FT.kind === 'tackle';
+      const onDeadeyes = FT.kind === 'deadeyes', onTackle = FT.kind === 'tackle', onLashing = FT.kind === 'lashing';
       /* ── A SHROUD ON AN ALL-LATEEN HULL SETS UP WITH A TACKLE (round 246). r245 left the
          tackle class — a lateen mast on a hull with no square rig: dhow, caravel, galley,
          galleass, 72 feet — landing at the deck edge on nothing drawn. The structure is a
@@ -3608,7 +3608,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
          deadeye pair does not; a class default read from no plate, as the deadeye row is. The
          seat comes from shroudFeet; the tackle lies on the line from the seat to the masthead,
          so the shroud runs straight into it. */
-      const tackles = [];
+      /* ── AND A SHROUD ON A LASHED DOUBLE CANOE SETS UP WITH A LASHING (round 247): the
+         shroud ends in an eye over the crossbeam at the hull's rail, and a lanyard of turns
+         from the eye round the beam sets it up — the seat and the timber come from shroudFeet,
+         the eye lies on the line from the seat to the masthead. r246 left this class, the
+         voyaging canoe's four feet, on the platform on nothing drawn. */
+      const tackles = [], lashings = [];
       for (let s = 0; s < mk.shrouds; s++) {
         const chX = FT.xs[s];
         const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
@@ -3627,6 +3632,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
             const hi = lo.clone().addScaledVector(dir, FT.drift + FT.block);       // the upper block's centre
             a = hi.clone().addScaledVector(dir, FT.block * 0.5);                   // the shroud ends at its top
             tackles.push({ lo, hi, dir, side, s });
+          } else if (onLashing) {
+            const st = FT.seats[s];
+            const seat = new THREE.Vector3(st.x, st.y, side * st.z);
+            const dir = new THREE.Vector3().subVectors(b, seat).normalize();
+            a = seat.clone().addScaledVector(dir, FT.lash);                        // the shroud ends in its eye
+            lashings.push({ eye: a, seat, dir, side, s, timber: st.timber });
           } else a = new THREE.Vector3(chX, base, side * half * 1.06);
           shroudSegs.push([a, b]);
           shroudPts[si2].push([a, b]);
@@ -3667,6 +3678,35 @@ function buildRig(S, group, mats, FINE, FURLED) {
         if (fm) tg.add(fm);
         tg.userData.mast = mi;
         group.add(tag(tg, 'tackle'));
+      }
+      /* the lashings themselves (round 247): an eye at the shroud's end, and a lanyard of
+         three turns from it round the timber under the seat — over the top, down the forward
+         face, under, up the after face and back to the eye — each turn a rope's width along
+         the beam from the last. Every eye records its mast, shroud, side, eye, seat and timber
+         for the audit (userData.lash). */
+      if (lashings.length) {
+        const lg = new THREE.Group(), turns = [];
+        const rr = 0.006 + B * 0.0006;
+        for (const Lh of lashings) {
+          const T = Lh.timber, hw = T.lenX / 2 + rr, zc = Lh.seat.z;
+          const eye = new THREE.Mesh(new THREE.TorusGeometry(0.03 + B * 0.01, rr * 1.2, 6, 12), ropeMat);
+          eye.position.copy(Lh.eye);
+          const axis = new THREE.Vector3().crossVectors(Lh.dir, new THREE.Vector3(0, 0, 1)).normalize();
+          if (axis.lengthSq() > 0.5) eye.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), axis);
+          eye.userData.lash = { mast: mi, shroud: Lh.s, side: Lh.side, eye: [Lh.eye.x, Lh.eye.y, Lh.eye.z],
+                                seat: [Lh.seat.x, Lh.seat.y, Lh.seat.z], timber: T };
+          lg.add(eye);
+          for (const k of [-1, 0, 1]) {
+            const z = zc + k * rr * 2.2;
+            const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
+                       new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
+            turns.push([Lh.eye, p[0]], [p[0], p[1]], [p[1], p[2]], [p[2], p[3]], [p[3], Lh.eye]);
+          }
+        }
+        const tm = ropeMesh(turns, rr, ropeMat);
+        if (tm) lg.add(tm);
+        lg.userData.mast = mi;
+        group.add(tag(lg, 'shroudLashing'));
       }
 
       /* ── ⚠ RATLINES ARE NOT A UNIVERSAL FITTING ────────────────────────────────────
@@ -4902,6 +4942,14 @@ const PARTS = {
                   + 'can be let go and set up in a minute, and a deadeye pair cannot. Galleys, '
                   + 'dhows and the lateen caravel set up this way. A class default here, read '
                   + 'from no plate.' },
+  shroudLashing: { stage: 5, name: 'Shroud lashings',
+              what: 'An eye at the foot of each shroud on a lashed double canoe, and a lanyard of '
+                  + 'several turns from the eye round the crossbeam just outboard of the hull\'s '
+                  + 'rail — the same joint that holds the beam to the hull. It is how a rig with no '
+                  + 'metal in it sets its shrouds up: the turns are hove taut and seized, and taken '
+                  + 'up again when the fibre stretches. On Hōkūleʻa every shroud lands on the '
+                  + 'hull\'s rail at a beam end (the Polynesian Voyaging Society\'s 2009 broadside); '
+                  + 'the eye\'s height over the beam is a class figure read from no plate.' },
   channelWale: { stage: 5, name: 'Channel wale',
               what: 'The timber outside the planking that the shrouds set up to on a cog: a wale '
                   + 'at the castle\'s forward corner with stanchions standing on it up to the '
@@ -12232,13 +12280,18 @@ function channelRun(S, H, u, halfU) {
  *     'tackle'   a lateen on an all-lateen hull (dhow, galley, galleass, caravel) sets up with a
  *                tackle — two blocks and a fall — from the shroud's end to the rail: no deadeye,
  *                no channel. buildRig draws it from this derivation's seats (round 246);
- *     'lashing'  a crab claw or a junk: stays lashed to the hull — not drawn (r246 residual).
+ *     'lashing'  a crab claw or a junk: the shroud ends in an eye and a lanyard of turns round
+ *                the crossbeam at the hull's rail sets it up (round 247; the cap on a hull with
+ *                no beams). mast.shroudSetup in the record names any of the three where a plate
+ *                has been read.
  *   Returns null for a mast without shrouds, else {kind, xs, y, z, r, chan, castle, run, seats,
  *   drift, block}: xs the hull x of each shroud's foot, y and z the deadeyes' row (a deadeye-class
  *   foot is the top of its deadeye, at (xs[s], y + r, ±z)), r the deadeye's radius, chan the
  *   channel box {x, y, z, len, d, w} or null; for the tackle class seats[s] = {x, y, z} is where
  *   the lower block hooks to the rail's cap, drift the run of fall between the blocks and block
- *   a block's length — the foot is the upper block's top, on the line from the seat to the head.
+ *   a block's length — the foot is the upper block's top, on the line from the seat to the head;
+ *   for the lashing class seats[s] is the timber's top at the hull's rail with the timber itself
+ *   (seats[s].timber: x, yTop, yBot, lenX) and lash the eye's height over it along that line.
  *   The feet keep the class spread (±0.0275 L, shrunk to the mast's own structure by channelRun on
  *   a castled hull, r244); a deadeye is 0.018 B across, never more than 0.5 m, and never wider
  *   than that pitch allows — on a 74 the class gives 0.32 m a shroud against a 0.53 m block. The castle placement is FINE
@@ -12248,7 +12301,12 @@ function shroudFeet(S, H, mk, FINE) {
   const L = S.lwl, B = S.beam, u = mk.at, n = mk.shrouds;
   const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
   const anySquare = (S.masts || []).some(m => m.rig === 'square');
+  /* the record's word wins where it has one (round 247, the home r245 named as (0s)):
+     mast.shroudSetup names the class — 'deadeyes', 'tackle' or 'lashing' — with its
+     provenance beside it in the record; the class derivation stands for every other mast */
+  const REC = ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup : null;
   const kind = SF ? 'fixing'
+    : REC ? REC
     : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
     : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
   const x = (u - 0.5) * L + H.rake(u);
@@ -12278,13 +12336,66 @@ function shroudFeet(S, H, mk, FINE) {
      block is 0.03 B long held to 0.12–0.30 m. Both are class figures read from no plate, as the
      deadeye's radius is. The r245 probe left these 72 feet at the deck edge on nothing drawn. */
   const capH = S.capM ? S.capM : B * 0.016 * 1.6;
-  const seats = kind === 'tackle' ? xs.map(xf => {
+  const capSeat = xf => {
     const uf = Math.max(0.02, Math.min(0.98, u + (xf - x) / L));
-    return { x: xf, y: H.sheer(uf) + capH, z: Math.abs(surfacePoint(S, H, uf, 1)[2]) };
-  }) : null;
+    return { x: xf, y: H.sheer(uf) + capH, z: Math.abs(surfacePoint(S, H, uf, 1)[2]),
+             timber: { what: 'cap', x: xf, yTop: H.sheer(uf) + capH, yBot: H.sheer(uf), lenX: 0.12 } };
+  };
+  let seats = kind === 'tackle' ? xs.map(capSeat) : null;
+  /* ── THE LASHING CLASS (round 247): a crab-claw mast on a double hull sets its shrouds up
+     with a LASHING. The shroud ends in an eye a short way over the crossbeam, and a lanyard
+     of several turns from the eye round the beam, just outboard of the hull's rail, sets it
+     up — the same joint that holds the beam to the hull, and the only kind of joint a rig
+     with no metal in it has. Read off the Polynesian Voyaging Society's 2009 broadside of
+     Hōkūleʻa (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near
+     hull): every shroud lands on the hull's RAIL, each at a beam end, and the beam ends stand
+     proud of the hull's side. The class had landed the canoe's four feet on the platform at
+     z ±0.55 (r246/feet-after.json) on hulls whose rails are 2.7 m out. Each shroud takes its
+     own beam — the n beams nearest the mast, one shroud each, fore to aft — and the seat is
+     the beam's top at the hull's rail, a hand outboard of the sheer's half-breadth. On a hull
+     with no crossbeams the lashing goes round the cap, where the tackle class seats. The eye
+     stands `lash` over the seat on the line to the masthead: 0.3 B held to 0.25–0.5 m, a
+     class figure read from no plate. */
+  if (kind === 'lashing') {
+    const CB = crossbeamsOf(S, H);
+    if (CB.length) {
+      const sep = S.hullSep || S.loa * 0.26;
+      const near = CB.map(b => ({ b, d: Math.abs(b.x - x) })).sort((p, q) => p.d - q.d)
+        .slice(0, n).map(p => p.b).sort((p, q) => p.x - q.x);
+      seats = xs.map((xf, s) => {
+        const b = near[Math.min(s, near.length - 1)];
+        return { x: b.x, y: b.yTop, z: sep / 2 + Math.abs(surfacePoint(S, H, b.u, 1)[2]) + 0.06,
+                 timber: { what: 'crossbeam', x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, u: b.u } };
+      });
+      for (let s = 0; s < n; s++) xs[s] = seats[s].x;
+    } else seats = xs.map(capSeat);
+  }
   const drift = Math.max(0.5, Math.min(1.4, L * 0.025));
   const block = Math.max(0.12, Math.min(0.30, B * 0.03));
-  return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR, seats, drift, block };
+  const lash = Math.max(0.25, Math.min(0.5, B * 0.3));
+  return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR, seats, drift, block, lash };
+}
+
+/* ── THE CROSSBEAMS OF A DOUBLE HULL ARE ONE DERIVATION (round 247). buildShip drew three at
+ * 0.30, 0.50 and 0.70 of the waterline from a literal, and nothing else could ask where they
+ * were. The record's count spreads them over the middle seven tenths of the length (Hōkūleʻa
+ * carries eight ʻiako — the Polynesian Voyaging Society's own description, and the eight beam
+ * ends along her side in the 2009 broadside, which is read for their spread at about 50 px/m,
+ * so to half a metre); without a count the class keeps its three where they were. Each beam
+ * is loa·0.035 fore and aft, 0.16 B deep, its underside on the sheer, and spans the two hulls
+ * plus 0.8 B beyond each hull's centreline. shroudFeet's lashing class seats on these. */
+function crossbeamsOf(S, H) {
+  if (!S.doubleHull) return [];
+  const sep = S.hullSep || S.loa * 0.26, B = S.beam, L = S.lwl;
+  const rec = S.crossbeams >= 2 ? Math.round(S.crossbeams) : 0;
+  const n = rec || 3, u0 = rec ? 0.15 : 0.30, u1 = rec ? 0.85 : 0.70;
+  const out = [];
+  for (let k = 0; k < n; k++) {
+    const u = u0 + (u1 - u0) * k / (n - 1);
+    out.push({ u, x: (u - 0.5) * L, lenX: S.loa * 0.035, h: B * 0.16,
+               yBot: H.sheer(u), yTop: H.sheer(u) + B * 0.16, span: sep + B * 1.6 });
+  }
+  return out;
 }
 
 function buildTieredCastles(S, group, mats, hullMat) {
@@ -14807,10 +14918,14 @@ function buildShip(S, opts) {
     });
     const beamMat = new THREE.MeshStandardMaterial({ color: 0x6f5836, roughness: 0.82 });
     const dk = hullSurface(S);
-    [0.30, 0.50, 0.70].forEach(u => {
-      const cb = new THREE.Mesh(
-        new THREE.BoxGeometry(S.loa * 0.035, S.beam * 0.16, sep + S.beam * 1.6), beamMat);
-      cb.position.set((u - 0.5) * S.lwl, dk.sheer(u) + S.beam * 0.08, 0);
+    /* the beams from crossbeamsOf (round 247) — the record's count spread over the middle
+       seven tenths of the length, the class's three at 0.30, 0.50 and 0.70 without it — the
+       one derivation shroudFeet's lashing class seats on; each beam records itself for the
+       audit (userData.crossbeam) */
+    crossbeamsOf(S, dk).forEach(b => {
+      const cb = new THREE.Mesh(new THREE.BoxGeometry(b.lenX, b.h, b.span), beamMat);
+      cb.position.set(b.x, (b.yTop + b.yBot) / 2, 0);
+      cb.userData.crossbeam = { u: b.u, x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, halfSpan: b.span / 2 };
       group.add(tag(cb, 'crossbeam'));
     });
     const plat = new THREE.Mesh(

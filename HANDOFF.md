@@ -20731,3 +20731,111 @@ docs/audit-hulls.js carries D-SHROUDS' three tackle convictions (1, 1, 1); docs/
 THE RATCHET: THE OPENING FULL RATCHET at the clean r245 HEAD 3cd3c33 (r246/open-ratchet.out, launched 07:54 as the round's first act, ended 08:39): RATCHET EXIT 1  END 08:39:46; 65 frames scored; movers 15: action 0.127%/0.030; ship-trireme 0.386%/0.166; ship-titanic 0.059%/0.029; map-floor 0.105%/0.044; aboard-cable 0.244%/0.085; aboard-preussen 0.543%/0.192; aboard-wyoming 0.102%/0.029; shipwright-ahead 0.190%/0.088; shipwright-astern 1.060%/0.845; shipwright-furled 4.190%/1.553; shipwright-hounds 1.614%/0.648; shipwright-corbis 0.299%/0.092; action-salamis 0.086%/0.015; action-gravelines 0.052%/0.009; ship-slave-ship 0.583%/0.256. Largest three: shipwright-furled 4.190%/1.553, shipwright-hounds 1.614%/0.648, shipwright-astern 1.060%/0.845.
  Of the opening run's 15 movers, 11 were on r245's MUST list and 1 on its MAY list; the 3 on its MUST NOT list — aboard-cable 0.244%/0.085, ship-titanic 0.059%/0.029, map-floor 0.105%/0.044 — were re-checked solo by check --frame BEFORE the push, still at the r245 HEAD, and reproduced at identical numbers; each is r245's change reaching a frame its list misread (Great Eastern's aboard view, Great Eastern at Titanic's frame edge, the carrack as the map's fleet token), and all 15 were accepted with those reasons (FRAME-LOG.md). PARTIAL after the push, the r239 pattern (r246/partial-ship-*.out): frames scored one at a time by check --frame on the r246 builder, each diff read (r246/partial-*-pair.png) — ship-dhow 0.305%/0.127 CHANGED, ship-galley 0.212%/0.084 CHANGED, ship-galleass 0.296%/0.134 CHANGED (3 frames, the 3 on r246's MUST list; the diffs lie on the tackle-class shrouds only, the galleass frame's also on the galley's at its edge; r246/PREDICTIONS-close.md names the 6 that MAY and the 56 that must not). The other 62 frames are UNSCORED on the r246 builder; r247's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (ae3ae49 audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 247 — 2026-09-05 — a shroud on a lashed double canoe sets up with a lashing round the crossbeam at the hull's rail: the class read off Hōkūleʻa's 2009 broadside and named in the record, the crossbeams made one derivation with the record's count of eight, the audit reads the eyes, the seats and the beams, and the full ratchet ran first at the clean r246 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r246 ordered r247's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0r′), the lashing class, or Endurance by looking. The ratchet ran at HEAD edd13b1
+from 09:04 while the round's work was developed on a COPY of web/ served on :8150 (build/staging/r247/web, every file a
+symlink to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240 pattern); the copy's files were moved
+into web/ only after the run ended (cmp-verified). THE OPENING RATCHET: its result is in the receipt paragraph below,
+per the r198 rule. (0r′) was taken.**
+
+**THE FAULT, measured (r246/feet-after.json, r245's probe on the r246 builder): the voyaging canoe's one mast carries
+two shrouds a side, four lower feet, and buildRig's last branch landed all four on the PLATFORM beside the mast —
+at x −0.885 and −0.555, y 0.75, z ±0.545 — on a vessel whose two hulls stand 2.7 m either side of the centreline, so
+the shrouds ran down almost vertically to a deck they could not stay the mast from, on nothing drawn. The plate
+(build/staging/r247/hokulea-2009.jpg — Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near
+hull) shows what the structure is: every shroud from each masthead lands on the hull's RAIL at a beam end, the beam
+ends stand proud of the hull's side, and there are eight of them from near the bow to near the stern — the ʻiako the
+Polynesian Voyaging Society's own descriptions count. A lashed canoe carries no metal (her own construction row), so
+the shroud's end is an eye, and a lanyard of several turns from the eye round the beam, just outboard of the rail,
+sets it up: the same joint that holds the beam to the hull. The model drew three beams at 0.30, 0.50 and 0.70 of the
+waterline from a literal in buildShip, and nothing else could ask where they were.**
+
+**THE MODEL (web/js/hull.js; r247/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+(1) crossbeamsOf(S, H) is the double hull's one derivation of its beams: the record's count spread over the middle
+seven tenths of the length (u 0.15–0.85), the class's three at 0.30, 0.50, 0.70 without a count; each beam loa·0.035
+fore and aft, 0.16 B deep, its underside on the sheer, spanning the hulls plus 0.8 B beyond each hull's centreline.
+buildShip's double-hull block reads it and every beam records itself (userData.crossbeam) for the audit. (2)
+shroudFeet reads the record's word first — mast.shroudSetup names 'deadeyes', 'tackle' or 'lashing' where a plate has
+been read, the (0s) home r245 named — and for the lashing class returns a seat per shroud: the n beams nearest the mast,
+one shroud each, fore to aft; the seat is the beam's top at the hull's rail, a hand (0.06 m) outboard of the sheer's
+half-breadth on that hull, and the seat carries its timber (x, yTop, yBot, lenX). On a hull with no beams the lashing
+seats on the cap, where the tackle class does. lash, the eye's height over the seat along the line to the masthead,
+is 0.3 B held to 0.25–0.5 m, a class figure read from no plate. (3) buildRig's lashing branch ends the shroud at the
+eye, and draws the lashings as a group tagged 'shroudLashing' with its own PARTS card: a rope eye (a torus, 0.03 m +
+0.01 B) at the shroud's end and a lanyard of three turns from it round the timber — over the top, down the forward
+face, under, up the after face, back to the eye — each turn a rope's width along the beam from the last, in small
+stuff 6 mm + 0.6 mm per metre of beam. Every eye records its mast, shroud, side, eye, seat and timber (userData.lash).
+The deadeye and tackle classes are untouched.**
+
+**MEASURED AFTER (r247/probe_lashing.py on :8150, r247/feet-after.json — feet from the rope mesh's own vertices, eyes
+from the lashing group, beams from the built crossbeam meshes' vertices): eight beams at u 0.15, 0.25 … 0.85. Four
+feet, at x −0.862 and +0.877, y 1.21, z ±3.164 — each 0.000 m from its eye. Four seats at x ∓0.9, y 0.919, z ±3.274,
+on the beams at u 0.45 and 0.55: every seat 0.000 m over its beam's top and 0.266 m inside the beam's end. Two eyes a
+side. The mast's foot stands at y 0.772 and the platform's top at 0.955, so the mast steps 0.18 m under the platform
+it is said to stand on — named (0x) below, not touched.**
+
+**THE RECORD (web/data/vessels.json; r247/apply-record-edits.py, the canoe's entry only, 12 changed lines): hull
+gains crossbeams 8 with crossbeamsProvenance (RECORDED count — the Polynesian Voyaging Society, Kamehameha Schools'
+Holomoana tour; the spread READ off the 2009 broadside, named with its scale, to about half a metre); the mast gains
+shroudSetup 'lashing' with shroudSetupProvenance (READ off the same plate, which also shows four or five shrouds a
+side to the near hull against the record's two — the count is not changed here, and the provenance says so); and a
+card row, "Crossbeams — eight ʻiako, lashed to the hulls; the shrouds set up to them at the rail", after the
+Construction row.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r247/apply-audit-edits.py). D-SHROUDS gains the lashing class, reading the
+BUILT scene: (7) 'a shroud on no lashing' — each lashing-class lower shroud's foot lies within 0.10 m of an eye's
+centre; (8) 'a lashing off its beam' — each lashing's seat lies on a built crossbeam (within its x extent + 0.02, within
+0.05 m of its top, inboard of its end), or on the cap's top at the sheer where the timber is the cap; (9) 'shrouds and
+no lashing' — one eye a side per shroud on every lashing-class mast; and kindOf reads mast.shroudSetup as shroudFeet
+does. PROOF A (r247/audit-proof-a.out, the r246 builder under the r247 audit, on :8150): checked 33 hulls, 3 problems
+on 1 hull — 'a shroud on no lashing' (4 of 4, no lashing drawn) and 'shrouds and no lashing' port and starboard. Rule 8
+on the way: the first final under the r247 builder convicted the canoe twice for 'an undecked hull is capped' — rays
+bottoming out at 0.92 m in both hulls — because that rule probed five stations picked clear of the CLASS's three beams
+(0.35, 0.45 … 0.75) and the record's eight put a beam under every one of them; the audit was wrong, and it now probes
+halfway between the BUILT beams (userData.crossbeam), 0.9 m clear of each. The final audit on the r247 builder: on
+:8150, checked 33 hulls, 0 problems (audit-final-8150.out); on :8149 after the copy into web/, see the receipt
+paragraph's audit line (audit-final-8149.out).**
+
+**WITNESSED (r247/spin-canoe-before/ and -after/ — b180, b135, low180 and low090 at 2880 × 1800 off :8150, the before
+captured with the r246 builder swapped in; pair-b180-canoe.png stacks the starboard broadside before over after;
+crop-canoe-b180-aft-4x.png and -fwd-4x.png are the after at 4× about the near hull's two lashings, with the before
+crops beside them). Before: three beams, and four shrouds running from the masthead almost straight down to the
+platform beside the mast. After: eight beams across both hulls, and each shroud spreading outboard to its own beam at
+the hull's rail, where it ends in a lashing — at 4× the shroud comes down to a point over the beam and the turns splay
+from it to the beam's forward and after edges and round it. From b180 the far hull's two lashings are seen through the
+sail's foot.**
+
+**Rule 0 on the after broadside read whole (r247/spin-canoe-after/b180.png): a rendered vessel on water, not a chart —
+two dark lashed-plank hulls with their sheer rising to the ends, eight pale beams across them carrying a platform, the
+raked mast with the crab-claw sail's two spars opening from a tack forward, the shrouds to the hulls, a fleet neighbour's
+hull at the frame's edge. Three facts a viewer can read off it without a legend: she is two hulls joined by beams;
+her shrouds set up to the hulls at those beams, not to a deck; her sail is a triangle on two spars, widening upward.**
+
+**Named residuals, in order:** (0r′) CLOSED. (0s) CLOSED for the canoe — mast.shroudSetup is the record field, read
+by shroudFeet and the audit; every other mast still takes the class derivation, unnamed. NEW (0x) the canoe's mast
+steps at the single hull's deck line, 0.18 m under the platform's top (r247/feet-after.json: mastFootY 0.772,
+platformTopY 0.955) — buildRig's base = deckAt(u) does not know the platform; the mast should step on it. NEW (0y) the
+plate shows four or five shrouds a side from each masthead and two masts; the record carries one mast with two
+shrouds a side (her own Rig row says two masts) — a record round, with the sail area split as the row gives it. NEW
+(0z) the lashing's turns are three parallel loops and the eye is a plain ring; a real lashing is frapped and seized,
+and the beam-to-hull lashings the plate shows at every beam end are not drawn at all. (0v) the tackle's strop and
+belay, (0t) (0u) as r245 names them. (0l) Queen Mary 2's Hull row and her data, (0n) the carrack's castle stations as a
+class default, (0o) the bowsprit through the forecastle deck with no aperture, (0i) the galley's stern tent, (0j) the
+free foot's scallop, (0k) the cap's 30°, (0e²²) the cog's Frames 1 and 2 on the stem, unchanged and unread. (0e¹⁷)
+(0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶)
+(0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r248 opens by running the FULL ratchet at the clean HEAD first (r247/PREDICTIONS-close.md names 2 frames that MUST
+move — ship-canoe and sea-canoe-floor — 2 that MAY, her berth neighbours ship-dugout and ship-trireme, and 61 that
+MUST NOT; only those scored by check --frame after the push are accepted here, and the movers in the opening run are to
+be read against that list — any mover in the MUST NOT list is not explained by this round); then takes (0x), the mast's
+step on the platform, or (0y), the canoe's second mast from her own Rig row, or the survey's next never-spun hull,
+Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788626988 at the build; the push and the live poll are in
+build/staging/r247/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r247 staging stays on disk uncommitted, the r211 convention.**

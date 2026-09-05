@@ -155,6 +155,10 @@
         [
           "Construction",
           "lashed-lug planking, no metal at all"
+        ],
+        [
+          "Crossbeams",
+          "eight ʻiako, lashed to the hulls; the shrouds set up to them at the rail"
         ]
       ],
       "crew": 14,
@@ -215,7 +219,9 @@
             "height": 0.95,
             "rig": "crabclaw",
             "rake": 6,
-            "shrouds": 2
+            "shrouds": 2,
+            "shroudSetup": "lashing",
+            "shroudSetupProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): every shroud from each masthead lands on the hull's rail at a beam end, none on the platform, and the vessel carries no metal fastening (her own construction row), so the set-up is a lashing round the beam at the rail. The number of shrouds a side the plate shows exceeds the record's 2 (four or five to the near hull from the foremast); the count is not changed here. The eye's height over the beam is a class figure."
           }
         ],
         "build": "shell",
@@ -230,7 +236,9 @@
         "sailAreaEach": 25.0,
         "deckLaid": false,
         "steering": "paddle",
-        "steeringProvenance": "ATTESTED by her own card row — “Steering: a long paddle, not a rudder” (Hōkūleʻa; Finney 1977, Polynesian Voyaging Society logs). The steering sweep is handled by the steersman over the quarter, not hung on the hull; no crew is drawn, so nothing is mounted. Before round 121 the model hung a pintled stern rudder on EACH hull."
+        "steeringProvenance": "ATTESTED by her own card row — “Steering: a long paddle, not a rudder” (Hōkūleʻa; Finney 1977, Polynesian Voyaging Society logs). The steering sweep is handled by the steersman over the quarter, not hung on the hull; no crew is drawn, so nothing is mounted. Before round 121 the model hung a pintled stern rudder on EACH hull.",
+        "crossbeams": 8,
+        "crossbeamsProvenance": "RECORDED: Hōkūleʻa's two hulls are joined by eight crossbeams, the ʻiako (Polynesian Voyaging Society; Kamehameha Schools' Holomoana tour of Hōkūleʻa). Their spread along the hull is READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): eight beam ends stand proud of the hull's side from near the bow to near the stern, so the model spreads them over the middle seven tenths of the length — the stations are the plate's to about half a metre, not a plan's."
       }
     },
     {
