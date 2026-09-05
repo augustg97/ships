@@ -19577,3 +19577,12 @@ land there; the audit's R-POST-CLOSE already convicts daylight, and a rule for t
 build/staging/r237/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r237 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788585051 on https://augustg97.github.io/ships/index.html at 22:12 PDT,
+90 s after the push (build/staging/r237/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r232 correction): docs/data/vessels.json carries the straight post (0), its angle (0)
+and the castle's after-edge station (0); docs/js/hull.js defines straightPostLine (1), leans the run below the
+water (1) and places the after edge through the datum (1); docs/audit-hulls.js carries R-POST-ANGLE's string (1),
+R-POST-CLOSE's string (1) and C-AFTEDGE's string (1).
+THE RATCHET, run after the push: RATCHET EXIT 0  END 22:47:21; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. Prediction (r237/PREDICTIONS-close.md) held.
+Two commits close the round (ae890c0 record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
