@@ -130,7 +130,7 @@
         ],
         [
           "Sail area",
-          "50.2 m² for the pair"
+          "50.2 m² for the pair by the PVS plan (540 sq ft); the 2009 sails measure about 61 m² for the pair on her broadside — contested; the model is drawn to the 2009 spars"
         ],
         [
           "Crew",
@@ -222,21 +222,45 @@
             "at": 0.26,
             "height": 0.95,
             "rig": "crabclaw",
-            "rake": 6,
+            "rake": 1,
             "shrouds": 2,
             "shroudSetup": "lashing",
             "shroudSetupProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): every shroud from each masthead lands on the hull's rail at a beam end, none on the platform, and the vessel carries no metal fastening (her own construction row), so the set-up is a lashing round the beam at the rail. The number of shrouds a side the plate shows exceeds the record's 2 (four or five to the near hull from the foremast); the count is not changed here. The eye's height over the beam is a class figure.",
-            "atProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the foremast's foot meets the deck at x 405, (405 − 155) / 970 = 0.26 of the waterline from the stem. A 10 px read is 0.01 of u. Before round 249 the record stepped ONE mast at 0.46, between the two the plate shows and the card's own Rig row names. The plate reads the foremast about 10.0 m and the mainmast about 11.7 m from deck to head against the model's 9.05 m for both (a 0.95 share of Steel's main); the heights are not changed here."
+            "atProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the foremast's foot meets the deck at x 405, (405 − 155) / 970 = 0.26 of the waterline from the stem. A 10 px read is 0.01 of u. Before round 249 the record stepped ONE mast at 0.46, between the two the plate shows and the card's own Rig row names. The plate reads the foremast about 10.0 m and the mainmast about 11.7 m from deck to head against the model's 9.05 m for both (a 0.95 share of Steel's main); the heights are not changed here.",
+            "rakeProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; 54 px/m at the near hull, about 50 at the far, so 52 ± 2 on the centreline where the rig stands): the foremast's foot at plate (405, 715) and its head at (410, 215), the mainmast's at (683, 725) and (690, 280) — both within a degree of vertical. The 6 was a class figure. Round 250; before it the model raked both masts 6° aft.",
+            "sail": {
+              "yard": 12.75,
+              "boom": 9.46,
+              "cloth": 12.75,
+              "boomAngle": 47.9,
+              "yardOffMast": 1.0,
+              "tackAbaft": 0.5,
+              "tackUp": 0.2,
+              "leechRatio": 0.88,
+              "provenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; 54 px/m at the near hull, about 50 at the far, so 52 ± 2 on the centreline where the rig stands): the fore tack at plate (430, 715), the yard's tip at (425, 52) and the boom's tip at (760, 350) — the yard 663 px = 12.8 m at 90.4° over the aft-horizontal (the mast within a degree of vertical, so the yard lies along it, its peak above the masthead), the boom 492 px = 9.5 m at 48°, the spars opening 43°; the tack 0.5 m abaft the mast's foot at the deck. The cloth's head reaches the yard's tip. leechRatio 0.88 is the fore sail's cloth counted in pixels (96974) over its straight triangle (110308), the leech's hollow; the main is occluded by the fore and takes the same share. A 2 px/m scale error is 4% of length and 8% of area. Round 249 read the main's boom tip (990, 415) as the fore's, which is where its 64° spread and 12 m spars came from; the fore boom ends at (760, 350), just abaft the mainmast. tackUp 0.2 m is a class figure for the lashing over the deck, not a read. Before round 250 the class put the tack 0.22 L forward of the mast and solved 10.8 m spars at 42° from 25 m² a sail."
+            }
           },
           {
             "at": 0.54,
             "height": 0.95,
             "rig": "crabclaw",
-            "rake": 6,
+            "rake": 1,
             "shrouds": 2,
             "shroudSetup": "lashing",
             "shroudSetupProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px, about 50 px/m at the near hull): every shroud from each masthead lands on the hull's rail at a beam end, none on the platform, and the vessel carries no metal fastening (her own construction row), so the set-up is a lashing round the beam at the rail. The number of shrouds a side the plate shows exceeds the record's 2 (four or five to the near hull from the foremast); the count is not changed here. The eye's height over the beam is a class figure.",
-            "atProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the mainmast's foot meets the deck at x 683, (683 − 155) / 970 = 0.54 of the waterline from the stem. A 10 px read is 0.01 of u. Before round 249 the record stepped ONE mast at 0.46, between the two the plate shows and the card's own Rig row names. The plate reads the foremast about 10.0 m and the mainmast about 11.7 m from deck to head against the model's 9.05 m for both (a 0.95 share of Steel's main); the heights are not changed here."
+            "atProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the mainmast's foot meets the deck at x 683, (683 − 155) / 970 = 0.54 of the waterline from the stem. A 10 px read is 0.01 of u. Before round 249 the record stepped ONE mast at 0.46, between the two the plate shows and the card's own Rig row names. The plate reads the foremast about 10.0 m and the mainmast about 11.7 m from deck to head against the model's 9.05 m for both (a 0.95 share of Steel's main); the heights are not changed here.",
+            "rakeProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; 54 px/m at the near hull, about 50 at the far, so 52 ± 2 on the centreline where the rig stands): the foremast's foot at plate (405, 715) and its head at (410, 215), the mainmast's at (683, 725) and (690, 280) — both within a degree of vertical. The 6 was a class figure. Round 250; before it the model raked both masts 6° aft.",
+            "sail": {
+              "yard": 11.6,
+              "boom": 8.16,
+              "cloth": 10.19,
+              "boomAngle": 46.9,
+              "yardOffMast": 1.0,
+              "tackAbaft": 0.3,
+              "tackUp": 0.2,
+              "leechRatio": 0.88,
+              "provenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; 54 px/m at the near hull, about 50 at the far, so 52 ± 2 on the centreline where the rig stands): the main tack at plate (700, 725), the yard's tip at (697, 122) and the boom's tip at (990, 415) — the yard 603 px = 11.6 m at 90.3° over the aft-horizontal (the mast within a degree of vertical, so the yard lies along it, its peak above the masthead), the boom 424 px = 8.2 m at 47°, the spars opening 43°; the tack 0.3 m abaft the mast's foot at the deck. The cloth's head stops at plate (705, 195), 10.2 m up the yard, 1.4 m short of the tip. leechRatio 0.88 is the fore sail's cloth counted in pixels (96974) over its straight triangle (110308), the leech's hollow; the main is occluded by the fore and takes the same share. A 2 px/m scale error is 4% of length and 8% of area. Round 249 read the main's boom tip (990, 415) as the fore's, which is where its 64° spread and 12 m spars came from; the fore boom ends at (760, 350), just abaft the mainmast. tackUp 0.2 m is a class figure for the lashing over the deck, not a read. Before round 250 the class put the tack 0.22 L forward of the mast and solved 10.8 m spars at 42° from 25 m² a sail."
+            }
           }
         ],
         "build": "shell",
@@ -259,6 +283,18 @@
           "u1": 0.92
         },
         "platformProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px; the near hull's manu tips at x 128 and 1140 span her 18.7 m, 54 px/m, and her waterline runs x 155 to 1125): the deck between the hulls runs from its forward edge at x 255, where the crew stand forward of the foremast, to the after rail's last post at x 1050, so (255 − 155) / 970 = 0.10 to (1050 − 155) / 970 = 0.92 of the waterline. It lies on the ʻiako; its depth and its width between the hulls are class figures read from no plate. Before round 249 the model drew it 0.34 of the length long about midships (u 0.32–0.68), which left the foremast's station with nothing under it."
+      },
+      "sailAreaContested": {
+        "record": 50.2,
+        "recordSource": "540 sq ft: the Polynesian Voyaging Society's plan (pvs.kcc.hawaii.edu/pics/hokuplan.gif) as Wikipedia cites it; the card row's figure",
+        "plate": 60.6,
+        "plateBounds": [
+          56.2,
+          65.5
+        ],
+        "plateSource": "the 2009 broadside's cloth counted in pixels at 52 ± 2 px/m: fore 35.9 m² (the whole sail, unoccluded), main 24.7 m² (partly behind the fore; its straight triangle at the fore's cloth share), projected on the plate's plane — the true cloth is this or more",
+        "used": "plate",
+        "why": "the masts' stations, the deck's span and the spars are all read off the same 2009 plate, so the cloth is the 2009 suit's; the plan's 540 sq ft may be an earlier suit's figure, and which is not settled here"
       }
     },
     {

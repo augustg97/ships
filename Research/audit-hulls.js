@@ -6328,6 +6328,70 @@
         }
       }
     }
+    /* ── D-CRABCLAW-SPARS and D-SAIL-AREA (round 250): THE SPARS ARE THE RECORD'S, AND THE
+       CLOTH IS THE ROW'S OR THE RECORD SAYS WHY NOT. The canoe's crab claws had their tacks
+       0.22 L forward of their masts and their spars solved from 25 m² a sail, for 249 rounds,
+       while the 2009 broadside puts both tacks at the masts' feet, the yards along the masts
+       and the booms at 47–48°, and counts about 60 m² of cloth for the pair against the row's
+       50.2. (a) For every mast whose record carries `sail` (yard, boom, boomAngle) the built
+       spars — userData.crabclaw on the yard mesh — must be the record's: the yard and the boom
+       to 0.02 m, the boom's angle to 0.5°, the tack within 0.10 m of the mast's built heel
+       plus tackAbaft; a recorded read the builder did not draw is convicted. (b) The row keyed
+       'Sail area' is read for its figure (the first number before m²); the built cloth —
+       every set sail mesh's triangles ('square', 'tri', 'quad'; not a 'furl' bundle) summed in
+       hull space, so belly and creases are in it — is compared to that figure, or to sailAreaContested's used figure where the
+       record names a contest; a built cloth more than 25% off the figure it answers to is
+       convicted, and a contest field that names no used figure is convicted for the silence
+       (rule 9: what is contested is a field). */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const hullPt = (o, k, out) => { const a = o.geometry.attributes.position; return out.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); };
+      const cc = [], heels = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return;
+        if (o.userData.crabclaw) cc.push(o.userData.crabclaw);
+        const p = tagOf(o);
+        if (p && p.key === 'mast' && p.name === 'Mast') { o.updateMatrixWorld(true); const V = new THREE.Vector3(); let lo = null;
+          for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); if (!lo || V.y < lo.y) lo = V.clone(); }
+          if (lo) heels.push(lo); }
+      });
+      (H.masts || []).forEach((mk, i) => {
+        const sg = mk.sail; if (!sg || !(sg.yard > 0) || !(sg.boom > 0)) return;
+        const b = cc.find(c => Math.abs(c.at - mk.at) < 1e-6);
+        if (!b) { say(v.id, 'a recorded sail the builder did not draw', `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m recorded, no crab claw built from it`); return; }
+        if (!b.fromRecord || Math.abs(b.yard - sg.yard) > 0.02 || Math.abs(b.boom - sg.boom) > 0.02)
+          say(v.id, "crab-claw spars that are not the record's", `mast ${i}: yard ${b.yard.toFixed(2)} m and boom ${b.boom.toFixed(2)} m built, ${sg.yard} and ${sg.boom} recorded`);
+        if (Math.abs(b.boomAngle - sg.boomAngle) > 0.5)
+          say(v.id, 'a crab-claw boom at the wrong angle', `mast ${i}: ${b.boomAngle.toFixed(1)}° built, ${sg.boomAngle}° recorded`);
+        let heel = null; for (const h of heels) if (!heel || Math.abs(h.x - b.mastX) < Math.abs(heel.x - b.mastX)) heel = h;
+        if (heel) { const want = heel.x + (sg.tackAbaft || 0), off = b.tack[0] - want;
+          if (Math.abs(off) > 0.10) say(v.id, 'a crab-claw tack away from its mast', `mast ${i}: the tack at x ${b.tack[0].toFixed(2)}, ${off.toFixed(2)} m from the heel at ${heel.x.toFixed(2)} plus the record's ${sg.tackAbaft || 0} m abaft`); }
+      });
+      const saRow = (v.rows || []).find(r => Array.isArray(r) && /^sail area$/i.test(String(r[0]).trim()));
+      if (saRow) {
+        const mnum = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*m²/.exec(String(saRow[1]).replace(/\*/g, ''));
+        const rowA = mnum ? parseFloat(mnum[1].replace(/,/g, '')) : NaN;
+        const con = v.sailAreaContested;
+        let expect = rowA, src = 'the Sail area row';
+        if (con) {
+          const used = con.used === 'plate' ? con.plate : con.used === 'record' ? con.record : NaN;
+          if (!(used > 0)) say(v.id, 'a sail-area contest that names no figure', `sailAreaContested.used = ${con.used}`);
+          else { expect = used; src = `sailAreaContested, ${con.used} ${used} m² against the row's ${rowA}`; }
+        }
+        let built = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+        g.traverse(o => {
+          /* every SET cloth: 'square' (makeSail), 'tri' and 'quad'; a 'furl' bundle is not cloth area. The rule's
+             first run read only 'tri' and 'quad' and convicted the clipper on 787 m² of jibs and staysails against her
+             2,970 — rule 8, the audit was wrong */
+          if (!o.isMesh || !o.geometry || !o.userData.kind || o.userData.kind === 'furl') return;
+          o.updateMatrixWorld(true); const ix = o.geometry.index, n = ix ? ix.count : o.geometry.attributes.position.count;
+          const at = (k, out) => hullPt(o, ix ? ix.getX(k) : k, out);
+          for (let k = 0; k + 2 < n; k += 3) { at(k, A); at(k + 1, B); at(k + 2, C); built += B.sub(A).cross(C.sub(A)).length() / 2; }
+        });
+        if (expect > 0 && Math.abs(built - expect) / expect > 0.25)
+          say(v.id, 'a sail area the cloth contradicts', `${built.toFixed(1)} m² of cloth built against ${expect} m² (${src})`);
+      }
+    }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/
        feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig

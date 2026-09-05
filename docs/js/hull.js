@@ -1849,31 +1849,46 @@ sails.push(makeTriSail(tack, peakPt, clew, group, 0.055));
 }
 }
 if (mk.rig === 'crabclaw') {
-const spread = 1.19 - 0.46;
-const LEECH = 0.640;
-const sparLen = S.sailAreaEach
-? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
+const SG = mk.sail && mk.sail.yard > 0 && mk.sail.boom > 0 ? mk.sail : null;
+const RAD = Math.PI / 180;
+const aY = SG ? (Math.PI / 2 - rakeRad) + (SG.yardOffMast || 0) * RAD : 1.19;
+const aB0 = SG ? SG.boomAngle * RAD : 0.46;
+const spread = aY - aB0;
+const LEECH = SG ? Math.min(1, Math.max(0.4, SG.leechRatio || 0.88)) : 0.640;
+const pull = SG ? 1 - 1.5 * (1 - LEECH) : (S.leechPull || 0.46);
+const sparLen = SG ? SG.yard
+: S.sailAreaEach ? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
 : L * 0.98;
-const tack = [x - L * 0.22, base];
-const aB = FURLED ? 1.09 : 0.46;
-const tipY = [tack[0] + Math.cos(1.19) * sparLen, tack[1] + Math.sin(1.19) * sparLen];
-const tipB = [tack[0] + Math.cos(aB) * sparLen, tack[1] + Math.sin(aB) * sparLen];
+const boomLen = SG ? SG.boom : sparLen;
+const clothLuff = SG && SG.cloth > 0 ? Math.min(SG.cloth, sparLen) : sparLen;
+const tack = SG ? [x + (SG.tackAbaft || 0), base + (SG.tackUp || 0)] : [x - L * 0.22, base];
+const aB = FURLED ? aY - 0.10 : aB0;
+const tipY = [tack[0] + Math.cos(aY) * sparLen, tack[1] + Math.sin(aY) * sparLen];
+const tipB = [tack[0] + Math.cos(aB) * boomLen, tack[1] + Math.sin(aB) * boomLen];
+const peakC = [tack[0] + Math.cos(aY) * clothLuff, tack[1] + Math.sin(aY) * clothLuff];
+const clothArea = 0.5 * clothLuff * boomLen * Math.sin(spread) * LEECH;
 [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
 const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
 const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
 const m2 = new THREE.Mesh(g2, woodDark);
 m2.position.set((tack[0] + tip[0]) / 2, (tack[1] + tip[1]) / 2, 0);
 m2.rotation.z = -Math.atan2(tip[0] - tack[0], tip[1] - tack[1]);
+if (nm === 'Yard') m2.userData.crabclaw = {
+at: mk.at, mastX: +x.toFixed(3), fromRecord: !!SG,
+tack: [+tack[0].toFixed(3), +tack[1].toFixed(3)],
+yardTip: [+tipY[0].toFixed(3), +tipY[1].toFixed(3)], boomTip: [+tipB[0].toFixed(3), +tipB[1].toFixed(3)],
+peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
+yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
+yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2) };
 group.add(tag(m2, 'yard', nm));
 });
 if (FURLED) {
-const area = S.sailAreaEach || 0.5 * sparLen * sparLen * Math.sin(spread) * LEECH;
-const mid = [(tipY[0] + tipB[0]) / 2, (tipY[1] + tipB[1]) / 2];
+const mid = [(peakC[0] + tipB[0]) / 2, (peakC[1] + tipB[1]) / 2];
 sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
 new THREE.Vector3(mid[0], mid[1], 0),
-area, furlMat(mats), group, {}));
+clothArea, furlMat(mats), group, {}));
 } else {
-sails.push(makeTriSail(tack, tipY, tipB, group, 0.075, S.leechPull || 0.46, true));
+sails.push(makeTriSail(tack, peakC, tipB, group, 0.075, pull, true));
 }
 }
 if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {

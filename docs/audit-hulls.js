@@ -4500,6 +4500,52 @@ say(v.id, 'a rig row the masts contradict', `the Rig row says "${one[0]}" and hu
 }
 }
 }
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const hullPt = (o, k, out) => { const a = o.geometry.attributes.position; return out.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); };
+const cc = [], heels = [];
+g.traverse(o => {
+if (!o.isMesh || !o.geometry) return;
+if (o.userData.crabclaw) cc.push(o.userData.crabclaw);
+const p = tagOf(o);
+if (p && p.key === 'mast' && p.name === 'Mast') { o.updateMatrixWorld(true); const V = new THREE.Vector3(); let lo = null;
+for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); if (!lo || V.y < lo.y) lo = V.clone(); }
+if (lo) heels.push(lo); }
+});
+(H.masts || []).forEach((mk, i) => {
+const sg = mk.sail; if (!sg || !(sg.yard > 0) || !(sg.boom > 0)) return;
+const b = cc.find(c => Math.abs(c.at - mk.at) < 1e-6);
+if (!b) { say(v.id, 'a recorded sail the builder did not draw', `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m recorded, no crab claw built from it`); return; }
+if (!b.fromRecord || Math.abs(b.yard - sg.yard) > 0.02 || Math.abs(b.boom - sg.boom) > 0.02)
+say(v.id, "crab-claw spars that are not the record's", `mast ${i}: yard ${b.yard.toFixed(2)} m and boom ${b.boom.toFixed(2)} m built, ${sg.yard} and ${sg.boom} recorded`);
+if (Math.abs(b.boomAngle - sg.boomAngle) > 0.5)
+say(v.id, 'a crab-claw boom at the wrong angle', `mast ${i}: ${b.boomAngle.toFixed(1)}° built, ${sg.boomAngle}° recorded`);
+let heel = null; for (const h of heels) if (!heel || Math.abs(h.x - b.mastX) < Math.abs(heel.x - b.mastX)) heel = h;
+if (heel) { const want = heel.x + (sg.tackAbaft || 0), off = b.tack[0] - want;
+if (Math.abs(off) > 0.10) say(v.id, 'a crab-claw tack away from its mast', `mast ${i}: the tack at x ${b.tack[0].toFixed(2)}, ${off.toFixed(2)} m from the heel at ${heel.x.toFixed(2)} plus the record's ${sg.tackAbaft || 0} m abaft`); }
+});
+const saRow = (v.rows || []).find(r => Array.isArray(r) && /^sail area$/i.test(String(r[0]).trim()));
+if (saRow) {
+const mnum = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*m²/.exec(String(saRow[1]).replace(/\*/g, ''));
+const rowA = mnum ? parseFloat(mnum[1].replace(/,/g, '')) : NaN;
+const con = v.sailAreaContested;
+let expect = rowA, src = 'the Sail area row';
+if (con) {
+const used = con.used === 'plate' ? con.plate : con.used === 'record' ? con.record : NaN;
+if (!(used > 0)) say(v.id, 'a sail-area contest that names no figure', `sailAreaContested.used = ${con.used}`);
+else { expect = used; src = `sailAreaContested, ${con.used} ${used} m² against the row's ${rowA}`; }
+}
+let built = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+g.traverse(o => {
+if (!o.isMesh || !o.geometry || !o.userData.kind || o.userData.kind === 'furl') return;
+o.updateMatrixWorld(true); const ix = o.geometry.index, n = ix ? ix.count : o.geometry.attributes.position.count;
+const at = (k, out) => hullPt(o, ix ? ix.getX(k) : k, out);
+for (let k = 0; k + 2 < n; k += 3) { at(k, A); at(k + 1, B); at(k + 2, C); built += B.sub(A).cross(C.sub(A)).length() / 2; }
+});
+if (expect > 0 && Math.abs(built - expect) / expect > 0.25)
+say(v.id, 'a sail area the cloth contradicts', `${built.toFixed(1)} m² of cloth built against ${expect} m² (${src})`);
+}
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

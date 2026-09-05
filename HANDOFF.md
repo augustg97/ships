@@ -21074,3 +21074,137 @@ docs/audit-hulls.js carries D-MAST-COUNT (2) and D-MAST-STEP's two new convictio
 THE RATCHET: THE OPENING FULL RATCHET at the clean r248 HEAD cddf175 (r249/open-ratchet.out, launched 11:10 as the round's first act, ended 12:05): RATCHET EXIT 0  END 12:05:26; 65 frames scored; movers 0. Largest three: ship-yamato 0.043%/0.015, passage-sahul 0.038%/0.013, aboard 0.037%/0.009.
  PARTIAL after the push, the r239 pattern (r249/partial-*.out): frames scored one at a time by check --frame on the r249 builder, each diff read before its accept — sea-canoe-floor 11.641%/5.866 CHANGED, ship-canoe 10.933%/4.559 CHANGED, ship-dugout 0.000%/0.000 ok, ship-trireme 0.017%/0.011 ok (4 frames; r249/PREDICTIONS-close.md names the 2 frames that MUST move — the canoe's own and the Sea's floor view of her — the 2 that MAY, her berth neighbours, and the 61 that must not). The other 61 frames are UNSCORED on the r249 builder; r250's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (01d6ab2 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 250 — 2026-09-05 — the crab claw's spars are the plate's: both tacks at the masts' feet, the yards along the masts with their peaks over the mastheads, the booms at 47–48°, the cloth counted in pixels at 60 m² for the pair against the card's 50.2 and the record saying so in a field, the masts' rake read at 1°, the audit reading the spars against the record and the cloth against the row, and the full ratchet launched first at the clean r249 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r249 ordered r250's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y″), the crab claw's geometry by the plate against the record's area, or (0y‴),
+or Endurance by looking. The ratchet was launched at HEAD 6f67ec5 at 12:27 as the round's first act; the round's work
+was developed on a COPY of web/ served on :8150 (build/staging/r250/web, every file a symlink to web/ except hull.js,
+audit-hulls.js and data/vessels.json — the r240 pattern). ⚠ ONE SLIP, recorded so the ratchet's table is read right:
+the edit scripts were first run against web/ itself at 12:38:50 and web/ was restored from HEAD at 12:39:57 (git
+checkout of the three files; the edits kept as the re-runnable scripts and copied to the :8150 tree). The frame
+captured in that window is ship-galley (12:39:44; ship-trireme's capture ended at 12:38:37, before the edit) — the
+r250 change is gated on a crab-claw mast with a recorded `sail`, which no hull but the canoe has, so the galley's
+picture is the same on either builder; it is named here rather than laundered. (0y″) was taken.**
+
+**THE FAULT, in the plate's own pixels: the crab-claw builder put every tack 0.22 L FORWARD of its mast (3.96 m on
+the canoe), opened the spars 42° with the yard leaning 22° forward of vertical, and solved 10.8 m spars from 25 m² a
+sail with a leech hollowed to 0.64 of the straight triangle. The 2009 broadside (Wikimedia Commons,
+Hokule'aSailing2009.jpg, 1280 px; 54 px/m at the near hull, about 50 at the far, so 52 ± 2 on the centreline where the
+rig stands) shows none of that. Read on the gridded crops (r250/plate-sails-2x.png, plate-tacks-3x.png,
+plate-clews-3x.png, plate-foremasthead-3x.png, plate-mainmasthead-3x.png): the fore tack at plate (430, 715), half a
+metre abaft the foremast's foot at the deck; the fore yard's tip at (425, 52), 663 px = 12.75 m at 90.4° over the
+aft-horizontal, so the yard lies along a mast that is itself within a degree of vertical (foot (405, 715), head
+(410, 215)) and its peak stands 3 m over the masthead; the fore boom's tip at (760, 350), 492 px = 9.46 m at 47.9°,
+ending just abaft the mainmast; the main tack at (700, 725), the main yard's tip at (697, 122), 603 px = 11.6 m, its
+cloth's head at (705, 195), 10.2 m up the yard and 1.4 m short of the tip; the main boom's tip at (990, 415), 424 px =
+8.16 m at 46.9°. The spars open 43°, not 64°: r249 read the MAIN boom's tip (990, 415) as the fore's, which is where
+its 64° and 12 m came from — the fore boom ends at (760, 350). The cloth: the fore sail is unoccluded, and its red
+cloth counted in pixels (r250/cloth-labels.npy, cloth-vis.png; the region below the leech chord, above the boom line,
+clear of the main's luff) is 96,974 px of a 110,308 px straight triangle, 0.879 — a shallow hollow, not 0.64 — which
+is 35.9 m² at 52 px/m; the main is partly behind the fore, so its straight triangle (its cloth's own head) takes the
+fore's share: 24.7 m². The pair: 60.6 m², bounds 56.2–65.5 at 50–54 px/m. The card's Sail area row says 50.2 m² for
+the pair — the Polynesian Voyaging Society's plan's 540 sq ft, as Wikipedia cites it. The two disagree by a fifth at
+the least, and the plate is not a source the record summarises, so the rule that the record beats a derivation from the record (CLAUDE.md, Queen Mary 2's masthead) does not apply, so the disagreement
+is a CONTEST and goes on the record as one (rule 9).**
+
+**THE RECORD (web/data/vessels.json; r250/apply-record-edits.py, the canoe's entry only, every other vessel and every
+other canoe field parse-identical): each mast carries `sail` — yard 12.75 / boom 9.46 / cloth 12.75 m, boomAngle 47.9,
+yardOffMast 1, tackAbaft 0.5, tackUp 0.2, leechRatio 0.88 for the fore; yard 11.6 / boom 8.16 / cloth 10.19,
+boomAngle 46.9, tackAbaft 0.3 for the main — with a provenance naming the plate, its scale, every pixel the read
+stands on, the 2 px/m bound (4% of length, 8% of area), r249's misread, and that tackUp is a class figure for the
+lashing over the deck. Each mast's rake drops from the class's 6 to the plate's 1 with a rakeProvenance. A
+vessel-level `sailAreaContested` names the record's 50.2 and its source, the plate's 60.6 with its bounds and how it
+was counted, `used: 'plate'` and why (the masts' stations, the deck's span and the spars are all read off the same 2009
+plate, so the cloth is the 2009 suit's; the plan's 540 sq ft may be an earlier suit's figure, not settled here). The
+Sail area row now says both figures and which the model is drawn to. hull.sailAreaEach 25 stays as the class's
+fallback input, unread while `sail` is present.**
+
+**THE MODEL (web/js/hull.js; r250/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted). The
+crab-claw branch of buildRig reads mk.sail where it exists: the yard's direction is the MAST's (π/2 − rake) plus
+yardOffMast, the boom's is boomAngle over the aft-horizontal, the tack is the mast's station plus tackAbaft at the
+deck plus tackUp, the spars are the recorded lengths, the cloth's head runs `cloth` up the yard, and the leech's
+control point comes from leechRatio — makeTriSail's leech is a quadratic Bezier bowed toward the tack, so the cloth is
+1 − (2/3)(1 − pull) of the straight triangle and pull = 1 − 1.5(1 − ratio); 0.88 gives pull 0.82 where the class had
+0.46. The area FALLS OUT of the spars. Without `sail` the class solves the spar from sailAreaEach as before, at the old
+tack and angles. The yard mesh records what was built (userData.crabclaw: the tack, both tips, the cloth's peak, the
+lengths, the angles, the leech share, the flat area, and whether it came from the record) for the audit. A furled
+crab claw closes its boom onto the yard 0.10 rad short, as before, with the bundle sized from the same flat area.**
+
+**MEASURED AFTER (r250/probe_sails.py on :8150, r250/sails-after.json — the yard meshes' records, the 'Mast' meshes'
+heels and heads, each spar mesh's ends, the cloth meshes' summed triangle areas in hull space): the foremast's heel at
+x −4.292, y 1.027, its head at (−4.186, 10.075); the fore tack at (−3.823, 1.227), 0.47 m abaft the heel and 0.20 m
+over the deck; the fore yard from the tack to (−3.823, 13.977), 12.75 m at 90.0°, its peak 3.9 m over the masthead;
+the fore boom to (2.520, 8.246), 9.46 m at 47.9°, its tip 1.8 m abaft the mainmast's line; the mainmast's heel at
+(0.751, 0.961), the main tack at (1.020, 1.161), the main yard to (1.020, 12.761), 11.6 m, its cloth's head at 11.351,
+its boom to (6.596, 7.119), 8.16 m at 46.9°. Each spar mesh's measured length equals its record (12.75, 9.46, 11.6,
+8.16). Flat cloth by the builder's own arithmetic 35.58 + 25.00 = 60.58 m²; the built meshes 39.43 + 27.52 = 66.95 m²,
+1.105 of flat — belly and creases add a tenth, which is the floor under the audit's tolerance. The cloth's lowest
+point is 1.161 (the main tack), 0.20 m over the platform. The heel's lift over the platform's top, r248's (0x′) —
+0.022 m at 6° of rake — is 0.001 m at 1° (the platform's top at the foremast's station is r249's 1.026, unchanged
+by anything here): (0x′) closes as a side effect of the read rake. Before (r249/feet-after.json and the r249 builder):
+the tacks 3.96 m forward of the masts, spars 10.8 m at 42°, the cloth 25.0 m² flat a sail.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r250/apply-audit-edits.py). NEW D-CRABCLAW-SPARS (round 250): for every
+mast whose record carries `sail`, the yard mesh's userData.crabclaw must exist and come from the record (a recorded
+read the builder did not draw is convicted for the silence), the yard and boom must be the record's to 0.02 m, the
+boom's angle to 0.5°, and the tack within 0.10 m of the mast's built heel plus tackAbaft. NEW D-SAIL-AREA (round 250):
+the row keyed 'Sail area' is read for its figure; the built cloth — every set sail mesh's triangles ('square', 'tri',
+'quad'; not a 'furl' bundle) summed in hull space — must be within 25% of that figure, or of sailAreaContested's used
+figure where the record names a contest; a contest naming no used figure is convicted. PROOF A (r250/audit-proof-a.out,
+the r249 builder under the r250 audit with the r250 record, on :8150): 3 problems — the canoe's two masts, "sail.yard
+12.75 m recorded, no crab claw built from it" and the same for 11.6, and the clipper, "787.2 m² of cloth built against
+2970 m² (the Sail area row)". The third was the rule's own error (rule 8): its first draft summed only 'tri' and
+'quad' meshes, and makeSail tags square canvas 'square', so it counted the clipper's jibs and staysails and none of her
+square sails; the rule now sums every set cloth. The final audit on the r250 builder: see the receipt paragraph's
+audit line (audit-final-8150.out; :8149 after the copy into web/, audit-final-8149.out).**
+
+**WITNESSED (r250/spin-canoe-after/ — b180 and low090 at 2880 × 1800 off :8150; the before is r249/spin-canoe-after/,
+the r249 builder; pair-b180-canoe.png stacks the starboard broadside before over after at 0.5×). From b180, before:
+both tacks well forward of their masts over the beams, both yards leaning forward of the vertical, the spars opening
+narrowly and the leeches cut deep, the fore sail's foot reaching out over the bow. After: each tack at its mast's foot
+on the deck, each yard standing up along its mast with its peak three to four metres above the masthead, each boom
+sweeping aft and up at 48° — the fore boom's tip passing abaft the mainmast — and the leech a shallow hollow from peak
+to boom tip; the silhouette is the plate's (r250/plate-sails-2x.png). From low090 (the port bow, low): the two yards
+stand as the tallest spars, vertical above the mastheads, the sails' feet on the deck between the hulls, the shrouds
+to the beam ends at the rails. The Shipwright's "rig, deck to truck" tile reads 9.0 m before and after — the masts
+are unchanged in height (0y′) and the tile measures the mast, not the yard standing over it.**
+
+**Rule 0 on the after broadside read whole (r250/spin-canoe-after/b180.png): a rendered vessel on water, not a chart —
+two dark lashed-plank hulls, eight pale beams carrying a deck along most of their length, two masts each with a pale
+triangular sail whose two spars meet at the mast's foot and open aft and upward, the yard standing above the mast,
+the shrouds spreading to the hulls' rails, the sea and a hazy coast behind. Three facts a viewer can read off it
+without a legend: she is two hulls joined by beams that carry a deck; each of her two sails is a triangle between
+two spars that meet at the foot of its mast, the upper spar standing taller than the mast; her sails open aft, the
+fore sail's boom reaching past the mainmast.**
+
+**Named residuals, in order:** (0y″) CLOSED — the spars, the tack, the angles and the cloth are the plate's; the area
+contest is on the record as a field. (0y′) the masts' heights: the plate's foremast reads about 9.6 m from the deck
+(foot (405, 715), head (410, 215) at 52 px/m) and the mainmast about 8.6 m to where its shrouds converge (690, 280),
+against the model's 9.05 m for both; r249 read 10.0 and 11.7 by another datum; unsettled and unchanged. (0y‴) a sail
+sheeted on the centreline through the next mast: the fore boom's tip at x 2.52 is 1.8 m abaft the mainmast's line at
+8.25 m up, so the fore cloth crosses the mainmast in the model's one plane; the plate has the fore boom's tip 1.5 m
+abaft the mainmast at 7.2 m up on the sail's own side of it; the dhow's fore lateen is the same class; no audit rule
+reads it. NEW (0y⁗) the sail area's contest: the plan's 540 sq ft against the 2009 suit's 60.6 m² by pixels — whether
+they are two suits, and what the plan drew, is not settled; the record says which figure the model is drawn to and
+why. NEW (0y⁵) the shroud count the plate shows (four or five a side to the near hull from the foremast, r247) against
+the record's 2, unchanged. (0x′) CLOSED — the heel's lift is 0.001 m at the read rake. (0z) the lashing's frapping and
+the beam-to-hull lashings, (0v) the tackle's strop and belay, (0t) (0u) as r245 names them. (0l) Queen Mary 2's Hull
+row and her data, (0n) the carrack's castle stations as a class default, (0o) the bowsprit through the forecastle deck
+with no aperture, (0i) the galley's stern tent, (0j) the free foot's scallop, (0k) the cap's 30°, (0e²²) the cog's
+Frames 1 and 2 on the stem, unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸)
+(0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as
+r230 lists them.**
+
+**r251 opens by running the FULL ratchet at the clean HEAD first (r250/PREDICTIONS-close.md names 2 frames that MUST
+move — ship-canoe and sea-canoe-floor — 2 that MAY, her berth neighbours ship-dugout and ship-trireme, and 61 that
+MUST NOT; only those scored by check --frame after the push are accepted here, and the movers in the opening run are
+to be read against that list — any mover in the MUST NOT list is not explained by this round); then takes (0y‴), the
+sail through the next mast as a class, or (0y′), the masts' heights by the plate on one datum, or the survey's next
+never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788638518 at the build; the push and the live poll are in
+build/staging/r250/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r250 staging stays on disk uncommitted, the r211 convention.**
