@@ -19288,3 +19288,12 @@ build the attachment the wreck attests.**
 build/staging/r235/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r235 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788575898 on https://augustg97.github.io/ships/index.html at 19:39 PDT,
+60 s after the push (build/staging/r235/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r232 correction): docs/data/vessels.json carries "rimDiaM":1.5 (1) and
+"form":"basket" (1); docs/js/hull.js defines buildBasketTop (1), names the group 'Basket top' (1) and
+tags the cross (1); docs/audit-hulls.js carries R-TOP-BASKET's breadth string (1), its cross string (1)
+and reads 'Basket top' (2, the count rule and R-TOP-BASKET); docs/js/shipwright.js reads U.rigTruckY (2) and docs/js/hull.js exports rigTruckY (3).
+THE RATCHET, run after the push: RATCHET EXIT 1  END 20:10:36; 64 of 64 frames scored; movers 1: ship-treasure 0.054%/0.019. NOT ACCEPTED (unexplained by this round's change, r236's first item): ship-treasure 0.054%/0.019. Largest three: ship-treasure 0.054%/0.019, globe-default 0.048%/0.012, ship-endurance 0.043%/0.018. Prediction did NOT hold.
+Two commits close the round (e49442d record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
