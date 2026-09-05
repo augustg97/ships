@@ -20622,3 +20622,11 @@ survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking
 build/staging/r245/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r245 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788618579 on https://augustg97.github.io/ships/index.html at 07:31 PDT,
+90 s after the push (build/staging/r245/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries shroudFeet (1) and the deadeyes built at the feet (1);
+docs/audit-hulls.js carries D-SHROUDS' three convictions (1, 1, 1); docs/data/vessels.json is unchanged this round.
+THE RATCHET: THE OPENING FULL RATCHET at the clean r244 HEAD 335b343 (r245/open-ratchet.out, launched 06:43 as the round's first act, ended 07:28): RATCHET EXIT 0  END 07:28:11; 65 frames scored; movers 0. Largest three: shipwright-astern 0.046%/0.037, action 0.038%/0.009, passage-sahul 0.038%/0.013.
+ PARTIAL after the push, the r239 pattern (r245/partial-*.out): frames scored one at a time by check --frame, each diff read before its accept — ship-carrack 0.461%/0.181 CHANGED, ship-clipper 0.736%/0.328 CHANGED, ship-endurance 0.947%/0.374 CHANGED, ship-galley 0.111%/0.041 CHANGED, ship-great-eastern 0.708%/0.330 CHANGED, ship-preussen 1.667%/0.771 CHANGED, ship-steamer 1.006%/0.523 CHANGED, ship-treasure 0.000%/0.000 ok, ship-wyoming 0.865%/0.370 CHANGED, shipwright 0.732%/0.288 CHANGED (10 frames; r245/PREDICTIONS-close.md names the frames that MUST move — the carrack's own and her berth neighbours' — and those that must not). The other 55 frames are UNSCORED on the r245 builder; r245's full run at the clean HEAD is the test, and any mover outside the MUST list is not explained by this round.
+Two commits close the round (ac5e77a audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
