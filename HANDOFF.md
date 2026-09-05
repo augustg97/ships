@@ -19888,3 +19888,9 @@ foot station (1), the re-attributed line-2810 citation (1) and the Stem card row
 puts the skin's forward end on the stem's line (1) and closes the rail plan to the rabbet (1); docs/audit-hulls.js carries R-STEM-ANGLE's string (1).
 THE RATCHET, run after the push: PARTIAL, run beside the close (the 64-frame run could not fit the driver's 80 minutes after a second loft pass; r240 runs it first at the clean HEAD): 4 named frames scored by check --frame (r239/partial-*.out) — ship-dhow 0.158%/0.089 CHANGED (the cog's bow at the frame's right edge, the diff image read; ACCEPTED with the reason in FRAME-LOG.md, predicted in r239/PREDICTIONS-close.md), ship-treasure 0.018%/0.005 ok, shipwright 0.021%/0.029 ok, globe-default 0.048%/0.012 ok. The other 60 frames are UNSCORED this round; PREDICTIONS-close.md says every one of them is 0.000% (the loft's branches are gated on hull.stem, which only the cog carries), and r240's full run is the test of that.
 Two commits close the round (fd0bb05 record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+**THE RATCHET, second batch beside the close (r239/run-batch2.out, partial2-*.out; every ship-* and shipwright-* frame
+not in the first four, one check --frame each): 29 frames scored, movers 0. Largest three: ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023, ship-sekibune 0.036%/0.013. PREDICTIONS-close.md said every one of them stays under the gate,
+because the loft's branches are gated on hull.stem, which only the cog carries. Any mover above is NOT accepted and is
+r240's first item; the 31 aboard/sea/descent/passage/wake/action/board/globe/map frames are unscored this round and
+r240's full run at the clean HEAD scores them.**
