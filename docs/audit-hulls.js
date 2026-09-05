@@ -461,6 +461,17 @@ if (worstAft > 0.05)
 say(v.id, 'planking standing abaft its sternpost', `skin ${worstAft.toFixed(2)} m abaft the post's after face at ${yAft.toFixed(2)} m — the planks close on the post, not past it`);
 if (worstGap > 0.45)
 say(v.id, 'daylight between the planking and the sternpost', `skin ${worstGap.toFixed(2)} m short of the post's after face at ${yGap.toFixed(2)} m`);
+if (SP.hoodEndHalfBreadthM != null) {
+let worstW = 0, yW = 0;
+for (let y = yLo + 0.35; y < Math.min(yHi - 0.2, skinTop - 0.2); y += 0.25) {
+let sx = -1e9; for (const q of sv) if (Math.abs(q[1] - y) < 0.13) sx = Math.max(sx, q[0]);
+if (sx < -1e8) continue;
+let w = 0; for (const q of sv) if (Math.abs(q[1] - y) < 0.13 && q[0] > sx - 0.10) w = Math.max(w, Math.abs(q[2]));
+if (w > worstW) { worstW = w; yW = y; }
+}
+if (worstW > SP.hoodEndHalfBreadthM + 0.12)
+say(v.id, "the planking's hood ends standing off the post", `${worstW.toFixed(2)} m half-breadth at the skin's after end at ${yW.toFixed(2)} m, the record's rabbet ${SP.hoodEndHalfBreadthM} — an end face, not a rabbet`);
+}
 }
 }
 }

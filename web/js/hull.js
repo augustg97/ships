@@ -146,7 +146,7 @@ function hullSurface(S) {
   /* waterline half-breadth, normalised — or, on a hull whose record carries rail
      half-breadths by station, the RAIL plan through them (railPlan, round 228) */
   const plan = railPlan(S);
-  const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
+  const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, sternPlanEnd(S));
   /* depth of the keel below the waterline, normalised. The forefoot rises and the run sweeps
      up to the sternpost; a flat-floored cog barely does either. */
   const keel = u => {
@@ -489,6 +489,21 @@ function sectionAt(S, rows, u) {
    form turns it into the waterline's, and the coefficients fall out (r228/coeffs.py:
    Cw 0.59 → 0.70, Cp 0.61 → 0.64, Cb 0.39 → 0.45 on the cog). Without railHalfFrac on
    any station, the class plan, byte-identical. */
+/* ── THE PLANKING LANDS IN THE POST'S RABBET (round 238) ─────────────────────────────
+   The plan's after end was the class's sternFineness at both ends of the loft — 0.24 on
+   the cog, a half-breadth of 0.91 m at u 1 where the sternpost is 0.42 m sided — so the
+   strakes' hood ends met a flat end cap 0.7 m wide each side of the post instead of the
+   post. Lahn's Blatt 1 draws every strake line running into the post's forward line, and
+   a clinker hood end sits in the post's rabbet. Where a straight post's record carries
+   hull.sternpost.hoodEndHalfBreadthM (the half-siding less the rabbet's depth), the plan
+   closes to it; the cubic's own end tangent draws the closing between the last station
+   and the post, which the sheet does not carry. Without the field, sternFineness. */
+function sternPlanEnd(S) {
+  const SP = S.sternpost;
+  if (SP && SP.form === 'straight' && SP.hoodEndHalfBreadthM != null)
+    return Math.min(S.sternFineness, SP.hoodEndHalfBreadthM / (S.beam / 2));
+  return S.sternFineness;
+}
 function railRows(S) {
   const sec = S.section; if (!sec || !sec.stations) return null;
   const rows = sec.stations.filter(s => s.railHalfFrac !== undefined)
@@ -516,7 +531,7 @@ function pchip(pts) {
 }
 function railPlan(S) {
   const rows = railRows(S); if (!rows) return null;
-  return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: S.sternFineness }]));
+  return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: sternPlanEnd(S) }]));
 }
 
 function buildFramesGeometry(S, NF = 26, onlyU) {

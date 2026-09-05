@@ -75,7 +75,7 @@ function hullSurface(S) {
 const nExp = exponentForCm(S.cm);
 const halfB = S.beam / 2;
 const plan = railPlan(S);
-const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, S.sternFineness);
+const wl = u => plan ? plan(u) : fullness(u, S.wlPower, S.stemFineness, sternPlanEnd(S));
 const keel = u => {
 const fore = 1 - Math.pow(Math.max(0, (S.forefoot - u) / S.forefoot), 2) * S.riseF;
 const aft = 1 - Math.pow(Math.max(0, (u - (1 - S.run)) / S.run), 2) * S.riseA;
@@ -247,6 +247,12 @@ return { F: a.F + (b.F - a.F) * f, n: a.n + (b.n - a.n) * f };
 }
 return last;
 }
+function sternPlanEnd(S) {
+const SP = S.sternpost;
+if (SP && SP.form === 'straight' && SP.hoodEndHalfBreadthM != null)
+return Math.min(S.sternFineness, SP.hoodEndHalfBreadthM / (S.beam / 2));
+return S.sternFineness;
+}
 function railRows(S) {
 const sec = S.section; if (!sec || !sec.stations) return null;
 const rows = sec.stations.filter(s => s.railHalfFrac !== undefined)
@@ -273,7 +279,7 @@ return (2 * t3 - 3 * t2 + 1) * pts[i].r + (t3 - 2 * t2 + t) * h[i] * m[i]
 }
 function railPlan(S) {
 const rows = railRows(S); if (!rows) return null;
-return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: S.sternFineness }]));
+return pchip([{ u: 0, r: S.stemFineness }].concat(rows, [{ u: 1, r: sternPlanEnd(S) }]));
 }
 function buildFramesGeometry(S, NF = 26, onlyU) {
 const H = hullSurface(S);

@@ -19592,3 +19592,110 @@ pretty-printed form ("form": "straight") and docs/data/vessels.json is minified 
 miscount, on the record side this time). Re-read with the minified strings: "form":"straight" (1),
 "angleToKeelDeg":110 (1), "aftEdge":-3.1 (1), "footAbaftStationDatumM":1.12 (1). The published record carries the
 round. r238's push-log-commit.sh must grep the minified form for any record string.**
+
+## Round 238 — 2026-09-04 — the planking lands in the sternpost's rabbet: the rail plan closes to the post's siding where before it closed to the class's sternFineness and left an end cap 1.8 m wide; and r237's two Tanner citations for the post's angle were the Drogheda boat's and the Newport ship's, so the cog's 110° now rests on the plate alone
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r237's receipt reported the ratchet clean
+(64 of 64, movers 0), so nothing was carried in as a first item. r237 named (0e¹⁵), the planking's closing on the post:
+read the rail plan aft of Spant 35 and give the record the end half-breadth at the post's rabbet. Done at the class
+level for the end breadth; the closing's FORM between Spant 35 and the post stays unread, and the record says so. The
+r235 clock pattern held: the full ratchet STARTED beside the close (23:13, load 7.9) as soon as the audit passed, the
+round's work was built, committed and pushed while it ran, and its result is in the receipt commit.**
+
+**THE READ. No half-breadth plan of the cog is on disk. What is: (1) Lahn's Blatt 1 at 590.8 px/m draws every strake
+line running into the sternpost's forward line from the keel plank to the top strake (r237/blatt1-stern-post-half.png)
+— the strakes end ON the post, in its rabbet, as clinker hood ends do. (2) Tanner 2021 vol. 2 App. H reproduces
+Lahn's Blatt 35 body plan (Figure 13, PDF p. 303, extracted at its native 1063 × 707 px to r238/fig13-000.png, about
+125 px/m) and a hull lofted from Blatt 35–37 seen from the stern quarter (Figure 14, p. 304; r238/tanner-contact.png):
+the after sections close to the post with no end face. The body plan's stations are Lahn's Rekonstruktionsspanten 9–18
+on the Teil shown, and the figure carries no station spacing, so its after sections cannot be placed along the hull
+from it; the deck plan Tanner reads widths from ('Blatt 8 reconstructed framing plan', r230/tanner-vol2.txt line 11019)
+is not on disk. The sheet's rail stations stop at Spant 35, 0.98 of the beam, 3.5 m forward of the post's head.**
+
+**THE CORRECTION. r237's sternpost provenance quoted Tanner for the angle: 'a stern post at the determined 110 deg
+angle (taken from archaeological and historical parallels)' (line 7805) and 'the missing sternpost extended in a
+straight line continuing from the top of the sternhook' (lines 4760–4766). Neither is the cog. Line 7805 stands under
+the App. G header at line 7780, 'Newport Phase 2 Capital Reconstruction'; lines 4760–4766 stand under the App. F header
+at 4740, 'Drogheda Boat', and Figure 8's stern hook is J. Ryan's drawing of that boat. The cog is App. H (line 10045),
+and App. H says nothing about the post's angle. The record's angle rests on the plate's own row scan, 109.8° carried as
+110; Tanner's 110 is a parallel from the same author's Newport reconstruction, and the provenance, the contested field
+and the card's Sternpost row now say so (r238/apply-vessel-edits.py).**
+
+**THE MODEL BEFORE (r238/before-quarter-stern-3x.png; the plan replica in this round's handoff notes). railPlan ran
+the monotone cubic from Spant 35 (0.98) to sternFineness 0.24 at u 1 — the class's end value, standing where the sheet
+has no station. Half-breadth at the rail before the post's head: 3.73 m at 3.5 m, 3.11 at 2.0, 2.00 at 1.0, 1.42 at
+0.5, 0.91 AT THE POST — so the skin ended on the stern cap 1.82 m wide, 0.7 m each side of a post 0.42 m sided, and
+the strakes' hood ends met that flat face. The audit's R-POST-CLOSE could not see it: the cap stood at the post's
+line, neither abaft it nor short of it.**
+
+**THE DECISION. `hull.sternpost.hoodEndHalfBreadthM 0.17`: the post's half-siding (0.21, the class's 5.5% of beam;
+Lahn's own siding is not on disk) less a 4 cm rabbet — DERIVED from the class siding, not read, and hoodEndProvenance
+says which part is the plate's (the strakes end on the post) and which is the class's (the siding). The contested field
+carries that the closing from Spant 35 to the post is the loft's own cubic. sternProvenance and the card's Sternpost row
+carry the rabbet.**
+
+**THE MODEL (web/js/hull.js; r238/hull.before.js, hull.after.js, apply-hull-edits.py; 24 diff lines). sternPlanEnd(S):
+with sternpost.form 'straight' and hoodEndHalfBreadthM, the plan's after end is that half-breadth over the half-beam
+(0.0447 on the cog), else sternFineness. railPlan's end row and hullSurface's class plan (fullness's endA) both read
+it, so a record without the field is byte-identical. The cubic between Spant 35 and the post keeps its own end tangent
+(Fritsch–Carlson: the last tangent is the last secant). After: 3.73 m at 3.5 m, 3.45 at 2.5, 2.95 at 2.0, 2.29 at 1.5,
+1.54 at 1.0, 0.81 at 0.5, 0.47 at 0.25, 0.17 at the post. The skin's end vertices lie on the post's centre line at
+every height (surfacePoint, r237), 0.17 m off the centreline, inside the post's 0.21 m half-siding; at the post's
+forward face (0.11 m forward) the plan reads 0.30 m, so the strakes emerge from the post's sides 9 cm proud and bury
+into it over the moulding — the rabbet, drawn.**
+
+**MEASURED (r238/measure-after.out against r237/measure-after.out, hull space, water at y 0): extent 23.38 m and the
+Sternpost u 0.953–1.055 unchanged; Frame 30 of 32 half-breadth 3.06 (was 3.18), Frame 31 2.42 (was 2.68), Frame 32
+1.68 (was 2.10) — the after frames follow the skin in. The plan replica (r238 handoff, the Python in this round's
+shell log) is the loft's pchip on the record's four stations and matches the audit's read of the drawn skin: proof A's
+0.99 m at 2.00 m over the keel is the r237 skin's end at that height (0.91 at the rail, wider below it where the
+flared section's superellipse at F 0 stands proud of the rail plan by the section form).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; apply-audit-edits.py, 17 diff lines). R-HOOD-ENDS, inside the r237
+post block: with hoodEndHalfBreadthM, in every 0.25 m of shared height the planking's vertices within 0.10 m of the
+skin's aftmost x stand no wider than that half-breadth plus 0.12 m. PROOFS (r238/run-audit-and-witness.sh, .out):
+A, the r237 builder under the r238 record and audit — 1 problem, the cog: "the planking's hood ends standing off the
+post: 0.99 m half-breadth at the skin's after end at 2.00 m, the record's rabbet 0.17 — an end face, not a rabbet"
+(audit-proof-a.out); B, the r238 builder with the end half-breadth doctored +0.33 m (hull.doctored-end.js) — 1 problem,
+"0.59 m half-breadth at the skin's after end at 2.00 m" (audit-proof-b.out). The builder restored from the after-copy
+(cmp). The final audit: checked 33 hulls, 0 problems (r238/audit.err).**
+
+**WITNESSED (r238/witness-sea.png, #e=3&f=hanse, the stern at 4x in sea-stern-after-4x.png against r237's frame at
+the same window in sea-stern-before-4x.png; witness-shipwright.png, the broadside; witness-astern-close.png, b=180).
+On the Sea, from the port quarter: before, a solid dark wedge — the end cap — filled the space between the rudder and
+the hull under the castle; after, the planking sweeps in to the post, the post reads as one thin timber with the
+rudder hung on it, and the water shows between the post and the castle's after stanchions. ⚠ The Shipwright's close
+cameras (b=140–215, z 0.5–0.6) target the hull's centre and land on the castle deck; the stern's planking is not in
+any of them (witness-quarter-high.png, witness-port-quarter.png), and the stage panel covers the stern in the astern
+frame. The Sea frame is the witness. Rule 0 answered on witness-sea.png read whole: it reads as a rendered world — the
+swell's texture under a low sun, the wake's two arms astern, the coast's grey band under haze, the planking lit from
+the quarter. Three facts a viewer can read off it without a legend: the ship has one mast and one square sail with a
+cross at the truck; her rudder hangs on a raked sternpost under an overhanging castle; her planking runs into that
+post with no flat stern face.**
+
+**Named residuals, in order:** (0e¹⁵) RESOLVED for the end breadth; OPEN as a read: the closing's form from Spant 35
+to the post (Lahn's Blatt 8 framing plan or Blatt 35's station spacing would read it). NEW (0e¹⁸): the post's own
+siding — the record's 0.17 is derived from the class's 5.5% of beam; Lahn 1992 gives the sternpost's dimensions and is
+not on disk. (0e¹⁶) the stern hook as a timber and the post's moulding (the plate's second line 0.27–0.30 m forward of
+the after face) unchanged. (0e¹⁷) the stem's rake and curve unchanged. (0h′) profile_capture.py still selects the
+wrong hull for --ship cog; not run this round. (0e¹³) the wale's forward run, (0e¹⁴) the ratlines, (0e¹⁰) the mast's
+taper, (0e⁸) the sail's emblem and bonnet seams, (0e⁵) the trim and (0e⁶) the lwl unchanged. (0e′) (0e⁗) (0g⁵) (0g⁹)
+(0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**Two method notes. (1) A citation names an appendix, and the appendix names a vessel: r237 read two passages out of
+a five-appendix volume by line number and did not read the page header over them. Both were the right idea about the
+wrong ship. The check is one grep for the nearest 'Appendix' line above the passage, and it should be run on every
+Tanner citation on the record (r239's first item after the ratchet). (2) A class end value is a station too: the plan's
+u 1 row was 'the class's own end value where the sheet has nothing', which is true of the sheet and false of the ship —
+the post's siding is a bound the record can carry even where no plate draws the plan.**
+
+**r239 opens by reading the receipt paragraph below for the ratchet's result (any mover not named in
+r238/PREDICTIONS-close.md is r239's first item), then greps every 'Tanner' citation on the cog's record for the
+appendix header above its line number (method note 1), then takes (0e¹⁷), the stem: read Blatt 1's stem line from the
+keel plank's forward end to the head the same way r237 read the post (row scans at 590.8 px/m), give the record its
+rake and its curve, and let the loft draw the skin's forward end on it.**
+
+**Live stamp: docs/index.html carries data-version 1788589112 at the build; the push and the live poll are in
+build/staging/r238/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r238 staging stays on disk uncommitted, the r211 convention.**
