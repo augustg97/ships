@@ -19586,3 +19586,9 @@ water (1) and places the after edge through the datum (1); docs/audit-hulls.js c
 R-POST-CLOSE's string (1) and C-AFTEDGE's string (1).
 THE RATCHET, run after the push: RATCHET EXIT 0  END 22:47:21; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. Prediction (r237/PREDICTIONS-close.md) held.
 Two commits close the round (ae890c0 record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+**Receipt correction (r237, same close): the three record counts above read 0 because the receipt script grepped the
+pretty-printed form ("form": "straight") and docs/data/vessels.json is minified by the build (the r232 class of
+miscount, on the record side this time). Re-read with the minified strings: "form":"straight" (1),
+"angleToKeelDeg":110 (1), "aftEdge":-3.1 (1), "footAbaftStationDatumM":1.12 (1). The published record carries the
+round. r238's push-log-commit.sh must grep the minified form for any record string.**
