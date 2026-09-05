@@ -21066,3 +21066,11 @@ survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking
 build/staging/r249/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r249 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788635252 on https://augustg97.github.io/ships/index.html at 12:09 PDT,
+90 s after the push (build/staging/r249/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries buildRig's step at the platform's top at the mast's station (1) and platformOf's deck on the beams (1);
+docs/audit-hulls.js carries D-MAST-COUNT (2) and D-MAST-STEP's two new convictions (1, 1); docs/data/vessels.json carries the canoe's foremast at 0.26 (2), her mainmast at 0.54 (2) and her platform's after end at 0.92 (1) — the docs/ copy is minified, so the patterns allow any spacing.
+THE RATCHET: THE OPENING FULL RATCHET at the clean r248 HEAD cddf175 (r249/open-ratchet.out, launched 11:10 as the round's first act, ended 12:05): RATCHET EXIT 0  END 12:05:26; 65 frames scored; movers 0. Largest three: ship-yamato 0.043%/0.015, passage-sahul 0.038%/0.013, aboard 0.037%/0.009.
+ PARTIAL after the push, the r239 pattern (r249/partial-*.out): frames scored one at a time by check --frame on the r249 builder, each diff read before its accept — sea-canoe-floor 11.641%/5.866 CHANGED, ship-canoe 10.933%/4.559 CHANGED, ship-dugout 0.000%/0.000 ok, ship-trireme 0.017%/0.011 ok (4 frames; r249/PREDICTIONS-close.md names the 2 frames that MUST move — the canoe's own and the Sea's floor view of her — the 2 that MAY, her berth neighbours, and the 61 that must not). The other 61 frames are UNSCORED on the r249 builder; r249's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
+Two commits close the round (01d6ab2 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
