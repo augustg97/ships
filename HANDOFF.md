@@ -21318,3 +21318,11 @@ by looking.**
 build/staging/r251/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r251 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788644442 on https://augustg97.github.io/ships/index.html at 14:42 PDT,
+90 s after the push (build/staging/r251/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries the sheeted group's rotation about the yard (2: the crab claw and the lateen) and the cloth's named mast (3: the crab claw, the settee and the lateen);
+docs/audit-hulls.js carries D-SAIL-THROUGH-MAST's conviction (1); docs/data/vessels.json is unchanged this round.
+THE RATCHET: THE OPENING FULL RATCHET at the clean r250 HEAD 25198a8 (r251/open-ratchet.out, launched 13:36 as the round's first act, ended 14:37): RATCHET EXIT 0  END 14:37:27; 65 frames scored; movers 0. Largest three: ship-yamato 0.043%/0.015, passage-sahul 0.038%/0.013, aboard 0.037%/0.009.
+ PARTIAL after the push, the r239 pattern (r251/partial-*.out): frames scored one at a time by check --frame on the r251 builder, each diff read before its accept — sea-canoe-floor 8.812%/7.088 CHANGED, ship-canoe 4.218%/1.147 CHANGED, ship-carrack 0.756%/0.376 CHANGED, ship-dhow 12.657%/3.825 CHANGED, ship-galleass 14.618%/5.086 CHANGED, ship-galley 14.696%/4.727 CHANGED (6 frames; r251/PREDICTIONS-close.md names the 6 frames that MUST move — the canoe's own and the Sea's floor view of her, the dhow, the galley, the galleass and the carrack — the 6 that MAY, their berth neighbours and the two Action views with lateen craft, and the 53 that must not). The other 59 frames are UNSCORED on the r251 builder; r252's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
+Two commits close the round (2d17a35 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
