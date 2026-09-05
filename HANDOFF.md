@@ -19880,3 +19880,11 @@ Frame 1's x-span (2.9 m → under 0.3), and look at the frame stage (SW.stage=2,
 build/staging/r239/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r239 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788594128 on https://augustg97.github.io/ships/index.html at 00:43 PDT,
+60 s after the push (build/staging/r239/push.log, the r209 poll pattern). Published copies read
+back by CODE strings, the record's in the MINIFIED form (the r237 correction): docs/data/vessels.json carries the stem's
+foot station (1), the re-attributed line-2810 citation (1) and the Stem card row (1); docs/js/hull.js defines stemPlanEnd (1),
+puts the skin's forward end on the stem's line (1) and closes the rail plan to the rabbet (1); docs/audit-hulls.js carries R-STEM-ANGLE's string (1).
+THE RATCHET, run after the push: PARTIAL, run beside the close (the 64-frame run could not fit the driver's 80 minutes after a second loft pass; r240 runs it first at the clean HEAD): 4 named frames scored by check --frame (r239/partial-*.out) — ship-dhow 0.158%/0.089 CHANGED (the cog's bow at the frame's right edge, the diff image read; ACCEPTED with the reason in FRAME-LOG.md, predicted in r239/PREDICTIONS-close.md), ship-treasure 0.018%/0.005 ok, shipwright 0.021%/0.029 ok, globe-default 0.048%/0.012 ok. The other 60 frames are UNSCORED this round; PREDICTIONS-close.md says every one of them is 0.000% (the loft's branches are gated on hull.stem, which only the cog carries), and r240's full run is the test of that.
+Two commits close the round (fd0bb05 record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
