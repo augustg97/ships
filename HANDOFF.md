@@ -20839,3 +20839,12 @@ Endurance (4,114 triangles per metre), by looking.**
 build/staging/r247/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r247 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788626988 on https://augustg97.github.io/ships/index.html at 09:51 PDT,
+90 s after the push (build/staging/r247/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries crossbeamsOf (1) and the lashing group built at the feet (1);
+docs/audit-hulls.js carries D-SHROUDS' three lashing convictions (1, 1, 1); docs/data/vessels.json carries the canoe's
+eight crossbeams (0) and her mast's shroudSetup (0).
+THE RATCHET: THE OPENING FULL RATCHET at the clean r246 HEAD edd13b1 (r247/open-ratchet.out, launched 09:04 as the round's first act, ended 09:47): RATCHET EXIT 1  END 09:47:55; 65 frames scored; movers 1: action-lepanto 0.109%/0.020. Largest three: action-lepanto 0.109%/0.020, ship-yamato 0.043%/0.015, passage-sahul 0.038%/0.013.
+ PARTIAL after the push, the r239 pattern (r247/partial-*.out): frames scored one at a time by check --frame on the r247 builder, each diff read before its accept — sea-canoe-floor 10.426%/4.063 CHANGED, ship-canoe 2.313%/1.565 CHANGED, ship-dugout 0.000%/0.000 ok, ship-trireme 0.017%/0.010 ok (4 frames; r247/PREDICTIONS-close.md names the 2 frames that MUST move — the canoe's own and the Sea's floor view of her — the 2 that MAY, her berth neighbours, and the 61 that must not). The other 61 frames are UNSCORED on the r247 builder; r248's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
+Two commits close the round (96412e7 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
