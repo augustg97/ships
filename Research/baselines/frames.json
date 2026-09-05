@@ -336,6 +336,11 @@
    "name": "ship-slave-ship",
    "path": "/?frozen=1#v=ship&s=slave-ship",
    "note": "Added r131 with the rake authoring: until this frame she appeared in no committed view at all - the r114/r128 one-view-blindness class, on the hull that carries the Middle Passage. Berth 17, between ship-of-the-line and wyoming."
+  },
+  {
+   "name": "ship-carrack",
+   "path": "/?frozen=1#v=ship&s=carrack",
+   "note": "Added r243 with the castles: until this frame the carrack appeared in no committed view (the r114/r128/r131 one-view-blindness class), which is how a nau stood flush-decked for 243 rounds. Berth 10, between the caravel and the war galley. The walled forecastle and the two-tiered aftcastle in the hull's own planking, the waist open at the mainmast."
   }
  ]
 }
