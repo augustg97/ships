@@ -1998,14 +1998,17 @@ const SF = mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stati
 ? mk.shroudFixing : null;
 const sfLo = SF ? Math.min(...SF.stationsU) : 0, sfHi = SF ? Math.max(...SF.stationsU) : 0;
 const sfY = SF ? -S.draught + (SF.boardsAboveKeelM ? SF.boardsAboveKeelM[1] : SF.waleTopAboveKeelM + 0.6) : 0;
+const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
+const CT = CR ? CR.top : null;
 for (let s = 0; s < mk.shrouds; s++) {
 const f = (s + 1) / (mk.shrouds + 1);
-const chX = x + (f - 0.5) * L * 0.055;
+const chX = CR ? x + (CR.lo + (CR.hi - CR.lo) * f - u) * L : x + (f - 0.5) * L * 0.055;
 const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
 const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
 const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
 [1, -1].forEach((side, si2) => {
 const a = SF ? new THREE.Vector3(sfX, sfY, side * sfZ)
+: CT ? new THREE.Vector3(chX, CT.y - B * 0.012 + B * 0.016, side * (CT.half + B * 0.046))
 : new THREE.Vector3(chX, base, side * half * 1.06);
 const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
 shroudSegs.push([a, b]);
@@ -2013,7 +2016,12 @@ shroudPts[si2].push([a, b]);
 });
 }
 const shr = ropeMesh(shroudSegs, 0.018 + B * 0.0009, ropeMat);
-if (shr) group.add(tag(shr, 'shroud'));
+if (shr) {
+shr.userData.segs = shroudSegs.map(([p, q]) => [[p.x, p.y, p.z], [q.x, q.y, q.z]]);
+shr.userData.mast = mi;
+shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
+group.add(tag(shr, 'shroud'));
+}
 const RAT = 0.3302;
 if (mk.rig === 'square') shroudPts.forEach(side => {
 if (side.length < 2) return;
@@ -7811,6 +7819,49 @@ g.add(w);
 }
 group.add(tag(g, 'poop'));
 }
+function castleTiers(S, H) {
+const C = S.castles; if (!C || !(C.fore || C.aft)) return [];
+H = H || hullSurface(S);
+const L = S.lwl, B = S.beam;
+const dh = C.deckHM || B * 0.16;
+const cl = u => Math.max(0.001, Math.min(0.999, u));
+const halfAt = u => Math.abs(surfacePoint(S, H, cl(u), 1.0)[2]);
+const out = [];
+for (const end of ['fore', 'aft']) {
+const spec = C[end]; if (!spec) continue;
+const [u0, u1, tiers] = spec, aft = end === 'aft', span = u1 - u0;
+for (let t = 0; t < tiers; t++) {
+const a = aft ? u0 + span * 0.40 * t : u0;
+const b = aft ? u1 : u1 - span * 0.40 * t;
+const inset = B * (0.02 + 0.035 * t);
+out.push({ end, t, u0: a, u1: b, inset, dh,
+half: u => Math.max(halfAt(u) * 0.5, halfAt(u) - inset),
+yB: u => H.deck(cl(u)) + dh * t,
+yT: u => H.deck(cl(u)) + dh * (t + 1) });
+}
+}
+return out;
+}
+function castleTopAt(S, H, u) {
+let top = null;
+for (const T of castleTiers(S, H)) {
+if (u < T.u0 || u > T.u1) continue;
+if (!top || T.t > top.tier) top = { y: T.yT(u), half: T.half(u), end: T.end, tier: T.t, dh: T.dh,
+railH: (S.castles && S.castles.railHM) || 0.9 };
+}
+return top;
+}
+function channelRun(S, H, u, halfU) {
+halfU = halfU || 0.0275;
+const top = castleTopAt(S, H, u);
+const key = c => c ? c.end + c.tier : '';
+const same = uu => key(castleTopAt(S, H, uu)) === key(top);
+let lo = u - halfU, hi = u + halfU;
+const step = 0.001;
+while (lo < u - step && !same(lo)) lo += step;
+while (hi > u + step && !same(hi)) hi -= step;
+return { lo, hi, top };
+}
 function buildTieredCastles(S, group, mats, hullMat) {
 const C = S.castles; if (!C || !(C.fore || C.aft)) return;
 const H = hullSurface(S);
@@ -7818,23 +7869,16 @@ const L = S.lwl, B = S.beam;
 const dh = C.deckHM || B * 0.16;
 const rH = C.railHM || 0.9;
 const cl = u => Math.max(0.001, Math.min(0.999, u));
-const halfAt = u => Math.abs(surfacePoint(S, H, cl(u), 1.0)[2]);
+const TIERS = castleTiers(S, H);
 const xAt = u => (u - 0.5) * L + H.rake(cl(u));
 const vOf = (u, y) => 0.62 + 0.38 * (y / Math.max(0.5, H.sheer(cl(u))));
 const deckM = new THREE.MeshStandardMaterial({ color: 0xb09566, roughness: 0.80, side: THREE.DoubleSide });
 const railM = mats.woodDark;
 const up = new THREE.Vector3(0, 1, 0);
 const one = (label, spec, aft, what) => {
-const [u0, u1, tiers] = spec;
 const g = new THREE.Group();
-const span = u1 - u0;
-for (let t = 0; t < tiers; t++) {
-const a = aft ? u0 + span * 0.40 * t : u0;
-const b = aft ? u1 : u1 - span * 0.40 * t;
-const inset = B * (0.02 + 0.035 * t);
-const half = u => Math.max(halfAt(u) * 0.5, halfAt(u) - inset);
-const yB = u => H.deck(cl(u)) + dh * t;
-const yT = u => H.deck(cl(u)) + dh * (t + 1);
+for (const T of TIERS.filter(T => T.end === (aft ? 'aft' : 'fore'))) {
+const { t, u0: a, u1: b, half, yB, yT } = T;
 const N = Math.max(6, Math.round((b - a) * L / 0.9));
 const path = [];
 for (let k = 0; k <= N; k++) { const u = a + (b - a) * k / N; path.push({ u, x: xAt(u), z: half(u) }); }
@@ -7856,7 +7900,7 @@ wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
 wg.setAttribute('uv', new THREE.Float32BufferAttribute(tuv, 2));
 wg.setIndex(ti); wg.computeVertexNormals();
 const wall = new THREE.Mesh(wg, hullMat);
-wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh };
+wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh, railH: rH };
 g.add(wall);
 const dp = [], di = [];
 for (let k = 0; k <= N; k++) {
@@ -9452,15 +9496,22 @@ const HS = hullSurface(S);
 (S.masts || []).forEach(mk => {
 if (mk.rig !== 'square' || mk.shrouds === 0) return;
 if (mk.shroudFixing && mk.shroudFixing.stationsU) { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
+const CR = S.castles ? channelRun(S, HS, mk.at, 0.0375) : null;
+const CT = CR ? CR.top : null;
 for (const sgn of [-1, 1]) {
 const p = surfacePoint(S, HS, mk.at, 0.985);
+const cy = CT ? CT.y - S.beam * 0.012 : p[1] * 0.97;
+const cz = CT ? CT.half : p[2];
+const cx = CR ? p[0] + ((CR.lo + CR.hi) / 2 - mk.at) * S.lwl : p[0];
+const cl = CR ? (CR.hi - CR.lo) * S.lwl : S.lwl * 0.075;
 const ch = new THREE.Mesh(
-new THREE.BoxGeometry(S.lwl * 0.075, S.beam * 0.012, S.beam * 0.055), timber);
-ch.position.set(p[0], p[1] * 0.97, sgn * (p[2] + S.beam * 0.026));
+new THREE.BoxGeometry(cl, S.beam * 0.012, S.beam * 0.055), timber);
+ch.position.set(cx, cy, sgn * (cz + S.beam * 0.026));
+ch.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
 group.add(tag(ch, 'channel'));
 const de = buildDeadeyes(Math.max(3, (mk.shrouds || 3) + 1), S.beam * 0.018, timber);
 de.rotation.y = Math.PI / 2;
-de.position.set(p[0], p[1] * 0.97 + S.beam * 0.016, sgn * (p[2] + S.beam * 0.046));
+de.position.set(cx, cy + S.beam * 0.016, sgn * (cz + S.beam * 0.046));
 group.add(de);
 }
 });

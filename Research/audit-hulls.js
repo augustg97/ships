@@ -6075,6 +6075,54 @@
           if (lift > 0.30)
             say(v.id, 'a castle standing off the ship', `${c.end} tier ${c.tier}: base ${lift.toFixed(2)} m over ${c.tier === 0 ? 'the skin' : 'the tier beneath'} at x ${where.toFixed(1)}`);
         }
+        /* (4) A MAST'S SHROUDS SET UP ON THE STRUCTURE THAT STANDS AT THEIR STATION (round 244).
+           Read from the rope mesh's own geometry — ropeMesh lays 8 vertices a segment, the
+           foot's 4 then the head's — each lower shroud is sampled foot to head; the first
+           sample inboard of a wall's half-breadth (−0.02 m) while between the wall's base and
+           its head plus its rail is a rope drawn through the castle, and the band it is in
+           (wall or rail) is named. A wall is read only across its own x extent, so a shroud
+           standing forward of a break is not read against the wall abaft it. And a channel
+           whose x a wall covers must stand at that wall's head (within 0.5 m under it): the
+           r243 fore channel hung 2.2 m under the forecastle deck at the main-deck sheer, with
+           the forecastle's wall over it, and the shrouds it set up ran through the rail. */
+        const wallsX = walls.map(o => { const pts = worldC(o); return { c: o.userData.castle, pts,
+          xMin: Math.min(...pts.map(q => q[0])), xMax: Math.max(...pts.map(q => q[0])) }; });
+        const wallNear = (w, x) => {
+          if (x < w.xMin - 0.02 || x > w.xMax + 0.02) return null;
+          let h = 0, lo = 1e9, hi = -1e9, n = 0;
+          for (const q of w.pts) if (Math.abs(q[0] - x) < 0.6) { n++; h = Math.max(h, Math.abs(q[2])); lo = Math.min(lo, q[1]); hi = Math.max(hi, q[1]); }
+          return n ? { half: h, lo, hi, railH: w.c.railH || 0.9 } : null;
+        };
+        let through = 0, feet = 0, first = null;
+        g.traverse(o => {
+          const p = tagOf(o);
+          if (!(o.isMesh && p && p.key === 'shroud' && p.name === 'Shrouds')) return;
+          const pts = worldC(o);
+          for (let i = 0; i + 7 < pts.length; i += 8) {
+            const cen = k => { const s = [0, 0, 0]; for (let j = k; j < k + 4; j++) for (let d = 0; d < 3; d++) s[d] += pts[i + j][d] / 4; return s; };
+            const a = cen(0), b = cen(4), foot = a[1] < b[1] ? a : b, head = a[1] < b[1] ? b : a;
+            feet++;
+            let hit = null;
+            for (let k = 0; k <= 200 && !hit; k++) {
+              const f = k / 200, x = foot[0] + (head[0] - foot[0]) * f, y = foot[1] + (head[1] - foot[1]) * f, z = foot[2] + (head[2] - foot[2]) * f;
+              for (const w of wallsX) { const n = wallNear(w, x); if (!n) continue;
+                if (Math.abs(z) < n.half - 0.02 && y > n.lo - 0.02 && y < n.hi + n.railH) { hit = { w, y, band: y < n.hi ? 'wall' : 'rail', over: y - n.hi, foot }; break; } }
+            }
+            if (hit) { through++; if (!first) first = hit; }
+          }
+        });
+        if (through)
+          say(v.id, 'a shroud through a castle', `${through} of ${feet} lower shrouds pass through a castle's wall or rail (first: the ${first.w.c.end} tier ${first.w.c.tier} ${first.band} at y ${first.y.toFixed(2)}, ${first.over >= 0 ? first.over.toFixed(2) + ' m over' : (-first.over).toFixed(2) + ' m under'} the wall's head, from a foot at x ${first.foot[0].toFixed(2)}, y ${first.foot[1].toFixed(2)}, z ${first.foot[2].toFixed(2)})`);
+        g.traverse(o => {
+          const p = tagOf(o);
+          if (!(o.isMesh && p && p.key === 'channel')) return;
+          const pts = worldC(o);
+          const cx = pts.reduce((s, q) => s + q[0], 0) / pts.length, cy = pts.reduce((s, q) => s + q[1], 0) / pts.length;
+          let top = null;
+          for (const w of wallsX) { const n = wallNear(w, cx); if (n && (!top || n.hi > top.hi)) top = { ...n, c: w.c }; }
+          if (top && cy < top.hi - 0.5)
+            say(v.id, 'a channel under a castle wall', `a channel at x ${cx.toFixed(2)}, y ${cy.toFixed(2)} stands ${(top.hi - cy).toFixed(2)} m under the ${top.c.end} tier ${top.c.tier} wall's head (${top.hi.toFixed(2)}); the shrouds it sets up run through the castle`);
+        });
       }
     }
     /* ── THE CROSSED YARD IS WORKED, AND THE UPPER MASTS ARE STAYED (round 59). Item 2's

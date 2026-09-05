@@ -3576,15 +3576,33 @@ function buildRig(S, group, mats, FINE, FURLED) {
         ? mk.shroudFixing : null;
       const sfLo = SF ? Math.min(...SF.stationsU) : 0, sfHi = SF ? Math.max(...SF.stationsU) : 0;
       const sfY = SF ? -S.draught + (SF.boardsAboveKeelM ? SF.boardsAboveKeelM[1] : SF.waleTopAboveKeelM + 0.6) : 0;
+      /* ── A MAST STANDING WITHIN A WALLED CASTLE SETS UP ITS SHROUDS ON THE CASTLE'S SIDE
+         (round 244). The class lands every lower end at the sheer, 6% outside the skin —
+         right on a flush deck, wrong inside a castle: the carrack's fore and mizzen shrouds
+         started at the main-deck sheer under the castle deck and ran up through the castle's
+         rail and wall on their way to the masthead (r244/shrouds-before.json: every one of
+         the fore's four and the mizzen's three crossed a wall's or a rail's plane inside its
+         band). On the ship the chainplates are bolted to the castle's side and the deadeyes
+         stand at its deck edge — the Mataró model, the Santa María reconstructions — so the
+         foot goes to the highest tier's deck at this station, outboard of its wall by the
+         channel's own standoff, at the deadeyes' row; and the feet spread only over the run
+         the channel can occupy (channelRun: shrunk to stay on the mast's own structure, so
+         the mainmast's after shrouds no longer land under the quarterdeck's break).
+         buildShip's channel and deadeyes read the same two functions. FINE only, and only
+         on a hull with castles: the coarse build draws no castles, and a shroud set up to a
+         wall that is not there would float. */
+      const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
+      const CT = CR ? CR.top : null;
       for (let s = 0; s < mk.shrouds; s++) {
         const f = (s + 1) / (mk.shrouds + 1);
-        const chX = x + (f - 0.5) * L * 0.055;
+        const chX = CR ? x + (CR.lo + (CR.hi - CR.lo) * f - u) * L : x + (f - 0.5) * L * 0.055;
         const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
           const a = SF ? new THREE.Vector3(sfX, sfY, side * sfZ)
-                       : new THREE.Vector3(chX, base, side * half * 1.06);
+                       : CT ? new THREE.Vector3(chX, CT.y - B * 0.012 + B * 0.016, side * (CT.half + B * 0.046))
+                            : new THREE.Vector3(chX, base, side * half * 1.06);
           const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
           shroudSegs.push([a, b]);
           shroudPts[si2].push([a, b]);
@@ -3592,7 +3610,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
       }
       /* a main shroud is about 4½ inches in circumference — call it 36 mm of rope */
       const shr = ropeMesh(shroudSegs, 0.018 + B * 0.0009, ropeMat);
-      if (shr) group.add(tag(shr, 'shroud'));
+      if (shr) {
+        /* the segments as built, foot first, for the audit and the probe (r244) */
+        shr.userData.segs = shroudSegs.map(([p, q]) => [[p.x, p.y, p.z], [q.x, q.y, q.z]]);
+        shr.userData.mast = mi;
+        shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
+        group.add(tag(shr, 'shroud'));
+      }
 
       /* ── ⚠ RATLINES ARE NOT A UNIVERSAL FITTING ────────────────────────────────────
          They were rattled down on every set of shrouds regardless of rig, which put a rope
@@ -12062,6 +12086,71 @@ function buildJunkCastle(S, group) {
  * and an open rail round that. The walls wear the hull's own planking shader, continued
  * above the sheer at the same strake pitch, because on the ship they WERE the planking
  * carried up. Silence draws nothing: only a record that declares castles gets them. */
+/* ── THE CASTLE TIERS, DERIVED ONCE (round 244) ──────────────────────────────────────
+ * The stations, inset and heights of every walled tier, from `castles`. The castles builder
+ * lofts its walls from this list and the rigging reads it for where a mast's shrouds set up,
+ * so the two cannot disagree about where a wall stands. Each tier: {end, t, u0, u1, inset,
+ * dh, half(u), yB(u), yT(u)} — half(u) the wall's own half-breadth (the skin's at the sheer,
+ * inset a step a tier, floored at half the skin's so the ends close inside the stem), yB and
+ * yT its base and head over the keel datum. Empty for a hull without `castles`. */
+function castleTiers(S, H) {
+  const C = S.castles; if (!C || !(C.fore || C.aft)) return [];
+  H = H || hullSurface(S);
+  const L = S.lwl, B = S.beam;
+  const dh = C.deckHM || B * 0.16;
+  const cl = u => Math.max(0.001, Math.min(0.999, u));
+  const halfAt = u => Math.abs(surfacePoint(S, H, cl(u), 1.0)[2]);
+  const out = [];
+  for (const end of ['fore', 'aft']) {
+    const spec = C[end]; if (!spec) continue;
+    const [u0, u1, tiers] = spec, aft = end === 'aft', span = u1 - u0;
+    for (let t = 0; t < tiers; t++) {
+      /* each tier is shorter than the one under it: the break steps toward the end */
+      const a = aft ? u0 + span * 0.40 * t : u0;
+      const b = aft ? u1 : u1 - span * 0.40 * t;
+      const inset = B * (0.02 + 0.035 * t);
+      out.push({ end, t, u0: a, u1: b, inset, dh,
+                 half: u => Math.max(halfAt(u) * 0.5, halfAt(u) - inset),
+                 yB: u => H.deck(cl(u)) + dh * t,          // this tier stands on the deck below
+                 yT: u => H.deck(cl(u)) + dh * (t + 1) });
+    }
+  }
+  return out;
+}
+
+/* The highest walled tier covering station u, or null: {y: its deck's height there, half: its
+ * wall's half-breadth there, end, tier, dh, railH}. A mast standing within a castle steps its
+ * shrouds' chainplates on THIS wall at THIS height — the Mataró model's fore shrouds set up on
+ * the forecastle's side, its mizzen's on the poop's — and the channel stands there too. */
+function castleTopAt(S, H, u) {
+  let top = null;
+  for (const T of castleTiers(S, H)) {
+    if (u < T.u0 || u > T.u1) continue;
+    if (!top || T.t > top.tier) top = { y: T.yT(u), half: T.half(u), end: T.end, tier: T.t, dh: T.dh,
+                                        railH: (S.castles && S.castles.railHM) || 0.9 };
+  }
+  return top;
+}
+
+/* The run a channel (and the shroud feet spread along it) can occupy about station u: the
+ * class's ±halfU of the length, SHRUNK toward the mast until both ends stand on the same
+ * structure the mast does — a channel fits between the castles, and a shroud's foot lands on
+ * whatever stands at its own station. On the carrack the mainmast is 0.84 m forward of the
+ * quarterdeck's break and its shrouds spread ±0.96 m, so the after pair set up at the sheer
+ * under the quarterdeck's wall and ran up through its rail (r244/shrouds-before.json); now the
+ * spread stops at the break. Returns {lo, hi, top}: the run as u and castleTopAt at the mast. */
+function channelRun(S, H, u, halfU) {
+  halfU = halfU || 0.0275;
+  const top = castleTopAt(S, H, u);
+  const key = c => c ? c.end + c.tier : '';
+  const same = uu => key(castleTopAt(S, H, uu)) === key(top);
+  let lo = u - halfU, hi = u + halfU;
+  const step = 0.001;
+  while (lo < u - step && !same(lo)) lo += step;
+  while (hi > u + step && !same(hi)) hi -= step;
+  return { lo, hi, top };
+}
+
 function buildTieredCastles(S, group, mats, hullMat) {
   const C = S.castles; if (!C || !(C.fore || C.aft)) return;
   const H = hullSurface(S);
@@ -12069,7 +12158,7 @@ function buildTieredCastles(S, group, mats, hullMat) {
   const dh = C.deckHM || B * 0.16;                 // one deck of headroom a tier
   const rH = C.railHM || 0.9;
   const cl = u => Math.max(0.001, Math.min(0.999, u));
-  const halfAt = u => Math.abs(surfacePoint(S, H, cl(u), 1.0)[2]);
+  const TIERS = castleTiers(S, H);
   const xAt = u => (u - 0.5) * L + H.rake(cl(u));
   /* the shader's v: 0.62 at the load line, 1.0 at the sheer, continued above it */
   const vOf = (u, y) => 0.62 + 0.38 * (y / Math.max(0.5, H.sheer(cl(u))));
@@ -12078,17 +12167,9 @@ function buildTieredCastles(S, group, mats, hullMat) {
   const up = new THREE.Vector3(0, 1, 0);
 
   const one = (label, spec, aft, what) => {
-    const [u0, u1, tiers] = spec;
     const g = new THREE.Group();
-    const span = u1 - u0;
-    for (let t = 0; t < tiers; t++) {
-      /* each tier is shorter than the one under it: the break steps toward the end */
-      const a = aft ? u0 + span * 0.40 * t : u0;
-      const b = aft ? u1 : u1 - span * 0.40 * t;
-      const inset = B * (0.02 + 0.035 * t);
-      const half = u => Math.max(halfAt(u) * 0.5, halfAt(u) - inset);
-      const yB = u => H.deck(cl(u)) + dh * t;          // this tier stands on the deck below
-      const yT = u => H.deck(cl(u)) + dh * (t + 1);
+    for (const T of TIERS.filter(T => T.end === (aft ? 'aft' : 'fore'))) {
+      const { t, u0: a, u1: b, half, yB, yT } = T;   // stations, inset and heights from castleTiers
       const N = Math.max(6, Math.round((b - a) * L / 0.9));
       /* the perimeter, wound once round: starboard fwd→aft, port aft→fwd, closed */
       const path = [];
@@ -12113,7 +12194,7 @@ function buildTieredCastles(S, group, mats, hullMat) {
       wg.setAttribute('uv', new THREE.Float32BufferAttribute(tuv, 2));
       wg.setIndex(ti); wg.computeVertexNormals();
       const wall = new THREE.Mesh(wg, hullMat);
-      wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh };
+      wall.userData.castle = { kind: 'wall', end: aft ? 'aft' : 'fore', tier: t, u0: a, u1: b, dh, railH: rH };
       g.add(wall);
       /* the deck: a lofted strip at the tier's head, carrying the sheer out to the end */
       const dp = [], di = [];
@@ -14377,17 +14458,28 @@ function buildShip(S, opts) {
       /* a record that names WHERE the shrouds set up (mast.shroudFixing, round 236) draws
          that structure and no class channel: the Bremen cog's channel wale abaft the mast */
       if (mk.shroudFixing && mk.shroudFixing.stationsU) { buildChannelWale(S, HS, mk.shroudFixing, group, timber); return; }
+      /* a mast within a walled castle carries its channel on the castle's side, just under
+         the highest tier's deck edge, where its shrouds set up (round 244; buildRig reads the
+         same castleTopAt for the shrouds' feet). Without a castle over the station the
+         channel stands at the sheer, where it did. */
+      const CR = S.castles ? channelRun(S, HS, mk.at, 0.0375) : null;
+      const CT = CR ? CR.top : null;
       for (const sgn of [-1, 1]) {
         const p = surfacePoint(S, HS, mk.at, 0.985);
+        const cy = CT ? CT.y - S.beam * 0.012 : p[1] * 0.97;
+        const cz = CT ? CT.half : p[2];
+        const cx = CR ? p[0] + ((CR.lo + CR.hi) / 2 - mk.at) * S.lwl : p[0];
+        const cl = CR ? (CR.hi - CR.lo) * S.lwl : S.lwl * 0.075;
         const ch = new THREE.Mesh(
-          new THREE.BoxGeometry(S.lwl * 0.075, S.beam * 0.012, S.beam * 0.055), timber);
-        ch.position.set(p[0], p[1] * 0.97, sgn * (p[2] + S.beam * 0.026));
+          new THREE.BoxGeometry(cl, S.beam * 0.012, S.beam * 0.055), timber);
+        ch.position.set(cx, cy, sgn * (cz + S.beam * 0.026));
+        ch.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
         group.add(tag(ch, 'channel'));
         /* the deadeyes stand in a row along the channel's outer edge — this is where the
            shrouds actually terminate, and a channel without them reads as a bare shelf */
         const de = buildDeadeyes(Math.max(3, (mk.shrouds || 3) + 1), S.beam * 0.018, timber);
         de.rotation.y = Math.PI / 2;
-        de.position.set(p[0], p[1] * 0.97 + S.beam * 0.016, sgn * (p[2] + S.beam * 0.046));
+        de.position.set(cx, cy + S.beam * 0.016, sgn * (cz + S.beam * 0.046));
         group.add(de);
       }
     });

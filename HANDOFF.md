@@ -20370,3 +20370,110 @@ castlesProvenance (1).
 THE RATCHET: THE OPENING FULL RATCHET at the clean r242 HEAD 157ef56 (r243/open-ratchet.out, launched 04:34 as the round's first act, ended 05:21, into a load of 6–36 while the round's spins, proofs and probe ran on :8150): RATCHET EXIT 1  END 05:21:38; 64 frames scored; movers 20: globe-default 0.050%/0.012; ship-dhow 0.066%/0.038; ship-junk 1.141%/0.298; ship-canoe 0.676%/0.246; ship-great-eastern 0.063%/0.036; ship-panokseon 1.386%/0.350; map-floor 0.103%/0.038; ship-preussen 0.194%/0.080; ship-steamer 0.220%/0.083; aboard-preussen 0.190%/0.046; ship-wyoming 0.415%/0.218; aboard-wyoming 0.069%/0.025; ship-treasure 2.715%/0.671; aboard-treasure 0.193%/0.057; shipwright-ahead 0.164%/0.051; shipwright-hounds 0.853%/0.271; ship-endurance 0.200%/0.075; action-gravelines 0.065%/0.011; sea-canoe-floor 1.418%/0.611; ship-slave-ship 0.071%/0.053. Largest three: ship-treasure 2.715%/0.671, sea-canoe-floor 1.418%/0.611, ship-panokseon 1.386%/0.350. ALL TWENTY are r242's sail-holding change (heldBySpar) scored for the first time on the 60 frames r242 left unscored — junk panels between their battens (treasure ship, panokseon, junk), the crab claw whole (canoe, sea-canoe-floor, map-floor), headsails and gaff sails on their stays and spars (Wyoming, the steamer, Endurance, Preussen, Great Eastern, the 74 ahead and at the hounds), the dhow's settee head, the slave ship's berth neighbours, the Armada's cloth at 110 m (action-gravelines — r242's prediction that the action fleets are under bare spars was wrong; they set sail), and globe-default at the threshold on its vessel markers only. Each diff was read (the four largest whole, the rest by their tables against r242's prediction) and each accepted with its own reason in FRAME-LOG.md at 05:23; shipwright-hounds also carries a small overlapped figure label at its left edge that the sail change does not explain, noted in its reason. No frame moved that r242's list did not name except globe-default (0.050%, at the threshold, the r242 run's own largest non-mover at 0.048%) and map-floor (the canoe's crab claw on the floor map, which r242's list should have named).
  PARTIAL after the push, the r239 pattern (r243/partial-*.out): frames scored one at a time by check --frame, each diff read before its accept — ship-carrack NEW/— no, ship-galley 0.248%/0.058 CHANGED, ship-treasure 0.000%/0.000 ok (3 frames; r243/PREDICTIONS-close.md names the frames that MUST move — the carrack's own and her berth neighbours' — and those that must not). The other 61 frames are UNSCORED on the r243 builder; r243's full run at the clean HEAD is the test, and any mover outside the MUST list is not explained by this round.
 Two commits close the round (1f6e99d audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 244 — 2026-09-05 — the shrouds set up on the castle: a mast standing within a walled castle steps its chainplates on the castle's side at its top deck, the channel goes with them, a channel's run stops at a castle's break, and the audit reads every lower shroud against the walls and rails; the full ratchet ran first at the clean r243 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r243 ordered r244's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0m), the carrack's shrouds through her castle walls, or Endurance by looking.
+The ratchet ran at HEAD 9af6cd8 from 05:41 while the round's work was developed on a COPY of web/ served on :8150
+(build/staging/r244/web, every file a symlink to web/ except hull.js, audit-hulls.js and data/vessels.json — the r240
+pattern); the copy's files were moved into web/ only after the run ended (cmp-verified). THE OPENING RATCHET: its
+result is in the receipt paragraph below, per the r198 rule. (0m) was taken: it is a class fault (any mast standing
+within a walled castle), it was measurable on the built scene, and it was the one residual r243 left on the hull it
+had just changed.**
+
+**THE FAULT, measured (r244/probe_shrouds.py on :8150 against the r243 builder, r244/shrouds-before.json — the probe
+derives each lower shroud's segment from the rope mesh's own vertices, 8 a segment, foot first, and samples it foot to
+head against every castle wall's half-breadth and height band, a wall read only across its own x extent). 6 of the
+carrack's 26 lower shrouds passed through a castle. The fore's four pairs set up at the main-deck sheer (y 5.36, z
+±2.54) under the forecastle, whose wall stands from y 5.05 to 7.03 there: the aftmost pair crossed the WALL itself at
+y 6.48, 0.55 m under its head; the other three came inboard of the wall's plane above its rail cap only because the
+bow narrows under them, and passed up over the forecastle deck from a channel 2.2 m beneath it. The mizzen's three
+pairs set up at the sheer (y 4.99, z ±3.68) under two tiers: the forward pair crossed the quarterdeck's rail 0.50 m
+over its head (y 7.24), the middle pair the poop's rail 0.70 m over its head (y 9.39). The main's after pair set up at
+x 2.65, 15 cm forward of the quarterdeck's wall (the mainmast stands at u 0.556, the break at 0.58, 0.84 m abaft it,
+and the class spreads a mast's shrouds ±0.055 L = ±0.96 m and its channel ±1.3 m): not through the wall — my first
+probe read them so with a 0.6 m window that did not stop at the wall's end, and the audit's x-extent rule corrected
+it — but the channel's after 0.5 m ran under the wall's base and the last deadeye's edge reached under it. The fore
+channel hung at y 5.0, 2.2 m under the forecastle deck, its inner face 0.28 m outside the wall. The cause: buildRig
+lands every shroud's lower end at the sheer, 6% outside the skin, and buildShip's channel at v 0.985 of the skin —
+right for a flush deck, and the castles builder r243 wrote stands its walls above that sheer without telling the
+rigging.**
+
+**THE MODEL (web/js/hull.js; r244/hull.before.js, hull.after.js, apply-hull-edits.py). Three functions before
+buildTieredCastles: castleTiers(S, H) derives every walled tier's stations, inset, half-breadth and base and head
+heights ONCE, and buildTieredCastles now lofts its walls from that list, so the rigging and the walls cannot disagree
+about where a wall stands; castleTopAt(S, H, u) returns the highest tier covering station u — its deck height there,
+its wall's half-breadth there, end, tier, deck height and rail height — or null; channelRun(S, H, u, halfU) returns
+the run a channel and its shroud feet can occupy about u: the class's ±halfU of the length, shrunk toward the mast a
+thousandth of the length at a time until both ends stand on the same structure the mast does. In buildRig, on a hull
+with `castles`, on the FINE build and where no mast.shroudFixing names the station: the feet spread over channelRun's
+run, and where castleTopAt is non-null the foot goes to the tier's deck edge at the deadeyes' row (deck − 0.012 B +
+0.016 B) and outboard of the wall by the channel's standoff (wall half + 0.046 B); every shroud mesh records its
+segments (userData.segs, foot first), its mast and its castle foot. In buildShip, the same two functions place the
+channel (just under the deck edge, its inboard face on the wall) and the deadeyes, and the channel's box is the run's
+length. Without `castles` both take the old expressions unchanged, so no other hull moves; the coarse build draws no
+castles and gets no castle feet. Each castle wall's userData now carries railH.**
+
+**MEASURED AFTER (r244/shrouds-after.json, the same probe against the r244 builder): 0 of 26 through a castle. The
+fore's feet at y 7.21 (the forecastle deck at 7.16, the deadeyes' row) and z ±2.68 (the wall's 2.11–2.44 plus 0.5);
+the mizzen's at y 8.63 on the poop (tier 1) and z ±3.38; the main's spread over x 1.25–2.53 where it was 1.27–2.65,
+its channel shortened from 2.6 m to 2.1 and centred at x 1.72, its after end at 2.78, the quarterdeck's wall at 2.8.
+The fore channel at y 7.03, 0.17 m under the forecastle's head, its inner face 0.05 m off the wall. The recorded
+segments (userData.segs) agree with the geometry-derived ones to the centimetre on all 26.**
+
+**THE RECORD (web/data/vessels.json; r244/vessels.before.json, vessels.after.json): one sentence appended to the
+carrack's castlesProvenance — the shrouds' placement on the castle sides and the main's spread forward of the break
+are a CLASS placement, as on the Mataró model, read from no plate. Nothing else moved (diff: 4 lines, one string).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r244/apply-audit-edits.py). D-CASTLES (4), after the wall loop: each
+lower shroud, derived from the 'Shrouds' rope mesh's vertices exactly as the probe derives it, is sampled foot to head
+in 200 steps; the first sample inboard of a wall's half-breadth (−0.02 m) while between the wall's base (−0.02) and
+its head plus its rail is 'a shroud through a castle', with the band (wall or rail), the height, and the foot named;
+a wall is read only across its own x extent. And a channel whose x a wall covers must stand within 0.5 m under that
+wall's head, or it is 'a channel under a castle wall'. PROOFS (r244/run-proofs.sh on :8150): A, the r243 builder AND record under the r244 audit: checked 33 hulls, 3 problems — the carrack, 'a shroud through a castle', '6 of 26 lower shrouds pass through a castle's wall or rail (first: the fore tier 0 wall at y 6.48, 0.55 m under the wall's head, from a foot at x −14.65, y 5.36, z 2.54)', and 'a channel under a castle wall' twice, one a side, 'a channel at x −15.16, y 5.00 stands 2.20 m under the fore tier 0 wall's head (7.20)' (audit-proof-a.out). B, the r244 builder with the channel put back at the sheer under the castle, the shrouds left up (hull.doctored-channel.js): 2 problems, the two channel convictions and no shroud conviction (audit-proof-b.out). C, the r244 builder with the castled shrouds' feet one deck down at the wall's base, the channel left up (hull.doctored-feet.js): 1 problem, 'a shroud through a castle', '4 of 26 lower shrouds pass through a castle's wall or rail (first: the aft tier 0 rail at y 7.36, 0.62 m over the wall's head, from a foot at x 12.45, y 6.79, z 3.38)' — the mizzen's two forward pairs, lowered to the quarterdeck's deck edge, run up through the quarterdeck's and the poop's rails; the fore's, lowered to the sheer but standing 0.14 m further out than r243's, clear the forecastle's wall, which is what the r243 read of them said of three of the four (audit-proof-c.out). Builder and record restored from the after copies (cmp). The final audit on the r244 builder, record and audit: on :8150, checked 33 hulls, 0 problems (audit-final-8150.out); on :8149 after the copy into web/, see the receipt paragraph's audit line (audit-final-8149.out).
+Rule 8 on the way there: none of the audit's convictions disagreed with the probe.**
+
+**WITNESSED (r243/spin-carrack-after/ is this round's before — the r243 builder; r244/spin-carrack-after/ after;
+the pairs pair-b180-fore.png, pair-b180-mizzen.png, pair-b045-quarter.png and pair-b135-bow.png cropped from the 2880 × 1800
+frames — b180 is the port broadside with the bow to the right, b045 the starboard quarter, b135 the port bow). The bow on
+the broadside (pair-b180-fore): before, the fore channel and its deadeyes sit on the wale at the main-deck sheer with
+the forecastle's wall and rail above them, and the four shrouds with their ratlines run up out of the wall; after, the
+channel and deadeyes stand at the forecastle's deck edge just under the rail, the ratlines begin there, and nothing
+passes through the wall. The stern on the broadside (pair-b180-mizzen): before, the mizzen's three shrouds start at
+the quarter's sheer and run up through the quarterdeck's and the poop's rails; after, they start at the poop's deck
+edge, and the lines below the poop are the lateen's sheet and tack, which were there before. The starboard quarter
+(pair-b045-quarter): the same, seen with the main channel — before, its after end and last deadeye run under the
+quarterdeck's forward wall; after, the channel stops at the break. The port bow (pair-b135-bow): the fore channel
+at the forecastle deck. Nothing floats: every foot stands on a deadeye on a channel on a wall, except the mizzen's,
+which stand at the poop's deck edge on nothing drawn — the class draws no channel for a lateen mast, named (0p)
+below.**
+
+**Rule 0 on the after broadside read whole (r244/spin-carrack-after/b180.png): it reads as a rendered ship on water, not a chart — a dark planked hull
+with its strakes and wales, the tall forecastle and the taller stepped stern, two square sails on the fore and main
+with their topsails, the lateen on the mizzen, the bowsprit with its spritsail yard, the anchor catted at the bow,
+the sea to a low coast under a pale sky, a fleet neighbour's masts at the frame's edge. Three facts a viewer can read
+off it without a legend: her shrouds are set up on the sides of her castles, the fore's at the forecastle's deck and
+the mizzen's at the poop's, with ratlines up the fore and main; her ends are built up higher than her waist, the
+stern in two steps; and she sets square sails forward and a triangular sail aft.**
+
+**Named residuals, in order:** (0m) CLOSED this round. NEW (0p) a lateen mast with `shrouds` draws shrouds and no
+channel or deadeyes (buildShip's channel block is square-rig only), so the carrack's mizzen shrouds end at the poop's
+deck edge on nothing drawn; the carrack is the fleet's only lateen mizzen with shrouds. NEW (0q) the deadeye row is
+built n = shrouds + 1 at 2.4 r pitch and centred on the channel regardless of the channel's run; the main's seven
+deadeyes span 2.85 m on a channel now 2.1 m long. (0l) Queen Mary 2's Hull row and her data, (0n) the carrack's castle
+stations as a class default, (0o) the bowsprit through the forecastle deck with no aperture, (0i) the galley's stern
+tent, (0j) the free foot's scallop, (0k) the cap's 30°, (0e²²) the cog's Frames 1 and 2 on the stem, unchanged and
+unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷)
+(0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r245 opens by running the FULL ratchet at the clean HEAD first (this round scores only ship-carrack, ship-galley
+and ship-treasure by check --frame after the push; r244/PREDICTIONS-close.md says no other frame may move, and any
+mover outside it is not explained by this round); then takes (0p), the lateen mizzen's channel — the class is a mast
+with shrouds and no square rig, and the fix is to gate the channel on `shrouds`, not on `rig` — or the survey's next
+never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788614803 at the build; the push and the live poll are in
+build/staging/r244/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r244 staging stays on disk uncommitted, the r211 convention.**
