@@ -19699,3 +19699,11 @@ rake and its curve, and let the loft draw the skin's forward end on it.**
 build/staging/r238/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r238 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788589112 on https://augustg97.github.io/ships/index.html at 23:20 PDT,
+90 s after the push (build/staging/r238/push.log, the r209 poll pattern). Published copies read
+back by CODE strings, the record's in the MINIFIED form (the r237 correction): docs/data/vessels.json carries the hood ends'
+half-breadth (1), the re-attributed Tanner citation (2) and the card row (1); docs/js/hull.js defines sternPlanEnd (1),
+closes the rail plan to it (1) and the class plan to it (1); docs/audit-hulls.js carries R-HOOD-ENDS's string (1).
+THE RATCHET, run after the push: RATCHET EXIT 0  END 23:53:29; 64 of 64 frames scored; movers 0. Largest three: globe-default 0.048%/0.012, ship-endurance 0.043%/0.018, ship-wyoming 0.039%/0.023. Prediction (r238/PREDICTIONS-close.md) held. The two frames PREDICTIONS-close.md expected to move stayed under the gate: ship-dhow 0.037%/0.039, ship-treasure 0.018%/0.005 — the cog's stern narrows by 0.7 m each side over her last 2 m, which at a berth neighbour's distance is under 0.05% of the frame; no baseline accepted.
+Two commits close the round (a4ac13d record + audit + hull + shipwright + docs + handoff, and this push-log commit with any accepted baseline).**
