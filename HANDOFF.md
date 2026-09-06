@@ -21936,3 +21936,11 @@ Endurance (4,114 triangles per metre), by looking.**
 build/staging/r256/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r256 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788664351 on https://augustg97.github.io/ships/index.html at 20:13 PDT,
+60 s after the push (build/staging/r256/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js carries the one axis every square-mast fitting reads, mxA (1), and the segment record the audit reads the pole against (1);
+docs/audit-hulls.js convicts a mast segment built short of its record (1 mentions); docs/data/vessels.json is unchanged this round.
+THE RATCHET: THE OPENING FULL RATCHET at the clean r255 HEAD 7b86bb3 (r256/open-ratchet.out, launched 19:20 as the round's first act, ended 20:01): RATCHET EXIT 1  END 20:01:38; 65 frames scored; movers 4: action 0.058%/0.018; map-floor 0.167%/0.104; action-gravelines 0.052%/0.011; ship-slave-ship 0.061%/0.030. Largest three: map-floor 0.167%/0.104, ship-slave-ship 0.061%/0.030, action 0.058%/0.018.
+ PARTIAL after the push, the r239 pattern (r256/partial-*.out): frames scored one at a time by check --frame on the r256 builder, each diff read before its accept — ship-trireme 0.585%/0.287 CHANGED, shipwright-hounds 1.634%/0.835 CHANGED (2 frames; r256/PREDICTIONS-close.md names the 2 frames that MUST move — ship-trireme, whose bow mast's foot drops 0.35 m to the deck, and shipwright-hounds, where the 74's top moves 0.24 m onto the raked axis — the frames that MAY, the raked square-riggers' own frames and the 74's other three, the corbita's close frame, the berth neighbours, the Actions with square-riggers and the era 4 Sea views, and the rest that must not). The other 63 frames are UNSCORED on the r256 builder; r257's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
+Two commits close the round (2cf98ba record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
