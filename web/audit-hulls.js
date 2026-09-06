@@ -6664,7 +6664,16 @@
        along its mast and is r250's. The 'no mast' gate widens from 0.6 m to 1.5 m, because a
        yard before its mast stands off by two radii — 0.9 m on Preussen. A builder that
        records the offset (userData.slung, the lateen's pattern) is read the same way; the
-       record is provenance, not the test. */
+       record is provenance, not the test.
+       ── Round 258 (0y²⁷): D-YARD-HELD — SOMETHING HOLDS THE YARD THERE. r257 stood every
+       yard at the two radii and drew nothing holding it; the lateen and the lug carry their
+       parrels. Every mesh tagged 'parrel' or 'truss' is read: its vertex mean, its z extent
+       and its points. An athwartships yard must have one within 1.5 m of its slings and
+       within 0.6 m of its height, and that fitting must go ROUND the mast — reach both sides
+       of the centreline by half the mast's radius there and reach abaft the AXIS by half
+       the radius, read along the axis's own normal (on the corbita's 48° artemon the axis
+       at the yard's height is not the axis at the slings) — else 'a square yard with nothing holding it to its mast' (the r257
+       builder, every yard) or 'a yard's parrel that does not go round its mast'. */
     {
       const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
       const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
@@ -6684,9 +6693,12 @@
         return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span,
                  rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
       };
-      const masts = [], yards = [], segs = [];
+      const masts = [], yards = [], segs = [], fits = [];
       g.traverse(o => {
         if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+        if (p.key === 'parrel' || p.key === 'truss') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length);
+          let zMin = 1e9, zMax = -1e9; for (const q of pts) { zMin = Math.min(zMin, q.z); zMax = Math.max(zMax, q.z); }
+          fits.push({ key: p.key, name: p.name, c: fc, zMin, zMax, pts }); }
         if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
           if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
         if (p.key === 'yard' && p.name === 'Yard') { const ax = axisOf(hullPts(o)); if (Math.abs(ax.centre.z) < 0.3) yards.push({ c: ax.centre, ax, slung: o.userData.slung || null, athwart: Math.abs(ax.dir.z) >= 0.85 }); }
@@ -6713,6 +6725,13 @@
           if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
           else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
           else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
+          /* r258 (0y²⁷): D-YARD-HELD — the fitting at the slings, and it goes round the mast */
+          const nearF = fits.filter(f => f.c.distanceTo(c) <= 1.5 && Math.abs(f.c.y - c.y) <= 0.6);
+          /* how far abaft the AXIS the fitting reaches, along the axis's forward normal (−dir.y, dir.x): negative is abaft */
+          const faMin = f => { let mn = 1e9; for (const q of f.pts) { const w = q.clone().sub(m.foot), t = w.dot(m.dir); mn = Math.min(mn, (w.x - m.dir.x * t) * (-m.dir.y) + (w.y - m.dir.y * t) * m.dir.x); } return mn; };
+          const round = nearF.filter(f => f.zMin <= -0.5 * rAt && f.zMax >= 0.5 * rAt && faMin(f) <= -0.5 * rAt);
+          if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}`);
+          else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole`);
         }
       }
       /* ── D-MAST-SEGMENT (round 256): A POLE ENDS WHERE ITS BUILDER SAYS. Every square-block

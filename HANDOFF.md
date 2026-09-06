@@ -22070,3 +22070,130 @@ docs/audit-hulls.js convicts a square yard slung through its mast (1 mentions); 
 THE RATCHET: THE OPENING FULL RATCHET at the clean r256 HEAD a91c731 (r257/open-ratchet.out, launched 21:09 as the first act of the round's second attempt — the first attempt's run at 20:26 was killed by the driver at 49 of 65 captures and scored nothing — ended 21:48): RATCHET EXIT 1  END 21:48:31; 65 frames scored; movers 16: shipwright 0.478%/0.171; action 0.062%/0.019; ship-galleass 0.050%/0.027; ship-titanic 9.427%/2.640; map-floor 0.177%/0.108; aboard-coast 0.181%/0.071; ship-steamer 0.483%/0.184; ship-clipper 0.403%/0.133; shipwright-ahead 0.128%/0.048; shipwright-astern 0.127%/0.037; shipwright-furled 3.074%/1.358; shipwright-corbis 0.275%/0.059; ship-endurance 0.833%/0.381; action-gravelines 0.058%/0.012; ship-slave-ship 0.330%/0.123; ship-carrack 0.199%/0.082. Largest three: ship-titanic 9.427%/2.640, shipwright-furled 3.074%/1.358, ship-endurance 0.833%/0.381.
  Of the sixteen, thirteen are r256's own predicted MAY frames scored for the first time (r256 accepted only its two MUST frames after its push), three are the standing flap, and ship-titanic 9.427%/2.640 is UNEXPLAINED — her card's deck-to-truck 51.6 → 52.4 m at the r256 HEAD, a 0.8 m rig rise that reframes the camera, named (0y²⁹); none accepted at the clean HEAD (FRAME-LOG 21:51). PARTIAL after the push, the r239 pattern (r257/partial-*.out): frames scored one at a time by check --frame on the r257 builder, each diff read before its accept — aboard-clipper 0.103%/0.030 CHANGED, aboard-preussen 1.330%/0.490 CHANGED, ship-carrack 1.535%/0.563 CHANGED, ship-clipper 2.441%/0.855 CHANGED, ship-endurance 1.358%/0.563 CHANGED, ship-preussen 5.342%/1.900 CHANGED, ship-sekibune 1.315%/0.499 CHANGED, ship-slave-ship 2.170%/0.828 CHANGED, ship-steamer 2.649%/1.035 CHANGED, ship-trireme 0.942%/0.349 CHANGED, shipwright-ahead 0.804%/0.342 CHANGED, shipwright-astern 1.817%/0.937 CHANGED, shipwright-corbis 1.941%/0.802 CHANGED, shipwright-furled 7.210%/3.208 CHANGED, shipwright-hounds 7.559%/3.282 CHANGED, shipwright 2.416%/0.851 CHANGED (16 frames; r257/PREDICTIONS-close.md names the frames that MUST move — the 74's five Shipwright frames, the corbita's corbis frame, the eight square-rigged hulls' own close frames and the two square-rigged aboard frames, every crossed yard 0.10–0.89 m forward onto its mast's fore face — the berth neighbours, the Actions with square-riggers and the Sea views that MAY, and the rest that must not). The other 49 frames are UNSCORED on the r257 builder; r258's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (6089bcc record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 258 — 2026-09-05 — something holds the square yard to its mast: every crossed yard in the fleet stood at the truss's distance before its mast with nothing drawn holding it there, 104 yards on thirteen hulls; every yard now carries its fitting — a rope parrel round the mast's after side at the slings on the wooden rigs and on every hoisting yard, an iron truss (a band round the mast, a goose-neck, a band round the yard) on the iron hulls' fixed lower yards — the audit reads each yard's fitting off the meshes and convicts one that does not go round the pole, Titanic's 9.4% frame at the r256 HEAD is diagnosed as r256's own correction on her 9.46° poles and accepted, and the full ratchet ran first at the clean r257 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r257 ordered r258's opening: the FULL ratchet at
+the clean HEAD before any edit, with no screenshot beside it until RATCHET EXIT; then (0y²⁹), Titanic's 0.8 m rig
+rise, measured on the built scene before anything else; then (0y²⁷), the truss and the parrel drawn on the square
+yard, or (0y¹⁹) with (0y²⁴), or Endurance by looking. The ratchet was launched at HEAD 4272cf2 at 22:18:55 as the
+round's first act (r258/run-open.sh, open-ratchet.out) and waited on in the background with the turn held open;
+every edit was made on a COPY of web/ served on :8150 (build/staging/r258/web, every file a symlink to web/ except
+hull.js and audit-hulls.js; vessels.json is copied and unchanged); (0y²⁹) was measured, then (0y²⁷) taken.**
+
+**(0y²⁹) MEASURED AND CLOSED — Titanic's rig rise is r256's correction on a hull r256 did not name. Two builders,
+one hull, one tool (Research/measure_ship.py, the same probe both times): the r255 builder (git show 7b86bb3:
+web/js/hull.js, served from a second symlinked copy on :8151) and the r257 builder on :8150.
+r255 (r258/measure-titanic-before.out): 'Steel mast' y 10.56 → 62.23, the model's height above water 62.23 m.
+r257 (measure-titanic-after.out): 'Steel mast' y 10.21 → 62.59, the model's height 62.59 m. Her record is two
+'pole' masts, heightM 52.2 with a rake of 9.46°, and a pole mast is built through the square block's segment
+loop as ONE segment — so until round 256 it was the r256 fault exactly: a cylinder of the segment's height turned
+by the rake about its centre stands (1 − cos 9.46°)·52.2/2 = 0.355 m short at BOTH ends. Her masts' feet floated
+0.35 m over the weather deck (10.56 against a deck at 10.10–10.85 and a foot the pole's rim tilt puts at 10.21)
+and their heads stopped 0.36 m under the record. r256 built the pole seg / cos long to its head, and both ends
+went where they belong: the card's 'Rig, deck to truck' is the mast mesh's own bounding box (rigTruckY −
+rigDeckY, hull.js), which rose 0.71 m plus the rim's tilt, 51.6 → 52.4; and rigTop, the Shipwright camera's
+datum, rose 0.36 m, which reframed ship-titanic by 9.4%. r256's probe read no mast on her because it filtered
+the mast meshes by the name 'Mast' and hers is 'Steel mast' — the audit's /mast$/i was widened in r257 for
+Preussen's tubes and the probe was not. The frame is accepted at the clean HEAD as r256's correction, with this
+diagnosis as its reason (FRAME-LOG); nothing in hull.js changes for it.**
+
+**THE FAULT (0y²⁷), measured on the built scene: PROOF A (r258/audit-proof-a.out, the r257 builder under the r258
+audit on :8150) is exactly 104 problems, every one 'a square yard with nothing holding it to its mast' — the carrack 4, the clipper 15, the cog 1, the corbita 2, the east indiaman 9, Endurance 4, the fluyt 6, Preussen 30, the sekibune 1, the 74 9, the slave ship 9, the steamer 12, the trireme 2 —
+and nothing on any other hull or rule. r257 stood every crossed yard off its mast's axis by the two radii, on the
+fore face, and drew nothing holding it there: the lateen (r254) and the lug (r253) carry their parrels, the
+square yard stood at the truss's distance on air, a spar and a pole touching with no fitting between them, and
+the jeers' blocks hung at the yard's middle with nothing to hold the yard to the mast when the fall was cast off.
+What holds a square yard is one of two fittings. A hoisting yard — every topsail, topgallant and royal yard, and
+every yard of the single-tier rigs from the trireme to the cog — is held by a PARREL: Falconer 1780, "a machine
+used to fasten the sail-yards to the masts, in such a manner as that they may be easily hoisted or lowered" —
+a rope (in a ship of war, a rope threaded through ribs and trucks) round the mast's after side at the slings,
+made fast to the yard either side of the pole, so the yard slides up and down the mast on it and the wind abaft
+the beam presses the yard onto the pole through it. The fixed lower yard of the iron rig — Preussen's fifteen,
+the steamer's six — is not hoisted at all: it hangs in chain slings from the masthead, and an iron TRUSS holds
+it to the mast — a band round the mast, a band round the middle of the yard, and a goose-neck between them on
+which the yard braces round and cocks up (the fitting every photograph of a nineteenth-century lower yard shows
+at the slings). The wooden rig's fixed yards (the 74's crossjack; the classic course, which hangs in its jeers)
+carried a parrel with truss pendants, and are drawn with the parrel.**
+
+**THE MODEL (web/js/hull.js; r258/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+(1) crossYard names the fitting from the record's rig before it writes the yard's record: HELD = 'truss' where
+the hull is iron (S.iron) and the yard's hoist is 'fixed' — the iron rig's lower yards — and 'parrel' otherwise;
+the yard's record carries it (userData.slung.held, heldFrom: 'class (round 258): the iron hull's fixed lower yard
+on an iron truss, every hoisting yard and every yard of the wooden rig on a rope parrel; the truss's own throw is
+not modelled and the yard lies against the pole'). (2) THE PARREL: one rope loop of radius 0.010 + 0.0004·B
+(0.014 m on the trireme, 0.030 on Preussen — the lateen's and the lug's rope), in the plane square to the raked
+axis, centred on the axis at the slings, at the mast's radius there plus the rope's: an arc from 50° through 180°
+(dead aft) to 310°, its two ends brought forward to the yard's AFTER face either side of the pole at 0.766 of the
+loop's radius out along the braced spar (the ends move fore and aft with the trim, because the arms do). Drawn
+by ropeMesh, tagged 'parrel' — the lateen's loop turned to the fore face. (3) THE TRUSS: three iron meshes
+(mats.iron), tagged 'truss' and named — 'Truss band', an open cylinder round the mast at the slings 0.015 m
+proud of the mast's radius, 1.4 slings diameters tall, tilted with the raked axis; 'Truss goose-neck', a rod of
+0.22 slings diameters radius from the axis to the yard's centre along the axis's forward normal; 'Truss yard
+band', an open cylinder round the yard at its middle 0.012 m proud of it, 1.6 diameters long, in the yard's
+own braced frame. (4) Nothing moves: the yard, the cloth, the furled roll, the mast, the lifts, sheets, ties,
+jeers and braces stand where r257 left them — held-after.json reads every one of the 104 yards' offsets
+against r257/yards-after.json to 0.000 m. (5) The parts registry: the parrel's card names the square yard and
+Falconer's definition; 'truss' is a new part (stage 6) with its own card. No record field changes; the lateen,
+lug, gaff and crab-claw rigs are untouched; vessels.json is unchanged.**
+
+**MEASURED AFTER (r258/held-after.json, the second run of probe_held.py on the after builder — every centreline
+athwartships 'Yard' against its mast segment as r257 read it, and now every 'parrel'/'truss' mesh within 1.5 m of
+its slings: the mesh's z extent, its outer radius from the axis, and how far ABAFT the axis it reaches along the
+axis's own normal). 104 crossed yards on thirteen hulls, 104 held: 83 parrels (the trireme 2, corbita 2, cog 1,
+carrack 4, sekibune 1, fluyt 6, east indiaman 9, the 74 9, slave ship 9, clipper 15 — a wooden hull, so rope
+throughout — Endurance 4, Preussen's fifteen hoisting yards, the steamer's six) and 21 trusses (Preussen's
+fifteen fixed yards — the course, lower topsail and lower topgallant of each of five masts — and the steamer's
+six). Every fitting reaches both sides of the centreline by more than half its mast's radius and abaft the axis
+by 0.072–0.573 m (the loop's radius is the mast's plus the rope's; the truss band's the mast's plus 0.015), so every one goes ROUND the pole; the carrack's fifth and the fluyt's seventh 'parrel' are their
+lateen mizzens' (r254). The first run's probe and audit read 'round the mast' as the fitting's aftmost x against
+the axis's x AT THE YARD'S HEIGHT, and read the corbita's artemon's loop as not going round (r258/held-after-
+run1.json: abaft by −0.041 m) — on a 48° forward-raked spar the yard hangs 0.11 m under its slings, and the axis
+0.11 m lower is 0.12 m further aft than the loop's centre. Read in the mast's own frame, along the axis's normal,
+the loop reaches 0.127 m abaft the axis and round. The second run is the one recorded, and the audit's second
+pass is the one shipped.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r258/apply-audit-edits.py and apply-audit-edits-2.py, audit-
+hulls.before.js, audit-hulls.after.js). D-YARD-HELD (new, inside the r256/r257 yard block): every mesh tagged
+'parrel' or 'truss' is read — its vertex mean, its z extent, its points; an athwartships centreline 'Yard' must
+have one within 1.5 m of its slings and within 0.6 m of its height, and that fitting must go ROUND the mast —
+reach both sides of the centreline by half the mast's radius there and reach abaft the AXIS by half the radius,
+along the axis's own normal (−dir.y, dir.x) — else 'a square yard with nothing holding it to its mast' (the r257
+builder, every yard) or "a yard's parrel that does not go round its mast". The lateen's and the lug's yards are
+not centreline 'Yard' meshes and are r253's and r254's rules'. D-YARD-ON-MAST, D-SAIL-THROUGH-MAST, D-MAST-RAKE
+and D-MAST-SEGMENT are unchanged. PROOF A is above. The final audit on the r258 builder: "checked 33 hulls,
+0 problems" on :8150 (audit-final-8150.out) and again on :8149 after the copy into web/ (audit-final-8149.out).**
+
+**WITNESSED (r258/witness-74-before-b90.png, witness-74-b90.png, witness-preussen-before-b90.png, witness-preussen-b90.png — the r257 builder and the r258 builder off :8150 after RATCHET EXIT and CHAIN2 END, from the port beam, b=90, l=6, z=0.9; w-74-slings-pair.png and w-preussen-slings-pair.png crop the middle of each frame at 3x about the main yards, w-*-slings-6x-pair.png at 5–6x about one yard's slings). PREUSSEN: the change is legible. On the after frame the main course yard carries a blue-grey iron band at its middle where the before frame has bare tube — the truss's yard band, 0.6 m long round a 0.64 m yard — and the lower topsail yard above it the same; the goose-neck and the band round the mast stand behind the course from this bearing. THE 74: the rope parrel is NOT resolved. The 6x crop about the main topsail yard's slings is pixel-identical before and after: the loop lies round the mast's after side at the yard's own height, 0.024 m of rope standing 0.02 m proud of a 0.43 m pole, exactly behind the 0.21 m yard as seen from the beam. Two more cameras were tried on the after builder alone — dead astern (witness-74-astern.png, b=180, l=10, z=0.55) and aimed at the main course slings from the starboard quarter (witness-74-slings-aimed.png, b=150, z=0.35, l=8, y=23, cropped in w-74-slings-aimed-crop.png) — and in both the yard's own silhouette covers the loop; the wooldings above and below the slings read, the parrel does not separate from the yard at the Shipwright's field. What the frame carries is read off the mesh instead: D-YARD-HELD finds the loop round the pole on all 104 yards (held-after.json, the abaft reach 0.072–0.573 m). The witness that WOULD show it is a masthead-close capture aimed at a topgallant yard's slings (y at the yard, z 0.35, from the quarter), where the rope is a fifth of the pole; r259 takes it before touching the yards again.**
+
+**Rule 0 on the Preussen witness read whole (r258/witness-preussen-b90.png): a rendered ship on water, not a chart — a five-masted steel ship from the port beam, black hull with a white boot-top and a red underbody, white-painted steel lower masts and grey doublings, every square sail set and drawing, the courses sheeted to the rail, staysails between the masts, a grey-blue swell running under her and a hazed coast on the horizon. Three facts a viewer can read off it without a legend: her yards lie on the fore side of her masts, the poles standing behind the canvas; her lower yards are held at their middles by iron bands and carry no halyard, where the yards above them have their ties; her lower masts are steel tubes with futtock shrouds and ratlines running up to the tops.**
+
+**Named residuals, in order:** (0y²⁷) CLOSED as a class — every crossed yard carries its parrel or its truss and
+the audit reads the fitting round the pole off the meshes. (0y²⁹) CLOSED — diagnosed above, r256's correction on
+Titanic's raked poles, the frame accepted. NEW (0y³⁰) the truss's throw: a goose-neck holds the lower yard 0.3–
+0.6 m OFF the mast on the real rig, and the yard here lies against the pole with the goose-neck drawn between the
+axis and the yard's centre (its length is the two radii); the record says so (heldFrom), and D-YARD-ON-MAST's
+two-radii test would have to read the truss's length off the mesh to allow it. NEW (0y³¹) the chain slings of the
+fixed lower yard — the weight hangs in slings from the masthead while the truss takes the thrust — are not drawn;
+the iron rig's course hangs on its truss alone. NEW (0y³²) the iron rig's HOISTING yards (Preussen's upper
+topsails and topgallants, the steamer's) rode iron parrels or patent trusses, not rope; they carry the rope
+parrel here as a stated simplification of the class. (0y²⁶) the furled bunt into the mast's fore face and (0y²⁸)
+the fore-face rule on the SET build only, as r257 names them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹)
+(0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y′)
+(0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread.
+(0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗)
+(0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r259 opens by running the FULL ratchet at the clean HEAD first (r258/PREDICTIONS-close.md names the frames that
+MAY move — the 74's five Shipwright frames, the corbita's corbis frame, the eight square-rigged hulls' own close
+frames and the two square-rigged aboard frames, a 2–3 cm rope at the Shipwright's distance — and the rest that
+MUST NOT; only those scored by check --frame after the push are accepted here), with no screenshot beside it until
+RATCHET EXIT; then takes (0y²⁶) with (0y²⁸) — the furled bunt stowed on the yard against the mast and the fore-face
+rule run on the furled build with the roll's radius read off the roll mesh — or (0y³⁰), the truss's throw read off
+the mesh, or (0y¹⁹) with (0y²⁴), the carrack's mizzen and the artemon read from plates at a stated scale, or the
+survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788674967 at the build; the push and the live poll are in
+build/staging/r258/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r258 staging stays on disk uncommitted, the r211 convention.**

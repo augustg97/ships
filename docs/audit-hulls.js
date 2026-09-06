@@ -4711,9 +4711,12 @@ const radAt = (t0, tol) => { let r = 0, n = 0; pts.forEach((q, i) => { if (Math.
 return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span,
 rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
 };
-const masts = [], yards = [], segs = [];
+const masts = [], yards = [], segs = [], fits = [];
 g.traverse(o => {
 if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+if (p.key === 'parrel' || p.key === 'truss') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length);
+let zMin = 1e9, zMax = -1e9; for (const q of pts) { zMin = Math.min(zMin, q.z); zMax = Math.max(zMax, q.z); }
+fits.push({ key: p.key, name: p.name, c: fc, zMin, zMax, pts }); }
 if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
 if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
 if (p.key === 'yard' && p.name === 'Yard') { const ax = axisOf(hullPts(o)); if (Math.abs(ax.centre.z) < 0.3) yards.push({ c: ax.centre, ax, slung: o.userData.slung || null, athwart: Math.abs(ax.dir.z) >= 0.85 }); }
@@ -4736,6 +4739,11 @@ const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n
 if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
 else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
 else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
+const nearF = fits.filter(f => f.c.distanceTo(c) <= 1.5 && Math.abs(f.c.y - c.y) <= 0.6);
+const faMin = f => { let mn = 1e9; for (const q of f.pts) { const w = q.clone().sub(m.foot), t = w.dot(m.dir); mn = Math.min(mn, (w.x - m.dir.x * t) * (-m.dir.y) + (w.y - m.dir.y * t) * m.dir.x); } return mn; };
+const round = nearF.filter(f => f.zMin <= -0.5 * rAt && f.zMax >= 0.5 * rAt && faMin(f) <= -0.5 * rAt);
+if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}`);
+else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole`);
 }
 }
 if (segs.some(q => q.rec)) {

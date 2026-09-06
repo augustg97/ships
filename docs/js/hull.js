@@ -1403,12 +1403,17 @@ const OFF = mastRs + Math.max(slingsD / 2, rRoll);
 const nX = -Math.cos(rakeRad), nY = Math.sin(rakeRad);
 const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
 ym.position.set(yX, yY, 0);
+const HELD = (S.iron && hoist === 'fixed') ? 'truss' : 'parrel';
 ym.userData.slung = { mastX: +x.toFixed(3), axisX: +mxA(yy).toFixed(3), axisY: +yy.toFixed(3),
 off: +OFF.toFixed(3), mastR: +mastRs.toFixed(3), yardR: +(slingsD / 2).toFixed(3),
 rollR: +rRoll.toFixed(3), furled: FURLED, rakeDeg: mk.rake || 0, side: 'fore',
 sideFrom: 'class: a square yard lies before its mast, held to it by a parrel or a truss, '
 + 'and the wind abaft the beam presses it onto the pole; the offset is the two radii, '
-+ 'and no plate reads it' };
++ 'and no plate reads it',
+held: HELD,
+heldFrom: 'class (round 258): the iron hull\'s fixed lower yard on an iron truss, every '
++ 'hoisting yard and every yard of the wooden rig on a rope parrel; the truss\'s own '
++ 'throw is not modelled and the yard lies against the pole' };
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1419,6 +1424,39 @@ what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel 
 + 'length: the rate is the record\'s, the figure DERIVED from it.' };
 spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2,
 armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
+{
+const C = new THREE.Vector3(mxA(yy), yy, 0);
+const N = new THREE.Vector3(nX, nY, 0);
+const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
+if (HELD === 'truss') {
+const iron = mats.iron || woodDark;
+const rNeck = Math.max(0.02, slingsD * 0.22);
+const bandR = mastRs + 0.015, bandH = Math.max(0.12, slingsD * 1.4);
+const band = new THREE.Mesh(new THREE.CylinderGeometry(bandR, bandR, bandH, 14, 1, true), iron);
+band.position.copy(C); band.rotation.z = -rakeRad;
+group.add(tag(band, 'truss', 'Truss band'));
+const neck = new THREE.Mesh(new THREE.CylinderGeometry(rNeck, rNeck, OFF, 10), iron);
+neck.position.copy(C).addScaledVector(N, OFF / 2); neck.rotation.z = Math.atan2(-nX, nY);
+group.add(tag(neck, 'truss', 'Truss goose-neck'));
+const ybR = slingsD / 2 + 0.012, ybH = Math.max(0.15, slingsD * 1.6);
+const yb = new THREE.Mesh(new THREE.CylinderGeometry(ybR, ybR, ybH, 14, 1, true), iron);
+yb.position.copy(C).addScaledVector(N, OFF); yb.quaternion.copy(ym.quaternion);
+group.add(tag(yb, 'truss', 'Truss yard band'));
+} else {
+const rPar = 0.010 + B * 0.0004, Rp = mastRs + rPar, face = OFF - slingsD / 2;
+const arc = [];
+for (let a = 50; a <= 310; a += 20) {
+const ca = Math.cos(a * Math.PI / 180), sa = Math.sin(a * Math.PI / 180);
+arc.push(C.clone().addScaledVector(N, Rp * ca).setZ(Rp * sa));
+}
+const end = sg => C.clone().addScaledVector(N, face)
+.add(new THREE.Vector3(sT * sg * Rp * 0.766, 0, cT * sg * Rp * 0.766));
+const pts = [end(1), ...arc, end(-1)];
+const segs = []; for (let i = 0; i + 1 < pts.length; i++) segs.push([pts[i], pts[i + 1]]);
+const par = ropeMesh(segs, rPar, ropeMat);
+if (par) group.add(tag(par, 'parrel'));
+}
+}
 const drop = yy - prevYard;
 prevYard = yy;
 mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist });
@@ -2986,7 +3024,19 @@ what: 'The rope loop that holds a spar to its mast and lets it slide up and down
 + 'never through it. Hasler and McLeod, Practical Junk Rig (1988), call the '
 + 'batten parrel the fitting that makes the rig work at all. A lateen yard has '
 + 'one at its sling: the yard lies against the mast\'s lee side and the parrel '
-+ 'holds it there while the halyard from the masthead takes its weight.' },
++ 'holds it there while the halyard from the masthead takes its weight. A square '
++ 'yard has one too — Falconer, 1780: "a machine used to fasten the sail-yards to '
++ 'the masts, in such a manner as that they may be easily hoisted or lowered". '
++ 'The yard lies on the mast\'s fore face and the loop goes round the after side, '
++ 'so with the wind abaft the beam the sail presses the yard onto the pole and the '
++ 'mast takes the drive.' },
+truss:    { stage: 6, name: 'Truss',
+what: 'The iron fitting that holds a lower yard to its mast on the nineteenth-century '
++ 'rig, where a rope parrel and truss pendants held it before: a band round the '
++ 'mast, a band round the middle of the yard, and a goose-neck between them on '
++ 'which the yard braces round and cocks up. The lower yard is not hoisted — it '
++ 'hangs in chain slings from the masthead and the truss carries its thrust into '
++ 'the mast — so it has no tie and no jeers.' },
 halyard:  { stage: 6, name: 'Halyard',
 what: 'The line that hoists the yard, and it must go over a masthead to do it: '
 + 'the tie leads up from the yard\'s slings, through the sheave in the head '
