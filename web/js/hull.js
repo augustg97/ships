@@ -2443,7 +2443,43 @@ function buildRig(S, group, mats, FINE, FURLED) {
       ym.quaternion
         .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
         .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
-      ym.position.set(mxA(yy), yy, 0);
+      /* ── THE YARD LIES ON THE MAST'S FORE FACE (round 257, 0y²⁵) ─────────────────────
+         Every crossed yard in the fleet was slung ON its mast's axis — its centre at
+         mxA(yy), the spar passing through the middle of the pole (r257/yards-before.json:
+         every centreline yard on the thirteen square-rigged hulls within 0.02 m of its
+         mast's axis, where a yard touching the pole stands a mast's radius plus its own
+         away). A square yard is not slung through its mast. It lies BEFORE it, against the
+         fore face, and is held there by a parrel — Falconer 1780: "PARREL, a machine used to
+         fasten the sail-yards to the masts, in such a manner as that they may be easily
+         hoisted or lowered" — or, on the lower yards of the nineteenth-century rig, by an
+         iron truss. It is before the mast for a reason: with the wind abaft the beam, the
+         rig's working point, the sail presses the yard AFT onto the pole and the mast takes
+         the drive; abaft the mast it would only be held off by rope. So the yard's centre
+         stands off the axis by the mast's radius at the slings plus its own, along the
+         normal to the raked axis (two cylinders touching): dead forward on a plumb mast,
+         forward and a shade up on the 74's 5° mizzen, forward and DOWN on the corbita's 48°
+         artemon, where the yard hangs under the spar as a spritsail yard hangs under a
+         bowsprit, with its sail below it. Furled, the roll is fatter than the yard (a 0.46 m
+         roll on the 74's 0.27 m course yard), so the offset takes the roll's radius and the
+         bundle lies against the mast and not through it — the lateen's rule (round 254).
+         The cloth hangs from the yard where it is; the lifts, sheets, ties, jeers and braces
+         read the spar's own centre (mastYards, spars) as they always have. No plate reads
+         the offset — the fitting is the rig's own — and the record says so (userData.slung). */
+      const mastRs = mastRAt(yy);
+      const rRoll = FURLED
+        ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((yy - prevYard) * 0.97) * 0.055)
+                                   / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
+        : 0;
+      const OFF = mastRs + Math.max(slingsD / 2, rRoll);
+      const nX = -Math.cos(rakeRad), nY = Math.sin(rakeRad);   // the axis's forward normal
+      const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
+      ym.position.set(yX, yY, 0);
+      ym.userData.slung = { mastX: +x.toFixed(3), axisX: +mxA(yy).toFixed(3), axisY: +yy.toFixed(3),
+        off: +OFF.toFixed(3), mastR: +mastRs.toFixed(3), yardR: +(slingsD / 2).toFixed(3),
+        rollR: +rRoll.toFixed(3), furled: FURLED, rakeDeg: mk.rake || 0, side: 'fore',
+        sideFrom: 'class: a square yard lies before its mast, held to it by a parrel or a truss, '
+          + 'and the wind abaft the beam presses it onto the pole; the offset is the two radii, '
+          + 'and no plate reads it' };
       group.add(tag(ym, 'yard'));
       /* the steel yard's card carries its provenance, the iron-mast rule: no tube record
          was in reach for these spars, so the RATE is the record's and the figure derived */
@@ -2457,7 +2493,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* recorded from the spar that was actually placed, so the braces lead to real yard arms:
          a braced yard's arms swing FORE AND AFT as well as out, and the brace is the rope that
          holds them there, so it has to be led to where the arm now is. */
-      spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
+      spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2,
                    armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
       /* ── THE DROP IS THE GAP TO THE TIER BELOW ────────────────────────────────
          Which is what the comment here always said, while the code used a fixed fraction of
@@ -2468,19 +2504,19 @@ function buildRig(S, group, mats, FINE, FURLED) {
          needs so the sail can be handled. */
       const drop = yy - prevYard;
       prevYard = yy;
-      mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop, hoist });
+      mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist });
       if (FURLED) {
         /* the roll lies along the braced yard itself, between its arms, bunt at the slings */
         const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
         sails.push(makeFurl(
-          new THREE.Vector3(ym.position.x - sT2 * w2, yy, -cT2 * w2),
-          new THREE.Vector3(ym.position.x + sT2 * w2, yy, cT2 * w2),
+          new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
+          new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
           (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
       } else {
-        const sq = makeSail(mxA(yy), yy, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
+        const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
         /* the cloth names its mast and its yard's height, so the audit can tell its own
            mast's axis at the head row (where the yard is slung) from a spar through it */
-        sq.userData.mastX = x; sq.userData.yardY = yy;
+        sq.userData.mastX = x; sq.userData.yardY = yY;
         sails.push(sq);
       }
     };
@@ -2557,6 +2593,24 @@ function buildRig(S, group, mats, FINE, FURLED) {
       });
     }
     const radii = segR.map(s2 => s2.a);
+    /* ── r257: THE MAST'S RADIUS AT A HEIGHT — ONE DERIVATION ─────────────────────────
+       Every fitting that touches the pole reads it here: the square yard on the fore face
+       (crossYard, below), the gaff luff's hoops and jaws (the gaff block, which kept its own
+       copy of this loop through r256). Each drawn segment tapers from segR.a at its foot to
+       segR.b at its head, and the segments stack by the doubling — each heel at 0.88 of the
+       segment below, the stacking rule crossYard's caller applies — so a height is looked
+       up in the segment standing there. */
+    const mastRAt = h => {
+      let y0 = base;
+      for (let si = 0; si < segs.length; si++) {
+        if (h <= y0 + segs[si] || si === segs.length - 1) {
+          const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
+          return segR[si].a + (segR[si].b - segR[si].a) * t;
+        }
+        y0 += segs[si] * 0.88;
+      }
+      return segR[0].a;
+    };
 
     segs.forEach((seg, si) => {
       if (mk.only && si >= mk.only) return;
@@ -3099,7 +3153,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           const sgn = k % 2 ? 1 : -1;
           const hy = segHeads[yd.hoist.tie] !== undefined ? segHeads[yd.hoist.tie] : capY;
           const hd = V3(mx(hy), hy, 0);
-          hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
+          hals.push([V3(yd.cx, yd.yy, 0), hd],           // r257: from the slings, before the mast
                     [hd, rail(u + 0.05 + 0.015 * k, sgn)]);
         } else if (yd.hoist === 'jeers' && segHeads[0] !== undefined) {
           /* Falconer's JEARS: "two strong tackles, each of which has two blocks, viz.
@@ -3613,17 +3667,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          axis onto the mast's after face. The cloth names its mast for the audit (userData.mastX)
          and says its luff is on it (userData.luffOnMast), so any own-mast crossing convicts. */
       const mastX = mxA;
-      const mastR = h => {
-        let y0 = base;
-        for (let si = 0; si < segs.length; si++) {
-          if (h <= y0 + segs[si] || si === segs.length - 1) {
-            const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
-            return segR[si].a + (segR[si].b - segR[si].a) * t;
-          }
-          y0 += segs[si] * 0.88;
-        }
-        return segR[0].a;
-      };
+      const mastR = mastRAt;                 // r257: the one derivation, hoisted above crossYard
       const bm2 = new THREE.Mesh(
         new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
       bm2.rotation.z = Math.PI / 2;

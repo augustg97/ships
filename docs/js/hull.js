@@ -1394,7 +1394,21 @@ yg.computeVertexNormals();
 ym.quaternion
 .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
 .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
-ym.position.set(mxA(yy), yy, 0);
+const mastRs = mastRAt(yy);
+const rRoll = FURLED
+? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((yy - prevYard) * 0.97) * 0.055)
+/ (Math.PI * Math.max(yardLen * 0.96, 0.1))))
+: 0;
+const OFF = mastRs + Math.max(slingsD / 2, rRoll);
+const nX = -Math.cos(rakeRad), nY = Math.sin(rakeRad);
+const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
+ym.position.set(yX, yY, 0);
+ym.userData.slung = { mastX: +x.toFixed(3), axisX: +mxA(yy).toFixed(3), axisY: +yy.toFixed(3),
+off: +OFF.toFixed(3), mastR: +mastRs.toFixed(3), yardR: +(slingsD / 2).toFixed(3),
+rollR: +rRoll.toFixed(3), furled: FURLED, rakeDeg: mk.rake || 0, side: 'fore',
+sideFrom: 'class: a square yard lies before its mast, held to it by a parrel or a truss, '
++ 'and the wind abaft the beam presses it onto the pole; the offset is the two radii, '
++ 'and no plate reads it' };
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1403,20 +1417,20 @@ what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel 
 + 're-masting cut every steel yard to in 2017, and Great Eastern\'s 1858 iron '
 + 'lower yard holds at 50.4. An attested rate applied to this spar\'s own '
 + 'length: the rate is the record\'s, the figure DERIVED from it.' };
-spars.push({ u, x: ym.position.x, y: yy, half: yardLen / 2,
+spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2,
 armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
 const drop = yy - prevYard;
 prevYard = yy;
-mastYards.push({ yy, cx: ym.position.x, half: yardLen / 2, drop, hoist });
+mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist });
 if (FURLED) {
 const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
 sails.push(makeFurl(
-new THREE.Vector3(ym.position.x - sT2 * w2, yy, -cT2 * w2),
-new THREE.Vector3(ym.position.x + sT2 * w2, yy, cT2 * w2),
+new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
+new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
 (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
 } else {
-const sq = makeSail(mxA(yy), yy, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
-sq.userData.mastX = x; sq.userData.yardY = yy;
+const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
+sq.userData.mastX = x; sq.userData.yardY = yY;
 sails.push(sq);
 }
 };
@@ -1446,6 +1460,17 @@ return { a: rr, b: rr * 0.7 };
 });
 }
 const radii = segR.map(s2 => s2.a);
+const mastRAt = h => {
+let y0 = base;
+for (let si = 0; si < segs.length; si++) {
+if (h <= y0 + segs[si] || si === segs.length - 1) {
+const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
+return segR[si].a + (segR[si].b - segR[si].a) * t;
+}
+y0 += segs[si] * 0.88;
+}
+return segR[0].a;
+};
 segs.forEach((seg, si) => {
 if (mk.only && si >= mk.only) return;
 const mastMat = S.mastLivery === 'buff'
@@ -1747,7 +1772,7 @@ if (yd.hoist && yd.hoist.tie !== undefined) {
 const sgn = k % 2 ? 1 : -1;
 const hy = segHeads[yd.hoist.tie] !== undefined ? segHeads[yd.hoist.tie] : capY;
 const hd = V3(mx(hy), hy, 0);
-hals.push([V3(mx(yd.yy) + B * 0.02, yd.yy, 0), hd],
+hals.push([V3(yd.cx, yd.yy, 0), hd],
 [hd, rail(u + 0.05 + 0.015 * k, sgn)]);
 } else if (yd.hoist === 'jeers' && segHeads[0] !== undefined) {
 const jb = base + (segHeads[0] - base) * 0.86;
@@ -1970,17 +1995,7 @@ const gaffL = Math.min(lower * 0.42, boomL * 0.72);
 const peak = 0.62;
 const footY = base + lower * 0.11;
 const mastX = mxA;
-const mastR = h => {
-let y0 = base;
-for (let si = 0; si < segs.length; si++) {
-if (h <= y0 + segs[si] || si === segs.length - 1) {
-const t = Math.max(0, Math.min(1, (h - y0) / segs[si]));
-return segR[si].a + (segR[si].b - segR[si].a) * t;
-}
-y0 += segs[si] * 0.88;
-}
-return segR[0].a;
-};
+const mastR = mastRAt;
 const bm2 = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
 bm2.rotation.z = Math.PI / 2;

@@ -6645,7 +6645,26 @@
        within 0.6 m of its centre: none, and it is 'a yard hung on no mast'; if the centre
        stands more than 0.02 m above the highest of their heads, 'a yard slung above its
        mast's head' — a stacked mast is several collinear segments, and a topsail yard on the
-       topmast is above the LOWER's head by construction, so the highest head is the test. */
+       topmast is above the LOWER's head by construction, so the highest head is the test.
+       ── Round 257 (0y²⁵): A SQUARE YARD LIES ON ITS MAST'S FORE FACE. Every crossed yard was
+       slung ON its mast's axis — the spar's centre through the middle of the pole
+       (r257/yards-before.json: every centreline yard on the thirteen square-rigged hulls
+       within 0.02 m of its mast's axis). A yard touching its mast stands off the axis by the
+       mast's radius at the slings plus its own, before the mast, held there by a parrel or a
+       truss. Read from the MESHES, not from the builder's numbers: the yard's own axis and
+       its slings radius (the ring at its centre) by principal component; the mast segment's
+       radius at the yard's projection from its two rims (cyl() draws one open-ended tapered
+       segment, so the radius is linear between them); the nearest segment's perpendicular
+       distance to the yard's centre. Within 0.03 m of the two radii, and forward of the
+       axis at the yard's height, or it is 'a square yard slung through its mast' (nearer
+       than the radii allow — the r256 builder, every yard), 'a square yard standing off its
+       mast' (farther: hung on nothing that touches it), or 'a square yard slung abaft its
+       mast'. The fore-face test reads every ATHWARTSHIPS centreline 'Yard' (its axis within
+       32° of the beam — the square block braces its yards 19.5°); the crab claw's 'Yard' lies
+       along its mast and is r250's. The 'no mast' gate widens from 0.6 m to 1.5 m, because a
+       yard before its mast stands off by two radii — 0.9 m on Preussen. A builder that
+       records the offset (userData.slung, the lateen's pattern) is read the same way; the
+       record is provenance, not the test. */
     {
       const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
       const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
@@ -6657,23 +6676,44 @@
         const d = new THREE.Vector3(0, 1, 0);
         for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
         if (d.y < 0) d.negate();
-        let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
-        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+        let tMin = 1e9, tMax = -1e9; const ts = [];
+        for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        const span = tMax - tMin;
+        /* the radius at a station along the axis: the mean distance from the axis of the vertices within tol of it (r257) */
+        const radAt = (t0, tol) => { let r = 0, n = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) { r += q.clone().sub(c).addScaledVector(d, -ts[i]).length(); n++; } }); return n ? r / n : NaN; };
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span,
+                 rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
       };
       const masts = [], yards = [], segs = [];
       g.traverse(o => {
         if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
         if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
           if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
-        if (p.key === 'yard' && p.name === 'Yard') { const pts = hullPts(o); const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length); if (Math.abs(c.z) < 0.3) yards.push(c); }
+        if (p.key === 'yard' && p.name === 'Yard') { const ax = axisOf(hullPts(o)); if (Math.abs(ax.centre.z) < 0.3) yards.push({ c: ax.centre, ax, slung: o.userData.slung || null, athwart: Math.abs(ax.dir.z) >= 0.85 }); }
       });
       const distToAxis = (m, q) => { const w = q.clone().sub(m.foot); const t = w.dot(m.dir); return w.sub(m.dir.clone().multiplyScalar(t)).length(); };
-      for (const c of yards) {
-        let n = null; const near = [];
-        for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 0.6) near.push(m); }
+      for (const yd of yards) {
+        const c = yd.c; let n = null; const near = [];
+        /* the yard's segment: on a stacked mast every segment shares the axis line, so the pick is the LOWEST
+           segment whose own span contains the yard's projection (the builder's mastRAt reads the same one),
+           and only where none does, the nearest by distance */
+        let seg = null;
+        for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 1.5) near.push(m);
+          const tt = c.clone().sub(m.foot).dot(m.dir); if (d <= 1.5 && tt >= -0.02 && tt <= m.span + 0.02 && (!seg || m.foot.y < seg.m.foot.y)) seg = { m, d }; }
         if (!near.length) { say(v.id, 'a yard hung on no mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}, ${c.z.toFixed(2)}) is ${n ? n.d.toFixed(2) + ' m from the axis of the nearest mast (foot x ' + n.m.foot.x.toFixed(2) + ')' : 'on a hull with no mast mesh'}`); continue; }
         const top = near.reduce((mx, m) => Math.max(mx, m.head.y), -1e9), tm = near.reduce((b, m) => (!b || m.head.y > b.head.y) ? m : b, null);
         if (c.y > top + 0.02) say(v.id, "a yard slung above its mast's head", `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${(c.y - top).toFixed(2)} m above the head (y ${top.toFixed(2)}) of the mast at foot x ${tm.foot.x.toFixed(2)}`);
+        /* r257: the fore face — the yard's segment's radius at the yard's projection plus the yard's own */
+        if (yd.athwart || yd.slung) {
+          const pick = seg || n; const m = pick.m; n = pick;
+          const w = c.clone().sub(m.foot), t = Math.max(0, Math.min(1, w.dot(m.dir) / Math.max(m.span, 1e-6)));
+          const rAt = m.rFoot + (m.rHead - m.rFoot) * t, expect = rAt + yd.ax.rMid;
+          const axisXAtY = m.foot.x + (c.y - m.foot.y) * (m.dir.x / Math.max(m.dir.y, 1e-6));
+          const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off`;
+          if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
+          else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
+          else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
+        }
       }
       /* ── D-MAST-SEGMENT (round 256): A POLE ENDS WHERE ITS BUILDER SAYS. Every square-block
          segment records its own ends (userData.seg: footY, headY, footX, headX — the segment's

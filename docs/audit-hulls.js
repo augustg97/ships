@@ -4704,23 +4704,39 @@ for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx 
 const d = new THREE.Vector3(0, 1, 0);
 for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
 if (d.y < 0) d.negate();
-let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
-return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+let tMin = 1e9, tMax = -1e9; const ts = [];
+for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+const span = tMax - tMin;
+const radAt = (t0, tol) => { let r = 0, n = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) { r += q.clone().sub(c).addScaledVector(d, -ts[i]).length(); n++; } }); return n ? r / n : NaN; };
+return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span,
+rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
 };
 const masts = [], yards = [], segs = [];
 g.traverse(o => {
 if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
 if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
 if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
-if (p.key === 'yard' && p.name === 'Yard') { const pts = hullPts(o); const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length); if (Math.abs(c.z) < 0.3) yards.push(c); }
+if (p.key === 'yard' && p.name === 'Yard') { const ax = axisOf(hullPts(o)); if (Math.abs(ax.centre.z) < 0.3) yards.push({ c: ax.centre, ax, slung: o.userData.slung || null, athwart: Math.abs(ax.dir.z) >= 0.85 }); }
 });
 const distToAxis = (m, q) => { const w = q.clone().sub(m.foot); const t = w.dot(m.dir); return w.sub(m.dir.clone().multiplyScalar(t)).length(); };
-for (const c of yards) {
-let n = null; const near = [];
-for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 0.6) near.push(m); }
+for (const yd of yards) {
+const c = yd.c; let n = null; const near = [];
+let seg = null;
+for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 1.5) near.push(m);
+const tt = c.clone().sub(m.foot).dot(m.dir); if (d <= 1.5 && tt >= -0.02 && tt <= m.span + 0.02 && (!seg || m.foot.y < seg.m.foot.y)) seg = { m, d }; }
 if (!near.length) { say(v.id, 'a yard hung on no mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}, ${c.z.toFixed(2)}) is ${n ? n.d.toFixed(2) + ' m from the axis of the nearest mast (foot x ' + n.m.foot.x.toFixed(2) + ')' : 'on a hull with no mast mesh'}`); continue; }
 const top = near.reduce((mx, m) => Math.max(mx, m.head.y), -1e9), tm = near.reduce((b, m) => (!b || m.head.y > b.head.y) ? m : b, null);
 if (c.y > top + 0.02) say(v.id, "a yard slung above its mast's head", `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${(c.y - top).toFixed(2)} m above the head (y ${top.toFixed(2)}) of the mast at foot x ${tm.foot.x.toFixed(2)}`);
+if (yd.athwart || yd.slung) {
+const pick = seg || n; const m = pick.m; n = pick;
+const w = c.clone().sub(m.foot), t = Math.max(0, Math.min(1, w.dot(m.dir) / Math.max(m.span, 1e-6)));
+const rAt = m.rFoot + (m.rHead - m.rFoot) * t, expect = rAt + yd.ax.rMid;
+const axisXAtY = m.foot.x + (c.y - m.foot.y) * (m.dir.x / Math.max(m.dir.y, 1e-6));
+const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off`;
+if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
+else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
+else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
+}
 }
 if (segs.some(q => q.rec)) {
 for (const q of segs) {

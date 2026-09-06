@@ -21944,3 +21944,121 @@ docs/audit-hulls.js convicts a mast segment built short of its record (1 mention
 THE RATCHET: THE OPENING FULL RATCHET at the clean r255 HEAD 7b86bb3 (r256/open-ratchet.out, launched 19:20 as the round's first act, ended 20:01): RATCHET EXIT 1  END 20:01:38; 65 frames scored; movers 4: action 0.058%/0.018; map-floor 0.167%/0.104; action-gravelines 0.052%/0.011; ship-slave-ship 0.061%/0.030. Largest three: map-floor 0.167%/0.104, ship-slave-ship 0.061%/0.030, action 0.058%/0.018.
  PARTIAL after the push, the r239 pattern (r256/partial-*.out): frames scored one at a time by check --frame on the r256 builder, each diff read before its accept — ship-trireme 0.585%/0.287 CHANGED, shipwright-hounds 1.634%/0.835 CHANGED (2 frames; r256/PREDICTIONS-close.md names the 2 frames that MUST move — ship-trireme, whose bow mast's foot drops 0.35 m to the deck, and shipwright-hounds, where the 74's top moves 0.24 m onto the raked axis — the frames that MAY, the raked square-riggers' own frames and the 74's other three, the corbita's close frame, the berth neighbours, the Actions with square-riggers and the era 4 Sea views, and the rest that must not). The other 63 frames are UNSCORED on the r256 builder; r257's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (2cf98ba record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 257 — 2026-09-05 — the square yard lies on its mast's fore face: every crossed yard in the fleet was slung on its mast's axis, the spar's centre through the middle of the pole, 104 yards on thirteen hulls; the yard now stands off the axis by the mast's radius at the slings plus its own, along the normal to the raked axis, held there by a parrel or a truss, with its cloth, its furled roll, its tie and every rope led from it going with it; the audit reads each yard's distance from its mast against the two radii off the meshes, and the full ratchet ran first at the clean r256 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r256 ordered r257's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y²⁵), the square yard on its mast's fore face as a class with r254's lateen
+derivation, or (0y¹⁹) with (0y²⁴), or Endurance by looking. (0y²⁵) was taken. THIS ROUND RAN AS TWO ATTEMPTS. The
+first (the 20:25 firing) launched the ratchet at HEAD a91c731 at 20:26 as its first act, made every edit on a COPY of
+web/ served on :8150 (build/staging/r257/web, every file a symlink to web/ except hull.js and audit-hulls.js;
+vessels.json is copied and unchanged), ran the probes, the proof and the final audit on that copy one browser at a
+time, wrote this draft — and then ended its turn to wait for the ratchet's notification, which is the failure the
+loop prompt names: claude -p exits when the turn ends, the driver killed the round at 20:55 with 49 of 65 frames
+captured and nothing scored (open-ratchet-attempt1.out; the last capture met a refused connection), and the close
+scripts it had backgrounded copied the after files into web/ and took the witnesses after it was dead, with nothing
+committed. The second attempt (the 21:05 firing) found the tree carrying the uncommitted after files, verified them
+byte-for-byte against the staged copies (hull.after.js, audit-hulls.after.js) and the staged before copies against
+HEAD, restored web/ to HEAD from the staged copies (the r-rule: from a copy, not git), and re-launched the FULL
+ratchet at the clean HEAD a91c731 at 21:09 as its first act, with no screenshot beside it until RATCHET EXIT; the
+witnesses below were read in this attempt, on :8150, and the close ran after the exit.**
+
+**THE FAULT, measured on the built scene (r257/probe_yards.py on the r256 builder, yards-before.json: every
+centreline mesh named 'Yard' read by principal component — its centre, its own axis and its slings radius from
+the ring at its middle — against every mast segment's axis, the segment's radius at the yard's projection read
+from its two rims). 104 crossed yards on thirteen square-rigged hulls, and every one of them was slung ON its
+mast's axis: 0.005–0.033 m from it on twelve hulls, 0.020–0.057 m on Preussen's thirty, where a yard touching its
+pole stands a mast's radius plus its own away — 0.10–0.18 m on the trireme, 0.15–0.31 on the corbita, 0.47 on the
+cog (the wreck's 73 cm partner), 0.19–0.57 on the 74, 0.35–0.89 on Preussen. The cause is one line in the square
+block's crossYard: `ym.position.set(mxA(yy), yy, 0)` — the yard's centre placed on the axis, the r256 line, the
+same fault r254 found on the lateen yards and r253 on the lug's battens. A square yard is not slung through its
+mast. It lies BEFORE it, against the fore face, held to it by a parrel — Falconer 1780, "PARREL, a machine used to
+fasten the sail-yards to the masts, in such a manner as that they may be easily hoisted or lowered" — or, on the
+lower yards of the nineteenth-century rig, by an iron truss; and it is before the mast because with the wind abaft
+the beam, the rig's working point, the sail presses the yard aft onto the pole and the mast takes the drive. The
+tie of every hoisting yard began at a point 0.02·B ABAFT the axis at the yard's height (`mx(yd.yy) + B * 0.02`),
+inside the mast's after half, and ran up from there.**
+
+**THE MODEL (web/js/hull.js; r257/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+(1) One helper, `mastRAt(h)`, the mast's radius at a height — the segment standing there, tapering from segR.a at
+its foot to segR.b at its head, the segments stacked by the doubling — hoisted above crossYard; the gaff block
+kept its own copy of that loop since round 252 and now reads the one helper (`mastR = mastRAt`), so no gaff cloth
+moves. (2) crossYard: the yard's centre stands off the axis by OFF = mastRAt(yy) + max(slingsD / 2, rRoll), along
+the axis's forward normal (−cos rake, sin rake) — dead forward on a plumb mast, forward and a shade up on the 74's
+5° mizzen, forward and DOWN on the corbita's 48° artemon, where the yard hangs under the spar as a spritsail yard
+hangs under a bowsprit; rRoll is the furled roll's radius as makeFurl sizes it, so the brailed bundle lies against
+the mast and not through it, the lateen's rule (round 254), and is 0 when the sail is set. (3) The cloth hangs
+from the yard where it is (makeSail at the yard's centre; userData.yardY is the built height), the furled roll runs
+between the built arms, and `spars` and `mastYards` carry the built centre and height, so the lifts, sheets, tacks,
+jeers and braces lead to the spar that is there. (4) The tie starts at the yard's slings (`yd.cx`), before the mast,
+and runs up to the sheave in its own section's head. (5) The yard records its derivation — `userData.slung =
+{ mastX, axisX, axisY, off, mastR, yardR, rollR, furled, rakeDeg, side: 'fore', sideFrom }` — the lateen's pattern;
+which side no plate reads, and the record says so. No record field changes; the lateen, lug, gaff and crab-claw
+rigs are untouched.**
+
+**MEASURED AFTER (r257/yards-after.json, every hull on the after builder, the same probe): 104 crossed yards on thirteen hulls, every one now a mast's radius plus its own off its segment's axis, on the fore side: the read distance against the two radii off the meshes agrees to 0.007 m at worst (Preussen's tubes, read on nine radial segments), 0.004 m on the 74, 0.001 on Endurance; every centre is forward of the axis at its height (dxFromAxis −0.10 to −0.89 m, none positive); no yard above its mast's head (the nearest 0.51 m under, the slave ship's). Moved against yards-before.json by the record's offset exactly: the trireme's two 0.09–0.18 m forward, the corbita's main yard 0.31 m forward and the artemon's 0.10 m forward and 0.11 m DOWN (under the 48° spar, its cloth below it), the cog's 0.47 m, the carrack's four 0.25–0.44, the fluyt's six 0.11–0.31, the east indiaman's nine 0.16–0.53, the 74's nine 0.20–0.64 (the main course 0.64: a 0.36 m mast radius and a 0.28 m yard), the slave ship's nine 0.10–0.34, Preussen's thirty 0.36–0.89 (the six course yards 0.89: 0.57 m tubes and 0.32 m yards), the clipper's fifteen 0.17–0.49, the steamer's twelve 0.28–0.63, Endurance's four 0.16–0.27; heights within 0.04 m of where they were on every mast under 5° (the normal's sin term). The first after-probe picked a FAR mast for 11 yards — a segment whose span held the yard's projection along its own axis, 13–49 m away — and read them 13–49 m 'off'; the pick now requires the segment to be within 1.5 m first (probe_yards.py; the audit's pick had that gate from its first draft), and the second run is the one recorded.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r257/apply-audit-edits.py, audit-hulls.before.js,
+audit-hulls.after.js). D-YARD-ON-MAST (r256) now reads the fore face, from the MESHES and not from the builder's
+numbers: axisOf returns the radii at both rims and at the centre (the mean distance from the axis of the vertices
+within 2% of the end, 3% of the middle); every athwartships centreline 'Yard' (its axis within 32° of the beam —
+the square block braces its yards 19.5°; the crab claw's 'Yard' lies along its mast and is r250's) is read against
+its SEGMENT — the lowest segment whose own span contains the yard's projection, because on a stacked mast every
+segment shares the axis line and the nearest by distance is arbitrary; the builder's mastRAt reads the same one —
+and the yard's perpendicular distance from that axis must be the segment's radius at the projection plus the
+yard's slings radius, within 0.03 m, with the yard's centre forward of the axis at its height: else 'a square yard
+slung through its mast' (nearer than the radii allow), 'a square yard standing off its mast' (farther), or 'a
+square yard slung abaft its mast'. The 'no mast' gate widens from 0.6 m to 1.5 m, because a yard before its mast
+stands off by two radii. D-SAIL-THROUGH-MAST, D-MAST-RAKE and D-MAST-SEGMENT are unchanged. PROOF A
+(r257/audit-proof-a.out, the r256 builder under the r257 audit on :8150): exactly 104 problems, all of them 'a square yard slung through its mast' — the carrack's 4, the clipper's 15, the cog's 1, the corbita's 2, the east indiaman's 9, Endurance's 4, the fluyt's 6, Preussen's 30, the sekibune's 1, the 74's 9, the slave ship's 9, the steamer's 12 and the trireme's 2 — and nothing on any other hull or rule; the first detail reads 'the yard centred at (−2.45, 11.35) is 0.008 m from the axis of the mast at foot x −2.80, whose radius there is 0.083 m; the yard's slings radius is 0.093 m, so touching it the yard stands 0.176 m off'. The final audit on the r257
+builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out), and again on :8149 after the copy into web/ (audit-final-8149.out).**
+
+**WITNESSED (r257/witness-preussen-pair.png and witness-74-pair.png — the before and the after off :8150 after
+RATCHET EXIT, from the port beam, b=90, l=6, z=0.9, with the middle third cropped about the mainmast at 3x in
+witness-*-mast3x.png). Read whole (witness-74-pair.png, witness-preussen-pair.png: the same frame, the same rig, the yards a hand
+forward), and at the slings at 3x (w-74-main-slings-pair.png, w-preussen-main-slings-pair.png, the 2880 frame cropped
+about the main course yard where it meets the lower mast): BEFORE, the 74's woolded lower mast passes THROUGH the
+main yard — the pole shows above the yard and a sliver of it shows below, through the head of the course, because the
+yard's centre was on the axis and the cloth hung in the mast's plane; AFTER, the yard and the course stand 0.64 m
+before the mast, so from the port beam the pole is seen above the yard and disappears behind the canvas below it,
+and the yard's arm has moved forward by that much against the rigging behind it. On Preussen the ladder of the
+mainmast's futtock ratlines ran down through the course yard and the course; after, only the truss bracket shows at
+the yard's middle and the ratlines are behind the canvas. The corbita's artemon (w-corbita-artemon-pair.png: r256's
+b=250 witness as the before, this round's capture of the same camera as the after, cropped 2.5x about the spar):
+before, the artemon's sail hung from a yard crossing the spar at its 0.9; after, the yard lies UNDER the 48° spar and
+the cloth hangs below the spar's line — the spritsail's geometry — with the spar visible over the sail's head. Nothing
+else in either frame moved: the hulls, the masts, the stays and the cards are pixel-identical outside the yards.**
+
+**Rule 0 on the Preussen witness read whole (r257/witness-preussen-b90.png): a rendered ship on water, not a chart — a four-masted steel barque from the port beam, black hull with a
+white boot-top and a red underbody at the waterline, five masts of white-painted steel with grey doublings, every
+square sail set and drawing, the courses' clews sheeted to the rail, the staysails between the masts, a grey-blue sea
+with a swell running under her and a hazed coast on the horizon. Three facts a viewer can read off it without a
+legend: she is a five-masted full-rigged ship with six square sails on each mast; her yards lie on the fore side of
+her masts, the masts standing behind the canvas from this side; her lower masts are steel tubes, not wood, with the
+futtock shrouds and their ratlines running up to the tops.**
+
+**Named residuals, in order:** (0y²⁵) CLOSED as a class — every crossed yard stands on its mast's fore face at
+the two radii and the audit reads the distance off the meshes. NEW (0y²⁶) the furled roll's bunt: makeFurl swells
+the roll to 1.4× its radius at the bunt (the middle, where the mast is), and the furled offset takes the roll's
+nominal radius, so on the 74's furled course the bunt stands 0.4·r0 = 0.18 m into the mast's fore face — a bundle
+pressed against a pole, drawn as through it; the real bunt is stowed on TOP of the yard against the mast, which
+makeFurl does not draw. NEW (0y²⁷) the truss and the parrel themselves are not drawn on the square yard — the
+lateen (r254) and the lug (r253) carry theirs; the square yard stands at the truss's distance with nothing holding
+it there, and the jeers' blocks still hang at the axis's side. NEW (0y²⁸) the fore-face rule reads the SET build only (D-YARD-ON-MAST runs on the audit's `g`; the furled build `gf` is read by round 63's stowed-cloth rule alone), and furled the offset is the roll's radius, not the yard's, so a furled yard standing off by the roll is unread — and would convict as 'standing off its mast' if the rule were ever run on `gf`; the roll's radius should be read off the roll mesh and the rule run on both builds. NEW (0y²⁹) ship-titanic moved 9.4% at the clean r256 HEAD (r257/open-ratchet.out, open-ship-titanic-pair.png): her card's 'Rig, deck to truck' reads 51.6 m on the r255 baseline and 52.4 m on the r256 builder, a 0.8 m rise in the rig's top that reframes the Shipwright camera (its datum is rigTop, the r249 lesson); Titanic has no mesh tagged 'mast' and named 'Mast', so r256's probe did not read her (rake-after-all.json: masts []), and the rise is in something her rig reads that r256 changed — the truck's placement (truckY = segHead − 0.04·segL, where the shortfall term was subtracted before) on a pole the reader takes for a square-block mast is the first suspect; unaccepted, undiagnosed, and r258's first measurement. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹)
+(0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y′)
+(0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread.
+(0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗)
+(0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r258 opens by running the FULL ratchet at the clean HEAD first (r257/PREDICTIONS-close.md names the frames that
+MUST move — the 74's five Shipwright frames, the corbita's corbis frame, the eight square-rigged hulls' own close
+frames and the two square-rigged aboard frames — the berth neighbours, the Actions with square-riggers and the Sea
+views that MAY, and the rest that MUST NOT; only those scored by check --frame after the push are accepted here),
+with no screenshot beside it until RATCHET EXIT; then measures (0y²⁹), Titanic's 0.8 m rig rise at the r256 HEAD, on the built scene before anything else; then takes (0y²⁷), the truss and the parrel drawn on the square
+yard as the lateen's and the lug's are, or (0y¹⁹) with (0y²⁴), the carrack's mizzen and the artemon read from
+plates at a stated scale, or the survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788670303 at the build; the push and the live poll are in
+build/staging/r257/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r257 staging stays on disk uncommitted, the r211 convention.**
