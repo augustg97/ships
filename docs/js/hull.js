@@ -1804,6 +1804,7 @@ stp.position.set(x, yJoin + 1.05, 0);
 group.add(tag(stp, 'mast', 'Spotting top',
 'The fire-control position at the masthead: observers here spot the fall of shot and correct the guns. On Dreadnought this mast stood abaft the fore funnel, so at speed the top filled with hot smoke — the famous flaw that her successors inherited for a decade.'));
 }
+let lateenHead = null;
 if (mk.rig === 'lateen') {
 const mixed = (S.masts || []).some(m => m.rig === 'square');
 const yardLen = mixed ? lower * 1.15 : L * mScale;
@@ -1814,20 +1815,23 @@ const heelX = x - dir[0] * yardLen / 3;
 const heelU = Math.max(0, Math.min(1, heelX / L + 0.5));
 const heel = [heelX, deckMax(heelU, u) + B * 0.045];
 const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
-const mh = sling[1] - base;
-const mm = new THREE.Mesh(
-new THREE.CylinderGeometry(B * 0.020 * dScale[0], B * 0.032 * dScale[0], mh, 18),
-woodDark);
-mm.position.set(x, (base + sling[1]) / 2, 0);
-group.add(tag(mm, 'mast'));
 const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
 const mzD = mixed ? (mainLower * 0.875 * 0.700 / 36) * 2 / 3 : 0;
-const ym = new THREE.Mesh(
-new THREE.CylinderGeometry(mixed ? mzD * 0.21 : B * 0.005,
-mixed ? mzD * 0.50 : B * 0.011, ylen, 14), woodDark);
+const rYheel = mixed ? mzD * 0.50 : B * 0.011, rYpeak = mixed ? mzD * 0.21 : B * 0.005;
+const rYs = rYheel + (rYpeak - rYheel) / 3;
+const slingY = heel[1] + dir[1] * yardLen / 3;
+const headroom = Math.max(0.45, 10 * rYs);
+const hounds = mixed ? Math.max(slingY + headroom * 0.5, base + lower * 0.97) : slingY + headroom * 0.5;
+const mh = mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
+const mRtop = B * 0.020 * dScale[0], mRbot = B * 0.032 * dScale[0];
+const mastRl = h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
+const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh, 18), woodDark);
+mm.position.set(x, base + mh / 2, 0);
+group.add(tag(mm, 'mast'));
+lateenHead = { y: base + mh, hounds };
+const ym = new THREE.Mesh(new THREE.CylinderGeometry(rYpeak, rYheel, ylen, 14), woodDark);
 ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
 ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
-group.add(tag(ym, 'yard', 'Lateen yard'));
 const xStem = -0.455 * L;
 const along = Math.max(0, Math.min(yardLen * 0.5, (xStem - heel[0]) / dir[0]));
 const tack = [heel[0] + dir[0] * along, heel[1] + dir[1] * along];
@@ -1835,10 +1839,39 @@ const clewX = tack[0] + yardLen * 0.62;
 const clewU = Math.max(0, Math.min(1, clewX / L + 0.5));
 const clew = [clewX, deckMax(u, clewU) + Math.max(H.sheer(0.5) * 0.10, B * 0.10)];
 const SHEET = FURLED ? 0 : TRIM * 1.5;
+const areaF = S.settee
+? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
+: triA2(tack, peakPt, clew);
+const lenF = Math.hypot(peakPt[0] - tack[0], peakPt[1] - tack[1]);
+const rRoll = Math.max(0.05, Math.sqrt((areaF * 0.055) / (Math.PI * Math.max(lenF, 0.1))));
+const OFF = mastRl(slingY) + (FURLED ? Math.max(rYs, rRoll) : rYs);
+const beside = new THREE.Group();
+beside.position.set(0, 0, OFF);
+group.add(beside);
+ym.userData.lateen = {
+mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
+headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
+off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
+rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
+side: 'port', sideFrom: 'class: to leeward of the fleet\'s wind, the side every fore-and-aft cloth is sheeted to; no record names the side',
+sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1) };
+beside.add(tag(ym, 'yard', 'Lateen yard'));
+{
+const rPar = 0.010 + B * 0.0004, Rp = mastRl(slingY) + rPar, zFace = OFF - rYs;
+const arc = [];
+for (let a = 50; a <= 310; a += 20)
+arc.push(new THREE.Vector3(x + Rp * Math.sin(a * Math.PI / 180), slingY, Rp * Math.cos(a * Math.PI / 180)));
+const pts = [new THREE.Vector3(arc[0].x, slingY, zFace), ...arc,
+new THREE.Vector3(arc[arc.length - 1].x, slingY, zFace)];
+const segs = [];
+for (let i = 0; i + 1 < pts.length; i++) segs.push([pts[i], pts[i + 1]]);
+const par = ropeMesh(segs, rPar, ropeMat);
+if (par) group.add(tag(par, 'parrel'));
+}
 const sheetG = new THREE.Group();
 sheetG.position.set(heel[0], heel[1], 0);
 sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(dir[0], dir[1], 0).normalize(), -SHEET);
-group.add(sheetG);
+beside.add(sheetG);
 const rel = P => [P[0] - heel[0], P[1] - heel[1]];
 if (FURLED) {
 const area = S.settee
@@ -1846,7 +1879,7 @@ const area = S.settee
 : triA2(tack, peakPt, clew);
 sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
 new THREE.Vector3(peakPt[0], peakPt[1], 0),
-area, furlMat(mats), group, {}));
+area, furlMat(mats), beside, {}));
 } else if (S.settee) {
 const throat = [tack[0] + (peakPt[0] - tack[0]) * S.settee,
 tack[1] + (peakPt[1] - tack[1]) * S.settee];
@@ -1854,10 +1887,12 @@ const foreft = [tack[0] + (clew[0] - tack[0]) * S.settee * 0.55,
 tack[1] + (clew[1] - tack[1]) * S.settee * 0.55];
 const cl = makeQuadSail(rel(foreft), rel(throat), rel(peakPt), rel(clew), sheetG, 0.075, ['head']);
 cl.userData.mastX = +x.toFixed(3);
+cl.userData.besideMast = true;
 sails.push(cl);
 } else {
 const cl = makeTriSail(rel(tack), rel(peakPt), rel(clew), sheetG, 0.055);
 cl.userData.mastX = +x.toFixed(3);
+cl.userData.besideMast = true;
 sails.push(cl);
 }
 }
@@ -1901,7 +1936,7 @@ yardTip: [+tipY[0].toFixed(3), +tipY[1].toFixed(3)], boomTip: [+tipB[0].toFixed(
 peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
 yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
 yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
-sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'starboard' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug' };
+sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)' };
 (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
 });
 if (FURLED) {
@@ -2033,7 +2068,7 @@ bm.position.set((fwd[k][0] + aft[k][0]) / 2, (fwd[k][1] + aft[k][1]) / 2, 0);
 if (k === 0) bm.userData.lug = {
 mastX: +x.toFixed(3), rakeDeg: mk.rake || 0, off: +OFF.toFixed(3),
 mastR: +mastRj(footY).toFixed(3), sparR: +rBoomJ.toFixed(3),
-side: 'starboard', sideFrom: 'class: to leeward of the fleet\'s wind; no record names the side',
+side: 'port', sideFrom: 'class: to leeward of the fleet\'s wind; no record names the side; +z is port (round 254, r254/side.json)',
 sheetDeg: +(TRIM * 1.5 * 180 / Math.PI).toFixed(1) };
 side.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
 }
@@ -2086,7 +2121,7 @@ if (hal) lug.add(tag(hal, 'halyard'));
 }
 if (mk.shrouds) {
 const half = Math.abs(surfacePoint(S, H, u, 1)[2]);
-const topY = base + lower * 0.97;
+const topY = lateenHead ? lateenHead.hounds : base + lower * 0.97;
 const shroudPts = [[], []];
 const shroudSegs = [], ratSegs = [];
 const SF = mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length
@@ -2103,7 +2138,7 @@ const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
 const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
 const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
 [1, -1].forEach((side, si2) => {
-const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+const b = new THREE.Vector3(lateenHead ? x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
 let a;
 if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
 else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
@@ -2922,7 +2957,9 @@ what: 'The rope loop that holds a spar to its mast and lets it slide up and down
 + 'lug every batten has one, so the whole sail hangs on ONE side of the mast '
 + 'and is hoisted and dropped along it — the mast stands beside the canvas, '
 + 'never through it. Hasler and McLeod, Practical Junk Rig (1988), call the '
-+ 'batten parrel the fitting that makes the rig work at all.' },
++ 'batten parrel the fitting that makes the rig work at all. A lateen yard has '
++ 'one at its sling: the yard lies against the mast\'s lee side and the parrel '
++ 'holds it there while the halyard from the masthead takes its weight.' },
 halyard:  { stage: 6, name: 'Halyard',
 what: 'The line that hoists the yard, and it must go over a masthead to do it: '
 + 'the tie leads up from the yard\'s slings, through the sheave in the head '

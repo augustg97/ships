@@ -4591,6 +4591,68 @@ say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on t
 }
 }
 }
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const masts = [], yards = [], parrels = [], shrouds = [];
+g.traverse(o => {
+if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+if (p.key === 'mast') {
+const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+const span = yMax - yMin; if (span < 0.5) return;
+const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0, rLo = 0, rHi = 0;
+for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+lo.divideScalar(nl); hi.divideScalar(nh);
+for (const q of pts) { if (q.y < yMin + span * 0.02) rLo = Math.max(rLo, Math.hypot(q.x - lo.x, q.z - lo.z)); if (q.y > yMax - span * 0.02) rHi = Math.max(rHi, Math.hypot(q.x - hi.x, q.z - hi.z)); }
+masts.push({ name: p.name, foot: lo, head: hi, rFoot: rLo, rHead: rHi, span });
+}
+if (p.key === 'yard' && p.name === 'Lateen yard') yards.push({ o, rec: o.userData.lateen || null });
+if (p.key === 'parrel') parrels.push(o);
+if (p.key === 'shroud') shrouds.push(o);
+});
+const axisAt = (m, y) => { const d = m.head.clone().sub(m.foot); const t = Math.abs(d.y) > 1e-6 ? (y - m.foot.y) / d.y : 0; return m.foot.clone().add(d.multiplyScalar(t)); };
+const axisDist = (m, q) => { const d = m.head.clone().sub(m.foot).normalize(); const w = q.clone().sub(m.foot); return w.sub(d.multiplyScalar(w.dot(d))).length(); };
+const mastR = (m, y) => m.rFoot + (m.rHead - m.rFoot) * Math.max(0, Math.min(1, (y - m.foot.y) / Math.max(1e-6, m.head.y - m.foot.y)));
+for (const y of yards) {
+const pts = hullPts(y.o); let a = pts[0], b = pts[0]; for (const q of pts) { if (q.x < a.x) a = q; if (q.x > b.x) b = q; }
+const len = a.distanceTo(b); if (len < 1) continue;
+const A = new THREE.Vector3(), B = new THREE.Vector3(); let na = 0, nb = 0, rA = 0, rB = 0;
+for (const q of pts) { if (q.distanceTo(a) < len * 0.03) { A.add(q); na++; } if (q.distanceTo(b) < len * 0.03) { B.add(q); nb++; } }
+A.divideScalar(na); B.divideScalar(nb);
+for (const q of pts) { if (q.distanceTo(a) < len * 0.03) rA = Math.max(rA, Math.hypot(q.y - A.y, q.z - A.z, q.x - A.x) ); if (q.distanceTo(b) < len * 0.03) rB = Math.max(rB, q.distanceTo(B)); }
+let m = null, bd = 1e9;
+const want = y.rec && typeof y.rec.mastX === 'number' ? y.rec.mastX : A.x + (B.x - A.x) / 3;
+for (const mm of masts) { const dd = Math.abs(mm.foot.x - want); if (dd < bd) { bd = dd; m = mm; } }
+if (!m) { say(v.id, 'a lateen yard slung off its mast', 'no mast mesh on the hull'); continue; }
+const t = (m.foot.x - A.x) / ((B.x - A.x) || 1e-9);
+const cross = A.clone().lerp(B, Math.max(0, Math.min(1, t)));
+const ax = axisAt(m, cross.y), off = Math.hypot(cross.x - ax.x, cross.z - ax.z);
+const rM = mastR(m, cross.y), rY = rA + (rB - rA) * Math.max(0, Math.min(1, t));
+const where = `yard ${len.toFixed(1)} m on the mast at x ${m.foot.x.toFixed(2)}, crossing its station at y ${cross.y.toFixed(2)}`;
+if (t < 0 || t > 1 || cross.y > m.head.y - 0.02 || cross.y < m.foot.y)
+say(v.id, 'a lateen yard slung off its mast', `${where}: the mast runs y ${m.foot.y.toFixed(2)}–${m.head.y.toFixed(2)}, the sling ${(cross.y - m.head.y).toFixed(2)} m from its head`);
+if (off < 0.9 * (rM + rY))
+say(v.id, 'a lateen yard through its mast', `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
+else if (off > rM + rY + 0.6)
+say(v.id, 'a lateen yard adrift of its mast', `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
+let held = false;
+for (const o of parrels) { const pp = hullPts(o).filter(q => Math.abs(q.y - cross.y) < 0.15); if (pp.length < 8) continue;
+const c = new THREE.Vector3(); for (const q of pp) c.add(q); c.divideScalar(pp.length); const cax = axisAt(m, c.y);
+if (Math.hypot(c.x - cax.x, c.z - cax.z) < 0.1) { held = true; break; } }
+if (!held) say(v.id, 'a lateen yard held to its mast by nothing', `${where}: no parrel ring within 0.15 m of the sling's height centred on the mast`);
+}
+let loose = 0, first = null;
+for (const o of shrouds) {
+const pts = hullPts(o); let hi = pts[0]; for (const q of pts) if (q.y > hi.y) hi = q;
+let ok = false, near = null;
+for (const m of masts) { const d = axisDist(m, hi); if (near === null || d < near.d) near = { m, d };
+if (hi.y >= m.foot.y - 0.05 && hi.y <= m.head.y + 0.05 && d < 3.5) { ok = true; break; } }
+if (!ok) { loose++; if (!first) first = { hi, near }; }
+}
+if (loose)
+say(v.id, 'a shroud made fast above its mast', `${loose} of ${shrouds.length} shroud meshes end where no mast is (first: top at x ${first.hi.x.toFixed(2)}, y ${first.hi.y.toFixed(2)}, z ${first.hi.z.toFixed(2)}; the nearest axis ${first.near ? first.near.m.name + ' at x ' + first.near.m.foot.x.toFixed(2) + ', head y ' + first.near.m.head.y.toFixed(2) + ', ' + first.near.d.toFixed(2) + ' m off' : 'none'})`);
+}
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();

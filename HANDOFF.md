@@ -21566,3 +21566,130 @@ docs/audit-hulls.js reads besideMast (1 mentions); docs/data/vessels.json is unc
 THE RATCHET: THE OPENING FULL RATCHET at the clean r252 HEAD 5150a3f (r253/open-ratchet.out, launched 16:02 as the round's first act, ended 16:46): RATCHET EXIT 1  END 16:46:32; 65 frames scored; movers 9: shipwright 0.461%/0.115; ship-great-eastern 0.273%/0.126; ship-yamato 0.072%/0.025; aboard 0.066%/0.018; ship-preussen 0.078%/0.039; ship-steamer 0.928%/0.258; aboard-wyoming 0.065%/0.019; shipwright-astern 0.442%/0.247; shipwright-hounds 0.058%/0.010. Largest three: ship-steamer 0.928%/0.258, shipwright 0.461%/0.115, shipwright-astern 0.442%/0.247.
  PARTIAL after the push, the r239 pattern (r253/partial-*.out): frames scored one at a time by check --frame on the r253 builder, each diff read before its accept — ship-junk 3.447%/1.274 CHANGED, ship-panokseon 4.180%/1.536 CHANGED, ship-treasure 6.608%/2.048 CHANGED (3 frames; r253/PREDICTIONS-close.md names the 5 frames that MUST move — ship-junk, ship-treasure, ship-panokseon, aboard-treasure and action-myeongnyang, every frame that draws a junk-rigged hull — the 10 that MAY, the berth neighbours within three of the junk, the treasure ship and the panokseon, the default Shipwright and the era 3–4 Sea views, and the 50 that must not). The other 62 frames are UNSCORED on the r253 builder; r254's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (33604a9 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+
+## Round 254 — 2026-09-05 — the lateen yard lies on the mast's lee side: every lateen yard on six hulls was slung on the centreline through its own mast's axis and, because the sling was written from the deck at the mast while the heel is bowsed to the higher deck under it, crossed the mast's station 0.26–1.07 m above the masthead; every lateen mast's shrouds ran to the record's height, 2–12 m above the pole that was built; the yard now stands off the axis to port by the mast's radius and its own, held by a parrel at a sling the mast reaches, the shrouds end at the hounds on the mast that is there, the audit reads the yard against its mast and every shroud's head against a mast, the side's name is settled (+z is port), and the full ratchet ran first at the clean r253 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r253 ordered r254's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y¹⁰), the lateen yard on the mast's lee side, or (0y⁹), or Endurance by looking,
+and (0y¹⁷), the side's name, settled by probing the camera before any record says a side again. The ratchet was
+launched at HEAD 83e630a at 17:10 as the round's first act, and — the r250 rule — no screenshot was taken beside it:
+the round's probes and audits ran on a COPY of web/ served on :8150 (build/staging/r254/web, every file a symlink to
+web/ except hull.js and audit-hulls.js; vessels.json is copied and unchanged), one browser at a time, and the witness
+waited for RATCHET EXIT. (0y¹⁰) was taken, as a class, and (0y¹⁷) was settled.**
+
+**THE FAULT, measured on the built scene (r254/probe_lateen.py, lateen-before.json on the r253 builder: every mast's
+axis and its ring radii, every 'Lateen yard' mesh's axis, where that axis crosses its mast's station, the offset there,
+every cloth's and furled roll's least distance from an axis, every parrel ring, and — added after the first after-run —
+every shroud mesh's highest vertex against the nearest mast's head). Twelve lateen yards on six hulls (the dhow's two,
+the caravel's three, the galley's two, the galleass's three, the carrack's and the fluyt's mizzens) crossed their own
+mast's station 0.000–0.002 m from its axis: the yard was slung THROUGH the mast, which r251 had named (0y¹⁰) and left.
+And the crossing stood ABOVE the masthead on all twelve — the dhow's main by 1.07 m, her mizzen 0.29, the caravel's
+0.78 / 0.29 / 0.26, the galley's 0.38 / 0.55, the galleass's 0.50 / 0.72 / 0.36, the carrack's 0.50, the fluyt's 0.30 —
+because `sling` was written as base + dir·yardLen/3 from the deck AT the mast, while the heel (an earlier round's fix
+for a heel through the deck) is bowsed to the deck UNDER it, higher on every lateen hull's rising bow, so the yard's
+own line at the mast's station is heel + dir·yardLen/3 and the mast, built "up to the sling", stopped short of the
+spar it was meant to carry. A third fault the shroud read found: the shroud block's head is base + lower·0.97 with
+`lower` the RECORD's height (the galley's attested 16 m, a Steel share on the rest), while the lateen block builds a
+pole only as tall as its sling — so the dhow's main shrouds ended 5.67 m above her masthead, her mizzen's 3.37, the
+caravel's 3.80 / 3.42 / 2.08, the galley's 5.37 / 3.07, the galleass's 6.85 / 4.08 / 3.17, the carrack's mizzen's 10.61,
+the fluyt's mizzen's 12.06 (lateen-after.json, shroudTops, read on the first after-builder whose shroud code was still
+r253's) — made fast to air, and visible in the committed ship-galley baseline as shroud lines converging in the sail
+above the pole. On the galley's 4°-raked foremast the head also stood 0.73 m off the plumb pole the lateen block
+builds (its mast ignores mk.rake; named below).**
+
+**THE MODEL (web/js/hull.js; r254/hull.before.js, hull.after.js, apply-hull-edits.py, -2.py, -3.py, every replace
+asserted). A lateen yard is not slung through its mast: it lies against the mast's side, held to it by a parrel at
+the sling and hoisted by the halyard from the masthead, on the lee side on the good tack — the tack the fleet sails.
+Three changes in the lateen block and one in the shroud block. (1) The sling is a point on the yard: slingY = heel +
+dir·yardLen/3, read off the yard as built; the all-lateen pole runs from the deck to slingY + headroom, headroom ten
+yard-radii at the sling and not under 0.45 m (0.47–0.72 m on the four hulls; a class figure, read from no plate, and
+the yard's record says so — userData.lateen.headroomFrom). A MIXED hull's lateen mizzen — the carrack's, the fluyt's —
+is a tall pole on a square-rigged ship whose record gives 0.806 and 0.874 of the main lower and whose shrouds have
+always set up at 0.97 of that: the pole reaches it, with the hounds there and the yard slung where the class puts it
+(the carrack's pole from 5.9 to 18.5 m, the fluyt's from 4.7 to 14.9 m; the sling at two fifths of the pole, named
+below). (2) The yard, the cloth's hinge group (r251's sheetG) and the furled roll live in `beside`, a child of the
+hull's frame at z OFF = mastR(slingY) + rYs — the mast's radius at the sling plus the yard's radius there, read off
+the two cylinders' own taper — or, furled, mastR + max(rYs, rRoll) with rRoll makeFurl's own radius, so the brailed
+bundle lies against the mast and not through it. OFF is 0.12–0.28 m set, 0.25–0.58 m furled. (3) A parrel at the
+sling: a rope loop round the mast's far side at its radius plus the rope's, its ends to the yard's near face, tagged
+'parrel' (the r253 PARTS entry now names the lateen's). Each yard records what was built (userData.lateen: mastX,
+slingY, mastHeadY, headroom, off, mastR, yardR, rollR, furled, side 'port', sideFrom, sheetDeg); each cloth names its
+mast and says it hangs beside it (userData.besideMast). (4) The lateen block hands the shroud block `lateenHead`
+{y, hounds}: a lateen mast's shrouds end at its hounds, on the axis (not x + sin(rake)·lower), and the deadeye-,
+tackle- and lashing-class code below reads the head it always did. No record field changes.**
+
+**(0y¹⁷) SETTLED: +z is PORT. hull.js puts +x aft and +y up; three.js is right-handed, so aft × up is to port. The
+camera agrees (r254/probe_side.py, side.json): the Shipwright opened on the junk from ahead (b=0) has its camera at
+hull x −65 and projects the hull point (0, 5, +2) to NDC x +0.063 — the viewer's RIGHT, which from ahead is the ship's
+port side; at b=90 the camera stands at hull z +64.5, on the port beam, so #b runs 0 ahead, 90 port beam, 180 astern,
+270 starboard beam — and frames.json's "port quarter" notes on the b=125-class frames name the starboard quarter.
+The fleet's square yards are braced with their −z (starboard) arm forward on the 74 and the cog (side.json, wind):
+the weather arm, so the fleet sails the STARBOARD tack and every fore-and-aft cloth — lug, gaff, crab claw, lateen —
+is sheeted to port, to leeward, which is where the geometry has put them all along. Only the WORD was the mirror:
+the crab claw's sheetSide, the lug's side (r251, r253) and the comments in those two blocks said 'starboard'; they say
+'port' now, and the new lateen record does. The hull mirror's comments ("a starboard half mirrored to port", ~20
+places) still carry the mirrored word and are comments only; named below.**
+
+**MEASURED AFTER (r254/lateen-after-2.json, the final builder on :8150): every yard crosses its mast's station at OFF
+from the axis to 3 mm (dhow 0.190 / 0.138 against a record of 0.192 / 0.138; caravel 0.173 / 0.154 / 0.124; galley
+0.152 / 0.117; galleass 0.235 / 0.186 / 0.162; carrack 0.281; fluyt 0.190), on the +z side, within the mast's span
+0.47–0.99 m under its head; every parrel ring centred on the axis to the mast mesh's own ring eccentricity (0.003–0.039);
+every cloth's least distance from any axis 0.12–0.39 m (the head row rides the yard's axis at OFF) and every one of the
+twelve names its mast and says it hangs beside it; every furled roll's nearest vertex 0.09–0.27 m from the axis with
+the roll's surface on the mast's; every shroud top 0.23–0.56 m UNDER its mast's head (dhow −0.28 / −0.27, caravel
+−0.25 × 3, galley −0.23 / −0.23, galleass −0.35 × 3, carrack's mizzen −0.49, fluyt's −0.39). Crossings by r251's probe
+(r254/probe_cross.py): 0 on the six hulls.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r254/apply-audit-edits.py). D-LATEEN-YARD-ON-MAST (round 254) reads the
+BUILT scene: every 'Lateen yard' mesh's axis against its own mast (the record's mastX, or on an older builder the mast
+nearest the point a third from the heel) — (a) the crossing lies within the mast's span below its head, else 'a lateen
+yard slung off its mast'; (b) the offset there is at least nine tenths of the mast's radius plus the yard's, else 'a
+lateen yard through its mast', and not over that sum by more than 0.6 m, else 'adrift'; (c) a parrel ring stands
+within 0.15 m of that height centred on the axis, else 'held to its mast by nothing'. And every shroud mesh on every
+hull: its highest vertex lies within some mast's span with that axis within 3.5 m (a topmast shroud spreads to the
+top's rim — the first draft's 0.6 m convicted ten square-rigged hulls' top-spread shrouds, rule 8, checked and
+widened), else 'a shroud made fast above its mast'. D-SAIL-THROUGH-MAST (r251–253) now convicts any own-mast crossing
+of the lateen cloths, which say besideMast. PROOF A (r254/audit-proof-a.out, the r253 builder under the r254 audit on
+:8150, hull.before.js swapped in and restored from hull.after.js): 42 problems — 12 slung off, 12 through, 12 held by
+nothing, 6 'a shroud made fast above its mast' (one per lateen hull) — and none on any other hull or rule. The final
+audit on the r254 builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out) and on :8149 after the copy
+into web/ (audit-final-8149.out). One conviction on the way was the carrack's: with her mizzen shrouds brought down to
+a 7.4 m pole's hounds they ran at 45° from the aftcastle's side through its rail ('a shroud through a castle', r244's
+rule) — the pole was the fault, not the rule, and the mixed-hull pole to the record's height above is the answer.**
+
+**WITNESSED (r254/witness-dhow-b000.png, witness-galley-b200.png, witness-carrack-b150.png — 2880 × 1800 off :8150 after RATCHET EXIT, the after builder; the befores are the committed baselines frames/ship-dhow.png, ship-galley.png and ship-carrack.png). The dhow from ahead (b=0, l=6, z=0.9): the mainmast is a pole up the middle of the frame and the yard rises beside it on the viewer's right — port — from its heel over the bow to a peak above the masthead, two spars side by side from the deck up, the settee cloth standing wholly to port of the mast and filling the sky there; the card's "Rig, deck to truck" reads 6.9 m where the before frame's 5.3 m pole stopped a metre under the yard's crossing. The galley from the starboard quarter (b=200, l=10, z=0.9): both poles stand clear in front of their cloths, each yard passing up beside its mast on the far side, and the shrouds of both masts converge on the MASTHEADS — in the committed ship-galley baseline they converge on a point inside the mainsail, 5.4 m above the pole; "Rig, deck to truck" 10.2 m against 9.3. The carrack from the port quarter (b=150, l=8, z=0.8): the mizzen is a pole from the aftcastle to the height of the main's top, its shrouds ending on it, and the lateen yard slung on its port side two fifths of the way up — the pole the record's 0.806 describes and the low sling that (0y¹⁹) names.**
+
+**Rule 0 on the galley witness read whole (r254/witness-galley-b200.png): a rendered vessel on water, not a chart — a long low black hull with a bank of oars fanned along its side, seen from the quarter on a grey-blue sea under a pale sky with a hazed coast behind, two pale lateen sails on raked yards, the rigging as lines against the sky. Three facts a viewer can read off it without a legend: she is a two-masted lateen galley under oars and sail; each yard is slung beside its mast, the pole standing clear of the canvas on the near side; her shrouds run from the hull to the mastheads and stop there.**
+
+**Named residuals, in order:** (0y¹⁰) CLOSED as a class — every lateen yard lies beside its mast on a parrel at a sling
+the mast reaches, and no lateen mast's shrouds end on air. (0y¹⁷) SETTLED — +z is port; the words are corrected where
+they are data. NEW (0y¹⁸) the crab claw's yard is lashed ALONG its mast on the centreline, so the yard's axis lies
+inside the mast's radius its whole length: a lashed spar lies beside the mast too, by the two radii; unread by the new
+rule (it reads 'Lateen yard' only) and undrawn. NEW (0y¹⁹) the mixed hull's lateen mizzen: the pole now reaches the
+record's height (the carrack's 18.5 m, the fluyt's 14.9) but the yard is slung at two fifths of it, from the class's
+56° yard at 1.15 lower with the sling a third from the heel; a carrack's mizzen yard is slung near the masthead in every
+plate, so either the yard is too short and too flat or the record's 0.806 is Steel's square-rig proportion and not a
+lateen pole's — a research item, with the mast-height card tile now reading the pole. NEW (0y²⁰) the lateen mast
+ignores its record's rake (the galley's foremast, −4°): the pole is built plumb, and this round put the shroud head on
+the plumb pole rather than at x + sin(rake)·lower; the rake belongs on the pole, the yard and the parrel together, as
+r253 did for the lug. NEW (0y²¹) the headroom over the sling is a class figure (ten yard-radii, floor 0.45 m); a plate
+of a dhow's masthead with its halyard block would make it a read. NEW (0y²²) the hull mirror's comments say
+"starboard half mirrored to port" in ~20 places and frames.json's notes name the b=125-class frames "port quarter";
+both are the mirrored word, comments and notes only. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them — (0y¹⁴)'s side is now
+'port'. (0y¹²) (0y¹³) (0y⁹) (0y¹¹) as r252 names them. (0y′) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them.
+(0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰)
+(0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20)
+as r230 lists them.**
+
+**r255 opens by running the FULL ratchet at the clean HEAD first (r254/PREDICTIONS-close.md names 5 frames that MUST
+move — ship-dhow, ship-galley, ship-galleass, ship-carrack, action-lepanto — 13 that MAY, and 47 that MUST NOT; only
+those scored by check --frame after the push are accepted here), with no screenshot beside it until RATCHET EXIT;
+then takes (0y¹⁹), the mixed hull's mizzen yard and pole read from a carrack plate, or (0y²⁰), the lateen mast's rake,
+or (0y⁹), the corbita's artemon, or the survey's next never-spun hull, Endurance (4,114 triangles per metre), by
+looking.**
+
+**Live stamp: docs/index.html carries data-version 1788656347 at the build; the push and the live poll are in
+build/staging/r254/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r254 staging stays on disk uncommitted, the r211 convention.**

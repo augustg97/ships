@@ -3171,6 +3171,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
         'The fire-control position at the masthead: observers here spot the fall of shot and correct the guns. On Dreadnought this mast stood abaft the fore funnel, so at speed the top filled with hot smoke — the famous flaw that her successors inherited for a decade.'));
     }
 
+    /* the lateen block below builds a mast only as tall as its yard's sling needs, and says
+       so here for the shrouds — the record's height is the yard's share, not the pole's */
+    let lateenHead = null;
     if (mk.rig === 'lateen') {
       /* ── THE LATEEN IS DETERMINED BY THE SHIP, NOT BY THE MAST ─────
          Three sourced facts, and together they leave NO free parameters:
@@ -3225,17 +3228,6 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const heel = [heelX, deckMax(heelU, u) + B * 0.045];
       const peakPt = [heel[0] + dir[0] * yardLen, heel[1] + dir[1] * yardLen];
 
-      /* the mast, drawn from the deck UP TO the sling — its height is the consequence, and it
-         is SHORT, because a lateen takes its area from the spar rather than from height */
-      const mh = sling[1] - base;
-      /* the same per-mast thickness rule as the square masts above — a caravel's three
-         lateens are three different trees — and the spar is tagged like every other mast */
-      const mm = new THREE.Mesh(
-        new THREE.CylinderGeometry(B * 0.020 * dScale[0], B * 0.032 * dScale[0], mh, 18),
-        woodDark);
-      mm.position.set(x, (base + sling[1]) / 2, 0);
-      group.add(tag(mm, 'mast'));
-
       const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
       /* "Mizen-yard, 2/3 of the diameter of the main-yard" — Steel 1794's yard-diameter
          table laws the one lateen spar it knows, the crossed mizzen yard of a square-rigged
@@ -3243,12 +3235,40 @@ function buildRig(S, group, mats, FINE, FURLED) {
          A pure lateen craft's composite yard keeps its drawn proportion — its record is a
          different tradition and still to be read (r70 candidate). */
       const mzD = mixed ? (mainLower * 0.875 * 0.700 / 36) * 2 / 3 : 0;
-      const ym = new THREE.Mesh(
-        new THREE.CylinderGeometry(mixed ? mzD * 0.21 : B * 0.005,
-                                   mixed ? mzD * 0.50 : B * 0.011, ylen, 14), woodDark);
+      const rYheel = mixed ? mzD * 0.50 : B * 0.011, rYpeak = mixed ? mzD * 0.21 : B * 0.005;
+      const rYs = rYheel + (rYpeak - rYheel) / 3;          // the yard's radius at its sling
+      /* ── THE SLING IS A POINT ON THE YARD, AND THE MAST REACHES IT (round 254) ────────
+         `sling` above is written from `base`, the deck at the mast, while the heel is bowsed
+         down to the deck UNDER it — higher, on every lateen hull's rising bow — so the yard's
+         own line crossed the mast's station 0.26–1.07 m ABOVE the masthead on all twelve
+         lateen yards (r254/lateen-before.json): a spar slung on air, and a mast whose height
+         was "the consequence" of a sling it never reached. The sling is where the yard crosses
+         the mast, read off the yard as built; the mast stands above it by a masthead's room
+         for the halyard block — a class figure, five yard-diameters and not under 0.45 m,
+         read from no plate. The mast is SHORT still, because a lateen takes its area from the
+         spar rather than from height; it is only as tall as its own yard needs. */
+      const slingY = heel[1] + dir[1] * yardLen / 3;       // the yard's line at the mast's station
+      const headroom = Math.max(0.45, 10 * rYs);
+      /* a MIXED hull's lateen mizzen is a tall pole on a square-rigged ship — the carrack's
+         record gives 0.806 of the main lower, the fluyt's 0.874 — and its shrouds have
+         always set up at 0.97 of that height: the pole reaches it, with the hounds there
+         and the yard slung where the class puts it (r254 names the sling's height on such a
+         pole as a residual: it stands at two fifths of the mast, and no plate has been read
+         for it). An all-lateen pole stands a masthead's room over its sling. */
+      const hounds = mixed ? Math.max(slingY + headroom * 0.5, base + lower * 0.97) : slingY + headroom * 0.5;
+      const mh = mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
+      /* the same per-mast thickness rule as the square masts above — a caravel's three
+         lateens are three different trees — and the spar is tagged like every other mast */
+      const mRtop = B * 0.020 * dScale[0], mRbot = B * 0.032 * dScale[0];
+      const mastRl = h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
+      const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh, 18), woodDark);
+      mm.position.set(x, base + mh / 2, 0);
+      group.add(tag(mm, 'mast'));
+      lateenHead = { y: base + mh, hounds };
+      const ym = new THREE.Mesh(new THREE.CylinderGeometry(rYpeak, rYheel, ylen, 14), woodDark);
       ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
       ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
-      group.add(tag(ym, 'yard', 'Lateen yard'));
+      /* hung beside the mast below, once the furled roll's radius is known */
 
       /* The CANVAS starts at the stemhead, not at the heel: the projecting part of the yard is
          bare spar, and the tack is bowsed down to the stem. So the sail's tack is the point
@@ -3283,14 +3303,57 @@ function buildRig(S, group, mats, FINE, FURLED) {
          (r251/cross-before.json, the mast axes cast through the built cloth). A lateen lies
          on ONE side of its mast: the yard is slung to leeward of it and the clew is sheeted
          to leeward. The yard is the hinge; the cloth swings about the yard's own axis by the
-         fleet's one sheeting angle (the junk's 1.5·TRIM, to starboard), so the head row stays
-         on the yard and the tack stays at the stem. The yard itself is not moved here — it
-         still passes through the mast's axis at the sling, which is its own residual. */
+         fleet's one sheeting angle (the junk's 1.5·TRIM, to port), so the head row stays
+         on the yard and the tack stays at the stem.
+         ── AND THE YARD LIES ON THE MAST'S LEE SIDE (round 254) ─────────────────────────
+         r251 left the yard on the centreline, through its own mast's axis at the sling (all
+         twelve, offset 0.000–0.002 m; r254/lateen-before.json). A lateen yard is not slung
+         THROUGH its mast: it lies against the mast's side, held to it by a parrel at the
+         sling and hoisted by the halyard from the masthead — on the lee side on the good
+         tack, which is the tack the fleet sails. So the yard, the cloth that swings about it
+         and the furled roll all live in `beside`, a child of the hull's frame standing off
+         the axis to PORT (+z, the side every fore-and-aft cloth in the fleet is sheeted to)
+         by the mast's radius at the sling plus the yard's — or the roll's, when furled, so
+         the brailed bundle lies against the mast and not through it. Which side no record
+         names, and the yard's record says so (userData.lateen.sideFrom). */
       const SHEET = FURLED ? 0 : TRIM * 1.5;
+      /* the furled roll's radius, as makeFurl will size it, so the bundle clears the mast */
+      const areaF = S.settee
+        ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
+        : triA2(tack, peakPt, clew);
+      const lenF = Math.hypot(peakPt[0] - tack[0], peakPt[1] - tack[1]);
+      const rRoll = Math.max(0.05, Math.sqrt((areaF * 0.055) / (Math.PI * Math.max(lenF, 0.1))));
+      const OFF = mastRl(slingY) + (FURLED ? Math.max(rYs, rRoll) : rYs);
+      const beside = new THREE.Group();
+      beside.position.set(0, 0, OFF);
+      group.add(beside);
+      ym.userData.lateen = {
+        mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
+        headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
+        off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
+        rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
+        side: 'port', sideFrom: 'class: to leeward of the fleet\'s wind, the side every fore-and-aft cloth is sheeted to; no record names the side',
+        sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1) };
+      beside.add(tag(ym, 'yard', 'Lateen yard'));
+      /* ── THE PARREL: one rope loop at the sling, round the mast's far side at the mast's
+         radius there and made fast to the yard's near face either side of it — the same
+         fitting the battened lug carries at every batten (round 253). */
+      {
+        const rPar = 0.010 + B * 0.0004, Rp = mastRl(slingY) + rPar, zFace = OFF - rYs;
+        const arc = [];
+        for (let a = 50; a <= 310; a += 20)
+          arc.push(new THREE.Vector3(x + Rp * Math.sin(a * Math.PI / 180), slingY, Rp * Math.cos(a * Math.PI / 180)));
+        const pts = [new THREE.Vector3(arc[0].x, slingY, zFace), ...arc,
+                     new THREE.Vector3(arc[arc.length - 1].x, slingY, zFace)];
+        const segs = [];
+        for (let i = 0; i + 1 < pts.length; i++) segs.push([pts[i], pts[i + 1]]);
+        const par = ropeMesh(segs, rPar, ropeMat);
+        if (par) group.add(tag(par, 'parrel'));
+      }
       const sheetG = new THREE.Group();
       sheetG.position.set(heel[0], heel[1], 0);
       sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(dir[0], dir[1], 0).normalize(), -SHEET);
-      group.add(sheetG);
+      beside.add(sheetG);
       const rel = P => [P[0] - heel[0], P[1] - heel[1]];
       if (FURLED) {
         /* Mediterranean and Indian Ocean practice: the yard stays aloft and the cloth is
@@ -3301,7 +3364,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           : triA2(tack, peakPt, clew);
         sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
                             new THREE.Vector3(peakPt[0], peakPt[1], 0),
-                            area, furlMat(mats), group, {}));
+                            area, furlMat(mats), beside, {}));
       } else if (S.settee) {
         /* ⚠ The first attempt put the throat on the line from tack to peak, which is the YARD:
            a lateen's luff IS its yard, so tack, throat and peak were collinear, the forward
@@ -3318,10 +3381,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
            diagonal because the noise terms scale with each triangle's own edges */
         const cl = makeQuadSail(rel(foreft), rel(throat), rel(peakPt), rel(clew), sheetG, 0.075, ['head']);
         cl.userData.mastX = +x.toFixed(3);
+        cl.userData.besideMast = true;          // on a yard that lies beside the mast (round 254)
         sails.push(cl);
       } else {
         const cl = makeTriSail(rel(tack), rel(peakPt), rel(clew), sheetG, 0.055);
         cl.userData.mastX = +x.toFixed(3);
+        cl.userData.besideMast = true;          // on a yard that lies beside the mast (round 254)
         sails.push(cl);
       }
     }
@@ -3388,8 +3453,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
          x 0.815, y 6.38, on the boom's side of the sail). No sail lies in the plane of a mast
          abaft it. The yard is lashed along the mast and is the HINGE: the boom and the cloth
          swing about the yard's own axis, and the sheet sets how far. The fleet sails one wind —
-         the port tack that braces the square yards TRIM off square and sheets the junk's lug
-         1.5·TRIM to starboard — so the claw takes the lug's angle and the lug's side, as a class
+         the starboard tack that braces the square yards TRIM off square and sheets the junk's lug
+         1.5·TRIM to port — so the claw takes the lug's angle and the lug's side, as a class
          figure (no plate reads it: the 2009 broadside is square to the sail). The yard does not
          move (it is the axis), so the tack, the record's spars and the audit's reads of them are
          what they were; the cloth's area is a rotation's invariant. A furled claw closes onto
@@ -3419,7 +3484,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
           yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
           yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
-          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'starboard' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug' };
+          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)' };
         (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
       });
       if (FURLED) {
@@ -3680,7 +3745,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         if (k === 0) bm.userData.lug = {
           mastX: +x.toFixed(3), rakeDeg: mk.rake || 0, off: +OFF.toFixed(3),
           mastR: +mastRj(footY).toFixed(3), sparR: +rBoomJ.toFixed(3),
-          side: 'starboard', sideFrom: 'class: to leeward of the fleet\'s wind; no record names the side',
+          side: 'port', sideFrom: 'class: to leeward of the fleet\'s wind; no record names the side; +z is port (round 254, r254/side.json)',
           sheetDeg: +(TRIM * 1.5 * 180 / Math.PI).toFixed(1) };
         side.add(tag(bm, 'yard', k === 0 ? 'Boom' : (k === nb + 1 ? 'Yard' : 'Batten ' + k)));
       }
@@ -3763,7 +3828,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* the channels stand off the TRUE deck edge (r100) — the old parallel formula put
          them inboard of a flared topside */
       const half = Math.abs(surfacePoint(S, H, u, 1)[2]);
-      const topY = base + lower * 0.97;
+      /* ── A LATEEN MAST'S SHROUDS END AT ITS HEAD (round 254). `lower` is the record's
+         height — the galley's attested 16 m, a Steel share on the rest — and the lateen
+         block builds a pole only as tall as its yard's sling needs, so the shrouds of every
+         lateen mast ran to a point 2.1–6.9 m above the masthead on the all-lateen hulls
+         and 10.6–12.1 m above it on the carrack's and fluyt's mizzens (r254/lateen-after.json,
+         shroudTops), and on the galley's raked foremast 0.73 m off a plumb pole. They set up
+         at the hounds, between the sling and the head, on the mast that is there. */
+      const topY = lateenHead ? lateenHead.hounds : base + lower * 0.97;
       const shroudPts = [[], []];
       const shroudSegs = [], ratSegs = [];
       /* ── THE SHROUDS SET UP WHERE THE RECORD SAYS (round 236). The class lands them at
@@ -3822,7 +3894,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
-          const b = new THREE.Vector3(x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+          const b = new THREE.Vector3(lateenHead ? x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
           let a;
           if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
           else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
@@ -4960,7 +5032,9 @@ const PARTS = {
                   + 'lug every batten has one, so the whole sail hangs on ONE side of the mast '
                   + 'and is hoisted and dropped along it — the mast stands beside the canvas, '
                   + 'never through it. Hasler and McLeod, Practical Junk Rig (1988), call the '
-                  + 'batten parrel the fitting that makes the rig work at all.' },
+                  + 'batten parrel the fitting that makes the rig work at all. A lateen yard has '
+                  + 'one at its sling: the yard lies against the mast\'s lee side and the parrel '
+                  + 'holds it there while the halyard from the masthead takes its weight.' },
   halyard:  { stage: 6, name: 'Halyard',
               what: 'The line that hoists the yard, and it must go over a masthead to do it: '
                   + 'the tie leads up from the yard\'s slings, through the sheave in the head '
