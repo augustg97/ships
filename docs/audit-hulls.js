@@ -4558,17 +4558,22 @@ if (!o.isMesh || !o.geometry) return; const p = tagOf(o);
 if (p && p.key === 'mast') {
 const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
 const span = yMax - yMin; if (span < 0.5) return;
-const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
-for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
-masts.push({ name: p.name, foot: lo.divideScalar(nl), head: hi.divideScalar(nh) });
+const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+const d = new THREE.Vector3(0, 1, 0);
+for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+if (d.y < 0) d.negate();
+let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+masts.push({ name: p.name, foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax) });
 }
-if (o.userData.kind === 'tri' || o.userData.kind === 'quad') cloths.push(o);
+if (o.userData.kind === 'tri' || o.userData.kind === 'quad' || o.userData.kind === 'square') cloths.push(o);
 });
 const T = new THREE.Vector3();
 for (const o of cloths) {
 const pts = hullPts(o), ix = o.geometry.index, n = ix ? ix.count : pts.length, row = Math.round(Math.sqrt(pts.length));
-let xMin = 1e9, xMax = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
-const own = o.userData.mastX, named = typeof own === 'number';
+let xMin = 1e9, xMax = -1e9, yTop = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); yTop = Math.max(yTop, q.y); }
+const own = o.userData.mastX, named = typeof own === 'number', isSquare = o.userData.kind === 'square';
 for (const m of masts) {
 const dir = m.head.clone().sub(m.foot), len = dir.length(); dir.normalize();
 const ray = new THREE.Ray(m.foot, dir); let best = null;
@@ -4578,7 +4583,8 @@ if (ray.intersectTriangle(pts[a], pts[b], pts[c], false, T)) { const d = T.dista
 if (d <= len && (!best || d < best.d)) best = { d, at: T.clone(), i: Math.floor(a / row), j: a % row }; }
 }
 if (!best) continue;
-const onYard = o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
+const onYard = isSquare ? (yTop - best.at.y) < 0.35
+: o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
 const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
 const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
 : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
@@ -4657,6 +4663,19 @@ say(v.id, 'a shroud made fast above its mast', `${loose} of ${shrouds.length} sh
 }
 {
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const principalAxis = pts => {
+const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+const d = new THREE.Vector3(0, 1, 0);
+for (let it = 0; it < 60; it++)
+d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+if (d.y < 0) d.negate();
+let tMin = 1e9, tMax = -1e9;
+for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+};
 const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
 for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
 const Lr = H.lwl;
@@ -4664,17 +4683,53 @@ g.traverse(o => {
 if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p || p.key !== 'mast' || p.name !== 'Mast') return;
 const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
 const span = yMax - yMin; if (span < 2) return;
-const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
-for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
-lo.divideScalar(nl); hi.divideScalar(nh);
+const ax = principalAxis(pts), lo = ax.foot, hi = ax.head;
 const built = Math.atan2(hi.x - lo.x, hi.y - lo.y) * 180 / Math.PI;
 let rec = null, bd = 1e9;
 for (const mk of (H.masts || [])) { const dd = Math.abs((mk.at - 0.5) * Lr - lo.x); if (dd < bd) { bd = dd; rec = mk; } }
 if (!rec || bd > 0.1 * Lr) return;
-const want = rec.rake || 0; if (Math.abs(want) >= 20) return;
+const want = rec.rake || 0;
 if (Math.abs(built - want) > 0.5)
 say(v.id, "a mast built against its record's rake", `the ${rec.rig} mast at station ${rec.at} (foot x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}, ${span.toFixed(1)} m tall) stands at ${built.toFixed(2)}° where its record says ${want}°`);
 });
+}
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const axisOf = pts => {
+const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+const d = new THREE.Vector3(0, 1, 0);
+for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+if (d.y < 0) d.negate();
+let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+};
+const masts = [], yards = [], segs = [];
+g.traverse(o => {
+if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
+if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
+if (p.key === 'yard' && p.name === 'Yard') { const pts = hullPts(o); const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length); if (Math.abs(c.z) < 0.3) yards.push(c); }
+});
+const distToAxis = (m, q) => { const w = q.clone().sub(m.foot); const t = w.dot(m.dir); return w.sub(m.dir.clone().multiplyScalar(t)).length(); };
+for (const c of yards) {
+let n = null; const near = [];
+for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 0.6) near.push(m); }
+if (!near.length) { say(v.id, 'a yard hung on no mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}, ${c.z.toFixed(2)}) is ${n ? n.d.toFixed(2) + ' m from the axis of the nearest mast (foot x ' + n.m.foot.x.toFixed(2) + ')' : 'on a hull with no mast mesh'}`); continue; }
+const top = near.reduce((mx, m) => Math.max(mx, m.head.y), -1e9), tm = near.reduce((b, m) => (!b || m.head.y > b.head.y) ? m : b, null);
+if (c.y > top + 0.02) say(v.id, "a yard slung above its mast's head", `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${(c.y - top).toFixed(2)} m above the head (y ${top.toFixed(2)}) of the mast at foot x ${tm.foot.x.toFixed(2)}`);
+}
+if (segs.some(q => q.rec)) {
+for (const q of segs) {
+if (!q.rec) continue;
+const r = q.rec, dF = Math.hypot(q.ax.foot.x - r.footX, q.ax.foot.y - r.footY), dH = Math.hypot(q.ax.head.x - r.headX, q.ax.head.y - r.headY);
+if (dF > 0.03 || dH > 0.03)
+say(v.id, 'a mast segment built short of its record', `segment ${r.si} at foot x ${r.footX.toFixed(2)}: built foot (${q.ax.foot.x.toFixed(3)}, ${q.ax.foot.y.toFixed(3)}) against the record's (${r.footX.toFixed(3)}, ${r.footY.toFixed(3)}), ${dF.toFixed(3)} m off; head ${dH.toFixed(3)} m off`);
+}
+}
 }
 if (H.doubleHull) {
 const worldM = o => {

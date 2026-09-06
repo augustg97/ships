@@ -2299,6 +2299,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
       if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.topAt(x));
     }
     const rakeRad = (mk.rake || 0) * Math.PI / 180;
+    /* ── r256: A RAKED MAST IS ONE AXIS, AND EVERYTHING ON IT SITS ON THAT AXIS ─────────
+       The pole was a cylinder of the segment's HEIGHT turned by the rake about its centre,
+       so it stood (1 − cos)·seg/2 short at both ends — 0.2 mm at 5°, and 1.13 m at the
+       corbita's 48° artemon, whose foot floated 1.1 m over the deck and whose head stopped
+       1.1 m under its height (r256/rake-before.json: foot y 3.905 on a deck at 2.77, a span
+       of 4.58 m on a 6.85 m record). Every yard, ring, top, cheek and sail was placed on
+       x + sin(rake)·(h − base) — the line of a pole whose LENGTH is the height — and not on
+       the tilted pole's own line, x + tan(rake)·(h − base). The two agree at the centre and
+       part by (tan − sin)·(h − centre): nothing at 5°, half a metre at the artemon's head,
+       where the yard hung 0.41 m above the pole and 0.24 m abaft it and the spar's line ran
+       through the cloth 0.46 m under the yard (0y⁹, r256/cross-before.json). Now the pole is
+       seg / cos(rake) long about its centre, so its foot is at (x, base) and its head at
+       base + seg exactly, and mxA(h) is the ONE line every fitting on this mast reads — the
+       convention the lateen block has kept since round 255 (mxL). */
+    const tanRake = Math.tan(rakeRad);
+    const mxA = h => x + tanRake * (h - base);
 
     /* ── STEEL'S RULE, 1794 ────────────────────────────────────────────
        "The length of the lower deck and extreme breadth being added together, the half is the
@@ -2427,7 +2443,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       ym.quaternion
         .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
         .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
-      ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
+      ym.position.set(mxA(yy), yy, 0);
       group.add(tag(ym, 'yard'));
       /* the steel yard's card carries its provenance, the iron-mast rule: no tube record
          was in reach for these spars, so the RATE is the record's and the figure derived */
@@ -2461,8 +2477,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
           new THREE.Vector3(ym.position.x + sT2 * w2, yy, cT2 * w2),
           (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
       } else {
-        sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-                            yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+        const sq = makeSail(mxA(yy), yy, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
+        /* the cloth names its mast and its yard's height, so the audit can tell its own
+           mast's axis at the head row (where the yard is slung) from a spar through it */
+        sq.userData.mastX = x; sq.userData.yardY = yy;
+        sails.push(sq);
       }
     };
     /* ⚠ A JUNK MAST IS A SINGLE POLE. Only a square rig is built up in fidded sections —
@@ -2569,9 +2588,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
         : S.turrets ? (mats.mastGrey || (mats.mastGrey = new THREE.MeshStandardMaterial(
               { color: 0x5a6067, roughness: 0.55, metalness: 0.30 })))
         : woodDark;
-      const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
+      /* the pole is seg / cos(rake) long about its centre at y + seg/2, so its ends stand
+         at y and at y + seg exactly, both on the raked axis (r256) */
+      const segLen = seg / Math.cos(rakeRad);
+      const m = cyl(0, y + seg / 2 - segLen / 2, y + seg / 2 + segLen / 2,
                     segR[si].a, segR[si].b, mastMat, -rakeRad);
-      m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
+      m.position.x = mxA(y + seg / 2);
+      /* the segment's own record — its ends on the axis, as built — for the audit to read the
+         mesh against (D-MAST-SEGMENT): a pole whose rim centres are not at these points is a
+         pole built to some other line, which is what the artemon was for 250 rounds */
+      m.userData.seg = { si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
+                         rakeDeg: mk.rake || 0, lengthM: segLen };
       /* the iron mast's card carries its provenance: attested diameters are the record's,
          derived ones say derived — a number with no provenance is worse than none */
       if (S.iron) m.userData.part = { ...m.userData.part,
@@ -2624,14 +2651,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
         for (let i = 0; i < n; i++) {
           const t = (lo + (hi - lo) * (i + 0.5) / n) / seg;
           const rT = radii[0] * (1 - 0.3 * t);       // the mast's own taper
-          const cx = x + Math.sin(rakeRad) * seg * t, cyy = y + seg * t;
+          const cyy = y + seg * t, cx = mxA(cyy);
           if (ironHoops)
             rings.push({ cx, cy: cyy, r: rT + 0.013, h: 0.10, tilt: -rakeRad });
           else {
             /* twelve turns of 3-inch rope is a band about 0.3 m deep */
             rings.push({ cx, cy: cyy, r: rT + 0.028, h: 0.30, tilt: -rakeRad });
             for (const sg of [-1, 1])
-              hoops.push({ cx: cx + Math.sin(rakeRad) * sg * 0.21, cy: cyy + sg * 0.21,
+              hoops.push({ cx: mxA(cyy + sg * 0.21), cy: cyy + sg * 0.21,
                            r: rT + 0.035, h: 0.06, tilt: -rakeRad });
           }
         }
@@ -2662,7 +2689,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         for (let i = 0; i < n; i++) {
           const t = (lo + (hi - lo) * (i + 0.5) / n) / seg;
           const rT = radii[0] * (1 - 0.3 * t);       // the pole's own taper
-          rings.push({ cx: x + Math.sin(rakeRad) * seg * t, cy: y + seg * t,
+          rings.push({ cx: mxA(y + seg * t), cy: y + seg * t,
                        r: rT + 0.015, h: 0.14, tilt: -rakeRad });
         }
         const rm = ringMesh(rings, mats.ironBand || (mats.ironBand =
@@ -2687,7 +2714,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const nest = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.028, B * 0.024, B * 0.045, 12, 1, true),
           mats.woodPale || woodDark);
-        nest.position.set(x + Math.sin(rakeRad) * (seg * 0.66), y + seg * 0.66, 0);
+        nest.position.set(mxA(y + seg * 0.66), y + seg * 0.66, 0);
         group.add(tag(nest, 'mast', "Crow's nest",
           'The lookout station, about two thirds up the foremast. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.'));
       }
@@ -2718,7 +2745,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           const bY = y + seg - pole - bsk.heightM;
           const mastRAt = segR[si].a + (segR[si].b - segR[si].a) * ((bY - y) / seg);
           const bt = buildBasketTop(bsk, mastMat, mats, mastRAt);
-          bt.position.set(x + Math.sin(rakeRad) * (bY - base), bY, 0);
+          bt.position.set(mxA(bY), bY, 0);
           bt.rotation.z = -rakeRad;
           group.add(bt);
           /* ── THE CROSS AT THE TRUCK ────────────────────────────────────────────────
@@ -2746,13 +2773,15 @@ function buildRig(S, group, mats, FINE, FURLED) {
             post.position.y = staff + span / 2;
             cg.add(post);
             const tY = y + seg;
-            cg.position.set(x + Math.sin(rakeRad) * (tY - base), tY, 0);
+            cg.position.set(mxA(tY), tY, 0);
             cg.rotation.z = -rakeRad;
             group.add(tag(cg, 'cross'));
           }
         } else {
           const tp = buildTop(topR, mats.woodPale, headR, S.year);
-          tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
+          /* r256: on the axis at its OWN height — it stood at the head's x, 0.1·seg·sin(rake)
+             off the pole at the hounds on every raked mast */
+          tp.position.set(mxA(y + seg * 0.90), y + seg * 0.90, 0);
           group.add(tp);
         }
         /* ── THE CHEEKS AT THE HOUNDS ──────────────────────────────────────────────
@@ -2774,7 +2803,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
             cg.computeVertexNormals();
             const ck = new THREE.Mesh(cg, mastMat);
             const hy = topY - chH / 2;
-            ck.position.set(x + Math.sin(rakeRad) * hy, y + hy, sz * (headR + chW * 0.5));
+            ck.position.set(mxA(y + hy), y + hy, sz * (headR + chW * 0.5));
             ck.rotation.z = -rakeRad;
             group.add(tag(ck, 'cheek'));
           }
@@ -2818,7 +2847,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         kg.add(pin);
         /* the block IS the head: its top face is the truck of the pole */
         const hY = y + seg - blkH / 2;
-        kg.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+        kg.position.set(mxA(hY), hY, 0);
         kg.rotation.z = -rakeRad;
         group.add(tag(kg, 'karchesion'));
       }
@@ -2846,7 +2875,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         pin.rotation.x = Math.PI / 2;
         sg2.add(pin);
         const hY = y + seg * 0.965;
-        sg2.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+        sg2.position.set(mxA(hY), hY, 0);
         sg2.rotation.z = -rakeRad;
         group.add(tag(sg2, 'sheave'));
       }
@@ -2879,7 +2908,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         lan.position.set(0, 0.54, -hang * 0.5);
         lan.rotation.x = -0.96;
         cb.add(lan);
-        cb.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.94, hang);
+        cb.position.set(mxA(y + seg * 0.94), y + seg * 0.94, hang);
         group.add(tag(cb, 'corbis'));
       }
       if (mk.rig === 'square' && !mk.yards) {
@@ -3020,7 +3049,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        cap — the braces' own rule, so nothing can lead to where a spar is not. One merged
        mesh per category per mast, which is also what the audit counts. */
     if (FINE && mk.rig === 'square' && mastYards.length) {
-      const mx = h => x + Math.sin(rakeRad) * (h - base);
+      const mx = mxA;
       const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
       const V3 = (px, py, pz) => new THREE.Vector3(px, py, pz);
       /* the deck attachment: the bulwark at station uu, on side sgn */
@@ -3105,19 +3134,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
        truck. The collar sits a few percent of that segment below the cap, at the raked
        masthead's own x — the un-raked station x put a 5°-raked mizzen's stay head 3 m
        forward of its truck. */
-    /* the segment cylinder tilts about its own CENTRE, so a raked cap stands below capY by
-       (1 − cos)·seg/2 — 0.2 mm at 5° of rake and 0.93 m at the corbita's 48° artemon,
-       which is exactly where the audit caught the first version of this fix */
+    /* until round 256 the segment cylinder tilted about its own CENTRE and a raked cap stood
+       below capY by (1 − cos)·seg/2 — 0.2 mm at 5° of rake and 0.93 m at the corbita's 48°
+       artemon; the pole is now built seg / cos long to its head (mxA above), so the cap IS
+       the last segment's head and the collar sits 4% of that segment under it, on the axis */
     /* `only` truncates the DRAWN stack short of the record's segment list, so the top
        drawn segment is segHeads' last entry, not segs' — the corbita draws one of two */
     const segL = segHeads.length ? (segs[segHeads.length - 1] || 0) : 0;
-    const cosR = Math.cos(rakeRad), sinR = Math.sin(rakeRad);
     const truckY = segHeads.length
-      ? segHeads[segHeads.length - 1] - (1 - cosR) * segL / 2 - cosR * segL * 0.04
+      ? segHeads[segHeads.length - 1] - segL * 0.04
       : y + (lower * 0.14);
-    const truckX = segHeads.length
-      ? x + sinR * (segHeads[segHeads.length - 1] - base) - sinR * segL * 0.04
-      : x + sinR * (truckY - base);
+    const truckX = mxA(truckY);
     if (mk.rig === 'square') {
       mastTops.push({ u, x: truckX, y: truckY });
       /* the staysail block below needs each square mast's own station and truck height */
@@ -3585,7 +3612,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          standing there. On an unraked mast nothing moves but the luff, which steps aft off the
          axis onto the mast's after face. The cloth names its mast for the audit (userData.mastX)
          and says its luff is on it (userData.luffOnMast), so any own-mast crossing convicts. */
-      const mastX = h => x + Math.sin(rakeRad) * (h - base);
+      const mastX = mxA;
       const mastR = h => {
         let y0 = base;
         for (let si = 0; si < segs.length; si++) {
@@ -3726,7 +3753,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const rBoomJ = B * 0.0050;
       const OFF = mastRj(base + lower * 0.14) + rBoomJ;      // the boom's height, below
       const lug = new THREE.Group();
-      lug.position.set(x - Math.sin(rakeRad) * base, 0, 0);  // the axis at y 0
+      lug.position.set(mxA(0), 0, 0);                       // the axis at y 0
       lug.rotation.set(0, -TRIM * 1.5, -rakeRad, 'ZYX');    // trim about the axis, then rake
       group.add(lug);
       const side = new THREE.Group();
@@ -3922,7 +3949,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
-          const b = new THREE.Vector3(lateenHead ? lateenHead.x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+          const b = new THREE.Vector3(lateenHead ? lateenHead.x : mxA(base + lower), topY, side * B * 0.03);
           let a;
           if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
           else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
@@ -4051,10 +4078,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const tiersDrawn = mk.rig === 'square'
         ? (mk.only ? Math.min(mk.only, segs.length) : segs.length) : 1;
       if (FINE && mk.rig === 'square' && tiersDrawn >= 2) {
-        const platX = x + Math.sin(rakeRad) * lower;         // where buildTop stands
+        const platX = mxA(base + lower * 0.90);               // where buildTop stands (r256: on the axis at the hounds)
         const platY = base + lower * 0.90;
         const platR = B * 0.20;
-        const mxAt = h => x + Math.sin(rakeRad) * (h - base);
+        const mxAt = mxA;
         const topHead = base + lower * 0.88 + top * 0.97;
         const futt = [], upPts = [[], []], upSegs = [], upRats = [], tgSegs = [];
         for (let s = 0; s < mk.shrouds; s++) {

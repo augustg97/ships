@@ -21807,3 +21807,132 @@ docs/audit-hulls.js convicts a mast built against its record's rake (1 mentions)
 THE RATCHET: THE OPENING FULL RATCHET at the clean r254 HEAD 43ea173 (r255/open-ratchet.out, launched 18:17 as the round's first act, ended 18:58): RATCHET EXIT 1  END 18:58:10; 65 frames scored; movers 4: action 0.103%/0.036; map-floor 0.189%/0.125; action-gravelines 0.072%/0.015; ship-slave-ship 0.060%/0.030. Largest three: map-floor 0.189%/0.125, action 0.103%/0.036, action-gravelines 0.072%/0.015.
  PARTIAL after the push, the r239 pattern (r255/partial-*.out): frames scored one at a time by check --frame on the r255 builder, each diff read before its accept — action-lepanto 0.037%/0.006 ok, ship-carrack 0.272%/0.150 CHANGED, ship-galleass 0.045%/0.021 ok, ship-galley 0.144%/0.034 CHANGED (4 frames; r255/PREDICTIONS-close.md names the 3 frames that MUST move — ship-galley, ship-galleass and ship-carrack, the Shipwright frames of the three hulls in a frame whose lateen mast carries a rake — the 17 that MAY, action-lepanto and action-gravelines, the berth neighbours, the default Shipwright frames and the era 2–4 Sea views, and the rest that must not). The other 61 frames are UNSCORED on the r255 builder; r256's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round. ship-galleass, predicted MUST, scored 0.045%/0.021 — under the 0.05% gate, so nothing to accept: her foremast's 0.56 m lean and her mizzen's 0.24 m at the default Shipwright distance move fewer pixels than the gate counts, a prediction wrong in degree and not in kind; action-lepanto, a MAY, 0.037%/0.006 under the gate likewise.
 Two commits close the round (ee51795 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 256 — 2026-09-05 — a raked square mast is one axis, and everything on it sits on that axis: the square block built a raked pole as a cylinder of the segment's height turned about its centre, so it stood short at both ends — 1.13 m on the corbita's 48° artemon, whose foot floated over the deck and whose head stopped under its yard, 0.35 m on the trireme's 28° bow mast — while every yard, cloth, ring, top and masthead fitting was placed on a second line that is not the tilted pole's; the pole is now built to its height along its own line and one helper places every fitting on it, the audit reads every mast's axis by principal component, reads the square cloth, reads every yard against the segments it hangs on and every segment's built ends against its own record, and the full ratchet ran first at the clean r255 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r255 ordered r256's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y¹⁹), the mixed hull's mizzen yard from a carrack plate, or (0y⁹) with (0y²³),
+the corbita's artemon and the principal-axis read, or Endurance by looking. The ratchet was launched at HEAD 7b86bb3 at
+19:20 as the round's first act and — the r250 rule — no screenshot was taken beside it: the round's probes and audits
+ran on a COPY of web/ served on :8150 (build/staging/r256/web, every file a symlink to web/ except hull.js and
+audit-hulls.js; vessels.json is copied and unchanged), one browser at a time, and the witnesses waited for RATCHET
+EXIT. (0y⁹) with (0y²³) was taken, and (0y⁹) turned out to be a class fault of the whole square block.**
+
+**THE FAULT, measured on the built scene (r256/probe_rake.py and probe_cross.py on the r255 builder, rake-before.json
+and cross-before.json). The corbita's artemon — the record says station 0.1, rake −48°, height 0.3 of Steel's main,
+which is 6.85 m — was built with its foot at y 3.905 on a deck at 2.77, floating 1.13 m in the air, and its head at
+y 8.414, a span of 4.58 m on a 6.85 m record; its yard hung at y 8.82, 0.41 m ABOVE the pole's head and 0.24 m abaft
+it, and the spar's own line ran through the cloth at (−19.72, 8.32), 0.46 m under the yard. The cause is in the
+square block, and it is the same on every raked mast in the fleet. The pole was `cyl(x, y, y + seg)` — a cylinder of
+the segment's HEIGHT — turned by the rake about its centre, so its ends stood (1 − cos rake)·seg/2 short: 0.2 mm at
+5°, 0.35 m on the trireme's 28° bow mast (foot at 0.35 m over the deck), 1.13 m on the artemon. And every fitting on
+the mast — the yard (`ym.position`), the cloth (`makeSail`), the wooldings and rope hoops, the crow's nest, the
+basket top, the cross, the top, the cheeks, the karchesion, the halyard sheave, the corbis, the running rigging's
+anchor points (`mx`), the gaff luff's line (`mastX`), the shroud heads and the futtock platform (`platX`, `mxAt`), and
+the lug's frame — was placed on x + sin(rake)·(h − base), which is the line of a pole whose LENGTH is the height; the
+tilted pole's own line is x + tan(rake)·(h − base). The two agree at the segment's centre and part by
+(tan − sin)·(h − centre): nothing at 5°, and 0.5 m at the artemon's head. The r99 truck reader knew: it subtracted
+(1 − cos)·seg/2 from the cap's height "0.2 mm at 5° of rake and 0.93 m at the corbita's 48° artemon" instead of
+building the pole to its head. And the top of every raked square mast was placed at the HEAD's x while standing at
+0.90 of the segment — 0.1·seg·sin(rake) off the pole at the hounds, 0.24 m on the ship-of-the-line's 5° lower masts,
+which no rule read because the top has no rule.**
+
+**THE MODEL (web/js/hull.js; r256/hull.before.js, hull.after.js, apply-hull-edits.py and apply-hull-edits-2.py,
+every replace asserted). One helper after `rakeRad`: `mxA(h) = x + tan(rake)·(h − base)`, the pole's own line — the
+convention the lateen block has kept as `mxL` since round 255. (1) The pole: `segLen = seg / cos(rake)`, a cylinder of
+that length about its centre at y + seg/2, turned by −rake, so its foot is at (x, base) for the lower and its head at
+y + seg exactly, both on mxA. (2) Every placement listed above reads mxA(h) at its OWN height: the yard at mxA(yy), the
+cloth from it, each woolding at mxA(cyy) and each rope hoop at mxA(cyy ± 0.21), the nest at 0.66, the basket top,
+the cross and the karchesion at their heights, the top at mxA(y + 0.90·seg) — its own height, where it stood at the
+head's x — the cheeks at mxA(y + hy), the sheave at 0.965, the corbis at 0.94; the running rigging's `mx`, the gaff's
+`mastX`, the shrouds' `mxAt` and `platX` (now the axis at the hounds, where the top is), the lug's frame at mxA(0),
+and the square shroud head at mxA(base + lower). (3) The truck: the pole reaches its head, so the r99 shortfall term
+is gone — `truckY = segHead − 0.04·segL`, `truckX = mxA(truckY)`. (4) Each segment records its ends as built —
+`userData.seg = { si, footY, headY, footX, headX, rakeDeg, lengthM }` — the platform's pattern (r249), so the audit can
+read the mesh against the builder's own figures. (5) The square cloth names its mast and its yard's height
+(`userData.mastX`, `yardY`), so the cross rule can tell its own mast's axis at the head row from a spar through it. No
+record field changes; the lateen block is untouched.**
+
+**MEASURED AFTER (r256/rake-after-all.json, every masted hull on the after builder, against r255/rake-before.json —
+the r254 builder, whose square block is r255's). The corbita's artemon: foot from (−14.95, 3.905) to (−14.92, 2.847),
+down 1.06 m onto the deck; head from (−19.77, 8.41) to (−22.22, 9.48), up 1.07 m and 2.45 m forward; span 4.58 →
+6.76 m (the 2% ring read of a 6.85 m pole); the yard on the axis at 0.90 of it; cross-after.json: no hit on the cloth
+by any mast. The trireme's bow mast: foot down 0.352 m, head up 0.351 and 0.373 m forward, span 5.35 → 6.05 m. The
+21 other raked square-block masts (2–5°, on the carrack, panokseon, east indiaman, ship-of-the-line, slave ship,
+clipper, Endurance): both ends moved 1–5 cm along the axis and their rakes read unchanged to 0.01°. The five lateen
+masts of r255 are unchanged. The carrack's and the fluyt's mizzen shroud tops read 3–4 cm different against their
+nearest axis (the main's top moved). The record's `height` share is a VERTICAL height here (the head stands at base +
+seg, the pole is longer by 1/cos), which is what D-MAST-RAKE, the "deck to truck" tile and r255's lateen pole already
+assume; for every mast under 5° the two readings differ by under half a percent, and for the artemon the alternative —
+a 6.85 m spar rising 4.6 m — is named below as (0y²⁴).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r256/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js).
+Four rules. D-MAST-RAKE (r255) reads each mast mesh's axis by PRINCIPAL COMPONENT — the vertex mean is on the axis of
+a cylinder however it leans, the direction of greatest spread is the pole's own, the ends are the extreme projections,
+which are the rim centres exactly — so the read is exact at any rake and the 20° gate is gone: the rule now covers the
+artemon and the trireme's bow mast ((0y²³) closed). D-SAIL-THROUGH-MAST (r251) reads the SQUARE cloth too: it hangs
+from a yard slung on its mast, so its own mast's axis meets its head row by construction and a hit within 0.35 m of
+the cloth's top is exempt; any lower hit by its own mast, or any hit by another, convicts; the masts' axes here are by
+principal component as well. NEW D-YARD-ON-MAST (r256): every mesh tagged 'yard' and named 'Yard' whose centre is on
+the centreline (the square block's crossed yards, braced about their slings; the lug's yard is 'Yard' too but hangs
+beside its mast in its own frame and is not slung at its middle, so it is left to r253's rule) is read against every
+mast segment whose name ends in 'mast' — 'Mast', 'Iron mast', 'Steel mast', 'Wooden mast': a filter on 'Mast' alone
+read Preussen's thirty yards and the steamer's twelve against no mast at all, the first draft of this rule — and the
+segments whose axis passes within 0.6 m of the yard's centre are its masts: none, and it is 'a yard hung on no mast';
+its centre above the HIGHEST of their heads by more than 0.02 m, and it is 'a yard slung above its mast's head' (a
+stacked mast is several collinear segments, and a topsail yard stands above the lower's head by construction — the
+first draft convicted the clipper's mizzen topsail yard for that). NEW D-MAST-SEGMENT (r256): every mast segment that
+records its ends (userData.seg) must have its rim centres, by principal component, at the record's foot and head to
+0.03 m, else 'a mast segment built short of its record'; silent on a hull where no segment records itself (an older
+builder, or the lateen pole, which carries no record yet). PROOF A (r256/audit-proof-a.out, the r255 builder under the
+r256 audit on :8150): exactly 2 problems, both the corbita's — 'a sail through a mast' (the square cloth crossed at
+(−19.72, 8.32)) and 'a yard hung on no mast' (the artemon yard's centre 0.65 m from the axis of the nearest mast) —
+and nothing on any other hull or rule. The final audit on the r256 builder: "checked 33 hulls, 0 problems" on :8150
+(audit-final-8150.out).**
+
+**WITNESSED (r256/witness-corbita-b250-pair.png — the before and the after off :8150 after RATCHET EXIT, from the
+starboard bow quarter, b=250, l=8, z=1.15, cropped to the bow half at 2x; the beam frame (b=270, witness-corbita-pair.png)
+hides the bow under the fleet panel and the port-quarter frames (b=320, b=50) hide it under the card or the mainsail,
+all four kept). Before: the artemon spar begins in the air above the foredeck, abaft the windlass, with nothing under
+its foot, and leans over the bow to a small square sail whose yard sits at the spar's very end. After: the spar's foot
+stands on the deck planking at the same station, the spar leans over the bow at the same angle and reaches further —
+its head stands beyond the stem and a metre higher — and the artemon's sail hangs from a yard at 0.9 of the spar,
+deeper by the metre the yard rose, clear of the spar and in front of the mainsail; the card's "Rig, deck to truck" reads
+13.6 m before and after, the main's head unmoved. The trireme (witness-trireme-b250.png, after only; the before is the
+committed ship-trireme baseline): the bow mast steps on the deck where it stood 0.35 m over it.**
+
+**Rule 0 on the corbita witness read whole (r256/witness-corbita-b250.png): a rendered vessel on water, not a chart —
+a brown planked hull with a curved stem and an anchor catted at the bow, seen from forward of the beam on a grey-blue
+sea under a pale sky with a hazed coast behind, a tall mainmast with ratlines and a square mainsail, a grating over the
+hatch, a windlass on the foredeck, and a spar raking steeply over the bow with a small square sail on it. Three facts a
+viewer can read off it without a legend: she is a square-rigged merchantman with one mainsail and a small foresail on
+a spar that leans over her bow; that spar steps on the deck abaft the windlass, its foot on the planking; its sail
+hangs from a yard near the spar's head, in front of the mainsail and clear of the spar.**
+
+**Named residuals, in order:** (0y⁹) CLOSED as a class — every raked square-block pole is built to its height on
+its own line and every fitting on it sits on that line; the audit reads the cloth, the yard and the segment. (0y²³)
+CLOSED — the principal-axis read. NEW (0y²⁴) the record's `height` on a steeply raked spar: the artemon's 0.3 share of
+Steel's main is taken as a RISE (6.85 m up, a 10.2 m spar reaching 7.3 m forward of its foot, 4 m beyond the stem),
+the fleet's convention; read as a LENGTH it would be a 6.85 m spar rising 4.6 m. The Torlonia relief and the Ostia
+mosaics show the artemon spar about half the main's length; a plate read at a stated scale decides which the 0.3
+means, and the record should say. NEW (0y²⁵) the square yard sits ON its mast's axis (the yard's centre at mxA(yy)):
+a real yard lies on the mast's fore face, held by a truss or parrel, a mast's radius and its own forward of the axis —
+r254's fix for the lateen, not yet done for the square rig; on the artemon that face is the spar's UPPER face, and the
+cloth hanging from it would rest against the spar just under the yard, which is what the reliefs show. (0y¹⁹) as r255
+names it. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as
+r252 names them. (0y′) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²)
+unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗)
+(0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r257 opens by running the FULL ratchet at the clean HEAD first (r256/PREDICTIONS-close.md names 2 frames that MUST
+move — ship-trireme and shipwright-hounds — the raked square-riggers' frames, the 74's other three, the corbita's
+close frame, the berth neighbours, the Actions and the era 4 Sea views that MAY, and the rest that MUST NOT; only
+those scored by check --frame after the push are accepted here), with no screenshot beside it until RATCHET EXIT;
+then takes (0y²⁵), the square yard on its mast's fore face, as a class with r254's lateen derivation, or (0y¹⁹) with
+(0y²⁴), the carrack's mizzen and the artemon read from plates at a stated scale, or the survey's next never-spun hull,
+Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788664351 at the build; the push and the live poll are in
+build/staging/r256/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r256 staging stays on disk uncommitted, the r211 convention.**

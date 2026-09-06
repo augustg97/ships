@@ -1354,6 +1354,8 @@ const PL = platformOf(S, H);
 if (PL && x >= PL.x0 && x <= PL.x1) base = Math.max(base, PL.topAt(x));
 }
 const rakeRad = (mk.rake || 0) * Math.PI / 180;
+const tanRake = Math.tan(rakeRad);
+const mxA = h => x + tanRake * (h - base);
 const steelMain = (S.lwl + S.beam) / 2;
 const lower = mastLowerOf(mk, steelMain);
 const mainLower = S.masts.reduce((mx, m2) =>
@@ -1392,7 +1394,7 @@ yg.computeVertexNormals();
 ym.quaternion
 .setFromAxisAngle(new THREE.Vector3(0, 1, 0), TRIM)
 .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2));
-ym.position.set(x + Math.sin(rakeRad) * (yy - base), yy, 0);
+ym.position.set(mxA(yy), yy, 0);
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1413,8 +1415,9 @@ new THREE.Vector3(ym.position.x - sT2 * w2, yy, -cT2 * w2),
 new THREE.Vector3(ym.position.x + sT2 * w2, yy, cT2 * w2),
 (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
 } else {
-sails.push(makeSail(x + Math.sin(rakeRad) * (yy - base), yy,
-yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM));
+const sq = makeSail(mxA(yy), yy, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
+sq.userData.mastX = x; sq.userData.yardY = yy;
+sails.push(sq);
 }
 };
 const segs = mk.rig === 'lateen' ? []
@@ -1459,9 +1462,12 @@ const mastMat = S.mastLivery === 'buff'
 : S.turrets ? (mats.mastGrey || (mats.mastGrey = new THREE.MeshStandardMaterial(
 { color: 0x5a6067, roughness: 0.55, metalness: 0.30 })))
 : woodDark;
-const m = cyl(x - Math.sin(rakeRad) * (y - base), y, y + seg,
+const segLen = seg / Math.cos(rakeRad);
+const m = cyl(0, y + seg / 2 - segLen / 2, y + seg / 2 + segLen / 2,
 segR[si].a, segR[si].b, mastMat, -rakeRad);
-m.position.x = x + Math.sin(rakeRad) * (y + seg / 2 - base);
+m.position.x = mxA(y + seg / 2);
+m.userData.seg = { si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
+rakeDeg: mk.rake || 0, lengthM: segLen };
 if (S.iron) m.userData.part = { ...m.userData.part,
 name: mk.wood ? 'Wooden mast' : S.build === 'steel' ? 'Steel mast' : 'Iron mast',
 what: mk.diaM !== undefined
@@ -1494,13 +1500,13 @@ const n = Math.max(4, Math.round((hi - lo) / 2.6));
 for (let i = 0; i < n; i++) {
 const t = (lo + (hi - lo) * (i + 0.5) / n) / seg;
 const rT = radii[0] * (1 - 0.3 * t);
-const cx = x + Math.sin(rakeRad) * seg * t, cyy = y + seg * t;
+const cyy = y + seg * t, cx = mxA(cyy);
 if (ironHoops)
 rings.push({ cx, cy: cyy, r: rT + 0.013, h: 0.10, tilt: -rakeRad });
 else {
 rings.push({ cx, cy: cyy, r: rT + 0.028, h: 0.30, tilt: -rakeRad });
 for (const sg of [-1, 1])
-hoops.push({ cx: cx + Math.sin(rakeRad) * sg * 0.21, cy: cyy + sg * 0.21,
+hoops.push({ cx: mxA(cyy + sg * 0.21), cy: cyy + sg * 0.21,
 r: rT + 0.035, h: 0.06, tilt: -rakeRad });
 }
 }
@@ -1519,7 +1525,7 @@ const n = Math.max(3, Math.round((hi - lo) / 2.6));
 for (let i = 0; i < n; i++) {
 const t = (lo + (hi - lo) * (i + 0.5) / n) / seg;
 const rT = radii[0] * (1 - 0.3 * t);
-rings.push({ cx: x + Math.sin(rakeRad) * seg * t, cy: y + seg * t,
+rings.push({ cx: mxA(y + seg * t), cy: y + seg * t,
 r: rT + 0.015, h: 0.14, tilt: -rakeRad });
 }
 const rm = ringMesh(rings, mats.ironBand || (mats.ironBand =
@@ -1538,7 +1544,7 @@ if (FINE && mk.rig === 'pole' && mk.crowsNest && si === 0) {
 const nest = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.028, B * 0.024, B * 0.045, 12, 1, true),
 mats.woodPale || woodDark);
-nest.position.set(x + Math.sin(rakeRad) * (seg * 0.66), y + seg * 0.66, 0);
+nest.position.set(mxA(y + seg * 0.66), y + seg * 0.66, 0);
 group.add(tag(nest, 'mast', "Crow's nest",
 'The lookout station, about two thirds up the foremast. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.'));
 }
@@ -1550,7 +1556,7 @@ const pole = bsk.poleAboveRimM !== undefined ? bsk.poleAboveRimM : 0.55;
 const bY = y + seg - pole - bsk.heightM;
 const mastRAt = segR[si].a + (segR[si].b - segR[si].a) * ((bY - y) / seg);
 const bt = buildBasketTop(bsk, mastMat, mats, mastRAt);
-bt.position.set(x + Math.sin(rakeRad) * (bY - base), bY, 0);
+bt.position.set(mxA(bY), bY, 0);
 bt.rotation.z = -rakeRad;
 group.add(bt);
 if (bsk.cross) {
@@ -1569,13 +1575,13 @@ const post = new THREE.Mesh(new THREE.BoxGeometry(th, span, th * 0.45), cm);
 post.position.y = staff + span / 2;
 cg.add(post);
 const tY = y + seg;
-cg.position.set(x + Math.sin(rakeRad) * (tY - base), tY, 0);
+cg.position.set(mxA(tY), tY, 0);
 cg.rotation.z = -rakeRad;
 group.add(tag(cg, 'cross'));
 }
 } else {
 const tp = buildTop(topR, mats.woodPale, headR, S.year);
-tp.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.90, 0);
+tp.position.set(mxA(y + seg * 0.90), y + seg * 0.90, 0);
 group.add(tp);
 }
 if (mk.only !== 1) {
@@ -1589,7 +1595,7 @@ if (cp.getY(i) < 0) cp.setX(i, cp.getX(i) * 0.35);
 cg.computeVertexNormals();
 const ck = new THREE.Mesh(cg, mastMat);
 const hy = topY - chH / 2;
-ck.position.set(x + Math.sin(rakeRad) * hy, y + hy, sz * (headR + chW * 0.5));
+ck.position.set(mxA(y + hy), y + hy, sz * (headR + chW * 0.5));
 ck.rotation.z = -rakeRad;
 group.add(tag(ck, 'cheek'));
 }
@@ -1618,7 +1624,7 @@ pin.rotation.x = Math.PI / 2;
 pin.position.y = -hR * 0.3;
 kg.add(pin);
 const hY = y + seg - blkH / 2;
-kg.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+kg.position.set(mxA(hY), hY, 0);
 kg.rotation.z = -rakeRad;
 group.add(tag(kg, 'karchesion'));
 }
@@ -1638,7 +1644,7 @@ new THREE.CylinderGeometry(hR * 0.26, hR * 0.26, hR * 2.9, 8), slotMat2);
 pin.rotation.x = Math.PI / 2;
 sg2.add(pin);
 const hY = y + seg * 0.965;
-sg2.position.set(x + Math.sin(rakeRad) * (hY - base), hY, 0);
+sg2.position.set(mxA(hY), hY, 0);
 sg2.rotation.z = -rakeRad;
 group.add(tag(sg2, 'sheave'));
 }
@@ -1661,7 +1667,7 @@ new THREE.CylinderGeometry(0.012, 0.012, 1.0, 5), ropeMat);
 lan.position.set(0, 0.54, -hang * 0.5);
 lan.rotation.x = -0.96;
 cb.add(lan);
-cb.position.set(x + Math.sin(rakeRad) * (y + seg - base), y + seg * 0.94, hang);
+cb.position.set(mxA(y + seg * 0.94), y + seg * 0.94, hang);
 group.add(tag(cb, 'corbis'));
 }
 if (mk.rig === 'square' && !mk.yards) {
@@ -1709,7 +1715,7 @@ crossYard(base + T * f, courseL * r,
 kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm]); });
 }
 if (FINE && mk.rig === 'square' && mastYards.length) {
-const mx = h => x + Math.sin(rakeRad) * (h - base);
+const mx = mxA;
 const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
 const V3 = (px, py, pz) => new THREE.Vector3(px, py, pz);
 const rail = (uu, sgn) => {
@@ -1762,13 +1768,10 @@ const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(tag(hm, 'hal
 const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(tag(jm2, 'jeers'));
 }
 const segL = segHeads.length ? (segs[segHeads.length - 1] || 0) : 0;
-const cosR = Math.cos(rakeRad), sinR = Math.sin(rakeRad);
 const truckY = segHeads.length
-? segHeads[segHeads.length - 1] - (1 - cosR) * segL / 2 - cosR * segL * 0.04
+? segHeads[segHeads.length - 1] - segL * 0.04
 : y + (lower * 0.14);
-const truckX = segHeads.length
-? x + sinR * (segHeads[segHeads.length - 1] - base) - sinR * segL * 0.04
-: x + sinR * (truckY - base);
+const truckX = mxA(truckY);
 if (mk.rig === 'square') {
 mastTops.push({ u, x: truckX, y: truckY });
 stayMasts[mi] = { x, base, T: y - base };
@@ -1966,7 +1969,7 @@ const boomL = openAft
 const gaffL = Math.min(lower * 0.42, boomL * 0.72);
 const peak = 0.62;
 const footY = base + lower * 0.11;
-const mastX = h => x + Math.sin(rakeRad) * (h - base);
+const mastX = mxA;
 const mastR = h => {
 let y0 = base;
 for (let si = 0; si < segs.length; si++) {
@@ -2038,7 +2041,7 @@ const mastRj = h => segR[0].a + (segR[0].b - segR[0].a)
 const rBoomJ = B * 0.0050;
 const OFF = mastRj(base + lower * 0.14) + rBoomJ;
 const lug = new THREE.Group();
-lug.position.set(x - Math.sin(rakeRad) * base, 0, 0);
+lug.position.set(mxA(0), 0, 0);
 lug.rotation.set(0, -TRIM * 1.5, -rakeRad, 'ZYX');
 group.add(lug);
 const side = new THREE.Group();
@@ -2147,7 +2150,7 @@ const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
 const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
 const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
 [1, -1].forEach((side, si2) => {
-const b = new THREE.Vector3(lateenHead ? lateenHead.x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+const b = new THREE.Vector3(lateenHead ? lateenHead.x : mxA(base + lower), topY, side * B * 0.03);
 let a;
 if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
 else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
@@ -2241,10 +2244,10 @@ if (rats) group.add(tag(rats, 'ratline'));
 const tiersDrawn = mk.rig === 'square'
 ? (mk.only ? Math.min(mk.only, segs.length) : segs.length) : 1;
 if (FINE && mk.rig === 'square' && tiersDrawn >= 2) {
-const platX = x + Math.sin(rakeRad) * lower;
+const platX = mxA(base + lower * 0.90);
 const platY = base + lower * 0.90;
 const platR = B * 0.20;
-const mxAt = h => x + Math.sin(rakeRad) * (h - base);
+const mxAt = mxA;
 const topHead = base + lower * 0.88 + top * 0.97;
 const futt = [], upPts = [[], []], upSegs = [], upRats = [], tgSegs = [];
 for (let s = 0; s < mk.shrouds; s++) {

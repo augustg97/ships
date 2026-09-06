@@ -6406,9 +6406,15 @@
        on the seven lateen and crab-claw hulls; the other 56 are the residual classes named below).
        Read from the BUILT scene: each mesh tagged 'mast' gives an axis, foot to head (the
        means of its lowest and highest rings, in hull space), and that axis is cast through
-       every set fore-and-aft cloth — 'tri' and 'quad'; a 'furl' bundle is not cloth, and the
-       square cloth is not read (its one crossing, the corbita's artemon through its own raked
-       spar, is (0y⁹), unread until it is fixed). A hit is placed on the cloth's own grid from
+       every set fore-and-aft cloth — 'tri' and 'quad'; a 'furl' bundle is not cloth.
+       Round 256: THE SQUARE CLOTH IS READ TOO. It hangs from a yard slung ON its mast, so its
+       own mast's axis meets its head row by construction and that is exempt — a hit within
+       0.35 m of the cloth's top; any hit lower on the cloth by its own mast, or anywhere by
+       another, convicts. The corbita's artemon (0y⁹): the spar's line ran through the cloth
+       0.46 m under the yard (r256/cross-before.json) because the pole was built short and the
+       yard hung above and abaft its head. The square builder names its mast (userData.mastX,
+       round 256). The masts' axes are read by principal component here too (exact at any
+       rake; the ring-mean read was 1.1° off on the 48° artemon). A hit is placed on the cloth's own grid from
        its vertex index: makeTriSail's row i runs from the head on the yard to the foot,
        makeQuadSail's row i from the luff to the leech and its column j from the foot to the
        head. A cloth that names its mast (userData.mastX — the lateen, settee and crab-claw
@@ -6441,17 +6447,22 @@
         if (p && p.key === 'mast') {
           const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
           const span = yMax - yMin; if (span < 0.5) return;
-          const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
-          for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
-          masts.push({ name: p.name, foot: lo.divideScalar(nl), head: hi.divideScalar(nh) });
+          const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+          let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+          for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+          const d = new THREE.Vector3(0, 1, 0);
+          for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+          if (d.y < 0) d.negate();
+          let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+          masts.push({ name: p.name, foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax) });
         }
-        if (o.userData.kind === 'tri' || o.userData.kind === 'quad') cloths.push(o);
+        if (o.userData.kind === 'tri' || o.userData.kind === 'quad' || o.userData.kind === 'square') cloths.push(o);
       });
       const T = new THREE.Vector3();
       for (const o of cloths) {
         const pts = hullPts(o), ix = o.geometry.index, n = ix ? ix.count : pts.length, row = Math.round(Math.sqrt(pts.length));
-        let xMin = 1e9, xMax = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
-        const own = o.userData.mastX, named = typeof own === 'number';
+        let xMin = 1e9, xMax = -1e9, yTop = -1e9; for (const q of pts) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); yTop = Math.max(yTop, q.y); }
+        const own = o.userData.mastX, named = typeof own === 'number', isSquare = o.userData.kind === 'square';
         for (const m of masts) {
           const dir = m.head.clone().sub(m.foot), len = dir.length(); dir.normalize();
           const ray = new THREE.Ray(m.foot, dir); let best = null;
@@ -6461,7 +6472,8 @@
               if (d <= len && (!best || d < best.d)) best = { d, at: T.clone(), i: Math.floor(a / row), j: a % row }; }
           }
           if (!best) continue;
-          const onYard = o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
+          const onYard = isSquare ? (yTop - best.at.y) < 0.35
+                       : o.userData.kind === 'tri' ? best.i <= 1 : best.j >= row - 2;
           const inRun = m.foot.x > xMin - 0.5 && m.foot.x < xMax + 0.5;
           const isOwn = named ? Math.abs(m.foot.x - own) < 1.0
                       : inRun && ((best.at.x - xMin) < 0.15 * (xMax - xMin) || onYard);
@@ -6576,12 +6588,31 @@
        axis, foot to head (the means of its lowest and highest rings, in hull space); its rake
        is atan2(Δx, Δy) in degrees, +aft; its record is the mast whose station (at − 0.5)·lwl
        lies nearest its foot, within a tenth of the hull. The two must agree to 0.5°, else 'a
-       mast built against its record's rake'. Silent where the record's rake is 20° or more: a
-       spar raked like the corbita's artemon (−48°) reads its ring means a degree off the true
-       axis, the read's own bias (r255/rake-before.json, −46.9° against −48) — a residual of
-       the read, not of the build, and named in the handoff. */
+       mast built against its record's rake'.
+       Round 256: the axis is read by principal component (principalAxis below), which is
+       exact at any rake, so the rule now covers the corbita's 48° artemon and the trireme's
+       28° bow mast; the r255 ring-mean read and its 20° gate are gone. */
     {
       const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      /* r256: the axis by principal component. The mean of every vertex of a cylinder lies on
+         its axis however it leans, and the direction of greatest spread is the pole's own; the
+         ends are the extreme projections on that direction — the rim centres, exactly. The r255
+         read (the means of the lowest and highest 2% of the y-span) took one side of each rim
+         on a leaning pole and read the corbita's 48° artemon 1.1° off (0y²³); this read is
+         exact at any rake, so the 20° gate is gone. */
+      const principalAxis = pts => {
+        const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+          xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        const d = new THREE.Vector3(0, 1, 0);
+        for (let it = 0; it < 60; it++)
+          d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.y < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9;
+        for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+      };
       const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
         for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
       const Lr = H.lwl;
@@ -6589,17 +6620,79 @@
         if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p || p.key !== 'mast' || p.name !== 'Mast') return;
         const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
         const span = yMax - yMin; if (span < 2) return;
-        const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
-        for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
-        lo.divideScalar(nl); hi.divideScalar(nh);
+        const ax = principalAxis(pts), lo = ax.foot, hi = ax.head;
         const built = Math.atan2(hi.x - lo.x, hi.y - lo.y) * 180 / Math.PI;
         let rec = null, bd = 1e9;
         for (const mk of (H.masts || [])) { const dd = Math.abs((mk.at - 0.5) * Lr - lo.x); if (dd < bd) { bd = dd; rec = mk; } }
         if (!rec || bd > 0.1 * Lr) return;
-        const want = rec.rake || 0; if (Math.abs(want) >= 20) return;
+        const want = rec.rake || 0;
         if (Math.abs(built - want) > 0.5)
           say(v.id, "a mast built against its record's rake", `the ${rec.rig} mast at station ${rec.at} (foot x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}, ${span.toFixed(1)} m tall) stands at ${built.toFixed(2)}° where its record says ${want}°`);
       });
+    }
+    /* ── D-YARD-ON-MAST (round 256): A SQUARE YARD IS SLUNG ON ITS MAST, WITHIN ITS SPAN. The
+       corbita's artemon yard hung 0.41 m ABOVE its pole's head and 0.24 m abaft it
+       (r256/rake-before.json: head y 8.414, the yard at 8.82) because the pole was built short
+       of its height and the yard was placed on a line that was not the pole's (0y⁹). Read from
+       the BUILT scene: every mesh tagged 'yard' and named 'Yard' whose centre (the mean of
+       its vertices) is on the centreline — the square block's crossed yards, braced about
+       their own slings; the lug's yard is 'Yard' too but hangs beside its mast in its own
+       frame, its centre 0.5–1.6 m to port, and is not slung at its middle (round 253 reads
+       it). Every mast segment is a mesh tagged 'mast' whose name ends in 'mast' ('Mast',
+       'Iron mast', 'Steel mast', 'Wooden mast' — the iron hulls name their poles, and a
+       filter on 'Mast' alone read Preussen's thirty yards against no mast at all); its axis
+       is read by principal component. A yard's masts are the segments whose axis passes
+       within 0.6 m of its centre: none, and it is 'a yard hung on no mast'; if the centre
+       stands more than 0.02 m above the highest of their heads, 'a yard slung above its
+       mast's head' — a stacked mast is several collinear segments, and a topsail yard on the
+       topmast is above the LOWER's head by construction, so the highest head is the test. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const axisOf = pts => {
+        const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        const d = new THREE.Vector3(0, 1, 0);
+        for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.y < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9; for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c };
+      };
+      const masts = [], yards = [], segs = [];
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
+        if (p.key === 'mast' && /mast$/i.test(p.name)) { const pts = hullPts(o); const ax = axisOf(pts);
+          if (ax.head.y - ax.foot.y >= 0.5) { masts.push(ax); if (o.userData.seg) segs.push({ ax, rec: o.userData.seg }); else segs.push({ ax, rec: null }); } }
+        if (p.key === 'yard' && p.name === 'Yard') { const pts = hullPts(o); const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length); if (Math.abs(c.z) < 0.3) yards.push(c); }
+      });
+      const distToAxis = (m, q) => { const w = q.clone().sub(m.foot); const t = w.dot(m.dir); return w.sub(m.dir.clone().multiplyScalar(t)).length(); };
+      for (const c of yards) {
+        let n = null; const near = [];
+        for (const m of masts) { const d = distToAxis(m, c); if (!n || d < n.d) n = { m, d }; if (d <= 0.6) near.push(m); }
+        if (!near.length) { say(v.id, 'a yard hung on no mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}, ${c.z.toFixed(2)}) is ${n ? n.d.toFixed(2) + ' m from the axis of the nearest mast (foot x ' + n.m.foot.x.toFixed(2) + ')' : 'on a hull with no mast mesh'}`); continue; }
+        const top = near.reduce((mx, m) => Math.max(mx, m.head.y), -1e9), tm = near.reduce((b, m) => (!b || m.head.y > b.head.y) ? m : b, null);
+        if (c.y > top + 0.02) say(v.id, "a yard slung above its mast's head", `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${(c.y - top).toFixed(2)} m above the head (y ${top.toFixed(2)}) of the mast at foot x ${tm.foot.x.toFixed(2)}`);
+      }
+      /* ── D-MAST-SEGMENT (round 256): A POLE ENDS WHERE ITS BUILDER SAYS. Every square-block
+         segment records its own ends (userData.seg: footY, headY, footX, headX — the segment's
+         y and y + seg on the raked axis). The mesh's rim centres, by principal component, must
+         stand at those points to 0.03 m, else 'a mast segment built short of its record': the
+         r255 pole was a cylinder of the segment's HEIGHT turned about its centre, so it stood
+         (1 − cos rake)·seg/2 short at each end — 5 cm on a 5° mast, 0.35 m on the trireme's
+         28° bow mast and 1.13 m on the corbita's 48° artemon, whose foot floated over the
+         deck. Silent on a hull where no segment records itself (an older builder, or an all-lateen
+         hull — the lateen pole of round 255 carries no record yet); where the builder records,
+         every recorded segment is read. */
+      if (segs.some(q => q.rec)) {
+        for (const q of segs) {
+          if (!q.rec) continue;
+          const r = q.rec, dF = Math.hypot(q.ax.foot.x - r.footX, q.ax.foot.y - r.footY), dH = Math.hypot(q.ax.head.x - r.headX, q.ax.head.y - r.headY);
+          if (dF > 0.03 || dH > 0.03)
+            say(v.id, 'a mast segment built short of its record', `segment ${r.si} at foot x ${r.footX.toFixed(2)}: built foot (${q.ax.foot.x.toFixed(3)}, ${q.ax.foot.y.toFixed(3)}) against the record's (${r.footX.toFixed(3)}, ${r.footY.toFixed(3)}), ${dF.toFixed(3)} m off; head ${dH.toFixed(3)} m off`);
+        }
+      }
     }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/
