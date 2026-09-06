@@ -4693,8 +4693,9 @@ if (Math.abs(built - want) > 0.5)
 say(v.id, "a mast built against its record's rake", `the ${rec.rig} mast at station ${rec.at} (foot x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}, ${span.toFixed(1)} m tall) stands at ${built.toFixed(2)}° where its record says ${want}°`);
 });
 }
-{
-const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const yardRead = (G, STATE) => {
+const st = STATE === 'furled' ? ' (furled build)' : '';
+const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
 const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
 for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
 const axisOf = pts => {
@@ -4712,7 +4713,7 @@ return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVect
 rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
 };
 const masts = [], yards = [], segs = [], fits = [];
-g.traverse(o => {
+G.traverse(o => {
 if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
 if (p.key === 'parrel' || p.key === 'truss') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length);
 let zMin = 1e9, zMax = -1e9; for (const q of pts) { zMin = Math.min(zMin, q.z); zMax = Math.max(zMax, q.z); }
@@ -4735,18 +4736,18 @@ const pick = seg || n; const m = pick.m; n = pick;
 const w = c.clone().sub(m.foot), t = Math.max(0, Math.min(1, w.dot(m.dir) / Math.max(m.span, 1e-6)));
 const rAt = m.rFoot + (m.rHead - m.rFoot) * t, expect = rAt + yd.ax.rMid;
 const axisXAtY = m.foot.x + (c.y - m.foot.y) * (m.dir.x / Math.max(m.dir.y, 1e-6));
-const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off`;
+const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off${st}`;
 if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
 else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
 else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
 const nearF = fits.filter(f => f.c.distanceTo(c) <= 1.5 && Math.abs(f.c.y - c.y) <= 0.6);
 const faMin = f => { let mn = 1e9; for (const q of f.pts) { const w = q.clone().sub(m.foot), t = w.dot(m.dir); mn = Math.min(mn, (w.x - m.dir.x * t) * (-m.dir.y) + (w.y - m.dir.y * t) * m.dir.x); } return mn; };
 const round = nearF.filter(f => f.zMin <= -0.5 * rAt && f.zMax >= 0.5 * rAt && faMin(f) <= -0.5 * rAt);
-if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}`);
-else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole`);
+if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}${st}`);
+else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole${st}`);
 }
 }
-if (segs.some(q => q.rec)) {
+if (STATE === 'set' && segs.some(q => q.rec)) {
 for (const q of segs) {
 if (!q.rec) continue;
 const r = q.rec, dF = Math.hypot(q.ax.foot.x - r.footX, q.ax.foot.y - r.footY), dH = Math.hypot(q.ax.head.x - r.headX, q.ax.head.y - r.headY);
@@ -4754,7 +4755,9 @@ if (dF > 0.03 || dH > 0.03)
 say(v.id, 'a mast segment built short of its record', `segment ${r.si} at foot x ${r.footX.toFixed(2)}: built foot (${q.ax.foot.x.toFixed(3)}, ${q.ax.foot.y.toFixed(3)}) against the record's (${r.footX.toFixed(3)}, ${r.footY.toFixed(3)}), ${dF.toFixed(3)} m off; head ${dH.toFixed(3)} m off`);
 }
 }
-}
+return { masts, yards, hullPts, axisOf };
+};
+yardRead(g, 'set');
 if (H.doubleHull) {
 const worldM = o => {
 const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
@@ -5544,6 +5547,40 @@ try { gf = SHIPS_HULL.buildShip(H, { furled: true }); }
 catch (e) { say(v.id, 'FURLED BUILD THREW', e.message); }
 if (gf) {
 gf.updateMatrixWorld(true);
+const YF = yardRead(gf, 'furled');
+{
+const furlsF = [];
+gf.traverse(o => { if (o.isMesh && o.geometry && o.userData.kind === 'furl') {
+const pts = YF.hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsF.push({ c: fc, pts }); } });
+for (const yd of YF.yards) {
+if (!(yd.athwart || yd.slung)) continue;
+const c = yd.c; let seg = null, n = null;
+for (const m of YF.masts) { const w = c.clone().sub(m.foot), t = w.dot(m.dir), d = w.clone().addScaledVector(m.dir, -t).length();
+if (!n || d < n.d) n = { m, d }; if (d <= 1.5 && t >= -0.02 && t <= m.span + 0.02 && (!seg || m.foot.y < seg.m.foot.y)) seg = { m, d }; }
+if (!n || n.d > 1.5) continue;
+const m = (seg || n).m;
+const at = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)}`;
+const rolls = furlsF.filter(f => Math.abs(f.c.y - c.y) <= 1.5 && Math.abs(f.c.x - c.x) <= 1.5 && Math.abs(f.c.z - c.z) <= 1.5);
+if (!rolls.length) { say(v.id, 'a furled square yard with no roll on it', `${at} has no furled roll within 1.5 m of its centre`); continue; }
+for (const f of rolls) {
+let into = 0, gap = 1e9;
+for (const q of f.pts) {
+const w = q.clone().sub(m.foot), t = w.dot(m.dir);
+if (t >= -0.02 && t <= m.span + 0.02) {
+const tt = Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))), r = m.rFoot + (m.rHead - m.rFoot) * tt;
+const dist = w.clone().addScaledVector(m.dir, -t).length();
+if (dist < r) into = Math.max(into, r - dist);
+}
+const wy = q.clone().sub(c), ty = wy.dot(yd.ax.dir);
+gap = Math.min(gap, wy.addScaledVector(yd.ax.dir, -ty).length() - yd.ax.rMid);
+}
+const up = f.c.clone().sub(c).dot(m.dir);
+if (into > 0.03) say(v.id, 'a furled bunt stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+if (up < 0) say(v.id, 'a furled roll hung under its yard', `the roll on ${at} has its centre ${(-up).toFixed(3)} m BELOW the yard's along the mast's axis`);
+}
+}
+}
 let worn = 0, furls = 0;
 const furlBoxes = [], sparBoxes = [];
 const sparKeys = ['yard', 'stay', 'bowsprit'];

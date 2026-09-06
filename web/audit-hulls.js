@@ -6673,9 +6673,18 @@
        of the centreline by half the mast's radius there and reach abaft the AXIS by half
        the radius, read along the axis's own normal (on the corbita's 48° artemon the axis
        at the yard's height is not the axis at the slings) — else 'a square yard with nothing holding it to its mast' (the r257
-       builder, every yard) or 'a yard's parrel that does not go round its mast'. */
-    {
-      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+       builder, every yard) or 'a yard's parrel that does not go round its mast'.
+       ── Round 259 (0y²⁸): THE RULE READS BOTH BUILDS. It read the SET build only; the furled
+       build `gf` (built by the stowed-cloth block below) was read by round 63's rule alone, and
+       r257 stood every furled yard off its mast by the ROLL's radius — 104 yards on thirteen
+       hulls, 0.07–0.50 m past the two radii (r259/furl-before.json) — which this rule would
+       have convicted as 'standing off its mast' had it run on `gf`. The block is a function of
+       the scene now, run on `g` here and on `gf` from the stowed-cloth block, the state named in
+       every conviction; the mast-segment rule (below) runs on the set build alone. It returns
+       what it read, so the bunt rule can read the same masts and yards. */
+    const yardRead = (G, STATE) => {
+      const st = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
       const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
         for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
       const axisOf = pts => {
@@ -6694,7 +6703,7 @@
                  rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02), rMid: radAt(0, span * 0.03) };
       };
       const masts = [], yards = [], segs = [], fits = [];
-      g.traverse(o => {
+      G.traverse(o => {
         if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
         if (p.key === 'parrel' || p.key === 'truss') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length);
           let zMin = 1e9, zMax = -1e9; for (const q of pts) { zMin = Math.min(zMin, q.z); zMax = Math.max(zMax, q.z); }
@@ -6721,7 +6730,7 @@
           const w = c.clone().sub(m.foot), t = Math.max(0, Math.min(1, w.dot(m.dir) / Math.max(m.span, 1e-6)));
           const rAt = m.rFoot + (m.rHead - m.rFoot) * t, expect = rAt + yd.ax.rMid;
           const axisXAtY = m.foot.x + (c.y - m.foot.y) * (m.dir.x / Math.max(m.dir.y, 1e-6));
-          const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off`;
+          const where = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) is ${n.d.toFixed(3)} m from the axis of the mast at foot x ${m.foot.x.toFixed(2)}, whose radius there is ${rAt.toFixed(3)} m; the yard's slings radius is ${yd.ax.rMid.toFixed(3)} m, so touching it the yard stands ${expect.toFixed(3)} m off${st}`;
           if (n.d < expect - 0.03) say(v.id, 'a square yard slung through its mast', where);
           else if (n.d > expect + 0.03) say(v.id, 'a square yard standing off its mast', where);
           else if (c.x > axisXAtY) say(v.id, 'a square yard slung abaft its mast', `${where}; its centre is ${(c.x - axisXAtY).toFixed(2)} m ABAFT the axis at its height (x ${axisXAtY.toFixed(2)})`);
@@ -6730,8 +6739,8 @@
           /* how far abaft the AXIS the fitting reaches, along the axis's forward normal (−dir.y, dir.x): negative is abaft */
           const faMin = f => { let mn = 1e9; for (const q of f.pts) { const w = q.clone().sub(m.foot), t = w.dot(m.dir); mn = Math.min(mn, (w.x - m.dir.x * t) * (-m.dir.y) + (w.y - m.dir.y * t) * m.dir.x); } return mn; };
           const round = nearF.filter(f => f.zMin <= -0.5 * rAt && f.zMax >= 0.5 * rAt && faMin(f) <= -0.5 * rAt);
-          if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}`);
-          else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole`);
+          if (!nearF.length) say(v.id, 'a square yard with nothing holding it to its mast', `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)} has no parrel or truss mesh within 1.5 m of its slings${yd.slung && yd.slung.held ? ' (its record says ' + yd.slung.held + ')' : ''}${st}`);
+          else if (!round.length) say(v.id, "a yard's parrel that does not go round its mast", `the ${nearF[0].name.toLowerCase()} nearest the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) spans z ${nearF[0].zMin.toFixed(2)}..${nearF[0].zMax.toFixed(2)} and reaches ${(-faMin(nearF[0])).toFixed(3)} m abaft the axis, against a mast of radius ${rAt.toFixed(3)}: it does not go round the pole${st}`);
         }
       }
       /* ── D-MAST-SEGMENT (round 256): A POLE ENDS WHERE ITS BUILDER SAYS. Every square-block
@@ -6744,7 +6753,7 @@
          deck. Silent on a hull where no segment records itself (an older builder, or an all-lateen
          hull — the lateen pole of round 255 carries no record yet); where the builder records,
          every recorded segment is read. */
-      if (segs.some(q => q.rec)) {
+      if (STATE === 'set' && segs.some(q => q.rec)) {
         for (const q of segs) {
           if (!q.rec) continue;
           const r = q.rec, dF = Math.hypot(q.ax.foot.x - r.footX, q.ax.foot.y - r.footY), dH = Math.hypot(q.ax.head.x - r.headX, q.ax.head.y - r.headY);
@@ -6752,7 +6761,9 @@
             say(v.id, 'a mast segment built short of its record', `segment ${r.si} at foot x ${r.footX.toFixed(2)}: built foot (${q.ax.foot.x.toFixed(3)}, ${q.ax.foot.y.toFixed(3)}) against the record's (${r.footX.toFixed(3)}, ${r.footY.toFixed(3)}), ${dF.toFixed(3)} m off; head ${dH.toFixed(3)} m off`);
         }
       }
-    }
+      return { masts, yards, hullPts, axisOf };
+    };
+    yardRead(g, 'set');
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/
        feet-after.json: the heel at y 0.772, the platform's top at 0.955) because buildRig
@@ -7878,6 +7889,57 @@
         catch (e) { say(v.id, 'FURLED BUILD THREW', e.message); }
         if (gf) {
           gf.updateMatrixWorld(true);
+          /* r259 (0y²⁸): the yard rules on the furled build — the two radii, the fore face, the fitting */
+          const YF = yardRead(gf, 'furled');
+          /* ── D-FURL-BUNT (round 259, 0y²⁶): THE STOWED ROLL LIES ON ITS YARD AND CLEAR OF THE
+             POLE. makeFurl hung every roll 0.3·r0 UNDER its spar's line and swelled the square
+             roll to 1.4·r0 at the bunt, where the mast is, so on the furled build 56 of 104
+             square yards' bunts stood into their pole's fore face — 0.19 m on the 74's course,
+             0.25 m on Preussen's, 0.23 on the cog's (r259/furl-before.json: every roll's points
+             read against the axis, a point inside the cylinder when its distance from the axis
+             is under the mast's radius at its projection). A square sail is stowed on TOP of
+             its yard, the bunt triced up at the slings before the mast. Read from the BUILT
+             furled scene: every 'furl' mesh whose vertex mean lies within 1.5 m of a centreline
+             athwartships yard's centre is that yard's roll; against the yard's segment (the pick
+             above), no point of the roll may stand more than 0.03 m inside the pole — 'a furled
+             bunt stowed through its mast'; the roll's nearest point must come within 0.05 m of
+             the yard's slings surface — 'a furled roll floating off its yard'; and the roll's
+             centre must stand ABOVE the yard's along the mast's axis — 'a furled roll hung
+             under its yard' (the r258 builder, every one). A furled athwartships yard with no
+             roll within reach is 'a furled square yard with no roll on it'. */
+          {
+            const furlsF = [];
+            gf.traverse(o => { if (o.isMesh && o.geometry && o.userData.kind === 'furl') {
+              const pts = YF.hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsF.push({ c: fc, pts }); } });
+            for (const yd of YF.yards) {
+              if (!(yd.athwart || yd.slung)) continue;
+              const c = yd.c; let seg = null, n = null;
+              for (const m of YF.masts) { const w = c.clone().sub(m.foot), t = w.dot(m.dir), d = w.clone().addScaledVector(m.dir, -t).length();
+                if (!n || d < n.d) n = { m, d }; if (d <= 1.5 && t >= -0.02 && t <= m.span + 0.02 && (!seg || m.foot.y < seg.m.foot.y)) seg = { m, d }; }
+              if (!n || n.d > 1.5) continue;                       // 'a yard hung on no mast' is the rule above
+              const m = (seg || n).m;
+              const at = `the yard centred at (${c.x.toFixed(2)}, ${c.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)}`;
+              const rolls = furlsF.filter(f => Math.abs(f.c.y - c.y) <= 1.5 && Math.abs(f.c.x - c.x) <= 1.5 && Math.abs(f.c.z - c.z) <= 1.5);
+              if (!rolls.length) { say(v.id, 'a furled square yard with no roll on it', `${at} has no furled roll within 1.5 m of its centre`); continue; }
+              for (const f of rolls) {
+                let into = 0, gap = 1e9;
+                for (const q of f.pts) {
+                  const w = q.clone().sub(m.foot), t = w.dot(m.dir);
+                  if (t >= -0.02 && t <= m.span + 0.02) {
+                    const tt = Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))), r = m.rFoot + (m.rHead - m.rFoot) * tt;
+                    const dist = w.clone().addScaledVector(m.dir, -t).length();
+                    if (dist < r) into = Math.max(into, r - dist);
+                  }
+                  const wy = q.clone().sub(c), ty = wy.dot(yd.ax.dir);
+                  gap = Math.min(gap, wy.addScaledVector(yd.ax.dir, -ty).length() - yd.ax.rMid);
+                }
+                const up = f.c.clone().sub(c).dot(m.dir);
+                if (into > 0.03) say(v.id, 'a furled bunt stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+                if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+                if (up < 0) say(v.id, 'a furled roll hung under its yard', `the roll on ${at} has its centre ${(-up).toFixed(3)} m BELOW the yard's along the mast's axis`);
+              }
+            }
+          }
           let worn = 0, furls = 0;
           const furlBoxes = [], sparBoxes = [];
           /* no 'mast' here: nothing in the fleet stows to a bare mast — a junk's stack

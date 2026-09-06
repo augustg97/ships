@@ -22205,3 +22205,118 @@ docs/audit-hulls.js convicts a square yard with nothing holding it to its mast (
 THE RATCHET: THE OPENING FULL RATCHET at the clean r257 HEAD 4272cf2 (r258/open-ratchet.out, launched 22:18:55 as the round's first act, no screenshot beside it until RATCHET EXIT): RATCHET EXIT 1  END 22:59:52; 65 frames scored; movers 12: globe-default 0.075%/0.027; action 0.369%/0.096; ship-great-eastern 0.052%/0.017; ship-galley 0.604%/0.199; ship-galleass 0.101%/0.062; ship-titanic 9.427%/2.640; aboard 0.133%/0.035; map-floor 0.849%/0.606; aboard-coast 0.315%/0.121; action-salamis 0.103%/0.019; action-gravelines 0.221%/0.054; action-myeongnyang 0.055%/0.010. Largest three: ship-titanic 9.427%/2.640, map-floor 0.849%/0.606, ship-galley 0.604%/0.199. Of the twelve, ship-titanic 9.427%/2.640 is (0y²⁹) — the same picture as r257's opening run to the third decimal, diagnosed above as r256's correction on her 9.46° poles and ACCEPTED at the clean HEAD with that reason (FRAME-LOG 23:05); the other eleven are r257's yard move on frames unscored on the r257 builder, each diff read (r258/open-*-trio.png: baseline, current, amplified diff) and each confined to a square-rigged hull — the Sea floor's carrack token (map-floor), the Armada, Gravelines, Salamis and Myeongnyang fleets (action, action-gravelines, action-salamis, action-myeongnyang), the trireme and the steamer close-ups (aboard-coast, aboard), the berth neighbours at a frame's edge (ship-galley: the slave ship; ship-galleass: the sekibune; ship-great-eastern: the clipper), and globe-default 0.075%, whose diff is the 1590 era's carrack tokens on the Atlantic and nothing else — the globe draws built hulls, which r257's MUST NOT list did not know; all eleven ACCEPTED at the clean HEAD as r257's, with reasons naming the hull in each diff (r258/open-accepts.txt).
  PARTIAL after the push, the r239 pattern (r258/partial-*.out): frames scored one at a time by check --frame on the r258 builder, each diff read before its accept — ship-preussen 0.025%/0.026 ok, ship-steamer 0.014%/0.019 ok, shipwright-hounds 0.001%/0.000 ok, shipwright 0.001%/0.000 ok (4 frames; r258/PREDICTIONS-close.md names the frames that MAY move — the 74's five Shipwright frames, the corbita's corbis frame, the eight square-rigged hulls' own close frames and the two square-rigged aboard frames, every crossed yard now carrying its parrel or its truss at the slings, a rope of 2–3 cm radius that may or may not cross the gate at the Shipwright's distance — and the rest that must not). The other 61 frames are UNSCORED on the r258 builder; r259's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (658c796 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 259 — 2026-09-06 — the furled sail is stowed on top of its yard: every furled square roll hung under its yard's line with its bunt swelling into the pole's fore face, and every furled yard stood off its mast by the roll's radius where a parrel holds it at the two radii; the roll now sits on the yard's top, leaned forward, the bunt wedged between the yard and the pole and touching both, the furled yard stands where the set yard stands, the yard rules run on the furled build too, a new rule reads every stowed roll against its pole and its yard, and the full ratchet ran first at the clean r258 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r258 ordered r259's opening: the FULL ratchet at
+the clean HEAD before any edit, with no screenshot beside it until RATCHET EXIT; then (0y²⁶) with (0y²⁸) — the furled
+bunt stowed on the yard against the mast and the fore-face rule run on the furled build — or (0y³⁰), or (0y¹⁹) with
+(0y²⁴), or Endurance by looking. The ratchet was launched at HEAD 6321257 at 23:25:48 as the round's first act
+(r259/run-open.sh, open-ratchet.out) and waited on with the turn held open; every edit was made on a COPY of web/
+served on :8150 (build/staging/r259/web, every file a symlink to web/ except hull.js and audit-hulls.js; vessels.json
+is copied and unchanged); (0y²⁶) and (0y²⁸) were taken together, because they are one fault read from two sides.**
+
+**THE FAULT, measured on the built FURLED scene (r259/probe_furl.py on the r258 builder, :8150 — every centreline
+athwartships 'Yard' against its mast segment as r257 picks it, and the 'furl' mesh within 1.5 m of the yard's centre:
+its points read against the pole as a cylinder, a point inside when its distance from the axis is under the mast's
+radius at its projection; its vertex mean against the yard's centre along the axis (d, up the mast) and along the
+axis's forward normal (n); its nearest approach to the yard's own axis). r259/furl-before.json: 104 square yards on
+thirteen hulls, and on every one of them (a) the yard stands off its mast by MORE than the two radii — r257 wrote
+the furled offset as the mast's radius plus the ROLL's radius, 0.07 m past the two radii on Preussen's lower
+topgallants, 0.50 m on the 74's main topsail yard — which is not where a parrel or a truss holds a yard, and which D-YARD-ON-MAST could
+not see because it ran on the audit's set build `g` alone; (b) the roll hangs UNDER the yard's line — makeFurl puts
+every roll's centre 0.3·r0 down the side "the cloth gathers", 0.07–0.20 m below the yard's axis here; and (c) on 56
+of the 104 the bunt — makeFurl's 1.4·r0 swelling at the middle of the roll, which is where the mast is — reaches
+more than 3 cm INTO the pole: 0.19 m on the 74's main course, 0.25 m on every one of Preussen's fifteen courses,
+lower topsails and lower topgallants, 0.23 m on the cog's one yard and on the East Indiaman's main course, 0.10–0.18
+on the clipper's, the steamer's and the 74's upper yards. PROOF A (r259/audit-proof-a.out, the r258 builder under the
+r259 audit on :8150) is exactly 264 problems — 104 'a square yard standing off its mast (furled build)', 104 'a
+furled roll hung under its yard', 56 'a furled bunt stowed through its mast' — on the trireme 2/2/0, corbita 2/2/0,
+cog 1/1/1, carrack 4/4/0, sekibune 1/1/0, fluyt 6/6/1, East Indiaman 9/9/2, the 74 9/9/5, slave ship 9/9/1,
+Preussen 30/30/30, clipper 15/15/7, steamer 12/12/9, Endurance 4/4/0 — and nothing on any other hull or rule.**
+
+**WHAT A FURLED SQUARE SAIL IS. The sail is stowed UP, not down. The crew lie out along the yard on the footropes,
+abaft and below it, gather the cloth up onto the TOP of the yard, roll it there, and pass the gaskets round the roll
+and the yard together; the bunt — the body of the cloth at the middle of the sail, which is most of it — is hauled
+up onto the yard at the slings by the bunt-jigger and stowed there, on the yard and before the mast, where it
+bulges up and forward of the pole. This is what every photograph of a laid-up square-rigger shows: the rolls lie
+along the upper fore sides of the yards, and each course carries a swelling at its middle that stands up in front of
+its mast. A roll hanging under the yard, and a bunt pressed through the mast, is neither. And the yard does not move
+when the sail is furled: the parrel or the truss holds it against the pole in either state (r257, r258).**
+
+**THE MODEL (web/js/hull.js; r259/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+(1) crossYard: the furled yard's offset is the two radii, OFF = mastRs + slingsD/2, in BOTH states; the r257 term
+that took the roll's radius when furled is gone and the r257 comment says so. The yard's taper (Murray's five
+sectors; the steel tube's parallel middle and cone) is one function of the station, taperK, that the vertex loop
+and the roll's seat share. The yard's record carries the stow (userData.slung.stow: on the top of the yard, leaned
+forward, lean0Deg 20, clearM, and its derivation: 'class (round 259): the harbour stow rolls the cloth onto the top
+of the yard and trices the bunt up at the slings before the mast … no plate reads it'). (2) THE SEAT: the square
+yard's makeFurl call passes seat = { dir: up the mast's axis (sin rake, cos rake), fwd: the axis's forward normal,
+sparRAt: the yard's own radius at the roll's station (slingsD/2 · taperK), lean0: 20°, clear: 0.03 + 0.06·mastR }.
+(3) makeFurl, given a seat, stands each ring's centre off the spar's axis by the spar's radius there plus the
+roll's own (before the gasket pinch, so the centre line does not wobble at the lashings) along a line leaned off the
+spar's top toward fwd by lean = max(lean0, asin((1.085·R + clear − sparR) / (sparR + R))) — the lean that leaves the
+roll's creased after side (1.085·R, the crease term) `clear` forward of the plane of the spar's own after face, which
+is the plane of the pole's fore face. So the thin ends ride the tapered arms at 20°, and the bunt, where R is 1.4·r0,
+leans to 41–49° and lies wedged between the yard's fore-upper quarter and the pole, touching both. The clearance
+carries the braced arm's swing: at 19.5° of brace one arm comes aft toward the pole's shoulder by sin(TRIM)·z while
+the round pole recedes by z²/2R, a residue that peaks near 0.053·R at z = 0.31·R, under the 0.06·R allowed. Without
+a seat makeFurl is the r258 path byte for byte, so the lateen, lug, gaff, jib and junk rolls are untouched. (4) The
+furled sail's card, on a square yard: 'rolled onto the TOP of its yard and the gaskets passed round both; the bunt,
+the body of the cloth, is triced up at the slings, on the yard before the mast.' The SET build is unchanged in every
+expression. No record field changes; vessels.json is unchanged.**
+
+**MEASURED AFTER (r259/furl-after.json, the same probe on the r259 builder): 104 square yards on thirteen hulls (trireme 2, corbita 2, cog 1, carrack 4, sekibune 1, fluyt 6, East Indiaman 9, the 74 9, slave ship 9, Preussen 30, clipper 15, steamer 12, Endurance 4), every one read on the furled build. (a) Every yard stands at the two radii — the mast's radius at the slings plus its own, off the meshes — to 0.007 m, so each moved AFT onto its pole by what r257 had added, 0.07 m (Preussen's lower topgallants) to 0.50 m (the 74's main topsail yard). (b) No roll has a point inside its pole: the greatest reach into any mast is 0.000 m, against 0.25 m before. (c) Every roll's centre stands ABOVE its yard's along the mast's axis, 0.10–0.64 m up, and 0.13–0.44 m forward of it along the axis's normal, a lean off the top of 18° on the fattest yards to 64° where a thin royal yard carries a roll five times its radius; the 74's main course roll stands 0.54 m up and 0.26 m forward of its yard. (d) Every roll touches its yard: the nearest approach of each roll to its yard's axis is inside the slings radius by 0.03–0.15 m (the roll rests on the tapered arms, which are thinner than the slings). Nothing in the SET build moved: the set yard's offset expression is unchanged and the set probe of r258 (held-after.json) still describes it.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r259/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js).
+(1) D-YARD-ON-MAST and D-YARD-HELD (0y²⁸): the r256–r258 yard block is a function of the scene, yardRead(G, STATE),
+run on the set build `g` where it always ran and now on the furled build `gf` from the stowed-cloth block (round 63's),
+the state named in every conviction ('… (furled build)'); D-MAST-SEGMENT stays inside it and runs on the set build
+alone; the function returns the masts, yards and helpers it read. (2) D-FURL-BUNT (new, 0y²⁶), on the furled build:
+every 'furl' mesh whose vertex mean lies within 1.5 m of a centreline athwartships yard's centre is that yard's roll,
+read against the yard's segment — no point may stand more than 0.03 m inside the pole, read as a cylinder ('a furled
+bunt stowed through its mast'); the roll's nearest point must come within 0.05 m of the yard's slings surface ('a
+furled roll floating off its yard'); the roll's centre must stand above the yard's along the mast's axis ('a furled
+roll hung under its yard'); and a furled athwartships yard with no roll within reach is 'a furled square yard with no
+roll on it'. The canoe's two centreline crab-claw yards are neither athwartships nor slung and are not read, as in
+the r256 rule. PROOF A is above. The final audit on the r259 builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out)
+and "checked 33 hulls, 0 problems" on :8149 after the copy into web/ (audit-final-8149.out).**
+
+**WITNESSED (r259/witness-74-furled-before.png — the opening ratchet's own capture of the HEAD builder at the
+shipwright-furled frame's camera, copied out of _current at RATCHET EXIT; witness-74-furled-after.png — the r259
+builder on :8150 at the same camera, b=125, l=12, z=0.5, y=25; w-74-furled-pair.png the two side by side; w-74-course-
+bunt-3x-pair.png the main course's slings cropped at 3x from each). BEFORE (left of w-74-course-bunt-3x-pair.png): the main course yard crosses the frame as a bare spar with the furled roll hung UNDER it, the roll's after half passing behind the mast — the bunt goes into the pole and comes out the other side; the yard's upper face is bare wood the whole way. AFTER (right): the roll lies ON the yard's upper fore side, the spar showing beneath it toward the arms, and the bunt is a fat bundle standing before the mast at the slings with the pole visible behind it; the yard itself sits closer to the mast. In the whole frame (w-74-furled-pair.png) the hull, the masts, the tops, the shrouds, the mizzen's stowed gaff sail and the headsail rolls are the same picture; only the nine square rolls and their yards differ. From the starboard quarter (witness-74-furled-course-q.png, b=150, l=10, z=0.45, y=25; w-74-course-q-2x.png the middle at 2x) the main course roll and the main topsail roll each lie along the top of their yard with the gasket pinches scalloping them, the course bunt swelling before the mainmast under the top, and the foremast's two rolls behind read the same way.**
+
+**Rule 0 on the after witness read whole (r259/witness-74-furled-after.png): a rendered ship on water, not a chart — the 74's mainmast from the port quarter at deck height, the lower mast's wooldings and its top, the shrouds and their ratlines, the futtock shrouds running up to the top, the main course yard crossing the frame with its stowed sail rolled along it and the bunt bundled before the mast, the braces and lifts leading off it, a grey-blue swell running past and a low hazed coast on the horizon. Three facts a viewer can read off it without a legend: her sails are furled, rolled onto their yards and lashed in a scalloped bundle; the body of each sail is gathered at the middle of the yard before the mast, so the roll is fattest there and thins to the arms; her yards lie on the fore side of her masts, the poles standing behind the spars.**
+
+**THE PARREL WITNESS r258 asked for (r259/witness-74-tgallant-slings.png: the SET 74, b=150, l=8, z=0.35, y=60 — aimed
+at the main topgallant yard's slings; w-74-tgallant-4x.png cropped at 4x): NOT RESOLVED, again. The camera's target is the hull's centre (the r248 lesson), so y=60 did not aim it at the topgallant's slings: the frame looks up the mainmast from the starboard quarter with the main topgallant and royal set at its middle, and the topgallant yard's parrel — 0.024 m of rope round a 0.2 m pole, behind the yard and the set cloth — is under a pixel at z=0.35 (w-74-tgallant-4x.png). What the fitting is and where it is stays read off the mesh: D-YARD-HELD finds the loop round the pole on all 104 yards on both builds (r258/held-after.json; r259/audit-final-8150.out, 0 problems). A witness that would show it needs a camera that can be aimed at a point aloft, which the Shipwright's URL does not carry; r260 may add a `&at=y` target to the capture harness or take a Sea-view close-up at the masthead (the r237 lesson, #e=…&f=… cropped at 4x).**
+
+**Named residuals, in order:** (0y²⁶) CLOSED as a class — every furled square roll sits on its yard's top and its bunt
+stands clear of the pole, and the audit reads every roll against the pole as a cylinder. (0y²⁸) CLOSED — the yard rules
+run on both builds and the furled yard stands at the two radii. NEW (0y³³) the gaskets are a pinch in the roll's
+profile and no rope is drawn; a furled yard carries four to eight visible turns of small stuff round the roll and the
+yard, and the roll's own profile stands in for them. NEW (0y³⁴) the roll's lean is one law for the whole fleet (20°,
+and the bunt's clearance) and the clearance term is a constant of the brace; a photograph of a harbour stow reads the
+roll nearer the yard's top at the arms and the bunt higher than this cylinder puts it. NEW (0y³⁵) the lateen's and the
+lug's furled rolls still take r254's rule — the yard stands off its mast by the ROLL's radius when furled (line
+`OFF = mastRl(slingY) + (FURLED ? Math.max(rYs, rRoll) : rYs)`) and the roll hangs 0.3·r0 off the yard's line; the
+same seat would serve them and D-LATEEN's read of the offset would have to learn it. (0y³⁰) the truss's throw, (0y³¹)
+the chain slings, (0y³²) the iron rig's hoisting-yard parrels, as r258 names them. (0y¹⁹) (0y²⁴) as r256 names them.
+(0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names
+them. (0y′) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and
+unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷)
+(0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r260 opens by running the FULL ratchet at the clean HEAD first (r259/PREDICTIONS-close.md names the one frame that
+MUST move — shipwright-furled — the two Actions built furled with square yards that MAY, action-salamis and
+action-myeongnyang, and the rest that MUST NOT, the set build being unchanged in every expression; only those scored
+by check --frame after the push are accepted here), with no screenshot beside it until RATCHET EXIT; then takes
+(0y³⁵), the lateen's and the lug's rolls onto their yards by the same seat, or (0y³⁰), the truss's throw read off the
+mesh, or (0y¹⁹) with (0y²⁴), the carrack's mizzen and the artemon read from plates at a stated scale, or the survey's
+next never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788678626 at the build; the push and the live poll are in
+build/staging/r259/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r259 staging stays on disk uncommitted, the r211 convention.**

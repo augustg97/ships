@@ -2419,15 +2419,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const yg = new THREE.CylinderGeometry(slingsD / 2, slingsD / 2, yardLen, 16, 8);
       const ym = new THREE.Mesh(yg, woodDark);
       const yp = yg.attributes.position;
-      for (let i = 0; i < yp.count; i++) {
-        const t = Math.abs(yp.getY(i)) / (yardLen / 2);          // 0 slings, 1 arm
-        /* the steel tube runs parallel through its middle half, then cones to half the
-           slings diameter at the arms — which is exactly length/100 (Peking) */
-        const k = S.iron
+      /* the steel tube runs parallel through its middle half, then cones to half the
+         slings diameter at the arms — which is exactly length/100 (Peking). One function
+         of the station (0 slings, 1 arm), because the furled roll rests on this profile too */
+      const taperK = t => S.iron
           ? (t < 0.5 ? 1.0 : 1.0 - ((t - 0.5) / 0.5) * 0.5)
           : (t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
            : t < 0.75 ? 0.856 - 0.256 * ((t - 0.25) / 0.5)
                       : 0.600 - 0.200 * ((t - 0.75) / 0.25));
+      for (let i = 0; i < yp.count; i++) {
+        const t = Math.abs(yp.getY(i)) / (yardLen / 2);          // 0 slings, 1 arm
+        const k = taperK(Math.min(1, t));
         yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
       }
       yg.computeVertexNormals();
@@ -2460,9 +2462,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
          forward and a shade up on the 74's 5° mizzen, forward and DOWN on the corbita's 48°
          artemon, where the yard hangs under the spar as a spritsail yard hangs under a
          bowsprit, with its sail below it. Furled, the roll is fatter than the yard (a 0.46 m
-         roll on the 74's 0.27 m course yard), so the offset takes the roll's radius and the
-         bundle lies against the mast and not through it — the lateen's rule (round 254).
-         The cloth hangs from the yard where it is; the lifts, sheets, ties, jeers and braces
+         roll on the 74's 0.27 m course yard); r257 pushed the yard forward by the roll's
+         radius for it, which is not where a parrel holds a yard, and r259 (0y²⁶) stows the
+         roll on TOP of the yard instead (makeFurl's seat, below), so the yard stands at the
+         two radii in both states. The cloth hangs from the yard where it is; the lifts, sheets, ties, jeers and braces
          read the spar's own centre (mastYards, spars) as they always have. No plate reads
          the offset — the fitting is the rig's own — and the record says so (userData.slung). */
       const mastRs = mastRAt(yy);
@@ -2470,8 +2473,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
         ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((yy - prevYard) * 0.97) * 0.055)
                                    / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
         : 0;
-      const OFF = mastRs + Math.max(slingsD / 2, rRoll);
+      /* r259 (0y²⁶, 0y²⁸): the two radii in BOTH states — the parrel or the truss holds the
+         yard at the pole whether the cloth is set or stowed; the roll rides the yard's top */
+      const OFF = mastRs + slingsD / 2;
       const nX = -Math.cos(rakeRad), nY = Math.sin(rakeRad);   // the axis's forward normal
+      const dX = Math.sin(rakeRad), dY = Math.cos(rakeRad);    // up the axis
       const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
       ym.position.set(yX, yY, 0);
       /* r258: what holds the yard there — the iron hull's fixed lower yard hangs in chain
@@ -2487,7 +2493,15 @@ function buildRig(S, group, mats, FINE, FURLED) {
         held: HELD,
         heldFrom: 'class (round 258): the iron hull\'s fixed lower yard on an iron truss, every '
           + 'hoisting yard and every yard of the wooden rig on a rope parrel; the truss\'s own '
-          + 'throw is not modelled and the yard lies against the pole' };
+          + 'throw is not modelled and the yard lies against the pole',
+        /* r259 (0y²⁶): where the stowed cloth lies — on the yard's top, leaned forward, the
+           bunt wedged between the yard and the pole's fore face; the lean is makeFurl's */
+        stow: FURLED ? { on: 'the top of the yard, leaned forward', lean0Deg: 20,
+          clearM: +(0.03 + 0.06 * mastRs).toFixed(3),
+          stowFrom: 'class (round 259): the harbour stow rolls the cloth onto the top of the yard '
+            + 'and trices the bunt up at the slings before the mast; the roll leans forward off '
+            + 'the top by 20°, and by more where the bunt would else stand into the pole; no '
+            + 'plate reads it' } : null };
       group.add(tag(ym, 'yard'));
       /* the steel yard's card carries its provenance, the iron-mast rule: no tube record
          was in reach for these spars, so the RATE is the record's and the figure derived */
@@ -2567,7 +2581,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
         sails.push(makeFurl(
           new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
           new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
-          (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
+          (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true,
+            /* r259: the roll SITS on the yard — up the mast's axis and forward of it, on the
+               yard's own tapered radius at each station; the clearance carries the braced
+               arm's swing toward the pole's shoulder (sinTRIM·z less the round pole's
+               recession z²/2R peaks near 0.053·R at 19.5° of brace) */
+            seat: { dir: new THREE.Vector3(dX, dY, 0), fwd: new THREE.Vector3(nX, nY, 0),
+                    sparRAt: tt => (slingsD / 2) * taperK(Math.min(1, tt * 0.96)),
+                    lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs } }));
       } else {
         const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
         /* the cloth names its mast and its yard's height, so the audit can tell its own
@@ -4787,11 +4808,37 @@ function makeFurl(A, B, area, mat, group, o) {
     /* the cloth runs out toward the ends of the roll */
     let R = r0 * Math.pow(Math.max(0, Math.sin(Math.PI * t)), 0.30);
     if (o.bunt) R *= 0.72 + 0.68 * Math.exp(-Math.pow((t - 0.5) / 0.16, 2));
+    const Rs = R;                                    // the roll's radius here, before the pinch
     /* the gasket pinch, narrow at each lashing, full cloth between */
     R *= 1 - 0.24 * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.PI * t * nG), 5.0);
-    const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len)
+    const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len);
+    if (o.seat) {
+      /* ── THE ROLL SITS ON TOP OF ITS YARD, AND THE BUNT CLEARS THE MAST (round 259, 0y²⁶) ──
+         A square sail is stowed UP: the crew on the footropes gather the cloth onto the yard's
+         top and pass the gaskets round both, and the bunt — the body of the cloth — is triced
+         up onto the yard at the slings, before the mast. In every photograph of a laid-up
+         square-rigger the rolls lie along the yards' upper fore sides and the bunt swells up
+         and forward of the pole. This roll hung 0.3·r0 BELOW the spar's line like every other
+         furl, and its bunt, 1.4·r0 fat where the mast is, stood 0.4·r0 into the pole's fore
+         face — 0.19 m on the 74's course, 0.25 m on Preussen's, 56 of the fleet's 104 yards
+         by more than 3 cm (r259/furl-before.json). Now the roll's centre stands off the spar's
+         axis by the spar's own radius at this station plus the roll's — resting on it — along
+         a line leaned forward off the spar's top (seat.dir is up the mast, seat.fwd its forward
+         normal) by lean0, and by MORE where the bunt's creased after side (1.085·R, the crease
+         term below) would else reach abaft the plane of the spar's own after face, which is the
+         pole's: the lean that leaves it seat.clear forward of that plane. So the bunt lies
+         wedged between the yard's fore-upper quarter and the pole, touching both, where the
+         harbour stow puts it; the thin ends ride the tapered arms at 20°. The pinch is left
+         out of the seat so the roll's centre line does not wobble at the gaskets. */
+      const sparR = o.seat.sparRAt ? o.seat.sparRAt(Math.abs(2 * t - 1)) : o.seat.sparR;
+      const need = (1.085 * Rs + o.seat.clear - sparR) / Math.max(sparR + Rs, 1e-6);
+      const lean = Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
+      P.addScaledVector(o.seat.dir, (sparR + Rs) * Math.cos(lean))
+       .addScaledVector(o.seat.fwd, (sparR + Rs) * Math.sin(lean));
+    } else {
       /* the roll hangs a little off the spar's own line, on the side the cloth gathers */
-      .addScaledVector(e2, -r0 * 0.30);
+      P.addScaledVector(e2, -r0 * 0.30);
+    }
     for (let j = 0; j <= NR; j++) {
       const th = (j / NR) * Math.PI * 2;
       /* cloth, not machined metal: shallow longitudinal creases ride round the roll */
@@ -4816,7 +4863,10 @@ function makeFurl(A, B, area, mat, group, o) {
   group.add(tag(m, 'sail', o.name || 'Furled sail',
     'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
     + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
-    + 'stows fat and a royal thin.'));
+    + 'stows fat and a royal thin.'
+    + (o.seat ? ' A square sail is rolled onto the TOP of its yard and the gaskets passed '
+      + 'round both; the bunt, the body of the cloth, is triced up at the slings, on the yard '
+      + 'before the mast.' : '')));
   return m;
 }
 

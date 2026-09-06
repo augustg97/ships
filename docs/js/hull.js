@@ -1381,13 +1381,14 @@ const slingsD = S.iron ? yardLen / 50
 const yg = new THREE.CylinderGeometry(slingsD / 2, slingsD / 2, yardLen, 16, 8);
 const ym = new THREE.Mesh(yg, woodDark);
 const yp = yg.attributes.position;
-for (let i = 0; i < yp.count; i++) {
-const t = Math.abs(yp.getY(i)) / (yardLen / 2);
-const k = S.iron
+const taperK = t => S.iron
 ? (t < 0.5 ? 1.0 : 1.0 - ((t - 0.5) / 0.5) * 0.5)
 : (t < 0.25 ? 1.0 - 0.144 * (t / 0.25)
 : t < 0.75 ? 0.856 - 0.256 * ((t - 0.25) / 0.5)
 : 0.600 - 0.200 * ((t - 0.75) / 0.25));
+for (let i = 0; i < yp.count; i++) {
+const t = Math.abs(yp.getY(i)) / (yardLen / 2);
+const k = taperK(Math.min(1, t));
 yp.setX(i, yp.getX(i) * k); yp.setZ(i, yp.getZ(i) * k);
 }
 yg.computeVertexNormals();
@@ -1399,8 +1400,9 @@ const rRoll = FURLED
 ? Math.max(0.05, Math.sqrt(((yardLen * 0.96) * ((yy - prevYard) * 0.97) * 0.055)
 / (Math.PI * Math.max(yardLen * 0.96, 0.1))))
 : 0;
-const OFF = mastRs + Math.max(slingsD / 2, rRoll);
+const OFF = mastRs + slingsD / 2;
 const nX = -Math.cos(rakeRad), nY = Math.sin(rakeRad);
+const dX = Math.sin(rakeRad), dY = Math.cos(rakeRad);
 const yX = mxA(yy) + nX * OFF, yY = yy + nY * OFF;
 ym.position.set(yX, yY, 0);
 const HELD = (S.iron && hoist === 'fixed') ? 'truss' : 'parrel';
@@ -1413,7 +1415,13 @@ sideFrom: 'class: a square yard lies before its mast, held to it by a parrel or 
 held: HELD,
 heldFrom: 'class (round 258): the iron hull\'s fixed lower yard on an iron truss, every '
 + 'hoisting yard and every yard of the wooden rig on a rope parrel; the truss\'s own '
-+ 'throw is not modelled and the yard lies against the pole' };
++ 'throw is not modelled and the yard lies against the pole',
+stow: FURLED ? { on: 'the top of the yard, leaned forward', lean0Deg: 20,
+clearM: +(0.03 + 0.06 * mastRs).toFixed(3),
+stowFrom: 'class (round 259): the harbour stow rolls the cloth onto the top of the yard '
++ 'and trices the bunt up at the slings before the mast; the roll leans forward off '
++ 'the top by 20°, and by more where the bunt would else stand into the pole; no '
++ 'plate reads it' } : null };
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1465,7 +1473,10 @@ const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
 sails.push(makeFurl(
 new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
 new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
-(yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true }));
+(yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true,
+seat: { dir: new THREE.Vector3(dX, dY, 0), fwd: new THREE.Vector3(nX, nY, 0),
+sparRAt: tt => (slingsD / 2) * taperK(Math.min(1, tt * 0.96)),
+lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs } }));
 } else {
 const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
 sq.userData.mastX = x; sq.userData.yardY = yY;
@@ -2646,9 +2657,18 @@ for (let i = 0; i <= NA; i++) {
 const t = i / NA;
 let R = r0 * Math.pow(Math.max(0, Math.sin(Math.PI * t)), 0.30);
 if (o.bunt) R *= 0.72 + 0.68 * Math.exp(-Math.pow((t - 0.5) / 0.16, 2));
+const Rs = R;
 R *= 1 - 0.24 * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.PI * t * nG), 5.0);
-const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len)
-.addScaledVector(e2, -r0 * 0.30);
+const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len);
+if (o.seat) {
+const sparR = o.seat.sparRAt ? o.seat.sparRAt(Math.abs(2 * t - 1)) : o.seat.sparR;
+const need = (1.085 * Rs + o.seat.clear - sparR) / Math.max(sparR + Rs, 1e-6);
+const lean = Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
+P.addScaledVector(o.seat.dir, (sparR + Rs) * Math.cos(lean))
+.addScaledVector(o.seat.fwd, (sparR + Rs) * Math.sin(lean));
+} else {
+P.addScaledVector(e2, -r0 * 0.30);
+}
 for (let j = 0; j <= NR; j++) {
 const th = (j / NR) * Math.PI * 2;
 const rr = R * (1 + 0.05 * Math.sin(th * 5 + t * 31) + 0.035 * Math.sin(th * 9 - t * 57));
@@ -2672,7 +2692,10 @@ m.userData.kind = 'furl';
 group.add(tag(m, 'sail', o.name || 'Furled sail',
 'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
 + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
-+ 'stows fat and a royal thin.'));
++ 'stows fat and a royal thin.'
++ (o.seat ? ' A square sail is rolled onto the TOP of its yard and the gaskets passed '
++ 'round both; the bunt, the body of the cloth, is triced up at the slings, on the yard '
++ 'before the mast.' : '')));
 return m;
 }
 function furlMat(mats) {
