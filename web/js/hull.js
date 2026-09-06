@@ -3247,7 +3247,24 @@ function buildRig(S, group, mats, FINE, FURLED) {
          for the halyard block — a class figure, five yard-diameters and not under 0.45 m,
          read from no plate. The mast is SHORT still, because a lateen takes its area from the
          spar rather than from height; it is only as tall as its own yard needs. */
-      const slingY = heel[1] + dir[1] * yardLen / 3;       // the yard's line at the mast's station
+      /* ── AND THE MAST RAKES AS ITS RECORD SAYS (round 255) ───────────────────────────
+         The lateen pole was built plumb on every hull while five of the twelve carry a rake
+         in their record — the carrack's and the fluyt's mizzens 4° aft, the galley's and the
+         galleass's foremasts 4° forward, the galleass's mizzen 2° aft (r255/rake-before.json:
+         built 0.00° against the record on all five; the square masts above have always taken
+         theirs, and the lug's since round 253). The axis runs from the deck at the mast's
+         station up at the record's rake — x + tan(rake)·(h − base) — and the SLING is where
+         the yard's own line meets that axis: solve heel + dir·s = axis(y) for s. On a plumb
+         mast that is exactly r254's yardLen/3 from the heel; on the galley's forward-raked
+         foremast the axis leans towards the heel and the sling slides DOWN the yard to meet
+         it (0.43 m in height), on the carrack's aft-raked mizzen UP it (0.75 m). The yard's
+         angle is the halyard's and the tack's, not the mast's, so the yard does not turn with
+         the rake — it is the parrel that moves. */
+      const tanR = Math.tan(rakeRad);
+      const mxL = h => x + tanR * (h - base);                      // the axis's x at height h
+      const sAlong = (x - heel[0] + tanR * (heel[1] - base)) / (dir[0] - tanR * dir[1]);
+      const slingY = heel[1] + dir[1] * sAlong;             // the yard's line at the mast's AXIS
+      const slingX = mxL(slingY);
       const headroom = Math.max(0.45, 10 * rYs);
       /* a MIXED hull's lateen mizzen is a tall pole on a square-rigged ship — the carrack's
          record gives 0.806 of the main lower, the fluyt's 0.874 — and its shrouds have
@@ -3261,10 +3278,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
          lateens are three different trees — and the spar is tagged like every other mast */
       const mRtop = B * 0.020 * dScale[0], mRbot = B * 0.032 * dScale[0];
       const mastRl = h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
-      const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh, 18), woodDark);
-      mm.position.set(x, base + mh / 2, 0);
+      /* the pole lies along the raked axis: its length is the height over cos(rake), so the
+         head stands at base + mh exactly and the axis passes through (x, base) and
+         mxL(base + mh) — the same placement the square block gives its segments */
+      const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh / Math.cos(rakeRad), 18), woodDark);
+      mm.position.set(mxL(base + mh / 2), base + mh / 2, 0);
+      mm.rotation.z = -rakeRad;
       group.add(tag(mm, 'mast'));
-      lateenHead = { y: base + mh, hounds };
+      lateenHead = { y: base + mh, hounds, x: mxL(hounds), rakeDeg: mk.rake || 0 };
       const ym = new THREE.Mesh(new THREE.CylinderGeometry(rYpeak, rYheel, ylen, 14), woodDark);
       ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
       ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
@@ -3328,7 +3349,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
       beside.position.set(0, 0, OFF);
       group.add(beside);
       ym.userData.lateen = {
-        mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
+        mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), slingX: +slingX.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
+        rakeDeg: mk.rake || 0, mastHeadX: +mxL(base + mh).toFixed(3),
         headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
         off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
         rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
@@ -3340,11 +3362,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
          fitting the battened lug carries at every batten (round 253). */
       {
         const rPar = 0.010 + B * 0.0004, Rp = mastRl(slingY) + rPar, zFace = OFF - rYs;
+        /* the loop lies in the plane square to the mast's AXIS, centred where the yard meets
+           it (round 255): e1 is the in-plane unit vector square to a pole raked by rakeRad */
+        const e1 = [Math.cos(rakeRad), -Math.sin(rakeRad)];
         const arc = [];
-        for (let a = 50; a <= 310; a += 20)
-          arc.push(new THREE.Vector3(x + Rp * Math.sin(a * Math.PI / 180), slingY, Rp * Math.cos(a * Math.PI / 180)));
-        const pts = [new THREE.Vector3(arc[0].x, slingY, zFace), ...arc,
-                     new THREE.Vector3(arc[arc.length - 1].x, slingY, zFace)];
+        for (let a = 50; a <= 310; a += 20) {
+          const sa = Math.sin(a * Math.PI / 180), ca = Math.cos(a * Math.PI / 180);
+          arc.push(new THREE.Vector3(slingX + Rp * sa * e1[0], slingY + Rp * sa * e1[1], Rp * ca));
+        }
+        const pts = [new THREE.Vector3(arc[0].x, arc[0].y, zFace), ...arc,
+                     new THREE.Vector3(arc[arc.length - 1].x, arc[arc.length - 1].y, zFace)];
         const segs = [];
         for (let i = 0; i + 1 < pts.length; i++) segs.push([pts[i], pts[i + 1]]);
         const par = ropeMesh(segs, rPar, ropeMat);
@@ -3834,7 +3861,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
          lateen mast ran to a point 2.1–6.9 m above the masthead on the all-lateen hulls
          and 10.6–12.1 m above it on the carrack's and fluyt's mizzens (r254/lateen-after.json,
          shroudTops), and on the galley's raked foremast 0.73 m off a plumb pole. They set up
-         at the hounds, between the sling and the head, on the mast that is there. */
+         at the hounds, between the sling and the head, on the mast that is there — and since
+         round 255 the pole rakes as its record says, so the head is lateenHead.x, on the axis. */
       const topY = lateenHead ? lateenHead.hounds : base + lower * 0.97;
       const shroudPts = [[], []];
       const shroudSegs = [], ratSegs = [];
@@ -3894,7 +3922,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
-          const b = new THREE.Vector3(lateenHead ? x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+          const b = new THREE.Vector3(lateenHead ? lateenHead.x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
           let a;
           if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
           else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);

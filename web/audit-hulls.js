@@ -6531,7 +6531,15 @@
         const want = y.rec && typeof y.rec.mastX === 'number' ? y.rec.mastX : A.x + (B.x - A.x) / 3;
         for (const mm of masts) { const dd = Math.abs(mm.foot.x - want); if (dd < bd) { bd = dd; m = mm; } }
         if (!m) { say(v.id, 'a lateen yard slung off its mast', 'no mast mesh on the hull'); continue; }
-        const t = (m.foot.x - A.x) / ((B.x - A.x) || 1e-9);
+        /* the crossing is where the yard's LINE meets the mast's AXIS, not the foot's station
+           (round 255): on a raked pole the axis at the sling's height stands tan(rake) times
+           that height from the foot — 0.35 m on the carrack's 4° mizzen — and a read at the
+           station would call a yard slung on the axis 'adrift' or 'through'. Solve
+           A + (B − A)·t = axis(y) in the x–y plane; the station read is the fallback where
+           the yard runs parallel to the axis. */
+        const kx = (m.head.x - m.foot.x) / ((m.head.y - m.foot.y) || 1e-9);
+        const den = (B.x - A.x) - kx * (B.y - A.y);
+        const t = Math.abs(den) > 1e-9 ? (m.foot.x - A.x + kx * (A.y - m.foot.y)) / den : (m.foot.x - A.x) / ((B.x - A.x) || 1e-9);
         const cross = A.clone().lerp(B, Math.max(0, Math.min(1, t)));
         const ax = axisAt(m, cross.y), off = Math.hypot(cross.x - ax.x, cross.z - ax.z);
         const rM = mastR(m, cross.y), rY = rA + (rB - rA) * Math.max(0, Math.min(1, t));
@@ -6558,6 +6566,40 @@
       }
       if (loose)
         say(v.id, 'a shroud made fast above its mast', `${loose} of ${shrouds.length} shroud meshes end where no mast is (first: top at x ${first.hi.x.toFixed(2)}, y ${first.hi.y.toFixed(2)}, z ${first.hi.z.toFixed(2)}; the nearest axis ${first.near ? first.near.m.name + ' at x ' + first.near.m.foot.x.toFixed(2) + ', head y ' + first.near.m.head.y.toFixed(2) + ', ' + first.near.d.toFixed(2) + ' m off' : 'none'})`);
+    }
+    /* ── D-MAST-RAKE (round 255): A MAST STANDS AT ITS RECORD'S RAKE. The lateen block built
+       its pole plumb on every hull while five lateen masts carry a rake in their record — the
+       carrack's and the fluyt's mizzens 4° aft, the galley's and the galleass's foremasts 4°
+       forward, the galleass's mizzen 2° aft (r255/rake-before.json: built 0.00° on all five;
+       the square masts have always taken theirs, and the lug's since round 253). Read from
+       the BUILT scene: every mesh tagged 'mast' and named 'Mast' spanning 2 m or more gives an
+       axis, foot to head (the means of its lowest and highest rings, in hull space); its rake
+       is atan2(Δx, Δy) in degrees, +aft; its record is the mast whose station (at − 0.5)·lwl
+       lies nearest its foot, within a tenth of the hull. The two must agree to 0.5°, else 'a
+       mast built against its record's rake'. Silent where the record's rake is 20° or more: a
+       spar raked like the corbita's artemon (−48°) reads its ring means a degree off the true
+       axis, the read's own bias (r255/rake-before.json, −46.9° against −48) — a residual of
+       the read, not of the build, and named in the handoff. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const Lr = H.lwl;
+      g.traverse(o => {
+        if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p || p.key !== 'mast' || p.name !== 'Mast') return;
+        const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+        const span = yMax - yMin; if (span < 2) return;
+        const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0;
+        for (const q of pts) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+        lo.divideScalar(nl); hi.divideScalar(nh);
+        const built = Math.atan2(hi.x - lo.x, hi.y - lo.y) * 180 / Math.PI;
+        let rec = null, bd = 1e9;
+        for (const mk of (H.masts || [])) { const dd = Math.abs((mk.at - 0.5) * Lr - lo.x); if (dd < bd) { bd = dd; rec = mk; } }
+        if (!rec || bd > 0.1 * Lr) return;
+        const want = rec.rake || 0; if (Math.abs(want) >= 20) return;
+        if (Math.abs(built - want) > 0.5)
+          say(v.id, "a mast built against its record's rake", `the ${rec.rig} mast at station ${rec.at} (foot x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}, ${span.toFixed(1)} m tall) stands at ${built.toFixed(2)}° where its record says ${want}°`);
+      });
     }
     /* ── D-MAST-STEP (round 248): A MAST ON A DOUBLE HULL STEPS ON THE PLATFORM. The canoe's
        mast stood with its heel 0.18 m inside the platform between her hulls (r247/

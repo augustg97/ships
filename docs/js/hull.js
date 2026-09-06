@@ -1819,16 +1819,21 @@ const ylen = Math.hypot(peakPt[0] - heel[0], peakPt[1] - heel[1]);
 const mzD = mixed ? (mainLower * 0.875 * 0.700 / 36) * 2 / 3 : 0;
 const rYheel = mixed ? mzD * 0.50 : B * 0.011, rYpeak = mixed ? mzD * 0.21 : B * 0.005;
 const rYs = rYheel + (rYpeak - rYheel) / 3;
-const slingY = heel[1] + dir[1] * yardLen / 3;
+const tanR = Math.tan(rakeRad);
+const mxL = h => x + tanR * (h - base);
+const sAlong = (x - heel[0] + tanR * (heel[1] - base)) / (dir[0] - tanR * dir[1]);
+const slingY = heel[1] + dir[1] * sAlong;
+const slingX = mxL(slingY);
 const headroom = Math.max(0.45, 10 * rYs);
 const hounds = mixed ? Math.max(slingY + headroom * 0.5, base + lower * 0.97) : slingY + headroom * 0.5;
 const mh = mixed ? Math.max(slingY + headroom, hounds + headroom * 0.5) - base : slingY + headroom - base;
 const mRtop = B * 0.020 * dScale[0], mRbot = B * 0.032 * dScale[0];
 const mastRl = h => mRbot + (mRtop - mRbot) * Math.max(0, Math.min(1, (h - base) / mh));
-const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh, 18), woodDark);
-mm.position.set(x, base + mh / 2, 0);
+const mm = new THREE.Mesh(new THREE.CylinderGeometry(mRtop, mRbot, mh / Math.cos(rakeRad), 18), woodDark);
+mm.position.set(mxL(base + mh / 2), base + mh / 2, 0);
+mm.rotation.z = -rakeRad;
 group.add(tag(mm, 'mast'));
-lateenHead = { y: base + mh, hounds };
+lateenHead = { y: base + mh, hounds, x: mxL(hounds), rakeDeg: mk.rake || 0 };
 const ym = new THREE.Mesh(new THREE.CylinderGeometry(rYpeak, rYheel, ylen, 14), woodDark);
 ym.position.set((heel[0] + peakPt[0]) / 2, (heel[1] + peakPt[1]) / 2, 0);
 ym.rotation.z = -Math.atan2(peakPt[0] - heel[0], peakPt[1] - heel[1]);
@@ -1849,7 +1854,8 @@ const beside = new THREE.Group();
 beside.position.set(0, 0, OFF);
 group.add(beside);
 ym.userData.lateen = {
-mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
+mastX: +x.toFixed(3), slingY: +slingY.toFixed(3), slingX: +slingX.toFixed(3), mastHeadY: +(base + mh).toFixed(3),
+rakeDeg: mk.rake || 0, mastHeadX: +mxL(base + mh).toFixed(3),
 headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the sling, not under 0.45 m; no plate reads it',
 off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
 rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
@@ -1858,11 +1864,14 @@ sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1) };
 beside.add(tag(ym, 'yard', 'Lateen yard'));
 {
 const rPar = 0.010 + B * 0.0004, Rp = mastRl(slingY) + rPar, zFace = OFF - rYs;
+const e1 = [Math.cos(rakeRad), -Math.sin(rakeRad)];
 const arc = [];
-for (let a = 50; a <= 310; a += 20)
-arc.push(new THREE.Vector3(x + Rp * Math.sin(a * Math.PI / 180), slingY, Rp * Math.cos(a * Math.PI / 180)));
-const pts = [new THREE.Vector3(arc[0].x, slingY, zFace), ...arc,
-new THREE.Vector3(arc[arc.length - 1].x, slingY, zFace)];
+for (let a = 50; a <= 310; a += 20) {
+const sa = Math.sin(a * Math.PI / 180), ca = Math.cos(a * Math.PI / 180);
+arc.push(new THREE.Vector3(slingX + Rp * sa * e1[0], slingY + Rp * sa * e1[1], Rp * ca));
+}
+const pts = [new THREE.Vector3(arc[0].x, arc[0].y, zFace), ...arc,
+new THREE.Vector3(arc[arc.length - 1].x, arc[arc.length - 1].y, zFace)];
 const segs = [];
 for (let i = 0; i + 1 < pts.length; i++) segs.push([pts[i], pts[i + 1]]);
 const par = ropeMesh(segs, rPar, ropeMat);
@@ -2138,7 +2147,7 @@ const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
 const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
 const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
 [1, -1].forEach((side, si2) => {
-const b = new THREE.Vector3(lateenHead ? x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
+const b = new THREE.Vector3(lateenHead ? lateenHead.x : x + Math.sin(rakeRad) * lower, topY, side * B * 0.03);
 let a;
 if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
 else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);

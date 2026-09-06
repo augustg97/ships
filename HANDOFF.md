@@ -21701,3 +21701,101 @@ docs/audit-hulls.js convicts a lateen yard through its mast (1 mentions); docs/d
 THE RATCHET: THE OPENING FULL RATCHET at the clean r253 HEAD 83e630a (r254/open-ratchet.out, launched 17:10 as the round's first act, ended 17:54): RATCHET EXIT 1  END 17:54:55; 65 frames scored; movers 3: ship-dhow 0.057%/0.020; ship-galleass 0.158%/0.044; aboard-treasure 0.603%/0.311. Largest three: aboard-treasure 0.603%/0.311, ship-galleass 0.158%/0.044, ship-dhow 0.057%/0.020.
  PARTIAL after the push, the r239 pattern (r254/partial-*.out): frames scored one at a time by check --frame on the r254 builder, each diff read before its accept — action-lepanto 0.399%/0.097 CHANGED, ship-carrack 0.355%/0.208 CHANGED, ship-dhow 0.994%/0.503 CHANGED, ship-galleass 0.635%/0.377 CHANGED, ship-galley 0.547%/0.305 CHANGED (5 frames; r254/PREDICTIONS-close.md names the 5 frames that MUST move — ship-dhow, ship-galley, ship-galleass, ship-carrack and action-lepanto, every frame that draws a lateen-rigged hull's rig at a scale it can be read — the 13 that MAY, the berth neighbours within three of the four lateen berths, the default Shipwright, action-gravelines and the era 2–4 Sea views, and the 47 that must not). The other 60 frames are UNSCORED on the r254 builder; r255's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (593deb6 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 255 — 2026-09-05 — the lateen mast rakes as its record says: five lateen masts on four hulls carry a rake in their record and were built plumb, the carrack's and the fluyt's mizzens 4° aft, the galley's and the galleass's foremasts 4° forward, the galleass's mizzen 2° aft; the pole now lies along the raked axis, the sling is where the yard's own line meets that axis, the parrel is a loop square to it and the shrouds end on the raked head; the audit reads every lower mast's built rake against its record and solves the yard's crossing at the axis instead of the foot's station, and the full ratchet ran first at the clean r254 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r254 ordered r255's opening: the FULL ratchet at
+the clean HEAD before any edit, then (0y¹⁹), the mixed hull's mizzen yard read from a carrack plate, or (0y²⁰), the
+lateen mast's rake, or (0y⁹), the corbita's artemon, or Endurance by looking. The ratchet was launched at HEAD 43ea173
+at 18:17 as the round's first act and — the r250 rule — no screenshot was taken beside it: the round's probes and audits
+ran on a COPY of web/ served on :8150 (build/staging/r255/web, every file a symlink to web/ except hull.js and
+audit-hulls.js; vessels.json is copied and unchanged), one browser at a time, and the witness waited for RATCHET EXIT.
+(0y²⁰) was taken, as a class: (0y¹⁹) needs a plate that has not been found and the clock was 80 minutes.**
+
+**THE FAULT, measured on the built scene (r255/probe_rake.py, rake-before.json on the r254 builder: every mesh tagged
+'mast' and named 'Mast' on all 27 masted hulls, its axis foot to head in hull space and that axis's rake in degrees,
+atan2(Δx, Δy), +aft, against the record's mast nearest its foot; and on the lateen hulls every 'Lateen yard' against
+its mast with the crossing solved two ways, at the foot's STATION as r254's audit read it and at the mast's AXIS). Five
+lateen masts carry a rake in their record and were built at 0.00°: the carrack's mizzen (station 0.85, record 4°, an
+18.5 m pole from 4.99 m), the fluyt's mizzen (0.85, 4°, 14.9 m), the galley's foremast (0.13, −4°, 7.1 m), the
+galleass's foremast (0.14, −4°, 8.5 m) and her mizzen (0.80, 2°, 6.5 m). The lateen block wrote its pole at x and never
+read mk.rake — r254 named it (0y²⁰) when it put the shroud head on the plumb pole. Every other lower mast in the fleet
+stands at its record's rake to 0.3° except the corbita's artemon, which reads −46.91° against a record of −48°: that
+spar's ring means, taken over the lowest and highest 2% of its span, sit off the true axis on a 48° lean — a bias of the
+read, not of the build (the square block places every segment with x + sin(rake)·(h − base) and rotation −rake), and
+named below as (0y²³).**
+
+**THE MODEL (web/js/hull.js; r255/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted). A
+mast stands at the rake its record gives it, and everything hung on it follows the pole. Four changes in the lateen
+block and one in the shroud block. (1) The axis: mxL(h) = x + tan(rake)·(h − base), from the deck at the mast's
+station; the pole is a cylinder of length mh / cos(rake) centred at (mxL(base + mh/2), base + mh/2) and turned by
+−rake about z, so its head stands at base + mh exactly and its axis passes through (x, base) and mxL(base + mh) — the
+same placement the square block gives its segments. (2) The sling: the yard's line does not turn with the mast (its
+angle is the halyard's and the tack's), so the sling is where that line meets the raked axis — heel + dir·s =
+axis(y), solved for s: s = (x − heel.x + tan(rake)·(heel.y − base)) / (dir.x − tan(rake)·dir.y). On a plumb mast this
+is r254's yardLen/3 exactly, so the dhow's two yards, the caravel's three, the galley's main and the galleass's main are
+unchanged to the millimetre (rake-after.json against rake-before.json, crossing and head equal on all seven). (3) The
+parrel is a loop in the plane square to the raked axis, centred at (slingX, slingY): each point C + Rp·(sin a·e1 +
+cos a·e2) with e1 = (cos rake, −sin rake, 0) and e2 = +z, its ends to the yard's near face at arc[0].y and
+arc[last].y. (4) The yard's record gains slingX, rakeDeg and mastHeadX; lateenHead gains x = mxL(hounds) and rakeDeg.
+(5) The shroud block reads the head at lateenHead.x — on the raked axis — where r254 put it at the deck station x. No
+record field changes.**
+
+**MEASURED AFTER (r255/rake-after.json, the final builder on :8150): the five masts stand at 4.00, 4.00, −4.00, −4.00
+and 2.00° — delta 0.00 on every one. The carrack's mizzen head moved from x 12.931 to 14.223 (1.29 m aft at 23.47 m),
+the fluyt's from 10.029 to 11.068 (1.04 m aft at 18.18 m), the galley's foremast head from −14.673 to −15.141 (0.47 m
+forward) and DOWN from 8.459 to 8.025 m, the galleass's foremast head 0.56 m forward and down from 11.573 to 11.063,
+her mizzen head 0.24 m aft and up from 9.563 to 9.774 — because on an all-lateen hull the pole's height is the sling's
+plus a masthead's room, and the sling slid along the yard to meet the leaning axis (down the yard by 0.43 and 0.51 m
+in height on the forward-raked foremasts, up it by 0.21 m on the galleass's mizzen, up by 0.75 and 0.59 m on the
+carrack's and fluyt's mizzens whose pole height is the record's and did not move). Every yard crosses its mast's AXIS
+at the two radii — dx 0.000 on all twelve, offset 0.118–0.277 m to port (+z) — within the mast's span 0.47–0.72 m
+under the head on the all-lateen hulls, 11.3 and 9.2 m under it on the two mixed mizzens (the (0y¹⁹) sling, unchanged
+in kind); every parrel ring is centred on the axis within 0.018–0.043 m; every shroud top on the six lateen hulls'
+lateen masts lies 0.23–0.56 m UNDER its mast's head, on the raked axis to 0.35 m (the galley's foremast shrouds, which
+r254 left 0.73 m off the plumb pole, now end 0.18 m off the raked one).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r255/apply-audit-edits.py). D-MAST-RAKE (round 255) reads the BUILT
+scene: every mesh tagged 'mast' and named 'Mast' spanning 2 m or more gives an axis, foot to head (the means of its
+lowest and highest rings); its rake is atan2(Δx, Δy) in degrees; its record is the mast whose station (at − 0.5)·lwl
+lies nearest its foot, within a tenth of the hull; the two must agree to 0.5°, else 'a mast built against its
+record's rake'. Silent where the record's rake is 20° or more — the corbita's artemon reads 1.1° off at the ring
+means, the read's own bias (0y²³). And D-LATEEN-YARD-ON-MAST (r254) now solves the yard's crossing where the yard's
+LINE meets the mast's AXIS in the x–y plane — A + (B − A)·t = axis(y) — with the station read as the fallback where
+the two run parallel: on a raked pole the axis at the sling's height stands tan(rake) times that height from the foot
+(0.50 m on the carrack's mizzen), and a read at the foot's station would have called a yard slung on the axis 'adrift'
+or 'through'. PROOF A (r255/audit-proof-a.out, the r254 builder under the r255 audit on :8150, before hull.after.js
+went into the copy): exactly 5 problems — 'a mast built against its record's rake' on the carrack (0.00° against 4°),
+the galley (0.00° against −4°), the galleass twice (−4°, 2°) and the fluyt (4°) — and none on any other hull or rule.
+The final audit on the r255 builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out) and on :8149 after
+the copy into web/ (audit-final-8149.out).**
+
+**WITNESSED (r255/witness-galley-b270.png, witness-carrack-b270.png, witness-galleass-b270.png — 2880 × 1800 off :8150 after RATCHET EXIT, the after builder, from the starboard beam, b=270, l=6, z=0.9, where each mast stands in front of its cloth and a lean reads against the horizon; the befores are the committed baselines frames/ship-galley.png and ship-carrack.png, and the galleass's pair is read at its partial's accept). The galley: bow to the viewer's right, both yards raking down and forward with their heels over the bow, the mainmast a plumb pole amidships, and the foremast — the shorter pole forward — leaning visibly toward the bow, its shrouds converging on the leaning head and not on a point beside it; the card's "Rig, deck to truck" reads 10.2 m as before, the main's head unmoved. The carrack: the mizzen a pole from the aftcastle to the height of the main's top, leaning aft by the same angle the foremast leans forward and the main stands near-plumb (the record's −3°, +1°, +4°), its shrouds ending on it and the lateen yard slung low on its side — the (0y¹⁹) sling, unchanged in kind.**
+
+**Rule 0 on the galley witness read whole (r255/witness-galley-b270.png): a rendered vessel on water, not a chart — a long low black hull with a bank of oars fanned along its side and a spur at the bow, seen from the beam on a grey-blue sea under a pale sky with a hazed coast behind, two pale lateen sails on raked yards, the rigging as lines against the sky. Three facts a viewer can read off it without a legend: she is a two-masted lateen galley under sail with her oars out; her foremast leans toward the bow while her mainmast stands upright; each yard is slung beside its mast and the shrouds of both run to the mastheads and stop there.**
+
+**Named residuals, in order:** (0y²⁰) CLOSED as a class — every lateen mast stands at its record's rake, with its
+sling, its parrel and its shroud head on the raked axis, and the audit reads every lower mast's built rake against its
+record. NEW (0y²³) the corbita's artemon reads −46.9° at the ring means against a record of −48°: the 2%-of-span ring
+read is biased on a spar leaning 48°, so D-MAST-RAKE is silent at 20° or more; a principal-axis read of the mesh's
+vertices would remove the bias and let the rule cover the artemon — a change to the read, not to the build, and it
+belongs with (0y⁹). (0y¹⁹) as r254 names it, with this round's figure: the carrack's mizzen sling stands at 12.13 m on
+a pole from 4.99 to 23.47 m (0.39 of it), the fluyt's at 8.96 on 3.33–18.18 (0.38) — a carrack's mizzen yard is slung
+near the masthead in every plate, so either the class's 1.15·lower yard at 56° is wrong for a mixed hull or the
+record's 0.806 is Steel's square-rig proportion and not a lateen pole's; a plate read at a stated scale decides it.
+(0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y⁹) (0y¹¹) as r252
+names them. (0y′) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged
+and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷)
+(0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r256 opens by running the FULL ratchet at the clean HEAD first (r255/PREDICTIONS-close.md names 3 frames that MUST
+move — ship-galley, ship-galleass, ship-carrack — 17 that MAY, and the rest that MUST NOT; only those scored by check
+--frame after the push are accepted here), with no screenshot beside it until RATCHET EXIT; then takes (0y¹⁹), the
+mixed hull's mizzen yard and pole read from a carrack plate at a stated scale, or (0y⁹) with (0y²³), the corbita's
+artemon and the principal-axis read that would let the rake rule cover it, or the survey's next never-spun hull,
+Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788660179 at the build; the push and the live poll are in
+build/staging/r255/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r255 staging stays on disk uncommitted, the r211 convention.**
