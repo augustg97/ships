@@ -4508,11 +4508,21 @@ const hullPt = (o, k, out) => { const a = o.geometry.attributes.position; return
 const cc = [], heels = [];
 g.traverse(o => {
 if (!o.isMesh || !o.geometry) return;
-if (o.userData.crabclaw) cc.push(o.userData.crabclaw);
+const pointsOf = () => { o.updateMatrixWorld(true); const V = new THREE.Vector3(), P = []; for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); P.push(V.clone()); } return P; };
+if (o.userData.crabclaw) {
+const P = pointsOf(); let yMin = 1e9, yMax = -1e9; for (const q of P) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+const band = P.filter(q => q.y < yMin + (yMax - yMin) * 0.03); const c = new THREE.Vector3(); for (const q of band) c.add(q); c.divideScalar(Math.max(1, band.length));
+let r = 0; for (const q of band) r = Math.max(r, Math.hypot(q.x - c.x, q.z - c.z));
+cc.push(Object.assign({ heelR: r }, o.userData.crabclaw)); }
 const p = tagOf(o);
-if (p && p.key === 'mast' && p.name === 'Mast') { o.updateMatrixWorld(true); const V = new THREE.Vector3(); let lo = null;
-for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); if (!lo || V.y < lo.y) lo = V.clone(); }
-if (lo) heels.push(lo); }
+if (p && p.key === 'mast') {
+const P = pointsOf(); let yMin = 1e9, yMax = -1e9; for (const q of P) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
+const span = yMax - yMin; if (span < 0.5) return;
+const lo = new THREE.Vector3(), hi = new THREE.Vector3(); let nl = 0, nh = 0, rF = 0;
+for (const q of P) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
+lo.divideScalar(Math.max(1, nl)); hi.divideScalar(Math.max(1, nh));
+for (const q of P) if (q.y < yMin + span * 0.02) rF = Math.max(rF, Math.hypot(q.x - lo.x, q.z - lo.z));
+heels.push({ x: lo.x, y: lo.y, lo, hi, rFoot: rF }); }
 });
 (H.masts || []).forEach((mk, i) => {
 const sg = mk.sail; if (!sg || !(sg.yard > 0) || !(sg.boom > 0)) return;
@@ -4523,8 +4533,11 @@ say(v.id, "crab-claw spars that are not the record's", `mast ${i}: yard ${b.yard
 if (Math.abs(b.boomAngle - sg.boomAngle) > 0.5)
 say(v.id, 'a crab-claw boom at the wrong angle', `mast ${i}: ${b.boomAngle.toFixed(1)}° built, ${sg.boomAngle}° recorded`);
 let heel = null; for (const h of heels) if (!heel || Math.abs(h.x - b.mastX) < Math.abs(heel.x - b.mastX)) heel = h;
-if (heel) { const want = heel.x + (sg.tackAbaft || 0), off = b.tack[0] - want;
-if (Math.abs(off) > 0.10) say(v.id, 'a crab-claw tack away from its mast', `mast ${i}: the tack at x ${b.tack[0].toFixed(2)}, ${off.toFixed(2)} m from the heel at ${heel.x.toFixed(2)} plus the record's ${sg.tackAbaft || 0} m abaft`); }
+if (heel) {
+const d = heel.hi.clone().sub(heel.lo); const tt = Math.abs(d.y) > 1e-6 ? (b.tack[1] - heel.lo.y) / d.y : 0; const ax = heel.lo.clone().addScaledVector(d, tt);
+const nA = new THREE.Vector3(d.y, -d.x, 0).normalize(); if (nA.x < 0) nA.negate();
+const want = heel.rFoot + (b.heelR || 0); const aft = (b.tack[0] - ax.x) * nA.x + (b.tack[1] - ax.y) * nA.y; const off = aft - want;
+if (Math.abs(off) > 0.06) say(v.id, 'a crab-claw tack away from its mast', `mast ${i}: the tack at x ${b.tack[0].toFixed(2)} stands ${aft.toFixed(3)} m abaft the axis at its height against the two radii ${want.toFixed(3)} (mast ${heel.rFoot.toFixed(3)} + yard heel ${(b.heelR || 0).toFixed(3)})`); }
 });
 const saRow = (v.rows || []).find(r => Array.isArray(r) && /^sail area$/i.test(String(r[0]).trim()));
 if (saRow) {
@@ -4663,6 +4676,76 @@ if (loose && STATE === 'set')
 say(v.id, 'a shroud made fast above its mast', `${loose} of ${shrouds.length} shroud meshes end where no mast is (first: top at x ${first.hi.x.toFixed(2)}, y ${first.hi.y.toFixed(2)}, z ${first.hi.z.toFixed(2)}; the nearest axis ${first.near ? first.near.m.name + ' at x ' + first.near.m.foot.x.toFixed(2) + ', head y ' + first.near.m.head.y.toFixed(2) + ', ' + first.near.d.toFixed(2) + ' m off' : 'none'})`);
 };
 lateenRead(g, 'set');
+const crabRead = (G, STATE) => {
+const SB = STATE === 'furled' ? ' (furled build)' : '';
+const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const axisOf = pts => {
+const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+const d = new THREE.Vector3(0, 1, 0);
+for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+if (d.y < 0) d.negate();
+let tMin = 1e9, tMax = -1e9; const ts = [];
+for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+const span = tMax - tMin;
+const radAt = (t0, tol) => { let r = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) r = Math.max(r, q.clone().sub(c).addScaledVector(d, -ts[i]).length()); }); return r; };
+return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span, rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02) };
+};
+const masts = [], yards = [], lash = [], furls = [];
+G.traverse(o => { if (!o.isMesh || !o.geometry) return;
+if (o.userData.kind === 'furl') { if (STATE === 'furled') { const pts = hullPts(o); const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length); furls.push({ c, pts }); } return; }
+const p = tagOf(o); if (!p) return;
+if (p.key === 'yardLashing') { lash.push({ rec: o.userData.yardLashing || {}, pts: hullPts(o) }); return; }
+if (p.key === 'mast') { const ax = axisOf(hullPts(o)); if (ax.span >= 0.5) masts.push(ax); }
+if (p.key === 'yard' && o.userData.crabclaw) yards.push({ ax: axisOf(hullPts(o)), rec: o.userData.crabclaw }); });
+for (const yd of yards) {
+const Y = yd.ax, at = `the crab-claw yard on the mast at x ${yd.rec.mastX}`;
+let m = null, bd = 1e9; for (const mm of masts) { const dd = Math.abs(mm.foot.x - yd.rec.mastX); if (dd < bd) { bd = dd; m = mm; } }
+if (!m) { say(v.id, 'a crab-claw yard with no mast' + SB, at); continue; }
+const nA = new THREE.Vector3(m.dir.y, -m.dir.x, 0).normalize(); if (nA.x < 0) nA.negate();
+const mastR = h => { const t = Math.max(0, Math.min(1, (h - m.foot.y) / Math.max(1e-6, m.head.y - m.foot.y))); return m.rFoot + (m.rHead - m.rFoot) * t; };
+const axisAt = h => m.foot.clone().addScaledVector(m.dir, (h - m.foot.y) / (m.dir.y || 1e-9));
+const yardAt = h => Y.foot.clone().addScaledVector(Y.dir, (h - Y.foot.y) / (Y.dir.y || 1e-9));
+const yardR = h => { const t = Math.max(0, Math.min(1, (h - Y.foot.y) / Math.max(1e-6, Y.head.y - Y.foot.y))); return Y.rFoot + (Y.rHead - Y.rFoot) * t; };
+const h0 = Y.foot.y + 0.3, h1 = m.head.y - 0.1; let worstOff = -1e9, worstIn = 1e9, zMax = 0, fwd = false;
+for (let i = 0; i < 5; i++) { const h = h0 + (h1 - h0) * i / 4; const d = yardAt(h).sub(axisAt(h)); const aft = d.dot(nA); const ex = aft - (mastR(h) + yardR(h));
+worstOff = Math.max(worstOff, ex); worstIn = Math.min(worstIn, ex); zMax = Math.max(zMax, Math.abs(d.z)); if (aft < 0) fwd = true; }
+if (fwd) say(v.id, 'a crab-claw yard forward of its mast' + SB, `${at}: its centre stands forward of the axis`);
+else if (worstIn < -0.03) say(v.id, 'a crab-claw yard through its mast' + SB, `${at}: ${(-worstIn).toFixed(3)} m inside the two radii`);
+if (worstOff > 0.05) say(v.id, 'a crab-claw yard standing off its mast' + SB, `${at}: ${worstOff.toFixed(3)} m over the two radii (the mast's radius plus its own) at the worst of five stations`);
+if (zMax > 0.03) say(v.id, "a crab-claw yard off its mast's centreline" + SB, `${at}: ${zMax.toFixed(3)} m athwartships of the axis`);
+const L = lash.filter(l => typeof l.rec.mastX === 'number' && Math.abs(l.rec.mastX - yd.rec.mastX) < 0.05);
+if (L.length < 2) say(v.id, 'a crab-claw yard with no lashing to its mast' + SB, `${at}: ${L.length} lashing ring(s) drawn`);
+else {
+let nearHead = false, nearHeel = false;
+for (const l of L) { let lo = 1e9, hi = -1e9, hm = 0; for (const q of l.pts) { hm += q.y; const a = q.clone().sub(axisAt(q.y)).dot(nA); lo = Math.min(lo, a); hi = Math.max(hi, a); } hm /= l.pts.length;
+if (hm > m.head.y - 0.6) nearHead = true; if (hm < Y.foot.y + 0.6) nearHeel = true;
+const yFar = yardAt(hm).sub(axisAt(hm)).dot(nA) + yardR(hm);
+if (lo > -mastR(hm) + 0.03 || hi < yFar - 0.03) say(v.id, 'a crab-claw lashing that does not go round both spars' + SB, `${at}: the ring at ${hm.toFixed(2)} m reaches ${lo.toFixed(3)}..${hi.toFixed(3)} m abaft the axis against the mast's far side ${(-mastR(hm)).toFixed(3)} and the yard's ${yFar.toFixed(3)}`); }
+if (!nearHead) say(v.id, 'a crab-claw yard unlashed at the masthead' + SB, `${at}: no lashing within 0.6 m of the head`);
+if (!nearHeel) say(v.id, 'a crab-claw yard unlashed at its heel' + SB, `${at}: no lashing within 0.6 m of the heel`);
+}
+if (STATE === 'furled') {
+const rolls = furls.filter(f => { const vv = f.c.clone().sub(Y.foot); const s = vv.dot(Y.dir); return vv.clone().addScaledVector(Y.dir, -s).length() <= 1.5 && s >= -0.5 && s <= Y.span + 0.5; });
+if (!rolls.length) { say(v.id, 'a furled crab-claw yard with no roll on it', `${at} has no furled roll within 1.5 m of its line`); continue; }
+for (const f of rolls) {
+let into = 0, gap = 1e9;
+for (const q of f.pts) { const w = q.clone().sub(m.foot); const t = w.dot(m.dir);
+if (t >= -0.02 && t <= m.span + 0.02) { const r = m.rFoot + (m.rHead - m.rFoot) * Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))); const dist = w.clone().addScaledVector(m.dir, -t).length(); if (dist < r) into = Math.max(into, r - dist); }
+const wy = q.clone().sub(Y.centre); const ty = wy.dot(Y.dir); const sy = Math.max(0, Math.min(1, (ty + Y.span / 2) / Math.max(Y.span, 1e-6))); const rq = Y.rFoot + (Y.rHead - Y.rFoot) * sy;
+gap = Math.min(gap, wy.clone().addScaledVector(Y.dir, -ty).length() - rq); }
+const vv = f.c.clone().sub(Y.centre); const sv = vv.dot(Y.dir); const aftOf = vv.clone().addScaledVector(Y.dir, -sv).dot(nA);
+if (into > 0.03) say(v.id, 'a furled crab claw stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+if (aftOf < 0) say(v.id, 'a furled crab claw hung forward of its yard', `the roll on ${at} has its centre ${(-aftOf).toFixed(3)} m forward of the yard's axis, toward the mast`);
+}
+}
+}
+};
+crabRead(g, 'set');
 {
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const principalAxis = pts => {
@@ -5551,6 +5634,7 @@ if (gf) {
 gf.updateMatrixWorld(true);
 const YF = yardRead(gf, 'furled');
 lateenRead(gf, 'furled');
+crabRead(gf, 'furled');
 {
 const inv = new THREE.Matrix4().copy(gf.matrixWorld).invert();
 const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);

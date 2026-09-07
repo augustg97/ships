@@ -22481,3 +22481,153 @@ docs/audit-hulls.js convicts a furled lateen roll hung inboard of its yard (1 me
 THE RATCHET: THE OPENING FULL RATCHET at the clean r259 HEAD 0ee366f (r260/open-ratchet.out, launched a third time at 10:35:25 on 2026-09-07 as the 10:32 firing's first act — the 00:26:46 run of 2026-09-06 and the 10:03:18 run of 2026-09-07 each died with its session, the second at its 26th frame, r260/open-ratchet-1.out — the before witnesses taken beside it from :8149, one browser at a time): RATCHET EXIT 0  END 11:17:37; 65 frames scored; movers 0. Largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, passage-sahul 0.038%/0.013. No frame moved at the clean r259 HEAD: r259's stowed square rolls and its yard rules, unscored on 62 frames at r259's close, crossed no gate anywhere, and the three frames r259 accepted at its own close (shipwright-furled, action-salamis, action-myeongnyang) stand. Nothing to accept.
  PARTIAL after the push, the r239 pattern (r260/partial-*.out): frames scored one at a time by check --frame on the r260 builder, each diff read before its accept — action-lepanto 0.146%/0.025 CHANGED (1 frames; r260/PREDICTIONS-close.md names the one frame that MUST move — action-lepanto, the galleys and the galleass built furled, their five lateen yards moved inboard onto their poles and their five brailed rolls leaned outboard of the masts — no MAY frame, and the rest that must not: the set lateen build is unchanged in value and the square seat is re-expressed with the same numbers). The other 64 frames are UNSCORED on the r260 builder; r261's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (afbbcce record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+---
+
+## Round 261 — 2026-09-07 — the crab-claw yard is lashed along its mast: both of the voyaging canoe's luff spars stood in the air abaft their poles, 0.34–0.49 m abaft the fore mast's axis and 0.14–0.29 m abaft the main's on both builds against the two radii of 0.03–0.05, with nothing drawn holding them, on masts drawn 0.068 m thick and spars 0.03 m; the yard now lies against the mast's after face at the two radii from its heel to the masthead, held by four three-turn lashings, the masts and spars take the plate's girth, the furled roll seats on the yard's after side, a new rule reads every crab-claw yard against its mast and its lashings on both builds and its roll on the furled one, and the full ratchet ran first at the clean r260 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r260 ordered r261's opening: the FULL ratchet
+at the clean HEAD before any edit, with no screenshot beside it until RATCHET EXIT; then (0y³⁶), the canoe's crab-claw
+yard against its mast from Hōkūleʻa's plates, or (0y³⁰), or (0y¹⁹) with (0y²⁴), or Endurance by looking. The ratchet was
+launched at HEAD 2ce74c7 at 11:33:13 as the round's first act (r261/run-open.sh, open-ratchet.out) and waited on in the
+foreground; every edit was made on a COPY of web/ served on :8150 (build/staging/r261/web, every file a symlink to web/
+except hull.js, audit-hulls.js and vessels.json, which are copies); the probes, the two audit runs and the six witnesses
+were taken beside the ratchet one browser at a time (load 2–3 at launch, 30–70 from the ChatGPT/Codex app's renderer
+after 12:05, not from this round's browsers). (0y³⁶) was taken.**
+
+**THE PLATE, READ AT 8x (r261/plate-fore-3x.png, plate-main-3x.png; z-fore-mid-8x.png, z-fore-head-8x.png,
+z-fore-deck-8x.png, z-main-mid-8x.png, z-main-head-8x.png, z-main-deck-8x.png — crops of build/staging/r247/hokulea-2009.jpg,
+the 2009 broadside, Wikimedia Commons Hokule'aSailing2009.jpg, 1280 px, 52 ± 2 px/m at the rig). At mid-height the fore
+mast is a pole about 10 px thick, 0.19 m, and the yard, about 6 px, 0.11 m, lies against its AFTER side with a lashing of
+pale rope round both; at the masthead the yard passes the cap with a lashing round the two and stands on above it as a free
+spar, about 3.1 m (163 px) over the head; at the deck the yard's heel stands against the mast's foot in a mass of lashing
+with the boom's heel and the tack tackle at it. The main mast reads the same. r250 read the TACK at plate (430, 715),
+0.48 m abaft the mast's foot, and the yard's line through it at 90.4° over the aft-horizontal — that was the read of a
+corner of cloth, not of the spar, and a 1° angle inside the read's own ±0.9° — and recorded tackAbaft 0.5 / 0.3 and
+yardOffMast 1.0, from which the builder hung each yard's line through a point half a metre abaft its pole. The mast's
+own girth was never read: the class drew it from the single hull's 1.05 m beam.**
+
+**THE FAULT, measured on the built scene, set and furled (r261/probe_crab.py on the r260 builder, :8150 — every 'Yard'
+mesh carrying userData.crabclaw against its mast: the yard's axis by principal component, its centre at five stations
+from its heel + 0.3 m to the masthead − 0.1 m decomposed against the mast's axis, ABAFT along the axis's aft normal and
+athwartships, against the mast's radius there plus the yard's; every yardLashing ring's reach; on the furled build the
+roll's reach into the pole, its nearest approach to the yard and its centre's offset abaft the yard). r261/crab-before.json:
+the fore yard stands 0.491 m abaft the axis at 1.5 m and 0.344 m at 10.0 m against the two radii 0.049 and 0.034 — 0.31
+to 0.44 m over; the main 0.291 to 0.144 against 0.049 to 0.034 — 0.11 to 0.24 m over; the same on both builds, since the
+yard is the hinge and does not move with the state. No lashing exists (nLash 0). The masts read 0.034 m in radius at the
+foot and 0.024 at the head — 0.068 m thick, a 9 m pole with the girth of an oar — and the yards 0.015 / 0.008. The
+furled rolls were sound in themselves (no reach into any pole, touching their yards at −0.010 m), hung 0.165 and 0.138 m
+abaft the yards' lines. PROOF A (r261/audit-proof-a.out, the r260 builder under the r261 audit on :8150) is exactly 10
+problems, all on the voyaging canoe — 2 'a crab-claw tack away from its mast', 2 'a crab-claw yard standing off its mast',
+2 the same '(furled build)', 2 'a crab-claw yard with no lashing to its mast', 2 the same '(furled build)' — and nothing
+on any other hull or rule ("checked 33 hulls, 10 problems").**
+
+**WHAT THE RIG IS. The luff spar of this rig is not slung from the mast: it is LASHED to it. The yard lies against the
+pole's after face from its heel at the deck to the masthead and stands on above the head; the sail's luff is laced to
+the yard, the boom's heel is lashed at the yard's heel, which is the tack, and the boom opens aft and up from there. The
+lashings — rope round mast and yard together — are what hold the yard where it is; the halyard and the tack tackle
+set it up and down. That is what the plate shows and what every photograph of Hōkūleʻa under sail shows: mast and yard
+read as one thick spar with the yard's peak curving on above the masthead.**
+
+**THE MODEL (web/js/hull.js; r261/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+(1) The crab-claw block: the yard's centre stands off the raked axis by the mast's radius plus its own, dead aft (the
+axis's aft normal, z 0), at the heel (tackH = base + tackUp, the record's 0.2 m) and at the masthead (poleTop = base +
+poleM); a straight spar lashed hard to a tapering pole leans in toward the head by the difference of the two offsets
+over the pole's length (0.3° here), so the yard's angle is the mast's plus that lean; the tack IS the yard's heel; the
+spread, the boom, the peak and the cloth follow from the tack as before, so the sail's area is unchanged in value. The
+same law runs in both states, since the yard does not move with the state. (2) The spars' girth is the plate's: the
+yard's heel radius is 0.0043 of its length (0.11 m on the 12.75 m fore yard), the boom's the same rate, each tapering
+to half at the tip, where B × 0.014 drew both 0.03 m. (3) THE LASHINGS: at nLash stations about 2.6 m apart from 0.25 m
+above the heel to 0.12 m under the masthead (four on a 9 m pole), three turns each — an oval tube of rope (a Curve
+subclass through THREE.TubeGeometry) from the mast's far side to the yard's far side, as wide across as the fatter of
+the two plus the rope, the turns stacked 2.1 rope-radii apart along the axis — tagged 'yardLashing' (a new PARTS entry,
+stage 6, with its card) and recorded (userData.yardLashing: mastX, h, i, n, turn). The count and the turns are class
+figures; the plate reads three lashings on the fore mast at 52 px/m and does not resolve the turns. (4) The furled
+roll runs tack to peak along the yard and takes r259's seat with the yard's aft normal as dir, +z as fwd, the yard's own
+taper as sparRAt, lean0 0 and a new `plane: false` — the roll's centre stands off the yard's axis by the yard's radius
+plus its own, dead aft, and needs no plane to clear because the pole is on the yard's OTHER side; makeFurl reads
+plane === false as 'lean by lean0 exactly' and every other seat is the r260 line with the same value. The closed boom
+(aY − 0.10 rad, as before) lies along the roll's after side. (5) The yard's record (userData.crabclaw.lashed) carries the
+two offsets, the four radii, the lean, tackH, poleTop, the lashing count and the derivation. (6) THE RECORD
+(web/data/vessels.json; r261/vessels.before.json, vessels.after.json, apply-record-edits.py): both masts take diaM 0.19
+with a provenance naming the plate, the scale and the 2 px read (± 0.04 m), so the wooden-mast branch draws the pole
+outright (r234's rule) where the class drew 0.068; the sail records retire tackAbaft and yardOffMast and their provenance
+says what the r250 read was of and why it is retired. No other hull has a crabclaw mast, a diaM change or a lashing.**
+
+**MEASURED AFTER (r261/crab-after.json, the same probe on the r261 builder, set and furled). (a) Both yards stand at
+the two radii at all five stations on both builds: the fore 0.148 m abaft the axis at 1.5 m against 0.159 expected and
+0.103 at 10.0 m against 0.111, the main 0.143 against 0.154 and 0.098 against 0.106 — −0.008 to −0.011 m, inside the
+0.03 m 'through' gate (the probe's mast radius is the foot band's max, 0.104, against the builder's 0.094 at the tack's
+height); athwartships −0.005 to −0.007 m. The fore tack moved from x −3.823 to −4.170 (0.347 m forward onto its pole),
+the main's from 1.020 to 0.868 (0.152 m). The yards' angles read 89.3° against the masts' 89.0°. (b) The masts read
+0.104 / 0.073 m in radius (0.19 m thick at the deck), the yards 0.057 / 0.029 (fore) and 0.052 / 0.026 (main).
+(c) 24 lashing rings — four stations × three turns × two masts, at 1.45–1.50, 4.28–4.33, 7.11–7.15 and 9.93–9.98 m on
+the fore (the masthead at 10.08), 1.39–9.91 on the main — and every ring reaches from the mast's far side to the yard's
+far side: the lowest fore ring spans −0.114 to +0.223 m abaft the axis against the mast's far side at −0.103 and the
+yard's at +0.205, the highest −0.087 to +0.160 against −0.073 and +0.141. (d) The furled rolls: no point inside any pole
+(0.000 m), each touching its yard (−0.014 and −0.019 m), each centre abaft its yard's axis by 0.216 and 0.202 m.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r261/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js).
+(1) D-CRABCLAW-SPARS's tack test reads the mast's axis, its foot radius and the yard's heel radius off the meshes and
+wants the tack at the axis at its own height plus the two radii, abaft, within 0.06 m; the record's tackAbaft is gone
+from it. (2) D-CRABCLAW-YARD-ON-MAST (new, 0y³⁶) is crabRead(G, STATE), run on the set build `g` and the furled build
+`gf` with the state named in the conviction: every 'Yard' mesh carrying userData.crabclaw gives an axis by principal
+component and its end radii, its mast is the nearest foot to the record's mastX, and at five stations from the heel
++ 0.3 m to the masthead − 0.1 m the yard's centre is read against the axis — more than 0.05 m over the two radii 'a
+crab-claw yard standing off its mast', more than 0.03 m under 'through its mast', a centre forward of the axis 'forward
+of its mast', more than 0.03 m athwartships "off its mast's centreline"; every 'yardLashing' ring on that mast must reach
+from the mast's far side to the yard's far side (0.03 m), there must be at least two, one within 0.6 m of the masthead
+and one within 0.6 m of the heel. (3) D-FURL-CRABCLAW (new), on the furled build inside crabRead: the roll (a 'furl'
+mesh whose mean lies within 1.5 m of the yard's line) no more than 0.03 m inside the pole, within 0.05 m of the yard's
+surface, its centre ABAFT the yard's axis, and a yard with no roll convicted. PROOF A is above. The final audit on the
+r261 builder: "checked 33 hulls, 0 problems" on :8150 (r261/audit-final-8150.out); the files copied into web/ after
+RATCHET EXIT are cmp-identical to the copy :8150 served, and the :8149 run was not repeated for the clock.**
+
+**WITNESSED (r261/witness-canoe-beam-before.png — the r260 builder in web/ on :8149, taken beside the opening ratchet
+one browser at a time; witness-canoe-beam-after.png — the r261 builder on :8150; both the canoe set from the port beam,
+b=90, l=8, z=0.6; w-beam-fore-mid-3x-pair.png the fore mast at mid-height cropped at 3x from each, w-beam-fore-heel-3x-pair.png
+its foot, w-beam-main-mid-3x-pair.png the main; witness-canoe-furled-beam-before/after.png the same camera furled,
+w-furled-fore-2x-pair.png the fore mast at 2x). BEFORE (left): a thin mast with a separate thin stick standing in the air
+abaft it, daylight between the two the whole height, the cloth's luff on the stick; at the deck the stick stands on the
+platform half a metre abaft the mast's foot with the cloth's corner at it and nothing joining the two. AFTER (right): a
+pole three times as thick with the yard lying against its after side, the two touching the whole height, a band of rope
+turns round both at mid-height, the cloth's luff at the yard; at the deck the yard's heel against the mast's foot with
+the lashing round both and the cloth's tack at it. FURLED, before: the roll hung on a thin line in the air abaft the
+mast with the spar showing through it; after: the roll lies along the yard on the mast's after side, the lashing round
+mast and yard showing through the cloth, the closed boom along the roll's after side. Nothing else in any pair differs:
+the platform, the shrouds, the water and the hull are the same picture.**
+
+**Rule 0 on the after witness read whole (r261/witness-canoe-beam-after.png): a rendered double canoe on water from her
+port beam, not a chart — the planked hull with its platform of cross-beams, two thick masts with their yards lashed along
+them and their crab-claw sails set aft on booms, the shrouds to the rail, a grey sea to a hazed horizon. Three facts a
+viewer can read off it without a legend: her sails are triangles on two spars that meet at the deck and open upward and
+aft; the luff spar is lashed to the mast and not hung from it; she is a double hull under a platform, the masts stepped
+on the beams.**
+
+**Named residuals, in order:** (0y³⁶) CLOSED as a class — every crab-claw yard lies against its mast's after face at the
+two radii, lashed there, on both builds, and the stowed roll lies on the yard clear of the pole. NEW (0y³⁸) the yard's
+tip over the masthead: the record's 12.75 m fore yard on a 9.05 m pole (r249 left the mast heights unchanged at 0.95 of
+Steel's main; atProvenance reads the fore about 10.0 m and the main 11.7 m off the plate) stands 3.9 m over the head
+against the plate's 3.1 m; the mast heights are the read to take. NEW (0y³⁹) the lashings' count (four) and turns
+(three) are class figures; the plate reads three on the fore mast and does not resolve the turns; the halyard and the
+tack tackle at the heel are not drawn. NEW (0y⁴⁰) the closed boom passes through the furled roll's after side at 5.7°
+off the yard rather than lying lashed into the bundle. (0y³⁷) the lateen's outboard lean, as r260 names it. (0y³³) the
+gaskets, (0y³⁴) the square roll's one law, (0y³⁰) the truss's throw, (0y³¹) the chain slings, (0y³²) the iron rig's
+hoisting-yard parrels, as r258–r259 name them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them.
+(0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y′) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u)
+as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′)
+(0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c)
+(0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r262 opens by running the FULL ratchet at the clean HEAD first (r261/PREDICTIONS-close.md names the two frames that
+MUST move — ship-canoe and sea-canoe-floor — the two MAY frames, ship-dugout and ship-trireme as her berth neighbours,
+and the rest that MUST NOT; only those scored by check --frame after the push are accepted here), with no screenshot
+beside it until RATCHET EXIT; then takes (0y³⁸), the canoe's mast heights from the plate (10.0 and 11.7 m) with the
+yard's tip over the head, or (0y³⁰), the truss's throw read off the mesh, or (0y¹⁹) with (0y²⁴), the carrack's mizzen
+and the artemon read from plates at a stated scale, or the survey's next never-spun hull, Endurance (4,114 triangles
+per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788808377 at the build; the push and the live poll are in
+build/staging/r261/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r261 staging stays on disk uncommitted, the r211 convention.**

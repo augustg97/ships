@@ -2002,17 +2002,32 @@ sails.push(cl);
 if (mk.rig === 'crabclaw') {
 const SG = mk.sail && mk.sail.yard > 0 && mk.sail.boom > 0 ? mk.sail : null;
 const RAD = Math.PI / 180;
-const aY = SG ? (Math.PI / 2 - rakeRad) + (SG.yardOffMast || 0) * RAD : 1.19;
 const aB0 = SG ? SG.boomAngle * RAD : 0.46;
-const spread = aY - aB0;
+const poleTop = base + poleM;
+const tackH = base + (SG && SG.tackUp !== undefined ? SG.tackUp : 0.2);
+const nA = [Math.cos(rakeRad), -Math.sin(rakeRad)];
+const uA = [Math.sin(rakeRad), Math.cos(rakeRad)];
+const axisAt = h => [x + Math.tan(rakeRad) * (h - base), h];
 const LEECH = SG ? Math.min(1, Math.max(0.4, SG.leechRatio || 0.88)) : 0.640;
 const pull = SG ? 1 - 1.5 * (1 - LEECH) : (S.leechPull || 0.46);
 const sparLen = SG ? SG.yard
-: S.sailAreaEach ? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
+: S.sailAreaEach ? Math.sqrt(2 * S.sailAreaEach / (Math.sin((Math.PI / 2 - rakeRad) - aB0) * LEECH))
 : L * 0.98;
 const boomLen = SG ? SG.boom : sparLen;
 const clothLuff = SG && SG.cloth > 0 ? Math.min(SG.cloth, sparLen) : sparLen;
-const tack = SG ? [x + (SG.tackAbaft || 0), base + (SG.tackUp || 0)] : [x - L * 0.22, base];
+const rYheel = Math.max(B * 0.014, sparLen * 0.0043), rYtip = rYheel * 0.5;
+const rBheel = Math.max(B * 0.014, boomLen * 0.0043), rBtip = rBheel * 0.5;
+const yardRAt = sAlong => rYheel + (rYtip - rYheel) * Math.max(0, Math.min(1, sAlong / Math.max(sparLen, 1e-6)));
+const rMheel = mastRAt(tackH), rMhead = mastRAt(poleTop - 0.05);
+const sHead = (poleTop - tackH) / Math.cos(rakeRad);
+const offHeel = rMheel + rYheel, offHead = rMhead + yardRAt(sHead);
+const lean = Math.atan2(offHeel - offHead, sHead);
+const aY = (Math.PI / 2 - rakeRad) + lean;
+const spread = aY - aB0;
+const axT = axisAt(tackH);
+const tack = [axT[0] + nA[0] * offHeel, axT[1] + nA[1] * offHeel];
+const lashH0 = tackH + 0.25, lashH1 = poleTop - 0.12;
+const nLash = Math.max(2, Math.round((lashH1 - lashH0) / 2.6) + 1);
 const aB = FURLED ? aY - 0.10 : aB0;
 const tipY = [tack[0] + Math.cos(aY) * sparLen, tack[1] + Math.sin(aY) * sparLen];
 const tipB = [tack[0] + Math.cos(aB) * boomLen, tack[1] + Math.sin(aB) * boomLen];
@@ -2026,7 +2041,7 @@ group.add(sheetG);
 const rel = P => [P[0] - tack[0], P[1] - tack[1]];
 [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
 const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
-const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
+const g2 = new THREE.CylinderGeometry(nm === 'Yard' ? rYtip : rBtip, nm === 'Yard' ? rYheel : rBheel, len2, 14);
 const m2 = new THREE.Mesh(g2, woodDark);
 const inSheet = nm === 'Boom';
 const P0 = inSheet ? [0, 0] : tack, P1 = inSheet ? rel(tip) : tip;
@@ -2039,14 +2054,45 @@ yardTip: [+tipY[0].toFixed(3), +tipY[1].toFixed(3)], boomTip: [+tipB[0].toFixed(
 peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
 yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
 yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
-sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)' };
+sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
+lashed: { offHeel: +offHeel.toFixed(3), offHead: +offHead.toFixed(3), mastRheel: +rMheel.toFixed(3), mastRhead: +rMhead.toFixed(3),
+yardRheel: +rYheel.toFixed(3), yardRtip: +rYtip.toFixed(3), leanDeg: +(lean / RAD).toFixed(2), tackH: +tackH.toFixed(3), poleTop: +poleTop.toFixed(3), lashings: nLash,
+from: 'READ off the 2009 broadside at 8x (52 ± 2 px/m): the yard lies against the mast\'s after face, lashed to it at the heel, at mid-height and at the masthead (round 261, 0y³⁶); the offset is the two radii off the drawn spars, no plate reads a gap; the lashings\' count and turns are class figures' } };
 (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
 });
+{
+const ropeM = mats.ropeSolid || woodDark;
+const rr = Math.max(0.008, Math.min(0.014, rYheel * 0.2));
+const Oval = class extends THREE.Curve {
+constructor(a, b) { super(); this.a = a; this.b = b; }
+getPoint(t, o = new THREE.Vector3()) { const th = t * Math.PI * 2; return o.set(this.a * Math.cos(th), this.b * Math.sin(th), 0); }
+};
+const basis = new THREE.Matrix4().makeBasis(new THREE.Vector3(nA[0], nA[1], 0), new THREE.Vector3(0, 0, -1), new THREE.Vector3(uA[0], uA[1], 0));
+for (let i = 0; i < nLash; i++) {
+const h = lashH0 + (lashH1 - lashH0) * i / (nLash - 1);
+const rM = mastRAt(h), rY = yardRAt((h - tackH) / Math.cos(rakeRad));
+const off = offHeel + (offHead - offHeel) * (h - tackH) / Math.max(poleTop - tackH, 1e-6);
+const semiA = (rM + off + rY) / 2 + rr, semiZ = Math.max(rM, rY) + rr;
+const cA = (off + rY - rM) / 2;
+const ax = axisAt(h);
+for (let k = -1; k <= 1; k++) {
+const ring = new THREE.Mesh(new THREE.TubeGeometry(new Oval(semiA, semiZ), 28, rr, 6, true), ropeM);
+ring.quaternion.setFromRotationMatrix(basis);
+ring.position.set(ax[0] + nA[0] * cA + uA[0] * k * 2.1 * rr, ax[1] + nA[1] * cA + uA[1] * k * 2.1 * rr, 0);
+ring.userData.yardLashing = { mastX: +x.toFixed(3), h: +h.toFixed(3), i, n: nLash, turn: k + 1 };
+group.add(tag(ring, 'yardLashing'));
+}
+}
+}
 if (FURLED) {
-const mid = [(peakC[0] + tipB[0]) / 2, (peakC[1] + tipB[1]) / 2];
 sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
-new THREE.Vector3(mid[0], mid[1], 0),
-clothArea, furlMat(mats), group, {}));
+new THREE.Vector3(peakC[0], peakC[1], 0),
+clothArea, furlMat(mats), group, {
+seat: { dir: new THREE.Vector3(Math.sin(aY), -Math.cos(aY), 0), fwd: new THREE.Vector3(0, 0, 1),
+sparRAt: t => yardRAt(t * clothLuff), lean0: 0, plane: false,
+card: 'A crab claw closes on its own yard: the boom is hauled up against it and '
++ 'the cloth rolled to the yard on its after side, the mast standing clear on '
++ 'the other side of the spar the yard is lashed to.' } }));
 } else {
 const cl = makeTriSail([0, 0], rel(peakC), rel(tipB), sheetG, 0.075, pull, true);
 cl.userData.mastX = +x.toFixed(3);
@@ -2680,7 +2726,7 @@ const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len);
 if (o.seat) {
 const sparR = o.seat.sparRAt ? o.seat.sparRAt(t) : o.seat.sparR;
 const need = (1.085 * Rs + o.seat.clear - sparR) / Math.max(sparR + Rs, 1e-6);
-const lean = Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
+const lean = o.seat.plane === false ? o.seat.lean0 : Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
 P.addScaledVector(o.seat.dir, (sparR + Rs) * Math.cos(lean))
 .addScaledVector(o.seat.fwd, (sparR + Rs) * Math.sin(lean));
 } else {
@@ -3068,6 +3114,11 @@ what: 'The rope loop that holds a spar to its mast and lets it slide up and down
 + 'The yard lies on the mast\'s fore face and the loop goes round the after side, '
 + 'so with the wind abaft the beam the sail presses the yard onto the pole and the '
 + 'mast takes the drive.' },
+yardLashing: { stage: 6, name: 'Yard lashing',
+what: 'Turns of rope round the mast and the luff spar together, holding the spar against '
++ 'the pole\'s after face. A crab-claw yard is not slung from its mast: it is lashed '
++ 'along it, at the heel, at mid-height and at the masthead, and stands on above the '
++ 'head as a free spar.' },
 truss:    { stage: 6, name: 'Truss',
 what: 'The iron fitting that holds a lower yard to its mast on the nineteenth-century '
 + 'rig, where a rope parrel and truss pendants held it before: a band round the '

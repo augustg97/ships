@@ -3640,20 +3640,60 @@ function buildRig(S, group, mats, FINE, FURLED) {
          the masts' feet, both yards along their masts and both booms at 47–48°. */
       const SG = mk.sail && mk.sail.yard > 0 && mk.sail.boom > 0 ? mk.sail : null;
       const RAD = Math.PI / 180;
-      const aY = SG ? (Math.PI / 2 - rakeRad) + (SG.yardOffMast || 0) * RAD : 1.19;
       const aB0 = SG ? SG.boomAngle * RAD : 0.46;
-      const spread = aY - aB0;                          // the angle the two spars open to
+      /* ── THE YARD IS LASHED ALONG THE MAST'S AFTER FACE (round 261, 0y³⁶) ──────────────
+         The luff spar of this rig is not slung from the mast: it is LASHED to it, lying
+         against the pole's after face from its heel at the deck to the masthead, and standing
+         on above the head as a free spar. The 2009 broadside (Wikimedia Commons,
+         Hokule'aSailing2009.jpg, 1280 px, 52 ± 2 px/m at the rig; r261/z-fore-mid-8x.png,
+         z-fore-head-8x.png, z-fore-deck-8x.png) shows it at 8x: at mid-height the mast, a
+         pole about 10 px = 0.19 m thick, with the yard, about 6 px = 0.11 m, touching its
+         after side and a lashing of pale rope round both; at the masthead the yard passing
+         the cap with a lashing round the two; at the deck the yard's heel against the mast's
+         foot in a mass of lashing, the boom's heel and the tack tackle at it. r250 read the
+         TACK at plate (430, 715), 0.48 m abaft the mast's foot, and the yard's line through
+         it at 90.4° — the read of a corner of cloth, not of the spar, and a 1° angle inside
+         the read's own ±0.9° — so the model stood the yard 0.49 m abaft the fore mast's axis
+         at the deck and 0.34 m at the head, 0.29 and 0.14 m on the main (r261/crab-before.json),
+         a spar hung in the air abaft its pole with nothing drawn holding it there. Now the
+         yard's centre stands off the raked axis by the mast's radius plus its own, dead aft
+         (the axis's aft normal, z 0), at the heel and at the masthead — a straight spar
+         lashed hard to a tapering pole leans in toward the head by the difference of the two
+         radii over the pole's length, 0.2° here — and the tack IS the yard's heel, tackUp
+         over the deck. The record's tackAbaft and yardOffMast are retired (their reads are
+         re-stated in sail.provenance); the class solve without a record keeps its own spar
+         length from the area, on the same lashed line. */
+      const poleTop = base + poleM;                     // this rig's pole is one segment
+      const tackH = base + (SG && SG.tackUp !== undefined ? SG.tackUp : 0.2);
+      const nA = [Math.cos(rakeRad), -Math.sin(rakeRad)];   // the axis's AFT normal (+x is aft)
+      const uA = [Math.sin(rakeRad), Math.cos(rakeRad)];    // up the axis
+      const axisAt = h => [x + Math.tan(rakeRad) * (h - base), h];   // the axis's point at height h
       /* makeTriSail's leech is a quadratic Bezier bowed toward the tack: with its control
          point `pull` of the way from the tack to the chord's midpoint the cloth is
          1 − (2/3)(1 − pull) of the straight triangle — 0.640 at the class's 0.46 */
       const LEECH = SG ? Math.min(1, Math.max(0.4, SG.leechRatio || 0.88)) : 0.640;
       const pull = SG ? 1 - 1.5 * (1 - LEECH) : (S.leechPull || 0.46);
       const sparLen = SG ? SG.yard
-        : S.sailAreaEach ? Math.sqrt(2 * S.sailAreaEach / (Math.sin(spread) * LEECH))
+        : S.sailAreaEach ? Math.sqrt(2 * S.sailAreaEach / (Math.sin((Math.PI / 2 - rakeRad) - aB0) * LEECH))
         : L * 0.98;
       const boomLen = SG ? SG.boom : sparLen;
       const clothLuff = SG && SG.cloth > 0 ? Math.min(SG.cloth, sparLen) : sparLen;
-      const tack = SG ? [x + (SG.tackAbaft || 0), base + (SG.tackUp || 0)] : [x - L * 0.22, base];
+      /* the spars' girth is the plate's: the yard about 0.11 m thick on 12.75 m (0.0043 of its
+         length — 6 px at 52 px/m, ±2 px), the boom at the same rate, each tapering to half at
+         the tip; B × 0.014 drew them 0.03 m on this 1.05 m hull, a 12 m fishing rod */
+      const rYheel = Math.max(B * 0.014, sparLen * 0.0043), rYtip = rYheel * 0.5;
+      const rBheel = Math.max(B * 0.014, boomLen * 0.0043), rBtip = rBheel * 0.5;
+      const yardRAt = sAlong => rYheel + (rYtip - rYheel) * Math.max(0, Math.min(1, sAlong / Math.max(sparLen, 1e-6)));
+      const rMheel = mastRAt(tackH), rMhead = mastRAt(poleTop - 0.05);
+      const sHead = (poleTop - tackH) / Math.cos(rakeRad);        // the yard's station at the masthead
+      const offHeel = rMheel + rYheel, offHead = rMhead + yardRAt(sHead);   // the two radii, heel and head
+      const lean = Math.atan2(offHeel - offHead, sHead);          // the straight spar closes on the tapering pole
+      const aY = (Math.PI / 2 - rakeRad) + lean;                  // the yard's angle over the aft-horizontal
+      const spread = aY - aB0;                                    // the angle the two spars open to
+      const axT = axisAt(tackH);
+      const tack = [axT[0] + nA[0] * offHeel, axT[1] + nA[1] * offHeel];
+      const lashH0 = tackH + 0.25, lashH1 = poleTop - 0.12;      // the lashings' stations, heel to head
+      const nLash = Math.max(2, Math.round((lashH1 - lashH0) / 2.6) + 1);
       /* a crab claw furls by CLOSING: the boom swings up against the yard and the cloth is
          rolled between the two spars — the rig scissors shut about its own tack */
       const aB = FURLED ? aY - 0.10 : aB0;
@@ -3682,7 +3722,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const rel = P => [P[0] - tack[0], P[1] - tack[1]];
       [[tipY, 'Yard'], [tipB, 'Boom']].forEach(([tip, nm]) => {
         const len2 = Math.hypot(tip[0] - tack[0], tip[1] - tack[1]);
-        const g2 = new THREE.CylinderGeometry(B * 0.007, B * 0.014, len2, 14);
+        const g2 = new THREE.CylinderGeometry(nm === 'Yard' ? rYtip : rBtip, nm === 'Yard' ? rYheel : rBheel, len2, 14);
         const m2 = new THREE.Mesh(g2, woodDark);
         /* the boom swings with the cloth, in the sheeted group about the tack; the yard is the
            hinge and stays in the hull's frame where the record puts it */
@@ -3699,14 +3739,58 @@ function buildRig(S, group, mats, FINE, FURLED) {
           peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
           yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
           yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
-          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)' };
+          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
+          lashed: { offHeel: +offHeel.toFixed(3), offHead: +offHead.toFixed(3), mastRheel: +rMheel.toFixed(3), mastRhead: +rMhead.toFixed(3),
+                    yardRheel: +rYheel.toFixed(3), yardRtip: +rYtip.toFixed(3), leanDeg: +(lean / RAD).toFixed(2), tackH: +tackH.toFixed(3), poleTop: +poleTop.toFixed(3), lashings: nLash,
+                    from: 'READ off the 2009 broadside at 8x (52 ± 2 px/m): the yard lies against the mast\'s after face, lashed to it at the heel, at mid-height and at the masthead (round 261, 0y³⁶); the offset is the two radii off the drawn spars, no plate reads a gap; the lashings\' count and turns are class figures' } };
         (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
       });
+      /* ── THE LASHINGS (round 261, 0y³⁶): SOMETHING HOLDS THE YARD THERE ──────────────────
+         The plate shows pale rope round mast and yard together at the heel, at mid-height and
+         at the masthead. Each lashing is three turns round both spars — an oval of rope from
+         the mast's far side to the yard's far side, as wide across as the fatter of the two —
+         at nLash stations about 2.6 m apart from just above the heel to just under the
+         masthead. The count and the turns are class figures: the plate reads three lashings
+         on the fore mast at 52 px/m and does not resolve the turns. Tagged 'yardLashing' and
+         recorded (userData.yardLashing) for the audit, which reads each ring's reach. */
+      {
+        const ropeM = mats.ropeSolid || woodDark;
+        const rr = Math.max(0.008, Math.min(0.014, rYheel * 0.2));   // the rope's own radius
+        const Oval = class extends THREE.Curve {
+          constructor(a, b) { super(); this.a = a; this.b = b; }
+          getPoint(t, o = new THREE.Vector3()) { const th = t * Math.PI * 2; return o.set(this.a * Math.cos(th), this.b * Math.sin(th), 0); }
+        };
+        const basis = new THREE.Matrix4().makeBasis(new THREE.Vector3(nA[0], nA[1], 0), new THREE.Vector3(0, 0, -1), new THREE.Vector3(uA[0], uA[1], 0));
+        for (let i = 0; i < nLash; i++) {
+          const h = lashH0 + (lashH1 - lashH0) * i / (nLash - 1);
+          const rM = mastRAt(h), rY = yardRAt((h - tackH) / Math.cos(rakeRad));
+          const off = offHeel + (offHead - offHeel) * (h - tackH) / Math.max(poleTop - tackH, 1e-6);   // the yard's centre abaft the axis at h
+          const semiA = (rM + off + rY) / 2 + rr, semiZ = Math.max(rM, rY) + rr;
+          const cA = (off + rY - rM) / 2;                        // the oval's centre abaft the axis
+          const ax = axisAt(h);
+          for (let k = -1; k <= 1; k++) {
+            const ring = new THREE.Mesh(new THREE.TubeGeometry(new Oval(semiA, semiZ), 28, rr, 6, true), ropeM);
+            ring.quaternion.setFromRotationMatrix(basis);
+            ring.position.set(ax[0] + nA[0] * cA + uA[0] * k * 2.1 * rr, ax[1] + nA[1] * cA + uA[1] * k * 2.1 * rr, 0);
+            ring.userData.yardLashing = { mastX: +x.toFixed(3), h: +h.toFixed(3), i, n: nLash, turn: k + 1 };
+            group.add(tag(ring, 'yardLashing'));
+          }
+        }
+      }
       if (FURLED) {
-        const mid = [(peakC[0] + tipB[0]) / 2, (peakC[1] + tipB[1]) / 2];
+        /* a crab claw closes on its own yard: the boom swings up against it and the cloth is
+           rolled to the yard on its after side — the side the cloth hangs from — clear of the
+           mast by the yard's own body, since the pole is on the yard's other side (r261,
+           0y³⁶; r259's seat with the yard's aft normal, no lean and no plane to clear). The
+           closed boom lies along the roll's after side. */
         sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
-                            new THREE.Vector3(mid[0], mid[1], 0),
-                            clothArea, furlMat(mats), group, {}));
+                            new THREE.Vector3(peakC[0], peakC[1], 0),
+                            clothArea, furlMat(mats), group, {
+            seat: { dir: new THREE.Vector3(Math.sin(aY), -Math.cos(aY), 0), fwd: new THREE.Vector3(0, 0, 1),
+                    sparRAt: t => yardRAt(t * clothLuff), lean0: 0, plane: false,
+                    card: 'A crab claw closes on its own yard: the boom is hauled up against it and '
+                      + 'the cloth rolled to the yard on its after side, the mast standing clear on '
+                      + 'the other side of the spar the yard is lashed to.' } }));
       } else {
         /* the leech of a crab claw is CONCAVE, which is most of why it looks like a claw and
            also why it works: the deeply raked tips shed tip vortices and it out-performs a
@@ -4867,7 +4951,8 @@ function makeFurl(A, B, area, mat, group, o) {
          (0 at A, 1 at B) so an asymmetric spar's taper reads right. */
       const sparR = o.seat.sparRAt ? o.seat.sparRAt(t) : o.seat.sparR;
       const need = (1.085 * Rs + o.seat.clear - sparR) / Math.max(sparR + Rs, 1e-6);
-      const lean = Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
+      /* r261: a seat with no plane to clear (the crab claw's, whose pole is on the spar's OTHER side) leans by lean0 exactly */
+      const lean = o.seat.plane === false ? o.seat.lean0 : Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
       P.addScaledVector(o.seat.dir, (sparR + Rs) * Math.cos(lean))
        .addScaledVector(o.seat.fwd, (sparR + Rs) * Math.sin(lean));
     } else {
@@ -5278,6 +5363,11 @@ const PARTS = {
                   + 'The yard lies on the mast\'s fore face and the loop goes round the after side, '
                   + 'so with the wind abaft the beam the sail presses the yard onto the pole and the '
                   + 'mast takes the drive.' },
+  yardLashing: { stage: 6, name: 'Yard lashing',
+    what: 'Turns of rope round the mast and the luff spar together, holding the spar against '
+      + 'the pole\'s after face. A crab-claw yard is not slung from its mast: it is lashed '
+      + 'along it, at the heel, at mid-height and at the masthead, and stands on above the '
+      + 'head as a free spar.' },
   truss:    { stage: 6, name: 'Truss',
               what: 'The iron fitting that holds a lower yard to its mast on the nineteenth-century '
                   + 'rig, where a rope parrel and truss pendants held it before: a band round the '
