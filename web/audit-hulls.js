@@ -6193,7 +6193,13 @@
         else if (p.key === 'channel') { const pts = worldS(o), xs = pts.map(q => q[0]); chans.push({ c: cenOf(pts), xMin: Math.min(...xs), xMax: Math.max(...xs) }); }
         else if (p.key === 'shroud' && p.name === 'Shrouds') shr.push(o);
         else if (p.key === 'tackle' && o.userData.block) tack.push({ c: cenOf(worldS(o)), ...o.userData.block });
-        else if (p.key === 'shroudLashing' && o.userData.lash) lash.push({ c: cenOf(worldS(o)), ...o.userData.lash });
+        else if (p.key === 'shroudLashing' && o.userData.lash) {
+          const P = worldS(o); let top = null, bot = null;
+          for (const q of P) { if (!top || q[1] > top[1]) top = q; if (!bot || q[1] < bot[1]) bot = q; }
+          /* r265: a heart's top and bottom vertices and its length between them, off the mesh */
+          const heart = o.userData.lash.bullseye ? { top, bot, len: Math.hypot(top[0] - bot[0], top[1] - bot[1], top[2] - bot[2]) } : null;
+          lash.push({ c: cenOf(P), ...o.userData.lash, top: heart ? heart.top : null, heart });
+        }
         else if (p.key === 'crossbeam' && o.userData.crossbeam) beams.push({ ...extent(worldS(o)), ...o.userData.crossbeam });
       });
       let off = 0, feet = 0, first = null;
@@ -6272,7 +6278,11 @@
           const a = cenOf(pts.slice(i, i + 4)), b = cenOf(pts.slice(i + 4, i + 8)), foot = a[1] < b[1] ? a : b;
           feetL++;
           let best = null;
-          for (const e of lash) { const dist = Math.hypot(foot[0] - e.eye[0], foot[1] - e.eye[1], foot[2] - e.eye[2]); if (best === null || dist < best) best = dist; }
+          for (const e of lash) {
+            /* r265 (0y⁴⁶): where the eye is a hardwood heart the shroud ends seized round its rim — its top, read off
+               the mesh as the heart's highest vertex — not at its hole */
+            const at = e.top ? e.top : e.eye;
+            const dist = Math.hypot(foot[0] - at[0], foot[1] - at[1], foot[2] - at[2]); if (best === null || dist < best) best = dist; }
           if (best === null || best > 0.10) { offL++; if (!firstL) firstL = { foot, mast: o.userData.mast, dist: best }; }
         }
       }
@@ -6305,6 +6315,37 @@
           if (n !== mk.shrouds)
             say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} lashing${n === 1 ? '' : 's'}`);
         }
+      });
+      /* ── D-LASHING-BULLSEYE (round 265, 0y⁴⁶): A LASHED SHROUD ENDS IN THE BLOCK ITS RECORD READS. The lashing
+         class ended every shroud in a rope eye 0.3 B over the beam, a class figure; the 2010 Marine Education
+         Training Center plates of Hōkūleʻa (r265/crop-bullseye-3x.png) show a hardwood heart at every foot with the
+         lanyard rove through it. (a) A lashing-class mast whose spars are a plate read (mk.sail with a yard) and whose
+         record carries no shroudFoot.block is convicted for the silence — the feet stand on plates that show them.
+         (b) With a recorded bullseye: every lashing eye of the mast must be a heart (userData.lash.bullseye), the
+         hearts must number 2 × shrouds, each heart's length off the mesh (its highest to its lowest vertex) must
+         be within 25% of the record's, and each heart's centre must lie within 0.10 m of the builder's eye point
+         on the line from the seat. Rule (7) above already reads every foot against the heart's top. */
+      (H.masts || []).forEach((mk, mi) => {
+        if (kindOf(mk) !== 'lashing') return;
+        const plateRead = mk.sail && mk.sail.yard > 0;
+        const BF = mk.shroudFoot;
+        if (!BF || !BF.block) {
+          if (plateRead) say(v.id, "a lashed shroud whose foot fitting is a class figure while its spars are the plate's", `mast ${mi} at u ${mk.at}: sail.yard ${mk.sail.yard} m is a plate read and the record carries no shroudFoot — the 2010 plates show a hardwood bullseye at every foot`);
+          return;
+        }
+        if (BF.block !== 'bullseye') return;
+        const mine = lash.filter(e => e.mast === mi), hearts = mine.filter(e => e.heart);
+        const want = (mk.shrouds | 0) * 2;
+        if (hearts.length !== want) say(v.id, 'a lashed shroud with no bullseye', `mast ${mi}: ${hearts.length} hearts built at the feet, ${want} (${mk.shrouds} a side) recorded as bullseyes`);
+        let offLen = 0, offAt = 0, first = null;
+        for (const e of hearts) {
+          const L = e.heart.len, rec = BF.lengthM || 0.36;
+          if (Math.abs(L - rec) > rec * 0.25) { offLen++; if (!first) first = { e, L }; }
+          const d = Math.hypot(e.c[0] - e.eye[0], e.c[1] - e.eye[1], e.c[2] - e.eye[2]);
+          if (d > 0.10) { offAt++; if (!first) first = { e, L, d }; }
+        }
+        if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
+        if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
       });
     }
     /* ── D-MAST-COUNT (round 249): THE CARD'S RIG ROW AGAINST THE RECORD'S MASTS. The canoe's

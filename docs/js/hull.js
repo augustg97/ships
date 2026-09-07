@@ -2321,6 +2321,8 @@ const CT = FT.castle;
 const onDeadeyes = FT.kind === 'deadeyes', onTackle = FT.kind === 'tackle', onLashing = FT.kind === 'lashing';
 const tackles = [], lashings = [];
 const CH = crabHead && crabHead.band ? crabHead : null;
+const BE = mk.shroudFoot && mk.shroudFoot.block === 'bullseye'
+? { len: mk.shroudFoot.lengthM || 0.36, wid: mk.shroudFoot.breadthM || 0.22, thk: mk.shroudFoot.thicknessM || 0.05 } : null;
 const rrS = 0.018 + B * 0.0009;
 const eyes = [];
 for (let s = 0; s < mk.shrouds; s++) {
@@ -2349,8 +2351,9 @@ tackles.push({ lo, hi, dir, side, s });
 const st = FT.seats[s];
 const seat = new THREE.Vector3(st.x, st.y, side * st.z);
 const dir = new THREE.Vector3().subVectors(b, seat).normalize();
-a = seat.clone().addScaledVector(dir, FT.lash);
-lashings.push({ eye: a, seat, dir, side, s, timber: st.timber });
+const eyeP = seat.clone().addScaledVector(dir, FT.lash);
+a = BE ? eyeP.clone().addScaledVector(dir, BE.len / 2) : eyeP;
+lashings.push({ eye: eyeP, seat, dir, side, s, timber: st.timber });
 } else a = new THREE.Vector3(chX, base, side * half * 1.06);
 shroudSegs.push([a, b]);
 shroudPts[si2].push([a, b]);
@@ -2404,12 +2407,29 @@ const lg = new THREE.Group(), turns = [];
 const rr = 0.006 + B * 0.0006;
 for (const Lh of lashings) {
 const T = Lh.timber, hw = T.lenX / 2 + rr, zc = Lh.seat.z;
-const eye = new THREE.Mesh(new THREE.TorusGeometry(0.03 + B * 0.01, rr * 1.2, 6, 12), ropeMat);
+let eye;
+if (BE) {
+const hole = Math.max(0.03, Math.min(BE.wid * 0.3, 0.08));
+const Rt = (BE.wid / 2 + hole / 2) / 2, rt = (BE.wid / 2 - hole / 2) / 2;
+eye = new THREE.Mesh(new THREE.TorusGeometry(Rt, rt, 8, 20), woodDark);
+const Yb = Lh.dir.clone().normalize();
+const Zb = new THREE.Vector3().crossVectors(Yb, new THREE.Vector3(1, 0, 0)).normalize();
+const Xb = new THREE.Vector3().crossVectors(Yb, Zb).normalize();
+eye.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(Xb, Yb, Zb));
+eye.scale.set(1, BE.len / BE.wid, BE.thk / (2 * rt));
+eye.position.copy(Lh.eye);
+const rim = new THREE.Mesh(new THREE.TorusGeometry(BE.wid / 2 + rrS * 0.8, rrS * 0.9, 6, 20), ropeMat);
+rim.quaternion.copy(eye.quaternion); rim.scale.set(1, BE.len / BE.wid, 1); rim.position.copy(Lh.eye);
+lg.add(rim);
+} else {
+eye = new THREE.Mesh(new THREE.TorusGeometry(0.03 + B * 0.01, rr * 1.2, 6, 12), ropeMat);
 eye.position.copy(Lh.eye);
 const axis = new THREE.Vector3().crossVectors(Lh.dir, new THREE.Vector3(0, 0, 1)).normalize();
 if (axis.lengthSq() > 0.5) eye.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), axis);
+}
 eye.userData.lash = { mast: mi, shroud: Lh.s, side: Lh.side, eye: [Lh.eye.x, Lh.eye.y, Lh.eye.z],
-seat: [Lh.seat.x, Lh.seat.y, Lh.seat.z], timber: T };
+seat: [Lh.seat.x, Lh.seat.y, Lh.seat.z], timber: T,
+bullseye: BE ? { lengthM: BE.len, breadthM: BE.wid, thicknessM: BE.thk } : null };
 lg.add(eye);
 for (const k of [-1, 0, 1]) {
 const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) * rr * 2.2;
@@ -3400,8 +3420,12 @@ what: 'An eye at the foot of each shroud on a lashed double canoe, and a lanyard
 + 'rail — the same joint that holds the beam to the hull. It is how a rig with no '
 + 'metal in it sets its shrouds up: the turns are hove taut and seized, and taken '
 + 'up again when the fibre stretches. On Hōkūleʻa every shroud lands on the '
-+ 'hull\'s rail at a beam end (the Polynesian Voyaging Society\'s 2009 broadside); '
-+ 'the eye\'s height over the beam is a class figure read from no plate.' },
++ 'hull\'s rail at a beam end (the Polynesian Voyaging Society\'s 2009 broadside), and '
++ 'the 2010 plates of her moored at Honolulu Community College show what the eye is: a '
++ 'teardrop hardwood heart with one hole, about 0.36 m long, the shroud\'s end seized '
++ 'round its rim and the lanyard rove through the hole in three or four falls to the '
++ 'beam\'s end. The heart is drawn where the record reads one; its height over the '
++ 'beam is a class figure read from no plate.' },
 shroudEye: { stage: 5, name: 'Shroud collars',
 what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
 + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '
