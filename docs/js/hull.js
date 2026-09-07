@@ -1885,6 +1885,7 @@ group.add(tag(stp, 'mast', 'Spotting top',
 'The fire-control position at the masthead: observers here spot the fall of shot and correct the guns. On Dreadnought this mast stood abaft the fore funnel, so at speed the top filled with hot smoke — the famous flaw that her successors inherited for a decade.'));
 }
 let lateenHead = null;
+let crabHead = null;
 if (mk.rig === 'lateen') {
 const mixed = (S.masts || []).some(m => m.rig === 'square');
 const yardLen = mixed ? lower * 1.15 : L * mScale;
@@ -2008,6 +2009,9 @@ const tackH = base + (SG && SG.tackUp !== undefined ? SG.tackUp : 0.2);
 const nA = [Math.cos(rakeRad), -Math.sin(rakeRad)];
 const uA = [Math.sin(rakeRad), Math.cos(rakeRad)];
 const axisAt = h => [x + Math.tan(rakeRad) * (h - base), h];
+crabHead = { poleTop, axisAt, mastRAt, uA,
+band: mk.shroudHead && mk.shroudHead.firstUnderHeadM !== undefined && mk.shroudHead.lastUnderHeadM !== undefined
+? [mk.shroudHead.firstUnderHeadM, mk.shroudHead.lastUnderHeadM] : null };
 const LEECH = SG ? Math.min(1, Math.max(0.4, SG.leechRatio || 0.88)) : 0.640;
 const pull = SG ? 1 - 1.5 * (1 - LEECH) : (S.leechPull || 0.46);
 const sparLen = SG ? SG.yard
@@ -2316,13 +2320,20 @@ const FT = shroudFeet(S, H, mk, FINE);
 const CT = FT.castle;
 const onDeadeyes = FT.kind === 'deadeyes', onTackle = FT.kind === 'tackle', onLashing = FT.kind === 'lashing';
 const tackles = [], lashings = [];
+const CH = crabHead && crabHead.band ? crabHead : null;
+const rrS = 0.018 + B * 0.0009;
+const eyes = [];
 for (let s = 0; s < mk.shrouds; s++) {
 const chX = FT.xs[s];
+const hEye = CH ? CH.poleTop - (CH.band[0] + (CH.band[1] - CH.band[0]) * (s + 0.5) / mk.shrouds) : 0;
+const axEye = CH ? CH.axisAt(hEye) : null, rEye = CH ? CH.mastRAt(hEye) : 0;
+if (CH) eyes.push({ s, h: hEye, ax: axEye, r: rEye, underHead: CH.poleTop - hEye, poleTop: CH.poleTop });
 const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
 const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
 const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
 [1, -1].forEach((side, si2) => {
-const b = new THREE.Vector3(lateenHead ? lateenHead.x : mxA(base + lower), topY, side * B * 0.03);
+const b = CH ? new THREE.Vector3(axEye[0], hEye, side * (rEye + rrS))
+: new THREE.Vector3(lateenHead ? lateenHead.x : mxA(base + lower), topY, side * B * 0.03);
 let a;
 if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
 else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
@@ -2351,7 +2362,19 @@ shr.userData.segs = shroudSegs.map(([p, q]) => [[p.x, p.y, p.z], [q.x, q.y, q.z]
 shr.userData.mast = mi;
 shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
 shr.userData.feetKind = FT.kind;
+shr.userData.heads = eyes.map(e => ({ shroud: e.s, h: +e.h.toFixed(3), underHead: +e.underHead.toFixed(3), poleTop: +e.poleTop.toFixed(3) }));
 group.add(tag(shr, 'shroud'));
+}
+if (eyes.length) {
+const upC = new THREE.Vector3(CH.uA[0], CH.uA[1], 0);
+for (const e of eyes) {
+const col = new THREE.Mesh(new THREE.TorusGeometry(e.r + rrS, rrS, 6, 24), ropeMat);
+col.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), upC);
+col.position.set(e.ax[0], e.ax[1], 0);
+col.userData.shroudEye = { mast: mi, shroud: e.s, h: +e.h.toFixed(3), underHead: +e.underHead.toFixed(3), poleTop: +e.poleTop.toFixed(3), poleR: +e.r.toFixed(3),
+from: 'READ off the 2009 broadside at 8x, 53.5 px/m (round 264, 0y⁴³): the shrouds converge on the pole in a band under the block column; the collar and the pairs\' order are class figures' };
+group.add(tag(col, 'shroudEye'));
+}
 }
 if (tackles.length) {
 const tg = new THREE.Group(), falls = [];
@@ -2389,7 +2412,7 @@ eye.userData.lash = { mast: mi, shroud: Lh.s, side: Lh.side, eye: [Lh.eye.x, Lh.
 seat: [Lh.seat.x, Lh.seat.y, Lh.seat.z], timber: T };
 lg.add(eye);
 for (const k of [-1, 0, 1]) {
-const z = zc + k * rr * 2.2;
+const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) * rr * 2.2;
 const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
 new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
 turns.push([Lh.eye, p[0]], [p[0], p[1]], [p[1], p[2]], [p[2], p[3]], [p[3], Lh.eye]);
@@ -3379,6 +3402,15 @@ what: 'An eye at the foot of each shroud on a lashed double canoe, and a lanyard
 + 'up again when the fibre stretches. On Hōkūleʻa every shroud lands on the '
 + 'hull\'s rail at a beam end (the Polynesian Voyaging Society\'s 2009 broadside); '
 + 'the eye\'s height over the beam is a class figure read from no plate.' },
+shroudEye: { stage: 5, name: 'Shroud collars',
+what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
++ 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '
++ 'Hōkūleʻa 1.1–1.7 m under the fore head and 0.8–1.3 m under the main\'s, off the '
++ 'Polynesian Voyaging Society\'s 2009 broadside at 8x. The shrouds do not go to the '
++ 'head: the yard is lashed up the after face and the halyard\'s blocks hang down the '
++ 'forward face, and the shrouds fan from under them. How each shroud is made fast '
++ 'there — an eye seized round the pole, or a hitch to a collar — the plate does not '
++ 'resolve; the collar is the model\'s.' },
 channelWale: { stage: 5, name: 'Channel wale',
 what: 'The timber outside the planking that the shrouds set up to on a cog: a wale '
 + 'at the castle\'s forward corner with stanchions standing on it up to the '

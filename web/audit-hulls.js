@@ -6352,7 +6352,7 @@
     {
       const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
       const hullPt = (o, k, out) => { const a = o.geometry.attributes.position; return out.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); };
-      const cc = [], heels = [], mhf = [];
+      const cc = [], heels = [], mhf = [], shrM = [], collars = [];
       g.traverse(o => {
         if (!o.isMesh || !o.geometry) return;
         const pointsOf = () => { o.updateMatrixWorld(true); const V = new THREE.Vector3(), P = []; for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); P.push(V.clone()); } return P; };
@@ -6361,6 +6361,11 @@
           for (const q of P) { c.add(q); yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
           c.divideScalar(Math.max(1, P.length));
           mhf.push({ rec: o.userData.mastheadFitting, c, yMin, yMax, xMin, xMax }); }
+        if (o.userData.shroudEye) { /* r264 (0y⁴³): every shroud collar, its centre off the mesh */
+          const P = pointsOf(); const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(Math.max(1, P.length));
+          collars.push({ rec: o.userData.shroudEye, c }); }
+        if (o.userData.segs && o.userData.mast !== undefined && o.userData.feetKind !== undefined) { /* r264: the lower shrouds, 8 vertices a segment */
+          shrM.push({ mast: o.userData.mast, P: pointsOf() }); }
         if (o.userData.crabclaw) { /* r261 (0y³⁶): the yard's heel radius off the mesh, for the tack's two radii */
           const P = pointsOf(); let yMin = 1e9, yMax = -1e9; for (const q of P) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
           const band = P.filter(q => q.y < yMin + (yMax - yMin) * 0.03); const c = new THREE.Vector3(); for (const q of band) c.add(q); c.divideScalar(Math.max(1, band.length));
@@ -6443,6 +6448,49 @@
                 if (gap > 0.10 || gap < -0.05) say(v.id, "a masthead horn that does not reach the head", `mast ${i}: the horn's top ${gap.toFixed(3)} m under the pole's top`);
                 if (fwd <= 0) say(v.id, 'a masthead horn abaft its pole', `mast ${i}: the horn's centre ${(-fwd).toFixed(3)} m abaft the axis`); }
             } else if (horns.length) say(v.id, 'a masthead horn the record does not read', `mast ${i}: ${horns.length} horn meshes, none recorded`);
+          }
+        }
+        /* ── D-CRABCLAW-SHROUDS (round 264, 0y⁴³): THE SHROUDS ARE AS MANY AS THE PLATE SHOWS AND LEAVE THE POLE
+           WHERE IT SHOWS. For 263 rounds the canoe's record carried 2 shrouds a side, a class figure, under a
+           provenance that said the plate shows more; and every shroud ended 0.03 of the pole's height under the
+           head, on the axis, while the 2009 broadside at 8x shows them converging on the pole's forward side in
+           a band under the block column (r264/plate-fore-head-eyes-8x.png, plate-main-head-eyes-8x.png). (a) A
+           crab-claw mast with a `sail` record and no `shroudHead` band, or a `shrouds` count with no
+           shroudsProvenance, is convicted for the silence — the shrouds stand on the plate the spars were read
+           from. (b) With the record: the lower shroud mesh of this mast (userData.mast, 8 vertices a segment, the
+           upper end the higher of the two ends) must carry 2 × shrouds segments; each upper end must stand under
+           the built head by a height inside the band ± 0.15 m, within the pole's foot radius + 0.08 m of the axis
+           at its height (on the pole, not in the air), and within 0.06 m in height and 0.10 m in x of a shroud
+           collar (userData.shroudEye, its centre off the mesh); and the collars within 0.5 m of the axis under
+           the head must number shrouds — one a pair. Off the meshes; the builder's record on each mesh is
+           provenance, not the test. */
+        if (heel) {
+          const SH = mk.shroudHead;
+          if (!SH || SH.firstUnderHeadM === undefined || SH.lastUnderHeadM === undefined)
+            say(v.id, "a crab-claw mast whose shrouds leave the pole at a class height while its spars are the plate's", `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m is a plate read and the record carries no shroudHead band — the 2009 broadside at 8x shows where the shrouds converge on the pole`);
+          else if (mk.shrouds && mk.shroudsProvenance === undefined)
+            say(v.id, "a crab-claw shroud count that is a class figure while its spars are the plate's", `mast ${i}: ${mk.shrouds} shrouds a side recorded with no provenance — the plate shows the count`);
+          else {
+            const d = heel.hi.clone().sub(heel.lo), axX = y => heel.lo.x + (Math.abs(d.y) > 1e-6 ? (y - heel.lo.y) / d.y : 0) * d.x;
+            const cen = A => { const c = new THREE.Vector3(); for (const q of A) c.add(q); return c.divideScalar(Math.max(1, A.length)); };
+            const heads = [];
+            for (const m of shrM) { if (m.mast !== i) continue;
+              for (let k = 0; k + 7 < m.P.length; k += 8) { const a = cen(m.P.slice(k, k + 4)), b2 = cen(m.P.slice(k + 4, k + 8)); heads.push(a.y > b2.y ? a : b2); } }
+            const want = (mk.shrouds | 0) * 2;
+            if (heads.length !== want) say(v.id, 'a crab-claw mast with the wrong count of shrouds', `mast ${i}: ${heads.length} lower shroud segments built, ${want} (${mk.shrouds} a side) recorded`);
+            const lo = SH.firstUnderHeadM - 0.15, hi = SH.lastUnderHeadM + 0.15;
+            const mine = collars.filter(c => Math.abs(c.c.x - axX(c.c.y)) <= 0.5 && c.c.y >= heel.yMax - 3);
+            if (mine.length !== (mk.shrouds | 0)) say(v.id, 'a crab-claw mast with the wrong count of shroud collars', `mast ${i}: ${mine.length} collars round the pole under the head, ${mk.shrouds} (one a pair) recorded`);
+            let outBand = 0, offPole = 0, noCollar = 0, first = null;
+            for (const h of heads) {
+              const under = heel.yMax - h.y, off = Math.hypot(h.x - axX(h.y), h.z);
+              if (under < lo || under > hi) { outBand++; if (!first) first = { h, under, off }; }
+              if (off > heel.rFoot + 0.08) { offPole++; if (!first) first = { h, under, off }; }
+              if (!mine.some(c => Math.abs(c.c.y - h.y) <= 0.06 && Math.abs(c.c.x - axX(c.c.y)) <= 0.10)) { noCollar++; if (!first) first = { h, under, off }; }
+            }
+            if (outBand) say(v.id, "a shroud leaving the pole outside the band the plate reads", `mast ${i}: ${outBand} of ${heads.length} upper ends outside ${lo.toFixed(2)}–${hi.toFixed(2)} m under the head (first: ${first.under.toFixed(3)} m under, x ${first.h.x.toFixed(2)}, z ${first.h.z.toFixed(2)})`);
+            if (offPole) say(v.id, 'a shroud head standing off its pole', `mast ${i}: ${offPole} of ${heads.length} upper ends more than the foot radius + 0.08 m from the axis (first: ${first.off.toFixed(3)} m against ${heel.rFoot.toFixed(3)})`);
+            if (noCollar) say(v.id, 'a shroud head with no collar round the pole', `mast ${i}: ${noCollar} of ${heads.length} upper ends have no shroud collar within 0.06 m of their height (first: ${first.under.toFixed(3)} m under the head)`);
           }
         }
       });

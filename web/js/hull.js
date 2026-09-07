@@ -3335,6 +3335,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
     /* the lateen block below builds a mast only as tall as its yard's sling needs, and says
        so here for the shrouds — the record's height is the yard's share, not the pole's */
     let lateenHead = null;
+    /* r264 (0y⁴³): the crab-claw block hands the shroud block its pole — the top, the axis, the radius and the
+       record's band under the head where the shrouds leave it — so both read one pole */
+    let crabHead = null;
     if (mk.rig === 'lateen') {
       /* ── THE LATEEN IS DETERMINED BY THE SHIP, NOT BY THE MAST ─────
          Three sourced facts, and together they leave NO free parameters:
@@ -3681,6 +3684,14 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const nA = [Math.cos(rakeRad), -Math.sin(rakeRad)];   // the axis's AFT normal (+x is aft)
       const uA = [Math.sin(rakeRad), Math.cos(rakeRad)];    // up the axis
       const axisAt = h => [x + Math.tan(rakeRad) * (h - base), h];   // the axis's point at height h
+      /* ── THE SHROUDS LEAVE THE POLE WHERE THE PLATE SHOWS (round 264, 0y⁴³). The class ended every
+         shroud 0.03 of the pole's height under its head, on the axis; the 2009 broadside at 8x
+         (r264/plate-fore-head-eyes-8x.png, plate-main-head-eyes-8x.png) shows them converging on the
+         pole's forward side in a band under the block column — 1.1–1.7 m under the fore head, 0.8–1.3
+         under the main's — and mk.shroudHead records the band. The shroud block below reads this. */
+      crabHead = { poleTop, axisAt, mastRAt, uA,
+        band: mk.shroudHead && mk.shroudHead.firstUnderHeadM !== undefined && mk.shroudHead.lastUnderHeadM !== undefined
+          ? [mk.shroudHead.firstUnderHeadM, mk.shroudHead.lastUnderHeadM] : null };
       /* makeTriSail's leech is a quadratic Bezier bowed toward the tack: with its control
          point `pull` of the way from the tack to the chord's midpoint the cloth is
          1 − (2/3)(1 − pull) of the straight triangle — 0.640 at the class's 0.46 */
@@ -4256,13 +4267,26 @@ function buildRig(S, group, mats, FINE, FURLED) {
          the eye lies on the line from the seat to the masthead. r246 left this class, the
          voyaging canoe's four feet, on the platform on nothing drawn. */
       const tackles = [], lashings = [];
+      /* ── A CRAB-CLAW SHROUD LEAVES ITS POLE FROM A COLLAR IN THE RECORD'S BAND (round 264, 0y⁴³): the
+         record reads where the shrouds converge on the pole (mk.shroudHead, off the 2009 broadside at 8x);
+         each PAIR of shrouds — one a side — leaves a rope collar round the pole at its own station in
+         that band, the forward pair highest and the after pair lowest (a class order read from no
+         plate), and the rope's end sits on the collar's outboard side, not on the axis. A crab-claw
+         mast whose record carries no band keeps the class head. */
+      const CH = crabHead && crabHead.band ? crabHead : null;
+      const rrS = 0.018 + B * 0.0009;                                   // the shroud's own rope
+      const eyes = [];
       for (let s = 0; s < mk.shrouds; s++) {
         const chX = FT.xs[s];
+        const hEye = CH ? CH.poleTop - (CH.band[0] + (CH.band[1] - CH.band[0]) * (s + 0.5) / mk.shrouds) : 0;
+        const axEye = CH ? CH.axisAt(hEye) : null, rEye = CH ? CH.mastRAt(hEye) : 0;
+        if (CH) eyes.push({ s, h: hEye, ax: axEye, r: rEye, underHead: CH.poleTop - hEye, poleTop: CH.poleTop });
         const us = SF ? sfLo + (sfHi - sfLo) * (s + 0.5) / mk.shrouds : 0;
         const sfX = SF ? (us - 0.5) * L + H.rake(us) : 0;
         const sfZ = SF ? halfAtHeight(S, H, us, sfY) + (SF.waleSidedM || 0.15) + (SF.stanchionMouldedM || 0.15) + 0.05 : 0;
         [1, -1].forEach((side, si2) => {
-          const b = new THREE.Vector3(lateenHead ? lateenHead.x : mxA(base + lower), topY, side * B * 0.03);
+          const b = CH ? new THREE.Vector3(axEye[0], hEye, side * (rEye + rrS))
+            : new THREE.Vector3(lateenHead ? lateenHead.x : mxA(base + lower), topY, side * B * 0.03);
           let a;
           if (SF) a = new THREE.Vector3(sfX, sfY, side * sfZ);
           else if (onDeadeyes) a = new THREE.Vector3(chX, FT.y + FT.r, side * FT.z);
@@ -4293,7 +4317,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
         shr.userData.mast = mi;
         shr.userData.castleFoot = CT ? { end: CT.end, tier: CT.tier, y: CT.y } : null;
         shr.userData.feetKind = FT.kind;
+        shr.userData.heads = eyes.map(e => ({ shroud: e.s, h: +e.h.toFixed(3), underHead: +e.underHead.toFixed(3), poleTop: +e.poleTop.toFixed(3) }));
         group.add(tag(shr, 'shroud'));
+      }
+      /* the collars the crab-claw shrouds leave from (round 264, 0y⁴³): one turn of the shrouds' own rope
+         round the pole at each pair's station, square to the raked axis; every collar records its mast,
+         its pair, its height and its station under the head for the audit (userData.shroudEye) */
+      if (eyes.length) {
+        const upC = new THREE.Vector3(CH.uA[0], CH.uA[1], 0);
+        for (const e of eyes) {
+          const col = new THREE.Mesh(new THREE.TorusGeometry(e.r + rrS, rrS, 6, 24), ropeMat);
+          col.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), upC);
+          col.position.set(e.ax[0], e.ax[1], 0);
+          col.userData.shroudEye = { mast: mi, shroud: e.s, h: +e.h.toFixed(3), underHead: +e.underHead.toFixed(3), poleTop: +e.poleTop.toFixed(3), poleR: +e.r.toFixed(3),
+            from: 'READ off the 2009 broadside at 8x, 53.5 px/m (round 264, 0y⁴³): the shrouds converge on the pole in a band under the block column; the collar and the pairs\' order are class figures' };
+          group.add(tag(col, 'shroudEye'));
+        }
       }
       /* the tackles themselves: a block at each end of the drift, the fall rove between them
          in three parts (a double and a single block), every block recording its shroud, its
@@ -4339,7 +4378,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
                                 seat: [Lh.seat.x, Lh.seat.y, Lh.seat.z], timber: T };
           lg.add(eye);
           for (const k of [-1, 0, 1]) {
-            const z = zc + k * rr * 2.2;
+            /* r264: with four shrouds a side the two masts share two crossbeams; the after mast's turns
+               sit 3.4 rope widths outboard of the forward mast's on a shared beam, not through them */
+            const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) * rr * 2.2;
             const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
                        new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
             turns.push([Lh.eye, p[0]], [p[0], p[1]], [p[1], p[2]], [p[2], p[3]], [p[3], Lh.eye]);
@@ -5661,6 +5702,15 @@ const PARTS = {
                   + 'up again when the fibre stretches. On Hōkūleʻa every shroud lands on the '
                   + 'hull\'s rail at a beam end (the Polynesian Voyaging Society\'s 2009 broadside); '
                   + 'the eye\'s height over the beam is a class figure read from no plate.' },
+  shroudEye: { stage: 5, name: 'Shroud collars',
+              what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
+                  + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '
+                  + 'Hōkūleʻa 1.1–1.7 m under the fore head and 0.8–1.3 m under the main\'s, off the '
+                  + 'Polynesian Voyaging Society\'s 2009 broadside at 8x. The shrouds do not go to the '
+                  + 'head: the yard is lashed up the after face and the halyard\'s blocks hang down the '
+                  + 'forward face, and the shrouds fan from under them. How each shroud is made fast '
+                  + 'there — an eye seized round the pole, or a hitch to a collar — the plate does not '
+                  + 'resolve; the collar is the model\'s.' },
   channelWale: { stage: 5, name: 'Channel wale',
               what: 'The timber outside the planking that the shrouds set up to on a cog: a wale '
                   + 'at the castle\'s forward corner with stanchions standing on it up to the '

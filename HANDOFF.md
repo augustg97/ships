@@ -22915,3 +22915,142 @@ docs/audit-hulls.js convicts a crab-claw masthead whose fittings are unread whil
 THE RATCHET: THE OPENING FULL RATCHET at the clean r262 HEAD cada612 (r263/open-ratchet.out, launched at 13:50:21 on 2026-09-07 as the round's first act at a load of 53): RATCHET EXIT 1  END 13:55:39 — it captured globe-default and died on globe-crossing, whose page never reached FRAME_READY in 150 s (r263/open-ratchet.err) while the machine's load average passed 270 (13:56; nothing of the round's own was running beside it — one browser); 0 frames scored, and it was not relaunched because 65 frames at the 45–75 s the load allowed could not finish inside the round's 80 minutes. THE CLEAN HEAD BY PARTIALS (r263/open-partials.log, the r262 rule above load 15): ship-canoe 0.000%/0.000 ok and sea-canoe-floor 0.000%/0.000 ok by check --frame at HEAD cada612 at 14:00–14:05, both against the committed baselines — the two frames this round moves stood clean before it, and their captures are kept as r263/before-ship-canoe.png and before-sea-canoe-floor.png. The other 63 frames are UNSCORED at the clean HEAD this round; r262's full run at 19058c2 scored all 65 clean and r262 changed the canoe alone, so the committed baselines carry no unexplained drift that this round could see.
  PARTIAL after the push, the r239 pattern (r263/partial-*.out): frames scored one at a time by check --frame on the r263 builder, each diff read (r263/diff-ship-canoe-1x.png: exactly two clusters, one at each masthead, nothing else in the frame; diff-sea-canoe-floor-1x.png: one cluster at the followed canoe's near masthead and a faint trace at her other head) — every frame under the harness gate, so no baseline was accepted and the committed baselines stand — sea-canoe-floor 0.026%/0.010 ok, ship-canoe 0.012%/0.011 ok, ship-dugout 0.000%/0.000 ok, ship-trireme 0.000%/0.000 ok (4 frames; r263/PREDICTIONS-close.md names the two frames that MUST move — ship-canoe and sea-canoe-floor, each masthead gaining a horn and four blocks on its forward face, a few hundred pixels at each head with rigTop and the camera's datum unchanged — the two MAY frames, ship-dugout and ship-trireme as her berth neighbours, and the rest that must not: mk.masthead is read only inside the crab-claw block, the PARTS entries draw nothing, and no other record changed). The other 61 frames are UNSCORED on the r263 builder; any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (65c4df4 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+
+## Round 264 — 2026-09-07 — the canoe's shrouds are as many as the plate shows and leave the pole where it shows: both of the voyaging canoe's masts carried 2 shrouds a side, a class figure, under a provenance that had said since r247 that the 2009 broadside shows four or five, and every shroud ended 0.03 of the pole's height under its head, on the axis, while the plate at 8x shows them converging on each pole's forward side in a band under the block column; each mast now records four a side (± 1) and the band, each pair leaves a rope collar round the pole at its own station in the band, each shroud takes its own crossbeam, a new rule reads the count, the band and the collars off the meshes and convicts the silence, and the clean HEAD was scored by partials because the load stood above 15 all round
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r263 ordered r264's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load allowed, else the clean HEAD by partials on the frames the round
+moves; then (0y⁴³), the canoe's shroud count off the plate at 8x with the eyes seized at the head, or (0y³⁰) with a plate,
+or (0y¹⁹) with (0y²⁴), or Endurance by looking. The load at the open was 22 (15.6 / 14.5 / 18.4 by `uptime` at 14:43, 22.4
+by `sysctl` a minute later), from `bake_sheets.py` of the Tectonic Plate Model at 556% CPU in `ps -r` — not this round's
+and not this project's — and it stood at 17–33 for the round's first half, so no full run was launched (the r262 rule
+above 15, r263's death at frame 2). The clean HEAD was scored by partials: see THE RATCHET below. (0y⁴³) was taken. Every
+edit was made on a COPY of web/ served on :8150 (build/staging/r264/web, every file a symlink to web/ except hull.js,
+audit-hulls.js and vessels.json, which are copies); the probe, the three audit runs and the witnesses were taken one
+browser at a time.**
+
+**THE PLATE, RE-READ FOR THE SHROUDS (build/staging/r247/hokulea-2009.jpg, the 2009 broadside, Wikimedia Commons
+Hokule'aSailing2009.jpg, 1280 px, 53.5 ± 1 px/m at the rig, the scale the fore's recorded 9.50 m pins, r262). WHERE THEY
+LEAVE THE POLE (r264/plate-fore-head-eyes-8x.png, x 340–420 y 200–340; plate-main-head-eyes-8x.png, x 620–700 y 270–410;
+contrast-stretched crops with a 5 px grid, a cell 0.09 m): on both poles the shrouds do not go to the head. They converge
+on the pole's forward side in a band — fore y 265–300 under a head at 207 (1.1–1.7 m under it), main y 320–345 under a
+head at 277 (0.8–1.3 m) — which is the lower part of the block column r263 read (fore 0.34–1.55 m, main 0.34–1.18) and a
+little below it; ± 10 px (0.2 m) at each edge of the band. How each shroud is made fast there — an eye seized round the
+pole, a pair to a seizing, a collar the shrouds are hitched to — the plate does not resolve at this scale. THE COUNT
+(r264/plate-fore-landings-3x.png, x 150–430 y 380–860, a 10 px grid; plate-fore-shrouds-grid-4x.png; plate-rig-2x.png): from
+the fore head a fan of pale lines runs down and forward over the sky to the near hull's rail. A row-by-row peak count on
+the plate is noise at this scale (1 px lines at 3–9 units over the sky), so the lines were scored DIRECTIONALLY — for each
+candidate line from the head (400, y 250–330) to a point on y 700, the mean of (brightness − the row's 21 px median) along
+it over the sky between y 350 and 690 (r264, in the round's log): the peaks stand at x 267 (faint), 285, 352–358, 373–375
+(the strongest), 381 and 388 at y 700 — of which 381 and 388 run nearly along the pole (the halyard's fall and the pole's
+own edge), 373–375 is the brightest and thickest (the stay to the bow, or the fall), and 267 / 285 / 355 are shrouds to the
+forward rail; two or three more pale lines cross the fore sail's cloth from the head down and aft (plate-rig-2x.png). Four
+a side, ± 1. The main's fan crosses the fore sail and reads the same count with the same ± 1 (plate-main-shrouds-grid-4x.png:
+peaks at x 438–446, 471, 492 and 600–623 at y 700 for heads at y 300–340). WHICH LINE LANDS ON WHICH BEAM the plate does
+not resolve: crew stand along the rail in front of the landings (plate-fore-landings-3x.png, y 700–860), so the model keeps
+the lashing class's rule — each shroud takes its own beam, the n nearest the mast — and says so.**
+
+**THE FAULT, on the built scene: r263's builder drew 2 shrouds a side on each mast, each ending at 0.97 of the pole's
+height on the axis (0.286 m under the fore head, 0.252 under the main's, z ± 0.03 — r264/proof-b.log's first lines read
+the r263 geometry under the r264 rule), 0.8–1.4 m ABOVE where the plate shows the shrouds leaving, and above the blocks
+they fan from; r263/w-fore-head-pair.png (right) shows the two ropes leaving the bare head over the horn. PROOF A
+(r264/audit-proof-a.out — the r263 record and the r263 builder under the r264 audit on :8150) is exactly 2 problems, both
+"a crab-claw mast whose shrouds leave the pole at a class height while its spars are the plate's" on the canoe's two
+masts, and nothing on any other hull or rule ("checked 33 hulls, 2 problems").**
+
+**THE RECORD (web/data/vessels.json; r264/vessels.before.json, vessels.after.json, apply-record-edits.py, every assertion
+on the old values; every other vessel parse-identical, asserted). Both masts: `shrouds` 2 → 4 with `shroudsProvenance`
+(READ, the plate, the scale, the crops, the sweep's peaks and what each is, the ± 1, and that the beams are the class's);
+`shroudHead` {firstUnderHeadM 1.1, lastUnderHeadM 1.7 (fore) / 0.8, 1.3 (main), seized 'collar', side 'forward'} with a
+READ provenance naming the crops, the pixels, the ± 0.2 and what the plate cannot say (the fastening; the pairs' order);
+the shroudSetupProvenance's r247 sentence "the count is not changed here" replaced by a pointer to the read. The Rig row
+gains its last clause: "and four shrouds a side leaving each pole from a band under those blocks". THE MODEL
+(web/js/hull.js; r264/hull.before.js, hull.after.js, apply-hull-edits.py, six replaces each asserted to hit once, the file
+syntax-checked with node's vm before the browser): (1) `let crabHead = null` beside lateenHead, set inside the crab-claw
+block right after axisAt — the pole's top, axis, radius function, up-vector and the record's band (null without one) — so
+the shroud block reads the pole the crab-claw block built; (2) in the shroud block, with a band, shroud s of n leaves at
+poleTop − (band0 + (band1 − band0)(s + ½)/n) — the forward pair highest, the after pair lowest, a class order — and its
+upper end sits on the collar's outboard side at z ± (the pole's radius there + the shroud's own 0.019 m), not on the axis;
+without a band the class head stands; (3) one TorusGeometry collar of the shrouds' rope per pair round the pole at its
+station, square to the raked axis, tagged 'shroudEye' with userData.shroudEye (mast, pair, height, station under the head,
+the pole's radius, the provenance); shr.userData.heads records the stations; (4) on a SHARED crossbeam the after mast's
+three lanyard turns sit 3.4 rope widths outboard of the forward mast's (the turns' z, crossbeam timbers only — the junk's
+lashings go round its cap and are untouched); (5) a PARTS entry, 'Shroud collars', carries the card and says what the
+plate shows and what it does not.**
+
+**MEASURED AFTER (r264/shrouds-after.json — r264/probe_shrouds.py, the r263 probe's page-build pattern, on the r264
+builder on :8150, set build): 2 masts, 8 collars, 16 lashing eyes. FORE (pole 1.027 → 10.528, heightM 9.5, foot radius
+0.104): 8 lower shroud segments, their upper ends 1.176 / 1.326 / 1.476 / 1.626 m under the head (the record's 1.1–1.7),
+each 0.089–0.090 m off the axis at z ± 0.089–0.090 (the pole's 0.070 there plus the rope's 0.019), a collar on the axis
+(0.004 m) at each of the four stations; the feet at x −6.226 / −4.489 / −2.753 / −1.012, on the beams at u 0.15 / 0.25 /
+0.35 / 0.45, each on its lashing eye to 0.000 m. MAIN (0.961 → 9.332, heightM 8.37): upper ends 0.864 / 0.989 / 1.114 /
+1.239 (the record's 0.8–1.3), the same off-axis, four collars; the feet at −2.575 / −0.833 / 0.898 / 2.627, on u 0.35 /
+0.45 / 0.55 / 0.65 — the beams at 0.35 and 0.45 carry one shroud of each mast, the two eyes 0.18 m apart on the line to
+their own mastheads. Nothing else moved: the poles, the yards, the lashings up the after face, the masthead horn and blocks
+and the cloth read as r263 left them (the pole tops 10.528 / 9.332 against r263's 10.528 / 9.332).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r264/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js,
+three replaces each asserted once). D-CRABCLAW-SHROUDS (new, 0y⁴³), inside the D-CRABCLAW-SPARS loop over every mast whose
+record carries `sail`, after r263's fittings rule: the traverse now also collects every lower 'Shrouds' mesh (userData.segs
+and mast, 8 vertices a segment, the upper end the higher of the two end-means) and every collar (userData.shroudEye, its
+centre off the mesh). (a) A mast with `sail` and no `shroudHead` band is convicted for the silence; so is a `shrouds` count
+with no shroudsProvenance. (b) With the record: this mast's segments must number 2 × shrouds; each upper end must stand
+under the built head inside the band ± 0.15 m, within the pole's foot radius + 0.08 m of the axis at its height, and
+within 0.06 m in height and 0.10 m in x of a collar; the collars within 0.5 m of the axis under the head must number
+shrouds. Off the meshes; the builder's record on each mesh is provenance, not the test. PROOF A is above. PROOF B
+(r264/audit-proof-b.out, proof-b.log — the r264 audit on a BUILDER edited to ignore the record's band, `band: null`, the
+r263 rule that a changed record proves nothing where the builder draws from it): exactly 6 — on each mast '0 collars round
+the pole under the head, 4 recorded', '8 of 8 upper ends outside 0.95–1.85 m under the head (first: 0.286 m under, x
+−4.16, z 0.03)' / '… outside 0.65–1.45 (first: 0.252 m under)', and '8 of 8 upper ends have no shroud collar within 0.06 m
+of their height' — and nothing else; the builder was then restored (cmp-identical to hull.after.js). The final audit on
+the r264 builder: "checked 33 hulls, 0 problems" on :8150 (r264/audit-final-8150.out); the files copied into web/ at the
+close are cmp-identical to the copy :8150 served (r264/close.log).**
+
+**WITNESSED (r264/witness-canoe-far-before.png — the r263 builder in web/ on :8149; witness-canoe-far-after.png — the
+r264 builder on :8150; both the canoe set from the port beam, b=90, l=8, z=1.4, the whole rig in frame, 2880 × 1800;
+w-fore-head-pair.png and w-main-head-pair.png the two mastheads at 4x from each, before | after; w-rail-pair.png the near
+hull's rail at the beams at 3x, cx 640 cy 470 half 130 of the 1440 frame; the head pairs at cx 625 cy 255 and 778 cy 295, half 70). FORE, before: two ropes leave the bare head above the horn and run to two beam ends;
+after: nothing leaves the head — the horn and the four blocks stand alone on it — and four ropes leave the pole from four
+collars in a band under the blocks, fanning to four beam ends, the forward one to the beam ahead of the mast. MAIN, before
+and after the same, the band partly behind the fore sail's leech from this bearing (as r263 found its blocks), two of
+the four collars and the ropes leaving them in view under the blocks. At the rail: eight lashings a side where there were four, two of
+the beams carrying a pair with the after mast's turns outboard of the forward's. Nothing else in either pair differs: the
+hull, the platform, the poles, the yards, the cloth, the water and the camera's datum are the same picture.**
+
+**Rule 0 on the after witness read whole (r264/witness-canoe-far-after.png): a rendered double canoe on water from her
+port beam, not a chart — the planked hull with its platform and crossbeams standing proud of the side, two thick poles
+with their yards lashed along them and the crab-claw sails set aft on booms, the shrouds fanning from under each masthead
+to the beam ends, a grey-blue sea to a hazed coast. Three facts a viewer can read off it without a legend: each mast is
+held by four shrouds a side that land on the ends of the crossbeams, not on the hull; the shrouds leave the pole a metre
+or more under its head, below the blocks; the two masts share two of the beams between them.**
+
+**Named residuals, in order:** (0y⁴³) CLOSED — the count and the band are the plate's, the collars are drawn, the audit
+reads both. NEW (0y⁴⁵) WHICH BEAM EACH SHROUD TAKES: the model's four-nearest-beams rule puts one fore shroud ahead of the
+mast and two abaft it, while the plate's fan forward of the fore mast is at least as full as the fan aft — a plate of the
+near hull's rail from abeam with the crew off it (the PVS's own photographs of the ʻiako lashings) would read the landings
+and close it. NEW (0y⁴⁶) THE FASTENING AT THE POLE: eyes seized round the pole, a seizing a pair, or a collar the shrouds
+hitch to — unread at 53.5 px/m; the model's collar is a class figure and the card says so. The count's ± 1 stands with
+(0y⁴⁵). (0y⁴⁴) the masthead blocks' functions, as r263 names it. (0y³⁰) stands, as r263 names it: no truss plate. (0y³⁹)
+(0y⁴⁰) (0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name them. (0y¹⁹)
+(0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³)
+(0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²)
+unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵)
+(0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r265 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15 (r264/PREDICTIONS-close.md names the two frames that MUST move — ship-canoe and sea-canoe-floor, both with rigTop
+unchanged — the two MAY frames, ship-dugout and ship-trireme, and the rest that MUST NOT; only those scored by check --frame
+after the push are accepted here), with no screenshot beside it until RATCHET EXIT — and, above 15, scores the clean HEAD by
+partials on the frames it will move instead, as r262–r264 did; a partial that times out on FRAME_READY at 150 s under a
+load in the thirties is the load and not a page error (r264/open-partials.try1.log; a page_errors probe reached FRAME_READY
+in 56 s ten minutes later), so wait for `sysctl -n vm.loadavg` to fall and try again before writing the frame off. Then it
+takes (0y⁴⁵) if a plate of the canoe's rail surfaces, or (0y³⁰) with a plate of a lower-yard truss found first, or (0y¹⁹)
+with (0y²⁴), or the survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking. The load this round:
+22 at the open, 33 at 14:50, 17 at 14:53, 8 at 15:05 — `bake_sheets.py` in ~/Tectonic Plate Model/build, respawning
+every few seconds at 160–560% CPU.**
+
+**Live stamp: docs/index.html carries data-version 1788818944 at the build; the push and the live poll are in
+build/staging/r264/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r264 staging stays on disk uncommitted, the r211 convention.**
