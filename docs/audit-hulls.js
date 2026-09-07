@@ -4597,12 +4597,13 @@ say(v.id, 'a sail through a mast', `${o.userData.kind} cloth${named ? ' set on t
 }
 }
 }
-{
-const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const lateenRead = (G, STATE) => {
+const SB = STATE === 'furled' ? ' (furled build)' : '';
+const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
 const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
 for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
 const masts = [], yards = [], parrels = [], shrouds = [];
-g.traverse(o => {
+G.traverse(o => {
 if (!o.isMesh || !o.geometry) return; const p = tagOf(o); if (!p) return;
 if (p.key === 'mast') {
 const pts = hullPts(o); let yMin = 1e9, yMax = -1e9; for (const q of pts) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
@@ -4630,7 +4631,7 @@ for (const q of pts) { if (q.distanceTo(a) < len * 0.03) rA = Math.max(rA, Math.
 let m = null, bd = 1e9;
 const want = y.rec && typeof y.rec.mastX === 'number' ? y.rec.mastX : A.x + (B.x - A.x) / 3;
 for (const mm of masts) { const dd = Math.abs(mm.foot.x - want); if (dd < bd) { bd = dd; m = mm; } }
-if (!m) { say(v.id, 'a lateen yard slung off its mast', 'no mast mesh on the hull'); continue; }
+if (!m) { say(v.id, 'a lateen yard slung off its mast' + SB, 'no mast mesh on the hull'); continue; }
 const kx = (m.head.x - m.foot.x) / ((m.head.y - m.foot.y) || 1e-9);
 const den = (B.x - A.x) - kx * (B.y - A.y);
 const t = Math.abs(den) > 1e-9 ? (m.foot.x - A.x + kx * (A.y - m.foot.y)) / den : (m.foot.x - A.x) / ((B.x - A.x) || 1e-9);
@@ -4639,16 +4640,16 @@ const ax = axisAt(m, cross.y), off = Math.hypot(cross.x - ax.x, cross.z - ax.z);
 const rM = mastR(m, cross.y), rY = rA + (rB - rA) * Math.max(0, Math.min(1, t));
 const where = `yard ${len.toFixed(1)} m on the mast at x ${m.foot.x.toFixed(2)}, crossing its station at y ${cross.y.toFixed(2)}`;
 if (t < 0 || t > 1 || cross.y > m.head.y - 0.02 || cross.y < m.foot.y)
-say(v.id, 'a lateen yard slung off its mast', `${where}: the mast runs y ${m.foot.y.toFixed(2)}–${m.head.y.toFixed(2)}, the sling ${(cross.y - m.head.y).toFixed(2)} m from its head`);
+say(v.id, 'a lateen yard slung off its mast' + SB, `${where}: the mast runs y ${m.foot.y.toFixed(2)}–${m.head.y.toFixed(2)}, the sling ${(cross.y - m.head.y).toFixed(2)} m from its head`);
 if (off < 0.9 * (rM + rY))
-say(v.id, 'a lateen yard through its mast', `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
-else if (off > rM + rY + 0.6)
-say(v.id, 'a lateen yard adrift of its mast', `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
+say(v.id, 'a lateen yard through its mast' + SB, `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
+else if (off > rM + rY + 0.05)
+say(v.id, 'a lateen yard adrift of its mast' + SB, `${where}: offset ${off.toFixed(3)} m from the axis, the mast ${rM.toFixed(3)} m and the yard ${rY.toFixed(3)} m in radius there`);
 let held = false;
 for (const o of parrels) { const pp = hullPts(o).filter(q => Math.abs(q.y - cross.y) < 0.15); if (pp.length < 8) continue;
 const c = new THREE.Vector3(); for (const q of pp) c.add(q); c.divideScalar(pp.length); const cax = axisAt(m, c.y);
 if (Math.hypot(c.x - cax.x, c.z - cax.z) < 0.1) { held = true; break; } }
-if (!held) say(v.id, 'a lateen yard held to its mast by nothing', `${where}: no parrel ring within 0.15 m of the sling's height centred on the mast`);
+if (!held) say(v.id, 'a lateen yard held to its mast by nothing' + SB, `${where}: no parrel ring within 0.15 m of the sling's height centred on the mast`);
 }
 let loose = 0, first = null;
 for (const o of shrouds) {
@@ -4658,9 +4659,10 @@ for (const m of masts) { const d = axisDist(m, hi); if (near === null || d < nea
 if (hi.y >= m.foot.y - 0.05 && hi.y <= m.head.y + 0.05 && d < 3.5) { ok = true; break; } }
 if (!ok) { loose++; if (!first) first = { hi, near }; }
 }
-if (loose)
+if (loose && STATE === 'set')
 say(v.id, 'a shroud made fast above its mast', `${loose} of ${shrouds.length} shroud meshes end where no mast is (first: top at x ${first.hi.x.toFixed(2)}, y ${first.hi.y.toFixed(2)}, z ${first.hi.z.toFixed(2)}; the nearest axis ${first.near ? first.near.m.name + ' at x ' + first.near.m.foot.x.toFixed(2) + ', head y ' + first.near.m.head.y.toFixed(2) + ', ' + first.near.d.toFixed(2) + ' m off' : 'none'})`);
-}
+};
+lateenRead(g, 'set');
 {
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const principalAxis = pts => {
@@ -5548,6 +5550,60 @@ catch (e) { say(v.id, 'FURLED BUILD THREW', e.message); }
 if (gf) {
 gf.updateMatrixWorld(true);
 const YF = yardRead(gf, 'furled');
+lateenRead(gf, 'furled');
+{
+const inv = new THREE.Matrix4().copy(gf.matrixWorld).invert();
+const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const axisOf = pts => {
+const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+const d = new THREE.Vector3(0, 1, 0);
+for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+if (d.y < 0) d.negate();
+let tMin = 1e9, tMax = -1e9; const ts = [];
+for (const q of pts) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; ts.push(t); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+const span = tMax - tMin;
+const radAt = (t0, tol) => { let r = 0; pts.forEach((q, i) => { if (Math.abs(ts[i] - t0) <= tol) r = Math.max(r, q.clone().sub(c).addScaledVector(d, -ts[i]).length()); }); return r; };
+return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, centre: c, span, rFoot: radAt(tMin, span * 0.02), rHead: radAt(tMax, span * 0.02) };
+};
+const mastsL = [], yardsL = [], furlsL = [];
+gf.traverse(o => { if (!o.isMesh || !o.geometry) return;
+if (o.userData.kind === 'furl') { const pts = hullPts(o); const fc = new THREE.Vector3(); for (const q of pts) fc.add(q); fc.divideScalar(pts.length); furlsL.push({ c: fc, pts }); return; }
+const p = tagOf(o); if (!p) return;
+if (p.key === 'mast' && /mast$/i.test(p.name)) { const ax = axisOf(hullPts(o)); if (ax.head.y - ax.foot.y >= 0.5) mastsL.push(ax); }
+if (p.key === 'yard' && p.name === 'Lateen yard') yardsL.push({ ax: axisOf(hullPts(o)), rec: o.userData.lateen || null }); });
+for (const yd of yardsL) {
+const Y = yd.ax;
+const want = yd.rec && typeof yd.rec.mastX === 'number' ? yd.rec.mastX : Y.foot.x + (Y.head.x - Y.foot.x) / 3;
+let m = null, bd = 1e9; for (const mm of mastsL) { const dd = Math.abs(mm.foot.x - want); if (dd < bd) { bd = dd; m = mm; } }
+if (!m) continue;
+const at = `the lateen yard from (${Y.foot.x.toFixed(2)}, ${Y.foot.y.toFixed(2)}) to (${Y.head.x.toFixed(2)}, ${Y.head.y.toFixed(2)}) on the mast at foot x ${m.foot.x.toFixed(2)}`;
+const outb = Y.centre.z >= 0 ? 1 : -1;
+const rolls = furlsL.filter(f => { const w = f.c.clone().sub(Y.foot), sd = w.dot(Y.dir); return w.clone().addScaledVector(Y.dir, -sd).length() <= 1.5 && sd >= -0.5 && sd <= Y.span + 0.5; });
+if (!rolls.length) { say(v.id, 'a furled lateen yard with no roll on it', `${at} has no furled roll within 1.5 m of its line`); continue; }
+for (const f of rolls) {
+let into = 0, gap = 1e9;
+for (const q of f.pts) {
+const w = q.clone().sub(m.foot), t = w.dot(m.dir);
+if (t >= -0.02 && t <= m.span + 0.02) {
+const tt = Math.max(0, Math.min(1, t / Math.max(m.span, 1e-6))), r = m.rFoot + (m.rHead - m.rFoot) * tt;
+const dist = w.clone().addScaledVector(m.dir, -t).length();
+if (dist < r) into = Math.max(into, r - dist);
+}
+const wy = q.clone().sub(Y.centre), ty = wy.dot(Y.dir);
+const sy = Math.max(0, Math.min(1, (ty + Y.span / 2) / Math.max(Y.span, 1e-6))), rq = Y.rFoot + (Y.rHead - Y.rFoot) * sy;
+gap = Math.min(gap, wy.addScaledVector(Y.dir, -ty).length() - rq);
+}
+const vv = f.c.clone().sub(Y.centre), sv = vv.dot(Y.dir); const perp = vv.addScaledVector(Y.dir, -sv);
+const out = perp.z * outb;
+if (into > 0.03) say(v.id, 'a furled lateen roll stowed through its mast', `the roll on ${at} reaches ${into.toFixed(3)} m inside the pole`);
+if (gap > 0.05) say(v.id, 'a furled roll floating off its yard', `the roll on ${at} comes no nearer than ${gap.toFixed(3)} m to the yard's surface`);
+if (out < 0) say(v.id, 'a furled lateen roll hung inboard of its yard', `the roll on ${at} has its centre ${(-out).toFixed(3)} m INBOARD of the yard's axis, toward the mast`);
+}
+}
+}
 {
 const furlsF = [];
 gf.traverse(o => { if (o.isMesh && o.geometry && o.userData.kind === 'furl') {

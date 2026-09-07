@@ -2587,8 +2587,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
                arm's swing toward the pole's shoulder (sinTRIM·z less the round pole's
                recession z²/2R peaks near 0.053·R at 19.5° of brace) */
             seat: { dir: new THREE.Vector3(dX, dY, 0), fwd: new THREE.Vector3(nX, nY, 0),
-                    sparRAt: tt => (slingsD / 2) * taperK(Math.min(1, tt * 0.96)),
-                    lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs } }));
+                    sparRAt: t => (slingsD / 2) * taperK(Math.min(1, Math.abs(2 * t - 1) * 0.96)),
+                    lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs,
+                    card: 'A square sail is rolled onto the TOP of its yard and the gaskets passed '
+                      + 'round both; the bunt, the body of the cloth, is triced up at the slings, on '
+                      + 'the yard before the mast.' } }));
       } else {
         const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
         /* the cloth names its mast and its yard's height, so the audit can tell its own
@@ -3492,9 +3495,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
          tack, which is the tack the fleet sails. So the yard, the cloth that swings about it
          and the furled roll all live in `beside`, a child of the hull's frame standing off
          the axis to PORT (+z, the side every fore-and-aft cloth in the fleet is sheeted to)
-         by the mast's radius at the sling plus the yard's — or the roll's, when furled, so
-         the brailed bundle lies against the mast and not through it. Which side no record
-         names, and the yard's record says so (userData.lateen.sideFrom). */
+         by the mast's radius at the sling plus the yard's (r254 took the roll's when furled,
+         which stood the yard off its own parrel; r260 seats the roll outboard instead). Which
+         side no record names, and the yard's record says so (userData.lateen.sideFrom). */
       const SHEET = FURLED ? 0 : TRIM * 1.5;
       /* the furled roll's radius, as makeFurl will size it, so the bundle clears the mast */
       const areaF = S.settee
@@ -3502,7 +3505,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
         : triA2(tack, peakPt, clew);
       const lenF = Math.hypot(peakPt[0] - tack[0], peakPt[1] - tack[1]);
       const rRoll = Math.max(0.05, Math.sqrt((areaF * 0.055) / (Math.PI * Math.max(lenF, 0.1))));
-      const OFF = mastRl(slingY) + (FURLED ? Math.max(rYs, rRoll) : rYs);
+      /* r260 (0y³⁵): the two radii in BOTH states — the parrel holds the yard against the
+         pole whether the cloth is set or brailed. r254 stood the furled yard off by the ROLL's
+         radius, 0.125–0.332 m past the two radii on all twelve (r260/lateen-before.json), which
+         is off its own parrel; the roll now hangs on the yard's lower side and leans OUTBOARD
+         of the pole (makeFurl's seat, below), and the yard stays where the fitting holds it. */
+      const OFF = mastRl(slingY) + rYs;
       const beside = new THREE.Group();
       beside.position.set(0, 0, OFF);
       group.add(beside);
@@ -3513,7 +3521,15 @@ function buildRig(S, group, mats, FINE, FURLED) {
         off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
         rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
         side: 'port', sideFrom: 'class: to leeward of the fleet\'s wind, the side every fore-and-aft cloth is sheeted to; no record names the side',
-        sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1) };
+        sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1),
+        /* r260 (0y³⁵): where the brailed cloth lies — along the yard's lower side, the side
+           the cloth gathers, leaned outboard of the pole; the lean is makeFurl's */
+        stow: FURLED ? { on: 'the lower side of the yard, leaned outboard of the mast', lean0Deg: 20,
+          clearM: +(0.03 + 0.06 * mastRl(slingY)).toFixed(3),
+          stowFrom: 'class (round 260): the cloth is brailed to the yard aloft and the roll lashed '
+            + 'along it on the sail\'s own side; the roll leans outboard off that side by 20°, and '
+            + 'by more where it would else stand into the pole the yard lies against; no plate '
+            + 'reads it' } : null };
       beside.add(tag(ym, 'yard', 'Lateen yard'));
       /* ── THE PARREL: one rope loop at the sling, round the mast's far side at the mast's
          radius there and made fast to the yard's near face either side of it — the same
@@ -3547,9 +3563,23 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const area = S.settee
           ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
           : triA2(tack, peakPt, clew);
+        /* r260 (0y³⁵): the roll SITS on the yard — on its lower side, the side the cloth
+           gathers (dir: the in-plane normal to the yard, pointing down and aft), leaned
+           OUTBOARD (fwd: +z in `beside`, away from the mast the yard lies against) by 20°,
+           and by more where the roll would else reach inboard of the plane of the yard's own
+           inboard face, which is the pole's. The spar's radius under the roll is the yard's
+           own taper, heel to peak, at the roll's station (the roll runs tack to peak). */
+        const dn = new THREE.Vector3(dir[1], -dir[0], 0).normalize();
+        if (dn.y > 0) dn.negate();
         sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
                             new THREE.Vector3(peakPt[0], peakPt[1], 0),
-                            area, furlMat(mats), beside, {}));
+                            area, furlMat(mats), beside, {
+            seat: { dir: dn, fwd: new THREE.Vector3(0, 0, 1),
+                    sparRAt: t => rYheel + (rYpeak - rYheel) * Math.min(1, (along + t * lenF) / Math.max(ylen, 1e-6)),
+                    lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRl(slingY),
+                    card: 'A lateen is brailed up to its yard aloft and the roll lashed along it '
+                      + 'on the sail\'s own side of the spar, leaning outboard of the mast the '
+                      + 'yard lies against.' } }));
       } else if (S.settee) {
         /* ⚠ The first attempt put the throat on the line from tack to peak, which is the YARD:
            a lateen's luff IS its yard, so tack, throat and peak were collinear, the forward
@@ -4829,8 +4859,13 @@ function makeFurl(A, B, area, mat, group, o) {
          pole's: the lean that leaves it seat.clear forward of that plane. So the bunt lies
          wedged between the yard's fore-upper quarter and the pole, touching both, where the
          harbour stow puts it; the thin ends ride the tapered arms at 20°. The pinch is left
-         out of the seat so the roll's centre line does not wobble at the gaskets. */
-      const sparR = o.seat.sparRAt ? o.seat.sparRAt(Math.abs(2 * t - 1)) : o.seat.sparR;
+         out of the seat so the roll's centre line does not wobble at the gaskets.
+         Round 260 (0y³⁵): the lateen takes the same seat with its own two directions — dir is
+         the yard's lower side, the side the cloth gathers, and fwd is OUTBOARD, away from the
+         mast the yard lies against — so the yard stands at the two radii in both states and the
+         brailed roll leans out past the pole; sparRAt is called with the roll's own station t
+         (0 at A, 1 at B) so an asymmetric spar's taper reads right. */
+      const sparR = o.seat.sparRAt ? o.seat.sparRAt(t) : o.seat.sparR;
       const need = (1.085 * Rs + o.seat.clear - sparR) / Math.max(sparR + Rs, 1e-6);
       const lean = Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
       P.addScaledVector(o.seat.dir, (sparR + Rs) * Math.cos(lean))
@@ -4864,9 +4899,7 @@ function makeFurl(A, B, area, mat, group, o) {
     'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
     + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
     + 'stows fat and a royal thin.'
-    + (o.seat ? ' A square sail is rolled onto the TOP of its yard and the gaskets passed '
-      + 'round both; the bunt, the body of the cloth, is triced up at the slings, on the yard '
-      + 'before the mast.' : '')));
+    + (o.seat && o.seat.card ? ' ' + o.seat.card : '')));
   return m;
 }
 

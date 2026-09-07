@@ -1475,8 +1475,11 @@ new THREE.Vector3(ym.position.x - sT2 * w2, yY, -cT2 * w2),
 new THREE.Vector3(ym.position.x + sT2 * w2, yY, cT2 * w2),
 (yardLen * 0.96) * (drop * 0.97), furlMat(mats), group, { bunt: true,
 seat: { dir: new THREE.Vector3(dX, dY, 0), fwd: new THREE.Vector3(nX, nY, 0),
-sparRAt: tt => (slingsD / 2) * taperK(Math.min(1, tt * 0.96)),
-lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs } }));
+sparRAt: t => (slingsD / 2) * taperK(Math.min(1, Math.abs(2 * t - 1) * 0.96)),
+lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRs,
+card: 'A square sail is rolled onto the TOP of its yard and the gaskets passed '
++ 'round both; the bunt, the body of the cloth, is triced up at the slings, on '
++ 'the yard before the mast.' } }));
 } else {
 const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
 sq.userData.mastX = x; sq.userData.yardY = yY;
@@ -1926,7 +1929,7 @@ const areaF = S.settee
 : triA2(tack, peakPt, clew);
 const lenF = Math.hypot(peakPt[0] - tack[0], peakPt[1] - tack[1]);
 const rRoll = Math.max(0.05, Math.sqrt((areaF * 0.055) / (Math.PI * Math.max(lenF, 0.1))));
-const OFF = mastRl(slingY) + (FURLED ? Math.max(rYs, rRoll) : rYs);
+const OFF = mastRl(slingY) + rYs;
 const beside = new THREE.Group();
 beside.position.set(0, 0, OFF);
 group.add(beside);
@@ -1937,7 +1940,13 @@ headroom: +headroom.toFixed(3), headroomFrom: 'class: ten yard-radii at the slin
 off: +OFF.toFixed(3), mastR: +mastRl(slingY).toFixed(3), yardR: +rYs.toFixed(3),
 rollR: FURLED ? +rRoll.toFixed(3) : 0, furled: FURLED,
 side: 'port', sideFrom: 'class: to leeward of the fleet\'s wind, the side every fore-and-aft cloth is sheeted to; no record names the side',
-sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1) };
+sheetDeg: +(SHEET * 180 / Math.PI).toFixed(1),
+stow: FURLED ? { on: 'the lower side of the yard, leaned outboard of the mast', lean0Deg: 20,
+clearM: +(0.03 + 0.06 * mastRl(slingY)).toFixed(3),
+stowFrom: 'class (round 260): the cloth is brailed to the yard aloft and the roll lashed '
++ 'along it on the sail\'s own side; the roll leans outboard off that side by 20°, and '
++ 'by more where it would else stand into the pole the yard lies against; no plate '
++ 'reads it' } : null };
 beside.add(tag(ym, 'yard', 'Lateen yard'));
 {
 const rPar = 0.010 + B * 0.0004, Rp = mastRl(slingY) + rPar, zFace = OFF - rYs;
@@ -1963,9 +1972,17 @@ if (FURLED) {
 const area = S.settee
 ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
 : triA2(tack, peakPt, clew);
+const dn = new THREE.Vector3(dir[1], -dir[0], 0).normalize();
+if (dn.y > 0) dn.negate();
 sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
 new THREE.Vector3(peakPt[0], peakPt[1], 0),
-area, furlMat(mats), beside, {}));
+area, furlMat(mats), beside, {
+seat: { dir: dn, fwd: new THREE.Vector3(0, 0, 1),
+sparRAt: t => rYheel + (rYpeak - rYheel) * Math.min(1, (along + t * lenF) / Math.max(ylen, 1e-6)),
+lean0: 20 * Math.PI / 180, clear: 0.03 + 0.06 * mastRl(slingY),
+card: 'A lateen is brailed up to its yard aloft and the roll lashed along it '
++ 'on the sail\'s own side of the spar, leaning outboard of the mast the '
++ 'yard lies against.' } }));
 } else if (S.settee) {
 const throat = [tack[0] + (peakPt[0] - tack[0]) * S.settee,
 tack[1] + (peakPt[1] - tack[1]) * S.settee];
@@ -2661,7 +2678,7 @@ const Rs = R;
 R *= 1 - 0.24 * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.PI * t * nG), 5.0);
 const P = new THREE.Vector3().copy(A).addScaledVector(axis, t * len);
 if (o.seat) {
-const sparR = o.seat.sparRAt ? o.seat.sparRAt(Math.abs(2 * t - 1)) : o.seat.sparR;
+const sparR = o.seat.sparRAt ? o.seat.sparRAt(t) : o.seat.sparR;
 const need = (1.085 * Rs + o.seat.clear - sparR) / Math.max(sparR + Rs, 1e-6);
 const lean = Math.max(o.seat.lean0, Math.asin(Math.max(-1, Math.min(1, need))));
 P.addScaledVector(o.seat.dir, (sparR + Rs) * Math.cos(lean))
@@ -2693,9 +2710,7 @@ group.add(tag(m, 'sail', o.name || 'Furled sail',
 'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
 + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
 + 'stows fat and a royal thin.'
-+ (o.seat ? ' A square sail is rolled onto the TOP of its yard and the gaskets passed '
-+ 'round both; the bunt, the body of the cloth, is triced up at the slings, on the yard '
-+ 'before the mast.' : '')));
++ (o.seat && o.seat.card ? ' ' + o.seat.card : '')));
 return m;
 }
 function furlMat(mats) {

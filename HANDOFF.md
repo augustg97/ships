@@ -22328,3 +22328,148 @@ docs/audit-hulls.js convicts a furled bunt stowed through its mast (1 mentions) 
 THE RATCHET: THE OPENING FULL RATCHET at the clean r258 HEAD 6321257 (r259/open-ratchet.out, launched 23:25:48 as the round's first act, no screenshot beside it until RATCHET EXIT): RATCHET EXIT 0  END 00:05:26; 65 frames scored; movers 0. Largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, passage-sahul 0.038%/0.013. No frame moved at the clean r258 HEAD: r258's parrels and trusses, unscored on 61 frames at r258's close, crossed no gate anywhere, and the twelve frames r258 accepted at its own opening stand. Nothing to accept.
  PARTIAL after the push, the r239 pattern (r259/partial-*.out): frames scored one at a time by check --frame on the r259 builder, each diff read before its accept — action-myeongnyang 0.031%/0.005 ok, action-salamis 0.112%/0.023 CHANGED, shipwright-furled 4.474%/1.966 CHANGED (3 frames; r259/PREDICTIONS-close.md names the one frame that MUST move — shipwright-furled, the 74 with every square roll moved from under its yard to on top of it and every furled yard back onto its pole — the two Actions whose fleets are built furled and carry square yards (action-salamis, action-myeongnyang) that MAY, and the rest that must not: the set build is unchanged in every expression). The other 62 frames are UNSCORED on the r259 builder; r260's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (52fc3ba record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 260 — 2026-09-06, resumed 2026-09-07 — the furled lateen yard lies where its parrel holds it: every brailed lateen yard on the furled build stood off its mast by the ROLL's radius, 0.125–0.332 m past the two radii on all twelve yards of six hulls, off its own parrel; the yard now stands at the two radii in both states and the roll hangs on the yard's lower side leaned outboard of the pole by makeFurl's seat, the lateen yard rules run on the furled build, a new rule reads every brailed roll against its pole and its yard, and the full ratchet ran first at the clean r259 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r259 ordered r260's opening: the FULL ratchet at
+the clean HEAD before any edit, with no screenshot beside it until RATCHET EXIT; then (0y³⁵) — the lateen's and the lug's
+furled rolls onto their yards by the same seat — or (0y³⁰), or (0y¹⁹) with (0y²⁴), or Endurance by looking. The ratchet
+was launched at HEAD 0ee366f at 00:26:46 on 2026-09-06 as the round's first act; the round's edits, probes and audit runs
+were done by 00:50 and the session died there, before the close, with nothing committed (the r257 lesson, again). The
+round was resumed at 10:02 on 2026-09-07: the staged before files were cmp'd against HEAD and the after files against the
+copy :8150 still served (all identical), the FULL ratchet was relaunched at the same clean HEAD 0ee366f at 10:03:18, and the
+stale first-pass numbers in the comments and the predictions were replaced with the second pass's (r260/fix-numbers.py) —
+and that session too ended its turn while the ratchet ran: the driver killed its process group at 10:22:53 with the :8149
+server in it, the ratchet died at its 26th frame on a refused connection (r260/open-ratchet-1.out, RATCHET EXIT 1, nothing
+scored), the before witnesses failed on the same refused connection, and the after copies were left in web/ uncommitted.
+The round was resumed a second time by the 10:32:53 firing: web/ was restored to the staged HEAD copies (cmp against HEAD,
+not git checkout), the FULL ratchet was launched a third time at the clean HEAD 0ee366f at 10:35:25 as the firing's first
+act (r260/run-open.sh, open-ratchet.out) and waited on with the turn held open by a background waiter, the three before
+witnesses were taken from :8149 beside it, one browser at a time, and the close followed RATCHET EXIT; every edit was made on a COPY of web/ served on :8150 (build/staging/r260/web, every file a
+symlink to web/ except hull.js and audit-hulls.js; vessels.json is copied and unchanged); (0y³⁵) was taken. The 'lug'
+half of (0y³⁵) as r259 named it does not exist: the battened lug (junk, treasure ship, panokseon) furls by DROPPING —
+the battens stack on the boom in `side`, which stands off the axis by the mast's radius plus the boom's in BOTH states
+(`OFF = mastRj(base + lower * 0.14) + rBoomJ`), and its folds are rolls between stacked battens, not a bundle on a
+hoisted yard; the r254 line r259 quoted is the lateen block's alone.**
+
+**THE FAULT, measured on the built FURLED scene (r260/probe_lateen.py on the r259 builder, :8150 — every 'Lateen yard'
+against its mast: the yard's axis by principal component, the crossing where its line meets the mast's axis in the x–y
+plane, the offset there against the mast's radius at that height plus the yard's own; the roll, the 'furl' mesh whose
+vertex mean lies within 1.5 m of the yard's line, read for its reach into the pole as a cylinder, its centre's offset
+from the yard's axis outboard (z, away from the mast) and along the in-plane normal (down and aft, the side the cloth
+gathers), and its nearest approach to the yard's surface). r260/lateen-before.json: 12 lateen yards on 6 hulls
+(dhow 2, caravel 3, carrack 1, galley 2, galleass 3, fluyt 1), and on every one the yard stands off its mast by MORE than the two radii — 0.125 m
+(the caravel's mizzen) to 0.332 m (the galleass's foremast) past them — because r254 wrote the furled offset
+as the mast's radius plus the ROLL's radius, `OFF = mastRl(slingY) + (FURLED ? Math.max(rYs, rRoll) : rYs)`, so that the
+bundle, hung on the yard's own line, would lie against the pole and not through it. That is not where a parrel holds a
+yard: the parrel's loop was drawn round the mast at the mast's radius with its ends brought to the yard's near face
+0.12–0.33 m out, a rope fitting stretched to the length of the fault. D-LATEEN-YARD-ON-MAST could not
+see it: it ran on the audit's set build `g` alone and, on top of that, allowed 0.6 m over the two radii "because a furled
+roll lies between" — the grace was the fault. The rolls themselves were sound: each hung 0.06–0.12 m off its
+yard's line on the cloth's side, touching the spar (-0.074 to +0.014 m), and none reached into its pole (0.000 m).
+PROOF A (r260/audit-proof-a.out, the r259 builder under the r260 audit on :8150) is exactly 24 problems — 12 'a lateen yard adrift of its mast (furled build)', 12 'a furled lateen roll hung inboard of its yard' —
+on dhow 2/2; caravel 3/3; carrack 1/1; galley 2/2; galleass 3/3; fluyt 1/1 — and nothing on any other hull or rule ("checked 33 hulls, 24 problems").**
+
+**WHAT A FURLED LATEEN IS. The yard stays aloft on its halyard, against the mast's lee side where the parrel holds it
+(r254). The cloth is brailed up to the yard and the roll lashed along it with gaskets — on the sail's own side of the
+spar, which is its lower and after side, the side the canvas hangs from when set. The roll is fatter than the spar (a
+0.43 m roll on the galley's 0.10 m main yard), and it lies OUTBOARD of the mast: the yard is between the pole and the
+bundle, not the bundle between the pole and the yard. That is what every photograph of a dhow or a felucca at her
+moorings with the yard up shows — the long bundle hanging along the spar's underside, the mast standing clear on the
+other side of the yard.**
+
+**THE MODEL (web/js/hull.js; r260/hull.before.js, hull.after.js, apply-hull-edits.py, every replace asserted).
+(1) The lateen block: `OFF = mastRl(slingY) + rYs` in BOTH states — the r254 furled term is gone and its comment says so;
+the parrel, drawn from the mast's radius to the yard's near face at OFF − rYs, now spans the mast's own surface. The
+yard's record carries the stow (userData.lateen.stow: on the lower side of the yard, leaned outboard of the mast,
+lean0Deg 20, clearM, and its derivation: 'class (round 260): the cloth is brailed to the yard aloft and the roll lashed
+along it on the sail's own side … no plate reads it'). (2) THE SEAT: the lateen's makeFurl call passes seat = { dir: the
+in-plane normal to the yard pointing down and aft (the side the cloth gathers), fwd: +z in `beside` (outboard, away from
+the mast the yard lies against), sparRAt: the yard's own taper heel to peak at the roll's station (the roll runs tack to
+peak, the bare heel excluded), lean0: 20°, clear: 0.03 + 0.06·mastR } — r259's law with the lateen's two directions:
+the roll's centre stands off the spar's axis by the spar's radius there plus the roll's, along a line leaned outboard
+off the lower side by 20° and by more where the roll's creased inboard side would else reach inboard of the plane of
+the yard's own inboard face, which is the pole's. (3) makeFurl: sparRAt is called with the roll's own station t (0 at
+A, 1 at B) so an asymmetric spar's taper reads right; the square caller folds its symmetric taper itself
+(`Math.abs(2 * t - 1)`), the same numbers; the furled card's sentence comes from the seat (seat.card), the square text
+unchanged. Without a seat makeFurl is the r258 path, so the crab claw's, the gaff's, the jib's and the junk's rolls are
+untouched. The SET build is unchanged in value on every hull: the set lateen offset is the same expression's same value,
+and the square seat is re-expressed only. No record field changes; vessels.json is unchanged.**
+
+**MEASURED AFTER (r260/lateen-after.json, the same probe on the r260 builder): 12 lateen yards on 6 hulls, every one
+read on the furled build. (a) Every yard stands at the two radii — the mast's radius at the crossing plus its own, off
+the meshes — within 0.012 m, so each moved INBOARD onto its pole by 0.129–0.339 m. (b) Every roll's centre stands
+OUTBOARD of its yard's axis, 0.134–0.314 m away from the mast, and 0.094–0.239 m down its lower side. (c) No roll has a
+point inside its pole: the greatest reach into any mast is 0.000 m. (d) Every roll touches its yard: the nearest approach
+to the yard's surface is -0.036 to -0.003 m. The canoe's two crab-claw yards, which r256 leaves unread, read on the furled
+build off 0.274 m against the two radii's 0.032; off 0.094 m against the two radii's 0.032 — a separate residual, named below. Nothing in the SET build moved: the set offset is the same value.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r260/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js).
+(1) D-LATEEN-YARD-ON-MAST is a function of the scene, lateenRead(G, STATE), run on the set build `g` where it always ran
+and now on the furled build `gf` from the stowed-cloth block, the state named in the conviction ('… (furled build)');
+the 'adrift' gate is 0.05 m over the two radii in BOTH states, r254's 0.6 m of grace gone; the shroud read inside it
+runs on the set build alone. (2) D-FURL-LATEEN (new, 0y³⁵), on the furled build: every 'Lateen yard' mesh gives an
+axis by principal component and its end radii, its mast is the record's (userData.lateen.mastX) or the nearest foot to
+a third up the yard, its roll is every 'furl' mesh whose vertex mean lies within 1.5 m of the yard's line — no point
+more than 0.03 m inside the pole as a cylinder ('a furled lateen roll stowed through its mast'), the roll within 0.05 m
+of the yard's surface at that station ('a furled roll floating off its yard'), its centre OUTBOARD of the yard's axis
+('a furled lateen roll hung inboard of its yard'), and a lateen yard with no roll within reach convicted. The pole's
+end radii are the MAX radial distance in each end band: three.js's CylinderGeometry pushes one cap-centre vertex per
+radial segment, so a mean over a closed pole's end band reads two thirds of its radius (the first pass read the dhow's
+0.134 m mast as 0.093, and the probe the same; both now read the max — the square masts are open-ended cylinders and
+r259's yardRead reads them right as it is). PROOF A is
+above. The final audit on the r260 builder: "checked 33 hulls, 0 problems" on :8150 (audit-final-8150.out)
+and "checked 33 hulls, 0 problems" on :8149 after the copy into web/ (audit-final-8149.out).**
+
+**WITNESSED (r260/witness-galley-furled-beam-before.png — the r259 builder in web/ on :8149, taken beside the third
+opening ratchet, one browser at a time; witness-galley-furled-beam-after.png — the r260 builder on :8150, captured by the
+10:02 attempt at 10:23; both the galley furled from the port beam, b=90, l=10, z=0.5; w-galley-beam-main-2x-pair.png the
+mainmast's crossing cropped at 2x from each, w-galley-beam-fore-2x-pair.png the fore yard's middle). BEFORE (left): from the
+port beam the yard reads as a thin brown spar lying along the NEAR face of the bundle — r254 stood the yard outboard of
+the pole by the roll's radius, so the spar lay between the camera and the cloth — and at the mainmast's head the spar
+crossed the pole with the roll behind it. AFTER (right): the bundle is what the port beam sees, the spar hidden behind it
+the whole length, because the roll now hangs outboard of the yard; at the mainmast's head the yard crosses the pole
+against it. Dead astern (witness-galley-furled-astern-before/after.png, b=180, l=8, z=0.45; w-galley-astern-head-2x-pair.png
+the mainmast's head at 2x): BEFORE, the roll stands to port of the mast with the yard's thin line along its inboard edge
+and daylight between that line and the pole at the crossing — the yard held off its mast by the roll's radius; AFTER,
+the yard's line lies against the pole's port edge and the roll hangs to port of the yard, outboard, the three stacked
+across the beam pole, spar, bundle. The dhow from the port quarter (witness-dhow-furled-q-before/after.png, b=125, l=12,
+z=0.5; w-dhow-q-main-2x-pair.png her main mast's head, w-dhow-q-mizzen-2x-pair.png her mizzen's): the same change on both
+her yards — the spar that lay along the bundle's near face before is behind the bundle after, and each yard crosses its
+mast against the pole. Nothing else in any pair differs: hull, oars, deck, shrouds, halyard falls and the water are the
+same picture.**
+
+**Rule 0 on the after witness read whole (r260/witness-galley-furled-beam-after.png): a rendered galley on water from her
+port beam, not a chart — the outrigger frame along the deck with the oars run out from it in one long bank, the mainmast
+with its shrouds and halyard fall, the two lateen yards crossing the frame as long tapered spars with their brailed sails
+lashed along them in scalloped bundles, a grey-blue swell and a low hazed coast on the horizon. Three facts a viewer can
+read off it without a legend: her sails are brailed up to their yards and lashed there, the bundles fat at the middle and
+thin toward the peaks; the yards stay aloft with the sails furled, peaked up steeply from the deck forward; she is a
+rowing ship, her oars run out from the outrigger along the whole length of the hull.**
+
+**Named residuals, in order:** (0y³⁵) CLOSED as a class — every furled lateen yard stands where its parrel holds it, at
+the two radii, and the brailed roll hangs on its lower side outboard of the pole; the lug half of the name was not a
+fault (the junk's stack stands at the two radii in both states). NEW (0y³⁶) the canoe's two crab-claw yards on the
+furled build stand off 0.274 m against the two radii's 0.032; off 0.094 m against the two radii's 0.032 — r250 laid the yard along the mast and r256 left the crab claw unread; whether
+Hōkūleʻa's spar is lashed to the mast's side or stands off it is a plate question, and the furled roll there is
+r258's, hung on the yard's line at z 0 through the mast's own line. NEW (0y³⁷) the lateen's outboard lean is one law
+along the whole yard (20° and the pole's clearance), so the bundle clears a virtual wall the pole's length where it
+need clear the pole only at the sling; a photograph of a moored dhow reads the bundle straight under the spar away from
+the mast. (0y³³) the gaskets, (0y³⁴) the square roll's one law, (0y³⁰) the truss's throw, (0y³¹) the chain slings,
+(0y³²) the iron rig's hoisting-yard parrels, as r258–r259 name them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹)
+(0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y′) (0y⁗)
+(0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷)
+(0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″)
+(0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r261 opens by running the FULL ratchet at the clean HEAD first (r260/PREDICTIONS-close.md names the one frame that
+MUST move — action-lepanto — no MAY frame, and the rest that MUST NOT, the set build being unchanged in value; only
+those scored by check --frame after the push are accepted here), with no screenshot beside it until RATCHET EXIT; then
+takes (0y³⁶), the canoe's crab-claw yard against its mast from Hōkūleʻa's plates, or (0y³⁰), the truss's throw read off
+the mesh, or (0y¹⁹) with (0y²⁴), the carrack's mizzen and the artemon read from plates at a stated scale, or the
+survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788805147 at the build; the push and the live poll are in
+build/staging/r260/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r260 staging stays on disk uncommitted, the r211 convention.**
