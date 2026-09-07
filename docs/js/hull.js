@@ -2057,6 +2057,8 @@ yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +L
 sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
 lashed: { offHeel: +offHeel.toFixed(3), offHead: +offHead.toFixed(3), mastRheel: +rMheel.toFixed(3), mastRhead: +rMhead.toFixed(3),
 yardRheel: +rYheel.toFixed(3), yardRtip: +rYtip.toFixed(3), leanDeg: +(lean / RAD).toFixed(2), tackH: +tackH.toFixed(3), poleTop: +poleTop.toFixed(3), lashings: nLash,
+mastHeightM: +poleM.toFixed(3), mastHeightRec: mk.heightM !== undefined ? mk.heightM : null,
+tipOverHead: +(tipY[1] - poleTop).toFixed(3), tipOverHeadRec: SG && SG.tipOverHeadM !== undefined ? SG.tipOverHeadM : null,
 from: 'READ off the 2009 broadside at 8x (52 ± 2 px/m): the yard lies against the mast\'s after face, lashed to it at the heel, at mid-height and at the masthead (round 261, 0y³⁶); the offset is the two radii off the drawn spars, no plate reads a gap; the lashings\' count and turns are class figures' } };
 (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
 });

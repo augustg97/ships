@@ -6334,7 +6334,7 @@
         }
       }
     }
-    /* ── D-CRABCLAW-SPARS and D-SAIL-AREA (round 250): THE SPARS ARE THE RECORD'S, AND THE
+    /* ── D-CRABCLAW-SPARS, D-SAIL-AREA (round 250) and D-CRABCLAW-MASTHEAD (round 262): THE SPARS ARE THE RECORD'S, AND THE
        CLOTH IS THE ROW'S OR THE RECORD SAYS WHY NOT. The canoe's crab claws had their tacks
        0.22 L forward of their masts and their spars solved from 25 m² a sail, for 249 rounds,
        while the 2009 broadside puts both tacks at the masts' feet, the yards along the masts
@@ -6369,7 +6369,7 @@
           for (const q of P) { if (q.y < yMin + span * 0.02) { lo.add(q); nl++; } if (q.y > yMax - span * 0.02) { hi.add(q); nh++; } }
           lo.divideScalar(Math.max(1, nl)); hi.divideScalar(Math.max(1, nh));
           for (const q of P) if (q.y < yMin + span * 0.02) rF = Math.max(rF, Math.hypot(q.x - lo.x, q.z - lo.z));
-          heels.push({ x: lo.x, y: lo.y, lo, hi, rFoot: rF }); }
+          heels.push({ x: lo.x, y: lo.y, lo, hi, rFoot: rF, yMin, yMax }); }
       });
       (H.masts || []).forEach((mk, i) => {
         const sg = mk.sail; if (!sg || !(sg.yard > 0) || !(sg.boom > 0)) return;
@@ -6387,6 +6387,24 @@
           const nA = new THREE.Vector3(d.y, -d.x, 0).normalize(); if (nA.x < 0) nA.negate();
           const want = heel.rFoot + (b.heelR || 0); const aft = (b.tack[0] - ax.x) * nA.x + (b.tack[1] - ax.y) * nA.y; const off = aft - want;
           if (Math.abs(off) > 0.06) say(v.id, 'a crab-claw tack away from its mast', `mast ${i}: the tack at x ${b.tack[0].toFixed(2)} stands ${aft.toFixed(3)} m abaft the axis at its height against the two radii ${want.toFixed(3)} (mast ${heel.rFoot.toFixed(3)} + yard heel ${(b.heelR || 0).toFixed(3)})`); }
+        /* ── D-CRABCLAW-MASTHEAD (round 262, 0y³⁸): THE POLE IS AS TALL AS ITS RECORD, AND THE RECORD IS A
+           READ. A mast whose spars are read off a plate stands on that plate, so its height is readable too;
+           for 261 rounds the canoe's two poles were 0.95 of Steel's main (9.05 m) under spars read at 52 px/m,
+           and the fore yard's tip stood 3.90 m over its head against the plate's 2.90 (r262/tip-before.json).
+           (a) A crab-claw mast with a `sail` record and no heightM is convicted for the silence — a share of a
+           1794 warship rule is not a read of this rig. (b) With heightM, the built pole (the 'mast' mesh
+           nearest the station, its lowest to its highest vertex) must stand at it to 0.05 m. (c) With
+           sail.tipOverHeadM (the plate's read of the yard's tip over the masthead) the built yard's tip
+           (userData.crabclaw.yardTip) over the pole's top must be within 0.5 m of it — a 6 px read at each
+           end and the yard's own 2% — and a sail record without the read is convicted for the silence. */
+        if (mk.heightM === undefined) say(v.id, "a crab-claw mast whose height is a class share while its spars are the plate's", `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m is a plate read and the pole under it carries no heightM (${mk.height !== undefined ? mk.height + " of Steel's main" : 'no height at all'})`);
+        else if (heel) {
+          const built = heel.yMax - heel.yMin;
+          if (Math.abs(built - mk.heightM) > 0.05) say(v.id, "a crab-claw mast built against its record's height", `mast ${i}: ${built.toFixed(3)} m deck to head built, ${mk.heightM} recorded`);
+          if (sg.tipOverHeadM === undefined) say(v.id, 'a crab-claw sail record that does not say where its yard ends over the masthead', `mast ${i}: sail.tipOverHeadM missing`);
+          else { const over = b.yardTip[1] - heel.yMax;
+            if (Math.abs(over - sg.tipOverHeadM) > 0.5) say(v.id, over > sg.tipOverHeadM ? 'a crab-claw yard standing too far above its masthead' : 'a crab-claw yard stopping short above its masthead', `mast ${i}: the yard's tip ${over.toFixed(2)} m over the masthead against the plate's ${sg.tipOverHeadM}`); }
+        }
       });
       const saRow = (v.rows || []).find(r => Array.isArray(r) && /^sail area$/i.test(String(r[0]).trim()));
       if (saRow) {

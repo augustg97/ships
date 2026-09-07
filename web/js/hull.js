@@ -3663,6 +3663,19 @@ function buildRig(S, group, mats, FINE, FURLED) {
          over the deck. The record's tackAbaft and yardOffMast are retired (their reads are
          re-stated in sail.provenance); the class solve without a record keeps its own spar
          length from the area, on the same lashed line. */
+      /* ── THE POLE IS AS TALL AS ITS RECORD SAYS (round 262, 0y³⁸) ──────────────────────
+         poleM is the record's: heightM 9.50 m on the fore — the Polynesian Voyaging Society's
+         own specification, "Mast Height: 31ft, 2in", dimensioned from the deck line on the
+         forward mast (hokulea.com/wp-content/uploads/hokulea-diagram.pdf) — and 8.37 m on the
+         main, read off the 2009 broadside at the 53.5 px/m the fore's recorded height pins
+         (r262/main-cap-8x.png: the pole ends at plate y 277 where the shrouds and the halyard
+         blocks gather; the yard stands on 155 px above it). For 261 rounds both poles were
+         0.95 of Steel's main, 9.05 m — a 1794 warship rule on a Hawaiian double canoe — so the
+         fore yard's tip stood 3.90 m over its head against the plate's 2.90 and the main's
+         2.75 over a head 0.7 m too high; r249 had read the main "about 11.7 m" off the yard's
+         tip. The spar reads are at the same 53.5 px/m (12.39 / 9.20 fore, 11.27 / 7.93 main),
+         so the tip of each yard stands 3.09 m over its masthead, inside the plate's 2.90 and
+         the specification's 41 ft 5 in less 31 ft 2 in (3.12). */
       const poleTop = base + poleM;                     // this rig's pole is one segment
       const tackH = base + (SG && SG.tackUp !== undefined ? SG.tackUp : 0.2);
       const nA = [Math.cos(rakeRad), -Math.sin(rakeRad)];   // the axis's AFT normal (+x is aft)
@@ -3742,6 +3755,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
           sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
           lashed: { offHeel: +offHeel.toFixed(3), offHead: +offHead.toFixed(3), mastRheel: +rMheel.toFixed(3), mastRhead: +rMhead.toFixed(3),
                     yardRheel: +rYheel.toFixed(3), yardRtip: +rYtip.toFixed(3), leanDeg: +(lean / RAD).toFixed(2), tackH: +tackH.toFixed(3), poleTop: +poleTop.toFixed(3), lashings: nLash,
+                    /* r262 (0y³⁸): the pole's height and the yard's tip over its head, built, beside the record's reads */
+                    mastHeightM: +poleM.toFixed(3), mastHeightRec: mk.heightM !== undefined ? mk.heightM : null,
+                    tipOverHead: +(tipY[1] - poleTop).toFixed(3), tipOverHeadRec: SG && SG.tipOverHeadM !== undefined ? SG.tipOverHeadM : null,
                     from: 'READ off the 2009 broadside at 8x (52 ± 2 px/m): the yard lies against the mast\'s after face, lashed to it at the heel, at mid-height and at the masthead (round 261, 0y³⁶); the offset is the two radii off the drawn spars, no plate reads a gap; the lashings\' count and turns are class figures' } };
         (inSheet ? sheetG : group).add(tag(m2, 'yard', nm));
       });

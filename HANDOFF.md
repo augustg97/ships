@@ -22641,3 +22641,135 @@ THE RATCHET: THE OPENING FULL RATCHET at the clean r260 HEAD 2ce74c7 (r261/open-
 Two commits close the round (64546f3 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
 
 **Receipt correction (r261, 12:20): docs/data/vessels.json DOES carry the canoe's two masts at diaM 0.19 — the build minifies the JSON to `"diaM":0.19` and the receipt's grep pattern had a space in it, so it counted 0; `grep -o '"diaM":[ ]*0\.19' docs/data/vessels.json` finds 2, both on the voyaging canoe. The published copy is right; the count string was wrong.**
+
+## Round 262 — 2026-09-07 — the canoe's masts are as tall as her owner says: both of the voyaging canoe's poles were 0.95 of Steel's main, 9.05 m, a 1794 warship rule on a Hawaiian double canoe whose owner publishes the height, so the fore yard's tip stood 3.90 m over its masthead against the plate's 2.90 and the main's head stood 0.68 m too high; the fore pole now takes the Polynesian Voyaging Society's 31 ft 2 in (9.50 m), which pins the 2009 broadside's scale at the rig to 53.5 px/m, the main 8.37 m off the plate at that scale, the spar reads are re-scaled with it, each sail records where its yard ends over the masthead, a new rule reads a crab-claw mast's height and its yard's tip against the record and convicts a mast under plate-read spars whose height is a class share, and the full ratchet ran first at the clean r261 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r261 ordered r262's opening: the FULL ratchet
+at the clean HEAD before any edit, with no screenshot beside it until RATCHET EXIT; then (0y³⁸), the canoe's mast heights
+from the plate with the yard's tip over the head, or (0y³⁰), or (0y¹⁹) with (0y²⁴), or Endurance by looking. The ratchet
+was launched at HEAD 19058c2 at 12:31:04 as the round's first act (r262/run-open.sh, open-ratchet.out) and waited on in
+the foreground; every edit was made on a COPY of web/ served on :8150 (build/staging/r262/web, every file a symlink to
+web/ except hull.js, audit-hulls.js and vessels.json, which are copies); the two probes, the three audit runs and the four
+witnesses were taken beside the ratchet one browser at a time (load 10 at launch, 15–35 through the round). (0y³⁸) was taken.**
+
+**THE RECORD THAT WAS NOT LOOKED UP. The Polynesian Voyaging Society publishes Hōkūleʻa's rig: the specification graphic
+at hokulea.com/wp-content/uploads/hokulea-diagram.pdf (Dave Swann / Star-Advertiser for PVS; kept as r262/hokulea-diagram.pdf)
+dimensions "Mast Height: 31ft, 2in" and "Spar Height: 41ft, 5in" on its profile, both from the deck line, on the forward
+mast and its yard — 9.50 m to the masthead and 12.62 m to the yard's tip, the tip 3.12 m over the head — and draws the after
+mast shorter with no figure. For 261 rounds both masts were `height: 0.95`, a share of Steel's (lwl + beam) / 2, 9.05 m:
+Steel 1794's proportion for a 64- to 100-gun ship, applied to a lashed double canoe with a plate of her rig in hand since
+round 247. r249 read the plate for the heights — "the foremast about 10.0 m and the mainmast about 11.7 m" — and left the
+share standing; r261 named the fore yard's 3.9 m over its head against the plate's 3.1 as (0y³⁸).**
+
+**THE PLATE, RE-READ AT 8x (r262/fore-cap-8x.png, fore-tip-8x.png, main-cap-8x.png, main-tip-8x.png — contrast-stretched
+crops of build/staging/r247/hokulea-2009.jpg, the 2009 broadside, Wikimedia Commons Hokule'aSailing2009.jpg, 1280 px; the
+gridded plate is r262/plate-grid.png). The fore POLE — the thicker, darker spar carrying the lashings — ends at y 207 ± 6,
+where the shrouds and the halyard blocks gather in a mass of rope on its forward side; above it only the yard continues,
+bare yellow wood past the cloth's head, to its tip at (425, 52). The fore foot meets the deck at (405, 715): 508 px. The
+main pole ends the same way at y 277 ± 6 with its foot at (683, 725): 448 px; its yard's tip is at (697, 122). r249's
+"about 11.7 m" for the main is (725 − 140) / 50: the YARD's tip taken for the masthead — the pole ends 155 px lower, where
+r250's own rake read had already put its head (690, 280). The record's 9.50 m on the fore's 508 px pins the scale at the
+rig to 53.5 ± 1 px/m (the hull's manu tips read 54 at the near hull, the rig standing on the centreline; r250's 52 ± 2
+brackets it), and at that scale the main is 8.37 ± 0.2 m, each yard's tip stands 155 px = 2.90 m over its masthead, and
+the spar reads of r250 — the same pixels — are 2.8% shorter: the fore yard 663 px = 12.39 m (12.75 at 52), its boom
+492 px = 9.20 (9.46); the main yard 603 px = 11.27 (11.6), its boom 424 px = 7.93 (8.16), its cloth's head 530 px = 9.91
+up the yard (10.19). The angles are scale-free. A 1 px/m scale error is 2% of length and 4% of area; a 6 px read of a
+masthead is 0.11 m.**
+
+**THE FAULT, measured on the built scene (r262/probe_tip.py — r261's probe_crab.py with the pole's deck-to-head, the yard's
+tip over the masthead and over the deck, and the record's fields added to each yard's output; run on the r261 builder in
+web/ on :8149 beside the ratchet). r262/tip-before.json: both poles 9.049 m deck to head (recShare 0.95, no heightM); the
+fore yard's tip 3.898 m over its masthead and 12.946 m over the deck (the PVS's 12.62, the plate's 12.75 at 52); the main's
+2.748 m over a head 0.68 m too high, 11.797 m over the deck. PROOF A (r262/audit-proof-a.out — the r261 record and the r261
+builder under the r262 audit on :8150) is exactly 2 problems, both "a crab-claw mast whose height is a class share while
+its spars are the plate's" on the voyaging canoe's two masts, and nothing on any other hull or rule ("checked 33 hulls,
+2 problems").**
+
+**THE RECORD (web/data/vessels.json; r262/vessels.before.json, vessels.after.json, apply-record-edits.py, every assertion
+on the old values; every other vessel parse-identical). (1) Both masts lose `height` and take `heightM` — the fore 9.50
+with a RECORDED provenance naming the PVS graphic, its two dimensions and their datum, and the plate read that agrees with
+it and takes its scale from it; the main 8.37 with a READ provenance naming the pixels, the scale, the r249 misread and the
+graphic's silence on this mast. (2) Each sail's spars are re-scaled to 53.5 px/m (above) and gain `tipOverHeadM: 2.90`, the
+yard's tip over the masthead as the plate reads it; the provenance says what was re-scaled, from what, and gives the model's
+own 3.09 m against the plate's 2.90 and the PVS's 3.12. (3) Both atProvenance strings, which carried the "10.0 m and 11.7 m
+… not changed here" sentence, now say what the 11.7 was and where the heights went. (4) sailAreaContested's plate figure
+follows the scale: 60.6 → 57.2 m² for the pair (bounds 55.2–59.5 at 53.5 ± 1), the record's 50.2 unchanged, `used` still
+'plate'; the Sail area row reads "about 57 m²". (5) The Rig row names the heights: "the foremast 9.5 m deck to head (the
+PVS specification's 31 ft 2 in), the mainmast 8.4 m off the 2009 broadside, each yard standing about 3 m above its
+masthead". THE MODEL (web/js/hull.js; r262/hull.before.js, hull.after.js, apply-hull-edits.py, both replaces asserted): the
+crab-claw block reads poleM from the record through mastLowerOf as it always did — heightM in metres where the record has
+it — so nothing drawn changes except through the record; a comment at poleTop says what the height is and where it came
+from, and the yard's record (userData.crabclaw.lashed) gains mastHeightM / mastHeightRec and tipOverHead / tipOverHeadRec,
+built beside recorded, for the card and the audit. The Shipwright's "Rig, deck to truck" tile, which measures the tallest
+mast mesh, reads 9.5 m (it read 9.1).**
+
+**MEASURED AFTER (r262/tip-after.json, the same probe on the r262 builder on :8150, set build). The fore pole 9.500 m deck
+to head (9.501 along its axis) against heightM 9.5; the main 8.370 (8.371) against 8.37. The fore yard 12.390 m long, its
+tip 3.086 m over the masthead (recorded 2.90; the PVS's 3.12) and 12.587 m over the deck (the PVS's 12.62); the main
+11.270 m, its tip 3.097 over the head and 11.467 over the deck. Every r261 property holds on the new poles: both yards at
+the two radii at five stations (−0.008 to −0.011 m, the probe's foot-band radius against the builder's at the tack's height),
+four three-turn lashings a mast (24 rings), the top ring 0.12 m under each new masthead. The builder's flat-triangle cloth
+(0.5 · luff · boom · sin(spread) · 0.88) is 34.5 + 24.2 = 58.7 m² against the contest's 57.2, inside the r250 rule's 25% gate
+(it was 36.5 + 25.6 = 62.1 against 60.6).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r262/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js).
+D-CRABCLAW-MASTHEAD (new, 0y³⁸), inside the D-CRABCLAW-SPARS loop over every mast whose record carries `sail`: (a) a mast
+with no heightM is convicted for the silence — "a crab-claw mast whose height is a class share while its spars are the
+plate's" — because spars read off a plate stand on a mast that is on the same plate, and a share of a 1794 rule is not a
+read of this rig; (b) with heightM, the built pole (the 'mast' mesh nearest the station, lowest to highest vertex) must
+stand at it to 0.05 m, else "a crab-claw mast built against its record's height"; (c) with sail.tipOverHeadM the built
+yard's tip (userData.crabclaw.yardTip) over the pole's top must be within 0.5 m of it — a 6 px read at each end and the
+yard's own 2% — else "a crab-claw yard standing too far above its masthead" or "stopping short above its masthead"; a sail
+record without the read is convicted for that silence. PROOF A is above. PROOF B (r262/audit-proof-b.out — the r262 tree
+with a record that reads the fore tip 2.0 m over the head and puts the main yard back at 12.75): exactly 2 'standing too
+far above its masthead' — the fore's 3.08 m against 2, the main's 4.58 against 2.9 — and nothing else; the record was then
+restored (cmp-identical to vessels.after.json). The final audit on the r262 builder: "checked 33 hulls, 0 problems" on
+:8150 (r262/audit-final-8150.out); the files copied into web/ after RATCHET EXIT are cmp-identical to the copy :8150 served,
+and the :8149 run was not repeated for the clock.**
+
+**WITNESSED (r262/witness-canoe-far-before.png — the r261 builder in web/ on :8149, taken beside the opening ratchet one
+browser at a time; witness-canoe-far-after.png — the r262 builder on :8150; both the canoe set from the port beam, b=90,
+l=8, z=1.4, the whole rig in frame; w-far-fore-head-pair.png the fore masthead at 1.5x from each, w-far-main-head-pair.png
+the main's; witness-canoe-beam-before/after.png the r261 camera z=0.6, which crops the mastheads out but shows the card's
+"Rig, deck to truck" tile at 9.1 m before and 9.5 m after). FORE, before (left): the pole's top lashing sits well down the
+yard and the yard runs on above it for more than a third of its length, a long bare spar over a short pole; after (right):
+the pole reaches higher, its top lashing close under the cloth's head, and the yard stands on about three metres above it —
+the proportion of the plate's fore-cap crop. MAIN, before: the pole and its top lashing stand high on the yard; after: the
+pole ends lower, the lashing lower with it, the yard's tip lower over the water. Nothing else in either pair differs but the
+camera's datum: the hull, the platform, the shrouds and the water are the same picture reframed.**
+
+**Rule 0 on the after witness read whole (r262/witness-canoe-far-after.png): a rendered double canoe on water from her port
+beam, not a chart — the planked hull with its platform, two thick poles with their yards lashed along them and the crab-claw
+sails set aft on booms, the shrouds to the rail, a grey-blue sea to a hazed coast. Three facts a viewer can read off it
+without a legend: her forward mast is taller than her after one; each sail's luff spar stands on above its masthead for
+about a third of the mast's height; she is a double hull under a platform with both masts stepped on it.**
+
+**Named residuals, in order:** (0y³⁸) CLOSED — both poles are their record's height, the fore's the owner's figure, and each
+yard's tip stands over its masthead where the plate puts it, on both builds (the yard is the hinge and does not move with
+the state). NEW (0y⁴¹) the PVS graphic's hull figures — "Length: 64ft, 9in" (19.7 m) and "Beam: 19ft, 8in" (5.99 m) —
+against the card's 18.7 m LOA and 4.72 m beam (Wikipedia's 61 ft 5 in and 15 ft 6 in): the graphic may measure over the manu
+and the outside of the hulls, or describe the canoe after her 2013 dry-dock; a contest for the hull's own dimensions that
+this round did not open. NEW (0y⁴²) the masthead's fittings — the halyard horn (pueo) and the blocks the plate shows massed
+on the pole's forward side under the head — are not drawn; and the shroud count (the plate's four or five a side against
+the record's 2, noted since r249) stands. (0y³⁹) the lashings' count and turns, (0y⁴⁰) the closed boom through the furled
+roll, as r261 names them. (0y³⁷) the lateen's outboard lean, as r260 names it. (0y³³) (0y³⁴) (0y³⁰) (0y³¹) (0y³²) as
+r258–r259 name them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as
+r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y′) CLOSED with (0y³⁸) — it was the same residual, named in
+r249. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread.
+(0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶)
+(0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r263 opens by running the FULL ratchet at the clean HEAD first (r262/PREDICTIONS-close.md names the two frames that
+MUST move — ship-canoe, a whole-frame mover because rigTop fell 0.36 m and the camera's datum with it, and sea-canoe-floor —
+the two MAY frames, ship-dugout and ship-trireme as her berth neighbours, and the rest that MUST NOT; only those scored by
+check --frame after the push are accepted here), with no screenshot beside it until RATCHET EXIT; then takes (0y³⁰), the
+truss's throw read off the mesh, or (0y¹⁹) with (0y²⁴), the carrack's mizzen and the artemon read from plates at a stated
+scale, or (0y⁴²), the canoe's masthead fittings off the 2009 plate at 8x, or the survey's next never-spun hull, Endurance
+(4,114 triangles per metre), by looking. The machine's load through this round (15–35, the ratchet at 75 s a frame) did
+not let 65 frames finish inside the round's 80 minutes; a round that wants the full run scored should check `uptime` and
+`ps -r` at launch and, above load 15, expect to score the clean HEAD by partials.**
+
+**Live stamp: docs/index.html carries data-version 1788813224 at the build; the push and the live poll are in
+build/staging/r262/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r262 staging stays on disk uncommitted, the r211 convention.**
