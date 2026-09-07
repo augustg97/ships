@@ -126,7 +126,7 @@
         ],
         [
           "Rig",
-          "**two masts**, crab claw — a triangular sail on two spars along its long sides; the foremast 9.5 m deck to head (the PVS specification's 31 ft 2 in), the mainmast 8.4 m off the 2009 broadside, each yard standing about 3 m above its masthead"
+          "**two masts**, crab claw — a triangular sail on two spars along its long sides; the foremast 9.5 m deck to head (the PVS specification's 31 ft 2 in), the mainmast 8.4 m off the 2009 broadside, each yard standing about 3 m above its masthead, each masthead carrying a short horn and four blocks on its forward face"
         ],
         [
           "Sail area",
@@ -222,6 +222,17 @@
             "at": 0.26,
             "heightM": 9.5,
             "heightMProvenance": "RECORDED: the Polynesian Voyaging Society's specification graphic (hokulea.com/wp-content/uploads/hokulea-diagram.pdf, Dave Swann / Star-Advertiser for PVS; r262/hokulea-diagram.pdf): \"Mast Height: 31ft, 2in\" and \"Spar Height: 41ft, 5in\", both dimensioned on the profile from the deck line to the forward mast's head and to its yard's tip — 31 ft 2 in is 9.50 m, deck to masthead, on the forward mast. Read against the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px): the foremast's foot meets the deck at plate (405, 715) and its head — the top of the pole, where the shrouds and the halyard blocks gather and the yard stands on alone — at y 207 ± 6 (r262/fore-cap-8x.png), 508 px; at round 250's 52 ± 2 px/m that is 9.8 ± 0.4 m, and the record's 9.50 m pins the plate's scale at the rig to 53.5 ± 1 px/m (the hull's manu tips read 54 at the near hull; the rig stands on the centreline). Before round 262 the record gave both masts 0.95 of Steel's main, 9.05 m — a warship's rule of 1794 on a Hawaiian double canoe whose owner publishes the height. Round 262.",
+            "masthead": {
+              "horn": true,
+              "hornM": 0.37,
+              "hornProudM": 0.13,
+              "blocks": 4,
+              "blockM": 0.13,
+              "firstUnderHeadM": 0.34,
+              "lastUnderHeadM": 1.55,
+              "side": "forward",
+              "provenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px) at 8x, at the 53.5 ± 1 px/m the foremast's recorded 9.50 m pins at the rig (round 262); r263/fore-head-fit-8x.png and main-head-fit-8x.png, contrast-stretched crops with a 5 px grid (a cell is 0.09 m). On BOTH poles: at the head a short stiff piece, pale on the fore and dark on the main, whose top is at the masthead and whose lower end stands 6–8 px (0.11–0.15 m) proud of the pole's forward face about 20 px (0.37 m) down — a horn or cheek leaning forward at its foot, its function not readable; under it, on the forward face, a column of pale rounded blocks, each 6–8 px (0.11–0.15 m), the first about 18 px (0.34 m) under the head and the last about 63–83 px (1.2–1.55 m) under it (fore y 225–290 under a head at 207; main y 295–340 under a head at 277), four on each pole at this scale (± 1: two may be one, or a seizing may read as a block); the shrouds fan down and forward from the column. Nothing stands on the AFTER face, where the yard lies lashed (round 261). The blocks' functions (the halyard, the shrouds' or the sheet's tackles) are not readable off the plate and are not named; the count, the size and the band they occupy are the read. Round 263."
+            },
             "rig": "crabclaw",
             "rake": 1,
             "shrouds": 2,
@@ -246,6 +257,17 @@
             "at": 0.54,
             "heightM": 8.37,
             "heightMProvenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px) at 53.5 ± 1 px/m — the scale the foremast's recorded 9.50 m pins at the rig: the mainmast's foot meets the deck at plate (683, 725) and its head — the top of the pole, where the shrouds and the halyard blocks gather and the yard stands on alone — at y 277 ± 6 (r262/main-cap-8x.png), 448 px = 8.37 ± 0.2 m. Round 249 read this mast 'about 11.7 m': that was the main yard's tip at (697, 122) taken for the masthead; the pole ends 155 px lower, where round 250's rake read already put its head (690, 280). the Polynesian Voyaging Society's specification graphic (hokulea.com/wp-content/uploads/hokulea-diagram.pdf, Dave Swann / Star-Advertiser for PVS; r262/hokulea-diagram.pdf): \"Mast Height: 31ft, 2in\" and \"Spar Height: 41ft, 5in\", both dimensioned on the profile from the deck line to the forward mast's head and to its yard's tip gives no figure for the after mast and draws it shorter than the forward one, as the plate does. Before round 262 the record gave it 0.95 of Steel's main, 9.05 m. Round 262.",
+            "masthead": {
+              "horn": true,
+              "hornM": 0.37,
+              "hornProudM": 0.13,
+              "blocks": 4,
+              "blockM": 0.13,
+              "firstUnderHeadM": 0.34,
+              "lastUnderHeadM": 1.18,
+              "side": "forward",
+              "provenance": "READ off the 2009 broadside (Wikimedia Commons, Hokule'aSailing2009.jpg, 1280 px) at 8x, at the 53.5 ± 1 px/m the foremast's recorded 9.50 m pins at the rig (round 262); r263/fore-head-fit-8x.png and main-head-fit-8x.png, contrast-stretched crops with a 5 px grid (a cell is 0.09 m). On BOTH poles: at the head a short stiff piece, pale on the fore and dark on the main, whose top is at the masthead and whose lower end stands 6–8 px (0.11–0.15 m) proud of the pole's forward face about 20 px (0.37 m) down — a horn or cheek leaning forward at its foot, its function not readable; under it, on the forward face, a column of pale rounded blocks, each 6–8 px (0.11–0.15 m), the first about 18 px (0.34 m) under the head and the last about 63–83 px (1.2–1.55 m) under it (fore y 225–290 under a head at 207; main y 295–340 under a head at 277), four on each pole at this scale (± 1: two may be one, or a seizing may read as a block); the shrouds fan down and forward from the column. Nothing stands on the AFTER face, where the yard lies lashed (round 261). The blocks' functions (the halyard, the shrouds' or the sheet's tackles) are not readable off the plate and are not named; the count, the size and the band they occupy are the read. Round 263."
+            },
             "rig": "crabclaw",
             "rake": 1,
             "shrouds": 2,

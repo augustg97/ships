@@ -2086,6 +2086,49 @@ group.add(tag(ring, 'yardLashing'));
 }
 }
 }
+const MH = mk.masthead || null;
+if (MH && (MH.blocks > 0 || MH.horn)) {
+const fw = [-nA[0], -nA[1]];
+const ropeM = mats.ropeSolid || woodDark;
+const rr = Math.max(0.008, Math.min(0.014, rYheel * 0.2));
+const up3 = new THREE.Vector3(uA[0], uA[1], 0);
+const bl = MH.blockM || 0.13, bw = bl * 0.62;
+const hTop = poleTop - (MH.firstUnderHeadM !== undefined ? MH.firstUnderHeadM : 0.34);
+const hBot = poleTop - (MH.lastUnderHeadM !== undefined ? MH.lastUnderHeadM : 1.3);
+const nB = MH.blocks | 0;
+for (let i = 0; i < nB; i++) {
+const h = hTop + (hBot - hTop) * (nB > 1 ? i / (nB - 1) : 0);
+const ax = axisAt(h), rM = mastRAt(h);
+const strop = new THREE.Mesh(new THREE.TorusGeometry(rM + rr, rr, 6, 24), ropeM);
+strop.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), up3);
+strop.position.set(ax[0], ax[1], 0);
+strop.userData.mastheadFitting = { mastX: +x.toFixed(3), kind: 'strop', i, n: nB, h: +h.toFixed(3) };
+group.add(tag(strop, 'mastheadBlock', 'Block strop'));
+const blk = new THREE.Mesh(new THREE.CapsuleGeometry(bw / 2, Math.max(0.01, bl - bw), 3, 10), woodDark);
+blk.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), up3);
+const cB = [ax[0] + fw[0] * (rM + bw / 2) - uA[0] * (rr + bl / 2), ax[1] + fw[1] * (rM + bw / 2) - uA[1] * (rr + bl / 2)];
+blk.position.set(cB[0], cB[1], 0);
+blk.userData.mastheadFitting = { mastX: +x.toFixed(3), kind: 'block', i, n: nB, h: +h.toFixed(3),
+centre: [+cB[0].toFixed(3), +cB[1].toFixed(3)], lengthM: +bl.toFixed(3), breadthM: +bw.toFixed(3),
+underHead: +(poleTop - h).toFixed(3), side: 'forward', poleTop: +poleTop.toFixed(3),
+from: 'READ off the 2009 broadside at 8x, 53.5 px/m (round 263, 0y⁴²): a column of four blocks down the forward face from 0.34 m under the head; the strop is a class figure' };
+group.add(tag(blk, 'mastheadBlock'));
+}
+if (MH.horn) {
+const hL = MH.hornM || 0.37, proud = MH.hornProudM !== undefined ? MH.hornProudM : 0.13;
+const rMh = mastRAt(poleTop - 0.02), axH = axisAt(poleTop - 0.02);
+const P0 = [axH[0] + fw[0] * rMh, axH[1] + fw[1] * rMh];
+const dz = Math.sqrt(Math.max(0, hL * hL - proud * proud));
+const P1 = [P0[0] + fw[0] * proud - uA[0] * dz, P0[1] + fw[1] * proud - uA[1] * dz];
+const horn = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.022, hL, 10), woodDark);
+horn.position.set((P0[0] + P1[0]) / 2, (P0[1] + P1[1]) / 2, 0);
+horn.rotation.z = -Math.atan2(P0[0] - P1[0], P0[1] - P1[1]);
+horn.userData.mastheadFitting = { mastX: +x.toFixed(3), kind: 'horn', h: +axH[1].toFixed(3), lengthM: +hL.toFixed(3), proudM: +proud.toFixed(3),
+top: [+P0[0].toFixed(3), +P0[1].toFixed(3)], foot: [+P1[0].toFixed(3), +P1[1].toFixed(3)], poleTop: +poleTop.toFixed(3), side: 'forward',
+from: 'READ off the 2009 broadside at 8x, 53.5 px/m (round 263, 0y⁴²): a short stiff piece at the head, its foot 0.11–0.15 m proud of the forward face 0.37 m down; its function is not readable' };
+group.add(tag(horn, 'mastheadHorn'));
+}
+}
 if (FURLED) {
 sails.push(makeFurl(new THREE.Vector3(tack[0], tack[1], 0),
 new THREE.Vector3(peakC[0], peakC[1], 0),
@@ -3121,6 +3164,16 @@ what: 'Turns of rope round the mast and the luff spar together, holding the spar
 + 'the pole\'s after face. A crab-claw yard is not slung from its mast: it is lashed '
 + 'along it, at the heel, at mid-height and at the masthead, and stands on above the '
 + 'head as a free spar.' },
+mastheadBlock: { stage: 6, name: 'Masthead block',
+what: 'One of the blocks stacked down the forward face of a crab-claw mast under its head, '
++ 'each on a rope strop round the pole. The 2009 photograph of Hōkūleʻa shows four on '
++ 'each mast over about a metre, with the shrouds fanning from them; which of them '
++ 'takes the halyard and which the shrouds\' tackles the plate does not resolve, so '
++ 'the record names the count, the size and the band and not the function.' },
+mastheadHorn: { stage: 6, name: 'Masthead horn',
+what: 'A short stiff piece at the very head of a crab-claw mast, its top at the masthead '
++ 'and its foot standing a hand\'s breadth proud of the forward face. The photograph '
++ 'shows it on both masts and does not say what it is for; it is drawn as read.' },
 truss:    { stage: 6, name: 'Truss',
 what: 'The iron fitting that holds a lower yard to its mast on the nineteenth-century '
 + 'rig, where a rope parrel and truss pendants held it before: a band round the '

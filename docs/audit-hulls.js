@@ -4505,10 +4505,15 @@ say(v.id, 'a rig row the masts contradict', `the Rig row says "${one[0]}" and hu
 {
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const hullPt = (o, k, out) => { const a = o.geometry.attributes.position; return out.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); };
-const cc = [], heels = [];
+const cc = [], heels = [], mhf = [];
 g.traverse(o => {
 if (!o.isMesh || !o.geometry) return;
 const pointsOf = () => { o.updateMatrixWorld(true); const V = new THREE.Vector3(), P = []; for (let k = 0; k < o.geometry.attributes.position.count; k++) { hullPt(o, k, V); P.push(V.clone()); } return P; };
+if (o.userData.mastheadFitting) {
+const P = pointsOf(); const c = new THREE.Vector3(); let yMin = 1e9, yMax = -1e9, xMin = 1e9, xMax = -1e9;
+for (const q of P) { c.add(q); yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); }
+c.divideScalar(Math.max(1, P.length));
+mhf.push({ rec: o.userData.mastheadFitting, c, yMin, yMax, xMin, xMax }); }
 if (o.userData.crabclaw) {
 const P = pointsOf(); let yMin = 1e9, yMax = -1e9; for (const q of P) { yMin = Math.min(yMin, q.y); yMax = Math.max(yMax, q.y); }
 const band = P.filter(q => q.y < yMin + (yMax - yMin) * 0.03); const c = new THREE.Vector3(); for (const q of band) c.add(q); c.divideScalar(Math.max(1, band.length));
@@ -4545,6 +4550,29 @@ if (Math.abs(built - mk.heightM) > 0.05) say(v.id, "a crab-claw mast built again
 if (sg.tipOverHeadM === undefined) say(v.id, 'a crab-claw sail record that does not say where its yard ends over the masthead', `mast ${i}: sail.tipOverHeadM missing`);
 else { const over = b.yardTip[1] - heel.yMax;
 if (Math.abs(over - sg.tipOverHeadM) > 0.5) say(v.id, over > sg.tipOverHeadM ? 'a crab-claw yard standing too far above its masthead' : 'a crab-claw yard stopping short above its masthead', `mast ${i}: the yard's tip ${over.toFixed(2)} m over the masthead against the plate's ${sg.tipOverHeadM}`); }
+}
+if (heel) {
+const MH = mk.masthead;
+if (!MH) say(v.id, "a crab-claw masthead whose fittings are unread while its spars are the plate's", `mast ${i} at u ${mk.at}: sail.yard ${sg.yard} m is a plate read and the pole under it carries no masthead record — the head is bare on its forward face`);
+else {
+const d = heel.hi.clone().sub(heel.lo), axX = y => heel.lo.x + (Math.abs(d.y) > 1e-6 ? (y - heel.lo.y) / d.y : 0) * d.x;
+const mine = mhf.filter(f => Math.abs(f.c.x - axX(f.c.y)) <= 1.0 && f.c.y >= heel.yMax - 3);
+const blocks = mine.filter(f => f.rec.kind === 'block'), horns = mine.filter(f => f.rec.kind === 'horn');
+const want = MH.blocks | 0;
+if (blocks.length !== want) say(v.id, 'a crab-claw masthead with the wrong count of blocks', `mast ${i}: ${blocks.length} block meshes within 1 m of the axis under the head, ${want} recorded`);
+for (const f of blocks) {
+const fwd = axX(f.c.y) - f.c.x, under = heel.yMax - f.c.y;
+if (fwd < heel.rFoot) say(v.id, 'a masthead block that is not on the forward face', `mast ${i}: block ${f.rec.i} centred ${fwd.toFixed(3)} m forward of the axis (the pole's foot radius is ${heel.rFoot.toFixed(3)})`);
+const lo = (MH.firstUnderHeadM !== undefined ? MH.firstUnderHeadM : 0.34) - 0.15, hi = (MH.lastUnderHeadM !== undefined ? MH.lastUnderHeadM : 1.3) + 0.3;
+if (under < lo || under > hi) say(v.id, "a masthead block outside the band the plate reads", `mast ${i}: block ${f.rec.i} centred ${under.toFixed(2)} m under the head against the record's ${lo.toFixed(2)}–${hi.toFixed(2)}`);
+}
+if (MH.horn) {
+if (horns.length !== 1) say(v.id, 'a crab-claw masthead without its horn', `mast ${i}: ${horns.length} horn meshes at the head, one recorded`);
+else { const f = horns[0], gap = heel.yMax - f.yMax, fwd = axX(f.c.y) - f.c.x;
+if (gap > 0.10 || gap < -0.05) say(v.id, "a masthead horn that does not reach the head", `mast ${i}: the horn's top ${gap.toFixed(3)} m under the pole's top`);
+if (fwd <= 0) say(v.id, 'a masthead horn abaft its pole', `mast ${i}: the horn's centre ${(-fwd).toFixed(3)} m abaft the axis`); }
+} else if (horns.length) say(v.id, 'a masthead horn the record does not read', `mast ${i}: ${horns.length} horn meshes, none recorded`);
+}
 }
 });
 const saRow = (v.rows || []).find(r => Array.isArray(r) && /^sail area$/i.test(String(r[0]).trim()));

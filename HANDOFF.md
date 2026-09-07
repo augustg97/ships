@@ -22781,3 +22781,129 @@ docs/audit-hulls.js convicts a crab-claw mast whose height is a class share whil
 THE RATCHET: THE OPENING FULL RATCHET at the clean r261 HEAD 19058c2 (r262/open-ratchet.out, launched at 12:31:04 on 2026-09-07 as the round's first act, the two probes, the three audit runs and the four witnesses taken beside it one browser at a time): RATCHET EXIT 0  END 13:33:17; 65 frames scored; movers 0. Largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, passage-sahul 0.038%/0.013. The run finished at 13:33:17, 62 minutes for 65 frames at 42–78 s a frame (load 10–35, the ChatGPT/Codex renderer idle this time), with every frame ok and none BLANK: the clean r261 HEAD, which r261's own run could not score, stands SCORED CLEAN against the committed baselines, so r261's two accepted frames (ship-canoe, sea-canoe-floor) and the 63 it did not score carry no unexplained drift. The 65 frames are the r261 builder's own pictures; ship-canoe's and sea-canoe-floor's are kept as r262/before-ship-canoe.png and before-sea-canoe-floor.png.
  PARTIAL after the push, the r239 pattern (r262/partial-*.out): frames scored one at a time by check --frame on the r262 builder, each diff read before its accept — sea-canoe-floor 1.596%/0.826 CHANGED, ship-canoe 11.594%/3.585 CHANGED (2 frames; r262/PREDICTIONS-close.md names the two frames that MUST move — ship-canoe and sea-canoe-floor, the canoe's fore pole 0.45 m taller and her main 0.68 m shorter, both yards' tips at 3.09 m over their heads (the fore's 0.8 m lower than before, so rigTop and the Shipwright camera's datum move and ship-canoe is a whole-frame mover), the spars 2.8% shorter — the two MAY frames, ship-dugout and ship-trireme as her berth neighbours, and the rest that must not: no other hull has a crabclaw mast, heightM is read by mastLowerOf exactly as before, and the audit's edits do not draw). The other 63 frames are UNSCORED on the r262 builder; r262's opening full run at the clean HEAD is the test, and any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (4f7028e record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+
+## Round 263 — 2026-09-07 — the canoe's mastheads carry what the plate shows: both of the voyaging canoe's poles ended bare on their forward faces, the yard lashed up the after face and nothing on the other side, while the 2009 broadside at 8x shows on both masts a short horn at the head and a column of four blocks down the forward face over about a metre with the shrouds fanning from them; each mast now records the read and the builder draws it — a tapered horn from the head leaning forward at its foot, four rounded blocks on rope strops at the record's stations — a new rule reads the fittings off the meshes against the record and convicts the silence, and the opening full ratchet died at its second frame under a load of 270, so the clean HEAD was scored by partials on the two frames the round moves
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r262 ordered r263's opening: the FULL ratchet at
+the clean HEAD before any edit; then (0y³⁰), the truss's throw read off the mesh, or (0y¹⁹) with (0y²⁴), or (0y⁴²), the
+canoe's masthead fittings off the 2009 plate at 8x, or Endurance by looking. The ratchet was launched at HEAD cada612 at
+13:50:21 as the round's first act (r263/run-open.sh) at a load of 53 and DIED at 13:55:39 on its second frame — see THE
+RATCHET below; (0y³⁰) was opened and closed again for want of a plate (below); (0y⁴²) was taken. Every edit was made on a
+COPY of web/ served on :8150 (build/staging/r263/web, every file a symlink to web/ except hull.js, audit-hulls.js and
+vessels.json, which are copies); the probe, the three audit runs and the two witnesses were taken one browser at a time.**
+
+**(0y³⁰) OPENED AND PUT BACK. The truss's throw needs a plate of a four-masted barque's lower yard on its truss, read at a
+stated scale (the yard's slings diameter, the record's length/50, would carry it). Wikimedia Commons was searched by
+category (Passat, Peking, Pommern, Kruzenshtern, Preußen, Moshulu) and the three candidates fetched (r263/peking-fockmast.jpg,
+4650 px: Peking's foremast from the deck, yardless, re-rigged 2017–20; passat-takelage.jpg, 2448 px: Passat from dead
+ahead at a hundred metres, where a fore-and-aft throw has no width; peking-takelage-2018.jpg: the museum's workshop, no
+yard in it). None reads the throw. It stays (0y³⁰), and the next round that takes it should look for a broadside close-up of
+a P-liner's lower yard at the mast — Pommern's at Mariehamn, Passat's at Travemünde from the quay abeam — or for Underhill's
+truss plate with a dimension on it, before touching the code. Twelve minutes were spent; no code was written for it.**
+
+**THE PLATE, RE-READ AT 8x FOR THE MASTHEADS (r263/fore-head-fit-8x.png, main-head-fit-8x.png — contrast-stretched crops
+of build/staging/r247/hokulea-2009.jpg, the 2009 broadside, Wikimedia Commons Hokule'aSailing2009.jpg, 1280 px, with a 5 px
+grid, a cell 0.09 m at the 53.5 ± 1 px/m the fore's recorded 9.50 m pins at the rig, r262). On BOTH poles, above the top
+lashing and on the side the yard is not on: at the head a short stiff piece — pale on the fore (x 405–415, y 208–228),
+dark on the main (x 684–692, y 277–297) — whose top is at the masthead and whose lower end stands 6–8 px (0.11–0.15 m)
+proud of the pole's forward face about 20 px (0.37 m) down, a horn or a cheek leaning forward at its foot, its function
+not readable; under it a column of pale rounded blocks, each 6–8 px (0.11–0.15 m), the first about 18 px (0.34 m) under
+the head and the last 83 px (1.55 m) under the fore's and 63 px (1.18 m) under the main's (fore y 225–290 under a head at
+207; main y 295–340 under a head at 277), four on each pole at this scale (± 1: two may be one, or a seizing may read as a
+block); the shrouds fan down and forward from the column. Nothing stands on the AFTER face, where the yard lies lashed
+(r261). Which block takes the halyard and which the shrouds' or the sheet's tackles the plate does not resolve, so the
+record names the count, the size and the band and not the functions (rule 10).**
+
+**THE FAULT, on the built scene: the r262 builder draws nothing on a crab-claw masthead but the yard's top lashing —
+r262/witness-canoe-far-before.png, r263/w-fore-head-pair.png (left) and w-main-head-pair.png (left) at 4x show each pole
+ending bare with the shrouds leaving it. PROOF A (r263/audit-proof-a.out — the r262 record and the r262 builder under the
+r263 audit on :8150) is exactly 2 problems, both "a crab-claw masthead whose fittings are unread while its spars are the
+plate's" on the canoe's two masts, and nothing on any other hull or rule ("checked 33 hulls, 2 problems").**
+
+**THE RECORD (web/data/vessels.json; r263/vessels.before.json, vessels.after.json, apply-record-edits.py, every assertion
+on the old values; every other vessel parse-identical). Both masts gain `masthead`: horn true, hornM 0.37, hornProudM 0.13,
+blocks 4, blockM 0.13, firstUnderHeadM 0.34, lastUnderHeadM 1.55 (fore) / 1.18 (main), side 'forward', with a READ provenance
+naming the plate, the scale, the two crops, the pixels of each read, the ± 1 on the count and what the plate cannot say. The
+Rig row gains its last clause: "each masthead carrying a short horn and four blocks on its forward face". THE MODEL
+(web/js/hull.js; r263/hull.before.js, hull.after.js, apply-hull-edits.py, both replaces asserted, the file syntax-checked with
+node's vm before the browser): inside the crab-claw block after the lashings, from mk.masthead and from nothing else — for each
+of the record's blocks, at its station between the two recorded depths under the head, a TorusGeometry strop of the lashings'
+rope radius round the pole square to the raked axis, and under it a CapsuleGeometry block (0.13 m along the pole, 0.08 m
+across) standing off the forward face by its own half breadth, tagged 'mastheadBlock'; the horn a CylinderGeometry tapered
+0.022 → 0.014 m from the head's forward face to a foot the recorded distance proud, tagged 'mastheadHorn'; each mesh records
+its station, its side and its provenance in userData.mastheadFitting; two PARTS entries carry the cards, which say what the
+plate shows and that it does not say what the pieces are for. A mast whose record carries no masthead draws nothing here.**
+
+**MEASURED AFTER (r263/fit-after.json — r263/probe_fit.py, the r262 probe's page-build pattern, on the r263 builder on :8150,
+set build): 18 fitting meshes on 2 masts. FORE (pole 1.027 → 10.528, heightM 9.5): the horn's top 0.015 m under the head, its
+centre 0.132 m forward of the axis, 0.357 m tall; the strops at 0.341 / 0.745 / 1.148 / 1.551 m under the head (the record's
+0.34 → 1.55), each 0.18 m across and centred on the axis to 0.003 m; the blocks' centres 0.108–0.111 m forward of the axis
+(the pole's 0.073–0.09 m there plus the block's 0.04) with each top 0.01 m under its strop, 0.13 m tall and 0.08 m across.
+MAIN (0.961 → 9.332, heightM 8.37): the same horn; the strops at 0.341 / 0.621 / 0.901 / 1.181 (the record's 0.34 → 1.18);
+the blocks 0.108–0.111 m forward. Nothing else moved: the poles, the yards, the lashings, the cloth and the shrouds read as
+r262 left them (the yard's record poleTop 10.527 / 9.331 against the meshes' 10.528 / 9.332).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r263/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js).
+D-CRABCLAW-MASTHEAD-FITTINGS (new, 0y⁴²), inside the D-CRABCLAW-SPARS loop over every mast whose record carries `sail`,
+after r262's masthead rule: every mesh carrying userData.mastheadFitting is read in the same traverse (its centre and its
+extremes in hull space); a mesh is this mast's if its centre is within 1.0 m of the axis at its own height and above the
+pole's top less 3 m. (a) A mast with `sail` and no `masthead` is convicted for the silence — the fittings stand on the plate
+the spars were read from. (b) With the record: the blocks must number masthead.blocks; each block's centre must stand FORWARD
+of the axis at its height by at least the pole's foot radius (the yard's side is the after face); each must lie between
+lastUnderHeadM + 0.3 and firstUnderHeadM − 0.15 under the built head; with masthead.horn exactly one horn whose highest
+vertex is within 0.10 m of the head and whose centre is forward of the axis, and without it no horn at all. Off the meshes;
+the builder's record on each mesh is provenance, not the test. PROOF A is above. PROOF B (r263/audit-proof-b.out — the r263
+audit on a BUILDER edited to hang the blocks on the after face and draw one fewer; a changed record proves nothing here,
+because the builder draws from the record the audit reads, which the first attempt found by returning 0 problems): exactly
+10 — 6 'a masthead block that is not on the forward face' (three a mast, −0.108 to −0.111 m against a foot radius of
+0.104), 2 'a crab-claw masthead with the wrong count of blocks' (3 built, 4 recorded) and 2 'a masthead horn abaft its pole'
+— and nothing else; the builder was then restored (cmp-identical to hull.after.js). The final audit on the r263 builder:
+"checked 33 hulls, 0 problems" on :8150 (r263/audit-final-8150.out); the files copied into web/ at the close are
+cmp-identical to the copy :8150 served (r263/close.log).**
+
+**WITNESSED (r263/witness-canoe-far-before.png — the r262 builder in web/ on :8149; witness-canoe-far-after.png — the r263
+builder on :8150; both the canoe set from the port beam, b=90, l=8, z=1.4, the whole rig in frame, 2880 × 1800;
+w-fore-head-pair.png and w-main-head-pair.png the two mastheads at 4x from each, before | after). FORE, before: the pole ends
+at its top lashing with the yard running on above it and the shrouds leaving a bare head; after: a short horn stands out
+from the head on the forward side and four blocks hang in a column down the forward face on their strops, the top one just
+under the shrouds' departure, the bottom one a block's length above the top lashing — the proportion of the plate's
+fore-head crop. MAIN, before and after the same, the column partly behind the fore sail's leech from this bearing. Nothing
+else in either pair differs: the hull, the platform, the water and the camera's datum are the same picture.**
+
+**Rule 0 on the after witness read whole (r263/witness-canoe-far-after.png): a rendered double canoe on water from her port
+beam, not a chart — the planked hull with its platform and crossbeams, two thick poles with their yards lashed along them
+and the crab-claw sails set aft on booms, the shrouds to the rail, a grey-blue sea to a hazed coast. Three facts a viewer
+can read off it without a legend: her forward mast is taller than her after one; each masthead carries a cluster of blocks
+on the side away from its sail; she is a double hull under a platform with both masts stepped on it.**
+
+**Named residuals, in order:** (0y⁴²) CLOSED — both mastheads carry the plate's horn and its four blocks on the forward
+face, from a record that says what the plate reads and what it cannot. NEW (0y⁴³) the shroud COUNT: the plate's four or
+five a side against the record's 2 (noted since r249, restated r262), now with the blocks the shrouds fan from drawn under
+each head; the shrouds still leave the pole at the class's height and not from the blocks — a count read off the plate at
+8x, with the eyes seized at the head, would close both. NEW (0y⁴⁴) the blocks' functions — which takes the halyard, which
+the shrouds' tackles, which the sheet's — are unread and unnamed; a closer plate of the masthead (the PVS's own rigging
+photographs, if one surfaces) decides. (0y³⁰) stands, as above: no plate this round. (0y³⁹) the lashings' count and turns,
+(0y⁴⁰) the closed boom through the furled roll, (0y⁴¹) the PVS graphic's hull figures against the card's, as r261–r262 name
+them. (0y³⁷) the lateen's outboard lean, as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name them. (0y¹⁹) (0y²⁴)
+as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹)
+as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged
+and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷)
+(0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r264 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD (r263/PREDICTIONS-
+close.md names the two frames that MUST move — ship-canoe and sea-canoe-floor, both LOCAL movers, rigTop unchanged — the two
+MAY frames, ship-dugout and ship-trireme, and the rest that MUST NOT; only those scored by check --frame after the push are
+accepted here), with no screenshot beside it until RATCHET EXIT — and, above a load of 15, scores the clean HEAD by partials
+on the frames it will move instead, as r262 and r263 did, because a full run at that load cannot finish inside the round and
+a run killed mid-way scores nothing. Then it takes (0y⁴³), the canoe's shroud count off the plate at 8x with the eyes seized
+at the head, or (0y³⁰) with a plate of a lower-yard truss found first, or (0y¹⁹) with (0y²⁴), or the survey's next never-spun
+hull, Endurance (4,114 triangles per metre), by looking. The load this round: 53 at launch, 270 at 13:56 with nothing of the
+round's own running but one browser, 10 by 14:11 — a spike whose source `ps -r` did not show (no process above 12% CPU;
+the runnable threads were Chrome's); a round that launches into one should read `sysctl -n vm.loadavg` again two minutes
+later before deciding the run is lost.**
+
+**Live stamp: docs/index.html carries data-version 1788816248 at the build; the push and the live poll are in
+build/staging/r263/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r263 staging stays on disk uncommitted, the r211 convention.**
