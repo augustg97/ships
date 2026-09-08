@@ -23755,3 +23755,120 @@ file uncommitted, deliberately; the r269 staging stays on disk uncommitted, the 
 back by CODE strings (the r237 correction): docs/audit-hulls.js names a side through sideOf( (22 calls, the definition among them), keeps the three-word table (1), convicts 'a side spelled outside sideOf' (1 mentions), and holds 0 ternaries spelling a side off a sign; docs/js/hull.js and docs/data/vessels.json are unchanged this round.
 THE RATCHET: FULL RATCHET at the clean r268 HEAD 0589cee (START 19:54:13 load 3.76 5.72 10.06 HEAD 0589cee): RATCHET EXIT 0  END 20:41:04; 65 frames scored; movers 0. Largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, passage-sahul 0.038%/0.013. This IS the r269 tree's ratchet: the round changes only audit-hulls.js, which no frame loads (r269/PREDICTIONS-close.md: none MAY move, all 65 MUST NOT).
 Two commits close the round (2368e62 audit + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 270 — 2026-09-07 — the carrier's island, lifts, catapults, deck park and angled deck stand on the record's side: every one-sided fitting on the supercarrier was placed at +z under the belief that +z was starboard, so her island stood at the port deck edge, both deck-edge lifts and the twelve parked aircraft with it, and the landing area ran forward to starboard — the mirror of the ship her own record describes; the hull frame's sides are now stated once at the head of hull.js (+z is port), the carrier's record names the island's side, one derivation gives every one-sided fitting its sign and the landing area the opposite, the four labels in hull.js that spelled a side from a sign go through sideName and fourteen comments that read +z as starboard are corrected, a new rule reads the island, the lifts and the strip's two ends off the meshes against the record's word, the audit's side lint reads hull.js too, and the opening full ratchet ran at the clean r269 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r269 ordered r270's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet until globe-default
+had landed. The load at the open was 5.8 (20:54); the busy processes were Apple's image indexer (mediaanalysisd at 126%,
+over r269's staged crops) and the Codex app (42% and 32%), nothing of this project's, so the full ratchet was launched at
+20:55:13 at HEAD 7f00af8 (r270/open-ratchet.out) and nothing touched the machine until globe-default had landed (20:56).
+Every edit was made on a COPY of web/ served on :8150 (build/staging/r270/web, every file a symlink to web/ except
+audit-hulls.js, js/hull.js and data/vessels.json, which are copies; the :8150 server restarted from it at 21:02); the
+chain — PROOF A, FINAL, PROOF B, PROOF C with its witness, five witnesses — ran one browser at a time beside the ratchet
+from 21:06 (r270/chain.log). The chain ended at 21:27:03 (r270/chain.log). The opening ratchet was stopped at its 20th frame at 21:15:43 — 60 s a frame beside the chain's browser, and the close needed the machine — and its 20 captured frames, copied to r270/current-clean BEFORE any check --frame, score 0 movers offline (r270/clean-scores.out; the r268 score-offline.py needed the tool registered in sys.modules for its dataclasses, fixed in the r270 copy). The r269 receipt's full ratchet (65 frames, 0 movers at the r268 HEAD, and r269 changed no file a frame loads) already scores the tree before this round.**
+
+**THE FAULT, found by the (0y⁵⁴) sweep, and in one hull: hull.js placed the supercarrier's island at +0.40 of the
+flight-deck beam (+31.2 m), her two deck-edge lifts at +0.44 (+34.3 m), the hangar doors under them at +z, the foul line
+on the +z side of the landing area, the bow catapult pair with its farther track at −z, the waist catapult at −z, all
+twelve parked aircraft at +z, and the landing area's axis centred at −0.177 of the deck beam with a rotation of −0.157
+rad, which puts its forward end 29.2 m to −z and its aft end 1.6 m to +z (the audit's own figures, PROOF A). Every one
+of those was written under the reading that +z is starboard — the comment over landingStrip() said "(bow at -x,
+starboard +z)" — and +z is port (r254/side.json; r269's three grounds). So the island stood at the PORT deck edge, the
+lifts and the park with it, and the landing area ran forward to STARBOARD: the mirror of the arrangement the record's
+own text describes ("The island is small and to starboard … an aircraft going around swings to port") and of every
+angled-deck carrier built. The rest of the sweep, site by site: four labels spelled a side from a sign — a sail's
+sheetSide (line 3766, right: +z → 'port'), the standing knee's (6122, right), the channel wale's (8209) and the quarter
+rudder's (15599), both the mirror (sgn < 0 read as 'Port') — all on fittings drawn on both sides, so no pixel was wrong
+there; the tower balustrade's rail list (14782–14792) named 'stbd' at +hw and 'port' at −hw, symmetric rails under
+mirror labels; and fourteen comment sites read +z as starboard — the hull surface "built as a starboard half and
+mirrored to port" (1690), the end caps' vertex order (1697), the deck strip's "0 = starboard edge" (1787, the +b edge),
+seven tier, house and castle perimeters "starboard fwd→aft" on the +half leg (8722, 8778–8784, 9210, 9442, 12973,
+13337), and two "+PI/2 about x sends the span to starboard" (10637, 11381 — it sends +y to +z). frames.json has NO
+side-named frame: the r269 note that its 'stbd' names were the mirror was wrong; its two 'port quarter' notes stand
+at b=125, abaft the port beam (b=90), and are right. The other side words in hull.js are the record's (the Bremen
+cog's starboard wall came up with the wreck, 5702 and 6572), a sailing term (the starboard tack, 3735), a camera note
+(1168) or paired fittings ("port and starboard"), and stand.**
+
+**THE BUILDER (web/js/hull.js; r270/apply-hull-edits.py, thirty-six replaces each asserted to hit its count;
+hull.before.js and hull.after.js; parsed by node's vm before any browser ran it). (1) The frame's sides, once, at the
+head of the file after 'use strict': +x aft, +y up, right-handed, so +z = aft × up is PORT, with the r254 measurement;
+`const PORT = 1, STARBOARD = -1`, `SIDE_WORD` (the audit's three-word table), `sideName(z)` and `sideSign(word)`.
+(2) `islandSide(S)` — the record's islandSide through sideSign, starboard when the record is silent — is the one
+derivation of the carrier's side, exported with sideName for the audit; `landingStrip(S)` takes side = −islandSide(S)
+for cz and rot and records it (rotation.y = rot carries +x to (cos rot, −sin rot), so a positive rot swings the forward
+end to +z: the strip's side and its rotation carry one sign); buildFlightDeck reads ISL = islandSide(S) once and signs
+the island (ISL · 0.40 · deckW), both lifts (ISL · 0.44), the three hangar doors ([0.30, ISL], [0.62, ISL],
+[0.44, −ISL]), the foul line (LS.cz + ISL · 0.16 · deckW) and the three catapults (−ISL · 0.22, ISL · 0.10,
+−ISL · 0.26); buildDeckPark signs each spot's z and its heading by ISL — a mirrored park mirrors its headings. (3) The
+four labels go through sideName ('Channel wale, starboard', 'Quarter rudder, port', ', port' on the knee, sheetSide);
+the balustrade's rails through sideSign; 'stbd' reads 'starboard'. (4) The fourteen comments say +z (port) where they
+said starboard; the angled-deck note records that it was on the wrong half twice.**
+
+**THE RECORD (web/data/vessels.json; r270/apply-record-edits.py, json.loads after): the supercarrier's hull gains
+`islandSide: "starboard"` with its provenance — attested by the record's own text and the class's page, the statement
+that the word drives every one-sided fitting through islandSide() and the landing area the other way, and the r270
+correction named. No other record changed.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r270/apply-audit-edits.py, two replaces asserted;
+audit-hulls.before.js and .after.js; parsed and linted in node — the first draft's comment wrote a side word after a
+colon and the audit's own lint found it at line 9430, so the comment was reworded). (1) D-ISLAND-SIDE (new, 0y⁵⁴), in
+the flight-deck island block: reads the record's word itself (islandSide, starboard when silent) — not the builder's
+function, so a builder with no islandSide() is convicted by its meshes — and convicts the island group's centre on the
+other side, each 'Deck-edge lift' mesh on the other side, and a landing area whose forward end (LS.cz + sin(rot) ·
+halfLen, off the builder's shared landingStrip()) stands on the island's side or no farther out than its aft end;
+every side through sideOf. (2) A-SIDE-WORD reads js/hull.js as well as its own source: the hull.js shapes require the
+ternary's own '?' (a side word there is also a record VALUE) and match the word's start (the labels ran on: 'Port
+channel wale'); in node they find the four lines in hull.before.js (3766, 6122, 8209, 15599), none in hull.after.js,
+the twenty-one in r269's before-audit and none in the r270 audit.**
+
+**PROOFS (r270/chain.log; the r270 audit on :8150, one browser at a time beside the ratchet). PROOF A (HEAD's builder
+and HEAD's record under the r270 audit, 21:10:08): 5 problems — "carrier | island on the wrong side | the island's
+centre stands 31.2 m to port; the record puts it to starboard"; "a lift on the wrong side | a deck-edge lift at x −63
+stands 34.3 m to port; the lifts stand on the island's side, starboard" and the same at x 38; "the angled deck runs
+toward the island | the landing area's forward end stands 29.2 m to starboard and its aft end 1.6 m to port; it should
+run forward to port, away from an island to starboard"; and "hull.js | a side spelled outside sideName | 4 lines spell
+a side from a sign (lines 3766, 6122, 8209, 15599)". FINAL (the r270 builder, record and audit, 21:13:18): "checked 33
+hulls, 0 problems". PROOF B (the r270 builder with the island's own sign put back — ISL · 0.40 written −ISL · 0.40 — the record unchanged, 21:16:20): exactly 1, "carrier | island on the wrong side | the island's centre stands 31.2 m to port; the record puts it to starboard", and the builder restored (cmp). PROOF C (the record saying islandSide "port", 21:18:27): "checked 33 hulls, 0 problems" — the builder mirrors every one-sided fitting and the audit reads the same word — and its witness from ahead (witness-carrier-ahead-proof-c.png) is pixel-identical by cmp to HEAD's witness from the same camera: the r270 builder told 'port' draws exactly the picture the old builder drew, which is the proof that the old picture was the port-island ship; the record restored (cmp).**
+
+**WITNESSED (r270/witness-carrier-ahead-before.png from :8149 — web/ at HEAD — and -after.png from :8150, both b=0, l=8, z=0.9, 2880 × 1800; witness-carrier-deck-before.png and -after.png at b=135, l=55, z=1.05; witness-csg-after.png, the Sea at #e=7&f=csg). From ahead, before: the island and the bow park on the viewer's RIGHT (+z, port), the landing area's four lines at the far end leaning left, the farther bow catapult track on the left; after: the island, the bow park and the street on the viewer's LEFT (starboard), the landing area's lines leaning right toward the port edge, the farther bow catapult on the right — the ship a viewer off the Ford's bow sees. From the port quarter, high: before, the island on the NEAR (port) edge and the landing area along the far edge; after, the island on the far (starboard) edge, the landing area's forward end reaching the near (port) deck edge with the foul line on its island side and the three wires across its aft end, the bow park and the street along the starboard side, the fantail park aft. The aboard-carrier diff at its check lights only the carrier's island, deck lines and aircraft; nothing else in that frame moved.**
+
+**Rule 0 on the deck witness read whole (r270/witness-carrier-deck-after.png): a rendered flight deck seen from high on the port quarter over a dark sea, not a chart — the deck's grey non-skid with its painted lines, the tower with its window rows and mast, twelve parked fighters with their shadows, the hull's side under the deck edge. Three facts a viewer can read off it without a legend: the island stands on one side of the deck and the landing area runs to the other; the landing area is angled to the ship, not along her; the aircraft are parked clear of the painted landing area, in a row along the island's side and at the bow.**
+
+**Named residuals, in order:** (0y⁵⁴) CLOSED as above; three comment sites are left as they are, each with its reason:
+10906 (the citadel wall's 'port wall' and 'starboard wall' index comments, unread against the vertex order), 11061
+("port is the starboard geometry under a PI turn" — symmetric, and which side is built first is unread), and 5702 with
+6572 (the record's own claim about the wreck). NEW (0y⁵⁵) THE PARK'S PLATE: the twelve spots and their headings are a
+class layout on the island's side, read from no plate of the Ford's deck; an overhead of CVN-78 with her air wing
+embarked would give the spots' stations. (0y⁴⁹)
+the lanyard's tail, (0y⁵⁰) the timber the falls wrap, (0y⁴⁷) HALF CLOSED, as r266 names them. (0y⁴⁶) HALF CLOSED as
+r265 names it — the fastening at the POLE is still unread. (0y⁴⁵) STANDS as r265 names it. (0y⁴⁴) the masthead blocks'
+functions, as r263 names it. (0y³⁰) stands, as r263 names it: no truss plate. (0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name
+them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name them. (0y¹⁹) (0y²⁴) as r256 names them.
+(0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names
+them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread.
+(0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗)
+(0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.****
+
+**THE FRAMES: r270/PREDICTIONS-close.md, written before any frame of this round's tree was scored: ship-carrier and
+aboard-carrier MUST move; six berth neighbours MAY; the other 57 MUST NOT. The opening full ratchet at the clean r269
+HEAD scored the tree before this round; its result, the r270 tree's scores by check --frame, and each accepted frame's
+reason are in the receipt commit that follows this one.**
+
+**r271 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed; the chain may run beside it one browser at a time
+once the fourth frame is down; if the frames are taking over a minute each after the third, it stops the run and
+scores the clean HEAD by check --frame on the frames the round can move; and if the run dies part-way, it copies
+_current aside BEFORE any check --frame and scores the captured frames offline (r270/score-offline.py, ready to run on
+a copied directory). Then it takes (0y⁵⁵) if an overhead of the Ford with her air wing embarked surfaces, or (0y⁴⁹)
+off crop-bullseye-3x.png (the tail's coil is 0.1 m across at the rope's scale), or (0y⁵⁰) with (0y⁴⁷)'s farther feet
+if a plate square to the side surfaces (Commons Category:Hokulea, 109 files, listed in r265/commons-candidates.json),
+or (0y⁴⁵) if a scaled plan surfaces, or (0y³⁰) with a plate of a lower-yard truss, or (0y¹⁹) with (0y²⁴), or the
+survey's next never-spun hull, Endurance (4,114 triangles per metre), by looking. The load this round: 5.8 at the
+open, 32 with the ratchet's browser under the image indexer, 42 with the chain's browser beside it, 13.68 at
+the close.**
+
+**Live stamp: docs/index.html carries data-version 1788842308 at the build; the push and the live poll are in
+build/staging/r270/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r270 staging stays on disk uncommitted, the r211 convention.**

@@ -4982,6 +4982,8 @@
         "screws": 4,
         "decks": 2,
         "deckPark": 12,
+        "islandSide": "starboard",
+        "islandSideProvenance": "ATTESTED: the Ford's island stands at the starboard deck edge abaft amidships and her landing area is angled to port — the arrangement of every angled-deck carrier, stated in this record's own text and on the class's page (Wikipedia, Gerald R. Ford-class aircraft carrier, accessed 2026-08-03). The word drives every one-sided fitting through the builder's islandSide(): the island, the two deck-edge lifts and the hangar doors under them, the catapults, the foul line and the deck park stand on this side, and the landing area runs forward to the other. Until r270 each was drawn at +z under the belief that +z was starboard; +z is port (build/staging/r254/side.json, the frame's own statement at the head of hull.js), so the whole arrangement was the ship's mirror. The audit reads this word and the meshes, not the builder (D-ISLAND-SIDE).",
         "year": 2017,
         "deckM": 4.3,
         "steering": "steel"

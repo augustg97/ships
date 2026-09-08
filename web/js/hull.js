@@ -33,6 +33,22 @@
  */
 'use strict';
 
+/* ── THE SIDES OF THE HULL FRAME (round 270, 0y⁵⁴) ────────────────────────────────────
+   The hull frame has +x AFT and +y UP and is right-handed, so +z = aft × up is PORT. That was
+   measured on screen in round 254 (build/staging/r254/side.json): at b=0 the camera stands
+   ahead looking aft, hull (0, 5, +2) lands on the viewer's right, and from ahead the viewer's
+   right is the ship's port side; b=90 is the port beam, and every fore-and-aft cloth in the
+   fleet sheets to +z. Until r270 the comments in this file that named a side mostly read +z as
+   starboard, and the carrier's island, lifts, catapults, deck park and angled deck were PLACED
+   under that reading — each on the mirror side of the ship her record describes. A fitting
+   that stands on one side takes its sign from these two names and nowhere else; a label
+   spells the side through sideName, off the same three-word table the audit's sideOf uses;
+   a record's word becomes a sign through sideSign. */
+const PORT = 1, STARBOARD = -1;
+const SIDE_WORD = ['starboard', 'centreline', 'port'];            // indexed by Math.sign(z) + 1
+const sideName = z => SIDE_WORD[Math.sign(+z) + 1];
+const sideSign = word => (word === 'port' ? PORT : STARBOARD);   // a record's word → its sign
+
 /* ── numeric helpers ───────────────────────────────────────────────────────────────── */
 
 /* Area of one quadrant of |y/b|ⁿ + |z/t|ⁿ = 1, as a fraction of the enclosing rectangle b·t.
@@ -1687,15 +1703,15 @@ function buildHullGeometry(S, NU = 120, NV = 34) {
   }
 
   /* ── CLOSE THE ENDS. ⚠ THE HULL HAD AN OPEN SLOT DOWN BOTH OF THEM. ────────────────
-     The surface is built as a starboard half and mirrored to port, and the two halves only
+     The surface is built as a +z (port) half and mirrored to starboard, and the two halves only
      meet where the half-breadth reaches zero — which it never does. `wl(0)` is stemFineness
      and `wl(1)` is sternFineness, both deliberately non-zero because a real hull has a stem
      and a sternpost with actual width. So the mesh was open at bow and stern and you could see
      straight through into the inside of the ship, which is most of what read as "gaps".
      They are closed with their own vertices and their own outward normals, because reusing the
      hull's surface normals would light a flat end as if it were curved planking.
-     ⚠ AND THE CAPS WERE WOUND INWARD (found r216, fixed r218). Vertex a is starboard at v_j,
-     a+1 port at v_j, a+2 starboard at v_{j+1}: (a, a+1, a+2) has (a+1−a)×(a+2−a) along +x, so
+     ⚠ AND THE CAPS WERE WOUND INWARD (found r216, fixed r218). Vertex a is port (+z) at v_j,
+     a+1 starboard at v_j, a+2 port at v_{j+1}: (a, a+1, a+2) has (a+1−a)×(a+2−a) along +x, so
      wound that way the BOW cap's front faced aft, into the ship, and the stern cap's forward —
      against the (±1, 0, 0) normals stored on the same vertices. Nothing showed while the shader
      lit every face by its stored normal; once it lit a back face by its facing (gl_FrontFacing,
@@ -1784,7 +1800,7 @@ function buildDeckGeometry(S, NU = 120) {
     const edge = deckEdge(S, H, u);
     const b = edge[2], fb = edge[1], x = edge[0];
     for (let j = 0; j <= 8; j++) {
-      const k = j / 8;                    // 0 = starboard edge, 1 = port edge
+      const k = j / 8;                    // 0 = the +z (port) edge, 1 = starboard
       const y = b * (1 - 2 * k);
       const camber = Math.cos((k - 0.5) * Math.PI) * b * 0.035;   // real decks are cambered
       pos.push(x, fb + camber, y);
@@ -3763,7 +3779,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
           yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
           yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
-          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
+          sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET ? sideName(SHEET) : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
           lashed: { offHeel: +offHeel.toFixed(3), offHead: +offHead.toFixed(3), mastRheel: +rMheel.toFixed(3), mastRhead: +rMhead.toFixed(3),
                     yardRheel: +rYheel.toFixed(3), yardRtip: +rYtip.toFixed(3), leanDeg: +(lean / RAD).toFixed(2), tackH: +tackH.toFixed(3), poleTop: +poleTop.toFixed(3), lashings: nLash,
                     /* r262 (0y³⁸): the pole's height and the yard's tip over its head, built, beside the record's reads */
@@ -6119,7 +6135,7 @@ function buildFittings(S, group, mats) {
            head, and how far out it reaches); the lower arm is named for the measurer */
         vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
         kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
-        group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
+        group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + ', ' + sideName(sgn),
           'A grown knee standing on the beam and against the inside of the planking, up to the '
           + 'top strake — Lahn, Blatt 3, draws one at every beam end. Sidings are class defaults.'));
       }
@@ -8206,7 +8222,7 @@ function buildChannelWale(S, H, F, group, timber) {
       const zi = Math.abs(surfacePoint(S, H, us[i], 1)[2]) - 0.25;
       box(0.12, yC - yD, 0.12, xs[i], (yC + yD) / 2, sgn * zi, 'channel-wale-inner-stanchion');
     }
-    group.add(tag(gr, 'channelWale', sgn < 0 ? 'Port channel wale' : 'Starboard channel wale'));
+    group.add(tag(gr, 'channelWale', 'Channel wale, ' + sideName(sgn)));
   }
 }
 
@@ -8719,7 +8735,7 @@ function buildSuperstructure(S, group, hullMat) {
     return new THREE.Mesh(gg, wallMat);
   };
 
-  /* the closed perimeter of one tier: starboard forward→aft, across the stern, port aft→
+  /* the closed perimeter of one tier: the +z (port) side forward→aft, across the stern, starboard aft→
      forward, across the front, ending on the start point.
      ⚠ THE STATIONS MUST RESOLVE THE RHYTHM THEY CARRY. The default step, paneW·0.5, is
      exactly two stations per mullion period — the small-lights rhythm samples cleanly by
@@ -8775,13 +8791,13 @@ function buildSuperstructure(S, group, hullMat) {
           pts.push({ x: (u - 0.5) * L, z: zf(u) });
         }
       };
-      leg(t.uA, t.wingU, u => t.half(u));                          // stbd, out to the tip
+      leg(t.uA, t.wingU, u => t.half(u));                          // port (+z), out to the tip
       pts.push({ x: (t.wingU - chU - 0.5) * L, z: inz(t.wingU - chU) });   // the chamfer
       leg(t.wingU - chU, t.uB, u => inz(u));                       // wing inboard face
       for (const q of capPts(t, inz(t.uB), st)) pts.push(q);       // the centre face
-      leg(t.uB, t.wingU - chU, u => -inz(u));                      // port inboard face
-      pts.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });   // port chamfer
-      leg(t.wingU, t.uA, u => -t.half(u));                         // port side forward
+      leg(t.uB, t.wingU - chU, u => -inz(u));                      // starboard inboard face
+      pts.push({ x: (t.wingU - 0.5) * L, z: -t.half(t.wingU) });   // starboard chamfer
+      leg(t.wingU, t.uA, u => -t.half(u));                         // starboard side forward
       const hf = t.half(t.uA), NF = Math.max(6, Math.round(2 * hf / st));
       for (let k = 1; k <= NF; k++)
         pts.push({ x: (t.uA - 0.5) * L, z: -hf + 2 * hf * k / NF });
@@ -9207,7 +9223,7 @@ function buildSuperstructure(S, group, hullMat) {
       if (uB - uA < 1e-4) continue;
       const pts = [];
       const NU = Math.max(12, Math.round((uB - uA) * L));       // ~1 m stations
-      for (let q = 0; q <= NU; q++) {                            // starboard, fwd→aft
+      for (let q = 0; q <= NU; q++) {                            // the +z (port) side, fwd→aft
         const u = uA + (uB - uA) * q / NU;
         pts.push({ x: (u - 0.5) * L, z: t.half(u) });
       }
@@ -9439,7 +9455,7 @@ function buildRaisedEnds(S, group) {
   const mk = (u0, u1, label, what) => {
     const g = new THREE.Group();
     const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
-    /* the perimeter, wound like the house's: starboard fwd→aft, aft end, port aft→fwd,
+    /* the perimeter, wound like the house's: the +z (port) side fwd→aft, aft end, starboard aft→fwd,
        fwd end — each station carrying its own u so the wall can follow the sheer */
     const path = [];
     for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
@@ -10193,14 +10209,27 @@ function buildScrews(S, group) {
   });
 }
 
+/* which side the island stands (round 270, 0y⁵⁴): the record's word, starboard when the record
+   is silent — every angled-deck carrier's is, because an aircraft that misses the wires and goes
+   round turns away from the tower, to port. The island, the deck-edge lifts, the hangar doors
+   under them, the catapults, the foul line and the deck park all take their side from this ONE
+   derivation, and the landing area takes the opposite; the audit reads the same function.
+   Until r270 they were placed at +z under the belief that +z was starboard — see the head of
+   this file — so each stood on the mirror side of the ship the record describes. */
+function islandSide(S) {
+  return sideSign(S.islandSide || 'starboard');
+}
+
 /* the landing area's own geometry — ONE derivation, shared with the audit. Axis centre,
-   rotation about y, half-length and half-width, in the ship's frame (bow at -x, starboard +z).
+   rotation about y, half-length and half-width, in the ship's frame (bow at -x, +z port).
    The aft end of the axis sits near the centreline at the round-down; the forward end reaches
-   the port deck edge just forward of amidships — nine degrees, which is the whole invention. */
+   the deck edge OPPOSITE the island just forward of amidships — nine degrees, which is the
+   whole invention. rotation.y = rot carries +x (aft) to (cos rot, −sin rot), so a positive rot
+   swings the FORWARD end toward +z: the strip's side and its rotation carry one sign. */
 function landingStrip(S) {
-  const L = S.lwl, deckW = S.flightDeck;
-  return { cx: L * 0.14, cz: -deckW * 0.177, rot: -0.157,
-           halfLen: L * 0.31, halfW: deckW * 0.105 };
+  const L = S.lwl, deckW = S.flightDeck, side = -islandSide(S);
+  return { cx: L * 0.14, cz: side * deckW * 0.177, rot: side * 0.157,
+           halfLen: L * 0.31, halfW: deckW * 0.105, side };
 }
 
 function buildFlightDeck(S, group, mats) {
@@ -10208,6 +10237,7 @@ function buildFlightDeck(S, group, mats) {
   const H = hullSurface(S);
   const L = S.lwl, B = S.beam;
   const deckW = S.flightDeck;                       // full flight-deck beam in metres
+  const ISL = islandSide(S);                        // +1 port, −1 starboard: the island's side (r270)
   /* ── THE PAINT IS AN ALBEDO, NOT A TONE (round 35). ─────────────────────────────────
      She read as a black cutout in both views: deck 0x23272b, island 0x2b3036, casing
      0x363b41 — soot values, each authored to LOOK right under one rig and wrong under the
@@ -10282,10 +10312,10 @@ function buildFlightDeck(S, group, mats) {
     cap.position.set(spe[0], (yTopC + spe[1] - B * 0.012) / 2, 0);
     hg.add(cap);
   }
-  /* the hangar bay openings, flush in the casing side — under the deck-edge lifts to
-     starboard, because that is where the aircraft actually pass */
+  /* the hangar bay openings, flush in the casing side — under the deck-edge lifts on the
+     island's side, because that is where the aircraft actually pass, and one opposite */
   const openMat = new THREE.MeshStandardMaterial({ color: 0x14171b, roughness: 0.92 });
-  for (const [uo, sgn] of [[0.30, 1], [0.62, 1], [0.44, -1]]) {
+  for (const [uo, sgn] of [[0.30, ISL], [0.62, ISL], [0.44, -ISL]]) {
     const spo = surfacePoint(S, H, uo, 1.0);
     const gapH = yTopC - (spo[1] - B * 0.012);
     const door = new THREE.Mesh(
@@ -10301,11 +10331,14 @@ function buildFlightDeck(S, group, mats) {
      LINES on the same non-skid as the rest of the deck — its two edges — and the deck inside
      them is the same colour as the deck outside. */
   /* ⚠ AND IT RAN THE WRONG WAY ON THE WRONG HALF OF THE SHIP. The strip was centred forward
-     of amidships with its forward end drifting to STARBOARD — a mirror of the real geometry,
-     with the arrestor wires beside the bow catapults. A landing area exists so that a missed
-     wire flies off the BOW and goes round: it begins at the stern round-down near the
-     centreline and runs forward-PORT. Its geometry is one derivation now — landingStrip() —
-     shared with the audit, so the marks, the wires and the parking rule cannot disagree. */
+     of amidships with its forward end drifting toward the island — a mirror of the real
+     geometry, with the arrestor wires beside the bow catapults. A landing area exists so that
+     a missed wire flies off the BOW and goes round: it begins at the stern round-down near the
+     centreline and runs forward, AWAY from the island. Its geometry is one derivation now —
+     landingStrip() — shared with the audit, so the marks, the wires and the parking rule
+     cannot disagree. ⚠ AND THEN IT WAS ON THE WRONG HALF AGAIN (r270): drawn to −z under the
+     belief that −z was port, with the island at +z; +z is port, so the whole arrangement was
+     the ship's mirror until every one-sided fitting took its sign from islandSide(). */
   const LS = landingStrip(S);
   const aftX = Math.cos(LS.rot), aftZ = -Math.sin(LS.rot);   // unit vector down the axis, aft
   for (const edge of [-1, 1]) {
@@ -10478,7 +10511,7 @@ function buildFlightDeck(S, group, mats) {
     yard.position.set(-L * 0.014, mastTop + B * yq, 0);
     isl.add(yard);
   }
-  isl.position.set(L * 0.06, y + B * 0.022, deckW * 0.40);
+  isl.position.set(L * 0.06, y + B * 0.022, ISL * deckW * 0.40);
   group.add(tag(isl, 'island', 'The island',
     'Everything that cannot be under the deck: bridge, flying control, uptakes and radar. It is to starboard because a going-around aircraft swings to port.'));
 
@@ -10489,7 +10522,7 @@ function buildFlightDeck(S, group, mats) {
   for (const u of [0.30, 0.62]) {
     /* a lift IS deck — it wears the non-skid, not the vertical-surface haze grey */
     const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, deckW * 0.13), grey);
-    lift.position.set((u - 0.5) * L, y + B * 0.0225, deckW * 0.44);
+    lift.position.set((u - 0.5) * L, y + B * 0.0225, ISL * deckW * 0.44);
     group.add(tag(lift, 'flightdeck', 'Deck-edge lift',
       'Aircraft come up from the hangar on the deck edge rather than through the middle, so a lift out of action does not cut the flight deck in half. Flush with the deck when raised — it is a piece of the deck that moves.'));
   }
@@ -10508,9 +10541,9 @@ function buildFlightDeck(S, group, mats) {
   cl.rotation.y = LS.rot;
   group.add(tag(cl, 'flightdeck', 'Landing centreline',
     'The line a pilot flies down on approach. It runs along the angled deck, not the ship.'));
-  /* the foul line, offset to starboard of it */
+  /* the foul line, offset from it toward the island */
   const fl = new THREE.Mesh(new THREE.BoxGeometry(L * 0.52, B * 0.003, deckW * 0.008), paintY);
-  fl.position.set(LS.cx - L * 0.01, yTop, LS.cz + deckW * 0.16);
+  fl.position.set(LS.cx - L * 0.01, yTop, LS.cz + ISL * deckW * 0.16);
   fl.rotation.y = LS.rot;
   group.add(tag(fl, 'flightdeck', 'Foul line',
     'Nothing and nobody may be inside this line while an aircraft is coming aboard.'));
@@ -10536,7 +10569,9 @@ function buildFlightDeck(S, group, mats) {
      Two forward and one on the waist. On this class they are ELECTROMAGNETIC rather than
      steam, which is the whole reason the ship exists as a new design: a linear motor can be
      tuned to the aircraft, so it will launch something light without tearing it apart. */
-  for (const c of [[-0.30, -deckW * 0.22], [-0.30, deckW * 0.10], [-0.06, -deckW * 0.26]]) {
+  /* the bow pair either side of the centreline, the farther one opposite the island; the waist
+     catapult on the angled deck, opposite the island (the side is the record's, r270) */
+  for (const c of [[-0.30, -ISL * deckW * 0.22], [-0.30, ISL * deckW * 0.10], [-0.06, -ISL * deckW * 0.26]]) {
     const cat = new THREE.Mesh(new THREE.BoxGeometry(L * 0.28, B * 0.003, deckW * 0.020), paintW);
     cat.position.set(c[0] * L, yTop, c[1]);
     /* the waist catapult launches across the angled deck, so it lies along the same axis */
@@ -10550,8 +10585,8 @@ function buildFlightDeck(S, group, mats) {
 
 /* ── THE DECK PARK ─────────────────────────────────────────────────────────────────────
  * A carrier with a bare deck reads as a runway, not a warship at work. Parked aircraft go
- * where the deck is not working: the bow park to starboard of the catapults, the street
- * along the starboard side aft of the island, and the fantail — never inside the angled
+ * where the deck is not working: the bow park on the island's side of the catapults, the
+ * street along that side aft of the island, and the fantail — never inside the angled
  * landing area and never across the foul line, which is what those lines are FOR.
  */
 /* ⚠ AN AIRFRAME IS ONE BODY, NOT A CONE ABUTTING A BRICK (round 145). Until r145 each
@@ -10634,8 +10669,8 @@ function buildAircraft(mats, G) {
   can.scale.set(1.5, 0.55, 0.62); can.position.set(-4.6, 2.30, 0);
   ac.add(can);
   for (const s of [-1, 1]) {
-    /* the shape plane lies down: +PI/2 about x sends the span to starboard, -PI/2
-       to port — one geometry, two proper rotations, both windings outward */
+    /* the shape plane lies down: +PI/2 about x sends the span to +z, port, -PI/2
+       to starboard — one geometry, two proper rotations, both windings outward */
     const wing = new THREE.Mesh(G.wing, mats.acSkin);
     wing.rotation.x = s * Math.PI / 2;
     wing.position.y = 2.0;
@@ -10672,21 +10707,23 @@ function buildDeckPark(S, group, yDeck) {
     acGlass: new THREE.MeshStandardMaterial({ color: 0x1d2a2b, roughness: 0.18, metalness: 0.42 }),
     acDark:  new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.70, metalness: 0.20 }),
   };
-  /* [x/L, z/deckW, heading]: the bow park, the street, the fantail. Clear of the landing
-     area and the foul line by construction — and the audit re-checks every spot against
-     landingStrip() rather than trusting these numbers. Headings vary the way a real park
-     does, deterministically by index. */
+  /* [x/L, z/deckW, heading]: the bow park, the street, the fantail, z written for the
+     island's side and signed by it below (r270) — a mirrored park mirrors its headings too.
+     Clear of the landing area and the foul line by construction — and the audit re-checks
+     every spot against landingStrip() rather than trusting these numbers. Headings vary the
+     way a real park does, deterministically by index. */
   const spots = [
     [-0.43, 0.30, 2.45], [-0.38, 0.30, 2.30], [-0.33, 0.30, 2.55], [-0.28, 0.30, 2.40],
     [ 0.19, 0.33, 1.85], [ 0.245, 0.33, 2.05], [ 0.30, 0.33, 1.90], [ 0.355, 0.33, 2.10],
     [ 0.40, 0.23, 2.95], [ 0.455, 0.23, 3.05], [ 0.40, 0.32, 2.90], [ 0.455, 0.32, 3.10],
   ];
   const yTop = yDeck + S.beam * 0.0225;
+  const ISL = islandSide(S);
   const G = airframeGeometries();                  // one airframe, twelve aircraft
   for (let i = 0; i < Math.min(S.deckPark, spots.length); i++) {
     const ac = buildAircraft(mats, G);
-    ac.position.set(spots[i][0] * L, yTop, spots[i][1] * deckW);
-    ac.rotation.y = spots[i][2];
+    ac.position.set(spots[i][0] * L, yTop, ISL * spots[i][1] * deckW);
+    ac.rotation.y = ISL * spots[i][2];
     group.add(tag(ac, 'aircraft'));
   }
 }
@@ -11378,7 +11415,7 @@ function floatplaneGeometries() {
     canopy: new THREE.SphereGeometry(1, 8, 6),
     /* per-side planforms (x chord, span outboard): near-constant chord with rounded
        tips, the observation biplane's own wing. +PI/2 about x sends the span to
-       starboard, -PI/2 to port — one geometry, both sides, windings outward */
+       +z, port, -PI/2 to starboard — one geometry, both sides, windings outward */
     wingHi: plate([[-2.075, 0.0], [-2.05, 2.0], [-1.98, 3.8], [-1.86, 4.9],
                    [-1.62, 5.45], [-1.28, 5.60], [-0.95, 5.52], [-0.70, 5.18],
                    [-0.55, 4.60], [-0.44, 3.40], [-0.35, 1.4], [-0.325, 0.0]], 0.12),
@@ -12970,7 +13007,7 @@ function buildJunkCastle(S, group) {
       Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - inset);
     const y0 = u => H.deck(u) + dh * t, y1 = u => H.deck(u) + dh * (t + 1);   // tiers stand on the deck (r221)
     const N = Math.max(8, Math.round((u1 - u0) * L / 1.8));
-    /* the perimeter, wound once round: starboard fwd→aft, port aft→fwd, closed */
+    /* the perimeter, wound once round: the +z (port) side fwd→aft, starboard aft→fwd, closed */
     const path = [];
     for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L + H.rake(u), z: half(u) }); }
     for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L + H.rake(u), z: -half(u) }); }
@@ -13334,7 +13371,7 @@ function buildTieredCastles(S, group, mats, hullMat) {
     for (const T of TIERS.filter(T => T.end === (aft ? 'aft' : 'fore'))) {
       const { t, u0: a, u1: b, half, yB, yT } = T;   // stations, inset and heights from castleTiers
       const N = Math.max(6, Math.round((b - a) * L / 0.9));
-      /* the perimeter, wound once round: starboard fwd→aft, port aft→fwd, closed */
+      /* the perimeter, wound once round: the +z (port) side fwd→aft, starboard aft→fwd, closed */
       const path = [];
       for (let k = 0; k <= N; k++) { const u = a + (b - a) * k / N; path.push({ u, x: xAt(u), z: half(u) }); }
       for (let k = N; k >= 0; k--) { const u = a + (b - a) * k / N; path.push({ u, x: xAt(u), z: -half(u) }); }
@@ -14779,7 +14816,7 @@ function buildGalleyWorks(S, group, mats) {
        not a butt joint hanging a gap off the column face */
     const balR = B * 0.0045, span = T.w - colR, gate = 0.62;
     const railSec = [B * 0.014, B * 0.011];
-    for (const side of ['aft', 'port', 'stbd', 'fwd']) {
+    for (const side of ['aft', 'port', 'starboard', 'fwd']) {
       const fwd = side === 'fwd';
       const mkRail = (len, cx, cz, alongX) => {
         const r = new THREE.Mesh(new THREE.BoxGeometry(
@@ -14787,9 +14824,9 @@ function buildGalleyWorks(S, group, mats) {
         r.position.set(cx, platY + railH, cz);
         tg.add(r);
       };
-      const alongX = side === 'port' || side === 'stbd';
+      const alongX = side === 'port' || side === 'starboard';
       const off = side === 'aft' ? [hw, 0] : side === 'fwd' ? [-hw, 0]
-                : side === 'port' ? [0, -hw] : [0, hw];
+                : [0, sideSign(side) * hw];
       if (fwd) {                                                   // gate amidships for the ladder
         const seg = (span - gate) / 2;
         mkRail(seg, xC + off[0], -(gate + seg) / 2, false);
@@ -15596,7 +15633,7 @@ function buildShip(S, opts) {
       for (const sgn of [-1, 1])
         group.add(tag(new THREE.Mesh(buildQuarterRudderGeometry(S, sgn), timber),
                       'quarterRudder',
-                      sgn < 0 ? 'Port quarter rudder' : 'Starboard quarter rudder'));
+                      'Quarter rudder, ' + sideName(sgn)));
     } else if (steer !== 'paddle') {
       /* ⚠ THE RUDDER IS PART OF THE UNDERWATER BODY (round 153). A steel ship's foil
          works below her load line and is docked and painted with the shell: it wears
@@ -15917,4 +15954,4 @@ function buildShip(S, opts) {
 }
 
 window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
-                      superellipseFullness, surfacePoint, landingStrip, linerHouse, netDefenceGeom };
+                      superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

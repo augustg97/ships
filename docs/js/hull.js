@@ -1,4 +1,8 @@
 'use strict';
+const PORT = 1, STARBOARD = -1;
+const SIDE_WORD = ['starboard', 'centreline', 'port'];
+const sideName = z => SIDE_WORD[Math.sign(+z) + 1];
+const sideSign = word => (word === 'port' ? PORT : STARBOARD);
 function superellipseFullness(n) {
 const N = 256;
 let a = 0;
@@ -2058,7 +2062,7 @@ yardTip: [+tipY[0].toFixed(3), +tipY[1].toFixed(3)], boomTip: [+tipB[0].toFixed(
 peak: [+peakC[0].toFixed(3), +peakC[1].toFixed(3)],
 yard: +sparLen.toFixed(3), boom: +boomLen.toFixed(3), cloth: +clothLuff.toFixed(3),
 yardAngle: +(aY / RAD).toFixed(2), boomAngle: +(aB0 / RAD).toFixed(2), leech: +LEECH.toFixed(3), area: +clothArea.toFixed(2),
-sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET > 0 ? 'port' : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
+sheetDeg: +(SHEET / RAD).toFixed(1), sheetSide: SHEET ? sideName(SHEET) : 'none', sheetFrom: 'class: the fleet\'s wind, 1.5 TRIM as the junk\'s lug; +z is port (round 254, r254/side.json)',
 lashed: { offHeel: +offHeel.toFixed(3), offHead: +offHead.toFixed(3), mastRheel: +rMheel.toFixed(3), mastRhead: +rMhead.toFixed(3),
 yardRheel: +rYheel.toFixed(3), yardRtip: +rYtip.toFixed(3), leanDeg: +(lean / RAD).toFixed(2), tackH: +tackH.toFixed(3), poleTop: +poleTop.toFixed(3), lashings: nLash,
 mastHeightM: +poleM.toFixed(3), mastHeightRec: mk.heightM !== undefined ? mk.heightM : null,
@@ -3680,7 +3684,7 @@ const arm = new THREE.Mesh(new THREE.BoxGeometry(kS, 0.18, armL), wood);
 arm.position.set(0, yFoot + 0.09, sgn * (Math.abs(e[2]) - gap - armL / 2));
 vert.name = 'deck-knee'; arm.name = 'deck-knee-arm';
 kg.add(vert, arm); kg.position.x = e[0]; kg.name = 'knee';
-group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + (sgn < 0 ? ', starboard' : ', port'),
+group.add(tag(kg, 'crossbeam', 'Standing knee at through-beam ' + (i + 1) + ', ' + sideName(sgn),
 'A grown knee standing on the beam and against the inside of the planking, up to the '
 + 'top strake — Lahn, Blatt 3, draws one at every beam end. Sidings are class defaults.'));
 }
@@ -5130,7 +5134,7 @@ const yD = H.deck(us[i]);
 const zi = Math.abs(surfacePoint(S, H, us[i], 1)[2]) - 0.25;
 box(0.12, yC - yD, 0.12, xs[i], (yC + yD) / 2, sgn * zi, 'channel-wale-inner-stanchion');
 }
-group.add(tag(gr, 'channelWale', sgn < 0 ? 'Port channel wale' : 'Starboard channel wale'));
+group.add(tag(gr, 'channelWale', 'Channel wale, ' + sideName(sgn)));
 }
 }
 function buildDeadeyes(xs, r, mat) {
@@ -6308,16 +6312,20 @@ group.add(tag(scr, 'screw', 'Screw',
 'Manganese bronze, below the waterline. What she has instead of everything the sailing fleet carries aloft.'));
 });
 }
+function islandSide(S) {
+return sideSign(S.islandSide || 'starboard');
+}
 function landingStrip(S) {
-const L = S.lwl, deckW = S.flightDeck;
-return { cx: L * 0.14, cz: -deckW * 0.177, rot: -0.157,
-halfLen: L * 0.31, halfW: deckW * 0.105 };
+const L = S.lwl, deckW = S.flightDeck, side = -islandSide(S);
+return { cx: L * 0.14, cz: side * deckW * 0.177, rot: side * 0.157,
+halfLen: L * 0.31, halfW: deckW * 0.105, side };
 }
 function buildFlightDeck(S, group, mats) {
 if (!S.flightDeck) return;
 const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const deckW = S.flightDeck;
+const ISL = islandSide(S);
 const HAZE = 0x848a8e;
 const grey = new THREE.MeshStandardMaterial({ color: 0x4e5357, roughness: 0.99, metalness: 0.0 });
 const dark = new THREE.MeshStandardMaterial({ color: HAZE, roughness: 0.70, metalness: 0.15 });
@@ -6360,7 +6368,7 @@ cap.position.set(spe[0], (yTopC + spe[1] - B * 0.012) / 2, 0);
 hg.add(cap);
 }
 const openMat = new THREE.MeshStandardMaterial({ color: 0x14171b, roughness: 0.92 });
-for (const [uo, sgn] of [[0.30, 1], [0.62, 1], [0.44, -1]]) {
+for (const [uo, sgn] of [[0.30, ISL], [0.62, ISL], [0.44, -ISL]]) {
 const spo = surfacePoint(S, H, uo, 1.0);
 const gapH = yTopC - (spo[1] - B * 0.012);
 const door = new THREE.Mesh(
@@ -6492,12 +6500,12 @@ yard.rotation.x = Math.PI / 2;
 yard.position.set(-L * 0.014, mastTop + B * yq, 0);
 isl.add(yard);
 }
-isl.position.set(L * 0.06, y + B * 0.022, deckW * 0.40);
+isl.position.set(L * 0.06, y + B * 0.022, ISL * deckW * 0.40);
 group.add(tag(isl, 'island', 'The island',
 'Everything that cannot be under the deck: bridge, flying control, uptakes and radar. It is to starboard because a going-around aircraft swings to port.'));
 for (const u of [0.30, 0.62]) {
 const lift = new THREE.Mesh(new THREE.BoxGeometry(L * 0.055, B * 0.008, deckW * 0.13), grey);
-lift.position.set((u - 0.5) * L, y + B * 0.0225, deckW * 0.44);
+lift.position.set((u - 0.5) * L, y + B * 0.0225, ISL * deckW * 0.44);
 group.add(tag(lift, 'flightdeck', 'Deck-edge lift',
 'Aircraft come up from the hangar on the deck edge rather than through the middle, so a lift out of action does not cut the flight deck in half. Flush with the deck when raised — it is a piece of the deck that moves.'));
 }
@@ -6510,7 +6518,7 @@ cl.rotation.y = LS.rot;
 group.add(tag(cl, 'flightdeck', 'Landing centreline',
 'The line a pilot flies down on approach. It runs along the angled deck, not the ship.'));
 const fl = new THREE.Mesh(new THREE.BoxGeometry(L * 0.52, B * 0.003, deckW * 0.008), paintY);
-fl.position.set(LS.cx - L * 0.01, yTop, LS.cz + deckW * 0.16);
+fl.position.set(LS.cx - L * 0.01, yTop, LS.cz + ISL * deckW * 0.16);
 fl.rotation.y = LS.rot;
 group.add(tag(fl, 'flightdeck', 'Foul line',
 'Nothing and nobody may be inside this line while an aircraft is coming aboard.'));
@@ -6525,7 +6533,7 @@ wire.position.set(LS.cx + along * aftX, yTop + B * 0.002, LS.cz + along * aftZ);
 group.add(tag(wire, 'flightdeck', 'Arrestor wire',
 'A hook catches one of three and pays it out against the arresting engine below decks: about 240 km/h to a stop in roughly a hundred metres.'));
 }
-for (const c of [[-0.30, -deckW * 0.22], [-0.30, deckW * 0.10], [-0.06, -deckW * 0.26]]) {
+for (const c of [[-0.30, -ISL * deckW * 0.22], [-0.30, ISL * deckW * 0.10], [-0.06, -ISL * deckW * 0.26]]) {
 const cat = new THREE.Mesh(new THREE.BoxGeometry(L * 0.28, B * 0.003, deckW * 0.020), paintW);
 cat.position.set(c[0] * L, yTop, c[1]);
 if (c[0] > -0.2) cat.rotation.y = LS.rot;
@@ -6620,11 +6628,12 @@ const spots = [
 [ 0.40, 0.23, 2.95], [ 0.455, 0.23, 3.05], [ 0.40, 0.32, 2.90], [ 0.455, 0.32, 3.10],
 ];
 const yTop = yDeck + S.beam * 0.0225;
+const ISL = islandSide(S);
 const G = airframeGeometries();
 for (let i = 0; i < Math.min(S.deckPark, spots.length); i++) {
 const ac = buildAircraft(mats, G);
-ac.position.set(spots[i][0] * L, yTop, spots[i][1] * deckW);
-ac.rotation.y = spots[i][2];
+ac.position.set(spots[i][0] * L, yTop, ISL * spots[i][1] * deckW);
+ac.rotation.y = ISL * spots[i][2];
 group.add(tag(ac, 'aircraft'));
 }
 }
@@ -9514,7 +9523,7 @@ plat.position.set(xC, platY, 0);
 tg.add(plat);
 const balR = B * 0.0045, span = T.w - colR, gate = 0.62;
 const railSec = [B * 0.014, B * 0.011];
-for (const side of ['aft', 'port', 'stbd', 'fwd']) {
+for (const side of ['aft', 'port', 'starboard', 'fwd']) {
 const fwd = side === 'fwd';
 const mkRail = (len, cx, cz, alongX) => {
 const r = new THREE.Mesh(new THREE.BoxGeometry(
@@ -9522,9 +9531,9 @@ alongX ? len : railSec[0], railSec[1], alongX ? railSec[0] : len), timber);
 r.position.set(cx, platY + railH, cz);
 tg.add(r);
 };
-const alongX = side === 'port' || side === 'stbd';
+const alongX = side === 'port' || side === 'starboard';
 const off = side === 'aft' ? [hw, 0] : side === 'fwd' ? [-hw, 0]
-: side === 'port' ? [0, -hw] : [0, hw];
+: [0, sideSign(side) * hw];
 if (fwd) {
 const seg = (span - gate) / 2;
 mkRail(seg, xC + off[0], -(gate + seg) / 2, false);
@@ -10112,7 +10121,7 @@ if (steer === 'quarter') {
 for (const sgn of [-1, 1])
 group.add(tag(new THREE.Mesh(buildQuarterRudderGeometry(S, sgn), timber),
 'quarterRudder',
-sgn < 0 ? 'Port quarter rudder' : 'Starboard quarter rudder'));
+'Quarter rudder, ' + sideName(sgn)));
 } else if (steer !== 'paddle') {
 const rudderMat = steer === 'steel'
 ? new THREE.MeshStandardMaterial({ color: bottom, roughness: 0.78, metalness: 0.12 })
@@ -10297,4 +10306,4 @@ waterlineY: 0 };
 return group;
 }
 window.SHIPS_HULL = { PARTS, buildKeelGeometry, buildFramesGeometry, buildShip, buildHullGeometry, hullSurface, exponentForCm,
-superellipseFullness, surfacePoint, landingStrip, linerHouse, netDefenceGeom };
+superellipseFullness, surfacePoint, landingStrip, islandSide, sideName, linerHouse, netDefenceGeom };

@@ -5250,6 +5250,33 @@ say(v.id, 'island is not one tower',
 `principal mesh runs ${pRun.toFixed(2)} of ${(hi2 - lo2).toFixed(2)} m ` +
 `at ${pTris} triangles — slabs under a stick, not a lofted tower`);
 }
+const wantSide = (H.islandSide || 'starboard') === 'port' ? 1 : -1;
+const centreZ = o => { const bb = new THREE.Box3().setFromObject(o); return (bb.min.z + bb.max.z) / 2; };
+if (islG) {
+const zc = centreZ(islG);
+if (Math.sign(zc) !== wantSide)
+say(v.id, 'island on the wrong side',
+`the island's centre stands ${Math.abs(zc).toFixed(1)} m to ${sideOf(zc)}; ` +
+`the record puts it to ${sideOf(wantSide)}`);
+}
+const lifts = [];
+g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.name === 'Deck-edge lift') lifts.push(o); });
+for (const lf of lifts) {
+const zc = centreZ(lf);
+if (Math.sign(zc) !== wantSide)
+say(v.id, 'a lift on the wrong side',
+`a deck-edge lift at x ${lf.position.x.toFixed(0)} stands ${Math.abs(zc).toFixed(1)} m to ` +
+`${sideOf(zc)}; the lifts stand on the island's side, ${sideOf(wantSide)}`);
+}
+if (SHIPS_HULL.landingStrip) {
+const LS = SHIPS_HULL.landingStrip(H);
+const fwdZ = LS.cz + Math.sin(LS.rot) * LS.halfLen, aftZ = LS.cz - Math.sin(LS.rot) * LS.halfLen;
+if (Math.sign(fwdZ) === wantSide || Math.abs(fwdZ) <= Math.abs(aftZ))
+say(v.id, 'the angled deck runs toward the island',
+`the landing area's forward end stands ${Math.abs(fwdZ).toFixed(1)} m to ${sideOf(fwdZ)} ` +
+`and its aft end ${Math.abs(aftZ).toFixed(1)} m to ${sideOf(aftZ)}; it should run forward ` +
+`to ${sideOf(-wantSide)}, away from an island to ${sideOf(wantSide)}`);
+}
 }
 if (H.floatplanes) {
 const acs = [];
@@ -6617,17 +6644,25 @@ say('passage-readout', 'a land row that cannot be asked', 'fillLandRow threw: ' 
 }
 try { selectEra(eraHome2); await drain2(); } catch (e) {  }
 }
+const SOURCES = [
+{ file: 'audit-hulls.js', helper: 'sideOf', shapes: [
+new RegExp("[<>]=?\\s*0\\s*\\?\\s*'(?:port|starboard|stbd|z[+−])", 'g'),
+new RegExp(":\\s*'(?:port|starboard|stbd|z[+−])(?: side)?'", 'g') ] },
+{ file: 'js/hull.js', helper: 'sideName', shapes: [
+new RegExp("[<>]=?\\s*0\\s*\\?\\s*'[,\\s]*(?:port|starboard|stbd|z[+−])\\b", 'gi'),
+new RegExp("\\?[^:\\n]*:\\s*'[,\\s]*(?:port|starboard|stbd|z[+−])\\b[^']*'", 'gi') ] },
+];
+for (const S of SOURCES) {
 try {
-const src = await (await fetch('audit-hulls.js', { cache: 'no-store' })).text();
-const A = new RegExp("[<>]=?\\s*0\\s*\\?\\s*'(?:port|starboard|stbd|z[+−])", 'g');
-const B = new RegExp(":\\s*'(?:port|starboard|stbd|z[+−])(?: side)?'", 'g');
+const src = await (await fetch(S.file, { cache: 'no-store' })).text();
 const lines = new Set();
-for (const re of [A, B]) { let m; while ((m = re.exec(src))) lines.add(src.slice(0, m.index).split('\n').length); }
+for (const re of S.shapes) { let m; while ((m = re.exec(src))) lines.add(src.slice(0, m.index).split('\n').length); }
 if (lines.size)
-say('audit-hulls.js', 'a side spelled outside sideOf',
-`${lines.size} line${lines.size === 1 ? '' : 's'} spell${lines.size === 1 ? 's' : ''} a side from a sign (line${lines.size === 1 ? '' : 's'} ${[...lines].sort((a, b) => a - b).join(', ')}); every side-naming message goes through sideOf`);
+say(S.file.replace(/^js\//, ''), 'a side spelled outside ' + S.helper,
+`${lines.size} line${lines.size === 1 ? '' : 's'} spell${lines.size === 1 ? 's' : ''} a side from a sign (line${lines.size === 1 ? '' : 's'} ${[...lines].sort((a, b) => a - b).join(', ')}); every side-naming message goes through ${S.helper}`);
 } catch (e) {
-say('audit-hulls.js', 'an audit that cannot read its own source', 'fetch(audit-hulls.js) threw: ' + e.message);
+say(S.file.replace(/^js\//, ''), 'an audit that cannot read its source', `fetch(${S.file}) threw: ` + e.message);
+}
 }
 return { problems, checked: rows.length, rows };
 })()
