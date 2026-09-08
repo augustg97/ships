@@ -23872,3 +23872,10 @@ the close.**
 build/staging/r270/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r270 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788842308 on https://augustg97.github.io/ships/index.html at 21:41 PDT,
+90 s after the push (build/staging/r270/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/js/hull.js derives the carrier's side through islandSide( (4 uses, the definition among them), spells a side through sideName( (4), states the frame's sides once (1 line 'const PORT = 1, STARBOARD = -1;') and holds 0 ternaries spelling a side off a sign; docs/data/vessels.json carries "islandSide": "starboard" (1); docs/audit-hulls.js convicts the island, a lift and the angled deck on the wrong side (3 rule strings) and lints 1 sources for a spelled side.
+THE RATCHET: OPENING FULL RATCHET at the clean r269 HEAD 7f00af8 (START 20:55:13 load 6.83 6.32 7.92 HEAD 7f00af8) STOPPED at its 20th frame at 21:15:43 — 60 s a frame beside the chain's browser, and the close needed the machine; its 20 captured frames were copied to r270/current-clean before any check --frame and scored offline by the tool's own compare: 20 frames scored offline; movers 0. The r269 receipt's full ratchet (65 frames, 0 movers at the r268 HEAD; r269 changed no file a frame loads) already scores the tree before this round. THE r270 TREE (web/ after the copy-in, scored by check --frame per PREDICTIONS-close.md): aboard-carrier 0.303% 0.165 CHANGED; ship-azzam 0.023% 0.028 ok; ship-carrier 1.679% 0.649 CHANGED; ship-container 0.015% 0.015 ok; ship-dreadnought 0.047% 0.019 ok; ship-ever-given 0.034% 0.024 ok; ship-steamer 0.014% 0.019 ok; ship-yamato 0.006% 0.001 ok; ship-carrier accepted; 1.679%/0.649
+aboard-carrier accepted; 0.303%/0.165
+Two commits close the round (da542be audit + docs + handoff, and this push-log commit with any accepted baseline).**
