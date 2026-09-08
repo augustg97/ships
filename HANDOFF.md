@@ -24279,3 +24279,23 @@ end (01:27).**
 build/staging/r273/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r273 staging stays on disk uncommitted, the r211 convention.**
+
+**RECEIPT, r273 — NOT DEPLOYED. The build refused three times at the first-paint line: 8.61 MB with the long provenance
+strings (01:51), 8.60 with them cut to 668 and 1,163 characters (01:53), 8.60 with them cut to 337 and 847 and the card
+to three sentences (01:58) — the line is 8.6 and the r272 tree stood within a few hundred bytes of it, so the round's
+own bytes (two record strings, a card and the minified platform and rig code, about 3 KB) cannot be cut to fit: the
+next saving must be STRUCTURAL (the r271 memory), and (0y⁵⁸) is now the blocker, not a residual. The source tree is
+committed (f1d7ab2: hull.js, vessels.json with the 668/1,163 strings, the audit, the accepted ship-endurance baseline
+and this round's entry) and this receipt commits the 337/847 record and the three-sentence card; docs/ is HEAD's, the
+r272 build, and the live page still carries data-version 1788852735 (r272's 1788852735, read at 02:01 PDT). The
+commit message of f1d7ab2 carries three unfilled placeholders (the patch that filled them failed on an anchor and the
+clock ran): PROOF B was 3 problems (a platform floor off the record's height, a boom through the platform, a fitting
+standing on the sheer), PROOF B2 exactly 1 (a boom through the platform), PROOF C exactly 1 (a platform with no
+provenance), FINAL and FINAL-2 0 problems on 33 hulls; the boom's foot stands 5.2 m over the deck at the mast, not the
+4.6 the message says. THE RATCHET: OPENING FULL RATCHET at the clean r272 HEAD 1e0f4a9 (START 00:45:42 load 8.46 9.82 10.31 HEAD 1e0f4a9) DIED at its 41st frame (aboard-wyoming, a Page.screenshot timeout under a load of 43 — the proof chain's browser beside it and Apple's indexer; RATCHET EXIT 1 at 01:22:32); its 40 captured frames were copied to r273/current-clean before any check --frame and scored offline by the tool's own compare (r273/clean-scores.out): 40 frames scored offline; movers 0 — the six MAY neighbours among them at the numbers r271's and r272's receipts read (ship-container 0.015%, ship-dreadnought 0.047%, ship-queen-mary-2 0.008%, ship-titanic 0.000%, ship-wyoming 0.000%, ship-yamato 0.046%), the documented capture flap. The one MUST frame the run did not reach, ship-endurance, was scored at the clean HEAD by check --frame BEFORE the copy-in (r273/clean-partial-ship-endurance.out): ship-endurance 0.000% 0.000 ok. THE r273 TREE (web/ after the copy-in, scored by check --frame per PREDICTIONS-close.md, r273/checks.log): ship-container 0.015% 0.015 ok; ship-dreadnought 0.047% 0.019 ok; ship-endurance 1.810% 0.477 CHANGED; ship-queen-mary-2 0.008% 0.011 ok; ship-titanic 0.000% 0.000 ok; ship-wyoming 0.000% 0.000 ok; ship-yamato 0.046% 0.017 ok; ship-endurance accepted (r273: the compass platform and the lifted mizzen boom; the frame read before accepting).
+r274 OPENS with the first-paint saving before anything else: move every hull's provenance strings (headProvenance,
+stationProvenance, deck.provenance, capstanProvenance, helmProvenance, aftPlatform.provenance, castleProvenance and
+the rest — the largest share of vessels.json's bytes) out of docs/data/vessels.json into a docs/data/provenance.json
+the card fetches only when a provenance is opened, with the build splitting them and the audit reading the split file
+so no rule loses its silence checks; then build, push, verify the live stamp, and run the full ratchet at the clean
+HEAD. Until that lands the live site is r272's.**

@@ -5967,7 +5967,7 @@
           }
         ],
         "helmAt": 0.94,
-        "helmProvenance": "ON THE FLUSH MAIN DECK behind the bulwark, class station 0.94. The Framnaes section (RMG J9266 web copy 1024x322, ~16.9 px/m; the bow at the copy's RIGHT) draws the deck line level at rows 198-202 and the cap at 174-178 to the counter, stanchions between every 12-16 px: no poop. Hurley a090007 (Commons, 1500x1124, starboard quarter, ~24 px/m aft) shows the wall solid to the counter and a man's head over the cap on the after deck. The wheel is hidden in every plate, so the station is the class's. r272's (0y61) 'raised steering platform' is the compass platform (aftPlatform); closed as no fault, r273. The prints.rmg.co.uk copy of J9266 is the same 1024x322 file.",
+        "helmProvenance": "ON THE FLUSH MAIN DECK behind the bulwark, class station 0.94: the Framnaes section (RMG J9266, 1024x322, ~16.9 px/m, bow at the RIGHT) draws the deck line level to the counter, no poop; Hurley a090007 (starboard quarter, ~24 px/m aft) shows the wall solid to the counter and a man's head over the cap. r272's (0y61) closed as no fault, r273.",
         "aftPlatform": {
           "u": 0.99,
           "floorM": 3.45,
@@ -5975,7 +5975,7 @@
           "boxWM": 0.8,
           "boxHM": 1.0,
           "what": "compass platform (inferred; CONTESTED)",
-          "provenance": "LATTICE PLATFORM WITH A HOODED BOX, read off Hurley a090007 (Commons 'Endurance in Antarctica, 1915 Hurley a090007', 1500x1124; ~16 px/m at the bow to ~24 +/- 3 at the stern, from the mast gaps 210/255 px against 13.0/12.0 m; r273/a090007-stern-6x-ruled.png): cap top at row 700, frame base 697, floor 650 = 2.1 m (+/- 0.3) over the cap, 3.45 over the deck; frame 36 px (1.5 m) wide, one cross-braced panel a face; box 20 x 25 px (0.8 x 1.0 m) at rows 625-650, a short finial. Centre col 910, 0.79 of the way from the mizzen (740) to the taffrail (955): u 0.99 +/- 0.02, an upper bound (the quarter view foreshortens the far end). Also over the stern in the heeled plate and, wrecked, at the right edge of LCCN 2013646126. WHAT IT IS is inferred: a hooded box set high and right aft is the standard compass on its platform as Discovery, Nimrod and Terra Nova carried theirs; no source in reach names Endurance's, so CONTESTED. Centreline assumed. The rig lifts the mizzen boom over the box: drawn level, its foot stands 5.2 m over the deck at the mast, 0.5 m over the plate's gooseneck read (4.0-4.3 +/- 0.4, the spar topped up); the boom's cock is residual 0y63."
+          "provenance": "LATTICE PLATFORM WITH A HOODED BOX, read off Hurley a090007 (Commons, 1500x1124; ~24 px/m +/- 3 at the stern from the mast gaps; r273/a090007-stern-6x-ruled.png): cap top row 700, floor row 650 = 2.1 m (+/- 0.3) over the cap, 3.45 over the deck; frame 1.5 m wide, one cross-braced panel a face; box 0.8 x 1.0 m; centre col 910, 0.79 from the mizzen to the taffrail = u 0.99 +/- 0.02, an upper bound. Also in the heeled plate and, wrecked, in LCCN 2013646126. WHAT IT IS is inferred: a hooded box high and right aft is the standard compass on its platform, as Discovery, Nimrod and Terra Nova carried theirs; no source names Endurance's: CONTESTED. Centreline assumed. The rig lifts the mizzen boom over the box: level, its foot is 5.2 m over the deck at the mast, 0.5 m over the plate's gooseneck read (4.0-4.3 +/- 0.4); the cock is residual 0y63."
         },
         "year": 1912,
         "funnels": 1,

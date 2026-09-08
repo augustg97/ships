@@ -5924,11 +5924,9 @@ const PARTS = {
                   + 'screw gear under the wheel box — one man could hold a ship of nearly four '
                   + 'thousand tons.' },
   compassPlatform: { stage: 5, name: 'Compass platform',
-              what: 'A raised platform on an open lattice frame at the stern, with a hooded box on '
-                  + 'it. Hurley\'s 1915 plate from the starboard quarter shows it standing about '
-                  + 'two metres over the cap rail. The type\'s answer for a hooded box set high and '
-                  + 'right aft is the standard compass on its platform, clear of the engine\'s iron, '
-                  + 'and that is a reading of the plate, not a record.' },
+              what: 'A raised platform on an open lattice frame at the stern with a hooded box on it, '
+                  + 'as Hurley\'s 1915 plate shows. Read as the standard compass on its platform, clear '
+                  + 'of the engine\'s iron: a reading of the plate, not a record.' },
 };
 
 function tag(o, key, extra, what) {
