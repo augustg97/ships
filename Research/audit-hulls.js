@@ -6334,6 +6334,78 @@
       }
     }
 
+    /* ── A-FIFE-RAIL (round 280, 0y⁷²): THE JEERS ARE MADE FAST TO A FIFE RAIL, NOT TO THE DECK.
+       Through r279 the jeers' falls came down the mast and ended on the deck beside it on the one
+       hull that carries pins. A square-rigged mast on a hull with a pin rail carries a FIFE RAIL at
+       its foot. Read from the BUILT scene, on the set build: where a 'Belaying pins' mesh stands,
+       every square mast in the record must have a 'Fife rail' mesh recording that mast
+       (userData.fifeRail.mast) — the silence convicts ('a square mast with no fife rail', the r279
+       state) — whose timber straddles the mast (vertices before and abaft the mast's station and
+       beyond its radius to both sides), whose rail stands 0.9–1.3 m over the deck at the mast, and
+       a 'Fife rail pins' mesh for it recording at least six pin centres, each with a vertex of its
+       own within 0.05. The Jeers mesh must record belays ('jeers belayed nowhere'), every one on a
+       pin of the fife rail (rail 'fife', the pin within 0.05 of a recorded centre), and its lowest
+       vertex must stand at least 0.5 m over the deck ('jeers ending on the deck'). The record must
+       answer for the rail (hull.fifeRail, figures or a provenance) on a hull with pins and a square
+       mast — a class figure drawn in silence is convicted, as the r108 rule has it. A hull with no
+       pins may carry no fife rail; the pins and the belays are read again by A-BELAY. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const pinsM = [], fifeM = [], fifePinsM = [], jeersM = [], deckM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+        else if (p.key === 'fifeRail' && p.name === 'Fife rail') fifeM.push(o);
+        else if (p.key === 'fifeRail' && p.name === 'Fife rail pins') fifePinsM.push(o);
+        else if (p.key === 'jeers') jeersM.push(o);
+        else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+      const L = H.lwl || H.loa;
+      const sq = (H.masts || []).map((m, i) => ({ m, i })).filter(x => x.m.rig === 'square');
+      if (!pinsM.length) {
+        if (fifeM.length || fifePinsM.length) say(v.id, 'a fife rail on a hull with no pin rail', `${fifeM.length} Fife rail and ${fifePinsM.length} Fife rail pins mesh(es) and no Belaying pins mesh`);
+      } else if (sq.length) {
+        if (!H.fifeRail) say(v.id, 'a fife rail with no answer', `a hull with pins and ${sq.length} square mast(s) whose record says nothing of the fife rail (hull.fifeRail: figures, or a provenance naming the plates read)`);
+        let deckPts = null;
+        const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+          let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+            if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+        const fifePins = [];
+        for (const { m, i } of sq) {
+          const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+          const rails = fifeM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
+          if (!rails.length) { say(v.id, 'a square mast with no fife rail', `${at}: ${pinsM.length ? 'a pin rail' : 'pins'} and no Fife rail mesh records this mast — nothing that comes down the mast can be made fast at its foot`); continue; }
+          if (rails.length > 1) say(v.id, 'two fife rails on one mast', `${at}: ${rails.length} Fife rail meshes record it`);
+          const fr = rails[0].userData.fifeRail, P = pts(rails[0]);
+          let xMin = 1e9, xMax = -1e9, zMax = 0, yMax = -1e9; for (const q of P) { xMin = Math.min(xMin, q.x); xMax = Math.max(xMax, q.x); zMax = Math.max(zMax, Math.abs(q.z)); yMax = Math.max(yMax, q.y); }
+          const rM = fr.mastR || 0;
+          if (!(xMin < xm - rM - 0.2 && xMax > xm + rM + 0.2 && zMax > rM + 0.3))
+            say(v.id, 'a fife rail that does not stand round its mast', `${at}: the timber spans x ${xMin.toFixed(2)}..${xMax.toFixed(2)}, |z| to ${zMax.toFixed(2)} against the mast at x ${xm.toFixed(2)}, radius ${rM.toFixed(2)}`);
+          const e = deckAtX(xm), over = yMax - e;
+          if (e < 1e8 && (over < 0.9 || over > 1.3)) say(v.id, 'a fife rail off its height', `${at}: the rail's top stands ${over.toFixed(2)} m over the deck at the mast (0.9–1.3 wanted)`);
+          const pm = fifePinsM.filter(o => o.userData.fifeRail && o.userData.fifeRail.mast === i);
+          if (!pm.length) { say(v.id, 'a fife rail with no pins', `${at}: a Fife rail mesh and no Fife rail pins mesh for it`); continue; }
+          const rec = pm[0].userData.pins || [];
+          if (rec.length < 6) say(v.id, 'a fife rail short of pins', `${at}: ${rec.length} pin centre(s) recorded (six or more wanted along three rails)`);
+          const PV = pts(pm[0]);
+          for (const c of rec) { let d = 1e9; for (const q of PV) if (Math.abs(q.y - c[1]) < 0.30) d = Math.min(d, Math.hypot(q.x - c[0], q.z - c[2]));
+            if (d > 0.05) { say(v.id, 'a fife rail pin drawn elsewhere', `${at}: the recorded pin at [${c}] has no Fife rail pins vertex within 0.05 in plan (nearest ${d < 1e8 ? d.toFixed(3) : 'none within the pin\'s length'})`); break; } }
+          fifePins.push(...rec);
+        }
+        for (const o of jeersM) {
+          const bl = o.userData.belays || [];
+          if (!bl.length) { say(v.id, 'jeers belayed nowhere', `a Jeers mesh on a hull with pins records no belay — the falls end on the deck beside the mast`); continue; }
+          for (const b of bl) {
+            let d = 1e9; for (const c of fifePins) d = Math.min(d, Math.hypot(c[0] - b.pin[0], c[1] - b.pin[1], c[2] - b.pin[2]));
+            if (b.rail !== 'fife' || d > 0.05) say(v.id, 'jeers made fast off the fife rail', `the ${b.side} jeers of mast ${b.mast}: belayed on rail '${b.rail}', its pin [${b.pin}] ${d < 1e8 ? d.toFixed(3) + ' m' : 'far'} from the nearest fife rail pin`);
+          }
+          const P = pts(o); let lo = P[0]; for (const q of P) if (q.y < lo.y) lo = q;
+          const e = deckAtX(lo.x);
+          if (e < 1e8 && lo.y < e + 0.5) say(v.id, 'jeers ending on the deck', `the Jeers mesh's lowest vertex y ${lo.y.toFixed(2)} at x ${lo.x.toFixed(2)} lies ${(lo.y - e).toFixed(2)} m over the deck — a fall made fast to the planking`);
+        }
+      }
+    }
+
     /* ── A-BELAY (round 277, 0y⁷¹): A FALL IS MADE FAST TO A PIN, AND THE PIN CARRIES ITS COIL.
        r276 gave the bulwarked hull its pin rail and the running rigging went on ending at the deck
        edge, a hand over the deck, through the rail. Read from the BUILT scene: where a 'Belaying
@@ -6357,9 +6429,9 @@
         for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
       const pinsM = [], ropeM = [], coilM = [], deckM = [];
       g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
-        if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+        if ((p.key === 'pinRail' && p.name === 'Belaying pins') || (p.key === 'fifeRail' && p.name === 'Fife rail pins')) pinsM.push(o);   // r280: the fife rail's pins are pins
         else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace'
-                 || p.key === 'throatHalyard' || p.key === 'peakHalyard') ropeM.push(o);   // r279: the gaff halyards are falls too
+                 || p.key === 'throatHalyard' || p.key === 'peakHalyard' || p.key === 'jeers') ropeM.push(o);   // r279: the gaff halyards are falls too; r280: the jeers
         else if (p.key === 'coil') coilM.push(o);
         else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
       /* the pins' centres are the builder's record (userData.pins); a pins mesh with no record is

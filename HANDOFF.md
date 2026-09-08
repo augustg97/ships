@@ -25087,3 +25087,142 @@ uncommitted, deliberately; the r279 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js names hoistGaff 3 times and peakHalyard 3; docs/audit-hulls.js carries 'a gaff hoisted by nothing' (1 found) and reads the throatHalyard key (2); docs/data/vessels.json is unchanged (no record changed this round); web/js/hull.js against HEAD~1:  1 file changed, 108 insertions(+), 9 deletions(-); the build read first paint 8.43 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN AT THE r279 TREE (the opening run at the clean r278 HEAD was stopped at 16 frames, all 16 inside the gate offline; see the entry). THE r279 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r279/chain-check.sh (MUST first, then MAY, then the rest; every _current and _diff copied aside to r279/chain-current and chain-diff) at 23–88 s a frame: 41 frames scored, 6 beyond the gate, of which 6 ACCEPTED with a reason each (FRAME-LOG.md): ship-endurance 0.106%/0.050; ship-wyoming 0.146%/0.055; ship-great-eastern 0.093%/0.036; shipwright-astern 0.118%/0.081; shipwright-furled 0.283%/0.104; ship-yamato 0.052%/0.019. 35 inside the gate (10 at 0.000%/0.000), the largest of those shipwright-hounds 0.044%/0.011, ship-ever-given 0.034%/0.024, ship-preussen 0.023%/0.009. Left unscored at the r279 tree (24): ship-canoe ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune map-floor aboard-carrier aboard-cable aboard-titanic aboard-yamato ship-treasure aboard-treasure shipwright-corbis action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang passage-sahul sea-dugout-floor sea-canoe-floor ship-carrack — the clean-HEAD backlog r280 opens with.
 Two commits close the round (6480187 builder + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 280 — 2026-09-08 — the fife rail at the fore mast's foot: on the one hull that carries a pin rail, the foot of her square-rigged mast stood bare on the deck, and the falls that come down a mast had nowhere to be made fast there; Endurance's fore mast now carries a fife rail — a U of rail on six posts round the mast, open aft, fourteen belaying pins through it — drawn to class figures the record names as unread, with the pins in the one belay pool so a fall can ask for the fife rail by name; the jeers' falls take it wherever a hull has both, and no hull does yet (Endurance's doubled rig fixes her lower yard, so she has no jeers); the audit convicts a square mast with no fife rail on a hull with pins and a record silent on it; the clean-HEAD backlog of 24 frames was scored, its one mover (aboard-cable) is r279's gaff halyards on Great Eastern
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r279's entry ordered r280 to check `uptime` and
+`ps -r` FIRST and to run the full ratchet at the clean HEAD with the load under 15 and neither mediaanalysisd nor a Codex
+renderer hot, the clean-HEAD backlog being the 24 frames r279's chain did not reach. At the open (08:53) the load was 7.77
+(8.33 and 17.02 over 5 and 15 minutes), nothing hot: under the line. r279's receipt listed exactly which 24 baselines were
+unscored at the r279 tree, so the round scored THOSE 24 one at a time at the clean HEAD 0694c4e (r280/chain-backlog.sh,
+chain-backlog.log; 08:54:55–09:14:49, 19–71 s a frame at load 10–24) and did not run the other 41 again — every baseline
+has now been scored at the r279 tree. 23 inside the gate (9 at 0.000%/0.000; the largest ship-panokseon 0.038%/0.014 and
+passage-sahul 0.038%/0.013), ONE beyond it: aboard-cable 0.058%/0.025. Its diff (r280/aboard-cable-crop.png: baseline,
+current, diff side by side) lies on the six gaff sails' peaks and the new throat and peak halyards of Great Eastern — the
+Aboard view of the cable ship IS Great Eastern, and r279 hung her six gaffs from halyards without reaching that frame.
+ACCEPTED with that reason (FRAME-LOG.md, 09:15), from the copy set aside by the chain. Every edit was made on the :8150
+copy (r280/web, symlinks with real copies of hull.js, vessels.json and audit-hulls.js) and copied into web/ after the
+backlog chain had ended (r280/copy-in.sh, cmp-identical, chain.log).**
+
+**THE PLATE READ FIRST, as ordered, and what it could not settle. Eight plates were read for the foot of Endurance's fore
+mast (r280/contact-plates.png, heeled-1440.png, slide-24-fore-2x.png): Hurley's deck plate (build/hurley-deck.jpg, 1200 x
+858 — the Commons copy, SLNSW flickr 3535443028, is the same 1200 px, and the Commons category holds no larger) looks along
+the deck from amidships and the fore mast's foot stands behind the deck cargo, the winch drum and the kennels; the heeled
+plate at 4776 x 3713 (Commons 4793353650 / RMG P00004, fetched this round) is taken from before the bow with the deck
+tilted away; the Lichtbeelden Vereeniging lantern slide nr. 24 (Commons, 4117 px; "in enkele seconden helde het schip over
+tot het aan bakboord een slagzij had van 30 graden") is the same heel from the port bow, the bulwark's outside and the fore
+yards over it; RMG P00013 (4800 px, "looking forward from the port bow") shows the cathead and the bow's bulwark only;
+slides 20 and 33 are the ship at a distance and the wreck; the full-sail, night and broadside plates show the wall, which
+hides a waist-high rail. So NO PLATE IN REACH SHOWS THE FOOT, and the record says so (hull.fifeRail.provenance) — the fife
+rail is drawn to CLASS figures, named as such on the card and in the record, the r108 rule: the audit convicts the SILENCE
+(a hull with pins and a square mast whose record says nothing), not the class figure. The record's provenance also names
+what the plate hunt turned up about the rig itself: whether the course hangs in jeers at all on a 1912 hull is unread — a
+lower yard of her date sits on an iron truss with chain slings, which is exactly what the builder draws for her (below).**
+
+**THE FAULT (0y⁷², the last of it as r279 named it — and its premise corrected). r279 wrote that "the jeers' falls end on
+the deck beside the mast (a fife rail's job, and no fife rail is drawn)". The second half is right and is this round's
+work: at the foot of a square-rigged mast a ship of Endurance's date carries a FIFE RAIL — a rail on turned posts round
+the mast at waist height, bored for belaying pins like the pin rail along the bulwark — where the falls that come down
+the mast (the jeers on a classic rig; the buntlines, clewlines, leechlines and topsail sheets on hers) are made fast. The
+first half does not apply to the one hull with pins: Endurance's fore mast is recorded with the DOUBLED rig (yards course,
+ltop, utop, tg), and the doubled-rig block fixes the course on its truss (HOIST.course 'fixed', the Howes arrangement —
+"Jeers are gone from this rig; by its date the lower yards sit on iron trusses") — the probe finds NO Jeers mesh on her
+(r280/probe-endurance.out: jeers []). The jeers that end on the deck are the classic rigs' (the 74, the galleon, the
+carrack …), none of which carries a pin rail, so none has a fife rail to belay to. The lead is built for the day one does.**
+
+**THE BUILDER (web/js/hull.js; r280/apply-builder-edits.py, fifteen replaces asserted; hull.before.js and hull.after.js;
+parsed by node's vm). (1) `addFifeRail(mi, u, xm, yD, rM)` on S.__belay, defined beside leadTo in buildRig: the rail 0.10
+m over the pin rail (yPin + 0.10 = 1.05 m over the deck), a rail across 0.55 m before the mast's skin and one down each
+side to 0.85 m abaft it, 0.70 m off the skin each side, posts 0.10 m square at the four corners and midway along a side
+longer than 1.4 m, a pin every 0.25 m along all three rails between the posts; the mast's radius at the deck is the rig's
+own `mastRAt(base)` (r257's one derivation), so the rail stands off the pole by a working room and cannot be drawn through
+it; the figures are the record's where hull.fifeRail names heightM / foreM / aftM / halfM, class otherwise, and the
+record's provenance is carried onto the card either way. The pins join belayPins with `rail: 'fife'` (the pin rail's now
+carry `rail: 'pin'`), and the rail's record (rails, posts, pins, from) is pushed onto the spec's `fifeRails`. (2) It is
+called in the mast loop, right after mastRAt is defined, for every SQUARE mast when S.__belay exists — the gaff masts'
+falls keep the pin rail (r279), a named residual. (3) `leadTo(list, from, uu, sgn, part, mi, fallback, rail = 'pin')`:
+the caller names the rail it wants and the nearest free pin on that rail on its side is taken; the belay record names
+its rail. (4) The jeers' falls: `leadTo(jeers, blk, u + 0.02, sgn, 'jeers', mi, fallback, 'fife')` in place of the push
+to the deck point — the fallback IS the old point from the same numbers, so every hull without pins is byte-identical;
+the Jeers mesh goes through belayTag and records its belays; belayTag's card names the rail ('on the fife rail at the
+mast's foot' when every belay is there). (5) buildFittings reads `S.__belay.spec` — the rig's own spec object, the one
+the fife rails were added to — and falls back to bulwarkFurnitureSpec only where there is no belay pool; after the pin
+rail and its pins it draws each fife rail as two meshes (`pushBoxTo`, the pin rail's box builder generalised): 'Fife rail'
+(three rails of the pin rail's section, the posts from the deck to the rail) and 'Fife rail pins' (userData.pins, the
+centres, for the audit), each carrying userData.fifeRail. (6) NEW PARTS key `fifeRail` (stage 3). (7) The coils' card
+says 'under their rail — the pin rail along the bulwark, or the fife rail at a mast's foot'. Every hull without a pin rail
+is byte-identical: addFifeRail returns before touching anything when belayPins is empty.**
+
+**THE RECORD (web/data/vessels.json; r280/apply-record-edits.py, json round-tripped byte-identical at indent 2): Endurance's
+hull gains `fifeRail: { provenance }` — no figures, the class figures stand — naming the eight plates read and that none
+shows the foot, and that the jeers question is itself unread.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r280/apply-audit-edits.py, re-runnable from audit-hulls.before.js).
+NEW A-FIFE-RAIL, on the set build: where a 'Belaying pins' mesh stands, every square mast in the record must have a 'Fife
+rail' mesh recording that mast (userData.fifeRail.mast) — the silence convicts ('a square mast with no fife rail', the
+r279 state) — whose timber straddles the mast (vertices 0.2 m before and abaft the station beyond its recorded radius, and
+0.3 m beyond it to the sides), whose top stands 0.9–1.3 m over the deck at the mast (read off the deck meshes), with a
+'Fife rail pins' mesh recording at least six centres, each with a vertex of its own within 0.05 in PLAN and within the
+pin's half-length in height (FINAL1 below); a Jeers mesh on such a hull must record belays ('jeers belayed nowhere'),
+every one on a fife-rail pin, and its lowest vertex must stand 0.5 m over the deck; the record must answer for the rail
+('a fife rail with no answer'); a hull with no pins may carry no fife rail. A-BELAY reads the 'Fife rail pins' with the
+'Belaying pins' and the Jeers mesh with the other falls, so a jeers belay is held to the pin, the head height, the coil
+and the no-shared-pin rules.**
+
+**PROOFS (r280/chain.log; each audit alone in its browser on :8150). FINAL1 (09:13, the audit's first draft): 1 — 'a fife
+rail pin drawn elsewhere', the recorded centre 0.226 m from the nearest vertex of the pins mesh: a box's vertices are at
+its corners, so the nearest vertex to a 0.45 m pin's centre is half its length away (rule 8: the audit was wrong, the
+pins are read in plan now). PROOF B (the r279 builder hull.before.js on the r280 audit, 09:15): 1 — 'a square mast with
+no fife rail' on Endurance's mast 0. PROOF C (hull.proof-c.js: the rail drawn 3 m abaft its mast, the record unchanged):
+1 — 'a fife rail that does not stand round its mast' (the timber spans x −9.57..−7.76 against the mast at x −11.52). PROOF R (the r280 builder with the record silent — vessels.before.json): 1 — 'a fife rail with no answer'. FINAL2 (the audit as
+shipped, md5 43d18c14): "checked 33 hulls, 0 problems". The builder and the record were restored cmp-identical after each proof.**
+
+**MEASURED (r280/probe-endurance.out, SHIPS_HULL.buildShip on the :8150 copy, hull space, x aft-positive, y over the
+keel). Fore mast (station 0.209): axis x −11.815 at the deck, y 2.209, radius 0.128 at the deck; the rail's top at y 3.259
+(1.05 over the deck), the fore rail at x −12.493, the side rails from there to x −10.837 at z ±0.828, six posts (the
+corners and x −11.665 midway), fourteen pins at y 3.309: four a side rail (x −12.102 … −11.228), six across the fore rail
+(z ±0.146, ±0.437, ±0.728); the timber mesh 216 vertices, bbox x −12.573..−10.757, y 2.209..3.289, |z| to 0.908. Coils
+still 18 (nothing belays to the fife rail yet — see the residual). Every recorded pin has a pins-mesh vertex within 0.05
+in plan (FINAL2).**
+
+**THE FRAMES (r280/PREDICTIONS-close.md, written before any frame of the r280 tree was scored): MUST move —
+ship-endurance. MAY move — her berth neighbours within three (ship-azzam, ship-ever-given, ship-container,
+ship-queen-mary-2), most likely 0.000% because the rail stands low on the deck behind a 1.35 m bulwark. MUST NOT — every
+other frame. Witnessed before any frame was scored, first from high on her port bow (b=55, l=35, z=0.6; witness-endurance-pb-high-after/-before.png): ZERO pixels differ, because from before the mast the fore course hangs between the camera and the mast's foot — a witness camera that cannot see the change is no witness; then from high abaft her port beam (b=110, l=40, z=0.6; witness-endurance-pq-high-after.png on :8150, -before.png on :8152 serving the r279 builder — :8151 answered before any server of mine started and served a 783 KB hull.js, a days-old server, the r274 trap again, caught by the byte count): 2,369 changed pixels in one patch, columns 897–1008, rows 1006–1106 of the 2880 frame, nothing else. Read at 2x (crop-fore-foot-2x-before-after.png): in the r279 frame the fore mast's foot stands bare on the planked deck before the fore hatch; in the r280 frame a U of rail on six posts rings the mast, open aft toward the hatch, the pins standing up through the three rails, the timber the pin rail's tone The r280 tree on :8149 scored one frame at a time by r280/chain-close-checks.sh:
+ship-endurance 0.011%/0.004 (inside the gate: the rail is a 1.8 m fitting low on a 44 m hull), ship-azzam 0.023%/0.028, ship-ever-given 0.034%/0.024, ship-container 0.015%/0.015, ship-queen-mary-2 0.008%/0.011, shipwright shipwright                      0.015%     0.005  ok — every one inside the gate, NO baseline of the r280 tree moved beyond it; the MAY neighbours' few hundredths are the documented berth-neighbour flap, not the rail (it is not in their frames).**
+
+**Rule 0 on the port-bow-high witness read whole (witness-endurance-pb-high-after.png): a rendered barquentine seen from high abaft her port beam on a lit blue-green sea, her fore course and topsails drawing, the main's and mizzen's gaff sails set, the deck planked fore and aft with the hatches, the black funnel abaft the main and the houses aft — not a chart. Three facts a viewer can read off it without a legend: she is a barquentine, square yards on the fore mast only and gaff sails on the two after masts; her fore mast's foot is ringed by a rail on posts with belaying pins in it, the fore hatch just abaft it; the braces and halyards come down to the pin rail inside the bulwark and hang their coils there, stanchion after stanchion along the wall.**
+
+**Named residuals, in order:** (0y⁷²) CLOSED as named — the braces (r278), the gaff halyards (r279) and now a fife rail at
+the square mast's foot with the jeers' lead to it; what it opened: NEW (0y⁸¹) NOTHING BELAYS TO THE FIFE RAIL YET — its
+fourteen pins are bare because the falls that belong there (the course's buntlines, leechlines and clewlines, the topsail
+sheets and downhauls on a doubled rig) are not drawn by any builder; drawing the course's clewlines and buntlines from
+the clews and the foot up to the yard and down to the fife rail is the next thing the rail earns, and a coil on each pin
+with them. NEW (0y⁸²) THE GAFF MASTS HAVE NO FIFE RAIL and their throat and peak halyards belay to the pin rail (r279);
+a barquentine's main and mizzen commonly carried a fife rail or a spider band at the mast, and the falls would go there.
+NEW (0y⁸³) THE FIFE RAIL'S FIGURES ARE CLASS FIGURES (1.05 m, 0.55/0.85 fore and aft, 0.70 off the skin, six posts, a
+pin every 0.25 m, a U open aft); no plate of Endurance's foredeck from aft has been found at any scale — SLNSW's and
+SPRI's Hurley negatives are where one would be. NEW (0y⁸⁴) WHETHER ENDURANCE'S COURSE HANGS IN JEERS is unread — the
+builder fixes it on a truss by the doubled-rig rule and the record's provenance says so; a masthead plate would settle it.
+(0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them. (0y⁶⁰)'s
+remainder (scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴)
+(0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴)
+(0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶)
+(0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²)
+unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵)
+(0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle
+break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r281 opens by checking `uptime` and `ps -r` FIRST; every baseline has been scored at the r279 tree and the r280 tree's
+own movers are in the receipt below, so the clean-HEAD backlog is only what that receipt lists as unscored — score those
+by check --frame and do NOT run the full 65 (the r279 memory rule: an empty backlog stops the opening ratchet). Then it
+takes (0y⁸¹): the course's CLEWLINES and BUNTLINES on a hull with a fife rail — from the clews (the sheet's and tack's
+corner, already drawn) up to the yard's quarters and down the mast's fore side to the fife rail's pins through leadTo
+with rail 'fife', coils on those pins, the audit reading them off the meshes on both builds — or (0y⁸²), the gaff masts'
+fife rails with the throat and peak halyards moved to them, or a plate hunt at SLNSW / SPRI for Endurance's foredeck
+from aft (0y⁸³), or the survey's next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788885017 at the build; the push and the live poll are in
+build/staging/r280/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r280 staging stays on disk uncommitted, the r211 convention.**
