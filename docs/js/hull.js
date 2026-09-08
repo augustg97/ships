@@ -1377,6 +1377,11 @@ list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(
 belayed.push(rec);
 };
 S.__belay = belayPins.length ? { spec: BELAY, belayed, leadTo } : null;
+const railAt = (uu, sgn) => {
+const uc = Math.max(0.03, Math.min(0.965, uu));
+const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
+return new THREE.Vector3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
+};
 const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
 const h = y1 - y0;
 const g = new THREE.CylinderGeometry(r1, r0, h, 9, 1, true);
@@ -1852,11 +1857,7 @@ if (FINE && mk.rig === 'square' && mastYards.length) {
 const mx = mxA;
 const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
 const V3 = (px, py, pz) => new THREE.Vector3(px, py, pz);
-const rail = (uu, sgn) => {
-const uc = Math.max(0.03, Math.min(0.965, uu));
-const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
-return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
-};
+const rail = railAt;
 const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
 const lead = (list, from, uu, sgn, part) => leadTo(list, from, uu, sgn, part, mi, () => rail(uu, sgn));
 const belaysOf = part => belayed.filter(b => b.part === part && b.mast === mi);
@@ -2262,6 +2263,60 @@ const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
 const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
 const tack = [footX + rF, footY], clew = [clewX, clewY];
 const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
+const hoistGaff = (org, ang) => {
+const cA = Math.cos(ang), sA = Math.sin(ang);
+const G = f => new THREE.Vector3(org[0] + cA * f * gaffL, org[1] + sA * f * gaffL, 0);
+const blkAt = h => new THREE.Vector3(mastX(h) + mastR(h) + 0.12 + B * 0.006, h, 0);
+const fr = mk.rig === 'square' ? [0.80, 0.83, 0.86] : [0.93, 0.955, 0.985];
+const TB = blkAt(base + lower * fr[0]), PA = blkAt(base + lower * fr[1]), PB = blkAt(base + lower * fr[2]);
+const GT = G(Math.min(0.15, (mastR(org[1]) + 0.2) / gaffL)), G1 = G(0.50), G2 = G(0.85);
+const off = (p, z) => new THREE.Vector3(p.x, p.y, p.z + z);
+const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+const uF = u + 0.05;
+const zT = 0.035;
+const thr = [[off(GT, zT), off(TB, zT)], [off(TB, -zT), off(GT, -zT)]];
+leadTo(thr, TB, uF, -1, 'throat halyard', mi, () => railAt(uF, -1));
+const zP = -0.05;
+const pk = [[off(G2, zP), off(PB, zP)], [off(PB, zP), off(G1, zP)], [off(G1, zP), off(PA, zP)]];
+leadTo(pk, PA, uF, 1, 'peak halyard', mi, () => railAt(uF, 1));
+const rec = { at: mk.at, mast: mi, state: FURLED ? 'furled' : 'set', gaffL: +gaffL.toFixed(3),
+gaffOrigin: [+org[0].toFixed(3), +org[1].toFixed(3)], gaffDeg: +(ang * 180 / Math.PI).toFixed(2),
+throatBlock: R3(TB), jawsBlock: R3(GT), peakBlocks: [R3(PA), R3(PB)], spans: [R3(G1), R3(G2)],
+blockFrom: mk.rig === 'square' ? 'class: under the top, 0.80–0.86 of the lower mast' : 'class: under the cap, 0.93–0.985 of the lower mast',
+sides: { throat: sideName(-1), peak: sideName(1) },
+sidesFrom: 'class convention: throat to starboard, peak to port; no plate of this ship read' };
+const bel = part => belayed.filter(b => b.part === part && b.mast === mi);
+const rr = 0.011 + B * 0.0004;
+const card = (part, what) => { const bl = bel(part);
+return what + (bl.length
+? ` Made fast to a belaying pin on the ${bl[0].side} pin rail abaft the mast; the fall is coiled on the pin.`
+: ` The fall ends at the deck edge abaft the mast on the ${part === 'throat halyard' ? sideName(-1) : sideName(1)} side; this hull draws no pin rail.`)
++ ' Which side each halyard belays is a class convention of the gaff rig, not a plate read of this ship.'; };
+const tm = ropeMesh(thr, rr, ropeMat);
+if (tm) { tm.userData.belays = bel('throat halyard'); tm.userData.gaffHal = Object.assign({ role: 'throat' }, rec);
+group.add(tag(tm, 'throatHalyard', null, card('throat halyard', PARTS.throatHalyard.what))); }
+const pm = ropeMesh(pk, rr, ropeMat);
+if (pm) { pm.userData.belays = bel('peak halyard'); pm.userData.gaffHal = Object.assign({ role: 'peak' }, rec);
+group.add(tag(pm, 'peakHalyard', null, card('peak halyard', PARTS.peakHalyard.what))); }
+const rB = (0.14 + B * 0.004) / 2, lB = 0.08 + B * 0.004;
+const turns = [['throat block', TB], ['jaws block', GT], ['lower peak block', PA], ['upper peak block', PB], ['inner span', G1], ['outer span', G2]];
+const Pp = [], Nn = [], Ii = []; let off0 = 0;
+for (const [, p] of turns) {
+const g = new THREE.CapsuleGeometry(rB, lB, 2, 8); g.translate(p.x, p.y, p.z);
+const pa = g.attributes.position.array, na = g.attributes.normal.array, ia = g.index.array;
+for (let k = 0; k < pa.length; k++) { Pp.push(pa[k]); Nn.push(na[k]); }
+for (let k = 0; k < ia.length; k++) Ii.push(ia[k] + off0);
+off0 += g.attributes.position.count;
+}
+const bg = new THREE.BufferGeometry();
+bg.setAttribute('position', new THREE.Float32BufferAttribute(Pp, 3));
+bg.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3));
+bg.setIndex(Ii);
+const bm = new THREE.Mesh(bg, woodDark);
+bm.userData.blocks = turns.map(([role, p]) => ({ role, at: R3(p), mast: mi }));
+group.add(tag(bm, 'block', null, PARTS.block.what +
+` Six on this mast: the throat halyard's pair (jaws and masthead), the peak halyard's two on the masthead and its two spans on the gaff — ${rec.blockFrom}.`));
+};
 if (FURLED) {
 const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
 const nX = -sinC * r * 1.1, nY = cosC * r * 1.1;
@@ -2275,13 +2330,17 @@ gm.rotation.z = -(Math.PI / 2 - rest);
 const gfY = footY + cosC * r * 2.2, gfX = mastX(gfY);
 gm.position.set(gfX + Math.cos(rest) * gaffL / 2,
 gfY + Math.sin(rest) * gaffL / 2, 0);
+gm.userData.gaff = { at: mk.at, mast: mi, origin: [+gfX.toFixed(3), +gfY.toFixed(3)], deg: +(rest * 180 / Math.PI).toFixed(2), lengthM: +gaffL.toFixed(3), state: 'furled' };
 group.add(tag(gm, 'yard', 'Gaff'));
+hoistGaff([gfX, gfY], rest);
 } else {
 const gm = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
 gm.rotation.z = -(Math.PI / 2 - peak);
 gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2), lengthM: +gaffL.toFixed(3), state: 'set' };
 group.add(tag(gm, 'yard', 'Gaff'));
+hoistGaff([mastX(gy), gy], peak);
 const gq = makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075);
 gq.userData.mastX = x; gq.userData.luffOnMast = true;
 sails.push(gq);
@@ -2738,7 +2797,7 @@ const cm = new THREE.Mesh(coilGeometry(belayed.map(b => ({ x: b.pin[0], y: b.pin
 cm.userData.coils = belayed.map(b => ({ part: b.part, side: b.side, pin: b.pin,
 top: +(b.pin[1] - 0.105 + 0.024).toFixed(3), bottom: +(b.pin[1] - 0.105 - 0.55 - 0.024).toFixed(3) }));
 group.add(tag(cm, 'coil', 'Coils',
-`The falls of ${belayed.length} lines (${['sheet', 'tack', 'halyard', 'brace'].map(p => { const n = belayed.filter(b => b.part === p).length; return n ? n + ' ' + p + (n > 1 ? 's' : '') : null; }).filter(Boolean).join(', ')}) ` +
+`The falls of ${belayed.length} lines (${[...new Set(belayed.map(b => b.part))].map(p => { const n = belayed.filter(b => b.part === p).length; return n + ' ' + p + (n > 1 ? 's' : ''); }).join(', ')}) ` +
 'coiled and hung on their belaying pins under the pin rail: a 0.55 m hank a pin, a class figure — a coil is sized to the hand that makes it up, not to the ship.'));
 }
 const SAIL_VERT = SHADERS['SAIL_VERT.vert'];
@@ -3660,6 +3719,20 @@ toppingLift: { stage: 6, name: 'Topping lift',
 what: 'The rope from the lower masthead to the outer end of a gaff boom that carries '
 + 'the spar\'s weight and holds that end up. It is why a working boom rises aft, '
 + 'and what the crew top the boom up with to clear the deck when the sail is stowed (r275).' },
+throatHalyard: { stage: 6, name: 'Throat halyard',
+what: 'The tackle that hoists the gaff by its jaws: a block on the jaws, a block '
++ 'hung under the lower masthead on the mast\'s after side, and the fall down '
++ 'the mast to the deck. It carries the weight of the gaff and of the luff it '
++ 'stretches; the peak halyard only angles the spar (r279).' },
+peakHalyard: { stage: 6, name: 'Peak halyard',
+what: 'The rope that peaks the gaff up: from a span on the spar near its peak, up '
++ 'through a block on the masthead, down to a second span nearer the jaws, up '
++ 'through a lower masthead block, and the fall down to the deck. Ease it and '
++ 'the peak drops; it is the line the crew set the sail\'s angle with (r279).' },
+block:    { stage: 6, name: 'Blocks',
+what: 'The pulleys the running rigging turns through: a wooden shell round a sheave, '
++ 'stropped with rope or iron to the spar or the mast it hangs from. A rope '
++ 'that turns a corner in the air with no block at the corner is drawn wrong (r279).' },
 coil:     { stage: 6, name: 'Coils',
 what: 'The fall of a line made fast to a belaying pin, coiled and hung on the pin '
 + 'under the rail so the deck stays clear and the line can be cast off and run '

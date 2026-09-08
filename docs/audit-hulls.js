@@ -4335,6 +4335,105 @@ say(v.id, 'a boom too low over the platform', `${at}: its underside stands ${(un
 }
 };
 boomRead(g, 'set');
+const halRead = (G, STATE) => {
+const SB = STATE === 'furled' ? ' (furled build)' : '';
+const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const axisOf = P => {
+const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+for (const q of P) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+const d = new THREE.Vector3(1, 0, 0);
+for (let it = 0; it < 60; it++)
+d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+if (d.x < 0) d.negate();
+let tMin = 1e9, tMax = -1e9;
+for (const q of P) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax) };
+};
+const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker));
+const gaffs = [], thr = [], pk = [], blocks = [], mastM = [], deckM = [], pinsM = [];
+G.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+if (p.key === 'yard' && p.name === 'Gaff') gaffs.push(o);
+else if (p.key === 'throatHalyard') thr.push(o);
+else if (p.key === 'peakHalyard') pk.push(o);
+else if (p.key === 'block') blocks.push(o);
+else if (p.key === 'mast') mastM.push(o);
+else if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+if (!gaffMasts.length) {
+if (thr.length || pk.length || blocks.length)
+say(v.id, 'a gaff halyard on a hull with no gaff', `${thr.length} Throat halyard, ${pk.length} Peak halyard and ${blocks.length} Blocks mesh(es) and no gaff or spanker mast in the record${SB}`);
+return;
+}
+const BV = [].concat(...blocks.map(pts));
+const axes = mastM.map(o => axisOf(pts(o))).filter(a => a.head.distanceTo(a.foot) >= 0.5);
+const mastDist = q => { let d = 1e9;
+for (const a of axes) { const dx = a.head.x - a.foot.x, dy = a.head.y - a.foot.y, L2 = dx * dx + dy * dy;
+const t = L2 > 0 ? Math.max(0, Math.min(1, ((q.x - a.foot.x) * dx + (q.y - a.foot.y) * dy) / L2)) : 0;
+d = Math.min(d, Math.hypot(q.x - (a.foot.x + dx * t), q.y - (a.foot.y + dy * t))); }
+return d; };
+const topAtMast = Q => { let top = null; for (const q of Q) if (mastDist(q) < 0.8 && (!top || q.y > top.y)) top = q; return top; };
+let deckPts = null;
+const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+const gaffAxes = gaffs.map(o => { const ax = axisOf(pts(o)); let lo = ax.foot, hi = ax.head; if (lo.x > hi.x) [lo, hi] = [hi, lo]; return { lo, hi, o }; });
+for (const mk of gaffMasts) {
+const mi = (H.masts || []).indexOf(mk), xm = (mk.at - 0.5) * H.lwl;
+const at = `mast ${mi} (station ${mk.at})`;
+let gf = null, bd = 1e9; for (const ga of gaffAxes) { const d = Math.abs(ga.lo.x - xm); if (d < bd) { bd = d; gf = ga; } }
+if (!gf || bd > 3.0) { say(v.id, 'a gaff mast with no gaff', `${at}: no Gaff mesh has its forward end within 3 m of the mast's station (nearest ${gf ? bd.toFixed(2) + ' m' : 'none'})${SB}`); continue; }
+const T = thr.filter(o => o.userData.gaffHal && o.userData.gaffHal.mast === mi);
+const P = pk.filter(o => o.userData.gaffHal && o.userData.gaffHal.mast === mi);
+if (T.length !== 1 || P.length !== 1) {
+say(v.id, 'a gaff hoisted by nothing', `${at}: ${T.length} Throat halyard and ${P.length} Peak halyard mesh(es) name this mast${SB} — the gaff stands at its angle with nothing drawn holding it`);
+continue;
+}
+const gL = Math.hypot(gf.hi.x - gf.lo.x, gf.hi.y - gf.lo.y);
+const along = q => ((q.x - gf.lo.x) * (gf.hi.x - gf.lo.x) + (q.y - gf.lo.y) * (gf.hi.y - gf.lo.y)) / (gL * gL);
+const offLine = q => { const t = Math.max(0, Math.min(1, along(q)));
+return Math.hypot(q.x - (gf.lo.x + (gf.hi.x - gf.lo.x) * t), q.y - (gf.lo.y + (gf.hi.y - gf.lo.y) * t)); };
+const jaws = `(${gf.lo.x.toFixed(2)}, ${gf.lo.y.toFixed(2)})`;
+{ const Q = pts(T[0]);
+let best = null, bo = 1e9; for (const q of Q) { const o2 = offLine(q); if (o2 < bo) { bo = o2; best = q; } }
+const al = best ? along(best) : 1e9;
+if (bo > 0.15 || al > 0.15) say(v.id, 'a throat halyard off the jaws', `${at}: the rope's nearest vertex to the gaff's line is ${bo.toFixed(2)} m off it, ${(al * gL).toFixed(2)} m along the ${gL.toFixed(1)} m spar from the jaws ${jaws} (0.15 off and the first 0.15 of the spar allowed)${SB}`);
+const top = topAtMast(Q);
+if (!top) say(v.id, "a throat halyard's block off the mast", `${at}: no vertex of the rope lies within 0.8 m of a mast's axis${SB}`);
+else if (top.y < gf.lo.y + 0.3) say(v.id, 'a throat halyard with no hoist in it', `${at}: its highest vertex at the mast, y ${top.y.toFixed(2)}, stands ${(top.y - gf.lo.y).toFixed(2)} m over the jaws ${jaws}${SB}`); }
+{ const Q = pts(P[0]);
+const ts = []; for (const q of Q) if (offLine(q) < 0.12) ts.push(along(q));
+ts.sort((a, b) => a - b);
+const groups = []; for (const t of ts) { if (!groups.length || t - groups[groups.length - 1].max > 0.08) groups.push({ min: t, max: t }); else groups[groups.length - 1].max = t; }
+const spans = groups.filter(gp => gp.min > 0.2);
+if (spans.length < 2) say(v.id, 'a peak halyard off its gaff', `${at}: the rope meets the gaff's line (0.12) at ${spans.length} station(s) above the throat; a peak halyard spans the spar at two${SB}`);
+const top = topAtMast(Q);
+if (!top) say(v.id, "a peak halyard's block off the mast", `${at}: no vertex of the rope lies within 0.8 m of a mast's axis${SB}`);
+else if (top.y < gf.lo.y + 0.3) say(v.id, 'a peak halyard with no hoist in it', `${at}: its highest vertex at the mast, y ${top.y.toFixed(2)}, stands ${(top.y - gf.lo.y).toFixed(2)} m over the jaws ${jaws}${SB}`); }
+for (const o of [T[0], P[0]]) { const Q = pts(o), nm = tagOf(o).name;
+let lo = Q[0]; for (const q of Q) if (q.y < lo.y) lo = q;
+const e = deckAtX(lo.x);
+if (e < 1e8 && (lo.y > e + 1.6 || lo.y < e - 0.1))
+say(v.id, 'a gaff halyard fall ending in the air', `${at}: the ${nm}'s lowest vertex y ${lo.y.toFixed(2)} at x ${lo.x.toFixed(2)} stands ${(lo.y - e).toFixed(2)} m over the deck's edge (${e.toFixed(2)})${SB}`);
+if (pinsM.length && !(o.userData.belays || []).length)
+say(v.id, 'a gaff halyard belayed nowhere', `${at}: the ${nm} on a hull with pins records no belay${SB}`); }
+const rT = T[0].userData.gaffHal, rP = P[0].userData.gaffHal;
+const turns = [['throat block', rT.throatBlock, T[0]], ['jaws block', rT.jawsBlock, T[0]],
+['lower peak block', (rP.peakBlocks || [])[0], P[0]], ['upper peak block', (rP.peakBlocks || [])[1], P[0]],
+['inner span', (rP.spans || [])[0], P[0]], ['outer span', (rP.spans || [])[1], P[0]]];
+for (const [name, b, o] of turns) {
+if (!b) { say(v.id, 'a halyard turn with no record', `${at}: the builder records no ${name}${SB}`); continue; }
+let db = 1e9; for (const q of BV) db = Math.min(db, Math.hypot(q.x - b[0], q.y - b[1], q.z - b[2]));
+if (db > 0.25) say(v.id, 'a halyard turning on no block', `${at}: no Blocks vertex within 0.25 m of the ${name} recorded at [${b}] (nearest ${db < 1e8 ? db.toFixed(2) + ' m' : 'none drawn'})${SB}`);
+let dr = 1e9; for (const q of pts(o)) dr = Math.min(dr, Math.hypot(q.x - b[0], q.y - b[1]));
+if (dr > 0.10) say(v.id, 'a halyard that does not reach its block', `${at}: the ${tagOf(o).name}'s nearest vertex is ${dr.toFixed(2)} m (in the spar's plane) from the ${name} recorded at [${b}]${SB}`);
+}
+}
+};
+halRead(g, 'set');
 {
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
@@ -4415,7 +4514,8 @@ for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).apply
 const pinsM = [], ropeM = [], coilM = [], deckM = [];
 g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
 if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
-else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace') ropeM.push(o);
+else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace'
+|| p.key === 'throatHalyard' || p.key === 'peakHalyard') ropeM.push(o);
 else if (p.key === 'coil') coilM.push(o);
 else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
 let pins = [].concat(...pinsM.map(o => o.userData.pins || []));
@@ -6152,6 +6252,7 @@ const YF = yardRead(gf, 'furled');
 lateenRead(gf, 'furled');
 crabRead(gf, 'furled');
 boomRead(gf, 'furled');
+halRead(gf, 'furled');
 {
 const inv = new THREE.Matrix4().copy(gf.matrixWorld).invert();
 const hullPts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);

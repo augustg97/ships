@@ -24924,3 +24924,160 @@ uncommitted, deliberately; the r278 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js names buildCoils 2 times and leadTo 4; docs/audit-hulls.js carries 'braces belayed nowhere' (1 found) and reads the brace key (1); docs/data/vessels.json is unchanged (no record changed this round); web/js/hull.js against HEAD~1:  1 file changed, 67 insertions(+), 37 deletions(-); the build read first paint 8.43 MB against the 8.6 line.
 THE RATCHET: NO OPENING FULL RATCHET (load 22.6 at the open with mediaanalysisd at 216% and a Codex renderer hot — above the r277 line). THE r278 TREE (web/ after the copy-in, on :8149), scored one frame at a time by check --frame: ship-endurance 0.227%/0.083 CHANGED — the braces' runs from the yardarms to the rail amidships and nothing else (r278/diff-ship-endurance.png, read; the 5x witness crops) — ACCEPTED (FRAME-LOG.md 06:51); then, after the push, a check chain (r278/chain-check.sh, every _current and _diff copied aside to r278/chain-current and chain-diff) of 44 frames at 16–111 s a frame under a load of 12–54: the four MAY neighbours at the numbers r276 and r277 recorded for them (ship-azzam 0.023%/0.028, ship-ever-given 0.034%/0.024, ship-container 0.015%/0.015, ship-queen-mary-2 0.008%/0.011) and 40 of r277's 45-frame clean-HEAD backlog — 44 ok, 0 beyond the gate, 21 at 0.000%/0.000, the largest ship-yamato 0.047%/0.018, then aboard-cable 0.041%/0.020 and passage-sahul 0.038%/0.013: ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::, ::. Every hull without pins is byte-identical to the clean HEAD, so these are the clean HEAD's own scores. Backlog left unscored: none — the whole 45-frame backlog r277 left is scored (44 here, ship-endurance above), so every one of the 65 baselines has been scored at the r277/r278 HEAD. (Corrected in the commit after the receipt: the receipt as first written derived the 'largest' by a name sort and listed the whole backlog as unscored from an unsorted comm — both wrong; the chain log r278/chain-check.log is the record.)
 Two commits close the round (347a5c5 builder + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 279 — 2026-09-08 — the gaff hangs from its halyards: every gaff in the fleet, eighteen spars on seven hulls, stood at its angle with nothing drawn holding it there, set and furled; each gaff or spanker mast now carries a throat halyard (a two-part tackle from a block on the jaws to a block under the lower masthead, its fall down the mast) and a peak halyard (spans on the spar to two masthead blocks, its fall down the mast), a block drawn at every turn, the falls belayed to Endurance's pins and coiled there and ended at the deck edge everywhere else through the one deck-edge derivation, the audit reads both halyards off the meshes on both builds and convicts the silence, and the opening full ratchet at the clean r278 HEAD was stopped at 16 frames to free web/ for the round's own checks
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r278's entry ordered r279 to check `uptime` and
+`ps -r` FIRST and to run the full ratchet at the clean HEAD only with the load under 15 and neither mediaanalysisd nor a
+Codex renderer hot. At the open (07:39) the load was 2.97 (5.02 and 12.58 over 5 and 15 minutes), no mediaanalysisd, a
+Codex renderer at 42% and spotlightknowledged at 70%: under the line, so the FULL ratchet was launched at 07:39:56 at
+HEAD 8a4e9d2 (r279/run-open.sh, open-ratchet.out). It ran 16 frames in 12 minutes (45 s a frame at load 8–13) and was
+STOPPED at 07:52:02, deliberately: r278's receipt had already scored every one of the 65 baselines at the r277/r278
+HEAD, so the clean-HEAD backlog was empty, and 65 frames at 45 s would have held web/ until 08:29 and left the round's
+own frames unscored before the 08:58 kill. The 16 captured frames were copied aside (r279/open-current) and scored
+offline with r277's scorer (r279/open-scores.out): 16 ok, 0 beyond the gate, 8 at 0.000%/0.000, the largest globe-steam
+0.021%/0.006, then ship-junk 0.019%/0.007 and ship-canoe 0.017%/0.005. Every edit was made on the :8150 copy (r279/web,
+symlinks with real copies of hull.js, vessels.json and audit-hulls.js) and copied into web/ at 08:07:45 (r279/copy-in.sh,
+cmp-identical) after every browser of mine had run alone, one after another (r279/chain.log).**
+
+**THE FAULT (0y⁷², the gaff's half). r275 gave every gaff boom its topping lift and left the GAFF hanging from nothing:
+the spar was drawn at 35.5° over the throat on every gaff and spanker mast — Wyoming's six, Great Eastern's six,
+Endurance's main and mizzen, the 74's, the clipper's, Preussen's and the steamer's one each, eighteen — with no rope from
+it to the masthead in either state. A gaff is hoisted by two falls. The THROAT halyard is a tackle between a block on the
+gaff's jaws and a block under the lower masthead, hung from a crane iron on the mast's after side; it carries the weight
+of the spar and stretches the luff. The PEAK halyard peaks the spar up: its standing part is a span on the gaff near the
+peak, it runs up through the upper masthead block, down to a second span nearer the jaws, up through the lower masthead
+block, and its fall comes down the mast to the deck. Ease the peak halyard and the peak drops; ease both and the gaff
+comes down onto the boom, which is the furled state the model already drew — without the ropes that would have lowered
+it.**
+
+**THE BUILDER (web/js/hull.js; r279/apply-builder-edits.py, seven replaces asserted; hull.before.js and hull.after.js;
+parsed by node's vm; 115 lines changed). (1) `railAt(uu, sgn)` — the square gear's `rail()` hoisted verbatim to
+buildRig's top beside leadTo: the deck edge at station uu on side sgn, 0.96 of the skin's half-breadth, B × 0.012 over
+the deck. The square block's `rail` is now `railAt`, so every fall on every hull ends by one derivation. (2) In the gaff
+block, `hoistGaff(org, ang)` is defined once after the cloth's area and run in BOTH states from the gaff that was drawn:
+set from (mastX(gy), gy) at the peak angle, furled from (gfX, gfY) at the lowered gaff's rest angle. It places three
+masthead blocks a strop's length abaft the mast's after face (mastR(h) + 0.12 + B × 0.006): the throat block and the two
+peak blocks at 0.93, 0.955 and 0.985 of the lower mast on a gaff mast (under the cap), at 0.80, 0.83 and 0.86 on a square
+mast (under the top, whose platform the spanker's ropes must not pierce); the jaws block on the gaff's own line a hand
+(0.20 m) abaft the mast's after face, capped at 0.15 of the spar; the two spans at 0.50 and 0.85 of the spar. The throat
+is two parts a hand apart (z ± 0.035) from the jaws block to the throat block; the peak runs outer span → upper block →
+inner span → lower block, a hand to starboard of the centreline (z −0.05, the windward side under the fleet's one wind,
+clear of a gaff topsail's belly). Each fall leaves its masthead block through leadTo (r278) — the throat's on side −1
+(starboard), the peak's on side +1 (port), to the station u + 0.05 — which takes the nearest free pin where the hull
+carries pins and falls through to railAt(uF, sgn) where it does not. The sides are the working convention of the gaff
+rig and are named on the card as a CLASS convention: no plate of any of these seven hulls has been read for her own.
+The Gaff mesh records itself (userData.gaff: origin, angle, length, state); each halyard mesh records its belays and a
+gaffHal record (mast, state, every block and span, the block fractions and their source, the sides and their source);
+the six blocks of a mast are one mesh (CapsuleGeometry per turn, merged by hand — no addons), tagged `block`, with
+userData.blocks naming each turn. Three NEW PARTS keys, stage 6: `throatHalyard` ('Throat halyard'), `peakHalyard`
+('Peak halyard'), `block` ('Blocks'). buildCoils' card now counts whatever parts are belayed, in the order they were
+made fast. Drawn in every build, as the boom's lift is — the first draft gated the halyards on FINE, and the audit's
+furled build, which is not FINE, then had nothing to read (FINAL1 below). Every hull without a gaff mast is
+byte-identical.**
+
+**THE RECORD (web/data/vessels.json): unchanged; vessels.after.json is vessels.before.json.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r279/apply-audit-edits.py, four replaces; audit-hulls.before.js
+and audit-hulls.after.js). NEW A-GAFF-HALYARD, run on the set build and the furled build beside A-BOOM-COCK: for every
+gaff or spanker mast in the record there must be a Gaff mesh with its forward end within 3 m of the mast's station and
+exactly one Throat halyard and one Peak halyard mesh naming that mast — the silence convicts ('a gaff hoisted by
+nothing', the r278 state). The throat's rope must start ON the gaff (a vertex within 0.15 m of the spar's line in the
+first 0.15 of its length from the jaws) and must have a vertex at the mast (within 0.8 m of a mast segment's AXIS — a
+cylinder's vertices are at its ends, so the first draft's distance-to-a-vertex read 1.7–2.2 m on every mast) at least
+0.3 m over the jaws. The peak's rope must meet the gaff's line (0.12) at two separate stations above the throat and
+have a vertex at the mast 0.3 m over the jaws; its highest vertex is allowed to be the outer span, because a long gaff
+peaks above the lower masthead. Each fall's lowest vertex must lie between the deck's edge and 1.6 m over it; on a hull
+with pins each mesh must record a belay. Every recorded turn (throatBlock, jawsBlock, peakBlocks, spans) must have a
+Blocks vertex within 0.25 m and the rope's own vertex within 0.10 m in the spar's plane. A hull with no gaff mast may
+carry none of the three. A-BELAY reads the two halyard keys with the sheets, tacks, halyards and braces.**
+
+**PROOFS (r279/chain.log; each audit alone in its browser on :8150). FINAL1 (07:54, the first draft): 63 — the FINE
+gate (18 'a gaff hoisted by nothing', every mast on the furled build), the vertex-distance mast test (28) and the jaws
+block 0.5 m from the spar's forward end (17). FINAL2 (07:58, halyards in every build, the mast read by axis, the jaws
+block a hand abaft the after face): 14 'a throat halyard off the jaws' at 0.62–0.77 m — Great Eastern's and Preussen's
+masts are half a metre thick, so a block a hand abaft the after face IS 0.7 m from the axis, and the test moved onto the
+gaff's line. FINAL3 (08:07, the audit as shipped, md5 8f85068a): "checked 33 hulls, 0 problems". PROOF B (the r278
+builder hull.before.js on the r279 audit, 07:59): 36 — 'a gaff hoisted by nothing' on all eighteen gaffs on both builds
+(Wyoming 12, Great Eastern 12, Endurance 4, the 74, Preussen, the clipper and the steamer 2 each). PROOF C
+(hull.proof-c.js: the outer span DRAWN at 1.25 of the spar, past the peak, with the record unchanged, 08:01): 72 — 'a
+peak halyard off its gaff' 36 (the rope meets the gaff's line at one station) and 'a halyard that does not reach its
+block' 36 (the Peak halyard's nearest vertex 3.89 m from the recorded outer span on the 74). The builder was restored
+cmp-identical after each proof.**
+
+**MEASURED (r279/probe-endurance-final.out, SHIPS_HULL.buildShip on the :8150 copy, hull space, x aft-positive, y over
+the keel). Endurance's main (mast 1, station 0.537, 33.5 m): gaff from (2.471, 30.81) at 35.52°, 3.859 m; throat block
+(2.883, 33.155), jaws block (2.772, 31.025), peak blocks (2.911, 33.993) and (2.944, 34.998), spans (4.042, 31.931) and
+(5.141, 32.716); the throat's fall to the starboard pin at x 3.480, y 3.004, z −3.422 (head 0.195 over the pin's
+centre), the peak's to the port pin at the same station, both led direct. Her mizzen (mast 2, station 0.839): gaff from
+(15.413, 25.21), 9.169 m; throat block (15.808, 27.086), jaws block (15.658, 25.385), peak blocks (15.854, 27.756) and
+(15.909, 28.56), spans (19.144, 27.874) and (21.756, 29.738); falls to the pins at x 15.291, z ± 2.453. The Throat
+halyard mesh's lowest vertex is the pin head (y 3.197 / 3.407); the Peak halyard's likewise. Six blocks a mast, 0.17 m
+wide, 0.19 m long. Coils: 18 (was 14) — the four new falls hang theirs. Furled (probe-endurance-furled.out): the main's
+gaff lies from (1.63, 6.718) at 11.45° and the same falls run from the same masthead blocks to spans at y 7.1–7.4. The
+clipper (probe-clipper.out): the spanker's gaff from (22.463, 15.842); blocks at 21.42, 22.09 and 22.76 — 0.80–0.86 of
+the mizzen lower mast, under the top, above the gaff's peak at 21.3; falls to the deck edge at y 3.785, z ± 3.572.
+Wyoming (probe-wyoming.out): twelve halyard meshes, six block meshes, six gaffs; mast 0's blocks at 35.9–37.8 against
+the gaff's peak at 38.5 — the outer span leads up to the spar, which is what a schooner's peak halyard does when the
+gaff is peaked past the cap.**
+
+**THE FRAMES (r279/PREDICTIONS-close.md, written 07:56 and amended 08:02, before any frame of the r279 tree was scored):
+MUST move — ship-great-eastern, ship-preussen, ship-steamer, ship-wyoming, ship-clipper, ship-endurance, shipwright and
+shipwright-ahead/astern/furled/hounds (the 74's spanker), aboard-wyoming, aboard-clipper, aboard-preussen, aboard (the
+steamer). MAY move — the berth neighbours within three of a gaff hull and the Sea frames whose fleet pool might hold one,
+by a few pixels where a gaff neighbour's masthead is in frame, because the halyards are drawn in the coarse build too.
+MUST NOT — the globe, action, floor and passage frames and every ship-* of a hull with no gaff mast and no gaff neighbour.
+Witnessed on :8150 before any frame was scored, at r278's camera so the frames pair: Endurance high on the port quarter
+(b=125, l=35, z=0.6; witness-endurance-pq-high-after.png) diffed against r278's frame at the same camera
+(diff-pq-high-2880.png): 7,183 changed pixels over 24 in the 2880 frame, in two bands — columns 1400–1500 at rows
+100–200 (the main's falls beside the mast) and columns 2000–2400 from row 100 to row 1500 (the mizzen's blocks, tackle,
+spans and falls), nothing else. Read at 2x (crop-mizzen-head-2x-before.png / -after.png, the 2880 frame's 1950..2450 x
+150..750): in r278's frame the mizzen's head stands bare above the gaff's throat; in r279's two rounded blocks sit one
+above the other on the mast's after side, a third on the gaff at its jaws, the throat tackle runs between them, and the
+peak halyard leaves the masthead out along the spar to its spans. Wyoming (witness-wyoming-after.png) and the clipper
+from the port quarter, set and furled (witness-clipper-sq-after.png, -furled-after.png) were captured as contact sheets;
+at 1440 the halyards are under the eye's resolution there and the ratchet's own diffs carry them. The r279 tree on
+:8149, scored one frame at a time by r279/chain-check.sh (MUST first, then MAY, then the rest, every _current and _diff
+copied aside to r279/chain-current and chain-diff; the result and the accepted frames are in the receipt commit that
+follows this one).**
+
+**Rule 0 on the port-quarter-high witness read whole (witness-pq-high-after-1440.png): a rendered barquentine seen from
+high on her port quarter on a lit blue-green sea, her fore course and topsails drawing, the main's and mizzen's gaff sails
+set, the deck planked fore and aft with the hatches and the black funnel between the masts — not a chart. Three facts a
+viewer can read off it without a legend: the two after masts carry fore-and-aft sails on gaffs, and each gaff is hung
+from its masthead by ropes through blocks; the fore mast's braces and the after masts' halyards come down to the rail and
+are coiled on pins there; a lattice platform with a hooded box stands at the stern over the wheel.**
+
+**Named residuals, in order:** (0y⁷²) NEARLY CLOSED — the braces (r278) and now the gaff halyards belay; what remains of
+it: the jeers' falls end on the deck beside the mast (a fife rail's job, and no fife rail is drawn) and the staysail
+sheets are unread. NEW (0y⁷⁷) THE HALYARDS' SIDES ARE A CLASS CONVENTION: throat to starboard, peak to port, on every
+gaff mast; a plate of any of the seven hulls at her rail would settle hers. NEW (0y⁷⁸) THE BLOCKS' STATIONS ARE CLASS
+FIGURES: 0.93/0.955/0.985 of the lower mast on a gaff mast, 0.80/0.83/0.86 on a square mast, the spans at 0.50 and 0.85
+of the spar, the throat tackle drawn two-part and the peak halyard with two spans — no plate has been read for any of
+them, and Wyoming's peak halyards (three or four spans on a 30 m gaff) are the first to check. NEW (0y⁷⁹) THE PEAK
+HALYARD LIES IN THE GAFF TOPSAIL'S PLANE on Wyoming's six and the steamer's one, drawn a hand to windward of the
+centreline so it clears the belly — a stated simplification; the real rope lies against the cloth on one side. NEW
+(0y⁸⁰) THE SPANKER'S THROAT SITS AT 0.55 OF THE LOWER MAST (pre-existing, from before r100), so on the 74, the clipper
+and Preussen the throat tackle is a quarter of the lower mast long; a plate of a full-rigger's spanker at a readable
+scale would place the throat. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them. (0y⁶⁰)'s remainder (scuppers, the
+scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them.
+(0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷)
+(0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v)
+(0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶)
+(0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h)
+(0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance) still waits
+on the RMG original.**
+
+**r280 opens by checking `uptime` and `ps -r` FIRST; with the load under 15 and neither mediaanalysisd nor a Codex renderer
+hot it runs the FULL ratchet at the clean HEAD — the clean-HEAD backlog is whatever r279's check chain did not reach (the
+receipt below lists it); above 15, or with either hot, it scores by check --frame the frames the round's change can reach.
+Then it takes the last of (0y⁷²): a FIFE RAIL at the fore mast's foot on a hull that carries pins, with the jeers' falls
+belayed to it — read a plate first (Hurley's deck plate, build/hurley-deck.jpg at 1200 px, shows the mast's foot behind
+the pumps and the deck cargo and cannot settle it; a larger scan of that plate or of the foredeck plates is the first
+thing to fetch) — or (0y⁷⁷)/(0y⁷⁸), a plate read of a gaff rig's masthead at the rail, or (0y⁷⁰), a plate read of
+Endurance's bulwark, or the survey's next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788880778 at the build; the push and the live poll are in
+build/staging/r279/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r279 staging stays on disk uncommitted, the r211 convention.**
