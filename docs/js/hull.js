@@ -2443,7 +2443,7 @@ const Xb = new THREE.Vector3().crossVectors(Yb, Zo).normalize();
 HB = { Yb, Zo, Xb, face: BE.thk / 2 + rr, tip: BE.len / 2 + rr * 2 };
 }
 for (const k of ks) {
-const z = zc + (k + (T.what === 'crossbeam' ? mi * SHARED_OFF * Lh.side : 0)) * rr * 2.2;
+const z = zc + (k + (T.what === 'crossbeam' ? (T.rank || 0) * SHARED_OFF * Lh.side : 0)) * rr * 2.2;
 const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
 new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
 if (HB) {
@@ -2456,7 +2456,9 @@ turns.push([pIn, pOut], [pOut, tOut], [tOut, p[0]], [p[0], p[1]], [p[1], p[2]], 
 }
 const tm = ropeMesh(turns, rr, ropeMat);
 if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash,
-sharedOffsetM: +(mi * SHARED_OFF * rr * 2.2).toFixed(4), sharedOffsetSide: 'outboard' }; lg.add(tm); }
+sharedOffsetM: +(SHARED_OFF * rr * 2.2).toFixed(4), sharedOffsetSide: 'outboard',
+beams: lashings.filter(Lh => Lh.side > 0 && Lh.timber.what === 'crossbeam').map(Lh => ({ u: +(+Lh.timber.u).toFixed(3), rank: Lh.timber.rank || 0,
+sharers: Lh.timber.sharers || 1, sharedWith: Lh.timber.sharedWith || [], offsetM: +((Lh.timber.rank || 0) * SHARED_OFF * rr * 2.2).toFixed(4) })) }; lg.add(tm); }
 lg.userData.mast = mi;
 group.add(tag(lg, 'shroudLashing'));
 }
@@ -3444,9 +3446,10 @@ what: 'An eye at the foot of each shroud on a lashed double canoe, and a lanyard
 + 'beam\'s end. The heart is drawn where the record reads one, each fall passing through '
 + 'its hole and down its face to the beam, and its hole stands over the beam at the height '
 + 'the record reads — 0.45 m along the shroud on Hōkūleʻa, off the one foot the deck plate '
-+ 'shows down to the timber it wraps; the plate shows two farther feet hanging higher. On the two '
-+ 'beams both masts take, the after mast\'s turns wrap the beam outboard of the forward mast\'s, on '
-+ 'both sides — a class choice, since the deck plate looks along the rail and cannot separate them.' },
++ 'shows down to the timber it wraps; the plate shows two farther feet hanging higher. On a beam one '
++ 'mast has to itself the turns wrap it under the heart, at the beam\'s end; on the two beams both '
++ 'masts take, the after mast\'s turns wrap the beam outboard of the forward mast\'s, on both sides '
++ '— a class choice, since the deck plate looks along the rail and cannot separate them.' },
 shroudEye: { stage: 5, name: 'Shroud collars',
 what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
 + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '
@@ -8384,12 +8387,7 @@ function shroudFeet(S, H, mk, FINE) {
 if (!mk.shrouds) return null;
 const L = S.lwl, B = S.beam, u = mk.at, n = mk.shrouds;
 const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
-const anySquare = (S.masts || []).some(m => m.rig === 'square');
-const REC = ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup : null;
-const kind = SF ? 'fixing'
-: REC ? REC
-: (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
-: (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+const kind = shroudSetupKindOf(S, mk);
 const x = (u - 0.5) * L + H.rake(u);
 const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
 const CT = CR ? CR.top : null;
@@ -8418,12 +8416,15 @@ if (kind === 'lashing') {
 const CB = crossbeamsOf(S, H);
 if (CB.length) {
 const sep = S.hullSep || S.loa * 0.26;
-const near = CB.map(b => ({ b, d: Math.abs(b.x - x) })).sort((p, q) => p.d - q.d)
-.slice(0, n).map(p => p.b).sort((p, q) => p.x - q.x);
+const mine = lashingBeamsOf(S, H, CB, mk);
+const takers = (S.masts || []).map((m, i) => ({ m, i, beams: shroudSetupKindOf(S, m) === 'lashing' ? lashingBeamsOf(S, H, CB, m) : [] }));
 seats = xs.map((xf, s) => {
-const b = near[Math.min(s, near.length - 1)];
+const bi = mine[Math.min(s, mine.length - 1)], b = CB[bi];
+const sharers = takers.filter(t => t.beams.includes(bi)).sort((p, q) => (p.m.at - q.m.at) || (p.i - q.i));
+const rank = Math.max(0, sharers.findIndex(t => t.m === mk));
 return { x: b.x, y: b.yTop, z: sep / 2 + Math.abs(surfacePoint(S, H, b.u, 1)[2]) + 0.06,
-timber: { what: 'crossbeam', x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, u: b.u } };
+timber: { what: 'crossbeam', x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, u: b.u,
+rank, sharers: sharers.length, sharedWith: sharers.map(t => t.i) } };
 });
 for (let s = 0; s < n; s++) xs[s] = seats[s].x;
 } else seats = xs.map(capSeat);
@@ -8433,6 +8434,21 @@ const block = Math.max(0.12, Math.min(0.30, B * 0.03));
 const lashRec = mk.shroudFoot && mk.shroudFoot.holeOverSeatM > 0 ? mk.shroudFoot.holeOverSeatM : null;
 const lash = lashRec || Math.max(0.25, Math.min(0.5, B * 0.3));
 return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR, seats, drift, block, lash, lashRead: !!lashRec };
+}
+function shroudSetupKindOf(S, mk) {
+if (!mk.shrouds) return null;
+const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
+const anySquare = (S.masts || []).some(m => m.rig === 'square');
+const REC = ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup : null;
+return SF ? 'fixing'
+: REC ? REC
+: (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
+: (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+}
+function lashingBeamsOf(S, H, CB, mk) {
+const xm = (mk.at - 0.5) * S.lwl + H.rake(mk.at);
+return CB.map((b, i) => ({ i, d: Math.abs(b.x - xm) })).sort((p, q) => p.d - q.d)
+.slice(0, mk.shrouds).map(p => p.i).sort((p, q) => p - q);
 }
 function crossbeamsOf(S, H) {
 if (!S.doubleHull) return [];

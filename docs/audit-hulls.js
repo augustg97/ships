@@ -4563,7 +4563,7 @@ if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWoo
 });
 {
 const lm = (H.masts || []).filter(mk => kindOf(mk) === 'lashing');
-if (lm.length >= 2 && falls.length) {
+if (lm.length >= 1 && falls.length) {
 const groups = new Map();
 for (const e of lash) {
 const T = e.timber; if (!T || T.what !== 'crossbeam' || !e.seat || e.mast === undefined) continue;
@@ -4577,11 +4577,16 @@ if (at(a) && at(b)) zs.push(Math.abs(a[2]), Math.abs(b[2])); } }
 if (!zs.length) continue;
 if (!groups.has(key)) groups.set(key, { T, sgn, masts: new Map() });
 const gm = groups.get(key).masts;
-if (!gm.has(e.mast)) gm.set(e.mast, { rr, zs: [] });
+if (!gm.has(e.mast)) gm.set(e.mast, { rr, zs: [], mast: e.mast, seat: Math.abs(e.seat[2]) });
 gm.get(e.mast).zs.push(...zs);
 }
+const meanOf = zs => zs.reduce((t, z) => t + z, 0) / zs.length;
 for (const gp of groups.values()) {
 const ms = [...gp.masts.keys()].sort((a, b) => ((H.masts[a] || {}).at || 0) - ((H.masts[b] || {}).at || 0));
+const inner = ms.map(m => gp.masts.get(m)).sort((a, b) => meanOf(a.zs) - meanOf(b.zs))[0];
+const off = meanOf(inner.zs) - inner.seat;
+if (Math.abs(off) > inner.rr * 2 + 1e-6)
+say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${gp.sgn < 0 ? 'z−' : 'z+'} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
 for (let i = 0; i + 1 < ms.length; i++) {
 const F = gp.masts.get(ms[i]), A = gp.masts.get(ms[i + 1]);
 const gap = Math.min(...A.zs) - Math.max(...F.zs), rr = Math.max(F.rr, A.rr);

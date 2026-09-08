@@ -4432,9 +4432,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
                r267 (0y⁵¹): OUTBOARD is away from the hull's centreline, so the offset carries the side's sign —
                r264 added it in +z on both sides, which put the after mast's turns outboard to port and INBOARD to
                starboard, through the forward mast's; and the rank along the beam is the mast's order fore to
-               aft (mi), so a third mast would wrap outboard of the second. Which mast wraps outboard is a class
-               choice read from no plate (the 2010 deck plate looks along the rail and cannot separate them). */
-            const z = zc + (k + (T.what === 'crossbeam' ? mi * SHARED_OFF * Lh.side : 0)) * rr * 2.2;
+               aft, so a third mast would wrap outboard of the second. Which mast wraps outboard is a class
+               choice read from no plate (the 2010 deck plate looks along the rail and cannot separate them).
+               r268 (0y⁵²): the rank is the TIMBER's, read per beam by shroudFeet from which masts take it —
+               r267 used the mast's index on every beam, so the after mast's turns stood 0.05 m outboard of
+               the seat on the two beams it has to itself. A beam one mast takes is wrapped at the seat. */
+            const z = zc + (k + (T.what === 'crossbeam' ? (T.rank || 0) * SHARED_OFF * Lh.side : 0)) * rr * 2.2;
             const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
                        new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
             if (HB) {
@@ -4447,7 +4450,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
         }
         const tm = ropeMesh(turns, rr, ropeMat);
         if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash,
-                                        sharedOffsetM: +(mi * SHARED_OFF * rr * 2.2).toFixed(4), sharedOffsetSide: 'outboard' }; lg.add(tm); }
+                                        sharedOffsetM: +(SHARED_OFF * rr * 2.2).toFixed(4), sharedOffsetSide: 'outboard',
+                                        beams: lashings.filter(Lh => Lh.side > 0 && Lh.timber.what === 'crossbeam').map(Lh => ({ u: +(+Lh.timber.u).toFixed(3), rank: Lh.timber.rank || 0,
+                                          sharers: Lh.timber.sharers || 1, sharedWith: Lh.timber.sharedWith || [], offsetM: +((Lh.timber.rank || 0) * SHARED_OFF * rr * 2.2).toFixed(4) })) }; lg.add(tm); }
         lg.userData.mast = mi;
         group.add(tag(lg, 'shroudLashing'));
       }
@@ -5767,9 +5772,10 @@ const PARTS = {
                   + 'beam\'s end. The heart is drawn where the record reads one, each fall passing through '
                   + 'its hole and down its face to the beam, and its hole stands over the beam at the height '
                   + 'the record reads — 0.45 m along the shroud on Hōkūleʻa, off the one foot the deck plate '
-                  + 'shows down to the timber it wraps; the plate shows two farther feet hanging higher. On the two '
-                  + 'beams both masts take, the after mast\'s turns wrap the beam outboard of the forward mast\'s, on '
-                  + 'both sides — a class choice, since the deck plate looks along the rail and cannot separate them.' },
+                  + 'shows down to the timber it wraps; the plate shows two farther feet hanging higher. On a beam one '
+                  + 'mast has to itself the turns wrap it under the heart, at the beam\'s end; on the two beams both '
+                  + 'masts take, the after mast\'s turns wrap the beam outboard of the forward mast\'s, on both sides '
+                  + '— a class choice, since the deck plate looks along the rail and cannot separate them.' },
   shroudEye: { stage: 5, name: 'Shroud collars',
               what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
                   + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '
@@ -13129,15 +13135,11 @@ function shroudFeet(S, H, mk, FINE) {
   if (!mk.shrouds) return null;
   const L = S.lwl, B = S.beam, u = mk.at, n = mk.shrouds;
   const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
-  const anySquare = (S.masts || []).some(m => m.rig === 'square');
   /* the record's word wins where it has one (round 247, the home r245 named as (0s)):
      mast.shroudSetup names the class — 'deadeyes', 'tackle' or 'lashing' — with its
-     provenance beside it in the record; the class derivation stands for every other mast */
-  const REC = ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup : null;
-  const kind = SF ? 'fixing'
-    : REC ? REC
-    : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
-    : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+     provenance beside it in the record; the class derivation stands for every other mast.
+     r268: one derivation (shroudSetupKindOf), read here and by the per-beam rank for every mast */
+  const kind = shroudSetupKindOf(S, mk);
   const x = (u - 0.5) * L + H.rake(u);
   const CR = !SF && FINE && S.castles ? channelRun(S, H, u, 0.0275) : null;
   const CT = CR ? CR.top : null;
@@ -13189,12 +13191,21 @@ function shroudFeet(S, H, mk, FINE) {
     const CB = crossbeamsOf(S, H);
     if (CB.length) {
       const sep = S.hullSep || S.loa * 0.26;
-      const near = CB.map(b => ({ b, d: Math.abs(b.x - x) })).sort((p, q) => p.d - q.d)
-        .slice(0, n).map(p => p.b).sort((p, q) => p.x - q.x);
+      /* r268 (0y⁵²): the rank a mast's turns take along a beam is read PER BEAM — which lashing masts take
+         the beam, in the record's order fore to aft — so a beam one mast has to itself is wrapped at the
+         seat, under the heart, and only a beam two masts share spreads their turns. r267 ranked every beam
+         of the after mast by the mast's index, which stood its turns 0.05 m outboard of the seat on its own
+         two beams (u 0.55 and 0.65) as well as on the two it shares. The timber records the rank and the
+         sharers for the audit. */
+      const mine = lashingBeamsOf(S, H, CB, mk);
+      const takers = (S.masts || []).map((m, i) => ({ m, i, beams: shroudSetupKindOf(S, m) === 'lashing' ? lashingBeamsOf(S, H, CB, m) : [] }));
       seats = xs.map((xf, s) => {
-        const b = near[Math.min(s, near.length - 1)];
+        const bi = mine[Math.min(s, mine.length - 1)], b = CB[bi];
+        const sharers = takers.filter(t => t.beams.includes(bi)).sort((p, q) => (p.m.at - q.m.at) || (p.i - q.i));
+        const rank = Math.max(0, sharers.findIndex(t => t.m === mk));
         return { x: b.x, y: b.yTop, z: sep / 2 + Math.abs(surfacePoint(S, H, b.u, 1)[2]) + 0.06,
-                 timber: { what: 'crossbeam', x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, u: b.u } };
+                 timber: { what: 'crossbeam', x: b.x, yTop: b.yTop, yBot: b.yBot, lenX: b.lenX, u: b.u,
+                           rank, sharers: sharers.length, sharedWith: sharers.map(t => t.i) } };
       });
       for (let s = 0; s < n; s++) xs[s] = seats[s].x;
     } else seats = xs.map(capSeat);
@@ -13217,6 +13228,28 @@ function shroudFeet(S, H, mk, FINE) {
  * so to half a metre); without a count the class keeps its three where they were. Each beam
  * is loa·0.035 fore and aft, 0.16 B deep, its underside on the sheer, and spans the two hulls
  * plus 0.8 B beyond each hull's centreline. shroudFeet's lashing class seats on these. */
+/* ── THE SHROUDS' SETUP CLASS IS ONE DERIVATION (round 268). shroudFeet read it for the mast it was building;
+ * the per-beam rank needs it for every mast, so the two cannot disagree. The record's word wins where it
+ * has one (mast.shroudSetup, round 247); the class derivation stands for every other mast. */
+function shroudSetupKindOf(S, mk) {
+  if (!mk.shrouds) return null;
+  const SF = !!(mk.shroudFixing && mk.shroudFixing.stationsU && mk.shroudFixing.stationsU.length);
+  const anySquare = (S.masts || []).some(m => m.rig === 'square');
+  const REC = ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup : null;
+  return SF ? 'fixing'
+    : REC ? REC
+    : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
+    : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
+}
+
+/* the beams a lashing mast takes (round 247): the n nearest its foot, one a shroud, fore to aft — as indices
+ * into crossbeamsOf's list, which runs fore to aft, so two masts can be asked whether they share one (r268) */
+function lashingBeamsOf(S, H, CB, mk) {
+  const xm = (mk.at - 0.5) * S.lwl + H.rake(mk.at);
+  return CB.map((b, i) => ({ i, d: Math.abs(b.x - xm) })).sort((p, q) => p.d - q.d)
+    .slice(0, mk.shrouds).map(p => p.i).sort((p, q) => p - q);
+}
+
 function crossbeamsOf(S, H) {
   if (!S.doubleHull) return [];
   const sep = S.hullSep || S.loa * 0.26, B = S.beam, L = S.lwl;

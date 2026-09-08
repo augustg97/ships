@@ -6416,10 +6416,16 @@
          turns are grouped by beam and side; where two masts' turns share a group, the mast further aft (the record's
          `at`) must wrap the beam wholly outboard of the other's — its nearest turn further from the centreline than
          the other's farthest — with a rope's diameter clear between them. Which mast wraps outboard is the builder's
-         class choice; that it is the same on both sides is what the rule holds. */
+         class choice; that it is the same on both sides is what the rule holds.
+         ── D-LASHING-SEAT (round 268, 0y⁵²): ON EVERY BEAM, THE INNERMOST TURNS WRAP IT AT THE SEAT. r267 ranked every
+         beam of the after mast by the mast's index, so on the two beams it has to itself its turns stood 0.05 m
+         outboard of the seat its heart stands over, while the forward mast's stood centred on theirs. In the same
+         grouping — and with one lashing mast as well as two — the mast whose turns lie nearest the centreline on
+         a beam and side must have them centred on its seat (the mean of the turns' |z| against the seat's |z|)
+         within a rope's diameter. The side is named by z's sign. */
       {
         const lm = (H.masts || []).filter(mk => kindOf(mk) === 'lashing');
-        if (lm.length >= 2 && falls.length) {
+        if (lm.length >= 1 && falls.length) {
           const groups = new Map();
           for (const e of lash) {
             const T = e.timber; if (!T || T.what !== 'crossbeam' || !e.seat || e.mast === undefined) continue;
@@ -6433,11 +6439,16 @@
             if (!zs.length) continue;
             if (!groups.has(key)) groups.set(key, { T, sgn, masts: new Map() });
             const gm = groups.get(key).masts;
-            if (!gm.has(e.mast)) gm.set(e.mast, { rr, zs: [] });
+            if (!gm.has(e.mast)) gm.set(e.mast, { rr, zs: [], mast: e.mast, seat: Math.abs(e.seat[2]) });
             gm.get(e.mast).zs.push(...zs);
           }
+          const meanOf = zs => zs.reduce((t, z) => t + z, 0) / zs.length;
           for (const gp of groups.values()) {
             const ms = [...gp.masts.keys()].sort((a, b) => ((H.masts[a] || {}).at || 0) - ((H.masts[b] || {}).at || 0));
+            const inner = ms.map(m => gp.masts.get(m)).sort((a, b) => meanOf(a.zs) - meanOf(b.zs))[0];
+            const off = meanOf(inner.zs) - inner.seat;
+            if (Math.abs(off) > inner.rr * 2 + 1e-6)
+              say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${gp.sgn < 0 ? 'z−' : 'z+'} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
             for (let i = 0; i + 1 < ms.length; i++) {
               const F = gp.masts.get(ms[i]), A = gp.masts.get(ms[i + 1]);
               const gap = Math.min(...A.zs) - Math.max(...F.zs), rr = Math.max(F.rr, A.rr);
