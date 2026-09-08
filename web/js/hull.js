@@ -3952,10 +3952,41 @@ function buildRig(S, group, mats, FINE, FURLED) {
          idiom — and lifts the foot to clear the box by a hand's breadth and the spar's own
          radius where the boom reaches it; a boom that ends short of the platform is not
          lifted. */
+      /* ── THE BOOM IS COCKED UP AFT, AND THE FOOT STAYS WHERE THE RECORD PUTS IT (round 275, 0y⁶³) ──
+         r273 lifted the whole boom, LEVEL, over the platform's box, so Endurance's mizzen boom
+         stood 5.2 m over the deck at its jaws against the plate's gooseneck at 4.0–4.3 (a090007,
+         ~24 px/m). A gaff boom is not a level bar: it hangs from its jaws at the mast and from a
+         TOPPING LIFT at its outer end, led from the lower masthead, and the lift holds that end
+         UP. Every working spanker boom rises aft — the sail is cut with the clew higher than the
+         tack, and whatever stands under the boom (the taffrail, the wheel, a compass platform) is
+         cleared at the FAR end by the lift, never by hoisting the jaws. So the foot takes the
+         record's height over the deck at the mast (boomFootM; 0.11 of the lower mast where no
+         plate has read it), and the COCK is what clears the platform: the smallest angle that
+         puts the boom's underside a hand's breadth over the box at the box's near face, and never
+         less than the class minimum. The boom's own line, the clew, the furled roll, the lowered
+         gaff and the lift all read that one angle. Only Endurance's record carries a platform, so
+         on every other hull the boom rises by the class minimum alone.
+         ⚠ BOOM_COCK_MIN IS A CLASS FIGURE, NOT A PLATE READ: sail plans of the gaff rig draw the
+         boom rising aft by a few degrees; no plate in reach shows one of these seven hulls with
+         her gaff sail set at a scale that reads the angle. The card says so (cockFrom), the
+         audit reads the built angle against it, and the figure stands until a plate is read. */
+      const DEG = Math.PI / 180;
+      const BOOM_COCK_MIN = 4 * DEG;
+      const mastX = mxA;
+      const mastR = mastRAt;                 // r257: the one derivation, hoisted above crossYard
       const AP = S.aftPlatform;
-      const platTop = (AP && AP.u != null && AP.u > u && boomL >= (AP.u - u) * L - (AP.wM || 1.5) / 2)
-        ? deckAt(AP.u) + (AP.floorM || 3.0) + 0.06 + (AP.boxHM || 1.0) + 0.25 : -Infinity;
-      const footY = Math.max(base + lower * 0.11, platTop);
+      const rBoom = B * 0.016;                                 // the spar's radius at the jaws
+      const footRec = mk.boomFootM != null ? base + mk.boomFootM : null;
+      const footY = footRec != null ? footRec : base + lower * 0.11;
+      const footX = mastX(footY);
+      const xBoxNear = (AP && AP.u != null && AP.u > u) ? (AP.u - 0.5) * L - (AP.boxWM || 0.8) / 2 : null;
+      const overPlat = xBoxNear != null && footX + boomL * Math.cos(BOOM_COCK_MIN) >= xBoxNear;
+      const platTop = overPlat
+        ? deckAt(AP.u) + (AP.floorM || 3.0) + 0.06 + (AP.boxHM || 1.0) + 0.15 + rBoom : -Infinity;
+      const cockClear = overPlat ? Math.atan2(platTop - footY, xBoxNear - footX) : -Infinity;
+      const cock = Math.max(BOOM_COCK_MIN, cockClear);
+      const cockFrom = cock > BOOM_COCK_MIN + 1e-9 ? "the platform's clearance" : 'class minimum';
+      const cosC = Math.cos(cock), sinC = Math.sin(cock);
       /* ── THE LUFF RIDES THE MAST (round 252) ──────────────────────────────────────────
          Every point of this sail that touches the mast was placed at the mast's DECK station
          x, whatever the mast's rake: the boom's jaws, the tack, the throat and the gaff's jaws
@@ -3972,20 +4003,36 @@ function buildRig(S, group, mats, FINE, FURLED) {
          standing there. On an unraked mast nothing moves but the luff, which steps aft off the
          axis onto the mast's after face. The cloth names its mast for the audit (userData.mastX)
          and says its luff is on it (userData.luffOnMast), so any own-mast crossing convicts. */
-      const mastX = mxA;
-      const mastR = mastRAt;                 // r257: the one derivation, hoisted above crossYard
       const bm2 = new THREE.Mesh(
         new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
-      bm2.rotation.z = Math.PI / 2;
-      bm2.position.set(mastX(footY) + boomL / 2, footY, 0);
-      group.add(tag(bm2, 'yard', 'Boom'));
+      bm2.rotation.z = -(Math.PI / 2 - cock);       // the cylinder's +y (its thin end) to the clew: aft and up
+      bm2.position.set(footX + cosC * boomL / 2, footY + sinC * boomL / 2, 0);
+      const clewX = footX + cosC * boomL, clewY = footY + sinC * boomL;
+      /* the topping lift: from the boom's outer end to the lower masthead, on the axis */
+      const liftY = base + lower * 0.97, liftX = mastX(liftY);
+      bm2.userData.gaffBoom = {
+        at: mk.at, mastX: +x.toFixed(3), cockDeg: +(cock / DEG).toFixed(2), cockFrom,
+        cockMinDeg: +(BOOM_COCK_MIN / DEG).toFixed(2),
+        footM: +(footY - base).toFixed(3), footFrom: footRec != null ? 'record: boomFootM' : 'class: 0.11 of the lower mast',
+        foot: [+footX.toFixed(3), +footY.toFixed(3)], clew: [+clewX.toFixed(3), +clewY.toFixed(3)],
+        liftHead: [+liftX.toFixed(3), +liftY.toFixed(3)],
+        overPlatform: overPlat, platTop: overPlat ? +platTop.toFixed(3) : null, boomL: +boomL.toFixed(3) };
+      group.add(tag(bm2, 'yard', 'Boom',
+        `The boom rises ${(cock / DEG).toFixed(1)}° aft from its jaws ${(footY - base).toFixed(2)} m over the deck ` +
+        `(${footRec != null ? 'the record’s plate read' : 'a class share of the lower mast'}), held up at its outer end ` +
+        `by a topping lift from the lower masthead; the angle is ${cockFrom === 'class minimum'
+          ? 'the class minimum, a figure no plate of this ship has yet been read for'
+          : 'what clears the compass platform’s box by a hand’s breadth at its near face'}.`));
+      const liftMesh = ropeMesh([[new THREE.Vector3(clewX, clewY, 0), new THREE.Vector3(liftX, liftY, 0)]],
+                                0.012 + B * 0.0006, ropeMat);
+      if (liftMesh) group.add(tag(liftMesh, 'toppingLift'));
       /* the SET geometry decides the cloth's area whichever state it is shown in — furling
          does not change how much canvas she owns */
       const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
       const rT = mastR(gy), rF = mastR(footY);
       const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
       const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
-      const tack = [mastX(footY) + rF, footY], clew = [mastX(footY) + boomL, footY];
+      const tack = [footX + rF, footY], clew = [clewX, clewY];
       const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
       if (FURLED) {
         /* a gaff sail is handled entirely from the deck, and it stows the same way: halyards
@@ -3993,15 +4040,18 @@ function buildRig(S, group, mats, FINE, FURLED) {
            bundle is lashed along the top of the boom. The gaff rests on the stowed sail,
            just peaked above it. */
         const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
-        sails.push(makeFurl(new THREE.Vector3(mastX(footY), footY + r * 1.1, 0),
-                            new THREE.Vector3(mastX(footY) + boomL, footY + r * 1.1, 0),
+        /* r275: the roll lies along the boom's TOP, on the boom's own normal, so it rises with the cock */
+        const nX = -sinC * r * 1.1, nY = cosC * r * 1.1;
+        sails.push(makeFurl(new THREE.Vector3(footX + nX, footY + nY, 0),
+                            new THREE.Vector3(clewX + nX, clewY + nY, 0),
                             quadArea, furlMat(mats), group, { radius: r }));
-        const rest = 0.13;                       // the lowered gaff's slight peak
+        const rest = cock + 0.13;                // the lowered gaff rests on the roll, peaked a little over the boom's line
         const gm = new THREE.Mesh(
           new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
         gm.rotation.z = -(Math.PI / 2 - rest);
-        gm.position.set(mastX(footY + r * 2.2) + Math.cos(rest) * gaffL / 2,
-                        footY + r * 2.2 + Math.sin(rest) * gaffL / 2, 0);
+        const gfY = footY + cosC * r * 2.2, gfX = mastX(gfY);
+        gm.position.set(gfX + Math.cos(rest) * gaffL / 2,
+                        gfY + Math.sin(rest) * gaffL / 2, 0);
         group.add(tag(gm, 'yard', 'Gaff'));
         /* the jib-headed topsail is set flying and comes DOWN to the deck when struck —
            a furled ship shows a bare topmast, which is what the harbour photographs show */
@@ -5893,6 +5943,10 @@ const PARTS = {
   ratline:  { stage: 5, name: 'Ratlines',
               what: 'Light lines seized across the shrouds to make a ladder aloft. Steel 1794 '
                   + 'gives the spacing outright: thirteen inches, one comfortable rung.' },
+  toppingLift: { stage: 6, name: 'Topping lift',
+              what: 'The rope from the lower masthead to the outer end of a gaff boom that carries '
+                  + 'the spar\'s weight and holds that end up. It is why a working boom rises aft, '
+                  + 'and what the crew top the boom up with to clear the deck when the sail is stowed (r275).' },
   lift:     { stage: 6, name: 'Lifts',
               what: 'The ropes from each yardarm up to the masthead that carry the yard\'s '
                   + 'weight and hold it square. With the sail furled they are all that holds '

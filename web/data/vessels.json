@@ -5940,7 +5940,9 @@
             "heightM": 26.8,
             "rig": "gaff",
             "rake": 4,
-            "shrouds": 5
+            "shrouds": 5,
+            "boomFootM": 4.15,
+            "boomFootProvenance": "PLATE READ, r273/r275: the mizzen boom's jaws (the gooseneck) 4.0-4.3 m over the main deck at the mast, +/- 0.4, read off Hurley's plate from the starboard quarter (Commons a090007, State Library NSW, 1500x1124, ~24 px/m at the stern) in r273, where the boom lies against the mast above the deckhouse; the boom's rise aft (the cock) is NOT read from any plate of this ship and stands at the class minimum or at what the compass platform's box demands (the builder's derivation); a plate of her with the spanker set at a readable scale would replace both."
           }
         ],
         "build": "frame",

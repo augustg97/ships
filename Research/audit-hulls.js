@@ -5652,7 +5652,7 @@
       g.traverse(o => { if (o.isMesh && o.userData.part &&
                             o.userData.part.name === 'Boom') {
         const bbx = new THREE.Box3().setFromObject(o);
-        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: bbx.max.x - bbx.min.x });
+        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: Math.hypot(bbx.max.x - bbx.min.x, bbx.max.y - bbx.min.y) });   // r275: along the cocked line
       } });
       if (booms.length >= 2) {
         booms.sort((a, b) => a.cx - b.cx);
@@ -5693,7 +5693,7 @@
       g.traverse(o => { if (o.isMesh && o.userData.part &&
                             o.userData.part.name === 'Boom') {
         const bbx = new THREE.Box3().setFromObject(o);
-        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: bbx.max.x - bbx.min.x });
+        booms.push({ cx: (bbx.min.x + bbx.max.x) / 2, len: Math.hypot(bbx.max.x - bbx.min.x, bbx.max.y - bbx.min.y) });   // r275: along the cocked line
       } });
       if (!booms.length) return;
       booms.sort((a, b) => a.cx - b.cx);
@@ -6008,6 +6008,7 @@
           /* the boom */
           const pb = new THREE.Box3(new THREE.Vector3(x0, y0, z0), new THREE.Vector3(x1, y1, z1));
           g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && p.name === 'Boom')) return;
+            if (o.userData.gaffBoom) return;   // r275: a cocked boom's box always overlaps; A-BOOM-COCK reads it along its line
             const w = wv(o); if (!w.length) return;
             const bb = new THREE.Box3(); for (const q of w) bb.expandByPoint(new THREE.Vector3(q[0], q[1], q[2]));
             if (bb.intersectsBox(pb))
@@ -6018,6 +6019,101 @@
         say(v.id, 'a platform the record does not declare', `${pm.length} Compass platform mesh(es) drawn; hull.aftPlatform absent`);
       }
     }
+
+    /* ── A-BOOM-COCK (round 275, 0y⁶³): THE GAFF BOOM RISES AFT, AND SOMETHING HOLDS IT UP.
+       Seventeen booms on seven hulls lay LEVEL from their jaws, every one, with nothing drawn
+       at the outer end; r273 cleared Endurance's compass platform by lifting the whole level
+       spar, jaws and all, 0.9 m over the plate's gooseneck. A gaff boom hangs from its jaws
+       and from a topping lift at its outer end, and rises aft. Read from the BUILT scene, set
+       and furled: every 'Boom' mesh carrying userData.gaffBoom gives its axis by principal
+       component; its angle over the aft-horizontal must be at least 1° (a level boom is the
+       class fault) and within 0.5° of what the builder says it drew (cockDeg — a builder that
+       writes one angle and draws another); a record that states the foot (boomFootM) must
+       carry its provenance, and the built jaws must stand at that height over the deck read
+       off the deck meshes at the mast (0.5 m: the plate's ±0.4 and a deck-edge read); a
+       'Topping lift' mesh must end within 0.25 m of the boom's outer end and its head within
+       0.3 m of where the builder says the lift is led; and where the builder says the boom
+       passes over the platform, the boom's line at the box's near face must stand over the
+       platform's highest mesh by at least a hand's breadth less the spar's radius. Every gaff
+       or spanker mast must have such a boom. */
+    const boomRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const axisOf = P => {
+        const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+        let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+        for (const q of P) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z;
+          xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
+        const d = new THREE.Vector3(1, 0, 0);
+        for (let it = 0; it < 60; it++)
+          d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
+        if (d.x < 0) d.negate();
+        let tMin = 1e9, tMax = -1e9, rMax = 0;
+        for (const q of P) { const t = (q.x - c.x) * d.x + (q.y - c.y) * d.y + (q.z - c.z) * d.z; tMin = Math.min(tMin, t); tMax = Math.max(tMax, t);
+          rMax = Math.max(rMax, Math.abs(q.z - c.z)); }
+        return { foot: c.clone().addScaledVector(d, tMin), head: c.clone().addScaledVector(d, tMax), dir: d, r: rMax };
+      };
+      const booms = [], lifts = [], deckM = [], platM = [];
+      G.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.name === 'Boom' && o.userData.gaffBoom) booms.push({ o, rec: o.userData.gaffBoom });
+        if (p.key === 'toppingLift') lifts.push(o);
+        if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o);
+        if (p.name === 'Compass platform') platM.push(o); });
+      const gaffMasts = (H.masts || []).filter(mk => mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker));
+      if (gaffMasts.length && booms.length < gaffMasts.length)
+        say(v.id, 'a gaff mast with no boom', `${gaffMasts.length} gaff or spanker masts in the record, ${booms.length} Boom mesh(es) carrying a gaffBoom read${SB}`);
+      if (!booms.length) return;
+      const liftPts = lifts.map(pts);
+      let platTop = null;
+      if (platM.length) { platTop = -1e9; for (const m of platM) for (const q of pts(m)) platTop = Math.max(platTop, q.y); }
+      let deckPts = null;
+      const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+        let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+          if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+      for (const { o, rec } of booms) {
+        const P = pts(o), ax = axisOf(P);
+        let lo = ax.foot, hi = ax.head; if (lo.x > hi.x) [lo, hi] = [hi, lo];
+        const built = Math.atan2(hi.y - lo.y, hi.x - lo.x) * 180 / Math.PI;
+        const at = `the boom on the mast at station ${rec.at} (jaws x ${lo.x.toFixed(2)}, y ${lo.y.toFixed(2)}; end x ${hi.x.toFixed(2)}, y ${hi.y.toFixed(2)})`;
+        if (built < 1)
+          say(v.id, 'a boom lying level', `${at} rises ${built.toFixed(2)}° aft${SB}; a gaff boom hangs from its topping lift and rises aft (the class minimum is ${rec.cockMinDeg}°)`);
+        if (Math.abs(built - rec.cockDeg) > 0.5)
+          say(v.id, 'a boom off its own stated cock', `${at} is built at ${built.toFixed(2)}° where its builder says ${rec.cockDeg}° (${rec.cockFrom})${SB}`);
+        /* the record's foot */
+        let mk = null, bd = 1e9;
+        for (const m of gaffMasts) { const dd = Math.abs(m.at - rec.at); if (dd < bd) { bd = dd; mk = m; } }
+        if (mk && mk.boomFootM != null) {
+          if (!mk.boomFootProvenance && STATE === 'set')
+            say(v.id, 'a boom foot with no provenance', `masts[${(H.masts || []).indexOf(mk)}].boomFootM ${mk.boomFootM} declared, boomFootProvenance absent`);
+          const e = deckAtX(lo.x);
+          if (e < 1e8 && Math.abs((lo.y - e) - mk.boomFootM) > 0.5)
+            say(v.id, "a boom foot off the record's height", `${at}: jaws ${(lo.y - e).toFixed(2)} m over the deck's edge at x ${lo.x.toFixed(1)} (${e.toFixed(2)}); the record says ${mk.boomFootM} (0.5 allowed)${SB}`);
+        }
+        /* the lift */
+        let near = -1, dmin = 1e9;
+        liftPts.forEach((Q, i) => { for (const q of Q) { const d = Math.hypot(q.x - hi.x, q.y - hi.y, q.z - hi.z); if (d < dmin) { dmin = d; near = i; } } });
+        if (near < 0 || dmin > 0.25)
+          say(v.id, 'a boom held up by nothing', `${at}: no Topping lift ends within 0.25 m of the boom's outer end (nearest ${near < 0 ? 'none drawn' : dmin.toFixed(2) + ' m'})${SB}`);
+        else {
+          let top = liftPts[near][0]; for (const q of liftPts[near]) if (q.y > top.y) top = q;
+          const dh = Math.hypot(top.x - rec.liftHead[0], top.y - rec.liftHead[1]);
+          if (dh > 0.3) say(v.id, 'a topping lift led to the wrong place', `${at}: the lift's head at (${top.x.toFixed(2)}, ${top.y.toFixed(2)}) is ${dh.toFixed(2)} m from the lower masthead the builder names (${rec.liftHead[0]}, ${rec.liftHead[1]})${SB}`);
+        }
+        /* the platform, along the boom's own line */
+        if (H.aftPlatform && H.aftPlatform.u != null && platTop != null) {
+          const AP = H.aftPlatform, xN = (AP.u - 0.5) * H.lwl - (AP.boxWM || 0.8) / 2;
+          const xF = (AP.u - 0.5) * H.lwl + (AP.wM || 1.5) / 2;
+          const x0 = Math.max(xN, lo.x);                     // where the boom first stands over the platform
+          const yAt = lo.y + (hi.y - lo.y) * (x0 - lo.x) / Math.max(1e-6, hi.x - lo.x);
+          const under = yAt - ax.r;
+          if (hi.x >= xN && lo.x <= xF && under < platTop + 0.10)
+            say(v.id, 'a boom too low over the platform', `${at}: its underside stands ${(under - platTop).toFixed(2)} m over the platform's top (${platTop.toFixed(2)}) at the box's near face x ${xN.toFixed(2)}; a hand's breadth (0.10) is the least${SB}`);
+        }
+      }
+    };
+    boomRead(g, 'set');
 
     /* ── D-FITTINGS-ON-DECK (round 272, Endurance): THE DECK'S FITTINGS STAND ON THE DECK,
        AND THE DECK'S DEPTH SAYS WHERE IT WAS READ. Endurance carried hull.freeboard 2.0, the
@@ -8460,6 +8556,8 @@
           lateenRead(gf, 'furled');
           /* r261 (0y³⁶): the crab-claw yard rules on the furled build — the two radii, the lashings, the roll */
           crabRead(gf, 'furled');
+          /* r275 (0y⁶³): the boom rules on the furled build — the cock, the foot, the lift, the platform */
+          boomRead(gf, 'furled');
           /* ── D-FURL-LATEEN (round 260, 0y³⁵): THE BRAILED ROLL HANGS ON ITS YARD, OUTBOARD OF
              THE POLE. r254 stood every furled lateen yard off its mast by the ROLL's radius so
              the bundle, hung on the yard's line, would lie against the pole and not through it —

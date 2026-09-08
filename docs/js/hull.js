@@ -2158,34 +2158,64 @@ const boomL = openAft
 : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
 const gaffL = Math.min(lower * 0.42, boomL * 0.72);
 const peak = 0.62;
-const AP = S.aftPlatform;
-const platTop = (AP && AP.u != null && AP.u > u && boomL >= (AP.u - u) * L - (AP.wM || 1.5) / 2)
-? deckAt(AP.u) + (AP.floorM || 3.0) + 0.06 + (AP.boxHM || 1.0) + 0.25 : -Infinity;
-const footY = Math.max(base + lower * 0.11, platTop);
+const DEG = Math.PI / 180;
+const BOOM_COCK_MIN = 4 * DEG;
 const mastX = mxA;
 const mastR = mastRAt;
+const AP = S.aftPlatform;
+const rBoom = B * 0.016;
+const footRec = mk.boomFootM != null ? base + mk.boomFootM : null;
+const footY = footRec != null ? footRec : base + lower * 0.11;
+const footX = mastX(footY);
+const xBoxNear = (AP && AP.u != null && AP.u > u) ? (AP.u - 0.5) * L - (AP.boxWM || 0.8) / 2 : null;
+const overPlat = xBoxNear != null && footX + boomL * Math.cos(BOOM_COCK_MIN) >= xBoxNear;
+const platTop = overPlat
+? deckAt(AP.u) + (AP.floorM || 3.0) + 0.06 + (AP.boxHM || 1.0) + 0.15 + rBoom : -Infinity;
+const cockClear = overPlat ? Math.atan2(platTop - footY, xBoxNear - footX) : -Infinity;
+const cock = Math.max(BOOM_COCK_MIN, cockClear);
+const cockFrom = cock > BOOM_COCK_MIN + 1e-9 ? "the platform's clearance" : 'class minimum';
+const cosC = Math.cos(cock), sinC = Math.sin(cock);
 const bm2 = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.012, B * 0.016, boomL, 14), woodDark);
-bm2.rotation.z = Math.PI / 2;
-bm2.position.set(mastX(footY) + boomL / 2, footY, 0);
-group.add(tag(bm2, 'yard', 'Boom'));
+bm2.rotation.z = -(Math.PI / 2 - cock);
+bm2.position.set(footX + cosC * boomL / 2, footY + sinC * boomL / 2, 0);
+const clewX = footX + cosC * boomL, clewY = footY + sinC * boomL;
+const liftY = base + lower * 0.97, liftX = mastX(liftY);
+bm2.userData.gaffBoom = {
+at: mk.at, mastX: +x.toFixed(3), cockDeg: +(cock / DEG).toFixed(2), cockFrom,
+cockMinDeg: +(BOOM_COCK_MIN / DEG).toFixed(2),
+footM: +(footY - base).toFixed(3), footFrom: footRec != null ? 'record: boomFootM' : 'class: 0.11 of the lower mast',
+foot: [+footX.toFixed(3), +footY.toFixed(3)], clew: [+clewX.toFixed(3), +clewY.toFixed(3)],
+liftHead: [+liftX.toFixed(3), +liftY.toFixed(3)],
+overPlatform: overPlat, platTop: overPlat ? +platTop.toFixed(3) : null, boomL: +boomL.toFixed(3) };
+group.add(tag(bm2, 'yard', 'Boom',
+`The boom rises ${(cock / DEG).toFixed(1)}° aft from its jaws ${(footY - base).toFixed(2)} m over the deck ` +
+`(${footRec != null ? 'the record’s plate read' : 'a class share of the lower mast'}), held up at its outer end ` +
+`by a topping lift from the lower masthead; the angle is ${cockFrom === 'class minimum'
+? 'the class minimum, a figure no plate of this ship has yet been read for'
+: 'what clears the compass platform’s box by a hand’s breadth at its near face'}.`));
+const liftMesh = ropeMesh([[new THREE.Vector3(clewX, clewY, 0), new THREE.Vector3(liftX, liftY, 0)]],
+0.012 + B * 0.0006, ropeMat);
+if (liftMesh) group.add(tag(liftMesh, 'toppingLift'));
 const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
 const rT = mastR(gy), rF = mastR(footY);
 const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
 const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
-const tack = [mastX(footY) + rF, footY], clew = [mastX(footY) + boomL, footY];
+const tack = [footX + rF, footY], clew = [clewX, clewY];
 const quadArea = triA2(tack, setThroat, setPeak) + triA2(tack, setPeak, clew);
 if (FURLED) {
 const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
-sails.push(makeFurl(new THREE.Vector3(mastX(footY), footY + r * 1.1, 0),
-new THREE.Vector3(mastX(footY) + boomL, footY + r * 1.1, 0),
+const nX = -sinC * r * 1.1, nY = cosC * r * 1.1;
+sails.push(makeFurl(new THREE.Vector3(footX + nX, footY + nY, 0),
+new THREE.Vector3(clewX + nX, clewY + nY, 0),
 quadArea, furlMat(mats), group, { radius: r }));
-const rest = 0.13;
+const rest = cock + 0.13;
 const gm = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
 gm.rotation.z = -(Math.PI / 2 - rest);
-gm.position.set(mastX(footY + r * 2.2) + Math.cos(rest) * gaffL / 2,
-footY + r * 2.2 + Math.sin(rest) * gaffL / 2, 0);
+const gfY = footY + cosC * r * 2.2, gfX = mastX(gfY);
+gm.position.set(gfX + Math.cos(rest) * gaffL / 2,
+gfY + Math.sin(rest) * gaffL / 2, 0);
 group.add(tag(gm, 'yard', 'Gaff'));
 } else {
 const gm = new THREE.Mesh(
@@ -3548,6 +3578,10 @@ what: 'Standing rigging: fixed ropes from the masthead down to the channels on t
 ratline:  { stage: 5, name: 'Ratlines',
 what: 'Light lines seized across the shrouds to make a ladder aloft. Steel 1794 '
 + 'gives the spacing outright: thirteen inches, one comfortable rung.' },
+toppingLift: { stage: 6, name: 'Topping lift',
+what: 'The rope from the lower masthead to the outer end of a gaff boom that carries '
++ 'the spar\'s weight and holds that end up. It is why a working boom rises aft, '
++ 'and what the crew top the boom up with to clear the deck when the sail is stowed (r275).' },
 lift:     { stage: 6, name: 'Lifts',
 what: 'The ropes from each yardarm up to the masthead that carry the yard\'s '
 + 'weight and hold it square. With the sail furled they are all that holds '

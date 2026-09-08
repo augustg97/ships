@@ -24432,3 +24432,115 @@ not reach are the aboard-*, action-*, board-salamis, map-floor, passage-sahul, s
 frames from ship-azzam to ship-wyoming alphabetically outside the 26; of those ship-endurance was scored by
 check --frame before the push (0.000% 0.000 ok, r274/check-ship-endurance.out). No baseline was accepted this
 round. r275 opens with the FULL ratchet at the clean HEAD if the load is under 15, as the entry above says.**
+
+## Round 275 — 2026-09-08 — the gaff boom rises aft, held by its topping lift, and the jaws stay where the plate puts them: eighteen booms on seven hulls lay level from their jaws with nothing drawn at the outer end, and r273 had cleared Endurance's compass platform by hoisting the whole level spar 0.9 m over the plate's gooseneck; every boom now cocks up aft by a class minimum of 4° or, where a recorded platform stands under it, by the smallest angle that clears the box at its near face, a topping lift runs from each boom's end to the lower masthead, the clew, the furled roll and the lowered gaff follow the boom, Endurance's mizzen records the gooseneck's height off the plate, a new rule reads the cock, the foot, the lift and the platform off the meshes on both builds, and the opening full ratchet at the clean r274 HEAD was stopped at 11 frames for the clock and scored offline
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r274's entry ordered r275 to check the load, run
+the full ratchet at the clean HEAD if the load was under 15, and then take (0y⁶³), the boom's cock as a rig class. The
+load at the open was 5.4 (03:31; 10 and 22 over 5 and 15 minutes); the full ratchet was launched at 03:32:09 at the
+clean HEAD b20fcc3 and captured 11 frames at 60 s each under a load of 13–14 from outside the project (the Codex
+renderer at 50% CPU), the line r274's entry drew, so it was STOPPED at 03:42:51, its 11 frames copied to
+r275/current-clean before any check --frame and scored offline: 11 frames, 0 movers (r275/clean-scores.out). Every
+edit was made on the :8150 copy (r275/web, symlinks with real copies of hull.js, vessels.json and audit-hulls.js)
+and copied into web/ after the stop; every browser ran alone (r275/chain.log). The load later in the round: 69 at
+03:59 and 45–49 from 04:00 (Apple's mediaanalysisd at 210% CPU, the r237 pattern after the plate crops).**
+
+**THE FAULT (0y⁶³, named r273). The gaff block drew every boom as a level bar: bm2.rotation.z = π/2 from the jaws at
+base + 0.11·lower, the clew at the same height, and nothing at the outer end — 18 booms on ship-of-the-line (the
+driver), wyoming (6), preussen (the spanker), great-eastern (6), clipper (the spanker), steamer and endurance (2).
+A gaff boom is not a level bar: it hangs from its jaws at the mast and from a TOPPING LIFT led from the lower
+masthead to its outer end, and the lift holds that end up; a working spanker boom rises aft, because the sail is
+cut with the clew higher than the tack and because whatever stands under the boom (the taffrail, the wheel, a
+compass platform) is cleared at the far end by the lift and not by hoisting the jaws. r273 met Endurance's platform
+the other way — it lifted the whole level boom so its foot stood 5.2 m over the deck against the plate's gooseneck
+at 4.0–4.3 ± 0.4 (Hurley a090007, ~24 px/m).**
+
+**THE BUILDER (web/js/hull.js; r275/apply-builder-edits.py, five replaces asserted, and apply-fixes-2.py, two;
+hull.before.js and hull.after.js; parsed by node's vm). In the gaff block: (1) the foot takes the record's
+boomFootM over the mast's base where the record has one, else 0.11 of the lower mast as before; (2) the cock is
+max(BOOM_COCK_MIN, the angle from the foot to the box's near face at the box's top + a hand's breadth (0.15) + the
+spar's radius), the near face being (aftPlatform.u − 0.5)·L − boxWM/2, and only when the boom reaches it; (3) the
+boom cylinder lies on that line (rotation −(π/2 − cock), its thin end at the clew), the clew is its end, the cloth's
+tack and clew read it, the furled roll lies on the boom's own normal along its top, and the lowered gaff rests on
+the roll at cock + 0.13; (4) a topping lift (ropeMesh, 0.012 + B·0.0006) runs from the clew to the lower masthead
+at base + 0.97·lower on the axis, tagged toppingLift — a NEW part, because the yard-gear census counts 'lift'
+meshes per square mast and a fourth lift on the 74 read as a missing yard; (5) the boom mesh carries
+userData.gaffBoom (at, cockDeg, cockFrom, cockMinDeg, footM, footFrom, foot, clew, liftHead, overPlatform, platTop,
+boomL) and its card says the angle, the foot's source and whether the angle is the class minimum. ⚠ BOOM_COCK_MIN
+= 4° IS A CLASS FIGURE, NOT A PLATE READ: the plates in reach (the card plates of Wyoming at 753 px, Preussen's wreck,
+Cutty Sark at Greenwich, HMS Victory, Hurley's a090007 and the 2408 px ice plate) show no gaff sail set at a scale
+that reads a boom's angle, and Hurley's 'under full sail' plate (Commons a090012h, 2828x3912) is taken from ahead
+with the spanker hidden. The card says so, the audit reads the built angle against the builder's own figure, and
+the figure stands until a plate is read — (0y⁶⁷) below.**
+
+**THE RECORD (web/data/vessels.json; r275/apply-record-edits.py, one replace asserted, json-parsed; vessels.before.json
+and vessels.after.json): Endurance's mizzen (masts[2], at 0.839) gains boomFootM 4.15 and boomFootProvenance naming
+r273's read of a090007 (4.0–4.3 ± 0.4 over the main deck at the mast), what it does not give (the cock) and what would
+replace both. A provenance string costs nothing at first paint since r274. No other record changed.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r275/apply-audit-edits.py, four replaces, and apply-fixes-2.py,
+three; audit-hulls.before.js and audit-hulls.after.js). A-BOOM-COCK, boomRead(G, STATE), run on the set build and on
+the furled build: every 'Boom' mesh carrying gaffBoom gives its axis by principal component; the angle over the
+aft-horizontal must be at least 1° ('a boom lying level') and within 0.5° of the builder's cockDeg ('a boom off its own
+stated cock'); a record with boomFootM must carry boomFootProvenance ('a boom foot with no provenance', set build), and
+the built jaws must stand at that height over the deck read off the deck meshes at the mast, 0.5 m allowed ('a boom
+foot off the record's height'); a toppingLift mesh must end within 0.25 m of the boom's outer end ('a boom held up by
+nothing') with its head within 0.3 m of the lower masthead the builder names ('a topping lift led to the wrong place');
+and where the boom's span reaches the platform's box, the boom's underside on its own line at the near face must
+stand a hand's breadth (0.10) over the platform's highest mesh ('a boom too low over the platform'); every gaff or
+spanker mast must have such a boom ('a gaff mast with no boom'). The r273 bbox test 'a boom through the platform'
+stands down for a boom carrying the read (a cocked boom's box always overlaps the platform's; the line test replaces
+it) and stands for any other. The two r42/r101 boom-length reads take the spar along its line (hypot of the x and y
+extents) — a cocked boom's x-extent is short by cos.**
+
+**PROOFS (r275/chain.log; each audit alone in its browser on :8150). FINAL (r275 builder, record, audit): "checked 33
+hulls, 0 problems" (03:53). PROOF B (every boom drawn level while its read claims the cock, hull.proof-b.js): 73 —
+'a boom lying level' 36 and 'a boom off its own stated cock' 36 (18 booms on both builds) and 'a boom too low over the
+platform' 1 (Endurance's mizzen, the level boom at the box). PROOF C (no lift drawn, hull.proof-c.js): 36, 'a boom held
+up by nothing', 18 booms on both builds. PROOF D (boomFootProvenance removed, vessels.proof-d.json): exactly 1, 'a boom
+foot with no provenance'; the first PROOF D run timed out at 60 s under a load of 69 and was re-run with the 150 s
+waiter (r273/run_audit_8150.py) at load 43. The builder and the record were restored cmp-identical after each proof.**
+
+**MEASURED. Endurance's mizzen boom: jaws at y 6.20 (4.15 over the deck at 2.05, the record) against 7.25 before (5.2
+over the deck); the boom's outer end at y 8.75, x 26.6 (the r273 rule's bbox read at FINAL1, before it stood down);
+the cock 11.6° = atan((7.23 − 6.20) / (19.0 − 14.0)), the box's top 6.96 + 0.15 + the spar's radius 0.12 over the near
+face at x 19.0; boom 12.7 m along its line (gapAft·1.6 unchanged). Every other boom: 4.0° (the class minimum), the foot
+where it was. The topping lift on each: from the clew to base + 0.97·lower.**
+
+**THE FRAMES (r275/PREDICTIONS-close.md, written before scoring): sixteen MUST frames (the 74 at every shipwright
+bearing, the six gaff hulls' ship-* frames, aboard-preussen/-wyoming/-cable/-clipper and aboard), thirteen MAY
+(berth neighbours), the rest MUST NOT. Witnessed by r275/witness.py (150 s wait, load 43–49): Endurance from the port
+quarter before (:8149, web/ at HEAD) and after (:8150) — witness-endurance-pq-before/after.png — and Wyoming from
+the port beam after (witness-wyoming-beam-after.png). Read: the stern at 2x (1700..2500 x 950..1450 of the 2880 frame): BEFORE, the mizzen boom leaves the mast high on the pole and runs aft level to the sail's clew, passing the compass box with its foot 5.2 m over the deck; AFTER, the jaws sit visibly lower on the mast (the record's 4.15) and the boom rises aft over the box, the sail's foot rising with it to a clew above the box's top; the two frames differ by 0.309% of pixels inside a box spanning the mizzen from the deck to the masthead (r275 witness diff, threshold 24), which is the boom, the clew, the cloth's foot and the lift. Wyoming from the port beam: six gaff sails on six masts, each boom leaving its mast low and rising toward the stern, a thin line from each boom's end to the lower masthead; the lift lies in the sail's own plane and is hidden by the cloth from most bearings (0y⁶⁹). The r275 tree's frames scored by
+check --frame after the copy-in and the push are in the receipt commit that follows this one; the frames the clock
+did not reach are for r276's opening run to score and accept with this round's reason.**
+
+**Rule 0 on the Wyoming witness read whole (witness-wyoming-beam-after.png): a rendered six-masted schooner seen from her port beam on a lit blue sea with a low grey coast behind, her neighbours' bows at the frame's edges — not a chart. Three facts a viewer can read off it without a legend: she carries six masts, each with one four-sided sail hoisted on a gaff; two white deckhouses stand on her deck, one forward and one aft, with a boat stowed amidships between them; her hull is black with a pale strake at the sheer, and the foot of every sail rises toward the stern.**
+
+**Named residuals, in order:** (0y⁶³) CLOSED this round as a class: every gaff boom rises aft and is held by a lift.
+NEW (0y⁶⁷) THE CLASS MINIMUM IS UNREAD: 4° is a class figure; a plate of any of the seven hulls with her gaff sail set
+at ≥ 20 px/m would give a read (Wyoming under sail, Preussen's spanker at sea, Cutty Sark's or Victory's boom at the
+museum from abeam). NEW (0y⁶⁸) THE STOWED BOOM IS NOT TOPPED UP: on the furled build the boom keeps the set angle;
+Hurley's plates of Endurance in the ice show the spars topped well up when the canvas is off — a second angle per
+state, read off the ice plate at a usable scale. NEW (0y⁶⁹) THE LIFT IS ONE ROPE: a topping lift on a big boom is a
+pair, one each side of the sail, or a single lift with a pendant and tackle; drawn as one rope on the centreline it
+passes through the set cloth on the sail's own plane. (0y⁶²) (0y⁶⁴) (0y⁶⁰) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as
+r274 names them. (0y⁵⁷) (0y⁵⁸ CLOSED r274) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷)
+(0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v)
+(0t) (0u) as r245–r274 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶)
+(0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h)
+(0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance) still
+waits on the RMG original.**
+
+**r276 opens by checking `uptime` and `ps -r` FIRST; if mediaanalysisd or the Codex renderer is hot it waits, then
+runs the FULL ratchet at the clean HEAD, expecting the r275 MUST frames the clock did not reach to move (a cocked
+boom, a lift, a lifted clew on every gaff hull and the 74 at every bearing) and accepting each with this round's
+reason after LOOKING at its diff; if the frames take over a minute each after the third it stops the run and scores
+by check --frame. Then it takes (0y⁶⁷), a plate read for the boom's cock (the class figure), or (0y⁶⁰), the bulwark's
+stanchions and pin rail as a class, or (0y⁶⁸) the stowed boom's angle off the ice plate, or the survey's next
+never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788865724 at the build; the push and the live poll are in
+build/staging/r275/push.log, and the verified live value with the ratchet's result is recorded in the receipt
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r275 staging stays on disk uncommitted, the r211 convention.**
