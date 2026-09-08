@@ -2278,7 +2278,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       for (const p of belayPins) { if (p.sgn !== sgn || p.used || (p.rail || 'pin') !== rail) continue;
         const d = Math.abs(p.x - xw); if (d < bd) { bd = d; best = p; } }
     }
-    if (!best) { list.push([from, fallback()]); return; }
+    if (!best) { list.push([from, fallback()]); return null; }
     best.used = part;
     const head = new THREE.Vector3(best.x, best.y + BELAY.pinH / 2 - 0.03, best.z);
     const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
@@ -2291,7 +2291,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
       list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
     } else list.push([from, head]);
     belayed.push(rec);
+    return rec;
   };
+  /* r283 (0y⁸⁶): is any pin free on side sgn of the named rail — asked before a fall chooses its rail */
+  const freeOn = (sgn, rail) => belayPins.some(p => p.sgn === sgn && !p.used && (p.rail || 'pin') === rail);
   /* ── r280 (0y⁷²): THE FIFE RAIL ─────────────────────────────────────────────────────
      The jeers' falls came down the mast and ended on the deck beside it: a rope made fast to
      the planking. At the foot of a square-rigged mast a ship carries a FIFE RAIL — a rail on
@@ -2326,7 +2329,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
     }
     { const z0 = -zS + postS, z1 = zS - postS, np = Math.max(1, Math.floor((z1 - z0) / pinPitch));
       for (let k = 0; k <= np; k++) { const zp = z0 + (z1 - z0) * k / np;
-        pins.push({ x: xF, y: yF + 0.05, z: zp, sgn: zp < 0 ? -1 : 1, u, rail: 'fife', mast: mi, used: null }); } }
+        pins.push({ x: xF, y: yF + 0.05, z: zp, sgn: zp < 0 ? -1 : 1, u, rail: 'fife-fore', mast: mi, used: null }); } }   // r283: the fore rail's own name — a fall from aloft cannot reach these past the course yard on the mast's fore face
     belayPins.push(...pins);
     const R3a = a => a.map(q => +q.toFixed(3));
     const rec = { mast: mi, u, x: +xm.toFixed(3), yDeck: +yD.toFixed(3), mastR: +rM.toFixed(3), yRail: +yF.toFixed(3),
@@ -2540,7 +2543,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        trussed in place with no fall at all (crossjack, doubled-rig course, lower topsail,
        lower topgallant). The running gear below draws from this record, so a rope can
        only ever lead to the mechanism the yard actually rides. */
-    const crossYard = (yy, yardLen, kind, hoist) => {
+    const crossYard = (yy, yardLen, kind, hoist, listName) => {   // r283: listName is the record's word for the tier (mk.yards), kind the plan's
       /* ── A YARD IS AS THICK AS ITS OWN LENGTH ASKS — THE SPAR-MAKER'S OWN RATES ──────
          Steel 1794, "Proportional Diameters of Yards" (maritime.org full text): main and
          fore yards 7/10 of an inch to every yard of the length at the slings; topsail
@@ -2724,7 +2727,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
          needs so the sail can be handled. */
       const drop = yy - prevYard;
       prevYard = yy;
-      mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2 });   // r281: the yard's radius, for the clew garnet's block
+      mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2, name: listName || kind, kind });   // r281: the yard's radius, for the clew garnet's block; r283: the tier's names (the record's and the plan's), for its own gear figures
       if (FURLED) {
         /* the roll lies along the braced yard itself, between its arms, bunt at the slings */
         const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
@@ -3320,7 +3323,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         .sort((a, b) => PLAN[a][0] - PLAN[b][0])
         .forEach(nm => { const [f, r, kind] = PLAN[nm];
           crossYard(base + T * f, courseL * r,
-                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm]); });
+                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm); });
     }
 
     /* ── THE GEAR THE YARDS ARE WORKED BY ──────────────────────────────────────────────
@@ -3342,7 +3345,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* the deck attachment: the bulwark at station uu, on side sgn (railAt, buildRig's top, r279) */
       const rail = railAt;
       const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
-      const clewlines = [], buntlines = [], gearBlocks = [], gearRec = { clews: [], bunts: [] };   // r281 (0y⁸¹): the course's clewlines and buntlines
+      const clewlines = [], buntlines = [], gearBlocks = [], gearRec = { clews: [], bunts: [], tiers: [] };   // r281 (0y⁸¹): the course's clewlines and buntlines; r283 (0y⁸⁶): every tier's, in `tiers`
+      const upperIdx = { 1: 0, [-1]: 0 };   // r283: a running count of upper falls a side, to space their leads
       /* the fall's end (r277): the nearest free pin on this side, or the deck edge where the
          hull carries no pins; segments pushed onto `list`, the belay recorded for the mesh */
       const lead = (list, from, uu, sgn, part) => leadTo(list, from, uu, sgn, part, mi, () => rail(uu, sgn));
@@ -3362,7 +3366,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
         /* r281 (0y⁸¹): the clew garnet's block sits on the yard at gq of the half — the record's plate
            read where it has one (mk.courseGear.garnetAt), 0.45 as the class figure the furled clew has
            always hung at — and the hauled-up clew of a furled course hangs under THAT block: one figure */
-        const gq = (k === 0 && mk.courseGear && mk.courseGear.garnetAt) || 0.45;
+        /* r283 (0y⁸⁶): the fife rail on this hull, and this tier's own gear figures — the course's from
+           mk.courseGear (r281), an upper sail's from mk.upperGear[<tier name>], class figures where the
+           record is silent. The clew of a FURLED sail hangs under its clewline block, so the block's
+           station is one figure for both builds: the garnet at 0.45 of the half-yard (or the record's) on
+           a course, the QUARTER block beside the slings on an upper sail (0.17 of the half, or the record's)
+           — drawn only where the clewline is, so every hull without a fife rail is byte-identical. */
+        const fifeHere = S.__belay && S.__belay.spec.fifeRails.some(f => f.mast === mi);
+        const tierName = yd.name || (k === 0 ? 'course' : ((mk.yards || [])[k] || ('tier ' + k)));
+        const upper = k > 0;
+        const CG = upper ? ((mk.upperGear || {})[tierName] || (mk.upperGear || {})[yd.kind] || {}) : (mk.courseGear || {});
+        const gq = upper ? ((fifeHere && CG.clewAt) || (fifeHere ? 0.17 : 0.45)) : (CG.garnetAt || 0.45);
         const w2 = yd.half * (FURLED ? gq : 0.96);
         const clewY = FURLED ? yd.yy - 0.4 : yd.yy - yd.drop * 0.97;
         const clews = {};
@@ -3402,10 +3416,31 @@ function buildRig(S, group, mats, FINE, FURLED) {
            and are a named residual, because their falls need the deck-beside-the-mast end and
            a full ratchet. Furled: the clew hangs under its garnet block and the buntlines run
            from the roll to their blocks, hauled up. */
-        const fifeHere = S.__belay && S.__belay.spec.fifeRails.some(f => f.mast === mi);
-        if (k === 0 && fifeHere) {
-          const CG = mk.courseGear || {};
-          const buntAt = (Array.isArray(CG.buntlineAt) && CG.buntlineAt.length) ? CG.buntlineAt : [0.30, 0.65];
+        if (fifeHere) {
+          /* ── r283 (0y⁸⁶): EVERY TIER'S CLEWLINES AND BUNTLINES, ON A HULL WITH A FIFE RAIL ───
+             r281 drew the course's and left the topsail and the topgallant bare, with the fife rail's
+             pins standing empty. An upper square sail is taken in the same way, by lines a plate shows
+             on its fore face: a CLEWLINE from each clew up the canvas to a block under its own yard
+             beside the slings — the quarter block, the sheave the sheet of the sail above also leads
+             through — and BUNTLINES from cringles on the foot up the fore face to blocks under the
+             yard at the slings; from the yard every line goes in to a lead at the mast and down.
+             Hurley's plate of Endurance under full sail from ahead (build/hurley-fullsail.jpg,
+             2828x3912) shows on her deep topsail a line leaving each clew for the yard and meeting
+             it about 0.15-0.20 of the half-yard out from the mast, and lines from the foot converging
+             on the slings; on the topgallant the same, the clewlines meeting the yard nearer the mast
+             (r282/plate-mid-1x.png, plate-top-1x.png; r283/plate-*-yardcentre-2x.png). The record
+             carries that read (mk.upperGear) and class figures stand where it is silent. The falls of
+             a yard that stands ABOVE THE TOP come down abaft the top, over its after rim: the top's
+             lubber's hole is drawn the mast's own width (buildTop: hz = mastR), so a fall beside the
+             mast would pass through the platform; each fall leads from its mast block to a block over
+             the top's after edge, down past the edge to a block under it, and to its pin. The fife
+             rail's free side pins take the upper falls first (the topsail's clewlines, the heaviest);
+             when the rail is full the fall takes the nearest free pin on the bulwark's pin rail on its
+             own side, which is where a small fife rail's overflow belayed. The fore rail's six pins
+             stay bare: a fall from above cannot reach them past the course yard on the mast's fore
+             face without crossing it. A block at every turn (r279's rule). Furled: the clew hangs
+             under its quarter block and the buntlines run from the roll to their blocks. */
+          const buntAt = (Array.isArray(CG.buntlineAt) && CG.buntlineAt.length) ? CG.buntlineAt : (k <= 1 ? [0.30, 0.65] : [0.40]);
           const width = yd.half * 2 * 0.96, height = yd.drop * 0.97, half = yd.half;
           /* a point on the cloth's smooth surface: t = fraction of the half-yard out from the slings on
              side sgn (t=1 the clew), v = 0 at the head, 1 at the foot; `proud` metres before the cloth */
@@ -3418,11 +3453,37 @@ function buildRig(S, group, mats, FINE, FURLED) {
             const zb = Math.max(0, chord) * depth + proud;
             return V3(yd.cx - xw * sT - zb * cT, yd.yy + y, -xw * cT + zb * sT);
           };
-          const jb = base + (segHeads[0] !== undefined ? segHeads[0] - base : capY - base) * 0.86;   // just under the top, the jeers' station
+          const L0 = (segHeads[0] !== undefined ? segHeads[0] : capY) - base;
+          const jb = base + L0 * 0.86;            // just under the top, the jeers' station
+          const topY = base + L0 * 0.90;          // where the top stands (the rig's own placement)
+          const topR = B * 0.20, topAft = (S.year || 0) >= 1710 ? topR * 0.70 : topR;   // buildTop's D: the straight edge aft
           const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
           const PROUD = 0.14;
+          const tierRec = { k, name: tierName, clews: [], bunts: [], leads: [], clewAt: gq,
+            clewFrom: upper ? (CG.clewAt ? 'record: masts[].upperGear.' + tierName + '.clewAt' : 'class: the quarter block at 0.17 of the half-yard')
+                            : (CG.garnetAt ? 'record: masts[].courseGear.garnetAt' : 'class: 0.45 of the half-yard'),
+            buntlineAt: buntAt,
+            buntlineFrom: Array.isArray(CG.buntlineAt) ? 'record: masts[].' + (upper ? 'upperGear.' + tierName : 'courseGear') + '.buntlineAt'
+                        : (k <= 1 ? 'class: 0.30 and 0.65 of the half-yard' : 'class: 0.40 of the half-yard'),
+            overTop: upper && yd.yy > topY };
+          /* the fall from a mast block: over the top's after rim where the yard stands above the top,
+             then to the fife rail's nearest free side pin, or the bulwark's pin rail when it is full */
+          const fall = (list, from, sgn, part) => {
+            let end = from;
+            if (tierRec.overTop) {
+              const j = upperIdx[sgn]++;
+              const RB = V3(mx(topY) + topAft + 0.18 + 0.06 * j, topY + 0.12, sgn * (0.22 + 0.07 * j));
+              const LB = V3(RB.x, topY - 0.45 - 0.05 * j, RB.z);
+              list.push([from, RB], [RB, LB]); end = LB;
+              gearBlocks.push([part + ' lead over the top\'s rim', RB], [part + ' lead under the top', LB]);
+              tierRec.leads.push({ side: sideName(sgn), part, rim: R3(RB), under: R3(LB) });
+            }
+            const rail = freeOn(sgn, 'fife') ? 'fife' : 'pin';
+            const rec = leadTo(list, end, u + 0.01, sgn, part, mi, () => end, rail);
+            if (rec) rec.tier = k;
+          };
           for (const sgn of [1, -1]) {
-            /* the clew garnet */
+            /* the clewline: the clew garnet on the course, the quarter block's line on an upper sail */
             const GB = V3(yd.cx + sgn * sT * gq * half, yd.yy - yd.r - 0.05, sgn * cT * gq * half);
             const MB = V3(mx(yd.yy), yd.yy - yd.r - 0.10, sgn * (mastRAt(yd.yy) + 0.15));
             const clew = clews[sgn];
@@ -3431,28 +3492,41 @@ function buildRig(S, group, mats, FINE, FURLED) {
               for (let j = 1; j <= 4; j++) { const t = 1 + (gq - 1) * j / 4, v = 1 - j / 4;
                 const p = j < 4 ? sailPt(sgn, t, v, PROUD) : GB; clewlines.push([prev, p]); prev = p; } }
             clewlines.push([GB, MB]);
-            leadTo(clewlines, MB, u + 0.01, sgn, 'clewline', mi, () => MB, 'fife');
-            gearBlocks.push(['clew garnet block', GB], ['clew garnet lead', MB]);
-            gearRec.clews.push({ side: sideName(sgn), clew: R3(clew), block: R3(GB), mastBlock: R3(MB) });
-            /* the buntlines, from the foot up the fore face to the top */
+            fall(clewlines, MB, sgn, 'clewline');
+            gearBlocks.push([upper ? 'clewline quarter block' : 'clew garnet block', GB], [upper ? 'clewline lead' : 'clew garnet lead', MB]);
+            tierRec.clews.push({ side: sideName(sgn), clew: R3(clew), block: R3(GB), mastBlock: R3(MB) });
+            /* the buntlines, from the foot up the fore face: to blocks under the top on the course,
+               to blocks under the sail's own yard at the slings on an upper sail */
             buntAt.forEach((f, j) => {
-              const TB = V3(mx(jb - 0.15 * j), jb - 0.15 * j, sgn * (mastRAt(jb - 0.15 * j) + 0.18 + 0.10 * j));
+              const TB = upper
+                ? V3(yd.cx + sgn * sT * (0.06 + 0.05 * j) * half, yd.yy - yd.r - 0.05, sgn * cT * (0.06 + 0.05 * j) * half)
+                : V3(mx(jb - 0.15 * j), jb - 0.15 * j, sgn * (mastRAt(jb - 0.15 * j) + 0.18 + 0.10 * j));
+              const tIn = upper ? 0.06 + 0.05 * j : 0.06;
               let foot;
               if (FURLED) { foot = V3(yd.cx + sgn * sT * f * half - cT * 0.30, yd.yy + 0.30, sgn * cT * f * half + sT * 0.30); buntlines.push([foot, TB]); }
               else { foot = sailPt(sgn, f, 1, PROUD); let prev = foot;
-                for (let q = 1; q <= 4; q++) { const t = f + (0.06 - f) * q / 4, v = 1 - q / 4;
+                for (let q = 1; q <= 4; q++) { const t = f + (tIn - f) * q / 4, v = 1 - q / 4;
                   const p = sailPt(sgn, t, v, PROUD); buntlines.push([prev, p]); prev = p; }
                 buntlines.push([prev, TB]); }
-              leadTo(buntlines, TB, u + 0.01, sgn, 'buntline', mi, () => TB, 'fife');
-              gearBlocks.push(['buntline block', TB]);
-              gearRec.bunts.push({ side: sideName(sgn), at: f, foot: R3(foot), top: R3(TB) });
+              if (upper) {
+                const MBb = V3(mx(yd.yy), yd.yy - yd.r - 0.10 - 0.06 * (j + 1), sgn * (mastRAt(yd.yy) + 0.15 + 0.06 * (j + 1)));
+                buntlines.push([TB, MBb]); gearBlocks.push(['buntline block', TB], ['buntline lead', MBb]);
+                fall(buntlines, MBb, sgn, 'buntline');
+                tierRec.bunts.push({ side: sideName(sgn), at: f, foot: R3(foot), top: R3(TB), mastBlock: R3(MBb) });
+              } else {
+                fall(buntlines, TB, sgn, 'buntline');
+                gearBlocks.push(['buntline block', TB]);
+                tierRec.bunts.push({ side: sideName(sgn), at: f, foot: R3(foot), top: R3(TB) });
+              }
             });
           }
-          Object.assign(gearRec, { mast: mi, state: FURLED ? 'furled' : 'set', garnetAt: gq,
-            garnetFrom: (CG.garnetAt ? 'record: masts[].courseGear.garnetAt' : 'class: 0.45 of the half-yard'),
-            buntlineAt: buntAt, buntlineFrom: (Array.isArray(CG.buntlineAt) ? 'record: masts[].courseGear.buntlineAt' : 'class: 0.30 and 0.65 of the half-yard'),
-            leadFrom: 'class: the garnet in under the yard to the mast, the buntlines to blocks under the top, every fall down the mast\'s side abaft the yard to the fife rail',
-            provenance: CG.provenance || null, yard: { cx: +yd.cx.toFixed(3), yy: +yd.yy.toFixed(3), half: +half.toFixed(3), r: +yd.r.toFixed(3) }, topBlockY: +jb.toFixed(3) });
+          tierRec.yard = { cx: +yd.cx.toFixed(3), yy: +yd.yy.toFixed(3), half: +half.toFixed(3), r: +yd.r.toFixed(3) };
+          gearRec.tiers.push(tierRec);
+          if (!upper) Object.assign(gearRec, { mast: mi, state: FURLED ? 'furled' : 'set', garnetAt: gq, clews: tierRec.clews, bunts: tierRec.bunts,
+            garnetFrom: tierRec.clewFrom, buntlineAt: buntAt, buntlineFrom: tierRec.buntlineFrom,
+            leadFrom: 'class: the garnet in under the yard to the mast, the buntlines to blocks under the top, every fall down the mast\'s side abaft the yard to the fife rail; an upper sail\'s lines to blocks under its own yard, in to the mast, over the top\'s after rim and down to the fife rail or, when it is full, the pin rail (r283)',
+            provenance: CG.provenance || null, upperProvenance: (mk.upperGear && mk.upperGear.provenance) || null,
+            yard: tierRec.yard, topBlockY: +jb.toFixed(3), topY: +topY.toFixed(3) });
         }
         /* the fall, from the mechanism the yard was recorded to ride (crossYard's
            `hoist`), sides alternating by tier. A HOISTING yard's tie leads up from the
@@ -3503,14 +3577,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(belayTag(jm2, 'jeers'));   // r280: belayed to the fife rail
       /* r281 (0y⁸¹): the course's clewlines and buntlines, their record on each mesh, and a block at every turn */
       if (clewlines.length || buntlines.length) {
-        const gearCard = what => what + (gearRec.provenance ? ' Read off a plate of this ship: ' + gearRec.provenance.split('. ')[0] + '.' : ' Drawn to class figures; no plate of this ship has been read for them.')
-          + ' The falls come down the mast\'s side abaft the yard to the fife rail.';
+        const nUp = gearRec.tiers.filter(t => t.k > 0).length;
+        const gearCard = what => what + (gearRec.provenance ? ' The course\'s read off a plate of this ship: ' + gearRec.provenance.split('. ')[0] + '.' : ' The course\'s drawn to class figures; no plate of this ship has been read for them.')
+          + (nUp ? (gearRec.upperProvenance ? ' The ' + nUp + ' upper sail' + (nUp > 1 ? 's\'' : '\'s') + ' read off a plate: ' + gearRec.upperProvenance.split('. ')[0] + '.' : ' The upper sails\' drawn to class figures.') : '')
+          + ' The falls come down the mast\'s side abaft the yard to the fife rail' + (nUp ? ', the upper sails\' over the top\'s after rim, and to the bulwark\'s pin rail when the fife rail is full' : '') + '.';
         const cm = ropeMesh(clewlines, 0.012 + rr, ropeMat);
         if (cm) { cm.userData.courseGear = gearRec; cm.userData.belays = belaysOf('clewline');
-          group.add(tag(cm, 'clewline', null, gearCard(PARTS.clewline.what) + ` Made fast to ${cm.userData.belays.length} belaying pins on the fife rail; the falls are coiled there.`)); }
+          group.add(tag(cm, 'clewline', null, gearCard(PARTS.clewline.what) + ` ${gearRec.tiers.length} tier(s): ${gearRec.tiers.map(t => t.name).join(', ')}. Made fast to ${cm.userData.belays.length} belaying pins (${cm.userData.belays.filter(b => b.rail === 'fife').length} on the fife rail); the falls are coiled there.`)); }
         const bm3 = ropeMesh(buntlines, 0.011 + rr, ropeMat);
         if (bm3) { bm3.userData.courseGear = gearRec; bm3.userData.belays = belaysOf('buntline');
-          group.add(tag(bm3, 'buntline', null, gearCard(PARTS.buntline.what) + ` ${gearRec.bunts.length} buntlines, ${gearRec.buntlineAt.length} a side, made fast to ${bm3.userData.belays.length} belaying pins on the fife rail; the falls are coiled there.`)); }
+          group.add(tag(bm3, 'buntline', null, gearCard(PARTS.buntline.what) + ` ${gearRec.tiers.reduce((n, t) => n + t.bunts.length, 0)} buntlines on ${gearRec.tiers.length} tier(s) (${gearRec.tiers.map(t => t.name + ' ' + t.buntlineAt.length + ' a side').join(', ')}), made fast to ${bm3.userData.belays.length} belaying pins (${bm3.userData.belays.filter(b => b.rail === 'fife').length} on the fife rail); the falls are coiled there.`)); }
         const rB = (0.14 + B * 0.004) / 2, lB = 0.08 + B * 0.004;
         const Pp = [], Nn = [], Ii = []; let off0 = 0;
         for (const [, p] of gearBlocks) {
@@ -3527,7 +3603,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const gbm = new THREE.Mesh(bg, woodDark);
         const R3b = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
         gbm.userData.blocks = gearBlocks.map(([role, p]) => ({ role, at: R3b(p), mast: mi }));
-        group.add(tag(gbm, 'block', null, PARTS.block.what + ` ${gearBlocks.length} on this mast for the course's gear: a clew garnet block under the yard and its lead at the mast each side, and a block under the top for every buntline (r281).`));
+        group.add(tag(gbm, 'block', null, PARTS.block.what + ` ${gearBlocks.length} on this mast for the square sails' gear: on the course a clew garnet block under the yard and its lead at the mast each side and a block under the top for every buntline (r281); on each upper sail a quarter block and a buntline block under its own yard each side, their leads at the mast, and a block over and under the top's after rim for every fall that comes down from above the top (r283).`));
       }
     }
 
@@ -6015,15 +6091,18 @@ const PARTS = {
                   + 'yard, tons of timber, hangs in these; the drawing leads both falls down '
                   + 'their own side where Falconer crosses them behind the mast.' },
   clewline: { stage: 6, name: 'Clewlines',
-              what: 'The clew garnet: the line from each clew of the course up the fore face of the sail '
-                  + 'to a block under the yard about half-way out along the half-yard, in under the yard '
-                  + 'to the mast and down to the fife rail. Hauled, it brings the clew up to the yard — '
-                  + 'the first thing done to take a course in (r281).' },
+              what: 'The line from each clew of a square sail up the fore face of the canvas to a block under '
+                  + 'its own yard — the clew garnet, about half-way out along the half-yard, on the course; the '
+                  + 'quarter block beside the slings on a topsail or a topgallant — in under the yard to the '
+                  + 'mast and down to the rail. Hauled, it brings the clew up to the yard: the first thing '
+                  + 'done to take a square sail in (r281, r283).' },
   buntline: { stage: 6, name: 'Buntlines',
-              what: 'The lines bent to cringles along the foot of a square sail that run up its FORE face to '
-                  + 'blocks under the top and down the mast to the fife rail. Hauled, they lift the body '
+              what: 'The lines bent to cringles along the foot of a square sail that run up its FORE face — to '
+                  + 'blocks under the top from a course, to blocks under the sail\'s own yard at the slings from '
+                  + 'a topsail or a topgallant — and down the mast to the rail. Hauled, they lift the body '
                   + 'of the sail — the bunt — up to the yard so it can be furled; on a set sail they lie '
-                  + 'slack along the canvas, the lines a plate shows running up the face of a course (r281).' },
+                  + 'slack along the canvas, the lines a plate shows running up the face of every square '
+                  + 'sail on Endurance\'s fore mast (r281, r283).' },
   sheave:   { stage: 4, name: 'Masthead sheave',
               what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave '
                   + 'turns in a slot cut through the head of the pole itself, on a pin '

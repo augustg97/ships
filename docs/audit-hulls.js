@@ -4615,7 +4615,7 @@ if (off > yd.r + 0.20 || frac < 0.30 || frac > 0.70) say(v.id, 'a clew garnet bl
 if (Math.hypot(c.mastBlock[0] - xm, c.mastBlock[2]) > 0.6) say(v.id, 'a clew garnet lead off the mast', `${at}, ${c.side}: the lead block [${c.mastBlock}] is ${Math.hypot(c.mastBlock[0] - xm, c.mastBlock[2]).toFixed(2)} m from the mast's station in plan`);
 for (const q of [c.block, c.mastBlock]) if (!blocks.some(b => D3(b.at, q) < 0.05)) say(v.id, 'a turn with no block', `${at}, the ${c.side} clew garnet turns at [${q}] and no Blocks mesh records a block there`);
 }
-for (const b of bl) if (b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} clewline belays on rail '${b.rail}'`);
+for (const b of bl) if (!(b.tier > 0) && b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} clewline belays on rail '${b.rail}'`);
 if (!bl.length) say(v.id, 'clewlines belayed nowhere', `${at}: a Clewlines mesh on a hull with a fife rail records no belay`);
 }
 for (const o of bm) {
@@ -4631,9 +4631,94 @@ if (yd && b.top[1] < yd.c.y + 0.5) say(v.id, 'a buntline block under the yard', 
 if (Math.hypot(b.top[0] - xm, b.top[2]) > 0.8) say(v.id, 'a buntline block off the mast', `${at}, the ${b.side} buntline at ${b.at}: its top block is ${Math.hypot(b.top[0] - xm, b.top[2]).toFixed(2)} m from the mast's station in plan`);
 if (!blocks.some(q => D3(q.at, b.top) < 0.05)) say(v.id, 'a turn with no block', `${at}, the ${b.side} buntline at ${b.at} turns at [${b.top}] and no Blocks mesh records a block there`);
 }
-for (const b of bl) if (b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} buntline belays on rail '${b.rail}'`);
-if (bl.length < bunts.length) say(v.id, 'buntlines belayed nowhere', `${at}: ${bunts.length} buntlines recorded and ${bl.length} belay(s)`);
+for (const b of bl) if (!(b.tier > 0) && b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} buntline belays on rail '${b.rail}'`);
+if (bl.filter(b => !(b.tier > 0)).length < bunts.length) say(v.id, 'buntlines belayed nowhere', `${at}: ${bunts.length} course buntlines recorded and ${bl.filter(b => !(b.tier > 0)).length} belay(s) on the course tier`);
 }
+}
+}
+}
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const fifePinsM = [], clewM = [], buntM = [], sheetM = [], blockM = [], yardM = [], topG = [];
+g.traverse(o => { const p = tagOf(o); if (!p) return;
+if (!o.isMesh) { if (p.key === 'top' && p.name === 'Top') topG.push(new THREE.Box3().setFromObject(o)); return; }
+if (p.key === 'fifeRail' && p.name === 'Fife rail pins') fifePinsM.push(o);
+else if (p.key === 'clewline') clewM.push(o);
+else if (p.key === 'buntline') buntM.push(o);
+else if (p.key === 'sheet') sheetM.push(o);
+else if (p.key === 'block') blockM.push(o);
+else if (p.key === 'yard' && p.name === 'Yard') yardM.push(o); });
+if (fifePinsM.length) {
+const L = H.lwl || H.loa;
+const D3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+const near = (P, c) => { let d = 1e9; for (const q of P) d = Math.min(d, Math.hypot(q.x - c[0], q.y - c[1], q.z - c[2])); return d; };
+const blocks = [].concat(...blockM.map(o => o.userData.blocks || []));
+const sheetP = [].concat(...sheetM.map(pts));
+const axisOf = P => { const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0; for (const q of P) { const a = q.x - c.x, b = q.y - c.y, e = q.z - c.z; xx += a * a; xy += a * b; xz += a * e; yy += b * b; yz += b * e; zz += e * e; }
+let d = new THREE.Vector3(1, 0, 0); for (let it = 0; it < 30; it++) { d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize(); }
+let tMin = 1e9, tMax = -1e9; for (const q of P) { const t = q.clone().sub(c).dot(d); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+let rMax = 0; for (const q of P) { const w = q.clone().sub(c); const t = w.dot(d); if (Math.abs(t) < (tMax - tMin) * 0.1) rMax = Math.max(rMax, w.sub(d.clone().multiplyScalar(t)).length()); }
+return { c, d, half: (tMax - tMin) / 2, r: rMax }; };
+const yards = yardM.map(o => axisOf(pts(o))).filter(y => Math.abs(y.c.z) < 0.3 && Math.abs(y.d.z) >= 0.85);
+const onYard = (q, yd) => { const w = new THREE.Vector3(q[0] - yd.c.x, q[1] - yd.c.y, q[2] - yd.c.z); const t = w.dot(yd.d); return { off: w.clone().sub(yd.d.clone().multiplyScalar(t)).length(), frac: Math.abs(t) / yd.half }; };
+for (let i = 0; i < (H.masts || []).length; i++) {
+const m = H.masts[i]; if (m.rig !== 'square' || !(m.yards || []).length || m.yards.length < 2) continue;
+const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+const cm = clewM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+const bm = buntM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+const tiers = (cm[0] && cm[0].userData.courseGear.tiers) || (bm[0] && bm[0].userData.courseGear.tiers) || [];
+const cand = yards.filter(y => Math.abs(y.c.x - xm) < 1.5).sort((a, b) => a.c.y - b.c.y);
+const top = topG.filter(b => Math.abs((b.min.x + b.max.x) / 2 - xm) < 2.0).sort((a, b) => a.min.y - b.min.y)[0] || null;
+let anyUpper = false;
+for (let k = 1; k < m.yards.length; k++) {
+const name = m.yards[k], tk = `${at}, tier ${k} (${name})`;
+const t = tiers.find(q => q.k === k);
+if (!t || !t.clews || !t.clews.length) { say(v.id, 'an upper sail with no clewlines', `${tk}: a fife rail and ${m.yards.length} yards, and no clewline is recorded for this tier — its clews cannot be hauled up to the yard`); }
+if (!t || !t.bunts || !t.bunts.length) { say(v.id, 'an upper sail with no buntlines', `${tk}: a fife rail and ${m.yards.length} yards, and no buntline is recorded for this tier — its foot cannot be lifted to the yard`); }
+if (!t) continue;
+anyUpper = true;
+const yd = cand[k] || null;
+if (!yd) { say(v.id, 'upper gear with no yard', `${tk}: no ${k + 1}th Yard mesh within 1.5 m of the station to read the blocks against`); continue; }
+const cP = [].concat(...cm.map(pts)), bP = [].concat(...bm.map(pts));
+for (const c of t.clews || []) {
+const dS = near(sheetP, c.clew);
+if (dS > 0.10) say(v.id, 'an upper clewline that does not start at the clew', `${tk}, ${c.side}: the recorded clew [${c.clew}] is ${dS.toFixed(3)} m from the nearest Sheets vertex`);
+for (const [nm, q] of [['clew', c.clew], ['block', c.block], ['mast lead', c.mastBlock]]) { const d = near(cP, q); if (d > 0.10) say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${c.side} clewline's ${nm} [${q}]: nearest Clewlines vertex ${d.toFixed(3)} m away`); }
+const oy = onYard(c.block, yd);
+if (oy.off > yd.r + 0.20 || oy.frac < 0.03 || oy.frac > 0.35) say(v.id, 'an upper clewline block off the yard\'s quarter', `${tk}, ${c.side}: the block [${c.block}] stands ${oy.off.toFixed(2)} m off the yard's axis (radius ${yd.r.toFixed(2)}) at ${oy.frac.toFixed(2)} of the half-yard (0.03–0.35 wanted)`);
+if (Math.hypot(c.mastBlock[0] - yd.c.x, c.mastBlock[2]) > 0.6) say(v.id, 'an upper clewline lead off the mast', `${tk}, ${c.side}: the lead block [${c.mastBlock}] is ${Math.hypot(c.mastBlock[0] - yd.c.x, c.mastBlock[2]).toFixed(2)} m from the yard's slings in plan (the raked axis at this height, not the foot's station)`);
+for (const q of [c.block, c.mastBlock]) if (!blocks.some(b => D3(b.at, q) < 0.05)) say(v.id, 'a turn with no block', `${tk}, the ${c.side} clewline turns at [${q}] and no Blocks mesh records a block there`);
+}
+const clewY = (t.clews || []).map(c => c.clew[1]);
+for (const side of ['port', 'starboard']) { const nS = (t.bunts || []).filter(b => b.side === side).length; if (nS < 1) say(v.id, 'too few upper buntlines', `${tk}: no buntline on the ${side} side (one or more wanted)`); }
+for (const b of t.bunts || []) {
+for (const [nm, q] of [['foot', b.foot], ['yard block', b.top], ['mast lead', b.mastBlock]]) { if (!q) { say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${b.side} buntline at ${b.at}: no ${nm} recorded`); continue; } const d = near(bP, q); if (d > 0.10) say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${b.side} buntline at ${b.at}: its ${nm} [${q}] has its nearest Buntlines vertex ${d.toFixed(3)} m away`); }
+if (clewY.length) { const drop = yd.c.y - Math.min(...clewY), under = (yd.c.y - b.foot[1]) / drop;
+if (under < 0.55 || under > 1.05) say(v.id, 'an upper buntline that does not start at the foot', `${tk}, the ${b.side} buntline at ${b.at}: its foot [${b.foot}] hangs ${under.toFixed(2)} of the clew's drop under the yard (0.55–1.05 wanted)`); }
+const oy = onYard(b.top, yd);
+if (oy.off > yd.r + 0.20 || oy.frac > 0.30) say(v.id, 'an upper buntline block off its yard', `${tk}, the ${b.side} buntline at ${b.at}: its block [${b.top}] stands ${oy.off.toFixed(2)} m off the yard's axis at ${oy.frac.toFixed(2)} of the half-yard (on the yard within 0.30 of the slings wanted)`);
+if (b.mastBlock && Math.hypot(b.mastBlock[0] - yd.c.x, b.mastBlock[2]) > 0.6) say(v.id, 'an upper buntline lead off the mast', `${tk}, the ${b.side} buntline at ${b.at}: its lead is ${Math.hypot(b.mastBlock[0] - yd.c.x, b.mastBlock[2]).toFixed(2)} m from the yard's slings in plan`);
+for (const q of [b.top, b.mastBlock]) if (q && !blocks.some(r => D3(r.at, q) < 0.05)) say(v.id, 'a turn with no block', `${tk}, the ${b.side} buntline at ${b.at} turns at [${q}] and no Blocks mesh records a block there`);
+}
+const wantLeads = (t.clews || []).length + (t.bunts || []).length;
+if (top && yd.c.y > top.max.y) {
+if (!t.overTop || (t.leads || []).length < wantLeads) say(v.id, 'an upper fall through the top', `${tk}: the yard stands ${(yd.c.y - top.max.y).toFixed(2)} m over the top and ${(t.leads || []).length} of ${wantLeads} falls record a lead over its rim`);
+for (const ld of t.leads || []) {
+const P = ld.part === 'clewline' ? cP : bP;
+for (const [nm, q] of [['rim lead', ld.rim], ['under lead', ld.under]]) { const d = near(P, q); if (d > 0.10) say(v.id, 'upper gear drawn elsewhere', `${tk}, the ${ld.side} ${ld.part}'s ${nm} [${q}]: nearest vertex of its mesh ${d.toFixed(3)} m away`);
+if (!blocks.some(r => D3(r.at, q) < 0.05)) say(v.id, 'a turn with no block', `${tk}, the ${ld.side} ${ld.part} turns at its ${nm} [${q}] and no Blocks mesh records a block there`); }
+if (ld.rim[1] < top.max.y || ld.rim[0] < top.max.x) say(v.id, 'a rim lead not over the top\'s after edge', `${tk}, the ${ld.side} ${ld.part}: its rim lead [${ld.rim}] is not over the top (top y ${top.min.y.toFixed(2)}–${top.max.y.toFixed(2)}, after edge x ${top.max.x.toFixed(2)})`);
+if (ld.under[1] > top.min.y) say(v.id, 'an under lead not under the top', `${tk}, the ${ld.side} ${ld.part}: its under lead [${ld.under}] stands over the top's underside ${top.min.y.toFixed(2)}`);
+}
+}
+const belaysK = [].concat(...cm.map(o => (o.userData.belays || []).filter(b => b.tier === k)), ...bm.map(o => (o.userData.belays || []).filter(b => b.tier === k)));
+if (belaysK.length < wantLeads) say(v.id, 'upper gear belayed nowhere', `${tk}: ${wantLeads} falls and ${belaysK.length} belay(s) recorded for the tier`);
+for (const b of belaysK) if (b.rail !== 'fife' && b.rail !== 'pin') say(v.id, 'upper gear made fast off any rail', `${tk}: the ${b.side} ${b.part} belays on rail '${b.rail}'`);
+}
+if (anyUpper && !m.upperGear) say(v.id, 'upper gear with no answer', `${at}: clewlines and buntlines drawn on the tiers above the course and masts[${i}] says nothing of them (upperGear: figures per tier, or a provenance naming the plate read)`);
 }
 }
 }
