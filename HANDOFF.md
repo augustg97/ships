@@ -24554,8 +24554,8 @@ Two commits close the round (900e8a3 builder + record + audit + docs + handoff +
 **r275 addendum, after the receipt: shipwright-furled checked on the r275 tree at 04:31 — 0.268% 0.044 CHANGED — and
 accepted after its diff was read (r275/diff-shipwright-furled.png: the mizzen's topping lift from the lower masthead
 to the driver's clew off the frame's right edge, and the stowed roll and lowered gaff at the mizzen's foot, nothing
-else); the furled build's roll lies along the cocked boom and the audit's boom rules pass on it. Eight frames of the
-r275 tree are now accepted (ship-endurance, shipwright, ship-wyoming, ship-great-eastern, ship-preussen,
+else); the furled build's roll lies along the cocked boom and the audit's boom rules pass on it. Nine frames of the
+r275 tree are now accepted (ship-endurance, shipwright, ship-wyoming, ship-great-eastern, ship-preussen, shipwright-astern 0.659%/0.210 at 04:35,
 ship-clipper, ship-steamer, shipwright-furled); shipwright-ahead, shipwright-astern, shipwright-hounds, the five
 aboard-* frames named in PREDICTIONS-close.md and the thirteen MAY neighbours are r276's to score and accept with
 this round's reason.**
