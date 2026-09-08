@@ -274,6 +274,16 @@ def stamp_and_copy():
             out = minify_css(raw) if f.endswith(".css") else minify_js(raw)
             open(fp, "w", encoding="utf-8").write(out)
             mb += len(raw.encode()); ma += len(out.encode())
+    # r271: the same rule for the page itself. web/index.html keeps its HTML comments (3.3 KB:
+    # which script must load before which, and why); docs/ ships the page without them. A
+    # conditional comment would be kept; nothing the browser renders or runs is inside an HTML
+    # comment. Measured at r271: six headProvenance strings (2,022 bytes) put first paint 1,510
+    # bytes over the 8.6 MB line, and the comments were 3,284. The line is not moved.
+    ip = os.path.join(DOCS, "index.html")
+    raw = open(ip, encoding="utf-8").read()
+    out = re.sub(r"<!--(?!\[if).*?-->", "", raw, flags=re.S)
+    open(ip, "w", encoding="utf-8").write(out)
+    mb += len(raw.encode()); ma += len(out.encode())
     log(f"   minified docs/ {mb/1e6:.2f} MB -> {ma/1e6:.2f} MB "
         f"({100*(mb-ma)/max(1,mb):.0f}% of script and style bytes)")
     # ── COMPACT THE PUBLISHED DATA ────────────────────────────────────────────────────

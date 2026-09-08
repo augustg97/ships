@@ -5924,6 +5924,26 @@
       }
     }
 
+    /* ── A-HEAD-ATTESTED (round 271, Endurance): THE HEAD IS THE RECORD'S, AND THE RECORD SAYS
+       WHERE IT GOT IT. `head` draws a knee of the head standing before the stem, one or two
+       headrails a side and three turns of rope gammoning — the beakhead of the sixteenth to
+       nineteenth centuries — and six records carried it, one of them a 1912 polar barquentine
+       whose builder's section and whose plates show a plain raked stem with the bowsprit
+       rising from the stemhead. Nothing in the geometry can tell a head that belongs from
+       one that does not; only the record can, so the rule is the r108 pattern and convicts
+       SILENCE: a head with no headProvenance. With it, the two builder-record mismatches
+       the meshes can see — a head drawn where the record has none, a head declared and not
+       drawn. */
+    if (H.head) {
+      if (!H.headProvenance)
+        say(v.id, 'a head with no provenance',
+            `hull.head ${H.head} declared, hull.headProvenance absent — a knee, ${H.head >= 2 ? 'two rails' : 'a rail'} a side and gammoning drawn on no stated ground`);
+      if (!part.head) say(v.id, 'declared but not drawn', 'the head');
+    } else if (part.head) {
+      say(v.id, 'a head the record denies',
+          `${part.head.n} head mesh(es) drawn, x ${part.head.x[0].toFixed(1)}..${part.head.x[1].toFixed(1)} m; hull.head ${H.head === undefined ? 'absent' : H.head}`);
+    }
+
     /* ── THE FULL-RIGGER'S RIG IS THE RECORD'S RIG (round 44, Preussen). Three rules from
        one survey, the same class as Wyoming's: right count, in the right place, gated on
        the record. */

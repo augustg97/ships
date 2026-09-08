@@ -4199,6 +4199,15 @@ say(v.id, 'wheel stands on nothing',
 `base at ${part.helm.y[0].toFixed(1)} m, deck there ${HSw.deck(H.helmAt).toFixed(1)} m`);
 }
 }
+if (H.head) {
+if (!H.headProvenance)
+say(v.id, 'a head with no provenance',
+`hull.head ${H.head} declared, hull.headProvenance absent — a knee, ${H.head >= 2 ? 'two rails' : 'a rail'} a side and gammoning drawn on no stated ground`);
+if (!part.head) say(v.id, 'declared but not drawn', 'the head');
+} else if (part.head) {
+say(v.id, 'a head the record denies',
+`${part.head.n} head mesh(es) drawn, x ${part.head.x[0].toFixed(1)}..${part.head.x[1].toFixed(1)} m; hull.head ${H.head === undefined ? 'absent' : H.head}`);
+}
 {
 const stations = (H.masts || [])
 .map(mk => ({ mk, x: (mk.at - 0.5) * H.lwl }))

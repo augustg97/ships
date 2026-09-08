@@ -5,18 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ships — how we learned to cross the ocean</title>
 <meta name="description" content="The world ocean as a machine of wind, current and ice — and the ships built to cross it.">
-<link rel="stylesheet" href="css/styles.css?v=1788842308">
-<meta name="data-version" content="1788842308">
+<link rel="stylesheet" href="css/styles.css?v=1788848852">
+<meta name="data-version" content="1788848852">
 </head>
 <body>
 
-<!-- The canvas is a REPLACED element: position:fixed;inset:0 does NOT stretch it, and
-     measuring clientWidth to set width is a feedback loop that grows it every frame.
-     Its CSS size is 100vw/100vh so the CSS size never depends on the attribute. -->
+
 <canvas id="gl"></canvas>
 
-<!-- Chart lettering over the globe. Ports and seas are NAMED, not dotted: on a chart the
-     label IS the mark, and a name carries more than a symbol ever does. -->
+
 <div id="labels"></div>
 
 <div id="splash">
@@ -27,17 +24,10 @@
   </div>
 </div>
 
-<!-- ── readout ─────────────────────────────────────────────────────── -->
-<!-- ── TABS ─────────────────────────────────────────────────────────
-     Three views of the same evidence, each reachable at any time. The Shipwright and the
-     Action were previously buried inside the Yard, which meant that unless you already knew
-     they existed you could not find them. A view nobody can reach is a view that does not
-     exist. -->
+
+
 <nav id="tabs">
-  <!-- ⚠ THE TAB ORDER IS A CLAIM ABOUT WHERE YOU ARE. The Shipwright opens by default, so a
-       list that still reads Sea / Shipwright / Action puts the lit tab in the middle and the
-       eye reads the first entry as the place it started from. First in the room, first in the
-       line. -->
+  
   <button class="tab on" data-view="ship"><b>The Shipwright</b></button>
   <button class="tab" data-view="sea"><b>The Sea</b></button>
   <button class="tab" data-view="action"><b>The Action</b><span>a fleet from the water</span></button>
@@ -49,7 +39,7 @@
   <div class="ro-stats" id="roStats"></div>
 </div>
 
-<!-- ── right rail: the sea ─────────────────────────────────────────── -->
+
 <div id="rail" class="panel">
   <div class="rail-body">
     <h3 class="rule">The sea</h3>
@@ -67,13 +57,13 @@
   </div>
 </div>
 
-<!-- ── voyages ─────────────────────────────────────────────────────── -->
+
 <div id="voyages" class="panel">
   <h3 class="rule">Voyages of this era</h3>
   <div id="voyList"></div>
 </div>
 
-<!-- ── info card ───────────────────────────────────────────────────── -->
+
 <div id="card" class="panel hidden">
   <button id="cardClose" class="x">×</button>
   <div class="c-eyebrow" id="cEyebrow"></div>
@@ -85,9 +75,7 @@
   <div class="c-cite" id="cCite"></div>
 </div>
 
-<!-- ── eras: the timeline is a set of PERIODS, not a slider over everything ──────────
-     A linear scrubber over 70,000 years put every event on screen at once and explained
-     nothing. Each era now filters the world to itself and says what changed. -->
+
 <div id="eras">
   <div class="era-strip" id="eraStrip"></div>
   <div class="era-detail">
@@ -103,7 +91,7 @@
   </div>
 </div>
 
-<!-- ── the yard: a vessel, generated ───────────────────────────────── -->
+
 <div id="yard" class="hidden">
   <canvas id="yardCanvas"></canvas>
   <div id="yardNote"></div>
@@ -121,10 +109,7 @@
   </div>
 </div>
 
-<!-- ── the campaign bar: a battle that moves ────────────────────────
-     Shown only while a campaign is playing. The date, the wind of that day from the
-     commander's own journal, and which fleet holds the weather gauge — the last computed
-     from the two fleets' geometry, not asserted. -->
+
 <div id="campBar" class="panel hidden">
   <div class="cb-head">
     <span class="cb-day" id="campDay">—</span>
@@ -136,7 +121,7 @@
   <div class="cb-text" id="campText"></div>
 </div>
 
-<!-- ── the shipwright: take a ship apart, and put it together ──────── -->
+
 <div id="shipwright" class="hidden">
   <canvas id="swCanvas"></canvas>
   <div id="swLabels"></div>
@@ -169,7 +154,7 @@
   <div id="swFleet"></div>
 </div>
 
-<!-- ── the action: a fleet engagement from the water ───────────────── -->
+
 <div id="battle" class="hidden">
   <canvas id="btCanvas"></canvas>
   <div id="btBar">
@@ -188,23 +173,22 @@
   </div>
 </div>
 
-<!-- ── about ───────────────────────────────────────────────────────── -->
+
 <div id="about" class="sheet hidden">
   <button id="aboutClose" class="x">×</button>
   <div class="sheet-in" id="aboutBody"></div>
 </div>
 
 <script src="js/three.min.js"></script>
-<!-- GENERATED from web/shaders/*.glsl by Modeling Studio tools/glsl.py — must load
-     BEFORE any script that references SHADERS[...]. Regenerate after editing a .glsl. -->
-<script src="js/shaders.js?v=1788842308"></script>
-<script src="js/sea.js?v=1788842308"></script>
-<script src="js/hull.js?v=1788842308"></script>
-<script src="js/shipwright.js?v=1788842308"></script>
-<script src="js/yard.js?v=1788842308"></script>
-<script src="js/passage.js?v=1788842308"></script>
-<script src="js/battle.js?v=1788842308"></script>
-<script src="js/app.js?v=1788842308"></script>
-<script src="js/route.js?v=1788842308"></script>
+
+<script src="js/shaders.js?v=1788848852"></script>
+<script src="js/sea.js?v=1788848852"></script>
+<script src="js/hull.js?v=1788848852"></script>
+<script src="js/shipwright.js?v=1788848852"></script>
+<script src="js/yard.js?v=1788848852"></script>
+<script src="js/passage.js?v=1788848852"></script>
+<script src="js/battle.js?v=1788848852"></script>
+<script src="js/app.js?v=1788848852"></script>
+<script src="js/route.js?v=1788848852"></script>
 </body>
 </html>

@@ -23879,3 +23879,125 @@ back by CODE strings (the r237 correction): docs/js/hull.js derives the carrier'
 THE RATCHET: OPENING FULL RATCHET at the clean r269 HEAD 7f00af8 (START 20:55:13 load 6.83 6.32 7.92 HEAD 7f00af8) STOPPED at its 20th frame at 21:15:43 — 60 s a frame beside the chain's browser, and the close needed the machine; its 20 captured frames were copied to r270/current-clean before any check --frame and scored offline by the tool's own compare: 20 frames scored offline; movers 0. The r269 receipt's full ratchet (65 frames, 0 movers at the r268 HEAD; r269 changed no file a frame loads) already scores the tree before this round. THE r270 TREE (web/ after the copy-in, scored by check --frame per PREDICTIONS-close.md): aboard-carrier 0.303% 0.165 CHANGED; ship-azzam 0.023% 0.028 ok; ship-carrier 1.679% 0.649 CHANGED; ship-container 0.015% 0.015 ok; ship-dreadnought 0.047% 0.019 ok; ship-ever-given 0.034% 0.024 ok; ship-steamer 0.014% 0.019 ok; ship-yamato 0.006% 0.001 ok; ship-carrier accepted; 1.679%/0.649
 aboard-carrier accepted; 0.303%/0.165
 Two commits close the round (da542be audit + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 271 — 2026-09-07 — Endurance loses the beakhead she never carried: her record said head: 1, so the builder drew a pale knee of the head standing before her stem, an S-curved headrail a side and three turns of rope gammoning, the beakhead of the sixteenth to nineteenth centuries, on a 1912 polar barquentine whose builder's section and whose plates show a plain raked stem with the bowsprit rising from the stemhead; the record now says 0 and names both plates, the five hulls that keep a head say where theirs come from, a new rule convicts a head with no provenance, a head the record denies and a head declared and not drawn, no builder line changed, and the opening full ratchet ran at the clean r270 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r270 ordered r271's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet until globe-default
+had landed. The load at the open was 4.06 (21:53), nothing of this project's running, so the full ratchet was launched
+at 21:54:18 at HEAD d4a205f (r271/open-ratchet.out) and nothing touched the machine until globe-default had landed
+(21:55). Every edit was made on a COPY of web/ served on :8150 (build/staging/r271/web, every file a symlink to web/
+except audit-hulls.js, js/hull.js and data/vessels.json, which are copies; the :8150 server restarted from it at 22:08);
+the chain — PROOF A, FINAL, PROOF B, three witnesses — ran one browser at a time beside the ratchet from 22:28
+(r271/chain.log). The r270 list of residuals was read in order: no overhead of the Ford with her air wing surfaced,
+no plate square to the canoe's side, no scaled plan, no truss plate, and (0y⁴⁹) is a 0.1 m coil under a pixel in every
+frame, so the round took the survey's next never-spun hull, Endurance, by looking.**
+
+**THE SPIN (r271/spin-endurance-before, twelve bearings on :8150 at HEAD's files, 22:01): from every bow bearing the
+stem carries a pale cutwater knee projecting forward under the bowsprit, a headrail curving from the bow planking to
+the knee on each side, and the gammoning wound over the spar (crop-b090-bow.png, crop-low090-bowtrue.png at 3.5x). The
+record's hull.head was 1, and hull.js draws grade 1 as the knee, one rail a side and three turns of gammoning (the head
+builder at line 12646). THE PLATES: the Framnæs longitudinal section (as Polaris, RMG J9266, the web copy at 1024x322 px,
+~16.9 px/m along the hull, build/endurance-plan-crop2.png at the bow) draws a straight raked stem — the 1.3 m baulk the
+card names — with the bowsprit rising from the stemhead: no knee of the head, no rail, no gammoning slot. Hurley's
+heeled plate (build/endurance-heeled.png, 1280x995 px, bow-on and foreshortened; r271/plate-heeled-bow-5x.png) shows the
+same plain stem under the bowsprit. The head was an eighteenth-century fitting on a 1912 Norwegian polar barquentine,
+in every bow view since the record was written. The other five heads in the fleet — the fluyt and the slave ship at
+grade 1, the East Indiaman and the 74 at grade 2, the clipper at grade 1 — are period-right and were carried with the
+same silence: no record said where its head came from.**
+
+**THE RECORD (web/data/vessels.json; r271/apply-record-edits.py, line-level so the file's formatting is untouched, every
+edit asserted and the result json-parsed; vessels.before.json and vessels.after.json, 8 changed lines): Endurance's
+hull.head is 0 and her headProvenance says NO HEAD, names the section and the heeled plate with their pixel sizes and
+what each can and cannot give (the heeled plate bounds the shape and gives no station), and records what the old value
+drew. The five hulls that keep a head gain a headProvenance naming it a type-period CLASS DEFAULT with the source the
+class stands on (Witsen 1671 and the van de Veldes for the fluyt; the Batavia reconstruction and Vasa's head for the
+retourschip; Steel 1794 and Victory's head for the 74; Baker's Fragments for the late-sixteenth-century ship; Cutty
+Sark as preserved for the clipper). No other value in any record changed.**
+
+**THE BUILDER: web/js/hull.js is cmp-identical to HEAD's. The head builder already draws nothing when the record says 0
+(`const grade = S.head || 0; if (!grade) return;`); the fault was the record's value and the record's silence, and the
+system fix is the rule that ends the silence. The bowsprit keeps its bobstay, which is built by the rig and not by the
+head.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r271/apply-audit-edits.py, one replace asserted; parsed by node's
+vm). A-HEAD-ATTESTED, beside the wheel rule: for a hull whose record declares a head, no headProvenance is convicted
+('a head with no provenance', naming the grade and what it draws) and no head mesh is convicted ('declared but not
+drawn'); for a hull whose record declares none, a head mesh is convicted ('a head the record denies', with the mesh
+count and x extent). The rule is the r108 pattern — it convicts silence — because nothing in the geometry can tell a
+head that belongs from one that does not; only the record can.**
+
+**PROOFS (r271/chain.log; the r271 audit on :8150, one browser at a time beside the ratchet). PROOF A (HEAD's builder
+and HEAD's record under the r271 audit, 22:32): 6 problems, one per head — "fluyt | a head with no provenance |
+hull.head 1 declared, hull.headProvenance absent — a knee, a rail a side and gammoning drawn on no stated ground", the
+same for the slave ship, the clipper and Endurance, and "two rails a side" for the East Indiaman and the 74. FINAL
+(builder unchanged, the r271 record and audit): "checked 33 hulls, 0 problems" (22:35). PROOF B (the :8150 builder made to draw a head on a record
+that says 0 — `S.head === 0 ? 1 : (S.head || 0)` — the record unchanged): exactly 1, "endurance | a head the record denies | 4 head mesh(es) drawn, x -24.1..-17.9 m; hull.head 0" (22:38); the builder restored (cmp). No
+PROOF C: a rule that reads the record cannot be shown an old geometry it would convict, and the r266 pattern does not
+apply to a rule that convicts silence.**
+
+**WITNESSED (r271/witness-endurance-bow-before.png from :8149 — web/ at HEAD — and -after.png from :8150, both b=60,
+l=5, z=0.75, 2880 × 1800; witness-endurance-profile-after.png at b=270, l=4, z=0.9). From the port bow, before: a pale knee of the head standing before the stem under the bowsprit, the headrail curving down from the bow planking to it, the gammoning's turns over the spar at the stemhead, and the bobstay under the bowsprit to the stem; after: the stem plain and dark to the stemhead, the bowsprit rising from it, the bobstay where it was, the cathead and the anchor unchanged. Nothing abaft the foremast differs between the two frames. The profile from the starboard beam shows the plain stem's rake, the bowsprit and the jibs, the four square sails on the fore, the gaff main and mizzen, the funnel and the two houses.**
+
+**Rule 0 on the bow witness read whole (r271/witness-endurance-bow-after.png): a rendered barquentine under sail seen from her port bow over a lit sea, not a chart: the cloth shows its seams and its shading, the hull its planking and the light on its topsides, the deck its planks, the sea its ripple. Three facts a viewer can read off it without a legend: she is square-rigged on the foremast only and fore-and-aft on the other two; a black funnel stands between the main and the mizzen, so she has an engine; her stem is a plain raked timber under the bowsprit, with no beak.**
+
+**THE CLOSE, TWICE. The first r271 process was killed by the loop driver at 23:13 for overrunning its 80 minutes, at
+the close, with nothing committed. Its close-out script built docs/ at 22:56 and then compared docs/js/hull.js with
+web/js/hull.js byte for byte, which always differs because docs/ is minified (the r270 memory), so it stopped before
+the handoff and the commit; the build it re-ran at 23:10 refused at the first-paint budget — 8,601,510 bytes against the
+8.6 MB line, 1,510 over, the six headProvenance strings being 2,022 of them — and the edit it then made to
+build/build_site.py to strip the page's HTML comments from docs/ put `import re` above `from __future__` and did not
+parse. The second process (23:23) recovered it the r257 way: web/js/hull.js, web/data/vessels.json, web/audit-hulls.js
+and Research/audit-hulls.js were cmp-identical to the r271 copies (hull.after.js, vessels.after.json,
+audit-hulls.after.js), the two bow witnesses were read again (the knee, the rail and the gammoning in the before, the
+plain stem in the after), the build-script edit was saved as r271/build_site.r271-attempt.py and reverted, and the same
+compaction was written where the minify loop already runs and `re` is already imported: docs/index.html ships without
+its 15 HTML comments (3,284 bytes; web/index.html keeps every one), the same rule as the minified scripts and the
+compacted JSON, and the budget line is not moved. The build then passed at 8,598,226 bytes, 1,774 under. The seven
+frames PREDICTIONS-close.md names were scored again by check --frame on the final tree (r271/checks-recovery.log) and
+their rows are in the receipt.**
+
+**Named residuals, in order:** NEW (0y⁵⁶) THE BULWARK: Hurley's heeled plate at 4x (r271/plate-heeled-stern-4x.png) shows a
+solid bulwark along the whole side with a cap rail and a pale sheer band under it, the lifebuoy hung on the bulwark and
+the name on the counter; the model draws an open deck edge with a low cap and no bulwark, so from the beam the deck and
+everything on it stand in view over the side. A class change (the deck edge, the rail, the chainplates and the davits all
+read the deck's edge) and a measured height are needed; the heeled plate cannot give the height (foreshortened, no
+scale), the Hurley broadside RMG P00018 at 12.6 px/m can, to ±0.2 m. NEW (0y⁵⁷) THE TWO DISCS AT THE BOW: the heeled
+plate at 5x shows two large round objects standing edge-on on the foredeck under the bowsprit, about a man's height
+across; not identified (a reel, a drum, the ends of casks), not modelled. NEW (0y⁵⁸) THE FIRST-PAINT LINE: the
+budget measured on docs/ stands 1,774 bytes under 8.6 MB after this round, and every provenance string a record gains
+is paid at first paint because the app fetches the whole of vessels.json before it draws; the next saving is
+structural — the record's provenance strings served from a file the Shipwright fetches when a card opens, or the
+level-0 tiles and the two month keyframes compressed, as the budget's own note asks — and a record must never be
+shortened to fit the line. (0y⁵⁵) THE PARK'S PLATE stands as r270 names
+it. (0y⁴⁹) the lanyard's tail, (0y⁵⁰) the timber the falls wrap, (0y⁴⁷) HALF CLOSED, as r266 names them. (0y⁴⁶) HALF
+CLOSED as r265 names it. (0y⁴⁵) STANDS as r265 names it. (0y⁴⁴) as r263 names it. (0y³⁰) stands: no truss plate.
+(0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name
+them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names
+them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o)
+(0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵)
+(0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230
+lists them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**THE FRAMES: r271/PREDICTIONS-close.md, written before any frame of this round's tree was scored: ship-endurance MUST
+move; six berth neighbours MAY; every other frame MUST NOT. The opening full ratchet at the clean r270 HEAD scored the
+tree before this round; its result, the r271 tree's scores by check --frame, and each accepted frame's reason are in the
+receipt commit that follows this one.**
+
+**r272 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed; the chain may run beside it one browser at a time
+once the fourth frame is down; if the frames are taking over a minute each after the third, it stops the run and
+scores the clean HEAD by check --frame on the frames the round can move; and if the run dies part-way, it copies
+_current aside BEFORE any check --frame and scores the captured frames offline (r271/score-offline.py). Then it takes
+(0y⁵⁶), Endurance's bulwark, off the Hurley broadside RMG P00018 at 12.6 px/m (the height over the deck and the cap;
+the sheer band's height and colour), as a class: a record field for the bulwark's height, the deck edge and every
+fitting that reads it moved together, the audit reading the built height against the record. Or (0y⁵⁵) if an overhead
+of the Ford with her air wing surfaces, or (0y⁴⁹), (0y⁵⁰), (0y⁴⁵), (0y³⁰), (0y¹⁹) with (0y²⁴) as r270 lists them, or the
+survey's next never-spun hull after Endurance by looking. The load this round: 4.06 at the open, 81 at 22:11 with
+nothing of this project's hot (Apple's image indexer over this round's crops, the r237 memory), 11.9 at the chain's
+start, 3.99 at the first close; 5.14 at the recovery's open (23:24) and 9.33 at the close.**
+
+**Live stamp: docs/index.html carries data-version 1788848852 at the build; the push and the live poll are in
+build/staging/r271/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r271 staging stays on disk uncommitted, the r211 convention.**
