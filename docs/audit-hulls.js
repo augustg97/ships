@@ -3,6 +3,14 @@ const list = (typeof APP !== 'undefined' && (APP.vessels.vessels || APP.vessels)
 const problems = [];
 const rows = [];
 const say = (id, rule, detail) => problems.push({ id, rule, detail });
+const PROV = (typeof APP !== 'undefined' && APP.loadProvenance)
+? await APP.loadProvenance() : { split: false, merged: 0, missed: [] };
+if (PROV.split && PROV.merged === 0)
+say('(record)', 'a split provenance file that merged nothing',
+'data/provenance.json was served and no string of it found a record');
+for (const m of PROV.missed)
+say(m.split(':')[0], 'a provenance string with no home',
+`${m} — the path finds no object in the record to hold it`);
 const SIDE_WORD = ['starboard', 'centreline', 'port'];
 const sideOf = z => SIDE_WORD[Math.sign(+z) + 1];
 {
@@ -4208,6 +4216,49 @@ if (!part.head) say(v.id, 'declared but not drawn', 'the head');
 say(v.id, 'a head the record denies',
 `${part.head.n} head mesh(es) drawn, x ${part.head.x[0].toFixed(1)}..${part.head.x[1].toFixed(1)} m; hull.head ${H.head === undefined ? 'absent' : H.head}`);
 }
+{
+const AP = H.aftPlatform;
+const pm = []; g.traverse(o => { const p = tagOf(o); if (o.isMesh && p && p.name === 'Compass platform') pm.push(o); });
+if (AP && AP.u != null) {
+if (!AP.provenance)
+say(v.id, 'a platform with no provenance',
+`hull.aftPlatform at u ${AP.u} declared, aftPlatform.provenance absent — a lattice tower and a box drawn aft on no stated ground`);
+if (!pm.length) say(v.id, 'declared but not drawn', 'the aft platform');
+else {
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const wv = o => { const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+o.updateMatrixWorld(true);
+for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+return out; };
+const all = [].concat(...pm.map(wv));
+let y0 = 1e9, y1 = -1e9, xs = 0, x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+for (const q of all) { y0 = Math.min(y0, q[1]); y1 = Math.max(y1, q[1]); xs += q[0]; x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); z0 = Math.min(z0, q[2]); z1 = Math.max(z1, q[2]); }
+xs /= all.length;
+const xRec = (AP.u - 0.5) * H.lwl;
+if (Math.abs(xs - xRec) > 1.5)
+say(v.id, 'a platform off its station',
+`Compass platform centred at x ${xs.toFixed(1)} m; the record's u ${AP.u} is x ${xRec.toFixed(1)} (${Math.abs(xs - xRec).toFixed(1)} m off, 1.5 allowed)`);
+const boxH = AP.boxHM || 1.0, floorTop = y1 - boxH;
+const dm = []; g.traverse(o => { const p = tagOf(o);
+if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) dm.push(o); });
+const dv = [].concat(...dm.map(wv));
+let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - xs);
+if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); }
+if (e < 1e8 && Math.abs(floorTop - (e + (AP.floorM || 3.0))) > 0.3)
+say(v.id, 'a platform floor off the record\'s height',
+`floor top ${floorTop.toFixed(2)} m, ${(floorTop - e).toFixed(2)} over the deck's edge ${e.toFixed(2)} at x ${xs.toFixed(1)}; the record says ${AP.floorM} (0.3 allowed)`);
+const pb = new THREE.Box3(new THREE.Vector3(x0, y0, z0), new THREE.Vector3(x1, y1, z1));
+g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && p.name === 'Boom')) return;
+const w = wv(o); if (!w.length) return;
+const bb = new THREE.Box3(); for (const q of w) bb.expandByPoint(new THREE.Vector3(q[0], q[1], q[2]));
+if (bb.intersectsBox(pb))
+say(v.id, 'a boom through the platform',
+`a Boom spans y ${bb.min.y.toFixed(2)}..${bb.max.y.toFixed(2)} over x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)}; the Compass platform stands y ${y0.toFixed(2)}..${y1.toFixed(2)} at x ${x0.toFixed(1)}..${x1.toFixed(1)}`); });
+}
+} else if (pm.length) {
+say(v.id, 'a platform the record does not declare', `${pm.length} Compass platform mesh(es) drawn; hull.aftPlatform absent`);
+}
+}
 if (H.deck && H.deck.belowSheerM) {
 if (!H.deck.provenance)
 say(v.id, 'a deck depth with no provenance',
@@ -4223,7 +4274,7 @@ if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name 
 const dv = [].concat(...deckMeshes.map(world));
 const deckEdgeNear = x => { let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - x);
 if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); } return e; };
-const FEET = /^(Deckhouse|Funnel|The wheel|Boat skids|Windlass)$/;
+const FEET = /^(Deckhouse|Funnel|The wheel|Boat skids|Windlass|Compass platform)$/;
 const feet = new Map();
 g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && FEET.test(p.name || ''))) return;
 const w = world(o); if (!w.length) return;

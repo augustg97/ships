@@ -37,6 +37,24 @@
   const rows = [];
   const say = (id, rule, detail) => problems.push({ id, rule, detail });
 
+  /* ── THE PROVENANCE IS MERGED BEFORE ANY RULE READS THE RECORD (round 274) ────────────
+     The published record (docs/) carries its provenance strings in data/provenance.json,
+     fetched on demand by APP.loadProvenance() and merged into APP.vessels in place; served
+     from web/ the record is whole and the loader merges nothing. Every silence rule below —
+     a head, a platform, a deck depth, a castle, a shroud count with no provenance — reads the
+     merged record, so a split that lost a string would convict as the silence it is. What
+     that cannot see is a string that arrived and found no home (a path the builder of the
+     split writes in one grammar and this reader parses in another): A-PROVENANCE-HOME
+     convicts each such string by its path, and a split file that merged nothing at all. */
+  const PROV = (typeof APP !== 'undefined' && APP.loadProvenance)
+    ? await APP.loadProvenance() : { split: false, merged: 0, missed: [] };
+  if (PROV.split && PROV.merged === 0)
+    say('(record)', 'a split provenance file that merged nothing',
+        'data/provenance.json was served and no string of it found a record');
+  for (const m of PROV.missed)
+    say(m.split(':')[0], 'a provenance string with no home',
+        `${m} — the path finds no object in the record to hold it`);
+
   /* ── ONE WORD FOR A SIDE (round 269, 0y⁵³) ─────────────────────────────────────────────
      The hull frame is right-handed with +x aft and +y up, so +z is PORT: the beam b=90 looks
      at, the side every fore-and-aft cloth sheets to, measured on screen in r254/side.json

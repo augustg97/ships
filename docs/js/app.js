@@ -538,6 +538,32 @@ buildMarkers();
 APP.phase && APP.phase('  markers');
 updateReadout();
 }
+APP.loadProvenance = function () {
+if (APP._provenance) return APP._provenance;
+const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
+APP._provenance = (async () => {
+const out = { split: false, merged: 0, missed: [] };
+let r = null;
+try { r = await fetch('data/provenance.json?v=' + DV); } catch (e) { r = null; }
+if (!r || !r.ok) return out;
+const P = await r.json();
+out.split = true;
+const byId = new Map(((APP.vessels && APP.vessels.vessels) || []).map(v => [v.id, v]));
+for (const id in P) {
+const v = byId.get(id);
+for (const path in P[id]) {
+const toks = path.match(/[^.\[\]]+/g) || [];
+let o = v;
+for (let i = 0; o && typeof o === 'object' && i < toks.length - 1; i++) o = o[toks[i]];
+if (!o || typeof o !== 'object' || !toks.length) { out.missed.push(id + ': ' + path); continue; }
+o[toks[toks.length - 1]] = P[id][path];
+out.merged++;
+}
+}
+return out;
+})();
+return APP._provenance;
+};
 const SEAS = [
 ['North Atlantic Ocean', -40, 35], ['South Atlantic Ocean', -20, -25],
 ['North Pacific Ocean', -160, 30], ['South Pacific Ocean', -130, -25],

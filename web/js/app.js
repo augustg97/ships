@@ -1115,6 +1115,43 @@ async function loadData() {
   updateReadout();
 }
 
+/* ── THE RECORD'S PROVENANCE IS NOT PAID AT FIRST PAINT (round 274) ─────────────────────
+   Every provenance string in the record — hull.headProvenance, deck.provenance,
+   masts[i].shroudsProvenance and the rest, 135 of them and more than half of vessels.json —
+   was fetched by every visitor before the first frame, and nothing on screen reads one: the
+   part card that once printed them was removed (shipwright.js swSelect). The build now
+   publishes them in data/provenance.json and this is the ONE place that fetches it; the build
+   refuses if the file is named anywhere else in this script. Served from web/ the record is
+   whole and the file does not exist, so the loader merges nothing and says so ({ split:
+   false }). The path grammar is the audit's own — hull.masts[2].shroudsProvenance — and a
+   string whose path finds no home is reported, not dropped, so the audit can convict it. */
+APP.loadProvenance = function () {
+  if (APP._provenance) return APP._provenance;
+  const DV = (document.querySelector('meta[name="data-version"]') || {}).content || '0';
+  APP._provenance = (async () => {
+    const out = { split: false, merged: 0, missed: [] };
+    let r = null;
+    try { r = await fetch('data/provenance.json?v=' + DV); } catch (e) { r = null; }
+    if (!r || !r.ok) return out;
+    const P = await r.json();
+    out.split = true;
+    const byId = new Map(((APP.vessels && APP.vessels.vessels) || []).map(v => [v.id, v]));
+    for (const id in P) {
+      const v = byId.get(id);
+      for (const path in P[id]) {
+        const toks = path.match(/[^.\[\]]+/g) || [];
+        let o = v;
+        for (let i = 0; o && typeof o === 'object' && i < toks.length - 1; i++) o = o[toks[i]];
+        if (!o || typeof o !== 'object' || !toks.length) { out.missed.push(id + ': ' + path); continue; }
+        o[toks[toks.length - 1]] = P[id][path];
+        out.merged++;
+      }
+    }
+    return out;
+  })();
+  return APP._provenance;
+};
+
 /* ── CHART LETTERING, not dots ────────────────────────────────────────────
  * On an Admiralty chart the label IS the mark: a place is named, not stippled. So there are no
  * point symbols on this globe. Ports are set in letterspaced roman capitals with a short tick

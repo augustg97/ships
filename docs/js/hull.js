@@ -2158,7 +2158,10 @@ const boomL = openAft
 : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
 const gaffL = Math.min(lower * 0.42, boomL * 0.72);
 const peak = 0.62;
-const footY = base + lower * 0.11;
+const AP = S.aftPlatform;
+const platTop = (AP && AP.u != null && AP.u > u && boomL >= (AP.u - u) * L - (AP.wM || 1.5) / 2)
+? deckAt(AP.u) + (AP.floorM || 3.0) + 0.06 + (AP.boxHM || 1.0) + 0.25 : -Infinity;
+const footY = Math.max(base + lower * 0.11, platTop);
 const mastX = mxA;
 const mastR = mastRAt;
 const bm2 = new THREE.Mesh(
@@ -3575,6 +3578,10 @@ what: 'Right aft, in the open, where the helmsman can watch the leeches and the 
 + 'sea coming up astern. On the great schooners it drove the rudder through a '
 + 'screw gear under the wheel box — one man could hold a ship of nearly four '
 + 'thousand tons.' },
+compassPlatform: { stage: 5, name: 'Compass platform',
+what: 'A raised platform on an open lattice frame at the stern with a hooded box on it, '
++ 'as Hurley\'s 1915 plate shows. Read as the standard compass on its platform, clear '
++ 'of the engine\'s iron: a reading of the plate, not a record.' },
 };
 function tag(o, key, extra, what) {
 if (!o) return o;
@@ -4910,6 +4917,42 @@ wg.add(sp);
 }
 hg.add(wg);
 group.add(tag(hg, 'helm'));
+}
+if (S.aftPlatform && S.aftPlatform.u != null) {
+const P = S.aftPlatform, u = P.u;
+const x = (u - 0.5) * L, y = deckAtU(u);
+const w = P.wM || 1.5, hF = P.floorM || 3.0, hw = w / 2;
+const bw = P.boxWM || 0.8, bh = P.boxHM || 1.0;
+const leg = Math.max(0.06, B * 0.010), brace = leg * 0.6;
+const pg = new THREE.Group();
+const bar = (A, Bp, t, m) => {
+const d = new THREE.Vector3().subVectors(Bp, A), len = d.length();
+const mesh = new THREE.Mesh(new THREE.BoxGeometry(len, t, t), m);
+mesh.position.copy(A).addScaledVector(d, 0.5);
+mesh.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), d.normalize());
+return mesh;
+};
+const V = (px, py, pz) => new THREE.Vector3(px, py, pz);
+const c = hw - leg / 2;
+for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+const lg = new THREE.Mesh(new THREE.BoxGeometry(leg, hF, leg), pale);
+lg.position.set(x + sx * c, y + hF / 2, sz * c);
+pg.add(lg);
+}
+const corners = [[-c, -c], [c, -c], [c, c], [-c, c]];
+for (let k = 0; k < 4; k++) {
+const [ax, az] = corners[k], [bx, bz] = corners[(k + 1) % 4];
+pg.add(bar(V(x + ax, y + hF * 0.5, az), V(x + bx, y + hF, bz), brace, pale));
+pg.add(bar(V(x + ax, y + hF, az), V(x + bx, y + hF * 0.5, bz), brace, pale));
+pg.add(bar(V(x + ax, y + hF * 0.5, az), V(x + bx, y + hF * 0.5, bz), brace, pale));
+}
+const floor = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, w), pale);
+floor.position.set(x, y + hF + 0.03, 0);
+pg.add(floor);
+const box = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bw), wood);
+box.position.set(x, y + hF + 0.06 + bh / 2, 0);
+pg.add(box);
+group.add(tag(pg, 'compassPlatform'));
 }
 if (timberShip && laidDeck && S.lwl > 25) {
 const bl = L * 0.17, u = 0.46;

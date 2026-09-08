@@ -24299,3 +24299,119 @@ the rest — the largest share of vessels.json's bytes) out of docs/data/vessels
 the card fetches only when a provenance is opened, with the build splitting them and the audit reading the split file
 so no rule loses its silence checks; then build, push, verify the live stamp, and run the full ratchet at the clean
 HEAD. Until that lands the live site is r272's.**
+
+## Round 274 — 2026-09-08 — the record's provenance leaves first paint: r273 could not deploy because the published tree stood at 8.60–8.61 MB against the 8.6 MB first-paint line, and 187 KB of that was the record's 135 provenance strings, more than half of vessels.json, fetched by every visitor before the first frame and read by nothing on screen; the build now splits them into docs/data/provenance.json, the app fetches that file only through APP.loadProvenance(), the audit merges it before any rule reads the record and convicts a string whose path finds no home, the source in web/ stays one whole file, first paint is 8.41 MB, and the r273 geometry reaches the live site for the first time
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r273's receipt ordered r274 to open with the
+first-paint saving before anything else, and then to build, push, verify the live stamp and run the full ratchet at
+the clean HEAD. The load at the open was 8.95 (02:14, 1-minute; 20 and 21 over 5 and 15), 78 at 02:21, 150 at 02:44
+and 39 at 02:49, with no process of this project's hot (ps -r showed only idle shells: the pattern r264 and r265
+record, from outside the project). The full ratchet was not launched at the open, on the receipt's own order; its
+run at the new HEAD is in the receipt commit that follows this one (the r198 rule). Every edit was made in web/
+directly — no ratchet was running, so the :8150 copy was not needed — and every browser ran alone
+(r274/chain.log).**
+
+**THE FAULT. r273 built three times and refused three times: 8.61, 8.60 and 8.60 MB against 8.6, with its two new
+record strings cut to 337 and 847 characters. The r272 tree stood within a few hundred bytes of the line (the r271
+memory), so no cut of r273's own bytes could fit. What the line was paying for was measured this round
+(r274/apply-build-edits.py's opening survey, in this round's transcript): 135 strings under keys naming a
+provenance (provenance, headProvenance, anchorProvenance, windlassProvenance, framesProvenance and 47 more names),
+186,961 bytes of UTF-8 across 33 records, out of a minified vessels.json of 344,590 — 54% of the file. Nothing on
+screen reads one: the part card that printed a part's text was removed deliberately (shipwright.js, swSelect's
+note), and the one builder read, hull.js deckCovering's S.deck.provenance, goes into a card string no code prints.
+The audit is their only reader, through its silence rules (a head, a platform, a deck depth, a castle, a shroud
+count declared with no provenance).**
+
+**THE BUILD (build/build_site.py; r274/apply-build-edits.py, four replaces asserted; build_site.before.py).
+(1) LAZY_DATA = {'provenance.json': 'APP.loadProvenance'} stands beside the budget line: the one data file first
+paint does not pay for, named with the one function allowed to fetch it. (2) split_provenance(), run on docs/data
+after the copy and before the compaction: every string under a key whose name contains 'rovenance' is moved out
+of the published vessels.json into provenance.json as { <vessel id>: { <path>: <string> } }, the path in the
+audit's own grammar (hull.aftPlatform.provenance, hull.masts[2].shroudsProvenance). The split is checked by
+putting it back: the merged copy must equal the source, as dicts and as a sorted serialisation, or the build
+refuses; a key the grammar cannot carry (a dot, a bracket, a purely numeric dict key on a provenance path) or a
+provenance key holding a non-string refuses the build too. (3) gate_budget: the lazy file is off the first-paint
+sum and logged on its own line, and the gate checks the claim against the served app.js — the file's name must
+appear exactly once and within 4,000 characters after the loader's name — so a fetch added anywhere else puts the
+file straight back on the bill. web/data/vessels.json is untouched (cmp-identical to HEAD's): the source stays
+one file, the round scripts edit it as before, and the audit run against web/ sees the record whole.**
+
+**THE APP (web/js/app.js; r274/apply-app-audit-edits.py; app.before.js; 37 lines added after loadData, no other
+line changed; parsed by node's vm). APP.loadProvenance() fetches data/provenance.json?v=<stamp> once (the promise
+is cached), merges each string into APP.vessels' record in place by walking its path, and returns { split, merged,
+missed }: served from web/ the fetch is a 404 and it returns split false with nothing merged; a string whose path
+finds no object to hold it is reported in missed, not dropped. Nothing on the boot path calls it. The regex the
+path walker uses was written through two script layers and arrived with its backslashes doubled (the mirror of
+the r256 fault the memory records); node's vm parsed the file either way, and the grammar was tested in node on
+two paths before the browser ran (r274 transcript).**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; audit-hulls.before.js; 18 lines). Right after the record
+list is taken, the audit awaits APP.loadProvenance() before any rule reads the record, so every silence rule reads
+the merged record. A-PROVENANCE-HOME convicts a split file that was served and merged nothing, and each string
+whose path finds no home, by its path. Research/run_audit.py reads AUDIT_URL from the environment for the page's
+origin (:8149 by default; r273's chain used a hand-edited copy for :8150).**
+
+**MEASURED (r274/build2.out, stamp 1788859635): first paint 8.41 MB against 8.6 (8.60 at r273's last refusal); on
+demand 0.19 MB (provenance.json, 191,450 bytes); docs/data/vessels.json 154,771 bytes against 343,245 in the r272
+build the live site carried; 135 strings split, merged back equal to the source. The docs/ minifier and compactor
+are unchanged.**
+
+**PROOFS (r274/chain.log; each audit alone in its browser). FINAL-web (:8149, web/, the whole record, the r274
+audit): "checked 33 hulls, 0 problems" (02:30). FINAL-docs (:8152, a server started on docs/ for this round and
+checked by curl — provenance.json 200 at 191,450 bytes, vessels.json 200 at 154,771 — the split record): "checked
+33 hulls, 0 problems" (02:31); a merge that lost a string would have convicted the silence (Endurance's platform
+and deck depth, the five heads, the castles). PROOF C (hull.aftPlatform.provenance deleted from the SPLIT file,
+the source untouched): exactly 1, 'a platform with no provenance' — the r273 rule reads the merged record. PROOF
+D (Endurance's helmProvenance written to the path hull.masts[9].helmProvenance): exactly 1, 'a provenance string
+with no home' — the new rule, seen by nothing else; the split file restored (cmp-identical to
+provenance.after.json). Offline, node's own merge of the two published files against web/'s source: 135 merged, 0
+missed, deep-equal ignoring key order (a merged key lands last in its object; the order is not the record). One
+run is VOID and recorded as such: the first FINAL-docs went to :8151, which a six-day-old server of an older copy
+held (its vessels.json 261,268 bytes, whole), and passed for that reason; the port was checked by curl before the
+second server was started on :8152.**
+
+**THE FRAMES (r274/PREDICTIONS-close.md, written before scoring: every frame MUST NOT move — the harness captures
+from web/, whose record is whole, and the loader is the only code added on the boot path). check --frame on
+:8149 with the r274 app.js and audit in place: shipwright 0.001% 0.000 ok; ship-endurance 0.000% 0.000 ok
+(r274/check-*.out). The split copy itself was witnessed by one script from two origins (r274/witness.py, the r273
+witness with a 150 s ready wait, load 115 at the time): the Shipwright from :8149 (whole) against :8152 (split),
+changed 0.000%, mean_abs 0.000 — pixel-identical; both stand 25.392% from the committed harness baseline, the same
+number for both, which is the witness script's own offset from the harness (its frozen instant and settle), not
+the split's. Read (witness-shipwright-8152.png): the Shipwright open on the ship of the line with her full card —
+name, four dimensions, crew, speed, the plate, the fleet list, the build slider at 'Bent on' — every field the
+card prints present with the provenance gone.**
+
+**Rule 0 on the split copy's witness read whole (r274/witness-shipwright-8152.png): a rendered 74 under sail seen
+from her port beam on a lit sea with a low coast behind, her neighbours at their berths either side — not a chart.
+Three facts a viewer can read off it without a legend: she carries three masts with square sails on all of them;
+her gunports run in two rows down her side; the ship at her berth ahead is smaller and carries fewer sails.**
+
+**Named residuals, in order:** (0y⁵⁸) CLOSED this round: first paint 8.41 against 8.6, with 0.19 MB of headroom
+where r273 had none. NEW (0y⁶⁵) THE OTHER STRINGS AT FIRST PAINT: contested (4,833 bytes), rigNote (4,251),
+belowSheerContest (1,826), cite and source (about 2,300) ride at first paint still; they are card fields the app
+may print, so they stay until each has a confirmed reader or none. NEW (0y⁶⁶) NO SCREEN SHOWS A PROVENANCE: the
+part card was removed at swSelect; a provenance drawer fed by APP.loadProvenance() would give the reader what the
+record says, on demand — a UI decision, August's, not a round's. (0y⁶²) (0y⁶³) (0y⁶⁴) (0y⁶⁰) (0y⁵⁹) (0y⁵⁷) as
+r273 names them. (0y⁵⁵) as r270 names it. (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) as r266 names them. (0y⁴⁶) HALF CLOSED as r265
+names it. (0y⁴⁵) STANDS as r265 names it. (0y⁴⁴) as r263 names it. (0y³⁰) stands: no truss plate. (0y³⁹) (0y⁴⁰)
+(0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name them. (0y¹⁹)
+(0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²)
+(0y¹³) (0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j)
+(0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶)
+(0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists
+them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r275 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the
+load is under 15, keeping the machine quiet until globe-default has landed; if the frames are taking over a
+minute each after the third, it stops the run and scores the clean HEAD by check --frame on the frames the round
+can move; if the run dies part-way, it copies _current aside BEFORE any check --frame and scores the captured
+frames offline (r273/score-offline.py). Then it takes (0y⁶³), the boom's cock as a rig class, or (0y⁶⁰), the
+bulwark's stanchions and pin rail as a class for every hull whose deck lies below the sheer, or (0y⁶²) or (0y⁵⁹)
+if their sources surface, or the survey's next never-spun hull after Endurance by looking. A round that adds a
+provenance string now pays nothing at first paint for it; a round that adds any OTHER record string still does,
+and the headroom is 0.19 MB.**
+
+**Live stamp: docs/index.html carries data-version 1788859635 at the build; the push and the live poll are in
+build/staging/r274/push.log, and the verified live value with the ratchet's result is recorded in the receipt
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r274 staging stays on disk uncommitted, the r211 convention.**

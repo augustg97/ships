@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import os, sys
+import re
 import shutil
 import subprocess
 import sys
@@ -43,6 +44,19 @@ RESEARCH = os.path.join(HERE, "..", "Research", "modeling")
 # compress those rather than moving this line a third time.
 BUDGET_FIRST_PAINT_MB = 8.6     # level-0 tiles + two month keyframes + app + data
 BUDGET_TOTAL_MB = 460.0
+
+# ── WHAT FIRST PAINT DOES NOT PAY FOR (2026-09-08, round 274) ─────────────────────────
+# Every data file in docs/data/ is counted at first paint because app.js fetches every one of
+# them in loadData(). The one exception is listed here BY NAME, with the function that is the
+# only place allowed to fetch it; gate_budget checks that claim against the served app.js, so
+# a fetch of the file added anywhere else puts it straight back on the bill.
+#   provenance.json — the record's provenance strings (135 of them, 187 KB minified at r274,
+#   54% of vessels.json), split out of docs/data/vessels.json by split_provenance() below.
+#   Nothing on screen reads them: the part card that once showed them was removed
+#   (shipwright.js swSelect), and the audit is their only reader, through APP.loadProvenance().
+#   web/data/vessels.json keeps them inline — the source stays one file, so the round scripts
+#   and the audit run against web/ see the record whole.
+LAZY_DATA = {"provenance.json": "APP.loadProvenance"}
 
 
 def log(*a):
@@ -216,18 +230,111 @@ def gate_budget(man, root=None):
               ("index.html", "js/app.js", "js/route.js", "js/hull.js", "js/yard.js",
                "js/shipwright.js", "js/battle.js", "js/sea.js", "js/passage.js", "js/shaders.js", "js/three.min.js", "css/styles.css"))
     data = sum(os.path.getsize(os.path.join(W, "data", f))
-               for f in os.listdir(os.path.join(W, "data")))
+               for f in os.listdir(os.path.join(W, "data")) if f not in LAZY_DATA)
+    lazy = 0
+    for f, fn in LAZY_DATA.items():
+        fp = os.path.join(W, "data", f)
+        if not os.path.exists(fp):
+            continue
+        lazy += os.path.getsize(fp)
+        src = open(os.path.join(W, "js", "app.js"), encoding="utf-8").read()
+        ref = "data/" + f
+        if src.count(ref) != 1:
+            fail(f"{f} is off the first-paint bill but app.js names it {src.count(ref)} times, not once")
+        i, j = src.find(fn), src.find(ref)
+        if i < 0 or not (0 < j - i < 4000):
+            fail(f"{f} is off the first-paint bill but its one fetch is not inside {fn}")
     months = sum(os.path.getsize(os.path.join(W, "fields", f"{k}_{m:02d}.png"))
                  for k in ("sea", "wind") for m in (1, 2))
     first = (lv0 + app + data + months) / 1e6
     total = sum(os.path.getsize(os.path.join(r, f))
                 for r, _, fs in os.walk(W) for f in fs) / 1e6
     log(f"   first paint {first:.2f} MB (budget {BUDGET_FIRST_PAINT_MB})")
+    if lazy:
+        log(f"   on demand   {lazy/1e6:.2f} MB ({', '.join(LAZY_DATA)}; fetched by "
+            f"{', '.join(LAZY_DATA.values())}, not at first paint)")
     log(f"   total       {total:.1f} MB (budget {BUDGET_TOTAL_MB})")
     if first > BUDGET_FIRST_PAINT_MB:
         fail(f"first paint {first:.2f} MB over budget")
     if total > BUDGET_TOTAL_MB:
         fail(f"total {total:.1f} MB over budget")
+
+
+PROV_KEY = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+
+def _prov_walk(o, path, out):
+    """collect (path, string) for every key naming a provenance, in record order"""
+    if isinstance(o, dict):
+        for k, x in o.items():
+            if not PROV_KEY.match(k) or k.isdigit():
+                if any("rovenance" in kk for kk in _keys_below(x)) or "rovenance" in k:
+                    fail(f"provenance path through an ambiguous key {k!r} at {path}")
+            if "rovenance" in k:
+                if not isinstance(x, str):
+                    fail(f"{path}.{k} names a provenance but holds a {type(x).__name__}")
+                out.append((f"{path}.{k}" if path else k, x))
+            _prov_walk(x, f"{path}.{k}" if path else k, out)
+    elif isinstance(o, list):
+        for i, x in enumerate(o):
+            _prov_walk(x, f"{path}[{i}]", out)
+
+
+def _keys_below(o):
+    if isinstance(o, dict):
+        for k, x in o.items():
+            yield k
+            yield from _keys_below(x)
+    elif isinstance(o, list):
+        for x in o:
+            yield from _keys_below(x)
+
+
+def _prov_merge(v, path, s):
+    toks = re.findall(r"[^.\[\]]+", path)
+    o = v
+    for t in toks[:-1]:
+        o = o[int(t)] if isinstance(o, list) else o[t]
+    o[toks[-1]] = s
+
+
+def split_provenance(data_dir):
+    """docs/data/vessels.json -> the record without its provenance strings, plus
+    docs/data/provenance.json = { <vessel id>: { <path>: <string> } }. Round-tripped."""
+    vp = os.path.join(data_dir, "vessels.json")
+    pp = os.path.join(data_dir, "provenance.json")
+    src = json.load(open(vp, encoding="utf-8"))
+    rec = json.loads(json.dumps(src))              # a deep copy to strip
+    prov, n, nbytes = {}, 0, 0
+    for v in rec["vessels"]:
+        found = []
+        _prov_walk(v, "", found)
+        if not found:
+            continue
+        prov[v["id"]] = {}
+        for path, s in found:
+            prov[v["id"]][path] = s
+            n += 1
+            nbytes += len(s.encode("utf-8"))
+        for path, _ in found:
+            toks = re.findall(r"[^.\[\]]+", path)
+            o = v
+            for t in toks[:-1]:
+                o = o[int(t)] if isinstance(o, list) else o[t]
+            del o[toks[-1]]
+    # the round trip: merged back, the split record is the source, key for key
+    back = json.loads(json.dumps(rec))
+    by_id = {v["id"]: v for v in back["vessels"]}
+    for vid, m in prov.items():
+        for path, s in m.items():
+            _prov_merge(by_id[vid], path, s)
+    if back != src:
+        fail("provenance split does not round-trip to the source record")
+    if json.dumps(back, sort_keys=True) != json.dumps(src, sort_keys=True):
+        fail("provenance split does not round-trip to the source record (serialised)")
+    json.dump(rec, open(vp, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+    json.dump(prov, open(pp, "w", encoding="utf-8"), separators=(",", ":"), ensure_ascii=False)
+    return {"n": n, "bytes": nbytes}
 
 
 def stamp_and_copy():
@@ -286,6 +393,15 @@ def stamp_and_copy():
     mb += len(raw.encode()); ma += len(out.encode())
     log(f"   minified docs/ {mb/1e6:.2f} MB -> {ma/1e6:.2f} MB "
         f"({100*(mb-ma)/max(1,mb):.0f}% of script and style bytes)")
+    # ── SPLIT THE PROVENANCE OUT OF THE PUBLISHED RECORD ─────────────────────────────
+    # r274: see LAZY_DATA. The split is a pure function of the source and it is checked here
+    # by putting the pieces back together: the merged copy must equal the source exactly, or
+    # the build refuses. The path grammar is the audit's own (hull.masts[2].shroudsProvenance),
+    # and APP.loadProvenance() in app.js parses the same grammar, so a key that would be
+    # ambiguous in it (a dot, a bracket, a purely numeric dict key) refuses the build too.
+    moved = split_provenance(os.path.join(DOCS, "data"))
+    log(f"   provenance split: {moved['n']} strings, {moved['bytes']/1e6:.2f} MB, "
+        f"out of vessels.json into provenance.json; merged back, equal to the source")
     # ── COMPACT THE PUBLISHED DATA ────────────────────────────────────────────────────
     # r208: the first-paint budget refused at 8.60 against 8.6 with one card row added, and
     # the fat was indentation — web/data/*.json is written pretty-printed so diffs read, and
