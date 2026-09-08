@@ -4415,7 +4415,7 @@ for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).apply
 const pinsM = [], ropeM = [], coilM = [], deckM = [];
 g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
 if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
-else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard') ropeM.push(o);
+else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace') ropeM.push(o);
 else if (p.key === 'coil') coilM.push(o);
 else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
 let pins = [].concat(...pinsM.map(o => o.userData.pins || []));
@@ -4430,7 +4430,10 @@ if (belays.length) say(v.id, 'a fall belayed on a hull with no pins', `${belays.
 if (coilM.length) say(v.id, 'a coil where there is no pin rail', `${coilM.length} Coils mesh(es) and no Belaying pins mesh`);
 } else {
 const near = q => { let bp = null, bd = 1e9; for (const p of pins) { const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); if (d < bd) { bd = d; bp = p; } } return { p: bp, d: bd }; };
-if (squareMast && !belays.length) say(v.id, 'a pin rail with nothing belayed', `${pins.length} pins, a square-rigged mast, and no sheet, tack or halyard made fast to any of them`);
+if (squareMast && !belays.length) say(v.id, 'a pin rail with nothing belayed', `${pins.length} pins, a square-rigged mast, and no sheet, tack, halyard or brace made fast to any of them`);
+const braceM = ropeM.filter(o => tagOf(o).key === 'brace');
+if (braceM.length && !braceM.some(o => (o.userData.belays || []).length))
+say(v.id, 'braces belayed nowhere', `${pins.length} pins and a Braces mesh with no belay record — the braces end in the air over the deck`);
 const used = new Map();
 for (const b of belays) {
 const at = `the ${b.side} ${b.part} of mast ${b.mast}`;

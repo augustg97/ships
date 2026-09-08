@@ -24823,3 +24823,98 @@ uncommitted, deliberately; the r277 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js names coilGeometry 2 times and userData.belays 1, userData.pins 1; docs/audit-hulls.js carries the fourteen A-BELAY conviction strings (14 found); docs/data/vessels.json is unchanged (no record changed this round); web/js/hull.js against HEAD~1:  1 file changed, 195 insertions(+), 64 deletions(-); the build read first paint 8.43 MB against the 8.6 line.
 THE RATCHET: OPENING FULL RATCHET at the clean r276 HEAD 06cde10 (r277/run-open.sh, 05:39:20, load 4.8): 50–57 s a frame for its first nine, then mediaanalysisd at 180% (the fresh _current PNGs and the r276 crops being indexed, the r265 pattern) and the load at 74 took the frames to two minutes each; STOPPED at 06:05:39 (exit 143) with 20 frames captured, copied aside and scored OFFLINE with the tool's own compare() (r277/score-offline.py, clean-scores.out): 20 frames, 0 beyond the gate — action, globe-crossing, globe-default, globe-era-card, globe-modern, globe-steam, ship-canoe, ship-carrier, ship-dhow, ship-dugout, ship-galleass, ship-galley, ship-great-eastern, ship-junk, ship-panokseon, ship-sekibune, ship-titanic, ship-trireme, ship-usv, shipwright (the largest ship-panokseon 0.038%/0.014; thirteen at 0.000–0.004%). The 45 frames it did not reach are unscored at the clean HEAD since r275/r276's acceptances. THE r277 TREE (web/ after the copy-in and the push, scored by check --frame on :8149 per PREDICTIONS-close.md): ship-endurance 0.117%/0.043 CHANGED — the two halyard falls swinging from the deck edge to the pin heads, the course's sheets and tacks over the cap, and a coil ring under the rail at each belayed pin, nothing else in the frame (r277/diff-ship-endurance.png, read) — ACCEPTED; the four MAY neighbours ok at the numbers r276's chain recorded for them: ship-azzam 0.023%/0.028, ship-ever-given 0.034%/0.024, ship-container 0.015%/0.015, ship-queen-mary-2 0.008%/0.011. Every browser of mine ran alone, one after another (r277/chain.log: FINAL1 05:49–05:54, the probe, PROOF B, two witnesses, FINAL2, PROOF B2, PROOF C, 05:55–06:09).
 Two commits close the round (8997a1f builder + record + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 278 — 2026-09-08 — the braces are made fast to the pins too: r277 belayed Endurance's sheets, tacks and halyards and left her eight braces ending in the air over the deck, 0.26 L abaft their yard and 0.30 of the yard's half off the centreline, with nothing drawn holding them; every brace on a hull with a pin rail now takes the nearest free pin on its own side through the one lead the sheets and halyards use, over the cap from the yard arm, its belay recorded and its coil hung, the coils built after the braces so no belayed pin is bare, every hull without pins byte-identical, a new conviction reads a Braces mesh with no belay on a hull with pins, and the round scored by partial checks because the load stood above 15 all round
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r277's entry ordered r278 to check `uptime` and
+`ps -r` FIRST and to run the full ratchet only with the load under 15 and neither mediaanalysisd nor a Codex renderer
+hot. At the open (06:33) the load was 22.6 (35.7 and 29.2 over 5 and 15 minutes) with mediaanalysisd at 216% (327 CPU
+minutes since 00:23 — the r277 PNGs and crops being indexed, the r265 pattern), a Codex renderer at 53% and Mail at 51%
+— above the line with both hot, so no full ratchet was launched: the round scored by check --frame the frames the change
+can reach and the four MAY neighbours (below), and left the clean-HEAD backlog as r277 left it. Every edit was made on
+the :8150 copy (r278/web, symlinks with real copies of hull.js, vessels.json and audit-hulls.js) and copied into web/
+only after every browser of mine had run alone, one after another (r278/chain.log).**
+
+**THE FAULT (0y⁷², named r277, the braces' half). buildRigging ends every brace of the square rig at a point in the air
+over the deck: station 0.26 L abaft the yard (clamped to 0.97), 0.10 of the yard's half over the deck there, 0.30 of the
+half off the centreline. On Endurance, whose pin rail (r276) runs 0.95 m over the deck and whose sheets, tacks and
+halyards were made fast to it in r277, the fore mast's four yards sent eight braces down from their arms to eight
+points 0.74–2.2 m inboard of the rail and 0.26–0.7 m under it, through nothing, ending on nothing. A brace's fall is a
+fall like any other: it comes aft and down from the yard arm to a block at the rail and is made fast to a belaying pin
+beside it, and its coil hangs on the pin.**
+
+**THE BUILDER (web/js/hull.js; r278/apply-builder-edits.py, six replaces asserted; hull.before.js and hull.after.js;
+parsed by node's vm). (1) r277's `lead`, which lived inside buildRig's square-gear block and closed over that block's
+`rail()` and mast index, is now `leadTo(list, from, uu, sgn, part, mi, fallback)` at buildRig's top, defined once after
+belayPins: the same search (the nearest FREE pin on side sgn to station uu), the same head (pinH/2 − 0.03 over the pin's
+centre), the same over-the-cap test and fairlead, the same record; `fallback()` returns the fall's old end where the hull
+carries no pins. The gear block's `lead` is one line through it with `() => rail(uu, sgn)` as the fallback — the six r277
+belays land on the same six pins at the same numbers (MEASURED below). buildRig sets `S.__belay = { spec, belayed,
+leadTo }` (null where there are no pins) before it returns, beside S.__spars. (2) The spar record carries `mast: mi`, so
+a brace's belay can name its mast as the sheets' do. (3) buildRigging's braces: for each spar and side, `from` is the
+arm as before; `old()` is the r277 point; with S.__belay present the brace goes through `leadTo(braceSegs, from, bu,
+sgn, 'brace', sp.mast, old)`, otherwise `[from, old()]` is pushed from the same numbers. The Braces mesh takes
+userData.belays (the 'brace' records) and, where any, a card that says how many pins and whether over the cap. (4) THE
+COILS moved out of buildRig into `buildCoils(S, group, mats)`, which buildShip calls AFTER buildRigging inside the FINE
+block, reading S.__belay: same geometry (coilGeometry, two nested loops, 0.55 m, the class hank), same userData.coils,
+the card's part list now naming braces. Nothing else moved. Every hull without pins: the same brace segments from the
+same numbers, no coil, no belay record — byte-identical.**
+
+**THE RECORD (web/data/vessels.json): unchanged; vessels.after.json is vessels.before.json.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r278/apply-audit-edits.py, three replaces; audit-hulls.before.js
+and audit-hulls.after.js). A-BELAY now reads the Braces mesh with the sheets, tacks and halyards: its belays must each name
+a built pin (0.05), reach it with the mesh's own vertices (0.08 of the recorded head), sit on the pin's upper half, share
+no pin with any other fall; its lowest vertex may not lie 0.15 under the nearest pin's centre ('a fall ending under the
+pin rail'); its coils are counted and read with the rest. NEW: on a hull with pins, a Braces mesh with no belay record is
+convicted outright ('braces belayed nowhere' — the r277 state). The 'nothing belayed' message names the brace.**
+
+**PROOFS (r278/chain.log; each audit alone in its browser on :8150). FINAL1 (r278 builder, r278 audit, 06:41): "checked 33 hulls, 0 problems". PROOF B (the r277 builder hull.before.js on the r278 audit, 06:43): 2 — 'braces belayed nowhere' (320 pins and a Braces mesh with no belay record) and 'a fall ending under the pin rail' (Braces: its lowest vertex y 2.55 at x −1.24, |z| 1.67, 0.45 m under the nearest pin's centre). PROOF C (hull.proof-c.js: the braces RECORDED to their pins but DRAWN to the old point — the record and the mesh disagreeing, 06:45): 9 — 'a fall that does not reach its pin' 8 (the starboard brace of mast 0: the nearest vertex of its mesh 1.030 m from the recorded head [−1.295, 3.195, −3.438], and the other seven likewise) and 'a fall ending under the pin rail' 1. The builder was restored cmp-identical after each proof (chain.log).**
+
+**MEASURED (r278/probe-after.out, SHIPS_HULL.buildShip on the :8150 copy, hull space, x aft-positive). Endurance: 320
+pins built, as r277. The six r277 belays unchanged to the millimetre: the sheets to the pins at x −4.813, z ±3.392, the
+tacks at −17.378, z ±1.53, the halyards at −8.331 (starboard) and −7.829 (port). Eight braces belayed to eight distinct
+pins on the rail between the fore and main masts, all led over the cap through fairleads at y 3.565, |z| 3.666: the fore
+yard's (arms at y 13.52, |z| 7.754) to the pins at x −1.295, y 3.000, |z| 3.438; the lower topsail's (y 17.922, |z| 7.211)
+to x −1.044; the upper topsail's (y 21.694, |z| 6.591) to x −1.546; the topgallant's (y 26.095, |z| 5.273) to x −0.792 —
+the four nearest free pins a side to the one station all four yards want (0.26 L abaft the fore mast), taken in yard
+order at the rail's 0.25 m pitch. Every head 0.195 over its pin's centre. Fourteen coils (2 sheets, 2 tacks, 2 halyards,
+8 braces), the brace coils' tops at y 2.919–2.920 (0.081 under the pins), bottoms at 2.321–2.322. The Braces mesh's
+lowest vertex is now y 3.188 (a pin head); r277's was 0.10 of a yard's half over the deck.**
+
+**THE FRAMES (r278/PREDICTIONS-close.md, written before scoring): ship-endurance MUST move (eight braces swinging from
+points over the deck to the cap and the pins amidships, eight coils under the rail there); ship-azzam, ship-ever-given,
+ship-container, ship-queen-mary-2 MAY (berth neighbours, no move expected); everything else MUST NOT — the change is
+FINE-only and every hull without pins is byte-identical. Witnessed by r276/witness.py on :8150 (the edited copy) before any frame was scored, at r277's own cameras so the frames pair: Endurance close from the starboard quarter (b=150, l=28, z=0.42; witness-endurance-close-after.png) and high on the port quarter (b=125, l=35, z=0.6; witness-endurance-pq-high-after.png), each diffed against r277's frame at the same camera (diff-close-1440.png, diff-pq-high-1440.png): every changed pixel lies on the braces' runs from the yardarms to the rails — 33,485 and 28,825 pixels over 24 in the 2880 frames, columns 645–1468 and 712–1479, nothing else in either frame. Read at 5x (crop-pq-far-5x-before.png / -after.png, the pq-high frame's 1380..1580 x 980..1160 — the far, starboard rail): in r277's frame four braces cross the deck from the upper left and end in the air over the planking inboard of the rail; in r278's the same four come down to the cap and four hanks hang under the pin rail beside the stanchion, in the rope's own colour. crop-pq-near-5x (1240..1440 x 1100..1300, the near port rail): the four braces that ended over the deck now end at the rail's edge. The ratchet's own diff of the r278 tree on :8149 (diff-ship-endurance.png, read): the braces' runs and nothing else — ship-endurance 0.227%/0.083 CHANGED, ACCEPTED with that reason (FRAME-LOG.md). The four MAY neighbours and as many of the clean-HEAD backlog as the clock allowed were scored by a check chain after the push, with every _current and _diff copied aside; the result is in the receipt commit that follows this one.**
+
+**Rule 0 on the close witness read whole (witness-endurance-close-after.png): a rendered barquentine seen from high on her starboard quarter on a lit blue-green sea, her deck planked fore and aft, her fore course and topsails drawing, the main's gaff sail behind — not a chart. Three facts a viewer can read off it without a legend: the braces from her fore yards come down to the rail amidships and are coiled on the pins there, beside the sheets' coils; a black funnel stands between her main and mizzen masts, a steamer under sail; the hatch abaft the fore mast is covered by a grating.**
+
+**Named residuals, in order:** (0y⁷²) HALF CLOSED this round — the braces belay; what remains of it: the jeers' falls end
+on the deck beside the mast (a fife rail's job, and no fife rail is drawn), the gaff sails' throat and peak halyards are
+not drawn at all, so nothing of the main's or mizzen's belays, and the staysail sheets are unread. NEW (0y⁷⁵) THE BRACE
+LEADS STRAIGHT FROM THE ARM TO THE CAP: a brace on a ship of Endurance's rig runs from the yard arm to a brace block — on
+the bulwark for the lower yard, on a pendant from the mast abaft for the upper yards — and the fall comes down from the
+block; the straight line from the arm to the cap's fairlead is a stated simplification, the braces' share of (0y⁷⁴).
+NEW (0y⁷⁶) THE BRACE'S STATION IS A CLASS FIGURE: 0.26 L abaft the yard (buildRigging, from before r100) — no plate of
+Endurance's rail has been read for where her braces belay. (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r277 names them. (0y⁶⁰)'s remainder
+(scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273
+names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰)
+(0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗)
+(0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵)
+(0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″)
+(0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance)
+still waits on the RMG original.**
+
+**r279 opens by checking `uptime` and `ps -r` FIRST; with the load under 15 and neither mediaanalysisd nor a Codex renderer
+hot it runs the FULL ratchet at the clean HEAD (the clean-HEAD backlog is the 45 frames r277 did not reach, unscored since r275/r276's acceptances, less what r278's check chain reached — the receipt below lists them); above 15, or with either hot, it
+scores by check --frame the frames the round's change can reach and the four MAY neighbours. Then it takes the rest of
+(0y⁷²): a FIFE RAIL at the fore mast's foot on a hull that carries pins — the rail on its own stanchions round the mast
+with pins through it — and the jeers' falls and the hoisting yards' halyards belayed to it (the halyards move from the
+pin rail to the fife rail where one stands, which is where a topsail halyard's fall actually belays on a ship of her
+size only if the plate says so — read a plate first), or the gaff sails' throat and peak halyards drawn and belayed, or
+(0y⁷⁰), a plate read of Endurance's bulwark, or the survey's next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788875499 at the build; the push and the live poll are in
+build/staging/r278/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r278 staging stays on disk uncommitted, the r211 convention.**

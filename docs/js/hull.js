@@ -1356,6 +1356,27 @@ const ropeMat = mats.ropeSolid || woodDark;
 const BELAY = FINE ? bulwarkFurnitureSpec(S, H) : null;
 const belayPins = BELAY && BELAY.pinRail ? BELAY.pins.map(p => Object.assign({ used: null }, p)) : [];
 const belayed = [];
+const leadTo = (list, from, uu, sgn, part, mi, fallback) => {
+let best = null, bd = 1e9;
+if (belayPins.length) {
+const xw = (Math.max(0.03, Math.min(0.965, uu)) - 0.5) * L;
+for (const p of belayPins) { if (p.sgn !== sgn || p.used) continue;
+const d = Math.abs(p.x - xw); if (d < bd) { bd = d; best = p; } }
+}
+if (!best) { list.push([from, fallback()]); return; }
+best.used = part;
+const head = new THREE.Vector3(best.x, best.y + BELAY.pinH / 2 - 0.03, best.z);
+const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+const rec = { part, mast: mi, side: sideName(sgn), pin: R3(best), head: R3(head), from: R3(from), lead: 'direct' };
+const capHalf = Math.abs(surfacePoint(S, H, best.u, 1)[2]);
+if (Math.abs(from.z) > capHalf + 0.05) {
+const rc = S.capM ? S.capM / 1.6 : B * 0.016;
+const fair = new THREE.Vector3(best.x, H.sheer(best.u) + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
+list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
+} else list.push([from, head]);
+belayed.push(rec);
+};
+S.__belay = belayPins.length ? { spec: BELAY, belayed, leadTo } : null;
 const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
 const h = y1 - y0;
 const g = new THREE.CylinderGeometry(r1, r0, h, 9, 1, true);
@@ -1466,7 +1487,7 @@ what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel 
 + 're-masting cut every steel yard to in 2017, and Great Eastern\'s 1858 iron '
 + 'lower yard holds at 50.4. An attested rate applied to this spar\'s own '
 + 'length: the rate is the record\'s, the figure DERIVED from it.' };
-spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2,
+spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2, mast: mi,
 armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
 {
 const C = new THREE.Vector3(mxA(yy), yy, 0);
@@ -1837,26 +1858,7 @@ const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
 return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
 };
 const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
-const lead = (list, from, uu, sgn, part) => {
-let best = null, bd = 1e9;
-if (belayPins.length) {
-const xw = (Math.max(0.03, Math.min(0.965, uu)) - 0.5) * L;
-for (const p of belayPins) { if (p.sgn !== sgn || p.used) continue;
-const d = Math.abs(p.x - xw); if (d < bd) { bd = d; best = p; } }
-}
-if (!best) { list.push([from, rail(uu, sgn)]); return; }
-best.used = part;
-const head = V3(best.x, best.y + BELAY.pinH / 2 - 0.03, best.z);
-const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
-const rec = { part, mast: mi, side: sideName(sgn), pin: R3(best), head: R3(head), from: R3(from), lead: 'direct' };
-const capHalf = Math.abs(surfacePoint(S, H, best.u, 1)[2]);
-if (Math.abs(from.z) > capHalf + 0.05) {
-const rc = S.capM ? S.capM / 1.6 : B * 0.016;
-const fair = V3(best.x, H.sheer(best.u) + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
-list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
-} else list.push([from, head]);
-belayed.push(rec);
-};
+const lead = (list, from, uu, sgn, part) => leadTo(list, from, uu, sgn, part, mi, () => rail(uu, sgn));
 const belaysOf = part => belayed.filter(b => b.part === part && b.mast === mi);
 mastYards.forEach((yd, k) => {
 const above = mastYards[k + 1];
@@ -2726,16 +2728,18 @@ if (hs) hs.position.z = (k - (n - 1) / 2) * B * 0.032;
 }
 }
 }
-if (belayed.length) {
+S.__spars = spars; S.__mastTops = mastTops;
+return sails;
+}
+function buildCoils(S, group, mats) {
+const bel = S.__belay; if (!bel || !bel.belayed.length) return;
+const belayed = bel.belayed, BELAY = bel.spec, ropeMat = mats.ropeSolid || mats.spar;
 const cm = new THREE.Mesh(coilGeometry(belayed.map(b => ({ x: b.pin[0], y: b.pin[1], z: b.pin[2] })), BELAY.railT), ropeMat);
 cm.userData.coils = belayed.map(b => ({ part: b.part, side: b.side, pin: b.pin,
 top: +(b.pin[1] - 0.105 + 0.024).toFixed(3), bottom: +(b.pin[1] - 0.105 - 0.55 - 0.024).toFixed(3) }));
 group.add(tag(cm, 'coil', 'Coils',
-`The falls of ${belayed.length} lines (${['sheet', 'tack', 'halyard'].map(p => { const n = belayed.filter(b => b.part === p).length; return n ? n + ' ' + p + (n > 1 ? 's' : '') : null; }).filter(Boolean).join(', ')}) ` +
+`The falls of ${belayed.length} lines (${['sheet', 'tack', 'halyard', 'brace'].map(p => { const n = belayed.filter(b => b.part === p).length; return n ? n + ' ' + p + (n > 1 ? 's' : '') : null; }).filter(Boolean).join(', ')}) ` +
 'coiled and hung on their belaying pins under the pin rail: a 0.55 m hank a pin, a class figure — a coil is sized to the hand that makes it up, not to the ship.'));
-}
-S.__spars = spars; S.__mastTops = mastTops;
-return sails;
 }
 const SAIL_VERT = SHADERS['SAIL_VERT.vert'];
 const SAIL_FRAG = SHADERS['SAIL_FRAG.frag'];
@@ -5478,17 +5482,27 @@ const bx = (bu - 0.5) * L, by = deckAt(bu);
 const hb = Math.abs(surfacePoint(S, H, bu, 1)[2]);
 for (const sgn of [-1, 1]) staySegs.push(line([m.x, m.y, 0], [bx, by, sgn * hb]));
 });
+const bel = S.__belay;
 spars.forEach(sp => {
 const bu = Math.min(0.97, sp.u + 0.26);
 const bx = (bu - 0.5) * L, by = deckAt(bu);
-for (const sgn of [-1, 1])
-braceSegs.push(line([sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half)],
-[bx, by + sp.half * 0.10, sgn * sp.half * 0.30]));
+for (const sgn of [-1, 1]) {
+const from = new THREE.Vector3(sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half));
+const old = () => new THREE.Vector3(bx, by + sp.half * 0.10, sgn * sp.half * 0.30);
+if (bel) bel.leadTo(braceSegs, from, bu, sgn, 'brace', sp.mast, old);
+else braceSegs.push([from, old()]);
+}
 });
 const st = ropeMesh(staySegs, 0.020 + B * 0.0009, ropeMat);
 if (st) group.add(tag(st, 'stay'));
 const br = ropeMesh(braceSegs, 0.010 + B * 0.0004, ropeMat);
-if (br) group.add(tag(br, 'brace'));
+if (br) {
+const bl = bel ? bel.belayed.filter(b => b.part === 'brace') : null;
+if (bl) br.userData.belays = bl;
+group.add(tag(br, 'brace', null, bl && bl.length ? PARTS.brace.what +
+` Made fast to ${bl.length === 1 ? 'a belaying pin' : bl.length + ' belaying pins'} on the pin rail` +
+`${bl.some(b => b.lead !== 'direct') ? ', led over the cap' : ''}; each fall is coiled on its pin (r278).` : null));
+}
 }
 function linerHouse(S) {
 const n = S.decks || 0;
@@ -10496,6 +10510,7 @@ if (FINE) {
 buildGuns(S, group, mats.iron || mats.woodDark);
 if (S.__spars && S.__spars.length)
 buildRigging(S, group, mats, S.__spars, S.__mastTops || []);
+buildCoils(S, group, mats);
 }
 if (FINE) buildFittings(S, group, mats);
 if (FINE) buildFunnel(S, group);

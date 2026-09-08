@@ -6219,7 +6219,10 @@
        of those parts may end under the rail (the lowest vertex of each mesh at least 0.15 under
        no pin's centre); and the coils: a 'Coils' mesh, one coil recorded per belay, each coil's
        top 0.05–0.20 under its pin's centre (hung on the pin under the rail) and its bottom clear
-       of the deck. A hull with no pins must carry no belay record and no coil. */
+       of the deck. A hull with no pins must carry no belay record and no coil.
+       r278 (0y⁷²): the BRACES are falls too — the Braces mesh is read with the sheets, tacks and
+       halyards, and a hull with pins whose Braces mesh records no belay is convicted outright
+       ('braces belayed nowhere', the r277 state: eight braces ending in the air over the deck). */
     {
       const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
       const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
@@ -6227,7 +6230,7 @@
       const pinsM = [], ropeM = [], coilM = [], deckM = [];
       g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
         if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
-        else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard') ropeM.push(o);
+        else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace') ropeM.push(o);
         else if (p.key === 'coil') coilM.push(o);
         else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
       /* the pins' centres are the builder's record (userData.pins); a pins mesh with no record is
@@ -6246,7 +6249,10 @@
         if (coilM.length) say(v.id, 'a coil where there is no pin rail', `${coilM.length} Coils mesh(es) and no Belaying pins mesh`);
       } else {
         const near = q => { let bp = null, bd = 1e9; for (const p of pins) { const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); if (d < bd) { bd = d; bp = p; } } return { p: bp, d: bd }; };
-        if (squareMast && !belays.length) say(v.id, 'a pin rail with nothing belayed', `${pins.length} pins, a square-rigged mast, and no sheet, tack or halyard made fast to any of them`);
+        if (squareMast && !belays.length) say(v.id, 'a pin rail with nothing belayed', `${pins.length} pins, a square-rigged mast, and no sheet, tack, halyard or brace made fast to any of them`);
+        const braceM = ropeM.filter(o => tagOf(o).key === 'brace');
+        if (braceM.length && !braceM.some(o => (o.userData.belays || []).length))
+          say(v.id, 'braces belayed nowhere', `${pins.length} pins and a Braces mesh with no belay record — the braces end in the air over the deck`);
         const used = new Map();
         for (const b of belays) {
           const at = `the ${b.side} ${b.part} of mast ${b.mast}`;

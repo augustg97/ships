@@ -2264,6 +2264,34 @@ function buildRig(S, group, mats, FINE, FURLED) {
   const BELAY = FINE ? bulwarkFurnitureSpec(S, H) : null;
   const belayPins = BELAY && BELAY.pinRail ? BELAY.pins.map(p => Object.assign({ used: null }, p)) : [];
   const belayed = [];
+  /* r278 (0y⁷²): ONE lead for every fall — the square gear's below and the BRACES' in
+     buildRigging, which buildShip runs after this builder and which reads it off S.__belay.
+     The nearest FREE pin on side sgn to the station uu (no two falls on one pin), the rope's
+     head on the pin's upper half, over the cap first where the fall starts outboard of the
+     skin; `fallback()` is the fall's old end where the hull carries no pins, so every hull
+     without pins is byte-identical. The coils are hung after the braces (buildCoils). */
+  const leadTo = (list, from, uu, sgn, part, mi, fallback) => {
+    let best = null, bd = 1e9;
+    if (belayPins.length) {
+      const xw = (Math.max(0.03, Math.min(0.965, uu)) - 0.5) * L;
+      for (const p of belayPins) { if (p.sgn !== sgn || p.used) continue;
+        const d = Math.abs(p.x - xw); if (d < bd) { bd = d; best = p; } }
+    }
+    if (!best) { list.push([from, fallback()]); return; }
+    best.used = part;
+    const head = new THREE.Vector3(best.x, best.y + BELAY.pinH / 2 - 0.03, best.z);
+    const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+    const rec = { part, mast: mi, side: sideName(sgn), pin: R3(best), head: R3(head), from: R3(from), lead: 'direct' };
+    const capHalf = Math.abs(surfacePoint(S, H, best.u, 1)[2]);
+    if (Math.abs(from.z) > capHalf + 0.05) {
+      /* over the cap: a fairlead on the capping rail's top at the pin's station */
+      const rc = S.capM ? S.capM / 1.6 : B * 0.016;
+      const fair = new THREE.Vector3(best.x, H.sheer(best.u) + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
+      list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
+    } else list.push([from, head]);
+    belayed.push(rec);
+  };
+  S.__belay = belayPins.length ? { spec: BELAY, belayed, leadTo } : null;
 
   const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
     const h = y1 - y0;
@@ -2583,7 +2611,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* recorded from the spar that was actually placed, so the braces lead to real yard arms:
          a braced yard's arms swing FORE AND AFT as well as out, and the brace is the rope that
          holds them there, so it has to be led to where the arm now is. */
-      spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2,
+      spars.push({ u, x: ym.position.x, y: yY, half: yardLen / 2, mast: mi,
                    armX: Math.sin(TRIM) * yardLen / 2, armZ: Math.cos(TRIM) * yardLen / 2 });
       /* ── THE FITTING THAT HOLDS THE YARD THERE (round 258, 0y²⁷) ─────────────────────
          Round 257 stood the yard off the axis at the two radii and drew nothing holding it
@@ -3265,27 +3293,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
       /* the fall's end (r277): the nearest free pin on this side, or the deck edge where the
          hull carries no pins; segments pushed onto `list`, the belay recorded for the mesh */
-      const lead = (list, from, uu, sgn, part) => {
-        let best = null, bd = 1e9;
-        if (belayPins.length) {
-          const xw = (Math.max(0.03, Math.min(0.965, uu)) - 0.5) * L;
-          for (const p of belayPins) { if (p.sgn !== sgn || p.used) continue;
-            const d = Math.abs(p.x - xw); if (d < bd) { bd = d; best = p; } }
-        }
-        if (!best) { list.push([from, rail(uu, sgn)]); return; }
-        best.used = part;
-        const head = V3(best.x, best.y + BELAY.pinH / 2 - 0.03, best.z);
-        const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
-        const rec = { part, mast: mi, side: sideName(sgn), pin: R3(best), head: R3(head), from: R3(from), lead: 'direct' };
-        const capHalf = Math.abs(surfacePoint(S, H, best.u, 1)[2]);
-        if (Math.abs(from.z) > capHalf + 0.05) {
-          /* over the cap: a fairlead on the capping rail's top at the pin's station */
-          const rc = S.capM ? S.capM / 1.6 : B * 0.016;
-          const fair = V3(best.x, H.sheer(best.u) + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
-          list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
-        } else list.push([from, head]);
-        belayed.push(rec);
-      };
+      const lead = (list, from, uu, sgn, part) => leadTo(list, from, uu, sgn, part, mi, () => rail(uu, sgn));
       const belaysOf = part => belayed.filter(b => b.part === part && b.mast === mi);
       mastYards.forEach((yd, k) => {
         const above = mastYards[k + 1];
@@ -4865,18 +4873,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
     }
   }
 
-  /* ── THE COILS (round 277, 0y⁷¹): every fall made fast to a pin hangs its coil on it ── */
-  if (belayed.length) {
-    const cm = new THREE.Mesh(coilGeometry(belayed.map(b => ({ x: b.pin[0], y: b.pin[1], z: b.pin[2] })), BELAY.railT), ropeMat);
-    cm.userData.coils = belayed.map(b => ({ part: b.part, side: b.side, pin: b.pin,
-      top: +(b.pin[1] - 0.105 + 0.024).toFixed(3), bottom: +(b.pin[1] - 0.105 - 0.55 - 0.024).toFixed(3) }));
-    group.add(tag(cm, 'coil', 'Coils',
-      `The falls of ${belayed.length} lines (${['sheet', 'tack', 'halyard'].map(p => { const n = belayed.filter(b => b.part === p).length; return n ? n + ' ' + p + (n > 1 ? 's' : '') : null; }).filter(Boolean).join(', ')}) ` +
-      'coiled and hung on their belaying pins under the pin rail: a 0.55 m hank a pin, a class figure — a coil is sized to the hand that makes it up, not to the ship.'));
-  }
-
   S.__spars = spars; S.__mastTops = mastTops;
   return sails;
+}
+
+/* ── THE COILS (round 277, 0y⁷¹): every fall made fast to a pin hangs its coil on it ──
+   Built AFTER buildRig and buildRigging (r278), because the braces belay in the second: a
+   coil hung before the braces were led would leave their pins bare. */
+function buildCoils(S, group, mats) {
+  const bel = S.__belay; if (!bel || !bel.belayed.length) return;
+  const belayed = bel.belayed, BELAY = bel.spec, ropeMat = mats.ropeSolid || mats.spar;
+  const cm = new THREE.Mesh(coilGeometry(belayed.map(b => ({ x: b.pin[0], y: b.pin[1], z: b.pin[2] })), BELAY.railT), ropeMat);
+  cm.userData.coils = belayed.map(b => ({ part: b.part, side: b.side, pin: b.pin,
+    top: +(b.pin[1] - 0.105 + 0.024).toFixed(3), bottom: +(b.pin[1] - 0.105 - 0.55 - 0.024).toFixed(3) }));
+  group.add(tag(cm, 'coil', 'Coils',
+    `The falls of ${belayed.length} lines (${['sheet', 'tack', 'halyard', 'brace'].map(p => { const n = belayed.filter(b => b.part === p).length; return n ? n + ' ' + p + (n > 1 ? 's' : '') : null; }).filter(Boolean).join(', ')}) ` +
+    'coiled and hung on their belaying pins under the pin rail: a 0.55 m hank a pin, a class figure — a coil is sized to the hand that makes it up, not to the ship.'));
 }
 
 /* ── SAILCLOTH ────────────────────────────────────────────────────────────────────────
@@ -8734,19 +8746,36 @@ function buildRigging(S, group, mats, spars, mastTops) {
     for (const sgn of [-1, 1]) staySegs.push(line([m.x, m.y, 0], [bx, by, sgn * hb]));
   });
 
-  /* braces: from each yard arm aft and down */
+  /* braces: from each yard arm aft and down — and where the hull carries a pin rail (r278,
+     0y⁷²) to a belaying pin in it, through the same lead the sheets and halyards take
+     (buildRig's leadTo, on S.__belay): the nearest free pin on the arm's own side to the
+     station 0.26 L abaft the yard, over the cap first because a yard's arm stands outboard
+     of the skin. A brace's fall is not left in the air over the deck: it belays like every
+     other fall, and its coil hangs on its pin (buildCoils). Without pins the old point over
+     the deck stands, byte-identical. */
+  const bel = S.__belay;
   spars.forEach(sp => {
     const bu = Math.min(0.97, sp.u + 0.26);
     const bx = (bu - 0.5) * L, by = deckAt(bu);
-    for (const sgn of [-1, 1])
-      braceSegs.push(line([sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half)],
-                          [bx, by + sp.half * 0.10, sgn * sp.half * 0.30]));
+    for (const sgn of [-1, 1]) {
+      const from = new THREE.Vector3(sp.x + sgn * (sp.armX || 0), sp.y, sgn * (sp.armZ !== undefined ? sp.armZ : sp.half));
+      const old = () => new THREE.Vector3(bx, by + sp.half * 0.10, sgn * sp.half * 0.30);
+      if (bel) bel.leadTo(braceSegs, from, bu, sgn, 'brace', sp.mast, old);
+      else braceSegs.push([from, old()]);
+    }
   });
 
   const st = ropeMesh(staySegs, 0.020 + B * 0.0009, ropeMat);
   if (st) group.add(tag(st, 'stay'));
   const br = ropeMesh(braceSegs, 0.010 + B * 0.0004, ropeMat);
-  if (br) group.add(tag(br, 'brace'));
+  if (br) {
+    /* a belayed mesh records its pins (userData.belays) and says so on its card (r277) */
+    const bl = bel ? bel.belayed.filter(b => b.part === 'brace') : null;
+    if (bl) br.userData.belays = bl;
+    group.add(tag(br, 'brace', null, bl && bl.length ? PARTS.brace.what +
+      ` Made fast to ${bl.length === 1 ? 'a belaying pin' : bl.length + ' belaying pins'} on the pin rail` +
+      `${bl.some(b => b.lead !== 'direct') ? ', led over the cap' : ''}; each fall is coiled on its pin (r278).` : null));
+  }
 }
 
 
@@ -16185,6 +16214,7 @@ function buildShip(S, opts) {
     buildGuns(S, group, mats.iron || mats.woodDark);
     if (S.__spars && S.__spars.length)
       buildRigging(S, group, mats, S.__spars, S.__mastTops || []);
+    buildCoils(S, group, mats);
   }
   /* the fittings are what turn a hull with masts into a ship, and they are the reason the
      Shipwright's model is worth building separately from the globe's token */
