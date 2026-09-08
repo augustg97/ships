@@ -24130,3 +24130,152 @@ file uncommitted, deliberately; the r272 staging stays on disk uncommitted, the 
 back by CODE strings (the r237 correction, minified forms on docs/): docs/data/vessels.json carries 2 belowSheerM fields (the cog's and Endurance's), 1 hull with "freeboard":3.35 and 1 SOLID BULWARK provenance; docs/audit-hulls.js convicts a deck depth with no provenance and a fitting standing on the sheer of a bulwarked hull (2 rule strings); web/js/hull.js against HEAD~1's: unchanged (git diff HEAD~1 -- web/js/hull.js is empty); the build read first paint 8.60 MB against the 8.6 line.
 THE RATCHET: OPENING FULL RATCHET at the clean r271 HEAD cc9d7de (START 23:48:48 load 7.18 10.27 9.61 HEAD cc9d7de) DIED at its 5th frame (globe-era-card, a Page.screenshot timeout under a load of 33 from Apple's image indexer and the Codex app; RATCHET EXIT 1 at 23:52:39); its 4 captured frames were copied to r272/current-clean before any check --frame and scored offline by the tool's own compare (r272/clean-scores.out): 4 frames scored offline; movers 0. The clean HEAD's seven Shipwright frames this round can move are the r271 receipt's own check --frame rows on the tree that is this HEAD (ship-container 0.015%, ship-dreadnought 0.047%, ship-endurance 0.000% after its accept, ship-queen-mary-2 0.008%, ship-titanic 0.000%, ship-wyoming 0.000%, ship-yamato 0.006%). THE r272 TREE (web/ after the copy-in at 00:14, scored by check --frame per PREDICTIONS-close.md, r272/checks.log): ship-endurance 2.484% 1.728 CHANGED — accepted (the round's one predicted mover: the bulwark; the frame read before accepting); ship-titanic 0.000% 0.000 ok; ship-yamato 0.046% 0.016 ok; ship-wyoming 0.000% 0.000 ok; ship-container 0.015% 0.015 ok; ship-dreadnought 0.047% 0.019 ok; ship-queen-mary-2 0.008% 0.011 ok — the four non-zero neighbours at the same numbers r271's receipt read on the unchanged tree, the documented capture flap, not this round's.
 Two commits close the round (0aff9be record + audit + docs + handoff + the accepted baseline, and this push-log commit).**
+
+
+## Round 273 — 2026-09-08 — Endurance gets the compass platform at her stern, and her wheel stays where the plan puts it: r272's residual (0y⁶¹) said she steered from a raised platform aft that the plates show, but the Framnæs section draws the main deck line level to the counter with the cap over it and no poop, and Hurley's plate from the starboard quarter shows the wall solid to the counter with a man's head over the cap, so the wheel stands on the flush main deck behind the bulwark and the residual closes as no fault; what that plate shows aft is an open lattice frame 2.1 m over the cap with a level floor and a hooded box on it — the standard compass on its platform, an identification the record names CONTESTED — which the record now carries, the fittings builder draws from it, the gaff rig lifts the mizzen boom over it from the same record, a new rule reads the platform and the boom off the meshes and convicts the silence, and the opening full ratchet ran at the clean r272 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r272 ordered r273's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet until globe-default
+had landed. The load at the open was 8.2 (00:44), nothing of this project's running, so the full ratchet was launched at
+00:45:42 at HEAD 1e0f4a9 (r273/open-ratchet.out) and nothing touched the machine until globe-default had landed
+(00:47). Its result is in the receipt commit that follows this one (the r198 rule). Every edit was made on a COPY of
+web/ served on :8150 (build/staging/r273/web, every file a symlink to web/ except audit-hulls.js, js/hull.js and
+data/vessels.json, which are copies); the chain ran one browser at a time (r273/chain.log). r272's first residual,
+(0y⁶¹), was the task.**
+
+**THE FAULT, WHICH WAS IN THE RESIDUAL. (0y⁶¹) said the wheel stood behind 1.35 m of bulwark where Endurance steered
+from a raised platform aft in the plates. Two sources say otherwise. The Framnæs longitudinal section (as Polaris,
+RMG J9266, web copy 1024x322 px, ~16.9 px/m) has her BOW at the RIGHT of the copy — r272's plan-stern-4x.png is a crop
+of the bow, mislabelled — and its stern at cols 85–130; row profiles over column bands from midships to the counter
+(r273/plan-stern-6x-ruled.png; the profiles in this round's transcript) put the main deck's plank line at rows 198–202
+and the cap at rows 174–178 in every band to the stern, with the bulwark's stanchions between them every 12–16 px
+(0.7–0.95 m): no poop, no raised quarterdeck, no break abaft the mizzen. Hurley's plate from the starboard quarter
+(Commons 'Endurance in Antarctica, 1915 Hurley a090007', 1500x1124 px, r273/commons-a090007.jpg; the hull 900 px long,
+the fore-main gap 210 px against the main-mizzen 255 where the record has 13.0 and 12.0 m, so ~16 px/m at the bow and
+~24 at the stern ± 3; r273/a090007-stern-6x-ruled.png) shows the wall solid to the counter with the cap rail carried
+round it and a man's head and shoulders standing over the cap on the after deck: the helmsman sees over the wall. The
+wheel is hidden behind it in every plate. So the wheel stays at the class station 0.94 on the main deck, the record
+says so (helmProvenance), and (0y⁶¹) closes as no fault.**
+
+**WHAT THE PLATE SHOWS AFT INSTEAD (r273/a090007-stern-6x-ruled.png): standing over the cap at the stern, an open
+lattice frame whose base sits on the cap line at row 697 and which ends at row 650 in a level floor — 50 px, 2.1 m
+(± 0.3) over the cap, 3.45 m over the deck with the r272 bulwark of 1.35 — 36 px (1.5 m) across at the base and 34 at
+the floor, one cross-braced panel a face; on the floor a box 20 px (0.8 m) wide and 25 px (1.0 m) tall, rows 625–650,
+with a short finial. Its centre at col 910 lies 0.79 of the way from the mizzen (col 740) to the taffrail's cap (col
+955); with the mizzen at u 0.839 and the taffrail at the loft's u 1.035 that is u 0.99 ± 0.02, an upper bound because
+the quarter view foreshortens the far end. The same tower stands over the stern in the heeled plate (the pale
+columns at the top of r271's plate-heeled-stern-4x.png) and its wreck is at the right edge of the Library of Congress
+plate LCCN 2013646126 (r273/commons-lccn-after-pressure.jpg). What it IS is inferred: a hooded box on a platform set
+high and right aft, clear of the engine's and boiler's iron, is the standard compass on its platform as Discovery,
+Nimrod and Terra Nova carried theirs; no source in reach names Endurance's, so the record says CONTESTED and the card
+says the reading is the plate's, not a record's. The plate cannot give the athwartships position; the centreline is an
+assumption a standard compass has to satisfy. The prints.rmg.co.uk copy of J9266 (cdn/shop/products/j9266.jpg) is the
+same 1024x322 file, so the forecastle break and the draught contest (0y⁵⁹) still wait on the original; the Commons
+category was listed by the API and the six plausible stern plates fetched (r273/commons-*.jpg) — the others are
+distant or wrecked views.**
+
+**THE RECORD (web/data/vessels.json; r273/apply-record-edits.py, line-level, every edit asserted and the result
+json-parsed; vessels.before.json and vessels.after.json, 10 added lines, none changed): Endurance's hull gains
+helmProvenance (the two sources above, what each can give, and the closing of (0y⁶¹)) and aftPlatform {u 0.99, floorM
+3.45, wM 1.5, boxWM 0.8, boxHM 1.0, what 'compass platform (inferred; CONTESTED)', provenance} — the provenance names
+the plate, its pixel size, its scale and where it runs from, the rows and columns read, the tolerances, the two other
+plates that show the tower, the inference and its contest, and the boom. No other record changed.**
+
+**THE BUILDER (web/js/hull.js; r273/apply-builder-edits.py, three replaces asserted; hull.before.js and hull.after.js,
+66 insertions, 1 deletion; parsed by node's vm). (1) PARTS gains compassPlatform, stage 5, 'Compass platform', with a
+card that says what the plate shows and that the compass is a reading. (2) buildFittings, after the wheel: on a record
+with aftPlatform, four legs stand on the DECK at the record's station (deckEdge's x, deckAtU's height — the r272 lesson,
+the deck is not the sheer on a bulwarked hull), an X of braces over the upper panel of each face and a rail at the
+panel's foot (a bar helper from two endpoints, the quaternion set from the unit vectors, so no Euler order can put a
+brace in the wrong plane), the floor a plank square on the legs' heads, the box on it; nothing is drawn on a record
+without the field. (3) The gaff rig, at the boom's foot: the rig reads aftPlatform from the same record and lifts the
+aftermost boom's foot to the box's top plus a hand's breadth and the spar's radius where the boom reaches the
+platform — the junk-castle idiom — and leaves every other boom alone (the main boom, which ends at the mizzen, is
+not lifted). Drawn level, the mizzen boom's foot stands 5.2 m over the deck at the mast, 0.5 m over the plate's
+gooseneck read (4.0–4.3 ± 0.4), and the record says so — (0y⁶³) is the boom's cock. Only Endurance's record carries the
+field, so no other hull's geometry can change. Measured on the built scene (r273/measure-after.out on :8150): the
+Compass platform stands at u 0.971–1.009, x 18.65..20.15, y 2.45..6.96 (the legs' feet on the deck's edge at 2.45, the
+floor top at 5.96, the box to 6.96), 0.25 m abaft the wheel's box (which ends at x 18.4) and 0.45 m short of the deck's
+last vertex (x 20.6, u 1.020); the Boom row runs y 4.99..5.80 → 5.57..7.33 over the water — the main boom unchanged at
+5.57, the mizzen's lifted from 4.99–5.23 to 7.10–7.33 — and the mizzen's cloth shrinks under it; the wheel is unchanged
+at u 0.939–0.964, y 2.34–3.49. The first build placed the platform's x off deckEdge(S, H, u), which carries the counter's
+rake, and the first measure (r273/chain.log, FINAL at 01:21) put it at x 19.4..20.9 with its after legs 0.3 m past the
+deck's end; the shipped builder uses (u − 0.5) L, the wheel's own convention, and FINAL was re-run on it (FINAL-2,
+01:38: 0 problems). The two provenance strings were then cut to 337 and 883 characters, and the card to three sentences, because the build refused the
+first paint at 8.61 MB against the 8.6 line with the long forms (r273/build.out, 01:51); this entry carries the long
+form.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r273/apply-audit-edits.py, two replaces asserted; parsed by
+node's vm). A-AFT-PLATFORM, beside the head rule: a platform with no provenance is convicted for the silence (the r108
+pattern); then, on the meshes tagged 'Compass platform' read in the hull's frame: declared and not drawn; drawn on a
+record without the field; the centroid more than 1.5 m off the record's station; the floor's top (the highest vertex
+less the record's box height) more than 0.3 m off the record's height over the deck's edge at its station; and any
+mesh named Boom whose box intersects the platform's, 'a boom through the platform'. D-FITTINGS-ON-DECK's foot list
+gains 'Compass platform', so the legs' contact with the deck is the r272 rule's.**
+
+**PROOFS (r273/chain.log; the r273 audit on :8150, one browser at a time). FINAL (r273 builder, record and audit):
+"checked 33 hulls, 0 problems" (01:21). PROOF B (the :8150 builder's platform datum flipped from the deck to the
+sheer, `y = railAtU(u)`; record and audit unchanged): 3 problems, all Endurance's — 'a platform floor off the record's
+height' (floor top 7.31 m, 4.86 over the deck's edge 2.46 at x 20.2; the record says 3.45), 'a boom through the
+platform' (the boom lifted from the record's floor over the DECK spans y 7.10..7.33 through a platform that now stands
+y 3.80..8.31) and the r272 rule's 'a fitting standing on the sheer of a bulwarked hull' (Compass platform, 18 meshes,
+foot 3.80 m, the deck's edge 2.42: 1.39 m over it, 0.68 allowed); the builder restored (cmp). PROOF B2 (the boom's
+clearance removed, `footY = base + lower * 0.11` as it was): exactly 1, 'a boom through the platform' (a Boom spans y
+4.99..5.23 over x 14.0..26.7; the platform stands y 2.45..6.96 at x 19.4..20.9) — the fault the rig change removes,
+seen by the new rule and nothing else; the builder restored (cmp). PROOF C (aftPlatform.provenance removed from the
+record, the builder unchanged): exactly 1, 'a platform with no provenance'; the record restored (cmp). PROOFS B, B2 and
+C ran on the builder before the station's x change (the platform then at x 19.4..20.9); the change moves x by 0.75 m and
+touches no height, no boom and no provenance, so their verdicts stand, and FINAL-2 is the shipped builder's own.**
+
+**WITNESSED (r273/witness-endurance-stbdquarter-before.png from :8149 — web/ at HEAD — and -after.png from :8150, both
+b=240, l=6, z=0.7, 2880 × 1800, the plate's own bearing; -profile-after.png at b=270, l=4, z=0.9). From the starboard
+quarter, before: the after deck's wall runs to the counter under the mizzen's gaff sail, whose boom lies low over the
+cap, and nothing stands at the stern; after: a pale lattice tower stands at the stern over the cap with a dark box on
+its floor, the braces crossing on each face, and the mizzen boom runs over the box with the gaff sail's foot lifted
+above it. From the starboard beam the tower reads at the counter's end with the boom's line above it.**
+
+**Rule 0 on the quarter witness read whole (r273/witness-endurance-stbdquarter-after.png): a rendered barquentine
+under sail seen from her starboard quarter over a lit sea, not a chart: the cloth's seams and shading, the planking,
+the dark wall under its pale cap, the tower's braces catching the light, the sea's ripple. Three facts a viewer can
+read off it without a legend: a lattice tower with a box on it stands at her stern, higher than a man; her after
+boom passes over that tower; she carries square sails on the foremast only, with gaff sails abaft.**
+
+**Named residuals, in order:** NEW (0y⁶²) THE PLATFORM'S IDENTITY: compass platform is an inference from the type;
+the record says CONTESTED; needs a source naming Endurance's standard compass or a deck plan. NEW (0y⁶³) THE BOOM'S
+COCK: the mizzen boom is drawn level at the lifted foot; the plate shows the spar topped up in the ice and every
+working spanker boom is cocked up aft by its topping lift, which would let the foot sit lower over the deck (the
+gooseneck's plate read is 4.0–4.3 m against the drawn 5.2) — a rig class change, not Endurance's alone. NEW (0y⁶⁴)
+THE PLATFORM'S FINIAL AND LADDER: the plate shows a short finial over the box and the frame must have had a ladder;
+neither is drawn. (0y⁶¹) CLOSED as no fault, this round. (0y⁶⁰) THE BULWARK'S FURNITURE as r272 names it — and the
+plan's stern bands now give the stanchion pitch (12–16 px, 0.7–0.95 m) for whoever takes it. (0y⁵⁹) THE DRAUGHT as
+r272 names it; the prints.rmg.co.uk copy is no larger. (0y⁵⁷) (0y⁵⁸) as r271 names them; this round pays two more
+provenance strings at first paint (the build's figure is in the receipt). (0y⁵⁵) as r270 names it. (0y⁴⁹) (0y⁵⁰)
+(0y⁴⁷) as r266 names them. (0y⁴⁶) HALF CLOSED as r265 names it. (0y⁴⁵) STANDS as r265 names it. (0y⁴⁴) as r263 names
+it. (0y³⁰) stands: no truss plate. (0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴)
+(0y³¹) (0y³²) as r258–r259 name them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴)
+(0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as
+r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′)
+(0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h)
+(0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance) still
+waits on the RMG original.**
+
+**THE FRAMES: r273/PREDICTIONS-close.md, written before any frame of this round's tree was scored: ship-endurance
+MUST move; six berth neighbours MAY; every other frame MUST NOT. The r273 tree's frames were scored by check --frame
+after the copy-in; the rows and each accepted frame's reason are in the receipt commit that follows this one.**
+
+**r274 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed — and if Apple's indexer or the Codex app is hot,
+waiting for it before launching; if the frames are taking over a minute each after the third, it stops the run and
+scores the clean HEAD by check --frame on the frames the round can move; and if the run dies part-way, it copies
+_current aside BEFORE any check --frame and scores the captured frames offline (r273/score-offline.py). Then it takes
+(0y⁶³), the boom's cock as a rig class (every gaff boom rises aft by its topping lift; read the angle off a plate), or
+(0y⁶⁰), the bulwark's stanchions at the plan's pitch and a pin rail as a class for every hull whose deck lies below
+the sheer, or (0y⁶²) if a source naming Endurance's standard compass surfaces, or (0y⁵⁹) if the RMG original of J9266
+surfaces, or the survey's next never-spun hull after Endurance by looking. The load this round: 8.2 at the open,
+45 at 00:53 and 43 at 01:21 (the indexer, r237's pattern, after the staging crops were written), 11 at the chain's
+end (01:27).**
+
+**Live stamp: docs/index.html carries data-version NOT BUILT (the build refused at the first-paint budget; see the receipt) at the build; the push and the live poll are in
+build/staging/r273/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r273 staging stays on disk uncommitted, the r211 convention.**

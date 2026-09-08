@@ -3945,7 +3945,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
         : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
       const gaffL = Math.min(lower * 0.42, boomL * 0.72);
       const peak = 0.62;                                 // the gaff's angle above horizontal
-      const footY = base + lower * 0.11;
+      /* ── THE BOOM CLEARS THE PLATFORM UNDER IT (round 273, Endurance) ─────────────────
+         The aftermost boom overhangs the stern, and Endurance's stern carries the compass
+         platform (aftPlatform): a boom at 0.11 of the mast ran through its box. The rig reads
+         the platform from the same record the fittings build it from — the junk's castle
+         idiom — and lifts the foot to clear the box by a hand's breadth and the spar's own
+         radius where the boom reaches it; a boom that ends short of the platform is not
+         lifted. */
+      const AP = S.aftPlatform;
+      const platTop = (AP && AP.u != null && AP.u > u && boomL >= (AP.u - u) * L - (AP.wM || 1.5) / 2)
+        ? deckAt(AP.u) + (AP.floorM || 3.0) + 0.06 + (AP.boxHM || 1.0) + 0.25 : -Infinity;
+      const footY = Math.max(base + lower * 0.11, platTop);
       /* ── THE LUFF RIDES THE MAST (round 252) ──────────────────────────────────────────
          Every point of this sail that touches the mast was placed at the mast's DECK station
          x, whatever the mast's rake: the boom's jaws, the tack, the throat and the gaff's jaws
@@ -5913,6 +5923,12 @@ const PARTS = {
                   + 'sea coming up astern. On the great schooners it drove the rudder through a '
                   + 'screw gear under the wheel box — one man could hold a ship of nearly four '
                   + 'thousand tons.' },
+  compassPlatform: { stage: 5, name: 'Compass platform',
+              what: 'A raised platform on an open lattice frame at the stern, with a hooded box on '
+                  + 'it. Hurley\'s 1915 plate from the starboard quarter shows it standing about '
+                  + 'two metres over the cap rail. The type\'s answer for a hooded box set high and '
+                  + 'right aft is the standard compass on its platform, clear of the engine\'s iron, '
+                  + 'and that is a reading of the plate, not a record.' },
 };
 
 function tag(o, key, extra, what) {
@@ -7911,6 +7927,55 @@ function buildFittings(S, group, mats) {
     }
     hg.add(wg);
     group.add(tag(hg, 'helm'));
+  }
+
+  /* ── THE COMPASS PLATFORM AFT, FROM THE RECORD: `aftPlatform` (round 273, Endurance) ────
+     Hurley's plate from the starboard quarter (a090007) shows, standing over the cap at her
+     stern, an open lattice frame with a level floor about 2.1 m over the cap and a hooded box
+     on the floor. The record reads it as the standard compass on its platform, set high and
+     right aft to stand clear of the engine's iron, and says that reading is inferred. The
+     frame's four legs stand on the DECK at the record's station — on a bulwarked hull the deck
+     is not the sheer, the r272 lesson — with one cross-braced panel a face over an open lower
+     panel, a rail at the panel's foot, the floor a plank square on the legs' heads and the box
+     on it. Nothing is drawn on a record without the field. The rig reads the same record and
+     lifts the boom over the box (the gaff block). */
+  if (S.aftPlatform && S.aftPlatform.u != null) {
+    const P = S.aftPlatform, u = P.u;
+    const x = (u - 0.5) * L, y = deckAtU(u);   // the wheel's own station convention, not the counter's raked edge (r273 measure)
+    const w = P.wM || 1.5, hF = P.floorM || 3.0, hw = w / 2;
+    const bw = P.boxWM || 0.8, bh = P.boxHM || 1.0;
+    const leg = Math.max(0.06, B * 0.010), brace = leg * 0.6;
+    const pg = new THREE.Group();
+    const bar = (A, Bp, t, m) => {
+      const d = new THREE.Vector3().subVectors(Bp, A), len = d.length();
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(len, t, t), m);
+      mesh.position.copy(A).addScaledVector(d, 0.5);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), d.normalize());
+      return mesh;
+    };
+    const V = (px, py, pz) => new THREE.Vector3(px, py, pz);
+    const c = hw - leg / 2;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      const lg = new THREE.Mesh(new THREE.BoxGeometry(leg, hF, leg), pale);
+      lg.position.set(x + sx * c, y + hF / 2, sz * c);
+      pg.add(lg);
+    }
+    /* the faces: the corner posts of each, wound round; an X over the upper panel of each
+       face and a rail at the panel's foot */
+    const corners = [[-c, -c], [c, -c], [c, c], [-c, c]];
+    for (let k = 0; k < 4; k++) {
+      const [ax, az] = corners[k], [bx, bz] = corners[(k + 1) % 4];
+      pg.add(bar(V(x + ax, y + hF * 0.5, az), V(x + bx, y + hF, bz), brace, pale));
+      pg.add(bar(V(x + ax, y + hF, az), V(x + bx, y + hF * 0.5, bz), brace, pale));
+      pg.add(bar(V(x + ax, y + hF * 0.5, az), V(x + bx, y + hF * 0.5, bz), brace, pale));
+    }
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(w, 0.06, w), pale);
+    floor.position.set(x, y + hF + 0.03, 0);
+    pg.add(floor);
+    const box = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bw), wood);
+    box.position.set(x, y + hF + 0.06 + bh / 2, 0);
+    pg.add(box);
+    group.add(tag(pg, 'compassPlatform'));
   }
 
   /* ── THE SHIP'S BOAT, WHICH IS A HULL, SO IT COMES FROM THE HULL GENERATOR ──────────
