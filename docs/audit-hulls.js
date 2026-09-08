@@ -4759,6 +4759,19 @@ say(v.id, 'square tiers miscounted',
 }
 }
 (H.masts || []).forEach((mk, mi) => {
+if (mk.rig !== 'square' || !Array.isArray(mk.yards)) return;
+const at = `masts[${mi}] (station ${mk.at})`;
+if (!mk.yardsProvenance)
+say(v.id, 'a yard list with no provenance',
+`${at}: yards [${mk.yards.join(', ')}] declared, yardsProvenance absent — a class list reads as the record`);
+if (mk.yardsRead !== undefined && mk.yardsRead !== mk.yards.length)
+say(v.id, 'a yard list its own plate read denies',
+`${at}: ${mk.yards.length} yards listed [${mk.yards.join(', ')}] against yardsRead ${mk.yardsRead}, the count read off the plates yardsProvenance names`);
+const KNOWN = ['course', 'ltop', 'utop', 'top', 'ltg', 'utg', 'tg', 'royal'];
+mk.yards.filter(nm => !KNOWN.includes(nm)).forEach(nm =>
+say(v.id, 'a yard the plan does not cross', `${at}: '${nm}' is not a yard the builder's plan knows; it drops out of the rig silently`));
+});
+(H.masts || []).forEach((mk, mi) => {
 if (!mk.staysails || !mi) return;
 const xF = (H.masts[mi - 1].at - 0.5) * H.lwl, xA = (mk.at - 0.5) * H.lwl;
 const tol = H.lwl * 0.03;

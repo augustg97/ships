@@ -25397,3 +25397,141 @@ uncommitted, deliberately; the r281 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js names sailPt 4 times and courseGear 7; docs/audit-hulls.js carries 'a course with no clewlines' (1 found) and reads clewline 8 times; docs/data/vessels.json names courseGear 1 time(s) (Endurance's fore mast); web/js/hull.js against HEAD~1:  1 file changed, 124 insertions(+), 3 deletions(-); the build read first paint 8.44 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r280's receipt: every frame its change could not reach stands as scored at the r279 tree and its MAY neighbours were all scored). THE r281 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r281/chain.sh's check loop (the MUST frame first, then the MAY neighbours) at 78–150 s a frame: 6 frames scored, 1 beyond the gate, of which 1 ACCEPTED with a reason each (FRAME-LOG.md): ship-endurance 0.100%/0.046. 5 inside the gate (0 at 0.000%/0.000), the largest of those ship-ever-given 0.034%/0.024, ship-azzam 0.023%/0.028, shipwright 0.015%/0.005. Left unscored at the r281 tree (59): globe-default globe-crossing globe-steam globe-modern globe-era-card action ship-dhow ship-junk ship-canoe ship-great-eastern ship-usv ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune ship-carrier ship-titanic ship-yamato descent descent-high descent-coast aboard aboard-off map-floor aboard-coast sea-magnified ship-preussen ship-steamer ship-dreadnought aboard-carrier aboard-cable aboard-titanic aboard-yamato aboard-preussen ship-wyoming aboard-wyoming ship-treasure aboard-treasure ship-clipper aboard-clipper shipwright-ahead shipwright-astern shipwright-furled shipwright-hounds shipwright-corbis action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang wake-plan sea-ever-given passage-sahul sea-dugout-floor sea-canoe-floor ship-slave-ship ship-carrack — of these, every frame the change cannot reach (every hull without a fife rail is byte-identical; the furled frame is the ship-of-the-line) stands as scored at the r280/r279 trees; the clean-HEAD backlog r282 opens with is empty unless a MAY neighbour was not reached here.
 Two commits close the round (c1ef285 builder + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 282 — 2026-09-08 — Endurance crosses the three yards her plates show, and every yard list says where it comes from: her record listed course, lower topsail, upper topsail and topgallant — Howes' doubled rig, a class list — and the builder crossed a lower topsail yard she never carried and drew her deep topsail as two shallow sails; every plate of her fore mast (Hurley's full-sail plate from ahead, his night plate, the heeled plate) shows three yards, the middle sail one deep cloth with a reef band; the record now lists course, top, tg with the count read off the plates and a provenance naming them, the twelve yard lists in the fleet each say whether they are the ship's documented rig or a class list, no builder line changed, a new rule convicts a yard list with no provenance and a list its own plate read denies, and the clean-HEAD backlog was empty so no opening ratchet ran
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r281's entry ordered r282 to check `uptime` and
+`ps -r` FIRST and to score only what its receipt listed as unscored. At the open (10:45) the load was 3.32 (4.29 and 6.97
+over 5 and 15 minutes), nothing hot, the loop driver holding the lock (round starting 10:45:18). r281's receipt: every
+frame its change could not reach stands as scored at the r280/r279 trees and all five MAY neighbours were scored, so the
+clean-HEAD backlog was EMPTY and no opening ratchet was run (the r279 memory rule). Every edit was made on the :8150 copy
+(r282/web, symlinks with real copies of hull.js, vessels.json and audit-hulls.js) and copied into web/ by r282/copy-in.sh
+after the proofs and the witnesses (chain.log, close.log, cmp-identical); a :8152 server on r282/web-before served the r281
+record for the before-probe and the before-witnesses. :8151 still answers with the days-old tree; nothing read from it.**
+
+**THE PLATE READ FIRST, AND IT CHANGED THE ROUND. r281 left three candidates (the gaff masts' fife rails, the upper sails'
+clewlines and buntlines, the fleet-wide gear) and the upper sails' gear was the one to take, so the upper sails were cropped
+off Hurley's full-sail plate (build/hurley-fullsail.jpg, 2828x3912, taken from AHEAD with the ship beset; r282/plate-rig-0.6x.png
+the whole fore rig, plate-mid-1x.png the middle sail at full resolution, plate-top-1x.png the top one) to read their gear —
+and the plate shows THREE square sails on the fore mast, not four. The middle sail is ONE cloth from its yard (spanning ~1320 px
+at full resolution) down to the course yard's arms, with a single reef band and its points running across it a third of the way
+down and NO spar across its face: a single deep topsail, sheeted straight to the course yard. Above it the topgallant (its yard
+~880 px); below it the course (its yard ~1600 px). Hurley's night plate (build/hurley-night.jpg, 2590x3502; r282/night-foremast-0.5x.png,
+the fore mast cropped at half scale) shows the same three yards with their sails furled on them, the topmast doubling under the
+topsail yard's station and the pole to the truck: the gaps course-to-topsail, topsail-to-topgallant and topgallant-to-truck read
+210 : 230 : 230 px (+/- 10) at half scale. The heeled plate (build/endurance-heeled.png, the 1280x995 web copy, ~16 px/m along the
+mast) shows three yards and cannot read their heights. The record said `yards: ["course", "ltop", "utop", "tg"]` — the doubled-rig
+list the r-series gave every post-1850 square mast as a class figure, with no provenance field and no plate behind it — and the
+audit's rule (5) counted the drawn tiers against that list and passed, because the list and the drawing agreed with each other
+and neither with the ship. The r271 class of fault (the beakhead she never carried), one tier up.**
+
+**THE FRACTIONS STAND, MEASURED. The builder's plan for a single-topsail list puts the course yard at 0.36 of the truck over the
+deck, the deep topsail at 0.55 and the topgallant at 0.76 (gaps 0.19 : 0.21 : 0.24, i.e. 1 : 1.11 : 1.26); the night plate's
+gaps are 1 : 1.10 : 1.10 (+/- 0.05), the same to within the read for the two lower gaps and 13% short on the pole above the
+topgallant yard, which is the farthest from a camera on the ice and the most foreshortened. The yards' lengths on the full-sail
+plate read 0.82 (topsail) and 0.55 (topgallant) of the course yard's apparent span; the upper yards are farther from a camera
+ahead of and below the ship, so the true shares are larger — the plan's 0.88 and 0.68 stand. No plan figure was changed, and
+the record says which figures were checked against which plate.**
+
+**THE RECORD (web/data/vessels.json; r282/apply-record-edits.py, json round-tripped at indent 2, re-runnable from
+vessels.before.json, every assumption asserted). Endurance's fore mast: `yards: ["course", "top", "tg"]`, `yardsRead: 3` (the
+count read off her plates — a structured field the audit can test the list against), and `yardsProvenance` naming the three
+plates, their sizes and scales, what each shows, the gap and length reads with their bounds, and what the record said until
+r282 and why it was wrong. The other eleven yard lists in the fleet gain a `yardsProvenance` each: Preussen's five say RECORD
+(six yards a mast, the five-master's thirty square sails as Tecklenborg rigged her in 1902; the attested spar lengths already in
+mastProvenance; no plate re-read for the count this round); the clipper's three and the steamer's three say CLASS LIST, no plate
+(class hulls, not named ships, so no plate can be read for the count). The provenance strings leave first paint at the build
+(r274: docs/data/provenance.json); the list and the count stay in the record the app loads.**
+
+**NO BUILDER LINE CHANGED. hull.js's PLAN already knew `top` — the single deep topsail for a pre-Howes list, 0.55 T, 0.88 of the
+course yard, hoisting on a tie over the topmast head — and `tg` over it; the drop chain hangs the topsail from its yard to the
+course yard, the clews sheet to the course yard's arms, the topgallant to the topsail yard's arms, each hoisting yard's halyard
+and both braces take their pins through the one belay derivation (r277, r278), the lifts lead to the next yard's slings, and
+r281's course gear is untouched (the course is still k = 0). web/js/hull.js is cmp-identical to HEAD.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r282/apply-audit-edits.py, both anchors asserted, re-runnable from
+audit-hulls.before.js; parsed by node's vm). NEW A-YARD-LIST, right after rule (5): for every square mast with a `yards` list,
+(a) `yardsProvenance` must be present — the SILENCE convicts ('a yard list with no provenance'), never a class answer that says
+it is one (the r108 rule); (b) where the record carries `yardsRead`, the list's length must equal it ('a yard list its own plate
+read denies'), and rule (5) then binds the drawn tiers to the list, so the meshes cross the plate's count transitively;
+(c) every name in the list must be one the plan crosses ('a yard the plan does not cross') — an unknown name drops out of the
+rig silently and rule (5) would read it only as a miscount. The header's list of silences the audit convicts names the yard
+list.**
+
+**PROOFS (r282/chain.log; each audit alone in its browser on :8150, at a load of 4–12). FINAL (the r282 record, the r282 audit
+md5 bdde1a61, 11:00): "checked 33 hulls, 0 problems". PROOF B (the r281 record vessels.before.json on the r282 audit, 11:02):
+12 problems, 'a yard list with no provenance' on Endurance, Preussen (five masts), the clipper (three) and the steamer (three) —
+the r281 state, every yard list in the fleet a class list nobody had signed. PROOF C (vessels.proof-c.json: Endurance's list set
+back to the four yards under yardsRead 3 and the provenance kept, 11:04): 1 — 'a yard list its own plate read denies: masts[0]
+(station 0.209): 4 yards listed [course, ltop, utop, tg] against yardsRead 3, the count read off the plates yardsProvenance
+names'. PROOF R (vessels.proof-r.json: the r282 list with Endurance's yardsProvenance and yardsRead removed, 11:06): 1 — 'a yard
+list with no provenance' on Endurance alone. The record was restored cmp-identical after R.**
+
+**MEASURED (r282/probe-yards.py: SHIPS_HULL.buildShip on the :8150 copy and on the :8152 before-tree, hull space, y over the
+water, the Yard meshes' world boxes and the square cloths' boxes). BEFORE (probe-before.out): four yards at y 13.520 (16.65 m
+long), 17.922 (15.47), 21.694 (14.14) and 26.096 (11.30); four square cloths — the course 13.52 → 5.175 (8.34 m deep), the lower
+topsail 17.92 → 13.65 (4.27), the upper topsail 21.69 → 18.04 (3.66), the topgallant 26.10 → 21.83 (4.27); 24 coils. AFTER
+(probe-after.out): three yards at 13.520 (16.65), 19.493 (14.64) and 26.096 (11.30); three cloths — the course unchanged, the
+topsail 19.49 → 13.70 (5.79 m deep), the topgallant 26.10 → 19.69 (6.40); two halyard belays as before (the topsail's and the
+topgallant's; the sides alternate by tier, so the topsail's fall now belays to port where the upper topsail's went to starboard);
+22 coils — the removed yard's two braces and their coils gone, nothing else. The course yard, the course, its sheets, tacks,
+garnets and buntlines are at r281's figures to the millimetre.**
+
+**THE FRAMES (r282/PREDICTIONS-close.md, written before any frame of the r282 tree was scored): MUST move — ship-endurance.
+MAY move — her berth neighbours within three (ship-azzam, ship-ever-given, ship-container, ship-queen-mary-2) and shipwright, by
+the berth-neighbour flap only. MUST NOT — every other frame: the builder is unchanged and the three other hulls' records gain a
+string that reaches no geometry. Witnessed BEFORE any frame was scored, from a little off her starboard bow (b=20, l=12, z=1.0;
+witness-ahead-before.png from :8152 on the r281 record, -after.png from :8150): 34,017 changed pixels in one region, columns
+1009–1564, rows 171–1193 of the 2880 frame — the fore mast's canvas; read side by side (crop-ahead-foremast-before-after.png): in
+the r281 frame four shallow tiers stand on the fore mast, in the r282 frame three, the middle one a deep cloth from its yard to the
+course yard, the three the plate shows. From the port beam (b=90, l=6, z=1.1; crop-beam-foremast-before-after.png): 10,667 changed
+pixels in columns 998–1417, rows 258–1104 — the fore mast's yards, three spar lines across the canvas where there were four. The
+r282 tree on :8149 scored one frame at a time by r282/check-chain.sh (chain-check.log): ship-endurance 0.489%/0.166 CHANGED — the
+diff confined to the fore mast's tiers and the lines that moved with them (columns 1020–1470, rows 240–1100; r282/chain-diff/
+ship-endurance.png read at half scale: the yards, the square cloths and the braces, lifts and halyard that lead from them, nothing
+on the hull or the other masts) — ACCEPTED 11:18 with that reason (FRAME-LOG.md), from the copy the chain set aside; ship-azzam
+0.023%/0.028, ship-ever-given 0.034%/0.024, ship-container 0.015%/0.015, ship-queen-mary-2 0.008%/0.011, shipwright 0.015%/0.005,
+all inside the gate and at the figures the same frames scored in r281 (the documented berth-neighbour flap). NO baseline of the
+r282 tree moved beyond the gate except the MUST frame.**
+
+**Rule 0 on the ahead witness read whole (witness-ahead-after.png): a rendered barquentine seen from a little off her starboard
+bow on a lit blue-green sea, three tiers of square canvas on her fore mast drawing toward the camera with their cloths seamed and
+their bellies shaded, the headsails to the left, the main's gaff sail behind, the deck and the bulwark under the course's foot —
+not a chart. Three facts a viewer can read off it without a legend: the fore mast carries three yards, the middle sail nearly as
+deep as the two others together; the topmost yard is the shortest and the lowest the longest; a line leaves each lower corner of
+the course for the yard, and four run up its face — r281's garnets and buntlines, unchanged.**
+
+**Named residuals, in order:** NEW (0y⁸⁸) THE COURSE IS TOO DEEP AND THE TOPSAIL TOO SHALLOW AGAINST THE FULL-SAIL PLATE — on the
+plate the course reads 0.22–0.28 of its yard's span deep (its clews sheeted down, the roach lifting the middle) and the topsail
+0.54 of its yard's span; from the same camera (ahead, ~35 m off the mast, on the ice) the built rig would show the course at
+0.48 and the topsail at 0.38 (the drop chain hangs the course 8.34 m under a 16.65 m yard and the topsail 5.79 m under a 14.64 m
+yard). The figure that would move is the course yard's height over the deck (class 0.36 T, 11.3 m): a lower course yard makes a
+shallower course and a deeper topsail at once, and both the topsail's and the topgallant's plate reads point the same way. The
+heeled plate's web copy cannot read it and the night plate hides the deck at the mast; it needs a plate that shows the fore
+mast's foot with its yards (the RMG originals, or Hurley's deck plates read for the course yard's height over the rail) and a
+record override for a mast's yard fractions, which the plan does not take today. NEW (0y⁸⁹) THE TOPSAIL'S REEF BAND — the plate
+shows one band with its points across the topsail about a third of the way down; the builder draws no reef band on any square
+sail. (0y⁸⁶) now reads: the topsail and the topgallant have no clewlines or buntlines, and the fife rail's six fore pins and one
+side pin a side stand bare — r281's sailPt on the upper cloths (k > 0) would draw them. (0y⁸⁵) (0y⁸⁷) as r281 names them. (0y⁸²)
+(0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as
+r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names
+them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶)
+(0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵)
+(0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²)
+unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵)
+(0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle
+break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r283 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as
+unscored among the frames this change can reach (the r279 memory rule: an empty backlog stops the opening ratchet). Then
+it takes (0y⁸⁸) — a record override for a square mast's yard fractions (`yardsAt`, read by the plan where the record has
+it, the class fractions otherwise, the audit convicting an override with no provenance) and the course yard's height read
+off a plate that shows the fore mast's foot — or (0y⁸⁶), the topsail's and topgallant's clewlines and buntlines to the fore
+rail's bare pins with r281's sailPt on the upper cloths (the plate now read at r282/plate-mid-1x.png shows the topsail's
+lines: a clewline from each clew to the yard and lines converging on the slings), or (0y⁸⁹), the reef band, or the survey's
+next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788891563 at the build; the push and the live poll are in
+build/staging/r282/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r282 staging stays on disk uncommitted, the r211 convention.**

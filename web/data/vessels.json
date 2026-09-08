@@ -3558,7 +3558,8 @@
               "royal"
             ],
             "truckM": 58.0,
-            "courseYardM": 32.0
+            "courseYardM": 32.0,
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
           },
           {
             "at": 0.34,
@@ -3574,7 +3575,8 @@
             ],
             "staysails": 3,
             "truckM": 58.0,
-            "courseYardM": 32.0
+            "courseYardM": 32.0,
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
           },
           {
             "at": 0.52,
@@ -3590,7 +3592,8 @@
             ],
             "staysails": 3,
             "truckM": 58.0,
-            "courseYardM": 32.0
+            "courseYardM": 32.0,
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
           },
           {
             "at": 0.7,
@@ -3606,7 +3609,8 @@
             ],
             "staysails": 3,
             "truckM": 58.0,
-            "courseYardM": 32.0
+            "courseYardM": 32.0,
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
           },
           {
             "at": 0.86,
@@ -3623,7 +3627,8 @@
             "staysails": 3,
             "spanker": true,
             "truckM": 58.0,
-            "courseYardM": 32.0
+            "courseYardM": 32.0,
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
           }
         ],
         "build": "steel",
@@ -4230,7 +4235,8 @@
               "utop",
               "tg",
               "royal"
-            ]
+            ],
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count."
           },
           {
             "at": 0.556,
@@ -4245,7 +4251,8 @@
               "tg",
               "royal"
             ],
-            "staysails": 3
+            "staysails": 3,
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count."
           },
           {
             "at": 0.85,
@@ -4261,7 +4268,8 @@
               "royal"
             ],
             "staysails": 3,
-            "spanker": true
+            "spanker": true,
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count."
           }
         ],
         "build": "frame",
@@ -4417,7 +4425,8 @@
               "ltop",
               "utop",
               "tg"
-            ]
+            ],
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count."
           },
           {
             "at": 0.38,
@@ -4431,7 +4440,8 @@
               "utop",
               "tg"
             ],
-            "staysails": 2
+            "staysails": 2,
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count."
           },
           {
             "at": 0.61,
@@ -4445,7 +4455,8 @@
               "utop",
               "tg"
             ],
-            "staysails": 2
+            "staysails": 2,
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count."
           },
           {
             "at": 0.845,
@@ -5923,8 +5934,7 @@
             "shrouds": 6,
             "yards": [
               "course",
-              "ltop",
-              "utop",
+              "top",
               "tg"
             ],
             "courseGear": {
@@ -5934,7 +5944,9 @@
                 0.65
               ],
               "provenance": "PLATE READ, r281: Hurley's plate of Endurance under full sail, taken from ahead (build/hurley-fullsail.jpg, 2828x3912; the fore course yard spans ~1440 px of a 1540 px crop, ~90 px/m at the yard), shows on the FORE FACE of the set fore course four buntlines, two a side, leaving the foot at about 0.3 and 0.65 of the half-yard (+/- 0.1) and running up and in across the canvas toward the slings, and each clew garnet leaving its clew for the yard at about half the half-yard (0.50 +/- 0.05) on both sides. The plate stops at the yard: where the falls belay is NOT read from it — the fife rail is the class answer (r280, hull.fifeRail) — and the lead blocks under the top are a class arrangement. A plate of her foredeck from aft would settle the belay; none is in reach (r280)."
-            }
+            },
+            "yardsRead": 3,
+            "yardsProvenance": "PLATE READ, r282: THREE YARDS - the course, ONE deep topsail and a topgallant. Every plate of this ship that shows the fore mast whole crosses three yards and no fourth. Hurley's plate of her under full sail, taken from ahead (build/hurley-fullsail.jpg, 2828x3912, ~90 px/m at the course yard), sets three square sails: the middle one is a single cloth from its yard down to the course yard's arms, with one reef band across it and no spar across its face. Hurley's night plate (build/hurley-night.jpg, 2590x3502; the fore mast about 2000 px from the course yard to the truck, read at half scale) shows three yards with their sails furled on them; the gaps course-to-topsail, topsail-to-topgallant and topgallant-to-truck read 210 : 230 : 230 px (+/- 10), and the builder's class fractions for a single-topsail list (course 0.36, topsail 0.55, topgallant 0.76 of the truck over the deck; gaps 0.19 : 0.21 : 0.24) agree with them to within the read, so the fractions stand. Hurley's heeled plate (build/endurance-heeled.png, 1280x995) shows three yards. The upper yards' lengths on the full-sail plate are 0.82 (topsail) and 0.55 (topgallant) of the course yard's apparent span, foreshortened by their greater distance from a camera ahead of and below the ship; the class shares 0.88 and 0.68 stand. Until r282 the record listed course, lower topsail, upper topsail and topgallant - Howes' doubled rig, a class list no plate of this ship supports - and the builder crossed a lower topsail yard she never carried and drew her deep topsail as two sails."
           },
           {
             "at": 0.537,

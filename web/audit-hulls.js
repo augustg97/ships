@@ -41,7 +41,7 @@
      The published record (docs/) carries its provenance strings in data/provenance.json,
      fetched on demand by APP.loadProvenance() and merged into APP.vessels in place; served
      from web/ the record is whole and the loader merges nothing. Every silence rule below —
-     a head, a platform, a deck depth, a castle, a shroud count with no provenance — reads the
+     a head, a platform, a deck depth, a castle, a shroud count, a yard list with no provenance — reads the
      merged record, so a split that lost a string would convict as the silence it is. What
      that cannot see is a string that arrived and found no home (a path the builder of the
      split writes in one grammar and this reader parses in another): A-PROVENANCE-HOME
@@ -6680,6 +6680,32 @@
         }
       }
     }
+    /* ── A-YARD-LIST (round 282): THE YARD LIST SAYS WHERE IT COMES FROM, AND A PLATE-READ COUNT
+       BINDS IT. Endurance's record listed course, lower topsail, upper topsail and topgallant —
+       Howes' doubled rig, a CLASS list — and the builder crossed a lower topsail yard she never
+       carried: every plate of her fore mast (Hurley's full-sail, night and heeled plates) shows
+       THREE yards, the middle sail one deep topsail with a reef band. Rule (5) counts the drawn
+       tiers against the list, so a list the plates deny passed every check downstream as "the
+       record". So: (a) every square mast with a `yards` list carries `yardsProvenance` — the
+       SILENCE convicts, never a class answer that says it is one (the r108 rule); (b) where the
+       record carries `yardsRead` (the count read off plates of this ship) the list's length must
+       equal it — a list its own plate read denies is convicted, and rule (5) then binds the drawn
+       tiers to the list, so the meshes cross the plate's count transitively; (c) every name in the
+       list is one the builder's plan crosses — an unknown name drops out silently and rule (5)
+       would read it only as a miscount. */
+    (H.masts || []).forEach((mk, mi) => {
+      if (mk.rig !== 'square' || !Array.isArray(mk.yards)) return;
+      const at = `masts[${mi}] (station ${mk.at})`;
+      if (!mk.yardsProvenance)
+        say(v.id, 'a yard list with no provenance',
+            `${at}: yards [${mk.yards.join(', ')}] declared, yardsProvenance absent — a class list reads as the record`);
+      if (mk.yardsRead !== undefined && mk.yardsRead !== mk.yards.length)
+        say(v.id, 'a yard list its own plate read denies',
+            `${at}: ${mk.yards.length} yards listed [${mk.yards.join(', ')}] against yardsRead ${mk.yardsRead}, the count read off the plates yardsProvenance names`);
+      const KNOWN = ['course', 'ltop', 'utop', 'top', 'ltg', 'utg', 'tg', 'royal'];
+      mk.yards.filter(nm => !KNOWN.includes(nm)).forEach(nm =>
+        say(v.id, 'a yard the plan does not cross', `${at}: '${nm}' is not a yard the builder's plan knows; it drops out of the rig silently`));
+    });
     /* (6) DECLARED STAYSAILS FLY IN THEIR OWN GAP, ALOFT. `staysails: n` on the after
        mast is the suit on the stays to the mast ahead. A staysail lives wholly BETWEEN
        the two stations — square canvas straddles its own mast, jibs stand before the
