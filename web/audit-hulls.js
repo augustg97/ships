@@ -37,6 +37,18 @@
   const rows = [];
   const say = (id, rule, detail) => problems.push({ id, rule, detail });
 
+  /* ── ONE WORD FOR A SIDE (round 269, 0y⁵³) ─────────────────────────────────────────────
+     The hull frame is right-handed with +x aft and +y up, so +z is PORT: the beam b=90 looks
+     at, the side every fore-and-aft cloth sheets to, measured on screen in r254/side.json
+     (from ahead at b=0, +z stands on the viewer's right). From r247 to r268 every rule that
+     named a side wrote its own ternary on a sign and read z− as port, the mirror of the app's
+     word — right about the geometry, wrong about the word, in every message. No rule spells
+     the word now: sideOf takes any signed athwartships quantity — a z, a sign, a double hull's
+     lane — and returns the app's word for it, off a three-word table so the helper itself is
+     not a ternary. A-SIDE-WORD at the end reads the source for a ternary that spells one. */
+  const SIDE_WORD = ['starboard', 'centreline', 'port'];          // indexed by Math.sign(z) + 1
+  const sideOf = z => SIDE_WORD[Math.sign(+z) + 1];
+
   /* ── AN ASTERISK THE RENDERER CANNOT SPEND (round 180) ────────────────────────────────
      rows, cite and text are markdown-bearing fields, and every path that renders them now
      spends the emphasis through inlineMD/proseHTML (bold first, then italic). A star that
@@ -1397,7 +1409,7 @@
                 if (!runs.length) continue;
                 const headOf = run => Math.max(...run.map(r => r.y)), footOf = run => Math.min(...run.map(r => r.y));
                 runs.sort((p, q) => headOf(q) - headOf(p));
-                const top = runs[0], topY = headOf(top), side = sg < 0 ? 'starboard' : 'port';
+                const top = runs[0], topY = headOf(top), side = sideOf(sg);
                 const tp = H.frames.headTaperM || 0;
                 /* the body is read BELOW the taper: on the cog the taper's 1.2 m starts at the
                    deck, so the bulwark band is already inside it (the rule's first run, r223,
@@ -1483,7 +1495,7 @@
              SAME side; a skipped station is a gap of two pitches. */
           if (floorArms.length) {
             const byX = new Map();
-            for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[fa.side < 0 ? 's' : 'p'] = fa; }
+            for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[sideOf(fa.side) === 'port' ? 'p' : 's'] = fa; }
             const fl = [...byX.values()].filter(f => f.s && f.p).sort((a, c) => a.x - c.x);
             if (fl.length < fr.length - 1 - cutFrames.size)
               say(v.id, 'floors whose arms the rule could not pair', `${fl.length} floors read on both sides of ${fr.length} frames${cutFrames.size ? ' (' + cutFrames.size + ' end on the stem or the post and have none)' : ''}`);
@@ -1491,7 +1503,7 @@
               const d = Math.abs(f.p.y - f.s.y);
               if (Math.abs(d - f.p.alt) > 0.15)
                 say(v.id, "a floor whose arms do not stand the record's height apart", `port arm ${f.p.y.toFixed(2)} m, starboard ${f.s.y.toFixed(2)}, ${d.toFixed(2)} apart, record ${f.p.alt} at x ${f.x.toFixed(1)}`);
-              f.longSide = f.p.y > f.s.y ? 'port' : 'starboard';
+              f.longSide = sideOf(f.p.y > f.s.y ? 1 : -1);
             }
             for (let i = 1; i < fl.length; i++) {
               const skipped = (fl[i].x - fl[i - 1].x) > 1.5 * rs;
@@ -1657,7 +1669,7 @@
           }
           if (deepest > -0.02)
             say(v.id, 'an undecked hull is capped',
-                `rays down the ${lane ? (lane < 0 ? 'port' : 'starboard') + ' hull ' : ''}`
+                `rays down the ${lane ? sideOf(lane) + ' hull ' : ''}`
                 + `centreline bottom out at ${deepest === 1e9 ? 'nothing' : deepest.toFixed(2) + ' m'}`
                 + ' — the record lays no deck, so the view should reach the floor of the '
                 + 'hollow, below the load waterline');
@@ -2504,7 +2516,7 @@
             if (isSlot ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
               bad++;
               if (!first) first = `${isSlot ? 'slot' : 'wall'} at u ${u.toFixed(2)} `
-                + `${sgn > 0 ? 'stbd' : 'port'}: first strike ${hit ? depth.toFixed(2) + ' m in'
+                + `${sideOf(sgn)}: first strike ${hit ? depth.toFixed(2) + ' m in'
                                                                     : 'nothing'}`;
             }
           }
@@ -2555,7 +2567,7 @@
             if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
               bad++;
               if (!first) first = `${isPort ? 'port' : 'wall'} at u ${u.toFixed(2)} `
-                + `${sgn > 0 ? 'stbd' : 'port side'}: first strike `
+                + `${sideOf(sgn)} side: first strike `
                 + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
             }
           }
@@ -2614,7 +2626,7 @@
             if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
               bad++;
               if (!first) first = `${isPort ? 'port' : 'belt'} at u ${u.toFixed(2)} `
-                + `${sgn > 0 ? 'stbd' : 'port side'}: first strike `
+                + `${sideOf(sgn)} side: first strike `
                 + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
             }
           }
@@ -2759,7 +2771,7 @@
               const hit = rc.intersectObjects(sj, true)[0];
               if (!hit || hit.point.z * sgn < railZ - 0.35
                        || hit.point.z * sgn > railZ + overW + 0.6)
-                miss(`at u ${u.toFixed(2)} ${sgn > 0 ? 'stbd' : 'port'}`, y);
+                miss(`at u ${u.toFixed(2)} ${sideOf(sgn)}`, y);
             }
           }
           for (const uE of [GDw.from, GDw.to]) {
@@ -2838,7 +2850,7 @@
                        || hit.point.z * sgn > railZ + overM + 0.3) {
                 open++;
                 if (!first) first = `first at u ${u.toFixed(2)} ` +
-                                    `${sgn > 0 ? 'stbd' : 'port'}, y ${y.toFixed(1)} m`;
+                                    `${sideOf(sgn)}, y ${y.toFixed(1)} m`;
               }
             }
           }
@@ -2903,7 +2915,7 @@
             } });
           if (!vtx.length) {
             say(v.id, 'maku band drawn without its valance',
-                `no border geometry on the ${sgn > 0 ? 'starboard' : 'port'} side`);
+                `no border geometry on the ${sideOf(sgn)} side`);
             continue;
           }
           /* V-HEAD, judged amidships: the border's top edge is the hanging line */
@@ -6229,7 +6241,7 @@
         const mx = (mk.at - 0.5) * H.lwl;
         for (const sgn of [-1, 1])
           if (!chans.some(c => Math.sign(c.c[2]) === sgn && Math.abs(c.c[0] - mx) < 0.06 * H.lwl))
-            say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sgn < 0 ? 'port' : 'starboard'} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
+            say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sideOf(sgn)} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
       });
       /* (4) a tackle-class shroud ends in its upper block */
       let offT = 0, feetT = 0, firstT = null;
@@ -6259,7 +6271,7 @@
           if (dy < -0.05 || dy > t.len * 1.5 + 0.1 || Math.abs(dz) > 0.35) { offR++; if (!firstR) firstR = { t, dy, dz }; }
         }
         if (offR)
-          say(v.id, 'a tackle off the rail', `${offR} lower tackle blocks stand off the rail's cap (first: mast ${firstR.t.mast} shroud ${firstR.t.shroud} ${firstR.t.side < 0 ? 'port' : 'starboard'}, ${firstR.dy.toFixed(2)} m over the cap, ${firstR.dz.toFixed(2)} m outboard of the sheer's half-breadth)`);
+          say(v.id, 'a tackle off the rail', `${offR} lower tackle blocks stand off the rail's cap (first: mast ${firstR.t.mast} shroud ${firstR.t.shroud} ${sideOf(firstR.t.side)}, ${firstR.dy.toFixed(2)} m over the cap, ${firstR.dz.toFixed(2)} m outboard of the sheer's half-breadth)`);
       }
       /* (6) every tackle-class shroud has its tackle */
       (H.masts || []).forEach((mk, mi) => {
@@ -6267,7 +6279,7 @@
         for (const sgn of [-1, 1]) {
           const n = tack.filter(t => t.mast === mi && t.side === sgn && t.upper).length;
           if (n !== mk.shrouds)
-            say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} tackle${n === 1 ? '' : 's'}`);
+            say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sideOf(sgn)} tackle${n === 1 ? '' : 's'}`);
         }
       });
       /* (7) a lashing-class shroud ends in its eye (round 247) */
@@ -6306,7 +6318,7 @@
           if (!on) { offB++; if (!firstB) firstB = e; }
         }
         if (offB)
-          say(v.id, 'a lashing off its beam', `${offB} of ${lash.length} shroud lashings seat on no built ${firstB.timber && firstB.timber.what === 'crossbeam' ? 'crossbeam' : 'cap'} (first: mast ${firstB.mast} shroud ${firstB.shroud} ${firstB.side < 0 ? 'port' : 'starboard'}, seat at x ${firstB.seat[0].toFixed(2)}, y ${firstB.seat[1].toFixed(2)}, z ${firstB.seat[2].toFixed(2)}; ${beams.length} crossbeams built)`);
+          say(v.id, 'a lashing off its beam', `${offB} of ${lash.length} shroud lashings seat on no built ${firstB.timber && firstB.timber.what === 'crossbeam' ? 'crossbeam' : 'cap'} (first: mast ${firstB.mast} shroud ${firstB.shroud} ${sideOf(firstB.side)}, seat at x ${firstB.seat[0].toFixed(2)}, y ${firstB.seat[1].toFixed(2)}, z ${firstB.seat[2].toFixed(2)}; ${beams.length} crossbeams built)`);
       }
       /* (9) every lashing-class shroud has its lashing */
       (H.masts || []).forEach((mk, mi) => {
@@ -6314,7 +6326,7 @@
         for (const sgn of [-1, 1]) {
           const n = lash.filter(e => e.mast === mi && e.side === sgn).length;
           if (n !== mk.shrouds)
-            say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} lashing${n === 1 ? '' : 's'}`);
+            say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sideOf(sgn)} lashing${n === 1 ? '' : 's'}`);
         }
       });
       /* ── D-LASHING-BULLSEYE (round 265, 0y⁴⁶): A LASHED SHROUD ENDS IN THE BLOCK ITS RECORD READS. The lashing
@@ -6345,8 +6357,8 @@
           const d = Math.hypot(e.c[0] - e.eye[0], e.c[1] - e.eye[1], e.c[2] - e.eye[2]);
           if (d > 0.10) { offAt++; if (!first) first = { e, L, d }; }
         }
-        if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
-        if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
+        if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${sideOf(first.e.side)})`);
+        if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${sideOf(first.e.side)})`);
         /* r266 (0y⁴⁷): the hole stands over the timber at the height the record reads — each heart's centre, off its
            mesh, against the builder's seat; a plate-read rig whose record reads the heart but not its height is
            convicted for the silence (the 2010 deck plate shows the nearest foot down to its timber) */
@@ -6359,7 +6371,7 @@
             const d = Math.hypot(e.c[0] - e.seat[0], e.c[1] - e.seat[1], e.c[2] - e.seat[2]);
             if (Math.abs(d - BF.holeOverSeatM) > tol) { offH++; if (!firstH) firstH = { e, d }; }
           }
-          if (offH) say(v.id, 'a bullseye not at the height the plate reads', `mast ${mi}: ${offH} of ${hearts.length} hearts' centres more than ${tol} m off the record's ${BF.holeOverSeatM} m from the seat (first: ${firstH.d.toFixed(3)} m, shroud ${firstH.e.shroud} ${firstH.e.side < 0 ? 'port' : 'starboard'})`);
+          if (offH) say(v.id, 'a bullseye not at the height the plate reads', `mast ${mi}: ${offH} of ${hearts.length} hearts' centres more than ${tol} m off the record's ${BF.holeOverSeatM} m from the seat (first: ${firstH.d.toFixed(3)} m, shroud ${firstH.e.shroud} ${sideOf(firstH.e.side)})`);
         }
       });
       /* ── D-LASHING-FALLS (round 266, 0y⁴⁸): A LANYARD THROUGH A BULLSEYE PASSES THROUGH ITS HOLE. The r265 turns ran
@@ -6405,8 +6417,8 @@
           }
           if (through !== want || along !== through) { badN++; if (!firstN) firstN = { e, through, along }; }
         }
-        if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${firstN.e.side < 0 ? 'port' : 'starboard'}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
-        if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${firstW.e.side < 0 ? 'port' : 'starboard'}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
+        if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${sideOf(firstN.e.side)}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
+        if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${sideOf(firstW.e.side)}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
       });
       /* ── D-LASHING-SHARED (round 267, 0y⁵¹): ON A BEAM TWO MASTS SHARE, THE AFTER MAST'S LANYARD WRAPS IT OUTBOARD OF
          THE FORWARD MAST'S, ON BOTH SIDES. r264 set the after mast's turns 3.4 rope widths from the forward mast's on a
@@ -6422,7 +6434,7 @@
          outboard of the seat its heart stands over, while the forward mast's stood centred on theirs. In the same
          grouping — and with one lashing mast as well as two — the mast whose turns lie nearest the centreline on
          a beam and side must have them centred on its seat (the mean of the turns' |z| against the seat's |z|)
-         within a rope's diameter. The side is named by z's sign. */
+         within a rope's diameter. The side is named through sideOf, the app's word (round 269). */
       {
         const lm = (H.masts || []).filter(mk => kindOf(mk) === 'lashing');
         if (lm.length >= 1 && falls.length) {
@@ -6448,12 +6460,12 @@
             const inner = ms.map(m => gp.masts.get(m)).sort((a, b) => meanOf(a.zs) - meanOf(b.zs))[0];
             const off = meanOf(inner.zs) - inner.seat;
             if (Math.abs(off) > inner.rr * 2 + 1e-6)
-              say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${gp.sgn < 0 ? 'z−' : 'z+'} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
+              say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${sideOf(gp.sgn)} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
             for (let i = 0; i + 1 < ms.length; i++) {
               const F = gp.masts.get(ms[i]), A = gp.masts.get(ms[i + 1]);
               const gap = Math.min(...A.zs) - Math.max(...F.zs), rr = Math.max(F.rr, A.rr);
               if (gap < rr * 2 - 1e-6)
-                say(v.id, "a shared beam's lanyards the wrong way round", `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} ${gp.sgn < 0 ? 'port' : 'starboard'}: mast ${ms[i + 1]}'s turns ${gap < 0 ? 'lie inboard of' : 'touch'} mast ${ms[i]}'s — the nearest after turn stands ${gap.toFixed(3)} m outboard of the farthest forward turn, a rope's diameter (${(rr * 2).toFixed(3)} m) wanted (${A.zs.length / 2} after and ${F.zs.length / 2} forward turn segments read off the lanyard meshes)`);
+                say(v.id, "a shared beam's lanyards the wrong way round", `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} ${sideOf(gp.sgn)}: mast ${ms[i + 1]}'s turns ${gap < 0 ? 'lie inboard of' : 'touch'} mast ${ms[i]}'s — the nearest after turn stands ${gap.toFixed(3)} m outboard of the farthest forward turn, a rope's diameter (${(rr * 2).toFixed(3)} m) wanted (${A.zs.length / 2} after and ${F.zs.length / 2} forward turn segments read off the lanyard meshes)`);
             }
           }
         }
@@ -9366,6 +9378,25 @@
       say('passage-readout', 'a land row that cannot be asked', 'fillLandRow threw: ' + e.message);
     }
     try { selectEra(eraHome2); await drain2(); } catch (e) { /* state restore only */ }
+  }
+  /* ── A-SIDE-WORD (round 269, 0y⁵³): NO RULE SPELLS A SIDE ITSELF. From r247 to r268 every rule that named a
+     side wrote its own ternary on a sign, and every one read z− as port, the mirror of the app's word (+z is the
+     port beam, b=90; r254/side.json measured it on screen). The word comes from sideOf now, and this reads the
+     audit's own source — the file the page serves, fetched the way the runners fetch it — for a ternary that
+     spells a side off a comparison with zero, or a side word standing in a ternary's else-branch, which is
+     what every one of the twenty-one looked like. The gun-port labels (a port against a wall or a belt) are
+     not sides and do not match. If the source cannot be read, that is said as a problem, not passed. */
+  try {
+    const src = await (await fetch('audit-hulls.js', { cache: 'no-store' })).text();
+    const A = new RegExp("[<>]=?\\s*0\\s*\\?\\s*'(?:port|starboard|stbd|z[+−])", 'g');
+    const B = new RegExp(":\\s*'(?:port|starboard|stbd|z[+−])(?: side)?'", 'g');
+    const lines = new Set();
+    for (const re of [A, B]) { let m; while ((m = re.exec(src))) lines.add(src.slice(0, m.index).split('\n').length); }
+    if (lines.size)
+      say('audit-hulls.js', 'a side spelled outside sideOf',
+          `${lines.size} line${lines.size === 1 ? '' : 's'} spell${lines.size === 1 ? 's' : ''} a side from a sign (line${lines.size === 1 ? '' : 's'} ${[...lines].sort((a, b) => a - b).join(', ')}); every side-naming message goes through sideOf`);
+  } catch (e) {
+    say('audit-hulls.js', 'an audit that cannot read its own source', 'fetch(audit-hulls.js) threw: ' + e.message);
   }
   return { problems, checked: rows.length, rows };
 })()

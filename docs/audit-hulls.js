@@ -3,6 +3,8 @@ const list = (typeof APP !== 'undefined' && (APP.vessels.vessels || APP.vessels)
 const problems = [];
 const rows = [];
 const say = (id, rule, detail) => problems.push({ id, rule, detail });
+const SIDE_WORD = ['starboard', 'centreline', 'port'];
+const sideOf = z => SIDE_WORD[Math.sign(+z) + 1];
 {
 const spend = s => String(s == null ? '' : s)
 .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
@@ -913,7 +915,7 @@ const runs = all.filter(run => Math.sign(run.reduce((a2, r) => a2 + r.z, 0)) ===
 if (!runs.length) continue;
 const headOf = run => Math.max(...run.map(r => r.y)), footOf = run => Math.min(...run.map(r => r.y));
 runs.sort((p, q) => headOf(q) - headOf(p));
-const top = runs[0], topY = headOf(top), side = sg < 0 ? 'starboard' : 'port';
+const top = runs[0], topY = headOf(top), side = sideOf(sg);
 const tp = H.frames.headTaperM || 0;
 let body = top.filter(q => q.y < topY - tp - 0.02).map(q => q.s);
 if (!body.length) body = top.slice().sort((a, c) => a.y - c.y).slice(0, 4).map(q => q.s);
@@ -976,7 +978,7 @@ say(v.id, 'a lap head cut square', `lower timber's top station ${loTop.toFixed(3
 const beamX = byName('deck-beam').map(bm => { const b = bbox(bm); return (b[0] + b[3]) / 2; });
 if (floorArms.length) {
 const byX = new Map();
-for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[fa.side < 0 ? 's' : 'p'] = fa; }
+for (const fa of floorArms) { const k = fa.x.toFixed(2); if (!byX.has(k)) byX.set(k, { x: fa.x }); byX.get(k)[sideOf(fa.side) === 'port' ? 'p' : 's'] = fa; }
 const fl = [...byX.values()].filter(f => f.s && f.p).sort((a, c) => a.x - c.x);
 if (fl.length < fr.length - 1 - cutFrames.size)
 say(v.id, 'floors whose arms the rule could not pair', `${fl.length} floors read on both sides of ${fr.length} frames${cutFrames.size ? ' (' + cutFrames.size + ' end on the stem or the post and have none)' : ''}`);
@@ -984,7 +986,7 @@ for (const f of fl) {
 const d = Math.abs(f.p.y - f.s.y);
 if (Math.abs(d - f.p.alt) > 0.15)
 say(v.id, "a floor whose arms do not stand the record's height apart", `port arm ${f.p.y.toFixed(2)} m, starboard ${f.s.y.toFixed(2)}, ${d.toFixed(2)} apart, record ${f.p.alt} at x ${f.x.toFixed(1)}`);
-f.longSide = f.p.y > f.s.y ? 'port' : 'starboard';
+f.longSide = sideOf(f.p.y > f.s.y ? 1 : -1);
 }
 for (let i = 1; i < fl.length; i++) {
 const skipped = (fl[i].x - fl[i - 1].x) > 1.5 * rs;
@@ -1086,7 +1088,7 @@ if (hit) deepest = Math.min(deepest, hit.point.y);
 }
 if (deepest > -0.02)
 say(v.id, 'an undecked hull is capped',
-`rays down the ${lane ? (lane < 0 ? 'port' : 'starboard') + ' hull ' : ''}`
+`rays down the ${lane ? sideOf(lane) + ' hull ' : ''}`
 + `centreline bottom out at ${deepest === 1e9 ? 'nothing' : deepest.toFixed(2) + ' m'}`
 + ' — the record lays no deck, so the view should reach the floor of the '
 + 'hollow, below the load waterline');
@@ -1701,7 +1703,7 @@ const isSlot = j % 2 === 0;
 if (isSlot ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
 bad++;
 if (!first) first = `${isSlot ? 'slot' : 'wall'} at u ${u.toFixed(2)} `
-+ `${sgn > 0 ? 'stbd' : 'port'}: first strike ${hit ? depth.toFixed(2) + ' m in'
++ `${sideOf(sgn)}: first strike ${hit ? depth.toFixed(2) + ' m in'
 : 'nothing'}`;
 }
 }
@@ -1739,7 +1741,7 @@ const isPort = j % 2 === 0;
 if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
 bad++;
 if (!first) first = `${isPort ? 'port' : 'wall'} at u ${u.toFixed(2)} `
-+ `${sgn > 0 ? 'stbd' : 'port side'}: first strike `
++ `${sideOf(sgn)} side: first strike `
 + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
 }
 }
@@ -1782,7 +1784,7 @@ const isPort = j % 2 === 0;
 if (isPort ? depth < 0.02 : (depth < -0.1 || depth > 0.15)) {
 bad++;
 if (!first) first = `${isPort ? 'port' : 'belt'} at u ${u.toFixed(2)} `
-+ `${sgn > 0 ? 'stbd' : 'port side'}: first strike `
++ `${sideOf(sgn)} side: first strike `
 + `${hit ? depth.toFixed(2) + ' m in' : 'nothing'}`;
 }
 }
@@ -1881,7 +1883,7 @@ shot++;
 const hit = rc.intersectObjects(sj, true)[0];
 if (!hit || hit.point.z * sgn < railZ - 0.35
 || hit.point.z * sgn > railZ + overW + 0.6)
-miss(`at u ${u.toFixed(2)} ${sgn > 0 ? 'stbd' : 'port'}`, y);
+miss(`at u ${u.toFixed(2)} ${sideOf(sgn)}`, y);
 }
 }
 for (const uE of [GDw.from, GDw.to]) {
@@ -1941,7 +1943,7 @@ if (!hit || hit.point.z * sgn < railZ - 0.05
 || hit.point.z * sgn > railZ + overM + 0.3) {
 open++;
 if (!first) first = `first at u ${u.toFixed(2)} ` +
-`${sgn > 0 ? 'stbd' : 'port'}, y ${y.toFixed(1)} m`;
+`${sideOf(sgn)}, y ${y.toFixed(1)} m`;
 }
 }
 }
@@ -1985,7 +1987,7 @@ if (VW.z * sgn > 0) vtx.push([VW.x, VW.y, VW.z]);
 } });
 if (!vtx.length) {
 say(v.id, 'maku band drawn without its valance',
-`no border geometry on the ${sgn > 0 ? 'starboard' : 'port'} side`);
+`no border geometry on the ${sideOf(sgn)} side`);
 continue;
 }
 const xMidLo = lerpV(sxV, 1 / 3), xMidHi = lerpV(sxV, 2 / 3);
@@ -4411,7 +4413,7 @@ if (kindOf(mk) !== 'deadeyes') return;
 const mx = (mk.at - 0.5) * H.lwl;
 for (const sgn of [-1, 1])
 if (!chans.some(c => Math.sign(c.c[2]) === sgn && Math.abs(c.c[0] - mx) < 0.06 * H.lwl))
-say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sgn < 0 ? 'port' : 'starboard'} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
+say(v.id, 'shrouds and no channel', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on deadeyes and draws no ${sideOf(sgn)} channel within ${(0.06 * H.lwl).toFixed(1)} m of its station`);
 });
 let offT = 0, feetT = 0, firstT = null;
 for (const o of shr) {
@@ -4439,14 +4441,14 @@ const dy = t.c[1] - top, dz = Math.abs(t.c[2]) - hb;
 if (dy < -0.05 || dy > t.len * 1.5 + 0.1 || Math.abs(dz) > 0.35) { offR++; if (!firstR) firstR = { t, dy, dz }; }
 }
 if (offR)
-say(v.id, 'a tackle off the rail', `${offR} lower tackle blocks stand off the rail's cap (first: mast ${firstR.t.mast} shroud ${firstR.t.shroud} ${firstR.t.side < 0 ? 'port' : 'starboard'}, ${firstR.dy.toFixed(2)} m over the cap, ${firstR.dz.toFixed(2)} m outboard of the sheer's half-breadth)`);
+say(v.id, 'a tackle off the rail', `${offR} lower tackle blocks stand off the rail's cap (first: mast ${firstR.t.mast} shroud ${firstR.t.shroud} ${sideOf(firstR.t.side)}, ${firstR.dy.toFixed(2)} m over the cap, ${firstR.dz.toFixed(2)} m outboard of the sheer's half-breadth)`);
 }
 (H.masts || []).forEach((mk, mi) => {
 if (kindOf(mk) !== 'tackle') return;
 for (const sgn of [-1, 1]) {
 const n = tack.filter(t => t.mast === mi && t.side === sgn && t.upper).length;
 if (n !== mk.shrouds)
-say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} tackle${n === 1 ? '' : 's'}`);
+say(v.id, 'shrouds and no tackle', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on tackles and draws ${n} ${sideOf(sgn)} tackle${n === 1 ? '' : 's'}`);
 }
 });
 let offL = 0, feetL = 0, firstL = null;
@@ -4481,14 +4483,14 @@ on = Math.abs(st[1] - top) <= 0.05 && Math.abs(Math.abs(st[2]) - hb) <= 0.35;
 if (!on) { offB++; if (!firstB) firstB = e; }
 }
 if (offB)
-say(v.id, 'a lashing off its beam', `${offB} of ${lash.length} shroud lashings seat on no built ${firstB.timber && firstB.timber.what === 'crossbeam' ? 'crossbeam' : 'cap'} (first: mast ${firstB.mast} shroud ${firstB.shroud} ${firstB.side < 0 ? 'port' : 'starboard'}, seat at x ${firstB.seat[0].toFixed(2)}, y ${firstB.seat[1].toFixed(2)}, z ${firstB.seat[2].toFixed(2)}; ${beams.length} crossbeams built)`);
+say(v.id, 'a lashing off its beam', `${offB} of ${lash.length} shroud lashings seat on no built ${firstB.timber && firstB.timber.what === 'crossbeam' ? 'crossbeam' : 'cap'} (first: mast ${firstB.mast} shroud ${firstB.shroud} ${sideOf(firstB.side)}, seat at x ${firstB.seat[0].toFixed(2)}, y ${firstB.seat[1].toFixed(2)}, z ${firstB.seat[2].toFixed(2)}; ${beams.length} crossbeams built)`);
 }
 (H.masts || []).forEach((mk, mi) => {
 if (kindOf(mk) !== 'lashing') return;
 for (const sgn of [-1, 1]) {
 const n = lash.filter(e => e.mast === mi && e.side === sgn).length;
 if (n !== mk.shrouds)
-say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sgn < 0 ? 'port' : 'starboard'} lashing${n === 1 ? '' : 's'}`);
+say(v.id, 'shrouds and no lashing', `mast ${mi} (${mk.rig}, ${mk.shrouds} shrouds a side) sets up on lashings and draws ${n} ${sideOf(sgn)} lashing${n === 1 ? '' : 's'}`);
 }
 });
 (H.masts || []).forEach((mk, mi) => {
@@ -4510,8 +4512,8 @@ if (Math.abs(L - rec) > rec * 0.25) { offLen++; if (!first) first = { e, L }; }
 const d = Math.hypot(e.c[0] - e.eye[0], e.c[1] - e.eye[1], e.c[2] - e.eye[2]);
 if (d > 0.10) { offAt++; if (!first) first = { e, L, d }; }
 }
-if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
-if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
+if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${sideOf(first.e.side)})`);
+if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${sideOf(first.e.side)})`);
 if (!(BF.holeOverSeatM > 0)) {
 if (plateRead) say(v.id, "a bullseye whose height over the beam is a class figure while its spars are the plate's", `mast ${mi}: the record reads the heart (${BF.lengthM} m) but not how far its hole stands over the timber the lanyard wraps — the 2010 deck plate shows it at the nearest foot`);
 } else {
@@ -4521,7 +4523,7 @@ for (const e of hearts) {
 const d = Math.hypot(e.c[0] - e.seat[0], e.c[1] - e.seat[1], e.c[2] - e.seat[2]);
 if (Math.abs(d - BF.holeOverSeatM) > tol) { offH++; if (!firstH) firstH = { e, d }; }
 }
-if (offH) say(v.id, 'a bullseye not at the height the plate reads', `mast ${mi}: ${offH} of ${hearts.length} hearts' centres more than ${tol} m off the record's ${BF.holeOverSeatM} m from the seat (first: ${firstH.d.toFixed(3)} m, shroud ${firstH.e.shroud} ${firstH.e.side < 0 ? 'port' : 'starboard'})`);
+if (offH) say(v.id, 'a bullseye not at the height the plate reads', `mast ${mi}: ${offH} of ${hearts.length} hearts' centres more than ${tol} m off the record's ${BF.holeOverSeatM} m from the seat (first: ${firstH.d.toFixed(3)} m, shroud ${firstH.e.shroud} ${sideOf(firstH.e.side)})`);
 }
 });
 (H.masts || []).forEach((mk, mi) => {
@@ -4558,8 +4560,8 @@ if (Math.abs(ax) < thk / 2 * 0.9 && rho > hole + 0.003 && rho < wid / 2 - 0.003)
 }
 if (through !== want || along !== through) { badN++; if (!firstN) firstN = { e, through, along }; }
 }
-if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${firstN.e.side < 0 ? 'port' : 'starboard'}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
-if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${firstW.e.side < 0 ? 'port' : 'starboard'}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
+if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${sideOf(firstN.e.side)}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
+if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${sideOf(firstW.e.side)}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
 });
 {
 const lm = (H.masts || []).filter(mk => kindOf(mk) === 'lashing');
@@ -4586,12 +4588,12 @@ const ms = [...gp.masts.keys()].sort((a, b) => ((H.masts[a] || {}).at || 0) - ((
 const inner = ms.map(m => gp.masts.get(m)).sort((a, b) => meanOf(a.zs) - meanOf(b.zs))[0];
 const off = meanOf(inner.zs) - inner.seat;
 if (Math.abs(off) > inner.rr * 2 + 1e-6)
-say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${gp.sgn < 0 ? 'z−' : 'z+'} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
+say(v.id, 'a lanyard off its seat', `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} on the ${sideOf(gp.sgn)} side: mast ${inner.mast}'s turns wrap the beam centred ${Math.abs(off).toFixed(3)} m ${off > 0 ? 'outboard' : 'inboard'} of the seat its heart stands over, a rope's diameter (${(inner.rr * 2).toFixed(3)} m) allowed; ${ms.length === 1 ? 'no other mast takes the beam' : `${ms.length} masts take the beam`} (${inner.zs.length / 2} turn segments read off the lanyard meshes)`);
 for (let i = 0; i + 1 < ms.length; i++) {
 const F = gp.masts.get(ms[i]), A = gp.masts.get(ms[i + 1]);
 const gap = Math.min(...A.zs) - Math.max(...F.zs), rr = Math.max(F.rr, A.rr);
 if (gap < rr * 2 - 1e-6)
-say(v.id, "a shared beam's lanyards the wrong way round", `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} ${gp.sgn < 0 ? 'port' : 'starboard'}: mast ${ms[i + 1]}'s turns ${gap < 0 ? 'lie inboard of' : 'touch'} mast ${ms[i]}'s — the nearest after turn stands ${gap.toFixed(3)} m outboard of the farthest forward turn, a rope's diameter (${(rr * 2).toFixed(3)} m) wanted (${A.zs.length / 2} after and ${F.zs.length / 2} forward turn segments read off the lanyard meshes)`);
+say(v.id, "a shared beam's lanyards the wrong way round", `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} ${sideOf(gp.sgn)}: mast ${ms[i + 1]}'s turns ${gap < 0 ? 'lie inboard of' : 'touch'} mast ${ms[i]}'s — the nearest after turn stands ${gap.toFixed(3)} m outboard of the farthest forward turn, a rope's diameter (${(rr * 2).toFixed(3)} m) wanted (${A.zs.length / 2} after and ${F.zs.length / 2} forward turn segments read off the lanyard meshes)`);
 }
 }
 }
@@ -6614,6 +6616,18 @@ say('passage-readout', 'a distance the field cannot state',
 say('passage-readout', 'a land row that cannot be asked', 'fillLandRow threw: ' + e.message);
 }
 try { selectEra(eraHome2); await drain2(); } catch (e) {  }
+}
+try {
+const src = await (await fetch('audit-hulls.js', { cache: 'no-store' })).text();
+const A = new RegExp("[<>]=?\\s*0\\s*\\?\\s*'(?:port|starboard|stbd|z[+−])", 'g');
+const B = new RegExp(":\\s*'(?:port|starboard|stbd|z[+−])(?: side)?'", 'g');
+const lines = new Set();
+for (const re of [A, B]) { let m; while ((m = re.exec(src))) lines.add(src.slice(0, m.index).split('\n').length); }
+if (lines.size)
+say('audit-hulls.js', 'a side spelled outside sideOf',
+`${lines.size} line${lines.size === 1 ? '' : 's'} spell${lines.size === 1 ? 's' : ''} a side from a sign (line${lines.size === 1 ? '' : 's'} ${[...lines].sort((a, b) => a - b).join(', ')}); every side-naming message goes through sideOf`);
+} catch (e) {
+say('audit-hulls.js', 'an audit that cannot read its own source', 'fetch(audit-hulls.js) threw: ' + e.message);
 }
 return { problems, checked: rows.length, rows };
 })()

@@ -23626,3 +23626,126 @@ docs/audit-hulls.js convicts a lanyard off its seat (1 mentions); docs/data/vess
 THE RATCHET: FULL RATCHET at the clean r267 HEAD 6a51d5f LAUNCHED (START 19:01:44 load 3.76 5.26 12.30 HEAD 6a51d5f) and DIED 19:34:17 at its 36th frame (aboard-cable) on Page.screenshot's 30 s timeout under a load spike to 44 (19:34, nothing of this project's above idle; the chain had ended at 19:25 at load 26); the 35 frames it captured are copied to r268/current-clean-35 and scored offline by the tool's own compare (r268/clean-35-scores.out): 35 ok, 0 movers; sea-canoe-floor, not among them, scored by check --frame on :8149 (partial-clean-sea-canoe-floor.out). OFFLINE: 35 frames scored offline; movers 0 (largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, ship-preussen 0.025%/0.026). CLEAN HEAD on the two frames this round can move: ship-canoe 0.012%/0.004 ok (offline, among the 35), sea-canoe-floor 0.037%/0.011 ok (check --frame on :8149, web/ at HEAD, r268/partial-clean-sea-canoe-floor.out). The chain (PROOF A, the probe, the final audit, PROOF B, four witnesses) ran one browser at a time beside the ratchet from 19:08 to 19:25 (r268/chain.log).
  PARTIAL after the push, the r239 pattern (r268/partial-*.out): frames scored one at a time by check --frame on the r268 builder, each diff read and any mover beyond the gate accepted with its reason in FRAME-LOG.md — sea-canoe-floor 0.059%/0.017 CHANGED, ship-canoe 0.017%/0.005 ok, ship-dugout 0.000%/0.000 ok, ship-trireme 0.004%/0.003 ok (4 frames; r268/PREDICTIONS-close.md names the frames that MAY move — ship-canoe and sea-canoe-floor, the main mast's three turns on each of its two own beams (u 0.55 and 0.65) shifted 0.05 m inboard along the beam on both sides, 13 mm rope sub-pixel wide at the frames' scale, the two shared beams unchanged, rigTop and the camera's datum unchanged; ship-dugout and ship-trireme as her berth neighbours with her envelope unchanged — and the rest that must not: the rank is read only where a lashing's timber is a crossbeam, which only the canoe has, and no record changed). sea-canoe-floor moved beyond the gate and was ACCEPTED at 19:41 with its reason in FRAME-LOG.md (r268/diff-sea-canoe-floor.png: six marks at the beam ends, four starboard carrying r267's unaccepted shift plus this round's and two port with this round's alone; ship-canoe, the same turns from abeam, stayed under the gate). The other 61 frames are UNSCORED on the r268 builder; any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (4691bc6 audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 269 — 2026-09-07 — the audit names a side the app's way: from r247 every rule that named a side spelled the word from a sign in its own ternary and read z− as port, the mirror of the app's word, where +z is the port beam (b=90) and b=0 looks aft from ahead with +z on the viewer's right; one helper now returns the word from z's sign off a three-word table, all twenty-one side-naming lines go through it, a new rule reads the audit's own served source and convicts a ternary that spells a side, no geometry and no record changed, and the full ratchet ran at the clean r268 HEAD with the machine kept quiet for its first frames
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r268 ordered r269's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet until globe-default
+had landed. The load at the open was 3.9 (19:53); nothing of this project's was above idle and the only busy processes
+were a video call's (avconferenced and the capture agents at 30–40%), so the full ratchet was launched at 19:54:13 at
+HEAD 0589cee (r269/open-ratchet.out) and nothing touched the machine until the fourth frame had landed (19:57). The
+frames took about 35 s each with the machine to themselves and about 55 s while the chain's browser ran beside them
+(14 frames by 20:02, 28 by 20:16). Every edit was made on a COPY of web/ served on :8150 (build/staging/r269/web,
+every file a symlink to web/ except audit-hulls.js, hull.js and vessels.json, which are copies; the :8150 server
+restarted from it at 19:59); the chain — PROOF A′, PROOF A″, the final audit, PROOF C, two witnesses — ran one browser
+at a time beside the ratchet from 20:02 to 20:16 (r269/chain.log), and a re-run of PROOF C and the final audit on the
+file that ships from 20:16 (the same log). The load of 37 at 20:14 was this project's own: the ratchet's browser at
+450% CPU and the witness browser at 95%, nothing from outside.**
+
+**THE FAULT, in the audit's words and in no hull: twenty-one lines of Research/audit-hulls.js named a side, each from
+its own ternary on a sign, and eighteen of them read z− as 'port' and z+ as 'starboard' — the r247 convention, as r267
+named it (0y⁵³) — which is the mirror of the app's word. The eighteen: the undecked-hull rule (a double hull's lane),
+the gun-port slot rule, the wall-port and belt-port rules ('port side'), the gallery reach rule, the maku open-face and
+valance rules, 'shrouds and no channel', 'a tackle off the rail', 'shrouds and no tackle', 'a lashing off its beam',
+'shrouds and no lashing', the three bullseye rules, the two lanyard rules and "a shared beam's lanyards the wrong way
+round". Two lines were the app's way already — the bulwark-band rule's `side` (r223) and the floors rule's arm keys and
+long-side word (r240) — and one, D-LASHING-SEAT (r268), sidestepped the word and printed z+ and z−. Every message the
+eighteen printed was right about the geometry and wrong about the word, so every side word in a proof message from
+r247 to r268 under one of those rules reads the mirror: r267's PROOF A "crossbeam at u 0.35 port" was the z− side,
+which is starboard; the handoffs' own z-sign statements stand.**
+
+**THE CONVENTION, established three ways before a word was changed. (1) The frame: hull.js says +x is aft in four
+places (lines 3684, 8015, 8734, 12004) and a mast's x is (at − 0.5)·lwl with `at` counted from the bow — the junk's fore
+mast at 0.18 and main at 0.64, the canoe's at 0.26 and 0.54 — so the bow is at −x; the frame is right-handed with +y up,
+and (forward, port, up) is a right-handed triple, so (aft) × (up) = port: +z is port. (2) The measurement:
+r254/side.json at the junk's b=0 has the camera at hull x −65.1 with the bow at −10 and the stern at +10, the stern's
+screen point 0.167 higher in ndc than the bow's — the far end — so b=0 looks AFT from ahead; hull (0, 5, +2) lands at
+ndc x +0.063, the viewer's right, and from ahead the viewer's right is the ship's port side. (3) The builder's own
+record fields: the lateen's and the lug's side fields say "+z is port (round 254, r254/side.json)" and every
+fore-and-aft cloth in the fleet is sheeted to +z.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r269/apply-audit-edits.py, twenty-two replaces each asserted to
+hit its count, audit-hulls.before.js and audit-hulls.after.js, the file syntax-checked with node's vm and linted in
+node before any browser ran it). (1) `SIDE_WORD = ['starboard', 'centreline', 'port']` and `sideOf(z) =
+SIDE_WORD[Math.sign(z) + 1]`, defined beside `say` with the convention and its three grounds in the comment above it —
+a table, so the helper is not itself a ternary the lint would read (the first draft's helper was, and the lint found
+it at line 49). (2) The twenty-one lines: the eighteen rewritten from the mirror to `sideOf(sgn)`, `sideOf(lane)`,
+`sideOf(e.side)`; the two that were right routed through the helper with their meaning unchanged; D-LASHING-SEAT's
+z+/z− replaced by the words; the messages that said 'stbd' say 'starboard'. (3) A-SIDE-WORD (new, 0y⁵³): fetches
+'audit-hulls.js' relative to the page — the runners' own origin, /ships/audit-hulls.js on Pages — and convicts any
+line where a comparison with zero is followed by a quoted side word, or where a quoted side word stands in a ternary's
+else-branch, the two shapes all twenty-one took; the gun-port labels (a 'port' against a 'wall' or a 'belt') match
+neither; if the fetch throws, that is said as a problem, not passed. In node the two regexes find the twenty-one lines
+in the before file and none in the after. No record changed and no builder changed: web/js/hull.js and
+web/data/vessels.json are cmp-identical to HEAD's.**
+
+**PROOFS (r269/chain.log; the r269 audit on :8150, one browser at a time beside the ratchet). PROOF A′ (r267's
+hull.before.js — the r266 builder — 20:04:38): 8 problems, all the canoe's: D-LASHING-SHARED's two, "crossbeam at u
+0.35 starboard: mast 1's turns lie inboard of mast 0's — the nearest after turn stands −0.079 m outboard of the farthest
+forward turn" and the same at u 0.45 — the two lines r267's PROOF A printed with 'port' — and D-LASHING-SEAT's six (a
+rule r267 did not have): u 0.35 and 0.45 "on the starboard side … 0.050 m inboard of the seat" (2 masts take the beam),
+u 0.55 and 0.65 "on the port side … 0.050 m outboard" and "on the starboard side … 0.050 m inboard" — which is exactly
+what adding to z on both sides does: outboard where z is positive, inboard where it is negative. PROOF A″ (r268's
+hull.before.js — the r267 builder — 20:06:58): exactly r268's four, "crossbeam at u 0.55 on the port side … 0.050 m
+outboard", "on the starboard side … 0.050 m outboard", u 0.65 the same, z+ printed as port and z− as starboard with
+the figures unchanged. FINAL (HEAD's builder, 20:09:19): "checked 33 hulls, 0 problems". PROOF C (the served copy with
+D-LASHING-SHARED's ternary put back, 20:13:29): exactly 1 — "audit-hulls.js | a side spelled outside sideOf | 1 line
+spell a side from a sign (line 6468); every side-naming message goes through sideOf" — and the copy restored (cmp).
+The lint's verb was then made to agree with its count, and PROOF C and the final audit were re-run on the file that
+ships: PROOF C2 (20:19:28): "checked 33 hulls, 1 problems" — exactly one, "audit-hulls.js | a side spelled outside sideOf | 1 line spells a side from a sign (line 6468); every side-naming message goes through sideOf" — and the copy restored (cmp). FINAL2 (HEAD's builder, 20:22:10): "checked 33 hulls, 0 problems". The files copied into web/ and Research/ at the close are cmp-identical to the copy :8150
+served (r269/close.log).**
+
+**WITNESSED (r269/witness-canoe-ahead.png and witness-junk-ahead.png, both from :8149 — web/ at HEAD, which is this
+round's geometry — at b=0, l=8, z=0.9, 2880 × 1800; crop-canoe-ahead.png and crop-junk-ahead.png carry the labels;
+crop-junk-face-2x.png). The canoe from ahead: both hulls' near ends, the platform between them, the poles, and the
+crab-claw's cloth standing wholly to the viewer's RIGHT of its pole — +z, the side the class sheets every fore-and-aft
+cloth to — with the shroud fans landing on hearts at the beam ends on both sides. The junk from ahead: her bluff bow
+transom with the anchor windlass on deck at the foremast and the deep central notch in the bow face below it, and the
+lug's cloth to the viewer's right of the mast — +z again. From ahead the viewer's right is the ship's port side, so the
+word the audit now prints for +z is the word a viewer standing off the bow would use.**
+
+**Rule 0 on the canoe witness read whole (r269/witness-canoe-ahead.png): a rendered double canoe on a grey-blue sea
+seen from ahead, not a chart — planked hulls with their seams, the platform's deck between them, a pole with its yard
+and the crab-claw cloth set to one side, shroud fans to wooden hearts at the beam ends, a hazed coast under a pale
+sky. Three facts a viewer can read off it without a legend: the sail is set to one side of the pole, not square across
+the ship; the shrouds land on the beam ends outboard of the hulls, not on the hulls; the two hulls are joined by
+crossbeams under a platform deck.**
+
+**Named residuals, in order:** (0y⁵³) CLOSED: the word comes from sideOf; A-SIDE-WORD reads the served source for a
+ternary that spells one. NEW (0y⁵⁴) THE BUILDER'S AND THE FRAME LIST'S OWN SIDE LABELS: hull.js draws a platform
+balustrade's 'port' rail at −z (line 14792, `side === 'port' ? [0, -hw] : [0, hw]` — the rails are symmetric, so the
+picture is right and the label is the mirror), and frames.json's 'stbd' names are the mirror by the r264 note; a sweep
+of both files for side words against z's sign is the next side task, with the convention stated once at the top of
+hull.js; no geometry moves for it unless a label drives an asymmetric fitting, which the sweep must say per site. (0y⁴⁹)
+the lanyard's tail, (0y⁵⁰) the timber the falls wrap, (0y⁴⁷) HALF CLOSED, as r266 names them. (0y⁴⁶) HALF CLOSED as
+r265 names it — the fastening at the POLE is still unread. (0y⁴⁵) STANDS as r265 names it. (0y⁴⁴) the masthead blocks'
+functions, as r263 names it. (0y³⁰) stands, as r263 names it: no truss plate. (0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name
+them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name them. (0y¹⁹) (0y²⁴) as r256 names them.
+(0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them. (0y¹²) (0y¹³) (0y¹¹) as r252 names
+them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread.
+(0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗)
+(0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**THE FRAMES: r269/PREDICTIONS-close.md, written before any frame was scored, names none that MAY move and all 65 that
+MUST NOT — the round changes one file no frame loads, so the full ratchet launched at the clean r268 HEAD is this
+round's ratchet outright; its result, and any frame it moved, are in the receipt commit that follows this one. A mover
+is not explained by this round and is classified by stash-and-re-run (the r132 rule), never accepted as r269's.**
+
+**r270 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed; the chain may run beside it one browser at a time
+once the fourth frame is down (this round: the frames slowed from 35 s to about 55 s while it did and none timed out,
+and the run was not troubled by a load of 37 that was its own browser's); if the frames are taking over a minute each
+after the third, it stops the run and scores the clean HEAD by check --frame on the frames the round can move; and if
+the run dies part-way, it copies _current aside BEFORE any check --frame and scores the captured frames offline —
+r269/score-offline.py is that script, ready to run on a copied directory. Then it takes (0y⁵⁴) (the sweep of hull.js
+and frames.json for side words against z's sign), or (0y⁴⁹) off crop-bullseye-3x.png (the tail's coil is 0.1 m across
+at the rope's scale), or (0y⁵⁰) with (0y⁴⁷)'s farther feet if a plate square to the side surfaces (Commons
+Category:Hokulea, 109 files, listed in r265/commons-candidates.json), or (0y⁴⁵) if a scaled plan surfaces, or (0y³⁰)
+with a plate of a lower-yard truss, or (0y¹⁹) with (0y²⁴), or the survey's next never-spun hull, Endurance (4,114
+triangles per metre), by looking. The load this round: 3.9 at the open and at the ratchet's launch, 8–17 with the
+ratchet's browser alone, 15–37 with the chain's beside it (all of it this project's own), 5.64 at the close.**
+
+**Live stamp: docs/index.html carries data-version 1788838889 at the build; the push and the live poll are in
+build/staging/r269/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r269 staging stays on disk uncommitted, the r211 convention.**
