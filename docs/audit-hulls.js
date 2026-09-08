@@ -4335,6 +4335,79 @@ say(v.id, 'a boom too low over the platform', `${at}: its underside stands ${(un
 }
 };
 boomRead(g, 'set');
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const deep = !!(H.deck && H.deck.belowSheerM > 0.3), timbers = !!(H.frames && H.frames.roomAndSpaceM);
+const stM = [], railM = [], pinsM = [], capM = [], deckM = [];
+g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+if (p.key === 'bulwarkStanchion') stM.push(o);
+else if (p.key === 'pinRail' && p.name === 'Pin rail') railM.push(o);
+else if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+else if (p.key === 'rail') capM.push(o);
+else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+const want = deep && !timbers;
+if (!want) {
+if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.length} Bulwark stanchion mesh(es) on a hull ${deep ? 'whose frames are drawn to the head (frames.roomAndSpaceM)' : 'with no deck below the sheer'}`);
+if (railM.length) say(v.id, 'a pin rail in a bulwark that is not there', `${railM.length} Pin rail mesh(es) on a hull ${deep ? 'whose frames are drawn to the head' : 'with no deck below the sheer'}`);
+} else {
+let deckPts = null, capPts = null;
+const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+const capAtX = (xq, sgn) => { if (!capPts) capPts = [].concat(...capM.map(pts));
+let under = 1e9, outer = 0, n = 0; for (const q of capPts) { if (Math.sign(q.z) !== sgn || Math.abs(q.x - xq) > 0.35) continue;
+under = Math.min(under, q.y); outer = Math.max(outer, Math.abs(q.z)); n++; } return n ? { under, outer } : null; };
+const year = H.year || 0, pinsDue = year >= 1600;
+if (!stM.length) say(v.id, 'a bulwark with no stanchions', `deck.belowSheerM ${H.deck.belowSheerM}, frames not drawn as timbers, and no Bulwark stanchion mesh: the wall is the planking's bare inner face`);
+const rec = stM.length ? stM[0].userData.bulwarkFurniture : null;
+const bySide = { 1: [], '-1': [] };
+for (const o of stM) {
+const P = pts(o); let yF = 1e9, yH = -1e9, x = 0, zOut = 0, sgn = 0;
+for (const q of P) { yF = Math.min(yF, q.y); yH = Math.max(yH, q.y); x += q.x; zOut = Math.max(zOut, Math.abs(q.z)); sgn += q.z; }
+x /= P.length; sgn = sgn > 0 ? 1 : -1;
+const at = `the ${sideOf(sgn)} stanchion at x ${x.toFixed(2)}`;
+const e = deckAtX(x);
+if (e < 1e8 && Math.abs(yF - e) > 0.12) say(v.id, 'a stanchion off the deck', `${at}: its foot at y ${yF.toFixed(2)} stands ${(yF - e).toFixed(2)} m from the deck's edge (${e.toFixed(2)}) at that x (0.12 allowed)`);
+const c = capAtX(x, sgn);
+if (!c) say(v.id, 'a stanchion under no cap', `${at}: no capping rail mesh within 0.35 m of its x on its side`);
+else {
+if (yH > c.under + 0.02) say(v.id, 'a stanchion through the cap', `${at}: its head at y ${yH.toFixed(2)} stands ${(yH - c.under).toFixed(2)} m above the cap's underside (${c.under.toFixed(2)})`);
+if (yH < c.under - 0.25) say(v.id, 'a stanchion short of the cap', `${at}: its head at y ${yH.toFixed(2)} stops ${(c.under - yH).toFixed(2)} m under the cap's underside (${c.under.toFixed(2)}); a hand is the most`);
+if (zOut > c.outer + 0.01) say(v.id, 'a stanchion outside the planking', `${at}: its outer face at |z| ${zOut.toFixed(3)} stands ${(zOut - c.outer).toFixed(3)} m outside the cap's outer edge (${c.outer.toFixed(3)})`);
+}
+bySide[sgn].push({ x, yF, yH, P });
+}
+if (rec) for (const sgn of [1, -1]) {
+const xs = bySide[sgn].map(q => q.x).sort((a, b) => a - b);
+if (xs.length < 3) continue;
+const gaps = xs.slice(1).map((x, i) => x - xs[i]).sort((a, b) => a - b), med = gaps[Math.floor(gaps.length / 2)];
+if (Math.abs(med - rec.pitchM) > 0.1 * rec.pitchM) say(v.id, 'stanchions off their pitch', `the ${sideOf(sgn)} stanchions stand a median ${med.toFixed(2)} m apart where the builder says ${rec.pitchM} (${rec.pitchFrom})`);
+}
+if (pinsDue && !railM.length) say(v.id, 'a bulwark with no pin rail', `year ${year}, a bulwark ${H.deck.belowSheerM} m deep, and no Pin rail mesh: the running rigging has nothing to belay to`);
+if (!pinsDue && railM.length) say(v.id, 'a pin rail before belaying pins', `year ${year}: a Pin rail mesh on a hull depicted before 1600`);
+if (railM.length && !pinsM.length) say(v.id, 'a pin rail with no pins', `${railM.length} Pin rail mesh(es), no Belaying pins mesh`);
+for (const o of railM) {
+const P = pts(o); const rr = o.userData.bulwarkFurniture || rec;
+for (const sgn of [1, -1]) {
+const Q = P.filter(q => Math.sign(q.z) === sgn); if (!Q.length) continue;
+const hs = []; for (let k = 0; k < Q.length; k += 8) { const e = deckAtX(Q[k].x); if (e < 1e8) hs.push(Q[k].y - e); }
+hs.sort((a, b) => a - b); const hMed = hs.length ? hs[Math.floor(hs.length / 2)] : null;
+if (rr && rr.pinRailM != null && hMed != null && Math.abs(hMed - rr.pinRailM) > 0.12)
+say(v.id, 'a pin rail off its height', `the ${sideOf(sgn)} pin rail stands a median ${hMed.toFixed(2)} m over the deck's edge at its own stations (${hs.length} reads, ${hs[0].toFixed(2)}–${hs[hs.length - 1].toFixed(2)}) where the builder says ${rr.pinRailM} (${rr.pinRailFrom})`);
+let worst = -1e9, wq = null;
+for (let k = 0; k < Q.length; k += 4) { const q = Q[k];
+let st = null, bd = 1e9; for (const c of bySide[sgn]) { const d = Math.abs(c.x - q.x); if (d < bd) { bd = d; st = c; } }
+if (!st || bd > 1.5) continue;
+let inner = 1e9; for (const r of st.P) if (Math.abs(r.y - q.y) < 0.35) inner = Math.min(inner, Math.abs(r.z));
+if (inner > 1e8) continue;
+const over = Math.abs(q.z) - inner; if (over > worst) { worst = over; wq = q; } }
+if (wq && worst > 0.03) say(v.id, 'a pin rail in the wall', `the ${sideOf(sgn)} pin rail at x ${wq.x.toFixed(2)} stands ${worst.toFixed(3)} m outside the nearest stanchion's inner face`);
+}
+}
+}
+}
 if (H.deck && H.deck.belowSheerM) {
 if (!H.deck.provenance)
 say(v.id, 'a deck depth with no provenance',

@@ -24559,3 +24559,139 @@ r275 tree are now accepted (ship-endurance, shipwright, ship-wyoming, ship-great
 ship-clipper, ship-steamer, shipwright-furled); shipwright-ahead, shipwright-astern, shipwright-hounds, the five
 aboard-* frames named in PREDICTIONS-close.md and the thirteen MAY neighbours are r276's to score and accept with
 this round's reason.**
+
+## Round 276 — 2026-09-08 — the bulwark gets its furniture: on every hull whose deck lies below the sheer and whose frames are not drawn to the head, the inside of the wall was the planking's bare inner face from the deck to the cap; a wooden bulwark is planked on the outside of stanchions, the frames' top timbers carried past the deck, with the pin rail the running rigging belays to along their inner faces at waist height; Endurance's 1.35 m wall now carries a 0.12 x 0.15 m stanchion every 1.2 m from the deck to a hand under the cap, a pin rail 0.95 m over the deck on their inner faces and a belaying pin every 0.25 m through it, the pitch and the heights named as class figures on the card until a plate is read, the cog and every flush-decked hull byte-identical, a new rule reads the timbers against the deck meshes, the cap and the builder's own figures, and the r275 frames the clock did not reach were scored by a check chain at the clean HEAD and accepted
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r275's entry ordered r276 to check `uptime` and
+`ps -r` FIRST, wait if mediaanalysisd or the Codex renderer was hot, and then run the full ratchet at the clean HEAD,
+stopping it if the frames took over a minute each after the third. At the open (04:50) the load was 19.8 (27 and 36
+over 5 and 15 minutes) with mediaanalysisd at 214% CPU, corespotlightd at 51% and two Codex renderers at 47% and 24% —
+both hot, and nothing in the 80-minute clock to wait for. A full run at that load (60–136 s a frame, r275's own
+figures) cannot finish in the round, so the opening ratchet was replaced by a CHECK CHAIN (r276/chain-checks.sh): the
+r275 frames the clock did not reach, one check --frame at a time against :8149 (web/ at the clean HEAD c42731b),
+each frame's current and diff copied aside before the next check wipes them, and each mover accepted from the copy
+after its diff was LOOKED AT. Every edit was made on the :8150 copy (r276/web, symlinks with real copies of hull.js,
+vessels.json and audit-hulls.js) and copied into web/ after the chain ended; every browser of mine ran alone, one
+after another (r276/chain.log). The load in the round: 52 at 04:52, 100 at 05:04, 25–45 after.**
+
+**THE OPENING CHAIN (r276/chain-checks.log; the r275 tree at the clean HEAD, PREDICTIONS-close.md of r275). The seven
+MUST frames the r275 clock did not reach: shipwright-ahead 0.000% ok (a MUST that did not move — from dead ahead the
+74's driver boom and its lift are hidden behind the courses, so the prediction was wrong and the frame right);
+shipwright-hounds 0.017%/0.005 ok (the masthead close-up; the boom is out of frame); aboard-preussen 0.143%/0.054
+CHANGED — the spanker's foot wedge rising to the lifted clew and the truss specks of the documented capture flap
+(r276/diff-aboard-preussen.png) — ACCEPTED; aboard-wyoming 0.065%/0.020 CHANGED — six gaff feet rising to six lifted
+clews and nothing else (r276/diff-aboard-wyoming.png) — ACCEPTED; aboard-cable 0.041%/0.020 ok; aboard-clipper
+0.000% ok; aboard 0.009%/0.003 ok (the Great Western's hull is not the steamer's at that camera). The thirteen MAY
+neighbours: ship-slave-ship 0.001% ok, ship-titanic 0.010% ok, ship-dreadnought 0.115%/0.033 CHANGED — a berth
+neighbour's gaff cloth and cocked boom at the frame's left edge, nothing on the dreadnought herself
+(r276/diff-ship-dreadnought.png) — ACCEPTED; ship-container 0.015% ok, ship-queen-mary-2 0.008% ok, ship-yamato
+0.047%/0.018 ok, ship-azzam 0.023%/0.028 ok, ship-ever-given 0.034%/0.024 ok, ship-carrier 0.000%/0.000 ok, ship-treasure 0.024%/0.012 ok, ship-carrack 0.001%/0.000 ok, ship-galleass 0.000%/0.000 ok, ship-usv 0.000%/0.000 ok. Every r275 frame is now
+scored and, where it moved, accepted with r275's reason; the r275 predictions missed on shipwright-ahead (no move)
+and hit everywhere else.**
+
+**THE FAULT (0y⁶⁰, named r272). deck.belowSheerM (r215) puts the deck under the sheer and the loft draws the skin up
+to the cap, so the bulwark's inside was the planking's own inner face: on Endurance a bare dark wall 1.35 m high the
+whole length, on every bearing that looks over her rail (every Shipwright elevation above ~20°, the Sea close-up
+from the quarter). A wooden bulwark is not a bare wall. It is planked on the OUTSIDE of stanchions — the frames'
+top timbers carried up past the deck, or short timbers let into the covering board — and every stanchion stands
+exposed inside, from the deck to the underside of the cap; along their inner faces at waist height runs the PIN
+RAIL, the timber bored for the belaying pins the running rigging is made fast to. Only two hulls carry the field:
+the cog (1.75) and Endurance (1.35). The cog's recorded frames (frames.roomAndSpaceM, r217) are already drawn as
+timbers to the head inside her wall at the record's pitch, so she has her furniture and takes nothing here;
+Endurance had none.**
+
+**THE BUILDER (web/js/hull.js; r276/apply-builder-edits.py, two replaces asserted; hull.before.js and hull.after.js;
+parsed by node's vm). In buildFittings after the capping rail: gate = !openHull && deck.belowSheerM > 0.3 && no
+frames.roomAndSpaceM. (1) Stanchions: at every station u = 0.05 + k·pitch/L up to 0.95 where the wall is at least
+0.3 m deep and no terrace owns it (H.stepTop null), a BoxGeometry sided 0.12 (fore-and-aft) by moulded 0.15
+(athwart), its foot on the deck (H.deck) and its head a hand (0.05) under the sheer, both ends at the skin read at
+their own height (surfacePoint at v = 0.62 + 0.38·y/fb — the bulwark is straight in v, the futtock's own derivation)
+less the hand's gap and half the moulding, the box aligned foot-to-head by quaternion so it leans with the
+tumblehome; tagged bulwarkStanchion (a NEW PARTS key, stage 3) and carrying userData.bulwarkStanchion {u, side,
+foot, head} and userData.bulwarkFurniture {pitchM, pitchFrom, sidedM, mouldedM, gapM, pinRailM, pinRailFrom,
+pinPitchM, stanchionsX}. (2) The pin rail, gated on S.year ≥ 1600: an indexed strip (the capping rail's own
+pattern) 0.16 wide by 0.06 thick along the 91 stations at H.deck(u) + 0.95, its outer edge at the skin at that
+height less the gap and the moulding — on the stanchions' inner faces — over every run where the wall stands 0.15 m
+over the rail; and the pins, one every 0.25 m along each run, 0.035 square by 0.45 long standing through the rail
+(0.275 over its centre, 0.175 under), pushed as six-faced boxes into one indexed geometry; both tagged pinRail (a
+NEW PARTS key) with the names 'Pin rail' and 'Belaying pins'. (3) A record may carry bulwark.stanchionPitchM,
+stanchionSidedM, stanchionMouldedM and pinRailM; the builder reads them in place of the class figures and the card
+says which it used. ⚠ THE PITCH (1.2 m, about four feet, the wooden-ship rules' spacing), THE SCANTLINGS AND THE
+RAIL'S HEIGHT ARE CLASS FIGURES, NOT PLATE READS: no plate in reach shows the inside of Endurance's bulwark at a
+scale that reads any of them. The card says so on every stanchion and on the rail, the mesh records it, and the
+audit reads the built timbers against the builder's own figures — (0y⁷⁰) below.**
+
+**THE RECORD (web/data/vessels.json): unchanged; vessels.after.json is vessels.before.json.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r276/apply-audit-edits.py, one replace, and the height read
+corrected in place; audit-hulls.before.js and audit-hulls.after.js). A-BULWARK-FURNITURE, after boomRead on the set
+build: on every hull with deck.belowSheerM > 0.3 and no frames.roomAndSpaceM there must be 'Bulwark stanchion'
+meshes ('a bulwark with no stanchions'); each one's foot within 0.12 of the deck read off the deck meshes at its x
+('a stanchion off the deck'), its head under the capping rail's underside at that x ('a stanchion through the cap')
+and no more than 0.25 below it ('a stanchion short of the cap'), its outer face inside the rail's outer edge ('a
+stanchion outside the planking'), a rail within 0.35 m of it on its side ('a stanchion under no cap'); the median
+gap of a side's stanchions within 10% of the builder's stated pitch ('stanchions off their pitch'); from 1600 a
+'Pin rail' mesh ('a bulwark with no pin rail'), before 1600 none ('a pin rail before belaying pins'), pins on it
+('a pin rail with no pins'), the rail's median height over the deck read POINT BY POINT at each point's own x
+within 0.12 of the builder's figure ('a pin rail off its height'), and every point of it inboard of the nearest
+stanchion's inner face at its height, 0.03 allowed ('a pin rail in the wall'); and a hull without the gate must
+carry none of it ('stanchions in a bulwark that is not there', 'a pin rail in a bulwark that is not there'). THE
+AUDIT WAS WRONG FIRST (rule 8): FINAL1 convicted both pin rails 'off its height' at 1.11 m because it compared the
+rail's MEAN y with the deck at the rail's mean x, and the deck follows the sheer, which rises 0.95 m at the bow;
+the rule now reads each point against the deck at its own x and takes the median.**
+
+**PROOFS (r276/chain.log; each audit alone in its browser on :8150). FINAL1 (the mean-x read): "checked 33 hulls,
+2 problems", the audit's own error above. FINAL2 (r276 builder, audit corrected): "checked 33 hulls, 0 problems" (05:13). PROOF B (every
+stanchion drawn 0.5 m off the deck and 0.45 m through the cap, hull.proof-b.js): 122 — 'a stanchion off the deck' 60 and 'a stanchion through the cap' 60 (every timber, both sides) and 'a pin rail in the wall' 2 (the lifted timbers' inner faces at the rail's height moved with the tumblehome, so the rail's outer edge stood 0.03 m proud of them). PROOF C (no pin rail
+drawn on any hull, hull.proof-c.js): exactly 1, 'a bulwark with no pin rail' (Endurance, year 1912). PROOF D (the pin rail drawn in the wall, its inner edge at the skin,
+and 0.4 m too high, hull.proof-d.js): 4 — 'a pin rail in the wall' 2 (0.474 m outside the nearest stanchion's inner face) and 'a pin rail off its height' 2 (a median 1.32 m over the deck at 46 reads a side, the builder's 0.95). The builder was restored cmp-identical after each proof.**
+
+**MEASURED (the audit's own reads at FINAL1, r276/audit-final-8150.out, and the builder's userData). Endurance: the
+deck's edge at x −0.1 reads y 2.00 (the record's 3.35 cap less 1.35); the rail's mean y 3.11 over a run whose deck
+follows the sheer from 2.00 amidships to 2.95 at the bow — 0.95 over the deck at every station by construction, which
+the corrected rule reads as a median. Stanchions: 0.05 to 0.95 of a 39.6 m LWL at 1.2 m = 30 stations a side, 60
+timbers; pins at 0.25 m over the two runs, about 140 a side.**
+
+**THE FRAMES (r276/PREDICTIONS-close.md, written before scoring): ship-endurance MUST move (the Shipwright looks over
+her rail from the quarter); ship-azzam, ship-ever-given, ship-container, ship-queen-mary-2 MAY (berth neighbours);
+everything else MUST NOT — every hull without the gate is byte-identical. Witnessed by r276/witness.py on :8150 (the
+edited copy) before any frame was scored: Endurance from high on the port quarter (b=125, l=35, z=0.6;
+witness-endurance-pq-high-after.png) and closer from the starboard quarter (b=150, l=28, z=0.42;
+witness-endurance-close-after.png). Read at 3x (r276/crop-stbd-bulwark-3x.png, the 2880 frame's 950..1750 x 760..1060):
+the starboard bulwark's inner face carries a row of upright timbers from the deck to under the pale cap, a rail
+along them at waist height, and a pin standing through the rail every quarter-metre; the wall between them is the
+dark planking. The r276 tree's frames scored by check --frame after the copy-in and the push are in the receipt
+commit that follows this one.**
+
+**Rule 0 on the close witness read whole (witness-endurance-close-after.png): a rendered barquentine seen from high
+on her starboard quarter on a lit blue-green sea, her deck planked fore and aft, her sails set — not a chart. Three
+facts a viewer can read off it without a legend: her deck is walled by a bulwark the height of a man, with
+stanchions and a pin rail along its inside; a black funnel stands between her main and mizzen masts, a steamer under
+sail; her hatch amidships is covered by a grating.**
+
+**Named residuals, in order:** (0y⁶⁰) CLOSED this round for the stanchions and the pin rail; what it also named —
+the scuppers, the scrolled pale band under the cap at the bow and the lifebuoy — stays open under the same number.
+NEW (0y⁷⁰) THE BULWARK'S FIGURES ARE UNREAD: 1.2 m, 0.12 x 0.15, 0.95 m are class figures; a Hurley plate of
+Endurance's deck looking along the bulwark (the dog-kennel plates, RMG/SPRI) at ≥ 20 px/m would read the pitch and
+the rail's height, and the record would take bulwark.stanchionPitchM and pinRailM with their provenance. NEW (0y⁷¹)
+THE PIN RAIL IS BARE: no line is belayed to any pin; the running rigging's falls end where they end and none is
+coiled on the rail — a rope-end class, not a fitting. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them; the ice plate on disk
+(r273/commons-trapped-pack-ice.jpg, 2408 px) shows her at ~8 px/m and cannot read a boom's angle, so (0y⁶⁸) needs a
+plate that is not on disk. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵)
+(0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴)
+(0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them.
+(0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰)
+(0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20)
+as r230 lists them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r277 opens by checking `uptime` and `ps -r` FIRST; with the load under 15 it runs the FULL ratchet at the clean
+HEAD (every r275 and r276 frame is now scored and accepted, so the run should show 0 movers and any mover is a
+regression to explain); above 15 it scores by check --frame the frames the round's change can reach. Then it takes
+(0y⁷⁰), a plate read of Endurance's bulwark (a deck plate along the wall), or (0y⁶⁷), a plate read for the boom's
+cock, or (0y⁷¹), lines belayed to the pins as a rope-end class, or the survey's next never-spun hull after Endurance
+by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788870165 at the build; the push and the live poll are in
+build/staging/r276/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r276 staging stays on disk uncommitted, the r211 convention.**

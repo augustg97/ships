@@ -5719,6 +5719,15 @@ const PARTS = {
   rail:     { stage: 3, name: 'Rail',
               what: 'The capping timber round the deck edge, following the sheer. It finishes '
                   + 'the tops of the frames and is what everyone aboard actually holds on to.' },
+  bulwarkStanchion: { stage: 3, name: 'Bulwark stanchion',
+              what: 'The timbers a wooden bulwark is planked on: the frames\' top timbers carried up '
+                  + 'past the deck, standing exposed inside the wall from the deck to the underside '
+                  + 'of the cap. The planking is fastened to their outer faces; the pin rail to their '
+                  + 'inner faces (r276).' },
+  pinRail:  { stage: 3, name: 'Pin rail',
+              what: 'The timber bolted along the inside of the bulwark at waist height, bored for the '
+                  + 'belaying pins the running rigging is made fast to. A sixteenth-century fitting: '
+                  + 'earlier ships belayed to cleats and beam heads (r276).' },
   terrace:  { stage: 3, name: 'Stern terraces',
               what: 'The stepped after decks and their solid bulwarks, descending from the main '
                   + 'deck to a low platform at the transom. Each step is a deck you can stand '
@@ -6109,6 +6118,134 @@ function buildFittings(S, group, mats) {
       ? new THREE.MeshStandardMaterial({ color: 0x4a5057, roughness: 0.58, metalness: 0.42 })
       : pale;
     group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
+  }
+
+  /* ── THE BULWARK'S FURNITURE: STANCHIONS AND A PIN RAIL INSIDE THE WALL (round 276, 0y⁶⁰) ──
+     On a hull whose deck lies below the sheer (deck.belowSheerM, r215) the inside of the
+     bulwark was the planking's own inner face: a bare wall from the deck to the cap, the whole
+     length, on every bearing that looks over the rail. A wooden bulwark is not a bare wall. It
+     is planked on the OUTSIDE of stanchions — the frames' top timbers carried up past the deck —
+     and every stanchion stands exposed inside, from the deck to the underside of the cap; along
+     their inner faces at waist height runs the PIN RAIL, the timber bored for the belaying pins
+     the running rigging is made fast to. A hull whose recorded frames are drawn as timbers to the
+     head (frames.roomAndSpaceM: the Bremen cog, r217) already shows her futtocks inside the wall
+     at the record's own pitch and takes no second timber at each station; every other bulwarked
+     hull takes stanchions here. The pin rail is gated on the date: belaying pins are a
+     sixteenth-century fitting, so a hull depicted before 1600 belays to cleats and beam heads and
+     gets none. A terraced stern owns its own wall (buildSternTerraces) and takes nothing here.
+     ⚠ THE PITCH, THE SCANTLINGS AND THE RAIL'S HEIGHT ARE CLASS FIGURES, NOT PLATE READS: 1.2 m
+     between stanchions (the wooden-ship rules of the classification societies spaced bulwark
+     stanchions at about four feet), 0.12 m sided by 0.15 moulded, the outer face a hand (0.05)
+     inside the skin as the cog's futtocks stand, the rail 0.95 m over the deck (a waist), 0.16
+     wide and 0.06 thick, a pin every 0.25 m. No plate in reach shows the inside of Endurance's
+     bulwark at a scale that reads any of them; every mesh records the figures and their source
+     (userData.bulwarkFurniture), the card says they are the class's, and the audit reads the built
+     timbers against them (A-BULWARK-FURNITURE). A record that names its own — bulwark.
+     stanchionPitchM, stanchionSidedM, stanchionMouldedM, pinRailM, with bulwark.provenance — is
+     read in place of the class figure. */
+  const frameTimbers = !!(S.frames && S.frames.roomAndSpaceM);
+  if (!openHull && S.deck && S.deck.belowSheerM > 0.3 && !frameTimbers) {
+    const BW = S.bulwark || {};
+    const pitch = BW.stanchionPitchM || 1.2;
+    const sided = BW.stanchionSidedM || 0.12, moulded = BW.stanchionMouldedM || 0.15, gap = 0.05;
+    const yPin = BW.pinRailM || 0.95, pinRail = (S.year || 0) >= 1600;
+    const railW = 0.16, railT = 0.06, pinPitch = 0.25, pinS = 0.035, pinH = 0.45;
+    const read = {
+      pitchM: pitch, pitchFrom: BW.stanchionPitchM ? 'record: bulwark.stanchionPitchM' : 'class: 1.2 m, about four feet',
+      sidedM: sided, mouldedM: moulded, gapM: gap,
+      pinRailM: pinRail ? yPin : null,
+      pinRailFrom: !pinRail ? 'none: depicted before 1600, before belaying pins'
+        : BW.pinRailM ? 'record: bulwark.pinRailM' : 'class: 0.95 m over the deck',
+      pinPitchM: pinPitch, stanchionsX: [] };
+    /* the skin at height y at station u: the bulwark is straight in v above 0.62 (surfacePoint),
+       so the v of a height is direct — the futtock's own derivation (r217) */
+    const skinAt = (u, y) => { const fb = H.sheer(u);
+      return surfacePoint(S, H, u, fb > 0 ? Math.max(0.62, Math.min(1, 0.62 + 0.38 * y / fb)) : 1); };
+    const wallAt = u => H.stepTop(u) === null && railAtU(u) - deckAtU(u) >= 0.3;
+    const stations = [];
+    for (let k = 0; ; k++) {
+      const u = 0.05 + k * pitch / L;
+      if (u > 0.95) break;
+      if (!wallAt(u)) continue;
+      stations.push({ u, fb: railAtU(u), yD: deckAtU(u) });
+    }
+    const UP = new THREE.Vector3(0, 1, 0);
+    for (const sgn of [-1, 1]) for (const st of stations) {
+      const pf = skinAt(st.u, st.yD), ph = skinAt(st.u, st.fb - 0.05);
+      const foot = new THREE.Vector3(pf[0], st.yD, sgn * (Math.abs(pf[2]) - gap - moulded / 2));
+      const head = new THREE.Vector3(ph[0], st.fb - 0.05, sgn * (Math.abs(ph[2]) - gap - moulded / 2));
+      const dir = head.clone().sub(foot), h = dir.length(); dir.normalize();
+      const m = new THREE.Mesh(new THREE.BoxGeometry(sided, h, moulded), wood);
+      m.position.copy(foot).addScaledVector(dir, h / 2);
+      m.quaternion.setFromUnitVectors(UP, dir);
+      m.userData.bulwarkFurniture = read;
+      m.userData.bulwarkStanchion = { u: +st.u.toFixed(4), side: sideName(sgn),
+        foot: [+foot.x.toFixed(3), +foot.y.toFixed(3), +foot.z.toFixed(3)],
+        head: [+head.x.toFixed(3), +head.y.toFixed(3), +head.z.toFixed(3)] };
+      group.add(tag(m, 'bulwarkStanchion', 'Bulwark stanchion',
+        `A ${sided.toFixed(2)} by ${moulded.toFixed(2)} m timber standing inside the bulwark from the deck to a hand ` +
+        `under the cap, one every ${pitch.toFixed(2)} m (${BW.stanchionPitchM ? 'the record’s pitch' : 'the class pitch; no plate of this ship has been read for it'}); ` +
+        `the planking is fastened outside it${pinRail ? ', the pin rail inside' : ''}.`));
+      if (sgn > 0) read.stanchionsX.push(+foot.x.toFixed(3));
+    }
+    if (pinRail && stations.length) {
+      const pos = [], idx = [], ppos = [], pidx = [];
+      const NU = 90; let base = 0;
+      /* a box of six faces into an indexed buffer: the pins, one geometry for the lot */
+      const pushBox = (cx, cy, cz, sx, sy, sz) => {
+        const X = sx / 2, Y = sy / 2, Z = sz / 2, b0 = ppos.length / 3;
+        const F = [[[1,0,0],[0,1,0],[0,0,1]], [[-1,0,0],[0,1,0],[0,0,-1]], [[0,1,0],[0,0,1],[1,0,0]],
+                   [[0,-1,0],[0,0,-1],[1,0,0]], [[0,0,1],[0,1,0],[-1,0,0]], [[0,0,-1],[0,1,0],[1,0,0]]];
+        F.forEach(([n, a, b], f) => {
+          for (const [sa, sb] of [[-1,-1],[1,-1],[1,1],[-1,1]])
+            ppos.push(cx + X * (n[0] + sa * a[0] + sb * b[0]), cy + Y * (n[1] + sa * a[1] + sb * b[1]), cz + Z * (n[2] + sa * a[2] + sb * b[2]));
+          const o = b0 + f * 4; pidx.push(o, o + 1, o + 2, o, o + 2, o + 3);
+        });
+      };
+      for (const sgn of [-1, 1]) {
+        let run = [];
+        const flush = () => {
+          if (run.length < 2) { run = []; return; }
+          const start = base;
+          for (const q of run)
+            pos.push(q.x, q.y - railT / 2, sgn * (q.zi + railW), q.x, q.y + railT / 2, sgn * (q.zi + railW),
+                     q.x, q.y + railT / 2, sgn * q.zi, q.x, q.y - railT / 2, sgn * q.zi);
+          for (let i = 0; i < run.length - 1; i++) {
+            const a = start + i * 4, b = a + 4;
+            for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, b + f, a + c, a + c, b + f, b + c); }
+          }
+          /* the pins, standing through the rail, one every pinPitch along the run */
+          const x0 = run[0].x, x1 = run[run.length - 1].x, n = Math.max(1, Math.floor((x1 - x0) / pinPitch));
+          for (let k = 0; k <= n; k++) {
+            const x = x0 + (x1 - x0) * (k / n);
+            let j = 0; while (j < run.length - 2 && run[j + 1].x < x) j++;
+            const t = (x - run[j].x) / Math.max(1e-6, run[j + 1].x - run[j].x);
+            const y = run[j].y + (run[j + 1].y - run[j].y) * t, zi = run[j].zi + (run[j + 1].zi - run[j].zi) * t;
+            pushBox(x, y + 0.05, sgn * (zi + railW / 2), pinS, pinH, pinS);
+          }
+          base += run.length * 4; run = [];
+        };
+        for (let i = 0; i <= NU; i++) {
+          const u = 0.035 + (i / NU) * 0.93;
+          const yD = deckAtU(u);
+          if (!wallAt(u) || railAtU(u) - yD < yPin + 0.15) { flush(); continue; }
+          const p = skinAt(u, yD + yPin);
+          run.push({ x: p[0], y: yD + yPin, zi: Math.abs(p[2]) - gap - moulded - railW });
+        }
+        flush();
+      }
+      const mkG = (P, I) => { const gg = new THREE.BufferGeometry();
+        gg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); gg.setIndex(I); gg.computeVertexNormals(); return gg; };
+      const railMesh = new THREE.Mesh(mkG(pos, idx), wood);
+      railMesh.userData.bulwarkFurniture = read;
+      group.add(tag(railMesh, 'pinRail', 'Pin rail',
+        `The rail along the inside of the bulwark, ${yPin.toFixed(2)} m over the deck (${BW.pinRailM ? 'the record’s height' : 'the class height, a waist; no plate of this ship has been read for it'}), ` +
+        `${railW.toFixed(2)} wide on the stanchions’ inner faces, bored for a belaying pin every ${pinPitch.toFixed(2)} m.`));
+      const pinsMesh = new THREE.Mesh(mkG(ppos, pidx), wood);
+      pinsMesh.userData.bulwarkFurniture = read;
+      group.add(tag(pinsMesh, 'pinRail', 'Belaying pins',
+        `The pins standing through the pin rail, ${pinH.toFixed(2)} m long, one every ${pinPitch.toFixed(2)} m; a line is made fast with figure-of-eight turns round the pin above and below the rail.`));
+    }
   }
 
   /* ── THE THROUGH-BEAMS (Durchbalken), record-gated on deck.throughBeams (round 215) ──
