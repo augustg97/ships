@@ -3562,7 +3562,8 @@
             "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.34,
@@ -3582,7 +3583,8 @@
             "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.52,
@@ -3602,7 +3604,8 @@
             "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.7,
@@ -3622,7 +3625,8 @@
             "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.86,
@@ -3643,7 +3647,8 @@
             "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           }
         ],
         "build": "steel",
@@ -4254,7 +4259,8 @@
             "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.556,
@@ -4273,7 +4279,8 @@
             "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.85,
@@ -4293,7 +4300,8 @@
             "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           }
         ],
         "build": "frame",
@@ -4453,7 +4461,8 @@
             "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.38,
@@ -4471,7 +4480,8 @@
             "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.61,
@@ -4489,7 +4499,8 @@
             "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count.",
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
-            }
+            },
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
           },
           {
             "at": 0.845,
@@ -6011,7 +6022,11 @@
                 "bands": []
               },
               "provenance": "PLATE READ, r284: Hurley's plate of Endurance under full sail, taken from AHEAD with the ship beset (build/hurley-fullsail.jpg, 2828x3912; the topsail cropped at full resolution in build/staging/r282/plate-mid-1x.png, 1790x880, its two leeches at 2x in build/staging/r284/plate-topsail-leftleech-2x.png and -rightleech-2x.png and the band's middle at 3x in plate-topsail-band-3x.png; ~75 px/m at the band's row, the band spanning ~1105 px from leech to leech). TOPSAIL: ONE reef band, a straight seam across the cloth from (280, 350) at the starboard leech (the image's left) to (1385, 232) at the port leech, with a row of eyelets along it. Its row on each leech: starboard, head at row 75 (the cloth under the yard), band 350, clew 765 - 0.40 of the leech; port, the yard's line extrapolated to row -35 above the crop's edge, band 232, clew 640 - 0.40 of the leech. Recorded as 0.40 of the drop, +/- 0.03 (the camera below and ahead expands the lower cloth by about a tenth over the upper, which moves the read by under 0.01; r282's 'about a third' was an eyeball). THE POINTS: dark blobs along the band's line at a pitch of 51-64 px where no rigging crosses it (338, 389, 443, 500, 557, 614, 672, 731 ... 847, 906, 970 ... 1134, 1197), about 0.77 m at the band's scale, +/- 0.08 - recorded as pitchM 0.77; about 18-19 eyelets across the cloth, the builder placing round(width / pitch). THE BAND'S WIDTH is not readable at this scale (one seam line and the eyelets read, not two tablings): bandM 0.30 is a class figure for a 14 m topsail and is named as such. COURSE: no band reads on the course's fore face at ~90 px/m (build/staging/r284/plate-course-half.png; the r281 read of the buntlines and garnets off the same face saw none) - recorded as none, with the bound that the course is foreshortened from below and a band low on it would lie in the foot's belly. TOPGALLANT: no band on the topgallant's face at ~55 px/m (build/staging/r282/plate-top-1x.png) - recorded as none. Until r284 the builder drew every square sail in the fleet plain and the record said nothing of reef bands."
-            }
+            },
+            "yardFracs": {
+              "course": 0.35
+            },
+            "yardFracsProvenance": "PLATE READ, r285: Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743; the ship cropped at 3x with a grid in build/staging/r285/plate-broadside-ship-3x-grid.png and the fore mast at 6x in plate-broadside-foremast-6x-grid.png). SCALE 12.4 +/- 0.4 px/m, from the mast spacing against the record's stations (fore to main 162 px for 0.328 x 39.6 m, main to mizzen 148 px for 0.302 x 39.6 m; the hull's ends are behind ice, so its length gives no better figure), the same for heights because the view is on the beam. AT THE FORE MAST (col 2600): the cap rail's top edge at row 620 +/- 3; the course yard with its furled sail a dark bar about 90 px wide across the mast centred on row 545 +/- 3 (the strongest horizontal feature on the mast; the top and the lowered topsail yard read faintly at rows 495-530); the pole vanishing at row 372 +/- 6 (a darkness of 42 against a sky of 22 at row 380, 24 at 360). With the bulwark 1.35 m (16.7 px) from the plan (r272): the course yard 75 px over the cap = 6.0 m, 7.4 m over the deck; the truck 248 px over the cap = 20.0 m, 21.4 m over the deck; the yard at (75 + 16.7) / (248 + 16.7) = 0.35 +/- 0.03 of the truck over the deck. That is the plan's class fraction (0.36) inside the read's bound, so the plate does NOT move the course yard as (0y88) supposed; recorded as 0.35, the plate's own number, which the builder draws. The topsail's and the topgallant's yards were LOWERED on the beset ship (sails furled), so their set fractions do not read on this plate and stand at the plan's (top 0.55, tg 0.76). The truck row is the read's weakest figure: see trucksContested."
           },
           {
             "at": 0.537,
@@ -6095,7 +6110,8 @@
           "whelps": 6,
           "bars": 8
         },
-        "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars."
+        "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars.",
+        "trucksContested": "CONTESTED, r285: the record's mast heights (heightM 18.8 / 33.5 / 26.8; the fore figure is a lower mast the builder stacks a topmast and a topgallant mast on, to a built fore truck about 32 m over the deck; stationProvenance reads the trucks off the beset broadside at 12.6 px/m as fore 34.3, main 35.2, mizzen 29.3 m over the water) against r285's read of the same plate at 12.4 +/- 0.4 px/m from the mast spacing: the fore pole vanishes 248 px over the cap (21.4 +/- 1.5 m over the deck, 24.8 over the water), the main's 310 +/- 20 px (26.4 +/- 2 m over the deck), the mizzen's 270 +/- 20 px (23.1 +/- 2 m over the deck); the funnel's top 54 px over the cap (4.4 m; the record's 6.5 m over the deck is 5.15 m over the cap, 64 px). The old figures cannot be reproduced from the plate at any one scale: 34.3 m over the water at 12.6 px/m puts the fore truck at row 230, where nothing is drawn, and the funnel's '5.7 m over the rail' wants 9.5 px/m. A thin pole may fade before its truck, which bounds this read from above by a few metres, not by ten. NOT RESOLVED HERE: a plate with the hull to the waterline and the masts in it, or the RMG plan's mast table, settles it; until then the built masts stand at the record's heights and this field says they are contested."
       },
       "rows": [
         [

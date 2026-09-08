@@ -6815,6 +6815,47 @@
       mk.yards.filter(nm => !KNOWN.includes(nm)).forEach(nm =>
         say(v.id, 'a yard the plan does not cross', `${at}: '${nm}' is not a yard the builder's plan knows; it drops out of the rig silently`));
     });
+    /* ── A-YARD-FRAC (round 285, 0y⁸⁸): A YARD HANGS WHERE THE RECORD SAYS, AND THE RECORD ANSWERS.
+       Every yard of a listed rig was crossed at a class fraction of the truck (the builder's PLAN table)
+       and the record could not say otherwise, so a plate read of a yard's height had nowhere to go but the
+       table. Now `yardFracs: { <yard>: f }` on the mast hangs a named yard at its own fraction and each
+       plan-crossed yard records where it hangs (`userData.yardFrac`: name, frac, from 'record' | 'plan',
+       base, T, y). Read from the meshes and the record: (a) every square mast with a `yards` list carries
+       `yardFracsProvenance` — the SILENCE convicts ('yard fractions with no answer'); a CLASS answer that says
+       so passes (the r108 rule); (b) a recorded fraction names a yard the list crosses; (c) the mast's yard
+       meshes number the list; (d) a yard the record gives a fraction for is drawn at that fraction and
+       says so ('a recorded yard fraction not drawn'), a yard drawn as 'record' has one ('a yard fraction
+       drawn with no record'); (e) each yard mesh sits at the y its own record says (0.02), and a FIXED
+       yard at base + T × f (0.05 — the yard stands off the mast's face by its truss, which on a raked
+       mast is a few cm of y). */
+    {
+      const yardM = []; g.traverse(o => { if (o.isMesh && o.userData.yardFrac) yardM.push(o); });
+      (H.masts || []).forEach((mk, mi) => {
+        if (mk.rig !== 'square' || !Array.isArray(mk.yards)) return;
+        const at = `masts[${mi}] (station ${mk.at})`;
+        if (!mk.yardFracsProvenance)
+          say(v.id, 'yard fractions with no answer',
+              `${at}: ${mk.yards.length} yards crossed at the plan's class fractions of the truck and the record says nothing of where they hang (yardFracs per yard with a provenance naming the plate read, or a provenance saying the class fractions stand unread)`);
+        const rec = mk.yardFracs || {};
+        Object.keys(rec).forEach(nm => { if (!mk.yards.includes(nm))
+          say(v.id, 'a yard fraction for a yard not crossed', `${at}: yardFracs.${nm} = ${rec[nm]} and '${nm}' is not in the yard list [${mk.yards.join(', ')}]`); });
+        const mine = yardM.filter(o => o.userData.yardFrac.mast === mi);
+        if (mine.length !== mk.yards.length)
+          say(v.id, 'yards miscounted against the list', `${at}: ${mine.length} yard meshes on this mast record where they hang, ${mk.yards.length} listed`);
+        for (const o of mine) {
+          const f = o.userData.yardFrac, tk = `${at}, yard '${f.name}'`;
+          const want = typeof rec[f.name] === 'number' ? rec[f.name] : null;
+          if (want !== null && (f.from !== 'record' || Math.abs(f.frac - want) > 1e-6))
+            say(v.id, 'a recorded yard fraction not drawn', `${tk}: the record hangs it at ${want} of the truck and the yard is drawn at ${f.frac} (${f.from})`);
+          if (want === null && f.from === 'record')
+            say(v.id, 'a yard fraction drawn with no record', `${tk}: drawn as the record's ${f.frac} and the record gives no fraction for this yard`);
+          if (Math.abs(o.position.y - f.y) > 0.02)
+            say(v.id, 'a yard drawn off its record', `${tk}: the mesh sits at y ${o.position.y.toFixed(3)} and its own record says ${f.y.toFixed(3)}`);
+          if (f.hoist === 'fixed' && Math.abs(o.position.y - (f.base + f.T * f.frac)) > 0.05)
+            say(v.id, 'a fixed yard off its fraction', `${tk}: at y ${o.position.y.toFixed(3)}; base ${f.base.toFixed(2)} + T ${f.T.toFixed(2)} x ${f.frac} = ${(f.base + f.T * f.frac).toFixed(3)}`);
+        }
+      });
+    }
     /* ── A-REEF-BAND (round 284, 0y⁸⁹): A SQUARE SAIL'S REEF BANDS ARE THE RECORD'S, AND THE RECORD
        ANSWERS. Hurley's plate of Endurance's topsail shows one band with its points at 0.40 of the leech,
        and until r284 the builder drew every square sail in the fleet plain. Read from the BUILT scene

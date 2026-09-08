@@ -4857,6 +4857,34 @@ mk.yards.filter(nm => !KNOWN.includes(nm)).forEach(nm =>
 say(v.id, 'a yard the plan does not cross', `${at}: '${nm}' is not a yard the builder's plan knows; it drops out of the rig silently`));
 });
 {
+const yardM = []; g.traverse(o => { if (o.isMesh && o.userData.yardFrac) yardM.push(o); });
+(H.masts || []).forEach((mk, mi) => {
+if (mk.rig !== 'square' || !Array.isArray(mk.yards)) return;
+const at = `masts[${mi}] (station ${mk.at})`;
+if (!mk.yardFracsProvenance)
+say(v.id, 'yard fractions with no answer',
+`${at}: ${mk.yards.length} yards crossed at the plan's class fractions of the truck and the record says nothing of where they hang (yardFracs per yard with a provenance naming the plate read, or a provenance saying the class fractions stand unread)`);
+const rec = mk.yardFracs || {};
+Object.keys(rec).forEach(nm => { if (!mk.yards.includes(nm))
+say(v.id, 'a yard fraction for a yard not crossed', `${at}: yardFracs.${nm} = ${rec[nm]} and '${nm}' is not in the yard list [${mk.yards.join(', ')}]`); });
+const mine = yardM.filter(o => o.userData.yardFrac.mast === mi);
+if (mine.length !== mk.yards.length)
+say(v.id, 'yards miscounted against the list', `${at}: ${mine.length} yard meshes on this mast record where they hang, ${mk.yards.length} listed`);
+for (const o of mine) {
+const f = o.userData.yardFrac, tk = `${at}, yard '${f.name}'`;
+const want = typeof rec[f.name] === 'number' ? rec[f.name] : null;
+if (want !== null && (f.from !== 'record' || Math.abs(f.frac - want) > 1e-6))
+say(v.id, 'a recorded yard fraction not drawn', `${tk}: the record hangs it at ${want} of the truck and the yard is drawn at ${f.frac} (${f.from})`);
+if (want === null && f.from === 'record')
+say(v.id, 'a yard fraction drawn with no record', `${tk}: drawn as the record's ${f.frac} and the record gives no fraction for this yard`);
+if (Math.abs(o.position.y - f.y) > 0.02)
+say(v.id, 'a yard drawn off its record', `${tk}: the mesh sits at y ${o.position.y.toFixed(3)} and its own record says ${f.y.toFixed(3)}`);
+if (f.hoist === 'fixed' && Math.abs(o.position.y - (f.base + f.T * f.frac)) > 0.05)
+say(v.id, 'a fixed yard off its fraction', `${tk}: at y ${o.position.y.toFixed(3)}; base ${f.base.toFixed(2)} + T ${f.T.toFixed(2)} x ${f.frac} = ${(f.base + f.T * f.frac).toFixed(3)}`);
+}
+});
+}
+{
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
 for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };

@@ -1467,7 +1467,7 @@ let capY = base;
 const mastYards = [];
 const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
-const crossYard = (yy, yardLen, kind, hoist, listName) => {
+const crossYard = (yy, yardLen, kind, hoist, listName, fracRec) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
 : yardLen * (RATE[kind] || 0.625) / 36;
@@ -1515,6 +1515,7 @@ stowFrom: 'class (round 259): the harbour stow rolls the cloth onto the top of t
 + 'and trices the bunt up at the slings before the mast; the roll leans forward off '
 + 'the top by 20°, and by more where the bunt would else stand into the pole; no '
 + 'plate reads it' } : null };
+if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1906,11 +1907,14 @@ const HOIST = { course: 'fixed', ltop: 'fixed', ltg: 'fixed',
 top: { tie: 1 }, utop: { tie: 1 },
 tg: { tie: 2 }, utg: { tie: 2 }, royal: { tie: 2 } };
 const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
+const fracOf = nm => (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? mk.yardFracs[nm] : PLAN[nm][0];
 mk.yards.filter(nm => PLAN[nm])
-.sort((a, b) => PLAN[a][0] - PLAN[b][0])
-.forEach(nm => { const [f, r, kind] = PLAN[nm];
+.sort((a, b) => fracOf(a) - fracOf(b))
+.forEach(nm => { const [, r, kind] = PLAN[nm], f = fracOf(nm);
 crossYard(base + T * f, courseL * r,
-kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm); });
+kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm,
+{ name: nm, kind, frac: f, from: (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? 'record' : 'plan',
+base, T, hoist: HOIST[nm] === 'fixed' ? 'fixed' : 'tie', mast: mi }); });
 }
 if (FINE && mk.rig === 'square' && mastYards.length) {
 const mx = mxA;

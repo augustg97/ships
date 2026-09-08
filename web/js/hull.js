@@ -2543,7 +2543,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        trussed in place with no fall at all (crossjack, doubled-rig course, lower topsail,
        lower topgallant). The running gear below draws from this record, so a rope can
        only ever lead to the mechanism the yard actually rides. */
-    const crossYard = (yy, yardLen, kind, hoist, listName) => {   // r283: listName is the record's word for the tier (mk.yards), kind the plan's
+    const crossYard = (yy, yardLen, kind, hoist, listName, fracRec) => {   // r283: listName is the record's word for the tier (mk.yards), kind the plan's; r285: fracRec, where the yard hangs and why
       /* ── A YARD IS AS THICK AS ITS OWN LENGTH ASKS — THE SPAR-MAKER'S OWN RATES ──────
          Steel 1794, "Proportional Diameters of Yards" (maritime.org full text): main and
          fore yards 7/10 of an inch to every yard of the length at the slings; topsail
@@ -2655,6 +2655,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
             + 'and trices the bunt up at the slings before the mast; the roll leans forward off '
             + 'the top by 20°, and by more where the bunt would else stand into the pole; no '
             + 'plate reads it' } : null };
+      /* r285 (0y88): where this yard hangs and why — the record's fraction or the plan's — on the mesh, with the y it
+         was actually placed at, so the audit reads the fraction off the yard itself (A-YARD-FRAC) */
+      if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
       group.add(tag(ym, 'yard'));
       /* the steel yard's card carries its provenance, the iron-mast rule: no tube record
          was in reach for these spars, so the RATE is the record's and the figure derived */
@@ -3366,11 +3369,19 @@ function buildRig(S, group, mats, FINE, FURLED) {
          confirming the plan's own fractions). An attested spar beats Steel's 7/8 of a
          derived mast. */
       const courseL = mk.courseYardM !== undefined ? mk.courseYardM : lower * 0.875;
+      /* r285 (0y88): the record may hang a named yard at its OWN fraction of the truck — `yardFracs: { course: 0.35 }`,
+         a plate read — and the plan's class fraction stands for every yard it does not name. Endurance's course yard
+         reads 0.35 +/- 0.03 of her fore truck on the beset broadside (the plan's 0.36 inside the bound); the mechanism
+         is here so a plate read of any yard's height goes into the record and not into this table. The order of the
+         yards up the mast follows the fractions actually used, so a record cannot cross them out of sequence silently. */
+      const fracOf = nm => (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? mk.yardFracs[nm] : PLAN[nm][0];
       mk.yards.filter(nm => PLAN[nm])
-        .sort((a, b) => PLAN[a][0] - PLAN[b][0])
-        .forEach(nm => { const [f, r, kind] = PLAN[nm];
+        .sort((a, b) => fracOf(a) - fracOf(b))
+        .forEach(nm => { const [, r, kind] = PLAN[nm], f = fracOf(nm);
           crossYard(base + T * f, courseL * r,
-                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm); });
+                    kind === 'course' && isMizzen ? 'topsail' : kind, HOIST[nm], nm,
+                    { name: nm, kind, frac: f, from: (mk.yardFracs && typeof mk.yardFracs[nm] === 'number') ? 'record' : 'plan',
+                      base, T, hoist: HOIST[nm] === 'fixed' ? 'fixed' : 'tie', mast: mi }); });
     }
 
     /* ── THE GEAR THE YARDS ARE WORKED BY ──────────────────────────────────────────────

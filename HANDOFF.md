@@ -25830,3 +25830,143 @@ uncommitted, deliberately; the r284 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/data/vessels.json carries "reefs" 12 time(s) (the twelve square masts with a yard list: Endurance's fore mast with the figures, eleven named UNREAD); docs/js/hull.js carries 'reefPoint' 3 time(s); docs/data/provenance.json carries reefs.provenance 12 time(s) (split out of first paint at the build, r274); docs/audit-hulls.js carries 'reef bands with no answer' (1 found); docs/js/shaders.js carries uReefOn (3 found); web/data/vessels.json against HEAD~1:  1 file changed, 61 insertions(+), 12 deletions(-); web/js/hull.js against HEAD~1:  1 file changed, 90 insertions(+), 4 deletions(-); the build read first paint 8.46 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r283's receipt: every frame its change could not reach stands as scored at earlier trees and its MAY neighbours were all scored). THE r284 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r284/check-one.sh and check-may.sh (the MUST frame first, then the MAY neighbours and the two MUST-NOT witnesses beside the push) at 40-45 s a frame under a load of 2.5-5.6: 8 frames scored, 0 beyond the gate, 0 accepted, 0 baselines moved. ship-endurance 0.003%/0.002 — the MUST frame, INSIDE the gate: the band is about six pixels tall at the Shipwright's default camera and the tails under a pixel wide, so the change was witnessed at z=1.0 instead (r284/crop-ahead-topsail-before-after.png, crop-abaft-topsail-before-after.png: the band's two stitched edges and the row of reef points on the fore face, the tails down the after face). The two MUST-NOT witnesses of the shader change: ship-preussen 0.023%/0.009 — identical to its prior unchanged score, the diff (r284/chain-diff/ship-preussen.png) a neighbour's rigging lines at the frame's right edge and nothing on any of her thirty sails; ship-clipper 0.019%/0.006 — the diff one-pixel rigging lines of neighbours at both edges and no cloth, the documented capture flap on thin lines. The five MAY neighbours at exactly the figures the same frames scored in r281, r282 and r283 (the documented berth-neighbour flap): ship-azzam 0.023%/0.028, ship-ever-given 0.034%/0.024, ship-container 0.015%/0.015, ship-queen-mary-2 0.008%/0.011, shipwright 0.015%/0.005. Left unscored at the r284 tree (57): globe-default globe-crossing globe-steam globe-modern globe-era-card action ship-dhow ship-junk ship-canoe ship-great-eastern ship-usv ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune ship-carrier ship-titanic ship-yamato descent descent-high descent-coast aboard aboard-off map-floor aboard-coast sea-magnified ship-steamer ship-dreadnought aboard-carrier aboard-cable aboard-titanic aboard-yamato aboard-preussen ship-wyoming aboard-wyoming ship-treasure aboard-treasure aboard-clipper shipwright-ahead shipwright-astern shipwright-furled shipwright-hounds shipwright-corbis action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang wake-plan sea-ever-given passage-sahul sea-dugout-floor sea-canoe-floor ship-slave-ship ship-carrack - every one of them a frame the change cannot reach (the shader's block is behind uReefOn, 0 on every sail without a record and on the tri and quad materials that never set it, witnessed on the two square-riggers with the most canvas above; the builder's reef block runs only where a band is recorded and Endurance's topsail is the only tier in the fleet with one; the record change on the eleven other masts is a provenance string, split out of first paint), so each stands as scored at the r283/r282/r281/r280 trees and the clean-HEAD backlog r285 opens with is empty.
 Two commits close the round (d1f40b5 record + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 285 — 2026-09-08 — the course yard hangs where the plate says, and the plate says where the plan already had it: Hurley's beset broadside, read at 12.4 px/m against the cap rail, puts Endurance's course yard at 0.35 ± 0.03 of her fore truck, the builder's class 0.36 inside the bound, so (0y⁸⁸)'s supposed fix — a lower course yard — is not supported; the record now hangs any named yard at its own fraction (`yardFracs`), every yard of a listed rig records where it hangs on its own mesh, the audit convicts the silence on all twelve listed masts and reads each yard's fraction off the mesh, and the same plate read puts the fore truck 21 m over the deck against 31 m built, which the record now carries as a contested field
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r284's entry ordered r285 to check `uptime` and
+`ps -r` FIRST and named its candidates in order: (0y⁹⁰) only if the load was under ~5 with the geometry final and the
+full ratchet launched inside 15 minutes; else (0y⁸⁸); else (0y⁹³); else the survey. At the open (13:24) the load was
+4.47 (3.88 and 4.21 over 5 and 15 minutes), the loop driver holding the lock (round starting 13:24:01), no hot process.
+(0y⁹⁰) was NOT taken: it couples a builder change (the hole's width), a re-lead of ten upper falls and a rewrite of
+A-UPPER-GEAR's rim test, and none of r277–r284's builder rounds had geometry final inside 15 minutes; it stays first for
+a round that can open with it. (0y⁸⁸) was taken. Every edit was made on the :8150 copy (r285/web, symlinks with real
+copies of hull.js, vessels.json and audit-hulls.js) by three re-runnable scripts (apply-builder-edits.py,
+apply-record-edits.py, apply-audit-edits.py, every anchor asserted, each reproducing its after-file from its
+before-file), syntax-checked by node's vm, and copied into web/ by r285/copy-in.sh after the proofs and the witnesses;
+:8149 served web/ at HEAD for the before-probe and the before-witness. No shader changed.**
+
+**THE PLATE (build/hurley-broadside.png, RMG P00018, 4800x3743, the beset ship on the beam beyond pressure ridges; the ship
+cropped at 3x with a labelled grid in r285/plate-broadside-ship-3x-grid.png, the fore mast at 6x in
+plate-broadside-foremast-6x-grid.png). THE SCALE: 12.4 ± 0.4 px/m, from the mast spacing against the record's stations
+(fore at col 2600 to main at 2762, 162 px for 0.328 × 39.6 m; main to mizzen at 2910, 148 px for 0.302 × 39.6 m); the
+hull's ends stand behind ice, so its length gives nothing better, and the view is on the beam so heights carry the same
+scale. AT THE FORE MAST, by row profiles (the darkness of a band of columns per row against the sky beside it): the cap
+rail's top edge at row 620 ± 3; the course yard with its furled sail the strongest horizontal feature on the mast, a bar
+about 90 px wide across the mast centred on row 545 ± 3 (the top and the lowered topsail yard read faintly at rows
+495–530); the pole vanishing at row 372 ± 6 (a darkness of 42 against a sky of 22 at row 380, 24 at 360). With the
+bulwark 1.35 m (16.7 px) from the plan (r272): the course yard 75 px over the cap, 6.0 m, 7.4 m over the deck; the truck
+248 px over the cap, 20.0 m, 21.4 m over the deck; the yard at (75 + 16.7) / (248 + 16.7) = 0.35 ± 0.03 of the truck
+over the deck. The plan's class fraction is 0.36. The read does not move the course yard; the sail-depth discrepancy
+(0y⁸⁸) named against the full-sail plate cannot be met by moving it within the bound (at the built truck the course
+would have to hang at about 0.25 to read 0.28 of its yard deep). The topsail and the topgallant yards were lowered on
+the beset ship, so their set fractions do not read here and stand at the plan's.**
+
+**THE SAME READ ON THE TRUCKS. The record's stationProvenance reads the trucks off this plate at 12.6 px/m as fore 34.3,
+main 35.2, mizzen 29.3 m over the water, and the fore mast's heightM 18.8 is the lower mast the builder stacks a topmast
+and a topgallant mast on, to a built fore truck 31.4 m over the deck (T in the builder, measured). At 12.4 px/m the fore
+pole vanishes 248 px over the cap: 21.4 ± 1.5 m over the deck, 24.8 over the water. The main's pole 310 ± 20 px:
+26.4 ± 2 m over the deck (record 33.5). The mizzen's 270 ± 20 px: 23.1 ± 2 m (record 26.8). The funnel's top 54 px over
+the cap, 4.4 m; the record's 6.5 m over the deck is 5.15 m over the cap, 64 px. The old figures cannot be reproduced from
+the plate at any one scale: 34.3 m over the water at 12.6 px/m puts the fore truck at row 230, where nothing is drawn,
+and the funnel's "5.7 m over the rail" wants 9.5 px/m. A thin pole may fade before its truck, which bounds the read from
+above by a few metres, not by ten. This is rule 9's case — the record now carries it as `hull.trucksContested`, naming
+both reads and the arithmetic — and NOT resolved here: the built masts stand at the record's heights until a plate with
+the hull to the waterline and the masts in it, or the RMG plan's mast table, settles it.**
+
+**THE RECORD (web/data/vessels.json; r285/apply-record-edits.py, every other field asserted identical). Endurance's fore mast
+gains `yardFracs: { course: 0.35 }` and `yardFracsProvenance` (PLATE READ, the rows, the scale, the arithmetic and the
+bound above, and what does not read); her hull gains `trucksContested`. The eleven other square masts with a yard list
+— Preussen's five, the clipper's three, the steamer's three — each gain `yardFracsProvenance` reading CLASS: no plate of
+that ship has been read for where her yards hang, every yard is crossed at the plan's class fraction, the silence named
+(the r282/r284 pattern). Thirteen provenance strings leave first paint at the build (r274).**
+
+**THE BUILDER (web/js/hull.js; r285/apply-builder-edits.py, 15 lines). In the listed-rig block, `fracOf(nm)` returns the
+record's `yardFracs[nm]` where it is a number and the plan's fraction otherwise; the yards are sorted up the mast by the
+fractions actually used, so a record cannot cross them out of sequence silently; crossYard takes a sixth argument, the
+yard's own record — name, kind, fraction, `from` ('record' or 'plan'), base, T, hoist, mast — and puts it on the yard
+mesh as `userData.yardFrac` with the y the yard was placed at (`y`) and the y the fraction gave before the truss stood it
+off the mast's face (`yPlan`). Every mast without `yardFracs` draws exactly as before: fracOf returns the table's value.**
+
+**MEASURED (r285/probe-yardfrac.py on :8149 at HEAD and on the :8150 copy, set and furled builds, hull space;
+probe-before.out, probe-after.out). Fore mast: base 2.209, T 31.434 (the truck 34.32 in hull space, the fife rail's
+foot 3.08). The course yard y 13.520 before, 13.206 after (0.314 m down; yPlan 13.210, the truss's stand-off 4 mm on
+a mast raked 1°); `from` 'record', frac 0.35, hoist 'fixed'. The topsail yard 19.493 and the topgallant 26.095 before
+and after, 'plan', 0.55 and 0.76. The course cloth 8.345 m deep before, 8.041 after; the topsail 5.793 before, 6.098
+after; the topgallant 6.403 both. 359 meshes set, 358 furled, both builds, before and after; the furled build carries
+the same yards at the same heights.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r285/apply-audit-edits.py, 41 lines, parsed by node's vm). NEW
+A-YARD-FRAC, after A-YARD-LIST: (a) every square mast with a `yards` list carries `yardFracsProvenance` — the SILENCE
+convicts ('yard fractions with no answer'), a CLASS answer that says so passes (the r108 rule); (b) a recorded fraction
+names a yard the list crosses ('a yard fraction for a yard not crossed'); (c) the mast's yard meshes that record where
+they hang number the list ('yards miscounted against the list'); (d) a yard the record gives a fraction for is drawn at
+it and says so ('a recorded yard fraction not drawn'), and a yard drawn as the record's has a record ('a yard fraction
+drawn with no record'); (e) each yard mesh sits at the y its own record says (0.02, 'a yard drawn off its record') and a
+FIXED yard at base + T × f (0.05, 'a fixed yard off its fraction' — the truss stands the yard off the mast's face, a few
+cm of y on a raked mast).**
+
+**PROOFS (r285/chain.log; each audit alone in its browser on :8150). FINAL (the r285 builder, record and audit, md5
+812eae02, 13:39): "checked 33 hulls, 0 problems". PROOF B (the r284 record vessels.before.json on the r285 builder and
+audit, 13:41): 12 — 'yard fractions with no answer' on every square mast with a yard list (Preussen's five, the clipper's
+three, the steamer's three, Endurance's one). PROOF C (the r285 builder with one line flipped to ignore the record's
+fraction, hull.proofc.js, on the r285 record and audit, 13:42): 1 — 'a recorded yard fraction not drawn' on Endurance's
+masts[0] 'course': "the record hangs it at 0.35 of the truck and the yard is drawn at 0.36". PROOF C0 (the r284 builder
+hull.before.js on the r285 record and audit, 13:43): 12 — 'yards miscounted against the list', no yard of the old
+builder recording where it hangs. The builder and the record were restored cmp-identical after each proof.**
+
+**THE FRAMES (r285/PREDICTIONS-close.md, written before any frame of the r285 tree was scored): MUST move —
+ship-endurance. MAY — her berth neighbours within three (ship-azzam, ship-ever-given, ship-container,
+ship-queen-mary-2) and shipwright, by the berth-neighbour flap only. MUST NOT — every other frame; ship-preussen and
+ship-clipper (the two rigs with the most listed yards) scored as witnesses. Witnessed BEFORE any frame was scored, from
+the port beam (b=90, l=8, z=1.0; witness-abeam-before.png from :8149 at HEAD, -after.png from :8150): 7,568 changed
+pixels in columns 941–1392, rows 647–1121 of the 2880 frame, the fore mast's square canvas and nothing else; read side by
+side at 2x (crop-abeam-before-after.png): the course yard and its furled-roll fittings a little lower, the course
+shallower under it, the deep topsail's foot lower and its reef band with it, the sheets and braces re-led from the
+lowered yard. The r285 tree on :8149 scored by r285/check-one.sh: ship-endurance 0.178%/0.062 — CHANGED, beyond the
+gate, the amplified diff (chain-diff/ship-endurance.png) the fore mast's canvas and gear alone, no hull, no other mast
+— ACCEPTED with that reason (FRAME-LOG.md, 13:47). The MAY and MUST-NOT frames were scored by r285/check-may.sh beside
+the close (the r232 pattern) and their figures are in the receipt commit that follows.**
+
+**Rule 0 on the accepted frame read whole (chain-current/ship-endurance.png): a rendered barquentine from her port beam
+on a lit sea under a pale sky, three square sails on the fore mast, gaff sails on the main and mizzen, a black hull with
+a black funnel abaft the main mast, the Shipwright's card and fleet list around her — not a chart. Three facts a viewer
+can read off it without a legend: she is square-rigged on the fore mast only; her funnel stands between the main and the
+mizzen; the card gives her 44.0 m overall and 33.5 m deck to truck — and that last figure is the one this round names as
+contested.**
+
+**Named residuals, in order:** (0y⁸⁸) CLOSED as a question about the course yard's fraction: the plate confirms the plan's.
+NEW (0y⁹⁴) THE TRUCKS ARE CONTESTED — the beset broadside at 12.4 px/m puts the fore truck 21.4 ± 1.5 m over the deck
+against 31.4 built, the main 26.4 ± 2 against 33.5, the mizzen 23.1 ± 2 against 26.8, and the record's own read of the
+same plate (34.3 / 35.2 / 29.3 over the water) cannot be reproduced at any one scale; the full-sail plate's sail depths
+that (0y⁸⁸) laid to the course yard point the same way, at the mast's height and the yards' lengths (courseL = 0.875 ×
+heightM). It needs a plate with the hull to the water and the masts in it (the Commons quarter plate a090007 shows the
+mizzen and the counter; the heeled plate has the hull and the fore rig but heeled 30° and from the bow), or the RMG
+plan's mast table; a change to heightM moves every fitting on the fore mast and its frame, and (0y⁹⁰)'s full ratchet
+would cover it in the same round. NEW (0y⁹⁵) THE TOPSAIL'S AND TOPGALLANT'S FRACTIONS ARE THE PLAN'S — the night plate
+(yardsProvenance: the gaps course–topsail–topgallant–truck 210 : 230 : 230 px, foreshortened from below) reads the
+topgallant-to-truck gap shorter than the plan's 0.24 T; with the mechanism in place a read of the set yards' heights off
+the full-sail or the night plate against the course yard's goes into `yardFracs.top` and `.tg`. (0y⁹²) (0y⁹³) as r284
+names them. (0y⁹⁰) THE LUBBER'S HOLE, first for a round that can open with the full ratchet, and (0y⁹¹) as r283 names
+them. (0y⁸⁵) (0y⁸⁷) as r281 names them. (0y⁸²) (0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279
+names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the
+lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274
+names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴)
+(0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t)
+(0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶)
+(0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴)
+(0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance) still
+waits on the RMG original.**
+
+**r286 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as
+unscored among the frames this change can reach (the r279 memory rule). Then, if the load is under ~5 at the open and
+the round can launch the full ratchet inside 15 minutes: (0y⁹⁰) the lubber's hole and (0y⁹⁴) the trucks TOGETHER, because
+both move every frame the fore mast is in and one 64-frame ratchet covers both — but (0y⁹⁴) only with a plate that
+settles the heights first (the Commons Hurley plates by category, memory: commons-category-plates; read the hull to the
+water and the masts in one frame at 15 px/m or better). Else (0y⁹⁵), the set topsail's and topgallant's fractions off the
+night plate against the course yard's, a record-only round on the mechanism r285 built. Else (0y⁹³) for Preussen from a
+plate of her upper topsails. Else the survey's next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788900609 at the build; the push and the live poll are in
+build/staging/r285/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r285 staging stays on disk uncommitted, the r211 convention.**
