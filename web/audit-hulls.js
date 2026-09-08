@@ -5944,6 +5944,55 @@
           `${part.head.n} head mesh(es) drawn, x ${part.head.x[0].toFixed(1)}..${part.head.x[1].toFixed(1)} m; hull.head ${H.head === undefined ? 'absent' : H.head}`);
     }
 
+    /* ── D-FITTINGS-ON-DECK (round 272, Endurance): THE DECK'S FITTINGS STAND ON THE DECK,
+       AND THE DECK'S DEPTH SAYS WHERE IT WAS READ. Endurance carried hull.freeboard 2.0, the
+       height of her deck line, and the loft draws freeboard as the SKIN's top, so her solid
+       bulwark — the Framnaes section draws the cap rail 22–24 px over the deck line at 16.9
+       px/m, and every Hurley plate shows the wall — was never built: the deck lay at the
+       skin's top and the rail capped an open edge. The record now says the cap's height and
+       the deck's depth under it (deck.belowSheerM, the r215 class), and the r215 rules read
+       the built depth. Two things they do not read: (a) SILENCE — a depth with no
+       deck.provenance, the r108 pattern; (b) the fittings the cog has none of. A house, a
+       funnel, a wheel or a boat's skids reads the loft's deck(u); a builder that read the
+       sheer would stand its fitting on the cap rail, a bulwark's height over the deck, and no
+       existing rule would see it. Read on the meshes by name, all meshes of a name together
+       (a house is walls and a roof; its foot is the lowest of them): the foot over the deck's
+       edge at its station is at most half the bulwark, and 0.45 m at least (the camber's
+       crown over the edge). Half, because a house whose sill is sunk 0.45 m stood 0.90 m over
+       the edge when the builder was flipped to the sheer in PROOF B, and half plus 0.3 let
+       it by.
+       Silent on a hull whose deck is at the sheer. */
+    if (H.deck && H.deck.belowSheerM) {
+      if (!H.deck.provenance)
+        say(v.id, 'a deck depth with no provenance',
+            `deck.belowSheerM ${H.deck.belowSheerM} declared, deck.provenance absent — the deck lowered under the skin on no stated ground`);
+      const world = o => {
+        const a = o.geometry.attributes.position, out = [], vv = new THREE.Vector3();
+        o.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+        for (let i = 0; i < a.count; i++) { vv.set(a.getX(i), a.getY(i), a.getZ(i)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push([vv.x, vv.y, vv.z]); }
+        return out;
+      };
+      const deckMeshes = []; g.traverse(o => { const p = tagOf(o);
+        if (o.isMesh && p && p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckMeshes.push(o); });
+      const dv = [].concat(...deckMeshes.map(world));
+      const deckEdgeNear = x => { let e = 1e9, best = 0.5; for (const q of dv) { const d = Math.abs(q[0] - x);
+        if (d < best - 1e-6) { best = d; e = q[1]; } else if (d <= best + 1e-6) e = Math.min(e, q[1]); } return e; };
+      const FEET = /^(Deckhouse|Funnel|The wheel|Boat skids|Windlass)$/;
+      const feet = new Map();
+      g.traverse(o => { const p = tagOf(o); if (!(o.isMesh && p && FEET.test(p.name || ''))) return;
+        const w = world(o); if (!w.length) return;
+        let y0 = 1e9, xs = 0; for (const q of w) { y0 = Math.min(y0, q[1]); xs += q[0]; }
+        const f = feet.get(p.name) || { y0: 1e9, x: 0, n: 0 };
+        if (y0 < f.y0) { f.y0 = y0; f.x = xs / w.length; } f.n++; feet.set(p.name, f); });
+      const allow = Math.max(0.45, 0.5 * H.deck.belowSheerM);
+      for (const [name, f] of feet) {
+        const e = dv.length ? deckEdgeNear(f.x) : 1e9; if (e > 1e8) continue;
+        if (f.y0 - e > allow)
+          say(v.id, 'a fitting standing on the sheer of a bulwarked hull',
+              `${name} (${f.n} mesh${f.n > 1 ? 'es' : ''}) foot ${f.y0.toFixed(2)} m, the deck's edge ${e.toFixed(2)} at x ${f.x.toFixed(1)}: ${(f.y0 - e).toFixed(2)} m over it, ${allow.toFixed(2)} allowed where the cap stands ${H.deck.belowSheerM} over the deck`);
+      }
+    }
+
     /* ── THE FULL-RIGGER'S RIG IS THE RECORD'S RIG (round 44, Preussen). Three rules from
        one survey, the same class as Wyoming's: right count, in the right place, gated on
        the record. */

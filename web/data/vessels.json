@@ -5949,7 +5949,7 @@
         "lwl": 39.6,
         "beam": 7.6,
         "draught": 4.2,
-        "freeboard": 2.0,
+        "freeboard": 3.35,
         "cm": 0.78,
         "headsails": 4,
         "deckhouses": [
@@ -5985,6 +5985,11 @@
           }
         ],
         "stationProvenance": "Masts, funnel, deckhouses and overhangs READ off the Framnaes longitudinal-section plan (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m along the hull — stations good to ±0.5 m, no finer), anchored at the stem and counter LWL crossings; mast-gap ratio and funnel station cross-checked against the Hurley broadside (RMG P00018, ~12.6 px/m: fore-main/main-mizzen 1.12, funnel 45% of main→mizzen). Trucks from the same broadside at 12.6 px/m: fore 34.3 m, main 35.2 m, mizzen 29.3 m over the water, main the tallest — the old record drew the fore at 49 m (27.5 m lower through the square-stack rule) and the main at 31.7. Funnel at 0.677: the plan reads 0.670 +/- 0.015 and the boiler casing must seat inside the house whose forward end it rises from. Funnel black: it reads as dark as the black hull in every plate where masts read pale; height 5.7 m over the rail at the broadside’s scale. No forward deckhouse: the plan shows a boat on skids between fore and main, and no photograph shows a house there. Quarter boats (davitBoats): a canvas-covered boat hangs outboard in radial davits on the port quarter in the Hurley night plate and two stand on the starboard side in the full-sail plate; both plates are bow-on and foreshortened, so the station is bounded, not measured — abaft the aft house (plan, 0.781) and clear of the counter, u 0.80 ± 0.04. Length 6.7 m: the expedition's cutters (Dudley Docker, Stancomb Wills) as recorded; the James Caird measured 6.9. Kept: the forecastle break — the web plan at 16.9 px/m cannot carry a clean break station or height (the deck lines there are one to two px apart); needs the RMG original before it is modelled.",
+        "deck": {
+          "covering": "wood",
+          "belowSheerM": 1.35,
+          "provenance": "SOLID BULWARK, read off the Framnaes longitudinal section (as Polaris, RMG J9266, web copy 1024x322 px, ~16.9 px/m): at midships between the fore and main masts the cap rail's upper line lies at row 176-178 of the copy and the main deck's plank line at row 200, 22-24 px apart, so the bulwark stands 1.35 m (+/- 0.15) over the deck; the cap is drawn 5 px (0.3 m) deep, rows 178-183. The plates agree in kind and cannot give the height: Hurley's full-sail plate (build/hurley-fullsail.jpg, 2828x3912 px, from the port bow) shows a solid bulwark the whole length with a pale cap rail and a pale scrolled band under the cap at the bow; the night plate (build/hurley-night.jpg, 2590x3502 px) and the heeled plate (build/endurance-heeled.png) show the same wall with a lifebuoy hung on it; the beset broadside (RMG P00018, ~12.6 px/m) shows the cap line only, the hull behind ice. hull.freeboard is the SKIN's top in this record (the cap rail over the water, the r215 semantics): it was 2.0, the deck line's own height, and is 3.35 from r272, the cap's; the deck stays at 2.0 m over the water (deck.belowSheerM 1.35), so every mast, house, funnel and boat stands where it stood. The plan's own waterline, the long line at rows 236-238 that runs past both ends, lies 37 px (2.2 m) under the deck line and 44 px (2.6 m) over the keel's underside at row 281; the record's draught of 4.2 m does not match that, and the vertical scale of the web copy is unverified, so the draught is CONTESTED here and not changed (r272). The bulwark is the hull's own planking carried up to the cap, its inboard face the planking's back; stanchions, the pin rail and the scuppers are not drawn."
+        },
         "steering": "stern",
         "capstan": {
           "whelps": 6,

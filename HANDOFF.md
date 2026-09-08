@@ -24007,3 +24007,120 @@ file uncommitted, deliberately; the r271 staging stays on disk uncommitted, the 
 back by CODE strings (the r237 correction, minified forms on docs/): docs/data/vessels.json carries 6 headProvenance fields, 1 hull with "head":0 and 5 with a head of 1 or 2; docs/audit-hulls.js convicts a head with no provenance and a head the record denies (2 rule strings); web/js/hull.js against the r270 HEAD's: unchanged (git diff d4a205f..HEAD -- web/js/hull.js is empty; the receipt script's cmp read the minified docs copy and printed nothing, corrected by hand); docs/index.html carries 0 HTML comments where web/index.html carries 15 (the r271 build rule), and the build read first paint 8.60 MB against the 8.6 line.
 THE RATCHET: OPENING FULL RATCHET at the clean r270 HEAD d4a205f (START 21:54:18 load 4.10 9.15 19.94 HEAD d4a205f) STOPPED at its 53rd frame at 22:48:38 — the close needed the machine; its 53 captured frames were copied to r271/current-clean before any check --frame and scored offline by the tool's own compare: 53 frames scored offline; movers 0. The r269 receipt's full ratchet (65 frames, 0 movers at the r269 HEAD; r269 changed no file a frame loads) already scores the tree before this round. THE r271 TREE (web/ after the copy-in, scored by check --frame per PREDICTIONS-close.md): ship-container 0.015% 0.015 ok; ship-dreadnought 0.047% 0.019 ok; ship-endurance 0.000% 0.000 ok; ship-queen-mary-2 0.008% 0.011 ok; ship-titanic 0.000% 0.000 ok; ship-wyoming 0.000% 0.000 ok; ship-yamato 0.006% 0.001 ok; ship-endurance accepted; 0.035%/0.018 (under the gate; the round's one predicted mover, accepted so the baseline matches the tree)
 Two commits close the round (b6367d6 audit + record + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 272 — 2026-09-08 — Endurance gets her solid bulwark: her record's freeboard of 2.0 m was the height of her deck line off the Framnæs section, and the loft draws freeboard as the skin's top, so her deck lay at the top of her planking with a low capping round an open edge, while the same section draws the cap rail 22–24 px over the deck line at 16.9 px/m and every Hurley plate shows a solid wall the whole length with a cap rail on it; the record now says the cap's height (3.35) and the deck's depth under it (1.35, the r215 class), no builder line changed, the deck, masts, houses, funnel, skid boats and wheel stand where they stood and the cap, channels, deadeyes, cathead and davits rise with the skin, a new rule reads the deck fittings against the deck and convicts a depth with no provenance, and the opening full ratchet at the clean r271 HEAD died at its fifth frame under a load of 33
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r271 ordered r272's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet until globe-default
+had landed. The load at the open was 5.5 (23:48), nothing of this project's running, so the full ratchet was launched at
+23:48:48 at HEAD cc9d7de (r272/open-ratchet.out) and nothing touched the machine until globe-default had landed (23:49).
+Apple's image indexer (mediaanalysisd, 200% CPU) and the Codex app (50–90%) then took the load to 33 (23:53, the r237 and
+r261 memories), the fifth frame (globe-era-card) hit the screenshot timeout and the run exited (RATCHET EXIT 1 at
+23:52:39, four frames captured in four minutes); the four frames were copied to r272/current-clean and scored offline
+by the tool's own compare (r272/clean-scores.out): 0 movers. The clean HEAD's Shipwright frames this round can move
+are scored by the r271 receipt's own check --frame rows, taken on the tree that is this HEAD (the r271 receipt commit
+changed no file a frame loads). Every edit was made on a COPY of web/ served on :8150 (build/staging/r272/web, every
+file a symlink to web/ except audit-hulls.js, js/hull.js and data/vessels.json, which are copies); the chain ran one
+browser at a time (r272/chain.log). r271's first residual, (0y⁵⁶), was the task.**
+
+**THE FAULT. From the port quarter at 3° of elevation (r272/witness-endurance-quarter-before.png, :8149 at HEAD) the deck
+and everything on it — the two skid boats, both houses, the funnel's foot, the wheel — stood in open view over a low
+capping at the planking's top edge, because the record's hull.freeboard 2.0 is the DECK line's height off the Framnæs
+section and the loft reads freeboard as the height of the SKIN's top (hull.js line 12552: 'S.freeboard, which is the
+sheer's height over the water'; the r215 semantics, where the cog's 2.01 is her top strake). So the deck was built at
+the skin's top and the bulwark was never built. The card's own text and every plate disagree with that: Hurley's
+full-sail plate (build/hurley-fullsail.jpg, 2828x3912 px, from the port bow; r272/plate-fullsail-bow-1x.png) shows a
+solid bulwark the whole length with a pale cap rail and a pale scrolled band under the cap at the bow; the night plate
+(build/hurley-night.jpg, 2590x3502 px; r272/plate-night-hull-1x.png) and the heeled plate (r271/plate-heeled-stern-4x.png)
+show the same wall with the lifebuoy hung on it.**
+
+**THE MEASUREMENT (r272/plan-midbody-full-6x-ruled.png, the Framnæs longitudinal section as Polaris, RMG J9266, web copy
+1024x322 px, ~16.9 px/m, cropped at cols 320–500 and rows 140–300 at 6x with a 5-px ruler; the row profiles in this
+round's transcript). At midships between the fore and main masts the cap rail's upper line lies at row 176–178 (a
+line 0.34 of the hull's columns long) and the main deck's plank line at row 200 (0.39), with the beam line under it at
+203: 22–24 px, so the bulwark stands 1.35 m ± 0.15 over the deck. The cap is drawn 5 px deep (rows 178–183, 0.3 m). The
+beset broadside RMG P00018 (build/hurley-broadside.png, 4800x3743 px, the hull 509 px long at cols 2464–2973, ~12.6
+px/m; r272/plate-broadside-hull-4x.png) shows the cap line only, the hull behind pressure ridges, and gives no height:
+r271's note that it could give the bulwark to ±0.2 m was wrong, and this entry corrects it. The plan's own waterline —
+the long line at rows 236–238 that runs past both ends — lies 37 px (2.2 m) under the deck line and 44 px (2.6 m) over
+the keel's underside at row 281, which the record's draught of 4.2 m does not match; the web copy's vertical scale is
+unverified, so the draught is named CONTESTED in the record and not changed.**
+
+**THE RECORD (web/data/vessels.json; r272/apply-record-edits.py, line-level, every edit asserted and the result
+json-parsed; vessels.before.json and vessels.after.json, 1 changed line and 5 added): Endurance's hull.freeboard is 3.35
+(the cap rail over the water; it was 2.0, the deck line) and her hull gains deck {covering 'wood', belowSheerM 1.35,
+provenance} — the provenance names the section's rows and scale, the three plates and what each can give, the
+freeboard semantics, and the waterline contest. The covering word is the registry's planked deck (the card's
+Construction row: oak and Norwegian fir); without it the existing covering rule convicted the new deck record ('deck
+covering unknown to the model'), which is how the word came to be written. No other record changed.**
+
+**THE BUILDER: web/js/hull.js is cmp-identical to HEAD's. The r215 class carries the whole change: deck(u) is the sheer
+less the record's depth, deckEdge(S, H, u) gives the skin point at deck height, the hull material is DoubleSide so the
+planking's back is the bulwark's inboard face, and railAtU keeps the skin's top. Measured on the built scene
+(r272/measure-before.out on :8149 at HEAD, r272/measure-after-record.out on :8150 with the r272 record; heights in
+metres over the water): the weather deck 2.00–2.95 in both; the rail 2.00–2.97 → 3.35–4.32; the channels 1.82–2.10 →
+3.08–3.36 and the deadeyes 1.87–2.31 → 3.13–3.57 (on the cap, where the night plate sets them up); the cathead 2.07 →
+3.43; the planking's top 2.95 → 4.30 at the bow; the mast heels 1.98 → 1.99; the skid boats 1.90, the boat skids 2.00,
+the deckhouses 1.50, the funnel 1.86 and the wheel 2.34 unchanged; the quarter boat 2.36 → 3.71 and its davits 1.61 →
+2.96, because the davit is socketed on the skin 0.39 m under the cap and the boat hangs at the cap's level, as the
+night plate shows her port-quarter boat.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r272/apply-audit-edits.py, one replace asserted; parsed by
+node's vm). D-FITTINGS-ON-DECK, beside the head rule: for a hull whose deck lies below the sheer, no deck.provenance
+is convicted ('a deck depth with no provenance', the r108 pattern), and every fitting named Deckhouse, Funnel, The
+wheel, Boat skids or Windlass is read on the meshes, all meshes of a name together, its lowest vertex against the
+deck's edge at its station: a foot more than half the bulwark plus 0.3 m over the edge is 'a fitting standing on the
+sheer of a bulwarked hull'. The r215 rules (D-DEPTH, D-LEVEL, D-RAIL, D-WELL) read Endurance now as well as the cog.**
+
+**PROOFS (r272/chain.log; the r272 audit on :8150, one browser at a time). FINAL (builder unchanged, the r272 record and audit): "checked 33 hulls, 0 problems" (00:22, under the allowance as shipped; the first FINAL at 00:16 read 0 under the looser allowance, and a FINAL at 00:09 before the covering word read 1 problem, 'deck covering unknown to the model'). PROOF B (the :8150 builder's buildFittings datum flipped from the deck to the sheer — `const deckAtU = u => H.sheer(u)` — the record unchanged, so every fitting that builder places on both bulwarked hulls rose by the bulwark): 34 problems, of which the r272 rule's are 4: cog — Windlass (7 meshes) foot 2.28 m, the deck's edge 0.56 at x 7.7; endurance — Deckhouse (12 meshes) foot 2.85 m, the deck's edge 2.00 at x 3.6; endurance — The wheel (7 meshes) foot 3.69 m, the deck's edge 2.34 at x 17.9; endurance — Boat skids (2 meshes) foot 3.35 m, the deck's edge 2.01 at x -3.6; the other 30 are the r215 and older rules on the same lifted fittings (cog 'a knee off its beam' x10; cog 'a stern beam up in the castle' x2; cog 'a through-beam off its deck' x5; cog 'a through-beam off the plate's height over the keel' x5; cog 'a through-beam that does not come through' x5; endurance 'deckhouse off the deck' x2; endurance 'wheel stands on nothing' x1). Under the first allowance (half the bulwark plus 0.3 m) the Deckhouse was let by at 0.90 m over the edge, because its sill is sunk 0.45 m, so the allowance shipped is max(0.45, half); the builder restored (cmp). PROOF C (deck.provenance removed from the record, the builder unchanged): exactly 2, 'a deck depth with no provenance' (the r272 rule) and 'deck covering with no provenance' (the existing covering rule reads the same field); the record restored (cmp).**
+
+**WITNESSED (r272/witness-endurance-quarter-before.png from :8149 — web/ at HEAD — and -after.png from :8150, both
+b=120, l=3, z=0.7, 2880 × 1800; -profile-before/-after at b=270, l=4, z=0.9). From the port quarter, before: an open
+deck edge with a thin capping, the two skid boats, the white houses, the funnel's foot and the wheel all standing in
+view over the planking's edge; after: a dark solid wall the whole length with the pale cap rail along its top, the
+deck hidden behind it, the boats' gunwales and the houses' upper halves showing over the cap, the funnel rising from
+behind the wall, the deadeyes on the cap. From the starboard beam the profile reads the same wall from stem to counter
+under the three masts, the wale band along the topsides below it.**
+
+**Rule 0 on the quarter witness read whole (r272/witness-endurance-quarter-after.png): a rendered barquentine under
+sail seen from her port quarter over a lit sea, not a chart: the cloth shows its seams and shading, the hull its
+planking, the wall its dark paint under a pale cap, the sea its ripple. Three facts a viewer can read off it without a
+legend: she has a solid bulwark a man's chest high round her whole deck; she is square-rigged on the foremast only,
+with gaff sails on the main and mizzen; a black funnel stands between the main and the mizzen, so she has an engine.**
+
+**Named residuals, in order:** NEW (0y⁵⁹) THE DRAUGHT: the plan's waterline stands 2.6 m over the keel's underside at
+the web copy's scale where the record says 4.2 m; the copy's vertical scale is unverified (a 1024x322 web image of a
+long sheet); the record names the contest; needs the RMG original or a second vertical datum on the same sheet.
+NEW (0y⁶⁰) THE BULWARK'S FURNITURE: stanchions, the pin rail, the scuppers, the scrolled pale band under the cap at the
+bow (the full-sail plate) and the lifebuoy are not drawn; the wall is the planking's own inner face. NEW (0y⁶¹) THE
+WHEEL BEHIND THE WALL: the wheel stands on the main deck at u 0.94 behind 1.35 m of bulwark; Endurance steered from
+a raised platform aft in the plates, which the record does not carry. (0y⁵⁷) THE TWO DISCS AT THE BOW as r271 names
+it. (0y⁵⁸) THE FIRST-PAINT LINE as r271 names it, and this round pays one more provenance string at first paint (the
+build's own figure is in the receipt). (0y⁵⁵) as r270 names it. (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) as r266 names them. (0y⁴⁶) HALF
+CLOSED as r265 names it. (0y⁴⁵) STANDS as r265 names it. (0y⁴⁴) as r263 names it. (0y³⁰) stands: no truss plate.
+(0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name
+them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names
+them. (0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o)
+(0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵)
+(0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230
+lists them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**THE FRAMES: r272/PREDICTIONS-close.md, written before any frame of this round's tree was scored: ship-endurance MUST
+move; six berth neighbours MAY; every other frame MUST NOT. The r272 tree's frames were scored by check --frame after
+the copy-in; the rows and each accepted frame's reason are in the receipt commit that follows this one.**
+
+**r273 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed — and if Apple's indexer or the Codex app is hot,
+waiting for it before launching; if the frames are taking over a minute each after the third, it stops the run and
+scores the clean HEAD by check --frame on the frames the round can move; and if the run dies part-way, it copies
+_current aside BEFORE any check --frame and scores the captured frames offline (r272/score-offline.py). Then it takes
+(0y⁶¹), the wheel behind the wall — the raised steering platform aft that the plates show, as a record field with its
+plate and scale — or (0y⁶⁰), the bulwark's stanchions and pin rail as a class for every hull whose deck lies below the
+sheer, or (0y⁵⁹) if the RMG original of J9266 surfaces, or (0y⁵⁵) if an overhead of the Ford with her air wing
+surfaces, or the survey's next never-spun hull after Endurance by looking. The load this round: 5.5 at the open, 33 at
+23:53 (the indexer and the Codex app), 4.2 at the witnesses (00:02), 5.63 at the close.**
+
+**Live stamp: docs/index.html carries data-version 1788852735 at the build; the push and the live poll are in
+build/staging/r272/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r272 staging stays on disk uncommitted, the r211 convention.**
