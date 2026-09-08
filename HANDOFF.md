@@ -24415,3 +24415,20 @@ and the headroom is 0.19 MB.**
 build/staging/r274/push.log, and the verified live value with the ratchet's result is recorded in the receipt
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
 uncommitted, deliberately; the r274 staging stays on disk uncommitted, the r211 convention.**
+
+**RECEIPT, r274 — DEPLOYED. docs/index.html data-version 1788859635 at the build (r274/build2.out); git push
+origin main rc=0 (af0e864..8207c3a) at 02:51:46 PDT; the live page carried data-version 1788859635 at 02:52:49,
+60 s after the push (r274/push.log). The live DATA was read too, not the stamp alone: data/provenance.json 200 at
+191,450 bytes and data/vessels.json 200 at 154,771, and the live Endurance record carries aftPlatform {u 0.99,
+floorM 3.45} with its provenance in the split file and not in vessels.json, 135 strings in all — the r273
+geometry is on the live site for the first time. THE RATCHET: the FULL ratchet at the r274 HEAD 8207c3a (RATCHET
+START 02:51:43, load 22.5 with 60.6 and 62.3 over 5 and 15 minutes) ran 26 frames at 50–70 s each under a load of
+18–108 from outside the project (a spike to 108 at 03:14 with nothing of this project's hot) and was STOPPED at
+03:19:45 for the round's clock; its 26 captured frames were copied to r274/current-r274 before any check --frame
+and scored offline by the tool's own compare (r274/scores.out): 26 frames scored offline; movers 0. Rows: action 0.000% 0.000 ok; descent-coast 0.003% 0.000 ok; descent-high 0.000% 0.000 ok; descent 0.000% 0.000 ok; globe-crossing 0.004% 0.003 ok; globe-default 0.000% 0.000 ok; globe-era-card 0.012% 0.003 ok; globe-modern 0.016% 0.004 ok; globe-steam 0.021% 0.006 ok; ship-canoe 0.017% 0.005 ok; ship-carrier 0.000% 0.000 ok; ship-container 0.015% 0.015 ok; ship-dhow 0.000% 0.000 ok; ship-dugout 0.000% 0.000 ok; ship-galleass 0.000% 0.000 ok; ship-galley 0.000% 0.000 ok; ship-great-eastern 0.000% 0.000 ok; ship-junk 0.019% 0.007 ok; ship-panokseon 0.038% 0.014 ok; ship-queen-mary-2 0.008% 0.011 ok; ship-sekibune 0.000% 0.000 ok; ship-titanic 0.000% 0.000 ok; ship-trireme 0.004% 0.003 ok; ship-usv 0.000% 0.000 ok; ship-yamato 0.046% 0.017 ok; shipwright 0.001% 0.000 ok; 
+— every one under the gate, the six berth neighbours at the numbers r271–r273's receipts read (the documented
+capture flap), and the prediction (every frame MUST NOT move) holds on every frame captured. The frames the run did
+not reach are the aboard-*, action-*, board-salamis, map-floor, passage-sahul, sea-*, wake-plan and the ship-*
+frames from ship-azzam to ship-wyoming alphabetically outside the 26; of those ship-endurance was scored by
+check --frame before the push (0.000% 0.000 ok, r274/check-ship-endurance.out). No baseline was accepted this
+round. r275 opens with the FULL ratchet at the clean HEAD if the load is under 15, as the entry above says.**
