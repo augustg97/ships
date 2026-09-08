@@ -6208,6 +6208,85 @@
       }
     }
 
+    /* ── A-BELAY (round 277, 0y⁷¹): A FALL IS MADE FAST TO A PIN, AND THE PIN CARRIES ITS COIL.
+       r276 gave the bulwarked hull its pin rail and the running rigging went on ending at the deck
+       edge, a hand over the deck, through the rail. Read from the BUILT scene: where a 'Belaying
+       pins' mesh stands (its userData.pins are the built pins' centres), every sheet, tack and
+       halyard mesh's recorded belays (userData.belays, written by the rig builder) must each name
+       a built pin (0.05), reach it with the rope's own geometry (a vertex within 0.08 of the
+       recorded head), sit on the pin's upper half (the head 0.10–0.30 over the pin's centre), and
+       no two falls may share a pin; a square-rigged hull with pins must belay something; no fall
+       of those parts may end under the rail (the lowest vertex of each mesh at least 0.15 under
+       no pin's centre); and the coils: a 'Coils' mesh, one coil recorded per belay, each coil's
+       top 0.05–0.20 under its pin's centre (hung on the pin under the rail) and its bottom clear
+       of the deck. A hull with no pins must carry no belay record and no coil. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const pinsM = [], ropeM = [], coilM = [], deckM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
+        else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard') ropeM.push(o);
+        else if (p.key === 'coil') coilM.push(o);
+        else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
+      /* the pins' centres are the builder's record (userData.pins); a pins mesh with no record is
+         convicted, and its own vertices stand in for the centres so the falls are still read
+         against it — rule 8: the first draft of this rule read only the record and passed the
+         r276 builder, which draws pins and records none, in silence (PROOF B, r277) */
+      let pins = [].concat(...pinsM.map(o => o.userData.pins || []));
+      if (pinsM.length && !pins.length) {
+        say(v.id, 'belaying pins with no record of their centres', `${pinsM.length} Belaying pins mesh(es) and no userData.pins on any: the falls cannot be read against them except by their vertices`);
+        for (const o of pinsM) { const P = pts(o); for (let k = 0; k < P.length; k += 4) pins.push([P[k].x, P[k].y, P[k].z]); }
+      }
+      const belays = [].concat(...ropeM.map(o => (o.userData.belays || []).map(b => Object.assign({ mesh: o }, b))));
+      const squareMast = (H.masts || []).some(m => m.rig === 'square');
+      if (!pins.length) {
+        if (belays.length) say(v.id, 'a fall belayed on a hull with no pins', `${belays.length} belay record(s) on sheet/tack/halyard meshes and no Belaying pins mesh`);
+        if (coilM.length) say(v.id, 'a coil where there is no pin rail', `${coilM.length} Coils mesh(es) and no Belaying pins mesh`);
+      } else {
+        const near = q => { let bp = null, bd = 1e9; for (const p of pins) { const d = Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); if (d < bd) { bd = d; bp = p; } } return { p: bp, d: bd }; };
+        if (squareMast && !belays.length) say(v.id, 'a pin rail with nothing belayed', `${pins.length} pins, a square-rigged mast, and no sheet, tack or halyard made fast to any of them`);
+        const used = new Map();
+        for (const b of belays) {
+          const at = `the ${b.side} ${b.part} of mast ${b.mast}`;
+          const { d } = near(b.pin);
+          if (d > 0.05) say(v.id, 'a fall belayed to no pin', `${at}: its recorded pin [${b.pin}] is ${d.toFixed(3)} m from the nearest built pin`);
+          const key = b.pin.join(','); if (used.has(key)) say(v.id, 'two falls on one pin', `${at} and ${used.get(key)} share the pin at [${b.pin}]`); used.set(key, at);
+          const over = b.head[1] - b.pin[1];
+          if (over < 0.10 || over > 0.30) say(v.id, 'a fall made fast off the pin', `${at}: its head stands ${over.toFixed(3)} m over the pin's centre (0.10–0.30 is the pin's upper half)`);
+          const P = pts(b.mesh); let bd2 = 1e9; for (const q of P) bd2 = Math.min(bd2, Math.hypot(q.x - b.head[0], q.y - b.head[1], q.z - b.head[2]));
+          if (bd2 > 0.08) say(v.id, 'a fall that does not reach its pin', `${at}: the nearest vertex of its mesh is ${bd2.toFixed(3)} m from the recorded head [${b.head}]`);
+        }
+        for (const o of ropeM) {
+          const P = pts(o); if (!P.length) continue;
+          let lo = P[0]; for (const q of P) if (q.y < lo.y) lo = q;
+          const { p } = near([lo.x, lo.y, lo.z]);
+          if (p && lo.y < p[1] - 0.15) say(v.id, 'a fall ending under the pin rail', `${(tagOf(o).name || tagOf(o).key)}: its lowest vertex y ${lo.y.toFixed(2)} at x ${lo.x.toFixed(2)}, |z| ${Math.abs(lo.z).toFixed(2)} lies ${(p[1] - lo.y).toFixed(2)} m under the nearest pin's centre — a fall through the rail to the deck`);
+        }
+        if (belays.length && !coilM.length) say(v.id, 'belayed pins with no coils', `${belays.length} falls made fast and no Coils mesh`);
+        if (coilM.length) {
+          const C = [].concat(...coilM.map(pts));
+          let deckPts = null;
+          const deckAtX = xq => { if (!deckPts) deckPts = [].concat(...deckM.map(pts));
+            let e = 1e9, best = 0.5; for (const q of deckPts) { const d = Math.abs(q.x - xq);
+              if (d < best - 1e-6) { best = d; e = q.y; } else if (d <= best + 1e-6) e = Math.min(e, q.y); } return e; };
+          const nC = coilM.reduce((a, o) => a + (o.userData.coils || []).length, 0);
+          if (nC !== belays.length) say(v.id, 'coils and belays disagree', `${nC} coil(s) recorded on the Coils mesh, ${belays.length} fall(s) belayed`);
+          for (const b of belays) {
+            const at = `the coil of the ${b.side} ${b.part} of mast ${b.mast}`;
+            const Q = C.filter(q => Math.sign(q.z) === Math.sign(b.pin[2]) && Math.abs(q.x - b.pin[0]) < 0.16 && Math.abs(q.z - b.pin[2]) < 0.12);
+            if (!Q.length) { say(v.id, 'a belayed pin with no coil', `${at}: no Coils vertex within 0.16 m of the pin at [${b.pin}]`); continue; }
+            let top = -1e9, bot = 1e9; for (const q of Q) { top = Math.max(top, q.y); bot = Math.min(bot, q.y); }
+            const under = b.pin[1] - top;
+            if (under < 0.05 || under > 0.20) say(v.id, 'a coil off its pin', `${at}: its top at y ${top.toFixed(3)} hangs ${under.toFixed(3)} m under the pin's centre (0.05–0.20 wanted: on the pin, under the rail)`);
+            const e = deckAtX(b.pin[0]);
+            if (e < 1e8 && bot < e + 0.10) say(v.id, 'a coil on the deck', `${at}: its bottom at y ${bot.toFixed(3)} against the deck's edge at ${e.toFixed(3)}`);
+          }
+        }
+      }
+    }
+
     /* ── D-FITTINGS-ON-DECK (round 272, Endurance): THE DECK'S FITTINGS STAND ON THE DECK,
        AND THE DECK'S DEPTH SAYS WHERE IT WAS READ. Endurance carried hull.freeboard 2.0, the
        height of her deck line, and the loft draws freeboard as the SKIN's top, so her solid

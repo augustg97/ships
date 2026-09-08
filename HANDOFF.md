@@ -24701,3 +24701,119 @@ uncommitted, deliberately; the r276 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js names bulwarkStanchion 3 times and 'Belaying pins' 1; docs/audit-hulls.js carries the twelve A-BULWARK-FURNITURE conviction strings (12 found); docs/data/vessels.json carries belowSheerM 3 times (the cog and Endurance, the gate; no record changed this round); web/js/hull.js against HEAD~1:  1 file changed, 137 insertions(+); the build read first paint 8.42 MB against the 8.6 line.
 THE RATCHET: OPENING CHECK CHAIN at the clean r275 HEAD c42731b (r276/chain-checks.sh, 04:52:14–05:19:02, one check --frame at a time against :8149, load 18–100 from mediaanalysisd and the Codex renderers — no full ratchet could finish in the round): the seven r275 MUST frames the clock had not reached and its thirteen MAY neighbours, twenty frames, each current and diff copied aside before the next check and every mover accepted from the copy after its diff was LOOKED AT: shipwright-ahead 0.000% ok (the driver's boom is hidden behind the courses from dead ahead — the one r275 MUST that did not move), shipwright-hounds 0.017% ok, aboard-preussen 0.143%/0.054 ACCEPTED (the spanker's foot from aboard), aboard-wyoming 0.065%/0.020 ACCEPTED (six gaff feet from aboard), aboard-cable 0.041% ok, aboard-clipper 0.000% ok, aboard 0.009% ok, ship-slave-ship 0.001% ok, ship-titanic 0.010% ok, ship-dreadnought 0.115%/0.033 ACCEPTED (a neighbour's gaff cloth at the frame edge), ship-container 0.015% ok, ship-queen-mary-2 0.008% ok, ship-yamato 0.047% ok, ship-azzam 0.023% ok, ship-ever-given 0.034% ok, ship-carrier 0.000% ok, ship-treasure 0.024% ok, ship-carrack 0.001% ok, ship-galleass 0.000% ok, ship-usv 0.000% ok. THE r276 TREE (web/ after the copy-in, scored by check --frame per PREDICTIONS-close.md, r276/partial-ship-endurance.out): ship-endurance 0.106%/0.028 CHANGED — the stanchion heads, the pin rail and its pins along the far bulwark's inner face and nothing else (r276/diff-ship-endurance.png) — ACCEPTED; the four MAY neighbours (ship-azzam, ship-ever-given, ship-container, ship-queen-mary-2) are for r277's opening run to score, expected under the gate (Endurance's own bulwark is inside her hull's silhouette at every neighbour's bearing).
 Two commits close the round (cd18909 builder + record + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 277 — 2026-09-08 — the falls are made fast to the pins, and every pin that takes a line hangs its coil: r276 built Endurance's pin rail and the square rig's running rigging went on ending where it had always ended, at the deck edge a hand over the deck, straight through the rail; now the course's sheets and tacks and the hoisting yards' halyards each take the nearest free belaying pin on their side, the falls from outboard of the skin led over the cap first, the falls from the masthead straight to the pin's head, with a 0.55 m coil hung under the rail on every belayed pin; the pin rail and the rig read one derivation so they cannot disagree, every other hull is byte-identical, a new rule reads the falls, the pins and the coils off the meshes on both builds, and the opening full ratchet at the clean r276 HEAD was stopped for the clock and scored offline
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r276's entry ordered r277 to check `uptime` and
+`ps -r` FIRST and, with the load under 15, run the FULL ratchet at the clean HEAD. At the open (05:38) the load was 5.2
+(7.2 and 16.3 over 5 and 15 minutes) with two Codex renderers at 65% and 38% and mediaanalysisd at 28% — under the line, so
+the full ratchet was launched at 05:39:20 against :8149 (web/ at the clean HEAD 06cde10, r277/run-open.sh). It ran at
+50–57 s a frame for its first nine, then mediaanalysisd went to 180% (the r276 crops and the fresh _current PNGs being
+indexed — the r265 pattern) and the load to 74, and the frames went to two minutes each; it was stopped at 06:05:39 (r277/open-ratchet.out, exit 143, 26 minutes in) with
+20 frames captured, which were copied aside and scored with the tool's own compare() (r277/score-offline.py, the
+r268 pattern) — 20 frames, 0 beyond the gate (r277/clean-scores.out): action, globe-crossing, globe-default, globe-era-card, globe-modern, globe-steam, ship-canoe, ship-carrier, ship-dhow, ship-dugout, ship-galleass, ship-galley, ship-great-eastern, ship-junk, ship-panokseon, ship-sekibune, ship-titanic, ship-trireme, ship-usv and shipwright, the largest ship-panokseon 0.038%/0.014 and thirteen at 0.000–0.004%; the 45 frames it did not reach are unscored at the clean HEAD since r275/r276's acceptances. Every edit was made on the :8150 copy (r277/web, symlinks with real copies of hull.js,
+vessels.json and audit-hulls.js) and copied into web/ after the ratchet was stopped; every browser of mine ran alone, one
+after another (r277/chain.log).**
+
+**THE FAULT (0y⁷¹, named r276). buildRig's `rail(uu, sgn)` ends every fall of the square rig's gear — the course's sheets
+and tacks, the hoisting yards' halyards — at the deck edge at station uu, a hand (B·0.012) over the deck, 0.96 of the
+half-breadth out: on Endurance, whose pin rail (r276) runs 0.95 m over that deck on the stanchions' inner faces, six ropes
+came down from aloft, crossed the rail and stopped on the deck, and the 320 pins along her two rails had nothing on them.
+A fall is not left on the deck. It is made fast to a belaying pin — figure-of-eight turns round the pin above and below
+the rail — and the rest of it is coiled and the coil hung on the pin, so the deck is clear and the line can be cast off
+and run with one hand. And the course's sheet and tack come from a clew OUTBOARD of the skin (the fore yard's arm stands
+7.4 m off the centreline on a 7.6 m beam), so a straight rope from the clew to a pin inside the wall passes through the
+planking; it leads over the cap.**
+
+**THE BUILDER (web/js/hull.js; r277/apply-builder-edits.py, thirteen replaces asserted; hull.before.js and hull.after.js;
+parsed by node's vm). (1) `bulwarkFurnitureSpec(S, H)`, a top-level function: the r276 derivation — the gate (not an open
+hull, deck.belowSheerM > 0.3, no frames.roomAndSpaceM), the class or record figures, the stanchion stations, the pin rail's
+runs a side at a time and every pin's centre (x, y, z, side, u) — moved out of buildFittings into one place, because
+buildShip draws the rig (buildRig) BEFORE the fittings (buildFittings) and a fall has to know where its pin stands. The
+fittings block now draws the runs and the pins the spec hands it (the same loops, the same numbers; the pins mesh carries
+userData.pins, every centre, for the audit) and the rig belays to the same list, so the two cannot disagree. (2) In
+buildRig, before the masts: BELAY = the spec on the FINE build, belayPins = its pins each with a `used` slot. In the
+square gear block a `lead(list, from, uu, sgn, part)` replaces the three `rail()` call sites: it takes the nearest FREE
+pin on side sgn to the station the rope wanted (so no two falls share a pin), ends the rope at the pin's head (pinH/2 −
+0.03 over the pin's centre, on the pin's upper half), and if the rope's origin stands outboard of the skin's top at the
+pin's station by more than 0.05 (surfacePoint at v = 1) it leads first to a fairlead on the capping rail's top face at
+that station (H.sheer + the cap's section height + 0.02, a third of the section in from its outer edge) and then down to
+the pin; a fall from inboard (a halyard from the masthead) goes straight. Every belay is recorded — part, mast, side, pin,
+head, from, lead, fair — on the sheet, tack and halyard meshes as userData.belays, and the card says how many pins the
+part is made fast to and whether it was led over the cap. Where the hull has no pins `lead` falls through to `rail()`
+unchanged: every rope segment on every other hull is the same numbers. (3) `coilGeometry(pins)`, after ropeMesh: two
+nested elliptical tubes in the bulwark's own plane per pin — the outer 0.10 × 0.275 m (semi-axes) wrapping the pin, its
+centre-line 0.105 under the pin's centre so the rope's top lies just under the rail's underside; the inner 0.065 × 0.23
+a second layer of the hank 0.05 m inboard — 22 stations of 6, tube radius 0.024, one geometry for all the ship's coils;
+tagged `coil` (a NEW PARTS key, stage 6, 'Coils') with userData.coils (part, side, pin, top, bottom) and a card that
+counts the lines. ⚠ THE HANK (0.55 m, two loops) IS A CLASS FIGURE: a coil is sized to the hand that makes it up, not to
+the ship, and no plate of Endurance's pin rail has been read for hers.**
+
+**THE RECORD (web/data/vessels.json): unchanged; vessels.after.json is vessels.before.json.**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r277/apply-audit-edits.py, one replace; audit-hulls.before.js and
+audit-hulls.after.js). A-BELAY, before D-FITTINGS-ON-DECK on the set build: where a 'Belaying pins' mesh stands, its
+userData.pins are the built pins; every belay recorded on a sheet, tack or halyard mesh must name a built pin within 0.05
+('a fall belayed to no pin'), reach it with the rope's own geometry — a vertex within 0.08 of the recorded head ('a fall
+that does not reach its pin') — and sit on the pin's upper half, the head 0.10–0.30 over the pin's centre ('a fall made
+fast off the pin'); no two falls share a pin ('two falls on one pin'); a hull with pins and a square-rigged mast must
+belay something ('a pin rail with nothing belayed'); the lowest vertex of every sheet, tack and halyard mesh must lie no
+more than 0.15 under the nearest pin's centre ('a fall ending under the pin rail' — the r276 state); the coils: a Coils
+mesh where anything is belayed ('belayed pins with no coils'), one coil recorded per belay ('coils and belays disagree'),
+a coil's vertices within 0.16 m of each belayed pin ('a belayed pin with no coil') whose top hangs 0.05–0.20 under the
+pin's centre ('a coil off its pin') and whose bottom clears the deck's edge at its x by 0.10 ('a coil on the deck'); and
+a hull with no pins must carry no belay record and no Coils mesh ('a fall belayed on a hull with no pins', 'a coil where
+there is no pin rail').**
+
+**PROOFS (r277/chain.log; each audit alone in its browser on :8150). FINAL1 (r277 builder, r277 audit, 05:54): "checked
+33 hulls, 0 problems". PROOF B (the r276 builder hull.before.js on the r277 audit): "checked 33 hulls, 0 problems" on the FIRST draft of the rule (06:00) — THE AUDIT WAS WRONG (rule 8): it read the pins only from userData.pins, which the r276 builder never wrote, so it saw no pins and kept silent on a hull with 1,920 pin vertices and nothing belayed; the rule now convicts a pins mesh with no record ('belaying pins with no record of their centres') and takes the mesh's own vertices as the centres so the falls are still read against it. FINAL2 (r277 builder, corrected audit, 06:06): "checked 33 hulls, 0 problems". PROOF B2 (the r276 builder on the corrected audit, 06:08): 5 — 'a fall ending under the pin rail' 3 (Sheets: its lowest vertex y 2.09 at x −4.80, |z| 3.50, 0.70 m under the nearest pin vertex; Tacks and Halyards likewise), 'belaying pins with no record of their centres' 1, 'a pin rail with nothing belayed' 1.. PROOF C (every coil hung 0.5 m too low, hull.proof-c.js, 06:09): 12 — 'a coil off its pin' 6 (the port sheet's top at y 2.433, 0.585 under the pin's centre) and 'a coil on the deck' 6 (its bottom at 1.843 against the deck's edge at 2.020). The builder was
+restored cmp-identical after each proof.**
+
+**MEASURED (r277/probe-after.out, SHIPS_HULL.buildShip on the :8150 copy, hull space, x aft-positive). Endurance: 320 pins
+built (the first at x −20.645, y 3.775, z −0.544; the last at 19.312, 3.392, 1.546). Six falls belayed, six distinct pins:
+the port and starboard course sheets to the pins at x −4.813 (u 0.378), y 3.018, z ±3.392, heads at 3.213, led over the
+cap through fairleads at y 3.583, |z| 3.62, from clews at (−9.644, 5.175, 7.444) and (−14.91, 5.175, −7.444) — the braced
+yard's arms 7.4 m off the centreline; the tacks to the pins at x −17.378 (u 0.061), y 3.528, z ±1.53, over the cap at y
+4.092; the upper topsail's and topgallant's halyards direct from the mastheads at y 30.0 and 34.3 to the pins at x −8.331
+(starboard, y 3.084) and −7.829 (port, y 3.071). Six coils, tops 0.081 under their pins' centres (2.937 on the sheet pins,
+3.447 on the tack pins, 3.003/2.990 on the halyard pins), bottoms 0.68 under (2.339 … 2.849), 0.32 m over the deck. The
+Sheets mesh's lowest vertex is now y 3.205 (a pin head); r276's was the deck edge.**
+
+**THE FRAMES (r277/PREDICTIONS-close.md, written before scoring): ship-endurance MUST move (six falls at the pin heads and
+six coils under the rails, the sheets and tacks over the cap); ship-azzam, ship-ever-given, ship-container,
+ship-queen-mary-2 MAY (berth neighbours, no move expected); everything else MUST NOT — every hull without pins is
+byte-identical. Witnessed by r276/witness.py on :8150 (the edited copy) before any frame was scored, at r276's own cameras
+so the frames pair: Endurance close from the starboard quarter (b=150, l=28, z=0.42; witness-endurance-close-after.png)
+and high on the port quarter (b=125, l=35, z=0.6; witness-endurance-pq-high-after.png). Read at 6x (r277/crop-port-rail-6x-after.png and crop-port-rail-aft-6x-after.png, the 2880 frame's 1000..1400 x 800..1000 and 1150..1550 x 950..1150, against the same regions of r276's witness, crop-port-rail-6x-before.png): along the port bulwark's inner face a fall comes down from aloft to the rail and stops there, and a hank hangs under the rail at its pin in the rope's own colour; a second hangs by the stanchion abaft the fore mast; in r276's frame the same ropes ran through the rail to the deck and nothing hung on it. The two witnesses' framings differ slightly (the cap sits lower in r277's), which the check --frame on ship-endurance in the receipt commit reads against the committed baseline. The r277 tree's frames scored by check --frame after the copy-in and the push are in the receipt commit that follows this one.**
+
+**Rule 0 on the close witness read whole (witness-endurance-close-after.png): a rendered barquentine seen from high on her starboard quarter on a lit blue-green sea, her deck planked fore and aft, her fore course and topsails drawing, the main's gaff sail behind — not a chart. Three facts a viewer can read off it without a legend: her running rigging comes down to a pin rail inside the bulwark and is coiled on the pins; a black funnel stands between her main and mizzen masts, a steamer under sail; her hatch amidships is covered by a grating.**
+
+**Named residuals, in order:** (0y⁷¹) CLOSED this round for the square rig's sheets, tacks and halyards. NEW (0y⁷²) THE
+REST OF THE RUNNING RIGGING BELAYS NOWHERE: the braces end at a point on the deck 0.26 L abaft their yard (buildRigging),
+not at a rail or a pin, on every square-rigger; the jeers' falls end on the deck beside the mast (a fife rail's job, and
+no fife rail is drawn); the gaff sails' throat and peak halyards are not drawn at all, so nothing of the main's or
+mizzen's belays; the staysail sheets were not read this round. NEW (0y⁷³) THE HANK IS A CLASS FIGURE: 0.55 m, two loops,
+0.024 tube — a plate of a coiled pin rail at ≥ 30 px/m would read a hank's length. NEW (0y⁷⁴) THE SHEET LEADS OVER THE CAP:
+a course sheet on a bulwarked ship leads through a sheave in the bulwark (a sheet-hole) or a block at the rail, not over
+the capping; the fairlead on the cap's top is a stated simplification until a plate shows Endurance's. (0y⁷⁰) as r276
+names it (the bulwark's pitch and rail height unread). (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy)
+open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them.
+(0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹)
+(0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them.
+(0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰)
+(0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20)
+as r230 lists them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r278 opens by checking `uptime` and `ps -r` FIRST; with the load under 15 and neither mediaanalysisd nor a Codex renderer
+hot it runs the FULL ratchet at the clean HEAD (the clean-HEAD frames the r277 ratchet did not reach are unscored since
+r275/r276's acceptances, so any mover is either the documented capture flap or a regression to explain); above 15, or with
+either hot, it scores by check --frame the frames the round's change can reach and the four MAY neighbours r276 and r277
+both left (ship-azzam, ship-ever-given, ship-container, ship-queen-mary-2). Then it takes (0y⁷²), the braces and the
+jeers belayed — a fife rail at the mast for the jeers and the halyards' falls on a hull that carries one, the braces to
+the pin rail — or (0y⁷⁰), a plate read of Endurance's bulwark, or the survey's next never-spun hull after Endurance by
+looking.**
+
+**Live stamp: docs/index.html carries data-version 1788873113 at the build; the push and the live poll are in
+build/staging/r277/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r277 staging stays on disk uncommitted, the r211 convention.**

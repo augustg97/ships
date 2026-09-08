@@ -52,6 +52,35 @@ g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setIndex(idx); g.computeVertexNormals();
 return new THREE.Mesh(g, mat);
 }
+function coilGeometry(pins, railT) {
+const pos = [], idx = [], N = 22, M = 6, tube = 0.024;
+const loop = (cx, cy, cz, a, b) => {
+const b0 = pos.length / 3;
+for (let k = 0; k < N; k++) {
+const th = k / N * Math.PI * 2, cs = Math.cos(th), sn = Math.sin(th);
+const tx = -a * sn, ty = b * cs, tl = Math.hypot(tx, ty), nx = ty / tl, ny = -tx / tl;
+for (let j = 0; j < M; j++) {
+const ph = j / M * Math.PI * 2, c2 = Math.cos(ph) * tube, s2 = Math.sin(ph) * tube;
+pos.push(cx + a * cs + nx * c2, cy + b * sn + ny * c2, cz + s2);
+}
+}
+for (let k = 0; k < N; k++) for (let j = 0; j < M; j++) {
+const a0 = b0 + k * M + j, a1 = b0 + k * M + (j + 1) % M;
+const c0 = b0 + ((k + 1) % N) * M + j, c1 = b0 + ((k + 1) % N) * M + (j + 1) % M;
+idx.push(a0, c0, a1, a1, c0, c1);
+}
+};
+for (const p of pins) {
+const sgn = Math.sign(p.z) || 1;
+const top = p.y - 0.105;
+loop(p.x, top - 0.275, p.z, 0.10, 0.275);
+loop(p.x, top - 0.230, p.z - sgn * 0.05, 0.065, 0.230);
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+g.setIndex(idx); g.computeVertexNormals();
+return g;
+}
 function ringMesh(rings, mat) {
 const pos = [], idx = [], N = 14;
 rings.forEach(({ cx, cy, r, h, tilt }) => {
@@ -1324,6 +1353,9 @@ const triA2 = (P, Q, R) =>
 Math.abs((Q[0] - P[0]) * (R[1] - P[1]) - (R[0] - P[0]) * (Q[1] - P[1])) / 2;
 const woodDark = mats.spar, canvas = mats.canvas;
 const ropeMat = mats.ropeSolid || woodDark;
+const BELAY = FINE ? bulwarkFurnitureSpec(S, H) : null;
+const belayPins = BELAY && BELAY.pinRail ? BELAY.pins.map(p => Object.assign({ used: null }, p)) : [];
+const belayed = [];
 const cyl = (x, y0, y1, r0, r1, mat, tiltZ = 0) => {
 const h = y1 - y0;
 const g = new THREE.CylinderGeometry(r1, r0, h, 9, 1, true);
@@ -1805,6 +1837,27 @@ const hz = Math.abs(surfacePoint(S, H, uc, 1)[2]) * 0.96;
 return V3((uc - 0.5) * L, deckAt(uc) + B * 0.012, sgn * hz);
 };
 const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
+const lead = (list, from, uu, sgn, part) => {
+let best = null, bd = 1e9;
+if (belayPins.length) {
+const xw = (Math.max(0.03, Math.min(0.965, uu)) - 0.5) * L;
+for (const p of belayPins) { if (p.sgn !== sgn || p.used) continue;
+const d = Math.abs(p.x - xw); if (d < bd) { bd = d; best = p; } }
+}
+if (!best) { list.push([from, rail(uu, sgn)]); return; }
+best.used = part;
+const head = V3(best.x, best.y + BELAY.pinH / 2 - 0.03, best.z);
+const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+const rec = { part, mast: mi, side: sideName(sgn), pin: R3(best), head: R3(head), from: R3(from), lead: 'direct' };
+const capHalf = Math.abs(surfacePoint(S, H, best.u, 1)[2]);
+if (Math.abs(from.z) > capHalf + 0.05) {
+const rc = S.capM ? S.capM / 1.6 : B * 0.016;
+const fair = V3(best.x, H.sheer(best.u) + rc * 1.6 + 0.02, sgn * (capHalf - rc * 0.35));
+list.push([from, fair], [fair, head]); rec.lead = 'over the cap'; rec.fair = R3(fair);
+} else list.push([from, head]);
+belayed.push(rec);
+};
+const belaysOf = part => belayed.filter(b => b.part === part && b.mast === mi);
 mastYards.forEach((yd, k) => {
 const above = mastYards[k + 1];
 const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
@@ -1816,8 +1869,8 @@ const clewY = FURLED ? yd.yy - 0.4 : yd.yy - yd.drop * 0.97;
 for (const sgn of [1, -1]) {
 const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2);
 if (k === 0) {
-sheets.push([clew, rail(u + 0.17, sgn)]);
-tacks.push([clew, rail(u - 0.15, sgn)]);
+lead(sheets, clew, u + 0.17, sgn, 'sheet');
+lead(tacks, clew, u - 0.15, sgn, 'tack');
 } else {
 const below = mastYards[k - 1];
 sheets.push([clew, V3(below.cx + sgn * sT * below.half, below.yy,
@@ -1828,8 +1881,8 @@ if (yd.hoist && yd.hoist.tie !== undefined) {
 const sgn = k % 2 ? 1 : -1;
 const hy = segHeads[yd.hoist.tie] !== undefined ? segHeads[yd.hoist.tie] : capY;
 const hd = V3(mx(hy), hy, 0);
-hals.push([V3(yd.cx, yd.yy, 0), hd],
-[hd, rail(u + 0.05 + 0.015 * k, sgn)]);
+hals.push([V3(yd.cx, yd.yy, 0), hd]);
+lead(hals, hd, u + 0.05 + 0.015 * k, sgn, 'halyard');
 } else if (yd.hoist === 'jeers' && segHeads[0] !== undefined) {
 const jb = base + (segHeads[0] - base) * 0.86;
 const zo = Math.max(0.25, B * 0.03);
@@ -1843,9 +1896,13 @@ jeers.push([V3(mx(jb), jb, sgn * zo), blk],
 });
 const rr = B * 0.0004;
 const lm = ropeMesh(lifts, 0.012 + rr, ropeMat);  if (lm) group.add(tag(lm, 'lift'));
-const sm = ropeMesh(sheets, 0.013 + rr, ropeMat); if (sm) group.add(tag(sm, 'sheet'));
-const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(tag(tm, 'tack'));
-const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(tag(hm, 'halyard'));
+const belayTag = (m, part) => { const bl = belaysOf(part); m.userData.belays = bl;
+return tag(m, part, null, bl.length ? PARTS[part].what +
+` Made fast to ${bl.length === 1 ? 'a belaying pin' : bl.length + ' belaying pins'} on the pin rail` +
+`${bl.some(b => b.lead !== 'direct') ? ', led over the cap' : ''}; the fall is coiled on the pin (r277).` : null); };
+const sm = ropeMesh(sheets, 0.013 + rr, ropeMat); if (sm) group.add(belayTag(sm, 'sheet'));
+const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(belayTag(tm, 'tack'));
+const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(belayTag(hm, 'halyard'));
 const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(tag(jm2, 'jeers'));
 }
 const segL = segHeads.length ? (segs[segHeads.length - 1] || 0) : 0;
@@ -2668,6 +2725,14 @@ hs = makeTriSail(tack, head, clew, group, 0.020, 0.97);
 if (hs) hs.position.z = (k - (n - 1) / 2) * B * 0.032;
 }
 }
+}
+if (belayed.length) {
+const cm = new THREE.Mesh(coilGeometry(belayed.map(b => ({ x: b.pin[0], y: b.pin[1], z: b.pin[2] })), BELAY.railT), ropeMat);
+cm.userData.coils = belayed.map(b => ({ part: b.part, side: b.side, pin: b.pin,
+top: +(b.pin[1] - 0.105 + 0.024).toFixed(3), bottom: +(b.pin[1] - 0.105 - 0.55 - 0.024).toFixed(3) }));
+group.add(tag(cm, 'coil', 'Coils',
+`The falls of ${belayed.length} lines (${['sheet', 'tack', 'halyard'].map(p => { const n = belayed.filter(b => b.part === p).length; return n ? n + ' ' + p + (n > 1 ? 's' : '') : null; }).filter(Boolean).join(', ')}) ` +
+'coiled and hung on their belaying pins under the pin rail: a 0.55 m hank a pin, a class figure — a coil is sized to the hand that makes it up, not to the ship.'));
 }
 S.__spars = spars; S.__mastTops = mastTops;
 return sails;
@@ -3591,6 +3656,10 @@ toppingLift: { stage: 6, name: 'Topping lift',
 what: 'The rope from the lower masthead to the outer end of a gaff boom that carries '
 + 'the spar\'s weight and holds that end up. It is why a working boom rises aft, '
 + 'and what the crew top the boom up with to clear the deck when the sail is stowed (r275).' },
+coil:     { stage: 6, name: 'Coils',
+what: 'The fall of a line made fast to a belaying pin, coiled and hung on the pin '
++ 'under the rail so the deck stays clear and the line can be cast off and run '
++ 'with one hand. A pin with no coil on it has nothing belayed to it (r277).' },
 lift:     { stage: 6, name: 'Lifts',
 what: 'The ropes from each yardarm up to the masthead that carry the yard\'s '
 + 'weight and hold it square. With the sail furled they are all that holds '
@@ -3631,6 +3700,66 @@ if (!o) return o;
 const P = PARTS[key];
 o.userData.part = { key, stage: P.stage, name: extra || P.name, what: what || P.what };
 return o;
+}
+function bulwarkFurnitureSpec(S, H) {
+const openHull = deckCovering(S).mode === 0;
+const frameTimbers = !!(S.frames && S.frames.roomAndSpaceM);
+if (openHull || !S.deck || !(S.deck.belowSheerM > 0.3) || frameTimbers) return null;
+const L = S.lwl;
+const deckAtU = u => H.deck(u), railAtU = u => H.sheer(u);
+const BW = S.bulwark || {};
+const pitch = BW.stanchionPitchM || 1.2;
+const sided = BW.stanchionSidedM || 0.12, moulded = BW.stanchionMouldedM || 0.15, gap = 0.05;
+const yPin = BW.pinRailM || 0.95, pinRail = (S.year || 0) >= 1600;
+const railW = 0.16, railT = 0.06, pinPitch = 0.25, pinS = 0.035, pinH = 0.45;
+const read = {
+pitchM: pitch, pitchFrom: BW.stanchionPitchM ? 'record: bulwark.stanchionPitchM' : 'class: 1.2 m, about four feet',
+sidedM: sided, mouldedM: moulded, gapM: gap,
+pinRailM: pinRail ? yPin : null,
+pinRailFrom: !pinRail ? 'none: depicted before 1600, before belaying pins'
+: BW.pinRailM ? 'record: bulwark.pinRailM' : 'class: 0.95 m over the deck',
+pinPitchM: pinPitch, stanchionsX: [] };
+const skinAt = (u, y) => { const fb = H.sheer(u);
+return surfacePoint(S, H, u, fb > 0 ? Math.max(0.62, Math.min(1, 0.62 + 0.38 * y / fb)) : 1); };
+const wallAt = u => H.stepTop(u) === null && railAtU(u) - deckAtU(u) >= 0.3;
+const stations = [];
+for (let k = 0; ; k++) {
+const u = 0.05 + k * pitch / L;
+if (u > 0.95) break;
+if (!wallAt(u)) continue;
+stations.push({ u, fb: railAtU(u), yD: deckAtU(u) });
+}
+const runs = [], pins = [];
+if (pinRail && stations.length) {
+const NU = 90;
+for (const sgn of [-1, 1]) {
+let run = [];
+const flush = () => {
+if (run.length < 2) { run = []; return; }
+runs.push({ sgn, pts: run });
+const x0 = run[0].x, x1 = run[run.length - 1].x, n = Math.max(1, Math.floor((x1 - x0) / pinPitch));
+for (let k = 0; k <= n; k++) {
+const x = x0 + (x1 - x0) * (k / n);
+let j = 0; while (j < run.length - 2 && run[j + 1].x < x) j++;
+const t = (x - run[j].x) / Math.max(1e-6, run[j + 1].x - run[j].x);
+const y = run[j].y + (run[j + 1].y - run[j].y) * t, zi = run[j].zi + (run[j + 1].zi - run[j].zi) * t;
+const u = run[j].u + (run[j + 1].u - run[j].u) * t;
+pins.push({ x, y: y + 0.05, z: sgn * (zi + railW / 2), sgn, u });
+}
+run = [];
+};
+for (let i = 0; i <= NU; i++) {
+const u = 0.035 + (i / NU) * 0.93;
+const yD = deckAtU(u);
+if (!wallAt(u) || railAtU(u) - yD < yPin + 0.15) { flush(); continue; }
+const p = skinAt(u, yD + yPin);
+run.push({ u, x: p[0], y: yD + yPin, zi: Math.abs(p[2]) - gap - moulded - railW });
+}
+flush();
+}
+}
+return { BW, pitch, sided, moulded, gap, yPin, pinRail, railW, railT, pinPitch, pinS, pinH,
+read, skinAt, stations, runs, pins };
 }
 function buildFittings(S, group, mats) {
 const timberShip = !(S.build === 'iron' || S.build === 'steel');
@@ -3687,30 +3816,10 @@ const railMat = (S.build === 'steel' || S.build === 'iron')
 : pale;
 group.add(tag(new THREE.Mesh(g, railMat), 'rail'));
 }
-const frameTimbers = !!(S.frames && S.frames.roomAndSpaceM);
-if (!openHull && S.deck && S.deck.belowSheerM > 0.3 && !frameTimbers) {
-const BW = S.bulwark || {};
-const pitch = BW.stanchionPitchM || 1.2;
-const sided = BW.stanchionSidedM || 0.12, moulded = BW.stanchionMouldedM || 0.15, gap = 0.05;
-const yPin = BW.pinRailM || 0.95, pinRail = (S.year || 0) >= 1600;
-const railW = 0.16, railT = 0.06, pinPitch = 0.25, pinS = 0.035, pinH = 0.45;
-const read = {
-pitchM: pitch, pitchFrom: BW.stanchionPitchM ? 'record: bulwark.stanchionPitchM' : 'class: 1.2 m, about four feet',
-sidedM: sided, mouldedM: moulded, gapM: gap,
-pinRailM: pinRail ? yPin : null,
-pinRailFrom: !pinRail ? 'none: depicted before 1600, before belaying pins'
-: BW.pinRailM ? 'record: bulwark.pinRailM' : 'class: 0.95 m over the deck',
-pinPitchM: pinPitch, stanchionsX: [] };
-const skinAt = (u, y) => { const fb = H.sheer(u);
-return surfacePoint(S, H, u, fb > 0 ? Math.max(0.62, Math.min(1, 0.62 + 0.38 * y / fb)) : 1); };
-const wallAt = u => H.stepTop(u) === null && railAtU(u) - deckAtU(u) >= 0.3;
-const stations = [];
-for (let k = 0; ; k++) {
-const u = 0.05 + k * pitch / L;
-if (u > 0.95) break;
-if (!wallAt(u)) continue;
-stations.push({ u, fb: railAtU(u), yD: deckAtU(u) });
-}
+const BF = bulwarkFurnitureSpec(S, H);
+if (BF) {
+const { BW, pitch, sided, moulded, gap, yPin, pinRail, railW, railT, pinPitch, pinS, pinH,
+read, skinAt, stations } = BF;
 const UP = new THREE.Vector3(0, 1, 0);
 for (const sgn of [-1, 1]) for (const st of stations) {
 const pf = skinAt(st.u, st.yD), ph = skinAt(st.u, st.fb - 0.05);
@@ -3732,7 +3841,7 @@ if (sgn > 0) read.stanchionsX.push(+foot.x.toFixed(3));
 }
 if (pinRail && stations.length) {
 const pos = [], idx = [], ppos = [], pidx = [];
-const NU = 90; let base = 0;
+let base = 0;
 const pushBox = (cx, cy, cz, sx, sy, sz) => {
 const X = sx / 2, Y = sy / 2, Z = sz / 2, b0 = ppos.length / 3;
 const F = [[[1,0,0],[0,1,0],[0,0,1]], [[-1,0,0],[0,1,0],[0,0,-1]], [[0,1,0],[0,0,1],[1,0,0]],
@@ -3743,10 +3852,7 @@ ppos.push(cx + X * (n[0] + sa * a[0] + sb * b[0]), cy + Y * (n[1] + sa * a[1] + 
 const o = b0 + f * 4; pidx.push(o, o + 1, o + 2, o, o + 2, o + 3);
 });
 };
-for (const sgn of [-1, 1]) {
-let run = [];
-const flush = () => {
-if (run.length < 2) { run = []; return; }
+for (const { sgn, pts: run } of BF.runs) {
 const start = base;
 for (const q of run)
 pos.push(q.x, q.y - railT / 2, sgn * (q.zi + railW), q.x, q.y + railT / 2, sgn * (q.zi + railW),
@@ -3755,25 +3861,9 @@ for (let i = 0; i < run.length - 1; i++) {
 const a = start + i * 4, b = a + 4;
 for (let f = 0; f < 4; f++) { const c = (f + 1) % 4; idx.push(a + f, b + f, a + c, a + c, b + f, b + c); }
 }
-const x0 = run[0].x, x1 = run[run.length - 1].x, n = Math.max(1, Math.floor((x1 - x0) / pinPitch));
-for (let k = 0; k <= n; k++) {
-const x = x0 + (x1 - x0) * (k / n);
-let j = 0; while (j < run.length - 2 && run[j + 1].x < x) j++;
-const t = (x - run[j].x) / Math.max(1e-6, run[j + 1].x - run[j].x);
-const y = run[j].y + (run[j + 1].y - run[j].y) * t, zi = run[j].zi + (run[j + 1].zi - run[j].zi) * t;
-pushBox(x, y + 0.05, sgn * (zi + railW / 2), pinS, pinH, pinS);
+base += run.length * 4;
 }
-base += run.length * 4; run = [];
-};
-for (let i = 0; i <= NU; i++) {
-const u = 0.035 + (i / NU) * 0.93;
-const yD = deckAtU(u);
-if (!wallAt(u) || railAtU(u) - yD < yPin + 0.15) { flush(); continue; }
-const p = skinAt(u, yD + yPin);
-run.push({ x: p[0], y: yD + yPin, zi: Math.abs(p[2]) - gap - moulded - railW });
-}
-flush();
-}
+for (const p of BF.pins) pushBox(p.x, p.y, p.z, pinS, pinH, pinS);
 const mkG = (P, I) => { const gg = new THREE.BufferGeometry();
 gg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); gg.setIndex(I); gg.computeVertexNormals(); return gg; };
 const railMesh = new THREE.Mesh(mkG(pos, idx), wood);
@@ -3783,6 +3873,7 @@ group.add(tag(railMesh, 'pinRail', 'Pin rail',
 `${railW.toFixed(2)} wide on the stanchions’ inner faces, bored for a belaying pin every ${pinPitch.toFixed(2)} m.`));
 const pinsMesh = new THREE.Mesh(mkG(ppos, pidx), wood);
 pinsMesh.userData.bulwarkFurniture = read;
+pinsMesh.userData.pins = BF.pins.map(p => [+p.x.toFixed(3), +p.y.toFixed(3), +p.z.toFixed(3)]);
 group.add(tag(pinsMesh, 'pinRail', 'Belaying pins',
 `The pins standing through the pin rail, ${pinH.toFixed(2)} m long, one every ${pinPitch.toFixed(2)} m; a line is made fast with figure-of-eight turns round the pin above and below the rail.`));
 }
