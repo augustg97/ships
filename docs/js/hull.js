@@ -1558,7 +1558,7 @@ if (par) group.add(tag(par, 'parrel'));
 }
 const drop = yy - prevYard;
 prevYard = yy;
-mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist });
+mastYards.push({ yy: yY, cx: ym.position.x, half: yardLen / 2, drop, hoist, r: slingsD / 2 });
 if (FURLED) {
 const sT2 = Math.sin(TRIM), cT2 = Math.cos(TRIM), w2 = yardLen * 0.48;
 sails.push(makeFurl(
@@ -1889,6 +1889,7 @@ const sT = Math.sin(TRIM), cT = Math.cos(TRIM);
 const V3 = (px, py, pz) => new THREE.Vector3(px, py, pz);
 const rail = railAt;
 const lifts = [], sheets = [], tacks = [], hals = [], jeers = [];
+const clewlines = [], buntlines = [], gearBlocks = [], gearRec = { clews: [], bunts: [] };
 const lead = (list, from, uu, sgn, part) => leadTo(list, from, uu, sgn, part, mi, () => rail(uu, sgn));
 const belaysOf = part => belayed.filter(b => b.part === part && b.mast === mi);
 mastYards.forEach((yd, k) => {
@@ -1897,10 +1898,12 @@ const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
 for (const sgn of [1, -1])
 lifts.push([V3(yd.cx + sgn * sT * yd.half, yd.yy, sgn * cT * yd.half),
 V3(mx(hL), hL, 0)]);
-const w2 = yd.half * (FURLED ? 0.45 : 0.96);
+const gq = (k === 0 && mk.courseGear && mk.courseGear.garnetAt) || 0.45;
+const w2 = yd.half * (FURLED ? gq : 0.96);
 const clewY = FURLED ? yd.yy - 0.4 : yd.yy - yd.drop * 0.97;
+const clews = {};
 for (const sgn of [1, -1]) {
-const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2);
+const clew = V3(yd.cx + sgn * sT * w2, clewY, sgn * cT * w2); clews[sgn] = clew;
 if (k === 0) {
 lead(sheets, clew, u + 0.17, sgn, 'sheet');
 lead(tacks, clew, u - 0.15, sgn, 'tack');
@@ -1909,6 +1912,54 @@ const below = mastYards[k - 1];
 sheets.push([clew, V3(below.cx + sgn * sT * below.half, below.yy,
 sgn * cT * below.half)]);
 }
+}
+const fifeHere = S.__belay && S.__belay.spec.fifeRails.some(f => f.mast === mi);
+if (k === 0 && fifeHere) {
+const CG = mk.courseGear || {};
+const buntAt = (Array.isArray(CG.buntlineAt) && CG.buntlineAt.length) ? CG.buntlineAt : [0.30, 0.65];
+const width = yd.half * 2 * 0.96, height = yd.drop * 0.97, half = yd.half;
+const sailPt = (sgn, t, v, proud) => {
+const uu = 0.5 - sgn * t / 2, arch = Math.sin(Math.PI * uu);
+const xw = (uu - 0.5) * width * (1 - 0.022 * arch * 0.55);
+const footY = -height + 0.085 * height * arch, y = footY * v;
+const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (uu - 0.40)));
+const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
+const zb = Math.max(0, chord) * depth + proud;
+return V3(yd.cx - xw * sT - zb * cT, yd.yy + y, -xw * cT + zb * sT);
+};
+const jb = base + (segHeads[0] !== undefined ? segHeads[0] - base : capY - base) * 0.86;
+const R3 = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+const PROUD = 0.14;
+for (const sgn of [1, -1]) {
+const GB = V3(yd.cx + sgn * sT * gq * half, yd.yy - yd.r - 0.05, sgn * cT * gq * half);
+const MB = V3(mx(yd.yy), yd.yy - yd.r - 0.10, sgn * (mastRAt(yd.yy) + 0.15));
+const clew = clews[sgn];
+if (FURLED) clewlines.push([clew, GB]);
+else { let prev = clew;
+for (let j = 1; j <= 4; j++) { const t = 1 + (gq - 1) * j / 4, v = 1 - j / 4;
+const p = j < 4 ? sailPt(sgn, t, v, PROUD) : GB; clewlines.push([prev, p]); prev = p; } }
+clewlines.push([GB, MB]);
+leadTo(clewlines, MB, u + 0.01, sgn, 'clewline', mi, () => MB, 'fife');
+gearBlocks.push(['clew garnet block', GB], ['clew garnet lead', MB]);
+gearRec.clews.push({ side: sideName(sgn), clew: R3(clew), block: R3(GB), mastBlock: R3(MB) });
+buntAt.forEach((f, j) => {
+const TB = V3(mx(jb - 0.15 * j), jb - 0.15 * j, sgn * (mastRAt(jb - 0.15 * j) + 0.18 + 0.10 * j));
+let foot;
+if (FURLED) { foot = V3(yd.cx + sgn * sT * f * half - cT * 0.30, yd.yy + 0.30, sgn * cT * f * half + sT * 0.30); buntlines.push([foot, TB]); }
+else { foot = sailPt(sgn, f, 1, PROUD); let prev = foot;
+for (let q = 1; q <= 4; q++) { const t = f + (0.06 - f) * q / 4, v = 1 - q / 4;
+const p = sailPt(sgn, t, v, PROUD); buntlines.push([prev, p]); prev = p; }
+buntlines.push([prev, TB]); }
+leadTo(buntlines, TB, u + 0.01, sgn, 'buntline', mi, () => TB, 'fife');
+gearBlocks.push(['buntline block', TB]);
+gearRec.bunts.push({ side: sideName(sgn), at: f, foot: R3(foot), top: R3(TB) });
+});
+}
+Object.assign(gearRec, { mast: mi, state: FURLED ? 'furled' : 'set', garnetAt: gq,
+garnetFrom: (CG.garnetAt ? 'record: masts[].courseGear.garnetAt' : 'class: 0.45 of the half-yard'),
+buntlineAt: buntAt, buntlineFrom: (Array.isArray(CG.buntlineAt) ? 'record: masts[].courseGear.buntlineAt' : 'class: 0.30 and 0.65 of the half-yard'),
+leadFrom: 'class: the garnet in under the yard to the mast, the buntlines to blocks under the top, every fall down the mast\'s side abaft the yard to the fife rail',
+provenance: CG.provenance || null, yard: { cx: +yd.cx.toFixed(3), yy: +yd.yy.toFixed(3), half: +half.toFixed(3), r: +yd.r.toFixed(3) }, topBlockY: +jb.toFixed(3) });
 }
 if (yd.hoist && yd.hoist.tie !== undefined) {
 const sgn = k % 2 ? 1 : -1;
@@ -1938,6 +1989,33 @@ const sm = ropeMesh(sheets, 0.013 + rr, ropeMat); if (sm) group.add(belayTag(sm,
 const tm = ropeMesh(tacks, 0.013 + rr, ropeMat);  if (tm) group.add(belayTag(tm, 'tack'));
 const hm = ropeMesh(hals, 0.011 + rr, ropeMat);   if (hm) group.add(belayTag(hm, 'halyard'));
 const jm2 = ropeMesh(jeers, 0.015 + rr, ropeMat); if (jm2) group.add(belayTag(jm2, 'jeers'));
+if (clewlines.length || buntlines.length) {
+const gearCard = what => what + (gearRec.provenance ? ' Read off a plate of this ship: ' + gearRec.provenance.split('. ')[0] + '.' : ' Drawn to class figures; no plate of this ship has been read for them.')
++ ' The falls come down the mast\'s side abaft the yard to the fife rail.';
+const cm = ropeMesh(clewlines, 0.012 + rr, ropeMat);
+if (cm) { cm.userData.courseGear = gearRec; cm.userData.belays = belaysOf('clewline');
+group.add(tag(cm, 'clewline', null, gearCard(PARTS.clewline.what) + ` Made fast to ${cm.userData.belays.length} belaying pins on the fife rail; the falls are coiled there.`)); }
+const bm3 = ropeMesh(buntlines, 0.011 + rr, ropeMat);
+if (bm3) { bm3.userData.courseGear = gearRec; bm3.userData.belays = belaysOf('buntline');
+group.add(tag(bm3, 'buntline', null, gearCard(PARTS.buntline.what) + ` ${gearRec.bunts.length} buntlines, ${gearRec.buntlineAt.length} a side, made fast to ${bm3.userData.belays.length} belaying pins on the fife rail; the falls are coiled there.`)); }
+const rB = (0.14 + B * 0.004) / 2, lB = 0.08 + B * 0.004;
+const Pp = [], Nn = [], Ii = []; let off0 = 0;
+for (const [, p] of gearBlocks) {
+const gg = new THREE.CapsuleGeometry(rB, lB, 2, 8); gg.translate(p.x, p.y, p.z);
+const pa = gg.attributes.position.array, na = gg.attributes.normal.array, ia = gg.index.array;
+for (let q = 0; q < pa.length; q++) { Pp.push(pa[q]); Nn.push(na[q]); }
+for (let q = 0; q < ia.length; q++) Ii.push(ia[q] + off0);
+off0 += gg.attributes.position.count;
+}
+const bg = new THREE.BufferGeometry();
+bg.setAttribute('position', new THREE.Float32BufferAttribute(Pp, 3));
+bg.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3));
+bg.setIndex(Ii);
+const gbm = new THREE.Mesh(bg, woodDark);
+const R3b = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+gbm.userData.blocks = gearBlocks.map(([role, p]) => ({ role, at: R3b(p), mast: mi }));
+group.add(tag(gbm, 'block', null, PARTS.block.what + ` ${gearBlocks.length} on this mast for the course's gear: a clew garnet block under the yard and its lead at the mast each side, and a block under the top for every buntline (r281).`));
+}
 }
 const segL = segHeads.length ? (segs[segHeads.length - 1] || 0) : 0;
 const truckY = segHeads.length
@@ -3456,6 +3534,16 @@ what: 'The heaviest purchase on the ship. Falconer, 1780: "an assemblage of '
 + 'middle of the yard", the falls leading down to the deck. The course '
 + 'yard, tons of timber, hangs in these; the drawing leads both falls down '
 + 'their own side where Falconer crosses them behind the mast.' },
+clewline: { stage: 6, name: 'Clewlines',
+what: 'The clew garnet: the line from each clew of the course up the fore face of the sail '
++ 'to a block under the yard about half-way out along the half-yard, in under the yard '
++ 'to the mast and down to the fife rail. Hauled, it brings the clew up to the yard — '
++ 'the first thing done to take a course in (r281).' },
+buntline: { stage: 6, name: 'Buntlines',
+what: 'The lines bent to cringles along the foot of a square sail that run up its FORE face to '
++ 'blocks under the top and down the mast to the fife rail. Hauled, they lift the body '
++ 'of the sail — the bunt — up to the yard so it can be furled; on a set sail they lie '
++ 'slack along the canvas, the lines a plate shows running up the face of a course (r281).' },
 sheave:   { stage: 4, name: 'Masthead sheave',
 what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave '
 + 'turns in a slot cut through the head of the pole itself, on a pin '

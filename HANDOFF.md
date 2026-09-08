@@ -25232,3 +25232,162 @@ uncommitted, deliberately; the r280 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js names addFifeRail 3 times and fifeRail 10; docs/audit-hulls.js carries 'a square mast with no fife rail' (1 found) and reads 'Fife rail pins' (5); docs/data/vessels.json names fifeRail 1 time(s) (Endurance's record); web/js/hull.js against HEAD~1:  1 file changed, 97 insertions(+), 13 deletions(-); the build read first paint 8.44 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN (every baseline had been scored at the r279 tree once the backlog was done). THE CLEAN-HEAD BACKLOG (24 frames, HEAD 0694c4e, r280/chain-backlog.sh, 19–71 s a frame): 24 scored, 1 beyond the gate — aboard-cable 0.058%/0.025 (ACCEPTED: r279's gaff halyards on Great Eastern). THE r280 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r280/chain-close-checks.sh (the MUST frame first, then the MAY neighbours) at 45–154 s a frame: 6 frames scored, 0 beyond the gate, of which 0 ACCEPTED with a reason each (FRAME-LOG.md): none. 6 inside the gate (0 at 0.000%/0.000), the largest of those ship-ever-given 0.034%/0.024, ship-azzam 0.023%/0.028, ship-container 0.015%/0.015. Left unscored at the r280 tree (59): globe-default globe-crossing globe-steam globe-modern globe-era-card action ship-dhow ship-junk ship-canoe ship-great-eastern ship-usv ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune ship-carrier ship-titanic ship-yamato descent descent-high descent-coast aboard aboard-off map-floor aboard-coast sea-magnified ship-preussen ship-steamer ship-dreadnought aboard-carrier aboard-cable aboard-titanic aboard-yamato aboard-preussen ship-wyoming aboard-wyoming ship-treasure aboard-treasure ship-clipper aboard-clipper shipwright-ahead shipwright-astern shipwright-furled shipwright-hounds shipwright-corbis action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang wake-plan sea-ever-given passage-sahul sea-dugout-floor sea-canoe-floor ship-slave-ship ship-carrack — of these, every frame the change cannot reach (every hull without a pin rail is byte-identical) stands as scored at the r279 tree; the clean-HEAD backlog r281 opens with is the MAY neighbours not reached here, if any.
 Two commits close the round (be3b33c builder + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 281 — 2026-09-08 — the course's clewlines and buntlines, made fast to the fife rail: r280 built the rail at Endurance's fore mast and its fourteen pins stood bare, because the falls that belong there were drawn by no builder; Hurley's plate of her under full sail, taken from ahead, shows on the fore face of the set course four buntlines, two a side, running up the canvas from the foot toward the slings, and each clew garnet leaving its clew for the yard at about half the half-yard; the record carries that read, the builder draws each line ON the cloth by sampling the sail's own surface, leads the garnets in under the yard to the mast and the buntlines to blocks under the top, brings every fall down the mast's side abaft the yard to the fife rail's side pins and hangs the coils, a block at every turn; the audit convicts the silence and reads every point off the meshes; every hull without a fife rail is byte-identical
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r280's entry ordered r281 to check `uptime` and
+`ps -r` FIRST and to score only what its receipt listed as unscored. At the open (09:47) the load was 5.03 (5.78 and 8.33
+over 5 and 15 minutes), nothing hot, the loop driver holding the lock (round starting 09:46:47). r280's receipt: every
+frame its change could not reach stands as scored at the r279 tree and all four MAY neighbours were scored, so the
+clean-HEAD backlog was EMPTY and no opening ratchet was run (the r279 memory rule). Every edit was made on the :8150 copy
+(r281/web, symlinks with real copies of hull.js, vessels.json and audit-hulls.js) and copied into web/ by r281/copy-in.sh
+after the proofs and the before-witnesses (chain.log, cmp-identical). :8151 still answers with a 783 KB hull.js — the
+days-old server r280 caught; nothing this round read from it.**
+
+**THE PLATE READ FIRST. Hurley's plate of Endurance under full sail (build/hurley-fullsail.jpg, 2828 x 3912, taken from
+AHEAD with the ship beset) shows the fore face of the set fore course whole; the course was cropped at full resolution
+(r281/fullsail-course-crop.png, 1540 x 890, the yard spanning ~1440 px → ~90 px/m at the yard; fullsail-yard-2x.png the
+yard at 2x). What it shows, read at that scale: FOUR lines running up the face of the sail from its foot, two a side,
+converging on the slings — the buntlines, their feet at about 0.3 and 0.65 of the half-yard (± 0.1 at this scale), and a
+block hanging on the canvas mid-height where one of them turns; the foot gathered into bights between them; and from each
+CLEW a line rising to the yard at about half the half-yard — the left one meets the yard at x ≈ 380 of a 40–1480 span
+(0.53 of the half), the right at ≈ 1100 (0.47): the clew garnets, 0.50 ± 0.05. The plate STOPS AT THE YARD: where these
+falls belay is not on it, nor the lead blocks under the top; both stand as class arrangements and the record says so
+(masts[0].courseGear.provenance). r280's eight plates of the foot are unchanged: none reaches it.**
+
+**THE FAULT (0y⁸¹, as r280 named it). The fife rail's fourteen pins were bare because no builder drew the lines a fife
+rail exists for. A course is taken in by two kinds of line: the CLEW GARNET (the clewline of the lower sail) runs from each
+clew up the fore face of the sail to a block under the yard part-way out along the half-yard, in under the yard to a lead
+block at the mast and down the mast's side to the rail — hauled, it brings the clew up to the yard; the BUNTLINES are bent
+to cringles on the foot and run up the FORE face of the cloth to lead blocks under the top and down the mast — hauled,
+they lift the bunt to the yard for furling. Set, they lie slack along the canvas, which is what the plate shows.**
+
+**THE BUILDER (web/js/hull.js; r281/apply-builder-edits.py, six replaces asserted, re-runnable from hull.before.js;
+parsed by node's vm). (1) `mastYards` carries each yard's radius (`r: slingsD / 2`), so the garnet block can hang under
+the spar. (2) ONE figure for the garnet block and the hauled-up clew: `gq` is the record's `masts[i].courseGear.garnetAt`
+on the course, else 0.45 — the class share the furled clew has hung at since r59 — and the furled clew now hangs at `gq`
+of the half (on every hull without a record, 0.45, byte-identical). (3) The gear, in the mast-yards loop after the clew
+loop, for the course (k === 0) where `S.__belay.spec.fifeRails` names this mast: `sailPt(sgn, t, v, proud)` returns a
+point on the cloth's own smooth surface — makeSail's roach (0.085), hollow (0.022), draft (chord peaking 0.40 aft of the
+luff, depth 0.115 of the width growing to the foot), WITHOUT its crease, roband and slack noise — in hull space through
+the yard's centre, its braced direction (sT, cT) and the forward normal (−cT, +sT), then `proud` metres before the cloth;
+so a line drawn through samples of it lies ON the fore face as the plate shows and cannot pass through the belly, which a
+straight chord from the foot to the yard would. Each clew garnet: from the clew (the sheet's own V3) through three
+samples along the cloth to (gq, head) then the block GB under the yard at gq of the half (yard radius + 0.05 under it),
+GB → MB, the lead block at the mast on the axis at the yard's height (mast radius + 0.15 to its side, yard radius + 0.10
+under), MB → the fife rail through `leadTo(…, 'clewline', mi, () => MB, 'fife')`. Each buntline, at f of the half from
+the record's `buntlineAt` (class 0.30, 0.65): from the foot at f through four samples along the cloth to (0.06, head) at
+the slings, then to TB, a block under the top on the mast's side — jb = 0.86 of the lower mast, the jeers' station,
+stepped 0.15 m and 0.10 m between the two a side — and down through leadTo with rail 'fife'. THE FALLS COME DOWN ABAFT
+THE YARD: the yard lies against the mast's fore face (r257), so a fall dropped before the mast would pass through the
+spar; MB and TB stand at the axis's x, and the side pins lie at and abaft the station, so every fall clears the yard's
+after face (probe: by 0.2 m at the yard's height). Furled: the clew hangs under its garnet block (clew → GB → MB → pin)
+and each buntline runs from the roll's fore face at f to its TB and down. (4) Meshes 'Clewlines' (key clewline) and
+'Buntlines' (key buntline), each carrying userData.courseGear (mast, state, garnetAt/From, buntlineAt/From, leadFrom,
+provenance, the yard's centre/half/radius, clews[] with clew/block/mastBlock, bunts[] with at/foot/top) and
+userData.belays through belaysOf; one 'Blocks' mesh of capsules (the r279 block) at all eight turns, userData.blocks
+recording role and centre. The card names the plate where the record has one, the class figures where it does not, and
+the fife rail. (5) NEW PARTS keys `clewline` and `buntline` (stage 6). Gated on the fife rail: the twelve square-rigged
+hulls without one draw nothing new (byte-identical) — their falls would need the deck-beside-the-mast end and a full
+ratchet, a named residual below.**
+
+**THE RECORD (web/data/vessels.json; r281/apply-record-edits.py, json round-tripped at indent 2, seven lines added):
+Endurance's fore mast gains `courseGear: { garnetAt: 0.50, buntlineAt: [0.30, 0.65], provenance }` — the plate, its size
+and scale, what was read and its bound, and what the plate does not show (the belay, the blocks under the top).**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r281/apply-audit-edits.py, re-runnable from
+audit-hulls.before.js). NEW A-COURSE-GEAR, on the set build (the audit's furled build is coarse, so the FINE-gated gear
+is not on it): where a 'Fife rail pins' mesh stands, every square mast whose record's yards include a course must carry a
+Clewlines and a Buntlines mesh recording that mast — the silence convicts ('a course with no clewlines', 'a course with no
+buntlines', the r280 state); the record must answer ('course gear with no answer'); each recorded clew garnet must start
+AT THE CLEW (within 0.10 of the Sheets mesh's recorded `from` on that side), its block must hang on the course yard's line
+(the lowest athwart 'Yard' mesh within 1.5 m of the station, read by principal axis: within the yard's radius + 0.20 of
+the axis and 0.30–0.70 of the half-yard out) and its mast lead within 0.6 of the station in plan; each buntline must start
+at the FOOT (0.55–1.05 of the clew's drop under the yard) and rise to a block 0.5 m or more over the yard within 0.8 of
+the station, two or more a side; every recorded point must have a vertex of its own mesh within 0.10 ('course gear drawn
+elsewhere'), a Blocks mesh must record a block within 0.05 of every turn ('a turn with no block'), every belay must be on
+rail 'fife', and a hull with no fife rail may carry neither mesh. A-BELAY reads both meshes as falls (the pin, the head,
+the coil, no shared pin, nothing ending under the rail).**
+
+**PROOFS (r281/chain.log; each audit alone in its browser on :8150, except the first FINAL, which timed out at 150 s
+beside the frame checks at a load of 53 and was re-run alone). PROOF B (the r280 builder hull.before.js on the r281 audit,
+10:13): 2 — 'a course with no clewlines' and 'a course with no buntlines' on Endurance's mast 0 (station 0.209), the r280
+state. PROOF C (hull.proof-c.js: the garnet block drawn at the YARDARM, gq → 1.0 in the block's position only, the record
+and the rope unchanged, 10:15): 2 — 'a clew garnet block off the yard's quarter', port and starboard, the block at 1.00 of
+the half-yard against 0.30–0.70, read off the Yard mesh's principal axis (radius 0.17). PROOF R (the r281 builder with the
+record silent, vessels.before.json, 10:17): 1 — 'course gear with no answer' (the builder fell back to the class figures
+0.45 / 0.30, 0.65 and drew them; the audit convicted the silence, the r108 rule). FINAL2 (the audit as shipped, md5
+ad2bf633, 10:30): "checked 33 hulls, 0 problems". The builder and the record were restored cmp-identical after each proof.
+r281/chain.sh's first pass set `PY` to the Studio interpreter's path and used it UNQUOTED, so every browser step died in one
+second on the space in "Modeling Studio" while the copy-in ran; chain2.sh re-ran the proofs quoted, with a :8152 server on
+the r280 builder and record for the before-witnesses (memory: quote-studio-python-path-in-chain-scripts).**
+
+**MEASURED (r281/probe-endurance.out, SHIPS_HULL.buildShip on the :8150 copy, hull space, x aft-positive, y over the
+keel). Course yard: centre x −12.277, y 13.520, half 8.225, radius 0.160. Clews at (−9.644, 5.175, 7.444) and (−14.910,
+5.175, −7.444) — the Sheets mesh's own `from` points, to the millimetre. Garnet blocks at (−10.906, 13.310, 3.877) and its
+mirror: 0.50 of the half along the braced yard (0.5 x 8.225 x cos 0.34 = 3.88 in z). Mast leads at (−12.012, 13.260,
+±0.255), on the axis at the yard's height. Buntline feet at y 5.807 (f 0.30) and 5.545 (f 0.65), 0.92 and 0.96 of the
+clew's 8.345 m drop under the yard; top blocks at y 18.377 and 18.227, |z| 0.275 and 0.375. The falls: the clewlines to
+the aft-most side pin each side (−11.228, 3.309, ±0.828), the buntlines to (−11.519) and (−11.811) — the three aft-most
+pins of each side rail, the fore rail's six still bare (a residual). Every recorded point within 0.021 m of its rope's
+vertices, every head within 0.021 of the pin's head; Clewlines 96 vertices, Buntlines 192, lowest vertices y 3.502 (the
+pin heads); eight blocks on the fore mast (two garnet blocks, two leads, four buntline blocks) beside the gaff masts' six
+each; 24 coils (18 + 2 clewlines + 4 buntlines). The FURLED build (probe-endurance-furled.out): the clews hang under their garnet blocks, 2 clewline and 4 buntline belays on the same pins, the buntlines' feet on the roll's fore face at y 13.82 (0.30 over the yard), every recorded point within 0.021 of its rope, 24 coils.**
+
+**THE FRAMES (r281/PREDICTIONS-close.md, written before any frame of the r281 tree was scored): MUST move —
+ship-endurance. MAY move — her berth neighbours within three (ship-azzam, ship-ever-given, ship-container,
+ship-queen-mary-2) and shipwright, by the berth-neighbour flap only. MUST NOT — every other frame. Witnessed BEFORE any
+frame was scored, from high on her port bow (b=55, l=35, z=0.6; witness-pb-high-before.png from :8152 on the r280 builder,
+-after.png from :8150): 2,525 changed pixels in one region, columns 728–1052, rows 1094–1465 of the 2880 frame — the fore
+face of the course on the camera's side; read at 2x (crop-pb-high-2x-before-after.png): in the r280 frame the canvas is
+bare; in the r281 frame four ropes lie ALONG the cloth, two rising from the foot and converging toward the slings, one
+coming down from the yard toward the clew, each following the belly — the lines Hurley's plate shows on the real sail.
+From high abaft her port beam (b=110, l=40, z=0.6; crop-pq-high-before-after.png): 7,313 changed pixels in columns
+782–992, rows 466–1221 — the fore mast from under the top to the fife rail; in the r281 frame the falls come down the
+mast's side abaft the yard to the rail's side pins and three coils hang under the near side rail where in the r280 frame
+its pins were bare. The r281 tree on :8149 scored one frame at a time by r281/chain.sh's check loop (chain-check.log):
+ship-endurance 0.100%/0.046 CHANGED — the diff confined to columns 1089–1203, rows 660–1064 of the 2880 frame (the fore
+mast from the top to the rail, 5,292 amplified-diff pixels; crop-endurance-mast-2x-before-after.png shows the new falls
+beside the mast and the extra coils at the foot) — ACCEPTED 10:17 with that reason (FRAME-LOG.md), from the copy the chain
+set aside; ship-azzam 0.023%/0.028, ship-ever-given 0.034%/0.024, ship-queen-mary-2 0.008%/0.011, shipwright
+0.015%/0.005, all inside the gate and at the figures the same frames scored in r280 (the documented berth-neighbour
+flap); ship-container's first check hit the 150 s readiness timeout at a load of 53 (three browsers at once: the check,
+chain2's audit and the loop's own) and was re-run alone at 10:17: 0.015%/0.015, inside the gate. NO baseline of the r281
+tree moved beyond the gate except the MUST frame.**
+
+**Rule 0 on the port-bow-high witness read whole (witness-pb-high-after.png): a rendered barquentine seen from high on
+her port bow on a lit blue-green sea, the fore course drawing toward the camera with its cloths seamed and its belly
+shaded, the topsails and topgallant over it, the bowsprit and headsails to the left, the planked deck and the bulwark's
+pin rail under the sail's foot — not a chart. Three facts a viewer can read off it without a legend: four lines run up
+the face of the course from its foot and meet near the slings, the way the buntlines do on a set sail; a line leaves
+each lower corner of the course for the yard; the course's foot is cut in an upward curve between its two corners, the
+roach, with the deck visible under it.**
+
+**Named residuals, in order:** (0y⁸¹) CLOSED as named — the course's clewlines and buntlines drawn, on the cloth, led
+through blocks and made fast to the fife rail with their coils; what it opened: NEW (0y⁸⁵) THE TWELVE SQUARE-RIGGED HULLS
+WITHOUT A FIFE RAIL DRAW NO CLEWLINES OR BUNTLINES — the gear is gated on the rail because its falls have nowhere else to
+end; drawing it fleet-wide needs the deck-beside-the-mast end (the jeers' fallback) and a full ratchet, and would touch
+every ship-*, aboard-* and action frame with a square course. NEW (0y⁸⁶) THE UPPER SAILS HAVE NO CLEWLINES OR BUNTLINES —
+Endurance's lower and upper topsails and topgallant are taken in by nothing drawn, and the fife rail's six fore pins and
+one side pin a side stand bare; the topsail gear and the leechlines would take them. NEW (0y⁸⁷) THE LEAD UNDER THE TOP
+IS A CLASS ARRANGEMENT — the plate stops at the yard; a masthead plate would settle where the buntlines turn. (0y⁸²)
+(0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as
+r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names
+them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶)
+(0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵)
+(0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²)
+unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵)
+(0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle
+break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r282 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as
+unscored among the frames this change can reach (the r279 memory rule: an empty backlog stops the opening ratchet). Then
+it takes (0y⁸²), the gaff masts' fife rails with the throat and peak halyards moved to them (the same addFifeRail, called
+for a gaff mast, and leadTo asked for 'fife'), or (0y⁸⁶), the topsails' clewlines and buntlines to the fore rail's bare
+pins (the same sailPt on the upper cloths, k > 0), or (0y⁸⁵) fleet-wide with a full ratchet when the machine is quiet
+from the first minute, or the survey's next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788888688 at the build; the push and the live poll are in
+build/staging/r281/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r281 staging stays on disk uncommitted, the r211 convention.**

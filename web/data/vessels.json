@@ -5926,7 +5926,15 @@
               "ltop",
               "utop",
               "tg"
-            ]
+            ],
+            "courseGear": {
+              "garnetAt": 0.5,
+              "buntlineAt": [
+                0.3,
+                0.65
+              ],
+              "provenance": "PLATE READ, r281: Hurley's plate of Endurance under full sail, taken from ahead (build/hurley-fullsail.jpg, 2828x3912; the fore course yard spans ~1440 px of a 1540 px crop, ~90 px/m at the yard), shows on the FORE FACE of the set fore course four buntlines, two a side, leaving the foot at about 0.3 and 0.65 of the half-yard (+/- 0.1) and running up and in across the canvas toward the slings, and each clew garnet leaving its clew for the yard at about half the half-yard (0.50 +/- 0.05) on both sides. The plate stops at the yard: where the falls belay is NOT read from it — the fife rail is the class answer (r280, hull.fifeRail) — and the lead blocks under the top are a class arrangement. A plate of her foredeck from aft would settle the belay; none is in reach (r280)."
+            }
           },
           {
             "at": 0.537,

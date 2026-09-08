@@ -6406,6 +6406,103 @@
       }
     }
 
+    /* ── A-COURSE-GEAR (round 281, 0y⁸¹): THE COURSE'S CLEWLINES AND BUNTLINES ARE DRAWN, AND MADE FAST
+       TO THE FIFE RAIL. r280 built the fife rail and nothing belayed to it: the falls that belong there
+       — the clew garnets and the buntlines of the course — were not drawn by any builder. Read from the
+       BUILT scene, on the set build: where a 'Fife rail pins' mesh stands, every square mast in the
+       record whose yards include a course must carry a 'Clewlines' mesh and a 'Buntlines' mesh recording
+       that mast (userData.courseGear.mast) — the silence convicts ('a course with no clewlines', 'a
+       course with no buntlines', the r280 state). Each recorded clew garnet must START AT THE CLEW (its
+       recorded clew within 0.10 of the Sheets mesh's recorded `from` on the same side — the sheet and the
+       garnet leave the same corner), its block must hang on the course yard's line (read off the lowest
+       'Yard' mesh within 1.5 m of the mast's station, by principal axis: within the yard's radius + 0.20
+       of the axis and between 0.30 and 0.70 of the half-yard out from the slings — a garnet block at the
+       yardarm would be a sheet block), and its mast lead must stand at the mast (within 0.6 in plan of
+       the station). Each recorded buntline must start at the FOOT (its foot between 0.55 and 1.05 of the
+       clew's drop under the yard's height) and rise to a block ABOVE the yard within 0.8 in plan of the
+       mast's station; there must be at least two a side. Every recorded point (clew, block, mast lead,
+       foot, top) must have a vertex of its own rope mesh within 0.10 ('course gear drawn elsewhere'), a
+       'Blocks' mesh must record a block within 0.05 of every turn ('a turn with no block'), every belay
+       of both meshes must be on rail 'fife' ('course gear made fast off the fife rail'), and the record
+       must answer for the figures (masts[i].courseGear: figures or a provenance — a class figure drawn in
+       silence is convicted, the r108 rule). A hull with no fife rail may carry no clewline or buntline
+       mesh (their falls would have nowhere to end). A-BELAY reads the falls themselves: the pin, the
+       head, the coil, no shared pin. */
+    {
+      const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+      const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+        for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+      const fifePinsM = [], clewM = [], buntM = [], sheetM = [], blockM = [], yardM = [];
+      g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
+        if (p.key === 'fifeRail' && p.name === 'Fife rail pins') fifePinsM.push(o);
+        else if (p.key === 'clewline') clewM.push(o);
+        else if (p.key === 'buntline') buntM.push(o);
+        else if (p.key === 'sheet') sheetM.push(o);
+        else if (p.key === 'block') blockM.push(o);
+        else if (p.key === 'yard' && p.name === 'Yard') yardM.push(o); });
+      const L = H.lwl || H.loa;
+      const D3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+      const near = (P, c) => { let d = 1e9; for (const q of P) d = Math.min(d, Math.hypot(q.x - c[0], q.y - c[1], q.z - c[2])); return d; };
+      if (!fifePinsM.length) {
+        if (clewM.length || buntM.length) say(v.id, 'course gear on a hull with no fife rail', `${clewM.length} Clewlines and ${buntM.length} Buntlines mesh(es) and no Fife rail pins mesh — falls with nowhere to end`);
+      } else {
+        const blocks = [].concat(...blockM.map(o => o.userData.blocks || []));
+        const axisOf = P => { const c = new THREE.Vector3(); for (const q of P) c.add(q); c.divideScalar(P.length);
+          let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0; for (const q of P) { const a = q.x - c.x, b = q.y - c.y, e = q.z - c.z; xx += a * a; xy += a * b; xz += a * e; yy += b * b; yz += b * e; zz += e * e; }
+          let d = new THREE.Vector3(1, 0, 0); for (let it = 0; it < 30; it++) { d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize(); }
+          let tMin = 1e9, tMax = -1e9; for (const q of P) { const t = q.clone().sub(c).dot(d); tMin = Math.min(tMin, t); tMax = Math.max(tMax, t); }
+          let rMax = 0; for (const q of P) { const w = q.clone().sub(c); const t = w.dot(d); if (Math.abs(t) < (tMax - tMin) * 0.1) rMax = Math.max(rMax, w.sub(d.clone().multiplyScalar(t)).length()); }
+          return { c, d, half: (tMax - tMin) / 2, r: rMax }; };
+        const yards = yardM.map(o => axisOf(pts(o))).filter(y => Math.abs(y.c.z) < 0.3 && Math.abs(y.d.z) >= 0.85);
+        for (let i = 0; i < (H.masts || []).length; i++) {
+          const m = H.masts[i]; if (m.rig !== 'square' || !(m.yards || []).includes('course')) continue;
+          const xm = (m.at - 0.5) * L, at = `mast ${i} (station ${m.at})`;
+          const cm = clewM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+          const bm = buntM.filter(o => o.userData.courseGear && o.userData.courseGear.mast === i);
+          if (!cm.length) say(v.id, 'a course with no clewlines', `${at}: a fife rail and a course, and no Clewlines mesh records this mast — the clews cannot be hauled up to the yard`);
+          if (!bm.length) say(v.id, 'a course with no buntlines', `${at}: a fife rail and a course, and no Buntlines mesh records this mast — the foot cannot be lifted to the yard`);
+          if (!cm.length && !bm.length) continue;
+          if (!m.courseGear) say(v.id, 'course gear with no answer', `${at}: clewlines and buntlines drawn and masts[${i}] says nothing of them (courseGear: figures, or a provenance naming the plate read)`);
+          const cand = yards.filter(y => Math.abs(y.c.x - xm) < 1.5).sort((a, b) => a.c.y - b.c.y);
+          const yd = cand[0] || null;
+          if (!yd) say(v.id, 'course gear with no yard', `${at}: no Yard mesh within 1.5 m of the station to read the garnet blocks against`);
+          const sheetFrom = [].concat(...sheetM.map(o => (o.userData.belays || []).filter(b => b.mast === i).map(b => ({ side: b.side, from: b.from }))));
+          for (const o of cm) {
+            const rec = o.userData.courseGear, P = pts(o), bl = o.userData.belays || [];
+            if (!rec.clews || rec.clews.length < 2) { say(v.id, 'a clewline a side wanted', `${at}: ${rec.clews ? rec.clews.length : 0} clew garnet(s) recorded`); }
+            for (const c of rec.clews || []) {
+              const sf = sheetFrom.filter(q => q.side === c.side);
+              const dS = sf.length ? Math.min(...sf.map(q => D3(q.from, c.clew))) : 1e9;
+              if (dS > 0.10) say(v.id, 'a clewline that does not start at the clew', `${at}, ${c.side}: the garnet's recorded clew [${c.clew}] is ${dS < 1e8 ? dS.toFixed(3) + ' m' : 'far'} from the sheet's clew${sf.length ? '' : ' (no sheet belay recorded on this side)'}`);
+              for (const [nm, q] of [['clew', c.clew], ['block', c.block], ['mast lead', c.mastBlock]]) { const d = near(P, q); if (d > 0.10) say(v.id, 'course gear drawn elsewhere', `${at}, the ${c.side} clew garnet's ${nm} [${q}]: nearest Clewlines vertex ${d.toFixed(3)} m away`); }
+              if (yd) { const w = new THREE.Vector3(c.block[0] - yd.c.x, c.block[1] - yd.c.y, c.block[2] - yd.c.z); const t = w.dot(yd.d); const off = w.clone().sub(yd.d.clone().multiplyScalar(t)).length(); const frac = Math.abs(t) / yd.half;
+                if (off > yd.r + 0.20 || frac < 0.30 || frac > 0.70) say(v.id, 'a clew garnet block off the yard\'s quarter', `${at}, ${c.side}: the block [${c.block}] stands ${off.toFixed(2)} m off the course yard's axis (radius ${yd.r.toFixed(2)}) at ${frac.toFixed(2)} of the half-yard (0.30–0.70 wanted)`); }
+              if (Math.hypot(c.mastBlock[0] - xm, c.mastBlock[2]) > 0.6) say(v.id, 'a clew garnet lead off the mast', `${at}, ${c.side}: the lead block [${c.mastBlock}] is ${Math.hypot(c.mastBlock[0] - xm, c.mastBlock[2]).toFixed(2)} m from the mast's station in plan`);
+              for (const q of [c.block, c.mastBlock]) if (!blocks.some(b => D3(b.at, q) < 0.05)) say(v.id, 'a turn with no block', `${at}, the ${c.side} clew garnet turns at [${q}] and no Blocks mesh records a block there`);
+            }
+            for (const b of bl) if (b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} clewline belays on rail '${b.rail}'`);
+            if (!bl.length) say(v.id, 'clewlines belayed nowhere', `${at}: a Clewlines mesh on a hull with a fife rail records no belay`);
+          }
+          for (const o of bm) {
+            const rec = o.userData.courseGear, P = pts(o), bl = o.userData.belays || [];
+            const bunts = rec.bunts || [];
+            for (const side of ['port', 'starboard']) { const nS = bunts.filter(b => b.side === side).length; if (nS < 2) say(v.id, 'too few buntlines', `${at}: ${nS} buntline(s) on the ${side} side (two or more wanted)`); }
+            const clewY = (rec.clews && rec.clews.length ? rec.clews : (cm[0] && cm[0].userData.courseGear.clews) || []).map(c => c.clew[1]);
+            for (const b of bunts) {
+              for (const [nm, q] of [['foot', b.foot], ['top block', b.top]]) { const d = near(P, q); if (d > 0.10) say(v.id, 'course gear drawn elsewhere', `${at}, the ${b.side} buntline at ${b.at}: its ${nm} [${q}] has its nearest Buntlines vertex ${d.toFixed(3)} m away`); }
+              if (yd && clewY.length) { const drop = yd.c.y - Math.min(...clewY), under = (yd.c.y - b.foot[1]) / drop;
+                if (under < 0.55 || under > 1.05) say(v.id, 'a buntline that does not start at the foot', `${at}, the ${b.side} buntline at ${b.at}: its foot [${b.foot}] hangs ${under.toFixed(2)} of the clew's drop under the yard (0.55–1.05 wanted)`); }
+              if (yd && b.top[1] < yd.c.y + 0.5) say(v.id, 'a buntline block under the yard', `${at}, the ${b.side} buntline at ${b.at}: its top block [${b.top}] stands ${(b.top[1] - yd.c.y).toFixed(2)} m over the yard (0.5 or more wanted, under the top)`);
+              if (Math.hypot(b.top[0] - xm, b.top[2]) > 0.8) say(v.id, 'a buntline block off the mast', `${at}, the ${b.side} buntline at ${b.at}: its top block is ${Math.hypot(b.top[0] - xm, b.top[2]).toFixed(2)} m from the mast's station in plan`);
+              if (!blocks.some(q => D3(q.at, b.top) < 0.05)) say(v.id, 'a turn with no block', `${at}, the ${b.side} buntline at ${b.at} turns at [${b.top}] and no Blocks mesh records a block there`);
+            }
+            for (const b of bl) if (b.rail !== 'fife') say(v.id, 'course gear made fast off the fife rail', `${at}: the ${b.side} buntline belays on rail '${b.rail}'`);
+            if (bl.length < bunts.length) say(v.id, 'buntlines belayed nowhere', `${at}: ${bunts.length} buntlines recorded and ${bl.length} belay(s)`);
+          }
+        }
+      }
+    }
+
     /* ── A-BELAY (round 277, 0y⁷¹): A FALL IS MADE FAST TO A PIN, AND THE PIN CARRIES ITS COIL.
        r276 gave the bulwarked hull its pin rail and the running rigging went on ending at the deck
        edge, a hand over the deck, through the rail. Read from the BUILT scene: where a 'Belaying
@@ -6431,7 +6528,8 @@
       g.traverse(o => { const p = tagOf(o); if (!o.isMesh || !p) return;
         if ((p.key === 'pinRail' && p.name === 'Belaying pins') || (p.key === 'fifeRail' && p.name === 'Fife rail pins')) pinsM.push(o);   // r280: the fife rail's pins are pins
         else if (p.key === 'sheet' || p.key === 'tack' || p.key === 'halyard' || p.key === 'brace'
-                 || p.key === 'throatHalyard' || p.key === 'peakHalyard' || p.key === 'jeers') ropeM.push(o);   // r279: the gaff halyards are falls too; r280: the jeers
+                 || p.key === 'throatHalyard' || p.key === 'peakHalyard' || p.key === 'jeers'
+                 || p.key === 'clewline' || p.key === 'buntline') ropeM.push(o);   // r279: the gaff halyards are falls too; r280: the jeers; r281: the course's clewlines and buntlines
         else if (p.key === 'coil') coilM.push(o);
         else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
       /* the pins' centres are the builder's record (userData.pins); a pins mesh with no record is
