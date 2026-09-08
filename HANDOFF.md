@@ -23749,3 +23749,9 @@ ratchet's browser alone, 15–37 with the chain's beside it (all of it this proj
 build/staging/r269/push.log, and the verified live value with the ratchet's result is recorded in the push-log
 commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
 file uncommitted, deliberately; the r269 staging stays on disk uncommitted, the r211 convention.**
+
+**Live stamp VERIFIED: 1788838889 on https://augustg97.github.io/ships/index.html at 20:43 PDT,
+90 s after the push (build/staging/r269/push.log, the r209 poll pattern). Published copies read
+back by CODE strings (the r237 correction): docs/audit-hulls.js names a side through sideOf( (22 calls, the definition among them), keeps the three-word table (1), convicts 'a side spelled outside sideOf' (1 mentions), and holds 0 ternaries spelling a side off a sign; docs/js/hull.js and docs/data/vessels.json are unchanged this round.
+THE RATCHET: FULL RATCHET at the clean r268 HEAD 0589cee (START 19:54:13 load 3.76 5.72 10.06 HEAD 0589cee): RATCHET EXIT 0  END 20:41:04; 65 frames scored; movers 0. Largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, passage-sahul 0.038%/0.013. This IS the r269 tree's ratchet: the round changes only audit-hulls.js, which no frame loads (r269/PREDICTIONS-close.md: none MAY move, all 65 MUST NOT).
+Two commits close the round (2368e62 audit + docs + handoff, and this push-log commit with any accepted baseline).**
