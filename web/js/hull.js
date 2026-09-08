@@ -2746,11 +2746,58 @@ function buildRig(S, group, mats, FINE, FURLED) {
                       + 'round both; the bunt, the body of the cloth, is triced up at the slings, on '
                       + 'the yard before the mast.' } }));
       } else {
-        const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
+        /* ── THE TIER'S REEF BANDS (r284, 0y⁸⁹) ────────────────────────────────────────────
+           A square sail is shortened by REEFING: a band of doubled cloth is sewn across it at the
+           row the reef will be taken to, eyelets are worked through the band at a pace apart, and
+           a short line — the reef point — is rove through each, a tail hanging on either face.
+           To reef, the yard is lowered, the band is hauled up to it and the points are tied round
+           the yard over the gathered cloth. Where a plate has been read the record says which
+           tiers carry bands and at what row (masts[].reefs.<tier>.bands, 0 the head, 1 the foot),
+           the points' pitch and the band's width; where no plate has been read the record says
+           so, and the tier is drawn plain — the silence named, not a class figure passed off as
+           a read. Hurley's plate of Endurance under full sail shows one band on her topsail at
+           0.40 of the leech with its points about 0.77 m apart, and none on the course or the
+           topgallant. The record's word for the tier (listName) is tried first, the plan's
+           (kind) after it (r283, memory: plan-tier-word-vs-record-word). */
+        const RF = (mk.reefs && (mk.reefs[listName || kind] || mk.reefs[kind])) || null;
+        const rbands = RF && Array.isArray(RF.bands) ? RF.bands.filter(b => b > 0.02 && b < 0.98) : [];
+        const sqW = yardLen * 0.96, sqH = drop * 0.97;
+        const reef = rbands.length ? { bands: rbands, bandM: RF.bandM || 0.30, pitchM: RF.pitchM || 0.75,
+                                       n: Math.max(2, Math.round(sqW / (RF.pitchM || 0.75))), tier: listName || kind, mast: mi,
+                                       from: 'record: masts[].reefs.' + (listName || kind) + (RF.bandM ? '' : '; the band\'s width the class 0.30 m') + (RF.pitchM ? '' : '; the points\' pitch the class 0.75 m') } : null;
+        const sq = makeSail(yX, yY, sqW, sqH, canvas, group, 'square', TRIM, reef);
         /* the cloth names its mast and its yard's height, so the audit can tell its own
            mast's axis at the head row (where the yard is slung) from a spar through it */
         sq.userData.mastX = x; sq.userData.yardY = yY;
         sails.push(sq);
+        if (reef) {
+          /* ── THE REEF POINTS (r284, 0y⁸⁹) ── one line rove through each eyelet of the band, a tail
+             hanging on each face of the cloth; the tail before the sail blows a little forward off the
+             belly, the one abaft lies down the after face. Each eyelet is placed by the cloth's own
+             surface at the eyelet's station ((k + 0.5) / n across, the shader's own stations, at the
+             band's row), and each tail's end stands off the cloth AT THE ROW IT ENDS ON — the belly
+             grows toward the foot, so a tail hung straight down from the fore face would pass into
+             the canvas. Tails a class 0.45 m; the pitch and the row are the record's. */
+          const ang = Math.PI / 2 + TRIM, ca = Math.cos(ang), sa = Math.sin(ang);
+          const toHull = (lx, ly, lz) => new THREE.Vector3(yX + lx * ca + lz * sa, yY + ly, -lx * sa + lz * ca);
+          const R = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+          const surf = sq.userData.surface, tail = 0.45, segs = [], eyelets = [], foreEnds = [], aftEnds = [], clothAtTail = [];
+          for (const at of reef.bands) for (let k = 0; k < reef.n; k++) {
+            const u = (k + 0.5) / reef.n, sw = Math.sin(k * 2.3) * 0.04;   // a hand's swing, so the row does not read as a comb
+            const [lx, ly, lz] = surf(u, at), [tx, ty, tz] = surf(u, Math.min(1, at + tail / sqH));
+            const E = toHull(lx, ly, lz), Ef = toHull(lx, ly, lz - 0.012), Ea = toHull(lx, ly, lz + 0.012);
+            const F1 = toHull(lx + sw, ly - tail * 0.5, (lz + tz) / 2 - 0.06), F2 = toHull(lx + sw * 1.6, ty, tz - 0.12);
+            const A1 = toHull(lx - sw, ly - tail * 0.5, (lz + tz) / 2 + 0.06), A2 = toHull(lx - sw * 1.4, ty, tz + 0.07);
+            segs.push([Ef, F1], [F1, F2], [Ea, A1], [A1, A2]);
+            eyelets.push(R(E)); foreEnds.push(R(F2)); aftEnds.push(R(A2)); clothAtTail.push(R(toHull(tx, ty, tz)));
+          }
+          const rp = ropeMesh(segs, 0.009 + B * 0.0002, ropeMat);
+          if (rp) {
+            rp.userData.reef = { mast: mi, tier: reef.tier, bands: reef.bands, n: reef.n, pitchM: reef.pitchM, bandM: reef.bandM, tailM: tail,
+                                 eyelets, foreEnds, aftEnds, clothAtTail, from: reef.from, state: 'set' };
+            group.add(tag(rp, 'reefPoint', null, PARTS.reefPoint.what + ` ${eyelets.length} points on the ${reef.tier}: ${reef.n} across each of ${reef.bands.length} band(s) at ${reef.pitchM.toFixed(2)} m, the tails ${tail} m — ${reef.from}.`));
+          }
+        }
       }
     };
     /* ⚠ A JUNK MAST IS A SINGLE POLE. Only a square rig is built up in fidded sections —
@@ -5231,7 +5278,7 @@ const SAIL_FRAG = SHADERS['SAIL_FRAG.frag'];
 
 /* A sail is a bellied surface, not a flat quad: it takes the shape the wind puts in it, and
    that curve is most of what makes a ship under sail look alive rather than papery. */
-function makeSail(x, yTop, width, height, mat, group, kind, trim) {
+function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {   // r284 (0y⁸⁹): reef = the tier's reef bands, or null
   /* ── A SAIL IS NOT A RECTANGLE WITH A BULGE IN IT ────────────────────────────────────
      The first version was a PlaneGeometry with a symmetric hump pushed out of the middle, and
      it read as exactly that: a flat card, bent. Three things are wrong with it, and all three
@@ -5320,25 +5367,59 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim) {
       const a = i * row + j;
       idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
     }
+  /* ── THE CLOTH'S OWN SURFACE, FOR WHATEVER HANGS FROM IT (r284, 0y⁸⁹) ──────────────────
+     The reef points are rove through the cloth, so they must stand ON it — the vertex loop above,
+     term for term and in the same order, so that at a grid station the function returns the
+     vertex itself and between stations the cloth the mesh interpolates. Local coordinates: x
+     across the sail, y down from the head (negative), z the belly, NEGATIVE forward (the loop's
+     mirror). r281's sailPt in the rig builder samples the smooth belly alone; this carries the
+     creases too, which near the leeches stand a hand off the smooth cloth. */
+  const surface = (u, v) => {
+    const arch = Math.sin(Math.PI * u);
+    const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
+    const footY = -height + roach * height * arch;
+    const y = footY * v;
+    const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
+    const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
+    let z = Math.max(0, chord) * depth;
+    const cx = Math.min(u, 1 - u) * 2.0;
+    const cy = v;
+    const corner = Math.exp(-cx * 3.4) * Math.exp(-Math.abs(cy - 1.0) * 2.2)
+                 + Math.exp(-cx * 3.4) * Math.exp(-cy * 3.0);
+    const crease = Math.sin((u * 9.0 + v * 5.0) * Math.PI) * corner * width * 0.016;
+    const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
+    const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
+    z += crease + roband + slack;
+    return [xw, y, -z];
+  };
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   g.setIndex(idx);
   g.computeVertexNormals();
   /* 0.61 m = the 24-inch bolt. A 30 m course therefore carries about 49 cloths. */
+  /* r284 (0y⁸⁹): the reef bands, where the tier's record gives them — the band is composed on the cloth
+     by the sail shader (SAIL_FRAG: a doubled strip that catches light, its two tablings, a row of eyelets
+     at the points' pitch); uReefOn stays 0 on every sail without a record, so those are byte-identical. */
+  const rb = reef && Array.isArray(reef.bands) ? reef.bands.slice(0, 3) : [];
   const sailMat = new THREE.ShaderMaterial({
     vertexShader: SAIL_VERT, fragmentShader: SAIL_FRAG, side: THREE.DoubleSide,
     uniforms: { uPanels: { value: Math.max(4, Math.round(width / 0.61)) },
-                uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
+                uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
+                uReefOn: { value: rb.length ? 1 : 0 }, uReefAt: { value: new THREE.Vector3(rb[0] !== undefined ? rb[0] : -1, rb[1] !== undefined ? rb[1] : -1, rb[2] !== undefined ? rb[2] : -1) },
+                uReefN: { value: rb.length }, uReefW: { value: rb.length ? reef.bandM / 2 : 0 }, uReefPitch: { value: rb.length ? reef.n : 1 },
+                uSailM: { value: new THREE.Vector2(width, height) } },
   });
   const m = new THREE.Mesh(g, sailMat);
+  m.userData.surface = surface; m.userData.grid = { NW, NH };   // r284: the cloth's own grid, so a reader can find its head and foot at any column
+  m.userData.reef = rb.length ? { bands: rb, n: reef.n, pitchM: reef.pitchM, bandM: reef.bandM, widthM: +width.toFixed(3), dropM: +height.toFixed(3), tier: reef.tier, mast: reef.mast, from: reef.from } : null;
   m.position.set(x, yTop, 0);
   /* ⚠ Square sails hang ACROSS the ship; lug, lateen and gaff sails lie ALONG it. This
      quarter-turn was applied unconditionally, which silently swung every fore-and-aft sail
      broadside-on. The rig type has to decide it. */
   if (kind === 'square') m.rotation.y = Math.PI / 2 + (trim || 0);
   m.userData.kind = kind;
-  group.add(tag(m, 'sail'));
+  group.add(tag(m, 'sail', null, rb.length ? PARTS.sail.what + ` This ${reef.tier} carries ${rb.length === 1 ? 'one reef band' : rb.length + ' reef bands'} at ${rb.map(b => b.toFixed(2)).join(', ')} of its drop — a doubled strip ${reef.bandM.toFixed(2)} m wide with ${reef.n} eyelets across it at ${reef.pitchM.toFixed(2)} m, the reef points rove through them — ${reef.from}.` : null));
   return m;
 }
 
@@ -6103,6 +6184,11 @@ const PARTS = {
                   + 'of the sail — the bunt — up to the yard so it can be furled; on a set sail they lie '
                   + 'slack along the canvas, the lines a plate shows running up the face of every square '
                   + 'sail on Endurance\'s fore mast (r281, r283).' },
+  reefPoint: { stage: 7, name: 'Reef points',
+              what: 'Short lines rove through the eyelets of a reef band, a tail hanging on each face of the '
+                  + 'sail. To shorten sail the yard is lowered, the band is hauled up to it and each point is '
+                  + 'tied round the yard over the gathered cloth — a reef. On a set sail the tails hang loose '
+                  + 'along the band, the row of marks a plate shows across Endurance\'s topsail (r284).' },
   sheave:   { stage: 4, name: 'Masthead sheave',
               what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave '
                   + 'turns in a slot cut through the head of the pole itself, on a pin '

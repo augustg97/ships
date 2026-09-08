@@ -25689,3 +25689,138 @@ uncommitted, deliberately; the r283 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/data/vessels.json carries "upperGear" 1 time(s) (Endurance's fore mast, the figures); docs/js/hull.js carries 'clewline quarter block' 1 time(s); docs/data/provenance.json carries upperGear 1 time(s) (its provenance path, split out of first paint at the build, r274); docs/audit-hulls.js carries 'an upper sail with no clewlines' (1 found) and 'upper gear with no answer' (1 found); web/data/vessels.json against HEAD~1:  1 file changed, 17 insertions(+), 1 deletion(-); web/js/hull.js against HEAD~1:  1 file changed, 118 insertions(+), 39 deletions(-); the build read first paint 8.45 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r282's receipt: every frame its change could not reach stands as scored at earlier trees and its MAY neighbours were all scored). THE r283 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r283/check-one.sh and check-may.sh (the MUST frame first, then the MAY neighbours beside the push) at 40-55 s a frame under a load of 5-9: 6 frames scored, 1 beyond the gate, of which 1 ACCEPTED with a reason (FRAME-LOG.md): ship-endurance 0.178%/0.070 (the topsail's and the topgallant's clewlines and buntlines, their leads down the mast and the coils at the rails; the diff read at r283/chain-diff/ship-endurance.png). 5 inside the gate, every one at the figures the same frame scored in r281 and r282 (the documented berth-neighbour flap): ship-azzam 0.023%/0.028, ship-ever-given 0.034%/0.024, ship-container 0.015%/0.015, ship-queen-mary-2 0.008%/0.011, shipwright 0.015%/0.005. Left unscored at the r283 tree (59): globe-default globe-crossing globe-steam globe-modern globe-era-card action ship-dhow ship-junk ship-canoe ship-great-eastern ship-usv ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune ship-carrier ship-titanic ship-yamato descent descent-high descent-coast aboard aboard-off map-floor aboard-coast sea-magnified ship-preussen ship-steamer ship-dreadnought aboard-carrier aboard-cable aboard-titanic aboard-yamato aboard-preussen ship-wyoming aboard-wyoming ship-treasure aboard-treasure ship-clipper aboard-clipper shipwright-ahead shipwright-astern shipwright-furled shipwright-hounds shipwright-corbis action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang wake-plan sea-ever-given passage-sahul sea-dugout-floor sea-canoe-floor ship-slave-ship ship-carrack - every one of them a frame the change cannot reach (the gear block is gated on a fife rail and Endurance alone carries one; the furled-clew figure for an upper tier stays 0.45 where there is none; the only other builder change is a name on the yard record), so each stands as scored at the r282/r281/r280 trees and the clean-HEAD backlog r284 opens with is empty.
 Two commits close the round (c613a32 record + audit + docs + handoff + any accepted baseline, and this push-log commit).**
+
+## Round 284 — 2026-09-08 — the topsail's reef band: Hurley's full-sail plate shows one band across Endurance's topsail with a row of reef points along it, and the builder drew every square sail in the fleet plain; the plate is measured (the band at 0.40 of each leech, the points 0.77 m apart, none on the course or the topgallant), the record carries the read and names the silence on the eleven other square masts, the sail shader composes the band on the cloth per pixel behind a uniform that is 0 everywhere else, the rig builder hangs a reef point through every eyelet with a tail on each face stood off the cloth at its own row, the audit convicts the silence and reads every eyelet and tail off the meshes, and every other sail in the fleet is byte-identical
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r283's entry ordered r284 to check `uptime` and
+`ps -r` FIRST and named its candidates ((0y⁹⁰), (0y⁸⁹), (0y⁸⁸)). At the open (12:35) the load was 2.16 (2.53 and 4.65
+over 5 and 15 minutes), the loop driver holding the lock (round starting 12:33:35), Codex's renderer the only hot
+process. r283's receipt: every frame its change could not reach stands as scored at earlier trees and all five MAY
+neighbours were scored, so the clean-HEAD backlog was EMPTY and no opening ratchet was run (the r279 memory rule).
+(0y⁹⁰) was NOT taken: widening the lubber's hole moves every top in the fleet and needs a full 64-frame ratchet AFTER
+the geometry is final, which does not fit an 80-minute round (memory: full-ratchet-needs-65-min-at-load) — it stays
+first in the queue for a round that can open with it. (0y⁸⁹) was taken: the plate was already cropped (r282) and the
+r281/r283 machinery (the tier's record by name, a point on the cloth) was in place. Every edit was made on the :8150 copy
+(r284/web, symlinks with real copies of hull.js, vessels.json, audit-hulls.js and js/shaders.js) by four re-runnable
+scripts (apply-shader-edit.py, apply-builder-edits.py, apply-record-edits.py, apply-audit-edits.py, every anchor
+asserted, each reproducing its after-file from its before-file) and copied into web/ by r284/copy-in.sh after the proofs
+and the witnesses; :8149 served web/ at HEAD for the before-witnesses. The shader SOURCE (web/shaders/SAIL_FRAG.frag.glsl)
+was edited in place — it is not served, the bundle is — checked by glsl.py, and bundled with `--out` into the copy only,
+so web/js/shaders.js stayed at HEAD until the copy-in.**
+
+**THE PLATE (build/hurley-fullsail.jpg, 2828x3912, from ahead; the topsail at 1x in r282/plate-mid-1x.png, 1790x880; its
+two leeches at 2x with a labelled grid in r284/plate-topsail-leftleech-2x.png and -rightleech-2x.png, the band's middle
+at 3x in plate-topsail-band-3x.png, the course's face at half scale in plate-course-half.png, the whole plate at a
+quarter in plate-whole-quarter.png). THE BAND: one straight seam across the topsail from (280, 350) at the starboard
+leech (the image's left) to (1385, 232) at the port leech, with a row of eyelets along it. Read at each leech against
+the cloth's own ends: starboard, the head under the yard at row 75, the band 350, the clew 765 — 0.40 of the leech;
+port, the yard's line extrapolated to row −35 above the crop's top edge, the band 232, the clew 640 — 0.40 of the
+leech. Recorded 0.40 ± 0.03; the camera below and ahead expands the lower cloth by about a tenth over the upper (foot
+37 m off at 19° up, head 39 m at 27°), which moves the read by under 0.01. r282's "about a third of the way down" was
+an eyeball and is superseded. THE POINTS: a directional sweep along the band's line (the darkest pixel in a 9-row window
+at every column) finds blobs at 338, 389, 443, 500, 557, 614, 672, 731 … 847, 906, 970 … 1134, 1197 — 51–64 px apart
+where no rigging crosses the band, the gaps of 164 and 185 where the clewlines and buntlines do; at the band's scale
+(~1105 px leech to leech for a cloth about 14.8 m wide there, ~75 px/m) that is 0.77 ± 0.08 m, about 18–19 eyelets
+across. THE BAND'S WIDTH does not read at this scale (one seam line and the eyelets show, not two tablings): 0.30 m is a
+class figure for a 14 m topsail and the record names it as one. THE COURSE shows no band on its fore face at ~90 px/m
+(the r281 read of its buntlines and garnets off the same face saw none), with the bound that it is foreshortened from
+below and a band low on it would lie in the foot's belly; THE TOPGALLANT shows none at ~55 px/m (r282/plate-top-1x.png).**
+
+**THE RECORD (web/data/vessels.json; r284/apply-record-edits.py, every other field asserted identical). Endurance's fore
+mast gains `reefs`: `course: { bands: [] }`, `top: { bands: [0.40], pitchM: 0.77, bandM: 0.30 }`, `tg: { bands: [] }`
+and a provenance naming the plate, the crops, their scales, each read with its bound and what does not read. The eleven
+other square masts with a yard list — Preussen's five, the clipper's three, the steamer's three — each gain
+`reefs: { provenance: "UNREAD, r284: …" }`: no plate of those ships' sails has been read for reef bands, every tier is
+drawn plain, and the record now SAYS so, so the audit's conviction is of a record that says nothing, not of one that
+answers "unread" (the r282 pattern for the yard lists). Twelve provenance strings leave first paint at the build (r274).**
+
+**THE SHADER (web/shaders/SAIL_FRAG.frag.glsl → web/js/shaders.js; r284/apply-shader-edit.py). The band is a thing ON
+the cloth, so it is composed per pixel where the panel seams already are (rule 0): behind `uReefOn`, for up to three
+rows in `uReefAt` (`uReefN` live), a strip `uReefW` metres each side of the row — doubled cloth, so it catches light as
+the seams do (×1.07) — with its two tablings as stitched lines a shade darker (×0.82 over 0.8–2.2 cm), and at every
+(k + 0.5) / `uReefPitch` across the cloth a dark ring 1–4.6 cm in radius, the eyelet. `uSailM` carries the cloth's width
+and drop so the band and the rings are in metres on every sail. A uniform a material never sets reads 0 in three.js
+(`seqWithValue` skips it), so the triangular and quadrilateral sails' materials, which share the shader and set none of
+these, are unchanged, and every square sail whose record gives no band has `uReefOn` 0 — the shader's added block is
+skipped and the pixel is the old pixel.**
+
+**THE BUILDER (web/js/hull.js; r284/apply-builder-edits.py). makeSail takes a ninth argument, the tier's reef record,
+sets the uniforms from it, records it on the cloth (`userData.reef`: bands, n, pitch, band width, the cloth's width and
+drop, the tier, the mast, `from`), names the band on the sail's card, and EXPOSES THE CLOTH'S OWN SURFACE
+(`userData.surface(u, v)`, term for term the vertex loop in the same order, so at a grid station it returns the vertex
+— measured 3e-7 m — and between stations the cloth the mesh interpolates; r281's sailPt in the rig builder samples the
+smooth belly alone) and its grid (`userData.grid`). crossYard resolves the tier's record by the record's word first and
+the plan's after it (memory: plan-tier-word-vs-record-word), passes it, and where a band is recorded hangs THE REEF
+POINTS: one line rove through each eyelet at the shader's own stations, a tail 0.45 m on each face, the tail before the
+cloth blowing a little forward off the belly and the one abaft lying down the after face, each tail's end stood off the
+cloth AT THE ROW IT ENDS ON — the belly grows toward the foot, so a tail hung straight down from the fore face would pass
+into the canvas; a hand's swing (±4 cm, by point) so the row does not read as a comb. One Reef points mesh per tier,
+tagged `reefPoint` (its own PARTS key, memory: new-rope-part-needs-own-parts-key), its record on the mesh (`userData.reef`:
+eyelets, foreEnds, aftEnds, clothAtTail, tier, mast, `from`), its card naming the count, the pitch and the provenance.
+Gated on the record: for a tier without a band `reef` is null, the block does not run, and the cloth's uniforms are 0.**
+
+**MEASURED (r284/probe-reef.py on the :8150 copy, set and furled builds, hull space; probe-after.out). The topsail's
+uniforms: uReefOn 1, uReefAt [0.40, −1, −1], uReefN 1, uReefW 0.15, uReefPitch 18, uSailM [13.897, 5.793]; the course's
+and the topgallant's uReefOn 0. The Reef points mesh: 18 eyelets, 576 vertices (18 points × 4 segments × 8), each eyelet
+0.000–0.018 m off the cloth's triangles — its nearest VERTEX 0.000–0.233 m away, because the grid is 28 × 20 on a
+13.9 × 5.8 m cloth and an eyelet lies on a face, which is why the audit measures to the surface — and at 0.3999–0.4001
+of the cloth's drop at its own column (the head and the roached foot read at that column: the eyelets' y runs 17.19 at
+the leeches to 17.37 mid-sail, the roach's lift, and a rule that read the row as a fraction of the yard's height would
+have convicted every mid-sail point at 0.366); the tails hang 0.412–0.446 m; the fore tails' ends 0.091–0.134 m before
+the cloth at their row and the aft 0.047–0.084 m abaft it; the eyelets span z −6.10 to 6.27. The furled build carries no
+band and no points (358 meshes to the set build's 359).**
+
+**THE AUDIT (Research/audit-hulls.js → web/ and docs/; r284/apply-audit-edits.py, parsed by node's vm). NEW A-REEF-BAND,
+after A-YARD-LIST: (a) every square mast with a `yards` list must carry `reefs` with a provenance — the SILENCE convicts
+('reef bands with no answer'), an UNREAD answer that says so passes (the r108 rule); (b) for each tier of the list the
+drawn cloth (the k-th square sail up the mast's station by its yard's height, rule (5)'s assignment) must carry in
+`userData.reef` the bands the record gives for that tier and no other — 'a recorded reef band not drawn', 'a reef band
+drawn with no record', 'a reef band at the wrong row' (0.005), 'reef points miscounted' (against the cloth's width and
+the pitch, and the mesh's eyelet count), 'reef points with no band', 'reef points not drawn'; (c) every eyelet within
+0.06 of the cloth's triangles (`THREE.Triangle.closestPointToPoint` over the sail's index — the first draft tested the
+nearest vertex at 0.15 and would have convicted half the points on a correct cloth), at the band's row within 0.02 of
+the cloth's drop at its own column (the head and foot interpolated from `userData.grid`), each point with two tails
+('a reef point with no tails'), each tail's end on the mesh (0.05, 'a reef tail drawn elsewhere'), hanging 0.30 m ('a reef
+tail that does not hang'), and the two ends across the cloth from each other at the row they end on — the cloth's own
+point there recorded, on the surface, the fore end at least 0.03 before it in x and the aft end 0.03 abaft ('reef tails
+on one face'); 'reef points on no square mast' for a mesh naming a mast the record has not.**
+
+**PROOFS (r284/chain.log; each audit alone in its browser on :8150). FINAL (the r284 builder, record, shader and audit, audit md5 9413592a, 12:59): "checked 33 hulls, 0 problems". PROOF B (the r283 record vessels.before.json on the r284 builder and audit, 13:00): 12 — 'reef bands with no answer' on every square mast with a yard list (Preussen's five, the clipper's three, the steamer's three, Endurance's one), the r283 state. PROOF C (the r283 builder hull.before.js on the r284 record and audit, 13:01): 1 — 'a recorded reef band not drawn' on Endurance's masts[0] tier 1 (top): "the record gives band(s) at [0.4] of the drop and the cloth carries none". The builder and the record were restored cmp-identical after each proof.**
+
+**THE FRAMES (r284/PREDICTIONS-close.md, written before any frame of the r284 tree was scored): MUST move —
+ship-endurance. MAY move — her berth neighbours within three (ship-azzam, ship-ever-given, ship-container,
+ship-queen-mary-2) and shipwright, by the berth-neighbour flap only. MUST NOT — every other frame: the shader's block is
+behind uReefOn, 0 on every sail without a record; the builder's reef block runs only where a band is recorded, and
+Endurance's topsail is the only tier in the fleet with one; ship-preussen (30 square sails) and ship-clipper are scored
+as witnesses of that. Witnessed BEFORE any frame was scored, from a little off her starboard bow (b=20, l=12, z=1.0; witness-ahead-before.png from :8149 at HEAD, -after.png from :8150): 723 changed pixels in columns 1052–1521, rows 769–799 of the 2880 frame — a 30-row strip across the topsail's fore face; read side by side at 2x (crop-ahead-topsail-before-after.png): in the r283 frame plain cloth between the clewlines, in the r284 frame a faint band with its two stitched edges across the sail and a row of short lines hanging under it, evenly spaced. From the port quarter (b=160, l=14, z=1.0; crop-abaft-topsail-before-after.png): 252 changed pixels in columns 1165–1432, rows 638–681 — the tails hanging down the topsail's AFTER face across its width. The r284 tree on :8149 scored by r284/check-one.sh (chain-check.log): ship-endurance 0.003%/0.002 — INSIDE the gate, no accept: at the Shipwright's default camera the band is about six pixels tall and the tails under a pixel wide, and the r232 witness rule (a fitting-scale change is invisible in a contact sheet) is why the witnesses were taken at z=1.0. The prediction 'MUST move' was right in direction and wrong about the gate; the receipt below records it as scored. The seven MAY and MUST-NOT frames were scored by r284/check-may.sh beside the close (the r232 pattern) and their figures are in the receipt commit that follows.**
+
+**Rule 0 on the ahead witness read whole (witness-ahead-after.png): a rendered barquentine seen from a little off her starboard bow on a lit blue-green sea, three tiers of square canvas on her fore mast drawing toward the camera, the headsails to the left, the main's gaff sail behind, the deck and the bulwark under the course's foot — not a chart. Three facts a viewer can read off it without a legend: the middle square sail carries one reef band and the sails above and below it none; a row of short lines hangs from that band, evenly spaced across the sail; the band sits nearer the sail's head than its foot.**
+
+**Named residuals, in order:** (0y⁸⁹) CLOSED. NEW (0y⁹²) THE REEF BAND'S WIDTH AND THE TABLINGS ARE CLASS FIGURES — the
+plate shows one seam and the eyelets at ~75 px/m; a plate of the topsail at 150 px/m or better would read the band's two
+edges and settle whether the band is 0.30 m and whether it is sewn on the fore or the after face (drawn on both, the
+shader being two-sided with one uv). NEW (0y⁹³) THE ELEVEN OTHER SQUARE MASTS ARE UNREAD FOR REEF BANDS — Preussen's
+doubled rig (Howes) was built to do without them and her record could say so from a plate of her upper topsails;
+the clipper's single-reef upper topsails and reefed courses are the class and no plate of this ship has been read;
+the steamer's brigantine rig likewise. (0y⁹⁰) THE LUBBER'S HOLE, first for a round that can open with the full ratchet,
+and (0y⁹¹) as r283 names them. (0y⁸⁸) as r282 names it. (0y⁸⁵) (0y⁸⁷) as r281 names them. (0y⁸²) (0y⁸³) (0y⁸⁴) as r280
+names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them.
+(0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²)
+(0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵)
+(0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵)
+(0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²)
+unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵)
+(0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle
+break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r285 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as
+unscored among the frames this change can reach (the r279 memory rule). Then it takes (0y⁹⁰) — the lubber's hole at a
+class or recorded width and the upper falls led through it — ONLY if the load is under ~5 at the open, the geometry can
+be final inside 15 minutes and the full ratchet launched by then (memory: full-ratchet-needs-65-min-at-load; otherwise it
+does not fit the round); else (0y⁸⁸), the course yard's height off a plate of the fore mast's foot; else (0y⁹³) for
+Preussen from a plate of her upper topsails; else the survey's next never-spun hull after Endurance by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788897989 at the build; the push and the live poll are in
+build/staging/r284/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r284 staging stays on disk uncommitted, the r211 convention.**

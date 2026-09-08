@@ -1574,9 +1574,36 @@ card: 'A square sail is rolled onto the TOP of its yard and the gaskets passed '
 + 'round both; the bunt, the body of the cloth, is triced up at the slings, on '
 + 'the yard before the mast.' } }));
 } else {
-const sq = makeSail(yX, yY, yardLen * 0.96, drop * 0.97, canvas, group, 'square', TRIM);
+const RF = (mk.reefs && (mk.reefs[listName || kind] || mk.reefs[kind])) || null;
+const rbands = RF && Array.isArray(RF.bands) ? RF.bands.filter(b => b > 0.02 && b < 0.98) : [];
+const sqW = yardLen * 0.96, sqH = drop * 0.97;
+const reef = rbands.length ? { bands: rbands, bandM: RF.bandM || 0.30, pitchM: RF.pitchM || 0.75,
+n: Math.max(2, Math.round(sqW / (RF.pitchM || 0.75))), tier: listName || kind, mast: mi,
+from: 'record: masts[].reefs.' + (listName || kind) + (RF.bandM ? '' : '; the band\'s width the class 0.30 m') + (RF.pitchM ? '' : '; the points\' pitch the class 0.75 m') } : null;
+const sq = makeSail(yX, yY, sqW, sqH, canvas, group, 'square', TRIM, reef);
 sq.userData.mastX = x; sq.userData.yardY = yY;
 sails.push(sq);
+if (reef) {
+const ang = Math.PI / 2 + TRIM, ca = Math.cos(ang), sa = Math.sin(ang);
+const toHull = (lx, ly, lz) => new THREE.Vector3(yX + lx * ca + lz * sa, yY + ly, -lx * sa + lz * ca);
+const R = q => [+q.x.toFixed(3), +q.y.toFixed(3), +q.z.toFixed(3)];
+const surf = sq.userData.surface, tail = 0.45, segs = [], eyelets = [], foreEnds = [], aftEnds = [], clothAtTail = [];
+for (const at of reef.bands) for (let k = 0; k < reef.n; k++) {
+const u = (k + 0.5) / reef.n, sw = Math.sin(k * 2.3) * 0.04;
+const [lx, ly, lz] = surf(u, at), [tx, ty, tz] = surf(u, Math.min(1, at + tail / sqH));
+const E = toHull(lx, ly, lz), Ef = toHull(lx, ly, lz - 0.012), Ea = toHull(lx, ly, lz + 0.012);
+const F1 = toHull(lx + sw, ly - tail * 0.5, (lz + tz) / 2 - 0.06), F2 = toHull(lx + sw * 1.6, ty, tz - 0.12);
+const A1 = toHull(lx - sw, ly - tail * 0.5, (lz + tz) / 2 + 0.06), A2 = toHull(lx - sw * 1.4, ty, tz + 0.07);
+segs.push([Ef, F1], [F1, F2], [Ea, A1], [A1, A2]);
+eyelets.push(R(E)); foreEnds.push(R(F2)); aftEnds.push(R(A2)); clothAtTail.push(R(toHull(tx, ty, tz)));
+}
+const rp = ropeMesh(segs, 0.009 + B * 0.0002, ropeMat);
+if (rp) {
+rp.userData.reef = { mast: mi, tier: reef.tier, bands: reef.bands, n: reef.n, pitchM: reef.pitchM, bandM: reef.bandM, tailM: tail,
+eyelets, foreEnds, aftEnds, clothAtTail, from: reef.from, state: 'set' };
+group.add(tag(rp, 'reefPoint', null, PARTS.reefPoint.what + ` ${eyelets.length} points on the ${reef.tier}: ${reef.n} across each of ${reef.bands.length} band(s) at ${reef.pitchM.toFixed(2)} m, the tails ${tail} m — ${reef.from}.`));
+}
+}
 }
 };
 const segs = mk.rig === 'lateen' ? []
@@ -2954,7 +2981,7 @@ group.add(tag(cm, 'coil', 'Coils',
 }
 const SAIL_VERT = SHADERS['SAIL_VERT.vert'];
 const SAIL_FRAG = SHADERS['SAIL_FRAG.frag'];
-function makeSail(x, yTop, width, height, mat, group, kind, trim) {
+function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {
 const NW = 28, NH = 20;
 const pos = [], uvs = [], idx = [];
 const roach = kind === 'square' ? 0.085 : 0.03;
@@ -2988,21 +3015,45 @@ for (let j = 0; j < NH; j++) {
 const a = i * row + j;
 idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
 }
+const surface = (u, v) => {
+const arch = Math.sin(Math.PI * u);
+const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
+const footY = -height + roach * height * arch;
+const y = footY * v;
+const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
+const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
+let z = Math.max(0, chord) * depth;
+const cx = Math.min(u, 1 - u) * 2.0;
+const cy = v;
+const corner = Math.exp(-cx * 3.4) * Math.exp(-Math.abs(cy - 1.0) * 2.2)
++ Math.exp(-cx * 3.4) * Math.exp(-cy * 3.0);
+const crease = Math.sin((u * 9.0 + v * 5.0) * Math.PI) * corner * width * 0.016;
+const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
+const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
+z += crease + roband + slack;
+return [xw, y, -z];
+};
 const g = new THREE.BufferGeometry();
 g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
 g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 g.setIndex(idx);
 g.computeVertexNormals();
+const rb = reef && Array.isArray(reef.bands) ? reef.bands.slice(0, 3) : [];
 const sailMat = new THREE.ShaderMaterial({
 vertexShader: SAIL_VERT, fragmentShader: SAIL_FRAG, side: THREE.DoubleSide,
 uniforms: { uPanels: { value: Math.max(4, Math.round(width / 0.61)) },
-uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() } },
+uSun: { value: new THREE.Vector3(0.5, 0.72, 0.42).normalize() },
+uReefOn: { value: rb.length ? 1 : 0 }, uReefAt: { value: new THREE.Vector3(rb[0] !== undefined ? rb[0] : -1, rb[1] !== undefined ? rb[1] : -1, rb[2] !== undefined ? rb[2] : -1) },
+uReefN: { value: rb.length }, uReefW: { value: rb.length ? reef.bandM / 2 : 0 }, uReefPitch: { value: rb.length ? reef.n : 1 },
+uSailM: { value: new THREE.Vector2(width, height) } },
 });
 const m = new THREE.Mesh(g, sailMat);
+m.userData.surface = surface; m.userData.grid = { NW, NH };
+m.userData.reef = rb.length ? { bands: rb, n: reef.n, pitchM: reef.pitchM, bandM: reef.bandM, widthM: +width.toFixed(3), dropM: +height.toFixed(3), tier: reef.tier, mast: reef.mast, from: reef.from } : null;
 m.position.set(x, yTop, 0);
 if (kind === 'square') m.rotation.y = Math.PI / 2 + (trim || 0);
 m.userData.kind = kind;
-group.add(tag(m, 'sail'));
+group.add(tag(m, 'sail', null, rb.length ? PARTS.sail.what + ` This ${reef.tier} carries ${rb.length === 1 ? 'one reef band' : rb.length + ' reef bands'} at ${rb.map(b => b.toFixed(2)).join(', ')} of its drop — a doubled strip ${reef.bandM.toFixed(2)} m wide with ${reef.n} eyelets across it at ${reef.pitchM.toFixed(2)} m, the reef points rove through them — ${reef.from}.` : null));
 return m;
 }
 function distToLine(P, A, B) {
@@ -3590,6 +3641,11 @@ what: 'The lines bent to cringles along the foot of a square sail that run up it
 + 'of the sail — the bunt — up to the yard so it can be furled; on a set sail they lie '
 + 'slack along the canvas, the lines a plate shows running up the face of every square '
 + 'sail on Endurance\'s fore mast (r281, r283).' },
+reefPoint: { stage: 7, name: 'Reef points',
+what: 'Short lines rove through the eyelets of a reef band, a tail hanging on each face of the '
++ 'sail. To shorten sail the yard is lowered, the band is hauled up to it and each point is '
++ 'tied round the yard over the gathered cloth — a reef. On a set sail the tails hang loose '
++ 'along the band, the row of marks a plate shows across Endurance\'s topsail (r284).' },
 sheave:   { stage: 4, name: 'Masthead sheave',
 what: 'The Chinese masthead: no top, no block, no fitting at all — the sheave '
 + 'turns in a slot cut through the head of the pole itself, on a pin '

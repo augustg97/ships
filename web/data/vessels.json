@@ -3559,7 +3559,10 @@
             ],
             "truckM": 58.0,
             "courseYardM": 32.0,
-            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.34,
@@ -3576,7 +3579,10 @@
             "staysails": 3,
             "truckM": 58.0,
             "courseYardM": 32.0,
-            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.52,
@@ -3593,7 +3599,10 @@
             "staysails": 3,
             "truckM": 58.0,
             "courseYardM": 32.0,
-            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.7,
@@ -3610,7 +3619,10 @@
             "staysails": 3,
             "truckM": 58.0,
             "courseYardM": 32.0,
-            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.86,
@@ -3628,7 +3640,10 @@
             "spanker": true,
             "truckM": 58.0,
             "courseYardM": 32.0,
-            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282."
+            "yardsProvenance": "RECORD: six yards on each of her five masts - course, lower and upper topsail, lower and upper topgallant, royal - the five-masted full-rigged ship's thirty square sails as Tecklenborg rigged her in 1902; the record's own attested spar lengths (the 32 m course yard, the 16 m royal yard) are in mastProvenance. No plate was re-read for the count in r282.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           }
         ],
         "build": "steel",
@@ -4236,7 +4251,10 @@
               "tg",
               "royal"
             ],
-            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count."
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.556,
@@ -4252,7 +4270,10 @@
               "royal"
             ],
             "staysails": 3,
-            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count."
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.85,
@@ -4269,7 +4290,10 @@
             ],
             "staysails": 3,
             "spanker": true,
-            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count."
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant and a royal on each mast, Howes' rig as the clippers of the 1860s carried it. This hull is a class clipper, not a named ship, so no plate can be read for the count.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           }
         ],
         "build": "frame",
@@ -4426,7 +4450,10 @@
               "utop",
               "tg"
             ],
-            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count."
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.38,
@@ -4441,7 +4468,10 @@
               "tg"
             ],
             "staysails": 2,
-            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count."
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.61,
@@ -4456,7 +4486,10 @@
               "tg"
             ],
             "staysails": 2,
-            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count."
+            "yardsProvenance": "CLASS LIST, no plate: double topsails under a single topgallant on the three square-rigged masts of an ocean steamer of 1870 under sail. This hull is a class steamer, not a named ship, so no plate can be read for the count.",
+            "reefs": {
+              "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
+            }
           },
           {
             "at": 0.845,
@@ -5962,6 +5995,22 @@
                 ]
               },
               "provenance": "PLATE READ, r283: Hurley's plate of Endurance under full sail, taken from AHEAD with the ship beset (build/hurley-fullsail.jpg, 2828x3912; the fore mast's canvas cropped at full resolution in build/staging/r282/plate-mid-1x.png (the topsail, 1790x880) and plate-top-1x.png (the topgallant, 1510x680), the yards' centres at 2x in build/staging/r283/plate-mid-yardcentre-2x.png and plate-top-yardcentre-2x.png; ~70 px/m at the topsail yard and ~55 px/m at the topgallant yard, both farther from the camera than the course yard). TOPSAIL: on the FORE FACE of the set sail a line leaves each clew at the course yard's arm and runs up the canvas to the topsail yard, meeting it 0.15 (starboard, the image's left) and 0.19 (port) of the half-yard out from the mast (+/- 0.05: the yard's half spans ~645 px, the mast ~835 px from the crop's left edge, the lines meet the yard at ~715 and ~930 px) - the CLEWLINES to the quarter blocks; recorded as 0.17. Lines from the foot run up the face and converge on the slings, two a side read as likely and one a side certain, their foot stations not readable within 0.15 of the half-yard at this scale - the BUNTLINES; the class stations 0.30 and 0.65 are kept and named as class figures. TOPGALLANT: a line from each clew to the yard meeting it 0.05-0.14 of the half-yard from the mast (the yard's half ~440 px; the lines meet it 20-60 px from the mast's line); recorded as 0.12, +/- 0.05. From the foot one line a side rises to the slings; its station reads about 0.4 of the half, +/- 0.15. WHAT THE PLATE DOES NOT SHOW: where the falls belay (the deck is out of frame below the course), and the blocks at the yards (the lines vanish into the yard's own line) - the leads and the belays are class figures: the falls over the top's after rim to the fife rail's side pins, the overflow to the bulwark's pin rail. Until r283 the record said nothing of the upper sails' gear and the builder drew none."
+            },
+            "reefs": {
+              "course": {
+                "bands": []
+              },
+              "top": {
+                "bands": [
+                  0.4
+                ],
+                "pitchM": 0.77,
+                "bandM": 0.3
+              },
+              "tg": {
+                "bands": []
+              },
+              "provenance": "PLATE READ, r284: Hurley's plate of Endurance under full sail, taken from AHEAD with the ship beset (build/hurley-fullsail.jpg, 2828x3912; the topsail cropped at full resolution in build/staging/r282/plate-mid-1x.png, 1790x880, its two leeches at 2x in build/staging/r284/plate-topsail-leftleech-2x.png and -rightleech-2x.png and the band's middle at 3x in plate-topsail-band-3x.png; ~75 px/m at the band's row, the band spanning ~1105 px from leech to leech). TOPSAIL: ONE reef band, a straight seam across the cloth from (280, 350) at the starboard leech (the image's left) to (1385, 232) at the port leech, with a row of eyelets along it. Its row on each leech: starboard, head at row 75 (the cloth under the yard), band 350, clew 765 - 0.40 of the leech; port, the yard's line extrapolated to row -35 above the crop's edge, band 232, clew 640 - 0.40 of the leech. Recorded as 0.40 of the drop, +/- 0.03 (the camera below and ahead expands the lower cloth by about a tenth over the upper, which moves the read by under 0.01; r282's 'about a third' was an eyeball). THE POINTS: dark blobs along the band's line at a pitch of 51-64 px where no rigging crosses it (338, 389, 443, 500, 557, 614, 672, 731 ... 847, 906, 970 ... 1134, 1197), about 0.77 m at the band's scale, +/- 0.08 - recorded as pitchM 0.77; about 18-19 eyelets across the cloth, the builder placing round(width / pitch). THE BAND'S WIDTH is not readable at this scale (one seam line and the eyelets read, not two tablings): bandM 0.30 is a class figure for a 14 m topsail and is named as such. COURSE: no band reads on the course's fore face at ~90 px/m (build/staging/r284/plate-course-half.png; the r281 read of the buntlines and garnets off the same face saw none) - recorded as none, with the bound that the course is foreshortened from below and a band low on it would lie in the foot's belly. TOPGALLANT: no band on the topgallant's face at ~55 px/m (build/staging/r282/plate-top-1x.png) - recorded as none. Until r284 the builder drew every square sail in the fleet plain and the record said nothing of reef bands."
             }
           },
           {

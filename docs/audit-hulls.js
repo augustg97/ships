@@ -4856,6 +4856,64 @@ const KNOWN = ['course', 'ltop', 'utop', 'top', 'ltg', 'utg', 'tg', 'royal'];
 mk.yards.filter(nm => !KNOWN.includes(nm)).forEach(nm =>
 say(v.id, 'a yard the plan does not cross', `${at}: '${nm}' is not a yard the builder's plan knows; it drops out of the rig silently`));
 });
+{
+const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
+for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };
+const near = (Q, c) => { let d = 1e9; for (const q of Q) d = Math.min(d, Math.hypot(q.x - c[0], q.y - c[1], q.z - c[2])); return d; };
+const toCloth = (S, ix, c) => { const P = new THREE.Vector3(c[0], c[1], c[2]), T = new THREE.Triangle(), Q = new THREE.Vector3(); let d = 1e9;
+for (let t = 0; t < ix.length; t += 3) { T.set(S[ix[t]], S[ix[t + 1]], S[ix[t + 2]]); T.closestPointToPoint(P, Q); d = Math.min(d, Q.distanceTo(P)); } return d; };
+const sailM = [], reefM = [];
+g.traverse(o => { if (!o.isMesh) return; const p = tagOf(o);
+if (o.userData.kind === 'square') sailM.push(o);
+else if (p && p.key === 'reefPoint') reefM.push(o); });
+const stations = (H.masts || []).map((mk, mi) => ({ mk, mi, x: (mk.at - 0.5) * H.lwl })).filter(s => s.mk.rig === 'square');
+const byMast = new Map(stations.map(s => [s.mi, []]));
+for (const o of sailM) { let best = null, bd = Infinity; for (const s of stations) { const d = Math.abs(o.position.x - s.x); if (d < bd) { bd = d; best = s; } } if (best) byMast.get(best.mi).push(o); }
+for (const o of reefM) { const r = o.userData.reef; if (!r || !stations.some(s => s.mi === r.mast)) say(v.id, 'reef points on no square mast', `a Reef points mesh records mast ${r && r.mast}, which is no square mast of the record`); }
+for (const s of stations) {
+const m = s.mk; if (!Array.isArray(m.yards)) continue;
+const at = `masts[${s.mi}] (station ${m.at})`;
+if (!m.reefs || !m.reefs.provenance)
+say(v.id, 'reef bands with no answer', `${at}: ${m.yards.length} square tiers and the record says nothing of their reef bands (reefs: bands per tier with a provenance naming the plate read, or a provenance saying no plate has been read)`);
+const cloths = byMast.get(s.mi).slice().sort((a, b) => (a.userData.yardY || 0) - (b.userData.yardY || 0));
+for (let k = 0; k < m.yards.length; k++) {
+const name = m.yards[k], tk = `${at}, tier ${k} (${name})`;
+const rec = (m.reefs && m.reefs[name]) || null, want = rec && Array.isArray(rec.bands) ? rec.bands.filter(b => b > 0.02 && b < 0.98) : [];
+const cloth = cloths[k]; if (!cloth) continue;
+const drawn = cloth.userData.reef || null;
+const rp = reefM.find(o => o.userData.reef && o.userData.reef.mast === s.mi && o.userData.reef.tier === name) || null;
+if (want.length && !drawn) say(v.id, 'a recorded reef band not drawn', `${tk}: the record gives band(s) at [${want.join(', ')}] of the drop and the cloth carries none`);
+if (!want.length && drawn) say(v.id, 'a reef band drawn with no record', `${tk}: the cloth carries band(s) at [${(drawn.bands || []).join(', ')}] and the record gives none for this tier`);
+if (!want.length && rp) say(v.id, 'reef points with no band', `${tk}: a Reef points mesh hangs on a tier the record gives no band for`);
+if (!(want.length && drawn)) continue;
+const db = drawn.bands || [];
+if (db.length !== want.length || db.some((b, i) => Math.abs(b - want[i]) > 0.005)) say(v.id, 'a reef band at the wrong row', `${tk}: drawn at [${db.join(', ')}], the record says [${want.join(', ')}]`);
+const pitch = rec.pitchM || 0.75, nWant = Math.max(2, Math.round(drawn.widthM / pitch));
+if (drawn.n !== nWant) say(v.id, 'reef points miscounted', `${tk}: ${drawn.n} points across a ${drawn.widthM} m cloth at ${pitch} m (${nWant} wanted)`);
+if (!rp) { say(v.id, 'reef points not drawn', `${tk}: a band is drawn on the cloth and no Reef points mesh hangs from it`); continue; }
+const rr = rp.userData.reef, P = pts(rp), S = pts(cloth), IX = cloth.geometry.index.array, grid = cloth.userData.grid || { NW: 28, NH: 20 };
+const colY = (i, j) => S[i * (grid.NH + 1) + j].y;
+if ((rr.eyelets || []).length !== want.length * drawn.n) say(v.id, 'reef points miscounted', `${tk}: ${(rr.eyelets || []).length} eyelets recorded on the Reef points mesh, ${want.length * drawn.n} wanted`);
+const yHead = cloth.userData.yardY, dropM = drawn.dropM;
+(rr.eyelets || []).forEach((e, i) => {
+const dS = toCloth(S, IX, e); if (dS > 0.06) say(v.id, 'a reef point off the cloth', `${tk}, point ${i}: the eyelet [${e}] is ${dS.toFixed(3)} m off the cloth's surface`);
+const u = ((i % drawn.n) + 0.5) / drawn.n, fi = u * grid.NW, i0 = Math.min(grid.NW - 1, Math.floor(fi)), f = fi - i0;
+const yH = colY(i0, 0) * (1 - f) + colY(i0 + 1, 0) * f, yF = colY(i0, grid.NH) * (1 - f) + colY(i0 + 1, grid.NH) * f;
+const row = (yH - e[1]) / (yH - yF), bandAt = want[Math.min(want.length - 1, Math.floor(i / drawn.n))];
+if (Math.abs(row - bandAt) > 0.02) say(v.id, 'a reef point off the band\'s row', `${tk}, point ${i}: the eyelet hangs ${row.toFixed(3)} of the cloth's drop at its column (head ${yH.toFixed(2)}, foot ${yF.toFixed(2)}), the band is at ${bandAt}`);
+const F = (rr.foreEnds || [])[i], A = (rr.aftEnds || [])[i], C = (rr.clothAtTail || [])[i];
+if (!F || !A || !C) { say(v.id, 'a reef point with no tails', `${tk}, point ${i}: the mesh records no tail ends for the eyelet`); return; }
+for (const [nm, q] of [['fore tail', F], ['aft tail', A]]) {
+const d = near(P, q); if (d > 0.05) say(v.id, 'a reef tail drawn elsewhere', `${tk}, point ${i}: the ${nm}'s end [${q}] has its nearest Reef points vertex ${d.toFixed(3)} m away`);
+if (e[1] - q[1] < 0.30) say(v.id, 'a reef tail that does not hang', `${tk}, point ${i}: the ${nm} ends ${(e[1] - q[1]).toFixed(2)} m under its eyelet (0.30 wanted)`);
+}
+const dC = toCloth(S, IX, C); if (dC > 0.06) say(v.id, 'a reef point off the cloth', `${tk}, point ${i}: the cloth's recorded point at the tails' row [${C}] is ${dC.toFixed(3)} m off the sail's surface`);
+if (!(F[0] < C[0] - 0.03 && A[0] > C[0] + 0.03)) say(v.id, 'reef tails on one face', `${tk}, point ${i}: the fore tail ends at x ${F[0]} and the aft at ${A[0]} against the cloth's ${C[0]} at that row — not one on each face`);
+});
+}
+}
+}
 (H.masts || []).forEach((mk, mi) => {
 if (!mk.staysails || !mi) return;
 const xF = (H.masts[mi - 1].at - 0.5) * H.lwl, xA = (mk.at - 0.5) * H.lwl;

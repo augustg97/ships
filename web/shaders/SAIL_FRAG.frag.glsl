@@ -2,6 +2,11 @@ precision highp float;
 varying vec2 vUv; varying vec3 vN;
 uniform float uPanels;      // number of 24-inch cloths across this sail
 uniform vec3 uSun;
+/* r284 (0y⁸⁹): the reef bands. uReefOn is 0 on every sail whose record answers nothing — a uniform a material
+   does not set reads 0 in three.js, so a sail built without these stays byte-identical. uReefAt holds up to
+   three bands' rows (0 the head, 1 the foot), uReefN how many of them are live, uReefW the band's half-width
+   in metres, uReefPitch the number of reef points across the sail, uSailM the cloth's width and drop in metres. */
+uniform float uReefOn; uniform vec3 uReefAt; uniform float uReefN; uniform float uReefW; uniform float uReefPitch; uniform vec2 uSailM;
 float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
 float noise(vec2 p){ vec2 i=floor(p),f=fract(p); vec2 u=f*f*(3.0-2.0*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),u.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y); }
@@ -34,6 +39,29 @@ void main(){
   float grime = max(low * 0.55, side * 0.35) * (0.5 + 0.5 * weather);
   col = mix(col, col * vec3(0.80, 0.77, 0.72), grime);
   col *= mix(1.10, 1.0, seam);                       // the seam is thicker, so it catches light
+  /* ── THE REEF BAND (r284, 0y⁸⁹) ───────────────────────────────────────────────────────
+     A strip of doubled cloth sewn across the sail at the row the record gives, tabled along both
+     edges, with a row of eyelets worked through it at the reef points' pitch. It reads three ways
+     on a plate: the band itself is thicker and catches light as the panel seams do; its two
+     tablings are stitched lines a shade darker than the cloth; and each eyelet is a small dark
+     ring, the pitch of the points. Hurley's plate of Endurance's topsail shows all three at 0.40
+     of the leech. The eyelets sit at (k + 0.5) / uReefPitch across the cloth, the stations the
+     reef points (geometry, in the rig builder) hang from. */
+  if (uReefOn > 0.5) {
+    for (int b = 0; b < 3; b++) {
+      if (float(b) >= uReefN) break;
+      float at = b == 0 ? uReefAt.x : (b == 1 ? uReefAt.y : uReefAt.z);
+      float dv = (vUv.y - at) * uSailM.y;                                   // metres from the band's centre line
+      float band = 1.0 - smoothstep(uReefW - 0.02, uReefW + 0.02, abs(dv));
+      col *= mix(1.0, 1.07, band);                                          // doubled cloth: thicker, catches light
+      float tab = 1.0 - smoothstep(0.008, 0.022, abs(abs(dv) - uReefW));    // the tablings' stitched edges
+      col *= mix(1.0, 0.82, tab);
+      float du = (fract(vUv.x * uReefPitch) - 0.5) / uReefPitch * uSailM.x;   // metres from the nearest eyelet
+      float ring = length(vec2(du, dv));
+      float eye = (1.0 - smoothstep(0.030, 0.046, ring)) * smoothstep(0.010, 0.020, ring);
+      col *= mix(1.0, 0.55, eye);
+    }
+  }
   /* ── CANVAS IS TRANSLUCENT, and that is half of why a sail reads as fabric ──────────
      A sail lit from behind GLOWS, and the spars and rigging in front of it show through as
      dark bars. A shell that only reflects can never look like cloth however it is shaped,
