@@ -4366,7 +4366,7 @@ const kindOf = mk => !mk.shrouds ? null
 : ['deadeyes', 'tackle', 'lashing'].includes(mk.shroudSetup) ? mk.shroudSetup
 : (mk.rig === 'square' || mk.rig === 'gaff' || anySquare) ? 'deadeyes'
 : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? 'lashing' : 'tackle';
-const dead = [], chans = [], shr = [], tack = [], lash = [], beams = [];
+const dead = [], chans = [], shr = [], tack = [], lash = [], beams = [], falls = [];
 const extent = pts => { const e = { xMin: Infinity, xMax: -Infinity, yMin: Infinity, yMax: -Infinity, zMax: 0 };
 for (const q of pts) { e.xMin = Math.min(e.xMin, q[0]); e.xMax = Math.max(e.xMax, q[0]); e.yMin = Math.min(e.yMin, q[1]); e.yMax = Math.max(e.yMax, q[1]); e.zMax = Math.max(e.zMax, Math.abs(q[2])); }
 return e; };
@@ -4380,8 +4380,9 @@ else if (p.key === 'shroudLashing' && o.userData.lash) {
 const P = worldS(o); let top = null, bot = null;
 for (const q of P) { if (!top || q[1] > top[1]) top = q; if (!bot || q[1] < bot[1]) bot = q; }
 const heart = o.userData.lash.bullseye ? { top, bot, len: Math.hypot(top[0] - bot[0], top[1] - bot[1], top[2] - bot[2]) } : null;
-lash.push({ c: cenOf(P), ...o.userData.lash, top: heart ? heart.top : null, heart });
+lash.push({ c: cenOf(P), ...o.userData.lash, top: heart ? heart.top : null, heart, pts: heart ? P : null });
 }
+else if (p.key === 'shroudLashing' && o.userData.falls) falls.push({ pts: worldS(o), ...o.userData.falls });
 else if (p.key === 'crossbeam' && o.userData.crossbeam) beams.push({ ...extent(worldS(o)), ...o.userData.crossbeam });
 });
 let off = 0, feet = 0, first = null;
@@ -4511,6 +4512,54 @@ if (d > 0.10) { offAt++; if (!first) first = { e, L, d }; }
 }
 if (offLen) say(v.id, 'a bullseye not the length the plate reads', `mast ${mi}: ${offLen} of ${hearts.length} hearts off the record's ${BF.lengthM} m by more than 25% (first: ${first.L.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
 if (offAt) say(v.id, 'a bullseye off its shroud', `mast ${mi}: ${offAt} of ${hearts.length} hearts more than 0.10 m from the eye point on the shroud's line (first: ${first.d.toFixed(3)} m, shroud ${first.e.shroud} ${first.e.side < 0 ? 'port' : 'starboard'})`);
+if (!(BF.holeOverSeatM > 0)) {
+if (plateRead) say(v.id, "a bullseye whose height over the beam is a class figure while its spars are the plate's", `mast ${mi}: the record reads the heart (${BF.lengthM} m) but not how far its hole stands over the timber the lanyard wraps — the 2010 deck plate shows it at the nearest foot`);
+} else {
+const tol = BF.holeOverSeatToleranceM > 0 ? BF.holeOverSeatToleranceM : 0.10;
+let offH = 0, firstH = null;
+for (const e of hearts) {
+const d = Math.hypot(e.c[0] - e.seat[0], e.c[1] - e.seat[1], e.c[2] - e.seat[2]);
+if (Math.abs(d - BF.holeOverSeatM) > tol) { offH++; if (!firstH) firstH = { e, d }; }
+}
+if (offH) say(v.id, 'a bullseye not at the height the plate reads', `mast ${mi}: ${offH} of ${hearts.length} hearts' centres more than ${tol} m off the record's ${BF.holeOverSeatM} m from the seat (first: ${firstH.d.toFixed(3)} m, shroud ${firstH.e.shroud} ${firstH.e.side < 0 ? 'port' : 'starboard'})`);
+}
+});
+(H.masts || []).forEach((mk, mi) => {
+if (kindOf(mk) !== 'lashing') return;
+const BF = mk.shroudFoot; if (!BF || BF.block !== 'bullseye') return;
+const hearts = lash.filter(e => e.mast === mi && e.heart && e.pts), fm = falls.filter(f => f.mast === mi);
+if (!hearts.length) return;
+if (!fm.length) { say(v.id, 'a bullseye with no lanyard', `mast ${mi}: ${hearts.length} hearts and no lanyard mesh`); return; }
+const segs = [];
+for (const f of fm) { const P = f.pts; for (let i = 0; i + 7 < P.length; i += 8) segs.push([cenOf(P.slice(i, i + 4)), cenOf(P.slice(i + 4, i + 8))]); }
+const want = Math.max(2, Math.min(4, Math.round(BF.turns || 3)));
+const len = BF.lengthM || 0.36, wid = BF.breadthM || 0.22, thk = BF.thicknessM || 0.05;
+const hole = Math.max(0.03, Math.min(wid * 0.3, 0.08)) / 2;
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const nrm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+let badN = 0, badAxis = 0, inWood = 0, firstN = null, firstW = null;
+for (const e of hearts) {
+const c = e.c, U = nrm(sub(e.heart.top, e.heart.bot));
+let W = null, wBest = 0;
+for (const q of e.pts) { const dq = sub(q, c), t = dot(dq, U), perp = [dq[0] - U[0] * t, dq[1] - U[1] * t, dq[2] - U[2] * t], m = Math.hypot(perp[0], perp[1], perp[2]); if (m > wBest) { wBest = m; W = nrm(perp); } }
+const A = nrm(crs(U, W));
+let through = 0, along = 0;
+for (const [a, b] of segs) {
+const da = Math.hypot(a[0] - c[0], a[1] - c[1], a[2] - c[2]), db = Math.hypot(b[0] - c[0], b[1] - c[1], b[2] - c[2]);
+if (da < 0.06 && db < 0.06) { through++; if (Math.abs(dot(nrm(sub(b, a)), A)) > 0.9) along++; }
+if (Math.min(da, db) > len) continue;
+const L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), nS = Math.max(2, Math.ceil(L / 0.02) + 1);
+for (let i = 0; i < nS; i++) {
+const t = i / (nS - 1), q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t], dq = sub(q, c);
+const u = dot(dq, U), w = dot(dq, W), ax = dot(dq, A), rho = Math.hypot(u * wid / len, w);
+if (Math.abs(ax) < thk / 2 * 0.9 && rho > hole + 0.003 && rho < wid / 2 - 0.003) { inWood++; if (!firstW) firstW = { e, q, rho, ax }; break; }
+}
+}
+if (through !== want || along !== through) { badN++; if (!firstN) firstN = { e, through, along }; }
+}
+if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${firstN.e.side < 0 ? 'port' : 'starboard'}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
+if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${firstW.e.side < 0 ? 'port' : 'starboard'}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
 });
 }
 {

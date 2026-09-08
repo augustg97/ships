@@ -2431,15 +2431,30 @@ eye.userData.lash = { mast: mi, shroud: Lh.s, side: Lh.side, eye: [Lh.eye.x, Lh.
 seat: [Lh.seat.x, Lh.seat.y, Lh.seat.z], timber: T,
 bullseye: BE ? { lengthM: BE.len, breadthM: BE.wid, thicknessM: BE.thk } : null };
 lg.add(eye);
-for (const k of [-1, 0, 1]) {
+const nT = BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3;
+const ks = nT === 2 ? [-0.5, 0.5] : nT === 4 ? [-1.5, -0.5, 0.5, 1.5] : [-1, 0, 1];
+let HB = null;
+if (BE) {
+const Yb = Lh.dir.clone().normalize();
+const Zb = new THREE.Vector3().crossVectors(Yb, new THREE.Vector3(1, 0, 0)).normalize();
+const Zo = Zb.z * Lh.side >= 0 ? Zb : Zb.clone().negate();
+const Xb = new THREE.Vector3().crossVectors(Yb, Zo).normalize();
+HB = { Yb, Zo, Xb, face: BE.thk / 2 + rr, tip: BE.len / 2 + rr * 2 };
+}
+for (const k of ks) {
 const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) * rr * 2.2;
 const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
 new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
-turns.push([Lh.eye, p[0]], [p[0], p[1]], [p[1], p[2]], [p[2], p[3]], [p[3], Lh.eye]);
+if (HB) {
+const o = HB.Xb.clone().multiplyScalar(k * rr * 2.2);
+const pIn = Lh.eye.clone().add(o).addScaledVector(HB.Zo, -HB.face), pOut = Lh.eye.clone().add(o).addScaledVector(HB.Zo, HB.face);
+const tOut = pOut.clone().addScaledVector(HB.Yb, -HB.tip), tIn = pIn.clone().addScaledVector(HB.Yb, -HB.tip);
+turns.push([pIn, pOut], [pOut, tOut], [tOut, p[0]], [p[0], p[1]], [p[1], p[2]], [p[2], p[3]], [p[3], tIn], [tIn, pIn]);
+} else turns.push([Lh.eye, p[0]], [p[0], p[1]], [p[1], p[2]], [p[2], p[3]], [p[3], Lh.eye]);
 }
 }
 const tm = ropeMesh(turns, rr, ropeMat);
-if (tm) lg.add(tm);
+if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash }; lg.add(tm); }
 lg.userData.mast = mi;
 group.add(tag(lg, 'shroudLashing'));
 }
@@ -3424,8 +3439,10 @@ what: 'An eye at the foot of each shroud on a lashed double canoe, and a lanyard
 + 'the 2010 plates of her moored at Honolulu Community College show what the eye is: a '
 + 'teardrop hardwood heart with one hole, about 0.36 m long, the shroud\'s end seized '
 + 'round its rim and the lanyard rove through the hole in three or four falls to the '
-+ 'beam\'s end. The heart is drawn where the record reads one; its height over the '
-+ 'beam is a class figure read from no plate.' },
++ 'beam\'s end. The heart is drawn where the record reads one, each fall passing through '
++ 'its hole and down its face to the beam, and its hole stands over the beam at the height '
++ 'the record reads — 0.45 m along the shroud on Hōkūleʻa, off the one foot the deck plate '
++ 'shows down to the timber it wraps; the plate shows two farther feet hanging higher.' },
 shroudEye: { stage: 5, name: 'Shroud collars',
 what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
 + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '
@@ -8409,8 +8426,9 @@ for (let s = 0; s < n; s++) xs[s] = seats[s].x;
 }
 const drift = Math.max(0.5, Math.min(1.4, L * 0.025));
 const block = Math.max(0.12, Math.min(0.30, B * 0.03));
-const lash = Math.max(0.25, Math.min(0.5, B * 0.3));
-return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR, seats, drift, block, lash };
+const lashRec = mk.shroudFoot && mk.shroudFoot.holeOverSeatM > 0 ? mk.shroudFoot.holeOverSeatM : null;
+const lash = lashRec || Math.max(0.25, Math.min(0.5, B * 0.3));
+return { kind, xs, y: cy + B * 0.016, z: cz + B * 0.046, r, chan, castle: CT, run: CR, seats, drift, block, lash, lashRead: !!lashRec };
 }
 function crossbeamsOf(S, H) {
 if (!S.doubleHull) return [];

@@ -23201,3 +23201,144 @@ docs/audit-hulls.js convicts a lashed shroud whose foot fitting is a class figur
 THE RATCHET: NO FULL RATCHET at the clean r264 HEAD b6e17e7: two full runs were launched and both died. The first (START 15:26:08 load 5.58 9.06 11.45 HEAD b6e17e7) died on its FIRST frame, globe-default, at 15:27:30 — Page.screenshot's 30 s timeout (r265/open-ratchet.try1.err) — while this round's own plate downloads and sips resizes ran beside it (ten 4000 px plates written to the staging dir, the load 5.6 → 11 in that minute): a lesson, the machine must be quiet for the first frame. The second (START 15:28:57 load 8.22 10.25 11.62 HEAD b6e17e7) captured six frames at ~65 s each and died on the seventh, shipwright, at 15:35:57 with the same 30 s screenshot timeout (r265/open-ratchet.err) under a load of 130–152 (vm.loadavg 152.29 60.23 31.20 at 15:36) from the ChatGPT app's Codex framework at 45–47% CPU and a node incidence-audit.mjs at 60% — not this project's (the r261 class, Codex app load). The clean HEAD was then scored by partials once the load fell: r265/open-partials.log, 15:44:45–15:48:00, load 11.7 at the start, scored ship-canoe 0.000%/0.000 ok and sea-canoe-floor 0.000%/0.000 ok by check --frame at HEAD b6e17e7 against the committed baselines — both frames this round moves stood exactly at their r264-accepted baselines before it (their captures are r265/before-ship-canoe.png and before-sea-canoe-floor.png). The other 63 frames are UNSCORED at the clean HEAD this round; r262's full run at 19058c2 scored all 65 clean and r263–r264 changed the canoe alone, so the committed baselines carry no unexplained drift that this round could see.
  PARTIAL after the push, the r239 pattern (r265/partial-*.out): frames scored one at a time by check --frame on the r265 builder, each diff read and each mover beyond the gate accepted with its reason in FRAME-LOG.md — sea-canoe-floor 0.124%/0.046 CHANGED, ship-canoe 0.139%/0.076 CHANGED (2 frames; r265/PREDICTIONS-close.md names the two frames that MUST move — ship-canoe and sea-canoe-floor, a hardwood heart 0.36 × 0.22 m at each of the sixteen shroud feet in place of a rope eye, the shroud's end running 0.18 m higher to its rim, rigTop and the camera's datum unchanged — the two MAY frames, ship-dugout and ship-trireme as her berth neighbours, and the rest that must not: BE is set only from mk.shroudFoot.block, which only the canoe's two masts carry, the rope eye stands on every other lashing-class mast, the PARTS text draws nothing, and no other record changed). The other 63 frames are UNSCORED on the r265 builder; any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (591b802 record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 266 — 2026-09-07 — the lanyard is rove through the bullseye and the heart stands where the plate puts it: on both of the voyaging canoe's masts the r265 lanyard ran from the hole's centre in the heart's own plane, out through the wood, and every heart's hole stood 0.315 m over its beam, the class's 0.3 B, while the 2010 deck plate shows three falls side by side in the hole hanging down the heart's face and, at the one foot it shows down to its timber, the hole 0.42 m over the timber the falls wrap; each mast now records that height with its bound and what the two farther feet show, the builder stands the heart at the record's height and passes each fall through the hole along its axis and down the faces to the beam, two new rules read the falls and the height off the meshes and convict the silence, and the full ratchet ran first at the clean r265 HEAD
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r265 ordered r266's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet for its first frame;
+then (0y⁴⁷) with (0y⁴⁸) off the 2010 plates. The load at the open was 9.2 (16:52, falling from 13) with no process above
+idle, so the full ratchet was launched at 16:53:32 at HEAD c836bec and nothing else touched the machine until
+globe-default had landed (16:56); the round's own reads were text and the plates already on disk (r265/crop-deck-*.png,
+crop-bullseye-3x.png, contact-metc-2010-deck-sleeping.jpg, crop-ho-rail.png). Every edit was made on a COPY of web/
+served on :8150 (build/staging/r266/web, every file a symlink to web/ except hull.js, audit-hulls.js and vessels.json,
+which are copies; the :8150 server restarted from it at 16:58); the three audit proofs, the probe and the witnesses ran
+one browser at a time from 17:08, beside the ratchet.**
+
+**THE PLATE, read again (r265/crop-deck-2-x1700.png and crop-deck-3-x2550.png, 'Hokulea deck and sleeping area.JPG' at
+1.5x, the plate's x 1700–3550 and y 1000–1700). THE NEAREST FOOT (plate x 2300–2700): the lanyard's three falls hang
+straight down from the hole to a fore-and-aft timber at the beam's black lashing and wrap it in thick turns, the rope the
+same 20 px top to bottom, so the heart and that timber stand at one depth and the shroud's own rope scales both — 800 ±
+160 px/m (r265's read of a one-inch line). The hole's centre stands 505 ± 20 px at 1.5x, 337 px on the plate, over the
+top of the wrapped timber: 0.42 m ± 0.10 vertically, 0.45 m along the shroud's 20° lean, which is the distance the
+model's `lash` sets. r265 read the same hole 0.09 m over 'the cap rail'; that rail runs BEHIND the heart at about 3.6
+times its distance (the hearts over it are 80 px long against the nearest heart's 290), and the camera looks down from
+above the rail, so a near object at the same height reads lower on the plate than a far one — the 0.09 m was a
+projection, not a height. THE TWO FARTHER FEET (plate x 3000–3300): their holes stand roughly 0.75 m over the rail
+beneath them (260 px at 1.5x at the 333 px/m their own 0.36 m hearts give), and their lanyards run more than a metre
+down behind the rail's canvas before the plate loses them, so those two hang higher over their timber than the nearest
+one and by an amount the plate does not give; a lanyard is as long as the shroud's made length leaves it, so one figure
+for every foot is the model's simplification, said in the record. THE FALLS (crop-bullseye-3x.png): three parts of the
+lanyard lie side by side in the hole and hang down the heart's outboard face to the timber; the tail is coiled and hung
+on the shroud. Which timber the falls wrap — the hull's gunwale at the beam's lashing, or the beam's own end — the
+camera's line along the rail does not resolve (the timber runs across the frame, fore and aft); the model wraps the
+crossbeam, as r247 chose. The head-on frame (crop-ho-rail.png) shows the beam ends standing proud of the hull's side
+with hearts at them, at no scale a height can be read from.**
+
+**THE FAULT, on the built scene: the r265 turns ran from the hole's centre to the beam's top edges and back, in the
+heart's own plane — every one of the 48 segments a mast (8 hearts × 3 turns × 2) passing through the heart's wood 0.04 m
+from the hole's centre (PROOF C below reads it off the meshes) — and the hole stood 0.315 m over the seat on all sixteen
+feet, the class figure r265 said it was. PROOF A (r266/audit-proof-a.out — the r265 record and the r265 builder under
+the r266 audit on :8150) is exactly 4 problems, all the canoe's: 'a bullseye whose height over the beam is a class
+figure while its spars are the plate's' on each mast (the silence), and 'a bullseye with no lanyard' on each — the r265
+lanyard mesh carries no record of itself, so the audit cannot find it; the geometric conviction of those turns is PROOF C.
+"checked 33 hulls, 4 problems", nothing on any other hull or rule.**
+
+**THE RECORD (web/data/vessels.json; r266/vessels.before.json, vessels.after.json, apply-record-edits.py, every assertion
+on the old values; every other vessel parse-identical, asserted). Both masts' `shroudFoot` gains `holeOverSeatM` 0.45,
+`holeOverSeatVerticalM` 0.42, `holeOverSeatToleranceM` 0.10, `fartherFeet` 'higher, unread', and a
+`holeOverSeatProvenance` naming the plate, the crops, the scale and its bound, the projection r265 fell for, the two
+farther feet and what a lanyard's length is; the shroudSetupProvenance's last sentence now points to it. THE MODEL
+(web/js/hull.js; r266/hull.before.js, hull.after.js, apply-hull-edits.py, four replaces each asserted to hit once, the
+file syntax-checked with node's vm before the browser): (1) shroudFeet's `lash` takes mk.shroudFoot.holeOverSeatM where
+the record reads one and keeps the class figure where it does not, and reports `lashRead`; (2) in the lashings block,
+with BE, each heart takes a basis — Yb the shroud's line, Zo the hole's axis turned OUTBOARD (Yb × x̂, negated on the
+side where that points inboard), Xb their cross, fore and aft — and each of the record's `turns` falls (three; 2–4
+allowed) is eight segments: through the hole along Zo from the inboard face to the outboard face (the faces a
+half-thickness and a rope's radius off the mid-plane), down the outboard face past the tip (a half-length and two rope
+radii), to the beam's forward top edge, round the beam as before, up from the aft top edge to beside the tip on the
+inboard side, up the inboard face to the hole; the falls sit a rope's width and a fifth apart along Xb in the hole and
+along the beam as r264 spaced them; a mast whose record reads no block keeps the r247 turns from the eye's centre; (3)
+the lanyard mesh carries userData.falls (mast, rove, turns, ropeR, lashRead, lash) for the audit and the probe; (4) the
+'Shroud lashings' card says the falls pass through the hole and where the height comes from.**
+
+**MEASURED AFTER (r266/falls-after.json — r266/probe_falls.py on the r266 builder on :8150, set build; each heart's frame
+read off its own vertices, the lanyard's segments off the lanyard mesh eight vertices at a time): 16 hearts, 192 lanyard
+segments a mast (8 hearts × 3 falls × 8). On every heart: exactly 3 segments with both ends within 0.06 m of the centre,
+all 3 along the hole's axis with |cos| 1.000; 0 of the 15 segments near each heart with a sample in its wood; six runs
+along the faces, each 0.0316 m off the mid-plane (the half-thickness 0.025 plus the rope's 0.0066), three a face; every
+heart's centre 0.450 m from its seat (the record's 0.45). The hole's axis on every heart is (0, ±0.35–0.41, −0.91–0.94):
+athwartships, tilted with the heart's lean. The probe's 'lowest fall point' is not a read of the beam — its filter
+skipped the segments under the beam — and is not cited; the turns round the beam are r247's and r264's geometry
+unchanged, and rule (8) still seats every lashing on a built crossbeam.**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r266/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js,
+four replaces each asserted once). The traverse keeps each heart's vertices and every lanyard mesh (userData.falls).
+D-LASHING-BULLSEYE gains (c), 0y⁴⁷: a lashing-class mast under plate-read spars whose record reads a bullseye but no
+holeOverSeatM is convicted for the silence; where it reads one, each heart's centre off the mesh must stand within the
+record's tolerance (0.10 m) of that distance from the builder's seat. D-LASHING-FALLS (new, 0y⁴⁸): for each heart, its
+frame off its own vertices — the long axis top to bottom, the breadth the widest direction square to it, the hole's axis
+their cross; (a) the lanyard segments with both ends within 0.06 m of the heart's centre are the falls through the hole,
+which must number the record's turns and each run along the axis (|cos| > 0.9); (b) every 0.02 m of every lanyard
+segment near the heart is tested against the heart's scaled ring — between the hole's edge and the rim in the plane,
+within 0.9 of the half-thickness along the axis — and any sample in the wood convicts. PROOF A is above. PROOF B
+(r266/audit-proof-b.out, chain.log — the r266 audit on a BUILDER edited to ignore the record's height, `lashRec = null
+&& …`): exactly 2 — '8 of 8 hearts' centres more than 0.1 m off the record's 0.45 m from the seat (first: 0.315 m)' on
+each mast — and nothing else. PROOF C (r266/audit-proof-c.out, proof-c.log — the r266 audit on a builder edited to draw
+the r265 turns on the hearts, `if (null && HB)`): exactly 4 — on each mast '8 of 8 hearts have not 3 falls through the
+hole along its axis (0 segments through the hole)' and '48 lanyard segments pass through a heart's wood (a point 0.042 m
+from the hole's centre in the heart's plane, 0.001 m along its axis)' — and nothing else; the builder was restored after
+each proof (cmp-identical to hull.after.js). The final audit on the r266 builder: "checked 33 hulls, 0 problems" on :8150
+(r266/audit-final-8150.out); the files copied into web/ at the close are cmp-identical to the copy :8150 served
+(r266/close.log).**
+
+**WITNESSED (r266/witness-canoe-rail-before.png — the r265 builder in web/ on :8149; witness-canoe-rail-after.png — the
+r266 builder on :8150; both the canoe from the port beam at z=0.7, b=90, l=6, 2880 × 1800; w-rail-pair.png the near
+hull's rail at the beams at 3x, cx 640 cy 470 half 130 of the 1440 frame, before | after; w-rail-pair-wide.png the same
+at 1.6x; witness-canoe-far-after.png the whole canoe at z=1.4). Before: each heart sits with its lower tip on the beam
+end and three ropes spread from the middle of its face to the beam, out through the wood. After: each heart stands a
+hand's span higher on its shroud, three dark parts of the lanyard show inside the hole and run down the heart's face,
+and the turns to the beam leave from beside its tip; on the two beams the masts share, the pairs of hearts stand side
+by side as before. Nothing else in the pair differs: the hull, the beams, the poles, the yards, the cloth, the collars,
+the water and the camera's datum are the same picture.**
+
+**Rule 0 on the far witness read whole (r266/witness-canoe-far-after.png): a rendered double canoe on water from her port
+beam, not a chart — the planked hull with its beams standing proud of the side, two poles with their yards lashed along
+them and the crab-claw sails set aft, the shrouds fanning from under each masthead to the beam ends, wooden hearts
+standing over the beam ends, a grey-blue sea to a hazed coast. Three facts a viewer can read off it without a legend:
+each shroud is set up at a beam end through a wooden block standing above the beam, not to the hull; the two masts
+share two of the beams, where two blocks stand together; the shrouds leave each pole a metre under its head.**
+
+**Named residuals, in order:** (0y⁴⁷) HALF CLOSED — the hole's height over its timber is read at the ONE foot the deck
+plate shows down to the timber and every foot takes it; the two farther feet stand higher by an unread amount (their
+lanyards run more than a metre before the canvas hides them), and a plate square to the hull's side from a boat
+alongside, or the Society's own drawings, would give each foot its own. (0y⁴⁸) CLOSED as far as the plate reads: three
+falls through the hole, down the face, to the timber. NEW (0y⁴⁹) THE LANYARD'S TAIL: the plate shows it coiled and hung
+on the shroud above the heart; the model draws no tail. NEW (0y⁵⁰) THE TIMBER THE FALLS WRAP: the deck plate shows a
+fore-and-aft timber at the beam's lashing, the gunwale or the beam's end, and the camera's line along the rail does not
+say which; the model wraps the crossbeam (r247). NEW (0y⁵¹) THE SHARED-BEAM OFFSET'S SIGN: r264 moves the after mast's
+turns +z on a shared beam on both sides, which is outboard to port and inboard to starboard; a sign from the side would
+make it outboard on both. (0y⁴⁶) HALF CLOSED as r265 names it — the fastening at the POLE is still unread. (0y⁴⁵) STANDS
+as r265 names it. (0y⁴⁴) the masthead blocks' functions, as r263 names it. (0y³⁰) stands, as r263 names it: no truss
+plate. (0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name
+them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them.
+(0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j)
+(0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′)
+(0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r267 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed (this round's run did so and captured at 33 s a frame
+until a load spike to 26 at 17:20 from outside this project slowed it to 50). r266/PREDICTIONS-close.md names the two
+frames that MUST move — ship-canoe and sea-canoe-floor, rigTop unchanged — the two MAY frames, ship-dugout and
+ship-trireme, and the rest that MUST NOT; only those scored by check --frame after the push are accepted here. Then it
+takes (0y⁵¹) (a one-line sign fix with a rule that reads the offset's side off the meshes), or (0y⁴⁹) off
+crop-bullseye-3x.png (the tail's coil is 0.1 m across at the rope's scale), or (0y⁵⁰) with (0y⁴⁷)'s farther feet if a
+plate square to the side surfaces (Commons Category:Hokulea, 109 files, listed in r265/commons-candidates.json), or
+(0y⁴⁵) if a scaled plan surfaces, or (0y³⁰) with a plate of a lower-yard truss, or (0y¹⁹) with (0y²⁴), or the survey's
+next never-spun hull, Endurance (4,114 triangles per metre), by looking. The load this round: 9.2 at the open, 7.3 at
+the ratchet's launch, 9.3 at 17:08, 26 at 17:21 and 17 at 17:25 (no process of this project's above idle; the spike from
+outside it).**
+
+**Live stamp: docs/index.html carries data-version 1788828755 at the build; the push and the live poll are in
+build/staging/r266/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r266 staging stays on disk uncommitted, the r211 convention.**
