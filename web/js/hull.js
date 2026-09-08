@@ -4379,6 +4379,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
       if (lashings.length) {
         const lg = new THREE.Group(), turns = [];
         const rr = 0.006 + B * 0.0006;
+        const SHARED_OFF = 3.4;                       // rope widths (rr · 2.2) between two masts' turns on a shared beam (r264)
         for (const Lh of lashings) {
           const T = Lh.timber, hw = T.lenX / 2 + rr, zc = Lh.seat.z;
           let eye;
@@ -4427,8 +4428,13 @@ function buildRig(S, group, mats, FINE, FURLED) {
           }
           for (const k of ks) {
             /* r264: with four shrouds a side the two masts share two crossbeams; the after mast's turns
-               sit 3.4 rope widths outboard of the forward mast's on a shared beam, not through them */
-            const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) * rr * 2.2;
+               sit 3.4 rope widths outboard of the forward mast's on a shared beam, not through them.
+               r267 (0y⁵¹): OUTBOARD is away from the hull's centreline, so the offset carries the side's sign —
+               r264 added it in +z on both sides, which put the after mast's turns outboard to port and INBOARD to
+               starboard, through the forward mast's; and the rank along the beam is the mast's order fore to
+               aft (mi), so a third mast would wrap outboard of the second. Which mast wraps outboard is a class
+               choice read from no plate (the 2010 deck plate looks along the rail and cannot separate them). */
+            const z = zc + (k + (T.what === 'crossbeam' ? mi * SHARED_OFF * Lh.side : 0)) * rr * 2.2;
             const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
                        new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
             if (HB) {
@@ -4440,7 +4446,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
           }
         }
         const tm = ropeMesh(turns, rr, ropeMat);
-        if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash }; lg.add(tm); }
+        if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash,
+                                        sharedOffsetM: +(mi * SHARED_OFF * rr * 2.2).toFixed(4), sharedOffsetSide: 'outboard' }; lg.add(tm); }
         lg.userData.mast = mi;
         group.add(tag(lg, 'shroudLashing'));
       }
@@ -5760,7 +5767,9 @@ const PARTS = {
                   + 'beam\'s end. The heart is drawn where the record reads one, each fall passing through '
                   + 'its hole and down its face to the beam, and its hole stands over the beam at the height '
                   + 'the record reads — 0.45 m along the shroud on Hōkūleʻa, off the one foot the deck plate '
-                  + 'shows down to the timber it wraps; the plate shows two farther feet hanging higher.' },
+                  + 'shows down to the timber it wraps; the plate shows two farther feet hanging higher. On the two '
+                  + 'beams both masts take, the after mast\'s turns wrap the beam outboard of the forward mast\'s, on '
+                  + 'both sides — a class choice, since the deck plate looks along the rail and cannot separate them.' },
   shroudEye: { stage: 5, name: 'Shroud collars',
               what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
                   + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '

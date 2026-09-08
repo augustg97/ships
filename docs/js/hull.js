@@ -2405,6 +2405,7 @@ group.add(tag(tg, 'tackle'));
 if (lashings.length) {
 const lg = new THREE.Group(), turns = [];
 const rr = 0.006 + B * 0.0006;
+const SHARED_OFF = 3.4;
 for (const Lh of lashings) {
 const T = Lh.timber, hw = T.lenX / 2 + rr, zc = Lh.seat.z;
 let eye;
@@ -2442,7 +2443,7 @@ const Xb = new THREE.Vector3().crossVectors(Yb, Zo).normalize();
 HB = { Yb, Zo, Xb, face: BE.thk / 2 + rr, tip: BE.len / 2 + rr * 2 };
 }
 for (const k of ks) {
-const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) * rr * 2.2;
+const z = zc + (k + (T.what === 'crossbeam' ? mi * SHARED_OFF * Lh.side : 0)) * rr * 2.2;
 const p = [new THREE.Vector3(T.x - hw, T.yTop + rr, z), new THREE.Vector3(T.x - hw, T.yBot - rr, z),
 new THREE.Vector3(T.x + hw, T.yBot - rr, z), new THREE.Vector3(T.x + hw, T.yTop + rr, z)];
 if (HB) {
@@ -2454,7 +2455,8 @@ turns.push([pIn, pOut], [pOut, tOut], [tOut, p[0]], [p[0], p[1]], [p[1], p[2]], 
 }
 }
 const tm = ropeMesh(turns, rr, ropeMat);
-if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash }; lg.add(tm); }
+if (tm) { tm.userData.falls = { mast: mi, rove: !!BE, turns: BE ? Math.max(2, Math.min(4, Math.round(mk.shroudFoot.turns || 3))) : 3, ropeR: rr, lashRead: !!FT.lashRead, lash: FT.lash,
+sharedOffsetM: +(mi * SHARED_OFF * rr * 2.2).toFixed(4), sharedOffsetSide: 'outboard' }; lg.add(tm); }
 lg.userData.mast = mi;
 group.add(tag(lg, 'shroudLashing'));
 }
@@ -3442,7 +3444,9 @@ what: 'An eye at the foot of each shroud on a lashed double canoe, and a lanyard
 + 'beam\'s end. The heart is drawn where the record reads one, each fall passing through '
 + 'its hole and down its face to the beam, and its hole stands over the beam at the height '
 + 'the record reads — 0.45 m along the shroud on Hōkūleʻa, off the one foot the deck plate '
-+ 'shows down to the timber it wraps; the plate shows two farther feet hanging higher.' },
++ 'shows down to the timber it wraps; the plate shows two farther feet hanging higher. On the two '
++ 'beams both masts take, the after mast\'s turns wrap the beam outboard of the forward mast\'s, on '
++ 'both sides — a class choice, since the deck plate looks along the rail and cannot separate them.' },
 shroudEye: { stage: 5, name: 'Shroud collars',
 what: 'Where a crab-claw mast\'s shrouds leave the pole: a turn of rope round it for each '
 + 'pair, one a side, in the band the plate reads under the masthead\'s blocks — on '

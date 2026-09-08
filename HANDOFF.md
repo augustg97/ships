@@ -23350,3 +23350,129 @@ docs/audit-hulls.js convicts a lanyard not rove through its bullseye (1 mentions
 THE RATCHET: FULL RATCHET at the clean r265 HEAD c836bec (START 16:53:32 load 7.28 9.78 12.78 HEAD c836bec): RATCHET EXIT 0  END 17:52:04; 65 frames scored; movers 0. Largest three: ship-dreadnought 0.047%/0.019, ship-panokseon 0.038%/0.014, passage-sahul 0.038%/0.013. The machine was kept quiet for its first frame (no downloads, no resizes, no second browser until globe-default landed at 16:54); the r266 chain (audits, probe, witnesses) ran one browser at a time on :8150 beside it from 17:08 (r266/open-ratchet.out, chain.log).
  PARTIAL after the push, the r239 pattern (r266/partial-*.out): frames scored one at a time by check --frame on the r266 builder, each diff read and each mover beyond the gate accepted with its reason in FRAME-LOG.md — sea-canoe-floor 0.191%/0.057 CHANGED, ship-canoe 0.205%/0.084 CHANGED (2 frames; r266/PREDICTIONS-close.md names the two frames that MUST move — ship-canoe and sea-canoe-floor, sixteen hearts 0.135 m higher on their shrouds with their falls rove through the holes, rigTop and the camera's datum unchanged — the two MAY frames, ship-dugout and ship-trireme as her berth neighbours, and the rest that must not: lashRec and the rove falls are set only from the canoe's two masts' shroudFoot, every other lashing-class mast keeps the class height and the r247 turns, the PARTS text draws nothing, and no other record changed). The other 63 frames are UNSCORED on the r266 builder; any mover in the MUST NOT list is not explained by this round.
 Two commits close the round (39ea96e record + audit + hull + docs + handoff, and this push-log commit with any accepted baseline).**
+
+## Round 267 — 2026-09-07 — the after mast's lanyard wraps a shared beam outboard of the forward mast's on both sides: on the two crossbeams both of the voyaging canoe's masts take, r264 set the main mast's three turns 3.4 rope widths from the fore mast's by adding to z on both sides, which is outboard where z is positive and inboard where it is negative, so on the z− side the main mast's turns wrapped each shared beam through the fore mast's; the offset now carries the side's sign, the lanyard mesh records it, the card says which way the turns lie, a new rule reads every turn round a crossbeam off the meshes and convicts an after mast's turns inboard of or touching the forward mast's on either side, and the clean HEAD was scored by partials after the full ratchet was stopped under a load of 30–97 from outside the project
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r266 ordered r267's opening: `uptime` and `ps -r`
+FIRST, then the FULL ratchet at the clean HEAD if the load was under 15, with the machine kept quiet until globe-default
+had landed; then (0y⁵¹). The load at the open was 9.0 (18:11, falling from 15), the Codex app's two processes at 46% and
+43% and nothing of this project's above idle, so the full ratchet was launched at 18:11:29 at HEAD e2a96dc and nothing
+touched the machine until globe-default had landed (18:13:40). The load then rose to 28–35 from the Codex app and the run
+took about two minutes a frame — three frames by 18:18 — so it could not land 65 before the driver's 80-minute kill at
+19:30, and it was stopped at 18:18:15 (r267/open-ratchet.out records the frames and the load). The clean HEAD was scored
+by check --frame on the two frames this round can move, the r265 pattern: ship-canoe 0.000%/0.000 ok and sea-canoe-floor
+0.000%/0.000 ok (r267/partial-clean-*.out, on :8149 with web/ at HEAD). Every edit was made on a COPY of web/ served on
+:8150 (build/staging/r267/web, every file a symlink to web/ except hull.js, audit-hulls.js and vessels.json, which are
+copies; the :8150 server restarted from it at 18:15); the chain — the clean partials, PROOF A, the probe, the final audit,
+PROOF B, three witnesses — ran one browser at a time from 18:19 at loads of 15 to 97, the spike from outside the project
+(r267/chain.log).**
+
+**THE FAULT, on the built scene (the r266 builder): `const z = zc + (k + (T.what === 'crossbeam' ? (mi % 2) * 3.4 : 0)) *
+rr * 2.2` set the after mast's three turns 3.4 rope widths (7.5 rr, 0.050 m at the canoe's rr of 0.0066) in +z of the
+forward mast's on a shared beam, on both sides. +z is outboard on the port side and inboard on the starboard, so on the
+z− side of the two beams both masts take (u 0.35 and u 0.45) the main mast's turns wrapped the beam 0.050 m inboard of
+the fore mast's, the two sets overlapping: the nearest after turn 0.079 m inboard of the farthest forward turn. PROOF A
+(r267/audit-proof-a.out — the r266 builder under the r267 audit on :8150) is exactly 2 problems, both the canoe's: 'a
+shared beam's lanyards the wrong way round' at u 0.35 and at u 0.45 on the z− side, "mast 1's turns lie inboard of mast
+0's — the nearest after turn stands -0.079 m outboard of the farthest forward turn, a rope's diameter (0.013 m) wanted (9
+after and 9 forward turn segments read off the lanyard meshes)". "checked 33 hulls, 2 problems", nothing on any other
+hull or rule. The audit's message calls that side 'port': the audit labels z− 'port' throughout by its r247 convention,
+and the app's +z is the port beam (b=90; the r256 finding recorded in the r264 rig work), so the audit's side labels are
+the mirror of the app's — a residual named below, not changed this round because the label runs through every rule that
+names a side.**
+
+**THE MODEL (web/js/hull.js; r267/hull.before.js, hull.after.js, apply-hull-edits.py, three replaces each asserted to hit
+once, the file syntax-checked with node's vm before the browser): (1) the offset carries the side's sign — `mi *
+SHARED_OFF * Lh.side` — and its rank along the beam is the mast's order fore to aft (mi), so a third mast would wrap
+outboard of the second; SHARED_OFF is one named figure, r264's 3.4 rope widths, with the comment saying that which mast
+wraps outboard is a class choice read from no plate (the 2010 deck plate looks along the rail and cannot separate the two
+lanyards on a shared beam); (2) the lanyard mesh records sharedOffsetM and sharedOffsetSide 'outboard' in userData.falls;
+(3) the 'Shroud lashings' card says that on the two beams both masts take, the after mast's turns wrap the beam outboard
+of the forward mast's on both sides, a class choice. No record changed: r267/vessels.after.json is a copy of
+vessels.before.json and web/data/vessels.json is cmp-identical to HEAD's.**
+
+**MEASURED AFTER (r267/shared-after.json — r267/probe_shared.py on the r267 builder on :8150, set build; every turn round a
+crossbeam read off the lanyard meshes, grouped by beam and side): 16 eyes, 2 lanyard meshes, twelve groups (the six beams
+the shrouds take × two sides), 9 turn segments a mast in each group (3 falls × the forward face, the underside and the
+after face). On the two shared beams, both sides alike: the fore mast's turns at |z| 3.250–3.280 m (u 0.35) and
+3.260–3.289 (u 0.45), the main mast's at 3.300–3.329 and 3.309–3.339, so the nearest after turn stands 0.0204 m outboard
+of the farthest forward turn on all four, against the rope's diameter of 0.0132 m; the seats stand at |z| 3.265 and
+3.274. On the main mast's two unshared beams (u 0.55 and u 0.65) its turns stand 0.035–0.064 m outboard of the seat's
+centre on both sides, because the rank offset is applied to every crossbeam of the after mast and not only to a shared
+one — named below as (0y⁵²).**
+
+**THE AUDIT (Research/audit-hulls.js → web/; r267/apply-audit-edits.py, audit-hulls.before.js, audit-hulls.after.js, one
+replace asserted once). D-LASHING-SHARED (new, 0y⁵¹): on a hull with two or more lashing-class masts, every lanyard
+segment lying at a crossbeam (both ends within the timber's fore-and-aft width and its depth, two rope widths clear, on
+the eye's side and within 0.5 m of its seat) is a turn round it; the turns are grouped by beam and side; where two masts'
+turns share a group, the mast further aft by the record's `at` must wrap the beam wholly outboard of the other's — its
+nearest turn further from the centreline than the other's farthest — with a rope's diameter clear between them; the
+rule holds the two sides to the same answer and does not say which mast should be outboard. PROOF A is above. PROOF B
+(r267/audit-proof-b.out, chain.log — the r267 audit on a BUILDER with the offset zeroed, `mi * 0 * SHARED_OFF`):
+exactly 4 — 'a shared beam's lanyards the wrong way round' at u 0.35 and u 0.45 on both sides, "the nearest after
+turn stands -0.029 m outboard of the farthest forward turn, a rope's diameter (0.013 m) wanted" on each (the two masts'
+sets of turns coinciding, each spread ±0.015 m about the seat) — and nothing else. The builder was restored after each proof (cmp-identical to hull.after.js). The final audit on the r267
+builder: "checked 33 hulls, 0 problems" on :8150 (r267/audit-final-8150.out); the files copied into web/ at the close
+are cmp-identical to the copy :8150 served (r267/close.log).**
+
+**WITNESSED (r267/witness-canoe-stbd-before.png — the r266 builder in web/ on :8149; witness-canoe-stbd-after.png — the
+r267 builder on :8150; both the canoe from the z− beam at b=270, l=6, z=0.7, 2880 × 1800; w-stbd-pair-wide.png the near
+hull's rail at 2x, before | after; w-stbd-beam-539.png, -660, -781 and -902 each changed beam end at 4x;
+witness-canoe-stbd-above-before.png and -after.png the same side at l=35, z=0.6, with w-above-beam-*.png at 5x). The two
+abeam frames differ in 398 pixels of 5.2 M (a difference over 24 of 255), in four clusters along the near rail at 1x
+x 516–562, 638–683, 758–804 and 879–925, y 542–574 — the four beams the main mast's shrouds take — and nowhere else:
+not the fore mast's own two beams, not a heart, not a shroud, not the poles or the cloth. At 4x, on the two shared
+beams (the pairs of hearts, w-stbd-beam-781 and -902) the after heart's lanyard legs land on the beam further toward
+the camera than before, clear of the forward heart's legs where before they crossed them; on the main mast's own two
+beams (the single hearts, -539 and -660) its legs land the same distance further out. From abeam the shift runs along
+the camera's line, so it reads as a few pixels at each beam; from above at l=35 the hearts sit at the frame's foot over
+the Bent on panel and only the legs' splay shows, wider on the after heart. The port view (witness-canoe-port-after.png
+against r266's witness-canoe-rail-after.png, the same camera b=90, l=6, z=0.7 on the r266 builder): 157 pixels in four
+clusters at y 515–549, which is the FAR rail's beam ends seen across the platform — the same starboard turns; the near
+port rail's hearts and turns are pixel-identical, as a sign that leaves the +z side alone must make them.**
+
+**Rule 0 on the starboard witness read whole (r267/witness-canoe-stbd-after.png): a rendered double canoe on water from
+her starboard beam, not a chart — the planked near hull with its beam ends standing proud of the side, the platform's
+deck between the hulls, two poles with their yards lashed along them and the crab-claw sails set, the shrouds fanning
+from under each masthead to wooden hearts standing over the beam ends, a lanyard from each heart to its beam, a
+grey-blue sea to a hazed coast. Three facts a viewer can read off it without a legend: each shroud is set up at a beam
+end through a wooden block standing above the beam, not to the hull; the fore mast's four shrouds take the four
+forward beams and the main mast's the next four, with two blocks standing together on the two beams both masts take;
+each block's lanyard runs from the block down to the beam end it stands over.**
+
+**Named residuals, in order:** (0y⁵¹) CLOSED: the after mast's turns wrap a shared beam outboard of the forward mast's on
+both sides, read off the meshes by the new rule; which mast wraps outboard stays a class choice no plate reads. NEW
+(0y⁵²) THE RANK OFFSET ON AN UNSHARED BEAM: the offset is applied to every crossbeam of the after mast, so on its two
+own beams (u 0.55 and u 0.65) its turns stand 0.035–0.064 m outboard of the seat's centre while the fore mast's stand
+centred on theirs; a rank read per beam — which masts share it, in what order — would put the turns at the seat where
+no beam is shared, and it needs shroudFeet to know every lashing mast's beams, which it can compute from crossbeamsOf
+and the masts' stations; this round's probe_shared.py reads the result. NEW (0y⁵³) THE AUDIT'S SIDE LABELS: every rule
+that names a side calls z− 'port' and z+ 'starboard' (the r247 convention), the mirror of the app's, where +z is the
+port beam (b=90); the messages are right about the geometry and wrong about the word; the fix is one helper used by
+every side-naming rule, with the proofs' message strings re-read. (0y⁴⁹) the lanyard's tail, (0y⁵⁰) the timber the
+falls wrap, (0y⁴⁷) HALF CLOSED, as r266 names them. (0y⁴⁶) HALF CLOSED as r265 names it — the fastening at the POLE is still unread. (0y⁴⁵) STANDS
+as r265 names it. (0y⁴⁴) the masthead blocks' functions, as r263 names it. (0y³⁰) stands, as r263 names it: no truss
+plate. (0y³⁹) (0y⁴⁰) (0y⁴¹) as r261–r262 name them. (0y³⁷) as r260 names it. (0y³³) (0y³⁴) (0y³¹) (0y³²) as r258–r259 name
+them. (0y¹⁹) (0y²⁴) as r256 names them. (0y¹⁸) (0y²¹) (0y²²) as r254 names them. (0y¹⁴) (0y¹⁵) (0y¹⁶) as r253 names them.
+(0y¹²) (0y¹³) (0y¹¹) as r252 names them. (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r250 name them. (0l) (0n) (0o) (0i) (0j)
+(0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′)
+(0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them.**
+
+**r268 opens by checking `uptime` and `ps -r` FIRST and then running the FULL ratchet at the clean HEAD if the load is
+under 15, keeping the machine quiet until globe-default has landed; if the frames are taking over a minute each after
+the third, it stops the run and scores the clean HEAD by check --frame on the frames the round can move (this round's
+r267/open-ratchet.out and partial-clean-*.out are the pattern). r267/PREDICTIONS-close.md names the frames that MAY move
+— ship-canoe and sea-canoe-floor — and the rest that MUST NOT; only those scored by check --frame after the push are
+accepted here. Then it takes (0y⁵³) (one helper in the audit, the proofs' messages re-read), or (0y⁵²) (shroudFeet
+computing every lashing mast's beams so the rank is per beam, this round's probe reading the result), or (0y⁴⁹) off
+crop-bullseye-3x.png (the tail's coil is 0.1 m across at the rope's scale), or (0y⁵⁰) with (0y⁴⁷)'s farther feet if a
+plate square to the side surfaces (Commons Category:Hokulea, 109 files, listed in r265/commons-candidates.json), or
+(0y⁴⁵) if a scaled plan surfaces, or (0y³⁰) with a plate of a lower-yard truss, or (0y¹⁹) with (0y²⁴), or the survey's
+next never-spun hull, Endurance (4,114 triangles per metre), by looking. The load this round: 9.0 at the open, 7.7 at
+the ratchet's launch, 28–35 from 18:13, 97 at 18:26, 39 at 18:31, 22 at 18:36 and 16 at 18:40 (no process of this
+project's above idle; the spike from the Codex app).**
+
+**Live stamp: docs/index.html carries data-version 1788831744 at the build; the push and the live poll are in
+build/staging/r267/push.log, and the verified live value with the ratchet's result is recorded in the push-log
+commit that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie
+file uncommitted, deliberately; the r267 staging stays on disk uncommitted, the r211 convention.**

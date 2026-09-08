@@ -6408,6 +6408,45 @@
         if (badN) say(v.id, 'a lanyard not rove through its bullseye', `mast ${mi}: ${badN} of ${hearts.length} hearts have not ${want} falls through the hole along its axis (first: shroud ${firstN.e.shroud} ${firstN.e.side < 0 ? 'port' : 'starboard'}, ${firstN.through} segments through the hole, ${firstN.along} along the axis)`);
         if (inWood) say(v.id, "a lanyard through the heart's wood", `mast ${mi}: ${inWood} lanyard segments pass through a heart's wood (first: shroud ${firstW.e.shroud} ${firstW.e.side < 0 ? 'port' : 'starboard'}, a point ${firstW.rho.toFixed(3)} m from the hole's centre in the heart's plane, ${firstW.ax.toFixed(3)} m along its axis)`);
       });
+      /* ── D-LASHING-SHARED (round 267, 0y⁵¹): ON A BEAM TWO MASTS SHARE, THE AFTER MAST'S LANYARD WRAPS IT OUTBOARD OF
+         THE FORWARD MAST'S, ON BOTH SIDES. r264 set the after mast's turns 3.4 rope widths from the forward mast's on a
+         shared crossbeam by adding to z on both sides — outboard to port and inboard to starboard, where they ran
+         through the forward mast's turns. Off the meshes: every lanyard segment lying at a crossbeam (both ends within
+         the timber's fore-and-aft width and depth, two rope widths clear, on the eye's side) is a turn round it; the
+         turns are grouped by beam and side; where two masts' turns share a group, the mast further aft (the record's
+         `at`) must wrap the beam wholly outboard of the other's — its nearest turn further from the centreline than
+         the other's farthest — with a rope's diameter clear between them. Which mast wraps outboard is the builder's
+         class choice; that it is the same on both sides is what the rule holds. */
+      {
+        const lm = (H.masts || []).filter(mk => kindOf(mk) === 'lashing');
+        if (lm.length >= 2 && falls.length) {
+          const groups = new Map();
+          for (const e of lash) {
+            const T = e.timber; if (!T || T.what !== 'crossbeam' || !e.seat || e.mast === undefined) continue;
+            const fm = falls.filter(f => f.mast === e.mast); if (!fm.length) continue;
+            const rr = fm[0].ropeR || 0.007, sgn = e.side < 0 ? -1 : 1, key = `${T.x.toFixed(2)}|${sgn}`;
+            const at = q => Math.abs(q[0] - T.x) <= T.lenX / 2 + rr * 2 + 0.01 && q[1] >= T.yBot - rr * 2 - 0.01 && q[1] <= T.yTop + rr * 2 + 0.01 && q[2] * sgn > 0 && Math.abs(q[2] - e.seat[2]) < 0.5;
+            const zs = [];
+            for (const f of fm) { const P = f.pts; for (let i = 0; i + 7 < P.length; i += 8) {
+              const a = cenOf(P.slice(i, i + 4)), b = cenOf(P.slice(i + 4, i + 8));
+              if (at(a) && at(b)) zs.push(Math.abs(a[2]), Math.abs(b[2])); } }
+            if (!zs.length) continue;
+            if (!groups.has(key)) groups.set(key, { T, sgn, masts: new Map() });
+            const gm = groups.get(key).masts;
+            if (!gm.has(e.mast)) gm.set(e.mast, { rr, zs: [] });
+            gm.get(e.mast).zs.push(...zs);
+          }
+          for (const gp of groups.values()) {
+            const ms = [...gp.masts.keys()].sort((a, b) => ((H.masts[a] || {}).at || 0) - ((H.masts[b] || {}).at || 0));
+            for (let i = 0; i + 1 < ms.length; i++) {
+              const F = gp.masts.get(ms[i]), A = gp.masts.get(ms[i + 1]);
+              const gap = Math.min(...A.zs) - Math.max(...F.zs), rr = Math.max(F.rr, A.rr);
+              if (gap < rr * 2 - 1e-6)
+                say(v.id, "a shared beam's lanyards the wrong way round", `crossbeam at u ${gp.T.u !== undefined ? (+gp.T.u).toFixed(2) : gp.T.x.toFixed(2)} ${gp.sgn < 0 ? 'port' : 'starboard'}: mast ${ms[i + 1]}'s turns ${gap < 0 ? 'lie inboard of' : 'touch'} mast ${ms[i]}'s — the nearest after turn stands ${gap.toFixed(3)} m outboard of the farthest forward turn, a rope's diameter (${(rr * 2).toFixed(3)} m) wanted (${A.zs.length / 2} after and ${F.zs.length / 2} forward turn segments read off the lanyard meshes)`);
+            }
+          }
+        }
+      }
     }
     /* ── D-MAST-COUNT (round 249): THE CARD'S RIG ROW AGAINST THE RECORD'S MASTS. The canoe's
        Rig row said "two masts" and her text "carrying two masts" while hull.masts stepped one,
