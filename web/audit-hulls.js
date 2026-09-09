@@ -6753,6 +6753,50 @@
       }
     }
 
+    /* ── A-STATIONS (round 293, Preussen): A MAST STANDS WHERE ITS OWN READ PUTS IT.
+       Preussen's five stations were a class placement at 0.18 intervals with no provenance while
+       three plates of her had been read for the rig, row by row on each pole's own column: the
+       fore stood 8.4 m and the main 5.5 m abaft the anchor plate's poles, and every mast stood
+       plumb where the plate leans them 2 degrees aft. The record now carries the read itself
+       (hull.stationRead: each pole's column at the deck row, its rake, the extent mapping) beside
+       the stations, and this rule reads three things. The SILENCE: a mast whose yard fractions
+       were read off a plate, on a hull whose stations carry no provenance; or a read with no
+       provenance. The RAKE: each mast's `rake` against the read's (0.15 deg). The MESH against
+       the PLATE: each mast's first segment's foot in hull space against the loft's own stem head
+       (-lwl/2 - stemRake x loa, hullSurface.rake(0)) plus the pole's distance abaft the head on
+       the plate, (col - stemHeadCol) / pxPerMAlongHull (0.3 m) - so a station typed through a
+       linear u, which the loft's ends are not, convicts here and nowhere else (the first r293
+       record was: 0.092 for the fore, drawn 1.7 m forward of the plate). Silent on every hull
+       without stationRead, except for the silence. */
+    {
+      const SR = H.stationRead;
+      const plateRead = (H.masts || []).some(m => /^PLATE READ/.test(m.yardFracsProvenance || ''));
+      if ((plateRead || SR) && !H.stationProvenance)
+        say(v.id, 'a rig read off a plate whose mast stations carry no provenance',
+            `${plateRead ? "a mast's yardFracsProvenance is a PLATE READ" : 'hull.stationRead is present'} and hull.stationProvenance is absent`);
+      if (SR) {
+        (H.masts || []).forEach((mk, i) => {
+          const rk = (SR.rakeDeg || [])[i];
+          if (rk !== undefined && Math.abs((mk.rake || 0) - rk) > 0.15)
+            say(v.id, 'a mast rake off its own read', `masts[${i}] rake ${mk.rake || 0} deg against the read's ${rk}`);
+        });
+        /* the mesh against the plate: the loft's deck-level stem head is at -lwl/2 - stemRake x rakeScale x loa in hull space
+           (hullSurface.rake(0)), and each pole stands (col - stemHeadCol) / pxPerMAlongHull abaft it on the plate */
+        const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
+        const xHead = -H.lwl / 2 - (H.stemRake || 0) * rs * H.loa;
+        const feet = {};
+        g.traverse(o => { const s = o.isMesh && o.userData.seg; if (s && s.si === 0 && s.footX !== undefined && feet[s.mi] === undefined) feet[s.mi] = s.footX; });
+        (H.masts || []).forEach((mk, i) => {
+          const col = (SR.cols || [])[i];
+          if (col === undefined) { say(v.id, 'a mast with no station read', `masts[${i}]: hull.stationRead.cols has no column for it`); return; }
+          if (feet[i] === undefined) { say(v.id, 'a mast with no segment foot to read its station off', `masts[${i}]`); return; }
+          const xPlate = xHead + (col - SR.stemHeadCol) / SR.pxPerMAlongHull;
+          if (Math.abs(feet[i] - xPlate) > 0.3)
+            say(v.id, 'a mast built off its read',
+                `masts[${i}] at ${mk.at}: its first segment's foot stands at x ${feet[i].toFixed(2)} in hull space, ${(feet[i] - xHead).toFixed(1)} m abaft the loft's stem head; the plate's column ${col} puts it ${((col - SR.stemHeadCol) / SR.pxPerMAlongHull).toFixed(1)} m abaft (${(feet[i] - xPlate).toFixed(2)} m off)`);
+        });
+      }
+    }
     /* ── A-RIG-DATUM (round 291, Preussen): A RIG READ OVER THE DECK STANDS ON THE DECK.
        Preussen's five trucks and her thirty yard fractions were read on two plates over a
        deck placed a bulwark's depth under the cap rail (r289: 'the cap rail plus the r215

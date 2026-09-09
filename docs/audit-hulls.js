@@ -4820,6 +4820,33 @@ say(v.id, 'a fitting standing on the sheer of a bulwarked hull',
 `${name} (${f.n} mesh${f.n > 1 ? 'es' : ''}) foot ${f.y0.toFixed(2)} m, the deck's edge ${e.toFixed(2)} at x ${f.x.toFixed(1)}: ${(f.y0 - e).toFixed(2)} m over it, ${allow.toFixed(2)} allowed where the cap stands ${H.deck.belowSheerM} over the deck`);
 }
 }
+{
+const SR = H.stationRead;
+const plateRead = (H.masts || []).some(m => /^PLATE READ/.test(m.yardFracsProvenance || ''));
+if ((plateRead || SR) && !H.stationProvenance)
+say(v.id, 'a rig read off a plate whose mast stations carry no provenance',
+`${plateRead ? "a mast's yardFracsProvenance is a PLATE READ" : 'hull.stationRead is present'} and hull.stationProvenance is absent`);
+if (SR) {
+(H.masts || []).forEach((mk, i) => {
+const rk = (SR.rakeDeg || [])[i];
+if (rk !== undefined && Math.abs((mk.rake || 0) - rk) > 0.15)
+say(v.id, 'a mast rake off its own read', `masts[${i}] rake ${mk.rake || 0} deg against the read's ${rk}`);
+});
+const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
+const xHead = -H.lwl / 2 - (H.stemRake || 0) * rs * H.loa;
+const feet = {};
+g.traverse(o => { const s = o.isMesh && o.userData.seg; if (s && s.si === 0 && s.footX !== undefined && feet[s.mi] === undefined) feet[s.mi] = s.footX; });
+(H.masts || []).forEach((mk, i) => {
+const col = (SR.cols || [])[i];
+if (col === undefined) { say(v.id, 'a mast with no station read', `masts[${i}]: hull.stationRead.cols has no column for it`); return; }
+if (feet[i] === undefined) { say(v.id, 'a mast with no segment foot to read its station off', `masts[${i}]`); return; }
+const xPlate = xHead + (col - SR.stemHeadCol) / SR.pxPerMAlongHull;
+if (Math.abs(feet[i] - xPlate) > 0.3)
+say(v.id, 'a mast built off its read',
+`masts[${i}] at ${mk.at}: its first segment's foot stands at x ${feet[i].toFixed(2)} in hull space, ${(feet[i] - xHead).toFixed(1)} m abaft the loft's stem head; the plate's column ${col} puts it ${((col - SR.stemHeadCol) / SR.pxPerMAlongHull).toFixed(1)} m abaft (${(feet[i] - xPlate).toFixed(2)} m off)`);
+});
+}
+}
 if (!(H.deck && H.deck.belowSheerM > 0)) {
 const texts = [H.mastProvenance || ''].concat((H.masts || []).map(m => (m.yardFracsProvenance || '') + ' ' + (m.truckProvenance || '')));
 const re = /bulwark depth of ([0-9.]+) m|rail \+ ([0-9.]+) m/;

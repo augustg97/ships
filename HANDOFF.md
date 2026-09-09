@@ -27013,3 +27013,150 @@ uncommitted, deliberately; the r292 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/data/provenance.json carries 'READ, r292' 1 time(s) (the islands' provenance); docs/data/vessels.json carries '"railM":1' 1 time(s) (Preussen's islands block) and 'Midship bridge' 1 time(s) (the island's name); docs/audit-hulls.js carries 'an island recorded and not built' 1 time(s) (the A-ISLANDS rule's own string; its name lives in a comment the build strips); docs/js/hull.js carries 'buildIslands' 2 time(s) (the definition and its call); web/data/vessels.json against HEAD~1:  1 file changed, 45 insertions(+), 3 deletions(-); web/js/hull.js against HEAD~1:  1 file changed, 108 insertions(+), 3 deletions(-); Research/audit-hulls.js against HEAD~1:  1 file changed, 36 insertions(+), 2 deletions(-); the build read first paint 8.46 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r291's receipt: empty). SCORED at the r292 tree (web/ after the copy-ins, on :8149) one frame at a time by r292/check-chain.sh: the first r292 tree (before the island-deck fix), 9 frames, 21:46-21:55 under a load of 9-19: ship-preussen 0.964%/0.480 and aboard-preussen 0.389%/0.170 beyond the gate, ship-dreadnought 0.015%/0.005, shipwright 0.000%, sea-magnified 0.000%, aboard-coast 0.000%, map-floor 0.002%/0.001, ship-steamer 0.000%, aboard-carrier 0.000% inside it; the FINAL tree (the island deck wound upward and drawn in DECK_FRAG), 4 frames, 21:55-21:59: ship-preussen 0.886%/0.536 and aboard-preussen 0.361%/0.167 beyond the gate and ACCEPTED (2 baselines moved) - the three islands as black shell over the rail with planked decks, the bowsprit and its headsails higher, no capping along the islands, and the diff images (r292/chain-diff/) show nothing else; ship-dreadnought 0.020%/0.008 (Preussen's headsails at the frame's edge) and shipwright 0.000% inside the gate. The five frames scored only at the first tree stand: each was 0.000-0.002% there, so Preussen's islands are not in them and the deck fix cannot reach them. Left unscored at the r292 tree (55): every other frame - the record change is Preussen's alone, every builder path is gated on a field only she carries, the audit is not on screen; so each stands as scored at the r291 tree or earlier, and the clean-HEAD backlog r293 opens with is empty.
 Two commits close the round (7bb261f record + builder + audit + docs + handoff + accepted baselines, and this push-log commit).**
+
+## Round 293 — 2026-09-08 — Preussen's five masts stand where the anchor plate puts them, and lean aft as its poles do: her stations were a class placement at 0.18 intervals with no provenance while three plates of her had been read for the rig, so the fore stood 8.2 m and the main 5.5 m abaft the plate's poles and every mast stood plumb where the plate leans them two degrees aft; each pole was read column by column and fitted as a line, the station taken where it meets the main-deck row, the rake from its slope; the columns were first mapped to u linearly and the measure caught the loft drawing the fore mast 1.7 m forward of the plate, because the loft's deck-level line absorbs the stem and stern overhangs quadratically inside the forefoot and the run, so the stations are solved through the loft's own line and the record carries the read, the mapping and its two bounds; a new rule reads each mast's foot off the mesh against the plate's distance from the loft's own stem head and convicts the silence; no builder line changed, and the frames the change reaches were scored one at a time and accepted
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r292's entry ordered r293 to check `uptime` and
+`ps -r` FIRST and named its candidates in order: (0y¹¹¹), the mast stations; else (0y¹¹²); else (0y¹¹³); else the survey. At the
+open (22:15) the load was 3.73 (3.98 and 6.41 over 5 and 15 minutes), the loop driver holding the lock (round starting
+22:15:34), no hot process; the clean-HEAD backlog was empty by r292's receipt. (0y¹¹¹) WAS taken. Every edit was made on the
+:8150 copy (the r292 staging web dir, still served by the r292 server on :8150 with the same cwd; r293/web is a symlink to it)
+by two re-runnable scripts (r293/apply-record-edits.py, apply-audit-edits.py; every anchor asserted, every other field of every
+vessel asserted identical, the generated files parsed by json and node's vm), and copied into web/ twice: at 22:34 (the
+linear-mapped stations, the first audit) and at 22:45 (the loft-solved stations, the mesh-against-plate audit), after the
+audit passed on each; :8149 served web/ at HEAD until the first copy-in.**
+
+**THE FAULT (r292's naming, 0y¹¹¹). The record's five stations, 0.16 / 0.34 / 0.52 / 0.70 / 0.86, were a class placement at
+0.18 intervals with no provenance, while r289, r290 and r292 had read three plates of her row by row on each pole's own
+column; r292's island trace put the fore mast at u 0.103 and the main at 0.310 against the record. And every mast stood
+plumb, with no rake field, on a plate whose five poles all lean aft.**
+
+**THE READ (r293/r293_read_stations.py the centroid fit, r293_refine.py the midpoint fit that is recorded; read-stations.json,
+read-stations-refined.json; each mast's foot at 3x with the fitted line in green and r292's column in red in foot-*-3x.png;
+the bow at 2x in ends-bow-2x.png). On the Brodie anchor plate (SLV H99.220/3712, IE40684, 5421 px, bow left, starboard beam;
+build/staging/r289/full-IE40684.jpg) each pole is the dark run crossing a 3-row band every 10 rows from row 1500 down to 15 px
+above the hull's own top edge at that column (r292's topedge.npy); its column is the MIDPOINT of the run's half-depth edges
+— the first fit took the darkness-weighted centroid, and the foot crops showed that line riding the aft half of every pole,
+where the shroud gang darkens the plate, 3–14 px aft of the midpoint; rows crossed by a yard, a top or a doubling (a run
+wider than 45 px) are skipped; a line is fitted through 67–92 reads per mast (sd 5–11 px), the STATION is where it meets the
+main-deck row 2843 (r291's datum, the painted-ports band's foot, 3.65 m over the water) and the RAKE is its slope. COLUMNS
+at the deck row: fore 1428, main 2213, kreuz 3012, laeisz 3799, jigger 4477, ± 12 px (0.4 m, the spread between the two
+fits); abaft the stem head (column 894, r292's trace) at 31.11 px/m along the hull: 17.2 / 42.4 / 68.1 / 93.4 / 115.2 m. The
+spacing at the deck row is 785 / 799 / 788 / 678 px (r289's 796 / 796 / 770 / 702 were taken at one height on raked poles).
+RAKE: 1.8 / 2.4 / 2.1 / 2.0 / 2.4 degrees aft, ± 0.5 (the centroid fit read 1.9–2.9), on a plate whose waterline is level
+within 10 rows over 2900 columns (the hull's bottom edge at rows 2960–2970 from column 1500 to 4400), so the lean is the
+ship's and not the plate's. r292's columns (1467 / 2268 / 3044 / 3800 / 4473) were 3–59 px aft of these: they were taken at
+one height on raked poles and not carried to the deck.**
+
+**THE MAPPING — the round's finding. The first record mapped the columns to u linearly, u = −0.046 + (col − 894) / (31.11 ×
+124), r292's island mapping: 0.092 / 0.296 / 0.503 / 0.707 / 0.883. The audit passed on it, and measure_ship then put the fore
+mast's pole at u 0.074–0.088 (its fore edge), 1.7 m forward of where the plate's 17.2 m abaft the head should land. The loft
+places every mast foot on `x = (u − 0.5) × lwl + rake(u)` (hull.js, `hullSurface.rake`): inside the forefoot (u < 0.2) the
+offset is −stemRake × loa × ((0.2 − u)/0.2)², inside the run (u > 0.72) it is +sternRake × loa × ((u − 0.72)/0.28)², and
+between them it is 0 — so at DECK level u 0 is the stem head (x = −67.7 m in hull space) and u 1 the stern end (+66.3), the
+line is linear only in the middle, and the two overhangs are absorbed quadratically at the ends. A plate distance from the
+stem head therefore has to be solved through that line, not divided by lwl: fore 0.103, main 0.296, kreuz 0.503, laeisz
+0.707, jigger 0.873 (r293/apply-record-edits.py carries the loft's formula with the record's own fields and bisects it;
+rakeScale is 1.0 for her, loa − lwl = 10 = the rakes' sum). The middle three did not move between the two mappings; the two
+ends moved 1.4 m and 1.3 m. r292's ISLANDS were mapped linearly and carry the same error at their ends: the forecastle's
+break at u 0.057 is drawn 9.9 m abaft the head (the plate: 12.8), the poop's break at 0.915 is drawn 12.8 m from the stern end
+(the plate: 14.9); the bridge island lies in the linear middle and is right — (0y¹¹⁵) below.**
+
+**THE RECORD (web/data/vessels.json; r293/apply-record-edits.py, vessels.before.json → vessels.after.json, 61 lines). Each of
+Preussen's five masts: `at` 0.103 / 0.296 / 0.503 / 0.707 / 0.873 and `rake` 1.8 / 2.4 / 2.1 / 2.0 / 2.4 (the field the
+clipper's, the steamer's, the 74's and the East Indiaman's masts already carry; positive is aft). `hull.stationRead`: the
+plate, deckRow 2843, stemHeadCol 894, sternEndCol 5063, pxPerMAlongHull 31.112, the five cols and their bound (12 px), the
+five rakeDeg and their bound (0.5), stemHeadX −67.708 (the loft's deck-level stem head, −lwl/2 − stemRake × loa),
+distAbaftStemHeadM, a `mapping` sentence naming the loft's line, and the read's files. `hull.stationProvenance`: the method,
+the columns, the mapping and what it leans on — (1) the stem head's column: the bow crop shows the hull's dark top reaching
+forward under the headgear to about column 830, so the bow end is bracketed 830–894 and every distance from it is 0.0–2.1 m
+short at the fore mast, less aft; 894 is kept so that the stations and r292's islands keep their distances from each other;
+(2) the model's overhangs: the mapping fixes the head and the stern end to the model's own rake figures (5.7 and 4.3 m, class
+figures with no provenance), and on the plate the stem meets the water about 4.5 m abaft its head — and what did NOT move:
+every truckM and every yard fraction (r289, r290) was read as rows on each pole's own column and stands; the kreuz still
+stands inside the bridge island (u 0.429–0.625) and passes through its deck; with the rake the card's 58 m is the stack's
+length along the axis, 0.05 m over the plate's vertical read at 2.4°, inside the read's ± 0.5 m. Every other field of
+Preussen and every other vessel asserted identical. No builder line changed.**
+
+**THE AUDIT (Research/audit-hulls.js = web/audit-hulls.js; r293/apply-audit-edits.py, one insertion before A-RIG-DATUM,
+parsed by node's vm). A-STATIONS reads three things. The SILENCE: a mast whose yardFracsProvenance begins 'PLATE READ' on a
+hull with no stationProvenance, or a stationRead with no stationProvenance ('a rig read off a plate whose mast stations carry
+no provenance'; the clipper's and the steamer's yard provenances begin 'CLASS' and Endurance carries stationProvenance from
+r285, so it convicts no other hull). The RAKE: each mast's `rake` against the read's rakeDeg (0.15°). The MESH against the
+PLATE: each mast's first segment's foot (`seg.footX`, hull space) against the loft's own stem head, −lwl/2 − stemRake ×
+rakeScale × loa, plus the pole's distance abaft the head on the plate, (col − stemHeadCol) / pxPerMAlongHull (0.3 m: 'a mast
+built off its read') — the check that a linearly-typed station fails and nothing else could see. Silent on every hull
+without stationRead, except for the silence. PROOFS (r293/chain.log, one browser at a time on :8150): FINAL (the r293 record
+and audit) "checked 33 hulls, 0 problems" (22:41). PROOF B (the fore's station put back to 0.16, the read unchanged): 1,
+exactly 'a mast built off its read' — "masts[0] at 0.16: its first segment's foot stands at x −42.39 in hull space, 25.3 m
+abaft the loft's stem head; the plate's column 1427.9 puts it 17.2 m abaft (8.16 m off)" (22:42). PROOF S (stationProvenance
+deleted): 1, exactly the silence (22:43). The first record (the linear 0.092) had passed the first audit's arithmetic rule,
+which compared `at` with the same linear mapping — that rule was replaced by the mesh-against-plate check for that reason.**
+
+**MEASURED (r292/measure-after.out at HEAD, which is r293's before; r293/measure-after.out on the final tree; hull space): the
+Steel masts u 0.154–0.872 → 0.088–0.901 (the fore pole's fore edge at 0.088, its axis at 17.2 m abaft the head), the Yards
+0.106–0.908 → 0.043–0.926, the Shrouds 0.138–0.887 → 0.072–0.902, the Tops, Crosstrees, Cheeks, Futtock and Topmast shrouds,
+Ratlines, Parrels, Truss bands, Channels, Deadeyes, Braces, Lifts, Sheets, Halyards, the Gaff, Boom and Topping lift each
+with its mast; the Forecastle, Midship bridge and Poop, the Bowsprit, the Bobstay, the Rail and the Weather deck unchanged
+to the centimetre; the Sail envelope 0.161 fwd–1.005 → 1.020 aft (the spanker over the poop); the model's height over the
+water 61.71 → 61.76.**
+
+**THE WITNESS (r293/witness.py, 2880 px, on :8150): abeam `#v=ship&s=preussen&b=90&l=6&z=1.25`, the before shot on the HEAD
+tree at 22:24 (witness-abeam-before.png), the after on the final tree at 22:45 (witness-abeam-after.png;
+witness-abeam-after-1.png is the linear-mapped tree): 9.96% of pixels differ, rows 253–1362 — the whole rig forward, the
+fore mast now standing just abaft the forecastle's break, the jigger's spanker reaching over the poop, every pole leaning
+aft, the kreuz through the bridge island as before (crop-abeam-before-after.png, crop-abeam-diff-x6.png).**
+
+**THE FRAMES (r293/PREDICTIONS-close.md, written at 22:52 by the file's own clock — the clock read in the entry is `date`'s,
+22:34 — before any frame of the r293 tree was scored: MUST ship-preussen and aboard-preussen; MAY ship-dreadnought,
+ship-wyoming, ship-great-eastern, ship-titanic, shipwright, ship-clipper, ship-slave-ship; MUST NOT everything else). NO FULL
+RUN and NO CLEAN-HEAD BACKLOG (r292's receipt: empty). SCORED at the r293 tree one frame at a time by r293/check-chain.sh: the
+first tree (22:34–22:37, load 5–6) ship-preussen 14.751%/7.105, aboard-preussen 4.014%/1.893, ship-dreadnought 0.242%/0.087
+beyond the gate, ship-wyoming 0.000% and shipwright 0.000% inside it; the FINAL tree (22:45–22:47) ship-preussen
+14.389%/6.924, aboard-preussen 3.886%/1.806, ship-dreadnought 0.200%/0.067 beyond the gate and ACCEPTED (3 baselines moved;
+FRAME-LOG.md carries the reasons) — every mast forward to its column and leaning aft with its yards, canvas, shrouds, stays
+and staysails; ship-dreadnought carries Preussen's headsails and jigger canvas at its frame edge and nothing of Dreadnought
+changed (chain-diff/). ship-wyoming and shipwright stand as scored at the first tree: 0.000% there with the masts 8 m
+forward, so Preussen's rig is not in them. Left unscored at the r293 tree (60): every other frame — the record change is
+Preussen's alone, the audit is not on screen, no builder or shader line changed; each stands as scored at the r292 tree or
+earlier, and the clean-HEAD backlog r294 opens with is empty.**
+
+**Rule 0 on the accepted frame read whole (r293/chain-current/ship-preussen.png): a rendered five-masted ship from her port
+bow on a lit sea under a pale sky with a grey coast behind, square sails set on every mast, her five white-and-black poles
+leaning aft together, the first standing close behind her forecastle, the third rising through the planked deck of the
+bridge island amidships, the fleet's neighbours at their berths, the Shipwright's card beside her; not a chart. Three facts a
+viewer can read off it without a legend: she is square-rigged on five masts with six yards on each; her masts rake aft and
+the third stands on the raised island amidships; the card gives her 134.0 m overall, 16.40 m beam and 58.0 m from deck to
+truck.**
+
+**Named residuals, in order:** (0y¹¹¹) CLOSED. NEW (0y¹¹⁵) THE ISLANDS' ENDS THROUGH THE LOFT'S LINE — r292 mapped the
+three islands linearly; the forecastle's break (12.8 m abaft the head on the plate) is drawn 9.9 m abaft it and the poop's
+(14.9 m from the stern end) 12.8 m; solving them as the stations were solved gives the forecastle u 0–0.075 and the poop
+0.900–1.0 (the bridge island unchanged), a record-only change — but A-ISLANDS reads each island's span off its mesh against
+the record's u × lwl, the same linear assumption, so the rule needs the loft's line before the record can move. NEW (0y¹¹⁶)
+THE STEM'S OVERHANG — on the plate the stem meets the water about 4.5 m abaft its head (ends-bow-2x.png: columns 815–840 at
+the forecastle top, 955 at the water, ± 0.5 m) against the model's 5.7 (stemRake 0.0426, a class figure); and the stem head's
+own column is bracketed 830–894 under the headgear; a plan would fix both, and every distance read from the head (the
+stations, the islands) is re-derived when they move. (0y¹¹²) (0y¹¹³) (0y¹¹⁰) (0y¹⁰⁸) (0y¹⁰⁶) (0y⁹⁰) as r292 names them. (0y¹⁰¹)
+(0y¹⁰²) (0y¹⁰³) as r288 names them. (0y¹⁰⁰) (0y⁹⁵) (0y⁹⁸) (0y⁹³) (0y⁹⁴) (0y⁹²) (0y⁹¹) as r287 names them. (0y⁸⁵) (0y⁸⁷) as r281
+names them. (0y⁸²) (0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴)
+(0y⁷⁰) as r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275
+names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷)
+(0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴)
+(0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k)
+(0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗)
+(0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The
+forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r294 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as unscored
+among the frames this change can reach (the r279 memory rule). Then, in order: (0y¹¹⁵), the islands' ends through the loft's
+line — first teach A-ISLANDS the deck-level line (the same formula A-STATIONS carries, factored into one helper both rules
+call), then move the forecastle's and the poop's u in the record, predict ship-preussen and aboard-preussen as movers. Else
+(0y¹¹²), Titanic's raised ends through the islands' two fixes. Else (0y¹¹³), the bridge island's house and boats off the
+anchor plate. Else the survey's next never-spun hull. (0y¹⁰⁸) and (0y⁹⁰) only as the FIRST of a declared two-round pair,
+never alone.**
+
+**Live stamp: docs/index.html carries data-version 1788933061 at the build; the push and the live poll are in
+build/staging/r293/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r293 staging stays on disk uncommitted, the r211 convention.**
