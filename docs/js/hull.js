@@ -133,6 +133,15 @@ return st.topM[0] + (st.topM[1] - st.topM[0]) * t;
 }
 return null;
 };
+const islandTop = u => {
+if (!(S.islands && S.islands.list)) return null;
+for (const isl of S.islands.list)
+if (u >= isl.u[0] && u <= isl.u[1]) {
+const t = (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0]);
+return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
+}
+return null;
+};
 const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
 const rakeAllow = ((S.stemRake || 0) + (S.sternRake || 0)) * S.loa;
 const rakeScale = rakeAllow > 0
@@ -161,7 +170,7 @@ if (!deckDrop) return sheer(u);
 if (S.deck.level) return S.freeboard - deckDrop;
 return sheer(u) - deckDrop;
 };
-return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S),
+return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, islandTop, section: sectionRows(S),
 straightPost: SP, postTan, stemLine };
 }
 function deckEdge(S, H, u) {
@@ -2914,15 +2923,17 @@ if (S.bowsprit) {
 const u0 = 0.02;
 const x0 = -L / 2 + H.rake(u0);
 const len = L * S.bowsprit;
+const spritDeck = H.islandTop(u0) !== null
+? H.islandTop(u0) - ((S.islands && S.islands.railM) || 1.0) : deckAt(u0);
 const steeve = (S.steeve || 22) * Math.PI / 180;
 const bg = new THREE.CylinderGeometry(B * 0.010, B * 0.020, len, 16);
 const bm = new THREE.Mesh(bg, woodDark);
 bm.rotation.z = Math.PI / 2 - steeve;
 bm.position.set(x0 - Math.cos(steeve) * len / 2,
-deckAt(u0) + Math.sin(steeve) * len / 2, 0);
+spritDeck + Math.sin(steeve) * len / 2, 0);
 group.add(tag(bm, 'bowsprit'));
 const spritAt = f => [x0 - Math.cos(steeve) * len * f,
-deckAt(u0) + Math.sin(steeve) * len * f];
+spritDeck + Math.sin(steeve) * len * f];
 if (S.headsails) {
 const stemFoot = new THREE.Vector3(x0 + B * 0.03, 0.5, 0);
 const bobSegs = [0.52, 0.93].map(f => {
@@ -4088,6 +4099,7 @@ const T = S.decks ? linerHouse(S) : null;
 const t0 = T && T.tiers.length ? T.tiers[0] : null;
 const open = (u) => {
 if (H.stepTop(u) !== null) return false;
+if (H.islandTop(u) !== null) return false;
 if (!t0 || u < t0.uA || u > t0.uB) return true;
 return halfAtU(u) - t0.half(u) > B * 0.045;
 };
@@ -6475,6 +6487,62 @@ g.add(tag(bell, 'vent', 'Cowl ventilator',
 }
 }
 group.add(tag(g, 'superstructure'));
+}
+function buildIslands(S, group, hullMat) {
+if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
+const H = hullSurface(S);
+const L = S.lwl, B = S.beam, railM = S.islands.railM || 1.0;
+const steel = hex => new THREE.ShaderMaterial({
+vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
+side: THREE.DoubleSide,
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+uCol: { value: new THREE.Color(hex) } } });
+const wallMat = steel(S.topside || '#3a3a3c');
+const cover = deckCovering(S);
+const deckMat = new THREE.ShaderMaterial({
+vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+side: THREE.DoubleSide,
+uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+uCol: { value: new THREE.Color(cover.col) }, uMode: { value: cover.mode },
+uPlankW: { value: cover.plankW || 1 }, uButtL: { value: cover.buttL || 1 },
+uPlankRun: { value: cover.run || 0 } } });
+const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
+const strip = (pts, mat, up) => {
+const idx = [];
+for (let k = 0; k + 1 < pts.length / 6; k++) {
+const a = k * 2, b = a + 2;
+if (up) idx.push(a, a + 1, b, a + 1, b + 1, b); else idx.push(a, b, a + 1, a + 1, b, b + 1);
+}
+const g = new THREE.BufferGeometry();
+g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+g.setIndex(idx); g.computeVertexNormals();
+return new THREE.Mesh(g, mat);
+};
+for (const isl of S.islands.list) {
+const u0 = Math.max(0.004, isl.u[0]), u1 = Math.min(0.996, isl.u[1]);
+const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+const g = new THREE.Group();
+const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
+const path = [];
+for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
+path.push({ u: u1, x: (u1 - 0.5) * L, z: -halfAt(u1) });
+for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: -halfAt(u) }); }
+path.push({ u: u0, x: (u0 - 0.5) * L, z: halfAt(u0) });
+const wall = [];
+for (const p of path) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, top(p.u), p.z);
+g.add(strip(wall, wallMat));
+for (const ue of [u0, u1]) {
+const x = (ue - 0.5) * L, h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
+g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat));
+}
+const dp = [];
+for (let k = 0; k <= N; k++) {
+const u = u0 + (u1 - u0) * k / N, y = top(u) - railM, h = halfAt(u);
+dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
+}
+g.add(strip(dp, deckMat, true));
+group.add(tag(g, 'forecast', isl.name, isl.what));
+}
 }
 function buildRaisedEnds(S, group) {
 if (!(S.wellM && S.houseAt && S.houseAt.length === 2 && S.decks)) return;
@@ -10845,6 +10913,7 @@ if (FINE) buildFittings(S, group, mats);
 if (FINE) buildFunnel(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
 if (FINE && S.cluster) buildCluster(S, group);
+if (FINE && S.islands) buildIslands(S, group, hullMat);
 if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
 if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
 if (FINE) buildJunkCastle(S, group);

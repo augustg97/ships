@@ -243,6 +243,24 @@ function hullSurface(S) {
       }
     return null;
   };
+  /* ── THE ISLANDS (hull.islands, round 292, Preussen) ──────────────────────────────────
+     A forecastle, a midship bridge and a poop are the SHELL carried up over a raised deck,
+     and on a Laeisz five-master they are most of what the broadside shows over the rail.
+     The record reads each island's TOP over the water at both ends (topM: the line the plate
+     shows, linear between them like a terrace's cap), and the deck behind the top is the top
+     less islands.railM. The main deck under an island keeps deck(u): every mast's truck and
+     yard fraction was read over the MAIN deck line, so a mast inside an island's span steps
+     on the main deck and passes through the island's deck, which is where the plate puts it.
+     null anywhere the record has no island, so every other hull is byte-identical. */
+  const islandTop = u => {
+    if (!(S.islands && S.islands.list)) return null;
+    for (const isl of S.islands.list)
+      if (u >= isl.u[0] && u <= isl.u[1]) {
+        const t = (u - isl.u[0]) / Math.max(1e-6, isl.u[1] - isl.u[0]);
+        return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
+      }
+    return null;
+  };
   /* tumblehome grows above the waterline; quoted as the fraction of half-beam lost at deck */
   const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
 
@@ -321,7 +339,7 @@ function hullSurface(S) {
     if (S.deck.level) return S.freeboard - deckDrop;
     return sheer(u) - deckDrop;
   };
-  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, section: sectionRows(S),
+  return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, islandTop, section: sectionRows(S),
            straightPost: SP, postTan, stemLine };
 }
 
@@ -5175,16 +5193,20 @@ function buildRig(S, group, mats, FINE, FURLED) {
     const u0 = 0.02;
     const x0 = -L / 2 + H.rake(u0);
     const len = L * S.bowsprit;
+    /* the sprit's heel is on the deck under the stem head, which on a hull with a recorded
+       forecastle island (hull.islands, r292) is the forecastle's deck, railM under its top */
+    const spritDeck = H.islandTop(u0) !== null
+      ? H.islandTop(u0) - ((S.islands && S.islands.railM) || 1.0) : deckAt(u0);
     const steeve = (S.steeve || 22) * Math.PI / 180;
     const bg = new THREE.CylinderGeometry(B * 0.010, B * 0.020, len, 16);
     const bm = new THREE.Mesh(bg, woodDark);
     bm.rotation.z = Math.PI / 2 - steeve;
     bm.position.set(x0 - Math.cos(steeve) * len / 2,
-                    deckAt(u0) + Math.sin(steeve) * len / 2, 0);
+                    spritDeck + Math.sin(steeve) * len / 2, 0);
     group.add(tag(bm, 'bowsprit'));
     /* a point f of the way out along the spar, from its root at the stemhead */
     const spritAt = f => [x0 - Math.cos(steeve) * len * f,
-                          deckAt(u0) + Math.sin(steeve) * len * f];
+                          spritDeck + Math.sin(steeve) * len * f];
 
     /* ── THE BOBSTAY, WHICH IS WHY THE SPAR STAYS IN THE SHIP ────────────────────────
        Every stay the bowsprit anchors pulls UP on it; the bobstay is the chain from the
@@ -6725,6 +6747,9 @@ function buildFittings(S, group, mats) {
          buildSternTerraces, and a second capping ridden along the old sheer line here
          would hang in the air over the lowered decks */
       if (H.stepTop(u) !== null) return false;
+      /* an island's side is the shell carried up past the sheer (r292): no deck edge here,
+         and a capping ridden along the sheer would stand as a lip outside the island's wall */
+      if (H.islandTop(u) !== null) return false;
       if (!t0 || u < t0.uA || u > t0.uB) return true;
       /* the house is here: is there deck left outboard of it to stand on? */
       return halfAtU(u) - t0.half(u) > B * 0.045;
@@ -10338,6 +10363,85 @@ function buildSuperstructure(S, group, hullMat) {
     }
   }
   group.add(tag(g, 'superstructure'));
+}
+
+/* ── THE ISLANDS: THE SHELL CARRIED UP OVER A RAISED DECK (round 292, Preussen) ───────
+ * Every plate of Preussen shows three of them — a forecastle, a midship bridge 24 m long
+ * with the painted-ports band along its side, and a poop — and the model drew a flush deck
+ * from stem to stern, so the broadside read as a hull with five masts and no ship on it.
+ * The record (hull.islands) carries each island's u-span and its top over the water at both
+ * ends, read off the plate; here the wall is the shell's own line carried straight up from
+ * the sheer to that top (flush, no inset: the skin ends at the sheer and the wall begins
+ * there, one edge), the deck lies railM under the top, and each end is closed by a bulkhead
+ * that runs down to the MAIN deck, because the well deck looks at the island's front from
+ * a bulwark's depth below the sheer. The wall takes the shell's own light (STEEL_FRAG on the
+ * hull material's uSun/uCam, the r102 lesson) so a black island on a black hull is one
+ * black. Masts keep the main deck (see islandTop in hullSurface). Record-gated. */
+function buildIslands(S, group, hullMat) {
+  if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
+  const H = hullSurface(S);
+  const L = S.lwl, B = S.beam, railM = S.islands.railM || 1.0;
+  const steel = hex => new THREE.ShaderMaterial({
+    vertexShader: SHADERS['STEEL_VERT.vert'], fragmentShader: SHADERS['STEEL_FRAG.frag'],
+    side: THREE.DoubleSide,
+    uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                uCol: { value: new THREE.Color(hex) } } });
+  const wallMat = steel(S.topside || '#3a3a3c');
+  /* the island's deck is a weather deck: the same DECK_FRAG recipe the hull's own deck is
+     drawn in, the recorded covering's planking, lit by the declared normal — so it reads as
+     the planked deck it is and not as a dark plate (the first r292 witness) */
+  const cover = deckCovering(S);
+  const deckMat = new THREE.ShaderMaterial({
+    vertexShader: SHADERS['DECK_VERT.vert'], fragmentShader: SHADERS['DECK_FRAG.frag'],
+    side: THREE.DoubleSide,
+    uniforms: { uSun: hullMat.uniforms.uSun, uCam: hullMat.uniforms.uCam,
+                uCol: { value: new THREE.Color(cover.col) }, uMode: { value: cover.mode },
+                uPlankW: { value: cover.plankW || 1 }, uButtL: { value: cover.buttL || 1 },
+                uPlankRun: { value: cover.run || 0 } } });
+  const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
+  const strip = (pts, mat, up) => {
+    /* pts: [x, yLo, z, x, yHi, z] per station, a quad between neighbours. The winding is the
+       normal: walked round the perimeter it faces OUT of the wall; on the deck strip, whose
+       pairs run −z to +z, the same order faces DOWN, and a deck shader lit by its declared
+       normal draws that as shadow — so the deck is wound the other way (`up`). */
+    const idx = [];
+    for (let k = 0; k + 1 < pts.length / 6; k++) {
+      const a = k * 2, b = a + 2;
+      if (up) idx.push(a, a + 1, b, a + 1, b + 1, b); else idx.push(a, b, a + 1, a + 1, b, b + 1);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return new THREE.Mesh(g, mat);
+  };
+  for (const isl of S.islands.list) {
+    const u0 = Math.max(0.004, isl.u[0]), u1 = Math.min(0.996, isl.u[1]);
+    const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
+    const g = new THREE.Group();
+    const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
+    /* the perimeter: port side fwd→aft, the aft end, starboard aft→fwd, the fore end */
+    const path = [];
+    for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
+    path.push({ u: u1, x: (u1 - 0.5) * L, z: -halfAt(u1) });
+    for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: -halfAt(u) }); }
+    path.push({ u: u0, x: (u0 - 0.5) * L, z: halfAt(u0) });
+    const wall = [];
+    for (const p of path) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, top(p.u), p.z);
+    g.add(strip(wall, wallMat));
+    /* the end bulkheads, from the main deck up to the sheer where the wall above begins */
+    for (const ue of [u0, u1]) {
+      const x = (ue - 0.5) * L, h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
+      g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat));
+    }
+    /* the island's deck, railM under the top, lofted station by station */
+    const dp = [];
+    for (let k = 0; k <= N; k++) {
+      const u = u0 + (u1 - u0) * k / N, y = top(u) - railM, h = halfAt(u);
+      dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
+    }
+    g.add(strip(dp, deckMat, true));
+    group.add(tag(g, 'forecast', isl.name, isl.what));
+  }
 }
 
 /* ── THE RAISED ENDS: FORECASTLE AND POOP ──────────────────────────────────────────────
@@ -16729,6 +16833,7 @@ function buildShip(S, opts) {
      length, and the main battery was buried inside them. A turreted ship gets the citadel. */
   if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
   if (FINE && S.cluster) buildCluster(S, group);
+  if (FINE && S.islands) buildIslands(S, group, hullMat);
   if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
   if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
   if (FINE) buildJunkCastle(S, group);

@@ -70,9 +70,9 @@ const H = v.hull;
 const hullRow = (v.rows || []).find(r => Array.isArray(r) && /^hull$/i.test(String(r[0]).trim()));
 const timber = !/^(steel|iron)$/.test(String(H.build || ''));
 const names = timber && hullRow && /castle|\bpoop\b/i.test(String(hullRow[1]));
-const declares = !!(H.castle || H.castles || H.poop || (H.wellM && H.houseAt));
+const declares = !!(H.castle || H.castles || H.poop || (H.wellM && H.houseAt) || (H.islands && H.islands.list));
 if (names && !declares)
-say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop or raised ends in the data`);
+say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop, islands or raised ends in the data`);
 if (H.castles && !H.castlesProvenance)
 say(v.id, 'castles with no provenance', 'hull.castles declared, hull.castlesProvenance absent');
 if (H.castles) for (const end of ['fore', 'aft']) {
@@ -6364,6 +6364,29 @@ const d = bb2.min.y - deck;
 if (d < -2.0 || d > 1.5) { bad++; msg = `casing bottom ${d.toFixed(1)} m from its deck`; }
 });
 if (bad) say(v.id, 'funnel does not stand on its deck', `${bad} of ${H.funnels}: ${msg}`);
+}
+if (H.islands) {
+const IL = H.islands.list;
+if (!(Array.isArray(IL) && IL.length)) say(v.id, 'islands with no list', 'hull.islands.list absent or empty');
+if (!(H.islands.provenance && H.islands.provenance.length > 20)) say(v.id, 'islands with no provenance', 'hull.islands.provenance absent');
+const H2 = SHIPS_HULL.hullSurface(H);
+const groups = [];
+g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.key === 'forecast') groups.push({ o, name: p.name }); });
+for (const isl of (IL || [])) {
+const shapeOK = isl && typeof isl.name === 'string' && Array.isArray(isl.u) && isl.u.length === 2 && isl.u[0] >= 0 && isl.u[1] <= 1 && isl.u[1] > isl.u[0]
+&& Array.isArray(isl.topM) && isl.topM.length === 2 && isl.topM.every(t => typeof t === 'number');
+if (!shapeOK) { say(v.id, 'an island declared out of shape', `${JSON.stringify(isl).slice(0, 120)}; want {name, u: [a, b], topM: [fwd, aft]}`); continue; }
+const um = (isl.u[0] + isl.u[1]) / 2;
+if (Math.min(isl.topM[0], isl.topM[1]) < H2.sheer(um)) say(v.id, 'an island whose top lies under the sheer', `${isl.name}: topM ${isl.topM.join('/')} m, the sheer at its middle ${H2.sheer(um).toFixed(2)} m`);
+const grp = groups.find(q => q.name === isl.name);
+if (!grp) { say(v.id, 'an island recorded and not built', `${isl.name}, u ${isl.u[0]}-${isl.u[1]}: no forecast group of that name`); continue; }
+const bb = new THREE.Box3().setFromObject(grp.o);
+const wantTop = Math.max(isl.topM[0], isl.topM[1]);
+if (Math.abs(bb.max.y - wantTop) > 0.15) say(v.id, 'an island built off its recorded top', `${isl.name}: built top ${bb.max.y.toFixed(2)} m over the water, record ${wantTop.toFixed(2)}`);
+const x0 = (Math.max(0.004, isl.u[0]) - 0.5) * H.lwl, x1 = (Math.min(0.996, isl.u[1]) - 0.5) * H.lwl;
+if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+}
+for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
 }
 if (part.container || part.forecast) {
 const H2 = SHIPS_HULL.hullSurface(H);

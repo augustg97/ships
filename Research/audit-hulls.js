@@ -164,9 +164,9 @@
          plates, named as residual (0l); the rule reaches steel when that is answered. */
       const timber = !/^(steel|iron)$/.test(String(H.build || ''));
       const names = timber && hullRow && /castle|\bpoop\b/i.test(String(hullRow[1]));
-      const declares = !!(H.castle || H.castles || H.poop || (H.wellM && H.houseAt));
+      const declares = !!(H.castle || H.castles || H.poop || (H.wellM && H.houseAt) || (H.islands && H.islands.list));
       if (names && !declares)
-        say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop or raised ends in the data`);
+        say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop, islands or raised ends in the data`);
       if (H.castles && !H.castlesProvenance)
         say(v.id, 'castles with no provenance', 'hull.castles declared, hull.castlesProvenance absent');
       if (H.castles) for (const end of ['fore', 'aft']) {
@@ -8975,6 +8975,40 @@
        rule above cannot see it: B*0.52 is generous amidships and wrong at the bow. So ask at
        each part's OWN station, against the hull's own half-breadth, from the same
        surfacePoint the builder lofts from — one derivation of the edge. */
+    /* ── A-ISLANDS (round 292, Preussen): A RECORDED ISLAND IS BUILT WHERE AND AS HIGH AS THE
+       RECORD SAYS, AND NOTHING ELSE IS. hull.islands carries each island's u-span and its top
+       over the water at both ends, read off a plate; the builder lofts a wall from the sheer to
+       that top and a deck railM under it, tagged 'forecast' with the island's own name. Read
+       back off the meshes: for every listed island a group of that name must exist, its top
+       (the group's max y) must be the record's higher end within 0.15 m, its length along the
+       hull the span's within 1.5 m; a 'forecast' group named for no island on a hull that has
+       islands is a stray; and the record side — each island needs a name, an ascending u-span
+       inside [0,1], a topM pair over the sheer, and the block a provenance. Silent on every hull
+       without hull.islands. */
+    if (H.islands) {
+      const IL = H.islands.list;
+      if (!(Array.isArray(IL) && IL.length)) say(v.id, 'islands with no list', 'hull.islands.list absent or empty');
+      if (!(H.islands.provenance && H.islands.provenance.length > 20)) say(v.id, 'islands with no provenance', 'hull.islands.provenance absent');
+      const H2 = SHIPS_HULL.hullSurface(H);
+      const groups = [];
+      g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.key === 'forecast') groups.push({ o, name: p.name }); });
+      for (const isl of (IL || [])) {
+        const shapeOK = isl && typeof isl.name === 'string' && Array.isArray(isl.u) && isl.u.length === 2 && isl.u[0] >= 0 && isl.u[1] <= 1 && isl.u[1] > isl.u[0]
+          && Array.isArray(isl.topM) && isl.topM.length === 2 && isl.topM.every(t => typeof t === 'number');
+        if (!shapeOK) { say(v.id, 'an island declared out of shape', `${JSON.stringify(isl).slice(0, 120)}; want {name, u: [a, b], topM: [fwd, aft]}`); continue; }
+        const um = (isl.u[0] + isl.u[1]) / 2;
+        if (Math.min(isl.topM[0], isl.topM[1]) < H2.sheer(um)) say(v.id, 'an island whose top lies under the sheer', `${isl.name}: topM ${isl.topM.join('/')} m, the sheer at its middle ${H2.sheer(um).toFixed(2)} m`);
+        const grp = groups.find(q => q.name === isl.name);
+        if (!grp) { say(v.id, 'an island recorded and not built', `${isl.name}, u ${isl.u[0]}-${isl.u[1]}: no forecast group of that name`); continue; }
+        const bb = new THREE.Box3().setFromObject(grp.o);
+        const wantTop = Math.max(isl.topM[0], isl.topM[1]);
+        if (Math.abs(bb.max.y - wantTop) > 0.15) say(v.id, 'an island built off its recorded top', `${isl.name}: built top ${bb.max.y.toFixed(2)} m over the water, record ${wantTop.toFixed(2)}`);
+        const x0 = (Math.max(0.004, isl.u[0]) - 0.5) * H.lwl, x1 = (Math.min(0.996, isl.u[1]) - 0.5) * H.lwl;
+        if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+      }
+      for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
+    }
+
     if (part.container || part.forecast) {
       const H2 = SHIPS_HULL.hullSurface(H);
       let over = 0, worst = 0;
