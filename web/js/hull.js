@@ -2937,8 +2937,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* the segment's own record — its ends on the axis, as built — for the audit to read the
          mesh against (D-MAST-SEGMENT): a pole whose rim centres are not at these points is a
          pole built to some other line, which is what the artemon was for 250 rounds */
-      m.userData.seg = { si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
+      m.userData.seg = { mi, si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
                          rakeDeg: mk.rake || 0, lengthM: segLen };
+      /* r287 (0y96): `mi` names the mast, so the loft's deck-to-truck and the audit can read one mast's
+         segments as one stack — the foot of segment 0 to the head of the last drawn — from the meshes */
       /* the iron mast's card carries its provenance: attested diameters are the record's,
          derived ones say derived — a number with no provenance is worse than none */
       if (S.iron) m.userData.part = { ...m.userData.part,
@@ -3343,7 +3345,15 @@ function buildRig(S, group, mats, FINE, FURLED) {
        rig reads as a WALL of canvas — the gaps a viewer can see through are exactly the
        gaps the crew could not have worked. */
     if (mk.rig === 'square' && mk.yards) {
-      const T = y - base;                     // truck height above the deck at this mast
+      /* r287 (0y96): T IS THE TRUCK OVER THE DECK, AND THE TRUCK IS THE HEAD OF THE LAST SEGMENT. `y` after
+         the loop stands 0.88 of the last segment over that segment's heel — the doubling advance applied once
+         more than there are doublings — so `y - base` was 0.036 x lower SHORT of the truck the meshes draw:
+         Preussen's T 56.78 against the 58 her record attests and mastLowerOf solves the stack for, the clipper's
+         main 43.31 against 44.24, the steamer's 41.30 against 42.19, Endurance's fore 31.43 against 32.11. A
+         plate's fraction (r285, r286) is read from the deck to the top of the pole; capY is that head, so a
+         yard hangs where the read puts it, and the yards, the card's tile and the audit measure between the
+         same two points. */
+      const T = capY - base;                  // truck height above the deck at this mast: the last segment's head
       const PLAN = {          // [fraction of T, length as a share of the course yard, diameter rate]
         course: [0.36, 1.000, 'course'],
         ltop:   [0.50, 0.93, 'topsail'],
@@ -3687,7 +3697,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
     if (mk.rig === 'square') {
       mastTops.push({ u, x: truckX, y: truckY });
       /* the staysail block below needs each square mast's own station and truck height */
-      stayMasts[mi] = { x, base, T: y - base };
+      stayMasts[mi] = { x, base, T: capY - base };   // r287 (0y96): the truck, as the yards' T above
     }
     /* a gaff masthead is a stay anchorage too — the schooner's web is drawn in
        buildRigging from these, and it is a different web from a square-rigger's */
@@ -5138,6 +5148,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const lo = [fwdM.x, fwdM.base + fwdM.T * (0.33 + 0.38 * t)];
       const st = ropeMesh([[new THREE.Vector3(lo[0], lo[1], 0),
                             new THREE.Vector3(hi[0], hi[1], 0)]], 0.016 + B * 0.0005, ropeMat);
+      if (st) st.userData.staysail = { mi, k, aftT: aftM.T, aftBase: aftM.base, fwdT: fwdM.T, fwdBase: fwdM.base,
+                                       hiY: +hi[1].toFixed(4), loY: +lo[1].toFixed(4) };   // r287 (0y96)
       if (st) group.add(tag(st, 'stay'));
       const at = f => [lo[0] + (hi[0] - lo[0]) * f, lo[1] + (hi[1] - lo[1]) * f];
       /* tack near the stay's foot, head hoisted close under the after masthead, clew sheeted
@@ -16824,16 +16836,42 @@ function buildShip(S, opts) {
      datum; the cog's cross at the truck (0.5 m staff, 0.6 m cross) put rigTop 1.1 m over her
      truck and the tile read 24.6 m for a 23.5 m mast. A flag, a vane or an aerial above the
      truck is the same class. undefined on a hull with no mast, like rigDeckY. */
-  let rigDeckY, rigTruckY;
-  { let top = -Infinity;
+  let rigDeckY, rigTruckY, rigTruckFrom;
+  { let top = -Infinity, topSeg = null;
     group.traverse(o => {
       if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
       const b2 = new THREE.Box3().setFromObject(o);
-      if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; }
+      if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; topSeg = o.userData.seg || null; }
     });
-    if (top > -Infinity) rigTruckY = top; }
+    if (top > -Infinity) { rigTruckY = top; rigTruckFrom = 'measured: the span of the mast mesh that reaches highest (no segment record)'; }
+    /* r287 (0y96): A MAST DRAWN IN SEGMENTS HAS ONE FOOT, AND IT IS THE FIRST SEGMENT'S. The mesh that reaches
+       highest on a fidded mast is the topgallant, and its own min.y is its heel at the second doubling, not
+       the deck — so the tile read that one segment's length on every hull whose tallest mast is more than one
+       pole (ten of thirty-three: 10.2 m for Preussen's attested 58, 9.8 for the 74's 56, 5.0 for the slave
+       ship's 28.5, 17.4 for Wyoming's 46.9) and the single-pole hulls read right by accident. Every segment
+       records its mast and its ends on the axis (`seg`), so the deck is the foot of segment 0 of the mast that
+       reaches highest and the truck is the head of its last drawn segment — the two points the yards' T and
+       the r155 truckM rule are measured between. A mast built without segment records (a lateen's, a tripod's,
+       a whip) keeps the mesh-box derivation above, and says so. And the loft says where the figure comes from
+       (rigTruckFrom), because a derived number printed beside the record's reads as the record's: 'record'
+       when the mast attests its flag-button (truckM, the stack solved for it) or is one piece of the record's
+       own length (heightM on a single segment); 'derived' when a lower mast — recorded or a beam share — is
+       carried to the truck through the class fractions. */
+    if (topSeg && topSeg.mi !== undefined) {
+      let foot = Infinity, head = -Infinity, n = 0;
+      group.traverse(o => { const sg = o.isMesh && o.userData.seg; if (!sg || sg.mi !== topSeg.mi) return;
+        if (sg.si === 0) foot = Math.min(foot, sg.footY); head = Math.max(head, sg.headY); n++; });
+      if (foot < Infinity && head > -Infinity) {
+        rigDeckY = foot; rigTruckY = head;
+        const mk = (S.masts || [])[topSeg.mi] || {};
+        rigTruckFrom = (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
+                     : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
+                     : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
+                     : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
+      }
+    } }
   group.userData = { hullMat, sails, spec: S, furled: FURLED,
-                     rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY,
+                     rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom,
                      extentX: bb.max.x - bb.min.x,     // a lateen yard overhangs the stem
                      /* ── THE FLOAT DATUM IS A CONSTRUCTION FACT, NOT A MEASUREMENT ──────
                         surfacePoint puts the load waterline at local y = 0 (v = 0.62 → z = 0)

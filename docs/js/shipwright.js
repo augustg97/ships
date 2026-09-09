@@ -421,10 +421,13 @@ document.getElementById('swDims').innerHTML = [
 ['Length overall', L.toFixed(1) + ' m'],
 ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
 ['Draught' + (vessel.hull.draughtCondition ? ', ' + vessel.hull.draughtCondition : ''), vessel.hull.draught.toFixed(2) + ' m'],
-[(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
+[(vessel.hull.masts || []).length
+? 'Rig, deck to truck' + (U.rigTruckFrom && U.rigTruckFrom.indexOf('record') !== 0 ? ' (derived)' : '')
+: 'Air draught, above deck',
 ((U.rigTruckY !== undefined ? U.rigTruckY : U.rigTop)
-- (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'],
-].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
+- (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m',
+U.rigTruckFrom || ''],
+].map(d => '<div' + (d[2] ? ' title="' + d[2].replace(/"/g, '&quot;') + '"' : '') + '><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 if (SW.key) {
 const r = Math.max(L, U.rigTop) * 0.85;
 const sc = SW.key.shadow.camera;

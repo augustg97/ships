@@ -1665,7 +1665,7 @@ const segLen = seg / Math.cos(rakeRad);
 const m = cyl(0, y + seg / 2 - segLen / 2, y + seg / 2 + segLen / 2,
 segR[si].a, segR[si].b, mastMat, -rakeRad);
 m.position.x = mxA(y + seg / 2);
-m.userData.seg = { si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
+m.userData.seg = { mi, si, footY: y, headY: y + seg, footX: mxA(y), headX: mxA(y + seg),
 rakeDeg: mk.rake || 0, lengthM: segLen };
 if (S.iron) m.userData.part = { ...m.userData.part,
 name: mk.wood ? 'Wooden mast' : S.build === 'steel' ? 'Steel mast' : 'Iron mast',
@@ -1892,7 +1892,7 @@ segHeads[si] = capY;
 y += seg * 0.88;
 });
 if (mk.rig === 'square' && mk.yards) {
-const T = y - base;
+const T = capY - base;
 const PLAN = {
 course: [0.36, 1.000, 'course'],
 ltop:   [0.50, 0.93, 'topsail'],
@@ -2098,7 +2098,7 @@ const truckY = segHeads.length
 const truckX = mxA(truckY);
 if (mk.rig === 'square') {
 mastTops.push({ u, x: truckX, y: truckY });
-stayMasts[mi] = { x, base, T: y - base };
+stayMasts[mi] = { x, base, T: capY - base };
 }
 else if (mk.rig === 'gaff' && segs.length)
 mastTops.push({ u, x: truckX, y: truckY, gaff: true });
@@ -2896,6 +2896,8 @@ const hi = [aftM.x, aftM.base + aftM.T * (0.55 + 0.38 * t)];
 const lo = [fwdM.x, fwdM.base + fwdM.T * (0.33 + 0.38 * t)];
 const st = ropeMesh([[new THREE.Vector3(lo[0], lo[1], 0),
 new THREE.Vector3(hi[0], hi[1], 0)]], 0.016 + B * 0.0005, ropeMat);
+if (st) st.userData.staysail = { mi, k, aftT: aftM.T, aftBase: aftM.base, fwdT: fwdM.T, fwdBase: fwdM.base,
+hiY: +hi[1].toFixed(4), loY: +lo[1].toFixed(4) };
 if (st) group.add(tag(st, 'stay'));
 const at = f => [lo[0] + (hi[0] - lo[0]) * f, lo[1] + (hi[1] - lo[1]) * f];
 const tack = at(0.08), head = at(0.90);
@@ -10909,16 +10911,29 @@ group.add(tag(plat, 'platform'));
 }
 }
 const bb = new THREE.Box3().setFromObject(group);
-let rigDeckY, rigTruckY;
-{ let top = -Infinity;
+let rigDeckY, rigTruckY, rigTruckFrom;
+{ let top = -Infinity, topSeg = null;
 group.traverse(o => {
 if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
 const b2 = new THREE.Box3().setFromObject(o);
-if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; }
+if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; topSeg = o.userData.seg || null; }
 });
-if (top > -Infinity) rigTruckY = top; }
+if (top > -Infinity) { rigTruckY = top; rigTruckFrom = 'measured: the span of the mast mesh that reaches highest (no segment record)'; }
+if (topSeg && topSeg.mi !== undefined) {
+let foot = Infinity, head = -Infinity, n = 0;
+group.traverse(o => { const sg = o.isMesh && o.userData.seg; if (!sg || sg.mi !== topSeg.mi) return;
+if (sg.si === 0) foot = Math.min(foot, sg.footY); head = Math.max(head, sg.headY); n++; });
+if (foot < Infinity && head > -Infinity) {
+rigDeckY = foot; rigTruckY = head;
+const mk = (S.masts || [])[topSeg.mi] || {};
+rigTruckFrom = (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
+: (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
+: mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
+: 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
+}
+} }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,
-rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY,
+rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom,
 extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;

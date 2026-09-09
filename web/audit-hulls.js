@@ -6856,6 +6856,68 @@
         }
       });
     }
+    /* ── A-RIG-HEIGHT (round 287, 0y⁹⁶): THE RIG'S HEIGHT IS ONE FIGURE, MEASURED BETWEEN THE SAME TWO POINTS
+       EVERYWHERE. The Shipwright's 'deck to truck' tile read the loft's rigTruckY - rigDeckY, and the loft took
+       both off the one mast MESH that reaches highest — on a fidded mast the topgallant, whose own foot is the
+       second doubling — so ten hulls printed one segment's length (Preussen 10.2 m against her attested 58, the
+       74 9.8 against 56); and every listed yard hung at base + T x f with T = the segment loop's y - base, 0.88 of
+       the last segment over its heel, 0.036 x lower SHORT of the truck the meshes draw (Preussen 56.78 against 58).
+       Every segment mesh records its mast and its ends (`seg.mi`, `seg.si`, `seg.footY`, `seg.headY`), so the truck
+       over the deck at a mast is the head of its last drawn segment over the foot of its first, read off the
+       meshes: (a) the loft's rigDeckY and rigTruckY are that pair for the mast that reaches highest (0.02) —
+       'the card's rig height is one segment' convicts the r235 derivation; (b) the loft says where the figure
+       comes from (rigTruckFrom) — the SILENCE convicts — and says 'record' exactly when that mast attests truckM
+       (a square stack solved for it) or is one piece of the record's own heightM, otherwise not; (c) every yard
+       mesh's T is its own mast's truck over its foot and its base that foot (0.02) — 'a yard's T is not the
+       truck'; (d) a square mast attesting truckM has its segments' deck-to-truck at truckM (0.05; the r155 rule
+       reads the mesh boxes at 0.75, this one the segments' own record); (e) every staysail's stay records the two
+       trucks it hoists between (`staysail`), and each is its mast's truck over its foot (0.02) — "a staysail's T is not the
+       truck". */
+    {
+      const U = g.userData || {};
+      const stacks = {};
+      g.traverse(o => { const s = o.isMesh && o.userData.seg; if (!s || s.mi === undefined) return;
+        const m = stacks[s.mi] = stacks[s.mi] || { foot: Infinity, head: -Infinity, n: 0 };
+        if (s.si === 0) m.foot = Math.min(m.foot, s.footY); m.head = Math.max(m.head, s.headY); m.n++; });
+      const anyMast = (H.masts || []).length > 0;
+      let tallest = null, tmi = null;
+      Object.keys(stacks).forEach(k => { const m = stacks[k]; if (m.foot < Infinity && (!tallest || m.head > tallest.head)) { tallest = m; tmi = +k; } });
+      let topMesh = -Infinity;
+      g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast') { const b2 = new THREE.Box3().setFromObject(o); topMesh = Math.max(topMesh, b2.max.y); } });
+      if (anyMast && topMesh > -Infinity) {
+        const d2t = (U.rigTruckY !== undefined && U.rigDeckY !== undefined) ? (U.rigTruckY - U.rigDeckY) : null;
+        if (d2t === null)
+          say(v.id, "the card's rig height is unset", `masts drawn and the loft records no rigDeckY/rigTruckY`);
+        else if (tallest && topMesh - tallest.head < 0.5) {
+          if (Math.abs(U.rigDeckY - tallest.foot) > 0.02 || Math.abs(U.rigTruckY - tallest.head) > 0.02)
+            say(v.id, "the card's rig height is one segment",
+                `the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
+          const mk = H.masts[tmi] || {};
+          const wantRecord = (mk.truckM !== undefined && mk.rig === 'square') || (tallest.n === 1 && mk.heightM !== undefined);
+          if (!U.rigTruckFrom)
+            say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
+          else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)
+            say(v.id, 'rig height provenance wrong', `rigTruckFrom '${U.rigTruckFrom}' for masts[${tmi}] (${mk.rig}; truckM ${mk.truckM}, heightM ${mk.heightM}, ${tallest.n} segment(s)) — ${wantRecord ? 'the record attests this figure' : 'the figure is derived through class fractions'}`);
+        } else if (!U.rigTruckFrom)
+          say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck off a mast with no segment record and does not say so (rigTruckFrom)`);
+      }
+      g.traverse(o => { if (!o.isMesh || !o.userData.yardFrac) return; const f = o.userData.yardFrac; const m = stacks[f.mast];
+        const tk = `masts[${f.mast}], yard '${f.name}'`;
+        if (!m || m.foot === Infinity) { say(v.id, 'a yard on a mast with no segment record', tk); return; }
+        const truck = m.head - m.foot;
+        if (Math.abs(f.T - truck) > 0.02)
+          say(v.id, "a yard's T is not the truck", `${tk}: hangs at ${f.frac} of T ${f.T.toFixed(3)} and the mast's segments put the truck ${truck.toFixed(3)} over its foot (T ${(truck - f.T).toFixed(3)} m short)`);
+        if (Math.abs(f.base - m.foot) > 0.02)
+          say(v.id, "a yard's base is not the mast's foot", `${tk}: base ${f.base.toFixed(3)} against the first segment's foot ${m.foot.toFixed(3)}`); });
+      g.traverse(o => { if (!o.isMesh || !o.userData.staysail) return; const f = o.userData.staysail;
+        const a = stacks[f.mi], w = stacks[f.mi - 1], tk = `masts[${f.mi}], staysail ${f.k}`;
+        if (!a || a.foot === Infinity || !w || w.foot === Infinity) { say(v.id, 'a staysail between masts with no segment record', tk); return; }
+        if (Math.abs(f.aftT - (a.head - a.foot)) > 0.02 || Math.abs(f.fwdT - (w.head - w.foot)) > 0.02 || Math.abs(f.aftBase - a.foot) > 0.02 || Math.abs(f.fwdBase - w.foot) > 0.02)
+          say(v.id, "a staysail's T is not the truck", `${tk}: hoists on aft T ${f.aftT.toFixed(3)} over base ${f.aftBase.toFixed(3)} and fwd T ${f.fwdT.toFixed(3)} over ${f.fwdBase.toFixed(3)}, against the segments' ${(a.head - a.foot).toFixed(3)} over ${a.foot.toFixed(3)} and ${(w.head - w.foot).toFixed(3)} over ${w.foot.toFixed(3)}`); });
+      (H.masts || []).forEach((mk, mi) => { if (mk.truckM === undefined || mk.rig !== 'square') return; const m = stacks[mi]; if (!m || m.foot === Infinity) return;
+        if (Math.abs((m.head - m.foot) - mk.truckM) > 0.05)
+          say(v.id, 'a recorded truck the segments do not land', `masts[${mi}]: the segments span ${(m.head - m.foot).toFixed(3)} m deck to truck against truckM ${mk.truckM}`); });
+    }
     /* ── A-REEF-BAND (round 284, 0y⁸⁹): A SQUARE SAIL'S REEF BANDS ARE THE RECORD'S, AND THE RECORD
        ANSWERS. Hurley's plate of Endurance's topsail shows one band with its points at 0.40 of the leech,
        and until r284 the builder drew every square sail in the fleet plain. Read from the BUILT scene

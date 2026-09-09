@@ -773,10 +773,20 @@ function swOpen(vessel) {
     /* r235: and TO THE TRUCK, which is the head of the tallest mast (U.rigTruckY), not the
        model's highest point — the cog's cross at the truck put rigTop 1.1 m over her truck and
        this printed 24.6 m for a 23.5 m mast. rigTop stays the datum where no mast stands. */
-    [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
+    /* r287 (0y96): the loft's rigDeckY/rigTruckY are now the tallest mast's own first-segment foot and
+       last-segment head — a fidded mast's highest MESH is its topgallant, whose own foot is a doubling, and
+       this tile printed 10.2 m for Preussen's attested 58 and 9.8 for the 74's 56 — and the loft says where
+       the figure comes from (rigTruckFrom). The label says '(derived)' when it is not the record's, so a
+       class-fraction truck is not read as an attested one; the full derivation is the tile's title. The
+       word wraps the label to a second line on the ten hulls it names, which is the card growing by one
+       line, not a fault. */
+    [(vessel.hull.masts || []).length
+       ? 'Rig, deck to truck' + (U.rigTruckFrom && U.rigTruckFrom.indexOf('record') !== 0 ? ' (derived)' : '')
+       : 'Air draught, above deck',
      ((U.rigTruckY !== undefined ? U.rigTruckY : U.rigTop)
-      - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'],
-  ].map(d => '<div><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
+      - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m',
+     U.rigTruckFrom || ''],
+  ].map(d => '<div' + (d[2] ? ' title="' + d[2].replace(/"/g, '&quot;') + '"' : '') + '><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
   /* fit the shadow frustum to this ship, in her own place on the line */
   if (SW.key) {

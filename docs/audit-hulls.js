@@ -4885,6 +4885,51 @@ say(v.id, 'a fixed yard off its fraction', `${tk}: at y ${o.position.y.toFixed(3
 });
 }
 {
+const U = g.userData || {};
+const stacks = {};
+g.traverse(o => { const s = o.isMesh && o.userData.seg; if (!s || s.mi === undefined) return;
+const m = stacks[s.mi] = stacks[s.mi] || { foot: Infinity, head: -Infinity, n: 0 };
+if (s.si === 0) m.foot = Math.min(m.foot, s.footY); m.head = Math.max(m.head, s.headY); m.n++; });
+const anyMast = (H.masts || []).length > 0;
+let tallest = null, tmi = null;
+Object.keys(stacks).forEach(k => { const m = stacks[k]; if (m.foot < Infinity && (!tallest || m.head > tallest.head)) { tallest = m; tmi = +k; } });
+let topMesh = -Infinity;
+g.traverse(o => { if (o.isMesh && tagOf(o) && tagOf(o).key === 'mast') { const b2 = new THREE.Box3().setFromObject(o); topMesh = Math.max(topMesh, b2.max.y); } });
+if (anyMast && topMesh > -Infinity) {
+const d2t = (U.rigTruckY !== undefined && U.rigDeckY !== undefined) ? (U.rigTruckY - U.rigDeckY) : null;
+if (d2t === null)
+say(v.id, "the card's rig height is unset", `masts drawn and the loft records no rigDeckY/rigTruckY`);
+else if (tallest && topMesh - tallest.head < 0.5) {
+if (Math.abs(U.rigDeckY - tallest.foot) > 0.02 || Math.abs(U.rigTruckY - tallest.head) > 0.02)
+say(v.id, "the card's rig height is one segment",
+`the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
+const mk = H.masts[tmi] || {};
+const wantRecord = (mk.truckM !== undefined && mk.rig === 'square') || (tallest.n === 1 && mk.heightM !== undefined);
+if (!U.rigTruckFrom)
+say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
+else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)
+say(v.id, 'rig height provenance wrong', `rigTruckFrom '${U.rigTruckFrom}' for masts[${tmi}] (${mk.rig}; truckM ${mk.truckM}, heightM ${mk.heightM}, ${tallest.n} segment(s)) — ${wantRecord ? 'the record attests this figure' : 'the figure is derived through class fractions'}`);
+} else if (!U.rigTruckFrom)
+say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck off a mast with no segment record and does not say so (rigTruckFrom)`);
+}
+g.traverse(o => { if (!o.isMesh || !o.userData.yardFrac) return; const f = o.userData.yardFrac; const m = stacks[f.mast];
+const tk = `masts[${f.mast}], yard '${f.name}'`;
+if (!m || m.foot === Infinity) { say(v.id, 'a yard on a mast with no segment record', tk); return; }
+const truck = m.head - m.foot;
+if (Math.abs(f.T - truck) > 0.02)
+say(v.id, "a yard's T is not the truck", `${tk}: hangs at ${f.frac} of T ${f.T.toFixed(3)} and the mast's segments put the truck ${truck.toFixed(3)} over its foot (T ${(truck - f.T).toFixed(3)} m short)`);
+if (Math.abs(f.base - m.foot) > 0.02)
+say(v.id, "a yard's base is not the mast's foot", `${tk}: base ${f.base.toFixed(3)} against the first segment's foot ${m.foot.toFixed(3)}`); });
+g.traverse(o => { if (!o.isMesh || !o.userData.staysail) return; const f = o.userData.staysail;
+const a = stacks[f.mi], w = stacks[f.mi - 1], tk = `masts[${f.mi}], staysail ${f.k}`;
+if (!a || a.foot === Infinity || !w || w.foot === Infinity) { say(v.id, 'a staysail between masts with no segment record', tk); return; }
+if (Math.abs(f.aftT - (a.head - a.foot)) > 0.02 || Math.abs(f.fwdT - (w.head - w.foot)) > 0.02 || Math.abs(f.aftBase - a.foot) > 0.02 || Math.abs(f.fwdBase - w.foot) > 0.02)
+say(v.id, "a staysail's T is not the truck", `${tk}: hoists on aft T ${f.aftT.toFixed(3)} over base ${f.aftBase.toFixed(3)} and fwd T ${f.fwdT.toFixed(3)} over ${f.fwdBase.toFixed(3)}, against the segments' ${(a.head - a.foot).toFixed(3)} over ${a.foot.toFixed(3)} and ${(w.head - w.foot).toFixed(3)} over ${w.foot.toFixed(3)}`); });
+(H.masts || []).forEach((mk, mi) => { if (mk.truckM === undefined || mk.rig !== 'square') return; const m = stacks[mi]; if (!m || m.foot === Infinity) return;
+if (Math.abs((m.head - m.foot) - mk.truckM) > 0.05)
+say(v.id, 'a recorded truck the segments do not land', `masts[${mi}]: the segments span ${(m.head - m.foot).toFixed(3)} m deck to truck against truckM ${mk.truckM}`); });
+}
+{
 const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
 const pts = o => { const a = o.geometry.attributes.position, out = [], V = new THREE.Vector3(); o.updateMatrixWorld(true);
 for (let k = 0; k < a.count; k++) { V.set(a.getX(k), a.getY(k), a.getZ(k)).applyMatrix4(o.matrixWorld).applyMatrix4(inv); out.push(V.clone()); } return out; };

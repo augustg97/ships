@@ -26126,3 +26126,135 @@ uncommitted, deliberately; the r286 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/data/vessels.json carries "yardFracs" 6 time(s) (Endurance's fore mast and Preussen's five); docs/data/provenance.json carries 'PLATE READ, r286' 5 time(s) (Preussen's five masts) and yardFracsProvenance 12 time(s); web/data/vessels.json against HEAD~1:  1 file changed, 45 insertions(+), 5 deletions(-); web/js/hull.js against HEAD~1: unchanged (0 lines); the build read first paint 8.46 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r285's receipt: every frame its change could not reach stands as scored at earlier trees and its MAY neighbours were all scored). THE r286 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r286/check-one.sh and check-may.sh (the two MUST frames first, then the two MUST-NOT witnesses and the five MAY neighbours beside the push) at 25-50 s a frame under a load of 3-8: 9 frames scored, 2 beyond the gate, 2 accepted, 2 baselines moved. ship-preussen 4.710%/1.593 - the Shipwright MUST frame, CHANGED and ACCEPTED (FRAME-LOG.md 14:38): the amplified diff (r286/chain-diff/ship-preussen.png) is the five masts' sails and yards - the courses 7.4 m lower and 8 m deep in place of 15, every tier re-cut between the yards - no hull, no deck fitting; witnessed abeam at z=1.0 (r286/crop-abeam-before-after.png, 310,729 changed pixels in columns 653-2415, rows 119-1118 of the 2880 frame). aboard-preussen 2.368%/0.919 - the Sea MUST frame, CHANGED and ACCEPTED (FRAME-LOG.md 14:39): the rig alone from the Sea's quarter camera, read whole as a rendered five-master on a lit sea. The two MUST-NOT witnesses (the other rigs with yardFracsProvenance, read by the same fracOf): ship-endurance 0.000%/0.000 - byte-identical - and ship-clipper 0.019%/0.006, exactly its r285 figure (the documented capture flap on a neighbour's rigging line). The five MAY neighbours all inside the gate: sea-magnified 0.000%/0.000, aboard-coast 0.000%/0.000, ship-steamer 0.017%/0.008, ship-dreadnought 0.023%/0.008, shipwright 0.015%/0.005 (its r281-r285 figure). Left unscored at the r286 tree (56): globe-default globe-crossing globe-steam globe-modern globe-era-card action ship-dhow ship-junk ship-canoe ship-great-eastern ship-usv ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune ship-carrier ship-titanic ship-yamato descent descent-high descent-coast aboard aboard-off map-floor aboard-carrier aboard-cable aboard-titanic aboard-yamato ship-wyoming aboard-wyoming ship-treasure aboard-treasure aboard-clipper shipwright-ahead shipwright-astern shipwright-furled shipwright-hounds shipwright-corbis action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang wake-plan sea-ever-given passage-sahul sea-dugout-floor sea-canoe-floor ship-slave-ship ship-carrack ship-endurance-neighbours(ship-azzam ship-ever-given ship-container ship-queen-mary-2) - every one of them a frame the change cannot reach (the record change is five yardFracs objects on Preussen's masts and five provenance strings split out of first paint; fracOf returns the plan's value on every other mast, witnessed byte-identical on Endurance and at the flap figure on the clipper; aboard-preussen is the only Sea frame with her in it), so each stands as scored at the r285/r284/r283/r282/r281/r280 trees and the clean-HEAD backlog r287 opens with is empty.
 Two commits close the round (d8ca149 record + docs + handoff + accepted baselines, and this push-log commit).**
+
+## Round 287 — 2026-09-08 — the rig's height is one figure, measured between the same two points everywhere: the Shipwright's 'deck to truck' tile took its two ends off the one mast MESH that reaches highest, which on a fidded mast is the topgallant, so ten hulls printed one segment's length (Preussen 10.2 m for her attested 58, the 74 9.8 for 56), and every listed yard and every staysail hung on a T taken from the segment loop's counter after its last doubling advance, 0.021 of the truck short on twelve masts and five hulls; every segment mesh now names its mast, the loft reads the tallest mast's stack from its first foot to its last head and says whether the figure is the record's or derived, the card prints it and labels the derived ones, the yards' and the staysails' T is the truck, a new rule reads all of it off the meshes and convicts the silence and the arithmetic, no record changed, and the sixteen frames the change reaches were scored one at a time and accepted
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r286's entry ordered r287 to check `uptime` and
+`ps -r` FIRST and named its candidates in order: (0y⁹⁰) the lubber's hole if the load was under ~5 with the full ratchet
+launched inside 15 minutes; else (0y⁹⁶); else (0y⁹⁷); else the clipper's and the steamer's fractions; else the survey. At
+the open (16:39) the load was 3.19 (3.57 and 3.00 over 5 and 15 minutes), the loop driver holding the lock (round
+starting 16:39:28), no hot process. (0y⁹⁰) was NOT taken, for r284's, r285's and r286's reason: it couples a builder
+change, a re-lead of ten falls and a rewrite of A-UPPER-GEAR's rim test, and no builder round since r277 has had its
+geometry final inside 15 minutes; it stays first for a round that can open with it. (0y⁹⁶) was taken. A prior r287
+attempt at 15:02–15:08 (the loop's authentication lapsed after it; build/loop.log) had already staged the :8150 copy
+(r287/web, symlinks with real copies of hull.js, shipwright.js, vessels.json and audit-hulls.js), run the before-probe
+and written apply-edits.py; this round read that script line by line, added the staysails' T and its audit clause to it,
+and ran it — every anchor asserted, each after-file reproduced from its before-file, all three syntax-checked by node's
+vm — and copied into web/ by r287/copy-in.sh after the proofs and the witness. :8149 served web/ at HEAD for the
+before-witness. No record and no shader changed.**
+
+**THE TWO DERIVATIONS, AND WHY EACH STOPPED SHORT OF THE TRUCK. (1) The card. The loft (buildRig's tail) found rigTruckY
+and rigDeckY by walking every mesh tagged 'mast' and keeping the min.y and max.y of the ONE whose max.y was highest.
+Every fidded segment is its own mesh, so on a three-segment mast that mesh is the topgallant, and its min.y is its heel
+at the second doubling, not the deck. The tile therefore printed the topgallant's own length — 0.30 x lower = 10.19 m on
+Preussen, which is exactly what the card showed — and did so on every hull whose tallest mast is more than one pole. The
+before-probe (r287/probe-righeight.py on :8149 at HEAD, all 27 hulls with masts, probe-before.out) read the card's figure
+against the segments' own stack: carrack 12.98 for 32.00, fluyt 5.22 for 29.70, East Indiaman 7.98 for 45.42,
+ship-of-the-line 9.85 for 56.02, slave ship 5.00 for 28.46, Wyoming 17.42 for 46.90, Preussen 10.19 for 58.00, Great
+Eastern 20.80 for 56.00, clipper 7.78 for 44.24, steamer 7.42 for 42.19 — ten hulls; Titanic 52.35 for 52.20 (a
+single pole, the mesh box's rim over the axis head); every other single-pole hull the same figure to 0.01. r286 had
+guessed the card derived from heightM; it did not, and the guess is corrected here. (2) The yards' T. The yard-list
+block (`if (mk.rig === 'square' && mk.yards)`) set `T = y - base`, and `y` is the segment loop's counter, advanced by
+0.88 of EVERY segment including the last — the doubling advance applied once more than there are doublings — so T was
+0.88 x (lower + top + tg) = 1.672 x lower where the truck stands at 1.708 x lower: 0.036 x lower short, 0.021 of the
+truck. mastLowerOf solves the stack so that the drawn truck lands truckM (Preussen: lower = 58 / 1.708), and the meshes
+DID land it — the after-probe reads the segments' head 58.000 over the foot — but every yard hung at f x 56.78 and every
+plate fraction of r285 and r286, read from the deck to the top of the pole, was applied to the wrong T. The staysail
+block took `stayMasts[mi].T = y - base` from the same counter, so Preussen's, the clipper's, the steamer's and the 74's
+staysails hoisted on the short T at both ends.**
+
+**THE BUILDER (web/js/hull.js; r287/apply-edits.py E1–E5). E1: `m.userData.seg` gains `mi`, so one mast's segments can
+be read as one stack off the meshes. E2: `const T = capY - base` — capY is the last drawn segment's head (the variable
+segHeads and the stays already used), so the yards' T is the truck the meshes draw and the plate fractions were read
+against. E3: the loft's rigDeckY / rigTruckY are the foot of segment 0 and the head of the last drawn segment of the mast
+whose head is highest, read off `seg`; a mast built without segment records (the lateen's, a tripod's) keeps the mesh-box
+read; and the loft says where the figure comes from — `rigTruckFrom`: 'record: truckM 58 m …' when a square mast
+attests its flag-button (the stack solved for it), 'record: heightM … one pole' when one segment is the record's own
+length, 'derived: the recorded lower mast (heightM …) carried to the truck through the class fractions, 3 segments' or
+'derived: a beam-share lower mast …' otherwise. E4: `stayMasts[mi].T = capY - base`. E5: every staysail's stay mesh
+records `staysail: { mi, k, aftT, aftBase, fwdT, fwdBase, hiY, loY }`. THE CARD (web/js/shipwright.js): the tile prints
+the loft's pair as before, the label reads 'Rig, deck to truck (derived)' when rigTruckFrom does not begin 'record', and
+the full derivation is the tile's title. The word wraps the label to a second line on the ten hulls it names, which is
+the card growing by one line; the first form of the label (', derived') left a comma hanging at the line's end and was
+replaced before the frames were accepted (both runs' figures are in the receipt).**
+
+**MEASURED (r287/probe-righeight.py on :8150 after, probe-after.out, against probe-before.out; set build, fine, hull
+space). Every card now equals its stack: Preussen 58.00, the 74 56.02, the clipper 44.24, the steamer 42.19, Great
+Eastern 56.00, Wyoming 46.90, the carrack 32.00, the fluyt 29.70, the East Indiaman 45.42, the slave ship 28.45 (the
+stack 28.46), Titanic 52.20; every single-pole hull unchanged to 0.01. The yards' T: Preussen 56.778 → 58.000 on all
+five masts; the clipper 38.79 / 43.305 / 37.286 → 39.626 / 44.237 / 38.088; the steamer 35.915 / 41.302 / 37.71 →
+36.688 / 42.191 / 38.522; Endurance 31.434 → 32.11. Preussen's fore mast yards (hull y): course 18.432 → 18.714, ltop
+26.949 → 27.414, utop 36.033 → 36.694, ltg 43.415 → 44.234, utg 50.796 → 51.774, royal 57.609 → 58.734 (1.125 m, the
+largest); Endurance's course 13.206 → 13.443, top 19.493 → 19.866, tg 26.095 → 26.61. The 74's staysails (from PROOF C's
+own convictions): aft T 54.842 → 56.022 over base 5.402, forward T 48.754 → 49.804 over 6.266.**
+
+**THE AUDIT (Research/audit-hulls.js = web/audit-hulls.js; NEW A-RIG-HEIGHT, before A-REEF-BAND). It builds each mast's
+stack from the `seg` records (foot of si 0, max head, count), then: (a) the loft's rigDeckY / rigTruckY must be that
+pair for the tallest stack (0.02) — 'the card's rig height is one segment'; (b) rigTruckFrom must exist — 'rig height
+with no provenance' — and must begin 'record' exactly when the mast attests truckM on a square rig or is one segment
+with heightM — 'rig height provenance wrong'; (c) every yardFrac mesh's T and base must be its mast's truck over its foot
+and that foot (0.02) — "a yard's T is not the truck", "a yard's base is not the mast's foot", 'a yard on a mast with no
+segment record'; (d) a square mast attesting truckM must have its segments span it (0.05); (e) every staysail mesh's two
+T's and bases must be its two masts' (0.02) — "a staysail's T is not the truck". PROOFS (r287/chain.log; each audit
+alone in its browser on :8150). FINAL (md5 e67706ef, 16:47): "checked 33 hulls, 0 problems". PROOF B (the r286 builder
+hull.before.js on the r287 audit, 16:49): 87 on 27 hulls — 'rig height with no provenance' on every hull with masts and
+'a yard on a mast with no segment record' on the sixty listed yards. PROOF C (the r287 builder with T = y − base put
+back at both sites, hull.proofc.js, 16:54): 87 — "a yard's T is not the truck" x 60 and "a staysail's T is not the
+truck" x 27 on the clipper, Endurance, Preussen, the ship-of-the-line and the steamer. PROOF C2 (the r287 builder with
+the stack read switched off so the loft keeps the mesh-box pair, hull.proofc2.js, 16:55): 22 — "the card's rig height is
+one segment" on eleven hulls (the ten above and Titanic's 0.15 m) and 'rig height provenance wrong' on eleven. The
+builder was restored cmp-identical after each proof.**
+
+**THE FRAMES (r287/PREDICTIONS-close.md, written before any frame of the r287 tree was scored). MUST move (geometry) —
+ship-preussen, aboard-preussen, ship-clipper, aboard-clipper, ship-steamer, ship-endurance; MUST move (the 74's
+staysails) — the four shipwright-* cameras; MUST move (the card's text) — ship-carrack, ship-great-eastern, ship-wyoming,
+ship-slave-ship; MAY — shipwright, ship-titanic. The prediction missed one: `aboard` (#e=5&f=greatwestern) is the
+STEAMER on the 1838 crossing, found by reading voyages.json when the receipt was drafted, scored at 0.153% and accepted.
+And it misjudged the card frames' size: a few thousand pixels of text was predicted and 2% arrived, because the label
+wraps and every tile under it moves down — the diff (r287/chain-diff/ship-carrack.png) is the card alone. Witnessed
+BEFORE any frame was scored, from the port beam (b=90, l=8, z=1.0; witness-abeam-before.png from :8149 at HEAD,
+-after.png from :8150; crop-cluster-1-before-after.png and witness-abeam-before-after-half.png): 354,117 changed pixels in
+columns 302–2401 of the 2880 frame, the five masts' yards and cloth and the card's tile — '10.2 m RIG, DECK TO TRUCK'
+before, '58.0 m' after — and nothing of the hull. Every moved frame was LOOKED AT as a diff or a witness before its
+accept (ship-carrack, ship-clipper and shipwright-hounds read as diffs in this transcript; the figures and the reasons in
+FRAME-LOG.md 17:18–17:20 and in the receipt).**
+
+**Rule 0 on the accepted frame read whole (r287/chain-current/ship-preussen.png, and the witness half-scale pair): a
+rendered five-masted ship from her port beam on a lit sea under a pale sky, six square sails on every mast stepping from
+a low course to a royal just under the truck, a black hull with a white band and a tan deck, the Shipwright's card and
+fleet list around her — not a chart. Three facts a viewer can read off it without a legend: she is square-rigged on all
+five masts; each mast carries six yards; the card gives her 134.0 m overall, 16.40 m beam and 58.0 m from deck to
+truck, the record's figure.**
+
+**Named residuals, in order:** (0y⁹⁶) CLOSED. NEW (0y⁹⁹) THE LABEL WRAPS — 'Rig, deck to truck (derived)' takes two
+lines in the tile on ten hulls, and the tile's title carries the derivation where nothing on screen invites a hover;
+a shorter word or a mark beside the figure, decided with the card's other qualifiers (the draught condition, r233) in
+view, would hold the card's height. NEW (0y¹⁰⁰) THE 74'S, THE CLIPPER'S AND THE STEAMER'S STAYSAIL HOISTS ARE CLASS
+FRACTIONS (0.55 + 0.38 t of the after truck, 0.33 + 0.38 t of the forward) now measured from the right T; no plate has
+been read for them. (0y⁹⁵) (0y⁹⁷) (0y⁹⁸) as r286 names them — (0y⁹⁷)'s and (0y⁹⁸)'s numbers were read against the
+truck and are unchanged by this round; the yards now hang at those fractions of the truck the plate was read to. (0y⁹³)
+as r284 names it. (0y⁹⁴) THE TRUCKS ARE CONTESTED as r285 names it — and r285's contested read (the fore pole 21.4 m
+over the deck against 31.4 built) was made against the mesh, which this round confirms stands at the record's 32.11 in
+hull space over its foot (33.5 on the card is the main). (0y⁹²) as r284 names it. (0y⁹⁰) THE LUBBER'S HOLE, first for a
+round that can open with the full ratchet, and (0y⁹¹) as r283 names them. (0y⁸⁵) (0y⁸⁷) as r281 names them. (0y⁸²)
+(0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰)
+as r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275
+names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰)
+(0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹)
+(0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o)
+(0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵)
+(0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230
+lists them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r288 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as
+unscored among the frames this change can reach (the r279 memory rule), and this round's receipt says it is empty. Then,
+if the load is under ~5 at the open and the round can launch the full ratchet inside 15 minutes: (0y⁹⁰) the lubber's
+hole. Else (0y⁹⁷), a second Preussen plate on the beam to tighten the two lowest fractions and read the fore mast. Else
+the clipper's and the steamer's yard fractions off a beam plate of each, the r286 method (the two remaining CLASS rigs,
+now hung from the right T). Else (0y⁹⁹), the label, as a card round with the card's qualifiers decided together. Else
+the survey's next never-spun hull by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788913464 at the build; the push and the live poll are in
+build/staging/r287/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r287 staging stays on disk uncommitted, the r211 convention.**
