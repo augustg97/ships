@@ -6595,7 +6595,14 @@ function tag(o, key, extra, what) {
 function bulwarkFurnitureSpec(S, H) {
   const openHull = deckCovering(S).mode === 0;
   const frameTimbers = !!(S.frames && S.frames.roomAndSpaceM);
-  if (openHull || !S.deck || !(S.deck.belowSheerM > 0.3) || frameTimbers) return null;
+  /* r291 (Preussen): the stanchions and the timber pin rail below are the WOODEN bulwark's -
+     the frames' top timbers carried past the deck, planked outside. A steel or iron ship's
+     bulwark is plating stiffened by bulwark stays, with pin rails on the stays; none of that
+     is drawn here, and giving her the wooden class's timbers at four-foot pitch would draw a
+     wooden wall inside a steel ship and lead every fall to a pin the class invented. Null,
+     and the record names the stays as not drawn; the falls end at the deck edge as before. */
+  const steelShip = S.build === 'steel' || S.build === 'iron';
+  if (openHull || !S.deck || !(S.deck.belowSheerM > 0.3) || frameTimbers || steelShip) return null;
   const L = S.lwl;
   const deckAtU = u => H.deck(u), railAtU = u => H.sheer(u);
   const BW = S.bulwark || {};

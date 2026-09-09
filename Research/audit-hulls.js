@@ -6269,9 +6269,12 @@
         else if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
         else if (p.key === 'rail') capM.push(o);
         else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
-      const want = deep && !timbers;
+      /* r291: a steel or iron ship's bulwark is plating on stays; the builder gives her none of the wooden
+         class's timbers (bulwarkFurnitureSpec returns null), and the record names the stays as not drawn */
+      const steel = H.build === 'steel' || H.build === 'iron';
+      const want = deep && !timbers && !steel;
       if (!want) {
-        if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.length} Bulwark stanchion mesh(es) on a hull ${deep ? 'whose frames are drawn to the head (frames.roomAndSpaceM)' : 'with no deck below the sheer'}`);
+        if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.length} Bulwark stanchion mesh(es) on a hull ${!deep ? 'with no deck below the sheer' : steel ? 'built of steel or iron, whose bulwark is plating on stays' : 'whose frames are drawn to the head (frames.roomAndSpaceM)'}`);
         if (railM.length) say(v.id, 'a pin rail in a bulwark that is not there', `${railM.length} Pin rail mesh(es) on a hull ${deep ? 'whose frames are drawn to the head' : 'with no deck below the sheer'}`);
       } else {
         let deckPts = null, capPts = null;
@@ -6747,6 +6750,29 @@
         if (f.y0 - e > allow)
           say(v.id, 'a fitting standing on the sheer of a bulwarked hull',
               `${name} (${f.n} mesh${f.n > 1 ? 'es' : ''}) foot ${f.y0.toFixed(2)} m, the deck's edge ${e.toFixed(2)} at x ${f.x.toFixed(1)}: ${(f.y0 - e).toFixed(2)} m over it, ${allow.toFixed(2)} allowed where the cap stands ${H.deck.belowSheerM} over the deck`);
+      }
+    }
+
+    /* ── A-RIG-DATUM (round 291, Preussen): A RIG READ OVER THE DECK STANDS ON THE DECK.
+       Preussen's five trucks and her thirty yard fractions were read on two plates over a
+       deck placed a bulwark's depth under the cap rail (r289: 'the cap rail plus the r215
+       class bulwark depth of 1.35 m'; r290 registered to r289), and the model drew her deck
+       at the skin's top, so every mast heel and every yard stood 1.35 m higher over the
+       water than the read that placed it, and the card's 58 m deck-to-truck was measured
+       from the cap. No rule could see it: the r215 and r272 rules are gated on
+       deck.belowSheerM, and she had no deck record. This rule reads the SILENCE: a mast
+       provenance that names a bulwark depth as its datum, on a hull whose record has no
+       deck.belowSheerM, is a read the model does not share. Silent on every hull whose
+       provenances name no such datum, and on every hull whose record lowers the deck. */
+    if (!(H.deck && H.deck.belowSheerM > 0)) {
+      const texts = [H.mastProvenance || ''].concat((H.masts || []).map(m => (m.yardFracsProvenance || '') + ' ' + (m.truckProvenance || '')));
+      const re = /bulwark depth of ([0-9.]+) m|rail \+ ([0-9.]+) m/;
+      for (let i = 0; i < texts.length; i++) {
+        const mm = re.exec(texts[i]); if (!mm) continue;
+        const d = mm[1] || mm[2];
+        say(v.id, 'a rig read over a deck the model draws at the cap',
+            `${i === 0 ? 'mastProvenance' : 'mast ' + (i - 1) + "'s provenance"} places the read's datum ${d} m under the cap rail and the record has no deck.belowSheerM: the masts stand on the skin's top, ${d} m over the deck the plate read them from`);
+        break;
       }
     }
 

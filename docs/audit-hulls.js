@@ -4446,9 +4446,10 @@ else if (p.key === 'pinRail' && p.name === 'Pin rail') railM.push(o);
 else if (p.key === 'pinRail' && p.name === 'Belaying pins') pinsM.push(o);
 else if (p.key === 'rail') capM.push(o);
 else if (p.key === 'deck' && !/Waterplane|Gunwale|log/i.test(p.name || '')) deckM.push(o); });
-const want = deep && !timbers;
+const steel = H.build === 'steel' || H.build === 'iron';
+const want = deep && !timbers && !steel;
 if (!want) {
-if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.length} Bulwark stanchion mesh(es) on a hull ${deep ? 'whose frames are drawn to the head (frames.roomAndSpaceM)' : 'with no deck below the sheer'}`);
+if (stM.length) say(v.id, 'stanchions in a bulwark that is not there', `${stM.length} Bulwark stanchion mesh(es) on a hull ${!deep ? 'with no deck below the sheer' : steel ? 'built of steel or iron, whose bulwark is plating on stays' : 'whose frames are drawn to the head (frames.roomAndSpaceM)'}`);
 if (railM.length) say(v.id, 'a pin rail in a bulwark that is not there', `${railM.length} Pin rail mesh(es) on a hull ${deep ? 'whose frames are drawn to the head' : 'with no deck below the sheer'}`);
 } else {
 let deckPts = null, capPts = null;
@@ -4817,6 +4818,17 @@ const e = dv.length ? deckEdgeNear(f.x) : 1e9; if (e > 1e8) continue;
 if (f.y0 - e > allow)
 say(v.id, 'a fitting standing on the sheer of a bulwarked hull',
 `${name} (${f.n} mesh${f.n > 1 ? 'es' : ''}) foot ${f.y0.toFixed(2)} m, the deck's edge ${e.toFixed(2)} at x ${f.x.toFixed(1)}: ${(f.y0 - e).toFixed(2)} m over it, ${allow.toFixed(2)} allowed where the cap stands ${H.deck.belowSheerM} over the deck`);
+}
+}
+if (!(H.deck && H.deck.belowSheerM > 0)) {
+const texts = [H.mastProvenance || ''].concat((H.masts || []).map(m => (m.yardFracsProvenance || '') + ' ' + (m.truckProvenance || '')));
+const re = /bulwark depth of ([0-9.]+) m|rail \+ ([0-9.]+) m/;
+for (let i = 0; i < texts.length; i++) {
+const mm = re.exec(texts[i]); if (!mm) continue;
+const d = mm[1] || mm[2];
+say(v.id, 'a rig read over a deck the model draws at the cap',
+`${i === 0 ? 'mastProvenance' : 'mast ' + (i - 1) + "'s provenance"} places the read's datum ${d} m under the cap rail and the record has no deck.belowSheerM: the masts stand on the skin's top, ${d} m over the deck the plate read them from`);
+break;
 }
 }
 {

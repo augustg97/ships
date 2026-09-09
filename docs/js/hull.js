@@ -4013,7 +4013,8 @@ return o;
 function bulwarkFurnitureSpec(S, H) {
 const openHull = deckCovering(S).mode === 0;
 const frameTimbers = !!(S.frames && S.frames.roomAndSpaceM);
-if (openHull || !S.deck || !(S.deck.belowSheerM > 0.3) || frameTimbers) return null;
+const steelShip = S.build === 'steel' || S.build === 'iron';
+if (openHull || !S.deck || !(S.deck.belowSheerM > 0.3) || frameTimbers || steelShip) return null;
 const L = S.lwl;
 const deckAtU = u => H.deck(u), railAtU = u => H.sheer(u);
 const BW = S.bulwark || {};

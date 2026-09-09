@@ -26738,3 +26738,138 @@ uncommitted, deliberately; the r290 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/data/provenance.json carries 'PLATE READ, r290' 5 time(s) (the five masts' reads); docs/data/vessels.json carries '"utop":0.55' 5 time(s) and '"royal":0.93' 5 time(s) (Preussen's five masts; any other hull's equal fraction counted with them); web/data/vessels.json against HEAD~1:  1 file changed, 20 insertions(+), 20 deletions(-); web/js/hull.js against HEAD~1: unchanged (0 lines); the build read first paint 8.46 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r289's receipt: empty). SCORED at the r290 tree (web/ after the copy-in, on :8149) one frame at a time by r290/check-chain.sh, 22-44 s a frame under a load of 3-7, 20:11-20:13: 3 frames, 2 beyond the gate, 2 accepted, 2 baselines moved. THE RIG (the record alone): ship-preussen 1.802%/0.721 — the upper topsail, upper topgallant and royal yards on all five masts 0.01 of the truck higher (0.5-0.6 m), the three upper tiers re-cut between them, the fixed yards and the trucks as r289 left them; aboard-preussen 0.662%/0.282 — the Sea's quarter camera, the same rig. THE NEIGHBOUR: ship-dreadnought 0.019%/0.005, inside the gate (r289 had Preussen's canvas at its frame edges; a 0.5 m rise did not reach them beyond the gate). Left unscored at the r290 tree (61): every other frame — the change is three keys of Preussen's five yardFracs and their provenances, and nothing else reads them; so each stands as scored at the r289 tree or earlier, and the clean-HEAD backlog r291 opens with is empty.
 Two commits close the round (e8e6cb1 record + docs + handoff + accepted baselines, and this push-log commit).**
+
+## Round 291 — 2026-09-08 — Preussen's deck lies 1.35 m under her cap rail, where both plate reads already put it: her record carried no deck field, so the loft drew her deck at the skin's top and every mast heel, every yard, every truck and the card's attested 58 m deck-to-truck were measured from the cap rail, 1.35 m higher over the water than the r289 and r290 reads that placed them; the record now carries the deck's depth by r272's mechanism with the two plates' bracket (1.1–1.6 m) in its provenance, the builder withholds the r276 wooden-bulwark timbers from a steel ship because letting them on pulled the whole pin-gated gear apparatus onto her five masts and 356 rules failed, a new rule convicts the silence — a rig read over a bulwark's depth on a hull whose deck is drawn at the cap — and the frames the change reaches were scored one at a time and accepted
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r290's entry ordered r291 to check `uptime` and
+`ps -r` FIRST and named its candidates in order: (0y¹⁰⁴), the deck under Preussen's cap by r272's mechanism; else (0y¹⁰²);
+else the survey; (0y⁹⁰) only as the first of a declared pair. At the open (20:35) the load was 1.15 (1.52 and 2.14 over 5
+and 15 minutes), the loop driver holding the lock (round starting 20:35:22), no hot process; the clean-HEAD backlog was
+empty by r290's receipt. (0y¹⁰⁴) WAS taken. Every edit was made on a :8150 copy (r291/web, symlinks with real copies of
+vessels.json, hull.js and the audit) by three re-runnable scripts (r291/apply-record-edits.py, apply-builder-edits.py,
+apply-audit-edits.py; every anchor asserted, every other field of every vessel asserted identical, every generated file
+parsed by json or node's vm), and copied into web/ by r291/copy-in.sh after the audit; :8149 served web/ at HEAD until
+the copy-in at 21:01.**
+
+**THE FAULT (r289's naming). Preussen's five truckM figures are 'deck to truck' — the main's 58 m attested, the other four
+derived from the anchor plate as ratios to it (r289) — and all thirty yard fractions were read over a DECK that both
+plates placed a bulwark's depth under the cap rail ('the cap rail plus the r215 class bulwark depth of 1.35 m', r289; r290
+registered its datum to r289's fractions). Her record had no deck field, so hullSurface's deck(u) returned sheer(u) and
+the masts stepped on the skin's top: measured on the built scene at HEAD (r291/measure-before.out), the weather deck at
+5.00–6.12 m over the water, the steel masts' heels at 5.00, the mast top 63.05, the yards 15.68–59.15 — every one of them
+1.35 m over the height the reads that placed them meant. Nothing convicted it: the r215 and r272 rules are gated on
+deck.belowSheerM, which she did not have.**
+
+**THE PLATES BRACKET THE DEPTH AND DO NOT FIX IT (r291/anchor-strip-half.png, the anchor plate's band strip rows 2600–3000
+at half scale; anchor-island-fwd-3x.png and anchor-island-aft-3x.png, the midship island's two ends at 3x with a 25-row
+grid; the r290 full-sail band sheet r290/sheet-band-2x.png). On the Brodie anchor plate square on the starboard beam
+(SLV H99.220/3712, IE40684, 30.6 px/m) the painted-ports band stands on the midship island alone and runs from row 2810 to
+2843 — 33 px, 1.08 m — and the main-deck cap rail forward and aft of the island reads at rows 2800 (at the main) and 2795
+(at the laeisz), 43–48 px (1.40–1.57 m) over the band's foot. The band's foot is the main deck's line where the island's
+side meets the sheer strake (r289 used it as the kreuz's deck row and it agreed with rail + 41 px at the main and the
+laeisz). So the bulwark stands 1.1 m over the deck if the band's top is the cap's own level, and 1.4–1.6 m if the cap rail
+rows are; the island's own top reads at row 2750, 3.0 m over the main deck. On the full-sail halftone (IE32693, 42 px/m at
+the kreuz, the halftone cell 8 px = 0.19 m) the band along the hull at the kreuz spans about 55 px, 1.3 m — the same bracket
+at a coarser scale. The class 1.35 lies inside both, and it is what both rig reads used, so the record carries 1.35 ± 0.3
+m as the class figure inside a plate bracket, not as a read. NOT READ: the deck's own line, behind the bulwark on every
+plate; freeing ports, not resolved at 30.6 px/m; a general-arrangement drawing (Hamecher 1993, or the Tecklenborg yard's
+plan) would fix the depth to a decimetre and say which masts stand on the main deck and which on an island.**
+
+**THE RECORD (web/data/vessels.json; r291/apply-record-edits.py, vessels.before.json → vessels.after.json, 10 lines added
+and 5 changed). Preussen's hull gains deck {covering 'wood', belowSheerM 1.35, provenance} after `steering`: hull.freeboard
+5.0 stays as the SKIN's top (the cap rail over the water, the r215 semantics; the 5.0 itself carries no provenance and the
+record now says so), the deck 1.35 under it. The provenance names the fault, the class figure and both plates' bracket
+with rows and scales, the covering ('wood': the Laeisz practice of a planked weather deck over steel, as on the preserved
+Peking; not read for Preussen herself), and what is NOT DRAWN by name — bulwark stays, pin rails, freeing ports, and the
+islands (forecastle, midship bridge, poop) every plate shows. (0y¹⁰⁷) is closed in the record: r290's five openers 'under
+full sail square on the port beam' now read 'from aft of the port beam — r289's census called it square on the beam at 22
+px/m off the 1200 px preview, and it is oblique, 37–49 px/m across the hull ... corrected r291'. Every other field of
+Preussen and every other vessel asserted identical.**
+
+**THE BUILDER (web/js/hull.js; r291/apply-builder-edits.py, one replace asserted, parsed by node's vm). The r215 class
+carried the deck: deck(u) = sheer(u) − 1.35, the mast heels, the yards, the tops, the stays, the sails and the bowsprit all
+follow it, the rail, the channels and the deadeyes keep the skin's top. But the FIRST audit on that tree read 356 problems,
+all on Preussen (r291/chain.log, FINAL 20:46): bulwarkFurnitureSpec is gated on deck.belowSheerM > 0.3 and gave her the
+r276 wooden bulwark's timbers — stanchions at four-foot pitch and a timber pin rail — and with pins present every
+pin-gated rule of r276–r285 ran on her five fidded six-yard steel masts: 'a stanchion under no cap' ×94, 'a rim lead not
+over the top's after edge' ×80, 'an under lead not under the top' ×60, 'an upper buntline lead off the mast' ×50, 'an upper
+clewline lead off the mast' ×40, garnet and buntline blocks off the mast ×20, and the silences 'course gear', 'upper gear'
+and 'a fife rail with no answer' ×11. The r276 comment says what that furniture is — 'a WOODEN bulwark is planked on the
+OUTSIDE of stanchions, the frames' top timbers carried up past the deck' — and a steel ship's bulwark is plating
+stiffened by bulwark stays with pin rails on the stays, which this builder has never drawn. So bulwarkFurnitureSpec
+returns null for a hull built of steel or iron (`steelShip`), the record names the stays as not drawn, and her falls end
+at the deck edge as they did before this round. The gear failures are a finding in their own right, named below.**
+
+**THE AUDIT (Research/audit-hulls.js = web/audit-hulls.js; r291/apply-audit-edits.py, both edits asserted, parsed by
+node's vm). A-RIG-DATUM, before the round-44 rig rules: on a hull with no deck.belowSheerM, a mastProvenance or any mast's
+yardFracsProvenance that names its datum as 'bulwark depth of N m' or 'rail + N m' is 'a rig read over a deck the model
+draws at the cap' — a read the model does not share. Silent on every hull whose provenances name no such datum and on
+every hull whose record lowers the deck. A-BULWARK-FURNITURE's gate `want = deep && !timbers` gains `&& !steel`, and its
+'stanchions in a bulwark that is not there' message names the steel case. PROOFS (r291/chain.log, one browser at a
+time on :8150): FINAL (the r291 record, builder and audit) "checked 33 hulls, 0 problems" (20:54). PROOF C (Preussen's
+deck block deleted from the record, builder and audit unchanged): exactly 1, 'a rig read over a deck the model draws at
+the cap' — "mast 0's provenance places the read's datum 1.35 m under the cap rail and the record has no
+deck.belowSheerM"; the record restored (cmp). PROOF B (the :8150 builder's deckDrop forced to 0, the record saying 1.35):
+4 — Preussen and Endurance each 'a deck off the record's depth' (the r215 rule: "0.00 m under the top strake at midships,
+record says 1.35"), and Endurance's 'a bulwark with no stanchions' and 'no pin rail' because her furniture spec is gated
+on the same depth; the builder restored (cmp).**
+
+**MEASURED (r291/measure-before.out at HEAD on :8150 before the edits, measure-after.out on the r291 tree; hull space,
+metres over the water): the weather deck 5.00–6.12 → 3.65–4.77; the steel masts 5.00–63.05 → 3.65–61.70; the yards
+15.68–59.15 → 14.33–57.80; the tops 29.11–35.75 → 27.76–34.40; the stays 4.99–62.65 → 3.64–61.30; the bowsprit
+5.66–8.83 → 4.31–7.48; the rail 5.00–6.32 unchanged; the channels 4.56–5.11 and the deadeyes 4.67–5.52 unchanged; the
+model's height over the water 63.06 → 61.71. THE PROBE (r291/probe-yardfrac.py, the fore mast, set and furled alike):
+base 5.374 → 4.024, T 55.8 on both, every yard −1.350 (course 19.32 → 17.97, royal 57.27 → 55.92), every fraction and
+z-span identical, every yard `from` 'record'. THE WITNESSES (r291/witness.py, 2880 px; the before shot from HEAD's tree —
+abeam on :8150 before the edits, over-the-rail on :8149 — at the same fragment as the after): abeam
+`#v=ship&s=preussen&b=90&l=6&z=1.25` (crop-abeam-before-after.png, crop-abeam-diff-x6.png) 8.90% of pixels differ, rows
+254–1659 — the rig 1.35 m lower with the camera datum, and the pale deck strip that showed along the sheer from 6° of
+elevation is gone behind a 1.35 m bulwark, which is what a solid bulwark does from a boat; over the rail
+`#v=ship&s=preussen&b=125&l=28&z=0.7` (crop-rail-before-after.png) 17.55% differ — the planked deck a metre and a third
+down inside a dark inboard wall, the masts stepping into it, nothing of the card or the sea.**
+
+**THE FRAMES (r291/PREDICTIONS-close.md, written before any frame of the r291 tree was scored: MUST ship-preussen and
+aboard-preussen; MAY ship-dreadnought and the other berth neighbours within three and shipwright; MUST NOT everything
+else). SCORED at the r291 tree (web/ after the copy-in, on :8149) one frame at a time by r291/check-chain.sh, 18–62 s a frame under a load of 5–6, 21:01–21:06: 9 frames, 3 beyond the gate, 3 accepted, 3 baselines moved. THE DECK (record + builder): ship-preussen 18.817%/6.890 — the deck 1.35 m under the cap, every mast heel, yard, top and truck 1.35 m lower over the water, the Shipwright camera datum (rigTop) down with them so the whole frame reframes (the r287 memory: the datum is the rig's top), the planked deck inside the bulwark with its dark inboard face over it; aboard-preussen 3.497%/1.550 — the Sea's quarter camera, the same hull. THE NEIGHBOUR: ship-dreadnought 0.161%/0.052 — Preussen's canvas at both edges of the dreadnought's frame, 1.35 m lower; the diff image (r291/chain-diff/ship-dreadnought.png) shows nothing else. INSIDE THE GATE (6): sea-magnified 0.000%, aboard-coast 0.000%, map-floor 0.002%/0.001, ship-steamer 0.000%, aboard-carrier 0.000%, shipwright 0.000%. Left unscored at the r291 tree (55): every other frame — the builder change is a gate that returns null for a steel or iron hull with deck.belowSheerM (Preussen alone has both), the audit change is not on screen, and the record change is Preussen's alone; so each stands as scored at the r290 tree or earlier, and the clean-HEAD backlog r292 opens with is empty.**
+
+**Rule 0 on the accepted frame read whole (r291/chain-current/ship-preussen.png): a rendered five-masted ship from her port
+bow on a lit sea under a pale sky with a grey coast behind, square sails set on every mast, her black steel hull with the
+planked deck lying inside the bulwark and the bulwark's dark inboard face standing over it, the fleet's neighbours at
+their berths, the Shipwright's card beside her — not a chart. Three facts a viewer can read off it without a legend: she
+is square-rigged on five masts with six yards on each; her deck lies a man's chest below her rail, behind a solid wall
+the whole length; the card gives her 134.0 m overall, 16.40 m beam and 58.0 m from deck to truck.**
+
+**Named residuals, in order:** (0y¹⁰⁴) CLOSED. (0y¹⁰⁷) CLOSED in the record (the five openers corrected in place; r289's
+HANDOFF sentence stands as written and is corrected by r290's entry and this one). NEW (0y¹⁰⁸) THE STEEL BULWARK'S
+FURNITURE AND THE GEAR THAT WAITS ON IT — Preussen's bulwark stays, pin rails and freeing ports are not drawn (the record
+says so); and the r281–r285 running-gear derivation with its six lead rules is SINGLE-HULL-TESTED, on Endurance's one
+square mast: let onto a fidded six-yard steel mast with a top and crosstrees it fails 240 times on five masts (the counts
+above, r291/audit-final.out of 20:46 is overwritten; the counts are in chain.log). Drawing her pin rails means
+generalising that derivation first — a two-round shape, the first round the derivation on the :8150 copy with the r283
+probes, the second the furniture. NEW (0y¹⁰⁹) THE ISLANDS — every plate shows a forecastle, a midship bridge (its top at
+row 2750 on the anchor plate, 3.0 m over the main deck, the painted-ports band across its side) and a poop, and the model
+draws a flush deck; which masts stand on the main deck and which on an island is unread (the kreuz stands at the island's
+station). NEW (0y¹¹⁰) THE DEPTH IS A CLASS FIGURE INSIDE A PLATE BRACKET (1.1–1.6 m) and hull.freeboard 5.0 has no
+provenance; a GA drawing fixes both. (0y¹⁰⁶) OPEN as r290 narrows it. (0y⁹⁰) THE LUBBER'S HOLE, with r290's two-round
+shape. (0y¹⁰¹) (0y¹⁰²) (0y¹⁰³) as r288 names them. (0y¹⁰⁰) (0y⁹⁵) (0y⁹⁸) (0y⁹³) (0y⁹⁴) (0y⁹²) (0y⁹¹) as r287 names them.
+(0y⁸⁵) (0y⁸⁷) as r281 names them. (0y⁸²) (0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them.
+(0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy) open.
+(0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷)
+(0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴)
+(0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l)
+(0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸)
+(0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230
+lists them. The forecastle break the record keeps (stationProvenance) still waits on the RMG original.**
+
+**r292 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as unscored
+among the frames this change can reach (the r279 memory rule). Then, in order: (0y¹⁰⁹), the islands — read the anchor
+plate's island ends (r291/anchor-island-fwd-3x.png, -aft-3x.png: the island's top at row 2750, its ends at plate columns
+about 2730 and 3460 at 30.6 px/m) and the forecastle and poop off the same strip, and give her record `houseAt`-class
+islands if the builder's terrace mechanism (buildSternTerraces / the r221 raised ends) can carry a midship island; a
+record-and-builder round that moves her frames and possibly the dreadnought's. Else (0y¹⁰²). Else the survey's next
+never-spun hull. (0y¹⁰⁸) and (0y⁹⁰) only as the FIRST of a declared two-round pair, never alone.**
+
+**Live stamp: docs/index.html carries data-version 1788926854 at the build; the push and the live poll are in
+build/staging/r291/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r291 staging stays on disk uncommitted, the r211 convention.**
