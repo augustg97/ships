@@ -26565,3 +26565,170 @@ uncommitted, deliberately; the r289 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/data/provenance.json carries 'PLATE READ, r289' 5 time(s) (the five masts' reads); docs/data/vessels.json carries '"truckM":46.6' 1 time(s) (the jigger) and '"truckM":58' 1 time(s) (the main; every other hull's 58 counted with it); web/data/vessels.json against HEAD~1:  1 file changed, 21 insertions(+), 21 deletions(-); web/js/hull.js against HEAD~1: unchanged (0 lines); the build read first paint 8.46 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r288's receipt: empty). SCORED at the r289 tree (web/ after the copy-in, on :8149) one frame at a time by r289/check-chain.sh, 41–82 s a frame under a load of 5–7, 19:20–19:29: 9 frames, 3 beyond the gate, 3 accepted, 3 baselines moved. THE RIG (the record alone): ship-preussen 14.931%/5.903 — four of her five masts shorter (fore 55.8, kreuz 57.1, laeisz 53.1, jigger 46.6 m deck to truck; the main 58 as before), the three fixed yards on every mast at the anchor plate's per-mast fractions, every tier re-cut between them; aboard-preussen 3.051%/1.325 — the Sea's quarter camera, the same rig. THE NEIGHBOUR: ship-dreadnought 0.154%/0.048 — Preussen's canvas at both edges of the dreadnought's frame (chain-diff/ship-dreadnought.png: two strips at the frame's left and right edges and nothing of the dreadnought), the documented berth-neighbour class. INSIDE THE GATE, NOT ACCEPTED: sea-magnified 0.000%; aboard-coast 0.000%; map-floor 0.002%/0.001; ship-steamer 0.000%; aboard-carrier 0.000%; shipwright 0.000%. Left unscored at the r289 tree (55): every other frame — the change is Preussen's record (five masts' yardFracs and truckM, two provenances) and nothing else reads it; so each stands as scored at the r288 tree or earlier, and the clean-HEAD backlog r290 opens with is empty.
 Two commits close the round (dc92173 record + docs + handoff + accepted baselines, and this push-log commit).**
+
+## Round 290 — 2026-09-08 — Preussen's three hoisting yards hang where the full-sail plate puts them, read against the fixed yards r289 anchored: (0y¹⁰⁵) named the SLV halftone of her under full sail on the port beam (H99.220/4261, IE32693, 5421 px, fetched in r289 and unread) as the plate for the upper topsail, upper topgallant and royal yards, which the anchor plate could not read because they were lowered on it; the plate is oblique, its trucks and deck cannot be trusted, so each mast's datum was registered from its three fixed yards against r289's per-mast fractions and the three hoisting yards read in that frame — 0.55 / 0.81 / 0.93 on all five masts, +0.01 on each against r286's quarter-plate read, the per-mast spread inside the bound; no builder, audit or shader line changed, and the two frames the record reaches were scored one at a time and accepted
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r289's entry ordered r290 to check `uptime` and
+`ps -r` FIRST and named its candidates in order: (0y⁹⁰) the lubber's hole if the load was under ~5 at the open and the
+geometry could be final by the 30th minute; else (0y¹⁰⁵); else (0y¹⁰⁴); else (0y¹⁰²); else the survey. At the open (19:48)
+the load was 3.17 (3.25 and 4.42 over 5 and 15 minutes), the loop driver holding the lock (round starting 19:48:15), no
+hot process. (0y⁹⁰) was NOT taken, and this time the arithmetic is written down so the next reader does not weigh it
+again: it moves every top in the fleet, so the full 64-frame ratchet must run on its FINAL geometry (47 minutes at 44 s a
+frame at this load), and the push that follows carries every accepted 2880 px baseline at about 50 s each over the uplink
+(memory: push-with-many-baselines-takes-13-min) — thirty moved tops is 25 minutes of push — so even a round that has the
+geometry final at its 20th minute cannot land the accepted baselines inside the driver's 80. THE SHAPE THAT CAN: a round
+that ships the geometry with the audit and its own witnesses, launches the full ratchet beside the push (the r232/r235
+pattern) and leaves the moved frames UNACCEPTED, named in its receipt; the next round opens by scoring and accepting that
+clean-HEAD backlog (the r279 rule is written for exactly this), which is its whole opening hour. Two rounds, not one, and
+the first must say so in its receipt. (0y¹⁰⁵) WAS taken. Every edit was made on a :8150 copy (r290/web, symlinks with real
+copies of vessels.json and the audit) by one re-runnable script (r290/apply-record-edits.py, every anchor asserted, every
+other field of every vessel asserted identical), and copied into web/ by r290/copy-in.sh after the audit; :8149 served
+web/ at HEAD until the copy-in.**
+
+**THE PLATE (r289/full-IE32693.jpg, symlinked into r290/; the whole plate at half scale with a 200 px grid in
+r289/plate-IE32693-half-grid.png; the mastheads at 2x in r290/sheet-trucks-2x.png, the hull's band at 2x in
+sheet-band-2x.png, each mast in crop-marked-*.png with its fitted line and the yard rows drawn, the main's band profiles
+plotted in profile-main.png). State Library of Victoria, Malcolm Brodie shipping collection, H99.220/4261, a halftone
+postcard captioned 'A mass of canvas to attend to in a ship like this', Rosetta IE32693, 5421 x 4071 as the JPG derivative
+at the master's width by the r289 route, out of copyright. Bow to the RIGHT, so the masts run jigger, laeisz, kreuz, main,
+fore left to right; all six yards SET on every mast; the halftone cell about 8 px. r289's census called it 'square on the
+beam at 22 px/m' off the 1200 px preview: IT IS NOT. The camera is aft of the beam and the ship runs away from it — the
+mast spacing is 890 / 900 / 780 / 700 px jigger to fore, and the per-mast scale (below) runs 48.6 px/m at the jigger to
+36.8 at the fore, a third of scale across one hull. That obliquity leaves a fraction ALONG a mast intact (a near-vertical
+line at one depth projects at one scale, and the registration below absorbs a linear scale anyway) and makes anything
+ACROSS the picture — a yard arm, a mast spacing, the hull's length — a projection. The white painted-ports band runs the
+hull's length at the bulwark (as on r286's Green plate, not as on r289's anchor plate where it stood on the island alone),
+with white deckhouses standing on it amidships and the forecastle and boats over it forward.**
+
+**THE METHOD (r290/read-fullsail.py, read-fullsail3.py, read-register.py; the profiles in read-fullsail.json, the edges in
+read-fullsail3.json, the registration in register.json). r289's mast-line fitter (the darkest narrow run per row) locked
+onto stays and halftone dots on this plate three times running, so each pole was found instead by a LINE SEARCH — the x
+at the truck row and the slope (0.02–0.11 px/row) minimising the mean brightness along the line over the mast's sky rows,
+on a 4 px blurred plate — anchored by eye off the 2x masthead sheet (sky slopes 0.090 / 0.090 / 0.075 / 0.060 / 0.030 jigger
+to fore); a foot search among the deck gear was tried and discarded (it found deckhouse edges, slopes 0.02–0.13). Bands
+60–220 px out on both sides profiled per row on the unblurred plate (the plate's +x is FORWARD here; r289's scripts label
++x aft). Under full sail a yard is the HEAD of its sail and the canvas is darkest just under it, so a yard is the sharp
+light-to-dark edge going DOWN the plate — the steepest 24-row descent of the 5-row-smoothed band inside a drop of 25 or
+more — on both sides, the two sides paired within 45 rows and averaged (the yards are braced, so the two sides differ by
+10–30 rows); a dip detector (r289's) found two or three bars a mast and was discarded. Six edges on the forward side of
+every mast; the aft side broken by the next mast's gear on the fore's two lowest and the jigger's course.**
+
+**THE DATUM IS REGISTERED, NOT READ. The plate's own truck and deck failed on three masts: the kreuz's pole top sits under a
+white cloud streak (rows 835–850), the fore's stands against bright sky (226 against 70–115 elsewhere) and the axis
+detector ran off to row 716, and the band's foot forward is overlaid by the forecastle and the boats (the fore's read
+3080 against 3139–3176 amidships). Read on the plate's own datums the main agreed with r289's three fixed yards to 0.011
+on all three (course 0.263 / 0.272, lower topsail 0.404 / 0.414, lower topgallant 0.675 / 0.686), the kreuz drifted to
++0.025 aloft and the fore was 0.06–0.12 off (fractions-full.json) — the datum, not the yards. So each mast's deck row D and
+truck-over-deck T on THIS plate were solved by least squares from its course, lower topsail and lower topgallant rows
+against r289's per-mast fractions (row = D − f·T; three rows, two unknowns), and the three hoisting yards read as fractions
+in that frame. Residuals: main −0.3 / 0.4 / −0.1 px, kreuz 1.3 / −2.0 / 0.7, laeisz 2.4 / −3.7 / 1.3, jigger −1.1 / 1.7 /
+−0.6, fore 4.5 / −6.9 / 2.4 — the fixed yards on this plate lie on r289's spacing to within the halftone cell on four masts
+and within one cell on the fore, which is the cross-plate check r289 asked for on its own read. The main, whose own datum
+was sound, registers at D 3176 / T 2290 against its own 3156 / 2298: the same figures to 1%. ROWS (royal / upper
+topgallant / lower topgallant / upper topsail / lower topsail / course, the two sides' mean; D; T; px/m from T over r289's
+truckM): fore 1207 / 1458 / 1735 / 1994.5 / 2306 / 2623; 3139.3; 2050.6; 36.7. main 1061.5 / 1323.5 / 1605 / 1892.5 / 2228.5 /
+2553; 3176.2; 2290.2; 39.5. kreuz 954.5 / 1229 / 1530.5 / 1830.5 / 2190 / 2548.5; 3175.5; 2416.6; 42.3. laeisz 907 / 1215.5 /
+1529 / 1852.5 / 2237.5 / 2626; 3161.8; 2435.3; 45.9. jigger 1055.5 / 1303.5 / 1611 / 1900 / 2278.5 / 2631; 3143.5; 2262.8; 48.6.**
+
+**THE READ (upper topsail / upper topgallant / royal, of the truck over the deck): fore 0.558 / 0.820 / 0.942; main 0.561 /
+0.809 / 0.923; kreuz 0.557 / 0.805 / 0.919; laeisz 0.538 / 0.799 / 0.936; jigger 0.550 / 0.813 / 0.923. BOUND ± 0.02 on each:
+the edge row ± 8 px (one halftone cell) on 2050–2435 px of T is ± 0.004, and the registration carries r289's ± 0.01 per
+fixed yard through T (the three fixed yards span 0.43 of T, so ± 0.01 on their fractions is ± 3% on T and ± 0.02 on a
+fraction near 0.9). The per-mast spread — 0.538–0.561, 0.799–0.820, 0.919–0.942 — is INSIDE that bound on every yard, so
+no per-mast split is claimed for the hoisting yards: unlike the fixed yards, where two plates read the same 0.03–0.04
+split between the forward and the after masts beyond their ± 0.01 (r289), one plate at ± 0.02 reading a spread of 0.02 is
+silence. RECORDED AS ONE SET ON ALL FIVE MASTS: upper topsail 0.55, upper topgallant 0.81, royal 0.93 (the five-mast means
+0.553 / 0.809 / 0.929). Against r286's read from the quarter (0.54 / 0.80 / 0.92): +0.01 on each, inside both reads'
+bounds — two plates from two bearings agree on where the hoisting yards were set, and the record now says which plate
+and how on each mast. The order up the mast is asserted in the edit script (ltop < utop < ltg < utg < royal < 1) and holds
+on all five.**
+
+**(0y¹⁰⁶) THE YARD ARMS, READ AND NOT SETTLED (r290/span-read.py, spans.json; sheet-spans-2x.png, the twelve arm ends at 2x).
+The fore's forward arms and the jigger's aft arms stand against clear sky, so each was traced along its own line (the tilt
+from the two side rows) to the last dark run under the sky level 760 px out, and doubled at the mast's registered scale.
+The fore: royal 16.3 m (attested 16 — the one clean check), upper topgallant 12.7, lower topgallant 27.1, upper topsail
+30.0, lower topsail 32.1, course 42.4 m against an attested 32 (the run crossed into the headsails). The jigger: royal and
+upper topgallant broken by the cloud streaks (4.0 and 1.0 m, not reads), lower topgallant 17.8, upper topsail 21.1, lower
+topsail 24.5, course 24.8 m. The jigger's tiers come out at 0.66–0.76 of the fore's, and the fore's lower topsail (32.1)
+comes out LONGER than its attested course — so these are projections: the yards are braced, the camera is oblique, and a
+braced yard's projected length depends on its bearing from the camera, which differs between the fore and the jigger by
+the whole obliquity above. A plate can answer (0y¹⁰⁶) only with the yards SQUARE and the camera on the beam — the anchor
+plate has both and its arms are broken by the lowered yards lying on the doublings (r289); IE55773 (H99.220/1163, at
+anchor on the beam, 2313 px, about 13 px/m) is the remaining SLV candidate and is coarse. The record's provenance says all
+of this in the NOT READ sentence; courseYardM 32 stands attested on every mast.**
+
+**THE RECORD (web/data/vessels.json; r290/apply-record-edits.py, vessels.before.json → vessels.after.json). Each of
+Preussen's five masts: `yardFracs.utop` 0.54 → 0.55, `yardFracs.utg` 0.80 → 0.81, `yardFracs.royal` 0.92 → 0.93 (the
+three fixed yards' per-mast figures of r289 untouched); `yardFracsProvenance` gains a PLATE READ, r290 paragraph after
+r289's naming the plate, its catalogue, size and route, the obliquity and how it was measured, the method, why the datum
+is registered and from what, the per-mast read and bound, why one set is recorded, the read against r286, what was not
+read and why, and THIS MAST's rows, registration and read at the end. Every other field of Preussen and every other
+vessel asserted identical; the file grows 18 KB, all of it provenance, which the build splits out of first paint (r274).
+The builder takes each yard's own fraction (hull.js `fracOf`), so the geometry follows the record with no builder line
+changed.**
+
+**MEASURED (r290/probe-yardfrac.py on the :8150 copy, set build, hull space, the fore mast at station 0.16; the before is
+r289/probe-after.out, the same record web/ served at HEAD): course 19.32 → 19.32, lower topsail 27.69 → 27.69, upper
+topsail 35.51 → 36.06, lower topgallant 43.88 → 43.88, upper topgallant 50.01 → 50.57, royal 56.71 → 57.27 — each hoisting
+yard +0.56 m (0.01 of the fore's 55.8), every yard `from` 'record', the mast top 61.17 on both, every yard's z-span the
+same. THE WITNESS (witness.py on :8150 at `#v=ship&s=preussen&b=90&l=6&z=1.25`, 2880 px: witness-abeam-before.png from the
+r289 record swapped onto the copy for the shot, witness-abeam-after.png from the r290 record; crop-abeam-before-after.png
+at half scale, crop-abeam-diff-x6.png the difference amplified six times): 0.76% of pixels differ and every one of them
+lies in the rig between rows 255 and 1125 — the three upper tiers on five masts, nothing of the hull, the sea or the card.
+A first comparison against r289's own witness file differed by 18% and was thrown out: that file was shot at a different
+camera, which is why the before was re-shot at this one.**
+
+**THE AUDIT (Research/audit-hulls.js = web/audit-hulls.js, UNCHANGED). A-YARD-FRAC reads each yard's drawn fraction against
+the record's, so a record that says 0.55 and a builder that draws 0.54 is convicted by the rule already shipped. FINAL on
+:8150 (r290/audit-final.out, audit-final.err): "checked 33 hulls, 0 problems" at 20:08 (the r290 record on the r289
+builder and audit). No proof B or C: no rule changed and r285's proof already convicts a fraction ignored.**
+
+**THE FRAMES (r290/PREDICTIONS-close.md, written before any frame of the r290 tree was scored: MUST ship-preussen and
+aboard-preussen; MAY ship-dreadnought and the other berth neighbours within three and shipwright; MUST NOT everything
+else). SCORED at the r290 tree (web/ after the copy-in, on :8149) one frame at a time by r290/check-chain.sh, 22–44 s a
+frame under a load of 3–7, 20:11–20:13: 3 frames, 2 beyond the gate, 2 accepted, 2 baselines moved. THE RIG (the record
+alone): ship-preussen 1.802%/0.721 — the upper topsail, upper topgallant and royal yards on all five masts 0.01 of the
+truck higher, the three upper tiers re-cut between them, the fixed yards and the trucks as r289 left them; aboard-preussen
+0.662%/0.282 — the Sea's quarter camera, the same rig. THE NEIGHBOUR: ship-dreadnought 0.019%/0.005, inside the gate (r289
+had her canvas at the dreadnought's frame edges; a 0.5 m rise did not reach them beyond the gate), so the other five MAY
+neighbours, which sit farther, were not scored. Left unscored at the r290 tree (61): every other frame — the change is
+three keys of Preussen's five yardFracs and their provenances, and nothing else reads them; so each stands as scored at the
+r289 tree or earlier, and the clean-HEAD backlog r291 opens with is empty.**
+
+**Rule 0 on the accepted frame read whole (r290/chain-current/ship-preussen.png): a rendered five-masted ship from her port
+bow on a lit sea under a pale sky with a grey coast behind, square sails set on every mast, her black hull with the white
+painted-ports band, the fleet's neighbours at their berths, the Shipwright's card beside her — not a chart. Three facts a
+viewer can read off it without a legend: she is square-rigged on five masts with six yards on each; her after two masts
+stand lower than her forward three, the jigger lowest; the card gives her 134.0 m overall, 16.40 m beam and 58.0 m from
+deck to truck.**
+
+**Named residuals, in order:** (0y¹⁰⁵) CLOSED. (0y¹⁰⁶) OPEN, narrowed: the full-sail plate cannot read it (projections, above);
+it needs a plate with the yards square and the camera on the beam — the anchor plate's arms are broken by the lowered
+yards, IE55773 is 13 px/m. NEW (0y¹⁰⁷) THE r289 CENSUS DESCRIBES IE32693 WRONGLY — 'square on the beam at 22 px/m' should
+read 'oblique, from aft of the port beam, 37–49 px/m across the hull'; the description lives in r289's HANDOFF entry and
+in Preussen's r289 provenance sentence 'a halftone of her under FULL SAIL SQUARE ON THE BEAM', which r290's paragraph
+corrects in place but does not delete. (0y¹⁰⁴) as r289 names it — the deck under Preussen's cap: every fraction read over
+the deck on both plates is drawn from the cap rail, 1.35 m too high; r272's mechanism is the shape. (0y⁹⁰) THE LUBBER'S
+HOLE, with the two-round shape written above. (0y¹⁰¹) (0y¹⁰²) (0y¹⁰³) as r288 names them. (0y¹⁰⁰) (0y⁹⁵) (0y⁹⁸) (0y⁹³)
+(0y⁹⁴) (0y⁹²) (0y⁹¹) as r287 names them. (0y⁸⁵) (0y⁸⁷) as r281 names them. (0y⁸²) (0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷)
+(0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them. (0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them. (0y⁶⁰)'s remainder
+(scuppers, the scrolled band, the lifebuoy) open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273
+names them. (0y⁶⁵) (0y⁶⁶) as r274 names them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰)
+(0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹) (0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗)
+(0y⁵) (0z) (0v) (0t) (0u) as r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵)
+(0e¹⁸) (0e¹⁶) (0h′) (0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″)
+(0b‴) (0h) (0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance)
+still waits on the RMG original.**
+
+**r291 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as unscored
+among the frames this change can reach (the r279 memory rule), and this round's receipt says it is empty. Then, in order:
+(0y¹⁰⁴), the deck under Preussen's cap by r272's mechanism (freeboard names the cap, a recorded depth under it, the
+bulwark drawn) — a record-and-builder round that moves her two frames and possibly the dreadnought's, fits the driver's
+80 with room, and corrects a 1.35 m datum error that both plate reads already carry the fix for (rail + 1.35 m class,
+± 0.3); the probe and witness scripts in r290/ take a ship name and a fragment and run unchanged. Else (0y¹⁰²). Else the
+survey's next never-spun hull. (0y⁹⁰) only as the FIRST of a declared two-round pair (above), never alone.**
+
+**Live stamp: docs/index.html carries data-version 1788923984 at the build; the push and the live poll are in
+build/staging/r290/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r290 staging stays on disk uncommitted, the r211 convention.**
