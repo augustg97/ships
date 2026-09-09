@@ -776,15 +776,19 @@ function swOpen(vessel) {
     /* r287 (0y96): the loft's rigDeckY/rigTruckY are now the tallest mast's own first-segment foot and
        last-segment head — a fidded mast's highest MESH is its topgallant, whose own foot is a doubling, and
        this tile printed 10.2 m for Preussen's attested 58 and 9.8 for the 74's 56 — and the loft says where
-       the figure comes from (rigTruckFrom). The label says '(derived)' when it is not the record's, so a
-       class-fraction truck is not read as an attested one; the full derivation is the tile's title. The
-       word wraps the label to a second line on the ten hulls it names, which is the card growing by one
-       line, not a fault. */
-    [(vessel.hull.masts || []).length
-       ? 'Rig, deck to truck' + (U.rigTruckFrom && U.rigTruckFrom.indexOf('record') !== 0 ? ' (derived)' : '')
-       : 'Air draught, above deck',
+       the figure comes from (rigTruckFrom), so a class-fraction truck is not read as an attested one. */
+    /* r288 (0y99): WHERE A QUALIFIER GOES DEPENDS ON WHAT IT QUALIFIES. The draught's 'laden' (r233) is the
+       CONDITION the figure holds under, and it sits in the label after a comma, because it is part of what
+       was measured. 'Derived' is not a condition of the measurement but the STATUS of the figure — whether
+       the record attests it — so it stands beside the number, in the label's small type, and the label keeps
+       naming the two points ('deck to truck') in one line on every masted hull. r287 wrote '(derived)' into
+       the label, which wrapped the tile to a second line on nine hulls and left the derivation itself on a
+       hover title nothing invites; the derivation is now a row of 'Measurements and sources' (swFillCard),
+       on screen, in words, with the record's figure in it. */
+    [(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
      ((U.rigTruckY !== undefined ? U.rigTruckY : U.rigTop)
-      - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m',
+      - (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'
+      + ((vessel.hull.masts || []).length && U.rigTruckFrom && U.rigTruckFrom.indexOf('record') !== 0 ? ' <i>derived</i>' : ''),
      U.rigTruckFrom || ''],
   ].map(d => '<div' + (d[2] ? ' title="' + d[2].replace(/"/g, '&quot;') + '"' : '') + '><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 
@@ -903,8 +907,23 @@ function swFillCard(v) {
   /* ⚠ ROWS AND THE CITE CARRY MARKDOWN, same contract as the card's rows in app.js — a row
      value or a citation prints journal titles as *Nature* unless the emphasis is spent here.
      inlineMD escapes before emphasising, so innerHTML carries no more trust than textContent. */
-  document.getElementById('swRows').innerHTML = (v.rows || []).length
-    ? '<h4>Measurements and sources</h4>' + v.rows.map(r =>
+  /* r288 (0y99): A DERIVED FIGURE SAYS ON SCREEN WHAT IT WAS DERIVED FROM. The dims tile marks the rig
+     height 'derived' when the loft did not take it from the record (rigTruckHow, hull.js); this row says
+     how, in words, with the record's own figure in it, where the card already keeps its measurements and
+     their sources. Nothing is printed on a hull whose figure is the record's. The row is written from the
+     loft's record, not from the mast list, so the card and the loft cannot name different masts. */
+  const H = SW.ship && SW.ship.userData && SW.ship.userData.rigTruckHow;
+  const rigRow = (H && H.from !== 'record' && (v.hull.masts || []).length)
+    ? [['Rig, deck to truck',
+        'derived, not recorded: ' + (
+          H.from === 'measured' ? 'no mast height is recorded; the figure is the span of the tallest mast as drawn, to a class proportion of the hull'
+          : H.lower === 'record' ? 'the lower mast is the record\'s (' + H.heightM + ' m); the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
+          : H.n > 1 ? 'no mast height is recorded; the lower mast is drawn to a class proportion of the hull and the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
+          : 'no mast height is recorded; the mast is one pole, drawn to a class proportion of the hull')]]
+    : [];
+  const rows = (v.rows || []).concat(rigRow);
+  document.getElementById('swRows').innerHTML = rows.length
+    ? '<h4>Measurements and sources</h4>' + rows.map(r =>
         '<div class="rw"><i>' + inlineMD(r[0]) + '</i><b>' + inlineMD(r[1]) + '</b></div>').join('')
     : '';
   document.getElementById('swCite').innerHTML = inlineMD(v.cite || '');

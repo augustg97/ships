@@ -10911,14 +10911,15 @@ group.add(tag(plat, 'platform'));
 }
 }
 const bb = new THREE.Box3().setFromObject(group);
-let rigDeckY, rigTruckY, rigTruckFrom;
+let rigDeckY, rigTruckY, rigTruckFrom, rigTruckHow;
 { let top = -Infinity, topSeg = null;
 group.traverse(o => {
 if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
 const b2 = new THREE.Box3().setFromObject(o);
 if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; topSeg = o.userData.seg || null; }
 });
-if (top > -Infinity) { rigTruckY = top; rigTruckFrom = 'measured: the span of the mast mesh that reaches highest (no segment record)'; }
+if (top > -Infinity) { rigTruckY = top; rigTruckFrom = 'measured: the span of the mast mesh that reaches highest (no segment record)';
+rigTruckHow = { from: 'measured' }; }
 if (topSeg && topSeg.mi !== undefined) {
 let foot = Infinity, head = -Infinity, n = 0;
 group.traverse(o => { const sg = o.isMesh && o.userData.seg; if (!sg || sg.mi !== topSeg.mi) return;
@@ -10929,11 +10930,14 @@ const mk = (S.masts || [])[topSeg.mi] || {};
 rigTruckFrom = (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
 : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
 : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
+: n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
 : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
+rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
+lower: mk.heightM !== undefined ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM };
 }
 } }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,
-rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom,
+rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom, rigTruckHow,
 extentX: bb.max.x - bb.min.x,
 waterlineY: 0 };
 return group;

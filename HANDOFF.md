@@ -26264,3 +26264,140 @@ uncommitted, deliberately; the r287 staging stays on disk uncommitted, the r211 
 back by CODE strings (minified forms on docs/): docs/js/hull.js carries rigTruckFrom 4 time(s) (the loft's provenance of the card's figure); docs/js/shipwright.js carries '(derived)' 1 time(s) (the tile's label); docs/audit-hulls.js carries 'is not the truck' 2 time(s) (the yard and staysail T rules); web/data/vessels.json against HEAD~1: unchanged (0 lines); web/js/hull.js against HEAD~1:  1 file changed, 46 insertions(+), 8 deletions(-); the build read first paint 8.46 MB against the 8.6 line.
 THE RATCHET: NO FULL RUN and NO CLEAN-HEAD BACKLOG (r286's receipt: every frame its change could not reach stands as scored at earlier trees and its MAY neighbours were all scored). THE r287 TREE (web/ after the copy-in, on :8149) scored one frame at a time by r287/check-may.sh (the r286 check-one pattern; each frame's _current and _diff copied aside to r287/chain-current and chain-diff, the accept made by restoring the copy) at 33-47 s a frame under a load of 4-6: 17 frames scored, 16 beyond the gate, 16 accepted, 16 baselines moved. The thirteen Shipwright card frames were scored twice — once with the ', derived' label (run 1, diffs in r287/chain-diff-run1) and again after the label became '(derived)'; the figures below are the second run's. GEOMETRY (the yards' and the staysails' T): ship-preussen 5.411%/2.055 (thirty yards up 0.021 x truck x fraction, the royals 1.1 m, the staysails, the card 10.2 -> 58.0 m; witnessed abeam at z=1.0, r287/crop-cluster-1-before-after.png, 354,117 changed pixels in columns 302-2401 of the 2880 frame, the rig and the card and nothing of the hull); aboard-preussen 1.741%/0.714 (the rig alone); ship-clipper 5.465%/2.189 (fifteen yards, sails, six staysails and every line led from them, the card 7.8 -> 44.2 m (derived); chain-diff/ship-clipper.png); aboard-clipper 0.157%/0.057; ship-steamer 3.935%/1.798 (twelve yards, four staysails, the card 7.4 -> 42.2 m (derived)); aboard 0.153%/0.047 (the steamer on the 1838 crossing, the rig alone); ship-endurance 0.462%/0.175 (three yards up 0.24-0.5 m, T 31.43 -> 32.11, the card unchanged at 33.5). THE 74'S STAYSAILS AND CARD: shipwright-ahead 2.382%/1.200, shipwright-astern 2.291%/1.177, shipwright-furled 3.350%/1.873, shipwright-hounds 8.989%/4.074 (the five staysail triangles close up; chain-diff/shipwright-hounds.png shows them, the card and nothing else), shipwright 3.072%/1.449 (the default hull's card and, if she is the 74, her staysails). THE CARD ALONE (no geometry; the label '(derived)' wraps the tile to a second line and the tiles below move down): ship-carrack 2.086%/1.097 (13.0 -> 32.0 m; chain-diff/ship-carrack.png is the card and a few pixels of rope), ship-great-eastern 2.120%/1.140 (20.8 -> 56.0), ship-wyoming 1.835%/0.856 (17.4 -> 46.9), ship-slave-ship 2.675%/1.720 (5.0 -> 28.5). INSIDE THE GATE: ship-titanic 0.020%/0.012 (52.35 -> 52.2 on a single-pole mast, 'record', one character; the MAY witness). Left unscored at the r287 tree (48): globe-default globe-crossing globe-steam globe-modern globe-era-card action ship-dhow ship-junk ship-canoe ship-usv ship-dugout ship-trireme ship-galley ship-galleass ship-panokseon ship-sekibune ship-carrier ship-yamato ship-container ship-queen-mary-2 descent descent-high descent-coast aboard-off map-floor aboard-coast sea-magnified ship-dreadnought aboard-carrier aboard-cable aboard-titanic aboard-yamato aboard-wyoming ship-treasure aboard-treasure shipwright-corbis ship-azzam ship-ever-given action-salamis board-salamis action-gravelines action-lepanto action-myeongnyang wake-plan sea-ever-given passage-sahul sea-dugout-floor sea-canoe-floor - every one a frame the change cannot reach: the T change touches only a mast with a yard list or a staysail (Preussen, the clipper, the steamer, Endurance, the ship-of-the-line - all scored above, in the Shipwright and the Sea); the card change touches only the Shipwright view, and on a single-pole mast the stack reads the mesh box's figure to 0.01 m (Titanic, the largest such difference at 0.15 m, scored inside the gate); the globe, the descent, the action and the sea frames carry no card; so each stands as scored at the r286/r285/r284/r283/r282/r281/r280 trees. wake-plan is the container ship (frames.json), so the clean-HEAD backlog r288 opens with is empty.
 Two commits close the round (8449a3b record + docs + handoff + accepted baselines, and this push-log commit).**
+
+
+## Round 288 — 2026-09-08 — the card says 'derived' beside the figure, in one line, and says on screen what the figure was derived from: r287's label 'Rig, deck to truck (derived)' wrapped the tile to a second line on every hull whose rig height is not the record's and left the derivation on a hover title; the word now stands beside the number at the label's size, the label names the two points in one line on every masted hull, a row of 'Measurements and sources' says in words what the figure was derived from, the loft carries that derivation as a record beside its sentence, no record, geometry, shader or audit rule changed, and the probe that listed every hull's provenance found six frames r287's receipt had called unreachable that its label had reached
+
+**Queue check first: August's second list stands WORKED IN FULL (r57). r287's entry ordered r288 to check `uptime` and
+`ps -r` FIRST and named its candidates in order: (0y⁹⁰) the lubber's hole if the load was under ~5 with the full ratchet
+launched inside 15 minutes; else (0y⁹⁷), a second Preussen plate on the beam; else the clipper's and the steamer's
+fractions off a beam plate of each; else (0y⁹⁹), the label; else the survey. At the open (17:51) the load was 1.67
+(1.83 and 2.49 over 5 and 15 minutes), the loop driver holding the lock (round starting 17:50:54), no hot process.
+(0y⁹⁰) was NOT taken, for r284's, r285's, r286's and r287's reason: it couples a builder change, a re-lead of ten falls
+and a rewrite of A-UPPER-GEAR's rim test, and its geometry cannot be final inside 15 minutes; it stays first for a round
+that can open with it. (0y⁹⁷) was NOT taken, and the reason is a census, not a guess (r288/, the files by name): the
+Commons category and search list sixteen files of her. The two 'in full sail' postcards (State Library of Queensland
+70 73320 and 1 73319 — the first credited to Allan C. Green — are her famous broadside from a little forward of the
+beam, and both are 1000 px wide, about 4.5 px/m at the ship; the Sjöhistoriska museet SB 1228 (4908 px) is a 1925
+pencil drawing from the port bow, signed 'EJ', an artist's proportions and not a plate; the MAS Fotobriefkaart (3364
+px) and the SLNSW FL20702467 (3333 px) are the wreck under the Dover cliffs with the upper yards lowered and the fore
+topmast gone; LoC 01459 is the April 1908 berth from ahead with the upper yards down (r286 set aside the 2323 px copy);
+SLQ 75490 (1000 px) is a clean beam view at anchor with the yards crossed and the upper three lowered, which would read
+the three FIXED yards (course, lower topsail, lower topgallant) at 7 px/m, ± 0.04, no tighter than r286's bound; SLV
+H91.325-1441 and H99.220-2487 are 1000 px harbour views, HESTER 839 is 768 px. Where the next reader should look: the
+State Library of Victoria's Primo catalogue lists a Green 'PREUSSEN [picture]' (alma9916504093607636) and eight more
+records of her (alma9917506533607636 'Only ship ever rigged like this', at anchor; 9916594313607636, 9918756693607636,
+9916594293607636; 9917472633607636 at a wharf; 9917406123607636; 9939663774807636 and 9939658201107636) — the SLV holds
+Green's negatives at ~5000 px (r286's H91.250-378 came from there through Commons), and any one of these that is the
+broadside under sail settles (0y⁹⁷). The clipper's and the steamer's fractions were NOT taken: both are class hulls and
+their records say no plate can be read for them. (0y⁹⁹) was taken, as a card round with the card's other qualifier
+in view. Every edit was made on a :8150 copy (r288/web, symlinks with real copies of hull.js, shipwright.js, styles.css,
+vessels.json and audit-hulls.js), by r288/apply-edits.py (every anchor asserted, each after-file reproduced from its
+before-file, both scripts syntax-checked by node's vm), and copied into web/ by r288/copy-in.sh after the audit and the
+witnesses. :8149 served web/ at HEAD for the before-witness.**
+
+**THE DECISION — WHERE A QUALIFIER GOES DEPENDS ON WHAT IT QUALIFIES. The card has two kinds of qualifier on its four
+tiles. The draught's 'laden' (r233) is the CONDITION the figure holds under: it is part of what was measured, and it sits
+in the label after a comma — 'Draught, laden'. 'Derived' is not a condition of the measurement; it is the STATUS of the
+figure, whether the record attests it. r287 put it in the label, which is why the label wrapped: 'Rig, deck to truck
+(derived)' is 28 letters against a tile that holds about 21. So the status stands beside the number, in the label's own
+small type, and the label keeps naming the two points — 'RIG, DECK TO TRUCK' — in one line on every masted hull. The
+card's height on the derived hulls returns to r286's. The second half of the residual was the derivation itself, which
+r287 left on the tile's title, where nothing on screen invites a hover; it is now a row in 'Measurements and sources',
+the card's own table of figures and where they come from, in words, with the record's figure in it where there is one.
+A hull whose figure is the record's prints nothing new anywhere.**
+
+**THE CARD (web/js/shipwright.js; r288/apply-edits.py S1–S2). S1, the tile: the label is 'Rig, deck to truck' when the
+hull has masts and 'Air draught, above deck' when it has none, as before r287; the value is the figure and, when
+rigTruckFrom does not begin 'record', ' <i>derived</i>'; the title keeps the loft's sentence. S2, the row: swFillCard
+reads SW.ship.userData.rigTruckHow (swOpen builds the ship before it fills the card, line 802) and, when `from` is not
+'record', appends ['Rig, deck to truck', 'derived, not recorded: …'] to the vessel's rows, the wording by case — lower
+mast recorded: "the lower mast is the record's (25.9 m); the masts above it are carried to the truck through class
+fractions, 3 segments in all" (the clipper); no height recorded, more than one segment: "no mast height is recorded;
+the lower mast is drawn to a class proportion of the hull and the masts above it are carried to the truck through class
+fractions, 2 segments in all" (the carrack); one pole: "no mast height is recorded; the mast is one pole, drawn to a
+class proportion of the hull" (the corbita); no segment record (a lateen): "no mast height is recorded; the figure is
+the span of the tallest mast as drawn, to a class proportion of the hull" (the dhow). THE STYLE (web/css/styles.css):
+`#swLeft .dims b i` — the sans face, 9.5 px, the label's letter-spacing and case, the faint ink, 5 px off the number.
+THE LOFT (web/js/hull.js; H1–H4): beside rigTruckFrom the loft now records rigTruckHow — { from: 'record' | 'derived' |
+'measured', mi, n, lower: 'record' | 'beam', heightM, truckM } — so the card composes its row from fields and not by
+parsing a sentence that the next reword would break; and the one-pole beam-share sentence is now 'derived: a beam-share
+mast, one pole, no height recorded' where it read '… carried to the truck through the class fractions, 1 segments'. No
+builder geometry changed: the four edits are a declaration, two assignments and a field on userData.**
+
+**MEASURED (r288/probe-how.py on :8150, set build, fine, probe-how-after.out; every hull). The loft says 'derived' on
+twelve hulls — corbita (13.64 m, one pole, beam share), junk (16.68, one pole), treasure ship (39.0, one pole), carrack
+(32.0, beam share, 2 segments), fluyt (29.7, 3), East Indiaman (45.42, 3), ship-of-the-line (56.02, 3), slave ship
+(28.46, 3), Wyoming (46.9, the recorded 33.5 m lower mast, 2), Great Eastern (56.0, the recorded 40 m, 2), clipper
+(44.24, the recorded 25.9 m, 3), steamer (42.19, beam share, 3); 'measured' on four — dhow (6.95), caravel (5.35),
+galley (10.16), galleass (11.58), the lateens with no segment record; 'record' on eleven — voyaging canoe, trireme, cog,
+panokseon, sekibune, Preussen, Titanic, dreadnought, Yamato, Endurance, Queen Mary 2; no masts on six. Every figure is
+the stack r287 left. The rows probe (r288/probe-rows.py, carrack, clipper, corbita, dhow; probe-rows.out and
+rows-<id>.png, each looked at) prints the tile's HTML and the row's text above, no page error.**
+
+**THE AUDIT (Research/audit-hulls.js = web/audit-hulls.js, UNCHANGED). The fault class — a derived figure printed as the
+record's — is convicted at the loft by A-RIG-HEIGHT's provenance clause (r287), and the card reads the loft; no new
+class. FINAL on :8150 (r288/chain.log): "checked 33 hulls, 0 problems" at 18:13 and again at 18:20 on the copy with
+the one-pole sentence (hull.js md5 50355ea2). No proof B or C: no rule changed.**
+
+**THE FRAMES (r288/PREDICTIONS-close.md, written before any frame of the r288 tree was scored). MUST move (the card's
+tile, every tile under it rising one line): the seven hulls r287 scored with a derived card — ship-carrack, ship-slave-
+ship, ship-wyoming, ship-great-eastern, ship-clipper, ship-steamer and the 74's five cameras (shipwright, -ahead, -astern,
+-furled, -hounds); and the six r287 did NOT score — ship-junk, ship-treasure, shipwright-corbis, ship-dhow, ship-galley,
+ship-galleass — whose baselines are the r286 card, so that their diff is the word beside the figure alone. MUST NOT:
+every frame whose hull's loft says 'record' or has no mast, and every globe, descent, action, sea and aboard frame.
+SCORED at the r288 tree (web/ after the copy-in, on :8149) one frame at a time by r288/check-chain.sh, 34–52 s a frame under a load of 4–9, 18:17–18:29: 17 frames, 11 beyond the gate, 11 accepted, 11 baselines moved. THE CARD BACK TO ONE LINE (every tile under the rig tile rising one line, the plate photograph with it; no geometry): ship-carrack 2.090%/1.097; ship-clipper 2.309%/1.096; ship-slave-ship 2.664%/1.700; ship-wyoming 1.832%/0.845; ship-great-eastern 2.054%/1.115; ship-steamer 1.610%/0.878. THE 74'S FIVE CAMERAS (her card, the same change): shipwright 2.280%/1.148; shipwright-ahead 2.280%/1.148; shipwright-astern 2.280%/1.156; shipwright-furled 2.280%/1.142; shipwright-hounds 2.280%/1.144. INSIDE THE GATE, NOT ACCEPTED (the word 'derived' beside the figure alone, against a baseline that is the r286 card): ship-junk 0.030%/0.016; ship-dhow 0.011%/0.008; ship-treasure 0.034%/0.021; shipwright-corbis 0.014%/0.009; ship-galley 0.011%/0.008; ship-galleass 0.010%/0.008 — on these six the r287 label was never captured and the r288 word is a few thousand pixels, under the 0.05% gate; their baselines therefore carry no 'derived' word, and a future loss of the word would be invisible to the ratchet on them (noted in (0y¹⁰¹)). Witnessed BEFORE any frame was scored, the carrack's card from :8149 at HEAD and from :8150
+(r288/crop-carrack-tile-before-after.png): '32.0 m / RIG, DECK TO TRUCK / (DERIVED)' above, '32.0 m DERIVED / RIG, DECK
+TO TRUCK' below, the performance block one line higher; and the clipper's after (crop-clipper-after-card.png). The
+carrack's diff (chain-diff/ship-carrack.png, looked at) is the card and the plate photograph moving up, and nothing of
+any hull.**
+
+**r287'S RECEIPT WAS WRONG ABOUT SIX FRAMES, AND THE PROBE IS WHAT FOUND IT. r287 listed ship-junk, ship-treasure,
+shipwright-corbis, ship-dhow, ship-galley and ship-galleass among 48 frames 'the change cannot reach', reasoning that a
+single-pole mast reads the same figure from the segments as from the mesh box. The figure did not move on them; the
+LABEL did — r287's tile printed '(derived)' wherever rigTruckFrom did not begin 'record', and on those six hulls it
+begins 'derived' (one pole, a beam share) or 'measured' (a lateen with no segment record). So the r287 tree changed
+those six frames and no baseline captured it. This round's probe listed every hull's provenance before the frames were
+predicted, which is the check r287 did not make: a receipt's 'cannot reach' must be read against the code's own
+branches per hull, not against the geometry. The six are scored and accepted here against their r286 baselines, and
+their FRAME-LOG reasons say so.**
+
+**Rule 0 on the accepted frame read whole (r288/chain-current/ship-clipper.png): a rendered three-masted ship from her
+port bow on a lit sea under a pale sky, square sails set on every mast, her white-and-black hull with the fleet's
+neighbours at their berths, the Shipwright's card beside her — not a chart. Three facts a viewer can read off it without
+a legend: she is square-rigged on three masts with five yards on the main; the card gives her 64.8 m overall, 10.97 m
+beam and 44.2 m from deck to truck, marked derived; the tab reads 'The Shipwright'.**
+
+**Named residuals, in order:** (0y⁹⁹) CLOSED. NEW (0y¹⁰¹) A RECEIPT'S 'CANNOT REACH' MUST BE READ AGAINST THE CODE'S
+BRANCHES PER HULL — r287's six missed frames above; the r288 probe (probe-how.py) is the pattern: list what the changed
+code prints for EVERY hull before predicting the frames. NEW (0y¹⁰²) THE 'MEASURED' HULLS SAY 'DERIVED' — the dhow, the
+caravel, the galley and the galleass carry lateen masts built without segment records, so the loft measures the mesh
+and the card marks the figure derived, which is true (the mast is drawn to a class proportion) but the loft's sentence
+says 'measured'; giving the lateen builder segment records (mi, si, footY, headY) would let A-RIG-HEIGHT read those four
+stacks as it reads the other twenty-three. NEW (0y¹⁰³) THE ROW'S 'CLASS PROPORTION OF THE HULL' IS THE SHARE OF A
+CLASS MAIN — `mk.height` is that mast's share of a class main mast whose own length is a class rule of the hull; the
+row says 'a class proportion of the hull' and does not name the base, because the base differs by builder; a reader who
+wants it must read hull.js (steelMain). (0y⁹⁷) RESTATED with the SLV leads above: the nine alma records are the next
+step, and the read is r286's method. (0y¹⁰⁰) (0y⁹⁵) (0y⁹⁸) (0y⁹³) (0y⁹⁴) (0y⁹²) (0y⁹⁰) (0y⁹¹) as r287 names them. (0y⁸⁵)
+(0y⁸⁷) as r281 names them. (0y⁸²) (0y⁸³) (0y⁸⁴) as r280 names them. (0y⁷⁷) (0y⁷⁸) (0y⁷⁹) (0y⁸⁰) as r279 names them.
+(0y⁷⁵) (0y⁷⁶) (0y⁷³) (0y⁷⁴) (0y⁷⁰) as r278 names them. (0y⁶⁰)'s remainder (scuppers, the scrolled band, the lifebuoy)
+open. (0y⁶⁷) (0y⁶⁸) (0y⁶⁹) as r275 names them. (0y⁶²) (0y⁶⁴) (0y⁵⁹) as r273 names them. (0y⁶⁵) (0y⁶⁶) as r274 names
+them. (0y⁵⁷) (0y⁵⁵) (0y⁴⁹) (0y⁵⁰) (0y⁴⁷) (0y⁴⁶) (0y⁴⁵) (0y⁴⁴) (0y³⁰) (0y³⁹) (0y⁴⁰) (0y⁴¹) (0y³⁷) (0y³³) (0y³⁴) (0y³¹)
+(0y³²) (0y¹⁹) (0y²⁴) (0y¹⁸) (0y²¹) (0y²²) (0y¹⁴) (0y¹⁵) (0y¹⁶) (0y¹²) (0y¹³) (0y¹¹) (0y⁗) (0y⁵) (0z) (0v) (0t) (0u) as
+r245–r275 name them. (0l) (0n) (0o) (0i) (0j) (0k) (0e²²) unchanged and unread. (0e¹⁷) (0e¹⁵) (0e¹⁸) (0e¹⁶) (0h′)
+(0e²³) (0e¹³) (0e¹⁴) (0e¹⁰) (0e⁸) (0e⁵) (0e⁶) (0e′) (0e⁗) (0g⁵) (0g⁹) (0g⁷) (0g⁗) (0g⁶) (0g″) (0a) (0b″) (0b‴) (0h)
+(0c) (0f) unchanged. (1)–(20) as r230 lists them. The forecastle break the record keeps (stationProvenance) still waits
+on the RMG original.**
+
+**r289 opens by checking `uptime` and `ps -r` FIRST; the clean-HEAD backlog is only what the receipt below lists as
+unscored among the frames this change can reach (the r279 memory rule), read against probe-how-after.out per hull (the
+(0y¹⁰¹) rule), and this round's receipt says it is empty. Then, if the load is under ~5 at the open and the round can
+launch the full ratchet inside 15 minutes: (0y⁹⁰) the lubber's hole. Else (0y⁹⁷) through the SLV records named above —
+fetch the nine alma records' images first (the Primo delivery link or the handle on each record), keep any broadside
+under sail at 15 px/m or better, and read it by r286's method. Else (0y¹⁰²), segment records on the lateen masts, a
+builder round that moves the four lateen hulls' audits and no pixel. Else the survey's next never-spun hull by looking.**
+
+**Live stamp: docs/index.html carries data-version 1788917424 at the build; the push and the live poll are in
+build/staging/r288/push.log, and the verified live value with the frames' result is recorded in the receipt commit
+that follows this one (the r198 rule). Tree at close: only build/loop.log and the r205 daemon's cookie file
+uncommitted, deliberately; the r288 staging stays on disk uncommitted, the r211 convention.**

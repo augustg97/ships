@@ -16836,14 +16836,15 @@ function buildShip(S, opts) {
      datum; the cog's cross at the truck (0.5 m staff, 0.6 m cross) put rigTop 1.1 m over her
      truck and the tile read 24.6 m for a 23.5 m mast. A flag, a vane or an aerial above the
      truck is the same class. undefined on a hull with no mast, like rigDeckY. */
-  let rigDeckY, rigTruckY, rigTruckFrom;
+  let rigDeckY, rigTruckY, rigTruckFrom, rigTruckHow;
   { let top = -Infinity, topSeg = null;
     group.traverse(o => {
       if (!o.isMesh || !o.userData.part || o.userData.part.key !== 'mast') return;
       const b2 = new THREE.Box3().setFromObject(o);
       if (b2.max.y > top) { top = b2.max.y; rigDeckY = b2.min.y; topSeg = o.userData.seg || null; }
     });
-    if (top > -Infinity) { rigTruckY = top; rigTruckFrom = 'measured: the span of the mast mesh that reaches highest (no segment record)'; }
+    if (top > -Infinity) { rigTruckY = top; rigTruckFrom = 'measured: the span of the mast mesh that reaches highest (no segment record)';
+                           rigTruckHow = { from: 'measured' }; }
     /* r287 (0y96): A MAST DRAWN IN SEGMENTS HAS ONE FOOT, AND IT IS THE FIRST SEGMENT'S. The mesh that reaches
        highest on a fidded mast is the topgallant, and its own min.y is its heel at the second doubling, not
        the deck — so the tile read that one segment's length on every hull whose tallest mast is more than one
@@ -16867,11 +16868,19 @@ function buildShip(S, opts) {
         rigTruckFrom = (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
                      : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
                      : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
+                     : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
                      : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
+        /* r288 (0y99): the same derivation as a RECORD, so the card can say it on screen in its own words —
+           the sentence above is one string, and a card that has to parse a string to find the number will
+           print the wrong thing the first time the sentence is reworded. `from` is 'record' or 'derived';
+           `lower` says what the lower mast is (this ship's recorded heightM, or a beam share); `n` is the
+           count of segments the class fractions carry it through; truckM / heightM are the record's figures. */
+        rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
+                        lower: mk.heightM !== undefined ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM };
       }
     } }
   group.userData = { hullMat, sails, spec: S, furled: FURLED,
-                     rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom,
+                     rigTop: bb.max.y, keelBottom: bb.min.y, rigDeckY, rigTruckY, rigTruckFrom, rigTruckHow,
                      extentX: bb.max.x - bb.min.x,     // a lateen yard overhangs the stem
                      /* ── THE FLOAT DATUM IS A CONSTRUCTION FACT, NOT A MEASUREMENT ──────
                         surfacePoint puts the load waterline at local y = 0 (v = 0.62 → z = 0)

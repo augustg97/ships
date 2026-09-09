@@ -421,11 +421,10 @@ document.getElementById('swDims').innerHTML = [
 ['Length overall', L.toFixed(1) + ' m'],
 ['Beam', vessel.hull.beam.toFixed(2) + ' m'],
 ['Draught' + (vessel.hull.draughtCondition ? ', ' + vessel.hull.draughtCondition : ''), vessel.hull.draught.toFixed(2) + ' m'],
-[(vessel.hull.masts || []).length
-? 'Rig, deck to truck' + (U.rigTruckFrom && U.rigTruckFrom.indexOf('record') !== 0 ? ' (derived)' : '')
-: 'Air draught, above deck',
+[(vessel.hull.masts || []).length ? 'Rig, deck to truck' : 'Air draught, above deck',
 ((U.rigTruckY !== undefined ? U.rigTruckY : U.rigTop)
-- (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m',
+- (U.rigDeckY !== undefined ? U.rigDeckY : vessel.hull.freeboard)).toFixed(1) + ' m'
++ ((vessel.hull.masts || []).length && U.rigTruckFrom && U.rigTruckFrom.indexOf('record') !== 0 ? ' <i>derived</i>' : ''),
 U.rigTruckFrom || ''],
 ].map(d => '<div' + (d[2] ? ' title="' + d[2].replace(/"/g, '&quot;') + '"' : '') + '><b>' + d[1] + '</b><span>' + d[0] + '</span></div>').join('');
 if (SW.key) {
@@ -493,8 +492,18 @@ document.getElementById('swStory').innerHTML =
 '</figcaption></figure>'
 : '') +
 '<h4>History and service</h4>' + proseHTML(v.text);
-document.getElementById('swRows').innerHTML = (v.rows || []).length
-? '<h4>Measurements and sources</h4>' + v.rows.map(r =>
+const H = SW.ship && SW.ship.userData && SW.ship.userData.rigTruckHow;
+const rigRow = (H && H.from !== 'record' && (v.hull.masts || []).length)
+? [['Rig, deck to truck',
+'derived, not recorded: ' + (
+H.from === 'measured' ? 'no mast height is recorded; the figure is the span of the tallest mast as drawn, to a class proportion of the hull'
+: H.lower === 'record' ? 'the lower mast is the record\'s (' + H.heightM + ' m); the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
+: H.n > 1 ? 'no mast height is recorded; the lower mast is drawn to a class proportion of the hull and the masts above it are carried to the truck through class fractions, ' + H.n + ' segments in all'
+: 'no mast height is recorded; the mast is one pole, drawn to a class proportion of the hull')]]
+: [];
+const rows = (v.rows || []).concat(rigRow);
+document.getElementById('swRows').innerHTML = rows.length
+? '<h4>Measurements and sources</h4>' + rows.map(r =>
 '<div class="rw"><i>' + inlineMD(r[0]) + '</i><b>' + inlineMD(r[1]) + '</b></div>').join('')
 : '';
 document.getElementById('swCite').innerHTML = inlineMD(v.cite || '');
