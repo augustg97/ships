@@ -1,0 +1,1 @@
+**THE FRAMES.** Predicted: no frame moves. Endurance's set build is unchanged but for a userData tag, and the one furled frame (`shipwright-furled`) is the 74, whose furled card has no gaff clause. The full check was launched at 09:55 on the round's tree, beside this close; every frame is scored and classified in the receipt that follows.

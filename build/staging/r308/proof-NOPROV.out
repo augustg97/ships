@@ -1,0 +1,7 @@
+[
+ {
+  "id": "endurance",
+  "rule": "a brailed stowage with no provenance",
+  "detail": "mast 2 (station 0.839): furlStow 'brailed', furlStowProvenance absent"
+ }
+]

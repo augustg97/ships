@@ -4446,8 +4446,17 @@ function buildRig(S, group, mats, FINE, FURLED) {
          gaffStow: 'brailed' is a loose-footed sail stowed by its brails: the leech and foot
          are hauled in to the mast, the head stays laced to the gaff, and the gaff stays aloft.
          There is no boom and so no topping lift. Endurance's main is drawn this way because
-         both plates of her that show the main show it so (the record's gaffStowProvenance). */
-      const BRAILED = mk.gaffStow === 'brailed';
+         both plates of her that show the main show it so (the record's gaffStowProvenance).
+         ── A SPANKER BRAILED OVER ITS BOOM (round 308, 0y¹³⁴) ──────────────────────────────
+         furlStow: 'brailed' is a sail that is SET on its gaff and boom like any other, and is
+         STOWED by its brails: the leech and foot are hauled in to the mast, the gaff stays aloft
+         at its working angle, and the boom stays where it is, on its topping lift. Before r308
+         every furled gaff sail was stowed the schooner's way, with the gaff lowered onto a roll
+         along the boom. Endurance's mizzen is drawn this way because both plates of her mizzen
+         in the ice show it so (the record's furlStowProvenance). BOOMLESS is the main's case;
+         BRAILED is what the cloth and the gaff do in this build. */
+      const BOOMLESS = mk.gaffStow === 'brailed';
+      const BRAILED = BOOMLESS || (FURLED && mk.furlStow === 'brailed');
       const peak = 0.62;                                 // the gaff's angle above horizontal
       /* ── THE BOOM CLEARS THE PLATFORM UNDER IT (round 273, Endurance) ─────────────────
          The aftermost boom overhangs the stern, and Endurance's stern carries the compass
@@ -4521,7 +4530,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         foot: [+footX.toFixed(3), +footY.toFixed(3)], clew: [+clewX.toFixed(3), +clewY.toFixed(3)],
         liftHead: [+liftX.toFixed(3), +liftY.toFixed(3)],
         overPlatform: overPlat, platTop: overPlat ? +platTop.toFixed(3) : null, boomL: +boomL.toFixed(3) };
-      if (!BRAILED) group.add(tag(bm2, 'yard', 'Boom',
+      if (!BOOMLESS) group.add(tag(bm2, 'yard', 'Boom',
         `The boom rises ${(cock / DEG).toFixed(1)}° aft from its jaws ${(footY - base).toFixed(2)} m over the deck ` +
         `(${footRec != null ? 'the record’s plate read' : 'a class share of the lower mast'}), held up at its outer end ` +
         `by a topping lift from the lower masthead; the angle is ${cockFrom === 'class minimum'
@@ -4529,7 +4538,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
           : 'what clears the compass platform’s box by a hand’s breadth at its near face'}.`));
       const liftMesh = ropeMesh([[new THREE.Vector3(clewX, clewY, 0), new THREE.Vector3(liftX, liftY, 0)]],
                                 0.012 + B * 0.0006, ropeMat);
-      if (liftMesh && !BRAILED) group.add(tag(liftMesh, 'toppingLift'));
+      if (liftMesh && !BOOMLESS) group.add(tag(liftMesh, 'toppingLift'));
       /* the SET geometry decides the cloth's area whichever state it is shown in — furling
          does not change how much canvas she owns */
       const gy = base + lower * (mk.throatFrac != null ? mk.throatFrac : (mk.rig === 'square' ? 0.55 : 0.86));
@@ -4636,8 +4645,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const bA = new THREE.Vector3(mastX(footY) + mastR(footY) + rb, footY, 0);
         const bB = new THREE.Vector3(mastX(gy) + mastR(gy) + rb, gy, 0);
         const br = makeFurl(bA, bB, area, furlMat(mats), group, { radius: rb, name: 'Brailed sail',
-          card: 'This sail is loose-footed and is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. She carries no boom on this mast. Hurley\u2019s plates show it this way.' });
-        if (br) { br.userData.brailed = { mast: mi, at: mk.at, foot: [+bA.x.toFixed(3), +bA.y.toFixed(3)], head: [+bB.x.toFixed(3), +bB.y.toFixed(3)], r: +rb.toFixed(3) }; }
+          card: BOOMLESS
+            ? 'This sail is loose-footed and is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. She carries no boom on this mast. Hurley\u2019s plates show it this way.'
+            : 'This sail is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. The boom stays where it is, held up by its topping lift. Hurley\u2019s plates of her in the ice show the sail stowed this way.' });
+        if (br) { br.userData.brailed = { mast: mi, at: mk.at, boom: !BOOMLESS, foot: [+bA.x.toFixed(3), +bA.y.toFixed(3)], head: [+bB.x.toFixed(3), +bB.y.toFixed(3)], r: +rb.toFixed(3) }; }
         sails.push(br);
       } else if (FURLED) {
         /* a gaff sail is handled entirely from the deck, and it stows the same way: halyards

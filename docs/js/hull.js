@@ -2447,7 +2447,8 @@ const boomL = openAft
 : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
 const gaffL = mk.gaffFrac != null ? lower * mk.gaffFrac : Math.min(lower * 0.42, boomL * 0.72);
 const gaffFrom = mk.gaffFrac != null ? 'record: gaffFrac' : 'class: the lesser of 0.42 of the lower mast and 0.72 of the boom';
-const BRAILED = mk.gaffStow === 'brailed';
+const BOOMLESS = mk.gaffStow === 'brailed';
+const BRAILED = BOOMLESS || (FURLED && mk.furlStow === 'brailed');
 const peak = 0.62;
 const DEG = Math.PI / 180;
 const BOOM_COCK_MIN = 4 * DEG;
@@ -2479,7 +2480,7 @@ footM: +(footY - base).toFixed(3), footFrom: footRec != null ? 'record: boomFoot
 foot: [+footX.toFixed(3), +footY.toFixed(3)], clew: [+clewX.toFixed(3), +clewY.toFixed(3)],
 liftHead: [+liftX.toFixed(3), +liftY.toFixed(3)],
 overPlatform: overPlat, platTop: overPlat ? +platTop.toFixed(3) : null, boomL: +boomL.toFixed(3) };
-if (!BRAILED) group.add(tag(bm2, 'yard', 'Boom',
+if (!BOOMLESS) group.add(tag(bm2, 'yard', 'Boom',
 `The boom rises ${(cock / DEG).toFixed(1)}° aft from its jaws ${(footY - base).toFixed(2)} m over the deck ` +
 `(${footRec != null ? 'the record’s plate read' : 'a class share of the lower mast'}), held up at its outer end ` +
 `by a topping lift from the lower masthead; the angle is ${cockFrom === 'class minimum'
@@ -2487,7 +2488,7 @@ if (!BRAILED) group.add(tag(bm2, 'yard', 'Boom',
 : 'what clears the compass platform’s box by a hand’s breadth at its near face'}.`));
 const liftMesh = ropeMesh([[new THREE.Vector3(clewX, clewY, 0), new THREE.Vector3(liftX, liftY, 0)]],
 0.012 + B * 0.0006, ropeMat);
-if (liftMesh && !BRAILED) group.add(tag(liftMesh, 'toppingLift'));
+if (liftMesh && !BOOMLESS) group.add(tag(liftMesh, 'toppingLift'));
 const gy = base + lower * (mk.throatFrac != null ? mk.throatFrac : (mk.rig === 'square' ? 0.55 : 0.86));
 const rT = mastR(gy), rF = mastR(footY);
 const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
@@ -2562,8 +2563,10 @@ const rb = Math.max(0.05, Math.sqrt((area * 0.035) / (Math.PI * Math.max(luff, 0
 const bA = new THREE.Vector3(mastX(footY) + mastR(footY) + rb, footY, 0);
 const bB = new THREE.Vector3(mastX(gy) + mastR(gy) + rb, gy, 0);
 const br = makeFurl(bA, bB, area, furlMat(mats), group, { radius: rb, name: 'Brailed sail',
-card: 'This sail is loose-footed and is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. She carries no boom on this mast. Hurley\u2019s plates show it this way.' });
-if (br) { br.userData.brailed = { mast: mi, at: mk.at, foot: [+bA.x.toFixed(3), +bA.y.toFixed(3)], head: [+bB.x.toFixed(3), +bB.y.toFixed(3)], r: +rb.toFixed(3) }; }
+card: BOOMLESS
+? 'This sail is loose-footed and is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. She carries no boom on this mast. Hurley\u2019s plates show it this way.'
+: 'This sail is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. The boom stays where it is, held up by its topping lift. Hurley\u2019s plates of her in the ice show the sail stowed this way.' });
+if (br) { br.userData.brailed = { mast: mi, at: mk.at, boom: !BOOMLESS, foot: [+bA.x.toFixed(3), +bA.y.toFixed(3)], head: [+bB.x.toFixed(3), +bB.y.toFixed(3)], r: +rb.toFixed(3) }; }
 sails.push(br);
 } else if (FURLED) {
 const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));

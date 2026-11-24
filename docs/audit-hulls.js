@@ -4480,10 +4480,35 @@ if (hasT && gf.userData.gaff.state !== 'furled' && Math.abs(jawsY - (seg.footY +
 say(v.id, 'a gaff throat off its recorded height', `${at}: jaws at y ${jawsY.toFixed(2)}, throatFrac ${mk.throatFrac} puts them at ${(seg.footY + lower * mk.throatFrac).toFixed(2)}${SB}`);
 }
 }
-if (mk.gaffStow === 'brailed') {
-if (STATE === 'set' && !mk.gaffStowProvenance) say(v.id, 'a brailed sail with no provenance', `${at}: gaffStow 'brailed', gaffStowProvenance absent`);
+if (mk.furlStow != null) {
+if (STATE === 'set') {
+if (mk.furlStow !== 'brailed') say(v.id, 'a furl stowage the builder does not know', `${at}: furlStow '${mk.furlStow}'`);
+if (!mk.furlStowProvenance) say(v.id, 'a brailed stowage with no provenance', `${at}: furlStow '${mk.furlStow}', furlStowProvenance absent`);
+const set = cloth.filter(o => o.userData.kind !== 'furl' && o.userData.mastX != null && Math.abs(o.userData.mastX - xm) < 1.5);
+if (!set.length) say(v.id, 'a sail stowed by brails not drawn set', `${at}: no set cloth names this mast in the set build`);
+const brS = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);
+if (brS.length) say(v.id, 'a brailed bundle in the set build', `${at}: ${brS.length} Brailed sail bundle(s) on a mast whose sail is set`);
+} else if (mk.furlStow === 'brailed') {
 const bm = booms.filter(o => Math.abs(o.userData.gaffBoom.at - mk.at) < 1e-6);
-if (bm.length) say(v.id, 'a boom under a brailed sail', `${at}: ${bm.length} Boom mesh(es) on a mast whose sail is loose-footed and brailed${SB}`);
+if (bm.length !== 1) say(v.id, 'a brailed spanker without its boom', `${at}: ${bm.length} Boom mesh(es); the sail is brailed to the mast and the boom stays${SB}`);
+for (const b of bm) {
+const f = b.userData.gaffBoom.foot, c = b.userData.gaffBoom.clew;
+const dx = c[0] - f[0], dy = c[1] - f[1], L2 = Math.hypot(dx, dy);
+const rolls = cloth.filter(o => {
+if (o.userData.kind !== 'furl' || o.userData.brailed) return false;
+const P = pts(o); let cx = 0, cy = 0; for (const q of P) { cx += q.x; cy += q.y; } cx /= P.length; cy /= P.length;
+const t = ((cx - f[0]) * dx + (cy - f[1]) * dy) / (L2 * L2);
+const d = Math.abs((cx - f[0]) * dy - (cy - f[1]) * dx) / L2;
+return t > 0 && t < 1 && d < 1.2;
+});
+if (rolls.length) say(v.id, 'a brailed sail rolled on its boom', `${at}: ${rolls.length} furl roll(s) along the boom of a sail the record stows by its brails${SB}`);
+}
+}
+}
+if (mk.gaffStow === 'brailed' || (STATE === 'furled' && mk.furlStow === 'brailed')) {
+if (STATE === 'set' && mk.gaffStow === 'brailed' && !mk.gaffStowProvenance) say(v.id, 'a brailed sail with no provenance', `${at}: gaffStow 'brailed', gaffStowProvenance absent`);
+const bm = booms.filter(o => Math.abs(o.userData.gaffBoom.at - mk.at) < 1e-6);
+if (bm.length && mk.gaffStow === 'brailed') say(v.id, 'a boom under a brailed sail', `${at}: ${bm.length} Boom mesh(es) on a mast whose sail is loose-footed and brailed${SB}`);
 const set = cloth.filter(o => o.userData.kind !== 'furl' && o.userData.mastX != null && Math.abs(o.userData.mastX - xm) < 1.5);
 if (set.length) say(v.id, 'a brailed sail drawn set', `${at}: ${set.length} set cloth mesh(es) name this mast${SB}`);
 const br = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);
@@ -6968,6 +6993,11 @@ const txt = f[0] + ' — ' + f[1];
 const RIGF = { square: /square sails/i, lateen: /lateen/i, gaff: /gaff sails/i, junk: /battened/i, crabclaw: /crab-claw/i };
 for (const [rig, re] of Object.entries(RIGF)) if (re.test(txt) !== rigs.has(rig))
 say(v.id, 'a furled card that misnames her rig', `the ${rig} rig is ${rigs.has(rig) ? 'carried and not named' : 'named and not carried'}: "${txt.slice(0, 140)}"`);
+const gmF = (H.masts || []).filter(m => m.rig === 'gaff');
+const nBr = gmF.filter(m => m.gaffStow === 'brailed' || m.furlStow === 'brailed').length;
+if (nBr && !/brailed/i.test(txt)) say(v.id, 'a furled card that lowers a brailed gaff', `${nBr} gaff mast(s) stow by brails and the card does not say so: "${txt.slice(0, 160)}"`);
+if (gmF.length > nBr && !/lowered onto their booms/i.test(txt)) say(v.id, 'a furled card that leaves a lowered gaff unsaid', `${gmF.length - nBr} gaff mast(s) lower the gaff onto the boom and the card does not say so: "${txt.slice(0, 160)}"`);
+if (gmF.length === nBr && /lowered onto their booms/i.test(txt)) say(v.id, 'a furled card that lowers a brailed gaff', `every gaff mast stows by brails and the card says the gaffs are lowered: "${txt.slice(0, 160)}"`);
 } else say(v.id, 'a furled card the audit cannot ask', 'window.SW_FURLED_CARD is not defined');
 }
 }

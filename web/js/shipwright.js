@@ -739,7 +739,13 @@ function swFurledCard(spec) {
   const how = [];
   if (rigs.has('square')) how.push('the square sails are rolled up on their yards and tied with gaskets');
   if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
-  if (rigs.has('gaff')) how.push('the gaff sails are lowered onto their booms');
+  /* r308: a gaff sail stowed by its brails keeps its gaff aloft (gaffStow or furlStow
+     'brailed'); only the others are lowered onto their booms */
+  const gm = ((spec.hull || {}).masts || []).filter(m => m.rig === 'gaff');
+  const gBr = gm.filter(m => m.gaffStow === 'brailed' || m.furlStow === 'brailed').length;
+  if (gm.length && gBr === gm.length) how.push('the gaff sails are brailed in to their masts under gaffs left aloft');
+  else if (gBr) how.push(`the gaff sails on ${gBr === 1 ? 'one mast are' : gBr + ' masts are'} brailed in to the mast with the gaff left aloft, and the others are lowered onto their booms`);
+  else if (gm.length) how.push('the gaff sails are lowered onto their booms');
   if (rigs.has('junk')) how.push('the battened sails are lowered and folded down onto their booms');
   if (rigs.has('crabclaw')) how.push('the crab-claw sails are rolled round their spars');
   if ((spec.hull || {}).headsails) how.push('the headsails are hauled down onto their stays');

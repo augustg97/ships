@@ -1,0 +1,17 @@
+[
+ {
+  "id": "endurance",
+  "rule": "a brailed sail rolled on its boom",
+  "detail": "mast 2 (station 0.839): 1 furl roll(s) along the boom of a sail the record stows by its brails (furled build)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed sail not drawn",
+  "detail": "mast 2 (station 0.839): 0 Brailed sail bundle(s) (furled build)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed gaff lowered",
+  "detail": "mast 2 (station 0.839): the gaff lies at 18.1\u00b0; a brailed sail's gaff stays aloft (furled build)"
+ }
+]

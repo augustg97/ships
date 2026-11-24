@@ -1,0 +1,12 @@
+[
+ {
+  "id": "endurance",
+  "rule": "a sail stowed by brails not drawn set",
+  "detail": "mast 2 (station 0.839): no set cloth names this mast in the set build"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed bundle in the set build",
+  "detail": "mast 2 (station 0.839): 1 Brailed sail bundle(s) on a mast whose sail is set"
+ }
+]

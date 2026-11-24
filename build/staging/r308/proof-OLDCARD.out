@@ -1,0 +1,12 @@
+[
+ {
+  "id": "endurance",
+  "rule": "a furled card that lowers a brailed gaff",
+  "detail": "2 gaff mast(s) stow by brails and the card does not say so: \"Bent on, furled \u2014 The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the gaff sails are lowered \""
+ },
+ {
+  "id": "endurance",
+  "rule": "a furled card that lowers a brailed gaff",
+  "detail": "every gaff mast stows by brails and the card says the gaffs are lowered: \"Bent on, furled \u2014 The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the gaff sails are lowered \""
+ }
+]

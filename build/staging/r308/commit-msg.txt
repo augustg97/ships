@@ -1,0 +1,8 @@
+Round 308: Endurance's furled mizzen is brailed to the mast under a standing gaff, as Hurley's quarter plate and beset broadside show; the boom stays on its lift; the furled card names the brails
+
+- record: mizzen furlStow 'brailed' with its plate provenance and width read
+- hull.js: furlStow brails the sail in the furled build only; BOOMLESS and BRAILED split
+- shipwright.js: the furled card's gaff clause follows each gaff mast's stowage
+- audit: A-BRAILED over a boom (record, set, furled) and the furled card's gaff clause; proofs 3/2/1/2/0
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

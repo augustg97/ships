@@ -1,0 +1,947 @@
+{
+ "ship-of-the-line:set": {
+  "booms": [
+   {
+    "at": 0.85,
+    "foot": [
+     18.552,
+     8.824
+    ],
+    "clew": [
+     34.018,
+     9.905
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 2,
+    "origin": [
+     19.634,
+     21.192
+    ],
+    "deg": 35.52,
+    "L": 11.163,
+    "state": "set"
+   }
+  ],
+  "brailed": [],
+  "rolls": 0,
+  "lifts": 1
+ },
+ "ship-of-the-line:furled": {
+  "booms": [
+   {
+    "at": 0.85,
+    "foot": [
+     18.552,
+     8.824
+    ],
+    "clew": [
+     34.018,
+     9.905
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 2,
+    "origin": [
+     18.623,
+     9.636
+    ],
+    "deg": 11.45,
+    "L": 11.163,
+    "state": "furled"
+   }
+  ],
+  "brailed": [],
+  "rolls": 17,
+  "lifts": 1
+ },
+ "ship-of-the-line:card": "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets and the headsails are hauled down onto their stays. This is how she lay in harbour and at anchor.",
+ "wyoming:set": {
+  "booms": [
+   {
+    "at": 0.14,
+    "foot": [
+     -36.665,
+     8.443
+    ],
+    "clew": [
+     -24.946,
+     9.262
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.29,
+    "foot": [
+     -21.084,
+     8.008
+    ],
+    "clew": [
+     -9.366,
+     8.828
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.44,
+    "foot": [
+     -6.024,
+     7.889
+    ],
+    "clew": [
+     4.913,
+     8.653
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.58,
+    "foot": [
+     8.032,
+     7.89
+    ],
+    "clew": [
+     18.969,
+     8.655
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.72,
+    "foot": [
+     22.088,
+     7.975
+    ],
+    "clew": [
+     33.025,
+     8.74
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.86,
+    "foot": [
+     36.647,
+     8.244
+    ],
+    "clew": [
+     57.367,
+     9.693
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 0,
+    "origin": [
+     -36.665,
+     33.568
+    ],
+    "deg": 35.52,
+    "L": 8.458,
+    "state": "set"
+   },
+   {
+    "mast": 1,
+    "origin": [
+     -21.084,
+     33.133
+    ],
+    "deg": 35.52,
+    "L": 8.458,
+    "state": "set"
+   },
+   {
+    "mast": 2,
+    "origin": [
+     -6.024,
+     33.014
+    ],
+    "deg": 35.52,
+    "L": 7.894,
+    "state": "set"
+   },
+   {
+    "mast": 3,
+    "origin": [
+     8.032,
+     33.015
+    ],
+    "deg": 35.52,
+    "L": 7.894,
+    "state": "set"
+   },
+   {
+    "mast": 4,
+    "origin": [
+     22.088,
+     33.1
+    ],
+    "deg": 35.52,
+    "L": 7.894,
+    "state": "set"
+   },
+   {
+    "mast": 5,
+    "origin": [
+     36.647,
+     33.369
+    ],
+    "deg": 35.52,
+    "L": 14.07,
+    "state": "set"
+   }
+  ],
+  "brailed": [],
+  "rolls": 0,
+  "lifts": 6
+ },
+ "wyoming:furled": {
+  "booms": [
+   {
+    "at": 0.14,
+    "foot": [
+     -36.665,
+     8.443
+    ],
+    "clew": [
+     -24.946,
+     9.262
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.29,
+    "foot": [
+     -21.084,
+     8.008
+    ],
+    "clew": [
+     -9.366,
+     8.828
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.44,
+    "foot": [
+     -6.024,
+     7.889
+    ],
+    "clew": [
+     4.913,
+     8.653
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.58,
+    "foot": [
+     8.032,
+     7.89
+    ],
+    "clew": [
+     18.969,
+     8.655
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.72,
+    "foot": [
+     22.088,
+     7.975
+    ],
+    "clew": [
+     33.025,
+     8.74
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.86,
+    "foot": [
+     36.647,
+     8.244
+    ],
+    "clew": [
+     57.367,
+     9.693
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 0,
+    "origin": [
+     -36.665,
+     9.513
+    ],
+    "deg": 11.45,
+    "L": 8.458,
+    "state": "furled"
+   },
+   {
+    "mast": 1,
+    "origin": [
+     -21.084,
+     9.079
+    ],
+    "deg": 11.45,
+    "L": 8.458,
+    "state": "furled"
+   },
+   {
+    "mast": 2,
+    "origin": [
+     -6.024,
+     8.954
+    ],
+    "deg": 11.45,
+    "L": 7.894,
+    "state": "furled"
+   },
+   {
+    "mast": 3,
+    "origin": [
+     8.032,
+     8.955
+    ],
+    "deg": 11.45,
+    "L": 7.894,
+    "state": "furled"
+   },
+   {
+    "mast": 4,
+    "origin": [
+     22.088,
+     9.04
+    ],
+    "deg": 11.45,
+    "L": 7.894,
+    "state": "furled"
+   },
+   {
+    "mast": 5,
+    "origin": [
+     36.647,
+     9.348
+    ],
+    "deg": 11.45,
+    "L": 14.07,
+    "state": "furled"
+   }
+  ],
+  "brailed": [],
+  "rolls": 11,
+  "lifts": 6
+ },
+ "wyoming:card": "The sails are bent to their spars and stowed: the gaff sails are lowered onto their booms and the headsails are hauled down onto their stays. This is how she lay in harbour and at anchor.",
+ "preussen:set": {
+  "booms": [
+   {
+    "at": 0.873,
+    "foot": [
+     47.658,
+     6.959
+    ],
+    "clew": [
+     64.533,
+     8.139
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 4,
+    "origin": [
+     48.161,
+     18.964
+    ],
+    "deg": 35.52,
+    "L": 11.459,
+    "state": "set"
+   }
+  ],
+  "brailed": [],
+  "rolls": 0,
+  "lifts": 1
+ },
+ "preussen:furled": {
+  "booms": [
+   {
+    "at": 0.873,
+    "foot": [
+     47.658,
+     6.959
+    ],
+    "clew": [
+     64.533,
+     8.139
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 4,
+    "origin": [
+     47.692,
+     7.758
+    ],
+    "deg": 11.45,
+    "L": 11.459,
+    "state": "furled"
+   }
+  ],
+  "brailed": [],
+  "rolls": 47,
+  "lifts": 1
+ },
+ "preussen:card": "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets and the headsails are hauled down onto their stays. This is how she lay in harbour and at anchor.",
+ "great-eastern:set": {
+  "booms": [
+   {
+    "at": 0.13,
+    "foot": [
+     -76.66,
+     12.584
+    ],
+    "clew": [
+     -65.386,
+     13.373
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.26,
+    "foot": [
+     -49.68,
+     12.782
+    ],
+    "clew": [
+     -38.405,
+     13.571
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.4,
+    "foot": [
+     -20.7,
+     12.909
+    ],
+    "clew": [
+     -4.593,
+     14.035
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.6,
+    "foot": [
+     20.7,
+     12.906
+    ],
+    "clew": [
+     31.975,
+     13.694
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.74,
+    "foot": [
+     49.68,
+     12.744
+    ],
+    "clew": [
+     59.344,
+     13.42
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.87,
+    "foot": [
+     77.09,
+     12.235
+    ],
+    "clew": [
+     96.882,
+     13.619
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 0,
+    "origin": [
+     -76.66,
+     38.084
+    ],
+    "deg": 35.52,
+    "L": 8.138,
+    "state": "set"
+   },
+   {
+    "mast": 1,
+    "origin": [
+     -49.68,
+     41.282
+    ],
+    "deg": 35.52,
+    "L": 8.138,
+    "state": "set"
+   },
+   {
+    "mast": 2,
+    "origin": [
+     -20.7,
+     42.909
+    ],
+    "deg": 35.52,
+    "L": 11.625,
+    "state": "set"
+   },
+   {
+    "mast": 3,
+    "origin": [
+     20.7,
+     42.906
+    ],
+    "deg": 35.52,
+    "L": 8.138,
+    "state": "set"
+   },
+   {
+    "mast": 4,
+    "origin": [
+     49.68,
+     41.244
+    ],
+    "deg": 35.52,
+    "L": 6.975,
+    "state": "set"
+   },
+   {
+    "mast": 5,
+    "origin": [
+     77.09,
+     36.235
+    ],
+    "deg": 35.52,
+    "L": 13.44,
+    "state": "set"
+   }
+  ],
+  "brailed": [],
+  "rolls": 0,
+  "lifts": 6
+ },
+ "great-eastern:furled": {
+  "booms": [
+   {
+    "at": 0.13,
+    "foot": [
+     -76.66,
+     12.584
+    ],
+    "clew": [
+     -65.386,
+     13.373
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.26,
+    "foot": [
+     -49.68,
+     12.782
+    ],
+    "clew": [
+     -38.405,
+     13.571
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.4,
+    "foot": [
+     -20.7,
+     12.909
+    ],
+    "clew": [
+     -4.593,
+     14.035
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.6,
+    "foot": [
+     20.7,
+     12.906
+    ],
+    "clew": [
+     31.975,
+     13.694
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.74,
+    "foot": [
+     49.68,
+     12.744
+    ],
+    "clew": [
+     59.344,
+     13.42
+    ],
+    "cock": 4
+   },
+   {
+    "at": 0.87,
+    "foot": [
+     77.09,
+     12.235
+    ],
+    "clew": [
+     96.882,
+     13.619
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 0,
+    "origin": [
+     -76.66,
+     13.658
+    ],
+    "deg": 11.45,
+    "L": 8.138,
+    "state": "furled"
+   },
+   {
+    "mast": 1,
+    "origin": [
+     -49.68,
+     13.906
+    ],
+    "deg": 11.45,
+    "L": 8.138,
+    "state": "furled"
+   },
+   {
+    "mast": 2,
+    "origin": [
+     -20.7,
+     14.088
+    ],
+    "deg": 11.45,
+    "L": 11.625,
+    "state": "furled"
+   },
+   {
+    "mast": 3,
+    "origin": [
+     20.7,
+     14.055
+    ],
+    "deg": 11.45,
+    "L": 8.138,
+    "state": "furled"
+   },
+   {
+    "mast": 4,
+    "origin": [
+     49.68,
+     13.862
+    ],
+    "deg": 11.45,
+    "L": 6.975,
+    "state": "furled"
+   },
+   {
+    "mast": 5,
+    "origin": [
+     77.09,
+     13.313
+    ],
+    "deg": 11.45,
+    "L": 13.44,
+    "state": "furled"
+   }
+  ],
+  "brailed": [],
+  "rolls": 6,
+  "lifts": 6
+ },
+ "great-eastern:card": "The sails are bent to their spars and stowed: the gaff sails are lowered onto their booms. This is how she lay in harbour and at anchor.",
+ "clipper:set": {
+  "booms": [
+   {
+    "at": 0.85,
+    "foot": [
+     21.605,
+     6.03
+    ],
+    "clew": [
+     35.397,
+     6.994
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 2,
+    "origin": [
+     22.463,
+     15.842
+    ],
+    "deg": 35.52,
+    "L": 9.366,
+    "state": "set"
+   }
+  ],
+  "brailed": [],
+  "rolls": 0,
+  "lifts": 1
+ },
+ "clipper:furled": {
+  "booms": [
+   {
+    "at": 0.85,
+    "foot": [
+     21.605,
+     6.03
+    ],
+    "clew": [
+     35.397,
+     6.994
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 2,
+    "origin": [
+     21.668,
+     6.753
+    ],
+    "deg": 11.45,
+    "L": 9.366,
+    "state": "furled"
+   }
+  ],
+  "brailed": [],
+  "rolls": 26,
+  "lifts": 1
+ },
+ "clipper:card": "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets and the headsails are hauled down onto their stays. This is how she lay in harbour and at anchor.",
+ "steamer:set": {
+  "booms": [
+   {
+    "at": 0.845,
+    "foot": [
+     32.412,
+     8.374
+    ],
+    "clew": [
+     44.369,
+     9.21
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 3,
+    "origin": [
+     33.172,
+     22.873
+    ],
+    "deg": 35.52,
+    "L": 8.119,
+    "state": "set"
+   }
+  ],
+  "brailed": [],
+  "rolls": 0,
+  "lifts": 1
+ },
+ "steamer:furled": {
+  "booms": [
+   {
+    "at": 0.845,
+    "foot": [
+     32.412,
+     8.374
+    ],
+    "clew": [
+     44.369,
+     9.21
+    ],
+    "cock": 4
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 3,
+    "origin": [
+     32.456,
+     9.206
+    ],
+    "deg": 11.45,
+    "L": 8.119,
+    "state": "furled"
+   }
+  ],
+  "brailed": [],
+  "rolls": 20,
+  "lifts": 1
+ },
+ "steamer:card": "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the gaff sails are lowered onto their booms and the headsails are hauled down onto their stays. This is how she lay in harbour and at anchor.",
+ "endurance:set": {
+  "booms": [
+   {
+    "at": 0.839,
+    "foot": [
+     14.092,
+     6.312
+    ],
+    "clew": [
+     24.053,
+     8.184
+    ],
+    "cock": 10.65
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 1,
+    "origin": [
+     1.937,
+     15.508
+    ],
+    "deg": 35.52,
+    "L": 10.318,
+    "state": "brailed"
+   },
+   {
+    "mast": 2,
+    "origin": [
+     14.636,
+     14.096
+    ],
+    "deg": 35.52,
+    "L": 9.155,
+    "state": "set"
+   }
+  ],
+  "brailed": [
+   {
+    "mast": 1,
+    "at": 0.537,
+    "boom": false,
+    "foot": [
+     2.051,
+     4.064
+    ],
+    "head": [
+     2.409,
+     15.508
+    ],
+    "r": 0.294
+   }
+  ],
+  "rolls": 0,
+  "lifts": 1
+ },
+ "endurance:furled": {
+  "booms": [
+   {
+    "at": 0.839,
+    "foot": [
+     14.092,
+     6.312
+    ],
+    "clew": [
+     24.053,
+     8.184
+    ],
+    "cock": 10.65
+   }
+  ],
+  "gaffs": [
+   {
+    "mast": 1,
+    "origin": [
+     1.937,
+     15.508
+    ],
+    "deg": 35.52,
+    "L": 10.318,
+    "state": "brailed"
+   },
+   {
+    "mast": 2,
+    "origin": [
+     14.636,
+     14.096
+    ],
+    "deg": 35.52,
+    "L": 9.155,
+    "state": "brailed"
+   }
+  ],
+  "brailed": [
+   {
+    "mast": 1,
+    "at": 0.537,
+    "boom": false,
+    "foot": [
+     2.051,
+     4.064
+    ],
+    "head": [
+     2.409,
+     15.508
+    ],
+    "r": 0.294
+   },
+   {
+    "mast": 2,
+    "at": 0.839,
+    "boom": true,
+    "foot": [
+     14.495,
+     6.312
+    ],
+    "head": [
+     15.019,
+     14.096
+    ],
+    "r": 0.277
+   }
+  ],
+  "rolls": 7,
+  "lifts": 1
+ },
+ "endurance:card": "The sails are bent to their spars and stowed: the square sails are rolled up on their yards and tied with gaskets, the gaff sails are brailed in to their masts and the gaffs stay aloft and the headsails are hauled down onto their stays. This is how she lay in harbour and at anchor."
+}
