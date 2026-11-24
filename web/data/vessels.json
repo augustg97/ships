@@ -6708,7 +6708,30 @@
               "scalePxPerM": 12.4,
               "script": "build/staging/r304/r304_steps.py",
               "provenance": "Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743), read in r304 by build/staging/r304/r304_steps.py: the darkness of each pole summed across it, row by row, which measures its width where the blur is wider than the spar. The main pole sums to about 260 over rows 425-490 and steps to about 520 below row 500 (the half-way crossing, +/- 3 rows): a thin topmast over a thick lower mast, with the gaff's throat just under the step. The cap rail stands at row 630 (r285) and the deck 16.7 px under it (the plan's 1.35 m bulwark, r272), so the cap is 146.7 px over the deck. The pole fades to half its plateau at row 385 (+/- 6), 261.7 px over the deck, so the cap stands at 146.7/261.7 = 0.56 of the truck. A thin pole may fade before its truck, which makes this share a bound from above. The same read on the fore gives 0.55 for its top against the builder's 0.586 for the fore's stack, so the method lands within 0.04 on a mast whose sections are known. The heeled plate (build/endurance-heeled.png, Commons 4776 px copy in build/staging/r280) shows the mizzen's crosstrees with the topmast standing beside the lower masthead. The plate gives no lengths: the truck stays the record's figure (trucksContested), and only the cap's share of it is read here. Hurley's night plate (August 1915) shows the main ending at a capped head level with the fore topsail yard, which may be a struck topmast; it is not read here."
-            }
+            },
+            "gaffFrac": 0.55,
+            "throatFrac": 0.72,
+            "gaffRead": {
+              "plate": "RMG P00018 (build/hurley-broadside.png)",
+              "mastAxisCol": 2766,
+              "throat": [
+                2766,
+                541.5
+              ],
+              "peak": [
+                2831,
+                493.6
+              ],
+              "lengthPx": 80.8,
+              "angleDeg": 36.4,
+              "throatOverDeckPx": 105.2,
+              "capOverDeckPx": 146.7,
+              "fitResidualPx": 1.48,
+              "script": "build/staging/r306/r306_gaffread.py",
+              "provenance": "Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743), read in r306 by build/staging/r306/r306_gaffread.py (crops plate-gaffs-4x.png): the gaff is a faint line rising aft from the mast, under the cap, with the sail stowed. For every column of its visible run the darkest row in a 13-px band is taken, a line is fitted (weighted by the dip under the sky), and the gaff is read from the mast's axis along that line to its last visible column. The main gaff runs 80.8 px from the mast's axis (column 2766) to its peak at column 2831, row 493.6, at 36.4 degrees over the horizontal (the line fits its rows to 1.48 px). The throat meets the axis at row 541.5, 105.2 px over the deck (the cap rail row of r285 plus the plan's 1.35 m bulwark, 16.7 px, r272). Against the lower mast's 146.7 px from deck to cap (r304's read of the same plate), the gaff is 0.55 of the lower mast and the throat stands at 0.72 of it. Each end is good to about 3 px, so each share to about 0.029. The shares do not depend on the plate's scale, which is contested (trucksContested): the built gaff is this share of the built lower mast. The peak stands a few px over the cap on the plate, as a long gaff's does."
+            },
+            "gaffStow": "brailed",
+            "gaffStowProvenance": "PLATE READ, r306: the main is a loose-footed sail, brailed in to the mast under a gaff that stays aloft, and she carries no main boom. On the beset broadside (RMG P00018, crop build/staging/r306/plate-main-foot-4x.png) the gaff stands at its working angle while the sail is stowed, the stowed cloth is a dark wedge along the after side of the mast that widens down to the rail, and the sky between the mast and the funnel is clear at every height over the rail: a boom of the length the class rule drew (4.3 m, about 34 to 54 px at this plate's two contested scales) would cross that gap as a dark bar, and none is there. On Hurley's plate of her under sail from ahead (build/hurley-fullsail.jpg) the square sails are set and no fore-and-aft canvas shows abaft the main mast. The funnel stands 5.5 m abaft the mast (stationProvenance), under the gaff's reach: a sail of this head set on a boom short enough to clear the stack would put its leech through the funnel's top. Where the sheet led when the sail was set is not read; the model draws the sail as both plates show it, brailed."
           },
           {
             "at": 0.839,
@@ -6731,6 +6754,27 @@
               "scalePxPerM": 12.4,
               "script": "build/staging/r304/r304_steps.py",
               "provenance": "Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743), read in r304 by build/staging/r304/r304_steps.py: the darkness of each pole summed across it, row by row, which measures its width where the blur is wider than the spar. The mizzen pole sums to about 200 over rows 425-490 and steps to about 950 below row 507 (the half-way crossing, +/- 3 rows): a thin topmast over a thick lower mast, with the gaff's throat just under the step. The cap rail stands at row 645 (r285) and the deck 16.7 px under it (the plan's 1.35 m bulwark, r272), so the cap is 154.7 px over the deck. The pole fades to half its plateau at row 409 (+/- 6), 252.7 px over the deck, so the cap stands at 154.7/252.7 = 0.61 of the truck. A thin pole may fade before its truck, which makes this share a bound from above. The same read on the fore gives 0.55 for its top against the builder's 0.586 for the fore's stack, so the method lands within 0.04 on a mast whose sections are known. The heeled plate (build/endurance-heeled.png, Commons 4776 px copy in build/staging/r280) shows the mizzen's crosstrees with the topmast standing beside the lower masthead. The plate gives no lengths: the truck stays the record's figure (trucksContested), and only the cap's share of it is read here. Hurley's night plate (August 1915) shows the main ending at a capped head level with the fore topsail yard, which may be a struck topmast; it is not read here."
+            },
+            "gaffFrac": 0.56,
+            "throatFrac": 0.73,
+            "gaffRead": {
+              "plate": "RMG P00018 (build/hurley-broadside.png)",
+              "mastAxisCol": 2914,
+              "throat": [
+                2914,
+                548.1
+              ],
+              "peak": [
+                2982,
+                495.6
+              ],
+              "lengthPx": 85.9,
+              "angleDeg": 37.7,
+              "throatOverDeckPx": 113.6,
+              "capOverDeckPx": 154.7,
+              "fitResidualPx": 1.15,
+              "script": "build/staging/r306/r306_gaffread.py",
+              "provenance": "Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743), read in r306 by build/staging/r306/r306_gaffread.py (crops plate-gaffs-4x.png): the gaff is a faint line rising aft from the mast, under the cap, with the sail stowed. For every column of its visible run the darkest row in a 13-px band is taken, a line is fitted (weighted by the dip under the sky), and the gaff is read from the mast's axis along that line to its last visible column. The mizzen gaff runs 85.9 px from the mast's axis (column 2914) to its peak at column 2982, row 495.6, at 37.7 degrees over the horizontal (the line fits its rows to 1.15 px). The throat meets the axis at row 548.1, 113.6 px over the deck (the cap rail row of r285 plus the plan's 1.35 m bulwark, 16.7 px, r272). Against the lower mast's 154.7 px from deck to cap (r304's read of the same plate), the gaff is 0.56 of the lower mast and the throat stands at 0.73 of it. Each end is good to about 3 px, so each share to about 0.027. The shares do not depend on the plate's scale, which is contested (trucksContested): the built gaff is this share of the built lower mast. The peak stands a few px over the cap on the plate, as a long gaff's does."
             }
           }
         ],

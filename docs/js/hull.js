@@ -2445,7 +2445,9 @@ if (mk.rig === 'gaff' || (mk.rig === 'square' && mk.spanker)) {
 const boomL = openAft
 ? Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 1.6))
 : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
-const gaffL = Math.min(lower * 0.42, boomL * 0.72);
+const gaffL = mk.gaffFrac != null ? lower * mk.gaffFrac : Math.min(lower * 0.42, boomL * 0.72);
+const gaffFrom = mk.gaffFrac != null ? 'record: gaffFrac' : 'class: the lesser of 0.42 of the lower mast and 0.72 of the boom';
+const BRAILED = mk.gaffStow === 'brailed';
 const peak = 0.62;
 const DEG = Math.PI / 180;
 const BOOM_COCK_MIN = 4 * DEG;
@@ -2477,7 +2479,7 @@ footM: +(footY - base).toFixed(3), footFrom: footRec != null ? 'record: boomFoot
 foot: [+footX.toFixed(3), +footY.toFixed(3)], clew: [+clewX.toFixed(3), +clewY.toFixed(3)],
 liftHead: [+liftX.toFixed(3), +liftY.toFixed(3)],
 overPlatform: overPlat, platTop: overPlat ? +platTop.toFixed(3) : null, boomL: +boomL.toFixed(3) };
-group.add(tag(bm2, 'yard', 'Boom',
+if (!BRAILED) group.add(tag(bm2, 'yard', 'Boom',
 `The boom rises ${(cock / DEG).toFixed(1)}° aft from its jaws ${(footY - base).toFixed(2)} m over the deck ` +
 `(${footRec != null ? 'the record’s plate read' : 'a class share of the lower mast'}), held up at its outer end ` +
 `by a topping lift from the lower masthead; the angle is ${cockFrom === 'class minimum'
@@ -2485,8 +2487,8 @@ group.add(tag(bm2, 'yard', 'Boom',
 : 'what clears the compass platform’s box by a hand’s breadth at its near face'}.`));
 const liftMesh = ropeMesh([[new THREE.Vector3(clewX, clewY, 0), new THREE.Vector3(liftX, liftY, 0)]],
 0.012 + B * 0.0006, ropeMat);
-if (liftMesh) group.add(tag(liftMesh, 'toppingLift'));
-const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
+if (liftMesh && !BRAILED) group.add(tag(liftMesh, 'toppingLift'));
+const gy = base + lower * (mk.throatFrac != null ? mk.throatFrac : (mk.rig === 'square' ? 0.55 : 0.86));
 const rT = mastR(gy), rF = mastR(footY);
 const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
 const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
@@ -2546,7 +2548,24 @@ bm.userData.blocks = turns.map(([role, p]) => ({ role, at: R3(p), mast: mi }));
 group.add(tag(bm, 'block', null, PARTS.block.what +
 ` Six on this mast: the throat halyard's pair (jaws and masthead), the peak halyard's two on the masthead and its two spans on the gaff — ${rec.blockFrom}.`));
 };
-if (FURLED) {
+if (BRAILED) {
+const gm = new THREE.Mesh(
+new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
+gm.rotation.z = -(Math.PI / 2 - peak);
+gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2),
+lengthM: +gaffL.toFixed(3), state: 'brailed', gaffFrom, throatFrac: mk.throatFrac != null ? mk.throatFrac : null };
+group.add(tag(gm, 'yard', 'Gaff'));
+hoistGaff([mastX(gy), gy], peak);
+const luff = gy - footY, area = 0.75 * gaffL * luff;
+const rb = Math.max(0.05, Math.sqrt((area * 0.035) / (Math.PI * Math.max(luff, 0.1))));
+const bA = new THREE.Vector3(mastX(footY) + mastR(footY) + rb, footY, 0);
+const bB = new THREE.Vector3(mastX(gy) + mastR(gy) + rb, gy, 0);
+const br = makeFurl(bA, bB, area, furlMat(mats), group, { radius: rb, name: 'Brailed sail',
+card: 'This sail is loose-footed and is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. She carries no boom on this mast. Hurley\u2019s plates show it this way.' });
+if (br) { br.userData.brailed = { mast: mi, at: mk.at, foot: [+bA.x.toFixed(3), +bA.y.toFixed(3)], head: [+bB.x.toFixed(3), +bB.y.toFixed(3)], r: +rb.toFixed(3) }; }
+sails.push(br);
+} else if (FURLED) {
 const r = Math.max(0.05, Math.sqrt((quadArea * 0.035) / (Math.PI * Math.max(boomL, 0.1))));
 const nX = -sinC * r * 1.1, nY = cosC * r * 1.1;
 sails.push(makeFurl(new THREE.Vector3(footX + nX, footY + nY, 0),
@@ -2567,7 +2586,8 @@ const gm = new THREE.Mesh(
 new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
 gm.rotation.z = -(Math.PI / 2 - peak);
 gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
-gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2), lengthM: +gaffL.toFixed(3), state: 'set' };
+gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2), lengthM: +gaffL.toFixed(3), state: 'set',
+gaffFrom, throatFrac: mk.throatFrac != null ? mk.throatFrac : null };
 group.add(tag(gm, 'yard', 'Gaff'));
 hoistGaff([mastX(gy), gy], peak);
 const gq = makeQuadSail(tack, setThroat, setPeak, clew, group, 0.075);
@@ -3332,7 +3352,8 @@ group.add(tag(m, 'sail', o.name || 'Furled sail',
 'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
 + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
 + 'stows fat and a royal thin.'
-+ (o.seat && o.seat.card ? ' ' + o.seat.card : '')));
++ (o.seat && o.seat.card ? ' ' + o.seat.card : '')
++ (o.card ? ' ' + o.card : '')));
 return m;
 }
 function furlMat(mats) {

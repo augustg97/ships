@@ -4432,7 +4432,22 @@ function buildRig(S, group, mats, FINE, FURLED) {
       const boomL = openAft
         ? Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 1.6))
         : Math.max(lower * 0.16, Math.min(lower * 0.62, gapAft * 0.78));
-      const gaffL = Math.min(lower * 0.42, boomL * 0.72);
+      /* ── THE GAFF AND ITS THROAT FROM THE RECORD (round 306, 0y¹³²) ─────────────────────
+         The class gaff is 0.72 of the boom, and the boom is cut to the room abaft the mast, so a
+         funnel standing in that room shortened the GAFF as well, though the gaff swings far over
+         the stack. Endurance's main gaff came out 3.1 m where Hurley's beset broadside draws it
+         at 0.55 of the lower mast, as long as her mizzen's. A record that has read the gaff
+         gives it as shares of the lower mast (gaffFrac, throatFrac, with gaffRead holding the
+         plate's rows); the class figures stand everywhere else. Shares, not metres, because the
+         plate's scale is contested and the lower mast is what the builder already has. */
+      const gaffL = mk.gaffFrac != null ? lower * mk.gaffFrac : Math.min(lower * 0.42, boomL * 0.72);
+      const gaffFrom = mk.gaffFrac != null ? 'record: gaffFrac' : 'class: the lesser of 0.42 of the lower mast and 0.72 of the boom';
+      /* ── A BRAILED SAIL HAS NO BOOM (round 306) ────────────────────────────────────────
+         gaffStow: 'brailed' is a loose-footed sail stowed by its brails: the leech and foot
+         are hauled in to the mast, the head stays laced to the gaff, and the gaff stays aloft.
+         There is no boom and so no topping lift. Endurance's main is drawn this way because
+         both plates of her that show the main show it so (the record's gaffStowProvenance). */
+      const BRAILED = mk.gaffStow === 'brailed';
       const peak = 0.62;                                 // the gaff's angle above horizontal
       /* ── THE BOOM CLEARS THE PLATFORM UNDER IT (round 273, Endurance) ─────────────────
          The aftermost boom overhangs the stern, and Endurance's stern carries the compass
@@ -4506,7 +4521,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
         foot: [+footX.toFixed(3), +footY.toFixed(3)], clew: [+clewX.toFixed(3), +clewY.toFixed(3)],
         liftHead: [+liftX.toFixed(3), +liftY.toFixed(3)],
         overPlatform: overPlat, platTop: overPlat ? +platTop.toFixed(3) : null, boomL: +boomL.toFixed(3) };
-      group.add(tag(bm2, 'yard', 'Boom',
+      if (!BRAILED) group.add(tag(bm2, 'yard', 'Boom',
         `The boom rises ${(cock / DEG).toFixed(1)}° aft from its jaws ${(footY - base).toFixed(2)} m over the deck ` +
         `(${footRec != null ? 'the record’s plate read' : 'a class share of the lower mast'}), held up at its outer end ` +
         `by a topping lift from the lower masthead; the angle is ${cockFrom === 'class minimum'
@@ -4514,10 +4529,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
           : 'what clears the compass platform’s box by a hand’s breadth at its near face'}.`));
       const liftMesh = ropeMesh([[new THREE.Vector3(clewX, clewY, 0), new THREE.Vector3(liftX, liftY, 0)]],
                                 0.012 + B * 0.0006, ropeMat);
-      if (liftMesh) group.add(tag(liftMesh, 'toppingLift'));
+      if (liftMesh && !BRAILED) group.add(tag(liftMesh, 'toppingLift'));
       /* the SET geometry decides the cloth's area whichever state it is shown in — furling
          does not change how much canvas she owns */
-      const gy = base + lower * (mk.rig === 'square' ? 0.55 : 0.86);
+      const gy = base + lower * (mk.throatFrac != null ? mk.throatFrac : (mk.rig === 'square' ? 0.55 : 0.86));
       const rT = mastR(gy), rF = mastR(footY);
       const setThroat = [mastX(gy) + Math.cos(peak) * rT, gy + Math.sin(peak) * rT];
       const setPeak = [mastX(gy) + Math.cos(peak) * gaffL, gy + Math.sin(peak) * gaffL];
@@ -4602,7 +4617,29 @@ function buildRig(S, group, mats, FINE, FURLED) {
         group.add(tag(bm, 'block', null, PARTS.block.what +
           ` Six on this mast: the throat halyard's pair (jaws and masthead), the peak halyard's two on the masthead and its two spans on the gaff — ${rec.blockFrom}.`));
       };
-      if (FURLED) {
+      if (BRAILED) {
+        /* the gaff stands at its working angle in both states, and the cloth lies in a bundle
+           along the mast's after side from the tack to the throat. Its girth is the cloth of a
+           sail with this luff and head (a quadrilateral whose foot is as long as its head, about
+           0.75 of head times luff), at the furl's own 3.5 cm of stowed thickness per square metre
+           of canvas spread along the bundle. */
+        const gm = new THREE.Mesh(
+          new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
+        gm.rotation.z = -(Math.PI / 2 - peak);
+        gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
+        gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2),
+          lengthM: +gaffL.toFixed(3), state: 'brailed', gaffFrom, throatFrac: mk.throatFrac != null ? mk.throatFrac : null };
+        group.add(tag(gm, 'yard', 'Gaff'));
+        hoistGaff([mastX(gy), gy], peak);
+        const luff = gy - footY, area = 0.75 * gaffL * luff;
+        const rb = Math.max(0.05, Math.sqrt((area * 0.035) / (Math.PI * Math.max(luff, 0.1))));
+        const bA = new THREE.Vector3(mastX(footY) + mastR(footY) + rb, footY, 0);
+        const bB = new THREE.Vector3(mastX(gy) + mastR(gy) + rb, gy, 0);
+        const br = makeFurl(bA, bB, area, furlMat(mats), group, { radius: rb, name: 'Brailed sail',
+          card: 'This sail is loose-footed and is stowed by its brails, lines that haul the leech and foot in to the mast while the gaff stays aloft. She carries no boom on this mast. Hurley\u2019s plates show it this way.' });
+        if (br) { br.userData.brailed = { mast: mi, at: mk.at, foot: [+bA.x.toFixed(3), +bA.y.toFixed(3)], head: [+bB.x.toFixed(3), +bB.y.toFixed(3)], r: +rb.toFixed(3) }; }
+        sails.push(br);
+      } else if (FURLED) {
         /* a gaff sail is handled entirely from the deck, and it stows the same way: halyards
            run, the GAFF COMES DOWN with the cloth folding between it and the boom, and the
            bundle is lashed along the top of the boom. The gaff rests on the stowed sail,
@@ -4630,7 +4667,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
           new THREE.CylinderGeometry(B * 0.008, B * 0.012, gaffL, 14), woodDark);
         gm.rotation.z = -(Math.PI / 2 - peak);
         gm.position.set(mastX(gy) + Math.cos(peak) * gaffL / 2, gy + Math.sin(peak) * gaffL / 2, 0);
-        gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2), lengthM: +gaffL.toFixed(3), state: 'set' };
+        gm.userData.gaff = { at: mk.at, mast: mi, origin: [+mastX(gy).toFixed(3), +gy.toFixed(3)], deg: +(peak * 180 / Math.PI).toFixed(2), lengthM: +gaffL.toFixed(3), state: 'set',
+          gaffFrom, throatFrac: mk.throatFrac != null ? mk.throatFrac : null };
         group.add(tag(gm, 'yard', 'Gaff'));
         hoistGaff([mastX(gy), gy], peak);
         /* the sail is the quadrilateral: throat, peak, clew, tack — built from the two spars'
@@ -5931,7 +5969,8 @@ function makeFurl(A, B, area, mat, group, o) {
     'The canvas stowed: rolled along the spar it is bent to and lashed with gaskets. The '
     + 'roll\'s girth is the sail\'s own area put back on the spar, which is why a course '
     + 'stows fat and a royal thin.'
-    + (o.seat && o.seat.card ? ' ' + o.seat.card : '')));
+    + (o.seat && o.seat.card ? ' ' + o.seat.card : '')
+    + (o.card ? ' ' + o.card : '')));
   return m;
 }
 

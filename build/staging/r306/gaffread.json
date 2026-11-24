@@ -1,0 +1,44 @@
+{
+ "main": {
+  "mastAxisCol": 2766,
+  "throat": [
+   2766,
+   541.5
+  ],
+  "peak": [
+   2831,
+   493.6
+  ],
+  "lengthPx": 80.8,
+  "angleDeg": 36.4,
+  "fitResidualPx": 1.48,
+  "meanDip": 10.1,
+  "throatOverDeckPx": 105.2,
+  "capOverDeckPx": 146.7,
+  "gaffFrac": 0.551,
+  "throatFrac": 0.717,
+  "endBoundPx": 3,
+  "fracBound": 0.029
+ },
+ "mizzen": {
+  "mastAxisCol": 2914,
+  "throat": [
+   2914,
+   548.1
+  ],
+  "peak": [
+   2982,
+   495.6
+  ],
+  "lengthPx": 85.9,
+  "angleDeg": 37.7,
+  "fitResidualPx": 1.15,
+  "meanDip": 10.4,
+  "throatOverDeckPx": 113.6,
+  "capOverDeckPx": 154.7,
+  "gaffFrac": 0.555,
+  "throatFrac": 0.734,
+  "endBoundPx": 3,
+  "fracBound": 0.027
+ }
+}

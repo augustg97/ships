@@ -1,0 +1,62 @@
+[
+ {
+  "id": "endurance",
+  "rule": "a gaff off its recorded length",
+  "detail": "mast 1 (station 0.537): built 3.11 m, gaffFrac 0.55 of the 18.76 m lower mast is 10.32"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff throat off its recorded height",
+  "detail": "mast 1 (station 0.537): jaws at y 18.13, throatFrac 0.72 puts them at 15.51"
+ },
+ {
+  "id": "endurance",
+  "rule": "a boom under a brailed sail",
+  "detail": "mast 1 (station 0.537): 1 Boom mesh(es) on a mast whose sail is loose-footed and brailed"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed sail drawn set",
+  "detail": "mast 1 (station 0.537): 1 set cloth mesh(es) name this mast"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed sail not drawn",
+  "detail": "mast 1 (station 0.537): 0 Brailed sail bundle(s)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff off its recorded length",
+  "detail": "mast 2 (station 0.839): built 6.87 m, gaffFrac 0.56 of the 16.35 m lower mast is 9.15"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff throat off its recorded height",
+  "detail": "mast 2 (station 0.839): jaws at y 16.22, throatFrac 0.73 puts them at 14.10"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff off its recorded length",
+  "detail": "mast 1 (station 0.537): built 3.11 m, gaffFrac 0.55 of the 18.76 m lower mast is 10.32 (furled build)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a boom under a brailed sail",
+  "detail": "mast 1 (station 0.537): 1 Boom mesh(es) on a mast whose sail is loose-footed and brailed (furled build)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed sail not drawn",
+  "detail": "mast 1 (station 0.537): 0 Brailed sail bundle(s) (furled build)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a brailed gaff lowered",
+  "detail": "mast 1 (station 0.537): the gaff lies at 11.45\u00b0; a brailed sail's gaff stays aloft (furled build)"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff off its recorded length",
+  "detail": "mast 2 (station 0.839): built 6.87 m, gaffFrac 0.56 of the 16.35 m lower mast is 9.15 (furled build)"
+ }
+]

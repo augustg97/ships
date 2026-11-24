@@ -1,0 +1,8 @@
+OLDFILE checked 33 hulls, 12 problems
+SETMAIN checked 33 hulls, 1 problems
+FINAL checked 33 hulls, 0 problems
+DONE
+r306 proofs: each run on the :8150 copy (build/staging/r306/webB) with the round's final audit-hulls.js, then restored to the before files.
+OLDFILE  hull.before.js + the new record      -> 12 on endurance: gaff length x4, throat x2, boom under a brailed sail x2, drawn set, not drawn x2, gaff lowered   proof-OLDFILE.out
+SETMAIN  hull.after.js, main's gaffStow removed -> 1: 'canvas or a spar through a funnel', the set main's leech 10 vertices inside the stack at y 8.76   proof-SETMAIN.out
+FINAL    hull.after.js + the new record        -> 33 hulls, 0 problems   proof-FINAL.err

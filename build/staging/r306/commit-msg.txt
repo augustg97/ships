@@ -1,0 +1,16 @@
+Round 306: Endurance's gaffs at the beset broadside's length and height; her main sail brailed, with no boom
+
+The main gaff was 3.1 m: the class cut it to 0.72 of a boom the funnel had cut short, though
+the gaff swings far over the stack. Hurley's beset broadside (RMG P00018) draws both gaffs at
+0.55 of the lower mast and both throats at 0.72-0.73 of it, read as shares so the plate's
+contested scale does not enter. The record carries the read (gaffFrac, throatFrac, gaffRead).
+
+Both plates that show the main show it brailed to the mast under a gaff left aloft, with no
+boom across the clear gap to the funnel. The record says so (gaffStow: 'brailed'); the builder
+draws no boom and no lift for a brailed sail, stands the gaff aloft in both states and stows
+the cloth along the mast's after side.
+
+Audit: A-GAFF-READ, A-BRAILED, and the class rule A-CLOTH-FUNNEL (no canvas or spar inside a
+drawn funnel stack). 33 hulls, 0 problems.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

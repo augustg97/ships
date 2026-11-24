@@ -1,0 +1,7 @@
+[
+ {
+  "id": "endurance",
+  "rule": "canvas or a spar through a funnel",
+  "detail": "Sail (quad): 10 vertices inside a funnel stack, e.g. (6.53, 8.76, 0.11)"
+ }
+]
