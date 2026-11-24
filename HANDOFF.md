@@ -27921,3 +27921,5 @@ Four stage-4 cards changed out of 264 (`cards-before.json`, `cards-after.json`).
 **r306 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r306` already exists before writing into it. Then (0y¹³²). Else (0y¹³⁰).**
 
 **Live stamp: docs/index.html carries data-version 1795531668 at the build.**
+
+**Live stamp VERIFIED: 1795531668 on https://augustg97.github.io/ships/index.html at 06:49:53 PST, about 100 s after the push. The published `js/hull.js`, `js/shipwright.js` and `audit-hulls.js` are byte-identical to docs/.**
