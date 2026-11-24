@@ -9245,6 +9245,36 @@
             say(v.id, 'a house built off its plate', `built x ${bbH.min.x.toFixed(2)}..${bbH.max.x.toFixed(2)}, the plate's columns put it at ${wa.toFixed(2)}..${wb.toFixed(2)}`);
         }
       }
+      /* ── A-ISLAND-TOP-READ (round 298, Titanic): AN ISLAND'S TOP IS ITS PLATE'S ROWS, AT BOTH ENDS.
+         r295 read Titanic's islands' ends off the 1911 side plan and left their heights a class
+         figure (the weather deck plus one 2.96 m deck), and its provenance said so; the forecastle
+         stood 1.40 m under the plan at the stem. On a hull whose islands carry a plate datum
+         (islands.plate), every island must carry topRead {rows, datumRows, datumM, pxPerM}, and
+         each end's topM must be datumM + (datumRow - row) / pxPerM within 0.05 m. Then off the
+         meshes: the island's highest vertex within 1.5 m of each built end, inside its span,
+         must stand at that end's topM within 0.15 m, so a builder that drew the right top at one
+         end and a flat line from it is caught at the other. Silent without islands.plate. */
+      if (H.islands.plate) for (const isl of (IL || [])) {
+        if (!(isl && Array.isArray(isl.topM) && isl.topM.length === 2 && Array.isArray(isl.u))) continue;
+        const TR = isl.topRead;
+        if (!(TR && Array.isArray(TR.rows) && TR.rows.length === 2 && Array.isArray(TR.datumRows) && TR.datumRows.length === 2 && typeof TR.datumM === 'number' && TR.pxPerM > 0)) {
+          say(v.id, 'an island top under a plate datum with no read', `${isl.name}: hull.islands.plate is present and isl.topRead is absent or out of shape, so topM ${isl.topM.join('/')} m is not a reading`); continue; }
+        for (const e of [0, 1]) {
+          const want = TR.datumM + (TR.datumRows[e] - TR.rows[e]) / TR.pxPerM;
+          if (Math.abs(isl.topM[e] - want) > 0.05) say(v.id, 'an island top off its plate read', `${isl.name} ${e ? 'aft' : 'fwd'} end: topM ${isl.topM[e]} m, the plate's row ${TR.rows[e]} over datum row ${TR.datumRows[e]} (${TR.datumM} m) at ${TR.pxPerM} px/m reads ${want.toFixed(2)} m`);
+        }
+        const grp = groups.find(q => q.name === isl.name);
+        if (!grp) continue;
+        const xa = loftDeckX(H, isl.u[0]), xb = loftDeckX(H, isl.u[1]);
+        const P4 = new THREE.Vector3(), endTop = [-Infinity, -Infinity];
+        grp.o.updateMatrixWorld(true);
+        grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+          for (let i = 0; i < pa.count; i++) { P4.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+            if (P4.x >= xa - 0.05 && P4.x <= xa + 1.5) endTop[0] = Math.max(endTop[0], P4.y);
+            if (P4.x <= xb + 0.05 && P4.x >= xb - 1.5) endTop[1] = Math.max(endTop[1], P4.y); } });
+        for (const e of [0, 1])
+          if (!(Math.abs(endTop[e] - isl.topM[e]) <= 0.15)) say(v.id, 'an island built off its top at one end', `${isl.name} ${e ? 'aft' : 'fwd'} end: built top ${endTop[e].toFixed(2)} m within 1.5 m of x ${(e ? xb : xa).toFixed(2)}, record ${isl.topM[e]} m`);
+      }
       for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
     }
 

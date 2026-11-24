@@ -27324,3 +27324,41 @@ The mean is 42.17 m at the plan's length scale (13.03 px/m), 0.63 m under the re
 **Live stamp VERIFIED: 1795493358 on https://augustg97.github.io/ships/index.html at 20:10:58 PST, 90 s after the push (`build/staging/r297/push.log`). The published `js/hull.js`, `data/vessels.json`, `data/provenance.json` and `audit-hulls.js` are byte-identical to docs/, and the live record carries `funnelTopM` 42.8.**
 
 **THE FRAMES: ALL 65 SCORED at this tree (`build/staging/r297/score-all.out`).** The ratchet ran alone on the final tree and stopped at frame 42 (`ship-treasure`) on a 150 s readiness timeout, with no other browser running and the load at 2 to 7. The 41 frames it had captured were kept (`run1-current`), and the other 24 were captured one at a time (`r297_capture_rest.py`). `ship-treasure` captured in 42 s on its first attempt. Moved by this round and ACCEPTED after viewing each beside its old baseline (`pair-ship-titanic.png`, `pair-aboard-titanic.png`): `ship-titanic` 0.349% / 0.353 and `aboard-titanic` 0.065% / 0.037. In both, only the four stacks changed. NOT accepted, because it is the harness fault r295 named: `globe-crossing` 9.825% on :8149. The same tree served from :8150 scores 0.020% / 0.009 against the baseline, inside the gate (`check-8150.out`; the script's label "clean HEAD" there means the :8150 copy, which is this round's tree). The other 62 were inside the gate.
+
+## Round 298 — 2026-11-23 — Titanic's forecastle deck stands 15.26 m over the water at the stem and her poop 12.99 m at its break, where the 1911 side plan draws them: the model had built both islands one class deck over the weather deck, which left the forecastle 1.40 m low at the stem
+
+**Queue check: August's second list stands worked in full (r57). This round took the raised-deck part of r297's first carried item, (0y¹¹⁹). `build/staging/r298` did not exist, the load was 1.9 at the start, and no process was hot. r297's receipt left no unscored frames, so the opening ratchet was skipped.**
+
+**THE DECK LABELS.** The plan prints BOAT DECK, A, B, C, D, E, F and LOWER beside the stem. Each label stands just above its own line: at column 3500, C, D, E, F and LOWER are the five dashed lines at rows 666, 701, 737, 770 and 803, 2.7 m apart. The forecastle deck is at the B label, one deck over C. This matches the deck names in the record: C, the shelter deck, ran the whole length and carried both well decks; the forecastle and poop are one deck higher.
+
+**WHAT r295 READ WRONG.** r295 took the heavy solid line through both wells as the well deck (11.7 m forward, 11.5 m aft) and so reported the rise from the well to each raised deck as 2.0 m and 1.5 m. That line is the top of the wells' bulwark. The freeing ports drawn in the wells hang from it down to the dashed C line, and the cranes' pedestals are drawn standing on it because the bulwark hides their feet. The well deck is the C line: 10.62 m over the water at column 3020 in the fore well. In the after well, at column 660, there are two lines at 10.0 and 10.5 m that this round did not tell apart.
+
+**THE READ.** Each island's deck edge is the solid bottom line of the open-rail band drawn along it. It was traced every 4 columns (the forecastle on columns 3135 to 3615, the poop on 128 to 544), fitted as a quadratic (rms 0.32 and 0.34 px), and read over r297's tilted waterline at 13.03 px/m (`r298_read.py`, `read.json`):
+
+| End | Plan row | Waterline row | Plan, over the water | Model before |
+|---|---|---|---|---|
+| Forecastle, stem head (col 3629) | 621.2 | 820.0 | 15.26 m | 13.86 m |
+| Forecastle, break (col 3106.5) | 646.4 | 823.7 | 13.61 m | 13.45 m |
+| Poop, break (col 556.5) | 672.7 | 841.9 | 12.99 m | 13.35 m |
+| Poop, stern end (col 123.5) | 667.7 | 845.0 | 13.61 m | 13.56 m |
+
+The builder draws each top as a straight line between its two ends. The plan's line is curved, and the straight line lies 0.20 m over it at the worst point of the forecastle (20 m abaft the stem head) and 0.08 m over it on the poop. Each height carries the plan's 1% scale bound (0.15 m at 15 m) and about 0.1 m of line width.
+
+**WHAT CHANGED.** RECORD only, no builder line. Titanic: both islands' `topM` as in the table, and a `topRead` on each carrying its two rows, the two waterline rows, the datum height and the scale. The islands' provenance replaces its "HEIGHTS ARE NOT READ HERE" sentence with this read and the bulwark correction. Preussen: each of her three islands gained a `topRead` with the rows r292 already read (row 2843 = 3.65 m, 30.6 px/m). Her `topM` values did not change; the script asserted each one equals its rows within 0.05 m before writing. AUDIT: A-ISLAND-TOP-READ. On a hull whose islands carry a plate datum, every island must carry `topRead`, each end's `topM` must equal its rows within 0.05 m, and the built group's highest vertex within 1.5 m of each end must stand at that end's `topM` within 0.15 m. The older A-ISLANDS rule only compared the higher end, so a builder that drew one flat top at the higher figure passed it.
+
+**AUDIT AND PROOFS.** Final tree: 33 hulls, 0 problems. Three proofs ran on a :8150 copy and each convicted its fault (`proofs.log`). OLDTOP, r297's tops with the new reads: 4 problems, "an island top off its plate read". SILENCE, the forecastle's `topRead` deleted: 1 problem. FLAT, a builder that draws each island flat at its higher end: 4 problems, on Titanic and Preussen, "an island built off its top at one end". The restored copy scored 0 problems.
+
+**WITNESSED.** `pair-ends.png` crops both ends of a 3° profile before (top) and after (bottom) at the same camera. The forecastle now rises to the stem where it was flat, and the poop falls slightly toward its break. `profile-after/starboard.png` is the whole frame.
+
+**Rule 0, on `profile-after/starboard.png` read whole: a rendered liner on a lit sea with a coast behind her, not a chart. Three facts a viewer can read off it without a legend: her forecastle deck climbs toward the stem and stands higher than the poop; the two well decks lie lower than both raised ends, in front of and behind the white superstructure; her four buff funnels stand evenly along the boat deck with the masts at either end.**
+
+**WHAT THE PLAN SHOWS THAT THE MODEL STILL GETS WRONG.**
+
+- **(0y¹¹⁹) THE SHEER AND THE WELL DECK, still open.** The plan's C deck stands 9.5 m over the water amidships, 10.62 m in the fore well and 11.89 m at column 3500, a sheer of about 2.4 m forward. The model's weather deck runs from 10.1 m amidships to 10.85 m at the ends, a sheer of 0.75 m, so it is about 0.3 m low in the fore well and 0.6 m high amidships under the house. The sheer comes from `freeboard`, `sheerBow` and `sheerStern`, which move the whole loft and everything pinned to the sheer (the house, the rail, the masts' feet). Check every reader of `H.sheer` before changing them. The wells' bulwark top (11.6 m fore, 11.4 m aft) is a separate line, against the model's rail top of 11.1 m. The trucks are as r297 lists them.
+- **(0y¹²⁴), (0y¹²⁰), (0y¹²¹), (0y¹²²), (0y¹²³)** as r295 to r297 list them.
+
+**Named residuals.** (0y¹¹⁹) is narrower: the funnel tops (r297) and the island tops (this round) are done; the sheer, the well deck and the trucks are open. (0y¹¹³), (0y¹¹⁶), (0y¹¹⁷) and every other residual stand as r294 to r297 list them.
+
+**r299 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r299` already exists before writing into it. Then (0y¹¹⁹)'s sheer: trace the plan's C line from stem to stern, list every reader of `H.sheer` and `deck(u)` on Titanic, and decide whether the record can carry a read sheer curve. Else (0y¹²³), her standing rigging. Else (0y¹¹³), Preussen's bridge house and boats.**
+
+**Live stamp: docs/index.html carries data-version 1795497369 at the build; the live check and the frame results are in the receipt that follows.**
