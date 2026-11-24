@@ -27748,3 +27748,5 @@ The restored copy scored 0.
 
 After the ratchet, the furl fix was checked alone: `shipwright-furled` 0.190% / 0.260, **predicted and ACCEPTED**. No other frame shows the button in its `on` state. The other 61 frames were inside the gate.
 
+
+**Live stamp VERIFIED after the receipt build: 1795522778 on https://augustg97.github.io/ships/index.html at 04:21:27 PST; the published `css/styles.css` is byte-identical to docs/.**
