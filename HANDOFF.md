@@ -28184,3 +28184,12 @@ Final tree: 33 hulls, 0 problems.
 **r309 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r309` already exists before writing into it. Then (0y¹³⁶), Titanic's after well deck. Else (0y¹³⁸) for the clipper, if a plate of her furled is in reach.**
 
 **Live stamp: docs/index.html carries data-version 1795542996 at the build.**
+
+**Live stamp VERIFIED: 1795542996 on https://augustg97.github.io/ships/index.html at 09:58:19 PST, about 90 s after the push. The published `js/hull.js`, `js/shipwright.js`, `data/vessels.json` and `audit-hulls.js` are byte-identical to docs/.**
+
+**THE FRAMES: ALL 65 SCORED, NONE MOVED, as predicted.** Captured with the harness's check and r307's resume script (`r308_resume.py`), scored with r277's offline scorer (`score1.out` to `score4.out`).
+
+- `run1-current`: 36 frames, died at `aboard-titanic` (the 150 s FRAME_READY wait, load 7). `run2-current`: 19, died at `action-lepanto`. `run3-current`: the last 10; it finished. Both frames that killed a run captured clean in the next one.
+- `board-salamis` 33.214% in run 2: **capture fault**. The frame caught the coarse terrain level, blocky land with no tile detail (`salamis-run2-small.png`), the dropped-tile fault documented since r295. Recaptured alone in run 4: 0.000%.
+- Every other frame is inside the gate. The largest is `passage-sahul` at 0.047%. `ship-endurance` and `shipwright-furled` are inside it, as the set build and the 74's card predicted.
+- No baseline was accepted this round.
