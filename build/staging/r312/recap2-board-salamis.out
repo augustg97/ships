@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  board-salamis                   0.000%     0.000  ok
+
+  all frames within tolerance.
+
