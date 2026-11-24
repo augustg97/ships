@@ -6800,6 +6800,28 @@ else if (Math.abs(bbH.min.x - wa) > 1.0 || Math.abs(bbH.max.x - wb) > 1.0)
 say(v.id, 'a house built off its plate', `built x ${bbH.min.x.toFixed(2)}..${bbH.max.x.toFixed(2)}, the plate's columns put it at ${wa.toFixed(2)}..${wb.toFixed(2)}`);
 }
 }
+const plateTrace = (what, R, cols) => {
+if (!(R && Array.isArray(R.colRange))) return;
+const T = R.trace;
+if (!(T && Array.isArray(T.rows) && T.rows.length >= 3 && T.stepCol && T.maxStepRows > 0 && Array.isArray(T.fit) && T.fit.length >= 2 && Array.isArray(cols) && cols.length === R.rows.length)) {
+say(v.id, 'a plate read fitted over columns with no trace', `${what}: colRange ${R.colRange.join('-')} is recorded and trace {fromCol, stepCol, rows, maxStepRows, fit} is absent or out of shape, so the fit cannot be checked against the rows it was fitted to`); return; }
+const fit = c => T.fit.reduce((a, k) => a * c + k, 0);
+let prev = -1, worst = 0, wAt = null, off = 0, oAt = null, n = 0, ss = 0, cLo = Infinity, cHi = -Infinity;
+T.rows.forEach((r, i) => {
+if (r === null || r === undefined) return;
+const c = T.fromCol + i * T.stepCol, e = r - fit(c);
+n++; ss += e * e; cLo = Math.min(cLo, c); cHi = Math.max(cHi, c);
+if (Math.abs(e) > Math.abs(off)) { off = e; oAt = c; }
+if (prev >= 0) { const d = Math.abs(r - T.rows[prev]) / (i - prev); if (d > worst) { worst = d; wAt = c; } }
+prev = i;
+});
+if (worst > T.maxStepRows) say(v.id, 'a plate trace that steps onto another line', `${what}: the trace steps ${worst.toFixed(2)} rows per ${Math.abs(T.stepCol)} columns at column ${wAt}, over its limit of ${T.maxStepRows}`);
+if (Math.abs(off) > 2.0) say(v.id, 'a plate fit that leaves its trace', `${what}: the trace's row at column ${oAt} stands ${off.toFixed(2)} px off the fit`);
+cols.forEach((c, e) => { if (Math.abs(R.rows[e] - fit(c)) > 0.15) say(v.id, 'a plate read whose end rows are not its fit', `${what}: row ${R.rows[e]} at column ${c}, the trace's fit gives ${fit(c).toFixed(2)}`); });
+if (cLo !== Math.min(...R.colRange) || cHi !== Math.max(...R.colRange)) say(v.id, 'a plate read whose column range is not its trace', `${what}: colRange ${R.colRange.join('-')}, the kept trace spans ${cLo}-${cHi}`);
+const rms = Math.sqrt(ss / Math.max(1, n));
+if (typeof R.rmsPx === 'number' && Math.abs(rms - R.rmsPx) > 0.05) say(v.id, 'a plate read whose rms is not its trace', `${what}: rmsPx ${R.rmsPx}, the kept trace's rms about the fit is ${rms.toFixed(2)}`);
+};
 if (H.islands.plate) for (const isl of (IL || [])) {
 if (!(isl && Array.isArray(isl.topM) && isl.topM.length === 2 && Array.isArray(isl.u))) continue;
 const TR = isl.topRead;
@@ -6809,6 +6831,7 @@ for (const e of [0, 1]) {
 const want = TR.datumM + (TR.datumRows[e] - TR.rows[e]) / TR.pxPerM;
 if (Math.abs(isl.topM[e] - want) > 0.05) say(v.id, 'an island top off its plate read', `${isl.name} ${e ? 'aft' : 'fwd'} end: topM ${isl.topM[e]} m, the plate's row ${TR.rows[e]} over datum row ${TR.datumRows[e]} (${TR.datumM} m) at ${TR.pxPerM} px/m reads ${want.toFixed(2)} m`);
 }
+plateTrace(`${isl.name} top`, TR, isl.cols);
 const grp = groups.find(q => q.name === isl.name);
 if (!grp) continue;
 const xa = loftDeckX(H, isl.u[0]), xb = loftDeckX(H, isl.u[1]);
@@ -6839,6 +6862,7 @@ else for (const e of [0, 1]) {
 const want = TR.datumM + (TR.datumRows[e] - TR.rows[e]) / TR.pxPerM;
 if (Math.abs(w.topM[e] - want) > 0.05) say(v.id, "a well's bulwark top off its plate read", `${w.name} ${e ? 'aft' : 'fwd'} end: topM ${w.topM[e]} m, row ${TR.rows[e]} over datum row ${TR.datumRows[e]} reads ${want.toFixed(2)} m`);
 }
+if (TR) plateTrace(`${w.name} bulwark top`, TR, w.cols);
 const xa = loftDeckX(H, w.u[0]), xb = loftDeckX(H, w.u[1]);
 let grp = null;
 g.traverse(o => { const pt = o.userData && o.userData.part; if (pt && pt.key === 'wellBulwark' && pt.name === w.name + ' bulwark') grp = o; });

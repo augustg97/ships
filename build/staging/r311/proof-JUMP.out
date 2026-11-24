@@ -1,0 +1,17 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a plate trace that steps onto another line",
+  "detail": "Forward well bulwark top: the trace steps 4.50 rows per 3 columns at column 2956, over its limit of 1.5"
+ },
+ {
+  "id": "titanic",
+  "rule": "a plate fit that leaves its trace",
+  "detail": "Forward well bulwark top: the trace's row at column 2956 stands 4.28 px off the fit"
+ },
+ {
+  "id": "titanic",
+  "rule": "a plate read whose rms is not its trace",
+  "detail": "Forward well bulwark top: rmsPx 0.24, the kept trace's rms about the fit is 1.54"
+ }
+]

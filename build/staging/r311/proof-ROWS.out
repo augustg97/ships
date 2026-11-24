@@ -1,0 +1,7 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a plate read whose end rows are not its fit",
+  "detail": "Poop deck top: row 673.2 at column 556.5, the trace's fit gives 672.66"
+ }
+]

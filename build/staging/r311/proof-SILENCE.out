@@ -1,0 +1,7 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a plate read fitted over columns with no trace",
+  "detail": "Forecastle top: colRange 3135-3615 is recorded and trace {fromCol, stepCol, rows, maxStepRows, fit} is absent or out of shape, so the fit cannot be checked against the rows it was fitted to"
+ }
+]

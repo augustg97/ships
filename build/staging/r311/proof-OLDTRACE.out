@@ -1,0 +1,7 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a plate trace that steps onto another line",
+  "detail": "After well bulwark top: the trace steps 3.00 rows per 3 columns at column 757, over its limit of 1.5"
+ }
+]

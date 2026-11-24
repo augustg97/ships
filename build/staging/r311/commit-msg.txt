@@ -1,0 +1,7 @@
+Round 311: Titanic's island-top and well-top plate reads carry their raw traces; the after well's trace had stepped 3 rows onto the house's line at columns 754-760, and both wells are refitted on whole-line columns (tops move 0.01 m or less)
+
+- vessels.json: topRead.trace {fromCol, stepCol, rows, maxStepRows, fit} on the forecastle, poop and both wells; the wells refitted without the four thin-line points; wellsProvenance quotes the new heights
+- audit: A-PLATE-TRACE: a read fitted over columns carries its trace; no jump past maxStepRows; every kept point within 2 px of the fit; end rows are the fit's; colRange and rmsPx are the trace's
+- proofs OLDTRACE, SILENCE, ROWS, JUMP each convicted; final tree 33 hulls, 0 problems
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
