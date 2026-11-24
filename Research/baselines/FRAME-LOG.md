@@ -1592,3 +1592,4 @@ Every accepted change, with the reason. A baseline moved without a reason here i
 - **2026-11-24 06:41** · `ship-wyoming` — r305 (0y133): crosstrees at all six lower mastheads and a topmast shroud a side. 0.218%. Predicted; viewed (build/staging/r305/pair-ship-wyoming.png).
 - **2026-11-24 06:41** · `aboard-wyoming` — r305 (0y133): the Sea view of Wyoming; the new topmast shrouds and crosstrees, 0.078% spread thinly over her rig. Predicted.
 - **2026-11-24 06:41** · `aboard-cable` — r305 (0y133): the Sea view of Great Eastern laying cable; her new topmast shrouds and crosstrees, 0.070%. Predicted.
+- **2026-11-24 07:51** · `ship-endurance` — r306: Endurance's main gaff at the beset broadside's 0.55 of the lower mast, standing aloft with the main sail brailed to the mast and no boom; the mizzen gaff at 0.56 with its throat at 0.73. Predicted; viewed beside the old baseline (build/staging/r306/pair-ship-endurance.png).
