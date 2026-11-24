@@ -28384,3 +28384,14 @@ Final tree: 33 hulls, 0 problems.
 **r311 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r311` already exists before writing into it. Then (0y¹⁴¹). Else (0y¹³⁸) for the 74, if a plate of a working 74 at anchor is in reach.**
 
 **Live stamp: docs/index.html carries data-version 1795553199 at the build.**
+
+**Live stamp VERIFIED: 1795553199 on https://augustg97.github.io/ships/index.html at 12:48:28 PST, about 90 s after the push. The published `data/vessels.json` carries the clipper's `"furlStow":"lowered"`. First paint is 8.51 MB against the 8.6 MB budget.**
+
+**THE FRAMES: ALL 65 SCORED.** Captured by the harness's check (run 1), `run-resume.sh` (runs 2 to 6), `run-resume2.sh` (runs 7 and 8) and two recaptures done alone (`recap-current`, `recap2-current`). Scored with r277's offline scorer (`score1.out` to `score8.out`, `score-recap.out`, `score-recap2.out`). Each run died on the 150 s FRAME_READY wait at a different frame. `page_errors.py` on `aboard-titanic`, one of the frames that timed out, found no page error, and FRAME_READY came true.
+
+- `shipwright-furled` 2.651% / 3.161: **predicted, ACCEPTED** (FRAME-LOG.md). `pair-shipwright-furled.png` (baseline over new): the 74's card gains the spanker clause and grows one line, and the nav on its top moves up a line. Every changed pixel lies in the card and the nav.
+- Four **capture faults**, each recaptured alone and inside the gate:
+  - `ship-usv` 91.107% (run 1) and `action-myeongnyang` 97.931% (run 8) each captured the globe, because their view never opened (`myeong-run8-small.png`). Recaptured: 0.000% and 0.033%.
+  - `globe-steam` 9.884% (run 1), captured while the proofs ran a second browser, as in r309. Recaptured: 0.042%.
+  - `board-salamis` 33.214% (run 8), the dropped-tile fault, the same figure as in r308 and r309. Recaptured: 0.000%.
+- Every other frame is inside the gate. The largest is `passage-sahul` at 0.047%. No hull frame moved, which confirms the record change drew no new geometry.

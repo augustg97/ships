@@ -1,0 +1,5 @@
+3 frames to capture
+    · globe-steam                  http://localhost:8149/?frozen=1#e=5&t=1870
+    · ship-usv                     http://localhost:8149/?frozen=1#v=ship&s=usv
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+captured 3

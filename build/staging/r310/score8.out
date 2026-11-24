@@ -1,0 +1,13 @@
+  action-gravelines              0.002%  0.000 ok
+  action-lepanto                 0.003%  0.001 ok
+  action-myeongnyang            97.931% 87.422 CHANGED
+  board-salamis                 33.214%  9.455 CHANGED
+  passage-sahul                  0.047%  0.015 ok
+  sea-canoe-floor                0.010%  0.003 ok
+  sea-dugout-floor               0.018%  0.005 ok
+  sea-ever-given                 0.024%  0.008 ok
+  ship-carrack                   0.000%  0.000 ok
+  ship-ever-given                0.000%  0.000 ok
+  ship-slave-ship                0.000%  0.000 ok
+  wake-plan                      0.019%  0.004 ok
+12 frames scored offline, 2 beyond the gate
