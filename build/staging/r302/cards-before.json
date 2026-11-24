@@ -1,0 +1,1124 @@
+{
+ "dugout": [
+  [
+   "Nothing to lay",
+   "A dugout is not assembled, so there is no keel and nothing is measured from one. The work starts with a standing tree, not a timber on blocks."
+  ],
+  [
+   "Log felled",
+   "The hull is chosen, not designed. Its beam is the trunk's beam and cannot exceed it, which fixes what the boat can ever be before a tool touches it."
+  ],
+  [
+   "Hollowed",
+   "Burned and adzed out from above. There is no seam anywhere in the hull, so nothing can leak — and nothing can be replaced either, because there are no parts."
+  ],
+  [
+   "Rim finished",
+   "The gunwale is dressed to a fair curve and left thick, because the rim takes the paddle strokes and every landing. Below it the hull is already complete: there is nothing left to add."
+  ],
+  [
+   "Rim finished",
+   "The gunwale is dressed to a fair curve and left thick, because the rim takes the paddle strokes and every landing. Below it the hull is already complete: there is nothing left to add."
+  ],
+  [
+   "Rim finished",
+   "The gunwale is dressed to a fair curve and left thick, because the rim takes the paddle strokes and every landing. Below it the hull is already complete: there is nothing left to add."
+  ],
+  [
+   "Rim finished",
+   "The gunwale is dressed to a fair curve and left thick, because the rim takes the paddle strokes and every landing. Below it the hull is already complete: there is nothing left to add."
+  ],
+  [
+   "Afloat",
+   "She floats with about a third of a metre of freeboard. Paddlers, food and water all sit on the hollowed floor, below the line of the rim."
+  ]
+ ],
+ "voyaging-canoe": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Shell built",
+   "The planking shell goes up FIRST and holds the shape — clinker riveted, or edge-joined by mortise and tenon, or sewn. The form exists only in the shipwright's eye and hands; there is no plan."
+  ],
+  [
+   "Frames inserted",
+   "Light frames go in afterwards, into a hull whose shape already exists. Superb hulls — and they do not scale, because the shell has to carry the building loads."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "trireme": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Shell built",
+   "The planking shell goes up FIRST and holds the shape — clinker riveted, or edge-joined by mortise and tenon, or sewn. The form exists only in the shipwright's eye and hands; there is no plan."
+  ],
+  [
+   "Frames inserted",
+   "Light frames go in afterwards, into a hull whose shape already exists. Superb hulls — and they do not scale, because the shell has to carry the building loads."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "corbita": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Shell built",
+   "The planking shell goes up FIRST and holds the shape — clinker riveted, or edge-joined by mortise and tenon, or sewn. The form exists only in the shipwright's eye and hands; there is no plan."
+  ],
+  [
+   "Frames inserted",
+   "Light frames go in afterwards, into a hull whose shape already exists. Superb hulls — and they do not scale, because the shell has to carry the building loads."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "dhow": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Shell built",
+   "The planking shell goes up FIRST and holds the shape — clinker riveted, or edge-joined by mortise and tenon, or sewn. The form exists only in the shipwright's eye and hands; there is no plan."
+  ],
+  [
+   "Frames inserted",
+   "Light frames go in afterwards, into a hull whose shape already exists. Superb hulls — and they do not scale, because the shell has to carry the building loads."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "junk": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Bulkheads raised",
+   "Transverse bulkheads go up first. They are structure and subdivision at once — which gave the junk WATERTIGHT COMPARTMENTS centuries before Europe thought of them. Hole one compartment and the ship swims home."
+  ],
+  [
+   "Planked",
+   "The planking is fastened to the bulkheads rather than to ribs."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "treasure-ship": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Bulkheads raised",
+   "Transverse bulkheads go up first. They are structure and subdivision at once — which gave the junk WATERTIGHT COMPARTMENTS centuries before Europe thought of them. Hole one compartment and the ship swims home."
+  ],
+  [
+   "Planked",
+   "The planking is fastened to the bulkheads rather than to ribs."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "cog": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Shell built",
+   "The planking shell goes up FIRST and holds the shape — clinker riveted, or edge-joined by mortise and tenon, or sewn. The form exists only in the shipwright's eye and hands; there is no plan."
+  ],
+  [
+   "Frames inserted",
+   "Light frames go in afterwards, into a hull whose shape already exists. Superb hulls — and they do not scale, because the shell has to carry the building loads."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "caravel": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "carrack": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "galley": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "galleass": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "panokseon": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Bulkheads raised",
+   "Transverse bulkheads go up first. They are structure and subdivision at once — which gave the junk WATERTIGHT COMPARTMENTS centuries before Europe thought of them. Hole one compartment and the ship swims home."
+  ],
+  [
+   "Planked",
+   "The planking is fastened to the bulkheads rather than to ribs."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "sekibune": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Shell built",
+   "The planking shell goes up FIRST and holds the shape — clinker riveted, or edge-joined by mortise and tenon, or sewn. The form exists only in the shipwright's eye and hands; there is no plan."
+  ],
+  [
+   "Frames inserted",
+   "Light frames go in afterwards, into a hull whose shape already exists. Superb hulls — and they do not scale, because the shell has to carry the building loads."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "fluyt": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "east-indiaman": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "ship-of-the-line": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "slave-ship": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "wyoming": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "preussen": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames erected",
+   "Mild-steel frames on a keel plate, erected one by one and faired by eye — the block-built hull is a post-war invention. Steel displaced iron in the 1880s because it is stronger for the same weight, so the same ship needs fewer tons of hull."
+  ],
+  [
+   "Plated",
+   "Plates riveted to the frames, lapped at every land. Titanic carried three million rivets, driven by four-man gangs — hydraulic where the shell was fair enough, by hand round the bow and stern where the machine could not reach."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "great-eastern": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames erected",
+   "Rolled iron frames on a keel plate. Iron does not care about the length of a tree, which is the whole point: a wooden hull is limited to about 60 m by the timber available and by hogging, and iron simply is not."
+  ],
+  [
+   "Plated",
+   "Plates riveted to the frames, lapped and caulked. A riveted seam is watertight and, unlike a caulked one, does not need re-caulking every few years — which is a large part of why iron won."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "titanic": [
+  [
+   "Afloat",
+   "Two four-cylinder triple-expansion steam engines, 30,000 hp between them, turned her two wing propellers. Their exhaust steam drove a 16,000 hp low-pressure Parsons turbine on the centre propeller. The steam came from 29 coal-fired boilers with 159 furnaces, which took more than 600 tonnes of coal a day, shovelled by hand."
+  ],
+  [
+   "Frames erected",
+   "Mild-steel frames on a keel plate, erected one by one and faired by eye — the block-built hull is a post-war invention. Steel displaced iron in the 1880s because it is stronger for the same weight, so the same ship needs fewer tons of hull."
+  ],
+  [
+   "Plated",
+   "Plates riveted to the frames, lapped at every land. Titanic carried three million rivets, driven by four-man gangs — hydraulic where the shell was fair enough, by hand round the bow and stern where the machine could not reach."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, 4 funnels, superstructure, bridge, forecastle, poop deck and boats."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: masts and cowl ventilators."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Two four-cylinder triple-expansion steam engines, 30,000 hp between them, turned her two wing propellers. Their exhaust steam drove a 16,000 hp low-pressure Parsons turbine on the centre propeller. The steam came from 29 coal-fired boilers with 159 furnaces, which took more than 600 tonnes of coal a day, shovelled by hand."
+  ]
+ ],
+ "usv": [
+  [
+   "Afloat",
+   "No engine drives her. A rigid wing sail, trimmed by its tail vane, gives her way, and solar panels power the instruments."
+  ],
+  [
+   "Frames erected",
+   "Steel frames on a keel plate — and not one at a time. A modern hull is assembled from prefabricated BLOCKS welded up elsewhere and craned together, which is why a 400 m ship takes months rather than years."
+  ],
+  [
+   "Plated",
+   "Welded plate, not riveted. A welded seam is continuous, so the hull is one member instead of thousands of plates lapped together — and that continuity is what lets a ship be 400 m long at all."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: wing sail and tail vane, solar panels and instrument mast."
+  ],
+  [
+   "Afloat",
+   "No engine drives her. A rigid wing sail, trimmed by its tail vane, gives her way, and solar panels power the instruments."
+  ]
+ ],
+ "clipper": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "steamer": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames erected",
+   "Rolled iron frames on a keel plate. Iron does not care about the length of a tree, which is the whole point: a wooden hull is limited to about 60 m by the timber available and by hogging, and iron simply is not."
+  ],
+  [
+   "Plated",
+   "Plates riveted to the frames, lapped and caulked. A riveted seam is watertight and, unlike a caulked one, does not need re-caulking every few years — which is a large part of why iron won."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "dreadnought": [
+  [
+   "Afloat",
+   "Parsons direct-drive steam turbines, the first in any battleship, turned four propellers: 23,000 shp from 18 Babcock & Wilcox boilers. They burned coal, with fuel oil sprayed on it to make it burn faster. On trials in October 1906 she made 21.6 knots."
+  ],
+  [
+   "Frames erected",
+   "Mild-steel frames on a keel plate, erected one by one and faired by eye — the block-built hull is a post-war invention. Steel displaced iron in the 1880s because it is stronger for the same weight, so the same ship needs fewer tons of hull."
+  ],
+  [
+   "Plated",
+   "Plates riveted to the frames, lapped at every land. Titanic carried three million rivets, driven by four-man gangs — hydraulic where the shell was fair enough, by hand round the bow and stern where the machine could not reach."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, 2 funnels and superstructure."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: masts, torpedo nets and gun turrets."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Parsons direct-drive steam turbines, the first in any battleship, turned four propellers: 23,000 shp from 18 Babcock & Wilcox boilers. They burned coal, with fuel oil sprayed on it to make it burn faster. On trials in October 1906 she made 21.6 knots."
+  ]
+ ],
+ "yamato": [
+  [
+   "Afloat",
+   "Four steam turbines on four shafts, fed by 12 Kampon boilers, developed 150,000 shp and gave her 27 knots."
+  ],
+  [
+   "Frames erected",
+   "Mild-steel frames on a keel plate, erected one by one and faired by eye — the block-built hull is a post-war invention. Steel displaced iron in the 1880s because it is stronger for the same weight, so the same ship needs fewer tons of hull."
+  ],
+  [
+   "Plated",
+   "Plates riveted to the frames, lapped at every land. Titanic carried three million rivets, driven by four-man gangs — hydraulic where the shell was fair enough, by hand round the bow and stern where the machine could not reach."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, funnel and superstructure."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: masts, searchlights, gun turrets, heavy anti-aircraft guns, light anti-aircraft guns, aircraft catapults and crane and hatches."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Added at this stage: floatplanes. Four steam turbines on four shafts, fed by 12 Kampon boilers, developed 150,000 shp and gave her 27 knots."
+  ]
+ ],
+ "carrier": [
+  [
+   "Afloat",
+   "Two A1B nuclear reactors make steam. It drives the turbines on her four shafts and four turbine generators, which supply the ship's electricity, including the electromagnetic catapults."
+  ],
+  [
+   "Frames erected",
+   "Steel frames on a keel plate — and not one at a time. A modern hull is assembled from prefabricated BLOCKS welded up elsewhere and craned together, which is why a 400 m ship takes months rather than years."
+  ],
+  [
+   "Plated",
+   "Welded plate, not riveted. A welded seam is continuous, so the hull is one member instead of thousands of plates lapped together — and that continuity is what lets a ship be 400 m long at all."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder and screws."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: flight deck, hangar and island."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Added at this stage: aircraft on deck. Two A1B nuclear reactors make steam. It drives the turbines on her four shafts and four turbine generators, which supply the ship's electricity, including the electromagnetic catapults."
+  ]
+ ],
+ "container": [
+  [
+   "Afloat",
+   "Most large container ships have one low-speed two-stroke diesel coupled directly to one fixed-pitch propeller, with no gearbox."
+  ],
+  [
+   "Frames erected",
+   "Steel frames on a keel plate — and not one at a time. A modern hull is assembled from prefabricated BLOCKS welded up elsewhere and craned together, which is why a 400 m ship takes months rather than years."
+  ],
+  [
+   "Plated",
+   "Welded plate, not riveted. A welded seam is continuous, so the hull is one member instead of thousands of plates lapped together — and that continuity is what lets a ship be 400 m long at all."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, container stacks, forecastle, bridge, boats and funnel. Most of her deck is hatch covers, because the boxes in the holds are lowered straight down into cell guides. Every box has the same ISO corner castings, so any crane, ship or truck can lift it."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: masts."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Most large container ships have one low-speed two-stroke diesel coupled directly to one fixed-pitch propeller, with no gearbox."
+  ]
+ ],
+ "ever-given": [
+  [
+   "Afloat",
+   "One 11-cylinder MAN B&W 11G95ME-C9 two-stroke diesel, built under licence by Mitsui, turns her single propeller directly: 59,300 kW at 79 rpm, for a service speed of 22.8 knots. Four Yanmar diesel generators make her electricity, and two 2,500 kW bow thrusters push her bow sideways in port."
+  ],
+  [
+   "Frames erected",
+   "Steel frames on a keel plate — and not one at a time. A modern hull is assembled from prefabricated BLOCKS welded up elsewhere and craned together, which is why a 400 m ship takes months rather than years."
+  ],
+  [
+   "Plated",
+   "Welded plate, not riveted. A welded seam is continuous, so the hull is one member instead of thousands of plates lapped together — and that continuity is what lets a ship be 400 m long at all."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, container stacks, forecastle, bridge, boats and funnel. Most of her deck is hatch covers, because the boxes in the holds are lowered straight down into cell guides. Every box has the same ISO corner castings, so any crane, ship or truck can lift it."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: masts."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Added at this stage: livery and name. One 11-cylinder MAN B&W 11G95ME-C9 two-stroke diesel, built under licence by Mitsui, turns her single propeller directly: 59,300 kW at 79 rpm, for a service speed of 22.8 knots. Four Yanmar diesel generators make her electricity, and two 2,500 kW bow thrusters push her bow sideways in port."
+  ]
+ ],
+ "azzam": [
+  [
+   "Afloat",
+   "A combined diesel and gas-turbine plant of about 94,000 shaft horsepower drives four waterjets, for more than 30 knots."
+  ],
+  [
+   "Frames erected",
+   "Steel frames on a keel plate — and not one at a time. A modern hull is assembled from prefabricated BLOCKS welded up elsewhere and craned together, which is why a 400 m ship takes months rather than years."
+  ],
+  [
+   "Plated",
+   "Welded plate, not riveted. A welded seam is continuous, so the hull is one member instead of thousands of plates lapped together — and that continuity is what lets a ship be 400 m long at all."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, superstructure, mast and exhaust tower and stern terraces."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: mast."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "A combined diesel and gas-turbine plant of about 94,000 shaft horsepower drives four waterjets, for more than 30 knots."
+  ]
+ ],
+ "endurance": [
+  [
+   "Keel laid",
+   "One timber, stem to sternpost. Everything is measured from it."
+  ],
+  [
+   "Frames raised",
+   "The ribs go up on the keel. The shape is decided now, on the drawing floor, before a single plank is cut — which is what makes a 74 reproducible by a yard that has never built one."
+  ],
+  [
+   "Planked",
+   "Planks meet edge to edge on the frames and the seams are caulked."
+  ],
+  [
+   "Decked",
+   "The deck ties the sides together and carries the guns. Rudder hung aft."
+  ],
+  [
+   "Masts stepped",
+   "Lower mast, topmast, topgallant — each fidded through the doubling."
+  ],
+  [
+   "Rigged",
+   "Shrouds take the sideways pull; ratlines make them a ladder aloft."
+  ],
+  [
+   "Yards crossed",
+   "The spars the square sails hang from, braced round to trim to the wind."
+  ],
+  [
+   "Bent on",
+   "Canvas. She can now be driven by the wind rather than carried by it."
+  ]
+ ],
+ "queen-mary-2": [
+  [
+   "Afloat",
+   "Four Wärtsilä 16V46 diesels (67,200 kW together) and two General Electric LM2500+ gas turbines (50,000 kW) drive generators. The electricity runs four 21,500 kW motors that sit inside the pods under her stern, outside the hull."
+  ],
+  [
+   "Frames erected",
+   "Steel frames on a keel plate — and not one at a time. A modern hull is assembled from prefabricated BLOCKS welded up elsewhere and craned together, which is why a 400 m ship takes months rather than years."
+  ],
+  [
+   "Plated",
+   "Welded plate, not riveted. A welded seam is continuous, so the hull is one member instead of thousands of plates lapped together — and that continuity is what lets a ship be 400 m long at all."
+  ],
+  [
+   "Decked",
+   "The weather deck closes the hull. Added at this stage: rudder, funnel, superstructure, bridge and boats."
+  ],
+  [
+   "Fitted out",
+   "Added at this stage: mast."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Nothing added",
+   "Nothing is added at this stage. On a sailing ship this is when the rigging and yards go up; she sets no sail."
+  ],
+  [
+   "Afloat",
+   "Four Wärtsilä 16V46 diesels (67,200 kW together) and two General Electric LM2500+ gas turbines (50,000 kW) drive generators. The electricity runs four 21,500 kW motors that sit inside the pods under her stern, outside the hull."
+  ]
+ ]
+}

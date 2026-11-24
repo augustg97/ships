@@ -1,0 +1,13 @@
+Round 302: the Shipwright's sailing build-stage cards say what each stage adds to that hull.
+
+The eight sailing cards were one fixed list shown on all 22 hulls that set sail. They told the junk
+and the clipper that the deck "carries the guns", told the trireme, corbita and dhow (quarter rudders)
+"Rudder hung aft", and told every lateen, junk and crab-claw pole "Lower mast, topmast, topgallant —
+each fidded through the doubling". swSailCard now composes each card from the parts the stage adds
+(with each mast mesh's segment index) and the record's masts. The furled card names only the rigs she
+carries. Stage 0 is the keel on every hull: r301's powered composer had answered it with "Afloat".
+
+Audit: A-STAGE-CARD-SAIL convicts any card claim the built parts contradict, and stage 0 on every
+hull. 33 hulls, 0 problems. Proofs OLDFILE 233, GUNS 18, POLE 8, KEEL0 32, FURLSQUARE 10; restored 0.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

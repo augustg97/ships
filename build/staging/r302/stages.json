@@ -1,0 +1,1608 @@
+{
+ "dugout": {
+  "sail": false,
+  "build": "dugout",
+  "rigs": [],
+  "parts": {
+   "3": {
+    "deck | Open hull \u2014 the carved hollow": 1,
+    "deck | Gunwale rim \u2014 dressed timber": 1,
+    "deck | Waterplane mask": 1
+   },
+   "7": {
+    "stowage | Spare paddle \u2014 stowed": 2,
+    "stowage | Bailer \u2014 carved scoop": 1
+   }
+  }
+ },
+ "voyaging-canoe": {
+  "sail": true,
+  "build": "shell",
+  "rigs": [
+   "crabclaw",
+   "crabclaw"
+  ],
+  "parts": {
+   "3": {
+    "deck | Open hull \u2014 no deck laid": 2,
+    "deck | Gunwale \u2014 top strake edge": 2,
+    "deck | Waterplane mask": 2,
+    "crossbeam | Crossbeams": 8,
+    "platform | Platform": 1
+   },
+   "4": {
+    "mast | Mast": 2
+   },
+   "5": {
+    "shroud | Shrouds": 2,
+    "shroudEye | Shroud collars": 8,
+    "shroudLashing | Shroud lashings": 2
+   },
+   "6": {
+    "yard | Boom": 2,
+    "yard | Yard": 2,
+    "yardLashing | Yard lashing": 24,
+    "mastheadBlock | Block strop": 8,
+    "mastheadBlock | Masthead block": 8,
+    "mastheadHorn | Masthead horn": 2
+   },
+   "7": {
+    "sail | Sail": 2,
+    "stowage | Steering paddle \u2014 stowed": 2,
+    "stowage | Bailer \u2014 carved scoop": 2,
+    "stowage | Lashing line \u2014 coiled spare": 2
+   }
+  }
+ },
+ "trireme": {
+  "sail": true,
+  "build": "shell",
+  "rigs": [
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "quarterRudder | Quarter rudder, starboard": 1,
+    "quarterRudder | Quarter rudder, port": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2
+   },
+   "4": {
+    "mast | Mast": 2,
+    "karchesion | Karchesion": 2,
+    "oar | Oars": 1
+   },
+   "5": {
+    "channel | Channels": 2,
+    "deadeye | Deadeyes": 2,
+    "shroud | Shrouds": 1,
+    "ratline | Ratlines": 1,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 2,
+    "parrel | Parrels": 2,
+    "lift | Lifts": 2,
+    "sheet | Sheets": 2,
+    "tack | Tacks": 2,
+    "halyard | Halyard": 2,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 2
+   }
+  }
+ },
+ "corbita": {
+  "sail": true,
+  "build": "shell",
+  "rigs": [
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "quarterRudder | Quarter rudder, starboard": 1,
+    "quarterRudder | Quarter rudder, port": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "windlass | Windlass": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 2,
+    "karchesion | Karchesion": 2,
+    "corbis | The corbis": 1,
+    "bowsprit | Bowsprit": 1
+   },
+   "5": {
+    "channel | Channels": 2,
+    "deadeye | Deadeyes": 2,
+    "shroud | Shrouds": 1,
+    "ratline | Ratlines": 1,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 2,
+    "parrel | Parrels": 2,
+    "lift | Lifts": 2,
+    "sheet | Sheets": 2,
+    "tack | Tacks": 2,
+    "halyard | Halyard": 2,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 2
+   }
+  }
+ },
+ "dhow": {
+  "sail": true,
+  "build": "shell",
+  "rigs": [
+   "lateen",
+   "lateen"
+  ],
+  "parts": {
+   "3": {
+    "quarterRudder | Quarter rudder, starboard": 1,
+    "quarterRudder | Quarter rudder, port": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "grapnel | Grapnel anchor": 1
+   },
+   "4": {
+    "mast | Mast": 2
+   },
+   "5": {
+    "shroud | Shrouds": 2,
+    "tackle | Shroud tackles": 2
+   },
+   "6": {
+    "yard | Lateen yard": 2,
+    "parrel | Parrels": 2
+   },
+   "7": {
+    "sail | Sail": 2
+   }
+  }
+ },
+ "junk": {
+  "sail": true,
+  "build": "bulkhead",
+  "rigs": [
+   "junk",
+   "junk"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "windlass | Windlass": 1,
+    "stoneAnchor | Stone anchor": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2
+   },
+   "4": {
+    "mast | Mast": 2,
+    "mastband | Iron mast straps": 1,
+    "sheave | Masthead sheave": 2,
+    "poop | Aft castle": 1
+   },
+   "6": {
+    "yard | Boom": 2,
+    "yard | Batten 1": 2,
+    "yard | Batten 2": 2,
+    "yard | Batten 3": 2,
+    "yard | Batten 4": 2,
+    "yard | Batten 5": 2,
+    "yard | Yard": 2,
+    "parrel | Parrels": 2,
+    "sheet | Sheets": 2,
+    "halyard | Halyard": 2
+   },
+   "7": {
+    "sail | Sail": 12
+   }
+  }
+ },
+ "treasure-ship": {
+  "sail": true,
+  "build": "bulkhead",
+  "rigs": [
+   "junk",
+   "junk",
+   "junk",
+   "junk",
+   "junk"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "windlass | Windlass": 1,
+    "ironAnchors | Four-claw anchor": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2
+   },
+   "4": {
+    "mast | Mast": 5,
+    "mastband | Iron mast straps": 5,
+    "sheave | Masthead sheave": 5,
+    "poop | Aft castle": 1
+   },
+   "6": {
+    "yard | Boom": 5,
+    "yard | Batten 1": 5,
+    "yard | Batten 2": 5,
+    "yard | Batten 3": 5,
+    "yard | Batten 4": 5,
+    "yard | Batten 5": 5,
+    "yard | Yard": 5,
+    "parrel | Parrels": 5,
+    "sheet | Sheets": 5,
+    "halyard | Halyard": 5
+   },
+   "7": {
+    "sail | Sail": 30
+   }
+  }
+ },
+ "cog": {
+  "sail": true,
+  "build": "shell",
+  "rigs": [
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 1,
+    "rudder | rudder-band": 4,
+    "rudder | rudder-pintle": 4,
+    "rudder | rudder-gudgeon": 8,
+    "rudder | rudder-tiller": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "crossbeam | Standing knee at through-beam 1, starboard": 1,
+    "crossbeam | Standing knee at through-beam 1, port": 1,
+    "crossbeam | Through-beam 1 of 5 (Durchbalken, DB 1)": 1,
+    "crossbeam | Standing knee at through-beam 2, starboard": 1,
+    "crossbeam | Standing knee at through-beam 2, port": 1,
+    "crossbeam | Through-beam 2 of 5 (Durchbalken, DB 2)": 1,
+    "crossbeam | Standing knee at through-beam 3, starboard": 1,
+    "crossbeam | Standing knee at through-beam 3, port": 1,
+    "crossbeam | Through-beam 3 of 5 (Durchbalken, DB 3)": 1,
+    "crossbeam | Standing knee at through-beam 4, starboard": 1,
+    "crossbeam | Standing knee at through-beam 4, port": 1,
+    "crossbeam | Through-beam 4 of 5 (Durchbalken, DB 4)": 1,
+    "crossbeam | Standing knee at through-beam 5, starboard": 1,
+    "crossbeam | Standing knee at through-beam 5, port": 1,
+    "crossbeam | Through-beam 5 of 5 (Durchbalken, DB 5)": 1,
+    "crossbeam | Carling between through-beams 2 and 3": 4,
+    "crossbeam | Carling between through-beams 3 and 4": 4,
+    "crossbeam | Carling between through-beams 4 and 5": 4,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "windlass | Windlass": 1
+   },
+   "4": {
+    "mast | Mast": 1,
+    "top | Basket top": 1,
+    "cross | Cross at the truck": 1,
+    "castle | Aftcastle": 1
+   },
+   "5": {
+    "channelWale | Channel wale, starboard": 1,
+    "channelWale | Channel wale, port": 1,
+    "shroud | Shrouds": 1,
+    "ratline | Ratlines": 1,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 1,
+    "parrel | Parrels": 1,
+    "lift | Lifts": 1,
+    "sheet | Sheets": 1,
+    "tack | Tacks": 1,
+    "halyard | Halyard": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 1
+   }
+  }
+ },
+ "caravel": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "lateen",
+   "lateen",
+   "lateen"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 2,
+    "rudder | rudder-band": 4,
+    "rudder | rudder-pintle": 4,
+    "rudder | rudder-gudgeon": 8,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 3,
+    "bowsprit | Bowsprit": 1
+   },
+   "5": {
+    "shroud | Shrouds": 3,
+    "tackle | Shroud tackles": 3
+   },
+   "6": {
+    "yard | Lateen yard": 3,
+    "parrel | Parrels": 3
+   },
+   "7": {
+    "sail | Sail": 3
+   }
+  }
+ },
+ "carrack": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "square",
+   "lateen"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 6,
+    "rudder | rudder-band": 5,
+    "rudder | rudder-pintle": 5,
+    "rudder | rudder-gudgeon": 10,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 5,
+    "woolding | Wooldings": 2,
+    "woolding | Woolding hoops": 2,
+    "top | Top": 2,
+    "cheek | Cheeks": 4,
+    "bowsprit | Bowsprit": 1,
+    "castles | Forecastle": 1,
+    "castles | Aftcastle": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 2,
+    "shroud | Futtock shrouds": 2,
+    "shroud | Topmast shrouds": 2,
+    "ratline | Topmast ratlines": 2,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 4,
+    "parrel | Parrels": 5,
+    "lift | Lifts": 2,
+    "sheet | Sheets": 2,
+    "tack | Tacks": 2,
+    "halyard | Halyard": 2,
+    "jeers | Jeers": 2,
+    "yard | Lateen yard": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 5
+   }
+  }
+ },
+ "galley": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "lateen",
+   "lateen"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 7,
+    "rudder | rudder-band": 3,
+    "rudder | rudder-pintle": 3,
+    "rudder | rudder-gudgeon": 6,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "spur | Spur": 1,
+    "spur | Spur shoe": 1,
+    "spur | Cheek knee": 2,
+    "apostis | Rowing frame": 2,
+    "apostis | Banda": 2,
+    "apostis | Baccalaro": 48,
+    "apostis | Thole": 48,
+    "apostis | Corsia": 1,
+    "arrumbada | Bow platform": 1,
+    "arrumbada | Platform beam": 3,
+    "arrumbada | Platform post": 4,
+    "arrumbada | Breastwork": 1,
+    "arrumbada | Breastwork cap": 1,
+    "arrumbada | Edge beam": 2,
+    "gun | Courser": 1,
+    "gun | Flanking piece": 4
+   },
+   "4": {
+    "mast | Mast": 2,
+    "oar | Oars": 1,
+    "bench | Rowing bench": 48,
+    "bench | Pedagna": 48
+   },
+   "5": {
+    "shroud | Shrouds": 2,
+    "tackle | Shroud tackles": 2
+   },
+   "6": {
+    "yard | Lateen yard": 2,
+    "parrel | Parrels": 2
+   },
+   "7": {
+    "sail | Sail": 2,
+    "canopy | Stern awning": 1,
+    "canopy | Ridgepole": 1,
+    "canopy | Tent post": 2
+   }
+  }
+ },
+ "galleass": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "lateen",
+   "lateen",
+   "lateen"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 8,
+    "rudder | rudder-band": 5,
+    "rudder | rudder-pintle": 5,
+    "rudder | rudder-gudgeon": 10,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "spur | Spur": 1,
+    "spur | Spur shoe": 1,
+    "spur | Cheek knee": 2,
+    "apostis | Rowing frame": 2,
+    "apostis | Banda": 2,
+    "apostis | Baccalaro": 52,
+    "apostis | Thole": 52,
+    "apostis | Corsia": 1,
+    "gun | Broadside piece": 16,
+    "fortress | Bow fortress": 1,
+    "fortress | Parapet": 22,
+    "fortress | Fortress post": 12,
+    "gun | Courser": 1,
+    "gun | Gun port": 5,
+    "gun | Flanking piece": 4,
+    "gun | Stern chaser": 2
+   },
+   "4": {
+    "mast | Mast": 3,
+    "oar | Oars": 1,
+    "bench | Rowing bench": 52,
+    "bench | Pedagna": 52
+   },
+   "5": {
+    "shroud | Shrouds": 3,
+    "tackle | Shroud tackles": 3,
+    "gundeck | Gun deck": 1,
+    "gundeck | Deck beam": 13,
+    "gundeck | Deck clamp": 2,
+    "gundeck | Stanchion": 26,
+    "gundeck | Screen": 2,
+    "gundeck | Screen cap": 2
+   },
+   "6": {
+    "yard | Lateen yard": 3,
+    "parrel | Parrels": 3
+   },
+   "7": {
+    "sail | Sail": 3,
+    "canopy | Stern awning": 1,
+    "canopy | Ridgepole": 1,
+    "canopy | Tent post": 2
+   }
+  }
+ },
+ "panokseon": {
+  "sail": true,
+  "build": "bulkhead",
+  "rigs": [
+   "junk",
+   "junk"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "windlass | Windlass": 1,
+    "woodAnchor | Wooden anchor and its stone": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "gun | Gun port": 4,
+    "gun | Deck piece": 12
+   },
+   "4": {
+    "mast | Mast": 2,
+    "sheave | Masthead sheave": 2,
+    "oar | Oars": 1
+   },
+   "5": {
+    "gundeck | Sangjang": 1,
+    "gundeck | Stanchion": 24,
+    "gundeck | Deck clamp": 2,
+    "gundeck | End bulwark": 2,
+    "sangjang | Sangjang belt": 2,
+    "sangjang | Oar-deck port": 4,
+    "sangjang | Oar-deck end wall, forward": 1,
+    "sangjang | Oar-deck end wall, aft": 1,
+    "gundeck | Bulwark": 2,
+    "tower | Commander's tower": 1
+   },
+   "6": {
+    "yard | Boom": 2,
+    "yard | Batten 1": 2,
+    "yard | Batten 2": 2,
+    "yard | Batten 3": 2,
+    "yard | Batten 4": 2,
+    "yard | Batten 5": 2,
+    "yard | Yard": 2,
+    "parrel | Parrels": 2,
+    "sheet | Sheets": 2,
+    "halyard | Halyard": 2
+   },
+   "7": {
+    "sail | Sail": 12
+   }
+  }
+ },
+ "sekibune": {
+  "sail": true,
+  "build": "shell",
+  "rigs": [
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 3,
+    "rudder | rudder-band": 3,
+    "rudder | rudder-pintle": 3,
+    "rudder | rudder-gudgeon": 6,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "yotsumeAnchor | Yotsume-ikari": 1
+   },
+   "4": {
+    "mast | Mast": 1,
+    "top | Top": 1,
+    "oar | Oars": 1
+   },
+   "5": {
+    "stay | Stays and backstays": 1,
+    "gundeck | S\u014d-yagura": 1,
+    "gundeck | Stanchion": 24,
+    "gundeck | Deck clamp": 2,
+    "gundeck | End bulwark": 2,
+    "maku | Maku": 2,
+    "maku | Maku valance": 2,
+    "gundeck | Tate-ita": 2,
+    "sama | Sama": 4,
+    "tower | Yakata": 1
+   },
+   "6": {
+    "yard | Yard": 1,
+    "parrel | Parrels": 1,
+    "lift | Lifts": 1,
+    "sheet | Sheets": 1,
+    "tack | Tacks": 1,
+    "halyard | Halyard": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 1
+   }
+  }
+ },
+ "fluyt": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "square",
+   "lateen"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 4,
+    "rudder | rudder-band": 5,
+    "rudder | rudder-pintle": 5,
+    "rudder | rudder-gudgeon": 10,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2,
+    "sternlight | Stern lights": 2,
+    "taffrail | Taffrail": 6
+   },
+   "4": {
+    "mast | Mast": 7,
+    "top | Top": 2,
+    "cheek | Cheeks": 4,
+    "top | Crosstrees": 2,
+    "bowsprit | Bowsprit": 1,
+    "head | Head and beakhead": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 2,
+    "shroud | Futtock shrouds": 2,
+    "shroud | Topmast shrouds": 2,
+    "ratline | Topmast ratlines": 2,
+    "shroud | Topgallant shrouds": 2,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 6,
+    "parrel | Parrels": 7,
+    "lift | Lifts": 2,
+    "sheet | Sheets": 2,
+    "tack | Tacks": 2,
+    "halyard | Halyard": 2,
+    "jeers | Jeers": 2,
+    "yard | Lateen yard": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 7
+   }
+  }
+ },
+ "east-indiaman": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 7,
+    "rudder | rudder-band": 5,
+    "rudder | rudder-pintle": 5,
+    "rudder | rudder-gudgeon": 10,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "gun | Great guns": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2,
+    "sternlight | Stern lights": 4,
+    "taffrail | Taffrail": 6,
+    "gallery | Quarter galleries": 8
+   },
+   "4": {
+    "mast | Mast": 9,
+    "woolding | Wooldings": 2,
+    "woolding | Woolding hoops": 2,
+    "top | Top": 3,
+    "cheek | Cheeks": 6,
+    "top | Crosstrees": 3,
+    "bowsprit | Bowsprit": 1,
+    "head | Head and beakhead": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 3,
+    "shroud | Futtock shrouds": 3,
+    "shroud | Topmast shrouds": 3,
+    "ratline | Topmast ratlines": 3,
+    "shroud | Topgallant shrouds": 3,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 9,
+    "parrel | Parrels": 9,
+    "lift | Lifts": 3,
+    "sheet | Sheets": 3,
+    "tack | Tacks": 3,
+    "halyard | Halyard": 3,
+    "jeers | Jeers": 2,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 9
+   }
+  }
+ },
+ "ship-of-the-line": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 9,
+    "rudder | rudder-band": 6,
+    "rudder | rudder-pintle": 6,
+    "rudder | rudder-gudgeon": 12,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "gun | Great guns": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2,
+    "sternlight | Stern lights": 4,
+    "taffrail | Taffrail": 6,
+    "gallery | Quarter galleries": 8
+   },
+   "4": {
+    "mast | Mast": 9,
+    "woolding | Wooldings": 2,
+    "woolding | Woolding hoops": 2,
+    "top | Top": 3,
+    "cheek | Cheeks": 6,
+    "top | Crosstrees": 3,
+    "bowsprit | Bowsprit": 1,
+    "head | Head and beakhead": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 3,
+    "shroud | Futtock shrouds": 3,
+    "shroud | Topmast shrouds": 3,
+    "ratline | Topmast ratlines": 3,
+    "shroud | Topgallant shrouds": 3,
+    "stay | Stays and backstays": 8,
+    "stay | Bobstay": 1
+   },
+   "6": {
+    "yard | Yard": 9,
+    "parrel | Parrels": 9,
+    "lift | Lifts": 3,
+    "sheet | Sheets": 3,
+    "tack | Tacks": 3,
+    "halyard | Halyard": 3,
+    "jeers | Jeers": 2,
+    "yard | Boom": 1,
+    "toppingLift | Topping lift": 1,
+    "yard | Gaff": 1,
+    "throatHalyard | Throat halyard": 1,
+    "peakHalyard | Peak halyard": 1,
+    "block | Blocks": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 17
+   }
+  }
+ },
+ "slave-ship": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 4,
+    "rudder | rudder-band": 5,
+    "rudder | rudder-pintle": 5,
+    "rudder | rudder-gudgeon": 10,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 9,
+    "top | Top": 3,
+    "cheek | Cheeks": 6,
+    "top | Crosstrees": 3,
+    "bowsprit | Bowsprit": 1,
+    "head | Head and beakhead": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 3,
+    "shroud | Futtock shrouds": 3,
+    "shroud | Topmast shrouds": 3,
+    "ratline | Topmast ratlines": 3,
+    "shroud | Topgallant shrouds": 3,
+    "stay | Stays and backstays": 1
+   },
+   "6": {
+    "yard | Yard": 9,
+    "parrel | Parrels": 9,
+    "lift | Lifts": 3,
+    "sheet | Sheets": 3,
+    "tack | Tacks": 3,
+    "halyard | Halyard": 3,
+    "jeers | Jeers": 2,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 9
+   }
+  }
+ },
+ "wyoming": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "gaff",
+   "gaff",
+   "gaff",
+   "gaff",
+   "gaff",
+   "gaff"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 19,
+    "rudder | rudder-band": 5,
+    "rudder | rudder-pintle": 5,
+    "rudder | rudder-gudgeon": 10,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 12,
+    "bowsprit | Bowsprit": 1
+   },
+   "5": {
+    "channel | Channels": 12,
+    "deadeye | Deadeyes": 12,
+    "shroud | Shrouds": 6,
+    "stay | Bobstay": 1,
+    "stay | Stays and backstays": 5,
+    "deckhouse | Deckhouse": 2,
+    "helm | The wheel": 1
+   },
+   "6": {
+    "yard | Boom": 6,
+    "toppingLift | Topping lift": 6,
+    "yard | Gaff": 6,
+    "throatHalyard | Throat halyard": 6,
+    "peakHalyard | Peak halyard": 6,
+    "block | Blocks": 6
+   },
+   "7": {
+    "sail | Sail": 17
+   }
+  }
+ },
+ "preussen": {
+  "sail": true,
+  "build": "steel",
+  "rigs": [
+   "square",
+   "square",
+   "square",
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "forecast | Forecastle": 1,
+    "forecast | Midship bridge": 1,
+    "forecast | Poop": 1,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Steel mast": 15,
+    "top | Top": 5,
+    "cheek | Cheeks": 10,
+    "top | Crosstrees": 5,
+    "bowsprit | Bowsprit": 1
+   },
+   "5": {
+    "channel | Channels": 10,
+    "deadeye | Deadeyes": 10,
+    "shroud | Shrouds": 5,
+    "ratline | Ratlines": 5,
+    "shroud | Futtock shrouds": 5,
+    "shroud | Topmast shrouds": 5,
+    "ratline | Topmast ratlines": 5,
+    "shroud | Topgallant shrouds": 5,
+    "stay | Stays and backstays": 17,
+    "stay | Bobstay": 1
+   },
+   "6": {
+    "yard | Yard": 30,
+    "truss | Truss band": 15,
+    "truss | Truss goose-neck": 15,
+    "truss | Truss yard band": 15,
+    "parrel | Parrels": 15,
+    "lift | Lifts": 5,
+    "sheet | Sheets": 5,
+    "tack | Tacks": 5,
+    "halyard | Halyard": 5,
+    "yard | Boom": 1,
+    "toppingLift | Topping lift": 1,
+    "yard | Gaff": 1,
+    "throatHalyard | Throat halyard": 1,
+    "peakHalyard | Peak halyard": 1,
+    "block | Blocks": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 47
+   }
+  }
+ },
+ "great-eastern": {
+  "sail": true,
+  "build": "iron",
+  "rigs": [
+   "gaff",
+   "gaff",
+   "gaff",
+   "gaff",
+   "gaff",
+   "gaff"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid teak": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "funnel | Funnel": 10,
+    "funnel | Boiler casing": 5,
+    "funnel | Steam pipe": 5,
+    "superstructure | Superstructure": 1,
+    "superstructure | House deck \u2014 laid teak": 3,
+    "bridge | Navigating bridge": 1,
+    "boat | Ship's boat": 20,
+    "boat | Davit": 40
+   },
+   "4": {
+    "mast | Iron mast": 10,
+    "mast | Wooden mast": 2,
+    "vent | Cowl ventilator": 20,
+    "paddle | Paddle wheels": 2,
+    "paddle | Sponson": 2,
+    "paddlebox | Paddle box": 2,
+    "paddlebox | Paddle-box rib": 22,
+    "paddlebox | Paddle-box vent": 12
+   },
+   "5": {
+    "channel | Channels": 12,
+    "deadeye | Deadeyes": 12,
+    "shroud | Shrouds": 6
+   },
+   "6": {
+    "yard | Boom": 6,
+    "toppingLift | Topping lift": 6,
+    "yard | Gaff": 6,
+    "throatHalyard | Throat halyard": 6,
+    "peakHalyard | Peak halyard": 6,
+    "block | Blocks": 6
+   },
+   "7": {
+    "sail | Sail": 6
+   }
+  }
+ },
+ "titanic": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [
+   "pole",
+   "pole"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid pine": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "funnel | Funnel": 8,
+    "funnel | Boiler casing": 4,
+    "funnel | Steam pipe": 4,
+    "superstructure | Superstructure": 1,
+    "superstructure | House deck \u2014 laid pine": 4,
+    "bridge | Navigating bridge": 1,
+    "forecast | Forecastle": 1,
+    "islandRail | Forecastle rail": 1,
+    "forecast | Poop deck": 1,
+    "islandRail | Poop deck rail": 1,
+    "boat | Ship's boat": 20,
+    "boat | Davit": 40
+   },
+   "4": {
+    "mast | Steel mast": 2,
+    "mast | Crow's nest": 2,
+    "vent | Cowl ventilator": 16
+   }
+  }
+ },
+ "usv": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 painted steel": 1,
+    "rail | Rail": 1
+   },
+   "6": {
+    "wing | Wing bearing": 1,
+    "wing | Wing sail": 2,
+    "wing | Tail vane": 1,
+    "solar | Solar array": 5,
+    "sensor | Instrument mast": 1
+   }
+  }
+ },
+ "clipper": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "square",
+   "square"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 11,
+    "rudder | rudder-band": 6,
+    "rudder | rudder-pintle": 6,
+    "rudder | rudder-gudgeon": 12,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 9,
+    "mastband | Mast hoops": 2,
+    "top | Top": 3,
+    "cheek | Cheeks": 6,
+    "top | Crosstrees": 3,
+    "bowsprit | Bowsprit": 1,
+    "head | Head and beakhead": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 3,
+    "shroud | Futtock shrouds": 3,
+    "shroud | Topmast shrouds": 3,
+    "ratline | Topmast ratlines": 3,
+    "shroud | Topgallant shrouds": 3,
+    "stay | Stays and backstays": 11,
+    "stay | Bobstay": 1,
+    "deckhouse | Deckhouse": 2,
+    "helm | The wheel": 1
+   },
+   "6": {
+    "yard | Yard": 15,
+    "parrel | Parrels": 15,
+    "lift | Lifts": 3,
+    "sheet | Sheets": 3,
+    "tack | Tacks": 3,
+    "halyard | Halyard": 3,
+    "yard | Boom": 1,
+    "toppingLift | Topping lift": 1,
+    "yard | Gaff": 1,
+    "throatHalyard | Throat halyard": 1,
+    "peakHalyard | Peak halyard": 1,
+    "block | Blocks": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 26
+   }
+  }
+ },
+ "steamer": {
+  "sail": true,
+  "build": "iron",
+  "rigs": [
+   "square",
+   "square",
+   "square",
+   "gaff"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "funnel | Funnel": 2,
+    "funnel | Boiler casing": 1,
+    "funnel | Steam pipe": 1,
+    "superstructure | Superstructure": 1,
+    "bridge | Navigating bridge": 1,
+    "anchor | Bower anchor": 2,
+    "boat | Ship's boat": 6,
+    "boat | Davit": 12
+   },
+   "4": {
+    "mast | Iron mast": 11,
+    "top | Top": 3,
+    "cheek | Cheeks": 6,
+    "top | Crosstrees": 3,
+    "bowsprit | Bowsprit": 1,
+    "vent | Cowl ventilator": 24
+   },
+   "5": {
+    "channel | Channels": 8,
+    "deadeye | Deadeyes": 8,
+    "shroud | Shrouds": 4,
+    "ratline | Ratlines": 3,
+    "shroud | Futtock shrouds": 3,
+    "shroud | Topmast shrouds": 3,
+    "ratline | Topmast ratlines": 3,
+    "shroud | Topgallant shrouds": 3,
+    "stay | Stays and backstays": 8,
+    "stay | Bobstay": 1
+   },
+   "6": {
+    "yard | Yard": 12,
+    "truss | Truss band": 6,
+    "truss | Truss goose-neck": 6,
+    "truss | Truss yard band": 6,
+    "parrel | Parrels": 6,
+    "lift | Lifts": 3,
+    "sheet | Sheets": 3,
+    "tack | Tacks": 3,
+    "halyard | Halyard": 3,
+    "yard | Boom": 1,
+    "toppingLift | Topping lift": 1,
+    "yard | Gaff": 1,
+    "throatHalyard | Throat halyard": 1,
+    "peakHalyard | Peak halyard": 1,
+    "block | Blocks": 1,
+    "brace | Braces": 1
+   },
+   "7": {
+    "sail | Sail": 21
+   }
+  }
+ },
+ "dreadnought": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [
+   "none",
+   "none"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "funnel | Funnel": 4,
+    "funnel | Boiler casing": 2,
+    "funnel | Steam pipe": 2,
+    "superstructure | Superstructure": 1,
+    "superstructure | Citadel deck": 1,
+    "superstructure | Shelter deck": 1,
+    "superstructure | Bridge tower": 1,
+    "superstructure | Main rangefinder": 1
+   },
+   "4": {
+    "mast | Steel mast": 2,
+    "mast | Tripod leg": 4,
+    "mast | Spotting top": 2,
+    "net | Net shelf": 1,
+    "net | Torpedo net, rolled": 2,
+    "net | Net boom": 24,
+    "net | Boom hinge": 24,
+    "turret | Main battery": 5,
+    "turret | Barbette": 5,
+    "turret | Turret": 5,
+    "turret | Main gun": 10,
+    "turret | Turret rangefinder": 5
+   }
+  }
+ },
+ "yamato": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [
+   "none",
+   "none"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid hinoki": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "funnel | Funnel": 2,
+    "funnel | Boiler casing": 1,
+    "funnel | Steam pipe": 1,
+    "superstructure | Superstructure": 1,
+    "superstructure | Citadel deck": 1,
+    "superstructure | Shelter deck": 1,
+    "superstructure | Bridge tower": 1,
+    "superstructure | Main rangefinder": 1
+   },
+   "4": {
+    "mast | Steel mast": 2,
+    "searchlight | Searchlight platform": 16,
+    "searchlight | Platform bracket": 8,
+    "searchlight | Searchlight": 8,
+    "searchlight | Searchlight mirror": 8,
+    "turret | Secondary battery": 4,
+    "turret | Barbette": 7,
+    "turret | Turret": 7,
+    "turret | Main gun": 21,
+    "aa | High-angle battery": 6,
+    "aa | Gun platform": 6,
+    "aa | High-angle mount": 6,
+    "aa | High-angle gun": 12,
+    "aaLight | Light anti-aircraft battery": 8,
+    "aaLight | Bandstand": 8,
+    "aaLight | Gun tub": 8,
+    "aaLight | Triple 25 mm mount": 8,
+    "aaLight | 25 mm gun": 24,
+    "catapult | Aircraft catapult": 5,
+    "catapult | Catapult turntable": 2,
+    "catapult | Launch rail": 2,
+    "catapult | Crane post": 1,
+    "catapult | Aircraft crane": 1,
+    "hatch | Stowage hatch": 6,
+    "turret | Main battery": 3,
+    "turret | Turret rangefinder": 3
+   },
+   "7": {
+    "floatplane | Floatplane": 4,
+    "floatplane | Main float": 2,
+    "floatplane | Canopy": 2,
+    "floatplane | Fin": 2,
+    "floatplane | Upper wing": 4,
+    "floatplane | Lower wing": 4,
+    "floatplane | Wingtip float": 4
+   }
+  }
+ },
+ "carrier": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 painted steel": 1,
+    "rail | Rail": 1,
+    "screw | Screw": 4
+   },
+   "4": {
+    "flightdeck | Flight deck": 1,
+    "hangar | Hangar and gallery decks": 1,
+    "flightdeck | Angled landing area": 2,
+    "island | The island": 1,
+    "flightdeck | Deck-edge lift": 2,
+    "flightdeck | Landing centreline": 1,
+    "flightdeck | Foul line": 1,
+    "flightdeck | Arrestor wire": 3,
+    "flightdeck | Catapult track": 3
+   },
+   "7": {
+    "aircraft | Deck park": 12
+   }
+  }
+ },
+ "container": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 painted steel": 1,
+    "rail | Rail": 1,
+    "container | Containers": 1,
+    "forecast | Forecastle": 1,
+    "bridge | Accommodation and bridge": 2,
+    "boat | Lifeboat": 2,
+    "funnel | Funnel": 1
+   },
+   "4": {
+    "mast | Foremast": 1,
+    "mast | Radar mast": 1
+   }
+  }
+ },
+ "ever-given": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 painted steel": 1,
+    "rail | Rail": 1,
+    "container | Containers": 1,
+    "forecast | Forecastle": 1,
+    "bridge | Accommodation and bridge": 1,
+    "boat | Lifeboat": 2,
+    "funnel | Engine casing": 1,
+    "funnel | Funnel": 1
+   },
+   "4": {
+    "mast | Foremast": 1,
+    "mast | Radar mast": 1
+   },
+   "7": {
+    "livery | Livery": 2,
+    "livery | Stern name": 1
+   }
+  }
+ },
+ "azzam": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid teak": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "superstructure | Superstructure": 1,
+    "superstructure | House deck \u2014 laid teak": 3,
+    "cluster | Mast and stack cluster": 1,
+    "cluster | Mast block": 1,
+    "cluster | Glass sweep": 1,
+    "cluster | Stack fairing": 1,
+    "cluster | Stack casing": 1,
+    "cluster | Exhaust pipe": 4,
+    "cluster | Radome pedestal": 7,
+    "cluster | Radome": 7,
+    "terrace | Stern terraces": 31,
+    "terrace | Terrace glazing": 2,
+    "terrace | Terrace doors": 2,
+    "stair | Terrace stair": 8
+   },
+   "4": {
+    "mast | Signal mast": 1,
+    "mast | Spreader platform": 3,
+    "mast | Aerial dome": 2,
+    "mast | Masthead whip": 1
+   }
+  }
+ },
+ "endurance": {
+  "sail": true,
+  "build": "frame",
+  "rigs": [
+   "square",
+   "gaff",
+   "gaff"
+  ],
+  "parts": {
+   "3": {
+    "rudder | rudder-stock": 1,
+    "rudder | rudder-plank": 7,
+    "rudder | rudder-band": 6,
+    "rudder | rudder-pintle": 6,
+    "rudder | rudder-gudgeon": 12,
+    "deck | Weather deck \u2014 laid planking": 1,
+    "rail | Rail": 1,
+    "bulwarkStanchion | Bulwark stanchion": 60,
+    "pinRail | Pin rail": 1,
+    "pinRail | Belaying pins": 1,
+    "fifeRail | Fife rail": 1,
+    "fifeRail | Fife rail pins": 1,
+    "waterway | Waterway": 1,
+    "grating | Grating": 3,
+    "capstan | Capstan": 1,
+    "boat | Ship's boat": 1,
+    "boat | Boat skids": 2,
+    "boat | Quarter boat": 2,
+    "boat | Davit": 8,
+    "boat | Davit fall": 4,
+    "funnel | Funnel": 2,
+    "funnel | Boiler casing": 1,
+    "funnel | Steam pipe": 1,
+    "cathead | Cathead": 2,
+    "anchor | Cat pendant": 2,
+    "anchor | Bower anchor": 2
+   },
+   "4": {
+    "mast | Mast": 5,
+    "top | Top": 1,
+    "cheek | Cheeks": 2,
+    "top | Crosstrees": 1,
+    "bowsprit | Bowsprit": 1
+   },
+   "5": {
+    "channel | Channels": 6,
+    "deadeye | Deadeyes": 6,
+    "shroud | Shrouds": 3,
+    "ratline | Ratlines": 1,
+    "shroud | Futtock shrouds": 1,
+    "shroud | Topmast shrouds": 1,
+    "ratline | Topmast ratlines": 1,
+    "shroud | Topgallant shrouds": 1,
+    "stay | Bobstay": 1,
+    "stay | Stays and backstays": 5,
+    "deckhouse | Deckhouse": 2,
+    "helm | The wheel": 1,
+    "compassPlatform | Compass platform": 1
+   },
+   "6": {
+    "yard | Yard": 3,
+    "parrel | Parrels": 3,
+    "lift | Lifts": 1,
+    "sheet | Sheets": 1,
+    "tack | Tacks": 1,
+    "halyard | Halyard": 1,
+    "clewline | Clewlines": 1,
+    "buntline | Buntlines": 1,
+    "block | Blocks": 3,
+    "yard | Boom": 2,
+    "toppingLift | Topping lift": 2,
+    "yard | Gaff": 2,
+    "throatHalyard | Throat halyard": 2,
+    "peakHalyard | Peak halyard": 2,
+    "brace | Braces": 1,
+    "coil | Coils": 1
+   },
+   "7": {
+    "sail | Sail": 9,
+    "reefPoint | Reef points": 1
+   }
+  }
+ },
+ "queen-mary-2": {
+  "sail": false,
+  "build": "steel",
+  "rigs": [
+   "pole"
+  ],
+  "parts": {
+   "3": {
+    "rudder | Rudder": 1,
+    "deck | Weather deck \u2014 laid teak": 1,
+    "rail | Rail": 1,
+    "waterway | Waterway": 1,
+    "funnel | Funnel": 2,
+    "funnel | Boiler casing": 1,
+    "funnel | Steam pipe": 1,
+    "superstructure | Superstructure": 1,
+    "superstructure | House deck \u2014 laid teak": 9,
+    "bridge | Navigating bridge": 1,
+    "superstructure | Deck works": 1,
+    "bridge | Radome": 2,
+    "funnel | Gas turbine uptake": 1,
+    "boat | Ship's boat": 22
+   },
+   "4": {
+    "mast | Steel mast": 1
+   }
+  }
+ }
+}

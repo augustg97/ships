@@ -5,16 +5,6 @@ yard: null, layout: null, shipX: 0, panX: undefined,
 lon: 0.9, lat: 0.16, dist: 1.12, spin: true, stage: 7, sel: null,
 ray: null, hit: [], t0: 0,
 };
-const STAGE_NAMES = [
-['Keel laid', 'One timber, stem to sternpost. Everything is measured from it.'],
-['Frames raised', 'The ribs go up on the keel. In a carvel ship the shape is now decided.'],
-['Planked', 'The skin goes on. Carvel: edge to edge, caulked. Clinker: overlapped, riveted.'],
-['Decked', 'The deck ties the sides together and carries the guns. Rudder hung aft.'],
-['Masts stepped', 'Lower mast, topmast, topgallant — each fidded through the doubling.'],
-['Rigged', 'Shrouds take the sideways pull; ratlines make them a ladder aloft.'],
-['Yards crossed', 'The spars the square sails hang from, braced round to trim to the wind.'],
-['Bent on', 'Canvas. She can now be driven by the wind rather than carried by it.'],
-];
 function swInit() {
 if (SW.renderer) return;
 const cv = document.getElementById('swCanvas');
@@ -278,10 +268,268 @@ return ['Nothing added', 'Nothing is added at this stage. On a sailing ship this
 const mach = H.machinery ? H.machinery : 'Her machinery is not recorded in this model.';
 return ['Afloat', (added ? added + ' ' : '') + mach];
 }
+const SAIL_SKIP = new Set(['deck', 'rail', 'waterway', 'islandRail', 'stair', 'cheek',
+'mast', 'shroud', 'stay', 'ratline', 'yard', 'sail']);
+const SAIL_PHRASE = {
+gun: 'guns', anchor: 'anchors', grapnel: 'a grapnel anchor', ironAnchors: 'four-claw iron anchors',
+stoneAnchor: 'a stone anchor', woodAnchor: 'a wooden anchor weighted with a stone',
+yotsumeAnchor: 'a four-claw iron anchor (yotsume-ikari)', capstan: 'a capstan',
+windlass: 'a windlass', cathead: 'catheads', boat: 'boats', grating: 'hatch gratings',
+gallery: 'quarter galleries', sternlight: 'stern lanterns', taffrail: 'a taffrail',
+apostis: 'the rowing frame (apostis) the oars work from', arrumbada: 'a bow fighting platform (arrumbada)',
+spur: 'a beak spur', fortress: 'a bow fortress', platform: 'a deck platform',
+bulwarkStanchion: 'bulwark stanchions', fifeRail: 'fife rails', pinRail: 'pin rails',
+superstructure: 'a superstructure', bridge: 'a bridge', boatDeck: 'a boat deck',
+bench: 'rowing benches', bowsprit: 'a bowsprit', head: 'the beakhead at the bow',
+oar: 'oars', paddle: 'paddle wheels', paddlebox: 'paddle boxes', sheave: 'masthead sheaves',
+vent: 'cowl ventilators', woolding: 'wooldings round the lower masts', cross: 'a cross at the truck',
+karchesion: 'a masthead cage (karchesion)', corbis: 'the corbis',
+deadeye: 'deadeyes with their lanyards', channel: 'channels outside the hull',
+channelWale: 'channel wales', tackle: 'shroud tackles', shroudEye: 'rope collars on the masts',
+shroudLashing: 'shroud lashings', deckhouse: 'a deckhouse', helm: 'a steering wheel',
+compassPlatform: 'a compass platform', tower: null, gundeck: null, sangjang: null,
+maku: 'the maku (a cloth band hung over the oar band)', sama: 'sama (loopholes in the shield wall)',
+block: 'blocks', brace: 'braces', buntline: 'buntlines', clewline: 'clewlines', coil: 'rope coils',
+halyard: 'halyards', jeers: 'jeers', lift: 'lifts', parrel: 'parrels', sheet: 'sheets',
+tack: 'tacks', peakHalyard: 'peak halyards', throatHalyard: 'throat halyards',
+toppingLift: 'topping lifts', truss: 'trusses', mastheadBlock: 'masthead blocks',
+mastheadHorn: 'masthead horns', yardLashing: 'yard lashings', reefPoint: 'reef points',
+canopy: 'a stern awning', rudder: 'a rudder hung at the stern',
+};
+const SAIL_NUM = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+const swNum = n => SAIL_NUM[n] || String(n);
+const swCap = t => t.charAt(0).toUpperCase() + t.slice(1);
+function swAnd(list) {
+return list.length > 1 ? list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1] : (list[0] || '');
+}
+function swMastGroup(idx, n) {
+if (idx.length === n) return n === 1 ? 'her mast' : n === 2 ? 'both masts' : 'all ' + swNum(n) + ' masts';
+const pre = idx.every((m, i) => m === i), suf = idx.every((m, i) => m === n - idx.length + i);
+if (pre) return idx.length === 1 ? 'the foremost mast' : 'the forward ' + swNum(idx.length);
+if (suf) return idx.length === 1 ? 'the aftermost mast' : 'the aftermost ' + swNum(idx.length);
+const ord = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'];
+return 'the ' + swAnd(idx.map(i => ord[i])) + ' from forward';
+}
+const SAIL_RIG = {
+square: ['square sails', 'square sails'], lateen: ['a lateen sail', 'lateen sails'],
+gaff: ['a gaff sail', 'gaff sails'], junk: ['a battened lug sail', 'battened lug sails'],
+crabclaw: ['a crab-claw sail', 'crab-claw sails'],
+};
+function swSailCard(spec, stage, parts) {
+const H = spec.hull || {};
+const masts = (H.masts || []).map((m, i) => ({ m, i })).sort((a, b) => (a.m.at || 0) - (b.m.at || 0));
+const n = masts.length;
+const order = {};
+masts.forEach((e, k) => { order[e.i] = k; });
+const keys = [], names = {};
+for (const p of parts) {
+if (!names[p.key]) { names[p.key] = new Set(); keys.push(p.key); }
+names[p.key].add(p.name);
+}
+const has = k => !!names[k];
+const nameList = k => [...names[k]].map(t => t.split(' — ')[0].toLowerCase());
+const phrase = k => {
+if (k === 'quarterRudder') {
+const q = names[k].size;
+return q > 1 ? swNum(q) + ' quarter rudders, one on each side aft' : 'a quarter rudder';
+}
+if (k === 'crossbeam') return [...names[k]].some(t => /through-beam/i.test(t))
+? 'through-beams with their knees and carlings' : 'crossbeams';
+if (k === 'funnel') return (H.funnels || 1) > 1 ? swNum(H.funnels) + ' funnels' : 'a funnel';
+if (k === 'top') return [...names[k]].map(t => t === 'Top' ? 'tops at the lower mastheads'
+: t === 'Crosstrees' ? 'crosstrees at the topmast heads' : 'a ' + t.toLowerCase());
+if (k === 'gundeck') return [...names[k]].filter(t => !/^(Stanchion|Deck beam|Deck clamp|Screen cap|End bulwark|Bulwark)$/.test(t))
+.map(t => t === 'Sangjang' ? 'the sangjang (a fighting deck built over the rowers)'
+: t === 'Gun deck' ? 'a gun deck over the rowers'
+: t === 'Tate-ita' ? 'the tate-ita (the shield wall)'
+: /yagura$/i.test(t) ? 'the ' + t.toLowerCase() + ' (the fighting superstructure)'
+: t.toLowerCase());
+if (k === 'sangjang') return 'the oar deck\'s walls and oar ports';
+if (['castle', 'castles', 'poop'].includes(k)) return nameList(k).map(t => 'the ' + t);
+if (k === 'tower') return nameList(k).map(t => t === 'yakata' ? 'the yakata (a deckhouse)'
+: t === "commander's tower" ? "the commander's tower" : t);
+if (['forecast', 'mastband', 'stowage'].includes(k))
+return nameList(k).map(t => k === 'forecast' ? 'the ' + t : t);
+if (k in SAIL_PHRASE && SAIL_PHRASE[k]) return SAIL_PHRASE[k];
+return [...names[k]][0].toLowerCase();
+};
+const extras = (skip) => {
+const l = keys.filter(k => !SAIL_SKIP.has(k) && !(skip || []).includes(k)).map(phrase).flat();
+return [...new Set(l)];
+};
+if (stage === 3) {
+const open = parts.filter(p => p.key === 'deck' && /^Open hull/.test(p.name)).length;
+const joined = open > 1 && has('crossbeam');
+let t = joined ? 'Her ' + swNum(open) + ' hulls are left open, with no deck laid in either. '
++ 'Crossbeams join them' + (has('platform') ? ' and carry a platform between them.' : '.')
+: open ? 'Her hull is left open, with no deck laid.'
+: 'The deck is laid, and its beams tie the two sides together.';
+const l = extras(joined ? ['crossbeam', 'platform'] : []);
+if (l.length) t += ' Added at this stage: ' + swAnd(l) + '.';
+return [joined ? 'Hulls joined' : open ? 'Open hull' : 'Decked', t];
+}
+if (stage === 4) {
+const pieces = masts.map(() => 1);
+for (const p of parts) if (p.key === 'mast' && p.mi !== undefined && order[p.mi] !== undefined)
+pieces[order[p.mi]] = Math.max(pieces[order[p.mi]], (p.si || 0) + 1);
+const tube = (H.build === 'steel' || H.build === 'iron') && (H.year || 0) >= 1890;
+const PIECES = {
+1: ['is a single pole', 'are single poles'],
+2: ['is built in two pieces, lower mast and topmast', 'are each built in two pieces, lower mast and topmast'],
+3: tube ? ['is a steel tube, lower mast and topmast in one piece, with a topgallant mast above it',
+'are steel tubes, lower mast and topmast in one piece, with a topgallant mast above each']
+: ['is built in three pieces, lower mast, topmast and topgallant mast',
+'are each built in three pieces, lower mast, topmast and topgallant mast'],
+4: ['is built in four pieces, lower mast, topmast, topgallant and royal mast',
+'are each built in four pieces, lower mast, topmast, topgallant and royal mast'],
+};
+let t = n === 1 ? 'Her mast is stepped.' : swCap(swNum(n)) + ' masts are stepped.';
+const groups = [];
+pieces.forEach((pc, k) => {
+const g = groups.find(x => x.pc === pc);
+if (g) g.idx.push(k); else groups.push({ pc, idx: [k] });
+});
+const clauses = groups.map((g, gi) => {
+const who = swMastGroup(g.idx, n);
+const pl = g.idx.length > 1 ? 1 : 0;
+const what = (PIECES[Math.min(g.pc, 4)] || PIECES[1])[pl];
+const subj = who === 'her mast' ? 'it' : who;
+return (gi === 0 ? swCap(subj) : subj) + ' ' + what;
+});
+if (n) t += ' ' + clauses.join('; ') + '.';
+if (tube && pieces.every(pc => pc === 3))
+t += ' The topgallant mast stands in the doubling at the head of the tube, held up by an '
++ 'iron fid through its heel, so it can be lowered to the deck.';
+else if (pieces.some(pc => pc > 1))
+t += ' Each piece above the lowest stands in the doubling at the head of the one below, '
++ 'held up by an iron fid through its heel, so it can be lowered to the deck.';
+const l = extras();
+if (l.length) t += ' Also added: ' + swAnd(l) + '.';
+return ['Masts stepped', t];
+}
+if (stage === 5) {
+const shr = has('shroud'), stay = has('stay');
+let t;
+const mm = n === 1 ? 'the mast' : 'each mast';
+if (shr) {
+t = 'Shrouds run from ' + (n === 1 ? 'the masthead' : 'each masthead') + ' down to the hull '
++ 'and hold ' + mm + ' against the sideways pull of the sail.';
+if (stay) t += ' Stays hold ' + (n === 1 ? 'it' : 'them') + ' fore and aft.';
+if (has('ratline')) t += ' Ratlines across the shrouds make a ladder for the crew to climb aloft.';
+} else if (stay) {
+t = 'Stays hold ' + mm + ' fore and aft. She carries no shrouds.';
+} else {
+t = 'Her masts stand without shrouds or stays.';
+}
+const l = extras();
+if (l.length) t += ' Also added: ' + swAnd(l) + '.';
+return [shr || stay ? 'Rigged' : 'No standing rigging', t];
+}
+if (stage === 6) {
+const rigs = new Set(masts.map(e => e.m.rig));
+const yn = [...(names.yard || [])];
+const count = nm => parts.filter(p => p.key === 'yard' && p.name === nm).length;
+const bits = [];
+if (rigs.has('square')) {
+const ny = count('Yard');
+const one = ny === 1, sq = masts.filter(e => e.m.rig === 'square').length;
+bits.push((sq > 1 ? 'The square-rigged masts cross ' : 'The square-rigged mast crosses ')
++ swNum(ny) + ' yard' + (one ? '' : 's')
++ (one ? '; the square sail hangs from it.' : '; the square sails hang from them.')
++ (has('brace') ? (one ? ' Braces at the yardarms swing the yard round to trim the sail to the wind.'
+: ' Braces at the yardarms swing the yards round to trim the sails to the wind.') : ''));
+}
+if (rigs.has('lateen')) {
+const nl = masts.filter(e => e.m.rig === 'lateen').length;
+bits.push((nl === 1 ? 'The lateen mast gets one long yard' : 'Each lateen mast gets one long yard')
++ ', slung slantwise across it; the sail is laced along the yard.');
+}
+if (rigs.has('gaff')) {
+const ng = count('Gaff'), nb = count('Boom');
+bits.push(swCap(swNum(ng)) + ' gaff' + (ng === 1 ? '' : 's') + ' and ' + swNum(nb) + ' boom' + (nb === 1 ? '' : 's')
++ ' go up: a gaff holds the head of a fore-and-aft sail and a boom its foot.');
+}
+if (rigs.has('junk')) {
+const nbat = yn.filter(x => /^Batten/.test(x)).length;
+bits.push('Each mast gets a yard for the head of its sail, a boom for the foot and '
++ swNum(nbat) + ' battens between them. The battens hold the sail flat, and it is '
++ 'reefed by lowering it a panel at a time onto the boom.');
+}
+if (rigs.has('crabclaw'))
+bits.push('Each mast gets the two spars of a crab-claw sail, a yard and a boom.');
+const ROPE = ['halyard', 'sheet', 'tack', 'lift', 'jeers', 'buntline', 'clewline', 'peakHalyard',
+'throatHalyard', 'toppingLift', 'coil'];
+const ropes = ROPE.filter(k => has(k) && k !== 'coil').map(k => SAIL_PHRASE[k]);
+const l = extras(['brace', ...ROPE]);
+let t = bits.join(' ');
+if (ropes.length)
+t += ' The running rigging is rove: ' + (ropes.length > 3
+? ropes.slice(0, 3).join(', ') + ' and ' + swNum(ropes.length - 3) + ' more kind' + (ropes.length - 3 > 1 ? 's' : '') + ' of line.'
+: swAnd(ropes) + '.');
+if (l.length) t += ' Also added: ' + swAnd(l) + '.';
+const title = rigs.has('square') ? 'Yards crossed'
+: rigs.has('gaff') && rigs.size === 1 ? 'Gaffs and booms' : 'Spars hung';
+return [title, t];
+}
+if (stage === 7) {
+const byRig = [];
+masts.forEach((e, k) => {
+const g = byRig.find(x => x.rig === e.m.rig);
+if (g) g.idx.push(k); else byRig.push({ rig: e.m.rig, idx: [k] });
+});
+const nSail = parts.filter(p => p.key === 'sail').length;
+const oneEach = byRig.length === 1 && byRig[0].rig === 'square' && nSail === n;
+if (oneEach) {
+let t = 'The sails are bent on: ' + (n === 1 ? 'one square sail on her mast' : 'one square sail on each mast')
++ (H.headsails ? ', and ' + (H.headsails === 1 ? 'a headsail on a stay forward' : swNum(H.headsails) + ' headsails on the stays forward') : '') + '.';
+const l = extras();
+if (l.length) t += ' Also added: ' + swAnd(l) + '.';
+return ['Bent on', t];
+}
+const parts7 = byRig.filter(g => SAIL_RIG[g.rig]).map(g => {
+const who = swMastGroup(g.idx, n);
+const one = g.idx.length === 1 && g.rig !== 'square';
+const w = SAIL_RIG[g.rig][one ? 0 : 1];
+if (who === 'her mast') return w + ' on her mast';
+if (who === 'both masts' || /^all /.test(who)) return w + ' on ' + who;
+return w + ' on ' + who;
+});
+if (H.headsails) parts7.push(H.headsails === 1 ? 'a headsail on a stay forward'
+: swNum(H.headsails) + ' headsails on the stays forward');
+let t = 'The sails are bent on: ' + swAnd(parts7) + '.';
+const l = extras();
+if (l.length) t += ' Also added: ' + swAnd(l) + '.';
+return ['Bent on', t];
+}
+return null;
+}
+function swKeelCard(spec) {
+const H = spec.hull || {};
+if (H.build === 'steel' || H.build === 'iron')
+return ['Keel laid', 'The keel goes down first: a line of heavy ' + H.build + ' plates along '
++ 'the bottom on the centreline, with the stem and sternpost at its ends. '
++ 'Every frame is set out from it.'];
+return ['Keel laid', 'One timber, stem to sternpost. Every frame is set out from it.'];
+}
 function swStageCard(spec, stage, parts) {
-return swHullSetsSail(spec.hull || {}) ? STAGE_NAMES[stage] : swPowerCard(spec, stage, parts);
+if (stage === 0) return swKeelCard(spec);
+return swHullSetsSail(spec.hull || {}) ? swSailCard(spec, stage, parts || [])
+: swPowerCard(spec, stage, parts || []);
 }
 window.SW_STAGE_CARD = swStageCard;
+window.SW_FURLED_CARD = (spec) => swFurledCard(spec);
+function swFurledCard(spec) {
+const rigs = new Set(((spec.hull || {}).masts || []).map(m => m.rig));
+const how = [];
+if (rigs.has('square')) how.push('the square sails are rolled up on their yards and tied with gaskets');
+if (rigs.has('lateen')) how.push('each lateen yard is lowered and its sail furled along it');
+if (rigs.has('gaff')) how.push('the gaff sails are lowered onto their booms');
+if (rigs.has('junk')) how.push('the battened sails are lowered and folded down onto their booms');
+if (rigs.has('crabclaw')) how.push('the crab-claw sails are rolled round their spars');
+if ((spec.hull || {}).headsails) how.push('the headsails are hauled down onto their stays');
+return ['Bent on, furled', 'The sails are bent to their spars and stowed: ' + swAnd(how)
++ '. This is how she lay in harbour and at anchor.'];
+}
 function swApplyStage() {
 if (!SW.ship) return;
 const H = SW.spec && SW.spec.hull;
@@ -312,9 +560,12 @@ SW.viewX = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z);
 }
 const engine = !swHullSetsSail(SW.spec.hull);
 let addedHere = [];
-if (engine && SW.stage >= 3) SW.ship.traverse(o => {
+if (SW.stage >= 3) SW.ship.traverse(o => {
 const p = o.userData && o.userData.part;
-if (p && p.stage === SW.stage) addedHere.push({ key: p.key, name: p.name });
+if (p && p.stage === SW.stage) {
+const sg = o.userData.seg;
+addedHere.push(sg ? { key: p.key, name: p.name, mi: sg.mi, si: sg.si } : { key: p.key, name: p.name });
+}
 });
 let nm = SW.stage === 1 ? trad.s1
 : SW.stage === 2 ? trad.s2
@@ -323,12 +574,7 @@ if (trad['s' + SW.stage]) nm = trad['s' + SW.stage];
 else if (trad.s3 && SW.stage > 3 && SW.stage < 7) nm = trad.s3;
 const cloth = !engine;
 if (SW.stage === 7 && SW.furled && cloth)
-nm = ['Bent on, furled', 'The canvas is bent to its spars and stowed: square sails rolled '
-+ 'on their yards in harbour gaskets with the bunt gathered at the '
-+ 'slings, gaff sails lowered onto their booms, a junk\'s battens '
-+ 'dropped into their stack. This is how a ship spends most of her '
-+ 'life — canvas wears out in use, and it was set only when she '
-+ 'was going somewhere.'];
+nm = swFurledCard(SW.spec);
 document.getElementById('swStageName').textContent = nm[0];
 document.getElementById('swStageWhat').textContent = nm[1];
 document.getElementById('swOrder').textContent = trad.label;
