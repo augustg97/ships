@@ -1351,7 +1351,13 @@ group.add(g);
 }
 const HULL_VERT = SHADERS['HULL_VERT.vert'];
 const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
+function gaffTopmastOf(mk, lower) {
+return (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+? mk.truckM - 0.88 * lower : lower * 0.52;
+}
 function mastLowerOf(mk, steelMain, footY) {
+if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+return mk.truckM * mk.capFrac;
 if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
 return footY !== undefined ? mk.truckWLM - footY : 0;
 if (mk.truckM !== undefined && mk.rig === 'square') {
@@ -1633,7 +1639,7 @@ group.add(tag(rp, 'reefPoint', null, PARTS.reefPoint.what + ` ${eyelets.length} 
 const segs = mk.rig === 'lateen' ? []
 : (mk.rig === 'pole' || mk.rig === 'none') ? [lower]
 : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
-: mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
+: mk.rig === 'gaff' ? (mk.topmast ? [lower, gaffTopmastOf(mk, lower)] : [lower])
 : [lower, top, tg];
 const poleM = segs.reduce((a2, s2) => a2 + s2, 0);
 let segR;
@@ -11018,12 +11024,13 @@ rigDeckY = foot; rigTruckY = head;
 const mk = (S.masts || [])[topSeg.mi] || {};
 rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
 : (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
+: (mk.truckM !== undefined && mk.rig === 'gaff' && mk.capFrac !== undefined) ? 'record: truckM ' + mk.truckM + ' m deck to truck, the cap at the plate-read ' + mk.capFrac + ' of it'
 : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
 : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
 : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
 : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
 rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
-lower: (mk.heightM !== undefined || mk.truckWLM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
+lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
 }
 } }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,

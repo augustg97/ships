@@ -181,6 +181,8 @@ const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
 'sheet', 'tack', 'ratline', 'oar', 'mast', 'parrel']);
 const HSlo = (H.masts || []).some(mk => mk.truckWLM !== undefined) ? SHIPS_HULL.hullSurface(H) : null;
 const lowerOf = mk => {
+if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+return mk.truckM * mk.capFrac;
 if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
 return mk.truckWLM - HSlo.deck(mk.at);
 if (mk.truckM !== undefined && mk.rig === 'square') {
@@ -1571,6 +1573,36 @@ if (hi > lo && Math.abs((hi - lo) - mk.truckM) > 0.75)
 say(v.id, 'mast short of its recorded flag-button',
 `mast ${i} spans ${(hi - lo).toFixed(2)} m deck-to-truck against the record's `
 + `${mk.truckM} m`);
+});
+(H.masts || []).forEach((mk, i) => {
+if (mk.rig !== 'gaff') return;
+if (mk.truckM !== undefined && mk.capFrac === undefined)
+{ say(v.id, 'a gaff truck with no cap share', `mast ${i}: truckM ${mk.truckM} and no capFrac`); return; }
+if (mk.capFrac === undefined) return;
+if (!mk.topmast || !(mk.capFrac >= 0.3 && mk.capFrac <= 0.9))
+say(v.id, 'a gaff cap share out of its domain', `mast ${i}: topmast ${mk.topmast}, capFrac ${mk.capFrac}`);
+const CR = mk.capRead;
+if (!CR || !(CR.provenance && CR.provenance.length > 20) || !(CR.capOverDeckPx > 0 && CR.truckOverDeckPx > 0))
+say(v.id, 'a gaff cap share with no plate read', `mast ${i}: capRead absent or incomplete`);
+else if (Math.abs(CR.capOverDeckPx / CR.truckOverDeckPx - mk.capFrac) > 0.02)
+say(v.id, "a gaff cap share off its plate read", `mast ${i}: read ${(CR.capOverDeckPx / CR.truckOverDeckPx).toFixed(3)}, record ${mk.capFrac}`);
+const segsB = [];
+g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg && sg.mi === i) segsB[sg.si] = sg; });
+if (segsB.length !== 2 || !segsB[0] || !segsB[1])
+{ say(v.id, 'a recorded gaff topmast not built', `mast ${i}: ${segsB.filter(Boolean).length} segment(s) built, want lower + topmast`); return; }
+const foot = segsB[0].footY, cap = segsB[0].headY, truck = segsB[1].headY;
+if (Math.abs((cap - foot) - mk.truckM * mk.capFrac) > 0.1)
+say(v.id, 'a gaff lower mast off its cap share', `mast ${i}: cap ${(cap - foot).toFixed(2)} m over its foot, record ${(mk.truckM * mk.capFrac).toFixed(2)}`);
+if (Math.abs((truck - foot) - mk.truckM) > 0.1)
+say(v.id, 'a gaff topmast off its recorded truck', `mast ${i}: truck ${(truck - foot).toFixed(2)} m over its foot, record ${mk.truckM}`);
+if (!(segsB[1].footY < cap - 0.3 && segsB[1].footY > foot + (cap - foot) * 0.7))
+say(v.id, 'a gaff topmast heel outside the doubling', `mast ${i}: heel ${(segsB[1].footY - foot).toFixed(2)} m, cap ${(cap - foot).toFixed(2)} m`);
+let throat = Infinity;
+g.traverse(o => { const t = o.isMesh && tagOf(o); if (!t || t.key !== 'yard' || t.name !== 'Gaff') return;
+const b2 = new THREE.Box3().setFromObject(o);
+if (Math.abs(b2.min.x - segsB[0].headX) < (H.beam || 8) * 0.6 && b2.min.y > foot) throat = Math.min(throat, b2.min.y); });
+if (throat < Infinity && throat > cap)
+say(v.id, 'a gaff hoisted above its lower masthead', `mast ${i}: gaff's lowest point ${(throat - foot).toFixed(2)} m over the foot, cap ${(cap - foot).toFixed(2)} m`);
 });
 g.traverse(o => {
 if (!o.isGroup || !o.userData.part || o.userData.part.key !== 'anchor') return;
@@ -5025,7 +5057,7 @@ if (Math.abs(U.rigDeckY - tallest.foot) > 0.02 || Math.abs(U.rigTruckY - tallest
 say(v.id, "the card's rig height is one segment",
 `the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
 const mk = H.masts[tmi] || {};
-const wantRecord = (mk.truckM !== undefined && mk.rig === 'square') || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
+const wantRecord = (mk.truckM !== undefined && (mk.rig === 'square' || (mk.rig === 'gaff' && mk.capFrac !== undefined))) || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
 if (!U.rigTruckFrom)
 say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
 else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)
@@ -5755,7 +5787,7 @@ const axisOf = pts => {
 const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
 let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
 for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
-const d = new THREE.Vector3(0, 1, 0);
+const d = new THREE.Vector3(0.31, 0.89, 0.33).normalize();
 for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
 if (d.y < 0) d.negate();
 let tMin = 1e9, tMax = -1e9; const ts = [];
@@ -5857,7 +5889,7 @@ const axisOf = pts => {
 const c = new THREE.Vector3(); for (const q of pts) c.add(q); c.divideScalar(pts.length);
 let xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
 for (const q of pts) { const dx = q.x - c.x, dy = q.y - c.y, dz = q.z - c.z; xx += dx * dx; xy += dx * dy; xz += dx * dz; yy += dy * dy; yz += dy * dz; zz += dz * dz; }
-const d = new THREE.Vector3(0, 1, 0);
+const d = new THREE.Vector3(0.31, 0.89, 0.33).normalize();
 for (let it = 0; it < 60; it++) d.set(xx * d.x + xy * d.y + xz * d.z, xy * d.x + yy * d.y + yz * d.z, xz * d.x + yz * d.y + zz * d.z).normalize();
 if (d.y < 0) d.negate();
 let tMin = 1e9, tMax = -1e9; const ts = [];

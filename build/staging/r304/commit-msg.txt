@@ -1,0 +1,9 @@
+Round 304: Endurance's main and mizzen are built as a lower mast and a topmast, as Hurley's beset broadside shows them.
+
+Each cap stands at the share of the truck read off the plate (main 0.56, mizzen 0.61; the same read on the
+fore lands within 0.04 of its known stack). The gaff hangs under the cap, and the topmast stands bare above
+it to the record's truck. Record: topmast, truckM, capFrac and capRead on both masts. Builder: mastLowerOf
+and gaffTopmastOf solve the stack. Audit: new rule A-GAFF-TOPMAST, six proofs. The audit's principal-axis
+iteration now starts off every axis; it had read an exactly level yard as vertical.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

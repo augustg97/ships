@@ -6691,19 +6691,47 @@
           },
           {
             "at": 0.537,
-            "heightM": 33.5,
             "rig": "gaff",
             "rake": 2,
-            "shrouds": 7
+            "shrouds": 7,
+            "topmast": true,
+            "truckM": 33.5,
+            "capFrac": 0.56,
+            "capRead": {
+              "plate": "RMG P00018 (build/hurley-broadside.png)",
+              "capRailRow": 630,
+              "bulwarkPx": 16.7,
+              "stepRow": 500,
+              "truckFadeRow": 385,
+              "capOverDeckPx": 146.7,
+              "truckOverDeckPx": 261.7,
+              "scalePxPerM": 12.4,
+              "script": "build/staging/r304/r304_steps.py",
+              "provenance": "Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743), read in r304 by build/staging/r304/r304_steps.py: the darkness of each pole summed across it, row by row, which measures its width where the blur is wider than the spar. The main pole sums to about 260 over rows 425-490 and steps to about 520 below row 500 (the half-way crossing, +/- 3 rows): a thin topmast over a thick lower mast, with the gaff's throat just under the step. The cap rail stands at row 630 (r285) and the deck 16.7 px under it (the plan's 1.35 m bulwark, r272), so the cap is 146.7 px over the deck. The pole fades to half its plateau at row 385 (+/- 6), 261.7 px over the deck, so the cap stands at 146.7/261.7 = 0.56 of the truck. A thin pole may fade before its truck, which makes this share a bound from above. The same read on the fore gives 0.55 for its top against the builder's 0.586 for the fore's stack, so the method lands within 0.04 on a mast whose sections are known. The heeled plate (build/endurance-heeled.png, Commons 4776 px copy in build/staging/r280) shows the mizzen's crosstrees with the topmast standing beside the lower masthead. The plate gives no lengths: the truck stays the record's figure (trucksContested), and only the cap's share of it is read here. Hurley's night plate (August 1915) shows the main ending at a capped head level with the fore topsail yard, which may be a struck topmast; it is not read here."
+            }
           },
           {
             "at": 0.839,
-            "heightM": 26.8,
             "rig": "gaff",
             "rake": 4,
             "shrouds": 5,
             "boomFootM": 4.15,
-            "boomFootProvenance": "PLATE READ, r273/r275: the mizzen boom's jaws (the gooseneck) 4.0-4.3 m over the main deck at the mast, +/- 0.4, read off Hurley's plate from the starboard quarter (Commons a090007, State Library NSW, 1500x1124, ~24 px/m at the stern) in r273, where the boom lies against the mast above the deckhouse; the boom's rise aft (the cock) is NOT read from any plate of this ship and stands at the class minimum or at what the compass platform's box demands (the builder's derivation); a plate of her with the spanker set at a readable scale would replace both."
+            "boomFootProvenance": "PLATE READ, r273/r275: the mizzen boom's jaws (the gooseneck) 4.0-4.3 m over the main deck at the mast, +/- 0.4, read off Hurley's plate from the starboard quarter (Commons a090007, State Library NSW, 1500x1124, ~24 px/m at the stern) in r273, where the boom lies against the mast above the deckhouse; the boom's rise aft (the cock) is NOT read from any plate of this ship and stands at the class minimum or at what the compass platform's box demands (the builder's derivation); a plate of her with the spanker set at a readable scale would replace both.",
+            "topmast": true,
+            "truckM": 26.8,
+            "capFrac": 0.61,
+            "capRead": {
+              "plate": "RMG P00018 (build/hurley-broadside.png)",
+              "capRailRow": 645,
+              "bulwarkPx": 16.7,
+              "stepRow": 507,
+              "truckFadeRow": 409,
+              "capOverDeckPx": 154.7,
+              "truckOverDeckPx": 252.7,
+              "scalePxPerM": 12.4,
+              "script": "build/staging/r304/r304_steps.py",
+              "provenance": "Hurley's beset broadside (RMG P00018, build/hurley-broadside.png, 4800x3743), read in r304 by build/staging/r304/r304_steps.py: the darkness of each pole summed across it, row by row, which measures its width where the blur is wider than the spar. The mizzen pole sums to about 200 over rows 425-490 and steps to about 950 below row 507 (the half-way crossing, +/- 3 rows): a thin topmast over a thick lower mast, with the gaff's throat just under the step. The cap rail stands at row 645 (r285) and the deck 16.7 px under it (the plan's 1.35 m bulwark, r272), so the cap is 154.7 px over the deck. The pole fades to half its plateau at row 409 (+/- 6), 252.7 px over the deck, so the cap stands at 154.7/252.7 = 0.61 of the truck. A thin pole may fade before its truck, which makes this share a bound from above. The same read on the fore gives 0.55 for its top against the builder's 0.586 for the fore's stack, so the method lands within 0.04 on a mast whose sections are known. The heeled plate (build/endurance-heeled.png, Commons 4776 px copy in build/staging/r280) shows the mizzen's crosstrees with the topmast standing beside the lower masthead. The plate gives no lengths: the truck stays the record's figure (trucksContested), and only the cap's share of it is read here. Hurley's night plate (August 1915) shows the main ending at a capped head level with the fore topsail yard, which may be a struck topmast; it is not read here."
+            }
           }
         ],
         "build": "frame",
@@ -6772,7 +6800,7 @@
           "bars": 8
         },
         "capstanProvenance": "Bar capstan of the European tradition, a type-period CLASS DEFAULT — no hull-specific plate; counts are class defaults (whelps 6: Falconer 1769 pl. II figs 11-12 resolve six, period range 6-8). Form and proportions from Falconer 1769 CAPSTERN (whelps drumhead-to-deck like buttresses, chocks, two iron pawls, bars heaved at the breast) and pl. II fig 11 (engraving, widths ~±10%: height ≈ 0.86 of drumhead dia, neck sweep 0.82 flaring to 1.0 at the deck). Sized to the men at its bars.",
-        "trucksContested": "CONTESTED, r285: the record's mast heights (heightM 18.8 / 33.5 / 26.8; the fore figure is a lower mast the builder stacks a topmast and a topgallant mast on, to a built fore truck about 32 m over the deck; stationProvenance reads the trucks off the beset broadside at 12.6 px/m as fore 34.3, main 35.2, mizzen 29.3 m over the water) against r285's read of the same plate at 12.4 +/- 0.4 px/m from the mast spacing: the fore pole vanishes 248 px over the cap (21.4 +/- 1.5 m over the deck, 24.8 over the water), the main's 310 +/- 20 px (26.4 +/- 2 m over the deck), the mizzen's 270 +/- 20 px (23.1 +/- 2 m over the deck); the funnel's top 54 px over the cap (4.4 m; the record's 6.5 m over the deck is 5.15 m over the cap, 64 px). The old figures cannot be reproduced from the plate at any one scale: 34.3 m over the water at 12.6 px/m puts the fore truck at row 230, where nothing is drawn, and the funnel's '5.7 m over the rail' wants 9.5 px/m. A thin pole may fade before its truck, which bounds this read from above by a few metres, not by ten. NOT RESOLVED HERE: a plate with the hull to the waterline and the masts in it, or the RMG plan's mast table, settles it; until then the built masts stand at the record's heights and this field says they are contested."
+        "trucksContested": "CONTESTED, r285: the record's mast heights (fore heightM 18.8, main and mizzen truckM 33.5 / 26.8 deck to truck since r304, which gave them topmasts at the plate's cap shares; the fore figure is a lower mast the builder stacks a topmast and a topgallant mast on, to a built fore truck about 32 m over the deck; stationProvenance reads the trucks off the beset broadside at 12.6 px/m as fore 34.3, main 35.2, mizzen 29.3 m over the water) against r285's read of the same plate at 12.4 +/- 0.4 px/m from the mast spacing: the fore pole vanishes 248 px over the cap (21.4 +/- 1.5 m over the deck, 24.8 over the water), the main's 310 +/- 20 px (26.4 +/- 2 m over the deck), the mizzen's 270 +/- 20 px (23.1 +/- 2 m over the deck); the funnel's top 54 px over the cap (4.4 m; the record's 6.5 m over the deck is 5.15 m over the cap, 64 px). The old figures cannot be reproduced from the plate at any one scale: 34.3 m over the water at 12.6 px/m puts the fore truck at row 230, where nothing is drawn, and the funnel's '5.7 m over the rail' wants 9.5 px/m. A thin pole may fade before its truck, which bounds this read from above by a few metres, not by ten. NOT RESOLVED HERE: a plate with the hull to the waterline and the masts in it, or the RMG plan's mast table, settles it; until then the built masts stand at the record's heights and this field says they are contested."
       },
       "rows": [
         [

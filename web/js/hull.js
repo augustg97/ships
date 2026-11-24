@@ -2266,7 +2266,22 @@ const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
    r299 raised her C deck 0.6 m under the foremast and a recorded 52.2 m pole carried the truck
    up with it, 2.4 m over the plan. `footY` is the deck the pole steps on; a call that cannot
    name one gets no pole from a truck record. */
+/* ── r304: A GAFF MAST WITH A TOPMAST MAY BE RECORDED BY ITS TRUCK AND THE CAP'S SHARE OF IT ──
+   Endurance's main and mizzen were drawn as single poles 33.5 and 26.8 m tall with the gaff
+   hoisted to 0.86 of them. Hurley's beset broadside shows each as a thick lower mast stepping
+   to a thin topmast about halfway up, level with the fore's top. A plate of this kind gives no
+   lengths, only where along the mast the step stands, so the record states the truck over the
+   deck (`truckM`) and the cap's height as a share of it (`capFrac`), and the stack is solved:
+   the lower mast is truckM * capFrac, and the topmast, whose heel stands at 0.88 of the lower
+   (the doubling, as on every fidded mast here), runs from there to the truck. Without capFrac a
+   gaff topmast keeps the class 0.52 of the lower. */
+function gaffTopmastOf(mk, lower) {
+  return (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+    ? mk.truckM - 0.88 * lower : lower * 0.52;
+}
 function mastLowerOf(mk, steelMain, footY) {
+  if (mk.rig === 'gaff' && mk.topmast && mk.truckM !== undefined && mk.capFrac !== undefined)
+    return mk.truckM * mk.capFrac;
   if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
     return footY !== undefined ? mk.truckWLM - footY : 0;
   if (mk.truckM !== undefined && mk.rig === 'square') {
@@ -2888,7 +2903,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
     const segs = mk.rig === 'lateen' ? []                       // built below, from the yard
                : (mk.rig === 'pole' || mk.rig === 'none') ? [lower]
                : (mk.rig === 'crabclaw' || mk.rig === 'junk') ? [lower]
-               : mk.rig === 'gaff' ? (mk.topmast ? [lower, lower * 0.52] : [lower])
+               : mk.rig === 'gaff' ? (mk.topmast ? [lower, gaffTopmastOf(mk, lower)] : [lower])
                : [lower, top, tg];
     /* ── AN IRON MAST IS A TUBE, AND ITS DIAMETER IS THE RECORD'S ─────────────────────
        beam x 0.06 was the wooden law's calibration point, and on an iron hull it kept the
@@ -17036,6 +17051,7 @@ function buildShip(S, opts) {
         const mk = (S.masts || [])[topSeg.mi] || {};
         rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
                      : (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
+                     : (mk.truckM !== undefined && mk.rig === 'gaff' && mk.capFrac !== undefined) ? 'record: truckM ' + mk.truckM + ' m deck to truck, the cap at the plate-read ' + mk.capFrac + ' of it'
                      : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
                      : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
                      : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
@@ -17046,7 +17062,7 @@ function buildShip(S, opts) {
            `lower` says what the lower mast is (this ship's recorded heightM, or a beam share); `n` is the
            count of segments the class fractions carry it through; truckM / heightM are the record's figures. */
         rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
-                        lower: (mk.heightM !== undefined || mk.truckWLM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
+                        lower: (mk.heightM !== undefined || mk.truckWLM !== undefined || mk.truckM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
       }
     } }
   group.userData = { hullMat, sails, spec: S, furled: FURLED,
