@@ -28462,3 +28462,13 @@ The capture runs `run-resume.sh`, which chains `r311_resume.py` runs from the fi
 **r312 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r312` already exists before writing into it. Then (0y¹³⁸) for the 74, if a plate of a working 74 at anchor is in reach. Else (0y¹⁴²).**
 
 **Live stamp: docs/index.html carries data-version 1795556878 at the build.**
+
+**Live stamp VERIFIED: 1795556878 on https://augustg97.github.io/ships/index.html at 13:49:44 PST, about 95 s after the push. The published `data/vessels.json` carries all five traces (the sheer, two island tops, two well tops), and the published `audit-hulls.js` carries A-PLATE-TRACE. First paint is 8.51 MB against the 8.6 MB budget.**
+
+**THE FRAMES: ALL 65 SCORED.** Captured by `run-resume.sh`: run 1, 14 frames, died at `ship-galley` on the 150 s FRAME_READY wait; run 2, 46 frames, died at 14:15 on the same wait; run 3 took the last 5. Then `ship-great-eastern` and `ship-titanic` were each recaptured alone by `frame_baseline.py check --frame` (`recap-*.out`). Scored with r277's offline scorer (`score-run1-current.out` to `score-run3-current.out`).
+
+- No frame is accepted. None moved beyond the gate on the final tree.
+- `ship-titanic`: 0.000% in run 2, whose page may have loaded the r310 record; **0.006% / 0.002 recaptured alone on the final tree**, inside the gate. The 0.01 m change to the wells' bulwark tops is below a pixel at the frame's distance, as the witness predicted.
+- `aboard-titanic`: 0.001%, captured after the swap, inside the gate.
+- One **capture fault**: `ship-great-eastern` 89.979% in run 1 captured the globe, because the Shipwright view never opened (`ge-run1-small.png`). Recaptured alone: 0.000%.
+- Every other frame is inside the gate. The largest is `passage-sahul` at 0.047%.

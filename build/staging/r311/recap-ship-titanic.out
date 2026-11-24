@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-titanic                 http://localhost:8149/?frozen=1#v=ship&s=titanic
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-titanic                    0.006%     0.002  ok
+
+  all frames within tolerance.
+
