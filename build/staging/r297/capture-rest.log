@@ -1,0 +1,57 @@
+to capture 24
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+ship-treasure ok 42 s attempt 1
+    · aboard-treasure              http://localhost:8149/?frozen=1#e=4&f=zhenghe
+aboard-treasure ok 43 s attempt 1
+    · ship-clipper                 http://localhost:8149/?frozen=1#v=ship&s=clipper
+ship-clipper ok 36 s attempt 1
+    · aboard-clipper               http://localhost:8149/?frozen=1#e=5&f=woolrun
+aboard-clipper ok 35 s attempt 1
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+      ! Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED
+shipwright-ahead ok 36 s attempt 1
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+shipwright-astern ok 38 s attempt 1
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+shipwright-furled ok 35 s attempt 1
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+shipwright-hounds ok 41 s attempt 1
+    · shipwright-corbis            http://localhost:8149/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15
+shipwright-corbis ok 35 s attempt 1
+    · ship-azzam                   http://localhost:8149/?frozen=1#v=ship&s=azzam
+ship-azzam ok 38 s attempt 1
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+ship-endurance ok 34 s attempt 1
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+action-salamis ok 52 s attempt 1
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+board-salamis ok 18 s attempt 1
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+action-gravelines ok 22 s attempt 1
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+action-lepanto ok 43 s attempt 1
+    · action-myeongnyang           http://localhost:8149/?frozen=1#v=action&bt=myeongnyang&day=3&cb=45&cd=1100&ch=13
+action-myeongnyang ok 50 s attempt 1
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+wake-plan ok 33 s attempt 1
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+ship-ever-given ok 48 s attempt 1
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+sea-ever-given ok 33 s attempt 1
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+passage-sahul ok 27 s attempt 1
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+sea-dugout-floor ok 15 s attempt 1
+    · sea-canoe-floor              http://localhost:8149/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25
+sea-canoe-floor ok 24 s attempt 1
+    · ship-slave-ship              http://localhost:8149/?frozen=1#v=ship&s=slave-ship
+ship-slave-ship ok 37 s attempt 1
+    · ship-carrack                 http://localhost:8149/?frozen=1#v=ship&s=carrack
+ship-carrack ok 38 s attempt 1
+CAPTURE DONE 20:49:23
