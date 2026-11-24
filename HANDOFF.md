@@ -27730,6 +27730,21 @@ The restored copy scored 0.
 - **(0y¹³¹), NEW: the capping's section.** The capping on every steel hull is a class section, 0.72 m deep on Titanic (beam × 0.0256), and it reads as a grey pipe along the top of each well. Nothing on the plan gives its depth.
 - **(0y¹²⁸), (0y¹²⁹), (0y¹²³), (0y¹²⁵)** and the named residuals (0y¹²⁴), (0y¹²⁰), (0y¹²¹), (0y¹²²), (0y¹¹³), (0y¹¹⁶), (0y¹¹⁷) stand as r294 to r302 list them.
 
-**r304 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r304` already exists before writing into it. Then (0y¹²⁹), the furled-state button with no visible label: read `swSetFurled` for the label it sets and check the button's colours. It is a short fix to a control a visitor uses. Then (0y¹²⁸): Endurance's topmasts, off the Hurley plates. Else (0y¹²³).**
+**r304 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r304` already exists before writing into it. Then (0y¹²⁸): Endurance's topmasts, off the Hurley plates (`build/hurley-*.jpg`). Else (0y¹³⁰), the wells' openings. Else (0y¹²³).** (0y¹²⁹) was closed in this round's receipt below.
 
 **Live stamp: docs/index.html carries data-version 1795520285 at the build; the live check and the frame results are in the receipt that follows.**
+
+**Live stamp VERIFIED: 1795520285 on https://augustg97.github.io/ships/index.html at 03:39:32 PST, about 80 s after the push. The published `js/hull.js`, `js/shipwright.js`, `audit-hulls.js` and `data/vessels.json` are byte-identical to docs/.**
+
+**(0y¹²⁹) CLOSED IN THIS RECEIPT: THE FURLED-STATE BUTTON.** `swSetFurled` sets the label correctly ("Set sail") and adds the class `on`. The fault was in the stylesheet. `.mini.on` (two classes) gives the button a brass ground and `--abyss` text. `#swNav .mini` (an id and a class) outranks it and resets the ground to `--panel`. `--abyss` is the page's pale paper colour, so the label was drawn pale on the pale panel and the button looked blank. A `#swNav .mini.on` rule in `styles.css` restores the brass ground. `pair-furl-button.png` shows the old baseline over the new frame: the button now reads SET SAIL in pale letters on brass. Nothing else on the frame moved.
+
+**THE FRAMES: ALL 65 SCORED (`build/staging/r303/ratchet.out`, then three single-frame checks).** The ratchet ran alone on the round's tree, at about 38 s a frame under load 7. It flagged three frames:
+
+- `ship-titanic`, 0.103% / 0.079, **predicted and ACCEPTED**. `pair-ship-titanic-crop.png` shows the old baseline over the new frame. Only the two wells change: the black bulwark now stands where the tan deck edge showed.
+- `globe-crossing`, 9.825%, **a capture fault**. The sea's wind-streak texture was missing (`pair-globe-crossing.png`), which is the dropped-field-tiles fault r295 recorded. Recaptured alone, it scored 0.020%, inside the gate.
+- `action-lepanto`, 98.012%, **a capture fault**. The frame shows the globe in place of the Action view (`pair-action-lepanto.png`). Recaptured alone, it scored 0.003%, inside the gate.
+
+`aboard-titanic` scored 0.016%, inside the gate. The Sea camera does not look into the wells.
+
+After the ratchet, the furl fix was checked alone: `shipwright-furled` 0.190% / 0.260, **predicted and ACCEPTED**. No other frame shows the button in its `on` state. The other 61 frames were inside the gate.
+

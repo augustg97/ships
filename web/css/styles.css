@@ -480,6 +480,10 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swNav .mini{font-size:15px;line-height:1;padding:7px 16px;background:var(--panel);
   border:1px solid var(--edge)}
 #swNav .mini:hover{border-color:var(--edge-strong);color:var(--ink)}
+/* r303 (0y129): the toggle's ON state. `#swNav .mini` (an id and a class) outranks `.mini.on` (two
+   classes), so in the furled state the button kept .on's text colour (--abyss) and lost its brass
+   ground: 'Set sail' was drawn in the panel's own pale tone on the panel and read as a blank button. */
+#swNav .mini.on{color:var(--abyss);background:var(--brass);border-color:var(--brass)}
 /* the canvas-state toggle reads as a labelled control, not a third arrow */
 #swNav #swFurl{font-size:10px;letter-spacing:.13em;text-transform:uppercase;padding:9px 14px}
 #swNavPos{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
