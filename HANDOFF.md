@@ -27834,3 +27834,14 @@ After the ratchet, the furl fix was checked alone: `shipwright-furled` 0.190% / 
 **r305 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r305` already exists before writing into it. Then (0y¹³³), the gaff topmasts' rigging, because it touches three hulls. Else (0y¹³²). Else (0y¹³⁰).**
 
 **Live stamp: docs/index.html carries data-version 1795525521 at the build; the live check is in the receipt that follows.**
+
+**Live stamp VERIFIED: 1795525521 on https://augustg97.github.io/ships/index.html at 05:07:08 PST, about 95 s after the push. The published `js/hull.js`, `data/vessels.json` and `audit-hulls.js` are byte-identical to docs/.**
+
+**THE FRAMES: ALL 65 SCORED (`build/staging/r304/ratchet.out`, then two single-frame checks).** The ratchet ran beside the close on the round's tree, at about 38 s a frame under load 7 to 13. It flagged four frames:
+
+- `ship-endurance`, 5.172% / 1.847, **predicted and ACCEPTED**. `pair-ship-endurance.png` shows the old baseline over the new frame. The main and mizzen gaff sails are set lower, each topmast stands bare above its sail to the same truck, and the fore's lower mast is thicker.
+- `ship-yamato`, 0.075% / 0.026, **a berth-neighbour mover, ACCEPTED**. Only Endurance changes, in the next berth at the frame's left edge (`pair-ship-yamato-crop.png`).
+- `globe-default`, 11.148%, **a capture fault**. The voyage markers stood at other positions on the globe (`pair-globe-default.png`). Recaptured alone, it scored 0.023%, inside the gate.
+- `aboard-off`, 26.806%, **a capture fault**. The container ship stood at 2°30′S 99°E where the baseline has 8°32′S 110°E (`pair-aboard-off.png`). Recaptured alone, it scored 0.029%, inside the gate. Endurance is in neither era. Both faults moved voyage positions in the full run and in no single-frame run. If this happens again, the next round should look at what the voyage clock reads under `?frozen` when the page follows a long run.
+
+The other 61 frames were inside the gate.
