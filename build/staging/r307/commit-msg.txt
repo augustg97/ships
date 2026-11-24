@@ -1,0 +1,9 @@
+Round 307: Titanic's wash ports, read off the 1911 plan; the forward pair open with bars, the after pair closed by doors; the capping bounded at 0.31 m
+
+The plan's rectangles under each well's bulwark line are wash ports (Bob Read). Each
+is recorded with its read u-span, top and bottom, cut through the bulwark, and fitted
+with doors (aft) or two bars (forward). The bulwark is white inboard. hull.capM 0.31,
+the plan line's thickness, replaces the 0.72 m class capping that covered the ports.
+New audit rule A-WASH-PORT; 33 hulls, 0 problems.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

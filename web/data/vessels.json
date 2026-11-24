@@ -4409,7 +4409,60 @@
                 "rmsPx": 0.32,
                 "n": 53,
                 "read": "build/staging/r303/r303_trace.py, r303_read.py"
-              }
+              },
+              "ports": [
+                {
+                  "u": [
+                    0.1376,
+                    0.1523
+                  ],
+                  "topM": 11.63,
+                  "bottomM": 10.7,
+                  "read": {
+                    "cols": [
+                      3049.5,
+                      3099.0
+                    ],
+                    "lineUnderRow": 672.5,
+                    "bottomRow": 684.5,
+                    "datumRow": 823.94,
+                    "datumM": 0.0,
+                    "pxPerM": 13.0268,
+                    "script": "build/staging/r307/r307_read.py, r307_rows.py"
+                  },
+                  "doors": "removed",
+                  "bars": [
+                    0.33,
+                    0.67
+                  ]
+                },
+                {
+                  "u": [
+                    0.164,
+                    0.1779
+                  ],
+                  "topM": 11.37,
+                  "bottomM": 10.56,
+                  "read": {
+                    "cols": [
+                      2963.0,
+                      3010.0
+                    ],
+                    "lineUnderRow": 676.5,
+                    "bottomRow": 687.0,
+                    "datumRow": 824.59,
+                    "datumM": 0.0,
+                    "pxPerM": 13.0268,
+                    "script": "build/staging/r307/r307_read.py, r307_rows.py"
+                  },
+                  "doors": "removed",
+                  "bars": [
+                    0.33,
+                    0.67
+                  ]
+                }
+              ],
+              "inboardCol": "#e4e2dc"
             },
             {
               "name": "After well",
@@ -4443,10 +4496,56 @@
                 "rmsPx": 0.35,
                 "n": 66,
                 "read": "build/staging/r303/r303_trace.py, r303_read.py"
-              }
+              },
+              "ports": [
+                {
+                  "u": [
+                    0.8444,
+                    0.8576
+                  ],
+                  "topM": 11.25,
+                  "bottomM": 10.4,
+                  "read": {
+                    "cols": [
+                      658.0,
+                      705.5
+                    ],
+                    "lineUnderRow": 694.5,
+                    "bottomRow": 705.48,
+                    "datumRow": 841.02,
+                    "datumM": 0.0,
+                    "pxPerM": 13.0268,
+                    "script": "build/staging/r307/r307_read.py, r307_rows.py"
+                  },
+                  "doors": "closed"
+                },
+                {
+                  "u": [
+                    0.8697,
+                    0.8814
+                  ],
+                  "topM": 11.37,
+                  "bottomM": 10.54,
+                  "read": {
+                    "cols": [
+                      572.5,
+                      614.5
+                    ],
+                    "lineUnderRow": 693.5,
+                    "bottomRow": 704.4,
+                    "datumRow": 841.64,
+                    "datumM": 0.0,
+                    "pxPerM": 13.0268,
+                    "script": "build/staging/r307/r307_read.py, r307_rows.py"
+                  },
+                  "doors": "closed"
+                }
+              ],
+              "inboardCol": "#e4e2dc"
             }
           ],
-          "wellsProvenance": "READ, r303, off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (build/staging/r295/plates/side-plan-1911.png, 13.03 px/m). The plan draws each well's bulwark top as a heavy solid line, 4 to 5 px thick, running from the raised end's break to the house. Each line was traced every 3 columns as the centre of its dark run (the forward well on columns 2930 to 3090, 53 points; the after well on 565 to 760, 66 points; build/staging/r303/r303_trace.py), fitted as a straight line in the column (rms 0.32 and 0.35 px, about 0.03 m), and read at each well's two ends over r297's tilted waterline. The ends are the forecastle's and poop's recorded breaks (islands.list) and the house's stations (houseAt), placed on the plan through the loft's deck-level line (r303_read.py). The line's own thickness, 0.3 to 0.4 m, bounds where in it the plating's top edge lies; the centre is recorded. The forward well's top falls from 11.84 m at the forecastle break to 11.40 m at the house, the after well's rises from 11.29 m at the house to 11.58 m at the poop. The plan also draws rectangles hanging under the line in both wells, which may be freeing ports or openings in the bulwark; the model does not draw them."
+          "wellsProvenance": "READ, r303, off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (build/staging/r295/plates/side-plan-1911.png, 13.03 px/m). The plan draws each well's bulwark top as a heavy solid line, 4 to 5 px thick, running from the raised end's break to the house. Each line was traced every 3 columns as the centre of its dark run (the forward well on columns 2930 to 3090, 53 points; the after well on 565 to 760, 66 points; build/staging/r303/r303_trace.py), fitted as a straight line in the column (rms 0.32 and 0.35 px, about 0.03 m), and read at each well's two ends over r297's tilted waterline. The ends are the forecastle's and poop's recorded breaks (islands.list) and the house's stations (houseAt), placed on the plan through the loft's deck-level line (r303_read.py). The line's own thickness, 0.3 to 0.4 m, bounds where in it the plating's top edge lies; the centre is recorded. The forward well's top falls from 11.84 m at the forecastle break to 11.40 m at the house, the after well's rises from 11.29 m at the house to 11.58 m at the poop. The rectangles the plan draws under the line in both wells are the wash ports (portsProvenance, r307).",
+          "portsProvenance": "READ, r307. Position and size off the 1911 side plan (Engineering vol. 91, 26 May 1911, build/staging/r295/plates/side-plan-1911.png, 13.03 px/m): each well's bulwark line has two rectangles hanging under it, found as the columns where a dark edge runs down through rows 4 to 9 under the line (forward well 2963-3010 and 3049.5-3099, 3.6 and 3.8 m; after well 572.5-614.5 and 658-705.5, 3.2 and 3.65 m). Each port's top is the underside of the bulwark line and its bottom the centre of its lower edge, read over the tilted waterline at the port's middle column. In the forward well the bottoms stand 0.05 to 0.07 m under the deck, inside one pixel (0.08 m), so those ports open to the deck. In the after well they stand 0.66 and 0.76 m over the recorded deck, which r303 found about 1 m lower there than in the forward well while the bulwark line is only 0.1 to 0.5 m lower; the model cuts them where the plan draws them and leaves the sill. Columns map to u linearly between each well's two loft-mapped ends (r303). WHAT THEY ARE, off Bob Read, 'Open Wash Ports of Titanic's Forward Well Deck' (rms-titanic.fr/otb/glossaire/titanic_open_wash_ports.pdf): wash ports to drain a sea off the well; Olympic was built with doors hinged to open outboard in both wells; Titanic's forward doors were removed during fitting out (her Southampton photographs show the white of the well through them) and each open port has two horizontal safety bars; the after well kept its doors. The plan shows the starboard side; the port side is taken as its mirror. The bars' heights (a third and two thirds of the opening) are not read off any plate. The inboard white is Read's 'white painted areas of the well deck', a colour taken from his description, not measured off a photograph."
         },
         "stationRead": {
           "plate": "the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png)",
@@ -4650,7 +4749,9 @@
         "deckMProvenance": "DERIVED, r299: the boat deck's recorded 19.0 m over the water less the C deck's read 9.60 m amidships (sheerRead), over the 3 decks the house stands above C (B, A and the boat deck): 3.133 m. It was 2.96 m while the model drew the deck at 10.1 m amidships; the plan's C deck is 0.50 m lower there, so the same three decks must each be about 0.17 m taller to reach the same boat deck.",
         "mastTopMProvenance": "CONTESTED. 62.5 m is 'approximately 205 ft above the maximum load line', the round figure that secondary accounts of her fitting-out in August 1911 give for the tops of both masts, with no drawing or measurement cited. The 1911 side plan in Engineering draws the two trucks at different heights: the fore at 60.81 m and the main at 61.87 m over its waterline (r300; each mast carries its read as truckWLM). The masts are built to the plan's reads. This figure is kept as the printed one, and the audit holds the tallest built mast within 1.5 m of it.",
         "machinery": "Two four-cylinder triple-expansion steam engines, 30,000 hp between them, turned her two wing propellers. Their exhaust steam drove a 16,000 hp low-pressure Parsons turbine on the centre propeller. The steam came from 29 coal-fired boilers with 159 furnaces, which took more than 600 tonnes of coal a day, shovelled by hand.",
-        "machineryProvenance": "Wikipedia, *RMS Titanic* (read 2026-11-24, r301), Power: three main engines, the two reciprocating engines 30,000 hp combined and the turbine 16,000 hp; 29 boilers (24 double-ended, 5 single-ended), 159 furnaces; over 600 tonnes of coal a day shovelled by 176 firemen. That the turbine ran on the reciprocating engines' exhaust steam is the standard description of the Olympic class's combination machinery; the quoted passage states the engines and outputs, not the steam path."
+        "machineryProvenance": "Wikipedia, *RMS Titanic* (read 2026-11-24, r301), Power: three main engines, the two reciprocating engines 30,000 hp combined and the turbine 16,000 hp; 29 boilers (24 double-ended, 5 single-ended), 159 furnaces; over 600 tonnes of coal a day shovelled by 176 firemen. That the turbine ran on the reciprocating engines' exhaust steam is the standard description of the Olympic class's combination machinery; the quoted passage states the engines and outputs, not the steam path.",
+        "capM": 0.31,
+        "capProvenance": "BOUNDED, r307. The capping is the heavy line the 1911 side plan draws along each well's bulwark top: 4 px thick at 13.03 px/m, 0.31 m (build/staging/r307/ports.json, lineThickM). The plan draws each wash port's top edge against that line's underside, so the capping is no deeper than the line; before this round the class section B x 0.0256 made it 0.72 m and it would have hung over the top 0.4 m of every port. The capping's own profile is not read."
       }
     },
     {

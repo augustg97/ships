@@ -1,0 +1,78 @@
+[
+ {
+  "name": "Forward well",
+  "edges": [
+   2963.0,
+   3010.0,
+   3049.5,
+   3099.0
+  ],
+  "spans": [
+   {
+    "cols": [
+     2963.0,
+     3010.0
+    ],
+    "bottomDr": 13,
+    "bottomDark": 7.1,
+    "interior": 255.0
+   },
+   {
+    "cols": [
+     3010.0,
+     3049.5
+    ],
+    "bottomDr": 13,
+    "bottomDark": 71.7,
+    "interior": 255.0
+   },
+   {
+    "cols": [
+     3049.5,
+     3099.0
+    ],
+    "bottomDr": 14,
+    "bottomDark": 0.8,
+    "interior": 254.8
+   }
+  ]
+ },
+ {
+  "name": "After well",
+  "edges": [
+   572.5,
+   614.5,
+   658.0,
+   705.5
+  ],
+  "spans": [
+   {
+    "cols": [
+     572.5,
+     614.5
+    ],
+    "bottomDr": 13,
+    "bottomDark": 22.9,
+    "interior": 255.0
+   },
+   {
+    "cols": [
+     614.5,
+     658.0
+    ],
+    "bottomDr": 17,
+    "bottomDark": 252.7,
+    "interior": 255.0
+   },
+   {
+    "cols": [
+     658.0,
+     705.5
+    ],
+    "bottomDr": 13,
+    "bottomDark": 4.0,
+    "interior": 252.8
+   }
+  ]
+ }
+]

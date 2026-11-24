@@ -1,0 +1,92 @@
+[
+ {
+  "id": "titanic",
+  "rule": "wash ports recorded and no fittings built",
+  "detail": "Forward well: no washPort group named 'Forward well wash ports'"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "Forward well port 0, +z side: the plating stands across it at the opening's mid-height 11.10 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "an open wash port's bars not built",
+  "detail": "Forward well port 0, +z side: 0 bars, the record 2"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "Forward well port 0, -z side: the plating stands across it at the opening's mid-height 11.10 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "an open wash port's bars not built",
+  "detail": "Forward well port 0, -z side: 0 bars, the record 2"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "Forward well port 1, +z side: the plating stands across it at the opening's mid-height 10.91 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "an open wash port's bars not built",
+  "detail": "Forward well port 1, +z side: 0 bars, the record 2"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "Forward well port 1, -z side: the plating stands across it at the opening's mid-height 10.91 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "an open wash port's bars not built",
+  "detail": "Forward well port 1, -z side: 0 bars, the record 2"
+ },
+ {
+  "id": "titanic",
+  "rule": "wash ports recorded and no fittings built",
+  "detail": "After well: no washPort group named 'After well wash ports'"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "After well port 0, +z side: the plating stands across it at the opening's mid-height 10.74 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a closed wash port with no door over it",
+  "detail": "After well port 0, +z side: the ray meets no door"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "After well port 0, -z side: the plating stands across it at the opening's mid-height 10.74 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a closed wash port with no door over it",
+  "detail": "After well port 0, -z side: the ray meets no door"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "After well port 1, +z side: the plating stands across it at the opening's mid-height 10.88 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a closed wash port with no door over it",
+  "detail": "After well port 1, +z side: the ray meets no door"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port not cut through the bulwark",
+  "detail": "After well port 1, -z side: the plating stands across it at the opening's mid-height 10.88 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a closed wash port with no door over it",
+  "detail": "After well port 1, -z side: the ray meets no door"
+ }
+]

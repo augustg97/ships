@@ -1,0 +1,7 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a plate-read well with its wash ports unanswered",
+  "detail": "Forward well: topRead is recorded and ports is absent; the plate draws or does not draw ports, and the record must say which"
+ }
+]

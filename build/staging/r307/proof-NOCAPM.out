@@ -1,0 +1,22 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a wash port with no room under the capping",
+  "detail": "Forward well port 0: the opening runs 10.74..11.04 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port with no room under the capping",
+  "detail": "Forward well port 1: the opening runs 10.58..10.84 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port with no room under the capping",
+  "detail": "After well port 0: the opening runs 10.40..10.68 m"
+ },
+ {
+  "id": "titanic",
+  "rule": "a wash port with no room under the capping",
+  "detail": "After well port 1: the opening runs 10.54..10.80 m"
+ }
+]
