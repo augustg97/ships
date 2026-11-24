@@ -13,6 +13,13 @@ say(m.split(':')[0], 'a provenance string with no home',
 `${m} — the path finds no object in the record to hold it`);
 const SIDE_WORD = ['starboard', 'centreline', 'port'];
 const sideOf = z => SIDE_WORD[Math.sign(+z) + 1];
+const loftDeckX = (H, u) => {
+const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
+let r = 0;
+if (u < H.forefoot) { const k = (H.forefoot - u) / H.forefoot; r = -(H.stemRake || 0) * rs * k * k * H.loa; }
+else if (u > 1 - H.run) { const k = (u - (1 - H.run)) / H.run; r = (H.sternRake || 0) * rs * k * k * H.loa; }
+return (u - 0.5) * H.lwl + r;
+};
 {
 const spend = s => String(s == null ? '' : s)
 .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
@@ -4832,8 +4839,7 @@ const rk = (SR.rakeDeg || [])[i];
 if (rk !== undefined && Math.abs((mk.rake || 0) - rk) > 0.15)
 say(v.id, 'a mast rake off its own read', `masts[${i}] rake ${mk.rake || 0} deg against the read's ${rk}`);
 });
-const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
-const xHead = -H.lwl / 2 - (H.stemRake || 0) * rs * H.loa;
+const xHead = loftDeckX(H, 0);
 const feet = {};
 g.traverse(o => { const s = o.isMesh && o.userData.seg; if (s && s.si === 0 && s.footX !== undefined && feet[s.mi] === undefined) feet[s.mi] = s.footX; });
 (H.masts || []).forEach((mk, i) => {
@@ -6410,9 +6416,39 @@ if (!grp) { say(v.id, 'an island recorded and not built', `${isl.name}, u ${isl.
 const bb = new THREE.Box3().setFromObject(grp.o);
 const wantTop = Math.max(isl.topM[0], isl.topM[1]);
 if (Math.abs(bb.max.y - wantTop) > 0.15) say(v.id, 'an island built off its recorded top', `${isl.name}: built top ${bb.max.y.toFixed(2)} m over the water, record ${wantTop.toFixed(2)}`);
-const x0 = (Math.max(0.004, isl.u[0]) - 0.5) * H.lwl, x1 = (Math.min(0.996, isl.u[1]) - 0.5) * H.lwl;
-if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+const x0 = loftDeckX(H, isl.u[0]), x1 = loftDeckX(H, isl.u[1]);
+if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record u ${isl.u[0]}-${isl.u[1]} on the loft's deck-level line ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+for (const ue of [0, 1]) {
+if (ue === 0 ? isl.u[0] > 0 : isl.u[1] < 1) continue;
+const xe = loftDeckX(H, ue), built = ue === 0 ? bb.min.x : bb.max.x;
+if (Math.abs(built - xe) > 0.1) say(v.id, "an island short of the hull's end it runs to", `${isl.name}: built to x ${built.toFixed(2)}, the loft's ${ue === 0 ? 'stem head' : 'stern end'} at ${xe.toFixed(2)}`);
+const tE = isl.topM[ue] - (H.islands.railM || 1.0), floorY = Math.min(H2.sheer(ue), tE) - 0.3;
+let low = 0, lowest = Infinity; const P3 = new THREE.Vector3();
+grp.o.updateMatrixWorld(true);
+grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+for (let i = 0; i < pa.count; i++) { P3.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+if (Math.abs(P3.x - xe) < 1.5 && P3.y < floorY) { low++; lowest = Math.min(lowest, P3.y); } } });
+const endAt = y => { let a0 = 0, b0 = 1; for (let i = 0; i < 24; i++) { const m = (a0 + b0) / 2; if (SHIPS_HULL.surfacePoint(H, H2, ue, m)[1] < y) a0 = m; else b0 = m; } return SHIPS_HULL.surfacePoint(H, H2, ue, (a0 + b0) / 2)[0]; };
+let past = 0, worstPast = 0;
+grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+for (let i = 0; i < pa.count; i++) { P3.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+if (Math.abs(P3.x - xe) > 3 || P3.y >= H2.sheer(ue) - 0.05) continue;
+const over = ue === 0 ? endAt(P3.y) - P3.x : P3.x - endAt(P3.y);
+if (over > 0.05) { past++; worstPast = Math.max(worstPast, over); } } });
+if (past) say(v.id, "an island standing out through the hull's raked end", `${isl.name}: ${past} vertices under the sheer stand up to ${worstPast.toFixed(2)} m past the shell's ${ue === 0 ? 'stem' : 'stern'} at their own height`);
+if (low) say(v.id, "a bulkhead hung under the sheer at an island's closed end", `${isl.name}: ${low} vertices within 1.5 m of the ${ue === 0 ? 'stem head' : 'stern end'} reach y ${lowest.toFixed(2)}, under the floor ${floorY.toFixed(2)} (the sheer ${H2.sheer(ue).toFixed(2)}, the island's deck ${tE.toFixed(2)})`);
 }
+const PL = H.islands.plate;
+if (PL && !(Array.isArray(isl.cols) && isl.cols.length === 2)) { say(v.id, 'an island under a plate datum with no columns', `${isl.name}: hull.islands.plate is present and isl.cols is not`); continue; }
+if (PL) {
+const xHead = loftDeckX(H, 0), xStern = loftDeckX(H, 1);
+const xp0 = xHead + (isl.cols[0] - PL.stemHeadCol) / PL.pxPerMAlongHull, xp1 = xHead + (isl.cols[1] - PL.stemHeadCol) / PL.pxPerMAlongHull;
+const e0 = bb.min.x - xp0, e1 = bb.max.x - xp1;
+if (Math.abs(e0) > 1.5 || Math.abs(e1) > 1.5)
+say(v.id, 'an island built off its plate', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, ${(bb.min.x - xHead).toFixed(1)}..${(bb.max.x - xHead).toFixed(1)} m abaft the loft's stem head; the plate's columns ${isl.cols[0]}..${isl.cols[1]} put it ${(xp0 - xHead).toFixed(1)}..${(xp1 - xHead).toFixed(1)} m abaft (${e0.toFixed(2)} / ${e1.toFixed(2)} m off; the loft's stern end ${(xStern - xHead).toFixed(1)} m abaft the head)`);
+}
+}
+if (H.stationRead && !H.islands.plate) say(v.id, 'islands on a plate-read hull with no plate datum of their own', `hull.stationRead is present and hull.islands.plate is absent, so no island's end can be read against the plate`);
 for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
 }
 if (part.container || part.forecast) {

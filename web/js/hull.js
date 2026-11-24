@@ -10376,7 +10376,19 @@ function buildSuperstructure(S, group, hullMat) {
  * that runs down to the MAIN deck, because the well deck looks at the island's front from
  * a bulwark's depth below the sheer. The wall takes the shell's own light (STEEL_FRAG on the
  * hull material's uSun/uCam, the r102 lesson) so a black island on a black hull is one
- * black. Masts keep the main deck (see islandTop in hullSurface). Record-gated. */
+ * black. Masts keep the main deck (see islandTop in hullSurface). Record-gated.
+ * ⚠ EVERY STATION LIES ON THE LOFT'S DECK-LEVEL LINE (round 294): x = (u − 0.5) L + H.rake(u),
+ * the line the shell's sheer, every mast foot and the bowsprit's heel are placed on. r292
+ * placed the island at (u − 0.5) L, which is that line only between the forefoot and the run;
+ * inside them the loft absorbs the overhangs quadratically, so the wall stood up to 5.5 m
+ * abaft the shell's own sheer at the bow, the forecastle began 6.2 m abaft the stem head and
+ * ran 6.6 m where the plate reads 12.8, and the poop stopped 4.8 m short of the stern.
+ * ⚠ AN ISLAND THAT RUNS TO THE HULL'S END CLOSES ON IT (round 294): a record end of u 0 or 1 is
+ * the stem head or the stern end itself, so the wall reaches that station (it stopped 0.7 m
+ * short at a clamp of 0.004 / 0.996) with its stations graded toward the end, where the
+ * half-breadth changes fastest. Only an end that faces a well has a bulkhead down to the main
+ * deck: at a closed end the shell is already there, and it rakes inboard below the sheer, so
+ * a bulkhead hung from the sheer's station stands out through it. */
 function buildIslands(S, group, hullMat) {
   if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
   const H = hullSurface(S);
@@ -10398,7 +10410,19 @@ function buildIslands(S, group, hullMat) {
                 uCol: { value: new THREE.Color(cover.col) }, uMode: { value: cover.mode },
                 uPlankW: { value: cover.plankW || 1 }, uButtL: { value: cover.buttL || 1 },
                 uPlankRun: { value: cover.run || 0 } } });
-  const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]);
+  const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0, Math.min(1, u)), 1.0)[2]);
+  const xAt = u => (u - 0.5) * L + H.rake(u);      // the loft's deck-level line (round 294)
+  /* where the shell stands at height y on station u, as [x, half-breadth]. A raked end leans
+     inboard below the sheer, and the poop's deck lies up to 0.85 m under it, so a deck edge
+     placed at the sheer's x and half-breadth comes out through the stern (round 294). */
+  const shellAt = (u, y) => {
+    const uc = Math.max(0, Math.min(1, u));
+    if (y >= H.sheer(uc)) return [xAt(uc), halfAt(uc)];
+    let a = 0, b = 1;
+    for (let i = 0; i < 24; i++) { const m = (a + b) / 2; if (surfacePoint(S, H, uc, m)[1] < y) a = m; else b = m; }
+    const p = surfacePoint(S, H, uc, (a + b) / 2);
+    return [p[0], Math.abs(p[2])];
+  };
   const strip = (pts, mat, up) => {
     /* pts: [x, yLo, z, x, yHi, z] per station, a quad between neighbours. The winding is the
        normal: walked round the perimeter it faces OUT of the wall; on the deck strip, whose
@@ -10415,29 +10439,35 @@ function buildIslands(S, group, hullMat) {
     return new THREE.Mesh(g, mat);
   };
   for (const isl of S.islands.list) {
-    const u0 = Math.max(0.004, isl.u[0]), u1 = Math.min(0.996, isl.u[1]);
+    const u0 = isl.u[0], u1 = isl.u[1], closedFwd = u0 <= 0, closedAft = u1 >= 1;
     const top = u => Math.max(H.islandTop(u), H.sheer(u) + 0.05);
     const g = new THREE.Group();
     const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
+    /* station k of N, graded toward an end that closes on the hull's own end */
+    const stU = k => {
+      const t = k / N;
+      return u0 + (u1 - u0) * (closedFwd && !closedAft ? t * t : closedAft && !closedFwd ? 1 - (1 - t) * (1 - t) : t);
+    };
     /* the perimeter: port side fwd→aft, the aft end, starboard aft→fwd, the fore end */
     const path = [];
-    for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
-    path.push({ u: u1, x: (u1 - 0.5) * L, z: -halfAt(u1) });
-    for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: -halfAt(u) }); }
-    path.push({ u: u0, x: (u0 - 0.5) * L, z: halfAt(u0) });
+    for (let k = 0; k <= N; k++) { const u = stU(k); path.push({ u, x: xAt(u), z: halfAt(u) }); }
+    path.push({ u: u1, x: xAt(u1), z: -halfAt(u1) });
+    for (let k = N; k >= 0; k--) { const u = stU(k); path.push({ u, x: xAt(u), z: -halfAt(u) }); }
+    path.push({ u: u0, x: xAt(u0), z: halfAt(u0) });
     const wall = [];
     for (const p of path) wall.push(p.x, H.sheer(p.u) - 0.02, p.z, p.x, top(p.u), p.z);
     g.add(strip(wall, wallMat));
-    /* the end bulkheads, from the main deck up to the sheer where the wall above begins */
-    for (const ue of [u0, u1]) {
-      const x = (ue - 0.5) * L, h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
+    /* the end bulkheads, from the main deck up to the sheer where the wall above begins: only
+       at an end that faces a well */
+    for (const ue of [...(closedFwd ? [] : [u0]), ...(closedAft ? [] : [u1])]) {
+      const x = xAt(ue), h = halfAt(ue), yd = H.deck(ue) - 0.05, ys = H.sheer(ue) - 0.02;
       g.add(strip([x, yd, h, x, ys, h, x, yd, -h, x, ys, -h], wallMat));
     }
     /* the island's deck, railM under the top, lofted station by station */
     const dp = [];
     for (let k = 0; k <= N; k++) {
-      const u = u0 + (u1 - u0) * k / N, y = top(u) - railM, h = halfAt(u);
-      dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
+      const u = stU(k), y = top(u) - railM, [dx, h] = shellAt(u, y);
+      dp.push(dx, y, -h, dx, y, h);
     }
     g.add(strip(dp, deckMat, true));
     group.add(tag(g, 'forecast', isl.name, isl.what));

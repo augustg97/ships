@@ -66,6 +66,20 @@
      not a ternary. A-SIDE-WORD at the end reads the source for a ternary that spells one. */
   const SIDE_WORD = ['starboard', 'centreline', 'port'];          // indexed by Math.sign(z) + 1
   const sideOf = z => SIDE_WORD[Math.sign(+z) + 1];
+  /* ── THE LOFT'S DECK-LEVEL LINE (round 294): x(u) = (u − 0.5) lwl + rake(u), hull.js hullSurface.rake —
+     the line every mast foot, island end and deck-level fitting is placed on. It is linear in u only
+     between the forefoot and the run; inside them the two overhangs are absorbed quadratically, so at
+     deck level u 0 is the stem head (−lwl/2 − stemRake·loa) and u 1 the stern end. Every rule that
+     turns a u or a plate distance into an x along the deck goes through this one function (A-STATIONS,
+     A-ISLANDS); a rule that multiplies u by lwl is wrong by the overhang anywhere inside the ends —
+     the r292 island rule agreed with a builder that made the same error, and neither could see it. */
+  const loftDeckX = (H, u) => {
+    const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
+    let r = 0;
+    if (u < H.forefoot) { const k = (H.forefoot - u) / H.forefoot; r = -(H.stemRake || 0) * rs * k * k * H.loa; }
+    else if (u > 1 - H.run) { const k = (u - (1 - H.run)) / H.run; r = (H.sternRake || 0) * rs * k * k * H.loa; }
+    return (u - 0.5) * H.lwl + r;
+  };
 
   /* ── AN ASTERISK THE RENDERER CANNOT SPEND (round 180) ────────────────────────────────
      rows, cite and text are markdown-bearing fields, and every path that renders them now
@@ -6782,8 +6796,7 @@
         });
         /* the mesh against the plate: the loft's deck-level stem head is at -lwl/2 - stemRake x rakeScale x loa in hull space
            (hullSurface.rake(0)), and each pole stands (col - stemHeadCol) / pxPerMAlongHull abaft it on the plate */
-        const rs = Math.min(1, Math.max(0, H.loa - H.lwl) / (((H.stemRake || 0) + (H.sternRake || 0)) * H.loa || 1));
-        const xHead = -H.lwl / 2 - (H.stemRake || 0) * rs * H.loa;
+        const xHead = loftDeckX(H, 0);                    // the loft's deck-level stem head (the r294 helper)
         const feet = {};
         g.traverse(o => { const s = o.isMesh && o.userData.seg; if (s && s.si === 0 && s.footX !== undefined && feet[s.mi] === undefined) feet[s.mi] = s.footX; });
         (H.masts || []).forEach((mk, i) => {
@@ -9028,7 +9041,16 @@
        hull the span's within 1.5 m; a 'forecast' group named for no island on a hull that has
        islands is a stray; and the record side — each island needs a name, an ascending u-span
        inside [0,1], a topM pair over the sheer, and the block a provenance. Silent on every hull
-       without hull.islands. */
+       without hull.islands.
+       ⚠ THE SPAN IS READ THROUGH THE LOFT'S DECK-LEVEL LINE (round 294), loftDeckX, not u × lwl:
+       r292's rule multiplied u by lwl and so did r292's builder, and the two agreed while the
+       forecastle began 6.2 m abaft the stem head and ran 6.6 m for the plate's 12.8. And the
+       MESH AGAINST THE PLATE: where the record carries the plate's datum (islands.plate:
+       stemHeadCol, pxPerMAlongHull) and each island its two columns (isl.cols), each end of the
+       built group must stand (col − stemHeadCol) / pxPerMAlongHull abaft the loft's own stem head
+       within 1.5 m — a u typed through a linear mapping fails here and nowhere else. The SILENCE:
+       islands on a hull whose stations were read off a plate (hull.stationRead) with no plate
+       datum of their own, or an island with no columns under a datum. */
     if (H.islands) {
       const IL = H.islands.list;
       if (!(Array.isArray(IL) && IL.length)) say(v.id, 'islands with no list', 'hull.islands.list absent or empty');
@@ -9047,9 +9069,45 @@
         const bb = new THREE.Box3().setFromObject(grp.o);
         const wantTop = Math.max(isl.topM[0], isl.topM[1]);
         if (Math.abs(bb.max.y - wantTop) > 0.15) say(v.id, 'an island built off its recorded top', `${isl.name}: built top ${bb.max.y.toFixed(2)} m over the water, record ${wantTop.toFixed(2)}`);
-        const x0 = (Math.max(0.004, isl.u[0]) - 0.5) * H.lwl, x1 = (Math.min(0.996, isl.u[1]) - 0.5) * H.lwl;
-        if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+        const x0 = loftDeckX(H, isl.u[0]), x1 = loftDeckX(H, isl.u[1]);
+        if (Math.abs(bb.min.x - x0) > 1.5 || Math.abs(bb.max.x - x1) > 1.5) say(v.id, 'an island built off its recorded span', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, record u ${isl.u[0]}-${isl.u[1]} on the loft's deck-level line ${x0.toFixed(1)}..${x1.toFixed(1)}`);
+        /* ⚠ AN ISLAND THAT RUNS TO THE HULL'S END CLOSES ON IT (round 294). A record end of u 0 or 1
+           is the stem head or the stern end: the built group must reach it (0.1 m), and within
+           1.5 m of it no vertex may hang more than 0.3 m under both the sheer and the island's own
+           deck, which is what a bulkhead dropped to the main deck does where the shell rakes inboard. */
+        for (const ue of [0, 1]) {
+          if (ue === 0 ? isl.u[0] > 0 : isl.u[1] < 1) continue;
+          const xe = loftDeckX(H, ue), built = ue === 0 ? bb.min.x : bb.max.x;
+          if (Math.abs(built - xe) > 0.1) say(v.id, "an island short of the hull's end it runs to", `${isl.name}: built to x ${built.toFixed(2)}, the loft's ${ue === 0 ? 'stem head' : 'stern end'} at ${xe.toFixed(2)}`);
+          const tE = isl.topM[ue] - (H.islands.railM || 1.0), floorY = Math.min(H2.sheer(ue), tE) - 0.3;
+          let low = 0, lowest = Infinity; const P3 = new THREE.Vector3();
+          grp.o.updateMatrixWorld(true);
+          grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P3.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (Math.abs(P3.x - xe) < 1.5 && P3.y < floorY) { low++; lowest = Math.min(lowest, P3.y); } } });
+          /* and nothing under the sheer stands past the shell's own end AT ITS OWN HEIGHT: the end
+             rakes inboard going down, so a deck edge placed at the sheer's x comes out through it */
+          const endAt = y => { let a0 = 0, b0 = 1; for (let i = 0; i < 24; i++) { const m = (a0 + b0) / 2; if (SHIPS_HULL.surfacePoint(H, H2, ue, m)[1] < y) a0 = m; else b0 = m; } return SHIPS_HULL.surfacePoint(H, H2, ue, (a0 + b0) / 2)[0]; };
+          let past = 0, worstPast = 0;
+          grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P3.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (Math.abs(P3.x - xe) > 3 || P3.y >= H2.sheer(ue) - 0.05) continue;
+              const over = ue === 0 ? endAt(P3.y) - P3.x : P3.x - endAt(P3.y);
+              if (over > 0.05) { past++; worstPast = Math.max(worstPast, over); } } });
+          if (past) say(v.id, "an island standing out through the hull's raked end", `${isl.name}: ${past} vertices under the sheer stand up to ${worstPast.toFixed(2)} m past the shell's ${ue === 0 ? 'stem' : 'stern'} at their own height`);
+          if (low) say(v.id, "a bulkhead hung under the sheer at an island's closed end", `${isl.name}: ${low} vertices within 1.5 m of the ${ue === 0 ? 'stem head' : 'stern end'} reach y ${lowest.toFixed(2)}, under the floor ${floorY.toFixed(2)} (the sheer ${H2.sheer(ue).toFixed(2)}, the island's deck ${tE.toFixed(2)})`);
+        }
+        const PL = H.islands.plate;
+        if (PL && !(Array.isArray(isl.cols) && isl.cols.length === 2)) { say(v.id, 'an island under a plate datum with no columns', `${isl.name}: hull.islands.plate is present and isl.cols is not`); continue; }
+        if (PL) {
+          const xHead = loftDeckX(H, 0), xStern = loftDeckX(H, 1);
+          const xp0 = xHead + (isl.cols[0] - PL.stemHeadCol) / PL.pxPerMAlongHull, xp1 = xHead + (isl.cols[1] - PL.stemHeadCol) / PL.pxPerMAlongHull;
+          const e0 = bb.min.x - xp0, e1 = bb.max.x - xp1;
+          if (Math.abs(e0) > 1.5 || Math.abs(e1) > 1.5)
+            say(v.id, 'an island built off its plate', `${isl.name}: built x ${bb.min.x.toFixed(1)}..${bb.max.x.toFixed(1)} m, ${(bb.min.x - xHead).toFixed(1)}..${(bb.max.x - xHead).toFixed(1)} m abaft the loft's stem head; the plate's columns ${isl.cols[0]}..${isl.cols[1]} put it ${(xp0 - xHead).toFixed(1)}..${(xp1 - xHead).toFixed(1)} m abaft (${e0.toFixed(2)} / ${e1.toFixed(2)} m off; the loft's stern end ${(xStern - xHead).toFixed(1)} m abaft the head)`);
+        }
       }
+      if (H.stationRead && !H.islands.plate) say(v.id, 'islands on a plate-read hull with no plate datum of their own', `hull.stationRead is present and hull.islands.plate is absent, so no island's end can be read against the plate`);
       for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
     }
 
