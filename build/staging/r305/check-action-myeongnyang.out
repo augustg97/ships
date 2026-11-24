@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · action-myeongnyang           http://localhost:8149/?frozen=1#v=action&bt=myeongnyang&day=3&cb=45&cd=1100&ch=13
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  action-myeongnyang              0.033%     0.006  ok
+
+  all frames within tolerance.
+

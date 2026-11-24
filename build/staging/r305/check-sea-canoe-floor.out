@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · sea-canoe-floor              http://localhost:8149/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  sea-canoe-floor                 0.010%     0.003  ok
+
+  all frames within tolerance.
+

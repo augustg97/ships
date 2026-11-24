@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  sea-dugout-floor                0.018%     0.005  ok
+
+  all frames within tolerance.
+

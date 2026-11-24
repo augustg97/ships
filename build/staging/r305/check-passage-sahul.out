@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  passage-sahul                   0.047%     0.015  ok
+
+  all frames within tolerance.
+

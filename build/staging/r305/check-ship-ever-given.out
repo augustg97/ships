@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-ever-given                 0.000%     0.000  ok
+
+  all frames within tolerance.
+

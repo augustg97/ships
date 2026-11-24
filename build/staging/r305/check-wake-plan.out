@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  wake-plan                       0.019%     0.004  ok
+
+  all frames within tolerance.
+

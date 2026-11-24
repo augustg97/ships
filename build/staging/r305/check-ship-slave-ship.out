@@ -1,0 +1,9 @@
+  capturing current → /Users/augustgweon/Ships/Research/baselines/_current
+    · ship-slave-ship              http://localhost:8149/?frozen=1#v=ship&s=slave-ship
+
+  frame                          changed   mean|Δ|  verdict
+  ---------------------------- --------- ---------  ----------------------------
+  ship-slave-ship                 0.000%     0.000  ok
+
+  all frames within tolerance.
+
