@@ -1,0 +1,77 @@
+[
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 0: topmast 34.24\u201351.66 m built, no topmast shrouds"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 1: topmast 33.80\u201351.22 m built, no topmast shrouds"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 2: topmast 33.68\u201351.10 m built, no topmast shrouds"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 3: topmast 33.69\u201351.11 m built, no topmast shrouds"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 4: topmast 33.77\u201351.19 m built, no topmast shrouds"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 5: topmast 34.04\u201351.46 m built, no topmast shrouds"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 0: topmast 38.76\u201356.44 m built, no topmast shrouds"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 1: topmast 42.04\u201361.80 m built, no topmast shrouds"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 2: topmast 43.71\u201364.51 m built, no topmast shrouds"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 3: topmast 43.71\u201364.51 m built, no topmast shrouds"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 4: topmast 42.00\u201361.76 m built, no topmast shrouds"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 5: topmast 36.88\u201353.52 m built, no topmast shrouds"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 3: topmast 23.26\u201333.31 m built, no topmast shrouds"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 1: topmast 18.51\u201335.50 m built, no topmast shrouds"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast unstayed",
+  "detail": "mast 2: topmast 16.55\u201328.96 m built, no topmast shrouds"
+ }
+]

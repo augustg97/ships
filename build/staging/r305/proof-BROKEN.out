@@ -1,0 +1,452 @@
+[
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 0 side 1: head 50.44 m (topmast 34.24\u201351.66), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 0 side 1: bend at 37.50 m, 0.39 m out; crosstrees 37.42 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 0 side 1: foot -33.90, 4.93, 5.10; after lower shroud's foot -35.28, 4.93, 5.84"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 0 side -1: head 50.44 m (topmast 34.24\u201351.66), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 0 side -1: bend at 37.50 m, 0.39 m out; crosstrees 37.42 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 0 side -1: foot -33.90, 4.93, 5.10; after lower shroud's foot -35.28, 4.93, 5.84"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 1 side 1: head 50.00 m (topmast 33.80\u201351.22), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 1 side 1: bend at 37.07 m, 0.39 m out; crosstrees 36.99 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 1 side 1: foot -18.32, 4.52, 6.81; after lower shroud's foot -19.70, 4.52, 7.74"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 1 side -1: head 50.00 m (topmast 33.80\u201351.22), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 1 side -1: bend at 37.07 m, 0.39 m out; crosstrees 36.99 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 1 side -1: foot -18.32, 4.52, 6.81; after lower shroud's foot -19.70, 4.52, 7.74"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 2 side 1: head 49.88 m (topmast 33.68\u201351.10), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 2 side 1: bend at 36.95 m, 0.39 m out; crosstrees 36.87 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 2 side 1: foot -3.26, 4.41, 7.13; after lower shroud's foot -4.64, 4.41, 8.13"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 2 side -1: head 49.88 m (topmast 33.68\u201351.10), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 2 side -1: bend at 36.95 m, 0.39 m out; crosstrees 36.87 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 2 side -1: foot -3.26, 4.41, 7.13; after lower shroud's foot -4.64, 4.41, 8.13"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 3 side 1: head 49.89 m (topmast 33.69\u201351.11), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 3 side 1: bend at 36.95 m, 0.39 m out; crosstrees 36.87 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 3 side 1: foot 10.79, 4.41, 7.11; after lower shroud's foot 9.41, 4.41, 8.12"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 3 side -1: head 49.89 m (topmast 33.69\u201351.11), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 3 side -1: bend at 36.95 m, 0.39 m out; crosstrees 36.87 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 3 side -1: foot 10.79, 4.41, 7.11; after lower shroud's foot 9.41, 4.41, 8.12"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 4 side 1: head 49.97 m (topmast 33.77\u201351.19), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 4 side 1: bend at 37.04 m, 0.39 m out; crosstrees 36.95 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 4 side 1: foot 24.85, 4.49, 6.64; after lower shroud's foot 23.47, 4.49, 7.73"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 4 side -1: head 49.97 m (topmast 33.77\u201351.19), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 4 side -1: bend at 37.04 m, 0.39 m out; crosstrees 36.95 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 4 side -1: foot 24.85, 4.49, 6.64; after lower shroud's foot 23.47, 4.49, 7.73"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 5 side 1: head 50.24 m (topmast 34.04\u201351.46), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 5 side 1: bend at 37.31 m, 0.39 m out; crosstrees 37.22 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 5 side 1: foot 39.41, 4.74, 5.54; after lower shroud's foot 38.03, 4.74, 6.68"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 5 side -1: head 50.24 m (topmast 34.04\u201351.46), 0.000 m off the axis, pole 0.221"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 5 side -1: bend at 37.31 m, 0.39 m out; crosstrees 37.22 m, 1.50 m out"
+ },
+ {
+  "id": "wyoming",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 5 side -1: foot 39.41, 4.74, 5.54; after lower shroud's foot 38.03, 4.74, 6.68"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 0 side 1: head 55.21 m (topmast 38.76\u201356.44), 0.000 m off the axis, pole 0.156"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 0 side 1: bend at 42.13 m, 0.65 m out; crosstrees 41.99 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 0 side 1: foot -70.97, 8.90, 9.19; after lower shroud's foot -73.24, 8.90, 9.84"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 0 side -1: head 55.21 m (topmast 38.76\u201356.44), 0.000 m off the axis, pole 0.156"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 0 side -1: bend at 42.13 m, 0.65 m out; crosstrees 41.99 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 0 side -1: foot -70.97, 8.90, 9.19; after lower shroud's foot -73.24, 8.90, 9.84"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 1 side 1: head 60.42 m (topmast 42.04\u201361.80), 0.000 m off the axis, pole 0.198"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 1 side 1: bend at 45.79 m, 0.65 m out; crosstrees 45.65 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 1 side 1: foot -43.99, 8.67, 11.91; after lower shroud's foot -46.26, 8.67, 12.81"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 1 side -1: head 60.42 m (topmast 42.04\u201361.80), 0.000 m off the axis, pole 0.198"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 1 side -1: bend at 45.79 m, 0.65 m out; crosstrees 45.65 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 1 side -1: foot -43.99, 8.67, 11.91; after lower shroud's foot -46.26, 8.67, 12.81"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 2 side 1: head 63.05 m (topmast 43.71\u201364.51), 0.000 m off the axis, pole 0.198"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 2 side 1: bend at 47.65 m, 0.65 m out; crosstrees 47.51 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 2 side 1: foot -15.01, 8.58, 12.55; after lower shroud's foot -16.90, 8.58, 13.55"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 2 side -1: head 63.05 m (topmast 43.71\u201364.51), 0.000 m off the axis, pole 0.198"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 2 side -1: bend at 47.65 m, 0.65 m out; crosstrees 47.51 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 2 side -1: foot -15.01, 8.58, 12.55; after lower shroud's foot -16.90, 8.58, 13.55"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 3 side 1: head 63.05 m (topmast 43.71\u201364.51), 0.000 m off the axis, pole 0.198"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 3 side 1: bend at 47.64 m, 0.65 m out; crosstrees 47.51 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 3 side 1: foot 26.39, 8.58, 12.53; after lower shroud's foot 24.49, 8.58, 13.55"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 3 side -1: head 63.05 m (topmast 43.71\u201364.51), 0.000 m off the axis, pole 0.198"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 3 side -1: bend at 47.64 m, 0.65 m out; crosstrees 47.51 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 3 side -1: foot 26.39, 8.58, 12.53; after lower shroud's foot 24.49, 8.58, 13.55"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 4 side 1: head 60.38 m (topmast 42.00\u201361.76), 0.000 m off the axis, pole 0.156"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 4 side 1: bend at 45.75 m, 0.65 m out; crosstrees 45.61 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 4 side 1: foot 55.37, 8.63, 11.79; after lower shroud's foot 53.10, 8.63, 12.91"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 4 side -1: head 60.38 m (topmast 42.00\u201361.76), 0.000 m off the axis, pole 0.156"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 4 side -1: bend at 45.75 m, 0.65 m out; crosstrees 45.61 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 4 side -1: foot 55.37, 8.63, 11.79; after lower shroud's foot 53.10, 8.63, 12.91"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 5 side 1: head 52.35 m (topmast 36.88\u201353.52), 0.000 m off the axis, pole 0.156"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 5 side 1: bend at 40.05 m, 0.65 m out; crosstrees 39.92 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 5 side 1: foot 82.78, 8.77, 9.88; after lower shroud's foot 80.51, 8.77, 11.13"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 5 side -1: head 52.35 m (topmast 36.88\u201353.52), 0.000 m off the axis, pole 0.156"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 5 side -1: bend at 40.05 m, 0.65 m out; crosstrees 39.92 m, 2.47 m out"
+ },
+ {
+  "id": "great-eastern",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 5 side -1: foot 82.78, 8.77, 9.88; after lower shroud's foot 80.51, 8.77, 11.13"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 3 side 1: head 32.61 m (topmast 23.26\u201333.31), 0.000 m off the axis, pole 0.099"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 3 side 1: bend at 25.18 m, 0.39 m out; crosstrees 25.10 m, 1.51 m out"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 3 side 1: foot 34.83, 6.32, 4.92; after lower shroud's foot 33.57, 6.32, 6.22"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 3 side -1: head 32.61 m (topmast 23.26\u201333.31), 0.000 m off the axis, pole 0.099"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 3 side -1: bend at 25.18 m, 0.39 m out; crosstrees 25.10 m, 1.51 m out"
+ },
+ {
+  "id": "steamer",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 3 side -1: foot 34.83, 6.32, 4.92; after lower shroud's foot 33.57, 6.32, 6.22"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 1 side 1: head 34.31 m (topmast 18.51\u201335.50), 0.000 m off the axis, pole 0.109"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 1 side 1: bend at 20.33 m, 0.19 m out; crosstrees 20.29 m, 0.74 m out"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 1 side 1: foot 2.55, 3.36, 3.06; after lower shroud's foot 2.28, 3.36, 4.06"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 1 side -1: head 34.31 m (topmast 18.51\u201335.50), 0.000 m off the axis, pole 0.109"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 1 side -1: bend at 20.33 m, 0.19 m out; crosstrees 20.29 m, 0.74 m out"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 1 side -1: foot 2.55, 3.36, 3.06; after lower shroud's foot 2.28, 3.36, 4.06"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 2 side 1: head 28.09 m (topmast 16.55\u201328.96), 0.000 m off the axis, pole 0.077"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 2 side 1: bend at 18.14 m, 0.19 m out; crosstrees 18.10 m, 0.74 m out"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 2 side 1: foot 14.89, 3.53, 2.28; after lower shroud's foot 14.53, 3.53, 3.35"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its hounds",
+  "detail": "mast 2 side -1: head 28.09 m (topmast 16.55\u201328.96), 0.000 m off the axis, pole 0.077"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud off its crosstree",
+  "detail": "mast 2 side -1: bend at 18.14 m, 0.19 m out; crosstrees 18.10 m, 0.74 m out"
+ },
+ {
+  "id": "endurance",
+  "rule": "a gaff topmast shroud set up off the rail",
+  "detail": "mast 2 side -1: foot 14.89, 3.53, 2.28; after lower shroud's foot 14.53, 3.53, 3.35"
+ }
+]

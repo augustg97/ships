@@ -1,0 +1,5 @@
+r305 proofs: each run on the :8150 copy (build/staging/r305/webB), with the round's final audit-hulls.js, then restored.
+OLDFILE  hull.before.js                              -> 15 problems: 'a gaff topmast unstayed' x15 (endurance 2, wyoming 6, great-eastern 6, steamer 1)   proof-OLDFILE.out
+BROKEN   hull.after.js with head z=0, bend at 0.3 ctR, foot 1 m inboard -> 90: off its hounds 30, off its crosstree 30, set up off the rail 30   proof-BROKEN.out
+FINAL    hull.after.js + shipwright.after.js           -> 33 hulls, 0 problems   proof-FINAL.out
+The first BROKEN run, on the audit's first version, let the head-on-axis break pass on endurance and the steamer (slender topmasts under the 0.12 m band); the rule was tightened to 'on or outside the skin' and both BROKEN runs above are on the tightened rule.

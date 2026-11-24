@@ -1,0 +1,11 @@
+Round 305: every gaff topmast is stayed, with crosstrees at the lower masthead and a topmast shroud a side to the rail.
+
+Fifteen gaff topmasts on four hulls (Endurance 2, Wyoming 6, Great Eastern 6, the steamer 1)
+stood with only the truck-to-truck spring stay on them, because buildRig stayed square
+topmasts only. Each now has a pair of crosstrees athwart the lower masthead (beam x 0.085 a
+side, the square rig's figure) and one shroud a side from the topmast's hounds, over the
+crosstree's end, down to the rail one shroud-space abaft the after lower shroud. Class rules,
+labelled on the cards. New audit rule A-GAFF-TOPMAST-STAYED; the stage-4 card names the new
+crosstrees where they stand. Audit: 33 hulls, 0 problems.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

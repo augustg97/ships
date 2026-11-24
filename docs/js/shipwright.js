@@ -337,7 +337,13 @@ if (k === 'crossbeam') return [...names[k]].some(t => /through-beam/i.test(t))
 ? 'through-beams with their knees and carlings' : 'crossbeams';
 if (k === 'funnel') return (H.funnels || 1) > 1 ? swNum(H.funnels) + ' funnels' : 'a funnel';
 if (k === 'top') return [...names[k]].map(t => t === 'Top' ? 'tops at the lower mastheads'
-: t === 'Crosstrees' ? 'crosstrees at the topmast heads' : 'a ' + t.toLowerCase());
+: t === 'Crosstrees' ? 'crosstrees at the topmast heads'
+: t === 'Crosstrees at the lower masthead'
+? ((H.masts || []).every(m => m.rig === 'gaff') ? 'crosstrees at the lower mastheads'
+: (H.masts || []).filter(m => m.rig === 'gaff' && m.topmast).length === 1
+? 'crosstrees at the lower masthead of the gaff mast'
+: 'crosstrees at the lower mastheads of the gaff masts')
+: 'a ' + t.toLowerCase());
 if (k === 'gundeck') return [...names[k]].filter(t => !/^(Stanchion|Deck beam|Deck clamp|Screen cap|End bulwark|Bulwark)$/.test(t))
 .map(t => t === 'Sangjang' ? 'the sangjang (a fighting deck built over the rowers)'
 : t === 'Gun deck' ? 'a gun deck over the rowers'
