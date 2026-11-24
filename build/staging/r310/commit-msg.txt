@@ -1,0 +1,8 @@
+Round 310: the clipper's spanker stowage read off a photograph of Cutty Sark at anchor in Sydney (no gaff aloft, so 'lowered'); every other gaff sail and spanker names its silence; the furled card names the spanker
+
+- vessels.json: clipper mizzen furlStow 'lowered' with the plate's provenance; 15 other masts carry a furlStowProvenance that opens UNREAD
+- audit: A-LOWERED (furled build: one boom, gaff lowered to its foot, one roll along it, no brailed bundle), A-STOW-SILENCE, A-CARD-SPANKER
+- shipwright.js: the furled card names a square-rigged ship's spanker and how it is stowed (the 74, the clipper, Preussen)
+- hull.js: comment only; no geometry changed
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

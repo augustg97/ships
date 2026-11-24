@@ -746,6 +746,13 @@ function swFurledCard(spec) {
   if (gm.length && gBr === gm.length) how.push('the gaff sails are brailed in to their masts under gaffs left aloft');
   else if (gBr) how.push(`the gaff sails on ${gBr === 1 ? 'one mast are' : gBr + ' masts are'} brailed in to the mast with the gaff left aloft, and the others are lowered onto their booms`);
   else if (gm.length) how.push('the gaff sails are lowered onto their booms');
+  /* r310 (0y¹³⁸): a square-rigged ship's spanker is a gaff sail too, and the card left it out on
+     the 74, the clipper and Preussen. It is stowed as the builder draws it: lowered onto its boom,
+     or brailed in under a standing gaff where the record reads furlStow 'brailed'. */
+  const sp = ((spec.hull || {}).masts || []).filter(m => m.rig === 'square' && m.spanker);
+  if (sp.length) how.push(sp.every(m => m.furlStow === 'brailed')
+    ? 'the spanker is brailed in to the mast under its gaff'
+    : 'the spanker\u2019s gaff is lowered and the sail is stowed along its boom');
   if (rigs.has('junk')) how.push('the battened sails are lowered and folded down onto their booms');
   if (rigs.has('crabclaw')) how.push('the crab-claw sails are rolled round their spars');
   if ((spec.hull || {}).headsails) how.push('the headsails are hauled down onto their stays');

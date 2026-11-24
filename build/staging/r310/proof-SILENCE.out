@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a furled stowage with no read and no named silence",
+  "detail": "mast 2 (station 0.85): no furlStow, and furlStowProvenance absent; the builder lowers the gaff by default"
+ }
+]

@@ -1,0 +1,7 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a lowered stowage with no read",
+  "detail": "mast 2 (station 0.85): furlStow 'lowered', furlStowProvenance opens UNREAD"
+ }
+]

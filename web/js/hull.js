@@ -4454,7 +4454,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
          every furled gaff sail was stowed the schooner's way, with the gaff lowered onto a roll
          along the boom. Endurance's mizzen is drawn this way because both plates of her mizzen
          in the ice show it so (the record's furlStowProvenance). BOOMLESS is the main's case;
-         BRAILED is what the cloth and the gaff do in this build. */
+         BRAILED is what the cloth and the gaff do in this build.
+         r310 (0y¹³⁸): furlStow 'lowered' is the read of a plate that shows no gaff aloft on a
+         furled ship (the clipper's spanker, off a photograph of Cutty Sark at anchor in Sydney).
+         It is drawn by the same FURLED branch as a mast with no furlStow, which is the default;
+         the record says which of the two is a read, and every unread mast's furlStowProvenance
+         opens 'UNREAD'. */
       const BOOMLESS = mk.gaffStow === 'brailed';
       const BRAILED = BOOMLESS || (FURLED && mk.furlStow === 'brailed');
       const peak = 0.62;                                 // the gaff's angle above horizontal

@@ -3098,7 +3098,8 @@
             "shrouds": 6,
             "only": 3,
             "staysails": 2,
-            "spanker": true
+            "spanker": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           }
         ],
         "build": "frame",
@@ -3373,7 +3374,8 @@
             "rig": "gaff",
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.29,
@@ -3381,7 +3383,8 @@
             "rig": "gaff",
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.44,
@@ -3389,7 +3392,8 @@
             "rig": "gaff",
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.58,
@@ -3397,7 +3401,8 @@
             "rig": "gaff",
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.72,
@@ -3405,7 +3410,8 @@
             "rig": "gaff",
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.86,
@@ -3413,7 +3419,8 @@
             "rig": "gaff",
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           }
         ],
         "build": "frame",
@@ -3693,7 +3700,8 @@
               "utg": 0.81,
               "royal": 0.93
             },
-            "yardFracsProvenance": "PLATE READ, r289, on the r286 read: the State Library of Victoria's Brodie collection print of Preussen at anchor, 'PREUSSEN. Only ship ever rigged like this.' (Malcolm Brodie shipping collection, accession H99.220/3712, gelatin silver 9.5 x 15.5 cm, between 1902 and 1910, catalogue alma9917506533607636, Rosetta IE40684, master FL15666487.tif 5421x4071 served as the JPG derivative FL21230608; out of copyright; build/staging/r289/full-IE40684.jpg, the whole plate at half scale with a 200 px grid in plate-IE40684-half-grid.png, each mast in crop-anchor-*.png, the trucks at 4x in sheet-anchor-trucks-4x.png, the rails at 2x in sheet-anchor-rails-2x.png). She lies square on the starboard beam, bow to the left, the whole hull and every truck in the frame at one scale: the mast spacing 796 / 796 / 770 / 702 px against the record's stations (0.18 / 0.18 / 0.18 / 0.16 of L, which at one scale is 796 / 796 / 796 / 708), so no foreshortening is measurable; 30.6 px/m from the main mast's attested 58 m. The upper topsail, upper topgallant and royal yards are LOWERED onto their doublings, so only the three FIXED yards - course, lower topsail, lower topgallant - and the trucks are read here; the three hoisting yards keep r286's figures (0.54 / 0.80 / 0.92), which this plate cannot read. METHOD as r286: each mast's centreline fitted through the pole (sd 2.5-3.4 px); a yard read as the dark bar crossing bands 60-220 px out on both sides, the crossing row the mean of the two sides; the truck the top of the pole's dark run, read on 4x crops (+/- 5 px); the DECK the top of the dark topsides on the mast's forward side (the cap rail, +/- 8 px) plus the r215 class bulwark depth of 1.35 m (41 px, +/- 0.3 m) - the plate's painted-ports band stands only on the midship island, and there its lower edge (2843) agrees with the neighbouring masts' rail + 41 (2841, 2833), which is the datum's check. ROWS: fore truck 1108, rail 2775, deck 2815, lower topgallant 1644.5, lower topsail 2127, course 2381.5 (the lowered upper topsail 2070, the lowered upper topgallant 1600); main truck 1068, rail 2800, deck 2841, lower topgallant 1625, lower topsail 2107, course 2359.5 (the lowered upper topsail 2048, the lowered upper topgallant 1577); kreuz truck 1098, the midship island's rail 2750 and its painted-ports band 2813-2843, deck 2843 (the band's foot), lower topgallant 1655, lower topsail 2132.5, course 2390 (the lowered upper topsail 2069, the lowered upper topgallant 1606); laeisz truck 1210, rail 2795, deck 2833, lower topgallant 1743.5, lower topsail 2219.5, course 2473.5 (the lowered upper topsail 2164, the lowered upper topgallant 1703); jigger truck 1408, rail 2800, deck 2833, lower topgallant 1868, lower topsail 2287, course 2511.5 (the lowered upper topsail 2229, the lowered upper topgallant 1825). FRACTIONS OF THE TRUCK OVER THE DECK, per mast: fore course 0.254, lower topsail 0.403, lower topgallant 0.686; deck to truck 1707 px, 55.8 m; main course 0.272, lower topsail 0.414, lower topgallant 0.686; deck to truck 1773 px, 58.0 m (the scale's anchor); kreuz course 0.260, lower topsail 0.407, lower topgallant 0.681; deck to truck 1745 px, 57.1 m; laeisz course 0.221, lower topsail 0.378, lower topgallant 0.671; deck to truck 1623 px, 53.1 m; jigger course 0.226, lower topsail 0.383, lower topgallant 0.677; deck to truck 1425 px, 46.6 m. RECORDED PER MAST, to 0.01, because the plate reads the same split r286 could not resolve - the two after masts hang their three lower yards lower than the three forward masts by 0.03-0.04 of their trucks - and reads it square on the beam with every mast at one scale: fore 0.25 / 0.40 / 0.69, main 0.27 / 0.41 / 0.69, kreuz 0.26 / 0.41 / 0.68, laeisz 0.22 / 0.38 / 0.67, jigger 0.23 / 0.38 / 0.68. AGAINST r286 (the Green plate from the quarter, per mast): the course within 0.025 (jigger 0.20 -> 0.23, laeisz 0.21 -> 0.22, kreuz 0.25 -> 0.26, main 0.27 -> 0.27), the lower topsail within 0.03, the lower topgallant within 0.01; r286's +/- 0.04 on the two lowest yards was that split, and it is real. BOUNDS: +/- 0.01 on every fraction (the truck +/- 5, the deck +/- 10 and the yard +/- 4 px on 1425-1773 px of truck over deck; the bulwark's +/- 0.3 m moves a fraction by under 0.005). THE TRUCKS: deck to truck reads 1707 / 1773 / 1745 / 1623 / 1425 px on the five masts at one scale, so the after masts are SHORTER - the main's attested 58 m is the tallest, and the fore is 55.8, the kreuz 57.1, the laeisz 53.1 and the jigger 46.6 m (+/- 0.5 m; the datum's uncertainty moves all five alike and the ratios to the main hold); r286's Green plate had the jigger's truck-over-deck 2256 px against the laeisz's 2310 although the jigger stood nearer that camera, the same finding unread. NOT READ HERE: the spar lengths (the yards' dark runs are broken by the lowered yards and the rigging; courseYardM 32 stands attested); the bulwark's own height (assumed at the class 1.35 m); the three hoisting yards' set heights. THIS MAST (jigger, station 0.86): rows truck 1408, rail 2800, deck 2833, lower topgallant 1868, lower topsail 2287, course 2511.5 (the lowered upper topsail 2229, the lowered upper topgallant 1825); read course 0.226, lower topsail 0.383, lower topgallant 0.677; deck to truck 1425 px, 46.6 m. PLATE READ, r290, the three HOISTING yards: the State Library of Victoria's halftone of Preussen under full sail from aft of the port beam - r289's census called it square on the beam at 22 px/m off the 1200 px preview, and it is oblique, 37-49 px/m across the hull, as this paragraph measures below; corrected r291 (Malcolm Brodie shipping collection, accession H99.220/4261, 'A mass of canvas to attend to in a ship like this', Rosetta IE32693, 5421 x 4071, the JPG derivative at the master's width by the r289 route; out of copyright; build/staging/r290/full-IE32693.jpg, the whole plate at half scale with a 200 px grid in ../r289/plate-IE32693-half-grid.png, each mast in crop-marked-*.png with its fitted line and the yard rows drawn, the mastheads at 2x in sheet-trucks-2x.png, the hull's band at 2x in sheet-band-2x.png, the main's band profiles in profile-main.png). Bow to the RIGHT, the camera a little aft of the beam (the mast spacing 890 / 900 / 780 / 700 px jigger to fore, so the forward masts are farther and smaller), all six yards SET on every mast, the halftone cell about 8 px. METHOD (read-fullsail.py, read-fullsail3.py, read-register.py): each pole found by a line search over its sky rows on a 4 px blurred plate (mean brightness along the line, slope 0.03-0.09 px/row); bands 60-220 px out on both sides profiled per row on the unblurred plate; under full sail a yard is the HEAD of its sail and the canvas is darkest just under it, so a yard is the sharp light-to-dark edge going down the plate on both sides (the steepest 24-row descent; the two sides averaged; six on every mast). THE DATUM IS REGISTERED, NOT READ: this plate's trucks are hidden by cloud (kreuz) or faint against bright sky (fore), and the painted-ports band's foot at the deck is overlaid by the forecastle and the boats forward, so the plate's own truck and deck reads disagreed with r289's fixed yards by up to 0.12 at the fore; instead each mast's deck row D and truck-over-deck T were solved by least squares from its course, lower topsail and lower topgallant rows against r289's per-mast fractions (three rows, two unknowns; residuals under 4 px on four masts and 7 px on the fore), and the three hoisting yards read as fractions in that frame. READ PER MAST (utop / utg / royal): fore upper topsail 0.558, upper topgallant 0.820, royal 0.942; main upper topsail 0.561, upper topgallant 0.809, royal 0.923; kreuz upper topsail 0.557, upper topgallant 0.805, royal 0.919; laeisz upper topsail 0.538, upper topgallant 0.799, royal 0.936; jigger upper topsail 0.550, upper topgallant 0.813, royal 0.923. BOUND +/- 0.02 on each (the edge row +/- 8 px on 2050-2435 px of T, and the registration's own +/- 0.01 per fixed yard propagated through T). RECORDED AS ONE SET ON ALL FIVE MASTS - upper topsail 0.55, upper topgallant 0.81, royal 0.93 (the five-mast means 0.553 / 0.809 / 0.929) - because the per-mast spread (0.538-0.561, 0.799-0.820, 0.919-0.942) is inside the bound, so no per-mast split is claimed for these three yards, unlike the fixed yards' split r289 read on two plates beyond its bound. Against r286's quarter-plate read (0.54 / 0.80 / 0.92): +0.01 on each, inside both reads' bounds. NOT READ: the spar lengths - the yards are braced on this plate and their arms run into the next mast's canvas in the bands, so the dark run along a yard's line did not end at the arm; the plate's own trucks and deck (see above). THIS MAST (jigger): rows royal 1055.5 (1042, 1069), upper topgallant 1303.5 (1309, 1298), lower topgallant 1611 (1595, 1627), upper topsail 1900 (1884, 1916), lower topsail 2278.5 (2264, 2293), course 2631 (fwd only); registered deck 3143.5, truck over deck 2262.8 px, residuals -1.1 / 1.7 / -0.6 px; 48.6 px/m; read upper topsail 0.550, upper topgallant 0.813, royal 0.923."
+            "yardFracsProvenance": "PLATE READ, r289, on the r286 read: the State Library of Victoria's Brodie collection print of Preussen at anchor, 'PREUSSEN. Only ship ever rigged like this.' (Malcolm Brodie shipping collection, accession H99.220/3712, gelatin silver 9.5 x 15.5 cm, between 1902 and 1910, catalogue alma9917506533607636, Rosetta IE40684, master FL15666487.tif 5421x4071 served as the JPG derivative FL21230608; out of copyright; build/staging/r289/full-IE40684.jpg, the whole plate at half scale with a 200 px grid in plate-IE40684-half-grid.png, each mast in crop-anchor-*.png, the trucks at 4x in sheet-anchor-trucks-4x.png, the rails at 2x in sheet-anchor-rails-2x.png). She lies square on the starboard beam, bow to the left, the whole hull and every truck in the frame at one scale: the mast spacing 796 / 796 / 770 / 702 px against the record's stations (0.18 / 0.18 / 0.18 / 0.16 of L, which at one scale is 796 / 796 / 796 / 708), so no foreshortening is measurable; 30.6 px/m from the main mast's attested 58 m. The upper topsail, upper topgallant and royal yards are LOWERED onto their doublings, so only the three FIXED yards - course, lower topsail, lower topgallant - and the trucks are read here; the three hoisting yards keep r286's figures (0.54 / 0.80 / 0.92), which this plate cannot read. METHOD as r286: each mast's centreline fitted through the pole (sd 2.5-3.4 px); a yard read as the dark bar crossing bands 60-220 px out on both sides, the crossing row the mean of the two sides; the truck the top of the pole's dark run, read on 4x crops (+/- 5 px); the DECK the top of the dark topsides on the mast's forward side (the cap rail, +/- 8 px) plus the r215 class bulwark depth of 1.35 m (41 px, +/- 0.3 m) - the plate's painted-ports band stands only on the midship island, and there its lower edge (2843) agrees with the neighbouring masts' rail + 41 (2841, 2833), which is the datum's check. ROWS: fore truck 1108, rail 2775, deck 2815, lower topgallant 1644.5, lower topsail 2127, course 2381.5 (the lowered upper topsail 2070, the lowered upper topgallant 1600); main truck 1068, rail 2800, deck 2841, lower topgallant 1625, lower topsail 2107, course 2359.5 (the lowered upper topsail 2048, the lowered upper topgallant 1577); kreuz truck 1098, the midship island's rail 2750 and its painted-ports band 2813-2843, deck 2843 (the band's foot), lower topgallant 1655, lower topsail 2132.5, course 2390 (the lowered upper topsail 2069, the lowered upper topgallant 1606); laeisz truck 1210, rail 2795, deck 2833, lower topgallant 1743.5, lower topsail 2219.5, course 2473.5 (the lowered upper topsail 2164, the lowered upper topgallant 1703); jigger truck 1408, rail 2800, deck 2833, lower topgallant 1868, lower topsail 2287, course 2511.5 (the lowered upper topsail 2229, the lowered upper topgallant 1825). FRACTIONS OF THE TRUCK OVER THE DECK, per mast: fore course 0.254, lower topsail 0.403, lower topgallant 0.686; deck to truck 1707 px, 55.8 m; main course 0.272, lower topsail 0.414, lower topgallant 0.686; deck to truck 1773 px, 58.0 m (the scale's anchor); kreuz course 0.260, lower topsail 0.407, lower topgallant 0.681; deck to truck 1745 px, 57.1 m; laeisz course 0.221, lower topsail 0.378, lower topgallant 0.671; deck to truck 1623 px, 53.1 m; jigger course 0.226, lower topsail 0.383, lower topgallant 0.677; deck to truck 1425 px, 46.6 m. RECORDED PER MAST, to 0.01, because the plate reads the same split r286 could not resolve - the two after masts hang their three lower yards lower than the three forward masts by 0.03-0.04 of their trucks - and reads it square on the beam with every mast at one scale: fore 0.25 / 0.40 / 0.69, main 0.27 / 0.41 / 0.69, kreuz 0.26 / 0.41 / 0.68, laeisz 0.22 / 0.38 / 0.67, jigger 0.23 / 0.38 / 0.68. AGAINST r286 (the Green plate from the quarter, per mast): the course within 0.025 (jigger 0.20 -> 0.23, laeisz 0.21 -> 0.22, kreuz 0.25 -> 0.26, main 0.27 -> 0.27), the lower topsail within 0.03, the lower topgallant within 0.01; r286's +/- 0.04 on the two lowest yards was that split, and it is real. BOUNDS: +/- 0.01 on every fraction (the truck +/- 5, the deck +/- 10 and the yard +/- 4 px on 1425-1773 px of truck over deck; the bulwark's +/- 0.3 m moves a fraction by under 0.005). THE TRUCKS: deck to truck reads 1707 / 1773 / 1745 / 1623 / 1425 px on the five masts at one scale, so the after masts are SHORTER - the main's attested 58 m is the tallest, and the fore is 55.8, the kreuz 57.1, the laeisz 53.1 and the jigger 46.6 m (+/- 0.5 m; the datum's uncertainty moves all five alike and the ratios to the main hold); r286's Green plate had the jigger's truck-over-deck 2256 px against the laeisz's 2310 although the jigger stood nearer that camera, the same finding unread. NOT READ HERE: the spar lengths (the yards' dark runs are broken by the lowered yards and the rigging; courseYardM 32 stands attested); the bulwark's own height (assumed at the class 1.35 m); the three hoisting yards' set heights. THIS MAST (jigger, station 0.86): rows truck 1408, rail 2800, deck 2833, lower topgallant 1868, lower topsail 2287, course 2511.5 (the lowered upper topsail 2229, the lowered upper topgallant 1825); read course 0.226, lower topsail 0.383, lower topgallant 0.677; deck to truck 1425 px, 46.6 m. PLATE READ, r290, the three HOISTING yards: the State Library of Victoria's halftone of Preussen under full sail from aft of the port beam - r289's census called it square on the beam at 22 px/m off the 1200 px preview, and it is oblique, 37-49 px/m across the hull, as this paragraph measures below; corrected r291 (Malcolm Brodie shipping collection, accession H99.220/4261, 'A mass of canvas to attend to in a ship like this', Rosetta IE32693, 5421 x 4071, the JPG derivative at the master's width by the r289 route; out of copyright; build/staging/r290/full-IE32693.jpg, the whole plate at half scale with a 200 px grid in ../r289/plate-IE32693-half-grid.png, each mast in crop-marked-*.png with its fitted line and the yard rows drawn, the mastheads at 2x in sheet-trucks-2x.png, the hull's band at 2x in sheet-band-2x.png, the main's band profiles in profile-main.png). Bow to the RIGHT, the camera a little aft of the beam (the mast spacing 890 / 900 / 780 / 700 px jigger to fore, so the forward masts are farther and smaller), all six yards SET on every mast, the halftone cell about 8 px. METHOD (read-fullsail.py, read-fullsail3.py, read-register.py): each pole found by a line search over its sky rows on a 4 px blurred plate (mean brightness along the line, slope 0.03-0.09 px/row); bands 60-220 px out on both sides profiled per row on the unblurred plate; under full sail a yard is the HEAD of its sail and the canvas is darkest just under it, so a yard is the sharp light-to-dark edge going down the plate on both sides (the steepest 24-row descent; the two sides averaged; six on every mast). THE DATUM IS REGISTERED, NOT READ: this plate's trucks are hidden by cloud (kreuz) or faint against bright sky (fore), and the painted-ports band's foot at the deck is overlaid by the forecastle and the boats forward, so the plate's own truck and deck reads disagreed with r289's fixed yards by up to 0.12 at the fore; instead each mast's deck row D and truck-over-deck T were solved by least squares from its course, lower topsail and lower topgallant rows against r289's per-mast fractions (three rows, two unknowns; residuals under 4 px on four masts and 7 px on the fore), and the three hoisting yards read as fractions in that frame. READ PER MAST (utop / utg / royal): fore upper topsail 0.558, upper topgallant 0.820, royal 0.942; main upper topsail 0.561, upper topgallant 0.809, royal 0.923; kreuz upper topsail 0.557, upper topgallant 0.805, royal 0.919; laeisz upper topsail 0.538, upper topgallant 0.799, royal 0.936; jigger upper topsail 0.550, upper topgallant 0.813, royal 0.923. BOUND +/- 0.02 on each (the edge row +/- 8 px on 2050-2435 px of T, and the registration's own +/- 0.01 per fixed yard propagated through T). RECORDED AS ONE SET ON ALL FIVE MASTS - upper topsail 0.55, upper topgallant 0.81, royal 0.93 (the five-mast means 0.553 / 0.809 / 0.929) - because the per-mast spread (0.538-0.561, 0.799-0.820, 0.919-0.942) is inside the bound, so no per-mast split is claimed for these three yards, unlike the fixed yards' split r289 read on two plates beyond its bound. Against r286's quarter-plate read (0.54 / 0.80 / 0.92): +0.01 on each, inside both reads' bounds. NOT READ: the spar lengths - the yards are braced on this plate and their arms run into the next mast's canvas in the bands, so the dark run along a yard's line did not end at the arm; the plate's own trucks and deck (see above). THIS MAST (jigger): rows royal 1055.5 (1042, 1069), upper topgallant 1303.5 (1309, 1298), lower topgallant 1611 (1595, 1627), upper topsail 1900 (1884, 1916), lower topsail 2278.5 (2264, 2293), course 2631 (fwd only); registered deck 3143.5, truck over deck 2262.8 px, residuals -1.1 / 1.7 / -0.6 px; 48.6 px/m; read upper topsail 0.550, upper topgallant 0.813, royal 0.923.",
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           }
         ],
         "build": "steel",
@@ -3987,7 +3995,8 @@
             "diaM": 0.838,
             "rig": "gaff",
             "topmast": true,
-            "shrouds": 4
+            "shrouds": 4,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.26,
@@ -3995,7 +4004,8 @@
             "diaM": 1.067,
             "rig": "gaff",
             "topmast": true,
-            "shrouds": 4
+            "shrouds": 4,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.4,
@@ -4003,7 +4013,8 @@
             "diaM": 1.067,
             "rig": "gaff",
             "topmast": true,
-            "shrouds": 5
+            "shrouds": 5,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.6,
@@ -4011,7 +4022,8 @@
             "diaM": 1.067,
             "rig": "gaff",
             "topmast": true,
-            "shrouds": 5
+            "shrouds": 5,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.74,
@@ -4019,7 +4031,8 @@
             "diaM": 0.838,
             "rig": "gaff",
             "topmast": true,
-            "shrouds": 4
+            "shrouds": 4,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           },
           {
             "at": 0.87,
@@ -4028,7 +4041,8 @@
             "wood": true,
             "rig": "gaff",
             "topmast": true,
-            "shrouds": 4
+            "shrouds": 4,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           }
         ],
         "build": "iron",
@@ -5404,7 +5418,9 @@
             "reefs": {
               "provenance": "UNREAD, r284: no plate of this ship's square sails has been read for reef bands; every tier is drawn plain, which is the silence named, not a read. A plate of any tier's face at 50 px/m or better would settle which tiers carry bands and at what row."
             },
-            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03."
+            "yardFracsProvenance": "CLASS, r285: no plate of this ship has been read for where her yards hang; every yard is crossed at the plan's class fraction of the truck (course 0.36, ltop 0.50, utop 0.62, top 0.55, ltg 0.73, utg 0.83, tg 0.76, royal 0.92), which is the silence named, not a read. A broadside plate at 10 px/m or better with the cap rail in it reads a fixed yard's fraction to +/- 0.03.",
+            "furlStow": "lowered",
+            "furlStowProvenance": "READ, r310 (0y¹³⁸): LOWERED. The plate is the State Library of Queensland's John Oxley Library negative 146359, 'The Cutty Sark waiting in Sydney Harbour for the new season's wool', 1885-94 (Commons 'StateLibQld 1 146359 Cutty Sark (ship).jpg', 706 x 1000 px), taken from high on her port quarter at anchor. At the mizzen it is about 11 px/m: 167 px from the poop to the mizzen top. A gaff 0.25 m thick and over 10 m long would show at 3 px by 110 px or more, as her 0.3 m yards do. No gaff stands on the mizzen: the lower mast is bare from the crossjack yard down to the poop, and no brailed bundle lies along its after side. The poop is covered by an awning whose ridge runs aft from the mast at the height a boom would stand. So the gaff is down, either lowered to the boom or struck, and the builder's lowered stowage is the nearer of the two it draws. CONTESTED: this is one plate of one ship, the Cutty Sark whose dimensions this class hull carries, at anchor in port 16 to 25 years after her launch and after her 1880 re-rig. It does not show where the gaff lies, and other clippers may have kept a standing gaff."
           }
         ],
         "build": "frame",
@@ -5612,7 +5628,8 @@
             "rake": 3,
             "shrouds": 3,
             "topmast": true,
-            "topsail": true
+            "topsail": true,
+            "furlStowProvenance": "UNREAD, r310: no plate of this hull furled has been read for how this sail is stowed. The builder lowers the gaff onto a roll along the boom, a schooner's stowage; that is the default named, not a read. A plate of her at anchor that shows this mast between the deck and the top settles it: a gaff standing at its working angle with the sail gathered against the mast is 'brailed'; no gaff aloft is 'lowered'."
           }
         ],
         "build": "iron",

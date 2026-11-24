@@ -1,0 +1,17 @@
+[
+ {
+  "id": "clipper",
+  "rule": "a lowered gaff standing aloft",
+  "detail": "mast 2 (station 0.85): the Gaff is in state 'brailed', the record reads it lowered (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered sail not rolled on its boom",
+  "detail": "mast 2 (station 0.85): 0 furl roll(s) along the boom of a sail the record stows lowered (furled build)"
+ },
+ {
+  "id": "clipper",
+  "rule": "a lowered sail drawn brailed",
+  "detail": "mast 2 (station 0.85): 1 Brailed sail bundle(s) on a mast whose sail the record stows lowered (furled build)"
+ }
+]
