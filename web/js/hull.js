@@ -2241,7 +2241,16 @@ const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
    for the full stack, 1.48 truncated at two segments by `only`, 1.00 at one. Encoding the
    solved lower in the DATA instead would bake these constants into the record and drift
    silently the day they change. */
-function mastLowerOf(mk, steelMain) {
+/* ── r300: A POLE MAY BE RECORDED BY ITS TRUCK OVER THE WATER ──────────────────────────
+   Titanic's side plan draws each truck at a height over the waterline, and nothing in reach
+   gives either pole's length from her deck. `truckWLM` on a pole mast states that height, and
+   the pole is the truck less the deck at its foot, so it follows the deck when the deck moves:
+   r299 raised her C deck 0.6 m under the foremast and a recorded 52.2 m pole carried the truck
+   up with it, 2.4 m over the plan. `footY` is the deck the pole steps on; a call that cannot
+   name one gets no pole from a truck record. */
+function mastLowerOf(mk, steelMain, footY) {
+  if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
+    return footY !== undefined ? mk.truckWLM - footY : 0;
   if (mk.truckM !== undefined && mk.rig === 'square') {
     const K = mk.only === 1 ? 1.0
             : mk.only === 2 ? 0.88 + 0.60
@@ -2511,7 +2520,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        a trireme at L/B 9.7 comes out with a 20 m mast against Olympias's measured 11 m. Where a
        vessel has an attested mast, that measurement wins and the rule is not used at all —
        `heightM` is metres, `height` is a share of Steel's main. */
-    const lower = mastLowerOf(mk, steelMain);
+    const lower = mastLowerOf(mk, steelMain, base);
     /* ── A MAST IS AS THICK AS ITS OWN LENGTH ASKS, NOT AS ITS SHIP'S BEAM ─────────────
        Every mast on a ship drew the same diameter — beam x 0.06 — so the treasure ship's
        0.6-share mizzen stood as fat as her main, and the corbita's little artemon as fat
@@ -2528,7 +2537,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        mizzen) is inference, like the height shares themselves. Junk and crabclaw masts
        take the length scaling only — China is not rigged by Steel's tables. */
     const mainLower = S.masts.reduce((mx, m2) =>
-      Math.max(mx, mastLowerOf(m2, steelMain)), 0)
+      Math.max(mx, mastLowerOf(m2, steelMain, deckAt(m2.at))), 0)
       || lower || 1;
     /* the mizzen is the AFTERMOST STATION, not the last list entry — the corbita and the
        trireme list their mains first and their bow masts second */
@@ -5266,9 +5275,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
     if (S.headsails && S.masts && S.masts.length) {
       const fm = S.masts[0];
       const steelMain = (S.lwl + S.beam) / 2;
-      const flower = mastLowerOf(fm, steelMain);
-      const fx = (fm.at - 0.5) * L + H.rake(fm.at);
       const fbase = deckAt(fm.at);
+      const flower = mastLowerOf(fm, steelMain, fbase);
+      const fx = (fm.at - 0.5) * L + H.rake(fm.at);
       const hounds = fbase + flower * 0.78;
       /* the outermost stay stops at the topmast HEAD, short of the truck — hoisted to the
          truck itself the flying jib lies in the fore topsail's own triangle.
@@ -16982,7 +16991,8 @@ function buildShip(S, opts) {
       if (foot < Infinity && head > -Infinity) {
         rigDeckY = foot; rigTruckY = head;
         const mk = (S.masts || [])[topSeg.mi] || {};
-        rigTruckFrom = (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
+        rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
+                     : (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
                      : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
                      : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
                      : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
@@ -16993,7 +17003,7 @@ function buildShip(S, opts) {
            `lower` says what the lower mast is (this ship's recorded heightM, or a beam share); `n` is the
            count of segments the class fractions carry it through; truckM / heightM are the record's figures. */
         rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
-                        lower: mk.heightM !== undefined ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM };
+                        lower: (mk.heightM !== undefined || mk.truckWLM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
       }
     } }
   group.userData = { hullMat, sails, spec: S, furled: FURLED,

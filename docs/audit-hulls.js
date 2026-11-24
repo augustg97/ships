@@ -179,7 +179,10 @@ if (e.userData && e.userData.part) return e.userData.part;
 return null; };
 const NONBEARING = new Set(['stay', 'shroud', 'halyard', 'brace', 'lift',
 'sheet', 'tack', 'ratline', 'oar', 'mast', 'parrel']);
+const HSlo = (H.masts || []).some(mk => mk.truckWLM !== undefined) ? SHIPS_HULL.hullSurface(H) : null;
 const lowerOf = mk => {
+if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
+return mk.truckWLM - HSlo.deck(mk.at);
 if (mk.truckM !== undefined && mk.rig === 'square') {
 const K = mk.only === 1 ? 1.0 : mk.only === 2 ? 0.88 + 0.60
 : 0.88 * (1 + 0.60) + 0.30;
@@ -5022,7 +5025,7 @@ if (Math.abs(U.rigDeckY - tallest.foot) > 0.02 || Math.abs(U.rigTruckY - tallest
 say(v.id, "the card's rig height is one segment",
 `the loft's deck-to-truck ${d2t.toFixed(2)} m (rigDeckY ${U.rigDeckY.toFixed(2)}, rigTruckY ${U.rigTruckY.toFixed(2)}) against masts[${tmi}]'s segments: foot ${tallest.foot.toFixed(2)}, truck ${tallest.head.toFixed(2)}, ${(tallest.head - tallest.foot).toFixed(2)} m deck to truck over ${tallest.n} segment(s)`);
 const mk = H.masts[tmi] || {};
-const wantRecord = (mk.truckM !== undefined && mk.rig === 'square') || (tallest.n === 1 && mk.heightM !== undefined);
+const wantRecord = (mk.truckM !== undefined && mk.rig === 'square') || (tallest.n === 1 && (mk.heightM !== undefined || mk.truckWLM !== undefined));
 if (!U.rigTruckFrom)
 say(v.id, 'rig height with no provenance', `the loft prints ${d2t.toFixed(1)} m deck to truck and does not say whether it is the record's (rigTruckFrom)`);
 else if ((U.rigTruckFrom.indexOf('record') === 0) !== wantRecord)
@@ -6578,6 +6581,19 @@ if (!(Math.abs(endTop[e] - isl.topM[e]) <= 0.15)) say(v.id, 'an island built off
 }
 for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
 }
+if (H.stationRead) {
+const headOf = mi => { let hd = -Infinity; g.traverse(o => { const sg = o.isMesh && o.userData.seg; if (sg && sg.mi === mi) hd = Math.max(hd, sg.headY); }); return hd; };
+(H.masts || []).forEach((mk, mi) => {
+if (!(mk.rig === 'pole' || mk.rig === 'none')) return;
+if (mk.truckWLM === undefined) { say(v.id, 'a pole with no truck read on a plate-read hull', `mast ${mi} at u ${mk.at}: the stations were read off the plate and the truck was not`); return; }
+const tr = mk.truckRead;
+if (!(tr && tr.pxPerM > 0 && typeof tr.topRow === 'number' && typeof tr.wlRow === 'number')) { say(v.id, 'a truck height with no rows', `mast ${mi}: truckWLM ${mk.truckWLM} m and no truckRead`); return; }
+const want = (tr.wlRow - tr.topRow) / tr.pxPerM;
+if (Math.abs(mk.truckWLM - want) > 0.05) say(v.id, 'a truck off its plate read', `mast ${mi}: truckWLM ${mk.truckWLM} m, the plate's row ${tr.topRow} over waterline row ${tr.wlRow} reads ${want.toFixed(2)} m`);
+const hd = headOf(mi);
+if (!(Math.abs(hd - mk.truckWLM) <= 0.15)) say(v.id, 'a pole built off its read truck', `mast ${mi}: the highest segment's head stands at ${isFinite(hd) ? hd.toFixed(2) : 'nothing'} m, the read ${mk.truckWLM} m`);
+});
+}
 if (H.sheerRead) {
 const SR = H.sheerRead, ST = SR.stations;
 if (!(Array.isArray(ST) && ST.length >= 2 && Array.isArray(SR.rows) && SR.rows.length === ST.length && Array.isArray(SR.datumRows) && SR.datumRows.length === ST.length && SR.pxPerM > 0 && typeof SR.datumM === 'number'))
@@ -7304,7 +7320,7 @@ say(v.id, 'an iron mast grown from a tree',
 {
 const steelMainD = (H.lwl + H.beam) / 2;
 const lowersD = (H.masts || []).map(mm =>
-mm.heightM !== undefined ? mm.heightM : (mm.height || 0) * steelMainD);
+lowerOf(mm));
 const mainLowerD = Math.max(...lowersD, 0) || 1;
 const aftAtD = Math.max(...(H.masts || []).map(mm => mm.at || 0), 0);
 const mixedSqD = (H.masts || []).some(mm => mm.rig === 'square');

@@ -1,0 +1,9 @@
+Round 300: Titanic's two trucks stand where the 1911 side plan draws them, 60.81 m (fore) and 61.87 m (main) over the water.
+
+Each mast record carries truckWLM, its truck over the load waterline read off the plan, with the
+rows and the provenance; the builder draws the pole from the deck at its foot to that height, so
+the foremast no longer rises with the deck r299 raised under it (its truck stood at 63.25 m).
+mastTopM's 62.5 m ("approximately 205 ft") is marked contested against the plan. New audit rule
+A-TRUCK-READ; four proofs convicted their faults; 33 hulls, 0 problems.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

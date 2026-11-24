@@ -1341,7 +1341,9 @@ group.add(g);
 }
 const HULL_VERT = SHADERS['HULL_VERT.vert'];
 const HULL_FRAG = SHADERS['HULL_FRAG.frag'];
-function mastLowerOf(mk, steelMain) {
+function mastLowerOf(mk, steelMain, footY) {
+if (mk.truckWLM !== undefined && (mk.rig === 'pole' || mk.rig === 'none'))
+return footY !== undefined ? mk.truckWLM - footY : 0;
 if (mk.truckM !== undefined && mk.rig === 'square') {
 const K = mk.only === 1 ? 1.0
 : mk.only === 2 ? 0.88 + 0.60
@@ -1461,9 +1463,9 @@ const rakeRad = (mk.rake || 0) * Math.PI / 180;
 const tanRake = Math.tan(rakeRad);
 const mxA = h => x + tanRake * (h - base);
 const steelMain = (S.lwl + S.beam) / 2;
-const lower = mastLowerOf(mk, steelMain);
+const lower = mastLowerOf(mk, steelMain, base);
 const mainLower = S.masts.reduce((mx, m2) =>
-Math.max(mx, mastLowerOf(m2, steelMain)), 0)
+Math.max(mx, mastLowerOf(m2, steelMain, deckAt(m2.at))), 0)
 || lower || 1;
 const isMizzen = mk.at === Math.max(...S.masts.map(m2 => m2.at)) && S.masts.length >= 3
 && !S.iron && S.masts.some(m2 => m2.rig === 'square') && lower < mainLower * 0.95
@@ -2968,9 +2970,9 @@ if (bob) group.add(tag(bob, 'stay', 'Bobstay',
 if (S.headsails && S.masts && S.masts.length) {
 const fm = S.masts[0];
 const steelMain = (S.lwl + S.beam) / 2;
-const flower = mastLowerOf(fm, steelMain);
-const fx = (fm.at - 0.5) * L + H.rake(fm.at);
 const fbase = deckAt(fm.at);
+const flower = mastLowerOf(fm, steelMain, fbase);
+const fx = (fm.at - 0.5) * L + H.rake(fm.at);
 const hounds = fbase + flower * 0.78;
 const truck = fbase + (fm.topmast ? flower * 0.88 + flower * 0.52 * 0.80
 : fm.rig === 'square' ? flower * 0.88 + flower * 0.60 * 0.72
@@ -10985,13 +10987,14 @@ if (sg.si === 0) foot = Math.min(foot, sg.footY); head = Math.max(head, sg.headY
 if (foot < Infinity && head > -Infinity) {
 rigDeckY = foot; rigTruckY = head;
 const mk = (S.masts || [])[topSeg.mi] || {};
-rigTruckFrom = (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
+rigTruckFrom = (mk.truckWLM !== undefined && n === 1) ? 'record: truckWLM ' + mk.truckWLM + ' m over the load waterline, one pole from the deck at its foot'
+: (mk.truckM !== undefined && mk.rig === 'square') ? 'record: truckM ' + mk.truckM + ' m deck to flag-button, the stack solved for it'
 : (n === 1 && mk.heightM !== undefined) ? 'record: heightM ' + mk.heightM + ' m, one pole'
 : mk.heightM !== undefined ? 'derived: the recorded lower mast (heightM ' + mk.heightM + ' m) carried to the truck through the class fractions, ' + n + ' segments'
 : n === 1 ? 'derived: a beam-share mast, one pole, no height recorded'
 : 'derived: a beam-share lower mast carried to the truck through the class fractions, ' + n + ' segments';
 rigTruckHow = { from: rigTruckFrom.indexOf('record') === 0 ? 'record' : 'derived', mi: topSeg.mi, n,
-lower: mk.heightM !== undefined ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM };
+lower: (mk.heightM !== undefined || mk.truckWLM !== undefined) ? 'record' : 'beam', truckM: mk.truckM, heightM: mk.heightM, truckWLM: mk.truckWLM };
 }
 } }
 group.userData = { hullMat, sails, spec: S, furled: FURLED,

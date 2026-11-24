@@ -4161,7 +4161,6 @@
         "masts": [
           {
             "at": 0.1168,
-            "heightM": 52.2,
             "rig": "pole",
             "rake": 9.46,
             "shrouds": 0,
@@ -4177,14 +4176,29 @@
                 "pxPerM": 13.0268
               },
               "provenance": "PLATE READ, r296: the crow's nest off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). The plan draws it as a box on the fore side of the foremast, its top on row 470, its foot on row 490, reaching from the mast's fore edge at column 3138.5 to column 3153.5. The plan's waterline stands on row 823.4 at that column, so the box stands 25.6 to 27.1 m over the water and reaches 1.15 m forward of the mast. The read is good to about 2 rows (0.15 m). The model had hung it at two thirds of the mast, 44.9 m over the water, which was a class rule with no source."
-            }
+            },
+            "truckWLM": 60.81,
+            "truckRead": {
+              "col": 3050.9,
+              "topRow": 32,
+              "wlRow": 824.1,
+              "pxPerM": 13.0268
+            },
+            "truckProvenance": "PLATE READ, r300: the foremast's truck off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). The plan draws each mast as two tapering edges ending in a black knob, the truck, with a house flag flying from it. The mast's centre line (r296's fit, leaning 10.4 degrees on the page) was followed up to the highest row with ink within 3 px of it: row 32 at column 3050.9. The plan's waterline stands on row 824.1 at that column, so the truck stands 60.81 m over the load waterline at 13.03 px/m. The plan's bar scale reads 1% longer, which puts the bound at about 0.6 m; the read itself is good to about a row (0.1 m). The pole is not recorded: the builder draws it from the deck at its foot up to this height, so it follows the deck when the deck moves. Until r300 both poles carried a heightM of 52.2 m from the deck, set to put the trucks at the record's 62.5 m (mastTopM), which stood the fore truck at 63.25 m once r299 raised the deck under it."
           },
           {
             "at": 0.816,
-            "heightM": 52.2,
             "rig": "pole",
             "rake": 9.46,
-            "shrouds": 0
+            "shrouds": 0,
+            "truckWLM": 61.87,
+            "truckRead": {
+              "col": 690.5,
+              "topRow": 35,
+              "wlRow": 841.0,
+              "pxPerM": 13.0268
+            },
+            "truckProvenance": "PLATE READ, r300: the mainmast's truck off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). The plan draws each mast as two tapering edges ending in a black knob, the truck, with a house flag flying from it. The mast's centre line (r296's fit, leaning 9.8 degrees on the page) was followed up to the highest row with ink within 3 px of it: row 35 at column 690.5. The plan's waterline stands on row 841.0 at that column, so the truck stands 61.87 m over the load waterline at 13.03 px/m. The plan's bar scale reads 1% longer, which puts the bound at about 0.6 m; the read itself is good to about a row (0.1 m). The pole is not recorded: the builder draws it from the deck at its foot up to this height, so it follows the deck when the deck moves. Until r300 both poles carried a heightM of 52.2 m from the deck, set to put the trucks at the record's 62.5 m (mastTopM), which stood the fore truck at 63.25 m once r299 raised the deck under it."
           }
         ],
         "build": "steel",
@@ -4562,7 +4576,8 @@
           "read": "build/staging/r299/r299_read.py",
           "provenance": "PLATE READ, r299: the C deck (the shelter deck, which ran her whole length and was the floor of both well decks) off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). The plan labels its decks beside the stem, and the C label stands just above a dashed line at row 661 at column 3600. That line was followed aft every 10 columns to column 150 (346 points, each the darkness peak of a 40-column window within 4 rows of the last), and fitted as a quintic in the column (rms 1.20 px, about 0.09 m). Each station's height is the fit's row read over r297's waterline, which tilts from row 845 at the stern end (column 123.5) to row 820 at the stem head (column 3629), at 13.03 px/m. The columns map to u through the loft's deck-level line, as r295 placed the islands (its two breaks map back to u 0.1354 and 0.8858 exactly). Beyond the trace (columns 3600 and 150) each end station holds the fit's end value. The deck stands 12.2 m over the water at the stem, 10.7 m at the forecastle break, 9.60 m amidships, lowest at 9.55 m at u 0.60, and 10.1 m at the stern: a sheer of about 2.6 m forward and 0.6 m aft. The builder draws the sheer as a monotone cubic through these stations. BOUNDS: the plan's scale carries 1% (0.1 m at 10 m), the line's width about 0.1 m, and the waterline's tilt is r297's read. CONTESTED IN THE AFTER WELL: between columns 560 and 760 the plan draws three lines close together, at rows 704, 710 and 716 (10.5, 10.05 and 9.6 m). The trace follows the dashed line at row 710, the one continuous with the C line amidships, so the after well deck carries a bound of about 0.45 m. The heavy solid line 1.2 to 1.8 m higher, from 11.6 m at the forecastle break through 10.9 m amidships to 12.3 m at the stern, is the top of the shell and of the wells' bulwark, not a deck. The model's rail still stands a class 1 m over this deck."
         },
-        "deckMProvenance": "DERIVED, r299: the boat deck's recorded 19.0 m over the water less the C deck's read 9.60 m amidships (sheerRead), over the 3 decks the house stands above C (B, A and the boat deck): 3.133 m. It was 2.96 m while the model drew the deck at 10.1 m amidships; the plan's C deck is 0.50 m lower there, so the same three decks must each be about 0.17 m taller to reach the same boat deck."
+        "deckMProvenance": "DERIVED, r299: the boat deck's recorded 19.0 m over the water less the C deck's read 9.60 m amidships (sheerRead), over the 3 decks the house stands above C (B, A and the boat deck): 3.133 m. It was 2.96 m while the model drew the deck at 10.1 m amidships; the plan's C deck is 0.50 m lower there, so the same three decks must each be about 0.17 m taller to reach the same boat deck.",
+        "mastTopMProvenance": "CONTESTED. 62.5 m is 'approximately 205 ft above the maximum load line', the round figure that secondary accounts of her fitting-out in August 1911 give for the tops of both masts, with no drawing or measurement cited. The 1911 side plan in Engineering draws the two trucks at different heights: the fore at 60.81 m and the main at 61.87 m over its waterline (r300; each mast carries its read as truckWLM). The masts are built to the plan's reads. This figure is kept as the printed one, and the audit holds the tallest built mast within 1.5 m of it."
       }
     },
     {
