@@ -1,0 +1,15 @@
+Round 303: Titanic's two well decks have bulwarks to the height the 1911 side plan draws them.
+
+In both wells the shell stopped at the deck and the capping sat on the deck edge, so the after
+well's side stood 0.85 to 1.04 m under the plan's bulwark line. The heavy line was traced across
+each well (rms 0.32 and 0.35 px) and read at the wells' ends over the plan's tilted waterline:
+11.84 to 11.40 m forward, 11.29 to 11.58 m aft. hull.islands.wells records it; buildIslands
+carries the shell up to it flush with the skin (a new part, the well-deck bulwark), and the
+capping sits on its top. Every hull without the field is byte-identical.
+
+Audit: A-WELL-BULWARK reads the record against its rows, the built bulwark against the record,
+the capping against the bulwark, and convicts a hull with islands, a deck at the sheer and no
+wells record. 33 hulls, 0 problems. Proofs OLDFILE 2, NOBULWARK 2, OLDCAP 2, OFFROW 1,
+SILENCE 1; restored 0.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

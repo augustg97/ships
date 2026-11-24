@@ -144,6 +144,16 @@ return isl.topM[0] + (isl.topM[1] - isl.topM[0]) * t;
 }
 return null;
 };
+const wellTop = u => {
+const W = S.islands && S.islands.wells;
+if (!W) return null;
+for (const w of W)
+if (u >= w.u[0] && u <= w.u[1]) {
+const t = (u - w.u[0]) / Math.max(1e-6, w.u[1] - w.u[0]);
+return w.topM[0] + (w.topM[1] - w.topM[0]) * t;
+}
+return null;
+};
 const tumble = u => S.tumblehome * fullness(u, 1.4, 0.55, 0.7);
 const rakeAllow = ((S.stemRake || 0) + (S.sternRake || 0)) * S.loa;
 const rakeScale = rakeAllow > 0
@@ -172,7 +182,7 @@ if (!deckDrop) return sheer(u);
 if (S.deck.level) return S.freeboard - deckDrop;
 return sheer(u) - deckDrop;
 };
-return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, islandTop, section: sectionRows(S),
+return { nExp, halfB, wl, keel, sheer, deck, tumble, rake, stepTop, islandTop, wellTop, section: sectionRows(S),
 straightPost: SP, postTan, stemLine };
 }
 function deckEdge(S, H, u) {
@@ -3738,6 +3748,9 @@ brace:    { stage: 6, name: 'Braces',
 what: 'Running rigging from each yard ARM, leading aft. Hauling one brace and '
 + 'easing the other swings the yard round to meet the wind at an angle. They '
 + 'are the reason a square-rigger can sail anything other than dead downwind.' },
+wellBulwark: { stage: 3, name: 'Well-deck bulwark',
+what: 'The side plating carried on up past a well deck, between a raised end and the house. '
++ 'It holds a breaking sea off the deck and stands about chest high on the people there.' },
 islandRail: { stage: 3, name: 'Raised-deck rail',
 what: 'The open rail round the edge of a raised deck: stanchions carrying three bars.' },
 rail:     { stage: 3, name: 'Rail',
@@ -4113,7 +4126,9 @@ const H = hullSurface(S);
 const L = S.lwl, B = S.beam;
 const deckAtU = u => H.deck(u);
 const halfAtU = u => Math.abs(deckEdge(S, H, u)[2]);
-const railAtU = u => H.sheer(u), railHalfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
+const capH = S.capM ? S.capM : B * 0.016 * 1.6;
+const railAtU = u => { const w = H.wellTop(u); return w !== null ? w - capH : H.sheer(u); };
+const railHalfAtU = u => Math.abs(surfacePoint(S, H, u, 1)[2]);
 const wood = mats.woodDark, pale = mats.woodPale || mats.woodDark;
 if (!openHull) {
 const pos = [], idx = [];
@@ -6607,6 +6622,20 @@ rg.add(bar);
 }
 group.add(tag(rg, 'islandRail', isl.name + ' rail'));
 }
+}
+for (const w of (S.islands.wells || [])) {
+const N = Math.max(4, Math.round((w.u[1] - w.u[0]) * L / 1.6));
+const g = new THREE.Group();
+for (const sgn of [1, -1]) {
+const pts = [];
+for (let k = 0; k <= N; k++) {
+const u = w.u[0] + (w.u[1] - w.u[0]) * (sgn > 0 ? k : N - k) / N;
+const x = xAt(u), z = sgn * halfAt(u);
+pts.push(x, H.sheer(u) - 0.02, z, x, H.wellTop(u), z);
+}
+g.add(strip(pts, wallMat));
+}
+group.add(tag(g, 'wellBulwark', w.name + ' bulwark'));
 }
 }
 function funnelStations(S) {

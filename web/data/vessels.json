@@ -4375,7 +4375,78 @@
               "aftWell": 15.7,
               "poop": 33.24
             }
-          }
+          },
+          "wells": [
+            {
+              "name": "Forward well",
+              "u": [
+                0.1354,
+                0.1915
+              ],
+              "topM": [
+                11.84,
+                11.4
+              ],
+              "cols": [
+                3106.5,
+                2917.1
+              ],
+              "topRead": {
+                "rows": [
+                  669.4,
+                  676.6
+                ],
+                "datumRows": [
+                  823.7,
+                  825.1
+                ],
+                "datumM": 0.0,
+                "pxPerM": 13.0268,
+                "colRange": [
+                  2932,
+                  3088
+                ],
+                "rmsPx": 0.32,
+                "n": 53,
+                "read": "build/staging/r303/r303_trace.py, r303_read.py"
+              }
+            },
+            {
+              "name": "After well",
+              "u": [
+                0.8305,
+                0.8858
+              ],
+              "topM": [
+                11.29,
+                11.58
+              ],
+              "cols": [
+                755.5,
+                556.5
+              ],
+              "topRead": {
+                "rows": [
+                  693.4,
+                  691.1
+                ],
+                "datumRows": [
+                  840.5,
+                  841.9
+                ],
+                "datumM": 0.0,
+                "pxPerM": 13.0268,
+                "colRange": [
+                  565,
+                  760
+                ],
+                "rmsPx": 0.35,
+                "n": 66,
+                "read": "build/staging/r303/r303_trace.py, r303_read.py"
+              }
+            }
+          ],
+          "wellsProvenance": "READ, r303, off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (build/staging/r295/plates/side-plan-1911.png, 13.03 px/m). The plan draws each well's bulwark top as a heavy solid line, 4 to 5 px thick, running from the raised end's break to the house. Each line was traced every 3 columns as the centre of its dark run (the forward well on columns 2930 to 3090, 53 points; the after well on 565 to 760, 66 points; build/staging/r303/r303_trace.py), fitted as a straight line in the column (rms 0.32 and 0.35 px, about 0.03 m), and read at each well's two ends over r297's tilted waterline. The ends are the forecastle's and poop's recorded breaks (islands.list) and the house's stations (houseAt), placed on the plan through the loft's deck-level line (r303_read.py). The line's own thickness, 0.3 to 0.4 m, bounds where in it the plating's top edge lies; the centre is recorded. The forward well's top falls from 11.84 m at the forecastle break to 11.40 m at the house, the after well's rises from 11.29 m at the house to 11.58 m at the poop. The plan also draws rectangles hanging under the line in both wells, which may be freeing ports or openings in the bulwark; the model does not draw them."
         },
         "stationRead": {
           "plate": "the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png)",

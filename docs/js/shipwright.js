@@ -221,7 +221,7 @@ catapult: 'aircraft catapults with their crane', hatch: 'hatches', searchlight: 
 flightdeck: 'flight deck', hangar: 'hangar', island: 'island', sensor: 'instrument mast',
 solar: 'solar panels', wing: 'wing sail with its tail vane', floatplane: 'floatplanes',
 aircraft: 'aircraft on deck', livery: 'livery and name', paddle: 'paddle wheels',
-paddlebox: 'paddle boxes',
+paddlebox: 'paddle boxes', wellBulwark: 'bulwarks along the well decks',
 };
 function swHullSetsSail(H) {
 return (H.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole')
