@@ -28288,3 +28288,16 @@ Final tree: 33 hulls, 0 problems.
 **r310 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r310` already exists before writing into it. Then (0y¹³⁸) for the clipper, if a plate of her furled is in reach. Else (0y¹⁴¹): store the r298 and r303 traces in the record and extend A-SHEER-TRACE to them.**
 
 **Live stamp: docs/index.html carries data-version 1795547761 at the build.**
+
+**Live stamp VERIFIED: 1795547761 on https://augustg97.github.io/ships/index.html at 11:17:31 PST, about 80 s after the push. The published `data/vessels.json` and `audit-hulls.js` are byte-identical to docs/. First paint is 8.50 MB against the 8.6 MB budget, so 0.10 MB of headroom is left.**
+
+**THE FRAMES: ALL 65 SCORED.** Captured by the harness's check and `run-resume.sh`, which chains `r309_resume.py` runs until every frame is in. Scored with r277's offline scorer (`score1.out` to `score7.out`, `score-recap.out`).
+
+- `run1-current`: 5 frames, died at `shipwright`. Runs 2 to 7: 11, 14, 26, 1, 4 and 4 frames; runs 2 to 6 each died on the 150 s FRAME_READY wait on a frame that the next run captured clean.
+- `ship-titanic` 0.431% / 0.138: **predicted, ACCEPTED** (FRAME-LOG.md). `pair-ship-titanic-right.png` (baseline over new): the after well's grey inboard bulwark face is thinner over the higher deck. Every changed pixel is on Titanic.
+- `aboard-titanic` 0.081% / 0.026: **predicted, ACCEPTED**. `pair-aboard-titanic.png`: the changes lie on her after end and the after well.
+- Four **capture faults**, each recaptured alone in `recap-current` and inside the gate there:
+  - `globe-crossing` 9.825% and `globe-steam` 5.341% in run 1, captured while `profile_capture` ran beside the check. `pair-globe-crossing.png` and `pair-globe-steam.png` show no visible difference at 720 px. Recaptured: 0.020% and 0.042%.
+  - `descent-high` 0.016% / 0.372 in run 3: a low-amplitude difference over the whole sea (99.94% of pixels within 6 levels; `diff-descent-high.png`) in an 1869 frame that Titanic is not in. Recaptured: 0.013% / 0.003.
+  - `board-salamis` 33.214% in run 4: the dropped-tile fault, the same figure as in r308. Recaptured: 0.000%.
+- Every other frame is inside the gate. The largest is `passage-sahul` at 0.047%.

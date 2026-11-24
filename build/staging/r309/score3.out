@@ -1,0 +1,15 @@
+  aboard-coast                   0.012%  0.003 ok
+  aboard-off                     0.029%  0.010 ok
+  aboard                         0.015%  0.004 ok
+  descent-coast                  0.016%  0.003 ok
+  descent-high                   0.016%  0.372 CHANGED
+  descent                        0.014%  0.004 ok
+  map-floor                      0.014%  0.004 ok
+  ship-carrier                   0.000%  0.000 ok
+  ship-container                 0.000%  0.000 ok
+  ship-panokseon                 0.000%  0.000 ok
+  ship-queen-mary-2              0.000%  0.000 ok
+  ship-sekibune                  0.000%  0.000 ok
+  ship-titanic                   0.000%  0.000 ok
+  ship-yamato                    0.033%  0.013 ok
+14 frames scored offline, 1 beyond the gate
