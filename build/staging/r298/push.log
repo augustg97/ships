@@ -1,0 +1,8 @@
+2026-11-23 21:16:14 PST  docs/index.html data-version 1795497369
+2026-11-23 21:16:18 PST  git push origin main rc=0 →    bdc806c..0df8853  main -> main
+2026-11-23 21:26:28 PST  Deploy Pages run 45332132433 failed: 'No artifacts named github-pages were found' (the r297 receipt's run 45329150448 failed the same way); re-run requested
+2026-11-23 21:30:10 PST  re-run 1 failed the same way; workflow_dispatch requested
+2026-11-23 21:41:30 PST  workflow_dispatch run 45334970354: failure
+2026-11-23 21:41:51 PST  workflow changed to two jobs on v5 and pushed (28a2d13)
+2026-11-23 21:43:28 PST  run 45335121489: success; live data-version 1795497369
+2026-11-23 21:43:33 PST  live vessels.json, provenance.json, audit-hulls.js, hull.js byte-identical to docs/
