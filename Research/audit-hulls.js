@@ -9278,6 +9278,39 @@
       for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
     }
 
+    /* ── A-SHEER-READ (round 299, Titanic): A READ DECK LINE IS ITS PLATE'S ROWS, AND THE BUILT DECK.
+       Titanic's sheer was the class curve (freeboard 10.1 m, rises 0.7 and 0.4 m) while her
+       side plan draws the C deck 9.60 m amidships and 2.6 m higher at the stem. On a hull whose
+       record carries sheerRead: every station's height must be datumM + (datumRow - row) /
+       pxPerM within 0.05 m; hullSurface's sheer must pass through every station within 0.05 m;
+       and off the meshes, the deck's OUTERMOST vertex within 0.5 m of each station's x, between
+       the islands, must stand at that station within 0.15 m. The outermost, because the deck is
+       cambered: its crown stands about half a metre over its edge on a 28 m beam, and the
+       sheer is the edge. Silent without sheerRead. */
+    if (H.sheerRead) {
+      const SR = H.sheerRead, ST = SR.stations;
+      if (!(Array.isArray(ST) && ST.length >= 2 && Array.isArray(SR.rows) && SR.rows.length === ST.length && Array.isArray(SR.datumRows) && SR.datumRows.length === ST.length && SR.pxPerM > 0 && typeof SR.datumM === 'number'))
+        say(v.id, 'a deck line read with no rows', 'hull.sheerRead needs stations, rows and datumRows of one length, datumM and pxPerM');
+      else {
+        const HS = SHIPS_HULL.hullSurface(H);
+        const inIsland = u => ((H.islands && H.islands.list) || []).some(isl => isl && Array.isArray(isl.u) && u >= isl.u[0] - 0.01 && u <= isl.u[1] + 0.01);
+        const P5 = new THREE.Vector3();
+        const near = ST.map(() => NaN), far = ST.map(() => -1), xs = ST.map(([u]) => loftDeckX(H, u));
+        g.updateMatrixWorld(true);
+        g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (!pt || pt.key !== 'deck') return;
+          const pa = o.geometry.attributes.position;
+          for (let i = 0; i < pa.count; i++) { P5.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+            for (let j = 0; j < ST.length; j++) if (Math.abs(P5.x - xs[j]) <= 0.5 && Math.abs(P5.z) > far[j]) { far[j] = Math.abs(P5.z); near[j] = P5.y; } } });
+        ST.forEach(([u, m], j) => {
+          const want = SR.datumM + (SR.datumRows[j] - SR.rows[j]) / SR.pxPerM;
+          if (Math.abs(m - want) > 0.05) say(v.id, 'a deck line station off its plate read', `u ${u}: ${m} m, the plate's row ${SR.rows[j]} over datum row ${SR.datumRows[j]} reads ${want.toFixed(2)} m`);
+          if (Math.abs(HS.sheer(u) - m) > 0.05) say(v.id, 'a sheer drawn off its read deck line', `u ${u}: hullSurface sheer ${HS.sheer(u).toFixed(2)} m, the read ${m} m`);
+          if (u > 0.02 && u < 0.98 && !inIsland(u) && !(Math.abs(near[j] - m) <= 0.15))
+            say(v.id, 'a deck built off its read deck line', `u ${u}: the deck's outermost vertex within 0.5 m of x ${xs[j].toFixed(2)} stands at ${near[j].toFixed(2)} m, the read ${m} m`);
+        });
+      }
+    }
+
     if (part.container || part.forecast) {
       const H2 = SHIPS_HULL.hullSurface(H);
       let over = 0, worst = 0;

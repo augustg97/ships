@@ -114,10 +114,12 @@ const fore = 1 - Math.pow(Math.max(0, (S.forefoot - u) / S.forefoot), 2) * S.ris
 const aft = 1 - Math.pow(Math.max(0, (u - (1 - S.run)) / S.run), 2) * S.riseA;
 return Math.max(0.06, Math.min(fore, aft));
 };
+const SR = S.sheerRead && Array.isArray(S.sheerRead.stations) && S.sheerRead.stations.length >= 2
+? pchip(S.sheerRead.stations.map(([u, r]) => ({ u, r }))) : null;
 const sheer = u => {
 const s = Math.abs(2 * u - 1);
 const rise = u < 0.5 ? S.sheerBow : S.sheerStern;
-const base = S.freeboard + rise * Math.pow(s, 2.8);
+const base = SR ? SR(u) : S.freeboard + rise * Math.pow(s, 2.8);
 if (S.sternSteps)
 for (const st of S.sternSteps.steps)
 if (u >= st.u[0] && u <= st.u[1] && st.deckM !== undefined)

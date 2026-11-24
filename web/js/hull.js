@@ -214,10 +214,20 @@ function hullSurface(S) {
      outer sixth, with bow sheer exactly TWICE stern sheer.
      ⚠ A power of 1.9 spreads the rise across the whole hull and bends the ship into a banana.
      The real curve is much flatter amidships — hence 2.8. */
+  /* ── A READ DECK LINE OUTRANKS THE STANDARD CURVE (sheerRead, round 299, Titanic) ──────
+     The curve below is a class shape: one freeboard amidships and two rises at the ends.
+     Titanic's 1911 side plan draws her C deck 9.60 m over the water amidships, lowest at
+     u 0.60, and climbing 2.6 m to the stem and 0.5 m to the stern; the class curve had her
+     0.5 m high amidships and 0.4 m low at the forecastle break. A hull whose record carries
+     the read stations draws the sheer as a monotone cubic through them, so the deck, the
+     house, the masts' feet and every fitting pinned to the sheer stand where the plate puts
+     them. Record-gated: every other hull is byte-identical. */
+  const SR = S.sheerRead && Array.isArray(S.sheerRead.stations) && S.sheerRead.stations.length >= 2
+    ? pchip(S.sheerRead.stations.map(([u, r]) => ({ u, r }))) : null;
   const sheer = u => {
     const s = Math.abs(2 * u - 1);
     const rise = u < 0.5 ? S.sheerBow : S.sheerStern;
-    const base = S.freeboard + rise * Math.pow(s, 2.8);
+    const base = SR ? SR(u) : S.freeboard + rise * Math.pow(s, 2.8);
     /* ── STERN TERRACES (sternSteps, from the record) ─────────────────────────────────
        A terraced stern descends in DECKS, not in a swept sheer: each recorded span holds
        its own deck height, and the drop between spans is a vertical break the mesh gives
