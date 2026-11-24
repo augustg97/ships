@@ -221,20 +221,67 @@ s1: ['Bulkheads raised', 'Transverse bulkheads go up first. They are structure a
 + 'one compartment and the ship swims home.'],
 s2: ['Planked', 'The planking is fastened to the bulkheads rather than to ribs.'] },
 };
-const ENGINE_STAGES = [
-null, null, null,
-['Decked', 'The strength deck closes the box. On a container ship it is mostly hatch, because '
-+ 'the hull is a rack and the cargo has to drop straight in.'],
-['Machinery in', 'The engine and shafting go in before the ship is closed up — they are far too '
-+ 'big to fit through any opening afterwards. A modern low-speed diesel is three '
-+ 'storeys tall and turns at about 100 rpm, straight onto the shaft, no gearbox.'],
-['Accommodation', 'The house and bridge, pushed to one end so nothing blocks the crane runs.'],
-['Funnel and uptakes', 'What a mast used to be, doing what a mast never did: taking the exhaust '
-+ 'of about 80 megawatts out of the top of the ship.'],
-['Loaded', 'Cargo, stores and people aboard. What a hull is built to carry is what decides '
-+ 'her proportions: how much of her volume is hold, how much is accommodation, and '
-+ 'how deep she floats when it is all in.'],
-];
+const POWER_SKIP = new Set(['deck', 'rail', 'waterway', 'islandRail', 'stair']);
+const POWER_PHRASE = {
+rudder: 'rudder', screw: 'screws', superstructure: 'superstructure', bridge: 'bridge',
+boat: 'boats', container: 'container stacks', cluster: 'mast-and-stack tower',
+terrace: 'stern terraces', vent: 'cowl ventilators', net: 'torpedo nets',
+turret: 'gun turrets', aa: 'heavy anti-aircraft guns', aaLight: 'light anti-aircraft guns',
+catapult: 'aircraft catapults with their crane', hatch: 'hatches', searchlight: 'searchlights',
+flightdeck: 'flight deck', hangar: 'hangar', island: 'island', sensor: 'instrument mast',
+solar: 'solar panels', wing: 'wing sail with its tail vane', floatplane: 'floatplanes',
+aircraft: 'aircraft on deck', livery: 'livery and name', paddle: 'paddle wheels',
+paddlebox: 'paddle boxes',
+};
+function swHullSetsSail(H) {
+return (H.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole')
+|| !!H.headsails;
+}
+function swPowerCard(spec, stage, parts) {
+const H = spec.hull || {};
+const keys = [], names = {};
+for (const p of parts) {
+if (POWER_SKIP.has(p.key)) continue;
+if (!names[p.key]) { names[p.key] = new Set(); keys.push(p.key); }
+names[p.key].add(p.name);
+}
+const phrase = k => {
+if (k === 'funnel') {
+const n = H.funnels || 1;
+return n > 1 ? (['', '', 'two', 'three', 'four', 'five', 'six'][n] || n) + ' funnels' : 'funnel';
+}
+if (k === 'mast') {
+const nm = [...names.mast].filter(n => /mast$/i.test(n)).length;
+return Math.max(nm, (H.masts || []).length) > 1 ? 'masts' : 'mast';
+}
+if (k === 'forecast') return [...names.forecast].map(n => n.toLowerCase()).join(', ');
+return POWER_PHRASE[k] || [...names[k]][0].toLowerCase();
+};
+const list = keys.map(phrase);
+const added = list.length
+? 'Added at this stage: ' + (list.length > 1 ? list.slice(0, -1).join(', ') + ' and '
++ list[list.length - 1] : list[0]) + '.'
+: '';
+if (stage === 3) {
+let t = 'The weather deck closes the hull. ' + added;
+if (H.containers)
+t += ' Most of her deck is hatch covers, because the boxes in the holds are lowered '
++ 'straight down into cell guides. Every box has the same ISO corner castings, so any '
++ 'crane, ship or truck can lift it.';
+return ['Decked', t];
+}
+if (stage >= 4 && stage <= 6) {
+if (list.length) return ['Fitted out', added];
+return ['Nothing added', 'Nothing is added at this stage. On a sailing ship this is when '
++ 'the rigging and yards go up' + (H.wingSail ? '.' : '; she sets no sail.')];
+}
+const mach = H.machinery ? H.machinery : 'Her machinery is not recorded in this model.';
+return ['Afloat', (added ? added + ' ' : '') + mach];
+}
+function swStageCard(spec, stage, parts) {
+return swHullSetsSail(spec.hull || {}) ? STAGE_NAMES[stage] : swPowerCard(spec, stage, parts);
+}
+window.SW_STAGE_CARD = swStageCard;
 function swApplyStage() {
 if (!SW.ship) return;
 const H = SW.spec && SW.spec.hull;
@@ -263,18 +310,18 @@ if (!bb.isEmpty()) {
 SW.viewTop = bb.max.y; SW.viewBot = bb.min.y;
 SW.viewX = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z);
 }
-const engine = !(SW.spec.hull.masts || []).length;
+const engine = !swHullSetsSail(SW.spec.hull);
+let addedHere = [];
+if (engine && SW.stage >= 3) SW.ship.traverse(o => {
+const p = o.userData && o.userData.part;
+if (p && p.stage === SW.stage) addedHere.push({ key: p.key, name: p.name });
+});
 let nm = SW.stage === 1 ? trad.s1
 : SW.stage === 2 ? trad.s2
-: (engine && ENGINE_STAGES[SW.stage]) || STAGE_NAMES[SW.stage];
+: swStageCard(SW.spec, SW.stage, addedHere);
 if (trad['s' + SW.stage]) nm = trad['s' + SW.stage];
 else if (trad.s3 && SW.stage > 3 && SW.stage < 7) nm = trad.s3;
-if (SW.stage === 7 && SW.spec.hull.containers)
-nm = ['Loaded', 'The boxes. Eight feet by eight foot six by twenty or forty, corner castings '
-+ 'identical everywhere on earth — and the standard, not the ship, is the '
-+ 'invention.'];
-const cloth = (SW.spec.hull.masts || []).some(m => m.rig && m.rig !== 'none' && m.rig !== 'pole')
-|| SW.spec.hull.headsails;
+const cloth = !engine;
 if (SW.stage === 7 && SW.furled && cloth)
 nm = ['Bent on, furled', 'The canvas is bent to its spars and stowed: square sails rolled '
 + 'on their yards in harbour gaskets with the bunt gathered at the '

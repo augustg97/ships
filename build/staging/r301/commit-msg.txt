@@ -1,0 +1,16 @@
+Round 301: the Shipwright's build-stage cards stop telling steamships about canvas.
+
+A hull was treated as powered only when it had no masts, so Titanic, Queen Mary 2,
+Dreadnought and Yamato were shown the topgallant, ratline, yard and "Canvas" cards. The five
+mastless hulls got four fixed container-ship paragraphs that named parts at the wrong stages
+and a diesel on the nuclear carrier and the wind-driven USV.
+
+- shipwright.js: "powered" now means "sets no sail". One dispatch, swStageCard, builds the
+  cards for such a hull from the parts each stage adds (userData.part tags), and the last
+  card gives the recorded machinery. Sailing hulls' cards are unchanged.
+- vessels.json: hull.machinery and machineryProvenance on the nine hulls that set no sail.
+- index.html/styles.css: the ship nav rides on the stage card's top edge, so a long card no
+  longer covers the arrows. Its position for a one-line card is unchanged.
+- audit: A-STAGE-CARD; 33 hulls, 0 problems; five proofs convict (proofs.log).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

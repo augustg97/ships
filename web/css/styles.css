@@ -471,8 +471,12 @@ input[type=range]{width:100%;accent-color:var(--brass);margin:7px 0 3px}
 #swLabels .sl.on span{color:var(--verdigris)}
 
 /* ── stepping along the line ──────────────────────────────────────────────────────────── */
-#swNav{position:absolute;left:50%;transform:translateX(-50%);bottom:272px;z-index:5;
-  display:flex;align-items:center;gap:14px}
+/* r301: the nav is a child of #swBuild and stands 29 px over the card's top edge, wherever that
+   edge is. It sat at a fixed bottom:272px while the card grows upward with its text, so a
+   four-line stage card (a powered hull's machinery, or the furled-canvas card) covered the
+   arrows. 100% + 29px reproduces the old position exactly for the one-line card. */
+#swNav{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(100% + 29px);z-index:5;
+  width:max-content;display:flex;align-items:center;gap:14px}
 #swNav .mini{font-size:15px;line-height:1;padding:7px 16px;background:var(--panel);
   border:1px solid var(--edge)}
 #swNav .mini:hover{border-color:var(--edge-strong);color:var(--ink)}

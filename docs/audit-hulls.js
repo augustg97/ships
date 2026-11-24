@@ -6594,6 +6594,31 @@ const hd = headOf(mi);
 if (!(Math.abs(hd - mk.truckWLM) <= 0.15)) say(v.id, 'a pole built off its read truck', `mast ${mi}: the highest segment's head stands at ${isFinite(hd) ? hd.toFixed(2) : 'nothing'} m, the read ${mk.truckWLM} m`);
 });
 }
+{
+const setsSail = (H.masts || []).some(m => m.rig && m.rig !== 'pole' && m.rig !== 'none') || !!H.headsails;
+if (!setsSail && H.build !== 'dugout') {
+if (typeof SW_STAGE_CARD !== 'function') say(v.id, 'a stage card the audit cannot ask', 'window.SW_STAGE_CARD is not defined');
+else {
+if (!H.machinery) say(v.id, 'a hull that sets no sail with no machinery record', 'hull.machinery is absent, so her last stage card cannot say what drives her');
+else if (!H.machineryProvenance) say(v.id, 'a machinery record with no provenance', 'hull.machinery has no machineryProvenance');
+const SKIP = new Set(['deck', 'rail', 'waterway', 'islandRail', 'stair']);
+const by = {};
+g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.stage >= 3) (by[p.stage] = by[p.stage] || []).push({ key: p.key, name: p.name }); });
+for (let st = 3; st <= 7; st++) {
+const card = SW_STAGE_CARD(v, st, by[st] || []);
+const txt = card ? card[0] + ' — ' + card[1] : '';
+if (!card) { say(v.id, 'a stage with no card', `stage ${st}`); continue; }
+if (/canvas|topgallant|ratline|yards crossed|bent on|driven by the wind|fidded|doubling/i.test(txt))
+say(v.id, 'a sailing card on a hull that sets no sail', `stage ${st}: "${txt.slice(0, 120)}"`);
+const adds = (by[st] || []).some(p => !SKIP.has(p.key));
+if (adds !== /Added at this stage/.test(txt))
+say(v.id, 'a stage card that does not say what the stage adds', `stage ${st}: the built hull adds ${adds ? [...new Set((by[st] || []).filter(p => !SKIP.has(p.key)).map(p => p.key))].join(', ') : 'nothing'}; the card reads "${txt.slice(0, 120)}"`);
+if (st === 7 && H.machinery && txt.indexOf(H.machinery) < 0)
+say(v.id, 'a last stage card without her machinery', `stage 7 reads "${txt.slice(0, 120)}"`);
+}
+}
+}
+}
 if (H.sheerRead) {
 const SR = H.sheerRead, ST = SR.stations;
 if (!(Array.isArray(ST) && ST.length >= 2 && Array.isArray(SR.rows) && SR.rows.length === ST.length && Array.isArray(SR.datumRows) && SR.datumRows.length === ST.length && SR.pxPerM > 0 && typeof SR.datumM === 'number'))

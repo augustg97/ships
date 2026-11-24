@@ -9305,6 +9305,45 @@
       });
     }
 
+    /* ── A-STAGE-CARD (round 301, 0y¹²⁶): A HULL THAT SETS NO SAIL IS NOT TOLD ABOUT CANVAS, AND ITS
+       CARDS SAY WHAT EACH STAGE ADDS. The Shipwright's card on Titanic read "Canvas. She can now be
+       driven by the wind", because the test for a powered hull was "no masts" and she has two poles;
+       Queen Mary 2, Dreadnought and Yamato got the topgallant, ratline and yard cards the same way.
+       The rigless hulls got four fixed container-ship paragraphs that named machinery, accommodation
+       and a funnel at stages where the picture adds none of them. This rule decides "sets no sail"
+       for itself (no mast rigged other than pole or none, no headsails), asks the page's own
+       dispatch (SW_STAGE_CARD) for stages 3 to 7 with the parts the built hull adds at each, and
+       convicts: a sailing word on such a card; a card that lists additions at a stage that adds
+       none, or lists none where the stage adds some; a last card without the recorded machinery;
+       and a hull that sets no sail with no machinery record, or one without its provenance. */
+    {
+      const setsSail = (H.masts || []).some(m => m.rig && m.rig !== 'pole' && m.rig !== 'none') || !!H.headsails;
+      /* the dugout is outside it: she is paddled, and TRADITION.dugout writes her stage 3 to 7
+         cards itself (swApplyStage), so the powered composer never speaks for her */
+      if (!setsSail && H.build !== 'dugout') {
+        if (typeof SW_STAGE_CARD !== 'function') say(v.id, 'a stage card the audit cannot ask', 'window.SW_STAGE_CARD is not defined');
+        else {
+          if (!H.machinery) say(v.id, 'a hull that sets no sail with no machinery record', 'hull.machinery is absent, so her last stage card cannot say what drives her');
+          else if (!H.machineryProvenance) say(v.id, 'a machinery record with no provenance', 'hull.machinery has no machineryProvenance');
+          const SKIP = new Set(['deck', 'rail', 'waterway', 'islandRail', 'stair']);
+          const by = {};
+          g.traverse(o => { const p = o.userData && o.userData.part; if (p && p.stage >= 3) (by[p.stage] = by[p.stage] || []).push({ key: p.key, name: p.name }); });
+          for (let st = 3; st <= 7; st++) {
+            const card = SW_STAGE_CARD(v, st, by[st] || []);
+            const txt = card ? card[0] + ' — ' + card[1] : '';
+            if (!card) { say(v.id, 'a stage with no card', `stage ${st}`); continue; }
+            if (/canvas|topgallant|ratline|yards crossed|bent on|driven by the wind|fidded|doubling/i.test(txt))
+              say(v.id, 'a sailing card on a hull that sets no sail', `stage ${st}: "${txt.slice(0, 120)}"`);
+            const adds = (by[st] || []).some(p => !SKIP.has(p.key));
+            if (adds !== /Added at this stage/.test(txt))
+              say(v.id, 'a stage card that does not say what the stage adds', `stage ${st}: the built hull adds ${adds ? [...new Set((by[st] || []).filter(p => !SKIP.has(p.key)).map(p => p.key))].join(', ') : 'nothing'}; the card reads "${txt.slice(0, 120)}"`);
+            if (st === 7 && H.machinery && txt.indexOf(H.machinery) < 0)
+              say(v.id, 'a last stage card without her machinery', `stage 7 reads "${txt.slice(0, 120)}"`);
+          }
+        }
+      }
+    }
+
     /* ── A-SHEER-READ (round 299, Titanic): A READ DECK LINE IS ITS PLATE'S ROWS, AND THE BUILT DECK.
        Titanic's sheer was the class curve (freeboard 10.1 m, rises 0.7 and 0.4 m) while her
        side plan draws the C deck 9.60 m amidships and 2.6 m higher at the stem. On a hull whose

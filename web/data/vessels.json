@@ -4577,7 +4577,9 @@
           "provenance": "PLATE READ, r299: the C deck (the shelter deck, which ran her whole length and was the floor of both well decks) off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). The plan labels its decks beside the stem, and the C label stands just above a dashed line at row 661 at column 3600. That line was followed aft every 10 columns to column 150 (346 points, each the darkness peak of a 40-column window within 4 rows of the last), and fitted as a quintic in the column (rms 1.20 px, about 0.09 m). Each station's height is the fit's row read over r297's waterline, which tilts from row 845 at the stern end (column 123.5) to row 820 at the stem head (column 3629), at 13.03 px/m. The columns map to u through the loft's deck-level line, as r295 placed the islands (its two breaks map back to u 0.1354 and 0.8858 exactly). Beyond the trace (columns 3600 and 150) each end station holds the fit's end value. The deck stands 12.2 m over the water at the stem, 10.7 m at the forecastle break, 9.60 m amidships, lowest at 9.55 m at u 0.60, and 10.1 m at the stern: a sheer of about 2.6 m forward and 0.6 m aft. The builder draws the sheer as a monotone cubic through these stations. BOUNDS: the plan's scale carries 1% (0.1 m at 10 m), the line's width about 0.1 m, and the waterline's tilt is r297's read. CONTESTED IN THE AFTER WELL: between columns 560 and 760 the plan draws three lines close together, at rows 704, 710 and 716 (10.5, 10.05 and 9.6 m). The trace follows the dashed line at row 710, the one continuous with the C line amidships, so the after well deck carries a bound of about 0.45 m. The heavy solid line 1.2 to 1.8 m higher, from 11.6 m at the forecastle break through 10.9 m amidships to 12.3 m at the stern, is the top of the shell and of the wells' bulwark, not a deck. The model's rail still stands a class 1 m over this deck."
         },
         "deckMProvenance": "DERIVED, r299: the boat deck's recorded 19.0 m over the water less the C deck's read 9.60 m amidships (sheerRead), over the 3 decks the house stands above C (B, A and the boat deck): 3.133 m. It was 2.96 m while the model drew the deck at 10.1 m amidships; the plan's C deck is 0.50 m lower there, so the same three decks must each be about 0.17 m taller to reach the same boat deck.",
-        "mastTopMProvenance": "CONTESTED. 62.5 m is 'approximately 205 ft above the maximum load line', the round figure that secondary accounts of her fitting-out in August 1911 give for the tops of both masts, with no drawing or measurement cited. The 1911 side plan in Engineering draws the two trucks at different heights: the fore at 60.81 m and the main at 61.87 m over its waterline (r300; each mast carries its read as truckWLM). The masts are built to the plan's reads. This figure is kept as the printed one, and the audit holds the tallest built mast within 1.5 m of it."
+        "mastTopMProvenance": "CONTESTED. 62.5 m is 'approximately 205 ft above the maximum load line', the round figure that secondary accounts of her fitting-out in August 1911 give for the tops of both masts, with no drawing or measurement cited. The 1911 side plan in Engineering draws the two trucks at different heights: the fore at 60.81 m and the main at 61.87 m over its waterline (r300; each mast carries its read as truckWLM). The masts are built to the plan's reads. This figure is kept as the printed one, and the audit holds the tallest built mast within 1.5 m of it.",
+        "machinery": "Two four-cylinder triple-expansion steam engines, 30,000 hp between them, turned her two wing propellers. Their exhaust steam drove a 16,000 hp low-pressure Parsons turbine on the centre propeller. The steam came from 29 coal-fired boilers with 159 furnaces, which took more than 600 tonnes of coal a day, shovelled by hand.",
+        "machineryProvenance": "Wikipedia, *RMS Titanic* (read 2026-11-24, r301), Power: three main engines, the two reciprocating engines 30,000 hp combined and the turbine 16,000 hp; 29 boilers (24 double-ended, 5 single-ended), 159 furnaces; over 600 tonnes of coal a day shovelled by 176 firemen. That the turbine ran on the reciprocating engines' exhaust steam is the standard description of the Olympic class's combination machinery; the quoted passage states the engines and outputs, not the steam path."
       }
     },
     {
@@ -4710,7 +4712,9 @@
         "wingAt": 0.46,
         "year": 2015,
         "deckSteel": true,
-        "steering": "steel"
+        "steering": "steel",
+        "machinery": "No engine drives her. A rigid wing sail, trimmed by its tail vane, gives her way, and solar panels power the instruments.",
+        "machineryProvenance": "Her own card in this record (Saildrone and NOAA survey programmes): a Saildrone is driven by wind and sunlight; the model's hull.wingSail and the stage-6 parts (wing sail, tail vane, solar array, instrument mast)."
       }
     },
     {
@@ -5275,7 +5279,9 @@
           "to": 0.92
         },
         "deckM": 2.62,
-        "steering": "steel"
+        "steering": "steel",
+        "machinery": "Parsons direct-drive steam turbines, the first in any battleship, turned four propellers: 23,000 shp from 18 Babcock & Wilcox boilers. They burned coal, with fuel oil sprayed on it to make it burn faster. On trials in October 1906 she made 21.6 knots.",
+        "machineryProvenance": "Wikipedia, *HMS Dreadnought (1906)* (read 2026-11-24, r301), Propulsion: two paired sets of direct-drive turbines, each driving two propellers; 18 Babcock & Wilcox boilers at 250 psi; 23,000 shp rated; 21.6 kn from 27,018 shp on trials, 9 October 1906; 2,868 long tons of coal and 1,120 long tons of fuel oil sprayed on the coal."
       }
     },
     {
@@ -5500,7 +5506,9 @@
           "roofs": true,
           "roofsProvenance": "Her hinoki planking is recorded for the exposed decks, which on a battleship includes the shelter deck the tiers stand on."
         },
-        "steering": "steel"
+        "steering": "steel",
+        "machinery": "Four steam turbines on four shafts, fed by 12 Kampon boilers, developed 150,000 shp and gave her 27 knots.",
+        "machineryProvenance": "Wikipedia, *Japanese battleship Yamato* (read 2026-11-24, r301), infobox: installed power 12 Kampon boilers, 150,000 shp; propulsion 4 shafts, 4 steam turbines; speed 27 kn."
       }
     },
     {
@@ -5620,7 +5628,9 @@
         "islandSideProvenance": "ATTESTED: the Ford's island stands at the starboard deck edge abaft amidships and her landing area is angled to port — the arrangement of every angled-deck carrier, stated in this record's own text and on the class's page (Wikipedia, Gerald R. Ford-class aircraft carrier, accessed 2026-08-03). The word drives every one-sided fitting through the builder's islandSide(): the island, the two deck-edge lifts and the hangar doors under them, the catapults, the foul line and the deck park stand on this side, and the landing area runs forward to the other. Until r270 each was drawn at +z under the belief that +z was starboard; +z is port (build/staging/r254/side.json, the frame's own statement at the head of hull.js), so the whole arrangement was the ship's mirror. The audit reads this word and the meshes, not the builder (D-ISLAND-SIDE).",
         "year": 2017,
         "deckM": 4.3,
-        "steering": "steel"
+        "steering": "steel",
+        "machinery": "Two A1B nuclear reactors make steam. It drives the turbines on her four shafts and four turbine generators, which supply the ship's electricity, including the electromagnetic catapults.",
+        "machineryProvenance": "Wikipedia, *Gerald R. Ford-class aircraft carrier* (read 2026-11-24, r301): two A1B reactors per ship; steam piped to four main turbine generators for ship systems and the EMALS catapults; steam turbines for propulsion; four shafts (infobox)."
       }
     },
     {
@@ -5746,7 +5756,9 @@
         "year": 1991,
         "freeboardProvenance": "TYPE SHIP — the drawn freeboard is DERIVED, and the card row says so (rule 10). This composite is drawn at the 24,000-TEU generation its own rows name (MSC Gülsün / MSC Irina classes, 399.9 m × 61.3 m): depth moulded 33.2 m to main deck (RINA, Significant Ships of 2019, MSC Gülsün; the Irina class repeats the figure) less the recorded 16.0 m deep draught leaves 17.2 m of weather-deck freeboard. The old 30.0 had no source and stood the deck at nearly the whole moulded depth over the water — a hull floating near her light line drawn as loaded. The statutory summer freeboard is smaller still and is measured to a lower freeboard deck, not the weather deck this model lofts — the same distinction ever-given's stationProvenance records from her casualty report.",
         "rakeProvenance": "AUTHORED to fill the record's own allowance: loa 399.9 − lwl 383.0 = 16.9 m, and the old 0.03/0.0 drew only 12.0 m of it (r129 fleet sweep, −4.9). 383.0 is the class's length between perpendiculars (RINA, Significant Ships of 2019, MSC Gülsün — the same plate as the depth moulded above); on this generation the transom stands nearly plumb at the aft perpendicular and virtually the whole LOA−LPP difference is the flared bow above the bulb — ever-given, the fleet's attested hull of the same 400 m generation, carried the identical 383 LBP against 399.94 LOA before r113 moved her lwl to her casualty report's 387 waterline. The stern keeps its authored 0.0 and the stem takes the allowance: 0.0423, which the r129 loft clamp trims to 16.90 m of bow overhang, 399.90 m drawn exactly. NOTE the semantics this leaves: this type ship's lwl is the class LBP; the loaded waterline of the real hull runs ~4 m further over the bulb (the ever-given precedent) and is not published for this class, so the record keeps the figure a plate attests.",
-        "steering": "steel"
+        "steering": "steel",
+        "machinery": "Most large container ships have one low-speed two-stroke diesel coupled directly to one fixed-pitch propeller, with no gearbox.",
+        "machineryProvenance": "Wikipedia, *Ever Given* (read 2026-11-24, r301): 'As with most large container ships, Ever Given's propulsion system consists of a single low-speed two-stroke diesel engine coupled to a large fixed-pitch propeller.' This record is the type, not one ship, so the card states the type's usual plant."
       }
     },
     {
@@ -5838,7 +5850,9 @@
           "sideU": 0.48
         },
         "stationProvenance": "Twin-island stations from the ship's OWN papers, not a photograph: the PMA casualty report R-026-2021-DIAM carries her voyage-plan particulars (Fig. 6, loading computer) — keel to highest point 75.71 m, air draft 60.26 m at ~15.4 m draught, and the highest point (the bridge mast) 245.35 m forward of the aft perpendicular on LBP 387.00 m, which is u 0.366 from the FP; bridgeU 0.361 lands the drawn mast there. Depth moulded 32.90 m and breadth 58.80 m from the same report's Table 1 (vessel certificates); freeboard 17.2 = depth less the 15.7 m draught (the statutory 10.226 m summer freeboard is to a lower freeboard deck, not the weather deck the model draws). Funnel casing at funnelU 0.845 READ off the GA plan reproduced in the report (Fig. 2, 711x315 px, ~1.04 px/m — good to +/-4 m, no finer), cross-checked against Commons broadsides (kees torn 51343xxx series: dark-green casing amid the stacks, short black stack above). Stow: 23 rows on the real ship; the drawn TEU grid fits 22 across the 58.8 m beam (one row under, below any frame's resolution), 10 tiers on deck midships-aft per the Rotterdam photographs. EVERGREEN side lettering span and stern name from the same photographs; bow name NOT drawn — the flare there is curved and a flat decal would lie about it.",
-        "steering": "steel"
+        "steering": "steel",
+        "machinery": "One 11-cylinder MAN B&W 11G95ME-C9 two-stroke diesel, built under licence by Mitsui, turns her single propeller directly: 59,300 kW at 79 rpm, for a service speed of 22.8 knots. Four Yanmar diesel generators make her electricity, and two 2,500 kW bow thrusters push her bow sideways in port.",
+        "machineryProvenance": "Wikipedia, *Ever Given* (read 2026-11-24, r301): licence-built Mitsui MAN B&W 11G95ME-C9, 59,300 kW at 79 rpm, service speed 22.8 kn; four Yanmar 8EY33LW auxiliary generators; two 2,500 kW bow thrusters."
       },
       "rows": [
         [
@@ -6429,7 +6443,9 @@
         "bottom": "#2f353b",
         "paintProvenance": "MEASURED off two independent broadsides — Wikimedia Commons File:AzzamCadiz.jpg (Javier Virues Ortega, CC BY-SA 4.0, port side, bow left) and File:Yacht Azzam - UAE.jpg (Farid mernissi, CC BY-SA 4.0, starboard, bow right). Both show her WHITE to the waterline with no boot-top and a near-black antifouling, where the class default for a hull built after 1955 is oxide red. And both show the deck edge rising about 3.0 m from amidships to the stem, against the 0.25 m the record carried — which is why she read as a flat slab. The RISE is a difference between two points on one line, so it is immune to where the hull ends and the first tier begins, which is the one thing these plates cannot resolve.",
         "bowTopM": 8.2,
-        "sheerProvenance": "MEASURED 2026-08-25 (round 160) off two independent broadsides, each with its scale: the Cadiz in-service broadside (Commons AzzamCadiz.jpg, 17.27 px/m re-anchored, stem tip x351 y1709, waterline fit y=1847.8+0.00162x) reads the stem head at 8.05-8.13 m and the foredeck cap 8.19-8.38 m rising to 8.84 at the house front; the kept Bremen broadside (azzam-broadside-fricke-2014.jpg, 8.96 px/m, anchors x332/x1950/y941) reads the same stem head at 8.37 m. Both refute the former sheerBow 3.0 (a 12.0 m bow) by ~3.9 m: her sheer is INVERTED, the bow below the freeboard deck, one sweep rising aft into the house. bowTopM is the two-plate band's centre; sheerBow = bowTopM - freeboard. The 1343_Azzam.jpg fitting-out oblique was rejected as a witness: no local scale anchor at the bow (Research/AZZAM-PLATES.md, r160 section)."
+        "sheerProvenance": "MEASURED 2026-08-25 (round 160) off two independent broadsides, each with its scale: the Cadiz in-service broadside (Commons AzzamCadiz.jpg, 17.27 px/m re-anchored, stem tip x351 y1709, waterline fit y=1847.8+0.00162x) reads the stem head at 8.05-8.13 m and the foredeck cap 8.19-8.38 m rising to 8.84 at the house front; the kept Bremen broadside (azzam-broadside-fricke-2014.jpg, 8.96 px/m, anchors x332/x1950/y941) reads the same stem head at 8.37 m. Both refute the former sheerBow 3.0 (a 12.0 m bow) by ~3.9 m: her sheer is INVERTED, the bow below the freeboard deck, one sweep rising aft into the house. bowTopM is the two-plate band's centre; sheerBow = bowTopM - freeboard. The 1343_Azzam.jpg fitting-out oblique was rejected as a witness: no local scale anchor at the bow (Research/AZZAM-PLATES.md, r160 section).",
+        "machinery": "A combined diesel and gas-turbine plant of about 94,000 shaft horsepower drives four waterjets, for more than 30 knots.",
+        "machineryProvenance": "Her own card in this record (Lürssen; Boat International): roughly 94,000 shp, combined diesel and gas turbine, four waterjets, over 30 kn. Not checked against a builder's specification in r301."
       },
       "rows": [
         [
@@ -6962,7 +6978,9 @@
           "hM": 1.2,
           "leanDeg": 12,
           "provenance": "READ off both era ends (Research/QM2-PLATES.md): the fantail rail is not an open rail but a continuous translucent WINDSCREEN band under a dark top rail, ringing the swept deck edge. Plate 3 (2011 Southampton astern, 3296 px) resolves panel posts, five horizontal framing lines and a person leaning with elbows on the top rail - the height witness: 1.2 m over the deck, +/-0.2 (regulation floor 1.0 m). Plate 1 (2016 aerial) carries the same band around the sweep at both quarters. The panels lean OUTBOARD (r161 read, both plates); neither plate resolves the angle - 12 deg +/-8 is the drawn lean, an attested direction with a stated bound, not a measured quantity."
-        }
+        },
+        "machinery": "Four Wärtsilä 16V46 diesels (67,200 kW together) and two General Electric LM2500+ gas turbines (50,000 kW) drive generators. The electricity runs four 21,500 kW motors that sit inside the pods under her stern, outside the hull.",
+        "machineryProvenance": "Wikipedia, *RMS Queen Mary 2* (read 2026-11-24, r301), Power plant: four Wärtsilä 16V46CR diesels, 67,200 kW combined at 514 rpm; two GE LM2500+ gas turbines, a further 50,000 kW; generators driving four 21,500 kW Alstom motors inside the podded propulsors, outside the hull."
       },
       "rows": [
         [

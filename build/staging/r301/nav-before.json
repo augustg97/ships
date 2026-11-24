@@ -1,0 +1,56 @@
+{
+ "preussen": {
+  "build": [
+   460,
+   656,
+   980,
+   782
+  ],
+  "nav": [
+   561.52,
+   597,
+   878.48,
+   628
+  ],
+  "prev": [
+   561.52,
+   597,
+   612.63,
+   628
+  ],
+  "furl": [
+   779.73,
+   597.5,
+   878.48,
+   627.5
+  ],
+  "what": "Canvas. She can now be driven by the wind rather than carrie"
+ },
+ "titanic": {
+  "build": [
+   460,
+   618,
+   980,
+   782
+  ],
+  "nav": [
+   561.52,
+   597,
+   878.48,
+   628
+  ],
+  "prev": [
+   561.52,
+   597,
+   612.63,
+   628
+  ],
+  "furl": [
+   779.73,
+   597.5,
+   878.48,
+   627.5
+  ],
+  "what": "Two four-cylinder triple-expansion steam engines, 30,000 hp "
+ }
+}

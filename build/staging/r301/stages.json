@@ -1,0 +1,676 @@
+{
+ "titanic": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 laid pine": 1,
+   "rail | Rail": 1,
+   "waterway | Waterway": 1,
+   "funnel | Funnel": 8,
+   "funnel | Boiler casing": 4,
+   "funnel | Steam pipe": 4,
+   "superstructure | Superstructure": 1,
+   "superstructure | House deck \u2014 laid pine": 4,
+   "bridge | Navigating bridge": 1,
+   "forecast | Forecastle": 1,
+   "islandRail | Forecastle rail": 1,
+   "forecast | Poop deck": 1,
+   "islandRail | Poop deck rail": 1,
+   "boat | Ship's boat": 20,
+   "boat | Davit": 40
+  },
+  "4": {
+   "mast | Steel mast": 2,
+   "mast | Crow's nest": 2,
+   "vent | Cowl ventilator": 16
+  }
+ },
+ "dreadnought": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 laid planking": 1,
+   "rail | Rail": 1,
+   "waterway | Waterway": 1,
+   "funnel | Funnel": 4,
+   "funnel | Boiler casing": 2,
+   "funnel | Steam pipe": 2,
+   "superstructure | Superstructure": 1,
+   "superstructure | Citadel deck": 1,
+   "superstructure | Shelter deck": 1,
+   "superstructure | Bridge tower": 1,
+   "superstructure | Main rangefinder": 1
+  },
+  "4": {
+   "mast | Steel mast": 2,
+   "mast | Tripod leg": 4,
+   "mast | Spotting top": 2,
+   "net | Net shelf": 1,
+   "net | Torpedo net, rolled": 2,
+   "net | Net boom": 24,
+   "net | Boom hinge": 24,
+   "turret | Main battery": 5,
+   "turret | Barbette": 5,
+   "turret | Turret": 5,
+   "turret | Main gun": 10,
+   "turret | Turret rangefinder": 5
+  }
+ },
+ "yamato": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 laid hinoki": 1,
+   "rail | Rail": 1,
+   "waterway | Waterway": 1,
+   "funnel | Funnel": 2,
+   "funnel | Boiler casing": 1,
+   "funnel | Steam pipe": 1,
+   "superstructure | Superstructure": 1,
+   "superstructure | Citadel deck": 1,
+   "superstructure | Shelter deck": 1,
+   "superstructure | Bridge tower": 1,
+   "superstructure | Main rangefinder": 1
+  },
+  "4": {
+   "mast | Steel mast": 2,
+   "searchlight | Searchlight platform": 16,
+   "searchlight | Platform bracket": 8,
+   "searchlight | Searchlight": 8,
+   "searchlight | Searchlight mirror": 8,
+   "turret | Secondary battery": 4,
+   "turret | Barbette": 7,
+   "turret | Turret": 7,
+   "turret | Main gun": 21,
+   "aa | High-angle battery": 6,
+   "aa | Gun platform": 6,
+   "aa | High-angle mount": 6,
+   "aa | High-angle gun": 12,
+   "aaLight | Light anti-aircraft battery": 8,
+   "aaLight | Bandstand": 8,
+   "aaLight | Gun tub": 8,
+   "aaLight | Triple 25 mm mount": 8,
+   "aaLight | 25 mm gun": 24,
+   "catapult | Aircraft catapult": 5,
+   "catapult | Catapult turntable": 2,
+   "catapult | Launch rail": 2,
+   "catapult | Crane post": 1,
+   "catapult | Aircraft crane": 1,
+   "hatch | Stowage hatch": 6,
+   "turret | Main battery": 3,
+   "turret | Turret rangefinder": 3
+  },
+  "7": {
+   "floatplane | Floatplane": 4,
+   "floatplane | Main float": 2,
+   "floatplane | Canopy": 2,
+   "floatplane | Fin": 2,
+   "floatplane | Upper wing": 4,
+   "floatplane | Lower wing": 4,
+   "floatplane | Wingtip float": 4
+  }
+ },
+ "queen-mary-2": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 laid teak": 1,
+   "rail | Rail": 1,
+   "waterway | Waterway": 1,
+   "funnel | Funnel": 2,
+   "funnel | Boiler casing": 1,
+   "funnel | Steam pipe": 1,
+   "superstructure | Superstructure": 1,
+   "superstructure | House deck \u2014 laid teak": 9,
+   "bridge | Navigating bridge": 1,
+   "superstructure | Deck works": 1,
+   "bridge | Radome": 2,
+   "funnel | Gas turbine uptake": 1,
+   "boat | Ship's boat": 22
+  },
+  "4": {
+   "mast | Steel mast": 1
+  }
+ },
+ "usv": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 painted steel": 1,
+   "rail | Rail": 1
+  },
+  "6": {
+   "wing | Wing bearing": 1,
+   "wing | Wing sail": 2,
+   "wing | Tail vane": 1,
+   "solar | Solar array": 5,
+   "sensor | Instrument mast": 1
+  }
+ },
+ "carrier": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 painted steel": 1,
+   "rail | Rail": 1,
+   "screw | Screw": 4
+  },
+  "4": {
+   "flightdeck | Flight deck": 1,
+   "hangar | Hangar and gallery decks": 1,
+   "flightdeck | Angled landing area": 2,
+   "island | The island": 1,
+   "flightdeck | Deck-edge lift": 2,
+   "flightdeck | Landing centreline": 1,
+   "flightdeck | Foul line": 1,
+   "flightdeck | Arrestor wire": 3,
+   "flightdeck | Catapult track": 3
+  },
+  "7": {
+   "aircraft | Deck park": 12
+  }
+ },
+ "container": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1,
+   "bulb | Bulbous bow": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 painted steel": 1,
+   "rail | Rail": 1,
+   "container | Containers": 1,
+   "forecast | Forecastle": 1,
+   "bridge | Accommodation and bridge": 2,
+   "boat | Lifeboat": 2,
+   "funnel | Funnel": 1
+  },
+  "4": {
+   "mast | Foremast": 1,
+   "mast | Radar mast": 1
+  }
+ },
+ "ever-given": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1,
+   "bulb | Bulbous bow": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 painted steel": 1,
+   "rail | Rail": 1,
+   "container | Containers": 1,
+   "forecast | Forecastle": 1,
+   "bridge | Accommodation and bridge": 1,
+   "boat | Lifeboat": 2,
+   "funnel | Engine casing": 1,
+   "funnel | Funnel": 1
+  },
+  "4": {
+   "mast | Foremast": 1,
+   "mast | Radar mast": 1
+  },
+  "7": {
+   "livery | Livery": 2,
+   "livery | Stern name": 1
+  }
+ },
+ "azzam": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 laid teak": 1,
+   "rail | Rail": 1,
+   "waterway | Waterway": 1,
+   "superstructure | Superstructure": 1,
+   "superstructure | House deck \u2014 laid teak": 3,
+   "cluster | Mast and stack cluster": 1,
+   "cluster | Mast block": 1,
+   "cluster | Glass sweep": 1,
+   "cluster | Stack fairing": 1,
+   "cluster | Stack casing": 1,
+   "cluster | Exhaust pipe": 4,
+   "cluster | Radome pedestal": 7,
+   "cluster | Radome": 7,
+   "terrace | Stern terraces": 31,
+   "terrace | Terrace glazing": 2,
+   "terrace | Terrace doors": 2,
+   "stair | Terrace stair": 8
+  },
+  "4": {
+   "mast | Signal mast": 1,
+   "mast | Spreader platform": 3,
+   "mast | Aerial dome": 2,
+   "mast | Masthead whip": 1
+  }
+ },
+ "great-eastern": {
+  "0": {
+   "keel | Keel": 1,
+   "stempost | Stem": 1,
+   "stempost | Sternpost": 1
+  },
+  "1": {
+   "frames | Frame 1 of 30": 1,
+   "frames | Frame 2 of 30": 1,
+   "frames | Frame 3 of 30": 1,
+   "frames | Frame 4 of 30": 1,
+   "frames | Frame 5 of 30": 1,
+   "frames | Frame 6 of 30": 1,
+   "frames | Frame 7 of 30": 1,
+   "frames | Frame 8 of 30": 1,
+   "frames | Frame 9 of 30": 1,
+   "frames | Frame 10 of 30": 1,
+   "frames | Frame 11 of 30": 1,
+   "frames | Frame 12 of 30": 1,
+   "frames | Frame 13 of 30": 1,
+   "frames | Frame 14 of 30": 1,
+   "frames | Frame 15 of 30": 1,
+   "frames | Frame 16 of 30": 1,
+   "frames | Frame 17 of 30": 1,
+   "frames | Frame 18 of 30": 1,
+   "frames | Frame 19 of 30": 1,
+   "frames | Frame 20 of 30": 1,
+   "frames | Frame 21 of 30": 1,
+   "frames | Frame 22 of 30": 1,
+   "frames | Frame 23 of 30": 1,
+   "frames | Frame 24 of 30": 1,
+   "frames | Frame 25 of 30": 1,
+   "frames | Frame 26 of 30": 1,
+   "frames | Frame 27 of 30": 1,
+   "frames | Frame 28 of 30": 1,
+   "frames | Frame 29 of 30": 1,
+   "frames | Frame 30 of 30": 1
+  },
+  "2": {
+   "planking | Planking": 1
+  },
+  "3": {
+   "rudder | Rudder": 1,
+   "deck | Weather deck \u2014 laid teak": 1,
+   "rail | Rail": 1,
+   "waterway | Waterway": 1,
+   "funnel | Funnel": 10,
+   "funnel | Boiler casing": 5,
+   "funnel | Steam pipe": 5,
+   "superstructure | Superstructure": 1,
+   "superstructure | House deck \u2014 laid teak": 3,
+   "bridge | Navigating bridge": 1,
+   "boat | Ship's boat": 20,
+   "boat | Davit": 40
+  },
+  "4": {
+   "mast | Iron mast": 10,
+   "mast | Wooden mast": 2,
+   "vent | Cowl ventilator": 20,
+   "paddle | Paddle wheels": 2,
+   "paddle | Sponson": 2,
+   "paddlebox | Paddle box": 2,
+   "paddlebox | Paddle-box rib": 22,
+   "paddlebox | Paddle-box vent": 12
+  },
+  "5": {
+   "channel | Channels": 12,
+   "deadeye | Deadeyes": 12,
+   "shroud | Shrouds": 6
+  },
+  "6": {
+   "yard | Boom": 6,
+   "toppingLift | Topping lift": 6,
+   "yard | Gaff": 6,
+   "throatHalyard | Throat halyard": 6,
+   "peakHalyard | Peak halyard": 6,
+   "block | Blocks": 6
+  },
+  "7": {
+   "sail | Sail": 6
+  }
+ }
+}
