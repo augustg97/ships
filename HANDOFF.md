@@ -27668,3 +27668,5 @@ MOVED BY THIS ROUND AND ACCEPTED (predicted: every sailing hull's stage-7 card i
 | `ship-carrack` | 0.782% | 0.736 |
 
 Every powered hull's frame and the dugout's scored identical or inside the gate: the round changed their stage-0 card only, which no frame shows. `pair-cards.png` shows `shipwright`, `ship-canoe` and `ship-junk` beside their old baselines: only the card text moves, and the canoe's card grows one line, which moves the nav up with it.
+
+`crop-furled.png` beside `crop-furled-old.png`: the furled card is now three lines, naming the square sails and the headsails this hull carries, and the nav moves down with it. **(0y¹²⁹), NEW:** in the furled state, the button to the right of the arrows is blank in both the old baseline and the new frame. In the open state it reads "FURL SAILS", so in the furled state its label is either missing or drawn in the button's own colour. This predates r302. Read `swSetFurled` for the label it sets.
