@@ -1,0 +1,88 @@
+to capture 43
+    · ship-queen-mary-2            http://localhost:8149/?frozen=1#v=ship&s=queen-mary-2
+ship-queen-mary-2 ok 47 s attempt 1
+    · descent                      http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700
+descent ok 38 s attempt 1
+    · descent-high                 http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000
+descent-high ok 26 s attempt 1
+    · descent-coast                http://localhost:8149/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260
+descent-coast ok 38 s attempt 1
+    · aboard                       http://localhost:8149/?frozen=1#e=5&f=greatwestern
+aboard ok 27 s attempt 1
+    · aboard-off                   http://localhost:8149/?frozen=1#e=7&f=boxroute
+aboard-off ok 26 s attempt 1
+    · map-floor                    http://localhost:8149/?frozen=1#e=4&t=1590&c=-45.3,-24.1&z=300000
+map-floor ok 35 s attempt 1
+    · aboard-coast                 http://localhost:8149/?frozen=1#e=2&f=syracuse
+aboard-coast ok 31 s attempt 1
+    · sea-magnified                http://localhost:8149/?frozen=1#e=7&t=2000&c=-30,35&z=10000
+sea-magnified ok 19 s attempt 1
+    · ship-preussen                http://localhost:8149/?frozen=1#v=ship&s=preussen
+ship-preussen ok 36 s attempt 1
+    · ship-steamer                 http://localhost:8149/?frozen=1#v=ship&s=steamer
+ship-steamer ok 38 s attempt 1
+    · ship-dreadnought             http://localhost:8149/?frozen=1#v=ship&s=dreadnought
+ship-dreadnought ok 40 s attempt 1
+    · aboard-carrier               http://localhost:8149/?frozen=1#e=7&f=csg
+aboard-carrier ok 34 s attempt 1
+    · aboard-cable                 http://localhost:8149/?frozen=1#e=5&f=cable
+aboard-cable ok 34 s attempt 1
+    · aboard-titanic               http://localhost:8149/?frozen=1#e=6&f=titanicvoy
+aboard-titanic ok 33 s attempt 1
+    · aboard-yamato                http://localhost:8149/?frozen=1#e=6&f=tenichigo
+aboard-yamato ok 22 s attempt 1
+    · aboard-preussen              http://localhost:8149/?frozen=1#e=6&f=preussenvoy
+aboard-preussen ok 33 s attempt 1
+    · ship-wyoming                 http://localhost:8149/?frozen=1#v=ship&s=wyoming
+ship-wyoming ok 35 s attempt 1
+    · aboard-wyoming               http://localhost:8149/?frozen=1#e=6&f=wyomingvoy
+aboard-wyoming ok 32 s attempt 1
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+ship-treasure ok 39 s attempt 1
+    · aboard-treasure              http://localhost:8149/?frozen=1#e=4&f=zhenghe
+aboard-treasure ok 51 s attempt 1
+    · ship-clipper                 http://localhost:8149/?frozen=1#v=ship&s=clipper
+ship-clipper ok 43 s attempt 1
+    · aboard-clipper               http://localhost:8149/?frozen=1#e=5&f=woolrun
+aboard-clipper ok 36 s attempt 1
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+shipwright-ahead ok 45 s attempt 1
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+shipwright-astern ok 45 s attempt 1
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+shipwright-furled ok 42 s attempt 1
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+shipwright-hounds ok 34 s attempt 1
+    · shipwright-corbis            http://localhost:8149/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15
+shipwright-corbis ok 34 s attempt 1
+    · ship-azzam                   http://localhost:8149/?frozen=1#v=ship&s=azzam
+ship-azzam ok 46 s attempt 1
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+ship-endurance ok 41 s attempt 1
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+action-salamis ok 56 s attempt 1
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+board-salamis ok 25 s attempt 1
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+action-gravelines ok 57 s attempt 1
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+action-lepanto ok 52 s attempt 1
+    · action-myeongnyang           http://localhost:8149/?frozen=1#v=action&bt=myeongnyang&day=3&cb=45&cd=1100&ch=13
+action-myeongnyang ok 44 s attempt 1
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+wake-plan ok 36 s attempt 1
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+ship-ever-given ok 51 s attempt 1
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+sea-ever-given ok 33 s attempt 1
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+passage-sahul ok 15 s attempt 1
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+sea-dugout-floor ok 28 s attempt 1
+    · sea-canoe-floor              http://localhost:8149/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25
+sea-canoe-floor ok 28 s attempt 1
+    · ship-slave-ship              http://localhost:8149/?frozen=1#v=ship&s=slave-ship
+ship-slave-ship ok 37 s attempt 1
+    · ship-carrack                 http://localhost:8149/?frozen=1#v=ship&s=carrack
+ship-carrack ok 45 s attempt 1
+CAPTURE DONE 03:08:44

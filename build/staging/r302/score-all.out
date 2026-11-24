@@ -43,4 +43,24 @@ ship-treasure                  0.130%  0.117 CHANGED
 aboard-treasure                0.013%  0.003 ok
 ship-clipper                   0.786%  0.737 CHANGED
 aboard-clipper                 0.012%  0.003 ok
-45 scored, 15 beyond the gate, missing ['shipwright-ahead', 'shipwright-astern', 'shipwright-furled', 'shipwright-hounds', 'shipwright-corbis', 'ship-azzam', 'ship-endurance', 'action-salamis', 'board-salamis', 'action-gravelines', 'action-lepanto', 'action-myeongnyang', 'wake-plan', 'ship-ever-given', 'sea-ever-given', 'passage-sahul', 'sea-dugout-floor', 'sea-canoe-floor', 'ship-slave-ship', 'ship-carrack']
+shipwright-ahead               0.786%  0.732 CHANGED
+shipwright-astern              0.787%  0.727 CHANGED
+shipwright-furled              2.731%  3.442 CHANGED
+shipwright-hounds              0.786%  0.746 CHANGED
+shipwright-corbis              0.154%  0.126 CHANGED
+ship-azzam                     0.000%  0.000 ok
+ship-endurance                 0.871%  0.830 CHANGED
+action-salamis                 0.002%  0.001 ok
+board-salamis                  0.000%  0.000 ok
+action-gravelines              0.002%  0.000 ok
+action-lepanto                 0.003%  0.001 ok
+action-myeongnyang             0.033%  0.006 ok
+wake-plan                      0.019%  0.004 ok
+ship-ever-given                0.000%  0.000 ok
+sea-ever-given                 0.024%  0.008 ok
+passage-sahul                  0.047%  0.015 ok
+sea-dugout-floor               0.018%  0.005 ok
+sea-canoe-floor                0.010%  0.003 ok
+ship-slave-ship                0.141%  0.119 CHANGED
+ship-carrack                   0.782%  0.736 CHANGED
+65 scored, 23 beyond the gate, missing []
