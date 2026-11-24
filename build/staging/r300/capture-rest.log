@@ -1,0 +1,133 @@
+to capture 60
+    · shipwright                   http://localhost:8149/?frozen=1#v=ship
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+shipwright ok 30 s attempt 1
+    · action                       http://localhost:8149/?frozen=1#v=action
+action ok 42 s attempt 1
+    · ship-dhow                    http://localhost:8149/?frozen=1#v=ship&s=dhow
+ship-dhow ok 42 s attempt 1
+    · ship-junk                    http://localhost:8149/?frozen=1#v=ship&s=junk
+ship-junk ok 41 s attempt 1
+    · ship-canoe                   http://localhost:8149/?frozen=1#v=ship&s=voyaging-canoe
+ship-canoe ok 46 s attempt 1
+    · ship-great-eastern           http://localhost:8149/?frozen=1#v=ship&s=great-eastern
+ship-great-eastern ok 44 s attempt 1
+    · ship-usv                     http://localhost:8149/?frozen=1#v=ship&s=usv
+ship-usv ok 38 s attempt 1
+    · ship-dugout                  http://localhost:8149/?frozen=1#v=ship&s=dugout
+ship-dugout ok 36 s attempt 1
+    · ship-trireme                 http://localhost:8149/?frozen=1.4#v=ship&s=trireme
+ship-trireme ok 35 s attempt 1
+    · ship-galley                  http://localhost:8149/?frozen=1#v=ship&s=galley
+ship-galley ok 43 s attempt 1
+    · ship-galleass                http://localhost:8149/?frozen=1#v=ship&s=galleass
+ship-galleass ok 46 s attempt 1
+    · ship-panokseon               http://localhost:8149/?frozen=1#v=ship&s=panokseon
+ship-panokseon ok 40 s attempt 1
+    · ship-sekibune                http://localhost:8149/?frozen=1#v=ship&s=sekibune
+ship-sekibune ok 42 s attempt 1
+    · ship-carrier                 http://localhost:8149/?frozen=1#v=ship&s=carrier
+ship-carrier ok 39 s attempt 1
+    · ship-titanic                 http://localhost:8149/?frozen=1#v=ship&s=titanic
+ship-titanic ok 42 s attempt 1
+    · ship-yamato                  http://localhost:8149/?frozen=1#v=ship&s=yamato
+ship-yamato ok 35 s attempt 1
+    · ship-container               http://localhost:8149/?frozen=1#v=ship&s=container
+ship-container ok 39 s attempt 1
+    · ship-queen-mary-2            http://localhost:8149/?frozen=1#v=ship&s=queen-mary-2
+ship-queen-mary-2 ok 39 s attempt 1
+    · descent                      http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.9130,51.262&z=700
+descent ok 33 s attempt 1
+    · descent-high                 http://localhost:8149/?frozen=1#e=5&v=sea&c=-3.255,50.35&z=9000
+descent-high ok 19 s attempt 1
+    · descent-coast                http://localhost:8149/?frozen=1#e=4&v=sea&c=-5.55,35.99&z=260
+descent-coast ok 50 s attempt 1
+    · aboard                       http://localhost:8149/?frozen=1#e=5&f=greatwestern
+aboard ok 38 s attempt 1
+    · aboard-off                   http://localhost:8149/?frozen=1#e=7&f=boxroute
+aboard-off ok 35 s attempt 1
+    · map-floor                    http://localhost:8149/?frozen=1#e=4&t=1590&c=-45.3,-24.1&z=300000
+map-floor ok 34 s attempt 1
+    · aboard-coast                 http://localhost:8149/?frozen=1#e=2&f=syracuse
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+      ! Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED
+aboard-coast ok 13 s attempt 1
+    · sea-magnified                http://localhost:8149/?frozen=1#e=7&t=2000&c=-30,35&z=10000
+sea-magnified ok 19 s attempt 1
+    · ship-preussen                http://localhost:8149/?frozen=1#v=ship&s=preussen
+ship-preussen ok 38 s attempt 1
+    · ship-steamer                 http://localhost:8149/?frozen=1#v=ship&s=steamer
+ship-steamer ok 38 s attempt 1
+    · ship-dreadnought             http://localhost:8149/?frozen=1#v=ship&s=dreadnought
+ship-dreadnought ok 41 s attempt 1
+    · aboard-carrier               http://localhost:8149/?frozen=1#e=7&f=csg
+aboard-carrier ok 33 s attempt 1
+    · aboard-cable                 http://localhost:8149/?frozen=1#e=5&f=cable
+aboard-cable ok 27 s attempt 1
+    · aboard-titanic               http://localhost:8149/?frozen=1#e=6&f=titanicvoy
+aboard-titanic ok 23 s attempt 1
+    · aboard-yamato                http://localhost:8149/?frozen=1#e=6&f=tenichigo
+aboard-yamato ok 31 s attempt 1
+    · aboard-preussen              http://localhost:8149/?frozen=1#e=6&f=preussenvoy
+aboard-preussen ok 23 s attempt 1
+    · ship-wyoming                 http://localhost:8149/?frozen=1#v=ship&s=wyoming
+ship-wyoming ok 36 s attempt 1
+    · aboard-wyoming               http://localhost:8149/?frozen=1#e=6&f=wyomingvoy
+aboard-wyoming ok 33 s attempt 1
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+ship-treasure ok 45 s attempt 1
+    · aboard-treasure              http://localhost:8149/?frozen=1#e=4&f=zhenghe
+aboard-treasure ok 50 s attempt 1
+    · ship-clipper                 http://localhost:8149/?frozen=1#v=ship&s=clipper
+ship-clipper ok 37 s attempt 1
+    · aboard-clipper               http://localhost:8149/?frozen=1#e=5&f=woolrun
+aboard-clipper ok 37 s attempt 1
+    · shipwright-ahead             http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=0
+shipwright-ahead ok 41 s attempt 1
+    · shipwright-astern            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=180&z=0.35&l=6&y=7
+shipwright-astern ok 45 s attempt 1
+    · shipwright-furled            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&sail=furled&b=125&z=0.5&l=12&y=25
+shipwright-furled ok 35 s attempt 1
+    · shipwright-hounds            http://localhost:8149/?frozen=1#v=ship&s=ship-of-the-line&b=125&z=0.35&l=30&y=34
+shipwright-hounds ok 33 s attempt 1
+    · shipwright-corbis            http://localhost:8149/?frozen=1#v=ship&s=corbita&b=100&z=0.35&l=18&y=15
+shipwright-corbis ok 34 s attempt 1
+    · ship-azzam                   http://localhost:8149/?frozen=1#v=ship&s=azzam
+ship-azzam ok 46 s attempt 1
+    · ship-endurance               http://localhost:8149/?frozen=1#v=ship&s=endurance
+ship-endurance ok 41 s attempt 1
+    · action-salamis               http://localhost:8149/?frozen=1#v=action&bt=salamis&day=5&cb=60&cd=950&ch=16
+action-salamis ok 45 s attempt 1
+    · board-salamis                http://localhost:8149/?frozen=1#e=2&battle=salamis
+board-salamis ok 15 s attempt 1
+    · action-gravelines            http://localhost:8149/?frozen=1#v=action&bt=armada&day=9&cb=15&cd=1500&ch=11
+action-gravelines ok 43 s attempt 1
+    · action-lepanto               http://localhost:8149/?frozen=1#v=action&bt=lepanto&day=7&cb=170&cd=1200&ch=9
+action-lepanto ok 45 s attempt 1
+    · action-myeongnyang           http://localhost:8149/?frozen=1#v=action&bt=myeongnyang&day=3&cb=45&cd=1100&ch=13
+action-myeongnyang ok 41 s attempt 1
+    · wake-plan                    http://localhost:8149/?frozen=1#e=7&f=boxroute&fb=305&fd=60&fz=2600
+wake-plan ok 34 s attempt 1
+    · ship-ever-given              http://localhost:8149/?frozen=1#v=ship&s=ever-given
+ship-ever-given ok 43 s attempt 1
+    · sea-ever-given               http://localhost:8149/?frozen=1#e=7&f=evergiven&fb=347&fd=7&fz=800
+sea-ever-given ok 34 s attempt 1
+    · passage-sahul                http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=10&fz=70
+
+    browser console errors seen during capture (these do not fail the run, but read them):
+      ! Failed to load resource: net::ERR_CONNECTION_RESET
+      ! Failed to load resource: net::ERR_SOCKET_NOT_CONNECTED
+passage-sahul ok 23 s attempt 1
+    · sea-dugout-floor             http://localhost:8149/?frozen=374#e=0&f=sahul&fb=160&fd=55&fz=30
+sea-dugout-floor ok 15 s attempt 1
+    · sea-canoe-floor              http://localhost:8149/?frozen=553#e=3&f=aotearoa&fb=160&fd=80&fz=25
+sea-canoe-floor ok 24 s attempt 1
+    · ship-slave-ship              http://localhost:8149/?frozen=1#v=ship&s=slave-ship
+ship-slave-ship ok 44 s attempt 1
+    · ship-carrack                 http://localhost:8149/?frozen=1#v=ship&s=carrack
+ship-carrack ok 45 s attempt 1
+CAPTURE DONE 00:23:36
