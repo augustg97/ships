@@ -4511,6 +4511,7 @@ if (mk.furlStow != null) {
 if (STATE === 'set') {
 if (mk.furlStow !== 'brailed' && mk.furlStow !== 'lowered') say(v.id, 'a furl stowage the builder does not know', `${at}: furlStow '${mk.furlStow}'`);
 if (!mk.furlStowProvenance) say(v.id, 'a furl stowage with no provenance', `${at}: furlStow '${mk.furlStow}', furlStowProvenance absent`);
+else if (mk.furlStow === 'brailed' && /^UNREAD/.test(mk.furlStowProvenance)) say(v.id, 'a brailed stowage with no read', `${at}: furlStow 'brailed', furlStowProvenance opens UNREAD`);
 const set = cloth.filter(o => o.userData.kind !== 'furl' && o.userData.mastX != null && Math.abs(o.userData.mastX - xm) < 1.5);
 if (!set.length) say(v.id, 'a sail stowed by brails not drawn set', `${at}: no set cloth names this mast in the set build`);
 const brS = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);

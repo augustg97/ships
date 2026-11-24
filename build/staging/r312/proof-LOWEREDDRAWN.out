@@ -1,0 +1,17 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a brailed sail rolled on its boom",
+  "detail": "mast 2 (station 0.85): 1 furl roll(s) along the boom of a sail the record stows by its brails (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a brailed sail not drawn",
+  "detail": "mast 2 (station 0.85): 0 Brailed sail bundle(s) (furled build)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a brailed gaff lowered",
+  "detail": "mast 2 (station 0.85): the gaff lies at 11.45\u00b0; a brailed sail's gaff stays aloft (furled build)"
+ }
+]

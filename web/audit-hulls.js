@@ -6281,7 +6281,11 @@
        the fleet carries furlStow, gaffStow 'brailed', or a furlStowProvenance that opens 'UNREAD'
        naming the builder's default. Before r310 the 74, the clipper, Great Eastern, Wyoming,
        Preussen and the steamer lowered their gaffs with nothing in the record to say whether a
-       plate had been read for it. */
+       plate had been read for it.
+       r312 (0y¹³⁸), A-STOW-READ: 'brailed' over a furlStowProvenance that opens UNREAD is convicted, as
+       'lowered' was in r310. The 74's spanker is the first square mast to carry 'brailed', so the
+       r308 rules (one boom, no roll on it, one bundle on the mast's after side between the deck
+       and the jaws, the gaff above 20°) now run on a square mast as well as on Endurance's mizzen. */
     const gaffSailRead = (G, STATE) => {
       const SB = STATE === 'furled' ? ' (furled build)' : '';
       const inv = new THREE.Matrix4().copy(G.matrixWorld).invert();
@@ -6366,6 +6370,9 @@
           if (STATE === 'set') {
             if (mk.furlStow !== 'brailed' && mk.furlStow !== 'lowered') say(v.id, 'a furl stowage the builder does not know', `${at}: furlStow '${mk.furlStow}'`);
             if (!mk.furlStowProvenance) say(v.id, 'a furl stowage with no provenance', `${at}: furlStow '${mk.furlStow}', furlStowProvenance absent`);
+            /* r312: A-STOW-READ. r310 convicted a 'lowered' stowage over an UNREAD provenance and let a
+               'brailed' one through; either value is a claim that a plate was read. */
+            else if (mk.furlStow === 'brailed' && /^UNREAD/.test(mk.furlStowProvenance)) say(v.id, 'a brailed stowage with no read', `${at}: furlStow 'brailed', furlStowProvenance opens UNREAD`);
             const set = cloth.filter(o => o.userData.kind !== 'furl' && o.userData.mastX != null && Math.abs(o.userData.mastX - xm) < 1.5);
             if (!set.length) say(v.id, 'a sail stowed by brails not drawn set', `${at}: no set cloth names this mast in the set build`);
             const brS = cloth.filter(o => o.userData.brailed && o.userData.brailed.mast === mi);

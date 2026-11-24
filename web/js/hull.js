@@ -4459,7 +4459,11 @@ function buildRig(S, group, mats, FINE, FURLED) {
          furled ship (the clipper's spanker, off a photograph of Cutty Sark at anchor in Sydney).
          It is drawn by the same FURLED branch as a mast with no furlStow, which is the default;
          the record says which of the two is a read, and every unread mast's furlStowProvenance
-         opens 'UNREAD'. */
+         opens 'UNREAD'.
+         r312 (0y¹³⁸): the 74's spanker is 'brailed', read off Eckersberg's 1828 painting of the
+         Russian 74 Asow at anchor (the sail gathered along the mizzen's after side under a
+         standing gaff, the boom left in place). A square mast's spanker comes through this same
+         branch, so the read needed no new geometry. */
       const BOOMLESS = mk.gaffStow === 'brailed';
       const BRAILED = BOOMLESS || (FURLED && mk.furlStow === 'brailed');
       const peak = 0.62;                                 // the gaff's angle above horizontal
