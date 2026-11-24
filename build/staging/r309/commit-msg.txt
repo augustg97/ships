@@ -1,0 +1,7 @@
+Round 309: Titanic's C deck re-traced off the 1911 plan; r299's trace had stepped onto a solid line 0.4 m under C at column 790, so her after well deck now stands 0.27-0.3 m higher and the after wash ports 0.35-0.44 m over it
+
+- record: sheerRead re-traced with a 1.5-row step limit (rms 1.20 -> 0.60 px), the raw trace stored, deckM 3.143
+- audit: A-SHEER-TRACE (a step onto another line, a station off its own trace, silence); the house rule reads the read sheer
+- no builder change; measure_ship: after well foot 9.70 -> 9.93 m, poop 9.77 -> 10.11, stern 10.14 -> 10.53
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

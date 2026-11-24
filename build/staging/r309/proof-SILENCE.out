@@ -1,0 +1,7 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a deck line read with no trace",
+  "detail": "hull.sheerRead needs trace {fromCol, stepCol, rows, maxStepRows} and cols, so the fit can be checked against the raw rows"
+ }
+]

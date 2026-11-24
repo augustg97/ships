@@ -1,0 +1,22 @@
+[
+ {
+  "id": "titanic",
+  "rule": "a deck line trace that steps onto another line",
+  "detail": "the trace steps 4.96 rows at column 790, over its limit of 1.5"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.55: the station's row 709.1 is -2.40 px off the trace's 711.50 at column 1707.6"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.8: the station's row 713.72 is 2.68 px off the trace's 711.04 at column 862.2"
+ },
+ {
+  "id": "titanic",
+  "rule": "a deck line station off its own trace",
+  "detail": "u 0.85: the station's row 713.97 is -2.49 px off the trace's 716.46 at column 686.1"
+ }
+]

@@ -2481,7 +2481,8 @@ if (H.iron && H.year >= 1950 && H.cove)
 say(v.id, 'anachronistic dress', `cove line declared on a ${H.year} welded hull`);
 if (H.boatDeckM && H.decks) {
 const dh = H.deckM || H.beam * 0.105;
-const top = H.freeboard + (H.boatsRecessed ? (H.shellTiers || 0) : H.decks) * dh;
+const base = H.sheerRead ? SHIPS_HULL.hullSurface(H).sheer(0.5) : H.freeboard;
+const top = base + (H.boatsRecessed ? (H.shellTiers || 0) : H.decks) * dh;
 if (Math.abs(top - H.boatDeckM) > 0.5)
 say(v.id, 'house off the record',
 `boat deck derives to ${top.toFixed(1)} m over water, record says ${H.boatDeckM}`);
@@ -7023,6 +7024,23 @@ if (Math.abs(HS.sheer(u) - m) > 0.05) say(v.id, 'a sheer drawn off its read deck
 if (u > 0.02 && u < 0.98 && !inIsland(u) && !(Math.abs(near[j] - m) <= 0.15))
 say(v.id, 'a deck built off its read deck line', `u ${u}: the deck's outermost vertex within 0.5 m of x ${xs[j].toFixed(2)} stands at ${near[j].toFixed(2)} m, the read ${m} m`);
 });
+const TR = SR.trace;
+if (!(TR && Array.isArray(TR.rows) && TR.rows.length >= 2 && TR.stepCol && TR.maxStepRows > 0 && Array.isArray(SR.cols) && SR.cols.length === ST.length))
+say(v.id, 'a deck line read with no trace', 'hull.sheerRead needs trace {fromCol, stepCol, rows, maxStepRows} and cols, so the fit can be checked against the raw rows');
+else {
+let worst = 0, at = null;
+for (let i = 1; i < TR.rows.length; i++) { const dd = Math.abs(TR.rows[i] - TR.rows[i - 1]); if (dd > worst) { worst = dd; at = TR.fromCol + i * TR.stepCol; } }
+if (worst > TR.maxStepRows)
+say(v.id, 'a deck line trace that steps onto another line', `the trace steps ${worst.toFixed(2)} rows at column ${at}, over its limit of ${TR.maxStepRows}`);
+const lastCol = TR.fromCol + (TR.rows.length - 1) * TR.stepCol, cMin = Math.min(TR.fromCol, lastCol), cMax = Math.max(TR.fromCol, lastCol);
+ST.forEach(([u], j) => {
+const c = SR.cols[j]; if (!(c >= cMin && c <= cMax)) return;
+const f = (c - TR.fromCol) / TR.stepCol, i0 = Math.min(TR.rows.length - 2, Math.floor(f)), t = f - i0;
+const tr = TR.rows[i0] * (1 - t) + TR.rows[i0 + 1] * t;
+if (Math.abs(SR.rows[j] - tr) > 2.0)
+say(v.id, 'a deck line station off its own trace', `u ${u}: the station's row ${SR.rows[j]} is ${(SR.rows[j] - tr).toFixed(2)} px off the trace's ${tr.toFixed(2)} at column ${c}`);
+});
+}
 }
 }
 if (part.container || part.forecast) {
