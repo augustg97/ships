@@ -28105,3 +28105,15 @@ Final tree: 33 hulls, 0 problems.
 **r308 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r308` already exists before writing into it. Then (0y¹³⁴), Endurance's mizzen stowage. Else (0y¹³⁶).**
 
 **Live stamp: docs/index.html carries data-version 1795540578 at the build.**
+
+**Live stamp VERIFIED: 1795540578 on https://augustg97.github.io/ships/index.html at 09:18:03 PST, about 90 s after the push. The published `js/hull.js`, `js/shipwright.js`, `data/vessels.json` and `audit-hulls.js` are byte-identical to docs/.**
+
+**THE FRAMES: ALL 65 SCORED.** Five capture runs with r277's offline scorer (`score1.out` to `score5.out`). The close's "42 of 65" counted `ship-titanic` twice; it was 41.
+
+- `run1-current`: 26 frames, died at `aboard`. `run2-current`: 14, died at `ship-wyoming`. `run3-current`: 2, died at `ship-treasure`. `run4-current`: 21, died at `sea-canoe-floor`. `run5-current`: the last 3 and `shipwright` recaptured; it finished.
+- Each run died on the 150 s FRAME_READY wait, at load 1.6 to 14, on a frame that the next run captured without trouble. The audit proofs ran beside run 4, which still captured 21 frames.
+- `ship-titanic` 0.058% / 0.033: **predicted, ACCEPTED** (FRAME-LOG.md), as the close says.
+- `shipwright` 89.055% in run 1: **capture fault** (the 1590 globe). Recaptured alone in run 5: 0.000%.
+- Every other frame is inside the gate. The largest is `passage-sahul` at 0.047%.
+
+**This round's lesson:** the harness's 150 s FRAME_READY wait now kills a run every 2 to 26 frames at any load. Five short resume runs scored all 65 frames in 55 minutes. The deaths happen on different frames each time and each frame opens clean alone, so they are a harness flap. `r307_resume.py` takes any number of earlier run directories and skips what they hold.
