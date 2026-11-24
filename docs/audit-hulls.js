@@ -4882,6 +4882,25 @@ say(v.id, 'a funnel built off its read', `funnel ${i + 1}: its axis at y ${FR.yM
 }
 }
 }
+{
+if (H.funnelRead && H.funnelTopM === undefined)
+say(v.id, 'funnel stations read with no head height', 'hull.funnelRead is present and hull.funnelTopM is absent');
+if (H.funnelTopM !== undefined) {
+g.updateMatrixWorld(true);
+const invT = new THREE.Matrix4().copy(g.matrixWorld).invert(), P = new THREE.Vector3();
+let n = 0;
+g.traverse(o => {
+if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
+n++;
+const M = new THREE.Matrix4().multiplyMatrices(invT, o.matrixWorld), A = o.geometry.attributes.position;
+let top = -Infinity;
+for (let k = 0; k < A.count; k++) top = Math.max(top, P.fromBufferAttribute(A, k).applyMatrix4(M).y);
+if (Math.abs(top - H.funnelTopM) > 0.15)
+say(v.id, 'a funnel head off its recorded height', `funnel ${n}: head at ${top.toFixed(2)} m over the water, the record says ${H.funnelTopM} m (${(top - H.funnelTopM).toFixed(2)} m off)`);
+});
+if (!n) say(v.id, 'a funnel head height with no funnel built', 'hull.funnelTopM is present and no Funnel mesh was found');
+}
+}
 (H.masts || []).forEach((mk, mi) => {
 if (!mk.crowsNest) return;
 const CN = mk.crowsNest;

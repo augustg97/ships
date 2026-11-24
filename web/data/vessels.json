@@ -4166,6 +4166,31 @@
           0.8305
         ],
         "funnelH": 19.0,
+        "funnelTopM": 42.8,
+        "funnelTopRead": {
+          "plate": "the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png)",
+          "pxPerM": 13.0268,
+          "topRows": [
+            280.8,
+            280.7,
+            281.1,
+            289.4
+          ],
+          "wlRows": [
+            827.4,
+            830.7,
+            834.1,
+            837.3
+          ],
+          "overWLM": [
+            41.96,
+            42.22,
+            42.45,
+            42.06
+          ],
+          "read": "build/staging/r297/r297_read.py",
+          "provenance": "RECORDED, r297: the funnel heads stand 42.80 m over the load waterline. Harland and Wolff's figures for the class give 175 ft (53.34 m) from the keel to the top of the funnels and a load draught of 34 ft 7 in (10.54 m); the difference is 42.80 m. CHECKED against the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', bow at the right). Each funnel's head is drawn with its top edge square to the raked stack. That edge was fitted as a line and read where r296's fit of the stack's axis meets it: rows 280.8, 280.7, 281.1 and 289.4, which over the plan's tilted waterline (row 845 at the stern to row 820 at the bow) stand 41.96, 42.22, 42.45 and 42.06 m, mean 42.17 m. At the plan's length scale (13.03 px/m, from her 269.1 m overall) that is 0.63 m under the record. The plan's own bar scale is 1% longer and gives 42.58 m. At funnel 3 the plan's keel line lies on row 971, 10.53 m under its waterline, which matches the recorded draught. WHY THE MODEL WAS LOW: funnelH (19.0 m, the 62 ft funnel height the specification sources print) was built up from the boat deck, which puts the heads at 38.87 m. The record's waterline-to-boat-deck figure is 60 ft 6 in (18.44 m), so the heads stand 24.4 m over the boat deck. The 62 ft is therefore not measured from the boat deck, and the sources that print it do not say what it is measured from. The builder now solves each stack's height from its own deck to funnelTopM, so the head lands at the recorded height whatever the deck under it."
+        },
         "funnelAt": [
           0.2711,
           0.4108,

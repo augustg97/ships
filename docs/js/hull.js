@@ -6627,7 +6627,7 @@ function buildFunnel(S, group) {
 const n = S.funnels || 0;
 if (!n) return;
 const H = hullSurface(S);
-const h = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
+const hRec = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
 const r = S.beam * 0.115;
 const black = new THREE.MeshStandardMaterial({ color: 0x24211e, roughness: 0.62, metalness: 0.30 });
 const band = new THREE.MeshStandardMaterial({ color: 0x8a3820, roughness: 0.55, metalness: 0.18 });
@@ -6640,6 +6640,7 @@ const u = stations[i];
 let y = H.deck(u);
 if (T && T.recorded)
 for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);
+const h = S.funnelTopM !== undefined ? (S.funnelTopM - y) / (1 + 0.085 * 0.55) : hRec;
 const g = new THREE.Group();
 const ri = r * ((S.funnelScale || [])[i] || 1);
 const oval = S.funnelOval || 1;

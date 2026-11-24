@@ -1,0 +1,13 @@
+OLDHEIGHT: checked 33 hulls, 4 problems
+  titanic: a funnel head off its recorded height — funnel 1: head at 38.87 m over the water, the record says 42.8 m (-3.93 m off)
+  titanic: a funnel head off its recorded height — funnel 2: head at 38.87 m over the water, the record says 42.8 m (-3.93 m off)
+  titanic: a funnel head off its recorded height — funnel 3: head at 38.87 m over the water, the record says 42.8 m (-3.93 m off)
+  titanic: a funnel head off its recorded height — funnel 4: head at 38.87 m over the water, the record says 42.8 m (-3.93 m off)
+SILENCE: checked 33 hulls, 1 problems
+  titanic: funnel stations read with no head height — hull.funnelRead is present and hull.funnelTopM is absent
+HALFMETRE: checked 33 hulls, 4 problems
+  titanic: a funnel head off its recorded height — funnel 1: head at 42.30 m over the water, the record says 42.8 m (-0.50 m off)
+  titanic: a funnel head off its recorded height — funnel 2: head at 42.30 m over the water, the record says 42.8 m (-0.50 m off)
+  titanic: a funnel head off its recorded height — funnel 3: head at 42.30 m over the water, the record says 42.8 m (-0.50 m off)
+  titanic: a funnel head off its recorded height — funnel 4: head at 42.30 m over the water, the record says 42.8 m (-0.50 m off)
+FINAL: checked 33 hulls, 0 problems

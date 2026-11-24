@@ -6847,6 +6847,32 @@
         }
       }
     }
+    /* ── A-FUNNEL-TOP (round 297, Titanic): A RECORDED FUNNEL HEAD STANDS AT ITS RECORDED HEIGHT.
+       Her stacks were built 19.0 m up from the boat deck, which put the heads at 38.87 m over
+       the water against the record's 42.80 m (175 ft keel to funnel top, less 34 ft 7 in of
+       draught). Where a hull carries funnelTopM, this rule reads each built stack's highest
+       vertex and convicts any head more than 0.15 m off. It also convicts the silence: a hull
+       whose funnel stations were read off a plan (funnelRead) and whose head height was not
+       recorded, because a station read with no height leaves the height a class default. */
+    {
+      if (H.funnelRead && H.funnelTopM === undefined)
+        say(v.id, 'funnel stations read with no head height', 'hull.funnelRead is present and hull.funnelTopM is absent');
+      if (H.funnelTopM !== undefined) {
+        g.updateMatrixWorld(true);
+        const invT = new THREE.Matrix4().copy(g.matrixWorld).invert(), P = new THREE.Vector3();
+        let n = 0;
+        g.traverse(o => {
+          if (!o.isMesh || !o.userData.part || o.userData.part.name !== 'Funnel') return;
+          n++;
+          const M = new THREE.Matrix4().multiplyMatrices(invT, o.matrixWorld), A = o.geometry.attributes.position;
+          let top = -Infinity;
+          for (let k = 0; k < A.count; k++) top = Math.max(top, P.fromBufferAttribute(A, k).applyMatrix4(M).y);
+          if (Math.abs(top - H.funnelTopM) > 0.15)
+            say(v.id, 'a funnel head off its recorded height', `funnel ${n}: head at ${top.toFixed(2)} m over the water, the record says ${H.funnelTopM} m (${(top - H.funnelTopM).toFixed(2)} m off)`);
+        });
+        if (!n) say(v.id, 'a funnel head height with no funnel built', 'hull.funnelTopM is present and no Funnel mesh was found');
+      }
+    }
     /* ── A-CROWS-NEST (round 296, Titanic): THE NEST STANDS WHERE THE PLAN DRAWS IT, ON THE MAST.
        A class rule hung it at two thirds of the mast, 44.9 m over the water, where the 1911 side
        plan draws it at 26.4 m. Where a mast's crowsNest carries a read, this rule measures the

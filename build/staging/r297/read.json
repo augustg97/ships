@@ -1,0 +1,54 @@
+[
+ {
+  "funnel": 1,
+  "headCols": [
+   2563,
+   2727
+  ],
+  "headMidCol": 2593.2,
+  "topRow": 280.8,
+  "wlRow": 827.4,
+  "overWL": 41.96,
+  "keelRow": 966,
+  "overKeel": 52.6
+ },
+ {
+  "funnel": 2,
+  "headCols": [
+   2077,
+   2173
+  ],
+  "headMidCol": 2123.2,
+  "topRow": 280.7,
+  "wlRow": 830.7,
+  "overWL": 42.22,
+  "keelRow": 969,
+  "overKeel": 52.84
+ },
+ {
+  "funnel": 3,
+  "headCols": [
+   1617,
+   1704
+  ],
+  "headMidCol": 1658.5,
+  "topRow": 281.1,
+  "wlRow": 834.1,
+  "overWL": 42.45,
+  "keelRow": 940,
+  "overKeel": 50.58
+ },
+ {
+  "funnel": 4,
+  "headCols": [
+   1157,
+   1252
+  ],
+  "headMidCol": 1203.1,
+  "topRow": 289.4,
+  "wlRow": 837.3,
+  "overWL": 42.06,
+  "keelRow": 954,
+  "overKeel": 51.02
+ }
+]

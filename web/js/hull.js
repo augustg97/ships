@@ -10578,7 +10578,7 @@ function buildFunnel(S, group) {
      Titanic 43.7 m of funnel against a real 19 above the boat deck, and Yamato 60 m against 28
      — so on both of them the stacks were the tallest thing aboard and read as chimneys on a
      factory. Height comes from the record when the record is in the data. */
-  const h = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
+  const hRec = S.funnelH !== undefined ? S.funnelH : S.beam * 1.55;
   /* ⚠ SISTER FUNNELS ARE NOT ALWAYS THE SAME FUNNEL. Dreadnought's aft stack served twice
      the boilers of her fore one and photographs show it plainly fatter; one shared radius
      drew them as twins. `funnelScale` is a per-funnel radius factor from the record. */
@@ -10626,6 +10626,16 @@ function buildFunnel(S, group) {
     let y = H.deck(u);                            // the casing stands on the DECK (r221)
     if (T && T.recorded)
       for (const t of T.tiers) if (u >= t.uA && u <= t.uB) y = Math.max(y, t.y1);
+    /* ── ⚠ A RECORDED HEAD HEIGHT IS OVER THE WATER, NOT OVER A DECK (round 297) ───────
+       funnelH is a funnel's own length, and the sources that print one rarely say what it is
+       measured from. Titanic's 62 ft (19.0 m) was built up from the boat deck and put her
+       heads at 38.87 m, where the class's 175 ft keel-to-funnel-top less her 34 ft 7 in
+       draught puts them at 42.80 m and the 1911 side plan draws them at 42.0 to 42.5 m.
+       funnelTopM is the head over the load waterline. Where the record carries it, each
+       stack's height is solved from ITS OWN deck, so the head lands at the recorded height
+       whichever tier the casing stands on. The head is y + caseH * 0.55 + h with
+       caseH = 0.085 h, hence the divisor. */
+    const h = S.funnelTopM !== undefined ? (S.funnelTopM - y) / (1 + 0.085 * 0.55) : hRec;
     const g = new THREE.Group();
     /* ── ⚠ THE FLICKER WAS THE FUNNEL'S OWN BASE ────────────────────────────────────
        The stack ran from y = 0 to y = h with its group sitting exactly on the sheer, so its

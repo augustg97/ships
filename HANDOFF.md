@@ -27283,3 +27283,40 @@ The funnels on the plan stand 36.2, 35.6 and 35.3 m apart. r295's handoff estima
 **Live stamp VERIFIED: 1795490302 on https://augustg97.github.io/ships/index.html at 19:20:05 PST, 90 s after the push (`build/staging/r296/push.log`). The published `js/hull.js`, `data/vessels.json`, `data/provenance.json` and `audit-hulls.js` are byte-identical to docs/, and the live record carries the new funnelAt, both mast stations and the nest at 26.36 m.**
 
 **THE FRAMES: ALL 65 SCORED at this tree (`build/staging/r296/score-all.out`).** The ratchet stopped at frame 23 (`ship-queen-mary-2`) on a 150 s readiness timeout while two witness captures ran beside it. The 22 frames it had captured were kept, and the other 43 were captured one at a time (`r296_capture_rest.py`); `ship-queen-mary-2` captured in 46 s alone. 60 were inside the gate. Moved by this round and ACCEPTED: `ship-titanic` 6.251% / 2.400 and `aboard-titanic` 0.267% / 0.146; after the accept, `check --frame ship-titanic` scored 0.000%. NOT accepted, because they are the harness fault r295 named: `board-salamis` 33.214%, `globe-crossing` 5.301% and `globe-modern` 10.232% on :8149, where the terrain is drawn from coarser tiles. The same tree on :8150 scores 0.000%, 0.020% and 0.036%, inside the gate (`check-8150.out`). `board-salamis` is a new member of that class: it first did this in r296.
+
+## Round 297 — 2026-11-23 — Titanic's four funnel heads stand 42.80 m over the water, where her record and the 1911 side plan put them: the model built each stack 19.0 m up from the boat deck, which left the heads at 38.87 m, 3.93 m low
+
+**Queue check: August's second list stands worked in full (r57). This round took the funnel-top part of r296's first carried item, (0y¹¹⁹). `build/staging/r297` did not exist, the load was 1.3 at the start, and no process was hot. r296's receipt left no unscored frames, so the opening ratchet was skipped.**
+
+**THE RECORD.** Harland and Wolff's figures for the class give 175 ft (53.34 m) from the keel to the top of the funnels and a load draught of 34 ft 7 in (10.54 m), so the heads stand 42.80 m over the load waterline. The same specification lists give 60 ft 6 in (18.44 m) from the waterline to the boat deck and a funnel height of 62 ft (19.0 m). The heads therefore stand 24.4 m over the boat deck, so the 62 ft figure is not measured from the boat deck. The sources that print it do not say what it is measured from. The model had built `funnelH` = 19.0 m up from the boat deck tier (y 18.98), which put every head at 38.87 m.
+
+**THE PLATE CHECK.** The plate is the same side plan r295 and r296 used (*Engineering* vol. 91, 26 May 1911). Each funnel's head is drawn with its top edge square to the raked stack. That edge was fitted as a line and read where r296's fit of the stack's axis meets it (`r297_read.py`, `read.json`):
+
+| Funnel | Top row | Waterline row | Over the water |
+|---|---|---|---|
+| 1 | 280.8 | 827.4 | 41.96 m |
+| 2 | 280.7 | 830.7 | 42.22 m |
+| 3 | 281.1 | 834.1 | 42.45 m |
+| 4 | 289.4 | 837.3 | 42.06 m |
+
+The mean is 42.17 m at the plan's length scale (13.03 px/m), 0.63 m under the record. On the plan's own bar scale, which is 1% longer, it is 42.58 m. At funnel 3 the plan's keel line lies on row 971, 10.53 m under its waterline, which matches the recorded draught. The record is the figure used, and the plan read is in its provenance.
+
+**WHAT CHANGED.** RECORD (Titanic only): `funnelTopM` 42.8 and `funnelTopRead` with the rows, the read and the provenance. BUILDER: where a hull carries `funnelTopM`, `buildFunnel` solves each stack's height from its own deck so the head lands at that height. Without it, nothing changes, and no other hull carries it. AUDIT: A-FUNNEL-TOP reads each built stack's highest vertex against `funnelTopM` (0.15 m). It also convicts a hull whose funnel stations were read (`funnelRead`) with no head height recorded.
+
+**AUDIT AND PROOFS.** Final tree: 33 hulls, 0 problems. Three proofs ran on a :8150 copy, and each convicted its fault (`proofs.log`). OLDHEIGHT, the stack built from `funnelH` again: 4 problems, every head 3.93 m low. SILENCE, `funnelTopM` deleted: 1 problem. HALFMETRE, the heads built 0.5 m low: 4 problems. The restored copy scored 0 problems.
+
+**WITNESSED.** `overlay-pair.png` lays the plan over a 3° profile before (from the clean HEAD on :8151) and after. Before, every stack stops about 4 m under the plan's head box. After, all four heads land on the plan's head line. `profile-after/starboard.png` is the whole frame.
+
+**Rule 0, on `profile-after/starboard.png` read whole: a rendered liner on a lit sea with a coast behind her, not a chart. Three facts a viewer can read off it without a legend: her four buff funnels with black tops now rise above the white superstructure by more than the superstructure's own height; her black hull steps up at the bow and the stern into a raised forecastle and poop; her two masts lean aft and stand well clear of the funnels at either end.**
+
+**WHAT THE PLAN SHOWS THAT THE MODEL STILL GETS WRONG.**
+
+- **(0y¹¹⁹) THE DECK HEIGHTS AND TRUCKS, still open.** r295's deck heights stand: the plan's well deck is about 1.3 m higher than the model's (11.7 m forward and 11.5 m aft against 10.3). The rise from the well to the raised deck is 2.0 m at the forecastle and 1.5 m at the poop against the model's 2.96. The plan labels its decks at the stem (BOAT D, A, B, C, D, E, F, LOWER, around column 3640). The forecastle deck is at B and the well deck at C, so the decks can be read off those labels and need no estimate. The trucks were not re-read this round. r296 read them at 60.8 m (fore) and 61.9 m (main) against 62.6 and 62.4 built. The overlay puts them within about a metre of the plan's.
+- **(0y¹²⁴) THE BLACK TOP'S DEPTH.** The model paints the top 20% of the stack black, which is 4.6 m. The plan draws a head box about 87 rows (6.7 m) deep. Whether that box is the black band needs a photograph, because a line drawing does not show paint.
+- **(0y¹²⁰) THE BOATS, (0y¹²¹) THE STEM, (0y¹²²) THE FUNNELS' SECTION, (0y¹²³) THE STANDING RIGGING**, as r295 and r296 list them.
+
+**Named residuals.** (0y¹¹⁹) is now partly closed: the funnel tops are done, and the deck heights and trucks are open. (0y¹²⁴) is new. (0y¹¹³), (0y¹¹⁶), (0y¹¹⁷) and every other residual stand as r294 to r296 list them.
+
+**r298 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r298` already exists before writing into it. Then (0y¹¹⁹)'s deck heights: read the plan's deck labels at the stem and the well and raised decks against its tilted waterline, and find what in the record (`freeboard`, `deckM`, the islands' `topM`) moves them. Check what is pinned to the sheer before moving it. Else (0y¹²³), her standing rigging. Else (0y¹¹³), Preussen's bridge house and boats.**
+
+**Live stamp: docs/index.html carries data-version 1795493358 at the build; the live check and the frame results are in the receipt that follows.**
