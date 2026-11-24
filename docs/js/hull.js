@@ -3717,6 +3717,8 @@ brace:    { stage: 6, name: 'Braces',
 what: 'Running rigging from each yard ARM, leading aft. Hauling one brace and '
 + 'easing the other swings the yard round to meet the wind at an angle. They '
 + 'are the reason a square-rigger can sail anything other than dead downwind.' },
+islandRail: { stage: 3, name: 'Raised-deck rail',
+what: 'The open rail round the edge of a raised deck: stanchions carrying three bars.' },
 rail:     { stage: 3, name: 'Rail',
 what: 'The capping timber round the deck edge, following the sheer. It finishes '
 + 'the tops of the frames and is what everyone aboard actually holds on to.' },
@@ -6555,82 +6557,36 @@ dp.push(dx, y, -h, dx, y, h);
 }
 g.add(strip(dp, deckMat, true));
 group.add(tag(g, 'forecast', isl.name, isl.what));
-}
-}
-function buildRaisedEnds(S, group) {
-if (!(S.wellM && S.houseAt && S.houseAt.length === 2 && S.decks)) return;
-const H = hullSurface(S);
-const L = S.lwl, B = S.beam, dh = S.deckM || B * 0.105;
-const wellU = S.wellM / L;
-const wallMat = new THREE.MeshStandardMaterial({
-color: new THREE.Color(S.topside || '#3a3a3c'), roughness: 0.58, metalness: 0.22,
-side: THREE.DoubleSide });
-const deckMat = new THREE.MeshStandardMaterial({ color: 0xd3c9b4, roughness: 0.72, side: THREE.DoubleSide });
+if (S.islands.openRail) {
+const rg = new THREE.Group(), up = new THREE.Vector3(0, 1, 0);
 const railMat = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
-const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.015;
-const up = new THREE.Vector3(0, 1, 0);
-const mk = (u0, u1, label, what) => {
-const g = new THREE.Group();
-const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
-const path = [];
-for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
-path.push({ u: u1, x: (u1 - 0.5) * L, z: -halfAt(u1) });
-for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: -halfAt(u) }); }
-path.push({ u: u0, x: (u0 - 0.5) * L, z: halfAt(u0) });
-const tp = [], ti = [];
-for (const p of path) {
-const ys = H.sheer(p.u), yd = H.deck(p.u);
-tp.push(p.x, ys - dh * 0.15, p.z, p.x, yd + dh, p.z);
-}
-for (let k = 0; k + 1 < path.length; k++) {
-const a = k * 2, b = a + 2;
-ti.push(a, b, a + 1, a + 1, b, b + 1);
-}
-const wg = new THREE.BufferGeometry();
-wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
-wg.setIndex(ti); wg.computeVertexNormals();
-g.add(new THREE.Mesh(wg, wallMat));
-const dp = [], di = [];
-for (let k = 0; k <= N; k++) {
-const u = u0 + (u1 - u0) * k / N, y = H.deck(u) + dh, h = halfAt(u);
-dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
-}
-for (let k = 0; k < N; k++) { const a = k * 2, b = a + 2; di.push(a, b, a + 1, a + 1, b, b + 1); }
-const dg = new THREE.BufferGeometry();
-dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
-dg.setIndex(di); dg.computeVertexNormals();
-g.add(new THREE.Mesh(dg, deckMat));
-const step = B * 0.22, Q = [];
-let acc = 0; Q.push(path[0]);
+const postH = 0.89, edge = 0.08, step = B * 0.22, Q = [path[0]];
+let acc = 0;
 for (let k = 1; k < path.length; k++) {
 acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
 if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
 }
+const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
+const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - railM, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
 for (const q of Q) {
-const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), railMat);
-st.position.set(q.x, H.deck(q.u) + dh + dh * 0.15, q.z);
-g.add(st);
+const p = at(q), st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, postH, 5), railMat);
+st.position.set(p.x, p.y + postH / 2, p.z);
+rg.add(st);
 }
 for (let k = 0; k + 1 < Q.length; k++) {
-const a = Q[k], b = Q[k + 1];
-const len = Math.hypot(b.x - a.x, b.z - a.z);
+const a = at(Q[k]), b = at(Q[k + 1]), len = Math.hypot(b.x - a.x, b.z - a.z);
 if (len < 0.01) continue;
 const dir = new THREE.Vector3(b.x - a.x, 0, b.z - a.z).normalize();
-const ym = (H.deck(a.u) + H.deck(b.u)) / 2 + dh;
-for (const hf of [0.10, 0.20, 0.30]) {
+for (const hf of [1 / 3, 2 / 3, 1]) {
 const bar = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), railMat);
-bar.position.set((a.x + b.x) / 2, ym + dh * hf, (a.z + b.z) / 2);
+bar.position.set((a.x + b.x) / 2, (a.y + b.y) / 2 + postH * hf, (a.z + b.z) / 2);
 bar.quaternion.setFromUnitVectors(up, dir);
-g.add(bar);
+rg.add(bar);
 }
 }
-group.add(tag(g, 'forecast', label, what));
-};
-const [hA, hB] = S.houseAt;
-mk(0.004, hA - wellU, 'Forecastle',
-'The shell carried one deck higher at the bow: anchor gear, windlass and the break of the deck. Between here and the bridge superstructure lies the forward well deck — on Titanic it was Third Class open space, and the first place the sea came aboard.');
-mk(hB + wellU, 0.996, 'Poop deck',
-'The raised aft deck, and on Titanic the last of her to stay dry. The aft well deck between the poop and the superstructure was Third Class promenade; the docking bridge stood here, from which she was conned going astern.');
+group.add(tag(rg, 'islandRail', isl.name + ' rail'));
+}
+}
 }
 function funnelStations(S) {
 if (S.funnelAt && S.funnelAt.length) return S.funnelAt.slice();
@@ -10927,7 +10883,6 @@ if (FINE) buildFunnel(S, group);
 if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
 if (FINE && S.cluster) buildCluster(S, group);
 if (FINE && S.islands) buildIslands(S, group, hullMat);
-if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
 if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
 if (FINE) buildJunkCastle(S, group);
 if (FINE) buildTieredCastles(S, group, mats, hullMat);

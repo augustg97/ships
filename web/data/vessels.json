@@ -4150,8 +4150,8 @@
         "portholes": true,
         "mastLivery": "buff",
         "houseAt": [
-          0.202,
-          0.849
+          0.1915,
+          0.8305
         ],
         "funnelH": 19.0,
         "funnelAt": [
@@ -4163,7 +4163,6 @@
         "year": 1912,
         "cove": 1,
         "shellTiers": 1,
-        "wellM": 15.2,
         "boatDeckM": 19.0,
         "mastTopM": 62.5,
         "buff": "#c9a267",
@@ -4175,7 +4174,83 @@
           "roofs": true,
           "roofsProvenance": "The Shipbuilder 1911 names the exposed decks INCLUDING the boat deck, so the tier roofs are inside the same specification as the weather deck."
         },
-        "steering": "steel"
+        "steering": "steel",
+        "islands": {
+          "list": [
+            {
+              "name": "Forecastle",
+              "u": [
+                0,
+                0.1354
+              ],
+              "topM": [
+                13.86,
+                13.45
+              ],
+              "cols": [
+                3629.0,
+                3106.5
+              ],
+              "what": "The shell carried one deck higher at the bow: anchor gear, windlass and the break of the deck. Between here and the bridge superstructure lies the forward well deck, which on Titanic was Third Class open space and the first place the sea came aboard."
+            },
+            {
+              "name": "Poop deck",
+              "u": [
+                0.8858,
+                1
+              ],
+              "topM": [
+                13.35,
+                13.56
+              ],
+              "cols": [
+                556.5,
+                123.5
+              ],
+              "what": "The raised aft deck, and on Titanic the last of her to stay dry. The aft well deck between the poop and the superstructure was Third Class promenade; the docking bridge stood here, from which she was conned going astern."
+            }
+          ],
+          "railM": 0.1,
+          "openRail": true,
+          "provenance": "READ, r295, off the side plan of Olympic and Titanic printed in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png; the read in build/staging/r295/r295_read.py). SCALE: the stem head stands at column 3629 and the stern end at 123.5, 3505.5 px apart, which at the recorded 269.1 m overall is 13.027 px/m. The plan's own bar scale reads 3.93 px/ft, which would make her 271.7 m, so every length below carries a bound of 1%. COLUMNS: each break is a curved plate, so its column is the midpoint of the curve's top and foot: the forecastle's break 3113 and 3100, the bridge's fore end 2910 and 2924, its after end 765 and 757, the poop's break 550 and 563 (each good to about 7 px, 0.5 m). LENGTHS on the plan: forecastle 40.1 m, forward well 14.6 m, bridge 165.5 m, after well 15.7 m, poop 33.2 m. The lengths this record carried before r295 were 128 ft (39.0 m), about 50 ft (15.2 m), 550 ft (167.6 m), about 50 ft and 106 ft (32.3 m); they had set the house 2.7 m too far aft at its fore end and 4.8 m too far aft at its after end. MAPPING: each column's distance abaft the stem head is placed at x = stemHeadX + that distance and the island's u is solved through the loft's deck-level line x(u) = (u - 0.5) lwl + rake(u). The house's two stations stay x / lwl, which is how linerHouse reads a tier pin. HEIGHTS ARE NOT READ HERE: each island's top is the model's weather deck plus one 2.96 m deck plus a 0.10 m plate edge. Read against the plan's waterline, the well deck stands about 1.3 m higher than the model draws it (11.7 m forward and 11.5 m aft against 10.3), and the plan's rise from the well to the raised deck is 2.0 m at the forecastle and 1.5 m at the poop against the model's 2.96.",
+          "plate": {
+            "plate": "Engineering vol. 91, 26 May 1911, side plan of Olympic and Titanic (Wikimedia Commons), 3803 px, bow at the right; build/staging/r295/plates/side-plan-1911.png",
+            "stemHeadCol": 3629.0,
+            "sternEndCol": 123.5,
+            "pxPerMAlongHull": -13.0268,
+            "pxSign": "negative because the bow is at the plate's right: columns fall going aft",
+            "stemHeadX": -134.55,
+            "houseCols": [
+              2917.0,
+              761.0
+            ],
+            "breakColsTopFoot": {
+              "foreBreak": [
+                3113,
+                3100
+              ],
+              "houseFore": [
+                2910,
+                2924
+              ],
+              "houseAft": [
+                765,
+                757
+              ],
+              "poopBreak": [
+                550,
+                563
+              ]
+            },
+            "lengthsM": {
+              "forecastle": 40.11,
+              "foreWell": 14.55,
+              "bridge": 165.5,
+              "aftWell": 15.7,
+              "poop": 33.24
+            }
+          }
+        }
       }
     },
     {

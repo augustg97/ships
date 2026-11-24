@@ -167,18 +167,18 @@
        words and the record's data are read against each other here: a Hull row naming a
        castle (or a poop) must be matched by `castle` (the cog's open platform), `castles`
        (the walled tiers of the southern tradition), `poop` (a junk's tiered quarters) or a
-       liner's raised ends (wellM + houseAt). And a `castles` declaration without its
+       liner's raised ends (hull.islands since r295). And a `castles` declaration without its
        provenance is the Azzam-cluster fault in a new field: nothing bounds the claim. */
     {
       const hullRow = (v.rows || []).find(r => Array.isArray(r) && /^hull$/i.test(String(r[0]).trim()));
       /* scoped to timber builds this round: Queen Mary 2's Hull row names 'a true forecastle' — a
-         liner's raised end, the wellM + houseAt builder's business, and her house runs from u 0.079
+         liner's raised end, which hull.islands carries where it is read, and her house runs from u 0.079
          to the stern with no well — and the first r243 run convicted her (r243/audit.out). Whether
          her bow's mooring deck is a raised forecastle the model must draw is a question for her
          plates, named as residual (0l); the rule reaches steel when that is answered. */
       const timber = !/^(steel|iron)$/.test(String(H.build || ''));
       const names = timber && hullRow && /castle|\bpoop\b/i.test(String(hullRow[1]));
-      const declares = !!(H.castle || H.castles || H.poop || (H.wellM && H.houseAt) || (H.islands && H.islands.list));
+      const declares = !!(H.castle || H.castles || H.poop || (H.islands && H.islands.list));
       if (names && !declares)
         say(v.id, 'a hull whose record names a castle it does not declare', `Hull row: '${hullRow[1]}'; no castle, castles, poop, islands or raised ends in the data`);
       if (H.castles && !H.castlesProvenance)
@@ -9108,6 +9108,46 @@
         }
       }
       if (H.stationRead && !H.islands.plate) say(v.id, 'islands on a plate-read hull with no plate datum of their own', `hull.stationRead is present and hull.islands.plate is absent, so no island's end can be read against the plate`);
+      /* ── A-ISLAND-SEATING (round 295, Titanic): AN ISLAND'S SIDE IS THE SHELL. Read off the meshes:
+         (1) FLUSH: every vertex of the island above the sheer, clear of its two ends, stands on the
+         shell's half-breadth at its own station within 0.05 m (her old wall stood 0.42 m inside it
+         over an open slot); (2) NO CAPPING along it: no 'rail' vertex lies within 0.6 m of the sheer
+         inside the island's span; (3) THE HOUSE AGAINST THE PLATE: where islands.plate carries
+         houseCols, the Superstructure's built ends stand at those columns within 1.0 m, because a
+         break read off a plate means nothing if the well's other side is somewhere else. */
+      {
+        const uAtX = x => { let a = 0, b = 1; for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (loftDeckX(H, m) < x) a = m; else b = m; } return (a + b) / 2; };
+        const P4 = new THREE.Vector3();
+        for (const isl of (IL || [])) {
+          const grp = groups.find(q => isl && q.name === isl.name); if (!grp) continue;
+          const xa = loftDeckX(H, isl.u[0]), xb = loftDeckX(H, isl.u[1]);
+          let worstInset = 0, atX = 0;
+          grp.o.updateMatrixWorld(true);
+          grp.o.traverse(o => { if (!o.isMesh) return; const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P4.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (P4.x < xa + 0.5 || P4.x > xb - 0.5) continue;
+              const u = uAtX(P4.x); if (P4.y < H2.sheer(u) + 0.2) continue;
+              const inset = Math.abs(SHIPS_HULL.surfacePoint(H, H2, u, 1)[2]) - Math.abs(P4.z);
+              if (inset > worstInset) { worstInset = inset; atX = P4.x; } } });
+          if (worstInset > 0.05) say(v.id, "an island's side standing inside the shell", `${isl.name}: a vertex at x ${atX.toFixed(1)} stands ${worstInset.toFixed(2)} m inside the shell's half-breadth`);
+          let capped = 0, capX = 0;
+          g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (!pt || pt.key !== 'rail') return;
+            o.updateMatrixWorld(true); const pa = o.geometry.attributes.position;
+            for (let i = 0; i < pa.count; i++) { P4.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld);
+              if (P4.x < xa + 0.5 || P4.x > xb - 0.5) continue;
+              if (Math.abs(P4.y - H2.sheer(uAtX(P4.x))) < 0.6) { capped++; capX = P4.x; } } });
+          if (capped) say(v.id, "a capping ridden along an island's side", `${isl.name}: ${capped} 'rail' vertices within 0.6 m of the sheer inside its span, one at x ${capX.toFixed(1)}`);
+        }
+        const PLH = H.islands.plate;
+        if (PLH && Array.isArray(PLH.houseCols)) {
+          const bbH = new THREE.Box3().makeEmpty();
+          g.traverse(o => { if (!o.isMesh) return; const pt = tagOf(o); if (pt && pt.key === 'superstructure' && pt.name === 'Superstructure') bbH.expandByObject(o); });
+          const xH = loftDeckX(H, 0), wa = xH + (PLH.houseCols[0] - PLH.stemHeadCol) / PLH.pxPerMAlongHull, wb = xH + (PLH.houseCols[1] - PLH.stemHeadCol) / PLH.pxPerMAlongHull;
+          if (bbH.isEmpty()) say(v.id, 'a house read off a plate and not built', 'islands.plate.houseCols is present and no Superstructure part exists');
+          else if (Math.abs(bbH.min.x - wa) > 1.0 || Math.abs(bbH.max.x - wb) > 1.0)
+            say(v.id, 'a house built off its plate', `built x ${bbH.min.x.toFixed(2)}..${bbH.max.x.toFixed(2)}, the plate's columns put it at ${wa.toFixed(2)}..${wb.toFixed(2)}`);
+        }
+      }
       for (const q of groups) if (!(IL || []).some(isl => isl && isl.name === q.name)) say(v.id, 'a forecast group named for no island', `'${q.name}' built on a hull whose islands are ${(IL || []).map(i => i && i.name).join(', ')}`);
     }
 

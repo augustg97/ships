@@ -6288,6 +6288,8 @@ const PARTS = {
               what: 'Running rigging from each yard ARM, leading aft. Hauling one brace and '
                   + 'easing the other swings the yard round to meet the wind at an angle. They '
                   + 'are the reason a square-rigger can sail anything other than dead downwind.' },
+  islandRail: { stage: 3, name: 'Raised-deck rail',
+    what: 'The open rail round the edge of a raised deck: stanchions carrying three bars.' },
   rail:     { stage: 3, name: 'Rail',
               what: 'The capping timber round the deck edge, following the sheer. It finishes '
                   + 'the tops of the frames and is what everyone aboard actually holds on to.' },
@@ -7603,7 +7605,7 @@ function buildFittings(S, group, mats) {
      its top', and the man at the tiller stood 'underneath the castle-deck in between the
      long cabins at both sides and behind the heavy windlass'. So: the castle deck lofted
      off the hull's own sheer and half-breadth (a platform lofted off the real surface
-     cannot overhang — the buildRaisedEnds idiom), athwartship beams under it with their
+     cannot overhang — the buildIslands idiom), athwartship beams under it with their
      ends carried through past the sides (the through-beam look of every cog seal), posts
      down to the afterdeck, an open stanchion-and-rail parapet round the top, and the two
      side cabins beneath, flanking the helmsman's passage abaft the machine. The forward
@@ -10388,7 +10390,11 @@ function buildSuperstructure(S, group, hullMat) {
  * short at a clamp of 0.004 / 0.996) with its stations graded toward the end, where the
  * half-breadth changes fastest. Only an end that faces a well has a bulkhead down to the main
  * deck: at a closed end the shell is already there, and it rakes inboard below the sheer, so
- * a bulkhead hung from the sheer's station stands out through it. */
+ * a bulkhead hung from the sheer's station stands out through it.
+ * ⚠ A LINER'S RAISED ENDS ARE ISLANDS TOO (round 295): Titanic's forecastle and poop had a
+ * builder of their own that placed them on the straight u line, inset the wall from the skin
+ * over an open slot and let the capping ride the sheer along them. She now carries them in
+ * hull.islands, read off the 1911 side plan, with `openRail` for the rail on their edges. */
 function buildIslands(S, group, hullMat) {
   if (!(S.islands && S.islands.list && S.islands.list.length && hullMat)) return;
   const H = hullSurface(S);
@@ -10471,108 +10477,38 @@ function buildIslands(S, group, hullMat) {
     }
     g.add(strip(dp, deckMat, true));
     group.add(tag(g, 'forecast', isl.name, isl.what));
-  }
-}
-
-/* ── THE RAISED ENDS: FORECASTLE AND POOP ──────────────────────────────────────────────
- * A liner's sheer line was not the top of her shell. On the Olympic class the plating rose
- * one deck above the shelter deck in three places — a 128 ft forecastle, the 550 ft bridge
- * superstructure, and a 106 ft poop — with two ~50 ft WELL DECKS cut between them, and that
- * alternation of black wall and open well is a large part of the recognisable profile. The
- * record closes on itself: 128 + 50 + 550 + 50 + 106 = 884 ft against her 882.75 ft overall,
- * so the two ends are DERIVED — the recorded house (houseAt) minus a recorded well (wellM)
- * on each side, running out to the hull's own extremities. Their lengths then fall out at
- * 39 m and ~26 m drawn (the counter overhang carries the rest of the poop's 32 m), and the
- * BREAKS — the thing the eye reads — stand at the record's stations.
- * The walls follow the hull's own half-breadth (flush shell, not inset house) and the hull's
- * own sheer, in the hull's own paint. */
-function buildRaisedEnds(S, group) {
-  if (!(S.wellM && S.houseAt && S.houseAt.length === 2 && S.decks)) return;
-  const H = hullSurface(S);
-  const L = S.lwl, B = S.beam, dh = S.deckM || B * 0.105;
-  const wellU = S.wellM / L;
-  const wallMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(S.topside || '#3a3a3c'), roughness: 0.58, metalness: 0.22,
-    side: THREE.DoubleSide });
-  const deckMat = new THREE.MeshStandardMaterial({ color: 0xd3c9b4, roughness: 0.72, side: THREE.DoubleSide });
-  const railMat = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
-  const halfAt = u => Math.abs(surfacePoint(S, H, Math.max(0.001, Math.min(0.999, u)), 1.0)[2]) - B * 0.015;
-  const up = new THREE.Vector3(0, 1, 0);
-
-  const mk = (u0, u1, label, what) => {
-    const g = new THREE.Group();
-    const N = Math.max(10, Math.round((u1 - u0) * L / 1.6));
-    /* the perimeter, wound like the house's: the +z (port) side fwd→aft, aft end, starboard aft→fwd,
-       fwd end — each station carrying its own u so the wall can follow the sheer */
-    const path = [];
-    for (let k = 0; k <= N; k++) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: halfAt(u) }); }
-    path.push({ u: u1, x: (u1 - 0.5) * L, z: -halfAt(u1) });
-    for (let k = N; k >= 0; k--) { const u = u0 + (u1 - u0) * k / N; path.push({ u, x: (u - 0.5) * L, z: -halfAt(u) }); }
-    path.push({ u: u0, x: (u0 - 0.5) * L, z: halfAt(u0) });
-    /* the wall: two vertex rows, base sunk a little into the shell (no coplanar cap to
-       fight), head one deck-height over the local sheer */
-    const tp = [], ti = [];
-    for (const p of path) {
-      const ys = H.sheer(p.u), yd = H.deck(p.u);
-      tp.push(p.x, ys - dh * 0.15, p.z, p.x, yd + dh, p.z);
-    }
-    for (let k = 0; k + 1 < path.length; k++) {
-      const a = k * 2, b = a + 2;
-      ti.push(a, b, a + 1, a + 1, b, b + 1);
-    }
-    const wg = new THREE.BufferGeometry();
-    wg.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3));
-    wg.setIndex(ti); wg.computeVertexNormals();
-    g.add(new THREE.Mesh(wg, wallMat));
-    /* the deck: a planked strip lofted station by station at deck + dh, so it carries the
-       hull's own sheer out to the end rather than lying flat across it. H.deck (r221): the
-       raised end stands one deck-height over the WEATHER DECK, which is the sheer on every
-       hull without deck.belowSheerM and the recorded depth under it otherwise; the wall's
-       base above stays on the skin's own edge, since it is the shell carried up. */
-    const dp = [], di = [];
-    for (let k = 0; k <= N; k++) {
-      const u = u0 + (u1 - u0) * k / N, y = H.deck(u) + dh, h = halfAt(u);
-      dp.push((u - 0.5) * L, y, -h, (u - 0.5) * L, y, h);
-    }
-    for (let k = 0; k < N; k++) { const a = k * 2, b = a + 2; di.push(a, b, a + 1, a + 1, b, b + 1); }
-    const dg = new THREE.BufferGeometry();
-    dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3));
-    dg.setIndex(di); dg.computeVertexNormals();
-    g.add(new THREE.Mesh(dg, deckMat));
-    /* railed all round, posts and three bars resampled from the same perimeter the wall
-       stands on (the round-25 lesson: one polyline in, posts and rails out) */
-    const step = B * 0.22, Q = [];
-    let acc = 0; Q.push(path[0]);
-    for (let k = 1; k < path.length; k++) {
-      acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
-      if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
-    }
-    for (const q of Q) {
-      const st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, dh * 0.30, 5), railMat);
-      st.position.set(q.x, H.deck(q.u) + dh + dh * 0.15, q.z);
-      g.add(st);
-    }
-    for (let k = 0; k + 1 < Q.length; k++) {
-      const a = Q[k], b = Q[k + 1];
-      const len = Math.hypot(b.x - a.x, b.z - a.z);
-      if (len < 0.01) continue;
-      const dir = new THREE.Vector3(b.x - a.x, 0, b.z - a.z).normalize();
-      const ym = (H.deck(a.u) + H.deck(b.u)) / 2 + dh;
-      for (const hf of [0.10, 0.20, 0.30]) {
-        const bar = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), railMat);
-        bar.position.set((a.x + b.x) / 2, ym + dh * hf, (a.z + b.z) / 2);
-        bar.quaternion.setFromUnitVectors(up, dir);
-        g.add(bar);
+    /* an OPEN RAIL on the deck's edge, where the record says the ship has one (islands.openRail,
+       round 295). It is its own part, so an island's built top stays the top of its plating. */
+    if (S.islands.openRail) {
+      const rg = new THREE.Group(), up = new THREE.Vector3(0, 1, 0);
+      const railMat = new THREE.MeshStandardMaterial({ color: 0xe4e2dc, roughness: 0.60 });
+      const postH = 0.89, edge = 0.08, step = B * 0.22, Q = [path[0]];
+      let acc = 0;
+      for (let k = 1; k < path.length; k++) {
+        acc += Math.hypot(path[k].x - path[k - 1].x, path[k].z - path[k - 1].z);
+        if (acc >= step || k === path.length - 1) { Q.push(path[k]); acc = 0; }
       }
+      const xLo = closedFwd ? xAt(u0) + 0.15 : -Infinity, xHi = closedAft ? xAt(u1) - 0.15 : Infinity;
+      const at = q => ({ x: Math.max(xLo, Math.min(xHi, q.x)), y: top(q.u) - railM, z: Math.sign(q.z) * Math.max(0, Math.abs(q.z) - edge) });
+      for (const q of Q) {
+        const p = at(q), st = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.004, B * 0.004, postH, 5), railMat);
+        st.position.set(p.x, p.y + postH / 2, p.z);
+        rg.add(st);
+      }
+      for (let k = 0; k + 1 < Q.length; k++) {
+        const a = at(Q[k]), b = at(Q[k + 1]), len = Math.hypot(b.x - a.x, b.z - a.z);
+        if (len < 0.01) continue;
+        const dir = new THREE.Vector3(b.x - a.x, 0, b.z - a.z).normalize();
+        for (const hf of [1 / 3, 2 / 3, 1]) {
+          const bar = new THREE.Mesh(new THREE.CylinderGeometry(B * 0.0035, B * 0.0035, len, 5), railMat);
+          bar.position.set((a.x + b.x) / 2, (a.y + b.y) / 2 + postH * hf, (a.z + b.z) / 2);
+          bar.quaternion.setFromUnitVectors(up, dir);
+          rg.add(bar);
+        }
+      }
+      group.add(tag(rg, 'islandRail', isl.name + ' rail'));
     }
-    group.add(tag(g, 'forecast', label, what));
-  };
-
-  const [hA, hB] = S.houseAt;
-  mk(0.004, hA - wellU, 'Forecastle',
-     'The shell carried one deck higher at the bow: anchor gear, windlass and the break of the deck. Between here and the bridge superstructure lies the forward well deck — on Titanic it was Third Class open space, and the first place the sea came aboard.');
-  mk(hB + wellU, 0.996, 'Poop deck',
-     'The raised aft deck, and on Titanic the last of her to stay dry. The aft well deck between the poop and the superstructure was Third Class promenade; the docking bridge stood here, from which she was conned going astern.');
+  }
 }
 
 /* ── WHERE THE FUNNELS STAND ────────────────────────────────────────────────────────────
@@ -14031,7 +13967,7 @@ function buildJunkEnds(S, group) {
  * illustration and every reconstruction of the treasure ships shows the stern built up in
  * stepped timber tiers, because the ship was an embassy and the embassy lived aft. Declared
  * in the data as `poop: [from, to, tiers]`; the walls follow the hull's own half-breadth
- * and sheer (the buildRaisedEnds idiom — a wall lofted off the real surface cannot
+ * and sheer (the buildIslands idiom — a wall lofted off the real surface cannot
  * overhang), each tier steps inboard of the one below, and each carries its roof out past
  * its walls, which is the one line of the silhouette that says China rather than Europe.
  */
@@ -14111,7 +14047,7 @@ function buildJunkCastle(S, group) {
  * aftcastle rising in steps to the poop — and they are most of what makes a carrack read
  * as one: without them the Shipwright drew a flush-decked barque (r243, the carrack spun
  * from twelve bearings). Each tier is a wall lofted off the hull's own half-breadth and
- * sheer at its stations (the buildRaisedEnds idiom: a wall lofted off the real surface
+ * sheer at its stations (the buildIslands idiom: a wall lofted off the real surface
  * cannot overhang), inset a step from the tier below, with a planked deck across its head
  * and an open rail round that. The walls wear the hull's own planking shader, continued
  * above the sheer at the same strake pitch, because on the ship they WERE the planking
@@ -16864,7 +16800,6 @@ function buildShip(S, opts) {
   if (FINE && !S.flightDeck && !S.turrets) buildSuperstructure(S, group, hullMat);
   if (FINE && S.cluster) buildCluster(S, group);
   if (FINE && S.islands) buildIslands(S, group, hullMat);
-  if (FINE && !S.flightDeck && !S.turrets) buildRaisedEnds(S, group);
   if (FINE && S.sternSteps) buildSternTerraces(S, group, hullMat);
   if (FINE) buildJunkCastle(S, group);
   if (FINE) buildTieredCastles(S, group, mats, hullMat);

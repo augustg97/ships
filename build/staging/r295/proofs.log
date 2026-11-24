@@ -1,0 +1,6 @@
+INSET 5 [('preussen', "an island's side standing inside the shell"), ('titanic', "an island's side standing inside the shell")]
+CAPPING 5 [('preussen', "a capping ridden along an island's side"), ('titanic', "a capping ridden along an island's side")]
+HOUSE 1 [('titanic', 'a house built off its plate')]
+BREAKS 2 [('titanic', 'an island built off its plate')]
+SILENCE 1 [('titanic', 'an island under a plate datum with no columns')]
+restored 0 0
