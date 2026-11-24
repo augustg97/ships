@@ -18,17 +18,26 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: true
+# 2026-11-23 (r298): every deploy from 04:50Z failed with 'No artifacts named "github-pages"
+# were found' 0.6 s after the upload step reported the artifact finalized, four runs in a row,
+# with githubstatus.com all green. It is actions/deploy-pages issue "Intermittent 'No artifacts
+# named github-pages' when deploy-pages runs right after upload-pages-artifact in the same job".
+# The upload and the deploy are now two jobs, and both actions are on v5.
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
