@@ -27510,3 +27510,39 @@ Stage 7's "driven by the wind rather than carried by it" is the kind of sentence
 **r302 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r302` already exists before writing into it. Then (0y¹¹⁹)'s rail: trace the plan's heavy shell-top line from stem to stern. Else (0y¹²⁷), the sailing cards. Else (0y¹²³).**
 
 **Live stamp: docs/index.html carries data-version 1795512431 at the build; the live check and the frame results are in the receipt that follows.**
+
+**Live stamp VERIFIED: 1795512431 on https://augustg97.github.io/ships/index.html at 01:28 PST, 80 s after the push (`build/staging/r301/push.log`). Deploy Pages run 45365345652 succeeded in 1 m 18 s. The published `js/shipwright.js`, `data/vessels.json`, `data/provenance.json`, `audit-hulls.js`, `index.html` and `css/styles.css` are byte-identical to docs/.**
+
+**THE FRAMES: ALL 65 SCORED at this tree (`build/staging/r301/score-all.out`).** The ratchet stopped at frame 47 (`shipwright-astern`) on the 150 s readiness timeout, as in r298 to r300. The close-out's build ran beside it in that minute. The 46 frames it had captured were kept (`run1-current`), and the other 19 were captured one at a time (`r301_capture_rest.py`, all on the first attempt).
+
+Four frames that no change this round can reach scored beyond the gate in those batches and were recaptured alone (`run3-current`):
+- `ship-wyoming` (90%) had captured the globe, not the Shipwright;
+- `ship-clipper` (90%);
+- `aboard-titanic` (16%) showed her 2′ further along her track;
+- `sea-canoe-floor` (3.7%).
+
+All four came back inside the gate. `globe-steam` scored 9.9% and then 5.3% on two captures. The only difference is the positions printed in the voyage list (for example "Great Eastern lays the cable 32°W" against 29°W), and the two captures disagree with each other, so it is a capture flap and was NOT accepted.
+
+MOVED BY THIS ROUND AND ACCEPTED, each viewed beside its old baseline (`pair-ship-titanic.png`, `pair-shipwright-furled.png`, `pair-ship-dugout.png`, `sheet-movers.png`):
+
+| Frame | Changed | Mean abs |
+|---|---|---|
+| `ship-titanic` | 3.428% | 4.168 |
+| `ship-queen-mary-2` | 2.645% | 3.224 |
+| `ship-dreadnought` | 2.661% | 3.274 |
+| `ship-yamato` | 0.848% | 0.797 |
+| `ship-carrier` | 1.146% | 1.189 |
+| `ship-container` | 0.499% | 0.444 |
+| `ship-usv` | 2.000% | 2.412 |
+| `ship-azzam` | 2.028% | 2.415 |
+| `ship-ever-given` | 3.386% | 4.076 |
+| `shipwright-furled` | 0.911% | 1.084 |
+| `ship-dugout` | 0.145% | 0.130 |
+
+- The nine powered hulls' frames changed in the stage-7 card ("Afloat" and the machinery) and in the nav above it. The ships themselves are unchanged.
+- `shipwright-furled` changed only in the nav: before this round the five-line furled card covered the lower half of the arrows, and now the nav stands clear of it.
+- `ship-dugout`'s nav rose 2 px with her two-line card.
+
+I predicted the nine `ship-*` frames. I did not predict `shipwright-furled` and `ship-dugout`. They follow from the layout fix, because any stage-7 card taller than one line now moves the nav. The other 53 frames were inside the gate.
+
+**Rule 0, on the accepted `ship-titanic` frame:** the same liner on a lit sea, with the "Afloat" card under her naming her engines, turbine, boilers and furnaces, and the ←/→/Furl row standing clear above the card.
