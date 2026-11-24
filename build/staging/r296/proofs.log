@@ -1,0 +1,7 @@
+FUNNEL rc 1 problems 4 ['titanic: a funnel built off its read']
+MAST rc 1 problems 2 ['titanic: a mast built off its read']
+NESTHEIGHT rc 1 problems 1 ["titanic: a crow's nest built off its read"]
+NESTSILENCE rc 1 problems 1 ["titanic: a crow's nest with no read on a plate-read mast"]
+FUNNELSILENCE rc 1 problems 1 ['titanic: funnels on a side-plan hull with no read of their own']
+NESTOFF rc 1 problems 1 ["titanic: a crow's nest off its mast"]
+FINAL rc 0 problems 0 []

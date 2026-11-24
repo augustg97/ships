@@ -4121,15 +4121,27 @@
         "steeve": 22,
         "masts": [
           {
-            "at": 0.175,
+            "at": 0.1168,
             "heightM": 52.2,
             "rig": "pole",
             "rake": 9.46,
             "shrouds": 0,
-            "crowsNest": true
+            "crowsNest": {
+              "yM": 26.36,
+              "heightM": 1.54,
+              "foreM": 1.15,
+              "read": {
+                "col": 3146,
+                "topRow": 470,
+                "footRow": 490,
+                "wlRow": 823.4,
+                "pxPerM": 13.0268
+              },
+              "provenance": "PLATE READ, r296: the crow's nest off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). The plan draws it as a box on the fore side of the foremast, its top on row 470, its foot on row 490, reaching from the mast's fore edge at column 3138.5 to column 3153.5. The plan's waterline stands on row 823.4 at that column, so the box stands 25.6 to 27.1 m over the water and reaches 1.15 m forward of the mast. The read is good to about 2 rows (0.15 m). The model had hung it at two thirds of the mast, 44.9 m over the water, which was a class rule with no source."
+            }
           },
           {
-            "at": 0.878,
+            "at": 0.816,
             "heightM": 52.2,
             "rig": "pole",
             "rake": 9.46,
@@ -4155,10 +4167,10 @@
         ],
         "funnelH": 19.0,
         "funnelAt": [
-          0.335,
-          0.445,
-          0.555,
-          0.665
+          0.2711,
+          0.4108,
+          0.5481,
+          0.6843
         ],
         "year": 1912,
         "cove": 1,
@@ -4250,6 +4262,39 @@
               "poop": 33.24
             }
           }
+        },
+        "stationRead": {
+          "plate": "the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png)",
+          "stemHeadCol": 3629.0,
+          "sternEndCol": 123.5,
+          "pxPerMAlongHull": -13.0268,
+          "cols": [
+            3171.1,
+            806.5
+          ],
+          "colBoundPx": 4,
+          "stemHeadX": -134.55,
+          "distAbaftStemHeadM": [
+            35.15,
+            216.67
+          ],
+          "read": "build/staging/r296/r296_fit2.py",
+          "mapping": "each column's distance abaft the stem head is placed at x = stemHeadX + that distance, and the station is solved through the loft's deck-level line x(u) = (u - 0.5) lwl + rake(u)"
+        },
+        "stationProvenance": "PLATE READ, r296: the two masts' stations off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). Each mast is drawn on the plan as two tapering edges. Both edges were traced every 2 rows from row 430 to row 598 and fitted as lines (rms 0.2 to 0.4 px), and the mast's centre line is their mean. The centre line is read at the height of the model's own mast foot over the plan's waterline, which tilts from row 845 at the stern to row 820 at the bow: the fore at column 3171.1, the main at column 806.5. The scale is the plan's 13.03 px/m over her recorded 269.1 m. The plan's bar scale reads 1% longer, so these distances carry a bound of 1%, and the read itself about 4 px (0.3 m). The plan's mast centre lines lean 10.4 and 9.8 degrees on the page. Taking out the 0.41 degrees by which the plan's waterline is tilted leaves 10.0 and 9.4, so the record keeps its attested rake of 2 inches to the foot (9.46 degrees).",
+        "funnelRead": {
+          "cols": [
+            2648.4,
+            2177.2,
+            1713.9,
+            1254.4
+          ],
+          "yM": 19.0,
+          "stemHeadCol": 3629.0,
+          "pxPerMAlongHull": -13.0268,
+          "colBoundPx": 3,
+          "read": "build/staging/r296/r296_fit2.py",
+          "provenance": "PLATE READ, r296: the four funnels' stations off the side plan of Olympic and Titanic in Engineering vol. 91, 26 May 1911 (Wikimedia Commons, 'Olympic and Titanic Side Plan 1911.png', 3803 x 1052 px, bow at the right; build/staging/r295/plates/side-plan-1911.png). Each funnel's two edges were read on rows 304 to 345, in the plain head of the stack above the guys, and their midpoints fitted as a line (rms 0.2 px). The line is read at 19.0 m over the plan's waterline, the height of the stack's root in the model: columns 2648.4, 2177.2, 1713.9 and 1254.4, which stand 75.3, 111.4, 147.0 and 182.3 m abaft the stem head. The spacing is 36.2, 35.6 and 35.3 m. funnelAt is x / lwl, which is how buildFunnel places a stack. The scale carries the plan's 1% bound."
         }
       }
     },

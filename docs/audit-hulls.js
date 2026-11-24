@@ -4853,6 +4853,60 @@ say(v.id, 'a mast built off its read',
 });
 }
 }
+{
+const FR = H.funnelRead;
+if (!FR && H.funnels && H.islands && H.islands.plate)
+say(v.id, 'funnels on a side-plan hull with no read of their own', 'hull.islands.plate is present and hull.funnelRead is absent');
+if (FR) {
+const stacks = [];
+g.updateMatrixWorld(true);
+const invF = new THREE.Matrix4().copy(g.matrixWorld).invert();
+g.traverse(o => { if (o.isMesh && o.userData.part && o.userData.part.name === 'Funnel') stacks.push(o); });
+if (stacks.length !== (FR.cols || []).length)
+say(v.id, 'a funnel read that does not match the funnels built', `${(FR.cols || []).length} columns read, ${stacks.length} stacks built`);
+else {
+const xHeadF = loftDeckX(H, 0), P = new THREE.Vector3();
+stacks.forEach((m, i) => {
+const M = new THREE.Matrix4().multiplyMatrices(invF, m.matrixWorld), A = m.geometry.attributes.position;
+let y0 = Infinity, y1 = -Infinity;
+for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M); y0 = Math.min(y0, P.y); y1 = Math.max(y1, P.y); }
+let a0 = Infinity, b0 = -Infinity, a1 = Infinity, b1 = -Infinity;
+for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M);
+if (P.y < y0 + 0.02) { a0 = Math.min(a0, P.x); b0 = Math.max(b0, P.x); }
+if (P.y > y1 - 0.02) { a1 = Math.min(a1, P.x); b1 = Math.max(b1, P.x); } }
+const c0 = (a0 + b0) / 2, c1 = (a1 + b1) / 2, built = c0 + (c1 - c0) * (FR.yM - y0) / (y1 - y0);
+const plate = xHeadF + (FR.cols[i] - FR.stemHeadCol) / FR.pxPerMAlongHull;
+if (Math.abs(built - plate) > 0.25)
+say(v.id, 'a funnel built off its read', `funnel ${i + 1}: its axis at y ${FR.yM} stands at x ${built.toFixed(2)}; the plan's column ${FR.cols[i]} puts it at ${plate.toFixed(2)} (${(built - plate).toFixed(2)} m off)`);
+});
+}
+}
+}
+(H.masts || []).forEach((mk, mi) => {
+if (!mk.crowsNest) return;
+const CN = mk.crowsNest;
+if (CN === true || !CN.read) { if (H.stationRead) say(v.id, "a crow's nest with no read on a plate-read mast", `masts[${mi}].crowsNest carries no plate read`); return; }
+g.updateMatrixWorld(true);
+const invN = new THREE.Matrix4().copy(g.matrixWorld).invert(), bN = new THREE.Box3(), P = new THREE.Vector3();
+let seg0 = null;
+g.traverse(o => { if (!o.isMesh) return;
+if (o.userData.part && o.userData.part.name === "Crow's nest") { const A = o.geometry.attributes.position, M = new THREE.Matrix4().multiplyMatrices(invN, o.matrixWorld); for (let k = 0; k < A.count; k++) bN.expandByPoint(P.fromBufferAttribute(A, k).applyMatrix4(M)); }
+const s = o.userData.seg; if (s && s.mi === mi && s.si === 0) seg0 = o; });
+if (bN.isEmpty()) { say(v.id, "a crow's nest recorded and not built", `masts[${mi}]`); return; }
+const R = CN.read, plateY = (R.wlRow - (R.topRow + R.footRow) / 2) / R.pxPerM, yC = (bN.min.y + bN.max.y) / 2;
+if (Math.abs(yC - plateY) > 0.2) say(v.id, "a crow's nest built off its read", `its centre stands ${yC.toFixed(2)} m over the water; the plan's rows put it at ${plateY.toFixed(2)}`);
+if (seg0) {
+const A = seg0.geometry.attributes.position, M = new THREE.Matrix4().multiplyMatrices(invN, seg0.matrixWorld);
+let yLo = Infinity, yHi = -Infinity;
+for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M); yLo = Math.min(yLo, P.y); yHi = Math.max(yHi, P.y); }
+const yMid = (yLo + yHi) / 2; let f0 = null, f1 = null;
+for (let k = 0; k < A.count; k++) { P.fromBufferAttribute(A, k).applyMatrix4(M);
+if (P.y < yMid) { if (!f0 || P.x < f0.x) f0 = { x: P.x, y: P.y }; }
+else if (!f1 || P.x < f1.x) f1 = { x: P.x, y: P.y }; }
+const face = f0.x + (f1.x - f0.x) * (yC - f0.y) / (f1.y - f0.y);
+if (bN.max.x < face - 0.02 || bN.max.x > face + 0.15) say(v.id, "a crow's nest off its mast", `its aft edge is at x ${bN.max.x.toFixed(2)}; the mast's fore face at that height is at ${face.toFixed(2)}`);
+}
+});
 if (!(H.deck && H.deck.belowSheerM > 0)) {
 const texts = [H.mastProvenance || ''].concat((H.masts || []).map(m => (m.yardFracsProvenance || '') + ' ' + (m.truckProvenance || '')));
 const re = /bulwark depth of ([0-9.]+) m|rail \+ ([0-9.]+) m/;

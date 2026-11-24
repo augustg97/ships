@@ -3071,12 +3071,32 @@ function buildRig(S, group, mats, FINE, FURLED) {
          they sighted the iceberg, and they had no binoculars: the ship's glasses had been
          locked in a cabinet whose key left with an officer reassigned at Southampton. */
       if (FINE && mk.rig === 'pole' && mk.crowsNest && si === 0) {
-        const nest = new THREE.Mesh(
-          new THREE.CylinderGeometry(B * 0.028, B * 0.024, B * 0.045, 12, 1, true),
-          mats.woodPale || woodDark);
-        nest.position.set(mxA(y + seg * 0.66), y + seg * 0.66, 0);
-        group.add(tag(nest, 'mast', "Crow's nest",
-          'The lookout station, about two thirds up the foremast. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.'));
+        /* r296: a nest with a plate read stands at the read's height on the mast's FORE FACE,
+           as the 1911 side plan draws it, with a floor and a visible inside. A nest with no
+           read keeps the class rule. */
+        const CN = typeof mk.crowsNest === 'object' ? mk.crowsNest : null;
+        const nestWhat = CN
+          ? 'The lookout station, on the fore side of the foremast about 13 m above the forecastle deck. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.'
+          : 'The lookout station, about two thirds up the foremast. Fleet and Lee were in Titanic\'s when they sighted the iceberg — without binoculars, the ship\'s glasses having been locked in a cabinet whose key left with an officer reassigned at Southampton.';
+        if (CN) {
+          const rN = CN.foreM / 2, rMast = segR[si].a + (segR[si].b - segR[si].a) * ((CN.yM - y) / seg);
+          const nestMat = (mats.woodPale || woodDark).clone();
+          nestMat.side = THREE.DoubleSide;
+          const nx = mxA(CN.yM) - rMast + 0.04 - rN;
+          const nest = new THREE.Mesh(new THREE.CylinderGeometry(rN, rN * 0.92, CN.heightM, 16, 1, true), nestMat);
+          nest.position.set(nx, CN.yM, 0);
+          group.add(tag(nest, 'mast', "Crow's nest", nestWhat));
+          const floor = new THREE.Mesh(new THREE.CircleGeometry(rN * 0.92, 16), nestMat);
+          floor.rotation.x = Math.PI / 2;
+          floor.position.set(nx, CN.yM - CN.heightM * 0.46, 0);
+          group.add(tag(floor, 'mast', "Crow's nest", nestWhat));
+        } else {
+          const nest = new THREE.Mesh(
+            new THREE.CylinderGeometry(B * 0.028, B * 0.024, B * 0.045, 12, 1, true),
+            mats.woodPale || woodDark);
+          nest.position.set(mxA(y + seg * 0.66), y + seg * 0.66, 0);
+          group.add(tag(nest, 'mast', "Crow's nest", nestWhat));
+        }
       }
       /* ── THE TOP IS A DATED TECHNOLOGY, like the woolding and the iron hoop ──────────
          The trireme struck her masts before battle and left them ashore; no Greek warship
