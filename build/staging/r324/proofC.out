@@ -1,0 +1,52 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[0] (station 0.115) topmast: set 0.9360 of the way from the mast's foot (y 5.37) to the section's head (y 32.97); the plate reads 0.901 +/- 0.01"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[0] (station 0.115) topgallantMast: set 0.9766 of the way from the mast's foot (y 5.37) to the section's head (y 37.47); the plate reads 0.9652 +/- 0.01"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[1] (station 0.556) topmast: set 0.9342 of the way from the mast's foot (y 4.60) to the section's head (y 33.80); the plate reads 0.8826 +/- 0.01"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[1] (station 0.556) topgallantMast: set 0.9710 of the way from the mast's foot (y 4.60) to the section's head (y 40.59); the plate reads 0.9506 +/- 0.01"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[2] (station 0.85) topmast: set 0.9391 of the way from the mast's foot (y 4.93) to the section's head (y 24.76); the plate reads 0.9054 +/- 0.01"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[0] (station 0.115) topmast: set 0.9359 of the way from the mast's foot (y 3.58) to the section's head (y 20.21); the plate reads 0.901 +/- 0.01"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[0] (station 0.115) topgallantMast: set 0.9766 of the way from the mast's foot (y 3.58) to the section's head (y 22.92); the plate reads 0.9652 +/- 0.01"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[1] (station 0.556) topmast: set 0.9342 of the way from the mast's foot (y 3.00) to the section's head (y 20.59); the plate reads 0.8826 +/- 0.01"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[1] (station 0.556) topgallantMast: set 0.9710 of the way from the mast's foot (y 3.00) to the section's head (y 24.68); the plate reads 0.9506 +/- 0.01"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard off its plate read",
+  "detail": "masts[2] (station 0.85) topmast: set 0.9390 of the way from the mast's foot (y 3.22) to the section's head (y 15.17); the plate reads 0.9054 +/- 0.01"
+ }
+]

@@ -1,0 +1,116 @@
+{
+ "east-indiaman": [
+  {
+   "mast": 0,
+   "tie": 1,
+   "overFoot": 25.833,
+   "top": 13.17,
+   "cap": 27.6,
+   "heel": 12.877,
+   "ofTopToCap": 0.8776,
+   "ofTopmast": 0.88,
+   "read": null
+  },
+  {
+   "mast": 0,
+   "tie": 2,
+   "overFoot": 31.348,
+   "top": 13.17,
+   "cap": 27.6,
+   "heel": 12.877,
+   "ofTopToCap": 1.2598,
+   "ofTopmast": 1.2546,
+   "read": null
+  },
+  {
+   "mast": 1,
+   "tie": 1,
+   "overFoot": 27.28,
+   "top": 13.5,
+   "cap": 29.2,
+   "heel": 13.2,
+   "ofTopToCap": 0.8777,
+   "ofTopmast": 0.88,
+   "read": null
+  },
+  {
+   "mast": 1,
+   "tie": 2,
+   "overFoot": 34.945,
+   "top": 13.5,
+   "cap": 29.2,
+   "heel": 13.2,
+   "ofTopToCap": 1.3659,
+   "ofTopmast": 1.3591,
+   "read": null
+  },
+  {
+   "mast": 2,
+   "tie": 1,
+   "overFoot": 18.621,
+   "top": 9.98,
+   "cap": 19.83,
+   "heel": 9.758,
+   "ofTopToCap": 0.8773,
+   "ofTopmast": 0.88,
+   "read": null
+  }
+ ],
+ "slave-ship": [
+  {
+   "mast": 0,
+   "tie": 1,
+   "overFoot": 15.565,
+   "top": 7.93,
+   "cap": 16.63,
+   "heel": 7.754,
+   "ofTopToCap": 0.8776,
+   "ofTopmast": 0.88,
+   "read": null
+  },
+  {
+   "mast": 0,
+   "tie": 2,
+   "overFoot": 18.887,
+   "top": 7.93,
+   "cap": 16.63,
+   "heel": 7.754,
+   "ofTopToCap": 1.2594,
+   "ofTopmast": 1.2542,
+   "read": null
+  },
+  {
+   "mast": 1,
+   "tie": 1,
+   "overFoot": 16.433,
+   "top": 8.13,
+   "cap": 17.59,
+   "heel": 7.949,
+   "ofTopToCap": 0.8777,
+   "ofTopmast": 0.88,
+   "read": null
+  },
+  {
+   "mast": 1,
+   "tie": 2,
+   "overFoot": 21.051,
+   "top": 8.13,
+   "cap": 17.59,
+   "heel": 7.949,
+   "ofTopToCap": 1.3658,
+   "ofTopmast": 1.359,
+   "read": null
+  },
+  {
+   "mast": 2,
+   "tie": 1,
+   "overFoot": 11.221,
+   "top": 6.01,
+   "cap": 11.95,
+   "heel": 5.876,
+   "ofTopToCap": 0.8773,
+   "ofTopmast": 0.88,
+   "read": null
+  }
+ ]
+}

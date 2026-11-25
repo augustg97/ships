@@ -1507,7 +1507,7 @@ const mastYards = [];
 const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
 let lastYardTop = -Infinity;
-const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec) => {
+const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec, hoistRec) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
 : yardLen * (RATE[kind] || 0.625) / 36;
@@ -1578,6 +1578,7 @@ stowFrom: 'class (round 259): the harbour stow rolls the cloth onto the top of t
 + 'plate reads it' } : null };
 if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
 if (courseRec) ym.userData.courseAt = Object.assign(courseRec, { y: yY, yPlan: yy });
+if (hoistRec) ym.userData.hoistAt = Object.assign(hoistRec, { y: yY, yPlan: yy, setY: +setY.toFixed(3) });
 if (hoist && typeof hoist === 'object' && hoist.tie >= 1)
 ym.userData.lowered = loweredRec ? Object.assign(loweredRec, { y: +yY.toFixed(3) })
 : { mast: mi, furled: FURLED, lowered: false, tie: hoist.tie, y: +yY.toFixed(3),
@@ -1973,11 +1974,19 @@ const rd = (mk.courseRead && typeof mk.courseRead.ofDeckToTop === 'number') ? mk
 if (rd) courseAt = rd.ofDeckToTop * 0.90;
 courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: 0.90, from: rd ? 'record' : 'class' };
 }
-crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
+let hoistRec = null, hoistY = y + seg * 0.88;
+if (si >= 1 && tiers > 1 && !Array.isArray(mk.yards)) {
+const key = si === 1 ? 'topmast' : 'topgallantMast';
+const hr = mk.hoistRead && mk.hoistRead[key];
+if (hr && typeof hr.ofFootToHead === 'number') hoistY = base + hr.ofFootToHead * (y + seg - base);
+hoistRec = { mast: mi, section: key, si, base, head: y + seg, frac: hr && typeof hr.ofFootToHead === 'number' ? hr.ofFootToHead : null,
+from: hr && typeof hr.ofFootToHead === 'number' ? 'record' : 'class' };
+}
+crossYard(si === 0 ? y + seg * courseAt : hoistY, yardLen,
 si === 0 ? (isMizzen ? 'topsail' : 'course')
 : si === 1 ? 'topsail' : 'topgallant',
 si > 0 || tiers === 1 ? { tie: si }
-: isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers', undefined, undefined, courseRec);
+: isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers', undefined, undefined, courseRec, hoistRec);
 }
 capY = y + seg;
 segHeads[si] = capY;

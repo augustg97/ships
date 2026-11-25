@@ -1,0 +1,132 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[0] (station 0.115): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 0 hoisting yards record where they are set, 1 expected"
+ },
+ {
+  "id": "carrack",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[1] (station 0.556): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "carrack",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 0 hoisting yards record where they are set, 1 expected"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[0] (station 0.115): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[1] (station 0.556): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[0] (station 0.115): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[1] (station 0.556): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[2] (station 0.85): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[2] (station 0.85): 0 hoisting yards record where they are set, 1 expected"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[0] (station 0.115): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[1] (station 0.556): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[2] (station 0.85): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[2] (station 0.85): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[0] (station 0.115): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[1] (station 0.556): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 0 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard with no answer",
+  "detail": "masts[2] (station 0.85): the yards above the course are set at the class 0.88 of their sections and the record says nothing of where they are set (hoistProvenance opening PLATE READ with a hoistRead, or UNREAD)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[2] (station 0.85): 0 hoisting yards record where they are set, 1 expected"
+ }
+]
