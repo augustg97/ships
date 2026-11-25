@@ -29812,3 +29812,14 @@ Proofs, all on :8150 (`webb/`):
 **r327 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r327` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁶⁹) or (0y¹⁶³).**
 
 **Live stamp: docs/index.html carries data-version 1795625245 at the build.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The full check was launched at 08:46 and captured 36 frames. It died at frame 37, `aboard-titanic`, on the 150 s ready wait (09:10), as r320's to r325's runs did. The 36 were kept (`run1/`, `score-run1.out`). The 29 it never reached were captured one process per frame with no failure (`r326_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). Every frame was scored with r277's offline scorer.
+
+- **ACCEPTED, predicted** (FRAME-LOG.md; crops `pair-<frame>.png`, before on the left): `shipwright` 0.275% / 0.095, `shipwright-ahead` 0.115% / 0.056, `shipwright-hounds` 1.215% / 0.651 (the 74's mizzen top stood in front of the topsail and is now behind it), `ship-steamer` 0.205% / 0.058 and `ship-preussen` 0.108% / 0.030 (the D tops' platforms stood in front of the topsails and the cloth now covers them), `ship-slave-ship` 0.687% / 0.241 (from abeam each sail now bellies forward round its top), `ship-carrack` 0.097% / 0.042, `ship-clipper` 0.054% / 0.015, `ship-sekibune` 0.055% / 0.018 (the upper cloth slightly fuller; the head stays on its yard).
+- **CAPTURE FAULTS:** `aboard`, 13.260% / 3.520, and `globe-steam`, 9.886% / 2.072, both in `run1`. In both, every ship of the era stood at another position: the steamer at 49°55′N 8°14′W, course 274°, where the baseline has 50°39′N 8°45′W, course 258°, and the voyage list read 50°N 8°W where it reads 51°N 9°W. This round's change cannot move a ship along her voyage. Recaptured alone at 09:30, they are 0.014% / 0.004 and 0.045% / 0.014, inside the gate (`run3/`, `score-run3.out`). Not accepted.
+- **Predicted, and did not move:** `shipwright-astern`, `ship-galley`, `ship-galleass`, `aboard-clipper`, `aboard-preussen` and `globe-default`, all inside the gate. `globe-crossing`, which was capturing when the head-row line went in, is inside the gate.
+- **Inside the gate:** the other 47.
+- The run did not reach its end, so the harness's console-error list was not printed.
+- **No frames are left unscored for r327.**
+
+**Live stamp VERIFIED: 1795625245 on https://augustg97.github.io/ships/index.html at 08:52 PST, 2 min after the push. The published hull.js carries `topOutline`.**
