@@ -1,0 +1,7 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a lateen mizzen with no answer for its topsail",
+  "detail": "masts[2]: mizzenTopsail undefined, provenance absent"
+ }
+]

@@ -225,6 +225,34 @@ Confidence: no top, **sourced** for the tradition and **read** off the class's o
 the plate's resolution. The semi on a ship of 1597: **inferred** from the tradition, because
 the sources attest it for the Edo wasen. Its form and size: **derived** from the pole.
 
+## 6. A lateen mizzen on a square-rigged ship: bare pole, bare topmast, or topsail (round 328)
+
+Three plates give three answers, and each hull now records which one it takes (`mizzenTopsail`,
+`mizzenTopsailProvenance`).
+
+- **Master W with the Key (Master W.A.), a three-masted ship, about 1475** (Commons
+  `File:Master W with the Key ship.jpg`, 548 × 768 px, about 12 px/m). The mizzen is a single pole on the
+  aftercastle carrying a lateen yard, with a pennant at its head. It has no top and no topmast. This is the
+  carrack's answer (hull dated 1500). At about 12 px/m a top under about 1 m across would not show.
+- **Wenceslaus Hollar, *Navis Mercatoria Hollandica, vulgo VLIET*, 1647** (Commons
+  `File:Wenceslas Hollar - A Flute (State 2).jpg`, read at the 1920 px thumbnail, about 37 px/m). The mizzen
+  carries the lateen, a small round top, and a topmast with shrouds to its head, a pennant staff over it, and
+  no yard. This is the fluyt's answer (hull dated 1620). Rows: top 588, topmast head 424, staff end 349, deck
+  hidden behind the poop rail at 868 ± 10. Recorded as `lateenTopmast`: the head stands 0.586 (0.556–0.620) of
+  the top's height over the deck above the top, and the top is 0.143 of that height across.
+- **Hocker's rig diagram of Vasa, 1628** (r320). The mizzen sets a square topsail over the lateen, from a
+  crossjack under the top. The East Indiaman and the slave ship take this.
+
+The builder draws the fluyt's top at 0.90 of the lower mast, which is the height the r321 lateen read keys the
+yard to. The plate cannot set the top's height on its own, because the deck is hidden. The topmast's heel is
+in the doubling at 0.88 of the lower mast. A-MIZZEN-TOPSAIL holds each lateen mizzen on a square-rigged hull
+to its answer.
+
+**Confidence.** The carrack's bare pole is **read**, from a plate 25 years before her date and at a scale that
+cannot resolve a small top. The fluyt's top and bare topmast are **read**, from a plate 27 years after her
+date; the height ratio is bound by the hidden deck. The fluyt's top form is the fleet's class top (round,
+before 1710); Hollar draws it with a lower rim than the class top has.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent

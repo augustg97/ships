@@ -8049,6 +8049,66 @@ say(v.id, 'a corbis adrift down the mast',
 }
 }
 {
+const anySq = (H.masts || []).some(mm => mm.rig === 'square');
+g.updateMatrixWorld(true);
+const lTops = [], lTms = [], lShr = [], yardsAll = [], poles = [];
+g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+if (!o.isMesh && p.key === 'top' && o.userData.lateenTop) lTops.push(o);
+if (o.isMesh && p.key === 'mast' && o.userData.lateenTopmast) lTms.push(o);
+if (o.isMesh && p.key === 'mast' && !o.userData.lateenTopmast) poles.push(o);
+if (o.userData.lateenTopmastShrouds) lShr.push(o);
+if (o.isMesh && p.key === 'yard') yardsAll.push(o); });
+(H.masts || []).forEach((mm, mi) => {
+const at = `masts[${mi}]`;
+const myTops = lTops.filter(o => o.userData.lateenTop.mast === mi);
+const myTms = lTms.filter(o => o.userData.lateenTopmast.mast === mi);
+if (!(mm.rig === 'lateen' && anySq)) {
+if (myTops.length || myTms.length) say(v.id, 'a lateen topmast on a mast that is not a lateen mizzen', `${at}: rig '${mm.rig}'`);
+return;
+}
+if (typeof mm.mizzenTopsail !== 'boolean' || !/^(PLATE READ|CLASS)/.test(mm.mizzenTopsailProvenance || ''))
+say(v.id, 'a lateen mizzen with no answer for its topsail',
+`${at}: mizzenTopsail ${JSON.stringify(mm.mizzenTopsail)}, provenance ${mm.mizzenTopsailProvenance ? JSON.stringify(mm.mizzenTopsailProvenance.slice(0, 40)) : 'absent'}`);
+if (mm.mizzenTopsail === true)
+say(v.id, 'a mizzen topsail the lateen pole cannot carry', `${at}: build it as rig 'square' with lateenMizzen (r317)`);
+const LT = mm.lateenTopmast;
+if (!LT) {
+if (myTops.length || myTms.length)
+say(v.id, 'a mizzen topmast nobody recorded', `${at}: ${myTops.length} tops, ${myTms.length} topmasts, no lateenTopmast`);
+return;
+}
+if (myTops.length !== 1 || myTms.length !== 1) {
+say(v.id, 'a recorded mizzen topmast not built', `${at}: ${myTops.length} mizzen tops and ${myTms.length} mizzen topmasts (want 1 and 1)`);
+return;
+}
+const T = myTops[0].userData.lateenTop, M = myTms[0].userData.lateenTopmast;
+const hT = T.y - T.base;
+const tb = new THREE.Box3().setFromObject(myTops[0]);
+const mb = new THREE.Box3().setFromObject(myTms[0]);
+const lowM = lowerOf(mm);
+if (lowM > 0 && Math.abs(hT - LT.topOfLower * lowM) > 0.05)
+say(v.id, 'a mizzen top off its read height', `${at}: top ${hT.toFixed(2)} m over the mast's foot, read ${(LT.topOfLower * lowM).toFixed(2)} m (topOfLower ${LT.topOfLower} of ${lowM.toFixed(2)} m)`);
+const wantHead = T.y + LT.headOverTop * hT;
+if (Math.abs(mb.max.y - wantHead) > 0.01 * hT)
+say(v.id, 'a mizzen topmast off its read height', `${at}: head ${mb.max.y.toFixed(2)} m, read ${wantHead.toFixed(2)} m (headOverTop ${LT.headOverTop})`);
+const wantR = LT.topDiaOfTopHeight * hT / 2, builtR = (tb.max.z - tb.min.z) / 2;
+if (Math.abs(builtR - wantR) > Math.max(0.01 * wantR, 0.03))
+say(v.id, 'a mizzen top off its read width', `${at}: radius ${builtR.toFixed(3)} m, read ${wantR.toFixed(3)} m`);
+const myPole = poles.filter(o => { const b = new THREE.Box3().setFromObject(o);
+return Math.abs((b.min.x + b.max.x) / 2 - (tb.min.x + tb.max.x) / 2) < 1.5 && b.min.y < T.y && b.max.y > T.base; });
+const poleHead = Math.max(...myPole.map(o => new THREE.Box3().setFromObject(o).max.y), -Infinity);
+if (!(mb.min.y < T.y) || !(poleHead > T.y))
+say(v.id, 'a mizzen topmast with no doubling', `${at}: topmast heel ${mb.min.y.toFixed(2)} m, lower head ${poleHead.toFixed(2)} m, top ${T.y.toFixed(2)} m`);
+if (!lShr.some(o => o.userData.lateenTopmastShrouds.mast === mi))
+say(v.id, 'a mizzen topmast with no shrouds', at);
+const axX = (mb.min.x + mb.max.x) / 2;
+yardsAll.forEach(o => { const b = new THREE.Box3().setFromObject(o);
+const cx = (b.min.x + b.max.x) / 2, cy = (b.min.y + b.max.y) / 2;
+if (cy > T.y && Math.abs(cx - axX) < 1.5 && Math.max(b.max.x - b.min.x, b.max.z - b.min.z) > 2 && b.max.y - b.min.y < 1)
+say(v.id, 'a yard crossed on a mizzen topmast recorded bare', `${at}: '${o.userData.part.name}' at ${cy.toFixed(2)} m`); });
+});
+}
+{
 const FORMS = ['none', 'basket'];
 const tops = [], semis = [], hals = [];
 g.updateMatrixWorld(true);

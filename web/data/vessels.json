@@ -1867,7 +1867,9 @@
             "rig": "lateen",
             "rake": 4,
             "shrouds": 3,
-            "lateenYardProvenance": "CLASS, r321 (0y¹⁵⁸): the lateen yard is 1.15 of the lower mast, 56° from the horizontal, slung a third of its length from the heel; these are the builder's mixed-hull figures and were read from no plate. The fluyt, the East Indiaman and the slave ship take Hocker's Vasa diagram of 1628 (Vasa II, 2023, p. 31) instead. This hull is dated 1450-1600, a century before Vasa, and no plate of a carrack's mizzen yard has been read, so the Vasa read is not applied to her."
+            "lateenYardProvenance": "CLASS, r321 (0y¹⁵⁸): the lateen yard is 1.15 of the lower mast, 56° from the horizontal, slung a third of its length from the heel; these are the builder's mixed-hull figures and were read from no plate. The fluyt, the East Indiaman and the slave ship take Hocker's Vasa diagram of 1628 (Vasa II, 2023, p. 31) instead. This hull is dated 1450-1600, a century before Vasa, and no plate of a carrack's mizzen yard has been read, so the Vasa read is not applied to her.",
+            "mizzenTopsail": false,
+            "mizzenTopsailProvenance": "PLATE READ, r328 (0y¹⁶³): read off Master W with the Key (Master W.A.), engraving of a three-masted ship, about 1475 (Commons File:Master W with the Key ship.jpg, 548 × 768 px, about 12 px/m at the hull). Her mizzen is a single pole about 3 px wide, standing on the aftercastle. It carries a lateen yard, and a pennant flies from its head. It has no top and no topmast, and crosses no square yard. At this scale a top under about 1 m across would not resolve. A pole with a top and a topsail over it would. The engraving is a quarter of a century earlier than the hull's 1500. The mizzen topsail is attested on large carracks by the 1540s (the Anthony Roll, 1546). A carrack dated after about 1530 would need a later plate."
           }
         ],
         "build": "frame",
@@ -2848,7 +2850,30 @@
               }
             },
             "lateenYardProvenance": "PLATE READ, r321 (0y¹⁵⁸): the mizzen lateen yard lies at 42.1° from the horizontal, is 1.576 times the horizontal distance between the main and mizzen masts' feet, and has its heel on the deck 0.531 of that distance before the mizzen, so its peak stands over the taffrail. Read off Hocker, F. (ed.), Vasa II: Rigging and Sailing a Swedish Warship of 1628 (Vasamuseet / Nordic Academic Press, 2023), p. 31, the rig diagram, as Wikimedia Commons File:Vasa_rig_diagram.jpg (1920 px thumbnail, build/staging/r320/dl/vasa-rig.jpg, about 24 px/m on Vasa's 61 m hull): the yard's brown line was fitted on 346 columns (slope 0.904, rms 1.3 px); its peak is at column 112 row 599, where the spar tapers to a grey hairline over the taffrail (column 88), and its heel at column 500 row 950 on the hull's upper edge. The mizzen's axis meets the hull at column 323.7 row 944 and the main's at column 655.6 row 1012, 331.9 px apart; the yard is 523 px. A 5 px error at the faint peak is 0.015 of the spacing, and the bound on each share is 0.03 and on the angle 1°. On Vasa the yard crosses the mizzen at 0.717 of the height from the deck to the mizzen top. That share is NOT built here: this hull's lower masts are Steel's 1794 proportions, and on the East Indiaman the deck-to-top height is 0.46 of the hull's length where Vasa's is 0.17, so keying the yard to the mizzen's height drew a 44 m yard on a 45 m hull. The crossing on this mast is where the heel, the angle and the length put it, and it stands low on the mast until the mast heights of the 1620 hulls are read (0y¹⁶⁴). The clew is still the class 0.62 of the yard abaft the tack. This hull is dated 1595-1700 and has no plate of its own; the read is Vasa's, applied to it.",
-            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together."
+            "mastHeightsProvenance": "CLASS, r322 (0y¹⁶⁴): Steel's 1794 shares (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50). The East Indiaman and the slave ship take Vasa's mast heights off Hocker's rig diagram (Vasa II, 2023, p. 31). The fluyt does not yet, because her mizzen is one lateen pole with no topsail and Vasa's mizzen is two pieces with a topsail: which of Vasa's two heights her pole should take depends on whether she set a mizzen topsail, which is open as (0y¹⁶³). Her three masts wait on it together.",
+            "lateenTopmast": {
+              "topOfLower": 0.9,
+              "headOverTop": 0.586,
+              "topDiaOfTopHeight": 0.143,
+              "boundHeadOverTop": [
+                0.556,
+                0.62
+              ],
+              "rows": {
+                "deckFrom": 860,
+                "deck": 868,
+                "deckTo": 878,
+                "top": 588,
+                "head": 424,
+                "staffEnd": 349
+              },
+              "topWidthPx": 40,
+              "plate": "build/staging/r328/dl/hollar-flute.jpg",
+              "plateWidthPx": 1920,
+              "pxPerM": 37
+            },
+            "mizzenTopsail": false,
+            "mizzenTopsailProvenance": "PLATE READ, r328 (0y¹⁶³): read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET' (etching, 1647; Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, about 37 px/m along the hull at the record's 32 m). The mizzen sets a lateen from a lower pole. At the pole's head is a small round top, 40 px wide. Above the top stands a topmast with shrouds to its head and a pennant staff over it, and it crosses no yard. So the fluyt sets no mizzen topsail, and she carries a top and a bare topmast. Rows on that copy: the top at 588; the topmast's head, where its shrouds meet, at 424; the staff's end at 349. The deck at the mizzen is hidden behind the poop rail. It is taken at 868 ± 10, between the row where the pole comes out of the rail (860) and the feet of the men standing on the poop (878). The topmast's head therefore stands 0.586 (0.556-0.620) of the top's height over the deck above the top. The top is 0.143 of that height across. The top stands at 0.90 of the lower mast, the height the r321 lateen read already keys the yard to; the plate cannot set it independently, because the deck is hidden. The pennant staff is not drawn. Hollar's plate is dated 1647 and the hull 1620."
           }
         ],
         "build": "frame",
