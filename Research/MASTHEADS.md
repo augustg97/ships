@@ -310,6 +310,27 @@ yard stands 8.25 m over the mast's foot where it stood 5.57 m, and the main 9.95
 A-COURSE-READ now holds a course read and a mast read off the same plate to the same top row, and convicts a
 course read at 0.97 of the deck-to-top height or more: r329's fore top would have given the fore course 0.987.
 
+**Round 331 (0y¹⁷⁶): the topsail yards.** Each topsail yard is the head edge of the set topsail, traced the same
+way (`build/staging/r331/r331_trace.py`) and crossed with the same axis line. The share is the yard's height over
+the mast's foot, over the topmast's head over the same foot, the measure r324 took off Vasa (`hoistRead`).
+
+| Topsail yard | traced columns | points, rms | axis column | crossing row | foot row | topmast head row | share | built over the foot, before → after |
+|---|---|---|---|---|---|---|---|---|
+| fore | 674–734 | 21, 1.64 px | 695.7 | 339.6 | 902 | 285 | 0.9115 | 16.15 → 15.59 m |
+| main | 1128–1206 | 27, 0.88 px | 1172.5 | 270.1 | 933 (963 gives 0.8987) | 192 | 0.8946 | 19.38 → 18.37 m |
+
+Until r331 both yards were set at the class 0.88 of the topmast section, 0.944 of this height. Vasa's fore
+topsail yard reads 0.901, so the fluyt's two reads lie either side of it. Each topsail is shallower by the same
+amount, and the topgallant sail above it is deeper, because its foot sheets to the topsail yard.
+
+**The plate crosses no yard on either topgallant mast**, so `hoistRead.topgallantMast` answers `unread` with that
+reason, and the topgallant yard stays at the class figure. The plate at anchor draws topgallant yards, with the
+sails furled, so it shows no set hoist. A-HOIST-READ now accepts a section answered `unread`, convicts a section
+both read and unread, and holds a hoist read and a mast read off the same plate to the same foot and head rows.
+
+**What the plate shows that the model does not:** Hollar's fluyt under sail sets two square sails on the fore and
+the main, a course and a topsail, and nothing above the topsail. The model sets a topgallant sail on both.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent

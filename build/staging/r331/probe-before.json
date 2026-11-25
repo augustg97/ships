@@ -1,0 +1,54 @@
+[
+ {
+  "mast": 0,
+  "section": "topmast",
+  "from": "class",
+  "frac": null,
+  "base": 3.577,
+  "head": 20.677,
+  "setY": 19.727,
+  "overFoot": 16.15,
+  "headOverFoot": 17.1,
+  "share": 0.9444,
+  "axisY": 19.727
+ },
+ {
+  "mast": 0,
+  "section": "topgallantMast",
+  "from": "class",
+  "frac": null,
+  "base": 3.577,
+  "head": 24.107,
+  "setY": 23.582,
+  "overFoot": 20.005,
+  "headOverFoot": 20.53,
+  "share": 0.9744,
+  "axisY": 23.582
+ },
+ {
+  "mast": 1,
+  "section": "topmast",
+  "from": "class",
+  "frac": null,
+  "base": 3.002,
+  "head": 23.532,
+  "setY": 22.385,
+  "overFoot": 19.383,
+  "headOverFoot": 20.53,
+  "share": 0.9441,
+  "axisY": 22.385
+ },
+ {
+  "mast": 1,
+  "section": "topgallantMast",
+  "from": "class",
+  "frac": null,
+  "base": 3.002,
+  "head": 27.552,
+  "setY": 26.932,
+  "overFoot": 23.93,
+  "headOverFoot": 24.55,
+  "share": 0.9747,
+  "axisY": 26.932
+ }
+]

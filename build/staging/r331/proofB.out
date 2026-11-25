@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a hoist and a mast read that disagree on the head",
+  "detail": "masts[0] (station 0.115) topmast: hoistRead puts the section's head on row 300 and mastHeightsRead's crosstrees on row 285, off the same plate (build/staging/r328/dl/hollar-flute.jpg)"
+ }
+]

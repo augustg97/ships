@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "an unread hoist section that does not say why",
+  "detail": "masts[1] (station 0.556) topgallantMast: hoistRead.topgallantMast.unread is 'UNREAD'"
+ }
+]

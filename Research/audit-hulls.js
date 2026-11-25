@@ -7842,7 +7842,11 @@
        'class'); a mast crosses one per section above the lower; a read is drawn as the record's and a class yard as the
        class figure; and the set height over the mast's foot, over the section's head over the foot, stands within the
        read's bound of the read. The furled build lowers the yard onto the cap below, so the SET height (`setY`) is the
-       one tested, and a set build's yard stands at it (0.005 m). */
+       one tested, and a set build's yard stands at it (0.005 m).
+       r331 (0y¹⁷⁶): a section the plate does not draw answers `{ unread: 'UNREAD, …' }` with its reason, and its yard is drawn
+       at the class figure; a section both read and unread convicts. Hollar's fluyt under sail (1647) crosses no topgallant
+       yard. A hoist read and a mast read taken off the same plate agree on the mast's foot row and the section's head row
+       within 1 px, so the two reads cannot measure the yard against a different mast. */
     {
       const hoistM = [];
       g.traverse(o => { if (o.isMesh && o.userData.hoistAt) hoistM.push(o); });
@@ -7859,7 +7863,23 @@
           say(v.id, 'a hoist provenance that does not say', `${at}: hoistProvenance opens '${P.slice(0, 30)}', neither PLATE READ nor UNREAD`);
         if (R) keys.forEach(k => {
           const e = R[k];
+          if (e && typeof e.unread === 'string') {   // r331: a section the plate does not draw answers unread, with its reason
+            if (typeof e.ofFootToHead === 'number' || e.rows)
+              say(v.id, 'a hoist section both read and unread', `${at} ${k}: hoistRead.${k} carries a figure and an unread answer`);
+            else if (!/^UNREAD/.test(e.unread) || e.unread.length < 60)
+              say(v.id, 'an unread hoist section that does not say why', `${at} ${k}: hoistRead.${k}.unread is '${e.unread.slice(0, 40)}'`);
+            return;
+          }
           if (!e || typeof e.ofFootToHead !== 'number') { say(v.id, 'a hoist read missing a section', `${at}: hoistRead.${k}.ofFootToHead is absent`); return; }
+          {   // r331: a hoist read and a mast read off the same plate agree on the mast's foot and the section's head (1 px)
+            const MR = mk.mastHeightsRead, file = s => String(s || '').split(' (')[0], hk = k === 'topmast' ? 'crosstrees' : 'truck';
+            if (e.rows && MR && MR.rows && Array.isArray(MR.foot) && file(R.plate) === file(MR.plate)) {
+              if (Math.abs(e.rows.foot - MR.foot[1]) > 1)
+                say(v.id, 'a hoist and a mast read that disagree on the foot', `${at} ${k}: hoistRead puts the foot on row ${e.rows.foot} and mastHeightsRead on row ${MR.foot[1]}, off the same plate (${file(R.plate)})`);
+              if (typeof MR.rows[hk] === 'number' && Math.abs(e.rows.head - MR.rows[hk]) > 1)
+                say(v.id, 'a hoist and a mast read that disagree on the head', `${at} ${k}: hoistRead puts the section's head on row ${e.rows.head} and mastHeightsRead's ${hk} on row ${MR.rows[hk]}, off the same plate (${file(R.plate)})`);
+            }
+          }
           if (e.rows) {
             const w = e.rows, a = (w.foot - w.yard) / (w.foot - w.head);
             if (Math.abs(a - e.ofFootToHead) > 0.005)

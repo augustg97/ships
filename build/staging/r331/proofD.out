@@ -1,0 +1,12 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a hoist read missing a section",
+  "detail": "masts[0] (station 0.115): hoistRead.topgallantMast.ofFootToHead is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoist read missing a section",
+  "detail": "masts[1] (station 0.556): hoistRead.topgallantMast.ofFootToHead is absent"
+ }
+]

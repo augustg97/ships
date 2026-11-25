@@ -5599,7 +5599,23 @@ else if (!/^(PLATE READ|UNREAD)/.test(P))
 say(v.id, 'a hoist provenance that does not say', `${at}: hoistProvenance opens '${P.slice(0, 30)}', neither PLATE READ nor UNREAD`);
 if (R) keys.forEach(k => {
 const e = R[k];
+if (e && typeof e.unread === 'string') {
+if (typeof e.ofFootToHead === 'number' || e.rows)
+say(v.id, 'a hoist section both read and unread', `${at} ${k}: hoistRead.${k} carries a figure and an unread answer`);
+else if (!/^UNREAD/.test(e.unread) || e.unread.length < 60)
+say(v.id, 'an unread hoist section that does not say why', `${at} ${k}: hoistRead.${k}.unread is '${e.unread.slice(0, 40)}'`);
+return;
+}
 if (!e || typeof e.ofFootToHead !== 'number') { say(v.id, 'a hoist read missing a section', `${at}: hoistRead.${k}.ofFootToHead is absent`); return; }
+{
+const MR = mk.mastHeightsRead, file = s => String(s || '').split(' (')[0], hk = k === 'topmast' ? 'crosstrees' : 'truck';
+if (e.rows && MR && MR.rows && Array.isArray(MR.foot) && file(R.plate) === file(MR.plate)) {
+if (Math.abs(e.rows.foot - MR.foot[1]) > 1)
+say(v.id, 'a hoist and a mast read that disagree on the foot', `${at} ${k}: hoistRead puts the foot on row ${e.rows.foot} and mastHeightsRead on row ${MR.foot[1]}, off the same plate (${file(R.plate)})`);
+if (typeof MR.rows[hk] === 'number' && Math.abs(e.rows.head - MR.rows[hk]) > 1)
+say(v.id, 'a hoist and a mast read that disagree on the head', `${at} ${k}: hoistRead puts the section's head on row ${e.rows.head} and mastHeightsRead's ${hk} on row ${MR.rows[hk]}, off the same plate (${file(R.plate)})`);
+}
+}
 if (e.rows) {
 const w = e.rows, a = (w.foot - w.yard) / (w.foot - w.head);
 if (Math.abs(a - e.ofFootToHead) > 0.005)

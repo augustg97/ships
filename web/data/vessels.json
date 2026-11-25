@@ -2785,7 +2785,7 @@
             "only": 3,
             "courseAtProvenance": "PLATE READ, r330 (0y¹⁷⁴): the fore course yard hangs at 0.879 of the height from the deck to the fore top, read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left). The deck at this mast is row 902, the foot of the forecastle rail's lattice, where the mast stands on the forecastle deck (r329's deck for this mast). The top is row 563, the upper edge of the top. The top shows as a dark band on rows 563-572 at columns 740-758, aft of the topsail's leech, with the topmast shrouds' deadeyes above it, drawn as the main top is drawn. Its fore half is behind the topsail. The course yard was traced from column 660 to 772 (29 points, a straight line within 1.6 px rms), and it crosses the mast's axis at row 604. The axis there is taken at column 708, on the line from the mast's foot (column 724, row 902) to the topmast's cap (column 693, row 285); 8 px of error in that column moves the crossing by 1.6 px. The yard is drawn sloping, its after yardarm higher, because it is braced round and the ship is seen from a little forward of the beam; the model hangs it level at the crossing. The deck-to-top span is 339 px, so a 3 px reading error is 0.009 of it, and the bound is 0.03. Until r330 this course hung at the class 0.60 of the lower mast, 0.667 of the deck-to-top height, which no plate set. The hull is dated 1620 and the plate 1647.",
             "mastHeightsProvenance": "READ, r329 (0y¹⁷¹), the top re-read r330 (0y¹⁷⁴): the top 9.39 m, the topmast's head 17.1 m and the head of the pole above it (built as the topgallant mast) 20.53 m over the foot of the mast. Each is a share of the distance between the fore and mizzen masts' feet (0.4363, 0.7941, 0.9537), times that distance on this hull's built masts (21.53 m). Read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left): the fore and mizzen masts meet the deck at columns 724 and 1501, 777 px apart; the deck at this mast is taken at the foot of the forecastle rail's lattice, where the mast stands on the forecastle deck (row 902, to about 8 px); the top's upper edge is on row 563 (r329 read the top on row 600; that is the row where the course yard crosses the mast's column 724, and the top stands 37 px above it, a band on rows 563-572 aft of the topsail with the topmast shrouds' deadeyes above it, drawn as the main top is; from r329 to r330 the fore top stood 1.02 m too low), the topmast's head, where its shrouds meet under the cap, on row 285, and the head of the pole above it on row 161. Under sail Hollar draws that pole bare, with a pennant on it and no yard crossed; his second fluyt plate of 1647 (the fluyts at anchor, 'vulgo VLIETEN', build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant masts with yards crossed on the fore and the main. So the pole is built as the topgallant mast, and the three tiers stand. The tops and caps are read to about 5 px, 0.006 of the span. The datum is the masts' feet, as on the East Indiaman and the slave ship (r322). CONTESTED datum: the plate's own spacing of the main between the fore and the mizzen (0.539 of the span) differs from this hull's stations (0.606), and Hollar draws the ship a little from forward of the beam, so the horizontal span is foreshortened and these heights may be a few per cent high. Until r329 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 150 years later; the lower tops stood 4.4 to 5.7 m higher. The hull is dated 1620 and the plate 1647.",
-            "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it.",
+            "hoistProvenance": "PLATE READ, r331 (0y¹⁷⁶): the fore topsail yard, read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left). The yard is the head edge of the set topsail, traced as the centroid of the dark pixels on each of 21 columns (674-734) and fitted as a straight line (rms 1.64 px). It crosses the mast's axis, the line from the foot to the cap, at column 695.7, row 339.6. The foot is row 902, the mast's foot on the forecastle deck. The head of the topmast is row 285, the topmast's cap, where the ring of the crosstrees shows at column 693. The yard stands 0.9115 of the height from the foot to the topmast's head. The yard slopes 0.5369 px per column on the plate, because it is braced round and the ship is seen from a little forward of the beam; the model hangs it level at the crossing. A 3 px error in the yard's row is 0.005 of the 617 px span, and the bound is 0.01. The foot and head rows are r329's mast read (mastHeightsRead). Until r331 the yard was set at the class 0.88 of its section, 0.944 of this height. The topgallant yard is not read: this plate crosses no yard on the topgallant mast. Above the topmast's cap the pole is bare and carries a pennant. Hollar's plate of fluyts at anchor (1647, build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant yards crossed, but its sails are furled, so it does not show where a set yard is hoisted. The yard stays at the class 0.88 of its section.",
             "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read.",
             "mastHeightsM": {
               "top": 9.39,
@@ -2843,6 +2843,34 @@
                 "rmsPx": 1.6
               },
               "script": "build/staging/r330/r330_trace.py, build/staging/r330/r330_edit.py"
+            },
+            "hoistRead": {
+              "topmast": {
+                "ofFootToHead": 0.9115,
+                "rows": {
+                  "foot": 902,
+                  "head": 285,
+                  "yard": 339.6
+                },
+                "fit": {
+                  "col": 695.7,
+                  "slope": -0.5369,
+                  "icpt": 713.12,
+                  "rmsPx": 1.64,
+                  "n": 21,
+                  "cols": [
+                    674,
+                    734
+                  ]
+                },
+                "spanPx": 617
+              },
+              "topgallantMast": {
+                "unread": "UNREAD, r331: this plate crosses no yard on the topgallant mast. Above the topmast's cap the pole is bare and carries a pennant. Hollar's plate of fluyts at anchor (1647, build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant yards crossed, but its sails are furled, so it does not show where a set yard is hoisted. The yard stays at the class 0.88 of its section."
+              },
+              "plate": "build/staging/r328/dl/hollar-flute.jpg (Hollar 1647, 1920 px)",
+              "boundPm": 0.01,
+              "script": "build/staging/r331/r331_trace.py, r331_edit.py"
             }
           },
           {
@@ -2854,7 +2882,7 @@
             "only": 3,
             "courseAtProvenance": "PLATE READ, r330 (0y¹⁷⁴): the main course yard hangs at 0.886 of the height from the deck to the main top, read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left). The deck at this mast is row 933, the waist rail, where the mast comes out from behind it (r329's deck for this mast). The waist deck is hidden behind the bulwark and the men in the waist show only their heads over the rail, so the deck may lie up to 30 px lower, at row 963; the read is the mean of the shares from the two rows. The top is row 528, the upper edge of the top, as r329 read it. The top shows as a dark band on rows 528-540 at columns 1165-1205, aft of the topsail's leech, with the topmast shrouds' deadeyes above it. The course yard was traced from column 1065 to 1205 (36 points, a straight line within 1.4 px rms), and it crosses the mast's axis at row 576. The axis there is taken at column 1159, on the line from the mast's foot (column 1143, row 933) to the topmast's cap (column 1176, row 192); 8 px of error in that column moves the crossing by 2.4 px. the shares from rows 933 and 963 are 0.881 and 0.890. The yard is drawn sloping, its after yardarm higher, because it is braced round and the ship is seen from a little forward of the beam; the model hangs it level at the crossing. The deck-to-top span is 405 px, so a 3 px reading error is 0.007 of it, and the bound is 0.03. Until r330 this course hung at the class 0.60 of the lower mast, 0.667 of the deck-to-top height, which no plate set. The hull is dated 1620 and the plate 1647.",
             "mastHeightsProvenance": "READ, r329 (0y¹⁷¹): the top 11.22 m, the topmast's head 20.53 m and the head of the pole above it (built as the topgallant mast) 24.55 m over the foot of the mast. Each is a share of the distance between the fore and mizzen masts' feet (0.5212, 0.9537, 1.1403), times that distance on this hull's built masts (21.53 m). Read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left): the fore and mizzen masts meet the deck at columns 724 and 1501, 777 px apart; the deck at this mast is taken at the waist rail, where the mast comes out from behind it (row 933). The waist deck is hidden behind the bulwark, and the men in the waist show only their heads over the rail, so the deck may lie up to about 30 px (0.8 m) lower; the top's upper edge is on row 528, the topmast's head, where its shrouds meet under the cap, on row 192, and the head of the pole above it on row 47. Under sail Hollar draws that pole bare, with a pennant on it and no yard crossed; his second fluyt plate of 1647 (the fluyts at anchor, 'vulgo VLIETEN', build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant masts with yards crossed on the fore and the main. So the pole is built as the topgallant mast, and the three tiers stand. The pole's head is drawn against the plate's top border line (row 43), so it may stand a few pixels higher than read. The tops and caps are read to about 5 px, 0.006 of the span. The datum is the masts' feet, as on the East Indiaman and the slave ship (r322). CONTESTED datum: the plate's own spacing of the main between the fore and the mizzen (0.539 of the span) differs from this hull's stations (0.606), and Hollar draws the ship a little from forward of the beam, so the horizontal span is foreshortened and these heights may be a few per cent high. Until r329 the mast was Steel's 1794 proportions (lower mast a share of Steel's main, topmast 0.60, topgallant 0.50), a rule for warships 150 years later; the lower tops stood 4.4 to 5.7 m higher. The hull is dated 1620 and the plate 1647.",
-            "hoistProvenance": "UNREAD, r324 (0y¹⁶⁶): each yard above the course is set atrip, at 0.88 of the section it hoists on, the class figure (Falconer 1769, ATRIP: 'The top-sails are said to be atrip, when they are hoisted up to the top-mast-heads'), and no plate of this hull's set sails has been read for it.",
+            "hoistProvenance": "PLATE READ, r331 (0y¹⁷⁶): the main topsail yard, read off Wenceslaus Hollar, 'Navis Mercatoria Hollandica, vulgo VLIET', etching, 1647 (Wikimedia Commons File:Wenceslas Hollar - A Flute (State 2).jpg, read at the 1920 px thumbnail, build/staging/r328/dl/hollar-flute.jpg, about 36 px/m at the masts, bow at the left). The yard is the head edge of the set topsail, traced as the centroid of the dark pixels on each of 27 columns (1128-1206) and fitted as a straight line (rms 0.88 px). It crosses the mast's axis, the line from the foot to the cap, at column 1172.5, row 270.1. The foot is row 933, the waist rail, where the mast comes out from behind it. The waist deck is hidden behind the bulwark and may lie up to 30 px lower, at row 963; read from there the share is 0.8987, 0.004 more, inside the bound. The head of the topmast is row 192, the topmast's cap at column 1176. The yard stands 0.8946 of the height from the foot to the topmast's head. The yard slopes 0.4167 px per column on the plate, because it is braced round and the ship is seen from a little forward of the beam; the model hangs it level at the crossing. A 3 px error in the yard's row is 0.005 of the 741 px span, and the bound is 0.01. The foot and head rows are r329's mast read (mastHeightsRead). Until r331 the yard was set at the class 0.88 of its section, 0.944 of this height. The topgallant yard is not read: this plate crosses no yard on the topgallant mast. Above the topmast's cap the pole is bare and carries a pennant. Hollar's plate of fluyts at anchor (1647, build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant yards crossed, but its sails are furled, so it does not show where a set yard is hoisted. The yard stays at the class 0.88 of its section.",
             "topmastTopProvenance": "UNREAD, r325 (0y¹⁶⁷): the topmast carries crosstrees at its head, the class fitting, and no plate of this hull's topmasts has been read for a top. Before about 1700 a topmast commonly carried a small round top under its cap (Vasa's rig diagram draws one on the fore and the main); whether this hull's did is not read.",
             "mastHeightsM": {
               "top": 11.22,
@@ -2912,6 +2940,34 @@
                 "rmsPx": 1.4
               },
               "script": "build/staging/r330/r330_trace.py, build/staging/r330/r330_edit.py"
+            },
+            "hoistRead": {
+              "topmast": {
+                "ofFootToHead": 0.8946,
+                "rows": {
+                  "foot": 933,
+                  "head": 192,
+                  "yard": 270.1
+                },
+                "fit": {
+                  "col": 1172.5,
+                  "slope": -0.4167,
+                  "icpt": 758.68,
+                  "rmsPx": 0.88,
+                  "n": 27,
+                  "cols": [
+                    1128,
+                    1206
+                  ]
+                },
+                "spanPx": 741
+              },
+              "topgallantMast": {
+                "unread": "UNREAD, r331: this plate crosses no yard on the topgallant mast. Above the topmast's cap the pole is bare and carries a pennant. Hollar's plate of fluyts at anchor (1647, build/staging/r328/dl/fleuten-1647.jpg, 644 px wide) draws topgallant yards crossed, but its sails are furled, so it does not show where a set yard is hoisted. The yard stays at the class 0.88 of its section."
+              },
+              "plate": "build/staging/r328/dl/hollar-flute.jpg (Hollar 1647, 1920 px)",
+              "boundPm": 0.01,
+              "script": "build/staging/r331/r331_trace.py, r331_edit.py"
             }
           },
           {

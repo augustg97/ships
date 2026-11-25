@@ -1,0 +1,54 @@
+[
+ {
+  "mast": 0,
+  "section": "topmast",
+  "from": "record",
+  "frac": 0.9115,
+  "base": 3.577,
+  "head": 20.677,
+  "setY": 19.164,
+  "overFoot": 15.587,
+  "headOverFoot": 17.1,
+  "share": 0.9115,
+  "axisY": 19.164
+ },
+ {
+  "mast": 0,
+  "section": "topgallantMast",
+  "from": "class",
+  "frac": null,
+  "base": 3.577,
+  "head": 24.107,
+  "setY": 23.582,
+  "overFoot": 20.005,
+  "headOverFoot": 20.53,
+  "share": 0.9744,
+  "axisY": 23.582
+ },
+ {
+  "mast": 1,
+  "section": "topmast",
+  "from": "record",
+  "frac": 0.8946,
+  "base": 3.002,
+  "head": 23.532,
+  "setY": 21.368,
+  "overFoot": 18.366,
+  "headOverFoot": 20.53,
+  "share": 0.8946,
+  "axisY": 21.368
+ },
+ {
+  "mast": 1,
+  "section": "topgallantMast",
+  "from": "class",
+  "frac": null,
+  "base": 3.002,
+  "head": 27.552,
+  "setY": 26.932,
+  "overFoot": 23.93,
+  "headOverFoot": 24.55,
+  "share": 0.9747,
+  "axisY": 26.932
+ }
+]
