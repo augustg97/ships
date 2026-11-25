@@ -28724,3 +28724,12 @@ The card check (rule 5) went in after the proofs. The final audit with it finds 
 **r315 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r315` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁴⁹), the bare crossjack. Else (0y¹⁵⁰).**
 
 **Live stamp: docs/index.html carries data-version 1795570472 at the build.**
+
+**Live stamp VERIFIED: 1795570472 on https://augustg97.github.io/ships/index.html at 17:36:02 PST, about 80 s after the push. The published `audit-hulls.js` carries A-YARD-LOWERED, and the published `js/shipwright.js` carries the lowered-yards clause. First paint is 8.51 MB against the 8.6 MB budget.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** Captured by `run-resume.sh` on the final tree, runs 1 to 4. Runs 1 to 3 each died on the 150 s FRAME_READY wait at a Sea frame (run 1 at `aboard-off`), and the next run picked up where it stopped; run 4 finished at 18:23. Scored with r277's offline scorer (`r314_scoreall.sh`, `score-all.out`, first copy of each frame), against the baselines with `shipwright-furled` already accepted.
+
+- `shipwright-furled`: accepted in the close (10.076% / 5.847 against r313's baseline), and 0.000% against its new one.
+- The other 64 frames are inside the gate, as predicted. The largest is `passage-sahul` at 0.047%, then `shipwright-ahead` at 0.038% and `ship-yamato` at 0.033%, the same figures as in r313. The set build did not change, so every set Shipwright frame scores as it did before this round.
+
+No frame is left unscored for r315.
