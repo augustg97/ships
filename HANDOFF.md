@@ -29539,7 +29539,7 @@ On the plate the fore course yard is level. The main course yard is drawn cocked
 **WHAT IS STILL OPEN.**
 
 - **(0y¹⁶⁵) is closed** for the East Indiaman and the slave ship. Every course on both hulls is now read off Vasa's plate.
-- **(0y¹⁶⁶), NEW: the topsail yards on a Vasa mast.** The topsail yard hangs at the segment rule, 0.88 of the topmast. Read where Vasa's fore and main topsail yards cross their masts (below the topmast caps, which r322 read at rows 330 and 298) and compare with the built height, before deciding whether a record field is needed.
+- **(0y¹⁶⁶), NEW: the topsail yards on a Vasa mast.** The topsail yard hangs at the segment rule, 0.88 of the topmast. A first read was made off `upper-fore.png` and `upper-main.png` (2x crops, `r323_crop_top.py`), each row to about 3 px: the fore topsail yard crosses the mast at row 396, under the fore topmast's top at 367 (cap 330); the main topsail yard, drawn cocked like the main course, crosses the raked mast at row 381, under the main topmast's top at 338 (cap 298). As shares of the span from the lower top to the topmast's top, that is (683 − 396) / 316 = 0.908 on the fore and (682 − 381) / 344 = 0.875 on the main. Compare these with the built yards in the same terms, by a probe, before deciding whether a record field is needed.
 - **(0y¹⁶³)**, the fluyt's and the carrack's mizzen topsail. Once it is decided, read the fluyt's three masts off the same plate.
 - `ship-treasure` captures the globe in a full run (r318, r319); r320's next step stands. **(0y¹⁶¹)**, **(0y¹⁶²)**, **(0y¹⁵⁹)**, **(0y¹⁶⁰)**, **(0y¹⁵³)**, **(0y¹⁵⁵)**, **(0y¹⁵¹)**, and **(0y¹⁴⁵)** to **(0y⁹⁴)** and the named residuals stand as r294 to r322 list them.
 
@@ -29548,3 +29548,16 @@ On the plate the fore course yard is level. The main course yard is drawn cocked
 **r324 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r324` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁶⁶) off the same Vasa drawing.**
 
 **Live stamp: docs/index.html carries data-version 1795612505 at the build.**
+
+**Live stamp VERIFIED: 1795612505 on https://augustg97.github.io/ships/index.html at 05:17:46 PST, about two minutes after the push. The published `vessels.json` carries `ofDeckToTop` 0.815 and 0.788 on the four masts.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The full check was launched at 05:14 and captured 34 frames. It died at frame 35, `aboard-carrier`, on the 150 s ready wait (05:37), as r320's to r322's did. The 34 were kept (`run1/`, `score-run1.out`). The 31 it never reached were captured one process per frame (`r323_resume.sh`, `resume.out`, `run2/`, `score-run2.out`) with no failure, and three frames that scored as capture faults were captured again alone (`run3/`, `score-run3.out`). Every frame was scored with r277's offline scorer.
+
+- **ACCEPTED, predicted** (FRAME-LOG.md):
+  - `ship-slave-ship` 0.481% / 0.172: her fore and main course yards rise to just under the tops (`pair-ship-slave-ship-frame.png`). The truck is unchanged, so the frame is not reframed.
+  - `ship-galley` 0.117% / 0.046: the slave ship's fore course at the right edge (`pair-ship-galley.png`).
+- **Predicted, and did not move:** `shipwright` 0.003%, `shipwright-ahead` 0.003%, `shipwright-astern` 0.000%, `shipwright-furled` 0.044%, `shipwright-hounds` 0.000%, `ship-galleass` 0.005%, `ship-carrack` 0.000%, `globe-default` 0.005%. The East Indiaman's rig reaches the 74's frames only above her courses, and the slave ship sits outside the galleass's frame below her tops.
+- **Capture faults, inside the gate when captured again alone:** `aboard-coast` 17.990% in run1 (0.012% alone), `aboard-carrier` 16.629% in run2 (0.012%), `board-salamis` 33.214% in run2 (0.000%). `aboard-coast` 17.990% and `board-salamis` 33.214% are the same numbers r322 and r312 recorded, to the third decimal. In r322 and r312 a second browser of the round was running beside the capture. This round no browser of its own ran beside the ratchet: the witnesses ran before it, and only the user's Google Chrome was open. A second browser is therefore not the whole cause. These two frames fail the same way under a load of 7–8, including in a one-frame process, and a later capture alone passes. None of the three was accepted.
+- **Inside the gate:** the other 60.
+- The run did not reach its end, so the harness's console-error list was not printed.
+- **No frames are left unscored for r324.**
