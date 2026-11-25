@@ -29257,3 +29257,12 @@ The full ratchet was launched on the final tree at 00:36:06, at load 8–12.
 **r320 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r320` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁵⁷).**
 
 **Live stamp: docs/index.html carries data-version 1795595769 at the build.**
+
+**Live stamp VERIFIED: 1795595769 on https://augustg97.github.io/ships/index.html at 00:38:55 PST, about 90 s after the push. The published `js/hull.js` carries the outlicker, and the published `audit-hulls.js` carries A-LATEEN-SHEET ('a lateen clew sheeted to nothing'). First paint is 8.52 MB against the 8.6 MB budget.**
+
+**THE FRAMES (receipt): 57 OF 65 SCORED, 8 LEFT FOR r320.** The full check ran from 00:36 at load 11–16, about 40 s a frame. It was stopped at 01:13 to close the round, with 57 frames captured. They were copied to `run1/` first and scored with r277's offline scorer (`score-run1.out`).
+
+- **ACCEPTED** (FRAME-LOG.md): `action` 0.108% / 0.036 and `action-gravelines` 0.055% / 0.017, the Armada's carracks, each with its lateen foot lifted over the sterncastle rail and an outlicker and sheet (`pair-action.png`); `map-floor` 0.124% / 0.053, Sousa's 1590 fleet with the same change at token scale. These are the predicted class of change, on frames the prediction did not name.
+- **`ship-treasure` 90.829%: capture fault, NOT accepted.** The full run captured the globe in place of the Shipwright, to the same figure as r318. Captured alone at the start of this round, it scored 0.000% (`score-backlog.out`). The fault repeats at the same place in a full run, so it is not random. **r320: find why the full run lands on the globe at this frame** (the frame before it, `aboard-wyoming`, is a Sea view).
+- **Inside the gate:** the other 53, including the predicted `ship-dhow` 0.016%, `ship-galley` 0.046%, `ship-galleass` 0.012%, `ship-panokseon` 0.006%, `ship-sekibune` 0.000%, `shipwright` 0.003% and its four companions. The lateen sheets are thin ropes at these cameras.
+- **UNSCORED, for r320:** `wake-plan`, `ship-ever-given`, `sea-ever-given`, `passage-sahul`, `sea-dugout-floor`, `sea-canoe-floor`, `ship-slave-ship`, `ship-carrack`. The last two are this round's predicted movers. Score them first with `r319_capture.py` (ONLY=…) and r277's scorer.
