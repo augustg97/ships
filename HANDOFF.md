@@ -29399,3 +29399,12 @@ The full ratchet was launched on the final tree at 01:39:18, at load 7–8, besi
 **r322 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r322` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁶⁴) off the same Vasa drawing.**
 
 **Live stamp: docs/index.html carries data-version 1795604263 at the build.**
+
+**Live stamp VERIFIED: 1795604263 on https://augustg97.github.io/ships/index.html at 03:00:58 PST, about 100 s after the push. The published `audit-hulls.js` carries 'a lateen yard off its read', and the published `vessels.json` carries `yardOfMastSpacing` on the three hulls.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The full check captured 27 frames and died at frame 28, `aboard-off`, on the 150 s ready wait (03:17), as r320's did; that frame then reached ready alone in its own process. The 27 were kept (`run1/`) and the other 38 were captured one process per frame, predicted movers first (`r321_resume.sh`, `resume.out`, `run2/`), with no failure. Every frame was scored with r277's offline scorer (`score-run1.out`, `score-run2.out`; `s2/` is the first 12 of run2, scored before two of them were accepted).
+
+- **ACCEPTED** (FRAME-LOG.md), all predicted: `ship-slave-ship` 0.733% / 0.230, her lateen lower and flatter, and the outlicker gone from her stern (`pair-ship-slave-ship.png`); `shipwright` and `shipwright-ahead` 0.210% / 0.070 each, the East Indiaman's lateen at the left edge of the 74's frame, diff bbox x 665–838, y 673–986 in both (`pair-shipwright.png`, `pair-shipwright-ahead.png`).
+- **Inside the gate:** the other 62. The largest are `passage-sahul` and `action-gravelines` at 0.047%, `ship-galley` 0.046%, `globe-steam` 0.045%, `shipwright-furled` 0.041%. `ship-galleass` 0.001%, `ship-sekibune` 0.000%, `ship-panokseon` 0.006%, `shipwright-astern` 0.006%, `shipwright-hounds` 0.000%: the predicted neighbours that did not move.
+- The run did not reach its end, so the harness's console-error list was not printed, and `ship-treasure` (captured alone here, 0.000%) stays open as r320 wrote it.
+- **No frames are left unscored for r322.**
