@@ -1,0 +1,60 @@
+{
+ "east-indiaman": {
+  "courses": [
+   {
+    "mast": 0,
+    "from": "class",
+    "frac": 0.6,
+    "yardOverFoot": 8.765,
+    "topOverFoot": 13.17,
+    "share": 0.6655
+   },
+   {
+    "mast": 1,
+    "from": "class",
+    "frac": 0.6,
+    "yardOverFoot": 9.008,
+    "topOverFoot": 13.5,
+    "share": 0.6672
+   },
+   {
+    "mast": 2,
+    "from": "record",
+    "frac": 0.7632,
+    "yardOverFoot": 8.481,
+    "topOverFoot": 9.98,
+    "share": 0.8498
+   }
+  ],
+  "sails": []
+ },
+ "slave-ship": {
+  "courses": [
+   {
+    "mast": 0,
+    "from": "class",
+    "frac": 0.6,
+    "yardOverFoot": 5.277,
+    "topOverFoot": 7.93,
+    "share": 0.6655
+   },
+   {
+    "mast": 1,
+    "from": "class",
+    "frac": 0.6,
+    "yardOverFoot": 5.425,
+    "topOverFoot": 8.13,
+    "share": 0.6673
+   },
+   {
+    "mast": 2,
+    "from": "record",
+    "frac": 0.7632,
+    "yardOverFoot": 5.108,
+    "topOverFoot": 6.01,
+    "share": 0.8499
+   }
+  ],
+  "sails": []
+ }
+}
