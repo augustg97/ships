@@ -29481,3 +29481,24 @@ Above the highest cap on every mast Vasa carries a bare staff with no sail on it
 **r323 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r323` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then (0y¹⁶⁵) off the same Vasa drawing.**
 
 **Live stamp: docs/index.html carries data-version 1795608964 at the build.**
+
+**Live stamp VERIFIED: 1795608964 on https://augustg97.github.io/ships/index.html at 04:19:11 PST, about two minutes after the push. The published `audit-hulls.js` carries 'mast heights off their read', and the published `vessels.json` carries `ofForeMizzenSpacing` on the six masts.**
+
+**THE FRAMES (receipt): ALL 65 SCORED.** The full check was launched at 04:08 and captured 53 frames. It died at frame 54, `board-salamis`, on the 150 s ready wait (04:44), as r320's and r321's did, and that frame then reached ready alone in its own process. The 53 were kept (`run1/`, `score-run1.out`). The 12 it never reached, plus six run1 frames that showed capture faults, were captured one process per frame, predicted movers first (`r322_resume.sh`, `resume.out`, `run2/`, `score-run2.out`), with no failure. Every frame was scored with r277's offline scorer.
+
+- **ACCEPTED, predicted** (FRAME-LOG.md):
+  - `ship-slave-ship` 23.277% / 8.210, reframed because her rig is 6.8 m lower (`pair-ship-slave-ship-frame.png`).
+  - `shipwright` 0.605% / 0.266, the East Indiaman's lower rig at the left edge, diff bbox x 696–824 (`pair1-shipwright.png`).
+  - `shipwright-ahead` 0.605% / 0.266, captured alone.
+  - `shipwright-astern` 0.051% / 0.034, left edge.
+  - `ship-galley` 0.676% / 0.304, the slave ship in the right half.
+  - `ship-galleass` 0.307% / 0.118, the slave ship at the left edge.
+- **ACCEPTED, not predicted:** `globe-default` 0.072% / 0.040. The 1590 globe draws the Middle Passage fleet as slave-ship models, and only those markers moved (`crop-globe-diff.png`). The handoff above says no globe frame shows her; that was wrong. Before predicting frames for a vessel change, check which globe eras draw her as a marker.
+- **Capture faults in run1, inside the gate when captured alone:**
+  - `shipwright-ahead` 88.987%: run1 captured the globe (`pair1-shipwright-ahead.png`).
+  - `aboard` 13.263% (alone 0.000%), `aboard-coast` 17.990% (0.012%), `globe-default` 11.141% and `globe-modern` 10.232% (0.036%). These were all captured while this round's audit and witness browser ran beside the ratchet (04:08–04:15). The voyage ship stood at another position and course (`early-pair-aboard.png`: 50°39′ N, course 258° in the baseline; 49°55′ N, 274° in run1). Run the witnesses before the ratchet, or after it.
+  - `aboard-yamato` 5.812% (alone 0.020%).
+  None of these was accepted.
+- **Inside the gate:** the other 57. `ship-carrack`, a predicted neighbour, was 0.000% alone. `ship-sekibune` 0.000% and `ship-panokseon` 0.006% did not move.
+- The run did not reach its end, so the harness's console-error list was not printed.
+- **No frames are left unscored for r323.**
