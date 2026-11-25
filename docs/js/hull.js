@@ -1504,6 +1504,12 @@ const { top, tg } = squareStackOf(mk, lower);
 let y = base;
 let capY = base;
 const mastYards = [];
+const mastDiscs = [];
+if (FINE && mk.rig === 'square' && (mk.only ? Math.min(mk.only, 3) : 3) >= 3 && mk.topmastTop
+&& typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0) {
+const tmH = base + lower * 0.88 + top, yT = base + mk.topmastTop.ofFootToHead * (tmH - base);
+mastDiscs.push({ x: mxA(yT), y: yT, r: B * 0.20 * mk.topmastTop.ofLowerTop, year: S.year || 0, mastR: null, name: 'Topmast top' });
+}
 const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
 let lastYardTop = -Infinity;
@@ -1651,8 +1657,10 @@ const sqW = yardLen * 0.96, sqH = drop * 0.97;
 const reef = rbands.length ? { bands: rbands, bandM: RF.bandM || 0.30, pitchM: RF.pitchM || 0.75,
 n: Math.max(2, Math.round(sqW / (RF.pitchM || 0.75))), tier: listName || kind, mast: mi,
 from: 'record: masts[].reefs.' + (listName || kind) + (RF.bandM ? '' : '; the band\'s width the class 0.30 m') + (RF.pitchM ? '' : '; the points\' pitch the class 0.75 m') } : null;
-const sq = makeSail(yX, yY, sqW, sqH, canvas, group, 'square', TRIM, reef);
+const sq = makeSail(yX, yY, sqW, sqH, canvas, group, 'square', TRIM, reef, mastDiscs);
 sq.userData.mastX = x; sq.userData.yardY = yY;
+sq.userData.mast = mi; sq.userData.yardR = slingsD / 2;
+mastYards[mastYards.length - 1].sail = sq;
 sails.push(sq);
 if (reef) {
 const ang = Math.PI / 2 + TRIM, ca = Math.cos(ang), sa = Math.sin(ang);
@@ -1868,7 +1876,9 @@ group.add(tag(cg, 'cross'));
 } else {
 const tp = buildTop(topR, mats.woodPale, headR, S.year);
 tp.position.set(mxA(y + seg * 0.90), y + seg * 0.90, 0);
+tp.userData.mast = mi;
 group.add(tp);
+mastDiscs.push({ x: mxA(y + seg * 0.90), y: y + seg * 0.90, r: topR, year: S.year || 0, mastR: headR, name: 'Top' });
 }
 if (mk.only !== 1) {
 const chH = seg * 0.085, chD = radii[0] * 2.1, chW = radii[0] * 0.5;
@@ -2087,7 +2097,8 @@ const xw = (uu - 0.5) * width * (1 - 0.022 * arch * 0.55);
 const footY = -height + 0.085 * height * arch, y = footY * v;
 const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (uu - 0.40)));
 const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
-const zb = Math.max(0, chord) * depth + proud;
+const zb = Math.max(0, chord) * depth + proud
++ (yd.sail && yd.sail.userData.drapeAt ? yd.sail.userData.drapeAt(uu, v) : 0);
 return V3(yd.cx - xw * sT - zb * cT, yd.yy + y, -xw * cT + zb * sT);
 };
 const L0 = (segHeads[0] !== undefined ? segHeads[0] : capY) - base;
@@ -3277,18 +3288,15 @@ group.add(tag(cm, 'coil', 'Coils',
 }
 const SAIL_VERT = SHADERS['SAIL_VERT.vert'];
 const SAIL_FRAG = SHADERS['SAIL_FRAG.frag'];
-function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {
+function makeSail(x, yTop, width, height, mat, group, kind, trim, reef, discs) {
 const NW = 28, NH = 20;
 const pos = [], uvs = [], idx = [];
 const roach = kind === 'square' ? 0.085 : 0.03;
 const hollow = 0.022;
-for (let i = 0; i <= NW; i++) {
-const u = i / NW;
+const cloth0 = (u, v) => {
 const arch = Math.sin(Math.PI * u);
 const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
 const footY = -height + roach * height * arch;
-for (let j = 0; j <= NH; j++) {
-const v = j / NH;
 const y = footY * v;
 const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
 const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
@@ -3301,7 +3309,73 @@ const crease = Math.sin((u * 9.0 + v * 5.0) * Math.PI) * corner * width * 0.016;
 const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
 const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
 z += crease + roband + slack;
-pos.push(xw, y, -z);
+return [xw, y, z];
+};
+const drapes = [];
+if (kind === 'square' && Array.isArray(discs) && discs.length) {
+const CLR = 0.04, ang = Math.PI / 2 + (trim || 0), cA = Math.cos(ang), sA = Math.sin(ang);
+const NS = 240;
+for (const d of discs) {
+const dx = d.x - x, dy = d.y - yTop;
+const pts = topOutline(d.r, d.year, d.mastR).map(([px, py, pz, h0, h1]) => {
+const hx = dx + px, hz = pz;
+return { lx: hx * cA - hz * sA, lz: hx * sA + hz * cA, y0: dy + h0, y1: dy + h1, rho: CLR + py };
+}).filter(p => p.y0 <= 0 && p.y1 >= -height);
+if (!pts.length) continue;
+const P = new Float64Array(NS + 1), VA = new Float64Array(NS + 1).fill(1), VB = new Float64Array(NS + 1), X = new Float64Array(NS + 1);
+let any = 0;
+const R = d.r;
+for (let k = 0; k <= NS; k++) {
+const u = k / NS, xw = cloth0(u, 0)[0], footY = cloth0(u, 1)[1];
+X[k] = xw;
+let need = 0;
+for (const p of pts) {
+const q = xw - p.lx;
+if (Math.abs(q) >= p.rho) continue;
+const va = Math.max(0, p.y1 / footY - 1 / NH), vb = Math.min(1, p.y0 / footY + 1 / NH);
+if (vb <= va) continue;
+if (va < VA[k]) VA[k] = va; if (vb > VB[k]) VB[k] = vb;
+const zFront = p.lz - Math.sqrt(p.rho * p.rho - q * q);
+for (let t = 0; t <= 4; t++) {
+const v = va + (vb - va) * t / 4;
+need = Math.max(need, -cloth0(u, v)[2] - zFront);
+}
+}
+P[k] = need; if (need > any) any = need;
+}
+let last = -1;
+for (let k = 0; k <= NS; k++) if (VB[k] > VA[k]) last = k; else if (last >= 0) { VA[k] = VA[last]; VB[k] = VB[last]; }
+last = -1;
+for (let k = NS; k >= 0; k--) if (VB[k] > VA[k]) last = k; else if (last >= 0) { VA[k] = VA[last]; VB[k] = VB[last]; }
+if (!(any > 0)) continue;
+const Ps = new Float64Array(NS + 1);
+for (let k = 0; k <= NS; k++) {
+let m = 0;
+for (let k2 = 0; k2 <= NS; k2++) if (P[k2] > 0) m = Math.max(m, P[k2] * Math.max(0, 1 - Math.abs(X[k] - X[k2]) / R));
+Ps[k] = m;
+}
+drapes.push({ Ps, VA, VB, d, push: any });
+}
+}
+const drapeAt = (u, v) => {
+if (!drapes.length) return 0;
+let D = 0;
+const f = Math.min(1, Math.max(0, u)) * 240, k = Math.min(239, Math.floor(f)), w = f - k;
+for (const dr of drapes) {
+const p = dr.Ps[k] * (1 - w) + dr.Ps[k + 1] * w;
+if (!(p > 0)) continue;
+const va = Math.max(dr.VA[k], 1 / NH), vb = dr.VB[k];
+const T = v < va ? Math.sin(Math.PI / 2 * v / va) : v > vb ? Math.sin(Math.PI / 2 * (1 - v) / (1 - vb)) : 1;
+D = Math.max(D, p * Math.max(0, T));
+}
+return D;
+};
+for (let i = 0; i <= NW; i++) {
+const u = i / NW;
+for (let j = 0; j <= NH; j++) {
+const v = j / NH;
+const [xw, y, z] = cloth0(u, v);
+pos.push(xw, y, -(z + drapeAt(u, v)));
 uvs.push(u, v);
 }
 }
@@ -3312,22 +3386,8 @@ const a = i * row + j;
 idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
 }
 const surface = (u, v) => {
-const arch = Math.sin(Math.PI * u);
-const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
-const footY = -height + roach * height * arch;
-const y = footY * v;
-const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
-const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
-let z = Math.max(0, chord) * depth;
-const cx = Math.min(u, 1 - u) * 2.0;
-const cy = v;
-const corner = Math.exp(-cx * 3.4) * Math.exp(-Math.abs(cy - 1.0) * 2.2)
-+ Math.exp(-cx * 3.4) * Math.exp(-cy * 3.0);
-const crease = Math.sin((u * 9.0 + v * 5.0) * Math.PI) * corner * width * 0.016;
-const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
-const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
-z += crease + roband + slack;
-return [xw, y, -z];
+const [xw, y, z] = cloth0(u, v);
+return [xw, y, -(z + drapeAt(u, v))];
 };
 const g = new THREE.BufferGeometry();
 g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -3345,6 +3405,9 @@ uSailM: { value: new THREE.Vector2(width, height) } },
 });
 const m = new THREE.Mesh(g, sailMat);
 m.userData.surface = surface; m.userData.grid = { NW, NH };
+m.userData.drapeAt = drapes.length ? drapeAt : null;
+m.userData.drape = drapes.map(dr => ({ name: dr.d.name, y: +dr.d.y.toFixed(3), r: +dr.d.r.toFixed(3), pushM: +dr.push.toFixed(3),
+clearM: 0.04, from: 'class: the cloth bears on the top, 4 cm off its outline' }));
 m.userData.reef = rb.length ? { bands: rb, n: reef.n, pitchM: reef.pitchM, bandM: reef.bandM, widthM: +width.toFixed(3), dropM: +height.toFixed(3), tier: reef.tier, mast: reef.mast, from: reef.from } : null;
 m.position.set(x, yTop, 0);
 if (kind === 'square') m.rotation.y = Math.PI / 2 + (trim || 0);
@@ -5904,6 +5967,34 @@ group.add(tag(fall, 'boat', 'Davit fall'));
 }
 }
 }
+}
+function topOutline(r, year, mastR) {
+const zT = mastR ? mastR + r * 0.055 : r * 0.13, thick = r * 0.09, out = [];
+const step = Math.max(0.03, r * 0.04), rho = step * 0.6;
+const edge = (x0, z0, x1, z1, h0, h1) => {
+const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / step));
+for (let i = 0; i <= n; i++) out.push([x0 + (x1 - x0) * i / n, rho, z0 + (z1 - z0) * i / n, h0, h1]);
+};
+const walled = (year || 0) < 1710;
+const hTop = walled ? thick / 2 + r * 0.5 : thick / 2;
+const n = Math.ceil(2 * Math.PI * r / step);
+for (let i = 0; i < n; i++) {
+const a = 2 * Math.PI * i / n, px = r * Math.cos(a), pz = r * Math.sin(a);
+if (!walled && px > 0) continue;
+out.push([px, rho, pz, -thick / 2, hTop]);
+}
+if (!walled) { edge(0, -r, r * 0.70, -r, -thick / 2, hTop); edge(0, r, r * 0.70, r, -thick / 2, hTop); edge(r * 0.70, -r, r * 0.70, r, -thick / 2, hTop); }
+for (const sz of [-1, 1]) {
+const z0 = sz * zT - r * 0.055, z1 = sz * zT + r * 0.055, h0 = -r * 0.22, h1 = -r * 0.09;
+edge(-r * 0.75, z0, r * 0.75, z0, h0, h1); edge(-r * 0.75, z1, r * 0.75, z1, h0, h1);
+edge(-r * 0.75, z0, -r * 0.75, z1, h0, h1); edge(r * 0.75, z0, r * 0.75, z1, h0, h1);
+}
+for (const sx of [-1, 1]) {
+const x0 = sx * r * 0.40 - r * 0.07, x1 = sx * r * 0.40 + r * 0.07, h0 = -r * 0.125, h1 = -r * 0.025;
+edge(x0, -r * 0.95, x0, r * 0.95, h0, h1); edge(x1, -r * 0.95, x1, r * 0.95, h0, h1);
+edge(x0, -r * 0.95, x1, -r * 0.95, h0, h1); edge(x0, r * 0.95, x1, r * 0.95, h0, h1);
+}
+return out;
 }
 function buildTop(r, mat, mastR, year) {
 const g = new THREE.Group();

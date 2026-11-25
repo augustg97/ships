@@ -2621,6 +2621,16 @@ function buildRig(S, group, mats, FINE, FURLED) {
     /* every yard this mast crosses, recorded as built — the running rigging below is led
        from these, the braces' own rule: rope goes to where the spar actually is */
     const mastYards = [];
+    /* r326 (0y¹⁶⁸): every top this mast carries, in hull space, so each square sail set over one can be cut to
+       bear on its forward rim (makeSail). The lower top is entered where it is built; the topmast top is built
+       in the standing rigging below, after the sails, so its disc is entered here from the same record and the
+       same expressions (the r325 block: tmHeadY, ttY, ttR = platR x ofLowerTop). */
+    const mastDiscs = [];
+    if (FINE && mk.rig === 'square' && (mk.only ? Math.min(mk.only, 3) : 3) >= 3 && mk.topmastTop
+        && typeof mk.topmastTop.ofFootToHead === 'number' && mk.topmastTop.ofLowerTop > 0) {
+      const tmH = base + lower * 0.88 + top, yT = base + mk.topmastTop.ofFootToHead * (tmH - base);
+      mastDiscs.push({ x: mxA(yT), y: yT, r: B * 0.20 * mk.topmastTop.ofLowerTop, year: S.year || 0, mastR: null, name: 'Topmast top' });
+    }
     /* the HEAD of each drawn segment, by section — the sheave a hoisting yard's tie runs
        over is in the head of its OWN mast section (Falconer's encornail: "the sheave-hole
        in a top-mast-head, through which the top-sail-tye is reeved"), so the running gear
@@ -2933,10 +2943,12 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const reef = rbands.length ? { bands: rbands, bandM: RF.bandM || 0.30, pitchM: RF.pitchM || 0.75,
                                        n: Math.max(2, Math.round(sqW / (RF.pitchM || 0.75))), tier: listName || kind, mast: mi,
                                        from: 'record: masts[].reefs.' + (listName || kind) + (RF.bandM ? '' : '; the band\'s width the class 0.30 m') + (RF.pitchM ? '' : '; the points\' pitch the class 0.75 m') } : null;
-        const sq = makeSail(yX, yY, sqW, sqH, canvas, group, 'square', TRIM, reef);
+        const sq = makeSail(yX, yY, sqW, sqH, canvas, group, 'square', TRIM, reef, mastDiscs);
         /* the cloth names its mast and its yard's height, so the audit can tell its own
            mast's axis at the head row (where the yard is slung) from a spar through it */
         sq.userData.mastX = x; sq.userData.yardY = yY;
+        sq.userData.mast = mi; sq.userData.yardR = slingsD / 2;   // r326: the head is laced round the yard to its diameter
+        mastYards[mastYards.length - 1].sail = sq;                // r326: the gear's sailPt reads this cloth's drape
         sails.push(sq);
         if (reef) {
           /* ── THE REEF POINTS (r284, 0y⁸⁹) ── one line rove through each eyelet of the band, a tail
@@ -3309,7 +3321,9 @@ function buildRig(S, group, mats, FINE, FURLED) {
           /* r256: on the axis at its OWN height — it stood at the head's x, 0.1·seg·sin(rake)
              off the pole at the hounds on every raked mast */
           tp.position.set(mxA(y + seg * 0.90), y + seg * 0.90, 0);
+          tp.userData.mast = mi;
           group.add(tp);
+          mastDiscs.push({ x: mxA(y + seg * 0.90), y: y + seg * 0.90, r: topR, year: S.year || 0, mastR: headR, name: 'Top' });
         }
         /* ── THE CHEEKS AT THE HOUNDS ──────────────────────────────────────────────
            The top does not float. Bolted to either side of the masthead are two knees
@@ -3781,7 +3795,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
             const footY = -height + 0.085 * height * arch, y = footY * v;
             const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (uu - 0.40)));
             const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
-            const zb = Math.max(0, chord) * depth + proud;
+            const zb = Math.max(0, chord) * depth + proud
+                     + (yd.sail && yd.sail.userData.drapeAt ? yd.sail.userData.drapeAt(uu, v) : 0);   // r326: over a top's rim
             return V3(yd.cx - xw * sT - zb * cT, yd.yy + y, -xw * cT + zb * sT);
           };
           const L0 = (segHeads[0] !== undefined ? segHeads[0] : capY) - base;
@@ -5841,7 +5856,7 @@ const SAIL_FRAG = SHADERS['SAIL_FRAG.frag'];
 
 /* A sail is a bellied surface, not a flat quad: it takes the shape the wind puts in it, and
    that curve is most of what makes a ship under sail look alive rather than papery. */
-function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {   // r284 (0y⁸⁹): reef = the tier's reef bands, or null
+function makeSail(x, yTop, width, height, mat, group, kind, trim, reef, discs) {   // r284 (0y⁸⁹): reef = the tier's reef bands, or null; r326 (0y¹⁶⁸): discs = the tops on its mast
   /* ── A SAIL IS NOT A RECTANGLE WITH A BULGE IN IT ────────────────────────────────────
      The first version was a PlaneGeometry with a symmetric hump pushed out of the middle, and
      it read as exactly that: a flat card, bent. Three things are wrong with it, and all three
@@ -5862,82 +5877,9 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {   // r
   const pos = [], uvs = [], idx = [];
   const roach = kind === 'square' ? 0.085 : 0.03;     // the foot's upward cut
   const hollow = 0.022;                                // the leeches' inward cut
-  for (let i = 0; i <= NW; i++) {
-    const u = i / NW;                                  // 0 = one leech, 1 = the other
-    const arch = Math.sin(Math.PI * u);
-    /* ⚠ `hollow` was declared, documented, and multiplied by 0.0 in both places it was used —
-       wired but unset, the same class as `shellFirst`. The leeches of a square sail ARE cut
-       hollow so the cloth does not curl and chafe on the shrouds, and it is visible: the two
-       side edges bow inward instead of running dead straight. */
-    const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
-    const footY = -height + roach * height * arch;     // the roach lifts the middle of the foot
-    for (let j = 0; j <= NH; j++) {
-      const v = j / NH;                                // 0 = head, 1 = foot
-      const y = footY * v;                               // (the second `* 0.0` term went with it)
-      /* draft: peak 40% aft of the luff, growing from head to foot */
-      const chord = Math.pow(arch, 0.72) * (1.0 + 0.30 * Math.cos(Math.PI * (u - 0.40)));
-      const depth = width * 0.115 * (0.35 + 0.65 * Math.pow(v, 0.75));
-      /* ⚠ AND IT BELLIES FORWARD, NOT AFT — every square sail on every ship had this
-         backwards. The belly was clamped to local +z, and `m.rotation.y = PI/2` maps local +z
-         onto hull +x, which this file's own comments define as AFT (line ~964, "+x is AFT";
-         line ~3132, "bow at -x"). So the canvas sat permanently abaft its yard and you could
-         see the masts standing in front of the sails from ahead.
-         A square sail bellies to LEEWARD. A square-rigger's working condition is the wind
-         abaft the beam — that is the whole point of the rig — so the cloth sets FORWARD of
-         the yard and the mast, pressing away from them. Aft of the mast is what a sail looks
-         like when it is aback: caught on the wrong side, driving the ship astern. It is the
-         one sail attitude that means the ship is in trouble, and the fleet was wearing it. */
-      let z = Math.max(0, chord) * depth;
-
-      /* ── WHAT MAKES CLOTH LOOK LIKE CLOTH ─────────────────────────────────────────
-         A sail is not a smooth shell. It is a limp sheet held at a few points, and every
-         one of those points shows.
-
-         WRINKLES RADIATE FROM THE CORNERS. All the load in a square sail arrives through
-         the two clews and the bolt rope; the cloth between them is slack, so it creases in
-         fans running diagonally inward from each corner. That fan is the single most
-         recognisable thing about real canvas and no amount of smooth curvature substitutes
-         for it.
-
-         AND IT SAGS BETWEEN ITS FASTENINGS. The head is laced to the yard at intervals, not
-         continuously, so it scallops between the robands — a row of shallow bights along the
-         top edge that says "tied on" rather than "welded to". */
-      const cx = Math.min(u, 1 - u) * 2.0;              // 0 at a leech, 1 amidships
-      const cy = v;
-      const corner = Math.exp(-cx * 3.4) * Math.exp(-Math.abs(cy - 1.0) * 2.2)
-                   + Math.exp(-cx * 3.4) * Math.exp(-cy * 3.0);
-      const crease = Math.sin((u * 9.0 + v * 5.0) * Math.PI) * corner * width * 0.016;
-      const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
-      /* slack cloth low down luffs a little; taut cloth at the head does not */
-      const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
-      z += crease + roband + slack;
-      /* ⚠ MIRRORED HERE, AFTER THE CLOTH DETAIL, AND THAT ORDER IS THE WHOLE CORRECTION.
-         The belly must end up FORWARD — see the note above — but negating it at the top of the
-         loop was wrong twice over: the crease, roband and slack terms are all written as
-         POSITIVE additions to a positive belly, so against a negative one they pushed back
-         toward the plane and through it, and the cloth crumpled through itself. The first
-         attempt produced sails that read as narrow strips instead of full courses.
-         Mirroring the finished vertex keeps every one of those relationships intact and simply
-         reflects the whole sail. computeVertexNormals() below then derives normals from the
-         reflected winding, so the lighting follows it. */
-      pos.push(xw, y, -z);
-      uvs.push(u, v);
-    }
-  }
-  const row = NH + 1;
-  for (let i = 0; i < NW; i++)
-    for (let j = 0; j < NH; j++) {
-      const a = i * row + j;
-      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
-    }
-  /* ── THE CLOTH'S OWN SURFACE, FOR WHATEVER HANGS FROM IT (r284, 0y⁸⁹) ──────────────────
-     The reef points are rove through the cloth, so they must stand ON it — the vertex loop above,
-     term for term and in the same order, so that at a grid station the function returns the
-     vertex itself and between stations the cloth the mesh interpolates. Local coordinates: x
-     across the sail, y down from the head (negative), z the belly, NEGATIVE forward (the loop's
-     mirror). r281's sailPt in the rig builder samples the smooth belly alone; this carries the
-     creases too, which near the leeches stand a hand off the smooth cloth. */
-  const surface = (u, v) => {
+  /* The cloth before any top bears on it: x across, y down from the head, z the belly POSITIVE forward
+     (the vertex loop below mirrors it). The same terms, in the same order, as the loop always used. */
+  const cloth0 = (u, v) => {
     const arch = Math.sin(Math.PI * u);
     const xw = (u - 0.5) * width * (1 - hollow * arch * 0.55);
     const footY = -height + roach * height * arch;
@@ -5953,7 +5895,143 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {   // r
     const roband = Math.sin(u * Math.PI * (NW / 3)) * Math.exp(-v * 14.0) * width * 0.008;
     const slack = Math.sin(u * Math.PI * 5.0 + v * 7.0) * Math.pow(v, 2.0) * width * 0.010;
     z += crease + roband + slack;
-    return [xw, y, -z];
+    return [xw, y, z];
+  };
+  /* ── r326 (0y¹⁶⁸): A SAIL SET OVER A TOP BEARS ON THE TOP'S FORWARD RIM ─────────────────────────
+     A topsail's foot is sheeted to the yard below the top, so the cloth comes down past the top on the fore
+     side of the mast. The model hung that cloth in its own belly alone, about a mast's width forward of the
+     axis, and a top reaches forward of the axis by its whole radius: on 9 hulls 25 tops stood through the sail
+     set over them, by up to 1.9 m (the East Indiaman's mizzen top through her mizzen topsail). A real sail is
+     pressed forward by the wind and lies against the top's forward rim, and where it rubbed it was lined:
+     Falconer 1769, TOP-LINING, a lining on the after part of a topsail to save it from chafing on the top's
+     rim. So the cloth is cut here to stand 4 cm clear of each top on its mast: at each station across the
+     sail it is pushed forward the least that clears every point of the top's own outline at the rows that
+     point spans (topOutline: the platform's rim, the wall, the trestletrees and crosstrees under it, as
+     buildTop draws them); it holds that over the rows the top spans and eases back to its own belly at the
+     head and the foot, where it is made fast to its yards; across, it eases back over one more radius on
+     each side. A sail no top reaches is not touched. */
+  const drapes = [];
+  if (kind === 'square' && Array.isArray(discs) && discs.length) {
+    const CLR = 0.04, ang = Math.PI / 2 + (trim || 0), cA = Math.cos(ang), sA = Math.sin(ang);
+    const NS = 240;
+    for (const d of discs) {
+      const dx = d.x - x, dy = d.y - yTop;
+      /* the top's own outline, point by point (topOutline mirrors buildTop), in the cloth's frame */
+      const pts = topOutline(d.r, d.year, d.mastR).map(([px, py, pz, h0, h1]) => {
+        const hx = dx + px, hz = pz;
+        return { lx: hx * cA - hz * sA, lz: hx * sA + hz * cA, y0: dy + h0, y1: dy + h1, rho: CLR + py };
+      }).filter(p => p.y0 <= 0 && p.y1 >= -height);
+      if (!pts.length) continue;
+      const P = new Float64Array(NS + 1), VA = new Float64Array(NS + 1).fill(1), VB = new Float64Array(NS + 1), X = new Float64Array(NS + 1);
+      let any = 0;
+      const R = d.r;                                        // the ease across: one radius beyond the outermost point
+      for (let k = 0; k <= NS; k++) {
+        const u = k / NS, xw = cloth0(u, 0)[0], footY = cloth0(u, 1)[1];
+        X[k] = xw;
+        let need = 0;
+        for (const p of pts) {
+          const q = xw - p.lx;
+          if (Math.abs(q) >= p.rho) continue;
+          const va = Math.max(0, p.y1 / footY - 1 / NH), vb = Math.min(1, p.y0 / footY + 1 / NH);
+          if (vb <= va) continue;
+          if (va < VA[k]) VA[k] = va; if (vb > VB[k]) VB[k] = vb;
+          const zFront = p.lz - Math.sqrt(p.rho * p.rho - q * q);   // forward NEGATIVE
+          for (let t = 0; t <= 4; t++) {
+            const v = va + (vb - va) * t / 4;
+            need = Math.max(need, -cloth0(u, v)[2] - zFront);
+          }
+        }
+        P[k] = need; if (need > any) any = need;
+      }
+      /* the columns the ease reaches take the band of the nearest column the top touches */
+      let last = -1;
+      for (let k = 0; k <= NS; k++) if (VB[k] > VA[k]) last = k; else if (last >= 0) { VA[k] = VA[last]; VB[k] = VB[last]; }
+      last = -1;
+      for (let k = NS; k >= 0; k--) if (VB[k] > VA[k]) last = k; else if (last >= 0) { VA[k] = VA[last]; VB[k] = VB[last]; }
+      if (!(any > 0)) continue;
+      const Ps = new Float64Array(NS + 1);
+      for (let k = 0; k <= NS; k++) {
+        let m = 0;
+        for (let k2 = 0; k2 <= NS; k2++) if (P[k2] > 0) m = Math.max(m, P[k2] * Math.max(0, 1 - Math.abs(X[k] - X[k2]) / R));
+        Ps[k] = m;
+      }
+      drapes.push({ Ps, VA, VB, d, push: any });
+    }
+  }
+  const drapeAt = (u, v) => {
+    if (!drapes.length) return 0;
+    let D = 0;
+    const f = Math.min(1, Math.max(0, u)) * 240, k = Math.min(239, Math.floor(f)), w = f - k;
+    for (const dr of drapes) {
+      const p = dr.Ps[k] * (1 - w) + dr.Ps[k + 1] * w;
+      if (!(p > 0)) continue;
+      const va = Math.max(dr.VA[k], 1 / NH), vb = dr.VB[k];   // the head row is laced to its yard: the ease starts there even where a top reaches it
+      const T = v < va ? Math.sin(Math.PI / 2 * v / va) : v > vb ? Math.sin(Math.PI / 2 * (1 - v) / (1 - vb)) : 1;
+      D = Math.max(D, p * Math.max(0, T));
+    }
+    return D;
+  };
+  for (let i = 0; i <= NW; i++) {
+    const u = i / NW;                                  // 0 = one leech, 1 = the other
+    for (let j = 0; j <= NH; j++) {
+      const v = j / NH;                                // 0 = head, 1 = foot
+      /* the outline, the draft, the belly forward and the cloth's creases: cloth0 above, and the notes below */
+      const [xw, y, z] = cloth0(u, v);
+      pos.push(xw, y, -(z + drapeAt(u, v)));
+      uvs.push(u, v);
+    }
+  }
+  /* ── THE NOTES THAT STOOD IN THE VERTEX LOOP (moved with r326's cloth0) ── */
+      /* draft: peak 40% aft of the luff, growing from head to foot */
+      /* ⚠ AND IT BELLIES FORWARD, NOT AFT — every square sail on every ship had this
+       backwards. The belly was clamped to local +z, and `m.rotation.y = PI/2` maps local +z
+       onto hull +x, which this file's own comments define as AFT (line ~964, "+x is AFT";
+       line ~3132, "bow at -x"). So the canvas sat permanently abaft its yard and you could
+       see the masts standing in front of the sails from ahead.
+       A square sail bellies to LEEWARD. A square-rigger's working condition is the wind
+       abaft the beam — that is the whole point of the rig — so the cloth sets FORWARD of
+       the yard and the mast, pressing away from them. Aft of the mast is what a sail looks
+       like when it is aback: caught on the wrong side, driving the ship astern. It is the
+       one sail attitude that means the ship is in trouble, and the fleet was wearing it. */
+      /* ── WHAT MAKES CLOTH LOOK LIKE CLOTH ─────────────────────────────────────────
+       A sail is not a smooth shell. It is a limp sheet held at a few points, and every
+       one of those points shows.
+
+       WRINKLES RADIATE FROM THE CORNERS. All the load in a square sail arrives through
+       the two clews and the bolt rope; the cloth between them is slack, so it creases in
+       fans running diagonally inward from each corner. That fan is the single most
+       recognisable thing about real canvas and no amount of smooth curvature substitutes
+       for it.
+
+       AND IT SAGS BETWEEN ITS FASTENINGS. The head is laced to the yard at intervals, not
+       continuously, so it scallops between the robands — a row of shallow bights along the
+       top edge that says "tied on" rather than "welded to". */
+      /* slack cloth low down luffs a little; taut cloth at the head does not */
+      /* ⚠ MIRRORED HERE, AFTER THE CLOTH DETAIL, AND THAT ORDER IS THE WHOLE CORRECTION.
+       The belly must end up FORWARD — see the note above — but negating it at the top of the
+       loop was wrong twice over: the crease, roband and slack terms are all written as
+       POSITIVE additions to a positive belly, so against a negative one they pushed back
+       toward the plane and through it, and the cloth crumpled through itself. The first
+       attempt produced sails that read as narrow strips instead of full courses.
+       Mirroring the finished vertex keeps every one of those relationships intact and simply
+       reflects the whole sail. computeVertexNormals() below then derives normals from the
+       reflected winding, so the lighting follows it. */
+  const row = NH + 1;
+  for (let i = 0; i < NW; i++)
+    for (let j = 0; j < NH; j++) {
+      const a = i * row + j;
+      idx.push(a, a + row, a + 1, a + 1, a + row, a + row + 1);
+    }
+  /* ── THE CLOTH'S OWN SURFACE, FOR WHATEVER HANGS FROM IT (r284, 0y⁸⁹) ──────────────────
+     The reef points are rove through the cloth, so they must stand ON it — the vertex loop above,
+     term for term and in the same order, so that at a grid station the function returns the
+     vertex itself and between stations the cloth the mesh interpolates. Local coordinates: x
+     across the sail, y down from the head (negative), z the belly, NEGATIVE forward (the loop's
+     mirror). r281's sailPt in the rig builder samples the smooth belly alone; this carries the
+     creases too, which near the leeches stand a hand off the smooth cloth. */
+  const surface = (u, v) => {
+    const [xw, y, z] = cloth0(u, v);
+    return [xw, y, -(z + drapeAt(u, v))];
   };
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -5974,7 +6052,10 @@ function makeSail(x, yTop, width, height, mat, group, kind, trim, reef) {   // r
                 uSailM: { value: new THREE.Vector2(width, height) } },
   });
   const m = new THREE.Mesh(g, sailMat);
-  m.userData.surface = surface; m.userData.grid = { NW, NH };   // r284: the cloth's own grid, so a reader can find its head and foot at any column
+  m.userData.surface = surface; m.userData.grid = { NW, NH };
+  m.userData.drapeAt = drapes.length ? drapeAt : null;   // r326: the push off the plain belly, forward, at (u, v)
+  m.userData.drape = drapes.map(dr => ({ name: dr.d.name, y: +dr.d.y.toFixed(3), r: +dr.d.r.toFixed(3), pushM: +dr.push.toFixed(3),
+                                         clearM: 0.04, from: 'class: the cloth bears on the top, 4 cm off its outline' }));   // r284: the cloth's own grid, so a reader can find its head and foot at any column
   m.userData.reef = rb.length ? { bands: rb, n: reef.n, pitchM: reef.pitchM, bandM: reef.bandM, widthM: +width.toFixed(3), dropM: +height.toFixed(3), tier: reef.tier, mast: reef.mast, from: reef.from } : null;
   m.position.set(x, yTop, 0);
   /* ⚠ Square sails hang ACROSS the ship; lug, lateen and gaff sails lie ALONG it. This
@@ -9490,6 +9571,38 @@ function buildFittings(S, group, mats) {
    of 0.85 of its breadth (Steel's three-quarters, eased so the trestletrees' after ends stay
    under the platform) — DERIVED, no record gives this fleet's tops; the round top's bulwark
    at half its radius is read off the Kraeck's proportion, also derived. */
+/* r326 (0y¹⁶⁸): buildTop's outline as points [x, ρ, z, y0, y1] in the top's own frame (+x aft): each point
+   stands for ρ of outline either side, between heights y0 and y1 over the top's centre. Kept beside buildTop
+   so the two change together; makeSail cuts a sail set over a top to clear these. */
+function topOutline(r, year, mastR) {
+  const zT = mastR ? mastR + r * 0.055 : r * 0.13, thick = r * 0.09, out = [];
+  const step = Math.max(0.03, r * 0.04), rho = step * 0.6;
+  const edge = (x0, z0, x1, z1, h0, h1) => {
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / step));
+    for (let i = 0; i <= n; i++) out.push([x0 + (x1 - x0) * i / n, rho, z0 + (z1 - z0) * i / n, h0, h1]);
+  };
+  const walled = (year || 0) < 1710;
+  const hTop = walled ? thick / 2 + r * 0.5 : thick / 2;
+  const n = Math.ceil(2 * Math.PI * r / step);
+  for (let i = 0; i < n; i++) {
+    const a = 2 * Math.PI * i / n, px = r * Math.cos(a), pz = r * Math.sin(a);
+    if (!walled && px > 0) continue;                       // the D: forward semicircle; its straight sides below
+    out.push([px, rho, pz, -thick / 2, hTop]);
+  }
+  if (!walled) { edge(0, -r, r * 0.70, -r, -thick / 2, hTop); edge(0, r, r * 0.70, r, -thick / 2, hTop); edge(r * 0.70, -r, r * 0.70, r, -thick / 2, hTop); }
+  for (const sz of [-1, 1]) {                              // the trestletrees, 1.5 r long, 0.11 r wide
+    const z0 = sz * zT - r * 0.055, z1 = sz * zT + r * 0.055, h0 = -r * 0.22, h1 = -r * 0.09;
+    edge(-r * 0.75, z0, r * 0.75, z0, h0, h1); edge(-r * 0.75, z1, r * 0.75, z1, h0, h1);
+    edge(-r * 0.75, z0, -r * 0.75, z1, h0, h1); edge(r * 0.75, z0, r * 0.75, z1, h0, h1);
+  }
+  for (const sx of [-1, 1]) {                              // the crosstrees, 1.9 r long, 0.14 r wide
+    const x0 = sx * r * 0.40 - r * 0.07, x1 = sx * r * 0.40 + r * 0.07, h0 = -r * 0.125, h1 = -r * 0.025;
+    edge(x0, -r * 0.95, x0, r * 0.95, h0, h1); edge(x1, -r * 0.95, x1, r * 0.95, h0, h1);
+    edge(x0, -r * 0.95, x1, -r * 0.95, h0, h1); edge(x0, r * 0.95, x1, r * 0.95, h0, h1);
+  }
+  return out;
+}
+
 function buildTop(r, mat, mastR, year) {
   const g = new THREE.Group();
   const zT = mastR ? mastR + r * 0.055 : r * 0.13;

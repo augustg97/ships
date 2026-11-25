@@ -5664,6 +5664,50 @@ if (Math.abs(dz - 0.85 * u.r) > 0.15 * u.r + 0.05) say(v.id, 'a topgallant shrou
 });
 }
 {
+g.updateMatrixWorld(true);
+const sqS = [], tps = [];
+g.traverse(o => { const p = o.userData && o.userData.part; if (!p) return;
+if (o.isMesh && p.key === 'sail' && o.userData.kind === 'square' && o.userData.surface && o.userData.grid) sqS.push(o);
+if (!o.isMesh && p.key === 'top') {
+const mi = o.userData.topmastTop ? o.userData.topmastTop.mast : o.userData.mast;
+if (mi !== undefined) tps.push({ o, mi });
+} });
+const V = new THREE.Vector3();
+for (const sl of sqS) {
+const ud = sl.userData, surf = ud.surface, { NW, NH } = ud.grid;
+const at = `the sail on masts[${ud.mast}] from the yard at y ${(+ud.yardY).toFixed(2)}`;
+if (!Array.isArray(ud.drape)) { say(v.id, 'a sail that does not say what it bears on', `${at}: userData.drape is absent`); continue; }
+if (ud.mast === undefined) continue;
+const W = 2 * surf(1, 0)[0], pa = sl.geometry.attributes.position, row = NH + 1;
+const inv = new THREE.Matrix4().copy(sl.matrixWorld).invert();
+const headSkip = 2 * (ud.yardR || 0.1);
+const uOf = x => { let a = 0, b = 1; for (let k = 0; k < 40; k++) { const m = (a + b) / 2; if (surf(m, 0)[0] < x) a = m; else b = m; } return (a + b) / 2; };
+const zAt = (u, vv) => {
+const fi = Math.min(NW - 1e-9, u * NW), fj = Math.min(NH - 1e-9, vv * NH), i = Math.floor(fi), j = Math.floor(fj), ss = fi - i, tt = fj - j;
+const Z = (ii, jj) => pa.getZ(ii * row + jj);
+return ss + tt <= 1 ? Z(i, j) + ss * (Z(i + 1, j) - Z(i, j)) + tt * (Z(i, j + 1) - Z(i, j))
+: Z(i + 1, j + 1) + (1 - ss) * (Z(i, j + 1) - Z(i + 1, j + 1)) + (1 - tt) * (Z(i + 1, j) - Z(i + 1, j + 1));
+};
+for (const { o, mi } of tps) {
+if (mi !== ud.mast) continue;
+let worst = -Infinity, n = 0;
+o.traverse(m => { if (!m.isMesh) return; const ga = m.geometry.attributes.position;
+for (let k = 0; k < ga.count; k++) {
+V.fromBufferAttribute(ga, k).applyMatrix4(m.matrixWorld).applyMatrix4(inv);
+if (Math.abs(V.x) > W / 2 * 0.98 || V.y > -headSkip) continue;
+const u = uOf(V.x), foot = surf(u, 1)[1];
+if (V.y < foot) continue;
+n++;
+worst = Math.max(worst, zAt(u, V.y / foot) - V.z);
+} });
+if (!n) continue;
+const nm = o.userData.part.name || 'Top';
+if (worst > 0.005) say(v.id, 'a top through the sail set over it', `${at}: the ${nm} stands ${worst.toFixed(3)} m before the cloth (${n} of its vertices inside the sail's rows)`);
+else if (ud.drape.some(d => d.name === nm) && worst < -0.30) say(v.id, 'a sail cut over a top and standing off it', `${at}: cut over the ${nm}, the cloth stands ${(-worst).toFixed(3)} m before its nearest point; it bears within 0.30 m`);
+}
+}
+}
+{
 const U = g.userData || {};
 const stacks = {};
 g.traverse(o => { const s = o.isMesh && o.userData.seg; if (!s || s.mi === undefined) return;

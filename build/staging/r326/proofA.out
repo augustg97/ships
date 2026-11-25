@@ -1,0 +1,492 @@
+[
+ {
+  "id": "trireme",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 11.36: userData.drape is absent"
+ },
+ {
+  "id": "trireme",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 7.24: userData.drape is absent"
+ },
+ {
+  "id": "corbita",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 14.68: userData.drape is absent"
+ },
+ {
+  "id": "corbita",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 8.71: userData.drape is absent"
+ },
+ {
+  "id": "cog",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 14.91: userData.drape is absent"
+ },
+ {
+  "id": "carrack",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 19.19: userData.drape is absent"
+ },
+ {
+  "id": "carrack",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 32.42: userData.drape is absent"
+ },
+ {
+  "id": "carrack",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 19.98: userData.drape is absent"
+ },
+ {
+  "id": "carrack",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 34.85: userData.drape is absent"
+ },
+ {
+  "id": "sekibune",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 13.10: userData.drape is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 12.85: userData.drape is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 25.35: userData.drape is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 29.43: userData.drape is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 13.44: userData.drape is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 27.49: userData.drape is absent"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 32.08: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 16.09: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 30.23: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 36.35: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 15.25: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 30.38: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 38.82: userData.drape is absent"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 22.90: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 23.74: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 47.31: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 55.01: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 25.09: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 51.59: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 60.25: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 45.34: userData.drape is absent"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 52.75: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 10.03: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 18.56: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 22.24: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 9.41: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 18.53: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 23.61: userData.drape is absent"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 14.05: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 18.20: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 26.57: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 34.94: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 42.75: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 49.44: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 56.13: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 19.44: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 27.56: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 35.67: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 43.79: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 50.74: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 57.69: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 18.53: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 27.09: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 35.09: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 42.50: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 49.92: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 56.76: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 15.42: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 23.92: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 32.94: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 39.31: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 46.74: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 53.10: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 14.71: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 21.70: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 29.62: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 35.67: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 41.73: userData.drape is absent"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 47.31: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 18.10: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 24.95: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 32.28: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 37.88: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 42.11: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 19.44: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 25.63: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 33.81: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 40.76: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 46.22: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 15.56: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 22.66: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 28.21: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 32.53: userData.drape is absent"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 35.76: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 19.83: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 28.29: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 36.86: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 42.52: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 21.24: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 30.96: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 40.82: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 47.34: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 19.90: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 28.78: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 37.78: userData.drape is absent"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 43.73: userData.drape is absent"
+ },
+ {
+  "id": "endurance",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 13.44: userData.drape is absent"
+ },
+ {
+  "id": "endurance",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 28.67: userData.drape is absent"
+ },
+ {
+  "id": "endurance",
+  "rule": "a sail that does not say what it bears on",
+  "detail": "the sail on masts[undefined] from the yard at y 33.64: userData.drape is absent"
+ }
+]

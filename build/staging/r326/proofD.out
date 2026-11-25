@@ -1,0 +1,147 @@
+[
+ {
+  "id": "carrack",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 32.42: cut over the Top, the cloth stands 0.610 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "carrack",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 34.85: cut over the Top, the cloth stands 0.622 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 25.35: cut over the Top, the cloth stands 0.570 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 27.49: cut over the Top, the cloth stands 0.575 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 30.23: cut over the Top, the cloth stands 0.607 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 36.35: cut over the Topmast top, the cloth stands 0.564 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 30.38: cut over the Top, the cloth stands 0.592 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 38.82: cut over the Topmast top, the cloth stands 0.560 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[2] from the yard at y 22.90: cut over the Top, the cloth stands 0.587 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 47.31: cut over the Top, the cloth stands 0.644 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 51.59: cut over the Top, the cloth stands 0.661 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "ship-of-the-line",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[2] from the yard at y 45.34: cut over the Top, the cloth stands 0.616 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 18.56: cut over the Top, the cloth stands 0.569 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 22.24: cut over the Topmast top, the cloth stands 0.540 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 18.53: cut over the Top, the cloth stands 0.568 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 23.61: cut over the Topmast top, the cloth stands 0.538 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[2] from the yard at y 14.05: cut over the Top, the cloth stands 0.557 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 34.94: cut over the Top, the cloth stands 0.684 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 35.67: cut over the Top, the cloth stands 0.683 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[2] from the yard at y 35.09: cut over the Top, the cloth stands 0.683 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[3] from the yard at y 32.94: cut over the Top, the cloth stands 0.684 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "preussen",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[4] from the yard at y 29.62: cut over the Top, the cloth stands 0.683 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 24.95: cut over the Top, the cloth stands 0.626 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 25.63: cut over the Top, the cloth stands 0.617 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "clipper",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[2] from the yard at y 22.66: cut over the Top, the cloth stands 0.616 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 28.29: cut over the Top, the cloth stands 0.645 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[1] from the yard at y 30.96: cut over the Top, the cloth stands 0.653 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "steamer",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[2] from the yard at y 28.78: cut over the Top, the cloth stands 0.648 m before its nearest point; it bears within 0.30 m"
+ },
+ {
+  "id": "endurance",
+  "rule": "a sail cut over a top and standing off it",
+  "detail": "the sail on masts[0] from the yard at y 28.67: cut over the Top, the cloth stands 0.610 m before its nearest point; it bears within 0.30 m"
+ }
+]

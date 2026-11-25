@@ -1,0 +1,22 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a top through the sail set over it",
+  "detail": "the sail on masts[0] from the yard at y 36.35: the Topmast top stands 0.040 m before the cloth (880 of its vertices inside the sail's rows)"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a top through the sail set over it",
+  "detail": "the sail on masts[1] from the yard at y 38.82: the Topmast top stands 0.294 m before the cloth (880 of its vertices inside the sail's rows)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a top through the sail set over it",
+  "detail": "the sail on masts[0] from the yard at y 22.24: the Topmast top stands 0.073 m before the cloth (880 of its vertices inside the sail's rows)"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a top through the sail set over it",
+  "detail": "the sail on masts[1] from the yard at y 23.61: the Topmast top stands 0.226 m before the cloth (880 of its vertices inside the sail's rows)"
+ }
+]
