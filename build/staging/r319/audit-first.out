@@ -1,0 +1,12 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 6: the card names the lateen rig, which the built hull does not add here: \"Yards crossed \u2014 The square-rigged masts cross nine yards; the square sails hang from them. Braces at the yardarms swing the yards round to t\""
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a sailing stage card that misstates what the stage adds",
+  "detail": "stage 6: the card names the lateen rig, which the built hull does not add here: \"Yards crossed \u2014 The square-rigged masts cross nine yards; the square sails hang from them. Braces at the yardarms swing the yards round to t\""
+ }
+]

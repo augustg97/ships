@@ -1,0 +1,72 @@
+[
+ {
+  "id": "dhow",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 0 (lateen, x -7.793): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "dhow",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 1 (lateen, x 3.15): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "caravel",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 0 (lateen, x -7.311): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "caravel",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 1 (lateen, x 0.963): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "caravel",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 2 (lateen, x 6.336): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "carrack",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 2 (lateen, x 12.931): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "galley",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 0 (lateen, x -3.16): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "galley",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 1 (lateen, x -14.673): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "galleass",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 0 (lateen, x -2.64): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "galleass",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 1 (lateen, x -15.938): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "galleass",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 2 (lateen, x 13.253): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 2 (lateen, x 10.029): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 2 (lateen, x 15.722): 0 lateen sheet meshes, and the yard records no clew"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen clew sheeted to nothing",
+  "detail": "mast 2 (lateen, x 9.5): 0 lateen sheet meshes, and the yard records no clew"
+ }
+]

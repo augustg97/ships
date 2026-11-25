@@ -5427,6 +5427,43 @@ for (const L of lys) { const m2 = ms[L.mast];
 if (!m2 || !m2.lateenMizzen) say(v.id, 'a lateen yard the record does not name', `mast ${L.mast}: a lateen yard on a square mast whose record has no lateenMizzen`); }
 }
 {
+g.updateMatrixWorld(true);
+const hs = SHIPS_HULL.hullSurface(H), xAft = 0.5 * H.lwl + hs.rake(1);
+const lys = [], cl = [], shs = [], outs = [];
+g.traverse(o => { if (!o.isMesh) return;
+if (o.userData.lateen) lys.push(o.userData.lateen);
+if (o.userData.besideMast && typeof o.userData.mastX === 'number') cl.push(o);
+if (o.userData.lateenSheet) shs.push(o);
+if (o.userData.part && o.userData.part.key === 'outlicker') outs.push(o); });
+const vp = new THREE.Vector3();
+const minD = (o, P) => { let d = Infinity; const pa = o.geometry.attributes.position;
+for (let i = 0; i < pa.count; i++) { vp.fromBufferAttribute(pa, i).applyMatrix4(o.matrixWorld); d = Math.min(d, vp.distanceTo(P)); } return d; };
+for (const L of lys) {
+const at = `mast ${L.mast} (lateen, x ${L.mastX})`;
+const mySh = shs.filter(o => o.userData.lateenSheet.mast === L.mast);
+if (mySh.length !== 1 || !L.clew) { say(v.id, 'a lateen clew sheeted to nothing', `${at}: ${mySh.length} lateen sheet meshes${L.clew ? '' : ', and the yard records no clew'}`); continue; }
+const C = new THREE.Vector3(...L.clew);
+const myCl = cl.filter(o => Math.abs(o.userData.mastX - L.mastX) < 0.01);
+if (myCl.length && Math.min(...myCl.map(o => minD(o, C))) > 0.2) say(v.id, 'a lateen clew off its cloth', `${at}: no cloth vertex within 0.2 m of the recorded clew ${L.clew}`);
+const dC = minD(mySh[0], C);
+if (dC > 0.08) say(v.id, 'a lateen sheet short of its clew', `${at}: the sheet's nearest vertex ${dC.toFixed(3)} m from the clew`);
+const myO = outs.filter(o => o.userData.outlicker && o.userData.outlicker.mast === L.mast);
+const need = L.clew[0] > xAft - 0.3;
+if (need && !myO.length) say(v.id, 'a clew abaft the stern with no outlicker', `${at}: clew x ${L.clew[0]} against the deck's aft end ${xAft.toFixed(3)}`);
+if (!need && myO.length) say(v.id, 'an outlicker where the sheet has room within-board', `${at}: clew x ${L.clew[0]}, ${(xAft - L.clew[0]).toFixed(2)} m forward of the deck's aft end`);
+for (const o of myO) {
+const bb = new THREE.Box3().setFromObject(o), len = bb.max.x - bb.min.x;
+if (len < 1.81 || len > 2.76) say(v.id, "an outlicker outside Mainwaring's two to three yards", `${at}: ${len.toFixed(3)} m`);
+if (bb.min.x >= xAft) say(v.id, 'an outlicker not made fast to the poop', `${at}: inboard end x ${bb.min.x.toFixed(3)}, the deck's aft end ${xAft.toFixed(3)}`);
+if (bb.max.x < L.clew[0]) say(v.id, 'an outlicker short of the clew', `${at}: outer end x ${bb.max.x.toFixed(3)}, clew x ${L.clew[0]}`);
+if (bb.max.y > L.clew[1] - 0.2) say(v.id, 'an outlicker the sheet hauls up to', `${at}: outlicker top y ${bb.max.y.toFixed(3)}, clew y ${L.clew[1]}`);
+const end = new THREE.Vector3(bb.max.x, (bb.min.y + bb.max.y) / 2, (bb.min.z + bb.max.z) / 2);
+const dE = minD(mySh[0], end);
+if (dE > 0.2) say(v.id, 'a sheet that does not reach its outlicker', `${at}: the sheet's nearest vertex ${dE.toFixed(3)} m from the outer end`);
+}
+}
+}
+{
 const courseM = [], topM = [];
 g.traverse(o => { if (o.isMesh && o.userData.courseAt) courseM.push(o);
 if (o.userData.part && o.userData.part.key === 'top') topM.push(o); });
@@ -7253,7 +7290,8 @@ claim('stays', /\bStays hold\b/.test(card[st]), has('stay'));
 }
 if (st >= 6) {
 const RIGW = { square: /square/i, lateen: /lateen/i, gaff: /\bgaffs?\b/i, junk: /batten/i, crabclaw: /crab-claw/i };
-for (const [rig, re] of Object.entries(RIGW)) claim(`the ${rig} rig`, re.test(card[st]), (st === 7 ? rigs7 : rigs).has(rig));
+const rigs6 = new Set(rigs); if ((H.masts || []).some(m => m.rig === 'square' && m.lateenMizzen)) rigs6.add('lateen');
+for (const [rig, re] of Object.entries(RIGW)) claim(`the ${rig} rig`, re.test(card[st]), (st === 7 ? rigs7 : rigs6).has(rig));
 }
 }
 if (typeof SW_FURLED_CARD === 'function') {

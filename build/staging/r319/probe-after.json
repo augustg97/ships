@@ -1,0 +1,868 @@
+{
+"dhow": {
+"set": {
+"L": [
+{
+"mast": 0,
+"clew": [
+2.616,
+4.052,
+6.142
+],
+"sheet": {
+"lead": "rail",
+"xAft": 12.074,
+"end": [
+2.616,
+2.009,
+2.87
+],
+"room": 9.457,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+7.668,
+3.34,
+2.726
+],
+"sheet": {
+"lead": "rail",
+"xAft": 12.074,
+"end": [
+7.668,
+2.188,
+2.054
+],
+"room": 4.406,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [],
+"SH": [
+{
+"mast": 0,
+"lead": "rail"
+},
+{
+"mast": 1,
+"lead": "rail"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 0,
+"clew": [
+3.712,
+2.955,
+0.192
+],
+"sheet": {
+"lead": "rail",
+"xAft": 12.074,
+"end": [
+3.712,
+2.025,
+2.794
+],
+"room": 8.361,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+8.145,
+2.863,
+0.138
+],
+"sheet": {
+"lead": "rail",
+"xAft": 12.074,
+"end": [
+8.145,
+2.223,
+1.904
+],
+"room": 3.929,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [],
+"SH": []
+}
+},
+"caravel": {
+"set": {
+"L": [
+{
+"mast": 0,
+"clew": [
+1.922,
+4.078,
+5.146
+],
+"sheet": {
+"lead": "rail",
+"xAft": 9.72,
+"end": [
+1.922,
+2.108,
+2.542
+],
+"room": 7.798,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+5.914,
+3.433,
+3.03
+],
+"sheet": {
+"lead": "rail",
+"xAft": 9.72,
+"end": [
+5.914,
+2.275,
+1.718
+],
+"room": 3.806,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 2,
+"clew": [
+9.703,
+3.52,
+1.969
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 9.72,
+"end": [
+10.87,
+2.65,
+0.281
+],
+"room": 0.017,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 9.12,
+"xOut": 10.95,
+"y": 2.65,
+"z": 0.281,
+"r": 0.05,
+"len": 1.83,
+"past": 1.23,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": [
+{
+"mast": 0,
+"lead": "rail"
+},
+{
+"mast": 1,
+"lead": "rail"
+},
+{
+"mast": 2,
+"lead": "outlicker"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 0,
+"clew": [
+2.838,
+3.161,
+0.175
+],
+"sheet": {
+"lead": "rail",
+"xAft": 9.72,
+"end": [
+2.838,
+2.122,
+2.458
+],
+"room": 6.882,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+6.443,
+2.903,
+0.156
+],
+"sheet": {
+"lead": "rail",
+"xAft": 9.72,
+"end": [
+6.443,
+2.323,
+1.504
+],
+"room": 3.277,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 2,
+"clew": [
+10.043,
+3.18,
+0.124
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 9.72,
+"end": [
+10.87,
+2.65,
+0.281
+],
+"room": -0.323,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 9.12,
+"xOut": 10.95,
+"y": 2.65,
+"z": 0.281,
+"r": 0.05,
+"len": 1.83,
+"past": 1.23,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": []
+}
+},
+"carrack": {
+"set": {
+"L": [
+{
+"mast": 2,
+"clew": [
+21.345,
+11.404,
+4.183
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 20.222,
+"end": [
+21.865,
+10.437,
+1.955
+],
+"room": -1.123,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 19.622,
+"xOut": 21.945,
+"y": 10.437,
+"z": 1.955,
+"r": 0.067,
+"len": 2.323,
+"past": 1.723,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": [
+{
+"mast": 2,
+"lead": "outlicker"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 2,
+"clew": [
+22.19,
+10.838,
+0.279
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 20.222,
+"end": [
+22.282,
+10.437,
+1.955
+],
+"room": -1.968,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 19.622,
+"xOut": 22.362,
+"y": 10.437,
+"z": 1.955,
+"r": 0.067,
+"len": 2.74,
+"past": 2.14,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": []
+}
+},
+"galley": {
+"set": {
+"L": [
+{
+"mast": 0,
+"clew": [
+10.483,
+3.391,
+8.476
+],
+"sheet": {
+"lead": "rail",
+"xAft": 21.5,
+"end": [
+10.483,
+1.261,
+2.007
+],
+"room": 11.017,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+-3.103,
+3.06,
+6.643
+],
+"sheet": {
+"lead": "rail",
+"xAft": 21.5,
+"end": [
+-3.103,
+1.103,
+2.341
+],
+"room": 24.603,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [],
+"SH": [
+{
+"mast": 0,
+"lead": "rail"
+},
+{
+"mast": 1,
+"lead": "rail"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 0,
+"clew": [
+12.016,
+1.856,
+0.154
+],
+"sheet": {
+"lead": "rail",
+"xAft": 21.5,
+"end": [
+12.016,
+1.336,
+1.836
+],
+"room": 9.484,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+-1.901,
+1.857,
+0.118
+],
+"sheet": {
+"lead": "rail",
+"xAft": 21.5,
+"end": [
+-1.901,
+1.101,
+2.346
+],
+"room": 23.401,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [],
+"SH": []
+}
+},
+"galleass": {
+"set": {
+"L": [
+{
+"mast": 0,
+"clew": [
+12.568,
+5.581,
+9.449
+],
+"sheet": {
+"lead": "rail",
+"xAft": 23.909,
+"end": [
+12.568,
+2.998,
+2.842
+],
+"room": 11.341,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+-2.728,
+5.214,
+7.642
+],
+"sheet": {
+"lead": "rail",
+"xAft": 23.909,
+"end": [
+-2.728,
+2.802,
+3.528
+],
+"room": 26.637,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 2,
+"clew": [
+21.312,
+5.39,
+4.714
+],
+"sheet": {
+"lead": "rail",
+"xAft": 23.909,
+"end": [
+21.312,
+3.669,
+0.53
+],
+"room": 2.598,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [],
+"SH": [
+{
+"mast": 0,
+"lead": "rail"
+},
+{
+"mast": 1,
+"lead": "rail"
+},
+{
+"mast": 2,
+"lead": "rail"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 0,
+"clew": [
+14.265,
+3.882,
+0.238
+],
+"sheet": {
+"lead": "rail",
+"xAft": 23.909,
+"end": [
+14.265,
+3.082,
+2.549
+],
+"room": 9.644,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 1,
+"clew": [
+-1.355,
+3.839,
+0.187
+],
+"sheet": {
+"lead": "rail",
+"xAft": 23.909,
+"end": [
+-1.355,
+2.8,
+3.534
+],
+"room": 25.264,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+},
+{
+"mast": 2,
+"clew": [
+22.15,
+4.55,
+0.162
+],
+"sheet": {
+"lead": "rail",
+"xAft": 23.909,
+"end": [
+22.15,
+3.75,
+0.254
+],
+"room": 1.759,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [],
+"SH": []
+}
+},
+"fluyt": {
+"set": {
+"L": [
+{
+"mast": 2,
+"clew": [
+16.595,
+5.149,
+4.243
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 15.625,
+"end": [
+17.115,
+4.39,
+1.785
+],
+"room": -0.969,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 15.025,
+"xOut": 17.195,
+"y": 4.39,
+"z": 1.785,
+"r": 0.054,
+"len": 2.169,
+"past": 1.569,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": [
+{
+"mast": 2,
+"lead": "outlicker"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 2,
+"clew": [
+17.472,
+4.56,
+0.188
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 15.625,
+"end": [
+17.685,
+4.39,
+1.785
+],
+"room": -1.847,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 15.025,
+"xOut": 17.765,
+"y": 4.39,
+"z": 1.785,
+"r": 0.054,
+"len": 2.74,
+"past": 2.14,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": []
+}
+},
+"east-indiaman": {
+"set": {
+"L": [
+{
+"mast": 2,
+"clew": [
+25.756,
+7.648,
+6.569
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 24.19,
+"end": [
+26.25,
+6.401,
+3.051
+],
+"room": -1.566,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 23.59,
+"xOut": 26.33,
+"y": 6.401,
+"z": 3.051,
+"r": 0.083,
+"len": 2.74,
+"past": 2.14,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": [
+{
+"mast": 2,
+"lead": "outlicker"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 2,
+"clew": [
+27.109,
+6.74,
+0.319
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 24.19,
+"end": [
+26.25,
+6.401,
+3.051
+],
+"room": -2.919,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 23.59,
+"xOut": 26.33,
+"y": 6.401,
+"z": 3.051,
+"r": 0.083,
+"len": 2.74,
+"past": 2.14,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": []
+}
+},
+"slave-ship": {
+"set": {
+"L": [
+{
+"mast": 2,
+"clew": [
+15.787,
+4.967,
+4.109
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 14.6,
+"end": [
+16.307,
+3.652,
+1.663
+],
+"room": -1.187,
+"drawn": true,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 14,
+"xOut": 16.387,
+"y": 3.652,
+"z": 1.663,
+"r": 0.052,
+"len": 2.387,
+"past": 1.787,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": [
+{
+"mast": 2,
+"lead": "outlicker"
+}
+]
+},
+"furled": {
+"L": [
+{
+"mast": 2,
+"clew": [
+16.632,
+4.4,
+0.204
+],
+"sheet": {
+"lead": "outlicker",
+"xAft": 14.6,
+"end": [
+16.66,
+3.652,
+1.663
+],
+"room": -2.032,
+"drawn": false,
+"from": "Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker"
+}
+}
+],
+"O": [
+{
+"xIn": 14,
+"xOut": 16.74,
+"y": 3.652,
+"z": 1.663,
+"r": 0.052,
+"len": 2.74,
+"past": 2.14,
+"mast": 2,
+"lenFrom": "Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew",
+"sideFrom": "class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern"
+}
+],
+"SH": []
+}
+}
+}

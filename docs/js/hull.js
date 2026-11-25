@@ -2292,7 +2292,12 @@ const along = Math.max(0, Math.min(yardLen * 0.5, (xStem - heel[0]) / dir[0]));
 const tack = [heel[0] + dir[0] * along, heel[1] + dir[1] * along];
 const clewX = tack[0] + yardLen * 0.62;
 const clewU = Math.max(0, Math.min(1, clewX / L + 0.5));
-const clew = [clewX, deckMax(u, clewU) + Math.max(H.sheer(0.5) * 0.10, B * 0.10)];
+let castleRail = -Infinity;
+for (let k = 0; k <= 8; k++) {
+const ct = castleTopAt(S, H, Math.max(0, Math.min(1, u + (clewU - u) * k / 8)));
+if (ct) castleRail = Math.max(castleRail, ct.y + ct.railH + 0.5);
+}
+const clew = [clewX, Math.max(deckMax(u, clewU) + Math.max(H.sheer(0.5) * 0.10, B * 0.10), castleRail)];
 const SHEET = FURLED ? 0 : TRIM * 1.5;
 const areaF = S.settee
 ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
@@ -2339,6 +2344,52 @@ sheetG.position.set(heel[0], heel[1], 0);
 sheetG.quaternion.setFromAxisAngle(new THREE.Vector3(dir[0], dir[1], 0).normalize(), -SHEET);
 beside.add(sheetG);
 const rel = P => [P[0] - heel[0], P[1] - heel[1]];
+const clewHull = new THREE.Vector3(clew[0] - heel[0], clew[1] - heel[1], 0)
+.applyQuaternion(sheetG.quaternion).add(new THREE.Vector3(heel[0], heel[1], OFF));
+{
+const se = deckEdge(S, H, 1);
+const xAft = se[0], ROOM = 0.30, ABAFT = 0.60;
+const needOut = clewHull.x > xAft - ROOM;
+const ctS = castleTopAt(S, H, 0.985);
+const crown = (S.sternLights || S.gunDecks) ? B * 0.055 + B * 0.011 : 0;
+const poopTop = ctS ? ctS.y + ctS.railH : H.sheer(1) + crown;
+const rO = Math.max(0.05, rYheel * 0.55);
+const quarterZ = ctS ? ctS.half * 0.85 : se[2] * 0.85;
+let lead, outl = null;
+if (needOut) {
+const len = Math.max(1.83, Math.min(2.74, clewHull.x + ABAFT - xAft + 0.6));
+const xIn = xAft - 0.6, xOut = xIn + len, yO = poopTop + rO;
+const om = new THREE.Mesh(new THREE.CylinderGeometry(rO * 0.8, rO, len, 10), woodDark);
+om.rotation.z = Math.PI / 2;
+om.position.set((xIn + xOut) / 2, yO, quarterZ);
+outl = { xIn: +xIn.toFixed(3), xOut: +xOut.toFixed(3), y: +yO.toFixed(3), z: +quarterZ.toFixed(3), r: +rO.toFixed(3),
+len: +len.toFixed(3), past: +(xOut - xAft).toFixed(3), mast: mi,
+lenFrom: 'Mainwaring 1644: two or three yards long, as they have occasion to use it; class: long enough to stand 0.6 m abaft the clew',
+sideFrom: 'class: on the lee quarter, the side the lateen is sheeted to; Mainwaring says only that it stands right out astern' };
+om.userData.outlicker = outl;
+group.add(tag(om, 'outlicker'));
+lead = { end: new THREE.Vector3(xOut - 0.08, yO, quarterZ), block: new THREE.Vector3(xOut - 0.30, yO + rO + 0.05, quarterZ),
+fall: new THREE.Vector3(xIn + 0.15, yO + rO, quarterZ) };
+} else {
+const uC = Math.max(0, Math.min(1, (clewHull.x + L / 2) / L));
+const ctC = castleTopAt(S, H, uC);
+const yR = ctC ? ctC.y + ctC.railH : H.sheer(uC);
+const zR = (ctC ? ctC.half : deckEdge(S, H, uC)[2]) * 0.96;
+lead = { end: new THREE.Vector3(clewHull.x, yR, zR), block: new THREE.Vector3(clewHull.x + 0.25, yR + 0.05, zR),
+fall: new THREE.Vector3(clewHull.x + 0.25, (ctC ? ctC.y : H.deck(uC)) + 0.4, zR * 0.9) };
+}
+ym.userData.lateen.clew = [+clewHull.x.toFixed(3), +clewHull.y.toFixed(3), +clewHull.z.toFixed(3)];
+ym.userData.lateen.sheet = { lead: needOut ? 'outlicker' : 'rail', xAft: +xAft.toFixed(3),
+end: [+lead.end.x.toFixed(3), +lead.end.y.toFixed(3), +lead.end.z.toFixed(3)],
+room: +(xAft - clewHull.x).toFixed(3), drawn: !FURLED,
+from: 'Mainwaring 1644 (Outlicker, Sheets): the sheet hauls the clew down and aft; where there is no room within-board, an outlicker' };
+if (!FURLED) {
+const ck = clewHull.clone();
+const segs = [[lead.end, ck], [ck, lead.block], [lead.block, lead.fall]];
+const shm = ropeMesh(segs, 0.012 + B * 0.0004, ropeMat);
+if (shm) { shm.userData.lateenSheet = { mast: mi, lead: needOut ? 'outlicker' : 'rail' }; group.add(tag(shm, 'lateenSheet')); }
+}
+}
 if (FURLED) {
 const area = S.settee
 ? triA2(tack, peakPt, clew) * (1 - S.settee * 0.35)
@@ -3777,6 +3828,20 @@ what: 'The rope at each clew — a sail\'s lower corner — that trims it to the
 + 'the rail. A battened lug carries a sheetlet to every batten end, gathered '
 + 'through blocks to a single fall — the whole sail worked by a few hands on '
 + 'deck, which is why no junk ever needed men aloft.' },
+lateenSheet: { stage: 6, name: 'Lateen sheet',
+what: 'The rope that hauls a lateen\'s clew, its lower after corner, down and aft. '
++ 'Its standing part is made fast on deck under the clew, it is rove through '
++ 'the sheet block at the clew and back through a block beside the standing part, '
++ 'and its fall is hauled on deck. Where the clew stands abaft the stern, the '
++ 'sheet leads to an outlicker over the stern instead.' },
+outlicker: { stage: 6, name: 'Outlicker',
+what: 'A short spar made fast on top of the poop and standing straight out astern, '
++ 'for the mizzen sheet. Mainwaring\'s Seaman\'s Dictionary (1644): it is "some '
++ 'two or three yards long", the sheet\'s standing part is made fast at its outer '
++ 'end and the sheet rove through a block seized near that end, and it is used '
++ 'where "the mizen mast is placed so far aft that there is not room enough '
++ 'within-board to haul down the sheet flat". He says "generally all Newcastle '
++ 'carvels have them" and that it is "seldom used in great ships".' },
 parrel:   { stage: 6, name: 'Parrels',
 what: 'The rope loop that holds a spar to its mast and lets it slide up and down '
 + 'it: round the mast and made fast to the spar either side. On a battened '

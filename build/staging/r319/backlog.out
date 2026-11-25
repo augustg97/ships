@@ -1,0 +1,5 @@
+3 frames to capture
+    · ship-treasure                http://localhost:8149/?frozen=1#v=ship&s=treasure-ship
+    · ship-slave-ship              http://localhost:8149/?frozen=1#v=ship&s=slave-ship
+    · ship-carrack                 http://localhost:8149/?frozen=1#v=ship&s=carrack
+captured 3

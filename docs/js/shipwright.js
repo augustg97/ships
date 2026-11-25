@@ -450,6 +450,8 @@ const nl = masts.filter(e => e.m.rig === 'lateen').length;
 bits.push((nl === 1 ? 'The lateen mast gets one long yard' : 'Each lateen mast gets one long yard')
 + ', slung slantwise across it; the sail is laced along the yard.');
 }
+if (!rigs.has('lateen') && masts.some(e => e.m.rig === 'square' && e.m.lateenMizzen))
+bits.push('The mizzen also gets a lateen yard, slung slantwise under its topsail; the lateen sail is laced along it.');
 if (rigs.has('gaff')) {
 const ng = count('Gaff'), nb = count('Boom');
 bits.push(swCap(swNum(ng)) + ' gaff' + (ng === 1 ? '' : 's') + ' and ' + swNum(nb) + ' boom' + (nb === 1 ? '' : 's')

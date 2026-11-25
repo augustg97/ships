@@ -1,0 +1,27 @@
+[
+ {
+  "id": "caravel",
+  "rule": "a clew abaft the stern with no outlicker",
+  "detail": "mast 2 (lateen, x 6.336): clew x 9.703 against the deck's aft end 9.720"
+ },
+ {
+  "id": "carrack",
+  "rule": "a clew abaft the stern with no outlicker",
+  "detail": "mast 2 (lateen, x 12.931): clew x 21.345 against the deck's aft end 20.222"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a clew abaft the stern with no outlicker",
+  "detail": "mast 2 (lateen, x 10.029): clew x 16.595 against the deck's aft end 15.625"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a clew abaft the stern with no outlicker",
+  "detail": "mast 2 (lateen, x 15.722): clew x 25.756 against the deck's aft end 24.190"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a clew abaft the stern with no outlicker",
+  "detail": "mast 2 (lateen, x 9.5): clew x 15.787 against the deck's aft end 14.600"
+ }
+]
