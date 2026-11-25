@@ -1,0 +1,3 @@
+r329 receipt: all 65 frames scored; shipwright and shipwright-ahead accepted as predicted movers (the fluyt is the 74's left berth neighbour, and her lowered rig stands at the frames' left edge); action-gravelines accepted, not predicted (the English fleet at Gravelines is drawn with the fluyt model); ship-great-eastern captured the globe in the full run and was 0.001% alone; the full check died at aboard-preussen on a transient ready wait and the other 27 were captured one per process with no failure; live stamp 1795637845 verified
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

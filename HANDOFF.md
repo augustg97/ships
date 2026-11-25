@@ -30026,8 +30026,24 @@ Proofs, all on :8150 (`webb/`):
 - **(0y¹⁷⁵), NEW: the fluyt's mast stations.** Hollar's main stands 0.539 of the way from the fore to the mizzen, and the hull's stations put it at 0.606. His fluyt also has a strong rise of sheer aft, and the model's hull is nearly flush. The stations and the sheer are CLASS; read them off the plate.
 - **(0y¹⁷⁰)**, the sekibune's halyard lead; **(0y¹⁶¹)**, **(0y¹⁶²)**, **(0y¹⁵⁹)**, **(0y¹⁶⁰)**, **(0y¹⁵³)**, **(0y¹⁵⁵)**, **(0y¹⁵¹)**, and **(0y¹⁴⁵)** to **(0y⁹⁴)** and the named residuals stand as r294 to r328 list them.
 
-**THE FRAMES.** No baseline frame shows the fluyt in her own berth. Her rig is about 5 m lower, so anything of it that showed at a neighbour's frame edge is now gone. Predicted possible movers are her berth neighbours, `ship-sekibune`, `ship-panokseon`, `ship-galleass` and `ship-slave-ship`, and `globe-default` if a fluyt voyage marker is on screen. The full ratchet was launched on the final tree at 12:16:08, at load 7.4, before the build and this entry. **Every frame is scored and classified in the receipt that follows.**
+**THE FRAMES.** No baseline frame shows the fluyt in her own berth. Her rig is about 5 m lower, so anything of it that showed at a neighbour's frame edge is now gone. The Shipwright yard is sorted by `from`, and the fluyt (1595) stands between the East Indiaman (1595, listed first) and the 74 (1640). So she is the 74's immediate left neighbour, and the predicted movers are the 74's frames: `shipwright`, `shipwright-ahead`, `-astern`, `-furled` and `-hounds`. The East Indiaman has no frame of her own. r328's handoff named `ship-sekibune`, `ship-panokseon`, `ship-galleass` and `ship-slave-ship` as the fluyt's neighbours; that was wrong, and those four are predicted not to move. `globe-default` would move if a fluyt voyage marker is on screen. In the first 20 frames, `shipwright` moved 0.202% / 0.089, all of it in the left 36 px where the fluyt's rig stands (`early-crop-shipwright.png`), and `ship-great-eastern` captured the 1590 globe (`early-ge.png`), a capture fault. The full ratchet was launched on the final tree at 12:16:08, at load 7.4, before the build and this entry. **Every frame is scored and classified in the receipt that follows.**
 
 **r330 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r330` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁷⁴), the fluyt's course yards, off the same plate.**
 
 **Live stamp: docs/index.html carries data-version 1795637845 at the build.**
+
+**Live stamp VERIFIED: 1795637845 on https://augustg97.github.io/ships/index.html at 12:27 PST. The published `js/hull.js` carries the lateen pole's line in `mastLowerOf`.**
+
+**THE FRAMES (receipt): ALL 65 SCORED; `shipwright`, `shipwright-ahead` and `action-gravelines` ACCEPTED.**
+
+- **The full check** was launched at 12:16:08 and captured 38 frames. It died at frame 39, `aboard-preussen`, on the 150 s ready wait (12:41), as in r320–r328. The 38 were kept (`run1/`, `score-run1.out`).
+- **The other 27**, and `ship-great-eastern` again, were captured one process per frame, the 74's frames first, with no failure (`r329_resume.sh`, `resume.out`, `run2/`, `score-run2.out`). Every frame was scored with r277's offline scorer.
+- **ACCEPTED, predicted** (FRAME-LOG.md):
+  - `shipwright` 0.202% / 0.089: the fluyt at the left edge, x 0–35 (`pair-shipwright.png`).
+  - `shipwright-ahead` 0.202% / 0.089, the same pixels; her berth label "Fluyt" shows under them (`pair-shipwright-ahead.png`).
+- **ACCEPTED, not predicted:** `action-gravelines` 0.325% / 0.102. The Action at Gravelines draws the English fleet's ranks with the fluyt model, so every English rig in the frame came down. The diff is only those rigs, x 1971–2696, rows 775–973 (`crop-action-gravelines.png`). Before predicting frames for a vessel change, grep `battles.json` for her id.
+- **Predicted, and inside the gate:** `shipwright-astern` 0.000%, `shipwright-hounds` 0.000%, `shipwright-furled` 0.044% / 0.016 (x 0–50, the fluyt furled, under the gate).
+- **Named by r328 as neighbours, and did not move:** `ship-sekibune` 0.000%, `ship-panokseon` 0.006%, `ship-galleass` 0.022%, `ship-slave-ship` 0.000%. `globe-default` 0.028%.
+- **Capture fault:** `ship-great-eastern` 89.982% / 67.315 in the full run captured the 1590 globe (`early-ge.png`). Alone it was 0.001%.
+- **Inside the gate:** the other 59.
+- **No frames are left unscored for r330.**
