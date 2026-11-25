@@ -1,0 +1,22 @@
+[
+ {
+  "id": "east-indiaman",
+  "rule": "a lateen mizzen whose tiers have no answer",
+  "detail": "masts[2] (station 0.85, lateen mizzen): tiersProvenance is absent; the record does not say how many square sails the mizzen crosses, or from what"
+ },
+ {
+  "id": "east-indiaman",
+  "rule": "a topgallant over a lateen mizzen",
+  "detail": "masts[2] (station 0.85, lateen mizzen): 3 mast pieces and 3 square yards drawn; a lateen mizzen crosses the crossjack and the topsail on two pieces"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a lateen mizzen whose tiers have no answer",
+  "detail": "masts[2] (station 0.85, lateen mizzen): tiersProvenance is absent; the record does not say how many square sails the mizzen crosses, or from what"
+ },
+ {
+  "id": "slave-ship",
+  "rule": "a topgallant over a lateen mizzen",
+  "detail": "masts[2] (station 0.85, lateen mizzen): 3 mast pieces and 3 square yards drawn; a lateen mizzen crosses the crossjack and the topsail on two pieces"
+ }
+]

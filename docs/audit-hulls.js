@@ -5464,6 +5464,22 @@ if (dE > 0.2) say(v.id, 'a sheet that does not reach its outlicker', `${at}: the
 }
 }
 {
+const segN = {}, slung = [], lat = {};
+g.traverse(o => { if (!o.isMesh) return; const u = o.userData;
+if (u.seg) segN[u.seg.mi] = Math.max(segN[u.seg.mi] || 0, u.seg.si + 1);
+if (u.slung && !u.lateen) slung.push(u.slung.mastX);
+if (u.lateen && u.lateen.onSquareMast) lat[u.lateen.mast] = u.lateen.mastX; });
+(H.masts || []).forEach((mk, mi) => {
+if (mk.rig !== 'square' || mk.lateenMizzen !== true) return;
+const at = `masts[${mi}] (station ${mk.at}, lateen mizzen)`;
+if (!mk.tiersProvenance) say(v.id, 'a lateen mizzen whose tiers have no answer', `${at}: tiersProvenance is absent; the record does not say how many square sails the mizzen crosses, or from what`);
+if (lat[mi] === undefined) { say(v.id, 'a lateen mizzen with no lateen yard', `${at}: no lateen yard records this mast`); return; }
+const ny = slung.filter(x => Math.abs(x - lat[mi]) < 0.6).length;
+if ((segN[mi] || 0) > 2 || ny > 2)
+say(v.id, 'a topgallant over a lateen mizzen', `${at}: ${segN[mi] || 0} mast pieces and ${ny} square yards drawn; a lateen mizzen crosses the crossjack and the topsail on two pieces`);
+});
+}
+{
 const courseM = [], topM = [];
 g.traverse(o => { if (o.isMesh && o.userData.courseAt) courseM.push(o);
 if (o.userData.part && o.userData.part.key === 'top') topM.push(o); });

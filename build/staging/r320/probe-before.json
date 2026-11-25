@@ -1,0 +1,334 @@
+{
+ "east-indiaman": {
+  "set": {
+   "segs": [
+    [
+     0,
+     4.93,
+     27.73
+    ],
+    [
+     1,
+     24.99,
+     38.67
+    ],
+    [
+     2,
+     37.03,
+     43.87
+    ]
+   ],
+   "lateen": [
+    {
+     "slingY": 13.657,
+     "mastHeadY": 27.729,
+     "headroom": 1.217,
+     "mastX": 15.722
+    }
+   ],
+   "yards": [
+    {
+     "mastX": 15.722,
+     "y": 18.63,
+     "len": 18.92,
+     "name": "Yard",
+     "courseAt": {
+      "frac": 0.6,
+      "from": "class"
+     },
+     "lowered": null,
+     "bare": true
+    },
+    {
+     "mastX": 15.722,
+     "y": 37.05,
+     "len": 13.51,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": null,
+     "bare": false
+    },
+    {
+     "mastX": 15.722,
+     "y": 43.06,
+     "len": 9.01,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": null,
+     "bare": false
+    }
+   ],
+   "sails": [
+    {
+     "name": "Sail",
+     "x0": 13.4,
+     "x1": 20.2,
+     "y0": 19.18,
+     "y1": 37.05
+    },
+    {
+     "name": "Sail",
+     "x0": 15.4,
+     "x1": 19.9,
+     "y0": 37.22,
+     "y1": 43.06
+    },
+    {
+     "name": "Sail",
+     "x0": 10.3,
+     "x1": 27.1,
+     "y0": 5.39,
+     "y1": 27.74
+    }
+   ]
+  },
+  "furled": {
+   "segs": [
+    [
+     0,
+     4.93,
+     27.73
+    ],
+    [
+     1,
+     24.99,
+     38.67
+    ],
+    [
+     2,
+     37.03,
+     43.87
+    ]
+   ],
+   "lateen": [
+    {
+     "slingY": 13.657,
+     "mastHeadY": 27.729,
+     "headroom": 1.217,
+     "mastX": 15.722
+    }
+   ],
+   "yards": [
+    {
+     "mastX": 15.722,
+     "y": 18.63,
+     "len": 18.92,
+     "name": "Yard",
+     "courseAt": {
+      "frac": 0.6,
+      "from": "class"
+     },
+     "lowered": null,
+     "bare": true
+    },
+    {
+     "mastX": 15.722,
+     "y": 27.89,
+     "len": 13.51,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": "topsail",
+     "bare": false
+    },
+    {
+     "mastX": 15.722,
+     "y": 38.78,
+     "len": 9.01,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": "topgallant",
+     "bare": false
+    }
+   ],
+   "sails": [
+    {
+     "name": "Furled sail",
+     "x0": 14.5,
+     "x1": 19.3,
+     "y0": 27.6,
+     "y1": 29.15
+    },
+    {
+     "name": "Furled sail",
+     "x0": 16.3,
+     "x1": 19.4,
+     "y0": 38.61,
+     "y1": 39.52
+    },
+    {
+     "name": "Furled sail",
+     "x0": 11,
+     "x1": 25.5,
+     "y0": 5.41,
+     "y1": 27.23
+    }
+   ]
+  }
+ },
+ "slave-ship": {
+  "set": {
+   "segs": [
+    [
+     0,
+     3.22,
+     17.5
+    ],
+    [
+     1,
+     15.79,
+     24.36
+    ],
+    [
+     2,
+     23.33,
+     27.61
+    ]
+   ],
+   "lateen": [
+    {
+     "slingY": 8.698,
+     "mastHeadY": 17.501,
+     "headroom": 0.762,
+     "mastX": 9.5
+    }
+   ],
+   "yards": [
+    {
+     "mastX": 9.5,
+     "y": 11.8,
+     "len": 11.85,
+     "name": "Yard",
+     "courseAt": {
+      "frac": 0.6,
+      "from": "class"
+     },
+     "lowered": null,
+     "bare": true
+    },
+    {
+     "mastX": 9.5,
+     "y": 23.34,
+     "len": 8.46,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": null,
+     "bare": false
+    },
+    {
+     "mastX": 9.5,
+     "y": 27.1,
+     "len": 5.64,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": null,
+     "bare": false
+    }
+   ],
+   "sails": [
+    {
+     "name": "Sail",
+     "x0": 8,
+     "x1": 12.3,
+     "y0": 12.15,
+     "y1": 23.34
+    },
+    {
+     "name": "Sail",
+     "x0": 9.3,
+     "x1": 12.1,
+     "y0": 23.45,
+     "y1": 27.1
+    },
+    {
+     "name": "Sail",
+     "x0": 6.1,
+     "x1": 16.6,
+     "y0": 3.52,
+     "y1": 17.52
+    }
+   ]
+  },
+  "furled": {
+   "segs": [
+    [
+     0,
+     3.22,
+     17.5
+    ],
+    [
+     1,
+     15.79,
+     24.36
+    ],
+    [
+     2,
+     23.33,
+     27.61
+    ]
+   ],
+   "lateen": [
+    {
+     "slingY": 8.698,
+     "mastHeadY": 17.501,
+     "headroom": 0.762,
+     "mastX": 9.5
+    }
+   ],
+   "yards": [
+    {
+     "mastX": 9.5,
+     "y": 11.8,
+     "len": 11.85,
+     "name": "Yard",
+     "courseAt": {
+      "frac": 0.6,
+      "from": "class"
+     },
+     "lowered": null,
+     "bare": true
+    },
+    {
+     "mastX": 9.5,
+     "y": 17.61,
+     "len": 8.46,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": "topsail",
+     "bare": false
+    },
+    {
+     "mastX": 9.5,
+     "y": 24.43,
+     "len": 5.64,
+     "name": "Yard",
+     "courseAt": null,
+     "lowered": "topgallant",
+     "bare": false
+    }
+   ],
+   "sails": [
+    {
+     "name": "Furled sail",
+     "x0": 8.7,
+     "x1": 11.7,
+     "y0": 17.37,
+     "y1": 18.51
+    },
+    {
+     "name": "Furled sail",
+     "x0": 9.8,
+     "x1": 11.8,
+     "y0": 24.24,
+     "y1": 24.96
+    },
+    {
+     "name": "Furled sail",
+     "x0": 6.5,
+     "x1": 15.6,
+     "y0": 3.53,
+     "y1": 17.2
+    }
+   ]
+  }
+ }
+}

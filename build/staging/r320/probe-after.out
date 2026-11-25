@@ -1,0 +1,20 @@
+## east-indiaman set segs [[0, 4.93, 27.73], [1, 24.99, 38.67]] lateen [{'slingY': 13.657, 'mastHeadY': 27.729, 'headroom': 1.217, 'mastX': 15.722}]
+   yard {'mastX': 15.722, 'y': 22.35, 'len': 18.92, 'name': 'Yard', 'courseAt': {'frac': 0.763, 'from': 'record'}, 'lowered': None, 'bare': True}
+   yard {'mastX': 15.722, 'y': 37.05, 'len': 13.51, 'name': 'Yard', 'courseAt': None, 'lowered': None, 'bare': False}
+   sail {'name': 'Sail', 'x0': 13.4, 'x1': 20.2, 'y0': 22.79, 'y1': 37.05}
+   sail {'name': 'Sail', 'x0': 10.3, 'x1': 27.1, 'y0': 5.39, 'y1': 27.74}
+## east-indiaman furled segs [[0, 4.93, 27.73], [1, 24.99, 38.67]] lateen [{'slingY': 13.657, 'mastHeadY': 27.729, 'headroom': 1.217, 'mastX': 15.722}]
+   yard {'mastX': 15.722, 'y': 22.35, 'len': 18.92, 'name': 'Yard', 'courseAt': {'frac': 0.763, 'from': 'record'}, 'lowered': None, 'bare': True}
+   yard {'mastX': 15.722, 'y': 27.89, 'len': 13.51, 'name': 'Yard', 'courseAt': None, 'lowered': 'topsail', 'bare': False}
+   sail {'name': 'Furled sail', 'x0': 14.6, 'x1': 19.3, 'y0': 27.66, 'y1': 29.06}
+   sail {'name': 'Furled sail', 'x0': 11, 'x1': 25.5, 'y0': 5.41, 'y1': 27.23}
+## slave-ship set segs [[0, 3.22, 17.5], [1, 15.79, 24.36]] lateen [{'slingY': 8.698, 'mastHeadY': 17.501, 'headroom': 0.762, 'mastX': 9.5}]
+   yard {'mastX': 9.5, 'y': 14.13, 'len': 11.85, 'name': 'Yard', 'courseAt': {'frac': 0.763, 'from': 'record'}, 'lowered': None, 'bare': True}
+   yard {'mastX': 9.5, 'y': 23.34, 'len': 8.46, 'name': 'Yard', 'courseAt': None, 'lowered': None, 'bare': False}
+   sail {'name': 'Sail', 'x0': 8, 'x1': 12.3, 'y0': 14.41, 'y1': 23.34}
+   sail {'name': 'Sail', 'x0': 6.1, 'x1': 16.6, 'y0': 3.52, 'y1': 17.52}
+## slave-ship furled segs [[0, 3.22, 17.5], [1, 15.79, 24.36]] lateen [{'slingY': 8.698, 'mastHeadY': 17.501, 'headroom': 0.762, 'mastX': 9.5}]
+   yard {'mastX': 9.5, 'y': 14.13, 'len': 11.85, 'name': 'Yard', 'courseAt': {'frac': 0.763, 'from': 'record'}, 'lowered': None, 'bare': True}
+   yard {'mastX': 9.5, 'y': 17.61, 'len': 8.46, 'name': 'Yard', 'courseAt': None, 'lowered': 'topsail', 'bare': False}
+   sail {'name': 'Furled sail', 'x0': 8.7, 'x1': 11.7, 'y0': 17.42, 'y1': 18.44}
+   sail {'name': 'Furled sail', 'x0': 6.5, 'x1': 15.6, 'y0': 3.53, 'y1': 17.2}
