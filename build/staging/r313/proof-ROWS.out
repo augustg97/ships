@@ -1,0 +1,7 @@
+[
+ {
+  "id": "ship-of-the-line",
+  "rule": "a course read off its own rows",
+  "detail": "masts[2] (station 0.85): rows give 0.810 and 0.824 (mean 0.817) against ofDeckToTop 0.845"
+ }
+]

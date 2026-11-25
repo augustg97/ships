@@ -1847,7 +1847,8 @@
             "rig": "square",
             "rake": -3,
             "shrouds": 4,
-            "only": 2
+            "only": 2,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.72 of the lower mast from the deck (two tiers: a course under one topsail). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.556,
@@ -1855,7 +1856,8 @@
             "rig": "square",
             "rake": 1,
             "shrouds": 6,
-            "only": 2
+            "only": 2,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.72 of the lower mast from the deck (two tiers: a course under one topsail). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.85,
@@ -2770,7 +2772,8 @@
             "rig": "square",
             "rake": -2,
             "shrouds": 4,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.556,
@@ -2778,7 +2781,8 @@
             "rig": "square",
             "rake": 1,
             "shrouds": 5,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.85,
@@ -2921,7 +2925,8 @@
             "rig": "square",
             "rake": -2,
             "shrouds": 6,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.556,
@@ -2929,7 +2934,8 @@
             "rig": "square",
             "rake": 1,
             "shrouds": 8,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.85,
@@ -2937,7 +2943,8 @@
             "rig": "square",
             "rake": 4,
             "shrouds": 5,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           }
         ],
         "build": "frame",
@@ -3079,7 +3086,8 @@
             "rig": "square",
             "rake": -2,
             "shrouds": 7,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck. The Asow plate (r313) shows this mast's course yard close under its top too, but the stern hides this mast's deck, so its height over the deck is not read; a broadside of a working 74 would read it."
           },
           {
             "at": 0.556,
@@ -3088,7 +3096,8 @@
             "rake": 1,
             "shrouds": 9,
             "only": 3,
-            "staysails": 3
+            "staysails": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck. The Asow plate (r313) shows this mast's course yard close under its top too, but the stern hides this mast's deck, so its height over the deck is not read; a broadside of a working 74 would read it."
           },
           {
             "at": 0.85,
@@ -3100,7 +3109,33 @@
             "staysails": 2,
             "spanker": true,
             "furlStowProvenance": "READ, r312 (0y¹³⁸): BRAILED. This hull is a class 74 with no single ship behind it, so the plate is the nearest dated painting of a working 74 at anchor by a painter known for drawing rigging exactly: C. W. Eckersberg, 'The Russian Ship of the Line Asow and a Frigate at Anchor in the Roads of Elsinore', 1828, oil on canvas, Statens Museum for Kunst (Commons 'C.W. Eckersberg - The Russian Ship of the Line \"Asow\" and a Frigate at Anchor in the Roads of Elsinore - Google Art Project.jpg', 4044 x 4939 px, read off the 1920 px derivative; build/staging/r312/plates/asow.jpg, the mizzen at 2x in asow-mizzen-2x.png and at 3x in asow-mizzen-3x.png). Asow (Azov) was a Russian 74 launched in 1826 (Commons 'Category:Azov (ship, 1826)'); the painting shows her at anchor with her yards crossed and every square sail furled, seen from high on her starboard quarter. At the mizzen it is about 20 px/m on the 1920 px derivative: about 410 px from the poop rail to the mizzen top. A gaff 0.25 m thick would show 5 px wide. WHAT IT SHOWS: a long buff bundle of canvas lies close along the after side of the mizzen lower mast, from just under the crossjack yard down to the poop, where the boom lies fore and aft over the taffrail; the St Andrew's ensign hangs from the peak of a gaff that stands aloft. That is the spanker brailed in to the mast under a standing gaff, with the boom left in place. CONTESTED: this is one painting of one ship, a Russian 74 forty-eight years after this hull's 1780, and a painting, not a photograph. The ensign hides the gaff's own line, so its angle is not read, and the gaff's length and the boom's height are not read either. The builder's 'lowered' default (a schooner's stowage) is not shown on any plate of a 74 that has been read.",
-            "furlStow": "brailed"
+            "furlStow": "brailed",
+            "courseRead": {
+              "ofDeckToTop": 0.845,
+              "boundPm": 0.025,
+              "rows": {
+                "deckRail": 1782,
+                "deckHidden": 1815,
+                "top": 1372,
+                "yard": 1438,
+                "yardHead": 1430,
+                "yardFoot": 1449,
+                "cap": 1283
+              },
+              "plate": "build/staging/r312/plates/asow.jpg (1920 px derivative of the Google Art Project copy)",
+              "cols": [
+                [
+                  330,
+                  370
+                ],
+                [
+                  600,
+                  640
+                ]
+              ],
+              "topAtOfLower": 0.9
+            },
+            "courseAtProvenance": "PLATE READ, r313 (0y¹⁴³): the crossjack hangs at 0.845 of the height from the deck to the mizzen top (bound +/-0.025). Plate: C. W. Eckersberg, 'The Russian Ship of the Line Asow and a Frigate at Anchor in the Roads of Elsinore', 1828 (Commons, Google Art Project copy, read off the 1920 px derivative, build/staging/r312/plates/asow.jpg; the mizzen lower rig at about 30 px/m, from the main yard's length). She is seen from abaft her starboard quarter with the eye near the water, so the masts stand upright on the canvas and heights along one mast keep their ratios. Rows on the derivative, read as brightness profiles in columns 330-370 and 600-640, either side of the mizzen and clear of the ensign: the crossjack, a pale yard, rows 1430-1449, centre 1438; the main yard, dark, crosses just above it at 1416-1428; the front edge of the mizzen top 1372 (+/-6); the mizzen cap 1283; the taffrail's top at the mast 1782. The poop deck at the mast is hidden behind the taffrail, so its row lies between 1782 and about 1815 (a 1 m rail at 30 px/m); the two datums give 0.839 and 0.851, and the record takes their mean. The builder stands the top's centre at 0.90 of the lower mast, so the crossjack hangs at 0.845 x 0.90 of the lower mast; the class figure it replaces was 0.60 of the lower mast, which put the yard at 0.665 of the deck-to-top height. CONTESTED: one painting of one ship, a Russian 74 launched in 1826, 46 years after this hull's 1780. The plate also shows the mizzen's proportions differ from the model's: its masthead, cap to top, is 0.18 of the deck-to-cap height and the model's is 0.12, so the read is taken against the top, where the yard's slings hang, and not against the cap."
           }
         ],
         "build": "frame",
@@ -3242,7 +3277,8 @@
             "rig": "square",
             "rake": -2,
             "shrouds": 5,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.556,
@@ -3250,7 +3286,8 @@
             "rig": "square",
             "rake": 1,
             "shrouds": 6,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           },
           {
             "at": 0.85,
@@ -3258,7 +3295,8 @@
             "rig": "square",
             "rake": 4,
             "shrouds": 4,
-            "only": 3
+            "only": 3,
+            "courseAtProvenance": "UNREAD, r313: the class figure stands, the course yard at 0.60 of the lower mast from the deck (three tiers: a course under a topsail and a topgallant). No plate of this hull's course yard has been read."
           }
         ],
         "build": "frame",

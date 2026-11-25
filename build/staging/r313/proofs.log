@@ -1,0 +1,5 @@
+SILENCE-OLDAUDIT rc=0 checked 33 hulls, 0 problems
+SILENCE rc=1 checked 33 hulls, 1 problems
+ROWS rc=1 checked 33 hulls, 1 problems
+CLASSDRAWN rc=1 checked 33 hulls, 1 problems
+restored

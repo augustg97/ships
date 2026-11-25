@@ -2613,7 +2613,7 @@ function buildRig(S, group, mats, FINE, FURLED) {
        trussed in place with no fall at all (crossjack, doubled-rig course, lower topsail,
        lower topgallant). The running gear below draws from this record, so a rope can
        only ever lead to the mechanism the yard actually rides. */
-    const crossYard = (yy, yardLen, kind, hoist, listName, fracRec) => {   // r283: listName is the record's word for the tier (mk.yards), kind the plan's; r285: fracRec, where the yard hangs and why
+    const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec) => {   // r283: listName is the record's word for the tier (mk.yards), kind the plan's; r285: fracRec, where the yard hangs and why; r313: courseRec, where a segment-rig course hangs and why
       /* ── A YARD IS AS THICK AS ITS OWN LENGTH ASKS — THE SPAR-MAKER'S OWN RATES ──────
          Steel 1794, "Proportional Diameters of Yards" (maritime.org full text): main and
          fore yards 7/10 of an inch to every yard of the length at the slings; topsail
@@ -2728,6 +2728,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
       /* r285 (0y88): where this yard hangs and why — the record's fraction or the plan's — on the mesh, with the y it
          was actually placed at, so the audit reads the fraction off the yard itself (A-YARD-FRAC) */
       if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
+      /* r313 (0y¹⁴³): a course on a segment rig records where it hangs, the record's read or the class figure (A-COURSE-READ) */
+      if (courseRec) ym.userData.courseAt = Object.assign(courseRec, { y: yY, yPlan: yy });
       group.add(tag(ym, 'yard'));
       /* the steel yard's card carries its provenance, the iron-mast rule: no tube record
          was in reach for these spars, so the RATE is the record's and the figure derived */
@@ -3398,11 +3400,26 @@ function buildRig(S, group, mats, FINE, FURLED) {
            yards of a ship are hoisted up along the mast" — except the crossjack, which
            hung in standing slings and gets nothing; every upper yard rides a TIE over
            the sheave in its own section's head. */
+        /* ── r313 (0y¹⁴³): THE RECORD MAY READ WHERE THE COURSE HANGS ──────────────────────
+           A course under upper tiers hangs in its slings under the top, and the 0.60 above is a
+           class figure that no plate set. Eckersberg's 1828 painting of the Russian 74 Asow puts
+           her crossjack at 0.845 of the height from the deck to the mizzen top, where 0.60 of the
+           lower mast puts it at 0.667. The record carries such a read as `courseRead.ofDeckToTop`,
+           a share of the deck-to-top height because that is what a plate shows (the slings hang
+           from the masthead over the top), and the top's centre stands at 0.90 of the lower mast
+           (buildTop's own height, below). Every other course keeps the class figure, and its mast
+           says so in `courseAtProvenance`. Without the field, byte-identical. */
+        let courseRec = null;
+        if (si === 0 && tiers > 1) {
+          const rd = (mk.courseRead && typeof mk.courseRead.ofDeckToTop === 'number') ? mk.courseRead : null;
+          if (rd) courseAt = rd.ofDeckToTop * 0.90;
+          courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: 0.90, from: rd ? 'record' : 'class' };
+        }
         crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
                   si === 0 ? (isMizzen ? 'topsail' : 'course')
                 : si === 1 ? 'topsail' : 'topgallant',
                   si > 0 || tiers === 1 ? { tie: si }
-                : isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers');
+                : isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers', undefined, undefined, courseRec);
       }
 
       /* ── MASTS STACK. ⚠ THIS LINE WAS MISSING, AND NOTHING LOOKED WRONG. ──────────────

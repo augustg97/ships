@@ -1496,7 +1496,7 @@ let capY = base;
 const mastYards = [];
 const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
-const crossYard = (yy, yardLen, kind, hoist, listName, fracRec) => {
+const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
 : yardLen * (RATE[kind] || 0.625) / 36;
@@ -1545,6 +1545,7 @@ stowFrom: 'class (round 259): the harbour stow rolls the cloth onto the top of t
 + 'the top by 20°, and by more where the bunt would else stand into the pole; no '
 + 'plate reads it' } : null };
 if (fracRec) ym.userData.yardFrac = Object.assign(fracRec, { y: yY, yPlan: yy });
+if (courseRec) ym.userData.courseAt = Object.assign(courseRec, { y: yY, yPlan: yy });
 group.add(tag(ym, 'yard'));
 if (S.iron) ym.userData.part = { ...ym.userData.part,
 what: 'A rolled ' + (S.build === 'steel' ? 'steel' : 'iron') + ' tube, parallel '
@@ -1927,11 +1928,17 @@ const areaM2 = mk.sail.areaM2 + (mk.sail.bonnetsM2 || []).reduce((a2, b2) => a2 
 const depth = areaM2 / (yardLen * 0.96);
 courseAt = Math.min(0.90, (prevYard + depth - y) / seg);
 }
+let courseRec = null;
+if (si === 0 && tiers > 1) {
+const rd = (mk.courseRead && typeof mk.courseRead.ofDeckToTop === 'number') ? mk.courseRead : null;
+if (rd) courseAt = rd.ofDeckToTop * 0.90;
+courseRec = { mast: mi, base: y, seg, frac: courseAt, topAt: 0.90, from: rd ? 'record' : 'class' };
+}
 crossYard(y + seg * (si === 0 ? courseAt : 0.88), yardLen,
 si === 0 ? (isMizzen ? 'topsail' : 'course')
 : si === 1 ? 'topsail' : 'topgallant',
 si > 0 || tiers === 1 ? { tie: si }
-: isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers');
+: isMizzen ? 'fixed' : S.iron ? 'fixed' : 'jeers', undefined, undefined, courseRec);
 }
 capY = y + seg;
 segHeads[si] = capY;
