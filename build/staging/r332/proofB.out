@@ -1,0 +1,12 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a section crossed at anchor drawn uncrossed",
+  "detail": "masts[0] (station 0.115) topgallantMast (furled build): the furled build crosses no yard on it; the record leaves it uncrossed at sea only"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a section crossed at anchor drawn uncrossed",
+  "detail": "masts[1] (station 0.556) topgallantMast (furled build): the furled build crosses no yard on it; the record leaves it uncrossed at sea only"
+ }
+]

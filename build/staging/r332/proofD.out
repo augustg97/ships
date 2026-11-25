@@ -1,0 +1,17 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 1 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 1 hoisting yards record where they are set, 2 expected"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard without its tie",
+  "detail": "4 hoisting yards want 8 halyard legs (slings to the head, head to the rail), 4 drawn \u2014 a count below the mark is a fall that misses its masthead, above it is a fall on a fixed yard"
+ }
+]

@@ -1,0 +1,27 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[0] (station 0.115): 2 hoisting yards record where they are set, 1 expected"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard that does not say where it is set",
+  "detail": "masts[1] (station 0.556): 2 hoisting yards record where they are set, 1 expected"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a section uncrossed at sea drawn crossed",
+  "detail": "masts[0] (station 0.115) topgallantMast: the record crosses no yard on it at sea and the set build crosses one at y 23.58"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a section uncrossed at sea drawn crossed",
+  "detail": "masts[1] (station 0.556) topgallantMast: the record crosses no yard on it at sea and the set build crosses one at y 26.93"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard without its tie",
+  "detail": "2 hoisting yards want 4 halyard legs (slings to the head, head to the rail), 8 drawn \u2014 a count below the mark is a fall that misses its masthead, above it is a fall on a fixed yard"
+ }
+]

@@ -5623,7 +5623,8 @@ say(v.id, 'a hoist read off its own rows', `${at} ${k}: rows give ${a.toFixed(4)
 }
 });
 const mine = hoistM.filter(o => o.userData.hoistAt.mast === mi);
-if (mine.length !== keys.length) { say(v.id, 'a hoisting yard that does not say where it is set', `${at}: ${mine.length} hoisting yards record where they are set, ${keys.length} expected`); return; }
+const want = keys.filter(k => !(Array.isArray(mk.uncrossedAtSea) && mk.uncrossedAtSea.includes(k))).length;
+if (mine.length !== want) { say(v.id, 'a hoisting yard that does not say where it is set', `${at}: ${mine.length} hoisting yards record where they are set, ${want} expected`); return; }
 mine.forEach(o => {
 const h = o.userData.hoistAt, e = R && R[h.section], read = !!(e && typeof e.ofFootToHead === 'number');
 if ((h.from === 'record') !== read)
@@ -5637,6 +5638,40 @@ say(v.id, 'a set hoisting yard not at its set height', `${at} ${h.section}: the 
 });
 });
 }
+const uncrossedRead = (G, STATE) => {
+const SB = STATE === 'furled' ? ' (furled build)' : '';
+const segM = [], yardM = [];
+G.traverse(o => { if (!o.isMesh) return; if (o.userData.seg) segM.push(o); if (o.userData.hoistAt) yardM.push(o); });
+(H.masts || []).forEach((mk, mi) => {
+const at = `masts[${mi}] (station ${mk.at})`, L = mk.uncrossedAtSea;
+const marks = segM.filter(o => o.userData.seg.mi === mi && o.userData.uncrossed);
+const listed = Array.isArray(L) ? L : [];
+marks.forEach(o => { if (!listed.includes(o.userData.uncrossed.section))
+say(v.id, 'a section left uncrossed with no record', `${at}${SB}: segment ${o.userData.seg.si} records ${o.userData.uncrossed.section} uncrossed and the record does not list it`); });
+if (L === undefined) return;
+if (STATE === 'set') {
+const tiers = mk.only || 3;
+const keys = mk.rig === 'square' && !Array.isArray(mk.yards) ? (tiers >= 3 ? ['topmast', 'topgallantMast'] : tiers >= 2 ? ['topmast'] : []) : [];
+if (!Array.isArray(L) || !L.length) say(v.id, 'an uncrossed list that names nothing', `${at}: uncrossedAtSea is ${JSON.stringify(L)}`);
+listed.forEach(k => { if (!keys.includes(k)) say(v.id, 'an uncrossed section the mast does not have', `${at}: uncrossedAtSea names '${k}'; the mast's hoisting sections are ${JSON.stringify(keys)}`); });
+const P = mk.uncrossedAtSeaProvenance || '';
+if (!/^PLATE READ/.test(P) || P.length < 120)
+say(v.id, 'an uncrossed section with no plate read', `${at}: uncrossedAtSeaProvenance opens '${P.slice(0, 30)}'; a section is left without a yard at sea only on a plate that draws it so`);
+listed.forEach(k => { const e = mk.hoistRead && mk.hoistRead[k];
+if (e && typeof e.ofFootToHead === 'number')
+say(v.id, 'a section read set and listed uncrossed', `${at} ${k}: hoistRead.${k} reads a set yard at ${e.ofFootToHead} and uncrossedAtSea says no yard is crossed at sea`); });
+}
+listed.forEach(k => {
+const yard = yardM.find(o => o.userData.hoistAt.mast === mi && o.userData.hoistAt.section === k);
+const mark = marks.find(o => o.userData.uncrossed.section === k);
+if (STATE === 'set') {
+if (yard) say(v.id, 'a section uncrossed at sea drawn crossed', `${at} ${k}: the record crosses no yard on it at sea and the set build crosses one at y ${yard.position.y.toFixed(2)}`);
+else if (!mark) say(v.id, 'an uncrossed section that does not say so', `${at} ${k}: no yard is crossed and no segment records the omission`);
+} else if (!yard) say(v.id, 'a section crossed at anchor drawn uncrossed', `${at} ${k}${SB}: the furled build crosses no yard on it; the record leaves it uncrossed at sea only`);
+});
+});
+};
+uncrossedRead(g, 'set');
 {
 const ttG = [], ctG = [], tmS = [], tgS = [];
 g.updateMatrixWorld(true);
@@ -7854,6 +7889,7 @@ gaffSailRead(gf, 'furled');
 {
 const nLow = yardLowerRead(gf, 'furled');
 crossjackRead(gf, 'furled');
+uncrossedRead(gf, 'furled');
 if (typeof SW_FURLED_CARD === 'function') {
 let nBare = 0; gf.traverse(o => { if (o.isMesh && o.userData.bare) nBare++; });
 const txt2 = SW_FURLED_CARD(v, gf).join(' — ');
@@ -8257,7 +8293,7 @@ let want = 0, nHoist = 0;
 for (const m of sq) {
 const tiers = m.only ? Math.min(m.only, 3) : 3;
 const nh = m.yards ? m.yards.filter(nm => HOISTY[nm]).length
-: Math.max(1, tiers - 1);
+: Math.max(1, tiers - 1) - (Array.isArray(m.uncrossedAtSea) ? m.uncrossedAtSea.length : 0);
 nHoist += nh; want += 2 * nh;
 }
 nHoist += jmM.length; want += 2 * jmM.length;

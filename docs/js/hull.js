@@ -1515,6 +1515,7 @@ mastDiscs.push({ x: mxA(yT), y: yT, r: B * 0.20 * mk.topmastTop.ofLowerTop, year
 const segHeads = [];
 let prevYard = deckMax(u - 0.10, u + 0.10) + lower * 0.13;
 let lastYardTop = -Infinity;
+let uncrossedAbove = false;
 const crossYard = (yy, yardLen, kind, hoist, listName, fracRec, courseRec, hoistRec) => {
 const RATE = { course: 0.700, topsail: 0.625, topgallant: 0.600, royal: 0.600 };
 const slingsD = S.iron ? yardLen / 50
@@ -2026,6 +2027,11 @@ if (hr && typeof hr.ofFootToHead === 'number') hoistY = base + hr.ofFootToHead *
 hoistRec = { mast: mi, section: key, si, base, head: y + seg, frac: hr && typeof hr.ofFootToHead === 'number' ? hr.ofFootToHead : null,
 from: hr && typeof hr.ofFootToHead === 'number' ? 'record' : 'class' };
 }
+const secKey = si === 1 ? 'topmast' : si === 2 ? 'topgallantMast' : null;
+if (secKey && !FURLED && Array.isArray(mk.uncrossedAtSea) && mk.uncrossedAtSea.includes(secKey)) {
+uncrossedAbove = true;
+m.userData.uncrossed = { mast: mi, section: secKey, si, from: 'record' };
+} else
 crossYard(si === 0 ? y + seg * courseAt : hoistY, yardLen,
 si === 0 ? (isMizzen ? 'topsail' : 'course')
 : si === 1 ? 'topsail' : 'topgallant',
@@ -2097,7 +2103,9 @@ const lead = (list, from, uu, sgn, part) => leadTo(list, from, uu, sgn, part, mi
 const belaysOf = part => belayed.filter(b => b.part === part && b.mast === mi);
 mastYards.forEach((yd, k) => {
 const above = mastYards[k + 1];
-const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
+const hL = above ? above.yy
+: (uncrossedAbove && yd.hoist && typeof yd.hoist === 'object' && segHeads[yd.hoist.tie] !== undefined) ? segHeads[yd.hoist.tie]
+: Math.min(capY, yd.yy + yd.half * 0.9);
 for (const sgn of [1, -1])
 lifts.push([V3(yd.cx + sgn * sT * yd.half, yd.yy, sgn * cT * yd.half),
 V3(mx(hL), hL, 0)]);

@@ -331,6 +331,22 @@ both read and unread, and holds a hoist read and a mast read off the same plate 
 **What the plate shows that the model does not:** Hollar's fluyt under sail sets two square sails on the fore and
 the main, a course and a topsail, and nothing above the topsail. The model sets a topgallant sail on both.
 
+**Round 332 (0y¹⁷⁷): no topgallant yard under sail.** Above each topmast's cap Hollar draws a bare pole with a
+pennant: on the fore from row 285 to about row 85, on the main from row 192 to about row 55. No spar crosses
+either pole and no cloth hangs from it; the lines that meet the pole are its stays and shrouds. His plate of
+fluyts at anchor, from the same year, draws topgallant yards crossed on the same masts with the sails furled.
+So the fluyt carried a topgallant yard and did not cross it at sea on the ship Hollar drew under sail.
+
+The record now lists the section in `uncrossedAtSea` on the fore and the main, with
+`uncrossedAtSeaProvenance` opening PLATE READ. The set build crosses no topgallant yard and sets no topgallant
+sail on either mast. The topsail's lifts lead to the topmast's cap. The furled build is unchanged: the yard is
+crossed, its sail furled on it, and it is lowered onto the topmast's cap by the r314 rule. The topgallant masts
+and their stays are drawn in both builds. A-UNCROSSED-AT-SEA tests the record and both builds, and the
+halyard-leg census and A-HOIST-READ count only the yards a set build crosses.
+
+Not read: whether a fluyt crossed her topgallant yards at sea in light weather. One plate under sail is one
+ship on one day, and the record says that it is one plate.
+
 ## Confidence
 
 - Compound junk masts bound with iron straps: **sourced** (Needham IV:3, two independent

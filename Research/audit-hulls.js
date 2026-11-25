@@ -7887,7 +7887,9 @@
           }
         });
         const mine = hoistM.filter(o => o.userData.hoistAt.mast === mi);
-        if (mine.length !== keys.length) { say(v.id, 'a hoisting yard that does not say where it is set', `${at}: ${mine.length} hoisting yards record where they are set, ${keys.length} expected`); return; }
+        /* r332: the set build crosses no yard on a section the record leaves uncrossed at sea (A-UNCROSSED-AT-SEA tests that) */
+        const want = keys.filter(k => !(Array.isArray(mk.uncrossedAtSea) && mk.uncrossedAtSea.includes(k))).length;
+        if (mine.length !== want) { say(v.id, 'a hoisting yard that does not say where it is set', `${at}: ${mine.length} hoisting yards record where they are set, ${want} expected`); return; }
         mine.forEach(o => {
           const h = o.userData.hoistAt, e = R && R[h.section], read = !!(e && typeof e.ofFootToHead === 'number');
           if ((h.from === 'record') !== read)
@@ -7901,6 +7903,49 @@
         });
       });
     }
+    /* ── A-UNCROSSED-AT-SEA (round 332, 0y¹⁷⁷): A SECTION THE RECORD LEAVES WITHOUT A YARD AT SEA IS DRAWN SO, AND ONLY AT SEA.
+       Hollar's fluyt under sail (1647) draws her fore and main topgallant masts as bare poles with pennants, and his
+       fluyts at anchor cross topgallant yards with the sails furled. The record lists such a section in `uncrossedAtSea`.
+       RECORD (on the set build): the list names sections the mast has ('topmast', and 'topgallantMast' on a three-piece
+       square mast with no `yards` list), `uncrossedAtSeaProvenance` opens PLATE READ and says what the plate draws, and a
+       listed section carries no set-height read (hoistRead.<section>.ofFootToHead), because a plate that shows no yard
+       cannot read where one is set. BUILT: in the set build a listed section crosses no yard (no hoistAt for it) and its
+       segment records the omission (userData.uncrossed); in the furled build it crosses its yard. A segment that records
+       an omission the record does not list convicts in either build. */
+    const uncrossedRead = (G, STATE) => {
+      const SB = STATE === 'furled' ? ' (furled build)' : '';
+      const segM = [], yardM = [];
+      G.traverse(o => { if (!o.isMesh) return; if (o.userData.seg) segM.push(o); if (o.userData.hoistAt) yardM.push(o); });
+      (H.masts || []).forEach((mk, mi) => {
+        const at = `masts[${mi}] (station ${mk.at})`, L = mk.uncrossedAtSea;
+        const marks = segM.filter(o => o.userData.seg.mi === mi && o.userData.uncrossed);
+        const listed = Array.isArray(L) ? L : [];
+        marks.forEach(o => { if (!listed.includes(o.userData.uncrossed.section))
+          say(v.id, 'a section left uncrossed with no record', `${at}${SB}: segment ${o.userData.seg.si} records ${o.userData.uncrossed.section} uncrossed and the record does not list it`); });
+        if (L === undefined) return;
+        if (STATE === 'set') {
+          const tiers = mk.only || 3;
+          const keys = mk.rig === 'square' && !Array.isArray(mk.yards) ? (tiers >= 3 ? ['topmast', 'topgallantMast'] : tiers >= 2 ? ['topmast'] : []) : [];
+          if (!Array.isArray(L) || !L.length) say(v.id, 'an uncrossed list that names nothing', `${at}: uncrossedAtSea is ${JSON.stringify(L)}`);
+          listed.forEach(k => { if (!keys.includes(k)) say(v.id, 'an uncrossed section the mast does not have', `${at}: uncrossedAtSea names '${k}'; the mast's hoisting sections are ${JSON.stringify(keys)}`); });
+          const P = mk.uncrossedAtSeaProvenance || '';
+          if (!/^PLATE READ/.test(P) || P.length < 120)
+            say(v.id, 'an uncrossed section with no plate read', `${at}: uncrossedAtSeaProvenance opens '${P.slice(0, 30)}'; a section is left without a yard at sea only on a plate that draws it so`);
+          listed.forEach(k => { const e = mk.hoistRead && mk.hoistRead[k];
+            if (e && typeof e.ofFootToHead === 'number')
+              say(v.id, 'a section read set and listed uncrossed', `${at} ${k}: hoistRead.${k} reads a set yard at ${e.ofFootToHead} and uncrossedAtSea says no yard is crossed at sea`); });
+        }
+        listed.forEach(k => {
+          const yard = yardM.find(o => o.userData.hoistAt.mast === mi && o.userData.hoistAt.section === k);
+          const mark = marks.find(o => o.userData.uncrossed.section === k);
+          if (STATE === 'set') {
+            if (yard) say(v.id, 'a section uncrossed at sea drawn crossed', `${at} ${k}: the record crosses no yard on it at sea and the set build crosses one at y ${yard.position.y.toFixed(2)}`);
+            else if (!mark) say(v.id, 'an uncrossed section that does not say so', `${at} ${k}: no yard is crossed and no segment records the omission`);
+          } else if (!yard) say(v.id, 'a section crossed at anchor drawn uncrossed', `${at} ${k}${SB}: the furled build crosses no yard on it; the record leaves it uncrossed at sea only`);
+        });
+      });
+    };
+    uncrossedRead(g, 'set');
     /* ── A-TOPMAST-TOP (round 325, 0y¹⁶⁷): A TOPMAST BEFORE 1710 SAYS WHETHER IT CARRIES A TOP, AND A READ TOP IS DRAWN THERE.
        Every three-tier topmast was given open crosstrees at its head, the 18th-century fitting. Hocker's Vasa rig diagram
        (1628) draws a small round top on the fore and main topmasts, under the cap, at 0.945 and 0.943 of the height from
@@ -11070,6 +11115,7 @@
           {
             const nLow = yardLowerRead(gf, 'furled');
             crossjackRead(gf, 'furled');   // r315 (0y¹⁴⁹)
+            uncrossedRead(gf, 'furled');   // r332 (0y¹⁷⁷)
             if (typeof SW_FURLED_CARD === 'function') {
               let nBare = 0; gf.traverse(o => { if (o.isMesh && o.userData.bare) nBare++; });
               const txt2 = SW_FURLED_CARD(v, gf).join(' — ');
@@ -11614,8 +11660,9 @@
         let want = 0, nHoist = 0;
         for (const m of sq) {
           const tiers = m.only ? Math.min(m.only, 3) : 3;
+          /* r332: a section the record leaves uncrossed at sea has no yard in the set build, and no tie */
           const nh = m.yards ? m.yards.filter(nm => HOISTY[nm]).length
-                   : Math.max(1, tiers - 1);
+                   : Math.max(1, tiers - 1) - (Array.isArray(m.uncrossedAtSea) ? m.uncrossedAtSea.length : 0);
           nHoist += nh; want += 2 * nh;
         }
         nHoist += jmM.length; want += 2 * jmM.length;

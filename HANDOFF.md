@@ -30205,3 +30205,50 @@ Proofs, all on :8150 (`webb/`):
 - **The largest of the rest:** `passage-sahul` 0.047%, `ship-yamato` 0.036%, `aboard-preussen` 0.036%, all inside the gate.
 - **No capture faults** this round: no connection resets, and `board-salamis` and `wake-plan` were inside the gate in the run.
 - **No frames are left unscored for r332.**
+
+## Round 332 — 2026-11-25 — The fluyt no longer sets topgallant sails at sea. Hollar's 1647 etching of a fluyt under sail draws her fore and main topgallant masts as bare poles, each with a pennant, and crosses no yard on either. Until this round the model crossed a topgallant yard on both masts and set a sail on it, which no plate of this ship draws. Under sail she now sets a course and a topsail on the fore and the main, as the plate draws her. In the furled build the topgallant yards are still crossed with their sails furled, as Hollar's plate of fluyts at anchor draws them
+
+**Queue check: August's second list stands worked in full (r57). This round took (0y¹⁷⁷), which r331 named. `build/staging/r332` did not exist. At the start the load was 2.3 and no process was hot. r331's receipt left no unscored frames, so no clean-HEAD run was made.**
+
+**THE PLATES.** Hollar, *Navis Mercatoria Hollandica, vulgo VLIET*, 1647 (`r328/dl/hollar-flute.jpg`, 1920 px, about 36 px/m at the masts), read on r331's crops `r331/fore-upper.png` and `r331/main-upper.png`. On the fore, above the topmast's cap at row 285, a bare pole stands to about row 85 with a pennant flying from it. On the main, above the cap at row 192, the pole stands to about row 55, also with a pennant. No spar crosses either pole and no cloth hangs from it; the only lines that meet the poles are their stays and shrouds. Hollar's plate of fluyts at anchor (`r328/dl/fleuten-1647.jpg`, same year) draws topgallant yards crossed on the same masts with the sails furled. So the yard belonged to the rig, and the ship Hollar drew under sail did not have it crossed.
+
+**WHAT CHANGED** (`r332_edit.py`, one script for the builder, the record and the audit, every replace asserted).
+
+- **Record.** The fluyt's fore and main carry `uncrossedAtSea: ['topgallantMast']` and `uncrossedAtSeaProvenance`, which opens PLATE READ and gives the rows, the crops and the plate at anchor. The last sentence of `hoistRead.topgallantMast.unread` and of `hoistProvenance` now says the yard is not crossed under sail, and that the furled build crosses it and lowers it onto the cap.
+- **Builder** (`hull.js`, the segment rig's yard loop). A section listed in `uncrossedAtSea` gets no yard and no sail in the set build, and its segment mesh records the omission (`userData.uncrossed`). The furled build crosses the yard as before. Under an uncrossed section the topsail's lifts lead to the topmast's cap; before, they led to the topgallant yard's slings. The topgallant pole and its stays are drawn in both builds. Every hull without the field is byte-identical.
+- **Audit.** A new rule, A-UNCROSSED-AT-SEA, runs on the set and the furled builds. It checks that the list names sections the mast has, that the provenance opens PLATE READ, and that no listed section also carries a set-height read. In the set build a listed section must cross no yard and its segment must record the omission. In the furled build it must cross its yard. A segment that records an omission the record does not list is also convicted. A-HOIST-READ and the halyard-leg census (r79) now count only the yards the set build crosses.
+
+**MEASURED** (`r332_probe.py`; `probe-before.json`, `probe-after.json`). Set build, before → after: hoisting yards 4 → 2 (the fore topgallant yard at y 23.58 and the main at y 26.93 are gone), square cloths 3 → 2 on each of the fore and the main, yards 6 → 4. Furled build: identical before and after (6 yards, 7 rolls, the topgallant yards lowered onto the caps at y 20.73 and 23.60).
+
+**PROOFS** (:8150, `webb/`, `r332_proofs.sh`):
+
+| Proof | What was broken | Problems found |
+|---|---|---|
+| A | the builder ignoring `uncrossedAtSea` (one line flipped) | 5: 'a section uncrossed at sea drawn crossed' ×2, 'a hoisting yard that does not say where it is set' ×2, 'a hoisting yard without its tie' |
+| B | the builder leaving the yard off in the furled build too | 2: 'a section crossed at anchor drawn uncrossed' ×2 |
+| C | the fore's provenance cut to 'UNREAD' | 1: 'an uncrossed section with no plate read' |
+| D | r331's audit with this round's tree | 3: the old counts expect the topgallant yards and their ties |
+| E | the main's list given a 'royal' it does not have | 4: 'an uncrossed section the mast does not have', 'an uncrossed section that does not say so', 'a section crossed at anchor drawn uncrossed', 'a hoisting yard without its tie' |
+
+`audit-webb.out` (:8150, files identical to the tree by `cmp`): **0 problems on 33 hulls.**
+
+**WITNESSED.** `#v=ship&s=fluyt&b=90&l=8&z=1.0`, panels hidden, before and after on :8150 (`w-fluyt-before-beam.png`, `w-fluyt-after-beam.png`, `pair-fluyt-beam.png`, and `crop-after-rig.png` at full scale). In the after frame the fore and main each carry two square sails. Above each topsail the topgallant mast stands bare with its stays, and the topsail's lifts run from the yard's arms up to the topmast's cap. The frame is framed a little differently from the before frame because the rig's top is lower.
+
+**Rule 0, on `w-fluyt-after-beam.png` read whole: three rendered ships on a rippled sea under a low grey coast, the fluyt broadside in the middle and an oared galley at her left. It is not a chart. Three facts a viewer can read off it without a legend:**
+
+1. **The fluyt has three masts. The fore and the main each carry two square sails, one above the other, and the mizzen carries a triangular sail on a slanting yard.**
+2. **Above the upper sail on the fore and the main a bare pole stands up with no sail on it, held by ropes.**
+3. **A small round platform stands on the foremast just above its lower sail.**
+
+**WHAT IS STILL OPEN.**
+
+- **(0y¹⁷⁷) is closed** for the plate under sail. Whether a fluyt crossed her topgallants at sea in light weather is not read: one plate under sail is one ship on one day.
+- **(0y¹⁷⁸), NEW: the pennants.** Hollar draws a long pennant on each topgallant pole and on the mizzen's staff; the model draws none.
+- **(0y¹⁷³)**, the lateen's peak against Hollar's rows, and **(0y¹⁷⁵)**, the fluyt's mast stations and sheer, stand as r329 lists them.
+- **(0y¹⁷⁰)**, the sekibune's halyard lead; **(0y¹⁶¹)**, **(0y¹⁶²)**, **(0y¹⁵⁹)**, **(0y¹⁶⁰)**, **(0y¹⁵³)**, **(0y¹⁵⁵)**, **(0y¹⁵¹)**, and **(0y¹⁴⁵)** to **(0y⁹⁴)** and the named residuals stand as r294 to r331 list them.
+
+**THE FRAMES.** No baseline frame shows the fluyt in her own berth. Predicted movers: `shipwright` and `shipwright-ahead` (her rig stands at the left edge, as the 74's left berth neighbour; the topgallant sails are gone), and `action-gravelines`, whose English fleet is drawn with the fluyt model. `shipwright-furled` should not move: the furled build is unchanged. The full ratchet was launched on the final tree at 15:38:31, at load 5.6. **Every frame is scored and classified in the receipt that follows.**
+
+**r333 opens by checking `uptime` and `ps -r`, and checks whether `build/staging/r333` already exists before writing into it. If this round's receipt lists unscored frames, score them first. Then take (0y¹⁷³) or (0y¹⁷⁵), the fluyt's lateen peak or her mast stations, which are the remaining reads of her own plate.**
+
+**Live stamp: docs/index.html carries data-version 1795650657 at the build.**

@@ -1,0 +1,158 @@
+{
+ "set": {
+  "yards": [
+   {
+    "mast": 0,
+    "section": "topmast",
+    "from": "record",
+    "setY": 19.164,
+    "y": 19.159,
+    "lowered": false
+   },
+   {
+    "mast": 1,
+    "section": "topmast",
+    "from": "record",
+    "setY": 21.368,
+    "y": 21.371,
+    "lowered": false
+   }
+  ],
+  "uncrossed": [
+   {
+    "mast": 0,
+    "section": "topgallantMast",
+    "si": 2,
+    "from": "record"
+   },
+   {
+    "mast": 1,
+    "section": "topgallantMast",
+    "si": 2,
+    "from": "record"
+   }
+  ],
+  "cloth": {
+   "0": 2,
+   "1": 2
+  },
+  "furls": 0,
+  "yardsAll": 4,
+  "segs": [
+   {
+    "mi": 0,
+    "si": 0,
+    "foot": 3.577,
+    "head": 14.011
+   },
+   {
+    "mi": 0,
+    "si": 1,
+    "foot": 12.759,
+    "head": 20.677
+   },
+   {
+    "mi": 0,
+    "si": 2,
+    "foot": 19.727,
+    "head": 24.107
+   },
+   {
+    "mi": 1,
+    "si": 0,
+    "foot": 3.002,
+    "head": 15.469
+   },
+   {
+    "mi": 1,
+    "si": 1,
+    "foot": 13.973,
+    "head": 23.532
+   },
+   {
+    "mi": 1,
+    "si": 2,
+    "foot": 22.385,
+    "head": 27.552
+   }
+  ]
+ },
+ "furled": {
+  "yards": [
+   {
+    "mast": 0,
+    "section": "topmast",
+    "from": "record",
+    "setY": 19.164,
+    "y": 14.082,
+    "lowered": null
+   },
+   {
+    "mast": 0,
+    "section": "topgallantMast",
+    "from": "class",
+    "setY": 23.582,
+    "y": 20.73,
+    "lowered": null
+   },
+   {
+    "mast": 1,
+    "section": "topmast",
+    "from": "record",
+    "setY": 21.368,
+    "y": 15.56,
+    "lowered": null
+   },
+   {
+    "mast": 1,
+    "section": "topgallantMast",
+    "from": "class",
+    "setY": 26.932,
+    "y": 23.597,
+    "lowered": null
+   }
+  ],
+  "uncrossed": [],
+  "cloth": {},
+  "furls": 7,
+  "yardsAll": 6,
+  "segs": [
+   {
+    "mi": 0,
+    "si": 0,
+    "foot": 3.577,
+    "head": 14.011
+   },
+   {
+    "mi": 0,
+    "si": 1,
+    "foot": 12.759,
+    "head": 20.677
+   },
+   {
+    "mi": 0,
+    "si": 2,
+    "foot": 19.727,
+    "head": 24.107
+   },
+   {
+    "mi": 1,
+    "si": 0,
+    "foot": 3.002,
+    "head": 15.469
+   },
+   {
+    "mi": 1,
+    "si": 1,
+    "foot": 13.973,
+    "head": 23.532
+   },
+   {
+    "mi": 1,
+    "si": 2,
+    "foot": 22.385,
+    "head": 27.552
+   }
+  ]
+ }
+}

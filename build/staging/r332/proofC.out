@@ -1,0 +1,7 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "an uncrossed section with no plate read",
+  "detail": "masts[0] (station 0.115): uncrossedAtSeaProvenance opens 'UNREAD'; a section is left without a yard at sea only on a plate that draws it so"
+ }
+]

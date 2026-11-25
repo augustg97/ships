@@ -2645,6 +2645,8 @@ function buildRig(S, group, mats, FINE, FURLED) {
     /* r314 (0y¹⁴⁶): the top of the last yard crossed on this mast, its furled roll included: what a lowered
        hoisting yard above it comes to rest on (crossYard, below) */
     let lastYardTop = -Infinity;
+    /* r332 (0y¹⁷⁷): set when the record leaves a section above the last crossed yard without a yard at sea */
+    let uncrossedAbove = false;
 
     /* ── ONE CROSSED YARD, WITH ITS SAIL ──────────────────────────────────────────────
        Factored out because a mast may cross three yards — one per fidded segment, the
@@ -3592,6 +3594,20 @@ function buildRig(S, group, mats, FINE, FURLED) {
           hoistRec = { mast: mi, section: key, si, base, head: y + seg, frac: hr && typeof hr.ofFootToHead === 'number' ? hr.ofFootToHead : null,
                        from: hr && typeof hr.ofFootToHead === 'number' ? 'record' : 'class' };
         }
+        /* ── r332 (0y¹⁷⁷): A SECTION THE RECORD LEAVES WITHOUT A YARD AT SEA ─────────────────────────────
+           Hollar's etching of a fluyt under sail (1647) draws the fore and main topgallant masts as bare poles
+           above the topmasts' caps, each with a pennant, and crosses no yard on either. His plate of fluyts at
+           anchor (the same year) draws topgallant yards crossed on the same masts, with the sails furled. The
+           record lists such a section in `uncrossedAtSea` ('topmast' or 'topgallantMast'). The set build, which
+           is the ship under sail, crosses no yard and sets no sail on it; the furled build crosses the yard and
+           furls its sail, as every other furled yard. The pole and its stays are drawn in both. The segment's
+           mesh records the omission (userData.uncrossed) so the audit can tell an omission from a missing yard.
+           Without the field, byte-identical. */
+        const secKey = si === 1 ? 'topmast' : si === 2 ? 'topgallantMast' : null;
+        if (secKey && !FURLED && Array.isArray(mk.uncrossedAtSea) && mk.uncrossedAtSea.includes(secKey)) {
+          uncrossedAbove = true;
+          m.userData.uncrossed = { mast: mi, section: secKey, si, from: 'record' };
+        } else
         crossYard(si === 0 ? y + seg * courseAt : hoistY, yardLen,
                   si === 0 ? (isMizzen ? 'topsail' : 'course')
                 : si === 1 ? 'topsail' : 'topgallant',
@@ -3750,7 +3766,10 @@ function buildRig(S, group, mats, FINE, FURLED) {
         const above = mastYards[k + 1];
         /* the lift leads to the next yard's slings — which is where the cap of this yard's
            own mast section stands in the drop chain — or to the cap itself for the topmost */
-        const hL = above ? above.yy : Math.min(capY, yd.yy + yd.half * 0.9);
+        /* r332: under a section the record leaves uncrossed at sea, the lift leads to the head of the yard's own section */
+        const hL = above ? above.yy
+          : (uncrossedAbove && yd.hoist && typeof yd.hoist === 'object' && segHeads[yd.hoist.tie] !== undefined) ? segHeads[yd.hoist.tie]
+          : Math.min(capY, yd.yy + yd.half * 0.9);
         for (const sgn of [1, -1])
           lifts.push([V3(yd.cx + sgn * sT * yd.half, yd.yy, sgn * cT * yd.half),
                       V3(mx(hL), hL, 0)]);

@@ -1,0 +1,22 @@
+[
+ {
+  "id": "fluyt",
+  "rule": "an uncrossed section the mast does not have",
+  "detail": "masts[1] (station 0.556): uncrossedAtSea names 'royal'; the mast's hoisting sections are [\"topmast\",\"topgallantMast\"]"
+ },
+ {
+  "id": "fluyt",
+  "rule": "an uncrossed section that does not say so",
+  "detail": "masts[1] (station 0.556) royal: no yard is crossed and no segment records the omission"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a section crossed at anchor drawn uncrossed",
+  "detail": "masts[1] (station 0.556) royal (furled build): the furled build crosses no yard on it; the record leaves it uncrossed at sea only"
+ },
+ {
+  "id": "fluyt",
+  "rule": "a hoisting yard without its tie",
+  "detail": "1 hoisting yards want 2 halyard legs (slings to the head, head to the rail), 4 drawn \u2014 a count below the mark is a fall that misses its masthead, above it is a fall on a fixed yard"
+ }
+]
